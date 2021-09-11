@@ -35,7 +35,7 @@
           <a href="?p=cfg_activity" class="btn btn-secondary">Cancelar</a>
           <input
             type="submit"
-            value="Crear nuevo Usuario Virtual"
+            value="Crear nueva Actividad"
             class="btn btn-success float-right"
           />
         </div>

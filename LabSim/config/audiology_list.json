@@ -1,11 +1,21 @@
 {
-  "data": [
-    
-      ["Audiometría",
-        ["Umbrales aéreos", "aerea", "textarea", ["OD", "aeOD", "text"]]],
-      ["Acumetría", 
-        ["rinne", "weber"], ["OD", "OI"], [512, 1024, 2048]],
-      ["Impedanciometría", ["admittance", "reflex"], ["OD", "OI"], []]
-  ]
-  
+    "data" : 
+    [
+
+        [
+            "Audiometría",
+            ["aerea", "aerea", "text_group",[
+                "OD", "aeOD", "text"
+
+            ]
+            
+        ],[
+            "Acumetría",
+            ["rinne OD","weber"],["OD", "OI"],[512,1024,2048]
+        ],[
+            "Impedanciometría",
+            ["admittance","reflex"],["OD","OI"],[]
+]
+    ]
+
 }

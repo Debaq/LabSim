@@ -40,6 +40,7 @@ if ($count == "1") {
         $_SESSION['user'] = $_POST['ext_user_username'];
         $_SESSION['credentials'] = $_POST['roles'];
         $_SESSION['login'] = true;
+        #print_r($_SESSION);
         header('Location: ../index.php');
     }
 else {
