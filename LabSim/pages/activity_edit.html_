@@ -1,0 +1,232 @@
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>Detalle de la Actividad - estoy acá</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="?p=%HOME%">index</a></li>
+            <li class="breadcrumb-item"><a href="?p=%BACK%">%BACK%</a></li>
+            <li class="breadcrumb-item active">%SECTION%</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <!-- /.container-fluid -->
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+    <!-- Default box -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Datos Básicos</h3>
+
+        <div class="card-tools">
+          <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+            <i class="fas fa-minus"></i>
+          </button>
+          <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12 col-md-12 col-lg-8 order-2 order-md-1">
+            <div class="row">
+              <div class="col-12 col-sm-4">
+                <div class="info-box bg-light">
+                  <div class="info-box-content">
+                    <span class="info-box-text text-center text-muted">Cantidad de usuarios</span>
+                    <span id="number_users" class="info-box-number text-center text-muted mb-0"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-4">
+                <div class="info-box bg-light">
+                  <div class="info-box-content">
+                    <span class="info-box-text text-center text-muted">Asignaturas comprometidas</span>
+                    <span id="signatures" class="info-box-number text-center text-muted mb-0"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-4">
+                <div class="info-box bg-light">
+                  <div class="info-box-content">
+                    <span class="info-box-text text-center text-muted">Tiempo de duración</span>
+                    <span id="time" class="info-box-number text-center text-muted mb-0"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12">
+                <div class="post">
+
+                  <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">Descripción</h3>
+                  </div>
+                  <div class="card-body">
+                      <div id="description"></div>
+                  </div>
+
+                </div>
+
+                  <div class="card">
+                    <div class="card-header">
+                      <h3 class="card-title">Módulos</h3>
+                    </div>
+                    <div class="card-body">
+                      <div id="accordion">
+                        <div id="modules"></div>
+                      </div>
+                    </div>
+
+                  </div>
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-12 col-lg-4 order-1 order-md-2">
+            <h3 class="text-primary">
+              <i id="icon"></i>
+              <div id="title">
+                <div>
+            </h3>
+            <p id="Description" class="text-muted"></p>
+            <br />
+            <div class="text-muted">
+              <p class="text-sm">
+                Creador/a
+                <b id="SuperUser" class="d-block"></b>
+              </p>
+              <p class="text-sm">
+                Equipo
+                <b id="team" class="d-block"></b>
+              </p>
+            </div>
+
+            <h5 class="mt-5 text-muted">Archivos del proyecto</h5>
+            <ul class="list-unstyled" id="files"></ul>
+
+            <div class="text-center mt-5 mb-3">
+              <a href="#" class="btn btn-sm btn-primary">Agregar Archivos</a>
+              <a href="#" class="btn btn-sm btn-warning">Reportar error</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /.card-body -->
+    </div>
+    <!-- /.card -->
+  </section>
+  <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+<script type="text/javascript">
+  function getNavUrl() {
+    return window.location.search.replace("?", "");
+  }
+  function getParameters(url) {
+    var params = {};
+    url = url.toLowerCase();
+    url = url.split("&");
+    var length = url.length;
+    for (var i = 0; i < length; i++) {
+      var prop = url[i].slice(0, url[i].search("="));
+      var value = url[i].slice(url[i].search("=")).replace("=", "");
+      params[prop] = value;
+    }
+    return params;
+  }
+  var $variables = getParameters(getNavUrl());
+  console.log($variables);
+
+  window.onload = function () {
+    $.ajax({
+      url: "module/read_activity.php",
+      type: "POST",
+      data: jQuery.param({ p: $variables["p"] }),
+      contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+    }).done(function (data) {
+      const obj = JSON.parse(data);
+      console.log(obj);
+      document.getElementById("title").innerHTML = obj["title"];
+      document.getElementById("number_users").innerHTML = obj["number_users"];
+      document.getElementById("signatures").innerHTML = obj["signatures"];
+      document.getElementById("time").innerHTML = obj["time"];
+      document.getElementById("SuperUser").innerHTML = obj["SuperUser"];
+      document.getElementById("team").innerHTML = obj["team"];
+      var icon = "<img src='" + obj["icon"] + "' alt='Logo'  height='40' width='40'>";
+      document.getElementById("icon").innerHTML = icon;
+      var array = obj["file"];
+      listDocs = array.reduce((_doc, doc) => {
+        _doc += `<li><a class="btn-link text-secondary" href="${doc[0]}"><i class="${doc[2]}"></i>${doc[1]}</a></li>`;
+        return _doc;
+      }, '');
+      resultElement = document.getElementById('files');
+      resultElement.innerHTML = listDocs;
+      var modules = obj["modules"];
+      listModules = modules.reduce((_mod, module) => {
+
+        listextra = (Object.values(module[4])).reduce((_extra, extra) => {
+          console.log(extra);
+          _extra +=`
+          
+          <li>${extra[0]} : ${extra[1]} ${extra[2]}</li>
+          
+          `;
+          return _extra;
+        }, '');
+
+        _mod += `
+                <div class="card ${module[6]}">
+                  <div class="card-header">
+                    <h3 class="card-title w-100">
+                      <a class="d-block w-100" data-toggle="collapse" href="#collapse${module[0]}">
+                        ${module[2]}
+                      </a>
+                    </h3>
+                  </div>
+                  <div id="collapse${module[0]}" class="collapse" data-parent="#accordion">
+                    <div class="card-body">
+                      <p>Tipo de módulo: ${module[1]}</p>
+                      <p>Descripción: ${module[3]}</p>
+                      <ul>Contenido: ${listextra}</ul>
+                      <p>Requisitos: [${module[5]}]</p>
+                      <div class="text-center mt-5 mb-3">
+                        <a href="?p=${module[0]}&a=mod" class="btn btn-sm btn-primary">Modificar</a>
+                        <a href="?p=${module[0]}&a=deactivate" class="btn btn-sm btn-warning">Desactivar</a>
+                        <a href="?p=${module[0]}&a=delete" class="btn btn-sm btn-danger">Eliminar</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>`;
+        return _mod;
+      }, '');
+      resultElement = document.getElementById('modules').innerHTML = listModules;
+
+      description =  `
+      <p>${obj["description"]}</p>
+      <h4>Objetivos:</h4>
+      ${obj["goals"]}
+
+
+
+
+
+      `
+      resultElement = document.getElementById('description').innerHTML = description;
+
+
+
+    });
+  };
+</script>

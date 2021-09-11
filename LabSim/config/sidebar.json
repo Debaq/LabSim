@@ -1,0 +1,130 @@
+{
+    "Title_1": {
+        "name" : "Actividades",
+        "alias" : "",
+        "permits":["Admin","Instructor"],
+        "path" : "#",
+        "icon" : "nav-icon fas fa-book-reader",
+        "active" : true,
+        "notice" : "",
+        "subT" : true,
+        "data" : "list_activity",
+        "sub_titles" : {
+            "subTitle_1_1" : {
+                "name" : "Crear",
+                "alias" : "add_activity",
+                "permits":["Admin","Instructor"],
+                "path" : "?p=add_activity",
+                "icon" : "fas fa-plus-circle nav-icon",
+                "active" : true,
+                "notice" : ""
+            },
+            "subTitle_1_2" : {
+                "name" : "Configurar",
+                "alias" : "cfg_activity",
+                "permits":["Admin","Instructor"],
+                "path" : "?p=cfg_activity",
+                "icon" : "far fa-list-alt nav-icon",
+                "active" : true,
+                "notice" : ""
+            }
+        }
+    },
+    "Title_2": {
+        "name" : "Usuarios",
+        "alias" : "",
+        "permits":["Admin","Instructor"],
+        "path" : "#",
+        "icon" : "nav-icon fas fa-users",
+        "active" : true,
+        "notice" : "",
+        "subT" : true,
+        "data" : "list_activity",
+        "sub_titles" : {
+            "subTitle_1_1" : {
+                "name" : "Docentes",
+                "alias" : "add_instructor",
+                "permits":["Admin","Instructor"],
+                "path" : "?p=add_instructor",
+                "icon" : "nav-icon fas fa-user-graduate",
+                "active" : true,
+                "notice" : ""
+            },
+            "subTitle_1_2" : {
+                "name" : "Estudiantes",
+                "alias" : "cfg_learner",
+                "permits":["Admin","Instructor"],
+                "path" : "?p=cfg_learner",
+                "icon" : "fas fa-chalkboard-teacher nav-icon",
+                "active" : true,
+                "notice" : ""
+            }
+        }
+    },
+    "Title_3": {
+        "name" : "Módulos",
+        "alias" : "module",
+        "permits":["Admin"],
+        "path" : "?p=module",
+        "icon" : "nav-icon fas fa-puzzle-piece",
+        "active" : true,
+        "notice" : "",
+        "subT" : false,
+        "data" : ""        
+    },
+
+    "Title_4": {
+        "name" : "Configuración",
+        "alias" : "",
+        "permits":["Admin","Instructor","Instructor"],
+        "path" : "#",
+        "icon" : "nav-icon fas fa-cogs",
+        "active" : true,
+        "notice" : "",
+        "subT" : true,
+        "sub_titles" : {
+            "subTitle_2_1" : {
+                "name" : "Usuario",
+                "alias" : "cfg_user",
+                "permits":["Admin","Learner", "Learner_V" ,"Instructor"],
+                "path" : "?p=cfg_user",
+                "icon" : "far fa-user nav-icon",
+                "active" : true,
+                "notice" : ""
+            },
+            "subTitle_2_2" : {
+                "name" : "Admin",
+                "alias" : "cfg_admin",
+                "permits":["Admin"],
+                "path" : "?p=cfg_admin",
+                "icon" : "fas fa-user-cog nav-icon",
+                "active" : true,
+                "notice" : ""
+            }            
+        }
+    },
+    "Title_5": {
+        "name" : "Agenda",
+        "alias" : "schelude",
+        "permits":["Learner", "Learner_V" ],
+        "path" : "?p=schelude",
+        "icon" : "fas fa-calendar-plus nav-icon",
+        "active" : true,
+        "notice" : "",
+        "subT" : false,
+        "data" : ""        
+    },
+    "Title_6":{
+        "name" : "Software",
+        "alias" : "download",
+        "permits":["Admin","Learner", "Learner_V","Instructor"],
+        "path" : "?p=download",
+        "icon" : "fab fa-python nav-icon",
+        "active" : true,
+        "notice" : "<span class='right badge badge-danger'>v0.7.5</span>",
+        "subT" : false
+
+    }  
+
+
+}

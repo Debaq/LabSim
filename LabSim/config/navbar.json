@@ -1,0 +1,52 @@
+{
+    "item_0":{
+        "permits" : ["Admin", "Learner", "Learner_V" ,"Instructor"],
+        "class" : "",
+        "data-widget" : "pushmenu",
+        "data-toggle" : "",
+        "href" : "#",
+        "role" : "button",
+        "aling" : "left",
+        "icon" : "fas fa-bars",
+        "name" : "",
+        "span" : ""
+    },
+    "item_1" :{
+        "permits" : ["Admin", "Learner", "Learner_V" , "Instructor"],
+        "class" : "d-none d-sm-inline-block",
+        "data-widget" : "",
+        "data-toggle" : "",
+        "href" : "?p=index",
+        "role" : "button",
+        "aling" : "left",
+        "icon" : "",
+        "name" : "Inicio",
+        "span" : ""
+    },
+    "item_2" :{
+        "permits" : ["Admin", "Instructor", "Learner_V" ],
+        "class" : "",
+        "role" : "button",
+        "data-widget" : "",
+        "data-toggle" : "",
+        "href" : "module/change_role.php",
+        "aling" : "right",
+        "icon" : "fas fa-user-shield",
+        "name" : "",
+        "span": "badge badge-danger navbar-badge",
+        "content" : "message"
+    },
+    "item_3" :{
+        "permits" : ["Admin", "Learner", "Learner_V", "Instructor"],
+        "class" : "dropdown",
+        "data-widget" : "fullscreen",
+        "data-toggle" : "",
+        "href" : "#",
+        "role" : "button",
+        "aling" : "right",
+        "icon" : "fas fa-expand-arrows-alt",
+        "name" : "",
+        "span": "badge badge-danger navbar-badge",
+        "content" : "message"
+    }  
+}

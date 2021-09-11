@@ -1,0 +1,52 @@
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Error 401 - No tienes autorización</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="?p=%HOME%">index</a></li>
+              <li class="breadcrumb-item"><a href="?p=%BACK%">%BACK%</a></li>
+              <li class="breadcrumb-item active">%SECTION%</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="error-page">
+        <h2 class="headline text-warning"> 401</h2>
+
+        <div class="error-content">
+          <h3><i class="fas fa-exclamation-triangle text-warning"></i> Oops! La página a la que intentas acceder no es para ti</h3>
+
+          <p>
+            De seguro el concejo de gnomos ha determinado que aun no tienes la experiencia necesaria para 
+            para enfrentarte a lo que hay aquí. Mientras tanto vuelve al <a href="?p=index">Inicio</a> o intente consultar con el consejo.
+          </p>
+
+          <form class="search-form">
+            <div class="input-group">
+              <input type="text" name="Buscar" class="form-control" placeholder="Buscar">
+
+              <div class="input-group-append">
+                <button type="submit" name="submit" class="btn btn-warning"><i class="fas fa-search"></i>
+                </button>
+              </div>
+            </div>
+            <!-- /.input-group -->
+          </form>
+        </div>
+        <!-- /.error-content -->
+      </div>
+      <!-- /.error-page -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->

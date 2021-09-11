@@ -1,0 +1,13 @@
+{
+  "data": [
+    [
+      "Datos Básicos",
+      ["Nombre Completo", "Name", "text", ["", [], "required"]],
+      ["Sexo","gender","radio",["",[[0, 1],["Mujer", "Hombre"]],"required"]],
+      ["Edad", "age", "number", ["", [1, 100], "required"]]
+    ],
+    ["Anamnesis",["Motivo de consulta", "anam_reason", "textarea", ["", [], ""]]],
+    ["Resultados", ["Resultados", "anam_reason", "textarea", ["", [], ""]]],
+    ["CIE-10", ["CIE-10", "anam_reason", "textarea", ["", [], ""]]]
+  ]
+}

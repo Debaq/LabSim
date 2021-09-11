@@ -1,0 +1,306 @@
+<div class="content-wrapper">
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>BOX Audiología</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="?p=%HOME%">index</a></li>
+            <li class="breadcrumb-item"><a href="?p=%BACK%">%BACK%</a></li>
+            <li class="breadcrumb-item active">%SECTION%</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content">
+    <div class="card card-solid">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12 col-sm-6">
+            <h3 id="Name_sm" class="d-inline-block d-sm-none"></h3>
+            <div class="col-12">
+              <canvas id="profile_img" width="500" height="500"></canvas>
+            </div>
+            <div class="col-12 product-image-thumbs">
+              <div class="product-image-thumb active">
+                <img id="profile_img_sm" onclick="changeimage(0)" src="" alt="Profile" />
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <h3 id="Name" class="my-3"></h3>
+            <p id="Gender"></p>
+            <p id="Age"></p>
+
+            <hr />
+            <h4>Anamnesis:</h4>
+            <p id="Anamnesis"></p>
+            <h4>Datos Mórbidos:</h4>
+            <p id="Morbid"></p>
+            <div class="btn-group">
+              <a class="btn btn-secondary text-center" id="otoOD" onclick="changeimage(1)" role="button">
+                Otoscopía OD <br />
+                <i class="fas fa-circle fa-2x text-red"></i>
+              </a>
+              <a class="btn btn-secondary text-center" id="otoOI" onclick="changeimage(2)" role="button">
+                Otoscopía OI <br />
+                <i class="fas fa-circle fa-2x text-blue"></i>
+              </a>
+            </div>
+            <div class="btn-group">
+              <a class="btn btn-secondary text-center" href="#" role="button">
+                Rinne OD <br />
+                <i class="fas fa-circle fa-2x text-red"></i>
+              </a>
+
+              <a class="btn btn-secondary text-center" href="#" role="button">
+                Rinne OI <br />
+                <i class="fas fa-circle fa-2x text-blue"></i>
+              </a>
+            </div>
+            <a class="btn btn-secondary text-center" href="#" role="button">
+              Weber <br />
+              <i class="fas fa-circle fa-2x text-green"></i>
+            </a>
+
+            <h4 class="mt-3">Impedanciometría<small></small></h4>
+
+            <div class="btn-group">
+              <a class="btn btn-secondary text-center" role="button" id="Z_OD" onclick="moveTo(1)">
+                Poner oliva en OD <br /> <i class="fas fa-circle fa-2x text-gray-300"></i>
+              </a>
+              <a class="btn btn-secondary text-center" role="button" id="Z_OI" onclick="moveTo(2)">
+                Poner Olvia en OI <br />
+                <i class="fas fa-circle fa-2x text-gray-300"></i>
+              </a>
+            </div>
+
+            <div class="btn-group">
+              <a class="btn btn-secondary text-center" onclick="changeimage(8)" role="button">
+                Reflex OD <br />
+                <i class="fas fa-circle fa-2x text-red"></i>
+              </a>
+              <a class="btn btn-secondary text-center" onclick="changeimage(9)" role="button">
+                Reflex OI <br />
+                <i class="fas fa-circle fa-2x text-blue"></i>
+              </a>
+            </div>
+
+            <div class="mt-4">
+              <div id="Camara_sono" class="btn btn-primary btn-lg btn-flat" onclick="moveTo(0)">
+                <i class="fas fa-headphones-alt fa-lg mr-2"></i>Pasar a la cámara sonoamortiguada
+              </div>
+              <div id="ficha" onclick="createattention()" class="btn btn-secondary btn-lg btn-flat">
+                <i class="fas fa-notes-medical a-lg mr-2"></i>
+                Llenar ficha
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  const states = [0, 0, 0];
+  $(document).ready(function () {
+    function getNavUrl() {
+      return window.location.search.replace("?", "");
+    }
+
+    function getParameters(url) {
+      var params = {};
+      url = url.toLowerCase();
+      url = url.split("&");
+      var length = url.length;
+      for (var i = 0; i < length; i++) {
+        var prop = url[i].slice(0, url[i].search("="));
+        var value = url[i].slice(url[i].search("=")).replace("=", "");
+        params[prop] = value;
+      }
+      return params;
+    }
+    var $Parameters = getParameters(getNavUrl());
+
+    function testajax() {
+      var result = $.ajax({
+        type: "POST",
+        url: "module/read_patient.php",
+        data: { p: $Parameters["p"] },
+        async: false,
+        success: function (data) {
+          const obj = JSON.parse(data);
+          var array = Object.values(obj);
+          resultElement = document.getElementById("Name");
+          resultElement.innerHTML = obj["Name"];
+          resultElement = document.getElementById("Name_sm");
+          resultElement.innerHTML = obj["Name"];
+          resultElement = document.getElementById("Gender");
+          resultElement.innerHTML = `Sexo: ${obj["Gender"]}`;
+          resultElement = document.getElementById("Age");
+          resultElement.innerHTML = `${obj["Age"]} años`;
+          resultElement = document.getElementById("Anamnesis");
+          resultElement.innerHTML = `${obj["Anamnesis"]}`;
+          resultElement = document.getElementById("Morbid");
+          resultElement.innerHTML = `${obj["Morbid"]}`;
+          resultElement = document.getElementById(
+            "profile_img"
+          ).src = `dist/img/${obj["Profile"]}`;
+          resultElement = document.getElementById(
+            "profile_img_sm"
+          ).src = `dist/img/${obj["Profile"]}`;
+          result = data;
+        },
+      });
+      return result.responseText;
+    }
+
+    var img = testajax();
+    const obj = JSON.parse(img);
+    img_array = [
+      `dist/img/${obj["Profile"]}`,
+      `dist/img/${obj["OTO_OD"]}`,
+      `dist/img/${obj["OTO_OI"]}`,
+      `dist/img/${obj["Rinne_OD"]}`,
+      `dist/img/${obj["Rinne_OI"]}`,
+      `dist/img/${obj["Weber"]}`,
+      `dist/img/${obj["Reflex_OD"]}`,
+      `dist/img/${obj["Reflex_OI"]}`,
+    ];
+
+    $_data_codes = [
+      `${obj["User"]}`,
+      `${$Parameters["p"]}`
+    ];
+
+  });
+  function changeimage(i) {
+    img.src = img_array[i];
+  };
+  function createattention() {
+    var data_codes = $_data_codes;
+
+
+    window.location.href = `?p=${data_codes[1]}&a=create`;
+  };
+
+  function moveTo(place) {
+    var data_codes = $_data_codes;
+    const place_list = ["Camara_sono", "Z_OD", "Z_OI"];
+    const action_list = ["Sacar de la cámara sonoamortiguada",
+      "Pasar a la cámara sonoamortiguada",
+      "Quitar Sonda de OD", "Poner Sonda de OD",
+      "Quitar Sonda de OI", "Poner Sonda de OI"];
+
+
+    resultElement = document.getElementById(place_list[place]);
+
+    if (place == 0) {
+      if (states[place] == 0) {
+        resultElement.innerHTML = ` <i class="fas fa-headphones-alt fa-lg mr-2">
+                                    </i>${action_list[0]}`;
+      } else {
+        resultElement.innerHTML = ` <i class="fas fa-headphones-alt fa-lg mr-2">
+                                    </i>${action_list[1]}`;
+      }
+      $("#Z_OD").toggleClass('disabled');
+      $("#Z_OI").toggleClass('disabled');
+      $("#otoOD").toggleClass('disabled');
+      $("#otoOI").toggleClass('disabled');
+    }
+
+    if (place == 1) {
+      if (states[place] == 0) {
+        resultElement.innerHTML = `${action_list[2]}<br />
+                                   <i class="fas fa-circle fa-2x text-red"></i>`;
+
+      } else {
+        resultElement.innerHTML = `${action_list[3]}<br />
+                                   <i class="fas fa-circle fa-2x text-gray-300"></i>`;
+      }
+      $("#Camara_sono").toggleClass('disabled');
+      $("#Z_OI").toggleClass('disabled');
+      $("#otoOD").toggleClass('disabled');
+      $("#otoOI").toggleClass('disabled');
+    }
+    if (place == 2) {
+      if (states[place] == 0) {
+        resultElement.innerHTML = `${action_list[4]}<br />
+                                   <i class="fas fa-circle fa-2x text-blue"></i>`;
+      } else {
+        resultElement.innerHTML = `${action_list[5]}<br />
+                                   <i class="fas fa-circle fa-2x text-gray-300"></i>`;
+      }
+
+      $("#Camara_sono").toggleClass('disabled');
+      $("#Z_OD").toggleClass('disabled');
+      $("#otoOD").toggleClass('disabled');
+      $("#otoOI").toggleClass('disabled');
+    }
+
+    states[place] = (states[place] == 0) ? 1 : 0;
+
+    $.ajax({
+      type: "POST",
+      url: "module/camera_sono.php",
+      data: jQuery.param({ a: states[place], p: data_codes[1], u: data_codes[0], pl: place_list[place] }),
+      success: function (data) {
+      }
+    });
+
+  };
+
+  var can = document.getElementById('profile_img');
+  var ctx = can.getContext('2d');
+  can.addEventListener('mousemove', function (e) {
+    var mouse = getMouse(e, can);
+    redraw(mouse);
+  }, false);
+
+
+  function redraw(mouse) {
+    console.log('a');
+    can.width = can.width;
+    ctx.drawImage(img, 0, 0);
+    ctx.beginPath();
+    ctx.rect(0, 0, 500, 500);
+    ctx.arc(mouse.x, mouse.y, 170, 0, Math.PI * 2, true)
+    ctx.clip();
+    ctx.fillRect(0, 0, 500, 500);
+  }
+
+  var img = new Image();
+  img.onload = function () {
+    redraw({ x: -500, y: -500 })
+  }
+
+  function getMouse(e, canvas) {
+    var element = canvas,
+      offsetX = 0,
+      offsetY = 0,
+      mx, my;
+
+    // Compute the total offset. It's possible to cache this if you want
+    if (element.offsetParent !== undefined) {
+      do {
+        offsetX += element.offsetLeft;
+        offsetY += element.offsetTop;
+      } while ((element = element.offsetParent));
+    }
+
+    mx = e.pageX - offsetX;
+    my = e.pageY - offsetY;
+
+    // We return a simple javascript object with x and y defined
+    return {
+      x: mx,
+      y: my
+    };
+  }
+
+</script>

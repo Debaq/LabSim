@@ -1,0 +1,60 @@
+{
+    "modules":{
+        "schedule" : [
+            "h3",
+            "schedule",
+            "Agenda",
+            "agenda de usuarios de audio", 
+            {},
+            ["patient-virtual","wait_room"],
+            "card-primary"
+        ],
+        "audio_box" : [
+            "ty", 
+            "audio_box", 
+            "Box Audiología",
+            "Box para realizar actividades de audiología",
+            {
+                "audiometro" : ["Audiometro",1, "equipo"],
+                "otoscopio" : ["Otoscopío",1, "equipo"], 
+                "especulos_ch" : ["Especulos chicos",3, "ud"], 
+                "especulos_med" : ["Especulos medianos", 3, "ud"], 
+                "especulos_gr" : ["Especulos grandes", 3, "ud"], 
+                "diapasón_500": ["Diapasón de 500hz",1, "ud"]
+            },
+            ["stock"],
+            "card-orange"
+        ],
+        "wait_room" :[
+            "AD", 
+            "wait_room",
+            "Sala de espera",
+            "Sala de espera con cuatro sillas",
+            {},
+            [],
+            "card-lightblue"
+        ],
+        "patient" : [
+            "yu",
+            "patient-virtual",
+            "Usuarios Virtuales",
+            "Lista y creador de usuarios virtuales",
+            {},
+            [],
+            "card-purple"
+        ],
+        "stock" : [
+            "sk",
+            "stock",
+            "Stock",
+            "Stock de productos",
+            {
+                "alcohol":["Alcohol",1000, "cc"], 
+                "algodon": ["Algodón",100, "ud"], 
+                "bandeja_met" : ["Bandeja metálica",2, "ud"]
+            },
+            [],
+            "card-purple"
+        ]
+    }
+}
