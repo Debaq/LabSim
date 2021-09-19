@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>933</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="spacing">
+     <number>4</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QFrame" name="verticalFrame">
+        <property name="minimumSize">
+         <size>
+          <width>40</width>
+          <height>0</height>
+         </size>
+        </property>
+        <layout class="QVBoxLayout" name="layout_test">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>10</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QMdiArea" name="mdiArea">
+      <property name="background">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>136</red>
+         <green>142</green>
+         <blue>147</blue>
+        </color>
+       </brush>
+      </property>
+      <property name="documentMode">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>933</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuArchivo">
+    <property name="title">
+     <string>Archivo</string>
+    </property>
+    <addaction name="actionLogin"/>
+    <addaction name="actionSalir"/>
+   </widget>
+   <widget class="QMenu" name="menuAcerca_de">
+    <property name="title">
+     <string>Acerca de ..</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionEnviar_un_ticket"/>
+    <addaction name="actionAcerca_de"/>
+   </widget>
+   <widget class="QMenu" name="menuequipos">
+    <property name="title">
+     <string>Equipos</string>
+    </property>
+    <addaction name="actionAudiometro"/>
+    <addaction name="actionImpedanciometro"/>
+    <addaction name="actionABR"/>
+   </widget>
+   <widget class="QMenu" name="menuventanas">
+    <property name="title">
+     <string>ventanas</string>
+    </property>
+    <addaction name="actionCascada"/>
+    <addaction name="actionCerrar_todas"/>
+    <addaction name="actionTiles"/>
+   </widget>
+   <addaction name="menuArchivo"/>
+   <addaction name="menuequipos"/>
+   <addaction name="menuventanas"/>
+   <addaction name="menuAcerca_de"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>10</height>
+    </size>
+   </property>
+  </widget>
+  <action name="actionLogin">
+   <property name="text">
+    <string>Ingresar</string>
+   </property>
+  </action>
+  <action name="actionSalir">
+   <property name="text">
+    <string>Salir</string>
+   </property>
+  </action>
+  <action name="actionEnviar_un_ticket">
+   <property name="text">
+    <string>Enviar un ticket</string>
+   </property>
+  </action>
+  <action name="actionAcerca_de">
+   <property name="text">
+    <string>Acerca de LabSim</string>
+   </property>
+  </action>
+  <action name="actionAudiometro">
+   <property name="text">
+    <string>Audiometro</string>
+   </property>
+  </action>
+  <action name="actionImpedanciometro">
+   <property name="text">
+    <string>Impedanciometro</string>
+   </property>
+  </action>
+  <action name="actionCascada">
+   <property name="text">
+    <string>Cascada</string>
+   </property>
+  </action>
+  <action name="actionCerrar_todas">
+   <property name="text">
+    <string>Cerrar todas</string>
+   </property>
+  </action>
+  <action name="actionTiles">
+   <property name="text">
+    <string>Tiles</string>
+   </property>
+  </action>
+  <action name="actionABR">
+   <property name="text">
+    <string>Potenciales Evocados</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

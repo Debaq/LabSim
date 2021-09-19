@@ -42,7 +42,7 @@ class ZRscreen(QWidget, Ui_Z_rscreen):
         ax = pw1.getAxis('bottom')
         ay = pw1.getAxis('left')
         pw1.setLabel(axis='bottom', text='S')
-        pw1.setLabel(axis='left', text='ul')
+        pw1.setLabel(axis='left', text='μl')
         ticksx = [ 2]
         ticksy = [-150,0, 150]
         ax.setTicks([[(v, str(v)) for v in ticksx ]])
@@ -65,7 +65,7 @@ class ZDscreen(QWidget, Ui_Z_dscreen):
         ax = pw1.getAxis('bottom')
         ay = pw1.getAxis('left')
         pw1.setLabel(axis='bottom', text='S')
-        pw1.setLabel(axis='left', text='ul')
+        pw1.setLabel(axis='left', text='μl')
         ticksx = [ 12]
         ticksy = [-225,0, 225]
         ax.setTicks([[(v, str(v)) for v in ticksx ]])
@@ -122,13 +122,13 @@ class ZZscreen(QWidget, Ui_Z_zscreen):
 
 class ZControl(QWidget, Ui_Z_control):
     def __init__(self, OD, OI, sonda):
+        QWidget.__init__(self)
         # Inicialización de la ventana y propiedades
         self.data_OD = Z_225_result()
         self.data_OD.create_auto(OD)
         self.data_OI = Z_225_result()
         self.data_OI.create_auto(OI)
         #self.data_set = self.data_OD.getDataSet()
-        QWidget.__init__(self)
         self.setupUi(self)
         self.Z = ZZscreen()
         self.R = ZRscreen()

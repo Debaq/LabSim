@@ -62,15 +62,35 @@
         }
     },
     "Title_3": {
-        "name" : "Módulos",
+        "name" : "Base de datos",
         "alias" : "module",
         "permits":["Admin"],
-        "path" : "?p=module",
+        "path" : "#",
         "icon" : "nav-icon fas fa-puzzle-piece",
         "active" : true,
         "notice" : "",
-        "subT" : false,
-        "data" : ""        
+        "subT" : true,
+        "data" : "",
+        "sub_titles" : {
+            "subTitle_1_1" : {
+                "name" : "Módulos",
+                "alias" : "add_instructor",
+                "permits":["Admin","Instructor"],
+                "path" : "?p=add_instructor",
+                "icon" : "nav-icon fas fa-user-graduate",
+                "active" : true,
+                "notice" : ""
+            },
+            "subTitle_1_2" : {
+                "name" : "Usuarios virtuales",
+                "alias" : "cfg_learner",
+                "permits":["Admin","Instructor"],
+                "path" : "?p=cfg_learner",
+                "icon" : "fas fa-chalkboard-teacher nav-icon",
+                "active" : true,
+                "notice" : ""
+            }
+        }        
     },
 
     "Title_4": {

@@ -7,19 +7,26 @@
 #                                                               #
 #################################################################
 
-from fbs_runtime.application_context.PyQt5 import ApplicationContext
-from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QMessageBox
-from PyQt5.QtCore import QThread, pyqtSignal
-from PyQt5.QtGui import QFontDatabase, QFont,QGuiApplication
-import requests
-import sys
-from UI.Ui_main_login import Ui_MainLogin
-import Z
 import json
+import sys
 import time
-from Audiometer import *
+
+import requests
+from fbs_runtime.application_context.PyQt5 import ApplicationContext
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
+from PyQt5.QtGui import QFont, QFontDatabase, QGuiApplication
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QMdiSubWindow,
+                             QMessageBox, QPushButton, QWidget, QGroupBox)
+
+import ABR
+import Z
 from Audiometer import Audiometer
-from UI.Ui_main_login import Ui_MainLogin
+from UI.Ui_Main_new import Ui_MainWindow
+
+app_active = {
+    'A':True, 'Z':True, 'ABR':True,
+    'EOAs':False, 'EOAc':False, 'VNG':False, 
+    'Vhit':False, 'POS':False}
 
 threshold =  [[[130,130],[130,130],[130,130],[130,130],
                 [130,130],[130,130],[130,130],[130,130],
@@ -35,31 +42,124 @@ threshold =  [[[130,130],[130,130],[130,130],[130,130],
                 [130,130],[130,130],[130,130]]
                 ]
 
-class MainWindow(QMainWindow, Ui_MainLogin):
+class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, *args, **kwargs):
         QMainWindow.__init__(self)
-        QFontDatabase.addApplicationFont(
-            appctxt.get_resource('font/OpenSans-Regular.ttf'))
-        #self.font = QFont.setFamily('OpenSans-Bold')
-        font = QFont("OpenSans")
-        QGuiApplication.setFont(font)
         self.setupUi(self)
-        self.btn_login.clicked.connect(self.login)
-        # self.btn_login.clicked.connect(self.evt_btnStart_click)
-        self.btn_z.clicked.connect(self.activate_z)
-        self.btn_a.clicked.connect(self.activate_a)
-        self.btn_z.setDisabled(True)
-        self.btn_a.setDisabled(True)
-        self.Z_O = 3
-        self.Z = Z.ZControl('C', 'C', self.Z_O)
-        self.A = Audiometer(threshold)
+       # QFontDatabase.addApplicationFont(
+            #appctxt.get_resource('font/OpenSans-Regular.ttf'))
+        #self.font = QFont.setFamily('OpenSans-Bold')
+        #font = QFont("OpenSans")
+        #QGuiApplication.setFont(font)
+        self.showMaximized()
+        #self.actionAudiometro.triggered.connect(self.activate_a)
+        #self.actionImpedanciometro.triggered.connect(self.activate_z)
+        #self.actionCascada.triggered.connect(self.cascade)
+        #self.actionTiles.triggered.connect(self.tile)
+        #self.actionCerrar_todas.triggered.connect(self.closeAll)
+        #self.actionABR.triggered.connect(self.activate_abr)
+        #self.setWindowTitle("LabSim")
+        self.mdiArea.documentMode = True
+        #self.Z_O = 3
+        #self.Z = Z.ZControl('C', 'C', self.Z_O)
+        #self.A = Audiometer(threshold)
+        self.lisModuleActive = [None,None,None]
+        self.lateral_btn()
 
+
+    def lateral_btn(self):
+        #self.groupBox = QGroupBox(self.layout_test)
+        for i in app_active:
+            if app_active[i]:
+                self.btn = QPushButton('{}'.format(i))
+                text = self.btn.text()
+                self.btn.clicked.connect(lambda ch, text=text: self.printer(text))
+                #self.layout_test.addWidget(self.btn)
+
+    def printer(self, n):
+        print(n)
+
+    def closeAll(self):
+        #self.mdiArea.closeAllSubWindows()
+        for i in range(len(self.lisModuleActive)):
+            self.lisModuleActive[i].hide()
+
+
+    def cascade(self):
+        self.mdiArea.cascadeSubWindows()
+
+    def tile(self):
+        self.mdiArea.tileSubWindows()
 
     def activate_z(self):
-        self.Z.show()
+        if self.lisModuleActive[1] != None:
+            if self.lisModuleActive[1].isHidden():
+                self.lisModuleActive[1].show()
+            else:
+                self.lisModuleActive[1].hide()
+        else:
+            sub_Z = QMdiSubWindow()
+            sub_Z.setWidget(Z.ZControl('C', 'C', self.Z_O))
+            self.mdiArea.addSubWindow(sub_Z)
+            sub_Z.setWindowTitle("Impedanciómetro")
+            sub_Z.setWindowFlags(
+                Qt.Window |
+                Qt.CustomizeWindowHint |
+                Qt.WindowTitleHint |
+                Qt.WindowMaximizeButtonHint |
+                Qt.WindowCloseButtonHint |
+                Qt.WindowStaysOnTopHint
+                )
+            sub_Z.show()
+            list_wi = self.mdiArea.subWindowList()
+            self.lisModuleActive[1] = list_wi[-1]
+
+    def activate_abr(self):
+        if self.lisModuleActive[2] != None:
+            if self.lisModuleActive[2].isHidden():
+                self.lisModuleActive[2].show()
+            else:
+                self.lisModuleActive[2].hide()
+        else:
+            sub_ABR = QMdiSubWindow()
+            sub_ABR.setWidget(ABR.MainWindow())
+            self.mdiArea.addSubWindow(sub_ABR)
+            sub_ABR.setWindowTitle("Potenciales Evocados")
+            sub_ABR.setWindowFlags(
+                Qt.Window |
+                Qt.CustomizeWindowHint |
+                Qt.WindowTitleHint |
+                Qt.WindowMaximizeButtonHint |
+                Qt.WindowCloseButtonHint |
+                Qt.WindowStaysOnTopHint
+                )
+            sub_ABR.show()
+            list_wi = self.mdiArea.subWindowList()
+            self.lisModuleActive[2] = list_wi[-1]
+
 
     def activate_a(self):
-        self.A.show()
+        if self.lisModuleActive[0] != None:
+            if self.lisModuleActive[0].isHidden():
+                self.lisModuleActive[0].show()
+            else:
+                self.lisModuleActive[0].hide()
+        else:
+            sub_A = QMdiSubWindow()
+            sub_A.setWidget(Audiometer(threshold))
+            self.mdiArea.addSubWindow(sub_A)
+            sub_A.setWindowTitle("Audiometro")
+            sub_A.setWindowFlags(
+                Qt.Window |
+                Qt.CustomizeWindowHint |
+                Qt.WindowTitleHint |
+                Qt.WindowMaximizeButtonHint |
+                Qt.WindowCloseButtonHint |
+                Qt.WindowStaysOnTopHint
+                )
+            sub_A.show()
+            list_wi = self.mdiArea.subWindowList()
+            self.lisModuleActive[0] = list_wi[-1]
 
     def thread_data_clicked(self):
         self.thread_data = ReadThread()
