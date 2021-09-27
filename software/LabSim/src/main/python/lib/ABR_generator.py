@@ -1,62 +1,114 @@
 import numpy as np
 import bezier_prop as bz
+import random
+import collections
+from helpers import Preferences
 
-class ABR_generator:
-    def __init__(self):
+class_pref = Preferences()
+
+
+class ABR_creator():
+    def __init__(self, dBnHL = 80, VrelI = True):
+        basicData = (class_pref.get("ABR_Normal"))[str(dBnHL)]
+        self.intencity = dBnHL
+        self.data = self.cal_data(basicData)
+
+    def reset(self):
+        self.intencity = 80
+        self.basicData = class_pref.get("ABR_Normal")
+
+    def cal_data(self, data):
+        early = ["MC", "I", "II"]
+        late = ["III", "IV", "V", "VI", "VII"]
+        earlyGroup, lateGroup= {},{}
+        for i in early:
+            earlyGroup[i] = data[i]
+        for i in late:
+            lateGroup[i] = data[i]
+        return [self.intencity, earlyGroup, lateGroup]       
+  
+    def get(self):
         pass
 
+    def set_intencity(self, dBnHL):
+        self.prevInt = self.data[0]
+        self.data[0] = int(dBnHL)
+        self.attenuator()
+        self.updateCurve()
 
-    def ABR_Curve( curve_I, curve_III, curve_V ):
-        sn10 = (curve_V[0]+1, curve_V[0])
-        sn10_array = np.array(
-                            [sn10[0] -0.2,sn10[1]],
-                            [sn10[0]+ 0.4,sn10[1]],
-                            [sn10[0]+ 1,0],
-                            )
-            
-            _curves = ()
-    
-    def ABR_Int():
-        pass
+    def attenuator(self):
+        if self.data[0] >=50:
+            fvarLat = .15
+            fvarAmp = .05
+        else:
+            fvarLat = .3
+            fvarAmp = .06
+        varInt = abs(self.prevInt - self.data[0])
+        fvarInt = varInt/5
+        if self.prevInt < self.data[0]:
+            sideAmp = 1
+            sideLat = -1
+            #text = "subiendo"
+        else:
+            sideAmp = -1
+            sideLat = 1
+            #text = "bajando"
 
-    curve_I = (1.3,.13)
-    curve_Ip = (1.3,-.13)
-    curve_II = ()
-    curve_IIp = ()
-    curve_III = (3.7,0.3)
-    curve_IIIp = (3.7,0.3)
-    curve_IV = ()
-    curve_V = ()
-    curve_V = (5.6,0.7)
-    sn10 = (6.5,-.3)
+        varLat = (fvarLat * fvarInt) * sideLat
+        varAmp = (fvarAmp * fvarInt) * sideAmp
+        #print("{}:{} veces  amp:{}/lat:{} int:{}/prev:{} ".format(text, fvarInt, varAmp, varLat, self.data[0], self.prevInt))
 
-    points = np.array([
-            [0,0],
-            [curve_I[0] - 0.5,0],
-            [curve_I[0],curve_I[1]],
-            [curve_I[0]+ 0.5,0],
+        for k,i in self.data[2].items():
+            newLat = round(i[0] + varLat,2)
+            newAmp = round(i[2] + varAmp,2)
+            newAmp = 0 if newAmp < 0 else newAmp
+            self.data[2][k][0] = newLat
+            self.data[2][k][2] = newAmp
+        for k,i in self.data[1].items():
+            newLat = round(i[0] + varLat,2)
+            newAmp = round(i[2] + varAmp,2)
+            newAmp = 0 if newAmp < 0 else newAmp
+            self.data[1][k][0] = newLat
+            self.data[1][k][2] = newAmp
+        #self.cal_lat(varLat, varAmp)
+
         
-            [curve_III[0] - 0.5,0],
-            [curve_III[0],curve_III[1]],
-            [curve_III[0]+ 0.5,0],
+
+    def updateCurve(self):
+        prevPoints=[]
+        data = dict(self.data[1], **self.data[2])
         
-            [curve_V[0] - 0.5,0],
-            [curve_V[0],curve_V[1]],
-            [curve_V[0]+ 0.5,0],
-        
-            [sn10[0] -0.2,sn10[1]],
-            [sn10[0]+ 0.4,sn10[1]],
-            [sn10[0]+ 1,0],
-            
-    ])
-    Bezi = bz.Bezier()
-    path = Bezi.evaluate_bezier(points, 20)
+        print(data)
+        for k,i in data.items():
+            width = i[1]
+            f1p = [i[0] - (width/2), 0]
+            f2p = [i[0],i[1]]
+            f3p = [i[0] + (width/2), 0]
+            prevPoints.append(f1p) 
+            prevPoints.append(f2p) 
+            prevPoints.append(f3p)
 
-    # extract x & y coordinates of points
-    x, y = points[:,0], points[:,1]
-    px, py = path[:,0], path[:,1]
+        print(prevPoints)
+
+       
+        #Bezi = bz.Bezier()
+        #path = Bezi.evaluate_bezier(points, 20)
+
+        # extract x & y coordinates of points
+        #x, y = points[:,0], points[:,1]
+        #px, py = path[:,0], path[:,1]
+
+        #y_noise = np.random.normal(0, .01, py.shape)
+        #y_new = py + y_noise
+
+        #return px, y_new
 
 
-    y_noise = np.random.normal(0, .01, py.shape)
-    y_new = py + y_noise
+I = ABR_creator()
+while True:
+    i = input(":")
+    if i==type("q"):
+        break
+    else:
+        I.set_intencity(i)
 

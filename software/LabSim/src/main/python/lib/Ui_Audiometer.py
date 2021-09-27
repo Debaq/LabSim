@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/nick/Escritorio/Proyectos/LabSim/src/main/python/lib/Audiometer.ui'
+# Form implementation generated from reading ui file '/home/nick/Escritorio/Proyectos/LabSim/software/LabSim/src/main/python/lib/Audiometer.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #
@@ -14,12 +14,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Audiometer(object):
     def setupUi(self, Audiometer):
         Audiometer.setObjectName("Audiometer")
-        Audiometer.resize(832, 621)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(Audiometer.sizePolicy().hasHeightForWidth())
-        Audiometer.setSizePolicy(sizePolicy)
+        Audiometer.resize(740, 504)
+        Audiometer.setMinimumSize(QtCore.QSize(740, 500))
+        Audiometer.setMaximumSize(QtCore.QSize(830, 504))
         self.horizontalLayout_7 = QtWidgets.QHBoxLayout(Audiometer)
         self.horizontalLayout_7.setObjectName("horizontalLayout_7")
         self.verticalLayout = QtWidgets.QVBoxLayout()
@@ -29,6 +26,7 @@ class Ui_Audiometer(object):
         self.display.setMinimumSize(QtCore.QSize(0, 120))
         self.display.setMaximumSize(QtCore.QSize(16777215, 120))
         self.display.setStyleSheet("background-color: rgb(255, 255, 255);")
+        self.display.setFrameShape(QtWidgets.QFrame.Box)
         self.display.setObjectName("display")
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.display)
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
@@ -1036,8 +1034,15 @@ class Ui_Audiometer(object):
         self.btn_incorrecta.setObjectName("btn_incorrecta")
         self.horizontalLayout_16.addWidget(self.btn_incorrecta)
         self.verticalLayout_6.addLayout(self.horizontalLayout_16)
-        self.verticalLayout_13 = QtWidgets.QVBoxLayout()
-        self.verticalLayout_13.setObjectName("verticalLayout_13")
+        self.horizontalLayout_22 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_22.setObjectName("horizontalLayout_22")
+        self.btn_talkback = QtWidgets.QPushButton(Audiometer)
+        font = QtGui.QFont()
+        font.setPointSize(9)
+        self.btn_talkback.setFont(font)
+        self.btn_talkback.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.btn_talkback.setObjectName("btn_talkback")
+        self.horizontalLayout_22.addWidget(self.btn_talkback)
         self.btn_alternado = QtWidgets.QPushButton(Audiometer)
         font = QtGui.QFont()
         font.setPointSize(9)
@@ -1045,15 +1050,8 @@ class Ui_Audiometer(object):
         self.btn_alternado.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.btn_alternado.setCheckable(False)
         self.btn_alternado.setObjectName("btn_alternado")
-        self.verticalLayout_13.addWidget(self.btn_alternado)
-        self.btn_talkback = QtWidgets.QPushButton(Audiometer)
-        font = QtGui.QFont()
-        font.setPointSize(9)
-        self.btn_talkback.setFont(font)
-        self.btn_talkback.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.btn_talkback.setObjectName("btn_talkback")
-        self.verticalLayout_13.addWidget(self.btn_talkback)
-        self.verticalLayout_6.addLayout(self.verticalLayout_13)
+        self.horizontalLayout_22.addWidget(self.btn_alternado)
+        self.verticalLayout_6.addLayout(self.horizontalLayout_22)
         self.horizontalLayout_6 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_6.setContentsMargins(-1, 0, -1, -1)
         self.horizontalLayout_6.setObjectName("horizontalLayout_6")
@@ -1138,7 +1136,7 @@ class Ui_Audiometer(object):
 
     def retranslateUi(self, Audiometer):
         _translate = QtCore.QCoreApplication.translate
-        Audiometer.setWindowTitle(_translate("Audiometer", "Audiosim"))
+        Audiometer.setWindowTitle(_translate("Audiometer", "Audiómetro - Audiosim"))
         self.lbl_int_ch0.setText(_translate("Audiometer", "20 dB HL"))
         self.lbl_trans_ch0.setText(_translate("Audiometer", "Aérea"))
         self.lbl_step_ch0.setText(_translate("Audiometer", "Pasos : 5 dB "))
@@ -1174,7 +1172,7 @@ class Ui_Audiometer(object):
         self.label_10.setText(_translate("Audiometer", "Transductor"))
         self.btn_trans_aer_der.setText(_translate("Audiometer", "Aéreo"))
         self.btn_trans_ose_der.setText(_translate("Audiometer", "Ósea"))
-        self.btn_trans_cl_der.setText(_translate("Audiometer", "Campo libre"))
+        self.btn_trans_cl_der.setText(_translate("Audiometer", "C. libre"))
         self.btn_alt_frec.setText(_translate("Audiometer", "Alta frec."))
         self.groupBox_step.setTitle(_translate("Audiometer", "Pasos"))
         self.btn_step_1.setText(_translate("Audiometer", "1"))
@@ -1188,7 +1186,7 @@ class Ui_Audiometer(object):
         self.label_12.setText(_translate("Audiometer", "Transductor"))
         self.btn_trans_aer_izq.setText(_translate("Audiometer", "Aéreo"))
         self.btn_trans_ose_izq.setText(_translate("Audiometer", "Ósea"))
-        self.btn_trans_cl_izq.setText(_translate("Audiometer", "Campo libre"))
+        self.btn_trans_cl_izq.setText(_translate("Audiometer", "C. libre"))
         self.label_13.setText(_translate("Audiometer", "Estímulo"))
         self.btn_stim_tone_izq.setText(_translate("Audiometer", "Tono"))
         self.btn_stim_fm_izq.setText(_translate("Audiometer", "FM"))
@@ -1211,8 +1209,8 @@ class Ui_Audiometer(object):
         self.btn_correcta.setText(_translate("Audiometer", "+1"))
         self.btn_borrar.setText(_translate("Audiometer", "Limpiar"))
         self.btn_incorrecta.setText(_translate("Audiometer", "-1"))
-        self.btn_alternado.setText(_translate("Audiometer", "Alternado"))
         self.btn_talkback.setText(_translate("Audiometer", "Talkback"))
+        self.btn_alternado.setText(_translate("Audiometer", "Alternado"))
         self.btn_freq_minus.setText(_translate("Audiometer", "<"))
         self.btn_freq_minus.setShortcut(_translate("Audiometer", "A"))
         self.label_2.setText(_translate("Audiometer", "Frecuencia"))

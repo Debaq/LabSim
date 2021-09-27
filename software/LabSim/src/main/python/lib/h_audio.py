@@ -29,6 +29,22 @@ def create_sound(stim, f, ch):
     result = QMediaContent(QUrl.fromLocalFile(appctxt.get_resource(file)))
     return result
 
+def create_voice(name, gender, id):
+    file = "ogg/{}_{}{}.ogg".format(name, gender, id)
+    result = QMediaContent(QUrl.fromLocalFile(appctxt.get_resource(file)))
+    return result
+
+def create_word(name):
+    file = "ogg/{}".format(name)
+    result = QMediaContent(QUrl.fromLocalFile(appctxt.get_resource(file)))
+    return result
+
+def create_word_response(name, sex, number):
+    file = "ogg/LP_palacios_r_{}{}_{}.ogg".format(sex, number, name)
+    result = QMediaContent(QUrl.fromLocalFile(appctxt.get_resource(file)))
+    return result
+
+
 
 def create_frecuency(frecuency_dict, prueba, transductor=0,
                      Hf=False):

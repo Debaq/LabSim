@@ -10,6 +10,7 @@
 import json
 import sys
 import time
+import random
 
 import requests
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
@@ -270,58 +271,90 @@ class MainWindow(QWidget, Ui_ABRSim):
 
 
 
-def ABR_Curve( curve_I, curve_III, curve_V ):
+def ABR_Curve(nHL = 80, peak_I=1.6, peak_III=3.7, peak_v=5.6, amp_V = 0.8, VrelI = True):
+
+    peak_I = 1.6
+    peak_III = 3.7
+    peak_V = 5.6
+    amp_V = 0.8
+    VrelI = True
+
+    if VrelI:
+        var = random.uniform(0,0.2)
+        amp_I = amp_V / 3
+        amp_I = amp_I + var
+    else:
+        var = random.uniform(0,0.2)
+        amp_I = amp_V / 1.5
+        amp_I = amp_I 
+       
+
+    curve_cm = (0.6, 0.15)
+    curve_cmp = (0.7, -0.05)
+
+    curve_I = (peak_I,amp_I/2)
+    curve_Ip = (curve_I[0]+.5,-(amp_I/2))
+
+    curve_II = (curve_I[0] + 1, curve_Ip[1]+0.1)
+    curve_IIp = (curve_II[0]+.3,curve_II[1]-.02)
+
+    curve_III = (peak_III,0.3)
+    curve_IIIp = (curve_III[0]+.9,curve_III[1]-0.3)
+
+    VrefIII = (random.uniform(-.4,.7)) + curve_III[1]
+    curve_V = (peak_V,VrefIII)
+
+    sn10refV = curve_V[1] - amp_V
+    sn10 = (curve_V[0]+1,sn10refV)
+
+    curve_IV = (peak_V-.5, curve_V[1]-.05)
+    curve_IVp = (curve_IV[0]+.25, curve_IV[1]-.05)
+
+    curve_VI = (sn10[0]+1.5, curve_V[1]-.3)
+    curve_VIp = (curve_VI[0]+1.5, curve_VI[1]-.3)
+    curve_VII = (curve_VIp[0]+1.5, curve_VIp[1]+.6)
+
+
+    points = np.array([
+            [0,0],
+
+            [curve_cm[0]-.2, 0],
+            [curve_cm[0], curve_cm[1]],
+            [curve_cmp[0],curve_cmp[1]],
+
+            [curve_I[0],curve_I[1]],
+            [curve_Ip[0],curve_Ip[1]],
+
+            [curve_II[0],curve_II[1]],
+            [curve_IIp[0],curve_IIp[1]],
         
-        sn10 = (curve_V[0]+1, curve_V[0])
-        sn10_array = np.array(
-                                [sn10[0] -0.2,sn10[1]],
-                                [sn10[0]+ 0.4,sn10[1]],
-                                [sn10[0]+ 1,0],
-                            )
+            [curve_III[0],curve_III[1]],
+            [curve_IIIp[0],curve_IIIp[1]],
         
-        _curves = ()
-    
-def ABR_Int():
-    pass
+            [curve_IV[0], curve_IV[1]],
+            [curve_IVp[0], curve_IVp[1]],
+            
+            [curve_V[0],curve_V[1]],
+            [sn10[0],sn10[1]],
 
-curve_I = (1.3,.13)
-curve_Ip = (1.3,-.13)
+            [curve_VI[0],curve_VI[1]],
+            [curve_VIp[0],curve_VIp[1]],
+            [curve_VII[0],curve_VII[1]],
+            [12,0]        
+    ])
+    Bezi = bz.Bezier()
+    path = Bezi.evaluate_bezier(points, 20)
 
-curve_III = (3.7,0.3)
-curve_IIIp = (3.7,0.3)
+    # extract x & y coordinates of points
+    x, y = points[:,0], points[:,1]
+    px, py = path[:,0], path[:,1]
 
-curve_V = (5.6,0.7)
-sn10 = (6.5,-.3)
+    y_noise = np.random.normal(0, .01, py.shape)
+    y_new = py + y_noise
 
-points = np.array([
-        [0,0],
-        [curve_I[0] - 0.5,0],
-        [curve_I[0],curve_I[1]],
-        [curve_I[0]+ 0.5,0],
-    
-        [curve_III[0] - 0.5,0],
-        [curve_III[0],curve_III[1]],
-        [curve_III[0]+ 0.5,0],
-    
-        [curve_V[0] - 0.5,0],
-        [curve_V[0],curve_V[1]],
-        [curve_V[0]+ 0.5,0],
-    
-        [sn10[0] -0.2,sn10[1]],
-        [sn10[0]+ 0.4,sn10[1]],
-        [sn10[0]+ 1,0],
-        
-])
-Bezi = bz.Bezier()
-path = Bezi.evaluate_bezier(points, 20)
+    return px, y_new
 
-# extract x & y coordinates of points
-x, y = points[:,0], points[:,1]
-px, py = path[:,0], path[:,1]
-
-
-y_noise = np.random.normal(0, .01, py.shape)
-y_new = py + y_noise
+px, y_new = ABR_Curve()
 
 if __name__ == '__main__':
     appctxt = ApplicationContext()       # 1. Instantiate ApplicationContext

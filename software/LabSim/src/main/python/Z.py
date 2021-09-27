@@ -121,13 +121,14 @@ class ZZscreen(QWidget, Ui_Z_zscreen):
         
 
 class ZControl(QWidget, Ui_Z_control):
-    def __init__(self, OD, OI, sonda):
+    def __init__(self, data, sonda):
         QWidget.__init__(self)
         # Inicialización de la ventana y propiedades
+        self.laSuper(data)
         self.data_OD = Z_225_result()
-        self.data_OD.create_auto(OD)
+        self.data_OD.create_auto(data['Z_OD'])
         self.data_OI = Z_225_result()
-        self.data_OI.create_auto(OI)
+        self.data_OI.create_auto(data['Z_OI'])
         #self.data_set = self.data_OD.getDataSet()
         self.setupUi(self)
         self.Z = ZZscreen()
@@ -159,7 +160,29 @@ class ZControl(QWidget, Ui_Z_control):
         self.side_change()
 
 
+    def laSuper(self, data):
+        #print(data)
+        #side = self.Z.lbl_side.text()
+        state = data['sector']
 
+        if state == 'Z_OI' or state == 'Z_OD':
+            if state == 'Z_OD' :
+                self.side_sonda = 0
+                self.data_OD.create_auto(data['Z_OD'], vol = data['volume'][self.side_sonda])
+
+            else:
+                self.side_sonda = 1
+                self.data_OI.create_auto(data['Z_OI'], vol= data['volume'][self.side_sonda])
+            
+
+        else:
+            self.side_sonda = 2
+
+        
+        
+        
+        
+        
     def print(self):
         screen = QApplication.primaryScreen()
         screenshot = screen.grabWindow( self.Z.winId() )
@@ -243,10 +266,10 @@ class ZControl(QWidget, Ui_Z_control):
 
         if i > datalen:
             self.time_ch0.stop()
-            self.Z.lbl_c.setText(self.data_set[3])
             self.Z.lbl_p.setText(self.data_set[2])
-            self.Z.lbl_v.setText(self.data_set[4])
-            self.Z.lbl_g.setText(self.data_set[5])
+            self.Z.lbl_c.setText(self.data_set[3])
+            self.Z.lbl_v.setText(self.data_set[5])
+            self.Z.lbl_g.setText(self.data_set[4])
 
             self.memory[0] = -1
         else:
@@ -268,7 +291,7 @@ class Z_225_result():
     def __init__(self):
         pass
    
-    def create_manual(self, c, p, g = 0, pmax = 200, num_pts=20, vol=1.8):
+    def create_manual(self, c, p, g = 1, pmax = 200, num_pts=20, vol=1.8):
         self.compliance = c
         self.presure = p
         self.gradient = g
@@ -277,21 +300,34 @@ class Z_225_result():
         self.num_pts=num_pts
         self.curve_z()
     
-    def create_auto(self, letter):
+    def create_auto(self, letter, vol=1.8):
         if letter == 'A':
             c = random.uniform(0.3, 1.6)
             p = random.randint(-100, 100)
+            to = True
+        
         if letter == 'As':
             c = random.uniform(0.01, 0.3)
             p = random.randint(-100, 100)
+            to = True
+        
         if letter =='C':
             c = random.uniform(0.3, 1.6)
             p = random.randint(-400, -100)
+            to = True
         if letter =='B':
             c = random.uniform(0.0, 0.3)
             p = random.randint(-600, -200)
-            
-        self.create_manual(c, p)
+            to = False
+        if letter =='N':
+            c = 0
+            p = 0
+            to = False
+
+        if to:
+            self.create_manual(c, p, vol=vol)
+        else: 
+            self.create_manual(c, p, g = 0, vol=vol)
 
     def curve_z(self):
         c = self.compliance

@@ -64,8 +64,8 @@
     ]
 },
 
-"response_color" : ["background-color: rgb(170, 170, 255);  color : rgb(170, 170, 255);",
-                    "background-color: rgb(255, 255, 255);  color : rgb(255, 255, 255);"]
+"response_color" : ["background-color: rgb(170, 170, 255);  color : rgb(255, 0, 0);",
+    "background-color: rgb(255, 255, 255);  color : rgb(255, 0, 0);"]
 
 
 }

@@ -1,0 +1,429 @@
+body {
+    font: 18px arial;
+    background: gray;
+}
+
+
+
+#audio-container{
+    background-color: white;
+}
+
+
+#main {
+    min-height: 200px;
+    margin: 0;
+    padding: 0;
+
+    display: -webkit-box;
+    display: flex;
+    flex-flow: row;
+    justify-content: space-around;
+}
+
+
+/** Left Panel **/
+#main > left-panel {
+
+    margin: 4px;
+    padding: 5px;
+    border: 1px solid #c0c0c0;
+    border-radius: 0pt;
+
+    flex-basis: 20%;
+    -webkit-flex-basis: 20%;
+    order: 1;
+
+}
+
+
+/** Audiogram Panel **/
+#main > center-panel {
+    margin: 4px;
+    padding: 5px;
+    padding-left: 10px;
+
+    border: 2px solid grey;
+    border-radius: 0pt;
+    background: white;
+    flex-basis: 60%;
+    -webkit-flex-basis: 60%;
+    order: 2;
+
+
+}
+
+
+
+/**  Right Panel **/
+#main > right-panel {
+    margin: 4px;
+    padding: 5px;
+    border: 1px solid #c0c0c0;
+    border-radius: 0pt;
+    
+    flex-basis: 20%;
+    -webkit-flex-basis: 20%;
+    order: 3;
+
+}
+
+
+/** Header  **/
+header {
+    display: block;
+    margin: 4px;
+    padding: 5px;
+    min-height: 25px;
+    border: 1px solid #264b4b;
+    border-radius: 0pt;
+    background: #618585;
+    color: white;
+}
+
+/** & Footer **/
+footer {
+    display: block;
+    margin-left: 50px;
+    margin-right: 50px;
+    padding: 5px;
+    min-height: 55px;
+    border: 1px solid #264b4b;
+    border-radius: 0pt;
+    background: #c0c0c0;
+}
+
+
+
+/* Media Query Adjustments*/
+
+/* Too narrow to support three columns */
+@media all and (max-width: 700px) {
+    #main {
+        /*flex-direction: column;*/
+        flex-wrap: wrap;
+
+    }
+
+
+    center-panel {
+        flex-basis: 100%;
+        order:1;
+        
+    }
+
+    #main > left-panel
+    {
+        flex: 1;
+        order: 2;
+        min-width: 125px;
+    }
+ 
+    #main > right-panel{
+        flex: 1;
+        order: 3;
+    }
+
+}
+
+
+/* ***************************************** */
+
+.button {
+    width: 50px;
+    height: 25px;
+    color: blue;
+    font-size: 14px;
+    background-color: white;
+    border-radius: 5px;
+    margin:2px;
+}
+
+/*  obsolete
+.bt-update{
+    width:100px;
+    height:30px;
+    float:none;
+}
+*/
+
+a {color:white;}
+
+
+.pull-right {
+    float: right;
+    
+}
+
+/*--------- button layouts ----------*/
+.bt-save {
+    /*position: relative; */
+
+    float: right;
+    margin-left: 15px;
+    height: 30px;
+    width: 100px;
+}
+
+/* numeric grid edit button*/
+.bt-num {
+    /*position: relative;
+    float:none;*/
+    margin-left: 30px;
+    width: 100px;
+    height: 30px;
+}
+
+
+.bt-help {
+    float: left;
+
+    height: 30px;
+    width: 100px;
+}
+.button:hover {
+    background-color: #008CBA;
+    color: white;
+  }
+/* button groups*/
+.left-bg {
+    text-align:center;
+    background-color: blue;
+    color: white;
+}
+
+.right-bg {
+    text-align: center;
+    background-color: lightcoral;
+    color: white;
+}
+
+.panel-title{
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: lightgrey;
+}
+
+
+.nav-row {
+    display: block;
+    
+    font-size: 16px;
+    margin: 4px;
+    padding: 5px;
+  
+    border: 1px solid #264b4b;
+    border-radius: 0px;
+    background: #cbd0d3;
+}
+
+
+
+
+input[type="checkbox"] {
+    zoom: 1.5;
+    /*embiggen*/
+
+}
+
+
+input[type="number"] {
+    zoom: 1.0;
+    /*embiggen*/
+}
+
+
+
+/****************************************/
+/*     modal pop-up for numeric dB entry
+*/
+
+.dBmodal {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    /* Stay in place */
+    z-index: 1;
+    /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    /* Full width */
+    height: 100%;
+    /* Full height */
+    overflow: auto;
+    /* Enable scroll if needed */
+    background-color: rgb(0, 0, 0);
+    /* Fallback color */
+    background-color: rgba(0, 0, 200, 0.4);
+    /* Black w/ opacity */
+    -webkit-animation-name: fadeIn;
+    /* Fade in the background */
+    -webkit-animation-duration: 0.4s;
+    animation-name: fadeIn;
+    animation-duration: 0.5s
+}
+
+/* Modal Content */
+.modal-content {
+    position: inherit;
+   
+    /*text-align: center;*/
+    bottom: 0;
+    background-color: #fefefe;
+    width: 100%;
+    padding-bottom: 20px;
+    -webkit-animation-name: slideIn;
+    -webkit-animation-duration: 0.4s;
+    animation-name: slideIn;
+    animation-duration: 0.4s
+}
+
+/* The Close Button */
+.close {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-header {
+    padding: 2px 16px;
+    background-color: #264b4b;
+    color: white;
+    text-align: center;
+}
+
+.modal-body-grid {
+    padding: 2px 10px;
+    display:grid;
+    grid-template-columns: repeat(11 ,1fr) ;
+    grid-template-columns: auto auto auto auto auto auto auto auto auto auto auto;
+    grid-column-gap: 5px;
+    overflow: auto;
+}
+
+.mb-grid-item{
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  padding:10px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.modal-row{
+    
+    background-color:cadetblue;
+    margin:10px;
+    padding:10px;
+    
+}
+
+input{
+    display:relative;
+     
+}
+
+.mb-label  {
+    display:inline-block;
+    text-align:center;
+}
+
+
+.modal-footer {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: lightgray;
+}
+
+/* Add Animation */
+@-webkit-keyframes slideIn {
+    from {
+        bottom: -300px;
+        opacity: 0
+    }
+
+    to {
+        bottom: 0;
+        opacity: 1
+    }
+}
+
+@keyframes slideIn {
+    from {
+        bottom: -300px;
+        opacity: 0
+    }
+
+    to {
+        bottom: 0;
+        opacity: 1
+    }
+}
+
+@-webkit-keyframes fadeIn {
+    from {
+        opacity: 0
+    }
+
+    to {
+        opacity: 1
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0
+    }
+
+    to {
+        opacity: 1
+    }
+}
+
+table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+td,
+th {
+
+    text-align: center;
+
+}
+
+.nav-title{
+    text-align: center
+}
+
+#context-menu {
+    display: none;
+    position: absolute;
+    width: 100px;
+    background-color: white;
+    box-shadow: 5px 5px 7px gray;
+    border-radius: 3px;
+  }
+
+  #context-menu button {
+    width: 100%;
+    background-color: white;
+    border: 2px;;
+    margin: 0;
+    padding: 10px;
+  }
+
+  #context-menu button:hover {
+    background-color: lightgray;
+  }
+
+

@@ -113,24 +113,21 @@
     <addaction name="actionEnviar_un_ticket"/>
     <addaction name="actionAcerca_de"/>
    </widget>
-   <widget class="QMenu" name="menuequipos">
-    <property name="title">
-     <string>Equipos</string>
-    </property>
-    <addaction name="actionAudiometro"/>
-    <addaction name="actionImpedanciometro"/>
-    <addaction name="actionABR"/>
-   </widget>
    <widget class="QMenu" name="menuventanas">
     <property name="title">
-     <string>ventanas</string>
+     <string>Vista</string>
     </property>
-    <addaction name="actionCascada"/>
-    <addaction name="actionCerrar_todas"/>
-    <addaction name="actionTiles"/>
+    <widget class="QMenu" name="menuOrganizar">
+     <property name="title">
+      <string>Organizar</string>
+     </property>
+     <addaction name="actionCascada"/>
+     <addaction name="actionTiles"/>
+     <addaction name="actionCerrar_todas"/>
+    </widget>
+    <addaction name="menuOrganizar"/>
    </widget>
    <addaction name="menuArchivo"/>
-   <addaction name="menuequipos"/>
    <addaction name="menuventanas"/>
    <addaction name="menuAcerca_de"/>
   </widget>
@@ -184,7 +181,7 @@
   </action>
   <action name="actionTiles">
    <property name="text">
-    <string>Tiles</string>
+    <string>Lozas</string>
    </property>
   </action>
   <action name="actionABR">

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+  
+  <link rel="stylesheet" href="audGen.css" /> 
+    
+  <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width , initial-scale=1"> 
+  <title>audgenJS audstudent.com </title>
+    <meta name="KEYWORDS" content="Audiogram Graphics Generator, AudSim, Audiometer Simulator Software Program, Virtual Audiometer Software ">
+    <meta name="description" content="Audiogram Graphics Generator and Audiometer simulator programs for students of audiology.  AudSim Flex provides virtual interactive training in basic audiometry with masking. Threshold assistant mode guides beginning students in the modified Hughson-Westlake method (Windows and Mac OS X)">
+   
+
+</head>
+    
+<body onload="initApp()">
+
+<header align="center">    
+
+  <a href="https://www.audsim.com" class="pull-right">audstudent.com</a> AudGen 0.6.3 
+ 
+</header> 
+    
+<div id='main'> 
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- ~~~~~~~~~ Audiogram Container ~~~~~~~~~~~~~~ -->
+    <!-- ~~~~~~~~~~~~Center Panel~~~~~~~~~~~~~~~~~~~~ -->
+    <center-panel>
+        <div id="audio-container" align="center"></div>  <!-- the Konva JS graphics container -->
+        <div align="center">
+        <button  class="button bt-save" type="button" onclick="saveAudiogram()" >Save  </button>
+        
+        <button class="button bt-num" id="dBOpen">Table Edit</button>
+        
+        <button  class="button bt-help" type="button"  
+                 onclick="parent.open('./help.html')">Help </button>
+        </div>
+    </center-panel> 
+
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- ~~~~~~~~~ Left Panel ~~~~~~~~~~~~~~~ -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <left-panel ><div class="panel-title">LEFT</div><hr>
+    <!-- left air -->    
+    <div class="nav-row" id="nav-la" >
+            <div class="nav-title">Air <hr>  </div>   
+            <input type="checkbox" id="cb-la" name="left-air" checked onchange="chkboxChange(checked,id)">
+            <label for="left-air">Display</label>
+            <button class="button left-bg"  type="button" onclick="activateLayer(ltAirLayer,blueLineLayer,blueLine,'nav-la','cb-la')" >Edit</button> 
+            <button id="laReset" class="button left-bg"  type="button" onclick="resetSeries(ltAirLayer,blueLineLayer)" >Reset</button>    
+    </div>  
+        
+     <!-- left bone -->   
+     <div class="nav-row" id="nav-lb" >
+            <div class="nav-title">Bone <hr>  </div>    
+            <input type="checkbox" id="cb-lb" name="left-bone" onchange="chkboxChange(checked,id)">
+            <label for="left-bone">Display</label>
+            <button class="button left-bg"  type="button" onclick="activateLayer(ltBoneLayer,blankLineLayer,blankLine,'nav-lb','cb-lb')" >Edit</button> 
+            <button id="lbReset" class="button left-bg"  type="button" onclick="resetSeries(ltBoneLayer,blueLineLayer)" >Reset</button>    
+     </div>      
+        
+     <!-- left mask air -->   
+     <div class="nav-row" id="nav-lma" >
+            <div class="nav-title">Mask Air <hr>  </div>   
+            <input type="checkbox" id="cb-lma" name="left-maskair"  onchange="chkboxChange(checked,id)">
+            <label for="left-maskair">Display</label>
+            <button class="button left-bg"  type="button" onclick="activateLayer(ltMaskLayer,blankLineLayer,blankLine,'nav-lma','cb-lma')" >Edit</button> 
+            <button id="lmaReset" class="button left-bg"  type="button" onclick="resetSeries(ltMaskLayer,blueLineLayer)" >Reset</button>    
+     </div> 
+        
+     <!-- left mask bone -->   
+     <div class="nav-row" id="nav-lmb" >
+            <div class="nav-title">Mask Bone<hr>  </div>   
+            <input type="checkbox" id="cb-lmb" name="left-maskbone" onchange="chkboxChange(checked,id)">
+            <label for="left-maskbone">Display</label>
+            <button class="button left-bg"  type="button" onclick="activateLayer(ltMaskBoneLayer,blankLineLayer,blankLine,'nav-lmb','cb-lmb')" >Edit</button> 
+            <button id="lmbReset" class="button left-bg"  type="button" onclick="resetSeries(ltMaskBoneLayer,blueLineLayer,id)" >Reset</button>         
+     </div> 
+     
+
+       
+        
+    </left-panel>
+    
+    
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- ~~~~~~~~~ Right Panel ~~~~~~~~~~~~~~ -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <right-panel><div class="panel-title">RIGHT</div><hr>
+    <!-- right air -->    
+    <div class="nav-row" id="nav-ra"   >
+            <div class="nav-title">Air <hr>  </div>  
+            <input type="checkbox" id="cb-ra" name="right-air" checked  onchange="chkboxChange(checked,id)">
+            <label for="right-air">Display</label>
+            <button class="button right-bg"  type="button" onclick="activateLayer(rtAirLayer,redLineLayer,redLine,'nav-ra','cb-ra')" >Edit</button>
+            <button id="raReset" class="button right-bg"  type="button" onclick="resetSeries(rtAirLayer,redLineLayer)" >Reset</button>    
+    </div>  
+        
+     <!-- right bone -->   
+     <div class="nav-row" id="nav-rb"  >
+            <div class="nav-title">Bone <hr>  </div>        
+            <input type="checkbox" id="cb-rb" name="right-bone" onchange="chkboxChange(checked,id)">
+            <label for="right-bone">Display</label>
+            <button class="button right-bg"  type="button" onclick="activateLayer(rtBoneLayer,blankLineLayer,blankLine,'nav-rb','cb-rb')" >Edit</button> 
+            <button class="button right-bg"  type="button" onclick="  resetSeries(rtBoneLayer,blankLineLayer)" >Reset</button>     
+     </div>      
+        
+     <!-- right mask air -->   
+     <div class="nav-row" id="nav-rma" >
+            <div class="nav-title">Mask Air <hr>  </div>   
+            <input type="checkbox" id="cb-rma" name="right-maskair" onchange="chkboxChange(checked,id)">
+            <label for="right-maskair">Display</label>
+            <button class="button right-bg"  type="button" onclick="activateLayer(rtMaskLayer,blankLineLayer,blankLine,'nav-rma','cb-rma')" >Edit</button> 
+            <button id="maReset" class="button right-bg"  type="button" onclick="resetSeries(rtMaskLayer,redLineLayer)" >Reset</button>         
+     </div> 
+        
+     <!-- right mask bone -->   
+     <div class="nav-row" id="nav-rmb" >
+            <div class="nav-title">Mask Bone <hr>  </div>   
+            <input type="checkbox" id="cb-rmb" name="right-maskbone" onchange="chkboxChange(checked,id)">
+            <label for="right-maskbone">Display</label>
+            <button class="button right-bg"  type="button" onclick="activateLayer(rtMaskBoneLayer,blankLineLayer,blankLine,'nav-rmb','cb-rmb')" >Edit</button> 
+            <button id="mbReset" class="button right-bg"  type="button" onclick="resetSeries(rtMaskBoneLayer,blankLineLayer)" >Reset</button>         
+     </div>   
+     
+     <!-- google ad placement right panel -->
+ 
+      
+      
+        
+    </right-panel>
+    
+</div>   <!-- /main --> 
+
+
+
+
+    <!-- =========== dB Editor PopUp =========== -->
+<div id="dBPopup" class="dBmodal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="close">&times;</span>
+      <h2 id="dBEditTitle">dB Entry</h2>
+    </div>
+    
+    <div class="modal-body-grid">
+            <label for="fs125"  class="mb-label">125</label>
+            <label for="fs250"  class="mb-label">250</label>
+            <label for="fs500"  class="mb-label">500</label>
+            <label for="fs750"  class="mb-label">750</label>
+            <label for="fs1000" class="mb-label">1K</label>
+            <label for="fs1500" class="mb-label">1.5K</label>
+            <label for="fs2000" class="mb-label">2K</label>
+            <label for="fs3000" class="mb-label">3K</label>
+            <label for="fs4000" class="mb-label">4K</label>
+            <label for="fs6000" class="mb-label">6K</label>
+            <label for="fs8000" class="mb-label">8K</label>
+        
+
+            <input id="fs125"  type="number" step="1" min="-10" max="120" onchange="editdB(this.id,this.value)"> 
+            <input id="fs250"   type="number" placeholder="" step="5" min="-10" max="120" onchange="editdB(this.id,this.value)"> 
+            <input id="fs500"   type="number" placeholder="" step="5" min="-10" max="120" onchange="editdB(this.id,this.value)">
+            <input id="fs750"   type="number" placeholder="" step="5" min="-10" max="120" onchange="editdB(this.id,this.value)">
+            <input id="fs1000"  type="number" placeholder="" step="5" min="-10" max="120" onchange="editdB(this.id,this.value)">
+            <input id="fs1500"  type="number" placeholder="" step="5" min="-10" max="120" onchange="editdB(this.id,this.value)">
+            <input id="fs2000"  type="number" placeholder="" step="5" min="-10" max="120" onchange="editdB(this.id,this.value)">
+            <input id="fs3000"  type="number" placeholder="" step="5" min="-10" max="120" onchange="editdB(this.id,this.value)">
+            <input id="fs4000"  type="number" placeholder="" step="5" min="-10" max="120" onchange="editdB(this.id,this.value)">
+            <input id="fs6000"  type="number" placeholder="" step="5" min="-10" max="120" onchange="editdB(this.id,this.value)">
+            <input id="fs8000"  type="number" placeholder="" step="5" min="-10" max="120" onchange="editdB(this.id,this.value)"> 
+
+
+      </div> <!-- modal body grid -->
+
+    </div>  
+ </div><!-- db popup -->
+    
+ <div id="context-menu">
+       <div>
+         <button id="createNR-butt">Toggle NR</button>
+         <hr>
+         <button id="addNote-butt">Add Note</button>  
+                 
+         <button id="closeContext-butt">Close</button>  
+       </div>
+ </div>     
+
+<!-- ~~~~~~~~~~ The javascript ~~~~~~~~~ -->
+
+<script src="konva.min.js"></script>  
+
+<script src="audgrid.o.js"></script> 
+<script src="audgen.min.js"> </script> 
+    
+</body>
+</html>
