@@ -24,17 +24,19 @@ if($request == "state"){
     $from = "Users";
     $single = "pred_case";
     $case = request_data($name, $conn, $from, $single);
+    $single = "login";
+    $login = request_data($name, $conn, $from, $single);
 
     if($case != "0"){
         $case = json_decode($case, true);
         $code = $case['patient'];
         $instrument = $case['sector'];
-
         $from = "Patients";
         $single = "Audiology";
         $Scode64 = request_datav2($code, $conn, $from, $single);
         $result = json_decode(base64_decode($Scode64), true);
         $result['sector'] =  $instrument;
+        $result['state_login'] = $login;
         echo json_encode($result, JSON_UNESCAPED_UNICODE);
 
     }else{

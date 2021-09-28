@@ -22,7 +22,7 @@ from PyQt5.QtWidgets import QApplication, QDesktopWidget, QShortcut, QWidget
 from lib.h_audio import (calibrate, create_frecuency, create_intency,
                          create_sound, random_response, create_voice)
 from lib.helpers import Preferences
-from lib.Ui_Audiometer import *
+from UI.Ui_Audiometer import *
 
 import random
 

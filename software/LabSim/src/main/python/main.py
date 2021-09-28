@@ -18,28 +18,27 @@ from PyQt5.QtGui import QFont, QFontDatabase, QGuiApplication
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QMdiSubWindow,
                              QMessageBox, QPushButton, QWidget, QGroupBox, QFrame)
 
-
 import ABR
 import Z
 import login as Ui_login
 import Audiometer
 import ListWords
 
-from UI.Ui_Main_new import Ui_MainWindow
-
-
+from lib.h_audio import CalculateLogo
+from UI.Ui_Main import Ui_MainWindow
 
 app_active = {
-    'A':[True, "Audiómetro"], 'Z':[True, "Impedanciómetro"], 
-    'ABR':[False, "Potencial evocado auditivo de tronco cerebral"],
-    'VEMP':[False, "Potenciales evocados vestibulares miogénicos"],
-    'EOAs':[False, "Emisor Otoacústico de Screening"], 
-    'EOAc':[False, "Emisor Otoacústico Clínico"], 'VNG':[False, "Videonistagmografía"], 
-    'vHit':[False, "Video Head Impulse Test"], 'POS':[False, "Posturografía"]}
+    'A':[True, "Audiómetro",1], 'Z':[True, "Impedanciómetro",2], 
+    'ABR':[True, "Potencial evocado auditivo de tronco cerebral",3],
+    'VEMP':[False, "Potenciales evocados vestibulares miogénicos",4],
+    'EOAs':[False, "Emisor Otoacústico de Screening",5], 
+    'EOAc':[False, "Emisor Otoacústico Clínico",6], 'VNG':[False, "Videonistagmografía",7], 
+    'vHit':[False, "Video Head Impulse Test",8], 'POS':[False, "Posturografía",9]}
 
-flags = [Qt.Window, Qt.CustomizeWindowHint, Qt.WindowTitleHint, 
-        Qt.WindowMaximizeButtonHint, Qt.WindowCloseButtonHint,
-        Qt.WindowStaysOnTopHint]
+sectors_lbl = {'Camara_sono' : 'Usuario en cámara sonoamortiguada',
+                'Z_OD' : 'Usuario con oliva en OD',
+                'Z_OI': 'Usuario con oliva en OI'}
+
 
 threshold_basic =  [[130,130],[130,130],[130,130],[130,130],
                 [130,130],[130,130],[130,130],[130,130],
@@ -61,75 +60,14 @@ data_basic = {
 }
 
 
-class CalculateLogo():
-    def __init__(self, thr = data_basic):
-        self.thr = thr
-        self.sdt = self.sdt_calcule(self.thr)
-        self.srt = [self.thr["Aérea"][4][0],self.thr["Aérea"][4][1]]
-        if self.srt[0] == self.sdt[0]:
-            self.srt[0] = self.srt[0]+10
-        if self.srt[1] == self.sdt[1]:
-            self.srt[1]=self.srt[1]+10
-        self.umd = [self.srt[0]+25, self.srt[1]+25]
-        #self.porcentajes_logo = [[0,0],[5,24],[10,52],[15,64],[20,76],[25,84],[30,96],[35,100]]
-        self.porcentajes_logo = [0,24,52,64,76,84,96,100]
-        self.curve_normal = [0,5,10,15,20,25,30,35]
-        self.data = self.calculate_result()
-        
-
-
-    def sdt_calcule(self, data):
-        od = [data["Aérea"][1][0],data["Aérea"][2][0],data["Aérea"][3][0],data["Aérea"][4][0],data["Aérea"][5][0],data["Aérea"][6][0]]
-        oi = [data["Aérea"][1][1],data["Aérea"][2][1],data["Aérea"][3][1],data["Aérea"][4][1],data["Aérea"][5][1],data["Aérea"][6][1]]
-        od.sort()
-        oi.sort()
-        def prom(x):
-            result = sum(x)/len(x)
-            return result
-
-        prom_od = prom([od[0], od[1]])
-        prom_oi = prom([oi[0], oi[1]])
-
-        result_prev = [prom_od, prom_oi]
-        result = [int(result_prev[0]/5)*5,int(result_prev[1]/5)*5 ]
-        return result
-    
-    def calculate_result(self):
-        def generate(sdt , srt, umd, por):
-            temp = {}
-            idx_sdt = 0
-            idx_srt = 2
-            idx_umd = 7
-            temp[str(sdt)] = int(por[idx_sdt]/4)
-            temp[str(sdt+5)] = int(por[1]/4)
-            temp[str(srt)] = int(por[idx_srt]/4)
-            temp[str(sdt+5)] = int(por[3]/4)
-            temp[str(sdt+10)] = int(por[4]/4)
-            temp[str(sdt+15)] = int(por[5]/4)
-            temp[str(sdt+20)] = int(por[6]/4)
-            temp[str(sdt+25)] = int(por[6]/4)
-
-            temp[str(umd)] = int(por[idx_umd]/4)
-            return temp
-    
-        od = generate(self.sdt[0], self.srt[0], self.umd[0], self.porcentajes_logo )
-        oi = generate(self.sdt[1], self.srt[1], self.umd[1], self.porcentajes_logo )
-        data = [od, oi]
-        return data
-    
-    def get(self):
-        return self.data
-
-
-
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, *args, **kwargs):
         #QMainWindow.__init__(self)
         super(MainWindow, self).__init__()
-
         self.setupUi(self)
         QFontDatabase.addApplicationFont(appctxt.get_resource('font/OpenSans-Regular.ttf'))
         font = QFont("OpenSans")
+        font.setPointSize(5)
         QGuiApplication.setFont(font)
         self.showMaximized()
         self.setWindowTitle("LabSim")
@@ -140,17 +78,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionCerrar_todas.triggered.connect(self.closeAll)
         self.mdiArea.documentMode = False
         self.Z_O = 3
-        self.lisModuleActive = [None, None,None,None]
+        self.lisModuleActive = [None,None,None,None,None]
         self.var_listWord = [None, None]
         self.lateral_btn()
-
-        logo = CalculateLogo() 
+        logo = CalculateLogo(data_basic) 
         self.logo_data = logo.get()
         self.data = data_basic
-
+        self.login_win()
 
     def lateral_btn(self):
-        #self.groupBox = QGroupBox(self.layout_test)
         for i in app_active:
             btn = QPushButton('{}'.format(i))
             text = btn.text()
@@ -158,12 +94,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             btn.clicked.connect(lambda ch, text=text: self.activate_soft(text))
             tooltip= app_active[i][1]
             btn.setToolTip(tooltip)
-            self.layout_test.addWidget(btn)
+            btn.setCheckable(True)
+            self.layoutTest.addWidget(btn)
             if app_active[i][0] == False:
                 btn.setDisabled(True)
-            
+
     def speechlist_mode(self, state):
-        print(state)
         self.var_listWord = state
         self.activate_listWords()
         self.W.playable[1] = state[2]
@@ -172,7 +108,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.W.playable[0] = True
         else:
             self.W.playable[0] = False
-
 
 
     def activate_soft(self, n):
@@ -191,15 +126,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #        i.setDisabled(True)
         #print(widget.objectName())
 
-    def login_win(self):
-        sub_Login = QMdiSubWindow()
-        self.loginWin = Ui_login.MainLogin()
-        sub_Login.setWidget(self.loginWin)
-        self.loginWin.btn_login.clicked.connect(self.login)
-        self.mdiArea.addSubWindow(sub_Login)
-        self.flags(sub_Login)
-        sub_Login.show()
-
     def flags(self,var):
          var.setWindowFlags(Qt.Window |
                 Qt.CustomizeWindowHint |
@@ -217,89 +143,69 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def tile(self):
         self.mdiArea.tileSubWindows()
 
-    def activate_a(self):
+    def showHide(self, pos):
+        if self.lisModuleActive[pos].isHidden():
+            self.lisModuleActive[pos].show()
+        else:
+            self.lisModuleActive[pos].hide()
+    
+    def createSubWindow(self, widg, name, pos, size = True, width=740, height=560):
+        sub = QMdiSubWindow()
+        sub.setWidget(widg)
+        self.mdiArea.addSubWindow(sub)
+        sub.setWindowTitle(name)
+        self.flags(sub)
+        if size:
+            sub.setMaximumSize(width,height)
+            sub.setMinimumSize(width,height)
+        sub.show()
+        list_wi = self.mdiArea.subWindowList()
+        self.lisModuleActive[pos] = list_wi[-1]
+
+    def login_win(self):
         pos = 0
         if self.lisModuleActive[pos] != None:
-            if self.lisModuleActive[pos].isHidden():
-                self.lisModuleActive[pos].show()
-            else:
-                self.lisModuleActive[pos].hide()
+           self.showHide(pos)
         else:
-            sub_A = QMdiSubWindow()
-            self.A = Audiometer.Audiometer(self.data)
-            self.A.signal_speech.connect(self.speechlist_mode)
+            self.loginWin = Ui_login.MainLogin()
+            self.loginWin.btn_login.clicked.connect(self.login)
+            self.createSubWindow(self.loginWin, "Ingresar", pos, height=140, width=420)
 
-            sub_A.setWidget(self.A)
-            self.mdiArea.addSubWindow(sub_A)
-            sub_A.setWindowTitle("Audiometro")
-            self.flags(sub_A)
-            sub_A.setMaximumSize(740,560)
-            sub_A.setMinimumSize(740,560)
-            sub_A.show()
-            list_wi = self.mdiArea.subWindowList()
-            self.lisModuleActive[pos] = list_wi[-1]
-
-    def activate_z(self):
+    def activate_a(self):
         pos = 1
         if self.lisModuleActive[pos] != None:
-            if self.lisModuleActive[pos].isHidden():
-                self.lisModuleActive[pos].show()
-            else:
-                self.lisModuleActive[pos].hide()
+            self.showHide(pos)
         else:
-            sub_Z = QMdiSubWindow()
+            self.A = Audiometer.Audiometer(self.data)
+            self.A.signal_speech.connect(self.speechlist_mode)
+            self.createSubWindow(self.A, "Audiometro", pos)
+
+    def activate_z(self):
+        pos = 2
+        if self.lisModuleActive[pos] != None:
+           self.showHide(pos)
+        else:
             self.Z = Z.ZControl(self.data, self.Z_O)
-            sub_Z.setWidget(self.Z)
-            self.mdiArea.addSubWindow(sub_Z)
-            sub_Z.setWindowTitle("Impedanciómetro")
-            self.flags(sub_Z)
-            sub_Z.setMaximumSize(740,560)
-            sub_Z.setMinimumSize(740,560)
-            sub_Z.show()
-            list_wi = self.mdiArea.subWindowList()
-            self.lisModuleActive[pos] = list_wi[-1]
+            self.createSubWindow(self.Z, "Impedanciómetro", pos)
 
     def activate_abr(self):
-        pos = [2]
+        pos = 3
         if self.lisModuleActive[pos] != None:
-            if self.lisModuleActive[pos].isHidden():
-                self.lisModuleActive[pos].show()
-            else:
-                self.lisModuleActive[pos].hide()
+           self.showHide(pos)
         else:
-            sub_ABR = QMdiSubWindow()
-            sub_ABR.setWidget(ABR.MainWindow())
-            self.mdiArea.addSubWindow(sub_ABR)
-            sub_ABR.setWindowTitle("Potenciales Evocados")
-            self.flags(sub_ABR)
-            sub_ABR.show()
-            list_wi = self.mdiArea.subWindowList()
-            self.lisModuleActive[pos] = list_wi[-1]
-
+            self.ABR = ABR.MainWindow()
+            self.createSubWindow(self.ABR, "Potenciales Evocados", pos, size=False)
   
     def activate_listWords(self):
-        pos = 3        
+        pos = 4        
         if self.var_listWord[0]:
             if self.lisModuleActive[pos] != None:
                 self.lisModuleActive[pos].show()
             else:
-                sub_W = QMdiSubWindow()
-                
                 self.W = ListWords.ListWords(self.data)
-                sub_W.setWidget(self.W)
-                self.mdiArea.addSubWindow(sub_W)
-                sub_W.setWindowTitle("Lista de Palabras")
-                self.flags(sub_W)
-                sub_W.setMaximumSize(270,650)
-                sub_W.setMinimumSize(270,650)
-
-                sub_W.show()
-                list_wi = self.mdiArea.subWindowList()
-                self.lisModuleActive[pos] = list_wi[-1]
+                self.createSubWindow(self.W , "Lista de Palabras", pos,width=270, height=650)
         else:
             self.lisModuleActive[pos].hide()
-
-
 
     def thread_data_clicked(self):
         self.thread_data = ReadThread()
@@ -309,66 +215,56 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.thread_data.data_signal.connect(self.refresh_data)
 
     def refresh_data(self, data):
-        #print(data)
-        text= ''
-        if data['result'] == 0:
+        self.data = data
+        if self.data['result'] == 0:
             text = "conexión exitosa"
         else:
+            text = sectors_lbl[data['sector']]
             try:
-                if data['sector'] == 'Camara_sono':
-                    text = 'usuario en cámara sonoamortiguada'
-                    self.A.laSuper(data)
-                    self.W.laSuper(data)
-           
-                self.Z.laSuper(data)
-                
+                self.A.laSuper(self.data)
+                self.W.laSuper(self.data)
+                self.Z.laSuper(self.data)
             except:
                 pass
-
-        name = self.loginWin.Le_name.text()
-        passw = self.loginWin.Le_passw.text()
-        self.loginWin.lbl_infoLogin.setText(text)
-
-        data_2 = {'user': name, 'password': passw, 'request': 'state_login'}
-        result = request_API(data_2)
-        if result == "0":
-            QMessageBox.critical(self, "sesión", "Sesión terminada")
+        self.statusbar.showMessage(text)
+        #log off external
+        if data['state_login'] == "0":
             self.logout()
+            QMessageBox.critical(self, "sesión", "Sesión terminada")
 
     def login(self):
         button_login = self.loginWin.btn_login.text()
         name = self.loginWin.Le_name.text()
         passw = self.loginWin.Le_passw.text()
         if button_login == "Salir":
-            data = {'user': name, 'password': passw, 'request': 'logout'}
-            result = request_API(data)
             self.logout()
-
         else:
             data = {'user': name, 'password': passw, 'request': 'login'}
             result = request_API(data)
             if result == "ok":
                 self.loginWin.Le_name.setDisabled(True)
                 self.loginWin.Le_passw.setDisabled(True)
-                #self.btn_a.setDisabled(False)
-                #self.btn_z.setDisabled(False)
                 self.thread_data_clicked()
                 self.loginWin.btn_login.setText("Salir")
+                self.showHide(0)
+                text = "Conectado : {}".format(name)
+                self.lbl_name.setText(text)
+                self.statusbar.showMessage(text)
             else:
                 QMessageBox.critical(self, "Ingreso", "Error de credenciales")
 
     def logout(self):
+        name = self.loginWin.Le_name.text()
+        passw = self.loginWin.Le_passw.text()
+        self.thread_data.terminate()
+        data = {'user': name, 'password': passw, 'request': 'logout'}
+        request_API(data)
         self.loginWin.Le_name.setDisabled(False)
         self.loginWin.Le_passw.setDisabled(False)
-        self.loginWin.lbl_infoLogin.setText("")
-
         self.loginWin.Le_name.setText("")
         self.loginWin.Le_passw.setText("")
         self.loginWin.btn_login.setText("Ingresar")
-
-        #print("terminando")
-        self.thread_data.terminate()
-        #self.read_data.terminate()
+        self.lbl_name.setText("Desconectado")
 
 
 def Splash(app):
@@ -396,11 +292,10 @@ class ReadThread(QThread):
     name = ""
     passw = ""
     data_signal = pyqtSignal(dict)
-
     def run(self):
-        i = 0
+        #i = 0
         while True:
-            i += 1
+            #i += 1
             time.sleep(1)
             #print("funcionando {}".format(i))
             name = self.name
@@ -414,8 +309,6 @@ class ReadThread(QThread):
                 response['result'] = 1
             self.data_signal.emit(response)
 
-    
-
 
 if __name__ == '__main__':
     #app = QApplication(sys.argv)
@@ -423,7 +316,8 @@ if __name__ == '__main__':
     window = MainWindow()
     window.show()
     exit_code = appctxt.app.exec_()      # 2. Invoke appctxt.app.exec_()
-    #print("adiós")
-
+    button_login = window.loginWin.btn_login.text()
+    if button_login == "Salir":
+        window.logout()
     sys.exit(exit_code)
     #sys.exit(app.exec_())
