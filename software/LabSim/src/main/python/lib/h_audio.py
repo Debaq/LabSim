@@ -11,7 +11,29 @@ stim_list = class_pref.get("stim_list")
 stim_list_short = class_pref.get("stim_list_short")
 series_response = class_pref.get("series_response")
 
+threshold_basic =  [[130,130],[130,130],[130,130],[130,130],
+                [130,130],[130,130],[130,130],[130,130],
+                [130,130],[130,130],[130,130],[130,130],
+                [130,130],[130,130],[130,130]]
 
+
+
+
+def data_basic():
+    data_basic = {
+        'gender' : 0,
+        'id'    :   1,
+        'Aérea' : threshold_basic,
+        'Ósea' : threshold_basic,
+        'LDL' : threshold_basic,
+        'Aérea_mkg' :threshold_basic,
+        'Ósea_mkg' : threshold_basic,
+        "Z_OD": "A",
+        "Z_OI": "A",
+        "sector": "Camara_sono",
+        "volume" : [0,0,"N/D"]
+    }
+    return data_basic
 
 def create_sound(stim, f, ch):
     if stim == stim_list[4] or stim == stim_list[5] or stim == stim_list[6]:

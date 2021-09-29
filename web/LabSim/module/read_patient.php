@@ -3,7 +3,20 @@
 session_start();
 include_once('global_function.php');
 
+$user =$_SESSION["user"];
 $request = $_POST["p"];
+
+$box_name = "Box_1";
+
+$box = array(
+    'patient' => $_POST["p"],
+    'sector' => "none",
+    'box' => $box_name
+);
+$box = json_encode($box);
+
+update_sql($box, "Users", "pred_case", "Users", $user, $conn);
+
 
 function SQL_PAT($id, $conn){
 
@@ -42,6 +55,7 @@ $result = [
     "Morbid" => json_decode(base64_decode($data["Morbid"])),
     "Anamnesis" => json_decode(base64_decode($data["Anamnesis"]))[0],
     "Profile" => $profile,
+    "Box" => $box_name,
     "OTO_OD" => $OTO_OD,
     "OTO_OI" => $OTO_OI,
     "Z_OD" => $Z_OI,

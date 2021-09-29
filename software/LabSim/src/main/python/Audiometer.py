@@ -20,7 +20,7 @@ from PyQt5.QtWidgets import QApplication, QDesktopWidget, QShortcut, QWidget
 
 #from lib.API_connector import API, PostData
 from lib.h_audio import (calibrate, create_frecuency, create_intency,
-                         create_sound, random_response, create_voice)
+                         create_sound, random_response, create_voice, data_basic)
 from lib.helpers import Preferences
 from UI.Ui_Audiometer import *
 
@@ -272,7 +272,12 @@ class Audiometer(QWidget, Ui_Audiometer):
         #self.time_loop_mic.timeout.connect(self.mic)
          
                 
-    def laSuper(self, thr):
+    def laSuper(self, data):
+        if data["sector"] == "Camara_sono":
+            thr = data
+        else:
+            thr = data_basic()
+            
         gender = thr['gender']
         if gender == 0 :
             self.gender = "feme"
@@ -292,6 +297,8 @@ class Audiometer(QWidget, Ui_Audiometer):
         result1.append(thr['Aérea_mkg'])
         result1.append(thr['Ósea_mkg'])
         self.thr = [result, result1]
+        
+            
         
         
     """    

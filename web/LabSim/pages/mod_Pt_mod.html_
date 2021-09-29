@@ -162,6 +162,7 @@
 
     var img = testajax();
     const obj = JSON.parse(img);
+    $_box = `${obj["Box"]}`
     img_array = [
       `dist/img/${obj["Profile"]}`,
       `dist/img/${obj["OTO_OD"]}`,
@@ -193,6 +194,8 @@
 
   function moveTo(place) {
     var data_codes = $_data_codes;
+    var box = $_box;
+    
     const place_list = ["Camara_sono", "Z_OD", "Z_OI"];
     const action_list = ["Sacar de la cámara sonoamortiguada",
       "Pasar a la cámara sonoamortiguada",
@@ -255,7 +258,7 @@
     $.ajax({
       type: "POST",
       url: "module/camera_sono.php",
-      data: jQuery.param({ a: states[place], p: data_codes[1], u: data_codes[0], pl: place_list[place] }),
+      data: jQuery.param({ a: states[place], p: data_codes[1], u: data_codes[0], pl: place_list[place], b:box }),
       success: function (data) {
       }
     });
@@ -271,7 +274,7 @@
 
 
   function redraw(mouse) {
-    console.log('a');
+  
     can.width = can.width;
     ctx.drawImage(img, 0, 0);
     ctx.beginPath();

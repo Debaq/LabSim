@@ -31,12 +31,22 @@ if($request == "state"){
         $case = json_decode($case, true);
         $code = $case['patient'];
         $instrument = $case['sector'];
+        $box = $case['box'];
         $from = "Patients";
         $single = "Audiology";
         $Scode64 = request_datav2($code, $conn, $from, $single);
+        $single = "Gender";
+        $gender = request_datav2($code, $conn, $from, $single);
+        $single = "id_voice";
+        $voice = request_datav2($code, $conn, $from, $single);
         $result = json_decode(base64_decode($Scode64), true);
+        $result['gender'] = intval($gender);
+        $result['patient'] = $code;
+        $result['id_voice'] = $voice;
         $result['sector'] =  $instrument;
         $result['state_login'] = $login;
+        $result['box'] = $box;
+
         echo json_encode($result, JSON_UNESCAPED_UNICODE);
 
     }else{

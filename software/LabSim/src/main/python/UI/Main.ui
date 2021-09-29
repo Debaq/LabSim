@@ -30,7 +30,9 @@
        <number>0</number>
       </property>
       <item>
-       <layout class="QHBoxLayout" name="layoutTest"/>
+       <widget class="QFrame" name="frameAction">
+        <layout class="QHBoxLayout" name="layoutTest"/>
+       </widget>
       </item>
       <item>
        <spacer name="horizontalSpacer">
