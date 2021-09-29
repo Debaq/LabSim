@@ -141,7 +141,7 @@
         "path" : "?p=download",
         "icon" : "fab fa-python nav-icon",
         "active" : true,
-        "notice" : "<span class='right badge badge-danger'>v0.7.5</span>",
+        "notice" : "<span class='right badge badge-danger'>v0.8.2</span>",
         "subT" : false
 
     }  
