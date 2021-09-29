@@ -212,6 +212,10 @@ class ListWords(QWidget, Ui_ListWords):
         self.btn_h25.clicked.connect(lambda:self.pushaudio(25))
 
     def laSuper(self, data):
+        if data['sector'] == "Camara_sono":
+            self.isResponse = True
+        else:
+            self.isResponse = False
         gender = data['gender']
         id = data['id']
         if gender == 0 :
@@ -254,8 +258,9 @@ class ListWords(QWidget, Ui_ListWords):
             if self.continue_response:
                 self.time_2.start(ran_time)
     
-    def wait(self):        
-        self.response()
+    def wait(self):
+        if self.isResponse:        
+            self.response()
         self.time_1.stop()
         self.time_2.stop()
 
