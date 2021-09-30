@@ -10,7 +10,8 @@ from lib.h_z import storage
 class Graph(QWidget):
     data_info = pyqtSignal(dict)
     lat_info = pyqtSignal(dict)
-    def __init__(self):
+    def __init__(self, side):
+        self.side = side
         QWidget.__init__(self)
         color_backgorund = pg.mkColor(255, 255, 255, 255)
         self.color_pen = pg.mkColor(0, 0, 0, 255)
@@ -18,7 +19,7 @@ class Graph(QWidget):
         pg.setConfigOption('foreground', self.color_pen)
         self.win = pg.GraphicsLayoutWidget(show=True)
         self.pw1 = self.win.addPlot(row=1,col=0)
-        self.pw1.setRange(yRange=(-3, 3), xRange=(0, 12), disableAutoRange=True)
+        self.pw1.setRange(yRange=(-3, 3), xRange=(0, 13), disableAutoRange=True)
         self.pw1.showGrid(x=True, y=True)
         self.pw1.setMouseEnabled(x=False, y=False)
         self.pw1.setMenuEnabled(False)
@@ -45,11 +46,10 @@ class Graph(QWidget):
         idx = (np.abs(array - value)).argmin()
         return idx
 
-    def inifineA_B(self, pos_A = 0, pos_B = 0):
+    def inifineA_B(self, pos_A = 0, pos_B = 12):
         try:
             self.pw1.removeItem(self.inf_A)
             self.pw1.removeItem(self.inf_B)
-
         except:
             pass
 
@@ -59,6 +59,7 @@ class Graph(QWidget):
         #Lineas infinitas
         self.inf_A = pg.InfiniteLine(pos=pos_A, movable=True, angle=90, pen=pen1, label ="A", labelOpts=opst)
         self.inf_B = pg.InfiniteLine(pos=pos_B, movable=True, angle=90, pen=pen1, label ="B", labelOpts=opst)
+        #self.inf_B.setBounds(0,10)
         #Posición en X de las lineas infinitas
         self.inf_A.sigPositionChanged.connect(self.get_amplitude)
         self.inf_B.sigPositionChanged.connect(self.get_amplitude)
@@ -70,15 +71,12 @@ class Graph(QWidget):
         self.clearGraph()
         pos_A = self.inf_A.getXPos()
         pos_B = self.inf_B.getXPos()
-        
         for i in self.data:
             if self.actCurve == i:
                 act = True
             else:
                 act = False
-
             if self.data[i][2] == side:
-
                 if self.data[i][5]:
                     color_name = self.data[i][2]
                     if color_name == 0:
@@ -98,16 +96,20 @@ class Graph(QWidget):
 
                     lbl = """
                         <div style='text-align: center'>
-                        <span style='color: #FFF; font-size: 9pt;'>{}dBnHl</span></div>
+                        <span style='color: #FFF; font-size: 7pt;'>{}dBnHl</span></div>
                         """.format(self.data[i][3])
                     text = pg.TextItem(html=lbl, border="w", fill=fill)
                     self.pw1.addItem(text)
                     x = self.data[i][0][0]
                     y = self.data[i][0][1]  + self.data[i][6]
                     h = self.find_nearest(x,x.max(),y)
-                    text.setPos(x.max(), h)
+                    text.setPos(12, h)
                     self.pw1.plot(x,y, pen=color)
             self.inifineA_B(pos_A, pos_B)
+            try:
+                self.refresh_keys()
+            except:
+                pass
  
 
     def clearGraph(self):
@@ -139,16 +141,16 @@ class Graph(QWidget):
         amp = self.data[curve][0][1][id_X] + self.data[curve][6]
         curve_mark = "|{}".format(lbl)
         text = pg.TextItem(text = curve_mark, anchor=(0.34,0.5), color=(0,0,0,255))
-        text.setPos(lat, amp)
+        text.setPos(lat, amp+0.1)
         self.pw1.addItem(text)
         
-
+    """
     def change_keys(self, key=None, value=None):
         if key is not None and value is not None:
             self.change_mark = True
             self.marks[key] =  value
             self.update_graph()
-
+    """
 
     def refresh_keys(self):
         for k in self.data:
@@ -159,7 +161,6 @@ class Graph(QWidget):
                         self.create_marks(i,d,curveName=curve, useAct=False)
 
     def update_marks(self,side, idx, subidx, btn='A'):
-        new = False
         if btn == 'A':
             lat = self.inf_A.getXPos()
         else:
@@ -191,7 +192,23 @@ class Graph(QWidget):
         y = self.data[self.actCurve][0][1]
 
         lat_A = self.inf_A.getXPos()
+        
+        if lat_A > 12:
+            pos_B = self.inf_B.getXPos()
+            self.inifineA_B(pos_A=12, pos_B=pos_B)
+        if lat_A < 0:
+            pos_B = self.inf_B.getXPos()
+            self.inifineA_B(pos_A=0, pos_B=pos_B)
+        
+        
         lat_B = self.inf_B.getXPos()
+        if lat_B > 12:
+            pos_A = self.inf_A.getXPos()
+            self.inifineA_B(pos_A=pos_A, pos_B=12)
+        if lat_B < 0:
+            pos_A = self.inf_A.getXPos()
+            self.inifineA_B(pos_A=pos_A, pos_B=0)
+
         amp_A = self.find_nearest(x, lat_A, y)
         amp_B = self.find_nearest(x, lat_B, y)
         order_amp = np.sort(np.array([amp_A,amp_B]))
@@ -200,7 +217,7 @@ class Graph(QWidget):
         dif_amp = order_amp[1] - order_amp[0]
         dif_lat = order_lat[1] - order_lat[0]
         
-        response = {"lat_A": lat_A, "lat_B": lat_B, "amp_AB": dif_amp, "lat_AB": dif_lat}
+        response = {"side": self.side, "lat_A": lat_A, "lat_B": lat_B, "amp_AB": dif_amp, "lat_AB": dif_lat}
         #print(amp_B)
         self.data_info.emit(response)
         #self.lat_info.emit(self.marks)

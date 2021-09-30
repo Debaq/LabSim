@@ -26,12 +26,27 @@
     </property>
     <item>
      <layout class="QHBoxLayout" name="layout">
+      <property name="topMargin">
+       <number>3</number>
+      </property>
       <property name="rightMargin">
        <number>0</number>
       </property>
       <item>
        <widget class="QFrame" name="frameAction">
-        <layout class="QHBoxLayout" name="layoutTest"/>
+        <property name="font">
+         <font>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+        <layout class="QHBoxLayout" name="layoutTest">
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+        </layout>
        </widget>
       </item>
       <item>
@@ -50,12 +65,17 @@
       <item>
        <layout class="QHBoxLayout" name="layoutAction">
         <property name="rightMargin">
-         <number>20</number>
+         <number>0</number>
         </property>
        </layout>
       </item>
       <item>
        <widget class="QLabel" name="lbl_name">
+        <property name="font">
+         <font>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
         <property name="text">
          <string>Desconectado</string>
         </property>
@@ -94,6 +114,11 @@
     </rect>
    </property>
    <widget class="QMenu" name="menuArchivo">
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
     <property name="title">
      <string>Archivo</string>
     </property>
@@ -113,6 +138,11 @@
      <string>Vista</string>
     </property>
     <widget class="QMenu" name="menuOrganizar">
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
      <property name="title">
       <string>Organizar</string>
      </property>
@@ -132,6 +162,11 @@
      <width>16777215</width>
      <height>20</height>
     </size>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
    </property>
   </widget>
   <action name="actionLogin">

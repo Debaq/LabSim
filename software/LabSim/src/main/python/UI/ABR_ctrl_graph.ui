@@ -2,25 +2,10 @@
 <ui version="4.0">
  <class>ABR_control_curve</class>
  <widget class="QWidget" name="ABR_control_curve">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>102</width>
-    <height>358</height>
-   </rect>
-  </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>102</width>
-    <height>16777215</height>
-   </size>
+  <property name="font">
+   <font>
+    <pointsize>8</pointsize>
+   </font>
   </property>
   <property name="windowTitle">
    <string>Form</string>
@@ -39,7 +24,7 @@
     <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>0</number>
+    <number>10</number>
    </property>
    <item>
     <widget class="QLabel" name="label">
@@ -63,6 +48,12 @@
    </item>
    <item>
     <widget class="Line" name="line">
+     <property name="maximumSize">
+      <size>
+       <width>25</width>
+       <height>16777215</height>
+      </size>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -77,17 +68,20 @@
       <widget class="QLabel" name="btn_scale_minus">
        <property name="maximumSize">
         <size>
-         <width>40</width>
+         <width>25</width>
          <height>16777215</height>
         </size>
        </property>
        <property name="font">
         <font>
-         <pointsize>8</pointsize>
+         <pointsize>6</pointsize>
         </font>
        </property>
        <property name="text">
-        <string>Escala</string>
+        <string> μV</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -95,9 +89,14 @@
       <widget class="QPushButton" name="btn_scale_plus">
        <property name="maximumSize">
         <size>
-         <width>30</width>
-         <height>16777215</height>
+         <width>25</width>
+         <height>25</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
        </property>
        <property name="text">
         <string>+</string>
@@ -106,13 +105,28 @@
      </item>
      <item>
       <widget class="QLabel" name="lbl_scale">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>25</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="font">
         <font>
-         <pointsize>8</pointsize>
+         <pointsize>6</pointsize>
         </font>
        </property>
        <property name="text">
-        <string>0.25 μV</string>
+        <string>0.25</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -120,9 +134,14 @@
       <widget class="QPushButton" name="pushButton_2">
        <property name="maximumSize">
         <size>
-         <width>30</width>
-         <height>16777215</height>
+         <width>25</width>
+         <height>25</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
        </property>
        <property name="text">
         <string>-</string>
@@ -146,6 +165,24 @@
    </item>
    <item>
     <widget class="QGroupBox" name="frame_curves">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>25</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>25</width>
+       <height>16777215</height>
+      </size>
+     </property>
      <property name="font">
       <font>
        <pointsize>8</pointsize>
@@ -153,8 +190,12 @@
        <bold>true</bold>
       </font>
      </property>
+     <property name="styleSheet">
+      <string notr="true">border-style: outset;
+border-width: 0px;</string>
+     </property>
      <property name="title">
-      <string>curvas</string>
+      <string/>
      </property>
      <property name="flat">
       <bool>true</bool>
@@ -192,9 +233,6 @@
     </spacer>
    </item>
    <item>
-    <layout class="QGridLayout" name="layout_btn_curve"/>
-   </item>
-   <item>
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <property name="spacing">
       <number>0</number>
@@ -206,9 +244,14 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>30</width>
-         <height>16777215</height>
+         <width>25</width>
+         <height>25</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
        </property>
        <property name="text">
         <string>C/I</string>
@@ -219,13 +262,13 @@
       <widget class="QPushButton" name="btn_up">
        <property name="maximumSize">
         <size>
-         <width>30</width>
-         <height>16777215</height>
+         <width>25</width>
+         <height>25</height>
         </size>
        </property>
        <property name="font">
         <font>
-         <pointsize>12</pointsize>
+         <pointsize>8</pointsize>
          <weight>75</weight>
          <bold>true</bold>
         </font>
@@ -239,13 +282,13 @@
       <widget class="QPushButton" name="btn_down">
        <property name="maximumSize">
         <size>
-         <width>30</width>
-         <height>16777215</height>
+         <width>25</width>
+         <height>25</height>
         </size>
        </property>
        <property name="font">
         <font>
-         <pointsize>12</pointsize>
+         <pointsize>8</pointsize>
          <weight>75</weight>
          <bold>true</bold>
         </font>
@@ -256,32 +299,17 @@
       </widget>
      </item>
      <item>
-      <spacer name="verticalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>40</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QVBoxLayout" name="verticalLayout_3">
-     <property name="spacing">
-      <number>0</number>
-     </property>
-     <item>
       <widget class="QPushButton" name="btn_del">
        <property name="maximumSize">
         <size>
-         <width>30</width>
-         <height>16777215</height>
+         <width>25</width>
+         <height>25</height>
         </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>7</pointsize>
+        </font>
        </property>
        <property name="text">
         <string>Del</string>
@@ -289,6 +317,19 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>

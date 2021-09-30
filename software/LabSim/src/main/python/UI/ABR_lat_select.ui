@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>422</width>
-    <height>114</height>
+    <height>110</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,6 +39,11 @@
        <width>120</width>
        <height>16777215</height>
       </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
      </property>
      <property name="title">
       <string>Marcar Latencias</string>
@@ -75,6 +80,11 @@
         </property>
         <item>
          <widget class="QPushButton" name="btn_AB">
+          <property name="font">
+           <font>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
           <property name="text">
            <string>|A</string>
           </property>
@@ -353,6 +363,11 @@
    </item>
    <item>
     <widget class="QGroupBox" name="groupBox_2">
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
      <property name="title">
       <string>Medidas</string>
      </property>

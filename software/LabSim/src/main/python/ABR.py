@@ -17,6 +17,7 @@ import requests
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget
+from PyQt5.QtGui import QFont
 
 import lib.bezier_prop as bz
 from lib.ABR_generator import ABR_creator
@@ -83,8 +84,6 @@ class ABR_ctrl_curve(QWidget, Ui_ABR_control_curve):
 
 
 
-
-
 class MainWindow(QWidget, Ui_ABRSim):
     def __init__(self):
         QWidget.__init__(self)
@@ -99,8 +98,8 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.ctrl_curve_R = ABR_ctrl_curve()
         self.ctrl_curve_L = ABR_ctrl_curve()
 
-        self.grph_R = Graph()
-        self.grph_L = Graph()
+        self.grph_R = Graph(0)
+        self.grph_L = Graph(1)
 
         #LAYOUTS
         self.layout_left.addWidget(self.control)
@@ -125,8 +124,8 @@ class MainWindow(QWidget, Ui_ABRSim):
 
         self.grph_R.data_info.connect(self.update_data)
         self.grph_L.data_info.connect(self.update_data)
-        self.grph_L.lat_info.connect(self.update_data)
-        self.grph_R.lat_info.connect(self.update_data)
+        #self.grph_L.lat_info.connect(self.update_data)
+        #self.grph_R.lat_info.connect(self.update_data)
 
         self.lat_select_R.btn_wave_I.clicked.connect(lambda:self.update_markers(0,0,0))
         self.lat_select_R.btn_wave_II.clicked.connect(lambda:self.update_markers(0,1,0))
@@ -199,7 +198,6 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.currentCurve[side] = objName
 
 
-
     def capture(self):
         intencity = self.control.sb_int.value()
         side = self.control.cb_side.currentText()
@@ -250,9 +248,10 @@ class MainWindow(QWidget, Ui_ABRSim):
             if self.store[k][5]:
                 y, x = k.split('_')
                 l,num = x.split(':')
-                name = "{} {}{}".format(y, l, num) 
+                name = "{}".format(y)
+                short = "{} {}{}".format(y, l, num)
                 id = k
-                btn = [name,id]
+                btn = [name,id, short]
                 if l == 'L':
                     btns_left.append(btn)
                 else:
@@ -262,14 +261,17 @@ class MainWindow(QWidget, Ui_ABRSim):
             QWidget {
                 color: rgb(0, 0, 0);
                 background-color: rgb(255, 0, 0);
-                font: 87 8pt "Noto Sans";
+                border-style: outset;
+                border-width: 0px;
+
             }
             """)
         styleL = ("""
             QWidget {
                 color: rgb(0, 0, 0);
                 background-color: rgb(0, 0, 255);
-                font: 87 8pt "Noto Sans";
+                border-style: outset;
+                border-width: 0px;
             }
             """)            
         
@@ -281,6 +283,15 @@ class MainWindow(QWidget, Ui_ABRSim):
             btn.setAutoExclusive(True)
             self.ctrl_curve_L.layout_curves.addWidget(btn)
             btn.clicked.connect(self.selectCurve)
+            btn.setMaximumHeight(30)
+            btn.setMaximumWidth(30)
+            font = QFont()
+            font.setPointSize(7)
+            btn.setFont(font)
+            btn.setToolTip('{}'.format(btns_left[i][2]))
+            btn.setChecked(True)
+
+
         for i in range(len(btns_Right)):
             btn = QPushButton('{}'.format(btns_Right[i][0]))
             btn.setObjectName(btns_Right[i][1])
@@ -289,6 +300,14 @@ class MainWindow(QWidget, Ui_ABRSim):
             btn.setAutoExclusive(True)
             self.ctrl_curve_R.layout_curves.addWidget(btn)
             btn.clicked.connect(self.selectCurve)
+            btn.setMaximumHeight(30)
+            btn.setMaximumWidth(30)
+            font = QFont()
+            font.setPointSize(7)
+            btn.setFont(font)
+            btn.setToolTip('{}'.format(btns_Right[i][2]))
+            btn.setChecked(True)
+
 
     def numberName(self, name, ltr, tin, gap):
         n = list()
@@ -329,11 +348,17 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.control.cb_side.setDisabled(dis)
 
     def update_data(self, data):
+        side = data["side"]
         keys = data.keys()
+
         for i in keys:
-            self.lat_select_R.update_data(key=i, value=data[i])
-        if 'lat_A' in data or 'lat_B' in data:
-            self.AB = [[data['lat_A'], data['lat_B']], [data,data]]
+            if side == 0:
+                self.lat_select_R.update_data(key=i, value=data[i])
+            else:
+                self.lat_select_L.update_data(key=i, value=data[i])
+
+        #if 'lat_A' in data or 'lat_B' in data:
+        #    self.AB = [[data['lat_A'], data['lat_B']], [data,data]]
         
     def update_markers(self, idx, subidx, side ):
         if side == 0:
@@ -352,6 +377,7 @@ class MainWindow(QWidget, Ui_ABRSim):
             else:
                 text = B
             self.grph_L.update_marks(side, idx,subidx,text)
+            print("L")
         
         
 

@@ -40,7 +40,7 @@ sectors_lbl = {'Camara_sono' : 'Usuario en cámara sonoamortiguada',
                 'none' : 'Usuario en el Box',
                 'ABR': 'Usuario en PEATC'}
 
-Boxs =  {'sala_espera' : [], 'Box_1' : ['A', 'Z'], 'Box_2':['ABR']}
+Boxs =  {'sala_espera' : [], 'Box_1' : ['A', 'Z'], 'Box_2':['A', 'Z','ABR']}
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -50,15 +50,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         QFontDatabase.addApplicationFont(appctxt.get_resource('font/OpenSans-Regular.ttf'))
         font = QFont("OpenSans")
-        font.setPointSize(10)
+        font.setPointSize(8)
         QGuiApplication.setFont(font)
         self.showMaximized()
         self.setWindowTitle("LabSim")
+        self.setMinimumSize(1200,768)
         self.actionLogin.triggered.connect(self.login_win)
         self.actionCascada.triggered.connect(self.cascade)
         self.actionTiles.triggered.connect(self.tile)
         self.actionCerrar_todas.triggered.connect(self.closeAll)
-        self.mdiArea.documentMode = False
+        self.mdiArea.documentMode = True
         self.Z_O = 3
         self.lisModuleActive = [None,None,None,None,None]
         self.var_listWord = [None, None]
@@ -83,6 +84,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             btn.setCheckable(True)
             self.layoutTest.addWidget(btn)
             btn.setDisabled(True)
+            btn.setMaximumHeight(25)
+            btn.setMaximumWidth(35)
+            font = QFont()
+            font.setPointSize(8)
+            btn.setFont(font)
 
     def speechlist_mode(self, state):
         self.var_listWord = state
@@ -113,10 +119,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 if i.objectName() == area:
                     i.setDisabled(False)
     
-    def flags(self,var):
-         var.setWindowFlags(Qt.Window |
+    def flags(self,var, t = True):
+        if t == True:
+            var.setWindowFlags(Qt.Window |
                 Qt.CustomizeWindowHint |
                 Qt.WindowTitleHint |
+                Qt.WindowCloseButtonHint |
+                Qt.WindowStaysOnTopHint)
+        else:
+            var.setWindowFlags(Qt.Window |
+                Qt.CustomizeWindowHint |
+                Qt.WindowTitleHint |
+                Qt.WindowMaximizeButtonHint|
                 Qt.WindowCloseButtonHint |
                 Qt.WindowStaysOnTopHint)
 
@@ -143,15 +157,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.Z = Z.ZControl()
         self.W = ListWords.ListWords(self.data)
 
-    def createSubWindow(self, widg, name, pos, size = True, width=740, height=560):
+    def createSubWindow(self, widg, name, pos, size = [True,True], width=740, height=560, f = True):
         sub = QMdiSubWindow()
         sub.setWidget(widg)
         self.mdiArea.addSubWindow(sub)
         sub.setWindowTitle(name)
-        self.flags(sub)
-        if size:
-            sub.setMaximumSize(width,height)
-            sub.setMinimumSize(width,height)
+        self.flags(sub, f)
+        if size[0] == True or size[1] == True:
+            if size[0] == True:
+                sub.setMaximumSize(width,height)
+            if size[1] == True:
+                sub.setMinimumSize(width,height)
+                sub.resize(width,height)
         sub.show()
         list_wi = self.mdiArea.subWindowList()
         self.lisModuleActive[pos] = list_wi[-1]
@@ -185,7 +202,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
            self.showHide(pos)
         else:
             self.ABR = ABR.MainWindow()
-            self.createSubWindow(self.ABR, "Potenciales Evocados", pos, size=False)
+            self.createSubWindow(self.ABR, "Potenciales Evocados", pos, size=[False,True], width=1000, height=580, f=False)
   
     def activate_listWords(self):
         pos = 4        
@@ -262,7 +279,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.loginWin.btn_login.setText("Ingresar")
         self.lbl_name.setText("Desconectado")
 
-
+"""
 def Splash(app):
     #app = QApplication(sys.argv)
     pixmap = QPixmap(appctxt.get_resource('img/Logo.png'))
@@ -276,7 +293,7 @@ def Splash(app):
     for i in range(0, 2):
         time.sleep(0.1)
     splash_img.finish(app)
-
+"""
 
 def request_API(data):
     URL = "https://tmeduca.cl/LabSim/module/API_v2.php"

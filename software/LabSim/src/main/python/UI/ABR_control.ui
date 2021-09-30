@@ -33,15 +33,20 @@
     <widget class="QFrame" name="control">
      <property name="minimumSize">
       <size>
-       <width>320</width>
+       <width>170</width>
        <height>0</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>350</width>
+       <width>170</width>
        <height>16777215</height>
       </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
      </property>
      <layout class="QVBoxLayout" name="layout_left"/>
     </widget>
@@ -83,28 +88,33 @@
         <widget class="QFrame" name="verticalFrame_2">
          <property name="minimumSize">
           <size>
-           <width>40</width>
+           <width>30</width>
            <height>0</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>40</width>
+           <width>30</width>
            <height>16777215</height>
           </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>6</pointsize>
+          </font>
          </property>
          <layout class="QVBoxLayout" name="layout_ctrl_curve_R">
           <property name="spacing">
            <number>0</number>
           </property>
           <property name="leftMargin">
-           <number>0</number>
+           <number>1</number>
           </property>
           <property name="topMargin">
            <number>0</number>
           </property>
           <property name="rightMargin">
-           <number>0</number>
+           <number>1</number>
           </property>
           <property name="bottomMargin">
            <number>6</number>
@@ -114,12 +124,6 @@
        </item>
        <item>
         <widget class="QFrame" name="verticalFrame_3">
-         <property name="minimumSize">
-          <size>
-           <width>400</width>
-           <height>0</height>
-          </size>
-         </property>
          <layout class="QVBoxLayout" name="layout_graph_R">
           <property name="spacing">
            <number>0</number>
@@ -170,28 +174,33 @@
         <widget class="QFrame" name="verticalFrame_4">
          <property name="minimumSize">
           <size>
-           <width>40</width>
+           <width>30</width>
            <height>0</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>40</width>
+           <width>30</width>
            <height>16777215</height>
           </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>6</pointsize>
+          </font>
          </property>
          <layout class="QVBoxLayout" name="layout_ctrl_curve_L">
           <property name="spacing">
            <number>0</number>
           </property>
           <property name="leftMargin">
-           <number>0</number>
+           <number>1</number>
           </property>
           <property name="topMargin">
            <number>0</number>
           </property>
           <property name="rightMargin">
-           <number>0</number>
+           <number>1</number>
           </property>
           <property name="bottomMargin">
            <number>6</number>
@@ -201,12 +210,6 @@
        </item>
        <item>
         <widget class="QFrame" name="verticalFrame_5">
-         <property name="minimumSize">
-          <size>
-           <width>400</width>
-           <height>0</height>
-          </size>
-         </property>
          <layout class="QVBoxLayout" name="layout_graph_L">
           <property name="spacing">
            <number>0</number>
