@@ -52,7 +52,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         font = QFont("OpenSans")
         font.setPointSize(8)
         QGuiApplication.setFont(font)
-        self.showMaximized()
         self.setWindowTitle("LabSim")
         self.setMinimumSize(1200,768)
         self.actionLogin.triggered.connect(self.login_win)
@@ -72,6 +71,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.logo_data = logo.get()
         #self.data = data_basic
         self.login_win()
+        self.showMaximized()
+
 
     def lateral_btn(self):
         for i in app_active:
@@ -202,7 +203,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
            self.showHide(pos)
         else:
             self.ABR = ABR.MainWindow()
-            self.createSubWindow(self.ABR, "Potenciales Evocados", pos, size=[False,True], width=1000, height=580, f=False)
+            self.createSubWindow(self.ABR, "Potenciales Evocados", pos, size=[False,True], width=1000, height=600, f=False)
   
     def activate_listWords(self):
         pos = 4        
@@ -210,7 +211,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if self.lisModuleActive[pos] != None:
                 self.lisModuleActive[pos].show()
             else:
-                self.createSubWindow(self.W , "Lista de Palabras", pos,width=270, height=650)
+                self.createSubWindow(self.W , "Lista de Palabras", pos,width=270, height=600)
         else:
             self.lisModuleActive[pos].hide()
 
