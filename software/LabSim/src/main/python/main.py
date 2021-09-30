@@ -37,7 +37,8 @@ app_active = {
 sectors_lbl = {'Camara_sono' : 'Usuario en cámara sonoamortiguada',
                 'Z_OD' : 'Usuario con oliva en OD',
                 'Z_OI': 'Usuario con oliva en OI',
-                'none' : 'Usuario en el Box'}
+                'none' : 'Usuario en el Box',
+                'ABR': 'Usuario en PEATC'}
 
 Boxs =  {'sala_espera' : [], 'Box_1' : ['A', 'Z'], 'Box_2':['ABR']}
 
@@ -218,6 +219,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.W.laSuper(self.data)
                 self.Z.laSuper(self.data)
                 self.prevPatient = self.data['sector']
+            self.ABR.laSuper(self.data)
+
         self.statusbar.showMessage(text)
         #log off external
         if self.data['state_login'] == "0":

@@ -8,26 +8,28 @@
 #################################################################
 
 import json
-import random
 import sys
 import time
+import random
 
-import numpy as np
 import requests
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget
+
+from PyQt5.QtWidgets import QMainWindow, QWidget, QPushButton
+
+import pyqtgraph as pg
+import numpy as np
 
 import lib.bezier_prop as bz
-from lib.ABR_generator import ABR_creator
-from lib.ABR_graph import Graph
-from lib.EEG import EEG
-from UI.Ui_ABR_config import Ui_ABR_config
+
 from UI.Ui_ABR_control import Ui_ABRSim
+from UI.Ui_ABR_config import Ui_ABR_config
+from UI.Ui_ABR_lat_select import Ui_ABR_lat_select
 from UI.Ui_ABR_ctrl_graph import Ui_ABR_control_curve
 from UI.Ui_ABR_detail import Ui_ABR_detail
-from UI.Ui_ABR_lat_select import Ui_ABR_lat_select
-
+from lib.EEG import EEG
+from lib.ABR_generator import ABR_creator
 
 class ABR_control(QWidget, Ui_ABR_config):
     def __init__(self):
@@ -82,6 +84,119 @@ class ABR_ctrl_curve(QWidget, Ui_ABR_control_curve):
         self.setupUi(self)
 
 
+class Graph(QWidget):
+    data_info = pyqtSignal(dict)
+    lat_info = pyqtSignal(dict)
+    def __init__(self):
+        QWidget.__init__(self)
+        color_backgorund = pg.mkColor(255, 255, 255, 255)
+        self.color_pen = pg.mkColor(0, 0, 0, 255)
+        pg.setConfigOption('background', color_backgorund)
+        pg.setConfigOption('foreground', self.color_pen)
+        self.pw1 = pg.PlotWidget(name='Plot1', background='default')
+        self.pw1.setRange(yRange=(-2, 2), xRange=(0, 12), disableAutoRange=True)
+        self.pw1.showGrid(x=True, y=True)
+        self.pw1.setMouseEnabled(x=False, y=False)
+        self.pw1.setMenuEnabled(False)
+        #ax = self.pw1.getAxis('bottom')
+        ay = self.pw1.getAxis('left')
+        ay.setStyle(showValues=False)
+        self.inifineA_B()
+        #self.x = 0
+        #self.y = 0
+        self.marks = {'I': None, 'II':None, 'III':None, 'IV':None, 'V':None,
+                      'Ip': None, 'IIp':None, 'IIIp':None, 'IVp':None, 'Vp':None}
+        self.change_mark = False
+
+
+    def find_nearest(self, array_in, value, array_out):
+        array = np.asarray(array_in)
+        idx = (np.abs(array - value)).argmin()
+        return array_out[idx]
+
+    def inifineA_B(self, pos_A = 0, pos_B = 0):
+        #Variables internas
+        pen1 = pg.mkPen('b', width=.5, style=Qt.DashLine)         
+        opst = {'position':0.9, 'color': (255,255,255), 'fill': (0,0,0,255), 'movable': True}
+        #Lineas infinitas
+        self.inf_A = pg.InfiniteLine(pos=pos_A, movable=True, angle=90, pen=pen1, label ="A", labelOpts=opst)
+        self.inf_B = pg.InfiniteLine(pos=pos_B, movable=True, angle=90, pen=pen1, label ="B", labelOpts=opst)
+        #Posición en X de las lineas infinitas
+        self.inf_A.sigPositionChanged.connect(self.get_amplitude)
+        self.inf_B.sigPositionChanged.connect(self.get_amplitude)
+        #Se agregan lineas infinitas a la grafica
+        self.pw1.addItem(self.inf_A)
+        self.pw1.addItem(self.inf_B)
+
+    def update_graph(self):
+        #Se actualiza el grafico
+        #Variables internas
+        pos_A = self.inf_A.getXPos()
+        pos_B = self.inf_B.getXPos()
+        #Plot con limpieza
+        self.pw1.plot(self.newData, clear=True)
+        #actualizar los componentes del gráfico
+        self.inifineA_B(pos_A, pos_B)
+        #self.update_marks()
+       
+
+    def update_data(self, data):
+        #se actualiza el data del grafico
+        x = data[0]
+        y = data[1]
+        self.newData = x,y
+        
+
+    def create_marks(self, mark, value):
+            #lat_A = self.inf_A.getXPos()
+            amp_A = self.find_nearest(self.x, value, self.y)
+            if mark[-1] == "p":
+                mod = mark[:-1]
+                curve_mark = "|{}'".format(mod)
+            else:
+                curve_mark = "|{}".format(mark)
+            text = pg.TextItem(text = curve_mark, anchor=(0.34,0.5), color=(0,0,0,255))
+            #text.setPos(lat_A, amp_A)
+            text.setPos(value, amp_A)
+            self.pw1.addItem(text)
+            self.lat_info.emit(self.marks)
+
+
+    def change_keys(self, key=None, value=None):
+        if key is not None and value is not None:
+            self.change_mark = True
+            self.marks[key] =  value
+            self.update_graph()
+
+    def update_marks(self):
+        keys = self.marks.keys()
+        for i in keys:
+            if self.marks[i] is not None:
+
+                self.create_marks(mark=i, value=self.marks[i])
+
+
+
+    def move_graph(self, str_ud):
+        if str_ud == "up":
+            self.y = self.y + .1
+        if str_ud == "down":
+            self.y = self.y - .1
+        self.update_graph()
+    
+    def get_amplitude(self):
+        lat_A = self.inf_A.getXPos()
+        lat_B = self.inf_B.getXPos()
+        amp_A = self.find_nearest(self.x, lat_A, self.y)
+        amp_B = self.find_nearest(self.x, lat_B, self.y)
+        order_amp = np.sort(np.array([amp_A,amp_B]))
+        order_lat = np.sort(np.array([lat_A,lat_B]))
+        
+        dif_amp = order_amp[1] - order_amp[0]
+        dif_lat = order_lat[1] - order_lat[0]
+        
+        response = {"lat_A": lat_A, "lat_B": lat_B, "amp_AB": dif_amp, "lat_AB": dif_lat}
+        self.data_info.emit(response)
 
 
 
@@ -113,91 +228,34 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.layout_ctrl_curve_R.addWidget(self.ctrl_curve_R)
         self.layout_ctrl_curve_L.addWidget(self.ctrl_curve_L)
 
-        self.ctrl_curve_R.btn_up.clicked.connect(lambda:self.grph_R.move_graph("up", self.currentCurve[0] , 0))
-        self.ctrl_curve_R.btn_down.clicked.connect(lambda:self.grph_R.move_graph("down", self.currentCurve[0], 0))
-        self.ctrl_curve_L.btn_up.clicked.connect(lambda:self.grph_L.move_graph("up", self.currentCurve[1] , 1))
-        self.ctrl_curve_L.btn_down.clicked.connect(lambda:self.grph_L.move_graph("down", self.currentCurve[1], 1))
-
-        self.layout_graph_R.addWidget(self.grph_R.win)
-        self.layout_graph_L.addWidget(self.grph_L.win)
+        self.ctrl_curve_R.btn_up.clicked.connect(lambda:self.grph_R.move_graph("up"))
+        self.ctrl_curve_R.btn_down.clicked.connect(lambda:self.grph_R.move_graph("down"))
+        
+        self.layout_graph_R.addWidget(self.grph_R.pw1)
+        self.layout_graph_L.addWidget(self.grph_L.pw1)
         self.store = dict()
         self.data = ABR_creator()
+       
+       
 
         self.grph_R.data_info.connect(self.update_data)
         self.grph_L.data_info.connect(self.update_data)
         self.grph_L.lat_info.connect(self.update_data)
         self.grph_R.lat_info.connect(self.update_data)
 
-        self.lat_select_R.btn_wave_I.clicked.connect(lambda:self.update_markers(0,0,0))
-        self.lat_select_R.btn_wave_II.clicked.connect(lambda:self.update_markers(0,1,0))
-        self.lat_select_R.btn_wave_III.clicked.connect(lambda:self.update_markers(0,2,0))
-        self.lat_select_R.btn_wave_IV.clicked.connect(lambda:self.update_markers(0,3,0))
-        self.lat_select_R.btn_wave_V.clicked.connect(lambda:self.update_markers(0,4,0))
+        self.lat_select_R.btn_wave_I.clicked.connect(lambda:self.update_markers("I"))
+        self.lat_select_R.btn_wave_II.clicked.connect(lambda:self.update_markers("II"))
+        self.lat_select_R.btn_wave_III.clicked.connect(lambda:self.update_markers("III"))
+        self.lat_select_R.btn_wave_IV.clicked.connect(lambda:self.update_markers("IV"))
+        self.lat_select_R.btn_wave_V.clicked.connect(lambda:self.update_markers("V"))
 
-        self.lat_select_R.btn_wave_Ip.clicked.connect(lambda:self.update_markers(1,0,0))
-        self.lat_select_R.btn_wave_IIp.clicked.connect(lambda:self.update_markers(1,1,0))
-        self.lat_select_R.btn_wave_IIIp.clicked.connect(lambda:self.update_markers(1,2,0))
-        self.lat_select_R.btn_wave_IVp.clicked.connect(lambda:self.update_markers(1,3,0))
-        self.lat_select_R.btn_wave_Vp.clicked.connect(lambda:self.update_markers(1,4,0))
-        
-        
-        self.lat_select_L.btn_wave_I.clicked.connect(lambda:self.update_markers(0,0,1))
-        self.lat_select_L.btn_wave_II.clicked.connect(lambda:self.update_markers(0,1,1))
-        self.lat_select_L.btn_wave_III.clicked.connect(lambda:self.update_markers(0,2,1))
-        self.lat_select_L.btn_wave_IV.clicked.connect(lambda:self.update_markers(0,3,1))
-        self.lat_select_L.btn_wave_V.clicked.connect(lambda:self.update_markers(0,4,1))
-
-        self.lat_select_L.btn_wave_Ip.clicked.connect(lambda:self.update_markers(1,0,1))
-        self.lat_select_L.btn_wave_IIp.clicked.connect(lambda:self.update_markers(1,1,1))
-        self.lat_select_L.btn_wave_IIIp.clicked.connect(lambda:self.update_markers(1,2,1))
-        self.lat_select_L.btn_wave_IVp.clicked.connect(lambda:self.update_markers(1,3,1))
-        self.lat_select_L.btn_wave_Vp.clicked.connect(lambda:self.update_markers(1,4,1))
-
-        self.lat_select_R.btn_AB.clicked.connect(self.toogle_AB)
-        self.lat_select_L.btn_AB.clicked.connect(self.toogle_AB)
-
+        self.lat_select_R.btn_wave_Ip.clicked.connect(lambda:self.update_markers("Ip"))
+        self.lat_select_R.btn_wave_IIp.clicked.connect(lambda:self.update_markers("IIp"))
+        self.lat_select_R.btn_wave_IIIp.clicked.connect(lambda:self.update_markers("IIIp"))
+        self.lat_select_R.btn_wave_IVp.clicked.connect(lambda:self.update_markers("IVp"))
+        self.lat_select_R.btn_wave_Vp.clicked.connect(lambda:self.update_markers("Vp"))
         self.detail.btn_start.clicked.connect(self.capture)
-        self.ctrl_curve_R.btn_del.clicked.connect(lambda: self.clearCurve(0))
-        self.ctrl_curve_L.btn_del.clicked.connect(lambda: self.clearCurve(1))
-        self.currentCurve = [None, None]
         self.control
-
-    def laSuper(self, data):
-        self.Sdata = data
-        if self.Sdata['sector'] == 'ABR':
-            self.entry = False
-        else:
-            self.entry = True
-    def toogle_AB(self, side):
-        widget = self.sender()
-        text = widget.text()
-        if text == "|A":
-            text = "B|"
-        else:
-            text = "|A"
-        widget.setText(text)
-
-    def clearCurve(self, side):
-        try:
-            self.store[self.currentCurve[side]][5] = False
-            self.updateFlagsCurves()
-            self.updateGraph()
-        except:
-            pass
-
-    def selectCurve(self):
-        widget = self.sender()
-        objName = widget.objectName()
-        _,x = objName.split('_')
-        side,_ = x.split(':')
-        if side == 'R':
-            side = 0
-            self.grph_R.activeCurve(objName, 0)
-        else: 
-            side = 1
-            self.grph_L.activeCurve(objName, 1)
-        self.currentCurve[side] = objName
-
 
 
     def capture(self):
@@ -209,35 +267,43 @@ class MainWindow(QWidget, Ui_ABRSim):
         else: 
             side = 1
             letter = 'L'
-        gap = 1.8
+        
         name = "{}_{}:0".format(intencity, letter)
+
         if name in self.store:
-            name, _ = self.numberName(name, letter, intencity, gap)
-        try:
-            gap = self.calGap(name, letter, intencity, gap)
-        except:
-            pass
+            name = self.numberName(name, letter, intencity)
+   
         view = True
         repro = random.randint(80,99)
-        self.store[name] = [[[],[]],[[],[]],side, intencity, repro, view, gap]
+        self.store[name] = [[[],[]],[[],[]],side, intencity, repro, view]
         self.data.set_intencity(intencity)
-        #x, y = self.data.get()
-        x, y, dx,dy = ABR_Curve(nHL=intencity, zeros=self.entry)
-        #print(dy)
+        x, y = self.data.get()
         self.store[name][0][0] = x
         self.store[name][0][1] = y
         self.disabledInCapture()
         self.updateFlagsCurves()
-        self.updateGraph()
-        self.currentCurve[side] = name
-        self.grph_R.activeCurve(name, 0)
-        self.grph_L.activeCurve(name, 1)
+        self.updateGraph(name)
+
 
         
-    def updateGraph(self):
-        self.grph_R.update_data(self.store, 0)
-        self.grph_L.update_data(self.store, 1)
+        
+        
+        
+    def updateGraph(self, curve):
+        data = self.store[curve]
+        x = data[0][0]
+        y = data[0][1]
+        side = data[2]
+        if side == 0:
+            self.grph_R.update_data([x,y])
+            self.grph_R.update_graph()
+        else:
+            self.grph_L.update_data([x,y])
+            self.grph_L.update_graph()
+        
         self.disabledInCapture(False)
+            
+
 
     def updateFlagsCurves(self):
         for i in reversed(range( self.ctrl_curve_R.layout_curves.count())): 
@@ -247,29 +313,26 @@ class MainWindow(QWidget, Ui_ABRSim):
         btns_left = list()
         btns_Right = list()
         for k in self.store:
-            if self.store[k][5]:
-                y, x = k.split('_')
-                l,num = x.split(':')
-                name = "{} {}{}".format(y, l, num) 
-                id = k
-                btn = [name,id]
-                if l == 'L':
-                    btns_left.append(btn)
-                else:
-                    btns_Right.append(btn)
+            y, x = k.split('_')
+            l,num = x.split(':')
+            name = "{} {}{}".format(y, l, num) 
+            id = k
+            btn = [name,id]
+            if l == 'L':
+                btns_left.append(btn)
+            else:
+                btns_Right.append(btn)
             
-        styleR = ("""
+            styleR = ("""
             QWidget {
                 color: rgb(0, 0, 0);
                 background-color: rgb(255, 0, 0);
-                font: 87 8pt "Noto Sans";
             }
             """)
-        styleL = ("""
+            styleL = ("""
             QWidget {
                 color: rgb(0, 0, 0);
                 background-color: rgb(0, 0, 255);
-                font: 87 8pt "Noto Sans";
             }
             """)            
         
@@ -277,50 +340,30 @@ class MainWindow(QWidget, Ui_ABRSim):
             btn = QPushButton('{}'.format(btns_left[i][0]))
             btn.setObjectName(btns_left[i][1])
             btn.setStyleSheet(styleL)
-            btn.setCheckable(True)
-            btn.setAutoExclusive(True)
+            #btn.setCheckable(True)
             self.ctrl_curve_L.layout_curves.addWidget(btn)
-            btn.clicked.connect(self.selectCurve)
         for i in range(len(btns_Right)):
             btn = QPushButton('{}'.format(btns_Right[i][0]))
             btn.setObjectName(btns_Right[i][1])
             btn.setStyleSheet(styleR)
-            btn.setCheckable(True)
-            btn.setAutoExclusive(True)
-            self.ctrl_curve_R.layout_curves.addWidget(btn)
-            btn.clicked.connect(self.selectCurve)
 
-    def numberName(self, name, ltr, tin, gap):
+            #btn.setCheckable(True)
+            self.ctrl_curve_R.layout_curves.addWidget(btn)
+
+
+
+
+    def numberName(self, name, ltr, tin):
         n = list()
-        g = list()
-        db = list()
         for i in self.store:
-            dbi,x = i.split('_')
+            _,x = i.split('_')
             l,num = x.split(':')
             if l == ltr:
                 n.append(int(num))
-            g.append(self.store[i][6])
-            db.append(dbi)
-
-
         n.sort()
-        g.sort(reverse=True)
-        resultG = g[-1] -0.6
         resultN = n[-1]+1
         name = "{}_{}:{}".format(tin,ltr,resultN)
-        return name , resultG
-
-    def calGap(self, name, ltr, tin, gap):
-        g = list()
-        for i in self.store:
-            dbi,x = i.split('_')
-            l,num = x.split(':')
-            if l == ltr:
-                g.append(self.store[i][6])
-
-        g.sort(reverse=True)
-        resultG = g[-1] -0.4
-        return resultG
+        return name
 
 
     def disabledInCapture(self, dis = True):
@@ -335,142 +378,62 @@ class MainWindow(QWidget, Ui_ABRSim):
         if 'lat_A' in data or 'lat_B' in data:
             self.AB = [[data['lat_A'], data['lat_B']], [data,data]]
         
-    def update_markers(self, idx, subidx, side ):
-        if side == 0:
-            text = self.lat_select_R.btn_AB.text()
-            A,B = text.split("|")
-            if A == "A":
-                text = A
-            else:
-                text = B
-            self.grph_R.update_marks(side, idx,subidx,text)
-        else:
-            text = self.lat_select_L.btn_AB.text()
-            A,B = text.split("|")
-            if A == "A":
-                text = A
-            else:
-                text = B
-            self.grph_L.update_marks(side, idx,subidx,text)
-        
-        
+    def update_markers(self, k ):
+        mark = self.grph_R.marks
+        data = self.AB[0][0]
+        self.grph_R.change_keys(key=k, value=data)
 
 
 
-def ABR_Curve(nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, VrelI = True, zeros = False):
-    
-    att = 0
-    lam = 0
-    varInt = abs(80 - nHL)
-    fvarInt = varInt/5
-    if 80 < nHL:
-        sideAmp = 1
-        sideLat = -1
-    else:
-        sideAmp = -1
-        sideLat = 1
-    
-    if nHL >=50:
-        fvarLat = .15
-        fvarAmp = .06
-    else:
-        fvarLat = .2
-        fvarAmp = .08
+def ABR_Curve(nHL = 80, peak_I=1.6, peak_III=3.7, peak_v=5.6, amp_V = 0.8, VrelI = True):
 
-    att = (fvarLat * fvarInt) * sideLat
-    lam = (fvarAmp * fvarInt) * sideAmp
-
-    peak_I =  p_I + att
-    peak_II =  p_I+1+ att
-
-    peak_III =  p_III + att
-    peak_V =  p_V + att
-
-    peak_IV = peak_V-.5 
-    end = 12 + att
-    amp_V = a_V + lam
-    if amp_V < 0:
-        amp_V = 0
-
-
+    peak_I = 1.6
+    peak_III = 3.7
+    peak_V = 5.6
+    amp_V = 0.8
     VrelI = True
 
     if VrelI:
         var = random.uniform(0,0.2)
         amp_I = amp_V / 3
-        amp_I = amp_I + lam
+        amp_I = amp_I + var
     else:
         var = random.uniform(0,0.2)
         amp_I = amp_V / 1.5
-        amp_I = amp_I + lam
-    
-    if amp_I < 0:
-        amp_I = 0
+        amp_I = amp_I 
+       
 
-    amp_Ip = -(amp_I/2)
-    amp_II = amp_Ip+0.1
-    amp_IIp = amp_II-.02
-
-    if amp_Ip == 0:
-        amp_II = 0
-        amp_IIp=0
-
-    amp_III = 0.3 +lam
-    if amp_III<0:
-        amp_III = 0
-    
-    amp_IIIp = 0
-    
-    amp_VI = amp_V -.3
-
-    if amp_VI < 0:
-        amp_VI = 0
-
-    curve_cm = (0.6+att, 0.15)
-    curve_cmp = (0.7+att, -0.05)
+    curve_cm = (0.6, 0.15)
+    curve_cmp = (0.7, -0.05)
 
     curve_I = (peak_I,amp_I/2)
-    curve_Ip = (curve_I[0]+.5,amp_Ip)
+    curve_Ip = (curve_I[0]+.5,-(amp_I/2))
 
-    curve_II = (peak_II, amp_II)
+    curve_II = (curve_I[0] + 1, curve_Ip[1]+0.1)
     curve_IIp = (curve_II[0]+.3,curve_II[1]-.02)
 
-    curve_III = (peak_III,amp_III)
-    curve_IIIp = (curve_III[0]+.9,amp_IIIp)
+    curve_III = (peak_III,0.3)
+    curve_IIIp = (curve_III[0]+.9,curve_III[1]-0.3)
 
-    #curve_III = (peak_III,amp_III)
-    #curve_IIIp = (curve_III[0]+.9,0)
-
-
-    VrefIII = (random.uniform(-.1,.1)) + curve_III[1]
+    VrefIII = (random.uniform(-.4,.7)) + curve_III[1]
     curve_V = (peak_V,VrefIII)
 
-    amp_IV = VrefIII-.05
-    if amp_IV < 0:
-        amp_IV = 0
-    amp_IVp = amp_IV-.05
-    if amp_IVp < 0:
-        amp_IVp = 0
-
     sn10refV = curve_V[1] - amp_V
-    if sn10refV > 0:
-        sn10refV = 0
-
     sn10 = (curve_V[0]+1,sn10refV)
 
-    curve_IV = (peak_IV, amp_IV)
-    curve_IVp = (curve_IV[0]+.05, amp_IVp)
+    curve_IV = (peak_V-.5, curve_V[1]-.05)
+    curve_IVp = (curve_IV[0]+.25, curve_IV[1]-.05)
 
-    curve_VI = (sn10[0]+1.5, amp_VI)
+    curve_VI = (sn10[0]+1.5, curve_V[1]-.3)
     curve_VIp = (curve_VI[0]+1.5, curve_VI[1]-.3)
     curve_VII = (curve_VIp[0]+1.5, curve_VIp[1]+.6)
 
-    print(sn10refV)
 
     points = np.array([
             [0,0],
 
-
+            [curve_cm[0]-.2, 0],
+            [curve_cm[0], curve_cm[1]],
             [curve_cmp[0],curve_cmp[1]],
 
             [curve_I[0],curve_I[1]],
@@ -491,7 +454,7 @@ def ABR_Curve(nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, VrelI = True, ze
             [curve_VI[0],curve_VI[1]],
             [curve_VIp[0],curve_VIp[1]],
             [curve_VII[0],curve_VII[1]],
-            [end,0]        
+            [12,0]        
     ])
     Bezi = bz.Bezier()
     path = Bezi.evaluate_bezier(points, 20)
@@ -503,12 +466,9 @@ def ABR_Curve(nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, VrelI = True, ze
     y_noise = np.random.normal(0, .01, py.shape)
     y_new = py + y_noise
 
-    if zeros:
-        px = np.zeros(20)
-        y_new = np.zeros(20)
-    return px, y_new, x, y
+    return px, y_new
 
-#px, y_new = ABR_Curve()
+px, y_new = ABR_Curve()
 
 if __name__ == '__main__':
     appctxt = ApplicationContext()       # 1. Instantiate ApplicationContext

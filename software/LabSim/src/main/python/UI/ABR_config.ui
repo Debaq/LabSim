@@ -63,7 +63,10 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox_6">
+         <widget class="QComboBox" name="cb_stim">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximumSize">
            <size>
             <width>80</width>
@@ -97,6 +100,9 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBox_11">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximumSize">
            <size>
             <width>100</width>
@@ -155,6 +161,9 @@
           </item>
           <item>
            <widget class="QSpinBox" name="spinBox_5">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="maximumSize">
              <size>
               <width>80</width>
@@ -194,6 +203,9 @@
           </item>
           <item>
            <widget class="QSpinBox" name="spinBox_6">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="maximumSize">
              <size>
               <width>80</width>
@@ -233,6 +245,9 @@
           </item>
           <item>
            <widget class="QSpinBox" name="spinBox_7">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="maximumSize">
              <size>
               <width>80</width>
@@ -271,6 +286,14 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <item>
+           <property name="text">
+            <string>Alteranada</string>
+           </property>
+          </item>
           <item>
            <property name="text">
             <string>Condensación</string>
@@ -279,11 +302,6 @@
           <item>
            <property name="text">
             <string>Rarefacción</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Alteranada</string>
            </property>
           </item>
          </widget>
@@ -300,7 +318,10 @@
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="spinBox">
+         <widget class="QSpinBox" name="sb_int">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="maximumSize">
            <size>
             <width>100</width>
@@ -316,6 +337,9 @@
           <property name="singleStep">
            <number>5</number>
           </property>
+          <property name="value">
+           <number>80</number>
+          </property>
          </widget>
         </item>
         <item>
@@ -326,7 +350,10 @@
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="spinBox_2">
+         <widget class="QSpinBox" name="sb_mskg">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximumSize">
            <size>
             <width>100</width>
@@ -366,6 +393,9 @@
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="doubleSpinBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximumSize">
            <size>
             <width>150</width>
@@ -373,7 +403,7 @@
            </size>
           </property>
           <property name="prefix">
-           <string> </string>
+           <string/>
           </property>
           <property name="suffix">
            <string> /segundo</string>
@@ -383,6 +413,9 @@
           </property>
           <property name="singleStep">
            <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>21.100000000000001</double>
           </property>
          </widget>
         </item>
@@ -405,6 +438,9 @@
         </item>
         <item>
          <widget class="QSpinBox" name="spinBox_3">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximumSize">
            <size>
             <width>120</width>
@@ -419,6 +455,9 @@
           </property>
           <property name="maximum">
            <number>300</number>
+          </property>
+          <property name="value">
+           <number>12</number>
           </property>
          </widget>
         </item>
@@ -441,12 +480,20 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBox_2">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximumSize">
            <size>
             <width>150</width>
             <height>16777215</height>
            </size>
           </property>
+          <item>
+           <property name="text">
+            <string>3000 Hz</string>
+           </property>
+          </item>
           <item>
            <property name="text">
             <string>500 Hz</string>
@@ -470,11 +517,6 @@
           <item>
            <property name="text">
             <string>2000 Hz</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>3000 Hz</string>
            </property>
           </item>
           <item>
@@ -513,12 +555,20 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboBox_4">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximumSize">
            <size>
             <width>150</width>
             <height>16777215</height>
            </size>
           </property>
+          <item>
+           <property name="text">
+            <string>100 Hz</string>
+           </property>
+          </item>
           <item>
            <property name="text">
             <string>5 Hz</string>
@@ -551,11 +601,6 @@
           </item>
           <item>
            <property name="text">
-            <string>100 Hz</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
             <string>200 Hz</string>
            </property>
           </item>
@@ -580,6 +625,9 @@
         </item>
         <item>
          <widget class="QSpinBox" name="spinBox_4">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximumSize">
            <size>
             <width>150</width>
@@ -591,6 +639,9 @@
           </property>
           <property name="maximum">
            <number>5000</number>
+          </property>
+          <property name="value">
+           <number>2000</number>
           </property>
          </widget>
         </item>
@@ -612,7 +663,10 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox_9">
+         <widget class="QComboBox" name="cb_side">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="maximumSize">
            <size>
             <width>150</width>
@@ -627,11 +681,6 @@
           <item>
            <property name="text">
             <string>OI</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Simultáneo</string>
            </property>
           </item>
          </widget>

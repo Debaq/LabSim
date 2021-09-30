@@ -1,8 +1,8 @@
 import numpy as np
-import bezier_prop as bz
+import lib.bezier_prop as bz
 import random
 import collections
-from helpers import Preferences
+from lib.helpers import Preferences
 
 class_pref = Preferences()
 
@@ -27,32 +27,33 @@ class ABR_creator():
             lateGroup[i] = data[i]
         return [self.intencity, earlyGroup, lateGroup]       
   
-    def get(self):
-        pass
 
     def set_intencity(self, dBnHL):
         self.prevInt = self.data[0]
-        self.data[0] = int(dBnHL)
+        self.data[0] = dBnHL
+        #print(self.data)
         self.attenuator()
+        #print(self.data)
+
         self.updateCurve()
 
     def attenuator(self):
         if self.data[0] >=50:
             fvarLat = .15
-            fvarAmp = .05
+            fvarAmp = .5
         else:
             fvarLat = .3
-            fvarAmp = .06
+            fvarAmp = .6
         varInt = abs(self.prevInt - self.data[0])
         fvarInt = varInt/5
         if self.prevInt < self.data[0]:
             sideAmp = 1
             sideLat = -1
-            #text = "subiendo"
+            text = "subiendo"
         else:
             sideAmp = -1
             sideLat = 1
-            #text = "bajando"
+            text = "bajando"
 
         varLat = (fvarLat * fvarInt) * sideLat
         varAmp = (fvarAmp * fvarInt) * sideAmp
@@ -77,8 +78,7 @@ class ABR_creator():
     def updateCurve(self):
         prevPoints=[]
         data = dict(self.data[1], **self.data[2])
-        
-        print(data)
+        #print(">>{}".format(data))
         for k,i in data.items():
             width = i[1]
             f1p = [i[0] - (width/2), 0]
@@ -88,27 +88,34 @@ class ABR_creator():
             prevPoints.append(f2p) 
             prevPoints.append(f3p)
 
-        print(prevPoints)
+        self.prevPoints = np.asarray(prevPoints)
+        self.curve()
 
-       
-        #Bezi = bz.Bezier()
-        #path = Bezi.evaluate_bezier(points, 20)
+    def curve(self):
+        Bezi = bz.Bezier()
+
+        path = Bezi.evaluate_bezier(self.prevPoints, 20)
 
         # extract x & y coordinates of points
-        #x, y = points[:,0], points[:,1]
-        #px, py = path[:,0], path[:,1]
+        #x, y = self.prevPoints[:,0], self.prevPoints[:,1]
+        px, py = path[:,0], path[:,1]
 
-        #y_noise = np.random.normal(0, .01, py.shape)
-        #y_new = py + y_noise
+        y_noise = np.random.normal(0, .01, py.shape)
+        y_new = py + y_noise
+        self.x = px
+        self.y = y_new
+        
+    def get(self):
+        self.updateCurve()
+        return self.x , self.y
 
-        #return px, y_new
+if __name__ == '__main__':
 
-
-I = ABR_creator()
-while True:
-    i = input(":")
-    if i==type("q"):
-        break
-    else:
-        I.set_intencity(i)
+    I = ABR_creator()
+    while True:
+        i = input(":")
+        if i==type("q"):
+            break
+        else:
+            I.set_intencity(i)
 

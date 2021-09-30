@@ -39,7 +39,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QProgressBar" name="progressBar">
+         <widget class="QProgressBar" name="pb_repro">
           <property name="value">
            <number>24</number>
           </property>
@@ -99,21 +99,21 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="btn_start">
         <property name="text">
          <string>Iniciar</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QPushButton" name="btn_pause">
         <property name="text">
          <string>Pausar</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="btn_stop">
         <property name="text">
          <string>Detener</string>
         </property>
