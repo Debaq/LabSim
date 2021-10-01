@@ -52,7 +52,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         font = QFont("OpenSans")
         font.setPointSize(8)
         QGuiApplication.setFont(font)
-        self.setWindowTitle("LabSim")
+        self.setWindowTitle("LabSim v0.8.3fix")
         self.setMinimumSize(1200,768)
         self.actionLogin.triggered.connect(self.login_win)
         self.actionCascada.triggered.connect(self.cascade)
@@ -157,6 +157,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.A.signal_speech.connect(self.speechlist_mode)
         self.Z = Z.ZControl()
         self.W = ListWords.ListWords(self.data)
+        self.ABR = ABR.MainWindow()
+
 
     def createSubWindow(self, widg, name, pos, size = [True,True], width=740, height=560, f = True):
         sub = QMdiSubWindow()
@@ -202,7 +204,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.lisModuleActive[pos] != None:
            self.showHide(pos)
         else:
-            self.ABR = ABR.MainWindow()
             self.createSubWindow(self.ABR, "Potenciales Evocados", pos, size=[False,True], width=1000, height=600, f=False)
   
     def activate_listWords(self):

@@ -112,10 +112,10 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.layout_ctrl_curve_R.addWidget(self.ctrl_curve_R)
         self.layout_ctrl_curve_L.addWidget(self.ctrl_curve_L)
 
-        self.ctrl_curve_R.btn_up.clicked.connect(lambda:self.grph_R.move_graph("up", self.currentCurve[0] , 0))
-        self.ctrl_curve_R.btn_down.clicked.connect(lambda:self.grph_R.move_graph("down", self.currentCurve[0], 0))
-        self.ctrl_curve_L.btn_up.clicked.connect(lambda:self.grph_L.move_graph("up", self.currentCurve[1] , 1))
-        self.ctrl_curve_L.btn_down.clicked.connect(lambda:self.grph_L.move_graph("down", self.currentCurve[1], 1))
+        self.ctrl_curve_R.btn_up.clicked.connect(lambda:self.upDown(0))
+        self.ctrl_curve_R.btn_down.clicked.connect(lambda:self.upDown(0))
+        self.ctrl_curve_L.btn_up.clicked.connect(lambda:self.upDown(1))
+        self.ctrl_curve_L.btn_down.clicked.connect(lambda:self.upDown(1))
 
         self.layout_graph_R.addWidget(self.grph_R.win)
         self.layout_graph_L.addWidget(self.grph_L.win)
@@ -152,8 +152,9 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.lat_select_L.btn_wave_IVp.clicked.connect(lambda:self.update_markers(1,3,1))
         self.lat_select_L.btn_wave_Vp.clicked.connect(lambda:self.update_markers(1,4,1))
 
-        self.lat_select_R.btn_AB.clicked.connect(self.toogle_AB)
-        self.lat_select_L.btn_AB.clicked.connect(self.toogle_AB)
+        self.lat_select_R.btn_AB.clicked.connect(lambda: self.toogle_AB(0))
+        self.lat_select_L.btn_AB.clicked.connect(lambda: self.toogle_AB(1))
+        self.memAB = ["A", "A"]
 
         self.detail.btn_start.clicked.connect(self.capture)
         self.ctrl_curve_R.btn_del.clicked.connect(lambda: self.clearCurve(0))
@@ -167,14 +168,30 @@ class MainWindow(QWidget, Ui_ABRSim):
             self.entry = False
         else:
             self.entry = True
+
+    def upDown(self, side):
+        widgets = self.sender()
+        direction = widgets.objectName()
+        _,text= direction.split('_')
+        curve = self.currentCurve[side]
+        if side == 0:
+            if curve is not None:
+                self.grph_R.move_graph(text)
+        else:
+            if curve is not None:
+                self.grph_L.move_graph(text)
+
     def toogle_AB(self, side):
         widget = self.sender()
         text = widget.text()
         if text == "|A":
             text = "B|"
+            new = "B"
         else:
             text = "|A"
+            new = "A"
         widget.setText(text)
+        self.memAB[side] = new
 
     def clearCurve(self, side):
         try:
@@ -226,15 +243,15 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.store[name][0][1] = y
         self.disabledInCapture()
         self.updateFlagsCurves()
-        self.updateGraph()
+        self.updateGraph(side)
         self.currentCurve[side] = name
-        self.grph_R.activeCurve(name, 0)
-        self.grph_L.activeCurve(name, 1)
+        self.grph_R.activeCurve(name, side)
+        self.grph_L.activeCurve(name, side)
 
         
-    def updateGraph(self):
-        self.grph_R.update_data(self.store, 0)
-        self.grph_L.update_data(self.store, 1)
+    def updateGraph(self,side):
+        self.grph_R.update_data(self.store, side)
+        self.grph_L.update_data(self.store, side)
         self.disabledInCapture(False)
 
     def updateFlagsCurves(self):
@@ -242,7 +259,7 @@ class MainWindow(QWidget, Ui_ABRSim):
              self.ctrl_curve_R.layout_curves.itemAt(i).widget().deleteLater()
         for i in reversed(range( self.ctrl_curve_L.layout_curves.count())): 
             self.ctrl_curve_L.layout_curves.itemAt(i).widget().deleteLater()
-        btns_left = list()
+        btns_Left = list()
         btns_Right = list()
         for k in self.store:
             if self.store[k][5]:
@@ -253,60 +270,49 @@ class MainWindow(QWidget, Ui_ABRSim):
                 id = k
                 btn = [name,id, short]
                 if l == 'L':
-                    btns_left.append(btn)
+                    btns_Left.append(btn)
                 else:
                     btns_Right.append(btn)
-            
-        styleR = ("""
-            QWidget {
-                color: rgb(0, 0, 0);
-                background-color: rgb(255, 0, 0);
-                border-style: outset;
-                border-width: 0px;
 
-            }
-            """)
-        styleL = ("""
-            QWidget {
-                color: rgb(0, 0, 0);
-                background-color: rgb(0, 0, 255);
-                border-style: outset;
-                border-width: 0px;
-            }
-            """)            
-        
-        for i in range(len(btns_left)):
-            btn = QPushButton('{}'.format(btns_left[i][0]))
-            btn.setObjectName(btns_left[i][1])
-            btn.setStyleSheet(styleL)
+        self.btnFlags(btns_Right, 0)
+        self.btnFlags(btns_Left, 1)
+
+
+    def btnFlags(self, btns, side):
+        def style(side):
+            if side == 0:
+                color = "255,0,0"
+            else:
+                color = "0,0,255"
+            style = ("""
+                QWidget {}
+                    color: rgb(0, 0, 0);
+                    background-color: rgb({});
+                    border-style: outset;
+                    border-width: 0px;
+
+                {}
+                """).format("{",color,"}")
+            return style
+        for i in range(len(btns)):
+            btn = QPushButton('{}'.format(btns[i][0]))
+            btn.setObjectName(btns[i][1])
+            btn.setStyleSheet(style(side))
             btn.setCheckable(True)
             btn.setAutoExclusive(True)
-            self.ctrl_curve_L.layout_curves.addWidget(btn)
             btn.clicked.connect(self.selectCurve)
             btn.setMaximumHeight(30)
             btn.setMaximumWidth(30)
             font = QFont()
             font.setPointSize(7)
             btn.setFont(font)
-            btn.setToolTip('{}'.format(btns_left[i][2]))
+            btn.setToolTip('{}'.format(btns[i][2]))
             btn.setChecked(True)
+            if side == 0:
+                self.ctrl_curve_R.layout_curves.addWidget(btn)
+            else:
+                self.ctrl_curve_L.layout_curves.addWidget(btn)
 
-
-        for i in range(len(btns_Right)):
-            btn = QPushButton('{}'.format(btns_Right[i][0]))
-            btn.setObjectName(btns_Right[i][1])
-            btn.setStyleSheet(styleR)
-            btn.setCheckable(True)
-            btn.setAutoExclusive(True)
-            self.ctrl_curve_R.layout_curves.addWidget(btn)
-            btn.clicked.connect(self.selectCurve)
-            btn.setMaximumHeight(30)
-            btn.setMaximumWidth(30)
-            font = QFont()
-            font.setPointSize(7)
-            btn.setFont(font)
-            btn.setToolTip('{}'.format(btns_Right[i][2]))
-            btn.setChecked(True)
 
 
     def numberName(self, name, ltr, tin, gap):
@@ -332,8 +338,8 @@ class MainWindow(QWidget, Ui_ABRSim):
     def calGap(self, name, ltr, tin, gap):
         g = list()
         for i in self.store:
-            dbi,x = i.split('_')
-            l,num = x.split(':')
+            _,x = i.split('_')
+            l,_ = x.split(':')
             if l == ltr:
                 g.append(self.store[i][6])
 
@@ -361,23 +367,13 @@ class MainWindow(QWidget, Ui_ABRSim):
         #    self.AB = [[data['lat_A'], data['lat_B']], [data,data]]
         
     def update_markers(self, idx, subidx, side ):
+        print("side: {}, idx:{}, subidx:{}".format(side, idx, subidx))
         if side == 0:
-            text = self.lat_select_R.btn_AB.text()
-            A,B = text.split("|")
-            if A == "A":
-                text = A
-            else:
-                text = B
-            self.grph_R.update_marks(side, idx,subidx,text)
+            text = self.memAB[0]
+            self.grph_R.update_marks(idx,subidx,text)
         else:
-            text = self.lat_select_L.btn_AB.text()
-            A,B = text.split("|")
-            if A == "A":
-                text = A
-            else:
-                text = B
-            self.grph_L.update_marks(side, idx,subidx,text)
-            print("L")
+            text = self.memAB[1]
+            self.grph_L.update_marks(idx,subidx,text)
         
         
 
@@ -491,7 +487,7 @@ def ABR_Curve(nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, VrelI = True, ze
     curve_VIp = (curve_VI[0]+1.5, curve_VI[1]-.3)
     curve_VII = (curve_VIp[0]+1.5, curve_VIp[1]+.6)
 
-    print(sn10refV)
+    #print(sn10refV)
 
     points = np.array([
             [0,0],
