@@ -23,11 +23,10 @@ class Graph(QWidget):
         self.pw1.showGrid(x=True, y=True)
         self.pw1.setMouseEnabled(x=False, y=False)
         self.pw1.setMenuEnabled(False)
-        ax = self.pw1.getAxis('bottom')
+        #ax = self.pw1.getAxis('bottom')
         ay = self.pw1.getAxis('left')
         ay.setStyle(showValues=False)
         self.actCurve = str()
-        self.inifineA_B()
         self.marks = dict()
         #self.x = 0
         #self.y = 0
@@ -56,9 +55,12 @@ class Graph(QWidget):
         #Variables internas
         pen1 = pg.mkPen('b', width=.5, style=Qt.DashLine)         
         opst = {'position':0.9, 'color': (255,255,255), 'fill': (0,0,0,255), 'movable': True}
+        nameA = "A{}".format(self.side)
+        nameB = "B{}".format(self.side)
         #Lineas infinitas
-        self.inf_A = pg.InfiniteLine(pos=pos_A, movable=True, angle=90, pen=pen1, label ="A", labelOpts=opst)
-        self.inf_B = pg.InfiniteLine(pos=pos_B, movable=True, angle=90, pen=pen1, label ="B", labelOpts=opst)
+
+        self.inf_A = pg.InfiniteLine(pos=pos_A, movable=True, angle=90, pen=pen1, label ="A", labelOpts=opst, name=nameA)
+        self.inf_B = pg.InfiniteLine(pos=pos_B, movable=True, angle=90, pen=pen1, label ="B", labelOpts=opst, name=nameB)
         #self.inf_B.setBounds(0,10)
         #Posición en X de las lineas infinitas
         self.inf_A.sigPositionChanged.connect(self.get_amplitude)
@@ -67,63 +69,80 @@ class Graph(QWidget):
         self.pw1.addItem(self.inf_A)
         self.pw1.addItem(self.inf_B)
 
-    def update_graph(self, side):
+
+    def update_data(self, data, side):
+        if self.side == side:
+            mem = dict()
+            for i in data:
+                side_in = data[i][2]
+                if side_in == self.side:
+                    mem[i] = data[i]
+            self.data = mem
+            Marks = [storage(5),storage(5)]
+            for i in self.data:
+                if self.data[i][2] == self.side:
+                    if not i in self.marks:
+                        self.marks[i] = Marks
+            self.update_graph()
+
+    def update_graph(self):
         self.clearGraph()
-        pos_A = self.inf_A.getXPos()
-        pos_B = self.inf_B.getXPos()
+        try:
+            pos_A = self.inf_A.getXPos()
+            pos_B = self.inf_B.getXPos()
+        except:
+            pass
         for i in self.data:
             if self.actCurve == i:
                 act = True
             else:
                 act = False
-            if self.data[i][2] == side:
-                if self.data[i][5]:
-                    color_name = self.data[i][2]
-                    if color_name == 0:
-                        if act :
-                            color = pg.mkColor(255, 0, 0, 255)
-                            fill = (255,0,0)
-                        else:
-                            color = pg.mkColor(180, 0, 0, 255)
-                            fill = (180,0,0)
+            if self.data[i][5]:
+                color_name = self.data[i][2]
+                if color_name == 0:
+                    if act :
+                        color = pg.mkColor(255, 0, 0, 255)
+                        fill = (255,0,0)
                     else:
-                        if act:
-                            color = pg.mkColor(50, 50, 255, 255)
-                            fill = (50,50,255)
-                        else:
-                            color = pg.mkColor(0, 0, 100, 255)
-                            fill = (0,0,180)
+                        color = pg.mkColor(180, 0, 0, 255)
+                        fill = (180,0,0)
+                else:
+                    if act:
+                        color = pg.mkColor(50, 50, 255, 255)
+                        fill = (50,50,255)
+                    else:
+                        color = pg.mkColor(0, 0, 100, 255)
+                        fill = (0,0,180)
 
-                    lbl = """
-                        <div style='text-align: center'>
-                        <span style='color: #FFF; font-size: 7pt;'>{}dBnHl</span></div>
-                        """.format(self.data[i][3])
-                    text = pg.TextItem(html=lbl, border="w", fill=fill)
-                    self.pw1.addItem(text)
-                    x = self.data[i][0][0]
-                    y = self.data[i][0][1]  + self.data[i][6]
-                    h = self.find_nearest(x,x.max(),y)
-                    text.setPos(12, h)
-                    self.pw1.plot(x,y, pen=color)
-            self.inifineA_B(pos_A, pos_B)
+                lbl = """
+                    <div style='text-align: center'>
+                    <span style='color: #FFF; font-size: 7pt;'>{}dBnHl</span></div>
+                    """.format(self.data[i][3])
+                text = pg.TextItem(html=lbl, border="w", fill=fill)
+                self.pw1.addItem(text)
+                x = self.data[i][0][0]
+                y = self.data[i][0][1]  + self.data[i][6]
+                h = self.find_nearest(x,x.max(),y)
+                text.setPos(12, h)
+                self.pw1.plot(x,y, pen=color, name =i) #ahora cada curva tiene su nombre
+            """
+            ACA aprendi que se pueden eliminar los objetos por nombre
+            for i in self.pw1.listDataItems():
+                print(i.name())
+                if i.name() == "80_R:2":
+                    self.pw1.removeItem(i)
+            """        
             try:
+                self.inifineA_B(pos_A, pos_B)
                 self.refresh_keys()
             except:
-                pass
- 
+                self.inifineA_B()
 
+ 
     def clearGraph(self):
         y, x = [],[]        
         self.pw1.plot(x, y, pen='w', clear=True)
 
-    def update_data(self, data, side):
-        Marks = [storage(5),storage(5)]
-        self.data = data
-        for i in self.data:
-            if self.data[i][2] == side:
-                if not i in self.marks:
-                    self.marks[i] = Marks
-        self.update_graph(side)
 
     def create_marks(self, idx, subidx, curveName = None, useAct = True):
         if useAct:
@@ -160,7 +179,7 @@ class Graph(QWidget):
                     if val is not None:
                         self.create_marks(i,d,curveName=curve, useAct=False)
 
-    def update_marks(self,side, idx, subidx, btn='A'):
+    def update_marks(self,idx, subidx, btn='A'):
         if btn == 'A':
             lat = self.inf_A.getXPos()
         else:
@@ -168,14 +187,16 @@ class Graph(QWidget):
         curve = self.actCurve
         id_X = self.find_idx(self.data[curve][0][0], lat)
         self.marks[curve][idx].set(subidx, id_X)
-        self.update_graph(side)
-        self.refresh_keys()
+        self.update_graph()
+        #self.refresh_keys()
 
     def activeCurve(self, curve, side):
-        self.actCurve = curve
-        self.update_graph(side)
+        if side == self.side:
+            self.actCurve = curve
+            self.update_graph()
 
-    def move_graph(self, str_ud, curve, side):
+    def move_graph(self, str_ud):
+        curve = self.actCurve
         try:
             y = self.data[curve][6]
             if str_ud == "up":
@@ -183,7 +204,7 @@ class Graph(QWidget):
             if str_ud == "down":
                 y = y - .1
             self.data[curve][6] = y
-            self.update_graph(side)
+            self.update_graph()
         except:
             pass
     
