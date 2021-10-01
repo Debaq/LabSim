@@ -367,7 +367,6 @@ class MainWindow(QWidget, Ui_ABRSim):
         #    self.AB = [[data['lat_A'], data['lat_B']], [data,data]]
         
     def update_markers(self, idx, subidx, side ):
-        print("side: {}, idx:{}, subidx:{}".format(side, idx, subidx))
         if side == 0:
             text = self.memAB[0]
             self.grph_R.update_marks(idx,subidx,text)
