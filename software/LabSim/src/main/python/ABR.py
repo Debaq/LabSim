@@ -197,7 +197,7 @@ class MainWindow(QWidget, Ui_ABRSim):
         try:
             self.store[self.currentCurve[side]][5] = False
             self.updateFlagsCurves()
-            self.updateGraph()
+            self.updateGraph(side)
         except:
             pass
 

@@ -40,7 +40,7 @@ sectors_lbl = {'Camara_sono' : 'Usuario en cámara sonoamortiguada',
                 'none' : 'Usuario en el Box',
                 'ABR': 'Usuario en PEATC'}
 
-Boxs =  {'sala_espera' : [], 'Box_1' : ['A', 'Z'], 'Box_2':['A', 'Z','ABR']}
+Boxs =  {'sala_espera' : [], 'Box_1' : ['A', 'Z'], 'Box_2':['ABR']}
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
