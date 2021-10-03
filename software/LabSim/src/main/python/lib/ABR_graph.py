@@ -4,7 +4,7 @@ import pyqtgraph as pg
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import Qt
-from lib.h_z import storage
+from lib.helpers import Storage
 
 
 class Graph(QWidget):
@@ -28,12 +28,6 @@ class Graph(QWidget):
         ay.setStyle(showValues=False)
         self.actCurve = str()
         self.marks = dict()
-        #self.x = 0
-        #self.y = 0
-        #self.marks = {'I': None, 'II':None, 'III':None, 'IV':None, 'V':None,
-        #              'Ip': None, 'IIp':None, 'IIIp':None, 'IVp':None, 'Vp':None}
-        #self.change_mark = False
-
 
     def find_nearest(self, array_in, value, array_out):
         array = np.asarray(array_in)
@@ -58,17 +52,14 @@ class Graph(QWidget):
         nameA = "A{}".format(self.side)
         nameB = "B{}".format(self.side)
         #Lineas infinitas
-
         self.inf_A = pg.InfiniteLine(pos=pos_A, movable=True, angle=90, pen=pen1, label ="A", labelOpts=opst, name=nameA)
         self.inf_B = pg.InfiniteLine(pos=pos_B, movable=True, angle=90, pen=pen1, label ="B", labelOpts=opst, name=nameB)
-        #self.inf_B.setBounds(0,10)
         #Posición en X de las lineas infinitas
         self.inf_A.sigPositionChanged.connect(self.get_amplitude)
         self.inf_B.sigPositionChanged.connect(self.get_amplitude)
         #Se agregan lineas infinitas a la grafica
         self.pw1.addItem(self.inf_A)
         self.pw1.addItem(self.inf_B)
-
 
     def update_data(self, data, side):
         if self.side == side:
@@ -78,7 +69,7 @@ class Graph(QWidget):
                 if side_in == self.side:
                     mem[i] = data[i]
             self.data = mem
-            Marks = [storage(5),storage(5)]
+            Marks = [Storage(5),Storage(5)]
             for i in self.data:
                 if self.data[i][2] == self.side:
                     if not i in self.marks:
@@ -137,19 +128,16 @@ class Graph(QWidget):
                 self.refresh_keys()
             except:
                 self.inifineA_B()
-
  
     def clearGraph(self):
         y, x = [],[]        
         self.pw1.plot(x, y, pen='w', clear=True)
-
 
     def create_marks(self, idx, subidx, curveName = None, useAct = True):
         if useAct:
             curve = self.actCurve
         else:
             curve = curveName
-
         lbl_marks = [
             ["I","II","III","IV","V", "VI","VII"],
             ["I'","II'","III'","IV'","V'", "VI'", "VII'"]
@@ -163,14 +151,6 @@ class Graph(QWidget):
         text.setPos(lat, amp+0.1)
         self.pw1.addItem(text)
         
-    """
-    def change_keys(self, key=None, value=None):
-        if key is not None and value is not None:
-            self.change_mark = True
-            self.marks[key] =  value
-            self.update_graph()
-    """
-
     def refresh_keys(self):
         for k in self.data:
             curve = k
@@ -188,7 +168,6 @@ class Graph(QWidget):
         id_X = self.find_idx(self.data[curve][0][0], lat)
         self.marks[curve][idx].set(subidx, id_X)
         self.update_graph()
-        #self.refresh_keys()
 
     def activeCurve(self, curve, side):
         if side == self.side:
@@ -211,7 +190,6 @@ class Graph(QWidget):
     def get_amplitude(self):
         x = self.data[self.actCurve][0][0]
         y = self.data[self.actCurve][0][1]
-
         lat_A = self.inf_A.getXPos()
         
         if lat_A > 12:
@@ -220,8 +198,6 @@ class Graph(QWidget):
         if lat_A < 0:
             pos_B = self.inf_B.getXPos()
             self.inifineA_B(pos_A=0, pos_B=pos_B)
-        
-        
         lat_B = self.inf_B.getXPos()
         if lat_B > 12:
             pos_A = self.inf_A.getXPos()
@@ -229,16 +205,11 @@ class Graph(QWidget):
         if lat_B < 0:
             pos_A = self.inf_A.getXPos()
             self.inifineA_B(pos_A=pos_A, pos_B=0)
-
         amp_A = self.find_nearest(x, lat_A, y)
         amp_B = self.find_nearest(x, lat_B, y)
         order_amp = np.sort(np.array([amp_A,amp_B]))
         order_lat = np.sort(np.array([lat_A,lat_B]))
-        
         dif_amp = order_amp[1] - order_amp[0]
         dif_lat = order_lat[1] - order_lat[0]
-        
         response = {"side": self.side, "lat_A": lat_A, "lat_B": lat_B, "amp_AB": dif_amp, "lat_AB": dif_lat}
-        #print(amp_B)
         self.data_info.emit(response)
-        #self.lat_info.emit(self.marks)

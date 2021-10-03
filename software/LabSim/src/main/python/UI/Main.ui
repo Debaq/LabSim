@@ -84,77 +84,126 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="btn_login">
+        <property name="text">
+         <string>login</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QPushButton" name="btn_min">
+          <property name="minimumSize">
+           <size>
+            <width>10</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>20</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>_</string>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_max">
+          <property name="maximumSize">
+           <size>
+            <width>20</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>O</string>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_salir">
+          <property name="maximumSize">
+           <size>
+            <width>20</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>X</string>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
     </item>
     <item>
-     <widget class="QMdiArea" name="mdiArea">
-      <property name="background">
-       <brush brushstyle="SolidPattern">
-        <color alpha="255">
-         <red>136</red>
-         <green>142</green>
-         <blue>147</blue>
-        </color>
-       </brush>
-      </property>
-      <property name="documentMode">
-       <bool>false</bool>
-      </property>
+     <widget class="QWidget" name="widget_Mdi" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QMdiArea" name="mdiArea">
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAsNeeded</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAsNeeded</enum>
+         </property>
+         <property name="sizeAdjustPolicy">
+          <enum>QAbstractScrollArea::AdjustToContents</enum>
+         </property>
+         <property name="background">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>136</red>
+            <green>142</green>
+            <blue>147</blue>
+           </color>
+          </brush>
+         </property>
+         <property name="viewMode">
+          <enum>QMdiArea::SubWindowView</enum>
+         </property>
+         <property name="documentMode">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>933</width>
-     <height>30</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuArchivo">
-    <property name="font">
-     <font>
-      <pointsize>8</pointsize>
-     </font>
-    </property>
-    <property name="title">
-     <string>Archivo</string>
-    </property>
-    <addaction name="actionLogin"/>
-    <addaction name="actionSalir"/>
-   </widget>
-   <widget class="QMenu" name="menuAcerca_de">
-    <property name="title">
-     <string>Acerca de ..</string>
-    </property>
-    <addaction name="separator"/>
-    <addaction name="actionEnviar_un_ticket"/>
-    <addaction name="actionAcerca_de"/>
-   </widget>
-   <widget class="QMenu" name="menuventanas">
-    <property name="title">
-     <string>Vista</string>
-    </property>
-    <widget class="QMenu" name="menuOrganizar">
-     <property name="font">
-      <font>
-       <pointsize>8</pointsize>
-      </font>
-     </property>
-     <property name="title">
-      <string>Organizar</string>
-     </property>
-     <addaction name="actionCascada"/>
-     <addaction name="actionTiles"/>
-     <addaction name="actionCerrar_todas"/>
-    </widget>
-    <addaction name="menuOrganizar"/>
-   </widget>
-   <addaction name="menuArchivo"/>
-   <addaction name="menuventanas"/>
-   <addaction name="menuAcerca_de"/>
   </widget>
   <widget class="QStatusBar" name="statusbar">
    <property name="maximumSize">

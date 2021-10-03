@@ -83,7 +83,6 @@ class ABR_ctrl_curve(QWidget, Ui_ABR_control_curve):
         self.setupUi(self)
 
 
-
 class MainWindow(QWidget, Ui_ABRSim):
     def __init__(self):
         QWidget.__init__(self)
@@ -139,7 +138,6 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.lat_select_R.btn_wave_IVp.clicked.connect(lambda:self.update_markers(1,3,0))
         self.lat_select_R.btn_wave_Vp.clicked.connect(lambda:self.update_markers(1,4,0))
         
-        
         self.lat_select_L.btn_wave_I.clicked.connect(lambda:self.update_markers(0,0,1))
         self.lat_select_L.btn_wave_II.clicked.connect(lambda:self.update_markers(0,1,1))
         self.lat_select_L.btn_wave_III.clicked.connect(lambda:self.update_markers(0,2,1))
@@ -151,7 +149,7 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.lat_select_L.btn_wave_IIIp.clicked.connect(lambda:self.update_markers(1,2,1))
         self.lat_select_L.btn_wave_IVp.clicked.connect(lambda:self.update_markers(1,3,1))
         self.lat_select_L.btn_wave_Vp.clicked.connect(lambda:self.update_markers(1,4,1))
-
+        
         self.lat_select_R.btn_AB.clicked.connect(lambda: self.toogle_AB(0))
         self.lat_select_L.btn_AB.clicked.connect(lambda: self.toogle_AB(1))
         self.memAB = ["A", "A"]
@@ -214,7 +212,6 @@ class MainWindow(QWidget, Ui_ABRSim):
             self.grph_L.activeCurve(objName, 1)
         self.currentCurve[side] = objName
 
-
     def capture(self):
         intencity = self.control.sb_int.value()
         side = self.control.cb_side.currentText()
@@ -248,7 +245,6 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.grph_R.activeCurve(name, side)
         self.grph_L.activeCurve(name, side)
 
-        
     def updateGraph(self,side):
         self.grph_R.update_data(self.store, side)
         self.grph_L.update_data(self.store, side)
@@ -276,7 +272,6 @@ class MainWindow(QWidget, Ui_ABRSim):
 
         self.btnFlags(btns_Right, 0)
         self.btnFlags(btns_Left, 1)
-
 
     def btnFlags(self, btns, side):
         def style(side):
@@ -313,8 +308,6 @@ class MainWindow(QWidget, Ui_ABRSim):
             else:
                 self.ctrl_curve_L.layout_curves.addWidget(btn)
 
-
-
     def numberName(self, name, ltr, tin, gap):
         n = list()
         g = list()
@@ -326,7 +319,6 @@ class MainWindow(QWidget, Ui_ABRSim):
                 n.append(int(num))
             g.append(self.store[i][6])
             db.append(dbi)
-
 
         n.sort()
         g.sort(reverse=True)
@@ -346,7 +338,6 @@ class MainWindow(QWidget, Ui_ABRSim):
         g.sort(reverse=True)
         resultG = g[-1] -0.4
         return resultG
-
 
     def disabledInCapture(self, dis = True):
         self.detail.btn_start.setDisabled(dis)
@@ -375,9 +366,6 @@ class MainWindow(QWidget, Ui_ABRSim):
             self.grph_L.update_marks(idx,subidx,text)
         
         
-
-
-
 def ABR_Curve(nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, VrelI = True, zeros = False):
     
     att = 0

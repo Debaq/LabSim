@@ -37,7 +37,25 @@ class Preferences:
 
     def set(self, pref, var):
         """modifica una configuración"""
+    
+    def getAll(self, p =False):
+        if p == False:
+            return self.data
+        else:
+            print(self.data)
+    
+    def getAllKeys(self):
+        data = list()
+        for i in self.data:
+            data.append(i)
+        return data
 
+    def getStyle(self, wid):
+        stylePred = self.data["styles"][0]
+        style = self.data["styles"][1][stylePred]
+        style = appctxt.get_resource('styles/{}.qss'.format(style))
+        with open(style,"r") as fh:
+            wid.setStyleSheet(fh.read())
 
 # keyboard_shortcuts : [up_dial_izq,down_dial_izq,up_dial_der,down_dial_der],
 
@@ -80,3 +98,72 @@ class Lang:
         for ele in s:
             str1 += ele
         return str1
+
+
+
+class Storage:
+    def __init__(self, n):
+        self.n = n
+        self.data = []
+        self.create(n)
+
+    def length(self, ran= False):
+        if ran == False:
+            return len(self.data)
+        else:
+            return range(len(self.data))
+
+    def create(self,n):
+        for _ in range(n):
+            self.data.append(None)
+    
+    def clean(self):
+        self.data = []
+        self.create(self.n)
+
+    def get(self, idx):
+        return self.data[idx]
+    
+    def set(self, idx, dat):
+        self.data[idx] = dat
+
+    def listSet(self, dat, noRe = True):
+
+        if noRe:
+            if len(dat) == len(self.data):
+                for idx in dat:
+                    self.data[idx] = dat[idx]
+        else:
+            self.n = len(dat)
+            self.clean()
+            for idx in range(len(dat)):
+                self.data[idx] = dat[idx]
+
+    def agrege(self, idx, dat):
+        try:
+            self.data[idx].append(dat)
+        except:
+            self.data[idx] = list()
+            self.data[idx].append(dat)
+
+    def isFull(self, idx):
+        state = True
+        if self.data[idx] == None:
+            state = False
+        return state
+    
+    def isNull(self, idx):
+        return not self.isFull(idx)
+
+    def isEmpty(self):
+        state = False
+        for i in self.data:
+            if i == None:
+                state = True
+        return state
+    
+    def getAll(self, p =False):
+        if p == False:
+            return self.data
+        else:
+            print(self.data)
