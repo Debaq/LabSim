@@ -15,10 +15,9 @@ import time
 
 import requests
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
-from PyQt5.QtCore import Qt, QThread, pyqtSignal
-from PyQt5.QtGui import QFont, QFontDatabase, QGuiApplication
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QPoint
 from PyQt5.QtWidgets import (QMainWindow, QMdiSubWindow, QMessageBox,
-                             QPushButton, QGroupBox, QHBoxLayout)
+                             QPushButton, QGroupBox, QHBoxLayout, QWidget)
 
 import ABR
 import Audiometer
@@ -27,6 +26,7 @@ import login as Ui_login
 import Z
 from lib.helpers import Preferences, Storage
 from UI.Ui_Main import Ui_MainWindow
+from UI.Ui_frameSubMdi import Ui_Form as UI_frameSubMdi
 
 Preferences = Preferences()
 APPS = Preferences.get("APP")
@@ -36,27 +36,53 @@ STYLES = Preferences.get("styles")
 LANGUAJE = Preferences.get("lang")
 
 
+class frameSubMdi(QWidget, UI_frameSubMdi):
+    def __init__(self, UI, name="Test"):
+        super(frameSubMdi, self).__init__()
+        self.setupUi(self)
+        self.ui = UI
+        self.layout_content.addWidget(self.ui)
+        self.clickPosition=QPoint()
+        self.barra.mouseMoveEvent = self.moveWindow
+
+    def moveWindow(self, e):
+          
+        
+            if e.buttons() == Qt.LeftButton:  
+                #Move window 
+
+                x = e.x()
+                y = e.y()
+                i = self.parent()
+                #print("{} , {} , {}, {}".format(x, y, self.clickPosition, i.pos()))
+                #print(e.globalPos()+ self.clickPosition)
+                x = e.windowPos().toPoint().x()
+                y = e.windowPos().toPoint().y()
+                x= int(x)
+                y= int(y)
+                i.move(x-1,y-88)
+                self.clickPosition = e.globalPos()
+                e.accept()
+    
+
+
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__()
         self.setupUi(self)
         self.setWindowFlags(Qt.FramelessWindowHint)
-
-        QFontDatabase.addApplicationFont(appctxt.get_resource('font/OpenSans-Regular.ttf'))
-        font = QFont("OpenSans")
-        font.setPointSize(8)
-        QGuiApplication.setFont(font)
         self.setWindowTitle("LabSim {}".format(__VERSION__))
+        self.lbl_title.setText("LabSim {}".format(__VERSION__))
         self.setMinimumSize(1200, 768)
         #self.actionLogin.triggered.connect(self.activate_login)
         self.btn_salir.clicked.connect(self.close)
         self.btn_min.clicked.connect(self.showMinimized)
-        self.btn_max.clicked.connect(self.showNormal)
+        self.btn_max.clicked.connect(self.toggle_MaxMin)
         self.actionCascada.triggered.connect(self.cascade)
         self.actionTiles.triggered.connect(self.tile)
         self.actionCerrar_todas.triggered.connect(self.closeAll)
         self.mdiArea.documentMode = True
-        
+        self.btn_login.clicked.connect(self.toggle_MaxMin)
         self.var_listWord = Storage(2)
         self.newLogin = False
         self.apps = APPS
@@ -64,10 +90,45 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.sectors_lbl = SECTORS
         self.Modules = Storage(len(self.apps))
         self.prevPatient = str()
-
         self.areas()
         self.activate_login()
         self.showMaximized()
+        self.setMouseTracking(True)
+        self.clickPosition=QPoint()
+        self.barra.mouseMoveEvent = self.moveWindow
+        self.btns_seccion()
+
+    
+    def moveWindow(self, e):
+            move = False
+            if self.isMaximized(): #Not maximized
+                self.toggle_MaxMin()
+                move=True
+            if self.isMaximized() == False: #Not maximized
+                move = True
+            if move:
+                if e.buttons() == Qt.LeftButton:  
+                    #Move window 
+                    x = e.x()
+                    y = e.y()
+                    
+                    print("{} , {} , {}, {}".format(x, y, self.clickPosition, self.pos()))
+
+                    #self.move(self.pos() + e.globalPos() - self.clickPosition)
+                    self.move(e.globalPos())
+                    self.clickPosition = e.globalPos()
+                    e.accept()
+    
+    
+    def btns_seccion(self):
+        btn = QPushButton("Box")
+        #btn.setFlat(True)
+        btn.setMinimumHeight(30)
+        self.horizontalLayout_5.addWidget(btn)
+        btn = QPushButton("Paciente")
+        #btn.setFlat(True)
+        btn.setMinimumHeight(30)
+        self.horizontalLayout_5.addWidget(btn)
 
     def areas(self):
         for i in self.Boxs:
@@ -75,7 +136,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 gbtns = QGroupBox()
                 name = "frame_{}".format(i)
                 gbtns.setObjectName(name)
-                gbtns.setTitle(self.Boxs[i][2])
+                #gbtns.setTitle(self.Boxs[i][2])
                 gbtns.setFlat(False)
                 layout = QHBoxLayout(gbtns)
                 layout.setObjectName(i)
@@ -83,7 +144,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.layoutTest.addWidget(gbtns)
                 self.btns_areas(i, self.Boxs[i][1])
 
-
+    def toggle_MaxMin(self):
+        if self.isMaximized():
+            self.showNormal()
+        else:
+            self.showMaximized()
+        
     def btns_areas(self, area, setBtns):
         for i in setBtns:
             btn = QPushButton('{}'.format(i))
@@ -96,31 +162,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             btn.setDisabled(True)
             btn.setMaximumHeight(25)
             btn.setMaximumWidth(35)
-            font = QFont()
-            font.setPointSize(8)
-            btn.setFont(font)
             parent = self.frameAction.findChild(QHBoxLayout,area)
             parent.addWidget(btn)
-        rec = self.widget_Mdi.frameSize()
-        print(rec)
 
 
-        """
-        for i in self.apps:
-            btn = QPushButton('{}'.format(i))
-            btn.setObjectName(i)
-            btn.clicked.connect(self.activate_soft)
-            tooltip = self.apps[i][1]
-            btn.setToolTip(tooltip)
-            btn.setCheckable(True)
-            self.layoutTest.addWidget(btn)
-            btn.setDisabled(True)
-            btn.setMaximumHeight(25)
-            btn.setMaximumWidth(35)
-            font = QFont()
-            font.setPointSize(8)
-            btn.setFont(font)
-        """
+       
     def activate_soft(self):
         widget = self.sender()
         objName = widget.objectName()
@@ -141,6 +187,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             var.setWindowFlags(Qt.Window |
                                Qt.CustomizeWindowHint |
                                Qt.WindowTitleHint |
+                               Qt.FramelessWindowHint|
                                Qt.WindowCloseButtonHint |
                                Qt.WindowStaysOnTopHint)
         else:
@@ -182,6 +229,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:   
             sub = QMdiSubWindow()
             sub.setWidget(widg)
+            sub.setObjectName("Test")
+            widg.lbl_title.setText(name)
             self.mdiArea.addSubWindow(sub)
             sub.setWindowTitle(name)
             self.flags(sub, flags)
@@ -261,14 +310,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.loginWin.btn_login.setText("Ingresar")
         self.lbl_name.setText("Desconectado")
 
-
+###Activate subwindows
     def activate_login(self):
         name = self.apps["Login"][1]
         pos = self.apps["Login"][2]
         size = self.apps["Login"][4]
-        self.loginWin = Ui_login.MainLogin()
-        self.loginWin.btn_login.clicked.connect(self.login)
+        self.loginWin = frameSubMdi(Ui_login.MainLogin())
+
+        
+        #self.loginWin = Ui_login.MainLogin()
+        self.loginWin.ui.btn_login.clicked.connect(self.login)
         self.createSubWindow(self.loginWin, name, pos, size=size)
+        self.loginWin.move(200, 200)
 
     def activate_a(self):
         name = self.apps["A"][1]

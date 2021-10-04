@@ -1,57 +1,47 @@
-
-QMainWindow{
-	background-color: rgb(24, 26, 31);
-}
-
-QLabel {
-  font-size: 8px;
-}
-
-QHBoxLayout{
-  color: rgb(220, 220, 220);
-	background-color: rgb(24, 26, 31);
-}
-
-QFrame {
-  background-color: #181a1f;
-  color: rgb(220, 220, 220);
-}
-
-QGroupBox{
-  color: rgb(220, 220, 220);
+QFrame#barra{
+  background-color: #5d1049;
+  color : #fff;
 
 
 }
 
-
-QGroupBox#frame_Box_1  QPushButton {
-  color: #da7b93;
-  background-color: #da7b93;
+QFrame#barra QLabel{
+  color : #fff;
 
 }
 
-QFrame {
-  background-color: #181a1f;
-  color: rgb(220, 220, 220);
+QGroupBox#frame_Box_1 QPushButton{
+  color : white;
+  background-color: rgb(255, 0, 0);
+
 }
 
-QProgressBar {
-  background-color: #da7b93;
-  color: rgb(200, 200, 200);
-  border-style: none;
-  border-radius: 10px;
-  text-align: center;
-  font-size: 8px;
+QFrame#frame_sec QPushButton{
+  height: 20px;
+  padding-top: 1px;
+  padding-bottom: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-radius: 3px; 
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgb(255, 255, 255);
+  color: rgb(255, 255, 255);
+  border-bottom-style: none;
 }
 
-QProgressBar::chunk {
-  border-radius: 10px;
-  background-color: qlineargradient(
-    spread: pad x1: 0,
-    x2: 1,
-    y1: 0.511364,
-    y2: 0.523,
-    stop: 0 #1c3334,
-    stop: 1 #376e6f
-  );
+
+QFrame#frame_sec QPushButton:hover {
+  color: #0e72ed;
+  background-color: rgb(155, 90, 90);
+
+
 }
+
+QWidget QMdiArea{
+  background-color: rgb(128,128,30);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+

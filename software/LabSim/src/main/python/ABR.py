@@ -16,7 +16,7 @@ import numpy as np
 import requests
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QMainWindow, QPushButton, QWidget
+from PyQt5.QtWidgets import QPushButton, QWidget
 from PyQt5.QtGui import QFont
 
 import lib.bezier_prop as bz

@@ -1,6 +1,6 @@
 {
   "APP": {
-    "Login": [true, "Ingreso", 0, [true, true], [410, 140],"pre"],
+    "Login": [true, "Ingreso", 0, [true, true], [410, 200],"pre"],
     "A": [false, "Audiómetro", 1, [true, true], [740, 560],"pre"],
     "W": [false, "Lista de Palabras", 2, [true, true], [270, 600],"pre"],
     "Z": [false, "Impedanciómetro", 3, [true, true], [740, 560],"pre"],

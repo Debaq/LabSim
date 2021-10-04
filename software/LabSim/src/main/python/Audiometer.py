@@ -16,7 +16,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QTimer, pyqtSignal
 from PyQt5.QtGui import QFont, QKeySequence
 from PyQt5.QtMultimedia import QMediaPlayer
-from PyQt5.QtWidgets import QApplication, QDesktopWidget, QShortcut, QWidget
+from PyQt5.QtWidgets import  QShortcut, QWidget
 
 #from lib.API_connector import API, PostData
 from lib.h_audio import (calibrate, create_frecuency, create_intency,
@@ -69,15 +69,15 @@ class Audiometer(QWidget, Ui_Audiometer):
 
         self.setupUi(self)
 
-        qtRectangle = self.frameGeometry()
-        centerPoint = QDesktopWidget().availableGeometry().center()
-        qtRectangle.moveCenter(centerPoint)
-        self.move(qtRectangle.topLeft())
+        #qtRectangle = self.frameGeometry()
+        #centerPoint = QDesktopWidget().availableGeometry().center()
+        #qtRectangle.moveCenter(centerPoint)
+        #self.move(qtRectangle.topLeft())
 
-        self.setMaximumHeight(500)
-        self.setMinimumHeight(500)
-        self.setMinimumWidth(740)
-        self.setMaximumWidth(740)
+        #self.setMaximumHeight(500)
+        #self.setMinimumHeight(500)
+        #self.setMinimumWidth(740)
+        #self.setMaximumWidth(740)
         
         self.frecuency_list = create_frecuency(
                 frecuency_dict, prueba="Umbrales")
