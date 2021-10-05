@@ -5,6 +5,37 @@ QFrame#barra{
 
 }
 
+QFrame#barra QPushButton#btn_login{
+  font: 7pt "Noto Sans";
+  height: 18px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 2px;
+  padding-right: 2px;
+  border-radius: 3px; 
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgb(255, 255, 255);
+  color: rgb(255, 255, 255);
+}
+
+
+QFrame#barra QPushButton#btn_login:hover{
+  font: 7pt "Noto Sans";
+  height: 18px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 2px;
+  padding-right: 2px;
+  border-radius: 3px; 
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgb(255, 255, 255);
+  color: rgb(255, 255, 255);
+  background-color: #a32529;
+
+}
+
 QFrame#barra QLabel{
   color : #fff;
 
@@ -20,8 +51,8 @@ QFrame#frame_sec QPushButton{
   height: 20px;
   padding-top: 1px;
   padding-bottom: 10px;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
   border-radius: 3px; 
   border-width: 1px;
   border-style: solid;
@@ -32,16 +63,14 @@ QFrame#frame_sec QPushButton{
 
 
 QFrame#frame_sec QPushButton:hover {
-  color: #0e72ed;
-  background-color: rgb(155, 90, 90);
-
+  
+  background-color: #821057;
+  font: Bold 9pt "Noto Sans";
 
 }
 
-QWidget QMdiArea{
-  background-color: rgb(128,128,30);
-  color: white;
-  font-size: 12px;
-  font-weight: bold;
-}
+QFrame#frame_sec QPushButton:checked {
+  
+  background-color: #821057;
 
+}
