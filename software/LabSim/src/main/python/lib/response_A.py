@@ -1,5 +1,5 @@
 from PyQt5.Qt import pyqtSignal
-
+from lib.logoaudiometry import CalculateLogo
 
 
 

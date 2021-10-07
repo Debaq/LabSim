@@ -1,5 +1,8 @@
 *.pyc
 software/LabSim/target/
 **/__pycache__/
+**/__pycache__/*
 .vscode/
 .idea/
+.vscode/*
+.idea/*
