@@ -2,7 +2,7 @@
   "APP": {
     "Login": [true, "Ingreso", 0, [true, true], [410, 140],"pre"],
     "A": [false, "Audiómetro", 1, [true, true], [740, 560],"pre"],
-    "W": [false, "Lista de Palabras", 2, [true, true], [270, 600],"pre"],
+    "W": [false, "Lista de Palabras", 2, [true, true], [170, 500],"pre"],
     "Z": [false, "Impedanciómetro", 3, [true, true], [740, 560],"pre"],
     "ABR": [false,"Potencial evocado auditivo de tronco cerebral",4,[false, true],[1000, 600], "pre"],
     "VEMP": [false, "Potenciales evocados vestibulares miogénicos", 5,[false, true],[1000, 600], "development"],
@@ -10,7 +10,11 @@
     "EOAc": [false, "Emisor Otoacústico Clínico", 7,[false, true],[1000, 600], "development"],
     "VNG": [false, "Videonistagmografía", 8,[false, true],[1000, 600], "development"],
     "vHit": [false, "Video Head Impulse Test", 9,[false, true],[1000, 600], "development"],
-    "POS": [false, "Posturografía", 10, [false, true],[1000, 600], "development"]
+    "POS": [false, "Posturografía", 10, [false, true],[1000, 600], "development"],
+    "cVoice": [false, "Comandos de Voz", 11, [true, true], [420, 200],"pre"]
+
+    
+
   },
   "SECTORS": {
     "Camara_sono": "Usuario en cámara sonoamortiguada",
@@ -21,8 +25,8 @@
   },
   "BOXS": {
     "sala_espera": [false,[], "Sala de Espera"],
-    "Box_1": [true,["A", "Z"], "Box Audiología"],
-    "Box_2": [true,["A", "Z","ABR", "VEMP", "EOAc"], "Box Electrofisiología"],
+    "Box_1": [true,["A", "Z", "ABR"], "Box Audiología"],
+    "Box_2": [true,["ABR", "VEMP", "EOAc"], "Box Electrofisiología"],
     "Box_3": [true,["VNG", "vHit", "POS"], "Box Otoneurología"]
   }
 }

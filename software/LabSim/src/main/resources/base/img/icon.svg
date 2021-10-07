@@ -2,13 +2,16 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="210mm"
-   height="297mm"
-   viewBox="0 0 210 297"
+   width="73mm"
+   height="73mm"
+   viewBox="0 0 73 73"
    version="1.1"
    id="svg5"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
    sodipodi:docname="icon.svg"
+   inkscape:export-filename="/home/nick/Escritorio/Proyectos/LabSim/software/LabSim/src/main/resources/base/img/icon.png"
+   inkscape:export-xdpi="34.93"
+   inkscape:export-ydpi="34.93"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -23,9 +26,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="2.0686841"
-     inkscape:cx="345.14695"
-     inkscape:cy="427.32479"
+     inkscape:zoom="0.36569514"
+     inkscape:cx="412.91224"
+     inkscape:cy="533.23104"
      inkscape:window-width="1920"
      inkscape:window-height="1007"
      inkscape:window-x="0"
@@ -38,28 +41,32 @@
      inkscape:label="Capa 1"
      inkscape:groupmode="layer"
      id="layer1">
-    <circle
-       style="fill:#5d1049;stroke:none;stroke-width:0.264583;fill-opacity:1"
-       id="path3794"
-       cx="78.659119"
-       cy="106.52221"
-       r="36.362793"
-       inkscape:export-filename="/home/nick/Escritorio/Proyectos/LabSim/software/LabSim/src/main/resources/base/img/Logo.png"
-       inkscape:export-xdpi="300"
-       inkscape:export-ydpi="300" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:19.3646px;line-height:1.25;font-family:sans-serif;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.484115"
-       x="42.999359"
-       y="113.25129"
-       id="text2234"
-       inkscape:export-filename="/home/nick/Escritorio/Proyectos/LabSim/software/LabSim/src/main/resources/base/img/Logo.png"
-       inkscape:export-xdpi="300"
-       inkscape:export-ydpi="300"><tspan
-         sodipodi:role="line"
-         id="tspan2232"
-         style="stroke-width:0.484115;fill:#ffffff;fill-opacity:1"
+    <g
+       id="g912"
+       transform="matrix(1.0037733,0,0,1.0037733,-42.455923,-70.424149)">
+      <circle
+         style="fill:#5d1049;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         id="path3794"
+         cx="78.659119"
+         cy="106.52221"
+         inkscape:export-filename="/home/nick/Escritorio/Proyectos/LabSim/software/LabSim/src/main/resources/base/img/Logo.png"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300"
+         r="36.362793" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:19.3646px;line-height:1.25;font-family:sans-serif;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.484115"
          x="42.999359"
-         y="113.25129">LabSim</tspan></text>
+         y="113.25129"
+         id="text2234"
+         inkscape:export-filename="/home/nick/Escritorio/Proyectos/LabSim/software/LabSim/src/main/resources/base/img/Logo.png"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300"><tspan
+           sodipodi:role="line"
+           id="tspan2232"
+           style="fill:#ffffff;fill-opacity:1;stroke-width:0.484115"
+           x="42.999359"
+           y="113.25129">LabSim</tspan></text>
+    </g>
   </g>
 </svg>

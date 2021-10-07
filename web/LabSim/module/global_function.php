@@ -39,6 +39,20 @@ function request_datav2($code, $conn, $from, $single = false){
     return $result;
 }
 
+
+function request_datav3($subject, $conn, $from, $predicate = '', $single = false){
+    $consult =  "SELECT $predicate FROM $from WHERE Code = '$subject'";
+    $request = mysqli_query($conn, $consult);
+    $row = mysqli_fetch_assoc($request);
+    if($single != false){
+        $result = $row[$single];
+    }else{
+        $result = $row;
+    }
+    return $result;
+}
+
+
 function generateRandomString($n, $from, $code, $conn) {
     $result = generate($n);
     $result = $code.'-'.$result;

@@ -29,13 +29,13 @@ if(!isset($_SESSION['page_prev'])){
 
 define('VERSION', '0.1.3');
 define('APP_TITLE', 'LabSim');
-define('APP_ICON', 'https://tmeduca.cl/AudioSim/lib/icon.svg');
+define('APP_ICON', 'https://tmeduca.cl/LabSim/dist/img/base/icon.svg');
 define('CONSUMER', 'UACH');
 define('WEB', 'http://www.tmeduca.cl');
 define('CFG_SIDEBAR', 'sidebar.json');
 define('CFG_NAVBAR', 'navbar.json');
 define('TEMPLATES', 'pages/');
-define('VERSION_SW', '0.8.2');
+define('VERSION_SW', '0.8.4');
 define('ROOT', __DIR__ . '/');
 
 

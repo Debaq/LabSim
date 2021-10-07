@@ -6,18 +6,38 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>265</width>
-    <height>646</height>
+    <width>194</width>
+    <height>495</height>
    </rect>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>8</pointsize>
+   </font>
   </property>
   <property name="windowTitle">
    <string>Lista de Palabras</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <property name="tabBarAutoHide">
       <bool>false</bool>
@@ -27,6 +47,21 @@
        <string>Disilabos (Palacios)</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="QToolBox" name="toolBox">
          <property name="currentIndex">
@@ -37,8 +72,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>233</width>
-            <height>513</height>
+            <width>186</width>
+            <height>396</height>
            </rect>
           </property>
           <attribute name="label">
@@ -48,10 +83,16 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_4">
              <property name="spacing">
-              <number>2</number>
+              <number>1</number>
              </property>
              <item>
               <widget class="QPushButton" name="btn_l1">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Verde</string>
                </property>
@@ -59,6 +100,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l2">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Aire</string>
                </property>
@@ -66,6 +113,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l3">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Joya</string>
                </property>
@@ -73,6 +126,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l4">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Queso</string>
                </property>
@@ -80,6 +139,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l5">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Bronce</string>
                </property>
@@ -87,6 +152,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l6">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Campo</string>
                </property>
@@ -94,6 +165,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l7">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Lana</string>
                </property>
@@ -101,6 +178,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l8">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Dedo</string>
                </property>
@@ -108,6 +191,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l9">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Chispa</string>
                </property>
@@ -115,6 +204,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l10">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Lentes</string>
                </property>
@@ -122,6 +217,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l11">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Hilo</string>
                </property>
@@ -129,6 +230,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l12">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Cuentas</string>
                </property>
@@ -136,6 +243,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l13">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Gente</string>
                </property>
@@ -146,7 +259,7 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_5">
              <property name="spacing">
-              <number>2</number>
+              <number>1</number>
              </property>
              <item>
               <widget class="QLabel" name="lbl_list1">
@@ -163,6 +276,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l14">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Mango</string>
                </property>
@@ -170,6 +289,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l15">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Nadie</string>
                </property>
@@ -177,6 +302,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l16">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Pila</string>
                </property>
@@ -184,6 +315,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l17">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Resta</string>
                </property>
@@ -191,6 +328,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l18">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Fibra</string>
                </property>
@@ -198,6 +341,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l19">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Sueldo</string>
                </property>
@@ -205,6 +354,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l20">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Doce</string>
                </property>
@@ -212,6 +367,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l21">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Serio</string>
                </property>
@@ -219,6 +380,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l22">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Nunca</string>
                </property>
@@ -226,6 +393,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l23">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Lima</string>
                </property>
@@ -233,6 +406,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l24">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Susto</string>
                </property>
@@ -240,6 +419,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_l25">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Extra</string>
                </property>
@@ -254,8 +439,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>233</width>
-            <height>513</height>
+            <width>186</width>
+            <height>396</height>
            </rect>
           </property>
           <attribute name="label">
@@ -265,10 +450,16 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_7">
              <property name="spacing">
-              <number>2</number>
+              <number>1</number>
              </property>
              <item>
               <widget class="QPushButton" name="btn_f1">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Leña</string>
                </property>
@@ -276,6 +467,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f2">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Parque</string>
                </property>
@@ -283,6 +480,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f3">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Grano</string>
                </property>
@@ -290,6 +493,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f4">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Leyes</string>
                </property>
@@ -297,6 +506,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f5">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Balde</string>
                </property>
@@ -304,6 +519,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f6">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Rueda</string>
                </property>
@@ -311,6 +532,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f7">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Cinco</string>
                </property>
@@ -318,6 +545,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f8">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Viaje</string>
                </property>
@@ -325,6 +558,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f9">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Falda</string>
                </property>
@@ -332,6 +571,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f10">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Dientes</string>
                </property>
@@ -339,6 +584,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f11">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Micro</string>
                </property>
@@ -346,6 +597,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f12">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Chicle</string>
                </property>
@@ -353,6 +610,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f13">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Mundo</string>
                </property>
@@ -363,7 +626,7 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_6">
              <property name="spacing">
-              <number>2</number>
+              <number>1</number>
              </property>
              <item>
               <widget class="QLabel" name="lbl_list2">
@@ -380,6 +643,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f14">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Once</string>
                </property>
@@ -387,6 +656,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f15">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Piso</string>
                </property>
@@ -394,6 +669,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f16">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Risa</string>
                </property>
@@ -401,6 +682,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f17">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Meses</string>
                </property>
@@ -408,6 +695,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f18">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Santo</string>
                </property>
@@ -415,6 +708,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f19">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Trueno</string>
                </property>
@@ -422,6 +721,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f20">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Pasto</string>
                </property>
@@ -429,6 +734,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f21">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Alga</string>
                </property>
@@ -436,6 +747,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f22">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Suerte</string>
                </property>
@@ -443,6 +760,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f23">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Tía</string>
                </property>
@@ -450,6 +773,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f24">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Bono</string>
                </property>
@@ -457,6 +786,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_f25">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Rienda</string>
                </property>
@@ -475,6 +810,21 @@
        <string>Terminos Conocidos</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="QToolBox" name="toolBox_2">
          <property name="currentIndex">
@@ -485,8 +835,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>233</width>
-            <height>513</height>
+            <width>186</width>
+            <height>396</height>
            </rect>
           </property>
           <attribute name="label">
@@ -496,10 +846,16 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_11">
              <property name="spacing">
-              <number>2</number>
+              <number>1</number>
              </property>
              <item>
               <widget class="QPushButton" name="btn_g1">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Barco</string>
                </property>
@@ -507,6 +863,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g2">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Libro</string>
                </property>
@@ -514,6 +876,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g3">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Brazo</string>
                </property>
@@ -521,6 +889,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g4">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Pescado</string>
                </property>
@@ -528,6 +902,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g5">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Puerta</string>
                </property>
@@ -535,6 +915,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g6">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Pelota</string>
                </property>
@@ -542,6 +928,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g7">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Amigo</string>
                </property>
@@ -549,6 +941,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g8">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Automóvil</string>
                </property>
@@ -556,6 +954,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g9">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Palo</string>
                </property>
@@ -563,6 +967,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g10">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Mamadera</string>
                </property>
@@ -570,6 +980,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g11">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Silla</string>
                </property>
@@ -577,6 +993,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g12">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Plato</string>
                </property>
@@ -584,6 +1006,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g13">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Taza</string>
                </property>
@@ -594,7 +1022,7 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_10">
              <property name="spacing">
-              <number>2</number>
+              <number>1</number>
              </property>
              <item>
               <widget class="QLabel" name="lbl_list3">
@@ -611,6 +1039,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g14">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Ventana</string>
                </property>
@@ -618,6 +1052,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g15">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Avión</string>
                </property>
@@ -625,6 +1065,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g16">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Escuela</string>
                </property>
@@ -632,6 +1078,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g17">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Perro</string>
                </property>
@@ -639,6 +1091,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g18">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Guagua</string>
                </property>
@@ -646,6 +1104,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g19">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Hospital</string>
                </property>
@@ -653,6 +1117,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g20">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Mesa</string>
                </property>
@@ -660,6 +1130,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g21">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Hermano</string>
                </property>
@@ -667,6 +1143,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g22">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Cielo</string>
                </property>
@@ -674,6 +1156,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g23">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Estufa</string>
                </property>
@@ -681,6 +1169,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g24">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>León</string>
                </property>
@@ -688,6 +1182,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_g25">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Luna</string>
                </property>
@@ -702,8 +1202,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>233</width>
-            <height>513</height>
+            <width>186</width>
+            <height>396</height>
            </rect>
           </property>
           <attribute name="label">
@@ -717,6 +1217,12 @@
              </property>
              <item>
               <widget class="QPushButton" name="btn_h1">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Sol</string>
                </property>
@@ -724,6 +1230,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h2">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Montaña</string>
                </property>
@@ -731,6 +1243,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h3">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Cortina</string>
                </property>
@@ -738,6 +1256,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h4">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Moto</string>
                </property>
@@ -745,6 +1269,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h5">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Loza</string>
                </property>
@@ -752,6 +1282,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h6">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Cuaderno</string>
                </property>
@@ -759,6 +1295,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h7">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Flor</string>
                </property>
@@ -766,6 +1308,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h8">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Reloj</string>
                </property>
@@ -773,6 +1321,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h9">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Tren</string>
                </property>
@@ -780,6 +1334,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h10">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Leche</string>
                </property>
@@ -787,6 +1347,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h11">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Cuchara</string>
                </property>
@@ -794,6 +1360,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h12">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Tierra</string>
                </property>
@@ -801,6 +1373,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h13">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Anillo</string>
                </property>
@@ -828,6 +1406,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h14">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Payaso</string>
                </property>
@@ -835,6 +1419,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h15">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Hoja</string>
                </property>
@@ -842,6 +1432,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h16">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Compañero</string>
                </property>
@@ -849,6 +1445,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h17">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Delantal</string>
                </property>
@@ -856,6 +1458,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h18">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Cama</string>
                </property>
@@ -863,6 +1471,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h19">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Pan</string>
                </property>
@@ -870,6 +1484,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h20">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Árbol</string>
                </property>
@@ -877,6 +1497,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h21">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Bandera</string>
                </property>
@@ -884,6 +1510,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h22">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Colegio</string>
                </property>
@@ -891,6 +1523,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h23">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Mantel</string>
                </property>
@@ -898,6 +1536,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h24">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Televisión</string>
                </property>
@@ -905,6 +1549,12 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_h25">
+               <property name="maximumSize">
+                <size>
+                 <width>55</width>
+                 <height>25</height>
+                </size>
+               </property>
                <property name="text">
                 <string>Camión</string>
                </property>
