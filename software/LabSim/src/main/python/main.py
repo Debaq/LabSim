@@ -354,7 +354,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         button_login = self.loginWin.ui.btn_login.text()
         name = self.loginWin.ui.Le_name.text()
         passw = self.loginWin.ui.Le_passw.text()
-        print("{} : {} -- {}".format(name,passw, button_login))
+        #print("{} : {} -- {}".format(name,passw, button_login))
         if button_login == "Salir":
             self.logout()
         else:
@@ -466,6 +466,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.activate_listWords()
         self.W.ui.playable[1] = state[2]
         self.W.ui.playable[2] = state[3]
+        self.W.ui.playable[3] = state[4]
         if state[1]:
             self.W.ui.playable[0] = True
         else:
@@ -475,7 +476,6 @@ def request_API(data):
     URL = "https://tmeduca.cl/LabSim/module/API_v2.php"
     response = requests.post(URL, data=data)
     return response.text
-
 
 class ReadThread(QThread):
     name = ""

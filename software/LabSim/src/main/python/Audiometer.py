@@ -20,10 +20,10 @@ from PyQt5.QtWidgets import QShortcut, QWidget
 
 #from lib.API_connector import API, PostData
 from lib.h_audio import (calibrate, create_frecuency, create_intency,
-                         create_sound, random_response, create_voice, data_basic, create_word)
+                         create_sound, random_response, create_voice, data_basic, create_word, minMax)
 from lib.helpers import Preferences
 from UI.Ui_Audiometer import *
-
+from lib.response_A import Response as Rsp
 import random
 
 #import sounddevice as sd
@@ -67,7 +67,7 @@ _THR_ = [
 
 def print_sound(indata, outdata, frames, time, status):
     volume_norm = np.linalg.norm(indata)*10
-    print(int(volume_norm))
+    #print(int(volume_norm))
 
 
 class Audiometer(QWidget, Ui_Audiometer):
@@ -77,30 +77,14 @@ class Audiometer(QWidget, Ui_Audiometer):
         # Inicialización de la ventana y propiedades
         QWidget.__init__(self, *args, **kwargs)
         self.thr = []
+        self.Rsp = Rsp()
         self.laSuper(thr)
-        #self.name_user = args[0].text()
-
-        #request = API(URL)
-
-        ##self.sendData = PostData(session, self.name_user, request)
-
         self.setupUi(self)
-
-        #qtRectangle = self.frameGeometry()
-        #centerPoint = QDesktopWidget().availableGeometry().center()
-        # qtRectangle.moveCenter(centerPoint)
-        # self.move(qtRectangle.topLeft())
-
-        # self.setMaximumHeight(500)
-        # self.setMinimumHeight(500)
-        # self.setMinimumWidth(740)
-        # self.setMaximumWidth(740)
-
         self.frecuency_list = create_frecuency(
             frecuency_dict, prueba="Umbrales")
-
         self.random_response = [0, 0]
-        self.datasignal_speech = [False, False, None, None]
+        #activado, reverse, intensidad, side, contrankg
+        self.datasignal_speech = [False, False, None, None, False]
 
         # Widgets
         # Diales
@@ -273,20 +257,17 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.btn_stim_sn_der.setDisabled(True)
         self.btn_stim_fm_izq.setDisabled(True)
         self.btn_stim_speech_izq.setDisabled(True)
-        self.btn_stim_tone_izq.setDisabled(True)
+        #self.btn_stim_tone_izq.setDisabled(True)
 
         self.dial_talkback.valueChanged.connect(self.talkback_level)
         self.talkback_volume = 5
 
-        #self.btn_talkback.pressed.connect(lambda: self.mic_activate(True))
-        #self.btn_talkback.released.connect(lambda: self.mic_activate(False))
         self.btn_talkback.clicked.connect(self.talkback)
-        self.activate_response = [0,0]
-        #self.time_loop_mic = QTimer(self)
-        # self.time_loop_mic.timeout.connect(self.mic)
+        self.activate_response = [0, 0]
+        self.trans_idx = [0,0]
 
     def laSuper(self, data):
-        print(data)
+        self.Rsp.set_response(data)
         if data["sector"] == "Camara_sono":
             thr = data
         else:
@@ -313,7 +294,8 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.thr = [result, result1]
 
     def supra(self, state):
-        print(state)
+        self.Rsp.set_command(state)
+        self.Rsp.transmit_(talk = False)
         if state != "silencio":
             command = "{}.ogg".format(state)
             comandvoice = create_word(command)
@@ -322,7 +304,6 @@ class Audiometer(QWidget, Ui_Audiometer):
             self.stateSupra = [None, None]
 
     def commandAction(self, command):
-        print(command)
         if command != None:
             if command == "colocar_fonos":
                 self.activate_response = [1, 0]
@@ -333,6 +314,7 @@ class Audiometer(QWidget, Ui_Audiometer):
             self.channels[1].stop()
             self.channels[0].setMedia(self.stateSupra[0])
             self.channels[0].play()
+            self.Rsp.transmit_(talk = True)
         self.commandAction(self.stateSupra[1])
 
     def talkback_level(self):
@@ -348,89 +330,20 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.vuMeters[1].setValue(int(volume_norm))
 
     def vu_meters_colors(self, level):
-
-        HIGH = """
-            QProgressBar::chunk {
-                background-color: #ff557f;
-            }
-                """
-
-        MED = """
-            QProgressBar::chunk {
-                background-color: #ffff7f;
-            }
-                """
-
-        LOW = """
-            QProgressBar::chunk {
-                background-color: #55ff7f;
-            }
-                """
-
+        colors = ["#ff557f", "#ffff7f", "#55ff7f"]
         if level <= 50:
-            return LOW
+            color = colors[2]
         if level > 50 and level < 75:
-            return MED
+            color = colors[1]
         if level >= 75:
-            return HIGH
-
-    def mic(self):
-        pass
-        # with sd.Stream(callback=self.vu_meters_mic):
-        #    sd.sleep(5)
-
-    def mic_activate(self, activate):
-        if activate:
-            self.time_loop_mic.start(10)
-        else:
-            self.time_loop_mic.stop()
-            self.vuMeters[0].setValue(0)
-            self.vuMeters[1].setValue(0)
-
-    def minMax(self, trans, thr, type_mkg, curve_z):
-        UOne = thr[2]
-        UAOne = thr[3]
-        UA = thr[1]
-        frecuency = thr[0]
-        F_WN = 15
-        F_NBN = 0
-        EOCL = [0, 15, 15, 10, 0, 0, 0, 0, 0]
-        AI_A = [35, 40, 40, 40, 45, 45, 50, 50, 50]
-        if type_mkg == "Narrow Band Noise":
-            RB = F_NBN
-        else:
-            RB = F_WN
-
-        if curve_z == 'A':
-            eoclu = EOCL[frecuency]
-        else:
-            eoclu = 0
-
-        if trans == 0:
-            AI = AI_A[trans]
-        else:
-            AI = 0
-
-        AIa = AI_A[trans]
-
-        Amin = UA - AI - UOne + UAOne + RB
-        Amax = AIa+UOne
-        Omin = UA - AI - UOne + UAOne + RB + eoclu
-        if trans == 0:
-            result = (Amax - Amin)/2
-            result = int(result/5)
-            result = result*5
-            result = Amin + result
-
-        else:
-            result = (Amax-Omin)/2
-            result = int(result/5)
-            result = result*5
-            result = Amin + result
-
-        return result
+            color = colors[0]
+        style = """
+        QProgressBar::chunk {}
+        background-color: {};
+        {}""".format("{", color, "}")
 
     # response
+
     def response(self, activate=True, time=3):
 
         # threshold
@@ -440,7 +353,6 @@ class Audiometer(QWidget, Ui_Audiometer):
             thr = self.thr
         else:
             thr = _THR_
-        print(thr)
 
         def test_response(thr, freq, ch, lvl, output, trans):
 
@@ -461,13 +373,13 @@ class Audiometer(QWidget, Ui_Audiometer):
 
             curve_z = self.curve_z[ouput_contra]
             name_mkg = self.lbl_stim_ch1.text()
-            test_minMax = self.minMax(
+            test_minMax = minMax(
                 trans_index, listforMinMax, curve_z, name_mkg)
 
             if self.lbl_stim_ch1.text() == "Narrow Band Noise" and self.lbl_rev_ch1.text() == "Invertido":
-                print("{}>{}".format(test_minMax, lvl[ouput_contra]))
+                #print("{}>{}".format(test_minMax, lvl[ouput_contra]))
 
-                if test_minMax <= lvl[ouput_contra]:
+                if test_minMax[0] <= lvl[ouput_contra]:
                     select_thr = 1
                 else:
                     select_thr = 0
@@ -574,28 +486,27 @@ class Audiometer(QWidget, Ui_Audiometer):
     # Reproducir Sonidos
 
     def Helper_Stim(self, ch, play=True, btnrev=False):
-        """[helper para verificar el estado de la prueba que no sea una logo]
-
-        Args:
-            t ([int]): [invertido]
-            ch ([int]): [canal 0-1]
-            play (bool, optional): [inicia reproduccion o la detiene]. Defaults to True.
-        """
         no_Logo = self.no_Logo(ch)
-        no_reverse = self.no_Rev(ch)
-        no_alternate = True if self.lbl_contin[0].text(
-        ) != tone_list[2] else False
+        #no_reverse = self.no_Rev(ch)
+        no_alternate = True if self.lbl_contin[0].text() != tone_list[2] else False
 
         if btnrev == False:
             if no_Logo and no_alternate:
                 if play:
                     self.puls_active[ch] = True
                     self.play(ch)
-                    self.response(activate=True)
+                    #self.response(activate=True)
                 else:
                     self.puls_active[ch] = False
                     self.stop(ch)
-                    self.response(activate=False)
+                    #self.response(activate=False)
+            elif no_alternate:
+                if play:
+                    self.play_papa(ch)
+
+                else:
+                    self.stop(ch)
+                    
 
         else:
             if no_alternate:
@@ -614,43 +525,27 @@ class Audiometer(QWidget, Ui_Audiometer):
                     self.alternate_active["active"] = False
 
     def no_Rev(self, ch):
-
         label = self.lbl_revers[ch].text()
-
         if label == reverse_list[1]:
             result = False
         else:
             result = True
-
         return result
 
     def no_Logo(self, ch):
-        """[Verifica que no es una logo y devuelve un boleano]
-
-        Args:
-            ch ([int]): [canal 0-1]
-
-        Returns:
-            [bool]: [True es una logo, False no lo es]
-        """
-
         label = self.lbl_stim[ch].text()
-
         if label == stim_list[2]:
             result = False
         else:
             result = True
-
         return result
 
     def no_puls(self, ch):
         label = self.lbl_contin[ch].text()
-
         if label == tone_list[1]:
             result = False
         else:
             result = True
-
         return result
 
     def update_logo(self, val):
@@ -661,7 +556,6 @@ class Audiometer(QWidget, Ui_Audiometer):
             side = 1
         self.datasignal_speech[2] = val
         self.datasignal_speech[3] = side
-
         self.signal_speech.emit(self.datasignal_speech)
 
     def reverse(self, ch):
@@ -716,12 +610,39 @@ class Audiometer(QWidget, Ui_Audiometer):
                 self.lbl_warnings[ch].setStyleSheet(
                     "background-color: rgb(170, 170, 255);  color : rgb(170, 170, 255);")
                 self.lbl_warnings[ch].setText("toc-toc")
+                #print(self.lbl_revers[1].text(), self.lbl_stim[1].text())
+                if self.lbl_revers[1].text() == "Invertido" and self.lbl_stim[1].text() == "Speech Noise":
+                    self.datasignal_speech[4] = True
+                    self.signal_speech.emit(self.datasignal_speech)
+
+                else:
+                    self.datasignal_speech[4] = False
+                    self.signal_speech.emit(self.datasignal_speech)
+
+
             else:
                 self.datasignal_speech[1] = False
                 self.signal_speech.emit(self.datasignal_speech)
                 self.lbl_warnings[ch].setStyleSheet(
                     "background-color: rgb(255, 255, 255);")
                 self.lbl_warnings[ch].setText("")
+
+    def play_papa(self,ch):
+        if self.stateSupra[1] == "pa_pa_pa":
+            lbl_out_1 = self.lbl_output[ch].text()
+            if lbl_out_1 == "Derecha":
+                lbl_out = "OD"
+            if lbl_out_1 == "Izquierda":
+                lbl_out = "OI"
+            if lbl_out_1 == "Simultáneo":
+                lbl_out = "sim"
+            self.vuMeters[ch].setValue(50)
+            self.lbl_warnings[ch].setStyleSheet("background-color: rgb(170, 170, 255);")
+            self.channels[ch].setMedia(self.stateSupra[0])
+            self.channels[ch].play()
+            self.channel_on[ch] = True
+            self.post_channel_on()
+
 
     def play(self, ch):
         lbl_out_1 = self.lbl_output[ch].text()
@@ -755,10 +676,9 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.post_channel_on()
 
     def post_channel_on(self):
-        data = {
-            "stim_on_ch0": self.channel_on[0], "stim_on_ch1": self.channel_on[1]}
-        #online = self.btn_online.isChecked()
-        ##self.sendData.send(data, online)
+        self.Rsp.transmit_(stimOn = self.channel_on)
+        self.Rsp.activate()
+
 
     # PRUEBAS
 
@@ -775,8 +695,8 @@ class Audiometer(QWidget, Ui_Audiometer):
 
             self.lbl_stim[0].setText(stim_list[0])
             self.lbl_stim[1].setText(stim_list[3])
-            data = {'frecuency': 1000,
-                    'stim_type_ch0': stim_list[0], 'stim_type_ch1': stim_list[3]}
+            #data = {'frecuency': 1000,
+            #        'stim_type_ch0': stim_list[0], 'stim_type_ch1': stim_list[3]}
             #online = self.btn_online.isChecked()
             ##self.sendData.send(data, online)
 
@@ -786,10 +706,10 @@ class Audiometer(QWidget, Ui_Audiometer):
         lbl_ext = self.lbl_ext_der.text()
         if lbl_ext == "ext.":
             self.lbl_ext_der.setText("")
-            data = {'ext_range': False}
+            #data = {'ext_range': False}
         else:
             self.lbl_ext_der.setText("ext.")
-            data = {'ext_range': True}
+            #data = {'ext_range': True}
         #online = self.btn_online.isChecked()
         ##self.sendData.send(data, online)
 
@@ -800,23 +720,25 @@ class Audiometer(QWidget, Ui_Audiometer):
 
             if lbl_hf == "alt. frec.":
                 self.lbl_ext_izq.setText("")
-                data = {'high_frec': False}
+                #data = {'high_frec': False}
 
             else:
                 self.lbl_ext_izq.setText("alt. frec.")
-                data = {'high_frec': True}
+                #data = {'high_frec': True}
         #online = self.btn_online.isChecked()
         ##self.sendData.send(data, online)
 
     def stim(self, ch, stim):
-        if stim == 2:
-            self.datasignal_speech[0] = True
-            self.signal_speech.emit(self.datasignal_speech)
-        else:
-            self.datasignal_speech[0] = False
-
-            self.signal_speech.emit(self.datasignal_speech)
-
+        try:
+            if stim == 2:
+                self.datasignal_speech[0] = True
+                self.signal_speech.emit(self.datasignal_speech)
+            else:
+                self.datasignal_speech[0] = False
+                self.signal_speech.emit(self.datasignal_speech)
+        except:
+            pass
+        
         verify = True
         contra = 0 if ch == 1 else 1
         verify_stim = self.lbl_stim[contra].text()
@@ -856,10 +778,12 @@ class Audiometer(QWidget, Ui_Audiometer):
             r_stim = stim_list[stim]
             self.lbl_stim[ch].setText(r_stim)
             stim_ch = ('stim_type_ch{}').format(ch)
-            data = {stim_ch: r_stim}
+            #data = {stim_ch: r_stim}
             #online = self.btn_online.isChecked()
             ##self.sendData.send(data, online)
-
+        ch0 = self.lbl_stim[0].text()
+        ch1 = self.lbl_stim[1].text()
+        self.Rsp.transmit_(stim = [ch0,ch1])
         self.reset_channels()
 
     def reset_channels(self):
@@ -877,35 +801,39 @@ class Audiometer(QWidget, Ui_Audiometer):
 
     def trans(self, ch, trans):
         self.lbl_trans[ch].setText(trans_list[trans])
-        data = {"ch{}_trans".format(ch): trans}
-        #online = self.btn_online.isChecked()
-        #self.sendData.send(data, online)
+        trans = trans_list.index(self.lbl_trans[ch].text())
+        self.trans_idx[ch] = trans
+        self.Rsp.transmit_(trans=self.trans_idx)
 
     def output(self, ch, out):
         r_output = output_list[out]
         self.lbl_output[ch].setText(r_output)
+        
+        def mod(text):
+            if text == 'Derecha':
+                return 0
+            else:
+                return 1
+        ch0 = mod(self.lbl_output[0].text())
+        ch1 = mod(self.lbl_output[1].text())
 
-        data = {"ch{}_side".format(ch): out}
-        #online = self.btn_online.isChecked()
-        #self.sendData.send(data, online)
-
+        #self.datasignal_speech[2] = val
+        self.datasignal_speech[3] = ch0
+        self.signal_speech.emit(self.datasignal_speech)
+        self.Rsp.transmit_(side = [ch0,ch1])
         self.reset_channels()
 
     def FrecChange(self, up):
         prueba = self.lbl_prueba.text()
         verify = True if prueba != test_list[1] else False
-
         if verify:
             if self.lbl_ext_izq.text() != "":
                 high_f = True
             else:
                 high_f = False
-
             via = self.stim_output()
-
             self.frecuency_list = create_frecuency(
                 frecuency_dict, prueba=prueba, transductor=via, Hf=high_f)
-
             old_hz = self.lbl_freq.text().split(' Hz')[0]
             old_hz = int(old_hz)
             if not old_hz in self.frecuency_list:
@@ -913,17 +841,21 @@ class Audiometer(QWidget, Ui_Audiometer):
                     old_hz = self.frecuency_list[-1]
                 else:
                     old_hz = self.frecuency_list[0]
-
             pos = self.frecuency_list.index(old_hz)
             #pos_next = 0
             if pos >= len(self.frecuency_list)-1:
                 pos = -1
-
             #pos_act = pos+1 if up else pos-1
+            #new_hz = self.frecuency_list[pos+1] if up else self.frecuency_list[pos-1]
+            if up :
+                new_hz = self.frecuency_list[pos+1]
+                fr_pos = pos+1
+            else:
+                new_hz = self.frecuency_list[pos-1]
+                fr_pos = pos-1
 
-            new_hz = self.frecuency_list[pos +
-                                         1] if up else self.frecuency_list[pos-1]
-            data = {"frecuency": new_hz}
+            self.Rsp.transmit_(freq=fr_pos)
+            #data = {"frecuency": new_hz}
             #online = self.btn_online.isChecked()
             #self.sendData.send(data, online)
 
@@ -950,9 +882,7 @@ class Audiometer(QWidget, Ui_Audiometer):
                     result = 1
         return result
 
-
 # START LOGO #############################################
-
 
     def logo_display(self):
         label = self.lbl_freq.text().split(' : ')[0]
@@ -1018,10 +948,7 @@ class Audiometer(QWidget, Ui_Audiometer):
             step = self.lbl_step_ch0.text().split(": ")[1]
             step = int(step.split("dB")[0])
 
-        data = {'step': step}
-        #online = self.btn_online.isChecked()
-        #self.sendData.send(data, online)
-
+        self.Rsp.transmit_(step = step)
         return step
 
     def IntChange(self, ch, up):
@@ -1038,33 +965,25 @@ class Audiometer(QWidget, Ui_Audiometer):
         else:
             ext = False
         step = self.step()
-        # print(step)
-
-        trans = trans_list.index(self.lbl_trans[ch].text())
-
+        #trans = trans_list.index(self.lbl_trans[ch].text())
+        trans = self.trans_idx[ch]
         # Se genera la lista de frecuencias
         intency = create_intency(
             intency_dict, step=step, f=f, transductor=trans, ext=ext)
         len_intency = len(intency)
-
         # Se busca el indice de la frecuencia actualmente seleccionada en el display
         old_int = self.lbl_intencity[ch].text()
         old_int = old_int.split(' dB HL')[0]
         old_int = int(old_int)
-
         intency_set = set(intency)
-
         if old_int not in intency_set:
             if old_int >= intency[-1]:
                 old_int = intency[-1]
             if old_int <= intency[0]:
                 old_int = intency[0]
-
         if old_int / step != 0:
             old_int = calibrate(old_int, step)
-
         pos = intency.index(old_int)
-
         # condicionales para que no aumente la intensidad más allá del tope
         # y no de la vuelta al indice 0
         ok = True
@@ -1076,21 +995,21 @@ class Audiometer(QWidget, Ui_Audiometer):
             if pos <= 0:
                 pos = 0
                 ok = False
-
         # condicionales para cambiar la intensidad si esta en el medio del rango
         # o en los extremos
         if ok:
             new_int = intency[pos+1] if up == 1 else intency[pos-1]
         else:
             new_int = intency[pos] if up == 1 else intency[pos]
-
         # condicionales para actualizar el display según el dial usado
         self.lbl_intencity[ch].setText("{} dB HL".format(new_int))
+        ch0 = self.lbl_intencity[0].text()
+        ch1 = self.lbl_intencity[1].text()
+        self.Rsp.transmit_(lvl = [ch0,ch1])
         lvl_ch = 'level_ch{}'.format(ch)
         data = {lvl_ch: new_int}
         #online = self.btn_online.isChecked()
         #self.sendData.send(data, online)
-
         self.block_mouse = False
         self.random_response = [0, 0]
         lbl = self.lbl_stim[ch].text()
@@ -1099,7 +1018,6 @@ class Audiometer(QWidget, Ui_Audiometer):
 
 
 ############## DIALES ################
-
 
     def MoveDial_mouse(self, dial):
         #pos = self.dial_der.value() if dial == 0 else self.dial_izq.value()
@@ -1157,14 +1075,14 @@ class Audiometer(QWidget, Ui_Audiometer):
         ipsi = self.alternate_active["ipsi"]
         active = self.alternate_active["active"]
 
-        # print("ipsi:{},contra:{}".format(ipsi,contra))
+        #print("ipsi:{},contra:{}".format(ipsi,contra))
 
         #self.alternate_ipsi[ipsi] = True
         #self.alternate_ipsi[contra] = False
 
         ch = self.alternate_active["side"]
 
-        # print(self.alternate_ipsi)
+        #print(self.alternate_ipsi)
 
         if active:
             if self.alternate_ipsi[2] == False:
@@ -1177,7 +1095,7 @@ class Audiometer(QWidget, Ui_Audiometer):
                         ch = 0 if ch == 1 else 1
                         self.alternate_active["side"] = ch
 
-                        # print(self.alternate_ipsi)
+                        #print(self.alternate_ipsi)
                         self.alternate_ipsi[2] = True
                         self.alternate_ipsi[ch] = True
                         #self.alternate_ipsi[ipsi] = False
@@ -1250,7 +1168,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         if state:
             self.time_alternate.start(100)
         else:
-            # print("stop")
+            #print("stop")
             self.time_alternate.stop()
 
     def counter(self, state=1):

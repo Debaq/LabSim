@@ -11,16 +11,13 @@ from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication, QWidget
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from lib.helpers import Preferences
-from PyQt5.QtMultimedia import QMediaPlayer
+from PyQt5.QtMultimedia import QMediaPlayer, QAudioProbe
 import random
 
 from lib.h_audio import create_word, create_word_response
+from lib.logoaudiometry import CalculateLogo
 
 from UI.Ui_ListWord import Ui_ListWords
-
-
-
-
 
 
 
@@ -33,7 +30,8 @@ class ListWords(QWidget, Ui_ListWords):
         
         self.setupUi(self)
         self.channel_0 = QMediaPlayer(self)
-        self.playable = [False, 0, None]
+        self.probe = QAudioProbe()
+        self.playable = [False, 0, None, False]
         self.time_1 = QtCore.QTimer(self)
         self.time_1.timeout.connect(self.timer)
         self.time_2 = QtCore.QTimer(self)
@@ -101,6 +99,32 @@ class ListWords(QWidget, Ui_ListWords):
         self.btn_f24.clicked.connect(lambda:self.pushaudio(24))
         self.btn_f25.clicked.connect(lambda:self.pushaudio(25))
 
+        self.btn_f1_2.clicked.connect(lambda:self.pushaudio(1))
+        self.btn_f2_2.clicked.connect(lambda:self.pushaudio(2))
+        self.btn_f3_2.clicked.connect(lambda:self.pushaudio(3))
+        self.btn_f4_2.clicked.connect(lambda:self.pushaudio(4))
+        self.btn_f5_2.clicked.connect(lambda:self.pushaudio(5))
+        self.btn_f6_2.clicked.connect(lambda:self.pushaudio(6))
+        self.btn_f7_2.clicked.connect(lambda:self.pushaudio(7))
+        self.btn_f8_2.clicked.connect(lambda:self.pushaudio(8))
+        self.btn_f9_2.clicked.connect(lambda:self.pushaudio(9))
+        self.btn_f10_2.clicked.connect(lambda:self.pushaudio(10))
+        self.btn_f11_2.clicked.connect(lambda:self.pushaudio(11))
+        self.btn_f12_2.clicked.connect(lambda:self.pushaudio(12))
+        self.btn_f13_2.clicked.connect(lambda:self.pushaudio(13))
+        self.btn_f14_2.clicked.connect(lambda:self.pushaudio(14))
+        self.btn_f15_2.clicked.connect(lambda:self.pushaudio(15))
+        self.btn_f16_2.clicked.connect(lambda:self.pushaudio(16))
+        self.btn_f17_2.clicked.connect(lambda:self.pushaudio(17))
+        self.btn_f18_2.clicked.connect(lambda:self.pushaudio(18))
+        self.btn_f19_2.clicked.connect(lambda:self.pushaudio(19))
+        self.btn_f20_2.clicked.connect(lambda:self.pushaudio(20))
+        self.btn_f21_2.clicked.connect(lambda:self.pushaudio(21))
+        self.btn_f22_2.clicked.connect(lambda:self.pushaudio(22))
+        self.btn_f23_2.clicked.connect(lambda:self.pushaudio(23))
+        self.btn_f24_2.clicked.connect(lambda:self.pushaudio(24))
+        self.btn_f25_2.clicked.connect(lambda:self.pushaudio(25))
+
         self.btn_g1.clicked.connect(lambda:self.pushaudio(1))
         self.btn_g2.clicked.connect(lambda:self.pushaudio(2))
         self.btn_g3.clicked.connect(lambda:self.pushaudio(3))
@@ -165,10 +189,28 @@ class ListWords(QWidget, Ui_ListWords):
         else:
             self.gender = "male"
         self.id = id
-
-       
-        prev = CalculateLogo(data)
+        UMD = data["UMD"]
+        self.isMkg = self.ifMkg(data)
+        prev = CalculateLogo(data, UMD)
         self.error_list = prev.get()
+        
+
+
+    def ifMkg(self, data):
+        mkg = False
+        side = 0
+        OD = (data["Ósea_mkg"][2][0] + data["Ósea_mkg"][3][0] + data["Ósea_mkg"][4][0] + data["Ósea_mkg"][6][0])/4
+        OI = (data["Ósea_mkg"][2][1] + data["Ósea_mkg"][3][1] + data["Ósea_mkg"][4][1] + data["Ósea_mkg"][6][1])/4
+        dif = abs(OD - OI)
+        if dif >= 35:
+            mkg = True
+            if OD>OI:
+                side=0
+            else:
+                side=1
+        result = [side, mkg]
+        return result
+
 
 
 
@@ -185,13 +227,18 @@ class ListWords(QWidget, Ui_ListWords):
         self.changecalcule()
         if self.playable[0]:
             self.channel_0.setMedia(word)
+            #self.probe.setSource(self.channel_0)
+            #self.probe.audioBufferProbed.connect(self.processProbe)
             self.channel_0.play()
             self.time_1.start()
             self.lbl_list1.setText("Última : {}".format(self.text))
             self.lbl_list2.setText("Última : {}".format(self.text))
+            self.lbl_list2_2.setText("Última : {}".format(self.text))
             self.lbl_list3.setText("Última : {}".format(self.text))
             self.lbl_list4.setText("Última : {}".format(self.text))
 
+    #def processProbe(self, buff):
+    #    print(buff.constData())
 
     def timer(self):
         if self.channel_0.state() == 0:
@@ -228,51 +275,63 @@ class ListWords(QWidget, Ui_ListWords):
                 self.playable[1] = 20
                 self.calculate(0)
                 self.prevINT = 20
-
-                
+               
         else:
             pass
 
     def calculate(self, side):
+        if side == 0:
+            contra = 1
+        else:
+            contra = 0
 
         result = []
-        data = self.error_list[side]
+
+        if self.isMkg[1]:
+            if self.isMkg[0] == side and self.playable[3] == False:
+            
+                data = self.error_list[contra]
+            else:
+                data = self.error_list[side]
+        else:
+            data = self.error_list[side]
+
         intencity = self.playable[1]
         value = []
         keys = []
         for k, v in data.items():
             value.append(v)
             keys.append(int(k))
-
+        
         if intencity <= keys[0]:
             range_error = 25
             self.continue_response = False
+            for _ in range(range_error):
+                result.append(0)
+        elif intencity > keys[0] and intencity <= keys[-1]:
+            self.continue_response = True
+            range_correct = data[str(intencity)]
+            range_error = 25 - range_correct
+            for _ in range(range_correct):
+                result.append(1)
+            for _ in range(range_error):
+                result.append(0)
+            random.shuffle(result)
+        elif intencity > keys[-1]:
+            range_correct = value[-1]
+            range_error = 25 - range_correct
+            for i in range(range_correct):
+                result.append(1)
             for i in range(range_error):
                 result.append(0)
+            random.shuffle(result)
         else:
-            self.continue_response = True 
-            if intencity >=keys[-1]:
-                range_correct = 25
-                for i in range(range_correct):
-                    result.append(1)
-            else:
-                range_correct = data[str(intencity)]
-                range_error = 25 - range_correct
-                for i in range(range_correct):
-                    result.append(1)
-                for i in range(range_error):
-                    result.append(0)
-                random.shuffle(result)
-        
+            pass
+           
         self.list_response = result
-        print(result)
 
 
 
 
 if __name__ == "__main__":
-    appctxt = ApplicationContext()     
-    app = QApplication([])
-    window = ListWords()
-    window.show()
-    sys.exit(app.exec())
+    pass
