@@ -25,7 +25,7 @@
   },
   "BOXS": {
     "sala_espera": [false,[], "Sala de Espera"],
-    "Box_1": [true,["A", "Z", "ABR"], "Box Audiología"],
+    "Box_1": [true,["A", "Z"], "Box Audiología"],
     "Box_2": [true,["ABR", "VEMP", "EOAc"], "Box Electrofisiología"],
     "Box_3": [true,["VNG", "vHit", "POS"], "Box Otoneurología"]
   }
