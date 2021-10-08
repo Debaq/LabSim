@@ -75,9 +75,13 @@ class Audiometer(QWidget, Ui_Audiometer):
 
     def __init__(self, thr, *args, **kwargs):
         # Inicialización de la ventana y propiedades
-        QWidget.__init__(self, *args, **kwargs)
+        #QWidget.__init__(self, *args, **kwargs)
+        super(Audiometer, self).__init__()
+
         self.thr = []
         self.Rsp = Rsp()
+        self.Rsp.button.connect(self.respa)
+
         self.laSuper(thr)
         self.setupUi(self)
         self.frecuency_list = create_frecuency(
@@ -302,6 +306,14 @@ class Audiometer(QWidget, Ui_Audiometer):
             self.stateSupra = [comandvoice, state]
         else:
             self.stateSupra = [None, None]
+    def respa(self, data):
+        print("Respa")
+        print(data)
+        if data:
+            self.lbl_response.setStyleSheet("background-color: rgb(170, 170, 255);")
+        else:
+            self.lbl_response.setStyleSheet("background-color: rgb(255, 255, 255);")
+
 
     def commandAction(self, command):
         if command != None:

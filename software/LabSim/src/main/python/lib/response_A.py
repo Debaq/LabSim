@@ -1,4 +1,5 @@
 from PyQt5.Qt import pyqtSignal
+from PyQt5.QtWidgets import QWidget
 from lib.logoaudiometry import CalculateLogo
 from lib.h_audio import (data_basic, minMax, create_voice)
 from PyQt5.QtMultimedia import QMediaPlayer
@@ -8,11 +9,11 @@ from PyQt5.QtMultimedia import QMediaPlayer
 
 
 
-class Response:
+class Response(QWidget):
     button = pyqtSignal(bool)
-    voice = pyqtSignal(str) #<<<insertar las voces por acá
    
     def __init__(self):
+        super(Response, self).__init__()
         self.data = {
             'stimOn': [False, False], 'freq': 3, 'step': 5,
             'lvl': [20, 20], 'side': [0, 1], 
@@ -82,10 +83,10 @@ class Response:
             self.state = "S_STAT_X"
         elif cmd == "sonidos_iguales":
             self.fowler_q(1)
-            print("y por por aca")
+            #print("y por por aca")
         elif cmd == "en_qué_oído":
             self.fowler_q(2)
-            print("pase por aca")
+            #print("pase por aca")
         else:
             self.state = "X_X_X"
             self.command_2 = cmd
@@ -113,7 +114,7 @@ class Response:
             if k == "stim":
                 l = []
                 for t in i:
-                    #print(t[0:2])
+                    ##print(t[0:2])
                     if t[0:2] == "Na" or t == "Sp":
                         m = "mkg"
                     else: 
@@ -123,11 +124,11 @@ class Response:
 
             self.data[k] = i
 
-        #print(self.data)
+        ##print(self.data)
 
     def activate(self):
-        #print("entre al activador y haré:{}".format(self.response))
-        #print(self.data)
+        ##print("entre al activador y haré:{}".format(self.response))
+        ##print(self.data)
         
         if self.response[1] == 'A':
             if self.data['stimOn'][0]:
@@ -187,12 +188,12 @@ class Response:
             if self.data['side'][1] == 0:
                 lvls[0] = lvlch1
             idx = self.bestEar(freq)
-            print (idx)
+            #print (idx)
             if str(lvls[idx]) in data:
                 p=data[str(lvls[idx])] 
                 t=lvls[idx-1]
                 if p < t:
-                    print("suena mas fuerte{}".format("OI"))
+                    #print("suena mas fuerte{}".format("OI"))
                     if n == 1:
                         voice_ldl = create_voice("no", self.gender, self.id)
                         self.channel_0.setMedia(voice_ldl)
@@ -202,9 +203,9 @@ class Response:
                     voice_ldl = create_voice("si", self.gender, self.id)
                     self.channel_0.setMedia(voice_ldl)
                     self.channel_0.play()
-                    print("suenan iguales")
+                    #print("suenan iguales")
                 else:
-                    print("suena mas fuerte{}".format("OD"))
+                    #print("suena mas fuerte{}".format("OD"))
                     if n == 1:
                         voice_ldl = create_voice("no", self.gender, self.id)
                         self.channel_0.setMedia(voice_ldl)
@@ -218,10 +219,6 @@ class Response:
             self.lastChoice_fowler = None
 
 
-
-                
-
-        
 
     def bestEar(self, f):
         OD = self.thr[1][1][f][0]
@@ -237,43 +234,40 @@ class Response:
             self.activate_fowler[0] = True
         if self.data['stimOn'][1]:
             self.activate_fowler[1] = True
-        
-
-    def no(self):
-        print("no escucho")
-        #self.activate_fowler = False
+    
 
     def carhart(self):
-        print("escucho")
+        self.upHand()
+        #print("escucho")
 
     def ldl(self):
-        print("estoy en ldl")
+        #print("estoy en ldl")
         side = self.data['side'][0]
         data = self.supra[0]
         freq = self.data['freq']
         lvl = self.data['lvl'][0]
         mol = data[freq][side]
         response = lvl>=mol
-        print(mol)
-        print(lvl)
-        print(response)
+      
         if response:
-            print("molesta!")
+            #print("molesta!")
             voice_ldl = create_voice("molesta", self.gender, self.id)
             self.channel_0.setMedia(voice_ldl)
             self.channel_0.play()
 
     def logo_sdt(self):
-        #print("ahora ahre sdt")
+        ##print("ahora ahre sdt")
         sdt = self.Logo.sdt
         side = self.data["side"][0]
         lvl = self.data["lvl"][0]
         response = lvl >= sdt[side]
     
         if response:
-            print("escucho!")
+            self.upHand()
+            #print("escucho!")
         else:
-            print("no escucho nadita")
+            self.no()
+            #print("no escucho nadita")
     
 
     def resp_THR(self, mkg):
@@ -313,7 +307,8 @@ class Response:
 
         response = lvl >= UA
         if response :
-            print("Escucho!!")
+            self.upHand()
+            #print("Escucho!!")
         
     def isChOn(self):
         if self.data["stimOn"][0]:
@@ -323,3 +318,15 @@ class Response:
             chOn = 1
             chOn_c = 0
         return chOn , chOn_c
+
+
+    def upHand(self):
+        hand = True
+        self.button.emit(hand)
+            
+
+    def no(self):
+        hand = False
+        self.button.emit(hand)
+        #print("no escucho")
+        #self.activate_fowler = False
