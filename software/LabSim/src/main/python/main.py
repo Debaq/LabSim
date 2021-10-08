@@ -9,7 +9,7 @@
 # pip install https://build-system.fman.io/pro/12a9a98c-755b-4d95-9c60-a17ae1a74d6c/1.0.7#egg=fbs
 #https://f002.backblazeb2.com/file/TMEduca/LabSim/LabSimSetup0.8.4.exe
 
-__VERSION__ = 'v0.8.4'
+__VERSION__ = 'v0.8.42'
 
 import json
 import sys
