@@ -130,7 +130,7 @@ class Response(QWidget):
         ##print("entre al activador y haré:{}".format(self.response))
         ##print(self.data)
         
-        if self.response[1] == 'A':
+        if self.response[1] == 'A' or self.response[1] == 'O':
             if self.data['stimOn'][0]:
                 self.resp_THR(mkg=self.response[2])
             else:
