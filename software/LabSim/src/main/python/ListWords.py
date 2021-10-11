@@ -238,7 +238,7 @@ class ListWords(QWidget, Ui_ListWords):
             self.lbl_list4.setText("Última : {}".format(self.text))
 
     #def processProbe(self, buff):
-    #    print(buff.constData())
+        #print(buff.constData())
 
     def timer(self):
         if self.channel_0.state() == 0:
@@ -289,7 +289,7 @@ class ListWords(QWidget, Ui_ListWords):
 
         if self.isMkg[1]:
             if self.isMkg[0] == side and self.playable[3] == False:
-            
+            #La logo no funciona en masking
                 data = self.error_list[contra]
             else:
                 data = self.error_list[side]
@@ -329,6 +329,7 @@ class ListWords(QWidget, Ui_ListWords):
             pass
            
         self.list_response = result
+        #print(result)
 
 
 

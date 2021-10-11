@@ -8,7 +8,7 @@ class dataFrame():
     
     def read(self, file, mime):
         if mime == 'csv':
-            print("file")
+            #print("file")
 
             self.data = pd.read_csv(file, header=None)
             numheaders = len(self.data.columns)

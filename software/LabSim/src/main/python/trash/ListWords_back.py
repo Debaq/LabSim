@@ -63,14 +63,14 @@ class ListWords(QWidget, Ui_ListWords):
                         buttons.append(buttons_temp)
                     else:
                         buttons_temp = []
-                    print(page)
+                    #print(page)
                     if prev_page == page:
                         buttons_temp = []
                     prev_page = page
                     for l in list_words[key_i][key_j][key_k]:
                         buttons_temp.append(l)
                         
-        print(buttons)
+        #print(buttons)
 
    
 

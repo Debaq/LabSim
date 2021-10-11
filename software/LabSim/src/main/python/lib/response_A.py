@@ -114,7 +114,7 @@ class Response(QWidget):
             if k == "stim":
                 l = []
                 for t in i:
-                    ##print(t[0:2])
+                    #print(t[0:2])
                     if t[0:2] == "Na" or t == "Sp":
                         m = "mkg"
                     else: 
@@ -124,11 +124,11 @@ class Response(QWidget):
 
             self.data[k] = i
 
-        ##print(self.data)
+        #print(self.data)
 
     def activate(self):
-        ##print("entre al activador y haré:{}".format(self.response))
-        ##print(self.data)
+        #print("entre al activador y haré:{}".format(self.response))
+        #print(self.data)
         
         if self.response[1] == 'A' or self.response[1] == 'O':
             if self.data['stimOn'][0]:
@@ -256,7 +256,7 @@ class Response(QWidget):
             self.channel_0.play()
 
     def logo_sdt(self):
-        ##print("ahora ahre sdt")
+        #print("ahora ahre sdt")
         sdt = self.Logo.sdt
         side = self.data["side"][0]
         lvl = self.data["lvl"][0]

@@ -307,8 +307,8 @@ class Audiometer(QWidget, Ui_Audiometer):
         else:
             self.stateSupra = [None, None]
     def respa(self, data):
-        print("Respa")
-        print(data)
+        #print("Respa")
+        #print(data)
         if data:
             self.lbl_response.setStyleSheet("background-color: rgb(170, 170, 255);")
         else:

@@ -6,7 +6,7 @@
                 thr = self.thr
             else:
                 thr = _THR_
-            print(thr)
+            #print(thr)
 
             def test_response(thr, freq, ch, lvl, output, trans):
 
@@ -31,7 +31,7 @@
                     trans_index, listforMinMax, curve_z, name_mkg)
 
                 if self.lbl_stim_ch1.text() == "Narrow Band Noise" and self.lbl_rev_ch1.text() == "Invertido":
-                    print("{}>{}".format(test_minMax, lvl[ouput_contra]))
+                    #print("{}>{}".format(test_minMax, lvl[ouput_contra]))
 
                     if test_minMax <= lvl[ouput_contra]:
                         select_thr = 1

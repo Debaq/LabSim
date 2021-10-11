@@ -119,7 +119,7 @@ class Graph(QWidget):
             """
             ACA aprendi que se pueden eliminar los objetos por nombre
             for i in self.pw1.listDataItems():
-                print(i.name())
+                #print(i.name())
                 if i.name() == "80_R:2":
                     self.pw1.removeItem(i)
             """        
