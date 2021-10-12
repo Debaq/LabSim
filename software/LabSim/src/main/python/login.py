@@ -7,9 +7,9 @@
 #                                                               #
 #################################################################
 import sys
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QWidget
-from fbs_runtime.application_context.PyQt5 import ApplicationContext
+from PyQt6 import QtCore
+from PyQt6.QtWidgets import QApplication, QWidget
+from fbs_runtime.application_context.PyQt6 import ApplicationContext
 
 
 from UI.Ui_Login import Ui_Login

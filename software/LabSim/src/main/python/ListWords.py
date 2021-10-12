@@ -7,11 +7,11 @@
 #                                                               #
 #################################################################
 import sys
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QWidget
-from fbs_runtime.application_context.PyQt5 import ApplicationContext
+from PyQt6 import QtCore
+from PyQt6.QtWidgets import QApplication, QWidget
+from fbs_runtime.application_context.PyQt6 import ApplicationContext
 from lib.helpers import Preferences
-from PyQt5.QtMultimedia import QMediaPlayer, QAudioProbe
+from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 import random
 
 from lib.h_audio import create_word, create_word_response
@@ -29,8 +29,10 @@ class ListWords(QWidget, Ui_ListWords):
         
         
         self.setupUi(self)
-        self.channel_0 = QMediaPlayer(self)
-        self.probe = QAudioProbe()
+        #self.channel_0 = QMediaPlayer(self)
+        self.output_ch = QAudioOutput()
+        self.channel_0 = QMediaPlayer()
+        self.channel_0.setAudioOutput(self.channel_0)
         self.playable = [False, 0, None, False]
         self.time_1 = QtCore.QTimer(self)
         self.time_1.timeout.connect(self.timer)
@@ -193,8 +195,6 @@ class ListWords(QWidget, Ui_ListWords):
         self.isMkg = self.ifMkg(data)
         prev = CalculateLogo(data, UMD)
         self.error_list = prev.get()
-        
-
 
     def ifMkg(self, data):
         mkg = False
@@ -226,7 +226,7 @@ class ListWords(QWidget, Ui_ListWords):
     def soundPlay(self, word):
         self.changecalcule()
         if self.playable[0]:
-            self.channel_0.setMedia(word)
+            self.channel_0.setSource(word)
             #self.probe.setSource(self.channel_0)
             #self.probe.audioBufferProbed.connect(self.processProbe)
             self.channel_0.play()
@@ -241,7 +241,7 @@ class ListWords(QWidget, Ui_ListWords):
         #print(buff.constData())
 
     def timer(self):
-        if self.channel_0.state() == 0:
+        if self.channel_0.MediaStatus() == 0:
             self.time_1.stop()
             ran_time = random.randrange(500 , 1100)
             if self.continue_response:
@@ -261,7 +261,7 @@ class ListWords(QWidget, Ui_ListWords):
             else:
                 noneN = "none{}".format(random.randint(1 , 3))
                 media = create_word_response(noneN, self.gender, self.id)
-            self.channel_0.setMedia(media)
+            self.channel_0.setSource(media)
             self.channel_0.play()
         except:
             pass

@@ -99,10 +99,10 @@
                     if LDL:
                         voice_ldl = create_voice("molesta", self.gender, self.id)
                         if self.channel_on[0] == False:
-                            self.channels[0].setMedia(voice_ldl)
+                            self.channels[0].setSource(voice_ldl)
                             self.channels[0].play()
                         if self.channel_on[1] == False:
-                            self.channels[1].setMedia(voice_ldl)
+                            self.channels[1].setSource(voice_ldl)
 
                             self.channels[1].play()
 

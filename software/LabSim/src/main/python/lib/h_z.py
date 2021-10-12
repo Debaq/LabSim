@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QFileDialog
+from PyQt6.QtWidgets import QApplication, QFileDialog
 from datetime import datetime
 
 

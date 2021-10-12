@@ -6,8 +6,8 @@
 #               CREADOR : NICOLÁS QUEZADA QUEZADA               #
 #                                                               #
 #################################################################
-from PyQt5.QtWidgets import QWidget
-from PyQt5.QtCore import QTimer
+from PyQt6.QtWidgets import QWidget
+from PyQt6.QtCore import QTimer
 from datetime import datetime
 import numpy as np
 
@@ -20,9 +20,13 @@ from lib.helpers import Storage
 
 class ZControl(QWidget, Ui_Z_control):
     def __init__(self,):
-        QWidget.__init__(self)
+        #QWidget.__init__(self)
+        super(ZControl, self).__init__()
         self.setupUi(self)
+        print("comenzando Z")
         self.Z = ZZscreen()
+        print("cargado zscree")
+
         self.Screen_Layout.addWidget(self.Z)
 
         # BUTTONS

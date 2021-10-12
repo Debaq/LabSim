@@ -1,8 +1,8 @@
-from PyQt5.Qt import pyqtSignal
-from PyQt5.QtWidgets import QWidget
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import QWidget
 from lib.logoaudiometry import CalculateLogo
 from lib.h_audio import (data_basic, minMax, create_voice)
-from PyQt5.QtMultimedia import QMediaPlayer
+from PyQt6.QtMultimedia import QMediaPlayer
 
 
 
@@ -196,25 +196,25 @@ class Response(QWidget):
                     #print("suena mas fuerte{}".format("OI"))
                     if n == 1:
                         voice_ldl = create_voice("no", self.gender, self.id)
-                        self.channel_0.setMedia(voice_ldl)
+                        self.channel_0.setSource(voice_ldl)
                         self.channel_0.play()
                         self.lastChoice_fowler = "elizquierdo"
                 elif p == t:
                     voice_ldl = create_voice("si", self.gender, self.id)
-                    self.channel_0.setMedia(voice_ldl)
+                    self.channel_0.setSource(voice_ldl)
                     self.channel_0.play()
                     #print("suenan iguales")
                 else:
                     #print("suena mas fuerte{}".format("OD"))
                     if n == 1:
                         voice_ldl = create_voice("no", self.gender, self.id)
-                        self.channel_0.setMedia(voice_ldl)
+                        self.channel_0.setSource(voice_ldl)
                         self.channel_0.play()
                         self.lastChoice_fowler = "elderecho"
         
         if n == 2 and self.lastChoice_fowler!=None:
             voice_ldl = create_voice(self.lastChoice_fowler, self.gender, self.id)
-            self.channel_0.setMedia(voice_ldl)
+            self.channel_0.setSource(voice_ldl)
             self.channel_0.play()
             self.lastChoice_fowler = None
 
@@ -252,7 +252,7 @@ class Response(QWidget):
         if response:
             #print("molesta!")
             voice_ldl = create_voice("molesta", self.gender, self.id)
-            self.channel_0.setMedia(voice_ldl)
+            self.channel_0.setSource(voice_ldl)
             self.channel_0.play()
 
     def logo_sdt(self):

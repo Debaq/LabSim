@@ -11,7 +11,7 @@
 
 import json
 import codecs
-from fbs_runtime.application_context.PyQt5 import ApplicationContext
+from fbs_runtime.application_context.PyQt6 import ApplicationContext
 
 appctxt = ApplicationContext()
 

@@ -2,11 +2,11 @@
 
 # Form implementation generated from reading ui file '/home/nick/Escritorio/Proyectos/LabSim/software/LabSim/src/main/python/UI/ListWord.ui'
 #
-# Created by: PyQt5 UI code generator 5.15.4
+# Created by: PyQt6 UI code generator 5.15.4
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 class Ui_ListWords(object):
     def setupUi(self, ListWords):

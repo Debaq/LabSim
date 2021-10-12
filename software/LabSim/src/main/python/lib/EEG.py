@@ -1,6 +1,6 @@
 import pyqtgraph as pg
 import numpy as np
-from PyQt5.QtWidgets import QWidget
+from PyQt6.QtWidgets import QWidget
 
 
 class EEG(QWidget):

@@ -14,10 +14,10 @@ import time
 
 import numpy as np
 import requests
-from fbs_runtime.application_context.PyQt5 import ApplicationContext
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QPushButton, QWidget
-from PyQt5.QtGui import QFont
+from fbs_runtime.application_context.PyQt6 import ApplicationContext
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtWidgets import QPushButton, QWidget
+from PyQt6.QtGui import QFont
 
 import lib.bezier_prop as bz
 from lib.ABR_generator import ABR_creator

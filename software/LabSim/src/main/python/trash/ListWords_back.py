@@ -7,9 +7,9 @@
 #                                                               #
 #################################################################
 import sys
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QTabWidget,QToolBox
-from fbs_runtime.application_context.PyQt5 import ApplicationContext
+from PyQt6 import QtCore
+from PyQt6.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QTabWidget,QToolBox
+from fbs_runtime.application_context.PyQt6 import ApplicationContext
 from lib.helpers import Preferences
 
 

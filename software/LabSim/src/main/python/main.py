@@ -16,11 +16,11 @@ import sys
 import time
 
 import requests
-from fbs_runtime.application_context.PyQt5 import ApplicationContext
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QPoint
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QMdiSubWindow, QMessageBox,
-                             QPushButton, QGroupBox, QHBoxLayout, QWidget, QMdiArea, QMenu, QAction)
-from PyQt5.QtGui import QPixmap, QPainter
+from fbs_runtime.application_context.PyQt6 import ApplicationContext
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QMdiSubWindow, QMessageBox,
+                             QPushButton, QGroupBox, QHBoxLayout, QWidget, QMdiArea, QMenu)
+from PyQt6.QtGui import QPixmap, QPainter
 
 
 import ABR
@@ -41,38 +41,38 @@ STYLES = Preferences.get("styles")
 LANGUAJE = Preferences.get("lang")
 
 
-class frameSubMdi(QWidget, UI_frameSubMdi):
-    def __init__(self, UI, name="Test"):
-        super(frameSubMdi, self).__init__()
+class FrameSubMdi(QWidget, UI_frameSubMdi):
+    def __init__(self, ui_ui):
+        super(FrameSubMdi, self).__init__()
         self.setupUi(self)
-        self.ui = UI
+        self.ui = ui_ui
         self.layout_content.addWidget(self.ui)
-        self.clickPosition=QPoint()
-        self.barra.mouseMoveEvent = self.moveWindow
+        self.click_position=QPoint()
+        self.barra.mouseMoveEvent = self.move_window
 
-    def moveWindow(self, e):
-            if e.buttons() == Qt.LeftButton:  
-                #Move window 
-                x = e.x()
-                y = e.y()
-                i = self.parent()
-                #print("{} , {} , {}, {}".format(x, y, self.clickPosition, i.pos()))
-                #print(e.globalPos()+ self.clickPosition)
-                x = e.windowPos().toPoint().x()
-                y = e.windowPos().toPoint().y()
-                x= int(x)
-                y= int(y)
-                i.move(x-1,y-88)
-                self.clickPosition = e.globalPos()
-                e.accept()
+    def move_window(self, e):
+        if e.buttons() == Qt.LeftButton:
+            #Move window
+            x = e.x()
+            y = e.y()
+            i = self.parent()
+            #print("{} , {} , {}, {}".format(x, y, self.click_position, i.pos()))
+            #print(e.globalPos()+ self.click_position)
+            x = e.windowPos().toPoint().x()
+            y = e.windowPos().toPoint().y()
+            x= int(x)
+            y= int(y)
+            i.move(x-1,y-88)
+            self.click_position = e.globalPos()
+            e.accept()
 
 class MdiArea(QMdiArea):
     def __init__(self):
         super(MdiArea, self).__init__()
-        self.mousePressEvent = self.moveWindow
+        self.mousePressEvent = self.move_window
         self.documentMode = True
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
 
     def paintEvent(self, event):
         super().paintEvent(event)
@@ -88,14 +88,14 @@ class MdiArea(QMdiArea):
             painter.drawPixmap(int(img_x), int(img_y), 200, 200, img)
             painter.end()
 
-    def moveWindow(self, e):
-            if e.buttons() == Qt.RightButton:  
-                contextMenu = QMenu(self)
-                ordenar=contextMenu.addMenu("Ordenar")
-                ordenar.addAction("Cascada", self.cascadeSubWindows)
-                ordenar.addAction("Azulejos", self.tileSubWindows)
-                ordenar.addAction("Cerrar todo", self.closeAll)
-                contextMenu.exec_(self.mapToGlobal(e.pos()))
+    def move_window(self, e):
+        if e.buttons() == Qt.RightButton:  
+            contextMenu = QMenu(self)
+            ordenar=contextMenu.addMenu("Ordenar")
+            ordenar.addAction("Cascada", self.cascadeSubWindows)
+            ordenar.addAction("Azulejos", self.tileSubWindows)
+            ordenar.addAction("Cerrar todo", self.closeAll)
+            contextMenu.exec_(self.mapToGlobal(e.pos()))
 
     def closeAll(self):
         i = self.parent().parent().parent()
@@ -105,7 +105,7 @@ class MdiArea(QMdiArea):
                     i.Modules.get(j).hide()
         except:
             pass
-        
+
 
 class ComandVoiceA(QWidget, commandVoiceA):
     btn_checked = pyqtSignal(str)
@@ -113,7 +113,7 @@ class ComandVoiceA(QWidget, commandVoiceA):
         super(ComandVoiceA, self).__init__()
         self.setupUi(self)
         self.buttonGroup.buttonClicked.connect(self.state)
-    
+
     def state(self):
         btn = self.buttonGroup.checkedButton()
         text = btn.text()
@@ -125,10 +125,10 @@ class ComandVoiceA(QWidget, commandVoiceA):
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         super(MainWindow, self).__init__()
         self.setupUi(self)
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setWindowTitle("LabSim {}".format(__VERSION__))
         self.lbl_title.setText("LabSim {}".format(__VERSION__))
         #BTNS
@@ -150,9 +150,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #set movement window
         self.showMaximized()
         self.setMouseTracking(True)
-        self.clickPosition=QPoint()
-        self.barra.mouseMoveEvent = self.moveWindow
-       
+        self.click_position=QPoint()
+        self.barra.mouseMoveEvent = self.move_window
 
     ## Funciones de la ventana
     def sizebtn(self):
@@ -160,27 +159,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         height = (self.size().height())/2
         #print("width:{} , height:{}".format(width, height))
         self.activate_login()
-    
-    def moveWindow(self, e):
-            move = False
-            if self.isMaximized(): #Not maximized
-                self.toggle_MaxMin()
-                move=True
-            if self.isMaximized() == False: #Not maximized
-                move = True
-            if move:
-                if e.buttons() == Qt.LeftButton:  
-                    #Move window 
-                    x = e.x()
-                    y = e.y()
-                    gx = e.globalX()
-                    gy = e.globalY()
-                    #print(e.globalPost())
-                    #self.move(self.pos() + e.globalPos() - self.clickPosition)
-                    #self.move(e.globalPos())
-                    self.move(gx, gy)
-                    self.clickPosition = e.globalPos()
-                    e.accept()
+
+    def move_window(self, e):
+        move = False
+        if self.isMaximized(): #Not maximized
+            self.toggle_MaxMin()
+            move=True
+        if self.isMaximized() == False: #Not maximized
+            move = True
+        if move:
+            if e.buttons() == Qt.MouseButton.LeftButton:
+                #Move window 
+                #x = e.pos().x()
+                #y = e.pos().y()
+                gx = e.position().globalX()
+                gy = e.position().globalY()
+                #print(e.globalPost())
+                #self.move(self.pos() + e.globalPos() - self.click_position)
+                #self.move(e.globalPos())
+                self.move(gx, gy)
+                self.click_position = e.globalPos()
+                e.accept()
 
     def toggle_MaxMin(self):
         if self.isMaximized():
@@ -188,7 +187,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.resize(800,600)
         else:
             self.showMaximized()
-        
+
     ## Funciones para el toolbar
     def btns_seccion(self):
         active = str()
@@ -210,10 +209,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         btn_selec.setChecked(True)
         self.chargeBtnsArea(active)
         self.btns_actions()
-        
+
     def changeArea(self):
-        for i in reversed(range( self.layoutTest.count())): 
-             self.layoutTest.itemAt(i).widget().deleteLater()
+        for i in reversed(range( self.layoutTest.count())):
+            self.layoutTest.itemAt(i).widget().deleteLater()
         widget = self.sender()
         objName = widget.objectName()
         self.chargeBtnsArea(objName)
@@ -235,9 +234,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def btns_actions(self):
         #command
-        self.btn_commandVoice = QPushButton("comandos de voz")
-        self.btn_commandVoice.clicked.connect(self.activate_Cvoice)
-        self.layoutAction.addWidget(self.btn_commandVoice)
+        self.btn_cmd_voice = QPushButton("comandos de voz")
+        self.btn_cmd_voice.clicked.connect(self.activate_Cvoice)
+        self.layoutAction.addWidget(self.btn_cmd_voice)
 
     def activate_soft(self):
         widget = self.sender()
@@ -255,30 +254,30 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                         i.setDisabled(False)
 
     def clearToolbar(self):
-        for i in reversed(range( self.layoutTest.count())): 
-             self.layoutTest.itemAt(i).widget().deleteLater()
-        for i in reversed(range( self.horizontalLayout_5.count())): 
-             self.horizontalLayout_5.itemAt(i).widget().deleteLater()
-        for i in reversed(range( self.layoutAction.count())): 
-             self.layoutAction.itemAt(i).widget().deleteLater()
+        for i in reversed(range( self.layoutTest.count())):
+            self.layoutTest.itemAt(i).widget().deleteLater()
+        for i in reversed(range( self.horizontalLayout_5.count())):
+            self.horizontalLayout_5.itemAt(i).widget().deleteLater()
+        for i in reversed(range( self.layoutAction.count())):
+            self.layoutAction.itemAt(i).widget().deleteLater()
 
     ##Funciones para las SubWindows
     def flags(self, var, t=True):
         if t == True:
-            var.setWindowFlags(Qt.Window |
-                               Qt.CustomizeWindowHint |
-                               Qt.WindowTitleHint |
-                               Qt.FramelessWindowHint|
-                               Qt.WindowCloseButtonHint |
-                               Qt.WindowStaysOnTopHint)
+            var.setWindowFlags(Qt.WindowType.Window |
+                               Qt.WindowType.CustomizeWindowHint |
+                               Qt.WindowType.WindowTitleHint |
+                               Qt.WindowType.FramelessWindowHint|
+                               Qt.WindowType.WindowCloseButtonHint |
+                               Qt.WindowType.WindowStaysOnTopHint)
         else:
-            var.setWindowFlags(Qt.Window |
-                               Qt.CustomizeWindowHint |
-                               Qt.WindowTitleHint |
-                               Qt.FramelessWindowHint|
-                               Qt.WindowMaximizeButtonHint |
-                               Qt.WindowCloseButtonHint |
-                               Qt.WindowStaysOnTopHint)
+            var.setWindowFlags(Qt.WindowType.Window |
+                               Qt.WindowType.CustomizeWindowHint |
+                               Qt.WindowType.WindowTitleHint |
+                               Qt.WindowType.FramelessWindowHint|
+                               Qt.WindowType.WindowMaximizeButtonHint |
+                               Qt.WindowType.WindowCloseButtonHint |
+                               Qt.WindowType.WindowStaysOnTopHint)
 
     def showHide(self, pos):
         if self.Modules.get(pos).isHidden():
@@ -288,18 +287,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def createInsWidegt(self, data):
         self.data = data
-        self.A = frameSubMdi(Audiometer.Audiometer(self.data))
-        self.A.ui.signal_speech.connect(self.speechlist_mode)
-        self.Z = frameSubMdi(Z.ZControl())
-        self.W = frameSubMdi(ListWords.ListWords(self.data))
-        self.ABR = frameSubMdi(ABR.MainWindow())
-        self.cVoice = frameSubMdi(ComandVoiceA())
-        self.cVoice.ui.btn_checked.connect(self.A.ui.supra)
+        self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data))
+        self.subw_a.ui.signal_speech.connect(self.speechlist_mode)
+        print("subw a")
 
-    def createSubWindow(self, widg, name, Z, fix=[True, True], size=[740,560], flags=True, position=[0,0]):
+        self.subw_z = FrameSubMdi(Z.ZControl())
+        print("subw z")
+        
+        self.subw_w = FrameSubMdi(ListWords.ListWords(self.data))
+        print("subw w")
+
+        self.subw_abr = FrameSubMdi(ABR.MainWindow())
+        print("subw abr")
+
+        self.subw_voice = FrameSubMdi(ComandVoiceA())
+        print("subw voice")
+
+        self.subw_voice.ui.btn_checked.connect(self.subw_a.ui.supra)
+
+    def createSubWindow(self, widg, name, Z, fix=[True, True], 
+                        size=[740,560], flags=True, position=[0,0]):
         if self.Modules.isFull(Z):
             self.showHide(Z)
-        else:   
+        else:
             sub = QMdiSubWindow()
             sub.setWidget(widg)
             #sub.setObjectName("Test")
@@ -323,8 +333,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     ##Conexión al Servidor
     def thread_data_clicked(self):
         self.thread_data = ReadThread()
-        self.thread_data.name = self.loginWin.ui.Le_name.text()
-        self.thread_data.passw = self.loginWin.ui.Le_passw.text()
+        self.thread_data.name = self.subw_login.ui.Le_name.text()
+        self.thread_data.passw = self.subw_login.ui.Le_passw.text()
         self.thread_data.start()
         self.thread_data.data_signal.connect(self.refresh_data)
 
@@ -341,11 +351,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             text = self.sectors_lbl[data['sector']]
             if self.prevPatient != self.data['sector']:
-                self.A.ui.laSuper(self.data)
-                self.W.ui.laSuper(self.data)
-                self.Z.ui.laSuper(self.data)
+                self.subw_a.ui.laSuper(self.data)
+                self.subw_w.ui.laSuper(self.data)
+                self.subw_z.ui.laSuper(self.data)
                 self.prevPatient = self.data['sector']
-            self.ABR.ui.laSuper(self.data)
+            self.subw_abr.ui.laSuper(self.data)
         self.statusbar.showMessage(text)
         # log off external
         if self.data['state_login'] == "0":
@@ -353,9 +363,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             QMessageBox.critical(self, "sesión", "Sesión terminada")
 
     def login(self):
-        button_login = self.loginWin.ui.btn_login.text()
-        name = self.loginWin.ui.Le_name.text()
-        passw = self.loginWin.ui.Le_passw.text()
+        button_login = self.subw_login.ui.btn_login.text()
+        name = self.subw_login.ui.Le_name.text()
+        passw = self.subw_login.ui.Le_passw.text()
         #print("{} : {} -- {}".format(name,passw, button_login))
         if button_login == "Salir":
             self.logout()
@@ -363,10 +373,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             data = {'user': name, 'password': passw, 'request': 'login'}
             result = request_API(data)
             if result == "ok":
-                self.loginWin.ui.Le_name.setDisabled(True)
-                self.loginWin.ui.Le_passw.setDisabled(True)
+                self.subw_login.ui.Le_name.setDisabled(True)
+                self.subw_login.ui.Le_passw.setDisabled(True)
                 self.thread_data_clicked()
-                self.loginWin.ui.btn_login.setText("Salir")
+                self.subw_login.ui.btn_login.setText("Salir")
                 self.btn_login.setText("Salir")
                 self.showHide(0)
                 text = "{}".format(name)
@@ -377,16 +387,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 QMessageBox.critical(self, "Ingreso", "Error de credenciales")
 
     def logout(self):
-        name = self.loginWin.ui.Le_name.text()
-        passw = self.loginWin.ui.Le_passw.text()
+        name = self.subw_login.ui.Le_name.text()
+        passw = self.subw_login.ui.Le_passw.text()
         self.thread_data.terminate()
         data = {'user': name, 'password': passw, 'request': 'logout'}
         request_API(data)
-        self.loginWin.ui.Le_name.setDisabled(False)
-        self.loginWin.ui.Le_passw.setDisabled(False)
-        self.loginWin.ui.Le_name.setText("")
-        self.loginWin.ui.Le_passw.setText("")
-        self.loginWin.ui.btn_login.setText("Ingresar")
+        self.subw_login.ui.Le_name.setDisabled(False)
+        self.subw_login.ui.Le_passw.setDisabled(False)
+        self.subw_login.ui.Le_name.setText("")
+        self.subw_login.ui.Le_passw.setText("")
+        self.subw_login.ui.btn_login.setText("Ingresar")
         self.btn_login.setText("Ingresar")
         self.lbl_name.setText("Desconectado")
         self.mdiArea.closeAll()
@@ -398,16 +408,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         name = self.apps["Login"][1]
         Z = self.apps["Login"][2]
         size = self.apps["Login"][4]
-        self.loginWin = frameSubMdi(Ui_login.MainLogin())
-        #self.loginWin = Ui_login.MainLogin()
-        self.loginWin.ui.btn_login.clicked.connect(self.login)
+        self.subw_login = FrameSubMdi(Ui_login.MainLogin())
+        #self.subw_login = Ui_login.MainLogin()
+        self.subw_login.ui.btn_login.clicked.connect(self.login)
         width = (self.size().width())/2
         height = (self.size().height())/2
         w=size[0]/2
         h=size[1]/2
         #print("width:{} , height:{} , w:{} , h:{} ".format(width, height, w, h))
         pos = [width-w, height-h]
-        self.createSubWindow(self.loginWin, name, Z, size=size, position=pos)
+        self.createSubWindow(self.subw_login, name, Z, size=size, position=pos)
 
     def activate_a(self):
         name = self.apps["A"][1]
@@ -418,7 +428,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         w=size[0]/2
         h=size[1]/2
         pos = [width-w, height-h]
-        self.createSubWindow(self.A, name, Z, size= size, position=pos)
+        self.createSubWindow(self.subw_a, name, Z, size= size, position=pos)
 
     def activate_z(self):
         name = self.apps["Z"][1]
@@ -429,7 +439,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         w=size[0]/2
         h=size[1]/2
         pos = [width-w, height-h]
-        self.createSubWindow(self.Z, name, Z, size= size, position=pos)
+        self.createSubWindow(self.subw_z, name, Z, size= size, position=pos)
 
     def activate_abr(self):
         name = self.apps["ABR"][1]
@@ -441,13 +451,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         w=size[0]/2
         h=size[1]/2
         pos = [width-w, height-h]
-        self.createSubWindow(self.ABR, name, Z, fix=fix, size=size,position=pos)
+        self.createSubWindow(self.subw_abr, name, Z, fix=fix, size=size,position=pos)
 
     def activate_Cvoice(self):
         name = self.apps["cVoice"][1]
         Z = self.apps["cVoice"][2]
         size = self.apps["cVoice"][4]
-        self.createSubWindow(self.cVoice, name, Z, size=size)
+        self.createSubWindow(self.subw_voice, name, Z, size=size)
 
     def activate_listWords(self):
         name = self.apps["W"][1]
@@ -457,7 +467,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if self.Modules.isFull(Z):
                 self.Modules.get(Z).show()
             else:
-                self.createSubWindow(self.W, name, Z, size=size)
+                self.createSubWindow(self.subw_w, name, Z, size=size)
         else:
             self.Modules.get(Z).hide()
 
@@ -466,13 +476,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.var_listWord.listSet(state, False)
         self.var_listWord.getAll(True)
         self.activate_listWords()
-        self.W.ui.playable[1] = state[2]
-        self.W.ui.playable[2] = state[3]
-        self.W.ui.playable[3] = state[4]
+        self.subw_w.ui.playable[1] = state[2]
+        self.subw_w.ui.playable[2] = state[3]
+        self.subw_w.ui.playable[3] = state[4]
         if state[1]:
-            self.W.ui.playable[0] = True
+            self.subw_w.ui.playable[0] = True
         else:
-            self.W.ui.playable[0] = False
+            self.subw_w.ui.playable[0] = False
 
 def request_API(data):
     URL = "https://tmeduca.cl/LabSim/module/API_v2.php"
@@ -501,11 +511,20 @@ class ReadThread(QThread):
 
 if __name__ == '__main__':
     # app = QApplication(sys.argv)
-    appctxt = ApplicationContext()
+    #appctxt = ApplicationContext()
+    #window = MainWindow()
+    # window.show()
+    #exit_code = appctxt.app.exec_()
+
+    #sys.exit(exit_code)
+    # sys.exit(app.exec_())
+
+
+    appctxt = ApplicationContext()       # 1. Instantiate ApplicationContext
     window = MainWindow()
     Preferences.getStyle(window)
-    # window.show()
-    exit_code = appctxt.app.exec_()
 
+    #window.resize(250, 150)
+    window.show()
+    exit_code = appctxt.app.exec()      # 2. Invoke appctxt.app.exec()
     sys.exit(exit_code)
-    # sys.exit(app.exec_())

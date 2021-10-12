@@ -1,6 +1,5 @@
-from fbs_runtime.application_context.PyQt5 import ApplicationContext
-from PyQt5.QtCore import QUrl
-from PyQt5.QtMultimedia import QMediaContent
+from fbs_runtime.application_context.PyQt6 import ApplicationContext
+from PyQt6.QtCore import QUrl
 import random
 
 from lib.helpers import Preferences
@@ -48,22 +47,22 @@ def create_sound(stim, f, ch):
         stim = stim_list_short[3]
 
     file = "ogg/{}_{}_{}.ogg".format(stim, f, ch)
-    result = QMediaContent(QUrl.fromLocalFile(appctxt.get_resource(file)))
+    result = QUrl.fromLocalFile(appctxt.get_resource(file))
     return result
 
-def create_voice(name, gender, id):
-    file = "ogg/{}_{}{}.ogg".format(name, gender, id)
-    result = QMediaContent(QUrl.fromLocalFile(appctxt.get_resource(file)))
+def create_voice(name, gender, idx):
+    file = "ogg/{}_{}{}.ogg".format(name, gender, idx)
+    result = QUrl.fromLocalFile(appctxt.get_resource(file))
     return result
 
 def create_word(name):
     file = "ogg/{}".format(name)
-    result = QMediaContent(QUrl.fromLocalFile(appctxt.get_resource(file)))
+    result = QUrl.fromLocalFile(appctxt.get_resource(file))
     return result
 
 def create_word_response(name, sex, number):
     file = "ogg/LP_palacios_r_{}{}_{}.ogg".format(sex, number, name)
-    result = QMediaContent(QUrl.fromLocalFile(appctxt.get_resource(file)))
+    result = QUrl.fromLocalFile(appctxt.get_resource(file))
     return result
 
 
