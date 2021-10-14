@@ -137,7 +137,7 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.lat_select_R.btn_wave_IIIp.clicked.connect(lambda:self.update_markers(1,2,0))
         self.lat_select_R.btn_wave_IVp.clicked.connect(lambda:self.update_markers(1,3,0))
         self.lat_select_R.btn_wave_Vp.clicked.connect(lambda:self.update_markers(1,4,0))
-        
+
         self.lat_select_L.btn_wave_I.clicked.connect(lambda:self.update_markers(0,0,1))
         self.lat_select_L.btn_wave_II.clicked.connect(lambda:self.update_markers(0,1,1))
         self.lat_select_L.btn_wave_III.clicked.connect(lambda:self.update_markers(0,2,1))
@@ -149,7 +149,7 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.lat_select_L.btn_wave_IIIp.clicked.connect(lambda:self.update_markers(1,2,1))
         self.lat_select_L.btn_wave_IVp.clicked.connect(lambda:self.update_markers(1,3,1))
         self.lat_select_L.btn_wave_Vp.clicked.connect(lambda:self.update_markers(1,4,1))
-        
+
         self.lat_select_R.btn_AB.clicked.connect(lambda: self.toogle_AB(0))
         self.lat_select_L.btn_AB.clicked.connect(lambda: self.toogle_AB(1))
         self.memAB = ["A", "A"]
@@ -165,7 +165,7 @@ class MainWindow(QWidget, Ui_ABRSim):
         if self.Sdata['sector'] == 'ABR':
             self.entry = False
         else:
-            self.entry = True
+            self.entry = False
 
     def upDown(self, side):
         widgets = self.sender()
@@ -234,8 +234,11 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.store[name] = [[[],[]],[[],[]],side, intencity, repro, view, gap]
         self.data.set_intencity(intencity)
         #x, y = self.data.get()
-        x, y, dx,dy = ABR_Curve(nHL=intencity, zeros=self.entry)
-        #print(dy)
+        if side == 0:
+            x, y, dx,dy = ABR_Curve(none=False, nHL=intencity, p_I=1.3, a_V = 0.6, zeros=False, VrelI = False)
+        else: 
+            x, y, dx,dy = ABR_Curve(none=True, nHL=intencity, p_I=1.3, a_V = 0.6, zeros=False, VrelI = False)
+
         self.store[name][0][0] = x
         self.store[name][0][1] = y
         self.disabledInCapture()
@@ -252,7 +255,7 @@ class MainWindow(QWidget, Ui_ABRSim):
 
     def updateFlagsCurves(self):
         for i in reversed(range( self.ctrl_curve_R.layout_curves.count())): 
-             self.ctrl_curve_R.layout_curves.itemAt(i).widget().deleteLater()
+            self.ctrl_curve_R.layout_curves.itemAt(i).widget().deleteLater()
         for i in reversed(range( self.ctrl_curve_L.layout_curves.count())): 
             self.ctrl_curve_L.layout_curves.itemAt(i).widget().deleteLater()
         btns_Left = list()
@@ -356,7 +359,7 @@ class MainWindow(QWidget, Ui_ABRSim):
 
         #if 'lat_A' in data or 'lat_B' in data:
         #    self.AB = [[data['lat_A'], data['lat_B']], [data,data]]
-        
+
     def update_markers(self, idx, subidx, side ):
         if side == 0:
             text = self.memAB[0]
@@ -364,10 +367,11 @@ class MainWindow(QWidget, Ui_ABRSim):
         else:
             text = self.memAB[1]
             self.grph_L.update_marks(idx,subidx,text)
-        
-        
-def ABR_Curve(nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, VrelI = True, zeros = False):
-    
+
+def ABR_Curve(none = False, nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, VrelI = True, zeros = False):
+    if none:
+        nHL = -15
+
     att = 0
     lam = 0
     varInt = abs(80 - nHL)
@@ -378,7 +382,7 @@ def ABR_Curve(nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, VrelI = True, ze
     else:
         sideAmp = -1
         sideLat = 1
-    
+
     if nHL >=50:
         fvarLat = .15
         fvarAmp = .06
@@ -387,7 +391,7 @@ def ABR_Curve(nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, VrelI = True, ze
         fvarAmp = .08
 
     att = (fvarLat * fvarInt) * sideLat
-    lam = (fvarAmp * fvarInt) * sideAmp
+    lam = (fvarAmp * fvarInt) * sideAmp/2
 
     peak_I =  p_I + att
     peak_II =  p_I+1+ att
@@ -401,8 +405,7 @@ def ABR_Curve(nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, VrelI = True, ze
     if amp_V < 0:
         amp_V = 0
 
-
-    VrelI = True
+    VrelI = VrelI
 
     if VrelI:
         var = random.uniform(0,0.2)
@@ -410,9 +413,9 @@ def ABR_Curve(nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, VrelI = True, ze
         amp_I = amp_I + lam
     else:
         var = random.uniform(0,0.2)
-        amp_I = amp_V / 1.5
+        amp_I = amp_V / 1
         amp_I = amp_I + lam
-    
+
     if amp_I < 0:
         amp_I = 0
 
@@ -427,9 +430,9 @@ def ABR_Curve(nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, VrelI = True, ze
     amp_III = 0.3 +lam
     if amp_III<0:
         amp_III = 0
-    
+
     amp_IIIp = 0
-    
+
     amp_VI = amp_V -.3
 
     if amp_VI < 0:
@@ -508,13 +511,20 @@ def ABR_Curve(nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, VrelI = True, ze
     # extract x & y coordinates of points
     x, y = points[:,0], points[:,1]
     px, py = path[:,0], path[:,1]
-
-    y_noise = np.random.normal(0, .01, py.shape)
+    if none:
+        y_noise = np.random.normal(0, .06, py.shape)
+    else:
+        y_noise = np.random.normal(0, .03, py.shape)
     y_new = py + y_noise
 
     if zeros:
         px = np.zeros(20)
         y_new = np.zeros(20)
+
+  
+
+
+
     return px, y_new, x, y
 
 #px, y_new = ABR_Curve()
