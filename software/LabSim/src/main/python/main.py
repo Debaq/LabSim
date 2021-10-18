@@ -18,8 +18,8 @@ import time
 import requests
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QPoint
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QMdiSubWindow, QMessageBox,
-                             QPushButton, QGroupBox, QHBoxLayout, QWidget, QMdiArea, QMenu, QAction)
+from PyQt5.QtWidgets import ( QMainWindow, QMdiSubWindow, QMessageBox,
+                             QPushButton,  QWidget, QMdiArea, QMenu)
 from PyQt5.QtGui import QPixmap, QPainter
 
 
@@ -248,7 +248,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         func(self)
 
     def change_state_btn_areas(self, b):
-        box = self.Boxs[b]
+        #box = self.Boxs[b]
         #for area in box[1]:
         for i in self.frameAction.findChildren(QPushButton):
         #if i.objectName() == area:

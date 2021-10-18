@@ -7,12 +7,8 @@
 #                                                               #
 #   NOTA: si no hablas español, no es mi culpa, aprende         #
 #################################################################
-import sys
-from typing import Text
-
 import numpy as np
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
-from PyQt5 import QtCore
 from PyQt5.QtCore import QTimer, pyqtSignal
 from PyQt5.QtGui import QFont, QKeySequence
 from PyQt5.QtMultimedia import QMediaPlayer
@@ -65,9 +61,7 @@ _THR_ = [
 ]
 
 
-def print_sound(indata, outdata, frames, time, status):
-    volume_norm = np.linalg.norm(indata)*10
-    #print(int(volume_norm))
+
 
 
 class Audiometer(QWidget, Ui_Audiometer):
