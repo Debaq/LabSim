@@ -6,49 +6,40 @@
 #               CREADOR : NICOLÁS QUEZADA QUEZADA               #
 #                                                               #
 #################################################################
-import sys
-from PyQt6 import QtCore
-from PyQt6.QtWidgets import QApplication, QWidget
-from fbs_runtime.application_context.PyQt6 import ApplicationContext
-from lib.helpers import Preferences
-from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 import random
+
+from PyQt6 import QtCore
+from PyQt6.QtMultimedia import QAudioOutput, QMediaPlayer
+from PyQt6.QtWidgets import QWidget
 
 from lib.h_audio import create_word, create_word_response
 from lib.logoaudiometry import CalculateLogo
-
 from UI.Ui_ListWord import Ui_ListWords
-
 
 
 class ListWords(QWidget, Ui_ListWords):
     def __init__(self,data):
         QWidget.__init__(self)
         # Inicialización de la ventana y propiedades
-        self.laSuper(data)
-        
-        
+        self.la_super(data)
         self.setupUi(self)
         #self.channel_0 = QMediaPlayer(self)
         self.output_ch = QAudioOutput()
         self.channel_0 = QMediaPlayer()
-        self.channel_0.setAudioOutput(self.channel_0)
+        self.channel_0.setAudioOutput(self.output_ch)
         self.playable = [False, 0, None, False]
         self.time_1 = QtCore.QTimer(self)
         self.time_1.timeout.connect(self.timer)
         self.time_2 = QtCore.QTimer(self)
         self.time_2.timeout.connect(self.wait)
         self.wait_count = [10, 0]
-        self.prevINT = 0
-
+        self.prev_int = 0
         self.continue_response = True
         self.list_response = [
                             0,0,0,0,0,0,0,0,0,0,
                             0,0,0,0,0,0,0,0,0,0,
                             0,0,0,0,0
                             ]
-
-
         self.btn_l1.clicked.connect(lambda:self.pushaudio(1))
         self.btn_l2.clicked.connect(lambda:self.pushaudio(2))
         self.btn_l3.clicked.connect(lambda:self.pushaudio(3))
@@ -179,28 +170,30 @@ class ListWords(QWidget, Ui_ListWords):
         self.btn_h24.clicked.connect(lambda:self.pushaudio(24))
         self.btn_h25.clicked.connect(lambda:self.pushaudio(25))
 
-    def laSuper(self, data):
+    def la_super(self, data):
         if data['sector'] == "Camara_sono":
-            self.isResponse = True
+            self.is_response = True
         else:
-            self.isResponse = False
+            self.is_response = False
         gender = data['gender']
-        id = data['id']
+        ide = data['id']
         if gender == 0 :
             self.gender = "feme"
         else:
             self.gender = "male"
-        self.id = id
+        self.id = ide
         UMD = data["UMD"]
-        self.isMkg = self.ifMkg(data)
+        self.is_mkg = self.ifMkg(data)
         prev = CalculateLogo(data, UMD)
         self.error_list = prev.get()
 
     def ifMkg(self, data):
         mkg = False
         side = 0
-        OD = (data["Ósea_mkg"][2][0] + data["Ósea_mkg"][3][0] + data["Ósea_mkg"][4][0] + data["Ósea_mkg"][6][0])/4
-        OI = (data["Ósea_mkg"][2][1] + data["Ósea_mkg"][3][1] + data["Ósea_mkg"][4][1] + data["Ósea_mkg"][6][1])/4
+        OD = (data["Ósea_mkg"][2][0] + data["Ósea_mkg"][3][0]
+            + data["Ósea_mkg"][4][0] + data["Ósea_mkg"][6][0])/4
+        OI = (data["Ósea_mkg"][2][1] + data["Ósea_mkg"][3][1]
+            + data["Ósea_mkg"][4][1] + data["Ósea_mkg"][6][1])/4
         dif = abs(OD - OI)
         if dif >= 35:
             mkg = True
@@ -210,9 +203,6 @@ class ListWords(QWidget, Ui_ListWords):
                 side=1
         result = [side, mkg]
         return result
-
-
-
 
     def pushaudio(self, num):
         self.num = num
@@ -248,7 +238,7 @@ class ListWords(QWidget, Ui_ListWords):
                 self.time_2.start(ran_time)
     
     def wait(self):
-        if self.isResponse:        
+        if self.is_response:        
             self.response()
         self.time_1.stop()
         self.time_2.stop()
@@ -267,15 +257,14 @@ class ListWords(QWidget, Ui_ListWords):
             pass
 
     def changecalcule(self):
-        if self.prevINT != self.playable[1]:
+        if self.prev_int != self.playable[1]:
             if self.playable[2] != None:
                 self.calculate(self.playable[2])
-                self.prevINT = self.playable[1]
+                self.prev_int = self.playable[1]
             else:
                 self.playable[1] = 20
                 self.calculate(0)
-                self.prevINT = 20
-               
+                self.prev_int = 20
         else:
             pass
 
@@ -284,11 +273,10 @@ class ListWords(QWidget, Ui_ListWords):
             contra = 1
         else:
             contra = 0
-
         result = []
 
-        if self.isMkg[1]:
-            if self.isMkg[0] == side and self.playable[3] == False:
+        if self.is_mkg[1]:
+            if self.is_mkg[0] == side and self.playable[3] == False:
             #La logo no funciona en masking
                 data = self.error_list[contra]
             else:
@@ -320,9 +308,9 @@ class ListWords(QWidget, Ui_ListWords):
         elif intencity > keys[-1]:
             range_correct = value[-1]
             range_error = 25 - range_correct
-            for i in range(range_correct):
+            for _ in range(range_correct):
                 result.append(1)
-            for i in range(range_error):
+            for _ in range(range_error):
                 result.append(0)
             random.shuffle(result)
         else:

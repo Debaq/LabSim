@@ -41,19 +41,3 @@ class dataFrame():
     
     def array2d(self):
         return self.data.values.tolist()
-        
-        
-        
-"""
-dicvalue={}
-
-for x in newHeader:
-    y = csv[x].tolist()
-    dicvalue[x] = y
-
-
-
-print(dicvalue['D'])
-
-
-"""

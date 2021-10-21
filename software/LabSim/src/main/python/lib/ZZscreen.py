@@ -8,14 +8,8 @@ from UI.Ui_Z_screen_z import Ui_Z_zscreen
 class ZZscreen(QWidget, Ui_Z_zscreen):
     def __init__(self):
         # Inicialización de la ventana y propiedades
-        print("iniciando wid")
-        
         QWidget.__init__(self)
-        print("iniciando wid 2")
-        
         self.setupUi(self)
-        print("iniciado setup")
-
         self.create_graph()
 
     def create_graph(self, clear=False):
@@ -27,31 +21,17 @@ class ZZscreen(QWidget, Ui_Z_zscreen):
         color = pg.mkColor(85,170,255,255)
         pg.setConfigOption('background', color)
         pg.setConfigOption('foreground', 'w')
-        print("hasta aca todo ok 0")
-
         self.pw1 = pg.PlotWidget(name='Plot1', background='default')
-        print("hasta aca todo ok 1")
-
         self.pw1.setXRange(-405,205)
         self.pw1.setYRange(0,1.8)
-        print("hasta aca todo ok 2")
-
         self.pw1.setLabel('left', '', units ='ml')
         self.pw1.setLabel('bottom', '', units ='daPa')
-        print("hasta aca todo ok 3")
-
         self.pw1.setMouseEnabled(x=False, y=False)
         self.pw1.setMenuEnabled(False)
-        print("hasta aca todo ok 4")
-
         pen1 = pg.mkPen('w', width=1, style=Qt.PenStyle.DashLine)          ## Make a dashed yellow line 2px wide
         self.inf1 = pg.InfiniteLine(movable=False, angle=90, pen=pen1)
-        print("hasta aca todo ok 5")
-
         self.pw1.addItem(self.inf1)
         self.ploty = self.pw1.plot()
-        print("hasta aca todo ok 6")
-
         self.graph.addWidget(self.pw1)
     
     def update_graph(self, x,y):

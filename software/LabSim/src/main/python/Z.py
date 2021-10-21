@@ -23,9 +23,7 @@ class ZControl(QWidget, Ui_Z_control):
         #QWidget.__init__(self)
         super(ZControl, self).__init__()
         self.setupUi(self)
-        print("comenzando Z")
         self.Z = ZZscreen()
-        print("cargado zscree")
 
         self.Screen_Layout.addWidget(self.Z)
 
