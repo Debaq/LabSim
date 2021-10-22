@@ -17,7 +17,7 @@ import time
 import requests
 from fbs_runtime.application_context.PyQt6 import ApplicationContext
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint
-from PyQt6.QtWidgets import (QMainWindow, QMdiSubWindow, QMessageBox,
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QMdiSubWindow, QMessageBox,
                              QPushButton, QWidget, QMdiArea, QMenu)
 from PyQt6.QtGui import QPixmap, QPainter, QCursor
 
@@ -484,9 +484,11 @@ class ReadThread(QThread):
 
 
 if __name__ == '__main__':
+    app = QApplication([])
     appctxt = ApplicationContext()
     window = MainWindow()
     Preferences.getStyle(window)
+    app.setStyle('Fusion')
     window.show()
     exit_code = appctxt.app.exec()
     sys.exit(exit_code)
