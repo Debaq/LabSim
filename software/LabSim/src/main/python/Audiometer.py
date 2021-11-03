@@ -10,7 +10,6 @@
 from typing import Text
 
 import numpy as np
-from fbs_runtime.application_context.PyQt6 import ApplicationContext
 from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtGui import QFont, QKeySequence, QShortcut
 from PyQt6.QtMultimedia import QAudioOutput, QMediaPlayer
@@ -20,10 +19,11 @@ from PyQt6.QtWidgets import QWidget
 from lib.h_audio import (calibrate, create_frecuency, create_intency,
                          create_sound, create_word, data_basic)
 from lib.helpers import Preferences
-from lib.response_A import Response 
+from lib.response_A import Response
+from base import context
 from UI.Ui_Audiometer import Ui_Audiometer
 
-appctxt = ApplicationContext()
+context
 class_pref = Preferences()
 keyboard_shortcuts = class_pref.get("keyboard_shortcuts")
 session = class_pref.get("session_pred")

@@ -51,7 +51,7 @@ class ZControl(QWidget, Ui_Z_control):
         self.store_data = [Storage(2), Storage(2)]
         self.new = [True, True]
 
-    def laSuper(self, data):
+    def la_super(self, data):
         self.data = data
         if data['sector'] == 'Z_OI' or data['sector'] == 'Z_OD':
             self.preCharger()

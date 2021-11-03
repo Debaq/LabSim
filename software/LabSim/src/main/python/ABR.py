@@ -14,7 +14,6 @@ import sys
 
 import numpy as np
 
-from fbs_runtime.application_context.PyQt6 import ApplicationContext
 from PyQt6.QtWidgets import QPushButton, QWidget
 from PyQt6.QtGui import QFont
 
@@ -518,5 +517,3 @@ def ABR_Curve(nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, VrelI = True, ze
 
 #px, y_new = ABR_Curve()
 
-if __name__ == '__main__':
-    pass

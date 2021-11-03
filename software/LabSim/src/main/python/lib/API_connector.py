@@ -22,7 +22,7 @@ class API:
     """
     def __init__(self, URL):
         self.URL = URL
-        
+
     def send_requests(self, data):
         """
         Envia solicitudes mediante POST a la API correspondiente.
@@ -38,16 +38,13 @@ class API:
        # print(string_response)
 
         try:
-            result = json.loads(string_response)
-            return result
+            return json.loads(string_response)
         except:
             pass
             #print(string_response)
 
     def exit(self, user):
-        t_request = "close_session"
-        request_array = {'request':t_request, 'user':user}
-        return self.send_requests(request_array)
+        return self._extracted_from_read_data_2("close_session", 'user', user)
         
     def send_requests_s(self, data):
         """
@@ -60,18 +57,11 @@ class API:
             json : diccionario con la info retornada desde la API.
         """
         response = requests.post(self.URL, data=data)
-        string_response=(response.text)
+        return (response.text)
     
-        #result = json.loads(string_response)
-        
-        #print(string_response)
-        return string_response
-
     def r_key(self, **kwargs):
         """conexión a la APi con un código predefinido"""
-
         t_request = "login"
-
         if "name" in kwargs:
             name_user = kwargs['name']
             password = kwargs['pasw']
@@ -80,11 +70,9 @@ class API:
             code = kwargs['code']
             name_user = "code3216"
             password = "00000"
-
         request_array = {'request':t_request, 'user':name_user, 'password':password, 'code':code}
-        
         return self.send_requests(request_array)
-    
+
 
 
     def read_data(self, code):
@@ -97,20 +85,22 @@ class API:
         Returns:
             json: diccionario con los datos.
         """
-        t_request = "read_data"
-        request_array = {'request':t_request, 'code':code}
-        result = self.send_requests(request_array)
-        #result = result[0]
-        return result
+        return self._extracted_from_read_data_2("read_data", 'code', code)
+
+    # TODO Rename this here and in `exit` and `read_data`
+    def _extracted_from_read_data_2(self, arg0, arg1, arg2):
+        t_request = arg0
+        request_array = {'request': t_request, arg1: arg2}
+        return self.send_requests(request_array)
 
 
     def create_session(self, **kwargs):
         """
         Crea una sesión, retorna el código de la sesión"""
-        t_request = "create_session"
         if "code" in kwargs:
             code = kwargs['code']
 
+            t_request = "create_session"
             request_array = {'request':t_request, 'code':code}
             self.send_requests(request_array)
 
@@ -129,9 +119,8 @@ class API:
         t_request = "write_data"
         data = json.dumps(data)
         request_array = {'request':t_request,'user': user, 'code':code, 'data':data}
-        result = self.send_requests(request_array)
         #result = result[0]
-        return result
+        return self.send_requests(request_array)
 
 
 class PostData:
@@ -147,7 +136,6 @@ class PostData:
         self.data_old = self.request.read_data(self.session)
 
     def send(self, data, online=True):
-        
         #data = data
         if online:
             for key, value in data.items():
@@ -156,8 +144,6 @@ class PostData:
                         datum = {key: value}
                         self.data_old = self.request.write_data(
                             self.session, datum, self.user)
-                    else:
-                        pass
                 else:
                     datum = {key: value}
                     self.data_old = self.request.write_data(

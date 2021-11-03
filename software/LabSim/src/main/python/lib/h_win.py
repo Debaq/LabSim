@@ -1,7 +1,9 @@
+from base import context
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QWidget
-
+from PyQt6.QtGui import QPainter, QPixmap
+from PyQt6.QtWidgets import QMdiArea, QWidget, QMenu
 from UI.Ui_frameSubMdi import Ui_Form as UI_frameSubMdi
+
 
 class MoveWin():
     def __init__(self, window):
@@ -48,3 +50,44 @@ class FrameSubMdi(QWidget, UI_frameSubMdi):
         self.barra.mousePressEvent = movewin.press_window
         self.barra.mouseMoveEvent = movewin.move_window
         self.barra.mouseReleaseEvent = movewin.release_window
+
+
+
+class MdiArea(QMdiArea):
+    def __init__(self):
+        super().__init__()
+        self.mousePressEvent = self.move_window
+        self.documentMode = True
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        if self.currentSubWindow() is None:
+
+            painter = QPainter(self.viewport())
+            width = event.rect().width()
+            height = event.rect().height()
+            img = QPixmap(context.get_resource("img/LogoBN.png"))
+            img_x = width/2 - 200/2
+            img_y = height/2 - 200/2
+            painter.drawPixmap(int(img_x), int(img_y), 200, 200, img)
+            painter.end()
+
+    def move_window(self, event):
+        if event.buttons() == Qt.MouseButton.RightButton:
+            context_menu = QMenu(self)
+            ordenar = context_menu.addMenu("Ordenar")
+            ordenar.addAction("Cascada", self.cascadeSubWindows)
+            ordenar.addAction("Azulejos", self.tileSubWindows)
+            ordenar.addAction("Cerrar todo", self.closeAll)
+            context_menu.exec(self.mapToGlobal(event.pos()))
+
+    def closeAll(self):
+        i = self.parent().parent().parent()
+        try:
+            for j in i.Modules.length(True):
+                if i.Modules.get(j) != None:
+                    i.Modules.get(j).hide()
+        except AttributeError:
+            print("No existe modulos")

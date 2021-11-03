@@ -11,21 +11,19 @@
 
 import json
 import codecs
-from fbs_runtime.application_context.PyQt6 import ApplicationContext
-
-appctxt = ApplicationContext()
+from base import context
 
 
 class Preferences:
     """preferencias del programa"""
 
     def __init__(self):
-        preferences_file = appctxt.get_resource('json/json_list.json')
+        preferences_file = context.get_resource('json/json_list.json')
         with codecs.open(preferences_file, 'r', 'utf-8') as json_file:
             list_data = json.load(json_file)
         self.data = {}
         for i in list_data:
-            file = appctxt.get_resource('json/{}'.format(list_data[i]))
+            file = context.get_resource('json/{}'.format(list_data[i]))
             with codecs.open(file, 'r', 'utf-8') as json_file:
                 data = json.load(json_file)
             self.data.update(data)
@@ -53,7 +51,7 @@ class Preferences:
     def getStyle(self, wid):
         stylePred = self.data["styles"][0]
         style = self.data["styles"][1][stylePred]
-        style = appctxt.get_resource('styles/{}.qss'.format(style))
+        style = context.get_resource('styles/{}.qss'.format(style))
         with open(style,"r") as fh:
             wid.setStyleSheet(fh.read())
 
@@ -78,7 +76,7 @@ class Lang:
     def __init__(self):
         class_pref = Preferences()
         lang = class_pref.get("Lang")
-        file_po = appctxt.get_resource('json/{}.json'.format(lang))
+        file_po = context.get_resource('json/{}.json'.format(lang))
         with codecs.open(file_po, 'r', 'utf-8') as json_file:
             self.lng_po = json.load(json_file)
 

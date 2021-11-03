@@ -15,22 +15,20 @@ import sys
 import time
 
 import requests
-from fbs_runtime.application_context.PyQt6 import ApplicationContext
-from PyQt6.QtCore import Qt, QThread, pyqtSignal, QPoint
-from PyQt6.QtWidgets import (QApplication, QMainWindow, QMdiSubWindow, QMessageBox,
-                             QPushButton, QWidget, QMdiArea, QMenu)
-from PyQt6.QtGui import QPixmap, QPainter, QCursor
-
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QMdiSubWindow,
+                             QMessageBox, QPushButton, QWidget)
 
 import ABR
 import Audiometer
 import ListWords
 import login as Ui_login
 import Z
+from base import context
+from lib.h_win import FrameSubMdi, MdiArea
 from lib.helpers import Preferences, Storage
-from UI.Ui_Main import Ui_MainWindow
 from UI.Ui_command_voice_A import Ui_Form as commandVoiceA
-from lib.h_win import FrameSubMdi, MoveWin
+from UI.Ui_Main import Ui_MainWindow
 
 Preferences = Preferences()
 APPS = Preferences.get("APP")
@@ -38,50 +36,6 @@ SECTORS = Preferences.get("SECTORS")
 BOXS = Preferences.get("BOXS")
 STYLES = Preferences.get("styles")
 LANGUAJE = Preferences.get("lang")
-
-
-    
-
-class MdiArea(QMdiArea):
-    def __init__(self):
-        super(MdiArea, self).__init__()
-        self.mousePressEvent = self.move_window
-        self.documentMode = True
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-
-    def paintEvent(self, event):
-        super().paintEvent(event)
-        if self.currentSubWindow() is None:
-            # call the base implementation to draw the default colored background
-            # create the painter *on the viewport*
-            painter = QPainter(self.viewport())
-            w = event.rect().width()
-            h = event.rect().height()
-            img = QPixmap(appctxt.get_resource("img/LogoBN.png"))
-            img_x = w/2 - 200/2
-            img_y = h/2 - 200/2
-            painter.drawPixmap(int(img_x), int(img_y), 200, 200, img)
-            painter.end()
-
-    def move_window(self, e):
-        if e.buttons() == Qt.RightButton:  
-            contextMenu = QMenu(self)
-            ordenar=contextMenu.addMenu("Ordenar")
-            ordenar.addAction("Cascada", self.cascadeSubWindows)
-            ordenar.addAction("Azulejos", self.tileSubWindows)
-            ordenar.addAction("Cerrar todo", self.closeAll)
-            contextMenu.exec_(self.mapToGlobal(e.pos()))
-
-    def closeAll(self):
-        i = self.parent().parent().parent()
-        try:
-            for j in i.Modules.length(True):
-                if i.Modules.get(j) != None:
-                    i.Modules.get(j).hide()
-        except:
-            pass
-
 
 class ComandVoiceA(QWidget, commandVoiceA):
     btn_checked = pyqtSignal(str)
@@ -119,13 +73,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.subw_w = None
         self.subw_abr = None
         self.subw_voice = None
-        
+        self.subw_login = FrameSubMdi(Ui_login.MainLogin())
+        self.subw_login.ui_ui.btn_login.clicked.connect(self.login)
+        self.subw = {"LOGIN": self.subw_login}
+       
     def configure_btn(self):
         #BTNS
         self.btn_salir.clicked.connect(self.close)
         self.btn_min.clicked.connect(self.showMinimized)
         self.btn_max.clicked.connect(self.toggle_MaxMin)
-        self.btn_login.clicked.connect(self.activate_login)
+        self.btn_login.clicked.connect(self.activate_soft)
 
     def create_stores(self):
         #Create Stores and variables
@@ -194,33 +151,35 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def chargeBtnsArea(self, area):
         for i in self.boxs[area][1]:
             btn = QPushButton('{}'.format(i))
-            btn.setObjectName(i)
+            btn.setObjectName("btn_{}".format(i))
             btn.clicked.connect(self.activate_soft)
             tooltip = self.apps[i][1]
             btn.setToolTip(tooltip)
             btn.setCheckable(True)
             self.layoutTest.addWidget(btn)
-            btn.setDisabled(True)
+            state = self.apps[i][5] == "development"
+            btn.setDisabled(state)
             btn.setMaximumHeight(25)
             btn.setMaximumWidth(40)
-            #parent = self.frameAction.findChild(QHBoxLayout,area)
-            #parent.addWidget(btn)
 
     def btns_actions(self):
         #command
         self.btn_cmd_voice = QPushButton("comandos de voz")
-        self.btn_cmd_voice.clicked.connect(self.activate_Cvoice)
+        self.btn_cmd_voice.setObjectName("btn_CVOICE")
+        self.btn_cmd_voice.clicked.connect(self.activate_soft)
         self.layoutAction.addWidget(self.btn_cmd_voice)
 
     def activate_soft(self):
         widget = self.sender()
-        objName = widget.objectName()
-        m = globals()['MainWindow']
-        print(m.__dict__.values())
+        btn_name = widget.objectName()
+        _, obj_name = btn_name.split("_")
+        obj_name = obj_name.upper()
+        #m = globals()['MainWindow']
+        #print(m.__dict__.values())
         #print(dir(self.createInsWidegt))
 
-        sub = getattr(m, 'subw_{}'.format(objName.lower()))
-        self.activate_subwindow(objName, sub)
+        #sub = getattr(m, 'subw_{}'.format(objName.lower()))
+        self.activate_subwindow(obj_name, self.subw[obj_name])
         #func(self)
 
     def changeStateBtnAreas(self, b):
@@ -267,7 +226,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     "Z":self.subw_z, 
                     "W": self.subw_w, 
                     "ABR": self.subw_abr,
-                    "cVoice": self.subw_voice}
+                    "CVOICE": self.subw_voice}
 
     def create_sub_window(self, widg, name, pos_z, fix=(True, True),
                         size=(740,560), position=(0,0)):
@@ -303,7 +262,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.data = data
         if self.new_login:
             self.createInsWidegt(self.data)
-            print("creados")
             self.btns_seccion()
             self.new_login = False
         self.changeStateBtnAreas(self.data["box"])
@@ -314,7 +272,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if self.prev_patient != self.data['sector']:
                 self.subw_a.ui_ui.la_super(self.data)
                 self.subw_w.ui_ui.la_super(self.data)
-                self.subw_z.ui_ui.laSuper(self.data)
+                self.subw_z.ui_ui.la_super(self.data)
                 self.prev_patient = self.data['sector']
             self.subw_abr.ui_ui.laSuper(self.data)
         self.statusbar.showMessage(text)
@@ -369,21 +327,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #self.close()
 
 ###Activate subwindows
-    def activate_login(self):
-        name = self.apps["Login"][1]
-        pos_z = self.apps["Login"][2]
-        size = self.apps["Login"][4]
-        self.subw_login = FrameSubMdi(Ui_login.MainLogin())
-        #self.subw_login = Ui_login.MainLogin()
-        self.subw_login.ui_ui.btn_login.clicked.connect(self.login)
-        width = (self.size().width())/2
-        height = (self.size().height())/2
-        width_div2=size[0]/2
-        height_div2=size[1]/2
-        #print("width:{} , height:{} , w:{} , h:{} ".format(width, height, w, h))
-        pos = [width-width_div2, height-height_div2]
-        self.create_sub_window(self.subw_login, name, pos_z, size=size, position=pos)
-
+  
     def activate_subwindow(self, app: str, submdi: FrameSubMdi) -> None:
         name = self.apps[app][1]
         pos_z = self.apps[app][2]
@@ -395,46 +339,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         h_submdi=size[1]/2
         pos = [width-w_submdi, height-h_submdi]
         self.create_sub_window(submdi, name, pos_z=pos_z, fix=fix, size=size,position=pos)
-
-    def activate_a(self):
-        name = self.apps["A"][1]
-        pos_z = self.apps["A"][2]
-        size = self.apps["A"][4]
-        width = (self.size().width())/2
-        height = (self.size().height())/2
-        w=size[0]/2
-        h=size[1]/2
-        pos = [width-w, height-h]
-        self.create_sub_window(self.subw_a, name, pos_z, size= size, position=pos)
-
-    def activate_z(self):
-        name = self.apps["Z"][1]
-        pos_z = self.apps["Z"][2]
-        size = self.apps["Z"][4]
-        width = (self.size().width())/2
-        height = (self.size().height())/2
-        w=size[0]/2
-        h=size[1]/2
-        pos = [width-w, height-h]
-        self.create_sub_window(self.subw_z, name, pos_z, size= size, position=pos)
-
-    def activate_abr(self):
-        name = self.apps["ABR"][1]
-        pos_z = self.apps["ABR"][2]
-        fix = self.apps["ABR"][3]
-        size = self.apps["ABR"][4]
-        width = (self.size().width())/2
-        height = (self.size().height())/2
-        w=size[0]/2
-        h=size[1]/2
-        pos = [width-w, height-h]
-        self.create_sub_window(self.subw_abr, name, pos_z, fix=fix, size=size,position=pos)
-
-    def activate_Cvoice(self):
-        name = self.apps["cVoice"][1]
-        pos_z = self.apps["cVoice"][2]
-        size = self.apps["cVoice"][4]
-        self.create_sub_window(self.subw_voice, name, pos_z, size=size)
 
     def activate_listWords(self):
         name = self.apps["W"][1]
@@ -482,13 +386,10 @@ class ReadThread(QThread):
                 response['result'] = 1
             self.data_signal.emit(response)
 
-
 if __name__ == '__main__':
-    app = QApplication([])
-    appctxt = ApplicationContext()
+    #app = QApplication([])
     window = MainWindow()
     Preferences.getStyle(window)
-    app.setStyle('Fusion')
     window.show()
-    exit_code = appctxt.app.exec()
+    exit_code = context.app.exec()
     sys.exit(exit_code)

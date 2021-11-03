@@ -1,10 +1,9 @@
-from fbs_runtime.application_context.PyQt6 import ApplicationContext
 from PyQt6.QtCore import QUrl
 import random
 
+from base import context
 from lib.helpers import Preferences
 
-appctxt = ApplicationContext()
 class_pref = Preferences()
 stim_list = class_pref.get("stim_list")
 stim_list_short = class_pref.get("stim_list_short")
@@ -47,22 +46,22 @@ def create_sound(stim, f, ch):
         stim = stim_list_short[3]
 
     file = "ogg/{}_{}_{}.ogg".format(stim, f, ch)
-    result = QUrl.fromLocalFile(appctxt.get_resource(file))
+    result = QUrl.fromLocalFile(context.get_resource(file))
     return result
 
 def create_voice(name, gender, idx):
     file = "ogg/{}_{}{}.ogg".format(name, gender, idx)
-    result = QUrl.fromLocalFile(appctxt.get_resource(file))
+    result = QUrl.fromLocalFile(context.get_resource(file))
     return result
 
 def create_word(name):
     file = "ogg/{}".format(name)
-    result = QUrl.fromLocalFile(appctxt.get_resource(file))
+    result = QUrl.fromLocalFile(context.get_resource(file))
     return result
 
 def create_word_response(name, sex, number):
     file = "ogg/LP_palacios_r_{}{}_{}.ogg".format(sex, number, name)
-    result = QUrl.fromLocalFile(appctxt.get_resource(file))
+    result = QUrl.fromLocalFile(context.get_resource(file))
     return result
 
 
