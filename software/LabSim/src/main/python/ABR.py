@@ -118,7 +118,7 @@ class MainWindow(QWidget, Ui_ABRSim):
 
         self.layout_graph_R.addWidget(self.grph_R.win)
         self.layout_graph_L.addWidget(self.grph_L.win)
-        self.store = dict()
+        self.store = {}
         self.data = ABR_creator()
 
         self.grph_R.data_info.connect(self.update_data)
@@ -162,21 +162,17 @@ class MainWindow(QWidget, Ui_ABRSim):
 
     def laSuper(self, data):
         self.Sdata = data
-        if self.Sdata['sector'] == 'ABR':
-            self.entry = False
-        else:
-            self.entry = False
+        self.entry = False
 
     def upDown(self, side):
         widgets = self.sender()
         direction = widgets.objectName()
         _,text= direction.split('_')
         curve = self.currentCurve[side]
-        if side == 0:
-            if curve is not None:
+        if curve is not None:
+            if side == 0:
                 self.grph_R.move_graph(text)
-        else:
-            if curve is not None:
+            else:
                 self.grph_L.move_graph(text)
 
     def toogle_AB(self, side):
@@ -207,7 +203,7 @@ class MainWindow(QWidget, Ui_ABRSim):
         if side == 'R':
             side = 0
             self.grph_R.activeCurve(objName, 0)
-        else: 
+        else:
             side = 1
             self.grph_L.activeCurve(objName, 1)
         self.currentCurve[side] = objName
@@ -258,8 +254,8 @@ class MainWindow(QWidget, Ui_ABRSim):
             self.ctrl_curve_R.layout_curves.itemAt(i).widget().deleteLater()
         for i in reversed(range( self.ctrl_curve_L.layout_curves.count())): 
             self.ctrl_curve_L.layout_curves.itemAt(i).widget().deleteLater()
-        btns_Left = list()
-        btns_Right = list()
+        btns_Left = []
+        btns_Right = []
         for k in self.store:
             if self.store[k][5]:
                 y, x = k.split('_')
@@ -278,11 +274,9 @@ class MainWindow(QWidget, Ui_ABRSim):
 
     def btnFlags(self, btns, side):
         def style(side):
-            if side == 0:
-                color = "255,0,0"
-            else:
-                color = "0,0,255"
-            style = ("""
+            color = "255,0,0" if side == 0 else "0,0,255"
+            return (
+                """
                 QWidget {}
                     color: rgb(0, 0, 0);
                     background-color: rgb({});
@@ -290,8 +284,8 @@ class MainWindow(QWidget, Ui_ABRSim):
                     border-width: 0px;
 
                 {}
-                """).format("{",color,"}")
-            return style
+                """
+            ).format("{", color, "}")
         for i in range(len(btns)):
             btn = QPushButton('{}'.format(btns[i][0]))
             btn.setObjectName(btns[i][1])
@@ -312,9 +306,9 @@ class MainWindow(QWidget, Ui_ABRSim):
                 self.ctrl_curve_L.layout_curves.addWidget(btn)
 
     def numberName(self, name, ltr, tin, gap):
-        n = list()
-        g = list()
-        db = list()
+        n = []
+        g = []
+        db = []
         for i in self.store:
             dbi,x = i.split('_')
             l,num = x.split(':')
@@ -331,7 +325,7 @@ class MainWindow(QWidget, Ui_ABRSim):
         return name , resultG
 
     def calGap(self, name, ltr, tin, gap):
-        g = list()
+        g = []
         for i in self.store:
             _,x = i.split('_')
             l,_ = x.split(':')
@@ -339,8 +333,7 @@ class MainWindow(QWidget, Ui_ABRSim):
                 g.append(self.store[i][6])
 
         g.sort(reverse=True)
-        resultG = g[-1] -0.4
-        return resultG
+        return g[-1] -0.4
 
     def disabledInCapture(self, dis = True):
         self.detail.btn_start.setDisabled(dis)
@@ -376,7 +369,7 @@ def ABR_Curve(none = False, nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, Vr
     lam = 0
     varInt = abs(80 - nHL)
     fvarInt = varInt/5
-    if 80 < nHL:
+    if nHL > 80:
         sideAmp = 1
         sideLat = -1
     else:
@@ -399,26 +392,16 @@ def ABR_Curve(none = False, nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, Vr
     peak_III =  p_III + att
     peak_V =  p_V + att
 
-    peak_IV = peak_V-.5 
+    peak_IV = peak_V-.5
     end = 12 + att
     amp_V = a_V + lam
-    if amp_V < 0:
-        amp_V = 0
-
+    amp_V = max(amp_V, 0)
     VrelI = VrelI
 
-    if VrelI:
-        var = random.uniform(0,0.2)
-        amp_I = amp_V / 3
-        amp_I = amp_I + lam
-    else:
-        var = random.uniform(0,0.2)
-        amp_I = amp_V / 1
-        amp_I = amp_I + lam
-
-    if amp_I < 0:
-        amp_I = 0
-
+    var = random.uniform(0,0.2)
+    amp_I = amp_V / 3 if VrelI else amp_V / 1
+    amp_I = amp_I + lam
+    amp_I = max(amp_I, 0)
     amp_Ip = -(amp_I/2)
     amp_II = amp_Ip+0.1
     amp_IIp = amp_II-.02
@@ -428,16 +411,12 @@ def ABR_Curve(none = False, nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, Vr
         amp_IIp=0
 
     amp_III = 0.3 +lam
-    if amp_III<0:
-        amp_III = 0
-
+    amp_III = max(amp_III, 0)
     amp_IIIp = 0
 
     amp_VI = amp_V -.3
 
-    if amp_VI < 0:
-        amp_VI = 0
-
+    amp_VI = max(amp_VI, 0)
     curve_cm = (0.6+att, 0.15)
     curve_cmp = (0.7+att, -0.05)
 
@@ -458,16 +437,11 @@ def ABR_Curve(none = False, nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, Vr
     curve_V = (peak_V,VrefIII)
 
     amp_IV = VrefIII-.05
-    if amp_IV < 0:
-        amp_IV = 0
+    amp_IV = max(amp_IV, 0)
     amp_IVp = amp_IV-.05
-    if amp_IVp < 0:
-        amp_IVp = 0
-
+    amp_IVp = max(amp_IVp, 0)
     sn10refV = curve_V[1] - amp_V
-    if sn10refV > 0:
-        sn10refV = 0
-
+    sn10refV = min(sn10refV, 0)
     sn10 = (curve_V[0]+1,sn10refV)
 
     curve_IV = (peak_IV, amp_IV)
@@ -490,13 +464,13 @@ def ABR_Curve(none = False, nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, Vr
 
             [curve_II[0],curve_II[1]],
             [curve_IIp[0],curve_IIp[1]],
-        
+
             [curve_III[0],curve_III[1]],
             [curve_IIIp[0],curve_IIIp[1]],
-        
+
             [curve_IV[0], curve_IV[1]],
             [curve_IVp[0], curve_IVp[1]],
-            
+
             [curve_V[0],curve_V[1]],
             [sn10[0],sn10[1]],
 
@@ -521,7 +495,7 @@ def ABR_Curve(none = False, nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, Vr
         px = np.zeros(20)
         y_new = np.zeros(20)
 
-  
+
 
 
 
