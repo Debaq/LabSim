@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>150</width>
+    <width>255</width>
     <height>462</height>
    </rect>
   </property>
@@ -92,10 +92,17 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_8">
-          <property name="text">
-           <string>Clíck</string>
-          </property>
+         <widget class="QComboBox" name="cb_stim">
+          <item>
+           <property name="text">
+            <string>Clic</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Chirp</string>
+           </property>
+          </item>
          </widget>
         </item>
        </layout>
@@ -116,10 +123,22 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_11">
-          <property name="text">
-           <string>Alternada</string>
-          </property>
+         <widget class="QComboBox" name="cb_pol">
+          <item>
+           <property name="text">
+            <string>Alternada</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Conden.</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Rarefac.</string>
+           </property>
+          </item>
          </widget>
         </item>
        </layout>
@@ -134,7 +153,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="sb_int">
+         <widget class="QSpinBox" name="sb_intencity">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -214,9 +233,15 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_12">
-          <property name="text">
-           <string>21.1 e/s</string>
+         <widget class="QDoubleSpinBox" name="sb_rate">
+          <property name="decimals">
+           <number>1</number>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>10.100000000000000</double>
           </property>
          </widget>
         </item>
@@ -238,10 +263,50 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_13">
-          <property name="text">
-           <string>3000hz</string>
+         <widget class="QComboBox" name="cb_filter_down">
+          <property name="currentText">
+           <string>1000</string>
           </property>
+          <item>
+           <property name="text">
+            <string>1000</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>1500</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2000</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2500</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>3000</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>3500</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>4000</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>4500</string>
+           </property>
+          </item>
          </widget>
         </item>
        </layout>
@@ -262,10 +327,37 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_14">
-          <property name="text">
-           <string>100hz</string>
-          </property>
+         <widget class="QComboBox" name="cb_filter_up">
+          <item>
+           <property name="text">
+            <string>50</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>100</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>200</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>300</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>400</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>500</string>
+           </property>
+          </item>
          </widget>
         </item>
        </layout>
@@ -286,9 +378,12 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_15">
-          <property name="text">
-           <string>2000</string>
+         <widget class="QSpinBox" name="sb_prom">
+          <property name="maximum">
+           <number>8000</number>
+          </property>
+          <property name="value">
+           <number>1000</number>
           </property>
          </widget>
         </item>

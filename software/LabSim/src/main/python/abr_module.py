@@ -158,6 +158,7 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.ctrl_curve_R.btn_del.clicked.connect(lambda: self.clear_curve(0))
         self.ctrl_curve_L.btn_del.clicked.connect(lambda: self.clear_curve(1))
         self.currentCurve = [None, None]
+        #self.control.sb
         #self.control
 
     def la_super(self, data):
@@ -207,37 +208,51 @@ class MainWindow(QWidget, Ui_ABRSim):
             side = 1
             self.grph_L.activeCurve(objName, 1)
         self.currentCurve[side] = objName
-
-    def capture(self):
-        intencity = self.control.sb_int.value()
+    def data_config_test(self):
+        stim = self.control.cb_stim.currentText()
+        pol = self.control.cb_pol.currentText()
+        intencity = self.control.sb_intencity.value()
+        filter_down = self.control.cb_filter_down.currentText()
+        filter_up = self.control.cb_filter_up.currentText()
+        prom = self.control.sb_prom.value()
         side = self.control.cb_side.currentText()
+        rate = self.control.sb_rate.value()
         if side == 'OD':
             side = 0
             letter = 'R'
         else:
             side = 1
             letter = 'L'
+
+        return {
+            "stim":stim, "pol":pol, "intencity":intencity, 
+            "filter_down":filter_down, "filter_up":filter_up, 
+            "prom":prom, "side":side, "rate":rate, "letter":letter
+            }
+        
+    def capture(self):
+        data_config = self.data_config_test()
         gap = 1.8
-        name = "{}_{}:0".format(intencity, letter)
+        name = "{}_{}:0".format(data_config["intencity"], data_config["letter"])
         if name in self.store:
-            name, _ = self.number_name(name, letter, intencity, gap)
+            name, _ = self.number_name(name, data_config["letter"], data_config["intencity"], gap)
         try:
-            gap = self.cal_gap(name, letter, intencity, gap)
+            gap = self.cal_gap(name, data_config["letter"], data_config["intencity"], gap)
         except:
             pass
         view = True
         repro = random.randint(80,99)
-        self.store[name] = [[[],[]],[[],[]],side, intencity, repro, view, gap]
-        self.data.set_intencity(intencity)
-        x, y, _,_ = abr_curve(nHL=intencity, data=self.super_data, side=side)
+        self.store[name] = [[[],[]],[[],[]],data_config["side"], data_config["intencity"], repro, view, gap]
+        self.data.set_intencity(data_config["intencity"])
+        x, y, _,_ = abr_curve(data_config=data_config, data=self.super_data)
         self.store[name][0][0] = x
         self.store[name][0][1] = y
         self.disabled_in_capture()
         self.update_flags_curves()
-        self.update_graph(side)
-        self.currentCurve[side] = name
-        self.grph_R.activeCurve(name, side)
-        self.grph_L.activeCurve(name, side)
+        self.update_graph(data_config["side"])
+        self.currentCurve[data_config["side"]] = name
+        self.grph_R.activeCurve(name, data_config["side"])
+        self.grph_L.activeCurve(name, data_config["side"])
 
     def update_graph(self,side):
         self.grph_R.update_data(self.store, side)
@@ -325,7 +340,7 @@ class MainWindow(QWidget, Ui_ABRSim):
 
     def disabled_in_capture(self, dis = True):
         self.detail.btn_start.setDisabled(dis)
-        self.control.sb_int.setDisabled(dis)
+        self.control.sb_intencity.setDisabled(dis)
         self.control.cb_side.setDisabled(dis)
 
     def update_data(self, data):
@@ -350,40 +365,81 @@ class MainWindow(QWidget, Ui_ABRSim):
             self.grph_L.update_marks(idx,subidx,text)
 
 
-def abr_peak(data, side):
+def abr_peak(data, data_config):
+    side = data_config["side"]
     if data is None:
         return [1.3,3.9,5.9,0.6]
+    print(data['abr_peak'])
+    if data_config["rate"] > 27.7:
+        _extracted_from_abr_peak_7(data_config, data, side)
+    print(data['abr_peak'])
     return data['abr_peak'][side]
 
-def pathology(data, side):
+# TODO Rename this here and in `abr_peak` fijarse como no debe hacer return
+def _extracted_from_abr_peak_7(data_config, data, side):
+    lat_plus = data_config["rate"]*0.01
+    data['abr_peak'][side][0] += lat_plus / 4
+    data['abr_peak'][side][1] += lat_plus - 0.2
+    data['abr_peak'][side][2] += lat_plus - 0.1
+    data['abr_peak'][side][3] += (-lat_plus)
+
+def pathology(data, data_config):
+    side = data_config["side"]
     if data is None:
         return 'Normal',True,True,True,True,True
     return data['abr_pathology'][side]
 
-def abr_thr(data, side):
+def abr_thr(data, data_config):
     if data is None:
         return 40,0.001,True, False
+
+    side = data_config["side"]
+    if data_config["filter_down"] == '3000' and data_config["filter_up"] == '100':
+        noise = data['abr_threshold_other'][side][1]
+    else:
+        noise = 0.1
+    if data_config["prom"] < 800:
+        noise += 0.01
+    elif data_config["prom"] < 2000:
+        noise += 0.005
+    elif data_config["prom"] < 3000:
+        noise += 0.0001
+    else:
+        noise = 0.001
+
+    data['abr_threshold_other'][side][1] = noise
     return data['abr_threshold_other'][side]
 
-def abr_curve(nHL=80, data=None, side=None):
+
+
+def abr_curve(data_config=None, data=None):
     """
     Calculate the ABR curve
     """
-    p_I,p_III,p_V,a_V = abr_peak(data,side)
-    pato,I,II, III, IV, V = pathology(data,side)
-    threshold, noise, VrelI, zeros = abr_thr(data, side)
+    nHL = data_config["intencity"]
 
+    if data_config["stim"] == "Chirp":
+        plus_lat_chirp = -0.2 if nHL > 40 else 0.2
+        plus_amp_chirp = 0.3
+    else:
+        plus_amp_chirp = 0
+        plus_lat_chirp = 0
+
+
+    p_I,p_III,p_V,a_V = abr_peak(data,data_config)
+    pato,I,II, III, IV, V = pathology(data,data_config)
+    threshold, noise, VrelI, zeros = abr_thr(data, data_config)
     att = 0
     lam = 0
     varInt = abs(80 - nHL)
     fvarInt = varInt/5
-    if pato == 'Normal':
-        var_lat_init = -.05
-        var_lat_end = .05
-
-    elif pato == 'Neural':
+    if pato == 'Neural':
         var_lat_init = .1
         var_lat_end = .3
+
+    elif pato == 'Normal':
+        var_lat_init = -.05
+        var_lat_end = .05
 
     else:
         var_lat_init = 0
@@ -403,8 +459,14 @@ def abr_curve(nHL=80, data=None, side=None):
         fvarLat = .15
         fvarAmp = .04
     else:
-        fvarLat = .2
-        fvarAmp = .06
+        if pato is not 'Sensorial':
+            fvarLat = .2
+            fvarAmp = .06
+        else:
+            fvarLat = .3
+            fvarAmp = .08
+
+
 
     att = (fvarLat * fvarInt) * sideLat
     lam = (fvarAmp * fvarInt) * sideAmp
@@ -413,13 +475,12 @@ def abr_curve(nHL=80, data=None, side=None):
     peak_II =  p_I+1+ att  + lat_random
 
     peak_III =  p_III + att  + lat_random
-    peak_V =  p_V + att  + lat_random
+    peak_V =  p_V + att  + lat_random + plus_lat_chirp
 
     peak_IV = peak_V-.5  + lat_random
-    end = 12 + att  
-    amp_V = a_V + lam + amp_random
+    end = 12 + att
+    amp_V = a_V + lam + amp_random + plus_amp_chirp
     amp_V = max(amp_V, 0)
-
     if threshold == nHL:
         amp_V += 0.1
     elif threshold > nHL:
@@ -444,7 +505,7 @@ def abr_curve(nHL=80, data=None, side=None):
     amp_III = 0.3 +lam + amp_random
     amp_III = max(amp_III, 0)
     amp_IIIp = 0
-    
+
     if III == False:
         amp_III = 0
         amp_IIIp = 0
@@ -521,7 +582,6 @@ def abr_curve(nHL=80, data=None, side=None):
     x, y = points[:,0], points[:,1]
     px, py = path[:,0], path[:,1]
     rho = 1
-
     sigma = rho * np.sqrt(noise/2)
     y_noise = np.random.normal(0,sigma , py.shape)
     y_new = py + y_noise
