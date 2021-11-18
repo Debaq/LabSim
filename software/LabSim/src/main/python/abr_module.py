@@ -458,13 +458,12 @@ def abr_curve(data_config=None, data=None):
     if nHL >=50:
         fvarLat = .15
         fvarAmp = .04
+    elif pato != 'Sensorial':
+        fvarLat = .2
+        fvarAmp = .06
     else:
-        if pato is not 'Sensorial':
-            fvarLat = .2
-            fvarAmp = .06
-        else:
-            fvarLat = .3
-            fvarAmp = .08
+        fvarLat = .3
+        fvarAmp = .08
 
 
 
