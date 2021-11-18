@@ -19,7 +19,7 @@ from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QMdiSubWindow,
                              QMessageBox, QPushButton, QWidget)
 
-import ABR
+import abr_module
 import Audiometer
 import ListWords
 import login as Ui_login
@@ -219,7 +219,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.subw_a.ui_ui.signal_speech.connect(self.speechlist_mode)
         self.subw_z = FrameSubMdi(Z.ZControl())
         self.subw_w = FrameSubMdi(ListWords.ListWords(self.data))
-        self.subw_abr = FrameSubMdi(ABR.MainWindow())
+        self.subw_abr = FrameSubMdi(abr_module.MainWindow())
         self.subw_voice = FrameSubMdi(ComandVoiceA())
         self.subw_voice.ui_ui.btn_checked.connect(self.subw_a.ui_ui.supra)
         self.subw = {
@@ -276,7 +276,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.subw_w.ui_ui.la_super(self.data)
                 self.subw_z.ui_ui.la_super(self.data)
                 self.prev_patient = self.data['sector']
-            self.subw_abr.ui_ui.laSuper(self.data)
+            self.subw_abr.ui_ui.la_super(self.data)
         self.statusbar.showMessage(text)
         # log off external
         if self.data['state_login'] == "0":
