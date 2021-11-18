@@ -222,11 +222,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.subw_abr = FrameSubMdi(ABR.MainWindow())
         self.subw_voice = FrameSubMdi(ComandVoiceA())
         self.subw_voice.ui_ui.btn_checked.connect(self.subw_a.ui_ui.supra)
-        self.subw = {"A": self.subw_a, 
-                    "Z":self.subw_z, 
-                    "W": self.subw_w, 
-                    "ABR": self.subw_abr,
-                    "CVOICE": self.subw_voice}
+        self.subw = {
+            "A": self.subw_a,
+            "Z":self.subw_z,
+            "W": self.subw_w,
+            "ABR": self.subw_abr,
+            "CVOICE": self.subw_voice
+            }
 
     def create_sub_window(self, widg, name, pos_z, fix=(True, True),
                         size=(740,560), position=(0,0)):

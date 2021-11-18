@@ -42,7 +42,7 @@ class Graph(QWidget):
         if self.inf_a is not None and self.inf_b is not None:
             self.pw1.removeItem(self.inf_a)
             self.pw1.removeItem(self.inf_b)
-        
+
         #Variables internas
         pen1 = pg.mkPen('b', width=.5, style=Qt.PenStyle.DashLine)         
         opst = {'position':0.9, 'color': (255,255,255), 'fill': (0,0,0,255), 'movable': True}
@@ -139,7 +139,7 @@ class Graph(QWidget):
         text = pg.TextItem(text = curve_mark, anchor=(0.34,0.5), color=(0,0,0,255))
         text.setPos(lat, amp+0.1)
         self.pw1.addItem(text)
-        
+
     def refresh_keys(self):
         for k in self.data:
             curve = k
@@ -177,7 +177,6 @@ class Graph(QWidget):
         x = self.data[self.act_curve][0][0]
         y = self.data[self.act_curve][0][1]
         lat_a = self.inf_a.getXPos()
-        
         if lat_a > 12:
             pos_b = self.inf_b.getXPos()
             self.inifine_ab(pos_A=12, pos_B=pos_b)
