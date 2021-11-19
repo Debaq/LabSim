@@ -3,7 +3,8 @@ from PyQt5.QtWidgets import QWidget
 from lib.logoaudiometry import CalculateLogo
 from lib.h_audio import (data_basic, minMax, create_voice)
 from PyQt5.QtMultimedia import QMediaPlayer
-
+from PyQt5.QtCore import QTimer
+import random
 
 
 
@@ -23,8 +24,18 @@ class Response(QWidget):
         self.channel_0 = QMediaPlayer()
         self.activate_fowler = [False, False]
         self.lastChoice_fowler = None
+        self.time = QTimer(self)
+        self.time.timeout.connect(self.counter)
+        print("test")
+        self.tim = 0
 
-
+    def counter(self):
+        if self.tim > 0:
+            self.tim += 1
+        if self.tim ==  self.carhart_random:
+            self.tim = 0
+            self.downHand()
+            self.timer.stop()
 
 
     def set_response(self, thr):
@@ -54,6 +65,7 @@ class Response(QWidget):
         self.supra.append(thr['LDL'])
         self.supra.append(thr['Fowler'])
         self.supra.append(thr['Carhart'])
+        print(self.supra[2])
         self.supra.append(thr['UMD'])
         self.thr = [result, result1]
 
@@ -134,13 +146,13 @@ class Response(QWidget):
             if self.data['stimOn'][0]:
                 self.resp_THR(mkg=self.response[2])
             else:
-                self.no()
+                self.downHand()
         elif self.response[0] == 'L':
             if self.response[1] == 'SDT':
                 if self.data['stimOn'][0]:
                     self.logo_sdt()
                 else:
-                    self.no()
+                    self.downHand()
             elif self.response[1] == 'UMD':
                 pass
             else:
@@ -150,19 +162,35 @@ class Response(QWidget):
                 if self.data['stimOn'][0]:
                     self.ldl()
                 else:
-                    self.no()
+                    self.downHand()
             elif self.response[1] == 'FOWLER':
                     self.fowler()
                 
             elif self.response[1] == 'CARHART':
                 if self.data['stimOn'][0]:
-                    self.carhart()
+                    side = self.data["side"][0]
+                    if side == 0:
+                        true_carh = self.supra[2][0]
+                    else:
+                        true_carh = self.supra[2][1]
+                    if true_carh == 1:
+                        print("deteriora")
+                        self.time.start(1000)
+                        self.tim = 1
+                        self.carhart()
+                    else:
+                        self.upHand()
                 else:
-                    self.no()
+                    self.downHand()
+                    self.time.stop()
+                    self.tim = 0
+
+
             else:
                 pass
         else:
             pass
+
     def fowler_q(self, n):
         data = self.supra[1][1]
         freq = self.supra[1][0]
@@ -237,9 +265,9 @@ class Response(QWidget):
     
 
     def carhart(self):
+        self.carhart_random = random.randint(10,40)
         self.upHand()
-        #print("escucho")
-
+        
     def ldl(self):
         #print("estoy en ldl")
         side = self.data['side'][0]
@@ -266,7 +294,7 @@ class Response(QWidget):
             self.upHand()
             #print("escucho!")
         else:
-            self.no()
+            self.downHand()
             #print("no escucho nadita")
     
 
@@ -320,12 +348,11 @@ class Response(QWidget):
         return chOn , chOn_c
 
 
-    def upHand(self):
-        hand = True
+    def upHand(self, hand = True):
         self.button.emit(hand)
             
 
-    def no(self):
+    def downHand(self):
         hand = False
         self.button.emit(hand)
         #print("no escucho")
