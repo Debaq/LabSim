@@ -465,8 +465,6 @@ def abr_curve(data_config=None, data=None):
         fvarLat = .3
         fvarAmp = .08
 
-
-
     att = (fvarLat * fvarInt) * sideLat
     lam = (fvarAmp * fvarInt) * sideAmp
 
