@@ -25,9 +25,8 @@ class ListWords(QWidget, Ui_ListWords):
     def __init__(self,data):
         QWidget.__init__(self)
         # Inicialización de la ventana y propiedades
-        self.laSuper(data)
-        
-        
+        self.la_super(data)
+
         self.setupUi(self)
         self.channel_0 = QMediaPlayer(self)
         self.probe = QAudioProbe()
@@ -177,24 +176,16 @@ class ListWords(QWidget, Ui_ListWords):
         self.btn_h24.clicked.connect(lambda:self.pushaudio(24))
         self.btn_h25.clicked.connect(lambda:self.pushaudio(25))
 
-    def laSuper(self, data):
-        if data['sector'] == "Camara_sono":
-            self.isResponse = True
-        else:
-            self.isResponse = False
+    def la_super(self, data):
+        self.is_response = data['sector'] == "Camara_sono"
         gender = data['gender']
-        id = data['id']
-        if gender == 0 :
-            self.gender = "feme"
-        else:
-            self.gender = "male"
-        self.id = id
+        idx = data['id']
+        self.gender = "feme" if gender == 0 else "male"
+        self.id_x = idx
         UMD = data["UMD"]
         self.isMkg = self.ifMkg(data)
         prev = CalculateLogo(data, UMD)
         self.error_list = prev.get()
-        
-
 
     def ifMkg(self, data):
         mkg = False
@@ -204,12 +195,8 @@ class ListWords(QWidget, Ui_ListWords):
         dif = abs(OD - OI)
         if dif >= 35:
             mkg = True
-            if OD>OI:
-                side=0
-            else:
-                side=1
-        result = [side, mkg]
-        return result
+            side = 0 if OD>OI else 1
+        return [side, mkg]
 
 
 
@@ -221,7 +208,6 @@ class ListWords(QWidget, Ui_ListWords):
         file = "LP_palacios_1_{}.ogg".format(self.text)
         word = create_word(file)
         self.soundPlay(word)
-   
 
     def soundPlay(self, word):
         self.changecalcule()
@@ -248,7 +234,7 @@ class ListWords(QWidget, Ui_ListWords):
                 self.time_2.start(ran_time)
     
     def wait(self):
-        if self.isResponse:        
+        if self.is_response:        
             self.response()
         self.time_1.stop()
         self.time_2.stop()
@@ -257,10 +243,10 @@ class ListWords(QWidget, Ui_ListWords):
         try:
             num = self.num - 1
             if self.list_response[num] == 1:
-                media = create_word_response(self.text, self.gender, self.id)
+                media = create_word_response(self.text, self.gender, self.id_x)
             else:
                 noneN = "none{}".format(random.randint(1 , 3))
-                media = create_word_response(noneN, self.gender, self.id)
+                media = create_word_response(noneN, self.gender, self.id_x)
             self.channel_0.setMedia(media)
             self.channel_0.play()
         except:
@@ -275,16 +261,11 @@ class ListWords(QWidget, Ui_ListWords):
                 self.playable[1] = 20
                 self.calculate(0)
                 self.prevINT = 20
-               
         else:
             pass
 
     def calculate(self, side):
-        if side == 0:
-            contra = 1
-        else:
-            contra = 0
-
+        contra = 1 if side == 0 else 0
         result = []
 
         if self.isMkg[1]:
@@ -302,13 +283,13 @@ class ListWords(QWidget, Ui_ListWords):
         for k, v in data.items():
             value.append(v)
             keys.append(int(k))
-        
+
         if intencity <= keys[0]:
             range_error = 25
             self.continue_response = False
             for _ in range(range_error):
                 result.append(0)
-        elif intencity > keys[0] and intencity <= keys[-1]:
+        elif intencity <= keys[-1]:
             self.continue_response = True
             range_correct = data[str(intencity)]
             range_error = 25 - range_correct
@@ -317,22 +298,13 @@ class ListWords(QWidget, Ui_ListWords):
             for _ in range(range_error):
                 result.append(0)
             random.shuffle(result)
-        elif intencity > keys[-1]:
+        else:
             range_correct = value[-1]
             range_error = 25 - range_correct
-            for i in range(range_correct):
+            for _ in range(range_correct):
                 result.append(1)
             for i in range(range_error):
                 result.append(0)
             random.shuffle(result)
-        else:
-            pass
-           
         self.list_response = result
         #print(result)
-
-
-
-
-if __name__ == "__main__":
-    pass

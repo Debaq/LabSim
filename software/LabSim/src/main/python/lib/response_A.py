@@ -41,6 +41,7 @@ class Response(QWidget):
     def set_response(self, thr):
         #thr = data_basic()
         UMD = thr["UMD"]
+        print(UMD)
 
         self.Logo = CalculateLogo(thr, UMD)
         gender = thr['gender']

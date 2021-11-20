@@ -9,7 +9,7 @@
 # pip install https://build-system.fman.io/pro/12a9a98c-755b-4d95-9c60-a17ae1a74d6c/1.0.8#egg=fbs
 # https://f002.backblazeb2.com/file/TMEduca/LabSim/LabSimSetup0.8.4.exe
 
-__VERSION__ = 'v0.8.42'
+__VERSION__ = 'v0.8.43'
 
 import json
 import sys
@@ -348,7 +348,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             text = self.sectors_lbl[data['sector']]
             if self.prevPatient != self.data['sector']:
                 self.A.ui.laSuper(self.data)
-                self.W.ui.laSuper(self.data)
+                self.W.ui.la_super(self.data)
                 self.Z.ui.laSuper(self.data)
                 self.prevPatient = self.data['sector']
             self.ABR.ui.laSuper(self.data)

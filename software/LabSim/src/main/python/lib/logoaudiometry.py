@@ -1,4 +1,3 @@
-
 class CalculateLogo():
     def __init__(self, thr, umd):
         self.thr = thr
@@ -13,15 +12,14 @@ class CalculateLogo():
         #print("srt:{},{}".format(self.srt[0], self.srt[1]))
         self.umd = [self.srt[0]+25, self.srt[1]+25]
         #print("umd:{},{}".format(self.umd[0], self.umd[1]))
-
-        
         #self.porcentajes_logo = [0,24,52,64,76,88,96,100]
         #self.curve_normal = [0,5,10,15,20,25,30,35]
         self.data = self.calculate_result()
 
 
     def calNewUmd(self, data):
-        por_logo = [0,24,52,64,76,88,96,100]
+        por_logo = [i for i in range(0,104,4)]
+        
         curve_normal = [0,5,10,15,20,25,30,35]
         result = [[],[]]
         maxUMD = [0,0]
@@ -39,9 +37,7 @@ class CalculateLogo():
                 idx = por_logo.index(maxUMD[i])
                 new_logo = por_logo[:idx+1]
                 step = len(por_logo[idx+1:])
-                dot = 0
-                for _ in range(step):
-                    dot +=1
+                for dot, _ in enumerate(range(step), start=1):
                     new_logo.append(por_logo[idx-dot])
                 result[i] = new_logo
             else:
@@ -56,8 +52,7 @@ class CalculateLogo():
         od.sort()
         oi.sort()
         def prom(x):
-            result = sum(x)/len(x)
-            return result
+            return sum(x)/len(x)
 
         prom_od = prom([od[0], od[1]])
         prom_oi = prom([oi[0], oi[1]])
@@ -69,20 +64,8 @@ class CalculateLogo():
     def calculate_result(self):
         def generate(rec, sdt , srt, umd, por):
             curve = [0,5,10,15,20,25,30,35]
-            temp = {}
-            if rec:
-                plus = 10
-            else:
-                plus = 0
-            for i in range(len(curve)):
-                
-                key = str(sdt+curve[i]+plus)
-                val = int(por[i]/4)
-                temp[key] = val
-
-
-            
-            return temp
+            plus = 10 if rec else 0
+            return {str(sdt+curve[i]+plus): int(por[i]/4) for i in range(len(curve))}
 
         od = generate(self.recl[0], self.sdt[0], self.srt[0], self.umd[0], self.porcentajes_logo[0])
         oi = generate(self.recl[1],self.sdt[1], self.srt[1], self.umd[1], self.porcentajes_logo[1])
