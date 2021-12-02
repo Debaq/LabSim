@@ -2,7 +2,7 @@ class CalculateLogo():
     def __init__(self, thr, umd):
         self.thr = thr
 
-        self.umd_test = self.calNewUmd(umd)
+        self.umd_test = self.calNewUmd(thr,umd)
         self.sdt = self.sdt_calcule(self.thr)
         self.srt = [self.thr["Aérea_mkg"][4][0],self.thr["Aérea_mkg"][4][1]]
         for i in range(len(self.srt)):
@@ -17,33 +17,52 @@ class CalculateLogo():
         self.data = self.calculate_result()
 
 
-    def calNewUmd(self, data):
-        por_logo = [i for i in range(0,104,4)]
+    def calNewUmd(self, thr, data):
+        best_od = [thr["Aérea_mkg"][i][0] for i in range(1,7)]
+        best_od.sort()
+        best_oi = [thr["Aérea_mkg"][i][1] for i in range(1,7)]
+        best_oi.sort()
+        thr_2k = [thr["Aérea_mkg"][4][i] for i in range(2)]
+        umd_data = [list(i[0].values()) for i in data]
+
+        sdt_od = sum(best_od[0:2])/2
+        sdt_oi = sum(best_oi[0:2])/2
+        data_sdt = [sdt_od, sdt_oi]
+
+        if umd_data[0][2] > 52:
+            srt_od = thr_2k[0] if thr_2k[0] >= sdt_od + 20 else sdt_od + 10
+        else:
+            srt_od = 130
+
+        if umd_data[1][2] > 52:
+            srt_oi = thr_2k[1] if thr_2k[1] >= sdt_oi + 20 else sdt_oi + 10
+        else:
+            srt_oi = 130
+        data_srt = [srt_od, srt_oi]
+
+        por_logo = list(range(0,104,4))
+        curve_normal = list(range(0,120,5))
         
-        curve_normal = [0,5,10,15,20,25,30,35]
-        result = [[],[]]
-        maxUMD = [0,0]
-        maxINT = [0,0]
-        self.recl = [data[0][0], data[1][0]]
-
-        for i in range(len(self.recl)):
-            for k,j in data[i][1].items():
-                #print(k,j)
-                maxUMD[i] = j
-                maxINT[i] = int(k)
-
-        for i in range(len(self.recl)):
-            if self.recl[i]:
-                idx = por_logo.index(maxUMD[i])
-                new_logo = por_logo[:idx+1]
-                step = len(por_logo[idx+1:])
-                for dot, _ in enumerate(range(step), start=1):
-                    new_logo.append(por_logo[idx-dot])
-                result[i] = new_logo
+        if umd_data[0][0] is False:
+            umd_od = {}
+            if srt_od == 130:
+                for i in curve_normal:
+                    if i <= sdt_od +10:
+                        value = 0
+                    else:
+                        value = umd_data[0][2]
+                    umd_od[str(i)] = value
             else:
-                result[i] = por_logo
+                for i in curve_normal:
+                    if i <= srt_od:
+                        value = 0
+                    else:
+                        pass
+                        
+                    
+                
 
-        self.porcentajes_logo = result
+   
     
 
     def sdt_calcule(self, data):
