@@ -16,7 +16,7 @@ import time
 
 import requests
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from PyQt6.QtWidgets import (QApplication, QMainWindow, QMdiSubWindow,
+from PyQt6.QtWidgets import (QMainWindow, QMdiSubWindow,
                              QMessageBox, QPushButton, QWidget)
 
 import abr_module
@@ -59,8 +59,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
-        self.setWindowTitle("LabSim {}".format(__VERSION__))
-        self.lbl_title.setText("LabSim {}".format(__VERSION__))
+        self.setWindowTitle(f"LabSim {__VERSION__}")
+        self.lbl_title.setText(f"LabSim {__VERSION__}")
         #Create MdiArea
         self.mdi_area = MdiArea()
         self.horizontalLayout.addWidget(self.mdi_area)
@@ -76,7 +76,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.subw_login = FrameSubMdi(Ui_login.MainLogin())
         self.subw_login.ui_ui.btn_login.clicked.connect(self.login)
         self.subw = {"LOGIN": self.subw_login}
-       
+
     def configure_btn(self):
         #BTNS
         self.btn_salir.clicked.connect(self.close)
@@ -150,8 +150,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def chargeBtnsArea(self, area):
         for i in self.boxs[area][1]:
-            btn = QPushButton('{}'.format(i))
-            btn.setObjectName("btn_{}".format(i))
+            btn = QPushButton(f'{i}')
+            btn.setObjectName(f"btn_{i}")
             btn.clicked.connect(self.activate_soft)
             tooltip = self.apps[i][1]
             btn.setToolTip(tooltip)
@@ -213,7 +213,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.modules.get(pos).hide()
 
-    def createInsWidegt(self, data):
+    def createInsWidget(self, data):
         self.data = data
         self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data))
         self.subw_a.ui_ui.signal_speech.connect(self.speechlist_mode)
@@ -263,7 +263,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def refresh_data(self, data):
         self.data = data
         if self.new_login:
-            self.createInsWidegt(self.data)
+            self.createInsWidget(self.data)
             self.btns_seccion()
             self.new_login = False
         self.changeStateBtnAreas(self.data["box"])
@@ -282,13 +282,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.data['state_login'] == "0":
             self.logout()
             QMessageBox.critical(self, "sesión", "Sesión terminada")
+    
+    def refresh_data_ofline(self):
+        if self.new_login:
+            #self.createInsWidget(data)
+            file = open(context.get_resource("test.json"))
+            data_raw = json.load(file)
+            self.refresh_data(data_raw[self.case])
+        
 
     def login(self):
         button_login = self.subw_login.ui_ui.btn_login.text()
         name = self.subw_login.ui_ui.Le_name.text()
         passw = self.subw_login.ui_ui.Le_passw.text()
         #print("{} : {} -- {}".format(name,passw, button_login))
-        if button_login == "Salir":
+        if name.lower() == "labsim":
+            self._flag_ofline = True
+            self.case = passw
+
+            self._extracted_from_login_12(name)
+
+        elif button_login == "Salir":
             self.logout()
         else:
             data = {'user': name, 'password': passw, 'request': 'login'}
@@ -302,11 +316,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def _extracted_from_login_12(self, name):
         self.subw_login.ui_ui.Le_name.setDisabled(True)
         self.subw_login.ui_ui.Le_passw.setDisabled(True)
-        self.thread_data_clicked()
+        if not self._flag_ofline:
+            self.thread_data_clicked()
+        else:
+            self.new_login = True
+            self.refresh_data_ofline()
         self.subw_login.ui_ui.btn_login.setText("Salir")
         self.btn_login.setText("Salir")
         self.showHide(0)
-        text = "{}".format(name)
+        text = f"{name}"
         self.lbl_name.setText(text)
         self.statusbar.showMessage(text)
         self.new_login = True

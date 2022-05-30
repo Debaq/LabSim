@@ -32,6 +32,7 @@ class Response(QWidget):
         UMD = thr["UMD"]
 
         self.Logo = CalculateLogo(thr, UMD)
+        print(f"Logo: {self.Logo}")
         gender = thr['gender']
         if gender == 0:
             self.gender = "feme"

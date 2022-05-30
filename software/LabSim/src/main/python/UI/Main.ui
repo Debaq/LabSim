@@ -108,6 +108,9 @@
           </spacer>
          </item>
          <item>
+          <widget class="QComboBox" name="cmb_case"/>
+         </item>
+         <item>
           <layout class="QHBoxLayout" name="horizontalLayout_6">
            <property name="spacing">
             <number>10</number>
