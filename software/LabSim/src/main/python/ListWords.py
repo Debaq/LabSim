@@ -171,6 +171,7 @@ class ListWords(QWidget, Ui_ListWords):
         self.btn_h25.clicked.connect(lambda:self.pushaudio(25))
 
     def la_super(self, data):
+        #print(f"la_super: {data}")
         if data['sector'] == "Camara_sono":
             self.is_response = True
         else:
@@ -190,10 +191,10 @@ class ListWords(QWidget, Ui_ListWords):
     def ifMkg(self, data):
         mkg = False
         side = 0
-        OD = (data["Ósea_mkg"][2][0] + data["Ósea_mkg"][3][0]
-            + data["Ósea_mkg"][4][0] + data["Ósea_mkg"][6][0])/4
-        OI = (data["Ósea_mkg"][2][1] + data["Ósea_mkg"][3][1]
-            + data["Ósea_mkg"][4][1] + data["Ósea_mkg"][6][1])/4
+        OD = (data["Osea_mkg"][2][0] + data["Osea_mkg"][3][0]
+            + data["Osea_mkg"][4][0] + data["Osea_mkg"][6][0])/4
+        OI = (data["Osea_mkg"][2][1] + data["Osea_mkg"][3][1]
+            + data["Osea_mkg"][4][1] + data["Osea_mkg"][6][1])/4
         dif = abs(OD - OI)
         if dif >= 35:
             mkg = True

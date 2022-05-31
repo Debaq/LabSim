@@ -1,6 +1,6 @@
-const input_list = ["Aérea", "Ósea", "LDL", "Campo_libre"];
+const input_list = ["Aerea", "Osea", "LDL", "Campo_libre"];
 const side_list = ["OD", "OI"];
-const mkg_list = { Aérea: ["c/mkg", "s/mkg"], Ósea: ["c/mkg", "s/mkg"], LDL: [""], Campo_libre:["s/mkg"] };
+const mkg_list = { Aerea: ["c/mkg", "s/mkg"], Osea: ["c/mkg", "s/mkg"], LDL: [""], Campo_libre:["s/mkg"] };
 const freq_list = ["125", "250", "500", "1k", "2k", "3k", "6k", "8k", "12k"];
 
 function tables(name) {

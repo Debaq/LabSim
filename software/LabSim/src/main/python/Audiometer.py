@@ -255,11 +255,11 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.curve_z = []
         self.curve_z.append(thr['Z_OD'])
         self.curve_z.append(thr['Z_OI'])
-        result.append(thr['Aérea'])
-        result.append(thr['Ósea'])
+        result.append(thr['Aerea'])
+        result.append(thr['Osea'])
         result.append(thr['LDL'])
-        result1.append(thr['Aérea_mkg'])
-        result1.append(thr['Ósea_mkg'])
+        result1.append(thr['Aerea_mkg'])
+        result1.append(thr['Osea_mkg'])
         self.thr = [result, result1]
 
     def supra(self, state):

@@ -120,7 +120,7 @@ class CalculateLogo():
     def __init__(self, thr):
         self.thr = thr
         self.sdt = self.sdt_calcule(self.thr)
-        self.srt = [self.thr["Aérea"][4][0],self.thr["Aérea"][4][1]]
+        self.srt = [self.thr["Aerea"][4][0],self.thr["Aerea"][4][1]]
         if self.srt[0] == self.sdt[0]:
             self.srt[0] = self.srt[0]+10
         if self.srt[1] == self.sdt[1]:
@@ -132,8 +132,8 @@ class CalculateLogo():
         self.data = self.calculate_result()
 
     def sdt_calcule(self, data):
-        od = [data["Aérea"][1][0],data["Aérea"][2][0],data["Aérea"][3][0],data["Aérea"][4][0],data["Aérea"][5][0],data["Aérea"][6][0]]
-        oi = [data["Aérea"][1][1],data["Aérea"][2][1],data["Aérea"][3][1],data["Aérea"][4][1],data["Aérea"][5][1],data["Aérea"][6][1]]
+        od = [data["Aerea"][1][0],data["Aerea"][2][0],data["Aerea"][3][0],data["Aerea"][4][0],data["Aerea"][5][0],data["Aerea"][6][0]]
+        oi = [data["Aerea"][1][1],data["Aerea"][2][1],data["Aerea"][3][1],data["Aerea"][4][1],data["Aerea"][5][1],data["Aerea"][6][1]]
         od.sort()
         oi.sort()
         def prom(x):

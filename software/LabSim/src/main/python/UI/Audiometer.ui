@@ -97,7 +97,7 @@
             <item>
              <widget class="QLabel" name="lbl_trans_ch0">
               <property name="text">
-               <string>Aérea</string>
+               <string>Aerea</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -740,7 +740,7 @@
             <item>
              <widget class="QLabel" name="lbl_trans_ch1">
               <property name="text">
-               <string>Aérea</string>
+               <string>Aerea</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -1397,7 +1397,7 @@
                 <cursorShape>PointingHandCursor</cursorShape>
                </property>
                <property name="text">
-                <string>Ósea</string>
+                <string>Osea</string>
                </property>
               </widget>
              </item>
@@ -1740,7 +1740,7 @@
                 <cursorShape>PointingHandCursor</cursorShape>
                </property>
                <property name="text">
-                <string>Ósea</string>
+                <string>Osea</string>
                </property>
               </widget>
              </item>

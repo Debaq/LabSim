@@ -58,16 +58,16 @@ class Preferences:
 # keyboard_shortcuts : [up_dial_izq,down_dial_izq,up_dial_der,down_dial_der],
 
 # frecuency_dict:
-#             {"Nombre de la prueba":[[aérea],[ósea],[campo libre]]}
+#             {"Nombre de la prueba":[[Aerea],[Osea],[campo libre]]}
 #             {"Nombre de la prueba": [[min,max],[add_others list], [high_f list]],....}
-#             transductor 0 : aérea
+#             transductor 0 : Aerea
 #             transductor 1 : óseo
 #             transductor 2 : Campo Libre
 
 # intency_dict:
 #             { "nombre del estimulo": [[aerea],[osea],[campo libre]]}
 #             { "nombre del estimulo": [[[min , max],[extend]],....
-#             transductor 0 : aérea
+#             transductor 0 : Aerea
 #             transductor 1 : óseo
 #             transductor 2 : Campo Libre
 

@@ -307,7 +307,7 @@
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt;AHORA VA ESCUCHAR UN RUIDO POR LA OTRA OREJITA, NECESITO QUE NO LE HAGA CASO A ESE RUIDO Y ME SIGA AVISANDO LOS SONIDOS DE ESTA OREJITA&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
-      <string>Aérea + ruido</string>
+      <string>Aerea + ruido</string>
      </property>
      <property name="checkable">
       <bool>true</bool>

@@ -5,7 +5,10 @@ class CalculateLogo():
 
         self.umd_test = self.calNewUmd(umd)
         self.sdt = self.sdt_calcule(self.thr)
-        self.srt = [self.thr["Aérea_mkg"][4][0],self.thr["Aérea_mkg"][4][1]]
+        print(f"sdt: {self.sdt}")
+        print(f"umd: {self.umd_test}")
+        print(f"thr: {self.thr}")
+        self.srt = [self.thr["Aerea_mkg"][4][0],self.thr["Aerea_mkg"][4][1]]
         for i in range(len(self.srt)):
             if self.srt[i] == self.sdt[i]:
                 self.srt[i] = self.srt[i]+10
@@ -51,6 +54,7 @@ class CalculateLogo():
     
 
     def sdt_calcule(self, data):
+        print(f"data: {data['SDT']}")
         return data["SDT"]
     
     def calculate_result(self):

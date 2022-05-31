@@ -30,9 +30,9 @@ class Response(QWidget):
     def set_response(self, thr):
         #thr = data_basic()
         UMD = thr["UMD"]
+        #print(f"Logo: {thr}")
 
         self.Logo = CalculateLogo(thr, UMD)
-        print(f"Logo: {self.Logo}")
         gender = thr['gender']
         if gender == 0:
             self.gender = "feme"
@@ -46,10 +46,10 @@ class Response(QWidget):
         self.curve_z = []
         self.curve_z.append(thr['Z_OD'])
         self.curve_z.append(thr['Z_OI'])
-        result.append(thr['Aérea'])
-        result.append(thr['Ósea'])
-        result1.append(thr['Aérea_mkg'])
-        result1.append(thr['Ósea_mkg'])
+        result.append(thr['Aerea'])
+        result.append(thr['Osea'])
+        result1.append(thr['Aerea_mkg'])
+        result1.append(thr['Osea_mkg'])
         self.supra = []
 
         self.supra.append(thr['LDL'])
@@ -68,7 +68,7 @@ class Response(QWidget):
             self.state = "L_UMD_X"
         elif cmd == "pitos_fuertes":
             self.state = "S_LDL_X"
-        elif cmd == "aérea_+_ruido":
+        elif cmd == "Aerea_+_ruido":
             self.state = "THR_A_MKG"
         elif cmd == "colocar_vibrador":
             self.state = "THR_O_X"

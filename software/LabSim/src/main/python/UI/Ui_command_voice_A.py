@@ -248,7 +248,7 @@ class Ui_Form(object):
         self.btn_act17.setToolTip(_translate("Form", "<html><head/><body><p><span style=\" background-color:transparent;\">LE VOY A COLOCAR ESTE APARATO DETRÁS DE SU OREJA, NECESITO QUE ME AVISE LOS PITOS IGUAL QUE AL COMIENZO DEL EXAMEN, AUNQUE SUENEN MUY BAJOS.</span></p></body></html>"))
         self.btn_act17.setText(_translate("Form", "Colocar vibrador"))
         self.pushButton_2.setToolTip(_translate("Form", "<html><head/><body><p><span style=\" background-color:transparent;\">AHORA VA ESCUCHAR UN RUIDO POR LA OTRA OREJITA, NECESITO QUE NO LE HAGA CASO A ESE RUIDO Y ME SIGA AVISANDO LOS SONIDOS DE ESTA OREJITA</span></p></body></html>"))
-        self.pushButton_2.setText(_translate("Form", "Aérea + ruido"))
+        self.pushButton_2.setText(_translate("Form", "Aerea + ruido"))
         self.btn_act12.setToolTip(_translate("Form", "<html><head/><body><p><span style=\" background-color:transparent;\">VA A ESCUCHAR DOS PITOS, DE FORMA ALTERNADA, UN OÍDO PRIMERO Y OTRO DESPUÉS. NECESITO QUE ME DIGA SI LOS ESCUCHA IGUAL EN VOLUMEN O UNO MÁS FUERTE QUE OTRO. </span></p></body></html>"))
         self.btn_act12.setText(_translate("Form", "Dos pitos"))
         self.btn_act14.setToolTip(_translate("Form", "<html><head/><body><p><span style=\" background-color:transparent;\">¿LOS ESCUCHO IGUALES? </span></p></body></html>"))

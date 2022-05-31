@@ -5,7 +5,7 @@ class CalculateLogo():
 
         self.umd_test = self.calNewUmd(umd)
         self.sdt = self.sdt_calcule(self.thr)
-        self.srt = [self.thr["Aérea_mkg"][4][0],self.thr["Aérea_mkg"][4][1]]
+        self.srt = [self.thr["Aerea_mkg"][4][0],self.thr["Aerea_mkg"][4][1]]
         for i in range(len(self.srt)):
             if self.srt[i] == self.sdt[i]:
                 self.srt[i] = self.srt[i]+10
@@ -51,8 +51,8 @@ class CalculateLogo():
     
 
     def sdt_calcule(self, data):
-        od = [data["Aérea_mkg"][1][0],data["Aérea_mkg"][2][0],data["Aérea_mkg"][3][0],data["Aérea_mkg"][4][0],data["Aérea_mkg"][5][0],data["Aérea_mkg"][6][0]]
-        oi = [data["Aérea_mkg"][1][1],data["Aérea_mkg"][2][1],data["Aérea_mkg"][3][1],data["Aérea_mkg"][4][1],data["Aérea_mkg"][5][1],data["Aérea_mkg"][6][1]]
+        od = [data["Aerea_mkg"][1][0],data["Aerea_mkg"][2][0],data["Aerea_mkg"][3][0],data["Aerea_mkg"][4][0],data["Aerea_mkg"][5][0],data["Aerea_mkg"][6][0]]
+        oi = [data["Aerea_mkg"][1][1],data["Aerea_mkg"][2][1],data["Aerea_mkg"][3][1],data["Aerea_mkg"][4][1],data["Aerea_mkg"][5][1],data["Aerea_mkg"][6][1]]
         od.sort()
         oi.sort()
         def prom(x):
