@@ -172,16 +172,10 @@ class ListWords(QWidget, Ui_ListWords):
 
     def la_super(self, data):
         #print(f"la_super: {data}")
-        if data['sector'] == "Camara_sono":
-            self.is_response = True
-        else:
-            self.is_response = False
+        self.is_response = data['sector'] == "Camara_sono"
         gender = data['gender']
         ide = data['id']
-        if gender == 0 :
-            self.gender = "feme"
-        else:
-            self.gender = "male"
+        self.gender = "feme" if gender == 0 else "male"
         self.id = ide
         UMD = data["UMD"]
         self.is_mkg = self.ifMkg(data)
@@ -198,18 +192,14 @@ class ListWords(QWidget, Ui_ListWords):
         dif = abs(OD - OI)
         if dif >= 35:
             mkg = True
-            if OD>OI:
-                side=0
-            else:
-                side=1
-        result = [side, mkg]
-        return result
+            side = 0 if OD>OI else 1
+        return [side, mkg]
 
     def pushaudio(self, num):
         self.num = num
         btn = self.sender()
         self.text = (btn.text()).lower()
-        file = "LP_palacios_1_{}.ogg".format(self.text)
+        file = f"LP_palacios_1_{self.text}.ogg"
         word = create_word(file)
         self.soundPlay(word)
    
@@ -221,12 +211,12 @@ class ListWords(QWidget, Ui_ListWords):
             #self.probe.setSource(self.channel_0)
             #self.probe.audioBufferProbed.connect(self.processProbe)
             self.channel_0.play()
-            self.time_1.start()
-            self.lbl_list1.setText("Última : {}".format(self.text))
-            self.lbl_list2.setText("Última : {}".format(self.text))
-            self.lbl_list2_2.setText("Última : {}".format(self.text))
-            self.lbl_list3.setText("Última : {}".format(self.text))
-            self.lbl_list4.setText("Última : {}".format(self.text))
+            #self.time_1.start()
+            self.lbl_list1.setText(f"Última : {self.text}")
+            self.lbl_list2.setText(f"Última : {self.text}")
+            self.lbl_list2_2.setText(f"Última : {self.text}")
+            self.lbl_list3.setText(f"Última : {self.text}")
+            self.lbl_list4.setText(f"Última : {self.text}")
 
     #def processProbe(self, buff):
         #print(buff.constData())
@@ -250,7 +240,7 @@ class ListWords(QWidget, Ui_ListWords):
             if self.list_response[num] == 1:
                 media = create_word_response(self.text, self.gender, self.id)
             else:
-                noneN = "none{}".format(random.randint(1 , 3))
+                noneN = f"none{random.randint(1, 3)}"
                 media = create_word_response(noneN, self.gender, self.id)
             self.channel_0.setSource(media)
             self.channel_0.play()
@@ -259,29 +249,21 @@ class ListWords(QWidget, Ui_ListWords):
 
     def changecalcule(self):
         if self.prev_int != self.playable[1]:
-            if self.playable[2] != None:
-                self.calculate(self.playable[2])
-                self.prev_int = self.playable[1]
-            else:
+            if self.playable[2] is None:
                 self.playable[1] = 20
                 self.calculate(0)
                 self.prev_int = 20
-        else:
-            pass
+            else:
+                self.calculate(self.playable[2])
+                self.prev_int = self.playable[1]
 
     def calculate(self, side):
-        if side == 0:
-            contra = 1
-        else:
-            contra = 0
         result = []
 
         if self.is_mkg[1]:
-            if self.is_mkg[0] == side and self.playable[3] == False:
-            #La logo no funciona en masking
-                data = self.error_list[contra]
-            else:
-                data = self.error_list[side]
+            contra = 1 if side == 0 else 0
+            data = self.error_list[contra] if self.is_mkg[0] == side and self.playable[3] == False else self.error_list[side]
+
         else:
             data = self.error_list[side]
 
@@ -291,33 +273,29 @@ class ListWords(QWidget, Ui_ListWords):
         for k, v in data.items():
             value.append(v)
             keys.append(int(k))
-        
+
         if intencity <= keys[0]:
             range_error = 25
             self.continue_response = False
-            for _ in range(range_error):
-                result.append(0)
-        elif intencity > keys[0] and intencity <= keys[-1]:
+            result.extend(0 for _ in range(range_error))
+        elif intencity <= keys[-1]:
             self.continue_response = True
             range_correct = data[str(intencity)]
-            range_error = 25 - range_correct
-            for _ in range(range_correct):
-                result.append(1)
-            for _ in range(range_error):
-                result.append(0)
-            random.shuffle(result)
-        elif intencity > keys[-1]:
-            range_correct = value[-1]
-            range_error = 25 - range_correct
-            for _ in range(range_correct):
-                result.append(1)
-            for _ in range(range_error):
-                result.append(0)
-            random.shuffle(result)
+            self._extracted_from_calculate_32(range_correct, result)
         else:
-            pass
-           
+            range_correct = value[-1]
+            self._extracted_from_calculate_32(range_correct, result)
         self.list_response = result
+        print(self.list_response)
+
+    # TODO Rename this here and in `calculate`
+    def _extracted_from_calculate_32(self, range_correct, result):
+        range_error = 25 - range_correct
+        for _ in range(range_correct):
+            result.append(1)
+        for _ in range(range_error):
+            result.append(0)
+        random.shuffle(result)
         #print(result)
 
 
