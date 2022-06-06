@@ -4,26 +4,13 @@ import copy
 class CalculateLogo():
     def __init__(self, thr, umd):
         self.thr = thr
+        #print(thr)
         recruit = thr["recruit"]
+        self.logo_attenuation = 45
         self.scale_htl = {str(i*5):1 for i in range(21)}
         self.por_logo = [i*4 for i in range(26)]
-
         self.sdt = self.sdt_calcule(self.thr)
         self.data = self.calNewUmd(umd, recruit, self.sdt)
-
-        #self.srt = [self.thr["Aerea_mkg"][4][0],self.thr["Aerea_mkg"][4][1]]
-        #for i in range(len(self.srt)):
-        #    if self.srt[i] == self.sdt[i]:
-        #        self.srt[i] = self.srt[i]+10
-        #print("sdt:{},{}".format(self.sdt[0], self.sdt[1]))
-        #print("srt:{},{}".format(self.srt[0], self.srt[1]))
-        #self.umd = [self.srt[0]+25, self.srt[1]+25]
-        #print("umd:{},{}".format(self.umd[0], self.umd[1]))
-
-        
-        #self.porcentajes_logo = [0,24,52,64,76,88,96,100]
-        #self.curve_normal = [0,5,10,15,20,25,30,35]
-        #self.data = self.calculate_result()
 
 
     def calNewUmd(self, data, recruit, sdt):
@@ -94,14 +81,14 @@ class CalculateLogo():
                 idx_value = idx - other_count
                 data[i_result] = values[idx_value]
         
-    def cal_range_umd_end(self, data:dict, rangex:list, perc_umd:int, umd:int, recruit: bool):
+    def cal_range_umd_end(self, data:dict, rangex:list, 
+                          perc_umd:int, umd:int, recruit: bool):
         count = 1
         for idx, i_result in enumerate(data):
             if rangex[0] < idx:
                 if recruit:
                     umd = umd-count*5
-                    if umd < 0:
-                        umd = 0
+                    umd = max(umd, 0)
                     data[i_result] = data[str(umd)]
                 else:
                     data[i_result] = perc_umd
@@ -111,14 +98,16 @@ class CalculateLogo():
         return data["SDT"]
 
     
-    def get(self):
-        return self.data
+    def get(self, side, mkg, intensity):
+        _mayor = 0 if self.sdt[0] > self.sdt[1] else 1
+        _minor = 1 if _mayor == 0 else 0
+        contra = 1 if side == 0 else 0
+        #estoy en el oído con sdt mayor?
+        #este umd es 45db mayor que el sdt o las oseas?
+        #_need_mkg = True if _minor + 45 < 
+
+        if not mkg:
+            return self.data
+        else:
+            return self.data
     
-if __name__ == '__main__':
-
-    umb = [{"int":85, "percentage": 40},{"int":40,"percentage":96}]
-
-    thr = {"SDT" :[50,10], "recruit":[False, True]}
-
-        
-    b = CalculateLogo(thr, umb)

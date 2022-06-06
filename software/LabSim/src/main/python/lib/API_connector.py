@@ -35,7 +35,7 @@ class API:
         """
         response = requests.post(self.URL, data=data)
         string_response=(response.text)
-       # print(string_response)
+       #print(string_response)
 
         try:
             return json.loads(string_response)

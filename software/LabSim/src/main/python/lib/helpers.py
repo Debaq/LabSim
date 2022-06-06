@@ -40,6 +40,7 @@ class Preferences:
         if p == False:
             return self.data
         else:
+            print("estoy aquí")
             print(self.data)
     
     def getAllKeys(self):
@@ -80,7 +81,6 @@ class Lang:
         with codecs.open(file_po, 'r', 'utf-8') as json_file:
             self.lng_po = json.load(json_file)
 
-
     def get(self, request):
         """obtiene la traducción del objeto"""
         try:
@@ -92,11 +92,7 @@ class Lang:
         return result
 
     def _listToString(self, s):
-        str1 = ""
-        for ele in s:
-            str1 += ele
-        return str1
-
+        return "".join(s)
 
 
 class Storage:
@@ -114,19 +110,18 @@ class Storage:
     def create(self,n):
         for _ in range(n):
             self.data.append(None)
-    
+
     def clean(self):
         self.data = []
         self.create(self.n)
 
     def get(self, idx):
         return self.data[idx]
-    
+
     def set(self, idx, dat):
         self.data[idx] = dat
 
     def listSet(self, dat, noRe = True):
-
         if noRe:
             if len(dat) == len(self.data):
                 for idx in dat:
@@ -145,23 +140,17 @@ class Storage:
             self.data[idx].append(dat)
 
     def isFull(self, idx):
-        state = True
-        if self.data[idx] == None:
-            state = False
-        return state
+        return self.data[idx] is not None
     
     def isNull(self, idx):
         return not self.isFull(idx)
 
     def isEmpty(self):
-        state = False
-        for i in self.data:
-            if i == None:
-                state = True
-        return state
+        return any(i is None for i in self.data)
     
     def getAll(self, p =False):
         if p == False:
             return self.data
         else:
+            print("estoy aca")
             print(self.data)

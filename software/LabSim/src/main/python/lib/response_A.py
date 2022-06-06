@@ -23,8 +23,7 @@ class Response(QWidget):
         self.channel_0 = QMediaPlayer()
         self.activate_fowler = [False, False]
         self.lastChoice_fowler = None
-
-
+        self.state =  None
 
 
     def set_response(self, thr):
@@ -60,38 +59,40 @@ class Response(QWidget):
 
     
     def set_command(self, cmd):
-        if cmd == "colocar_fonos":
-            self.state = "THR_A_X"
-        elif cmd == "escuche_mi_voz":
-            self.state = "L_SDT_X"
-        elif cmd == "dictar_palabras":
-            self.state = "L_UMD_X"
-        elif cmd == "pitos_fuertes":
-            self.state = "S_LDL_X"
-        elif cmd == "Aerea_+_ruido":
-            self.state = "THR_A_MKG"
-        elif cmd == "colocar_vibrador":
-            self.state = "THR_O_X"
-        elif cmd == "vibrador_+_ruido":
-            self.state = "THR_O_MKG"
-        elif cmd == "dos_pitos":
-            self.state = "S_FOWLER_X"
-        elif cmd == "cambie_de_volumen":
-            self.state = "S_SISI_X"
-        elif cmd == "mano_levantada":
-            self.state = "S_CARHART_X"
-        elif cmd == "mano_levantada_en_ruido":
-            self.state = "S_STAT_X"
-        elif cmd == "sonidos_iguales":
-            self.fowler_q(1)
-            #print("y por por aca")
-        elif cmd == "en_qué_oído":
-            self.fowler_q(2)
-            #print("pase por aca")
-        else:
-            self.state = "X_X_X"
-            self.command_2 = cmd
+        match cmd:
+            case "colocar_fonos":
+                self.state = "THR_A_X"
+            case "escuche_mi_voz":
+                self.state = "L_SDT_X"
+            case "dictar_palabras":
+                self.state = "L_UMD_X"
+            case "pitos_fuertes":
+                self.state = "S_LDL_X"
+            case "Aerea_+_ruido":
+                self.state = "THR_A_MKG"
+            case "colocar_vibrador":
+                self.state = "THR_O_X"
+            case "vibrador_+_ruido":
+                self.state = "THR_O_MKG"
+            case "dos_pitos":
+                self.state = "S_FOWLER_X"
+            case "cambie_de_volumen":
+                self.state = "S_SISI_X"
+            case "mano_levantada":
+                self.state = "S_CARHART_X"
+            case "mano_levantada_en_ruido":
+                self.state = "S_STAT_X"
+            case "sonidos_iguales":
+                self.fowler_q(1)
+                #print("y por por aca")
+            case "en_qué_oído":
+                self.fowler_q(2)
+                #print("pase por aca")
+            case default:
+                self.state = "X_X_X"
+                self.command_2 = cmd
         self.Action(self.state)
+                        
 
     def Action(self, action):
         t,p,m = action.split("_")
@@ -105,6 +106,7 @@ class Response(QWidget):
             self.response = (t, p, MKG)
 
     def transmit_(self, **kwargs):
+        #print("voy a trabsmitir {}".format(kwargs))
         for k, i in kwargs.items():
             if k == "lvl":
                 l = []
@@ -116,10 +118,7 @@ class Response(QWidget):
                 l = []
                 for t in i:
                     #print(t[0:2])
-                    if t[0:2] == "Na" or t == "Sp":
-                        m = "mkg"
-                    else: 
-                        m = t
+                    m = "mkg" if t[:2] == "Na" or t == "Sp" else t
                     l.append(m)
                 i = l
 
@@ -128,10 +127,9 @@ class Response(QWidget):
         #print(self.data)
 
     def activate(self):
-        #print("entre al activador y haré:{}".format(self.response))
+        #print(f"entre al activador y haré:{self.response}")
         #print(self.data)
-        
-        if self.response[1] == 'A' or self.response[1] == 'O':
+        if self.response[1] in ['A', 'O']:
             if self.data['stimOn'][0]:
                 self.resp_THR(mkg=self.response[2])
             else:
@@ -142,37 +140,30 @@ class Response(QWidget):
                     self.logo_sdt()
                 else:
                     self.no()
-            elif self.response[1] == 'UMD':
-                pass
-            else:
-                pass
         elif self.response[0] == 'S':
-            if self.response[1] == 'LDL':
-                if self.data['stimOn'][0]:
-                    self.ldl()
-                else:
-                    self.no()
+            if self.response[1] == 'LDL' and self.data['stimOn'][0]:
+                self.ldl()
+            elif self.response[1] == 'LDL' or self.response[1] != 'FOWLER' and self.response[1] == 'CARHART' and not self.data['stimOn'][0]:
+                self.no()
+            elif self.response[1] != 'FOWLER' and self.response[1] == 'CARHART':
+                self.carhart()
             elif self.response[1] == 'FOWLER':
-                    self.fowler()
+                self.fowler()
                 
-            elif self.response[1] == 'CARHART':
-                if self.data['stimOn'][0]:
-                    self.carhart()
-                else:
-                    self.no()
-            else:
-                pass
-        else:
-            pass
+                
     def fowler_q(self, n):
         data = self.supra[1][1]
         freq = self.supra[1][0]
+        print(f"la frecuencia actual es{self.data['freq']}")
+        print(f"la frecuencia es{freq}")
         if self.activate_fowler[0] and self.activate_fowler[1]:
             conti = True
         else:
             conti = False
+        #print(f"se puede continuar?{conti}")
 
         if freq == self.data['freq'] and conti:
+            print("pase la priemra condicion")
             self.activate_fowler[0] = False
             self.activate_fowler[1] = False
             lvlch0 = self.data['lvl'][0]
@@ -189,14 +180,18 @@ class Response(QWidget):
             if self.data['side'][1] == 0:
                 lvls[0] = lvlch1
             idx = self.bestEar(freq)
-            #print (idx)
+            print (f"el indice es {idx} y el lvl es{lvls}")
+            print(f"lo que busco es {lvls[idx]}")
+            print(f"lo busco en {data}")
             if str(lvls[idx]) in data:
+                print("lo encontre")
                 p=data[str(lvls[idx])] 
                 t=lvls[idx-1]
                 if p < t:
-                    #print("suena mas fuerte{}".format("OI"))
+                    print("suena mas fuerte{}".format("OI"))
                     if n == 1:
                         voice_ldl = create_voice("no", self.gender, self.id)
+                        print(voice_ldl)
                         self.channel_0.setSource(voice_ldl)
                         self.channel_0.play()
                         self.lastChoice_fowler = "elizquierdo"
@@ -204,9 +199,9 @@ class Response(QWidget):
                     voice_ldl = create_voice("si", self.gender, self.id)
                     self.channel_0.setSource(voice_ldl)
                     self.channel_0.play()
-                    #print("suenan iguales")
+                    print("suenan iguales")
                 else:
-                    #print("suena mas fuerte{}".format("OD"))
+                    print("suena mas fuerte{}".format("OD"))
                     if n == 1:
                         voice_ldl = create_voice("no", self.gender, self.id)
                         self.channel_0.setSource(voice_ldl)
@@ -222,13 +217,9 @@ class Response(QWidget):
 
 
     def bestEar(self, f):
-        OD = self.thr[1][1][f][0]
-        OI = self.thr[1][1][f][1]
-        if OD<OI:
-            best = 0
-        else:
-            best = 1
-        return best
+        o_d = self.thr[1][1][f][0]
+        o_i = self.thr[1][1][f][1]
+        return 0 if o_d<o_i else 1
 
     def fowler(self):
         if self.data['stimOn'][0]:

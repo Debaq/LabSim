@@ -42,6 +42,7 @@ alternate_time = class_pref.get("alternate_time")
 
 
 class Audiometer(QWidget, Ui_Audiometer):
+    
     signal_speech = pyqtSignal(list)
     def __init__(self, thr):
         # Inicialización de la ventana y propiedades
@@ -546,14 +547,24 @@ class Audiometer(QWidget, Ui_Audiometer):
         ##self.sendData.send(data, online)
 
     def stim(self, ch, stim):
-        try:
-            self.datasignal_speech[0] = stim == 2
-            self.signal_speech.emit(self.datasignal_speech)
-        except:
-            pass
+        contra = 0 if ch == 1 else 1
+
+
+            
+        inte_ch0 = self.lbl_intencity[ch].text().split(' dB HL')[0]
+        inte_ch1 = self.lbl_intencity[contra].text().split(' dB HL')[0]
+        side_text  = self.lbl_output[ch].text()
+        side = 0 if side_text == "Derecha" else 1
+
+
+        self.datasignal_speech[0] = stim == 2
+        self.datasignal_speech[2] = int(inte_ch0)
+        self.datasignal_speech[3] = side
+
+        self.signal_speech.emit(self.datasignal_speech)
+
 
         verify = True
-        contra = 0 if ch == 1 else 1
         verify_stim = self.lbl_stim[contra].text()
 
         if stim in [3, 4, 6]:
@@ -639,7 +650,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         high_f = self.lbl_ext_izq.text() != ""
         via = self.stim_output()
         self.frecuency_list = create_frecuency(
-            frecuency_dict, prueba=prueba, transductor=via, Hf=high_f)
+            frecuency_dict, prueba=prueba, transductor=via, high_frecuency=high_f)
         old_hz = self.lbl_freq.text().split(' Hz')[0]
         old_hz = int(old_hz)
         if old_hz not in self.frecuency_list:
@@ -790,7 +801,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         ch0 = self.lbl_intencity[0].text()
         ch1 = self.lbl_intencity[1].text()
         self.response.transmit_(lvl = [ch0,ch1])
-        lvl_ch = 'level_ch{}'.format(ch)
+        lvl_ch = f'level_ch{ch}'
         data = {lvl_ch: new_int}
         #online = self.btn_online.isChecked()
         #self.sendData.send(data, online)

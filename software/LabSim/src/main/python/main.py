@@ -13,6 +13,7 @@ __VERSION__ = 'v0.9.0'
 import json
 import sys
 import time
+import contextlib
 
 import requests
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
@@ -91,6 +92,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.apps = APPS
         self.boxs = BOXS
         self.sectors_lbl = SECTORS
+        print(f"{self.apps}")
         self.modules = Storage(len(self.apps))
         self.prev_patient = str()
 
@@ -218,7 +220,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data))
         self.subw_a.ui_ui.signal_speech.connect(self.speechlist_mode)
         self.subw_z = FrameSubMdi(Z.ZControl())
-        self.subw_w = FrameSubMdi(ListWords.ListWords(self.data))
+        self.subw_w = FrameSubMdi(ListWords.ListWords(self.data)) #ACA PASA POR PRIMERA VEZ
         self.subw_abr = FrameSubMdi(abr_module.MainWindow())
         self.subw_voice = FrameSubMdi(ComandVoiceA())
         self.subw_voice.ui_ui.btn_checked.connect(self.subw_a.ui_ui.supra)
@@ -271,7 +273,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             text = "conexión exitosa"
         else:
             text = self.sectors_lbl[data['sector']]
-            if self.prev_patient != self.data['sector']:
+            if self.prev_patient != self.data['sector'] and not self._flag_ofline:
                 self.subw_a.ui_ui.la_super(self.data)
                 self.subw_w.ui_ui.la_super(self.data)
                 self.subw_z.ui_ui.la_super(self.data)
@@ -288,7 +290,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             #self.createInsWidget(data)
             file = open(context.get_resource("test.json"))
             data_raw = json.load(file)
-            self.refresh_data(data_raw[self.case])
+            try:
+                self.refresh_data(data_raw[self.case])
+                return True
+            except KeyError:
+                QMessageBox.critical(self, "Error", "No se encontró el caso")
+                return False
         
 
     def login(self):
@@ -314,27 +321,29 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     # TODO Rename this here and in `login`
     def _extracted_from_login_12(self, name):
-        self.subw_login.ui_ui.Le_name.setDisabled(True)
-        self.subw_login.ui_ui.Le_passw.setDisabled(True)
         if not self._flag_ofline:
             self.thread_data_clicked()
         else:
             self.new_login = True
-            self.refresh_data_ofline()
-        self.subw_login.ui_ui.btn_login.setText("Salir")
-        self.btn_login.setText("Salir")
-        self.showHide(0)
-        text = f"{name}"
-        self.lbl_name.setText(text)
-        self.statusbar.showMessage(text)
-        self.new_login = True
+            login = self.refresh_data_ofline()
+        if login:            
+            self.subw_login.ui_ui.Le_name.setDisabled(True)
+            self.subw_login.ui_ui.Le_passw.setDisabled(True)
+            self.subw_login.ui_ui.btn_login.setText("Salir")
+            self.btn_login.setText("Salir")
+            self.showHide(0)
+            text = f"{name}"
+            self.lbl_name.setText(text)
+            self.statusbar.showMessage(text)
+            self.new_login = True
 
     def logout(self):
         name = self.subw_login.ui_ui.Le_name.text()
         passw = self.subw_login.ui_ui.Le_passw.text()
-        self.thread_data.terminate()
-        data = {'user': name, 'password': passw, 'request': 'logout'}
-        request_API(data)
+        if not self._flag_ofline:
+            data = {'user': name, 'password': passw, 'request': 'logout'}
+            request_API(data)
+            self.thread_data.terminate()
         self.subw_login.ui_ui.Le_name.setDisabled(False)
         self.subw_login.ui_ui.Le_passw.setDisabled(False)
         self.subw_login.ui_ui.Le_name.setText("")
@@ -370,13 +379,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             else:
                 self.create_sub_window(self.subw_w, name, pos_z, size=size)
         else:
-            self.modules.get(pos_z).hide()
+            with contextlib.suppress(AttributeError):
+                self.modules.get(pos_z).hide()
 
     def speechlist_mode(self, state):
-        self.var_list_word.getAll(True)
+        #self.var_list_word.getAll(True)
         self.var_list_word.listSet(state, False)
-        self.var_list_word.getAll(True)
+        #self.var_list_word.getAll(True)
         self.activate_listWords()
+        self.subw_w.ui_ui.update_state(state)
         self.subw_w.ui_ui.playable[1] = state[2]
         self.subw_w.ui_ui.playable[2] = state[3]
         self.subw_w.ui_ui.playable[3] = state[4]
