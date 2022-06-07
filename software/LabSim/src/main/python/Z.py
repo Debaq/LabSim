@@ -6,8 +6,8 @@
 #               CREADOR : NICOLÁS QUEZADA QUEZADA               #
 #                                                               #
 #################################################################
-from PyQt5.QtWidgets import QWidget
-from PyQt5.QtCore import QTimer
+from PySide6.QtWidgets import QWidget
+from PySide6.QtCore import QTimer
 from datetime import datetime
 import numpy as np
 
@@ -20,9 +20,11 @@ from lib.helpers import Storage
 
 class ZControl(QWidget, Ui_Z_control):
     def __init__(self,):
-        QWidget.__init__(self)
+        #QWidget.__init__(self)
+        super(ZControl, self).__init__()
         self.setupUi(self)
         self.Z = ZZscreen()
+
         self.Screen_Layout.addWidget(self.Z)
 
         # BUTTONS
@@ -49,7 +51,7 @@ class ZControl(QWidget, Ui_Z_control):
         self.store_data = [Storage(2), Storage(2)]
         self.new = [True, True]
 
-    def laSuper(self, data):
+    def la_super(self, data):
         self.data = data
         if data['sector'] == 'Z_OI' or data['sector'] == 'Z_OD':
             self.preCharger()

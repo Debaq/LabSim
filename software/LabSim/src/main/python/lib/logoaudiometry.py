@@ -1,95 +1,113 @@
+
+import copy
+
 class CalculateLogo():
     def __init__(self, thr, umd):
         self.thr = thr
-
-        self.umd_test = self.calNewUmd(thr,umd)
+        #print(thr)
+        recruit = thr["recruit"]
+        self.logo_attenuation = 45
+        self.scale_htl = {str(i*5):1 for i in range(21)}
+        self.por_logo = [i*4 for i in range(26)]
         self.sdt = self.sdt_calcule(self.thr)
-        self.srt = [self.thr["Aérea_mkg"][4][0],self.thr["Aérea_mkg"][4][1]]
-        for i in range(len(self.srt)):
-            if self.srt[i] == self.sdt[i]:
-                self.srt[i] = self.srt[i]+10
-        #print("sdt:{},{}".format(self.sdt[0], self.sdt[1]))
-        #print("srt:{},{}".format(self.srt[0], self.srt[1]))
-        self.umd = [self.srt[0]+25, self.srt[1]+25]
-        #print("umd:{},{}".format(self.umd[0], self.umd[1]))
-        #self.porcentajes_logo = [0,24,52,64,76,88,96,100]
-        #self.curve_normal = [0,5,10,15,20,25,30,35]
-        self.data = self.calculate_result()
+        self.data = self.calNewUmd(umd, recruit, self.sdt)
 
 
-    def calNewUmd(self, thr, data):
-        best_od = [thr["Aérea_mkg"][i][0] for i in range(1,7)]
-        best_od.sort()
-        best_oi = [thr["Aérea_mkg"][i][1] for i in range(1,7)]
-        best_oi.sort()
-        thr_2k = [thr["Aérea_mkg"][4][i] for i in range(2)]
-        umd_data = [list(i[0].values()) for i in data]
+    def calNewUmd(self, data, recruit, sdt):
+        #por_logo = [0,24,52,64,76,80,96,100]
+        max_response = [data[0]["int"],data[1]["int"]]
+        max_percentage = [data[0]["percentage"],data[1]["percentage"]]
+        result = [copy.copy(self.scale_htl),copy.copy(self.scale_htl)]
+        #establecer la maxima respuesta
+        for idx, _ in enumerate(data):
+            sdt_0 = sdt[idx]
+            max_response_ear = max_response[idx]
+            max_percentage_ear = max_percentage[idx]
+            result[idx][str(max_response_ear)] = max_percentage_ear
+            result[idx][str(sdt_0)] = 0
+            idx_sdt_0 = 0
+            idx_sdt_flag = False
+            idf_umd_flag = False
+            end_flag = False
+            idx_max_response_ear = 0
+            for idx_result, i_result in enumerate(result[idx]):
+                if int(i_result) == sdt_0:
+                    idx_sdt_0 = idx_result
+                    idx_sdt_flag = True
+                elif int(i_result) == max_response_ear:
+                    idx_max_response_ear = idx_result
+                    idf_umd_flag = True
+                elif idx_sdt_flag:
+                    zero_sdt = [0,idx_sdt_0]
+                    self.cal_range_zero_sdt(result[idx], zero_sdt)
+                    idx_sdt_flag = False
+                elif idf_umd_flag:                    
+                    sdt_umd = [idx_sdt_0,idx_max_response_ear]
+                    self.cal_range_sdt_umd(result[idx], sdt_umd, max_percentage_ear)
+                    idf_umd_flag = False
+                    end_flag = True
+                elif end_flag:
+                    umd_end = [idx_max_response_ear,len(result[idx])-1]
+                    self.cal_range_umd_end(result[idx], umd_end, max_percentage_ear,
+                                           max_response_ear, recruit[idx])
+                    end_flag = False
 
-        sdt_od = sum(best_od[0:2])/2
-        sdt_oi = sum(best_oi[0:2])/2
-        data_sdt = [sdt_od, sdt_oi]
-
-        if umd_data[0][2] > 52:
-            srt_od = thr_2k[0] if thr_2k[0] >= sdt_od + 20 else sdt_od + 10
-        else:
-            srt_od = 130
-
-        if umd_data[1][2] > 52:
-            srt_oi = thr_2k[1] if thr_2k[1] >= sdt_oi + 20 else sdt_oi + 10
-        else:
-            srt_oi = 130
-        data_srt = [srt_od, srt_oi]
-
-        por_logo = list(range(0,104,4))
-        curve_normal = list(range(0,120,5))
-        
-        if umd_data[0][0] is False:
-            umd_od = {}
-            if srt_od == 130:
-                for i in curve_normal:
-                    if i <= sdt_od +10:
-                        value = 0
-                    else:
-                        value = umd_data[0][2]
-                    umd_od[str(i)] = value
-            else:
-                for i in curve_normal:
-                    if i <= srt_od:
-                        value = 0
-                    else:
-                        pass
-                        
-                    
-                
-
-   
-    
-
-    def sdt_calcule(self, data):
-        od = [data["Aérea_mkg"][1][0],data["Aérea_mkg"][2][0],data["Aérea_mkg"][3][0],data["Aérea_mkg"][4][0],data["Aérea_mkg"][5][0],data["Aérea_mkg"][6][0]]
-        oi = [data["Aérea_mkg"][1][1],data["Aérea_mkg"][2][1],data["Aérea_mkg"][3][1],data["Aérea_mkg"][4][1],data["Aérea_mkg"][5][1],data["Aérea_mkg"][6][1]]
-        od.sort()
-        oi.sort()
-        def prom(x):
-            return sum(x)/len(x)
-
-        prom_od = prom([od[0], od[1]])
-        prom_oi = prom([oi[0], oi[1]])
-
-        result_prev = [prom_od, prom_oi]
-        result = [int(result_prev[0]/5)*5,int(result_prev[1]/5)*5 ]
+            #print(f"{zero_sdt},{sdt_umd},{umd_end}")
         return result
     
-    def calculate_result(self):
-        def generate(rec, sdt , srt, umd, por):
-            curve = [0,5,10,15,20,25,30,35]
-            plus = 10 if rec else 0
-            return {str(sdt+curve[i]+plus): int(por[i]/4) for i in range(len(curve))}
+    def cal_range_zero_sdt(self, data:dict, rangex:list):
+        for idx, i_result in enumerate(data):
+            if rangex[1] > idx:
+                data[i_result] = 0
+                
+    def cal_range_sdt_umd(self, data:dict, rangex:list, umd:int):
+        idx_umd = self.por_logo.index(umd)
+        cant_values = rangex[1]-rangex[0]
+        values = []
+        prev = 130
+        multiplo = 5 if umd > 92 else 2
+        for count, _ in enumerate(range(cant_values-1), start=1):
+            value = self.por_logo[idx_umd-count*multiplo]
+            if value <= 0 or value > umd or value > prev:
+                value = 4
+            prev = value
+            values.append(value)
+        values.reverse()
+        other_count = 130
+        for idx, i_result in enumerate(data):
+            if rangex[0] < idx and rangex[1] > idx:
+                if other_count == 130:
+                    other_count = idx
+                idx_value = idx - other_count
+                data[i_result] = values[idx_value]
+        
+    def cal_range_umd_end(self, data:dict, rangex:list, 
+                          perc_umd:int, umd:int, recruit: bool):
+        count = 1
+        for idx, i_result in enumerate(data):
+            if rangex[0] < idx:
+                if recruit:
+                    umd = umd-count*5
+                    umd = max(umd, 0)
+                    data[i_result] = data[str(umd)]
+                else:
+                    data[i_result] = perc_umd
 
-        od = generate(self.recl[0], self.sdt[0], self.srt[0], self.umd[0], self.porcentajes_logo[0])
-        oi = generate(self.recl[1],self.sdt[1], self.srt[1], self.umd[1], self.porcentajes_logo[1])
-        data = [od, oi]
-        return data
+
+    def sdt_calcule(self, data):
+        return data["SDT"]
+
     
-    def get(self):
-        return self.data
+    def get(self, side, mkg, intensity):
+        _mayor = 0 if self.sdt[0] > self.sdt[1] else 1
+        _minor = 1 if _mayor == 0 else 0
+        contra = 1 if side == 0 else 0
+        #estoy en el oído con sdt mayor?
+        #este umd es 45db mayor que el sdt o las oseas?
+        #_need_mkg = True if _minor + 45 < 
+
+        if not mkg:
+            return self.data
+        else:
+            return self.data
+    

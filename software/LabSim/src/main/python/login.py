@@ -6,10 +6,7 @@
 #               CREADOR : NICOLÁS QUEZADA QUEZADA               #
 #                                                               #
 #################################################################
-import sys
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QWidget
-from fbs_runtime.application_context.PyQt5 import ApplicationContext
+from PySide6.QtWidgets import QWidget
 
 
 from UI.Ui_Login import Ui_Login
@@ -23,11 +20,5 @@ class MainLogin(QWidget, Ui_Login):
         self.setupUi(self)
    
 
-
-
 if __name__ == "__main__":
-    appctxt = ApplicationContext()     
-    app = QApplication([])
-    window = MainLogin()
-    window.show()
-    sys.exit(app.exec())
+    pass

@@ -11,21 +11,19 @@
 
 import json
 import codecs
-from fbs_runtime.application_context.PyQt5 import ApplicationContext
-
-appctxt = ApplicationContext()
+from base import context
 
 
 class Preferences:
     """preferencias del programa"""
 
     def __init__(self):
-        preferences_file = appctxt.get_resource('json/json_list.json')
+        preferences_file = context.get_resource('json/json_list.json')
         with codecs.open(preferences_file, 'r', 'utf-8') as json_file:
             list_data = json.load(json_file)
         self.data = {}
         for i in list_data:
-            file = appctxt.get_resource('json/{}'.format(list_data[i]))
+            file = context.get_resource('json/{}'.format(list_data[i]))
             with codecs.open(file, 'r', 'utf-8') as json_file:
                 data = json.load(json_file)
             self.data.update(data)
@@ -42,6 +40,7 @@ class Preferences:
         if p == False:
             return self.data
         else:
+            print("estoy aquí")
             print(self.data)
     
     def getAllKeys(self):
@@ -53,23 +52,23 @@ class Preferences:
     def getStyle(self, wid):
         stylePred = self.data["styles"][0]
         style = self.data["styles"][1][stylePred]
-        style = appctxt.get_resource('styles/{}.qss'.format(style))
+        style = context.get_resource('styles/{}.qss'.format(style))
         with open(style,"r") as fh:
             wid.setStyleSheet(fh.read())
 
 # keyboard_shortcuts : [up_dial_izq,down_dial_izq,up_dial_der,down_dial_der],
 
 # frecuency_dict:
-#             {"Nombre de la prueba":[[aérea],[ósea],[campo libre]]}
+#             {"Nombre de la prueba":[[Aerea],[Osea],[campo libre]]}
 #             {"Nombre de la prueba": [[min,max],[add_others list], [high_f list]],....}
-#             transductor 0 : aérea
+#             transductor 0 : Aerea
 #             transductor 1 : óseo
 #             transductor 2 : Campo Libre
 
 # intency_dict:
 #             { "nombre del estimulo": [[aerea],[osea],[campo libre]]}
 #             { "nombre del estimulo": [[[min , max],[extend]],....
-#             transductor 0 : aérea
+#             transductor 0 : Aerea
 #             transductor 1 : óseo
 #             transductor 2 : Campo Libre
 
@@ -78,10 +77,9 @@ class Lang:
     def __init__(self):
         class_pref = Preferences()
         lang = class_pref.get("Lang")
-        file_po = appctxt.get_resource('json/{}.json'.format(lang))
+        file_po = context.get_resource('json/{}.json'.format(lang))
         with codecs.open(file_po, 'r', 'utf-8') as json_file:
             self.lng_po = json.load(json_file)
-
 
     def get(self, request):
         """obtiene la traducción del objeto"""
@@ -94,11 +92,7 @@ class Lang:
         return result
 
     def _listToString(self, s):
-        str1 = ""
-        for ele in s:
-            str1 += ele
-        return str1
-
+        return "".join(s)
 
 
 class Storage:
@@ -116,19 +110,18 @@ class Storage:
     def create(self,n):
         for _ in range(n):
             self.data.append(None)
-    
+
     def clean(self):
         self.data = []
         self.create(self.n)
 
     def get(self, idx):
         return self.data[idx]
-    
+
     def set(self, idx, dat):
         self.data[idx] = dat
 
     def listSet(self, dat, noRe = True):
-
         if noRe:
             if len(dat) == len(self.data):
                 for idx in dat:
@@ -147,23 +140,17 @@ class Storage:
             self.data[idx].append(dat)
 
     def isFull(self, idx):
-        state = True
-        if self.data[idx] == None:
-            state = False
-        return state
+        return self.data[idx] is not None
     
     def isNull(self, idx):
         return not self.isFull(idx)
 
     def isEmpty(self):
-        state = False
-        for i in self.data:
-            if i == None:
-                state = True
-        return state
+        return any(i is None for i in self.data)
     
     def getAll(self, p =False):
         if p == False:
             return self.data
         else:
+            print("estoy aca")
             print(self.data)

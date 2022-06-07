@@ -1,17 +1,16 @@
-from PyQt5.Qt import pyqtSignal
-from PyQt5.QtWidgets import QWidget
+from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QWidget
 from lib.logoaudiometry import CalculateLogo
 from lib.h_audio import (data_basic, minMax, create_voice)
-from PyQt5.QtMultimedia import QMediaPlayer
-from PyQt5.QtCore import QTimer
-import random
+from PySide6.QtMultimedia import QMediaPlayer
+
 
 
 
 
 
 class Response(QWidget):
-    button = pyqtSignal(bool)
+    button = Signal(bool)
    
     def __init__(self):
         super(Response, self).__init__()
@@ -24,24 +23,13 @@ class Response(QWidget):
         self.channel_0 = QMediaPlayer()
         self.activate_fowler = [False, False]
         self.lastChoice_fowler = None
-        self.time = QTimer(self)
-        self.time.timeout.connect(self.counter)
-        print("test")
-        self.tim = 0
-
-    def counter(self):
-        if self.tim > 0:
-            self.tim += 1
-        if self.tim ==  self.carhart_random:
-            self.tim = 0
-            self.downHand()
-            self.timer.stop()
+        self.state =  None
 
 
     def set_response(self, thr):
         #thr = data_basic()
         UMD = thr["UMD"]
-        print(UMD)
+        #print(f"Logo: {thr}")
 
         self.Logo = CalculateLogo(thr, UMD)
         gender = thr['gender']
@@ -57,21 +45,21 @@ class Response(QWidget):
         self.curve_z = []
         self.curve_z.append(thr['Z_OD'])
         self.curve_z.append(thr['Z_OI'])
-        result.append(thr['Aérea'])
-        result.append(thr['Ósea'])
-        result1.append(thr['Aérea_mkg'])
-        result1.append(thr['Ósea_mkg'])
+        result.append(thr['Aerea'])
+        result.append(thr['Osea'])
+        result1.append(thr['Aerea_mkg'])
+        result1.append(thr['Osea_mkg'])
         self.supra = []
 
         self.supra.append(thr['LDL'])
         self.supra.append(thr['Fowler'])
         self.supra.append(thr['Carhart'])
-        print(self.supra[2])
         self.supra.append(thr['UMD'])
         self.thr = [result, result1]
 
     
     def set_command(self, cmd):
+
         if cmd == "colocar_fonos":
             self.state = "THR_A_X"
         elif cmd == "escuche_mi_voz":
@@ -80,7 +68,7 @@ class Response(QWidget):
             self.state = "L_UMD_X"
         elif cmd == "pitos_fuertes":
             self.state = "S_LDL_X"
-        elif cmd == "aérea_+_ruido":
+        elif cmd == "Aerea_+_ruido":
             self.state = "THR_A_MKG"
         elif cmd == "colocar_vibrador":
             self.state = "THR_O_X"
@@ -104,6 +92,7 @@ class Response(QWidget):
             self.state = "X_X_X"
             self.command_2 = cmd
         self.Action(self.state)
+                        
 
     def Action(self, action):
         t,p,m = action.split("_")
@@ -117,6 +106,7 @@ class Response(QWidget):
             self.response = (t, p, MKG)
 
     def transmit_(self, **kwargs):
+        #print("voy a trabsmitir {}".format(kwargs))
         for k, i in kwargs.items():
             if k == "lvl":
                 l = []
@@ -128,10 +118,7 @@ class Response(QWidget):
                 l = []
                 for t in i:
                     #print(t[0:2])
-                    if t[0:2] == "Na" or t == "Sp":
-                        m = "mkg"
-                    else: 
-                        m = t
+                    m = "mkg" if t[:2] == "Na" or t == "Sp" else t
                     l.append(m)
                 i = l
 
@@ -140,67 +127,43 @@ class Response(QWidget):
         #print(self.data)
 
     def activate(self):
-        #print("entre al activador y haré:{}".format(self.response))
+        #print(f"entre al activador y haré:{self.response}")
         #print(self.data)
-        
-        if self.response[1] == 'A' or self.response[1] == 'O':
+        if self.response[1] in ['A', 'O']:
             if self.data['stimOn'][0]:
                 self.resp_THR(mkg=self.response[2])
             else:
-                self.downHand()
+                self.no()
         elif self.response[0] == 'L':
             if self.response[1] == 'SDT':
                 if self.data['stimOn'][0]:
                     self.logo_sdt()
                 else:
-                    self.downHand()
-            elif self.response[1] == 'UMD':
-                pass
-            else:
-                pass
+                    self.no()
         elif self.response[0] == 'S':
-            if self.response[1] == 'LDL':
-                if self.data['stimOn'][0]:
-                    self.ldl()
-                else:
-                    self.downHand()
+            if self.response[1] == 'LDL' and self.data['stimOn'][0]:
+                self.ldl()
+            elif self.response[1] == 'LDL' or self.response[1] != 'FOWLER' and self.response[1] == 'CARHART' and not self.data['stimOn'][0]:
+                self.no()
+            elif self.response[1] != 'FOWLER' and self.response[1] == 'CARHART':
+                self.carhart()
             elif self.response[1] == 'FOWLER':
-                    self.fowler()
+                self.fowler()
                 
-            elif self.response[1] == 'CARHART':
-                if self.data['stimOn'][0]:
-                    side = self.data["side"][0]
-                    if side == 0:
-                        true_carh = self.supra[2][0]
-                    else:
-                        true_carh = self.supra[2][1]
-                    if true_carh == 1:
-                        print("deteriora")
-                        self.time.start(1000)
-                        self.tim = 1
-                        self.carhart()
-                    else:
-                        self.upHand()
-                else:
-                    self.downHand()
-                    self.time.stop()
-                    self.tim = 0
-
-
-            else:
-                pass
-        else:
-            pass
-
+                
     def fowler_q(self, n):
         data = self.supra[1][1]
         freq = self.supra[1][0]
+        print(f"la frecuencia actual es{self.data['freq']}")
+        print(f"la frecuencia es{freq}")
         if self.activate_fowler[0] and self.activate_fowler[1]:
             conti = True
         else:
             conti = False
+        #print(f"se puede continuar?{conti}")
 
         if freq == self.data['freq'] and conti:
+            print("pase la priemra condicion")
             self.activate_fowler[0] = False
             self.activate_fowler[1] = False
             lvlch0 = self.data['lvl'][0]
@@ -217,46 +180,46 @@ class Response(QWidget):
             if self.data['side'][1] == 0:
                 lvls[0] = lvlch1
             idx = self.bestEar(freq)
-            #print (idx)
+            print (f"el indice es {idx} y el lvl es{lvls}")
+            print(f"lo que busco es {lvls[idx]}")
+            print(f"lo busco en {data}")
             if str(lvls[idx]) in data:
+                print("lo encontre")
                 p=data[str(lvls[idx])] 
                 t=lvls[idx-1]
                 if p < t:
-                    #print("suena mas fuerte{}".format("OI"))
+                    print("suena mas fuerte{}".format("OI"))
                     if n == 1:
                         voice_ldl = create_voice("no", self.gender, self.id)
-                        self.channel_0.setMedia(voice_ldl)
+                        print(voice_ldl)
+                        self.channel_0.setSource(voice_ldl)
                         self.channel_0.play()
                         self.lastChoice_fowler = "elizquierdo"
                 elif p == t:
                     voice_ldl = create_voice("si", self.gender, self.id)
-                    self.channel_0.setMedia(voice_ldl)
+                    self.channel_0.setSource(voice_ldl)
                     self.channel_0.play()
-                    #print("suenan iguales")
+                    print("suenan iguales")
                 else:
-                    #print("suena mas fuerte{}".format("OD"))
+                    print("suena mas fuerte{}".format("OD"))
                     if n == 1:
                         voice_ldl = create_voice("no", self.gender, self.id)
-                        self.channel_0.setMedia(voice_ldl)
+                        self.channel_0.setSource(voice_ldl)
                         self.channel_0.play()
                         self.lastChoice_fowler = "elderecho"
         
         if n == 2 and self.lastChoice_fowler!=None:
             voice_ldl = create_voice(self.lastChoice_fowler, self.gender, self.id)
-            self.channel_0.setMedia(voice_ldl)
+            self.channel_0.setSource(voice_ldl)
             self.channel_0.play()
             self.lastChoice_fowler = None
 
 
 
     def bestEar(self, f):
-        OD = self.thr[1][1][f][0]
-        OI = self.thr[1][1][f][1]
-        if OD<OI:
-            best = 0
-        else:
-            best = 1
-        return best
+        o_d = self.thr[1][1][f][0]
+        o_i = self.thr[1][1][f][1]
+        return 0 if o_d<o_i else 1
 
     def fowler(self):
         if self.data['stimOn'][0]:
@@ -266,9 +229,9 @@ class Response(QWidget):
     
 
     def carhart(self):
-        self.carhart_random = random.randint(10,40)
         self.upHand()
-        
+        #print("escucho")
+
     def ldl(self):
         #print("estoy en ldl")
         side = self.data['side'][0]
@@ -281,7 +244,7 @@ class Response(QWidget):
         if response:
             #print("molesta!")
             voice_ldl = create_voice("molesta", self.gender, self.id)
-            self.channel_0.setMedia(voice_ldl)
+            self.channel_0.setSource(voice_ldl)
             self.channel_0.play()
 
     def logo_sdt(self):
@@ -295,7 +258,7 @@ class Response(QWidget):
             self.upHand()
             #print("escucho!")
         else:
-            self.downHand()
+            self.no()
             #print("no escucho nadita")
     
 
@@ -349,11 +312,12 @@ class Response(QWidget):
         return chOn , chOn_c
 
 
-    def upHand(self, hand = True):
+    def upHand(self):
+        hand = True
         self.button.emit(hand)
             
 
-    def downHand(self):
+    def no(self):
         hand = False
         self.button.emit(hand)
         #print("no escucho")

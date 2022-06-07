@@ -1,5 +1,5 @@
 import pyqtgraph as pg
-from PyQt5.QtWidgets import QWidget
+from PySide6.QtWidgets import QWidget
 
 from UI.Ui_Z_screen_r import Ui_Z_rscreen
 from UI.Ui_Z_screen_d import Ui_Z_dscreen

@@ -1,6 +1,6 @@
 import pyqtgraph as pg
-from PyQt5.QtWidgets import QWidget
-from PyQt5.QtCore import Qt
+from PySide6.QtWidgets import QWidget
+from PySide6.QtCore import Qt
 import numpy as np
 from UI.Ui_Z_screen_z import Ui_Z_zscreen
 
@@ -11,7 +11,7 @@ class ZZscreen(QWidget, Ui_Z_zscreen):
         QWidget.__init__(self)
         self.setupUi(self)
         self.create_graph()
-    
+
     def create_graph(self, clear=False):
         if clear:
             self.pw1.clear()
@@ -28,7 +28,7 @@ class ZZscreen(QWidget, Ui_Z_zscreen):
         self.pw1.setLabel('bottom', '', units ='daPa')
         self.pw1.setMouseEnabled(x=False, y=False)
         self.pw1.setMenuEnabled(False)
-        pen1 = pg.mkPen('w', width=1, style=Qt.DashLine)          ## Make a dashed yellow line 2px wide
+        pen1 = pg.mkPen('w', width=1, style=Qt.PenStyle.DashLine)          ## Make a dashed yellow line 2px wide
         self.inf1 = pg.InfiniteLine(movable=False, angle=90, pen=pen1)
         self.pw1.addItem(self.inf1)
         self.ploty = self.pw1.plot()

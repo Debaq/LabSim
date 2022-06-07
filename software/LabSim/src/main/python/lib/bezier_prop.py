@@ -48,4 +48,3 @@ class Bezier:
     def evaluate_bezier(self, points, n):
         curves = self.get_bezier_cubic(points)
         return np.array([fun(t) for fun in curves for t in np.linspace(0, 1, n)])
-
