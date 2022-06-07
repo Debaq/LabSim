@@ -23,7 +23,7 @@ from lib.response_A import Response
 from base import context
 from UI.Ui_Audiometer import Ui_Audiometer
 
-context
+#context
 class_pref = Preferences()
 keyboard_shortcuts = class_pref.get("keyboard_shortcuts")
 session = class_pref.get("session_pred")
@@ -476,6 +476,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         stim = self.lbl_stim[ch].text()
         f = self.lbl_freq.text().split(' Hz')[0]
         sound = create_sound(stim=stim, f=f, ch=lbl_out)
+        print(sound)
 
         self.channels[ch].setSource(sound)
         self.channels[ch].play()
@@ -548,8 +549,6 @@ class Audiometer(QWidget, Ui_Audiometer):
 
     def stim(self, ch, stim):
         contra = 0 if ch == 1 else 1
-
-
             
         inte_ch0 = self.lbl_intencity[ch].text().split(' dB HL')[0]
         inte_ch1 = self.lbl_intencity[contra].text().split(' dB HL')[0]
@@ -594,6 +593,7 @@ class Audiometer(QWidget, Ui_Audiometer):
             r_stim = stim_list[stim]
             self.lbl_stim[ch].setText(r_stim)
             stim_ch = ('stim_type_ch{}').format(ch)
+            
             #data = {stim_ch: r_stim}
             #online = self.btn_online.isChecked()
             ##self.sendData.send(data, online)

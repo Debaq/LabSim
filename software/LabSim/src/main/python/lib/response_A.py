@@ -59,38 +59,38 @@ class Response(QWidget):
 
     
     def set_command(self, cmd):
-        match cmd:
-            case "colocar_fonos":
-                self.state = "THR_A_X"
-            case "escuche_mi_voz":
-                self.state = "L_SDT_X"
-            case "dictar_palabras":
-                self.state = "L_UMD_X"
-            case "pitos_fuertes":
-                self.state = "S_LDL_X"
-            case "Aerea_+_ruido":
-                self.state = "THR_A_MKG"
-            case "colocar_vibrador":
-                self.state = "THR_O_X"
-            case "vibrador_+_ruido":
-                self.state = "THR_O_MKG"
-            case "dos_pitos":
-                self.state = "S_FOWLER_X"
-            case "cambie_de_volumen":
-                self.state = "S_SISI_X"
-            case "mano_levantada":
-                self.state = "S_CARHART_X"
-            case "mano_levantada_en_ruido":
-                self.state = "S_STAT_X"
-            case "sonidos_iguales":
-                self.fowler_q(1)
-                #print("y por por aca")
-            case "en_qué_oído":
-                self.fowler_q(2)
-                #print("pase por aca")
-            case default:
-                self.state = "X_X_X"
-                self.command_2 = cmd
+
+        if cmd == "colocar_fonos":
+            self.state = "THR_A_X"
+        elif cmd == "escuche_mi_voz":
+            self.state = "L_SDT_X"
+        elif cmd == "dictar_palabras":
+            self.state = "L_UMD_X"
+        elif cmd == "pitos_fuertes":
+            self.state = "S_LDL_X"
+        elif cmd == "Aerea_+_ruido":
+            self.state = "THR_A_MKG"
+        elif cmd == "colocar_vibrador":
+            self.state = "THR_O_X"
+        elif cmd == "vibrador_+_ruido":
+            self.state = "THR_O_MKG"
+        elif cmd == "dos_pitos":
+            self.state = "S_FOWLER_X"
+        elif cmd == "cambie_de_volumen":
+            self.state = "S_SISI_X"
+        elif cmd == "mano_levantada":
+            self.state = "S_CARHART_X"
+        elif cmd == "mano_levantada_en_ruido":
+            self.state = "S_STAT_X"
+        elif cmd == "sonidos_iguales":
+            self.fowler_q(1)
+            #print("y por por aca")
+        elif cmd == "en_qué_oído":
+            self.fowler_q(2)
+            #print("pase por aca")
+        else:
+            self.state = "X_X_X"
+            self.command_2 = cmd
         self.Action(self.state)
                         
 
