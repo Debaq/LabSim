@@ -42,11 +42,11 @@ def create_sound(stim, f, ch):
     if stim == stim_list[6]:
         stim = stim_list_short[3]
 
-    file = f"ogg/{stim}_{f}_{ch}.ogg"
+    file = f"ogg/{stim}_{f}_{ch}.mp3"
     return QUrl.fromLocalFile(context.get_resource(file))
 
 def create_voice(name, gender, idx):
-    file = f"ogg/{name}_{gender}{idx}.ogg"
+    file = f"ogg/{name}_{gender}{idx}.mp3"
     return QUrl.fromLocalFile(context.get_resource(file))
 
 def create_word(name):
@@ -54,7 +54,7 @@ def create_word(name):
     return QUrl.fromLocalFile(context.get_resource(file))
 
 def create_word_response(name, sex, number):
-    file = f"ogg/LP_palacios_r_{sex}{number}_{name}.ogg"
+    file = f"ogg/LP_palacios_r_{sex}{number}_{name}.mp3"
     return QUrl.fromLocalFile(context.get_resource(file))
 
 
