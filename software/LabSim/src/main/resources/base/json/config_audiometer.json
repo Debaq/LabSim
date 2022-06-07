@@ -30,7 +30,7 @@
     "Speech Noise", "Pink Noise"],
 "stim_list_short" : ["NBN","WN","SN","PN"],
 "test_list" : ["Umbrales", "Logoaudiometría"],
-"trans_list" : ["Aérea", "Oséa", "Campo libre"],
+"trans_list" : ["Aerea", "Oséa", "Campo libre"],
 "reverse_list" : ["Normal","Invertido"],
 "tone_list" : ["Continuo", "Pulsado","Alternado"],
 "pulsatile_time" : [50,50],
