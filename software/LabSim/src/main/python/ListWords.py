@@ -93,7 +93,7 @@ class ListWords(QWidget, Ui_ListWords):
         btn = self.sender()
         self.num  = int(''.join(filter(str.isdigit, self.sender().objectName())))
         self.text = (btn.text()).lower()
-        file = f"LP_palacios_1_{self.text}.ogg"
+        file = f"LP_palacios_1_{self.text}"
         word = create_word(file)
         self.soundPlay(word)
    

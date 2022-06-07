@@ -8,7 +8,7 @@ from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 def main():
     app = QGuiApplication(sys.argv)
 
-    filename = "C:/Users/Dolores_Redondo/Desktop/Proyectos/LabSim/software/LabSim/src/main/resources/base/ogg/escuche_mi_voz.mp3"
+    filename = "/home/nick/Escritorio/Proyectos/LabSim/software/LabSim/src/main/resources/base/audio/NBN_1000_OI.mp3"
     player = QMediaPlayer()
     audio_output = QAudioOutput()
     player.setAudioOutput(audio_output)

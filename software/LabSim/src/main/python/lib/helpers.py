@@ -23,7 +23,7 @@ class Preferences:
             list_data = json.load(json_file)
         self.data = {}
         for i in list_data:
-            file = context.get_resource('json/{}'.format(list_data[i]))
+            file = context.get_resource(f'json/{list_data[i]}')
             with codecs.open(file, 'r', 'utf-8') as json_file:
                 data = json.load(json_file)
             self.data.update(data)
@@ -39,20 +39,16 @@ class Preferences:
     def getAll(self, p =False):
         if p == False:
             return self.data
-        else:
-            print("estoy aquí")
-            print(self.data)
+        print("estoy aquí")
+        print(self.data)
     
     def getAllKeys(self):
-        data = list()
-        for i in self.data:
-            data.append(i)
-        return data
+        return list(self.data)
 
     def getStyle(self, wid):
         stylePred = self.data["styles"][0]
         style = self.data["styles"][1][stylePred]
-        style = context.get_resource('styles/{}.qss'.format(style))
+        style = context.get_resource(f'styles/{style}.qss')
         with open(style,"r") as fh:
             wid.setStyleSheet(fh.read())
 
@@ -77,7 +73,7 @@ class Lang:
     def __init__(self):
         class_pref = Preferences()
         lang = class_pref.get("Lang")
-        file_po = context.get_resource('json/{}.json'.format(lang))
+        file_po = context.get_resource(f'json/{lang}.json')
         with codecs.open(file_po, 'r', 'utf-8') as json_file:
             self.lng_po = json.load(json_file)
 
@@ -135,8 +131,8 @@ class Storage:
     def agrege(self, idx, dat):
         try:
             self.data[idx].append(dat)
-        except:
-            self.data[idx] = list()
+        except Exception:
+            self.data[idx] = []
             self.data[idx].append(dat)
 
     def isFull(self, idx):
@@ -151,6 +147,4 @@ class Storage:
     def getAll(self, p =False):
         if p == False:
             return self.data
-        else:
-            print("estoy aca")
-            print(self.data)
+        print(self.data)

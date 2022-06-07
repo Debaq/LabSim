@@ -53,6 +53,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.response.button.connect(self.respa)
         self.la_super(thr)
         self.setupUi(self)
+        self.supra("silencio")
         self.frecuency_list = create_frecuency(
             frecuency_dict, prueba="Umbrales")
         self.random_response = [0, 0]
@@ -251,23 +252,18 @@ class Audiometer(QWidget, Ui_Audiometer):
         gender = thr['gender']
         self.gender = "feme" if gender == 0 else "male"
         self.id = thr['id']
-        result = []
-        result1 = []
         self.curve_z = []
         self.curve_z.append(thr['Z_OD'])
         self.curve_z.append(thr['Z_OI'])
-        result.append(thr['Aerea'])
-        result.append(thr['Osea'])
-        result.append(thr['LDL'])
-        result1.append(thr['Aerea_mkg'])
-        result1.append(thr['Osea_mkg'])
+        result = [thr['Aerea'], thr['Osea'], thr['LDL']]
+        result1 = [thr['Aerea_mkg'], thr['Osea_mkg']]
         self.thr = [result, result1]
 
     def supra(self, state):
         self.response.set_command(state)
         self.response.transmit_(talk = False)
         if state != "silencio":
-            command = "{}.mp3".format(state)
+            command = f"{state}"
             comandvoice = create_word(command)
             self.state_supra = [comandvoice, state]
         else:
