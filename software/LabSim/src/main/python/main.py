@@ -2,14 +2,14 @@
 #################################################################
 #                                                               #
 #                  NOMBRE PROYECTO : LabSim                     #
-#                          VER. 0.7.5                           #
+#                          VER. 0.9.1                           #
 #               CREADOR : NICOLÁS QUEZADA QUEZADA               #
 #                                                               #
 #################################################################
 #pip install https://build-system.fman.io/pro/12a9a98c-755b-4d95-9c60-a17ae1a74d6c/1.0.8#egg=fbs
 #https://f002.backblazeb2.com/file/TMEduca/LabSim/LabSimSetup0.8.4.exe
 
-__VERSION__ = 'v0.9.0'
+__VERSION__ = 'v0.9.1'
 import json
 import sys
 import time
