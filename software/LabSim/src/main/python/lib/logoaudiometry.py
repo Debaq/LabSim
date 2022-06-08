@@ -10,10 +10,10 @@ class CalculateLogo():
         self.scale_htl = {str(i*5):1 for i in range(21)}
         self.por_logo = [i*4 for i in range(26)]
         self.sdt = self.sdt_calcule(self.thr)
-        self.data = self.calNewUmd(umd, recruit, self.sdt)
+        self.data = self.cal_new_umd(umd, recruit, self.sdt)
 
 
-    def calNewUmd(self, data, recruit, sdt):
+    def cal_new_umd(self, data, recruit, sdt):
         #por_logo = [0,24,52,64,76,80,96,100]
         max_response = [data[0]["int"],data[1]["int"]]
         max_percentage = [data[0]["percentage"],data[1]["percentage"]]

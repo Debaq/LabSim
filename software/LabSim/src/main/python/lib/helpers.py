@@ -39,8 +39,8 @@ class Preferences:
     def getAll(self, p =False):
         if p == False:
             return self.data
-        print("estoy aquí")
-        print(self.data)
+        #print("estoy aquí")
+        #print(self.data)
     
     def getAllKeys(self):
         return list(self.data)
@@ -147,4 +147,4 @@ class Storage:
     def getAll(self, p =False):
         if p == False:
             return self.data
-        print(self.data)
+        #print(self.data)

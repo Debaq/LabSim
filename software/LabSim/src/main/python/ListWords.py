@@ -123,7 +123,7 @@ class ListWords(QWidget, Ui_ListWords):
         
     def timer(self):
         stat = str(self.channel_0.mediaStatus())
-        if stat == "MediaStatus.EndOfMedia":
+        if stat == "PySide6.QtMultimedia.QMediaPlayer.MediaStatus.EndOfMedia":
             self.time_1.stop()
             ran_time = random.randrange(500 , 1100)
             if self.continue_response:
