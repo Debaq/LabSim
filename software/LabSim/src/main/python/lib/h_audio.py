@@ -14,6 +14,18 @@ threshold_basic =  [[130,130],[130,130],[130,130],[130,130],
                 [130,130],[130,130],[130,130],[130,130],
                 [130,130],[130,130],[130,130]]
 
+def normalize(s):
+    replacements = (
+        ("á", "a"),
+        ("é", "e"),
+        ("í", "i"),
+        ("ó", "o"),
+        ("ú", "u"),
+        ("ñ", "n")
+    )
+    for a, b in replacements:
+        s = s.replace(a, b).replace(a.upper(), b.upper())
+    return s
 
 def data_basic():
     return {
@@ -43,18 +55,22 @@ def create_sound(stim, f, ch):
         stim = stim_list_short[3]
 
     file = f"audio/{stim}_{f}_{ch}.mp3"
+    file = normalize(file)
     return QUrl.fromLocalFile(context.get_resource(file))
 
 def create_voice(name, gender, idx):
     file = f"audio/{name}_{gender}{idx}.mp3"
+    file = normalize(file)
     return QUrl.fromLocalFile(context.get_resource(file))
 
 def create_word(name):
     file = f"audio/{name}.mp3"
+    file = normalize(file)
     return QUrl.fromLocalFile(context.get_resource(file))
 
 def create_word_response(name, sex, number):
     file = f"audio/LP_palacios_r_{sex}{number}_{name}.mp3"
+    file = normalize(file)
     return QUrl.fromLocalFile(context.get_resource(file))
 
 

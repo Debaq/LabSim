@@ -1,12 +1,11 @@
-from PySide6.QtCore import Signal
+import random
+
+from PySide6.QtCore import QTimer, Signal
+from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import QWidget
+
+from lib.h_audio import create_voice, create_word, data_basic, minMax
 from lib.logoaudiometry import CalculateLogo
-from lib.h_audio import (data_basic, minMax, create_voice)
-from PySide6.QtMultimedia import QMediaPlayer
-
-
-
-
 
 
 class Response(QWidget):
@@ -20,10 +19,13 @@ class Response(QWidget):
             'trans': [0, 0], 'stim': ['Tono', 'mkg']
             }
         self.response=['X',False]
+        self.output_ch = QAudioOutput()
         self.channel_0 = QMediaPlayer()
+        self.channel_0.setAudioOutput(self.output_ch)
         self.activate_fowler = [False, False]
-        self.lastChoice_fowler = None
+        self.last_choice_fowler = None
         self.state =  None
+        self.create_timer()
 
 
     def set_response(self, thr):
@@ -59,7 +61,6 @@ class Response(QWidget):
 
     
     def set_command(self, cmd):
-
         if cmd == "colocar_fonos":
             self.state = "THR_A_X"
         elif cmd == "escuche_mi_voz":
@@ -83,26 +84,54 @@ class Response(QWidget):
         elif cmd == "mano_levantada_en_ruido":
             self.state = "S_STAT_X"
         elif cmd == "sonidos_iguales":
-            self.fowler_q(1)
-            #print("y por por aca")
+            self.fowler_questions("sonidos_iguales", 1)
+            print("y por por aca")
         elif cmd == "en_qué_oído":
-            self.fowler_q(2)
-            #print("pase por aca")
+            self.fowler_questions("en_que_oido", 2)
+                #print("pase por aca")
         else:
             self.state = "X_X_X"
             self.command_2 = cmd
         self.Action(self.state)
+        
+    def create_timer(self):
+        self.time_1 = QTimer(self)
+        self.time_1.timeout.connect(self.timer)
+        self.time_2 = QTimer(self)
+        self.time_2.timeout.connect(self.wait)
+
+
+    def soundPlay(self, word):
+        self.channel_0.setSource(word)
+        self.channel_0.play()
+        self.time_1.start()
+
+    def timer(self):
+        print("timer1")
+        stat = str(self.channel_0.mediaStatus())
+        if stat == "PySide6.QtMultimedia.QMediaPlayer.MediaStatus.EndOfMedia":
+            self.time_1.stop()
+            ran_time = random.randrange(500 , 1100)
+            self.time_2.start(ran_time)
+                
+    def wait(self):
+        print("timer2")
+        self.fowler_q(self.response_fowler)
+        self.time_1.stop()
+        self.time_2.stop()
+    
+    def fowler_questions(self, arg0, arg1):
+        self.response_fowler = arg1
+        voice_ldl = create_word(arg0)
+        self.soundPlay(voice_ldl)
+
                         
 
     def Action(self, action):
         t,p,m = action.split("_")
-        if m == "MKG":
-            MKG = True
-        else:
-            MKG = False
-        if t == "THR":
-            self.response = (t, p, MKG)
-        elif t == "S" or t == "L":
+        MKG = m == "MKG"
+
+        if t in ["THR", "S", "L"]:
             self.response = (t, p, MKG)
 
     def transmit_(self, **kwargs):
@@ -152,10 +181,11 @@ class Response(QWidget):
                 
                 
     def fowler_q(self, n):
+        print(f"ntre al fowler {n}")
         data = self.supra[1][1]
         freq = self.supra[1][0]
-        print(f"la frecuencia actual es{self.data['freq']}")
-        print(f"la frecuencia es{freq}")
+        #print(f"la frecuencia actual es{self.data['freq']}")
+        #print(f"la frecuencia es{freq}")
         if self.activate_fowler[0] and self.activate_fowler[1]:
             conti = True
         else:
@@ -163,7 +193,7 @@ class Response(QWidget):
         #print(f"se puede continuar?{conti}")
 
         if freq == self.data['freq'] and conti:
-            print("pase la priemra condicion")
+            #print("pase la priemra condicion")
             self.activate_fowler[0] = False
             self.activate_fowler[1] = False
             lvlch0 = self.data['lvl'][0]
@@ -180,39 +210,38 @@ class Response(QWidget):
             if self.data['side'][1] == 0:
                 lvls[0] = lvlch1
             idx = self.bestEar(freq)
-            print (f"el indice es {idx} y el lvl es{lvls}")
-            print(f"lo que busco es {lvls[idx]}")
-            print(f"lo busco en {data}")
+            #print (f"el indice es {idx} y el lvl es{lvls}")
+            #print(f"lo que busco es {lvls[idx]}")
+            #print(f"lo busco en {data}")
             if str(lvls[idx]) in data:
-                print("lo encontre")
                 p=data[str(lvls[idx])] 
                 t=lvls[idx-1]
                 if p < t:
-                    print("suena mas fuerte{}".format("OI"))
+                    #print("suena mas fuerte{}".format("OI"))
                     if n == 1:
                         voice_ldl = create_voice("no", self.gender, self.id)
-                        print(voice_ldl)
+                        #print(voice_ldl)
                         self.channel_0.setSource(voice_ldl)
                         self.channel_0.play()
-                        self.lastChoice_fowler = "elizquierdo"
+                        self.last_choice_fowler = "elizquierdo"
                 elif p == t:
                     voice_ldl = create_voice("si", self.gender, self.id)
                     self.channel_0.setSource(voice_ldl)
                     self.channel_0.play()
-                    print("suenan iguales")
+                    #print("suenan iguales")
                 else:
-                    print("suena mas fuerte{}".format("OD"))
+                    #print("suena mas fuerte{}".format("OD"))
                     if n == 1:
                         voice_ldl = create_voice("no", self.gender, self.id)
                         self.channel_0.setSource(voice_ldl)
                         self.channel_0.play()
-                        self.lastChoice_fowler = "elderecho"
+                        self.last_choice_fowler = "elderecho"
         
-        if n == 2 and self.lastChoice_fowler!=None:
-            voice_ldl = create_voice(self.lastChoice_fowler, self.gender, self.id)
+        if n == 2 and self.last_choice_fowler!=None:
+            voice_ldl = create_voice(self.last_choice_fowler, self.gender, self.id)
             self.channel_0.setSource(voice_ldl)
             self.channel_0.play()
-            self.lastChoice_fowler = None
+            self.last_choice_fowler = None
 
 
 
@@ -233,19 +262,16 @@ class Response(QWidget):
         #print("escucho")
 
     def ldl(self):
-        #print("estoy en ldl")
         side = self.data['side'][0]
         data = self.supra[0]
         freq = self.data['freq']
         lvl = self.data['lvl'][0]
         mol = data[freq][side]
         response = lvl>=mol
-      
-        if response:
-            #print("molesta!")
-            voice_ldl = create_voice("molesta", self.gender, self.id)
-            self.channel_0.setSource(voice_ldl)
-            self.channel_0.play()
+        response_text = "molesta" if response else "no"
+        voice_ldl = create_voice(response_text, self.gender, self.id)
+        self.channel_0.setSource(voice_ldl)
+        self.channel_0.play()
 
     def logo_sdt(self):
         #print("ahora ahre sdt")

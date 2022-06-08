@@ -9,12 +9,10 @@
 import contextlib
 import itertools
 import random
-from unittest import result
 
 from PySide6 import QtCore
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import QWidget
-from numpy import number
 
 from lib.h_audio import create_word, create_word_response
 from lib.logoaudiometry import CalculateLogo
@@ -158,6 +156,7 @@ class ListWords(QWidget, Ui_ListWords):
 
     def calculate(self, intencity, side, with_mkg):
         data = self.prev.get(side, with_mkg, intencity)
+        
         intencity = max(intencity, 0)
         data = (data[side][str(intencity)])
         number_success = int(data / 4)

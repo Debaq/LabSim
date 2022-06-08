@@ -474,7 +474,6 @@ class Audiometer(QWidget, Ui_Audiometer):
         stim = self.lbl_stim[ch].text()
         f = self.lbl_freq.text().split(' Hz')[0]
         sound = create_sound(stim=stim, f=f, ch=lbl_out)
-        print(sound)
 
         self.channels[ch].setSource(sound)
         self.channels[ch].play()
