@@ -92,7 +92,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.apps = APPS
         self.boxs = BOXS
         self.sectors_lbl = SECTORS
-        print(f"{self.apps}")
+        #print(f"{self.apps}")
         self.modules = Storage(len(self.apps))
         self.prev_patient = str()
 

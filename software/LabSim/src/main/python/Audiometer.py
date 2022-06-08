@@ -66,6 +66,8 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.dial_der.valueChanged.connect(lambda: self.MoveDial_mouse(0))
         # conecta dial con movimiento con el mouse
         self.dial_izq.valueChanged.connect(lambda: self.MoveDial_mouse(1))
+
+
         self.block_mouse = False
         self.dial_monitor_ch1.valueChanged.connect(lambda: self.monitor(1))
         self.dial_monitor_ch2.valueChanged.connect(lambda: self.monitor(2))
