@@ -74,7 +74,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.subw_w = None
         self.subw_abr = None
         self.subw_voice = None
-        self.subw_login = FrameSubMdi(Ui_login.MainLogin())
+        self.subw_login = FrameSubMdi(Ui_login.MainLogin("offline"))
         self.subw_login.ui_ui.btn_login.clicked.connect(self.login)
         self.subw = {"LOGIN": self.subw_login}
 
@@ -234,7 +234,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def create_sub_window(self, widg, name, pos_z, fix=(True, True),
                         size=(740,560), position=(0,0)):
-        if self.modules.isFull(pos_z):
+        if self.modules.is_full(pos_z):
             self.showHide(pos_z)
         else:
             sub = QMdiSubWindow()
@@ -374,7 +374,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         pos_z = self.apps["W"][2]
         size = self.apps["W"][4]
         if self.var_list_word.get(0):
-            if self.modules.isFull(pos_z):
+            if self.modules.is_full(pos_z):
                 self.modules.get(pos_z).show()
             else:
                 self.create_sub_window(self.subw_w, name, pos_z, size=size)
@@ -384,7 +384,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def speechlist_mode(self, state):
         #self.var_list_word.getAll(True)
-        self.var_list_word.listSet(state, False)
+        self.var_list_word.list_set(state, False)
         #self.var_list_word.getAll(True)
         self.activate_listWords()
         self.subw_w.ui_ui.update_state(state)
@@ -420,7 +420,7 @@ class ReadThread(QThread):
 if __name__ == '__main__':
     #app = QApplication([])
     window = MainWindow()
-    Preferences.getStyle(window)
+    Preferences.get_style(window)
     window.show()
     exit_code = context.app.exec()
     sys.exit(exit_code)

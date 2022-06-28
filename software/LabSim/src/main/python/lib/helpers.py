@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+"""
+Helpers:
+CasesOfline: clase para manejar los casos en modo offline
+Preferences: clase para manejar las preferencias
+Lang: clase para manejar los idiomas
+Store: clase para crear almacenamientos
+"""
 
 #################################################################
 #                                                               #
@@ -8,14 +15,53 @@
 #                                                               #
 #   NOTA: si no hablas español, no es mi culpa, aprende         #
 #################################################################
+# pylint: disable=no-name-in-module, import-error
 
 import json
 import codecs
+
 from base import context
 
+class CasesOfline():
+    """
+    Clase para manejar los casos en modo offline
+    Func:
+        get_cases: devuelve los casos de un usuario
+    """
+    def __init__(self) -> None:
+        pass
+    def get_cases(self, username:str) -> dict:
+        """
+        Recupera los casos de un usuario
+        Args:
+            username (str): username del login
+        """
+        cases_file = context.get_resource(f'cases/{username}.json')
+        with codecs.open(cases_file, 'r', 'utf-8') as json_file:
+            list_data = json.load(json_file)
+        return list_data
+
+    def set_cases(self, username:str, cases:dict) -> None:
+        """
+        Guarda los casos de un usuario
+        Args:
+            username (str): username del login
+            cases (dict): casos del usuario
+        """
+        cases_file = context.get_resource(f'cases/{username}.json')
+        with codecs.open(cases_file, 'w', 'utf-8') as json_file:
+            json.dump(cases, json_file, ensure_ascii=False)
 
 class Preferences:
-    """preferencias del programa"""
+    """
+    Preferencias del programa
+    __init__ : inicializa las preferencias
+    get: recupera una preferencia
+    set: modifica una preferencia
+    get_all: recupera todas las preferencias
+    get_all_keys: recupera todas las claves de las preferencias
+    get_style: recupera el estilo de un widget
+    """
 
     def __init__(self):
         preferences_file = context.get_resource('json/json_list.json')
@@ -35,22 +81,31 @@ class Preferences:
 
     def set(self, pref, var):
         """modifica una configuración"""
-    
-    def getAll(self, p =False):
-        if p == False:
-            return self.data
-        #print("estoy aquí")
-        #print(self.data)
-    
-    def getAllKeys(self):
+
+    def get_all(self) -> dict:
+        """
+        devuelve todas las preferencias
+        Returns:
+            dict : diccionario de preferencias
+        """
+        return self.data
+
+    def get_all_keys(self) -> list:
+        """devuelve todas las claves de las preferencias
+
+        Returns:
+            list: claves de las preferencias
+        """
         return list(self.data)
 
-    def getStyle(self, wid):
-        stylePred = self.data["styles"][0]
-        style = self.data["styles"][1][stylePred]
+    def get_style(self, wid):
+        """permite cambiar el estilo del widget"""
+        #####ESTO NO DEBERIA ESTAR AQUI, hay que cambiarlo a un gui_helpers#####
+        style_pred = self.data["styles"][0]
+        style = self.data["styles"][1][style_pred]
         style = context.get_resource(f'styles/{style}.qss')
-        with open(style,"r") as fh:
-            wid.setStyleSheet(fh.read())
+        with open(style,"r",encoding="utf8") as f_h:
+            wid.setStyleSheet(f_h.read())
 
 # keyboard_shortcuts : [up_dial_izq,down_dial_izq,up_dial_der,down_dial_der],
 
@@ -82,69 +137,143 @@ class Lang:
         try:
             get_str = self.lng_po[request]
             if len(get_str) > 1:
-                result = self._listToString(get_str)
+                result = self._list_to_string(get_str)
         except KeyError:
             result = request
         return result
 
-    def _listToString(self, s):
-        return "".join(s)
+    def _list_to_string(self, string:list) -> str:
+        return "".join(string)
 
 
 class Storage:
-    def __init__(self, n):
-        self.n = n
+    """
+    Storage
+    Crea una lista en forma de almacenamiento
+    _init_: inicializa el almacenamiento y llama a la funcion create
+    create: crea una lista de longitud number_object
+    clean: limpia el almacenamiento manteniendo la longitud
+    get: recupera un elemento del almacenamiento
+    """
+    def __init__(self, number:int)->None:
+        self.number_object = number
         self.data = []
-        self.create(n)
+        self.create(number)
 
-    def length(self, ran= False):
-        if ran == False:
-            return len(self.data)
-        else:
-            return range(len(self.data))
+    def length(self, ran= False) -> int:
+        """
+        Devuelve el largo o rango del almacenamiento
+        Args:
+            ran (bool, optional): si es True devuelve el rango, si no el largo.
+            Defaults to False.
 
-    def create(self,n):
-        for _ in range(n):
+        Returns:
+            int: largo o rango del almacenamiento
+        """
+        return range(len(self.data)) if ran else len(self.data)
+
+
+    def create(self,number:int) -> None:
+        """
+        Crea los espacios de la memoria
+        Args:
+            n (int): numero de espacios a crear
+        """
+        for _ in range(number):
             self.data.append(None)
 
-    def clean(self):
+    def clean(self) -> None:
+        """Limpia el almacenamiento y vstruelve a crear los espacion de la memoria"""
         self.data = []
-        self.create(self.n)
+        self.create(self.number_object)
 
-    def get(self, idx):
+    def get(self, idx:int) -> object:
+        """
+        Devuelve el objeto en la posición idx
+
+        Args:
+            idx (int): posición del objeto
+
+        Returns:
+            object: objeto guardado en la posición idx
+        """
         return self.data[idx]
 
-    def set(self, idx, dat):
+    def set(self, idx:int, dat:any) -> None:
+        """
+        Modifica un objeto almacenado en la posición idx
+        Args:
+            idx (int): posición del objeto
+            dat (any): objeto a guardar en la posición idx
+        """
         self.data[idx] = dat
 
-    def listSet(self, dat, noRe = True):
-        if noRe:
-            if len(dat) == len(self.data):
+    def list_set(self, dat:any, no_rework = True) -> None:
+        ###CREO QUE ACA PUEDE HABER UN ERROR: quizas se debe hacer una copia de la lista original
+        """setea todos los elementos de la lista
+
+        Args:
+            dat (any): elementos a guardar en el almacenamiento
+            no_rework (bool, optional): _description_. Defaults to True.
+        """
+        if no_rework:
+            if len(dat) == self.length():
                 for idx in dat:
                     self.data[idx] = dat[idx]
         else:
-            self.n = len(dat)
+            self.number_object = len(dat)
             self.clean()
-            for idx in range(len(dat)):
+            for idx in enumerate(dat):
                 self.data[idx] = dat[idx]
 
-    def agrege(self, idx, dat):
-        try:
-            self.data[idx].append(dat)
-        except Exception:
-            self.data[idx] = []
-            self.data[idx].append(dat)
+    def agrege(self, idx:int, dat:any) -> None:
+        """
+        agrega un objeto en la lista de posición idx,
+        si el objeto en la posición idx no es una lista la transforma
+        en una y agrega el objeto
 
-    def isFull(self, idx):
+        Args:
+            idx (_type_): posición del objeto en el Store
+            dat (_type_): dato a almacenar en la lista
+        """
+        if isinstance(self.data[idx], list):
+            self.data[idx].append(dat)
+        else:
+            self.data[idx] = [dat]
+
+
+    def is_full(self, idx:int) -> bool:
+        """
+        Verifica si la posición idx esta llena
+
+        Args:
+            idx (int): posición del objeto en el Store
+
+        Returns:
+            bool: True si la posición esta llena, False si no
+        """
         return self.data[idx] is not None
-    
-    def isNull(self, idx):
-        return not self.isFull(idx)
 
-    def isEmpty(self):
+    def is_null(self, idx:int) -> bool:
+        """regresa lo contrario a is_full
+
+        Args:
+            idx (int): posición del objeto en el Store
+
+        Returns:
+            bool: True si la posición esta vacia, False si no
+        """
+        return not self.is_full(idx)
+
+    def is_empty(self) -> bool:
+        """devuelve True si el almacenamiento esta vacio, False si no"""
         return any(i is None for i in self.data)
-    
-    def getAll(self, p =False):
-        if p == False:
-            return self.data
-        #print(self.data)
+
+    def get_all(self) -> list:
+        """
+        Devuelve todos los objetos almacenados en el Store
+
+        Returns:
+            list: lista de objetos almacenados en el Store
+        """
+        return self.data

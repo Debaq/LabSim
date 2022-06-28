@@ -61,7 +61,7 @@ class ZControl(QWidget, Ui_Z_control):
 
     def preCharger(self):
         side = sideText(self.data['sector'])
-        if self.store_data[side].isNull(0):
+        if self.store_data[side].is_null(0):
             zGerger = self.data[self.data['sector']]
             vol = self.data['volume'][side]
             result = Z_225(letter=zGerger, vol=vol).getDataSet()

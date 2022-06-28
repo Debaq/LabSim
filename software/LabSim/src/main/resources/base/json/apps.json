@@ -11,9 +11,9 @@
     "VNG": [false, "Videonistagmografía", 8,[false, true],[1000, 600], "development"],
     "VHIT": [false, "Video Head Impulse Test", 9,[false, true],[1000, 600], "development"],
     "POS": [false, "Posturografía", 10, [false, true],[1000, 600], "development"],
-    "CVOICE": [false, "Comandos de Voz", 11, [true, true], [420, 200],"pre"]
-
-    
+    "CVOICE": [false, "Comandos de Voz", 11, [true, true], [420, 200],"pre"],
+    "CVC": [false, "Campo Visual Computarizado", 12, [true, true], [420, 200],"pre"]
+   
 
   },
   "SECTORS": {
@@ -21,12 +21,14 @@
     "Z_OD": "Usuario con oliva en OD",
     "Z_OI": "Usuario con oliva en OI",
     "none": "Usuario en el Box",
-    "ABR": "Usuario en PEATC"
+    "ABR": "Usuario en PEATC",
+    "CVC": "Usuario en CVC"
   },
   "BOXS": {
     "sala_espera": [false,[], "Sala de Espera"],
     "Box_1": [true,["A", "Z"], "Box Audiología"],
     "Box_2": [true,["ABR", "VEMP", "EOAS"], "Box Electrofisiología"],
-    "Box_3": [true,["VNG", "VHIT", "POS"], "Box Otoneurología"]
+    "Box_3": [true,["VNG", "VHIT", "POS"], "Box Otoneurología"],
+    "Box_4": [true,["CVC"], "Box campimetría"]
   }
 }
