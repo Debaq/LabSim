@@ -44,6 +44,6 @@ class Ui_pref_cvc(object):
     # setupUi
 
     def retranslateUi(self, pref_cvc):
-        pref_cvc.setWindowTitle(QCoreApplication.translate("pref_cvc", u"Form", None))
+        pref_cvc.setWindowTitle(QCoreApplication.translate("pref_cvc", u"pref_cvc", None))
     # retranslateUi
 

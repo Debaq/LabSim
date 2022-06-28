@@ -96,6 +96,7 @@ class Ui_CVC(object):
         self.layout_data = QHBoxLayout(self.frame_data)
         self.layout_data.setObjectName(u"layout_data")
         self.verticalLayout_4 = QVBoxLayout()
+        self.verticalLayout_4.setSpacing(0)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.lbl_name = QLabel(self.frame_data)
         self.lbl_name.setObjectName(u"lbl_name")
@@ -189,65 +190,6 @@ class Ui_CVC(object):
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.layout_eye = QHBoxLayout()
-        self.layout_eye.setObjectName(u"layout_eye")
-
-        self.horizontalLayout_3.addLayout(self.layout_eye)
-
-        self.layout_graph = QVBoxLayout()
-        self.layout_graph.setObjectName(u"layout_graph")
-
-        self.horizontalLayout_3.addLayout(self.layout_graph)
-
-        self.verticalFrame = QFrame(self.frame_central)
-        self.verticalFrame.setObjectName(u"verticalFrame")
-        self.verticalFrame.setMaximumSize(QSize(150, 16777215))
-        self.verticalLayout = QVBoxLayout(self.verticalFrame)
-        self.verticalLayout.setObjectName(u"verticalLayout")
-        self.btn_play_pause = QPushButton(self.verticalFrame)
-        self.btn_play_pause.setObjectName(u"btn_play_pause")
-        self.btn_play_pause.setMaximumSize(QSize(150, 16777215))
-
-        self.verticalLayout.addWidget(self.btn_play_pause)
-
-        self.btn_state = QPushButton(self.verticalFrame)
-        self.btn_state.setObjectName(u"btn_state")
-        self.btn_state.setMaximumSize(QSize(150, 16777215))
-
-        self.verticalLayout.addWidget(self.btn_state)
-
-        self.btn_param = QPushButton(self.verticalFrame)
-        self.btn_param.setObjectName(u"btn_param")
-        self.btn_param.setMaximumSize(QSize(150, 16777215))
-
-        self.verticalLayout.addWidget(self.btn_param)
-
-        self.btn_demo = QPushButton(self.verticalFrame)
-        self.btn_demo.setObjectName(u"btn_demo")
-        self.btn_demo.setMaximumSize(QSize(150, 16777215))
-
-        self.verticalLayout.addWidget(self.btn_demo)
-
-        self.btn_change_eye = QPushButton(self.verticalFrame)
-        self.btn_change_eye.setObjectName(u"btn_change_eye")
-        self.btn_change_eye.setMaximumSize(QSize(150, 16777215))
-
-        self.verticalLayout.addWidget(self.btn_change_eye)
-
-        self.btn_cancel = QPushButton(self.verticalFrame)
-        self.btn_cancel.setObjectName(u"btn_cancel")
-
-        self.verticalLayout.addWidget(self.btn_cancel)
-
-        self.lbl_time = QLabel(self.verticalFrame)
-        self.lbl_time.setObjectName(u"lbl_time")
-        self.lbl_time.setAlignment(Qt.AlignCenter)
-
-        self.verticalLayout.addWidget(self.lbl_time)
-
-
-        self.horizontalLayout_3.addWidget(self.verticalFrame)
-
 
         self.layout_central.addLayout(self.horizontalLayout_3)
 
@@ -304,6 +246,7 @@ class Ui_CVC(object):
         self.btn_up.setObjectName(u"btn_up")
         self.btn_up.setMinimumSize(QSize(0, 40))
         self.btn_up.setMaximumSize(QSize(40, 40))
+        self.btn_up.setAutoRepeat(True)
 
         self.gridLayout.addWidget(self.btn_up, 0, 2, 1, 1)
 
@@ -311,6 +254,7 @@ class Ui_CVC(object):
         self.btn_left.setObjectName(u"btn_left")
         self.btn_left.setMinimumSize(QSize(0, 40))
         self.btn_left.setMaximumSize(QSize(40, 40))
+        self.btn_left.setAutoRepeat(True)
 
         self.gridLayout.addWidget(self.btn_left, 1, 1, 1, 1)
 
@@ -318,6 +262,7 @@ class Ui_CVC(object):
         self.btn_down.setObjectName(u"btn_down")
         self.btn_down.setMinimumSize(QSize(0, 40))
         self.btn_down.setMaximumSize(QSize(40, 16777215))
+        self.btn_down.setAutoRepeat(True)
 
         self.gridLayout.addWidget(self.btn_down, 2, 2, 1, 1)
 
@@ -325,6 +270,7 @@ class Ui_CVC(object):
         self.btn_right.setObjectName(u"btn_right")
         self.btn_right.setMinimumSize(QSize(0, 40))
         self.btn_right.setMaximumSize(QSize(40, 40))
+        self.btn_right.setAutoRepeat(True)
 
         self.gridLayout.addWidget(self.btn_right, 1, 3, 1, 1)
 
@@ -352,23 +298,28 @@ class Ui_CVC(object):
         self.lbl_name.setText(QCoreApplication.translate("CVC", u"Name, Name", None))
         self.lbl_sex.setText(QCoreApplication.translate("CVC", u"Sex", None))
         self.lbl_id.setText(QCoreApplication.translate("CVC", u"ID:000", None))
-        self.lbl_age.setText(QCoreApplication.translate("CVC", u"20 a\u00f1os", None))
-        self.lbl_birthday.setText(QCoreApplication.translate("CVC", u"Fecha de Nacimiento: 12/08/1986", None))
+        self.lbl_age.setText(QCoreApplication.translate("CVC", u"00 a\u00f1os", None))
+        self.lbl_birthday.setText(QCoreApplication.translate("CVC", u"Fecha de Nacimiento: 00/00/0000", None))
         self.lbl_test.setText(QCoreApplication.translate("CVC", u"TEST", None))
         self.lbl_date_test.setText(QCoreApplication.translate("CVC", u"Fecha test", None))
         self.lbl_side_eye.setText(QCoreApplication.translate("CVC", u"OD", None))
-        self.btn_play_pause.setText(QCoreApplication.translate("CVC", u"Iniciar", None))
-        self.btn_state.setText(QCoreApplication.translate("CVC", u"Mostrar estado", None))
-        self.btn_param.setText(QCoreApplication.translate("CVC", u"Cambiar Par\u00e1metros", None))
-        self.btn_demo.setText(QCoreApplication.translate("CVC", u"DEMOSTRACI\u00d3N", None))
-        self.btn_change_eye.setText(QCoreApplication.translate("CVC", u"Examinar el otro ojo", None))
-        self.btn_cancel.setText(QCoreApplication.translate("CVC", u"Cancelar prueba", None))
-        self.lbl_time.setText(QCoreApplication.translate("CVC", u"Hora: 00:00", None))
         self.lbl_flase_positive.setText(QCoreApplication.translate("CVC", u"Falsos negativos : 00/00", None))
         self.lbl_lost_fixed.setText(QCoreApplication.translate("CVC", u"Perdidas de fijaci\u00f3n : 00/00", None))
         self.btn_up.setText(QCoreApplication.translate("CVC", u"up", None))
+#if QT_CONFIG(shortcut)
+        self.btn_up.setShortcut(QCoreApplication.translate("CVC", u"W", None))
+#endif // QT_CONFIG(shortcut)
         self.btn_left.setText(QCoreApplication.translate("CVC", u"left", None))
+#if QT_CONFIG(shortcut)
+        self.btn_left.setShortcut(QCoreApplication.translate("CVC", u"A", None))
+#endif // QT_CONFIG(shortcut)
         self.btn_down.setText(QCoreApplication.translate("CVC", u"down", None))
+#if QT_CONFIG(shortcut)
+        self.btn_down.setShortcut(QCoreApplication.translate("CVC", u"S", None))
+#endif // QT_CONFIG(shortcut)
         self.btn_right.setText(QCoreApplication.translate("CVC", u"right", None))
+#if QT_CONFIG(shortcut)
+        self.btn_right.setShortcut(QCoreApplication.translate("CVC", u"D", None))
+#endif // QT_CONFIG(shortcut)
     # retranslateUi
 
