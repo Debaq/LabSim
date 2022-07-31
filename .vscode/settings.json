@@ -1,6 +1,0 @@
-{
-    "python.pythonPath": "/home/nick/miniconda3/envs/build2/bin/python",
-    "python.linting.enabled": true,
-    "python.linting.pylintEnabled": true,
-    "autoHide.autoHidePanel": false
-}
