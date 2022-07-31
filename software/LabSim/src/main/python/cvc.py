@@ -153,7 +153,6 @@ class EyeImage(QWidget):
         self.plot_widget.setMouseEnabled(False, False)
         self.plot_widget.enableAutoRange(enable=True)
         
-        
         ####
         self.timer_animation = QTimer(self)
         self.timer_animation.timeout.connect(self._animation_image)
