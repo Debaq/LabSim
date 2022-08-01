@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
-from base import context
-
-
 from PySide6.QtWidgets import QWidget
-
 from UI.Ui_CVC import Ui_CVC
 
 
