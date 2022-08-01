@@ -21,7 +21,7 @@ from PySide6.QtGui import QFont
 
 import lib.bezier_prop as bz
 from lib.ABR_generator import ABR_creator
-from lib.ABR_graph import Graph
+from lib.ABR_graph import GraphABR
 from lib.EEG import EEG
 from UI.Ui_ABR_config import Ui_ABR_config
 from UI.Ui_ABR_control import Ui_ABRSim
@@ -97,8 +97,8 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.ctrl_curve_R = AbrCtrlCurve()
         self.ctrl_curve_L = AbrCtrlCurve()
 
-        self.grph_R = Graph(0)
-        self.grph_L = Graph(1)
+        self.grph_R = GraphABR(0)
+        self.grph_L = GraphABR(1)
 
         #LAYOUTS
         self.layout_left.addWidget(self.control)

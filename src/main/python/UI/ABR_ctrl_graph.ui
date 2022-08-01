@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>ABR_control_curve</class>
  <widget class="QWidget" name="ABR_control_curve">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>296</width>
+    <height>477</height>
+   </rect>
+  </property>
   <property name="font">
    <font>
     <pointsize>8</pointsize>
@@ -65,7 +73,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QLabel" name="btn_scale_minus">
+      <widget class="QLabel" name="lbl_unit">
        <property name="maximumSize">
         <size>
          <width>25</width>
@@ -131,7 +139,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="btn_scale_minus">
        <property name="maximumSize">
         <size>
          <width>25</width>

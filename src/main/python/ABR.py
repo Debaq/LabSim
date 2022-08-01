@@ -7,6 +7,7 @@
 #                                                               #
 #################################################################
 
+import contextlib
 import random
 import sys
 
@@ -14,11 +15,12 @@ import numpy as np
 from base import context
 
 from PySide6.QtWidgets import QPushButton, QWidget
+from PySide6.QtCore import Signal
 from PySide6.QtGui import QFont
 
 import lib.bezier_prop as bz
 from lib.ABR_generator import ABR_creator
-from lib.ABR_graph import Graph
+from lib.ABR_graph import GraphABR
 from lib.EEG import EEG
 from UI.Ui_ABR_config import Ui_ABR_config
 from UI.Ui_ABR_control import Ui_ABRSim
@@ -40,44 +42,156 @@ class ABR_detail(QWidget, Ui_ABR_detail):
 
 
 class ABR_lat_select(QWidget, Ui_ABR_lat_select):
-    def __init__(self):
+    data = Signal(dict)
+    def __init__(self, side):
         QWidget.__init__(self)
+        self.side = side
         self.setupUi(self)
-        self.data = {'lat_A':0, 'lat_B':0,'amp_AB':0, 'lat_AB':0,
-                    'I':0,'Ip':0,'II':0,'IIp':0,
-                    'III':0,'IIIp':0,'IV':0,'IVp':0,
-                    'V':0,'Vp':0, 'I_III' : 0, 
-                    'III_V' : 0, 'I_V' : 0}
-        self.update_data()
 
-    def update_data(self, key=None, value=None):
+        self.update_data({})
+        self.configure_btn()
+        self.flag_ab = "A"
+        self.list_marks = { 'I':0,'Ip':0,'II':1,'IIp':1,
+                            'III':2,'IIIp':2,'IV':3,'IVp':3,
+                            'V':4,'Vp':4}
 
-        if key is not None and value is not None:
-            self.data[key] = value
-            if self.data['I'] != 0 and self.data['III'] != 0:
-                self.data['I_III'] = self.data['III'] - self.data['I']
-            if self.data['I'] != 0 and self.data['V'] != 0:
-                self.data['I_V'] = self.data['V'] - self.data['I']
-            if self.data['III'] != 0 and self.data['V'] != 0:
-                self.data['III_V'] = self.data['V'] - self.data['III']
 
-        self.lbl_1.setText('A:{:.1f}ms B:{:.1f}ms'.format(self.data['lat_A'], self.data['lat_B']))
-        self.lbl_2.setText('A-B:{:.2f}μV'.format(self.data['amp_AB']))
-        self.lbl_3.setText('A<>B:{:.2f}ms'.format(self.data['lat_AB']))
-        self.lbl_4.setText("I:{:.1f}ms I':{:.1f}ms".format(self.data['I'],self.data['Ip']))
-        self.lbl_5.setText("II:{:.1f}ms II':{:.1f}ms".format(self.data['II'],self.data['IIp']))
-        self.lbl_6.setText("III:{:.1f}ms III':{:.1f}ms".format(self.data['III'],self.data['IIIp']))
-        self.lbl_7.setText("IV:{:.1f}ms IV':{:.1f}ms".format(self.data['IV'],self.data['IVp']))
-        self.lbl_8.setText("V:{:.1f}ms V':{:.1f}ms".format(self.data['V'],self.data['Vp']))
-        self.lbl_9.setText("I-III:{:.1f}ms".format(self.data['I_III']))
-        self.lbl_10.setText("III-V:{:.1f}ms".format(self.data['III_V']))
-        self.lbl_11.setText("I-V:{:.1f}ms".format(self.data['I_V']))
+    def configure_btn(self):
+        self.btn_AB.clicked.connect(self.toogle_AB)
+        list_btn_waves = [i for i in dir(self) if i.startswith('btn_wave')]
+        for i in list_btn_waves:
+            getattr(self, i).clicked.connect(self.update_marks)
 
+    def update_marks(self):
+        widget = self.sender()
+        name = widget.objectName()
+        end = name.endswith('p')
+        idx = 1 if end else 0
+        _,_,name_wave = name.split('_')
+        subidx = self.list_marks[name_wave]
+        self.data.emit({'action':'update_mark', 
+                        'data':{'prima': idx, 'n_curve':subidx,
+                                'side':self.side, 'flag' : self.flag_ab}})
+        
+    def toogle_AB(self):
+        widget = self.sender()
+        text = widget.text()
+        if text == "|A":
+            text = "B|"
+            new = "B"
+        else:
+            text = "|A"
+            new = "A"
+        widget.setText(text)
+        self.flag_ab = new
+        
+
+    def update_data(self, data):
+        
+        if 'lat_A' in data:
+            self.lbl_1.setText('A:{:.1f}ms B:{:.1f}ms'.format(data['lat_A'], data['lat_B']))
+            self.lbl_2.setText('A-B:{:.2f}μV'.format(data['amp_AB']))
+            self.lbl_3.setText('A<>B:{:.2f}ms'.format(data['lat_AB']))
+        if 'non_prima' in data:
+            self.lbl_4.setText("I:{:.1f}ms I':{:.1f}ms".format(data['non_prima'][0],data['prima'][0]))
+            self.lbl_5.setText("II:{:.1f}ms II':{:.1f}ms".format(data['non_prima'][1],data['prima'][1]))
+            self.lbl_6.setText("III:{:.1f}ms III':{:.1f}ms".format(data['non_prima'][2],data['prima'][2]))
+            self.lbl_7.setText("IV:{:.1f}ms IV':{:.1f}ms".format(data['non_prima'][3],data['prima'][3]))
+            self.lbl_8.setText("V:{:.1f}ms V':{:.1f}ms".format(data['non_prima'][4],data['prima'][4]))
+            I_III = data['non_prima'][2]-data['non_prima'][0]
+            III_V = data['non_prima'][4]-data['non_prima'][2]
+            I_V = data['non_prima'][4]-data['non_prima'][0]
+            self.lbl_9.setText("I-III:{:.1f}ms".format(I_III))
+            self.lbl_10.setText("III-V:{:.1f}ms".format(III_V))
+            self.lbl_11.setText("I-V:{:.1f}ms".format(I_V))
 
 class ABR_ctrl_curve(QWidget, Ui_ABR_control_curve):
-    def __init__(self):
+    data = Signal(dict)
+    def __init__(self, side):
         QWidget.__init__(self)
+        self.contra_view = False
+        self.side = side
         self.setupUi(self)
+        self.config_btn()
+        self.lbl_scale.setText('0.5')
+
+    
+    def config_btn(self):
+        self.btn_up.clicked.connect(self.move_curve)
+        self.btn_down.clicked.connect(self.move_curve)
+        self.btn_del.clicked.connect(self.remove_curve)
+        self.btn_scale_plus.clicked.connect(self.scale_graph)
+        self.btn_scale_minus.clicked.connect(self.scale_graph)
+        self.btn_contra.clicked.connect(self.contra_activate_toggle)
+        
+    
+    def move_curve(self):
+        widget = self.sender()
+        _,direction = widget.objectName().split('_')
+        self.data.emit({'action':'move', 
+                        'data':{'direction': direction, 'side':self.side}})
+    
+    def scale_graph(self):
+        widget = self.sender()
+        _,_,direction = widget.objectName().split('_')
+        self.scale_lbl_change(direction)
+        self.data.emit({'action':'scale', 
+                        'data':{'direction': direction, 'side':self.side}})
+    
+    def scale_lbl_change(self, direction):
+        scale = float(self.lbl_scale.text())
+        if direction == 'plus':
+            scale *= 2
+        else:
+            scale = scale/2
+        
+        self.lbl_scale.setText(str(scale))
+            
+    def remove_curve(self):
+        self.data.emit({'action':'remove', 
+                        'data':{'side':self.side}})
+        
+    def contra_activate_toggle(self):
+        self.contra_view = not self.contra_view
+        self.data.emit({'action':'contra', 
+                    'data':{'contra_view':self.contra_view}})
+        
+    def update_flag_curves(self, list_btns:list) -> None:
+        for i in reversed(range( self.layout_curves.count())): 
+            self.layout_curves.itemAt(i).widget().deleteLater()
+        
+        self.btns_flags_curves(list_btns)
+        
+    
+    def btns_flags_curves(self, btns:list):
+            color = "255,0,0" if self.side == 0 else "106,154,242"
+            style =f"""
+                    QWidget {'{'}
+                    color: rgb(0, 0, 0);
+                    background-color: rgb({color});
+                    border-style: outset;
+                    border-width: 0px;
+                    {'}'}"""
+            for i in range(len(btns)):
+                btn = QPushButton('{}'.format(btns[i][0]))
+                btn.setObjectName(btns[i][1])
+                btn.setStyleSheet(style)
+                btn.setCheckable(True)
+                btn.setAutoExclusive(True)
+                btn.clicked.connect(self.selected_curve)
+                btn.setMaximumSize(30,30)
+                font = QFont('Times', 7)
+                btn.setFont(font)
+                btn.setToolTip('{}'.format(btns[i][2]))
+                btn.setChecked(True)
+                self.layout_curves.addWidget(btn)
+        
+    def selected_curve(self):
+        widget = self.sender()
+        curve = widget.objectName()
+        self.data.emit({'action':'selected', 
+                        'data':{'curve': curve}})
+
 
 
 class MainWindow(QWidget, Ui_ABRSim):
@@ -89,124 +203,89 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.eeg = EEG()
         self.detail.layout_eeg.addWidget(self.eeg.pw)
 
-        self.lat_select_R = ABR_lat_select()
-        self.lat_select_L = ABR_lat_select()
-        self.ctrl_curve_R = ABR_ctrl_curve()
-        self.ctrl_curve_L = ABR_ctrl_curve()
-
-        self.grph_R = Graph(0)
-        self.grph_L = Graph(1)
-
+        self.lat_select_R = ABR_lat_select(0)
+        self.lat_select_L = ABR_lat_select(1)
+        self.lat_select_L.data.connect(self.capture_actions)
+        self.lat_select_R.data.connect(self.capture_actions)
+        self.ctrl_curve_rigth = ABR_ctrl_curve(0)
+        self.ctrl_curve_left = ABR_ctrl_curve(1)
+        self.ctrl_curve_rigth.data.connect(self.capture_actions)
+        self.ctrl_curve_left.data.connect(self.capture_actions)
+        
+        self.graph_right = GraphABR(0)
+        self.graph_left = GraphABR(1)
+        self.graph_right.data_info.connect(self.capture_actions)
+        self.graph_left.data_info.connect(self.capture_actions)
+        
         #LAYOUTS
         self.layout_left.addWidget(self.control)
         self.layout_left.addWidget(self.detail)
         self.layout_left.addWidget(self.eeg)
 
-
         self.layourt_ctrl_R.addWidget(self.lat_select_R)
         self.layourt_ctrl_L.addWidget(self.lat_select_L)
-        self.layout_ctrl_curve_R.addWidget(self.ctrl_curve_R)
-        self.layout_ctrl_curve_L.addWidget(self.ctrl_curve_L)
+        self.layout_ctrl_curve_R.addWidget(self.ctrl_curve_rigth)
+        self.layout_ctrl_curve_L.addWidget(self.ctrl_curve_left)
 
-        self.ctrl_curve_R.btn_up.clicked.connect(lambda:self.upDown(0))
-        self.ctrl_curve_R.btn_down.clicked.connect(lambda:self.upDown(0))
-        self.ctrl_curve_L.btn_up.clicked.connect(lambda:self.upDown(1))
-        self.ctrl_curve_L.btn_down.clicked.connect(lambda:self.upDown(1))
 
-        self.layout_graph_R.addWidget(self.grph_R.win)
-        self.layout_graph_L.addWidget(self.grph_L.win)
+        self.layout_graph_R.addWidget(self.graph_right.win)
+        self.layout_graph_L.addWidget(self.graph_left.win)
         self.store = {}
         self.data = ABR_creator()
 
-        self.grph_R.data_info.connect(self.update_data)
-        self.grph_L.data_info.connect(self.update_data)
-        #self.grph_L.lat_info.connect(self.update_data)
-        #self.grph_R.lat_info.connect(self.update_data)
-
-        self.lat_select_R.btn_wave_I.clicked.connect(lambda:self.update_markers(0,0,0))
-        self.lat_select_R.btn_wave_II.clicked.connect(lambda:self.update_markers(0,1,0))
-        self.lat_select_R.btn_wave_III.clicked.connect(lambda:self.update_markers(0,2,0))
-        self.lat_select_R.btn_wave_IV.clicked.connect(lambda:self.update_markers(0,3,0))
-        self.lat_select_R.btn_wave_V.clicked.connect(lambda:self.update_markers(0,4,0))
-
-        self.lat_select_R.btn_wave_Ip.clicked.connect(lambda:self.update_markers(1,0,0))
-        self.lat_select_R.btn_wave_IIp.clicked.connect(lambda:self.update_markers(1,1,0))
-        self.lat_select_R.btn_wave_IIIp.clicked.connect(lambda:self.update_markers(1,2,0))
-        self.lat_select_R.btn_wave_IVp.clicked.connect(lambda:self.update_markers(1,3,0))
-        self.lat_select_R.btn_wave_Vp.clicked.connect(lambda:self.update_markers(1,4,0))
-
-        self.lat_select_L.btn_wave_I.clicked.connect(lambda:self.update_markers(0,0,1))
-        self.lat_select_L.btn_wave_II.clicked.connect(lambda:self.update_markers(0,1,1))
-        self.lat_select_L.btn_wave_III.clicked.connect(lambda:self.update_markers(0,2,1))
-        self.lat_select_L.btn_wave_IV.clicked.connect(lambda:self.update_markers(0,3,1))
-        self.lat_select_L.btn_wave_V.clicked.connect(lambda:self.update_markers(0,4,1))
-
-        self.lat_select_L.btn_wave_Ip.clicked.connect(lambda:self.update_markers(1,0,1))
-        self.lat_select_L.btn_wave_IIp.clicked.connect(lambda:self.update_markers(1,1,1))
-        self.lat_select_L.btn_wave_IIIp.clicked.connect(lambda:self.update_markers(1,2,1))
-        self.lat_select_L.btn_wave_IVp.clicked.connect(lambda:self.update_markers(1,3,1))
-        self.lat_select_L.btn_wave_Vp.clicked.connect(lambda:self.update_markers(1,4,1))
-
-        self.lat_select_R.btn_AB.clicked.connect(lambda: self.toogle_AB(0))
-        self.lat_select_L.btn_AB.clicked.connect(lambda: self.toogle_AB(1))
-        self.memAB = ["A", "A"]
-
         self.detail.btn_start.clicked.connect(self.capture)
-        self.ctrl_curve_R.btn_del.clicked.connect(lambda: self.clearCurve(0))
-        self.ctrl_curve_L.btn_del.clicked.connect(lambda: self.clearCurve(1))
-        self.currentCurve = [None, None]
-        self.control
+        self.detail.btn_stop.clicked.connect(self.capture)
+
+        self.current_curves = [None, None]
 
     def laSuper(self, data):
         self.Sdata = data
         self.entry = False
+    
+    def capture_actions(self, data):
+        if data['action'] == 'move':
+            self.move_curve(data['data'])
+        if data['action'] == 'remove':
+            self.remove_curve(data['data'])
+        if data['action'] == 'selected':
+            self.selectCurve(data['data'])
+        if data['action'] == 'update_mark':
+            self.update_markers(data['data'])
+        if data['action'] == 'scale':
+            self.scale_graph(data['data'])
+        if data['action'] == 'latency_flag_update':
+            self.update_data_lat_ab(data['data'])
 
-    def upDown(self, side):
-        widgets = self.sender()
-        direction = widgets.objectName()
-        _,text= direction.split('_')
-        curve = self.currentCurve[side]
-        if curve is not None:
+    def scale_graph(self, data):
+       if data['side'] == 0:
+            self.graph_right.scale(data['direction'])
+       else:
+            self.graph_left.scale(data['direction'])
+           
+    def move_curve(self, data):
+            direction = data['direction']
+            side = data['side']
             if side == 0:
-                self.grph_R.move_graph(text)
+                self.graph_right.move_graph(direction)
             else:
-                self.grph_L.move_graph(text)
+                self.graph_left.move_graph(direction)
 
-    def toogle_AB(self, side):
-        widget = self.sender()
-        text = widget.text()
-        if text == "|A":
-            text = "B|"
-            new = "B"
-        else:
-            text = "|A"
-            new = "A"
-        widget.setText(text)
-        self.memAB[side] = new
-
-    def clearCurve(self, side):
-        try:
-            self.store[self.currentCurve[side]][5] = False
-            self.updateFlagsCurves()
-            self.updateGraph(side)
-        except:
-            pass
-
-    def selectCurve(self):
-        widget = self.sender()
-        objName = widget.objectName()
-        _,x = objName.split('_')
+    def remove_curve(self, data):
+        side = data['side']
+        self.store[self.current_curves[side]]['view'] = False
+        self.updateFlagsCurves()
+        self.updateGraph(side)
+  
+    def selectCurve(self, data):
+        _,x = data['curve'].split('_')
         side,_ = x.split(':')
-        if side == 'R':
-            side = 0
-            self.grph_R.activeCurve(objName, 0)
-        else:
-            side = 1
-            self.grph_L.activeCurve(objName, 1)
-        self.currentCurve[side] = objName
+        side = 0 if side == 'R' else 1
+        self.current_curves[side] = data['curve']
+        self.graph_right.activeCurve(self.current_curves)
+        self.graph_left.activeCurve(self.current_curves)
 
     def capture(self):
-        intencity = self.control.sb_int.value()
+        intencity = self.control.sb_intencity.value()
         side = self.control.cb_side.currentText()
         if side == 'OD':
             side = 0
@@ -215,94 +294,54 @@ class MainWindow(QWidget, Ui_ABRSim):
             side = 1
             letter = 'L'
         gap = 1.8
-        name = "{}_{}:0".format(intencity, letter)
+        name = f"{intencity}_{letter}:0"
         if name in self.store:
-            name, _ = self.numberName(name, letter, intencity, gap)
-        try:
-            gap = self.calGap(name, letter, intencity, gap)
-        except:
-            pass
+            name, _ = self.numberName(name, letter, intencity)
+        gap = self.calGap(letter, gap)
         view = True
         repro = random.randint(80,99)
-        self.store[name] = [[[],[]],[[],[]],side, intencity, repro, view, gap]
+        self.store[name] = {'ipsi_xy':[[],[]],'contra_xy':[[],[]],
+                            'side':side, 'intencity':intencity, 'repro':repro, 
+                            'view':view, 'gap':gap}
         self.data.set_intencity(intencity)
         #x, y = self.data.get()
         if side == 0:
             x, y, dx,dy = ABR_Curve(none=False, nHL=intencity, p_I=1.3, a_V = 0.6, zeros=False, VrelI = False)
         else: 
-            x, y, dx,dy = ABR_Curve(none=True, nHL=intencity, p_I=1.3, a_V = 0.6, zeros=False, VrelI = False)
+            x, y, dcx,dy = ABR_Curve(none=False, nHL=intencity, p_I=1.3, a_V = 0.6, zeros=False, VrelI = False)
 
-        self.store[name][0][0] = x
-        self.store[name][0][1] = y
-        self.disabledInCapture()
+        self.store[name]['ipsi_xy'][0] = x
+        self.store[name]['ipsi_xy'][1] = y
+        self.disabled_in_capture()
         self.updateFlagsCurves()
-        self.updateGraph(side)
-        self.currentCurve[side] = name
-        self.grph_R.activeCurve(name, side)
-        self.grph_L.activeCurve(name, side)
+        self.updateGraph()
+        name_curve = {'curve':name}
+        self.selectCurve(name_curve)
 
-    def updateGraph(self,side):
-        self.grph_R.update_data(self.store, side)
-        self.grph_L.update_data(self.store, side)
-        self.disabledInCapture(False)
+    def updateGraph(self):
+        self.graph_right.update_data(self.store)
+        self.graph_left.update_data(self.store)
+        self.disabled_in_capture(False)
 
     def updateFlagsCurves(self):
-        for i in reversed(range( self.ctrl_curve_R.layout_curves.count())): 
-            self.ctrl_curve_R.layout_curves.itemAt(i).widget().deleteLater()
-        for i in reversed(range( self.ctrl_curve_L.layout_curves.count())): 
-            self.ctrl_curve_L.layout_curves.itemAt(i).widget().deleteLater()
-        btns_Left = []
-        btns_Right = []
+        btns_left = []
+        btns_right = []
         for k in self.store:
-            if self.store[k][5]:
+            if self.store[k]['view']:
                 y, x = k.split('_')
                 l,num = x.split(':')
-                name = "{}".format(y)
-                short = "{} {}{}".format(y, l, num)
-                id = k
-                btn = [name,id, short]
+                name = f"{y}"
+                short = f"{y} {l}{num}"
+                id_x = k
+                btn = [name,id_x, short]
                 if l == 'L':
-                    btns_Left.append(btn)
+                    btns_left.append(btn)
                 else:
-                    btns_Right.append(btn)
+                    btns_right.append(btn)
+        self.ctrl_curve_rigth.update_flag_curves(btns_right)
+        self.ctrl_curve_left.update_flag_curves(btns_left)
 
-        self.btnFlags(btns_Right, 0)
-        self.btnFlags(btns_Left, 1)
-
-    def btnFlags(self, btns, side):
-        def style(side):
-            color = "255,0,0" if side == 0 else "0,0,255"
-            return (
-                """
-                QWidget {}
-                    color: rgb(0, 0, 0);
-                    background-color: rgb({});
-                    border-style: outset;
-                    border-width: 0px;
-
-                {}
-                """
-            ).format("{", color, "}")
-        for i in range(len(btns)):
-            btn = QPushButton('{}'.format(btns[i][0]))
-            btn.setObjectName(btns[i][1])
-            btn.setStyleSheet(style(side))
-            btn.setCheckable(True)
-            btn.setAutoExclusive(True)
-            btn.clicked.connect(self.selectCurve)
-            btn.setMaximumHeight(30)
-            btn.setMaximumWidth(30)
-            font = QFont()
-            font.setPointSize(7)
-            btn.setFont(font)
-            btn.setToolTip('{}'.format(btns[i][2]))
-            btn.setChecked(True)
-            if side == 0:
-                self.ctrl_curve_R.layout_curves.addWidget(btn)
-            else:
-                self.ctrl_curve_L.layout_curves.addWidget(btn)
-
-    def numberName(self, name, ltr, tin, gap):
+    def numberName(self, name, ltr, tin):
         n = []
         g = []
         db = []
@@ -311,52 +350,49 @@ class MainWindow(QWidget, Ui_ABRSim):
             l,num = x.split(':')
             if l == ltr:
                 n.append(int(num))
-            g.append(self.store[i][6])
+            g.append(self.store[i]['gap'])
             db.append(dbi)
 
         n.sort()
         g.sort(reverse=True)
         resultG = g[-1] -0.6
         resultN = n[-1]+1
-        name = "{}_{}:{}".format(tin,ltr,resultN)
+        name = f"{tin}_{ltr}:{resultN}"
         return name , resultG
 
-    def calGap(self, name, ltr, tin, gap):
+    def calGap(self,  ltr,  gap):
         g = []
         for i in self.store:
             _,x = i.split('_')
             l,_ = x.split(':')
             if l == ltr:
-                g.append(self.store[i][6])
+                g.append(self.store[i]['gap'])
 
         g.sort(reverse=True)
-        return g[-1] -0.4
+        return g[-1] -0.4 if g else gap
 
-    def disabledInCapture(self, dis = True):
+    def disabled_in_capture(self, dis = True):
         self.detail.btn_start.setDisabled(dis)
-        self.control.sb_int.setDisabled(dis)
+        self.control.sb_intencity.setDisabled(dis)
         self.control.cb_side.setDisabled(dis)
 
-    def update_data(self, data):
+    def update_data_lat_ab(self, data):
         side = data["side"]
-        keys = data.keys()
-
-        for i in keys:
-            if side == 0:
-                self.lat_select_R.update_data(key=i, value=data[i])
-            else:
-                self.lat_select_L.update_data(key=i, value=data[i])
-
-        #if 'lat_A' in data or 'lat_B' in data:
-        #    self.AB = [[data['lat_A'], data['lat_B']], [data,data]]
-
-    def update_markers(self, idx, subidx, side ):
         if side == 0:
-            text = self.memAB[0]
-            self.grph_R.update_marks(idx,subidx,text)
+            self.lat_select_R.update_data(data)
         else:
-            text = self.memAB[1]
-            self.grph_L.update_marks(idx,subidx,text)
+            self.lat_select_L.update_data(data)
+
+
+    def update_markers(self, data):
+        side = data['side']
+        idx = data['prima']
+        subidx = data['n_curve']
+        flag = data['flag']
+        if side == 0:
+            self.graph_right.update_marks(idx,subidx,flag)
+        else:
+            self.graph_left.update_marks(idx,subidx,flag)
 
 def ABR_Curve(none = False, nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, VrelI = True, zeros = False):
     if none:
@@ -491,11 +527,6 @@ def ABR_Curve(none = False, nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, Vr
     if zeros:
         px = np.zeros(20)
         y_new = np.zeros(20)
-
-
-
-
-
     return px, y_new, x, y
 
 #px, y_new = ABR_Curve()
@@ -503,5 +534,5 @@ def ABR_Curve(none = False, nHL = 80, p_I=1.6, p_III=3.7, p_V=5.6, a_V = 0.8, Vr
 if __name__ == '__main__':
     window = MainWindow()
     window.show()
-    exit_code = context.app.exec_()
+    exit_code = context.app.exec()
     sys.exit(exit_code)
