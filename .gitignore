@@ -8,3 +8,4 @@
 /.qt_for_python
 *.build/
 *.dist/
+.qt_for_python/
