@@ -1,6 +1,10 @@
 *.pyc
-software/LabSim/target/
 **/__pycache__/
 **/__pycache__/*
 
 .vscode/settings.json
+
+/target
+/.vscode
+**/__pycache__
+/.qt_for_python
