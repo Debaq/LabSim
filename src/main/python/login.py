@@ -42,6 +42,7 @@ class MainLogin(QWidget, Ui_Login):
             QMessageBox.critical(self, "Ingreso", "Error de Login")
         else:
             result = self.login_func.login(name, passw, True) if self._flag_online else self.login_func.login(name, passw, False)
+            print(result)
             self._verify_result(result)
 
     def _verify_result(self, result:any) -> None:
