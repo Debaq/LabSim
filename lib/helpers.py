@@ -20,9 +20,8 @@ Store: clase para crear almacenamientos
 import json
 import codecs
 
-from base import context
 
-class CasesOfline():
+class CasesOffline():
     """
     Clase para manejar los casos en modo offline
     Func:
@@ -36,7 +35,7 @@ class CasesOfline():
         Args:
             username (str): username del login
         """
-        cases_file = context.get_resource(f'cases/{username}.json')
+        cases_file = (f'resources/cases/{username}.json')
         with codecs.open(cases_file, 'r', 'utf-8') as json_file:
             list_data = json.load(json_file)
         return list_data
@@ -52,6 +51,19 @@ class CasesOfline():
         with codecs.open(cases_file, 'w', 'utf-8') as json_file:
             json.dump(cases, json_file, ensure_ascii=False)
 
+class Shedule:
+    def __init__(self):
+        preferences_file = 'resources/json/schedule.json'
+        with codecs.open(preferences_file, 'r', 'utf-8') as json_file:
+            list_data = json.load(json_file)
+        self.data = list_data
+
+
+    def get(self):
+        """recupera las prefernecias desde un archivo *.json"""
+        #print(self.data[pref])
+        return self.data 
+
 class Preferences:
     """
     Preferencias del programa
@@ -64,12 +76,12 @@ class Preferences:
     """
 
     def __init__(self):
-        preferences_file = context.get_resource('json/json_list.json')
+        preferences_file = 'resources/json/json_list.json'
         with codecs.open(preferences_file, 'r', 'utf-8') as json_file:
             list_data = json.load(json_file)
         self.data = {}
         for i in list_data:
-            file = context.get_resource(f'json/{list_data[i]}')
+            file = f'resources/json/{list_data[i]}'
             with codecs.open(file, 'r', 'utf-8') as json_file:
                 data = json.load(json_file)
             self.data.update(data)
@@ -103,7 +115,7 @@ class Preferences:
         #####ESTO NO DEBERIA ESTAR AQUI, hay que cambiarlo a un gui_helpers#####
         style_pred = self.data["styles"][0]
         style = self.data["styles"][1][style_pred]
-        style = context.get_resource(f'styles/{style}.qss')
+        style = f'resources/styles/{style}.qss'
         with open(style,"r",encoding="utf8") as f_h:
             wid.setStyleSheet(f_h.read())
 

@@ -216,6 +216,11 @@ class ToolBar(SubWindow):
         _, obj_name = btn_name.split("_")
         obj_name = obj_name.upper()
         self.activate_subwindow(self.size, obj_name, self.subw[obj_name])
+    
+    def activate_auto(self, name) -> None:
+        obj_name = name
+        self.activate_subwindow(self.size, obj_name, self.subw[obj_name])
+              
 
     def changeStateBtnAreas(self, frame:QFrame, b):
         box = self.boxs[b]

@@ -176,7 +176,7 @@ class EyeImage(QWidget):
         name_folder = f"img/cvc_pat_{patient}"
         name_file = f"{name_folder}/cvc_eye-2500_"
         extencion = ".jpg"
-        images = (434, 500)
+        images = (100, 200)
         data_image=[]
         for i in range(images[0], images[1]):
             #print(f"cvc_eye-2500_{i:05d}")

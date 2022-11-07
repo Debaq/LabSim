@@ -3,6 +3,7 @@ import random
 
 from base import context
 from lib.helpers import Preferences
+import sys
 
 class_pref = Preferences()
 stim_list = class_pref.get("stim_list")
@@ -55,8 +56,11 @@ def create_sound(stim, f, ch):
         stim = stim_list_short[3]
 
     file = f"audio/{stim}_{f}_{ch}.mp3"
+
     file = normalize(file)
-    return QUrl.fromLocalFile(context.get_resource(file))
+    path = sys.path[0]
+    file = f"{path}/resources/{file}"
+    return QUrl.fromLocalFile(file)
 
 def create_voice(name, gender, idx):
     file = f"audio/{name}_{gender}{idx}.mp3"

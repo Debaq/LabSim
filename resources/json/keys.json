@@ -1,8 +1,9 @@
 {
     "keys_app":{
         "labsim":{
-            "key": "w2EhyI1TUI0ANvt1Y8A=*JhCAJpq6agyEl6eM1HggMg==*FEWkcFyRhc4umVoN3r8/Lg==*8dxTqj3Xpa2k+Vpx5YNFGQ==",
-            "permission": 777
+            "key": "ZBCig2o5*bvYuWVKQYvFADmazh0CX9w==*AEronu5R2vty2Wh7rA09SQ==*3y0WIJGGjTuMOJdd86e5Ag==",
+            "permission": 777,
+            "modules": ["A","Z"]
         }
     }
 }

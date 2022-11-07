@@ -2,7 +2,7 @@
 # pylint: disable=no-name-in-module
 import requests as http_requests
 import cryptocode as crypto
-from lib.helpers import Preferences, CasesOfline
+from lib.helpers import Preferences, CasesOffline
 
 pref_data = Preferences()
 
@@ -26,7 +26,7 @@ class LoginConnect():
             dict: datos del caso        
         """
         data =  {'user': username, 'password': password, 'request': 'login'}
-        return self.request_api(data) if online else self.request_ofline(data)
+        return self.request_api(data) if online else self.request_offline(data)
 
     def request_api(self, data):
         """
@@ -52,7 +52,7 @@ class LoginConnect():
         """devuelve la url de la api service"""
         return pref_data.get("API_URL")
 
-    def request_ofline(self, data) -> dict:
+    def request_offline(self, data) -> dict:
         """
         verifica si el usuario y contraseña son correctos
         y devuelve los datos del caso
@@ -63,9 +63,11 @@ class LoginConnect():
             dict: datos del caso
         """
         verify = self._verify_key(data['user'], data['password'])
-        if verify[0]:
+
+        if verify and verify[0]:
             return {'user': data['user'],
                     'permission':verify[1],
+                    'modules':verify[2],
                     'cases': self._get_data_case_offline(data)
                     }
         return 0
@@ -87,7 +89,8 @@ class LoginConnect():
         if username in keys:
             verify = bool(crypto.decrypt(keys[username]["key"], password))
             permission = keys[username]["permission"]
-            return (verify, permission)
+            modules = keys[username]["modules"]
+            return [verify, permission, modules]
         return 0
 
     def _get_data_case_offline(self, data:dict) -> dict:
@@ -98,4 +101,4 @@ class LoginConnect():
         Returns:
             dict: datos del caso
         """
-        return CasesOfline().get_cases(data["user"])
+        return CasesOffline().get_cases(data["user"])

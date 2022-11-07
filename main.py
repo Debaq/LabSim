@@ -10,6 +10,7 @@ from PySide6.QtCore import Qt, Slot
 from PySide6.QtWidgets import QMainWindow
 
 import Audiometer
+import Agenda
 import login as Ui_login
 from base import context
 from lib.h_win import FrameSubMdi, MdiArea
@@ -74,7 +75,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Crea las variables necesarias para el funcionamiento del programa"""
         self.data_login = None #Datos de login
         self.data_current = None #Datos del caso actual
-        self.subw_login = None #Subventana de login
         self.subw = None #Lista de subventanas
         self.sectors_lbl = SECTORS #Lista de sectores
         #Memorias
@@ -86,9 +86,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
     def create_sw_login(self) -> None:
         """crea la subventana login"""
-        self.subw_login = FrameSubMdi(Ui_login.MainLogin(ONLINE))
-        self.subw_login.ui_ui.data_login_signal.connect(self._data_login)
-        self.subw = {"LOGIN": self.subw_login}
+        subw_login = FrameSubMdi(Ui_login.MainLogin(ONLINE))
+        subw_login.ui_ui.data_login_signal.connect(self._data_login)
+        self.subw = {"LOGIN": subw_login}
 
     @Slot(dict)
     def _data_login(self, data:dict) -> None:
@@ -107,7 +107,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.btn_login.setText("Cerrar Sesión")
             self.data_login = data
             self.combo_case()
-            #self.refresh_data()
+            self.refresh_data()
 
     def logout(self) -> None:
         """Cierra la sesion actual"""
@@ -136,9 +136,11 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def load_sub_windows(self) -> None:
         """Carga las subventanas"""
         #self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data_current))
-        self.subw_cvc = FrameSubMdi(CVC())
+        #self.subw["A"] = self.subw_a
+        subw_agenda = FrameSubMdi(Agenda.Agenda())
+        self.subw["AGENDA"]=subw_agenda
+        #self.subw_cvc = FrameSubMdi(CVC())
         #self.subw_a.ui_ui.signal_speech.connect(self.speechlist_mode)
-        self.subw = {"CVC": self.subw_cvc}
 
     def refresh_data(self):
         self.load_sub_windows()

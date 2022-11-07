@@ -1,7 +1,7 @@
 {
   "APP": {
     "LOGIN": [true, "Ingreso", 0, [true, true], [410, 140],"pre"],
-    "A": [false, "Audiómetro", 1, [true, true], [740, 560],"pre"],
+    "A": [false, "Audiómetro", 1, [true, true], [560, 560],"pre"],
     "W": [false, "Lista de Palabras", 2, [true, true], [170, 500],"pre"],
     "Z": [false, "Impedanciómetro", 3, [true, true], [740, 560],"pre"],
     "ABR": [false,"Potencial evocado auditivo de tronco cerebral",4,[false, true],[1000, 600], "pre"],
@@ -12,7 +12,9 @@
     "VHIT": [false, "Video Head Impulse Test", 9,[false, true],[1000, 600], "development"],
     "POS": [false, "Posturografía", 10, [false, true],[1000, 600], "development"],
     "CVOICE": [false, "Comandos de Voz", 11, [true, true], [420, 200],"pre"],
-    "CVC": [false, "Campo Visual Computarizado", 12, [true, true], [420, 200],"pre"]
+    "CVC": [false, "Campo Visual Computarizado", 12, [true, true], [420, 200],"pre"],
+    "AGENDA": [false, "Agenda", 12, [true, true], [900,400], "pre"]
+
    
 
   },
@@ -25,7 +27,7 @@
     "CVC": "Usuario en CVC"
   },
   "BOXS": {
-    "sala_espera": [false,[], "Sala de Espera"],
+    "sala_espera": [true,["AGENDA"], "Sala de Espera"],
     "Box_1": [true,["A", "Z"], "Box Audiología"],
     "Box_2": [true,["ABR", "VEMP", "EOAS"], "Box Electrofisiología"],
     "Box_3": [true,["VNG", "VHIT", "POS"], "Box Otoneurología"],

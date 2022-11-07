@@ -1,0 +1,1542 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>753</width>
+    <height>605</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QWidget" name="gridLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>6</y>
+     <width>683</width>
+     <height>96</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="5">
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>1000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLabel" name="label_10">
+      <property name="text">
+       <string>Frecuencia</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLabel" name="label_11">
+      <property name="text">
+       <string>Umbral OD</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>125</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="6">
+     <widget class="QLabel" name="label_5">
+      <property name="text">
+       <string>2000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="10">
+     <widget class="QLabel" name="label_9">
+      <property name="text">
+       <string>8000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QLabel" name="label_12">
+      <property name="text">
+       <string>Umbral OI</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="3">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>250</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="7">
+     <widget class="QLabel" name="label_6">
+      <property name="text">
+       <string>3000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="4">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>500</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="9">
+     <widget class="QLabel" name="label_8">
+      <property name="text">
+       <string>6000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="8">
+     <widget class="QLabel" name="label_7">
+      <property name="text">
+       <string>4000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" rowspan="3">
+     <widget class="QLabel" name="label_13">
+      <property name="text">
+       <string>Aérea</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QSpinBox" name="spbox_a_od_0">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3">
+     <widget class="QSpinBox" name="spbox_a_od_1">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="4">
+     <widget class="QSpinBox" name="spbox_a_od_2">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="5">
+     <widget class="QSpinBox" name="spbox_a_od_3">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="6">
+     <widget class="QSpinBox" name="spbox_a_od_4">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="7">
+     <widget class="QSpinBox" name="spbox_a_od_5">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="8">
+     <widget class="QSpinBox" name="spbox_a_od_6">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="9">
+     <widget class="QSpinBox" name="spbox_a_od_7">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="10">
+     <widget class="QSpinBox" name="spbox_a_od_8">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="8">
+     <widget class="QSpinBox" name="spbox_a_oi_6">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="9">
+     <widget class="QSpinBox" name="spbox_a_oi_7">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="10">
+     <widget class="QSpinBox" name="spbox_a_oi_8">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QSpinBox" name="spbox_a_oi_0">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="3">
+     <widget class="QSpinBox" name="spbox_a_oi_1">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="4">
+     <widget class="QSpinBox" name="spbox_a_oi_2">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="5">
+     <widget class="QSpinBox" name="spbox_a_oi_3">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="6">
+     <widget class="QSpinBox" name="spbox_a_oi_4">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="7">
+     <widget class="QSpinBox" name="spbox_a_oi_5">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="gridLayoutWidget_2">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>138</y>
+     <width>679</width>
+     <height>96</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="5">
+     <widget class="QLabel" name="label_14">
+      <property name="text">
+       <string>1000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLabel" name="label_15">
+      <property name="text">
+       <string>Frecuencia</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLabel" name="label_16">
+      <property name="text">
+       <string>Umbral OD</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QLabel" name="label_17">
+      <property name="text">
+       <string>125</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="6">
+     <widget class="QLabel" name="label_18">
+      <property name="text">
+       <string>2000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="10">
+     <widget class="QLabel" name="label_19">
+      <property name="text">
+       <string>8000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QLabel" name="label_20">
+      <property name="text">
+       <string>Umbral OI</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="3">
+     <widget class="QLabel" name="label_21">
+      <property name="text">
+       <string>250</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="7">
+     <widget class="QLabel" name="label_22">
+      <property name="text">
+       <string>3000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="4">
+     <widget class="QLabel" name="label_23">
+      <property name="text">
+       <string>500</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="9">
+     <widget class="QLabel" name="label_24">
+      <property name="text">
+       <string>6000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="8">
+     <widget class="QLabel" name="label_25">
+      <property name="text">
+       <string>4000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" rowspan="3">
+     <widget class="QLabel" name="label_26">
+      <property name="text">
+       <string>Ósea</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QSpinBox" name="spbox_o_od_0">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3">
+     <widget class="QSpinBox" name="spbox_o_od_1">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="4">
+     <widget class="QSpinBox" name="spbox_o_od_2">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="5">
+     <widget class="QSpinBox" name="spbox_o_od_3">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="6">
+     <widget class="QSpinBox" name="spbox_o_od_4">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="7">
+     <widget class="QSpinBox" name="spbox_o_od_5">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="8">
+     <widget class="QSpinBox" name="spbox_o_od_6">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="9">
+     <widget class="QSpinBox" name="spbox_o_od_7">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="10">
+     <widget class="QSpinBox" name="spbox_o_od_8">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="8">
+     <widget class="QSpinBox" name="spbox_o_oi_6">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="9">
+     <widget class="QSpinBox" name="spbox_o_oi_7">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="10">
+     <widget class="QSpinBox" name="spbox_o_oi_8">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QSpinBox" name="spbox_o_oi_0">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="3">
+     <widget class="QSpinBox" name="spbox_o_oi_1">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="4">
+     <widget class="QSpinBox" name="spbox_o_oi_2">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="5">
+     <widget class="QSpinBox" name="spbox_o_oi_3">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="6">
+     <widget class="QSpinBox" name="spbox_o_oi_4">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="7">
+     <widget class="QSpinBox" name="spbox_o_oi_5">
+      <property name="maximum">
+       <number>120</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="gridLayoutWidget_3">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>279</y>
+     <width>672</width>
+     <height>96</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout_3">
+    <item row="1" column="6">
+     <widget class="QSpinBox" name="spbox_ldl_od_4">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QLabel" name="label_33">
+      <property name="text">
+       <string>Umbral OI</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="2">
+     <widget class="QSpinBox" name="spbox_ldl_oi_0">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="10">
+     <widget class="QSpinBox" name="spbox_ldl_oi_9">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="7">
+     <widget class="QLabel" name="label_35">
+      <property name="text">
+       <string>3000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="9">
+     <widget class="QSpinBox" name="spbox_ldl_oi_8">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="5">
+     <widget class="QSpinBox" name="spbox_ldl_od_3">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="9">
+     <widget class="QSpinBox" name="spbox_ldl_od_7">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="10">
+     <widget class="QSpinBox" name="spbox_ldl_od_8">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="5">
+     <widget class="QLabel" name="label_27">
+      <property name="text">
+       <string>1000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QLabel" name="label_30">
+      <property name="text">
+       <string>125</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3">
+     <widget class="QSpinBox" name="spbox_ldl_od_1">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="7">
+     <widget class="QSpinBox" name="spbox_ldl_oi_6">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="8">
+     <widget class="QLabel" name="label_38">
+      <property name="text">
+       <string>4000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="7">
+     <widget class="QSpinBox" name="spbox_ldl_od_5">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="4">
+     <widget class="QSpinBox" name="spbox_ldl_oi_3">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLabel" name="label_29">
+      <property name="text">
+       <string>Umbral OD</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QSpinBox" name="spbox_ldl_od_0">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="9">
+     <widget class="QLabel" name="label_37">
+      <property name="text">
+       <string>6000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="3">
+     <widget class="QSpinBox" name="spbox_ldl_oi_1">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="3">
+     <widget class="QLabel" name="label_34">
+      <property name="text">
+       <string>250</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="10">
+     <widget class="QLabel" name="label_32">
+      <property name="text">
+       <string>8000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" rowspan="3">
+     <widget class="QLabel" name="label_39">
+      <property name="text">
+       <string>LDL</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="8">
+     <widget class="QSpinBox" name="spbox_ldl_od_6">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="6">
+     <widget class="QSpinBox" name="spbox_ldl_oi_5">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="4">
+     <widget class="QSpinBox" name="spbox_ldl_od_2">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="6">
+     <widget class="QLabel" name="label_31">
+      <property name="text">
+       <string>2000</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="4">
+     <widget class="QLabel" name="label_36">
+      <property name="text">
+       <string>500</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="5">
+     <widget class="QSpinBox" name="spbox_ldl_oi_4">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="8">
+     <widget class="QSpinBox" name="spbox_ldl_oi_7">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="maximum">
+       <number>130</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="value">
+       <number>130</number>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLabel" name="label_28">
+      <property name="text">
+       <string>Frecuencia</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QLabel" name="label_40">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>381</y>
+     <width>542</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Nota: Todos los datos deben ser llenados, si un umbral no se toma o no existe debe poner 130</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="horizontalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>108</y>
+     <width>246</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <widget class="QLabel" name="label_41">
+      <property name="text">
+       <string>Aéreas y Óseas pegadas:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="chbox_peg_od">
+      <property name="text">
+       <string>OD</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="chbox_peg_oi">
+      <property name="text">
+       <string>OI</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="horizontalLayoutWidget_2">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>249</y>
+     <width>184</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <widget class="QLabel" name="label_42">
+      <property name="text">
+       <string>Posee LDL en:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="chbox_ldl_od">
+      <property name="text">
+       <string>OD</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="chbox_ldl_oi">
+      <property name="text">
+       <string>OI</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="horizontalLayoutWidget_3">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>414</y>
+     <width>779</width>
+     <height>136</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QLabel" name="label_43">
+        <property name="text">
+         <string>LogoAudiometría</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="1" column="2">
+         <widget class="QLabel" name="label_51">
+          <property name="text">
+           <string>%</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_47">
+          <property name="text">
+           <string>UMD (max)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_45">
+          <property name="text">
+           <string>SDT</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4">
+         <widget class="QLabel" name="label_49">
+          <property name="text">
+           <string>OI</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" colspan="2">
+         <widget class="QLabel" name="label_50">
+          <property name="text">
+           <string>OD</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_46">
+          <property name="text">
+           <string>SRT</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="label_48">
+          <property name="text">
+           <string>dB</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLabel" name="label_52">
+          <property name="text">
+           <string>dB</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QLabel" name="label_53">
+          <property name="text">
+           <string>%</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2">
+         <widget class="QLabel" name="label_54">
+          <property name="text">
+           <string>50</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="4">
+         <widget class="QLabel" name="label_55">
+          <property name="text">
+           <string>50</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QLabel" name="label_56">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="4">
+         <widget class="QLabel" name="label_57">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="spbox_sdt_od_0">
+          <property name="maximum">
+           <number>130</number>
+          </property>
+          <property name="singleStep">
+           <number>5</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QSpinBox" name="spbox_srt_od_0">
+          <property name="maximum">
+           <number>130</number>
+          </property>
+          <property name="singleStep">
+           <number>5</number>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QSpinBox" name="spbox_umd_od_0">
+          <property name="maximum">
+           <number>130</number>
+          </property>
+          <property name="singleStep">
+           <number>5</number>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="2">
+         <widget class="QSpinBox" name="spbox_umd_od_1">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="singleStep">
+           <number>4</number>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="3">
+         <widget class="QSpinBox" name="spbox_umd_oi_0">
+          <property name="maximum">
+           <number>130</number>
+          </property>
+          <property name="singleStep">
+           <number>5</number>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="4">
+         <widget class="QSpinBox" name="spbox_umd_oi_1">
+          <property name="maximum">
+           <number>100</number>
+          </property>
+          <property name="singleStep">
+           <number>4</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="3">
+         <widget class="QSpinBox" name="spbox_srt_oi_0">
+          <property name="maximum">
+           <number>130</number>
+          </property>
+          <property name="singleStep">
+           <number>5</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="QSpinBox" name="spbox_sdt_oi_0">
+          <property name="maximum">
+           <number>130</number>
+          </property>
+          <property name="singleStep">
+           <number>5</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="label_44">
+        <property name="text">
+         <string>Otras Pruebas</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLabel" name="label_58">
+          <property name="text">
+           <string>Reclutamiento</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="chbox_recrut_od">
+          <property name="text">
+           <string>OD</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="chbox_recrut_oi">
+          <property name="text">
+           <string>OI</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLabel" name="label_59">
+          <property name="text">
+           <string>Deterioro</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="chbox_det_od">
+          <property name="text">
+           <string>OD</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="chbox_det_oi">
+          <property name="text">
+           <string>OI</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QLabel" name="label_60">
+          <property name="text">
+           <string>Z</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_61">
+          <property name="text">
+           <string>OD</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cb_z_od">
+          <item>
+           <property name="text">
+            <string>A</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>As</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Ad</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>C</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Cs</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>B</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_62">
+          <property name="text">
+           <string>OI</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cb_z_oi">
+          <item>
+           <property name="text">
+            <string>A</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>As</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Ad</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>C</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Cs</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>B</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="Line" name="line_2">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>405</y>
+     <width>779</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="Line" name="line_3">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>240</y>
+     <width>779</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_63">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>556</y>
+     <width>779</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Nota: todos los valores deben ser rellenados si alguno no existe en db poner 130 y al porcentaje 0, en el caso de UMD solo poner el valor maximo de discriminación</string>
+   </property>
+   <property name="textFormat">
+    <enum>Qt::AutoText</enum>
+   </property>
+   <property name="wordWrap">
+    <bool>true</bool>
+   </property>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>spbox_a_od_0</tabstop>
+  <tabstop>spbox_a_od_1</tabstop>
+  <tabstop>spbox_a_od_2</tabstop>
+  <tabstop>spbox_a_od_3</tabstop>
+  <tabstop>spbox_a_od_4</tabstop>
+  <tabstop>spbox_a_od_5</tabstop>
+  <tabstop>spbox_a_od_6</tabstop>
+  <tabstop>spbox_a_od_7</tabstop>
+  <tabstop>spbox_a_od_8</tabstop>
+  <tabstop>spbox_a_oi_0</tabstop>
+  <tabstop>spbox_a_oi_1</tabstop>
+  <tabstop>spbox_a_oi_2</tabstop>
+  <tabstop>spbox_a_oi_3</tabstop>
+  <tabstop>spbox_a_oi_4</tabstop>
+  <tabstop>spbox_a_oi_5</tabstop>
+  <tabstop>spbox_a_oi_6</tabstop>
+  <tabstop>spbox_a_oi_7</tabstop>
+  <tabstop>spbox_a_oi_8</tabstop>
+  <tabstop>chbox_peg_od</tabstop>
+  <tabstop>chbox_peg_oi</tabstop>
+  <tabstop>spbox_o_od_0</tabstop>
+  <tabstop>spbox_o_od_1</tabstop>
+  <tabstop>spbox_o_od_2</tabstop>
+  <tabstop>spbox_o_od_3</tabstop>
+  <tabstop>spbox_o_od_4</tabstop>
+  <tabstop>spbox_o_od_5</tabstop>
+  <tabstop>spbox_o_od_6</tabstop>
+  <tabstop>spbox_o_od_7</tabstop>
+  <tabstop>spbox_o_od_8</tabstop>
+  <tabstop>spbox_o_oi_0</tabstop>
+  <tabstop>spbox_o_oi_1</tabstop>
+  <tabstop>spbox_o_oi_2</tabstop>
+  <tabstop>spbox_o_oi_3</tabstop>
+  <tabstop>spbox_o_oi_4</tabstop>
+  <tabstop>spbox_o_oi_5</tabstop>
+  <tabstop>spbox_o_oi_6</tabstop>
+  <tabstop>spbox_o_oi_7</tabstop>
+  <tabstop>spbox_o_oi_8</tabstop>
+  <tabstop>chbox_ldl_od</tabstop>
+  <tabstop>chbox_ldl_oi</tabstop>
+  <tabstop>spbox_ldl_od_0</tabstop>
+  <tabstop>spbox_ldl_od_1</tabstop>
+  <tabstop>spbox_ldl_od_2</tabstop>
+  <tabstop>spbox_ldl_od_3</tabstop>
+  <tabstop>spbox_ldl_od_4</tabstop>
+  <tabstop>spbox_ldl_od_5</tabstop>
+  <tabstop>spbox_ldl_od_6</tabstop>
+  <tabstop>spbox_ldl_od_7</tabstop>
+  <tabstop>spbox_ldl_od_8</tabstop>
+  <tabstop>spbox_ldl_oi_0</tabstop>
+  <tabstop>spbox_ldl_oi_1</tabstop>
+  <tabstop>spbox_ldl_oi_3</tabstop>
+  <tabstop>spbox_ldl_oi_4</tabstop>
+  <tabstop>spbox_ldl_oi_5</tabstop>
+  <tabstop>spbox_ldl_oi_6</tabstop>
+  <tabstop>spbox_ldl_oi_7</tabstop>
+  <tabstop>spbox_ldl_oi_8</tabstop>
+  <tabstop>spbox_ldl_oi_9</tabstop>
+  <tabstop>spbox_sdt_od_0</tabstop>
+  <tabstop>spbox_srt_od_0</tabstop>
+  <tabstop>spbox_umd_od_0</tabstop>
+  <tabstop>spbox_umd_od_1</tabstop>
+  <tabstop>spbox_sdt_oi_0</tabstop>
+  <tabstop>spbox_srt_oi_0</tabstop>
+  <tabstop>spbox_umd_oi_0</tabstop>
+  <tabstop>spbox_umd_oi_1</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

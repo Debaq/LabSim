@@ -263,7 +263,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="cb_filter_down">
+         <widget class="QComboBox" name="cb_filterdown">
           <property name="currentText">
            <string>1000</string>
           </property>
@@ -327,7 +327,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="cb_filter_up">
+         <widget class="QComboBox" name="cb_filterup">
           <item>
            <property name="text">
             <string>50</string>
