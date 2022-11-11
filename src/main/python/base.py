@@ -1,8 +1,10 @@
 
-from PySide6.QtWidgets import QApplication
+from fbs_runtime.application_context.PySide6 import ApplicationContext
+
+context = ApplicationContext()
 
 
-
+"""
 
 class ApplicationContext():
     
@@ -14,3 +16,4 @@ class ApplicationContext():
        
         
 context = ApplicationContext()
+"""

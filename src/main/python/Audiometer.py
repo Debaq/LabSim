@@ -51,7 +51,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         #self.response.button.connect(self.respa)
         #self.la_super(thr)
         self.setupUi(self)
-        self.supra("silencio")
+        #self.supra("silencio")
         self.frecuency_list = create_frecuency(
             frecuency_dict, prueba="Umbrales")
         self.random_response = [0, 0]
@@ -238,7 +238,6 @@ class Audiometer(QWidget, Ui_Audiometer):
         #self.btn_stim_tone_izq.setDisabled(True)
 
     def la_super(self, data):
-        print(data)
         self.response.set_response(data)
         thr = data if data["sector"] == "camara_sono" else data_basic()
         gender = thr['gender']
@@ -475,8 +474,9 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.post_channel_on()
 
     def post_channel_on(self):
-        self.response.transmit_(stimOn = self.channel_on)
-        self.response.activate()
+        #self.response.transmit_(stimOn = self.channel_on)
+        #self.response.activate()
+        pass
 
     # PRUEBAS
     def speech(self):

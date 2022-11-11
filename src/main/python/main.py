@@ -135,8 +135,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
     def load_sub_windows(self) -> None:
         """Carga las subventanas"""
-        #self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data_current))
-        #self.subw["A"] = self.subw_a
+        self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data_current))
+        self.subw["A"] = self.subw_a
         subw_agenda = FrameSubMdi(Agenda.Agenda())
         self.subw["AGENDA"]=subw_agenda
         #self.subw_cvc = FrameSubMdi(CVC())

@@ -85,7 +85,7 @@ class SubWindow():
         self.modules = modules
         self.mdi_area = mdi_area
 
-    def activate_subwindow(self, size:QSize, app: str, submdi: FrameSubMdi) -> None:
+    def activate_subwindow(self, size:QSize, app:str, submdi: FrameSubMdi) -> None:
         """
         Activa la subventana que se le pasa por parametro según una lista
         previa en json que contiene la información basica de la ventana
@@ -99,6 +99,7 @@ class SubWindow():
         """
         width = size().width()
         height = size().height()
+        print(f"app:{app}")
         _, name, pos_z, fix, size, _ = self.app[app]
         width = width/2
         height = height/2
@@ -215,6 +216,7 @@ class ToolBar(SubWindow):
         btn_name = widget.objectName()
         _, obj_name = btn_name.split("_")
         obj_name = obj_name.upper()
+        print(f"subw:{self.subw}")
         self.activate_subwindow(self.size, obj_name, self.subw[obj_name])
     
     def activate_auto(self, name) -> None:
