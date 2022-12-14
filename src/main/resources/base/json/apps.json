@@ -1,7 +1,8 @@
 {
+  "APP_des" : "lista que contiene 0,tooltip,posición en z,size,estado (pre o development)",
   "APP": {
     "LOGIN": [true, "Ingreso", 0, [true, true], [410, 140],"pre"],
-    "A": [false, "Audiómetro", 1, [true, true], [560, 560],"pre"],
+    "A": [false, "Audiómetro", 1, [true, true], [740, 560],"pre"],
     "W": [false, "Lista de Palabras", 2, [true, true], [170, 500],"pre"],
     "Z": [false, "Impedanciómetro", 3, [true, true], [740, 560],"pre"],
     "ABR": [false,"Potencial evocado auditivo de tronco cerebral",4,[false, true],[1000, 600], "pre"],
@@ -13,7 +14,8 @@
     "POS": [false, "Posturografía", 10, [false, true],[1000, 600], "development"],
     "CVOICE": [false, "Comandos de Voz", 11, [true, true], [420, 200],"pre"],
     "CVC": [false, "Campo Visual Computarizado", 12, [true, true], [420, 200],"pre"],
-    "AGENDA": [false, "Agenda", 12, [true, true], [900,400], "pre"]
+    "AGENDA": [false, "Agenda", 13, [true, true], [900,400], "pre"],
+    "CREATE_A":[false, "Nuevo Usuario", 14, [true, true], [900,650], "pre"]
 
    
 

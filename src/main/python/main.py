@@ -6,10 +6,11 @@ __VERSION__ = 'v0.9.5'
 # pylint: disable=no-name-in-module
 import sys
 
-from PySide6.QtCore import Qt, Slot
-from PySide6.QtWidgets import QMainWindow
+from PySide6.QtCore import Qt, Slot, Signal
+from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton
 
 import Audiometer
+import create_a
 import Agenda
 import login as Ui_login
 from base import context
@@ -18,6 +19,7 @@ from lib.helpers import Preferences, Storage
 from lib.ui_helpers import ToolBar, show_hide, MoveWindow, toggle_max_min
 from UI.Ui_Main import Ui_MainWindow
 from UI.Ui_CVC import Ui_CVC
+from UI.Ui_command_voice_A import Ui_Form as commandVoiceA
 
 Preferences = Preferences()
 APPS = Preferences.get("APP")
@@ -31,6 +33,23 @@ class CVC (Ui_CVC):
     def __init__(self) -> None:
         super().__init__()
         self.setupUi(self)
+
+
+class ComandVoiceA(QWidget, commandVoiceA):
+    btn_checked = Signal(str)
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.buttonGroup.buttonClicked.connect(self.state)
+
+    def state(self):
+        btn = self.buttonGroup.checkedButton()
+        text = btn.text()
+        text = text.replace(" ", "_")
+        text = text.replace("?", "")
+        text = text.replace("¿", "")
+        text = text.lower()
+        self.btn_checked.emit(text)
 
 class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     """Ventana Principal"""
@@ -51,7 +70,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                          self.frame_sec,self.modules,
                          self.mdi_area, self.size,
                          self.subw) #Configura la barra de herramientas
-
 
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setWindowTitle(f"LabSim {__VERSION__}")
@@ -87,7 +105,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def create_sw_login(self) -> None:
         """crea la subventana login"""
         subw_login = FrameSubMdi(Ui_login.MainLogin(ONLINE))
-        subw_login.ui_ui.data_login_signal.connect(self._data_login)
+        subw_login.obj.data_login_signal.connect(self._data_login)
         self.subw = {"LOGIN": subw_login}
 
     @Slot(dict)
@@ -108,6 +126,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.data_login = data
             self.combo_case()
             self.refresh_data()
+            self.btns_actions() #este debo unirlo al toolbar
+
 
     def logout(self) -> None:
         """Cierra la sesion actual"""
@@ -136,17 +156,35 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def load_sub_windows(self) -> None:
         """Carga las subventanas"""
         self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data_current))
+        subw_agenda = FrameSubMdi(Agenda.Agenda(self.data_login["permission"],self))
+        subw_voice = FrameSubMdi(ComandVoiceA())
+        if self.data_login["permission"] == 777:
+            subw_create_a = FrameSubMdi(create_a.CreateA())
+            self.subw["CREATE_A"]=subw_create_a
+            
         self.subw["A"] = self.subw_a
-        subw_agenda = FrameSubMdi(Agenda.Agenda())
         self.subw["AGENDA"]=subw_agenda
+        self.subw["CVOICE"]=subw_voice
         #self.subw_cvc = FrameSubMdi(CVC())
         #self.subw_a.ui_ui.signal_speech.connect(self.speechlist_mode)
+        self.connect_signals()
+        
+    def connect_signals(self):
+        self.subw["CVOICE"].obj.btn_checked.connect(self.subw["A"].obj.supra)
+        
 
     def refresh_data(self):
         self.load_sub_windows()
         self.btns_seccion()
         self.changeStateBtnAreas(self.frameAction, self.data_current["box"])
-
+        
+    #ESTE DEBO SACARLO CON LOS COMANDOS
+    def btns_actions(self):
+        #command
+        self.btn_cmd_voice = QPushButton("comandos de voz")
+        self.btn_cmd_voice.setObjectName("btn_CVOICE")
+        self.btn_cmd_voice.clicked.connect(self.activate_soft)
+        self.layoutAction.addWidget(self.btn_cmd_voice)
 
 
 if __name__ == '__main__':

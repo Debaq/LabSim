@@ -56,11 +56,8 @@ def create_sound(stim, f, ch):
         stim = stim_list_short[3]
 
     file = f"audio/{stim}_{f}_{ch}.mp3"
-
     file = normalize(file)
-    path = sys.path[0]
-    file = f"{path}/resources/{file}"
-    return QUrl.fromLocalFile(file)
+    return QUrl.fromLocalFile(context.get_resource(file))
 
 def create_voice(name, gender, idx):
     file = f"audio/{name}_{gender}{idx}.mp3"

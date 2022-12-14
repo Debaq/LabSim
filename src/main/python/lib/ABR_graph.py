@@ -5,7 +5,7 @@ from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import Qt
 from lib.helpers import Storage
-
+import pyqtgraph.exporters
 
 class GraphABR(QWidget):
     data_info = Signal(dict)
@@ -43,11 +43,7 @@ class GraphABR(QWidget):
 
     def scale(self, direction):
         Yrange = self.pw1.getViewBox().state["targetRange"][1][1]
-        if direction == 'plus':
-            new_range = Yrange * 2
-        else:
-            new_range = Yrange / 2
-            
+        new_range = Yrange * 2 if direction == 'plus' else Yrange / 2
         self.pw1.setYRange(-new_range,new_range)
         
     def find_nearest(self, array_in, value, array_out):
@@ -105,13 +101,17 @@ class GraphABR(QWidget):
                 if color_name == 0:
                     if act :
                         color = pg.mkColor(255, 0, 0, 255)
-                        fill = (255,0,0)
+                        #fill = (255,0,0)
+                        fill = (14, 250, 0)
+
                     else:
                         color = pg.mkColor(180, 0, 0, 255)
                         fill = (180,0,0)
                 elif act:
                     color = pg.mkColor(106, 154, 242, 255)
-                    fill = (106,154,242)
+                    #fill = (106,154,242)
+                    fill = (14, 250, 0)
+                    
                 else:
                     color = pg.mkColor(112, 142, 199, 255)
                     fill = (112,142,199)
@@ -157,18 +157,32 @@ class GraphABR(QWidget):
     def refresh_keys(self):
         for k in self.data:
             curve = k
-            for i in range(2):
-                for d , val in enumerate(self.marks[curve][i].data):
-                    if val is not None:
-                        self.create_marks(i,d,curveName=curve, useAct=False)
+            if self.data[curve]['view']:
+                for i in range(2):
+                    for d , val in enumerate(self.marks[curve][i].data):
+                        if val is not None:
+                            self.create_marks(i,d,curveName=curve, useAct=False)
 
     def update_marks(self,idx, subidx, btn='A'):
-        lat = self.inf_a.getXPos() if btn == 'A' else self.inf_b.getXPos()
-        id_x = self.find_idx(self.data[self.act_curve]['ipsi_xy'][0], lat)
-        self.marks[self.act_curve][idx].set(subidx, id_x)
+        #verify if exist
+        mark_exist = self.remove_if_exist_mark(idx,subidx)
+        
+        if mark_exist == False:
+            lat = self.inf_a.getXPos() if btn == 'A' else self.inf_b.getXPos()
+            id_x = self.find_idx(self.data[self.act_curve]['ipsi_xy'][0], lat)
+            self.marks[self.act_curve][idx].set(subidx, id_x)
         self.update_graph()
         self.update_data_marks()
 
+
+    def remove_if_exist_mark(self, idx, subidx):
+        mark = self.marks[self.act_curve][idx].get_all()
+        mark = mark[subidx]
+        if mark is None:
+            return False
+        self.marks[self.act_curve][idx].set(subidx, None)
+        return True
+    
     def update_data_marks(self):
         def idx2number(list_idx):
             input_list = list_idx.get_all()
@@ -181,10 +195,12 @@ class GraphABR(QWidget):
         if self.act_curve is not None:
             non_prima = idx2number(self.marks[self.act_curve][0])
             prima = idx2number(self.marks[self.act_curve][1])
-            self.data_info.emit({'action':'latency_flag_update', 
+            data_emit = {'action':'latency_flag_update', 
                                 'data': {'side':self.side, 'non_prima':non_prima,
-                                        'prima': prima}})
-
+                                        'prima': prima, 'curve':self.act_curve}}
+            self.data_info.emit(data_emit)
+            #print(data_emit)
+            
     def activeCurve(self, curves:list):
         self.act_curve = curves[self.side]
         self.update_data_marks()
@@ -195,10 +211,10 @@ class GraphABR(QWidget):
         if self.act_curve is not None:
             curve = self.act_curve
             y = self.data[curve]['gap']
-            if str_ud == "up":
-                y = y + .1
             if str_ud == "down":
                 y = y - .1
+            elif str_ud == "up":
+                y = y + .1
             self.data[curve]['gap'] = y
             self.update_graph()
         
@@ -231,3 +247,8 @@ class GraphABR(QWidget):
                             "lat_B": lat_b, "amp_AB": dif_amp, 
                             "lat_AB": dif_lat}}
         self.data_info.emit(response)
+        
+    def save_image(self):
+        exporter = pg.exporters.ImageExporter(self.pw1)
+        exporter.parameters()['width'] = 800
+        exporter.export(f'image_{self.side}.png')

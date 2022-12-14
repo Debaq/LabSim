@@ -169,7 +169,7 @@ class Ui_ABR_config(object):
         ABR_config.setWindowTitle(_translate("ABR_config", "Form"))
         self.groupBox.setTitle(_translate("ABR_config", "Configuración"))
         self.label_6.setText(_translate("ABR_config", "Estímulo :"))
-        self.cb_stim.setItemText(0, _translate("ABR_config", "Clic"))
+        self.cb_stim.setItemText(0, _translate("ABR_config", "Click"))
         self.cb_stim.setItemText(1, _translate("ABR_config", "Chirp"))
         self.label.setText(_translate("ABR_config", "Polaridad :"))
         self.cb_pol.setItemText(0, _translate("ABR_config", "Alternada"))

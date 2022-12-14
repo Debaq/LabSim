@@ -75,7 +75,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.subw_abr = None
         self.subw_voice = None
         self.subw_login = FrameSubMdi(Ui_login.MainLogin("offline"))
-        self.subw_login.ui_ui.btn_login.clicked.connect(self.login)
+        self.subw_login.obj.btn_login.clicked.connect(self.login)
         self.subw = {"LOGIN": self.subw_login}
 
     def configure_btn(self):
@@ -218,12 +218,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def createInsWidget(self, data):
         self.data = data
         self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data))
-        self.subw_a.ui_ui.signal_speech.connect(self.speechlist_mode)
+        self.subw_a.obj.signal_speech.connect(self.speechlist_mode)
         self.subw_z = FrameSubMdi(Z.ZControl())
         self.subw_w = FrameSubMdi(ListWords.ListWords(self.data)) #ACA PASA POR PRIMERA VEZ
         self.subw_abr = FrameSubMdi(abr_module.MainWindow())
         self.subw_voice = FrameSubMdi(ComandVoiceA())
-        self.subw_voice.ui_ui.btn_checked.connect(self.subw_a.ui_ui.supra)
+        self.subw_voice.obj.btn_checked.connect(self.subw_a.obj.supra)
         self.subw = {
             "A": self.subw_a,
             "Z":self.subw_z,
@@ -257,8 +257,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     ##Conexión al Servidor
     def thread_data_clicked(self):
         self.thread_data = ReadThread()
-        self.thread_data.name = self.subw_login.ui_ui.Le_name.text()
-        self.thread_data.passw = self.subw_login.ui_ui.Le_passw.text()
+        self.thread_data.name = self.subw_login.obj.Le_name.text()
+        self.thread_data.passw = self.subw_login.obj.Le_passw.text()
         self.thread_data.start()
         self.thread_data.data_signal.connect(self.refresh_data)
 
@@ -274,11 +274,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             text = self.sectors_lbl[data['sector']]
             if self.prev_patient != self.data['sector'] and not self._flag_ofline:
-                self.subw_a.ui_ui.la_super(self.data)
-                self.subw_w.ui_ui.la_super(self.data)
-                self.subw_z.ui_ui.la_super(self.data)
+                self.subw_a.obj.la_super(self.data)
+                self.subw_w.obj.la_super(self.data)
+                self.subw_z.obj.la_super(self.data)
                 self.prev_patient = self.data['sector']
-            self.subw_abr.ui_ui.la_super(self.data)
+            self.subw_abr.obj.la_super(self.data)
         self.statusbar.showMessage(text)
         # log off external
         if self.data['state_login'] == "0":
@@ -299,9 +299,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
 
     def login(self):
-        button_login = self.subw_login.ui_ui.btn_login.text()
-        name = self.subw_login.ui_ui.Le_name.text()
-        passw = self.subw_login.ui_ui.Le_passw.text()
+        button_login = self.subw_login.obj.btn_login.text()
+        name = self.subw_login.obj.Le_name.text()
+        passw = self.subw_login.obj.Le_passw.text()
         #print("{} : {} -- {}".format(name,passw, button_login))
         if name.lower() == "labsim":
             self._flag_ofline = True
@@ -327,9 +327,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.new_login = True
             login = self.refresh_data_ofline()
         if login:            
-            self.subw_login.ui_ui.Le_name.setDisabled(True)
-            self.subw_login.ui_ui.Le_passw.setDisabled(True)
-            self.subw_login.ui_ui.btn_login.setText("Salir")
+            self.subw_login.obj.Le_name.setDisabled(True)
+            self.subw_login.obj.Le_passw.setDisabled(True)
+            self.subw_login.obj.btn_login.setText("Salir")
             self.btn_login.setText("Salir")
             self.showHide(0)
             text = f"{name}"
@@ -338,17 +338,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.new_login = True
 
     def logout(self):
-        name = self.subw_login.ui_ui.Le_name.text()
-        passw = self.subw_login.ui_ui.Le_passw.text()
+        name = self.subw_login.obj.Le_name.text()
+        passw = self.subw_login.obj.Le_passw.text()
         if not self._flag_ofline:
             data = {'user': name, 'password': passw, 'request': 'logout'}
             request_API(data)
             self.thread_data.terminate()
-        self.subw_login.ui_ui.Le_name.setDisabled(False)
-        self.subw_login.ui_ui.Le_passw.setDisabled(False)
-        self.subw_login.ui_ui.Le_name.setText("")
-        self.subw_login.ui_ui.Le_passw.setText("")
-        self.subw_login.ui_ui.btn_login.setText("Ingresar")
+        self.subw_login.obj.Le_name.setDisabled(False)
+        self.subw_login.obj.Le_passw.setDisabled(False)
+        self.subw_login.obj.Le_name.setText("")
+        self.subw_login.obj.Le_passw.setText("")
+        self.subw_login.obj.btn_login.setText("Ingresar")
         self.btn_login.setText("Ingresar")
         self.lbl_name.setText("Desconectado")
         self.mdi_area.closeAll()
@@ -387,11 +387,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.var_list_word.list_set(state, False)
         #self.var_list_word.getAll(True)
         self.activate_listWords()
-        self.subw_w.ui_ui.update_state(state)
-        self.subw_w.ui_ui.playable[1] = state[2]
-        self.subw_w.ui_ui.playable[2] = state[3]
-        self.subw_w.ui_ui.playable[3] = state[4]
-        self.subw_w.ui_ui.playable[0] = bool(state[1])
+        self.subw_w.obj.update_state(state)
+        self.subw_w.obj.playable[1] = state[2]
+        self.subw_w.obj.playable[2] = state[3]
+        self.subw_w.obj.playable[3] = state[4]
+        self.subw_w.obj.playable[0] = bool(state[1])
 
 def request_API(data):
     URL = "https://tmeduca.cl/LabSim/module/API_v2.php"

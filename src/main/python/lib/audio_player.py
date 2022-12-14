@@ -3,7 +3,7 @@ from PySide6.QtCore import QUrl
 
 class Player():
     def __init__(self, channels:int) -> None:
-        self.channels, self.outputs = self.create_channels(channels)
+        self.players, self.channels = self.create_channels(channels)
     
     def create_channels(self, ch:int) ->list:
 
@@ -18,18 +18,31 @@ class Player():
         
         return players, outputs
     def stop(self, ch:int)->None:
-        self.channels[ch].stop()
+        self.players[ch].stop()
+        
+    def stop_all(self):
+        for i in range(len(self.players)):
+            self.stop(i)
         
     
     def play(self, ch:int, source:QUrl)->None:
-        self.channels[ch].setSource(source)
-        self.channels[ch].play()
+        self.players[ch].setSource(source)
+        self.players[ch].play()
 
     def volume(self, ch:int, value:int) -> None:
-        self.outputs[ch].setVolume(value)
+        self.channels[ch].setVolume(value)
     
     def status(self, ch:int)->int:
-        return self.channels[ch].mediaStatus()
+        return self.players[ch].mediaStatus()
+    
+    def play_status(self, ch:int):
+        state = self.players[ch].playbackState()
+
+        if state == QMediaPlayer.PlaybackState.StoppedState:
+            return False
+        if state == QMediaPlayer.PlaybackState.PlayingState:
+            return True
+        
         
         
 

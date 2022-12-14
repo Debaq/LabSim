@@ -559,6 +559,20 @@ class Ui_generator_audio(object):
 
         self.gridLayout_3.addWidget(self.spbox_ldl_oi_0, 2, 2, 1, 1)
 
+        self.spbox_ldl_oi_9 = QSpinBox(generator_audio)
+        self.spbox_ldl_oi_9.setObjectName(u"spbox_ldl_oi_9")
+        self.spbox_ldl_oi_9.setEnabled(False)
+        self.spbox_ldl_oi_9.setMaximum(130)
+        self.spbox_ldl_oi_9.setSingleStep(5)
+        self.spbox_ldl_oi_9.setValue(130)
+
+        self.gridLayout_3.addWidget(self.spbox_ldl_oi_9, 2, 10, 1, 1)
+
+        self.label_35 = QLabel(generator_audio)
+        self.label_35.setObjectName(u"label_35")
+
+        self.gridLayout_3.addWidget(self.label_35, 0, 7, 1, 1)
+
         self.spbox_ldl_oi_8 = QSpinBox(generator_audio)
         self.spbox_ldl_oi_8.setObjectName(u"spbox_ldl_oi_8")
         self.spbox_ldl_oi_8.setEnabled(False)
@@ -566,21 +580,7 @@ class Ui_generator_audio(object):
         self.spbox_ldl_oi_8.setSingleStep(5)
         self.spbox_ldl_oi_8.setValue(130)
 
-        self.gridLayout_3.addWidget(self.spbox_ldl_oi_8, 2, 10, 1, 1)
-
-        self.label_35 = QLabel(generator_audio)
-        self.label_35.setObjectName(u"label_35")
-
-        self.gridLayout_3.addWidget(self.label_35, 0, 7, 1, 1)
-
-        self.spbox_ldl_oi_7 = QSpinBox(generator_audio)
-        self.spbox_ldl_oi_7.setObjectName(u"spbox_ldl_oi_7")
-        self.spbox_ldl_oi_7.setEnabled(False)
-        self.spbox_ldl_oi_7.setMaximum(130)
-        self.spbox_ldl_oi_7.setSingleStep(5)
-        self.spbox_ldl_oi_7.setValue(130)
-
-        self.gridLayout_3.addWidget(self.spbox_ldl_oi_7, 2, 9, 1, 1)
+        self.gridLayout_3.addWidget(self.spbox_ldl_oi_8, 2, 9, 1, 1)
 
         self.spbox_ldl_od_3 = QSpinBox(generator_audio)
         self.spbox_ldl_od_3.setObjectName(u"spbox_ldl_od_3")
@@ -628,14 +628,14 @@ class Ui_generator_audio(object):
 
         self.gridLayout_3.addWidget(self.spbox_ldl_od_1, 1, 3, 1, 1)
 
-        self.spbox_ldl_oi_5 = QSpinBox(generator_audio)
-        self.spbox_ldl_oi_5.setObjectName(u"spbox_ldl_oi_5")
-        self.spbox_ldl_oi_5.setEnabled(False)
-        self.spbox_ldl_oi_5.setMaximum(130)
-        self.spbox_ldl_oi_5.setSingleStep(5)
-        self.spbox_ldl_oi_5.setValue(130)
+        self.spbox_ldl_oi_6 = QSpinBox(generator_audio)
+        self.spbox_ldl_oi_6.setObjectName(u"spbox_ldl_oi_6")
+        self.spbox_ldl_oi_6.setEnabled(False)
+        self.spbox_ldl_oi_6.setMaximum(130)
+        self.spbox_ldl_oi_6.setSingleStep(5)
+        self.spbox_ldl_oi_6.setValue(130)
 
-        self.gridLayout_3.addWidget(self.spbox_ldl_oi_5, 2, 7, 1, 1)
+        self.gridLayout_3.addWidget(self.spbox_ldl_oi_6, 2, 7, 1, 1)
 
         self.label_38 = QLabel(generator_audio)
         self.label_38.setObjectName(u"label_38")
@@ -651,14 +651,14 @@ class Ui_generator_audio(object):
 
         self.gridLayout_3.addWidget(self.spbox_ldl_od_5, 1, 7, 1, 1)
 
-        self.spbox_ldl_oi_2 = QSpinBox(generator_audio)
-        self.spbox_ldl_oi_2.setObjectName(u"spbox_ldl_oi_2")
-        self.spbox_ldl_oi_2.setEnabled(False)
-        self.spbox_ldl_oi_2.setMaximum(130)
-        self.spbox_ldl_oi_2.setSingleStep(5)
-        self.spbox_ldl_oi_2.setValue(130)
+        self.spbox_ldl_oi_3 = QSpinBox(generator_audio)
+        self.spbox_ldl_oi_3.setObjectName(u"spbox_ldl_oi_3")
+        self.spbox_ldl_oi_3.setEnabled(False)
+        self.spbox_ldl_oi_3.setMaximum(130)
+        self.spbox_ldl_oi_3.setSingleStep(5)
+        self.spbox_ldl_oi_3.setValue(130)
 
-        self.gridLayout_3.addWidget(self.spbox_ldl_oi_2, 2, 4, 1, 1)
+        self.gridLayout_3.addWidget(self.spbox_ldl_oi_3, 2, 4, 1, 1)
 
         self.label_29 = QLabel(generator_audio)
         self.label_29.setObjectName(u"label_29")
@@ -712,14 +712,14 @@ class Ui_generator_audio(object):
 
         self.gridLayout_3.addWidget(self.spbox_ldl_od_6, 1, 8, 1, 1)
 
-        self.spbox_ldl_oi_4 = QSpinBox(generator_audio)
-        self.spbox_ldl_oi_4.setObjectName(u"spbox_ldl_oi_4")
-        self.spbox_ldl_oi_4.setEnabled(False)
-        self.spbox_ldl_oi_4.setMaximum(130)
-        self.spbox_ldl_oi_4.setSingleStep(5)
-        self.spbox_ldl_oi_4.setValue(130)
+        self.spbox_ldl_oi_5 = QSpinBox(generator_audio)
+        self.spbox_ldl_oi_5.setObjectName(u"spbox_ldl_oi_5")
+        self.spbox_ldl_oi_5.setEnabled(False)
+        self.spbox_ldl_oi_5.setMaximum(130)
+        self.spbox_ldl_oi_5.setSingleStep(5)
+        self.spbox_ldl_oi_5.setValue(130)
 
-        self.gridLayout_3.addWidget(self.spbox_ldl_oi_4, 2, 6, 1, 1)
+        self.gridLayout_3.addWidget(self.spbox_ldl_oi_5, 2, 6, 1, 1)
 
         self.spbox_ldl_od_2 = QSpinBox(generator_audio)
         self.spbox_ldl_od_2.setObjectName(u"spbox_ldl_od_2")
@@ -740,23 +740,23 @@ class Ui_generator_audio(object):
 
         self.gridLayout_3.addWidget(self.label_36, 0, 4, 1, 1)
 
-        self.spbox_ldl_oi_3 = QSpinBox(generator_audio)
-        self.spbox_ldl_oi_3.setObjectName(u"spbox_ldl_oi_3")
-        self.spbox_ldl_oi_3.setEnabled(False)
-        self.spbox_ldl_oi_3.setMaximum(130)
-        self.spbox_ldl_oi_3.setSingleStep(5)
-        self.spbox_ldl_oi_3.setValue(130)
+        self.spbox_ldl_oi_4 = QSpinBox(generator_audio)
+        self.spbox_ldl_oi_4.setObjectName(u"spbox_ldl_oi_4")
+        self.spbox_ldl_oi_4.setEnabled(False)
+        self.spbox_ldl_oi_4.setMaximum(130)
+        self.spbox_ldl_oi_4.setSingleStep(5)
+        self.spbox_ldl_oi_4.setValue(130)
 
-        self.gridLayout_3.addWidget(self.spbox_ldl_oi_3, 2, 5, 1, 1)
+        self.gridLayout_3.addWidget(self.spbox_ldl_oi_4, 2, 5, 1, 1)
 
-        self.spbox_ldl_oi_6 = QSpinBox(generator_audio)
-        self.spbox_ldl_oi_6.setObjectName(u"spbox_ldl_oi_6")
-        self.spbox_ldl_oi_6.setEnabled(False)
-        self.spbox_ldl_oi_6.setMaximum(130)
-        self.spbox_ldl_oi_6.setSingleStep(5)
-        self.spbox_ldl_oi_6.setValue(130)
+        self.spbox_ldl_oi_7 = QSpinBox(generator_audio)
+        self.spbox_ldl_oi_7.setObjectName(u"spbox_ldl_oi_7")
+        self.spbox_ldl_oi_7.setEnabled(False)
+        self.spbox_ldl_oi_7.setMaximum(130)
+        self.spbox_ldl_oi_7.setSingleStep(5)
+        self.spbox_ldl_oi_7.setValue(130)
 
-        self.gridLayout_3.addWidget(self.spbox_ldl_oi_6, 2, 8, 1, 1)
+        self.gridLayout_3.addWidget(self.spbox_ldl_oi_7, 2, 8, 1, 1)
 
         self.label_28 = QLabel(generator_audio)
         self.label_28.setObjectName(u"label_28")
@@ -1099,14 +1099,14 @@ class Ui_generator_audio(object):
         QWidget.setTabOrder(self.spbox_ldl_od_7, self.spbox_ldl_od_8)
         QWidget.setTabOrder(self.spbox_ldl_od_8, self.spbox_ldl_oi_0)
         QWidget.setTabOrder(self.spbox_ldl_oi_0, self.spbox_ldl_oi_1)
-        QWidget.setTabOrder(self.spbox_ldl_oi_1, self.spbox_ldl_oi_2)
-        QWidget.setTabOrder(self.spbox_ldl_oi_2, self.spbox_ldl_oi_3)
+        QWidget.setTabOrder(self.spbox_ldl_oi_1, self.spbox_ldl_oi_3)
         QWidget.setTabOrder(self.spbox_ldl_oi_3, self.spbox_ldl_oi_4)
         QWidget.setTabOrder(self.spbox_ldl_oi_4, self.spbox_ldl_oi_5)
         QWidget.setTabOrder(self.spbox_ldl_oi_5, self.spbox_ldl_oi_6)
         QWidget.setTabOrder(self.spbox_ldl_oi_6, self.spbox_ldl_oi_7)
         QWidget.setTabOrder(self.spbox_ldl_oi_7, self.spbox_ldl_oi_8)
-        QWidget.setTabOrder(self.spbox_ldl_oi_8, self.spbox_sdt_od_0)
+        QWidget.setTabOrder(self.spbox_ldl_oi_8, self.spbox_ldl_oi_9)
+        QWidget.setTabOrder(self.spbox_ldl_oi_9, self.spbox_sdt_od_0)
         QWidget.setTabOrder(self.spbox_sdt_od_0, self.spbox_srt_od_0)
         QWidget.setTabOrder(self.spbox_srt_od_0, self.spbox_umd_od_0)
         QWidget.setTabOrder(self.spbox_umd_od_0, self.spbox_umd_od_1)
@@ -1141,7 +1141,7 @@ class Ui_generator_audio(object):
         self.label_5.setText(QCoreApplication.translate("generator_audio", u"2000", None))
         self.label_4.setText(QCoreApplication.translate("generator_audio", u"1000", None))
         self.label_3.setText(QCoreApplication.translate("generator_audio", u"500", None))
-        self.label_41.setText(QCoreApplication.translate("generator_audio", u"\u00d3seas pegadas a A\u00e9reas:", None))
+        self.label_41.setText(QCoreApplication.translate("generator_audio", u"A\u00e9reas y \u00d3seas pegadas:", None))
         self.chbox_peg_od.setText(QCoreApplication.translate("generator_audio", u"OD", None))
         self.chbox_peg_oi.setText(QCoreApplication.translate("generator_audio", u"OI", None))
         self.label_14.setText(QCoreApplication.translate("generator_audio", u"1000", None))

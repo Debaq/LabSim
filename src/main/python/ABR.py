@@ -7,7 +7,6 @@
 #                                                               #
 #################################################################
 
-import contextlib
 import random
 import sys
 
@@ -15,8 +14,11 @@ import numpy as np
 from base import context
 
 from PySide6.QtWidgets import QPushButton, QWidget
+from PySide6.QtPrintSupport import QPrintDialog, QPrinter
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QFont
+from PySide6.QtWidgets import QApplication, QFileDialog
+from datetime import datetime
 
 import lib.bezier_prop as bz
 from lib.ABR_generator import ABR_creator
@@ -27,18 +29,50 @@ from UI.Ui_ABR_control import Ui_ABRSim
 from UI.Ui_ABR_ctrl_graph import Ui_ABR_control_curve
 from UI.Ui_ABR_detail import Ui_ABR_detail
 from UI.Ui_ABR_lat_select import Ui_ABR_lat_select
+from pdf_abr import dataset as dataset_pdf
+from pdf_abr import image_ABR, create_pdf
+
+
+def printer(self, widget):
+    screen = QApplication.primaryScreen()
+    screenshot = screen.grabWindow(widget)
+    now = datetime.now()
+    current_time = now.strftime("%d-%m-%y_%H_%M_%S")
+    file = str(QFileDialog.getExistingDirectory(self, "Seleccionar destino"))
+    name = f'{file}/{current_time}.jpg'
+    screenshot.save(name, 'jpg')
 
 
 class ABR_control(QWidget, Ui_ABR_config):
     def __init__(self):
         QWidget.__init__(self)
         self.setupUi(self)
+        
+    def get_data(self):
+        
+        stim = self.cb_stim.currentText()
+        pol = self.cb_pol.currentText()
+        inty = self.sb_intencity.value()
+        mkg = self.sb_mskg.value()
+        rate = self.sb_rate.value()
+        
+        filter_passdown = self.cb_filter_down.currentText()
+        filter_passhigh =self.cb_filter_up.currentText()
+        prom = self.sb_prom.value()
+        side = self.cb_side.currentText()
+        
+        return {"stim":stim, "pol":pol, "int":inty, "mkg":mkg, 
+                "rate":rate, "filter_down":filter_passdown, 
+                "filter_passhigh": filter_passhigh, "prom" : prom,
+                "side":side}
+        
 
 
 class ABR_detail(QWidget, Ui_ABR_detail):
     def __init__(self):
         QWidget.__init__(self)
         self.setupUi(self)
+        
 
 
 class ABR_lat_select(QWidget, Ui_ABR_lat_select):
@@ -93,17 +127,21 @@ class ABR_lat_select(QWidget, Ui_ABR_lat_select):
             self.lbl_2.setText('A-B:{:.2f}μV'.format(data['amp_AB']))
             self.lbl_3.setText('A<>B:{:.2f}ms'.format(data['lat_AB']))
         if 'non_prima' in data:
-            self.lbl_4.setText("I:{:.1f}ms I':{:.1f}ms".format(data['non_prima'][0],data['prima'][0]))
-            self.lbl_5.setText("II:{:.1f}ms II':{:.1f}ms".format(data['non_prima'][1],data['prima'][1]))
-            self.lbl_6.setText("III:{:.1f}ms III':{:.1f}ms".format(data['non_prima'][2],data['prima'][2]))
-            self.lbl_7.setText("IV:{:.1f}ms IV':{:.1f}ms".format(data['non_prima'][3],data['prima'][3]))
-            self.lbl_8.setText("V:{:.1f}ms V':{:.1f}ms".format(data['non_prima'][4],data['prima'][4]))
-            I_III = data['non_prima'][2]-data['non_prima'][0]
-            III_V = data['non_prima'][4]-data['non_prima'][2]
-            I_V = data['non_prima'][4]-data['non_prima'][0]
-            self.lbl_9.setText("I-III:{:.1f}ms".format(I_III))
-            self.lbl_10.setText("III-V:{:.1f}ms".format(III_V))
-            self.lbl_11.setText("I-V:{:.1f}ms".format(I_V))
+            self._extracted_from_update_data_8(data)
+
+    # TODO Rename this here and in `update_data`
+    def _extracted_from_update_data_8(self, data):
+        self.lbl_4.setText("I:{:.1f}ms I':{:.1f}ms".format(data['non_prima'][0],data['prima'][0]))
+        self.lbl_5.setText("II:{:.1f}ms II':{:.1f}ms".format(data['non_prima'][1],data['prima'][1]))
+        self.lbl_6.setText("III:{:.1f}ms III':{:.1f}ms".format(data['non_prima'][2],data['prima'][2]))
+        self.lbl_7.setText("IV:{:.1f}ms IV':{:.1f}ms".format(data['non_prima'][3],data['prima'][3]))
+        self.lbl_8.setText("V:{:.1f}ms V':{:.1f}ms".format(data['non_prima'][4],data['prima'][4]))
+        I_III = data['non_prima'][2]-data['non_prima'][0]
+        III_V = data['non_prima'][4]-data['non_prima'][2]
+        I_V = data['non_prima'][4]-data['non_prima'][0]
+        self.lbl_9.setText("I-III:{:.1f}ms".format(I_III))
+        self.lbl_10.setText("III-V:{:.1f}ms".format(III_V))
+        self.lbl_11.setText("I-V:{:.1f}ms".format(I_V))
 
 class ABR_ctrl_curve(QWidget, Ui_ABR_control_curve):
     data = Signal(dict)
@@ -164,27 +202,27 @@ class ABR_ctrl_curve(QWidget, Ui_ABR_control_curve):
         
     
     def btns_flags_curves(self, btns:list):
-            color = "255,0,0" if self.side == 0 else "106,154,242"
-            style =f"""
+        color = "255,0,0" if self.side == 0 else "106,154,242"
+        style =f"""
                     QWidget {'{'}
                     color: rgb(0, 0, 0);
                     background-color: rgb({color});
                     border-style: outset;
                     border-width: 0px;
                     {'}'}"""
-            for i in range(len(btns)):
-                btn = QPushButton('{}'.format(btns[i][0]))
-                btn.setObjectName(btns[i][1])
-                btn.setStyleSheet(style)
-                btn.setCheckable(True)
-                btn.setAutoExclusive(True)
-                btn.clicked.connect(self.selected_curve)
-                btn.setMaximumSize(30,30)
-                font = QFont('Times', 7)
-                btn.setFont(font)
-                btn.setToolTip('{}'.format(btns[i][2]))
-                btn.setChecked(True)
-                self.layout_curves.addWidget(btn)
+        for btn_ in btns:
+            btn = QPushButton(f'{btn_[0]}')
+            btn.setObjectName(btn_[1])
+            btn.setStyleSheet(style)
+            btn.setCheckable(True)
+            btn.setAutoExclusive(True)
+            btn.clicked.connect(self.selected_curve)
+            btn.setMaximumSize(30,30)
+            font = QFont('Times', 7)
+            btn.setFont(font)
+            btn.setToolTip(f'{btn_[2]}')
+            btn.setChecked(True)
+            self.layout_curves.addWidget(btn)
         
     def selected_curve(self):
         widget = self.sender()
@@ -233,11 +271,29 @@ class MainWindow(QWidget, Ui_ABRSim):
         self.store = {}
         self.data = ABR_creator()
 
+        self.detail.btn_start.setText("EMPEZAR")
+        self.detail.btn_stop.setText("IMPRIMIR")
         self.detail.btn_start.clicked.connect(self.capture)
-        self.detail.btn_stop.clicked.connect(self.capture)
+        self.detail.btn_stop.clicked.connect(self.printer)
 
         self.current_curves = [None, None]
 
+    def printer(self):
+        #print(self.store)     
+        self.graph_right.save_image()
+        self.graph_left.save_image()
+        table = dataset_pdf(self.store)
+        image_ABR()
+        create_pdf(table)
+        
+        """
+
+        self.control.get_data()
+        printer = QPrinter(QPrinter.HighResolution)
+        dialog = QPrintDialog(printer, self)
+        if dialog.exec_() == QPrintDialog.Accepted:
+            pass
+        """
     def laSuper(self, data):
         self.Sdata = data
         self.entry = False
@@ -254,6 +310,7 @@ class MainWindow(QWidget, Ui_ABRSim):
         if data['action'] == 'scale':
             self.scale_graph(data['data'])
         if data['action'] == 'latency_flag_update':
+            
             self.update_data_lat_ab(data['data'])
 
     def scale_graph(self, data):
@@ -274,7 +331,7 @@ class MainWindow(QWidget, Ui_ABRSim):
         side = data['side']
         self.store[self.current_curves[side]]['view'] = False
         self.updateFlagsCurves()
-        self.updateGraph(side)
+        self.updateGraph()
   
     def selectCurve(self, data):
         _,x = data['curve'].split('_')
@@ -300,16 +357,22 @@ class MainWindow(QWidget, Ui_ABRSim):
         gap = self.calGap(letter, gap)
         view = True
         repro = random.randint(80,99)
+        setting= (self.control.get_data())
+        
+
         self.store[name] = {'ipsi_xy':[[],[]],'contra_xy':[[],[]],
                             'side':side, 'intencity':intencity, 'repro':repro, 
-                            'view':view, 'gap':gap}
+                            'view':view, 'gap':gap, 'stim':setting['stim'], 
+                            'pol':setting['pol'], 'mkg':setting['mkg'], 'rate':setting['rate'],
+                            'filter':f"{setting['filter_passhigh']}-{setting['filter_down']}",
+                            'prom':setting['prom'], 'marks' : [0,0,0,0,0]}
+        
         self.data.set_intencity(intencity)
         #x, y = self.data.get()
         if side == 0:
             x, y, dx,dy = ABR_Curve(none=False, nHL=intencity, p_I=1.3, a_V = 0.6, zeros=False, VrelI = False)
         else: 
             x, y, dcx,dy = ABR_Curve(none=False, nHL=intencity, p_I=1.3, a_V = 0.6, zeros=False, VrelI = False)
-
         self.store[name]['ipsi_xy'][0] = x
         self.store[name]['ipsi_xy'][1] = y
         self.disabled_in_capture()
@@ -378,6 +441,10 @@ class MainWindow(QWidget, Ui_ABRSim):
 
     def update_data_lat_ab(self, data):
         side = data["side"]
+        if "non_prima" in data:
+            marks = data["non_prima"]
+            curve = data["curve"]
+            self.store[curve]['marks'] = marks
         if side == 0:
             self.lat_select_R.update_data(data)
         else:
@@ -389,6 +456,8 @@ class MainWindow(QWidget, Ui_ABRSim):
         idx = data['prima']
         subidx = data['n_curve']
         flag = data['flag']
+        
+        
         if side == 0:
             self.graph_right.update_marks(idx,subidx,flag)
         else:

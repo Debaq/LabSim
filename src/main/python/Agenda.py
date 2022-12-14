@@ -16,7 +16,7 @@ from lib.helpers import Shedule
 
 
 class Agenda(QWidget, Ui_Form):
-    def __init__(self):
+    def __init__(self, permissions, obj):
         # Inicialización de la ventana y propiedades
         #super(Audiometer, self).__init__()
         super().__init__()
@@ -27,6 +27,14 @@ class Agenda(QWidget, Ui_Form):
         
         self.read_shedule()
         self.populate_shedule()
+        
+        if permissions == 777:
+            self.pushButton.setEnabled(True)
+            self.pushButton.clicked.connect(lambda:self.create_case(obj))
+        
+    def create_case(self,obj):
+        obj.activate_auto("CREATE_A")
+
         
     def read_shedule(self):
         shedule = Shedule()

@@ -44,8 +44,8 @@ class FrameSubMdi(QWidget, UI_frameSubMdi):
         #super(FrameSubMdi, self).__init__()
         super().__init__()
         self.setupUi(self)
-        self.ui_ui = ui_ui
-        self.layout_content.addWidget(self.ui_ui)
+        self.obj = ui_ui
+        self.layout_content.addWidget(self.obj)
         movewin = MoveWin(self)
         self.barra.mousePressEvent = movewin.press_window
         self.barra.mouseMoveEvent = movewin.move_window

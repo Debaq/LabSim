@@ -1,0 +1,4 @@
+curva|Estim|Polaridad|int|mk|tasa|fil|prome|I|III|V
+80_R:0|Clic|Alternada|80|0|10.1|50-1000|1000|0|0|0
+80_R:1|Clic|Alternada|80|0|10.1|50-1000|1000|0|0|0
+80_R:2|Clic|Alternada|80|0|10.1|50-1000|1000|0|0|0

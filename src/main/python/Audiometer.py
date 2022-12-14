@@ -9,7 +9,7 @@
 #################################################################
 
 import numpy as np
-from PySide6.QtCore import QTimer, Signal, QObject
+from PySide6.QtCore import QTimer, Signal, QObject, Slot
 from PySide6.QtGui import QFont, QKeySequence, QShortcut
 from PySide6.QtWidgets import QWidget
 
@@ -20,7 +20,7 @@ from lib.helpers import Preferences
 #from lib.response_A import Response
 from lib.audio_player import Player
 from UI.Ui_Audiometer import Ui_Audiometer
-from response import ResponseThresholdAudiometry as Response
+from response import ResponseAudiometry as Response
 
 #context
 class_pref = Preferences()
@@ -47,11 +47,11 @@ class Audiometer(QWidget, Ui_Audiometer):
         #super(Audiometer, self).__init__()
         super().__init__()
         self.thr = []
-        self.response = Response()
+        self.response = Response(self)
         #self.response.button.connect(self.respa)
         #self.la_super(thr)
         self.setupUi(self)
-        #self.supra("silencio")
+        self.supra("silencio")
         self.frecuency_list = create_frecuency(
             frecuency_dict, prueba="Umbrales")
         self.random_response = [0, 0]
@@ -247,7 +247,8 @@ class Audiometer(QWidget, Ui_Audiometer):
         result = [thr['Aerea'], thr['Osea'], thr['LDL']]
         result1 = [thr['Aerea_mkg'], thr['Osea_mkg']]
         self.thr = [result, result1]
-
+    
+    @Slot()
     def supra(self, state):
         self.response.set_command(state)
         self.response.transmit_(talk = False)
@@ -269,11 +270,11 @@ class Audiometer(QWidget, Ui_Audiometer):
             self.activate_response = [1, 0]
 
     def talkback(self):
+        print(self.state_supra)
         if self.state_supra is not None:
-            self.channels[0].stop()
-            self.channels[1].stop()
-            self.channels[0].setSource(self.state_supra[0])
-            self.channels[0].play()
+            self.players.stop_all()
+            source=self.state_supra[0]
+            self.players.play(0, source)
             self.response.transmit_(talk = True)
         self.commandAction(self.state_supra[1])
 
@@ -390,7 +391,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         QObject.disconnect(self.btn_stims[ch], None, None, None)
         #self.btn_stims[ch].disconnect()
         #lbl_rev = self.lbl_revers[ch].text()
-
+        print("vamos a invertir")
         if self.no_Rev(ch):
             self.lbl_revers[ch].setText(reverse_list[1])
             self.puls_active[ch] = True
@@ -408,7 +409,7 @@ class Audiometer(QWidget, Ui_Audiometer):
                 lambda: self.Helper_Stim(ch=ch, play=False))
         lbl = self.lbl_stim[ch].text()
         if lbl != "Habla":
-            if self.players.status[ch] == 6:
+            if self.players.play_status(ch):
                 self.stop(ch)
             elif self.no_puls(ch):
                 self.play(ch)
@@ -457,6 +458,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         f = self.lbl_freq.text().split(' Hz')[0]
         sound = create_sound(stim=stim, f=f, ch=lbl_out)
         self.players.play(ch, sound)
+        #self.response.response_aerea()
         self.vu_meters[ch].setValue(50)
         self.lbl_warnings[ch].setStyleSheet(
             "background-color: rgb(170, 170, 255);  color : rgb(170, 170, 255);")
@@ -474,9 +476,8 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.post_channel_on()
 
     def post_channel_on(self):
-        #self.response.transmit_(stimOn = self.channel_on)
-        #self.response.activate()
-        pass
+        self.response.transmit_(stimOn = self.channel_on)
+        self.response.activate()
 
     # PRUEBAS
     def speech(self):

@@ -5,6 +5,7 @@
     "lista_palabras" : "lista_palabras.json",
     "ABR_DATA" :"ABR.json",
     "APPS" : "apps.json",
-    "keys" : "keys.json"
+    "keys" : "keys.json",
+    "c_voice" : "command_voice.json"
     
 }
