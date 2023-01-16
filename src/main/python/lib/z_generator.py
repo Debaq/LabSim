@@ -1,6 +1,6 @@
 import numpy as np
 import random
-import bezier
+from lib.bezier_prop import Bezier as bezier
 
 
 class Z_225():

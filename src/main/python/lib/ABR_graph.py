@@ -5,7 +5,6 @@ from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import Qt
 from lib.helpers import Storage
-import pyqtgraph.exporters
 
 class GraphABR(QWidget):
     data_info = Signal(dict)
