@@ -1,0 +1,22 @@
+{
+    "windows":{
+       "audiometer":{
+          "name" : "Audiómetro",
+          "active":true,
+          "size":[
+             200,
+             200
+          ]
+       },
+       "impedance":{
+        "name": "Impedanciómetro",
+        "active" : true,
+        "size" :[200,200]
+       },
+       "potencial_evoked":{
+         "name" : "potenciales evocados",
+         "active" : true,
+         "size":[200,200]
+       }
+    }
+ }
