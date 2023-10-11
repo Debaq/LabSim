@@ -1,0 +1,8 @@
+{
+    "Shorcut" : {"dial_ch0" : ["w","s"], "dial_ch1":["i","k"], "btn_freq_minus":["a"], "btn_freq_plus":["d"]},
+    "Frecuency" : [125,250,500,1000,2000,3000,4000,6000,8000],
+    "Range_intencity": {"normal": [-5, 120], "extend":[-15,130]},
+    "Transducer": {"aer":["Aérea"], "ose":["Ósea"], "cl":["Campo Libre"]},
+    "Stimulus": {"tone": ["Tone"], "fm":["FM"], "speech":["Habla"], "wn":["Ruido Blanco"], "nbn":["Banda Ancha"], "pn":["Ruido Rosa"], "sn": ["Ruido de Habla"]},
+    "Output" : {"r":["Derecha"], "l":["Izquierda"], "sim":["Simultáneo"]}
+}

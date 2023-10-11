@@ -203,7 +203,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="lbl_warning_stim_der">
+           <widget class="QLabel" name="lbl_warning_stim_ch0">
             <property name="autoFillBackground">
              <bool>false</bool>
             </property>
@@ -252,7 +252,7 @@
             <number>0</number>
            </property>
            <item>
-            <widget class="QProgressBar" name="vmeter_der">
+            <widget class="QProgressBar" name="vmeter_ch0">
              <property name="minimumSize">
               <size>
                <width>7</width>
@@ -507,7 +507,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QLabel" name="lbl_ext_der">
+              <widget class="QLabel" name="lbl_ext_ch0">
                <property name="minimumSize">
                 <size>
                  <width>90</width>
@@ -555,7 +555,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="lbl_ext_izq">
+              <widget class="QLabel" name="lbl_ext_ch1">
                <property name="minimumSize">
                 <size>
                  <width>90</width>
@@ -678,7 +678,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QProgressBar" name="vmeter_izq">
+            <widget class="QProgressBar" name="vmeter_ch1">
              <property name="minimumSize">
               <size>
                <width>7</width>
@@ -843,7 +843,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="lbl_warning_stim_izq">
+           <widget class="QLabel" name="lbl_warning_stim_ch1">
             <property name="text">
              <string/>
             </property>
@@ -1031,7 +1031,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_output_der_der">
+              <widget class="QPushButton" name="btn_output_r_ch0">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -1052,7 +1052,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_output_izq_der">
+              <widget class="QPushButton" name="btn_output_l_ch0">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -1073,7 +1073,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_output_sim_der">
+              <widget class="QPushButton" name="btn_output_sim_ch0">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -1129,7 +1129,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_stim_tone_der">
+              <widget class="QPushButton" name="btn_stim_tone_ch0">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -1150,7 +1150,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_stim_fm_der">
+              <widget class="QPushButton" name="btn_stim_fm_ch0">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -1171,7 +1171,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_stim_speech_der">
+              <widget class="QPushButton" name="btn_stim_speech_ch0">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -1211,7 +1211,7 @@
                   <number>0</number>
                  </property>
                  <item>
-                  <widget class="QPushButton" name="btn_stim_wn_der">
+                  <widget class="QPushButton" name="btn_stim_wn_ch0">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -1238,7 +1238,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="btn_stim_nbn_der">
+                  <widget class="QPushButton" name="btn_stim_nbn_ch0">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -1272,7 +1272,7 @@
                   <number>0</number>
                  </property>
                  <item>
-                  <widget class="QPushButton" name="btn_stim_pn_der">
+                  <widget class="QPushButton" name="btn_stim_pn_ch0">
                    <property name="maximumSize">
                     <size>
                      <width>35</width>
@@ -1293,7 +1293,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="btn_stim_sn_der">
+                  <widget class="QPushButton" name="btn_stim_sn_ch0">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -1356,7 +1356,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_trans_aer_der">
+              <widget class="QPushButton" name="btn_trans_aer_ch0">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -1377,7 +1377,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_trans_ose_der">
+              <widget class="QPushButton" name="btn_trans_ose_ch0">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -1398,7 +1398,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_trans_cl_der">
+              <widget class="QPushButton" name="btn_trans_cl_ch0">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -1496,7 +1496,7 @@
                <string>Alta frec.</string>
               </property>
               <property name="checkable">
-               <bool>false</bool>
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -1656,7 +1656,7 @@
                <string>E</string>
               </property>
               <property name="checkable">
-               <bool>false</bool>
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -1699,7 +1699,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_trans_aer_izq">
+              <widget class="QPushButton" name="btn_trans_aer_ch1">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -1720,7 +1720,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_trans_ose_izq">
+              <widget class="QPushButton" name="btn_trans_ose_ch1">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -1741,7 +1741,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_trans_cl_izq">
+              <widget class="QPushButton" name="btn_trans_cl_ch1">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -1797,7 +1797,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_stim_tone_izq">
+              <widget class="QPushButton" name="btn_stim_tone_ch1">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -1818,7 +1818,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_stim_fm_izq">
+              <widget class="QPushButton" name="btn_stim_fm_ch1">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -1839,7 +1839,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_stim_speech_izq">
+              <widget class="QPushButton" name="btn_stim_speech_ch1">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -1876,7 +1876,7 @@
                   <number>0</number>
                  </property>
                  <item>
-                  <widget class="QPushButton" name="btn_stim_wn_izq">
+                  <widget class="QPushButton" name="btn_stim_wn_ch1">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -1907,7 +1907,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="btn_stim_nbn_izq">
+                  <widget class="QPushButton" name="btn_stim_nbn_ch1">
                    <property name="maximumSize">
                     <size>
                      <width>35</width>
@@ -1942,7 +1942,7 @@
                   <number>0</number>
                  </property>
                  <item>
-                  <widget class="QPushButton" name="btn_stim_pn_izq">
+                  <widget class="QPushButton" name="btn_stim_pn_ch1">
                    <property name="maximumSize">
                     <size>
                      <width>35</width>
@@ -1963,7 +1963,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="btn_stim_sn_izq">
+                  <widget class="QPushButton" name="btn_stim_sn_ch1">
                    <property name="sizePolicy">
                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                      <horstretch>0</horstretch>
@@ -2030,7 +2030,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_output_der_izq">
+              <widget class="QPushButton" name="btn_output_r_ch1">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -2051,7 +2051,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_output_izq_izq">
+              <widget class="QPushButton" name="btn_output_l_ch1">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -2072,7 +2072,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_output_sim_izq">
+              <widget class="QPushButton" name="btn_output_sim_ch1">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -2189,7 +2189,7 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_7">
              <item>
-              <widget class="QDial" name="dial_der">
+              <widget class="QDial" name="dial_ch0">
                <property name="cursor">
                 <cursorShape>OpenHandCursor</cursorShape>
                </property>
@@ -2236,7 +2236,7 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
-              <widget class="QPushButton" name="btn_puls_der">
+              <widget class="QPushButton" name="btn_puls_ch0">
                <property name="font">
                 <font>
                  <pointsize>9</pointsize>
@@ -2559,7 +2559,7 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_10">
              <item>
-              <widget class="QPushButton" name="btn_puls_izq">
+              <widget class="QPushButton" name="btn_puls_ch1">
                <property name="font">
                 <font>
                  <pointsize>9</pointsize>
@@ -2634,7 +2634,7 @@
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_9">
              <item>
-              <widget class="QDial" name="dial_izq">
+              <widget class="QDial" name="dial_ch1">
                <property name="cursor">
                 <cursorShape>OpenHandCursor</cursorShape>
                </property>

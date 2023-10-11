@@ -8,7 +8,6 @@ from PySide6.QtCore import Qt
 from lib.CustomWidgets import CustomMdiArea, CustomMdiSubWindow
 import json
 from lib.ModuleImport import importar_modulo, importar_ui
-from lib.SoundCreate import SoundCreate
 
 MARGIN_RL = 20
 MARGIN_TB = 20
@@ -32,7 +31,6 @@ class MainWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         
-        self.player = SoundCreate(duration=5, channel="left")  # Sonará solo en el canal izquierdo
 
         # Layout principal
         main_layout = QVBoxLayout(self)
@@ -86,36 +84,30 @@ class MainWidget(QWidget):
 
         # Añadir widgets al layout principal
         main_layout.addWidget(h_widget1)
-        main_layout.addWidget(h_widget2, 1)  # El '1' aquí hace que este widget ocupe todo el espacio restante
+        main_layout.addWidget(h_widget2, 1)
         main_layout.addWidget(h_widget3)
-        
+
         self.setLayout(main_layout)
-        
+
     def set_label_info(self, text):
         self.label.setText(text)
-        
+
     def btn_test(self):
         self.add_subwindow()
 
     def add_subwindow(self):
-        
         ui = self.modules[self.sender().objectName()][0]
         fn = self.modules[self.sender().objectName()][1]
         fn_ui = fn.Funccion(ui)
-        
-
         #print(dir(ui))
-        
-        
         #self.player.play(noise_type="tone")  # Change to "white", "pink", or "nbn" as needed
         subwindow = CustomMdiSubWindow(fn_ui)
         subwindow.setWindowTitle(self.sender().objectName())
         #subwindow.resize(200, 100)
         self.mdi_area.addSubWindow(subwindow)
         subwindow.show()
-        
-    def stop(self):
-        self.player.stop_playback()
+
+
 if __name__ == '__main__':
     appctxt = AppContext()
     AppContextManager.set_context(appctxt)
