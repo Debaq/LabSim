@@ -18,7 +18,7 @@ from lib.h_win import FrameSubMdi, MdiArea
 
 def show_hide(obj:any, pos:int):
     """
-    Muestra o esconde la subventana que se encuentre en obj segpun su indice
+    Muestra o esconde la subventana que se encuentre en obj según su indice
 
     Args:
         pos(int): indice de la subventana

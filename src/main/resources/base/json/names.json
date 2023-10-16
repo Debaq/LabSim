@@ -1,0 +1,24 @@
+{
+    "nombres_mujeres": [
+      "Ana", "María", "Laura", "Carmen", "Isabel", "Sofía", "Marta", "Lucía", "Elena", "Sara",
+      "Patricia", "Alba", "Paula", "Clara", "Raquel", "Rocío", "Natalia", "Beatriz", "Silvia", "Alicia",
+      "Julia", "Luisa", "Cristina", "Andrea", "Esther", "Gabriela", "Daniela", "Teresa", "Marina", "Irene",
+      "Susana", "Inés", "Eva", "Rosa", "Pilar", "Adriana", "Carla", "Olga", "Mónica", "Lorena",
+      "Victoria", "Lourdes", "Aurora", "Miriam", "Blanca", "Noelia", "Verónica", "Yolanda", "Cecilia", "Emma"
+    ],
+    "nombres_hombres": [
+      "Juan", "José", "Carlos", "Manuel", "Francisco", "David", "Javier", "Daniel", "Miguel", "Antonio",
+      "Luis", "Jorge", "Alberto", "Fernando", "Sergio", "Pablo", "Rafael", "Pedro", "Ángel", "Diego",
+      "Adrián", "Ramón", "Mario", "Rubén", "Raúl", "Víctor", "Joaquín", "Óscar", "Enrique", "Ricardo",
+      "Andrés", "Ignacio", "Marcos", "Roberto", "Samuel", "Alejandro", "Felipe", "Hugo", "Iván", "Gabriel",
+      "Álvaro", "Ernesto", "Julio", "César", "Martín", "Rodrigo", "Josué", "Ismael", "Pepe", "Damián"
+    ],
+    "apellidos": [
+      "García", "Rodríguez", "Pérez", "Fernández", "López", "Martínez", "Sánchez", "González", "Hernández", "Ruiz",
+      "Ramírez", "Morales", "Torres", "Reyes", "Castro", "Ortega", "Gómez", "Cortés", "Díaz", "Mendoza",
+      "Aguilar", "Vargas", "Castillo", "Jiménez", "Moreno", "Romero", "Herrera", "Medina", "Alvarez", "Guzmán",
+      "Rojas", "Paredes", "Ramos", "Navarro", "Vega", "Cruz", "Rivas", "Molina", "Delgado", "Estrada",
+      "Contreras", "Salazar", "Peña", "Zamora", "Cardenas", "Campos", "Luna", "Solís", "Arias", "Valdez"
+    ]
+  }
+  

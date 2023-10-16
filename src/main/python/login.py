@@ -47,7 +47,7 @@ class MainLogin(QWidget, Ui_Login):
     def _verify_result(self, result:any) -> None:
         """
         Verifica que retorno de func_login, si es 0  levanta un mensaje de error,
-        si el login trae datos desativa el estado de los widgets y cambia la
+        si el login trae datos desactiva el estado de los widgets y cambia la
         función del login, luego envia los datos al main para ser tratados
         Args:
             result (any): retorno de func_login

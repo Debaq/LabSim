@@ -15,11 +15,13 @@ import Agenda
 import login as Ui_login
 from base import context
 from lib.h_win import FrameSubMdi, MdiArea
-from lib.helpers import Preferences, Storage
+from lib.helpers import Preferences, Storage, CreatePatient
+from lib.main.func_users import XLSReader
 from lib.ui_helpers import ToolBar, show_hide, MoveWindow, toggle_max_min
 from UI.Ui_Main import Ui_MainWindow
 from UI.Ui_CVC import Ui_CVC
 from UI.Ui_command_voice_A import Ui_Form as commandVoiceA
+
 
 Preferences = Preferences()
 APPS = Preferences.get("APP")
@@ -28,6 +30,18 @@ BOXS = Preferences.get("BOXS")
 STYLES = Preferences.get("styles")
 LANGUAJE = Preferences.get("lang")
 ONLINE = Preferences.get("online")
+#name = CreatePatient()
+#print(name.generar_nombre("men", social_name=True))
+
+
+# Uso
+#file_path = "cases/NominaAlumnos.xls"
+#reader = XLSReader(file_path)
+#reader.read_xls()
+#data = reader.get_data()
+#print(data)
+
+
 
 class CVC (Ui_CVC):
     def __init__(self) -> None:
@@ -113,8 +127,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Slot Recibe el data de la subventana login
 
         Args:
-            data (dict): data obtenida desde el login
+            data (dict): data obtenida desde el login_data_login
         """
+        print(f"data in main: {data}")
         user = data["user"]
         if user is False:
             self.logout()

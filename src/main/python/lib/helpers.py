@@ -20,6 +20,9 @@ Store: clase para crear almacenamientos
 import json
 import codecs
 from base import context
+import random
+from datetime import datetime
+import os
 
 
 class CasesOffline():
@@ -36,7 +39,15 @@ class CasesOffline():
         Args:
             username (str): username del login
         """
+        if "@" in username:
+            username , _ = username.split('@')
+        base_path = os.path.dirname(os.path.abspath(__file__))  # Directorio del script actual
+        print(base_path)
+        #try:    
         cases_file = context.get_resource(f'cases/{username}.json')
+        #except FileNotFoundError:
+        #    pass
+            #resource_path = os.path.join(context.app_dir, resource_name)
 
         with codecs.open(cases_file, 'r', 'utf-8') as json_file:
             list_data = json.load(json_file)
@@ -291,3 +302,50 @@ class Storage:
             list: lista de objetos almacenados en el Store
         """
         return self.data
+class CreatePatient():
+    def __init__(self):
+            pass
+        
+    def get_age_from_rut(self, rut):
+        today_date = datetime.now()
+        slope = 3.3363697569700348e-06
+        intercept = 1932.2573852507373
+        birth_date_float = rut * slope + intercept
+        birth_date_year = int(birth_date_float)
+        birth_date_month = round((birth_date_float - birth_date_year) * 12)
+        birth_date = datetime(birth_date_year, birth_date_month, 1)
+        age = (today_date - birth_date).days // 365
+        return age, birth_date_month, birth_date_year
+
+    def rut_from_age(self, age):
+        today_date = datetime.now()
+        slope = 3.3363697569700348e-06
+        intercept = 1932.2573852507373
+        birth_year = today_date.year - age
+        birth_date_float = birth_year + 0.5  # Asumimos que la persona nació a mitad de año para una aproximación
+        rut_approx = (birth_date_float - intercept) / slope
+        return int(rut_approx)
+
+    def generar_nombre(self, gender: str, social_name: bool = False) -> str:
+        class_pref = Preferences()
+
+        lastname = class_pref.get("apellidos")
+        
+        if gender == "men":
+            nombres = class_pref.get("nombres_hombres")
+            nombres_sociales = class_pref.get("nombres_mujeres")
+        else:
+            nombres = class_pref.get("nombres_mujeres")
+            nombres_sociales = class_pref.get("nombres_hombres")
+
+        nombre1 = random.choice(nombres)
+        nombre2 = random.choice([n for n in nombres if n != nombre1])
+        apellido1 = random.choice(lastname)
+        apellido2 = random.choice([a for a in lastname if a != apellido1])
+
+        if social_name:
+            social_name = random.choice(nombres_sociales)
+        else:
+            social_name = 0
+
+        return [nombre1, nombre2, apellido1, apellido2, social_name]

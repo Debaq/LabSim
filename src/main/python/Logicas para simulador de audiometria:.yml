@@ -1,0 +1,94 @@
+Logicas para simulador de audiometria:
+frecuencias : 125hz, 250hz,500hz,1khz,2khz,3khz,4khz,6khz,8khz
+atenuaciones interaurales para las frecuencias: [35,40,40,40,45,45,50,50, 50]
+coeficiente de enmascaramiento para masking de tipo nbn : 0
+coeficiente de enmascaramiento para masking de tipo rb: 10
+
+tengo un simulador de audiometria escrito en python con interfaz en pyside6 que funciona de la siguiente forma:
+
+- le entrego un json que tienen diferentes resultados (umbrales de intensidad) que deseo que aparezcan e pantalla formateados de la siguiente forma:
+    {"Aerea" : [[30,25],[35,30],[40,35],[45,40],[50,45],[50,45],[45,40],[40,35],[40,35]],
+    "Osea" :  [[15,15],[10,10],[10,10],[10,10],[30,30],[35,35],[30,30],[20,20],[15,15]]}
+    en este ejemplo se muestra un diccionario en el cual estan los umbrales de las frecuencias ordenadas en pares del [oido derecho, oido izquierdo]
+
+- el usuario del software debe seleccionar un oido (oído estudiado), una frecuencia y una intensidad y da el estimulo
+- si el estimulo es superior o igual a la intensidad (umbral) almacenado el GUI muestra una respuesta positiva, en caso contrario no muestra nada
+
+deseo agregarle una nueva caracteristica a la que llamaremos masking este es una respuesta fisiologica normal a un error en la tecnica de evaluación, te la describo brevemente
+"cuando se realiza la evaluación sin masking o con un masking inferior al adecuado la respuesta aparece a una intensidad del oido menor + su atenuación interaural.
+ la eluación de lo que es el oído mejor corresponde a la verificación de cual es la intetensidad mejor tanto Aerea como ósea en la misma frecuencia que se esta estudiando del oido contrario.
+ cuando se activa masking y se aplica en el oído contrario a un intensidad suficiente el oído estudiado responde a su umbral de intensidad real, si la intensidad sobre pasa el maximo de enmascaramiento se genera un nuevo proLogicas para simulador de audiometria:
+frecuencias : 125hz, 250hz,500hz,1khz,2khz,3khz,4khz,6khz,8khz
+atenuaciones interaurales para las frecuencias: [35,40,40,40,45,45,50,50, 50]
+coeficiente de enmascaramiento para nbn : 0
+coeficiente de enmascaramiento para rb: 10
+
+tengo un simulador de audiometria escrito en python con interfaz en pyside6 que funciona de la siguiente forma:
+
+- le entrego un json que tienen diferentes resultados (umbrales de intensidad) que deseo que aparezcan e pantalla formateados de la siguiente forma:
+    {"Aerea" : [[30,25],[35,30],[40,35],[45,40],[50,45],[50,45],[45,40],[40,35],[40,35]],
+    "Osea" :  [[15,15],[10,10],[10,10],[10,10],[30,30],[35,35],[30,30],[20,20],[15,15]]}
+    en este ejemplo se muestra un diccionario en el cual estan los umbrales de las frecuencias ordenadas en pares del [oido derecho, oido izquierdo]
+
+- el usuario del software debe seleccionar un oido, una frecuencia y una intensidad y da el estimulo
+- si el estimulo es superior o igual a la intensidad (umbral) almacenado el GUI muestra una respuesta positiva, en caso contrario no muestra nada
+
+deseo agregarle una nueva caracteristica a la que llamaremos masking este es una respuesta fisiologica normal a un error en la tecnica de evaluación, te la describo brevemente
+"cuando se realiza la evaluación sin masking o con un masking inferior al adecuado la respuesta aparece a una intensidad del oido menor + su atenuación interaural.
+ la eluación de lo que es el oído mejor corresponde a la verificación de cual es la intetensidad mejor tanto Aerea como ósea en la misma frecuencia que se esta estudiando del oido contrario.
+ cuando se activa masking y se aplica en el oído contrario a un intensidad suficiente el oído estudiado responde a su umbral de intensidad real, si la intensidad sobre pasa el maximo de enmascaramiento se genera un nuevo problema que es que no hay respuesta
+ "
+
+ el calculo del nivel o rango adecuado de masking se realiza de diferentes formas sin embargo la más sencilla a utilizar es:
+
+ minimo: UAE - AT - UONE + UANE + CE
+ maximo: UOE + AT
+ 
+donde:
+UAE: umbral aereo estudiado
+AT: Atenuación interaural
+UONE: umbral oseo no estudiado
+UOE: umbral oseo estudiado
+UANE: umbral aereo no estudiado
+CE: coeficiente de enmascaramiento
+
+- es posible en algunos casos que el minimo sea un numero mayor al maximo en esos casos se utiliza como minimo el maximo y viceversa
+blema que es que no hay respuesta
+ "
+
+ el calculo del nivel o rango adecuado de masking se realiza de diferentes formas sin embargo la más sencilla a utilizar es:
+
+ minimo: UAE - AT - UONE + UANE + CE
+ maximo: UOE + AT
+ 
+donde:
+UAE: umbral aereo estudiado
+AT: Atenuación interaural
+UONE: umbral oseo no estudiado
+UOE: umbral oseo estudiado
+UANE: umbral aereo no estudiado
+CE: coeficiente de enmascaramiento
+
+
+
+- es posible en algunos casos que el minimo sea un numero mayor al maximo en esos casos se utiliza como minimo el maximo y viceversa
+
+entonces lo que deseo es una clase a la que se le ingrese los diccionarios con los resultados, el oído que se esta estudiando, 
+la intensidad a la que se esta estudiando, la frecuencia a la que se esta estudiando, si se esta aplicando o no masking, donde se esta aplicando (oido), 
+que tipo de masking se usa y devueva si la respuesta es positiva o negativa
+
+
+sigue sin evaluar si se necesita masking, hay un error en la comprension de los terminos te ayudo para que me ayudes, primero crearemos una nueva función que se llame need_mkg que reciba los umbrales de la frecuencia estudiada tanto las oseas como las aereas en el siguiente pseudo codigo:
+def need_mkg(self, oido_estudiado, via_estudiada (osea o area), frecuencia):
+    umbral_aereo = self.get_umbrales("Aerea", oido, frecuencia)
+    umbral_oseo = self.get_umbrales("Osea", oido, frecuencia)
+    oido_opuesto = "derecho" if oido == "izquierdo" else "izquierdo"
+    umbral_aereo_opuesto = self.get_umbrales("Aerea", oido_opuesto, frecuencia)
+    umbral_oseo_opuesto = self.get_umbrales("Osea", oido_opuesto, frecuencia)
+
+    if via_estudiada == "aerea":
+        se usa la formula 
+    else:
+
+
+

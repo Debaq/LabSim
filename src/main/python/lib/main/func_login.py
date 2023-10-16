@@ -15,6 +15,7 @@ class LoginConnect():
         pass
 
     def login(self, username:str, password:str, online:bool) -> dict:
+        
         """
         recibe el usuario y contraseña y devuelve un 
         diccionario con los datos del caso
@@ -26,7 +27,11 @@ class LoginConnect():
             dict: datos del caso        
         """
         data =  {'user': username, 'password': password, 'request': 'login'}
-        return self.request_api(data) if online else self.request_offline(data)
+        print(f"login_in : {username},{password},{online}")
+        print(f"data_login:{data}")
+        test = self.request_api(data) if online else self.request_offline(data)
+        print(f"test:{test}")
+        return test
 
     def request_api(self, data):
         """
@@ -62,10 +67,12 @@ class LoginConnect():
         Returns:
             dict: datos del caso
         """
+        print("request is offline")
         verify = self._verify_key(data['user'], data['password'])
-
+        print(f"verify:{verify}")
         if verify and verify[0]:
             return {'user': data['user'],
+                    'name': verify[0],
                     'permission':verify[1],
                     'modules':verify[2],
                     'cases': self._get_data_case_offline(data)
@@ -86,8 +93,10 @@ class LoginConnect():
 
         """
         keys = pref_data.get("keys_app")
+        print(f"keys:{keys}")
         if username in keys:
-            verify = bool(crypto.decrypt(keys[username]["key"], password))
+            print(f"key:{keys[username]['key']}")
+            verify = crypto.decrypt(keys[username]["key"], password)
             permission = keys[username]["permission"]
             modules = keys[username]["modules"]
             return [verify, permission, modules]
@@ -100,5 +109,8 @@ class LoginConnect():
             data (dict): datos del login
         Returns:
             dict: datos del caso
+        ojo: aca hay que poner la logica para desencriptar los caso, 
+        por ahora estan en un json sin encriptación
+        
         """
         return CasesOffline().get_cases(data["user"])

@@ -1,9 +1,196 @@
 {
-    "keys_app":{
-        "labsim":{
-            "key": "ZBCig2o5*bvYuWVKQYvFADmazh0CX9w==*AEronu5R2vty2Wh7rA09SQ==*3y0WIJGGjTuMOJdd86e5Ag==",
+    "keys_app": {
+        "labsim": {
+            "key": "4z3kAw==*tsAha/7xYlJfZogukg0TYw==*5XemHmJ5DeZl3lMSQRAeUg==*Np69CEFYYlqqbvkhiUQWzQ==",
             "permission": 777,
-            "modules": ["A","Z"]
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "thalia.antitur@alumnos.uach.cl": {
+            "key": "H9KFXi0bcXY7kVQOXxQcEOYujRku/y6n73+5ZiQ=*sKqHA6l8rSCQ/ZeiNG3zSA==*FhK70podOaGEbun5zJxttg==*2k5T3aonhRvR9QkqI7BSug==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "biron.arroyo@alumnos.uach.cl": {
+            "key": "WuI1zP+MkUFB+XharbwTmMyphmPg3EELSYquDe4G*ZnLCJVcZ9laSwMpL4DZ5kQ==*jJDNGS63glWgbV+BLd90kg==*RHGN3MYNuKWkZconGPJgwg==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "benjamin.catipillan@alumnos.uach.cl": {
+            "key": "YrQHY/jYinx4DDTYIf2iesYn1ABuH7vigiDaCw9MXkeFkSEr46KKcAFW5Q==*44txCVBKaNX8ZHgv968nfg==*UBfIZjETCAlsmnBymiN+3w==*F2915kV2HTDMLd3mKfmuKQ==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "andrea.cavero@alumnos.uach.cl": {
+            "key": "tCzGXXsa9nszwhb9t/up871RO6LceUxjhowwZ9dj*OL+5l1ls7ZRHhUoysZyjLg==*mxpwJLHF3ueQ+92r1Z6L7w==*sKZk/O9XoKmNgIaxbtEO/A==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "kimberly.fuentes01@alumnos.uach.cl": {
+            "key": "/bD0wAuRPXwdjBi0yvgPIDIoJgX/u+bsTYFM5PlUdeBVsKo=*BzkJcv/ZkilPt7SxkLSdbQ==*NfLuPtZottVc0QsbnzXO+A==*5MfN9LDZ3WfQTfWtSrLmNQ==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "danae.mansilla@alumnos.uach.cl": {
+            "key": "Tsu1EAOABlASeJJO2AR8UU+olNxE6WiQMuTvAOE25Q==*o2OR6YdJzOI8iiptSI1XIg==*43/De3SzpWd5YrUQ/0+W/w==*FxP6kTm4PXvN/yM1AOJ/VA==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "valentina.menco@alumnos.uach.cl": {
+            "key": "66iyqEMScS9ojY/24RpNC2Md1HyAA5nl1v8=*vXtbJbEKhbcJBR3hJaqXJQ==*RZALDLpc8igKGbod/2GShQ==*1wHUUyNjxv/yfL4e937C7A==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "constanza.monsalve01@alumnos.uach.cl": {
+            "key": "2GUfBR1OpDRVUIIL3YYeOYyFVSjgriUqDErMIbSBCwk6Plk=*beo1umoSMf2U0UNhip4ijQ==*59kli4YpGpLXWeYvFcghDw==*1ZWwN4Q04Oty6v6EolILcg==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "camila.munoz08@alumnos.uach.cl": {
+            "key": "EpfmQCVS0Sf1HrZZNnAk8TSgwIcgq53HsifD2TeTNQ==*AdrKHFq9t4Fqt/3ZSeL+YQ==*rH5VkyH+TesGZJOfkVotLg==*+E1+zQxXX4ac2k3JihRulQ==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "debora.ortega@alumnos.uach.cl": {
+            "key": "3XopwGCJ97iFalo6Cq01OHZ8hP+6HDbyHcVVs8Aa*gReS96FPugd2c8AubBIKOg==*a4ps94KMxws97bma1BORIw==*pUOksdYvUSYzp62YcJPFvQ==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "marco.oyarzo@alumnos.uach.cl": {
+            "key": "qK7m2OtGkzZh8Yr9C8JRrTofzwulHKD7Of2gXQ==*qPGDWF5Db4ubMCbTXMYSjg==*tQPFysUmG3JmeFnmkC1Ziw==*unNeGcAu/jVYJlyQ5MhW8A==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "priscila.oyarzun@alumnos.uach.cl": {
+            "key": "gvvjk0vB6Xx7zUnRVzmZVzMPaNuvZgqVpa6/jxljePGryQ==*5Xfm37aQ4hlrL6EThfa7gg==*aymxPAOFH0XMA3vEbMMfTQ==*JNeqi2kVFFldLY9Q99yupA==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "valentina.oyarzun01@alumnos.uach.cl": {
+            "key": "4UpHfwQRf77vdL4u5YpRdOMZRCIRf7mOqi019pdnftnC*d2U8ozBTAUHEP5xcPSS/ug==*Y6a3ehKXUscS16TD6Zjxpw==*h1vboKVOlC9NIGB6qIEm7g==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "nicol.perez@alumnos.uach.cl": {
+            "key": "rawD9v2MBz5275IyoRNL3K0VVIqFqHnAAtnw/ZsU*6xC2XX0smFnIWF/AfKdyBA==*eA1PEZPcuJT06/2KZtBbXg==*ZMr5caAPR9lo17h3e7DgRg==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "laura.perez@alumnos.uach.cl": {
+            "key": "ZPzJ8IaVjvFQYZN7Mj47ME2TApheHnbN59oY2A==*5Lf3b+axWmD5is3GmM+U1Q==*AJFlimXQjcLvEfT9IJV8fg==*fFNjqlDsca93ygQko41ZEg==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "javiera.puentes@alumnos.uach.cl": {
+            "key": "s9kKZjhnq6cyyQH9y1eMbsh5Uh8U+xVoXOm2LgiZQw==*42QX1py55lwYtQGZhELAKA==*i1l7C515jYca7QKY1z5G0g==*JX/Sou+9yhgPgyC+0WHBFQ==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "jazmin.rebolledo@alumnos.uach.cl": {
+            "key": "rPgZbSWu8AKOvJS0m1zCxYlauRXVsDKqts3lXIzXmw==*0RZNCMD1WmEyUCmvw8fIBw==*NmKcS9t8LLvWr8xnApdmvQ==*roy5cTTjp6d0Kx15aecRZw==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "fabian.rojas04@alumnos.uach.cl": {
+            "key": "pUOgwEyscLdQOyQuMquDy0PPZWO3epWwZqPVejk=*V++b2oEGFzPAI4M5v5FJJw==*5SbRl0JMbZngTApzerql5w==*v2Swz1x2K5Xe/VlA3v3GfA==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "katherine.sanmartin@alumnos.uach.cl": {
+            "key": "TdRnhEyqR3YfVACZrk5/BdhzOHXYQflmXx8bwGbrjYN6U233*BgvFjXBRYuIJRv080CH+tw==*hUw40sEbde1hOJTRjzlzvQ==*x1WNK0Yk1duB2Gh2UA4u6g==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "kenia.vasquez@alumnos.uach.cl": {
+            "key": "kTRDq/wE9AQCceYGAZJPf53PbeJWRNES7MOo0qtO*S/1Hrx7D59au69TRUjGZTQ==*T42P6nKdHMCB/RSXFbuQ6g==*9CCwgGfbCMVIkCMoUR9QMg==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "karoline.vega@alumnos.uach.cl": {
+            "key": "s0mB49RJUmr3VKk7lYuNqlbDiPmmh3d7IYl2nuZv*PXo+wUBoLJyuJdZeu9yDkg==*MnqCLFSOEjgUpOZCBFZGiQ==*ZEfH/81jFNZGb7PBLjK5EQ==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "paula.vejar@alumnos.uach.cl": {
+            "key": "hCKY8Luntu3U1LLt3MxfVof7dLdTnd24Dyk=*c9Brp/KZkdg4eliRWzzRoA==*ekph1R4ogOSSgWcOnXislw==*t+7VUwPQOyJIluMdLJBGug==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "maria.venegas@alumnos.uach.cl": {
+            "key": "57UElenXSv7CYEHIyVXPuZSSKQV9MXEsBrRv*nyI5vcA8vsZfZGWFK4BUcg==*8SyAyPfS8PJKqJz+KxgYHQ==*kt9tprCKvsquefYJg5vmVw==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
         }
     }
 }
