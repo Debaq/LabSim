@@ -26,11 +26,15 @@ class LoginConnect():
         returns:
             dict: datos del caso        
         """
+        #print(online)
         data =  {'user': username, 'password': password, 'request': 'login'}
-        print(f"login_in : {username},{password},{online}")
-        print(f"data_login:{data}")
-        test = self.request_api(data) if online else self.request_offline(data)
-        print(f"test:{test}")
+        #print(f"login_in : {username},{password},{online}")
+        #print(f"data_login:{data}")
+        if online == "development":
+            test = self.request_offline_dev(data)
+        else:
+            test = self.request_api(data) if online else self.request_offline(data)
+        #print(f"test:{test}")
         return test
 
     def request_api(self, data):
@@ -56,6 +60,15 @@ class LoginConnect():
     def _get_url_api(self) -> str:
         """devuelve la url de la api service"""
         return pref_data.get("API_URL")
+
+    def request_offline_dev(self, data) ->dict:
+        print("request is development")
+        return {'user': data['user'],
+                'name': "labsim_dev",
+                'permission': '777',
+                'modules':["A","Z"],
+                'cases': CasesOffline().get_def_cases(data['password'])
+                }
 
     def request_offline(self, data) -> dict:
         """

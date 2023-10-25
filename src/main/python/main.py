@@ -21,7 +21,8 @@ from lib.ui_helpers import ToolBar, show_hide, MoveWindow, toggle_max_min
 from UI.Ui_Main import Ui_MainWindow
 from UI.Ui_CVC import Ui_CVC
 from UI.Ui_command_voice_A import Ui_Form as commandVoiceA
-
+import contextlib
+import ListWords
 
 Preferences = Preferences()
 APPS = Preferences.get("APP")
@@ -29,7 +30,10 @@ SECTORS = Preferences.get("SECTORS")
 BOXS = Preferences.get("BOXS")
 STYLES = Preferences.get("styles")
 LANGUAJE = Preferences.get("lang")
-ONLINE = Preferences.get("online")
+if Preferences.get("test"):
+    ONLINE = "development"
+else:
+    ONLINE = Preferences.get("online")
 #name = CreatePatient()
 #print(name.generar_nombre("men", social_name=True))
 
@@ -111,6 +115,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.sectors_lbl = SECTORS #Lista de sectores
         #Memorias
         self.modules = Storage(len(APPS)) #modulos
+        self.var_list_word = Storage(2)
 
     def create_sub_windows(self) -> None:
         """Crea las subventanas"""
@@ -129,7 +134,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         Args:
             data (dict): data obtenida desde el login_data_login
         """
-        print(f"data in main: {data}")
+        #print(f"data in main: {data}")
         user = data["user"]
         if user is False:
             self.logout()
@@ -167,12 +172,18 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """
         number_case = text.strip("caso : ")
         self.data_current = self.data_login["cases"][number_case]
+        try:
+            self.subw_a.obj.la_super(self.data_current)
+        except AttributeError:
+            pass
 
     def load_sub_windows(self) -> None:
         """Carga las subventanas"""
         self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data_current))
         subw_agenda = FrameSubMdi(Agenda.Agenda(self.data_login["permission"],self))
         subw_voice = FrameSubMdi(ComandVoiceA())
+        subw_w = FrameSubMdi(ListWords.ListWords(self.data_current))
+
         if self.data_login["permission"] == 777:
             subw_create_a = FrameSubMdi(create_a.CreateA())
             self.subw["CREATE_A"]=subw_create_a
@@ -180,12 +191,39 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw["A"] = self.subw_a
         self.subw["AGENDA"]=subw_agenda
         self.subw["CVOICE"]=subw_voice
+        self.subw["W"] = subw_w
+
         #self.subw_cvc = FrameSubMdi(CVC())
-        #self.subw_a.ui_ui.signal_speech.connect(self.speechlist_mode)
         self.connect_signals()
         
+    def activate_listWords(self):
+            self.activate_soft_("W")
+            """
+    
+            if self.var_list_word.get(0):
+                if self.modules.is_full(pos_z):
+                    self.modules.get(pos_z).show()
+                else:
+                    self.create_sub_window(self.subw_w, name, pos_z, size=size)
+            else:
+                with contextlib.suppress(AttributeError):
+                    self.modules.get(pos_z).hide()
+            """
+    def speechlist_mode(self, state):
+        #self.var_list_word.getAll(True)
+        #self.var_list_word.list_set(state, False)
+        #self.var_list_word.getAll(True)
+        self.activate_listWords()
+        self.subw["W"].obj.update_state(state)
+        self.subw["W"].obj.playable[1] = state[2]
+        self.subw["W"].obj.playable[2] = state[3]
+        self.subw["W"].obj.playable[3] = state[4]
+        self.subw["W"].obj.playable[0] = bool(state[1])
+
     def connect_signals(self):
         self.subw["CVOICE"].obj.btn_checked.connect(self.subw["A"].obj.supra)
+        self.subw["A"].obj.signal_speech.connect(self.speechlist_mode)
+
         
 
     def refresh_data(self):

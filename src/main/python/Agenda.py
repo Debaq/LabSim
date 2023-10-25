@@ -26,10 +26,10 @@ class Agenda(QWidget, Ui_Form):
         self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         
         self.read_shedule()
-        self.populate_shedule()
+        #self.populate_shedule()
         
         if permissions == 777:
-            self.pushButton.setEnabled(True)
+            self.pushButton.setEnabled(False)
             self.pushButton.clicked.connect(lambda:self.create_case(obj))
         
     def create_case(self,obj):
@@ -46,7 +46,7 @@ class Agenda(QWidget, Ui_Form):
         for i in self.shedule[agenda]:
             for idx_user in range(len(self.shedule[agenda][i])):
                 user = self.shedule[agenda][i][idx_user]
-                print(f"data:{user} idx:{idx_user} i:{i}")
+                #print(f"data:{user} idx:{idx_user} i:{i}")
                 item = QTableWidgetItem(user)
                 self.tableWidget.setItem(int(i),idx_user,item)
         

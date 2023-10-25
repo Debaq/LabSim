@@ -11,7 +11,7 @@
 import numpy as np
 from PySide6.QtCore import QTimer, Signal, QObject, Slot
 from PySide6.QtGui import QFont, QKeySequence, QShortcut
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QWidget, QLabel
 
 #from lib.API_connector import API, PostData
 from lib.h_audio import (calibrate, create_frecuency, create_intency,
@@ -49,7 +49,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.thr = []
         self.response = Response(self)
         #self.response.button.connect(self.respa)
-        #self.la_super(thr)
+        self.la_super(thr)
         self.setupUi(self)
         self.supra("silencio")
         self.frecuency_list = create_frecuency(
@@ -61,14 +61,14 @@ class Audiometer(QWidget, Ui_Audiometer):
         # Widgets
         # Diales
         # conecta dial con movimiento con el mouse
-        self.dial_der.valueChanged.connect(lambda: self.MoveDial_mouse(0))
+        self.dial_ch0.valueChanged.connect(lambda: self.MoveDial_mouse(0))
         # conecta dial con movimiento con el mouse
         self.dial_izq.valueChanged.connect(lambda: self.MoveDial_mouse(1))
         self.block_mouse = False #QUE ES ESTO?
         self.dial_monitor_ch1.valueChanged.connect(lambda: self.monitor(0))
         self.dial_monitor_ch2.valueChanged.connect(lambda: self.monitor(1))
         self.dials = [self.dial_monitor_ch1, self.dial_monitor_ch2]
-        self.dial_value_der = self.dial_der.value()
+        self.dial_value_der = self.dial_ch0.value()
         self.dial_value_izq = self.dial_izq.value()
 
         # Keyboard shorcuts diales
@@ -104,30 +104,30 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.btn_freq_plus.clicked.connect(lambda: self.FrecChange(True))
 
         # Outputs btns
-        self.btn_output_der_der.clicked.connect(lambda: self.output(0, 0))
-        self.btn_output_izq_der.clicked.connect(lambda: self.output(0, 1))
-        self.btn_output_sim_der.clicked.connect(lambda: self.output(0, 2))
+        self.btn_output_der_ch0.clicked.connect(lambda: self.output(0, 0))
+        self.btn_output_izq_ch0.clicked.connect(lambda: self.output(0, 1))
+        self.btn_output_sim_ch0.clicked.connect(lambda: self.output(0, 2))
 
-        self.btn_output_der_izq.clicked.connect(lambda: self.output(1, 0))
-        self.btn_output_izq_izq.clicked.connect(lambda: self.output(1, 1))
-        self.btn_output_sim_izq.clicked.connect(lambda: self.output(1, 2))
+        self.btn_output_der_ch1.clicked.connect(lambda: self.output(1, 0))
+        self.btn_output_izq_ch1.clicked.connect(lambda: self.output(1, 1))
+        self.btn_output_sim_ch1.clicked.connect(lambda: self.output(1, 2))
 
         # Stims btns
-        self.btn_stim_tone_der.clicked.connect(lambda: self.stim(0, 0))
-        self.btn_stim_fm_der.clicked.connect(lambda: self.stim(0, 1))
-        self.btn_stim_speech_der.clicked.connect(lambda: self.stim(0, 2))
-        self.btn_stim_nbn_der.clicked.connect(lambda: self.stim(0, 3))
-        self.btn_stim_wn_der.clicked.connect(lambda: self.stim(0, 4))
-        self.btn_stim_sn_der.clicked.connect(lambda: self.stim(0, 5))
-        self.btn_stim_pn_der.clicked.connect(lambda: self.stim(0, 6))
+        self.btn_stim_tone_ch0.clicked.connect(lambda: self.stim(0, 0))
+        self.btn_stim_fm_ch0.clicked.connect(lambda: self.stim(0, 1))
+        self.btn_stim_speech_ch0.clicked.connect(lambda: self.stim(0, 2))
+        self.btn_stim_nbn_ch0.clicked.connect(lambda: self.stim(0, 3))
+        self.btn_stim_wn_ch0.clicked.connect(lambda: self.stim(0, 4))
+        self.btn_stim_sn_ch0.clicked.connect(lambda: self.stim(0, 5))
+        self.btn_stim_pn_ch0.clicked.connect(lambda: self.stim(0, 6))
 
-        self.btn_stim_tone_izq.clicked.connect(lambda: self.stim(1, 0))
-        self.btn_stim_fm_izq.clicked.connect(lambda: self.stim(1, 1))
-        self.btn_stim_speech_izq.clicked.connect(lambda: self.stim(1, 2))
-        self.btn_stim_nbn_izq.clicked.connect(lambda: self.stim(1, 3))
-        self.btn_stim_wn_izq.clicked.connect(lambda: self.stim(1, 4))
-        self.btn_stim_sn_izq.clicked.connect(lambda: self.stim(1, 5))
-        self.btn_stim_pn_izq.clicked.connect(lambda: self.stim(1, 6))
+        self.btn_stim_tone_ch1.clicked.connect(lambda: self.stim(1, 0))
+        self.btn_stim_fm_ch1.clicked.connect(lambda: self.stim(1, 1))
+        self.btn_stim_speech_ch1.clicked.connect(lambda: self.stim(1, 2))
+        self.btn_stim_nbn_ch1.clicked.connect(lambda: self.stim(1, 3))
+        self.btn_stim_wn_ch1.clicked.connect(lambda: self.stim(1, 4))
+        self.btn_stim_sn_ch1.clicked.connect(lambda: self.stim(1, 5))
+        self.btn_stim_pn_ch1.clicked.connect(lambda: self.stim(1, 6))
 
         ### revers and pulsatil
         self.btn_rever_ch0.clicked.connect(
@@ -146,13 +146,13 @@ class Audiometer(QWidget, Ui_Audiometer):
             lambda: self.Helper_Stim(ch=1, play=False))
 
         # btn trans
-        self.btn_trans_aer_der.clicked.connect(lambda: self.trans(0, 0))
-        self.btn_trans_ose_der.clicked.connect(lambda: self.trans(0, 1))
-        self.btn_trans_cl_der.clicked.connect(lambda: self.trans(0, 2))
+        self.btn_trans_aer_ch0.clicked.connect(lambda: self.trans(0, 0))
+        self.btn_trans_ose_ch0.clicked.connect(lambda: self.trans(0, 1))
+        self.btn_trans_cl_ch0.clicked.connect(lambda: self.trans(0, 2))
 
-        self.btn_trans_aer_izq.clicked.connect(lambda: self.trans(1, 0))
-        self.btn_trans_ose_izq.clicked.connect(lambda: self.trans(1, 1))
-        self.btn_trans_cl_izq.clicked.connect(lambda: self.trans(1, 2))
+        self.btn_trans_aer_ch1.clicked.connect(lambda: self.trans(1, 0))
+        self.btn_trans_ose_ch1.clicked.connect(lambda: self.trans(1, 1))
+        self.btn_trans_cl_ch1.clicked.connect(lambda: self.trans(1, 2))
 
         # Logo
         self.btn_correcta.clicked.connect(lambda: self.logo_sumA(True))
@@ -167,7 +167,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.lbl_contin = [self.lbl_contin_ch0, self.lbl_contin_ch1]
 
         # Audios channels
-        self.players = Player(2)
+        self.players = Player(3)
         self.channel_on = [False, False]
         self.monitor(0)
         self.monitor(1)
@@ -187,8 +187,8 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.time_ch[0].timeout.connect(lambda: self.c_puls(0))
         self.time_ch[1].timeout.connect(lambda: self.c_puls(1))
 
-        self.btn_puls_der.clicked.connect(lambda: self.pulsatil(0))
-        self.btn_puls_izq.clicked.connect(lambda: self.pulsatil(1))
+        self.btn_puls_ch0.clicked.connect(lambda: self.pulsatil(0))
+        self.btn_puls_ch1.clicked.connect(lambda: self.pulsatil(1))
         self.puls_active = [False, False]
         self.time_acum_puls = [0, 0]
         self.puls_silence = [False, False]
@@ -207,38 +207,48 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.time_response.timeout.connect(self.response_timer)
 
         # vuMeters and lbl_stim warning
-        self.vu_meters = [self.vmeter_der, self.vmeter_izq]
+        self.vu_meters = [self.vmeter_ch0, self.vmeter_ch1]
         self.lbl_warnings = [
-            self.lbl_warning_stim_der, self.lbl_warning_stim_izq]
+            self.lbl_stimOn_ch0, self.lbl_stimOn_ch1]
         self.disabled_widgets()
         self.dial_talkback.valueChanged.connect(self.talkback_level)
-        self.talkback_volume = 5
+        self.talkback_level()
         self.btn_talkback.clicked.connect(self.talkback)
         self.activate_response = [0, 0]
         self.trans_idx = [0,0]
 
+        # Conectar todos los labels que comienzan con "lbl" al slot
+        for attribute_name in dir(self):
+            if attribute_name.startswith("lbl"):
+                attribute = getattr(self, attribute_name)
+                if isinstance(attribute, QLabel):
+                    attribute.textChanged.connect(self.on_label_text_changed)
+
+
+    def on_label_text_changed(self, sender):
+        self.response.set_config(sender)
 
     def disabled_widgets(self):
         # Disabled BETA
         # self.btn_alternado.setDisabled(True)
-        self.dial_talkback.setDisabled(True)
+        #self.dial_talkback.setDisabled(True)
         # self.btn_talkback.setDisabled(True)
-        self.btn_output_sim_der.setDisabled(True)
-        self.btn_output_sim_izq.setDisabled(True)
-        self.btn_trans_cl_der.setDisabled(True)
-        self.btn_trans_cl_izq.setDisabled(True)
-        self.btn_stim_wn_der.setDisabled(True)
-        self.btn_stim_wn_izq.setDisabled(True)
-        self.btn_stim_nbn_der.setDisabled(True)
-        self.btn_stim_pn_der.setDisabled(True)
-        self.btn_stim_pn_izq.setDisabled(True)
-        self.btn_stim_sn_der.setDisabled(True)
-        self.btn_stim_fm_izq.setDisabled(True)
-        self.btn_stim_speech_izq.setDisabled(True)
+        self.btn_output_sim_ch0.setDisabled(True)
+        self.btn_output_sim_ch1.setDisabled(True)
+        self.btn_trans_cl_ch0.setDisabled(True)
+        self.btn_trans_cl_ch1.setDisabled(True)
+        self.btn_stim_wn_ch0.setDisabled(True)
+        self.btn_stim_wn_ch1.setDisabled(True)
+        self.btn_stim_nbn_ch0.setDisabled(True)
+        self.btn_stim_pn_ch0.setDisabled(True)
+        self.btn_stim_pn_ch1.setDisabled(True)
+        self.btn_stim_sn_ch0.setDisabled(True)
+        self.btn_stim_fm_ch1.setDisabled(True)
+        self.btn_stim_speech_ch1.setDisabled(True)
         #self.btn_stim_tone_izq.setDisabled(True)
 
     def la_super(self, data):
-        self.response.set_response(data)
+        #self.response.set_response(data)
         thr = data if data["sector"] == "camara_sono" else data_basic()
         gender = thr['gender']
         self.gender = "feme" if gender == 0 else "male"
@@ -247,11 +257,11 @@ class Audiometer(QWidget, Ui_Audiometer):
         result = [thr['Aerea'], thr['Osea'], thr['LDL']]
         result1 = [thr['Aerea_mkg'], thr['Osea_mkg']]
         self.thr = [result, result1]
+        self.response.set_case(data)
+        
     
     @Slot()
     def supra(self, state):
-        self.response.set_command(state)
-        self.response.transmit_(talk = False)
         if state != "silencio":
             command = f"{state}"
             comandvoice = create_word(command)
@@ -270,16 +280,20 @@ class Audiometer(QWidget, Ui_Audiometer):
             self.activate_response = [1, 0]
 
     def talkback(self):
-        print(self.state_supra)
         if self.state_supra is not None:
-            self.players.stop_all()
-            source=self.state_supra[0]
-            self.players.play(0, source)
-            self.response.transmit_(talk = True)
+            if self.state_supra[1] != 'pa_pa_pa':
+                self.players.stop_all()
+                source=self.state_supra[0]
+                self.players.play(2, source)
+                self.response.rol_player(self.state_supra[1])
         self.commandAction(self.state_supra[1])
 
     def talkback_level(self):
         self.talkback_volume = self.dial_talkback.value()
+        new_value = (((self.talkback_volume - 0) / (20 - 0)) * (100 - 0) + 0)/100
+        if new_value < 0.5:
+            new_value -= 0.1
+        self.players.volume(2, new_value)
 
     def vu_meters_mic(self, indata, outdata, frames, time, status):
         volume_norm = np.linalg.norm(indata)*self.talkback_volume
@@ -337,11 +351,9 @@ class Audiometer(QWidget, Ui_Audiometer):
                 if play:
                     self.puls_active[ch] = True
                     self.play(ch)
-                    #self.response(activate=True)
                 else:
                     self.puls_active[ch] = False
                     self.stop(ch)
-                    #self.response(activate=False)
             elif no_alternate:
                 if play:
                     self.play_papa(ch)
@@ -391,7 +403,6 @@ class Audiometer(QWidget, Ui_Audiometer):
         QObject.disconnect(self.btn_stims[ch], None, None, None)
         #self.btn_stims[ch].disconnect()
         #lbl_rev = self.lbl_revers[ch].text()
-        print("vamos a invertir")
         if self.no_Rev(ch):
             self.lbl_revers[ch].setText(reverse_list[1])
             self.puls_active[ch] = True
@@ -440,9 +451,10 @@ class Audiometer(QWidget, Ui_Audiometer):
     def play_papa(self,ch):
         if self.state_supra[1] == "pa_pa_pa":
             self.vu_meters[ch].setValue(50)
-            self.lbl_warnings[ch].setStyleSheet("background-color: rgb(170, 170, 255);")
-            self.channels[ch].setSource(self.state_supra[0])
-            self.channels[ch].play()
+            self.lbl_warnings[ch].setStyleSheet(
+            "background-color: rgb(170, 170, 255);  color : rgb(170, 170, 255);")
+            self.lbl_warnings[ch].setText("toc-toc")
+            self.players.play(ch, self.state_supra[0], True)
             self.channel_on[ch] = True
             self.post_channel_on()
 
@@ -457,8 +469,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         stim = self.lbl_stim[ch].text()
         f = self.lbl_freq.text().split(' Hz')[0]
         sound = create_sound(stim=stim, f=f, ch=lbl_out)
-        self.players.play(ch, sound)
-        #self.response.response_aerea()
+        self.players.play(ch, sound, True)
         self.vu_meters[ch].setValue(50)
         self.lbl_warnings[ch].setStyleSheet(
             "background-color: rgb(170, 170, 255);  color : rgb(170, 170, 255);")
@@ -476,7 +487,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.post_channel_on()
 
     def post_channel_on(self):
-        self.response.transmit_(stimOn = self.channel_on)
+        #self.response.transmit_(stimOn = self.channel_on)
         self.response.activate()
 
     # PRUEBAS
@@ -501,12 +512,12 @@ class Audiometer(QWidget, Ui_Audiometer):
 
     # Comandos
     def ext_range(self):
-        lbl_ext = self.lbl_ext_der.text()
+        lbl_ext = self.lbl_ext_ch0.text()
         if lbl_ext == "ext.":
-            self.lbl_ext_der.setText("")
+            self.lbl_ext_ch0.setText("")
             #data = {'ext_range': False}
         else:
-            self.lbl_ext_der.setText("ext.")
+            self.lbl_ext_ch0.setText("ext.")
             #data = {'ext_range': True}
         #online = self.btn_online.isChecked()
         ##self.sendData.send(data, online)
@@ -514,14 +525,14 @@ class Audiometer(QWidget, Ui_Audiometer):
     def high_frec(self):
         verify = self.lbl_prueba.text() == test_list[0]
         if verify:
-            lbl_hf = self.lbl_ext_izq.text()
+            lbl_hf = self.lbl_ext_ch1.text()
 
             if lbl_hf == "alt. frec.":
-                self.lbl_ext_izq.setText("")
+                self.lbl_ext_ch1.setText("")
                 #data = {'high_frec': False}
 
             else:
-                self.lbl_ext_izq.setText("alt. frec.")
+                self.lbl_ext_ch1.setText("alt. frec.")
                 #data = {'high_frec': True}
         #online = self.btn_online.isChecked()
         ##self.sendData.send(data, online)
@@ -575,7 +586,7 @@ class Audiometer(QWidget, Ui_Audiometer):
 
         ch0 = self.lbl_stim[0].text()
         ch1 = self.lbl_stim[1].text()
-        self.response.transmit_(stim = [ch0,ch1])
+        #self.response.transmit_(stim = [ch0,ch1])
         self.reset_channels()
 
     def reset_channels(self):
@@ -593,7 +604,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.lbl_trans[ch].setText(trans_list[trans])
         trans = trans_list.index(self.lbl_trans[ch].text())
         self.trans_idx[ch] = trans
-        self.response.transmit_(trans=self.trans_idx)
+        #self.response.transmit_(trans=self.trans_idx)
 
     def output(self, ch, out):
         r_output = output_list[out]
@@ -608,7 +619,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         #self.datasignal_speech[2] = val
         self.datasignal_speech[3] = ch0
         self.signal_speech.emit(self.datasignal_speech)
-        self.response.transmit_(side = [ch0,ch1])
+        #self.response.transmit_(side = [ch0,ch1])
         self.reset_channels()
 
     def FrecChange(self, up):
@@ -621,7 +632,7 @@ class Audiometer(QWidget, Ui_Audiometer):
 
     def _extracted_from_FrecChange_None(self, prueba, up):
 
-        high_f = self.lbl_ext_izq.text() != ""
+        high_f = self.lbl_ext_ch1.text() != ""
         via = self.stim_output()
         self.frecuency_list = create_frecuency(
             frecuency_dict, prueba=prueba, transductor=via, high_frecuency=high_f)
@@ -639,9 +650,9 @@ class Audiometer(QWidget, Ui_Audiometer):
         else:
             new_hz = self.frecuency_list[pos-1]
             fr_pos = pos-1
-        self.response.transmit_(freq=fr_pos)
+        #self.response.transmit_(freq=fr_pos)
         self.lbl_freq.setText(f"{new_hz} Hz")
-        self.lbl_ext_der.setText("")
+        self.lbl_ext_ch0.setText("")
 
         self.reset_channels()
         self.modify_max_int()
@@ -724,7 +735,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         else:
             step = self.lbl_step_ch0.text().split(": ")[1]
             step = int(step.split("dB")[0])
-        self.response.transmit_(step = step)
+        #self.response.transmit_(step = step)
         return step
 
     def IntChange(self, ch, up):
@@ -736,7 +747,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         """
         # Se obtienen los datos básicos para generar la lista de frecuencias
         f = self.lbl_freq.text().split(' Hz')[0]
-        ext = self.lbl_ext_der.text() != ""
+        ext = self.lbl_ext_ch0.text() != ""
         step = self.step()
         #trans = trans_list.index(self.lbl_trans[ch].text())
         trans = self.trans_idx[ch]
@@ -774,7 +785,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.lbl_intencity[ch].setText(f"{new_int} dB HL")
         ch0 = self.lbl_intencity[0].text()
         ch1 = self.lbl_intencity[1].text()
-        self.response.transmit_(lvl = [ch0,ch1])
+        #self.response.transmit_(lvl = [ch0,ch1])
         lvl_ch = f'level_ch{ch}'
         data = {lvl_ch: new_int}
         #online = self.btn_online.isChecked()
@@ -795,7 +806,7 @@ class Audiometer(QWidget, Ui_Audiometer):
 
     def MoveDial(self, dial, up=True, mouse=False):
         pos = self.dial_value_der if dial == 0 else self.dial_value_izq
-        val = self.dial_der.value() if dial == 0 else self.dial_izq.value()
+        val = self.dial_ch0.value() if dial == 0 else self.dial_izq.value()
 
         if mouse is False:
             self.block_mouse = True
@@ -808,19 +819,19 @@ class Audiometer(QWidget, Ui_Audiometer):
             else:
                 val = val_p
         if dial == 0:
-            self.dial_der.setProperty("value", val) 
+            self.dial_ch0.setProperty("value", val) 
         else:
             self.dial_izq.setProperty("value", val)
         dir_dial = 1 if val > pos else -1
         self.dial_value_izq = self.dial_izq.value()
-        self.dial_value_der = self.dial_der.value()
+        self.dial_value_der = self.dial_ch0.value()
         self.IntChange(dial, dir_dial)
 
     def monitor(self, ch):
         #value = self.dial_monitor_ch1.value() if ch == 1 else self.dial_monitor_ch2.value()
         value = self.dials[ch].value()
-        val1 = self.dial_monitor_ch1.value()
-        val2 = self.dial_monitor_ch2.value()
+        #val1 = self.dial_monitor_ch1.value()
+        #val2 = self.dial_monitor_ch2.value()
         new_value = (((value - 0) / (20 - 0)) * (100 - 0) + 0)/100
         if new_value < 0.5:
             new_value -= 0.1

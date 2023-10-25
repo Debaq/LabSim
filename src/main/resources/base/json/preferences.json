@@ -3,6 +3,7 @@
     "session_pred" : "tunnel",
     "lang" : "ES_cl",
     "styles" : [1, ["normal", "dark"]],
-    "online" : false
+    "online" : false,
+    "test"  : true
     
 }

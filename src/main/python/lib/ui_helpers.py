@@ -67,7 +67,7 @@ class MoveWindow():
         """permite mover la ventana con la barra de titulo"""
         move = False
         if self.parent.isMaximized(): #Not maximized
-            self.parent.toggle_max_min()
+            self.toggle_max_min()
             move=True
         if not self.parent.isMaximized(): #Not maximized
             move = True
@@ -76,6 +76,13 @@ class MoveWindow():
             g_xy = event.globalPosition().toPoint()
             self.parent.move(g_xy)
             event.accept()
+            
+    def toggle_max_min(self):
+        if self.parent.isMaximized():
+            self.parent.showNormal()
+            self.parent.resize(800,600)
+        else:
+            self.parent.showMaximized()
 
 class SubWindow():
     """
@@ -217,6 +224,17 @@ class ToolBar(SubWindow):
         obj_name = obj_name.upper()
         self.activate_subwindow(self.size, obj_name, self.subw[obj_name])
     
+    def activate_soft_(self, name) -> None:
+        """activa la ventana con el mismo nombre del boton que envia la señal"""
+        
+        if name is not None:
+            #widget = self.sender()
+            #btn_name = widget.objectName()
+            #_, obj_name = btn_name.split("_")
+            #obj_name = obj_name.upper()
+            obj_name = name
+            self.activate_subwindow(self.size, obj_name, self.subw[obj_name])
+        
     def activate_auto(self, name) -> None:
         obj_name = name
         self.activate_subwindow(self.size, obj_name, self.subw[obj_name])

@@ -33,6 +33,12 @@ class CasesOffline():
     """
     def __init__(self) -> None:
         pass
+    def get_def_cases(self, case) ->dict:
+        cases_file = context.get_resource('cases/labsim.json')
+        with codecs.open(cases_file, 'r', 'utf-8') as json_file:
+            list_data = json.load(json_file)
+        return list_data
+
     def get_cases(self, username:str) -> dict:
         """
         Recupera los casos de un usuario

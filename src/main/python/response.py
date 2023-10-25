@@ -2,15 +2,26 @@ import random
 from lib.helpers import CasesOffline
 from lib.helpers import Preferences
 from PySide6.QtCore import QTimer
+from lib.response_A import Response
+class_pref = Preferences()
 
+c_voice = class_pref.get('command_voice')
+intency_dict = class_pref.get("intency_dict")
+frecuency_dict = class_pref.get("frecuency_dict")
+output_list = class_pref.get("output_list")
+stim_list = class_pref.get("stim_list")
+stim_list_short = class_pref.get("stim_list_short")
+test_list = class_pref.get("test_list")
+trans_list = class_pref.get("trans_list")
+reverse_list = class_pref.get("reverse_list")
+tone_list = class_pref.get("tone_list")
+pulsatile_time = class_pref.get("pulsatile_time")
+alternate_time = class_pref.get("alternate_time")
 
-c_voice = Preferences().get("command_voice")
-
-
-"""_summary_
+'''_summary_
 tipo->condición -> respuesta
 in:estimulo out:bool respuesta
-"""
+'''
 
 class DelayActions:
     def __init__(self):
@@ -33,11 +44,11 @@ class DelayActions:
 
     
     def timer(self):
-        print("soy un ciclo del infierno")
+        print('soy un ciclo del infierno')
         #self.set_action_init()
         
     def wait(self):
-        #print("timer2")
+        #print('timer2')
         self.fowler_q(self.response_fowler)
         self.time_1.stop()
         self.time_2.stop()
@@ -45,14 +56,14 @@ class DelayActions:
 class Response:
     def __init__(self):
         super().__init__()
-        self.dbdata = self.profile_data_load("1")
+        self.dbdata = self.profile_data_load('1')
         self.data = {}
         self.response=['X',False]
 
 
     
     def profile_data_load(self, profile:str):
-        base_data = CasesOffline().get_cases("labsim")
+        base_data = CasesOffline().get_cases('labsim')
         return base_data[profile]
         
     def set_command(self, cmd):
@@ -67,21 +78,148 @@ class Response:
         pass
     
     
-class ResponseAudiometry(Response):
+class ResponseAudiometry():
     def __init__(self,obj_audio):
         super().__init__()
-        self.data["audio"]={'stimOn': [False, False], 'freq': 3, 'step': 5, 
-                            'lvl': [20, 20], 'side': [0, 1],'trans': [0, 0], 
-                            'stim': ['Tono', 'mkg']}
+        self.data = {}
+        self.data['audio']={'stimOn': [False, False], 'freq': 3, 'step': 5, 
+                            'int': [20, 20], 'output': [0, 1],'trans': [0, 0], 
+                            'stim': [0, 3], 'test':'Tono'}
+        
+        self.history_command= []
         self.obj_audio = obj_audio
         self.frecuency =         [125,250, 500,1000,2000,3000,4000,6000,8000]
         self.attenuations = [35, 40,  40,  40, 40,  45,  45,  50, 50]
-        self.aerea = [[self.dbdata["Aerea"][i][0] for i in range(len(self.dbdata["Aerea"]))], 
-                      [self.dbdata["Aerea"][i][1] for i in range(len(self.dbdata["Aerea"]))]]
-        self.oseo = [[self.dbdata["Osea"][i][0] for i in range(len(self.dbdata["Osea"]))], 
-                      [self.dbdata["Osea"][i][1] for i in range(len(self.dbdata["Osea"]))]]
+
         
+    def set_case(self,dbdata):
+        self.dbdata = dbdata
+        self.aerea = [[dbdata['Aerea'][i][0] for i in range(len(dbdata['Aerea']))], 
+                      [dbdata['Aerea'][i][1] for i in range(len(dbdata['Aerea']))]]
+        self.oseo = [[dbdata['Osea'][i][0] for i in range(len(dbdata['Osea']))], 
+                      [dbdata['Osea'][i][1] for i in range(len(dbdata['Osea']))]]
         
+    def response_(self):
+        list_ = [0,1,2]
+        uphand = any(elem in self.data['audio']['stim'] for elem in list_)
+        if uphand:        
+            if self.history_command:
+                if self.history_command[0] == 'colocar_fonos':
+                    self.response_aerea_wout_msk()
+                elif self.history_command[0] =='escuche_mi_voz':
+                    self.response_aerea_wout_msk()
+                elif self.history_command[0] =='pitos_fuertes':
+                    self.ldl()
+            else:
+                print("no has dado comando alguno")
+        else:
+            pass
+
+        if not any(self.data["audio"]['stimOn']):
+            self.downHand()
+
+        
+    def set_config(self, data):
+        name = data.objectName()
+        str = data.text()
+        name = name.split('_')
+
+        if 'ch0' in name or 'ch1' in name:
+            channel = 0 if name[-1] == 'ch0' else 1
+
+        if 'int' in name:
+            value = str.split(' ')
+            self.data['audio']['int'][channel] = int(value[0])
+        elif 'trans' in name:
+            value = trans_list.index(str)
+            self.data['audio']['trans'][channel] = value
+        elif 'output' in name:
+            value = 0 if str == 'Derecha' else 1
+            self.data['audio']['output'][channel] = value
+        elif 'stim' in name:
+            value = stim_list.index(str)
+            self.data['audio']['stim'][channel] = value
+        elif 'stimOn' in name:
+            value = True if str == 'toc-toc' else False
+            self.data['audio']['stimOn'][channel] = value
+            self.response_()
+        elif 'freq' in name:
+            if self.data['audio']['test'] == 'Tono':
+                try:
+                    str = str.split(' ')
+                    value = self.frecuency.index(int(str[0]))
+                    self.data['audio']['freq'] = value
+                except ValueError:
+                    pass
+                    #print("el error de la prueba")
+        elif 'prueba' in name:
+            self.data['audio']['test'] = str
+            #print(f"la prueba es {self.data['audio']['test']}")
+
+        print(f'nombre: {data.objectName()} str:  {data.text()}')
+        #print(self.data['audio']['stimOn'])
+
+
+
+    def ldl(self):
+        if self.data['audio']['test'] == 'Tono':
+            if self.data['audio']['stimOn'].count(True) == 1:
+                stim_on = self.data['audio']['stimOn'].index(True)
+                trans = self.data['audio']['trans'][stim_on]
+                trans = 'Aerea' if trans == 0 else 'Osea'
+                if trans == 0:
+                    output = self.data['audio']['output'][stim_on] #derecho o izquierdo
+                    frecuency = self.data['audio']['freq'] #indice
+                    int = self.data['audio']['int'][stim_on]
+                    value = self.dbdata['LDL'][frecuency][output]
+                    verify = True if int >= value else False
+
+                    voice_ldl = create_voice("molesta", self.gender, self.id)
+                    if self.channel_on[0] == False:
+                        self.channels[0].setSource(voice_ldl)
+                        self.channels[0].play()
+                    if self.channel_on[1] == False:
+                        self.channels[1].setSource(voice_ldl)
+
+                        self.channels[1].play()
+
+                    self.lbl_response.setText("¡MOLESTA!")
+                else:
+                    print("lo esta haciendo con la osea")
+
+    def response_aerea_wout_msk(self):
+        if self.data['audio']['test'] == 'Tono':
+            if self.data['audio']['stimOn'].count(True) == 1:
+                stim_on = self.data['audio']['stimOn'].index(True)
+                trans = self.data['audio']['trans'][stim_on]
+                trans = 'Aerea' if trans == 0 else 'Osea'
+                output = self.data['audio']['output'][stim_on] #derecho o izquierdo
+                frecuency = self.data['audio']['freq'] #indice
+                int = self.data['audio']['int'][stim_on]
+
+                value = self.dbdata[trans][frecuency][output]
+
+                verify = True if int >= value else False
+
+                #print(f"la intencidad de estimulación es {int}, el umbral es {value} superaste el umbral {verify}")
+                if verify:
+                    self.upHand()
+                
+            else:
+                print("escucho en ambos oidos")
+        else:
+            if self.data['audio']['test']!= 'Tono':
+                #print(f"stimon {self.data['audio']['stimOn']}")
+                if any(self.data['audio']['stimOn']):
+                    stim_on = self.data['audio']['stimOn'].index(True)
+                    stim = self.data['audio']['stim'][stim_on]
+                    if stim == 2:
+                        int = self.data['audio']['int'][stim_on]
+                        value = self.dbdata['SDT'][stim_on]
+                        verify = True if int >= value else False
+                        if verify:
+                            self.upHand()
+
     def response_aerea(self, side, frecuency,stim, mkg, cfmkg=0):
         if frecuency in self.frecuency:
             index_frecuency = self.frecuency.index(frecuency)
@@ -95,114 +233,104 @@ class ResponseAudiometry(Response):
         attenuation = self.attenuations[index_frecuency]
         if_need_mkg = int_thr > int_thr_o_cnt + attenuation
         if not if_need_mkg:
-            #print("no necesita mkg")
+            #print('no necesita mkg')
             return stim >= int_thr
-        #print("necesita mkg")
+        #print('necesita mkg')
         if mkg==0:
-            #print("el mkg esta apagado")
+            #print('el mkg esta apagado')
             sombra = list(range(0,15,5))
             random.shuffle(sombra)
             return stim - attenuation >= int_thr_o_cnt + sombra[0]
         if mkg > 0:
             int_thr_o = self.oseo[side][index_frecuency]
-            #print("el mkg esta prendido")
+            #print('el mkg esta prendido')
             range_mkg = self.min_max_mkg_aereo(stim, int_thr,int_thr_cnt,int_thr_o,
                                             int_thr_o_cnt,attenuation,cfmkg)
             if range_mkg == 0:
-                print("estamos en cero")
+                print('estamos en cero')
             if mkg in range_mkg:
-                #print("esta enmascarado correctamente")
+                #print('esta enmascarado correctamente')
                 return stim >= int_thr
             if mkg > range_mkg[-1]:
-                #print("esta sobre enmascarado")
+                #print('esta sobre enmascarado')
                 return False
             elif mkg < range_mkg[0]:
-                #print("esta subenmascarado")
+                #print('esta subenmascarado')
                 return stim - attenuation >= int_thr_cnt
         
     def min_max_mkg_aereo(self, stim, a_ipsi,a_contra,o_ipsi,o_contra, attenuation, cfmkg):
-        #print(f"estimulo con:{a_ipsi}, le resto {attenuation}, pasan {a_ipsi-attenuation}")
+        #print(f'estimulo con:{a_ipsi}, le resto {attenuation}, pasan {a_ipsi-attenuation}')
         min_mkg = 5 + a_contra
         max_mkg = attenuation + a_contra + o_ipsi
         #min_mkg = a_ipsi - attenuation - o_contra + a_contra + cfmkg
         #max_mkg = o_ipsi + attenuation
-        #print(f"{min_mkg}-{max_mkg}")
+        #print(f'{min_mkg}-{max_mkg}')
         return list(range(min_mkg, max_mkg,5)) if min_mkg < max_mkg else 0
     
     
     def response_th(self):
         stop_response = False
-        stimOn = self.data["audio"]["stimOn"]
-        freq = self.data["audio"]["freq"]
-        lvl = self.data["audio"]["lvl"]
-        side = self.data["audio"]["side"]
-        stim = self.data["audio"]["stim"]
-        if "Tono" in stim:
-            mkg_exist = "mkg" in stim
+        stimOn = self.data['audio']['stimOn']
+        freq = self.data['audio']['freq']
+        lvl = self.data['audio']['lvl']
+        side = self.data['audio']['side']
+        stim = self.data['audio']['stim']
+        if 'Tono' in stim:
+            mkg_exist = 'mkg' in stim
             if mkg_exist:
-                side_mkg = 0 if stim[0] == "mkg" else 1
+                side_mkg = 0 if stim[0] == 'mkg' else 1
                 side_tone = int(not side_mkg)
                 mkg = lvl[side_mkg] if stimOn[side_mkg] else 0
                 
             else:
                 if not False in stimOn:
-                    print(f"ambos estimulos estan encendidos y ninguno es mkg : {stim}")
+                    print(f'ambos estimulos estan encendidos y ninguno es mkg : {stim}')
                     stop_response = True
                 
                 else:
-                    lvl_tone = lvl[0] if stim[0] == "Tono" and stimOn[0] else lvl[1]
-            
-                
-                
+                    lvl_tone = lvl[0] if stim[0] == 'Tono' and stimOn[0] else lvl[1]
             
         if not stop_response:
             pass
         
-        
-        
-        
-        
     def Action(self, action):
-        t,p,m = action.split("_")
-        if t in ["THR", "S", "L"]:
-            MKG = m == "MKG"
+        t,p,m = action.split('_')
+        if t in ['THR', 'S', 'L']:
+            MKG = m == 'MKG'
             self.response = (t, p, MKG)
         self.state = (t,p,m)
         
-    def transmit_(self, **kwargs):
-        for k, i in kwargs.items():
-            if k == "lvl":
-                l = []
-                for t in i:
-                    ch = int(t.split(' dB HL')[0])
-                    l.append(ch)
-                i = l
-            if k == "stim":
-                l = []
-                for t in i:
-                    #print(t[0:2])
-                    m = "mkg" if t[:2] == "Na" or t == "Sp" else t
-                    l.append(m)
-                i = l
+    def rol_player(self, rol):
+        if rol != 'pa_pa_pa':
+            max_list = 4
+            self.history_command.insert(0, rol)
+            while len(self.history_command) > max_list:
+                self.history_command.pop()
 
-            self.data["audio"][k] = i
+            print(self.history_command)
+        if rol == 'dictar_palabras':
+            pass
+            #self.obj_audio()
     
+
     def activate(self):
-        #print(f"entre al activador y haré:{self.response}")
+        #print(f'entre al activador y haré:{self.response}')
         #print(self.data)
+        pass
+        """
         if self.response[1] in ['A', 'O']:
-            if self.data["audio"]['stimOn'][0]:
+            if self.data['audio']['stimOn'][0]:
                 self.response_th()
             else:
                 self.downHand()
         elif self.response[0] == 'L':
             if self.response[1] == 'SDT':
-                if self.data["audio"]['stimOn'][0]:
+                if self.data['audio']['stimOn'][0]:
                     self.logo_sdt()
                 else:
                     self.no()
         elif self.response[0] == 'S':
-            if self.response[1] == 'LDL' and self.data["audio"]['stimOn'][0]:
+            if self.response[1] == 'LDL' and self.data['audio']['stimOn'][0]:
                 self.ldl()
             elif self.response[1] == 'LDL' or self.response[1] != 'FOWLER' and self.response[1] == 'CARHART' and not self.data['stimOn'][0]:
                 self.no()
@@ -210,14 +338,14 @@ class ResponseAudiometry(Response):
                 self.carhart()
             elif self.response[1] == 'FOWLER':
                 self.fowler()
-                
+        """        
                 
         
     def upHand(self):
-        self.obj_audio.lbl_response.setStyleSheet("background-color: rgb(170, 170, 255);")
+        self.obj_audio.lbl_response.setStyleSheet('background-color: rgb(170, 170, 255);')
     
     def downHand(self):
-        self.obj_audio.lbl_response.setStyleSheet("background-color: rgb(255, 255, 255);")
+        self.obj_audio.lbl_response.setStyleSheet('background-color: rgb(255, 255, 255);')
 
 
     
@@ -230,7 +358,7 @@ class ResponseTimpanometry():
 class ResponseAbr():
     pass
 
-"""a = ResponseThresholdAudiometry()
+'''a = ResponseThresholdAudiometry()
 side = 0
 frecuencia = 125
 mkg = 0
@@ -241,4 +369,4 @@ for i in lista:
     intensidad = i
     response = a.response_aerea(side, frecuencia, intensidad, mkg, cfmkg)
     
-    print(f"{i} - {response}")"""
+    print(f'{i} - {response}')'''

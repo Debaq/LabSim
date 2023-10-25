@@ -25,7 +25,7 @@ class ListWords(QWidget, Ui_ListWords):
         # Inicialización de la ventana y propiedades
         self.la_super(data)
         self.setupUi(self)
-        self.playable = [False, 0, None, False] # playable, intencity, side, with_mkg
+        self.playable = [False, 0, None, False] # playable, intencity, side, with_mkg, es playable solo si esta en invertido
         self.wait_count = [10, 0]
         self.prev_int = 0
         self.continue_response = True
@@ -53,8 +53,7 @@ class ListWords(QWidget, Ui_ListWords):
         self.time_2 = QtCore.QTimer(self)
         self.time_2.timeout.connect(self.wait)
         
-        
-        
+                
     def create_actions_btn(self): 
         t = dir(self)
         letters = ["f","g","h","i", "l"]
@@ -121,28 +120,26 @@ class ListWords(QWidget, Ui_ListWords):
         
     def timer(self):
         stat = str(self.channel_0.mediaStatus())
-        if stat == "PySide6.QtMultimedia.QMediaPlayer.MediaStatus.EndOfMedia":
+        if stat == "MediaStatus.EndOfMedia":
             self.time_1.stop()
             ran_time = random.randrange(500 , 1100)
             if self.continue_response:
                 self.time_2.start(ran_time)
     
     def wait(self):
-        if self.is_response:        
-            self.response()
+        self.response()
         self.time_1.stop()
         self.time_2.stop()
 
     def response(self):
-        with contextlib.suppress(Exception):
-            num = self.num - 1
-            if self.list_response[num] == 1:
-                media = create_word_response(self.text, self.gender, self.id)
-            else:
-                none_n = f"none{random.randint(1, 3)}"
-                media = create_word_response(none_n, self.gender, self.id)
-            self.channel_0.setSource(media)
-            self.channel_0.play()
+        num = self.num - 1
+        if self.list_response[num] == 1:
+            media = create_word_response(self.text, self.gender, self.id)
+        else:
+            none_n = f"none{random.randint(1, 3)}"
+            media = create_word_response(none_n, self.gender, self.id)
+        self.channel_0.setSource(media)
+        self.channel_0.play()
 
     def changecalcule(self):
         if self.prev_int != self.playable[1]:

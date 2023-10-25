@@ -24,6 +24,7 @@ class MainLogin(QWidget, Ui_Login):
 
     def __init__(self, online) -> None:
         QWidget.__init__(self)
+
         self._flag_online = online
         # Inicialización de la ventana y propiedades
         self.setupUi(self)
@@ -41,7 +42,7 @@ class MainLogin(QWidget, Ui_Login):
         if not self._verify_login(name, passw):
             QMessageBox.critical(self, "Ingreso", "Error de Login")
         else:
-            result = self.login_func.login(name, passw, True) if self._flag_online else self.login_func.login(name, passw, False)
+            result = self.login_func.login(name, passw, self._flag_online)
             self._verify_result(result)
 
     def _verify_result(self, result:any) -> None:
