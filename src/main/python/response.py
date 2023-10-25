@@ -52,7 +52,7 @@ class DelayActions:
         self.fowler_q(self.response_fowler)
         self.time_1.stop()
         self.time_2.stop()
-
+"""
 class Response:
     def __init__(self):
         super().__init__()
@@ -76,15 +76,16 @@ class Response:
     
     def threshold(self):
         pass
-    
+"""    
     
 class ResponseAudiometry():
     def __init__(self,obj_audio):
         super().__init__()
         self.data = {}
+        self.other_response = Response()
         self.data['audio']={'stimOn': [False, False], 'freq': 3, 'step': 5, 
                             'int': [20, 20], 'output': [0, 1],'trans': [0, 0], 
-                            'stim': [0, 3], 'test':'Tono'}
+                            'stim': [0, 3], 'test':'Tono', 'contin':['Continuo', 'Continuo']}
         
         self.history_command= []
         self.obj_audio = obj_audio
@@ -110,6 +111,8 @@ class ResponseAudiometry():
                     self.response_aerea_wout_msk()
                 elif self.history_command[0] =='pitos_fuertes':
                     self.ldl()
+                elif self.history_command[0] =='dos_pitos':
+                    self.fowler()
             else:
                 print("no has dado comando alguno")
         else:
@@ -121,42 +124,45 @@ class ResponseAudiometry():
         
     def set_config(self, data):
         name = data.objectName()
-        str = data.text()
+        str_ = data.text()
         name = name.split('_')
 
         if 'ch0' in name or 'ch1' in name:
             channel = 0 if name[-1] == 'ch0' else 1
 
         if 'int' in name:
-            value = str.split(' ')
+            value = str_.split(' ')
             self.data['audio']['int'][channel] = int(value[0])
         elif 'trans' in name:
-            value = trans_list.index(str)
+            value = trans_list.index(str_)
             self.data['audio']['trans'][channel] = value
         elif 'output' in name:
-            value = 0 if str == 'Derecha' else 1
+            value = 0 if str_ == 'Derecha' else 1
             self.data['audio']['output'][channel] = value
         elif 'stim' in name:
-            value = stim_list.index(str)
+            value = stim_list.index(str_)
             self.data['audio']['stim'][channel] = value
         elif 'stimOn' in name:
-            value = True if str == 'toc-toc' else False
+            value = True if str_ == 'toc-toc' else False
             self.data['audio']['stimOn'][channel] = value
             self.response_()
         elif 'freq' in name:
             if self.data['audio']['test'] == 'Tono':
                 try:
-                    str = str.split(' ')
-                    value = self.frecuency.index(int(str[0]))
+                    str_ = str_.split(' ')
+                    value = self.frecuency.index(int(str_[0]))
                     self.data['audio']['freq'] = value
                 except ValueError:
                     pass
                     #print("el error de la prueba")
         elif 'prueba' in name:
-            self.data['audio']['test'] = str
+            self.data['audio']['test'] = str_
             #print(f"la prueba es {self.data['audio']['test']}")
+        elif 'contin' in name:
+            self.data['audio']['contin'][channel] = str_
 
-        print(f'nombre: {data.objectName()} str:  {data.text()}')
+
+        #print(f'nombre: {data.objectName()} str:  {data.text()}')
         #print(self.data['audio']['stimOn'])
 
 
@@ -166,26 +172,27 @@ class ResponseAudiometry():
             if self.data['audio']['stimOn'].count(True) == 1:
                 stim_on = self.data['audio']['stimOn'].index(True)
                 trans = self.data['audio']['trans'][stim_on]
-                trans = 'Aerea' if trans == 0 else 'Osea'
                 if trans == 0:
                     output = self.data['audio']['output'][stim_on] #derecho o izquierdo
                     frecuency = self.data['audio']['freq'] #indice
-                    int = self.data['audio']['int'][stim_on]
+                    int_ = self.data['audio']['int'][stim_on]
                     value = self.dbdata['LDL'][frecuency][output]
-                    verify = True if int >= value else False
-
-                    voice_ldl = create_voice("molesta", self.gender, self.id)
-                    if self.channel_on[0] == False:
-                        self.channels[0].setSource(voice_ldl)
-                        self.channels[0].play()
-                    if self.channel_on[1] == False:
-                        self.channels[1].setSource(voice_ldl)
-
-                        self.channels[1].play()
-
-                    self.lbl_response.setText("¡MOLESTA!")
+                    verify = True if int_ >= value else False
+                    
+                    if verify:
+                        self.other_response.create_voice_('molesta')
                 else:
                     print("lo esta haciendo con la osea")
+
+    def fowler(self):
+        if self.data['audio']['test'] == 'Tono':
+            if all(x == 0 for x in self.data['audio']['stim']):
+                if all(x == 'Alternado' for x in self.data['audio']['contin']):
+
+                    self.other_response.set_fowler_data(self.dbdata['Fowler'])
+
+
+ 
 
     def response_aerea_wout_msk(self):
         if self.data['audio']['test'] == 'Tono':
@@ -195,11 +202,11 @@ class ResponseAudiometry():
                 trans = 'Aerea' if trans == 0 else 'Osea'
                 output = self.data['audio']['output'][stim_on] #derecho o izquierdo
                 frecuency = self.data['audio']['freq'] #indice
-                int = self.data['audio']['int'][stim_on]
+                int_ = self.data['audio']['int'][stim_on]
 
                 value = self.dbdata[trans][frecuency][output]
 
-                verify = True if int >= value else False
+                verify = True if int_ >= value else False
 
                 #print(f"la intencidad de estimulación es {int}, el umbral es {value} superaste el umbral {verify}")
                 if verify:
@@ -214,9 +221,9 @@ class ResponseAudiometry():
                     stim_on = self.data['audio']['stimOn'].index(True)
                     stim = self.data['audio']['stim'][stim_on]
                     if stim == 2:
-                        int = self.data['audio']['int'][stim_on]
+                        int_ = self.data['audio']['int'][stim_on]
                         value = self.dbdata['SDT'][stim_on]
-                        verify = True if int >= value else False
+                        verify = True if int_ >= value else False
                         if verify:
                             self.upHand()
 
@@ -301,6 +308,7 @@ class ResponseAudiometry():
         self.state = (t,p,m)
         
     def rol_player(self, rol):
+        
         if rol != 'pa_pa_pa':
             max_list = 4
             self.history_command.insert(0, rol)
@@ -311,7 +319,14 @@ class ResponseAudiometry():
         if rol == 'dictar_palabras':
             pass
             #self.obj_audio()
-    
+        if rol == 'sonidos_iguales':
+            freq = self.data['audio']['freq']
+            thr = self.dbdata['Aerea_mkg'][freq]
+            self.other_response.fowler_q(1, self.data, thr)
+        if rol == "en_qué_oído":
+            freq = self.data['audio']['freq']
+            thr = self.dbdata['Aerea_mkg'][freq]
+            self.other_response.fowler_q(2, self.data, thr)
 
     def activate(self):
         #print(f'entre al activador y haré:{self.response}')
