@@ -39,11 +39,12 @@ class Player():
         
     
     def play(self, ch: int, source: QUrl, loop: bool = False) -> None:
-        source_str = source.toString()
-        self.players[ch].setSource(source)
-        self.players[ch].play()
-        self.loop_media[source_str] = loop
-        self.current_medias[self.players[ch]] = source_str  # Establecer el medio actual para este reproductor.
+        if source is not None:
+            source_str = source.toString()
+            self.players[ch].setSource(source)
+            self.players[ch].play()
+            self.loop_media[source_str] = loop
+            self.current_medias[self.players[ch]] = source_str  # Establecer el medio actual para este reproductor.
 
 
     def volume(self, ch:int, value:int) -> None:

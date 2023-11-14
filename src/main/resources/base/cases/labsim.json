@@ -12,7 +12,7 @@
         "Z_OI": "A",
         "sector": "Camara_sono",
         "volume" : [0,0,"N/D"],
-        "UMD" : [{"int":40, "percentage": 100},{"int":60,"percentage":96}],
+        "UMD" : [{"int":40, "percentage": 40},{"int":60,"percentage":96}],
         "SDT" :[20,20],
         "Fowler" : [3, {"15" : 45,
                         "35" : 55,

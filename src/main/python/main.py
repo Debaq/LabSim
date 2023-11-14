@@ -2,7 +2,7 @@
 """
 LabSim: LabSim is a simulation environment for practical
 """
-__VERSION__ = 'v0.9.5'
+__VERSION__ = 'v0.9.8'
 # pylint: disable=no-name-in-module
 import sys
 
@@ -157,7 +157,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.btn_login.setText("Ingresar")
         self.data_login = None
         self.data_current = None
-
     def combo_case(self) -> None:
         """Crea el combo de casos"""
         self.cmb_case.clear()
@@ -237,6 +236,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.btn_cmd_voice.setObjectName("btn_CVOICE")
         self.btn_cmd_voice.clicked.connect(self.activate_soft)
         self.layoutAction.addWidget(self.btn_cmd_voice)
+        self.btn_list_words = QPushButton("Listas de Palabras")
+        self.btn_list_words.setObjectName("btn_W")
+        self.btn_list_words.clicked.connect(self.activate_soft)
+        self.layoutAction.addWidget(self.btn_list_words)
+
+
+
 
 
 if __name__ == '__main__':

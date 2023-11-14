@@ -85,7 +85,7 @@ class ResponseAudiometry():
         self.other_response = Response()
         self.data['audio']={'stimOn': [False, False], 'freq': 3, 'step': 5, 
                             'int': [20, 20], 'output': [0, 1],'trans': [0, 0], 
-                            'stim': [0, 3], 'test':'Tono', 'contin':['Continuo', 'Continuo']}
+                            'stim': [0, 3], 'test':'Umbrales', 'contin':['Continuo', 'Continuo']}
         
         self.history_command= []
         self.obj_audio = obj_audio
@@ -103,9 +103,10 @@ class ResponseAudiometry():
     def response_(self):
         list_ = [0,1,2]
         uphand = any(elem in self.data['audio']['stim'] for elem in list_)
+        #['dictar_palabras', 'vibrador_+_ruido', 'molesto_o', 'dictar_palabras']
         if uphand:        
             if self.history_command:
-                if self.history_command[0] == 'colocar_fonos':
+                if self.history_command[0] in ['colocar_fonos', 'colocar_vibrador', 'mano_levantada_en_ruido', 'mano_levantada']:
                     self.response_aerea_wout_msk()
                 elif self.history_command[0] =='escuche_mi_voz':
                     self.response_aerea_wout_msk()
@@ -175,8 +176,11 @@ class ResponseAudiometry():
 
 
     def ldl(self):
-        if self.data['audio']['test'] == 'Tono':
+        print(self.data)
+
+        if self.data['audio']['test'] == 'Umbrales':
             if self.data['audio']['stimOn'].count(True) == 1:
+                print("en ldl")
                 stim_on = self.data['audio']['stimOn'].index(True)
                 trans = self.data['audio']['trans'][stim_on]
                 if trans == 0:
@@ -192,7 +196,7 @@ class ResponseAudiometry():
                     print("lo esta haciendo con la osea")
 
     def fowler(self):
-        if self.data['audio']['test'] == 'Tono':
+        if self.data['audio']['test'] == 'Umbrales':
             if all(x == 0 for x in self.data['audio']['stim']):
                 if all(x == 'Alternado' for x in self.data['audio']['contin']):
 
@@ -214,7 +218,7 @@ class ResponseAudiometry():
         CE: coeficiente de enmascaramiento
         uae:40 - 40 - 15 + 15 + 0
         """
-        if self.data['audio']['test'] == 'Tono':
+        if self.data['audio']['test'] == 'Umbrales':
             if self.data['audio']['stimOn'].count(True) == 2:
                 #{'audio': {'stimOn': [True, True], 'freq': 3, 'step': 5, 'int': [25, 20], 'output': [0, 1], 'trans': [0, 0], 'stim': [0, 3], 'test': 'Tono', 'contin': ['Continuo', 'Continuo']}}
                 #No existe una logica de cuando le pongan mkg pero en realidad no lo necesite
@@ -224,12 +228,14 @@ class ResponseAudiometry():
 
                             o_e = 0 if self.data['audio']['output'][0] == 0 else 1
                             o_n = int(not o_e)
+                            ch_tone = 0 if self.data['audio']['stim'][0] == 0 else 1   
+                            ch_mkg = int(not ch_tone)                        
                             print(f"estudio el {o_e} y enmascaro el {o_n}")
                             trans = self.data['audio']['trans'][o_e]
                             trans = 'Aerea' if trans == 0 else 'Osea'
                             frecuency = self.data['audio']['freq'] #indice
-                            int_ = self.data['audio']['int'][o_e] #hay un error en el sentido de los oidos estan al contrario
-                            int_mkg = self.data['audio']['int'][o_n]
+                            int_ = self.data['audio']['int'][ch_tone] 
+                            int_mkg = self.data['audio']['int'][ch_mkg]
                             uae = self.dbdata[trans][frecuency][o_e]
                             uane = self.dbdata[trans][frecuency][o_n]
                             ce = 0
@@ -237,11 +243,11 @@ class ResponseAudiometry():
                             uone = self.dbdata['Osea_mkg'][frecuency][o_n]
                             uoe = self.dbdata['Osea_mkg'][frecuency][o_e]
                             mkg_min = uae - at - uone + uane + ce
-                            print(f"{uae} - {at} - {uone} + {uane} + {ce}")
+                            print(f"se calcula el minimo : {uae} - {at} - {uone} + {uane} + {ce}")
                             mkg_max = uoe + at
                             mkg = [mkg_min, mkg_max]
                             mkg.sort()
-                            print(mkg)
+                            print(f"minimo y maximo{mkg}, la intensidad del mkg es:{int_mkg}")
                             if mkg[0] <= int_mkg <= mkg[1]:
                                 threshold = self.dbdata['Aerea_mkg'][frecuency][o_e]
                                 
@@ -254,9 +260,9 @@ class ResponseAudiometry():
                             if threshold <= int_:
                                 self.upHand()
 
-                            print(f"{threshold} :: {int_}")
+                            print(f"{threshold} :?: {int_}")
                                     
-                print(self.data)
+                #print(self.data)
             else: 
                 self.response_aerea_wout_msk()
 
@@ -264,7 +270,7 @@ class ResponseAudiometry():
     def response_aerea_wout_msk(self):
         print(self.data)
 
-        if self.data['audio']['test'] == 'Tono':
+        if self.data['audio']['test'] == 'Umbrales':
             if self.data['audio']['stimOn'].count(True) == 1:
                 stim_on = self.data['audio']['stimOn'].index(True)
                 trans = self.data['audio']['trans'][stim_on]
@@ -283,7 +289,7 @@ class ResponseAudiometry():
                 print("escucho en ambos oidos")
                 #deberia tener umbral en el mejor
         else:
-            if self.data['audio']['test']!= 'Tono':
+            if self.data['audio']['test']!= 'Umbrales':
                 #print(f"stimon {self.data['audio']['stimOn']}")
                 if any(self.data['audio']['stimOn']):
                     stim_on = self.data['audio']['stimOn'].index(True)
@@ -343,7 +349,7 @@ class ResponseAudiometry():
         return list(range(min_mkg, max_mkg,5)) if min_mkg < max_mkg else 0
     
     
-    def response_th(self):
+    """    def response_th(self):
         stop_response = False
         stimOn = self.data['audio']['stimOn']
         freq = self.data['audio']['freq']
@@ -366,7 +372,7 @@ class ResponseAudiometry():
                     lvl_tone = lvl[0] if stim[0] == 'Tono' and stimOn[0] else lvl[1]
             
         if not stop_response:
-            pass
+            pass"""
         
     def Action(self, action):
         t,p,m = action.split('_')
