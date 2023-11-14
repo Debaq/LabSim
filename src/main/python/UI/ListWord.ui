@@ -65,15 +65,15 @@
        <item>
         <widget class="QToolBox" name="toolBox">
          <property name="currentIndex">
-          <number>2</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="page">
           <property name="geometry">
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>186</width>
-            <height>366</height>
+            <width>190</width>
+            <height>377</height>
            </rect>
           </property>
           <attribute name="label">
@@ -439,8 +439,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>186</width>
-            <height>366</height>
+            <width>138</width>
+            <height>331</height>
            </rect>
           </property>
           <attribute name="label">
@@ -802,6 +802,14 @@
           </layout>
          </widget>
          <widget class="QWidget" name="page_5">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>190</width>
+            <height>377</height>
+           </rect>
+          </property>
           <attribute name="label">
            <string>Lista 3</string>
           </attribute>
@@ -1194,8 +1202,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>186</width>
-            <height>396</height>
+            <width>138</width>
+            <height>331</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1561,8 +1569,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>186</width>
-            <height>396</height>
+            <width>138</width>
+            <height>343</height>
            </rect>
           </property>
           <attribute name="label">

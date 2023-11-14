@@ -197,18 +197,19 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.connect_signals()
         
     def activate_listWords(self):
+        if self.subw_a.obj.lbl_prueba.text() == "Logoaudiometría":
             self.activate_soft_("W")
-            """
-    
-            if self.var_list_word.get(0):
-                if self.modules.is_full(pos_z):
-                    self.modules.get(pos_z).show()
-                else:
-                    self.create_sub_window(self.subw_w, name, pos_z, size=size)
+        """
+
+        if self.var_list_word.get(0):
+            if self.modules.is_full(pos_z):
+                self.modules.get(pos_z).show()
             else:
-                with contextlib.suppress(AttributeError):
-                    self.modules.get(pos_z).hide()
-            """
+                self.create_sub_window(self.subw_w, name, pos_z, size=size)
+        else:
+            with contextlib.suppress(AttributeError):
+                self.modules.get(pos_z).hide()
+        """
     def speechlist_mode(self, state):
         #self.var_list_word.getAll(True)
         #self.var_list_word.list_set(state, False)
@@ -223,8 +224,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def connect_signals(self):
         self.subw["CVOICE"].obj.btn_checked.connect(self.subw["A"].obj.supra)
         self.subw["A"].obj.signal_speech.connect(self.speechlist_mode)
-
-        
 
     def refresh_data(self):
         self.load_sub_windows()

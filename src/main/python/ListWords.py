@@ -152,12 +152,13 @@ class ListWords(QWidget, Ui_ListWords):
                 self.prev_int = self.playable[1]
 
     def calculate(self, intencity, side, with_mkg):
-        data = self.prev.get(side, with_mkg, intencity)
-        
-        intencity = max(intencity, 0)
-        data = (data[side][str(intencity)])
-        number_success = int(data / 4)
-        self.list_response = self.list_success(number_success)
+        if intencity is not None:
+            data = self.prev.get(side, with_mkg, intencity)
+
+            intencity = max(intencity, 0)
+            data = (data[side][str(intencity)])
+            number_success = int(data / 4)
+            self.list_response = self.list_success(number_success)
         
 
         

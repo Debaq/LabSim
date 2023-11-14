@@ -383,6 +383,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.modules.get(pos_z).hide()
 
     def speechlist_mode(self, state):
+        print(f"state:{state}")
         #self.var_list_word.getAll(True)
         self.var_list_word.list_set(state, False)
         #self.var_list_word.getAll(True)
