@@ -1,7 +1,8 @@
 import numpy as np
 import random
-from lib.bezier_prop import Bezier as bezier
+#from lib.bezier_prop import Bezier as bezier
 
+import bezier
 
 class Z_225():
     def __init__(self, manual=False, letter="A", c=1, p=0, g=1, pmax=200, num_pts=20, vol=1.8, unseal=False):
@@ -39,16 +40,22 @@ class Z_225():
         if letter == 'A':
             c = random.uniform(0.3, 1.6)
             p = random.randint(-100, 20)
-        if letter == 'As':
+        elif letter == 'As':
             c = random.uniform(0.01, 0.3)
             p = random.randint(-100, 20)
-        if letter == 'C':
+        elif letter == 'Ad':
+            c = random.uniform(1.8, 4.0)
+            p = random.randint(-100, 20)
+        elif letter == 'C':
             c = random.uniform(0.3, 1.6)
             p = random.randint(-400, -100)
-        if letter == 'B':
+        elif letter == 'Cs':
+            c = random.uniform(0.01, 1.3)
+            p = random.randint(-400, -100)
+        elif letter == 'B':
             c = random.uniform(0.0, 0.003)
-            p = random.randint(-600, -200)
-        if letter == 'N':
+            p = random.randint(-100, 20)
+        elif letter == 'N':
             c = 0
             p = 0
             self.input[7] = True

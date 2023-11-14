@@ -17,6 +17,7 @@ from lib.h_z import changeSide, changeSideText, sideText, printer, date_time
 from lib.z_generator import Z_225
 from lib.helpers import Storage
 
+print("Z cargado")
 
 class ZControl(QWidget, Ui_Z_control):
     def __init__(self,):
@@ -53,6 +54,7 @@ class ZControl(QWidget, Ui_Z_control):
 
     def la_super(self, data):
         self.data = data
+        self.preCharger()
         if data['sector'] == 'Z_OI' or data['sector'] == 'Z_OD':
             self.preCharger()
         else:
@@ -60,9 +62,11 @@ class ZControl(QWidget, Ui_Z_control):
             # otro examen que no es Z puede ser reflejos y deterioro
 
     def preCharger(self):
-        side = sideText(self.data['sector'])
+        side = sideText(f"Z_{self.Z.get_side()}")
+        print(self.data)
         if self.store_data[side].is_null(0):
-            zGerger = self.data[self.data['sector']]
+            print(f"side : {side}")
+            zGerger = self.data[f"Z_{self.Z.get_side()}"]
             vol = self.data['volume'][side]
             result = Z_225(letter=zGerger, vol=vol).getDataSet()
             self.store_data[side].set(0, result)
@@ -89,6 +93,7 @@ class ZControl(QWidget, Ui_Z_control):
         else:
             self.Z.set_side('OD')
         self.refresh()
+        self.preCharger()
         # self.change_screen(self.screen_list[self.last_screen])
 
     def refresh(self):

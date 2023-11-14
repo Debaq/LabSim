@@ -115,6 +115,10 @@ class ListWords(QWidget, Ui_ListWords):
         intencity = state[2]
         side = state[3]
         with_mkg = state[4]
+        self.playable[1] = intencity
+        self.playable[2] = side
+        self.playable[3] = with_mkg
+        self.playable[0] = bool(state[1])
         self.calculate(intencity, side, with_mkg)
         
         

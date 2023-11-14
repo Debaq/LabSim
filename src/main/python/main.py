@@ -6,23 +6,21 @@ __VERSION__ = 'v0.9.8'
 # pylint: disable=no-name-in-module
 import sys
 
-from PySide6.QtCore import Qt, Slot, Signal
-from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton
-
+import Agenda
 import Audiometer
 import create_a
-import Agenda
+import ListWords
 import login as Ui_login
+import Z
 from base import context
 from lib.h_win import FrameSubMdi, MdiArea
-from lib.helpers import Preferences, Storage, CreatePatient
-from lib.main.func_users import XLSReader
-from lib.ui_helpers import ToolBar, show_hide, MoveWindow, toggle_max_min
-from UI.Ui_Main import Ui_MainWindow
-from UI.Ui_CVC import Ui_CVC
+from lib.helpers import CreatePatient, Preferences, Storage
+from lib.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min
+from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtWidgets import QMainWindow, QPushButton, QWidget
 from UI.Ui_command_voice_A import Ui_Form as commandVoiceA
-import contextlib
-import ListWords
+from UI.Ui_CVC import Ui_CVC
+from UI.Ui_Main import Ui_MainWindow
 
 Preferences = Preferences()
 APPS = Preferences.get("APP")
@@ -173,6 +171,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.data_current = self.data_login["cases"][number_case]
         try:
             self.subw_a.obj.la_super(self.data_current)
+            self.subw_z.obj.la_super(self.data_current)
+            self.subw_w.obj.la_super(self.data_current)
         except AttributeError:
             pass
 
@@ -181,7 +181,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data_current))
         subw_agenda = FrameSubMdi(Agenda.Agenda(self.data_login["permission"],self))
         subw_voice = FrameSubMdi(ComandVoiceA())
-        subw_w = FrameSubMdi(ListWords.ListWords(self.data_current))
+        self.subw_w = FrameSubMdi(ListWords.ListWords(self.data_current))
+        self.subw_z = FrameSubMdi(Z.ZControl())
 
         if self.data_login["permission"] == 777:
             subw_create_a = FrameSubMdi(create_a.CreateA())
@@ -190,8 +191,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw["A"] = self.subw_a
         self.subw["AGENDA"]=subw_agenda
         self.subw["CVOICE"]=subw_voice
-        self.subw["W"] = subw_w
-
+        self.subw["W"] = self.subw_w
+        self.subw["Z"] = self.subw_z
+        text = self.cmb_case.currentText()
+        self.change_case(text)
         #self.subw_cvc = FrameSubMdi(CVC())
         self.connect_signals()
         
@@ -213,12 +216,11 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         #self.var_list_word.getAll(True)
         #self.var_list_word.list_set(state, False)
         #self.var_list_word.getAll(True)
-        self.activate_listWords()
         self.subw["W"].obj.update_state(state)
-        self.subw["W"].obj.playable[1] = state[2]
-        self.subw["W"].obj.playable[2] = state[3]
-        self.subw["W"].obj.playable[3] = state[4]
-        self.subw["W"].obj.playable[0] = bool(state[1])
+        #self.subw["W"].obj.playable[1] = state[2]
+        #self.subw["W"].obj.playable[2] = state[3]
+        #self.subw["W"].obj.playable[3] = state[4]
+        #self.subw["W"].obj.playable[0] = bool(state[1])
 
     def connect_signals(self):
         self.subw["CVOICE"].obj.btn_checked.connect(self.subw["A"].obj.supra)
@@ -238,7 +240,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.layoutAction.addWidget(self.btn_cmd_voice)
         self.btn_list_words = QPushButton("Listas de Palabras")
         self.btn_list_words.setObjectName("btn_W")
-        self.btn_list_words.clicked.connect(self.activate_soft)
+        self.btn_list_words.clicked.connect(self.activate_listWords)
         self.layoutAction.addWidget(self.btn_list_words)
 
 

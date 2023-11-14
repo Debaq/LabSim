@@ -9,18 +9,17 @@
 #################################################################
 
 import numpy as np
-from PySide6.QtCore import QTimer, Signal, QObject, Slot
-from PySide6.QtGui import QFont, QKeySequence, QShortcut
-from PySide6.QtWidgets import QWidget, QLabel
-
+#from lib.response_A import Response
+from lib.audio_player import Player
 #from lib.API_connector import API, PostData
 from lib.h_audio import (calibrate, create_frecuency, create_intency,
                          create_sound, create_word, data_basic)
 from lib.helpers import Preferences
-#from lib.response_A import Response
-from lib.audio_player import Player
-from UI.Ui_Audiometer import Ui_Audiometer
+from PySide6.QtCore import QObject, QTimer, Signal, Slot
+from PySide6.QtGui import QFont, QKeySequence, QShortcut
+from PySide6.QtWidgets import QLabel, QWidget
 from response import ResponseAudiometry as Response
+from UI.Ui_Audiometer import Ui_Audiometer
 
 #context
 class_pref = Preferences()

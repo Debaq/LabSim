@@ -33,6 +33,7 @@ def changeSideText(side):
 
 
 def sideText(side):
+    print(side)
     _,text = side.split('_')
     if text == 'OD':
         result = 0

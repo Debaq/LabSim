@@ -269,16 +269,16 @@ class ResponseAudiometry():
 
     def response_aerea_wout_msk(self):
         print(self.data)
-
+        #aca se debe manejar la situación que esl estudiante no puso el fono en su lugar, ni el vibrador, eso no lo maneja
         if self.data['audio']['test'] == 'Umbrales':
             if self.data['audio']['stimOn'].count(True) == 1:
                 stim_on = self.data['audio']['stimOn'].index(True)
                 trans = self.data['audio']['trans'][stim_on]
-                trans = 'Aerea' if trans == 0 else 'Osea'
+                trans_letter = 'Aerea' if trans == 0 else 'Osea'
                 output = self.data['audio']['output'][stim_on] #derecho o izquierdo
                 frecuency = self.data['audio']['freq'] #indice
                 int_ = self.data['audio']['int'][stim_on]
-                value = self.dbdata[trans][frecuency][output]
+                value = self.dbdata[trans_letter][frecuency][output]
                 verify = True if int_ >= value else False
 
                 #print(f"la intencidad de estimulación es {int}, el umbral es {value} superaste el umbral {verify}")
