@@ -487,7 +487,8 @@ class Audiometer(QWidget, Ui_Audiometer):
 
     def post_channel_on(self):
         #self.response.transmit_(stimOn = self.channel_on)
-        self.response.activate()
+        #self.response.activate()
+        pass
 
     # PRUEBAS
     def speech(self):

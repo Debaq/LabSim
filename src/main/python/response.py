@@ -116,7 +116,8 @@ class ResponseAudiometry():
                     self.fowler()
                 elif self.history_command[0] =='aerea_+_ruido':
                     self.response_aerea_w_msk()
-
+                elif self.history_command[0] =='vibrador_+_ruido':
+                    self.response_osea_w_msk()
                     
             else:
                 print("no has dado comando alguno")
@@ -202,7 +203,6 @@ class ResponseAudiometry():
 
                     self.other_response.set_fowler_data(self.dbdata['Fowler'])
 
-
  
     def response_aerea_w_msk(self):
         """
@@ -225,7 +225,6 @@ class ResponseAudiometry():
                 if 3 in self.data['audio']['stim']:
                     if self.data['audio']['output'][0] != self.data['audio']['output'][1]:
                         if self.data['audio']['trans'] == [0,0]:
-
                             o_e = 0 if self.data['audio']['output'][0] == 0 else 1
                             o_n = int(not o_e)
                             ch_tone = 0 if self.data['audio']['stim'][0] == 0 else 1   
@@ -265,6 +264,73 @@ class ResponseAudiometry():
                 #print(self.data)
             else: 
                 self.response_aerea_wout_msk()
+                
+    def response_osea_w_msk(self):
+        """
+        minimo:
+        (UOE - UONE) + UANOE + CE + EO
+        max:
+        AT+UOE
+
+        UOE : umbral oseo oido estudiado
+        UONE: umbral oseo no estudiado
+        UANOE: umbral aereo no estudiado
+        CE: coeficiente de enmascaramiento
+        EO: efecto de oclusión
+        At: atenuación interaural
+        """
+        if self.data['audio']['test'] == 'Umbrales':
+            if self.data['audio']['stimOn'].count(True) == 2:
+                print(self.data)
+                if 3 in self.data['audio']['stim'] and 1 in self.data['audio']['trans']:
+                    print("todo ok")
+                    o_e = 0 if self.data['audio']['output'][0] == 0 else 1 #solución parche ya que supone que el oido estudiado es el ch 0
+                    o_n = int(not o_e)
+                    ch_tone = 0 if self.data['audio']['stim'][0] == 0 else 1   #aca se generaria un problema de inmediato con o_e
+                    ch_mkg = int(not ch_tone)                        
+                    print(f"estudio el {o_e} y enmascaro el {o_n}")
+                    frecuency = self.data['audio']['freq'] #indice
+                    int_ = self.data['audio']['int'][ch_tone] 
+                    int_mkg = self.data['audio']['int'][ch_mkg]
+                    uoe = self.dbdata['Osea'][frecuency][o_e]
+                    uone = self.dbdata['Osea'][frecuency][o_n]
+                    ce = 0
+                    eo = self.oclusive_efect(frecuency,o_e)
+                    at = 0
+                    uane = self.dbdata['Aerea_mkg'][frecuency][o_n]
+                    mkg_min = uoe - uone + uane + ce + eo
+                    print(f"se calcula el minimo : {uoe} - {uone} + {uane} + {ce} + {eo}")
+                    mkg_max = uoe + at
+                    mkg = [mkg_min, mkg_max]
+                    mkg.sort()
+                    print(f"minimo y maximo{mkg}, la intensidad del mkg es:{int_mkg}")
+                    if mkg[0] <= int_mkg <= mkg[1]:
+                        threshold = self.dbdata['Osea_mkg'][frecuency][o_e]
+                    else:
+                        if int_mkg > mkg[1]:
+                            threshold = 130
+                        if int_mkg < mkg[0]:
+                            threshold = uoe
+                    if threshold <= int_:
+                        self.upHand()
+
+                    print(f"{threshold} :?: {int_}")
+            else:
+                self.response_aerea_wout_msk()
+
+
+    def oclusive_efect(self, f:int, o:int)->int:
+        list_values = [15,15,15,10,0,0,0,0,0]
+        value_oclusive = list_values[f]
+        uone = self.dbdata['Osea_mkg'][f][o]
+        uane = self.dbdata['Aerea_mkg'][f][o]
+        diff = uane - uone
+        if diff < 0:
+            return 0
+        elif 0 <= diff <= 5:
+            return 0
+        elif diff > 5:
+            return value_oclusive
 
 
     def response_aerea_wout_msk(self):
@@ -300,7 +366,7 @@ class ResponseAudiometry():
                         verify = True if int_ >= value else False
                         if verify:
                             self.upHand()
-
+    """ 
     def response_aerea(self, side, frecuency,stim, mkg, cfmkg=0):
         if frecuency in self.frecuency:
             index_frecuency = self.frecuency.index(frecuency)
@@ -349,7 +415,7 @@ class ResponseAudiometry():
         return list(range(min_mkg, max_mkg,5)) if min_mkg < max_mkg else 0
     
     
-    """    def response_th(self):
+       def response_th(self):
         stop_response = False
         stimOn = self.data['audio']['stimOn']
         freq = self.data['audio']['freq']
@@ -395,39 +461,14 @@ class ResponseAudiometry():
             #self.obj_audio()
         if rol == 'sonidos_iguales':
             freq = self.data['audio']['freq']
-            thr = self.dbdata['Aerea_mkg'][freq]
+            thr = self.dbdata['Aerea_mkg'][freq] #umbrales de ambos oidos
             self.other_response.fowler_q(1, self.data, thr)
         if rol == "en_qué_oído":
             freq = self.data['audio']['freq']
             thr = self.dbdata['Aerea_mkg'][freq]
             self.other_response.fowler_q(2, self.data, thr)
 
-    def activate(self):
-        #print(f'entre al activador y haré:{self.response}')
-        #print(self.data)
-        pass
-        """
-        if self.response[1] in ['A', 'O']:
-            if self.data['audio']['stimOn'][0]:
-                self.response_th()
-            else:
-                self.downHand()
-        elif self.response[0] == 'L':
-            if self.response[1] == 'SDT':
-                if self.data['audio']['stimOn'][0]:
-                    self.logo_sdt()
-                else:
-                    self.no()
-        elif self.response[0] == 'S':
-            if self.response[1] == 'LDL' and self.data['audio']['stimOn'][0]:
-                self.ldl()
-            elif self.response[1] == 'LDL' or self.response[1] != 'FOWLER' and self.response[1] == 'CARHART' and not self.data['stimOn'][0]:
-                self.no()
-            elif self.response[1] != 'FOWLER' and self.response[1] == 'CARHART':
-                self.carhart()
-            elif self.response[1] == 'FOWLER':
-                self.fowler()
-        """        
+ 
                 
         
     def upHand(self):
@@ -439,23 +480,3 @@ class ResponseAudiometry():
 
     
         
-
-
-class ResponseTimpanometry():
-    pass
-
-class ResponseAbr():
-    pass
-
-'''a = ResponseThresholdAudiometry()
-side = 0
-frecuencia = 125
-mkg = 0
-cfmkg = 0
-lista = list(range(0,100,5))
-lista.reverse()
-for i in lista:
-    intensidad = i
-    response = a.response_aerea(side, frecuencia, intensidad, mkg, cfmkg)
-    
-    print(f'{i} - {response}')'''

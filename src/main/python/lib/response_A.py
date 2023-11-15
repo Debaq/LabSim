@@ -187,7 +187,90 @@ class Response(QWidget):
         self.data_fowler_new = data
 
 
+    def calcular_respuesta(self, baseline_A, baseline_B, A, B, cut_1, cut_2):
+        # Comprobar si A y B son iguales a sus baselines
+        if A == baseline_A and B == baseline_B:
+            return 0
+
+        # Comprobar si B no supera cut_1
+        if B < cut_1:
+            if B - baseline_B < A - baseline_A:
+                return 1
+            elif B - baseline_B == A - baseline_A:
+                return 0
+            else:
+                return 2
+
+        # Comprobar si B iguala o supera cut_1 pero no supera cut_2
+        if cut_1 <= B <= cut_2:
+            return 2
+            if B - (baseline_B - baseline_A) == A:
+                return 0
+            elif B - (baseline_B - baseline_A) < A:
+                return 1
+            else:
+                return 2
+
+        # Si B supera cut_2, la respuesta siempre es 0
+        if B > cut_2:
+            return 2
+
+        # En caso de no cumplir ninguna condición anterior
+        return 3
+
+
     def fowler_q(self, n, data_audio, thr):
+
+        idx_best = self.bestEar(thr)
+        idx_worst = int(not idx_best)
+        freqs = self.data_fowler_new[0]
+        cut_1 = self.data_fowler_new[1] + thr[idx_worst]
+        cut_2 = self.data_fowler_new[2] + thr[idx_worst]
+        baseline_a = thr[idx_best]
+        baseline_b = thr[idx_worst]
+   
+        lvlch0 = data_audio['audio']['int'][0]
+        lvlch1 = data_audio['audio']['int'][1]
+        lvls = [[],[]]
+        if data_audio['audio']['output'][0] == 0:
+            lvls[0] = lvlch0
+        if data_audio['audio']['output'][1] == 1:
+            lvls[1] = lvlch1
+        if data_audio['audio']['output'][0] == 1:
+            lvls[1] = lvlch0
+        if data_audio['audio']['output'][1] == 0:
+            lvls[0] = lvlch1
+        A = lvls[idx_best]
+        B = lvls[idx_worst]
+        if data_audio['audio']['freq'] in freqs:
+            self.response_fowler_n = self.calcular_respuesta(baseline_a, baseline_b, A, B, cut_1, cut_2)
+        else:
+            cut_1 = 130
+            cut_2 = 130
+            self.response_fowler_n = self.calcular_respuesta(thr[idx_best], thr[idx_worst], lvls[idx_best], lvls[idx_worst], cut_1, cut_2)
+
+        if n == 1:
+            if self.response_fowler_n == 0:
+                #suenan iguales
+                voice_ldl = create_voice("si", 'feme', 2)
+                self.channel_0.setSource(voice_ldl)
+                self.channel_0.play()
+            if self.response_fowler_n in [1,2]:
+                voice_ldl = create_voice("no", 'feme', 2)
+                self.channel_0.setSource(voice_ldl)
+                self.channel_0.play()
+
+        
+        else:
+            sides = ["elderecho", "elizquierdo"]
+            voice_ldl = create_voice(sides[self.response_fowler_n-1], 'feme', 2)
+            self.channel_0.setSource(voice_ldl)
+            self.channel_0.play()
+
+        print(f"baselines: {baseline_a}/{baseline_b} A:{A}, B:{B}, {self.response_fowler_n}")
+
+
+        """
         #el n es la pregunta 1 o dos
         print(f"entre al fowler {n}")
         data = self.data_fowler_new[1]
@@ -242,6 +325,7 @@ class Response(QWidget):
             self.channel_0.setSource(voice_ldl)
             self.channel_0.play()
             self.last_choice_fowler = None
+        """
                 
     def fowler_q_old(self, n):
         print(f"ntre al fowler {n}")
@@ -343,9 +427,7 @@ class Response(QWidget):
 
     def media_change(self, sender):
         state = self.sender().playbackState()
-        print(state)
         if str(state) == 'PlaybackState.StoppedState':
-            print("se detuvo")
             self.sender().setPosition(0)
 
     def create_voice_(self,response_text):
