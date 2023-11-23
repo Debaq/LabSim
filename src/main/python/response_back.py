@@ -71,20 +71,17 @@ class ResponseAudiometry():
                 print("no has dado comando alguno")
         else:
             pass
-        try:  
-            if not any(self.data["audio"]['stimOn']):
-                self.downHand()
-            elif  self.history_command[0] == 'aerea_+_ruido' and self.data['audio']['stimOn'].count(True) < 2:
-                self.downHand()
-            elif  self.history_command[0] == 'vibrador_+_ruido' and self.data['audio']['stimOn'].count(True) < 2:
-                self.downHand()
-        except IndexError:
-            print("no has dado comando alguno")
+            
+        if not any(self.data["audio"]['stimOn']):
+            self.downHand()
+        elif  self.history_command[0] == 'aerea_+_ruido' and self.data['audio']['stimOn'].count(True) < 2:
+            self.downHand()
+        elif  self.history_command[0] == 'vibrador_+_ruido' and self.data['audio']['stimOn'].count(True) < 2:
+            self.downHand()
 
 
         
     def set_config(self, data):
-        print("cambio el sender")
         name = data.objectName()
         str_ = data.text()
         name = name.split('_')
@@ -130,37 +127,20 @@ class ResponseAudiometry():
 
 
     def response_sdt(self):
-        """
-        sdt responde la mejor aerea con atenuación 45
-        lo verifico contra los umbrales aereos del contra y su osea
-        minr = int_est - at (45) - uone + uaone
-        max = at(45) + uoe
-        si sobrepaso el maximo no hay respuesta
-        """
-   
+        print("escucha mi voz?")
         if self.data['audio']['test'] == 'Logoaudiometría':
-            if 1 <= self.data['audio']['stimOn'].count(True) <= 2:
-
+            if self.data['audio']['stimOn'].count(True) == 1:
+                stim_on = self.data['audio']['stimOn'].index(True)
+                output = self.data['audio']['output'][stim_on] #derecho o izquierdo
+                int_ = self.data['audio']['int'][stim_on]                    
                 ths = self.dbdata['Aerea_mkg']
                 sdt = self.calc_sdt(ths)
                 print(sdt)
-                stim_on = self.data['audio']['stimOn'].index(True)
-                #verifica si es habla o ruido
-                if self.data['audio']['stim'][stim_on] == 2: #si es habla el oido que se estimula
-                    #verificar que sea habla y no mkg
-                    output = self.data['audio']['output'][stim_on] #derecho o izquierdo
-                    #verificar si necesita mkg, calculo el ptp de la via aerea y osea 
-                    int_ = self.data['audio']['int'][stim_on]                    
-                    verify = int_ >= sdt[output]
-                    if verify:
-                        self.upHand()
-                else: #si no es habla
-                    print("ese es el mkg")
-                    self.downHand()
+                verify = int_ >= sdt[output]
+                if verify:
+                    self.upHand()
 
-
-    def response_sdt_w_mkg(self):
-        pass
+                 
 
     def calc_sdt(self, lista):
         # Extraer los elementos de la lista desde el índice 1 hasta el 6 (inclusive)
@@ -201,8 +181,6 @@ class ResponseAudiometry():
         if self.data['audio']['test'] == 'Umbrales':
             if all(x == 0 for x in self.data['audio']['stim']):
                 if all(x == 'Alternado' for x in self.data['audio']['contin']):
-                    print(len(self.dbdata['Fowler']))
-
                     self.other_response.set_fowler_data(self.dbdata['Fowler'])
 
  

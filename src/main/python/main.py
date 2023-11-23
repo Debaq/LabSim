@@ -21,6 +21,9 @@ from PySide6.QtWidgets import QMainWindow, QPushButton, QWidget
 from UI.Ui_command_voice_A import Ui_Form as commandVoiceA
 from UI.Ui_CVC import Ui_CVC
 from UI.Ui_Main import Ui_MainWindow
+from Logger import Logger
+
+sys.stdout = Logger("log_file.txt")
 
 Preferences = Preferences()
 APPS = Preferences.get("APP")
@@ -201,17 +204,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def activate_listWords(self):
         if self.subw_a.obj.lbl_prueba.text() == "Logoaudiometría":
             self.activate_soft_("W")
-        """
 
-        if self.var_list_word.get(0):
-            if self.modules.is_full(pos_z):
-                self.modules.get(pos_z).show()
-            else:
-                self.create_sub_window(self.subw_w, name, pos_z, size=size)
-        else:
-            with contextlib.suppress(AttributeError):
-                self.modules.get(pos_z).hide()
-        """
     def speechlist_mode(self, state):
         #self.var_list_word.getAll(True)
         #self.var_list_word.list_set(state, False)

@@ -82,7 +82,7 @@ class LoginConnect():
         """
         print("request is offline")
         verify = self._verify_key(data['user'], data['password'])
-        print(f"verify:{verify}")
+        #print(f"verify:{verify}")
         if verify and verify[0]:
             return {'user': data['user'],
                     'name': verify[0],
@@ -106,9 +106,9 @@ class LoginConnect():
 
         """
         keys = pref_data.get("keys_app")
-        print(f"keys:{keys}")
+        #print(f"keys:{keys}")
         if username in keys:
-            print(f"key:{keys[username]['key']}")
+            #print(f"key:{keys[username]['key']}")
             verify = crypto.decrypt(keys[username]["key"], password)
             permission = keys[username]["permission"]
             modules = keys[username]["modules"]
