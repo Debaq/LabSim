@@ -1,11 +1,25 @@
+# Ignorar archivos compilados de Python
 *.pyc
+
+# Ignorar todos los directorios __pycache__ en cualquier nivel
 **/__pycache__/
 **/__pycache__/*
+
+# Ignorar configuraciones específicas de VSCode
 .vscode/settings.json
-/target
 /.vscode
-**/__pycache__
-/.qt_for_python
+
+# Ignorar directorio de destino
+/target
+
+# Ignorar directorio .qt_for_python
+/qt_for_python
+.qt_for_python/
+
+# Ignorar archivos de construcción y distribución
 *.build/
 *.dist/
-.qt_for_python/
+
+# Ignorar directorios de salida
+**/output/
+**/output/*
