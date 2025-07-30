@@ -1,0 +1,7 @@
+pyside
+numpy
+audiometer
+requests
+cryptocode
+pyqtgraph
+bezier

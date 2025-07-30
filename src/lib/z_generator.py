@@ -1,8 +1,8 @@
 import numpy as np
 import random
-#from lib.bezier_prop import Bezier as bezier
+from lib.bezier_prop import Bezier as bezier
 
-import bezier
+#import bezier
 
 class Z_225():
     def __init__(self, manual=False, letter="A", c=1, p=0, g=1, pmax=200, num_pts=20, vol=1.8, unseal=False):
