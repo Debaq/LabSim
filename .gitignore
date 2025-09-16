@@ -4,3 +4,4 @@ software/LabSim/target/
 **/__pycache__/*
 
 .vscode/settings.json
+/.vscode
