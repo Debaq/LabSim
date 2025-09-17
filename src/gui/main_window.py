@@ -79,8 +79,8 @@ class MainWindow(QMainWindow):
                 # Agregar a la barra de tareas
                 self.taskbar.addOpenApp(module_name)
                 
-                # Conectar señal de cierre para limpiar registro
-                window.destroyed.connect(lambda: self.on_window_closed(module_name))
+                # Conectar señal de cierre correctamente
+                window.finished.connect(lambda: self.on_window_closed(module_name))
     
     def on_window_closed(self, module_name: str):
         """Se ejecuta cuando se cierra una ventana."""

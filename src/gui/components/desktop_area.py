@@ -43,8 +43,13 @@ class DesktopIcon(QPushButton):
             }
         """)
         
-        # Conectar señal de clic
-        self.clicked.connect(self.launch_app)
+        # NO conectar clicked, usar mouseDoubleClickEvent en su lugar
+    
+    def mouseDoubleClickEvent(self, event):
+        """Lanzar la aplicación con doble clic."""
+        if event.button() == Qt.LeftButton:
+            self.launch_app()
+        super().mouseDoubleClickEvent(event)
     
     def launch_app(self):
         """Lanzar la aplicación correspondiente."""

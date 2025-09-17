@@ -13,12 +13,15 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, 
     QMenuBar, QFileDialog, QMessageBox, QApplication
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QAction, QFont
 
 
 class TextProWindow(QWidget):
     """Ventana del editor de texto TextPro."""
+    
+    # Señal para notificar cuando la ventana se cierra
+    finished = Signal()
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -253,6 +256,7 @@ class TextProWindow(QWidget):
     def closeEvent(self, event):
         """Evento al cerrar la ventana."""
         if self.check_unsaved_changes():
+            self.finished.emit()  # Emitir señal antes de cerrar
             event.accept()
         else:
-            event.ignore()
+            event.ignore()  
