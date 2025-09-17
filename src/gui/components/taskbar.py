@@ -1,78 +1,20 @@
 """
-main_window.py - Ventana Principal con Escritorio Simulado tipo Windows
+taskbar.py - Barra de tareas inferior simulando Windows
 Autor: LabSim 3.0
 Licencia: MIT
 
 Descripción
 -----------
-Ventana principal que simula un escritorio Windows completo con:
-- Área de escritorio con iconos de aplicaciones
-- Barra de tareas inferior (sin botón inicio)
-- Sistema de ventanas independientes para cada módulo
-- Chat de paciente IA flotante
+Componente de barra de tareas con botón de inicio, aplicaciones abiertas
+y bandeja del sistema. Separado para mantener responsabilidades claras.
 """
 
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
-    QLabel, QPushButton, QFrame, QGridLayout, QSizePolicy, QMenu
+    QFrame, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, 
+    QWidget, QMenu
 )
 from PySide6.QtCore import Qt, QTimer, QTime
-from PySide6.QtGui import QFont, QPalette, QColor, QAction
-
-# Importar ventanas de aplicaciones
-from textpro_window import TextProWindow
-
-
-class DesktopIcon(QPushButton):
-    """Icono de aplicación en el escritorio."""
-    
-    def __init__(self, icon_text: str, app_name: str, parent=None):
-        super().__init__(parent)
-        self.app_name = app_name
-        self.parent_window = parent
-        
-        # Configuración visual del icono
-        self.setFixedSize(80, 80)
-        self.setText(f"{icon_text}\n{app_name}")
-        self.setStyleSheet("""
-            QPushButton {
-                background-color: transparent;
-                border: none;
-                color: white;
-                font-size: 17px;
-                text-align: center;
-                padding: 10px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: rgba(255, 255, 255, 0.1);
-                border-radius: 8px;
-            }
-            QPushButton:pressed {
-                background-color: rgba(255, 255, 255, 0.2);
-            }
-        """)
-        
-        # Conectar señal de clic
-        self.clicked.connect(self.launch_app)
-    
-    def launch_app(self):
-        """Lanzar la aplicación correspondiente."""
-        if self.app_name == "TextPro":
-            self.open_textpro()
-        else:
-            # Por ahora, otras aplicaciones solo muestran mensaje
-            print(f"Abriendo {self.app_name}...")
-    
-    def open_textpro(self):
-        """Abrir ventana de TextPro."""
-        # Buscar la ventana principal para acceder al gestor de ventanas
-        main_window = self.parent_window
-        while main_window and not isinstance(main_window, MainWindow):
-            main_window = main_window.parent()
-        
-        if main_window:
-            main_window.open_textpro()
+from PySide6.QtGui import QAction
 
 
 class StartButton(QPushButton):
@@ -110,9 +52,9 @@ class StartButton(QPushButton):
         apps = [
             ("🎧", "Audiometría"),
             ("📊", "Impedancia"), 
-            ("🔊", "OAE"),
+            ("📊", "OAE"),
             ("⚡", "ABR"),
-            ("📁", "Casos Clínicos"),
+            ("📋", "Casos Clínicos"),
             ("📝", "TextPro"),
             ("⚙️", "Configuración")
         ]
@@ -166,6 +108,8 @@ class StartButton(QPushButton):
             pos.setY(pos.y() - self.start_menu.sizeHint().height())
             self.start_menu.exec(pos)
         super().mousePressEvent(event)
+
+
 class TaskbarButton(QPushButton):
     """Botón de aplicación en la barra de tareas."""
     
@@ -236,10 +180,11 @@ class SystemTrayArea(QWidget):
 class Taskbar(QFrame):
     """Barra de tareas inferior simulando Windows."""
     
-    def __init__(self, parent=None):
+    def __init__(self, main_window, parent=None):
         super().__init__(parent)
-        self.setupUI()
+        self.main_window = main_window
         self.open_apps = []  # Lista de aplicaciones abiertas
+        self.setupUI()
     
     def setupUI(self):
         self.setFixedHeight(40)
@@ -292,132 +237,3 @@ class Taskbar(QFrame):
                 if isinstance(widget, TaskbarButton) and widget.text() == app_name:
                     widget.deleteLater()
                     break
-
-
-class DesktopArea(QWidget):
-    """Área del escritorio con iconos de aplicaciones."""
-    
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.main_window = parent
-        self.setupUI()
-    
-    def setupUI(self):
-        # Layout en grid para organizar los iconos
-        layout = QGridLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(20)
-        
-        # Definir aplicaciones del escritorio
-        desktop_apps = [
-            ("🎧", "Audiometría"),
-            ("📊", "Impedancia"),
-            ("🔊", "OAE"),
-            ("⚡", "ABR"),
-            ("📁", "Casos"),
-            ("📝", "TextPro"),
-            ("⚙️", "Config")
-        ]
-        
-        # Crear iconos de escritorio
-        row, col = 0, 0
-        for icon_text, app_name in desktop_apps:
-            icon = DesktopIcon(icon_text, app_name, self.main_window)
-            layout.addWidget(icon, row, col)
-            
-            # Organizar en columnas de 2
-            col += 1
-            if col >= 2:
-                col = 0
-                row += 1
-        
-        # Agregar stretch para que los iconos se mantengan arriba-izquierda
-        layout.setRowStretch(row + 1, 1)
-        layout.setColumnStretch(2, 1)
-
-
-class MainWindow(QMainWindow):
-    """Ventana principal con escritorio simulado tipo Windows."""
-    
-    def __init__(self):
-        super().__init__()
-        self.open_windows = {}  # Diccionario para gestionar ventanas abiertas
-        self.setupUI()
-        self.setupWindow()
-    
-    def setupWindow(self):
-        """Configuración básica de la ventana."""
-        self.setWindowTitle("LabSim 3.0 - Simulación Audiológica")
-        self.showFullScreen()  # Ventana en pantalla completa
-        
-        # Aplicar tema oscuro de escritorio
-        self.setStyleSheet("""
-            QMainWindow {
-                background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 1,
-                    stop: 0 #1e3c72, stop: 1 #2a5298);
-            }
-        """)
-    
-    def setupUI(self):
-        """Configuración de la interfaz de usuario."""
-        # Widget central que contiene todo el escritorio
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        
-        # Layout principal vertical
-        main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
-        
-        # Área del escritorio (ocupa la mayor parte del espacio)
-        self.desktop_area = DesktopArea(self)
-        main_layout.addWidget(self.desktop_area, 1)  # Factor de stretch 1
-        
-        # Barra de tareas (altura fija en la parte inferior)
-        self.taskbar = Taskbar()
-        main_layout.addWidget(self.taskbar, 0)  # Sin stretch, altura fija
-    
-    def open_textpro(self):
-        """Abrir ventana de TextPro."""
-        # Verificar si ya hay una instancia abierta
-        if "TextPro" in self.open_windows and self.open_windows["TextPro"].isVisible():
-            # Si ya está abierta, traerla al frente
-            self.open_windows["TextPro"].raise_()
-            self.open_windows["TextPro"].activateWindow()
-        else:
-            # Crear nueva ventana de TextPro
-            textpro_window = TextProWindow(self)
-            textpro_window.show()
-            
-            # Registrar la ventana
-            self.open_windows["TextPro"] = textpro_window
-            
-            # Agregar a la barra de tareas
-            self.taskbar.addOpenApp("TextPro")
-            
-            # Conectar señal de cierre para limpiar registro
-            textpro_window.destroyed.connect(lambda: self.on_window_closed("TextPro"))
-    
-    def on_window_closed(self, app_name):
-        """Se ejecuta cuando se cierra una ventana."""
-        if app_name in self.open_windows:
-            del self.open_windows[app_name]
-        self.taskbar.removeOpenApp(app_name)
-    
-    def keyPressEvent(self, event):
-        """Manejo de teclas especiales."""
-        # ESC para salir de pantalla completa (temporal para desarrollo)
-        if event.key() == Qt.Key_Escape:
-            self.close()
-        super().keyPressEvent(event)
-
-
-if __name__ == "__main__":
-    import sys
-    from PySide6.QtWidgets import QApplication
-    
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    
-    sys.exit(app.exec())
