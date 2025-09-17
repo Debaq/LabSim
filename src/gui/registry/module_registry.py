@@ -6,7 +6,7 @@ Licencia: MIT
 Descripción
 -----------
 Sistema de registry que permite abrir módulos sin hard-coding en main_window.
-Por ahora solo soporta TextPro, preparado para futuros módulos audiológicos.
+Ahora incluye Audiometría y TextPro, preparado para futuros módulos audiológicos.
 """
 
 from typing import Optional, Dict, Callable, Any
@@ -22,11 +22,11 @@ class ModuleRegistry:
     
     def _register_modules(self):
         """Registra todos los módulos disponibles."""
-        # Por ahora solo TextPro está implementado
+        # Módulos implementados
+        self._modules["Audiometría"] = self._create_audiometry
         self._modules["TextPro"] = self._create_textpro
         
         # Módulos futuros (placeholder para preparar la estructura)
-        self._modules["Audiometría"] = self._module_not_implemented
         self._modules["Impedancia"] = self._module_not_implemented
         self._modules["OAE"] = self._module_not_implemented
         self._modules["ABR"] = self._module_not_implemented
@@ -40,6 +40,12 @@ class ModuleRegistry:
         else:
             print(f"Módulo '{module_name}' no encontrado en el registry")
             return None
+    
+    def _create_audiometry(self):
+        """Crea una instancia del Audiómetro."""
+        # Import local para evitar dependencias circulares
+        from ..modules.audiometer_window import AudiometerWindow
+        return AudiometerWindow(self.main_window)
     
     def _create_textpro(self):
         """Crea una instancia de TextPro."""
