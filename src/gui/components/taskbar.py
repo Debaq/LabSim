@@ -13,15 +13,19 @@ from PySide6.QtWidgets import (
     QFrame, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, 
     QWidget, QMenu
 )
-from PySide6.QtCore import Qt, QTimer, QTime
+from PySide6.QtCore import Qt, QTimer, QTime, Signal
 from PySide6.QtGui import QAction
 
 
 class StartButton(QPushButton):
     """Botón de Inicio en la barra de tareas."""
     
-    def __init__(self, parent=None):
+    # Señal para logout
+    logout_requested = Signal()
+    
+    def __init__(self, username: str, parent=None):
         super().__init__("Inicio", parent)
+        self.username = username
         self.setFixedSize(80, 30)
         self.setStyleSheet("""
             QPushButton {
@@ -46,6 +50,13 @@ class StartButton(QPushButton):
         
     def setupStartMenu(self):
         """Configura el menú de inicio."""
+        # Información del usuario en la parte superior
+        user_action = QAction(f"👤 {self.username}", self)
+        user_action.setEnabled(False)  # Solo informativo
+        self.start_menu.addAction(user_action)
+        
+        self.start_menu.addSeparator()
+        
         # Aplicaciones principales
         apps_menu = self.start_menu.addMenu("📁 Programas")
         
@@ -65,11 +76,9 @@ class StartButton(QPushButton):
         
         self.start_menu.addSeparator()
         
-        # Opciones del sistema
-        system_action = QAction("👤 Cambiar Usuario", self)
-        self.start_menu.addAction(system_action)
-        
+        # Opción de cerrar sesión
         logout_action = QAction("🚪 Cerrar Sesión", self)
+        logout_action.triggered.connect(self.logout_requested.emit)
         self.start_menu.addAction(logout_action)
         
         self.start_menu.addSeparator()
@@ -92,6 +101,11 @@ class StartButton(QPushButton):
             }
             QMenu::item:selected {
                 background-color: rgba(70, 130, 200, 0.7);
+            }
+            QMenu::item:disabled {
+                color: #86868b;
+                background-color: rgba(255, 255, 255, 0.05);
+                font-weight: bold;
             }
             QMenu::separator {
                 height: 1px;
@@ -180,11 +194,27 @@ class SystemTrayArea(QWidget):
 class Taskbar(QFrame):
     """Barra de tareas inferior simulando Windows."""
     
-    def __init__(self, main_window, parent=None):
+    # Señal para logout
+    logout_requested = Signal()
+    
+    def __init__(self, main_window, username: str, parent=None):
         super().__init__(parent)
         self.main_window = main_window
+        self.username = username
         self.open_apps = []  # Lista de aplicaciones abiertas
         self.setupUI()
+    
+    def update_user(self, username: str):
+        """Actualiza el usuario en la taskbar."""
+        self.username = username
+        # Recrear el botón de inicio con el nuevo usuario
+        self.start_button.deleteLater()
+        self.start_button = StartButton(self.username)
+        self.start_button.logout_requested.connect(self.logout_requested.emit)
+        
+        # Insertar en la primera posición
+        layout = self.layout()
+        layout.insertWidget(0, self.start_button)
     
     def setupUI(self):
         self.setFixedHeight(40)
@@ -200,7 +230,8 @@ class Taskbar(QFrame):
         layout.setSpacing(5)
         
         # Botón de Inicio
-        self.start_button = StartButton()
+        self.start_button = StartButton(self.username)
+        self.start_button.logout_requested.connect(self.logout_requested.emit)
         layout.addWidget(self.start_button)
         
         # Separador visual

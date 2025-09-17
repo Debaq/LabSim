@@ -10,7 +10,7 @@ Refactorizada para seguir la estructura modular propuesta.
 """
 
 from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPalette, QColor
 
 from .components.desktop_area import DesktopArea
@@ -21,8 +21,12 @@ from .registry.module_registry import ModuleRegistry
 class MainWindow(QMainWindow):
     """Ventana principal con escritorio simulado tipo Windows."""
     
+    # Señal para solicitar logout
+    logout_requested = Signal()
+    
     def __init__(self):
         super().__init__()
+        self.current_user = None  # Se establecerá después del login
         self.module_registry = ModuleRegistry(self)
         self.open_windows = {}  # Diccionario para gestionar ventanas abiertas
         self.setupWindow()
@@ -57,11 +61,26 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(self.desktop_area, 1)  # Factor de stretch 1
         
         # Barra de tareas (altura fija en la parte inferior)
-        self.taskbar = Taskbar(self)
+        # Inicialmente sin usuario, se actualizará después del login
+        self.taskbar = Taskbar(self, "")
         main_layout.addWidget(self.taskbar, 0)  # Sin stretch, altura fija
+        
+        # Conectar señal de logout de la taskbar
+        self.taskbar.logout_requested.connect(self.logout_requested.emit)
+    
+    def set_current_user(self, username: str):
+        """Establece el usuario actual después del login."""
+        self.current_user = username
+        
+        # Actualizar la taskbar con el nuevo usuario
+        self.taskbar.update_user(username)
     
     def open_module(self, module_name: str):
         """Abre un módulo específico usando el registry."""
+        # Solo permitir abrir módulos si hay usuario logueado
+        if not self.current_user:
+            return
+            
         # Verificar si ya hay una instancia abierta
         if module_name in self.open_windows and self.open_windows[module_name].isVisible():
             # Si ya está abierta, traerla al frente
