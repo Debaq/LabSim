@@ -19,6 +19,9 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QTimer, QTime
 from PySide6.QtGui import QFont, QPalette, QColor, QAction
 
+# Importar ventanas de aplicaciones
+from textpro_window import TextProWindow
+
 
 class DesktopIcon(QPushButton):
     """Icono de aplicación en el escritorio."""
@@ -26,6 +29,7 @@ class DesktopIcon(QPushButton):
     def __init__(self, icon_text: str, app_name: str, parent=None):
         super().__init__(parent)
         self.app_name = app_name
+        self.parent_window = parent
         
         # Configuración visual del icono
         self.setFixedSize(80, 80)
@@ -35,7 +39,7 @@ class DesktopIcon(QPushButton):
                 background-color: transparent;
                 border: none;
                 color: white;
-                font-size: 18px;
+                font-size: 17px;
                 text-align: center;
                 padding: 10px;
                 font-weight: bold;
@@ -48,6 +52,27 @@ class DesktopIcon(QPushButton):
                 background-color: rgba(255, 255, 255, 0.2);
             }
         """)
+        
+        # Conectar señal de clic
+        self.clicked.connect(self.launch_app)
+    
+    def launch_app(self):
+        """Lanzar la aplicación correspondiente."""
+        if self.app_name == "TextPro":
+            self.open_textpro()
+        else:
+            # Por ahora, otras aplicaciones solo muestran mensaje
+            print(f"Abriendo {self.app_name}...")
+    
+    def open_textpro(self):
+        """Abrir ventana de TextPro."""
+        # Buscar la ventana principal para acceder al gestor de ventanas
+        main_window = self.parent_window
+        while main_window and not isinstance(main_window, MainWindow):
+            main_window = main_window.parent()
+        
+        if main_window:
+            main_window.open_textpro()
 
 
 class StartButton(QPushButton):
@@ -274,6 +299,7 @@ class DesktopArea(QWidget):
     
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.main_window = parent
         self.setupUI()
     
     def setupUI(self):
@@ -296,7 +322,7 @@ class DesktopArea(QWidget):
         # Crear iconos de escritorio
         row, col = 0, 0
         for icon_text, app_name in desktop_apps:
-            icon = DesktopIcon(icon_text, app_name)
+            icon = DesktopIcon(icon_text, app_name, self.main_window)
             layout.addWidget(icon, row, col)
             
             # Organizar en columnas de 2
@@ -315,6 +341,7 @@ class MainWindow(QMainWindow):
     
     def __init__(self):
         super().__init__()
+        self.open_windows = {}  # Diccionario para gestionar ventanas abiertas
         self.setupUI()
         self.setupWindow()
     
@@ -343,12 +370,39 @@ class MainWindow(QMainWindow):
         main_layout.setSpacing(0)
         
         # Área del escritorio (ocupa la mayor parte del espacio)
-        self.desktop_area = DesktopArea()
+        self.desktop_area = DesktopArea(self)
         main_layout.addWidget(self.desktop_area, 1)  # Factor de stretch 1
         
         # Barra de tareas (altura fija en la parte inferior)
         self.taskbar = Taskbar()
         main_layout.addWidget(self.taskbar, 0)  # Sin stretch, altura fija
+    
+    def open_textpro(self):
+        """Abrir ventana de TextPro."""
+        # Verificar si ya hay una instancia abierta
+        if "TextPro" in self.open_windows and self.open_windows["TextPro"].isVisible():
+            # Si ya está abierta, traerla al frente
+            self.open_windows["TextPro"].raise_()
+            self.open_windows["TextPro"].activateWindow()
+        else:
+            # Crear nueva ventana de TextPro
+            textpro_window = TextProWindow(self)
+            textpro_window.show()
+            
+            # Registrar la ventana
+            self.open_windows["TextPro"] = textpro_window
+            
+            # Agregar a la barra de tareas
+            self.taskbar.addOpenApp("TextPro")
+            
+            # Conectar señal de cierre para limpiar registro
+            textpro_window.destroyed.connect(lambda: self.on_window_closed("TextPro"))
+    
+    def on_window_closed(self, app_name):
+        """Se ejecuta cuando se cierra una ventana."""
+        if app_name in self.open_windows:
+            del self.open_windows[app_name]
+        self.taskbar.removeOpenApp(app_name)
     
     def keyPressEvent(self, event):
         """Manejo de teclas especiales."""
