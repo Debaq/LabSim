@@ -26,8 +26,10 @@ class ModuleRegistry:
         self._modules["Audiometría"] = self._create_audiometry
         self._modules["TextPro"] = self._create_textpro
         
+        self._modules["Impedancia"] = self._create_impedance
+        
+        
         # Módulos futuros (placeholder para preparar la estructura)
-        self._modules["Impedancia"] = self._module_not_implemented
         self._modules["OAE"] = self._module_not_implemented
         self._modules["ABR"] = self._module_not_implemented
         self._modules["Casos"] = self._module_not_implemented
@@ -52,6 +54,12 @@ class ModuleRegistry:
         # Import local para evitar dependencias circulares
         from ..dialogs.textpro_window import TextProWindow
         return TextProWindow(self.main_window)
+    
+    def _create_impedance(self):
+        """Crea una instancia de Impedancia."""
+        # Import local para evitar dependencias circulares
+        from ..modules.impedance_window import ImpedanceWindow
+        return ImpedanceWindow(self.main_window)
     
     def _module_not_implemented(self):
         """Placeholder para módulos no implementados aún."""
