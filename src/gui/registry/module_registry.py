@@ -28,7 +28,8 @@ class ModuleRegistry:
         
         self._modules["Impedancia"] = self._create_impedance
         
-        
+        self._modules["Explorador"] = self._create_explorer
+
         # Módulos futuros (placeholder para preparar la estructura)
         self._modules["OAE"] = self._module_not_implemented
         self._modules["ABR"] = self._module_not_implemented
@@ -43,6 +44,12 @@ class ModuleRegistry:
             print(f"Módulo '{module_name}' no encontrado en el registry")
             return None
     
+    
+    def _create_explorer(self):
+        """Crea una instancia del Explorador."""
+        from ..dialogs.file_explorer import FileExplorerWindow
+        return FileExplorerWindow(self.main_window.current_user, self.main_window)
+
     def _create_audiometry(self):
         """Crea una instancia del Audiómetro."""
         # Import local para evitar dependencias circulares

@@ -78,7 +78,9 @@ class DesktopArea(QWidget):
             ("⚡", "ABR"),
             ("📋", "Casos"),
             ("📝", "TextPro"),
-            ("⚙️", "Config")
+            ("⚙️", "Config"),
+            ("📁", "Explorador"),
+
         ]
         
         # Crear iconos de escritorio
