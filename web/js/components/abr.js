@@ -1,366 +1,176 @@
+
 /**
  * AbrModule - Módulo de Potenciales Evocados Auditivos (ABR)
- * Ondas I, III, V con auto-cálculo de II y IV
+ * Vista preparada para 3 archivos de gráficos (views) independientes.
+ *
+ * Cambios clave:
+ *  - Sin "Configuración General".
+ *  - Sin checkbox de "Buena morfología".
+ *  - "Tone Burst" con subselector de frecuencias (500, 1k, 2k, 4k).
+ *  - Placeholders convertidos en valores por defecto reales.
+ *  - Auto-cálculo de II y IV siempre activo.
+ *  - Loader de vistas (3 archivos): ABRWaveform80View, ABRWaveformFinalView, ABRLatencyIntensityView.
  */
 
 class AbrModule {
     constructor(app) {
         this.app = app;
         this.moduleId = 'abr';
-        
-        // Configuración de ondas
+
+        // Ondas
         this.waves = ['I', 'II', 'III', 'IV', 'V'];
         this.editableWaves = ['I', 'III', 'V'];
         this.autoWaves = ['II', 'IV'];
-        
-        // Tipos de estímulo
-        this.stimulusTypes = [
+
+        // Tabs de estímulo
+        this.displayStimuli = [
             { id: 'click', name: 'Click', icon: '🔊' },
             { id: 'tone_burst', name: 'Tone Burst', icon: '📊' },
             { id: 'chirp', name: 'Chirp', icon: '🌊' }
         ];
+
+        // Subtabs de frecuencia para Tone Burst
+        this.toneBurstFrequencies = [
+            { id: '500', label: '500 Hz' },
+            { id: '1k', label: '1 kHz' },
+            { id: '2k', label: '2 kHz' },
+            { id: '4k', label: '4 kHz' }
+        ];
+
+        // Vistas de gráficos
+        this.chartViews = { wf80: null, wfFinal: null, latency: null };
+        this.chartViewsStatus = { wf80: 'pending', wfFinal: 'pending', latency: 'pending' };
+        this.chartConfig = [
+            { key: 'core',   file: 'js/components/views/abr-waveform-core.js',   className: null, canvasId: null },
+            { key: 'wf80',   file: 'js/components/views/abr-waveform-80.js',     className: 'ABRWaveform80View',       canvasId: 'abrWaveform80Canvas' },
+            { key: 'wfFinal',file: 'js/components/views/abr-waveform-final.js',  className: 'ABRWaveformFinalView',    canvasId: 'abrWaveformFinalCanvas' },
+            { key: 'latency',file: 'js/components/views/abr-li-curves.js',       className: 'ABRLatencyIntensityView', canvasId: 'abrLatencyCanvas' },
+        ];
     }
 
     /**
-     * Renderizar contenido del módulo
+     * Render principal
      */
     async render(existingData = {}) {
+        const activeStimulus = existingData.stimulus_activo || 'click';
+        const activeTbFreq = existingData.tone_burst_activo || '1k';
+
         return `
         <div class="form-section">
         <h3 class="section-title">⚡ Potenciales Evocados Auditivos (ABR)</h3>
-        <p class="section-description">
-        Evaluación de la función auditiva mediante potenciales evocados del tronco cerebral
-        </p>
+        <p class="section-description">Evaluación de la función auditiva mediante potenciales evocados del tronco cerebral</p>
 
-        <!-- Layout Principal: Formularios (40%) + Gráficos (60%) -->
         <div style="display: flex; gap: 30px;">
-        
         <!-- Panel de Formularios -->
         <div style="flex: 2; min-width: 450px;">
-        
-        <!-- Selector de Estímulo -->
+        <!-- Tabs estímulo -->
         <div class="abr-stimulus-selector">
-        ${this.renderStimulusSelector(existingData.stimulus_activo || 'click')}
+        ${this.renderStimulusSelector(activeStimulus)}
         </div>
 
-        <!-- Configuración Global -->
-        <div class="abr-global-config">
-        <h4 class="section-subtitle">Configuración General</h4>
-        
-        <div class="form-row">
-        <div class="form-col-3">
-        <label>Intensidad 80 dB</label>
-        <input type="checkbox" id="abr_80db_enabled" ${existingData.intensidad_80db?.habilitado !== false ? 'checked' : ''}>
-        <span style="margin-left: 8px; font-size: 12px;">Activado</span>
-        </div>
-        <div class="form-col-3">
-        <label>Intensidad Umbral</label>
-        <input type="number" 
-               id="abr_umbral_intensidad" 
-               class="abr-input"
-               min="0" max="80" step="5"
-               value="${existingData.intensidad_umbral?.valor || 30}"
-               placeholder="30"> dB nHL
-        </div>
-        <div class="form-col-3">
-        <label>Umbral Habilitado</label>
-        <input type="checkbox" id="abr_umbral_enabled" ${existingData.intensidad_umbral?.habilitado !== false ? 'checked' : ''}>
-        <span style="margin-left: 8px; font-size: 12px;">Activado</span>
-        </div>
-        </div>
-
-        <div class="form-row">
-        <div class="form-col-2">
-        <label>Generar Onda II</label>
-        <input type="checkbox" id="abr_generar_onda_ii" ${existingData.generar_ondas?.II !== false ? 'checked' : ''}>
-        <span style="margin-left: 8px; font-size: 12px;">Auto-calcular</span>
-        </div>
-        <div class="form-col-2">
-        <label>Generar Onda IV</label>
-        <input type="checkbox" id="abr_generar_onda_iv" ${existingData.generar_ondas?.IV !== false ? 'checked' : ''}>
-        <span style="margin-left: 8px; font-size: 12px;">Auto-calcular</span>
-        </div>
-        </div>
-        </div>
-
-        <!-- Formularios por Estímulo -->
+        <!-- Formularios -->
         <div class="abr-stimulus-forms">
-        ${this.stimulusTypes.map(stimulus => this.renderStimulusForm(stimulus, existingData[stimulus.id])).join('')}
+        ${this.renderStimulusForm({ id: 'click', name: 'Click', icon: '🔊' }, existingData['click'])}
+        ${this.renderToneBurstForm(existingData['tone_burst'], activeTbFreq)}
+        ${this.renderStimulusForm({ id: 'chirp', name: 'Chirp', icon: '🌊' }, existingData['chirp'])}
         </div>
 
         <!-- Observaciones -->
         <div class="form-group" style="margin-top: 20px;">
         <label class="label-optional">Observaciones</label>
-        <textarea id="abr_observations"
-                  rows="3"
-                  placeholder="Comentarios sobre morfología, replicabilidad, calidad técnica...">${existingData.observaciones || ''}</textarea>
+        <textarea id="abr_observations" rows="3" placeholder="Comentarios clínicos...">${existingData.observaciones || ''}</textarea>
         </div>
         </div>
 
         <!-- Panel de Gráficos -->
         <div style="flex: 3; min-width: 500px;">
         <h4 class="section-subtitle">📊 Visualización de Resultados</h4>
-        
-        <!-- Formas de Onda 80 dB -->
+
         <div class="chart-container">
         <h5>Formas de Onda - 80 dB nHL</h5>
-        <div id="abrWaveform80Canvas" class="chart-placeholder">
-        <div class="placeholder-content">
-        <span>📈 Gráfico de formas de onda</span>
-        <small>Ondas I, II, III, IV, V por oído</small>
+        <canvas id="abrWaveform80Canvas" class="chart-placeholder"></canvas>
         </div>
-        </div>
-        </div>
-        
-        <!-- Formas de Onda Umbral -->
+
         <div class="chart-container">
-        <h5>Formas de Onda - Umbral</h5>
-        <div id="abrWaveformThresholdCanvas" class="chart-placeholder">
-        <div class="placeholder-content">
-        <span>📈 Gráfico de umbral</span>
-        <small>Ondas detectables al umbral</small>
+        <h5>Formas de Onda - Final</h5>
+        <canvas id="abrWaveformFinalCanvas" class="chart-placeholder"></canvas>
         </div>
-        </div>
-        </div>
-        
-        <!-- Curvas Latencia-Intensidad -->
+
         <div class="chart-container">
         <h5>Curvas Latencia-Intensidad</h5>
-        <div id="abrLatencyCanvas" class="chart-placeholder">
-        <div class="placeholder-content">
-        <span>📊 Curvas L-I</span>
-        <small>Latencia vs Intensidad por onda</small>
-        </div>
-        </div>
+        <canvas id="abrLatencyCanvas" class="chart-placeholder"></canvas>
         </div>
         </div>
         </div>
         </div>
 
         <style>
-        .abr-stimulus-selector {
-            margin-bottom: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-        }
+        .abr-stimulus-selector { margin-bottom: 20px; background: #f8f9fa; border-radius: 8px; padding: 15px; }
+        .stimulus-tabs { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .stimulus-tab { padding: 8px 16px; border: 2px solid #dee2e6; border-radius: 6px; background: white; cursor: pointer; font-size: 13px; transition: all 0.2s ease; }
+        .stimulus-tab.active { border-color: #6f42c1; background: #6f42c1; color: white; }
+        .stimulus-tab:hover:not(.active) { border-color: #6f42c1; color: #6f42c1; }
 
-        .stimulus-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
+        .abr-stimulus-forms { margin-bottom: 20px; }
+        .stimulus-form { display: none; padding: 20px; background: white; border: 1px solid #dee2e6; border-radius: 8px; }
+        .stimulus-form.active { display: block; }
 
-        .stimulus-tab {
-            padding: 8px 16px;
-            border: 2px solid #dee2e6;
-            border-radius: 6px;
-            background: white;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.2s ease;
-        }
+        .tb-freq-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .tb-freq-tab { padding: 6px 10px; border: 1px solid #ced4da; border-radius: 6px; cursor: pointer; }
+        .tb-freq-tab.active { background: #0d6efd; color: white; border-color: #0d6efd; }
+        .tb-freq-form { display: none; }
+        .tb-freq-form.active { display: block; }
 
-        .stimulus-tab.active {
-            border-color: #6f42c1;
-            background: #6f42c1;
-            color: white;
-        }
+        .abr-ear-section { margin-bottom: 25px; padding: 15px; background: #fafafa; border-radius: 6px; border-left: 3px solid; }
+        .abr-ear-section.od { border-left-color: #dc3545; }
+        .abr-ear-section.oi { border-left-color: #007bff; }
+        .ear-title { font-weight: 600; margin-bottom: 15px; color: #333; }
+        .ear-title.od { color: #dc3545; }
+        .ear-title.oi { color: #007bff; }
 
-        .stimulus-tab:hover:not(.active) {
-            border-color: #6f42c1;
-            color: #6f42c1;
-        }
+        .abr-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 15px; }
+        .abr-table th { background: #e9ecef; border: 1px solid #dee2e6; padding: 6px 8px; text-align: center; font-weight: 600; font-size: 12px; }
+        .abr-table td { border: 1px solid #dee2e6; padding: 4px 6px; text-align: center; }
 
-        .abr-global-config {
-            margin-bottom: 25px;
-            padding: 15px;
-            background: #f1f3f4;
-            border-radius: 8px;
-            border-left: 4px solid #6f42c1;
-        }
+        .wave-label { background: #f8f9fa; font-weight: 500; width: 40px; }
+        .wave-label.auto { background: #fff3cd; color: #856404; font-style: italic; }
 
-        .abr-stimulus-forms {
-            margin-bottom: 20px;
-        }
+        .abr-input { width: 60px; padding: 3px 5px; border: 1px solid #ced4da; border-radius: 3px; text-align: center; font-size: 12px; }
+        .abr-input:focus { border-color: #6f42c1; outline: none; box-shadow: 0 0 0 2px rgba(111,66,193,0.1); }
+        .abr-input:disabled { background: #f8f9fa; color: #6c757d; }
 
-        .stimulus-form {
-            display: none;
-            padding: 20px;
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-        }
+        .abr-checkbox { transform: scale(0.9); }
 
-        .stimulus-form.active {
-            display: block;
-        }
-
-        .abr-ear-section {
-            margin-bottom: 25px;
-            padding: 15px;
-            background: #fafafa;
-            border-radius: 6px;
-            border-left: 3px solid;
-        }
-
-        .abr-ear-section.od {
-            border-left-color: #dc3545;
-        }
-
-        .abr-ear-section.oi {
-            border-left-color: #007bff;
-        }
-
-        .ear-title {
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        .ear-title.od {
-            color: #dc3545;
-        }
-
-        .ear-title.oi {
-            color: #007bff;
-        }
-
-        .abr-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-            margin-bottom: 15px;
-        }
-
-        .abr-table th {
-            background: #e9ecef;
-            border: 1px solid #dee2e6;
-            padding: 6px 8px;
-            text-align: center;
-            font-weight: 600;
-            font-size: 12px;
-        }
-
-        .abr-table td {
-            border: 1px solid #dee2e6;
-            padding: 4px 6px;
-            text-align: center;
-        }
-
-        .wave-label {
-            background: #f8f9fa;
-            font-weight: 500;
-            width: 40px;
-        }
-
-        .wave-label.auto {
-            background: #fff3cd;
-            color: #856404;
-            font-style: italic;
-        }
-
-        .abr-input {
-            width: 60px;
-            padding: 3px 5px;
-            border: 1px solid #ced4da;
-            border-radius: 3px;
-            text-align: center;
-            font-size: 12px;
-        }
-
-        .abr-input:focus {
-            border-color: #6f42c1;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(111, 66, 193, 0.1);
-        }
-
-        .abr-input:disabled {
-            background: #f8f9fa;
-            color: #6c757d;
-        }
-
-        .abr-checkbox {
-            transform: scale(0.9);
-        }
-
-        .morphology-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-top: 10px;
-            padding: 8px 12px;
-            background: #e8f5e8;
-            border-radius: 4px;
-        }
-
-        .chart-container {
-            margin-bottom: 15px;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 15px;
-            background: white;
-        }
-
-        .chart-container h5 {
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            color: #495057;
-            text-align: center;
-        }
-
-        .chart-placeholder {
-            height: 150px;
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            border-radius: 4px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #6c757d;
-        }
-
-        .placeholder-content span {
-            font-size: 16px;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .placeholder-content small {
-            font-size: 12px;
-            opacity: 0.7;
-        }
+        .chart-container { margin-bottom: 15px; border: 1px solid #dee2e6; border-radius: 6px; padding: 15px; background: white; }
+        .chart-container h5 { margin: 0 0 10px 0; font-size: 14px; color: #495057; text-align: center; }
+        .chart-placeholder { width: 100%; height: 180px; background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 4px; }
         </style>
         `;
     }
 
     /**
-     * Renderizar selector de estímulo
+     * Selector de estímulo
      */
     renderStimulusSelector(activeStimulus) {
         return `
         <div class="stimulus-tabs">
-        ${this.stimulusTypes.map(stimulus => `
-        <div class="stimulus-tab ${stimulus.id === activeStimulus ? 'active' : ''}" 
-             data-stimulus="${stimulus.id}">
-        ${stimulus.icon} ${stimulus.name}
-        </div>
-        `).join('')}
-        </div>
-        `;
+        ${this.displayStimuli.map(stimulus => `
+            <div class="stimulus-tab ${stimulus.id === activeStimulus ? 'active' : ''}" data-stimulus="${stimulus.id}">
+            ${stimulus.icon} ${stimulus.name}
+            </div>
+            `).join('')}
+            </div>
+            `;
     }
 
     /**
-     * Renderizar formulario por estímulo
+     * Formulario simple (click, chirp)
      */
     renderStimulusForm(stimulus, existingData = {}) {
-        const isActive = false; // Se manejará con JavaScript
-        
+        const isActive = false;
         return `
-        <div class="stimulus-form ${isActive ? 'active' : ''}" id="form_${stimulus.id}">
+        <div class="stimulus-form ${isActive ? 'active' : ''}" id="form_${stimulus.id}" data-stimulus="${stimulus.id}">
         <h4 class="section-subtitle">${stimulus.icon} ${stimulus.name}</h4>
-        
         ${this.renderEarSection('od', 'Oído Derecho', existingData?.oido_derecho, stimulus.id)}
         ${this.renderEarSection('oi', 'Oído Izquierdo', existingData?.oido_izquierdo, stimulus.id)}
         </div>
@@ -368,103 +178,111 @@ class AbrModule {
     }
 
     /**
-     * Renderizar sección por oído
+     * Formulario con subselector de frecuencias para Tone Burst
+     */
+    renderToneBurstForm(existingData = {}, activeFreq = '1k') {
+        const isActive = false;
+        return `
+        <div class="stimulus-form ${isActive ? 'active' : ''}" id="form_tone_burst" data-stimulus="tone_burst">
+        <h4 class="section-subtitle">📊 Tone Burst</h4>
+        <div class="tb-freq-tabs">
+        ${this.toneBurstFrequencies.map(f => `
+            <div class="tb-freq-tab ${f.id === activeFreq ? 'active' : ''}" data-tb-freq="${f.id}">${f.label}</div>
+            `).join('')}
+            </div>
+
+            ${this.toneBurstFrequencies.map(f => `
+                <div class="tb-freq-form ${f.id === activeFreq ? 'active' : ''}" id="tb_form_${f.id}" data-tb-freq="${f.id}">
+                ${this.renderEarSection('od', 'Oído Derecho', existingData?.[f.id]?.oido_derecho, `tone_burst_${f.id}`)}
+                ${this.renderEarSection('oi', 'Oído Izquierdo', existingData?.[f.id]?.oido_izquierdo, `tone_burst_${f.id}`)}
+                </div>
+                `).join('')}
+                </div>
+                `;
+    }
+
+    /**
+     * Sección por oído
      */
     renderEarSection(earId, earTitle, existingData = {}, stimulusId) {
         return `
         <div class="abr-ear-section ${earId}">
         <h5 class="ear-title ${earId}">${earTitle}</h5>
-        
-        <!-- Tabla de Ondas 80 dB -->
+
         <div class="intensity-section">
         <label style="font-weight: 600; margin-bottom: 8px; display: block;">Intensidad 80 dB nHL</label>
         <table class="abr-table">
         <thead>
         <tr>
-        <th>Onda</th>
-        <th>Latencia (ms)</th>
-        <th>Amplitud (µV)</th>
-        <th>Replicabilidad (ms)</th>
+        <th>Onda</th><th>Presente</th><th>Latencia (ms)</th><th>Amplitud (µV)</th><th>Replicabilidad (ms)</th>
         </tr>
         </thead>
         <tbody>
-        ${this.renderWaveRows(earId, stimulusId, '80db', existingData['80db'])}
+        ${this.renderWaveRows(earId, stimulusId, '80db', existingData?.['80db'] || {})}
         </tbody>
         </table>
         </div>
 
-        <!-- Tabla de Ondas Umbral -->
         <div class="intensity-section">
-        <label style="font-weight: 600; margin-bottom: 8px; display: block;">Intensidad Umbral</label>
+        <label style="font-weight: 600; margin-bottom: 8px; display: block;">Intensidad Final</label>
         <table class="abr-table">
         <thead>
         <tr>
-        <th>Onda</th>
-        <th>Latencia (ms)</th>
-        <th>Amplitud (µV)</th>
-        <th>Replicabilidad (ms)</th>
+        <th>Onda</th><th>Presente</th><th>Latencia (ms)</th><th>Amplitud (µV)</th><th>Replicabilidad (ms)</th>
         </tr>
         </thead>
         <tbody>
-        ${this.renderWaveRows(earId, stimulusId, 'umbral', existingData['umbral'])}
+        ${this.renderWaveRows(earId, stimulusId, 'final', existingData?.['final'] || {})}
         </tbody>
         </table>
-        </div>
-
-        <!-- Morfología -->
-        <div class="morphology-section">
-        <label style="font-weight: 500;">
-        <input type="checkbox" 
-               class="abr-checkbox" 
-               id="${stimulusId}_morfologia_${earId}"
-               ${existingData.buena_morfologia !== false ? 'checked' : ''}>
-        Buena morfología
-        </label>
         </div>
         </div>
         `;
     }
 
     /**
-     * Renderizar filas de ondas
+     * Filas de ondas
      */
     renderWaveRows(earId, stimulusId, intensity, existingData = {}) {
         return this.waves.map(wave => {
             const isAuto = this.autoWaves.includes(wave);
-            const waveData = existingData[`onda_${wave}`] || {};
+            const wd = existingData[`onda_${wave}`] || {};
             const disabled = isAuto ? 'disabled' : '';
             const autoClass = isAuto ? 'auto' : '';
-            
+            const isPresent = wd.presente !== false; // por defecto true
+
+            const defaultLatency = this.getDefaultLatency(wave, intensity);
+            const defaultAmplitude = '0.25';
+            const defaultRep = '0.05';
+
             return `
             <tr>
-            <td class="wave-label ${autoClass}">
-            ${wave}${isAuto ? '*' : ''}
+            <td class="wave-label ${autoClass}">${wave}${isAuto ? '*' : ''}</td>
+            <td>
+            <input type="checkbox" class="abr-checkbox wave-presence"
+            id="${stimulusId}_${intensity}_presente_${wave}_${earId}"
+            ${isPresent ? 'checked' : ''} ${disabled}>
             </td>
             <td>
-            <input type="number" 
-                   class="abr-input wave-latency" 
-                   id="${stimulusId}_${intensity}_latencia_${wave}_${earId}"
-                   min="0" max="10" step="0.01"
-                   value="${waveData.latencia || ''}"
-                   placeholder="${this.getDefaultLatency(wave, intensity)}"
-                   ${disabled}>
+            <input type="number" class="abr-input wave-latency"
+            id="${stimulusId}_${intensity}_latencia_${wave}_${earId}"
+            min="0" max="10" step="0.01"
+            value="${wd.latencia ?? defaultLatency}"
+            ${disabled || !isPresent ? 'disabled' : ''}>
             </td>
             <td>
-            <input type="number" 
-                   class="abr-input wave-amplitude" 
-                   id="${stimulusId}_${intensity}_amplitud_${wave}_${earId}"
-                   min="0" max="5" step="0.01"
-                   value="${waveData.amplitud || ''}"
-                   placeholder="0.25"
-                   ${disabled}>
+            <input type="number" class="abr-input wave-amplitude"
+            id="${stimulusId}_${intensity}_amplitud_${wave}_${earId}"
+            min="0" max="5" step="0.01"
+            value="${wd.amplitud ?? defaultAmplitude}"
+            ${disabled || !isPresent ? 'disabled' : ''}>
             </td>
             <td>
-            <input type="number" 
-                   class="abr-input wave-replicability" 
-                   id="${stimulusId}_${intensity}_replicabilidad_${wave}_${earId}"
-                   min="0" max="1" step="0.01"
-                   value="${waveData.replicabilidad || '0.08'}"
-                   placeholder="0.08">
+            <input type="number" class="abr-input wave-replicability"
+            id="${stimulusId}_${intensity}_replicabilidad_${wave}_${earId}"
+            min="0" max="1" step="0.01"
+            value="${wd.replicabilidad ?? defaultRep}"
+            ${!isPresent ? 'disabled' : ''}>
             </td>
             </tr>
             `;
@@ -472,47 +290,68 @@ class AbrModule {
     }
 
     /**
-     * Obtener latencia por defecto para una onda
+     * Defaults de latencia (puedes ajustar si tu protocolo difiere)
      */
     getDefaultLatency(wave, intensity) {
         const defaults = {
             '80db': { 'I': '1.5', 'II': '2.5', 'III': '3.5', 'IV': '4.5', 'V': '5.5' },
-            'umbral': { 'I': '1.8', 'II': '2.8', 'III': '3.8', 'IV': '4.8', 'V': '5.8' }
+            'final': { 'I': '1.8', 'II': '2.8', 'III': '3.8', 'IV': '4.8', 'V': '5.8' }
         };
         return defaults[intensity]?.[wave] || '';
     }
 
     /**
-     * Inicializar eventos después de renderizar
+     * Eventos y loader de vistas
      */
     async initEvents() {
-        // Configurar tabs de estímulo
         this.setupStimulusTabs();
+        this.setupToneBurstTabs();
+        this.setupPresenceControls();
 
-        // Auto-cálculo de ondas II y IV
-        this.setupAutoCalculation();
-
-        // Auto-save al cambiar valores
+        // Auto-save + repaint de charts
         const inputs = document.querySelectorAll('#tabsContent input, #tabsContent textarea');
         inputs.forEach(input => {
             input.addEventListener('input', () => {
                 this.updateAutoWaves();
                 this.app.updateModuleData(this.moduleId, this.getData());
+                this.updateABRPreviews();
             });
-
             input.addEventListener('change', () => {
                 this.updateAutoWaves();
                 this.app.updateModuleData(this.moduleId, this.getData());
+                this.updateABRPreviews();
             });
         });
 
-        // Configurar estado inicial
-        this.updateIntensityStates();
+        // Carga de vistas
+        await this.loadChartViews();
+
+        // Estado inicial
+        this.updatePresenceStates();
         this.updateAutoWaves();
+        this.updateABRPreviews();
+    }
+
+    async loadChartViews() {
+        for (const cfg of this.chartConfig) {
+            try {
+                await this.app.loadScript(cfg.file);
+                if (window[cfg.className]) {
+                    this.chartViews[cfg.key] = new window[cfg.className](cfg.canvasId);
+                    this.chartViewsStatus[cfg.key] = 'loaded';
+                } else {
+                    this.chartViews[cfg.key] = null;
+                    this.chartViewsStatus[cfg.key] = 'error';
+                }
+            } catch (e) {
+                this.chartViews[cfg.key] = null;
+                this.chartViewsStatus[cfg.key] = 'missing';
+            }
+        }
     }
 
     /**
-     * Configurar tabs de estímulo
+     * Tabs estímulo
      */
     setupStimulusTabs() {
         const tabs = document.querySelectorAll('.stimulus-tab');
@@ -520,165 +359,204 @@ class AbrModule {
 
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
-                const stimulusId = tab.dataset.stimulus;
-
-                // Actualizar tabs activos
+                const id = tab.dataset.stimulus;
                 tabs.forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
 
-                // Actualizar formularios activos
                 forms.forEach(f => f.classList.remove('active'));
-                const targetForm = document.getElementById(`form_${stimulusId}`);
-                if (targetForm) {
-                    targetForm.classList.add('active');
-                }
+                const target = document.getElementById(`form_${id}`);
+                if (target) target.classList.add('active');
 
-                // Guardar estímulo activo
-                this.app.updateModuleData(this.moduleId, { 
-                    ...this.getData(), 
-                    stimulus_activo: stimulusId 
-                });
+                const data = this.getData();
+                data.stimulus_activo = id;
+                this.app.updateModuleData(this.moduleId, data);
+
+                this.updateABRPreviews();
             });
         });
 
-        // Activar primer tab por defecto
         if (tabs.length > 0) {
-            tabs[0].click();
+            const anyActive = Array.from(forms).some(f => f.classList.contains('active'));
+            if (!anyActive) tabs[0].click();
         }
     }
 
     /**
-     * Configurar auto-cálculo de ondas
+     * Subtabs de Tone Burst
      */
-    setupAutoCalculation() {
-        // Checkboxes de habilitación de intensidades
-        const cb80db = document.getElementById('abr_80db_enabled');
-        const cbUmbral = document.getElementById('abr_umbral_enabled');
+    setupToneBurstTabs() {
+        const freqTabs = document.querySelectorAll('.tb-freq-tab');
+        const freqForms = document.querySelectorAll('.tb-freq-form');
 
-        [cb80db, cbUmbral].forEach(cb => {
-            if (cb) {
-                cb.addEventListener('change', () => {
-                    this.updateIntensityStates();
-                });
-            }
+        freqTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const fid = tab.dataset.tbFreq;
+                freqTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                freqForms.forEach(f => f.classList.remove('active'));
+                const target = document.getElementById(`tb_form_${fid}`);
+                if (target) target.classList.add('active');
+
+                const data = this.getData();
+                data.tone_burst_activo = fid;
+                this.app.updateModuleData(this.moduleId, data);
+
+                this.updateABRPreviews();
+            });
         });
 
-        // Checkboxes de generación de ondas auto
-        const cbOndaII = document.getElementById('abr_generar_onda_ii');
-        const cbOndaIV = document.getElementById('abr_generar_onda_iv');
+        if (freqTabs.length > 0) {
+            const anyActive = Array.from(freqForms).some(f => f.classList.contains('active'));
+            if (!anyActive) freqTabs[0].click();
+        }
+    }
 
-        [cbOndaII, cbOndaIV].forEach(cb => {
-            if (cb) {
-                cb.addEventListener('change', () => {
-                    this.updateAutoWaves();
-                });
+    /**
+     * Presencia on/off
+     */
+    setupPresenceControls() {
+        const presenceCheckboxes = document.querySelectorAll('.wave-presence');
+        presenceCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                this.updatePresenceStates();
+                this.updateAutoWaves();
+                this.updateABRPreviews();
+            });
+        });
+    }
+
+    updatePresenceStates() {
+        const presenceCheckboxes = document.querySelectorAll('.wave-presence');
+        presenceCheckboxes.forEach(cb => {
+            const isPresent = cb.checked;
+            const waveId = cb.id; // e.g., tone_burst_1k_80db_presente_I_od
+            const latencyId = waveId.replace('_presente_', '_latencia_');
+            const amplitudeId = waveId.replace('_presente_', '_amplitud_');
+            const replicabilityId = waveId.replace('_presente_', '_replicabilidad_');
+
+            const waveMatch = waveId.match(/_presente_([IVX]+)_/); // I, II, III, IV, V
+            const waveLabel = waveMatch ? waveMatch[1] : '';
+            const isAutoWave = (waveLabel === 'II' || waveLabel === 'IV');
+
+            const latF = document.getElementById(latencyId);
+            const ampF = document.getElementById(amplitudeId);
+            const repF = document.getElementById(replicabilityId);
+
+            if (latF) latF.disabled = !isPresent || isAutoWave;
+            if (ampF) ampF.disabled = !isPresent || isAutoWave;
+            if (repF) repF.disabled = !isPresent;
+
+            if (!isPresent) {
+                if (latF) latF.value = '';
+                if (ampF) ampF.value = '';
+                if (repF) repF.value = '';
             }
         });
     }
 
     /**
-     * Actualizar estados de intensidades
-     */
-    updateIntensityStates() {
-        const enabled80db = document.getElementById('abr_80db_enabled')?.checked ?? true;
-        const enabledUmbral = document.getElementById('abr_umbral_enabled')?.checked ?? true;
-
-        // Habilitar/deshabilitar campos según checkboxes
-        const fields80db = document.querySelectorAll('[id*="_80db_"]');
-        const fieldsUmbral = document.querySelectorAll('[id*="_umbral_"]');
-
-        fields80db.forEach(field => {
-            field.disabled = !enabled80db;
-            if (!enabled80db) field.value = '';
-        });
-
-        fieldsUmbral.forEach(field => {
-            field.disabled = !enabledUmbral;
-            if (!enabledUmbral) field.value = '';
-        });
-    }
-
-    /**
-     * Actualizar ondas auto-calculadas
+     * Auto-cálculo II y IV (siempre activo)
      */
     updateAutoWaves() {
-        const generateII = document.getElementById('abr_generar_onda_ii')?.checked ?? true;
-        const generateIV = document.getElementById('abr_generar_onda_iv')?.checked ?? true;
+        const latI = document.querySelectorAll('[id*="_latencia_I_"]');
+        latI.forEach(fieldI => {
+            const fieldIII = document.getElementById(fieldI.id.replace('_latencia_I_', '_latencia_III_'));
+            const fieldV   = document.getElementById(fieldI.id.replace('_latencia_I_', '_latencia_V_'));
+            const ampI     = document.getElementById(fieldI.id.replace('_latencia_I_', '_amplitud_I_'));
+            const ampIII   = document.getElementById(fieldI.id.replace('_latencia_I_', '_amplitud_III_'));
+            const ampV     = document.getElementById(fieldI.id.replace('_latencia_I_', '_amplitud_V_'));
 
-        this.stimulusTypes.forEach(stimulus => {
-            ['od', 'oi'].forEach(ear => {
-                ['80db', 'umbral'].forEach(intensity => {
-                    if (generateII) {
-                        this.calculateWaveII(stimulus.id, ear, intensity);
-                    }
-                    if (generateIV) {
-                        this.calculateWaveIV(stimulus.id, ear, intensity);
-                    }
-                });
-            });
+            // Calcular II
+            if (fieldIII && fieldI.value && fieldIII.value) {
+                const outII = document.getElementById(fieldI.id.replace('_latencia_I_', '_latencia_II_'));
+                if (outII && !outII.disabled) {
+                    outII.value = ((parseFloat(fieldI.value) + parseFloat(fieldIII.value)) / 2).toFixed(2);
+                }
+            }
+            if (ampI && ampIII && ampI.value && ampIII.value) {
+                const outAII = document.getElementById(fieldI.id.replace('_latencia_I_', '_amplitud_II_'));
+                if (outAII && !outAII.disabled) {
+                    outAII.value = ((parseFloat(ampI.value) + parseFloat(ampIII.value)) / 2).toFixed(2);
+                }
+            }
+
+            // Calcular IV
+            if (fieldIII && fieldV && fieldIII.value && fieldV.value) {
+                const outIV = document.getElementById(fieldI.id.replace('_latencia_I_', '_latencia_IV_'));
+                if (outIV && !outIV.disabled) {
+                    outIV.value = ((parseFloat(fieldIII.value) + parseFloat(fieldV.value)) / 2).toFixed(2);
+                }
+            }
+            if (ampIII && ampV && ampIII.value && ampV.value) {
+                const outAIV = document.getElementById(fieldI.id.replace('_latencia_I_', '_amplitud_IV_'));
+                if (outAIV && !outAIV.disabled) {
+                    outAIV.value = ((parseFloat(ampIII.value) + parseFloat(ampV.value)) / 2).toFixed(2);
+                }
+            }
         });
     }
 
     /**
-     * Calcular onda II (promedio entre I y III)
+     * Redibuja los tres gráficos si la vista está cargada
      */
-    calculateWaveII(stimulusId, ear, intensity) {
-        const latencyI = this.getFieldValue(`${stimulusId}_${intensity}_latencia_I_${ear}`);
-        const latencyIII = this.getFieldValue(`${stimulusId}_${intensity}_latencia_III_${ear}`);
-        const amplitudeI = this.getFieldValue(`${stimulusId}_${intensity}_amplitud_I_${ear}`);
-        const amplitudeIII = this.getFieldValue(`${stimulusId}_${intensity}_amplitud_III_${ear}`);
+    updateABRPreviews() {
+        const data = this.getData();
+        const mapping = { wf80: 'abrWaveform80Canvas', wfFinal: 'abrWaveformFinalCanvas', latency: 'abrLatencyCanvas' };
 
-        if (latencyI && latencyIII) {
-            const calculatedLatency = ((parseFloat(latencyI) + parseFloat(latencyIII)) / 2).toFixed(2);
-            this.setFieldValue(`${stimulusId}_${intensity}_latencia_II_${ear}`, calculatedLatency);
-        }
+        Object.keys(this.chartViews).forEach(key => {
+            const view = this.chartViews[key];
+            const status = this.chartViewsStatus[key];
+            const canvasId = mapping[key];
 
-        if (amplitudeI && amplitudeIII) {
-            const calculatedAmplitude = ((parseFloat(amplitudeI) + parseFloat(amplitudeIII)) / 2).toFixed(2);
-            this.setFieldValue(`${stimulusId}_${intensity}_amplitud_II_${ear}`, calculatedAmplitude);
-        }
+            if (status === 'loaded' && view && typeof view.render === 'function') {
+                try {
+                    view.render(data);
+                } catch (e) {
+                    this.renderStatusMessage(canvasId, 'error', key);
+                }
+            } else {
+                this.renderStatusMessage(canvasId, status, key);
+            }
+        });
     }
 
     /**
-     * Calcular onda IV (promedio entre III y V)
+     * Helper: mensaje en canvas cuando falta/carga/error
+     * (Esqueleto similar al usado en tus módulos OAE)
      */
-    calculateWaveIV(stimulusId, ear, intensity) {
-        const latencyIII = this.getFieldValue(`${stimulusId}_${intensity}_latencia_III_${ear}`);
-        const latencyV = this.getFieldValue(`${stimulusId}_${intensity}_latencia_V_${ear}`);
-        const amplitudeIII = this.getFieldValue(`${stimulusId}_${intensity}_amplitud_III_${ear}`);
-        const amplitudeV = this.getFieldValue(`${stimulusId}_${intensity}_amplitud_V_${ear}`);
+    renderStatusMessage(canvasId, status, key) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
 
-        if (latencyIII && latencyV) {
-            const calculatedLatency = ((parseFloat(latencyIII) + parseFloat(latencyV)) / 2).toFixed(2);
-            this.setFieldValue(`${stimulusId}_${intensity}_latencia_IV_${ear}`, calculatedLatency);
-        }
+        // Clear
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        if (amplitudeIII && amplitudeV) {
-            const calculatedAmplitude = ((parseFloat(amplitudeIII) + parseFloat(amplitudeV)) / 2).toFixed(2);
-            this.setFieldValue(`${stimulusId}_${intensity}_amplitud_IV_${ear}`, calculatedAmplitude);
-        }
+        // Size fallback
+        const w = canvas.width || canvas.clientWidth || 600;
+        const h = canvas.height || canvas.clientHeight || 180;
+        canvas.width = w;
+        canvas.height = h;
+
+        // Style
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        let msg = '';
+        if (status === 'pending') msg = 'Cargando vista...';
+        else if (status === 'missing') msg = 'Vista no disponible';
+        else if (status === 'error') msg = 'Error al renderizar';
+        else if (status === 'loaded') msg = 'Listo';
+
+        ctx.fillStyle = '#999';
+        ctx.fillText(`[${key}] ${msg}`, w / 2, h / 2);
     }
 
     /**
-     * Helper para obtener valor de campo
-     */
-    getFieldValue(id) {
-        const field = document.getElementById(id);
-        return field?.value || null;
-    }
-
-    /**
-     * Helper para establecer valor de campo
-     */
-    setFieldValue(id, value) {
-        const field = document.getElementById(id);
-        if (field && !field.disabled) {
-            field.value = value;
-        }
-    }
-
-    /**
-     * Obtener datos del formulario
+     * Data API
      */
     getData() {
         const getValue = (id) => {
@@ -686,60 +564,47 @@ class AbrModule {
             return element ? element.value : '';
         };
 
-        const getNumberValue = (id) => {
-            const value = getValue(id);
-            return value ? parseFloat(value) : null;
-        };
-
-        const getCheckboxValue = (id) => {
-            const element = document.getElementById(id);
-            return element ? element.checked : false;
-        };
-
         const data = {
             stimulus_activo: document.querySelector('.stimulus-tab.active')?.dataset.stimulus || 'click',
-            intensidad_80db: {
-                habilitado: getCheckboxValue('abr_80db_enabled'),
-                valor: 80
-            },
-            intensidad_umbral: {
-                habilitado: getCheckboxValue('abr_umbral_enabled'),
-                valor: getNumberValue('abr_umbral_intensidad')
-            },
-            generar_ondas: {
-                II: getCheckboxValue('abr_generar_onda_ii'),
-                IV: getCheckboxValue('abr_generar_onda_iv')
-            },
+            tone_burst_activo: document.querySelector('.tb-freq-tab.active')?.dataset.tbFreq || '1k',
             observaciones: getValue('abr_observations')
         };
 
-        // Recopilar datos por estímulo
-        this.stimulusTypes.forEach(stimulus => {
-            data[stimulus.id] = {
-                oido_derecho: this.getEarData(stimulus.id, 'od'),
-                oido_izquierdo: this.getEarData(stimulus.id, 'oi')
+        // Click / Chirp
+        const collectStimulus = (stimulusId) => ({
+            oido_derecho: this.getEarData(stimulusId, 'od'),
+                                                 oido_izquierdo: this.getEarData(stimulusId, 'oi')
+        });
+        data['click'] = collectStimulus('click');
+        data['chirp'] = collectStimulus('chirp');
+
+        // Tone Burst por frecuencia
+        data['tone_burst'] = {};
+        this.toneBurstFrequencies.forEach(f => {
+            data['tone_burst'][f.id] = {
+                oido_derecho: this.getEarData(`tone_burst_${f.id}`, 'od'),
+                                          oido_izquierdo: this.getEarData(`tone_burst_${f.id}`, 'oi')
             };
         });
 
         return data;
     }
 
-    /**
-     * Obtener datos de un oído específico
-     */
     getEarData(stimulusId, earId) {
         const getWaveData = (intensity) => {
             const waveData = {};
             this.waves.forEach(wave => {
-                const latencia = this.getFieldValue(`${stimulusId}_${intensity}_latencia_${wave}_${earId}`);
-                const amplitud = this.getFieldValue(`${stimulusId}_${intensity}_amplitud_${wave}_${earId}`);
-                const replicabilidad = this.getFieldValue(`${stimulusId}_${intensity}_replicabilidad_${wave}_${earId}`);
+                const presente = document.getElementById(`${stimulusId}_${intensity}_presente_${wave}_${earId}`)?.checked ?? true;
+                const lat = document.getElementById(`${stimulusId}_${intensity}_latencia_${wave}_${earId}`)?.value ?? '';
+                const amp = document.getElementById(`${stimulusId}_${intensity}_amplitud_${wave}_${earId}`)?.value ?? '';
+                const rep = document.getElementById(`${stimulusId}_${intensity}_replicabilidad_${wave}_${earId}`)?.value ?? '';
 
-                if (latencia || amplitud || replicabilidad) {
+                if (presente || lat || amp || rep) {
                     waveData[`onda_${wave}`] = {
-                        latencia: latencia ? parseFloat(latencia) : null,
-                        amplitud: amplitud ? parseFloat(amplitud) : null,
-                        replicabilidad: replicabilidad ? parseFloat(replicabilidad) : null
+                        presente: !!presente,
+                        latencia: lat ? parseFloat(lat) : null,
+                               amplitud: amp ? parseFloat(amp) : null,
+                               replicabilidad: rep ? parseFloat(rep) : null
                     };
                 }
             });
@@ -748,74 +613,69 @@ class AbrModule {
 
         return {
             '80db': getWaveData('80db'),
-            'umbral': getWaveData('umbral'),
-            buena_morfologia: document.getElementById(`${stimulusId}_morfologia_${earId}`)?.checked ?? true
+            'final': getWaveData('final')
         };
     }
 
     /**
-     * Validar datos del módulo
+     * Validaciones
      */
     validate(data) {
         const errors = [];
-
-        // Validar rangos de latencias
-        this.stimulusTypes.forEach(stimulus => {
+        const checkSet = (set) => {
             ['oido_derecho', 'oido_izquierdo'].forEach(ear => {
-                ['80db', 'umbral'].forEach(intensity => {
-                    const intensityData = data[stimulus.id]?.[ear]?.[intensity];
+                ['80db', 'final'].forEach(intensity => {
+                    const intensityData = set?.[ear]?.[intensity];
                     if (intensityData) {
                         this.waves.forEach(wave => {
-                            const waveData = intensityData[`onda_${wave}`];
-                            if (waveData) {
-                                if (waveData.latencia !== null && (waveData.latencia < 0.5 || waveData.latencia > 10)) {
-                                    errors.push(`Latencia onda ${wave} en ${stimulus.name} ${ear} ${intensity} fuera de rango (0.5-10 ms)`);
+                            const wd = intensityData[`onda_${wave}`];
+                            if (wd && wd.presente) {
+                                if (wd.latencia !== null && (wd.latencia < 0.5 || wd.latencia > 10)) {
+                                    errors.push(`Latencia onda ${wave} en ${ear} ${intensity} fuera de rango (0.5-10 ms)`);
                                 }
-                                if (waveData.amplitud !== null && (waveData.amplitud < 0 || waveData.amplitud > 5)) {
-                                    errors.push(`Amplitud onda ${wave} en ${stimulus.name} ${ear} ${intensity} fuera de rango (0-5 µV)`);
+                                if (wd.amplitud !== null && (wd.amplitud < 0 || wd.amplitud > 5)) {
+                                    errors.push(`Amplitud onda ${wave} en ${ear} ${intensity} fuera de rango (0-5 µV)`);
                                 }
                             }
                         });
                     }
                 });
             });
-        });
-
-        return {
-            isValid: errors.length === 0,
-            errors
         };
+        checkSet(data?.click);
+        checkSet(data?.chirp);
+        Object.keys(data?.tone_burst || {}).forEach(freq => checkSet(data.tone_burst[freq]));
+
+        return { isValid: errors.length === 0, errors };
     }
 
     /**
-     * Verificar si está completo
+     * Completitud mínima
      */
     isComplete(data) {
         if (!data) return false;
 
-        // Al menos debe tener un estímulo con datos en al menos un oído
-        const hasData = this.stimulusTypes.some(stimulus => {
-            const stimulusData = data[stimulus.id];
-            if (!stimulusData) return false;
-
+        const anySetHasData = (set) => {
+            if (!set) return false;
             return ['oido_derecho', 'oido_izquierdo'].some(ear => {
-                const earData = stimulusData[ear];
+                const earData = set[ear];
                 if (!earData) return false;
-
-                return ['80db', 'umbral'].some(intensity => {
-                    const intensityData = earData[intensity];
-                    if (!intensityData) return false;
-
-                    // Al menos una onda debe tener latencia
+                return ['80db', 'final'].some(intensity => {
+                    const intData = earData[intensity];
+                    if (!intData) return false;
                     return this.waves.some(wave => {
-                        const waveData = intensityData[`onda_${wave}`];
-                        return waveData?.latencia !== null && waveData?.latencia !== undefined;
+                        const wd = intData[`onda_${wave}`];
+                        return wd?.presente && wd?.latencia !== null && wd?.latencia !== undefined;
                     });
                 });
             });
-        });
+        };
 
-        return hasData;
+        const hasClick = anySetHasData(data?.click);
+        const hasChirp = anySetHasData(data?.chirp);
+        const hasTB = Object.keys(data?.tone_burst || {}).some(freq => anySetHasData(data.tone_burst[freq]));
+
+        return hasClick || hasChirp || hasTB;
     }
 }
 

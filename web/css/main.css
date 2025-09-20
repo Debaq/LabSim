@@ -90,12 +90,13 @@ body {
 
 .tabs-header {
     display: flex;
-    overflow-x: auto;
+    flex-wrap: wrap;
     border-bottom: 2px solid #eee;
     background: #fafafa;
     padding: 0 40px;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    max-height: 120px;
+    overflow-y: auto;
+    scrollbar-width: thin;
 }
 
 .tabs-header::-webkit-scrollbar {
@@ -103,18 +104,19 @@ body {
 }
 
 .tab-button {
-    padding: 15px 20px;
+    padding: 12px 16px;
     border: none;
     background: none;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13px;
     color: #666;
     border-bottom: 3px solid transparent;
     transition: all 0.3s ease;
     white-space: nowrap;
-    min-width: 120px;
+    min-width: 110px;
     text-align: center;
     font-weight: 500;
+    flex: 0 0 auto;
 }
 
 .tab-button:hover {
