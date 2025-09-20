@@ -81,6 +81,15 @@ class LabSimApp {
         // Configuración completa de módulos
         const allModules = [
             {
+                id: 'agenda',
+                name: 'Agenda',
+                icon: '📅',
+                description: 'Gestión de pacientes y agendas de atención',
+                component: 'agenda.js',
+                required: false,
+                completed: false
+            },
+            {
                 id: 'patient-info',
                 name: 'Información Básica',
                 icon: '👤',
