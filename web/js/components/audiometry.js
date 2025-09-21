@@ -1,195 +1,337 @@
 /**
- * AudiometryModule
- * - Formularios de umbrales aéreos/óseos + LDL (OD/OI)
- * - Canvas de audiograma separado y cargado como view: AudiogramChartView (audiogram-charts.js)
- * - Soporta frecuencias extendidas (checkbox)
- * - Exporta/lee datos con getData()/render(existingData)
- *
- * Requiere:
- *   this.app.loadScript(path)   // para cargar el view
- *   this.app.updateModuleData(moduleId, data) // para persistir cambios mientras editas
+ * AudiometryModule - Módulo de Audiometría
+ * Umbrales auditivos, vías aérea y ósea, LDL
  */
 class AudiometryModule {
     constructor(app) {
         this.app = app;
         this.moduleId = 'audiometry';
-
-        // Estado UI
         this.showHighFreq = false;
 
-        // View (canvas)
+        // NUEVO: handler del view externo
         this.chartView = null;
 
-        // Frecuencias base y extendidas
-        this.baseFreqs = ['125','250','500','1000','2000','4000','8000'];
-        this.extFreqs  = ['9000','10000','11200','12500','14000','16000','18000','20000'];
+        // Frecuencias estándar
+        this.frequencies = {
+            standard: ['125', '250', '500', '1000', '2000', '4000', '8000'],
+            high: ['9000', '10000', '11200', '12500', '14000', '16000', '18000', '20000'],
+            bone: ['250', '500', '1000', '2000', '4000'], // Solo estas para vía ósea
+            ldl:  ['250', '500', '1000', '2000', '4000']  // Solo estas para LDL
+        };
     }
 
-    // =========================
-    // RENDER
-    // =========================
+    /**
+     * Renderizar contenido del módulo (sin cambios en la distribución de inputs)
+     */
     async render(existingData = {}) {
-        // estado inicial desde datos existentes
-        this.showHighFreq = !!existingData.frecuencias_ext;
-
-        const freqsUI = this._currentFreqs();
-
         return `
         <div class="form-section">
         <h3 class="section-title">🎧 Audiometría Tonal</h3>
-        <p class="section-description">Registro de umbrales aéreos/óseos y niveles de disconfort (LDL)</p>
+        <p class="section-description">
+        Registro de umbrales auditivos por vía aérea y ósea.
+        Ingresa valores en dB HL. Deja vacío para umbral no obtenido. Use 130 dB para umbral ausente.
+        </p>
 
-        <div style="display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap;">
-        <!-- Panel formularios -->
-        <div style="flex: 2; min-width: 520px;">
-        <!-- Controles -->
-        <div class="audiometry-controls" style="display:flex; gap:16px; align-items:center; margin-bottom:10px;">
-        <label style="display:inline-flex; gap:8px; align-items:center;">
-        <input type="checkbox" id="aud_show_hf" ${this.showHighFreq ? 'checked' : ''}/>
-        <span>Mostrar frecuencias extendidas (9–20 kHz)</span>
-        </label>
-        </div>
+        <!-- Layout Principal: Formularios (40%) + Preview (60%) -->
+        <div style="display: flex; gap: 30px;">
+        <!-- Panel de Formularios -->
+        <div style="flex: 2; min-width: 400px;">
 
-        <!-- Aéreo -->
-        <div class="audiometry-card">
-        <h4 class="section-subtitle">Aéreos (dB HL)</h4>
-        <div class="audiometry-grid">
-        ${this._renderThresholdTable('umbrales_aereos', 'Aéreos', freqsUI, existingData?.umbrales_aereos)}
+        <!-- Control de Altas Frecuencias -->
+        <div class="form-group">
+        <div class="checkbox-group">
+        <div class="checkbox-item">
+        <input type="checkbox" id="showHighFreq" ${this.showHighFreq ? 'checked' : ''}>
+        <label for="showHighFreq">Mostrar altas frecuencias (9K - 20K Hz)</label>
         </div>
         </div>
-
-        <!-- Óseo -->
-        <div class="audiometry-card">
-        <h4 class="section-subtitle">Óseos (dB HL)</h4>
-        <div class="audiometry-grid">
-        ${this._renderThresholdTable('umbrales_oseos', 'Óseos', freqsUI, existingData?.umbrales_oseos)}
-        </div>
-        <p class="hint">* Usa 130 para “no responde” (se dibuja con flecha).</p>
         </div>
 
-        <!-- LDL -->
-        <div class="audiometry-card">
-        <h4 class="section-subtitle">LDL (Nivel de Disconfort) (dB)</h4>
-        <div class="audiometry-grid">
-        ${this._renderThresholdTable('ldl_disconfort', 'LDL', freqsUI, existingData?.ldl_disconfort)}
+        <!-- Tabla Vía Aérea -->
+        <div class="form-group">
+        <h4 class="section-subtitle">Vía Aérea (dB HL)</h4>
+        <table class="audiometry-table">
+        <thead>
+        <tr>
+        <th>Frecuencia</th>
+        <th style="color: #dc3545;">OD</th>
+        <th style="color: #007bff;">OI</th>
+        </tr>
+        </thead>
+        <tbody>
+        ${this.renderAudiometryRows('aereo', existingData.umbrales_aereos)}
+        </tbody>
+        </table>
         </div>
+
+        <!-- Tabla Vía Ósea -->
+        <div class="form-group">
+        <h4 class="section-subtitle">Vía Ósea (dB HL)</h4>
+        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
+        Solo frecuencias 250-4000 Hz.
+        </p>
+        <table class="audiometry-table">
+        <thead>
+        <tr>
+        <th>Frecuencia</th>
+        <th style="color: #dc3545;">OD</th>
+        <th style="color: #007bff;">OI</th>
+        </tr>
+        </thead>
+        <tbody>
+        ${this.renderBoneRows(existingData.umbrales_oseos)}
+        </tbody>
+        </table>
+        </div>
+
+        <!-- Tabla LDL -->
+        <div class="form-group">
+        <h4 class="section-subtitle">LDL - Nivel de Disconfort (dB HL)</h4>
+        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
+        Solo frecuencias 250-4000 Hz. Ausente por defecto en 120 dB.
+        </p>
+        <table class="audiometry-table">
+        <thead>
+        <tr>
+        <th>Frecuencia</th>
+        <th style="color: #dc3545;">OD</th>
+        <th style="color: #007bff;">OI</th>
+        </tr>
+        </thead>
+        <tbody>
+        ${this.renderLDLRows(existingData.ldl_disconfort)}
+        </tbody>
+        </table>
         </div>
 
         <!-- Observaciones -->
-        <div class="form-group" style="margin-top: 12px;">
-        <label class="label-optional">Observaciones</label>
-        <textarea id="aud_observaciones" rows="3" placeholder="Comentarios clínicos...">${existingData?.observaciones || ''}</textarea>
+        <div class="form-group">
+        <label for="observaciones">Observaciones</label>
+        <textarea id="observaciones"
+        placeholder="Particularidades del examen, dificultades técnicas, etc."
+        style="min-height: 80px;">${existingData.observaciones || ''}</textarea>
         </div>
         </div>
 
-        <!-- Panel gráfico -->
-        <div style="flex: 1.6; min-width: 420px;">
-        <h4 class="section-subtitle">📈 Audiograma</h4>
-        <canvas id="audiogramCanvas" width="720" height="520" style="width:100%; height:auto; border:1px solid #dee2e6; border-radius:6px; background:#fff;"></canvas>
-        <div class="legend" style="font-size:12px; color:#6c757d; margin-top:6px;">
-        <span style="color:#dc3545; font-weight:600;">OD</span> / <span style="color:#007bff; font-weight:600;">OI</span> · Líneas continuas = aéreo · Líneas punteadas = óseo · ▲ = LDL · ⭳ = no responde
+        <!-- Panel de Preview -->
+        <div style="flex: 3; min-width: 500px;">
+        <h4 class="section-subtitle">📊 Preview del Audiograma</h4>
+        <div id="audiogramPreview" style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: white;">
+        <canvas id="audiogramCanvas" width="600" height="400" style="width: 100%; height: auto;"></canvas>
         </div>
         </div>
         </div>
         </div>
 
         <style>
-        .audiometry-card {
-            background:#fff; border:1px solid #e9ecef; border-radius:8px; padding:12px; margin-bottom:12px;
+        .audiometry-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 14px;
         }
-        .audiometry-grid { overflow:auto; }
-        table.aud-table { border-collapse: collapse; width: 100%; min-width: 520px; font-size:13px; }
-        table.aud-table th, table.aud-table td { border:1px solid #dee2e6; padding:6px 8px; text-align:center; white-space:nowrap; }
-        table.aud-table th { background:#f8f9fa; font-weight:600; }
-        .ear-tag { display:inline-block; padding:2px 6px; border-radius:4px; font-size:12px; }
-        .ear-od { background:#fdecea; color:#d63340; }
-        .ear-oi { background:#e7f1ff; color:#0d6efd; }
-        input.aud-input { width:64px; padding:4px; text-align:center; border:1px solid #ced4da; border-radius:4px; }
-        input.aud-input:focus { border-color:#6f42c1; outline:none; box-shadow:0 0 0 2px rgba(111,66,193,0.1); }
+        .audiometry-table th {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 8px 12px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .audiometry-table td {
+            border: 1px solid #dee2e6;
+            padding: 4px 8px;
+            text-align: center;
+        }
+        .audiometry-table .freq-label {
+            background: #f8f9fa;
+            font-weight: 500;
+            text-align: right;
+            padding-right: 15px;
+        }
+        .audiometry-input {
+            width: 60px;
+            padding: 4px 6px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 13px;
+        }
+        .audiometry-input:focus {
+            border-color: #2a5298;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(42, 82, 152, 0.1);
+        }
+        .high-freq-row { display: ${this.showHighFreq ? 'table-row' : 'none'}; }
         </style>
         `;
     }
 
-    _renderThresholdTable(key, title, freqs, existing) {
-        const od = existing?.oido_derecho || {};
-        const oi = existing?.oido_izquierdo || {};
-        const row = (earKey, earLabel, earData) => `
-        <tr>
-        <td style="text-align:left;">
-        <span class="ear-tag ${earKey==='oido_derecho' ? 'ear-od' : 'ear-oi'}">${earLabel}</span>
-        </td>
-        ${freqs.map(f => `
+    // === Filas originales (sin cambios) ===
+    renderAudiometryRows(type, existingData) {
+        const allFreqs = [...this.frequencies.standard, ...this.frequencies.high];
+        let html = '';
+
+        allFreqs.forEach((freq, freqIndex) => {
+            const isHighFreq = this.frequencies.high.includes(freq);
+            const rowClass = isHighFreq ? 'high-freq-row' : '';
+
+            const valueOD = existingData?.oido_derecho?.[freq] || '';
+            const valueOI = existingData?.oido_izquierdo?.[freq] || '';
+
+            // Tabindex originales
+            let tabIndexOD, tabIndexOI;
+            if (type === 'aereo') {
+                tabIndexOD = freqIndex + 1;
+                tabIndexOI = freqIndex + 16;
+            } else { // oseo
+                tabIndexOD = freqIndex + 31;
+                tabIndexOI = freqIndex + 46;
+            }
+
+            html += `
+            <tr class="${rowClass}">
+            <td class="freq-label">${freq} Hz</td>
             <td>
-            <input class="aud-input" type="number" min="-10" max="130" step="5"
-            id="${key}_${earKey}_${f}"
-            value="${this._v(earData?.[f])}" />
+            <input type="number"
+            class="audiometry-input"
+            id="${type}_od_${freq}"
+            data-freq="${freq}"
+            data-type="${type}_od"
+            min="0" max="120" step="5"
+            value="${valueOD}"
+            placeholder="-"
+            tabindex="${tabIndexOD}">
             </td>
-            `).join('')}
-            </tr>
-            `;
-            return `
-            <table class="aud-table">
-            <thead>
+            <td>
+            <input type="number"
+            class="audiometry-input"
+            id="${type}_oi_${freq}"
+            data-freq="${freq}"
+            data-type="${type}_oi"
+            min="0" max="120" step="5"
+            value="${valueOI}"
+            placeholder="-"
+            tabindex="${tabIndexOI}">
+            </td>
+            </tr>`;
+        });
+
+        return html;
+    }
+
+    renderBoneRows(existingData) {
+        let html = '';
+        this.frequencies.bone.forEach((freq, freqIndex) => {
+            const valueOD = existingData?.oido_derecho?.[freq] || '';
+            const valueOI = existingData?.oido_izquierdo?.[freq] || '';
+            const tabIndexOD = freqIndex + 31;
+            const tabIndexOI = freqIndex + 36;
+
+            html += `
             <tr>
-            <th>Oído</th>
-            ${freqs.map(f => `<th>${f}</th>`).join('')}
-            </tr>
-            </thead>
-            <tbody>
-            ${row('oido_derecho', 'OD', od)}
-            ${row('oido_izquierdo','OI', oi)}
-            </tbody>
-            </table>
-            `;
+            <td class="freq-label">${freq} Hz</td>
+            <td>
+            <input type="number"
+            class="audiometry-input"
+            id="oseo_od_${freq}"
+            data-freq="${freq}"
+            data-type="oseo_od"
+            min="0" max="130" step="5"
+            value="${valueOD}"
+            placeholder="-"
+            tabindex="${tabIndexOD}">
+            </td>
+            <td>
+            <input type="number"
+            class="audiometry-input"
+            id="oseo_oi_${freq}"
+            data-freq="${freq}"
+            data-type="oseo_oi"
+            min="0" max="130" step="5"
+            value="${valueOI}"
+            placeholder="-"
+            tabindex="${tabIndexOI}">
+            </td>
+            </tr>`;
+        });
+        return html;
     }
 
-    _currentFreqs() {
-        return this.showHighFreq ? [...this.baseFreqs, ...this.extFreqs] : [...this.baseFreqs];
+    renderLDLRows(existingData) {
+        let html = '';
+        this.frequencies.ldl.forEach((freq, freqIndex) => {
+            const valueOD = existingData?.oido_derecho?.[freq] || '';
+            const valueOI = existingData?.oido_izquierdo?.[freq] || '';
+            const tabIndexOD = freqIndex + 41;
+            const tabIndexOI = freqIndex + 46;
+
+            html += `
+            <tr>
+            <td class="freq-label">${freq} Hz</td>
+            <td>
+            <input type="number"
+            class="audiometry-input"
+            id="ldl_od_${freq}"
+            data-freq="${freq}"
+            data-type="ldl_od"
+            min="60" max="130" step="5"
+            value="${valueOD}"
+            placeholder="120"
+            tabindex="${tabIndexOD}">
+            </td>
+            <td>
+            <input type="number"
+            class="audiometry-input"
+            id="ldl_oi_${freq}"
+            data-freq="${freq}"
+            data-type="ldl_oi"
+            min="60" max="130" step="5"
+            value="${valueOI}"
+            placeholder="120"
+            tabindex="${tabIndexOI}">
+            </td>
+            </tr>`;
+        });
+        return html;
     }
 
-    _v(x) { return (x === null || x === undefined) ? '' : x; }
-
-    // =========================
-    // INIT + EVENTOS
-    // =========================
+    // === Eventos ===
     async initEvents() {
-        // Toggle de high freq
-        const chk = document.getElementById('aud_show_hf');
-        if (chk) {
-            chk.addEventListener('change', () => {
-                this.showHighFreq = chk.checked;
-                // Re-render módulo para regenerar las tablas con columnas correctas
-                const data = this.getData();
-                data.frecuencias_ext = this.showHighFreq;
-                this.app.updateModuleData(this.moduleId, data);
-                this.app.refreshModule(this.moduleId); // asume que tu app soporta refrescar el módulo actual
+        // Toggle de altas frecuencias (igual que antes)
+        const showHighFreqCheck = document.getElementById('showHighFreq');
+        if (showHighFreqCheck) {
+            showHighFreqCheck.addEventListener('change', (e) => {
+                this.showHighFreq = e.target.checked;
+                this.toggleHighFrequencies();
             });
         }
 
-        // Delegación de eventos: inputs + textarea
-        const container = document.querySelector('.form-section');
-        if (container) {
-            container.addEventListener('input', (e) => {
-                if (e.target && (e.target.classList.contains('aud-input') || e.target.id === 'aud_observaciones')) {
-                    const data = this.getData();
-                    this.app.updateModuleData(this.moduleId, data);
-                    this.updateAudiogramPreview();
-                }
+        // Inputs (igual que antes)
+        const inputs = document.querySelectorAll('.audiometry-input');
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                this.validateInput(input);
+                this.updateAudiogramPreview();
+                this.app.updateModuleData(this.moduleId, this.getData());
             });
-            container.addEventListener('change', (e) => {
-                if (e.target && (e.target.classList.contains('aud-input') || e.target.id === 'aud_observaciones')) {
-                    const data = this.getData();
-                    this.app.updateModuleData(this.moduleId, data);
-                    this.updateAudiogramPreview();
-                }
+        });
+
+        // Observaciones (igual que antes)
+        const observaciones = document.getElementById('observaciones');
+        if (observaciones) {
+            observaciones.addEventListener('input', () => {
+                this.app.updateModuleData(this.moduleId, this.getData());
             });
         }
 
-        // Cargar el view y primera pinta
+        // NUEVO: cargar el view externo del gráfico
         await this.loadChartView();
-        this.updateAudiogramPreview();
+
+        // Primer render del preview
+        setTimeout(() => this.updateAudiogramPreview(), 100);
     }
 
+    // NUEVO: carga del view externo (igual patrón que Impedance)
     async loadChartView() {
         try {
             await this.app.loadScript('js/components/views/audiogram-charts.js');
@@ -197,102 +339,291 @@ class AudiometryModule {
                 this.chartView = new window.AudiogramChartView('audiogramCanvas');
             } else {
                 this.chartView = null;
+                console.warn('Clase AudiogramChartView no encontrada');
             }
         } catch (e) {
-            console.warn('audiogram-charts.js no disponible', e);
+            console.warn('No se pudo cargar audiogram-charts.js, usando fallback', e);
             this.chartView = null;
         }
     }
 
+    /**
+     * Mostrar/ocultar altas frecuencias (igual)
+     */
+    toggleHighFrequencies() {
+        const highFreqRows = document.querySelectorAll('.high-freq-row');
+        highFreqRows.forEach(row => {
+            row.style.display = this.showHighFreq ? 'table-row' : 'none';
+        });
+        this.updateAudiogramPreview();
+    }
+
+    /**
+     * Validar input individual (igual)
+     */
+    validateInput(input) {
+        const value = parseInt(input.value);
+        input.classList.remove('field-error', 'field-success');
+        if (input.value === '') return true;
+        if (isNaN(value) || value < 0 || value > 120 || value % 5 !== 0) {
+            input.classList.add('field-error');
+            return false;
+        }
+        input.classList.add('field-success');
+        return true;
+    }
+
+    /**
+     * Actualizar preview del audiograma
+     * - Si el view externo está cargado, lo usa.
+     * - Si no, mantiene tu dibujado original como fallback.
+     */
     updateAudiogramPreview() {
         const canvas = document.getElementById('audiogramCanvas');
         if (!canvas) return;
 
         const data = this.getData();
 
+        // Frecuencias a mostrar (para pasar al view)
+        const freqsToShow = this.showHighFreq
+        ? [...this.frequencies.standard, ...this.frequencies.high]
+        : this.frequencies.standard;
+
         if (this.chartView && typeof this.chartView.render === 'function') {
-            this.chartView.render(data, { showHighFreq: this.showHighFreq, freqs: this._currentFreqs() });
-        } else {
-            const ctx = canvas.getContext('2d');
-            const { width:w, height:h } = canvas;
-            ctx.clearRect(0,0,w,h);
-            ctx.fillStyle = '#666';
-            ctx.font = '14px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Vista de audiograma no disponible', w/2, h/2);
-            ctx.fillText('(carga audiogram-charts.js)', w/2, h/2 + 22);
+            // ✅ NUEVO: usa el view externo
+            this.chartView.render(data, { showHighFreq: this.showHighFreq, freqs: freqsToShow });
+            return;
+        }
+
+        // 🔁 Fallback: tu dibujado original
+        const ctx = canvas.getContext('2d');
+
+        // Limpiar canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Configuración del audiograma
+        const margin = { top: 30, right: 40, bottom: 50, left: 60 };
+        const plotWidth = canvas.width - margin.left - margin.right;
+        const plotHeight = canvas.height - margin.top - margin.bottom;
+
+        // Escalas
+        const freqScale = (index) => margin.left + (index / (freqsToShow.length - 1)) * plotWidth;
+        const dbScale = (db) => margin.top + ((db + 10) / 130) * plotHeight;
+
+        // Grilla + datos (funciones originales)
+        this.drawAudiogramGrid(ctx, margin, plotWidth, plotHeight, freqsToShow);
+        this.drawAudiogramData(ctx, data, freqsToShow, freqScale, dbScale);
+    }
+
+    // === A partir de aquí, QUEDAN tus funciones de dibujo originales como fallback ===
+    drawAudiogramGrid(ctx, margin, width, height, frequencies) {
+        ctx.strokeStyle = '#ddd';
+        ctx.lineWidth = 1;
+        ctx.font = '11px Arial';
+        ctx.fillStyle = '#666';
+
+        // verticales
+        frequencies.forEach((freq, index) => {
+            const x = margin.left + (index / (frequencies.length - 1)) * width;
+            ctx.beginPath();
+            ctx.moveTo(x, margin.top);
+            ctx.lineTo(x, margin.top + height);
+            ctx.stroke();
+
+            ctx.save();
+            ctx.translate(x, margin.top + height + 15);
+            ctx.rotate(-Math.PI/4);
+            ctx.fillText(freq, -10, 0);
+            ctx.restore();
+        });
+
+        // horizontales
+        for (let db = -10; db <= 120; db += 10) {
+            const y = margin.top + ((db + 10) / 130) * height;
+            if (db === 0 || db === 20) { ctx.strokeStyle = '#333'; ctx.lineWidth = 2; }
+            else { ctx.strokeStyle = '#ddd'; ctx.lineWidth = 1; }
+
+            ctx.beginPath();
+            ctx.moveTo(margin.left, y);
+            ctx.lineTo(margin.left + width, y);
+            ctx.stroke();
+
+            if (db % 20 === 0) {
+                ctx.fillStyle = '#333';
+                ctx.fillText(db.toString(), margin.left - 25, y + 3);
+            }
+        }
+
+        // etiquetas superiores
+        ctx.fillStyle = '#333';
+        ctx.font = '11px Arial';
+        frequencies.forEach((freq, index) => {
+            const x = margin.left + (index / (frequencies.length - 1)) * width;
+            ctx.save();
+            ctx.translate(x, margin.top - 10);
+            ctx.rotate(-Math.PI/4);
+            ctx.fillText(freq, -10, 0);
+            ctx.restore();
+        });
+
+        // títulos
+        ctx.fillStyle = '#333';
+        ctx.font = 'bold 12px Arial';
+        ctx.fillText('Frecuencia (Hz)', margin.left + width/2 - 40, margin.top + height + 40);
+        ctx.save();
+        ctx.translate(15, margin.top + height/2);
+        ctx.rotate(-Math.PI/2);
+        ctx.fillText('Umbral (dB HL)', -40, 0);
+        ctx.restore();
+    }
+
+    drawAudiogramData(ctx, data, frequencies, freqScale, dbScale) {
+        const styles = {
+            aereo_od: { color: '#dc3545', symbol: 'circle',        line: 'solid'  },
+            aereo_oi: { color: '#007bff', symbol: 'x',             line: 'solid'  },
+            oseo_od:  { color: '#dc3545', symbol: 'bracket_right', line: 'dashed' },
+            oseo_oi:  { color: '#007bff', symbol: 'bracket_left',  line: 'dashed' },
+            ldl_od:   { color: '#dc3545', symbol: 'triangle',      line: 'none'   },
+            ldl_oi:   { color: '#007bff', symbol: 'triangle',      line: 'none'   }
+        };
+
+        Object.keys(styles).forEach(type => {
+            const style = styles[type];
+            const points = [];
+            const absentPoints = [];
+
+            frequencies.forEach((freq, index) => {
+                let value = this.getValueForType(data, type, freq);
+                if (value !== null && value !== undefined && value !== '') {
+                    const x = freqScale(index);
+                    const intValue = parseInt(value);
+                    if (intValue === 130) {
+                        const y = dbScale(120);
+                        absentPoints.push({ x, y, freq, value });
+                        this.drawSymbol(ctx, x, y, 'arrow_down', style.color);
+                    } else {
+                        const y = dbScale(intValue);
+                        points.push({ x, y, freq, value });
+                        this.drawSymbol(ctx, x, y, style.symbol, style.color);
+                    }
+                }
+            });
+
+            if (points.length > 1 && style.line !== 'none') {
+                ctx.strokeStyle = style.color;
+                ctx.lineWidth = 2;
+                ctx.setLineDash(style.line === 'dashed' ? [4, 4] : []);
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        });
+    }
+
+    getValueForType(data, type, freq) {
+        switch (type) {
+            case 'aereo_od': return data.umbrales_aereos?.oido_derecho?.[freq];
+            case 'aereo_oi': return data.umbrales_aereos?.oido_izquierdo?.[freq];
+            case 'oseo_od':  return data.umbrales_oseos?.oido_derecho?.[freq];
+            case 'oseo_oi':  return data.umbrales_oseos?.oido_izquierdo?.[freq];
+            case 'ldl_od':   return data.ldl_disconfort?.oido_derecho?.[freq];
+            case 'ldl_oi':   return data.ldl_disconfort?.oido_izquierdo?.[freq];
+            default: return null;
         }
     }
 
-    // =========================
-    // DATA API
-    // =========================
+    drawSymbol(ctx, x, y, symbol, color) {
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        switch (symbol) {
+            case 'circle':
+                ctx.beginPath(); ctx.arc(x, y, 3, 0, 2*Math.PI); ctx.stroke(); break;
+            case 'x':
+                ctx.beginPath();
+                ctx.moveTo(x-3, y-3); ctx.lineTo(x+3, y+3);
+                ctx.moveTo(x+3, y-3); ctx.lineTo(x-3, y+3);
+                ctx.stroke(); break;
+            case 'bracket_right':
+                ctx.beginPath();
+                ctx.moveTo(x-2,y-3); ctx.lineTo(x+2,y-3);
+                ctx.lineTo(x+2,y+3); ctx.lineTo(x-2,y+3);
+                ctx.stroke(); break;
+            case 'bracket_left':
+                ctx.beginPath();
+                ctx.moveTo(x+2,y-3); ctx.lineTo(x-2,y-3);
+                ctx.lineTo(x-2,y+3); ctx.lineTo(x+2,y+3);
+                ctx.stroke(); break;
+            case 'triangle':
+                ctx.beginPath();
+                ctx.moveTo(x, y-4); ctx.lineTo(x-3, y+2); ctx.lineTo(x+3, y+2);
+                ctx.closePath(); ctx.fill(); break;
+            case 'arrow_down':
+                ctx.beginPath(); ctx.moveTo(x, y-6); ctx.lineTo(x, y+6); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(x-3, y+3); ctx.lineTo(x, y+6); ctx.lineTo(x+3, y+3); ctx.stroke();
+                break;
+        }
+    }
+
+    // === Data API (igual que tenías) ===
     getData() {
-        const readSet = (key) => {
-            const out = { oido_derecho: {}, oido_izquierdo: {} };
-            const freqs = this._currentFreqs();
-            freqs.forEach(f => {
-                const odEl = document.getElementById(`${key}_oido_derecho_${f}`);
-                const oiEl = document.getElementById(`${key}_oido_izquierdo_${f}`);
-                const parse = (el) => {
-                    if (!el) return null;
-                    const v = el.value.trim();
-                    if (v === '') return null;
-                    const num = Number(v);
-                    return Number.isFinite(num) ? num : null;
-                };
-                out.oido_derecho[f] = parse(odEl);
-                out.oido_izquierdo[f] = parse(oiEl);
-            });
-            return out;
+        const data = {
+            umbrales_aereos:  { oido_derecho: {}, oido_izquierdo: {} },
+            umbrales_oseos:   { oido_derecho: {}, oido_izquierdo: {} },
+            ldl_disconfort:   { oido_derecho: {}, oido_izquierdo: {} },
+            observaciones: ''
         };
 
-        const data = {
-            frecuencias_ext: this.showHighFreq,
-            umbrales_aereos:   readSet('umbrales_aereos'),
-            umbrales_oseos:    readSet('umbrales_oseos'),
-            ldl_disconfort:    readSet('ldl_disconfort'),
-            observaciones:     (document.getElementById('aud_observaciones')?.value || '').trim()
-        };
+        const allFreqs = [...this.frequencies.standard, ...this.frequencies.high];
+        allFreqs.forEach(freq => {
+            ['aereo', 'oseo'].forEach(type => {
+                ['od', 'oi'].forEach(ear => {
+                    const input = document.getElementById(`${type}_${ear}_${freq}`);
+                    if (input && input.value !== '') {
+                        const earKey  = ear === 'od' ? 'oido_derecho' : 'oido_izquierdo';
+                        const typeKey = type === 'aereo' ? 'umbrales_aereos' : 'umbrales_oseos';
+                        data[typeKey][earKey][freq] = parseInt(input.value);
+                    }
+                });
+            });
+        });
+
+        this.frequencies.ldl.forEach(freq => {
+            ['od', 'oi'].forEach(ear => {
+                const input = document.getElementById(`ldl_${ear}_${freq}`);
+                if (input && input.value !== '') {
+                    const earKey = ear === 'od' ? 'oido_derecho' : 'oido_izquierdo';
+                    data.ldl_disconfort[earKey][freq] = parseInt(input.value);
+                }
+            });
+        });
+
+        const observaciones = document.getElementById('observaciones');
+        if (observaciones) data.observaciones = observaciones.value;
 
         return data;
     }
 
     validate(data) {
         const errors = [];
-        const checkSet = (set, label) => {
-            const freqs = this._currentFreqs();
-            ['oido_derecho','oido_izquierdo'].forEach(ear => {
-                freqs.forEach(f => {
-                    const v = set?.[ear]?.[f];
-                    if (v === null || v === undefined || v === '') return;
-                    if (typeof v !== 'number' || !Number.isFinite(v)) {
-                        errors.push(`${label} ${ear === 'oido_derecho' ? 'OD' : 'OI'} ${f}Hz: valor inválido`);
-                        return;
-                    }
-                    if (v < -10 || v > 130) {
-                        errors.push(`${label} ${ear === 'oido_derecho' ? 'OD' : 'OI'} ${f}Hz: fuera de rango (-10 a 130 dB)`);
-                    }
-                });
-            });
-        };
-
-        checkSet(data?.umbrales_aereos, 'Aéreos');
-        checkSet(data?.umbrales_oseos,  'Óseos');
-        checkSet(data?.ldl_disconfort,  'LDL');
+        if (!data || typeof data !== 'object') {
+            errors.push('Datos de audiometría inválidos');
+            return { isValid: false, errors };
+        }
+        const hasAereoOD = data.umbrales_aereos?.oido_derecho && Object.keys(data.umbrales_aereos.oido_derecho).length > 0;
+        const hasAereoOI = data.umbrales_aereos?.oido_izquierdo && Object.keys(data.umbrales_aereos.oido_izquierdo).length > 0;
+        if (!hasAereoOD && !hasAereoOI) errors.push('Debe ingresar al menos algunos umbrales de vía aérea');
 
         return { isValid: errors.length === 0, errors };
     }
 
     isComplete(data) {
-        const hasAny = (set) => {
-            if (!set) return false;
-            const freqs = [...this.baseFreqs, ...this.extFreqs];
-            return ['oido_derecho','oido_izquierdo'].some(ear =>
-            freqs.some(f => typeof set?.[ear]?.[f] === 'number')
-            );
-        };
-        return hasAny(data?.umbrales_aereos) || hasAny(data?.umbrales_oseos) || hasAny(data?.ldl_disconfort);
+        if (!data) return false;
+        const hasAereoOD = data.umbrales_aereos?.oido_derecho  && Object.keys(data.umbrales_aereos.oido_derecho).length  >= 3;
+        const hasAereoOI = data.umbrales_aereos?.oido_izquierdo&& Object.keys(data.umbrales_aereos.oido_izquierdo).length>= 3;
+        return hasAereoOD || hasAereoOI;
     }
 }
 

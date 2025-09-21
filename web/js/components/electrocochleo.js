@@ -1,629 +1,435 @@
 /**
- * ElectrocochleoModule - Módulo de Electrocoleografía
- * Potenciales de Sumación (SP) y Acción (AP) con ratio SP/AP
+ * ElectrocochleoModule - Rehecho para soportar trazos temporales (ECochG)
+ *
+ * Objetivo:
+ * - Mantener captura de SP/AP (µV) para OD/OI (resumen cuantitativo)
+ * - Agregar soporte a forma de onda temporal (0–10 ms aprox.) por oído
+ * - Previsualizar trazo realista con un view externo si está disponible
+ * - Fallback de dibujo interno si el view no está cargado
+ *
+ * View externo esperado: js/components/views/electrocochlear-waveform.js
+ * Debe exponer window.ElectrocochlearWaveformView(canvasId)
  */
-
 class ElectrocochleoModule {
     constructor(app) {
         this.app = app;
         this.moduleId = 'electrocochleo';
-        this.chartView = null;
+
+        // Config UI
+        this.defaultFs = 20000; // Hz (20 kHz)
+        this.defaultWindowMs = 8; // ms visibles por defecto
+
+        // Handler del view externo
+        this.waveView = null;
     }
 
-    /**
-     * Renderizar contenido del módulo
-     */
+    /** Render principal */
     async render(existingData = {}) {
+        const d = this._withDefaults(existingData);
+
         return `
         <div class="form-section">
-            <h3 class="section-title">🔬 Electrocoleografía</h3>
-            <p class="section-description">
-                Evaluación de los potenciales cocleares: Potencial de Sumación (SP) y Potencial de Acción (AP)
-            </p>
+        <h3 class="section-title">⚡ Electrocochleografía (ECochG)</h3>
+        <p class="section-description">
+        Registra SP (Summating Potential) y AP (Action Potential), y permite adjuntar/pegar
+        la <strong>señal temporal</strong> (trazo en µV) para una visualización realista.
+        </p>
 
-            <!-- Layout Principal: Formularios (40%) + Preview (60%) -->
-            <div style="display: flex; gap: 30px;">
-                
-                <!-- Panel de Formularios -->
-                <div style="flex: 2; min-width: 400px;">
-                    
-                    <!-- Configuración de Estímulo -->
-                    <div class="electro-section">
-                        <h4 class="section-subtitle">Configuración del Estímulo</h4>
-                        
-                        <div class="form-row">
-                            <div class="form-col-2">
-                                <label>Tipo de Estímulo</label>
-                                <select id="stimulus_type" tabindex="1">
-                                    <option value="click" ${this.getSelectedValue(existingData.configuracion?.tipo_estimulo, 'click')}>Click</option>
-                                    <option value="tone_burst" ${this.getSelectedValue(existingData.configuracion?.tipo_estimulo, 'tone_burst')}>Tone Burst</option>
-                                    <option value="chirp" ${this.getSelectedValue(existingData.configuracion?.tipo_estimulo, 'chirp')}>Chirp</option>
-                                </select>
-                            </div>
-                            <div class="form-col-2">
-                                <label>Intensidad (dB nHL)</label>
-                                <input type="number" 
-                                       id="stimulus_intensity"
-                                       min="70" max="120" step="5"
-                                       value="${existingData.configuracion?.intensidad || 90}"
-                                       tabindex="2">
-                            </div>
-                        </div>
+        <div style="display:flex; gap:24px; align-items:flex-start;">
+        <!-- Panel izquierdo: Config + Datos numéricos -->
+        <div style="flex:2; min-width:380px;">
 
-                        <div class="form-row">
-                            <div class="form-col-2">
-                                <label>Frecuencia (Hz)</label>
-                                <select id="stimulus_frequency" tabindex="3">
-                                    <option value="1000" ${this.getSelectedValue(existingData.configuracion?.frecuencia, '1000')}>1000 Hz</option>
-                                    <option value="2000" ${this.getSelectedValue(existingData.configuracion?.frecuencia, '2000')}>2000 Hz</option>
-                                    <option value="4000" ${this.getSelectedValue(existingData.configuracion?.frecuencia, '4000')}>4000 Hz</option>
-                                    <option value="8000" ${this.getSelectedValue(existingData.configuracion?.frecuencia, '8000')}>8000 Hz</option>
-                                </select>
-                            </div>
-                            <div class="form-col-2">
-                                <label>Polaridad</label>
-                                <select id="stimulus_polarity" tabindex="4">
-                                    <option value="condensacion" ${this.getSelectedValue(existingData.configuracion?.polaridad, 'condensacion')}>Condensación</option>
-                                    <option value="rarefaccion" ${this.getSelectedValue(existingData.configuracion?.polaridad, 'rarefaccion')}>Rarefacción</option>
-                                    <option value="alternante" ${this.getSelectedValue(existingData.configuracion?.polaridad, 'alternante')}>Alternante</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+        <div class="form-group">
+        <h4 class="section-subtitle">Parámetros de visualización</h4>
+        <div class="inline-fields" style="display:flex; gap:12px; flex-wrap:wrap;">
+        <label>Fs (Hz)
+        <input id="ecochg_fs" type="number" class="audiometry-input" min="2000" max="96000" step="100"
+        value="${d.params.fs}" />
+        </label>
+        <label>Ventana (ms)
+        <input id="ecochg_window" type="number" class="audiometry-input" min="3" max="20" step="1"
+        value="${d.params.windowMs}" />
+        </label>
+        <label>Invertir polaridad
+        <input id="ecochg_invert" type="checkbox" ${d.params.invert ? 'checked' : ''} />
+        </label>
+        <label>Suavizado (puntos)
+        <input id="ecochg_smooth" type="number" class="audiometry-input" min="0" max="25" step="1"
+        value="${d.params.smooth}" />
+        </label>
+        </div>
+        <p style="font-size:12px; color:#666; margin-top:6px;">Admite datos en CSV: "tiempo(ms), microvoltios" o solo "microvoltios" con Fs arriba.</p>
+        </div>
 
-                    <!-- Mediciones por Oído -->
-                    <div class="electro-section">
-                        <h4 class="section-subtitle">Mediciones de Potenciales</h4>
-                        
-                        <div class="ear-measurements">
-                            <!-- Oído Derecho -->
-                            <div class="ear-column">
-                                <div class="ear-title" style="color: #dc3545;">🔴 Oído Derecho</div>
-                                
-                                <div class="measurement-group">
-                                    <label>Potencial de Sumación (SP)</label>
-                                    <div class="input-with-unit">
-                                        <input type="number" 
-                                               id="sp_od"
-                                               min="-2.0" max="2.0" step="0.01"
-                                               value="${existingData.potencial_sumacion?.oido_derecho || ''}"
-                                               placeholder="-0.25"
-                                               tabindex="5">
-                                        <span class="unit">µV</span>
-                                    </div>
-                                </div>
+        <div class="form-group">
+        <h4 class="section-subtitle">Valores cuantitativos</h4>
+        <table class="audiometry-table">
+        <thead>
+        <tr>
+        <th></th>
+        <th style="color:#dc3545;">OD</th>
+        <th style="color:#007bff;">OI</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        <td class="freq-label">SP (µV)</td>
+        <td><input id="sp_od" type="number" step="0.01" class="audiometry-input" value="${this._val(d.sp?.oido_derecho)}" /></td>
+        <td><input id="sp_oi" type="number" step="0.01" class="audiometry-input" value="${this._val(d.sp?.oido_izquierdo)}" /></td>
+        </tr>
+        <tr>
+        <td class="freq-label">AP (µV)</td>
+        <td><input id="ap_od" type="number" step="0.01" class="audiometry-input" value="${this._val(d.ap?.oido_derecho)}" /></td>
+        <td><input id="ap_oi" type="number" step="0.01" class="audiometry-input" value="${this._val(d.ap?.oido_izquierdo)}" /></td>
+        </tr>
+        </tbody>
+        </table>
+        <div style="font-size:12px; color:#555; margin-top:6px;">
+        El <strong>ratio SP/AP</strong> se calcula automáticamente en el gráfico si hay valores.
+        </div>
+        </div>
 
-                                <div class="measurement-group">
-                                    <label>Potencial de Acción (AP)</label>
-                                    <div class="input-with-unit">
-                                        <input type="number" 
-                                               id="ap_od"
-                                               min="0" max="20" step="0.01"
-                                               value="${existingData.potencial_accion?.oido_derecho || ''}"
-                                               placeholder="2.85"
-                                               tabindex="6">
-                                        <span class="unit">µV</span>
-                                    </div>
-                                </div>
+        <div class="form-group">
+        <h4 class="section-subtitle">Señal temporal (pegar CSV o texto)</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div>
+        <label for="wf_od">OD</label>
+        <textarea id="wf_od" placeholder="t(ms),uV\n0.00,0.02\n0.05,-0.01\n..." style="min-height:120px;">${this._textFromWave(d.waveform?.oido_derecho)}</textarea>
+        </div>
+        <div>
+        <label for="wf_oi">OI</label>
+        <textarea id="wf_oi" placeholder="uV (una columna)\n0.02\n-0.01\n..." style="min-height:120px;">${this._textFromWave(d.waveform?.oido_izquierdo)}</textarea>
+        </div>
+        </div>
+        <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+        <button id="wf_demo_od" class="btn btn-secondary">Demo OD</button>
+        <button id="wf_demo_oi" class="btn btn-secondary">Demo OI</button>
+        <button id="wf_clear" class="btn btn-light">Limpiar</button>
+        </div>
+        </div>
 
-                                <div class="calculated-ratio">
-                                    <label>Ratio SP/AP</label>
-                                    <div class="ratio-display" id="ratio_od">
-                                        ${this.calculateRatio(existingData.potencial_sumacion?.oido_derecho, existingData.potencial_accion?.oido_derecho)}
-                                    </div>
-                                </div>
-                            </div>
+        <div class="form-group">
+        <label for="ecochg_obs">Observaciones</label>
+        <textarea id="ecochg_obs" placeholder="Calidad de registro, número de promedios, electrodos, etc." style="min-height:80px;">${d.observaciones || ''}</textarea>
+        </div>
+        </div>
 
-                            <!-- Oído Izquierdo -->
-                            <div class="ear-column">
-                                <div class="ear-title" style="color: #007bff;">🔵 Oído Izquierdo</div>
-                                
-                                <div class="measurement-group">
-                                    <label>Potencial de Sumación (SP)</label>
-                                    <div class="input-with-unit">
-                                        <input type="number" 
-                                               id="sp_oi"
-                                               min="-2.0" max="2.0" step="0.01"
-                                               value="${existingData.potencial_sumacion?.oido_izquierdo || ''}"
-                                               placeholder="-0.18"
-                                               tabindex="7">
-                                        <span class="unit">µV</span>
-                                    </div>
-                                </div>
-
-                                <div class="measurement-group">
-                                    <label>Potencial de Acción (AP)</label>
-                                    <div class="input-with-unit">
-                                        <input type="number" 
-                                               id="ap_oi"
-                                               min="0" max="20" step="0.01"
-                                               value="${existingData.potencial_accion?.oido_izquierdo || ''}"
-                                               placeholder="3.20"
-                                               tabindex="8">
-                                        <span class="unit">µV</span>
-                                    </div>
-                                </div>
-
-                                <div class="calculated-ratio">
-                                    <label>Ratio SP/AP</label>
-                                    <div class="ratio-display" id="ratio_oi">
-                                        ${this.calculateRatio(existingData.potencial_sumacion?.oido_izquierdo, existingData.potencial_accion?.oido_izquierdo)}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Interpretación Clínica -->
-                    <div class="electro-section">
-                        <h4 class="section-subtitle">Interpretación Clínica</h4>
-                        <p class="clinical-note">
-                            <strong>Valores de referencia:</strong><br>
-                            • Ratio SP/AP normal: ≤ 0.37<br>
-                            • Ratio SP/AP patológico: > 0.37 (sugiere hidropesía endolinfática)<br>
-                            • SP normal: Negativo (-0.1 a -0.5 µV)<br>
-                            • AP normal: Positivo (1.0 a 8.0 µV)
-                        </p>
-                        
-                        <div class="interpretation-display" id="clinical_interpretation">
-                            ${this.generateInterpretation(existingData)}
-                        </div>
-                    </div>
-
-                    <!-- Observaciones -->
-                    <div class="form-group" style="margin-top: 20px;">
-                        <label class="label-optional">Observaciones</label>
-                        <textarea id="electrocochleo_observations"
-                                  rows="3"
-                                  tabindex="9"
-                                  placeholder="Comentarios sobre la calidad del registro, artefactos, condiciones de medición...">${existingData.observaciones || ''}</textarea>
-                    </div>
-                </div>
-
-                <!-- Panel de Preview -->
-                <div style="flex: 3; min-width: 500px;">
-                    <h4 class="section-subtitle">📊 Visualización de Potenciales</h4>
-                    <div id="electrocochlearPreview" style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: white;">
-                        <canvas id="electrocochlearCanvas" width="600" height="400" style="width: 100%; height: auto;"></canvas>
-                    </div>
-                    <div style="margin-top: 10px; font-size: 12px; color: #666;">
-                        <span style="color: #dc3545;">● OD</span> &nbsp;&nbsp;
-                        <span style="color: #007bff;">● OI</span> &nbsp;&nbsp;
-                        <span style="color: #28a745;">— SP</span> &nbsp;&nbsp;
-                        <span style="color: #fd7e14;">— AP</span>
-                    </div>
-                </div>
-            </div>
+        <!-- Panel derecho: Preview -->
+        <div style="flex:3; min-width:520px;">
+        <h4 class="section-subtitle">📈 Preview de trazo ECochG</h4>
+        <div id="ecochgPreview" style="border:1px solid #ddd; border-radius:8px; padding:12px; background:white;">
+        <canvas id="ecochgCanvas" width="700" height="420" style="width:100%; height:auto;"></canvas>
+        <div id="ecochgNoView" style="display:none; padding:12px; color:#666; font-size:13px;">
+        Vista previa no disponible. Carga <code>js/components/views/electrocochlear-waveform.js</code> para habilitar el trazo. Como fallback, verás un dibujo simple.
+        </div>
+        </div>
+        </div>
+        </div>
         </div>
 
         <style>
-            .electro-section {
-                margin-bottom: 25px;
-                padding: 20px;
-                background: #f8f9fa;
-                border-radius: 8px;
-                border-left: 4px solid #6f42c1;
-            }
-
-            .ear-measurements {
-                display: flex;
-                gap: 25px;
-            }
-
-            .ear-column {
-                flex: 1;
-                background: white;
-                border: 2px solid #e9ecef;
-                border-radius: 12px;
-                padding: 20px;
-                transition: all 0.3s ease;
-            }
-
-            .ear-column:hover {
-                border-color: #6f42c1;
-                box-shadow: 0 4px 15px rgba(111, 66, 193, 0.1);
-            }
-
-            .measurement-group {
-                margin-bottom: 15px;
-            }
-
-            .measurement-group label {
-                display: block;
-                margin-bottom: 5px;
-                font-weight: 600;
-                color: #333;
-                font-size: 13px;
-            }
-
-            .input-with-unit {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-
-            .input-with-unit input {
-                flex: 1;
-                padding: 8px 12px;
-                border: 1px solid #dee2e6;
-                border-radius: 6px;
-                font-size: 13px;
-                text-align: right;
-            }
-
-            .input-with-unit input:focus {
-                border-color: #6f42c1;
-                outline: none;
-                box-shadow: 0 0 0 2px rgba(111, 66, 193, 0.1);
-            }
-
-            .input-with-unit .unit {
-                font-size: 12px;
-                color: #666;
-                font-weight: 500;
-                min-width: 20px;
-            }
-
-            .calculated-ratio {
-                margin-top: 15px;
-                padding: 10px;
-                background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-                border-radius: 6px;
-                border: 1px solid #dee2e6;
-            }
-
-            .calculated-ratio label {
-                font-weight: 600;
-                color: #495057;
-                margin-bottom: 5px;
-                font-size: 12px;
-            }
-
-            .ratio-display {
-                font-size: 16px;
-                font-weight: bold;
-                color: #333;
-                text-align: center;
-                font-family: 'Courier New', monospace;
-            }
-
-            .ratio-normal {
-                color: #28a745;
-            }
-
-            .ratio-pathological {
-                color: #dc3545;
-            }
-
-            .ratio-pending {
-                color: #6c757d;
-                font-style: italic;
-            }
-
-            .clinical-note {
-                font-size: 12px;
-                color: #666;
-                background: #fff3cd;
-                padding: 10px;
-                border-radius: 6px;
-                border-left: 4px solid #ffc107;
-                line-height: 1.4;
-                margin-bottom: 15px;
-            }
-
-            .interpretation-display {
-                background: white;
-                padding: 15px;
-                border-radius: 6px;
-                border: 2px solid #e9ecef;
-                font-size: 14px;
-                min-height: 60px;
-            }
-
-            .interpretation-normal {
-                border-color: #28a745;
-                background: #d4edda;
-                color: #155724;
-            }
-
-            .interpretation-pathological {
-                border-color: #dc3545;
-                background: #f8d7da;
-                color: #721c24;
-            }
-
-            .interpretation-pending {
-                border-color: #6c757d;
-                background: #f8f9fa;
-                color: #6c757d;
-            }
-
-            @media (max-width: 768px) {
-                .ear-measurements {
-                    flex-direction: column;
-                    gap: 15px;
-                }
-            }
+        .audiometry-table { width:100%; border-collapse:collapse; margin-bottom:10px; font-size:14px; }
+        .audiometry-table th { background:#f8f9fa; border:1px solid #dee2e6; padding:8px 12px; text-align:center; font-weight:600; }
+        .audiometry-table td { border:1px solid #dee2e6; padding:4px 8px; text-align:center; }
+        .audiometry-table .freq-label { background:#f8f9fa; font-weight:500; text-align:right; padding-right:15px; }
+        .audiometry-input { width:100px; padding:4px 6px; border:1px solid #dee2e6; border-radius:4px; text-align:center; font-size:13px; }
+        .btn { border:1px solid #ccc; padding:6px 10px; border-radius:6px; cursor:pointer; }
+        .btn-secondary { background:#f3f4f6; }
+        .btn-light { background:#fff; }
+        .btn:hover { filter:brightness(0.98); }
         </style>
         `;
     }
 
-    /**
-     * Helper para valores seleccionados
-     */
-    getSelectedValue(currentValue, optionValue) {
-        return currentValue === optionValue ? 'selected' : '';
-    }
-
-    /**
-     * Calcular ratio SP/AP
-     */
-    calculateRatio(sp, ap) {
-        if (!sp || !ap || sp === '' || ap === '') {
-            return '<span class="ratio-pending">Pendiente</span>';
-        }
-
-        const spValue = parseFloat(sp);
-        const apValue = parseFloat(ap);
-
-        if (apValue === 0) {
-            return '<span class="ratio-pending">AP = 0</span>';
-        }
-
-        const ratio = Math.abs(spValue) / apValue;
-        const ratioFormatted = ratio.toFixed(3);
-
-        if (ratio <= 0.37) {
-            return `<span class="ratio-normal">${ratioFormatted}</span>`;
-        } else {
-            return `<span class="ratio-pathological">${ratioFormatted}</span>`;
-        }
-    }
-
-    /**
-     * Generar interpretación clínica
-     */
-    generateInterpretation(data) {
-        if (!data.potencial_sumacion || !data.potencial_accion) {
-            return '<div class="interpretation-pending">Complete las mediciones para obtener la interpretación clínica.</div>';
-        }
-
-        const interpretations = [];
-        
-        ['oido_derecho', 'oido_izquierdo'].forEach(ear => {
-            const sp = data.potencial_sumacion[ear];
-            const ap = data.potencial_accion[ear];
-            const earLabel = ear === 'oido_derecho' ? 'OD' : 'OI';
-
-            if (sp && ap) {
-                const spValue = parseFloat(sp);
-                const apValue = parseFloat(ap);
-                const ratio = Math.abs(spValue) / apValue;
-
-                let interpretation = `<strong>${earLabel}:</strong> `;
-                
-                if (ratio <= 0.37) {
-                    interpretation += `Ratio SP/AP normal (${ratio.toFixed(3)}). No evidencia de hidropesía endolinfática.`;
-                } else {
-                    interpretation += `Ratio SP/AP elevado (${ratio.toFixed(3)}). Sugiere hidropesía endolinfática compatible con enfermedad de Ménière.`;
-                }
-
-                interpretations.push(interpretation);
-            }
-        });
-
-        if (interpretations.length === 0) {
-            return '<div class="interpretation-pending">Complete las mediciones para obtener la interpretación clínica.</div>';
-        }
-
-        const hasPathological = interpretations.some(i => i.includes('elevado'));
-        const cssClass = hasPathological ? 'interpretation-pathological' : 'interpretation-normal';
-
-        return `<div class="${cssClass}">${interpretations.join('<br><br>')}</div>`;
-    }
-
-    /**
-     * Inicializar eventos después de renderizar
-     */
+    /** Inicializar eventos y cargar view externo */
     async initEvents() {
-        // Cargar vista del gráfico (cuando esté disponible)
-        await this.loadChartView();
-
-        // Auto-save y update display al cambiar valores
-        const inputs = document.querySelectorAll('#tabsContent input, #tabsContent select, #tabsContent textarea');
-        inputs.forEach(input => {
-            input.addEventListener('input', () => {
-                this.updateCalculations();
-                this.updateElectrocochlearPreview();
-                this.app.updateModuleData(this.moduleId, this.getData());
-            });
-
-            input.addEventListener('change', () => {
-                this.updateCalculations();
-                this.updateElectrocochlearPreview();
-                this.app.updateModuleData(this.moduleId, this.getData());
-            });
+        // Cambios de inputs
+        ['ecochg_fs','ecochg_window','ecochg_smooth','sp_od','sp_oi','ap_od','ap_oi'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', () => this._onDataChange());
         });
+            const invert = document.getElementById('ecochg_invert');
+            if (invert) invert.addEventListener('change', () => this._onDataChange());
 
-        // Validación en tiempo real
-        const numberInputs = document.querySelectorAll('#tabsContent input[type="number"]');
-        numberInputs.forEach(input => {
-            input.addEventListener('blur', () => {
-                this.validateField(input);
-            });
-        });
+            // Textareas waveform
+            const wfOD = document.getElementById('wf_od');
+        const wfOI = document.getElementById('wf_oi');
+        if (wfOD) wfOD.addEventListener('input', () => this._onDataChange());
+        if (wfOI) wfOI.addEventListener('input', () => this._onDataChange());
 
-        // Renderizar preview inicial
-        setTimeout(() => {
-            this.updateCalculations();
-            this.updateElectrocochlearPreview();
-        }, 100);
+        // Botones demo / limpiar
+        const bDemoOD = document.getElementById('wf_demo_od');
+        const bDemoOI = document.getElementById('wf_demo_oi');
+        const bClear  = document.getElementById('wf_clear');
+        if (bDemoOD) bDemoOD.addEventListener('click', () => { this._loadDemo('od'); });
+        if (bDemoOI) bDemoOI.addEventListener('click', () => { this._loadDemo('oi'); });
+        if (bClear)  bClear.addEventListener('click', () => { this._clearWaveforms(); });
+
+        // Cargar view externo
+        await this._loadWaveformView();
+
+        // Primer render
+        setTimeout(() => this.updatePreview(), 50);
     }
 
-    /**
-     * Cargar componente de vista del gráfico
-     */
-    async loadChartView() {
+    async _loadWaveformView() {
         try {
-            await this.app.loadScript('js/components/views/electrocochlear-chart.js');
-            this.chartView = new window.ElectrocochlearChartView('electrocochlearCanvas');
-        } catch (error) {
-            console.warn('electrocochlear-chart.js no disponible');
-            this.chartView = null;
-        }
-    }
-
-    /**
-     * Validar campo individual
-     */
-    validateField(input) {
-        const value = parseFloat(input.value);
-        const min = parseFloat(input.min);
-        const max = parseFloat(input.max);
-
-        if (input.value && (isNaN(value) || value < min || value > max)) {
-            input.classList.add('field-error');
-            this.app.notify(`Valor fuera del rango permitido (${min}-${max})`, 'warning');
-        } else {
-            input.classList.remove('field-error');
-        }
-    }
-
-    /**
-     * Actualizar cálculos y visualización
-     */
-    updateCalculations() {
-        // Actualizar ratios
-        ['od', 'oi'].forEach(ear => {
-            const spInput = document.getElementById(`sp_${ear}`);
-            const apInput = document.getElementById(`ap_${ear}`);
-            const ratioDisplay = document.getElementById(`ratio_${ear}`);
-
-            if (spInput && apInput && ratioDisplay) {
-                const sp = spInput.value;
-                const ap = apInput.value;
-                ratioDisplay.innerHTML = this.calculateRatio(sp, ap);
+            await this.app.loadScript('js/components/views/electrocochlear-waveform.js');
+            if (window.ElectrocochlearWaveformView) {
+                this.waveView = new window.ElectrocochlearWaveformView('ecochgCanvas');
+                document.getElementById('ecochgNoView').style.display = 'none';
+            } else {
+                this.waveView = null;
+                document.getElementById('ecochgNoView').style.display = 'block';
+                console.warn('ElectrocochlearWaveformView no encontrada');
             }
-        });
-
-        // Actualizar interpretación clínica
-        const interpretationDisplay = document.getElementById('clinical_interpretation');
-        if (interpretationDisplay) {
-            const data = this.getData();
-            interpretationDisplay.innerHTML = this.generateInterpretation(data);
+        } catch (e) {
+            this.waveView = null;
+            const el = document.getElementById('ecochgNoView');
+            if (el) el.style.display = 'block';
+            console.warn('No se pudo cargar electrocochlear-waveform.js, usando fallback', e);
         }
     }
 
-    /**
-     * Actualizar preview de potenciales
-     */
-    updateElectrocochlearPreview() {
-        if (this.chartView) {
-            const data = this.getData();
-            this.chartView.render(data);
-        } else {
-            this.renderSimpleFallback();
-        }
+    _onDataChange() {
+        this.app.updateModuleData(this.moduleId, this.getData());
+        this.updatePreview();
     }
 
-    /**
-     * Fallback simple si no hay componente de vista
-     */
-    renderSimpleFallback() {
-        const canvas = document.getElementById('electrocochlearCanvas');
+    /** Recolecta datos del formulario */
+    getData() {
+        const fs = parseInt(document.getElementById('ecochg_fs')?.value || this.defaultFs, 10);
+        const windowMs = parseFloat(document.getElementById('ecochg_window')?.value || this.defaultWindowMs);
+        const invert = !!document.getElementById('ecochg_invert')?.checked;
+        const smooth = parseInt(document.getElementById('ecochg_smooth')?.value || 0, 10);
+
+        const spOD = this._num(document.getElementById('sp_od')?.value);
+        const spOI = this._num(document.getElementById('sp_oi')?.value);
+        const apOD = this._num(document.getElementById('ap_od')?.value);
+        const apOI = this._num(document.getElementById('ap_oi')?.value);
+
+        // Parse waveform textareas (acepta CSV t,uV o columna uV)
+        const wfOD = this._parseWaveText(document.getElementById('wf_od')?.value || '', fs);
+        const wfOI = this._parseWaveText(document.getElementById('wf_oi')?.value || '', fs);
+
+        return {
+            sp: { oido_derecho: spOD, oido_izquierdo: spOI },
+            ap: { oido_derecho: apOD, oido_izquierdo: apOI },
+            waveform: { oido_derecho: wfOD, oido_izquierdo: wfOI },
+            params: { fs, windowMs, invert, smooth },
+            observaciones: document.getElementById('ecochg_obs')?.value || ''
+        };
+    }
+
+    /** Valida consistencia mínima */
+    validate(data) {
+        const errors = [];
+        if (!data || typeof data !== 'object') errors.push('Datos inválidos');
+
+        // Si no hay waveform para ningún oído, al menos debe existir AP o SP
+        const hasWf = (data.waveform?.oido_derecho?.length || 0) > 0 || (data.waveform?.oido_izquierdo?.length || 0) > 0;
+        const hasNums = (data.sp?.oido_derecho != null) || (data.sp?.oido_izquierdo != null) ||
+        (data.ap?.oido_derecho != null) || (data.ap?.oido_izquierdo != null);
+        if (!hasWf && !hasNums) errors.push('Ingrese al menos SP/AP o una forma de onda');
+
+        return { isValid: errors.length === 0, errors };
+    }
+
+    isComplete(data) {
+        // Consideramos completo si hay waveform en al menos un oído
+        const hasWfOD = (data.waveform?.oido_derecho?.length || 0) > 16;
+        const hasWfOI = (data.waveform?.oido_izquierdo?.length || 0) > 16;
+        return hasWfOD || hasWfOI;
+    }
+
+    /** Actualiza la previsualización */
+    updatePreview() {
+        const canvas = document.getElementById('ecochgCanvas');
         if (!canvas) return;
 
+        const data = this.getData();
+
+        if (this.waveView && typeof this.waveView.render === 'function') {
+            // View externo: pasa datos crudos y params
+            this.waveView.render(data);
+            return;
+        }
+
+        // Fallback simple: dibuja señal OD/OI (si existen) + marcadores SP/AP
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        ctx.fillStyle = '#666';
-        ctx.font = '14px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('Vista previa no disponible', canvas.width/2, canvas.height/2);
-        ctx.fillText('(electrocochlear-chart.js no cargado)', canvas.width/2, canvas.height/2 + 20);
+        const m = { top: 30, right: 20, bottom: 50, left: 60 };
+        const plotW = canvas.width - m.left - m.right;
+        const plotH = canvas.height - m.top - m.bottom;
+
+        // Ejes
+        ctx.strokeStyle = '#ddd';
+        ctx.strokeRect(m.left, m.top, plotW, plotH);
+
+        // Eje temporal 0–windowMs
+        const ms = data.params.windowMs || this.defaultWindowMs;
+        const xScale = (tMs) => m.left + (tMs / ms) * plotW;
+
+        // Eje voltaje: auto con ±maxAbs o ±3 µV
+        const allVals = [];
+        ['oido_derecho','oido_izquierdo'].forEach(ear => {
+            (data.waveform?.[ear] || []).forEach(p => allVals.push(p.v));
+        });
+        const maxAbs = Math.max(3, Math.max(...allVals.map(v => Math.abs(v) || 0), 0));
+        const yScale = (uV) => m.top + (1 - ((uV + maxAbs) / (2*maxAbs))) * plotH;
+
+        const drawWave = (arr, color) => {
+            if (!arr || arr.length < 2) return;
+            ctx.strokeStyle = color; ctx.lineWidth = 1.6; ctx.beginPath();
+            ctx.moveTo(xScale(arr[0].t), yScale(arr[0].v));
+            for (let i=1;i<arr.length;i++) ctx.lineTo(xScale(arr[i].t), yScale(arr[i].v));
+            ctx.stroke();
+        };
+
+        // Dibuja OD/OI
+        drawWave(data.waveform.oido_derecho, '#dc3545');
+        drawWave(data.waveform.oido_izquierdo, '#007bff');
+
+        // Baseline 0 µV
+        ctx.strokeStyle = '#aaa'; ctx.setLineDash([4,4]);
+        const y0 = yScale(0); ctx.beginPath(); ctx.moveTo(m.left, y0); ctx.lineTo(m.left + plotW, y0); ctx.stroke(); ctx.setLineDash([]);
+
+        // SP/AP markers (si hay valores)
+        const drawMarker = (label, uV, x, color) => {
+            if (uV == null) return;
+            const y = yScale(uV);
+            ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(x-6,y); ctx.lineTo(x+6,y); ctx.stroke();
+            ctx.font = '11px Arial'; ctx.fillText(`${label}: ${uV}µV`, x+8, y-4);
+        };
+
+        const tAPms = 1.5; // referencia visual fija en fallback
+        drawMarker('SP OD', data.sp.oido_derecho, xScale(0.8), '#dc3545');
+        drawMarker('AP OD', data.ap.oido_derecho, xScale(tAPms), '#dc3545');
+        drawMarker('SP OI', data.sp.oido_izquierdo, xScale(0.8), '#007bff');
+        drawMarker('AP OI', data.ap.oido_izquierdo, xScale(tAPms), '#007bff');
+
+        // Etiquetas ejes
+        ctx.fillStyle = '#333'; ctx.font = 'bold 12px Arial';
+        ctx.fillText('Tiempo (ms)', m.left + plotW/2 - 30, m.top + plotH + 35);
+        ctx.save(); ctx.translate(18, m.top + plotH/2); ctx.rotate(-Math.PI/2); ctx.fillText('Amplitud (µV)', -36, 0); ctx.restore();
     }
 
-    /**
-     * Obtener datos del formulario
-     */
-    getData() {
-        const getValue = (id) => {
-            const element = document.getElementById(id);
-            return element ? element.value : '';
-        };
+    /** DEMOS rápidas para probar preview sin datos reales */
+    _loadDemo(ear) {
+        const fs = parseInt(document.getElementById('ecochg_fs')?.value || this.defaultFs, 10);
+        const windowMs = parseFloat(document.getElementById('ecochg_window')?.value || this.defaultWindowMs);
+        const n = Math.floor((windowMs/1000) * fs);
 
-        const getNumberValue = (id) => {
-            const value = getValue(id);
-            return value ? parseFloat(value) : null;
-        };
+        const arr = [];
+        for (let i=0;i<n;i++) {
+            const t = (i/fs)*1000; // ms
+            // Señal sintética: pequeña línea base + SP lento + AP pico rápido ~1.5 ms
+            const sp = -0.05 * (1 - Math.exp(-t/2));
+            const ap = (t>1.2 && t<2.2) ? Math.exp(-((t-1.6)**2)/(2*0.08**2)) * 0.8 : 0; // pico gaussiano
+            const noise = (Math.random()-0.5)*0.02;
+            arr.push({ t, v: sp + ap + noise });
+        }
 
+        const ta = document.getElementById(ear === 'od' ? 'wf_od' : 'wf_oi');
+        if (ta) ta.value = arr.map(p => `${p.t.toFixed(3)},${p.v.toFixed(4)}`).join('\n');
+
+        // Valores SP/AP sugeridos
+        if (ear === 'od') {
+            const sp = document.getElementById('sp_od'); if (sp && !sp.value) sp.value = -0.4;
+            const ap = document.getElementById('ap_od'); if (ap && !ap.value) ap.value = 0.8;
+        } else {
+            const sp = document.getElementById('sp_oi'); if (sp && !sp.value) sp.value = -0.35;
+            const ap = document.getElementById('ap_oi'); if (ap && !ap.value) ap.value = 0.7;
+        }
+
+        this._onDataChange();
+    }
+
+    _clearWaveforms() {
+        const od = document.getElementById('wf_od');
+        const oi = document.getElementById('wf_oi');
+        if (od) od.value = '';
+        if (oi) oi.value = '';
+        this._onDataChange();
+    }
+
+    /** Utilidades */
+    _withDefaults(d) {
         return {
-            configuracion: {
-                tipo_estimulo: getValue('stimulus_type') || 'click',
-                intensidad: getNumberValue('stimulus_intensity') || 90,
-                frecuencia: getValue('stimulus_frequency') || '1000',
-                polaridad: getValue('stimulus_polarity') || 'condensacion'
+            sp: d?.sp || { oido_derecho: null, oido_izquierdo: null },
+            ap: d?.ap || { oido_derecho: null, oido_izquierdo: null },
+            waveform: d?.waveform || { oido_derecho: [], oido_izquierdo: [] },
+            params: {
+                fs: d?.params?.fs ?? this.defaultFs,
+                windowMs: d?.params?.windowMs ?? this.defaultWindowMs,
+                invert: d?.params?.invert ?? false,
+                smooth: d?.params?.smooth ?? 0
             },
-            potencial_sumacion: {
-                oido_derecho: getNumberValue('sp_od'),
-                oido_izquierdo: getNumberValue('sp_oi')
-            },
-            potencial_accion: {
-                oido_derecho: getNumberValue('ap_od'),
-                oido_izquierdo: getNumberValue('ap_oi')
-            },
-            observaciones: getValue('electrocochleo_observations')
+            observaciones: d?.observaciones || ''
         };
     }
 
-    /**
-     * Validar datos del módulo
-     */
-    validate(data) {
-        const errors = [];
+    _val(v) { return (v === null || v === undefined) ? '' : v; }
+    _num(v) { return (v === '' || v === null || v === undefined) ? null : Number(v); }
 
-        // Validar rangos de intensidad
-        if (data.configuracion?.intensidad) {
-            if (data.configuracion.intensidad < 70 || data.configuracion.intensidad > 120) {
-                errors.push('Intensidad debe estar entre 70-120 dB nHL');
+    _textFromWave(arr) {
+        if (!arr || !arr.length) return '';
+        const limited = arr.slice(0, 2000); // limitar por si es muy grande
+        return limited.map(p => (p.t !== undefined ? `${p.t},${p.v}` : `${p.v}`)).join('\n');
+    }
+
+    _parseWaveText(text, fs) {
+        if (!text || !text.trim()) return [];
+        const lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+        const out = [];
+
+        // Detectar si la primera línea tiene coma/; (CSV con tiempo)
+        const hasTime = /[,;\t]/.test(lines[0]) && lines[0].split(/[,;\t]/).length >= 2;
+
+        if (hasTime) {
+            for (const ln of lines) {
+                const [a,b] = ln.split(/[,;\t]/);
+                const t = parseFloat(a);
+                const v = parseFloat(b);
+                if (isFinite(t) && isFinite(v)) out.push({ t, v });
+            }
+        } else {
+            // Solo amplitud por muestra en µV; reconstruir t según Fs
+            let i = 0;
+            for (const ln of lines) {
+                const v = parseFloat(ln);
+                if (isFinite(v)) {
+                    const t = (i++ / fs) * 1000; // ms
+                    out.push({ t, v });
+                }
             }
         }
 
-        // Validar rangos SP
-        ['oido_derecho', 'oido_izquierdo'].forEach(ear => {
-            const sp = data.potencial_sumacion?.[ear];
-            if (sp !== null && sp !== undefined && (sp < -2.0 || sp > 2.0)) {
-                errors.push(`SP ${ear} debe estar entre -2.0 y 2.0 µV`);
+        // Invertir si así está marcado
+        const invert = !!document.getElementById('ecochg_invert')?.checked;
+        if (invert) out.forEach(p => p.v = -p.v);
+
+        // Suavizado simple por media móvil si corresponde
+        const smooth = parseInt(document.getElementById('ecochg_smooth')?.value || '0', 10);
+        if (smooth && smooth > 1) {
+            const k = Math.min(Math.max(2, smooth|0), 25);
+            const buf = out.map(p => p.v);
+            const sm = [];
+            for (let i=0;i<buf.length;i++) {
+                let s=0,c=0;
+                for (let j=-k;j<=k;j++) {
+                    const idx = i+j; if (idx>=0 && idx<buf.length) { s+=buf[idx]; c++; }
+                }
+                sm[i] = s/c;
             }
-        });
+            for (let i=0;i<out.length;i++) out[i].v = sm[i];
+        }
 
-        // Validar rangos AP
-        ['oido_derecho', 'oido_izquierdo'].forEach(ear => {
-            const ap = data.potencial_accion?.[ear];
-            if (ap !== null && ap !== undefined && (ap < 0 || ap > 20)) {
-                errors.push(`AP ${ear} debe estar entre 0 y 20 µV`);
-            }
-        });
-
-        return {
-            isValid: errors.length === 0,
-            errors
-        };
-    }
-
-    /**
-     * Verificar si está completo
-     */
-    isComplete(data) {
-        if (!data) return false;
-
-        // Al menos un oído debe tener tanto SP como AP
-        const odComplete = data.potencial_sumacion?.oido_derecho !== null && 
-                          data.potencial_accion?.oido_derecho !== null;
-        const oiComplete = data.potencial_sumacion?.oido_izquierdo !== null && 
-                          data.potencial_accion?.oido_izquierdo !== null;
-
-        return odComplete || oiComplete;
+        // Recortar a ventana ms si procede
+        const windowMs = parseFloat(document.getElementById('ecochg_window')?.value || this.defaultWindowMs);
+        return out.filter(p => p.t >= 0 && p.t <= windowMs);
     }
 }
 

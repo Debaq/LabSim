@@ -144,6 +144,15 @@ class LabSimApp {
                 completed: false
             },
             {
+                id: 'hearing-aids',
+                name: 'Audífonos',
+                icon: '🎧',
+                description: 'Historia de audífonos, campo libre y pruebas',
+                component: 'hearing-aids.js',
+                required: false,
+                completed: false
+            },
+            {
                 id: 'oae',
                 name: 'Emisiones OAE',
                 icon: '🌊',
