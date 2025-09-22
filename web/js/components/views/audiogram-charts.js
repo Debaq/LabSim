@@ -8,7 +8,7 @@ class AudiogramChartView {
     // ========== CONFIGURACIÓN DE SÍMBOLOS Y TAMAÑOS ==========
     this.symbolSize = 6; // Radio/tamaño base de símbolos (configurable)
     this.boneOffset = 14; // Padding horizontal para símbolos óseos (configurable)
-    this.ldlOffsetX = 5; // Desplazamiento horizontal LDL (configurable)
+    this.ldlOffsetX = 8; // Desplazamiento horizontal LDL (configurable)
     this.ldlOffsetY = 8; // Desplazamiento vertical LDL (configurable)
 
     // Atenuación interaural por frecuencia (dB)
@@ -63,6 +63,11 @@ class AudiogramChartView {
     // grilla y ejes
     this.drawGrid(freqs, xScale, yScale, plotW, plotH);
 
+    //LDL label
+
+    this.drawLDLLabel(data, xScale, yScale);
+
+
     // datos con enmascaramiento automático
     this.drawData(data, freqs, xScale, yScale);
   }
@@ -102,7 +107,8 @@ class AudiogramChartView {
       ctx.lineTo(m.left + plotW, y);
       ctx.stroke();
 
-      if (db % 20 === 0) {
+      if (db >= 0 && db <= 120) {
+
         ctx.fillStyle = '#333';
         ctx.fillText(String(db), m.left - 25, y + 3);
       }
@@ -192,6 +198,47 @@ class AudiogramChartView {
     Math.abs(curr - freq) < Math.abs(prev - freq) ? curr : prev
     );
     return this.interauralAttenuation[closest];
+  }
+
+
+  // Agregar etiqueta "LDL:" si hay datos de LDL
+  drawLDLLabel(data, xScale, yScale) {
+    // Verificar si hay datos de LDL
+    const hasLDLData = data.ldl_disconfort &&
+    (Object.keys(data.ldl_disconfort.oido_derecho || {}).length > 0 ||
+    Object.keys(data.ldl_disconfort.oido_izquierdo || {}).length > 0);
+
+    if (!hasLDLData) return;
+
+    const ctx = this.ctx;
+
+    // Posición: entre 100-120 dB (Y) y entre 125-250 Hz (X)
+    // Usar el punto medio de cada rango
+    const labelY = yScale(95); // Punto medio entre 100-120
+
+    // Para X, encontrar posición entre 125 Hz (índice 0) y 250 Hz (índice 1)
+    const labelX = (xScale(0) + xScale(1)) / 2; // Punto medio entre índices 0 y 1
+
+    // Configurar estilo del texto
+    ctx.save();
+    ctx.fillStyle = this.config.colors.text;
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Dibujar texto "LDL:"
+    ctx.fillText('LDL:', labelX, labelY);
+
+    // Dibujar subrayado
+    const textWidth = ctx.measureText('LDL:').width;
+    ctx.strokeStyle = this.config.colors.text;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(labelX - textWidth/2, labelY + 8);
+    ctx.lineTo(labelX + textWidth/2, labelY + 8);
+    ctx.stroke();
+
+    ctx.restore();
   }
 
   // ========== DIBUJO DE DATOS ==========
