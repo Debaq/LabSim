@@ -1,9 +1,8 @@
 /**
- * AudiometryModule - Solo Lógica de Negocio
- * ✅ Sin labels hardcodeados - Todo viene del template
- * ✅ HTML en templates/audiometry.html
- * ✅ CSS en css/modules/audiometry.css
- * ✅ Gráficos en js/components/views/audiogram-charts.js
+ * AudiometryModule - Módulo de Audiometría Tonal
+ * ✅ HTML desde templates/es/audiometry.html
+ * ✅ CSS desde css/modules/audiometry.css
+ * ✅ Gráficos interactivos con modules separados
  */
 class AudiometryModule {
     constructor(app) {
@@ -21,7 +20,7 @@ class AudiometryModule {
     }
 
     /**
-     * Renderizar contenido del módulo
+     * Renderizar contenido del módulo usando template
      */
     async render(existingData = {}) {
         await this.loadModuleCSS();
@@ -82,9 +81,9 @@ class AudiometryModule {
             id="aereo_od_${freq}"
             data-freq="${freq}"
             data-type="aereo_od"
-            min="0" max="130" step="5"
+            min="-10" max="130" step="5"
             value="${valueOD}"
-            placeholder="-">
+            placeholder="35">
             </td>
             <td>
             <input type="number"
@@ -92,9 +91,9 @@ class AudiometryModule {
             id="aereo_oi_${freq}"
             data-freq="${freq}"
             data-type="aereo_oi"
-            min="0" max="130" step="5"
+            min="-10" max="130" step="5"
             value="${valueOI}"
-            placeholder="-">
+            placeholder="35">
             </td>
             </tr>`;
         }).join('');
@@ -117,9 +116,9 @@ class AudiometryModule {
             id="oseo_od_${freq}"
             data-freq="${freq}"
             data-type="oseo_od"
-            min="0" max="130" step="5"
+            min="-10" max="80" step="5"
             value="${valueOD}"
-            placeholder="-">
+            placeholder="20">
             </td>
             <td>
             <input type="number"
@@ -127,9 +126,9 @@ class AudiometryModule {
             id="oseo_oi_${freq}"
             data-freq="${freq}"
             data-type="oseo_oi"
-            min="0" max="130" step="5"
+            min="-10" max="80" step="5"
             value="${valueOI}"
-            placeholder="-">
+            placeholder="20">
             </td>
             </tr>`;
         }).join('');
@@ -201,7 +200,7 @@ class AudiometryModule {
             });
         }
 
-        // Cargar view externo del gráfico
+        // Cargar view externo del gráfico con TODOS los módulos
         await this.loadChartView();
 
         // Primer render del preview
@@ -209,14 +208,34 @@ class AudiometryModule {
     }
 
     /**
-     * Cargar view externo del gráfico
+     * Cargar view externo del gráfico CON TODOS LOS MÓDULOS
      */
     async loadChartView() {
         try {
-            await this.app.loadScript('js/components/views/audiogram-charts.js');
+            // ✅ CARGAR TODOS LOS SCRIPTS EN ORDEN
+            const scripts = [
+                'js/components/views/audiogram-charts.js',
+                'js/components/views/audiogram/chart-core.js',
+                'js/components/views/audiogram/chart-drawing.js',
+                'js/components/views/audiogram/chart-symbols.js',
+                'js/components/views/audiogram/chart-interaction.js',
+                'js/components/views/audiogram/chart-masking.js'
+            ];
+
+            for (const script of scripts) {
+                await this.app.loadScript(script);
+            }
+
+            // ✅ CREAR INSTANCIA DESPUÉS DE CARGAR TODO
             if (window.AudiogramChartView) {
                 this.chartView = new window.AudiogramChartView('audiogramCanvas');
-                console.log('✅ AudiogramChartView loaded successfully');
+
+                // ✅ ACTIVAR MODO INTERACTIVO
+                this.chartView.enableInteractiveMode((freq, toolType, db, state) => {
+                    this.handleInteractiveDataChange(freq, toolType, db, state);
+                });
+
+                console.log('✅ AudiogramChartView loaded with interactive mode');
             } else {
                 this.chartView = null;
                 console.warn('⚠️ AudiogramChartView class not found');
@@ -225,6 +244,63 @@ class AudiometryModule {
             console.warn('📋 Could not load audiogram-charts.js:', e.message);
             this.chartView = null;
         }
+    }
+
+    /**
+     * ✅ NUEVA: Manejar cambios de datos desde el modo interactivo
+     */
+    handleInteractiveDataChange(freq, toolType, db, state) {
+        console.log(`🎯 Interactive change: ${freq}Hz, ${toolType}, ${db}dB, state: ${state}`);
+
+        // Determinar el ID del input según el toolType
+        let inputId;
+
+        switch (toolType) {
+            case 'aereo_od':
+                inputId = `aereo_od_${freq}`;
+                break;
+            case 'aereo_oi':
+                inputId = `aereo_oi_${freq}`;
+                break;
+            case 'oseo_od':
+                inputId = `oseo_od_${freq}`;
+                break;
+            case 'oseo_oi':
+                inputId = `oseo_oi_${freq}`;
+                break;
+            case 'ldl_od':
+                inputId = `ldl_od_${freq}`;
+                break;
+            case 'ldl_oi':
+                inputId = `ldl_oi_${freq}`;
+                break;
+            default:
+                console.warn('Unknown toolType:', toolType);
+                return;
+        }
+
+        // Obtener el input element
+        const input = document.getElementById(inputId);
+        if (!input) {
+            console.warn('Input not found:', inputId);
+            return;
+        }
+
+        // Actualizar el valor del input según el estado
+        if (state === 'empty') {
+            input.value = '';
+        } else if (state === 'no_response') {
+            input.value = '130'; // Valor especial para "no response"
+        } else {
+            input.value = db.toString();
+        }
+
+        // Validar el input y actualizar datos
+        this.validateInput(input);
+        this.app.updateModuleData(this.moduleId, this.getData());
+
+        // Re-renderizar para mostrar cambios
+        this.updateAudiogramPreview();
     }
 
     /**
@@ -247,7 +323,7 @@ class AudiometryModule {
 
         if (input.value === '') return true;
 
-        if (isNaN(value) || value < 0 || value > 130 || value % 5 !== 0) {
+        if (isNaN(value) || value < -10 || value > 130 || value % 5 !== 0) {
             input.classList.add('field-error');
             return false;
         }
@@ -318,34 +394,36 @@ class AudiometryModule {
 
         // Observaciones
         const observaciones = document.getElementById('observaciones');
-        if (observaciones) {
-            data.observaciones = observaciones.value;
+        if (observaciones && observaciones.value.trim()) {
+            data.observaciones = observaciones.value.trim();
         }
 
         return data;
     }
 
     /**
-     * Validar datos
+     * Validar datos del módulo
      */
     validate(data) {
         const errors = [];
 
-        if (!data || typeof data !== 'object') {
-            errors.push('Invalid audiometry data');
+        if (!data || Object.keys(data).length === 0) {
+            errors.push('No se han ingresado datos de audiometría');
             return { isValid: false, errors };
         }
 
-        const hasAereoOD = data.umbrales_aereos?.oido_derecho &&
-        Object.keys(data.umbrales_aereos.oido_derecho).length > 0;
-        const hasAereoOI = data.umbrales_aereos?.oido_izquierdo &&
-        Object.keys(data.umbrales_aereos.oido_izquierdo).length > 0;
+        // Validar que al menos haya algunos umbrales aéreos
+        const aereosOD = data.umbrales_aereos?.oido_derecho || {};
+        const aereosOI = data.umbrales_aereos?.oido_izquierdo || {};
 
-        if (!hasAereoOD && !hasAereoOI) {
-            errors.push('Must enter at least some air conduction thresholds');
+        if (Object.keys(aereosOD).length === 0 && Object.keys(aereosOI).length === 0) {
+            errors.push('Debe ingresar al menos algunos umbrales aéreos');
         }
 
-        return { isValid: errors.length === 0, errors };
+        return {
+            isValid: errors.length === 0,
+            errors
+        };
     }
 
     /**
@@ -354,13 +432,12 @@ class AudiometryModule {
     isComplete(data) {
         if (!data) return false;
 
-        const hasAereoOD = data.umbrales_aereos?.oido_derecho &&
-        Object.keys(data.umbrales_aereos.oido_derecho).length >= 3;
-        const hasAereoOI = data.umbrales_aereos?.oido_izquierdo &&
-        Object.keys(data.umbrales_aereos.oido_izquierdo).length >= 3;
+        const aereosOD = data.umbrales_aereos?.oido_derecho || {};
+        const aereosOI = data.umbrales_aereos?.oido_izquierdo || {};
 
-        return hasAereoOD || hasAereoOI;
+        return Object.keys(aereosOD).length > 0 || Object.keys(aereosOI).length > 0;
     }
 }
 
+// Registrar el módulo
 window.AudiometryModule = AudiometryModule;
