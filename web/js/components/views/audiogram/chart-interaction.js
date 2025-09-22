@@ -13,6 +13,13 @@ Object.assign(AudiogramChartView.prototype, {
     // Verificar click en panel de herramientas
     if (this.handleToolPanelClick(mouseX, mouseY)) return;
 
+    // Verificar click en símbolo existente para cambiar estado
+    const symbolClick = this.findClickedSymbol(mouseX, mouseY);
+    if (symbolClick) {
+      this.handleSymbolStateChange(symbolClick);
+      return;
+    }
+
     // Verificar click en intersección del grid
     const intersection = this.findNearestIntersection(mouseX, mouseY);
     if (intersection) {
@@ -45,6 +52,98 @@ Object.assign(AudiogramChartView.prototype, {
     return false;
   },
 
+  findClickedSymbol(mouseX, mouseY) {
+    if (!this.lastOpts || !this.lastOpts.freqs) return null;
+
+    const m = this.config.margin;
+    const plotW = this.canvas.width - m.left - m.right;
+    const plotH = this.canvas.height - m.top - m.bottom;
+    const freqs = this.lastOpts.freqs;
+
+    const xScale = (i) => m.left + (i / (freqs.length - 1)) * plotW;
+    const yScale = (db) => m.top + ((db + 10) / 130) * plotH;
+
+    // Radio pequeño para clic preciso en símbolo
+    const clickRadius = 8;
+
+    for (let freqIndex = 0; freqIndex < freqs.length; freqIndex++) {
+      const freq = freqs[freqIndex];
+      const stateKey = `${freq}_${this.activeTool}`;
+
+      // Solo verificar si existe un símbolo en esta posición
+      if (this.symbolStates[stateKey] || this.getThreshold(this.lastData, this.activeTool, freq)) {
+        let symbolDb;
+
+        // Obtener la posición actual del símbolo
+        if (this.symbolStatesDb[stateKey]) {
+          symbolDb = this.symbolStatesDb[stateKey];
+        } else {
+          const threshold = this.getThreshold(this.lastData, this.activeTool, freq);
+          if (threshold !== null && threshold !== undefined && threshold !== '') {
+            symbolDb = parseInt(threshold, 10);
+          } else {
+            continue;
+          }
+        }
+
+        const symbolX = xScale(freqIndex);
+        const symbolY = yScale(symbolDb);
+
+        // Ajustar coordenadas según el tipo de símbolo
+        let adjustedX = symbolX;
+        if (this.activeTool === 'oseo_od') {
+          adjustedX = symbolX - this.boneOffset;
+        } else if (this.activeTool === 'oseo_oi') {
+          adjustedX = symbolX + this.boneOffset;
+        } else if (this.activeTool.startsWith('ldl_')) {
+          if (this.activeTool === 'ldl_od') {
+            adjustedX = symbolX - this.ldlOffsetX;
+          } else {
+            adjustedX = symbolX + this.ldlOffsetX;
+          }
+        }
+
+        const distance = Math.sqrt(Math.pow(mouseX - adjustedX, 2) + Math.pow(mouseY - symbolY, 2));
+
+        if (distance <= clickRadius) {
+          return {
+            freq: freq,
+            freqIndex: freqIndex,
+            currentDb: symbolDb,
+            stateKey: stateKey
+          };
+        }
+      }
+    }
+
+    return null;
+  },
+
+  handleSymbolStateChange(symbolClick) {
+    const { freq, stateKey, currentDb } = symbolClick;
+
+    // Obtener estado actual
+    const currentState = this.symbolStates[stateKey] || 'normal';
+
+    // Ciclar al siguiente estado SIN cambiar la posición
+    const nextState = this.getNextState(currentState, freq);
+
+    if (nextState === 'empty') {
+      delete this.symbolStates[stateKey];
+      delete this.symbolStatesDb[stateKey];
+      // Actualizar datos para eliminar el umbral
+      this.updateAudiogramData(freq, this.activeTool, null, 'empty');
+    } else {
+      this.symbolStates[stateKey] = nextState;
+      // MANTENER la posición actual, no cambiarla
+      this.symbolStatesDb[stateKey] = currentDb;
+      // Actualizar datos manteniendo la intensidad actual
+      this.updateAudiogramData(freq, this.activeTool, currentDb, nextState);
+    }
+
+    this.render(this.lastData, this.lastOpts);
+  },
+
   findNearestIntersection(mouseX, mouseY) {
     if (!this.lastOpts || !this.lastOpts.freqs) return null;
 
@@ -58,12 +157,12 @@ Object.assign(AudiogramChartView.prototype, {
 
     // Verificar que esté dentro del área del plot
     if (mouseX < m.left || mouseX > m.left + plotW ||
-        mouseY < m.top || mouseY > m.top + plotH) {
+      mouseY < m.top || mouseY > m.top + plotH) {
       return null;
-    }
+      }
 
-    let closestIntersection = null;
-    let minDistance = 8; // Radio de precisión
+      let closestIntersection = null;
+    let minDistance = 12; // Radio de precisión para intersecciones
 
     freqs.forEach((freq, freqIndex) => {
       for (let db = -10; db <= 120; db += 5) {
@@ -92,22 +191,30 @@ Object.assign(AudiogramChartView.prototype, {
     const { freq, db } = intersection;
     const stateKey = `${freq}_${this.activeTool}`;
 
-    // Obtener estado actual
-    const currentState = this.symbolStates[stateKey] || 'normal';
+    // Verificar si ya existe un umbral (de datos o interactivo)
+    const hasExistingThreshold = this.symbolStates[stateKey] ||
+    this.getThreshold(this.lastData, this.activeTool, freq);
 
-    // Ciclar al siguiente estado
-    const nextState = this.getNextState(currentState, freq);
+    if (hasExistingThreshold) {
+      // Si existe un umbral, MOVER a la nueva intensidad
+      const currentState = this.symbolStates[stateKey] || 'normal';
 
-    if (nextState === 'empty') {
-      delete this.symbolStates[stateKey];
-      delete this.symbolStatesDb[stateKey];
-    } else {
-      this.symbolStates[stateKey] = nextState;
+      this.symbolStates[stateKey] = currentState;
       this.symbolStatesDb[stateKey] = db;
+
+      // Actualizar datos con la nueva intensidad
+      this.updateAudiogramData(freq, this.activeTool, db, currentState);
+    } else {
+      // Si NO existe umbral, CREAR nuevo símbolo
+      const initialState = this.getInitialState(freq, this.activeTool, db, this.lastData);
+
+      this.symbolStates[stateKey] = initialState;
+      this.symbolStatesDb[stateKey] = db;
+
+      // Actualizar datos con nuevo umbral
+      this.updateAudiogramData(freq, this.activeTool, db, initialState);
     }
 
-    // Actualizar datos y re-renderizar
-    this.updateAudiogramData(freq, this.activeTool, db, nextState);
     this.render(this.lastData, this.lastOpts);
   },
 

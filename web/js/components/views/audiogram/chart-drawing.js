@@ -1,18 +1,18 @@
 // js/components/views/audiogram/chart-drawing.js
-// Funciones de dibujo: grilla, etiquetas, panel de herramientas, datos
+// Funciones de dibujo: grid, datos, símbolos, panel de herramientas
 
 Object.assign(AudiogramChartView.prototype, {
 
   drawGrid(freqs, xScale, yScale, plotW, plotH) {
-    const ctx = this.ctx, m = this.config.margin;
+    const ctx = this.ctx;
+    const m = this.config.margin;
 
-    // Líneas verticales (frecuencias)
+    // Líneas de grid
     ctx.strokeStyle = this.config.colors.grid;
     ctx.lineWidth = 1;
-    ctx.fillStyle = '#666';
-    ctx.font = '11px Arial';
 
-    freqs.forEach((f, i) => {
+    // Líneas verticales (frecuencias)
+    freqs.forEach((freq, i) => {
       const x = xScale(i);
       ctx.beginPath();
       ctx.moveTo(x, m.top);
@@ -22,105 +22,74 @@ Object.assign(AudiogramChartView.prototype, {
 
     // Líneas horizontales (dB)
     for (let db = -10; db <= 120; db += 10) {
-      if (db === 20) {
-        ctx.strokeStyle = this.config.colors.gridStrong;
-        ctx.lineWidth = 3; // Línea gruesa en 20 dB
-      } else if (db === 0) {
-        ctx.strokeStyle = this.config.colors.gridStrong;
-        ctx.lineWidth = 2;
-      } else {
-        ctx.strokeStyle = this.config.colors.grid;
-        ctx.lineWidth = 1;
-      }
       const y = yScale(db);
+      ctx.strokeStyle = db === 20 ? this.config.colors.gridStrong : this.config.colors.grid;
+      ctx.lineWidth = db === 20 ? 2 : 1;
       ctx.beginPath();
       ctx.moveTo(m.left, y);
       ctx.lineTo(m.left + plotW, y);
       ctx.stroke();
-
-      if (db >= 0 && db <= 120) {
-        ctx.fillStyle = '#333';
-        ctx.fillText(String(db), m.left - 25, y + 3);
-      }
     }
 
-    // Etiquetas superiores (frecuencias)
-    ctx.fillStyle = '#333';
+    // Etiquetas
+    ctx.fillStyle = this.config.colors.text;
     ctx.font = '11px Arial';
-    freqs.forEach((f, i) => {
+    ctx.textAlign = 'center';
+
+    // Frecuencias
+    freqs.forEach((freq, i) => {
       const x = xScale(i);
-      ctx.save();
-      ctx.translate(x, m.top - 10);
-      ctx.rotate(-Math.PI/4);
-      ctx.fillText(f, -10, 0);
-      ctx.restore();
+      let label = freq;
+      if (parseInt(freq) >= 1000) {
+        label = (parseInt(freq) / 1000) + 'K';
+      }
+      ctx.fillText(label, x, m.top + plotH + 15);
     });
 
-    // Títulos de ejes
-    ctx.fillStyle = '#333';
-    ctx.font = 'bold 12px Arial';
-    ctx.fillText('Frecuencia (Hz)', m.left + plotW/2 - 40, m.top + plotH + 40);
-
-    ctx.save();
-    ctx.translate(15, m.top + plotH/2);
-    ctx.rotate(-Math.PI/2);
-    ctx.fillText('Umbral (dB HL)', -40, 0);
-    ctx.restore();
+    // dB HL
+    ctx.textAlign = 'right';
+    for (let db = -10; db <= 120; db += 10) {
+      const y = yScale(db);
+      ctx.fillText(db.toString(), m.left - 5, y + 4);
+    }
   },
 
   drawLDLLabel(data, xScale, yScale) {
-    const hasLDLData = data.ldl_disconfort &&
-      (Object.keys(data.ldl_disconfort.oido_derecho || {}).length > 0 ||
-       Object.keys(data.ldl_disconfort.oido_izquierdo || {}).length > 0);
-
-    if (!hasLDLData) return;
-
-    const ctx = this.ctx;
-    const labelY = yScale(95);
-    const labelX = (xScale(0) + xScale(1)) / 2;
-
-    ctx.save();
-    ctx.fillStyle = this.config.colors.text;
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('LDL:', labelX, labelY);
-
-    const textWidth = ctx.measureText('LDL:').width;
-    ctx.strokeStyle = this.config.colors.text;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(labelX - textWidth/2, labelY + 8);
-    ctx.lineTo(labelX + textWidth/2, labelY + 8);
-    ctx.stroke();
-    ctx.restore();
+    // Dibujar etiqueta "LDL" si hay datos
+    const hasLDL = data.ldl_disconfort?.oido_derecho || data.ldl_disconfort?.oido_izquierdo;
+    if (hasLDL) {
+      this.ctx.fillStyle = this.config.colors.text;
+      this.ctx.font = 'bold 10px Arial';
+      this.ctx.textAlign = 'left';
+      this.ctx.fillText('LDL', this.config.margin.left + 5, this.config.margin.top + 15);
+    }
   },
 
   drawToolPanel() {
-    if (!this.isInteractive) return;
-
-    const ctx = this.ctx;
     const panelX = 10;
     const panelY = 10;
     const buttonSize = 30;
     const spacing = 5;
 
     const tools = [
-      { id: 'aereo_od', label: 'O', color: this.config.colors.od },
-      { id: 'aereo_oi', label: 'X', color: this.config.colors.oi },
-      { id: 'oseo_od', label: '<', color: this.config.colors.od },
-      { id: 'oseo_oi', label: '>', color: this.config.colors.oi },
-      { id: 'ldl_od', label: 'LDL-OD', color: this.config.colors.od },
-      { id: 'ldl_oi', label: 'LDL-OI', color: this.config.colors.oi },
-      { id: 'fullscreen', label: '⛶', color: '#333' }
+      { id: 'aereo_od', label: 'AD', color: this.config.colors.od },
+      { id: 'aereo_oi', label: 'AI', color: this.config.colors.oi },
+      { id: 'oseo_od', label: 'OD', color: this.config.colors.od },
+      { id: 'oseo_oi', label: 'OI', color: this.config.colors.oi },
+      { id: 'ldl_od', label: 'LD', color: this.config.colors.od },
+      { id: 'ldl_oi', label: 'LI', color: this.config.colors.oi },
+      { id: 'fullscreen', label: '⛶', color: '#666' }
     ];
+
+    const ctx = this.ctx;
 
     tools.forEach((tool, i) => {
       const x = panelX + i * (buttonSize + spacing);
       const y = panelY;
 
       // Fondo del botón
-      ctx.fillStyle = this.activeTool === tool.id ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.8)';
+      ctx.fillStyle = this.activeTool === tool.id ?
+      'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.8)';
       ctx.fillRect(x, y, buttonSize, buttonSize);
 
       // Borde del botón
@@ -185,10 +154,10 @@ Object.assign(AudiogramChartView.prototype, {
 
         if (currentSymbolState === 'no_response') {
           symbol = type === 'aereo_od' ? 'no_response_circle' :
-                   type === 'aereo_oi' ? 'no_response_x' : st.unmasked;
+          type === 'aereo_oi' ? 'no_response_x' : st.unmasked;
         } else if (currentSymbolState === 'vt') {
           symbol = type === 'aereo_od' ? 'vt_circle' :
-                   type === 'aereo_oi' ? 'vt_x' : st.unmasked;
+          type === 'aereo_oi' ? 'vt_x' : st.unmasked;
         } else if (currentSymbolState === 'masked') {
           symbol = st.masked;
         } else if (type.startsWith('ldl_')) {
@@ -197,39 +166,42 @@ Object.assign(AudiogramChartView.prototype, {
           symbol = isMasked ? st.masked : st.unmasked;
         }
 
-        if (value === 130) {
-          const y = yScale(120);
-          this.drawSymbol(x, y, 'arrow', st.color);
-        } else {
-          const y = yScale(value);
-          let adjustedX = x;
-          let adjustedY = y;
+        // Usar la posición real del valor, sin forzar movimientos automáticos
+        const y = yScale(value);
+        let adjustedX = x;
+        let adjustedY = y;
 
-          // Ajustar coordenadas
-          if (type === 'oseo_od') {
-            adjustedX = x - this.boneOffset;
-          } else if (type === 'oseo_oi') {
-            adjustedX = x + this.boneOffset;
-          } else if (type.startsWith('ldl_')) {
-            if (type === 'ldl_od') {
-              adjustedX = x - this.ldlOffsetX;
-            } else {
-              adjustedX = x + this.ldlOffsetX;
-            }
-            adjustedY = y - this.ldlOffsetY;
-
-            if (!isAbsent) {
-              pts.push({ x: adjustedX, y: adjustedY });
-            }
+        // Ajustar coordenadas según el tipo
+        if (type === 'oseo_od') {
+          adjustedX = x - this.boneOffset;
+        } else if (type === 'oseo_oi') {
+          adjustedX = x + this.boneOffset;
+        } else if (type.startsWith('ldl_')) {
+          if (type === 'ldl_od') {
+            adjustedX = x - this.ldlOffsetX;
           } else {
+            adjustedX = x + this.ldlOffsetX;
+          }
+          adjustedY = y - this.ldlOffsetY;
+
+          if (!isAbsent) {
             pts.push({ x: adjustedX, y: adjustedY });
           }
+        } else {
+          pts.push({ x: adjustedX, y: adjustedY });
+        }
 
-          if (type === 'oseo_od' || type === 'oseo_oi') {
-            pts.push({ x: adjustedX, y: adjustedY });
-          }
+        if (type === 'oseo_od' || type === 'oseo_oi') {
+          pts.push({ x: adjustedX, y: adjustedY });
+        }
 
-          this.drawSymbol(x, y, symbol, st.color);
+        // Dibujar el símbolo en su posición real
+        // Para "no respuesta", usar símbolo de flecha si el valor es exactamente donde no hay respuesta
+        // pero mantener la posición donde se hizo clic
+        if (currentSymbolState === 'no_response' && value >= 120) {
+          this.drawSymbol(adjustedX, adjustedY, 'arrow', st.color);
+        } else {
+          this.drawSymbol(adjustedX, adjustedY, symbol, st.color);
         }
       });
 
