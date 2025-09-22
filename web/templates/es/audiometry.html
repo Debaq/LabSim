@@ -1,0 +1,92 @@
+<div class="audiometry-module">
+    <h3 class="section-title">🎧 Audiometría Tonal</h3>
+    <p class="section-description">Registro de umbrales auditivos por vía aérea y ósea. Ingresa valores en dB HL. Deja vacío para umbral no obtenido. Use 130 dB para umbral ausente.</p>
+
+    <div class="audiometry-layout">
+        <!-- Panel de Formularios -->
+        <div class="audiometry-forms">
+            <!-- Control de Altas Frecuencias -->
+            <div class="audiometry-controls">
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="showHighFreq" {{showHighFreqChecked}}>
+                        <label for="showHighFreq">Mostrar altas frecuencias (9K - 20K Hz)</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla Vía Aérea -->
+            <div class="audiometry-section">
+                <h4 class="audiometry-subtitle">Vía Aérea (dB HL)</h4>
+                <table class="audiometry-table">
+                    <thead>
+                        <tr>
+                            <th>Frecuencia</th>
+                            <th class="audiometry-od">OD</th>
+                            <th class="audiometry-oi">OI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="aereosTableBody">
+                        {{aereosRows}}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Tabla Vía Ósea -->
+            <div class="audiometry-section">
+                <h4 class="audiometry-subtitle">Vía Ósea (dB HL)</h4>
+                <p class="audiometry-note">Solo frecuencias 250-4000 Hz.</p>
+                <table class="audiometry-table">
+                    <thead>
+                        <tr>
+                            <th>Frecuencia</th>
+                            <th class="audiometry-od">OD</th>
+                            <th class="audiometry-oi">OI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="oseosTableBody">
+                        {{oseosRows}}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Tabla LDL -->
+            <div class="audiometry-section">
+                <h4 class="audiometry-subtitle">LDL - Niveles de Disconfort (dB HL)</h4>
+                <p class="audiometry-note">Opcional. Frecuencias 250-4000 Hz.</p>
+                <table class="audiometry-table">
+                    <thead>
+                        <tr>
+                            <th>Frecuencia</th>
+                            <th class="audiometry-od">OD</th>
+                            <th class="audiometry-oi">OI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ldlTableBody">
+                        {{ldlRows}}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Observaciones -->
+            <div class="audiometry-section">
+                <label class="audiometry-label">Observaciones</label>
+                <textarea id="observaciones"
+                          class="audiometry-textarea"
+                          rows="3"
+                          placeholder="Comentarios sobre la audiometría, morfología del audiograma, etc.">{{observaciones}}</textarea>
+            </div>
+        </div>
+
+        <!-- Panel de Preview -->
+        <div class="audiometry-preview">
+            <div class="audiometry-preview-container">
+                <h4 class="audiometry-subtitle">📊 Preview del Audiograma</h4>
+                <div class="audiometry-canvas-container">
+                    <canvas id="audiogramCanvas" width="600" height="400"></canvas>
+                </div>
+                <p class="audiometry-note">El audiograma se actualiza automáticamente al ingresar umbrales.</p>
+            </div>
+        </div>
+    </div>
+</div>
