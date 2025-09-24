@@ -19,7 +19,7 @@ class AudiogramChartView {
     };
 
     this.config = {
-      margin: { top: 30, right: 40, bottom: 50, left: 60 },
+      margin: { top: 60, right: 40, bottom: 50, left: 60 },
       colors: {
         od: '#dc3545',
         oi: '#007bff',

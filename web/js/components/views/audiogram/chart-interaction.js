@@ -122,22 +122,17 @@ Object.assign(AudiogramChartView.prototype, {
   handleSymbolStateChange(symbolClick) {
     const { freq, stateKey, currentDb } = symbolClick;
 
-    // Obtener estado actual
     const currentState = this.symbolStates[stateKey] || 'normal';
-
-    // Ciclar al siguiente estado SIN cambiar la posición
     const nextState = this.getNextState(currentState, freq);
 
     if (nextState === 'empty') {
       delete this.symbolStates[stateKey];
       delete this.symbolStatesDb[stateKey];
-      // Actualizar datos para eliminar el umbral
       this.updateAudiogramData(freq, this.activeTool, null, 'empty');
     } else {
       this.symbolStates[stateKey] = nextState;
-      // MANTENER la posición actual, no cambiarla
+      // 🔥 MANTENER la posición original, sin cambiar currentDb
       this.symbolStatesDb[stateKey] = currentDb;
-      // Actualizar datos manteniendo la intensidad actual
       this.updateAudiogramData(freq, this.activeTool, currentDb, nextState);
     }
 

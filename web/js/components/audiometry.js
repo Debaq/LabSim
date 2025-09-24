@@ -289,8 +289,6 @@ class AudiometryModule {
         // Actualizar el valor del input según el estado
         if (state === 'empty') {
             input.value = '';
-        } else if (state === 'no_response') {
-            input.value = '130'; // Valor especial para "no response"
         } else {
             input.value = db.toString();
         }

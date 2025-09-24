@@ -198,8 +198,12 @@ Object.assign(AudiogramChartView.prototype, {
         // Dibujar el símbolo en su posición real
         // Para "no respuesta", usar símbolo de flecha si el valor es exactamente donde no hay respuesta
         // pero mantener la posición donde se hizo clic
-        if (currentSymbolState === 'no_response' && value >= 120) {
-          this.drawSymbol(adjustedX, adjustedY, 'arrow', st.color);
+        if (currentSymbolState === 'no_response') {
+          // Dibujar el símbolo original (circle o x) en su posición real
+          const baseSymbol = type === 'aereo_od' ? 'circle' : 'x';
+          this.drawSymbol(adjustedX, adjustedY, baseSymbol, st.color);
+          // Dibujar la flecha JUSTO debajo, sin mover el símbolo
+          this.drawSymbol(adjustedX, adjustedY + this.symbolSize + 8, 'arrow', st.color);
         } else {
           this.drawSymbol(adjustedX, adjustedY, symbol, st.color);
         }
