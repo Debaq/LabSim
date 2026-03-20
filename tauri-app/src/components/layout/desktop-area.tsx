@@ -1,4 +1,5 @@
 import { useUIStore } from "@/stores/ui-store";
+import { useAuthStore } from "@/stores/auth-store";
 import { DesktopIcon } from "./desktop-icon";
 import {
   Headphones,
@@ -8,9 +9,19 @@ import {
   FileText,
   MessageCircle,
   Database,
+  ShieldCheck,
 } from "lucide-react";
 
-const desktopItems = [
+interface DesktopItem {
+  id: string;
+  label: string;
+  icon: typeof Headphones;
+  component: string;
+  color: string;
+  adminOnly?: boolean;
+}
+
+const desktopItems: DesktopItem[] = [
   {
     id: "audiometer",
     label: "Audiómetro",
@@ -34,10 +45,11 @@ const desktopItems = [
   },
   {
     id: "clinical",
-    label: "Módulo Clínico",
-    icon: Stethoscope,
+    label: "Crear Casos",
+    icon: ShieldCheck,
     component: "clinical",
     color: "text-purple-400",
+    adminOnly: true,
   },
   {
     id: "messaging",
@@ -68,12 +80,21 @@ interface Props {
 
 export function DesktopArea({ className }: Props) {
   const openWindow = useUIStore((s) => s.openWindow);
+  const isAdmin = useAuthStore((s) => s.isAdmin);
 
-  const handleOpen = (item: (typeof desktopItems)[number]) => {
+  const visibleItems = desktopItems.filter(
+    (item) => !item.adminOnly || isAdmin,
+  );
+
+  const handleOpen = (item: DesktopItem) => {
     const opts =
       item.id === "messaging"
         ? { width: 420, height: 620 }
-        : undefined;
+        : item.id === "audiometer"
+          ? { width: 780, height: 520, x: 60, y: 20 }
+          : item.id === "impedance"
+            ? { width: 800, height: 500 }
+            : undefined;
     openWindow(item.id, item.label, item.component, opts);
   };
 
@@ -81,7 +102,7 @@ export function DesktopArea({ className }: Props) {
     <div
       className={`grid auto-rows-min grid-cols-1 content-start gap-1 p-3 ${className ?? ""}`}
     >
-      {desktopItems.map((item) => (
+      {visibleItems.map((item) => (
         <DesktopIcon
           key={item.id}
           label={item.label}

@@ -61,6 +61,15 @@ impl Database {
         }
     }
 
+    pub fn get_user_role(&self, username: &str) -> Result<String, rusqlite::Error> {
+        let conn = self.conn.lock().unwrap();
+        conn.query_row(
+            "SELECT role FROM users WHERE username = ?1",
+            [username],
+            |row| row.get(0),
+        )
+    }
+
     pub fn list_patients(&self) -> Result<Vec<PatientSummary>, rusqlite::Error> {
         let conn = self.conn.lock().unwrap();
         let mut stmt = conn.prepare(
