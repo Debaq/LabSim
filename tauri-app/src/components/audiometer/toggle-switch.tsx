@@ -18,7 +18,7 @@ export function ToggleSwitch({
   return (
     <div className={cn("flex items-center gap-1", vertical && "flex-col")}>
       {label && (
-        <span className="w-8 shrink-0 text-[6px] font-semibold uppercase tracking-wider ls-text-muted">
+        <span className="w-8 shrink-0 text-xs font-semibold uppercase tracking-wider ls-text-muted">
           {label}
         </span>
       )}
@@ -35,7 +35,7 @@ export function ToggleSwitch({
               key={opt.value}
               onClick={() => onChange(opt.value)}
               className={cn(
-                "px-1.5 py-[2px] text-[7px] font-bold uppercase tracking-wider transition-all",
+                "px-1.5 py-[2px] text-xs font-bold uppercase tracking-wider transition-all",
                 isActive
                   ? cn("shadow-inner", opt.color ?? "bg-amber-500/80 text-black")
                   : "ls-text-muted hover:ls-text-muted",

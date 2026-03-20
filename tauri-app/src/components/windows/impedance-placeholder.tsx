@@ -207,7 +207,7 @@ export function ImpedancePlaceholder() {
             size="xs"
             variant="ghost"
             onClick={handleClearAll}
-            className="ls-text-muted hover:ls-text text-[10px]"
+            className="ls-text-muted hover:ls-text text-xs"
             title="Limpiar todo"
           >
             Limpiar todo
@@ -229,7 +229,7 @@ export function ImpedancePlaceholder() {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <Label className="text-[10px] ls-text-muted">
+                  <Label className="text-xs ls-text-muted">
                     Compliance max (ml)
                   </Label>
                   <Input
@@ -246,7 +246,7 @@ export function ImpedancePlaceholder() {
                   />
                 </div>
                 <div>
-                  <Label className="text-[10px] ls-text-muted">
+                  <Label className="text-xs ls-text-muted">
                     Presion (daPa)
                   </Label>
                   <Input
@@ -263,7 +263,7 @@ export function ImpedancePlaceholder() {
                   />
                 </div>
                 <div>
-                  <Label className="text-[10px] ls-text-muted">
+                  <Label className="text-xs ls-text-muted">
                     Volumen EAC (ml)
                   </Label>
                   <Input
@@ -280,7 +280,7 @@ export function ImpedancePlaceholder() {
                   />
                 </div>
                 <div>
-                  <Label className="text-[10px] ls-text-muted">Gradiente</Label>
+                  <Label className="text-xs ls-text-muted">Gradiente</Label>
                   <Input
                     type="number"
                     step="0.1"
@@ -311,7 +311,7 @@ export function ImpedancePlaceholder() {
                   >
                     Tipo {currentType}
                   </Badge>
-                  <span className="text-[10px] ls-text-muted">
+                  <span className="text-xs ls-text-muted">
                     {typeDescription(currentType)}
                   </span>
                 </div>
@@ -326,7 +326,7 @@ export function ImpedancePlaceholder() {
 
               <table className="w-full">
                 <thead>
-                  <tr className="text-[10px] ls-text-muted">
+                  <tr className="text-xs ls-text-muted">
                     <th className="pb-1 text-left font-normal">Hz</th>
                     {FREQUENCIES.map((f) => (
                       <th key={f} className="pb-1 text-center font-normal">
@@ -338,7 +338,7 @@ export function ImpedancePlaceholder() {
                 <tbody>
                   {(["ipsi", "contra"] as const).map((mode) => (
                     <tr key={mode}>
-                      <td className="py-1 pr-2 text-[10px] font-medium uppercase ls-text2">
+                      <td className="py-1 pr-2 text-xs font-medium uppercase ls-text2">
                         {mode === "ipsi" ? "Ipsi" : "Contra"}
                       </td>
                       {FREQUENCIES.map((freq) => (
@@ -349,7 +349,7 @@ export function ImpedancePlaceholder() {
                               handleReflexChange(mode, freq, e.target.value)
                             }
                             placeholder="dB"
-                            className="h-6 w-full ls-border ls-bg-input text-center text-[10px] ls-text placeholder:ls-text-muted"
+                            className="h-6 w-full ls-border ls-bg-input text-center text-xs ls-text placeholder:ls-text-muted"
                           />
                         </td>
                       ))}
@@ -357,7 +357,7 @@ export function ImpedancePlaceholder() {
                   ))}
                 </tbody>
               </table>
-              <p className="mt-1.5 text-[9px] ls-text-muted">
+              <p className="mt-1.5 text-xs ls-text-muted">
                 Ingresar dB o escribir AUS (ausente)
               </p>
             </div>
@@ -367,7 +367,7 @@ export function ImpedancePlaceholder() {
               <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide ls-text2">
                 Resumen
               </h4>
-              <div className="grid grid-cols-2 gap-2 text-[10px]">
+              <div className="grid grid-cols-2 gap-2 text-xs">
                 <div>
                   <span className="text-red-400">OD:</span>{" "}
                   <span className="ls-text2">
@@ -412,7 +412,7 @@ export function ImpedancePlaceholder() {
       </ScrollArea>
 
       {/* Status bar */}
-      <div className="flex items-center justify-between border-t ls-border px-3 py-1.5 text-[10px] ls-text-muted">
+      <div className="flex items-center justify-between border-t ls-border px-3 py-1.5 text-xs ls-text-muted">
         <span>
           {activeEar === "right" ? "Oido Derecho" : "Oido Izquierdo"}
         </span>

@@ -39,14 +39,14 @@ export function ChatBubble({ message }: ChatBubbleProps) {
         )}
       >
         {!isUser && message.senderName && (
-          <p className="mb-0.5 text-[10px] font-semibold text-emerald-400">
+          <p className="mb-0.5 text-xs font-semibold text-emerald-400">
             {message.senderName}
           </p>
         )}
         <p className="whitespace-pre-wrap leading-relaxed">{message.text}</p>
         <div
           className={cn(
-            "mt-1 flex items-center gap-1 text-[10px]",
+            "mt-1 flex items-center gap-1 text-xs",
             isUser ? "justify-end ls-text2" : "ls-text-muted",
           )}
         >

@@ -40,7 +40,7 @@ export function ChatPanel({
             {headerTitle}
           </p>
           {headerSubtitle && (
-            <p className="text-[11px] ls-text-muted">{headerSubtitle}</p>
+            <p className="text-xs ls-text-muted">{headerSubtitle}</p>
           )}
         </div>
       </div>

@@ -20,7 +20,7 @@ function ChannelInfo({ ch, label, color, ledColor }: { ch: ChannelState; label: 
     <div className="flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between mb-1">
-        <span className={cn("text-[10px] font-bold tracking-wider", color)}>{label}</span>
+        <span className={cn("text-xs font-bold tracking-wider", color)}>{label}</span>
         {ch.isPlaying && (
           <div className="flex items-center gap-1">
             <div className={cn("h-2.5 w-2.5 animate-pulse rounded-full shadow-sm", ledColor)} />
@@ -34,11 +34,11 @@ function ChannelInfo({ ch, label, color, ledColor }: { ch: ChannelState; label: 
           `[text-shadow:0_0_12px_currentColor]`)}>
           {ch.intensity}
         </span>
-        <span className="text-[10px] ls-text-muted">dB</span>
+        <span className="text-xs ls-text-muted">dB</span>
       </div>
 
       {/* Info grid */}
-      <div className="grid grid-cols-2 gap-x-3 gap-y-px text-[10px]">
+      <div className="grid grid-cols-2 gap-x-3 gap-y-px text-xs">
         <div className="flex justify-between">
           <span className="ls-text-muted">Trans</span>
           <span className="font-semibold ls-text2">{transL[ch.transducer]}</span>
@@ -87,11 +87,11 @@ export function UnifiedDisplay({ ch0, ch1, frequency, testMode, time, logoText }
           <div className="font-mono text-2xl font-black tabular-nums leading-none text-amber-400 [text-shadow:0_0_12px_rgb(251_191_36/0.5)]">
             {fmtF(frequency)}
           </div>
-          <div className="text-[10px] ls-text-muted mt-0.5">Hz</div>
+          <div className="text-xs ls-text-muted mt-0.5">Hz</div>
         </div>
 
         {/* Test mode */}
-        <div className="rounded bg-white/[0.04] px-2 py-0.5 text-[10px] font-semibold ls-text-muted">
+        <div className="rounded bg-white/[0.04] px-2 py-0.5 text-xs font-semibold ls-text-muted">
           {testMode === "umbrales" ? "Umbrales" : "Logoaudiometría"}
         </div>
 

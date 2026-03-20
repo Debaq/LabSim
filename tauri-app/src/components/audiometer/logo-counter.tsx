@@ -14,7 +14,7 @@ export function LogoCounter({ correct, total, onCorrect, onIncorrect, onReset }:
 
   return (
     <div className="flex flex-col items-center gap-1.5 rounded-lg border ls-border ls-bg/30 p-2">
-      <span className="text-[8px] font-bold uppercase tracking-[0.15em] ls-text-muted">
+      <span className="text-xs font-bold uppercase tracking-[0.15em] ls-text-muted">
         Logoaudiometría
       </span>
 

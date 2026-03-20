@@ -89,7 +89,7 @@ export function SettingsWindow() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold" style={{ color: active ? "var(--ls-accent)" : "var(--ls-text)" }}>{t.label}</p>
-                      <p className="text-[10px]" style={{ color: "var(--ls-text-muted)" }}>{t.desc}</p>
+                      <p className="text-xs" style={{ color: "var(--ls-text-muted)" }}>{t.desc}</p>
                     </div>
                     {active && <Check className="h-4 w-4 shrink-0 text-blue-400" />}
                   </button>
@@ -119,13 +119,13 @@ export function SettingsWindow() {
                       : <Download className="h-4 w-4 shrink-0" style={{ color: "var(--ls-text-muted)" }} />}
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium" style={{ color: "var(--ls-text)" }}>{model.name}</p>
-                      <p className="text-[10px]" style={{ color: "var(--ls-text-muted)" }}>{model.sizeMb} MB</p>
+                      <p className="text-xs" style={{ color: "var(--ls-text-muted)" }}>{model.sizeMb} MB</p>
                     </div>
                   </button>
                 );
               })}
 
-              <p className="text-[9px]" style={{ color: "var(--ls-text-muted)" }}>
+              <p className="text-xs" style={{ color: "var(--ls-text-muted)" }}>
                 Se descarga de HuggingFace (~1 vez). Se usa para Karime y el Docente.
               </p>
             </div>
@@ -136,9 +136,9 @@ export function SettingsWindow() {
             <SectionHeader icon={<Info className="h-4 w-4 text-amber-400" />} title="Acerca de" />
             <div className="rounded-lg border p-3 space-y-1" style={{ borderColor: "var(--ls-border)", backgroundColor: "var(--ls-panel-secondary)" }}>
               <p className="text-xs" style={{ color: "var(--ls-text)" }}><span className="font-semibold">LabSim</span> v3.0.0</p>
-              <p className="text-[10px]" style={{ color: "var(--ls-text-muted)" }}>Simulador Audiológico Educativo</p>
-              <p className="text-[10px]" style={{ color: "var(--ls-text-muted)" }}>Tauri + React + Rust + llama.cpp</p>
-              <p className="text-[10px] pt-1" style={{ color: "var(--ls-text-muted)", opacity: 0.5 }}>Nicolás Quezada Quezada</p>
+              <p className="text-xs" style={{ color: "var(--ls-text-muted)" }}>Simulador Audiológico Educativo</p>
+              <p className="text-xs" style={{ color: "var(--ls-text-muted)" }}>Tauri + React + Rust + llama.cpp</p>
+              <p className="text-xs pt-1" style={{ color: "var(--ls-text-muted)", opacity: 0.5 }}>Nicolás Quezada Quezada</p>
             </div>
           </section>
         </div>
@@ -151,7 +151,7 @@ function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }
   return (
     <div className="flex items-center gap-2 mb-2">
       {icon}
-      <h3 className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ls-text-muted)" }}>{title}</h3>
+      <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--ls-text-muted)" }}>{title}</h3>
     </div>
   );
 }

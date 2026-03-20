@@ -54,10 +54,10 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
     <div className="border-b ls-border ls-bg-panel/80">
       {/* Progress indicator */}
       <div className="flex items-center justify-between px-4 pt-2 pb-1">
-        <span className="text-[10px] font-medium tracking-wider ls-text-muted uppercase">
+        <span className="text-xs font-medium tracking-wider ls-text-muted uppercase">
           Módulos Clínicos
         </span>
-        <Badge variant="secondary" className="h-5 text-[10px]">
+        <Badge variant="secondary" className="h-5 text-xs">
           {completedCount}/{MODULE_IDS.length}
         </Badge>
       </div>

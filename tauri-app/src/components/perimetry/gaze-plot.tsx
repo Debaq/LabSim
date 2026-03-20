@@ -67,7 +67,7 @@ export function GazePlot({ gazeHistory }: GazePlotProps) {
 
   return (
     <div className="rounded border ls-border bg-black overflow-hidden">
-      <div className="px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-wider ls-text-muted ls-bg-panel2">
+      <div className="px-1.5 py-0.5 text-xs font-bold uppercase tracking-wider ls-text-muted ls-bg-panel2">
         Gaze Tracking
       </div>
       <canvas ref={canvasRef} width={160} height={100} className="block w-full" />

@@ -53,7 +53,7 @@ export function StimulusButton({
           c.ring,
         )}
       >
-        <span className="text-[8px] font-bold uppercase tracking-wider ls-text">
+        <span className="text-xs font-bold uppercase tracking-wider ls-text">
           {label}
         </span>
       </button>

@@ -246,7 +246,7 @@ export function PatientHistory() {
                       >
                         {patient.nombre} {patient.apellido}
                       </div>
-                      <div className="text-[10px] ls-text-muted">
+                      <div className="text-xs ls-text-muted">
                         {formatDate(patient.fecha_creacion)}
                       </div>
                     </div>
@@ -279,14 +279,14 @@ export function PatientHistory() {
                     <div className="mt-1 flex gap-1.5">
                       <Badge
                         variant="outline"
-                        className="ls-border text-[10px] ls-text-muted"
+                        className="ls-border text-xs ls-text-muted"
                       >
                         ID: {selectedPatient.id}
                       </Badge>
                       {selectedPatient.rut && (
                         <Badge
                           variant="outline"
-                          className="ls-border text-[10px] ls-text-muted"
+                          className="ls-border text-xs ls-text-muted"
                         >
                           {selectedPatient.rut}
                         </Badge>
@@ -365,7 +365,7 @@ export function PatientHistory() {
                 <p className="text-xs ls-text-muted">
                   Selecciona un paciente para ver sus datos
                 </p>
-                <p className="mt-0.5 text-[10px] ls-text-muted">
+                <p className="mt-0.5 text-xs ls-text-muted">
                   {patients.length} pacientes registrados
                 </p>
               </div>
@@ -375,7 +375,7 @@ export function PatientHistory() {
       </div>
 
       {/* Status bar */}
-      <div className="flex items-center justify-between border-t ls-border px-3 py-1.5 text-[10px] ls-text-muted">
+      <div className="flex items-center justify-between border-t ls-border px-3 py-1.5 text-xs ls-text-muted">
         <span>{filteredPatients.length} pacientes</span>
         {error && <span className="text-amber-400/60">{error}</span>}
         <span>SQLite</span>

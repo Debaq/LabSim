@@ -16,7 +16,7 @@ import { RotateCcw, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lu
 // === Components defined OUTSIDE the main component to avoid re-mounting ===
 function Tb({ on, click, children }: { on: boolean; click: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={(e) => { e.stopPropagation(); click(); }} className={cn("rounded border px-2 py-1 text-[8px] font-bold uppercase tracking-wide transition min-w-[36px] cursor-pointer",
+    <button onClick={(e) => { e.stopPropagation(); click(); }} className={cn("rounded border px-2 py-1 text-xs font-bold uppercase tracking-wide transition min-w-[36px] cursor-pointer",
       on ? "border-amber-500/30 bg-amber-500/20 text-amber-300" : "ls-border ls-bg-input ls-text-muted hover:ls-text2 hover:ls-bg-input")}>{children}</button>
   );
 }
@@ -308,45 +308,45 @@ export function AudiometerPlaceholder() {
 
   const renderChConfig = (chState: ChannelState, setCh: typeof setCh0, chIdx: 0 | 1, enabled: StimulusType[]) => (
     <div className="flex-1 rounded border ls-border ls-bg-panel2 p-2">
-      <div className="mb-1 text-[8px] font-bold tracking-wider ls-text-muted">
+      <div className="mb-1 text-xs font-bold tracking-wider ls-text-muted">
         {chIdx === 0 ? "CANAL 1" : "CANAL 2"}
       </div>
       <div className="mb-1.5">
-        <div className="mb-0.5 text-[7px] uppercase ls-text-muted">Estímulo</div>
+        <div className="mb-0.5 text-xs uppercase ls-text-muted">Estímulo</div>
         <div className="grid grid-cols-4 gap-1">
           {(["tone", "fm", "nbn", "speech", "wn", "sn", "pn"] as StimulusType[]).map((st) => {
             const dis = !enabled.includes(st);
             return <button key={st} disabled={dis} onClick={() => changeStim(chIdx, st)}
-              className={cn("rounded border py-1 text-[9px] font-bold transition",
+              className={cn("rounded border py-1 text-xs font-bold transition",
                 chState.stimulus === st ? "border-amber-500/40 bg-amber-500/20 text-amber-300" : dis ? "border-white/[0.03] text-white/[0.08]" : "ls-border ls-bg-input ls-text-muted hover:ls-bg-input")}>{stimLabels[st]}</button>;
           })}
         </div>
       </div>
       <div className="flex gap-2">
         <div>
-          <div className="mb-0.5 text-[7px] uppercase ls-text-muted">Transductor</div>
+          <div className="mb-0.5 text-xs uppercase ls-text-muted">Transductor</div>
           <div className="flex gap-1">
             {([["air", "VA"], ["bone", "VO"], ["free", "CL"]] as const).map(([v, l]) => (
               <button key={v} onClick={() => { setCh((p) => ({ ...p, transducer: v as TransducerType })); resetChannels(); }}
-                className={cn("rounded border px-2.5 py-1 text-[9px] font-bold transition",
+                className={cn("rounded border px-2.5 py-1 text-xs font-bold transition",
                   chState.transducer === v ? "border-amber-500/40 bg-amber-500/20 text-amber-300" : "ls-border ls-bg-input ls-text-muted hover:ls-bg-input")}>{l}</button>
             ))}
           </div>
         </div>
         <div>
-          <div className="mb-0.5 text-[7px] uppercase ls-text-muted">Salida</div>
+          <div className="mb-0.5 text-xs uppercase ls-text-muted">Salida</div>
           <div className="flex gap-1">
             <button onClick={() => { setCh((p) => ({ ...p, output: "right" })); resetChannels(); }}
-              className={cn("rounded border px-2.5 py-1 text-[9px] font-bold transition",
+              className={cn("rounded border px-2.5 py-1 text-xs font-bold transition",
                 chState.output === "right" ? "border-red-500/40 bg-red-500/20 text-red-400" : "ls-border ls-bg-input ls-text-muted hover:ls-bg-input")}>OD</button>
             <button onClick={() => { setCh((p) => ({ ...p, output: "left" })); resetChannels(); }}
-              className={cn("rounded border px-2.5 py-1 text-[9px] font-bold transition",
+              className={cn("rounded border px-2.5 py-1 text-xs font-bold transition",
                 chState.output === "left" ? "border-blue-500/40 bg-blue-500/20 text-blue-400" : "ls-border ls-bg-input ls-text-muted hover:ls-bg-input")}>OI</button>
           </div>
         </div>
         <div className="ml-auto flex items-end gap-1">
-          <button onClick={() => reg(chIdx)} className="rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[9px] font-bold text-emerald-400 hover:bg-emerald-500/20">Reg</button>
-          <button onClick={() => reg(chIdx, true)} className="rounded border ls-border px-2 py-1 text-[9px] font-bold ls-text-muted hover:ls-bg-input">S/R</button>
+          <button onClick={() => reg(chIdx)} className="rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20">Reg</button>
+          <button onClick={() => reg(chIdx, true)} className="rounded border ls-border px-2 py-1 text-xs font-bold ls-text-muted hover:ls-bg-input">S/R</button>
         </div>
       </div>
     </div>
@@ -367,7 +367,7 @@ export function AudiometerPlaceholder() {
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <div className="flex h-6 shrink-0 items-center justify-between ls-bg-panel px-3">
-          <span className="text-[9px] font-bold tracking-[0.2em] ls-text-muted">LABSIM <span className="font-normal ls-text-muted">DA-80</span></span>
+          <span className="text-xs font-bold tracking-[0.2em] ls-text-muted">LABSIM <span className="font-normal ls-text-muted">DA-80</span></span>
           <div className="flex items-center gap-2">
             <ToggleSwitch value={testMode} onChange={(v) => setTestMode(v as "umbrales" | "logo")} options={[{ value: "umbrales", label: "Umbrales" }, { value: "logo", label: "Logo" }]} />
             <button onClick={() => setShowAG(!showAG)} className="ls-text-muted hover:ls-text-muted">
@@ -436,7 +436,7 @@ export function AudiometerPlaceholder() {
           </div>
 
           {/* Timer + Logo */}
-          <div className="flex shrink-0 items-center justify-center gap-3 text-[9px]">
+          <div className="flex shrink-0 items-center justify-center gap-3 text-xs">
             <button onClick={() => setTimerOn(true)} className="text-emerald-400/60 hover:text-emerald-400">Iniciar</button>
             <button onClick={() => setTimerOn(false)} className="text-amber-400/60 hover:text-amber-400">Detener</button>
             <button onClick={() => { setTimerOn(false); setSecs(0); }} className="ls-text-muted hover:ls-text2">Borrar</button>
@@ -451,7 +451,7 @@ export function AudiometerPlaceholder() {
           </div>
         </div>
 
-        <div className="flex h-5 shrink-0 items-center justify-between bg-black/25 px-3 text-[8px] ls-text-muted">
+        <div className="flex h-5 shrink-0 items-center justify-between bg-black/25 px-3 text-xs ls-text-muted">
           <span>W/S: CH1 dB | ←→: Freq</span>
           <span>{freq} Hz | Rango: {range0.min}~{range0.max} dB</span>
           <span>O/L: CH2 dB</span>

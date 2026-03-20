@@ -112,7 +112,7 @@ function ContactList() {
                   <span className="text-sm font-medium ls-text">
                     {contact.name}
                   </span>
-                  <span className="text-[10px] ls-text-muted">
+                  <span className="text-xs ls-text-muted">
                     {getLastTime(contact.id)}
                   </span>
                 </div>
@@ -121,7 +121,7 @@ function ContactList() {
                     {getLastMessage(contact.id)}
                   </p>
                   {unread > 0 && (
-                    <Badge className="h-5 min-w-5 justify-center bg-emerald-500 px-1.5 text-[10px] ls-text">
+                    <Badge className="h-5 min-w-5 justify-center bg-emerald-500 px-1.5 text-xs ls-text">
                       {unread}
                     </Badge>
                   )}
@@ -244,7 +244,7 @@ function ConversationView({ contact }: { contact: Contact }) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold ls-text">{contact.name}</p>
-          <p className="text-[10px] ls-text-muted">
+          <p className="text-xs ls-text-muted">
             {typing ? "escribiendo..." : contact.subtitle}
           </p>
         </div>

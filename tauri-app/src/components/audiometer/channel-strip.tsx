@@ -109,7 +109,7 @@ export function ChannelStrip({
                 disabled={disabled}
                 onClick={() => onChange({ stimulus: stim })}
                 className={cn(
-                  "rounded px-1 py-px text-[6px] font-bold uppercase transition",
+                  "rounded px-1 py-px text-xs font-bold uppercase transition",
                   state.stimulus === stim
                     ? "bg-amber-500/25 text-amber-300"
                     : disabled
@@ -178,7 +178,7 @@ export function ChannelStrip({
                 key={key}
                 onClick={() => onChange({ [key]: !state[key] })}
                 className={cn(
-                  "rounded border px-1 py-px text-[6px] font-bold uppercase transition",
+                  "rounded border px-1 py-px text-xs font-bold uppercase transition",
                   state[key] ? activeClass : "ls-border ls-text-muted hover:ls-text-muted",
                 )}
               >

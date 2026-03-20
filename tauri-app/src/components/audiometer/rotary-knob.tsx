@@ -46,9 +46,9 @@ export function RotaryKnob({
   }, [value, min, max]);
 
   const sizes = {
-    sm: { knob: 48, text: "text-[8px]", display: "text-[10px]" },
-    md: { knob: 68, text: "text-[9px]", display: "text-xs" },
-    lg: { knob: 96, text: "text-[10px]", display: "text-sm" },
+    sm: { knob: 48, text: "text-xs", display: "text-xs" },
+    md: { knob: 68, text: "text-xs", display: "text-xs" },
+    lg: { knob: 96, text: "text-xs", display: "text-sm" },
   };
   const s = sizes[size];
 

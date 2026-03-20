@@ -91,7 +91,7 @@ export default function AudiometryModule() {
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-11">
           {freqs.map((freq) => (
             <div key={freq} className="space-y-1">
-              <Label className="text-[10px] ls-text-muted">{freq >= 1000 ? `${freq / 1000}k` : freq}</Label>
+              <Label className="text-xs ls-text-muted">{freq >= 1000 ? `${freq / 1000}k` : freq}</Label>
               <Input type="number" min={-10} max={130} step={5}
                 {...register(`${section}.${oido}.${freq}` as `umbralesAereos.oidoDerecho`)}
                 className="h-8 ls-border ls-bg-input px-1.5 text-center text-xs ls-text" />

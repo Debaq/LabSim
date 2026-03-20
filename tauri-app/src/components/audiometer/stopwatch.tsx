@@ -27,7 +27,7 @@ export function Stopwatch() {
 
   return (
     <div className="flex flex-col items-center gap-1 rounded-lg border ls-border ls-bg/30 p-2">
-      <span className="text-[8px] font-bold uppercase tracking-[0.15em] ls-text-muted">Cronómetro</span>
+      <span className="text-xs font-bold uppercase tracking-[0.15em] ls-text-muted">Cronómetro</span>
 
       <div className="rounded bg-black/60 px-2 py-0.5 font-mono text-lg font-bold tabular-nums text-green-400 [text-shadow:0_0_6px_rgb(74_222_128/0.4)]">
         {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
