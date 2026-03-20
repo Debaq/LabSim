@@ -45,7 +45,7 @@ export function StimulusButton({
         onMouseUp={onRelease}
         onMouseLeave={onRelease}
         className={cn(
-          "h-12 w-12 rounded-full border-2 border-white/10 transition-all select-none",
+          "h-12 w-12 rounded-full border-2 ls-border transition-all select-none",
           "flex items-center justify-center",
           "shadow-lg shadow-black/50",
           "active:translate-y-0.5 active:shadow-sm",
@@ -53,7 +53,7 @@ export function StimulusButton({
           c.ring,
         )}
       >
-        <span className="text-[8px] font-bold uppercase tracking-wider text-white/80">
+        <span className="text-[8px] font-bold uppercase tracking-wider ls-text">
           {label}
         </span>
       </button>

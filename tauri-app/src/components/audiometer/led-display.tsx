@@ -29,13 +29,13 @@ export function LedDisplay({
   return (
     <div className="flex flex-col items-center gap-0.5">
       {label && (
-        <span className="text-[8px] font-medium uppercase tracking-[0.15em] text-white/30">
+        <span className="text-[8px] font-medium uppercase tracking-[0.15em] ls-text-muted">
           {label}
         </span>
       )}
       <div
         className={cn(
-          "rounded-sm border border-white/5 bg-black/80 font-mono font-bold tabular-nums",
+          "rounded-sm border ls-border bg-black/80 font-mono font-bold tabular-nums",
           sizes[size],
           colors[color],
         )}

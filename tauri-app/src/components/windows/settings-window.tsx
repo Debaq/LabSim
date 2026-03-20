@@ -1,119 +1,157 @@
+import { useState, useEffect } from "react";
 import { useThemeStore, THEMES, type ThemeName } from "@/stores/theme-store";
 import { useAuthStore } from "@/stores/auth-store";
+import { useChatStore } from "@/stores/chat-store";
+import { invoke } from "@tauri-apps/api/core";
 import { cn } from "@/lib/utils";
-import { Check, Palette, User, Info, Volume2 } from "lucide-react";
+import { Check, Palette, User, Info, BrainCircuit, Download, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+interface ModelInfo { id: string; name: string; sizeMb: number; filename: string; }
 
 export function SettingsWindow() {
   const { theme, setTheme } = useThemeStore();
   const username = useAuthStore((s) => s.username);
   const role = useAuthStore((s) => s.role);
+  const llmConnected = useChatStore((s) => s.llmConnected);
+  const setLlmConnected = useChatStore((s) => s.setLlmConnected);
+  const setLastModel = useChatStore((s) => s.setLastModel);
+
+  const [models, setModels] = useState<ModelInfo[]>([]);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    invoke<ModelInfo[]>("llm_list_models").then(setModels).catch(() => {});
+  }, []);
+
+  const handleDownload = async (model: ModelInfo) => {
+    setDownloading(true);
+    setDownloadingId(model.id);
+    toast.info(`Descargando ${model.name}...`);
+    try {
+      const path = await invoke<string>("llm_download_model", { modelId: model.id, filename: model.filename });
+      toast.info("Cargando modelo en memoria...");
+      await invoke<boolean>("llm_load_model_async", { path });
+      setLlmConnected(true);
+      setLastModel(model.id, model.filename);
+      toast.success(`${model.name} — IA lista`);
+    } catch (err) {
+      toast.error(`Error: ${err}`);
+    } finally {
+      setDownloading(false);
+      setDownloadingId(null);
+    }
+  };
 
   return (
-    <div className="flex h-full flex-col" style={{ backgroundColor: "var(--settings-bg, #1e293b)" }}>
-      {/* Header */}
-      <div className="flex items-center gap-2 border-b px-4 py-3" style={{ borderColor: "var(--settings-border, rgba(255,255,255,0.06))" }}>
-        <span className="text-sm font-semibold" style={{ color: "var(--settings-text, #e2e8f0)" }}>Configuración</span>
+    <div className="flex h-full flex-col" style={{ backgroundColor: "var(--ls-window-bg)" }}>
+      <div className="flex items-center gap-2 border-b px-4 py-3" style={{ borderColor: "var(--ls-border)" }}>
+        <span className="text-sm font-semibold" style={{ color: "var(--ls-text)" }}>Configuración</span>
       </div>
 
-      <div className="flex-1 overflow-auto p-4 space-y-6">
+      <ScrollArea className="flex-1">
+        <div className="p-4 space-y-5">
 
-        {/* User info */}
-        <section>
-          <div className="flex items-center gap-2 mb-3">
-            <User className="h-4 w-4 text-blue-400" />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-white/40">Usuario</h3>
-          </div>
-          <div className="rounded-lg border border-white/[0.06] bg-black/20 p-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20 text-sm font-bold text-blue-400">
-                {username?.[0]?.toUpperCase() ?? "?"}
+          {/* User */}
+          <section>
+            <SectionHeader icon={<User className="h-4 w-4 text-blue-400" />} title="Usuario" />
+            <div className="rounded-lg border p-3" style={{ borderColor: "var(--ls-border)", backgroundColor: "var(--ls-panel-secondary)" }}>
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20 text-sm font-bold text-blue-400">
+                  {username?.[0]?.toUpperCase() ?? "?"}
+                </div>
+                <div>
+                  <p className="text-sm font-medium" style={{ color: "var(--ls-text)" }}>{username ?? "Sin sesión"}</p>
+                  <p className="text-xs capitalize" style={{ color: "var(--ls-text-muted)" }}>{role}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-white/80">{username ?? "Sin sesión"}</p>
-                <p className="text-xs text-white/30 capitalize">{role}</p>
+            </div>
+          </section>
+
+          {/* Themes */}
+          <section>
+            <SectionHeader icon={<Palette className="h-4 w-4 text-purple-400" />} title="Tema" />
+            <div className="grid grid-cols-1 gap-1.5">
+              {(Object.entries(THEMES) as [ThemeName, (typeof THEMES)[ThemeName]][]).map(([key, t]) => {
+                const active = theme === key;
+                return (
+                  <button key={key} onClick={() => setTheme(key)}
+                    className={cn("flex items-center gap-3 rounded-lg border p-2.5 text-left transition",
+                      active ? "border-blue-500/40" : "hover:opacity-80")}
+                    style={{ borderColor: active ? undefined : "var(--ls-border)", backgroundColor: "var(--ls-panel-secondary)" }}>
+                    <div className="flex gap-px shrink-0 rounded overflow-hidden">
+                      <div className="h-7 w-4" style={{ backgroundColor: t.vars["--ls-desktop-bg"] }} />
+                      <div className="h-7 w-4" style={{ backgroundColor: t.vars["--ls-window-bg"] }} />
+                      <div className="h-7 w-4" style={{ backgroundColor: t.vars["--ls-accent"] }} />
+                      <div className="h-7 w-4" style={{ backgroundColor: t.vars["--ls-window-header"] }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold" style={{ color: active ? "var(--ls-accent)" : "var(--ls-text)" }}>{t.label}</p>
+                      <p className="text-[10px]" style={{ color: "var(--ls-text-muted)" }}>{t.desc}</p>
+                    </div>
+                    {active && <Check className="h-4 w-4 shrink-0 text-blue-400" />}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* LLM */}
+          <section>
+            <SectionHeader icon={<BrainCircuit className="h-4 w-4 text-violet-400" />} title="Modelo de IA" />
+            <div className="rounded-lg border p-3 space-y-2" style={{ borderColor: "var(--ls-border)", backgroundColor: "var(--ls-panel-secondary)" }}>
+              <div className="flex items-center gap-2 mb-2">
+                <div className={cn("h-2.5 w-2.5 rounded-full", llmConnected ? "bg-emerald-400" : "bg-white/20")} />
+                <span className="text-xs font-medium" style={{ color: llmConnected ? "#22c55e" : "var(--ls-text-muted)" }}>
+                  {llmConnected ? "IA activa" : "IA desactivada"}
+                </span>
               </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Theme selector */}
-        <section>
-          <div className="flex items-center gap-2 mb-3">
-            <Palette className="h-4 w-4 text-purple-400" />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-white/40">Tema de Interfaz</h3>
-          </div>
-          <div className="grid grid-cols-1 gap-2">
-            {(Object.entries(THEMES) as [ThemeName, (typeof THEMES)[ThemeName]][]).map(([key, t]) => {
-              const isActive = theme === key;
-              return (
-                <button
-                  key={key}
-                  onClick={() => setTheme(key)}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg border p-3 text-left transition",
-                    isActive
-                      ? "border-blue-500/40 bg-blue-500/10"
-                      : "border-white/[0.06] bg-black/10 hover:bg-white/[0.03]",
-                  )}
-                >
-                  {/* Color preview swatches */}
-                  <div className="flex gap-0.5 shrink-0">
-                    <div className="h-8 w-5 rounded-l" style={{ backgroundColor: t.colors.bg }} />
-                    <div className="h-8 w-5" style={{ backgroundColor: t.colors.bgSecondary }} />
-                    <div className="h-8 w-5" style={{ backgroundColor: t.colors.accent }} />
-                    <div className="h-8 w-5 rounded-r" style={{ backgroundColor: t.colors.headerBg }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={cn("text-sm font-medium", isActive ? "text-blue-400" : "text-white/70")}>
-                      {t.label}
-                    </p>
-                    <p className="text-[10px] text-white/25">
-                      {key === "dark" && "Tema por defecto, ideal para ambientes oscuros"}
-                      {key === "light" && "Fondo claro, ideal para entornos clínicos bien iluminados"}
-                      {key === "dracula" && "Púrpura y rosa, popular entre desarrolladores"}
-                      {key === "clinical" && "Tonos azul-gris profesionales para uso clínico"}
-                      {key === "solarized" && "Paleta Solarized, cómodo para sesiones largas"}
-                    </p>
-                  </div>
-                  {isActive && <Check className="h-4 w-4 shrink-0 text-blue-400" />}
-                </button>
-              );
-            })}
-          </div>
-        </section>
+              {models.map((model) => {
+                const isDownloading = downloadingId === model.id;
+                return (
+                  <button key={model.id} disabled={downloading} onClick={() => handleDownload(model)}
+                    className="flex w-full items-center gap-2 rounded border p-2 text-left transition hover:opacity-80"
+                    style={{ borderColor: "var(--ls-border)" }}>
+                    {isDownloading ? <Loader2 className="h-4 w-4 shrink-0 animate-spin text-violet-400" />
+                      : <Download className="h-4 w-4 shrink-0" style={{ color: "var(--ls-text-muted)" }} />}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium" style={{ color: "var(--ls-text)" }}>{model.name}</p>
+                      <p className="text-[10px]" style={{ color: "var(--ls-text-muted)" }}>{model.sizeMb} MB</p>
+                    </div>
+                  </button>
+                );
+              })}
 
-        {/* Audio */}
-        <section>
-          <div className="flex items-center gap-2 mb-3">
-            <Volume2 className="h-4 w-4 text-emerald-400" />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-white/40">Audio</h3>
-          </div>
-          <div className="rounded-lg border border-white/[0.06] bg-black/20 p-3 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-white/50">Sample rate</span>
-              <span className="text-xs font-mono text-white/70">48000 Hz</span>
+              <p className="text-[9px]" style={{ color: "var(--ls-text-muted)" }}>
+                Se descarga de HuggingFace (~1 vez). Se usa para Karime y el Docente.
+              </p>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-white/50">Backend</span>
-              <span className="text-xs font-mono text-white/70">cpal (ALSA)</span>
-            </div>
-          </div>
-        </section>
+          </section>
 
-        {/* About */}
-        <section>
-          <div className="flex items-center gap-2 mb-3">
-            <Info className="h-4 w-4 text-amber-400" />
-            <h3 className="text-xs font-bold uppercase tracking-wider text-white/40">Acerca de</h3>
-          </div>
-          <div className="rounded-lg border border-white/[0.06] bg-black/20 p-3 space-y-1 text-xs text-white/40">
-            <p><span className="text-white/60 font-semibold">LabSim</span> v3.0.0</p>
-            <p>Simulador Audiológico Educativo</p>
-            <p>Tauri + React + Rust</p>
-            <p className="text-white/20 pt-1">Nicolás Quezada Quezada</p>
-          </div>
-        </section>
-      </div>
+          {/* About */}
+          <section>
+            <SectionHeader icon={<Info className="h-4 w-4 text-amber-400" />} title="Acerca de" />
+            <div className="rounded-lg border p-3 space-y-1" style={{ borderColor: "var(--ls-border)", backgroundColor: "var(--ls-panel-secondary)" }}>
+              <p className="text-xs" style={{ color: "var(--ls-text)" }}><span className="font-semibold">LabSim</span> v3.0.0</p>
+              <p className="text-[10px]" style={{ color: "var(--ls-text-muted)" }}>Simulador Audiológico Educativo</p>
+              <p className="text-[10px]" style={{ color: "var(--ls-text-muted)" }}>Tauri + React + Rust + llama.cpp</p>
+              <p className="text-[10px] pt-1" style={{ color: "var(--ls-text-muted)", opacity: 0.5 }}>Nicolás Quezada Quezada</p>
+            </div>
+          </section>
+        </div>
+      </ScrollArea>
+    </div>
+  );
+}
+
+function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
+  return (
+    <div className="flex items-center gap-2 mb-2">
+      {icon}
+      <h3 className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--ls-text-muted)" }}>{title}</h3>
     </div>
   );
 }

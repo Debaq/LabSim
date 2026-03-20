@@ -30,7 +30,7 @@ export function WindowContent({ component }: Props) {
   const Component = componentMap[component];
   if (!Component) {
     return (
-      <div className="flex h-full items-center justify-center bg-slate-800 text-white/40">
+      <div className="flex h-full items-center justify-center ls-bg ls-text-muted">
         Módulo no encontrado: {component}
       </div>
     );

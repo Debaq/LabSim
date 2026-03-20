@@ -118,11 +118,11 @@ export function PerimetryWindow() {
   const stratLabel = strategy === "sita-standard" ? "SITA Standard" : strategy === "sita-fast" ? "SITA Fast" : "Full Threshold";
 
   return (
-    <div className="flex h-full flex-col bg-gradient-to-b from-[#12151a] to-[#0d0f13]">
+    <div className="flex h-full flex-col ls-bg">
       {/* Header */}
-      <div className="flex h-7 shrink-0 items-center justify-between bg-[#0a0c10] px-3">
-        <span className="text-[9px] font-bold tracking-[0.2em] text-white/30">LABSIM <span className="font-normal text-white/12">PERIMETRY HFA-III</span></span>
-        <span className="text-[8px] text-white/15">{eye} | {pattern} | {stratLabel} | Goldmann {stimSize}</span>
+      <div className="flex h-7 shrink-0 items-center justify-between ls-bg-panel2 px-3">
+        <span className="text-[9px] font-bold tracking-[0.2em] ls-text-muted">LABSIM <span className="font-normal ls-text-muted">PERIMETRY HFA-III</span></span>
+        <span className="text-[8px] ls-text-muted">{eye} | {pattern} | {stratLabel} | Goldmann {stimSize}</span>
       </div>
 
       {/* Main layout: 3 columns */}
@@ -144,21 +144,21 @@ export function PerimetryWindow() {
             <span className={cn("text-[9px] font-bold", isFixating ? "text-emerald-400" : "text-red-400")}>
               {isFixating ? "FIJANDO" : "PÉRDIDA"}
             </span>
-            <span className="text-[8px] text-white/25">{flPct}%</span>
+            <span className="text-[8px] ls-text-muted">{flPct}%</span>
           </div>
 
           {/* Progress */}
-          <div className="rounded border border-white/[0.06] bg-black/30 p-2">
+          <div className="rounded border ls-border ls-bg-panel2 p-2">
             <div className="mb-1 flex justify-between text-[8px]">
-              <span className="text-white/25">Progreso</span>
-              <span className="font-mono font-bold text-white/50">{tested}/{total}</span>
+              <span className="ls-text-muted">Progreso</span>
+              <span className="font-mono font-bold ls-text2">{tested}/{total}</span>
             </div>
             <div className="h-2 rounded-full bg-black/40">
               <div className="h-full rounded-full bg-emerald-500/60 transition-all" style={{ width: `${progress}%` }} />
             </div>
             <div className="mt-1 flex justify-between text-[8px]">
-              <span className="text-white/25">Tiempo</span>
-              <span className="font-mono font-bold text-white/50">{mins}:{String(secs).padStart(2, "0")}</span>
+              <span className="ls-text-muted">Tiempo</span>
+              <span className="font-mono font-bold ls-text2">{mins}:{String(secs).padStart(2, "0")}</span>
             </div>
           </div>
 
@@ -178,7 +178,7 @@ export function PerimetryWindow() {
               </button>
             )}
             <button onClick={resetTest}
-              className="flex items-center justify-center rounded border border-white/10 px-3 py-2 text-white/25 hover:bg-white/[0.06]">
+              className="flex items-center justify-center rounded border ls-border px-3 py-2 ls-text-muted hover:bg-white/[0.06]">
               <RotateCcw className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -202,11 +202,11 @@ export function PerimetryWindow() {
         {/* RIGHT COLUMN: Configuration + Reliability + Results */}
         <div className="flex w-[160px] shrink-0 flex-col gap-2">
           {/* Protocol config */}
-          <div className="rounded border border-white/[0.06] bg-black/30 p-2 space-y-1.5">
-            <div className="text-[8px] font-bold uppercase tracking-wider text-white/25">Protocolo</div>
+          <div className="rounded border ls-border ls-bg-panel2 p-2 space-y-1.5">
+            <div className="text-[8px] font-bold uppercase tracking-wider ls-text-muted">Protocolo</div>
 
             <div>
-              <div className="mb-0.5 text-[7px] uppercase text-white/15">Ojo</div>
+              <div className="mb-0.5 text-[7px] uppercase ls-text-muted">Ojo</div>
               <ToggleSwitch value={eye} onChange={(v) => { setEye(v as "OD" | "OI"); resetTest(); }} options={[
                 { value: "OD", label: "OD", color: "bg-red-600 text-white" },
                 { value: "OI", label: "OI", color: "bg-blue-600 text-white" },
@@ -214,7 +214,7 @@ export function PerimetryWindow() {
             </div>
 
             <div>
-              <div className="mb-0.5 text-[7px] uppercase text-white/15">Patrón</div>
+              <div className="mb-0.5 text-[7px] uppercase ls-text-muted">Patrón</div>
               <ToggleSwitch value={pattern} onChange={setPattern} options={[
                 { value: "24-2", label: "24-2" },
                 { value: "30-2", label: "30-2" },
@@ -223,7 +223,7 @@ export function PerimetryWindow() {
             </div>
 
             <div>
-              <div className="mb-0.5 text-[7px] uppercase text-white/15">Estrategia</div>
+              <div className="mb-0.5 text-[7px] uppercase ls-text-muted">Estrategia</div>
               <ToggleSwitch value={strategy} onChange={(v) => setStrategy(v as Strategy)} options={[
                 { value: "sita-standard", label: "Std" },
                 { value: "sita-fast", label: "Fast" },
@@ -232,7 +232,7 @@ export function PerimetryWindow() {
             </div>
 
             <div>
-              <div className="mb-0.5 text-[7px] uppercase text-white/15">Estímulo Goldmann</div>
+              <div className="mb-0.5 text-[7px] uppercase ls-text-muted">Estímulo Goldmann</div>
               <ToggleSwitch value={stimSize} onChange={(v) => setStimSize(v as StimulusSize)} options={
                 STIMULUS_SIZES.map((s) => ({ value: s, label: s }))
               } />
@@ -243,17 +243,17 @@ export function PerimetryWindow() {
           <ReliabilityPanel indices={reliability} />
 
           {/* Results */}
-          <div className="rounded border border-white/[0.06] bg-black/30 p-2">
-            <div className="mb-1 text-[8px] font-bold uppercase tracking-wider text-white/25">Resultados</div>
+          <div className="rounded border ls-border ls-bg-panel2 p-2">
+            <div className="mb-1 text-[8px] font-bold uppercase tracking-wider ls-text-muted">Resultados</div>
             <div className="space-y-0.5 text-[9px]">
               <div className="flex justify-between">
-                <span className="text-white/30">DM:</span>
+                <span className="ls-text-muted">DM:</span>
                 <span className={cn("font-mono font-bold", Number(md) < -3 ? "text-red-400/70" : "text-emerald-400/70")}>{md} dB</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-white/30">Estado:</span>
+                <span className="ls-text-muted">Estado:</span>
                 <span className={cn("font-bold text-[8px]",
-                  testState === "running" ? "text-emerald-400" : testState === "paused" ? "text-amber-400" : testState === "done" ? "text-blue-400" : "text-white/30",
+                  testState === "running" ? "text-emerald-400" : testState === "paused" ? "text-amber-400" : testState === "done" ? "text-blue-400" : "ls-text-muted",
                 )}>{testState === "running" ? "Ejecutando" : testState === "paused" ? "Pausado" : testState === "done" ? "Completo" : "Configurar"}</span>
               </div>
             </div>
@@ -262,7 +262,7 @@ export function PerimetryWindow() {
       </div>
 
       {/* Status bar */}
-      <div className="flex h-5 shrink-0 items-center justify-between bg-black/30 px-3 text-[7px] text-white/15">
+      <div className="flex h-5 shrink-0 items-center justify-between ls-bg-panel2 px-3 text-[7px] ls-text-muted">
         <span>{eye} | {pattern} | {stratLabel} | Goldmann {stimSize}</span>
         <span>{testState === "done" ? "Test completado" : `${progress}% completado`}</span>
       </div>

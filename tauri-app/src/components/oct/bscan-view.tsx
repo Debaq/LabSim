@@ -58,7 +58,7 @@ export function BScanView({ seed, isMacular, pathology }: BScanViewProps) {
   }, []);
 
   return (
-    <div ref={containerRef} className="h-full w-full rounded border border-white/[0.06] bg-black overflow-hidden">
+    <div ref={containerRef} className="h-full w-full rounded border ls-border bg-black overflow-hidden">
       <canvas ref={canvasRef} className="block h-full w-full" />
     </div>
   );

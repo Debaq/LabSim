@@ -32,11 +32,11 @@ export function OCTWindow() {
   const signalQ = 7 + Math.floor((seed % 3));
 
   return (
-    <div className="flex h-full flex-col bg-gradient-to-b from-[#12151a] to-[#0d0f13]">
+    <div className="flex h-full flex-col ls-bg">
       {/* Header */}
-      <div className="flex h-7 shrink-0 items-center justify-between bg-[#0a0c10] px-3">
-        <span className="text-[9px] font-bold tracking-[0.2em] text-white/30">LABSIM <span className="font-normal text-white/12">OCT SPECTRALIS</span></span>
-        <div className="flex items-center gap-2 text-[8px] text-white/20">
+      <div className="flex h-7 shrink-0 items-center justify-between ls-bg-panel2 px-3">
+        <span className="text-[9px] font-bold tracking-[0.2em] ls-text-muted">LABSIM <span className="font-normal ls-text-muted">OCT SPECTRALIS</span></span>
+        <div className="flex items-center gap-2 text-[8px] ls-text-muted">
           <span className={cn("font-bold", eye === "OD" ? "text-red-400/60" : "text-blue-400/60")}>{eye}</span>
           <span>|</span>
           <span>{scanMode === "disc" ? "Disco Óptico" : "Mácula"}</span>
@@ -49,70 +49,70 @@ export function OCTWindow() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* LEFT panel */}
-        <div className="flex w-[155px] shrink-0 flex-col gap-1.5 border-r border-white/[0.04] p-1.5 overflow-y-auto">
+        <div className="flex w-[155px] shrink-0 flex-col gap-1.5 border-r ls-border p-1.5 overflow-y-auto">
           {/* Config */}
-          <div className="rounded border border-white/[0.06] bg-black/30 p-2 space-y-1.5">
-            <div className="text-[7px] font-bold uppercase tracking-wider text-white/25">Configuración</div>
+          <div className="rounded border ls-border ls-bg-panel2 p-2 space-y-1.5">
+            <div className="text-[7px] font-bold uppercase tracking-wider ls-text-muted">Configuración</div>
             <div>
-              <div className="mb-0.5 text-[6px] uppercase text-white/15">Ojo</div>
+              <div className="mb-0.5 text-[6px] uppercase ls-text-muted">Ojo</div>
               <ToggleSwitch value={eye} onChange={(v) => { setEye(v as "OD" | "OI"); regenerate(); }} options={[
                 { value: "OD", label: "OD", color: "bg-red-600 text-white" },
                 { value: "OI", label: "OI", color: "bg-blue-600 text-white" },
               ]} />
             </div>
             <div>
-              <div className="mb-0.5 text-[6px] uppercase text-white/15">Scan</div>
+              <div className="mb-0.5 text-[6px] uppercase ls-text-muted">Scan</div>
               <ToggleSwitch value={scanMode} onChange={(v) => setScanMode(v as ScanMode)} options={[
                 { value: "disc", label: "Disco" },
                 { value: "macula", label: "Mácula" },
               ]} />
             </div>
             <div>
-              <div className="mb-0.5 text-[6px] uppercase text-white/15">Patología</div>
+              <div className="mb-0.5 text-[6px] uppercase ls-text-muted">Patología</div>
               <div className="grid grid-cols-2 gap-0.5">
                 {(["normal", "glaucoma", "edema", "drusen", "epiretinal", "amd-dry", "amd-wet"] as Pathology[]).map((p) => {
                   const labels: Record<Pathology, string> = { normal: "Normal", glaucoma: "Glauc", edema: "Edema", drusen: "Drusen", epiretinal: "ERM", "amd-dry": "DMAE-s", "amd-wet": "DMAE-h" };
                   return <button key={p} onClick={() => { setPathology(p); regenerate(); }}
                     className={cn("rounded border py-0.5 text-[7px] font-bold transition",
-                      pathology === p ? "border-amber-500/40 bg-amber-500/20 text-amber-300" : "border-white/[0.06] text-white/20 hover:text-white/40")}>{labels[p]}</button>;
+                      pathology === p ? "border-amber-500/40 bg-amber-500/20 text-amber-300" : "ls-border ls-text-muted hover:ls-text-muted")}>{labels[p]}</button>;
                 })}
               </div>
             </div>
-            <button onClick={regenerate} className="flex w-full items-center justify-center gap-1 rounded border border-white/10 py-1 text-[7px] text-white/25 hover:bg-white/5">
+            <button onClick={regenerate} className="flex w-full items-center justify-center gap-1 rounded border ls-border py-1 text-[7px] ls-text-muted hover:ls-bg-input">
               <RefreshCw className="h-2.5 w-2.5" /> Regenerar
             </button>
           </div>
 
           {/* RNFL Quadrants */}
-          <div className="rounded border border-white/[0.06] bg-black/30 p-2">
-            <div className="mb-1 text-[7px] font-bold uppercase tracking-wider text-white/25">RNFL Cuadrantes</div>
+          <div className="rounded border ls-border ls-bg-panel2 p-2">
+            <div className="mb-1 text-[7px] font-bold uppercase tracking-wider ls-text-muted">RNFL Cuadrantes</div>
             {(["S", "N", "I", "T"] as const).map((q) => {
               const avg = clockAvg(q === "S" ? 45 : q === "N" ? 135 : q === "I" ? 225 : 315, q === "S" ? 135 : q === "N" ? 225 : q === "I" ? 315 : 405 > 360 ? 45 : 405);
               const norm = RNFL_QUADRANTS[q];
               return (
                 <div key={q} className="flex items-center justify-between py-px">
-                  <span className="text-[8px] font-bold text-white/30 w-4">{q}</span>
+                  <span className="text-[8px] font-bold ls-text-muted w-4">{q}</span>
                   <div className="h-2.5 flex-1 mx-1 rounded-sm" style={{ backgroundColor: normativeColor(avg, norm), opacity: 0.4 }} />
                   <span className="text-[9px] font-mono font-bold" style={{ color: normativeColor(avg, norm) }}>{avg}</span>
                 </div>
               );
             })}
-            <div className="mt-1 pt-1 border-t border-white/[0.06] flex justify-between">
-              <span className="text-[7px] font-bold text-white/30">Global</span>
-              <span className="text-[9px] font-mono font-bold text-white/60">{globalAvg} µm</span>
+            <div className="mt-1 pt-1 border-t ls-border flex justify-between">
+              <span className="text-[7px] font-bold ls-text-muted">Global</span>
+              <span className="text-[9px] font-mono font-bold ls-text2">{globalAvg} µm</span>
             </div>
           </div>
 
           {/* Clock Hours */}
-          <div className="rounded border border-white/[0.06] bg-black/30 p-2">
-            <div className="mb-1 text-[7px] font-bold uppercase tracking-wider text-white/25">Horas del Reloj</div>
+          <div className="rounded border ls-border ls-bg-panel2 p-2">
+            <div className="mb-1 text-[7px] font-bold uppercase tracking-wider ls-text-muted">Horas del Reloj</div>
             <div className="grid grid-cols-4 gap-px">
               {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((hr) => {
                 const avg = clockAvg((hr - 1) * 30, hr * 30);
                 const norm = RNFL_CLOCK_HOURS[hr];
                 return (
                   <div key={hr} className="flex flex-col items-center rounded p-0.5" style={{ backgroundColor: normativeColor(avg, norm) + "22" }}>
-                    <span className="text-[6px] text-white/30">{hr}h</span>
+                    <span className="text-[6px] ls-text-muted">{hr}h</span>
                     <span className="text-[8px] font-mono font-bold" style={{ color: normativeColor(avg, norm) }}>{avg}</span>
                   </div>
                 );
@@ -121,13 +121,13 @@ export function OCTWindow() {
           </div>
 
           {/* GCL+IPL */}
-          <div className="rounded border border-white/[0.06] bg-black/30 p-2">
-            <div className="mb-1 text-[7px] font-bold uppercase tracking-wider text-white/25">GCL+IPL</div>
+          <div className="rounded border ls-border ls-bg-panel2 p-2">
+            <div className="mb-1 text-[7px] font-bold uppercase tracking-wider ls-text-muted">GCL+IPL</div>
             {Object.entries(gclData).map(([sec, val]) => {
               const norm = GCL_IPL_SECTORS[sec];
               return (
                 <div key={sec} className="flex items-center justify-between py-px">
-                  <span className="text-[7px] text-white/25 w-5">{sec}</span>
+                  <span className="text-[7px] ls-text-muted w-5">{sec}</span>
                   <div className="h-2 flex-1 mx-1 rounded-sm" style={{ backgroundColor: norm ? normativeColor(val, norm) : "#555", opacity: 0.4 }} />
                   <span className="text-[8px] font-mono font-bold" style={{ color: norm ? normativeColor(val, norm) : "#aaa" }}>{val}</span>
                 </div>
@@ -165,7 +165,7 @@ export function OCTWindow() {
       </div>
 
       {/* Status */}
-      <div className="flex h-5 shrink-0 items-center justify-between bg-black/30 px-3 text-[7px] text-white/15">
+      <div className="flex h-5 shrink-0 items-center justify-between ls-bg-panel2 px-3 text-[7px] ls-text-muted">
         <span>{eye} | {scanMode === "disc" ? "Optic Disc" : "Macula"} | {pathology}</span>
         <div className="flex items-center gap-2">
           <span className="text-[6px]">

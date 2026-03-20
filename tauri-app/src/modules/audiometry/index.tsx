@@ -67,42 +67,42 @@ export default function AudiometryModule() {
       {/* Controls */}
       <div className="flex items-center gap-2">
         <Button type="button" size="xs" variant={activeEar === "right" ? "default" : "ghost"}
-          onClick={() => setActiveEar("right")} className={activeEar === "right" ? "bg-red-500/20 text-red-400" : "text-white/40"}>OD</Button>
+          onClick={() => setActiveEar("right")} className={activeEar === "right" ? "bg-red-500/20 text-red-400" : "ls-text-muted"}>OD</Button>
         <Button type="button" size="xs" variant={activeEar === "left" ? "default" : "ghost"}
-          onClick={() => setActiveEar("left")} className={activeEar === "left" ? "bg-blue-500/20 text-blue-400" : "text-white/40"}>OI</Button>
+          onClick={() => setActiveEar("left")} className={activeEar === "left" ? "bg-blue-500/20 text-blue-400" : "ls-text-muted"}>OI</Button>
         <div className="mx-1 h-4 w-px bg-white/10" />
         <Button type="button" size="xs" variant={activeType === "air" ? "default" : "ghost"}
-          onClick={() => setActiveType("air")} className={activeType === "air" ? "bg-white/10 text-white" : "text-white/40"}>Vía Aérea</Button>
+          onClick={() => setActiveType("air")} className={activeType === "air" ? "bg-white/10 text-white" : "ls-text-muted"}>Vía Aérea</Button>
         <Button type="button" size="xs" variant={activeType === "bone" ? "default" : "ghost"}
-          onClick={() => setActiveType("bone")} className={activeType === "bone" ? "bg-white/10 text-white" : "text-white/40"}>Vía Ósea</Button>
+          onClick={() => setActiveType("bone")} className={activeType === "bone" ? "bg-white/10 text-white" : "ls-text-muted"}>Vía Ósea</Button>
       </div>
 
       {/* Audiogram chart */}
-      <div className="rounded-lg border border-white/5 bg-white/[0.02] p-2" style={{ height: 400 }}>
+      <div className="rounded-lg border ls-border ls-bg-input p-2" style={{ height: 400 }}>
         <AudiogramChart points={points} onPointAdd={handlePointAdd} onPointRemove={handlePointRemove}
           activeEar={activeEar} activeType={activeType} interactive />
       </div>
 
       {/* Manual input table */}
-      <fieldset className="space-y-3 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-3 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           {activeType === "air" ? "Umbrales Aéreos" : "Umbrales Óseos"} — {activeEar === "right" ? "Oído Derecho" : "Oído Izquierdo"}
         </legend>
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-11">
           {freqs.map((freq) => (
             <div key={freq} className="space-y-1">
-              <Label className="text-[10px] text-white/40">{freq >= 1000 ? `${freq / 1000}k` : freq}</Label>
+              <Label className="text-[10px] ls-text-muted">{freq >= 1000 ? `${freq / 1000}k` : freq}</Label>
               <Input type="number" min={-10} max={130} step={5}
                 {...register(`${section}.${oido}.${freq}` as `umbralesAereos.oidoDerecho`)}
-                className="h-8 border-white/10 bg-white/5 px-1.5 text-center text-xs text-white" />
+                className="h-8 ls-border ls-bg-input px-1.5 text-center text-xs text-white" />
             </div>
           ))}
         </div>
       </fieldset>
 
-      <fieldset className="space-y-3 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">Observaciones</legend>
-        <Textarea {...register("observaciones")} className="min-h-16 border-white/10 bg-white/5 text-white" placeholder="Observaciones..." />
+      <fieldset className="space-y-3 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Observaciones</legend>
+        <Textarea {...register("observaciones")} className="min-h-16 ls-border ls-bg-input text-white" placeholder="Observaciones..." />
       </fieldset>
     </form>
   );

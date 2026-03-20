@@ -21,7 +21,7 @@ export function DesktopIcon({ label, icon: Icon, color, onOpen }: DesktopIconPro
       onBlur={() => setSelected(false)}
     >
       <div
-        className={`flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 ${color}`}
+        className={`flex h-12 w-12 items-center justify-center rounded-xl ls-bg-input ${color}`}
       >
         <Icon className="h-6 w-6" />
       </div>

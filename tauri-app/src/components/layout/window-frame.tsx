@@ -1,6 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { X, Minus, Maximize2, Minimize2 } from "lucide-react";
-import { useThemeStore } from "@/stores/theme-store";
 
 interface WindowFrameProps {
   id: string;
@@ -84,8 +83,6 @@ export function WindowFrame({
     }
   };
 
-  const colors = useThemeStore((s) => s.colors);
-
   if (minimized) return null;
 
   return (
@@ -99,29 +96,29 @@ export function WindowFrame({
         width: size.w,
         height: size.h,
         zIndex,
-        backgroundColor: colors.windowBg,
-        border: `1px solid ${colors.border}`,
+        backgroundColor: "var(--ls-window-bg)",
+        border: "1px solid var(--ls-border)",
       }}
       onMouseDown={onFocus}
     >
       {/* Title bar */}
       <div
         className="flex h-9 shrink-0 cursor-move items-center justify-between border-b px-3 select-none"
-        style={{ backgroundColor: colors.windowHeader, borderColor: colors.border }}
+        style={{ backgroundColor: "var(--ls-window-header)", borderColor: "var(--ls-border)" }}
         onMouseDown={onDragStart}
         onDoubleClick={toggleMaximize}
       >
-        <span className="text-xs font-medium" style={{ color: colors.text }}>{title}</span>
+        <span className="text-xs font-medium" style={{ color: "var(--ls-text)" }}>{title}</span>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setMinimized(true)}
-            className="flex h-5 w-5 items-center justify-center rounded text-white/40 transition hover:bg-white/10 hover:text-white"
+            className="flex h-5 w-5 items-center justify-center rounded ls-text-muted transition hover:bg-white/10 hover:text-white"
           >
             <Minus className="h-3 w-3" />
           </button>
           <button
             onClick={toggleMaximize}
-            className="flex h-5 w-5 items-center justify-center rounded text-white/40 transition hover:bg-white/10 hover:text-white"
+            className="flex h-5 w-5 items-center justify-center rounded ls-text-muted transition hover:bg-white/10 hover:text-white"
           >
             {maximized ? (
               <Minimize2 className="h-3 w-3" />
@@ -131,7 +128,7 @@ export function WindowFrame({
           </button>
           <button
             onClick={onClose}
-            className="flex h-5 w-5 items-center justify-center rounded text-white/40 transition hover:bg-red-500 hover:text-white"
+            className="flex h-5 w-5 items-center justify-center rounded ls-text-muted transition hover:bg-red-500 hover:text-white"
           >
             <X className="h-3 w-3" />
           </button>

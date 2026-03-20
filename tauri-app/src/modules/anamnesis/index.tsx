@@ -41,13 +41,13 @@ export default function AnamnesisModule() {
       </div>
 
       {/* Motivo de consulta */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">Motivo de Consulta</legend>
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Motivo de Consulta</legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label className="text-white/70">Síntoma Principal *</Label>
+            <Label className="ls-text2">Síntoma Principal *</Label>
             <Select value={watch("motivoConsulta.sintomaPrincipal") ?? ""} onValueChange={(v) => setValue("motivoConsulta.sintomaPrincipal", v ?? "", { shouldDirty: true })}>
-              <SelectTrigger className="border-white/10 bg-white/5 text-white"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+              <SelectTrigger className="ls-border ls-bg-input text-white"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
               <SelectContent>
                 {["Hipoacusia", "Tinnitus", "Vértigo", "Otalgia", "Otorrea", "Plenitud aural", "Control", "Otro"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
@@ -55,9 +55,9 @@ export default function AnamnesisModule() {
             {errors.motivoConsulta?.sintomaPrincipal && <p className="text-xs text-red-400">{errors.motivoConsulta.sintomaPrincipal.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label className="text-white/70">Severidad</Label>
+            <Label className="ls-text2">Severidad</Label>
             <Select value={watch("motivoConsulta.severidad") ?? ""} onValueChange={(v) => setValue("motivoConsulta.severidad", v ?? "", { shouldDirty: true })}>
-              <SelectTrigger className="border-white/10 bg-white/5 text-white"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+              <SelectTrigger className="ls-border ls-bg-input text-white"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
               <SelectContent>
                 {["Leve", "Moderado", "Severo"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
@@ -66,76 +66,76 @@ export default function AnamnesisModule() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label className="text-white/70">Tiempo de Evolución</Label>
-            <Input {...register("motivoConsulta.tiempoEvolucion")} className="border-white/10 bg-white/5 text-white" placeholder="ej: 6 meses" />
+            <Label className="ls-text2">Tiempo de Evolución</Label>
+            <Input {...register("motivoConsulta.tiempoEvolucion")} className="ls-border ls-bg-input text-white" placeholder="ej: 6 meses" />
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-white/70">Descripción</Label>
-          <Textarea {...register("motivoConsulta.descripcion")} className="min-h-16 border-white/10 bg-white/5 text-white" placeholder="Descripción del motivo de consulta..." />
+          <Label className="ls-text2">Descripción</Label>
+          <Textarea {...register("motivoConsulta.descripcion")} className="min-h-16 ls-border ls-bg-input text-white" placeholder="Descripción del motivo de consulta..." />
         </div>
       </fieldset>
 
       {/* Historia */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">Valoración del Paciente</legend>
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Valoración del Paciente</legend>
         <div className="flex flex-wrap gap-6">
           {(["cooperativo", "orientado", "confiable", "acompanado"] as const).map((field) => (
             <div key={field} className="flex items-center gap-2">
               <Checkbox id={field} checked={watch(`historiaLibre.${field}`) ?? false} onCheckedChange={(v) => setValue(`historiaLibre.${field}`, !!v, { shouldDirty: true })} />
-              <Label htmlFor={field} className="text-white/70 capitalize">{field === "acompanado" ? "Acompañado" : field}</Label>
+              <Label htmlFor={field} className="ls-text2 capitalize">{field === "acompanado" ? "Acompañado" : field}</Label>
             </div>
           ))}
         </div>
         <div className="space-y-1.5">
-          <Label className="text-white/70">Observaciones</Label>
-          <Textarea {...register("historiaLibre.observaciones")} className="min-h-16 border-white/10 bg-white/5 text-white" />
+          <Label className="ls-text2">Observaciones</Label>
+          <Textarea {...register("historiaLibre.observaciones")} className="min-h-16 ls-border ls-bg-input text-white" />
         </div>
       </fieldset>
 
       {/* Antecedentes */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">Antecedentes Mórbidos</legend>
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Antecedentes Mórbidos</legend>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {CONDITIONS.map((c) => (
             <div key={c} className="flex items-center gap-2">
               <Checkbox id={`cond-${c}`} checked={condiciones.includes(c)} onCheckedChange={() => toggleCondition(c)} />
-              <Label htmlFor={`cond-${c}`} className="text-xs text-white/70">{c}</Label>
+              <Label htmlFor={`cond-${c}`} className="text-xs ls-text2">{c}</Label>
             </div>
           ))}
         </div>
       </fieldset>
 
       {/* Exposición a ruido */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">Exposición a Ruido</legend>
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Exposición a Ruido</legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label className="text-white/70">Ocupacional</Label>
+            <Label className="ls-text2">Ocupacional</Label>
             <Select value={watch("exposicionRuido.ocupacional") ?? ""} onValueChange={(v) => setValue("exposicionRuido.ocupacional", v ?? "", { shouldDirty: true })}>
-              <SelectTrigger className="border-white/10 bg-white/5 text-white"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+              <SelectTrigger className="ls-border ls-bg-input text-white"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
               <SelectContent>
                 {["No", "Sí - Leve", "Sí - Moderado", "Sí - Severo"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-white/70">Años de exposición</Label>
-            <Input type="number" min={0} max={80} {...register("exposicionRuido.anosExposicion")} className="border-white/10 bg-white/5 text-white" />
+            <Label className="ls-text2">Años de exposición</Label>
+            <Input type="number" min={0} max={80} {...register("exposicionRuido.anosExposicion")} className="ls-border ls-bg-input text-white" />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-white/70">Protección auditiva</Label>
+            <Label className="ls-text2">Protección auditiva</Label>
             <Select value={watch("exposicionRuido.proteccionAuditiva") ?? ""} onValueChange={(v) => setValue("exposicionRuido.proteccionAuditiva", v ?? "", { shouldDirty: true })}>
-              <SelectTrigger className="border-white/10 bg-white/5 text-white"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+              <SelectTrigger className="ls-border ls-bg-input text-white"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
               <SelectContent>
                 {["No usa", "Ocasional", "Regular", "Siempre"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-white/70">Recreacional</Label>
+            <Label className="ls-text2">Recreacional</Label>
             <Select value={watch("exposicionRuido.recreacional") ?? ""} onValueChange={(v) => setValue("exposicionRuido.recreacional", v ?? "", { shouldDirty: true })}>
-              <SelectTrigger className="border-white/10 bg-white/5 text-white"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+              <SelectTrigger className="ls-border ls-bg-input text-white"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
               <SelectContent>
                 {["No", "Música fuerte", "Conciertos", "Caza/Tiro", "Herramientas", "Otro"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
               </SelectContent>
@@ -145,13 +145,13 @@ export default function AnamnesisModule() {
       </fieldset>
 
       {/* Tinnitus */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">Tinnitus</legend>
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Tinnitus</legend>
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="space-y-1.5">
-            <Label className="text-white/70">Presencia</Label>
+            <Label className="ls-text2">Presencia</Label>
             <Select value={tinnitus ?? "ausente"} onValueChange={(v) => setValue("tinnitus.presencia", v ?? "", { shouldDirty: true })}>
-              <SelectTrigger className="border-white/10 bg-white/5 text-white"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="ls-border ls-bg-input text-white"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="ausente">Ausente</SelectItem>
                 <SelectItem value="presente">Presente</SelectItem>
@@ -161,18 +161,18 @@ export default function AnamnesisModule() {
           {tinnitus === "presente" && (
             <>
               <div className="space-y-1.5">
-                <Label className="text-white/70">Lateralidad</Label>
+                <Label className="ls-text2">Lateralidad</Label>
                 <Select value={watch("tinnitus.lateralidad") ?? ""} onValueChange={(v) => setValue("tinnitus.lateralidad", v ?? "", { shouldDirty: true })}>
-                  <SelectTrigger className="border-white/10 bg-white/5 text-white"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                  <SelectTrigger className="ls-border ls-bg-input text-white"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
                   <SelectContent>
                     {["Bilateral", "Oído derecho", "Oído izquierdo", "Central"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label className="text-white/70">Tipo</Label>
+                <Label className="ls-text2">Tipo</Label>
                 <Select value={watch("tinnitus.tipo") ?? ""} onValueChange={(v) => setValue("tinnitus.tipo", v ?? "", { shouldDirty: true })}>
-                  <SelectTrigger className="border-white/10 bg-white/5 text-white"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                  <SelectTrigger className="ls-border ls-bg-input text-white"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
                   <SelectContent>
                     {["Tonal agudo", "Tonal grave", "Ruido blanco", "Pulsátil", "Intermitente", "Otro"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                   </SelectContent>
@@ -184,7 +184,7 @@ export default function AnamnesisModule() {
         {tinnitus === "presente" && (
           <>
             <div className="space-y-1.5">
-              <Label className="text-white/70">Severidad (0-10): {watch("tinnitus.severidad") ?? 0}</Label>
+              <Label className="ls-text2">Severidad (0-10): {watch("tinnitus.severidad") ?? 0}</Label>
               <input type="range" min={0} max={10} step={1} {...register("tinnitus.severidad")} className="w-full accent-blue-500" />
             </div>
             <div className="flex flex-wrap gap-4">
@@ -197,7 +197,7 @@ export default function AnamnesisModule() {
               ] as const).map(([field, label]) => (
                 <div key={field} className="flex items-center gap-2">
                   <Checkbox checked={watch(`tinnitus.${field}`) ?? false} onCheckedChange={(v) => setValue(`tinnitus.${field}`, !!v, { shouldDirty: true })} />
-                  <Label className="text-xs text-white/70">{label}</Label>
+                  <Label className="text-xs ls-text2">{label}</Label>
                 </div>
               ))}
             </div>

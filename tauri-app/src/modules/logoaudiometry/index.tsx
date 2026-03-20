@@ -32,8 +32,8 @@ export default function LogoaudiometryModule() {
       </div>
 
       {/* SDT */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           SDT - Umbral de Deteccion del Habla
         </legend>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -45,7 +45,7 @@ export default function LogoaudiometryModule() {
                 min={0}
                 max={100}
                 {...register(`sdt.${ear.key}`)}
-                className="border-white/10 bg-white/5 text-white"
+                className="ls-border ls-bg-input text-white"
                 placeholder="dB"
               />
             </div>
@@ -54,8 +54,8 @@ export default function LogoaudiometryModule() {
       </fieldset>
 
       {/* SRT */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           SRT - Umbral de Recepcion del Habla
         </legend>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -67,7 +67,7 @@ export default function LogoaudiometryModule() {
                 min={0}
                 max={100}
                 {...register(`srt.${ear.key}`)}
-                className="border-white/10 bg-white/5 text-white"
+                className="ls-border ls-bg-input text-white"
                 placeholder="dB"
               />
             </div>
@@ -76,8 +76,8 @@ export default function LogoaudiometryModule() {
       </fieldset>
 
       {/* UMD */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           UMD - Umbral Maximo de Discriminacion
         </legend>
         {EARS.map((ear) => (
@@ -86,7 +86,7 @@ export default function LogoaudiometryModule() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-white/40">
+                  <tr className="ls-text-muted">
                     <th className="px-2 py-1 text-left">Nivel</th>
                     <th className="px-2 py-1 text-left">Intensidad (dB)</th>
                     <th className="px-2 py-1 text-left">Porcentaje (%)</th>
@@ -95,14 +95,14 @@ export default function LogoaudiometryModule() {
                 <tbody>
                   {UMD_ROWS.map((row, i) => (
                     <tr key={row}>
-                      <td className="px-2 py-1 text-white/60">UMD {i + 1}</td>
+                      <td className="px-2 py-1 ls-text2">UMD {i + 1}</td>
                       <td className="px-2 py-1">
                         <Input
                           type="number"
                           min={0}
                           max={100}
                           {...register(`umd.${ear.key}.${row}.intensidad`)}
-                          className="h-8 w-24 border-white/10 bg-white/5 text-white"
+                          className="h-8 w-24 ls-border ls-bg-input text-white"
                         />
                       </td>
                       <td className="px-2 py-1">
@@ -111,7 +111,7 @@ export default function LogoaudiometryModule() {
                           min={0}
                           max={100}
                           {...register(`umd.${ear.key}.${row}.porcentaje`)}
-                          className="h-8 w-24 border-white/10 bg-white/5 text-white"
+                          className="h-8 w-24 ls-border ls-bg-input text-white"
                         />
                       </td>
                     </tr>
@@ -124,11 +124,11 @@ export default function LogoaudiometryModule() {
       </fieldset>
 
       {/* Observaciones */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">Observaciones</legend>
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Observaciones</legend>
         <Textarea
           {...register("observaciones")}
-          className="min-h-20 border-white/10 bg-white/5 text-white"
+          className="min-h-20 ls-border ls-bg-input text-white"
           placeholder="Observaciones sobre la logoaudiometria..."
         />
       </fieldset>

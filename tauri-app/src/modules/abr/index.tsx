@@ -70,18 +70,18 @@ export default function AbrModule() {
       </div>
 
       {/* Selector de Estimulo */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           Tipo de Estimulo
         </legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label className="text-white/70">Estimulo</Label>
+            <Label className="ls-text2">Estimulo</Label>
             <Select
               value={stimulusActivo}
               onValueChange={(v) => setValue("stimulusActivo", v ?? "", { shouldDirty: true })}
             >
-              <SelectTrigger className="border-white/10 bg-white/5 text-white">
+              <SelectTrigger className="ls-border ls-bg-input text-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -93,12 +93,12 @@ export default function AbrModule() {
           </div>
           {stimulusActivo === "toneBurst" && (
             <div className="space-y-1.5">
-              <Label className="text-white/70">Frecuencia Tone Burst</Label>
+              <Label className="ls-text2">Frecuencia Tone Burst</Label>
               <Select
                 value={toneBurstActivo}
                 onValueChange={(v) => setValue("toneBurstActivo", v ?? "", { shouldDirty: true })}
               >
-                <SelectTrigger className="border-white/10 bg-white/5 text-white">
+                <SelectTrigger className="ls-border ls-bg-input text-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -114,17 +114,17 @@ export default function AbrModule() {
 
       {/* Tabla de Ondas por oido e intensidad */}
       {EARS.map((ear) => (
-        <fieldset key={ear.key} className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
+        <fieldset key={ear.key} className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
           <legend className={`px-2 text-xs font-medium tracking-wider uppercase ${ear.color}`}>
             {ear.label}
           </legend>
           {INTENSITY_LEVELS.map((level) => (
             <div key={level.key} className="space-y-3">
-              <h4 className="text-sm font-medium text-white/60">{level.label}</h4>
+              <h4 className="text-sm font-medium ls-text2">{level.label}</h4>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-white/40">
+                    <tr className="ls-text-muted">
                       <th className="px-2 py-1 text-left">Onda</th>
                       <th className="px-2 py-1 text-center">Presente</th>
                       <th className="px-2 py-1 text-center">Latencia (ms)</th>
@@ -136,7 +136,7 @@ export default function AbrModule() {
                       const basePath = `${dataPath}.${ear.key}.${level.key}.${wave.key}` as const;
                       return (
                         <tr key={wave.key}>
-                          <td className="px-2 py-1 text-white/60">{wave.label}</td>
+                          <td className="px-2 py-1 ls-text2">{wave.label}</td>
                           <td className="px-2 py-1 text-center">
                             <div className="flex justify-center">
                               <Checkbox
@@ -152,7 +152,7 @@ export default function AbrModule() {
                               min={0}
                               max={15}
                               {...register(`${basePath}.latencia` as any)}
-                              className="h-8 w-20 border-white/10 bg-white/5 text-white text-center mx-auto"
+                              className="h-8 w-20 ls-border ls-bg-input text-white text-center mx-auto"
                               placeholder="ms"
                             />
                           </td>
@@ -163,7 +163,7 @@ export default function AbrModule() {
                               min={0}
                               max={5}
                               {...register(`${basePath}.amplitud` as any)}
-                              className="h-8 w-20 border-white/10 bg-white/5 text-white text-center mx-auto"
+                              className="h-8 w-20 ls-border ls-bg-input text-white text-center mx-auto"
                               placeholder="uV"
                             />
                           </td>
@@ -179,11 +179,11 @@ export default function AbrModule() {
       ))}
 
       {/* Observaciones */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">Observaciones</legend>
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Observaciones</legend>
         <Textarea
           {...register("observaciones")}
-          className="min-h-20 border-white/10 bg-white/5 text-white"
+          className="min-h-20 ls-border ls-bg-input text-white"
           placeholder="Observaciones sobre los potenciales evocados..."
         />
       </fieldset>

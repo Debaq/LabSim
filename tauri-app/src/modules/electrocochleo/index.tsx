@@ -39,8 +39,8 @@ export default function ElectrocochleoModule() {
       </div>
 
       {/* SP y AP por oido */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           Potenciales SP / AP
         </legend>
         <div className="grid gap-6 lg:grid-cols-2">
@@ -51,28 +51,28 @@ export default function ElectrocochleoModule() {
                 <h3 className={`text-sm font-medium ${ear.color}`}>{ear.label}</h3>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label className="text-white/70">SP (uV)</Label>
+                    <Label className="ls-text2">SP (uV)</Label>
                     <Input
                       type="number"
                       step="0.01"
                       {...register(`sp.${ear.key}`)}
-                      className="border-white/10 bg-white/5 text-white"
+                      className="ls-border ls-bg-input text-white"
                       placeholder="uV"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-white/70">AP (uV)</Label>
+                    <Label className="ls-text2">AP (uV)</Label>
                     <Input
                       type="number"
                       step="0.01"
                       {...register(`ap.${ear.key}`)}
-                      className="border-white/10 bg-white/5 text-white"
+                      className="ls-border ls-bg-input text-white"
                       placeholder="uV"
                     />
                   </div>
                 </div>
-                <div className="rounded-md bg-white/5 px-3 py-2">
-                  <span className="text-sm text-white/50">Relacion SP/AP: </span>
+                <div className="rounded-md ls-bg-input px-3 py-2">
+                  <span className="text-sm ls-text2">Relacion SP/AP: </span>
                   <span className="text-sm font-medium text-white">{ratio}</span>
                   {typeof ratio === "string" && ratio !== "—" && Number(ratio) > 0.4 && (
                     <span className="ml-2 text-xs text-yellow-400">(elevado &gt; 0.4)</span>
@@ -85,35 +85,35 @@ export default function ElectrocochleoModule() {
       </fieldset>
 
       {/* Parametros */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           Parametros de Registro
         </legend>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-1.5">
-            <Label className="text-white/70">Frecuencia Muestreo (Hz)</Label>
+            <Label className="ls-text2">Frecuencia Muestreo (Hz)</Label>
             <Input
               type="number"
               {...register("params.fs")}
-              className="border-white/10 bg-white/5 text-white"
+              className="ls-border ls-bg-input text-white"
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-white/70">Ventana (ms)</Label>
+            <Label className="ls-text2">Ventana (ms)</Label>
             <Input
               type="number"
               step="0.1"
               {...register("params.windowMs")}
-              className="border-white/10 bg-white/5 text-white"
+              className="ls-border ls-bg-input text-white"
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-white/70">Suavizado</Label>
+            <Label className="ls-text2">Suavizado</Label>
             <Input
               type="number"
               min={0}
               {...register("params.smooth")}
-              className="border-white/10 bg-white/5 text-white"
+              className="ls-border ls-bg-input text-white"
             />
           </div>
           <div className="flex items-end gap-2 pb-1">
@@ -121,17 +121,17 @@ export default function ElectrocochleoModule() {
               checked={watch("params.invert") ?? false}
               onCheckedChange={(v) => setValue("params.invert", !!v, { shouldDirty: true })}
             />
-            <Label className="text-white/70">Invertir polaridad</Label>
+            <Label className="ls-text2">Invertir polaridad</Label>
           </div>
         </div>
       </fieldset>
 
       {/* Observaciones */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">Observaciones</legend>
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Observaciones</legend>
         <Textarea
           {...register("observaciones")}
-          className="min-h-20 border-white/10 bg-white/5 text-white"
+          className="min-h-20 ls-border ls-bg-input text-white"
           placeholder="Observaciones sobre la electrococleografia..."
         />
       </fieldset>

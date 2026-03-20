@@ -31,8 +31,8 @@ export default function HearingAidsModule() {
       </div>
 
       {/* Historia de uso */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           Historia de Uso de Audifonos
         </legend>
         <div className="flex items-center gap-2">
@@ -40,42 +40,42 @@ export default function HearingAidsModule() {
             checked={usoAnterior}
             onCheckedChange={(v) => setValue("history.usoAnterior", !!v, { shouldDirty: true })}
           />
-          <Label className="text-white/70">Uso anterior de audifonos</Label>
+          <Label className="ls-text2">Uso anterior de audifonos</Label>
         </div>
         {usoAnterior && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-1.5">
-              <Label className="text-white/70">Marca</Label>
+              <Label className="ls-text2">Marca</Label>
               <Input
                 {...register("history.marca")}
-                className="border-white/10 bg-white/5 text-white"
+                className="ls-border ls-bg-input text-white"
                 placeholder="Marca del audifono"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white/70">Modelo</Label>
+              <Label className="ls-text2">Modelo</Label>
               <Input
                 {...register("history.modelo")}
-                className="border-white/10 bg-white/5 text-white"
+                className="ls-border ls-bg-input text-white"
                 placeholder="Modelo"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white/70">Anos de uso</Label>
+              <Label className="ls-text2">Anos de uso</Label>
               <Input
                 type="number"
                 min={0}
                 {...register("history.anosUso")}
-                className="border-white/10 bg-white/5 text-white"
+                className="ls-border ls-bg-input text-white"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white/70">Tipo</Label>
+              <Label className="ls-text2">Tipo</Label>
               <Select
                 value={watch("history.tipoAnterior") ?? ""}
                 onValueChange={(v) => setValue("history.tipoAnterior", v ?? "", { shouldDirty: true })}
               >
-                <SelectTrigger className="border-white/10 bg-white/5 text-white">
+                <SelectTrigger className="ls-border ls-bg-input text-white">
                   <SelectValue placeholder="Seleccionar" />
                 </SelectTrigger>
                 <SelectContent>
@@ -86,20 +86,20 @@ export default function HearingAidsModule() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white/70">Satisfaccion (0-10)</Label>
+              <Label className="ls-text2">Satisfaccion (0-10)</Label>
               <Input
                 type="number"
                 min={0}
                 max={10}
                 {...register("history.satisfaccion")}
-                className="border-white/10 bg-white/5 text-white"
+                className="ls-border ls-bg-input text-white"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-white/70">Motivo de cambio</Label>
+              <Label className="ls-text2">Motivo de cambio</Label>
               <Input
                 {...register("history.motivoCambio")}
-                className="border-white/10 bg-white/5 text-white"
+                className="ls-border ls-bg-input text-white"
                 placeholder="Razon del cambio"
               />
             </div>
@@ -108,18 +108,18 @@ export default function HearingAidsModule() {
       </fieldset>
 
       {/* Prescripcion */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           Prescripcion
         </legend>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-1.5">
-            <Label className="text-white/70">Formula prescriptiva</Label>
+            <Label className="ls-text2">Formula prescriptiva</Label>
             <Select
               value={watch("prescripcion.formula") ?? "NAL-NL2"}
               onValueChange={(v) => setValue("prescripcion.formula", v ?? "", { shouldDirty: true })}
             >
-              <SelectTrigger className="border-white/10 bg-white/5 text-white">
+              <SelectTrigger className="ls-border ls-bg-input text-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -130,12 +130,12 @@ export default function HearingAidsModule() {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-white/70">Tipo de audifono</Label>
+            <Label className="ls-text2">Tipo de audifono</Label>
             <Select
               value={watch("prescripcion.tipoAudifono") ?? ""}
               onValueChange={(v) => setValue("prescripcion.tipoAudifono", v ?? "", { shouldDirty: true })}
             >
-              <SelectTrigger className="border-white/10 bg-white/5 text-white">
+              <SelectTrigger className="ls-border ls-bg-input text-white">
                 <SelectValue placeholder="Seleccionar" />
               </SelectTrigger>
               <SelectContent>
@@ -146,12 +146,12 @@ export default function HearingAidsModule() {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-white/70">Tipo de molde</Label>
+            <Label className="ls-text2">Tipo de molde</Label>
             <Select
               value={watch("prescripcion.moldeTipo") ?? ""}
               onValueChange={(v) => setValue("prescripcion.moldeTipo", v ?? "", { shouldDirty: true })}
             >
-              <SelectTrigger className="border-white/10 bg-white/5 text-white">
+              <SelectTrigger className="ls-border ls-bg-input text-white">
                 <SelectValue placeholder="Seleccionar" />
               </SelectTrigger>
               <SelectContent>
@@ -162,12 +162,12 @@ export default function HearingAidsModule() {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-white/70">Ventilacion</Label>
+            <Label className="ls-text2">Ventilacion</Label>
             <Select
               value={watch("prescripcion.ventilacion") ?? ""}
               onValueChange={(v) => setValue("prescripcion.ventilacion", v ?? "", { shouldDirty: true })}
             >
-              <SelectTrigger className="border-white/10 bg-white/5 text-white">
+              <SelectTrigger className="ls-border ls-bg-input text-white">
                 <SelectValue placeholder="Seleccionar" />
               </SelectTrigger>
               <SelectContent>
@@ -197,8 +197,8 @@ export default function HearingAidsModule() {
       </fieldset>
 
       {/* Audiometria en Campo Libre */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           Audiometria en Campo Libre
         </legend>
         {(["sinAudifonos", "conAudifonos", "gananciaFuncional"] as const).map((section) => {
@@ -209,12 +209,12 @@ export default function HearingAidsModule() {
           };
           return (
             <div key={section} className="space-y-2">
-              <h4 className="text-sm font-medium text-white/60">{labels[section]}</h4>
+              <h4 className="text-sm font-medium ls-text2">{labels[section]}</h4>
               <div className="overflow-x-auto">
                 <div className="flex gap-2">
                   {FIELD_FREQS.map((freq) => (
                     <div key={freq} className="flex flex-col items-center gap-1">
-                      <span className="text-xs text-white/40">{freq}</span>
+                      <span className="text-xs ls-text-muted">{freq}</span>
                       <Input
                         type="number"
                         value={watch(`fieldAudio.${section}.${freq}`) ?? ""}
@@ -225,7 +225,7 @@ export default function HearingAidsModule() {
                             { shouldDirty: true },
                           )
                         }
-                        className="h-8 w-16 border-white/10 bg-white/5 text-white text-center"
+                        className="h-8 w-16 ls-border ls-bg-input text-white text-center"
                         placeholder="dB"
                       />
                     </div>
@@ -238,82 +238,82 @@ export default function HearingAidsModule() {
       </fieldset>
 
       {/* Prueba / Trial */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           Prueba de Audifonos
         </legend>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-1.5">
-            <Label className="text-white/70">Marca</Label>
+            <Label className="ls-text2">Marca</Label>
             <Input
               {...register("trial.marca")}
-              className="border-white/10 bg-white/5 text-white"
+              className="ls-border ls-bg-input text-white"
               placeholder="Marca"
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-white/70">Modelo</Label>
+            <Label className="ls-text2">Modelo</Label>
             <Input
               {...register("trial.modelo")}
-              className="border-white/10 bg-white/5 text-white"
+              className="ls-border ls-bg-input text-white"
               placeholder="Modelo"
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-white/70">Programa</Label>
+            <Label className="ls-text2">Programa</Label>
             <Input
               {...register("trial.programa")}
-              className="border-white/10 bg-white/5 text-white"
+              className="ls-border ls-bg-input text-white"
               placeholder="Programa activo"
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-white/70">Logo con audifonos (%)</Label>
+            <Label className="ls-text2">Logo con audifonos (%)</Label>
             <Input
               type="number"
               min={0}
               max={100}
               {...register("trial.logoConAudifonos")}
-              className="border-white/10 bg-white/5 text-white"
+              className="ls-border ls-bg-input text-white"
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-white/70">Logo sin audifonos (%)</Label>
+            <Label className="ls-text2">Logo sin audifonos (%)</Label>
             <Input
               type="number"
               min={0}
               max={100}
               {...register("trial.logoSinAudifonos")}
-              className="border-white/10 bg-white/5 text-white"
+              className="ls-border ls-bg-input text-white"
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-white/70">Satisfaccion (0-10)</Label>
+            <Label className="ls-text2">Satisfaccion (0-10)</Label>
             <Input
               type="number"
               min={0}
               max={10}
               {...register("trial.satisfaccion")}
-              className="border-white/10 bg-white/5 text-white"
+              className="ls-border ls-bg-input text-white"
             />
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-white/70">Observaciones de la prueba</Label>
+          <Label className="ls-text2">Observaciones de la prueba</Label>
           <Textarea
             {...register("trial.observaciones")}
-            className="min-h-16 border-white/10 bg-white/5 text-white"
+            className="min-h-16 ls-border ls-bg-input text-white"
             placeholder="Comentarios sobre la prueba de audifonos..."
           />
         </div>
       </fieldset>
 
       {/* Observaciones generales */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">Observaciones Generales</legend>
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Observaciones Generales</legend>
         <Textarea
           {...register("observaciones")}
-          className="min-h-20 border-white/10 bg-white/5 text-white"
+          className="min-h-20 ls-border ls-bg-input text-white"
           placeholder="Observaciones generales sobre audifonos..."
         />
       </fieldset>

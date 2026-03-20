@@ -18,13 +18,13 @@ export function ToggleSwitch({
   return (
     <div className={cn("flex items-center gap-1", vertical && "flex-col")}>
       {label && (
-        <span className="w-8 shrink-0 text-[6px] font-semibold uppercase tracking-wider text-white/25">
+        <span className="w-8 shrink-0 text-[6px] font-semibold uppercase tracking-wider ls-text-muted">
           {label}
         </span>
       )}
       <div
         className={cn(
-          "flex rounded-[2px] border border-white/[0.06] bg-slate-900/80",
+          "flex rounded-[2px] border ls-border ls-bg-panel/80",
           vertical ? "flex-col" : "flex-row",
         )}
       >
@@ -38,7 +38,7 @@ export function ToggleSwitch({
                 "px-1.5 py-[2px] text-[7px] font-bold uppercase tracking-wider transition-all",
                 isActive
                   ? cn("shadow-inner", opt.color ?? "bg-amber-500/80 text-black")
-                  : "text-white/20 hover:text-white/40",
+                  : "ls-text-muted hover:ls-text-muted",
               )}
             >
               {opt.label}

@@ -12,7 +12,6 @@ import {
   ShieldCheck,
   ScanEye,
   Layers,
-  Settings,
 } from "lucide-react";
 
 interface DesktopItem {
@@ -89,13 +88,6 @@ const desktopItems: DesktopItem[] = [
     component: "text-editor",
     color: "text-rose-400",
   },
-  {
-    id: "settings",
-    label: "Configuración",
-    icon: Settings,
-    component: "settings",
-    color: "text-slate-400",
-  },
 ];
 
 interface Props {
@@ -122,8 +114,6 @@ export function DesktopArea({ className }: Props) {
               ? { width: 750, height: 550 }
               : item.id === "oct"
                 ? { width: 800, height: 520 }
-                : item.id === "settings"
-                  ? { width: 450, height: 550 }
             : undefined;
     openWindow(item.id, item.label, item.component, opts);
   };

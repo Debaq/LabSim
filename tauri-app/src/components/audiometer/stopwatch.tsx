@@ -26,8 +26,8 @@ export function Stopwatch() {
   const secs = time % 60;
 
   return (
-    <div className="flex flex-col items-center gap-1 rounded-lg border border-white/5 bg-slate-800/30 p-2">
-      <span className="text-[8px] font-bold uppercase tracking-[0.15em] text-white/25">Cronómetro</span>
+    <div className="flex flex-col items-center gap-1 rounded-lg border ls-border ls-bg/30 p-2">
+      <span className="text-[8px] font-bold uppercase tracking-[0.15em] ls-text-muted">Cronómetro</span>
 
       <div className="rounded bg-black/60 px-2 py-0.5 font-mono text-lg font-bold tabular-nums text-green-400 [text-shadow:0_0_6px_rgb(74_222_128/0.4)]">
         {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
@@ -37,20 +37,20 @@ export function Stopwatch() {
         <button
           onClick={start}
           disabled={running}
-          className="rounded border border-white/10 p-1 text-emerald-400/60 transition hover:bg-white/5 disabled:opacity-30"
+          className="rounded border ls-border p-1 text-emerald-400/60 transition hover:ls-bg-input disabled:opacity-30"
         >
           <Play className="h-3 w-3" />
         </button>
         <button
           onClick={stop}
           disabled={!running}
-          className="rounded border border-white/10 p-1 text-amber-400/60 transition hover:bg-white/5 disabled:opacity-30"
+          className="rounded border ls-border p-1 text-amber-400/60 transition hover:ls-bg-input disabled:opacity-30"
         >
           <Square className="h-3 w-3" />
         </button>
         <button
           onClick={reset}
-          className="rounded border border-white/10 p-1 text-white/30 transition hover:bg-white/5"
+          className="rounded border ls-border p-1 ls-text-muted transition hover:ls-bg-input"
         >
           <RotateCcw className="h-3 w-3" />
         </button>

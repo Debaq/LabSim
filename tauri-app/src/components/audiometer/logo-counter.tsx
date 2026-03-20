@@ -13,16 +13,16 @@ export function LogoCounter({ correct, total, onCorrect, onIncorrect, onReset }:
   const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
 
   return (
-    <div className="flex flex-col items-center gap-1.5 rounded-lg border border-white/5 bg-slate-800/30 p-2">
-      <span className="text-[8px] font-bold uppercase tracking-[0.15em] text-white/25">
+    <div className="flex flex-col items-center gap-1.5 rounded-lg border ls-border ls-bg/30 p-2">
+      <span className="text-[8px] font-bold uppercase tracking-[0.15em] ls-text-muted">
         Logoaudiometría
       </span>
 
       <div className="rounded bg-black/60 px-2 py-0.5 font-mono text-sm">
         <span className="font-bold text-green-400">{correct}</span>
-        <span className="text-white/20">/</span>
-        <span className="text-white/50">{total}</span>
-        <span className="text-white/15"> : </span>
+        <span className="ls-text-muted">/</span>
+        <span className="ls-text2">{total}</span>
+        <span className="ls-text-muted"> : </span>
         <span className={cn(
           "font-bold",
           pct >= 80 ? "text-green-400" : pct >= 50 ? "text-amber-400" : "text-red-400",
@@ -46,7 +46,7 @@ export function LogoCounter({ correct, total, onCorrect, onIncorrect, onReset }:
         </button>
         <button
           onClick={onReset}
-          className="flex h-7 w-7 items-center justify-center rounded border border-white/10 text-white/30 transition hover:bg-white/5"
+          className="flex h-7 w-7 items-center justify-center rounded border ls-border ls-text-muted transition hover:ls-bg-input"
         >
           <RotateCcw className="h-3 w-3" />
         </button>

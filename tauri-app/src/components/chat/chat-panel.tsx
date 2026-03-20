@@ -31,16 +31,16 @@ export function ChatPanel({
   }, [messages, typing]);
 
   return (
-    <div className="flex h-full flex-col bg-slate-800">
+    <div className="flex h-full flex-col ls-bg">
       {/* Header */}
-      <div className="flex items-center gap-3 border-b border-white/5 bg-slate-900/90 px-4 py-2.5">
+      <div className="flex items-center gap-3 border-b ls-border ls-bg-panel/90 px-4 py-2.5">
         {headerAvatar}
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-white">
             {headerTitle}
           </p>
           {headerSubtitle && (
-            <p className="text-[11px] text-white/40">{headerSubtitle}</p>
+            <p className="text-[11px] ls-text-muted">{headerSubtitle}</p>
           )}
         </div>
       </div>

@@ -47,7 +47,7 @@ export function ChatBubble({ message }: ChatBubbleProps) {
         <div
           className={cn(
             "mt-1 flex items-center gap-1 text-[10px]",
-            isUser ? "justify-end text-white/50" : "text-white/30",
+            isUser ? "justify-end ls-text2" : "ls-text-muted",
           )}
         >
           <span>{message.time}</span>

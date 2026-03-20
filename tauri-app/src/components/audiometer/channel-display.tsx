@@ -42,7 +42,7 @@ export function ChannelDisplay({ state, color, label }: ChannelDisplayProps) {
       <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
         {/* Frequency */}
         <div className="flex items-baseline justify-between">
-          <span className="text-[6px] uppercase text-white/20">Freq</span>
+          <span className="text-[6px] uppercase ls-text-muted">Freq</span>
           <span className={cn("font-mono text-sm font-bold tabular-nums text-amber-400 [text-shadow:0_0_6px_rgb(251_191_36/0.4)]")}>
             {formatFreq(state.frequency)}
           </span>
@@ -50,7 +50,7 @@ export function ChannelDisplay({ state, color, label }: ChannelDisplayProps) {
 
         {/* Intensity */}
         <div className="flex items-baseline justify-between">
-          <span className="text-[6px] uppercase text-white/20">dB HL</span>
+          <span className="text-[6px] uppercase ls-text-muted">dB HL</span>
           <span className={cn(
             "font-mono text-sm font-bold tabular-nums",
             state.intensity > 90 ? "text-red-400 [text-shadow:0_0_6px_rgb(248_113_113/0.4)]" : cn(accentColor, glowColor),
@@ -61,13 +61,13 @@ export function ChannelDisplay({ state, color, label }: ChannelDisplayProps) {
 
         {/* Transducer */}
         <div className="flex items-baseline justify-between">
-          <span className="text-[6px] uppercase text-white/20">Trans</span>
-          <span className="text-[9px] font-medium text-white/50">{transLabels[state.transducer]}</span>
+          <span className="text-[6px] uppercase ls-text-muted">Trans</span>
+          <span className="text-[9px] font-medium ls-text2">{transLabels[state.transducer]}</span>
         </div>
 
         {/* Output */}
         <div className="flex items-baseline justify-between">
-          <span className="text-[6px] uppercase text-white/20">Salida</span>
+          <span className="text-[6px] uppercase ls-text-muted">Salida</span>
           <span className={cn("text-[9px] font-bold", state.output === "right" ? "text-red-400/70" : "text-blue-400/70")}>
             {state.output === "right" ? "OD" : "OI"}
           </span>
@@ -75,20 +75,20 @@ export function ChannelDisplay({ state, color, label }: ChannelDisplayProps) {
 
         {/* Stimulus */}
         <div className="flex items-baseline justify-between">
-          <span className="text-[6px] uppercase text-white/20">Estím</span>
-          <span className="text-[9px] font-medium text-white/50">{stimLabels[state.stimulus]}</span>
+          <span className="text-[6px] uppercase ls-text-muted">Estím</span>
+          <span className="text-[9px] font-medium ls-text2">{stimLabels[state.stimulus]}</span>
         </div>
 
         {/* Mode */}
         <div className="flex items-baseline justify-between">
-          <span className="text-[6px] uppercase text-white/20">Modo</span>
-          <span className="text-[9px] font-medium text-white/50">{modeLabels[state.toneMode]}</span>
+          <span className="text-[6px] uppercase ls-text-muted">Modo</span>
+          <span className="text-[9px] font-medium ls-text2">{modeLabels[state.toneMode]}</span>
         </div>
       </div>
 
       {/* Flags row */}
       <div className="mt-1 flex gap-1">
-        <span className="text-[6px] uppercase text-white/20">Pasos:{state.step}</span>
+        <span className="text-[6px] uppercase ls-text-muted">Pasos:{state.step}</span>
         {state.reversed && <span className="text-[6px] font-bold text-amber-400/60">REV</span>}
         {state.extRange && <span className="text-[6px] font-bold text-purple-400/60">EXT</span>}
         {state.highFreq && <span className="text-[6px] font-bold text-cyan-400/60">HF</span>}

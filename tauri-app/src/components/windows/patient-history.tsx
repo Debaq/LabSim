@@ -141,11 +141,11 @@ export function PatientHistory() {
   };
 
   return (
-    <div className="flex h-full flex-col bg-slate-800">
+    <div className="flex h-full flex-col ls-bg">
       {/* Header */}
-      <div className="flex items-center gap-2 border-b border-white/5 px-3 py-2">
+      <div className="flex items-center gap-2 border-b ls-border px-3 py-2">
         <Database className="h-4 w-4 text-cyan-400" />
-        <span className="text-xs font-medium text-white/60">
+        <span className="text-xs font-medium ls-text2">
           Historial de Pacientes
         </span>
 
@@ -154,7 +154,7 @@ export function PatientHistory() {
             size="xs"
             variant="ghost"
             onClick={handleNewPatient}
-            className="gap-1 text-white/40 hover:text-white"
+            className="gap-1 ls-text-muted hover:text-white"
           >
             <UserPlus className="h-3 w-3" />
             Nuevo
@@ -164,7 +164,7 @@ export function PatientHistory() {
             variant="ghost"
             onClick={handleSavePatient}
             disabled={saving}
-            className="gap-1 text-white/40 hover:text-white"
+            className="gap-1 ls-text-muted hover:text-white"
           >
             {saving ? (
               <Loader2 className="h-3 w-3 animate-spin" />
@@ -177,7 +177,7 @@ export function PatientHistory() {
             size="icon-xs"
             variant="ghost"
             onClick={loadPatients}
-            className="text-white/30 hover:text-white"
+            className="ls-text-muted hover:text-white"
             title="Recargar"
           >
             <RefreshCw className="h-3.5 w-3.5" />
@@ -186,14 +186,14 @@ export function PatientHistory() {
       </div>
 
       {/* Search */}
-      <div className="border-b border-white/5 px-3 py-2">
+      <div className="border-b ls-border px-3 py-2">
         <div className="relative">
-          <Search className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/30" />
+          <Search className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 ls-text-muted" />
           <Input
             placeholder="Buscar por nombre..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 border-white/10 bg-white/5 pl-7 text-xs text-white placeholder:text-white/20"
+            className="h-7 ls-border ls-bg-input pl-7 text-xs text-white placeholder:ls-text-muted"
           />
         </div>
       </div>
@@ -201,14 +201,14 @@ export function PatientHistory() {
       {/* Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Patient list */}
-        <div className="w-[260px] shrink-0 border-r border-white/5">
+        <div className="w-[260px] shrink-0 border-r ls-border">
           <ScrollArea className="h-full">
             {loading ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-5 w-5 animate-spin text-white/30" />
+                <Loader2 className="h-5 w-5 animate-spin ls-text-muted" />
               </div>
             ) : filteredPatients.length === 0 ? (
-              <div className="px-3 py-8 text-center text-xs text-white/30">
+              <div className="px-3 py-8 text-center text-xs ls-text-muted">
                 {searchQuery
                   ? "Sin resultados"
                   : "No hay pacientes registrados"}
@@ -222,7 +222,7 @@ export function PatientHistory() {
                     className={`flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left transition ${
                       selectedId === patient.id
                         ? "bg-cyan-500/10"
-                        : "hover:bg-white/5"
+                        : "hover:ls-bg-input"
                     }`}
                   >
                     {/* Avatar */}
@@ -230,7 +230,7 @@ export function PatientHistory() {
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
                         selectedId === patient.id
                           ? "bg-cyan-500/20 text-cyan-400"
-                          : "bg-white/10 text-white/50"
+                          : "bg-white/10 ls-text2"
                       }`}
                     >
                       {getInitials(patient)}
@@ -241,12 +241,12 @@ export function PatientHistory() {
                         className={`truncate text-xs font-medium ${
                           selectedId === patient.id
                             ? "text-cyan-300"
-                            : "text-white/70"
+                            : "ls-text2"
                         }`}
                       >
                         {patient.nombre} {patient.apellido}
                       </div>
-                      <div className="text-[10px] text-white/30">
+                      <div className="text-[10px] ls-text-muted">
                         {formatDate(patient.fecha_creacion)}
                       </div>
                     </div>
@@ -272,21 +272,21 @@ export function PatientHistory() {
                       {selectedPatient.nombre} {selectedPatient.apellido}
                     </h3>
                     {selectedPatient.edad && (
-                      <span className="text-xs text-white/40">
+                      <span className="text-xs ls-text-muted">
                         {selectedPatient.edad} anos
                       </span>
                     )}
                     <div className="mt-1 flex gap-1.5">
                       <Badge
                         variant="outline"
-                        className="border-white/10 text-[10px] text-white/40"
+                        className="ls-border text-[10px] ls-text-muted"
                       >
                         ID: {selectedPatient.id}
                       </Badge>
                       {selectedPatient.rut && (
                         <Badge
                           variant="outline"
-                          className="border-white/10 text-[10px] text-white/40"
+                          className="ls-border text-[10px] ls-text-muted"
                         >
                           {selectedPatient.rut}
                         </Badge>
@@ -297,34 +297,34 @@ export function PatientHistory() {
 
                 {/* Detail fields */}
                 <div className="space-y-3">
-                  <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                    <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-white/50">
+                  <div className="rounded-lg border ls-border ls-bg-input p-3">
+                    <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide ls-text2">
                       Informacion
                     </h4>
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div>
-                        <span className="text-white/30">Nombre:</span>{" "}
-                        <span className="text-white/70">
+                        <span className="ls-text-muted">Nombre:</span>{" "}
+                        <span className="ls-text2">
                           {selectedPatient.nombre}
                         </span>
                       </div>
                       <div>
-                        <span className="text-white/30">Apellido:</span>{" "}
-                        <span className="text-white/70">
+                        <span className="ls-text-muted">Apellido:</span>{" "}
+                        <span className="ls-text2">
                           {selectedPatient.apellido}
                         </span>
                       </div>
                       {selectedPatient.edad && (
                         <div>
-                          <span className="text-white/30">Edad:</span>{" "}
-                          <span className="text-white/70">
+                          <span className="ls-text-muted">Edad:</span>{" "}
+                          <span className="ls-text2">
                             {selectedPatient.edad}
                           </span>
                         </div>
                       )}
                       <div>
-                        <span className="text-white/30">Registro:</span>{" "}
-                        <span className="text-white/70">
+                        <span className="ls-text-muted">Registro:</span>{" "}
+                        <span className="ls-text2">
                           {formatDate(selectedPatient.fecha_creacion)}
                         </span>
                       </div>
@@ -332,11 +332,11 @@ export function PatientHistory() {
                   </div>
 
                   {selectedPatient.diagnostico && (
-                    <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                      <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-white/50">
+                    <div className="rounded-lg border ls-border ls-bg-input p-3">
+                      <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide ls-text2">
                         Diagnostico
                       </h4>
-                      <p className="text-xs text-white/60">
+                      <p className="text-xs ls-text2">
                         {selectedPatient.diagnostico}
                       </p>
                     </div>
@@ -358,14 +358,14 @@ export function PatientHistory() {
             </ScrollArea>
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5">
-                <User className="h-7 w-7 text-white/20" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl ls-bg-input">
+                <User className="h-7 w-7 ls-text-muted" />
               </div>
               <div>
-                <p className="text-xs text-white/40">
+                <p className="text-xs ls-text-muted">
                   Selecciona un paciente para ver sus datos
                 </p>
-                <p className="mt-0.5 text-[10px] text-white/20">
+                <p className="mt-0.5 text-[10px] ls-text-muted">
                   {patients.length} pacientes registrados
                 </p>
               </div>
@@ -375,7 +375,7 @@ export function PatientHistory() {
       </div>
 
       {/* Status bar */}
-      <div className="flex items-center justify-between border-t border-white/5 px-3 py-1.5 text-[10px] text-white/30">
+      <div className="flex items-center justify-between border-t ls-border px-3 py-1.5 text-[10px] ls-text-muted">
         <span>{filteredPatients.length} pacientes</span>
         {error && <span className="text-amber-400/60">{error}</span>}
         <span>SQLite</span>

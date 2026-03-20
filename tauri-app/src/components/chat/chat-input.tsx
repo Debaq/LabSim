@@ -32,11 +32,11 @@ export function ChatInput({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex items-end gap-2 border-t border-white/5 bg-slate-900/80 px-3 py-2"
+      className="flex items-end gap-2 border-t ls-border ls-bg-panel/80 px-3 py-2"
     >
       <button
         type="button"
-        className="shrink-0 rounded-full p-2 text-white/30 transition hover:bg-white/5 hover:text-white/60"
+        className="shrink-0 rounded-full p-2 ls-text-muted transition hover:ls-bg-input hover:ls-text2"
       >
         <Smile className="h-5 w-5" />
       </button>
@@ -48,7 +48,7 @@ export function ChatInput({
         placeholder={placeholder}
         disabled={disabled}
         rows={1}
-        className="max-h-24 min-h-9 flex-1 resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white outline-none placeholder:text-white/25 focus:border-emerald-500/30"
+        className="max-h-24 min-h-9 flex-1 resize-none rounded-2xl border ls-border ls-bg-input px-4 py-2 text-sm text-white outline-none placeholder:ls-text-muted focus:border-emerald-500/30"
       />
 
       <button

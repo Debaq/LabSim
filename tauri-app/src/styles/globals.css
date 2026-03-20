@@ -3,6 +3,17 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
+/* LabSim theme utilities — these map to CSS custom properties set by theme-store */
+@utility ls-bg { background-color: var(--ls-window-bg); }
+@utility ls-bg-panel { background-color: var(--ls-panel); }
+@utility ls-bg-panel2 { background-color: var(--ls-panel-secondary); }
+@utility ls-bg-input { background-color: var(--ls-input); }
+@utility ls-text { color: var(--ls-text); }
+@utility ls-text2 { color: var(--ls-text-secondary); }
+@utility ls-text-muted { color: var(--ls-text-muted); }
+@utility ls-border { border-color: var(--ls-border); }
+@utility ls-accent { color: var(--ls-accent); }
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {

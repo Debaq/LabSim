@@ -106,7 +106,7 @@ export function RotaryKnob({
   return (
     <div className="flex flex-col items-center gap-1">
       {label && (
-        <span className={cn("font-semibold uppercase tracking-[0.12em] text-white/30", s.text)}>
+        <span className={cn("font-semibold uppercase tracking-[0.12em] ls-text-muted", s.text)}>
           {label}
         </span>
       )}

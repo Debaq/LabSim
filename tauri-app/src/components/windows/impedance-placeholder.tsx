@@ -158,11 +158,11 @@ export function ImpedancePlaceholder() {
   }, [currentTimp]);
 
   return (
-    <div className="flex h-full flex-col bg-slate-800">
+    <div className="flex h-full flex-col ls-bg">
       {/* Header controls */}
-      <div className="flex items-center gap-2 border-b border-white/5 px-3 py-2">
+      <div className="flex items-center gap-2 border-b ls-border px-3 py-2">
         <Activity className="h-4 w-4 text-emerald-400" />
-        <span className="text-xs font-medium text-white/60">
+        <span className="text-xs font-medium ls-text2">
           Impedanciometro
         </span>
 
@@ -174,7 +174,7 @@ export function ImpedancePlaceholder() {
             className={
               activeEar === "right"
                 ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
-                : "text-white/40"
+                : "ls-text-muted"
             }
           >
             OD
@@ -186,7 +186,7 @@ export function ImpedancePlaceholder() {
             className={
               activeEar === "left"
                 ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
-                : "text-white/40"
+                : "ls-text-muted"
             }
           >
             OI
@@ -198,7 +198,7 @@ export function ImpedancePlaceholder() {
             size="icon-xs"
             variant="ghost"
             onClick={handleClear}
-            className="text-white/30 hover:text-white"
+            className="ls-text-muted hover:text-white"
             title="Limpiar oido actual"
           >
             <RotateCcw className="h-3.5 w-3.5" />
@@ -207,7 +207,7 @@ export function ImpedancePlaceholder() {
             size="xs"
             variant="ghost"
             onClick={handleClearAll}
-            className="text-white/30 hover:text-white text-[10px]"
+            className="ls-text-muted hover:text-white text-[10px]"
             title="Limpiar todo"
           >
             Limpiar todo
@@ -221,15 +221,15 @@ export function ImpedancePlaceholder() {
           {/* Left column: inputs */}
           <div className="flex w-[280px] shrink-0 flex-col gap-3">
             {/* Timpanometry inputs */}
-            <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-white/50">
+            <div className="rounded-lg border ls-border ls-bg-input p-3">
+              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide ls-text2">
                 Timpanometria -{" "}
                 {activeEar === "right" ? "Oido Derecho" : "Oido Izquierdo"}
               </h4>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <Label className="text-[10px] text-white/40">
+                  <Label className="text-[10px] ls-text-muted">
                     Compliance max (ml)
                   </Label>
                   <Input
@@ -242,11 +242,11 @@ export function ImpedancePlaceholder() {
                     onChange={(e) =>
                       handleTimpChange("complianceMaxima", e.target.value)
                     }
-                    className="h-7 border-white/10 bg-white/5 text-xs text-white placeholder:text-white/20"
+                    className="h-7 ls-border ls-bg-input text-xs text-white placeholder:ls-text-muted"
                   />
                 </div>
                 <div>
-                  <Label className="text-[10px] text-white/40">
+                  <Label className="text-[10px] ls-text-muted">
                     Presion (daPa)
                   </Label>
                   <Input
@@ -259,11 +259,11 @@ export function ImpedancePlaceholder() {
                     onChange={(e) =>
                       handleTimpChange("presion", e.target.value)
                     }
-                    className="h-7 border-white/10 bg-white/5 text-xs text-white placeholder:text-white/20"
+                    className="h-7 ls-border ls-bg-input text-xs text-white placeholder:ls-text-muted"
                   />
                 </div>
                 <div>
-                  <Label className="text-[10px] text-white/40">
+                  <Label className="text-[10px] ls-text-muted">
                     Volumen EAC (ml)
                   </Label>
                   <Input
@@ -276,11 +276,11 @@ export function ImpedancePlaceholder() {
                     onChange={(e) =>
                       handleTimpChange("volumenEac", e.target.value)
                     }
-                    className="h-7 border-white/10 bg-white/5 text-xs text-white placeholder:text-white/20"
+                    className="h-7 ls-border ls-bg-input text-xs text-white placeholder:ls-text-muted"
                   />
                 </div>
                 <div>
-                  <Label className="text-[10px] text-white/40">Gradiente</Label>
+                  <Label className="text-[10px] ls-text-muted">Gradiente</Label>
                   <Input
                     type="number"
                     step="0.1"
@@ -289,7 +289,7 @@ export function ImpedancePlaceholder() {
                     onChange={(e) =>
                       handleTimpChange("gradiente", e.target.value)
                     }
-                    className="h-7 border-white/10 bg-white/5 text-xs text-white placeholder:text-white/20"
+                    className="h-7 ls-border ls-bg-input text-xs text-white placeholder:ls-text-muted"
                   />
                 </div>
               </div>
@@ -311,7 +311,7 @@ export function ImpedancePlaceholder() {
                   >
                     Tipo {currentType}
                   </Badge>
-                  <span className="text-[10px] text-white/30">
+                  <span className="text-[10px] ls-text-muted">
                     {typeDescription(currentType)}
                   </span>
                 </div>
@@ -319,14 +319,14 @@ export function ImpedancePlaceholder() {
             </div>
 
             {/* Acoustic reflexes table */}
-            <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-white/50">
+            <div className="rounded-lg border ls-border ls-bg-input p-3">
+              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide ls-text2">
                 Reflejos Acusticos
               </h4>
 
               <table className="w-full">
                 <thead>
-                  <tr className="text-[10px] text-white/40">
+                  <tr className="text-[10px] ls-text-muted">
                     <th className="pb-1 text-left font-normal">Hz</th>
                     {FREQUENCIES.map((f) => (
                       <th key={f} className="pb-1 text-center font-normal">
@@ -338,7 +338,7 @@ export function ImpedancePlaceholder() {
                 <tbody>
                   {(["ipsi", "contra"] as const).map((mode) => (
                     <tr key={mode}>
-                      <td className="py-1 pr-2 text-[10px] font-medium uppercase text-white/50">
+                      <td className="py-1 pr-2 text-[10px] font-medium uppercase ls-text2">
                         {mode === "ipsi" ? "Ipsi" : "Contra"}
                       </td>
                       {FREQUENCIES.map((freq) => (
@@ -349,7 +349,7 @@ export function ImpedancePlaceholder() {
                               handleReflexChange(mode, freq, e.target.value)
                             }
                             placeholder="dB"
-                            className="h-6 w-full border-white/10 bg-white/5 text-center text-[10px] text-white placeholder:text-white/15"
+                            className="h-6 w-full ls-border ls-bg-input text-center text-[10px] text-white placeholder:ls-text-muted"
                           />
                         </td>
                       ))}
@@ -357,20 +357,20 @@ export function ImpedancePlaceholder() {
                   ))}
                 </tbody>
               </table>
-              <p className="mt-1.5 text-[9px] text-white/20">
+              <p className="mt-1.5 text-[9px] ls-text-muted">
                 Ingresar dB o escribir AUS (ausente)
               </p>
             </div>
 
             {/* Summary for both ears */}
-            <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-white/50">
+            <div className="rounded-lg border ls-border ls-bg-input p-3">
+              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide ls-text2">
                 Resumen
               </h4>
               <div className="grid grid-cols-2 gap-2 text-[10px]">
                 <div>
                   <span className="text-red-400">OD:</span>{" "}
-                  <span className="text-white/60">
+                  <span className="ls-text2">
                     {timpOD.complianceMaxima || timpOD.presion
                       ? `Tipo ${classifyType(
                           timpOD.complianceMaxima
@@ -383,7 +383,7 @@ export function ImpedancePlaceholder() {
                 </div>
                 <div>
                   <span className="text-blue-400">OI:</span>{" "}
-                  <span className="text-white/60">
+                  <span className="ls-text2">
                     {timpOI.complianceMaxima || timpOI.presion
                       ? `Tipo ${classifyType(
                           timpOI.complianceMaxima
@@ -400,7 +400,7 @@ export function ImpedancePlaceholder() {
 
           {/* Right column: chart */}
           <div className="flex flex-1 flex-col">
-            <div className="flex-1 rounded-lg border border-white/10 bg-white/5 p-2">
+            <div className="flex-1 rounded-lg border ls-border ls-bg-input p-2">
               <TimpanogramChart
                 data={timpanogramData}
                 width={480}
@@ -412,7 +412,7 @@ export function ImpedancePlaceholder() {
       </ScrollArea>
 
       {/* Status bar */}
-      <div className="flex items-center justify-between border-t border-white/5 px-3 py-1.5 text-[10px] text-white/30">
+      <div className="flex items-center justify-between border-t ls-border px-3 py-1.5 text-[10px] ls-text-muted">
         <span>
           {activeEar === "right" ? "Oido Derecho" : "Oido Izquierdo"}
         </span>

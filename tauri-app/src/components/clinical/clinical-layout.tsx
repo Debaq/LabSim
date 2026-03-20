@@ -37,7 +37,7 @@ export function ClinicalLayout() {
   }, [goPrev, goNext]);
 
   return (
-    <div className="flex h-full flex-col bg-slate-800">
+    <div className="flex h-full flex-col ls-bg">
       {/* Tab Navigation */}
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
@@ -49,19 +49,19 @@ export function ClinicalLayout() {
       </ScrollArea>
 
       {/* Bottom navigation */}
-      <div className="flex items-center justify-between border-t border-white/5 bg-slate-900/50 px-4 py-2">
+      <div className="flex items-center justify-between border-t ls-border ls-bg-panel/50 px-4 py-2">
         <Button
           variant="ghost"
           size="sm"
           onClick={goPrev}
           disabled={!hasPrev}
-          className="gap-1 text-white/50 hover:text-white"
+          className="gap-1 ls-text2 hover:text-white"
         >
           <ChevronLeft className="h-4 w-4" />
           Anterior
         </Button>
 
-        <span className="text-xs text-white/30">
+        <span className="text-xs ls-text-muted">
           {currentIndex + 1} / {MODULE_IDS.length}
         </span>
 
@@ -70,7 +70,7 @@ export function ClinicalLayout() {
           size="sm"
           onClick={goNext}
           disabled={!hasNext}
-          className="gap-1 text-white/50 hover:text-white"
+          className="gap-1 ls-text2 hover:text-white"
         >
           Siguiente
           <ChevronRight className="h-4 w-4" />

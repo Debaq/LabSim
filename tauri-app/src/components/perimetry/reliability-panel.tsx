@@ -10,9 +10,9 @@ function Stat({ label, num, den, warnThreshold }: { label: string; num: number; 
   const warn = pct > warnThreshold;
   return (
     <div className="flex items-center justify-between">
-      <span className="text-[9px] text-white/30">{label}</span>
+      <span className="text-[9px] ls-text-muted">{label}</span>
       <span className={cn("font-mono text-[10px] font-bold", warn ? "text-red-400/80" : "text-emerald-400/70")}>
-        {num}/{den} <span className="text-white/20">({pct}%)</span>
+        {num}/{den} <span className="ls-text-muted">({pct}%)</span>
       </span>
     </div>
   );
@@ -20,8 +20,8 @@ function Stat({ label, num, den, warnThreshold }: { label: string; num: number; 
 
 export function ReliabilityPanel({ indices }: ReliabilityPanelProps) {
   return (
-    <div className="rounded border border-white/[0.06] bg-black/30 p-2">
-      <div className="mb-1.5 text-[8px] font-bold uppercase tracking-wider text-white/25">
+    <div className="rounded border ls-border ls-bg-panel2 p-2">
+      <div className="mb-1.5 text-[8px] font-bold uppercase tracking-wider ls-text-muted">
         Confiabilidad
       </div>
       <div className="space-y-1">

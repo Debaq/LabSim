@@ -142,7 +142,7 @@ export function ThicknessMap({ seed, pathology, showColors = true }: ThicknessMa
   }, [seed, pathology, showColors]);
 
   return (
-    <div className="rounded border border-white/[0.06] bg-black overflow-hidden">
+    <div className="rounded border ls-border bg-black overflow-hidden">
       <canvas ref={canvasRef} width={220} height={220} className="block w-full aspect-square" />
     </div>
   );

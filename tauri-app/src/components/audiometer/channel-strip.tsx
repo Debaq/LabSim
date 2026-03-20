@@ -63,7 +63,7 @@ export function ChannelStrip({
   const borderColor = color === "red" ? "border-red-500/15" : "border-blue-500/15";
 
   return (
-    <div className={cn("flex flex-col rounded border bg-[#2a2e36]", borderColor)}>
+    <div className={cn("flex flex-col rounded border ls-bg-panel", borderColor)}>
       {/* === SCREEN: Display + VU === */}
       <div className="p-1.5 space-y-1">
         <ChannelDisplay state={state} color={color} label={label} />
@@ -71,7 +71,7 @@ export function ChannelStrip({
       </div>
 
       {/* === CONTROLS === */}
-      <div className="flex flex-col gap-1 border-t border-white/[0.04] px-1.5 py-1.5">
+      <div className="flex flex-col gap-1 border-t ls-border px-1.5 py-1.5">
         {/* Knobs row */}
         <div className="flex items-start justify-around">
           <RotaryKnob
@@ -114,7 +114,7 @@ export function ChannelStrip({
                     ? "bg-amber-500/25 text-amber-300"
                     : disabled
                       ? "text-white/[0.06] cursor-not-allowed"
-                      : "text-white/20 hover:text-white/40",
+                      : "ls-text-muted hover:ls-text-muted",
                 )}
               >
                 {labels[stim]}
@@ -179,7 +179,7 @@ export function ChannelStrip({
                 onClick={() => onChange({ [key]: !state[key] })}
                 className={cn(
                   "rounded border px-1 py-px text-[6px] font-bold uppercase transition",
-                  state[key] ? activeClass : "border-white/[0.06] text-white/15 hover:text-white/30",
+                  state[key] ? activeClass : "ls-border ls-text-muted hover:ls-text-muted",
                 )}
               >
                 {lbl}

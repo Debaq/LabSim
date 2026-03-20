@@ -17,7 +17,7 @@ import { RotateCcw, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lu
 function Tb({ on, click, children }: { on: boolean; click: () => void; children: React.ReactNode }) {
   return (
     <button onClick={(e) => { e.stopPropagation(); click(); }} className={cn("rounded border px-2 py-1 text-[8px] font-bold uppercase tracking-wide transition min-w-[36px] cursor-pointer",
-      on ? "border-amber-500/30 bg-amber-500/20 text-amber-300" : "border-white/10 bg-white/[0.03] text-white/25 hover:text-white/50 hover:bg-white/[0.06]")}>{children}</button>
+      on ? "border-amber-500/30 bg-amber-500/20 text-amber-300" : "ls-border ls-bg-input ls-text-muted hover:ls-text2 hover:bg-white/[0.06]")}>{children}</button>
   );
 }
 
@@ -26,7 +26,7 @@ function SBtn({ on, d, u, c }: { on: boolean; d: () => void; u: () => void; c: "
     <div className="flex flex-col items-center gap-px">
       <div className={cn("h-2.5 w-2.5 rounded-full transition shadow-sm", on ? (c === "r" ? "bg-red-400 shadow-red-400" : "bg-blue-400 shadow-blue-400") : "bg-white/10")} />
       <button onMouseDown={(e) => { e.stopPropagation(); d(); }} onMouseUp={(e) => { e.stopPropagation(); u(); }} onMouseLeave={u}
-        className={cn("h-11 w-11 rounded-full border-2 border-white/10 shadow-lg shadow-black/50 active:translate-y-0.5 active:shadow-sm select-none transition cursor-pointer",
+        className={cn("h-11 w-11 rounded-full border-2 ls-border shadow-lg shadow-black/50 active:translate-y-0.5 active:shadow-sm select-none transition cursor-pointer",
           on ? (c === "r" ? "bg-red-500" : "bg-blue-500") : (c === "r" ? "bg-red-900/50 hover:bg-red-800/50" : "bg-blue-900/50 hover:bg-blue-800/50"))} />
     </div>
   );
@@ -307,46 +307,46 @@ export function AudiometerPlaceholder() {
   const stimLabels: Record<StimulusType, string> = { tone: "Tono", fm: "FM", nbn: "NBN", speech: "Habla", wn: "WN", sn: "SN", pn: "PN" };
 
   const renderChConfig = (chState: ChannelState, setCh: typeof setCh0, chIdx: 0 | 1, enabled: StimulusType[]) => (
-    <div className="flex-1 rounded border border-white/[0.06] bg-black/20 p-2">
-      <div className="mb-1 text-[8px] font-bold tracking-wider text-white/20">
+    <div className="flex-1 rounded border ls-border ls-bg-panel2 p-2">
+      <div className="mb-1 text-[8px] font-bold tracking-wider ls-text-muted">
         {chIdx === 0 ? "CANAL 1" : "CANAL 2"}
       </div>
       <div className="mb-1.5">
-        <div className="mb-0.5 text-[7px] uppercase text-white/15">Estímulo</div>
+        <div className="mb-0.5 text-[7px] uppercase ls-text-muted">Estímulo</div>
         <div className="grid grid-cols-4 gap-1">
           {(["tone", "fm", "nbn", "speech", "wn", "sn", "pn"] as StimulusType[]).map((st) => {
             const dis = !enabled.includes(st);
             return <button key={st} disabled={dis} onClick={() => changeStim(chIdx, st)}
               className={cn("rounded border py-1 text-[9px] font-bold transition",
-                chState.stimulus === st ? "border-amber-500/40 bg-amber-500/20 text-amber-300" : dis ? "border-white/[0.03] text-white/[0.08]" : "border-white/10 bg-white/[0.03] text-white/30 hover:bg-white/[0.08]")}>{stimLabels[st]}</button>;
+                chState.stimulus === st ? "border-amber-500/40 bg-amber-500/20 text-amber-300" : dis ? "border-white/[0.03] text-white/[0.08]" : "ls-border ls-bg-input ls-text-muted hover:bg-white/[0.08]")}>{stimLabels[st]}</button>;
           })}
         </div>
       </div>
       <div className="flex gap-2">
         <div>
-          <div className="mb-0.5 text-[7px] uppercase text-white/15">Transductor</div>
+          <div className="mb-0.5 text-[7px] uppercase ls-text-muted">Transductor</div>
           <div className="flex gap-1">
             {([["air", "VA"], ["bone", "VO"], ["free", "CL"]] as const).map(([v, l]) => (
               <button key={v} onClick={() => { setCh((p) => ({ ...p, transducer: v as TransducerType })); resetChannels(); }}
                 className={cn("rounded border px-2.5 py-1 text-[9px] font-bold transition",
-                  chState.transducer === v ? "border-amber-500/40 bg-amber-500/20 text-amber-300" : "border-white/10 bg-white/[0.03] text-white/30 hover:bg-white/[0.08]")}>{l}</button>
+                  chState.transducer === v ? "border-amber-500/40 bg-amber-500/20 text-amber-300" : "ls-border ls-bg-input ls-text-muted hover:bg-white/[0.08]")}>{l}</button>
             ))}
           </div>
         </div>
         <div>
-          <div className="mb-0.5 text-[7px] uppercase text-white/15">Salida</div>
+          <div className="mb-0.5 text-[7px] uppercase ls-text-muted">Salida</div>
           <div className="flex gap-1">
             <button onClick={() => { setCh((p) => ({ ...p, output: "right" })); resetChannels(); }}
               className={cn("rounded border px-2.5 py-1 text-[9px] font-bold transition",
-                chState.output === "right" ? "border-red-500/40 bg-red-500/20 text-red-400" : "border-white/10 bg-white/[0.03] text-white/30 hover:bg-white/[0.08]")}>OD</button>
+                chState.output === "right" ? "border-red-500/40 bg-red-500/20 text-red-400" : "ls-border ls-bg-input ls-text-muted hover:bg-white/[0.08]")}>OD</button>
             <button onClick={() => { setCh((p) => ({ ...p, output: "left" })); resetChannels(); }}
               className={cn("rounded border px-2.5 py-1 text-[9px] font-bold transition",
-                chState.output === "left" ? "border-blue-500/40 bg-blue-500/20 text-blue-400" : "border-white/10 bg-white/[0.03] text-white/30 hover:bg-white/[0.08]")}>OI</button>
+                chState.output === "left" ? "border-blue-500/40 bg-blue-500/20 text-blue-400" : "ls-border ls-bg-input ls-text-muted hover:bg-white/[0.08]")}>OI</button>
           </div>
         </div>
         <div className="ml-auto flex items-end gap-1">
           <button onClick={() => reg(chIdx)} className="rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[9px] font-bold text-emerald-400 hover:bg-emerald-500/20">Reg</button>
-          <button onClick={() => reg(chIdx, true)} className="rounded border border-white/10 px-2 py-1 text-[9px] font-bold text-white/30 hover:bg-white/[0.06]">S/R</button>
+          <button onClick={() => reg(chIdx, true)} className="rounded border ls-border px-2 py-1 text-[9px] font-bold ls-text-muted hover:bg-white/[0.06]">S/R</button>
         </div>
       </div>
     </div>
@@ -355,7 +355,7 @@ export function AudiometerPlaceholder() {
   const logoText = testMode === "logo" ? `${logoOk}/${logoN} : ${logoN > 0 ? Math.round((logoOk / logoN) * 100) : 0}%` : undefined;
 
   return (
-    <div className="flex h-full flex-col bg-gradient-to-b from-[#3d424d] to-[#2d3139]">
+    <div className="flex h-full flex-col ls-bg">
       {showAG && (
         <div className="h-[40%] shrink-0 border-b border-black/30 p-1">
           <AudiogramChart points={points}
@@ -366,14 +366,14 @@ export function AudiometerPlaceholder() {
       )}
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="flex h-6 shrink-0 items-center justify-between bg-[#1e2127] px-3">
-          <span className="text-[9px] font-bold tracking-[0.2em] text-white/30">LABSIM <span className="font-normal text-white/12">DA-80</span></span>
+        <div className="flex h-6 shrink-0 items-center justify-between ls-bg-panel px-3">
+          <span className="text-[9px] font-bold tracking-[0.2em] ls-text-muted">LABSIM <span className="font-normal ls-text-muted">DA-80</span></span>
           <div className="flex items-center gap-2">
             <ToggleSwitch value={testMode} onChange={(v) => setTestMode(v as "umbrales" | "logo")} options={[{ value: "umbrales", label: "Umbrales" }, { value: "logo", label: "Logo" }]} />
-            <button onClick={() => setShowAG(!showAG)} className="text-white/20 hover:text-white/40">
+            <button onClick={() => setShowAG(!showAG)} className="ls-text-muted hover:ls-text-muted">
               {showAG ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
             </button>
-            <button onClick={() => setPoints([])} className="text-white/15 hover:text-white/30"><RotateCcw className="h-3 w-3" /></button>
+            <button onClick={() => setPoints([])} className="ls-text-muted hover:ls-text-muted"><RotateCcw className="h-3 w-3" /></button>
           </div>
         </div>
 
@@ -391,7 +391,7 @@ export function AudiometerPlaceholder() {
           </div>
 
           {/* KNOBS ROW */}
-          <div className="flex flex-1 items-center border-t border-white/[0.06] pt-2">
+          <div className="flex flex-1 items-center border-t ls-border pt-2">
             <div className="flex-shrink-0">
               <RotaryKnob value={ch0.intensity} min={range0.min} max={range0.max}
                 step={step} onChange={(v) => u0({ intensity: v })} label="CH 1" size="lg" marks={I_MARKS} />
@@ -406,7 +406,7 @@ export function AudiometerPlaceholder() {
 
             <div className="flex flex-1 items-center justify-center gap-3">
               <button onClick={fP} disabled={fi <= 0}
-                className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/10 bg-white/[0.04] text-white/40 transition hover:bg-white/10 disabled:opacity-20">
+                className="flex h-9 w-9 items-center justify-center rounded-full border-2 ls-border bg-white/[0.04] ls-text-muted transition hover:bg-white/10 disabled:opacity-20">
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <div className="flex flex-col items-center gap-1">
@@ -418,7 +418,7 @@ export function AudiometerPlaceholder() {
                 </div>
               </div>
               <button onClick={fN} disabled={fi >= freqList.length - 1}
-                className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white/10 bg-white/[0.04] text-white/40 transition hover:bg-white/10 disabled:opacity-20">
+                className="flex h-9 w-9 items-center justify-center rounded-full border-2 ls-border bg-white/[0.04] ls-text-muted transition hover:bg-white/10 disabled:opacity-20">
                 <ChevronRight className="h-5 w-5" />
               </button>
             </div>
@@ -439,19 +439,19 @@ export function AudiometerPlaceholder() {
           <div className="flex shrink-0 items-center justify-center gap-3 text-[9px]">
             <button onClick={() => setTimerOn(true)} className="text-emerald-400/60 hover:text-emerald-400">Iniciar</button>
             <button onClick={() => setTimerOn(false)} className="text-amber-400/60 hover:text-amber-400">Detener</button>
-            <button onClick={() => { setTimerOn(false); setSecs(0); }} className="text-white/25 hover:text-white/50">Borrar</button>
+            <button onClick={() => { setTimerOn(false); setSecs(0); }} className="ls-text-muted hover:ls-text2">Borrar</button>
             {testMode === "logo" && (
               <>
                 <span className="h-3 w-px bg-white/10" />
                 <button onClick={() => { setLogoOk((c) => c + 1); }} className="font-bold text-emerald-400/70">+1</button>
                 <button onClick={() => { setLogoOk((c) => Math.max(0, c - 1)); }} className="font-bold text-red-400/70">-1</button>
-                <button onClick={() => { setLogoOk(0); setLogoN(25); }} className="text-white/25">Limpiar</button>
+                <button onClick={() => { setLogoOk(0); setLogoN(25); }} className="ls-text-muted">Limpiar</button>
               </>
             )}
           </div>
         </div>
 
-        <div className="flex h-5 shrink-0 items-center justify-between bg-black/25 px-3 text-[8px] text-white/20">
+        <div className="flex h-5 shrink-0 items-center justify-between bg-black/25 px-3 text-[8px] ls-text-muted">
           <span>W/S: CH1 dB | ←→: Freq</span>
           <span>{freq} Hz | Rango: {range0.min}~{range0.max} dB</span>
           <span>O/L: CH2 dB</span>

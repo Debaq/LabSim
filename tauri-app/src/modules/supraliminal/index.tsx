@@ -36,14 +36,14 @@ export default function SupraliminalModule() {
       </div>
 
       {/* SISI */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           SISI - Short Increment Sensitivity Index
         </legend>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-white/40">
+              <tr className="ls-text-muted">
                 <th className="px-2 py-1 text-left">Oido</th>
                 {SISI_FREQS.map((f) => (
                   <th key={f} className="px-2 py-1 text-center">{f} Hz</th>
@@ -64,7 +64,7 @@ export default function SupraliminalModule() {
                         onChange={(e) =>
                           setValue(`sisi.${ear.key}.${freq}`, e.target.value ? Number(e.target.value) : null, { shouldDirty: true })
                         }
-                        className="h-8 w-20 border-white/10 bg-white/5 text-white text-center"
+                        className="h-8 w-20 ls-border ls-bg-input text-white text-center"
                         placeholder="%"
                       />
                     </td>
@@ -77,14 +77,14 @@ export default function SupraliminalModule() {
       </fieldset>
 
       {/* Carhart (Tone Decay) */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           Carhart - Tone Decay Test
         </legend>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-white/40">
+              <tr className="ls-text-muted">
                 <th className="px-2 py-1 text-left">Oido</th>
                 {CARHART_FREQS.map((f) => (
                   <th key={f} className="px-2 py-1 text-center">{f} Hz</th>
@@ -103,7 +103,7 @@ export default function SupraliminalModule() {
                         onChange={(e) =>
                           setValue(`carhart.${ear.key}.${freq}`, e.target.value ? Number(e.target.value) : null, { shouldDirty: true })
                         }
-                        className="h-8 w-20 border-white/10 bg-white/5 text-white text-center"
+                        className="h-8 w-20 ls-border ls-bg-input text-white text-center"
                         placeholder="dB"
                       />
                     </td>
@@ -116,8 +116,8 @@ export default function SupraliminalModule() {
       </fieldset>
 
       {/* Maspetiol */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           Maspetiol
         </legend>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -128,7 +128,7 @@ export default function SupraliminalModule() {
                 value={watch(`maspetiol.${ear.key}`) ?? ""}
                 onValueChange={(v) => setValue(`maspetiol.${ear.key}`, v, { shouldDirty: true })}
               >
-                <SelectTrigger className="border-white/10 bg-white/5 text-white">
+                <SelectTrigger className="ls-border ls-bg-input text-white">
                   <SelectValue placeholder="Seleccionar resultado" />
                 </SelectTrigger>
                 <SelectContent>
@@ -143,14 +143,14 @@ export default function SupraliminalModule() {
       </fieldset>
 
       {/* Fowler (ABLB) */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           Fowler - ABLB (Balance Binaural Alterno)
         </legend>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-white/40">
+              <tr className="ls-text-muted">
                 <th className="px-2 py-1 text-left">Frecuencia</th>
                 <th className="px-2 py-1 text-center">Resultado</th>
                 <th className="px-2 py-1 text-center">Diferencia (dB)</th>
@@ -159,13 +159,13 @@ export default function SupraliminalModule() {
             <tbody>
               {FOWLER_FREQS.map((freq) => (
                 <tr key={freq}>
-                  <td className="px-2 py-1 text-white/60">{freq} Hz</td>
+                  <td className="px-2 py-1 ls-text2">{freq} Hz</td>
                   <td className="px-2 py-1">
                     <Select
                       value={watch(`fowler.${freq}.resultado`) ?? ""}
                       onValueChange={(v) => setValue(`fowler.${freq}.resultado`, v, { shouldDirty: true })}
                     >
-                      <SelectTrigger className="h-8 border-white/10 bg-white/5 text-white">
+                      <SelectTrigger className="h-8 ls-border ls-bg-input text-white">
                         <SelectValue placeholder="Seleccionar" />
                       </SelectTrigger>
                       <SelectContent>
@@ -182,7 +182,7 @@ export default function SupraliminalModule() {
                       onChange={(e) =>
                         setValue(`fowler.${freq}.diferencia`, e.target.value ? Number(e.target.value) : null, { shouldDirty: true })
                       }
-                      className="h-8 w-20 border-white/10 bg-white/5 text-white text-center"
+                      className="h-8 w-20 ls-border ls-bg-input text-white text-center"
                       placeholder="dB"
                     />
                   </td>
@@ -194,14 +194,14 @@ export default function SupraliminalModule() {
       </fieldset>
 
       {/* Luscher */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           Luscher - DLI (Umbral Diferencial de Intensidad)
         </legend>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-white/40">
+              <tr className="ls-text-muted">
                 <th className="px-2 py-1 text-left">Oido</th>
                 {LUSCHER_FREQS.map((f) => (
                   <th key={f} className="px-2 py-1 text-center">{f} Hz</th>
@@ -221,7 +221,7 @@ export default function SupraliminalModule() {
                         onChange={(e) =>
                           setValue(`luscher.${ear.key}.${freq}`, e.target.value ? Number(e.target.value) : null, { shouldDirty: true })
                         }
-                        className="h-8 w-20 border-white/10 bg-white/5 text-white text-center"
+                        className="h-8 w-20 ls-border ls-bg-input text-white text-center"
                         placeholder="dB"
                       />
                     </td>
@@ -234,11 +234,11 @@ export default function SupraliminalModule() {
       </fieldset>
 
       {/* Observaciones */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">Observaciones</legend>
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Observaciones</legend>
         <Textarea
           {...form.register("observaciones")}
-          className="min-h-20 border-white/10 bg-white/5 text-white"
+          className="min-h-20 ls-border ls-bg-input text-white"
           placeholder="Observaciones sobre las pruebas supraliminales..."
         />
       </fieldset>

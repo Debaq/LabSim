@@ -59,21 +59,21 @@ export default function JsonOutputModule() {
       </div>
 
       {/* Resumen */}
-      <fieldset className="space-y-3 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-3 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           Resumen
         </legend>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-md bg-white/5 px-3 py-2">
-            <span className="text-xs text-white/40">ID Paciente</span>
+          <div className="rounded-md ls-bg-input px-3 py-2">
+            <span className="text-xs ls-text-muted">ID Paciente</span>
             <p className="text-sm font-medium text-white">{patientId ?? "Sin asignar"}</p>
           </div>
-          <div className="rounded-md bg-white/5 px-3 py-2">
-            <span className="text-xs text-white/40">Modulos con datos</span>
+          <div className="rounded-md ls-bg-input px-3 py-2">
+            <span className="text-xs ls-text-muted">Modulos con datos</span>
             <p className="text-sm font-medium text-white">{modulesWithData.length} / {Object.keys(data).length}</p>
           </div>
-          <div className="rounded-md bg-white/5 px-3 py-2">
-            <span className="text-xs text-white/40">Tamano</span>
+          <div className="rounded-md ls-bg-input px-3 py-2">
+            <span className="text-xs ls-text-muted">Tamano</span>
             <p className="text-sm font-medium text-white">{(new Blob([jsonString]).size / 1024).toFixed(1)} KB</p>
           </div>
         </div>
@@ -92,11 +92,11 @@ export default function JsonOutputModule() {
       </fieldset>
 
       {/* JSON Preview */}
-      <fieldset className="space-y-3 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-3 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           Vista previa JSON
         </legend>
-        <pre className="max-h-[60vh] overflow-auto rounded-md bg-black/30 p-4 text-xs text-green-400/80 font-mono leading-relaxed">
+        <pre className="max-h-[60vh] overflow-auto rounded-md ls-bg-panel2 p-4 text-xs text-green-400/80 font-mono leading-relaxed">
           {jsonString}
         </pre>
       </fieldset>

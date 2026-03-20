@@ -4,30 +4,16 @@ import { ChatBubble, type ChatMessage as ChatBubbleMsg } from "@/components/chat
 import { ChatInput } from "@/components/chat/chat-input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
 import {
   ArrowLeft,
   Circle,
-  Settings,
   Wifi,
   WifiOff,
-  Download,
-  Loader2,
-  Check,
   BrainCircuit,
-  ChevronLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-
-interface ModelInfo {
-  id: string;
-  name: string;
-  sizeMb: number;
-  filename: string;
-}
 
 // Fallback responses when LLM is not connected
 const FALLBACK: Record<string, string[]> = {
@@ -58,7 +44,6 @@ function ContactList() {
   const conversations = useChatStore((s) => s.conversations);
   const setActiveContact = useChatStore((s) => s.setActiveContact);
   const llmConnected = useChatStore((s) => s.llmConnected);
-  const [showSettings, setShowSettings] = useState(false);
 
   const getLastMessage = (id: string): string => {
     const msgs = conversations[id];
@@ -75,42 +60,28 @@ function ContactList() {
     return msgs[msgs.length - 1].time;
   };
 
-  if (showSettings) {
-    return <LlmSettingsPanel onBack={() => setShowSettings(false)} />;
-  }
-
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-white/5 bg-slate-900 px-4 py-3">
+      <div className="flex items-center justify-between border-b ls-border ls-bg-panel px-4 py-3">
         <h3 className="text-sm font-semibold text-white">Mensajes</h3>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {llmConnected ? (
             <Wifi className="h-3.5 w-3.5 text-emerald-400" />
           ) : (
-            <WifiOff className="h-3.5 w-3.5 text-white/20" />
+            <WifiOff className="h-3.5 w-3.5 ls-text-muted" />
           )}
-          <button
-            onClick={() => setShowSettings(true)}
-            className="rounded p-1 text-white/30 transition hover:bg-white/5 hover:text-white/60"
-            title="Configurar IA"
-          >
-            <Settings className="h-3.5 w-3.5" />
-          </button>
         </div>
       </div>
 
       {/* LLM status banner */}
       {!llmConnected && (
-        <button
-          onClick={() => setShowSettings(true)}
-          className="flex items-center gap-2 border-b border-amber-500/10 bg-amber-500/5 px-4 py-2 text-left transition hover:bg-amber-500/10"
-        >
+        <div className="flex items-center gap-2 border-b border-amber-500/10 bg-amber-500/5 px-4 py-2">
           <BrainCircuit className="h-4 w-4 shrink-0 text-amber-400" />
           <span className="text-xs text-amber-300/80">
-            IA desactivada — toca para configurar modelo
+            IA desactivada — actívala en Configuración
           </span>
-        </button>
+        </div>
       )}
 
       {/* Contact list */}
@@ -121,7 +92,7 @@ function ContactList() {
             <button
               key={contact.id}
               onClick={() => setActiveContact(contact.id)}
-              className="flex w-full items-center gap-3 border-b border-white/[0.03] px-4 py-3 text-left transition hover:bg-white/5"
+              className="flex w-full items-center gap-3 border-b border-white/[0.03] px-4 py-3 text-left transition hover:ls-bg-input"
             >
               <div className="relative shrink-0">
                 <div
@@ -141,12 +112,12 @@ function ContactList() {
                   <span className="text-sm font-medium text-white">
                     {contact.name}
                   </span>
-                  <span className="text-[10px] text-white/30">
+                  <span className="text-[10px] ls-text-muted">
                     {getLastTime(contact.id)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <p className="truncate text-xs text-white/40">
+                  <p className="truncate text-xs ls-text-muted">
                     {getLastMessage(contact.id)}
                   </p>
                   {unread > 0 && (
@@ -163,11 +134,6 @@ function ContactList() {
     </div>
   );
 }
-
-function LlmSettingsPanel({ onBack }: { onBack: () => void }) {
-  const llmConnected = useChatStore((s) => s.llmConnected);
-  const setLlmConnected = useChatStore((s) => s.setLlmConnected);
-  const setLastModel = useChatStore((s) => s.setLastModel);
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [phase, setPhase] = useState<"idle" | "downloading" | "loading" | "ready">(
@@ -242,12 +208,12 @@ function LlmSettingsPanel({ onBack }: { onBack: () => void }) {
   };
 
   return (
-    <div className="flex h-full flex-col bg-slate-800">
+    <div className="flex h-full flex-col ls-bg">
       {/* Header */}
-      <div className="flex items-center gap-3 border-b border-white/5 bg-slate-900 px-3 py-3">
+      <div className="flex items-center gap-3 border-b ls-border ls-bg-panel px-3 py-3">
         <button
           onClick={onBack}
-          className="rounded p-1 text-white/40 transition hover:bg-white/5 hover:text-white"
+          className="rounded p-1 ls-text-muted transition hover:ls-bg-input hover:text-white"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
@@ -263,7 +229,7 @@ function LlmSettingsPanel({ onBack }: { onBack: () => void }) {
               "flex items-center gap-2 rounded-lg p-3",
               phase === "ready"
                 ? "bg-emerald-500/10 text-emerald-400"
-                : "bg-white/5 text-white/50",
+                : "ls-bg-input ls-text2",
             )}
           >
             {phase === "ready" ? (
@@ -292,9 +258,9 @@ function LlmSettingsPanel({ onBack }: { onBack: () => void }) {
                 </span>
               </div>
               <Progress value={progress} className="h-2" />
-              <p className="text-[11px] text-white/40">{downloadInfo}</p>
+              <p className="text-[11px] ls-text-muted">{downloadInfo}</p>
               {phase === "downloading" && (
-                <p className="text-[10px] text-white/30">
+                <p className="text-[10px] ls-text-muted">
                   {progress < 100
                     ? `${Math.round(progress)}% — primera descarga, luego se cachea`
                     : "Descarga completa"}
@@ -305,7 +271,7 @@ function LlmSettingsPanel({ onBack }: { onBack: () => void }) {
 
           {/* Model selector */}
           <div className="space-y-2">
-            <h4 className="text-xs font-medium tracking-wider text-white/40 uppercase">
+            <h4 className="text-xs font-medium tracking-wider ls-text-muted uppercase">
               Modelos disponibles
             </h4>
             {models.map((model) => {
@@ -324,7 +290,7 @@ function LlmSettingsPanel({ onBack }: { onBack: () => void }) {
                       ? "border-emerald-500/30 bg-emerald-500/5"
                       : isBusy
                         ? "border-violet-500/30 bg-violet-500/5"
-                        : "border-white/5 bg-white/[0.02] hover:bg-white/5",
+                        : "ls-border ls-bg-input hover:ls-bg-input",
                   )}
                 >
                   <div
@@ -332,7 +298,7 @@ function LlmSettingsPanel({ onBack }: { onBack: () => void }) {
                       "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
                       isActive
                         ? "bg-emerald-500/20"
-                        : "bg-white/5",
+                        : "ls-bg-input",
                     )}
                   >
                     {isActive ? (
@@ -340,17 +306,17 @@ function LlmSettingsPanel({ onBack }: { onBack: () => void }) {
                     ) : isBusy ? (
                       <Loader2 className="h-5 w-5 animate-spin text-violet-400" />
                     ) : (
-                      <BrainCircuit className="h-5 w-5 text-white/30" />
+                      <BrainCircuit className="h-5 w-5 ls-text-muted" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-white">{model.name}</p>
-                    <p className="text-[11px] text-white/30">
+                    <p className="text-[11px] ls-text-muted">
                       {model.sizeMb} MB — {model.sizeMb < 700 ? "Rápido en CPU" : model.sizeMb < 1200 ? "Moderado" : "Más lento, mejor calidad"}
                     </p>
                   </div>
                   {!isActive && !isBusy && (
-                    <Download className="h-4 w-4 shrink-0 text-white/20" />
+                    <Download className="h-4 w-4 shrink-0 ls-text-muted" />
                   )}
                 </button>
               );
@@ -358,7 +324,7 @@ function LlmSettingsPanel({ onBack }: { onBack: () => void }) {
           </div>
 
           {/* Info */}
-          <div className="rounded-lg bg-white/[0.02] p-3 text-[11px] text-white/30">
+          <div className="rounded-lg ls-bg-input p-3 text-[11px] ls-text-muted">
             <p>Los modelos se descargan de HuggingFace y se guardan en caché local (~/.cache/huggingface/). Solo se descargan una vez.</p>
           </div>
         </div>
@@ -452,12 +418,12 @@ function ConversationView({ contact }: { contact: Contact }) {
   }));
 
   return (
-    <div className="flex h-full flex-col bg-slate-800">
+    <div className="flex h-full flex-col ls-bg">
       {/* Header */}
-      <div className="flex items-center gap-3 border-b border-white/5 bg-slate-900/90 px-3 py-2">
+      <div className="flex items-center gap-3 border-b ls-border ls-bg-panel/90 px-3 py-2">
         <button
           onClick={() => setActiveContact(null)}
-          className="rounded p-1 text-white/40 transition hover:bg-white/5 hover:text-white"
+          className="rounded p-1 ls-text-muted transition hover:ls-bg-input hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
@@ -476,7 +442,7 @@ function ConversationView({ contact }: { contact: Contact }) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-white">{contact.name}</p>
-          <p className="text-[10px] text-white/40">
+          <p className="text-[10px] ls-text-muted">
             {typing ? "escribiendo..." : contact.subtitle}
           </p>
         </div>

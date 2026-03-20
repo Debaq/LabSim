@@ -12,8 +12,8 @@ export function FixationMonitor({ isFixating, fixationLosses, total }: FixationM
   const isGood = pct < 20;
 
   return (
-    <div className="rounded border border-white/[0.06] bg-black/30 p-2">
-      <div className="mb-1.5 text-[8px] font-bold uppercase tracking-wider text-white/25">
+    <div className="rounded border ls-border ls-bg-panel2 p-2">
+      <div className="mb-1.5 text-[8px] font-bold uppercase tracking-wider ls-text-muted">
         Monitor de Fijación
       </div>
 
@@ -36,7 +36,7 @@ export function FixationMonitor({ isFixating, fixationLosses, total }: FixationM
 
       {/* Stats */}
       <div className="flex justify-between text-[9px]">
-        <span className="text-white/30">Pérdidas:</span>
+        <span className="ls-text-muted">Pérdidas:</span>
         <span className={cn("font-mono font-bold", isGood ? "text-emerald-400/70" : "text-red-400/70")}>
           {fixationLosses}/{total} ({pct}%)
         </span>

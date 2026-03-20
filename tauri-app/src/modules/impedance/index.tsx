@@ -39,8 +39,8 @@ export default function ImpedanceModule() {
       </div>
 
       {/* Timpanometria */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           Timpanometria
         </legend>
         <div className="grid gap-6 lg:grid-cols-2">
@@ -49,44 +49,44 @@ export default function ImpedanceModule() {
               <h3 className={`text-sm font-medium ${ear.color}`}>{ear.label}</h3>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label className="text-white/70">Compliance Max. (ml)</Label>
+                  <Label className="ls-text2">Compliance Max. (ml)</Label>
                   <Input
                     type="number"
                     step="0.1"
                     min={0}
                     max={10}
                     {...register(`timpanometria.${ear.key}.complianceMaxima`)}
-                    className="border-white/10 bg-white/5 text-white"
+                    className="ls-border ls-bg-input text-white"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-white/70">Presion (daPa)</Label>
+                  <Label className="ls-text2">Presion (daPa)</Label>
                   <Input
                     type="number"
                     min={-400}
                     max={200}
                     {...register(`timpanometria.${ear.key}.presion`)}
-                    className="border-white/10 bg-white/5 text-white"
+                    className="ls-border ls-bg-input text-white"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-white/70">Volumen EAC (ml)</Label>
+                  <Label className="ls-text2">Volumen EAC (ml)</Label>
                   <Input
                     type="number"
                     step="0.1"
                     min={0}
                     max={10}
                     {...register(`timpanometria.${ear.key}.volumenEac`)}
-                    className="border-white/10 bg-white/5 text-white"
+                    className="ls-border ls-bg-input text-white"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-white/70">Gradiente</Label>
+                  <Label className="ls-text2">Gradiente</Label>
                   <Input
                     type="number"
                     step="0.1"
                     {...register(`timpanometria.${ear.key}.gradiente`)}
-                    className="border-white/10 bg-white/5 text-white"
+                    className="ls-border ls-bg-input text-white"
                   />
                 </div>
               </div>
@@ -96,8 +96,8 @@ export default function ImpedanceModule() {
       </fieldset>
 
       {/* Reflejos Acusticos */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
           Reflejos Acusticos
         </legend>
         {EARS.map((ear) => (
@@ -106,7 +106,7 @@ export default function ImpedanceModule() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-white/40">
+                  <tr className="ls-text-muted">
                     <th className="px-2 py-1 text-left">Via</th>
                     {REFLEX_FREQS.map((f) => (
                       <th key={f} className="px-2 py-1 text-center">{REFLEX_FREQ_LABELS[f]}</th>
@@ -116,7 +116,7 @@ export default function ImpedanceModule() {
                 <tbody>
                   {(["ipsi", "contra"] as const).map((via) => (
                     <tr key={via}>
-                      <td className="px-2 py-1 text-white/60 capitalize">{via === "ipsi" ? "Ipsilateral" : "Contralateral"}</td>
+                      <td className="px-2 py-1 ls-text2 capitalize">{via === "ipsi" ? "Ipsilateral" : "Contralateral"}</td>
                       {REFLEX_FREQS.map((freq) => (
                         <td key={freq} className="px-2 py-1">
                           <Input
@@ -129,7 +129,7 @@ export default function ImpedanceModule() {
                                 { shouldDirty: true },
                               )
                             }
-                            className="h-8 w-20 border-white/10 bg-white/5 text-white text-center"
+                            className="h-8 w-20 ls-border ls-bg-input text-white text-center"
                             placeholder="dB"
                           />
                         </td>
@@ -144,11 +144,11 @@ export default function ImpedanceModule() {
       </fieldset>
 
       {/* Observaciones */}
-      <fieldset className="space-y-4 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider text-white/40 uppercase">Observaciones</legend>
+      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Observaciones</legend>
         <Textarea
           {...register("observaciones")}
-          className="min-h-20 border-white/10 bg-white/5 text-white"
+          className="min-h-20 ls-border ls-bg-input text-white"
           placeholder="Observaciones sobre la impedanciometria..."
         />
       </fieldset>
