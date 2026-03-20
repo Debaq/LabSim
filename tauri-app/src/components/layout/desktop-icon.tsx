@@ -8,7 +8,7 @@ interface DesktopIconProps {
   onOpen: () => void;
 }
 
-export function DesktopIcon({ label, icon: Icon, color, onOpen }: DesktopIconProps) {
+export function DesktopIcon({ label, icon: Icon, onOpen }: DesktopIconProps) {
   const [selected, setSelected] = useState(false);
 
   return (
@@ -21,9 +21,10 @@ export function DesktopIcon({ label, icon: Icon, color, onOpen }: DesktopIconPro
       onBlur={() => setSelected(false)}
     >
       <div
-        className={`flex h-12 w-12 items-center justify-center rounded-xl ls-bg-input ${color}`}
+        className="flex h-12 w-12 items-center justify-center rounded-xl"
+        style={{ backgroundColor: "color-mix(in srgb, var(--ls-desktop-text) 12%, transparent)" }}
       >
-        <Icon className="h-6 w-6" />
+        <Icon className="h-6 w-6" style={{ color: "var(--ls-desktop-text)" }} />
       </div>
       <span className="text-[11px] leading-tight font-medium drop-shadow-md"
         style={{ color: "var(--ls-desktop-text)" }}>
