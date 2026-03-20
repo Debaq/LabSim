@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Home,
   Headphones,
   LogOut,
   Settings,
@@ -44,6 +45,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 export function Taskbar() {
   const navigate = useNavigate();
   const username = useAuthStore((s) => s.username);
+  const role = useAuthStore((s) => s.role);
   const logout = useAuthStore((s) => s.logout);
   const windows = useUIStore((s) => s.windows);
   const openWindow = useUIStore((s) => s.openWindow);
@@ -84,38 +86,66 @@ export function Taskbar() {
       {/* Start Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger className="flex h-8 items-center gap-2 rounded-md px-3 text-sm font-semibold ls-text transition hover:ls-bg-input">
-          <Headphones className="h-4 w-4 text-blue-400" />
+          <Home className="h-4 w-4" style={{ color: "var(--ls-accent)" }} />
           <span>LabSim</span>
         </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="start"
-          side="top"
-          className="mb-1 w-56 ls-border ls-bg-panel ls-text"
-        >
-          <div className="flex items-center gap-2 px-2 py-2">
+        <DropdownMenuContent align="start" side="top" className="mb-1 w-64 ls-border ls-bg-panel ls-text">
+          {/* User */}
+          <div className="flex items-center gap-2 px-3 py-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/20">
               <User className="h-4 w-4 text-blue-400" />
             </div>
             <div>
               <p className="text-sm font-medium">{username}</p>
-              <p className="text-xs ls-text-muted">Audiología</p>
+              <p className="text-xs ls-text-muted capitalize">{role}</p>
             </div>
           </div>
           <DropdownMenuSeparator className="ls-bg-input" />
-          <DropdownMenuItem
-            onClick={() => openWindow("settings", "Configuración", "settings", { width: 450, height: 550 })}
-            className="ls-text2 focus:ls-bg-input focus:ls-text"
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Configuración
+
+          {/* Equipos */}
+          <p className="px-3 pt-1.5 pb-0.5 text-[10px] font-bold uppercase tracking-wider ls-text-muted">Equipos</p>
+          <DropdownMenuItem onClick={() => openWindow("audiometer", "Audiómetro", "audiometer", { width: 780, height: 520, x: 60, y: 20 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
+            <Headphones className="mr-2 h-4 w-4 text-blue-400" />Audiómetro
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openWindow("impedance", "Impedanciómetro", "impedance", { width: 800, height: 500 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
+            <Activity className="mr-2 h-4 w-4 text-emerald-400" />Impedanciómetro
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openWindow("perimetry", "Campo Visual", "perimetry", { width: 750, height: 550 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
+            <ScanEye className="mr-2 h-4 w-4 text-orange-400" />Campo Visual
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openWindow("oct", "OCT", "oct", { width: 800, height: 520 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
+            <Layers className="mr-2 h-4 w-4 text-pink-400" />OCT
           </DropdownMenuItem>
           <DropdownMenuSeparator className="ls-bg-input" />
-          <DropdownMenuItem
-            onClick={handleLogout}
-            className="text-red-400 focus:bg-red-500/10 focus:text-red-300"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Cerrar Sesión
+
+          {/* Herramientas */}
+          <p className="px-3 pt-1.5 pb-0.5 text-[10px] font-bold uppercase tracking-wider ls-text-muted">Herramientas</p>
+          <DropdownMenuItem onClick={() => openWindow("messaging", "Mensajes", "messaging", { width: 420, height: 620 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
+            <MessageCircle className="mr-2 h-4 w-4 text-green-400" />Mensajes
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openWindow("patient-history", "Historial", "patient-history")} className="ls-text2 focus:ls-bg-input focus:ls-text">
+            <Database className="mr-2 h-4 w-4 text-cyan-400" />Historial Pacientes
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openWindow("clinical", "Crear Casos", "clinical")} className="ls-text2 focus:ls-bg-input focus:ls-text">
+            <Stethoscope className="mr-2 h-4 w-4 text-purple-400" />Crear Casos
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="ls-bg-input" />
+
+          {/* Sistema */}
+          <p className="px-3 pt-1.5 pb-0.5 text-[10px] font-bold uppercase tracking-wider ls-text-muted">Sistema</p>
+          <DropdownMenuItem onClick={() => openWindow("file-explorer", "Explorador", "file-explorer")} className="ls-text2 focus:ls-bg-input focus:ls-text">
+            <FolderOpen className="mr-2 h-4 w-4 text-amber-400" />Explorador
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openWindow("text-editor", "Editor", "text-editor")} className="ls-text2 focus:ls-bg-input focus:ls-text">
+            <FileText className="mr-2 h-4 w-4 text-rose-400" />Editor de Texto
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openWindow("settings", "Configuración", "settings", { width: 450, height: 550 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
+            <Settings className="mr-2 h-4 w-4 ls-text-muted" />Configuración
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="ls-bg-input" />
+
+          <DropdownMenuItem onClick={handleLogout} className="text-red-400 focus:bg-red-500/10 focus:text-red-300">
+            <LogOut className="mr-2 h-4 w-4" />Cerrar Sesión
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
