@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   Home,
+  Power,
   Headphones,
   LogOut,
   Settings,
@@ -144,8 +145,11 @@ export function Taskbar() {
           </DropdownMenuItem>
           <DropdownMenuSeparator className="ls-bg-input" />
 
-          <DropdownMenuItem onClick={handleLogout} className="text-red-400 focus:bg-red-500/10 focus:text-red-300">
+          <DropdownMenuItem onClick={handleLogout} className="ls-text2 focus:ls-bg-input focus:ls-text">
             <LogOut className="mr-2 h-4 w-4" />Cerrar Sesión
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => { if (window.confirm("¿Salir de LabSim?")) window.close(); }} className="text-red-400 focus:bg-red-500/10 focus:text-red-300">
+            <Power className="mr-2 h-4 w-4" />Apagar LabSim
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

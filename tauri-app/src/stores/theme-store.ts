@@ -90,16 +90,23 @@ const FONT_SCALES: Record<FontSize, string> = {
 interface ThemeState {
   theme: ThemeName;
   fontSize: FontSize;
+  wallpaperColor: string | null; // null = use theme default
   setTheme: (theme: ThemeName) => void;
   setFontSize: (size: FontSize) => void;
+  setWallpaperColor: (color: string | null) => void;
 }
 
-function applyTheme(theme: ThemeName, fontSize: FontSize = "medium") {
+function applyTheme(theme: ThemeName, fontSize: FontSize = "medium", wallpaper: string | null = null) {
   const t = THEMES[theme];
   if (!t) return;
   const root = document.documentElement;
   for (const [key, value] of Object.entries(t.vars)) {
     root.style.setProperty(key, value);
+  }
+  // Custom wallpaper overrides the theme gradient
+  if (wallpaper) {
+    root.style.setProperty("--ls-desktop-gradient", wallpaper);
+    root.style.setProperty("--ls-desktop-bg", wallpaper);
   }
   root.style.setProperty("--ls-font-scale", FONT_SCALES[fontSize]);
   root.style.fontSize = `${parseFloat(FONT_SCALES[fontSize]) * 100}%`;
@@ -112,14 +119,16 @@ export const useThemeStore = create<ThemeState>()(
     (set, get) => ({
       theme: "midnight",
       fontSize: "medium",
-      setTheme: (theme) => { applyTheme(theme, get().fontSize); set({ theme }); },
-      setFontSize: (fontSize) => { applyTheme(get().theme, fontSize); set({ fontSize }); },
+      wallpaperColor: null,
+      setTheme: (theme) => { set({ theme, wallpaperColor: null }); applyTheme(theme, get().fontSize, null); },
+      setFontSize: (fontSize) => { set({ fontSize }); applyTheme(get().theme, fontSize, get().wallpaperColor); },
+      setWallpaperColor: (color) => { set({ wallpaperColor: color }); applyTheme(get().theme, get().fontSize, color); },
     }),
     {
       name: "labsim-theme",
       storage: createJSONStorage(() => localStorage),
       onRehydrateStorage: () => (state) => {
-        if (state) applyTheme(state.theme, state.fontSize);
+        if (state) applyTheme(state.theme, state.fontSize, state.wallpaperColor);
       },
     },
   ),
@@ -130,7 +139,7 @@ if (typeof window !== "undefined") {
   if (stored) {
     try {
       const { state } = JSON.parse(stored);
-      if (state?.theme && THEMES[state.theme as ThemeName]) applyTheme(state.theme, state.fontSize ?? "medium");
+      if (state?.theme && THEMES[state.theme as ThemeName]) applyTheme(state.theme, state.fontSize ?? "medium", state.wallpaperColor ?? null);
       else applyTheme("midnight");
     } catch { applyTheme("midnight"); }
   } else {

@@ -11,7 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface ModelInfo { id: string; name: string; sizeMb: number; filename: string; }
 
 export function SettingsWindow() {
-  const { theme, setTheme, fontSize, setFontSize } = useThemeStore();
+  const { theme, setTheme, fontSize, setFontSize, wallpaperColor, setWallpaperColor } = useThemeStore();
   const username = useAuthStore((s) => s.username);
   const role = useAuthStore((s) => s.role);
   const llmConnected = useChatStore((s) => s.llmConnected);
@@ -95,6 +95,35 @@ export function SettingsWindow() {
                   </button>
                 );
               })}
+            </div>
+          </section>
+
+          {/* Wallpaper */}
+          <section>
+            <SectionHeader icon={<Palette className="h-4 w-4 text-orange-400" />} title="Fondo de Escritorio" />
+            <div className="flex items-center gap-3 rounded-lg border p-3"
+              style={{ borderColor: "var(--ls-border)", backgroundColor: "var(--ls-panel-secondary)" }}>
+              <input
+                type="color"
+                value={wallpaperColor ?? THEMES[theme].vars["--ls-desktop-bg"]}
+                onChange={(e) => setWallpaperColor(e.target.value)}
+                className="h-8 w-12 cursor-pointer rounded border-0 bg-transparent"
+              />
+              <div className="flex-1">
+                <p className="text-xs font-medium" style={{ color: "var(--ls-text)" }}>Color personalizado</p>
+                <p className="text-xs" style={{ color: "var(--ls-text-muted)" }}>
+                  {wallpaperColor ?? "Usando color del tema"}
+                </p>
+              </div>
+              {wallpaperColor && (
+                <button
+                  onClick={() => setWallpaperColor(null)}
+                  className="rounded border px-2 py-1 text-xs"
+                  style={{ borderColor: "var(--ls-border)", color: "var(--ls-text-muted)" }}
+                >
+                  Reset
+                </button>
+              )}
             </div>
           </section>
 
