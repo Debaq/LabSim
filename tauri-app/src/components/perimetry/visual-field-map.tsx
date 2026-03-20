@@ -1,6 +1,7 @@
 import { useRef, useEffect } from "react";
 import type { PointResult } from "@/lib/perimetry-config";
 import { sensitivityToGray } from "@/lib/perimetry-config";
+import { getThemeColors } from "@/lib/theme-canvas";
 
 interface VisualFieldMapProps {
   points: PointResult[];
@@ -26,16 +27,18 @@ export function VisualFieldMap({ points, currentPoint, eye, mode, onPointClick }
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const tc = getThemeColors();
+
     const cx = size / 2;
     const cy = size / 2;
     const scale = size / 70; // ±35 degrees maps to canvas
 
     // Background
-    ctx.fillStyle = "#0a0a0a";
+    ctx.fillStyle = tc.canvasBg;
     ctx.fillRect(0, 0, size, size);
 
     // Concentric circles (eccentricity)
-    ctx.strokeStyle = "rgba(255,255,255,0.06)";
+    ctx.strokeStyle = tc.gridLine;
     ctx.lineWidth = 1;
     for (const r of [10, 20, 30]) {
       ctx.beginPath();
@@ -44,7 +47,7 @@ export function VisualFieldMap({ points, currentPoint, eye, mode, onPointClick }
     }
 
     // Cross axes
-    ctx.strokeStyle = "rgba(255,255,255,0.08)";
+    ctx.strokeStyle = tc.gridLineStrong;
     ctx.beginPath();
     ctx.moveTo(0, cy); ctx.lineTo(size, cy);
     ctx.moveTo(cx, 0); ctx.lineTo(cx, size);
@@ -52,7 +55,7 @@ export function VisualFieldMap({ points, currentPoint, eye, mode, onPointClick }
 
     // Blind spot marker
     const bsX = eye === "OD" ? 15 : -15;
-    ctx.fillStyle = "rgba(255,255,255,0.04)";
+    ctx.fillStyle = tc.canvasSubtle;
     ctx.beginPath();
     ctx.arc(cx + bsX * scale, cy + 1.5 * scale, 3 * scale, 0, Math.PI * 2);
     ctx.fill();
@@ -68,7 +71,7 @@ export function VisualFieldMap({ points, currentPoint, eye, mode, onPointClick }
 
       if (pt.sensitivity === null) {
         // Not tested yet
-        ctx.fillStyle = isCurrent ? "rgba(255, 200, 0, 0.4)" : "rgba(255,255,255,0.08)";
+        ctx.fillStyle = isCurrent ? "rgba(255, 200, 0, 0.4)" : tc.gridLineStrong;
         ctx.beginPath();
         ctx.arc(px, py, pointSize / 2, 0, Math.PI * 2);
         ctx.fill();
@@ -84,10 +87,19 @@ export function VisualFieldMap({ points, currentPoint, eye, mode, onPointClick }
         ctx.fillText(String(pt.sensitivity), px, py);
       } else if (mode === "deviation") {
         const dev = pt.totalDeviation ?? 0;
-        if (dev < -10) ctx.fillStyle = "#1a1a1a";
-        else if (dev < -5) ctx.fillStyle = "#444";
-        else if (dev < -2) ctx.fillStyle = "#888";
-        else ctx.fillStyle = "#ccc";
+        if (tc.isLight) {
+          // Light theme: darker = worse deficit
+          if (dev < -10) ctx.fillStyle = "#e0e0e0";
+          else if (dev < -5) ctx.fillStyle = "#b0b0b0";
+          else if (dev < -2) ctx.fillStyle = "#707070";
+          else ctx.fillStyle = "#333";
+        } else {
+          // Dark theme: original
+          if (dev < -10) ctx.fillStyle = "#1a1a1a";
+          else if (dev < -5) ctx.fillStyle = "#444";
+          else if (dev < -2) ctx.fillStyle = "#888";
+          else ctx.fillStyle = "#ccc";
+        }
         ctx.fillRect(px - pointSize, py - pointSize, pointSize * 2, pointSize * 2);
       }
 
@@ -102,7 +114,7 @@ export function VisualFieldMap({ points, currentPoint, eye, mode, onPointClick }
     });
 
     // Labels
-    ctx.fillStyle = "rgba(255,255,255,0.2)";
+    ctx.fillStyle = tc.canvasText;
     ctx.font = "10px sans-serif";
     ctx.textAlign = "center";
     ctx.fillText("Superior", cx, 12);

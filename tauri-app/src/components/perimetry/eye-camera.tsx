@@ -1,4 +1,5 @@
 import { useRef, useEffect } from "react";
+import { getThemeColors } from "@/lib/theme-canvas";
 
 interface EyeCameraProps {
   isFixating: boolean;
@@ -15,13 +16,15 @@ export function EyeCamera({ isFixating, isRunning, eye }: EyeCameraProps) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const tc = getThemeColors();
+
     const w = canvas.width;
     const h = canvas.height;
     const cx = w / 2;
     const cy = h / 2;
 
     // Dark IR-like background
-    ctx.fillStyle = "#0a0808";
+    ctx.fillStyle = tc.canvasBg;
     ctx.fillRect(0, 0, w, h);
 
     // Slight IR noise texture
@@ -70,7 +73,7 @@ export function EyeCamera({ isFixating, isRunning, eye }: EyeCameraProps) {
     }
 
     // Eye label
-    ctx.fillStyle = "rgba(255,255,255,0.15)";
+    ctx.fillStyle = tc.canvasText;
     ctx.font = "8px monospace";
     ctx.fillText(eye, 4, 10);
 
@@ -84,7 +87,7 @@ export function EyeCamera({ isFixating, isRunning, eye }: EyeCameraProps) {
 
   return (
     <div className="rounded border ls-border bg-black overflow-hidden">
-      <div className="px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-wider ls-text-muted bg-black/50">
+      <div className="px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-wider ls-text-muted ls-bg-panel2">
         Cámara IR
       </div>
       <canvas ref={canvasRef} width={160} height={120} className="block w-full" />
