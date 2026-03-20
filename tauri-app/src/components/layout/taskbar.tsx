@@ -16,7 +16,29 @@ import {
   User,
   Wifi,
   Volume2,
+  Activity,
+  ScanEye,
+  Layers,
+  Database,
+  Stethoscope,
+  MessageCircle,
+  FolderOpen,
+  FileText,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+const WINDOW_ICONS: Record<string, LucideIcon> = {
+  audiometer: Headphones,
+  impedance: Activity,
+  perimetry: ScanEye,
+  oct: Layers,
+  "patient-history": Database,
+  clinical: Stethoscope,
+  messaging: MessageCircle,
+  "file-explorer": FolderOpen,
+  "text-editor": FileText,
+  settings: Settings,
+};
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function Taskbar() {
@@ -39,11 +61,20 @@ export function Taskbar() {
     navigate({ to: "/login" });
   };
 
-  const handleTaskbarClick = (id: string, minimized: boolean) => {
-    if (minimized) {
+  const minimizeWindow = useUIStore((s) => s.minimizeWindow);
+
+  const handleTaskbarClick = (id: string, isMinimized: boolean) => {
+    if (isMinimized) {
       restoreWindow(id);
     } else {
-      focusWindow(id);
+      // If already focused (highest z), minimize it. Otherwise focus.
+      const win = windows.find((w) => w.id === id);
+      const maxZ = Math.max(...windows.map((w) => w.zIndex));
+      if (win && win.zIndex === maxZ) {
+        minimizeWindow(id);
+      } else {
+        focusWindow(id);
+      }
     }
   };
 
@@ -91,20 +122,28 @@ export function Taskbar() {
 
       {/* Window buttons */}
       <div className="flex flex-1 items-center gap-0.5 overflow-x-auto px-2">
-        {windows.map((w) => (
-          <button
-            key={w.id}
-            onClick={() => handleTaskbarClick(w.id, w.minimized)}
-            className={`flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs transition ${
-              w.minimized
-                ? "ls-text-muted hover:ls-bg-input hover:ls-text2"
-                : "ls-bg-input text-white/90"
-            }`}
-          >
-            <div className="h-1.5 w-1.5 rounded-full bg-blue-400" />
-            <span className="max-w-24 truncate">{w.title}</span>
-          </button>
-        ))}
+        {windows.map((w) => {
+          const Icon = WINDOW_ICONS[w.component] ?? FileText;
+          const maxZ = Math.max(...windows.map((x) => x.zIndex));
+          const isFocused = !w.minimized && w.zIndex === maxZ;
+          return (
+            <button
+              key={w.id}
+              onClick={() => handleTaskbarClick(w.id, w.minimized)}
+              className={`flex h-7 items-center gap-1.5 rounded-md px-2 text-xs transition ${
+                w.minimized
+                  ? "ls-text-muted hover:ls-bg-input"
+                  : isFocused
+                    ? "ls-bg-input ls-text"
+                    : "ls-text2 hover:ls-bg-input"
+              }`}
+              style={isFocused ? { borderBottom: "2px solid var(--ls-accent)" } : undefined}
+            >
+              <Icon className="h-3.5 w-3.5 shrink-0" />
+              <span className="max-w-20 truncate">{w.title}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* System Tray */}
