@@ -52,14 +52,14 @@ export function Taskbar() {
       style={{ backgroundColor: "var(--ls-taskbar)", borderColor: "var(--ls-border)" }}>
       {/* Start Menu */}
       <DropdownMenu>
-        <DropdownMenuTrigger className="flex h-8 items-center gap-2 rounded-md px-3 text-sm font-semibold text-white transition hover:bg-white/10">
+        <DropdownMenuTrigger className="flex h-8 items-center gap-2 rounded-md px-3 text-sm font-semibold ls-text transition hover:ls-bg-input">
           <Headphones className="h-4 w-4 text-blue-400" />
           <span>LabSim</span>
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="start"
           side="top"
-          className="mb-1 w-56 ls-border ls-bg-panel text-white"
+          className="mb-1 w-56 ls-border ls-bg-panel ls-text"
         >
           <div className="flex items-center gap-2 px-2 py-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/20">
@@ -70,15 +70,15 @@ export function Taskbar() {
               <p className="text-xs ls-text-muted">Audiología</p>
             </div>
           </div>
-          <DropdownMenuSeparator className="bg-white/10" />
+          <DropdownMenuSeparator className="ls-bg-input" />
           <DropdownMenuItem
             onClick={() => openWindow("settings", "Configuración", "settings", { width: 450, height: 550 })}
-            className="ls-text2 focus:bg-white/10 focus:text-white"
+            className="ls-text2 focus:ls-bg-input focus:ls-text"
           >
             <Settings className="mr-2 h-4 w-4" />
             Configuración
           </DropdownMenuItem>
-          <DropdownMenuSeparator className="bg-white/10" />
+          <DropdownMenuSeparator className="ls-bg-input" />
           <DropdownMenuItem
             onClick={handleLogout}
             className="text-red-400 focus:bg-red-500/10 focus:text-red-300"
@@ -98,7 +98,7 @@ export function Taskbar() {
             className={`flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs transition ${
               w.minimized
                 ? "ls-text-muted hover:ls-bg-input hover:ls-text2"
-                : "bg-white/10 text-white/90"
+                : "ls-bg-input text-white/90"
             }`}
           >
             <div className="h-1.5 w-1.5 rounded-full bg-blue-400" />

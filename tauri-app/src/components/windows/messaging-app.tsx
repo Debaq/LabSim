@@ -64,7 +64,7 @@ function ContactList() {
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className="flex items-center justify-between border-b ls-border ls-bg-panel px-4 py-3">
-        <h3 className="text-sm font-semibold text-white">Mensajes</h3>
+        <h3 className="text-sm font-semibold ls-text">Mensajes</h3>
         <div className="flex items-center gap-1">
           {llmConnected ? (
             <Wifi className="h-3.5 w-3.5 text-emerald-400" />
@@ -97,7 +97,7 @@ function ContactList() {
               <div className="relative shrink-0">
                 <div
                   className={cn(
-                    "flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br text-sm font-bold text-white",
+                    "flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br text-sm font-bold ls-text",
                     contact.color,
                   )}
                 >
@@ -109,7 +109,7 @@ function ContactList() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-white">
+                  <span className="text-sm font-medium ls-text">
                     {contact.name}
                   </span>
                   <span className="text-[10px] ls-text-muted">
@@ -121,7 +121,7 @@ function ContactList() {
                     {getLastMessage(contact.id)}
                   </p>
                   {unread > 0 && (
-                    <Badge className="h-5 min-w-5 justify-center bg-emerald-500 px-1.5 text-[10px] text-white">
+                    <Badge className="h-5 min-w-5 justify-center bg-emerald-500 px-1.5 text-[10px] ls-text">
                       {unread}
                     </Badge>
                   )}
@@ -225,14 +225,14 @@ function ConversationView({ contact }: { contact: Contact }) {
       <div className="flex items-center gap-3 border-b ls-border ls-bg-panel/90 px-3 py-2">
         <button
           onClick={() => setActiveContact(null)}
-          className="rounded p-1 ls-text-muted transition hover:ls-bg-input hover:text-white"
+          className="rounded p-1 ls-text-muted transition hover:ls-bg-input hover:ls-text"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="relative">
           <div
             className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white",
+              "flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold ls-text",
               contact.color,
             )}
           >
@@ -243,7 +243,7 @@ function ConversationView({ contact }: { contact: Contact }) {
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-white">{contact.name}</p>
+          <p className="text-sm font-semibold ls-text">{contact.name}</p>
           <p className="text-[10px] ls-text-muted">
             {typing ? "escribiendo..." : contact.subtitle}
           </p>
@@ -268,7 +268,7 @@ function ConversationView({ contact }: { contact: Contact }) {
             <div className="flex gap-2">
               <div
                 className={cn(
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold text-white",
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold ls-text",
                   contact.color,
                 )}
               >

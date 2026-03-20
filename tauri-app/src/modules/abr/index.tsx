@@ -62,7 +62,7 @@ export default function AbrModule() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BrainCircuit className="h-5 w-5 text-blue-400" />
-          <h2 className="text-lg font-semibold text-white">Potenciales Evocados Auditivos (ABR)</h2>
+          <h2 className="text-lg font-semibold ls-text">Potenciales Evocados Auditivos (ABR)</h2>
         </div>
         <Button type="submit" size="sm" className="gap-1.5">
           <Save className="h-3.5 w-3.5" />Guardar
@@ -81,7 +81,7 @@ export default function AbrModule() {
               value={stimulusActivo}
               onValueChange={(v) => setValue("stimulusActivo", v ?? "", { shouldDirty: true })}
             >
-              <SelectTrigger className="ls-border ls-bg-input text-white">
+              <SelectTrigger className="ls-border ls-bg-input ls-text">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -98,7 +98,7 @@ export default function AbrModule() {
                 value={toneBurstActivo}
                 onValueChange={(v) => setValue("toneBurstActivo", v ?? "", { shouldDirty: true })}
               >
-                <SelectTrigger className="ls-border ls-bg-input text-white">
+                <SelectTrigger className="ls-border ls-bg-input ls-text">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -152,7 +152,7 @@ export default function AbrModule() {
                               min={0}
                               max={15}
                               {...register(`${basePath}.latencia` as any)}
-                              className="h-8 w-20 ls-border ls-bg-input text-white text-center mx-auto"
+                              className="h-8 w-20 ls-border ls-bg-input ls-text text-center mx-auto"
                               placeholder="ms"
                             />
                           </td>
@@ -163,7 +163,7 @@ export default function AbrModule() {
                               min={0}
                               max={5}
                               {...register(`${basePath}.amplitud` as any)}
-                              className="h-8 w-20 ls-border ls-bg-input text-white text-center mx-auto"
+                              className="h-8 w-20 ls-border ls-bg-input ls-text text-center mx-auto"
                               placeholder="uV"
                             />
                           </td>
@@ -183,7 +183,7 @@ export default function AbrModule() {
         <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Observaciones</legend>
         <Textarea
           {...register("observaciones")}
-          className="min-h-20 ls-border ls-bg-input text-white"
+          className="min-h-20 ls-border ls-bg-input ls-text"
           placeholder="Observaciones sobre los potenciales evocados..."
         />
       </fieldset>

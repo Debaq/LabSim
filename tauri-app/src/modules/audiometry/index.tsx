@@ -59,7 +59,7 @@ export default function AudiometryModule() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <AudioLines className="h-5 w-5 text-blue-400" />
-          <h2 className="text-lg font-semibold text-white">Audiometría Tonal</h2>
+          <h2 className="text-lg font-semibold ls-text">Audiometría Tonal</h2>
         </div>
         <Button type="submit" size="sm" className="gap-1.5"><Save className="h-3.5 w-3.5" />Guardar</Button>
       </div>
@@ -70,11 +70,11 @@ export default function AudiometryModule() {
           onClick={() => setActiveEar("right")} className={activeEar === "right" ? "bg-red-500/20 text-red-400" : "ls-text-muted"}>OD</Button>
         <Button type="button" size="xs" variant={activeEar === "left" ? "default" : "ghost"}
           onClick={() => setActiveEar("left")} className={activeEar === "left" ? "bg-blue-500/20 text-blue-400" : "ls-text-muted"}>OI</Button>
-        <div className="mx-1 h-4 w-px bg-white/10" />
+        <div className="mx-1 h-4 w-px ls-bg-input" />
         <Button type="button" size="xs" variant={activeType === "air" ? "default" : "ghost"}
-          onClick={() => setActiveType("air")} className={activeType === "air" ? "bg-white/10 text-white" : "ls-text-muted"}>Vía Aérea</Button>
+          onClick={() => setActiveType("air")} className={activeType === "air" ? "ls-bg-input ls-text" : "ls-text-muted"}>Vía Aérea</Button>
         <Button type="button" size="xs" variant={activeType === "bone" ? "default" : "ghost"}
-          onClick={() => setActiveType("bone")} className={activeType === "bone" ? "bg-white/10 text-white" : "ls-text-muted"}>Vía Ósea</Button>
+          onClick={() => setActiveType("bone")} className={activeType === "bone" ? "ls-bg-input ls-text" : "ls-text-muted"}>Vía Ósea</Button>
       </div>
 
       {/* Audiogram chart */}
@@ -94,7 +94,7 @@ export default function AudiometryModule() {
               <Label className="text-[10px] ls-text-muted">{freq >= 1000 ? `${freq / 1000}k` : freq}</Label>
               <Input type="number" min={-10} max={130} step={5}
                 {...register(`${section}.${oido}.${freq}` as `umbralesAereos.oidoDerecho`)}
-                className="h-8 ls-border ls-bg-input px-1.5 text-center text-xs text-white" />
+                className="h-8 ls-border ls-bg-input px-1.5 text-center text-xs ls-text" />
             </div>
           ))}
         </div>
@@ -102,7 +102,7 @@ export default function AudiometryModule() {
 
       <fieldset className="space-y-3 rounded-lg border ls-border ls-bg-input p-4">
         <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Observaciones</legend>
-        <Textarea {...register("observaciones")} className="min-h-16 ls-border ls-bg-input text-white" placeholder="Observaciones..." />
+        <Textarea {...register("observaciones")} className="min-h-16 ls-border ls-bg-input ls-text" placeholder="Observaciones..." />
       </fieldset>
     </form>
   );

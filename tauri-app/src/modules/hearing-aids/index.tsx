@@ -23,7 +23,7 @@ export default function HearingAidsModule() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Ear className="h-5 w-5 text-blue-400" />
-          <h2 className="text-lg font-semibold text-white">Audifonos</h2>
+          <h2 className="text-lg font-semibold ls-text">Audifonos</h2>
         </div>
         <Button type="submit" size="sm" className="gap-1.5">
           <Save className="h-3.5 w-3.5" />Guardar
@@ -48,7 +48,7 @@ export default function HearingAidsModule() {
               <Label className="ls-text2">Marca</Label>
               <Input
                 {...register("history.marca")}
-                className="ls-border ls-bg-input text-white"
+                className="ls-border ls-bg-input ls-text"
                 placeholder="Marca del audifono"
               />
             </div>
@@ -56,7 +56,7 @@ export default function HearingAidsModule() {
               <Label className="ls-text2">Modelo</Label>
               <Input
                 {...register("history.modelo")}
-                className="ls-border ls-bg-input text-white"
+                className="ls-border ls-bg-input ls-text"
                 placeholder="Modelo"
               />
             </div>
@@ -66,7 +66,7 @@ export default function HearingAidsModule() {
                 type="number"
                 min={0}
                 {...register("history.anosUso")}
-                className="ls-border ls-bg-input text-white"
+                className="ls-border ls-bg-input ls-text"
               />
             </div>
             <div className="space-y-1.5">
@@ -75,7 +75,7 @@ export default function HearingAidsModule() {
                 value={watch("history.tipoAnterior") ?? ""}
                 onValueChange={(v) => setValue("history.tipoAnterior", v ?? "", { shouldDirty: true })}
               >
-                <SelectTrigger className="ls-border ls-bg-input text-white">
+                <SelectTrigger className="ls-border ls-bg-input ls-text">
                   <SelectValue placeholder="Seleccionar" />
                 </SelectTrigger>
                 <SelectContent>
@@ -92,14 +92,14 @@ export default function HearingAidsModule() {
                 min={0}
                 max={10}
                 {...register("history.satisfaccion")}
-                className="ls-border ls-bg-input text-white"
+                className="ls-border ls-bg-input ls-text"
               />
             </div>
             <div className="space-y-1.5">
               <Label className="ls-text2">Motivo de cambio</Label>
               <Input
                 {...register("history.motivoCambio")}
-                className="ls-border ls-bg-input text-white"
+                className="ls-border ls-bg-input ls-text"
                 placeholder="Razon del cambio"
               />
             </div>
@@ -119,7 +119,7 @@ export default function HearingAidsModule() {
               value={watch("prescripcion.formula") ?? "NAL-NL2"}
               onValueChange={(v) => setValue("prescripcion.formula", v ?? "", { shouldDirty: true })}
             >
-              <SelectTrigger className="ls-border ls-bg-input text-white">
+              <SelectTrigger className="ls-border ls-bg-input ls-text">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -135,7 +135,7 @@ export default function HearingAidsModule() {
               value={watch("prescripcion.tipoAudifono") ?? ""}
               onValueChange={(v) => setValue("prescripcion.tipoAudifono", v ?? "", { shouldDirty: true })}
             >
-              <SelectTrigger className="ls-border ls-bg-input text-white">
+              <SelectTrigger className="ls-border ls-bg-input ls-text">
                 <SelectValue placeholder="Seleccionar" />
               </SelectTrigger>
               <SelectContent>
@@ -151,7 +151,7 @@ export default function HearingAidsModule() {
               value={watch("prescripcion.moldeTipo") ?? ""}
               onValueChange={(v) => setValue("prescripcion.moldeTipo", v ?? "", { shouldDirty: true })}
             >
-              <SelectTrigger className="ls-border ls-bg-input text-white">
+              <SelectTrigger className="ls-border ls-bg-input ls-text">
                 <SelectValue placeholder="Seleccionar" />
               </SelectTrigger>
               <SelectContent>
@@ -167,7 +167,7 @@ export default function HearingAidsModule() {
               value={watch("prescripcion.ventilacion") ?? ""}
               onValueChange={(v) => setValue("prescripcion.ventilacion", v ?? "", { shouldDirty: true })}
             >
-              <SelectTrigger className="ls-border ls-bg-input text-white">
+              <SelectTrigger className="ls-border ls-bg-input ls-text">
                 <SelectValue placeholder="Seleccionar" />
               </SelectTrigger>
               <SelectContent>
@@ -225,7 +225,7 @@ export default function HearingAidsModule() {
                             { shouldDirty: true },
                           )
                         }
-                        className="h-8 w-16 ls-border ls-bg-input text-white text-center"
+                        className="h-8 w-16 ls-border ls-bg-input ls-text text-center"
                         placeholder="dB"
                       />
                     </div>
@@ -247,7 +247,7 @@ export default function HearingAidsModule() {
             <Label className="ls-text2">Marca</Label>
             <Input
               {...register("trial.marca")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
               placeholder="Marca"
             />
           </div>
@@ -255,7 +255,7 @@ export default function HearingAidsModule() {
             <Label className="ls-text2">Modelo</Label>
             <Input
               {...register("trial.modelo")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
               placeholder="Modelo"
             />
           </div>
@@ -263,7 +263,7 @@ export default function HearingAidsModule() {
             <Label className="ls-text2">Programa</Label>
             <Input
               {...register("trial.programa")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
               placeholder="Programa activo"
             />
           </div>
@@ -274,7 +274,7 @@ export default function HearingAidsModule() {
               min={0}
               max={100}
               {...register("trial.logoConAudifonos")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
             />
           </div>
           <div className="space-y-1.5">
@@ -284,7 +284,7 @@ export default function HearingAidsModule() {
               min={0}
               max={100}
               {...register("trial.logoSinAudifonos")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
             />
           </div>
           <div className="space-y-1.5">
@@ -294,7 +294,7 @@ export default function HearingAidsModule() {
               min={0}
               max={10}
               {...register("trial.satisfaccion")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
             />
           </div>
         </div>
@@ -302,7 +302,7 @@ export default function HearingAidsModule() {
           <Label className="ls-text2">Observaciones de la prueba</Label>
           <Textarea
             {...register("trial.observaciones")}
-            className="min-h-16 ls-border ls-bg-input text-white"
+            className="min-h-16 ls-border ls-bg-input ls-text"
             placeholder="Comentarios sobre la prueba de audifonos..."
           />
         </div>
@@ -313,7 +313,7 @@ export default function HearingAidsModule() {
         <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Observaciones Generales</legend>
         <Textarea
           {...register("observaciones")}
-          className="min-h-20 ls-border ls-bg-input text-white"
+          className="min-h-20 ls-border ls-bg-input ls-text"
           placeholder="Observaciones generales sobre audifonos..."
         />
       </fieldset>

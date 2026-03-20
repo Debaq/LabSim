@@ -31,7 +31,7 @@ export default function ImpedanceModule() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-blue-400" />
-          <h2 className="text-lg font-semibold text-white">Impedanciometria</h2>
+          <h2 className="text-lg font-semibold ls-text">Impedanciometria</h2>
         </div>
         <Button type="submit" size="sm" className="gap-1.5">
           <Save className="h-3.5 w-3.5" />Guardar
@@ -56,7 +56,7 @@ export default function ImpedanceModule() {
                     min={0}
                     max={10}
                     {...register(`timpanometria.${ear.key}.complianceMaxima`)}
-                    className="ls-border ls-bg-input text-white"
+                    className="ls-border ls-bg-input ls-text"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -66,7 +66,7 @@ export default function ImpedanceModule() {
                     min={-400}
                     max={200}
                     {...register(`timpanometria.${ear.key}.presion`)}
-                    className="ls-border ls-bg-input text-white"
+                    className="ls-border ls-bg-input ls-text"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -77,7 +77,7 @@ export default function ImpedanceModule() {
                     min={0}
                     max={10}
                     {...register(`timpanometria.${ear.key}.volumenEac`)}
-                    className="ls-border ls-bg-input text-white"
+                    className="ls-border ls-bg-input ls-text"
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -86,7 +86,7 @@ export default function ImpedanceModule() {
                     type="number"
                     step="0.1"
                     {...register(`timpanometria.${ear.key}.gradiente`)}
-                    className="ls-border ls-bg-input text-white"
+                    className="ls-border ls-bg-input ls-text"
                   />
                 </div>
               </div>
@@ -129,7 +129,7 @@ export default function ImpedanceModule() {
                                 { shouldDirty: true },
                               )
                             }
-                            className="h-8 w-20 ls-border ls-bg-input text-white text-center"
+                            className="h-8 w-20 ls-border ls-bg-input ls-text text-center"
                             placeholder="dB"
                           />
                         </td>
@@ -148,7 +148,7 @@ export default function ImpedanceModule() {
         <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Observaciones</legend>
         <Textarea
           {...register("observaciones")}
-          className="min-h-20 ls-border ls-bg-input text-white"
+          className="min-h-20 ls-border ls-bg-input ls-text"
           placeholder="Observaciones sobre la impedanciometria..."
         />
       </fieldset>

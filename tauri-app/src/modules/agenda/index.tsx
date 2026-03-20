@@ -97,7 +97,7 @@ export default function AgendaModule() {
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <CalendarDays className="h-5 w-5 text-blue-400" />
-        <h2 className="text-lg font-semibold text-white">Agenda</h2>
+        <h2 className="text-lg font-semibold ls-text">Agenda</h2>
       </div>
 
       {/* Agregar nueva cita */}
@@ -111,7 +111,7 @@ export default function AgendaModule() {
             <Input
               value={newAppt.patientName}
               onChange={(e) => setNewAppt((p) => ({ ...p, patientName: e.target.value }))}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
               placeholder="Nombre del paciente"
             />
           </div>
@@ -121,7 +121,7 @@ export default function AgendaModule() {
               type="date"
               value={newAppt.date}
               onChange={(e) => setNewAppt((p) => ({ ...p, date: e.target.value }))}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
             />
           </div>
           <div className="space-y-1.5">
@@ -130,7 +130,7 @@ export default function AgendaModule() {
               type="time"
               value={newAppt.time}
               onChange={(e) => setNewAppt((p) => ({ ...p, time: e.target.value }))}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
             />
           </div>
           <div className="space-y-1.5">
@@ -142,7 +142,7 @@ export default function AgendaModule() {
               step={15}
               value={newAppt.duration}
               onChange={(e) => setNewAppt((p) => ({ ...p, duration: Number(e.target.value) }))}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
             />
           </div>
           <div className="flex items-end">
@@ -156,7 +156,7 @@ export default function AgendaModule() {
           <Input
             value={newAppt.notes}
             onChange={(e) => setNewAppt((p) => ({ ...p, notes: e.target.value }))}
-            className="ls-border ls-bg-input text-white"
+            className="ls-border ls-bg-input ls-text"
             placeholder="Motivo de la cita o notas adicionales..."
           />
         </div>
@@ -188,7 +188,7 @@ export default function AgendaModule() {
                         <span className="text-sm font-medium">{appt.time}</span>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-white">{appt.patientName}</p>
+                        <p className="text-sm font-medium ls-text">{appt.patientName}</p>
                         {appt.notes && (
                           <p className="text-xs ls-text-muted">{appt.notes}</p>
                         )}

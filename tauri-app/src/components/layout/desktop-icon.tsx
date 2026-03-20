@@ -14,7 +14,7 @@ export function DesktopIcon({ label, icon: Icon, color, onOpen }: DesktopIconPro
   return (
     <button
       className={`flex w-20 flex-col items-center gap-1.5 rounded-lg p-2 text-center transition select-none ${
-        selected ? "bg-white/15" : "hover:bg-white/8"
+        selected ? "ls-bg-input" : "hover:bg-white/8"
       }`}
       onClick={() => setSelected(true)}
       onDoubleClick={onOpen}
@@ -25,7 +25,7 @@ export function DesktopIcon({ label, icon: Icon, color, onOpen }: DesktopIconPro
       >
         <Icon className="h-6 w-6" />
       </div>
-      <span className="text-[11px] leading-tight font-medium text-white drop-shadow-md">
+      <span className="text-[11px] leading-tight font-medium ls-text drop-shadow-md">
         {label}
       </span>
     </button>

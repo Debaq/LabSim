@@ -112,13 +112,13 @@ export function WindowFrame({
         <div className="flex items-center gap-1">
           <button
             onClick={() => setMinimized(true)}
-            className="flex h-5 w-5 items-center justify-center rounded ls-text-muted transition hover:bg-white/10 hover:text-white"
+            className="flex h-5 w-5 items-center justify-center rounded ls-text-muted transition hover:ls-bg-input hover:ls-text"
           >
             <Minus className="h-3 w-3" />
           </button>
           <button
             onClick={toggleMaximize}
-            className="flex h-5 w-5 items-center justify-center rounded ls-text-muted transition hover:bg-white/10 hover:text-white"
+            className="flex h-5 w-5 items-center justify-center rounded ls-text-muted transition hover:ls-bg-input hover:ls-text"
           >
             {maximized ? (
               <Minimize2 className="h-3 w-3" />
@@ -128,7 +128,7 @@ export function WindowFrame({
           </button>
           <button
             onClick={onClose}
-            className="flex h-5 w-5 items-center justify-center rounded ls-text-muted transition hover:bg-red-500 hover:text-white"
+            className="flex h-5 w-5 items-center justify-center rounded ls-text-muted transition hover:bg-red-500 hover:ls-text"
           >
             <X className="h-3 w-3" />
           </button>

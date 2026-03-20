@@ -178,7 +178,7 @@ export function PerimetryWindow() {
               </button>
             )}
             <button onClick={resetTest}
-              className="flex items-center justify-center rounded border ls-border px-3 py-2 ls-text-muted hover:bg-white/[0.06]">
+              className="flex items-center justify-center rounded border ls-border px-3 py-2 ls-text-muted hover:ls-bg-input">
               <RotateCcw className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -208,8 +208,8 @@ export function PerimetryWindow() {
             <div>
               <div className="mb-0.5 text-[7px] uppercase ls-text-muted">Ojo</div>
               <ToggleSwitch value={eye} onChange={(v) => { setEye(v as "OD" | "OI"); resetTest(); }} options={[
-                { value: "OD", label: "OD", color: "bg-red-600 text-white" },
-                { value: "OI", label: "OI", color: "bg-blue-600 text-white" },
+                { value: "OD", label: "OD", color: "bg-red-600 ls-text" },
+                { value: "OI", label: "OI", color: "bg-blue-600 ls-text" },
               ]} />
             </div>
 

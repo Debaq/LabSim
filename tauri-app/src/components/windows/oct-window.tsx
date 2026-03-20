@@ -56,8 +56,8 @@ export function OCTWindow() {
             <div>
               <div className="mb-0.5 text-[6px] uppercase ls-text-muted">Ojo</div>
               <ToggleSwitch value={eye} onChange={(v) => { setEye(v as "OD" | "OI"); regenerate(); }} options={[
-                { value: "OD", label: "OD", color: "bg-red-600 text-white" },
-                { value: "OI", label: "OI", color: "bg-blue-600 text-white" },
+                { value: "OD", label: "OD", color: "bg-red-600 ls-text" },
+                { value: "OI", label: "OI", color: "bg-blue-600 ls-text" },
               ]} />
             </div>
             <div>

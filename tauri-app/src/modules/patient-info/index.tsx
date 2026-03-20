@@ -25,7 +25,7 @@ export default function PatientInfoModule() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <User className="h-5 w-5 text-blue-400" />
-          <h2 className="text-lg font-semibold text-white">
+          <h2 className="text-lg font-semibold ls-text">
             Datos del Paciente
           </h2>
         </div>
@@ -49,7 +49,7 @@ export default function PatientInfoModule() {
             <Input
               id="firstName"
               {...register("firstName")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
               placeholder="Nombre"
             />
             {errors.firstName && (
@@ -64,7 +64,7 @@ export default function PatientInfoModule() {
             <Input
               id="lastName"
               {...register("lastName")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
               placeholder="Apellido"
             />
             {errors.lastName && (
@@ -81,7 +81,7 @@ export default function PatientInfoModule() {
             <Input
               id="documentId"
               {...register("documentId")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
               placeholder="RUT / DNI / CI"
             />
           </div>
@@ -94,7 +94,7 @@ export default function PatientInfoModule() {
               id="birthDate"
               type="date"
               {...register("birthDate")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
             />
           </div>
 
@@ -108,7 +108,7 @@ export default function PatientInfoModule() {
               min={0}
               max={150}
               {...register("age")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
               placeholder="Años"
             />
           </div>
@@ -124,7 +124,7 @@ export default function PatientInfoModule() {
               })
             }
           >
-            <SelectTrigger className="ls-border ls-bg-input text-white">
+            <SelectTrigger className="ls-border ls-bg-input ls-text">
               <SelectValue placeholder="Seleccionar" />
             </SelectTrigger>
             <SelectContent>
@@ -151,7 +151,7 @@ export default function PatientInfoModule() {
               id="phone"
               type="tel"
               {...register("phone")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
               placeholder="+56 9 1234 5678"
             />
           </div>
@@ -164,7 +164,7 @@ export default function PatientInfoModule() {
               id="email"
               type="email"
               {...register("email")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
               placeholder="paciente@email.com"
             />
             {errors.email && (
@@ -181,7 +181,7 @@ export default function PatientInfoModule() {
             <Input
               id="address"
               {...register("address")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
               placeholder="Calle, número"
             />
           </div>
@@ -193,7 +193,7 @@ export default function PatientInfoModule() {
             <Input
               id="city"
               {...register("city")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
               placeholder="Ciudad"
             />
           </div>
@@ -214,7 +214,7 @@ export default function PatientInfoModule() {
             <Input
               id="occupation"
               {...register("occupation")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
               placeholder="Ocupación actual"
             />
           </div>
@@ -226,7 +226,7 @@ export default function PatientInfoModule() {
             <Input
               id="referredBy"
               {...register("referredBy")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
               placeholder="Médico / Institución"
             />
           </div>
@@ -239,7 +239,7 @@ export default function PatientInfoModule() {
           <Input
             id="healthInsurance"
             {...register("healthInsurance")}
-            className="ls-border ls-bg-input text-white"
+            className="ls-border ls-bg-input ls-text"
             placeholder="Fonasa / Isapre / Particular"
           />
         </div>
@@ -251,7 +251,7 @@ export default function PatientInfoModule() {
           <Textarea
             id="notes"
             {...register("notes")}
-            className="min-h-20 ls-border ls-bg-input text-white"
+            className="min-h-20 ls-border ls-bg-input ls-text"
             placeholder="Notas adicionales..."
           />
         </div>

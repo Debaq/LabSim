@@ -192,13 +192,13 @@ export function ImpedancePlaceholder() {
             OI
           </Button>
 
-          <div className="mx-1 h-4 w-px bg-white/10" />
+          <div className="mx-1 h-4 w-px ls-bg-input" />
 
           <Button
             size="icon-xs"
             variant="ghost"
             onClick={handleClear}
-            className="ls-text-muted hover:text-white"
+            className="ls-text-muted hover:ls-text"
             title="Limpiar oido actual"
           >
             <RotateCcw className="h-3.5 w-3.5" />
@@ -207,7 +207,7 @@ export function ImpedancePlaceholder() {
             size="xs"
             variant="ghost"
             onClick={handleClearAll}
-            className="ls-text-muted hover:text-white text-[10px]"
+            className="ls-text-muted hover:ls-text text-[10px]"
             title="Limpiar todo"
           >
             Limpiar todo
@@ -242,7 +242,7 @@ export function ImpedancePlaceholder() {
                     onChange={(e) =>
                       handleTimpChange("complianceMaxima", e.target.value)
                     }
-                    className="h-7 ls-border ls-bg-input text-xs text-white placeholder:ls-text-muted"
+                    className="h-7 ls-border ls-bg-input text-xs ls-text placeholder:ls-text-muted"
                   />
                 </div>
                 <div>
@@ -259,7 +259,7 @@ export function ImpedancePlaceholder() {
                     onChange={(e) =>
                       handleTimpChange("presion", e.target.value)
                     }
-                    className="h-7 ls-border ls-bg-input text-xs text-white placeholder:ls-text-muted"
+                    className="h-7 ls-border ls-bg-input text-xs ls-text placeholder:ls-text-muted"
                   />
                 </div>
                 <div>
@@ -276,7 +276,7 @@ export function ImpedancePlaceholder() {
                     onChange={(e) =>
                       handleTimpChange("volumenEac", e.target.value)
                     }
-                    className="h-7 ls-border ls-bg-input text-xs text-white placeholder:ls-text-muted"
+                    className="h-7 ls-border ls-bg-input text-xs ls-text placeholder:ls-text-muted"
                   />
                 </div>
                 <div>
@@ -289,7 +289,7 @@ export function ImpedancePlaceholder() {
                     onChange={(e) =>
                       handleTimpChange("gradiente", e.target.value)
                     }
-                    className="h-7 ls-border ls-bg-input text-xs text-white placeholder:ls-text-muted"
+                    className="h-7 ls-border ls-bg-input text-xs ls-text placeholder:ls-text-muted"
                   />
                 </div>
               </div>
@@ -349,7 +349,7 @@ export function ImpedancePlaceholder() {
                               handleReflexChange(mode, freq, e.target.value)
                             }
                             placeholder="dB"
-                            className="h-6 w-full ls-border ls-bg-input text-center text-[10px] text-white placeholder:ls-text-muted"
+                            className="h-6 w-full ls-border ls-bg-input text-center text-[10px] ls-text placeholder:ls-text-muted"
                           />
                         </td>
                       ))}

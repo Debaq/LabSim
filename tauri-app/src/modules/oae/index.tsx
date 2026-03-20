@@ -25,7 +25,7 @@ export default function OaeModule() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Waves className="h-5 w-5 text-blue-400" />
-          <h2 className="text-lg font-semibold text-white">Emisiones Otoacusticas (OAE)</h2>
+          <h2 className="text-lg font-semibold ls-text">Emisiones Otoacusticas (OAE)</h2>
         </div>
         <Button type="submit" size="sm" className="gap-1.5">
           <Save className="h-3.5 w-3.5" />Guardar
@@ -49,7 +49,7 @@ export default function OaeModule() {
                     min={0}
                     max={100}
                     {...register(`teoae.${ear.key}.reproducibilidad`)}
-                    className="ls-border ls-bg-input text-white"
+                    className="ls-border ls-bg-input ls-text"
                     placeholder="%"
                   />
                 </div>
@@ -59,7 +59,7 @@ export default function OaeModule() {
                     value={watch(`teoae.${ear.key}.resultado`) || ""}
                     onValueChange={(v) => setValue(`teoae.${ear.key}.resultado`, v ?? "", { shouldDirty: true })}
                   >
-                    <SelectTrigger className="ls-border ls-bg-input text-white">
+                    <SelectTrigger className="ls-border ls-bg-input ls-text">
                       <SelectValue placeholder="Seleccionar" />
                     </SelectTrigger>
                     <SelectContent>
@@ -90,7 +90,7 @@ export default function OaeModule() {
                   value={watch(`dpoae.${ear.key}.resultado`) || ""}
                   onValueChange={(v) => setValue(`dpoae.${ear.key}.resultado`, v ?? "", { shouldDirty: true })}
                 >
-                  <SelectTrigger className="ls-border ls-bg-input text-white">
+                  <SelectTrigger className="ls-border ls-bg-input ls-text">
                     <SelectValue placeholder="Seleccionar" />
                   </SelectTrigger>
                   <SelectContent>
@@ -110,7 +110,7 @@ export default function OaeModule() {
         <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Observaciones</legend>
         <Textarea
           {...register("observaciones")}
-          className="min-h-20 ls-border ls-bg-input text-white"
+          className="min-h-20 ls-border ls-bg-input ls-text"
           placeholder="Observaciones sobre las emisiones otoacusticas..."
         />
       </fieldset>

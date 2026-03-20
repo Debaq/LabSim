@@ -28,7 +28,7 @@ export default function SupraliminalModule() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-blue-400" />
-          <h2 className="text-lg font-semibold text-white">Pruebas Supraliminales</h2>
+          <h2 className="text-lg font-semibold ls-text">Pruebas Supraliminales</h2>
         </div>
         <Button type="submit" size="sm" className="gap-1.5">
           <Save className="h-3.5 w-3.5" />Guardar
@@ -64,7 +64,7 @@ export default function SupraliminalModule() {
                         onChange={(e) =>
                           setValue(`sisi.${ear.key}.${freq}`, e.target.value ? Number(e.target.value) : null, { shouldDirty: true })
                         }
-                        className="h-8 w-20 ls-border ls-bg-input text-white text-center"
+                        className="h-8 w-20 ls-border ls-bg-input ls-text text-center"
                         placeholder="%"
                       />
                     </td>
@@ -103,7 +103,7 @@ export default function SupraliminalModule() {
                         onChange={(e) =>
                           setValue(`carhart.${ear.key}.${freq}`, e.target.value ? Number(e.target.value) : null, { shouldDirty: true })
                         }
-                        className="h-8 w-20 ls-border ls-bg-input text-white text-center"
+                        className="h-8 w-20 ls-border ls-bg-input ls-text text-center"
                         placeholder="dB"
                       />
                     </td>
@@ -128,7 +128,7 @@ export default function SupraliminalModule() {
                 value={watch(`maspetiol.${ear.key}`) ?? ""}
                 onValueChange={(v) => setValue(`maspetiol.${ear.key}`, v, { shouldDirty: true })}
               >
-                <SelectTrigger className="ls-border ls-bg-input text-white">
+                <SelectTrigger className="ls-border ls-bg-input ls-text">
                   <SelectValue placeholder="Seleccionar resultado" />
                 </SelectTrigger>
                 <SelectContent>
@@ -165,7 +165,7 @@ export default function SupraliminalModule() {
                       value={watch(`fowler.${freq}.resultado`) ?? ""}
                       onValueChange={(v) => setValue(`fowler.${freq}.resultado`, v, { shouldDirty: true })}
                     >
-                      <SelectTrigger className="h-8 ls-border ls-bg-input text-white">
+                      <SelectTrigger className="h-8 ls-border ls-bg-input ls-text">
                         <SelectValue placeholder="Seleccionar" />
                       </SelectTrigger>
                       <SelectContent>
@@ -182,7 +182,7 @@ export default function SupraliminalModule() {
                       onChange={(e) =>
                         setValue(`fowler.${freq}.diferencia`, e.target.value ? Number(e.target.value) : null, { shouldDirty: true })
                       }
-                      className="h-8 w-20 ls-border ls-bg-input text-white text-center"
+                      className="h-8 w-20 ls-border ls-bg-input ls-text text-center"
                       placeholder="dB"
                     />
                   </td>
@@ -221,7 +221,7 @@ export default function SupraliminalModule() {
                         onChange={(e) =>
                           setValue(`luscher.${ear.key}.${freq}`, e.target.value ? Number(e.target.value) : null, { shouldDirty: true })
                         }
-                        className="h-8 w-20 ls-border ls-bg-input text-white text-center"
+                        className="h-8 w-20 ls-border ls-bg-input ls-text text-center"
                         placeholder="dB"
                       />
                     </td>
@@ -238,7 +238,7 @@ export default function SupraliminalModule() {
         <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Observaciones</legend>
         <Textarea
           {...form.register("observaciones")}
-          className="min-h-20 ls-border ls-bg-input text-white"
+          className="min-h-20 ls-border ls-bg-input ls-text"
           placeholder="Observaciones sobre las pruebas supraliminales..."
         />
       </fieldset>

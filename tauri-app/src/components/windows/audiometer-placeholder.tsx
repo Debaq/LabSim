@@ -17,14 +17,14 @@ import { RotateCcw, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lu
 function Tb({ on, click, children }: { on: boolean; click: () => void; children: React.ReactNode }) {
   return (
     <button onClick={(e) => { e.stopPropagation(); click(); }} className={cn("rounded border px-2 py-1 text-[8px] font-bold uppercase tracking-wide transition min-w-[36px] cursor-pointer",
-      on ? "border-amber-500/30 bg-amber-500/20 text-amber-300" : "ls-border ls-bg-input ls-text-muted hover:ls-text2 hover:bg-white/[0.06]")}>{children}</button>
+      on ? "border-amber-500/30 bg-amber-500/20 text-amber-300" : "ls-border ls-bg-input ls-text-muted hover:ls-text2 hover:ls-bg-input")}>{children}</button>
   );
 }
 
 function SBtn({ on, d, u, c }: { on: boolean; d: () => void; u: () => void; c: "r" | "b" }) {
   return (
     <div className="flex flex-col items-center gap-px">
-      <div className={cn("h-2.5 w-2.5 rounded-full transition shadow-sm", on ? (c === "r" ? "bg-red-400 shadow-red-400" : "bg-blue-400 shadow-blue-400") : "bg-white/10")} />
+      <div className={cn("h-2.5 w-2.5 rounded-full transition shadow-sm", on ? (c === "r" ? "bg-red-400 shadow-red-400" : "bg-blue-400 shadow-blue-400") : "ls-bg-input")} />
       <button onMouseDown={(e) => { e.stopPropagation(); d(); }} onMouseUp={(e) => { e.stopPropagation(); u(); }} onMouseLeave={u}
         className={cn("h-11 w-11 rounded-full border-2 ls-border shadow-lg shadow-black/50 active:translate-y-0.5 active:shadow-sm select-none transition cursor-pointer",
           on ? (c === "r" ? "bg-red-500" : "bg-blue-500") : (c === "r" ? "bg-red-900/50 hover:bg-red-800/50" : "bg-blue-900/50 hover:bg-blue-800/50"))} />
@@ -318,7 +318,7 @@ export function AudiometerPlaceholder() {
             const dis = !enabled.includes(st);
             return <button key={st} disabled={dis} onClick={() => changeStim(chIdx, st)}
               className={cn("rounded border py-1 text-[9px] font-bold transition",
-                chState.stimulus === st ? "border-amber-500/40 bg-amber-500/20 text-amber-300" : dis ? "border-white/[0.03] text-white/[0.08]" : "ls-border ls-bg-input ls-text-muted hover:bg-white/[0.08]")}>{stimLabels[st]}</button>;
+                chState.stimulus === st ? "border-amber-500/40 bg-amber-500/20 text-amber-300" : dis ? "border-white/[0.03] text-white/[0.08]" : "ls-border ls-bg-input ls-text-muted hover:ls-bg-input")}>{stimLabels[st]}</button>;
           })}
         </div>
       </div>
@@ -329,7 +329,7 @@ export function AudiometerPlaceholder() {
             {([["air", "VA"], ["bone", "VO"], ["free", "CL"]] as const).map(([v, l]) => (
               <button key={v} onClick={() => { setCh((p) => ({ ...p, transducer: v as TransducerType })); resetChannels(); }}
                 className={cn("rounded border px-2.5 py-1 text-[9px] font-bold transition",
-                  chState.transducer === v ? "border-amber-500/40 bg-amber-500/20 text-amber-300" : "ls-border ls-bg-input ls-text-muted hover:bg-white/[0.08]")}>{l}</button>
+                  chState.transducer === v ? "border-amber-500/40 bg-amber-500/20 text-amber-300" : "ls-border ls-bg-input ls-text-muted hover:ls-bg-input")}>{l}</button>
             ))}
           </div>
         </div>
@@ -338,15 +338,15 @@ export function AudiometerPlaceholder() {
           <div className="flex gap-1">
             <button onClick={() => { setCh((p) => ({ ...p, output: "right" })); resetChannels(); }}
               className={cn("rounded border px-2.5 py-1 text-[9px] font-bold transition",
-                chState.output === "right" ? "border-red-500/40 bg-red-500/20 text-red-400" : "ls-border ls-bg-input ls-text-muted hover:bg-white/[0.08]")}>OD</button>
+                chState.output === "right" ? "border-red-500/40 bg-red-500/20 text-red-400" : "ls-border ls-bg-input ls-text-muted hover:ls-bg-input")}>OD</button>
             <button onClick={() => { setCh((p) => ({ ...p, output: "left" })); resetChannels(); }}
               className={cn("rounded border px-2.5 py-1 text-[9px] font-bold transition",
-                chState.output === "left" ? "border-blue-500/40 bg-blue-500/20 text-blue-400" : "ls-border ls-bg-input ls-text-muted hover:bg-white/[0.08]")}>OI</button>
+                chState.output === "left" ? "border-blue-500/40 bg-blue-500/20 text-blue-400" : "ls-border ls-bg-input ls-text-muted hover:ls-bg-input")}>OI</button>
           </div>
         </div>
         <div className="ml-auto flex items-end gap-1">
           <button onClick={() => reg(chIdx)} className="rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[9px] font-bold text-emerald-400 hover:bg-emerald-500/20">Reg</button>
-          <button onClick={() => reg(chIdx, true)} className="rounded border ls-border px-2 py-1 text-[9px] font-bold ls-text-muted hover:bg-white/[0.06]">S/R</button>
+          <button onClick={() => reg(chIdx, true)} className="rounded border ls-border px-2 py-1 text-[9px] font-bold ls-text-muted hover:ls-bg-input">S/R</button>
         </div>
       </div>
     </div>
@@ -406,7 +406,7 @@ export function AudiometerPlaceholder() {
 
             <div className="flex flex-1 items-center justify-center gap-3">
               <button onClick={fP} disabled={fi <= 0}
-                className="flex h-9 w-9 items-center justify-center rounded-full border-2 ls-border bg-white/[0.04] ls-text-muted transition hover:bg-white/10 disabled:opacity-20">
+                className="flex h-9 w-9 items-center justify-center rounded-full border-2 ls-border bg-white/[0.04] ls-text-muted transition hover:ls-bg-input disabled:opacity-20">
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <div className="flex flex-col items-center gap-1">
@@ -418,7 +418,7 @@ export function AudiometerPlaceholder() {
                 </div>
               </div>
               <button onClick={fN} disabled={fi >= freqList.length - 1}
-                className="flex h-9 w-9 items-center justify-center rounded-full border-2 ls-border bg-white/[0.04] ls-text-muted transition hover:bg-white/10 disabled:opacity-20">
+                className="flex h-9 w-9 items-center justify-center rounded-full border-2 ls-border bg-white/[0.04] ls-text-muted transition hover:ls-bg-input disabled:opacity-20">
                 <ChevronRight className="h-5 w-5" />
               </button>
             </div>
@@ -442,7 +442,7 @@ export function AudiometerPlaceholder() {
             <button onClick={() => { setTimerOn(false); setSecs(0); }} className="ls-text-muted hover:ls-text2">Borrar</button>
             {testMode === "logo" && (
               <>
-                <span className="h-3 w-px bg-white/10" />
+                <span className="h-3 w-px ls-bg-input" />
                 <button onClick={() => { setLogoOk((c) => c + 1); }} className="font-bold text-emerald-400/70">+1</button>
                 <button onClick={() => { setLogoOk((c) => Math.max(0, c - 1)); }} className="font-bold text-red-400/70">-1</button>
                 <button onClick={() => { setLogoOk(0); setLogoN(25); }} className="ls-text-muted">Limpiar</button>

@@ -31,7 +31,7 @@ export default function ElectrocochleoModule() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Zap className="h-5 w-5 text-blue-400" />
-          <h2 className="text-lg font-semibold text-white">Electrococleografia</h2>
+          <h2 className="text-lg font-semibold ls-text">Electrococleografia</h2>
         </div>
         <Button type="submit" size="sm" className="gap-1.5">
           <Save className="h-3.5 w-3.5" />Guardar
@@ -56,7 +56,7 @@ export default function ElectrocochleoModule() {
                       type="number"
                       step="0.01"
                       {...register(`sp.${ear.key}`)}
-                      className="ls-border ls-bg-input text-white"
+                      className="ls-border ls-bg-input ls-text"
                       placeholder="uV"
                     />
                   </div>
@@ -66,14 +66,14 @@ export default function ElectrocochleoModule() {
                       type="number"
                       step="0.01"
                       {...register(`ap.${ear.key}`)}
-                      className="ls-border ls-bg-input text-white"
+                      className="ls-border ls-bg-input ls-text"
                       placeholder="uV"
                     />
                   </div>
                 </div>
                 <div className="rounded-md ls-bg-input px-3 py-2">
                   <span className="text-sm ls-text2">Relacion SP/AP: </span>
-                  <span className="text-sm font-medium text-white">{ratio}</span>
+                  <span className="text-sm font-medium ls-text">{ratio}</span>
                   {typeof ratio === "string" && ratio !== "—" && Number(ratio) > 0.4 && (
                     <span className="ml-2 text-xs text-yellow-400">(elevado &gt; 0.4)</span>
                   )}
@@ -95,7 +95,7 @@ export default function ElectrocochleoModule() {
             <Input
               type="number"
               {...register("params.fs")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
             />
           </div>
           <div className="space-y-1.5">
@@ -104,7 +104,7 @@ export default function ElectrocochleoModule() {
               type="number"
               step="0.1"
               {...register("params.windowMs")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
             />
           </div>
           <div className="space-y-1.5">
@@ -113,7 +113,7 @@ export default function ElectrocochleoModule() {
               type="number"
               min={0}
               {...register("params.smooth")}
-              className="ls-border ls-bg-input text-white"
+              className="ls-border ls-bg-input ls-text"
             />
           </div>
           <div className="flex items-end gap-2 pb-1">
@@ -131,7 +131,7 @@ export default function ElectrocochleoModule() {
         <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Observaciones</legend>
         <Textarea
           {...register("observaciones")}
-          className="min-h-20 ls-border ls-bg-input text-white"
+          className="min-h-20 ls-border ls-bg-input ls-text"
           placeholder="Observaciones sobre la electrococleografia..."
         />
       </fieldset>

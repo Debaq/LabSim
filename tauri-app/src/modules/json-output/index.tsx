@@ -45,7 +45,7 @@ export default function JsonOutputModule() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FileJson className="h-5 w-5 text-blue-400" />
-          <h2 className="text-lg font-semibold text-white">Exportar Datos (JSON)</h2>
+          <h2 className="text-lg font-semibold ls-text">Exportar Datos (JSON)</h2>
         </div>
         <div className="flex gap-2">
           <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={handleCopy}>
@@ -66,15 +66,15 @@ export default function JsonOutputModule() {
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-md ls-bg-input px-3 py-2">
             <span className="text-xs ls-text-muted">ID Paciente</span>
-            <p className="text-sm font-medium text-white">{patientId ?? "Sin asignar"}</p>
+            <p className="text-sm font-medium ls-text">{patientId ?? "Sin asignar"}</p>
           </div>
           <div className="rounded-md ls-bg-input px-3 py-2">
             <span className="text-xs ls-text-muted">Modulos con datos</span>
-            <p className="text-sm font-medium text-white">{modulesWithData.length} / {Object.keys(data).length}</p>
+            <p className="text-sm font-medium ls-text">{modulesWithData.length} / {Object.keys(data).length}</p>
           </div>
           <div className="rounded-md ls-bg-input px-3 py-2">
             <span className="text-xs ls-text-muted">Tamano</span>
-            <p className="text-sm font-medium text-white">{(new Blob([jsonString]).size / 1024).toFixed(1)} KB</p>
+            <p className="text-sm font-medium ls-text">{(new Blob([jsonString]).size / 1024).toFixed(1)} KB</p>
           </div>
         </div>
         {modulesWithData.length > 0 && (

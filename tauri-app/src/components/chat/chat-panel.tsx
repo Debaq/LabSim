@@ -36,7 +36,7 @@ export function ChatPanel({
       <div className="flex items-center gap-3 border-b ls-border ls-bg-panel/90 px-4 py-2.5">
         {headerAvatar}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-white">
+          <p className="truncate text-sm font-semibold ls-text">
             {headerTitle}
           </p>
           {headerSubtitle && (
@@ -61,7 +61,7 @@ export function ChatPanel({
 
           {typing && (
             <div className="flex gap-2">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 text-xs font-bold text-white">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 text-xs font-bold ls-text">
                 K
               </div>
               <div className="rounded-2xl rounded-bl-md bg-slate-700 px-4 py-3">

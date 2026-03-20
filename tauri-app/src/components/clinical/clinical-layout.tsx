@@ -55,7 +55,7 @@ export function ClinicalLayout() {
           size="sm"
           onClick={goPrev}
           disabled={!hasPrev}
-          className="gap-1 ls-text2 hover:text-white"
+          className="gap-1 ls-text2 hover:ls-text"
         >
           <ChevronLeft className="h-4 w-4" />
           Anterior
@@ -70,7 +70,7 @@ export function ClinicalLayout() {
           size="sm"
           onClick={goNext}
           disabled={!hasNext}
-          className="gap-1 ls-text2 hover:text-white"
+          className="gap-1 ls-text2 hover:ls-text"
         >
           Siguiente
           <ChevronRight className="h-4 w-4" />

@@ -77,7 +77,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
                 className={cn(
                   "group flex shrink-0 items-center gap-1.5 rounded-t-lg px-3 py-2 text-xs font-medium transition",
                   isActive
-                    ? "ls-bg text-white"
+                    ? "ls-bg ls-text"
                     : "ls-text-muted hover:ls-bg-input hover:ls-text2",
                 )}
               >

@@ -24,7 +24,7 @@ export function ChatBubble({ message }: ChatBubbleProps) {
     >
       {/* Avatar */}
       {!isUser && (
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 text-xs font-bold text-white">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 text-xs font-bold ls-text">
           {message.avatar ?? message.senderName?.[0] ?? "?"}
         </div>
       )}
@@ -34,7 +34,7 @@ export function ChatBubble({ message }: ChatBubbleProps) {
         className={cn(
           "relative max-w-[75%] rounded-2xl px-3 py-2 text-sm",
           isUser
-            ? "rounded-br-md bg-emerald-600 text-white"
+            ? "rounded-br-md bg-emerald-600 ls-text"
             : "rounded-bl-md bg-slate-700 text-white/90",
         )}
       >

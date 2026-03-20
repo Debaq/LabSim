@@ -154,7 +154,7 @@ export function PatientHistory() {
             size="xs"
             variant="ghost"
             onClick={handleNewPatient}
-            className="gap-1 ls-text-muted hover:text-white"
+            className="gap-1 ls-text-muted hover:ls-text"
           >
             <UserPlus className="h-3 w-3" />
             Nuevo
@@ -164,7 +164,7 @@ export function PatientHistory() {
             variant="ghost"
             onClick={handleSavePatient}
             disabled={saving}
-            className="gap-1 ls-text-muted hover:text-white"
+            className="gap-1 ls-text-muted hover:ls-text"
           >
             {saving ? (
               <Loader2 className="h-3 w-3 animate-spin" />
@@ -177,7 +177,7 @@ export function PatientHistory() {
             size="icon-xs"
             variant="ghost"
             onClick={loadPatients}
-            className="ls-text-muted hover:text-white"
+            className="ls-text-muted hover:ls-text"
             title="Recargar"
           >
             <RefreshCw className="h-3.5 w-3.5" />
@@ -193,7 +193,7 @@ export function PatientHistory() {
             placeholder="Buscar por nombre..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-7 ls-border ls-bg-input pl-7 text-xs text-white placeholder:ls-text-muted"
+            className="h-7 ls-border ls-bg-input pl-7 text-xs ls-text placeholder:ls-text-muted"
           />
         </div>
       </div>
@@ -230,7 +230,7 @@ export function PatientHistory() {
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
                         selectedId === patient.id
                           ? "bg-cyan-500/20 text-cyan-400"
-                          : "bg-white/10 ls-text2"
+                          : "ls-bg-input ls-text2"
                       }`}
                     >
                       {getInitials(patient)}
@@ -268,7 +268,7 @@ export function PatientHistory() {
                     {getInitials(selectedPatient)}
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-white">
+                    <h3 className="text-sm font-semibold ls-text">
                       {selectedPatient.nombre} {selectedPatient.apellido}
                     </h3>
                     {selectedPatient.edad && (
@@ -348,7 +348,7 @@ export function PatientHistory() {
                   <Button
                     size="sm"
                     onClick={handleLoadPatient}
-                    className="gap-1.5 bg-cyan-600 text-white hover:bg-cyan-500"
+                    className="gap-1.5 bg-cyan-600 ls-text hover:bg-cyan-500"
                   >
                     <Download className="h-3.5 w-3.5" />
                     Cargar paciente

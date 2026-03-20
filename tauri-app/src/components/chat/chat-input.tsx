@@ -48,13 +48,13 @@ export function ChatInput({
         placeholder={placeholder}
         disabled={disabled}
         rows={1}
-        className="max-h-24 min-h-9 flex-1 resize-none rounded-2xl border ls-border ls-bg-input px-4 py-2 text-sm text-white outline-none placeholder:ls-text-muted focus:border-emerald-500/30"
+        className="max-h-24 min-h-9 flex-1 resize-none rounded-2xl border ls-border ls-bg-input px-4 py-2 text-sm ls-text outline-none placeholder:ls-text-muted focus:border-emerald-500/30"
       />
 
       <button
         type="submit"
         disabled={!text.trim() || disabled}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white transition hover:bg-emerald-500 disabled:opacity-30"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-600 ls-text transition hover:bg-emerald-500 disabled:opacity-30"
       >
         <Send className="h-4 w-4" />
       </button>

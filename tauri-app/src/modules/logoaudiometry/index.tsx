@@ -24,7 +24,7 @@ export default function LogoaudiometryModule() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <AudioLines className="h-5 w-5 text-blue-400" />
-          <h2 className="text-lg font-semibold text-white">Logoaudiometria</h2>
+          <h2 className="text-lg font-semibold ls-text">Logoaudiometria</h2>
         </div>
         <Button type="submit" size="sm" className="gap-1.5">
           <Save className="h-3.5 w-3.5" />Guardar
@@ -45,7 +45,7 @@ export default function LogoaudiometryModule() {
                 min={0}
                 max={100}
                 {...register(`sdt.${ear.key}`)}
-                className="ls-border ls-bg-input text-white"
+                className="ls-border ls-bg-input ls-text"
                 placeholder="dB"
               />
             </div>
@@ -67,7 +67,7 @@ export default function LogoaudiometryModule() {
                 min={0}
                 max={100}
                 {...register(`srt.${ear.key}`)}
-                className="ls-border ls-bg-input text-white"
+                className="ls-border ls-bg-input ls-text"
                 placeholder="dB"
               />
             </div>
@@ -102,7 +102,7 @@ export default function LogoaudiometryModule() {
                           min={0}
                           max={100}
                           {...register(`umd.${ear.key}.${row}.intensidad`)}
-                          className="h-8 w-24 ls-border ls-bg-input text-white"
+                          className="h-8 w-24 ls-border ls-bg-input ls-text"
                         />
                       </td>
                       <td className="px-2 py-1">
@@ -111,7 +111,7 @@ export default function LogoaudiometryModule() {
                           min={0}
                           max={100}
                           {...register(`umd.${ear.key}.${row}.porcentaje`)}
-                          className="h-8 w-24 ls-border ls-bg-input text-white"
+                          className="h-8 w-24 ls-border ls-bg-input ls-text"
                         />
                       </td>
                     </tr>
@@ -128,7 +128,7 @@ export default function LogoaudiometryModule() {
         <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Observaciones</legend>
         <Textarea
           {...register("observaciones")}
-          className="min-h-20 ls-border ls-bg-input text-white"
+          className="min-h-20 ls-border ls-bg-input ls-text"
           placeholder="Observaciones sobre la logoaudiometria..."
         />
       </fieldset>

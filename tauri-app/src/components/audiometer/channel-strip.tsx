@@ -140,8 +140,8 @@ export function ChannelStrip({
             value={state.output}
             onChange={(v) => onChange({ output: v as OutputType })}
             options={[
-              { value: "right", label: "OD", color: "bg-red-600 text-white" },
-              { value: "left", label: "OI", color: "bg-blue-600 text-white" },
+              { value: "right", label: "OD", color: "bg-red-600 ls-text" },
+              { value: "left", label: "OI", color: "bg-blue-600 ls-text" },
             ]}
           />
           <ToggleSwitch
