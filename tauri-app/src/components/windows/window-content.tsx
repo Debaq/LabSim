@@ -7,6 +7,7 @@ import { TextEditorPlaceholder } from "./text-editor-placeholder";
 import { MessagingApp } from "./messaging-app";
 import { PerimetryWindow } from "./perimetry-window";
 import { OCTWindow } from "./oct-window";
+import { SettingsWindow } from "./settings-window";
 
 interface Props {
   component: string;
@@ -22,6 +23,7 @@ const componentMap: Record<string, React.ComponentType> = {
   messaging: MessagingApp,
   perimetry: PerimetryWindow,
   oct: OCTWindow,
+  settings: SettingsWindow,
 };
 
 export function WindowContent({ component }: Props) {

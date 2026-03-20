@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { X, Minus, Maximize2, Minimize2 } from "lucide-react";
+import { useThemeStore } from "@/stores/theme-store";
 
 interface WindowFrameProps {
   id: string;
@@ -83,29 +84,34 @@ export function WindowFrame({
     }
   };
 
+  const colors = useThemeStore((s) => s.colors);
+
   if (minimized) return null;
 
   return (
     <div
       ref={frameRef}
       data-window-id={id}
-      className="absolute flex flex-col overflow-hidden rounded-lg border border-white/10 bg-slate-800 shadow-2xl"
+      className="absolute flex flex-col overflow-hidden rounded-lg shadow-2xl"
       style={{
         left: pos.x,
         top: pos.y,
         width: size.w,
         height: size.h,
         zIndex,
+        backgroundColor: colors.windowBg,
+        border: `1px solid ${colors.border}`,
       }}
       onMouseDown={onFocus}
     >
       {/* Title bar */}
       <div
-        className="flex h-9 shrink-0 cursor-move items-center justify-between border-b border-white/5 bg-slate-900 px-3 select-none"
+        className="flex h-9 shrink-0 cursor-move items-center justify-between border-b px-3 select-none"
+        style={{ backgroundColor: colors.windowHeader, borderColor: colors.border }}
         onMouseDown={onDragStart}
         onDoubleClick={toggleMaximize}
       >
-        <span className="text-xs font-medium text-white/80">{title}</span>
+        <span className="text-xs font-medium" style={{ color: colors.text }}>{title}</span>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setMinimized(true)}

@@ -18,6 +18,7 @@ import {
   Volume2,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useThemeStore } from "@/stores/theme-store";
 
 export function Taskbar() {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ export function Taskbar() {
   const windows = useUIStore((s) => s.windows);
   const focusWindow = useUIStore((s) => s.focusWindow);
   const restoreWindow = useUIStore((s) => s.restoreWindow);
+  const colors = useThemeStore((s) => s.colors);
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -47,7 +49,8 @@ export function Taskbar() {
   };
 
   return (
-    <div className="flex h-11 shrink-0 items-center justify-between border-t border-white/5 bg-slate-900/95 px-1.5 backdrop-blur-xl">
+    <div className="flex h-11 shrink-0 items-center justify-between border-t px-1.5 backdrop-blur-xl"
+      style={{ backgroundColor: colors.taskbarBg, borderColor: colors.border }}>
       {/* Start Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger className="flex h-8 items-center gap-2 rounded-md px-3 text-sm font-semibold text-white transition hover:bg-white/10">

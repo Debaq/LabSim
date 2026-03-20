@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import { generateRNFLProfile, RNFL_NORMAL, type Pathology } from "@/lib/oct-synthetic";
+import { generateRNFLProfile, RNFL_CLOCK_HOURS, type Pathology } from "@/lib/oct-synthetic";
 
 interface RNFLTSNITProps {
   seed: number;
@@ -17,113 +17,129 @@ export function RNFLTSNIT({ seed, pathology }: RNFLTSNITProps) {
 
     const w = container.clientWidth;
     const h = container.clientHeight;
+    if (w <= 0 || h <= 0) return;
     canvas.width = w;
     canvas.height = h;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    ctx.fillStyle = "#0a0a0a";
+    ctx.fillStyle = "#0a0c0f";
     ctx.fillRect(0, 0, w, h);
 
     const p = pathology === "glaucoma" ? "glaucoma" : "normal";
     const profile = generateRNFLProfile(seed, p);
 
-    const margin = { top: 20, right: 10, bottom: 25, left: 35 };
-    const pw = w - margin.left - margin.right;
-    const ph = h - margin.top - margin.bottom;
+    const m = { top: 22, right: 12, bottom: 28, left: 38 };
+    const pw = w - m.left - m.right;
+    const ph = h - m.top - m.bottom;
 
-    const xScale = (deg: number) => margin.left + (deg / 360) * pw;
-    const yScale = (t: number) => margin.top + ph - ((t - 20) / 180) * ph;
+    const xS = (deg: number) => m.left + (deg / 360) * pw;
+    const yS = (t: number) => m.top + ph - ((t - 10) / 190) * ph;
 
-    // Normal band (p5-p95 across TSNIT)
-    const bandPoints: { deg: number; p5: number; p95: number }[] = [];
+    // Normal band from clock hours (interpolated)
+    const p95: number[] = [];
+    const p5: number[] = [];
+    const p1: number[] = [];
     for (let deg = 0; deg < 360; deg++) {
-      // Estimate p5/p95 based on position
-      let sector: string;
-      if (deg < 45) sector = "T";
-      else if (deg < 90) sector = "TS";
-      else if (deg < 135) sector = "S";
-      else if (deg < 180) sector = "NS";
-      else if (deg < 225) sector = "N";
-      else if (deg < 270) sector = "NI";
-      else if (deg < 315) sector = "I";
-      else sector = "TI";
-      const norm = RNFL_NORMAL[sector];
-      bandPoints.push({ deg, p5: norm.p5, p95: norm.p95 });
+      const hour = Math.floor(deg / 30) + 1;
+      const hourData = RNFL_CLOCK_HOURS[hour > 12 ? hour - 12 : hour] ?? RNFL_CLOCK_HOURS[1];
+      p95.push(hourData.mean * 1.15);
+      p5.push(hourData.p5);
+      p1.push(hourData.p1);
     }
 
-    // Draw normal band (green zone)
-    ctx.fillStyle = "rgba(74,222,128,0.08)";
+    // Green band (p5 to p95)
+    ctx.fillStyle = "rgba(34,197,94,0.12)";
     ctx.beginPath();
-    bandPoints.forEach((p, i) => {
-      const x = xScale(p.deg);
-      const y = yScale(p.p95);
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    });
-    for (let i = bandPoints.length - 1; i >= 0; i--) {
-      ctx.lineTo(xScale(bandPoints[i].deg), yScale(bandPoints[i].p5));
-    }
+    for (let deg = 0; deg < 360; deg++) { const x = xS(deg); if (deg === 0) ctx.moveTo(x, yS(p95[deg])); else ctx.lineTo(x, yS(p95[deg])); }
+    for (let deg = 359; deg >= 0; deg--) ctx.lineTo(xS(deg), yS(p5[deg]));
     ctx.closePath();
     ctx.fill();
 
-    // Draw p5 and p95 lines
-    ctx.strokeStyle = "rgba(74,222,128,0.2)";
+    // Yellow band (p1 to p5)
+    ctx.fillStyle = "rgba(234,179,8,0.08)";
+    ctx.beginPath();
+    for (let deg = 0; deg < 360; deg++) { const x = xS(deg); if (deg === 0) ctx.moveTo(x, yS(p5[deg])); else ctx.lineTo(x, yS(p5[deg])); }
+    for (let deg = 359; deg >= 0; deg--) ctx.lineTo(xS(deg), yS(p1[deg]));
+    ctx.closePath();
+    ctx.fill();
+
+    // Red zone below p1
+    ctx.fillStyle = "rgba(239,68,68,0.06)";
+    ctx.beginPath();
+    for (let deg = 0; deg < 360; deg++) { const x = xS(deg); if (deg === 0) ctx.moveTo(x, yS(p1[deg])); else ctx.lineTo(x, yS(p1[deg])); }
+    ctx.lineTo(xS(359), yS(10));
+    ctx.lineTo(xS(0), yS(10));
+    ctx.closePath();
+    ctx.fill();
+
+    // Band boundary lines
+    ctx.setLineDash([2, 3]);
     ctx.lineWidth = 0.5;
-    ctx.setLineDash([3, 3]);
-    ctx.beginPath();
-    bandPoints.forEach((p, i) => { const x = xScale(p.deg); if (i === 0) ctx.moveTo(x, yScale(p.p95)); else ctx.lineTo(x, yScale(p.p95)); });
-    ctx.stroke();
-    ctx.beginPath();
-    bandPoints.forEach((p, i) => { const x = xScale(p.deg); if (i === 0) ctx.moveTo(x, yScale(p.p5)); else ctx.lineTo(x, yScale(p.p5)); });
-    ctx.stroke();
+    ctx.strokeStyle = "rgba(34,197,94,0.25)";
+    ctx.beginPath(); for (let d = 0; d < 360; d++) { if (d === 0) ctx.moveTo(xS(d), yS(p95[d])); else ctx.lineTo(xS(d), yS(p95[d])); } ctx.stroke();
+    ctx.strokeStyle = "rgba(234,179,8,0.3)";
+    ctx.beginPath(); for (let d = 0; d < 360; d++) { if (d === 0) ctx.moveTo(xS(d), yS(p5[d])); else ctx.lineTo(xS(d), yS(p5[d])); } ctx.stroke();
+    ctx.strokeStyle = "rgba(239,68,68,0.25)";
+    ctx.beginPath(); for (let d = 0; d < 360; d++) { if (d === 0) ctx.moveTo(xS(d), yS(p1[d])); else ctx.lineTo(xS(d), yS(p1[d])); } ctx.stroke();
     ctx.setLineDash([]);
 
-    // Grid
-    ctx.strokeStyle = "rgba(255,255,255,0.05)";
+    // Y grid
+    ctx.strokeStyle = "rgba(255,255,255,0.04)";
     ctx.lineWidth = 0.5;
     for (const t of [50, 100, 150]) {
-      ctx.beginPath(); ctx.moveTo(margin.left, yScale(t)); ctx.lineTo(w - margin.right, yScale(t)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(m.left, yS(t)); ctx.lineTo(w - m.right, yS(t)); ctx.stroke();
       ctx.fillStyle = "rgba(255,255,255,0.2)";
       ctx.font = "8px monospace";
       ctx.textAlign = "right";
-      ctx.fillText(`${t}`, margin.left - 3, yScale(t) + 3);
+      ctx.fillText(`${t}`, m.left - 3, yS(t) + 3);
+    }
+
+    // TSNIT sector separators
+    ctx.strokeStyle = "rgba(255,255,255,0.06)";
+    for (const deg of [90, 180, 270]) {
+      ctx.beginPath(); ctx.moveTo(xS(deg), m.top); ctx.lineTo(xS(deg), h - m.bottom); ctx.stroke();
     }
 
     // TSNIT labels
-    ctx.fillStyle = "rgba(255,255,255,0.25)";
-    ctx.font = "bold 9px sans-serif";
+    ctx.fillStyle = "rgba(255,255,255,0.35)";
+    ctx.font = "bold 10px sans-serif";
     ctx.textAlign = "center";
-    ["T", "S", "N", "I", "T"].forEach((lbl, i) => {
-      ctx.fillText(lbl, xScale(i * 90), h - 5);
-    });
+    ["T", "S", "N", "I", "T"].forEach((lbl, i) => ctx.fillText(lbl, xS(i * 90), h - 8));
 
-    // Profile line
-    ctx.strokeStyle = "rgba(255,200,50,0.9)";
-    ctx.lineWidth = 1.5;
+    // Profile line — thick, yellow/orange
+    ctx.strokeStyle = "#f59e0b";
+    ctx.lineWidth = 2;
+    ctx.shadowColor = "rgba(245,158,11,0.3)";
+    ctx.shadowBlur = 4;
     ctx.beginPath();
-    profile.forEach((p, i) => {
-      const x = xScale(p.angle);
-      const y = yScale(p.thickness);
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    });
+    profile.forEach((pt, i) => { const x = xS(pt.angle); const y = yS(pt.thickness); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
     ctx.stroke();
+    ctx.shadowBlur = 0;
 
-    // µm label
+    // µm axis label
     ctx.fillStyle = "rgba(255,255,255,0.15)";
     ctx.font = "7px sans-serif";
     ctx.save();
-    ctx.translate(8, margin.top + ph / 2);
+    ctx.translate(10, m.top + ph / 2);
     ctx.rotate(-Math.PI / 2);
     ctx.textAlign = "center";
-    ctx.fillText("µm", 0, 0);
+    ctx.fillText("Espesor (µm)", 0, 0);
     ctx.restore();
 
     // Title
-    ctx.fillStyle = "rgba(255,255,255,0.3)";
-    ctx.font = "bold 8px sans-serif";
+    ctx.fillStyle = "rgba(255,255,255,0.4)";
+    ctx.font = "bold 9px sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText("RNFL TSNIT", margin.left, 12);
+    ctx.fillText("RNFL TSNIT Profile", m.left, 14);
+
+    // Legend
+    const lx = w - 80;
+    ctx.font = "7px sans-serif";
+    ctx.fillStyle = "rgba(34,197,94,0.6)"; ctx.fillRect(lx, 5, 8, 6); ctx.fillStyle = "rgba(255,255,255,0.3)"; ctx.textAlign = "left"; ctx.fillText("Normal", lx + 11, 10);
+    ctx.fillStyle = "rgba(234,179,8,0.6)"; ctx.fillRect(lx, 13, 8, 6); ctx.fillStyle = "rgba(255,255,255,0.3)"; ctx.fillText("Límite", lx + 11, 18);
+    ctx.fillStyle = "rgba(239,68,68,0.6)"; ctx.fillRect(lx, 21, 8, 6); ctx.fillStyle = "rgba(255,255,255,0.3)"; ctx.fillText("Fuera", lx + 11, 26);
 
   }, [seed, pathology]);
 
