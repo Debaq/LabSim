@@ -79,33 +79,47 @@ export const THEMES: Record<ThemeName, { label: string; desc: string; vars: Them
   },
 };
 
+export type FontSize = "small" | "medium" | "large";
+
+const FONT_SCALES: Record<FontSize, string> = {
+  small: "0.85",
+  medium: "1",
+  large: "1.15",
+};
+
 interface ThemeState {
   theme: ThemeName;
+  fontSize: FontSize;
   setTheme: (theme: ThemeName) => void;
+  setFontSize: (size: FontSize) => void;
 }
 
-function applyTheme(theme: ThemeName) {
+function applyTheme(theme: ThemeName, fontSize: FontSize = "medium") {
   const t = THEMES[theme];
   if (!t) return;
   const root = document.documentElement;
   for (const [key, value] of Object.entries(t.vars)) {
     root.style.setProperty(key, value);
   }
+  root.style.setProperty("--ls-font-scale", FONT_SCALES[fontSize]);
+  root.style.fontSize = `${parseFloat(FONT_SCALES[fontSize]) * 100}%`;
   root.className = root.className.replace(/theme-\S+/g, "").trim();
   root.classList.add(`theme-${theme}`);
 }
 
 export const useThemeStore = create<ThemeState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       theme: "midnight",
-      setTheme: (theme) => { applyTheme(theme); set({ theme }); },
+      fontSize: "medium",
+      setTheme: (theme) => { applyTheme(theme, get().fontSize); set({ theme }); },
+      setFontSize: (fontSize) => { applyTheme(get().theme, fontSize); set({ fontSize }); },
     }),
     {
       name: "labsim-theme",
       storage: createJSONStorage(() => localStorage),
       onRehydrateStorage: () => (state) => {
-        if (state) applyTheme(state.theme);
+        if (state) applyTheme(state.theme, state.fontSize);
       },
     },
   ),
@@ -116,7 +130,7 @@ if (typeof window !== "undefined") {
   if (stored) {
     try {
       const { state } = JSON.parse(stored);
-      if (state?.theme && THEMES[state.theme as ThemeName]) applyTheme(state.theme);
+      if (state?.theme && THEMES[state.theme as ThemeName]) applyTheme(state.theme, state.fontSize ?? "medium");
       else applyTheme("midnight");
     } catch { applyTheme("midnight"); }
   } else {

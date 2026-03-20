@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
-import { useThemeStore, THEMES, type ThemeName } from "@/stores/theme-store";
+import { useThemeStore, THEMES, type ThemeName, type FontSize } from "@/stores/theme-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { useChatStore } from "@/stores/chat-store";
 import { invoke } from "@tauri-apps/api/core";
 import { cn } from "@/lib/utils";
-import { Check, Palette, User, Info, BrainCircuit, Download, Loader2 } from "lucide-react";
+import { Check, Palette, User, Info, BrainCircuit, Download, Loader2, Type } from "lucide-react";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ModelInfo { id: string; name: string; sizeMb: number; filename: string; }
 
 export function SettingsWindow() {
-  const { theme, setTheme } = useThemeStore();
+  const { theme, setTheme, fontSize, setFontSize } = useThemeStore();
   const username = useAuthStore((s) => s.username);
   const role = useAuthStore((s) => s.role);
   const llmConnected = useChatStore((s) => s.llmConnected);
@@ -92,6 +92,31 @@ export function SettingsWindow() {
                       <p className="text-xs" style={{ color: "var(--ls-text-muted)" }}>{t.desc}</p>
                     </div>
                     {active && <Check className="h-4 w-4 shrink-0 text-blue-400" />}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Font size */}
+          <section>
+            <SectionHeader icon={<Type className="h-4 w-4 text-emerald-400" />} title="Tamaño de Texto" />
+            <div className="flex gap-1.5">
+              {(["small", "medium", "large"] as FontSize[]).map((size) => {
+                const labels: Record<FontSize, string> = { small: "Pequeño", medium: "Normal", large: "Grande" };
+                const previews: Record<FontSize, string> = { small: "Aa", medium: "Aa", large: "Aa" };
+                const previewSizes: Record<FontSize, string> = { small: "text-xs", medium: "text-sm", large: "text-base" };
+                const active = fontSize === size;
+                return (
+                  <button key={size} onClick={() => setFontSize(size)}
+                    className={cn("flex-1 flex flex-col items-center gap-1 rounded-lg border p-2.5 transition",
+                      active ? "border-blue-500/40" : "hover:opacity-80")}
+                    style={{ borderColor: active ? undefined : "var(--ls-border)", backgroundColor: "var(--ls-panel-secondary)" }}>
+                    <span className={cn("font-bold", previewSizes[size])} style={{ color: active ? "var(--ls-accent)" : "var(--ls-text)" }}>
+                      {previews[size]}
+                    </span>
+                    <span className="text-xs" style={{ color: "var(--ls-text-muted)" }}>{labels[size]}</span>
+                    {active && <Check className="h-3 w-3 text-blue-400" />}
                   </button>
                 );
               })}
