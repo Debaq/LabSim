@@ -10,6 +10,8 @@ import {
   MessageCircle,
   Database,
   ShieldCheck,
+  ScanEye,
+  Layers,
 } from "lucide-react";
 
 interface DesktopItem {
@@ -35,6 +37,20 @@ const desktopItems: DesktopItem[] = [
     icon: Activity,
     component: "impedance",
     color: "text-emerald-400",
+  },
+  {
+    id: "perimetry",
+    label: "Campo Visual",
+    icon: ScanEye,
+    component: "perimetry",
+    color: "text-orange-400",
+  },
+  {
+    id: "oct",
+    label: "OCT",
+    icon: Layers,
+    component: "oct",
+    color: "text-pink-400",
   },
   {
     id: "patient-history",
@@ -94,6 +110,10 @@ export function DesktopArea({ className }: Props) {
           ? { width: 780, height: 520, x: 60, y: 20 }
           : item.id === "impedance"
             ? { width: 800, height: 500 }
+            : item.id === "perimetry"
+              ? { width: 750, height: 550 }
+              : item.id === "oct"
+                ? { width: 800, height: 520 }
             : undefined;
     openWindow(item.id, item.label, item.component, opts);
   };

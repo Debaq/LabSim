@@ -5,6 +5,8 @@ import { ClinicalLayout } from "@/components/clinical/clinical-layout";
 import { FileExplorerPlaceholder } from "./file-explorer-placeholder";
 import { TextEditorPlaceholder } from "./text-editor-placeholder";
 import { MessagingApp } from "./messaging-app";
+import { PerimetryWindow } from "./perimetry-window";
+import { OCTWindow } from "./oct-window";
 
 interface Props {
   component: string;
@@ -18,6 +20,8 @@ const componentMap: Record<string, React.ComponentType> = {
   "file-explorer": FileExplorerPlaceholder,
   "text-editor": TextEditorPlaceholder,
   messaging: MessagingApp,
+  perimetry: PerimetryWindow,
+  oct: OCTWindow,
 };
 
 export function WindowContent({ component }: Props) {
