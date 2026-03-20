@@ -25,7 +25,8 @@ export function DesktopIcon({ label, icon: Icon, color, onOpen }: DesktopIconPro
       >
         <Icon className="h-6 w-6" />
       </div>
-      <span className="text-[11px] leading-tight font-medium ls-text drop-shadow-md">
+      <span className="text-[11px] leading-tight font-medium drop-shadow-md"
+        style={{ color: "var(--ls-desktop-text)" }}>
         {label}
       </span>
     </button>

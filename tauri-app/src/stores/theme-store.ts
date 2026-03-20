@@ -96,6 +96,17 @@ interface ThemeState {
   setWallpaperColor: (color: string | null) => void;
 }
 
+function contrastText(hex: string): string {
+  const m = hex.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+  if (!m) return "#ffffff";
+  const r = parseInt(m[1], 16);
+  const g = parseInt(m[2], 16);
+  const b = parseInt(m[3], 16);
+  // Relative luminance (sRGB)
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return lum > 0.5 ? "#1a1a1a" : "#f0f0f0";
+}
+
 function applyTheme(theme: ThemeName, fontSize: FontSize = "medium", wallpaper: string | null = null) {
   const t = THEMES[theme];
   if (!t) return;
@@ -103,10 +114,13 @@ function applyTheme(theme: ThemeName, fontSize: FontSize = "medium", wallpaper: 
   for (const [key, value] of Object.entries(t.vars)) {
     root.style.setProperty(key, value);
   }
-  // Custom wallpaper overrides the theme gradient
+  // Custom wallpaper overrides the theme gradient + auto-contrast text
   if (wallpaper) {
     root.style.setProperty("--ls-desktop-gradient", wallpaper);
     root.style.setProperty("--ls-desktop-bg", wallpaper);
+    root.style.setProperty("--ls-desktop-text", contrastText(wallpaper));
+  } else {
+    root.style.setProperty("--ls-desktop-text", contrastText(t.vars["--ls-desktop-bg"]));
   }
   root.style.setProperty("--ls-font-scale", FONT_SCALES[fontSize]);
   root.style.fontSize = `${parseFloat(FONT_SCALES[fontSize]) * 100}%`;
