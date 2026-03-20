@@ -140,7 +140,7 @@ export function Taskbar() {
           <DropdownMenuItem onClick={() => openWindow("text-editor", "Editor", "text-editor")} className="ls-text2 focus:ls-bg-input focus:ls-text">
             <FileText className="mr-2 h-4 w-4 text-rose-400" />Editor de Texto
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openWindow("settings", "Configuración", "settings", { width: 450, height: 550 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
+          <DropdownMenuItem onClick={() => openWindow("settings", "Configuración", "settings", { width: 620, height: 480 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
             <Settings className="mr-2 h-4 w-4 ls-text-muted" />Configuración
           </DropdownMenuItem>
           <DropdownMenuSeparator className="ls-bg-input" />
