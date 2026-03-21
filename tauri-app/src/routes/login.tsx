@@ -7,11 +7,9 @@ import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
-import { Headphones, Loader2 } from "lucide-react";
+import { Loader2, Cross } from "lucide-react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -54,16 +52,23 @@ export default function LoginPage() {
       </div>
 
       <Card className="relative w-full max-w-sm border-white/10 bg-white/5 shadow-2xl backdrop-blur-xl">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500/20">
-            <Headphones className="h-8 w-8 text-blue-400" />
+        <CardHeader className="text-center pb-2">
+          {/* Logo: cruz clínica estilizada */}
+          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 border border-white/10">
+            <Cross className="h-10 w-10 text-indigo-400" strokeWidth={1.5} />
           </div>
-          <CardTitle className="text-2xl font-bold text-white">
-            LabSim
-          </CardTitle>
-          <CardDescription className="text-white/50">
-            Plataforma de Simulación Clínica v3.0
-          </CardDescription>
+
+          <div className="space-y-1">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/30">
+              Centro Clínico de Especialidades
+            </p>
+            <h1 className="text-3xl font-bold text-white tracking-tight">
+              LabSim
+            </h1>
+            <p className="text-xs text-white/40">
+              Plataforma de Simulación Clínica v3.0
+            </p>
+          </div>
         </CardHeader>
 
         <CardContent>
@@ -75,10 +80,10 @@ export default function LoginPage() {
               <Input
                 id="username"
                 type="text"
-                placeholder="admin"
+                placeholder="Ingrese su usuario"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="border-white/10 bg-white/5 text-white placeholder:text-white/30 focus:border-blue-400"
+                className="border-white/10 bg-white/5 text-white placeholder:text-white/30 focus:border-indigo-400"
                 autoFocus
               />
             </div>
@@ -93,7 +98,7 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="border-white/10 bg-white/5 text-white placeholder:text-white/30 focus:border-blue-400"
+                className="border-white/10 bg-white/5 text-white placeholder:text-white/30 focus:border-indigo-400"
               />
             </div>
 
@@ -103,7 +108,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full bg-blue-600 text-white hover:bg-blue-500"
+              className="w-full bg-indigo-600 text-white hover:bg-indigo-500"
               size="lg"
               disabled={loading}
             >
@@ -113,6 +118,10 @@ export default function LoginPage() {
               {loading ? "Ingresando..." : "Iniciar Sesión"}
             </Button>
           </form>
+
+          <p className="mt-4 text-center text-[10px] text-white/20">
+            Nicolás Baier Quezada
+          </p>
         </CardContent>
       </Card>
     </div>
