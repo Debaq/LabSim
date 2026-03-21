@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useThemeStore, THEMES, type ThemeName, type FontSize } from "@/stores/theme-store";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAuthStore } from "@/stores/auth-store";
 import { useChatStore } from "@/stores/chat-store";
 import { invoke } from "@tauri-apps/api/core";
@@ -21,7 +22,7 @@ const PAGES: { id: SettingsPage; label: string; icon: React.ReactNode }[] = [
 ];
 
 export function SettingsWindow() {
-  const { theme, setTheme, fontSize, setFontSize, wallpaperColor, setWallpaperColor } = useThemeStore();
+  const { theme, setTheme, fontSize, setFontSize, wallpaperColor, setWallpaperColor, autoLoadLlm, setAutoLoadLlm, autoLoadSpeech, setAutoLoadSpeech } = useThemeStore();
   const username = useAuthStore((s) => s.username);
   const role = useAuthStore((s) => s.role);
   const llmConnected = useChatStore((s) => s.llmConnected);
@@ -91,8 +92,10 @@ export function SettingsWindow() {
           {page === "ia" && <PageIA
             models={models} llmConnected={llmConnected}
             downloading={downloading} downloadingId={downloadingId}
-            onDownload={handleDownload} />}
+            onDownload={handleDownload}
+            autoLoad={autoLoadLlm} setAutoLoad={setAutoLoadLlm} />}
           {page === "voz" && <PageVoz speechLoaded={speechLoaded} speechLoading={speechLoading}
+            autoLoad={autoLoadSpeech} setAutoLoad={setAutoLoadSpeech}
             onLoad={async () => {
               setSpeechLoading(true);
               toast.info("Descargando Whisper tiny (75 MB)...");
@@ -194,19 +197,41 @@ function PageApariencia({ theme, setTheme, fontSize, setFontSize, wallpaperColor
   </>);
 }
 
-function PageIA({ models, llmConnected, downloading, downloadingId, onDownload }: {
+function PageIA({ models, llmConnected, downloading, downloadingId, onDownload, autoLoad, setAutoLoad }: {
   models: ModelInfo[]; llmConnected: boolean; downloading: boolean; downloadingId: string | null;
-  onDownload: (m: ModelInfo) => void;
+  onDownload: (m: ModelInfo) => void; autoLoad: boolean; setAutoLoad: (v: boolean) => void;
 }) {
+  const [testPrompt, setTestPrompt] = useState("");
+  const [testResult, setTestResult] = useState("");
+  const [testing, setTesting] = useState(false);
+
+  const handleTest = async () => {
+    if (!testPrompt.trim()) return;
+    setTesting(true); setTestResult("");
+    try {
+      const result = await invoke<string>("llm_chat", {
+        request: { personaId: "docente", messages: [{ role: "user", content: testPrompt }] },
+      });
+      setTestResult(result);
+    } catch (err) { setTestResult(`Error: ${err}`); }
+    finally { setTesting(false); }
+  };
+
   return (<>
     <PageTitle icon={<BrainCircuit className="h-5 w-5 text-violet-400" />} title="Inteligencia Artificial" subtitle="Modelo local para chat con Karime y el Docente" />
 
     <Card title="Estado">
-      <div className="flex items-center gap-3">
-        <div className={cn("h-3 w-3 rounded-full", llmConnected ? "bg-emerald-400" : "ls-bg-input")} />
-        <span className="text-sm font-medium" style={{ color: llmConnected ? "#22c55e" : "var(--ls-text-muted)" }}>
-          {llmConnected ? "Modelo cargado y activo" : "Sin modelo — selecciona uno abajo"}
-        </span>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className={cn("h-3 w-3 rounded-full", llmConnected ? "bg-emerald-400" : "ls-bg-input")} />
+          <span className="text-sm font-medium" style={{ color: llmConnected ? "#22c55e" : "var(--ls-text-muted)" }}>
+            {llmConnected ? "Modelo activo" : "Sin modelo"}
+          </span>
+        </div>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <Checkbox checked={autoLoad} onCheckedChange={(v) => setAutoLoad(v === true)} />
+          <span className="text-xs" style={{ color: "var(--ls-text-secondary)" }}>Cargar al iniciar</span>
+        </label>
       </div>
     </Card>
 
@@ -231,25 +256,75 @@ function PageIA({ models, llmConnected, downloading, downloadingId, onDownload }
           );
         })}
       </div>
-      <p className="mt-2 text-xs" style={{ color: "var(--ls-text-muted)" }}>
-        Se descarga de HuggingFace (solo la primera vez). Se cachea en ~/.cache/huggingface/.
-      </p>
     </Card>
+
+    {llmConnected && (
+      <Card title="Probar modelo">
+        <div className="space-y-2">
+          <textarea value={testPrompt} onChange={(e) => setTestPrompt(e.target.value)}
+            placeholder="Escribe algo para probar el modelo..."
+            className="w-full rounded-lg border p-2 text-sm resize-none h-16 ls-bg-input ls-border ls-text"
+            style={{ backgroundColor: "var(--ls-input)" }} />
+          <button onClick={handleTest} disabled={testing || !testPrompt.trim()}
+            className="rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:opacity-80"
+            style={{ borderColor: "var(--ls-accent)", color: "var(--ls-accent)" }}>
+            {testing ? "Generando..." : "Enviar"}
+          </button>
+          {testResult && (
+            <div className="rounded-lg border p-3 text-sm whitespace-pre-wrap" style={{ borderColor: "var(--ls-border)", backgroundColor: "var(--ls-panel)", color: "var(--ls-text)" }}>
+              {testResult}
+            </div>
+          )}
+        </div>
+      </Card>
+    )}
   </>);
 }
 
-function PageVoz({ speechLoaded, speechLoading, onLoad }: {
+function PageVoz({ speechLoaded, speechLoading, onLoad, autoLoad, setAutoLoad }: {
   speechLoaded: boolean; speechLoading: boolean; onLoad: () => void;
+  autoLoad: boolean; setAutoLoad: (v: boolean) => void;
 }) {
+  const [recording, setRecording] = useState(false);
+  const [transcription, setTranscription] = useState("");
+  const [transcribing, setTranscribing] = useState(false);
+
+  const handleRecord = async () => {
+    if (recording) {
+      // Stop and transcribe
+      try {
+        await invoke("speech_stop_recording");
+        setRecording(false);
+        setTranscribing(true);
+        const text = await invoke<string>("speech_transcribe", { language: "es" });
+        setTranscription(text || "(silencio)");
+      } catch (err) { setTranscription(`Error: ${err}`); }
+      finally { setTranscribing(false); }
+    } else {
+      // Start recording
+      setTranscription("");
+      try {
+        await invoke("speech_start_recording");
+        setRecording(true);
+      } catch (err) { setTranscription(`Error: ${err}`); }
+    }
+  };
+
   return (<>
     <PageTitle icon={<Mic className="h-5 w-5 text-rose-400" />} title="Reconocimiento de Voz" subtitle="Whisper para logoaudiometría y comandos de voz" />
 
-    <Card title="Estado del modelo">
-      <div className="flex items-center gap-3">
-        <div className={cn("h-3 w-3 rounded-full", speechLoaded ? "bg-emerald-400" : "ls-bg-input")} />
-        <span className="text-sm font-medium" style={{ color: speechLoaded ? "#22c55e" : "var(--ls-text-muted)" }}>
-          {speechLoaded ? "Whisper cargado y listo" : "Sin modelo — descarga para activar"}
-        </span>
+    <Card title="Estado">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className={cn("h-3 w-3 rounded-full", speechLoaded ? "bg-emerald-400" : "ls-bg-input")} />
+          <span className="text-sm font-medium" style={{ color: speechLoaded ? "#22c55e" : "var(--ls-text-muted)" }}>
+            {speechLoaded ? "Whisper activo" : "Sin modelo"}
+          </span>
+        </div>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <Checkbox checked={autoLoad} onCheckedChange={(v) => setAutoLoad(v === true)} />
+          <span className="text-xs" style={{ color: "var(--ls-text-secondary)" }}>Cargar al iniciar</span>
+        </label>
       </div>
     </Card>
 
@@ -267,24 +342,44 @@ function PageVoz({ speechLoaded, speechLoading, onLoad }: {
           <p className="text-xs" style={{ color: "var(--ls-text-muted)" }}>75 MB · Multiidioma · Rápido en CPU</p>
         </div>
       </button>
-      <p className="mt-2 text-xs" style={{ color: "var(--ls-text-muted)" }}>
-        OpenAI Whisper (tiny) — reconoce español, inglés y más. Se descarga una vez.
-      </p>
     </Card>
+
+    {speechLoaded && (
+      <Card title="Probar micrófono">
+        <div className="space-y-3">
+          <p className="text-xs" style={{ color: "var(--ls-text-muted)" }}>
+            Presiona para grabar, habla, y presiona de nuevo para transcribir.
+          </p>
+          <button onClick={handleRecord} disabled={transcribing}
+            className={cn("flex items-center justify-center gap-2 rounded-lg border w-full py-3 text-sm font-medium transition",
+              recording ? "border-red-500/40 bg-red-500/10 text-red-400 animate-pulse" : "hover:opacity-80")}
+            style={recording ? undefined : { borderColor: "var(--ls-accent)", color: "var(--ls-accent)" }}>
+            <Mic className="h-4 w-4" />
+            {transcribing ? "Transcribiendo..." : recording ? "Detener grabación" : "Grabar"}
+          </button>
+          {transcription && (
+            <div className="rounded-lg border p-3 text-sm" style={{ borderColor: "var(--ls-border)", backgroundColor: "var(--ls-panel)", color: "var(--ls-text)" }}>
+              <p className="text-xs mb-1 font-bold" style={{ color: "var(--ls-text-muted)" }}>Transcripción:</p>
+              {transcription}
+            </div>
+          )}
+        </div>
+      </Card>
+    )}
 
     <Card title="Usos">
       <div className="space-y-2 text-sm" style={{ color: "var(--ls-text-secondary)" }}>
         <div className="flex items-start gap-2">
           <span style={{ color: "var(--ls-accent)" }}>•</span>
-          <span><b>Logoaudiometría:</b> reconoce las palabras que repite el paciente</span>
+          <span><b>Logoaudiometría:</b> reconoce palabras del paciente</span>
         </div>
         <div className="flex items-start gap-2">
           <span style={{ color: "var(--ls-accent)" }}>•</span>
-          <span><b>Comandos de voz:</b> "siguiente", "registrar", "sin respuesta"</span>
+          <span><b>Comandos:</b> "siguiente", "registrar", "sin respuesta"</span>
         </div>
         <div className="flex items-start gap-2">
           <span style={{ color: "var(--ls-accent)" }}>•</span>
-          <span><b>Talkback:</b> detecta lo que el audiólogo dice al paciente</span>
+          <span><b>Talkback:</b> detecta voz del audiólogo</span>
         </div>
       </div>
     </Card>

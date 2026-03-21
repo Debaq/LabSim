@@ -90,10 +90,14 @@ const FONT_SCALES: Record<FontSize, string> = {
 interface ThemeState {
   theme: ThemeName;
   fontSize: FontSize;
-  wallpaperColor: string | null; // null = use theme default
+  wallpaperColor: string | null;
+  autoLoadLlm: boolean;
+  autoLoadSpeech: boolean;
   setTheme: (theme: ThemeName) => void;
   setFontSize: (size: FontSize) => void;
   setWallpaperColor: (color: string | null) => void;
+  setAutoLoadLlm: (v: boolean) => void;
+  setAutoLoadSpeech: (v: boolean) => void;
 }
 
 function contrastText(hex: string): string {
@@ -134,9 +138,13 @@ export const useThemeStore = create<ThemeState>()(
       theme: "midnight",
       fontSize: "medium",
       wallpaperColor: null,
+      autoLoadLlm: false,
+      autoLoadSpeech: false,
       setTheme: (theme) => { set({ theme, wallpaperColor: null }); applyTheme(theme, get().fontSize, null); },
       setFontSize: (fontSize) => { set({ fontSize }); applyTheme(get().theme, fontSize, get().wallpaperColor); },
       setWallpaperColor: (color) => { set({ wallpaperColor: color }); applyTheme(get().theme, get().fontSize, color); },
+      setAutoLoadLlm: (v) => set({ autoLoadLlm: v }),
+      setAutoLoadSpeech: (v) => set({ autoLoadSpeech: v }),
     }),
     {
       name: "labsim-theme",
