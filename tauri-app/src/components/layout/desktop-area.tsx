@@ -12,6 +12,7 @@ import {
   ClipboardPen,
   Building2,
   Eye,
+  CircleDot,
 } from "lucide-react";
 
 interface DesktopItem {
@@ -60,6 +61,13 @@ const desktopItems: DesktopItem[] = [
     icon: Eye,
     component: "retinography",
     color: "text-red-400",
+  },
+  {
+    id: "corneal-topography",
+    label: "Topógrafo Corneal",
+    icon: CircleDot,
+    component: "corneal-topography",
+    color: "text-teal-400",
   },
   {
     id: "larissa",
@@ -123,7 +131,9 @@ export function DesktopArea({ className }: Props) {
               ? { width: 800, height: 520 }
               : item.id === "retinography"
                 ? { width: 720, height: 540 }
-                : undefined;
+                : item.id === "corneal-topography"
+                  ? { width: 800, height: 520 }
+                  : undefined;
     openWindow(item.id, item.label, item.component, opts);
   };
 

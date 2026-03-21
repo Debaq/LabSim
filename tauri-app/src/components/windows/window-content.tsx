@@ -14,6 +14,7 @@ import { AgendaWindow } from "./agenda-window";
 import { LarissaWindow } from "./larissa-window";
 import { CenterWindow } from "./center-window";
 import { RetinographyWindow } from "./retinography-window";
+import { CornealTopographyWindow } from "./corneal-topography-window";
 
 interface Props {
   component: string;
@@ -36,6 +37,7 @@ const componentMap: Record<string, React.ComponentType> = {
   larissa: LarissaWindow,
   center: CenterWindow,
   retinography: RetinographyWindow,
+  "corneal-topography": CornealTopographyWindow,
 };
 
 export function WindowContent({ component }: Props) {

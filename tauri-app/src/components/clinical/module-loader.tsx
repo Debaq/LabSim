@@ -15,6 +15,7 @@ const modules: Record<ModuleId, React.LazyExoticComponent<React.ComponentType>> 
   "hearing-aids": lazy(() => import("@/modules/hearing-aids")),
   oct: lazy(() => import("@/modules/oct")),
   "visual-field": lazy(() => import("@/modules/visual-field")),
+  "corneal-topography": lazy(() => import("@/modules/corneal-topography")),
   agenda: lazy(() => import("@/modules/agenda")),
   "json-output": lazy(() => import("@/modules/json-output")),
 };

@@ -34,6 +34,7 @@ import {
   ClipboardPen,
   Building2,
   Eye,
+  CircleDot,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -54,6 +55,7 @@ const WINDOW_ICONS: Record<string, LucideIcon> = {
   larissa: ClipboardPen,
   center: Building2,
   retinography: Eye,
+  "corneal-topography": CircleDot,
 };
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -144,6 +146,9 @@ export function Taskbar() {
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => openWindow("retinography", "Retinógrafo", "retinography", { width: 720, height: 540 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
             <Eye className="mr-2 h-4 w-4 text-red-400" />Retinógrafo
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openWindow("corneal-topography", "Topógrafo Corneal", "corneal-topography", { width: 800, height: 520 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
+            <CircleDot className="mr-2 h-4 w-4 text-teal-400" />Topógrafo Corneal
           </DropdownMenuItem>
           <DropdownMenuSeparator className="ls-bg-input" />
 

@@ -2397,6 +2397,7 @@ name = "labsim"
 version = "3.0.0"
 dependencies = [
  "bcrypt",
+ "cc",
  "chrono",
  "cpal",
  "hf-hub",
