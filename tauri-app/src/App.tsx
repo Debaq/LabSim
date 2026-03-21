@@ -1,8 +1,9 @@
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { RouterProvider, createRouter, createHashHistory } from "@tanstack/react-router";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { routeTree } from "./routes/route-tree";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 const hashHistory = createHashHistory();
 const router = createRouter({ routeTree, history: hashHistory });
@@ -14,6 +15,20 @@ declare module "@tanstack/react-router" {
 }
 
 function App() {
+  // F11 toggle fullscreen
+  useEffect(() => {
+    const handler = async (e: KeyboardEvent) => {
+      if (e.key === "F11") {
+        e.preventDefault();
+        const win = getCurrentWindow();
+        const fs = await win.isFullscreen();
+        await win.setFullscreen(!fs);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
   return (
     <TooltipProvider>
       <Suspense

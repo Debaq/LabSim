@@ -5,7 +5,8 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useChatStore } from "@/stores/chat-store";
 import { invoke } from "@tauri-apps/api/core";
 import { cn } from "@/lib/utils";
-import { Check, Palette, User, Info, BrainCircuit, Download, Loader2, Type, Monitor, Mic } from "lucide-react";
+import { Check, Palette, User, Info, BrainCircuit, Download, Loader2, Type, Monitor, Mic, Maximize, Minimize } from "lucide-react";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -194,7 +195,42 @@ function PageApariencia({ theme, setTheme, fontSize, setFontSize, wallpaperColor
         })}
       </div>
     </Card>
+
+    {/* Fullscreen */}
+    <FullscreenToggle />
   </>);
+}
+
+function FullscreenToggle() {
+  const [isFullscreen, setIsFullscreen] = useState(true);
+
+  useEffect(() => {
+    getCurrentWindow().isFullscreen().then(setIsFullscreen).catch(() => {});
+  }, []);
+
+  const toggle = async () => {
+    const win = getCurrentWindow();
+    const next = !isFullscreen;
+    await win.setFullscreen(next);
+    setIsFullscreen(next);
+  };
+
+  return (
+    <Card title="Pantalla">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {isFullscreen ? <Maximize className="h-4 w-4" style={{ color: "var(--ls-accent)" }} /> : <Minimize className="h-4 w-4" style={{ color: "var(--ls-text-muted)" }} />}
+          <div>
+            <p className="text-sm font-medium" style={{ color: "var(--ls-text)" }}>Pantalla completa</p>
+            <p className="text-xs" style={{ color: "var(--ls-text-muted)" }}>{isFullscreen ? "Activado — F11 para alternar" : "Desactivado"}</p>
+          </div>
+        </div>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <Checkbox checked={isFullscreen} onCheckedChange={() => toggle()} />
+        </label>
+      </div>
+    </Card>
+  );
 }
 
 function PageIA({ models, llmConnected, downloading, downloadingId, onDownload, autoLoad, setAutoLoad }: {
