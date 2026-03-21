@@ -1,7 +1,7 @@
 [package]
 name = "labsim"
 version = "3.0.0"
-description = "LabSim - Simulador Audiológico Educativo"
+description = "LabSim - Plataforma de Simulación Clínica Educativa"
 authors = ["Nicolás Baier Quezada"]
 license = "MIT"
 edition = "2021"

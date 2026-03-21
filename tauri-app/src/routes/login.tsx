@@ -62,7 +62,7 @@ export default function LoginPage() {
             LabSim
           </CardTitle>
           <CardDescription className="text-white/50">
-            Simulador Audiológico v3.0
+            Plataforma de Simulación Clínica v3.0
           </CardDescription>
         </CardHeader>
 
