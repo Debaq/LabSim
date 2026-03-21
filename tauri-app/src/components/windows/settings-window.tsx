@@ -447,10 +447,10 @@ function PageAcerca() {
         <Row label="Nombre" value="LabSim" />
         <Row label="Versión" value="3.0.0" />
         <Row label="Framework" value="Tauri v2 + React 19" />
-        <Row label="Backend" value="Rust" />
+        <Row label="Backend" value="Rust + PHP" />
         <Row label="Audio" value="cpal (ALSA)" />
         <Row label="IA" value="llama.cpp (llama-cpp-2)" />
-        <Row label="Autor" value="Nicolás Quezada Quezada" />
+        <Row label="Autor" value="Nicolás Baier Quezada" />
       </div>
     </Card>
   </>);
