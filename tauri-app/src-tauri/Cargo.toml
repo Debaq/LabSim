@@ -40,6 +40,10 @@ hf-hub = "0.4"
 # Speech recognition (whisper.cpp via FFI)
 whisper-rs = "0.16"
 
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+tokio = { version = "1", features = ["full"] }
+
 # Utilidades
 log = "0.4"
 bcrypt = "0.17"

@@ -15,6 +15,7 @@
     "fs:default",
     "dialog:default",
     "shell:default",
-    "log:default"
+    "log:default",
+    "core:app:default"
   ]
 }

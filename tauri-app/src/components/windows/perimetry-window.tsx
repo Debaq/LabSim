@@ -9,11 +9,107 @@ import {
   type PointResult, type ReliabilityIndices, type Strategy,
   STIMULUS_SIZES, type StimulusSize,
 } from "@/lib/perimetry-config";
+import { usePatientStore } from "@/stores/patient-store";
 import { cn } from "@/lib/utils";
-import { Play, Square, RotateCcw, Pause } from "lucide-react";
+import { Play, RotateCcw, Pause, Link2, Link2Off } from "lucide-react";
 
 type ViewMode = "numeric" | "grayscale" | "deviation";
 type TestState = "idle" | "running" | "paused" | "done";
+
+type DefectType =
+  | "normal" | "escotoma-arcuato-sup" | "escotoma-arcuato-inf" | "escotoma-arcuato-doble"
+  | "escalon-nasal" | "hemianopsia-homonima-der" | "hemianopsia-homonima-izq"
+  | "hemianopsia-bitemporal" | "cuadrantanopsia-sup" | "cuadrantanopsia-inf"
+  | "depresion-general" | "isla-central" | "constriccion-periferica";
+
+type Severity = "leve" | "moderado" | "severo";
+
+// Generate defect-aware sensitivity for a point
+function defectSensitivity(
+  x: number, y: number, defect: DefectType, severity: Severity, mdTarget: number | null,
+): number {
+  const norm = normalSensitivity(x, y);
+  const sevFactor = severity === "leve" ? 0.4 : severity === "moderado" ? 0.7 : 1.0;
+  const noise = (Math.random() - 0.5) * 4;
+
+  let loss = 0;
+
+  switch (defect) {
+    case "normal":
+      return Math.max(0, Math.min(40, Math.round(norm + noise)));
+
+    case "escotoma-arcuato-sup":
+      // Superior arcuate: affects inferior visual field (y < 0), nasal side
+      if (y < -3 && x > -3) loss = 18 * sevFactor * Math.exp(-((y + 12) ** 2) / 120);
+      break;
+
+    case "escotoma-arcuato-inf":
+      // Inferior arcuate: affects superior visual field (y > 0), nasal side
+      if (y > 3 && x > -3) loss = 18 * sevFactor * Math.exp(-((y - 12) ** 2) / 120);
+      break;
+
+    case "escotoma-arcuato-doble":
+      if (y < -3 && x > -3) loss = 16 * sevFactor * Math.exp(-((y + 12) ** 2) / 120);
+      if (y > 3 && x > -3) loss += 16 * sevFactor * Math.exp(-((y - 12) ** 2) / 120);
+      break;
+
+    case "escalon-nasal":
+      // Nasal step: difference at horizontal midline, nasal side
+      if (x > 6) loss = 12 * sevFactor * (y < 0 ? 1 : 0.2);
+      break;
+
+    case "hemianopsia-homonima-der":
+      if (x > 0) loss = 28 * sevFactor;
+      break;
+
+    case "hemianopsia-homonima-izq":
+      if (x < 0) loss = 28 * sevFactor;
+      break;
+
+    case "hemianopsia-bitemporal":
+      // Temporal side affected for both eyes — here we don't know the eye,
+      // so we affect x < 0 (temporal for OD). Caller should flip for OI.
+      if (x < 0) loss = 28 * sevFactor;
+      break;
+
+    case "cuadrantanopsia-sup":
+      if (y > 0 && x > 0) loss = 26 * sevFactor;
+      break;
+
+    case "cuadrantanopsia-inf":
+      if (y < 0 && x > 0) loss = 26 * sevFactor;
+      break;
+
+    case "depresion-general":
+      loss = 10 * sevFactor;
+      break;
+
+    case "isla-central": {
+      const ecc = Math.sqrt(x * x + y * y);
+      if (ecc > 10) loss = 25 * sevFactor;
+      break;
+    }
+
+    case "constriccion-periferica": {
+      const ecc2 = Math.sqrt(x * x + y * y);
+      if (ecc2 > 15) loss = 22 * sevFactor;
+      else if (ecc2 > 10) loss = 12 * sevFactor;
+      break;
+    }
+  }
+
+  let sensitivity = norm - loss + noise;
+
+  // Apply MD target adjustment if specified
+  if (mdTarget !== null && defect !== "normal") {
+    const currentDev = sensitivity - norm;
+    const targetDev = mdTarget; // MD is negative for loss
+    const adjustment = (targetDev - currentDev) * 0.3;
+    sensitivity += adjustment;
+  }
+
+  return Math.max(0, Math.min(40, Math.round(sensitivity)));
+}
 
 export function PerimetryWindow() {
   const [eye, setEye] = useState<"OD" | "OI">("OD");
@@ -32,6 +128,27 @@ export function PerimetryWindow() {
     falsePositives: 0, falsePositivesTotal: 0,
     falseNegatives: 0, falseNegativesTotal: 0,
   });
+
+  // Case data from patient store
+  const vfConfig = usePatientStore((s) => s.data.visualField);
+  const patientId = usePatientStore((s) => s.currentPatientId);
+  const hasCaseLoaded = patientId !== null && Object.keys(vfConfig).length > 0;
+
+  // Current eye case config
+  const getEyeConfig = useCallback(() => {
+    if (!hasCaseLoaded) return null;
+    const eyeKey = eye === "OD" ? "ojoDerecho" : "ojoIzquierdo";
+    return (vfConfig as Record<string, Record<string, unknown>>)[eyeKey] ?? null;
+  }, [hasCaseLoaded, eye, vfConfig]);
+
+  // Sync protocol from case
+  useEffect(() => {
+    const cfg = getEyeConfig();
+    if (!cfg) return;
+    if (cfg.patron && typeof cfg.patron === "string") setPattern(cfg.patron);
+    if (cfg.estrategia && typeof cfg.estrategia === "string") setStrategy(cfg.estrategia as Strategy);
+    if (cfg.tamanoEstimulo && typeof cfg.tamanoEstimulo === "string") setStimSize(cfg.tamanoEstimulo as StimulusSize);
+  }, [getEyeConfig]);
 
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
   const testRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -58,11 +175,20 @@ export function PerimetryWindow() {
     if (testState === "idle" || testState === "done") initPoints();
     setTestState("running");
 
+    const cfg = getEyeConfig();
+    const defect: DefectType = (cfg?.defecto as DefectType) ?? "normal";
+    const severity: Severity = (cfg?.severidad as Severity) ?? "moderado";
+    const mdTarget = cfg?.mdObjetivo != null ? Number(cfg.mdObjetivo) : null;
+    const goodReliability = cfg?.confiabilidadBuena !== false;
+
+    const flRate = goodReliability ? 0.05 : 0.18;
+    const fpRate = goodReliability ? 0.03 : 0.12;
+    const fnRate = goodReliability ? 0.02 : 0.10;
+
     timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000);
 
-    // Simulate gaze data
     gazeRef.current = setInterval(() => {
-      const fixing = Math.random() > 0.08;
+      const fixing = Math.random() > (goodReliability ? 0.06 : 0.15);
       setIsFixating(fixing);
       setGazeHistory((h) => {
         const x = fixing ? (Math.random() - 0.5) * 3 : (Math.random() - 0.5) * 15;
@@ -71,7 +197,6 @@ export function PerimetryWindow() {
       });
     }, 200);
 
-    // Test point progression
     testRef.current = setInterval(() => {
       setPoints((pts) => {
         const untested = pts.map((p, i) => ({ p, i })).filter(({ p }) => p.sensitivity === null);
@@ -83,15 +208,19 @@ export function PerimetryWindow() {
         const { i } = untested[Math.floor(Math.random() * untested.length)];
         setCurrentPoint(i);
 
-        const norm = normalSensitivity(pts[i].x, pts[i].y);
-        const sensitivity = Math.max(0, Math.min(40, Math.round(norm + (Math.random() - 0.5) * 8)));
+        // For bitemporal hemianopsia, flip x for OI
+        let px = pts[i].x;
+        const py = pts[i].y;
+        if (defect === "hemianopsia-bitemporal" && eye === "OI") px = -px;
 
-        // Reliability checks
+        const sensitivity = defectSensitivity(px, py, defect, severity, mdTarget);
+        const norm = normalSensitivity(pts[i].x, pts[i].y);
+
         setReliability((r) => {
           const newR = { ...r, fixationLossesTotal: r.fixationLossesTotal + 1 };
-          if (Math.random() < 0.08) newR.fixationLosses++;
-          if (Math.random() < 0.04) { newR.falsePositivesTotal++; if (Math.random() < 0.1) newR.falsePositives++; }
-          if (Math.random() < 0.04) { newR.falseNegativesTotal++; if (Math.random() < 0.08) newR.falseNegatives++; }
+          if (Math.random() < flRate) newR.fixationLosses++;
+          if (Math.random() < 0.08) { newR.falsePositivesTotal++; if (Math.random() < fpRate) newR.falsePositives++; }
+          if (Math.random() < 0.08) { newR.falseNegativesTotal++; if (Math.random() < fnRate) newR.falseNegatives++; }
           return newR;
         });
 
@@ -99,8 +228,8 @@ export function PerimetryWindow() {
         newPts[i] = { ...pts[i], sensitivity, seen: sensitivity > 0, totalDeviation: sensitivity - norm };
         return newPts;
       });
-    }, 900 + Math.random() * 1200);
-  }, [testState, initPoints, stopAll]);
+    }, strategy === "sita-fast" ? 600 + Math.random() * 800 : 900 + Math.random() * 1200);
+  }, [testState, initPoints, stopAll, getEyeConfig, eye, strategy]);
 
   const pauseTest = useCallback(() => { stopAll(); setTestState("paused"); }, [stopAll]);
   const resetTest = useCallback(() => { stopAll(); setTestState("idle"); initPoints(); }, [stopAll, initPoints]);
@@ -122,21 +251,29 @@ export function PerimetryWindow() {
       {/* Header */}
       <div className="flex h-7 shrink-0 items-center justify-between ls-bg-panel2 px-3">
         <span className="text-xs font-bold tracking-[0.2em] ls-text-muted">LABSIM <span className="font-normal ls-text-muted">PERIMETRY HFA-III</span></span>
-        <span className="text-xs ls-text-muted">{eye} | {pattern} | {stratLabel} | Goldmann {stimSize}</span>
+        <div className="flex items-center gap-2 text-xs ls-text-muted">
+          {hasCaseLoaded ? (
+            <span className="flex items-center gap-1 text-emerald-400/70">
+              <Link2 className="h-3 w-3" /> Caso
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 ls-text-muted">
+              <Link2Off className="h-3 w-3" /> Libre
+            </span>
+          )}
+          <span>|</span>
+          <span>{eye} | {pattern} | {stratLabel} | Goldmann {stimSize}</span>
+        </div>
       </div>
 
       {/* Main layout: 3 columns */}
       <div className="flex flex-1 overflow-hidden gap-2 p-2">
 
-        {/* LEFT COLUMN: Eye camera + Gaze plot + Controls */}
+        {/* LEFT COLUMN */}
         <div className="flex w-[170px] shrink-0 flex-col gap-2">
-          {/* Eye camera */}
           <EyeCamera isFixating={isFixating} isRunning={testState === "running"} eye={eye} />
-
-          {/* Gaze tracking */}
           <GazePlot gazeHistory={gazeHistory} />
 
-          {/* Fixation status */}
           <div className={cn("flex items-center justify-center gap-2 rounded border p-1.5",
             isFixating ? "border-emerald-500/20 bg-emerald-500/5" : "border-red-500/20 bg-red-500/5 animate-pulse"
           )}>
@@ -147,7 +284,6 @@ export function PerimetryWindow() {
             <span className="text-xs ls-text-muted">{flPct}%</span>
           </div>
 
-          {/* Progress */}
           <div className="rounded border ls-border ls-bg-panel2 p-2">
             <div className="mb-1 flex justify-between text-xs">
               <span className="ls-text-muted">Progreso</span>
@@ -162,7 +298,6 @@ export function PerimetryWindow() {
             </div>
           </div>
 
-          {/* Controls */}
           <div className="flex gap-1">
             {testState !== "running" ? (
               <button onClick={startTest}
@@ -184,12 +319,11 @@ export function PerimetryWindow() {
           </div>
         </div>
 
-        {/* CENTER: Visual field map */}
+        {/* CENTER */}
         <div className="flex flex-1 flex-col gap-1 min-w-0">
           <div className="flex-1 min-h-0">
             <VisualFieldMap points={points} currentPoint={currentPoint} eye={eye} mode={viewMode} />
           </div>
-          {/* View mode selector */}
           <div className="flex items-center justify-center">
             <ToggleSwitch value={viewMode} onChange={(v) => setViewMode(v as ViewMode)} options={[
               { value: "numeric", label: "Numérico" },
@@ -199,9 +333,8 @@ export function PerimetryWindow() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Configuration + Reliability + Results */}
+        {/* RIGHT COLUMN */}
         <div className="flex w-[160px] shrink-0 flex-col gap-2">
-          {/* Protocol config */}
           <div className="rounded border ls-border ls-bg-panel2 p-2 space-y-1.5">
             <div className="text-xs font-bold uppercase tracking-wider ls-text-muted">Protocolo</div>
 
@@ -213,36 +346,46 @@ export function PerimetryWindow() {
               ]} />
             </div>
 
-            <div>
-              <div className="mb-0.5 text-xs uppercase ls-text-muted">Patrón</div>
-              <ToggleSwitch value={pattern} onChange={setPattern} options={[
-                { value: "24-2", label: "24-2" },
-                { value: "30-2", label: "30-2" },
-                { value: "10-2", label: "10-2" },
-              ]} />
-            </div>
+            {!hasCaseLoaded && (
+              <>
+                <div>
+                  <div className="mb-0.5 text-xs uppercase ls-text-muted">Patrón</div>
+                  <ToggleSwitch value={pattern} onChange={setPattern} options={[
+                    { value: "24-2", label: "24-2" },
+                    { value: "30-2", label: "30-2" },
+                    { value: "10-2", label: "10-2" },
+                  ]} />
+                </div>
 
-            <div>
-              <div className="mb-0.5 text-xs uppercase ls-text-muted">Estrategia</div>
-              <ToggleSwitch value={strategy} onChange={(v) => setStrategy(v as Strategy)} options={[
-                { value: "sita-standard", label: "Std" },
-                { value: "sita-fast", label: "Fast" },
-                { value: "full-threshold", label: "Full" },
-              ]} />
-            </div>
+                <div>
+                  <div className="mb-0.5 text-xs uppercase ls-text-muted">Estrategia</div>
+                  <ToggleSwitch value={strategy} onChange={(v) => setStrategy(v as Strategy)} options={[
+                    { value: "sita-standard", label: "Std" },
+                    { value: "sita-fast", label: "Fast" },
+                    { value: "full-threshold", label: "Full" },
+                  ]} />
+                </div>
 
-            <div>
-              <div className="mb-0.5 text-xs uppercase ls-text-muted">Estímulo Goldmann</div>
-              <ToggleSwitch value={stimSize} onChange={(v) => setStimSize(v as StimulusSize)} options={
-                STIMULUS_SIZES.map((s) => ({ value: s, label: s }))
-              } />
-            </div>
+                <div>
+                  <div className="mb-0.5 text-xs uppercase ls-text-muted">Estímulo Goldmann</div>
+                  <ToggleSwitch value={stimSize} onChange={(v) => setStimSize(v as StimulusSize)} options={
+                    STIMULUS_SIZES.map((s) => ({ value: s, label: s }))
+                  } />
+                </div>
+              </>
+            )}
+
+            {hasCaseLoaded && (
+              <div className="rounded border border-emerald-500/20 bg-emerald-500/5 p-1.5">
+                <span className="text-xs text-emerald-400/80">
+                  Protocolo definido por el caso clínico
+                </span>
+              </div>
+            )}
           </div>
 
-          {/* Reliability */}
           <ReliabilityPanel indices={reliability} />
 
-          {/* Results */}
           <div className="rounded border ls-border ls-bg-panel2 p-2">
             <div className="mb-1 text-xs font-bold uppercase tracking-wider ls-text-muted">Resultados</div>
             <div className="space-y-0.5 text-xs">

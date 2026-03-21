@@ -5,12 +5,14 @@ mod models;
 mod utils;
 mod llm;
 mod speech;
+mod api;
 
 use db::Database;
 use llm::LlmState;
 use commands::audio::AudioState;
 use speech::SpeechState;
 use commands::speech::RecordingState;
+use api::client::ApiClient;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -19,6 +21,7 @@ pub fn run() {
     let audio = AudioState::new();
     let speech = SpeechState::new();
     let recording = RecordingState::new();
+    let api_client = ApiClient::new();
 
     tauri::Builder::default()
         .manage(db)
@@ -26,6 +29,7 @@ pub fn run() {
         .manage(audio)
         .manage(speech)
         .manage(recording)
+        .manage(api_client)
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
@@ -59,6 +63,57 @@ pub fn run() {
             commands::speech::speech_stop_recording,
             commands::speech::speech_transcribe,
             commands::speech::speech_is_recording,
+            // API / Sync
+            commands::sync::api_login,
+            commands::sync::api_logout,
+            commands::sync::api_sync_cases,
+            commands::sync::api_push_case,
+            commands::sync::api_submit_work,
+            commands::sync::api_check_update,
+            commands::sync::api_get_agenda,
+            commands::sync::api_get_sessions,
+            commands::sync::api_get_session_detail,
+            commands::sync::api_get_submissions,
+            commands::sync::api_ping,
+            commands::sync::api_get_my_stats,
+            // Procedimientos
+            commands::sync::api_get_procedures,
+            // Directrices Karime
+            commands::sync::api_get_directives,
+            commands::sync::api_resolve_directives,
+            commands::sync::api_save_directive,
+            // Feedback pacientes
+            commands::sync::api_send_feedback,
+            commands::sync::api_get_feedback,
+            commands::sync::api_get_feedback_summary,
+            // Centro: Boxes
+            commands::sync::api_get_boxes,
+            commands::sync::api_create_boxes,
+            commands::sync::api_assign_box,
+            // Centro: Incidentes
+            commands::sync::api_get_incident_templates,
+            commands::sync::api_get_incidents,
+            commands::sync::api_inject_incident,
+            commands::sync::api_resolve_incident,
+            commands::sync::api_discuss_incident,
+            // Centro: Reuniones
+            commands::sync::api_get_meetings,
+            commands::sync::api_call_meeting,
+            commands::sync::api_start_meeting,
+            commands::sync::api_end_meeting,
+            // Centro: Chat
+            commands::sync::api_get_chat,
+            commands::sync::api_send_chat,
+            // Agenda extendida
+            commands::sync::api_create_agenda_item,
+            commands::sync::api_assign_agenda_group,
+            commands::sync::api_reschedule_appointment,
+            commands::sync::api_update_appointment_status,
+            // Telemetría
+            commands::telemetry::telemetry_start_session,
+            commands::telemetry::telemetry_end_session,
+            commands::telemetry::telemetry_push_events,
+            commands::telemetry::telemetry_push_encounter,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -2,11 +2,11 @@
 
 <p align="center">
   <strong>Simulación de equipamiento clínico para la formación de profesionales de la salud</strong><br>
-  Audiología · Otoneurología · Oftalmología · IA conversacional · Reconocimiento de voz · Multiplataforma
+  Audiología · Otoneurología · Oftalmología · IA conversacional · Reconocimiento de voz · Simulación de centro clínico · Multiplataforma
 </p>
 
 <p align="center">
-  <code>Tauri 2 + React 19 + Rust</code>&nbsp;&nbsp;|&nbsp;&nbsp;Versión 3.0.0&nbsp;&nbsp;|&nbsp;&nbsp;Licencia MIT
+  <code>Tauri 2 + React 19 + Rust + PHP Backend</code>&nbsp;&nbsp;|&nbsp;&nbsp;Versión 3.0.0&nbsp;&nbsp;|&nbsp;&nbsp;Licencia MIT
 </p>
 
 ---
@@ -24,12 +24,15 @@
 9. [Reconocimiento de voz](#9-reconocimiento-de-voz)
 10. [Interfaz de usuario](#10-interfaz-de-usuario)
 11. [Base de datos y persistencia](#11-base-de-datos-y-persistencia)
-12. [Guía de instalación y desarrollo](#12-guía-de-instalación-y-desarrollo)
-13. [Creación de módulos adicionales (Add-ons)](#13-creación-de-módulos-adicionales-add-ons)
-14. [Creación de personas IA personalizadas](#14-creación-de-personas-ia-personalizadas)
-15. [Stack tecnológico completo](#15-stack-tecnológico-completo)
-16. [Estructura del proyecto](#16-estructura-del-proyecto)
-17. [Roadmap](#17-roadmap)
+12. [Backend Web — tmeduca.org/labsim/backend](#12-backend-web--tmeducaorglabsimbackend)
+13. [Larissa — Sistema de fichas clínicas](#13-larissa--sistema-de-fichas-clínicas)
+14. [Modalidad Centro — Simulación de gestión clínica](#14-modalidad-centro--simulación-de-gestión-clínica)
+15. [Guía de instalación y desarrollo](#15-guía-de-instalación-y-desarrollo)
+16. [Creación de módulos adicionales (Add-ons)](#16-creación-de-módulos-adicionales-add-ons)
+17. [Creación de personas IA personalizadas](#17-creación-de-personas-ia-personalizadas)
+18. [Stack tecnológico completo](#18-stack-tecnológico-completo)
+19. [Estructura del proyecto](#19-estructura-del-proyecto)
+20. [Roadmap](#20-roadmap)
 
 ---
 
@@ -66,9 +69,10 @@ El simulador aborda tres dimensiones del aprendizaje:
 
 | Rol | Acceso | Propósito |
 |-----|--------|-----------|
-| **Estudiante** | Módulos de simulación, chat con IA docente | Práctica guiada |
-| **Docente** | Todo lo anterior + gestión de pacientes simulados | Diseño de casos clínicos multidisciplinarios |
-| **Admin** | Acceso completo + módulo clínico + configuración | Administración del sistema |
+| **Estudiante** | Simuladores, Larissa (fichas), sesiones, agenda asignada, chat de box | Práctica clínica |
+| **Instructor** | Todo lo anterior + Crear Casos, crear sesiones (con aprobación), gestionar agenda | Docente junior, apoyo directo |
+| **Docente** | Todo lo anterior + sesiones auto-aprobadas, directrices Karime, inyectar incidentes, calificar | Diseño y supervisión |
+| **Admin** | Acceso completo + panel web + directrices globales + gestión usuarios | Administración del sistema |
 
 ---
 
@@ -607,9 +611,9 @@ LabSim incluye reconocimiento de voz offline mediante [whisper-rs](https://githu
 La interfaz principal emula un escritorio de computador donde cada módulo se abre como una ventana independiente:
 
 - **Ventanas arrastrables y redimensionables** (`WindowFrame`)
-- **Barra de tareas** inferior con ventanas abiertas (`Taskbar`)
-- **Íconos de módulos** en el área de escritorio (`DesktopArea`)
-- **Modo clínico**: vista de pantalla completa para cada módulo
+- **Barra de tareas** inferior con ventanas abiertas, accesos directos (Mensajes con globito de notificación, Agenda), indicador de conexión al servidor (verde/amarillo/rojo)
+- **Escritorio limpio** — solo lo esencial: 4 simuladores + Larissa + Centro + Sesiones + Estadísticas + Crear Casos (admin/docente/instructor)
+- **Menú inicio** — acceso a todas las apps incluyendo Historial, Explorador, Editor, Configuración
 
 ### Audiómetro virtual
 
@@ -686,7 +690,214 @@ interface PatientData {
 
 ---
 
-## 12. Guía de instalación y desarrollo
+## 12. Backend Web — tmeduca.org/labsim/backend
+
+### Arquitectura servidor
+
+LabSim se conecta a un backend centralizado que gestiona usuarios, sesiones prácticas, entregas, telemetría y la modalidad Centro. El backend es **PHP 7.4+ puro** (sin frameworks) con **SQLite** como base de datos, diseñado para funcionar en cualquier hosting compartido.
+
+```
+App Tauri ←─ HTTPS ─→ tmeduca.org/labsim/backend/api/v1/
+  │                              │
+  SQLite (local)            SQLite (servidor)
+```
+
+### Stack del backend
+
+| Componente | Tecnología | Justificación |
+|---|---|---|
+| API REST | PHP 7.4+ puro | Disponible en cualquier hosting, sin dependencias |
+| Base de datos | SQLite (WAL mode) | Un solo archivo .db, sin servidor de BD |
+| Panel admin | PHP + HTML/CSS/JS vanilla | Sin build step, deploy por FTP |
+| Autenticación | JWT HS256 (implementación propia) | Sin librerías externas |
+| Archivos | Upload con validación MIME | Guías, releases, assets |
+
+### Estructura del backend
+
+```
+labsim-backend/
+├── api/                     # 16 endpoints REST
+│   ├── index.php            # Router principal
+│   ├── auth.php             # Login JWT, refresh, logout
+│   ├── users.php            # CRUD usuarios (admin)
+│   ├── cases.php            # CRUD casos clínicos
+│   ├── groups.php           # Grupos + miembros
+│   ├── sessions.php         # Sesiones prácticas + aprobación + guías
+│   ├── submissions.php      # Entregas + calificación
+│   ├── agenda.php           # Agenda de atención del centro
+│   ├── procedures.php       # Cartera de procedimientos
+│   ├── telemetry.php        # Ingest de eventos de simuladores
+│   ├── stats.php            # Estadísticas + export CSV
+│   ├── feedback.php         # Reclamos/felicitaciones de pacientes
+│   ├── directives.php       # Directrices jerárquicas de Karime
+│   ├── center.php           # Boxes, incidentes, reuniones, chat
+│   ├── assets.php           # Releases + archivos
+│   └── sync.php             # Push/pull sincronización
+├── admin/                   # Panel web admin (10 páginas)
+├── core/                    # JWT, DB, auth, validators, upload
+├── data/                    # SQLite (protegido por .htaccess)
+├── uploads/                 # Guías, releases, assets
+├── .htaccess                # Routing + seguridad
+└── install.php              # Setup: 22 tablas + procedimientos + incidentes
+```
+
+### Roles y permisos
+
+| Rol | Panel admin | Crear casos | Crear sesiones | Ver entregas | Gestionar centro |
+|---|---|---|---|---|---|
+| **admin** | ✓ | ✓ | ✓ (auto-aprobada) | Todas | ✓ |
+| **docente** | — | ✓ | ✓ (auto-aprobada) | Sus estudiantes | ✓ |
+| **instructor** | — | ✓ | ✓ (requiere aprobación) | Sus estudiantes | ✓ |
+| **estudiante** | — | — | — | Solo las suyas | Ve su box |
+
+### Base de datos (22 tablas)
+
+- **Usuarios**: users, login_attempts, refresh_tokens
+- **Casos**: cases
+- **Grupos**: student_groups, group_members
+- **Sesiones**: practice_sessions, practice_session_cases, session_guides, submissions
+- **Agenda**: agenda_items, procedures (cartera de 17 procedimientos)
+- **Centro**: boxes, center_incidents (40 templates), clinical_meetings, meeting_participants, meeting_incidents, chat_messages
+- **Telemetría**: app_sessions, simulator_events, patient_encounter_stats, module_interaction_stats
+- **Karime**: karime_directives
+- **Feedback**: patient_feedback
+- **Otros**: app_releases, assets, sync_log, time_alerts
+
+### Cartera de procedimientos
+
+El sistema incluye 17 procedimientos clínicos predefinidos:
+
+| Categoría | Procedimientos |
+|---|---|
+| Audiología | Audiometría tonal, Logoaudiometría, Supraliminar, Impedanciometría, EOA, PEATC, Electrococleografía, Audífonos, Evaluación completa |
+| Oftalmología | OCT, Campimetría, Evaluación completa |
+| Vestibular | VNG, Prueba calórica, vHIT |
+| General | Consulta, Control/seguimiento |
+
+---
+
+## 13. Larissa — Sistema de fichas clínicas
+
+### Concepto
+
+**Larissa** es el sistema de registro de fichas clínicas del estudiante. Es la app donde el estudiante llena los formularios con sus hallazgos, resultados de simuladores, y diagnósticos. Es distinto a "Crear Casos" (herramienta de autoría del docente).
+
+### Versionado de pacientes
+
+Cuando un docente crea un caso y lo asigna en una sesión práctica:
+
+1. **Caso base** = paciente creado por el docente (perfil completo, "respuesta correcta")
+2. **Versión del estudiante** = cada estudiante recibe el caso con `patientInfo` + `anamnesis`, pero los módulos de resultados llegan **vacíos**
+3. **Propagación docente** = el docente puede inyectar nuevas entradas (ej: "nueva información de anamnesis") que se aplican a TODAS las versiones de los estudiantes
+4. **Entrega** = el estudiante envía su versión final (snapshot) como submission al servidor
+
+Los módulos configurables del simulador (qué patología OCT mostrar, qué defecto de campo visual) se copian del caso base para que los simuladores muestren la patología correcta.
+
+---
+
+## 14. Modalidad Centro — Simulación de gestión clínica
+
+### Concepto
+
+La **Modalidad Centro** simula un día de trabajo completo en un centro clínico real. Cada estudiante es asignado a un box con su propia agenda de pacientes, y durante la sesión surgen incidentes realistas que deben resolver individualmente o en reuniones clínicas de equipo.
+
+Esto es **único en simulación clínica educativa** — no existe ningún simulador que cubra la gestión administrativa y operativa de un centro.
+
+### Flujo completo
+
+```
+1. Docente crea sesión práctica
+2. Configura N boxes (Box 1, Box 2, ...)
+3. Asigna estudiantes a cada box
+4. Crea agenda de pacientes por box (con procedimientos y duraciones)
+5. Opcionalmente programa incidentes que aparecerán durante la sesión
+6. Activa la sesión → los estudiantes ven su box y comienzan a atender
+7. Durante la sesión: incidentes surgen, Karime avisa atrasos, pacientes se quejan
+8. Reuniones clínicas: los estudiantes discuten problemas y toman decisiones
+9. Al finalizar: el docente ve estadísticas, reclamos, felicitaciones, tiempos
+```
+
+### Agenda de atención
+
+La agenda representa horarios reales del centro. El docente crea citas con:
+- Nombre del paciente
+- Hora exacta de llegada
+- Procedimiento a realizar (de la cartera, con duración estándar)
+- Estudiante asignado
+- Estados: `scheduled` → `in_progress` → `completed` | `rescheduled` | `no_show`
+
+Los estudiantes pueden **reagendar** un paciente (cambiar hora), pero esto puede generar reclamos.
+
+### Incidentes dinámicos
+
+40 templates de incidentes en 7 categorías que el docente puede inyectar durante la sesión:
+
+| Categoría | Ejemplos |
+|---|---|
+| **Accesibilidad** | Paciente en silla de ruedas no entra a cámara sonoamortiguada, paciente con discapacidad visual |
+| **Equipamiento** | Calibración vencida del audiómetro, impedanciómetro no enciende, sin olivas, auriculares obstruidos |
+| **Infraestructura** | Corte de luz, filtración de agua en box, ruido de construcción afecta exámenes, baños sin agua |
+| **Paciente** | Crisis de ansiedad en cámara, niño que no coopera, paciente con otitis activa, sospecha de maltrato infantil |
+| **Administrativo** | Colega no vino y hay que asumir doble agenda, doble agendamiento, paciente quiere grabar consulta |
+| **Bioseguridad** | Sospecha de COVID en sala de espera, falta alcohol gel |
+| **Emergencia** | Paciente se desmaya (somos especialidad, no urgencias), niño convulsiona, reacción alérgica a gel conductor |
+
+Los incidentes pueden programarse con `trigger_time_minutes` para que aparezcan automáticamente durante la sesión, o inyectarse en vivo por el docente.
+
+### Reuniones clínicas
+
+Los estudiantes pueden convocar o ser convocados a reuniones clínicas:
+- Se vinculan los incidentes activos a discutir
+- Se registran participantes, actas y decisiones
+- El docente/instructor puede participar u observar
+- Se notifica por chat del centro
+
+### Karime — Secretaria IA configurable
+
+Karime es la secretaria IA del centro. Su comportamiento es **configurable jerárquicamente**:
+
+| Nivel | Quién configura | Alcance | Aprobación |
+|---|---|---|---|
+| `global` | Admin | Todo el sistema (inamovible) | — |
+| `docente` | Docente | Sus actividades y estudiantes | Auto-aprobada |
+| `instructor` | Instructor | Ajustes a directrices del docente | Requiere aprobación del docente |
+| `session` | Instructor | Solo una sesión específica | Auto-aprobada |
+
+**Parámetros configurables:**
+- **Tratamiento**: cómo se dirige al estudiante (formal, nombre propio, custom)
+- **Tono**: profesional, amigable, estricto, relajado (4 sets completos de mensajes)
+- **Nivel de presión** (1-5): afecta cuándo aparecen avisos y probabilidad de quejas
+- **Mensajes custom**: sobreescriben los predefinidos
+- **Reglas**: texto libre con instrucciones adicionales
+
+**Control de tiempo:**
+
+| Evento | Karime avisa |
+|---|---|
+| Faltan 5 min | "Le quedan aproximadamente 5 minutos con el paciente" |
+| +5 min excedido | "Ha excedido el tiempo, el siguiente paciente aguarda" |
+| +15 min excedido | "15 minutos de retraso, los pacientes consultan por la demora" |
+| +30 min excedido | "30 minutos de retraso, un paciente solicitó hablar con el encargado" |
+| Termina a tiempo | "Atención completada en tiempo, buen trabajo" |
+
+### Reclamos y felicitaciones de pacientes
+
+Los pacientes simulados generan feedback automático:
+- **Reclamos**: atraso, reagendamiento, exceso de tiempo, mala atención
+- **Felicitaciones**: atención rápida, buen trato, diagnóstico acertado
+- Cada uno con severidad (1-3) y llega al docente/instructor
+- Panel de resumen: reclamos vs felicitaciones por estudiante
+
+### Chat del centro
+
+- Docente → estudiante individual o grupo completo
+- Instructor → estudiantes de su sesión
+- Estudiantes → entre ellos dentro de su grupo de box
+- Tipos de mensaje: texto, sistema, incidente, convocatoria a reunión
+
+---
+
+## 15. Guía de instalación y desarrollo
 
 ### Requisitos previos
 
@@ -740,7 +951,7 @@ El build de producción genera:
 
 ---
 
-## 13. Creación de módulos adicionales (Add-ons)
+## 16. Creación de módulos adicionales (Add-ons)
 
 ### Arquitectura modular
 
@@ -853,7 +1064,7 @@ Registrar en `lib.rs`:
 
 ---
 
-## 14. Creación de personas IA personalizadas
+## 17. Creación de personas IA personalizadas
 
 ### Agregar una nueva persona
 
@@ -909,7 +1120,7 @@ pub fn get_persona(id: &str) -> Option<&'static Persona> {
 
 ---
 
-## 15. Stack tecnológico completo
+## 18. Stack tecnológico completo
 
 ### Frontend
 
@@ -940,6 +1151,8 @@ pub fn get_persona(id: &str) -> Option<&'static Persona> {
 | llama-cpp-2 | 0.1 | Inferencia LLM (Qwen GGUF) |
 | whisper-rs | 0.16 | Speech-to-text (Whisper.cpp) |
 | rusqlite | 0.34 | Base de datos SQLite embebida |
+| reqwest | 0.12 | HTTP client para API del servidor |
+| tokio | 1 | Runtime async |
 | hf-hub | 0.4 | Descarga de modelos desde HuggingFace |
 | serde | 1.0 | Serialización/deserialización JSON |
 | bcrypt | 0.17 | Hashing de contraseñas |
@@ -948,6 +1161,15 @@ pub fn get_persona(id: &str) -> Option<&'static Persona> {
 | thiserror | 2.0 | Error handling ergonómico |
 | rand | 0.9 | Generación de números aleatorios (audio) |
 | log | 0.4 | Logging estructurado |
+
+### Backend Web (PHP)
+
+| Tecnología | Versión | Rol |
+|---|---|---|
+| PHP | 7.4+ | API REST, panel admin |
+| SQLite | 3 | Base de datos servidor (WAL mode) |
+| JWT HS256 | Puro PHP | Autenticación sin dependencias |
+| HTML/CSS/JS | Vanilla | Panel admin sin frameworks |
 
 ### Plugins Tauri
 
@@ -960,7 +1182,7 @@ pub fn get_persona(id: &str) -> Option<&'static Persona> {
 
 ---
 
-## 16. Estructura del proyecto
+## 19. Estructura del proyecto
 
 ```
 LabSim/
@@ -987,53 +1209,73 @@ LabSim/
 │   │   │   ├── agenda/                # Programación de citas
 │   │   │   └── json-output/           # Exportación de datos
 │   │   ├── components/                 # Componentes compartidos
-│   │   │   ├── audiometer/            # Audiómetro virtual (perillas, display, VU meter)
+│   │   │   ├── audiometer/            # Audiómetro virtual
 │   │   │   ├── chat/                  # Panel de chat con IA
+│   │   │   ├── clinical/             # Módulo clínico (Crear Casos)
 │   │   │   ├── layout/               # Desktop, Taskbar, WindowFrame
+│   │   │   ├── windows/              # Ventanas de la app
+│   │   │   │   ├── audiometer-placeholder.tsx
+│   │   │   │   ├── impedance-placeholder.tsx
+│   │   │   │   ├── perimetry-window.tsx
+│   │   │   │   ├── oct-window.tsx
+│   │   │   │   ├── larissa-window.tsx     # Fichas clínicas (estudiante)
+│   │   │   │   ├── center-window.tsx      # Modalidad Centro (boxes)
+│   │   │   │   ├── practice-sessions-window.tsx  # Sesiones prácticas
+│   │   │   │   ├── my-stats-window.tsx    # Estadísticas propias
+│   │   │   │   ├── agenda-window.tsx      # Agenda de atención
+│   │   │   │   ├── messaging-app.tsx      # Chat / Mensajería
+│   │   │   │   ├── settings-window.tsx    # Configuración
+│   │   │   │   └── window-content.tsx     # Registry de componentes
 │   │   │   └── ui/                   # shadcn/ui base components
-│   │   ├── stores/                     # Zustand stores
-│   │   │   ├── auth-store.ts          # Autenticación y roles
-│   │   │   ├── patient-store.ts       # Datos del paciente activo
-│   │   │   ├── chat-store.ts          # Conversaciones IA
+│   │   ├── stores/                     # Zustand stores (10)
+│   │   │   ├── auth-store.ts          # Autenticación (login servidor)
+│   │   │   ├── patient-store.ts       # Paciente + versionado
+│   │   │   ├── chat-store.ts          # Conversaciones IA (Karime, Docente)
 │   │   │   ├── ui-store.ts            # Estado de ventanas
 │   │   │   ├── theme-store.ts         # Tema y personalización
-│   │   │   └── audio-store.ts         # Estado de reproducción
+│   │   │   ├── audio-store.ts         # Estado de reproducción
+│   │   │   ├── sync-store.ts          # Conexión al servidor
+│   │   │   ├── telemetry-store.ts     # Eventos + flush automático
+│   │   │   ├── center-store.ts        # Modalidad Centro completa
+│   │   │   └── agenda-timer-store.ts  # Timer de Karime + feedback
 │   │   ├── charts/                     # Visualizaciones D3.js
 │   │   ├── hooks/                      # React hooks personalizados
 │   │   ├── lib/                        # Utilidades y constantes
-│   │   │   ├── constants.ts           # Frecuencias ISO, módulos, umbrales
-│   │   │   └── audiometer-config.ts   # Rangos de intensidad por transductor
-│   │   └── i18n/                       # Traducciones es/en
+│   │   └── locales/                    # Traducciones es/en
 │   ├── src-tauri/                      # Backend Rust
 │   │   ├── src/
-│   │   │   ├── lib.rs                 # Entry point, registro de comandos
+│   │   │   ├── lib.rs                 # Entry point (48 comandos registrados)
+│   │   │   ├── api/                   # HTTP client para backend web
+│   │   │   │   ├── mod.rs
+│   │   │   │   └── client.rs          # ApiClient (reqwest + JWT)
 │   │   │   ├── commands/              # Comandos Tauri (IPC)
-│   │   │   │   ├── auth.rs            # Login
+│   │   │   │   ├── auth.rs            # Login local
 │   │   │   │   ├── patients.rs        # CRUD pacientes
 │   │   │   │   ├── audio.rs           # play_tone, play_noise, stop
 │   │   │   │   ├── chat.rs            # LLM chat, modelos, descarga
-│   │   │   │   └── speech.rs          # Whisper recording/transcription
+│   │   │   │   ├── speech.rs          # Whisper recording/transcription
+│   │   │   │   ├── sync.rs            # 30 comandos API (centro, agenda, etc.)
+│   │   │   │   └── telemetry.rs       # 4 comandos de telemetría
 │   │   │   ├── audio/                 # Motor de audio
-│   │   │   │   ├── engine.rs          # AudioEngine (CPAL)
-│   │   │   │   ├── signals.rs         # Generadores (tono, ruidos)
-│   │   │   │   ├── dsp.rs             # Filtros biquad, envelope, dB→lin
-│   │   │   │   └── backend.rs         # Interfaz con hardware
-│   │   │   ├── llm/                   # Motor de lenguaje
-│   │   │   │   ├── mod.rs             # LlmEngine (llama.cpp)
-│   │   │   │   └── personas.rs        # Karime, Docente
-│   │   │   ├── speech/                # Reconocimiento de voz
-│   │   │   │   └── mod.rs             # SpeechEngine (whisper.cpp)
-│   │   │   ├── db/                    # Base de datos
-│   │   │   │   ├── mod.rs             # Database struct
-│   │   │   │   └── schema.rs          # Migraciones SQL
+│   │   │   ├── llm/                   # Motor de lenguaje (llama.cpp)
+│   │   │   ├── speech/                # Reconocimiento de voz (whisper)
+│   │   │   ├── db/                    # Base de datos local
 │   │   │   ├── models/                # Structs compartidos
-│   │   │   └── utils/                 # Utilidades Rust
+│   │   │   └── utils/
 │   │   ├── Cargo.toml                 # Dependencias Rust
 │   │   └── capabilities/             # Permisos Tauri
-│   ├── package.json                    # Dependencias JavaScript
-│   ├── vite.config.ts                  # Configuración Vite
-│   ├── tsconfig.json                   # Configuración TypeScript
-│   └── tailwind.config.ts             # Configuración Tailwind
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── tsconfig.json
+│   └── tailwind.config.ts
+├── labsim-backend/                     # Backend web (PHP 7.4+)
+│   ├── api/                            # 16 endpoints REST
+│   ├── admin/                          # Panel admin (10 páginas + CSS/JS)
+│   ├── core/                           # JWT, DB, auth, validators, upload
+│   ├── data/                           # SQLite servidor
+│   ├── uploads/                        # Guías, releases, assets
+│   ├── .htaccess                       # Routing + seguridad
+│   └── install.php                     # Setup inicial
 ├── src/                                # Legacy: PySide2 (v1.0)
 ├── web/                                # Legacy: documentación web (v2.0)
 └── README.md                           # Este archivo
@@ -1041,37 +1283,48 @@ LabSim/
 
 ---
 
-## 17. Roadmap
+## 20. Roadmap
+
+### Completado recientemente
+
+- [x] **Backend web** (PHP 7.4+ / SQLite): 16 endpoints REST, panel admin, JWT, 22 tablas
+- [x] **Larissa**: sistema de fichas clínicas del estudiante con versionado de pacientes
+- [x] **Modalidad Centro**: simulación de gestión de centro clínico con boxes, agenda real, incidentes dinámicos (40 templates), reuniones clínicas, chat grupal
+- [x] **Karime configurable**: directrices jerárquicas (admin > docente > instructor > sesión), 4 tonos, 5 niveles de presión
+- [x] **Telemetría**: tracking de eventos por simulador, tiempos por módulo, flush automático cada 30s
+- [x] **Feedback de pacientes**: reclamos y felicitaciones automáticos, panel de resumen para docentes
+- [x] **Cartera de procedimientos**: 17 procedimientos clínicos con duración estándar y equipo requerido
+- [x] **Sesiones prácticas**: flujo completo docente→instructor→estudiante con aprobación, guías, entregas, calificación
+- [x] **Conexión servidor**: login JWT, indicador de conexión en tiempo real, sync de casos y agenda
+- [x] **Rol instructor**: nuevo rol intermedio entre docente y estudiante
 
 ### Corto plazo — Consolidación
 
+- [ ] Deploy del backend a tmeduca.org
 - [ ] Pacientes virtuales con patologías pre-configuradas y respuestas automáticas
-- [ ] Modo examen: evaluación cronometrada con puntuación automática
 - [ ] Streaming de tokens LLM (respuesta en tiempo real, no batch)
 - [ ] Estéreo real: canal izquierdo / derecho independiente para simular lateralidad
 - [ ] Exportación de informes en PDF con formato clínico estándar
 
 ### Mediano plazo — Expansión otoneurológica y oftalmológica
 
-- [ ] **vHIT** (Video Head Impulse Test): simulación de respuestas por canal semicircular, gráficos de ganancia y saccades
-- [ ] **VNG / Videonistagmografía**: simulación de nistagmo espontáneo, posicional y calórico
-- [ ] **VEMP**: potenciales evocados miogénicos vestibulares cervicales y oculares
-- [ ] **Posturografía**: evaluación del control postural con análisis sensorial
-- [ ] **Tonometría**: simulación de medición de presión intraocular
-- [ ] **Fondo de ojo**: retinografía simulada con patologías (retinopatía diabética, degeneración macular, desprendimiento)
+- [ ] **vHIT** (Video Head Impulse Test): simulación de respuestas por canal semicircular
+- [ ] **VNG / Videonistagmografía**: nistagmo espontáneo, posicional y calórico
+- [ ] **VEMP**: potenciales evocados miogénicos vestibulares
+- [ ] **Posturografía**: control postural con análisis sensorial
+- [ ] **Tonometría**: presión intraocular
+- [ ] **Fondo de ojo**: retinografía simulada con patologías
 - [ ] Personas IA de pacientes otoneurológicos (vértigo, Ménière, VPPB)
 - [ ] Personas IA de pacientes oftalmológicos (glaucoma, diabético)
 
 ### Largo plazo — Plataforma multidisciplinaria
 
-- [ ] **Sistema de paquetes por especialidad**: cada área clínica se distribuye como un add-on independiente
-- [ ] **Marketplace de casos clínicos**: docentes crean y comparten pacientes virtuales con patologías configuradas
+- [ ] **Marketplace de casos clínicos**: docentes crean y comparten pacientes virtuales
 - [ ] Soporte GPU (CUDA/Metal) para inferencia LLM acelerada
 - [ ] Calibración acústica real con micrófono de referencia
 - [ ] Integración NOAH (estándar de la industria audiológica)
-- [ ] Aplicación móvil (Tauri 2 soporta iOS/Android experimentalmente)
-- [ ] Módulos para nuevas especialidades: fonoaudiología, neurofisiología, neumología (espirometría)
-- [ ] Modo multijugador: un estudiante opera, otro observa e interviene (rol docente)
+- [ ] Aplicación móvil (Tauri 2 soporta iOS/Android)
+- [ ] Módulos para nuevas especialidades: fonoaudiología, neurofisiología, neumología
 - [ ] Integración con LMS (Moodle, Canvas) para calificación automática
 
 ---

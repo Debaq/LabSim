@@ -1,5 +1,7 @@
 import { useAuthStore } from "@/stores/auth-store";
 import { useUIStore } from "@/stores/ui-store";
+import { useSyncStore } from "@/stores/sync-store";
+import { useChatStore } from "@/stores/chat-store";
 import { useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import {
@@ -26,6 +28,11 @@ import {
   MessageCircle,
   FolderOpen,
   FileText,
+  ClipboardList,
+  BarChart3,
+  CalendarDays,
+  ClipboardPen,
+  Building2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -40,6 +47,11 @@ const WINDOW_ICONS: Record<string, LucideIcon> = {
   "file-explorer": FolderOpen,
   "text-editor": FileText,
   settings: Settings,
+  "practice-sessions": ClipboardList,
+  "my-stats": BarChart3,
+  agenda: CalendarDays,
+  larissa: ClipboardPen,
+  center: Building2,
 };
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -52,10 +64,21 @@ export function Taskbar() {
   const openWindow = useUIStore((s) => s.openWindow);
   const focusWindow = useUIStore((s) => s.focusWindow);
   const restoreWindow = useUIStore((s) => s.restoreWindow);
+  const isOnline = useSyncStore((s) => s.isOnline);
+  const checkConnection = useSyncStore((s) => s.checkConnection);
+  const unreadCounts = useChatStore((s) => s.unreadCounts);
+  const totalUnread = Object.values(unreadCounts).reduce((sum, c) => sum + c, 0);
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Verificar conexión cada 60 segundos
+  useEffect(() => {
+    checkConnection();
+    const interval = setInterval(checkConnection, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -182,11 +205,52 @@ export function Taskbar() {
 
       {/* System Tray */}
       <div className="flex items-center gap-2 px-2">
+        {/* Accesos directos rápidos */}
         <Tooltip>
-          <TooltipTrigger className="cursor-default">
-            <Wifi className="h-3.5 w-3.5 ls-text-muted" />
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => openWindow("messaging", "Mensajes", "messaging", { width: 420, height: 620 })}
+              className="relative rounded p-1 transition hover:ls-bg-input"
+            >
+              <MessageCircle className={`h-3.5 w-3.5 ${totalUnread > 0 ? "text-green-300 animate-pulse" : "text-green-400"}`} />
+              {totalUnread > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white">
+                  {totalUnread > 9 ? "9+" : totalUnread}
+                </span>
+              )}
+            </button>
           </TooltipTrigger>
-          <TooltipContent side="top">Conectado</TooltipContent>
+          <TooltipContent side="top">
+            {totalUnread > 0 ? `Mensajes (${totalUnread} sin leer)` : "Mensajes"}
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => openWindow("agenda", "Agenda", "agenda", { width: 500, height: 450 })}
+              className="rounded p-1 transition hover:ls-bg-input"
+            >
+              <CalendarDays className="h-3.5 w-3.5 text-amber-400" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top">Agenda</TooltipContent>
+        </Tooltip>
+
+        <div className="mx-0.5 h-4 w-px ls-bg-input" />
+
+        <Tooltip>
+          <TooltipTrigger className="cursor-default" onClick={() => checkConnection()}>
+            <Wifi className={`h-3.5 w-3.5 ${
+              isOnline === "online" ? "text-green-400" :
+              isOnline === "checking" ? "text-yellow-400 animate-pulse" :
+              "text-red-400"
+            }`} />
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            {isOnline === "online" ? "Servidor conectado" :
+             isOnline === "checking" ? "Verificando conexión..." :
+             "Sin conexión al servidor"}
+          </TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger className="cursor-default">

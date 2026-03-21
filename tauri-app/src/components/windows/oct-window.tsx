@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BScanView } from "@/components/oct/bscan-view";
 import { RNFLTSNIT } from "@/components/oct/rnfl-tsnit";
 import { ThicknessMap } from "@/components/oct/thickness-map";
 import { ToggleSwitch } from "@/components/audiometer/toggle-switch";
 import { generateRNFLProfile, generateGCLIPL, RNFL_CLOCK_HOURS, RNFL_QUADRANTS, GCL_IPL_SECTORS, normativeColor, type Pathology } from "@/lib/oct-synthetic";
+import { usePatientStore } from "@/stores/patient-store";
 import { cn } from "@/lib/utils";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Link2, Link2Off } from "lucide-react";
 
 type ScanMode = "macula" | "disc";
 type ViewTab = "bscan" | "thickness" | "rnfl" | "gcl";
@@ -16,20 +17,46 @@ export function OCTWindow() {
   const [viewTab, setViewTab] = useState<ViewTab>("bscan");
   const [pathology, setPathology] = useState<Pathology>("normal");
   const [seed, setSeed] = useState(42);
+  const [signalOverride, setSignalOverride] = useState<number | null>(null);
+
+  // Read case config from patient store
+  const octConfig = usePatientStore((s) => s.data.oct);
+  const patientId = usePatientStore((s) => s.currentPatientId);
+  const hasCaseLoaded = patientId !== null && Object.keys(octConfig).length > 0;
+
+  // Sync from case when loaded
+  useEffect(() => {
+    if (!hasCaseLoaded) return;
+    const eyeKey = eye === "OD" ? "ojoDerecho" : "ojoIzquierdo";
+    const cfg = (octConfig as Record<string, Record<string, unknown>>)[eyeKey];
+    if (!cfg) return;
+
+    const patho = cfg.patologia as Pathology | undefined;
+    if (patho && patho !== pathology) setPathology(patho);
+
+    const scan = cfg.scanPreferido as string | undefined;
+    if (scan === "disco" || scan === "macula") setScanMode(scan === "disco" ? "disc" : "macula");
+
+    const q = cfg.calidadSenal as number | undefined;
+    setSignalOverride(q ?? null);
+
+    // Generate a deterministic seed from patient + eye for reproducibility
+    const seedBase = patientId ? patientId.split("").reduce((a, c) => a + c.charCodeAt(0), 0) : 42;
+    setSeed(seedBase + (eye === "OI" ? 1000 : 0));
+  }, [hasCaseLoaded, eye, octConfig, patientId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const regenerate = () => setSeed(Math.floor(Math.random() * 10000));
 
   const profile = generateRNFLProfile(seed, pathology);
   const gclData = generateGCLIPL(seed, pathology);
 
-  // Clock hour averages
   const clockAvg = (start: number, end: number) => {
     const pts = profile.filter((p) => p.angle >= start && p.angle < end);
     return pts.length > 0 ? Math.round(pts.reduce((s, p) => s + p.thickness, 0) / pts.length) : 0;
   };
 
   const globalAvg = Math.round(profile.reduce((s, p) => s + p.thickness, 0) / profile.length);
-  const signalQ = 7 + Math.floor((seed % 3));
+  const signalQ = signalOverride ?? (7 + Math.floor((seed % 3)));
 
   return (
     <div className="flex h-full flex-col ls-bg">
@@ -37,6 +64,16 @@ export function OCTWindow() {
       <div className="flex h-7 shrink-0 items-center justify-between ls-bg-panel2 px-3">
         <span className="text-xs font-bold tracking-[0.2em] ls-text-muted">LABSIM <span className="font-normal ls-text-muted">OCT SPECTRALIS</span></span>
         <div className="flex items-center gap-2 text-xs ls-text-muted">
+          {hasCaseLoaded ? (
+            <span className="flex items-center gap-1 text-emerald-400/70">
+              <Link2 className="h-3 w-3" /> Caso
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 ls-text-muted">
+              <Link2Off className="h-3 w-3" /> Libre
+            </span>
+          )}
+          <span>|</span>
           <span className={cn("font-bold", eye === "OD" ? "text-red-400/60" : "text-blue-400/60")}>{eye}</span>
           <span>|</span>
           <span>{scanMode === "disc" ? "Disco Óptico" : "Mácula"}</span>
@@ -67,17 +104,29 @@ export function OCTWindow() {
                 { value: "macula", label: "Mácula" },
               ]} />
             </div>
-            <div>
-              <div className="mb-0.5 text-xs uppercase ls-text-muted">Patología</div>
-              <div className="grid grid-cols-2 gap-0.5">
-                {(["normal", "glaucoma", "edema", "drusen", "epiretinal", "amd-dry", "amd-wet"] as Pathology[]).map((p) => {
-                  const labels: Record<Pathology, string> = { normal: "Normal", glaucoma: "Glauc", edema: "Edema", drusen: "Drusen", epiretinal: "ERM", "amd-dry": "DMAE-s", "amd-wet": "DMAE-h" };
-                  return <button key={p} onClick={() => { setPathology(p); regenerate(); }}
-                    className={cn("rounded border py-0.5 text-xs font-bold transition",
-                      pathology === p ? "border-amber-500/40 bg-amber-500/20 text-amber-300" : "ls-border ls-text-muted hover:ls-text-muted")}>{labels[p]}</button>;
-                })}
+
+            {!hasCaseLoaded && (
+              <div>
+                <div className="mb-0.5 text-xs uppercase ls-text-muted">Patología</div>
+                <div className="grid grid-cols-2 gap-0.5">
+                  {(["normal", "glaucoma", "edema", "drusen", "epiretinal", "amd-dry", "amd-wet"] as Pathology[]).map((p) => {
+                    const labels: Record<Pathology, string> = { normal: "Normal", glaucoma: "Glauc", edema: "Edema", drusen: "Drusen", epiretinal: "ERM", "amd-dry": "DMAE-s", "amd-wet": "DMAE-h" };
+                    return <button key={p} onClick={() => { setPathology(p); regenerate(); }}
+                      className={cn("rounded border py-0.5 text-xs font-bold transition",
+                        pathology === p ? "border-amber-500/40 bg-amber-500/20 text-amber-300" : "ls-border ls-text-muted hover:ls-text-muted")}>{labels[p]}</button>;
+                  })}
+                </div>
               </div>
-            </div>
+            )}
+
+            {hasCaseLoaded && (
+              <div className="rounded border border-emerald-500/20 bg-emerald-500/5 p-1.5">
+                <span className="text-xs text-emerald-400/80">
+                  Patología definida por el caso clínico
+                </span>
+              </div>
+            )}
+
             <button onClick={regenerate} className="flex w-full items-center justify-center gap-1 rounded border ls-border py-1 text-xs ls-text-muted hover:ls-bg-input">
               <RefreshCw className="h-2.5 w-2.5" /> Regenerar
             </button>

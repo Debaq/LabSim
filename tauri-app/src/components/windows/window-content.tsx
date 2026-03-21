@@ -8,6 +8,11 @@ import { MessagingApp } from "./messaging-app";
 import { PerimetryWindow } from "./perimetry-window";
 import { OCTWindow } from "./oct-window";
 import { SettingsWindow } from "./settings-window";
+import { PracticeSessionsWindow } from "./practice-sessions-window";
+import { MyStatsWindow } from "./my-stats-window";
+import { AgendaWindow } from "./agenda-window";
+import { LarissaWindow } from "./larissa-window";
+import { CenterWindow } from "./center-window";
 
 interface Props {
   component: string;
@@ -24,6 +29,11 @@ const componentMap: Record<string, React.ComponentType> = {
   perimetry: PerimetryWindow,
   oct: OCTWindow,
   settings: SettingsWindow,
+  "practice-sessions": PracticeSessionsWindow,
+  "my-stats": MyStatsWindow,
+  agenda: AgendaWindow,
+  larissa: LarissaWindow,
+  center: CenterWindow,
 };
 
 export function WindowContent({ component }: Props) {

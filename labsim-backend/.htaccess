@@ -1,0 +1,31 @@
+RewriteEngine On
+
+# Seguridad: bloquear acceso a directorios sensibles
+RewriteRule ^data/ - [F,L]
+RewriteRule ^core/ - [F,L]
+
+# Bloquear archivos de base de datos
+<FilesMatch "\.(db|sqlite|sqlite3)$">
+    Require all denied
+</FilesMatch>
+
+# Bloquear archivos ocultos
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# API routing: /api/v1/... -> api/index.php?route=...
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/v1/(.*)$ api/index.php?route=$1 [QSA,L]
+
+# Headers de seguridad
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "DENY"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Deshabilitar listado de directorios
+Options -Indexes

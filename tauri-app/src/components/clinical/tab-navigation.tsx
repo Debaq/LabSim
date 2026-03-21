@@ -14,6 +14,8 @@ import {
   BrainCircuit,
   Cable,
   Ear,
+  ScanEye,
+  Target,
   CalendarDays,
   FileJson,
 } from "lucide-react";
@@ -30,6 +32,8 @@ const moduleIcons: Record<ModuleId, LucideIcon> = {
   abr: BrainCircuit,
   electrocochleo: Cable,
   "hearing-aids": Ear,
+  oct: ScanEye,
+  "visual-field": Target,
   agenda: CalendarDays,
   "json-output": FileJson,
 };

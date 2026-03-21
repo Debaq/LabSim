@@ -13,6 +13,8 @@ const modules: Record<ModuleId, React.LazyExoticComponent<React.ComponentType>> 
   abr: lazy(() => import("@/modules/abr")),
   electrocochleo: lazy(() => import("@/modules/electrocochleo")),
   "hearing-aids": lazy(() => import("@/modules/hearing-aids")),
+  oct: lazy(() => import("@/modules/oct")),
+  "visual-field": lazy(() => import("@/modules/visual-field")),
   agenda: lazy(() => import("@/modules/agenda")),
   "json-output": lazy(() => import("@/modules/json-output")),
 };
