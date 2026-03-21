@@ -4,17 +4,18 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useChatStore } from "@/stores/chat-store";
 import { invoke } from "@tauri-apps/api/core";
 import { cn } from "@/lib/utils";
-import { Check, Palette, User, Info, BrainCircuit, Download, Loader2, Type, Monitor } from "lucide-react";
+import { Check, Palette, User, Info, BrainCircuit, Download, Loader2, Type, Monitor, Mic } from "lucide-react";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ModelInfo { id: string; name: string; sizeMb: number; filename: string; }
 
-type SettingsPage = "apariencia" | "ia" | "cuenta" | "acerca";
+type SettingsPage = "apariencia" | "ia" | "voz" | "cuenta" | "acerca";
 
 const PAGES: { id: SettingsPage; label: string; icon: React.ReactNode }[] = [
   { id: "apariencia", label: "Apariencia", icon: <Palette className="h-4 w-4" /> },
   { id: "ia", label: "Inteligencia Artificial", icon: <BrainCircuit className="h-4 w-4" /> },
+  { id: "voz", label: "Reconocimiento de Voz", icon: <Mic className="h-4 w-4" /> },
   { id: "cuenta", label: "Cuenta", icon: <User className="h-4 w-4" /> },
   { id: "acerca", label: "Acerca de", icon: <Info className="h-4 w-4" /> },
 ];
@@ -30,6 +31,10 @@ export function SettingsWindow() {
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [downloading, setDownloading] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [speechLoaded, setSpeechLoaded] = useState(false);
+  const [speechLoading, setSpeechLoading] = useState(false);
+
+  useEffect(() => { invoke<boolean>("speech_status").then(setSpeechLoaded).catch(() => {}); }, []);
 
   useEffect(() => { invoke<ModelInfo[]>("llm_list_models").then(setModels).catch(() => {}); }, []);
 
@@ -87,6 +92,17 @@ export function SettingsWindow() {
             models={models} llmConnected={llmConnected}
             downloading={downloading} downloadingId={downloadingId}
             onDownload={handleDownload} />}
+          {page === "voz" && <PageVoz speechLoaded={speechLoaded} speechLoading={speechLoading}
+            onLoad={async () => {
+              setSpeechLoading(true);
+              toast.info("Descargando Whisper tiny (75 MB)...");
+              try {
+                await invoke<boolean>("speech_load_model");
+                setSpeechLoaded(true);
+                toast.success("Reconocimiento de voz listo");
+              } catch (err) { toast.error(`Error: ${err}`); }
+              finally { setSpeechLoading(false); }
+            }} />}
           {page === "cuenta" && <PageCuenta username={username} role={role} />}
           {page === "acerca" && <PageAcerca />}
         </div>
@@ -218,6 +234,59 @@ function PageIA({ models, llmConnected, downloading, downloadingId, onDownload }
       <p className="mt-2 text-xs" style={{ color: "var(--ls-text-muted)" }}>
         Se descarga de HuggingFace (solo la primera vez). Se cachea en ~/.cache/huggingface/.
       </p>
+    </Card>
+  </>);
+}
+
+function PageVoz({ speechLoaded, speechLoading, onLoad }: {
+  speechLoaded: boolean; speechLoading: boolean; onLoad: () => void;
+}) {
+  return (<>
+    <PageTitle icon={<Mic className="h-5 w-5 text-rose-400" />} title="Reconocimiento de Voz" subtitle="Whisper para logoaudiometría y comandos de voz" />
+
+    <Card title="Estado del modelo">
+      <div className="flex items-center gap-3">
+        <div className={cn("h-3 w-3 rounded-full", speechLoaded ? "bg-emerald-400" : "ls-bg-input")} />
+        <span className="text-sm font-medium" style={{ color: speechLoaded ? "#22c55e" : "var(--ls-text-muted)" }}>
+          {speechLoaded ? "Whisper cargado y listo" : "Sin modelo — descarga para activar"}
+        </span>
+      </div>
+    </Card>
+
+    <Card title="Modelo">
+      <button disabled={speechLoading || speechLoaded} onClick={onLoad}
+        className="flex w-full items-center gap-3 rounded-lg border p-3 text-left transition hover:opacity-80"
+        style={{ borderColor: "var(--ls-border)", backgroundColor: "var(--ls-panel-secondary)" }}>
+        {speechLoading
+          ? <Loader2 className="h-5 w-5 shrink-0 animate-spin text-rose-400" />
+          : speechLoaded
+            ? <Check className="h-5 w-5 shrink-0 text-emerald-400" />
+            : <Download className="h-5 w-5 shrink-0" style={{ color: "var(--ls-text-muted)" }} />}
+        <div className="flex-1">
+          <p className="text-sm font-medium" style={{ color: "var(--ls-text)" }}>Whisper Tiny</p>
+          <p className="text-xs" style={{ color: "var(--ls-text-muted)" }}>75 MB · Multiidioma · Rápido en CPU</p>
+        </div>
+      </button>
+      <p className="mt-2 text-xs" style={{ color: "var(--ls-text-muted)" }}>
+        OpenAI Whisper (tiny) — reconoce español, inglés y más. Se descarga una vez.
+      </p>
+    </Card>
+
+    <Card title="Usos">
+      <div className="space-y-2 text-sm" style={{ color: "var(--ls-text-secondary)" }}>
+        <div className="flex items-start gap-2">
+          <span style={{ color: "var(--ls-accent)" }}>•</span>
+          <span><b>Logoaudiometría:</b> reconoce las palabras que repite el paciente</span>
+        </div>
+        <div className="flex items-start gap-2">
+          <span style={{ color: "var(--ls-accent)" }}>•</span>
+          <span><b>Comandos de voz:</b> "siguiente", "registrar", "sin respuesta"</span>
+        </div>
+        <div className="flex items-start gap-2">
+          <span style={{ color: "var(--ls-accent)" }}>•</span>
+          <span><b>Talkback:</b> detecta lo que el audiólogo dice al paciente</span>
+        </div>
+      </div>
     </Card>
   </>);
 }

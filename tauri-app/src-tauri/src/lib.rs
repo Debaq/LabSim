@@ -4,21 +4,28 @@ mod audio;
 mod models;
 mod utils;
 mod llm;
+mod speech;
 
 use db::Database;
 use llm::LlmState;
 use commands::audio::AudioState;
+use speech::SpeechState;
+use commands::speech::RecordingState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let db = Database::new().expect("Error inicializando base de datos");
     let llm = LlmState::new();
     let audio = AudioState::new();
+    let speech = SpeechState::new();
+    let recording = RecordingState::new();
 
     tauri::Builder::default()
         .manage(db)
         .manage(llm)
         .manage(audio)
+        .manage(speech)
+        .manage(recording)
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
@@ -46,6 +53,12 @@ pub fn run() {
             commands::chat::llm_download_model,
             commands::chat::llm_status,
             commands::chat::llm_chat,
+            commands::speech::speech_status,
+            commands::speech::speech_load_model,
+            commands::speech::speech_start_recording,
+            commands::speech::speech_stop_recording,
+            commands::speech::speech_transcribe,
+            commands::speech::speech_is_recording,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

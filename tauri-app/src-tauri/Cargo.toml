@@ -37,6 +37,9 @@ rand = "0.9"
 llama-cpp-2 = "0.1"
 hf-hub = "0.4"
 
+# Speech recognition (whisper.cpp via FFI)
+whisper-rs = "0.16"
+
 # Utilidades
 log = "0.4"
 bcrypt = "0.17"
