@@ -75,9 +75,10 @@ switch (true) {
         }
 
         $userId = Database::uuid();
+        $mustChange = isset($body['mustChangePassword']) ? (int)$body['mustChangePassword'] : 1;
         Database::execute(
-            "INSERT INTO users (id, username, email, password_hash, role, full_name, institution)
-             VALUES (:id, :username, :email, :hash, :role, :name, :inst)",
+            "INSERT INTO users (id, username, email, password_hash, role, full_name, institution, must_change_password)
+             VALUES (:id, :username, :email, :hash, :role, :name, :inst, :mcp)",
             [
                 ':id' => $userId,
                 ':username' => $body['username'],
@@ -86,6 +87,7 @@ switch (true) {
                 ':role' => $body['role'],
                 ':name' => $body['fullName'] ?? $body['full_name'] ?? null,
                 ':inst' => $body['institution'] ?? null,
+                ':mcp' => $mustChange,
             ]
         );
 
@@ -211,14 +213,14 @@ switch (true) {
         }
 
         Database::execute(
-            "UPDATE users SET password_hash = :hash, updated_at = datetime('now') WHERE id = :id",
+            "UPDATE users SET password_hash = :hash, must_change_password = 1, updated_at = datetime('now') WHERE id = :id",
             [':id' => $id, ':hash' => password_hash($body['password'], PASSWORD_BCRYPT)]
         );
 
         // Revocar refresh tokens para forzar re-login
         Database::execute('DELETE FROM refresh_tokens WHERE user_id = :uid', [':uid' => $id]);
 
-        json_response(['message' => 'Contraseña actualizada']);
+        json_response(['message' => 'Contraseña actualizada. El usuario deberá cambiarla al ingresar.']);
         break;
 
     default:

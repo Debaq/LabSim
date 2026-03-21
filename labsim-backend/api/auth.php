@@ -2,10 +2,11 @@
 /**
  * LabSim Backend - Auth endpoints
  *
- * POST /auth/login      → Login con username/password
- * POST /auth/refresh    → Refresh access token
- * POST /auth/logout     → Invalidar refresh token
- * GET  /auth/me         → Datos del usuario autenticado
+ * POST /auth/login            → Login con username/password
+ * POST /auth/refresh          → Refresh access token
+ * POST /auth/logout           → Invalidar refresh token
+ * POST /auth/change-password  → Cambiar contraseña propia
+ * GET  /auth/me               → Datos del usuario autenticado
  */
 
 require_once __DIR__ . '/../core/jwt.php';
@@ -26,7 +27,7 @@ switch ("$method:$action") {
         check_login_rate_limit($ip);
 
         $user = Database::fetchOne(
-            'SELECT id, username, password_hash, role, full_name, email, institution, is_active
+            'SELECT id, username, password_hash, role, full_name, email, institution, is_active, must_change_password
              FROM users WHERE username = :username',
             [':username' => $body['username']]
         );
@@ -67,6 +68,7 @@ switch ("$method:$action") {
                 'fullName' => $user['full_name'],
                 'email' => $user['email'],
                 'institution' => $user['institution'],
+                'mustChangePassword' => (bool)$user['must_change_password'],
             ],
         ]);
         break;
@@ -138,6 +140,35 @@ switch ("$method:$action") {
         }
 
         json_response(['message' => 'Sesión cerrada']);
+        break;
+
+    // ─── CAMBIAR CONTRASEÑA (cualquier usuario autenticado) ─
+    case 'POST:change-password':
+        $auth = require_auth();
+        $body = get_json_body();
+
+        $errors = validate_required($body, ['currentPassword', 'newPassword']);
+        $errors[] = validate_password($body['newPassword'] ?? '');
+        validate_or_fail($errors);
+
+        $user = Database::fetchOne(
+            'SELECT id, password_hash FROM users WHERE id = :id',
+            [':id' => $auth['sub']]
+        );
+
+        if (!$user || !password_verify($body['currentPassword'], $user['password_hash'])) {
+            error_response('Contraseña actual incorrecta', 401);
+        }
+
+        Database::execute(
+            "UPDATE users SET password_hash = :hash, must_change_password = 0, updated_at = datetime('now') WHERE id = :id",
+            [':id' => $auth['sub'], ':hash' => password_hash($body['newPassword'], PASSWORD_BCRYPT)]
+        );
+
+        // Revocar todos los refresh tokens para forzar re-login en otros dispositivos
+        Database::execute('DELETE FROM refresh_tokens WHERE user_id = :uid', [':uid' => $auth['sub']]);
+
+        json_response(['message' => 'Contraseña actualizada']);
         break;
 
     // ─── ME ──────────────────────────────────────────
