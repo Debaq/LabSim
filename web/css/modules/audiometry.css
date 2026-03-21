@@ -1,0 +1,212 @@
+/* Audiometry Module Styles */
+.audiometry-module {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+}
+
+.audiometry-layout {
+    display: flex;
+    gap: 30px;
+}
+
+.audiometry-forms {
+    flex: 2;
+    min-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.audiometry-preview {
+    flex: 3;
+    min-width: 500px;
+}
+
+.audiometry-controls {
+    margin-bottom: 15px;
+}
+
+.audiometry-section {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.audiometry-subtitle {
+    margin: 0 0 10px 0;
+    color: #495057;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.audiometry-note {
+    font-size: 12px;
+    color: #6c757d;
+    margin: 0 0 10px 0;
+    font-style: italic;
+}
+
+/* Tablas */
+.audiometry-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.audiometry-table th {
+    background: #e9ecef;
+    padding: 8px;
+    text-align: center;
+    border: 1px solid #dee2e6;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.audiometry-table td {
+    padding: 6px;
+    text-align: center;
+    border: 1px solid #dee2e6;
+    font-size: 12px;
+}
+
+.audiometry-table .freq-label {
+    background: #f8f9fa;
+    font-weight: 500;
+    text-align: left;
+    padding-left: 12px;
+}
+
+/* Colores de oídos */
+.audiometry-od {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.audiometry-oi {
+    color: #007bff;
+    font-weight: 600;
+}
+
+/* Inputs */
+.audiometry-input {
+    width: 60px;
+    padding: 4px 6px;
+    text-align: center;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 12px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.audiometry-input:focus {
+    outline: 0;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.audiometry-input.field-error {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.audiometry-input.field-success {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+/* Altas frecuencias */
+.high-freq-row {
+    background-color: #fff3cd;
+}
+
+.high-freq-row .freq-label {
+    background-color: #ffeaa7;
+}
+
+/* Textarea */
+.audiometry-textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.audiometry-textarea:focus {
+    outline: 0;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.audiometry-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    font-size: 13px;
+    color: #495057;
+}
+
+/* Preview */
+.audiometry-preview-container {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    text-align: center;
+}
+
+.audiometry-canvas-container {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    margin: 15px 0;
+    display: inline-block;
+}
+
+#audiogramCanvas {
+    display: block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .audiometry-layout {
+        flex-direction: column;
+    }
+    
+    .audiometry-forms,
+    .audiometry-preview {
+        min-width: unset;
+    }
+    
+    .audiometry-preview {
+        order: -1; /* Preview arriba en móvil */
+    }
+}
+
+@media (max-width: 768px) {
+    .audiometry-module {
+        padding: 10px;
+    }
+    
+    .audiometry-layout {
+        gap: 20px;
+    }
+    
+    .audiometry-table {
+        font-size: 11px;
+    }
+    
+    .audiometry-input {
+        width: 50px;
+        font-size: 11px;
+    }
+}
