@@ -1331,6 +1331,7 @@ LabSim/
 
 <p align="center">
   <sub>LabSim 3.0 — Plataforma de simulación clínica educativa</sub><br>
-  <sub>Audiología · Otoneurología · Oftalmología · y más</sub><br>
-  <sub>Desarrollado con Tauri, React y Rust — Licencia MIT</sub>
+  <sub>Audiología · Otoneurología · Oftalmología · Simulación de centro clínico</sub><br>
+  <sub>Creado por <strong>Nicolás Baier Quezada</strong></sub><br>
+  <sub>Desarrollado con Tauri, React, Rust y PHP — Licencia MIT</sub>
 </p>
