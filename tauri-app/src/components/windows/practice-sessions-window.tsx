@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSyncStore } from "@/stores/sync-store";
 import { usePatientStore } from "@/stores/patient-store";
-import { Calendar, Download, FileText, Send, Clock, ChevronRight } from "lucide-react";
+import { Calendar, Download, FileText, Clock, ChevronRight, Send, CheckCircle, Loader2 } from "lucide-react";
 
 interface Session {
   id: string;
@@ -38,9 +38,16 @@ export function PracticeSessionsWindow() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [submissions, setSubmissions] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState<string | null>(null);
   const getSessions = useSyncStore((s) => s.getSessions);
   const getSessionDetail = useSyncStore((s) => s.getSessionDetail);
+  const getSubmissions = useSyncStore((s) => s.getSubmissions);
+  const submitWork = useSyncStore((s) => s.submitWork);
   const loadCase = usePatientStore((s) => s.loadCase);
+  const caseInfo = usePatientStore((s) => s.caseInfo);
+  const mode = usePatientStore((s) => s.mode);
+  const getSnapshot = usePatientStore((s) => s.getSubmissionSnapshot);
 
   useEffect(() => {
     loadSessions();
@@ -63,12 +70,22 @@ export function PracticeSessionsWindow() {
     try {
       const detail = (await getSessionDetail(session.id)) as { session: Session };
       setSelectedSession(detail.session);
+
+      // Cargar estado de entregas
+      const subs = (await getSubmissions(session.id)) as {
+        items?: Array<{ case_id: string; status: string }>;
+      };
+      const statusMap: Record<string, string> = {};
+      for (const sub of subs?.items ?? []) {
+        statusMap[sub.case_id] = sub.status;
+      }
+      setSubmissions(statusMap);
     } catch {
       setSelectedSession(session);
     }
   }
 
-  function handleLoadCase(caseData: Session["cases"][0]) {
+  function handleLoadCase(caseData: NonNullable<Session["cases"]>[0]) {
     // Cargar caso en modo sesión: el estudiante recibe patientInfo + anamnesis,
     // pero los módulos de resultados llegan vacíos
     loadCase({
@@ -184,6 +201,19 @@ export function PracticeSessionsWindow() {
                       <p className="text-xs ls-text-muted mt-0.5">{c.description}</p>
                     )}
                   </div>
+                  {submissions[c.id] && (
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded flex items-center gap-0.5 ${
+                      submissions[c.id] === "reviewed" ? "bg-green-900/30 text-green-400" :
+                      submissions[c.id] === "submitted" ? "bg-blue-900/30 text-blue-400" :
+                      submissions[c.id] === "returned" ? "bg-amber-900/30 text-amber-400" :
+                      "bg-gray-900/30 text-gray-400"
+                    }`}>
+                      {submissions[c.id] === "reviewed" && <CheckCircle className="w-2.5 h-2.5" />}
+                      {submissions[c.id] === "reviewed" ? "Calificado" :
+                       submissions[c.id] === "submitted" ? "Enviado" :
+                       submissions[c.id] === "returned" ? "Devuelto" : "Borrador"}
+                    </span>
+                  )}
                   {c.difficulty && (
                     <span className={`text-xs px-2 py-0.5 rounded ${
                       c.difficulty === "hard" ? "bg-red-900/30 text-red-400" :
@@ -192,6 +222,34 @@ export function PracticeSessionsWindow() {
                     }`}>
                       {c.difficulty}
                     </span>
+                  )}
+                  {caseInfo?.caseId === c.id && mode === "session" && !submissions[c.id]?.match(/submitted|reviewed/) && (
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        setSubmitting(c.id);
+                        try {
+                          const snapshot = getSnapshot();
+                          await submitWork(
+                            selectedSession?.id ?? "",
+                            c.id,
+                            snapshot.data as unknown as Record<string, unknown>,
+                          );
+                          setSubmissions((prev) => ({ ...prev, [c.id]: "submitted" }));
+                        } catch { /* error silencioso */ } finally {
+                          setSubmitting(null);
+                        }
+                      }}
+                      disabled={submitting === c.id}
+                      className="shrink-0 px-2 py-1 text-[10px] rounded bg-indigo-600 text-white flex items-center gap-1 disabled:opacity-50"
+                    >
+                      {submitting === c.id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Send className="w-3 h-3" />
+                      )}
+                      Enviar
+                    </button>
                   )}
                   <ChevronRight className="w-4 h-4 ls-text-muted" />
                 </div>

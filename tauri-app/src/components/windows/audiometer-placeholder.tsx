@@ -5,13 +5,14 @@ import { UnifiedDisplay } from "@/components/audiometer/unified-display";
 import { VuMeter } from "@/components/audiometer/vu-meter";
 import { RotaryKnob } from "@/components/audiometer/rotary-knob";
 import { ToggleSwitch } from "@/components/audiometer/toggle-switch";
-import type { ChannelState, StimulusType, TransducerType, OutputType } from "@/components/audiometer/channel-strip";
+import type { ChannelState, StimulusType, TransducerType } from "@/components/audiometer/channel-strip";
 import {
   getIntensityRange, calibrateToStep, getFrequencyList, getEnabledStimuli,
   PULSATILE_ON, PULSATILE_OFF, ALTERNATE_IPSI, ALTERNATE_SILENCE,
 } from "@/lib/audiometer-config";
 import { cn } from "@/lib/utils";
 import { RotateCcw, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { TalkbackPanel } from "@/components/audiometer/talkback-panel";
 
 // === Components defined OUTSIDE the main component to avoid re-mounting ===
 function Tb({ on, click, children }: { on: boolean; click: () => void; children: React.ReactNode }) {
@@ -54,6 +55,8 @@ export function AudiometerPlaceholder() {
   const [logoN, setLogoN] = useState(25);
   const [secs, setSecs] = useState(0);
   const [timerOn, setTimerOn] = useState(false);
+  const [talkbackActive, setTalkbackActive] = useState(false);
+  const [talkbackLevel, setTalkbackLevel] = useState(10);
   const tmr = useRef<ReturnType<typeof setInterval>>(undefined);
   const v0 = useRef<ReturnType<typeof setInterval>>(undefined);
   const v1 = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -206,6 +209,12 @@ export function AudiometerPlaceholder() {
       }
     }, 100);
   }, [stopAlternate, startCh, stopCh]);
+
+  const handleTalkbackCommand = useCallback(async (command: string) => {
+    try {
+      await invoke("tts_speak", { text: command });
+    } catch { /* TTS no cargado */ }
+  }, []);
 
   // Stimulus press/release — reads from refs, no stale closures
   const handleStimPress = useCallback((chIdx: 0 | 1) => {
@@ -449,6 +458,14 @@ export function AudiometerPlaceholder() {
               </>
             )}
           </div>
+
+          <TalkbackPanel
+            level={talkbackLevel}
+            onLevelChange={setTalkbackLevel}
+            onCommand={handleTalkbackCommand}
+            isActive={talkbackActive}
+            onToggle={() => setTalkbackActive(!talkbackActive)}
+          />
         </div>
 
         <div className="flex h-5 shrink-0 items-center justify-between bg-black/25 px-3 text-xs ls-text-muted">

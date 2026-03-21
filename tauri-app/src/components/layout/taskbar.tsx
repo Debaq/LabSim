@@ -33,6 +33,7 @@ import {
   CalendarDays,
   ClipboardPen,
   Building2,
+  Eye,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -52,6 +53,7 @@ const WINDOW_ICONS: Record<string, LucideIcon> = {
   agenda: CalendarDays,
   larissa: ClipboardPen,
   center: Building2,
+  retinography: Eye,
 };
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -140,6 +142,9 @@ export function Taskbar() {
           <DropdownMenuItem onClick={() => openWindow("oct", "OCT", "oct", { width: 800, height: 520 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
             <Layers className="mr-2 h-4 w-4 text-pink-400" />OCT
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openWindow("retinography", "Retinógrafo", "retinography", { width: 720, height: 540 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
+            <Eye className="mr-2 h-4 w-4 text-red-400" />Retinógrafo
+          </DropdownMenuItem>
           <DropdownMenuSeparator className="ls-bg-input" />
 
           {/* Herramientas */}
@@ -207,7 +212,7 @@ export function Taskbar() {
       <div className="flex items-center gap-2 px-2">
         {/* Accesos directos rápidos */}
         <Tooltip>
-          <TooltipTrigger asChild>
+          <TooltipTrigger>
             <button
               onClick={() => openWindow("messaging", "Mensajes", "messaging", { width: 420, height: 620 })}
               className="relative rounded p-1 transition hover:ls-bg-input"
@@ -225,7 +230,7 @@ export function Taskbar() {
           </TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger asChild>
+          <TooltipTrigger>
             <button
               onClick={() => openWindow("agenda", "Agenda", "agenda", { width: 500, height: 450 })}
               className="rounded p-1 transition hover:ls-bg-input"

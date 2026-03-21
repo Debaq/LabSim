@@ -5,12 +5,14 @@ mod models;
 mod utils;
 mod llm;
 mod speech;
+mod tts;
 mod api;
 
 use db::Database;
 use llm::LlmState;
 use commands::audio::AudioState;
 use speech::SpeechState;
+use tts::TtsState;
 use commands::speech::RecordingState;
 use api::client::ApiClient;
 
@@ -20,6 +22,7 @@ pub fn run() {
     let llm = LlmState::new();
     let audio = AudioState::new();
     let speech = SpeechState::new();
+    let tts = TtsState::new();
     let recording = RecordingState::new();
     let api_client = ApiClient::new();
 
@@ -28,6 +31,7 @@ pub fn run() {
         .manage(llm)
         .manage(audio)
         .manage(speech)
+        .manage(tts)
         .manage(recording)
         .manage(api_client)
         .plugin(tauri_plugin_fs::init())
@@ -63,6 +67,12 @@ pub fn run() {
             commands::speech::speech_stop_recording,
             commands::speech::speech_transcribe,
             commands::speech::speech_is_recording,
+            // TTS (Piper)
+            commands::tts::tts_list_models,
+            commands::tts::tts_status,
+            commands::tts::tts_download_model,
+            commands::tts::tts_load_model,
+            commands::tts::tts_speak,
             // API / Sync
             commands::sync::api_login,
             commands::sync::api_logout,

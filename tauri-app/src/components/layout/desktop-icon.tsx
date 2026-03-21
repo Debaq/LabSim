@@ -33,7 +33,6 @@ export function DesktopIcon({ label, icon: Icon, color, onOpen }: DesktopIconPro
   // Check if icon color conflicts with desktop background
   const safeColor = useMemo(() => {
     const bg = getComputedStyle(document.documentElement).getPropertyValue("--ls-desktop-bg").trim();
-    const desktopText = getComputedStyle(document.documentElement).getPropertyValue("--ls-desktop-text").trim();
     if (!bg) return color;
 
     // Map tailwind color classes to approximate hex

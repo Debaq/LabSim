@@ -11,6 +11,7 @@ import {
   BarChart3,
   ClipboardPen,
   Building2,
+  Eye,
 } from "lucide-react";
 
 interface DesktopItem {
@@ -52,6 +53,13 @@ const desktopItems: DesktopItem[] = [
     icon: Layers,
     component: "oct",
     color: "text-pink-400",
+  },
+  {
+    id: "retinography",
+    label: "Retinógrafo",
+    icon: Eye,
+    component: "retinography",
+    color: "text-red-400",
   },
   {
     id: "larissa",
@@ -113,7 +121,9 @@ export function DesktopArea({ className }: Props) {
             ? { width: 750, height: 550 }
             : item.id === "oct"
               ? { width: 800, height: 520 }
-              : undefined;
+              : item.id === "retinography"
+                ? { width: 720, height: 540 }
+                : undefined;
     openWindow(item.id, item.label, item.component, opts);
   };
 

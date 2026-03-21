@@ -260,7 +260,7 @@ export const useAgendaTimerStore = create<AgendaTimerState>((set, get) => ({
   },
 
   endAppointment: () => {
-    const { activeAppointment, checkInterval, alertsSent } = get();
+    const { activeAppointment, checkInterval } = get();
     if (!activeAppointment?.startedAt) return;
 
     if (checkInterval) clearInterval(checkInterval);

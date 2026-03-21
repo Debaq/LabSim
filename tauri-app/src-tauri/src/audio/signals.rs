@@ -82,7 +82,7 @@ impl Signal for PureTone {
         let mut block = vec![0.0_f32; n];
 
         if self.fm_dev != 0.0 {
-            let fm_inc = pi2 * self.fm_rate / sr;
+            let _fm_inc = pi2 * self.fm_rate / sr;
             for i in 0..n {
                 let t = (self.emitted + i) as f32 / sr;
                 let inst_freq = self.freq + self.fm_dev * (pi2 * self.fm_rate * t + self.fm_phase).sin();
@@ -239,8 +239,6 @@ pub struct SpeechNoise {
     hp: Biquad,
     bp: Biquad,
     lp: Biquad,
-    initialized: bool,
-    sample_rate: u32,
 }
 
 impl SpeechNoise {
@@ -251,8 +249,6 @@ impl SpeechNoise {
         Self {
             white: WhiteNoise::new(duration, level_dbfs),
             hp, bp, lp,
-            initialized: true,
-            sample_rate,
         }
     }
 }
@@ -283,6 +279,65 @@ impl Signal for SpeechNoise {
         }
 
         Some(result)
+    }
+}
+
+// =====================
+// Raw Samples (TTS output)
+// =====================
+
+pub struct RawSamplesSignal {
+    samples: Vec<f32>,
+    source_rate: u32,
+    pos: f64,
+    block_size: usize,
+}
+
+impl RawSamplesSignal {
+    pub fn new(samples: Vec<f32>, source_rate: u32) -> Self {
+        Self {
+            samples,
+            source_rate,
+            pos: 0.0,
+            block_size: 1024,
+        }
+    }
+}
+
+impl Signal for RawSamplesSignal {
+    fn next_block(&mut self, sample_rate: u32) -> Option<Vec<f32>> {
+        let src_len = self.samples.len();
+        if src_len == 0 || self.pos >= src_len as f64 {
+            return None;
+        }
+
+        let ratio = self.source_rate as f64 / sample_rate as f64;
+        let mut block = Vec::with_capacity(self.block_size);
+
+        for _ in 0..self.block_size {
+            if self.pos >= src_len as f64 {
+                break;
+            }
+
+            let idx = self.pos as usize;
+            let frac = self.pos - idx as f64;
+
+            // Linear interpolation for resampling
+            let sample = if idx + 1 < src_len {
+                self.samples[idx] as f64 * (1.0 - frac) + self.samples[idx + 1] as f64 * frac
+            } else {
+                self.samples[idx] as f64
+            };
+
+            block.push(sample as f32);
+            self.pos += ratio;
+        }
+
+        if block.is_empty() {
+            None
+        } else {
+            Some(block)
+        }
     }
 }
 

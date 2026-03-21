@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 pub struct Persona {
     pub id: &'static str,
     pub name: &'static str,

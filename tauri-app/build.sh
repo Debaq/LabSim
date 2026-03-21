@@ -23,7 +23,7 @@ npx tsc --noEmit
 
 # Build
 echo "→ Compilando frontend + backend..."
-npx tauri build
+npx tauri build --no-bundle
 
 echo ""
 echo "╔══════════════════════════════╗"

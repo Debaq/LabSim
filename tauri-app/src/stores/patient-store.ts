@@ -14,6 +14,8 @@ export interface PatientData {
   hearingAids: Record<string, unknown>;
   oct: Record<string, unknown>;
   visualField: Record<string, unknown>;
+  retinography: Record<string, unknown>;
+  cornealTopography: Record<string, unknown>;
 }
 
 /**
@@ -74,6 +76,8 @@ const emptyData: PatientData = {
   hearingAids: {},
   oct: {},
   visualField: {},
+  retinography: {},
+  cornealTopography: {},
 };
 
 /** Módulos que el docente puede propagar a los estudiantes */
@@ -94,6 +98,8 @@ const STUDENT_WORK_MODULES: (keyof PatientData)[] = [
   "hearingAids",
   "oct",
   "visualField",
+  "retinography",
+  "cornealTopography",
 ];
 
 export const usePatientStore = create<PatientState>()(

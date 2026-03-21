@@ -101,7 +101,7 @@ function defectSensitivity(
   let sensitivity = norm - loss + noise;
 
   // Apply MD target adjustment if specified
-  if (mdTarget !== null && defect !== "normal") {
+  if (mdTarget !== null) {
     const currentDev = sensitivity - norm;
     const targetDev = mdTarget; // MD is negative for loss
     const adjustment = (targetDev - currentDev) * 0.3;

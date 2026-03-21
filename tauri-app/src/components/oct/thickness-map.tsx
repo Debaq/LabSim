@@ -7,17 +7,6 @@ interface ThicknessMapProps {
   showColors?: boolean;
 }
 
-const SECTOR_LAYOUT = [
-  { key: "outerSup",  cx: 0, cy: -3, r1: 2.5, r2: 4, a1: -60, a2: 60 },
-  { key: "outerNas",  cx: 3, cy: 0,  r1: 2.5, r2: 4, a1: 30, a2: 150 },
-  { key: "outerInf",  cx: 0, cy: 3,  r1: 2.5, r2: 4, a1: 120, a2: 240 },
-  { key: "outerTemp", cx: -3, cy: 0, r1: 2.5, r2: 4, a1: 210, a2: 330 },
-  { key: "innerSup",  cx: 0, cy: -1.5, r1: 0.8, r2: 2.5, a1: -60, a2: 60 },
-  { key: "innerNas",  cx: 1.5, cy: 0, r1: 0.8, r2: 2.5, a1: 30, a2: 150 },
-  { key: "innerInf",  cx: 0, cy: 1.5, r1: 0.8, r2: 2.5, a1: 120, a2: 240 },
-  { key: "innerTemp", cx: -1.5, cy: 0, r1: 0.8, r2: 2.5, a1: 210, a2: 330 },
-  { key: "fovea",     cx: 0, cy: 0, r1: 0, r2: 0.8, a1: 0, a2: 360 },
-];
 
 export function ThicknessMap({ seed, pathology, showColors = true }: ThicknessMapProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);

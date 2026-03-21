@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/auth-store";
 import { useSyncStore } from "@/stores/sync-store";
 import { invoke } from "@tauri-apps/api/core";
-import { CalendarDays, Clock, RotateCcw, Plus, Users } from "lucide-react";
+import { useAgendaTimerStore } from "@/stores/agenda-timer-store";
+import { CalendarDays, Clock, RotateCcw, Users } from "lucide-react";
 
 interface AgendaItem {
   id: string;
@@ -68,20 +69,28 @@ export function AgendaWindow() {
 
   async function handleReschedule() {
     if (!rescheduleItem || !newDate || !newTime) return;
+    setError(null);
     try {
-      // Crear item de reagendamiento
-      await invoke("api_push_case", {
-        caseData: {
-          // Usa el endpoint de agenda via sync
-        },
+      await invoke("api_reschedule_appointment", {
+        appointmentId: rescheduleItem.id,
+        scheduledDate: newDate,
+        scheduledTime: newTime,
       });
-      // Por ahora usar el endpoint directo de agenda
+
+      // Consecuencia: posible queja del paciente (según pressureLevel)
+      if (rescheduleItem.patient_name) {
+        useAgendaTimerStore.getState().triggerRescheduleConsequence(
+          rescheduleItem.patient_name,
+          rescheduleItem.id,
+        );
+      }
+
       setRescheduleItem(null);
       setNewDate("");
       setNewTime("");
       await loadAgenda();
-    } catch {
-      // fallback silencioso
+    } catch (e) {
+      setError(`Error al reagendar: ${e}`);
     }
   }
 

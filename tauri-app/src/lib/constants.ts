@@ -22,6 +22,7 @@ export const MODULE_IDS = [
   "hearing-aids",
   "oct",
   "visual-field",
+  "corneal-topography",
   "agenda",
   "json-output",
 ] as const;
@@ -41,6 +42,7 @@ export const MODULE_LABELS: Record<ModuleId, string> = {
   "hearing-aids": "Audífonos",
   oct: "OCT",
   "visual-field": "Campo Visual",
+  "corneal-topography": "Topografía Corneal",
   agenda: "Agenda",
   "json-output": "Exportar JSON",
 };

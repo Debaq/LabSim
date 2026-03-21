@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCenterStore } from "@/stores/center-store";
 import {
@@ -47,8 +47,8 @@ export function CenterWindow() {
   const isStaff = role === "admin" || role === "docente" || role === "instructor";
 
   const {
-    sessionId, boxes, incidents, meetings, chatMessages, templates, isActive,
-    initCenter, stopCenter, refreshBoxes, refreshIncidents,
+    boxes, incidents, meetings, chatMessages, templates, isActive, scheduledIncidents,
+    initCenter, stopCenter, refreshBoxes,
     createBoxes, assignStudentToBox, injectIncident, resolveIncident, discussIncident,
     callMeeting, startMeeting, endMeeting,
     sendChatMessage, startPatientAttention, endPatientAttention, loadTemplates,
@@ -67,6 +67,10 @@ export function CenterWindow() {
   const [customDesc, setCustomDesc] = useState("");
   const [customSeverity, setCustomSeverity] = useState("moderate");
 
+  // Schedule form
+  const [schedTemplate, setSchedTemplate] = useState("");
+  const [schedMinutes, setSchedMinutes] = useState(15);
+
   // Meeting form
   const [meetingTitle, setMeetingTitle] = useState("");
   const [meetingAgenda, setMeetingAgenda] = useState("");
@@ -76,6 +80,9 @@ export function CenterWindow() {
 
   // Resolve
   const [resolveNotes, setResolveNotes] = useState("");
+
+  // Assign student
+  const [assignInput, setAssignInput] = useState("");
 
   const selectedBox = boxes.find((b) => b.id === selectedBoxId);
   const activeIncidents = incidents.filter((i) => i.status === "active");
@@ -210,6 +217,70 @@ export function CenterWindow() {
             </button>
           </div>
         </div>
+
+        {/* Programar inyección automática */}
+        <div className="border-t ls-border pt-3 mt-3">
+          <h4 className="text-xs font-semibold ls-text-muted mb-2 flex items-center gap-1">
+            <Clock className="w-3 h-3" /> Programar inyección automática
+          </h4>
+          <select
+            value={schedTemplate}
+            onChange={(e) => setSchedTemplate(e.target.value)}
+            className="w-full px-2 py-1.5 text-xs rounded ls-bg-input border ls-border ls-text mb-2"
+          >
+            <option value="">Seleccionar incidente...</option>
+            {templates.map((t) => (
+              <option key={t.id} value={t.id}>{t.title} ({t.severity})</option>
+            ))}
+          </select>
+          <div className="flex gap-2 items-center mb-2">
+            <label className="text-xs ls-text-muted">Activar en:</label>
+            <input
+              type="number"
+              min={1}
+              max={120}
+              value={schedMinutes}
+              onChange={(e) => setSchedMinutes(Number(e.target.value))}
+              className="w-20 px-2 py-1 text-xs rounded ls-bg-input border ls-border ls-text"
+            />
+            <span className="text-xs ls-text-muted">min desde inicio</span>
+          </div>
+          <button
+            onClick={() => {
+              const tpl = templates.find((t) => t.id === schedTemplate);
+              if (tpl) {
+                scheduleIncidents([...scheduledIncidents, { ...tpl, trigger_time_minutes: schedMinutes }]);
+                setSchedTemplate("");
+                setSchedMinutes(15);
+              }
+            }}
+            disabled={!schedTemplate}
+            className="px-3 py-1 text-xs rounded bg-amber-600 text-white disabled:opacity-40"
+          >
+            Programar
+          </button>
+
+          {scheduledIncidents.length > 0 && (
+            <div className="mt-3 space-y-1">
+              <h5 className="text-[10px] font-semibold ls-text-muted uppercase">
+                Programados ({scheduledIncidents.length})
+              </h5>
+              {scheduledIncidents.map((inc, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs p-1.5 rounded ls-bg-input">
+                  <Clock className="w-3 h-3 text-amber-400" />
+                  <span className="ls-text flex-1">{inc.title}</span>
+                  <span className="ls-text-muted">@{inc.trigger_time_minutes}min</span>
+                  <button
+                    onClick={() => scheduleIncidents(scheduledIncidents.filter((_, j) => j !== i))}
+                    className="text-red-400 hover:text-red-300 text-xs"
+                  >
+                    x
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -331,6 +402,33 @@ export function CenterWindow() {
           <span className="text-xs ls-text-muted">{selectedBox.student_name ?? "Sin asignar"}</span>
         </div>
 
+        {/* Asignar estudiante */}
+        {isStaff && !selectedBox.student_id && (
+          <div className="flex gap-2 mb-3 items-center">
+            <input
+              type="text"
+              value={assignInput}
+              onChange={(e) => setAssignInput(e.target.value)}
+              placeholder="Username del estudiante"
+              className="flex-1 px-2 py-1.5 text-xs rounded ls-bg-input border ls-border ls-text"
+            />
+            <button
+              onClick={async () => {
+                const username = assignInput.trim();
+                if (username) {
+                  await assignStudentToBox(selectedBox.id, username);
+                  setAssignInput("");
+                  await refreshBoxes();
+                }
+              }}
+              disabled={!assignInput.trim()}
+              className="px-3 py-1.5 text-xs rounded bg-indigo-600 text-white disabled:opacity-40"
+            >
+              Asignar
+            </button>
+          </div>
+        )}
+
         {/* Incidentes del box */}
         {selectedBox.incidents.filter((i) => i.status === "active").map((inc) => (
           <div key={inc.id} className={`border-l-2 rounded p-3 mb-2 ${severityColors[inc.severity]}`}>
@@ -339,8 +437,15 @@ export function CenterWindow() {
               <span className="text-sm font-medium ls-text">{inc.title}</span>
             </div>
             <p className="text-xs ls-text-muted">{inc.description}</p>
+            <textarea
+              value={resolveNotes}
+              onChange={(e) => setResolveNotes(e.target.value)}
+              placeholder="Notas de resolución..."
+              rows={2}
+              className="w-full px-2 py-1.5 text-xs rounded ls-bg-input border ls-border ls-text mt-2"
+            />
             <div className="flex gap-2 mt-2">
-              <button onClick={() => resolveIncident(inc.id, resolveNotes)} className="px-2 py-1 text-[10px] rounded bg-green-700 text-white flex items-center gap-0.5">
+              <button onClick={() => { resolveIncident(inc.id, resolveNotes); setResolveNotes(""); }} className="px-2 py-1 text-[10px] rounded bg-green-700 text-white flex items-center gap-0.5">
                 <CheckCircle2 className="w-2.5 h-2.5" /> Resolver
               </button>
               <button onClick={() => discussIncident(inc.id)} className="px-2 py-1 text-[10px] rounded bg-indigo-700 text-white flex items-center gap-0.5">

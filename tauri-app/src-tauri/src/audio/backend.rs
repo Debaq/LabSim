@@ -1,5 +1,5 @@
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use cpal::{SampleFormat, StreamConfig};
+use cpal::StreamConfig;
 use std::sync::mpsc;
 use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 
@@ -39,6 +39,7 @@ impl AudioBackend {
         self.config.sample_rate.0
     }
 
+    #[allow(dead_code)]
     pub fn is_playing(&self) -> bool {
         self.playing.load(Ordering::Relaxed)
     }
@@ -133,6 +134,7 @@ impl AudioBackend {
         stream.play().map_err(|e| format!("Error play: {}", e))?;
 
         // Wrap stream in a Send-safe container
+        #[allow(dead_code)]
         struct SendStream(cpal::Stream);
         unsafe impl Send for SendStream {}
 

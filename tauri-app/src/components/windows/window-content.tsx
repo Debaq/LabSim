@@ -13,6 +13,7 @@ import { MyStatsWindow } from "./my-stats-window";
 import { AgendaWindow } from "./agenda-window";
 import { LarissaWindow } from "./larissa-window";
 import { CenterWindow } from "./center-window";
+import { RetinographyWindow } from "./retinography-window";
 
 interface Props {
   component: string;
@@ -34,6 +35,7 @@ const componentMap: Record<string, React.ComponentType> = {
   agenda: AgendaWindow,
   larissa: LarissaWindow,
   center: CenterWindow,
+  retinography: RetinographyWindow,
 };
 
 export function WindowContent({ component }: Props) {

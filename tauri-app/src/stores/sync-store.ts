@@ -36,9 +36,10 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   },
 
   syncCases: async (since) => {
+    const effectiveSince = since ?? get().lastSync ?? undefined;
     set({ isSyncing: true });
     try {
-      const result = await invoke("api_sync_cases", { since });
+      const result = await invoke("api_sync_cases", { since: effectiveSince });
       set({ lastSync: new Date().toISOString(), isSyncing: false });
       return result;
     } catch (e) {

@@ -40,6 +40,11 @@ hf-hub = "0.4"
 # Speech recognition (whisper.cpp via FFI)
 whisper-rs = "0.16"
 
+# TTS (Piper via ONNX)
+piper-rs = "0.1"
+ort = "=2.0.0-rc.9"
+ort-sys = "=2.0.0-rc.9"
+
 # HTTP client
 reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
 tokio = { version = "1", features = ["full"] }

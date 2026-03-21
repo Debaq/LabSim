@@ -5,25 +5,27 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useChatStore } from "@/stores/chat-store";
 import { invoke } from "@tauri-apps/api/core";
 import { cn } from "@/lib/utils";
-import { Check, Palette, User, Info, BrainCircuit, Download, Loader2, Type, Monitor, Mic, Maximize, Minimize } from "lucide-react";
+import { Check, Palette, User, Info, BrainCircuit, Download, Loader2, Monitor, Mic, Volume2, Maximize, Minimize } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ModelInfo { id: string; name: string; sizeMb: number; filename: string; }
+interface TtsModelInfo { id: string; name: string; sizeMb: number; onnxPath: string; configPath: string; }
 
-type SettingsPage = "apariencia" | "ia" | "voz" | "cuenta" | "acerca";
+type SettingsPage = "apariencia" | "ia" | "voz" | "tts" | "cuenta" | "acerca";
 
 const PAGES: { id: SettingsPage; label: string; icon: React.ReactNode }[] = [
   { id: "apariencia", label: "Apariencia", icon: <Palette className="h-4 w-4" /> },
   { id: "ia", label: "Inteligencia Artificial", icon: <BrainCircuit className="h-4 w-4" /> },
   { id: "voz", label: "Reconocimiento de Voz", icon: <Mic className="h-4 w-4" /> },
+  { id: "tts", label: "Síntesis de Voz", icon: <Volume2 className="h-4 w-4" /> },
   { id: "cuenta", label: "Cuenta", icon: <User className="h-4 w-4" /> },
   { id: "acerca", label: "Acerca de", icon: <Info className="h-4 w-4" /> },
 ];
 
 export function SettingsWindow() {
-  const { theme, setTheme, fontSize, setFontSize, wallpaperColor, setWallpaperColor, autoLoadLlm, setAutoLoadLlm, autoLoadSpeech, setAutoLoadSpeech } = useThemeStore();
+  const { theme, setTheme, fontSize, setFontSize, wallpaperColor, setWallpaperColor, autoLoadLlm, setAutoLoadLlm, autoLoadSpeech, setAutoLoadSpeech, autoLoadTts, setAutoLoadTts } = useThemeStore();
   const username = useAuthStore((s) => s.username);
   const role = useAuthStore((s) => s.role);
   const llmConnected = useChatStore((s) => s.llmConnected);
@@ -35,8 +37,14 @@ export function SettingsWindow() {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [speechLoaded, setSpeechLoaded] = useState(false);
   const [speechLoading, setSpeechLoading] = useState(false);
+  const [ttsLoaded, setTtsLoaded] = useState(false);
+  const [ttsLoading, setTtsLoading] = useState(false);
+  const [ttsModels, setTtsModels] = useState<TtsModelInfo[]>([]);
+  const [ttsDownloadingIdx, setTtsDownloadingIdx] = useState<number | null>(null);
 
   useEffect(() => { invoke<boolean>("speech_status").then(setSpeechLoaded).catch(() => {}); }, []);
+  useEffect(() => { invoke<boolean>("tts_status").then(setTtsLoaded).catch(() => {}); }, []);
+  useEffect(() => { invoke<TtsModelInfo[]>("tts_list_models").then(setTtsModels).catch(() => {}); }, []);
 
   useEffect(() => { invoke<ModelInfo[]>("llm_list_models").then(setModels).catch(() => {}); }, []);
 
@@ -106,6 +114,23 @@ export function SettingsWindow() {
                 toast.success("Reconocimiento de voz listo");
               } catch (err) { toast.error(`Error: ${err}`); }
               finally { setSpeechLoading(false); }
+            }} />}
+          {page === "tts" && <PageTts
+            models={ttsModels} ttsLoaded={ttsLoaded} ttsLoading={ttsLoading}
+            downloadingIdx={ttsDownloadingIdx}
+            autoLoad={autoLoadTts} setAutoLoad={setAutoLoadTts}
+            onDownload={async (idx: number, model: TtsModelInfo) => {
+              setTtsDownloadingIdx(idx);
+              setTtsLoading(true);
+              toast.info(`Descargando ${model.name}...`);
+              try {
+                const configPath = await invoke<string>("tts_download_model", { modelIndex: idx });
+                toast.info("Cargando modelo TTS...");
+                await invoke<boolean>("tts_load_model", { configPath });
+                setTtsLoaded(true);
+                toast.success(`${model.name} — Síntesis de voz lista`);
+              } catch (err) { toast.error(`Error: ${err}`); }
+              finally { setTtsLoading(false); setTtsDownloadingIdx(null); }
             }} />}
           {page === "cuenta" && <PageCuenta username={username} role={role} />}
           {page === "acerca" && <PageAcerca />}
@@ -416,6 +441,98 @@ function PageVoz({ speechLoaded, speechLoading, onLoad, autoLoad, setAutoLoad }:
         <div className="flex items-start gap-2">
           <span style={{ color: "var(--ls-accent)" }}>•</span>
           <span><b>Talkback:</b> detecta voz del audiólogo</span>
+        </div>
+      </div>
+    </Card>
+  </>);
+}
+
+function PageTts({ models, ttsLoaded, ttsLoading, downloadingIdx, onDownload, autoLoad, setAutoLoad }: {
+  models: TtsModelInfo[]; ttsLoaded: boolean; ttsLoading: boolean; downloadingIdx: number | null;
+  onDownload: (idx: number, m: TtsModelInfo) => void; autoLoad: boolean; setAutoLoad: (v: boolean) => void;
+}) {
+  const [testText, setTestText] = useState("");
+  const [speaking, setSpeaking] = useState(false);
+
+  const handleSpeak = async () => {
+    if (!testText.trim()) return;
+    setSpeaking(true);
+    try {
+      await invoke("tts_speak", { text: testText });
+    } catch (err) { toast.error(`Error: ${err}`); }
+    finally { setSpeaking(false); }
+  };
+
+  return (<>
+    <PageTitle icon={<Volume2 className="h-5 w-5 text-cyan-400" />} title="Síntesis de Voz" subtitle="Piper TTS para voz de pacientes y Karime" />
+
+    <Card title="Estado">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className={cn("h-3 w-3 rounded-full", ttsLoaded ? "bg-emerald-400" : "ls-bg-input")} />
+          <span className="text-sm font-medium" style={{ color: ttsLoaded ? "#22c55e" : "var(--ls-text-muted)" }}>
+            {ttsLoaded ? "Piper TTS activo" : "Sin modelo"}
+          </span>
+        </div>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <Checkbox checked={autoLoad} onCheckedChange={(v) => setAutoLoad(v === true)} />
+          <span className="text-xs" style={{ color: "var(--ls-text-secondary)" }}>Cargar al iniciar</span>
+        </label>
+      </div>
+    </Card>
+
+    <Card title="Voces disponibles">
+      <div className="space-y-1.5">
+        {models.map((model, idx) => {
+          const isDownloading = downloadingIdx === idx;
+          return (
+            <button key={model.id} disabled={ttsLoading} onClick={() => onDownload(idx, model)}
+              className="flex w-full items-center gap-3 rounded-lg border p-3 text-left transition hover:opacity-80"
+              style={{ borderColor: "var(--ls-border)", backgroundColor: "var(--ls-panel-secondary)" }}>
+              {isDownloading
+                ? <Loader2 className="h-5 w-5 shrink-0 animate-spin text-cyan-400" />
+                : <Download className="h-5 w-5 shrink-0" style={{ color: "var(--ls-text-muted)" }} />}
+              <div className="flex-1">
+                <p className="text-sm font-medium" style={{ color: "var(--ls-text)" }}>{model.name}</p>
+                <p className="text-xs" style={{ color: "var(--ls-text-muted)" }}>
+                  {model.sizeMb} MB · Offline · CPU
+                </p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </Card>
+
+    {ttsLoaded && (
+      <Card title="Probar voz">
+        <div className="space-y-2">
+          <textarea value={testText} onChange={(e) => setTestText(e.target.value)}
+            placeholder="Escribe algo para escuchar la voz..."
+            className="w-full rounded-lg border p-2 text-sm resize-none h-16 ls-bg-input ls-border ls-text"
+            style={{ backgroundColor: "var(--ls-input)" }} />
+          <button onClick={handleSpeak} disabled={speaking || !testText.trim()}
+            className="rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:opacity-80"
+            style={{ borderColor: "var(--ls-accent)", color: "var(--ls-accent)" }}>
+            {speaking ? "Hablando..." : "Escuchar"}
+          </button>
+        </div>
+      </Card>
+    )}
+
+    <Card title="Usos">
+      <div className="space-y-2 text-sm" style={{ color: "var(--ls-text-secondary)" }}>
+        <div className="flex items-start gap-2">
+          <span style={{ color: "var(--ls-accent)" }}>•</span>
+          <span><b>Pacientes:</b> respuestas habladas durante la consulta</span>
+        </div>
+        <div className="flex items-start gap-2">
+          <span style={{ color: "var(--ls-accent)" }}>•</span>
+          <span><b>Karime:</b> mensajes de voz de la secretaria</span>
+        </div>
+        <div className="flex items-start gap-2">
+          <span style={{ color: "var(--ls-accent)" }}>•</span>
+          <span><b>Logoaudiometría:</b> palabras habladas para el paciente</span>
         </div>
       </div>
     </Card>

@@ -44,6 +44,7 @@ impl ApiClient {
         self.tokens.lock().unwrap().as_ref().map(|t| t.access_token.clone())
     }
 
+    #[allow(dead_code)]
     pub fn set_base_url(&self, url: &str) {
         *self.base_url.lock().unwrap() = url.to_string();
     }
@@ -116,6 +117,7 @@ impl ApiClient {
     }
 
     /// DELETE request con JWT automático
+    #[allow(dead_code)]
     pub async fn delete(&self, route: &str) -> Result<serde_json::Value, String> {
         let mut req = self.client.delete(self.get_url(route));
 

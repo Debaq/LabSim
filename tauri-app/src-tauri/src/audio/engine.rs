@@ -17,6 +17,7 @@ impl AudioEngine {
         })
     }
 
+    #[allow(dead_code)]
     pub fn sample_rate(&self) -> u32 {
         self.sample_rate
     }
@@ -67,11 +68,18 @@ impl AudioEngine {
         backend.play(Box::new(noise))
     }
 
+    pub fn play_raw_samples(&self, samples: Vec<f32>, source_sample_rate: u32) -> Result<(), String> {
+        let signal = RawSamplesSignal::new(samples, source_sample_rate);
+        let mut backend = self.backend.lock().unwrap();
+        backend.play(Box::new(signal))
+    }
+
     pub fn stop(&self) {
         let mut backend = self.backend.lock().unwrap();
         backend.stop();
     }
 
+    #[allow(dead_code)]
     pub fn is_playing(&self) -> bool {
         let backend = self.backend.lock().unwrap();
         backend.is_playing()
