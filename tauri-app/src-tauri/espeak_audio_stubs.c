@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-typedef struct {} audio_object;
+typedef struct { char _unused; } audio_object;
 
 void* create_audio_device_object(const char* device, const char* app, const char* desc) {
     (void)device; (void)app; (void)desc;
