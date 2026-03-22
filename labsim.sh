@@ -7,6 +7,7 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 APP="$ROOT/tauri-app"
 BACKEND="$ROOT/labsim-backend"
 OUTPUT="$ROOT/output"
+TARGET="${CARGO_TARGET_DIR:-$APP/src-tauri/target}"
 
 # ─── Colores ──────────────────────────────────────────
 RED='\033[0;31m'
@@ -85,15 +86,24 @@ cmd_build() {
   mkdir -p "$out_dir"
 
   # Copiar binario
-  local bin="$APP/src-tauri/target/release/labsim"
-  if [ -f "$bin" ]; then
+  local bin=""
+  for name in labsim LabSim lab-sim; do
+    if [ -f "$TARGET/release/$name" ]; then
+      bin="$TARGET/release/$name"
+      break
+    fi
+  done
+  if [ -n "$bin" ]; then
     cp "$bin" "$out_dir/"
-    local size=$(du -h "$out_dir/labsim" | cut -f1)
-    ok "Binario: $size → output/$timestamp/labsim"
+    local bname=$(basename "$bin")
+    local size=$(du -h "$out_dir/$bname" | cut -f1)
+    ok "Binario: $size → output/$timestamp/$bname"
+  else
+    warn "No se encontró binario en $TARGET/release/"
   fi
 
   # Copiar paquetes
-  local bundle_dir="$APP/src-tauri/target/release/bundle"
+  local bundle_dir="$TARGET/release/bundle"
   if [ -d "$bundle_dir" ]; then
     find "$bundle_dir" -maxdepth 2 -type f \( -name "*.deb" -o -name "*.AppImage" -o -name "*.rpm" -o -name "*.dmg" -o -name "*.msi" \) 2>/dev/null | while read -r f; do
       cp "$f" "$out_dir/"
@@ -133,11 +143,20 @@ cmd_build_fast() {
   local out_dir="$OUTPUT/$timestamp"
   mkdir -p "$out_dir"
 
-  local bin="$APP/src-tauri/target/release/labsim"
-  if [ -f "$bin" ]; then
+  local bin=""
+  for name in labsim LabSim lab-sim; do
+    if [ -f "$TARGET/release/$name" ]; then
+      bin="$TARGET/release/$name"
+      break
+    fi
+  done
+  if [ -n "$bin" ]; then
     cp "$bin" "$out_dir/"
-    local size=$(du -h "$out_dir/labsim" | cut -f1)
-    ok "Binario: $size → output/$timestamp/labsim"
+    local bname=$(basename "$bin")
+    local size=$(du -h "$out_dir/$bname" | cut -f1)
+    ok "Binario: $size → output/$timestamp/$bname"
+  else
+    warn "No se encontró binario en $TARGET/release/"
   fi
 }
 
@@ -179,7 +198,7 @@ cmd_clean() {
       [ -d "$APP/.vite" ] && rm -rf "$APP/.vite" && ok "Caché Vite eliminado"
       ;;
     2)
-      local target="$APP/src-tauri/target"
+      local target="$TARGET"
       if [ -d "$target" ]; then
         local size=$(du -sh "$target" | cut -f1)
         warn "target/ ocupa $size"
@@ -203,7 +222,7 @@ cmd_clean() {
     4)
       [ -d "$APP/node_modules" ] && rm -rf "$APP/node_modules" && ok "node_modules eliminado"
       [ -d "$APP/.vite" ] && rm -rf "$APP/.vite" && ok "Caché Vite eliminado"
-      [ -d "$APP/src-tauri/target" ] && rm -rf "$APP/src-tauri/target" && ok "target/ eliminado"
+      [ -d "$TARGET" ] && rm -rf "$TARGET" && ok "target/ eliminado"
       [ -d "$OUTPUT" ] && rm -rf "$OUTPUT" && ok "output/ eliminado"
       ;;
     *) info "Cancelado" ;;
@@ -248,7 +267,7 @@ cmd_status() {
   info "Rust: $rust_size"
   info "Backend: $backend_size"
 
-  [ -d "$APP/src-tauri/target" ] && info "Build cache: $(du -sh "$APP/src-tauri/target" | cut -f1)"
+  [ -d "$TARGET" ] && info "Build cache: $(du -sh "$TARGET" | cut -f1)"
   [ -d "$APP/node_modules" ] && info "node_modules: $(du -sh "$APP/node_modules" | cut -f1)"
 
   if [ -d "$OUTPUT" ]; then
