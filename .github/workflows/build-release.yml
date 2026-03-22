@@ -2,6 +2,7 @@ name: Build & Release
 
 on:
   push:
+    branches: [labsim_tauri]
     tags: ['v*']
   workflow_dispatch:
 
