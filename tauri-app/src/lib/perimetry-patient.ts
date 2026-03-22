@@ -315,8 +315,6 @@ export function estimateThreshold(
   const { presentations } = state;
   if (presentations.length === 0) return 0;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _cfg = STAIRCASE_CONFIGS[strategy];
   const reversals: number[] = [];
 
   for (let i = 1; i < presentations.length; i++) {

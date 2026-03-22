@@ -106,10 +106,10 @@ export function VNGWindow() {
         };
         return { type: "nystagmus" as const, trace: generateSpontaneousNystagmus(params, 10000, seed), label: hasFix ? "Espontáneo con fijación" : "Espontáneo sin fijación" };
       }
-      case "caloric-rw": return { type: "caloric" as const, result: generateCaloricResponse("derecho", "caliente", cal.rightWarmSpv ?? 30, "moderado", seed) };
-      case "caloric-rc": return { type: "caloric" as const, result: generateCaloricResponse("derecho", "fria", cal.rightCoolSpv ?? 25, "moderado", seed + 1) };
-      case "caloric-lw": return { type: "caloric" as const, result: generateCaloricResponse("izquierdo", "caliente", cal.leftWarmSpv ?? 28, "moderado", seed + 2) };
-      case "caloric-lc": return { type: "caloric" as const, result: generateCaloricResponse("izquierdo", "fria", cal.leftCoolSpv ?? 26, "moderado", seed + 3) };
+      case "caloric-rw": return { type: "caloric" as const, result: generateCaloricResponse("derecho", "caliente", cal.rightWarmSpv ?? 30, seed) };
+      case "caloric-rc": return { type: "caloric" as const, result: generateCaloricResponse("derecho", "fria", cal.rightCoolSpv ?? 25, seed + 1) };
+      case "caloric-lw": return { type: "caloric" as const, result: generateCaloricResponse("izquierdo", "caliente", cal.leftWarmSpv ?? 28, seed + 2) };
+      case "caloric-lc": return { type: "caloric" as const, result: generateCaloricResponse("izquierdo", "fria", cal.leftCoolSpv ?? 26, seed + 3) };
 
       default: {
         // Posicionales

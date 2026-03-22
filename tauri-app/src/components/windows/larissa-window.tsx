@@ -5,7 +5,6 @@ import {
   type Evolution,
   type Interconsultation,
 } from "@/stores/larissa-store";
-import { useAuthStore } from "@/stores/auth-store";
 import { useLiveSessionStore } from "@/stores/live-session-store";
 import { useChatStore } from "@/stores/chat-store";
 import { Button } from "@/components/ui/button";
@@ -123,8 +122,6 @@ export function LarissaWindow() {
     createEvolution,
     createInterconsultation,
   } = useLarissaStore();
-
-  const role = useAuthStore((s) => s.role);
 
   // Live session
   const activePatientId = useLiveSessionStore((s) => s.activePatientId);

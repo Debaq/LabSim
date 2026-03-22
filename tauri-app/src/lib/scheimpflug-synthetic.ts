@@ -60,8 +60,6 @@ export function generateCrossSection(
   // Radios de curvatura (derivados de K)
   const k1Ant = config.k1Anterior ?? 43.5 + (r() - 0.5) * 1.5;
   const rAnt = 337.5 / k1Ant; // radio anterior en mm
-  const k1Post = config.k1Posterior ?? -6.4 + (r() - 0.5) * 0.3;
-  const _rPost = 337.5 / Math.abs(k1Post);
 
   // Generar superficies
   const anteriorSurface: { x: number; y: number }[] = [];
@@ -108,8 +106,7 @@ export function generateCrossSection(
     // Cristalino (solo zona central, ±3mm)
     if (Math.abs(x) <= 3.5) {
       const xLens = x / 3.5;
-      const _lensRant = 10 + (r() - 0.5) * 1; // radio anterior cristalino ~10mm
-      const _lensRpost = -6 + (r() - 0.5) * 0.5; // radio posterior ~-6mm
+      r(); r(); // consume RNG para determinismo
 
       const yLensAnt = yPost + acd + (xLens * xLens) * 0.3;
       const yLensPost = yLensAnt + lensThickness - (xLens * xLens) * 0.5;

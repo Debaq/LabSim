@@ -13,11 +13,6 @@ function rng(seed: number) {
   return () => { s = (s * 1664525 + 1013904223) & 0xFFFFFFFF; return (s >>> 0) / 0xFFFFFFFF; };
 }
 
-type Severity = "leve" | "moderado" | "severo";
-function sevFactor(sev: Severity): number {
-  return sev === "leve" ? 0.35 : sev === "moderado" ? 0.65 : 1.0;
-}
-
 // ─── Tipos compartidos ───────────────────────────────
 
 export interface EyeTracePoint {
@@ -105,11 +100,9 @@ export function generateCaloricResponse(
   temperature: "caliente" | "fria",
   /** SPV pico real del paciente (°/s). Normal: 15-50. Arreflexia: <5 */
   peakSpv: number,
-  severity: Severity,
   seed: number,
 ): CaloricResult {
   const r = rng(seed);
-  const _sf = sevFactor(severity);
   const durationMs = 180000; // 3 minutos
   const step = 10;
   const points: EyeTracePoint[] = [];
