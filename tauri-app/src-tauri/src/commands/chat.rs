@@ -2,12 +2,23 @@ use serde::{Deserialize, Serialize};
 use tauri::State;
 use crate::llm::LlmState;
 use crate::llm::personas;
+use crate::llm::patient_persona;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SendMessageRequest {
     pub persona_id: String,
     pub messages: Vec<ChatMessageDto>,
+    /// Contexto del paciente (solo cuando personaId = "patient")
+    pub patient_context: Option<PatientContext>,
+}
+
+#[derive(Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct PatientContext {
+    pub personality: serde_json::Value,
+    pub patient_info: serde_json::Value,
+    pub interaction_logs: Vec<String>,
 }
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -123,12 +134,28 @@ pub async fn llm_chat(llm: State<'_, LlmState>, request: SendMessageRequest) -> 
             return Err("Modelo no cargado. Descargue uno primero.".to_string());
         }
 
-        let persona = personas::get_persona(&request.persona_id)
-            .ok_or(format!("Persona '{}' no encontrada", request.persona_id))?;
+        // Determinar system prompt, temperature y max_tokens
+        let (system_prompt, temperature, max_tokens) = if request.persona_id == "patient" {
+            // Paciente dinámico: generar prompt desde contexto
+            let ctx = request.patient_context.as_ref()
+                .ok_or("Se requiere patientContext para el paciente".to_string())?;
+            let prompt = patient_persona::build_patient_prompt(
+                &ctx.personality,
+                &ctx.patient_info,
+                &ctx.interaction_logs,
+            );
+            let (temp, tokens) = patient_persona::get_patient_config();
+            (prompt, temp, tokens)
+        } else {
+            // Persona estática (Karime, Docente)
+            let persona = personas::get_persona(&request.persona_id)
+                .ok_or(format!("Persona '{}' no encontrada", request.persona_id))?;
+            (persona.system_prompt.to_string(), persona.temperature, persona.max_tokens)
+        };
 
         // Build chat prompt in ChatML format (used by Qwen)
         // /no_think disables Qwen3's thinking mode for faster, direct responses
-        let mut prompt = format!("<|im_start|>system\n{}\n/no_think<|im_end|>\n", persona.system_prompt);
+        let mut prompt = format!("<|im_start|>system\n{}\n/no_think<|im_end|>\n", system_prompt);
 
         for msg in &request.messages {
             let role = match msg.role.as_str() {
@@ -140,7 +167,7 @@ pub async fn llm_chat(llm: State<'_, LlmState>, request: SendMessageRequest) -> 
         }
         prompt.push_str("<|im_start|>assistant\n");
 
-        eng.generate(&prompt, persona.max_tokens, persona.temperature)
+        eng.generate(&prompt, max_tokens, temperature)
     })
     .await
     .map_err(|e| format!("Error en hilo: {}", e))?

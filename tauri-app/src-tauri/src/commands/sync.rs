@@ -54,6 +54,20 @@ pub async fn api_logout(api: State<'_, ApiClient>) -> Result<(), String> {
     Ok(())
 }
 
+/// Cambiar contraseña del usuario actual
+#[tauri::command]
+pub async fn api_change_password(
+    api: State<'_, ApiClient>,
+    current_password: String,
+    new_password: String,
+) -> Result<serde_json::Value, String> {
+    let body = json!({
+        "currentPassword": current_password,
+        "newPassword": new_password,
+    });
+    api.post("auth/change-password", &body).await
+}
+
 /// Sincronizar casos: pull del servidor
 #[tauri::command]
 pub async fn api_sync_cases(
@@ -74,6 +88,386 @@ pub async fn api_push_case(
     case_data: serde_json::Value,
 ) -> Result<serde_json::Value, String> {
     api.post("cases", &case_data).await
+}
+
+// ═══════════════════════════════════════════════════
+// GESTIONAR PACIENTES (CRUD de casos)
+// ═══════════════════════════════════════════════════
+
+/// Listar casos con filtros
+#[tauri::command]
+pub async fn api_list_cases(
+    api: State<'_, ApiClient>,
+    search: Option<String>,
+    published: Option<String>,
+    difficulty: Option<String>,
+    archived: Option<String>,
+    page: Option<u32>,
+    limit: Option<u32>,
+) -> Result<serde_json::Value, String> {
+    let mut params = vec![];
+    if let Some(s) = search { params.push(format!("search={}", s)); }
+    if let Some(p) = published { params.push(format!("published={}", p)); }
+    if let Some(d) = difficulty { params.push(format!("difficulty={}", d)); }
+    if let Some(a) = archived { params.push(format!("archived={}", a)); }
+    if let Some(pg) = page { params.push(format!("page={}", pg)); }
+    if let Some(l) = limit { params.push(format!("limit={}", l)); }
+    let route = if params.is_empty() {
+        "cases".to_string()
+    } else {
+        format!("cases&{}", params.join("&"))
+    };
+    api.get(&route).await
+}
+
+/// Obtener detalle de un caso
+#[tauri::command]
+pub async fn api_get_case(
+    api: State<'_, ApiClient>,
+    case_id: String,
+) -> Result<serde_json::Value, String> {
+    api.get(&format!("cases/{}", case_id)).await
+}
+
+/// Actualizar caso existente
+#[tauri::command]
+pub async fn api_update_case(
+    api: State<'_, ApiClient>,
+    case_id: String,
+    case_data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.put(&format!("cases/{}", case_id), &case_data).await
+}
+
+/// Eliminar caso
+#[tauri::command]
+pub async fn api_delete_case(
+    api: State<'_, ApiClient>,
+    case_id: String,
+) -> Result<serde_json::Value, String> {
+    api.delete(&format!("cases/{}", case_id)).await
+}
+
+/// Publicar/despublicar caso
+#[tauri::command]
+pub async fn api_toggle_publish(
+    api: State<'_, ApiClient>,
+    case_id: String,
+) -> Result<serde_json::Value, String> {
+    api.put(&format!("cases/{}/publish", case_id), &json!({})).await
+}
+
+/// Archivar/desarchivar caso
+#[tauri::command]
+pub async fn api_toggle_archive(
+    api: State<'_, ApiClient>,
+    case_id: String,
+) -> Result<serde_json::Value, String> {
+    api.put(&format!("cases/{}/archive", case_id), &json!({})).await
+}
+
+// ═══════════════════════════════════════════════════
+// LARISSA: EVOLUCIONES E INTERCONSULTAS
+// ═══════════════════════════════════════════════════
+
+/// Listar evoluciones de una cita
+#[tauri::command]
+pub async fn api_list_evolutions(
+    api: State<'_, ApiClient>,
+    agenda_item_id: String,
+) -> Result<serde_json::Value, String> {
+    api.get(&format!("evolutions&agenda_item_id={}", agenda_item_id)).await
+}
+
+/// Crear evolución clínica
+#[tauri::command]
+pub async fn api_create_evolution(
+    api: State<'_, ApiClient>,
+    evolution: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.post("evolutions", &evolution).await
+}
+
+/// Editar evolución
+#[tauri::command]
+pub async fn api_update_evolution(
+    api: State<'_, ApiClient>,
+    evolution_id: String,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.put(&format!("evolutions/{}", evolution_id), &data).await
+}
+
+/// Listar interconsultas de una cita
+#[tauri::command]
+pub async fn api_list_interconsultations(
+    api: State<'_, ApiClient>,
+    agenda_item_id: String,
+) -> Result<serde_json::Value, String> {
+    api.get(&format!("interconsultations&agenda_item_id={}", agenda_item_id)).await
+}
+
+/// Crear interconsulta
+#[tauri::command]
+pub async fn api_create_interconsultation(
+    api: State<'_, ApiClient>,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.post("interconsultations", &data).await
+}
+
+// ═══════════════════════════════════════════════════
+// CURSOS E INSCRIPCIÓN
+// ═══════════════════════════════════════════════════
+
+/// Listar cursos
+#[tauri::command]
+pub async fn api_list_courses(
+    api: State<'_, ApiClient>,
+    institution_id: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let route = match institution_id {
+        Some(iid) => format!("courses&institution_id={}", iid),
+        None => "courses".to_string(),
+    };
+    api.get(&route).await
+}
+
+/// Detalle de un curso
+#[tauri::command]
+pub async fn api_get_course(
+    api: State<'_, ApiClient>,
+    course_id: String,
+) -> Result<serde_json::Value, String> {
+    api.get(&format!("courses/{}", course_id)).await
+}
+
+/// Crear curso
+#[tauri::command]
+pub async fn api_create_course(
+    api: State<'_, ApiClient>,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.post("courses", &data).await
+}
+
+/// Actualizar curso
+#[tauri::command]
+pub async fn api_update_course(
+    api: State<'_, ApiClient>,
+    course_id: String,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.put(&format!("courses/{}", course_id), &data).await
+}
+
+/// Inscribir estudiante en curso
+#[tauri::command]
+pub async fn api_enroll_student(
+    api: State<'_, ApiClient>,
+    course_id: String,
+    user_id: String,
+    role: Option<String>,
+) -> Result<serde_json::Value, String> {
+    api.post(&format!("courses/{}/members", course_id), &json!({
+        "userId": user_id,
+        "role": role.unwrap_or_else(|| "estudiante".to_string()),
+    })).await
+}
+
+/// Quitar estudiante de curso
+#[tauri::command]
+pub async fn api_remove_student(
+    api: State<'_, ApiClient>,
+    course_id: String,
+    user_id: String,
+) -> Result<serde_json::Value, String> {
+    api.delete(&format!("courses/{}/members/{}", course_id, user_id)).await
+}
+
+/// Import masivo de estudiantes (CSV)
+#[tauri::command]
+pub async fn api_import_students(
+    api: State<'_, ApiClient>,
+    course_id: String,
+    students: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.post(&format!("courses/{}/import", course_id), &json!({
+        "students": students,
+    })).await
+}
+
+/// Listar estudiantes de la institución
+#[tauri::command]
+pub async fn api_list_institution_students(
+    api: State<'_, ApiClient>,
+    search: Option<String>,
+    institution_id: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let mut params = vec!["role=estudiante".to_string()];
+    if let Some(s) = search { params.push(format!("search={}", s)); }
+    if let Some(iid) = institution_id { params.push(format!("institution_id={}", iid)); }
+    api.get(&format!("users&{}", params.join("&"))).await
+}
+
+/// Crear estudiante (como docente)
+#[tauri::command]
+pub async fn api_create_student(
+    api: State<'_, ApiClient>,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.post("users", &data).await
+}
+
+// ═══════════════════════════════════════════════════
+// STATS DEL CENTRO
+// ═══════════════════════════════════════════════════
+
+/// Estadísticas del centro (incidentes, reuniones, planes, validaciones)
+#[tauri::command]
+pub async fn api_get_center_stats(
+    api: State<'_, ApiClient>,
+    session_id: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let route = match session_id {
+        Some(sid) => format!("stats/center&sessionId={}", sid),
+        None => "stats/center".to_string(),
+    };
+    api.get(&route).await
+}
+
+// ═══════════════════════════════════════════════════
+// CENTRO: PLANES DE MEJORA
+// ═══════════════════════════════════════════════════
+
+/// Listar planes de mejora de una sesión
+#[tauri::command]
+pub async fn api_get_plans(
+    api: State<'_, ApiClient>,
+    session_id: String,
+) -> Result<serde_json::Value, String> {
+    api.get(&format!("center/plans&sessionId={}", session_id)).await
+}
+
+/// Crear plan de mejora
+#[tauri::command]
+pub async fn api_create_plan(
+    api: State<'_, ApiClient>,
+    plan: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.post("center/plans", &plan).await
+}
+
+/// Actualizar plan de mejora
+#[tauri::command]
+pub async fn api_update_plan(
+    api: State<'_, ApiClient>,
+    plan_id: String,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.put(&format!("center/plans/{}", plan_id), &data).await
+}
+
+/// Completar tarea de plan
+#[tauri::command]
+pub async fn api_complete_task(
+    api: State<'_, ApiClient>,
+    task_id: String,
+) -> Result<serde_json::Value, String> {
+    api.post(&format!("center/plans/{}/complete", task_id), &json!({})).await
+}
+
+// ═══════════════════════════════════════════════════
+// SUPERVISIÓN: VALIDACIONES
+// ═══════════════════════════════════════════════════
+
+/// Listar validaciones pendientes
+#[tauri::command]
+pub async fn api_get_validations(
+    api: State<'_, ApiClient>,
+    status: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let route = match status {
+        Some(s) => format!("center/validations&status={}", s),
+        None => "center/validations".to_string(),
+    };
+    api.get(&route).await
+}
+
+/// Solicitar validación (estudiante)
+#[tauri::command]
+pub async fn api_request_validation(
+    api: State<'_, ApiClient>,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.post("center/validations", &data).await
+}
+
+/// Resolver validación (docente)
+#[tauri::command]
+pub async fn api_resolve_validation(
+    api: State<'_, ApiClient>,
+    validation_id: String,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.put(&format!("center/validations/{}", validation_id), &data).await
+}
+
+// ═══════════════════════════════════════════════════
+// PACIENTES VIVOS: LOGS DE INTERACCIÓN
+// ═══════════════════════════════════════════════════
+
+/// Listar logs de interacción de un paciente
+#[tauri::command]
+pub async fn api_get_patient_logs(
+    api: State<'_, ApiClient>,
+    case_id: String,
+) -> Result<serde_json::Value, String> {
+    api.get(&format!("patient-logs&case_id={}", case_id)).await
+}
+
+/// Crear log de interacción (al terminar atención)
+#[tauri::command]
+pub async fn api_create_patient_log(
+    api: State<'_, ApiClient>,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.post("patient-logs", &data).await
+}
+
+/// Detectar conflictos de agenda para un estudiante
+#[tauri::command]
+pub async fn api_check_agenda_conflicts(
+    api: State<'_, ApiClient>,
+    student_id: String,
+    date: String,
+    time: String,
+    duration: Option<u32>,
+) -> Result<serde_json::Value, String> {
+    let dur = duration.unwrap_or(30);
+    api.get(&format!(
+        "agenda/conflicts&studentId={}&date={}&time={}&duration={}",
+        student_id, date, time, dur
+    )).await
+}
+
+/// Agenda global de un estudiante específico
+#[tauri::command]
+pub async fn api_get_student_agenda(
+    api: State<'_, ApiClient>,
+    student_id: String,
+    from: Option<String>,
+    to: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let mut params = vec![];
+    if let Some(f) = from { params.push(format!("from={}", f)); }
+    if let Some(t) = to { params.push(format!("to={}", t)); }
+    let route = if params.is_empty() {
+        format!("agenda/student/{}", student_id)
+    } else {
+        format!("agenda/student/{}&{}", student_id, params.join("&"))
+    };
+    api.get(&route).await
 }
 
 /// Enviar entrega de trabajo

@@ -3,8 +3,10 @@ import { BScanView } from "@/components/oct/bscan-view";
 import { RNFLTSNIT } from "@/components/oct/rnfl-tsnit";
 import { ThicknessMap } from "@/components/oct/thickness-map";
 import { ToggleSwitch } from "@/components/audiometer/toggle-switch";
-import { generateRNFLProfile, generateGCLIPL, RNFL_CLOCK_HOURS, RNFL_QUADRANTS, GCL_IPL_SECTORS, normativeColor, type Pathology } from "@/lib/oct-synthetic";
+import { generateRNFLProfile, generateGCLIPL, RNFL_CLOCK_HOURS, RNFL_QUADRANTS, GCL_IPL_SECTORS, normativeColor, type Pathology, type OctSeverity, type OctPatientParams } from "@/lib/oct-synthetic";
 import { usePatientStore } from "@/stores/patient-store";
+import { useLiveSessionStore } from "@/stores/live-session-store";
+import { PatientBanner } from "@/components/ui/patient-banner";
 import { cn } from "@/lib/utils";
 import { RefreshCw, Link2, Link2Off } from "lucide-react";
 
@@ -16,11 +18,12 @@ export function OCTWindow() {
   const [scanMode, setScanMode] = useState<ScanMode>("disc");
   const [viewTab, setViewTab] = useState<ViewTab>("bscan");
   const [pathology, setPathology] = useState<Pathology>("normal");
+  const [severity, setSeverity] = useState<OctSeverity>("moderado");
   const [seed, setSeed] = useState(42);
   const [signalOverride, setSignalOverride] = useState<number | null>(null);
 
   // Read case config from patient store
-  const octConfig = usePatientStore((s) => s.data.oct);
+  const octConfig = usePatientStore((s) => s.data.modules.oct ?? {});
   const patientId = usePatientStore((s) => s.currentPatientId);
   const hasCaseLoaded = patientId !== null && Object.keys(octConfig).length > 0;
 
@@ -33,6 +36,9 @@ export function OCTWindow() {
 
     const patho = cfg.patologia as Pathology | undefined;
     if (patho && patho !== pathology) setPathology(patho);
+
+    const sev = cfg.severidad as OctSeverity | undefined;
+    if (sev) setSeverity(sev);
 
     const scan = cfg.scanPreferido as string | undefined;
     if (scan === "disco" || scan === "macula") setScanMode(scan === "disco" ? "disc" : "macula");
@@ -47,8 +53,19 @@ export function OCTWindow() {
 
   const regenerate = () => setSeed(Math.floor(Math.random() * 10000));
 
-  const profile = generateRNFLProfile(seed, pathology);
-  const gclData = generateGCLIPL(seed, pathology);
+  // Extraer parámetros fisiológicos del paciente
+  const eyeKey2 = eye === "OD" ? "ojoDerecho" : "ojoIzquierdo";
+  const eyeCfg = (octConfig as Record<string, Record<string, unknown>>)[eyeKey2] ?? {};
+  const patientParams: OctPatientParams = {
+    rnflAvg: eyeCfg.rnflAvg as number | undefined,
+    gclIplAvg: eyeCfg.gclIplAvg as number | undefined,
+    centralMacularThickness: eyeCfg.centralMacularThickness as number | undefined,
+    cooperationLevel: eyeCfg.cooperationLevel as number | undefined,
+    tearFilmQuality: eyeCfg.tearFilmQuality as number | undefined,
+  };
+
+  const profile = generateRNFLProfile(seed, pathology, severity, patientParams);
+  const gclData = generateGCLIPL(seed, pathology, severity, patientParams);
 
   const clockAvg = (start: number, end: number) => {
     const pts = profile.filter((p) => p.angle >= start && p.angle < end);
@@ -60,6 +77,7 @@ export function OCTWindow() {
 
   return (
     <div className="flex h-full flex-col ls-bg">
+      <PatientBanner simulatorName="OCT" />
       {/* Header */}
       <div className="flex h-7 shrink-0 items-center justify-between ls-bg-panel2 px-3">
         <span className="text-xs font-bold tracking-[0.2em] ls-text-muted">LABSIM <span className="font-normal ls-text-muted">OCT SPECTRALIS</span></span>

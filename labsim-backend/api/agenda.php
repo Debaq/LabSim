@@ -2,17 +2,15 @@
 /**
  * LabSim Backend - Agenda de Atención
  *
- * Horarios reales del centro clínico. Los docentes crean la agenda
- * con pacientes que llegan a horas específicas, asignan procedimientos
- * y estudiantes responsables.
- *
- * GET    /agenda                 → Lista citas
- * POST   /agenda                 → Crear cita (docente/instructor)
- * PUT    /agenda/:id             → Actualizar cita
- * POST   /agenda/:id/reschedule  → Estudiante reagenda su cita
- * POST   /agenda/:id/status      → Cambiar estado (in_progress, completed, no_show)
- * DELETE /agenda/:id             → Cancelar cita
- * POST   /agenda/assign-group    → Asignar agenda a todo un grupo
+ * GET    /agenda                     → Lista citas (visibilidad cruzada para docentes)
+ * POST   /agenda                     → Crear cita (con detección de conflictos)
+ * PUT    /agenda/:id                 → Actualizar cita
+ * POST   /agenda/:id/reschedule      → Estudiante reagenda su cita
+ * POST   /agenda/:id/status          → Cambiar estado
+ * DELETE /agenda/:id                 → Cancelar cita
+ * POST   /agenda/assign-group        → Asignar agenda a grupo o curso
+ * GET    /agenda/conflicts           → Detectar conflictos de horario
+ * GET    /agenda/student/:id         → Agenda global de un estudiante
  */
 
 require_once __DIR__ . '/../core/auth_middleware.php';
@@ -23,7 +21,7 @@ $action = $routeSegments[1] ?? null;
 
 switch (true) {
 
-    // ─── LISTAR CITAS ───────────────────────────────
+    // ─── LISTAR CITAS (visibilidad cruzada) ──────────
     case $method === 'GET' && $id === null:
         $auth = require_auth();
 
@@ -41,6 +39,9 @@ switch (true) {
         $procedureId = query_param('procedureId');
         if ($procedureId) { $where[] = 'a.procedure_id = :pid'; $params[':pid'] = $procedureId; }
 
+        $courseId = query_param('courseId');
+        if ($courseId) { $where[] = 'a.course_id = :cid_filter'; $params[':cid_filter'] = $courseId; }
+
         if ($auth['role'] === 'estudiante') {
             // Estudiante ve solo citas asignadas a él
             $where[] = "(a.assigned_to = :uid OR EXISTS (
@@ -50,19 +51,32 @@ switch (true) {
             ))";
             $params[':uid'] = $auth['sub'];
             $params[':uid2'] = $auth['sub'];
-        } else {
-            $author = query_param('author');
-            if ($author) { $where[] = 'a.author_id = :author'; $params[':author'] = $author; }
+        } elseif ($auth['role'] !== 'admin') {
+            // VISIBILIDAD CRUZADA: docente/instructor ve items de TODOS los estudiantes
+            // que están en algún curso donde él es miembro
+            $where[] = "(a.author_id = :myid OR a.assigned_to IN (
+                SELECT cm.user_id FROM course_members cm
+                WHERE cm.course_id IN (
+                    SELECT cm2.course_id FROM course_members cm2 WHERE cm2.user_id = :myid2
+                )
+                AND cm.role = 'estudiante'
+            ))";
+            $params[':myid'] = $auth['sub'];
+            $params[':myid2'] = $auth['sub'];
         }
+        // admin ve todo
 
         $sql = "SELECT a.*,
+                       a.course_id,
                        p.name as procedure_name, p.code as procedure_code, p.category as procedure_category,
                        u.username as author_username, u.full_name as author_name,
-                       au.username as assigned_username, au.full_name as assigned_name
+                       au.username as assigned_username, au.full_name as assigned_name,
+                       co.name as course_name, co.code as course_code
                 FROM agenda_items a
                 LEFT JOIN procedures p ON a.procedure_id = p.id
                 LEFT JOIN users u ON a.author_id = u.id
                 LEFT JOIN users au ON a.assigned_to = au.id
+                LEFT JOIN courses co ON a.course_id = co.id
                 WHERE " . implode(' AND ', $where) . "
                 ORDER BY a.scheduled_date, a.scheduled_time";
 
@@ -71,7 +85,79 @@ switch (true) {
         json_response(Database::paginate($sql, $params, $page, $limit));
         break;
 
-    // ─── CREAR CITA ─────────────────────────────────
+    // ─── DETECTAR CONFLICTOS ─────────────────────────
+    case $method === 'GET' && $id === 'conflicts':
+        $auth = require_auth(['admin', 'docente', 'instructor']);
+
+        $studentId = query_param('studentId');
+        $date = query_param('date');
+        $time = query_param('time');
+        $duration = query_int('duration', 30);
+
+        if (!$studentId || !$date || !$time) {
+            error_response('Se requiere studentId, date y time', 400);
+        }
+
+        // Calcular hora de fin del nuevo item
+        $startMinutes = intval(substr($time, 0, 2)) * 60 + intval(substr($time, 3, 2));
+        $endMinutes = $startMinutes + $duration;
+
+        $conflicts = Database::fetchAll(
+            "SELECT a.*, u.full_name as author_name, co.name as course_name
+             FROM agenda_items a
+             LEFT JOIN users u ON a.author_id = u.id
+             LEFT JOIN courses co ON a.course_id = co.id
+             WHERE a.assigned_to = :sid
+             AND a.scheduled_date = :date
+             AND a.is_active = 1
+             AND a.status NOT IN ('cancelled', 'rescheduled')
+             ORDER BY a.scheduled_time",
+            [':sid' => $studentId, ':date' => $date]
+        );
+
+        // Filtrar solapamientos en PHP (más preciso que SQL con tiempos)
+        $overlapping = [];
+        foreach ($conflicts as $c) {
+            $cStart = intval(substr($c['scheduled_time'], 0, 2)) * 60 + intval(substr($c['scheduled_time'], 3, 2));
+            $cEnd = $cStart + intval($c['duration_minutes']);
+
+            if ($startMinutes < $cEnd && $endMinutes > $cStart) {
+                $overlapping[] = $c;
+            }
+        }
+
+        json_response(['conflicts' => $overlapping, 'hasConflicts' => count($overlapping) > 0]);
+        break;
+
+    // ─── AGENDA GLOBAL DE UN ESTUDIANTE ──────────────
+    case $method === 'GET' && $id === 'student' && $action !== null:
+        $auth = require_auth(['admin', 'docente', 'instructor']);
+        $studentId = $action;
+
+        $where = ['a.is_active = 1', 'a.assigned_to = :sid'];
+        $params = [':sid' => $studentId];
+
+        $from = query_param('from');
+        if ($from) { $where[] = 'a.scheduled_date >= :from'; $params[':from'] = $from; }
+        $to = query_param('to');
+        if ($to) { $where[] = 'a.scheduled_date <= :to'; $params[':to'] = $to; }
+
+        $sql = "SELECT a.*,
+                       p.name as procedure_name,
+                       u.full_name as author_name, u.username as author_username,
+                       co.name as course_name, co.code as course_code
+                FROM agenda_items a
+                LEFT JOIN procedures p ON a.procedure_id = p.id
+                LEFT JOIN users u ON a.author_id = u.id
+                LEFT JOIN courses co ON a.course_id = co.id
+                WHERE " . implode(' AND ', $where) . "
+                ORDER BY a.scheduled_date, a.scheduled_time";
+
+        $rows = Database::fetchAll($sql, $params);
+        json_response(['data' => $rows]);
+        break;
+
+    // ─── CREAR CITA (con conflictos) ─────────────────
     case $method === 'POST' && $id === null:
         $auth = require_auth(['admin', 'docente', 'instructor']);
         $body = get_json_body();
@@ -81,25 +167,49 @@ switch (true) {
         $errors[] = validate_time($body['scheduledTime'] ?? null);
         validate_or_fail($errors);
 
-        // Si se especifica procedimiento, heredar duración
         $duration = $body['durationMinutes'] ?? $body['duration_minutes'] ?? null;
         $procedureId = $body['procedureId'] ?? $body['procedure_id'] ?? null;
 
         if ($procedureId && !$duration) {
             $proc = Database::fetchOne('SELECT default_duration_minutes FROM procedures WHERE id = :id', [':id' => $procedureId]);
-            if ($proc) {
-                $duration = $proc['default_duration_minutes'];
-            }
+            if ($proc) $duration = $proc['default_duration_minutes'];
         }
         $duration = $duration ?? 30;
+
+        $assignedTo = $body['assignedTo'] ?? $body['assigned_to'] ?? null;
+        $courseId = $body['courseId'] ?? $body['course_id'] ?? null;
+
+        // Detectar conflictos si hay estudiante asignado
+        $conflicts = [];
+        if ($assignedTo) {
+            $date = $body['scheduledDate'] ?? $body['scheduled_date'];
+            $time = $body['scheduledTime'] ?? $body['scheduled_time'];
+            $startMin = intval(substr($time, 0, 2)) * 60 + intval(substr($time, 3, 2));
+            $endMin = $startMin + $duration;
+
+            $existing = Database::fetchAll(
+                "SELECT a.id, a.patient_name, a.scheduled_time, a.duration_minutes, u.full_name as author_name
+                 FROM agenda_items a LEFT JOIN users u ON a.author_id = u.id
+                 WHERE a.assigned_to = :sid AND a.scheduled_date = :date
+                 AND a.is_active = 1 AND a.status NOT IN ('cancelled', 'rescheduled')",
+                [':sid' => $assignedTo, ':date' => $date]
+            );
+            foreach ($existing as $e) {
+                $eStart = intval(substr($e['scheduled_time'], 0, 2)) * 60 + intval(substr($e['scheduled_time'], 3, 2));
+                $eEnd = $eStart + intval($e['duration_minutes']);
+                if ($startMin < $eEnd && $endMin > $eStart) {
+                    $conflicts[] = $e;
+                }
+            }
+        }
 
         $itemId = Database::uuid();
         Database::execute(
             "INSERT INTO agenda_items (id, author_id, patient_name, patient_age, patient_gender,
                 patient_notes, procedure_id, scheduled_date, scheduled_time, duration_minutes,
-                status, case_id, assigned_to, session_id)
+                status, case_id, assigned_to, session_id, course_id)
              VALUES (:id, :uid, :patient, :age, :gender, :notes, :proc, :date, :time, :dur,
-                'scheduled', :cid, :assigned, :sid)",
+                'scheduled', :cid, :assigned, :sid, :courseid)",
             [
                 ':id' => $itemId,
                 ':uid' => $auth['sub'],
@@ -112,8 +222,9 @@ switch (true) {
                 ':time' => $body['scheduledTime'] ?? $body['scheduled_time'],
                 ':dur' => $duration,
                 ':cid' => $body['caseId'] ?? $body['case_id'] ?? null,
-                ':assigned' => $body['assignedTo'] ?? $body['assigned_to'] ?? null,
+                ':assigned' => $assignedTo,
                 ':sid' => $body['sessionId'] ?? $body['session_id'] ?? null,
+                ':courseid' => $courseId,
             ]
         );
 
@@ -123,22 +234,39 @@ switch (true) {
              WHERE a.id = :id",
             [':id' => $itemId]
         );
-        created_response(['item' => $item]);
+
+        $response = ['item' => $item];
+        if (!empty($conflicts)) {
+            $response['conflicts'] = $conflicts;
+        }
+        created_response($response);
         break;
 
-    // ─── ASIGNAR A GRUPO ────────────────────────────
+    // ─── ASIGNAR A GRUPO O CURSO ─────────────────────
     case $method === 'POST' && $id === 'assign-group':
         $auth = require_auth(['admin', 'docente', 'instructor']);
         $body = get_json_body();
 
-        $errors = validate_required($body, ['patientName', 'scheduledDate', 'scheduledTime', 'groupId']);
+        $errors = validate_required($body, ['patientName', 'scheduledDate', 'scheduledTime']);
         validate_or_fail($errors);
 
-        $groupId = $body['groupId'] ?? $body['group_id'];
-        $members = Database::fetchAll(
-            "SELECT user_id FROM group_members WHERE group_id = :gid AND member_role = 'student'",
-            [':gid' => $groupId]
-        );
+        // Obtener miembros: desde courseId o groupId
+        $courseId = $body['courseId'] ?? $body['course_id'] ?? null;
+        $groupId = $body['groupId'] ?? $body['group_id'] ?? null;
+
+        if ($courseId) {
+            $members = Database::fetchAll(
+                "SELECT user_id FROM course_members WHERE course_id = :cid AND role = 'estudiante'",
+                [':cid' => $courseId]
+            );
+        } elseif ($groupId) {
+            $members = Database::fetchAll(
+                "SELECT user_id FROM group_members WHERE group_id = :gid AND member_role = 'student'",
+                [':gid' => $groupId]
+            );
+        } else {
+            error_response('Se requiere courseId o groupId', 400);
+        }
 
         $procedureId = $body['procedureId'] ?? $body['procedure_id'] ?? null;
         $duration = $body['durationMinutes'] ?? $body['duration_minutes'] ?? null;
@@ -148,15 +276,41 @@ switch (true) {
         }
         $duration = $duration ?? 30;
 
+        $date = $body['scheduledDate'] ?? $body['scheduled_date'];
+        $time = $body['scheduledTime'] ?? $body['scheduled_time'];
+        $startMin = intval(substr($time, 0, 2)) * 60 + intval(substr($time, 3, 2));
+        $endMin = $startMin + $duration;
+
         $created = 0;
+        $conflictStudents = [];
+
         foreach ($members as $member) {
+            // Chequear conflictos por estudiante
+            $existing = Database::fetchAll(
+                "SELECT a.scheduled_time, a.duration_minutes FROM agenda_items a
+                 WHERE a.assigned_to = :sid AND a.scheduled_date = :date
+                 AND a.is_active = 1 AND a.status NOT IN ('cancelled', 'rescheduled')",
+                [':sid' => $member['user_id'], ':date' => $date]
+            );
+            $hasConflict = false;
+            foreach ($existing as $e) {
+                $eStart = intval(substr($e['scheduled_time'], 0, 2)) * 60 + intval(substr($e['scheduled_time'], 3, 2));
+                $eEnd = $eStart + intval($e['duration_minutes']);
+                if ($startMin < $eEnd && $endMin > $eStart) {
+                    $hasConflict = true;
+                    $student = Database::fetchOne('SELECT full_name FROM users WHERE id = :id', [':id' => $member['user_id']]);
+                    $conflictStudents[] = $student['full_name'] ?? $member['user_id'];
+                    break;
+                }
+            }
+
             $itemId = Database::uuid();
             Database::execute(
                 "INSERT INTO agenda_items (id, author_id, patient_name, patient_age, patient_gender,
                     patient_notes, procedure_id, scheduled_date, scheduled_time, duration_minutes,
-                    status, case_id, assigned_to, session_id)
+                    status, case_id, assigned_to, session_id, course_id)
                  VALUES (:id, :uid, :patient, :age, :gender, :notes, :proc, :date, :time, :dur,
-                    'scheduled', :cid, :assigned, :sid)",
+                    'scheduled', :cid, :assigned, :sid, :courseid)",
                 [
                     ':id' => $itemId,
                     ':uid' => $auth['sub'],
@@ -165,18 +319,24 @@ switch (true) {
                     ':gender' => $body['patientGender'] ?? $body['patient_gender'] ?? null,
                     ':notes' => $body['patientNotes'] ?? $body['patient_notes'] ?? null,
                     ':proc' => $procedureId,
-                    ':date' => $body['scheduledDate'] ?? $body['scheduled_date'],
-                    ':time' => $body['scheduledTime'] ?? $body['scheduled_time'],
+                    ':date' => $date,
+                    ':time' => $time,
                     ':dur' => $duration,
                     ':cid' => $body['caseId'] ?? $body['case_id'] ?? null,
                     ':assigned' => $member['user_id'],
                     ':sid' => $body['sessionId'] ?? $body['session_id'] ?? null,
+                    ':courseid' => $courseId,
                 ]
             );
             $created++;
         }
 
-        json_response(['message' => "Cita asignada a $created estudiantes", 'count' => $created]);
+        $response = ['message' => "Cita asignada a $created estudiantes", 'count' => $created];
+        if (!empty($conflictStudents)) {
+            $response['conflictStudents'] = $conflictStudents;
+            $response['conflictCount'] = count($conflictStudents);
+        }
+        json_response($response);
         break;
 
     // ─── REAGENDAR (estudiante) ─────────────────────
@@ -187,7 +347,6 @@ switch (true) {
         $item = Database::fetchOne('SELECT * FROM agenda_items WHERE id = :id AND is_active = 1', [':id' => $id]);
         if (!$item) error_response('Cita no encontrada', 404);
 
-        // Solo el estudiante asignado puede reagendar
         if ($item['assigned_to'] !== $auth['sub']) {
             error_response('Solo puedes reagendar tus propias citas', 403);
         }
@@ -201,20 +360,18 @@ switch (true) {
         $errors[] = validate_time($body['scheduledTime'] ?? null);
         validate_or_fail($errors);
 
-        // Marcar la cita original como reagendada
         Database::execute(
             "UPDATE agenda_items SET status = 'rescheduled', rescheduled_date = :date, rescheduled_time = :time WHERE id = :id",
             [':id' => $id, ':date' => $body['scheduledDate'], ':time' => $body['scheduledTime']]
         );
 
-        // Crear nueva cita con referencia a la original
         $newId = Database::uuid();
         Database::execute(
             "INSERT INTO agenda_items (id, author_id, patient_name, patient_age, patient_gender,
                 patient_notes, procedure_id, scheduled_date, scheduled_time, duration_minutes,
-                status, case_id, assigned_to, session_id, rescheduled_from)
+                status, case_id, assigned_to, session_id, course_id, rescheduled_from)
              VALUES (:id, :uid, :patient, :age, :gender, :notes, :proc, :date, :time, :dur,
-                'scheduled', :cid, :assigned, :sid, :from)",
+                'scheduled', :cid, :assigned, :sid, :courseid, :from)",
             [
                 ':id' => $newId,
                 ':uid' => $item['author_id'],
@@ -229,6 +386,7 @@ switch (true) {
                 ':cid' => $item['case_id'],
                 ':assigned' => $auth['sub'],
                 ':sid' => $item['session_id'],
+                ':courseid' => $item['course_id'],
                 ':from' => $id,
             ]
         );
@@ -254,7 +412,6 @@ switch (true) {
             error_response('Estado inválido. Permitidos: ' . implode(', ', $allowed), 400);
         }
 
-        // Estudiantes solo pueden marcar sus propias citas como in_progress o completed
         if ($auth['role'] === 'estudiante') {
             if ($item['assigned_to'] !== $auth['sub']) {
                 error_response('Solo puedes actualizar tus propias citas', 403);
@@ -302,6 +459,7 @@ switch (true) {
             'caseId' => 'case_id', 'case_id' => 'case_id',
             'assignedTo' => 'assigned_to', 'assigned_to' => 'assigned_to',
             'sessionId' => 'session_id', 'session_id' => 'session_id',
+            'courseId' => 'course_id', 'course_id' => 'course_id',
         ];
 
         foreach ($body as $key => $value) {

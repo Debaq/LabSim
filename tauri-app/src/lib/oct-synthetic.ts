@@ -1,5 +1,12 @@
 // === OCT Synthetic Data Generator — Clinical Accuracy ===
 
+export type OctSeverity = "leve" | "moderado" | "severo";
+
+/** Factor multiplicador de la patología según severidad */
+function sevFactor(severity: OctSeverity): number {
+  return severity === "leve" ? 0.35 : severity === "moderado" ? 0.65 : 1.0;
+}
+
 export const LAYERS = ["ILM", "RNFL", "GCL", "IPL", "INL", "OPL", "ONL", "ELM", "EZ", "RPE"] as const;
 export type LayerName = (typeof LAYERS)[number];
 
@@ -79,7 +86,7 @@ function rng(seed: number) {
 export type Pathology = "normal" | "glaucoma" | "edema" | "drusen" | "epiretinal" | "amd-dry" | "amd-wet";
 
 // === B-SCAN ===
-export function generateBScan(w: number, h: number, macular: boolean, seed: number, path: Pathology): ImageData {
+export function generateBScan(w: number, h: number, macular: boolean, seed: number, path: Pathology, severity: OctSeverity = "moderado"): ImageData {
   const r = rng(seed);
   const img = new ImageData(w, h);
   const d = img.data;
@@ -173,10 +180,24 @@ export function generateBScan(w: number, h: number, macular: boolean, seed: numb
   return img;
 }
 
+// === Patient params interface ===
+export interface OctPatientParams {
+  rnflAvg?: number;                  // RNFL promedio global (µm)
+  gclIplAvg?: number;               // GCL+IPL promedio (µm)
+  centralMacularThickness?: number;  // Espesor macular central (µm)
+  cooperationLevel?: number;         // 0-1
+  tearFilmQuality?: number;          // 0-1
+}
+
 // === RNFL TSNIT ===
-export function generateRNFLProfile(seed: number, path: Pathology): { angle: number; thickness: number }[] {
+export function generateRNFLProfile(
+  seed: number, path: Pathology, severity: OctSeverity = "moderado", params: OctPatientParams = {},
+): { angle: number; thickness: number }[] {
   const r = rng(seed);
   const result: { angle: number; thickness: number }[] = [];
+
+  // Generar perfil base
+  const raw: number[] = [];
   for (let deg = 0; deg < 360; deg++) {
     let t = 68;
     t += 60 * Math.exp(-((deg - 90) ** 2) / 900);
@@ -185,34 +206,81 @@ export function generateRNFLProfile(seed: number, path: Pathology): { angle: num
     t += 20 * Math.exp(-((deg - 310) ** 2) / 400);
     t -= 15 * Math.exp(-((deg - 180) ** 2) / 600);
     t += (r() - 0.5) * 6;
-    if (path === "glaucoma") { t -= 30 * Math.exp(-((deg - 270) ** 2) / 800); t -= 20 * Math.exp(-((deg - 90) ** 2) / 800); t -= 8; }
-    result.push({ angle: deg, thickness: Math.max(15, Math.round(t)) });
+    if (path === "glaucoma") {
+      const sf = sevFactor(severity);
+      t -= 30 * sf * Math.exp(-((deg - 270) ** 2) / 800);
+      t -= 20 * sf * Math.exp(-((deg - 90) ** 2) / 800);
+      t -= 8 * sf;
+    }
+    raw.push(Math.max(15, t));
+  }
+
+  // Si el docente definió RNFL promedio, escalar el perfil para que coincida
+  if (params.rnflAvg !== undefined) {
+    const currentAvg = raw.reduce((a, b) => a + b, 0) / raw.length;
+    const scale = currentAvg > 0 ? params.rnflAvg / currentAvg : 1;
+    for (let i = 0; i < raw.length; i++) raw[i] = Math.max(15, raw[i] * scale);
+  }
+
+  for (let deg = 0; deg < 360; deg++) {
+    result.push({ angle: deg, thickness: Math.round(raw[deg]) });
   }
   return result;
 }
 
 // === ETDRS MAP ===
-export function generateETDRS(seed: number, path: Pathology): Record<string, number> {
+export function generateETDRS(
+  seed: number, path: Pathology, severity: OctSeverity = "moderado", params: OctPatientParams = {},
+): Record<string, number> {
   const r = rng(seed);
   const res: Record<string, number> = {};
+  const sf = sevFactor(severity);
+
   for (const [sec, norm] of Object.entries(ETDRS_NORMAL)) {
     let t = norm.mean + (r() - 0.5) * 15;
-    if (path === "edema") { t += sec === "fovea" ? 120 + r() * 60 : sec.startsWith("inner") ? 60 + r() * 30 : 20 + r() * 15; }
-    if (path === "amd-dry" || path === "amd-wet") { t -= sec === "fovea" ? 30 + r() * 20 : sec.startsWith("inner") ? 15 + r() * 10 : 5; }
-    if (path === "glaucoma" && sec.startsWith("inner")) t -= 15 + r() * 8;
+    if (path === "edema") { t += sf * (sec === "fovea" ? 120 + r() * 60 : sec.startsWith("inner") ? 60 + r() * 30 : 20 + r() * 15); }
+    if (path === "amd-dry" || path === "amd-wet") { t -= sf * (sec === "fovea" ? 30 + r() * 20 : sec.startsWith("inner") ? 15 + r() * 10 : 5); }
+    if (path === "glaucoma" && sec.startsWith("inner")) t -= sf * (15 + r() * 8);
     res[sec] = Math.max(100, Math.round(t));
   }
+
+  // Si el docente definió espesor macular central, ajustar fóvea y propagar
+  if (params.centralMacularThickness !== undefined && res.fovea) {
+    const diff = params.centralMacularThickness - res.fovea;
+    res.fovea = params.centralMacularThickness;
+    // Propagar parcialmente a inner sectors
+    for (const sec of Object.keys(res)) {
+      if (sec.startsWith("inner")) res[sec] = Math.max(100, Math.round(res[sec] + diff * 0.4));
+      if (sec.startsWith("outer")) res[sec] = Math.max(100, Math.round(res[sec] + diff * 0.15));
+    }
+  }
+
   return res;
 }
 
 // === GCL+IPL ===
-export function generateGCLIPL(seed: number, path: Pathology): Record<string, number> {
+export function generateGCLIPL(
+  seed: number, path: Pathology, severity: OctSeverity = "moderado", params: OctPatientParams = {},
+): Record<string, number> {
   const r = rng(seed);
   const res: Record<string, number> = {};
+  const sf = sevFactor(severity);
+
   for (const [sec, norm] of Object.entries(GCL_IPL_SECTORS)) {
     let t = norm.mean + (r() - 0.5) * 6;
-    if (path === "glaucoma") t -= 15 + r() * 10;
+    if (path === "glaucoma") t -= sf * (15 + r() * 10);
     res[sec] = Math.max(30, Math.round(t));
   }
+
+  // Si el docente definió GCL+IPL promedio, escalar
+  if (params.gclIplAvg !== undefined) {
+    const vals = Object.values(res);
+    const currentAvg = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const scale = currentAvg > 0 ? params.gclIplAvg / currentAvg : 1;
+    for (const sec of Object.keys(res)) {
+      res[sec] = Math.max(30, Math.round(res[sec] * scale));
+    }
+  }
+
   return res;
 }

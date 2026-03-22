@@ -18,7 +18,7 @@ export function RetinographyWindow() {
   const [captured, setCaptured] = useState<{ OD: boolean; OI: boolean }>({ OD: false, OI: false });
   const [flash, setFlash] = useState(false);
 
-  const retConfig = usePatientStore((s) => s.data.retinography);
+  const retConfig = usePatientStore((s) => s.data.modules.retinography ?? {});
   const patientId = usePatientStore((s) => s.currentPatientId);
   const hasCaseLoaded = patientId !== null && Object.keys(retConfig).length > 0;
 

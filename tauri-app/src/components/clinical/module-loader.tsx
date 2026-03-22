@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 
 const modules: Record<ModuleId, React.LazyExoticComponent<React.ComponentType>> = {
   "patient-info": lazy(() => import("@/modules/patient-info")),
+  "patient-personality": lazy(() => import("@/modules/patient-personality")),
   anamnesis: lazy(() => import("@/modules/anamnesis")),
   audiometry: lazy(() => import("@/modules/audiometry")),
   logoaudiometry: lazy(() => import("@/modules/logoaudiometry")),
@@ -16,8 +17,10 @@ const modules: Record<ModuleId, React.LazyExoticComponent<React.ComponentType>> 
   oct: lazy(() => import("@/modules/oct")),
   "visual-field": lazy(() => import("@/modules/visual-field")),
   "corneal-topography": lazy(() => import("@/modules/corneal-topography")),
-  agenda: lazy(() => import("@/modules/agenda")),
-  "json-output": lazy(() => import("@/modules/json-output")),
+  retinography: lazy(() => import("@/modules/retinography")),
+  scheimpflug: lazy(() => import("@/modules/scheimpflug")),
+  vng: lazy(() => import("@/modules/vng")),
+  vhit: lazy(() => import("@/modules/vhit")),
 };
 
 interface Props {

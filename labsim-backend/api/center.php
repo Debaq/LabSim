@@ -450,6 +450,171 @@ case 'chat':
     }
     break;
 
+// ═══════════════════════════════════════════════════
+// PLANES DE MEJORA
+// ═══════════════════════════════════════════════════
+case 'plans':
+    switch (true) {
+
+        // Listar planes de una sesión
+        case $method === 'GET' && $id === null:
+            $auth = require_auth();
+            $sessionId = query_param('sessionId');
+            if (!$sessionId) error_response('Se requiere sessionId', 400);
+
+            $plans = Database::fetchAll(
+                "SELECT p.*, u.full_name as creator_name,
+                        (SELECT COUNT(*) FROM improvement_tasks t WHERE t.plan_id = p.id) as task_count,
+                        (SELECT COUNT(*) FROM improvement_tasks t WHERE t.plan_id = p.id AND t.is_completed = 1) as tasks_done
+                 FROM improvement_plans p
+                 LEFT JOIN users u ON p.created_by = u.id
+                 WHERE p.session_id = :sid
+                 ORDER BY p.created_at DESC",
+                [':sid' => $sessionId]
+            );
+            json_response(['data' => $plans]);
+            break;
+
+        // Crear plan
+        case $method === 'POST' && $id === null:
+            $auth = require_auth(['admin', 'docente', 'instructor']);
+            $body = get_json_body();
+            $errors = validate_required($body, ['sessionId', 'title']);
+            validate_or_fail($errors);
+
+            $planId = Database::uuid();
+            Database::execute(
+                "INSERT INTO improvement_plans (id, session_id, meeting_id, created_by, title, description, deadline)
+                 VALUES (:id, :sid, :mid, :uid, :title, :desc, :deadline)",
+                [
+                    ':id' => $planId,
+                    ':sid' => $body['sessionId'],
+                    ':mid' => $body['meetingId'] ?? null,
+                    ':uid' => $auth['sub'],
+                    ':title' => $body['title'],
+                    ':desc' => $body['description'] ?? null,
+                    ':deadline' => $body['deadline'] ?? null,
+                ]
+            );
+
+            // Crear tareas si vienen
+            $tasks = $body['tasks'] ?? [];
+            foreach ($tasks as $task) {
+                $taskId = Database::uuid();
+                Database::execute(
+                    "INSERT INTO improvement_tasks (id, plan_id, assigned_to, title, description)
+                     VALUES (:id, :pid, :assigned, :title, :desc)",
+                    [
+                        ':id' => $taskId,
+                        ':pid' => $planId,
+                        ':assigned' => $task['assignedTo'] ?? null,
+                        ':title' => $task['title'] ?? 'Tarea',
+                        ':desc' => $task['description'] ?? null,
+                    ]
+                );
+            }
+
+            $plan = Database::fetchOne('SELECT * FROM improvement_plans WHERE id = :id', [':id' => $planId]);
+            created_response(['plan' => $plan]);
+            break;
+
+        // Actualizar plan (status, etc.)
+        case $method === 'PUT' && $id !== null && $action === null:
+            $auth = require_auth(['admin', 'docente', 'instructor']);
+            $body = get_json_body();
+
+            $fields = [];
+            $params = [':id' => $id];
+            if (isset($body['status'])) { $fields[] = 'status = :status'; $params[':status'] = $body['status']; }
+            if (isset($body['title'])) { $fields[] = 'title = :title'; $params[':title'] = $body['title']; }
+            if (isset($body['description'])) { $fields[] = 'description = :desc'; $params[':desc'] = $body['description']; }
+            if (empty($fields)) error_response('No hay campos para actualizar', 400);
+
+            $fields[] = "updated_at = datetime('now')";
+            Database::execute("UPDATE improvement_plans SET " . implode(', ', $fields) . " WHERE id = :id", $params);
+            json_response(['plan' => Database::fetchOne('SELECT * FROM improvement_plans WHERE id = :id', [':id' => $id])]);
+            break;
+
+        // Completar tarea
+        case $method === 'POST' && $id !== null && $action === 'complete':
+            $auth = require_auth();
+            Database::execute(
+                "UPDATE improvement_tasks SET is_completed = 1, completed_at = datetime('now') WHERE id = :id",
+                [':id' => $id]
+            );
+            json_response(['message' => 'Tarea completada']);
+            break;
+
+        default:
+            error_response("Ruta no encontrada: center/plans/$id", 404);
+    }
+    break;
+
+// ═══════════════════════════════════════════════════
+// VALIDACIONES DOCENTE (CHECKPOINTS)
+// ═══════════════════════════════════════════════════
+case 'validations':
+    switch (true) {
+
+        // Listar validaciones pendientes (docente)
+        case $method === 'GET' && $id === null:
+            $auth = require_auth(['admin', 'docente', 'instructor']);
+            $status = query_param('status') ?? 'pending';
+
+            $sql = "SELECT v.*, u.full_name as student_name, u.username as student_username,
+                           a.patient_name, a.scheduled_time
+                    FROM validation_requests v
+                    LEFT JOIN users u ON v.student_id = u.id
+                    LEFT JOIN agenda_items a ON v.agenda_item_id = a.id
+                    WHERE v.status = :status
+                    ORDER BY v.requested_at DESC";
+            $rows = Database::fetchAll($sql, [':status' => $status]);
+            json_response(['data' => $rows]);
+            break;
+
+        // Solicitar validación (estudiante)
+        case $method === 'POST' && $id === null:
+            $auth = require_auth();
+            $body = get_json_body();
+            $errors = validate_required($body, ['agendaItemId']);
+            validate_or_fail($errors);
+
+            $vId = Database::uuid();
+            Database::execute(
+                "INSERT INTO validation_requests (id, agenda_item_id, student_id, procedure_name)
+                 VALUES (:id, :aid, :sid, :proc)",
+                [
+                    ':id' => $vId,
+                    ':aid' => $body['agendaItemId'],
+                    ':sid' => $auth['sub'],
+                    ':proc' => $body['procedureName'] ?? null,
+                ]
+            );
+            created_response(['validation' => Database::fetchOne('SELECT * FROM validation_requests WHERE id = :id', [':id' => $vId])]);
+            break;
+
+        // Resolver validación (docente aprueba/devuelve)
+        case $method === 'PUT' && $id !== null:
+            $auth = require_auth(['admin', 'docente', 'instructor']);
+            $body = get_json_body();
+
+            $newStatus = $body['status'] ?? null;
+            if (!$newStatus || !in_array($newStatus, ['approved', 'returned'])) {
+                error_response('Status debe ser approved o returned', 400);
+            }
+
+            Database::execute(
+                "UPDATE validation_requests SET status = :status, docente_id = :did, docente_notes = :notes, resolved_at = datetime('now') WHERE id = :id",
+                [':id' => $id, ':status' => $newStatus, ':did' => $auth['sub'], ':notes' => $body['notes'] ?? null]
+            );
+            json_response(['message' => $newStatus === 'approved' ? 'Validación aprobada' : 'Devuelto para corrección']);
+            break;
+
+        default:
+            error_response("Ruta no encontrada: center/validations/$id", 404);
+    }
+    break;
+
 default:
     error_response("Sección no encontrada: center/$section", 404);
 }

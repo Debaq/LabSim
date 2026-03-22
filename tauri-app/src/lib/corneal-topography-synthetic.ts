@@ -85,20 +85,39 @@ export function elevationColor(microns: number): [number, number, number] {
  * Retorna un array plano de size×size con valores en dioptrías.
  * Coordenadas: centro = (size/2, size/2), cada pixel ≈ 0.1mm
  */
+export type CornealSeverity = "leve" | "moderado" | "severo";
+
+export interface CornealPatientParams {
+  k1?: number;
+  k2?: number;
+  k1Axis?: number;
+  cct?: number;
+  thinnestPoint?: number;
+  cooperationLevel?: number;
+  tearFilmQuality?: number;
+}
+
 export function generateCurvatureMap(
   size: number,
   seed: number,
   pathology: CornealPathology,
   mapType: MapType = "axial",
+  severity: CornealSeverity = "moderado",
+  patientParams: CornealPatientParams = {},
 ): Float32Array {
   const r = rng(seed);
   const map = new Float32Array(size * size);
   const cx = size / 2;
   const cy = size / 2;
-  const radius = size / 2; // corneal radius in pixels (~4.5mm)
+  const radius = size / 2;
 
-  // Base curvature with slight patient variation
-  const kBase = NORMAL_K_CENTER + (r() - 0.5) * NORMAL_K_RANGE;
+  // Factor de severidad: escala las distorsiones patológicas
+  const sevFactor = severity === "leve" ? 0.4 : severity === "moderado" ? 0.7 : 1.0;
+
+  // Base curvature: usar K del paciente si disponibles, sino generar
+  const kBase = patientParams.k1
+    ? (patientParams.k1 + (patientParams.k2 ?? patientParams.k1)) / 2
+    : NORMAL_K_CENTER + (r() - 0.5) * NORMAL_K_RANGE;
 
   // Natural astigmatism axis and magnitude
   let astAxis = 90 + (r() - 0.5) * 20; // mostly WTR in normals
@@ -111,31 +130,31 @@ export function generateCurvatureMap(
 
   switch (pathology) {
     case "keratoconus":
-      kcConeX = (r() - 0.5) * radius * 0.25;     // slightly decentered
-      kcConeY = radius * 0.15 + r() * radius * 0.1; // inferotemporal
-      kcSteepening = 4 + r() * 6;                   // 4-10 D steeper
-      astMag = 2 + r() * 3;                         // irregular astigmatism
-      astAxis = 60 + r() * 60;                      // variable axis
+      kcConeX = (r() - 0.5) * radius * 0.25;
+      kcConeY = radius * 0.15 + r() * radius * 0.1;
+      kcSteepening = (4 + r() * 6) * sevFactor;       // severidad escala el cono
+      astMag = (2 + r() * 3) * sevFactor;
+      astAxis = 60 + r() * 60;
       break;
     case "pellucid":
       pellucidBandY = radius * 0.55 + r() * radius * 0.1;
-      astMag = 3 + r() * 4;
-      astAxis = 170 + r() * 20; // ATR pattern
+      astMag = (3 + r() * 4) * sevFactor;
+      astAxis = 170 + r() * 20;
       break;
     case "wtr-astigmatism":
-      astAxis = 85 + r() * 10;
-      astMag = 2 + r() * 2;
+      astAxis = patientParams.k1Axis ?? (85 + r() * 10);
+      astMag = (2 + r() * 2) * sevFactor;
       break;
     case "atr-astigmatism":
-      astAxis = 175 + r() * 10;
-      astMag = 2 + r() * 2;
+      astAxis = patientParams.k1Axis ?? (175 + r() * 10);
+      astMag = (2 + r() * 2) * sevFactor;
       break;
     case "oblique-astigmatism":
-      astAxis = 30 + r() * 30;
-      astMag = 1.5 + r() * 2.5;
+      astAxis = patientParams.k1Axis ?? (30 + r() * 30);
+      astMag = (1.5 + r() * 2.5) * sevFactor;
       break;
     case "post-lasik":
-      lasikFlatZone = 3 + r() * 2; // 3-5 D flatter in center
+      lasikFlatZone = (3 + r() * 2) * sevFactor;
       astMag = 0.5 + r() * 1;
       break;
   }
@@ -224,6 +243,7 @@ export function generateElevationMap(
   size: number,
   seed: number,
   pathology: CornealPathology,
+  severity: CornealSeverity = "moderado",
 ): Float32Array {
   const r = rng(seed + 500);
   const map = new Float32Array(size * size);
@@ -292,14 +312,17 @@ export function generatePachymetryMap(
   size: number,
   seed: number,
   pathology: CornealPathology,
+  severity: CornealSeverity = "moderado",
+  patientParams: CornealPatientParams = {},
 ): Float32Array {
   const r = rng(seed + 1000);
   const map = new Float32Array(size * size);
   const cx = size / 2;
   const cy = size / 2;
   const radius = size / 2;
+  const sevFactor = severity === "leve" ? 0.4 : severity === "moderado" ? 0.7 : 1.0;
 
-  const baseCCT = NORMAL_CCT + (r() - 0.5) * 30;
+  const baseCCT = patientParams.cct ?? (NORMAL_CCT + (r() - 0.5) * 30);
 
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {

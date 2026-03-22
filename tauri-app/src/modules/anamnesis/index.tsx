@@ -16,7 +16,7 @@ const CONDITIONS = [
 
 export default function AnamnesisModule() {
   const { form, onSubmit } = useModuleForm<AnamnesisData>(
-    "anamnesis", anamnesisSchema, "Anamnesis",
+    "clinicalHistory", anamnesisSchema, "Anamnesis",
   );
   const { register, handleSubmit, watch, setValue, formState: { errors } } = form;
   const tinnitus = watch("tinnitus.presencia");

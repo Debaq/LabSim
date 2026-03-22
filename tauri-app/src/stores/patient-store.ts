@@ -1,123 +1,166 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export interface PatientData {
-  patientInfo: Record<string, unknown>;
-  anamnesis: Record<string, unknown>;
-  audiometry: Record<string, unknown>;
-  logoaudiometry: Record<string, unknown>;
-  supraliminal: Record<string, unknown>;
-  impedance: Record<string, unknown>;
-  oae: Record<string, unknown>;
-  abr: Record<string, unknown>;
-  electrocochleo: Record<string, unknown>;
-  hearingAids: Record<string, unknown>;
-  oct: Record<string, unknown>;
-  visualField: Record<string, unknown>;
-  retinography: Record<string, unknown>;
-  cornealTopography: Record<string, unknown>;
+// ─── CORE: siempre existe, estructura fija ───────────
+
+export interface PatientIdentity {
+  firstName?: string;
+  lastName?: string;
+  displayName?: string;     // "Sra. Rosa Martínez" — cómo se presenta
+  documentId?: string;      // RUN, cédula, etc.
+  birthDate?: string;
+  age?: number;
+  gender?: string;          // "masculino" | "femenino" | "otro"
+  phone?: string;
+  email?: string;
+  address?: string;
+  city?: string;
+  occupation?: string;
+  referredBy?: string;
+  healthInsurance?: string; // FONASA, Isapre, etc.
+  notes?: string;
 }
 
+export interface PatientPersonality {
+  personalityType?: string;       // "colaborador" | "ansioso" | "impaciente" | "timido" | "agresivo" | "confuso"
+  communicationStyle?: string;    // "detallista" | "breve" | "evasivo"
+  toneOfVoice?: string;          // "formal" | "informal" | "coloquial"
+  cooperationLevel?: string;     // "total" | "parcial" | "dificil"
+}
+
+export interface PatientClinicalHistory {
+  // Motivo de consulta — lo que el paciente cuenta
+  mainComplaint?: string;         // Síntoma principal
+  complaintDescription?: string;  // Historia detallada (lo que el paciente narra)
+  evolutionTime?: string;         // "3 meses", "2 años"
+  severity?: string;              // "leve" | "moderado" | "severo"
+
+  // Antecedentes
+  medicalHistory?: string[];      // ["diabetes", "hipertensión", ...]
+  surgicalHistory?: string;
+  familyHistory?: string;
+  medications?: string;
+  allergies?: string;
+
+  // Específico audiología (ejemplo — cada especialidad agrega los suyos)
+  noiseExposure?: string;
+  noiseYears?: number;
+  hearingProtection?: boolean;
+  tinnitus?: boolean;
+  tinnitusDescription?: string;
+  vertigo?: boolean;
+  vertigoDescription?: string;
+}
+
+export interface PatientCore {
+  identity: PatientIdentity;
+  personality: PatientPersonality;
+  clinicalHistory: PatientClinicalHistory;
+}
+
+// ─── MÓDULOS CLÍNICOS: dinámicos, extensibles ────────
+
 /**
- * Información del caso base (creado por docente).
- * Contiene el perfil completo del paciente — la "respuesta correcta".
+ * Los módulos clínicos son un diccionario abierto.
+ * Cada simulador registra su propio ID y schema.
+ * Agregar un nuevo simulador = agregar un nuevo key, sin tocar PatientData.
  */
+export type ClinicalModules = Record<string, Record<string, unknown>>;
+
+// ─── PATIENT DATA: core + módulos ────────────────────
+
+export interface PatientData {
+  core: PatientCore;
+  modules: ClinicalModules;
+}
+
+// ─── MÓDULOS CORE (propagables al estudiante) ────────
+
+const CORE_KEYS: (keyof PatientCore)[] = ["identity", "personality", "clinicalHistory"];
+
+/** Prefijos de configuración que se copian de módulos clínicos al estudiante */
+const CONFIG_PREFIXES = ["config_", "pathology", "pattern", "strategy", "stimulus", "eye"];
+const CONFIG_EXACT_KEYS = new Set(["patologia", "severidad", "scanPreferido", "calidadSenal", "defecto", "patron", "estrategia", "tamanoEstimulo", "mapaPreferido", "calidadCaptura"]);
+
+function isConfigKey(key: string): boolean {
+  if (CONFIG_EXACT_KEYS.has(key)) return true;
+  return CONFIG_PREFIXES.some((p) => key.startsWith(p));
+}
+
+// ─── STORE ───────────────────────────────────────────
+
 interface CaseInfo {
   caseId: string;
   sessionId?: string;
   title: string;
   authorId?: string;
-  /** Datos base del caso que el docente definió (solo lectura para estudiantes) */
   baseProfile: PatientData;
 }
 
 interface PatientState {
   currentPatientId: string | null;
-  /** Datos de trabajo del estudiante (su versión del paciente) */
   data: PatientData;
-  /** Info del caso base si se cargó desde una sesión práctica */
   caseInfo: CaseInfo | null;
-  /** Modo de operación: "free" = práctica libre, "session" = dentro de sesión */
   mode: "free" | "session";
 
-  updateModule: (moduleId: keyof PatientData, values: Record<string, unknown>) => void;
+  // Core operations
+  updateCore: <K extends keyof PatientCore>(key: K, values: Partial<PatientCore[K]>) => void;
+  updateModule: (moduleId: string, values: Record<string, unknown>) => void;
   resetData: () => void;
   setPatientId: (id: string | null) => void;
 
-  /**
-   * Cargar un caso de sesión práctica.
-   * El estudiante recibe patientInfo + anamnesis + config simuladores,
-   * pero los módulos de resultados llegan VACÍOS (los debe completar).
-   */
+  // Case operations
   loadCase: (caseInfo: CaseInfo) => void;
-
-  /**
-   * Aplicar una actualización del docente (propagación).
-   * Mergea los datos en los módulos especificados sin borrar el trabajo del estudiante.
-   */
-  applyDocenteUpdate: (updates: Partial<PatientData>) => void;
-
-  /**
-   * Exportar la versión actual del estudiante como snapshot para entrega.
-   */
+  loadCaseForEditing: (caseId: string, title: string, profile: Record<string, unknown>) => void;
+  applyDocenteUpdate: (updates: Partial<PatientCore>) => void;
   getSubmissionSnapshot: () => { caseId: string | null; sessionId?: string; data: PatientData };
+
+  // Helpers
+  getDisplayName: () => string;
+  getModuleData: (moduleId: string) => Record<string, unknown>;
 }
 
-const emptyData: PatientData = {
-  patientInfo: {},
-  anamnesis: {},
-  audiometry: {},
-  logoaudiometry: {},
-  supraliminal: {},
-  impedance: {},
-  oae: {},
-  abr: {},
-  electrocochleo: {},
-  hearingAids: {},
-  oct: {},
-  visualField: {},
-  retinography: {},
-  cornealTopography: {},
+const emptyCore: PatientCore = {
+  identity: {},
+  personality: {},
+  clinicalHistory: {},
 };
 
-/** Módulos que el docente puede propagar a los estudiantes */
-const PROPAGABLE_MODULES: (keyof PatientData)[] = [
-  "patientInfo",
-  "anamnesis",
-];
-
-/** Módulos que el estudiante debe completar (llegan vacíos) */
-const STUDENT_WORK_MODULES: (keyof PatientData)[] = [
-  "audiometry",
-  "logoaudiometry",
-  "supraliminal",
-  "impedance",
-  "oae",
-  "abr",
-  "electrocochleo",
-  "hearingAids",
-  "oct",
-  "visualField",
-  "retinography",
-  "cornealTopography",
-];
+const emptyData: PatientData = {
+  core: { ...emptyCore },
+  modules: {},
+};
 
 export const usePatientStore = create<PatientState>()(
   persist(
     (set, get) => ({
       currentPatientId: null,
-      data: { ...emptyData },
+      data: { ...emptyData, core: { ...emptyCore } },
       caseInfo: null,
       mode: "free",
 
+      updateCore: (key, values) =>
+        set((state) => ({
+          data: {
+            ...state.data,
+            core: {
+              ...state.data.core,
+              [key]: { ...state.data.core[key], ...values },
+            },
+          },
+        })),
+
       updateModule: (moduleId, values) =>
         set((state) => ({
-          data: { ...state.data, [moduleId]: values },
+          data: {
+            ...state.data,
+            modules: { ...state.data.modules, [moduleId]: values },
+          },
         })),
 
       resetData: () =>
         set({
-          data: { ...emptyData },
+          data: { core: { ...emptyCore, identity: {}, personality: {}, clinicalHistory: {} }, modules: {} },
           currentPatientId: null,
           caseInfo: null,
           mode: "free",
@@ -126,37 +169,37 @@ export const usePatientStore = create<PatientState>()(
       setPatientId: (id) => set({ currentPatientId: id }),
 
       loadCase: (caseInfo) => {
-        const studentData: PatientData = { ...emptyData };
+        const studentData: PatientData = {
+          core: { identity: {}, personality: {}, clinicalHistory: {} },
+          modules: {},
+        };
 
-        // Copiar datos base que el estudiante SÍ recibe (patientInfo, anamnesis)
-        for (const mod of PROPAGABLE_MODULES) {
-          if (caseInfo.baseProfile[mod]) {
-            studentData[mod] = { ...caseInfo.baseProfile[mod] };
+        // Copiar core completo (identity, personality, clinicalHistory)
+        for (const key of CORE_KEYS) {
+          if (caseInfo.baseProfile.core?.[key]) {
+            studentData.core[key] = { ...caseInfo.baseProfile.core[key] } as any;
           }
         }
 
-        // Los módulos de resultados quedan vacíos — el estudiante los completa
-        // Pero sí copiamos configuración de simuladores si existe
-        // (ej: qué patología OCT mostrar, qué defecto de campo visual)
-        for (const mod of STUDENT_WORK_MODULES) {
-          const base = caseInfo.baseProfile[mod];
-          if (base && typeof base === "object") {
-            // Solo copiar campos de configuración (prefijo "config_" o "pathology" o "pattern")
+        // Módulos clínicos: solo copiar configuración (patología, patrón, etc.)
+        if (caseInfo.baseProfile.modules) {
+          for (const [modId, modData] of Object.entries(caseInfo.baseProfile.modules)) {
+            if (!modData || typeof modData !== "object") continue;
             const config: Record<string, unknown> = {};
-            for (const [key, val] of Object.entries(base)) {
-              if (
-                key.startsWith("config_") ||
-                key === "pathology" ||
-                key === "pattern" ||
-                key === "strategy" ||
-                key === "stimulus" ||
-                key === "eye"
-              ) {
+            for (const [key, val] of Object.entries(modData)) {
+              if (isConfigKey(key)) {
                 config[key] = val;
+              } else if (typeof val === "object" && val !== null) {
+                // Nested objects (ej: ojoDerecho.patologia)
+                const nested: Record<string, unknown> = {};
+                for (const [nk, nv] of Object.entries(val as Record<string, unknown>)) {
+                  if (isConfigKey(nk)) nested[nk] = nv;
+                }
+                if (Object.keys(nested).length > 0) config[key] = nested;
               }
             }
             if (Object.keys(config).length > 0) {
-              studentData[mod] = config;
+              studentData.modules[modId] = config;
             }
           }
         }
@@ -169,23 +212,56 @@ export const usePatientStore = create<PatientState>()(
         });
       },
 
+      loadCaseForEditing: (caseId, _title, profile) => {
+        // Cargar profile completo — puede venir en formato nuevo (core+modules) o viejo (flat)
+        const newData: PatientData = {
+          core: { identity: {}, personality: {}, clinicalHistory: {} },
+          modules: {},
+        };
+
+        if (profile.core && typeof profile.core === "object") {
+          // Formato nuevo
+          const core = profile.core as Record<string, unknown>;
+          for (const key of CORE_KEYS) {
+            if (core[key] && typeof core[key] === "object") {
+              newData.core[key] = core[key] as any;
+            }
+          }
+          if (profile.modules && typeof profile.modules === "object") {
+            newData.modules = profile.modules as ClinicalModules;
+          }
+        } else {
+          // Formato viejo (flat): migrar automáticamente
+          if (profile.patientInfo) newData.core.identity = profile.patientInfo as PatientIdentity;
+          if (profile.personality) newData.core.personality = profile.personality as PatientPersonality;
+          if (profile.anamnesis) newData.core.clinicalHistory = profile.anamnesis as PatientClinicalHistory;
+          // El resto son módulos clínicos
+          const coreKeys = new Set(["patientInfo", "personality", "anamnesis"]);
+          for (const [key, val] of Object.entries(profile)) {
+            if (!coreKeys.has(key) && val && typeof val === "object" && Object.keys(val as object).length > 0) {
+              newData.modules[key] = val as Record<string, unknown>;
+            }
+          }
+        }
+
+        set({
+          currentPatientId: caseId,
+          data: newData,
+          caseInfo: null,
+          mode: "free",
+        });
+      },
+
       applyDocenteUpdate: (updates) =>
         set((state) => {
-          const newData = { ...state.data };
-
-          for (const [moduleId, moduleData] of Object.entries(updates)) {
-            const mod = moduleId as keyof PatientData;
-            // Solo propagar módulos permitidos
-            if (!PROPAGABLE_MODULES.includes(mod)) continue;
-
-            // Merge: datos del docente + lo que el estudiante ya tenía
-            newData[mod] = {
-              ...state.data[mod],
-              ...moduleData,
-            };
+          const newCore = { ...state.data.core };
+          for (const [key, val] of Object.entries(updates)) {
+            const k = key as keyof PatientCore;
+            if (CORE_KEYS.includes(k)) {
+              newCore[k] = { ...state.data.core[k], ...val } as any;
+            }
           }
-
-          return { data: newData };
+          return { data: { ...state.data, core: newCore } };
         }),
 
       getSubmissionSnapshot: () => {
@@ -195,6 +271,19 @@ export const usePatientStore = create<PatientState>()(
           sessionId: state.caseInfo?.sessionId,
           data: { ...state.data },
         };
+      },
+
+      getDisplayName: () => {
+        const { identity, personality } = get().data.core;
+        if (identity.displayName) return identity.displayName;
+        if (identity.firstName || identity.lastName) {
+          return `${identity.firstName ?? ""} ${identity.lastName ?? ""}`.trim();
+        }
+        return "Paciente";
+      },
+
+      getModuleData: (moduleId) => {
+        return get().data.modules[moduleId] ?? {};
       },
     }),
     {

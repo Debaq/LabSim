@@ -64,8 +64,8 @@ const MESSAGES: Record<string, Record<string, string[]>> = {
       "{treatment}, alerta de 30 minutos de exceso. Se registrará en el informe de la sesión.",
     ],
     onTime: [
-      "{treatment}, {patient} fue atendido dentro del tiempo asignado. Buen trabajo.",
-      "{treatment}, atención completada en tiempo. Excelente gestión.",
+      "{treatment}, {patient} ya se retiró. {nextPatient}",
+      "{treatment}, listo con {patient}. {nextPatient}",
     ],
     rescheduleComplaint: [
       "{treatment}, el paciente {patient} presentó una queja por el cambio de horario. Indicó que tuvo dificultades para reorganizar su agenda.",
@@ -95,8 +95,8 @@ const MESSAGES: Record<string, Record<string, string[]>> = {
       "Ay {treatment}, 30 min de retraso. Un paciente se fue sin atenderse y otro quiere poner un reclamo 😞",
     ],
     onTime: [
-      "¡Bien ahí {treatment}! {patient} salió a buena hora 👏✨",
-      "¡Perfecto {treatment}! Terminaste justo a tiempo con {patient} 🎉",
+      "{treatment}, ya se fue {patient}. {nextPatient}",
+      "Listo {treatment}, {patient} terminó. {nextPatient}",
     ],
     rescheduleComplaint: [
       "{treatment}, {patient} no quedó nada contento con el cambio de hora 😕 Dejó un reclamo.",
@@ -126,8 +126,8 @@ const MESSAGES: Record<string, Record<string, string[]>> = {
       "{treatment}, alerta crítica: 30 minutos de exceso. Un paciente se retiró y otro presentó queja formal.",
     ],
     onTime: [
-      "{treatment}, atención completada en tiempo. Es lo esperado.",
-      "Correcto, {treatment}. {patient} atendido dentro del plazo.",
+      "{treatment}, {patient} se retiró. {nextPatient}",
+      "{treatment}, terminó con {patient}. {nextPatient}",
     ],
     rescheduleComplaint: [
       "{treatment}, el paciente {patient} presentó un reclamo formal por el reagendamiento. Esto será informado al docente.",
@@ -157,8 +157,8 @@ const MESSAGES: Record<string, Record<string, string[]>> = {
       "{treatment}, ya son 30 min extra. Lamentablemente un paciente se fue y dejó un reclamo.",
     ],
     onTime: [
-      "Todo bien {treatment}, {patient} listo y a tiempo 👌",
-      "Genial {treatment}, salió todo en orden con {patient}.",
+      "{treatment}, {patient} ya salió. {nextPatient}",
+      "Ya {treatment}, {patient} listo. {nextPatient}",
     ],
     rescheduleComplaint: [
       "{treatment}, {patient} no quedó muy contento con el cambio... dejó un comentario.",
@@ -187,7 +187,7 @@ interface AgendaTimerState {
 
   loadDirectives: (sessionId?: string) => Promise<void>;
   startAppointment: (appointment: ActiveAppointment) => void;
-  endAppointment: () => void;
+  endAppointment: (nextPatientName?: string) => void;
   triggerRescheduleConsequence: (patientName: string, agendaItemId: string) => void;
   _tick: () => void;
   _sendKarime: (category: string, extraVars?: Record<string, string>) => void;
@@ -259,24 +259,17 @@ export const useAgendaTimerStore = create<AgendaTimerState>((set, get) => ({
     get()._sendKarime("start");
   },
 
-  endAppointment: () => {
+  endAppointment: (nextPatientName?: string) => {
     const { activeAppointment, checkInterval } = get();
     if (!activeAppointment?.startedAt) return;
 
     if (checkInterval) clearInterval(checkInterval);
 
-    const elapsed = Math.round((Date.now() - activeAppointment.startedAt) / 60000);
-    const limit = activeAppointment.durationMinutes;
-
-    if (elapsed <= limit) {
-      get()._sendKarime("onTime");
-
-      // Feedback positivo al servidor
-      sendFeedback(activeAppointment.id, "compliment",
-        elapsed < limit - 5 ? "fast_service" : "good_attention",
-        `Paciente ${activeAppointment.patientName} atendido en ${elapsed} min (asignados: ${limit} min)`
-      ).catch(() => {});
-    }
+    // Karime avisa del siguiente paciente (o que no hay más)
+    const nextInfo = nextPatientName
+      ? `El siguiente es ${nextPatientName}, ya está en sala de espera.`
+      : "No hay más pacientes por ahora.";
+    get()._sendKarime("onTime", { nextPatient: nextInfo });
 
     set({ activeAppointment: null, checkInterval: null });
   },

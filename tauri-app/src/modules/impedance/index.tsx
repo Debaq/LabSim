@@ -3,26 +3,108 @@ import { impedanceSchema, type ImpedanceData } from "./schema";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Save, Activity } from "lucide-react";
+import { Save, Activity, Zap } from "lucide-react";
 
-const EARS = [
-  { key: "oidoDerecho", label: "Oido Derecho", color: "text-red-400" },
-  { key: "oidoIzquierdo", label: "Oido Izquierdo", color: "text-blue-400" },
-] as const;
+const REFLEX_FREQS = [500, 1000, 2000, 4000] as const;
 
-const REFLEX_FREQS = ["500", "1000", "2000", "4000", "WN"] as const;
-const REFLEX_FREQ_LABELS: Record<string, string> = {
-  "500": "500 Hz",
-  "1000": "1000 Hz",
-  "2000": "2000 Hz",
-  "4000": "4000 Hz",
-  "WN": "Ruido Blanco",
-};
+function EarConfig({
+  prefix,
+  label,
+  register,
+  setValue,
+  watch,
+}: {
+  prefix: "oidoDerecho" | "oidoIzquierdo";
+  label: string;
+  register: any;
+  setValue: any;
+  watch: any;
+}) {
+  return (
+    <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+      <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">{label}</legend>
+
+      {/* Timpanometría */}
+      <div className="space-y-1.5">
+        <Label className="text-[10px] ls-text-muted uppercase tracking-wider">Timpanometría</Label>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="space-y-1">
+            <Label className="ls-text2 text-xs">Compliance pico (ml)</Label>
+            <Input {...register(`${prefix}.compliancePeak`)} type="number" step="0.1" placeholder="0.8" className="ls-border ls-bg-input text-xs ls-text" />
+          </div>
+          <div className="space-y-1">
+            <Label className="ls-text2 text-xs">Presión oído medio (daPa)</Label>
+            <Input {...register(`${prefix}.middleEarPressure`)} type="number" placeholder="0" className="ls-border ls-bg-input text-xs ls-text" />
+          </div>
+          <div className="space-y-1">
+            <Label className="ls-text2 text-xs">Volumen CAE (ml)</Label>
+            <Input {...register(`${prefix}.earCanalVolume`)} type="number" step="0.1" placeholder="1.1" className="ls-border ls-bg-input text-xs ls-text" />
+          </div>
+          <div className="space-y-1">
+            <Label className="ls-text2 text-xs">Ancho curva (daPa)</Label>
+            <Input {...register(`${prefix}.tympWidth`)} type="number" placeholder="100" className="ls-border ls-bg-input text-xs ls-text" />
+          </div>
+          <div className="flex items-center gap-2 pt-5">
+            <Checkbox
+              checked={watch(`${prefix}.perforated`) ?? false}
+              onCheckedChange={(v) => setValue(`${prefix}.perforated`, !!v, { shouldDirty: true })}
+            />
+            <Label className="ls-text2 text-xs">Perforación timpánica</Label>
+          </div>
+        </div>
+      </div>
+
+      {/* Reflejos */}
+      <div className="space-y-1.5">
+        <Label className="text-[10px] ls-text-muted uppercase tracking-wider">Reflejos acústicos (umbral dB HL, vacío = ausente)</Label>
+        <div className="grid grid-cols-5 gap-1 text-[10px]">
+          <div className="ls-text-muted font-medium">Hz</div>
+          {REFLEX_FREQS.map((f) => <div key={f} className="text-center ls-text-muted font-medium">{f}</div>)}
+          <div className="ls-text2">Ipsi</div>
+          {REFLEX_FREQS.map((f) => <Input key={`i${f}`} {...register(`${prefix}.reflexIpsi${f}`)} type="number" placeholder="—" className="h-6 text-center ls-border ls-bg-input text-[10px] ls-text" />)}
+          <div className="ls-text2">Contra</div>
+          {REFLEX_FREQS.map((f) => <Input key={`c${f}`} {...register(`${prefix}.reflexContra${f}`)} type="number" placeholder="—" className="h-6 text-center ls-border ls-bg-input text-[10px] ls-text" />)}
+        </div>
+      </div>
+
+      {/* Deterioro */}
+      <div className="space-y-1.5">
+        <Label className="text-[10px] ls-text-muted uppercase tracking-wider">Deterioro del reflejo (% decaimiento en 10s)</Label>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <Label className="ls-text2 text-xs">500 Hz</Label>
+            <Input {...register(`${prefix}.reflexDecay500`)} type="number" placeholder="10" className="ls-border ls-bg-input text-xs ls-text" />
+          </div>
+          <div className="space-y-1">
+            <Label className="ls-text2 text-xs">1000 Hz</Label>
+            <Input {...register(`${prefix}.reflexDecay1000`)} type="number" placeholder="15" className="ls-border ls-bg-input text-xs ls-text" />
+          </div>
+        </div>
+      </div>
+
+      {/* Función tubárica */}
+      <div className="space-y-1.5">
+        <Label className="text-[10px] ls-text-muted uppercase tracking-wider">Función tubárica (desplazamiento daPa)</Label>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <Label className="ls-text2 text-xs">Toynbee</Label>
+            <Input {...register(`${prefix}.toynbeeShift`)} type="number" placeholder="-15" className="ls-border ls-bg-input text-xs ls-text" />
+          </div>
+          <div className="space-y-1">
+            <Label className="ls-text2 text-xs">Valsalva</Label>
+            <Input {...register(`${prefix}.valsalvaShift`)} type="number" placeholder="15" className="ls-border ls-bg-input text-xs ls-text" />
+          </div>
+        </div>
+      </div>
+    </fieldset>
+  );
+}
 
 export default function ImpedanceModule() {
   const { form, onSubmit } = useModuleForm<ImpedanceData>(
-    "impedance", impedanceSchema, "Impedanciometria",
+    "impedance", impedanceSchema, "Impedanciometría",
   );
   const { register, handleSubmit, setValue, watch } = form;
 
@@ -30,127 +112,32 @@ export default function ImpedanceModule() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Activity className="h-5 w-5 text-blue-400" />
-          <h2 className="text-lg font-semibold ls-text">Impedanciometria</h2>
+          <Activity className="h-5 w-5 text-emerald-400" />
+          <h2 className="text-lg font-semibold ls-text">Impedanciometría — Datos Fisiológicos</h2>
         </div>
         <Button type="submit" size="sm" className="gap-1.5">
-          <Save className="h-3.5 w-3.5" />Guardar
+          <Save className="h-3.5 w-3.5" />
+          Guardar
         </Button>
       </div>
 
-      {/* Timpanometria */}
-      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
-          Timpanometria
-        </legend>
-        <div className="grid gap-6 lg:grid-cols-2">
-          {EARS.map((ear) => (
-            <div key={ear.key} className="space-y-3">
-              <h3 className={`text-sm font-medium ${ear.color}`}>{ear.label}</h3>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1.5">
-                  <Label className="ls-text2">Compliance Max. (ml)</Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    min={0}
-                    max={10}
-                    {...register(`timpanometria.${ear.key}.complianceMaxima`)}
-                    className="ls-border ls-bg-input ls-text"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="ls-text2">Presion (daPa)</Label>
-                  <Input
-                    type="number"
-                    min={-400}
-                    max={200}
-                    {...register(`timpanometria.${ear.key}.presion`)}
-                    className="ls-border ls-bg-input ls-text"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="ls-text2">Volumen EAC (ml)</Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    min={0}
-                    max={10}
-                    {...register(`timpanometria.${ear.key}.volumenEac`)}
-                    className="ls-border ls-bg-input ls-text"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="ls-text2">Gradiente</Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    {...register(`timpanometria.${ear.key}.gradiente`)}
-                    className="ls-border ls-bg-input ls-text"
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </fieldset>
+      <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-xs text-amber-400/80">
+        <Zap className="inline h-3.5 w-3.5 mr-1" />
+        Configure los parámetros fisiológicos reales del oído. El simulador generará las curvas automáticamente.
+      </div>
 
-      {/* Reflejos Acusticos */}
-      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
-        <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
-          Reflejos Acusticos
-        </legend>
-        {EARS.map((ear) => (
-          <div key={ear.key} className="space-y-3">
-            <h3 className={`text-sm font-medium ${ear.color}`}>{ear.label}</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="ls-text-muted">
-                    <th className="px-2 py-1 text-left">Via</th>
-                    {REFLEX_FREQS.map((f) => (
-                      <th key={f} className="px-2 py-1 text-center">{REFLEX_FREQ_LABELS[f]}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(["ipsi", "contra"] as const).map((via) => (
-                    <tr key={via}>
-                      <td className="px-2 py-1 ls-text2 capitalize">{via === "ipsi" ? "Ipsilateral" : "Contralateral"}</td>
-                      {REFLEX_FREQS.map((freq) => (
-                        <td key={freq} className="px-2 py-1">
-                          <Input
-                            type="text"
-                            value={watch(`reflejosAcusticos.${ear.key}.${via}.${freq}`) ?? ""}
-                            onChange={(e) =>
-                              setValue(
-                                `reflejosAcusticos.${ear.key}.${via}.${freq}`,
-                                e.target.value,
-                                { shouldDirty: true },
-                              )
-                            }
-                            className="h-8 w-20 ls-border ls-bg-input ls-text text-center"
-                            placeholder="dB"
-                          />
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ))}
-      </fieldset>
+      <EarConfig prefix="oidoDerecho" label="Oído Derecho" register={register} setValue={setValue} watch={watch} />
+      <EarConfig prefix="oidoIzquierdo" label="Oído Izquierdo" register={register} setValue={setValue} watch={watch} />
 
-      {/* Observaciones */}
-      <fieldset className="space-y-4 rounded-lg border ls-border ls-bg-input p-4">
+      <div className="space-y-1.5">
+        <Label className="ls-text2 text-xs">Varianza natural</Label>
+        <Input {...register("naturalVariance")} type="number" step="0.05" min="0" max="1" placeholder="0.05" className="ls-border ls-bg-input text-xs ls-text max-w-[120px]" />
+        <p className="text-[10px] ls-text-muted">0 = mediciones perfectas, 1 = mucha variación</p>
+      </div>
+
+      <fieldset className="space-y-3 rounded-lg border ls-border ls-bg-input p-4">
         <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">Observaciones</legend>
-        <Textarea
-          {...register("observaciones")}
-          className="min-h-20 ls-border ls-bg-input ls-text"
-          placeholder="Observaciones sobre la impedanciometria..."
-        />
+        <Textarea {...register("observaciones")} rows={3} className="ls-border ls-bg-input text-xs ls-text resize-none" />
       </fieldset>
     </form>
   );

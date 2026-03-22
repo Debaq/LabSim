@@ -1,4 +1,5 @@
 pub mod personas;
+pub mod patient_persona;
 
 use llama_cpp_2::context::params::LlamaContextParams;
 use llama_cpp_2::llama_backend::LlamaBackend;

@@ -117,7 +117,6 @@ impl ApiClient {
     }
 
     /// DELETE request con JWT automático
-    #[allow(dead_code)]
     pub async fn delete(&self, route: &str) -> Result<serde_json::Value, String> {
         let mut req = self.client.delete(self.get_url(route));
 

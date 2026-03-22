@@ -15,7 +15,7 @@ import { Save, User } from "lucide-react";
 
 export default function PatientInfoModule() {
   const { form, onSubmit } = useModuleForm<PatientInfoData>(
-    "patientInfo", patientInfoSchema, "Datos del paciente",
+    "identity", patientInfoSchema, "Datos del paciente",
   );
   const { register, handleSubmit, setValue, watch, formState: { errors } } = form;
 

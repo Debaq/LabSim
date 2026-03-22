@@ -45,6 +45,13 @@ const WINDOW_ICONS: Record<string, LucideIcon> = {
   oct: Layers,
   "patient-history": Database,
   clinical: Stethoscope,
+  vng: Settings,
+  vhit: Settings,
+  scheimpflug: Settings,
+  courses: ClipboardList,
+  supervision: Settings,
+  "manage-patients": Stethoscope,
+  "clinical-editor": Stethoscope,
   messaging: MessageCircle,
   "file-explorer": FolderOpen,
   "text-editor": FileText,
@@ -160,8 +167,11 @@ export function Taskbar() {
           <DropdownMenuItem onClick={() => openWindow("patient-history", "Historial", "patient-history")} className="ls-text2 focus:ls-bg-input focus:ls-text">
             <Database className="mr-2 h-4 w-4 text-cyan-400" />Historial Pacientes
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openWindow("clinical", "Crear Casos", "clinical")} className="ls-text2 focus:ls-bg-input focus:ls-text">
-            <Stethoscope className="mr-2 h-4 w-4 text-purple-400" />Crear Casos
+          <DropdownMenuItem onClick={() => openWindow("courses", "Mis Cursos", "courses")} className="ls-text2 focus:ls-bg-input focus:ls-text">
+            <ClipboardList className="mr-2 h-4 w-4 text-sky-400" />Mis Cursos
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openWindow("manage-patients", "Gestionar Pacientes", "manage-patients")} className="ls-text2 focus:ls-bg-input focus:ls-text">
+            <Stethoscope className="mr-2 h-4 w-4 text-purple-400" />Gestionar Pacientes
           </DropdownMenuItem>
           <DropdownMenuSeparator className="ls-bg-input" />
 
@@ -217,7 +227,7 @@ export function Taskbar() {
       <div className="flex items-center gap-2 px-2">
         {/* Accesos directos rápidos */}
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <button
               onClick={() => openWindow("messaging", "Mensajes", "messaging", { width: 420, height: 620 })}
               className="relative rounded p-1 transition hover:ls-bg-input"
@@ -235,7 +245,7 @@ export function Taskbar() {
           </TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <button
               onClick={() => openWindow("agenda", "Agenda", "agenda", { width: 500, height: 450 })}
               className="rounded p-1 transition hover:ls-bg-input"

@@ -30,6 +30,14 @@ switch (true) {
             $where[] = 'c.is_published = 1';
         }
 
+        // Filtro de archivados (por defecto ocultar)
+        $archived = query_param('archived');
+        if ($archived === '1') {
+            $where[] = 'c.is_archived = 1';
+        } elseif ($archived !== 'all') {
+            $where[] = '(c.is_archived = 0 OR c.is_archived IS NULL)';
+        }
+
         $author = query_param('author');
         if ($author) {
             $where[] = 'c.author_id = :author';
@@ -67,7 +75,7 @@ switch (true) {
         }
 
         $sql = "SELECT c.id, c.title, c.description, c.author_id, c.tags, c.difficulty,
-                       c.is_published, c.schema_version, c.created_at, c.updated_at,
+                       c.is_published, c.is_archived, c.schema_version, c.created_at, c.updated_at,
                        u.username as author_username, u.full_name as author_name
                 FROM cases c
                 LEFT JOIN users u ON c.author_id = u.id
@@ -253,6 +261,27 @@ switch (true) {
         Database::execute('DELETE FROM cases WHERE id = :id', [':id' => $id]);
 
         json_response(['message' => 'Caso eliminado']);
+        break;
+
+    // ─── ARCHIVAR/DESARCHIVAR ─────────────────────────
+    case $method === 'PUT' && $id !== null && $action === 'archive':
+        $auth = require_auth(['admin', 'docente', 'instructor']);
+
+        $caso = Database::fetchOne('SELECT id, is_archived FROM cases WHERE id = :id', [':id' => $id]);
+        if (!$caso) {
+            error_response('Caso no encontrado', 404);
+        }
+
+        $newState = ($caso['is_archived'] ?? 0) ? 0 : 1;
+        Database::execute(
+            "UPDATE cases SET is_archived = :arch, updated_at = datetime('now') WHERE id = :id",
+            [':id' => $id, ':arch' => $newState]
+        );
+
+        json_response([
+            'message' => $newState ? 'Caso archivado' : 'Caso desarchivado',
+            'is_archived' => $newState,
+        ]);
         break;
 
     default:

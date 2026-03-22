@@ -98,6 +98,17 @@ out($isCli ? "\n— Columnas nuevas en tablas existentes..." : "<br><strong>Colu
 // users
 add_column($db, 'users', 'must_change_password', "INTEGER NOT NULL DEFAULT 0", $isCli);
 
+// cases
+add_column($db, 'cases', 'is_archived', "INTEGER NOT NULL DEFAULT 0", $isCli);
+
+// users: institución y número de identificación
+add_column($db, 'users', 'institution_id', "TEXT REFERENCES institutions(id)", $isCli);
+add_column($db, 'users', 'student_id_number', "TEXT", $isCli);
+
+// agenda_items: vinculación a cursos + configuración de sesión
+add_column($db, 'agenda_items', 'course_id', "TEXT REFERENCES courses(id)", $isCli);
+add_column($db, 'agenda_items', 'session_config_json', "TEXT DEFAULT '{}'", $isCli);
+
 // agenda_items
 add_column($db, 'agenda_items', 'assigned_to', "TEXT REFERENCES users(id)", $isCli);
 add_column($db, 'agenda_items', 'session_id', "TEXT REFERENCES practice_sessions(id)", $isCli);
@@ -113,6 +124,38 @@ add_column($db, 'agenda_items', 'completion_notes', "TEXT", $isCli);
 
 // ─── Tablas nuevas ──────────────────────────────────
 out($isCli ? "\n— Tablas nuevas..." : "<br><strong>Tablas nuevas...</strong>", $isCli);
+
+// Instituciones
+create_table($db, 'institutions', "CREATE TABLE IF NOT EXISTS institutions (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    config_json TEXT DEFAULT '{}',
+    is_active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now'))
+)", $isCli);
+
+// Cursos
+create_table($db, 'courses', "CREATE TABLE IF NOT EXISTS courses (
+    id TEXT PRIMARY KEY,
+    institution_id TEXT NOT NULL REFERENCES institutions(id),
+    name TEXT NOT NULL,
+    code TEXT,
+    description TEXT,
+    created_by TEXT NOT NULL REFERENCES users(id),
+    period TEXT,
+    is_active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now'))
+)", $isCli);
+
+// Miembros de cursos
+create_table($db, 'course_members', "CREATE TABLE IF NOT EXISTS course_members (
+    course_id TEXT NOT NULL REFERENCES courses(id),
+    user_id TEXT NOT NULL REFERENCES users(id),
+    role TEXT DEFAULT 'estudiante' CHECK (role IN ('estudiante','instructor','docente')),
+    enrolled_at TEXT DEFAULT (datetime('now')),
+    PRIMARY KEY (course_id, user_id)
+)", $isCli);
 
 create_table($db, 'procedures', "CREATE TABLE IF NOT EXISTS procedures (
     id TEXT PRIMARY KEY,
@@ -333,6 +376,89 @@ create_table($db, 'module_interaction_stats', "CREATE TABLE IF NOT EXISTS module
     last_saved_at TEXT
 )", $isCli);
 
+// ─── Larissa: Evoluciones clínicas ──────────────────
+create_table($db, 'evolutions', "CREATE TABLE IF NOT EXISTS evolutions (
+    id TEXT PRIMARY KEY,
+    agenda_item_id TEXT NOT NULL REFERENCES agenda_items(id),
+    student_id TEXT NOT NULL REFERENCES users(id),
+    motivo_consulta TEXT,
+    anamnesis_proxima TEXT,
+    examen_fisico TEXT,
+    hipotesis_diagnostica TEXT,
+    plan_estudio TEXT,
+    plan_terapeutico TEXT,
+    observaciones TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+)", $isCli);
+
+// ─── Larissa: Interconsultas ────────────────────────
+create_table($db, 'interconsultations', "CREATE TABLE IF NOT EXISTS interconsultations (
+    id TEXT PRIMARY KEY,
+    agenda_item_id TEXT NOT NULL REFERENCES agenda_items(id),
+    requester_id TEXT NOT NULL REFERENCES users(id),
+    target_specialty TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    priority TEXT DEFAULT 'normal' CHECK (priority IN ('normal','urgente')),
+    response_text TEXT,
+    responder_id TEXT REFERENCES users(id),
+    status TEXT DEFAULT 'solicitada' CHECK (status IN ('solicitada','respondida','completada')),
+    created_at TEXT DEFAULT (datetime('now')),
+    responded_at TEXT
+)", $isCli);
+
+// ─── Centro: Planes de mejora ────────────────────────
+create_table($db, 'improvement_plans', "CREATE TABLE IF NOT EXISTS improvement_plans (
+    id TEXT PRIMARY KEY,
+    session_id TEXT NOT NULL REFERENCES practice_sessions(id),
+    meeting_id TEXT REFERENCES clinical_meetings(id),
+    created_by TEXT NOT NULL REFERENCES users(id),
+    title TEXT NOT NULL,
+    description TEXT,
+    status TEXT DEFAULT 'pendiente' CHECK (status IN ('pendiente','en_progreso','completado','cancelado')),
+    deadline TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+)", $isCli);
+
+create_table($db, 'improvement_tasks', "CREATE TABLE IF NOT EXISTS improvement_tasks (
+    id TEXT PRIMARY KEY,
+    plan_id TEXT NOT NULL REFERENCES improvement_plans(id) ON DELETE CASCADE,
+    assigned_to TEXT REFERENCES users(id),
+    title TEXT NOT NULL,
+    description TEXT,
+    is_completed INTEGER DEFAULT 0,
+    completed_at TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+)", $isCli);
+
+// ─── Supervisión: Validaciones docente ──────────────
+create_table($db, 'validation_requests', "CREATE TABLE IF NOT EXISTS validation_requests (
+    id TEXT PRIMARY KEY,
+    agenda_item_id TEXT NOT NULL REFERENCES agenda_items(id),
+    student_id TEXT NOT NULL REFERENCES users(id),
+    procedure_name TEXT,
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending','approved','returned')),
+    docente_id TEXT REFERENCES users(id),
+    docente_notes TEXT,
+    requested_at TEXT DEFAULT (datetime('now')),
+    resolved_at TEXT
+)", $isCli);
+
+// ─── Pacientes vivos: memoria de interacciones ──────
+create_table($db, 'patient_interaction_logs', "CREATE TABLE IF NOT EXISTS patient_interaction_logs (
+    id TEXT PRIMARY KEY,
+    case_id TEXT NOT NULL REFERENCES cases(id),
+    agenda_item_id TEXT REFERENCES agenda_items(id),
+    student_id TEXT NOT NULL REFERENCES users(id),
+    student_name TEXT,
+    summary TEXT NOT NULL,
+    mood_at_end TEXT,
+    tests_performed TEXT DEFAULT '[]',
+    duration_minutes INTEGER,
+    created_at TEXT DEFAULT (datetime('now'))
+)", $isCli);
+
 // ─── Índices ────────────────────────────────────────
 out($isCli ? "\n— Índices..." : "<br><strong>Índices...</strong>", $isCli);
 
@@ -350,6 +476,22 @@ $indices = [
     "CREATE INDEX IF NOT EXISTS idx_agenda_assigned ON agenda_items(assigned_to)",
     "CREATE INDEX IF NOT EXISTS idx_agenda_procedure ON agenda_items(procedure_id)",
     "CREATE INDEX IF NOT EXISTS idx_app_sessions_user ON app_sessions(user_id)",
+    "CREATE INDEX IF NOT EXISTS idx_evolutions_agenda ON evolutions(agenda_item_id)",
+    "CREATE INDEX IF NOT EXISTS idx_evolutions_student ON evolutions(student_id)",
+    "CREATE INDEX IF NOT EXISTS idx_interconsultations_agenda ON interconsultations(agenda_item_id)",
+    "CREATE INDEX IF NOT EXISTS idx_interconsultations_requester ON interconsultations(requester_id)",
+    "CREATE INDEX IF NOT EXISTS idx_agenda_course ON agenda_items(course_id)",
+    "CREATE INDEX IF NOT EXISTS idx_improvement_plans_session ON improvement_plans(session_id)",
+    "CREATE INDEX IF NOT EXISTS idx_improvement_tasks_plan ON improvement_tasks(plan_id)",
+    "CREATE INDEX IF NOT EXISTS idx_validation_requests_student ON validation_requests(student_id)",
+    "CREATE INDEX IF NOT EXISTS idx_validation_requests_status ON validation_requests(status)",
+    "CREATE INDEX IF NOT EXISTS idx_patient_logs_case ON patient_interaction_logs(case_id)",
+    "CREATE INDEX IF NOT EXISTS idx_patient_logs_student ON patient_interaction_logs(student_id)",
+    "CREATE INDEX IF NOT EXISTS idx_courses_institution ON courses(institution_id)",
+    "CREATE INDEX IF NOT EXISTS idx_courses_creator ON courses(created_by)",
+    "CREATE INDEX IF NOT EXISTS idx_course_members_user ON course_members(user_id)",
+    "CREATE INDEX IF NOT EXISTS idx_users_institution ON users(institution_id)",
+    "CREATE INDEX IF NOT EXISTS idx_users_student_id ON users(student_id_number)",
 ];
 
 foreach ($indices as $sql) {
@@ -365,6 +507,32 @@ if ($procCount == 0) {
     // install.php ya maneja el seed de procedimientos e incidentes
 } else {
     out($isCli ? "\n· Procedimientos ya existen ($procCount)" : "<span class='skip'>· Procedimientos ya existen ($procCount)</span>", $isCli);
+}
+
+// ─── Seed: institución por defecto ──────────────────
+$instCount = 0;
+if (table_exists($db, 'institutions')) {
+    $instCount = $db->query("SELECT COUNT(*) as c FROM institutions")->fetch()['c'] ?? 0;
+}
+if ($instCount == 0 && table_exists($db, 'institutions')) {
+    out($isCli ? "\n— Creando institución por defecto..." : "<br><strong>Institución por defecto...</strong>", $isCli);
+    $defaultInstId = Database::uuid();
+    Database::execute(
+        "INSERT INTO institutions (id, name, slug) VALUES (:id, :name, :slug)",
+        [':id' => $defaultInstId, ':name' => 'LabSim Dev', ':slug' => 'labsim']
+    );
+    out($isCli ? "  ✓ Institución 'LabSim Dev' creada" : "<span class='ok'>  ✓ Institución 'LabSim Dev' creada</span>", $isCli);
+
+    // Asignar todos los usuarios existentes a la institución por defecto
+    $orphans = Database::execute(
+        "UPDATE users SET institution_id = :iid WHERE institution_id IS NULL",
+        [':iid' => $defaultInstId]
+    );
+    if ($orphans > 0) {
+        out($isCli ? "  ✓ $orphans usuarios asignados a institución por defecto" : "<span class='ok'>  ✓ $orphans usuarios migrados</span>", $isCli);
+    }
+} else {
+    out($isCli ? "\n· Institución ya existe" : "<span class='skip'>· Institución ya existe</span>", $isCli);
 }
 
 // ─── Resumen ────────────────────────────────────────

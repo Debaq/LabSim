@@ -1,427 +1,200 @@
+/**
+ * Impedanciómetro LabSim
+ *
+ * Simula un equipo real (tipo Interacoustics AT235 / GSI TympStar).
+ * El equipo muestra datos crudos — no interpreta. El estudiante analiza.
+ *
+ * Pruebas disponibles:
+ * - Timpanometría (sweep de presión con curva en tiempo real)
+ * - Reflejos acústicos (ipsi/contra, búsqueda de umbral)
+ * - Deterioro del reflejo (10s de estimulación sostenida)
+ * - Función tubárica (3 timpanogramas: basal, Toynbee, Valsalva)
+ */
+
 import { useState, useMemo } from "react";
-import {
-  TimpanogramChart,
-  type TimpanogramData,
-} from "@/charts/timpanogram/timpanogram-chart";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+import { usePatientStore } from "@/stores/patient-store";
+import { useLiveSessionStore } from "@/stores/live-session-store";
+import { PatientBanner } from "@/components/ui/patient-banner";
+import { ProbeIndicator, type ProbeStatus } from "@/components/impedance/probe-indicator";
+import { ImpedanceControls, DEFAULT_SETTINGS, type ImpedanceSettings } from "@/components/impedance/impedance-controls";
+import { TympanometryPanel } from "@/components/impedance/tympanometry-panel";
+import { ReflexPanel } from "@/components/impedance/reflex-panel";
+import { ReflexDecayPanel } from "@/components/impedance/reflex-decay-panel";
+import { EustachianPanel } from "@/components/impedance/eustachian-panel";
+import { generateTympanogram } from "@/lib/impedance-synthetic";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, RotateCcw } from "lucide-react";
+import type { EarPhysiology } from "@/modules/impedance/schema";
 
-const FREQUENCIES = ["500", "1000", "2000", "4000"] as const;
-
-interface TimpValues {
-  complianceMaxima: string;
-  presion: string;
-  volumenEac: string;
-  gradiente: string;
-}
-
-interface ReflexValues {
-  ipsi: Record<string, string>;
-  contra: Record<string, string>;
-}
-
-const emptyTimp = (): TimpValues => ({
-  complianceMaxima: "",
-  presion: "",
-  volumenEac: "",
-  gradiente: "",
-});
-
-const emptyReflex = (): ReflexValues => ({
-  ipsi: { "500": "", "1000": "", "2000": "", "4000": "" },
-  contra: { "500": "", "1000": "", "2000": "", "4000": "" },
-});
-
-function classifyType(
-  compliance: number | null,
-  pressure: number | null,
-): TimpanogramData["type"] {
-  if (compliance === null || pressure === null) return "A";
-  if (compliance < 0.2) return "B";
-  if (pressure < -150) return "C";
-  if (compliance < 0.4) return "As";
-  if (compliance > 1.6) return "Ad";
-  return "A";
-}
-
-function typeDescription(type: TimpanogramData["type"]): string {
-  switch (type) {
-    case "A":
-      return "Normal";
-    case "As":
-      return "Rigidez (otosclerosis)";
-    case "Ad":
-      return "Hipercompliance (disrupcion osicular)";
-    case "B":
-      return "Plano (efusion / perforacion)";
-    case "C":
-      return "Presion negativa (disfuncion tubaria)";
-  }
-}
+type TestMode = "tympanometry" | "reflex" | "decay" | "eustachian";
 
 export function ImpedancePlaceholder() {
-  const [activeEar, setActiveEar] = useState<"right" | "left">("right");
+  const [ear, setEar] = useState<"OD" | "OI">("OD");
+  const [testMode, setTestMode] = useState<TestMode>("tympanometry");
+  const [settings, setSettings] = useState<ImpedanceSettings>({ ...DEFAULT_SETTINGS });
+  const [probeStatus, setProbeStatus] = useState<ProbeStatus>("disconnected");
+  const [tympRunning, setTympRunning] = useState(false);
 
-  const [timpOD, setTimpOD] = useState<TimpValues>(emptyTimp());
-  const [timpOI, setTimpOI] = useState<TimpValues>(emptyTimp());
-  const [reflexOD, setReflexOD] = useState<ReflexValues>(emptyReflex());
-  const [reflexOI, setReflexOI] = useState<ReflexValues>(emptyReflex());
+  // Datos del paciente
+  const impedanceConfig = usePatientStore((s) => s.data.modules.impedance ?? {});
+  const patientId = usePatientStore((s) => s.currentPatientId);
+  const addEvent = useLiveSessionStore((s) => s.addEvent);
 
-  const currentTimp = activeEar === "right" ? timpOD : timpOI;
-  const setCurrentTimp = activeEar === "right" ? setTimpOD : setTimpOI;
-  const currentReflex = activeEar === "right" ? reflexOD : reflexOI;
-  const setCurrentReflex = activeEar === "right" ? setReflexOD : setReflexOI;
+  const earKey = ear === "OD" ? "oidoDerecho" : "oidoIzquierdo";
+  const earData: EarPhysiology = (impedanceConfig[earKey] as EarPhysiology) ?? {};
+  const variance = (impedanceConfig.naturalVariance as number) ?? 0.05;
+  const hasCaseLoaded = patientId !== null && Object.keys(earData).length > 0;
 
-  const handleTimpChange = (field: keyof TimpValues, value: string) => {
-    setCurrentTimp((prev) => ({ ...prev, [field]: value }));
-  };
+  // Seed determinístico
+  const seed = useMemo(() => {
+    if (!patientId) return 42;
+    return patientId.split("").reduce((a, c) => a + c.charCodeAt(0), 0) + (ear === "OI" ? 1000 : 0);
+  }, [patientId, ear]);
 
-  const handleReflexChange = (
-    mode: "ipsi" | "contra",
-    freq: string,
-    value: string,
-  ) => {
-    const upper = value.toUpperCase();
-    if (upper === "A" || upper === "AU" || upper === "AUS") {
-      setCurrentReflex((prev) => ({
-        ...prev,
-        [mode]: { ...prev[mode], [freq]: upper },
-      }));
-      return;
+  // Generar timpanograma
+  const tympData = useMemo(() => {
+    if (!hasCaseLoaded) {
+      // Demo con datos normales
+      return generateTympanogram(
+        { compliancePeak: 0.8, middleEarPressure: 0, earCanalVolume: 1.1, tympWidth: 100 },
+        settings.probeFrequency,
+        [settings.pressureMin, settings.pressureMax],
+        seed,
+        variance,
+      );
     }
-    if (value === "" || /^-?\d*\.?\d*$/.test(value)) {
-      setCurrentReflex((prev) => ({
-        ...prev,
-        [mode]: { ...prev[mode], [freq]: value },
-      }));
-    }
+    return generateTympanogram(
+      earData,
+      settings.probeFrequency,
+      [settings.pressureMin, settings.pressureMax],
+      seed,
+      variance,
+    );
+  }, [hasCaseLoaded, earData, settings.probeFrequency, settings.pressureMin, settings.pressureMax, seed, variance]);
+
+  const handleStartTymp = () => {
+    // Simular inserción de sonda
+    setProbeStatus("inserting");
+    setTimeout(() => {
+      setProbeStatus("sealed");
+      setTympRunning(true);
+      addEvent({ type: "test_start", simulator: "impedance", details: `Timpanometría ${ear}` });
+    }, 800);
   };
 
-  const handleClear = () => {
-    if (activeEar === "right") {
-      setTimpOD(emptyTimp());
-      setReflexOD(emptyReflex());
-    } else {
-      setTimpOI(emptyTimp());
-      setReflexOI(emptyReflex());
-    }
-  };
-
-  const handleClearAll = () => {
-    setTimpOD(emptyTimp());
-    setTimpOI(emptyTimp());
-    setReflexOD(emptyReflex());
-    setReflexOI(emptyReflex());
-  };
-
-  // Build timpanogram data for chart
-  const timpanogramData = useMemo(() => {
-    const result: TimpanogramData[] = [];
-
-    const buildEntry = (
-      t: TimpValues,
-      ear: "right" | "left",
-    ): TimpanogramData | null => {
-      const comp = t.complianceMaxima ? parseFloat(t.complianceMaxima) : null;
-      const pres = t.presion ? parseFloat(t.presion) : null;
-      const vol = t.volumenEac ? parseFloat(t.volumenEac) : null;
-      if (comp === null && pres === null) return null;
-      const type = classifyType(comp, pres);
-      return {
-        ear,
-        type,
-        peakPressure: pres ?? 0,
-        peakCompliance: comp ?? 0.5,
-        volume: vol ?? 1.0,
-      };
-    };
-
-    const od = buildEntry(timpOD, "right");
-    if (od) result.push(od);
-    const oi = buildEntry(timpOI, "left");
-    if (oi) result.push(oi);
-
-    return result;
-  }, [timpOD, timpOI]);
-
-  const currentType = useMemo(() => {
-    const comp = currentTimp.complianceMaxima
-      ? parseFloat(currentTimp.complianceMaxima)
-      : null;
-    const pres = currentTimp.presion ? parseFloat(currentTimp.presion) : null;
-    if (comp === null && pres === null) return null;
-    return classifyType(comp, pres);
-  }, [currentTimp]);
+  const TEST_MODES: { value: TestMode; label: string }[] = [
+    { value: "tympanometry", label: "Timpanometría" },
+    { value: "reflex", label: "Reflejos" },
+    { value: "decay", label: "Deterioro" },
+    { value: "eustachian", label: "Función Tubárica" },
+  ];
 
   return (
     <div className="flex h-full flex-col ls-bg">
-      {/* Header controls */}
-      <div className="flex items-center gap-2 border-b ls-border px-3 py-2">
-        <Activity className="h-4 w-4 text-emerald-400" />
-        <span className="text-xs font-medium ls-text2">
-          Impedanciometro
+      <PatientBanner simulatorName="Impedanciómetro" />
+
+      {/* Header del equipo */}
+      <div className="flex h-7 shrink-0 items-center justify-between ls-bg-panel2 px-3">
+        <span className="text-xs font-bold tracking-[0.2em] ls-text-muted">
+          LABSIM <span className="font-normal ls-text-muted">IMPEDANCE Z-400</span>
         </span>
-
-        <div className="ml-auto flex items-center gap-1">
-          <Button
-            size="xs"
-            variant={activeEar === "right" ? "default" : "ghost"}
-            onClick={() => setActiveEar("right")}
-            className={
-              activeEar === "right"
-                ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
-                : "ls-text-muted"
-            }
-          >
-            OD
-          </Button>
-          <Button
-            size="xs"
-            variant={activeEar === "left" ? "default" : "ghost"}
-            onClick={() => setActiveEar("left")}
-            className={
-              activeEar === "left"
-                ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
-                : "ls-text-muted"
-            }
-          >
-            OI
-          </Button>
-
-          <div className="mx-1 h-4 w-px ls-bg-input" />
-
-          <Button
-            size="icon-xs"
-            variant="ghost"
-            onClick={handleClear}
-            className="ls-text-muted hover:ls-text"
-            title="Limpiar oido actual"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            size="xs"
-            variant="ghost"
-            onClick={handleClearAll}
-            className="ls-text-muted hover:ls-text text-xs"
-            title="Limpiar todo"
-          >
-            Limpiar todo
-          </Button>
+        <div className="flex items-center gap-3">
+          <ProbeIndicator status={probeStatus} />
+          {hasCaseLoaded && (
+            <span className="text-[9px] text-emerald-400/60 font-mono">CASE</span>
+          )}
         </div>
       </div>
 
-      {/* Main content */}
-      <ScrollArea className="flex-1">
-        <div className="flex gap-3 p-3">
-          {/* Left column: inputs */}
-          <div className="flex w-[280px] shrink-0 flex-col gap-3">
-            {/* Timpanometry inputs */}
-            <div className="rounded-lg border ls-border ls-bg-input p-3">
-              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide ls-text2">
-                Timpanometria -{" "}
-                {activeEar === "right" ? "Oido Derecho" : "Oido Izquierdo"}
-              </h4>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label className="text-xs ls-text-muted">
-                    Compliance max (ml)
-                  </Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="10"
-                    placeholder="0.0"
-                    value={currentTimp.complianceMaxima}
-                    onChange={(e) =>
-                      handleTimpChange("complianceMaxima", e.target.value)
-                    }
-                    className="h-7 ls-border ls-bg-input text-xs ls-text placeholder:ls-text-muted"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs ls-text-muted">
-                    Presion (daPa)
-                  </Label>
-                  <Input
-                    type="number"
-                    step="1"
-                    min="-400"
-                    max="200"
-                    placeholder="0"
-                    value={currentTimp.presion}
-                    onChange={(e) =>
-                      handleTimpChange("presion", e.target.value)
-                    }
-                    className="h-7 ls-border ls-bg-input text-xs ls-text placeholder:ls-text-muted"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs ls-text-muted">
-                    Volumen EAC (ml)
-                  </Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="10"
-                    placeholder="0.0"
-                    value={currentTimp.volumenEac}
-                    onChange={(e) =>
-                      handleTimpChange("volumenEac", e.target.value)
-                    }
-                    className="h-7 ls-border ls-bg-input text-xs ls-text placeholder:ls-text-muted"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs ls-text-muted">Gradiente</Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    placeholder="0.0"
-                    value={currentTimp.gradiente}
-                    onChange={(e) =>
-                      handleTimpChange("gradiente", e.target.value)
-                    }
-                    className="h-7 ls-border ls-bg-input text-xs ls-text placeholder:ls-text-muted"
-                  />
-                </div>
-              </div>
-
-              {/* Type interpretation */}
-              {currentType && (
-                <div className="mt-2 flex items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className={`border-white/20 text-xs ${
-                      currentType === "A"
-                        ? "bg-green-500/10 text-green-400"
-                        : currentType === "B"
-                          ? "bg-red-500/10 text-red-400"
-                          : currentType === "C"
-                            ? "bg-yellow-500/10 text-yellow-400"
-                            : "bg-orange-500/10 text-orange-400"
-                    }`}
-                  >
-                    Tipo {currentType}
-                  </Badge>
-                  <span className="text-xs ls-text-muted">
-                    {typeDescription(currentType)}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Acoustic reflexes table */}
-            <div className="rounded-lg border ls-border ls-bg-input p-3">
-              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide ls-text2">
-                Reflejos Acusticos
-              </h4>
-
-              <table className="w-full">
-                <thead>
-                  <tr className="text-xs ls-text-muted">
-                    <th className="pb-1 text-left font-normal">Hz</th>
-                    {FREQUENCIES.map((f) => (
-                      <th key={f} className="pb-1 text-center font-normal">
-                        {f}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(["ipsi", "contra"] as const).map((mode) => (
-                    <tr key={mode}>
-                      <td className="py-1 pr-2 text-xs font-medium uppercase ls-text2">
-                        {mode === "ipsi" ? "Ipsi" : "Contra"}
-                      </td>
-                      {FREQUENCIES.map((freq) => (
-                        <td key={freq} className="px-0.5 py-1">
-                          <Input
-                            value={currentReflex[mode][freq]}
-                            onChange={(e) =>
-                              handleReflexChange(mode, freq, e.target.value)
-                            }
-                            placeholder="dB"
-                            className="h-6 w-full ls-border ls-bg-input text-center text-xs ls-text placeholder:ls-text-muted"
-                          />
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <p className="mt-1.5 text-xs ls-text-muted">
-                Ingresar dB o escribir AUS (ausente)
-              </p>
-            </div>
-
-            {/* Summary for both ears */}
-            <div className="rounded-lg border ls-border ls-bg-input p-3">
-              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide ls-text2">
-                Resumen
-              </h4>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <span className="text-red-400">OD:</span>{" "}
-                  <span className="ls-text2">
-                    {timpOD.complianceMaxima || timpOD.presion
-                      ? `Tipo ${classifyType(
-                          timpOD.complianceMaxima
-                            ? parseFloat(timpOD.complianceMaxima)
-                            : null,
-                          timpOD.presion ? parseFloat(timpOD.presion) : null,
-                        )} | ${timpOD.complianceMaxima || "—"} ml | ${timpOD.presion || "—"} daPa`
-                      : "Sin datos"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-blue-400">OI:</span>{" "}
-                  <span className="ls-text2">
-                    {timpOI.complianceMaxima || timpOI.presion
-                      ? `Tipo ${classifyType(
-                          timpOI.complianceMaxima
-                            ? parseFloat(timpOI.complianceMaxima)
-                            : null,
-                          timpOI.presion ? parseFloat(timpOI.presion) : null,
-                        )} | ${timpOI.complianceMaxima || "—"} ml | ${timpOI.presion || "—"} daPa`
-                      : "Sin datos"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right column: chart */}
-          <div className="flex flex-1 flex-col">
-            <div className="flex-1 rounded-lg border ls-border ls-bg-input p-2">
-              <TimpanogramChart
-                data={timpanogramData}
-                width={480}
-                height={340}
-              />
-            </div>
-          </div>
+      {/* Ear selector + test mode */}
+      <div className="flex items-center gap-2 border-b ls-border px-3 py-1.5">
+        {/* Oído */}
+        <div className="flex gap-0.5">
+          <button
+            onClick={() => setEar("OD")}
+            className={`rounded px-2.5 py-0.5 text-xs font-bold transition ${
+              ear === "OD" ? "bg-red-500/20 text-red-400" : "ls-text-muted hover:ls-bg-input"
+            }`}
+          >
+            OD
+          </button>
+          <button
+            onClick={() => setEar("OI")}
+            className={`rounded px-2.5 py-0.5 text-xs font-bold transition ${
+              ear === "OI" ? "bg-blue-500/20 text-blue-400" : "ls-text-muted hover:ls-bg-input"
+            }`}
+          >
+            OI
+          </button>
         </div>
-      </ScrollArea>
+
+        <div className="mx-1 h-4 w-px ls-bg-input" />
+
+        {/* Test mode */}
+        <div className="flex gap-0.5">
+          {TEST_MODES.map((m) => (
+            <button
+              key={m.value}
+              onClick={() => setTestMode(m.value)}
+              className={`rounded px-2 py-0.5 text-[10px] transition ${
+                testMode === m.value
+                  ? "bg-emerald-500/20 text-emerald-400"
+                  : "ls-text-muted hover:ls-bg-input"
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Main content: panel izquierdo (controles) + derecho (visualización) */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Controles */}
+        <div className="w-[180px] shrink-0 border-r ls-border overflow-auto">
+          <ImpedanceControls settings={settings} onChange={setSettings} />
+        </div>
+
+        {/* Visualización */}
+        <ScrollArea className="flex-1">
+          <div className="p-3">
+            {testMode === "tympanometry" && (
+              <TympanometryPanel
+                data={tympData}
+                settings={settings}
+                onStart={handleStartTymp}
+                isRunning={tympRunning}
+              />
+            )}
+            {testMode === "reflex" && (
+              <ReflexPanel
+                ear={earData}
+                settings={settings}
+                seed={seed}
+                variance={variance}
+              />
+            )}
+            {testMode === "decay" && (
+              <div className="space-y-4">
+                <ReflexDecayPanel ear={earData} frequency={500} seed={seed} />
+                <ReflexDecayPanel ear={earData} frequency={1000} seed={seed} />
+              </div>
+            )}
+            {testMode === "eustachian" && (
+              <EustachianPanel
+                ear={earData}
+                seed={seed}
+                variance={variance}
+                pressureRange={[settings.pressureMin, settings.pressureMax]}
+              />
+            )}
+          </div>
+        </ScrollArea>
+      </div>
 
       {/* Status bar */}
-      <div className="flex items-center justify-between border-t ls-border px-3 py-1.5 text-xs ls-text-muted">
-        <span>
-          {activeEar === "right" ? "Oido Derecho" : "Oido Izquierdo"}
-        </span>
-        <span>
-          {timpanogramData.length > 0
-            ? `${timpanogramData.length} curva(s) activa(s)`
-            : "Sin datos"}
-        </span>
-        <span>Timpanometria + Reflejos</span>
+      <div className="flex items-center justify-between border-t ls-border ls-bg-panel2 px-3 py-1 text-[9px] font-mono ls-text-muted">
+        <span>{ear} · {settings.probeFrequency} Hz · {settings.pressureMin}/{settings.pressureMax} daPa</span>
+        <span>{testMode.toUpperCase()}</span>
       </div>
     </div>
   );

@@ -8,9 +8,12 @@ import {
   generatePachymetryMap,
   computeKeratometricIndices,
   type CornealPathology,
+  type CornealSeverity,
   type MapType,
 } from "@/lib/corneal-topography-synthetic";
 import { usePatientStore } from "@/stores/patient-store";
+import { useLiveSessionStore } from "@/stores/live-session-store";
+import { PatientBanner } from "@/components/ui/patient-banner";
 import { cn } from "@/lib/utils";
 import { RefreshCw, Link2, Link2Off } from "lucide-react";
 
@@ -30,47 +33,59 @@ export function CornealTopographyWindow() {
   const [eye, setEye] = useState<"OD" | "OI">("OD");
   const [mapType, setMapType] = useState<MapType>("axial");
   const [pathology, setPathology] = useState<CornealPathology>("normal");
+  const [severity, setSeverity] = useState<CornealSeverity>("moderado");
   const [seed, setSeed] = useState(42);
-  const [qualityOverride, setQualityOverride] = useState<number | null>(null);
 
   // Read case config from patient store
-  const topoConfig = usePatientStore((s) => s.data.cornealTopography);
+  const topoConfig = usePatientStore((s) => s.data.modules.cornealTopography ?? {});
   const patientId = usePatientStore((s) => s.currentPatientId);
+  const addEvent = useLiveSessionStore((s) => s.addEvent);
   const hasCaseLoaded = patientId !== null && Object.keys(topoConfig).length > 0;
+
+  const eyeKey = eye === "OD" ? "ojoDerecho" : "ojoIzquierdo";
+  const eyeCfg = (topoConfig as Record<string, Record<string, unknown>>)[eyeKey] ?? {};
 
   // Sync from case when loaded
   useEffect(() => {
     if (!hasCaseLoaded) return;
-    const eyeKey = eye === "OD" ? "ojoDerecho" : "ojoIzquierdo";
-    const cfg = (topoConfig as Record<string, Record<string, unknown>>)[eyeKey];
-    if (!cfg) return;
 
-    const patho = cfg.patologia as CornealPathology | undefined;
-    if (patho && patho !== pathology) setPathology(patho);
+    const patho = eyeCfg.patologia as CornealPathology | undefined;
+    if (patho) setPathology(patho);
 
-    const mapa = cfg.mapaPreferido as MapType | undefined;
-    if (mapa) setMapType(mapa);
-
-    const q = cfg.calidadCaptura as number | undefined;
-    setQualityOverride(q ?? null);
+    const sev = eyeCfg.severidad as CornealSeverity | undefined;
+    if (sev) setSeverity(sev);
 
     const seedBase = patientId ? patientId.split("").reduce((a, c) => a + c.charCodeAt(0), 0) : 42;
     setSeed(seedBase + (eye === "OI" ? 1000 : 0));
-  }, [hasCaseLoaded, eye, topoConfig, patientId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [hasCaseLoaded, eye, eyeCfg, patientId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const regenerate = () => setSeed(Math.floor(Math.random() * 10000));
+  const regenerate = () => {
+    setSeed(Math.floor(Math.random() * 10000));
+    addEvent({ type: "test_start", simulator: "corneal-topography", details: `Captura ${eye}` });
+  };
 
-  const quality = qualityOverride ?? (7 + Math.floor(seed % 3));
+  const patientParams = {
+    k1: eyeCfg.k1 as number | undefined,
+    k2: eyeCfg.k2 as number | undefined,
+    k1Axis: eyeCfg.k1Axis as number | undefined,
+    cct: eyeCfg.cct as number | undefined,
+    thinnestPoint: eyeCfg.thinnestPoint as number | undefined,
+    cooperationLevel: eyeCfg.cooperationLevel as number | undefined,
+    tearFilmQuality: eyeCfg.tearFilmQuality as number | undefined,
+  };
+
+  const quality = Math.round((patientParams.cooperationLevel ?? 0.8) * 10);
 
   // Compute keratometric indices
   const indices = useMemo(() => {
-    const curvMap = generateCurvatureMap(MAP_SIZE, seed, pathology, "axial");
-    const pachMap = generatePachymetryMap(MAP_SIZE, seed, pathology);
+    const curvMap = generateCurvatureMap(MAP_SIZE, seed, pathology, "axial", severity, patientParams);
+    const pachMap = generatePachymetryMap(MAP_SIZE, seed, pathology, severity, patientParams);
     return computeKeratometricIndices(curvMap, pachMap, MAP_SIZE, seed);
-  }, [seed, pathology]);
+  }, [seed, pathology, severity]);
 
   return (
     <div className="flex h-full flex-col ls-bg">
+      <PatientBanner simulatorName="Topógrafo Corneal" />
       {/* Header */}
       <div className="flex h-7 shrink-0 items-center justify-between ls-bg-panel2 px-3">
         <span className="text-xs font-bold tracking-[0.2em] ls-text-muted">

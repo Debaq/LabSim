@@ -57,6 +57,11 @@ $handlers = [
     'assets'      => __DIR__ . '/assets.php',
     'releases'    => __DIR__ . '/assets.php',
     'sync'        => __DIR__ . '/sync.php',
+    'institutions' => __DIR__ . '/institutions.php',
+    'courses'     => __DIR__ . '/courses.php',
+    'patient-logs' => __DIR__ . '/patient-logs.php',
+    'evolutions'  => __DIR__ . '/evolutions.php',
+    'interconsultations' => __DIR__ . '/interconsultations.php',
 ];
 
 if (!isset($handlers[$resource])) {

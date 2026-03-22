@@ -34,6 +34,8 @@ interface ChatState {
   markAsRead: (contactId: string) => void;
   setLlmConnected: (connected: boolean) => void;
   setLastModel: (id: string, filename: string) => void;
+  setPatientContact: (name: string) => void;
+  removePatientContact: () => void;
 }
 
 const CONTACTS: Contact[] = [
@@ -148,6 +150,35 @@ export const useChatStore = create<ChatState>()(
 
       setLlmConnected: (connected) => set({ llmConnected: connected }),
       setLastModel: (id: string, filename: string) => set({ lastModelId: id, lastModelFilename: filename }),
+
+      setPatientContact: (name) => {
+        const contact: Contact = {
+          id: "patient",
+          name,
+          avatar: "🗣",
+          subtitle: "Paciente en atención",
+          personaId: "patient",
+          color: "from-pink-400 to-rose-500",
+          online: true,
+        };
+        set((state) => {
+          const filtered = state.contacts.filter((c) => c.id !== "patient");
+          return {
+            contacts: [contact, ...filtered],
+            conversations: {
+              ...state.conversations,
+              patient: state.conversations.patient ?? [],
+            },
+          };
+        });
+      },
+
+      removePatientContact: () => {
+        set((state) => ({
+          contacts: state.contacts.filter((c) => c.id !== "patient"),
+          activeContact: state.activeContact === "patient" ? null : state.activeContact,
+        }));
+      },
     }),
     {
       name: "labsim-chat",

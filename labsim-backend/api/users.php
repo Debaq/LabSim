@@ -20,10 +20,19 @@ switch (true) {
 
     // ─── LISTAR USUARIOS ────────────────────────────
     case $method === 'GET' && $id === null:
-        $auth = require_auth('admin');
+        $auth = require_auth(['admin', 'docente', 'instructor']);
 
         $where = ['1=1'];
         $params = [];
+
+        // Docentes/instructores solo ven estudiantes de su institución
+        if ($auth['role'] !== 'admin') {
+            $caller = Database::fetchOne('SELECT institution_id FROM users WHERE id = :id', [':id' => $auth['sub']]);
+            if ($caller && $caller['institution_id']) {
+                $where[] = 'institution_id = :iid';
+                $params[':iid'] = $caller['institution_id'];
+            }
+        }
 
         $role = query_param('role');
         if ($role) {
@@ -33,7 +42,7 @@ switch (true) {
 
         $search = query_param('search');
         if ($search) {
-            $where[] = "(username LIKE :search OR full_name LIKE :search OR email LIKE :search)";
+            $where[] = "(username LIKE :search OR full_name LIKE :search OR email LIKE :search OR student_id_number LIKE :search)";
             $params[':search'] = "%$search%";
         }
 
@@ -43,7 +52,13 @@ switch (true) {
             $params[':active'] = (int)$active;
         }
 
-        $sql = "SELECT id, username, email, role, full_name, institution, is_active, created_at, updated_at
+        $institutionId = query_param('institution_id');
+        if ($institutionId) {
+            $where[] = 'institution_id = :filter_iid';
+            $params[':filter_iid'] = $institutionId;
+        }
+
+        $sql = "SELECT id, username, email, role, full_name, institution, institution_id, student_id_number, is_active, created_at, updated_at
                 FROM users WHERE " . implode(' AND ', $where) . " ORDER BY created_at DESC";
 
         $page = query_int('page', 1);
@@ -55,7 +70,7 @@ switch (true) {
 
     // ─── CREAR USUARIO ──────────────────────────────
     case $method === 'POST' && $id === null:
-        $auth = require_auth('admin');
+        $auth = require_auth(['admin', 'docente']);
         $body = get_json_body();
 
         $errors = validate_required($body, ['username', 'password', 'role']);
@@ -64,6 +79,11 @@ switch (true) {
         $errors[] = validate_enum($body['role'] ?? null, ['admin', 'docente', 'instructor', 'estudiante'], 'role');
         $errors[] = validate_email($body['email'] ?? null);
         validate_or_fail($errors);
+
+        // Docentes solo pueden crear estudiantes
+        if ($auth['role'] === 'docente' && $body['role'] !== 'estudiante') {
+            error_response('Los docentes solo pueden crear cuentas de estudiante', 403);
+        }
 
         // Verificar username único
         $existing = Database::fetchOne(
@@ -74,11 +94,18 @@ switch (true) {
             error_response('El username ya está en uso', 409);
         }
 
+        // Determinar institución
+        $institutionId = $body['institutionId'] ?? null;
+        if (!$institutionId) {
+            $caller = Database::fetchOne('SELECT institution_id FROM users WHERE id = :id', [':id' => $auth['sub']]);
+            $institutionId = $caller['institution_id'] ?? null;
+        }
+
         $userId = Database::uuid();
         $mustChange = isset($body['mustChangePassword']) ? (int)$body['mustChangePassword'] : 1;
         Database::execute(
-            "INSERT INTO users (id, username, email, password_hash, role, full_name, institution, must_change_password)
-             VALUES (:id, :username, :email, :hash, :role, :name, :inst, :mcp)",
+            "INSERT INTO users (id, username, email, password_hash, role, full_name, institution, institution_id, student_id_number, must_change_password)
+             VALUES (:id, :username, :email, :hash, :role, :name, :inst, :iid, :sid, :mcp)",
             [
                 ':id' => $userId,
                 ':username' => $body['username'],
@@ -87,12 +114,14 @@ switch (true) {
                 ':role' => $body['role'],
                 ':name' => $body['fullName'] ?? $body['full_name'] ?? null,
                 ':inst' => $body['institution'] ?? null,
+                ':iid' => $institutionId,
+                ':sid' => $body['studentIdNumber'] ?? $body['student_id_number'] ?? null,
                 ':mcp' => $mustChange,
             ]
         );
 
         $user = Database::fetchOne(
-            'SELECT id, username, email, role, full_name, institution, is_active, created_at FROM users WHERE id = :id',
+            'SELECT id, username, email, role, full_name, institution, institution_id, student_id_number, is_active, created_at FROM users WHERE id = :id',
             [':id' => $userId]
         );
 
@@ -103,13 +132,21 @@ switch (true) {
     case $method === 'GET' && $id !== null && $action === null:
         $auth = require_auth();
 
-        // Admin ve todo, otros solo su propio perfil
+        // Admin ve todo, docente/instructor ven usuarios de su institución, otros solo su perfil
         if ($auth['role'] !== 'admin' && $auth['sub'] !== $id) {
-            error_response('Permisos insuficientes', 403);
+            if (in_array($auth['role'], ['docente', 'instructor'])) {
+                $caller = Database::fetchOne('SELECT institution_id FROM users WHERE id = :id', [':id' => $auth['sub']]);
+                $target = Database::fetchOne('SELECT institution_id FROM users WHERE id = :id', [':id' => $id]);
+                if (!$caller['institution_id'] || $caller['institution_id'] !== ($target['institution_id'] ?? '')) {
+                    error_response('Permisos insuficientes', 403);
+                }
+            } else {
+                error_response('Permisos insuficientes', 403);
+            }
         }
 
         $user = Database::fetchOne(
-            'SELECT id, username, email, role, full_name, institution, is_active, created_at, updated_at
+            'SELECT id, username, email, role, full_name, institution, institution_id, student_id_number, is_active, created_at, updated_at
              FROM users WHERE id = :id',
             [':id' => $id]
         );

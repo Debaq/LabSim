@@ -15,6 +15,12 @@ import { LarissaWindow } from "./larissa-window";
 import { CenterWindow } from "./center-window";
 import { RetinographyWindow } from "./retinography-window";
 import { CornealTopographyWindow } from "./corneal-topography-window";
+import { ManagePatientsWindow } from "./manage-patients-window";
+import { CoursesWindow } from "./courses-window";
+import { SupervisionWindow } from "./supervision-window";
+import { ScheimpflugWindow } from "./scheimpflug-window";
+import { VNGWindow } from "./vng-window";
+import { VHITWindow } from "./vhit-window";
 
 interface Props {
   component: string;
@@ -25,6 +31,12 @@ const componentMap: Record<string, React.ComponentType> = {
   impedance: ImpedancePlaceholder,
   "patient-history": PatientHistory,
   clinical: ClinicalLayout,
+  "manage-patients": ManagePatientsWindow,
+  "courses": CoursesWindow,
+  "supervision": SupervisionWindow,
+  "scheimpflug": ScheimpflugWindow,
+  "vng": VNGWindow,
+  "vhit": VHITWindow,
   "file-explorer": FileExplorerPlaceholder,
   "text-editor": TextEditorPlaceholder,
   messaging: MessagingApp,

@@ -320,6 +320,60 @@ switch (true) {
         fclose($output);
         exit;
 
+    // ─── STATS DEL CENTRO ───────────────────────────
+    case $method === 'GET' && $action === 'center':
+        $auth = require_auth(['admin', 'docente', 'instructor']);
+        $sessionId = query_param('sessionId');
+
+        $stats = [];
+
+        // Incidentes
+        $incidentWhere = $sessionId ? "WHERE ci.session_id = :sid" : "WHERE 1=1";
+        $incidentParams = $sessionId ? [':sid' => $sessionId] : [];
+
+        $stats['incidents'] = [
+            'total' => Database::fetchOne("SELECT COUNT(*) as c FROM center_incidents $incidentWhere", $incidentParams)['c'],
+            'bySeverity' => Database::fetchAll("SELECT severity, COUNT(*) as count FROM center_incidents $incidentWhere GROUP BY severity", $incidentParams),
+            'byCategory' => Database::fetchAll("SELECT category, COUNT(*) as count FROM center_incidents $incidentWhere GROUP BY category ORDER BY count DESC", $incidentParams),
+            'byStatus' => Database::fetchAll("SELECT status, COUNT(*) as count FROM center_incidents $incidentWhere GROUP BY status", $incidentParams),
+        ];
+
+        // Reuniones
+        $meetingWhere = $sessionId ? "WHERE cm.session_id = :sid" : "WHERE 1=1";
+        $meetingParams = $sessionId ? [':sid' => $sessionId] : [];
+        $stats['meetings'] = [
+            'total' => Database::fetchOne("SELECT COUNT(*) as c FROM clinical_meetings cm $meetingWhere", $meetingParams)['c'],
+            'completed' => Database::fetchOne("SELECT COUNT(*) as c FROM clinical_meetings cm $meetingWhere AND cm.status = 'completed'", $meetingParams)['c'],
+        ];
+
+        // Planes de mejora
+        $planWhere = $sessionId ? "WHERE ip.session_id = :sid" : "WHERE 1=1";
+        $planParams = $sessionId ? [':sid' => $sessionId] : [];
+        $stats['plans'] = [
+            'total' => Database::fetchOne("SELECT COUNT(*) as c FROM improvement_plans ip $planWhere", $planParams)['c'],
+            'byStatus' => Database::fetchAll("SELECT status, COUNT(*) as count FROM improvement_plans ip $planWhere GROUP BY status", $planParams),
+            'tasksCompleted' => Database::fetchOne("SELECT COUNT(*) as c FROM improvement_tasks WHERE is_completed = 1")['c'],
+            'tasksTotal' => Database::fetchOne("SELECT COUNT(*) as c FROM improvement_tasks")['c'],
+        ];
+
+        // Validaciones
+        $stats['validations'] = [
+            'total' => Database::fetchOne("SELECT COUNT(*) as c FROM validation_requests")['c'],
+            'pending' => Database::fetchOne("SELECT COUNT(*) as c FROM validation_requests WHERE status = 'pending'")['c'],
+            'approved' => Database::fetchOne("SELECT COUNT(*) as c FROM validation_requests WHERE status = 'approved'")['c'],
+            'returned' => Database::fetchOne("SELECT COUNT(*) as c FROM validation_requests WHERE status = 'returned'")['c'],
+        ];
+
+        // Feedback pacientes
+        $stats['feedback'] = [
+            'complaints' => Database::fetchOne("SELECT COUNT(*) as c FROM patient_feedback WHERE feedback_type = 'complaint'")['c'],
+            'compliments' => Database::fetchOne("SELECT COUNT(*) as c FROM patient_feedback WHERE feedback_type = 'compliment'")['c'],
+            'byReason' => Database::fetchAll("SELECT reason, feedback_type, COUNT(*) as count FROM patient_feedback GROUP BY reason, feedback_type ORDER BY count DESC"),
+        ];
+
+        json_response($stats);
+        break;
+
     default:
         error_response("Ruta no encontrada: stats/" . implode('/', $routeSegments), 404);
 }
