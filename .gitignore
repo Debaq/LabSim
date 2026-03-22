@@ -5,3 +5,4 @@ software/LabSim/target/
 
 .vscode/settings.json
 /.vscode
+output/

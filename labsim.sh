@@ -1,53 +1,35 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════
-#  LabSim 3.0 — Script de gestión
+#  LabSim 3.0 — Script de gestión interactivo
 # ═══════════════════════════════════════════════════════
-set -e
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 APP="$ROOT/tauri-app"
 BACKEND="$ROOT/labsim-backend"
+OUTPUT="$ROOT/output"
 
 # ─── Colores ──────────────────────────────────────────
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
 BOLD='\033[1m'
 DIM='\033[2m'
 NC='\033[0m'
 
-header() {
-  echo ""
-  echo -e "${CYAN}╔══════════════════════════════════════╗${NC}"
-  echo -e "${CYAN}║${NC}  ${BOLD}LabSim 3.0${NC} — $1"
-  echo -e "${CYAN}╚══════════════════════════════════════╝${NC}"
-  echo ""
-}
-
 ok()   { echo -e "  ${GREEN}✓${NC} $1"; }
-fail() { echo -e "  ${RED}✗${NC} $1"; exit 1; }
+fail() { echo -e "  ${RED}✗${NC} $1"; }
 info() { echo -e "  ${DIM}→${NC} $1"; }
 warn() { echo -e "  ${YELLOW}!${NC} $1"; }
 
-# ─── Verificar dependencias ───────────────────────────
-check_deps() {
-  local missing=0
-  for cmd in node npm cargo rustc php; do
-    if command -v "$cmd" >/dev/null 2>&1; then
-      ok "$cmd $(command $cmd --version 2>/dev/null | head -1 | grep -oP '[\d]+\.[\d]+\.[\d]+')"
-    else
-      warn "$cmd no encontrado"
-      missing=1
-    fi
-  done
-  if [ $missing -eq 1 ]; then
-    echo ""
-    warn "Algunas dependencias faltan. Puede que ciertos comandos no funcionen."
-  fi
+pause() {
+  echo ""
+  echo -e "  ${DIM}Presiona Enter para volver al menú...${NC}"
+  read -r
 }
 
-# ─── Instalar dependencias npm ────────────────────────
+# ─── Instalar dependencias npm si faltan ──────────────
 ensure_deps() {
   if [ ! -d "$APP/node_modules" ]; then
     info "Instalando dependencias npm..."
@@ -70,206 +52,294 @@ free_port() {
 # ═══════════════════════════════════════════════════════
 
 cmd_dev() {
-  header "Desarrollo"
   ensure_deps
   free_port 1420
+  echo ""
   info "Frontend: http://localhost:1420"
   info "Hot reload activo"
+  info "Ctrl+C para detener"
   echo ""
   (cd "$APP" && npx tauri dev)
 }
 
 cmd_build() {
-  header "Build"
   ensure_deps
 
   info "Verificando TypeScript..."
-  (cd "$APP" && npx tsc --noEmit)
+  if ! (cd "$APP" && npx tsc --noEmit); then
+    fail "TypeScript tiene errores"
+    return
+  fi
   ok "TypeScript OK"
 
-  local bundle_flag=""
-  if [ "$1" = "--no-bundle" ]; then
-    bundle_flag="--no-bundle"
-    info "Sin empaquetado (solo binario)"
-  fi
-
   info "Compilando frontend + backend..."
-  (cd "$APP" && npx tauri build $bundle_flag)
+  if ! (cd "$APP" && npx tauri build); then
+    fail "Build falló"
+    return
+  fi
   ok "Build completado"
 
-  # Mostrar salida
+  # Crear carpeta output con fecha
+  local timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
+  local out_dir="$OUTPUT/$timestamp"
+  mkdir -p "$out_dir"
+
+  # Copiar binario
   local bin="$APP/src-tauri/target/release/labsim"
   if [ -f "$bin" ]; then
-    echo ""
-    local size=$(du -h "$bin" | cut -f1)
-    ok "Binario: $size → $bin"
+    cp "$bin" "$out_dir/"
+    local size=$(du -h "$out_dir/labsim" | cut -f1)
+    ok "Binario: $size → output/$timestamp/labsim"
   fi
 
+  # Copiar paquetes
   local bundle_dir="$APP/src-tauri/target/release/bundle"
   if [ -d "$bundle_dir" ]; then
     find "$bundle_dir" -maxdepth 2 -type f \( -name "*.deb" -o -name "*.AppImage" -o -name "*.rpm" -o -name "*.dmg" -o -name "*.msi" \) 2>/dev/null | while read -r f; do
-      local size=$(du -h "$f" | cut -f1)
-      ok "Paquete: $size → $f"
+      cp "$f" "$out_dir/"
+      local name=$(basename "$f")
+      local size=$(du -h "$out_dir/$name" | cut -f1)
+      ok "Paquete: $size → output/$timestamp/$name"
     done
+  fi
+
+  echo ""
+  ok "Salida en: output/$timestamp/"
+
+  # Listar builds anteriores
+  local count=$(find "$OUTPUT" -maxdepth 1 -type d | tail -n +2 | wc -l)
+  if [ "$count" -gt 1 ]; then
+    info "$count builds en output/"
+  fi
+}
+
+cmd_build_fast() {
+  ensure_deps
+
+  info "Verificando TypeScript..."
+  if ! (cd "$APP" && npx tsc --noEmit); then
+    fail "TypeScript tiene errores"
+    return
+  fi
+  ok "TypeScript OK"
+
+  info "Compilando solo binario (sin empaquetar)..."
+  if ! (cd "$APP" && npx tauri build --no-bundle); then
+    fail "Build falló"
+    return
+  fi
+
+  local timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
+  local out_dir="$OUTPUT/$timestamp"
+  mkdir -p "$out_dir"
+
+  local bin="$APP/src-tauri/target/release/labsim"
+  if [ -f "$bin" ]; then
+    cp "$bin" "$out_dir/"
+    local size=$(du -h "$out_dir/labsim" | cut -f1)
+    ok "Binario: $size → output/$timestamp/labsim"
   fi
 }
 
 cmd_check() {
-  header "Verificación"
-  ensure_deps
-
   info "TypeScript..."
-  (cd "$APP" && npx tsc --noEmit)
-  ok "TypeScript OK"
+  if (cd "$APP" && npx tsc --noEmit 2>&1); then
+    ok "TypeScript OK"
+  else
+    fail "TypeScript tiene errores"
+  fi
 
   info "Rust..."
-  (cd "$APP/src-tauri" && cargo build 2>&1 | tail -1)
-  ok "Rust OK"
+  if (cd "$APP/src-tauri" && cargo build 2>&1 | tail -1); then
+    ok "Rust OK"
+  else
+    fail "Rust tiene errores"
+  fi
 
   echo ""
   ok "Todo compila correctamente"
 }
 
-cmd_migrate() {
-  header "Migración de base de datos"
-  if ! command -v php >/dev/null 2>&1; then
-    fail "PHP no encontrado"
-  fi
-  php "$BACKEND/migrate.php"
-  ok "Migración completada"
-}
-
-cmd_install_db() {
-  header "Instalación de base de datos"
-  if ! command -v php >/dev/null 2>&1; then
-    fail "PHP no encontrado"
-  fi
-  php "$BACKEND/install.php"
-  ok "Base de datos creada"
-}
-
 cmd_clean() {
-  header "Limpieza"
+  echo ""
+  echo -e "  ${BOLD}¿Qué limpiar?${NC}"
+  echo ""
+  echo "    1) node_modules + caché Vite"
+  echo "    2) target/ (build cache Rust)"
+  echo "    3) output/ (builds generados)"
+  echo "    4) Todo"
+  echo "    0) Cancelar"
+  echo ""
+  echo -ne "  ${CYAN}→${NC} "
+  read -r choice
 
-  if [ -d "$APP/node_modules" ]; then
-    info "Eliminando node_modules..."
-    rm -rf "$APP/node_modules"
-    ok "node_modules eliminado"
-  fi
-
-  if [ -d "$APP/.vite" ]; then
-    info "Eliminando caché Vite..."
-    rm -rf "$APP/.vite"
-    ok "Caché Vite eliminado"
-  fi
-
-  local target="$APP/src-tauri/target"
-  if [ -d "$target" ]; then
-    local size=$(du -sh "$target" | cut -f1)
-    echo ""
-    warn "target/ ocupa $size"
-    read -p "  ¿Eliminar target/? (s/N) " -n 1 -r
-    echo ""
-    if [[ $REPLY =~ ^[Ss]$ ]]; then
-      rm -rf "$target"
-      ok "target/ eliminado"
-    fi
-  fi
+  case $choice in
+    1)
+      [ -d "$APP/node_modules" ] && rm -rf "$APP/node_modules" && ok "node_modules eliminado"
+      [ -d "$APP/.vite" ] && rm -rf "$APP/.vite" && ok "Caché Vite eliminado"
+      ;;
+    2)
+      local target="$APP/src-tauri/target"
+      if [ -d "$target" ]; then
+        local size=$(du -sh "$target" | cut -f1)
+        warn "target/ ocupa $size"
+        rm -rf "$target"
+        ok "target/ eliminado"
+      else
+        info "target/ no existe"
+      fi
+      ;;
+    3)
+      if [ -d "$OUTPUT" ]; then
+        local size=$(du -sh "$OUTPUT" | cut -f1)
+        local count=$(find "$OUTPUT" -maxdepth 1 -type d | tail -n +2 | wc -l)
+        warn "output/ tiene $count builds ($size)"
+        rm -rf "$OUTPUT"
+        ok "output/ eliminado"
+      else
+        info "output/ no existe"
+      fi
+      ;;
+    4)
+      [ -d "$APP/node_modules" ] && rm -rf "$APP/node_modules" && ok "node_modules eliminado"
+      [ -d "$APP/.vite" ] && rm -rf "$APP/.vite" && ok "Caché Vite eliminado"
+      [ -d "$APP/src-tauri/target" ] && rm -rf "$APP/src-tauri/target" && ok "target/ eliminado"
+      [ -d "$OUTPUT" ] && rm -rf "$OUTPUT" && ok "output/ eliminado"
+      ;;
+    *) info "Cancelado" ;;
+  esac
 }
 
 cmd_status() {
-  header "Estado del proyecto"
-
   # Git
-  local branch=$(git -C "$ROOT" branch --show-current 2>/dev/null)
-  local commits=$(git -C "$ROOT" log --oneline -1 2>/dev/null)
-  ok "Branch: $branch"
-  ok "Último commit: $commits"
+  local branch=$(git -C "$ROOT" branch --show-current 2>/dev/null || echo "?")
+  local commit=$(git -C "$ROOT" log --oneline -1 2>/dev/null || echo "?")
+  local dirty=$(git -C "$ROOT" status --porcelain 2>/dev/null | wc -l)
+
+  echo ""
+  echo -e "  ${BOLD}Git${NC}"
+  info "Branch: ${CYAN}$branch${NC}"
+  info "Commit: $commit"
+  [ "$dirty" -gt 0 ] && warn "$dirty archivos sin commitear" || ok "Limpio"
 
   # Archivos
-  local ts_files=$(find "$APP/src" -name "*.tsx" -o -name "*.ts" | grep -v node_modules | wc -l)
-  local rs_files=$(find "$APP/src-tauri/src" -name "*.rs" | wc -l)
-  local php_files=$(find "$BACKEND" -name "*.php" | wc -l)
-  local modules=$(find "$APP/src/modules" -maxdepth 1 -type d | tail -n +2 | wc -l)
-  local simulators=$(find "$APP/src/components/windows" -name "*-window.tsx" -o -name "*-placeholder.tsx" | wc -l)
+  local ts_files=$(find "$APP/src" -name "*.tsx" -o -name "*.ts" 2>/dev/null | grep -v node_modules | wc -l)
+  local rs_files=$(find "$APP/src-tauri/src" -name "*.rs" 2>/dev/null | wc -l)
+  local php_files=$(find "$BACKEND" -name "*.php" 2>/dev/null | wc -l)
+  local modules=$(find "$APP/src/modules" -maxdepth 1 -type d 2>/dev/null | tail -n +2 | wc -l)
+  local windows=$(find "$APP/src/components/windows" -name "*-window.tsx" -o -name "*-placeholder.tsx" 2>/dev/null | wc -l)
 
   echo ""
-  info "TypeScript/TSX: $ts_files archivos"
-  info "Rust: $rs_files archivos"
-  info "PHP: $php_files archivos"
-  info "Módulos clínicos: $modules"
-  info "Ventanas/simuladores: $simulators"
+  echo -e "  ${BOLD}Código${NC}"
+  info "TypeScript/TSX: ${CYAN}$ts_files${NC} archivos"
+  info "Rust: ${CYAN}$rs_files${NC} archivos"
+  info "PHP: ${CYAN}$php_files${NC} archivos"
+  info "Módulos clínicos: ${CYAN}$modules${NC}"
+  info "Ventanas: ${CYAN}$windows${NC}"
 
   # Tamaños
-  echo ""
   local app_size=$(du -sh "$APP/src" 2>/dev/null | cut -f1)
   local rust_size=$(du -sh "$APP/src-tauri/src" 2>/dev/null | cut -f1)
   local backend_size=$(du -sh "$BACKEND" 2>/dev/null | cut -f1)
+
+  echo ""
+  echo -e "  ${BOLD}Tamaños${NC}"
   info "Frontend: $app_size"
   info "Rust: $rust_size"
   info "Backend: $backend_size"
 
-  if [ -d "$APP/src-tauri/target" ]; then
-    local target_size=$(du -sh "$APP/src-tauri/target" 2>/dev/null | cut -f1)
-    info "target/ (build cache): $target_size"
+  [ -d "$APP/src-tauri/target" ] && info "Build cache: $(du -sh "$APP/src-tauri/target" | cut -f1)"
+  [ -d "$APP/node_modules" ] && info "node_modules: $(du -sh "$APP/node_modules" | cut -f1)"
+
+  if [ -d "$OUTPUT" ]; then
+    local builds=$(find "$OUTPUT" -maxdepth 1 -type d | tail -n +2 | wc -l)
+    info "Builds: $builds en output/"
   fi
 }
 
 cmd_deps() {
-  header "Dependencias"
-  check_deps
+  echo ""
+  for cmd in node npm cargo rustc php git; do
+    if command -v "$cmd" >/dev/null 2>&1; then
+      local ver=$("$cmd" --version 2>/dev/null | head -1)
+      ok "$cmd — $ver"
+    else
+      fail "$cmd — no encontrado"
+    fi
+  done
 }
 
 # ═══════════════════════════════════════════════════════
-#  HELP
+#  MENÚ INTERACTIVO
 # ═══════════════════════════════════════════════════════
 
-cmd_help() {
+show_menu() {
+  clear
   echo ""
-  echo -e "${BOLD}LabSim 3.0${NC} — Script de gestión"
+  echo -e "  ${CYAN}╔══════════════════════════════════════╗${NC}"
+  echo -e "  ${CYAN}║${NC}        ${BOLD}LabSim 3.0${NC}                   ${CYAN}║${NC}"
+  echo -e "  ${CYAN}║${NC}  ${DIM}Plataforma de Simulación Clínica${NC}   ${CYAN}║${NC}"
+  echo -e "  ${CYAN}╚══════════════════════════════════════╝${NC}"
   echo ""
-  echo -e "${BOLD}Uso:${NC} ./labsim.sh <comando> [opciones]"
+  echo -e "  ${BOLD}Desarrollo${NC}"
+  echo -e "    ${GREEN}1${NC})  Modo desarrollo (hot reload)"
+  echo -e "    ${GREEN}2${NC})  Verificar compilación"
   echo ""
-  echo -e "${BOLD}Desarrollo:${NC}"
-  echo "  dev              Lanzar en modo desarrollo (hot reload)"
-  echo "  build            Compilar para producción"
-  echo "  build --no-bundle  Compilar sin empaquetar (solo binario)"
-  echo "  check            Verificar que TypeScript y Rust compilan"
+  echo -e "  ${BOLD}Build${NC}"
+  echo -e "    ${GREEN}3${NC})  Build completo (binario + paquetes)"
+  echo -e "    ${GREEN}4${NC})  Build rápido (solo binario)"
   echo ""
-  echo -e "${BOLD}Base de datos:${NC}"
-  echo "  install-db       Crear base de datos desde cero (install.php)"
-  echo "  migrate          Ejecutar migraciones (migrate.php)"
+  echo -e "  ${BOLD}Mantenimiento${NC}"
+  echo -e "    ${GREEN}5${NC})  Estado del proyecto"
+  echo -e "    ${GREEN}6${NC})  Verificar dependencias"
+  echo -e "    ${GREEN}7${NC})  Limpiar"
   echo ""
-  echo -e "${BOLD}Mantenimiento:${NC}"
-  echo "  clean            Limpiar node_modules, caché, target/"
-  echo "  status           Estado del proyecto (archivos, tamaños, git)"
-  echo "  deps             Verificar dependencias instaladas"
+  echo -e "    ${RED}0${NC})  Salir"
   echo ""
-  echo -e "${BOLD}Ejemplos:${NC}"
-  echo "  ./labsim.sh dev"
-  echo "  ./labsim.sh build --no-bundle"
-  echo "  ./labsim.sh migrate"
-  echo "  ./labsim.sh status"
-  echo ""
+  echo -ne "  ${CYAN}→${NC} "
 }
 
 # ═══════════════════════════════════════════════════════
-#  ROUTER
+#  MAIN LOOP
 # ═══════════════════════════════════════════════════════
 
-case "${1:-help}" in
-  dev)        cmd_dev ;;
-  build)      cmd_build "$2" ;;
-  check)      cmd_check ;;
-  migrate)    cmd_migrate ;;
-  install-db) cmd_install_db ;;
-  clean)      cmd_clean ;;
-  status)     cmd_status ;;
-  deps)       cmd_deps ;;
-  help|--help|-h) cmd_help ;;
-  *)
-    echo -e "${RED}Comando desconocido:${NC} $1"
-    cmd_help
-    exit 1
-    ;;
-esac
+# Si se pasa un argumento, ejecutar directo (para CI/scripts)
+if [ $# -gt 0 ]; then
+  case "$1" in
+    dev)         cmd_dev ;;
+    build)       cmd_build ;;
+    build-fast)  cmd_build_fast ;;
+    check)       cmd_check ;;
+    clean)       cmd_clean ;;
+    status)      cmd_status ;;
+    deps)        cmd_deps ;;
+    *)           echo "Comando desconocido: $1"; exit 1 ;;
+  esac
+  exit 0
+fi
+
+# Modo interactivo
+while true; do
+  show_menu
+  read -r choice
+
+  case $choice in
+    1)  cmd_dev; pause ;;
+    2)  cmd_check; pause ;;
+    3)  cmd_build; pause ;;
+    4)  cmd_build_fast; pause ;;
+    5)  cmd_status; pause ;;
+    6)  cmd_deps; pause ;;
+    7)  cmd_clean; pause ;;
+    0)
+      echo ""
+      echo -e "  ${DIM}Hasta luego.${NC}"
+      echo ""
+      exit 0
+      ;;
+    *)
+      warn "Opción inválida"
+      sleep 1
+      ;;
+  esac
+done
