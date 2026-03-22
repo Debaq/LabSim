@@ -1,63 +1,126 @@
-use whisper_rs::{FullParams, SamplingStrategy, WhisperContext, WhisperContextParameters};
+use base64::Engine as _;
+use std::io::{BufRead, BufReader, Write};
+use std::process::{Child, Command, Stdio};
 use std::sync::{Arc, Mutex};
-use std::path::PathBuf;
 
-pub struct SpeechEngine {
-    ctx: Option<WhisperContext>,
-    model_path: Option<PathBuf>,
+/// Client that communicates with the labsim-speech sidecar process via JSON lines.
+struct SidecarProcess {
+    child: Child,
+    reader: BufReader<std::process::ChildStdout>,
 }
 
-unsafe impl Send for SpeechEngine {}
+impl SidecarProcess {
+    fn send(&mut self, request: serde_json::Value) -> Result<serde_json::Value, String> {
+        let stdin = self.child.stdin.as_mut()
+            .ok_or("Sidecar stdin no disponible")?;
+
+        let line = serde_json::to_string(&request)
+            .map_err(|e| format!("Error serializando: {}", e))?;
+
+        writeln!(stdin, "{}", line)
+            .map_err(|e| format!("Error escribiendo a sidecar: {}", e))?;
+        stdin.flush()
+            .map_err(|e| format!("Error flush: {}", e))?;
+
+        let mut response_line = String::new();
+        self.reader.read_line(&mut response_line)
+            .map_err(|e| format!("Error leyendo de sidecar: {}", e))?;
+
+        if response_line.is_empty() {
+            return Err("Sidecar cerró la conexión".into());
+        }
+
+        let resp: serde_json::Value = serde_json::from_str(&response_line)
+            .map_err(|e| format!("Respuesta inválida del sidecar: {}", e))?;
+
+        if resp.get("ok").and_then(|v| v.as_bool()) == Some(true) {
+            Ok(resp)
+        } else {
+            let err = resp.get("error")
+                .and_then(|v| v.as_str())
+                .unwrap_or("Error desconocido del sidecar");
+            Err(err.to_string())
+        }
+    }
+}
+
+impl Drop for SidecarProcess {
+    fn drop(&mut self) {
+        let _ = self.child.kill();
+    }
+}
+
+pub struct SpeechEngine {
+    process: Option<SidecarProcess>,
+    model_loaded: bool,
+    sidecar_path: String,
+}
 
 impl SpeechEngine {
-    pub fn new() -> Self {
-        Self { ctx: None, model_path: None }
+    pub fn new(sidecar_path: String) -> Self {
+        Self {
+            process: None,
+            model_loaded: false,
+            sidecar_path,
+        }
     }
 
-    pub fn load_model(&mut self, path: &str) -> Result<(), String> {
-        let params = WhisperContextParameters::default();
-        let ctx = WhisperContext::new_with_params(path, params)
-            .map_err(|e| format!("Error cargando Whisper: {}", e))?;
-        self.ctx = Some(ctx);
-        self.model_path = Some(PathBuf::from(path));
-        log::info!("Whisper cargado: {}", path);
+    fn ensure_process(&mut self) -> Result<(), String> {
+        if self.process.is_some() {
+            return Ok(());
+        }
+
+        let mut child = Command::new(&self.sidecar_path)
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::inherit())
+            .spawn()
+            .map_err(|e| format!("Error lanzando sidecar Speech ({}): {}", self.sidecar_path, e))?;
+
+        let stdout = child.stdout.take()
+            .ok_or("No se pudo obtener stdout del sidecar")?;
+
+        self.process = Some(SidecarProcess {
+            child,
+            reader: BufReader::new(stdout),
+        });
+
+        log::info!("Sidecar Speech iniciado: {}", self.sidecar_path);
         Ok(())
     }
 
-    pub fn is_loaded(&self) -> bool {
-        self.ctx.is_some()
+    fn send(&mut self, request: serde_json::Value) -> Result<serde_json::Value, String> {
+        self.ensure_process()?;
+        self.process.as_mut().unwrap().send(request)
     }
 
-    pub fn transcribe(&self, samples: &[f32], language: &str) -> Result<String, String> {
-        let ctx = self.ctx.as_ref().ok_or("Modelo Whisper no cargado")?;
+    pub fn is_loaded(&self) -> bool {
+        self.model_loaded
+    }
 
-        let mut state = ctx.create_state()
-            .map_err(|e| format!("Error estado: {}", e))?;
+    pub fn load_model(&mut self) -> Result<(), String> {
+        self.send(serde_json::json!({"cmd": "load"}))?;
+        self.model_loaded = true;
+        Ok(())
+    }
 
-        let mut params = FullParams::new(SamplingStrategy::Greedy { best_of: 1 });
-        params.set_language(Some(language));
-        params.set_print_special(false);
-        params.set_print_progress(false);
-        params.set_print_realtime(false);
-        params.set_print_timestamps(false);
-        params.set_single_segment(true);
-        params.set_no_timestamps(true);
+    pub fn transcribe(&mut self, samples: &[f32], language: &str) -> Result<String, String> {
+        // Encode f32 samples as base64 little-endian bytes
+        let bytes: Vec<u8> = samples.iter()
+            .flat_map(|s| s.to_le_bytes())
+            .collect();
+        let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
 
-        state.full(params, samples)
-            .map_err(|e| format!("Error transcribiendo: {}", e))?;
+        let resp = self.send(serde_json::json!({
+            "cmd": "transcribe",
+            "samples_b64": b64,
+            "language": language,
+        }))?;
 
-        let n = state.full_n_segments();
-        let mut text = String::new();
-        for i in 0..n {
-            if let Some(seg) = state.get_segment(i) {
-                if let Ok(s) = seg.to_str() {
-                    text.push_str(s.trim());
-                    text.push(' ');
-                }
-            }
-        }
-
-        Ok(text.trim().to_string())
+        resp.get("data")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string())
+            .ok_or("Respuesta sin texto".into())
     }
 }
 
@@ -66,7 +129,9 @@ pub struct SpeechState {
 }
 
 impl SpeechState {
-    pub fn new() -> Self {
-        Self { engine: Arc::new(Mutex::new(SpeechEngine::new())) }
+    pub fn new(sidecar_path: String) -> Self {
+        Self {
+            engine: Arc::new(Mutex::new(SpeechEngine::new(sidecar_path))),
+        }
     }
 }

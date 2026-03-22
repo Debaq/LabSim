@@ -1,3 +1,7 @@
+[workspace]
+members = [".", "crates/sidecar-llm", "crates/sidecar-speech"]
+resolver = "2"
+
 [package]
 name = "labsim"
 version = "3.0.0"
@@ -34,12 +38,11 @@ rusqlite = { version = "0.34", features = ["bundled"] }
 cpal = "0.15"
 rand = "0.9"
 
-# LLM (llama.cpp via FFI)
-llama-cpp-2 = "0.1"
+# Model downloads (TTS)
 hf-hub = "0.4"
 
-# Speech recognition (whisper.cpp via FFI)
-whisper-rs = "0.16"
+# IPC with sidecars (LLM + Speech run as separate processes)
+base64 = "0.22"
 
 # TTS (Piper via ONNX)
 piper-rs = "0.1"

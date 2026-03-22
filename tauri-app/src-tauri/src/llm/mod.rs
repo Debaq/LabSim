@@ -1,131 +1,137 @@
 pub mod personas;
 pub mod patient_persona;
 
-use llama_cpp_2::context::params::LlamaContextParams;
-use llama_cpp_2::llama_backend::LlamaBackend;
-use llama_cpp_2::llama_batch::LlamaBatch;
-use llama_cpp_2::model::params::LlamaModelParams;
-use llama_cpp_2::model::{AddBos, LlamaModel};
-use llama_cpp_2::sampling::LlamaSampler;
-use std::num::NonZeroU32;
-use std::path::PathBuf;
+use std::io::{BufRead, BufReader, Write};
+use std::process::{Child, Command, Stdio};
 use std::sync::{Arc, Mutex};
 
-pub struct LlmEngine {
-    backend: LlamaBackend,
-    model: Option<LlamaModel>,
-    model_path: Option<PathBuf>,
+/// Client that communicates with the labsim-llm sidecar process via JSON lines.
+struct SidecarProcess {
+    child: Child,
+    reader: BufReader<std::process::ChildStdout>,
 }
 
-unsafe impl Send for LlmEngine {}
+impl SidecarProcess {
+    fn send(&mut self, request: serde_json::Value) -> Result<serde_json::Value, String> {
+        let stdin = self.child.stdin.as_mut()
+            .ok_or("Sidecar stdin no disponible")?;
+
+        let line = serde_json::to_string(&request)
+            .map_err(|e| format!("Error serializando: {}", e))?;
+
+        writeln!(stdin, "{}", line)
+            .map_err(|e| format!("Error escribiendo a sidecar: {}", e))?;
+        stdin.flush()
+            .map_err(|e| format!("Error flush: {}", e))?;
+
+        let mut response_line = String::new();
+        self.reader.read_line(&mut response_line)
+            .map_err(|e| format!("Error leyendo de sidecar: {}", e))?;
+
+        if response_line.is_empty() {
+            return Err("Sidecar cerró la conexión".into());
+        }
+
+        let resp: serde_json::Value = serde_json::from_str(&response_line)
+            .map_err(|e| format!("Respuesta inválida del sidecar: {}", e))?;
+
+        if resp.get("ok").and_then(|v| v.as_bool()) == Some(true) {
+            Ok(resp)
+        } else {
+            let err = resp.get("error")
+                .and_then(|v| v.as_str())
+                .unwrap_or("Error desconocido del sidecar");
+            Err(err.to_string())
+        }
+    }
+}
+
+impl Drop for SidecarProcess {
+    fn drop(&mut self) {
+        let _ = self.child.kill();
+    }
+}
+
+pub struct LlmEngine {
+    process: Option<SidecarProcess>,
+    model_loaded: bool,
+    sidecar_path: String,
+}
 
 impl LlmEngine {
-    pub fn new() -> Self {
-        let backend = LlamaBackend::init().expect("Failed to init llama backend");
+    pub fn new(sidecar_path: String) -> Self {
         Self {
-            backend,
-            model: None,
-            model_path: None,
+            process: None,
+            model_loaded: false,
+            sidecar_path,
         }
     }
 
-    pub fn load_model(&mut self, path: &str) -> Result<(), String> {
-        let model_params = LlamaModelParams::default();
-        let model = LlamaModel::load_from_file(&self.backend, path, &model_params)
-            .map_err(|e| format!("Error cargando modelo: {}", e))?;
-        self.model = Some(model);
-        self.model_path = Some(PathBuf::from(path));
-        log::info!("Modelo cargado: {}", path);
+    fn ensure_process(&mut self) -> Result<(), String> {
+        if self.process.is_some() {
+            return Ok(());
+        }
+
+        let mut child = Command::new(&self.sidecar_path)
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::inherit())
+            .spawn()
+            .map_err(|e| format!("Error lanzando sidecar LLM ({}): {}", self.sidecar_path, e))?;
+
+        let stdout = child.stdout.take()
+            .ok_or("No se pudo obtener stdout del sidecar")?;
+
+        self.process = Some(SidecarProcess {
+            child,
+            reader: BufReader::new(stdout),
+        });
+
+        log::info!("Sidecar LLM iniciado: {}", self.sidecar_path);
         Ok(())
     }
 
-    pub fn is_loaded(&self) -> bool {
-        self.model.is_some()
+    fn send(&mut self, request: serde_json::Value) -> Result<serde_json::Value, String> {
+        self.ensure_process()?;
+        self.process.as_mut().unwrap().send(request)
     }
 
-    pub fn generate(&self, prompt: &str, max_tokens: u32, temperature: f32) -> Result<String, String> {
-        let model = self.model.as_ref().ok_or("Modelo no cargado")?;
+    pub fn is_loaded(&self) -> bool {
+        self.model_loaded
+    }
 
-        let ctx_params = LlamaContextParams::default()
-            .with_n_ctx(NonZeroU32::new(2048));
+    pub fn download_model(&mut self, model_id: &str, filename: &str) -> Result<String, String> {
+        let resp = self.send(serde_json::json!({
+            "cmd": "download",
+            "model_id": model_id,
+            "filename": filename,
+        }))?;
+        resp.get("data")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string())
+            .ok_or("Respuesta sin path".into())
+    }
 
-        let mut ctx = model.new_context(&self.backend, ctx_params)
-            .map_err(|e| format!("Error creando contexto: {}", e))?;
+    pub fn load_model(&mut self, path: &str) -> Result<(), String> {
+        self.send(serde_json::json!({
+            "cmd": "load",
+            "path": path,
+        }))?;
+        self.model_loaded = true;
+        Ok(())
+    }
 
-        // Tokenize
-        let tokens = model.str_to_token(prompt, AddBos::Always)
-            .map_err(|e| format!("Error tokenizando: {}", e))?;
-
-        let mut batch = LlamaBatch::new(2048, 1);
-        let last_idx = (tokens.len() - 1) as i32;
-
-        for (i, token) in tokens.iter().enumerate() {
-            batch.add(*token, i as i32, &[0], i as i32 == last_idx)
-                .map_err(|e| format!("Error en batch: {}", e))?;
-        }
-
-        // Decode prompt
-        ctx.decode(&mut batch)
-            .map_err(|e| format!("Error decode prompt: {}", e))?;
-
-        // Setup sampler chain: temperature + top-p + dist
-        let mut sampler = LlamaSampler::chain_simple([
-            LlamaSampler::temp(temperature),
-            LlamaSampler::top_p(0.9, 1),
-            LlamaSampler::dist(42),
-        ]);
-
-        let mut output = String::new();
-        let mut n_cur = tokens.len() as i32;
-
-        for _ in 0..max_tokens {
-            let new_token = sampler.sample(&ctx, batch.n_tokens() - 1);
-            sampler.accept(new_token);
-
-            // Check EOS
-            if model.is_eog_token(new_token) {
-                break;
-            }
-
-            let bytes = model.token_to_piece_bytes(new_token, 64, true, None)
-                .map_err(|e| format!("Error decodificando token: {}", e))?;
-            let piece = String::from_utf8_lossy(&bytes);
-            output.push_str(&piece);
-
-            // Next batch
-            batch.clear();
-            batch.add(new_token, n_cur, &[0], true)
-                .map_err(|e| format!("Error batch: {}", e))?;
-
-            ctx.decode(&mut batch)
-                .map_err(|e| format!("Error decode: {}", e))?;
-
-            n_cur += 1;
-        }
-
-        // Strip <think>...</think> blocks (Qwen3 thinking mode)
-        let cleaned = output.trim().to_string();
-        // Remove all <think>...</think> blocks
-        let mut result = cleaned.clone();
-        while let (Some(start), Some(end)) = (result.find("<think>"), result.find("</think>")) {
-            if end > start {
-                result = format!("{}{}", &result[..start], &result[end + 8..]);
-            } else {
-                break;
-            }
-        }
-        // If still starts with <think> (unclosed), take everything after it
-        if result.trim().starts_with("<think>") {
-            result = result.trim().replacen("<think>", "", 1);
-        }
-        let result = result.trim().to_string();
-
-        // If empty after stripping, return the original without tags
-        if result.is_empty() {
-            Ok(cleaned.replace("<think>", "").replace("</think>", "").trim().to_string())
-        } else {
-            Ok(result)
-        }
+    pub fn generate(&mut self, prompt: &str, max_tokens: u32, temperature: f32) -> Result<String, String> {
+        let resp = self.send(serde_json::json!({
+            "cmd": "generate",
+            "prompt": prompt,
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+        }))?;
+        resp.get("data")
+            .and_then(|v| v.as_str())
+            .map(|s| s.to_string())
+            .ok_or("Respuesta sin texto".into())
     }
 }
 
@@ -134,9 +140,9 @@ pub struct LlmState {
 }
 
 impl LlmState {
-    pub fn new() -> Self {
+    pub fn new(sidecar_path: String) -> Self {
         Self {
-            engine: Arc::new(Mutex::new(LlmEngine::new())),
+            engine: Arc::new(Mutex::new(LlmEngine::new(sidecar_path))),
         }
     }
 }

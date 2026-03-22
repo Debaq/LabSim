@@ -73,6 +73,13 @@ cmd_build() {
   fi
   ok "TypeScript OK"
 
+  info "Compilando sidecars (LLM + Speech)..."
+  if ! (cd "$APP" && node scripts/build-sidecars.mjs); then
+    fail "Build de sidecars falló"
+    return
+  fi
+  ok "Sidecars compilados"
+
   info "Compilando frontend + backend..."
   if ! (cd "$APP" && npx tauri build); then
     fail "Build falló"
@@ -132,6 +139,13 @@ cmd_build_fast() {
     return
   fi
   ok "TypeScript OK"
+
+  info "Compilando sidecars (LLM + Speech)..."
+  if ! (cd "$APP" && node scripts/build-sidecars.mjs); then
+    fail "Build de sidecars falló"
+    return
+  fi
+  ok "Sidecars compilados"
 
   info "Compilando solo binario (sin empaquetar)..."
   if ! (cd "$APP" && npx tauri build --no-bundle); then

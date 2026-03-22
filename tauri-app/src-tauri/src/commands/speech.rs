@@ -29,20 +29,8 @@ pub async fn speech_load_model(speech: State<'_, SpeechState>) -> Result<bool, S
     let engine = speech.engine.clone();
 
     tauri::async_runtime::spawn_blocking(move || {
-        // Download whisper-tiny via hf-hub
-        let api = hf_hub::api::sync::ApiBuilder::new()
-            .with_progress(false)
-            .build()
-            .map_err(|e| format!("Error API HF: {}", e))?;
-
-        let repo = api.model("ggerganov/whisper.cpp".to_string());
-        log::info!("Descargando whisper-tiny...");
-
-        let path = repo.get("ggml-tiny.bin")
-            .map_err(|e| format!("Error descargando whisper: {}", e))?;
-
         let mut eng = engine.lock().unwrap();
-        eng.load_model(&path.to_string_lossy())
+        eng.load_model()
     })
     .await
     .map_err(|e| format!("Error en hilo: {}", e))??;
@@ -93,7 +81,6 @@ pub fn speech_start_recording(recording: State<RecordingState>) -> Result<(), St
         match stream {
             Ok(s) => {
                 s.play().ok();
-                // Keep recording until stopped
                 while is_rec.load(Ordering::Relaxed) {
                     std::thread::sleep(std::time::Duration::from_millis(50));
                 }
@@ -109,7 +96,7 @@ pub fn speech_start_recording(recording: State<RecordingState>) -> Result<(), St
 #[tauri::command]
 pub fn speech_stop_recording(recording: State<RecordingState>) -> Result<usize, String> {
     recording.is_recording.store(false, Ordering::Relaxed);
-    std::thread::sleep(std::time::Duration::from_millis(100)); // Let thread finish
+    std::thread::sleep(std::time::Duration::from_millis(100));
     let len = recording.samples.lock().unwrap().len();
     Ok(len)
 }
@@ -128,7 +115,7 @@ pub async fn speech_transcribe(
     }
 
     tauri::async_runtime::spawn_blocking(move || {
-        let eng = engine.lock().unwrap();
+        let mut eng = engine.lock().unwrap();
         eng.transcribe(&samples, &language)
     })
     .await

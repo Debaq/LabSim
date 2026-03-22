@@ -33,6 +33,12 @@ jobs:
         working-directory: tauri-app
         run: npm install
 
+      - name: Build sidecars (Windows)
+        working-directory: tauri-app
+        env:
+          CARGO_BUILD_TARGET: x86_64-pc-windows-msvc
+        run: node scripts/build-sidecars.mjs
+
       - name: Build Tauri (Windows)
         uses: tauri-apps/tauri-action@v0
         env:
@@ -62,12 +68,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             libwebkit2gtk-4.1-dev \
-            libappindicator3-dev \
             librsvg2-dev \
             patchelf \
             libgtk-3-dev \
             libssl-dev \
             libayatana-appindicator3-dev \
+            libasound2-dev \
             rpm
 
       - name: Setup Node.js
@@ -86,6 +92,10 @@ jobs:
       - name: Install frontend dependencies
         working-directory: tauri-app
         run: npm install
+
+      - name: Build sidecars (Linux)
+        working-directory: tauri-app
+        run: node scripts/build-sidecars.mjs
 
       - name: Build Tauri (Linux)
         uses: tauri-apps/tauri-action@v0

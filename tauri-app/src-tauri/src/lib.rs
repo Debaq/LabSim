@@ -16,12 +16,57 @@ use tts::TtsState;
 use commands::speech::RecordingState;
 use api::client::ApiClient;
 
+/// Resolve the path to a sidecar binary.
+/// In development: looks next to the main binary or in binaries/ dir.
+/// In production: bundled by Tauri alongside the main executable.
+fn resolve_sidecar(name: &str) -> String {
+    let exe = std::env::current_exe().unwrap_or_default();
+    let exe_dir = exe.parent().unwrap_or(std::path::Path::new("."));
+
+    // Try next to executable first (production bundle)
+    let beside = exe_dir.join(name);
+    if beside.exists() {
+        return beside.to_string_lossy().to_string();
+    }
+
+    // Try with .exe extension (Windows)
+    let beside_exe = exe_dir.join(format!("{}.exe", name));
+    if beside_exe.exists() {
+        return beside_exe.to_string_lossy().to_string();
+    }
+
+    // Development: try binaries/ dir relative to src-tauri
+    // (when running via `tauri dev`, exe is in target/debug/)
+    let target_triple = if cfg!(target_os = "windows") {
+        if cfg!(target_arch = "x86_64") { "x86_64-pc-windows-msvc" }
+        else { "aarch64-pc-windows-msvc" }
+    } else if cfg!(target_os = "macos") {
+        if cfg!(target_arch = "x86_64") { "x86_64-apple-darwin" }
+        else { "aarch64-apple-darwin" }
+    } else {
+        if cfg!(target_arch = "x86_64") { "x86_64-unknown-linux-gnu" }
+        else { "aarch64-unknown-linux-gnu" }
+    };
+
+    let dev_path = exe_dir.join(format!("{}-{}", name, target_triple));
+    if dev_path.exists() {
+        return dev_path.to_string_lossy().to_string();
+    }
+
+    // Fallback: just the name, hope it's in PATH or current dir
+    name.to_string()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let db = Database::new().expect("Error inicializando base de datos");
-    let llm = LlmState::new();
+
+    let llm_path = resolve_sidecar("labsim-llm");
+    let speech_path = resolve_sidecar("labsim-speech");
+
+    let llm = LlmState::new(llm_path);
     let audio = AudioState::new();
-    let speech = SpeechState::new();
+    let speech = SpeechState::new(speech_path);
     let tts = TtsState::new();
     let recording = RecordingState::new();
     let api_client = ApiClient::new();

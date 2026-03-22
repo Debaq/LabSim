@@ -63,42 +63,31 @@ pub fn llm_status(llm: State<LlmState>) -> bool {
 
 #[tauri::command]
 pub async fn llm_download_model(
+    llm: State<'_, LlmState>,
     model_id: String,
     filename: String,
     app_handle: tauri::AppHandle,
 ) -> Result<String, String> {
     use tauri::Emitter;
 
-    let fname = filename.clone();
-    let mid = model_id.clone();
-
     let _ = app_handle.emit("llm-download-progress", serde_json::json!({
         "status": "downloading",
-        "filename": fname,
+        "filename": &filename,
         "progress": 0,
     }));
 
-    // Run blocking download in a separate thread
-    let handle = app_handle.clone();
+    let engine = llm.engine.clone();
+    let fname = filename.clone();
+
     let path = tauri::async_runtime::spawn_blocking(move || {
-        let api = hf_hub::api::sync::ApiBuilder::new()
-            .with_progress(false)
-            .build()
-            .map_err(|e| format!("Error API HF: {}", e))?;
-
-        let repo = api.model(mid.clone());
-        log::info!("Descargando {} / {}", mid, fname);
-
-        let path = repo.get(&fname)
-            .map_err(|e| format!("Error descargando: {}", e))?;
-
-        Ok::<String, String>(path.to_string_lossy().to_string())
+        let mut eng = engine.lock().unwrap();
+        eng.download_model(&model_id, &fname)
     })
     .await
     .map_err(|e| format!("Error en hilo: {}", e))?
     ?;
 
-    let _ = handle.emit("llm-download-progress", serde_json::json!({
+    let _ = app_handle.emit("llm-download-progress", serde_json::json!({
         "status": "complete",
         "filename": filename,
         "progress": 100,
@@ -128,7 +117,7 @@ pub async fn llm_chat(llm: State<'_, LlmState>, request: SendMessageRequest) -> 
     let engine = llm.engine.clone();
 
     tauri::async_runtime::spawn_blocking(move || {
-        let eng = engine.lock().unwrap();
+        let mut eng = engine.lock().unwrap();
 
         if !eng.is_loaded() {
             return Err("Modelo no cargado. Descargue uno primero.".to_string());
@@ -136,7 +125,6 @@ pub async fn llm_chat(llm: State<'_, LlmState>, request: SendMessageRequest) -> 
 
         // Determinar system prompt, temperature y max_tokens
         let (system_prompt, temperature, max_tokens) = if request.persona_id == "patient" {
-            // Paciente dinámico: generar prompt desde contexto
             let ctx = request.patient_context.as_ref()
                 .ok_or("Se requiere patientContext para el paciente".to_string())?;
             let prompt = patient_persona::build_patient_prompt(
@@ -147,14 +135,12 @@ pub async fn llm_chat(llm: State<'_, LlmState>, request: SendMessageRequest) -> 
             let (temp, tokens) = patient_persona::get_patient_config();
             (prompt, temp, tokens)
         } else {
-            // Persona estática (Karime, Docente)
             let persona = personas::get_persona(&request.persona_id)
                 .ok_or(format!("Persona '{}' no encontrada", request.persona_id))?;
             (persona.system_prompt.to_string(), persona.temperature, persona.max_tokens)
         };
 
         // Build chat prompt in ChatML format (used by Qwen)
-        // /no_think disables Qwen3's thinking mode for faster, direct responses
         let mut prompt = format!("<|im_start|>system\n{}\n/no_think<|im_end|>\n", system_prompt);
 
         for msg in &request.messages {
