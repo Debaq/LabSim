@@ -97,6 +97,7 @@ out($isCli ? "\n— Columnas nuevas en tablas existentes..." : "<br><strong>Colu
 
 // users
 add_column($db, 'users', 'must_change_password', "INTEGER NOT NULL DEFAULT 0", $isCli);
+add_column($db, 'users', 'is_demo', "INTEGER NOT NULL DEFAULT 0", $isCli);
 
 // cases
 add_column($db, 'cases', 'is_archived', "INTEGER NOT NULL DEFAULT 0", $isCli);
@@ -533,6 +534,37 @@ if ($instCount == 0 && table_exists($db, 'institutions')) {
     }
 } else {
     out($isCli ? "\n· Institución ya existe" : "<span class='skip'>· Institución ya existe</span>", $isCli);
+}
+
+// ─── Usuario demo ────────────────────────────────────
+$demoUser = $db->query("SELECT id FROM users WHERE username = 'demo'")->fetch();
+if (!$demoUser) {
+    out($isCli ? "\n— Creando usuario demo..." : "<br><strong>Usuario demo...</strong>", $isCli);
+    $demoId = Database::uuid();
+    Database::execute(
+        "INSERT INTO users (id, username, email, password_hash, role, full_name, institution, is_active, is_demo)
+         VALUES (:id, 'demo', 'demo@labsim.local', :hash, 'docente', 'Usuario Demo', 'LabSim Demo', 1, 1)",
+        [
+            ':id' => $demoId,
+            ':hash' => password_hash('test', PASSWORD_BCRYPT),
+        ]
+    );
+    // Asignar institución por defecto si existe
+    $defaultInst = $db->query("SELECT id FROM institutions LIMIT 1")->fetch();
+    if ($defaultInst) {
+        Database::execute(
+            "UPDATE users SET institution_id = :iid WHERE id = :uid",
+            [':iid' => $defaultInst['id'], ':uid' => $demoId]
+        );
+    }
+    out($isCli ? "  ✓ Usuario demo creado (demo / test)" : "<span class='ok'>  ✓ Usuario demo creado (demo / test)</span>", $isCli);
+} else {
+    // Asegurar que is_demo=1 y contraseña actualizada
+    Database::execute(
+        "UPDATE users SET is_demo = 1, password_hash = :hash, is_active = 1 WHERE username = 'demo'",
+        [':hash' => password_hash('test', PASSWORD_BCRYPT)]
+    );
+    out($isCli ? "\n· Usuario demo ya existe (actualizado)" : "<span class='skip'>· Usuario demo ya existe (actualizado)</span>", $isCli);
 }
 
 // ─── Resumen ────────────────────────────────────────

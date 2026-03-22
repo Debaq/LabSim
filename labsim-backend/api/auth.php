@@ -27,7 +27,7 @@ switch ("$method:$action") {
         check_login_rate_limit($ip);
 
         $user = Database::fetchOne(
-            'SELECT id, username, password_hash, role, full_name, email, institution, is_active, must_change_password
+            'SELECT id, username, password_hash, role, full_name, email, institution, is_active, must_change_password, is_demo
              FROM users WHERE username = :username',
             [':username' => $body['username']]
         );
@@ -43,7 +43,8 @@ switch ("$method:$action") {
 
         record_login_attempt($ip, true);
 
-        $accessToken = JWT::createAccessToken($user['id'], $user['username'], $user['role']);
+        $isDemo = (bool)($user['is_demo'] ?? 0);
+        $accessToken = JWT::createAccessToken($user['id'], $user['username'], $user['role'], $isDemo);
         $refreshToken = JWT::createRefreshToken($user['id']);
 
         // Guardar hash del refresh token
@@ -69,6 +70,7 @@ switch ("$method:$action") {
                 'email' => $user['email'],
                 'institution' => $user['institution'],
                 'mustChangePassword' => (bool)$user['must_change_password'],
+                'isDemo' => $isDemo,
             ],
         ]);
         break;
@@ -103,7 +105,7 @@ switch ("$method:$action") {
 
         // Obtener datos actuales del usuario
         $user = Database::fetchOne(
-            'SELECT id, username, role, is_active FROM users WHERE id = :id',
+            'SELECT id, username, role, is_active, is_demo FROM users WHERE id = :id',
             [':id' => $payload['sub']]
         );
 
@@ -111,7 +113,7 @@ switch ("$method:$action") {
             error_response('Usuario no encontrado o desactivado', 401);
         }
 
-        $accessToken = JWT::createAccessToken($user['id'], $user['username'], $user['role']);
+        $accessToken = JWT::createAccessToken($user['id'], $user['username'], $user['role'], (bool)($user['is_demo'] ?? 0));
 
         json_response([
             'accessToken' => $accessToken,
@@ -176,7 +178,7 @@ switch ("$method:$action") {
         $auth = require_auth();
 
         $user = Database::fetchOne(
-            'SELECT id, username, email, role, full_name, institution, created_at
+            'SELECT id, username, email, role, full_name, institution, is_demo, created_at
              FROM users WHERE id = :id',
             [':id' => $auth['sub']]
         );
@@ -184,6 +186,9 @@ switch ("$method:$action") {
         if (!$user) {
             error_response('Usuario no encontrado', 404);
         }
+
+        $user['isDemo'] = (bool)($user['is_demo'] ?? 0);
+        unset($user['is_demo']);
 
         json_response(['user' => $user]);
         break;

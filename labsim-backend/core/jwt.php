@@ -74,8 +74,8 @@ class JWT {
     /**
      * Genera un access token
      */
-    public static function createAccessToken(string $userId, string $username, string $role): string {
-        return self::encode([
+    public static function createAccessToken(string $userId, string $username, string $role, bool $isDemo = false): string {
+        $payload = [
             'sub' => $userId,
             'username' => $username,
             'role' => $role,
@@ -83,7 +83,11 @@ class JWT {
             'iat' => time(),
             'exp' => time() + JWT_ACCESS_TTL,
             'iss' => JWT_ISSUER,
-        ]);
+        ];
+        if ($isDemo) {
+            $payload['demo'] = true;
+        }
+        return self::encode($payload);
     }
 
     /**

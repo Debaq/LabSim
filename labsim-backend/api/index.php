@@ -9,6 +9,7 @@
 require_once __DIR__ . '/../core/config.php';
 require_once __DIR__ . '/../core/response.php';
 require_once __DIR__ . '/../core/db.php';
+require_once __DIR__ . '/../core/jwt.php';
 
 // Error handler global
 set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline) {
@@ -78,5 +79,29 @@ if (!isset($handlers[$resource])) {
 
 // Pasar segmentos restantes al handler
 $routeSegments = array_slice($segments, 1);
+
+// ─── Demo guard: bloquear escrituras para usuarios demo ───
+if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
+    // Rutas permitidas para demo (auth básico)
+    $action = $routeSegments[0] ?? '';
+    $demoWhitelist = [
+        'auth:login', 'auth:refresh', 'auth:logout', 'auth:me',
+    ];
+    $routeKey = "$resource:$action";
+
+    if (!in_array($routeKey, $demoWhitelist, true)) {
+        $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+        if (preg_match('/^Bearer\s+(.+)$/i', $authHeader, $m)) {
+            try {
+                $tokenPayload = JWT::decode($m[1]);
+                if (!empty($tokenPayload['demo'])) {
+                    error_response('Modo demo: esta acción no está disponible. Los cambios no se guardan en modo demo.', 403);
+                }
+            } catch (Exception $e) {
+                // Token inválido: el handler se encargará del error
+            }
+        }
+    }
+}
 
 require $handlers[$resource];

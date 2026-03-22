@@ -31,7 +31,7 @@ function require_auth($requiredRole = null) {
 
     // Verificar que el usuario existe y está activo
     $user = Database::fetchOne(
-        'SELECT id, role, is_active FROM users WHERE id = :id',
+        'SELECT id, role, is_active, is_demo FROM users WHERE id = :id',
         [':id' => $payload['sub']]
     );
 
@@ -46,6 +46,9 @@ function require_auth($requiredRole = null) {
             error_response('Permisos insuficientes', 403);
         }
     }
+
+    // Exponer flag demo en el payload
+    $payload['is_demo'] = (bool)($user['is_demo'] ?? 0);
 
     return $payload;
 }
