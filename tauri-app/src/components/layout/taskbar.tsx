@@ -10,6 +10,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import {
   Home,
@@ -40,6 +43,8 @@ import {
   GraduationCap,
   ShieldCheck,
   Users,
+  Trash2,
+  BookOpen,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -68,6 +73,8 @@ const WINDOW_ICONS: Record<string, LucideIcon> = {
   center: Building2,
   retinography: Eye,
   "corneal-topography": CircleDot,
+  "trash": Trash2,
+  "kb-editor": BookOpen,
 };
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { WINDOW_SIZES } from "./desktop-area";
@@ -146,36 +153,61 @@ export function Taskbar() {
 
             {/* Equipos */}
             <p className="px-3 pt-1.5 pb-0.5 text-xs font-bold uppercase tracking-wider ls-text-muted">Equipos</p>
-            <DropdownMenuItem onClick={() => openWindow("audiometer", "Audiómetro", "audiometer", WINDOW_SIZES.audiometer)} className="ls-text2 focus:ls-bg-input focus:ls-text">
-              <Headphones className="mr-2 h-4 w-4 text-blue-400" />Audiómetro
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => openWindow("impedance", "Impedanciómetro", "impedance", WINDOW_SIZES.impedance)} className="ls-text2 focus:ls-bg-input focus:ls-text">
-              <Activity className="mr-2 h-4 w-4 text-emerald-400" />Impedanciómetro
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => openWindow("perimetry", "Campo Visual", "perimetry", WINDOW_SIZES.perimetry)} className="ls-text2 focus:ls-bg-input focus:ls-text">
-              <ScanEye className="mr-2 h-4 w-4 text-orange-400" />Campo Visual
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => openWindow("oct", "OCT", "oct", WINDOW_SIZES.oct)} className="ls-text2 focus:ls-bg-input focus:ls-text">
-              <Layers className="mr-2 h-4 w-4 text-pink-400" />OCT
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => openWindow("retinography", "Retinógrafo", "retinography", WINDOW_SIZES.retinography)} className="ls-text2 focus:ls-bg-input focus:ls-text">
-              <Eye className="mr-2 h-4 w-4 text-red-400" />Retinógrafo
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => openWindow("corneal-topography", "Topógrafo Corneal", "corneal-topography", WINDOW_SIZES["corneal-topography"])} className="ls-text2 focus:ls-bg-input focus:ls-text">
-              <CircleDot className="mr-2 h-4 w-4 text-teal-400" />Topógrafo Corneal
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => openWindow("scheimpflug", "Scheimpflug", "scheimpflug", WINDOW_SIZES.scheimpflug)} className="ls-text2 focus:ls-bg-input focus:ls-text">
-              <Scan className="mr-2 h-4 w-4 text-teal-400" />Scheimpflug
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => openWindow("autoref", "Autorefractómetro", "autoref", WINDOW_SIZES.autoref)} className="ls-text2 focus:ls-bg-input focus:ls-text">
-              <ScanEye className="mr-2 h-4 w-4 text-cyan-400" />Autorefractómetro
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => openWindow("vng", "VNG", "vng", WINDOW_SIZES.vng)} className="ls-text2 focus:ls-bg-input focus:ls-text">
-              <Eye className="mr-2 h-4 w-4 text-violet-400" />VNG
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => openWindow("vhit", "vHIT", "vhit", WINDOW_SIZES.vhit)} className="ls-text2 focus:ls-bg-input focus:ls-text">
-              <Activity className="mr-2 h-4 w-4 text-orange-400" />vHIT
-            </DropdownMenuItem>
+
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className="ls-text2 focus:ls-bg-input focus:ls-text">
+                <Headphones className="mr-2 h-4 w-4 text-blue-400" />Audiología
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="ls-border ls-bg-panel ls-text">
+                <DropdownMenuItem onClick={() => openWindow("audiometer", "Audiómetro", "audiometer", WINDOW_SIZES.audiometer)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                  <Headphones className="mr-2 h-4 w-4 text-blue-400" />Audiómetro
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openWindow("impedance", "Impedanciómetro", "impedance", WINDOW_SIZES.impedance)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                  <Activity className="mr-2 h-4 w-4 text-emerald-400" />Impedanciómetro
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className="ls-text2 focus:ls-bg-input focus:ls-text">
+                <Eye className="mr-2 h-4 w-4 text-red-400" />Oftalmología
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="ls-border ls-bg-panel ls-text">
+                <DropdownMenuItem onClick={() => openWindow("perimetry", "Campo Visual", "perimetry", WINDOW_SIZES.perimetry)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                  <ScanEye className="mr-2 h-4 w-4 text-orange-400" />Campo Visual
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openWindow("oct", "OCT", "oct", WINDOW_SIZES.oct)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                  <Layers className="mr-2 h-4 w-4 text-pink-400" />OCT
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openWindow("retinography", "Retinógrafo", "retinography", WINDOW_SIZES.retinography)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                  <Eye className="mr-2 h-4 w-4 text-red-400" />Retinógrafo
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openWindow("corneal-topography", "Topógrafo Corneal", "corneal-topography", WINDOW_SIZES["corneal-topography"])} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                  <CircleDot className="mr-2 h-4 w-4 text-teal-400" />Topógrafo Corneal
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openWindow("scheimpflug", "Scheimpflug", "scheimpflug", WINDOW_SIZES.scheimpflug)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                  <Scan className="mr-2 h-4 w-4 text-teal-400" />Scheimpflug
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openWindow("autoref", "Autorefractómetro", "autoref", WINDOW_SIZES.autoref)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                  <ScanEye className="mr-2 h-4 w-4 text-cyan-400" />Autorefractómetro
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className="ls-text2 focus:ls-bg-input focus:ls-text">
+                <Activity className="mr-2 h-4 w-4 text-violet-400" />Otoneurología
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="ls-border ls-bg-panel ls-text">
+                <DropdownMenuItem onClick={() => openWindow("vng", "VNG", "vng", WINDOW_SIZES.vng)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                  <Eye className="mr-2 h-4 w-4 text-violet-400" />VNG
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openWindow("vhit", "vHIT", "vhit", WINDOW_SIZES.vhit)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                  <Activity className="mr-2 h-4 w-4 text-orange-400" />vHIT
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+
             <DropdownMenuSeparator className="ls-bg-input" />
 
             {/* Clínica */}
@@ -214,9 +246,14 @@ export function Taskbar() {
                   <Users className="mr-2 h-4 w-4 text-purple-400" />Gestionar Pacientes
                 </DropdownMenuItem>
                 {(role === "admin" || role === "docente") && (
-                  <DropdownMenuItem onClick={() => openWindow("karime-config", "Configurar Karime", "karime-config", WINDOW_SIZES["karime-config"])} className="ls-text2 focus:ls-bg-input focus:ls-text">
-                    <BotMessageSquare className="mr-2 h-4 w-4 text-rose-400" />Configurar Karime
-                  </DropdownMenuItem>
+                  <>
+                    <DropdownMenuItem onClick={() => openWindow("karime-config", "Configurar Karime", "karime-config", WINDOW_SIZES["karime-config"])} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                      <BotMessageSquare className="mr-2 h-4 w-4 text-rose-400" />Configurar Karime
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => openWindow("kb-editor", "Base de Conocimiento", "kb-editor", WINDOW_SIZES["kb-editor"])} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                      <BookOpen className="mr-2 h-4 w-4 text-blue-400" />Base de Conocimiento
+                    </DropdownMenuItem>
+                  </>
                 )}
                 <DropdownMenuSeparator className="ls-bg-input" />
               </>

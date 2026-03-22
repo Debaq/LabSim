@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Check, CheckCheck } from "lucide-react";
+import { ContactAvatar } from "./contact-avatar";
 
 export interface ChatMessage {
   id: string;
@@ -24,8 +25,12 @@ export function ChatBubble({ message }: ChatBubbleProps) {
     >
       {/* Avatar */}
       {!isUser && (
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 text-xs font-bold ls-text">
-          {message.avatar ?? message.senderName?.[0] ?? "?"}
+        <div className="shrink-0">
+          <ContactAvatar
+            avatar={message.avatar ?? message.senderName?.[0] ?? "?"}
+            color="from-emerald-400 to-teal-500"
+            size="sm"
+          />
         </div>
       )}
 

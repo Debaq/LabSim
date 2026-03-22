@@ -202,6 +202,13 @@ pub fn run() {
             // Centro: Chat
             commands::sync::api_get_chat,
             commands::sync::api_send_chat,
+            // Base de Conocimiento
+            commands::sync::api_list_kb_articles,
+            commands::sync::api_get_kb_article,
+            commands::sync::api_create_kb_article,
+            commands::sync::api_update_kb_article,
+            commands::sync::api_delete_kb_article,
+            commands::sync::api_list_kb_categories,
             // Agenda extendida
             commands::sync::api_create_agenda_item,
             commands::sync::api_assign_agenda_group,

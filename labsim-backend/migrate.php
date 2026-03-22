@@ -460,6 +460,28 @@ create_table($db, 'patient_interaction_logs', "CREATE TABLE IF NOT EXISTS patien
     created_at TEXT DEFAULT (datetime('now'))
 )", $isCli);
 
+// ─── Base de Conocimiento ─────────────────────────────
+create_table($db, 'kb_categories', "CREATE TABLE IF NOT EXISTS kb_categories (
+    id TEXT PRIMARY KEY,
+    label TEXT NOT NULL,
+    icon TEXT DEFAULT 'help-circle',
+    sort_order INTEGER DEFAULT 0,
+    is_active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now'))
+)", $isCli);
+
+create_table($db, 'kb_articles', "CREATE TABLE IF NOT EXISTS kb_articles (
+    id TEXT PRIMARY KEY,
+    category_id TEXT NOT NULL REFERENCES kb_categories(id),
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    author_id TEXT REFERENCES users(id),
+    sort_order INTEGER DEFAULT 0,
+    is_active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+)", $isCli);
+
 // ─── Índices ────────────────────────────────────────
 out($isCli ? "\n— Índices..." : "<br><strong>Índices...</strong>", $isCli);
 
@@ -493,6 +515,8 @@ $indices = [
     "CREATE INDEX IF NOT EXISTS idx_course_members_user ON course_members(user_id)",
     "CREATE INDEX IF NOT EXISTS idx_users_institution ON users(institution_id)",
     "CREATE INDEX IF NOT EXISTS idx_users_student_id ON users(student_id_number)",
+    "CREATE INDEX IF NOT EXISTS idx_kb_articles_category ON kb_articles(category_id)",
+    "CREATE INDEX IF NOT EXISTS idx_kb_articles_active ON kb_articles(is_active)",
 ];
 
 foreach ($indices as $sql) {
@@ -565,6 +589,120 @@ if (!$demoUser) {
         [':hash' => password_hash('test', PASSWORD_BCRYPT)]
     );
     out($isCli ? "\n· Usuario demo ya existe (actualizado)" : "<span class='skip'>· Usuario demo ya existe (actualizado)</span>", $isCli);
+}
+
+// ─── Seed: Base de Conocimiento ────────────────────────
+if (table_exists($db, 'kb_categories')) {
+    $kbCount = $db->query("SELECT COUNT(*) as c FROM kb_categories")->fetch()['c'] ?? 0;
+    if ($kbCount == 0) {
+        out($isCli ? "\n— Insertando base de conocimiento..." : "<br><strong>Base de conocimiento...</strong>", $isCli);
+
+        $kbCategories = [
+            ['id' => 'app',              'label' => 'Usar LabSim',            'icon' => 'monitor',     'sort' => 1],
+            ['id' => 'audiometria',      'label' => 'Audiometría',            'icon' => 'headphones',  'sort' => 2],
+            ['id' => 'impedanciometria', 'label' => 'Impedanciometría',       'icon' => 'activity',    'sort' => 3],
+            ['id' => 'oftalmologia',     'label' => 'Oftalmología',           'icon' => 'eye',         'sort' => 4],
+            ['id' => 'otoneurologia',    'label' => 'Otoneurología',          'icon' => 'brain',       'sort' => 5],
+            ['id' => 'clinica',          'label' => 'Flujo clínico',          'icon' => 'clipboard',   'sort' => 6],
+            ['id' => 'equipos',          'label' => 'Equipamiento',           'icon' => 'settings',    'sort' => 7],
+            ['id' => 'rehabilitacion',   'label' => 'Rehabilitación auditiva','icon' => 'ear',         'sort' => 8],
+        ];
+
+        foreach ($kbCategories as $cat) {
+            Database::execute(
+                "INSERT INTO kb_categories (id, label, icon, sort_order) VALUES (:id, :label, :icon, :sort)",
+                [':id' => $cat['id'], ':label' => $cat['label'], ':icon' => $cat['icon'], ':sort' => $cat['sort']]
+            );
+        }
+
+        $kbArticles = [
+            // ── Usar LabSim ──
+            ['app', 'Primeros pasos', "LabSim simula un centro clínico completo. Desde el escritorio puedes abrir simuladores de equipos médicos, gestionar pacientes, agendar atenciones y comunicarte con la secretaria Karime.\n\nHaz doble click en los iconos del escritorio para abrir cada aplicación. También puedes usar el menú Inicio (botón LabSim en la barra de tareas)."],
+            ['app', 'Ventanas y escritorio', "Las ventanas se pueden mover arrastrando la barra de título, redimensionar desde los bordes, minimizar y maximizar.\n\nLa barra de tareas inferior muestra las ventanas abiertas. Click para enfocar o minimizar.\n\nClick derecho en el escritorio abre un menú con opciones rápidas."],
+            ['app', 'Inteligencia Artificial', "LabSim incluye IA local (no requiere internet). Desde Configuración > Inteligencia Artificial puedes descargar un modelo LLM (Qwen) que permite que Karime y los pacientes respondan de forma inteligente.\n\nTambién puedes activar reconocimiento de voz (Whisper) y síntesis de voz (Piper) desde la misma sección."],
+            ['app', 'Personalización', "Click derecho > Personalizar escritorio, o Configuración > Apariencia.\n\nTres temas: Midnight (oscuro), Clínico (claro) y Nord. Puedes cambiar tamaño de fuente y color de fondo."],
+            ['app', 'Mensajes y Karime', "El sistema de mensajes permite comunicarte con Karime (secretaria del centro). Ella gestiona la agenda, avisa sobre pacientes y te notifica atrasos.\n\nSi la IA está activada, Karime responde de forma inteligente según su personalidad. Sin IA, usa respuestas predeterminadas."],
+            ['app', 'Mis Documentos', "Mis Documentos organiza los archivos de tu práctica clínica en carpetas: Exámenes (por tipo), Informes, Evoluciones, Interconsultas y Notas.\n\nPuedes navegar con doble click en carpetas y usar los botones de atrás e inicio."],
+            ['app', 'Conexión al servidor', "El indicador Wi-Fi en la barra de tareas muestra el estado de conexión:\n• Verde: conectado al servidor\n• Amarillo: verificando\n• Rojo: sin conexión\n\nClick en el icono para forzar una verificación. Puedes trabajar offline y sincronizar después."],
+
+            // ── Audiometría ──
+            ['audiometria', '¿Qué es una audiometría?', "La audiometría tonal liminar evalúa los umbrales auditivos por vía aérea (VA) y vía ósea (VO) en frecuencias de 250 Hz a 8000 Hz.\n\nPermite determinar el tipo de hipoacusia (conductiva, sensorioneural o mixta), el grado de pérdida y la configuración audiométrica."],
+            ['audiometria', 'Procedimiento paso a paso', "1. Otoscopía previa para descartar obstrucciones\n2. Instrucciones al paciente\n3. Colocar auriculares (rojo = oído derecho, azul = izquierdo)\n4. Comenzar por el mejor oído a 1000 Hz\n5. Descender de 10 en 10 dB, ascender de 5 en 5 dB\n6. El umbral es el nivel más bajo donde responde 2 de 3 veces\n7. Evaluar: 1000, 2000, 4000, 8000, 500, 250 Hz\n8. Repetir vía ósea si hay pérdida por vía aérea"],
+            ['audiometria', 'Enmascaramiento', "Se requiere enmascaramiento cuando existe riesgo de audición cruzada.\n\nVía aérea: enmascarar cuando la diferencia entre VA del oído evaluado y VO del no evaluado es ≥ 40 dB (auriculares supraurales) o ≥ 55 dB (insertos).\n\nVía ósea: enmascarar cuando existe GAP aéreo-óseo ≥ 10 dB en el oído evaluado.\n\nMétodo de plateau: aumentar el ruido en pasos de 5 dB hasta que el umbral se mantenga estable en al menos 3 niveles consecutivos."],
+            ['audiometria', 'Interpretación del audiograma', "Tipos de hipoacusia:\n• Conductiva: VA descendida, VO normal, GAP > 10 dB\n• Sensorioneural: VA y VO descendidas sin GAP significativo\n• Mixta: VO descendida + GAP > 10 dB\n\nGrados (PTA 500-4000 Hz):\n• Normal: ≤ 20 dB HL\n• Leve: 21-40 dB\n• Moderada: 41-55 dB\n• Moderada-severa: 56-70 dB\n• Severa: 71-90 dB\n• Profunda: > 90 dB HL"],
+            ['audiometria', 'Configuraciones audiométricas', "• Plana: umbrales similares en todas las frecuencias\n• Descendente: pérdida mayor en agudos (presbiacusia, trauma acústico)\n• Ascendente: pérdida mayor en graves (Ménière, hidrops)\n• En U: pérdida en medias con conservación de graves y agudos\n• Escotoma: pérdida aislada en una frecuencia (4000 Hz en trauma acústico)\n• Esquina: solo restos auditivos en graves (hipoacusia profunda)"],
+            ['audiometria', 'Simbología audiométrica', "Oído derecho (rojo):\n• VA sin enmascarar: O\n• VA enmascarada: △\n• VO sin enmascarar: <\n• VO enmascarada: [\n\nOído izquierdo (azul):\n• VA sin enmascarar: X\n• VA enmascarada: □\n• VO sin enmascarar: >\n• VO enmascarada: ]\n\nSin respuesta: flecha hacia abajo en el símbolo correspondiente."],
+            ['audiometria', 'Logoaudiometría', "Evalúa la capacidad de discriminación del habla.\n\nMediciones principales:\n• SRT (Speech Reception Threshold): nivel donde el paciente repite correctamente el 50% de las palabras. Debe coincidir ±10 dB con el PTA.\n• SDS (Speech Discrimination Score): porcentaje de palabras correctas a 30-40 dB sobre SRT.\n\nUn SDS bajo con buena audiometría sugiere patología retrococlear."],
+            ['audiometria', 'Screening auditivo neonatal', "Todo recién nacido debe ser evaluado antes del mes de vida.\n\nMétodos:\n• OAE (Emisiones Otoacústicas): evalúan función de células ciliadas externas.\n• BERA automático (aABR): evalúa la vía auditiva hasta tronco encefálico.\n\nProtocolo: si falla el primer screening, repetir al mes. Si persiste, derivar a evaluación audiológica completa antes de los 3 meses."],
+
+            // ── Impedanciometría ──
+            ['impedanciometria', '¿Qué es la impedanciometría?', "Evalúa la función del oído medio mediante análisis de la impedancia acústica. Incluye timpanometría y reflejos acústicos estapediales.\n\nEs un examen objetivo (no requiere respuesta del paciente) y complementa la audiometría tonal."],
+            ['impedanciometria', 'Timpanometría', "Mide la compliancia del sistema tímpano-osicular en función de la presión.\n\nCurvas de Jerger:\n• Tipo A: normal (pico entre -100 y +50 daPa)\n• Tipo As: pico reducido (fijación osicular, otosclerosis)\n• Tipo Ad: pico muy elevado (disyunción osicular, membrana flácida)\n• Tipo B: plana (líquido en oído medio, perforación, cerumen)\n• Tipo C: pico desplazado a negativos > -100 daPa (disfunción tubárica)"],
+            ['impedanciometria', 'Reflejos acústicos', "El reflejo estapedial es la contracción bilateral del músculo del estribo ante un estímulo sonoro intenso (70-100 dB sobre umbral).\n\nSe evalúa ipsi y contralateral. Su presencia, ausencia y umbral orientan sobre:\n• Integridad de la vía auditiva del tronco\n• Lesiones retrococleares (decaimiento del reflejo)\n• Patología de oído medio\n• Reclutamiento (reflejo presente a baja sensación en hipoacusias cocleares)"],
+            ['impedanciometria', 'Función tubárica', "La tuba auditiva ventila el oído medio. Su disfunción causa presión negativa y otitis media con efusión.\n\nEvaluación:\n• Timpanometría: curva tipo C indica disfunción\n• Test de Williams: timpanograma con y sin maniobra de Valsalva/Toynbee\n• En perforación: la compliancia cambia al deglutir con la sonda puesta"],
+            ['impedanciometria', 'Impedanciometría pediátrica', "En lactantes < 6 meses se usa tono sonda de 1000 Hz (no 226 Hz) porque el conducto auditivo del lactante es más compliante.\n\nEn niños mayores se usa el protocolo estándar. La timpanometría es especialmente útil para detectar otitis media con efusión en preescolares."],
+
+            // ── Oftalmología ──
+            ['oftalmologia', 'Campimetría', "La perimetría computarizada evalúa el campo visual detectando estímulos luminosos.\n\nÍndices principales:\n• MD (Mean Deviation): defecto promedio global\n• PSD (Pattern Standard Deviation): irregularidad del defecto\n• VFI (Visual Field Index): porcentaje de campo visual funcional\n• GHT (Glaucoma Hemifield Test): compara hemicampos superior e inferior"],
+            ['oftalmologia', 'Patrones de defecto campimétrico', "• Escotoma arciforme: distribución de fibras nerviosas, típico glaucoma\n• Escalón nasal: asimetría nasal, glaucoma\n• Hemianopsia homónima: mismo lado en ambos ojos, lesión retroquiasmática\n• Hemianopsia bitemporal: compresión quiasmática\n• Constricción concéntrica: retinitis pigmentosa, glaucoma avanzado\n• Escotoma central/cecocentral: neuritis óptica, maculopatía"],
+            ['oftalmologia', 'OCT', "Tomografía de Coherencia Óptica: imágenes de alta resolución de las capas retinianas.\n\nAplicaciones:\n• RNFL (capa de fibras nerviosas) para glaucoma\n• Espesor macular para edema, membranas, agujeros\n• Cabeza del nervio óptico\n• OCT-Angiografía: vascularización sin contraste"],
+            ['oftalmologia', 'OCT en glaucoma', "Mide grosor de RNFL peripapilar y complejo de células ganglionares maculares.\n\nComparación con base normativa:\n• Verde: normal (p > 5%)\n• Amarillo: borderline (p 1-5%)\n• Rojo: fuera de límites (p < 1%)\n\nProgresión: análisis de tendencia y evento."],
+            ['oftalmologia', 'Topografía corneal', "Mapea la curvatura de la superficie corneal.\n\nUsos:\n• Detección de queratocono y ectasias\n• Adaptación de lentes de contacto\n• Planificación de cirugía refractiva\n• Seguimiento post-quirúrgico\n\nMapas: axial, tangencial, elevación anterior/posterior, paquimetría."],
+            ['oftalmologia', 'Queratocono', "Ectasia corneal progresiva.\n\nSignos topográficos:\n• Asimetría I-S > 1.4 D\n• KISA% > 100%\n• Adelgazamiento corneal descentrado\n• Elevación posterior aumentada\n\nClasificación Amsler-Krumeich: 4 estadios según K máximo, astigmatismo, paquimetría y cicatrices."],
+            ['oftalmologia', 'Scheimpflug (Pentacam)', "Cámara rotacional para segmento anterior.\n\nEvalúa:\n• Topografía anterior y posterior\n• Paquimetría punto a punto\n• Profundidad de cámara anterior\n• Densitometría del cristalino\n• Índices de ectasia (BAD-D, Belin-Ambrósio)\n\nÚtil para screening pre-refractivo."],
+            ['oftalmologia', 'Autorefractometría', "Mide objetivamente el error refractivo: miopía, hipermetropía y astigmatismo.\n\nProporciona esfera, cilindro y eje como punto de partida para la refracción subjetiva.\n\nLimitaciones: tiende a sobre-menos por acomodación. En niños se requiere cicloplejia."],
+            ['oftalmologia', 'Retinografía', "Fotografía del fondo de ojo.\n\nAplicaciones:\n• Retinopatía diabética\n• Excavación papilar en glaucoma\n• Degeneración macular\n• Oclusiones vasculares\n• Desprendimiento de retina\n\nLa retinografía de campo amplio captura hasta 200° del fondo."],
+
+            // ── Otoneurología ──
+            ['otoneurologia', 'VNG (Videonistagmografía)', "Registra movimientos oculares con cámaras infrarrojas.\n\nIncluye:\n• Pruebas oculomotoras: sacadas, seguimiento suave, optocinético\n• Pruebas posicionales: Dix-Hallpike, roll test\n• Prueba calórica bitérmica\n\nDiferencia lesiones vestibulares periféricas de centrales."],
+            ['otoneurologia', 'Prueba calórica', "Estimula cada laberinto con temperatura fría (30°C) y caliente (44°C).\n\nFórmula de Jongkees:\n• Paresia canalicular: asimetría > 20-25% → lesión periférica\n• Preponderancia direccional: asimetría > 30%\n\nCOWS: Cold Opposite, Warm Same."],
+            ['otoneurologia', 'vHIT', "Video Head Impulse Test: evalúa VOR de alta frecuencia.\n\n• Ganancia normal: 0.8-1.2\n• Ganancia reducida: hipofunción del canal\n• Sacadas covert: durante el impulso\n• Sacadas overt: después del impulso\n\nEvalúa los 6 canales, más fisiológico que la calórica."],
+            ['otoneurologia', 'VPPB', "Vértigo Posicional Paroxístico Benigno: la causa más frecuente de vértigo.\n\nDiagnóstico:\n• Canal posterior (90%): Dix-Hallpike → nistagmo torsional geotrópico\n• Canal horizontal: roll test\n\nTratamiento:\n• Canal posterior: maniobra de Epley o Semont\n• Canal horizontal: maniobra de Lempert"],
+            ['otoneurologia', 'Enfermedad de Ménière', "Tríada: vértigo episódico + hipoacusia fluctuante + tinnitus + plenitud aural.\n\nCriterios AAO-HNS 2015:\n• ≥ 2 episodios de vértigo de 20 min a 12 h\n• Hipoacusia sensorioneural documentada\n• Síntomas aurales fluctuantes\n\nAudiometría: hipoacusia sensorioneural ascendente en etapas iniciales."],
+            ['otoneurologia', 'Schwannoma vestibular', "Tumor benigno del VIII par.\n\nSospecha:\n• Hipoacusia sensorioneural unilateral progresiva\n• Tinnitus unilateral\n• Discriminación verbal desproporcionadamente mala\n• Reflejos acústicos ausentes o con decaimiento\n\nConfirmación: RMN con gadolinio. ABR: prolongación de onda V."],
+
+            // ── Flujo clínico ──
+            ['clinica', 'Agenda y atención de pacientes', "La agenda muestra los pacientes citados. Desde ella puedes:\n• Ver datos del paciente y motivo de consulta\n• Llamar al paciente cuando sea su turno\n• Registrar la atención y procedimientos\n\nKarime te avisará si hay atrasos o cambios."],
+            ['clinica', 'Ficha clínica (Larissa)', "Larissa es el sistema de ficha clínica formato MINSAL:\n• Datos de identificación\n• Anamnesis y antecedentes\n• Exámenes y resultados\n• Evoluciones clínicas\n• Interconsultas y derivaciones\n\nCada estudiante tiene su propia versión del paciente."],
+            ['clinica', 'Evoluciones e interconsultas', "Después de cada atención registra una evolución con:\n• Motivo de consulta\n• Hallazgos de los exámenes\n• Hipótesis diagnóstica\n• Plan de manejo\n\nSi el caso lo requiere, genera una interconsulta a otra especialidad."],
+            ['clinica', 'Anamnesis audiológica', "Preguntas fundamentales:\n• Motivo de consulta y cronología\n• Hipoacusia: lateralidad, inicio, progresión\n• Tinnitus: unilateral/bilateral, tono\n• Vértigo: tipo, duración, desencadenantes\n• Otalgia, otorrea, plenitud aural\n• Exposición a ruido\n• Antecedentes: ototóxicos, cirugías, familia\n• Desarrollo del lenguaje (en niños)"],
+            ['clinica', 'Otoscopía', "Inspección del CAE y membrana timpánica.\n\nDescribir:\n• CAE: permeable, cerumen, exostosis\n• Membrana: color, integridad, posición, movilidad\n• Triángulo luminoso\n• Mango del martillo\n\nAlteraciones frecuentes: perforación, retracción, nivel hidroaéreo, miringitis, tubos."],
+            ['clinica', 'Redacción de informes', "Estructura del informe audiológico:\n1. Datos del paciente y fecha\n2. Motivo del examen\n3. Exámenes realizados\n4. Resultados\n5. Correlación clínica\n6. Conclusión diagnóstica\n7. Recomendaciones\n\nLenguaje claro, objetivo y profesional."],
+
+            // ── Equipamiento ──
+            ['equipos', 'Audiómetro clínico', "El audiómetro clínico de dos canales permite:\n• Tono puro por vía aérea y ósea\n• Ruido enmascarante\n• Logoaudiometría\n• Campo libre\n\nCalibración según norma ISO 389. Verificar biológicamente cada día."],
+            ['equipos', 'Impedanciómetro', "Equipo para timpanometría y reflejos acústicos.\n\nComponentes:\n• Sonda: altavoz, micrófono, bomba de presión\n• Auricular contralateral para reflejos\n\nVerificar hermeticidad del sello. En niños < 6 meses usar tono sonda de 1000 Hz."],
+            ['equipos', 'Calibración y mantenimiento', "• Calibración electroacústica anual según ISO/IEC\n• Verificación biológica diaria\n• Limpieza de auriculares y olivas después de cada paciente\n• Almacenar en ambiente controlado\n• Registro de calibraciones en bitácora\n\nUn equipo descalibrado genera diagnósticos erróneos."],
+            ['equipos', 'Cabina audiométrica', "Requisitos según ANSI S3.1:\n• Nivel de ruido ambiental máximo por frecuencia\n• Paredes con aislamiento acústico y absorción interna\n• Puerta con sello hermético\n• Ventana de observación\n• Sistema de comunicación\n• Iluminación adecuada\n\nVerificar periódicamente con sonómetro."],
+
+            // ── Rehabilitación ──
+            ['rehabilitacion', 'Audífonos: tipos y selección', "Tipos principales:\n• BTE (retroauricular): versátil\n• RIC (receptor en canal): discreto\n• ITE/ITC/CIC (intraauricular): estéticos\n\nSelección según grado de pérdida, necesidades comunicativas, destreza manual, anatomía y presupuesto."],
+            ['rehabilitacion', 'Proceso de adaptación', "1. Evaluación audiológica completa\n2. Selección del audífono\n3. Toma de impresión\n4. Programación inicial (NAL-NL2 o DSL)\n5. Verificación con medición en oído real\n6. Validación subjetiva (APHAB, IOI-HA)\n7. Seguimiento y ajustes\n8. Consejería sobre uso y expectativas"],
+            ['rehabilitacion', 'Implante coclear', "Estimula directamente el nervio auditivo.\n\nCriterios:\n• Hipoacusia sensorioneural severa-profunda bilateral\n• Beneficio limitado con audífonos\n• Evaluación multidisciplinaria\n\nComponentes: procesador externo + implante interno con electrodo intracoclear."],
+            ['rehabilitacion', 'Terapia auditiva', "Rehabilitación complementaria:\n• Entrenamiento auditivo: detección, discriminación, identificación, comprensión\n• Lectura labial como apoyo visual\n• Estrategias comunicativas para paciente y familia\n• Manejo del tinnitus (TRT, CBT)\n\nEn niños: terapia auditivo-verbal para desarrollo del lenguaje."],
+        ];
+
+        $stmt = $db->prepare(
+            "INSERT INTO kb_articles (id, category_id, title, content, sort_order)
+             VALUES (:id, :cat, :title, :content, :sort)"
+        );
+        $sortIdx = 0;
+        $currentCat = '';
+        foreach ($kbArticles as $a) {
+            if ($a[0] !== $currentCat) { $sortIdx = 0; $currentCat = $a[0]; }
+            $stmt->execute([
+                ':id' => Database::uuid(),
+                ':cat' => $a[0],
+                ':title' => $a[1],
+                ':content' => $a[2],
+                ':sort' => ++$sortIdx,
+            ]);
+        }
+        $total = count($kbArticles);
+        out($isCli ? "  ✓ $total artículos insertados en " . count($kbCategories) . " categorías" : "<span class='ok'>  ✓ $total artículos insertados</span>", $isCli);
+    } else {
+        out($isCli ? "\n· Base de conocimiento ya existe ($kbCount categorías)" : "<span class='skip'>· Base de conocimiento ya existe</span>", $isCli);
+    }
 }
 
 // ─── Resumen ────────────────────────────────────────

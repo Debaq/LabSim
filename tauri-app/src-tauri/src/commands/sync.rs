@@ -470,6 +470,73 @@ pub async fn api_get_student_agenda(
     api.get(&route).await
 }
 
+// ═══════════════════════════════════════════════════
+// BASE DE CONOCIMIENTO (KB)
+// ═══════════════════════════════════════════════════
+
+/// Listar artículos de la KB (opcionalmente por categoría, con cache)
+#[tauri::command]
+pub async fn api_list_kb_articles(
+    api: State<'_, ApiClient>,
+    category: Option<String>,
+    since: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let mut params = vec![];
+    if let Some(c) = category { params.push(format!("category={}", c)); }
+    if let Some(s) = since { params.push(format!("since={}", s)); }
+    let route = if params.is_empty() {
+        "knowledge".to_string()
+    } else {
+        format!("knowledge&{}", params.join("&"))
+    };
+    api.get(&route).await
+}
+
+/// Obtener un artículo de la KB
+#[tauri::command]
+pub async fn api_get_kb_article(
+    api: State<'_, ApiClient>,
+    article_id: String,
+) -> Result<serde_json::Value, String> {
+    api.get(&format!("knowledge/{}", article_id)).await
+}
+
+/// Crear artículo (docente/admin)
+#[tauri::command]
+pub async fn api_create_kb_article(
+    api: State<'_, ApiClient>,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.post("knowledge", &data).await
+}
+
+/// Actualizar artículo (docente/admin)
+#[tauri::command]
+pub async fn api_update_kb_article(
+    api: State<'_, ApiClient>,
+    article_id: String,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.put(&format!("knowledge/{}", article_id), &data).await
+}
+
+/// Eliminar artículo (docente/admin)
+#[tauri::command]
+pub async fn api_delete_kb_article(
+    api: State<'_, ApiClient>,
+    article_id: String,
+) -> Result<serde_json::Value, String> {
+    api.delete(&format!("knowledge/{}", article_id)).await
+}
+
+/// Listar categorías de la KB
+#[tauri::command]
+pub async fn api_list_kb_categories(
+    api: State<'_, ApiClient>,
+) -> Result<serde_json::Value, String> {
+    api.get("knowledge/categories").await
+}
+
 /// Enviar entrega de trabajo
 #[tauri::command]
 pub async fn api_submit_work(

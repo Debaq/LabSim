@@ -16,8 +16,10 @@ interface UIState {
   activeTab: string;
   windows: WindowState[];
   nextZ: number;
+  settingsPage: string | null;
 
   setActiveTab: (tab: string) => void;
+  setSettingsPage: (page: string | null) => void;
 
   openWindow: (id: string, title: string, component: string, opts?: Partial<WindowState>) => void;
   closeWindow: (id: string) => void;
@@ -30,8 +32,10 @@ export const useUIStore = create<UIState>((set) => ({
   activeTab: "patient-info",
   windows: [],
   nextZ: 100,
+  settingsPage: null,
 
   setActiveTab: (tab) => set({ activeTab: tab }),
+  setSettingsPage: (page) => set({ settingsPage: page }),
 
   openWindow: (id, title, component, opts) =>
     set((state) => {

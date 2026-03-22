@@ -42,19 +42,19 @@ const CONTACTS: Contact[] = [
   {
     id: "karime",
     name: "Karime",
-    avatar: "K",
+    avatar: "/img_karime.jpeg",
     subtitle: "Secretaria",
     personaId: "karime",
     color: "from-emerald-400 to-teal-500",
     online: true,
   },
   {
-    id: "docente",
-    name: "Prof. Audiología",
-    avatar: "📚",
-    subtitle: "Docente Bot",
-    personaId: "docente",
-    color: "from-violet-500 to-purple-600",
+    id: "ayuda",
+    name: "Ayuda",
+    avatar: "?",
+    subtitle: "Bot de ayuda",
+    personaId: "ayuda",
+    color: "from-blue-500 to-indigo-600",
     online: true,
   },
 ];
@@ -93,16 +93,7 @@ const INITIAL_CONVERSATIONS: Record<string, Message[]> = {
       status: "read",
     },
   ],
-  docente: [
-    {
-      id: "d1",
-      contactId: "docente",
-      sender: "other",
-      text: "Hola! Soy tu asistente de enseñanza audiológica. Puedes preguntarme sobre cualquier tema clínico: audiometría, impedanciometría, OAE, ABR, audífonos, diagnóstico diferencial, enmascaramiento y más.\n\n¿En qué puedo ayudarte hoy?",
-      time: "09:00",
-      status: "read",
-    },
-  ],
+  ayuda: [],
 };
 
 let globalMsgId = 100;

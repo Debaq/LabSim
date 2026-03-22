@@ -77,7 +77,7 @@ export function WindowFrame({
   );
 
   return (
-    <div data-window-id={id}
+    <div data-window-id={id} data-window-frame
       className="absolute flex flex-col overflow-visible rounded-lg shadow-2xl"
       style={{ left: pos.x, top: pos.y, width: size.w, height: size.h, zIndex, backgroundColor: "var(--ls-window-bg)", border: "1px solid var(--ls-border)" }}
       onMouseDown={onFocus}>

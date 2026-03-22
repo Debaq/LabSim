@@ -22,6 +22,8 @@ import { VNGWindow } from "./vng-window";
 import { VHITWindow } from "./vhit-window";
 import { KarimeConfigWindow } from "./karime-config-window";
 import { AutorefWindow } from "./autoref-window";
+import { TrashWindow } from "./trash-window";
+import { KBEditorWindow } from "./kb-editor-window";
 
 interface Props {
   component: string;
@@ -52,6 +54,8 @@ const componentMap: Record<string, React.ComponentType> = {
   "corneal-topography": CornealTopographyWindow,
   "karime-config": KarimeConfigWindow,
   "autoref": AutorefWindow,
+  "trash": TrashWindow,
+  "kb-editor": KBEditorWindow,
 };
 
 export function WindowContent({ component }: Props) {

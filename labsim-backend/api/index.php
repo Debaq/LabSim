@@ -63,6 +63,7 @@ $handlers = [
     'patient-logs' => __DIR__ . '/patient-logs.php',
     'evolutions'  => __DIR__ . '/evolutions.php',
     'interconsultations' => __DIR__ . '/interconsultations.php',
+    'knowledge'   => __DIR__ . '/knowledge.php',
 ];
 
 if (!isset($handlers[$resource])) {

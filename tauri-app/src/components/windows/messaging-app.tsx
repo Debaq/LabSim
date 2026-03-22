@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { ContactAvatar } from "@/components/chat/contact-avatar";
+import { HelpBotView } from "@/components/chat/help-bot-view";
 
 // Fallback responses when LLM is not connected
 const FALLBACK: Record<string, string[]> = {
@@ -25,11 +27,6 @@ const FALLBACK: Record<string, string[]> = {
     "Le dejé los formularios en el escritorio",
     "Perfecto, le aviso al paciente entonces",
     "Uy doc, va un poco atrasado... 😬",
-  ],
-  docente: [
-    "Buena pregunta. ¿Podrías ser más específico sobre qué aspecto te gustaría profundizar?",
-    "Para responder de forma detallada, necesitaría conectarme con el modelo de IA. Ve a configuración para activar llama-server.",
-    "Te recomiendo revisar el material sobre este tema. Cuando el LLM esté activo, puedo darte explicaciones más completas.",
   ],
 };
 
@@ -95,14 +92,7 @@ function ContactList() {
               className="flex w-full items-center gap-3 border-b border-white/[0.03] px-4 py-3 text-left transition hover:ls-bg-input"
             >
               <div className="relative shrink-0">
-                <div
-                  className={cn(
-                    "flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br text-sm font-bold ls-text",
-                    contact.color,
-                  )}
-                >
-                  {contact.avatar}
-                </div>
+                <ContactAvatar avatar={contact.avatar} color={contact.color} size="lg" />
                 {contact.online && (
                   <Circle className="absolute -right-0.5 -bottom-0.5 h-3.5 w-3.5 fill-emerald-400 stroke-slate-800 stroke-2" />
                 )}
@@ -230,14 +220,7 @@ function ConversationView({ contact }: { contact: Contact }) {
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="relative">
-          <div
-            className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold ls-text",
-              contact.color,
-            )}
-          >
-            {contact.avatar}
-          </div>
+          <ContactAvatar avatar={contact.avatar} color={contact.color} size="md" />
           {contact.online && (
             <Circle className="absolute -right-0.5 -bottom-0.5 h-3 w-3 fill-emerald-400 stroke-slate-900 stroke-2" />
           )}
@@ -266,13 +249,8 @@ function ConversationView({ contact }: { contact: Contact }) {
 
           {typing && (
             <div className="flex gap-2">
-              <div
-                className={cn(
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold ls-text",
-                  contact.color,
-                )}
-              >
-                {contact.avatar}
+              <div className="shrink-0">
+                <ContactAvatar avatar={contact.avatar} color={contact.color} size="sm" />
               </div>
               <div className="rounded-2xl rounded-bl-md bg-slate-700 px-4 py-3">
                 <div className="flex gap-1">
@@ -328,6 +306,10 @@ export function MessagingApp() {
   }, [llmConnected, lastModelId, lastModelFilename, setLlmConnected]);
 
   const contact = contacts.find((c) => c.id === activeContact);
+
+  if (activeContact === "ayuda") {
+    return <HelpBotView onBack={() => useChatStore.getState().setActiveContact(null)} />;
+  }
 
   if (contact) {
     return <ConversationView contact={contact} />;

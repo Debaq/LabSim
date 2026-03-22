@@ -17,6 +17,8 @@ import {
   ShieldCheck,
   Scan,
   BotMessageSquare,
+  FolderOpen,
+  Trash2,
 } from "lucide-react";
 
 interface DesktopItem {
@@ -197,6 +199,9 @@ export const WINDOW_SIZES: Record<string, { width: number; height: number; x?: n
   agenda: { width: 550, height: 500 },
   settings: { width: 680, height: 520 },
   "karime-config": { width: 680, height: 520 },
+  "file-explorer": { width: 650, height: 480 },
+  "trash": { width: 500, height: 400 },
+  "kb-editor": { width: 650, height: 520 },
 };
 
 interface Props {
@@ -247,6 +252,22 @@ export function DesktopArea({ className }: Props) {
           ))}
         </div>
       )}
+
+      {/* Utilidades — esquina inferior derecha */}
+      <div className="absolute bottom-0 right-0 flex flex-col items-end gap-0.5 p-3">
+        <DesktopIcon
+          label="Mis Documentos"
+          icon={FolderOpen}
+          color="text-amber-400"
+          onOpen={() => openWindow("file-explorer", "Mis Documentos", "file-explorer", WINDOW_SIZES["file-explorer"])}
+        />
+        <DesktopIcon
+          label="Papelera"
+          icon={Trash2}
+          color="text-slate-400"
+          onOpen={() => openWindow("trash", "Papelera", "trash", WINDOW_SIZES.trash)}
+        />
+      </div>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useThemeStore, THEMES, type ThemeName, type FontSize } from "@/stores/t
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuthStore } from "@/stores/auth-store";
 import { useChatStore } from "@/stores/chat-store";
+import { useUIStore } from "@/stores/ui-store";
 import { invoke } from "@tauri-apps/api/core";
 import { cn } from "@/lib/utils";
 import { Check, Palette, User, Info, BrainCircuit, Download, Loader2, Monitor, Mic, Volume2, Maximize, Minimize, KeyRound } from "lucide-react";
@@ -31,7 +32,15 @@ export function SettingsWindow() {
   const llmConnected = useChatStore((s) => s.llmConnected);
   const setLlmConnected = useChatStore((s) => s.setLlmConnected);
   const setLastModel = useChatStore((s) => s.setLastModel);
-  const [page, setPage] = useState<SettingsPage>("apariencia");
+  const initialPage = useUIStore((s) => s.settingsPage);
+  const clearSettingsPage = useUIStore((s) => s.setSettingsPage);
+  const [page, setPage] = useState<SettingsPage>(() => {
+    const valid: SettingsPage[] = ["apariencia", "ia", "voz", "tts", "cuenta", "acerca"];
+    if (initialPage && valid.includes(initialPage as SettingsPage)) return initialPage as SettingsPage;
+    return "apariencia";
+  });
+
+  useEffect(() => { clearSettingsPage(null); }, []);
   const [models, setModels] = useState<ModelInfo[]>([]);
   const [downloading, setDownloading] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
