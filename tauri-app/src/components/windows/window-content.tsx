@@ -1,6 +1,5 @@
 import { AudiometerPlaceholder } from "./audiometer-placeholder";
 import { ImpedancePlaceholder } from "./impedance-placeholder";
-import { PatientHistory } from "./patient-history";
 import { ClinicalLayout } from "@/components/clinical/clinical-layout";
 import { FileExplorerPlaceholder } from "./file-explorer-placeholder";
 import { TextEditorPlaceholder } from "./text-editor-placeholder";
@@ -29,7 +28,6 @@ interface Props {
 const componentMap: Record<string, React.ComponentType> = {
   audiometer: AudiometerPlaceholder,
   impedance: ImpedancePlaceholder,
-  "patient-history": PatientHistory,
   clinical: ClinicalLayout,
   "manage-patients": ManagePatientsWindow,
   "courses": CoursesWindow,

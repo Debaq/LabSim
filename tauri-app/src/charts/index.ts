@@ -35,8 +35,5 @@ export type { ElectrocochlearChartProps, EcochgWaveformPoint } from "./electroco
 // Audiogram (existing)
 export { AudiogramChart } from "./audiogram/audiogram-chart";
 
-// Timpanogram (existing)
-export { TimpanogramChart } from "./timpanogram/timpanogram-chart";
-
 // Logoaudiometry (existing)
 export { LogoaudioChart } from "./logoaudiometry/logoaudio-chart";

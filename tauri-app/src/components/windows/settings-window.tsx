@@ -5,7 +5,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useChatStore } from "@/stores/chat-store";
 import { invoke } from "@tauri-apps/api/core";
 import { cn } from "@/lib/utils";
-import { Check, Palette, User, Info, BrainCircuit, Download, Loader2, Monitor, Mic, Volume2, Maximize, Minimize } from "lucide-react";
+import { Check, Palette, User, Info, BrainCircuit, Download, Loader2, Monitor, Mic, Volume2, Maximize, Minimize, KeyRound } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -132,7 +132,7 @@ export function SettingsWindow() {
               } catch (err) { toast.error(`Error: ${err}`); }
               finally { setTtsLoading(false); setTtsDownloadingIdx(null); }
             }} />}
-          {page === "cuenta" && <PageCuenta username={username} role={role} />}
+          {page === "cuenta" && <PageCuenta />}
           {page === "acerca" && <PageAcerca />}
         </div>
       </ScrollArea>
@@ -539,18 +539,156 @@ function PageTts({ models, ttsLoaded, ttsLoading, downloadingIdx, onDownload, au
   </>);
 }
 
-function PageCuenta({ username, role }: { username: string | null; role: string }) {
+function PageCuenta() {
+  const username = useAuthStore((s) => s.username);
+  const role = useAuthStore((s) => s.role);
+  const userInfo = useAuthStore((s) => s.userInfo);
+
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [pwError, setPwError] = useState("");
+  const [pwSuccess, setPwSuccess] = useState("");
+  const [changingPw, setChangingPw] = useState(false);
+
+  const handleChangePassword = async () => {
+    setPwError("");
+    setPwSuccess("");
+
+    if (!currentPw || !newPw || !confirmPw) {
+      setPwError("Complete todos los campos");
+      return;
+    }
+    if (newPw.length < 6) {
+      setPwError("La nueva contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+    if (newPw !== confirmPw) {
+      setPwError("Las contraseñas no coinciden");
+      return;
+    }
+    if (newPw === currentPw) {
+      setPwError("La nueva contraseña debe ser diferente a la actual");
+      return;
+    }
+
+    setChangingPw(true);
+    try {
+      await invoke("api_change_password", {
+        currentPassword: currentPw,
+        newPassword: newPw,
+      });
+      setPwSuccess("Contraseña actualizada correctamente");
+      setCurrentPw("");
+      setNewPw("");
+      setConfirmPw("");
+      toast.success("Contraseña actualizada");
+    } catch (err) {
+      const msg = String(err);
+      if (msg.includes("actual incorrecta") || msg.includes("401")) {
+        setPwError("La contraseña actual es incorrecta");
+      } else {
+        setPwError(`Error: ${msg}`);
+      }
+    } finally {
+      setChangingPw(false);
+    }
+  };
+
+  const roleLabels: Record<string, string> = {
+    admin: "Administrador",
+    docente: "Docente",
+    instructor: "Instructor",
+    estudiante: "Estudiante",
+  };
+
   return (<>
-    <PageTitle icon={<User className="h-5 w-5 text-blue-400" />} title="Cuenta" subtitle="Información del usuario actual" />
+    <PageTitle icon={<User className="h-5 w-5 text-blue-400" />} title="Cuenta" subtitle="Información del usuario y contraseña" />
+
+    {/* Perfil */}
     <Card title="Perfil">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 mb-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-500/20 text-lg font-bold text-blue-400">
           {username?.[0]?.toUpperCase() ?? "?"}
         </div>
         <div>
           <p className="text-base font-semibold" style={{ color: "var(--ls-text)" }}>{username ?? "Sin sesión"}</p>
-          <p className="text-sm capitalize" style={{ color: "var(--ls-text-muted)" }}>{role}</p>
+          <p className="text-sm" style={{ color: "var(--ls-accent)" }}>{roleLabels[role] ?? role}</p>
         </div>
+      </div>
+      {userInfo && (
+        <div className="space-y-1.5 pt-3 border-t" style={{ borderColor: "var(--ls-border)" }}>
+          {userInfo.fullName && (
+            <div className="flex justify-between">
+              <span className="text-sm" style={{ color: "var(--ls-text-muted)" }}>Nombre completo</span>
+              <span className="text-sm font-medium" style={{ color: "var(--ls-text)" }}>{userInfo.fullName}</span>
+            </div>
+          )}
+          {userInfo.email && (
+            <div className="flex justify-between">
+              <span className="text-sm" style={{ color: "var(--ls-text-muted)" }}>Email</span>
+              <span className="text-sm font-medium" style={{ color: "var(--ls-text)" }}>{userInfo.email}</span>
+            </div>
+          )}
+          {userInfo.institution && (
+            <div className="flex justify-between">
+              <span className="text-sm" style={{ color: "var(--ls-text-muted)" }}>Institución</span>
+              <span className="text-sm font-medium" style={{ color: "var(--ls-text)" }}>{userInfo.institution}</span>
+            </div>
+          )}
+        </div>
+      )}
+    </Card>
+
+    {/* Cambiar contraseña */}
+    <Card title="Cambiar contraseña">
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <label className="text-xs font-medium" style={{ color: "var(--ls-text-secondary)" }}>Contraseña actual</label>
+          <input
+            type="password"
+            value={currentPw}
+            onChange={(e) => { setCurrentPw(e.target.value); setPwError(""); setPwSuccess(""); }}
+            placeholder="••••••••"
+            className="w-full rounded-lg border p-2 text-sm"
+            style={{ borderColor: "var(--ls-border)", backgroundColor: "var(--ls-input)", color: "var(--ls-text)" }}
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium" style={{ color: "var(--ls-text-secondary)" }}>Nueva contraseña</label>
+          <input
+            type="password"
+            value={newPw}
+            onChange={(e) => { setNewPw(e.target.value); setPwError(""); setPwSuccess(""); }}
+            placeholder="Mínimo 6 caracteres"
+            className="w-full rounded-lg border p-2 text-sm"
+            style={{ borderColor: "var(--ls-border)", backgroundColor: "var(--ls-input)", color: "var(--ls-text)" }}
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium" style={{ color: "var(--ls-text-secondary)" }}>Confirmar nueva contraseña</label>
+          <input
+            type="password"
+            value={confirmPw}
+            onChange={(e) => { setConfirmPw(e.target.value); setPwError(""); setPwSuccess(""); }}
+            placeholder="Repita la contraseña"
+            className="w-full rounded-lg border p-2 text-sm"
+            style={{ borderColor: "var(--ls-border)", backgroundColor: "var(--ls-input)", color: "var(--ls-text)" }}
+          />
+        </div>
+
+        {pwError && <p className="text-xs text-red-400">{pwError}</p>}
+        {pwSuccess && <p className="text-xs text-emerald-400">{pwSuccess}</p>}
+
+        <button
+          onClick={handleChangePassword}
+          disabled={changingPw || !currentPw || !newPw || !confirmPw}
+          className="flex items-center gap-2 rounded-lg border px-4 py-2 text-xs font-medium transition hover:opacity-80 disabled:opacity-40"
+          style={{ borderColor: "var(--ls-accent)", color: "var(--ls-accent)" }}
+        >
+          {changingPw ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <KeyRound className="h-3.5 w-3.5" />}
+          {changingPw ? "Guardando..." : "Cambiar contraseña"}
+        </button>
       </div>
     </Card>
   </>);

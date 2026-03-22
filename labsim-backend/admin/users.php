@@ -21,8 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'El username ya existe';
             } else {
                 Database::execute(
-                    "INSERT INTO users (id, username, email, password_hash, role, full_name, institution)
-                     VALUES (:id, :u, :e, :h, :r, :n, :i)",
+                    "INSERT INTO users (id, username, email, password_hash, role, full_name, institution, must_change_password)
+                     VALUES (:id, :u, :e, :h, :r, :n, :i, 1)",
                     [
                         ':id' => Database::uuid(),
                         ':u' => $_POST['username'],
@@ -59,10 +59,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $userId = $_POST['user_id'] ?? '';
         $newPass = $_POST['new_password'] ?? '';
         if (strlen($newPass) >= 6) {
-            Database::execute("UPDATE users SET password_hash = :h, updated_at = datetime('now') WHERE id = :id",
+            Database::execute("UPDATE users SET password_hash = :h, must_change_password = 1, updated_at = datetime('now') WHERE id = :id",
                 [':h' => password_hash($newPass, PASSWORD_BCRYPT), ':id' => $userId]);
             Database::execute('DELETE FROM refresh_tokens WHERE user_id = :uid', [':uid' => $userId]);
-            $message = 'Contraseña actualizada';
+            $message = 'Contraseña actualizada. El usuario deberá cambiarla al ingresar.';
         } else {
             $error = 'La contraseña debe tener al menos 6 caracteres';
         }

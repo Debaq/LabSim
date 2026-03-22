@@ -10,6 +10,7 @@ interface UserInfo {
   fullName?: string;
   email?: string;
   institution?: string;
+  mustChangePassword?: boolean;
 }
 
 interface AuthState {
@@ -20,8 +21,10 @@ interface AuthState {
   isOnline: boolean;
   loginSource: "server" | "local" | null;
   userInfo: UserInfo | null;
+  mustChangePassword: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  clearMustChangePassword: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -32,6 +35,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   isOnline: false,
   loginSource: null,
   userInfo: null,
+  mustChangePassword: false,
 
   login: async (username: string, password: string) => {
     // Login exclusivamente contra el servidor
@@ -46,14 +50,18 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
 
     const role = (result.user.role ?? "estudiante") as UserRole;
+    const needsPasswordChange = !!result.user.mustChangePassword;
+
     set({
-      isAuthenticated: true,
+      // No autenticar si debe cambiar contraseña — queda en login
+      isAuthenticated: !needsPasswordChange,
       username: result.user.username,
       role,
       isAdmin: role === "admin" || role === "docente",
       isOnline: true,
       loginSource: "server",
       userInfo: result.user,
+      mustChangePassword: needsPasswordChange,
     });
   },
 
@@ -71,6 +79,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       isOnline: false,
       loginSource: null,
       userInfo: null,
+      mustChangePassword: false,
     });
   },
+
+  clearMustChangePassword: () => set({ mustChangePassword: false, isAuthenticated: true }),
 }));

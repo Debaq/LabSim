@@ -164,9 +164,6 @@ export function Taskbar() {
           <DropdownMenuItem onClick={() => openWindow("messaging", "Mensajes", "messaging", { width: 420, height: 620 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
             <MessageCircle className="mr-2 h-4 w-4 text-green-400" />Mensajes
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openWindow("patient-history", "Historial", "patient-history")} className="ls-text2 focus:ls-bg-input focus:ls-text">
-            <Database className="mr-2 h-4 w-4 text-cyan-400" />Historial Pacientes
-          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => openWindow("courses", "Mis Cursos", "courses")} className="ls-text2 focus:ls-bg-input focus:ls-text">
             <ClipboardList className="mr-2 h-4 w-4 text-sky-400" />Mis Cursos
           </DropdownMenuItem>
