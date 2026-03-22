@@ -20,6 +20,7 @@ import { SupervisionWindow } from "./supervision-window";
 import { ScheimpflugWindow } from "./scheimpflug-window";
 import { VNGWindow } from "./vng-window";
 import { VHITWindow } from "./vhit-window";
+import { KarimeConfigWindow } from "./karime-config-window";
 
 interface Props {
   component: string;
@@ -48,6 +49,7 @@ const componentMap: Record<string, React.ComponentType> = {
   center: CenterWindow,
   retinography: RetinographyWindow,
   "corneal-topography": CornealTopographyWindow,
+  "karime-config": KarimeConfigWindow,
 };
 
 export function WindowContent({ component }: Props) {

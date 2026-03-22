@@ -603,6 +603,31 @@ pub async fn api_save_directive(
     api.post("directives", &directive).await
 }
 
+#[tauri::command]
+pub async fn api_update_directive(
+    api: State<'_, ApiClient>,
+    directive_id: String,
+    directive: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.put(&format!("directives/{}", directive_id), &directive).await
+}
+
+#[tauri::command]
+pub async fn api_delete_directive(
+    api: State<'_, ApiClient>,
+    directive_id: String,
+) -> Result<serde_json::Value, String> {
+    api.delete(&format!("directives/{}", directive_id)).await
+}
+
+#[tauri::command]
+pub async fn api_approve_directive(
+    api: State<'_, ApiClient>,
+    directive_id: String,
+) -> Result<serde_json::Value, String> {
+    api.post(&format!("directives/{}/approve", directive_id), &serde_json::json!({})).await
+}
+
 // ═══════════════════════════════════════════════════
 // FEEDBACK PACIENTES
 // ═══════════════════════════════════════════════════

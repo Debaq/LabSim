@@ -16,6 +16,7 @@ import {
   GraduationCap,
   ShieldCheck,
   Scan,
+  BotMessageSquare,
 } from "lucide-react";
 
 interface DesktopItem {
@@ -160,6 +161,15 @@ const desktopItems: DesktopItem[] = [
     component: "manage-patients",
     color: "text-purple-400",
     roles: ["admin", "docente", "instructor"],
+    group: "gestion",
+  },
+  {
+    id: "karime-config",
+    label: "Configurar Karime",
+    icon: BotMessageSquare,
+    component: "karime-config",
+    color: "text-rose-400",
+    roles: ["admin", "docente"],
     group: "gestion",
   },
 ];

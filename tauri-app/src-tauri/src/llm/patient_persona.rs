@@ -1,5 +1,3 @@
-use crate::llm::personas::Persona;
-
 /// Genera un system prompt dinámico para un paciente basado en su perfil.
 ///
 /// `personality_json` viene del frontend con los campos:
@@ -8,7 +6,7 @@ use crate::llm::personas::Persona;
 /// `interaction_logs` son resúmenes de atenciones anteriores para dar memoria al paciente.
 pub fn build_patient_prompt(
     personality_json: &serde_json::Value,
-    patient_info_json: &serde_json::Value,
+    _patient_info_json: &serde_json::Value,
     interaction_logs: &[String],
 ) -> String {
     let name = personality_json.get("displayName")

@@ -132,6 +132,9 @@ pub fn run() {
             commands::sync::api_get_directives,
             commands::sync::api_resolve_directives,
             commands::sync::api_save_directive,
+            commands::sync::api_update_directive,
+            commands::sync::api_delete_directive,
+            commands::sync::api_approve_directive,
             // Feedback pacientes
             commands::sync::api_send_feedback,
             commands::sync::api_get_feedback,
