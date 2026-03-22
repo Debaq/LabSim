@@ -709,7 +709,7 @@ function PageAcerca() {
     <Card title="Aplicación">
       <div className="space-y-2">
         <Row label="Nombre" value="LabSim" />
-        <Row label="Versión" value="3.0.0" />
+        <Row label="Versión" value={__APP_VERSION__} />
         <Row label="Framework" value="Tauri v2 + React 19" />
         <Row label="Backend" value="Rust + PHP" />
         <Row label="Audio" value="cpal (ALSA)" />
