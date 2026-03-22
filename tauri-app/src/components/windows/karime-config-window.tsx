@@ -164,7 +164,7 @@ export function KarimeConfigWindow() {
       <div className="flex items-center gap-2 border-b ls-border px-3 py-2">
         <BotMessageSquare className="h-4 w-4 text-rose-400" />
         <span className="text-xs font-medium ls-text2">Configurar Karime</span>
-        <span className="rounded-md bg-rose-500/10 px-1.5 py-0.5 text-[9px] font-medium text-rose-400">
+        <span className="rounded-md bg-rose-500/10 px-1.5 py-0.5 text-xs font-medium text-rose-400">
           {isAdmin ? "Admin" : "Docente"}
         </span>
         <Button
@@ -188,7 +188,7 @@ export function KarimeConfigWindow() {
             {/* Info base para docente */}
             {!isAdmin && globalDirective && (
               <div className="rounded-lg border ls-border bg-indigo-500/5 p-3">
-                <p className="mb-1 text-[10px] font-medium uppercase tracking-wider text-indigo-400">
+                <p className="mb-1 text-xs font-medium uppercase tracking-wider text-indigo-400">
                   Configuración base (admin)
                 </p>
                 <div className="space-y-1 text-xs ls-text-muted">
@@ -227,7 +227,7 @@ export function KarimeConfigWindow() {
                     } ${isFieldLocked("tone") ? "cursor-not-allowed opacity-50" : ""}`}
                   >
                     <div className="text-xs font-medium">{opt.label}</div>
-                    <div className="text-[10px] ls-text-muted">{opt.desc}</div>
+                    <div className="text-xs ls-text-muted">{opt.desc}</div>
                   </button>
                 ))}
               </div>
@@ -257,7 +257,7 @@ export function KarimeConfigWindow() {
                       } ${isFieldLocked("pressure_level") ? "cursor-not-allowed opacity-50" : ""}`}
                     >
                       <div className="text-sm font-bold">{level}</div>
-                      <div className="text-[9px]">{lbl}</div>
+                      <div className="text-xs">{lbl}</div>
                     </button>
                   );
                 })}
@@ -315,14 +315,14 @@ export function KarimeConfigWindow() {
                 rows={3}
                 className="ls-border ls-bg-input text-xs ls-text resize-none"
               />
-              <p className="text-[10px] ls-text-muted">
+              <p className="text-xs ls-text-muted">
                 Estas reglas se concatenan con las de niveles superiores.
               </p>
             </div>
 
             {/* Preview */}
             <div className="rounded-lg border ls-border p-3">
-              <p className="mb-2 text-[10px] font-medium uppercase tracking-wider ls-text-muted">
+              <p className="mb-2 text-xs font-medium uppercase tracking-wider ls-text-muted">
                 Vista previa
               </p>
               <div className="space-y-1.5">
@@ -352,7 +352,7 @@ export function KarimeConfigWindow() {
       </ScrollArea>
 
       {/* Status bar */}
-      <div className="flex items-center justify-between border-t ls-border px-3 py-1.5 text-[10px] ls-text-muted">
+      <div className="flex items-center justify-between border-t ls-border px-3 py-1.5 text-xs ls-text-muted">
         <span>{directive ? "Editando directriz existente" : "Nueva configuración"}</span>
         {isAdmin && form.locked_fields.length > 0 && (
           <span className="text-amber-400">{form.locked_fields.length} campos bloqueados</span>
@@ -391,7 +391,7 @@ function FieldWrapper({
         {isAdmin && (
           <button
             onClick={() => onToggleLock(fieldName)}
-            className="ml-auto flex items-center gap-0.5 rounded px-1 py-0.5 text-[9px] transition hover:ls-bg-input"
+            className="ml-auto flex items-center gap-0.5 rounded px-1 py-0.5 text-xs transition hover:ls-bg-input"
             title={isLocked ? "Desbloquear para docentes" : "Bloquear para docentes"}
           >
             {isLocked ? (

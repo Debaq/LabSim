@@ -39,11 +39,17 @@ function seededRandom(seed: number) {
   };
 }
 
+export type FundusFilter = "color" | "red-free" | "blue" | "infrared";
+
 export interface FundusParams {
   seed: number;
   pathology: RetinopathyType;
   eye: "OD" | "OI";
   signalQuality: number; // 1-10
+  filter?: FundusFilter;
+  diopterOffset?: number; // -20 a +20, 0 = enfocado
+  flashIntensity?: number; // 0-100, default 50
+  captureAngle?: number; // 30, 45, 60 grados
 }
 
 interface Vessel {
@@ -459,12 +465,52 @@ export function renderFundus(
     }
   }
 
-  // Flash / reflejo especular sutil
+  // Flash / reflejo especular
+  const flashInt = params.flashIntensity ?? 50;
+  const flashAlpha = 0.02 + (flashInt / 100) * 0.06;
   const flashGrad = ctx.createRadialGradient(cx - radius * 0.2, cy - radius * 0.2, 0, cx, cy, radius);
-  flashGrad.addColorStop(0, "rgba(255, 255, 220, 0.04)");
+  flashGrad.addColorStop(0, `rgba(255, 255, 220, ${flashAlpha})`);
   flashGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
   ctx.fillStyle = flashGrad;
   ctx.fillRect(0, 0, w, h);
+
+  // Aplicar filtro de color
+  const filter = params.filter ?? "color";
+  if (filter !== "color") {
+    const imgData = ctx.getImageData(0, 0, w, h);
+    const d = imgData.data;
+    for (let i = 0; i < d.length; i += 4) {
+      if (filter === "red-free") {
+        // Filtro verde: resalta vasos y hemorragias
+        const g = d[i + 1];
+        d[i] = Math.round(g * 0.3);
+        d[i + 1] = g;
+        d[i + 2] = Math.round(g * 0.3);
+      } else if (filter === "blue") {
+        // Azul cobalto: resalta RNFL
+        const lum = d[i] * 0.2 + d[i + 1] * 0.5 + d[i + 2] * 0.3;
+        d[i] = Math.round(lum * 0.2);
+        d[i + 1] = Math.round(lum * 0.3);
+        d[i + 2] = Math.min(255, Math.round(lum * 1.2));
+      } else if (filter === "infrared") {
+        // Infrarrojo: monocromático cálido, resalta coroidea
+        const lum = d[i] * 0.6 + d[i + 1] * 0.3 + d[i + 2] * 0.1;
+        d[i] = Math.min(255, Math.round(lum * 1.1));
+        d[i + 1] = Math.round(lum * 0.8);
+        d[i + 2] = Math.round(lum * 0.5);
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+  }
+
+  // Desenfoque por dioptrías descompensadas
+  const diopter = Math.abs(params.diopterOffset ?? 0);
+  if (diopter > 1) {
+    const blurPx = Math.min(8, diopter * 0.4);
+    ctx.filter = `blur(${blurPx}px)`;
+    ctx.drawImage(ctx.canvas, 0, 0);
+    ctx.filter = "none";
+  }
 }
 
 function drawVessel(

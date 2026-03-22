@@ -30,7 +30,7 @@ interface DesktopItem {
 }
 
 const desktopItems: DesktopItem[] = [
-  // ─── Simuladores (columna izquierda) ───
+  // ─── Simuladores ───
   {
     id: "audiometer",
     label: "Audiómetro",
@@ -104,6 +104,14 @@ const desktopItems: DesktopItem[] = [
     group: "simuladores",
   },
   {
+    id: "autoref",
+    label: "Autorefractómetro",
+    icon: ScanEye,
+    component: "autoref",
+    color: "text-cyan-400",
+    group: "simuladores",
+  },
+  {
     id: "larissa",
     label: "Larissa",
     icon: ClipboardPen,
@@ -119,7 +127,7 @@ const desktopItems: DesktopItem[] = [
     color: "text-teal-400",
     group: "simuladores",
   },
-  // ─── Gestión (fila horizontal arriba derecha) ───
+  // ─── Gestión ───
   {
     id: "center",
     label: "Centro",
@@ -174,13 +182,21 @@ const desktopItems: DesktopItem[] = [
   },
 ];
 
-const WINDOW_SIZES: Record<string, { width: number; height: number; x?: number; y?: number }> = {
-  audiometer: { width: 780, height: 520, x: 60, y: 20 },
-  impedance: { width: 800, height: 500 },
-  perimetry: { width: 750, height: 550 },
-  oct: { width: 800, height: 520 },
-  retinography: { width: 720, height: 540 },
-  "corneal-topography": { width: 800, height: 520 },
+export const WINDOW_SIZES: Record<string, { width: number; height: number; x?: number; y?: number }> = {
+  audiometer: { width: 900, height: 580, x: 40, y: 15 },
+  impedance: { width: 950, height: 620 },
+  perimetry: { width: 1000, height: 700 },
+  oct: { width: 1050, height: 720 },
+  retinography: { width: 950, height: 700 },
+  "corneal-topography": { width: 1050, height: 720 },
+  scheimpflug: { width: 1000, height: 680 },
+  vng: { width: 950, height: 650 },
+  vhit: { width: 950, height: 650 },
+  autoref: { width: 850, height: 680 },
+  messaging: { width: 420, height: 620 },
+  agenda: { width: 550, height: 500 },
+  settings: { width: 680, height: 520 },
+  "karime-config": { width: 680, height: 520 },
 };
 
 interface Props {
@@ -204,8 +220,8 @@ export function DesktopArea({ className }: Props) {
 
   return (
     <div className={`relative h-full ${className ?? ""}`}>
-      {/* Simuladores — columna izquierda */}
-      <div className="absolute left-0 top-0 grid auto-rows-min grid-cols-1 content-start gap-1 p-3">
+      {/* Simuladores — grid 2 columnas izquierda */}
+      <div className="absolute left-0 top-0 grid grid-cols-2 auto-rows-min content-start gap-0.5 p-3">
         {simuladores.map((item) => (
           <DesktopIcon
             key={item.id}
@@ -219,7 +235,7 @@ export function DesktopArea({ className }: Props) {
 
       {/* Gestión — fila horizontal arriba derecha */}
       {gestion.length > 0 && (
-        <div className="absolute right-0 top-0 flex items-start gap-1 p-3">
+        <div className="absolute right-0 top-0 grid grid-cols-2 auto-rows-min content-start gap-0.5 p-3">
           {gestion.map((item) => (
             <DesktopIcon
               key={item.id}

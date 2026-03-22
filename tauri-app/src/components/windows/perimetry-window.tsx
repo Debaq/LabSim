@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { Play, Pause, RotateCcw, Link2, Link2Off } from "lucide-react";
 
 type ViewMode = "numeric" | "grayscale" | "deviation";
+const EMPTY_CONFIG = {};
 
 export function PerimetryWindow() {
   const [settings, setSettings] = useState<PerimetrySettings>({
@@ -52,7 +53,7 @@ export function PerimetryWindow() {
   const gazeRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
   // Patient data
-  const vfConfig = usePatientStore((s) => s.data.modules.visualField ?? {});
+  const vfConfig = usePatientStore((s) => s.data.modules.visualField ?? EMPTY_CONFIG);
   const patientId = usePatientStore((s) => s.currentPatientId);
   const addEvent = useLiveSessionStore((s) => s.addEvent);
   const hasCaseLoaded = patientId !== null && Object.keys(vfConfig).length > 0;
@@ -254,7 +255,7 @@ export function PerimetryWindow() {
           {/* Test controls */}
           <div className="flex gap-1">
             {!isRunning && !isDone && (
-              <button onClick={testState ? resumeTest : startTest} className="flex-1 flex items-center justify-center gap-1 rounded border ls-border py-1 text-[10px] text-emerald-400 hover:bg-emerald-500/10">
+              <button onClick={testState ? resumeTest : startTest} disabled={!hasCaseLoaded} className={`flex-1 flex items-center justify-center gap-1 rounded border ls-border py-1 text-[10px] ${hasCaseLoaded ? "text-emerald-400 hover:bg-emerald-500/10" : "ls-text-muted opacity-50 cursor-not-allowed"}`}>
                 <Play className="h-3 w-3" />
                 {testState ? "Continuar" : "Iniciar"}
               </button>
@@ -296,7 +297,7 @@ export function PerimetryWindow() {
 
           {/* View mode */}
           <div className="space-y-1 p-2">
-            <span className="text-[9px] ls-text-muted uppercase tracking-wider">Vista</span>
+            <span className="text-xs ls-text-muted uppercase tracking-wider">Vista</span>
             {(["numeric", "grayscale", "deviation"] as ViewMode[]).map((m) => (
               <button
                 key={m}
@@ -313,7 +314,7 @@ export function PerimetryWindow() {
       </div>
 
       {/* Status bar */}
-      <div className="flex items-center justify-between border-t ls-border ls-bg-panel2 px-3 py-1 text-[9px] font-mono ls-text-muted">
+      <div className="flex items-center justify-between border-t ls-border ls-bg-panel2 px-3 py-1 text-xs font-mono ls-text-muted">
         <span>{settings.eye} | {settings.pattern} | {stratLabel}</span>
         <span>
           {testState ? `${testState.points.filter((p) => p.done).length}/${testState.points.length} puntos | ${testState.presentationCount} presentaciones` : "Listo"}

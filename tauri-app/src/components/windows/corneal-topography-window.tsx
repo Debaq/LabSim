@@ -16,8 +16,10 @@ import { useLiveSessionStore } from "@/stores/live-session-store";
 import { PatientBanner } from "@/components/ui/patient-banner";
 import { cn } from "@/lib/utils";
 import { RefreshCw, Link2, Link2Off } from "lucide-react";
+import { AlignmentPanel, DEFAULT_ALIGNMENT, isAligned, type AlignmentState } from "@/components/ui/alignment-panel";
 
 const MAP_SIZE = 220;
+const EMPTY_CONFIG = {};
 
 const PATHO_LABELS: Record<CornealPathology, string> = {
   normal: "Normal",
@@ -35,9 +37,10 @@ export function CornealTopographyWindow() {
   const [pathology, setPathology] = useState<CornealPathology>("normal");
   const [severity, setSeverity] = useState<CornealSeverity>("moderado");
   const [seed, setSeed] = useState(42);
+  const [alignment, setAlignment] = useState<AlignmentState>(DEFAULT_ALIGNMENT);
 
   // Read case config from patient store
-  const topoConfig = usePatientStore((s) => s.data.modules.cornealTopography ?? {});
+  const topoConfig = usePatientStore((s) => s.data.modules.cornealTopography ?? EMPTY_CONFIG);
   const patientId = usePatientStore((s) => s.currentPatientId);
   const addEvent = useLiveSessionStore((s) => s.addEvent);
   const hasCaseLoaded = patientId !== null && Object.keys(topoConfig).length > 0;
@@ -120,7 +123,7 @@ export function CornealTopographyWindow() {
             <div className="text-xs font-bold uppercase tracking-wider ls-text-muted">Configuración</div>
             <div>
               <div className="mb-0.5 text-xs uppercase ls-text-muted">Ojo</div>
-              <ToggleSwitch value={eye} onChange={(v) => { setEye(v as "OD" | "OI"); regenerate(); }} options={[
+              <ToggleSwitch value={eye} onChange={(v) => { setEye(v as "OD" | "OI"); if (hasCaseLoaded) regenerate(); }} options={[
                 { value: "OD", label: "OD", color: "bg-red-600 ls-text" },
                 { value: "OI", label: "OI", color: "bg-blue-600 ls-text" },
               ]} />
@@ -140,32 +143,11 @@ export function CornealTopographyWindow() {
                 })}
               </div>
             </div>
-
-            {!hasCaseLoaded && (
-              <div>
-                <div className="mb-0.5 text-xs uppercase ls-text-muted">Patología</div>
-                <div className="grid grid-cols-2 gap-0.5">
-                  {(Object.keys(PATHO_LABELS) as CornealPathology[]).map((p) => (
-                    <button key={p} onClick={() => { setPathology(p); regenerate(); }}
-                      className={cn("rounded border py-0.5 text-[10px] font-bold transition",
-                        pathology === p ? "border-amber-500/40 bg-amber-500/20 text-amber-300" : "ls-border ls-text-muted hover:ls-text-muted")}>
-                      {PATHO_LABELS[p]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {hasCaseLoaded && (
-              <div className="rounded border border-emerald-500/20 bg-emerald-500/5 p-1.5">
-                <span className="text-xs text-emerald-400/80">
-                  Patología definida por el caso clínico
-                </span>
-              </div>
-            )}
-
-            <button onClick={regenerate} className="flex w-full items-center justify-center gap-1 rounded border ls-border py-1 text-xs ls-text-muted hover:ls-bg-input">
-              <RefreshCw className="h-2.5 w-2.5" /> Regenerar
+            <button onClick={regenerate} disabled={!hasCaseLoaded || !isAligned(alignment)}
+              className={cn("flex w-full items-center justify-center gap-1 rounded border ls-border py-1.5 text-xs font-bold transition",
+                hasCaseLoaded && isAligned(alignment) ? "text-emerald-400 hover:bg-emerald-500/10" : "ls-text-muted opacity-50 cursor-not-allowed")}
+            >
+              <RefreshCw className="h-2.5 w-2.5" /> {!isAligned(alignment) ? "Alinear" : "Capturar"}
             </button>
           </div>
 
@@ -175,49 +157,80 @@ export function CornealTopographyWindow() {
 
         {/* CENTER: Main map view */}
         <div className="flex flex-1 flex-col items-center justify-center gap-2 p-3 min-w-0">
-          <div className="flex items-center gap-3">
-            <TopographyMap seed={seed} pathology={pathology} mapType={mapType} size={MAP_SIZE} />
-            <ColorScale mapType={mapType} />
-          </div>
-
-          {/* Quick summary below map */}
-          <div className="flex items-center gap-4 text-xs ls-text-muted">
-            <span>K1: <span className="font-mono font-bold ls-text2">{indices.k1}D</span> @{indices.k1Axis}°</span>
-            <span>K2: <span className="font-mono font-bold ls-text2">{indices.k2}D</span> @{indices.k2Axis}°</span>
-            <span>Cyl: <span className={cn("font-mono font-bold", indices.cylD > 2 ? "text-amber-400" : "ls-text2")}>{indices.cylD}D</span></span>
-            <span>CCT: <span className="font-mono font-bold ls-text2">{indices.cct}µm</span></span>
-          </div>
+          {hasCaseLoaded ? (
+            <>
+              <div className="flex items-center gap-3">
+                <TopographyMap seed={seed} pathology={pathology} mapType={mapType} size={MAP_SIZE} />
+                <ColorScale mapType={mapType} />
+              </div>
+              <div className="flex items-center gap-4 text-xs ls-text-muted">
+                <span>K1: <span className="font-mono font-bold ls-text2">{indices.k1}D</span> @{indices.k1Axis}°</span>
+                <span>K2: <span className="font-mono font-bold ls-text2">{indices.k2}D</span> @{indices.k2Axis}°</span>
+                <span>Cyl: <span className={cn("font-mono font-bold", indices.cylD > 2 ? "text-amber-400" : "ls-text2")}>{indices.cylD}D</span></span>
+                <span>CCT: <span className="font-mono font-bold ls-text2">{indices.cct}µm</span></span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="h-[280px] w-[280px] rounded-full bg-black/60 flex items-center justify-center">
+                <span className="text-xs font-mono ls-text-muted">SIN CAPTURA</span>
+              </div>
+              <div className="flex items-center gap-4 text-xs ls-text-muted">
+                <span>K1: <span className="font-mono">---</span></span>
+                <span>K2: <span className="font-mono">---</span></span>
+                <span>Cyl: <span className="font-mono">---</span></span>
+                <span>CCT: <span className="font-mono">---</span></span>
+              </div>
+            </>
+          )}
         </div>
 
         {/* RIGHT panel — Dual map (optional second view) */}
         <div className="flex w-[155px] shrink-0 flex-col gap-1.5 border-l ls-border p-1.5 overflow-y-auto">
           <div className="rounded border ls-border ls-bg-panel2 p-2">
             <div className="mb-1 text-xs font-bold uppercase tracking-wider ls-text-muted">Vista Comparativa</div>
-            <div className="flex justify-center">
-              <TopographyMap
-                seed={seed}
-                pathology={pathology}
-                mapType={mapType === "axial" ? "tangential" : mapType === "tangential" ? "axial" : mapType === "elevation" ? "pachymetry" : "elevation"}
-                size={130}
-              />
-            </div>
-            <div className="mt-1 text-center text-[10px] ls-text-muted">
-              {mapType === "axial" ? "Tangencial" : mapType === "tangential" ? "Axial" : mapType === "elevation" ? "Paquimetría" : "Elevación"}
-            </div>
+            {hasCaseLoaded ? (
+              <>
+                <div className="flex justify-center">
+                  <TopographyMap
+                    seed={seed}
+                    pathology={pathology}
+                    mapType={mapType === "axial" ? "tangential" : mapType === "tangential" ? "axial" : mapType === "elevation" ? "pachymetry" : "elevation"}
+                    size={130}
+                  />
+                </div>
+                <div className="mt-1 text-center text-xs ls-text-muted">
+                  {mapType === "axial" ? "Tangencial" : mapType === "tangential" ? "Axial" : mapType === "elevation" ? "Paquimetría" : "Elevación"}
+                </div>
+              </>
+            ) : (
+              <div className="flex h-[130px] w-full items-center justify-center rounded bg-black/40">
+                <span className="text-xs font-mono ls-text-muted">---</span>
+              </div>
+            )}
           </div>
 
           {/* Diagnostic suggestion */}
           <div className="rounded border ls-border ls-bg-panel2 p-2">
             <div className="mb-1 text-xs font-bold uppercase tracking-wider ls-text-muted">Sugerencia</div>
-            <DiagnosticHint pathology={pathology} indices={indices} />
+            {hasCaseLoaded ? (
+              <DiagnosticHint pathology={pathology} indices={indices} />
+            ) : (
+              <span className="text-xs ls-text-muted">---</span>
+            )}
           </div>
         </div>
       </div>
 
+      {/* Joystick abajo */}
+      <div className="shrink-0 border-t ls-border px-3 py-1.5">
+        <AlignmentPanel state={alignment} onChange={setAlignment} onCapture={hasCaseLoaded ? regenerate : undefined} compact />
+      </div>
+
       {/* Status */}
       <div className="flex h-5 shrink-0 items-center justify-between ls-bg-panel2 px-3 text-xs ls-text-muted">
-        <span>{eye} | {PATHO_LABELS[pathology]} | Kmax {indices.kMax}D</span>
-        <span>TCT {indices.tct}µm ({indices.tctX > 0 ? "+" : ""}{indices.tctX}, {indices.tctY > 0 ? "+" : ""}{indices.tctY})mm</span>
+        <span>{eye} | {hasCaseLoaded ? `${PATHO_LABELS[pathology]} | Kmax ${indices.kMax}D` : "---"}</span>
+        <span>{hasCaseLoaded ? `TCT ${indices.tct}µm (${indices.tctX > 0 ? "+" : ""}${indices.tctX}, ${indices.tctY > 0 ? "+" : ""}${indices.tctY})mm` : "TCT ---"}</span>
       </div>
     </div>
   );

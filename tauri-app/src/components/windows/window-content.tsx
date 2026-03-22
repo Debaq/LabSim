@@ -21,6 +21,7 @@ import { ScheimpflugWindow } from "./scheimpflug-window";
 import { VNGWindow } from "./vng-window";
 import { VHITWindow } from "./vhit-window";
 import { KarimeConfigWindow } from "./karime-config-window";
+import { AutorefWindow } from "./autoref-window";
 
 interface Props {
   component: string;
@@ -50,6 +51,7 @@ const componentMap: Record<string, React.ComponentType> = {
   retinography: RetinographyWindow,
   "corneal-topography": CornealTopographyWindow,
   "karime-config": KarimeConfigWindow,
+  "autoref": AutorefWindow,
 };
 
 export function WindowContent({ component }: Props) {

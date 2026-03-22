@@ -4,7 +4,7 @@
  * El operador elige la prueba y el equipo registra movimiento ocular.
  */
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { usePatientStore } from "@/stores/patient-store";
 import { useLiveSessionStore } from "@/stores/live-session-store";
 import { PatientBanner } from "@/components/ui/patient-banner";
@@ -65,17 +65,23 @@ const POSITIONAL_KEYS: Record<string, string> = {
   "positional-sit": "sitting",
 };
 
+const EMPTY_CONFIG = {};
+
 export function VNGWindow() {
   const [testMode, setTestMode] = useState<TestMode>("spontaneous");
   const [seed, setSeed] = useState(42);
   const [running, setRunning] = useState(false);
+  // Controles del equipo
+  const [calibrated, setCalibrated] = useState(false);
+  const [caloricTemp, setCaloricTemp] = useState<"30" | "44">("44");
+  const [caloricDuration, setCaloricDuration] = useState(30);
 
-  const config = usePatientStore((s) => s.data.modules.vng ?? {}) as VNGData;
+  const config = usePatientStore((s) => s.data.modules.vng ?? EMPTY_CONFIG) as VNGData;
   const patientId = usePatientStore((s) => s.currentPatientId);
   const addEvent = useLiveSessionStore((s) => s.addEvent);
   const hasCaseLoaded = patientId !== null && Object.keys(config).length > 0;
 
-  useMemo(() => {
+  useEffect(() => {
     if (patientId) setSeed(patientId.split("").reduce((a, c) => a + c.charCodeAt(0), 0));
   }, [patientId]);
 
@@ -147,20 +153,56 @@ export function VNGWindow() {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Left: test selector by group */}
+        {/* Left: test selector + controls */}
         <div className="w-[160px] shrink-0 border-r ls-border overflow-auto">
           {TEST_GROUPS.map((group) => (
             <div key={group.label} className="py-1">
-              <div className="px-2 py-1 text-[8px] font-bold uppercase tracking-wider ls-text-muted">{group.label}</div>
+              <div className="px-2 py-1 text-[11px] font-bold uppercase tracking-wider ls-text-muted">{group.label}</div>
               {group.tests.map((t) => (
                 <button key={t.id} onClick={() => setTestMode(t.id)}
-                  className={`block w-full px-3 py-1 text-left text-[10px] transition ${
+                  className={`block w-full px-3 py-1 text-left text-xs transition ${
                     testMode === t.id ? "bg-violet-500/15 text-violet-400" : "ls-text-muted hover:ls-bg-input"
                   }`}
                 >{t.label}</button>
               ))}
             </div>
           ))}
+
+          {/* Controles del equipo */}
+          <div className="border-t ls-border p-2 space-y-1.5">
+            <div className="text-[11px] font-bold uppercase tracking-wider ls-text-muted">Equipo</div>
+            <button
+              onClick={() => setCalibrated(!calibrated)}
+              className={`flex w-full items-center justify-center gap-1 rounded border py-1 text-xs font-bold transition ${
+                calibrated ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "ls-border text-amber-400 hover:bg-amber-500/10"
+              }`}
+            >
+              {calibrated ? "Calibrado" : "Calibrar"}
+            </button>
+            {testMode.startsWith("caloric") && (
+              <>
+                <div>
+                  <div className="text-xs ls-text-muted mb-0.5">Temperatura</div>
+                  <div className="flex gap-0.5">
+                    <button onClick={() => setCaloricTemp("30")}
+                      className={`flex-1 rounded border py-0.5 text-xs font-bold transition ${caloricTemp === "30" ? "border-blue-500/40 bg-blue-500/20 text-blue-300" : "ls-border ls-text-muted hover:ls-bg-input"}`}
+                    >30°C</button>
+                    <button onClick={() => setCaloricTemp("44")}
+                      className={`flex-1 rounded border py-0.5 text-xs font-bold transition ${caloricTemp === "44" ? "border-red-500/40 bg-red-500/20 text-red-300" : "ls-border ls-text-muted hover:ls-bg-input"}`}
+                    >44°C</button>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs ls-text-muted">Duración</span>
+                    <span className="text-xs font-mono ls-text2">{caloricDuration}s</span>
+                  </div>
+                  <input type="range" min={20} max={40} value={caloricDuration} onChange={(e) => setCaloricDuration(parseInt(e.target.value))}
+                    className="w-full h-1.5 appearance-none rounded bg-zinc-700 accent-violet-500 cursor-pointer" />
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Center: trace display */}
@@ -168,43 +210,51 @@ export function VNGWindow() {
           <div className="p-3 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium ls-text2">{testMode}</span>
-              <button onClick={handleRun} disabled={running} className="flex items-center gap-1 rounded px-2 py-0.5 text-[10px] text-emerald-400 hover:bg-emerald-500/10">
-                <Play className="h-3 w-3" />{running ? "Registrando..." : "Registrar"}
+              <button onClick={handleRun} disabled={running || !hasCaseLoaded || !calibrated} className={`flex items-center gap-1 rounded px-2 py-0.5 text-xs ${hasCaseLoaded && calibrated ? "text-emerald-400 hover:bg-emerald-500/10" : "ls-text-muted cursor-not-allowed opacity-50"}`}>
+                <Play className="h-3 w-3" />{running ? "Registrando..." : !calibrated ? "Sin calibrar" : "Registrar"}
               </button>
             </div>
 
-            {traceData.type === "nystagmus" && (
-              <EyeTraceChart eyeTrace={traceData.trace} label={traceData.label} yRange={15} width={480} />
-            )}
-            {traceData.type === "caloric" && (
-              <>
-                <EyeTraceChart eyeTrace={traceData.result.trace} label="Calórico" yRange={25} width={480} height={160} />
-                <div className="flex gap-3 text-[10px] font-mono">
-                  <span className="ls-text-muted">SPV pico: <span className="text-cyan-400">{traceData.result.peakSPV}°/s</span></span>
-                  <span className="ls-text-muted">T pico: <span className="text-cyan-400">{traceData.result.timeToPeak}s</span></span>
-                </div>
-              </>
-            )}
-            {traceData.type === "saccade" && (
-              <>
-                <EyeTraceChart eyeTrace={traceData.result.trace} label="Sacadas" yRange={25} width={480} height={160} />
-                <div className="flex gap-3 text-[10px] font-mono">
-                  <span className="ls-text-muted">Latencia: <span className="text-cyan-400">{traceData.result.avgLatency}ms</span></span>
-                  <span className="ls-text-muted">Precisión: <span className="text-cyan-400">{traceData.result.avgAccuracy}%</span></span>
-                  <span className="ls-text-muted">Vel: <span className="text-cyan-400">{traceData.result.avgPeakVelocity}°/s</span></span>
-                </div>
-              </>
-            )}
-            {traceData.type === "empty" && (
-              <div className="py-8 text-center text-xs ls-text-muted">
-                Seleccione una prueba e inicie el registro
+            {!hasCaseLoaded ? (
+              <div className="flex h-[180px] w-full items-center justify-center rounded bg-black/60">
+                <span className="text-xs font-mono ls-text-muted">SIN SEÑAL</span>
               </div>
+            ) : (
+              <>
+                {traceData.type === "nystagmus" && (
+                  <EyeTraceChart eyeTrace={traceData.trace} label={traceData.label} yRange={15} width={480} />
+                )}
+                {traceData.type === "caloric" && (
+                  <>
+                    <EyeTraceChart eyeTrace={traceData.result.trace} label="Calórico" yRange={25} width={480} height={160} />
+                    <div className="flex gap-3 text-xs font-mono">
+                      <span className="ls-text-muted">SPV pico: <span className="text-cyan-400">{traceData.result.peakSPV}°/s</span></span>
+                      <span className="ls-text-muted">T pico: <span className="text-cyan-400">{traceData.result.timeToPeak}s</span></span>
+                    </div>
+                  </>
+                )}
+                {traceData.type === "saccade" && (
+                  <>
+                    <EyeTraceChart eyeTrace={traceData.result.trace} label="Sacadas" yRange={25} width={480} height={160} />
+                    <div className="flex gap-3 text-xs font-mono">
+                      <span className="ls-text-muted">Latencia: <span className="text-cyan-400">{traceData.result.avgLatency}ms</span></span>
+                      <span className="ls-text-muted">Precisión: <span className="text-cyan-400">{traceData.result.avgAccuracy}%</span></span>
+                      <span className="ls-text-muted">Vel: <span className="text-cyan-400">{traceData.result.avgPeakVelocity}°/s</span></span>
+                    </div>
+                  </>
+                )}
+                {traceData.type === "empty" && (
+                  <div className="py-8 text-center text-xs ls-text-muted">
+                    Seleccione una prueba e inicie el registro
+                  </div>
+                )}
+              </>
             )}
           </div>
         </ScrollArea>
       </div>
 
-      <div className="border-t ls-border ls-bg-panel2 px-3 py-1 text-[9px] font-mono ls-text-muted">
+      <div className="border-t ls-border ls-bg-panel2 px-3 py-1 text-xs font-mono ls-text-muted">
         {testMode}
       </div>
     </div>

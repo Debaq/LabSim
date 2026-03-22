@@ -3,7 +3,7 @@
  * Video Head Impulse Test: evalúa los 6 canales semicirculares.
  */
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { usePatientStore } from "@/stores/patient-store";
 import { useLiveSessionStore } from "@/stores/live-session-store";
 import { PatientBanner } from "@/components/ui/patient-banner";
@@ -23,20 +23,26 @@ const CANALS: { id: SemicircularCanal; key: string; label: string; pair: string 
   { id: "posterior-der", key: "posteriorRight", label: "Post. Der.", pair: "RALP" },
 ];
 
+const EMPTY_CONFIG = {};
+
 export function VHITWindow() {
   const [selectedCanal, setSelectedCanal] = useState<SemicircularCanal>("lateral-der");
   const [selectedImpulse, setSelectedImpulse] = useState(0);
   const [seed, setSeed] = useState(42);
   const [running, setRunning] = useState(false);
+  // Controles del equipo
+  const [velocityRange, setVelocityRange] = useState<"100-200" | "150-300" | "200-400">("150-300");
+  const [impulseCount, setImpulseCount] = useState(15);
+  const [gogglesFitted, setGogglesFitted] = useState(false);
 
-  const config = usePatientStore((s) => s.data.modules.vhit ?? {});
+  const config = usePatientStore((s) => s.data.modules.vhit ?? EMPTY_CONFIG);
   const patientId = usePatientStore((s) => s.currentPatientId);
   const addEvent = useLiveSessionStore((s) => s.addEvent);
   const hasCaseLoaded = patientId !== null && Object.keys(config).length > 0;
 
   const datos: VHITConfig = (config.datos as VHITConfig) ?? {};
 
-  useMemo(() => {
+  useEffect(() => {
     if (patientId) setSeed(patientId.split("").reduce((a, c) => a + c.charCodeAt(0), 0));
   }, [patientId]);
 
@@ -78,80 +84,112 @@ export function VHITWindow() {
 
       {/* Canal selector */}
       <div className="flex items-center gap-1 border-b ls-border px-3 py-1.5 flex-wrap">
-        {CANALS.map((c) => {
-          const cfg: CanalConfig = (datos[c.key as keyof VHITConfig] as CanalConfig) ?? {};
-          const g = cfg.gain ?? 1.0;
-          return (
-            <button key={c.id} onClick={() => { setSelectedCanal(c.id); setSelectedImpulse(0); }}
-              className={`rounded px-2 py-0.5 text-[10px] transition ${selectedCanal === c.id ? "bg-orange-500/20 text-orange-400" : "ls-text-muted hover:ls-bg-input"}`}
-            >
-              {c.label}
-              <span className={`ml-1 font-mono ${g < 0.7 ? "text-red-400" : g < 0.8 ? "text-amber-400" : "text-emerald-400"}`}>
-                {g.toFixed(2)}
-              </span>
-            </button>
-          );
-        })}
-        <button onClick={handleRun} disabled={running} className="ml-auto flex items-center gap-1 rounded px-2 py-0.5 text-[10px] text-emerald-400 hover:bg-emerald-500/10">
-          <Play className="h-3 w-3" />{running ? "Capturando..." : "Capturar"}
+        {CANALS.map((c) => (
+          <button key={c.id} onClick={() => { setSelectedCanal(c.id); setSelectedImpulse(0); }}
+            className={`rounded px-2 py-0.5 text-xs transition ${selectedCanal === c.id ? "bg-orange-500/20 text-orange-400" : "ls-text-muted hover:ls-bg-input"}`}
+          >
+            {c.label}
+            <span className="ml-1 font-mono ls-text-muted">
+              {hasCaseLoaded ? (() => { const cfg = (datos[c.key as keyof VHITConfig] as CanalConfig) ?? {}; return (cfg.gain ?? 1.0).toFixed(2); })() : "---"}
+            </span>
+          </button>
+        ))}
+        <button onClick={handleRun} disabled={running || !hasCaseLoaded || !gogglesFitted} className={`ml-auto flex items-center gap-1 rounded px-2 py-0.5 text-xs ${hasCaseLoaded && gogglesFitted ? "text-emerald-400 hover:bg-emerald-500/10" : "ls-text-muted cursor-not-allowed opacity-50"}`}>
+          <Play className="h-3 w-3" />{running ? "Capturando..." : !gogglesFitted ? "Sin gafas" : "Capturar"}
         </button>
+      </div>
+
+      {/* Equipment controls */}
+      <div className="flex items-center gap-3 border-b ls-border px-3 py-1">
+        <button onClick={() => setGogglesFitted(!gogglesFitted)}
+          className={`flex items-center gap-1 rounded border px-2 py-0.5 text-xs font-bold transition ${
+            gogglesFitted ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" : "ls-border text-amber-400 hover:bg-amber-500/10"
+          }`}
+        >
+          {gogglesFitted ? "Gafas OK" : "Colocar gafas"}
+        </button>
+        <div className="flex items-center gap-1">
+          <span className="text-xs ls-text-muted">Vel:</span>
+          {(["100-200", "150-300", "200-400"] as const).map((v) => (
+            <button key={v} onClick={() => setVelocityRange(v)}
+              className={`rounded px-1.5 py-0.5 text-xs font-mono transition ${velocityRange === v ? "bg-orange-500/20 text-orange-400" : "ls-text-muted hover:ls-bg-input"}`}
+            >{v}°/s</button>
+          ))}
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="text-xs ls-text-muted">Impulsos:</span>
+          <input type="range" min={10} max={25} value={impulseCount} onChange={(e) => setImpulseCount(parseInt(e.target.value))}
+            className="w-16 h-1 appearance-none rounded bg-zinc-700 accent-orange-500 cursor-pointer" />
+          <span className="text-xs font-mono ls-text2">{impulseCount}</span>
+        </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
         {/* Left: impulse list */}
         <div className="w-[140px] shrink-0 border-r ls-border overflow-auto">
-          <div className="p-1 space-y-0.5">
-            {result.impulses.map((imp, i) => (
-              <button key={i} onClick={() => setSelectedImpulse(i)}
-                className={`flex w-full items-center justify-between rounded px-2 py-1 text-[10px] transition ${
-                  selectedImpulse === i ? "bg-orange-500/15 text-orange-400" : "ls-text-muted hover:ls-bg-input"
-                }`}
-              >
-                <span>#{i + 1}</span>
-                <span className={`font-mono ${imp.gain < 0.7 ? "text-red-400" : imp.gain < 0.8 ? "text-amber-400" : "text-emerald-400"}`}>
-                  {imp.gain.toFixed(2)}
-                </span>
-                <div className="flex gap-0.5">
-                  {imp.isGoggleArtifact && (
-                    <Badge variant="outline" className="text-[7px] px-0.5 py-0 text-zinc-400 bg-zinc-500/10">
-                      <AlertTriangle className="inline h-2 w-2" />
-                    </Badge>
-                  )}
-                  {imp.hasCorrectiveSaccade && (
-                    <Badge variant="outline" className={`text-[7px] px-0.5 py-0 ${imp.saccadeType === "overt" ? "text-red-400 bg-red-500/10" : "text-amber-400 bg-amber-500/10"}`}>
-                      {imp.saccadeType === "overt" ? "OV" : "CV"}
-                    </Badge>
-                  )}
+          {hasCaseLoaded ? (
+            <>
+              <div className="p-1 space-y-0.5">
+                {result.impulses.map((imp, i) => (
+                  <button key={i} onClick={() => setSelectedImpulse(i)}
+                    className={`flex w-full items-center justify-between rounded px-2 py-1 text-xs transition ${
+                      selectedImpulse === i ? "bg-orange-500/15 text-orange-400" : "ls-text-muted hover:ls-bg-input"
+                    }`}
+                  >
+                    <span>#{i + 1}</span>
+                    <span className={`font-mono ${imp.gain < 0.7 ? "text-red-400" : imp.gain < 0.8 ? "text-amber-400" : "text-emerald-400"}`}>
+                      {imp.gain.toFixed(2)}
+                    </span>
+                    <div className="flex gap-0.5">
+                      {imp.isGoggleArtifact && (
+                        <Badge variant="outline" className="text-xs px-0.5 py-0 text-zinc-400 bg-zinc-500/10">
+                          <AlertTriangle className="inline h-2 w-2" />
+                        </Badge>
+                      )}
+                      {imp.hasCorrectiveSaccade && (
+                        <Badge variant="outline" className={`text-xs px-0.5 py-0 ${imp.saccadeType === "overt" ? "text-red-400 bg-red-500/10" : "text-amber-400 bg-amber-500/10"}`}>
+                          {imp.saccadeType === "overt" ? "OV" : "CV"}
+                        </Badge>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <div className="border-t ls-border p-2 text-xs space-y-0.5">
+                <div className="flex justify-between ls-text-muted">
+                  <span>Promedio:</span>
+                  <span className={`font-mono font-medium ${result.avgGain < 0.7 ? "text-red-400" : result.avgGain < 0.8 ? "text-amber-400" : "text-emerald-400"}`}>
+                    {result.avgGain.toFixed(2)}
+                  </span>
                 </div>
-              </button>
-            ))}
-          </div>
-          <div className="border-t ls-border p-2 text-[10px] space-y-0.5">
-            <div className="flex justify-between ls-text-muted">
-              <span>Promedio:</span>
-              <span className={`font-mono font-medium ${result.avgGain < 0.7 ? "text-red-400" : result.avgGain < 0.8 ? "text-amber-400" : "text-emerald-400"}`}>
-                {result.avgGain.toFixed(2)}
-              </span>
+                <div className="flex justify-between ls-text-muted">
+                  <span>Overts:</span>
+                  <span className="font-mono">{result.impulses.filter((i) => i.saccadeType === "overt").length}</span>
+                </div>
+                <div className="flex justify-between ls-text-muted">
+                  <span>Coverts:</span>
+                  <span className="font-mono">{result.impulses.filter((i) => i.saccadeType === "covert").length}</span>
+                </div>
+                <div className="flex justify-between ls-text-muted">
+                  <span>Artefactos:</span>
+                  <span className="font-mono">{result.impulses.filter((i) => i.isGoggleArtifact).length}</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="p-2 text-xs space-y-0.5">
+              <div className="flex justify-between ls-text-muted"><span>Promedio:</span><span className="font-mono">---</span></div>
+              <div className="flex justify-between ls-text-muted"><span>Overts:</span><span className="font-mono">0</span></div>
+              <div className="flex justify-between ls-text-muted"><span>Coverts:</span><span className="font-mono">0</span></div>
+              <div className="flex justify-between ls-text-muted"><span>Artefactos:</span><span className="font-mono">0</span></div>
             </div>
-            <div className="flex justify-between ls-text-muted">
-              <span>Overts:</span>
-              <span className="font-mono">{result.impulses.filter((i) => i.saccadeType === "overt").length}</span>
-            </div>
-            <div className="flex justify-between ls-text-muted">
-              <span>Coverts:</span>
-              <span className="font-mono">{result.impulses.filter((i) => i.saccadeType === "covert").length}</span>
-            </div>
-            <div className="flex justify-between ls-text-muted">
-              <span>Artefactos:</span>
-              <span className="font-mono">{result.impulses.filter((i) => i.isGoggleArtifact).length}</span>
-            </div>
-          </div>
+          )}
         </div>
 
         {/* Center: traces */}
         <ScrollArea className="flex-1">
           <div className="p-3 space-y-2">
-            {currentImpulse && (
+            {hasCaseLoaded && currentImpulse ? (
               <>
                 <EyeTraceChart
                   eyeTrace={currentImpulse.eyeTrace}
@@ -161,7 +199,7 @@ export function VHITWindow() {
                   height={180}
                   yRange={25}
                 />
-                <div className="flex gap-3 text-[10px] font-mono">
+                <div className="flex gap-3 text-xs font-mono">
                   <span className="ls-text-muted">Ganancia: <span className="text-cyan-400">{currentImpulse.gain.toFixed(2)}</span></span>
                   <span className="ls-text-muted">Sacada: <span className={currentImpulse.hasCorrectiveSaccade ? "text-red-400" : "text-emerald-400"}>
                     {currentImpulse.hasCorrectiveSaccade ? currentImpulse.saccadeType : "ninguna"}
@@ -173,13 +211,17 @@ export function VHITWindow() {
                   )}
                 </div>
               </>
+            ) : (
+              <div className="flex h-[180px] w-[450px] items-center justify-center rounded bg-black/60">
+                <span className="text-xs font-mono ls-text-muted">SIN SEÑAL</span>
+              </div>
             )}
           </div>
         </ScrollArea>
       </div>
 
-      <div className="border-t ls-border ls-bg-panel2 px-3 py-1 text-[9px] font-mono ls-text-muted">
-        {canalInfo.label} ({canalInfo.pair}) | {result.impulses.length} impulsos | G̅: {result.avgGain.toFixed(2)}
+      <div className="border-t ls-border ls-bg-panel2 px-3 py-1 text-xs font-mono ls-text-muted">
+        {canalInfo.label} ({canalInfo.pair}) | {hasCaseLoaded ? `${result.impulses.length} impulsos | G̅: ${result.avgGain.toFixed(2)}` : "0 impulsos | G̅: ---"}
       </div>
     </div>
   );

@@ -26,6 +26,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import type { EarPhysiology } from "@/modules/impedance/schema";
 
 type TestMode = "tympanometry" | "reflex" | "decay" | "eustachian";
+const EMPTY_CONFIG = {};
 
 export function ImpedancePlaceholder() {
   const [ear, setEar] = useState<"OD" | "OI">("OD");
@@ -35,7 +36,7 @@ export function ImpedancePlaceholder() {
   const [tympRunning, setTympRunning] = useState(false);
 
   // Datos del paciente
-  const impedanceConfig = usePatientStore((s) => s.data.modules.impedance ?? {});
+  const impedanceConfig = usePatientStore((s) => s.data.modules.impedance ?? EMPTY_CONFIG);
   const patientId = usePatientStore((s) => s.currentPatientId);
   const addEvent = useLiveSessionStore((s) => s.addEvent);
 
@@ -53,14 +54,7 @@ export function ImpedancePlaceholder() {
   // Generar timpanograma
   const tympData = useMemo(() => {
     if (!hasCaseLoaded) {
-      // Demo con datos normales
-      return generateTympanogram(
-        { compliancePeak: 0.8, middleEarPressure: 0, earCanalVolume: 1.1, tympWidth: 100 },
-        settings.probeFrequency,
-        [settings.pressureMin, settings.pressureMax],
-        seed,
-        variance,
-      );
+      return null;
     }
     return generateTympanogram(
       earData,
@@ -100,7 +94,7 @@ export function ImpedancePlaceholder() {
         <div className="flex items-center gap-3">
           <ProbeIndicator status={probeStatus} />
           {hasCaseLoaded && (
-            <span className="text-[9px] text-emerald-400/60 font-mono">CASE</span>
+            <span className="text-xs text-emerald-400/60 font-mono">CASE</span>
           )}
         </div>
       </div>
@@ -135,7 +129,7 @@ export function ImpedancePlaceholder() {
             <button
               key={m.value}
               onClick={() => setTestMode(m.value)}
-              className={`rounded px-2 py-0.5 text-[10px] transition ${
+              className={`rounded px-2 py-0.5 text-xs transition ${
                 testMode === m.value
                   ? "bg-emerald-500/20 text-emerald-400"
                   : "ls-text-muted hover:ls-bg-input"
@@ -157,42 +151,50 @@ export function ImpedancePlaceholder() {
         {/* Visualización */}
         <ScrollArea className="flex-1">
           <div className="p-3">
-            {testMode === "tympanometry" && (
-              <TympanometryPanel
-                data={tympData}
-                settings={settings}
-                onStart={handleStartTymp}
-                isRunning={tympRunning}
-              />
-            )}
-            {testMode === "reflex" && (
-              <ReflexPanel
-                ear={earData}
-                settings={settings}
-                seed={seed}
-                variance={variance}
-              />
-            )}
-            {testMode === "decay" && (
-              <div className="space-y-4">
-                <ReflexDecayPanel ear={earData} frequency={500} seed={seed} />
-                <ReflexDecayPanel ear={earData} frequency={1000} seed={seed} />
+            {!hasCaseLoaded ? (
+              <div className="flex h-[200px] w-full items-center justify-center rounded bg-black/40">
+                <span className="text-xs font-mono ls-text-muted">SIN SEÑAL</span>
               </div>
-            )}
-            {testMode === "eustachian" && (
-              <EustachianPanel
-                ear={earData}
-                seed={seed}
-                variance={variance}
-                pressureRange={[settings.pressureMin, settings.pressureMax]}
-              />
+            ) : (
+              <>
+                {testMode === "tympanometry" && tympData && (
+                  <TympanometryPanel
+                    data={tympData}
+                    settings={settings}
+                    onStart={handleStartTymp}
+                    isRunning={tympRunning}
+                  />
+                )}
+                {testMode === "reflex" && (
+                  <ReflexPanel
+                    ear={earData}
+                    settings={settings}
+                    seed={seed}
+                    variance={variance}
+                  />
+                )}
+                {testMode === "decay" && (
+                  <div className="space-y-4">
+                    <ReflexDecayPanel ear={earData} frequency={500} seed={seed} />
+                    <ReflexDecayPanel ear={earData} frequency={1000} seed={seed} />
+                  </div>
+                )}
+                {testMode === "eustachian" && (
+                  <EustachianPanel
+                    ear={earData}
+                    seed={seed}
+                    variance={variance}
+                    pressureRange={[settings.pressureMin, settings.pressureMax]}
+                  />
+                )}
+              </>
             )}
           </div>
         </ScrollArea>
       </div>
 
       {/* Status bar */}
-      <div className="flex items-center justify-between border-t ls-border ls-bg-panel2 px-3 py-1 text-[9px] font-mono ls-text-muted">
+      <div className="flex items-center justify-between border-t ls-border ls-bg-panel2 px-3 py-1 text-xs font-mono ls-text-muted">
         <span>{ear} · {settings.probeFrequency} Hz · {settings.pressureMin}/{settings.pressureMax} daPa</span>
         <span>{testMode.toUpperCase()}</span>
       </div>

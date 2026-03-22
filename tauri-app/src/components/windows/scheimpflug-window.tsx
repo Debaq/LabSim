@@ -9,6 +9,8 @@
 import { useState, useMemo } from "react";
 import { usePatientStore } from "@/stores/patient-store";
 import { useLiveSessionStore } from "@/stores/live-session-store";
+import { cn } from "@/lib/utils";
+import { AlignmentPanel, DEFAULT_ALIGNMENT, isAligned, type AlignmentState } from "@/components/ui/alignment-panel";
 import { PatientBanner } from "@/components/ui/patient-banner";
 import { CrossSectionView } from "@/components/scheimpflug/cross-section-view";
 import { ACIndicesPanel } from "@/components/scheimpflug/ac-indices-panel";
@@ -26,6 +28,7 @@ import { RefreshCw, Link2, Link2Off } from "lucide-react";
 
 type ViewTab = "scheimpflug" | "elev-ant" | "elev-post" | "pachymetry";
 const MAP_SIZE = 128;
+const EMPTY_CONFIG = {};
 
 /** Renders a pre-generated Float32Array map onto a canvas */
 function PreRenderedMap({ map, size, mapType }: { map: Float32Array; size: number; mapType: MapType }) {
@@ -47,8 +50,9 @@ export function ScheimpflugWindow() {
   const [eye, setEye] = useState<"OD" | "OI">("OD");
   const [viewTab, setViewTab] = useState<ViewTab>("scheimpflug");
   const [seed, setSeed] = useState(42);
+  const [alignment, setAlignment] = useState<AlignmentState>(DEFAULT_ALIGNMENT);
 
-  const config = usePatientStore((s) => s.data.modules.scheimpflug ?? {});
+  const config = usePatientStore((s) => s.data.modules.scheimpflug ?? EMPTY_CONFIG);
   const patientId = usePatientStore((s) => s.currentPatientId);
   const addEvent = useLiveSessionStore((s) => s.addEvent);
   const hasCaseLoaded = patientId !== null && Object.keys(config).length > 0;
@@ -57,7 +61,7 @@ export function ScheimpflugWindow() {
   const eyeCfg: ScheimpflugEyeConfig = (config[eyeKey] as ScheimpflugEyeConfig) ?? {};
 
   // Sync seed from patient
-  useMemo(() => {
+  useEffect(() => {
     if (!patientId) return;
     const s = patientId.split("").reduce((a, c) => a + c.charCodeAt(0), 0) + (eye === "OI" ? 2000 : 0);
     setSeed(s);
@@ -109,12 +113,16 @@ export function ScheimpflugWindow() {
         <div className="flex gap-0.5">
           {TABS.map((t) => (
             <button key={t.value} onClick={() => setViewTab(t.value)}
-              className={`rounded px-2 py-0.5 text-[10px] transition ${viewTab === t.value ? "bg-teal-500/20 text-teal-400" : "ls-text-muted hover:ls-bg-input"}`}
+              className={`rounded px-2 py-0.5 text-xs transition ${viewTab === t.value ? "bg-teal-500/20 text-teal-400" : "ls-text-muted hover:ls-bg-input"}`}
             >{t.label}</button>
           ))}
         </div>
-        <button onClick={regenerate} className="ml-auto rounded p-1 hover:ls-bg-input ls-text-muted" title="Nueva captura">
-          <RefreshCw className="h-3.5 w-3.5" />
+        <button onClick={regenerate} disabled={!hasCaseLoaded || !isAligned(alignment)}
+          className={cn("ml-auto flex items-center gap-1 rounded px-2 py-0.5 text-xs font-bold transition",
+            hasCaseLoaded && isAligned(alignment) ? "text-emerald-400 hover:bg-emerald-500/10" : "ls-text-muted opacity-50 cursor-not-allowed")}
+          title="Nueva captura"
+        >
+          <RefreshCw className="h-3 w-3" /> {!isAligned(alignment) ? "Alinear" : "Capturar"}
         </button>
       </div>
 
@@ -122,39 +130,61 @@ export function ScheimpflugWindow() {
       <div className="flex flex-1 overflow-hidden">
         {/* Center: visualization */}
         <div className="flex-1 flex items-center justify-center p-3">
-          {viewTab === "scheimpflug" && (
-            <CrossSectionView data={crossSection} width={400} height={220} />
-          )}
-          {viewTab === "elev-ant" && (
-            <div className="flex items-center gap-2">
-              <PreRenderedMap map={elevMaps.anterior} size={MAP_SIZE} mapType="elevation" />
-              <ColorScale mapType="elevation" />
-            </div>
-          )}
-          {viewTab === "elev-post" && (
-            <div className="flex items-center gap-2">
-              <PreRenderedMap map={elevMaps.posterior} size={MAP_SIZE} mapType="elevation" />
-              <ColorScale mapType="elevation" />
-            </div>
-          )}
-          {viewTab === "pachymetry" && (
-            <div className="flex items-center gap-2">
-              <PreRenderedMap map={pachMap} size={MAP_SIZE} mapType="pachymetry" />
-              <ColorScale mapType="pachymetry" />
-            </div>
+          {hasCaseLoaded ? (
+            <>
+              {viewTab === "scheimpflug" && (
+                <CrossSectionView data={crossSection} width={400} height={220} />
+              )}
+              {viewTab === "elev-ant" && (
+                <div className="flex items-center gap-2">
+                  <PreRenderedMap map={elevMaps.anterior} size={MAP_SIZE} mapType="elevation" />
+                  <ColorScale mapType="elevation" />
+                </div>
+              )}
+              {viewTab === "elev-post" && (
+                <div className="flex items-center gap-2">
+                  <PreRenderedMap map={elevMaps.posterior} size={MAP_SIZE} mapType="elevation" />
+                  <ColorScale mapType="elevation" />
+                </div>
+              )}
+              {viewTab === "pachymetry" && (
+                <div className="flex items-center gap-2">
+                  <PreRenderedMap map={pachMap} size={MAP_SIZE} mapType="pachymetry" />
+                  <ColorScale mapType="pachymetry" />
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="h-full w-full max-h-[300px] max-w-[500px] rounded bg-black/60" />
           )}
         </div>
 
         {/* Right: indices */}
         <div className="w-[170px] shrink-0 border-l ls-border overflow-auto">
-          <ACIndicesPanel indices={indices} />
+          {hasCaseLoaded ? (
+            <ACIndicesPanel indices={indices} />
+          ) : (
+            <div className="p-2 space-y-1.5 text-xs font-mono ls-text-muted">
+              <div>CCT: <span className="ls-text2">---</span></div>
+              <div>ACD: <span className="ls-text2">---</span></div>
+              <div>Densidad: <span className="ls-text2">---</span></div>
+              <div>Kf: <span className="ls-text2">---</span></div>
+              <div>Ks: <span className="ls-text2">---</span></div>
+              <div>Cyl: <span className="ls-text2">---</span></div>
+            </div>
+          )}
         </div>
       </div>
 
+      {/* Joystick abajo */}
+      <div className="shrink-0 border-t ls-border px-3 py-1.5">
+        <AlignmentPanel state={alignment} onChange={setAlignment} onCapture={hasCaseLoaded ? regenerate : undefined} compact />
+      </div>
+
       {/* Status bar */}
-      <div className="flex items-center justify-between border-t ls-border ls-bg-panel2 px-3 py-1 text-[9px] font-mono ls-text-muted">
-        <span>{eye} | {(eyeCfg.cornealPathology ?? "normal").toUpperCase()}</span>
-        <span>CCT: {indices.cct}µm | ACD: {indices.acd}mm | Densidad: {indices.lensDensity}%</span>
+      <div className="flex items-center justify-between border-t ls-border ls-bg-panel2 px-3 py-1 text-xs font-mono ls-text-muted">
+        <span>{eye} | {hasCaseLoaded ? (eyeCfg.cornealPathology ?? "normal").toUpperCase() : "---"}</span>
+        <span>CCT: {hasCaseLoaded ? `${indices.cct}µm` : "---"} | ACD: {hasCaseLoaded ? `${indices.acd}mm` : "---"} | Densidad: {hasCaseLoaded ? `${indices.lensDensity}%` : "---"}</span>
       </div>
     </div>
   );

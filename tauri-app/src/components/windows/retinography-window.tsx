@@ -3,12 +3,25 @@ import { FundusView } from "@/components/retinography/fundus-view";
 import { ToggleSwitch } from "@/components/audiometer/toggle-switch";
 import {
   type RetinopathyType,
+  type FundusFilter,
   RETINOPATHY_LABELS,
   getCDRatio,
 } from "@/lib/retinography-synthetic";
 import { usePatientStore } from "@/stores/patient-store";
 import { cn } from "@/lib/utils";
-import { RefreshCw, Link2, Link2Off, Camera } from "lucide-react";
+import { Link2, Link2Off, Camera } from "lucide-react";
+import { AlignmentPanel, DEFAULT_ALIGNMENT, isAligned, type AlignmentState } from "@/components/ui/alignment-panel";
+
+const EMPTY_CONFIG = {};
+
+const FILTER_OPTIONS: { value: FundusFilter; label: string }[] = [
+  { value: "color", label: "Color" },
+  { value: "red-free", label: "Aneritra" },
+  { value: "blue", label: "Azul" },
+  { value: "infrared", label: "IR" },
+];
+
+const ANGLE_OPTIONS = [30, 45, 60] as const;
 
 export function RetinographyWindow() {
   const [eye, setEye] = useState<"OD" | "OI">("OD");
@@ -17,8 +30,13 @@ export function RetinographyWindow() {
   const [signalOverride, setSignalOverride] = useState<number | null>(null);
   const [captured, setCaptured] = useState<{ OD: boolean; OI: boolean }>({ OD: false, OI: false });
   const [flash, setFlash] = useState(false);
+  const [filter, setFilter] = useState<FundusFilter>("color");
+  const [diopterOffset, setDiopterOffset] = useState(0);
+  const [flashIntensity, setFlashIntensity] = useState(50);
+  const [captureAngle, setCaptureAngle] = useState<number>(45);
+  const [alignment, setAlignment] = useState<AlignmentState>(DEFAULT_ALIGNMENT);
 
-  const retConfig = usePatientStore((s) => s.data.modules.retinography ?? {});
+  const retConfig = usePatientStore((s) => s.data.modules.retinography ?? EMPTY_CONFIG);
   const patientId = usePatientStore((s) => s.currentPatientId);
   const hasCaseLoaded = patientId !== null && Object.keys(retConfig).length > 0;
 
@@ -27,28 +45,26 @@ export function RetinographyWindow() {
     const eyeKey = eye === "OD" ? "ojoDerecho" : "ojoIzquierdo";
     const cfg = (retConfig as Record<string, Record<string, unknown>>)[eyeKey];
     if (!cfg) return;
-
     const patho = cfg.patologia as RetinopathyType | undefined;
     if (patho && patho !== pathology) setPathology(patho);
-
     const q = cfg.calidadSenal as number | undefined;
     setSignalOverride(q ?? null);
-
-    const seedBase = patientId
-      ? patientId.split("").reduce((a, c) => a + c.charCodeAt(0), 0)
-      : 42;
+    const seedBase = patientId ? patientId.split("").reduce((a, c) => a + c.charCodeAt(0), 0) : 42;
     setSeed(seedBase + (eye === "OI" ? 1000 : 0));
   }, [hasCaseLoaded, eye, retConfig, patientId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const regenerate = () => setSeed(Math.floor(Math.random() * 10000));
-
   const signalQ = signalOverride ?? (7 + Math.floor((seed % 3)));
   const cdRatio = getCDRatio(pathology, seed + (eye === "OI" ? 1000 : 0));
+  const isFocused = Math.abs(diopterOffset) <= 1;
+  const canCapture = hasCaseLoaded && isAligned(alignment);
 
   const handleCapture = () => {
+    if (!canCapture) return;
     setFlash(true);
     setTimeout(() => setFlash(false), 200);
     setCaptured((prev) => ({ ...prev, [eye]: true }));
+    regenerate();
   };
 
   return (
@@ -56,224 +72,148 @@ export function RetinographyWindow() {
       {/* Header */}
       <div className="flex h-7 shrink-0 items-center justify-between ls-bg-panel2 px-3">
         <span className="text-xs font-bold tracking-[0.2em] ls-text-muted">
-          LABSIM{" "}
-          <span className="font-normal ls-text-muted">RETINÓGRAFO</span>
+          LABSIM <span className="font-normal ls-text-muted">RETINÓGRAFO</span>
         </span>
         <div className="flex items-center gap-2 text-xs ls-text-muted">
           {hasCaseLoaded ? (
-            <span className="flex items-center gap-1 text-emerald-400/70">
-              <Link2 className="h-3 w-3" /> Caso
-            </span>
+            <span className="flex items-center gap-1 text-emerald-400/70"><Link2 className="h-3 w-3" /> Caso</span>
           ) : (
-            <span className="flex items-center gap-1 ls-text-muted">
-              <Link2Off className="h-3 w-3" /> Libre
-            </span>
+            <span className="flex items-center gap-1"><Link2Off className="h-3 w-3" /> Libre</span>
           )}
           <span>|</span>
-          <span
-            className={cn(
-              "font-bold",
-              eye === "OD" ? "text-red-400/60" : "text-blue-400/60",
-            )}
-          >
-            {eye}
-          </span>
+          <span className={cn("font-bold", eye === "OD" ? "text-red-400/60" : "text-blue-400/60")}>{eye}</span>
           <span>|</span>
-          <span
-            className={cn(
-              signalQ >= 7 ? "text-emerald-400/60" : "text-amber-400/60",
-            )}
-          >
-            Q:{signalQ}/10
-          </span>
+          <span>{captureAngle}°</span>
           <span>|</span>
-          <span className="capitalize">
-            {RETINOPATHY_LABELS[pathology]}
-          </span>
+          <span>{FILTER_OPTIONS.find((f) => f.value === filter)?.label}</span>
+          {hasCaseLoaded && (
+            <>
+              <span>|</span>
+              <span className={cn(signalQ >= 7 ? "text-emerald-400/60" : "text-amber-400/60")}>Q:{signalQ}/10</span>
+            </>
+          )}
         </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* LEFT: Controles */}
-        <div className="flex w-[155px] shrink-0 flex-col gap-1.5 overflow-y-auto border-r ls-border p-1.5">
-          {/* Configuración */}
-          <div className="rounded border ls-border ls-bg-panel2 p-2 space-y-1.5">
-            <div className="text-xs font-bold uppercase tracking-wider ls-text-muted">
-              Configuración
+        {/* LEFT: Controles del equipo (compactos) */}
+        <div className="flex w-[130px] shrink-0 flex-col gap-1.5 overflow-y-auto border-r ls-border p-1.5">
+          {/* Ojo */}
+          <div className="rounded border ls-border ls-bg-panel2 p-1.5 space-y-1">
+            <div className="text-xs font-bold uppercase tracking-wider ls-text-muted">Ojo</div>
+            <ToggleSwitch value={eye} onChange={(v) => { setEye(v as "OD" | "OI"); if (hasCaseLoaded) regenerate(); }}
+              options={[
+                { value: "OD", label: "OD", color: "bg-red-600 ls-text" },
+                { value: "OI", label: "OI", color: "bg-blue-600 ls-text" },
+              ]} />
+          </div>
+
+          {/* Filtro */}
+          <div className="rounded border ls-border ls-bg-panel2 p-1.5 space-y-1">
+            <div className="text-xs font-bold uppercase tracking-wider ls-text-muted">Filtro</div>
+            <div className="grid grid-cols-2 gap-0.5">
+              {FILTER_OPTIONS.map((f) => (
+                <button key={f.value} onClick={() => setFilter(f.value)}
+                  className={cn("rounded border py-0.5 text-xs font-bold transition",
+                    filter === f.value ? "border-red-500/40 bg-red-500/20 text-red-300" : "ls-border ls-text-muted hover:ls-bg-input")}
+                >{f.label}</button>
+              ))}
             </div>
-            <div>
-              <div className="mb-0.5 text-xs uppercase ls-text-muted">Ojo</div>
-              <ToggleSwitch
-                value={eye}
-                onChange={(v) => {
-                  setEye(v as "OD" | "OI");
-                  regenerate();
-                }}
-                options={[
-                  { value: "OD", label: "OD", color: "bg-red-600 ls-text" },
-                  { value: "OI", label: "OI", color: "bg-blue-600 ls-text" },
-                ]}
-              />
+          </div>
+
+          {/* Campo */}
+          <div className="rounded border ls-border ls-bg-panel2 p-1.5 space-y-1">
+            <div className="text-xs font-bold uppercase tracking-wider ls-text-muted">Campo</div>
+            <div className="flex gap-0.5">
+              {ANGLE_OPTIONS.map((a) => (
+                <button key={a} onClick={() => setCaptureAngle(a)}
+                  className={cn("flex-1 rounded border py-0.5 text-xs font-bold transition",
+                    captureAngle === a ? "border-red-500/40 bg-red-500/20 text-red-300" : "ls-border ls-text-muted hover:ls-bg-input")}
+                >{a}°</button>
+              ))}
             </div>
+          </div>
 
-            {!hasCaseLoaded && (
-              <div>
-                <div className="mb-0.5 text-xs uppercase ls-text-muted">
-                  Patología
-                </div>
-                <div className="grid grid-cols-2 gap-0.5">
-                  {(Object.keys(RETINOPATHY_LABELS) as RetinopathyType[]).map(
-                    (p) => (
-                      <button
-                        key={p}
-                        onClick={() => {
-                          setPathology(p);
-                          regenerate();
-                        }}
-                        className={cn(
-                          "rounded border py-0.5 text-[10px] font-bold transition",
-                          pathology === p
-                            ? "border-amber-500/40 bg-amber-500/20 text-amber-300"
-                            : "ls-border ls-text-muted hover:ls-text2",
-                        )}
-                      >
-                        {RETINOPATHY_LABELS[p]}
-                      </button>
-                    ),
-                  )}
-                </div>
-              </div>
-            )}
+          {/* Dioptrías */}
+          <div className="rounded border ls-border ls-bg-panel2 p-1.5 space-y-0.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider ls-text-muted">Dioptrías</span>
+              <span className={cn("text-xs font-mono font-bold", isFocused ? "text-emerald-400" : "text-amber-400")}>
+                {diopterOffset > 0 ? "+" : ""}{diopterOffset}D
+              </span>
+            </div>
+            <input type="range" min={-20} max={20} step={0.5} value={diopterOffset}
+              onChange={(e) => setDiopterOffset(parseFloat(e.target.value))}
+              className="w-full h-1.5 appearance-none rounded bg-zinc-700 accent-red-500 cursor-pointer" />
+          </div>
 
-            {hasCaseLoaded && (
-              <div className="rounded border border-emerald-500/20 bg-emerald-500/5 p-1.5">
-                <span className="text-xs text-emerald-400/80">
-                  Patología definida por el caso clínico
-                </span>
-              </div>
-            )}
-
-            <button
-              onClick={regenerate}
-              className="flex w-full items-center justify-center gap-1 rounded border ls-border py-1 text-xs ls-text-muted hover:ls-bg-input"
-            >
-              <RefreshCw className="h-2.5 w-2.5" /> Regenerar
-            </button>
+          {/* Flash */}
+          <div className="rounded border ls-border ls-bg-panel2 p-1.5 space-y-0.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider ls-text-muted">Flash</span>
+              <span className="text-xs font-mono ls-text-muted">{flashIntensity}%</span>
+            </div>
+            <input type="range" min={10} max={100} step={5} value={flashIntensity}
+              onChange={(e) => setFlashIntensity(parseInt(e.target.value))}
+              className="w-full h-1.5 appearance-none rounded bg-zinc-700 accent-red-500 cursor-pointer" />
           </div>
 
           {/* Hallazgos */}
-          <div className="rounded border ls-border ls-bg-panel2 p-2">
-            <div className="mb-1 text-xs font-bold uppercase tracking-wider ls-text-muted">
-              Hallazgos
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs ls-text-muted">C/D ratio</span>
-                <span
-                  className={cn(
-                    "text-xs font-mono font-bold",
-                    cdRatio > 0.6
-                      ? "text-red-400"
-                      : cdRatio > 0.4
-                        ? "text-amber-400"
-                        : "text-emerald-400",
-                  )}
-                >
-                  {cdRatio.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs ls-text-muted">Calidad</span>
-                <span
-                  className={cn(
-                    "text-xs font-mono font-bold",
-                    signalQ >= 7
-                      ? "text-emerald-400"
-                      : signalQ >= 5
-                        ? "text-amber-400"
-                        : "text-red-400",
-                  )}
-                >
-                  {signalQ}/10
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs ls-text-muted">Mácula</span>
-                <span className="text-xs font-bold ls-text2">
-                  {pathology === "normal" ||
-                  pathology === "glaucoma" ||
-                  pathology === "hta"
-                    ? "Normal"
-                    : "Alterada"}
-                </span>
-              </div>
+          <div className="rounded border ls-border ls-bg-panel2 p-1.5">
+            <div className="mb-0.5 text-xs font-bold uppercase tracking-wider ls-text-muted">Hallazgos</div>
+            <div className="space-y-0.5 text-xs">
+              <div className="flex justify-between"><span className="ls-text-muted">C/D</span><span className="font-mono ls-text2">{hasCaseLoaded ? cdRatio.toFixed(2) : "---"}</span></div>
+              <div className="flex justify-between"><span className="ls-text-muted">Q</span><span className="font-mono ls-text2">{hasCaseLoaded ? `${signalQ}/10` : "---"}</span></div>
             </div>
           </div>
 
           {/* Capturas */}
-          <div className="rounded border ls-border ls-bg-panel2 p-2">
-            <div className="mb-1 text-xs font-bold uppercase tracking-wider ls-text-muted">
-              Capturas
-            </div>
-            <div className="flex gap-2">
-              <div className="flex flex-col items-center gap-0.5">
-                <div
-                  className={cn(
-                    "h-3 w-3 rounded-full border",
-                    captured.OD
-                      ? "border-emerald-500 bg-emerald-500/40"
-                      : "ls-border",
-                  )}
-                />
-                <span className="text-[10px] ls-text-muted">OD</span>
-              </div>
-              <div className="flex flex-col items-center gap-0.5">
-                <div
-                  className={cn(
-                    "h-3 w-3 rounded-full border",
-                    captured.OI
-                      ? "border-emerald-500 bg-emerald-500/40"
-                      : "ls-border",
-                  )}
-                />
-                <span className="text-[10px] ls-text-muted">OI</span>
-              </div>
+          <div className="rounded border ls-border ls-bg-panel2 p-1.5">
+            <div className="mb-0.5 text-xs font-bold uppercase tracking-wider ls-text-muted">Capturas</div>
+            <div className="flex gap-2 justify-center">
+              {(["OD", "OI"] as const).map((e) => (
+                <div key={e} className="flex flex-col items-center gap-0.5">
+                  <div className={cn("h-3 w-3 rounded-full border", captured[e] ? "border-emerald-500 bg-emerald-500/40" : "ls-border")} />
+                  <span className="text-xs ls-text-muted">{e}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* CENTER: Vista del fondo de ojo */}
-        <div className="relative flex flex-1 flex-col items-center justify-center gap-2 p-3 min-w-0">
-          {/* Flash overlay */}
-          {flash && (
-            <div className="absolute inset-0 z-10 bg-white/30 animate-pulse pointer-events-none" />
-          )}
-
-          <div className="flex-1 flex items-center justify-center min-h-0 w-full">
-            <FundusView
-              seed={seed}
-              pathology={pathology}
-              eye={eye}
-              signalQuality={signalQ}
-            />
+        {/* CENTER + BOTTOM: Imagen arriba, joystick abajo */}
+        <div className="flex flex-1 flex-col min-w-0">
+          {/* Imagen */}
+          <div className="relative flex flex-1 items-center justify-center p-2 min-h-0">
+            {flash && <div className="absolute inset-0 z-10 bg-white/30 animate-pulse pointer-events-none" />}
+            {hasCaseLoaded && !isFocused && (
+              <div className="absolute top-2 right-2 z-10 rounded bg-amber-500/20 border border-amber-500/30 px-2 py-0.5">
+                <span className="text-xs font-mono text-amber-400">DESENFOCADO</span>
+              </div>
+            )}
+            <div className="flex-1 flex items-center justify-center min-h-0 w-full max-h-full">
+              {hasCaseLoaded ? (
+                <FundusView seed={seed} pathology={pathology} eye={eye} signalQuality={signalQ}
+                  filter={filter} diopterOffset={diopterOffset} flashIntensity={flashIntensity} captureAngle={captureAngle} />
+              ) : (
+                <div className="h-[280px] w-[280px] rounded-full bg-black/80 flex items-center justify-center">
+                  <span className="text-xs font-mono ls-text-muted">SIN CAPTURA</span>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Botón de captura */}
-          <button
-            onClick={handleCapture}
-            className="flex items-center gap-1.5 rounded-lg border ls-border px-4 py-1.5 text-xs font-bold ls-text2 transition hover:ls-bg-input hover:ls-text"
-          >
-            <Camera className="h-3.5 w-3.5" /> Capturar {eye}
-          </button>
+          {/* BOTTOM: Joystick centrado */}
+          <div className="shrink-0 border-t ls-border px-3 py-2">
+            <AlignmentPanel state={alignment} onChange={setAlignment} onCapture={handleCapture} compact />
+          </div>
         </div>
       </div>
 
       {/* Status bar */}
       <div className="flex h-5 shrink-0 items-center justify-between ls-bg-panel2 px-3 text-xs ls-text-muted">
-        <span>
-          {eye} | Retinografía | {RETINOPATHY_LABELS[pathology]}
-        </span>
-        <span>C/D: {cdRatio.toFixed(2)}</span>
+        <span>{eye} | {captureAngle}° | {FILTER_OPTIONS.find((f) => f.value === filter)?.label} | {diopterOffset > 0 ? "+" : ""}{diopterOffset}D</span>
+        <span>{hasCaseLoaded ? `${RETINOPATHY_LABELS[pathology]} | C/D: ${cdRatio.toFixed(2)} | Q:${signalQ}` : "---"}</span>
       </div>
     </div>
   );

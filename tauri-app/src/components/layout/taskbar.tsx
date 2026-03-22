@@ -35,6 +35,11 @@ import {
   Building2,
   Eye,
   CircleDot,
+  Scan,
+  BotMessageSquare,
+  GraduationCap,
+  ShieldCheck,
+  Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -65,6 +70,7 @@ const WINDOW_ICONS: Record<string, LucideIcon> = {
   "corneal-topography": CircleDot,
 };
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { WINDOW_SIZES } from "./desktop-area";
 
 export function Taskbar() {
   const navigate = useNavigate();
@@ -118,81 +124,149 @@ export function Taskbar() {
   return (
     <div className="flex h-11 shrink-0 items-center justify-between border-t px-1.5 backdrop-blur-xl"
       style={{ backgroundColor: "var(--ls-taskbar)", borderColor: "var(--ls-border)" }}>
-      {/* Start Menu */}
-      <DropdownMenu>
-        <DropdownMenuTrigger className="flex h-8 items-center gap-2 rounded-md px-3 text-sm font-semibold ls-text transition hover:ls-bg-input">
-          <Home className="h-4 w-4" style={{ color: "var(--ls-accent)" }} />
-          <span>LabSim</span>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" side="top" className="mb-1 w-64 ls-border ls-bg-panel ls-text">
-          {/* User */}
-          <div className="flex items-center gap-2 px-3 py-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/20">
-              <User className="h-4 w-4 text-blue-400" />
+      {/* Start Menu + Accesos directos */}
+      <div className="flex items-center gap-1">
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex h-8 items-center gap-2 rounded-md px-3 text-sm font-semibold ls-text transition hover:ls-bg-input">
+            <Home className="h-4 w-4" style={{ color: "var(--ls-accent)" }} />
+            <span>LabSim</span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" side="top" className="mb-1 w-64 max-h-[70vh] overflow-y-auto ls-border ls-bg-panel ls-text">
+            {/* User */}
+            <div className="flex items-center gap-2 px-3 py-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500/20">
+                <User className="h-4 w-4 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">{username}</p>
+                <p className="text-xs ls-text-muted capitalize">{role}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium">{username}</p>
-              <p className="text-xs ls-text-muted capitalize">{role}</p>
-            </div>
-          </div>
-          <DropdownMenuSeparator className="ls-bg-input" />
+            <DropdownMenuSeparator className="ls-bg-input" />
 
-          {/* Equipos */}
-          <p className="px-3 pt-1.5 pb-0.5 text-[10px] font-bold uppercase tracking-wider ls-text-muted">Equipos</p>
-          <DropdownMenuItem onClick={() => openWindow("audiometer", "Audiómetro", "audiometer", { width: 780, height: 520, x: 60, y: 20 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
-            <Headphones className="mr-2 h-4 w-4 text-blue-400" />Audiómetro
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openWindow("impedance", "Impedanciómetro", "impedance", { width: 800, height: 500 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
-            <Activity className="mr-2 h-4 w-4 text-emerald-400" />Impedanciómetro
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openWindow("perimetry", "Campo Visual", "perimetry", { width: 750, height: 550 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
-            <ScanEye className="mr-2 h-4 w-4 text-orange-400" />Campo Visual
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openWindow("oct", "OCT", "oct", { width: 800, height: 520 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
-            <Layers className="mr-2 h-4 w-4 text-pink-400" />OCT
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openWindow("retinography", "Retinógrafo", "retinography", { width: 720, height: 540 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
-            <Eye className="mr-2 h-4 w-4 text-red-400" />Retinógrafo
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openWindow("corneal-topography", "Topógrafo Corneal", "corneal-topography", { width: 800, height: 520 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
-            <CircleDot className="mr-2 h-4 w-4 text-teal-400" />Topógrafo Corneal
-          </DropdownMenuItem>
-          <DropdownMenuSeparator className="ls-bg-input" />
+            {/* Equipos */}
+            <p className="px-3 pt-1.5 pb-0.5 text-xs font-bold uppercase tracking-wider ls-text-muted">Equipos</p>
+            <DropdownMenuItem onClick={() => openWindow("audiometer", "Audiómetro", "audiometer", WINDOW_SIZES.audiometer)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <Headphones className="mr-2 h-4 w-4 text-blue-400" />Audiómetro
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openWindow("impedance", "Impedanciómetro", "impedance", WINDOW_SIZES.impedance)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <Activity className="mr-2 h-4 w-4 text-emerald-400" />Impedanciómetro
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openWindow("perimetry", "Campo Visual", "perimetry", WINDOW_SIZES.perimetry)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <ScanEye className="mr-2 h-4 w-4 text-orange-400" />Campo Visual
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openWindow("oct", "OCT", "oct", WINDOW_SIZES.oct)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <Layers className="mr-2 h-4 w-4 text-pink-400" />OCT
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openWindow("retinography", "Retinógrafo", "retinography", WINDOW_SIZES.retinography)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <Eye className="mr-2 h-4 w-4 text-red-400" />Retinógrafo
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openWindow("corneal-topography", "Topógrafo Corneal", "corneal-topography", WINDOW_SIZES["corneal-topography"])} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <CircleDot className="mr-2 h-4 w-4 text-teal-400" />Topógrafo Corneal
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openWindow("scheimpflug", "Scheimpflug", "scheimpflug", WINDOW_SIZES.scheimpflug)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <Scan className="mr-2 h-4 w-4 text-teal-400" />Scheimpflug
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openWindow("autoref", "Autorefractómetro", "autoref", WINDOW_SIZES.autoref)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <ScanEye className="mr-2 h-4 w-4 text-cyan-400" />Autorefractómetro
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openWindow("vng", "VNG", "vng", WINDOW_SIZES.vng)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <Eye className="mr-2 h-4 w-4 text-violet-400" />VNG
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openWindow("vhit", "vHIT", "vhit", WINDOW_SIZES.vhit)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <Activity className="mr-2 h-4 w-4 text-orange-400" />vHIT
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="ls-bg-input" />
 
-          {/* Herramientas */}
-          <p className="px-3 pt-1.5 pb-0.5 text-[10px] font-bold uppercase tracking-wider ls-text-muted">Herramientas</p>
-          <DropdownMenuItem onClick={() => openWindow("messaging", "Mensajes", "messaging", { width: 420, height: 620 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
-            <MessageCircle className="mr-2 h-4 w-4 text-green-400" />Mensajes
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openWindow("courses", "Mis Cursos", "courses")} className="ls-text2 focus:ls-bg-input focus:ls-text">
-            <ClipboardList className="mr-2 h-4 w-4 text-sky-400" />Mis Cursos
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openWindow("manage-patients", "Gestionar Pacientes", "manage-patients")} className="ls-text2 focus:ls-bg-input focus:ls-text">
-            <Stethoscope className="mr-2 h-4 w-4 text-purple-400" />Gestionar Pacientes
-          </DropdownMenuItem>
-          <DropdownMenuSeparator className="ls-bg-input" />
+            {/* Clínica */}
+            <p className="px-3 pt-1.5 pb-0.5 text-xs font-bold uppercase tracking-wider ls-text-muted">Clínica</p>
+            <DropdownMenuItem onClick={() => openWindow("larissa", "Larissa", "larissa")} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <ClipboardPen className="mr-2 h-4 w-4 text-cyan-400" />Larissa
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openWindow("agenda", "Agenda", "agenda", WINDOW_SIZES.agenda)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <CalendarDays className="mr-2 h-4 w-4 text-amber-400" />Agenda
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openWindow("messaging", "Mensajes", "messaging", WINDOW_SIZES.messaging)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <MessageCircle className="mr-2 h-4 w-4 text-green-400" />Mensajes
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openWindow("my-stats", "Mis Estadísticas", "my-stats")} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <BarChart3 className="mr-2 h-4 w-4 text-teal-400" />Mis Estadísticas
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="ls-bg-input" />
 
-          {/* Sistema */}
-          <p className="px-3 pt-1.5 pb-0.5 text-[10px] font-bold uppercase tracking-wider ls-text-muted">Sistema</p>
-          <DropdownMenuItem onClick={() => openWindow("file-explorer", "Explorador", "file-explorer")} className="ls-text2 focus:ls-bg-input focus:ls-text">
-            <FolderOpen className="mr-2 h-4 w-4 text-amber-400" />Explorador
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openWindow("text-editor", "Editor", "text-editor")} className="ls-text2 focus:ls-bg-input focus:ls-text">
-            <FileText className="mr-2 h-4 w-4 text-rose-400" />Editor de Texto
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openWindow("settings", "Configuración", "settings", { width: 620, height: 480 })} className="ls-text2 focus:ls-bg-input focus:ls-text">
-            <Settings className="mr-2 h-4 w-4 ls-text-muted" />Configuración
-          </DropdownMenuItem>
-          <DropdownMenuSeparator className="ls-bg-input" />
+            {/* Gestión (solo staff) */}
+            {(role === "admin" || role === "docente" || role === "instructor") && (
+              <>
+                <p className="px-3 pt-1.5 pb-0.5 text-xs font-bold uppercase tracking-wider ls-text-muted">Gestión</p>
+                <DropdownMenuItem onClick={() => openWindow("center", "Centro", "center")} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                  <Building2 className="mr-2 h-4 w-4 text-amber-400" />Centro
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openWindow("practice-sessions", "Sesiones", "practice-sessions")} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                  <ClipboardList className="mr-2 h-4 w-4 text-sky-400" />Sesiones
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openWindow("courses", "Mis Cursos", "courses")} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                  <GraduationCap className="mr-2 h-4 w-4 text-sky-400" />Mis Cursos
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openWindow("supervision", "Supervisión", "supervision")} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                  <ShieldCheck className="mr-2 h-4 w-4 text-indigo-400" />Supervisión
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openWindow("manage-patients", "Gestionar Pacientes", "manage-patients")} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                  <Users className="mr-2 h-4 w-4 text-purple-400" />Gestionar Pacientes
+                </DropdownMenuItem>
+                {(role === "admin" || role === "docente") && (
+                  <DropdownMenuItem onClick={() => openWindow("karime-config", "Configurar Karime", "karime-config", WINDOW_SIZES["karime-config"])} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                    <BotMessageSquare className="mr-2 h-4 w-4 text-rose-400" />Configurar Karime
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator className="ls-bg-input" />
+              </>
+            )}
 
-          <DropdownMenuItem onClick={handleLogout} className="ls-text2 focus:ls-bg-input focus:ls-text">
-            <LogOut className="mr-2 h-4 w-4" />Cerrar Sesión
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => { if (window.confirm("¿Salir de LabSim?")) window.close(); }} className="text-red-400 focus:bg-red-500/10 focus:text-red-300">
-            <Power className="mr-2 h-4 w-4" />Apagar LabSim
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            {/* Sistema */}
+            <p className="px-3 pt-1.5 pb-0.5 text-xs font-bold uppercase tracking-wider ls-text-muted">Sistema</p>
+            <DropdownMenuItem onClick={() => openWindow("settings", "Configuración", "settings", WINDOW_SIZES.settings)} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <Settings className="mr-2 h-4 w-4 ls-text-muted" />Configuración
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="ls-bg-input" />
+
+            <DropdownMenuItem onClick={handleLogout} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <LogOut className="mr-2 h-4 w-4" />Cerrar Sesión
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => { if (window.confirm("¿Salir de LabSim?")) window.close(); }} className="text-red-400 focus:bg-red-500/10 focus:text-red-300">
+              <Power className="mr-2 h-4 w-4" />Apagar LabSim
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <div className="mx-0.5 h-5 w-px ls-bg-input" />
+
+        {/* Accesos directos: Chat y Agenda */}
+        <Tooltip>
+          <TooltipTrigger
+            onClick={() => openWindow("messaging", "Mensajes", "messaging", WINDOW_SIZES.messaging)}
+            className="relative rounded p-1.5 transition hover:ls-bg-input"
+          >
+            <MessageCircle className={`h-4 w-4 ${totalUnread > 0 ? "text-green-300 animate-pulse" : "text-green-400"}`} />
+            {totalUnread > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-0.5 text-[10px] font-bold text-white">
+                {totalUnread > 9 ? "9+" : totalUnread}
+              </span>
+            )}
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            {totalUnread > 0 ? `Mensajes (${totalUnread} sin leer)` : "Mensajes"}
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger
+            onClick={() => openWindow("agenda", "Agenda", "agenda", WINDOW_SIZES.agenda)}
+            className="rounded p-1.5 transition hover:ls-bg-input"
+          >
+            <CalendarDays className="h-4 w-4 text-amber-400" />
+          </TooltipTrigger>
+          <TooltipContent side="top">Agenda</TooltipContent>
+        </Tooltip>
+      </div>
 
       {/* Window buttons */}
       <div className="flex flex-1 items-center gap-0.5 overflow-x-auto px-2">
@@ -222,39 +296,6 @@ export function Taskbar() {
 
       {/* System Tray */}
       <div className="flex items-center gap-2 px-2">
-        {/* Accesos directos rápidos */}
-        <Tooltip>
-          <TooltipTrigger>
-            <button
-              onClick={() => openWindow("messaging", "Mensajes", "messaging", { width: 420, height: 620 })}
-              className="relative rounded p-1 transition hover:ls-bg-input"
-            >
-              <MessageCircle className={`h-3.5 w-3.5 ${totalUnread > 0 ? "text-green-300 animate-pulse" : "text-green-400"}`} />
-              {totalUnread > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white">
-                  {totalUnread > 9 ? "9+" : totalUnread}
-                </span>
-              )}
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="top">
-            {totalUnread > 0 ? `Mensajes (${totalUnread} sin leer)` : "Mensajes"}
-          </TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger>
-            <button
-              onClick={() => openWindow("agenda", "Agenda", "agenda", { width: 500, height: 450 })}
-              className="rounded p-1 transition hover:ls-bg-input"
-            >
-              <CalendarDays className="h-3.5 w-3.5 text-amber-400" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="top">Agenda</TooltipContent>
-        </Tooltip>
-
-        <div className="mx-0.5 h-4 w-px ls-bg-input" />
-
         <Tooltip>
           <TooltipTrigger className="cursor-default" onClick={() => checkConnection()}>
             <Wifi className={`h-3.5 w-3.5 ${
