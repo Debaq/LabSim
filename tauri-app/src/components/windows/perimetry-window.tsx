@@ -18,7 +18,6 @@ import {
   initTestState,
   executePresentation,
   applyPresentation,
-  getProgress,
   type TestState,
   type TestConfig,
   type PresentationResult,
@@ -136,6 +135,7 @@ export function PerimetryWindow() {
 
     const config: TestConfig = {
       pattern: settings.pattern,
+      strategy: settings.strategy,
       eye: settings.eye,
       eyeConfig,
       seed,
@@ -278,9 +278,8 @@ export function PerimetryWindow() {
         <div className="flex-1 flex items-center justify-center overflow-hidden">
           <VisualFieldMap
             points={mapPoints}
-            pattern={settings.pattern}
-            viewMode={viewMode}
-            currentPointIndex={testState?.currentPointIndex ?? null}
+            mode={viewMode}
+            currentPoint={testState?.currentPointIndex ?? null}
             eye={settings.eye}
           />
         </div>

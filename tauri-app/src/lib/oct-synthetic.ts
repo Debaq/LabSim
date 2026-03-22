@@ -86,7 +86,7 @@ function rng(seed: number) {
 export type Pathology = "normal" | "glaucoma" | "edema" | "drusen" | "epiretinal" | "amd-dry" | "amd-wet";
 
 // === B-SCAN ===
-export function generateBScan(w: number, h: number, macular: boolean, seed: number, path: Pathology, severity: OctSeverity = "moderado"): ImageData {
+export function generateBScan(w: number, h: number, macular: boolean, seed: number, path: Pathology, _severity: OctSeverity = "moderado"): ImageData {
   const r = rng(seed);
   const img = new ImageData(w, h);
   const d = img.data;

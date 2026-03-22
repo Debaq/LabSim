@@ -13,7 +13,6 @@ interface PatientBannerProps {
 export function PatientBanner({ simulatorName }: PatientBannerProps) {
   const displayName = useLiveSessionStore((s) => s.patientDisplayName);
   const mood = useLiveSessionStore((s) => s.patientMood);
-  const addEvent = useLiveSessionStore((s) => s.addEvent);
   const activePatientId = useLiveSessionStore((s) => s.activePatientId);
 
   if (!activePatientId) return null;

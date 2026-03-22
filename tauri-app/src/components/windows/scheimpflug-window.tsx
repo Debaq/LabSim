@@ -19,13 +19,29 @@ import {
   computeIndices,
 } from "@/lib/scheimpflug-synthetic";
 import type { ScheimpflugEyeConfig } from "@/modules/scheimpflug/schema";
-import { TopographyMap } from "@/components/corneal-topography/topography-map";
+import { renderMapToImage, type MapType } from "@/lib/corneal-topography-synthetic";
 import { ColorScale } from "@/components/corneal-topography/color-scale";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useRef, useEffect } from "react";
 import { RefreshCw, Link2, Link2Off } from "lucide-react";
 
 type ViewTab = "scheimpflug" | "elev-ant" | "elev-post" | "pachymetry";
 const MAP_SIZE = 128;
+
+/** Renders a pre-generated Float32Array map onto a canvas */
+function PreRenderedMap({ map, size, mapType }: { map: Float32Array; size: number; mapType: MapType }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imageData = useMemo(() => renderMapToImage(map, size, mapType), [map, size, mapType]);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.putImageData(imageData, 0, 0);
+  }, [imageData, size]);
+  return <canvas ref={canvasRef} className="rounded" style={{ width: 220, height: 220, imageRendering: "pixelated" }} />;
+}
 
 export function ScheimpflugWindow() {
   const [eye, setEye] = useState<"OD" | "OI">("OD");
@@ -111,19 +127,19 @@ export function ScheimpflugWindow() {
           )}
           {viewTab === "elev-ant" && (
             <div className="flex items-center gap-2">
-              <TopographyMap map={elevMaps.anterior} size={MAP_SIZE} mapType="elevation" />
+              <PreRenderedMap map={elevMaps.anterior} size={MAP_SIZE} mapType="elevation" />
               <ColorScale mapType="elevation" />
             </div>
           )}
           {viewTab === "elev-post" && (
             <div className="flex items-center gap-2">
-              <TopographyMap map={elevMaps.posterior} size={MAP_SIZE} mapType="elevation" />
+              <PreRenderedMap map={elevMaps.posterior} size={MAP_SIZE} mapType="elevation" />
               <ColorScale mapType="elevation" />
             </div>
           )}
           {viewTab === "pachymetry" && (
             <div className="flex items-center gap-2">
-              <TopographyMap map={pachMap} size={MAP_SIZE} mapType="pachymetry" />
+              <PreRenderedMap map={pachMap} size={MAP_SIZE} mapType="pachymetry" />
               <ColorScale mapType="pachymetry" />
             </div>
           )}

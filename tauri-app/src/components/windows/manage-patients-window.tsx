@@ -105,7 +105,6 @@ export function ManagePatientsWindow() {
 
   const resetData = usePatientStore((s) => s.resetData);
   const loadCaseForEditing = usePatientStore((s) => s.loadCaseForEditing);
-  const currentPatientId = usePatientStore((s) => s.currentPatientId);
   const data = usePatientStore((s) => s.data);
 
   const [viewMode, setViewMode] = useState<ViewMode>("list");
@@ -486,7 +485,7 @@ export function ManagePatientsWindow() {
                   </Button>
 
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                    <DropdownMenuTrigger>
                       <Button size="sm" variant="outline" className="gap-1.5 ls-border ls-text2">
                         <MoreVertical className="h-3.5 w-3.5" />
                         Acciones

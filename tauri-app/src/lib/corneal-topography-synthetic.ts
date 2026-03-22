@@ -243,7 +243,7 @@ export function generateElevationMap(
   size: number,
   seed: number,
   pathology: CornealPathology,
-  severity: CornealSeverity = "moderado",
+  _severity: CornealSeverity = "moderado",
 ): Float32Array {
   const r = rng(seed + 500);
   const map = new Float32Array(size * size);
@@ -350,7 +350,7 @@ export function generatePachymetryMap(
         const coneDist = Math.sqrt((dx - coneX) ** 2 + (dy - coneY) ** 2);
         const coneR = radius * 0.3;
         if (coneDist < coneR) {
-          thickness -= (80 + r() * 60) * (1 - coneDist / coneR) ** 2;
+          thickness -= sevFactor * (80 + r() * 60) * (1 - coneDist / coneR) ** 2;
         }
       }
 
@@ -358,14 +358,14 @@ export function generatePachymetryMap(
         const bandY = radius * 0.55;
         const bandDist = Math.abs(dy - bandY);
         if (bandDist < radius * 0.2 && Math.abs(dx) < radius * 0.7) {
-          thickness -= (60 + r() * 40) * (1 - bandDist / (radius * 0.2)) ** 2;
+          thickness -= sevFactor * (60 + r() * 40) * (1 - bandDist / (radius * 0.2)) ** 2;
         }
       }
 
       if (pathology === "post-lasik") {
         const ablZone = radius * 0.45;
         if (dist < ablZone) {
-          thickness -= (40 + r() * 20) * (1 - dist / ablZone) ** 2;
+          thickness -= sevFactor * (40 + r() * 20) * (1 - dist / ablZone) ** 2;
         }
       }
 
@@ -383,7 +383,7 @@ export function computeKeratometricIndices(
   curvatureMap: Float32Array,
   pachymetryMap: Float32Array,
   size: number,
-  seed: number,
+  _seed: number,
 ): KeratometricIndices {
   const cx = size / 2;
   const cy = size / 2;

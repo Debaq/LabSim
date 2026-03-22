@@ -5,9 +5,9 @@
  * equipo varía la presión de +200 a -400 daPa.
  */
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Play, Square, RotateCcw } from "lucide-react";
+import { Play, Square } from "lucide-react";
 import type { TympanogramPoint } from "@/lib/impedance-synthetic";
 import type { ImpedanceSettings } from "./impedance-controls";
 

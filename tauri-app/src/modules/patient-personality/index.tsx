@@ -37,7 +37,7 @@ export default function PatientPersonalityModule() {
   const { form, onSubmit } = useModuleForm<PersonalityData>(
     "personality", personalitySchema, "Personalidad del paciente",
   );
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = form;
+  const { register, handleSubmit, setValue, watch } = form;
 
   const currentPersonality = watch("personalityType");
   const currentCooperation = watch("examCooperation");

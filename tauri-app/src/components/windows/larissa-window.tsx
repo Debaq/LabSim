@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   useLarissaStore,
   type AgendaItem,
@@ -9,7 +9,6 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useLiveSessionStore } from "@/stores/live-session-store";
 import { useChatStore } from "@/stores/chat-store";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -36,8 +35,6 @@ import {
   FlaskConical,
   FolderOpen,
   Send,
-  AlertCircle,
-  Play,
   Square,
   Phone,
 } from "lucide-react";
@@ -390,7 +387,6 @@ export function LarissaWindow() {
                       <InterconsultasTab
                         interconsultations={interconsultations}
                         onNew={() => setIcDialogOpen(true)}
-                        role={role}
                       />
                     </TabsContent>
                     <TabsContent value="examenes" className="flex-1 overflow-hidden">
@@ -525,11 +521,9 @@ function EvolutionField({ label, value }: { label: string; value: string }) {
 function InterconsultasTab({
   interconsultations,
   onNew,
-  role,
 }: {
   interconsultations: Interconsultation[];
   onNew: () => void;
-  role: string;
 }) {
   return (
     <div className="flex h-full flex-col">

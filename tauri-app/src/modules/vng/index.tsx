@@ -88,16 +88,16 @@ export default function VNGModule() {
             <div className="grid gap-2 sm:grid-cols-3 mt-2">
               <div className="space-y-1">
                 <Label className="ls-text2 text-[10px]">Dirección</Label>
-                <Select value={watch(`positionals.${pos.key}.direction`) || "ninguno"} onValueChange={(v) => setValue(`positionals.${pos.key}.direction`, v as any, { shouldDirty: true })}>
+                <Select value={watch(`positionals.${pos.key}.direction` as any) || "ninguno"} onValueChange={(v) => setValue(`positionals.${pos.key}.direction` as any, v as any, { shouldDirty: true })}>
                   <SelectTrigger className="ls-border ls-bg-input ls-text h-7 text-[10px]"><SelectValue /></SelectTrigger>
                   <SelectContent>{DIRECTIONS.map((d) => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1"><Label className="ls-text2 text-[10px]">SPV (°/s)</Label><Input type="number" {...register(`positionals.${pos.key}.spv`)} className="h-7 ls-border ls-bg-input text-[10px] ls-text" placeholder="0" /></div>
-              <div className="space-y-1"><Label className="ls-text2 text-[10px]">Duración (s)</Label><Input type="number" {...register(`positionals.${pos.key}.durationSec`)} className="h-7 ls-border ls-bg-input text-[10px] ls-text" placeholder="30" /></div>
-              <div className="space-y-1"><Label className="ls-text2 text-[10px]">Latencia (s)</Label><Input type="number" {...register(`positionals.${pos.key}.latencySec`)} className="h-7 ls-border ls-bg-input text-[10px] ls-text" placeholder="2" /></div>
+              <div className="space-y-1"><Label className="ls-text2 text-[10px]">SPV (°/s)</Label><Input type="number" {...register(`positionals.${pos.key}.spv` as any)} className="h-7 ls-border ls-bg-input text-[10px] ls-text" placeholder="0" /></div>
+              <div className="space-y-1"><Label className="ls-text2 text-[10px]">Duración (s)</Label><Input type="number" {...register(`positionals.${pos.key}.durationSec` as any)} className="h-7 ls-border ls-bg-input text-[10px] ls-text" placeholder="30" /></div>
+              <div className="space-y-1"><Label className="ls-text2 text-[10px]">Latencia (s)</Label><Input type="number" {...register(`positionals.${pos.key}.latencySec` as any)} className="h-7 ls-border ls-bg-input text-[10px] ls-text" placeholder="2" /></div>
               <div className="flex items-center gap-2 pt-4">
-                <Checkbox checked={watch(`positionals.${pos.key}.fatigable`) ?? false} onCheckedChange={(v) => setValue(`positionals.${pos.key}.fatigable`, !!v, { shouldDirty: true })} />
+                <Checkbox checked={watch(`positionals.${pos.key}.fatigable` as any) ?? false} onCheckedChange={(v) => setValue(`positionals.${pos.key}.fatigable` as any, !!v, { shouldDirty: true })} />
                 <Label className="ls-text2 text-[10px]">Fatigable</Label>
               </div>
             </div>

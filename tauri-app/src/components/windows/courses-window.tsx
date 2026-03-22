@@ -25,7 +25,7 @@ import {
   FileSpreadsheet,
   Search,
 } from "lucide-react";
-import { useCoursesStore, type Course, type ImportSummary } from "@/stores/courses-store";
+import { useCoursesStore, type ImportSummary } from "@/stores/courses-store";
 import { invoke } from "@tauri-apps/api/core";
 import { toast } from "sonner";
 
@@ -42,7 +42,6 @@ export function CoursesWindow() {
     membersLoading,
     setSelectedCourseId,
     fetchCourses,
-    fetchCourseDetail,
     createCourse,
     removeStudent,
     importStudents,

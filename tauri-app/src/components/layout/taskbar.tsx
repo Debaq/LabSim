@@ -224,7 +224,7 @@ export function Taskbar() {
       <div className="flex items-center gap-2 px-2">
         {/* Accesos directos rápidos */}
         <Tooltip>
-          <TooltipTrigger asChild>
+          <TooltipTrigger>
             <button
               onClick={() => openWindow("messaging", "Mensajes", "messaging", { width: 420, height: 620 })}
               className="relative rounded p-1 transition hover:ls-bg-input"
@@ -242,7 +242,7 @@ export function Taskbar() {
           </TooltipContent>
         </Tooltip>
         <Tooltip>
-          <TooltipTrigger asChild>
+          <TooltipTrigger>
             <button
               onClick={() => openWindow("agenda", "Agenda", "agenda", { width: 500, height: 450 })}
               className="rounded p-1 transition hover:ls-bg-input"

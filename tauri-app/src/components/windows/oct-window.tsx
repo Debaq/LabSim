@@ -5,7 +5,6 @@ import { ThicknessMap } from "@/components/oct/thickness-map";
 import { ToggleSwitch } from "@/components/audiometer/toggle-switch";
 import { generateRNFLProfile, generateGCLIPL, RNFL_CLOCK_HOURS, RNFL_QUADRANTS, GCL_IPL_SECTORS, normativeColor, type Pathology, type OctSeverity, type OctPatientParams } from "@/lib/oct-synthetic";
 import { usePatientStore } from "@/stores/patient-store";
-import { useLiveSessionStore } from "@/stores/live-session-store";
 import { PatientBanner } from "@/components/ui/patient-banner";
 import { cn } from "@/lib/utils";
 import { RefreshCw, Link2, Link2Off } from "lucide-react";

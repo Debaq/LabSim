@@ -109,7 +109,7 @@ export function generateCaloricResponse(
   seed: number,
 ): CaloricResult {
   const r = rng(seed);
-  const sf = sevFactor(severity);
+  const _sf = sevFactor(severity);
   const durationMs = 180000; // 3 minutos
   const step = 10;
   const points: EyeTracePoint[] = [];

@@ -94,7 +94,6 @@ export const useLiveSessionStore = create<LiveSessionState>()(
         }
 
         // Registrar evento de fin
-        const events = [...state.events, { timestamp: Date.now(), type: "attention_end" as const }];
         const tests = state.getTestsPerformed();
         const duration = state.getDurationMinutes();
 

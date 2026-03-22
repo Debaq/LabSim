@@ -274,7 +274,7 @@ export const usePatientStore = create<PatientState>()(
       },
 
       getDisplayName: () => {
-        const { identity, personality } = get().data.core;
+        const { identity } = get().data.core;
         if (identity.displayName) return identity.displayName;
         if (identity.firstName || identity.lastName) {
           return `${identity.firstName ?? ""} ${identity.lastName ?? ""}`.trim();

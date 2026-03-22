@@ -58,7 +58,7 @@ export function VHITWindow() {
     hasCovertSaccades: canalConfig.hasCovertSaccades ?? false,
     overtRate: canalConfig.overtRate ?? 0.7,
     covertRate: canalConfig.covertRate ?? 0.5,
-    goggleArtifactRate: datos.goggleArtifactRate ?? 0,
+    goggleArtifactRate: 0,
   };
 
   const result: VHITResult = useMemo(

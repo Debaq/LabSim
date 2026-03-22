@@ -167,7 +167,6 @@ export function simulatePatientResponse(
 
   // ¿El paciente puede ver el estímulo?
   // Si el estímulo es más brillante que la sensibilidad del punto → sí lo ve
-  const canSee = stimulusDb >= (40 - trueSensitivity); // 40dB = max, 0dB = min
   // Más precisamente: el estímulo en dB atenuación. 0dB = máximo brillo.
   // Si trueSensitivity = 30dB, el paciente ve estímulos de 10dB (40-30) o más brillantes.
   // Estímulos se presentan como atenuación: 0dB = más brillante.
@@ -259,7 +258,7 @@ const STAIRCASE_CONFIGS: Record<Strategy, StaircaseConfig> = {
  */
 export function getNextStimulus(
   state: ThresholdSearchState,
-  trueSensitivity: number,
+  _trueSensitivity: number,
   strategy: Strategy = "sita-standard",
 ): number {
   const { presentations } = state;
@@ -316,7 +315,8 @@ export function estimateThreshold(
   const { presentations } = state;
   if (presentations.length === 0) return 0;
 
-  const cfg = STAIRCASE_CONFIGS[strategy];
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _cfg = STAIRCASE_CONFIGS[strategy];
   const reversals: number[] = [];
 
   for (let i = 1; i < presentations.length; i++) {

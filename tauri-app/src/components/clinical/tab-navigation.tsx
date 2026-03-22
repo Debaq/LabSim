@@ -5,6 +5,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import {
   User,
+  SmilePlus,
   ClipboardList,
   AudioLines,
   MessageSquare,
@@ -17,13 +18,16 @@ import {
   ScanEye,
   Target,
   CircleDot,
-  CalendarDays,
-  FileJson,
+  Camera,
+  Box,
+  MonitorSmartphone,
+  Rotate3d,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 const moduleIcons: Record<ModuleId, LucideIcon> = {
   "patient-info": User,
+  "patient-personality": SmilePlus,
   anamnesis: ClipboardList,
   audiometry: AudioLines,
   logoaudiometry: MessageSquare,
@@ -36,8 +40,10 @@ const moduleIcons: Record<ModuleId, LucideIcon> = {
   oct: ScanEye,
   "visual-field": Target,
   "corneal-topography": CircleDot,
-  agenda: CalendarDays,
-  "json-output": FileJson,
+  retinography: Camera,
+  scheimpflug: Box,
+  vng: MonitorSmartphone,
+  vhit: Rotate3d,
 };
 
 interface TabNavigationProps {
