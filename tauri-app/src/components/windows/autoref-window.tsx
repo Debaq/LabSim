@@ -9,9 +9,8 @@ import { usePatientStore } from "@/stores/patient-store";
 import { useLiveSessionStore } from "@/stores/live-session-store";
 import { PatientBanner } from "@/components/ui/patient-banner";
 import { AlignmentPanel, DEFAULT_ALIGNMENT, isAligned, getAlignmentQuality, type AlignmentState } from "@/components/ui/alignment-panel";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Link2, Link2Off, Printer } from "lucide-react";
+import { Link2, Link2Off } from "lucide-react";
 import {
   generateAutorefResult,
   formatDiopter,

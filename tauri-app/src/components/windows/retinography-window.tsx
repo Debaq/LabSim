@@ -9,7 +9,7 @@ import {
 } from "@/lib/retinography-synthetic";
 import { usePatientStore } from "@/stores/patient-store";
 import { cn } from "@/lib/utils";
-import { Link2, Link2Off, Camera } from "lucide-react";
+import { Link2, Link2Off } from "lucide-react";
 import { AlignmentPanel, DEFAULT_ALIGNMENT, isAligned, type AlignmentState } from "@/components/ui/alignment-panel";
 
 const EMPTY_CONFIG = {};
