@@ -239,7 +239,7 @@ function StepParticipantes() {
   const [addOpen, setAddOpen] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<string | null>(null);
-  const [moving, setMoving] = useState(false);
+  const [_moving, setMoving] = useState(false);
 
   const docentes = courseMembers.filter((m) => m.role === "docente");
   const instructores = courseMembers.filter((m) => m.role === "instructor");
@@ -967,7 +967,7 @@ function GroupCard({
 function StepPlanificacion() {
   const {
     courses, selectedCourseId, selectedDocentes, selectedInstructores, selectedEstudiantes,
-    courseMembers, sessionDraft, sessionId, groups, groupsSaved, reset,
+    courseMembers, sessionDraft, groups, reset,
   } = useActivitiesStore();
   const openWindow = useUIStore((s) => s.openWindow);
 

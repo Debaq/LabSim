@@ -33,7 +33,6 @@ import {
   Settings2,
   FileText,
   BarChart3,
-  Clock,
   Repeat,
   MoreVertical,
   Archive,
@@ -58,7 +57,6 @@ import {
 } from "@/stores/panel-docente-store";
 import { useCoursesStore } from "@/stores/courses-store";
 import { useUIStore } from "@/stores/ui-store";
-import { WINDOW_SIZES } from "@/components/layout/desktop-area";
 import { toast } from "sonner";
 
 // ─── Status helpers ────────────────────────────────────
@@ -1665,7 +1663,7 @@ function CalendarModal({
   open,
   onOpenChange,
   blocks,
-  procedures,
+  procedures: _procedures,
   startDate,
   endDate,
   onAddBlock,
@@ -1705,20 +1703,6 @@ function CalendarModal({
   useEffect(() => {
     if (!selectedDate && calendarDays.length > 0) setSelectedDate(calendarDays[0]);
   }, [calendarDays]);
-
-  const dayBlocks = useMemo(() => {
-    if (!selectedDate) return [];
-    return blocks
-      .map((b, i) => ({ ...b, originalIndex: i }))
-      .filter((b) => b.date === selectedDate)
-      .sort((a, b) => a.time.localeCompare(b.time));
-  }, [blocks, selectedDate]);
-
-  const blockCountByDate = useMemo(() => {
-    const c: Record<string, number> = {};
-    for (const b of blocks) c[b.date] = (c[b.date] ?? 0) + 1;
-    return c;
-  }, [blocks]);
 
   const usedNames = useMemo(() => {
     const s = new Set<string>();

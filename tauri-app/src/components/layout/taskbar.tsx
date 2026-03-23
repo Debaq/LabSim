@@ -43,7 +43,6 @@ import {
   CircleDot,
   Scan,
   BotMessageSquare,
-  GraduationCap,
   ShieldCheck,
   Users,
   Trash2,

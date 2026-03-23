@@ -50,7 +50,7 @@ export function CenterWindow() {
     centroSessions, centroLoading, fetchCentroSessions,
     boxes, incidents, meetings, chatMessages, templates, isActive, scheduledIncidents,
     initCenter, stopCenter, refreshBoxes,
-    createBoxes, assignStudentToBox, injectIncident, resolveIncident, discussIncident,
+    assignStudentToBox, injectIncident, resolveIncident, discussIncident,
     callMeeting, startMeeting, endMeeting,
     sendChatMessage, startPatientAttention, endPatientAttention, loadTemplates,
     scheduleIncidents,

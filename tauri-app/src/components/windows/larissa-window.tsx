@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLarissaStore, type CaseProfile, type AgendaItem } from "@/stores/larissa-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { toast } from "sonner";
@@ -19,8 +19,6 @@ import {
   ExternalLink,
   FlaskConical,
   ArrowLeft,
-  Clock,
-  UserPlus,
   ChevronRight,
   Trash2,
   Pencil,
@@ -230,7 +228,7 @@ function FichaBaseTab({ profile }: { profile: CaseProfile }) {
               </div>
 
               {/* Descripción del motivo — ancho completo */}
-              {history.complaintDescription && (
+              {!!history.complaintDescription && (
                 <div>
                   <span className="text-xs ls-text-muted">Descripción:</span>
                   <p className="text-xs ls-text2 whitespace-pre-wrap mt-0.5">
@@ -240,7 +238,7 @@ function FichaBaseTab({ profile }: { profile: CaseProfile }) {
               )}
 
               {/* Descripción tinnitus */}
-              {history.tinnitus && history.tinnitusDescription && (
+              {!!history.tinnitus && !!history.tinnitusDescription && (
                 <div>
                   <span className="text-xs ls-text-muted">Descripción del tinnitus:</span>
                   <p className="text-xs ls-text2 whitespace-pre-wrap mt-0.5">
@@ -250,7 +248,7 @@ function FichaBaseTab({ profile }: { profile: CaseProfile }) {
               )}
 
               {/* Descripción vértigo */}
-              {history.vertigo && history.vertigoDescription && (
+              {!!history.vertigo && !!history.vertigoDescription && (
                 <div>
                   <span className="text-xs ls-text-muted">Descripción del vértigo:</span>
                   <p className="text-xs ls-text2 whitespace-pre-wrap mt-0.5">
@@ -346,10 +344,11 @@ function FieldSection({ title, children }: { title: string; children: React.Reac
 
 function FieldPair({ label, value }: { label: string; value: unknown }) {
   if (value == null || value === "" || (Array.isArray(value) && value.length === 0)) return null;
+  const text = String(value);
   return (
     <>
       <span className="ls-text-muted">{label}:</span>
-      <span className="ls-text2">{String(value)}</span>
+      <span className="ls-text2">{text}</span>
     </>
   );
 }
@@ -372,8 +371,6 @@ export function LarissaWindow() {
     setSearchQuery,
     setPatientTab,
   } = useLarissaStore();
-
-  const openWindow = useUIStore((s) => s.openWindow);
 
   // Cargar pacientes al montar
   useEffect(() => {
@@ -530,9 +527,9 @@ export function LarissaWindow() {
                       <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-semibold ls-text truncate">{displayName}</h3>
                         <div className="flex items-center gap-2 text-xs ls-text-muted">
-                          {identity.gender && <span>{String(identity.gender)}</span>}
+                          {!!identity.gender && <span>{String(identity.gender)}</span>}
                           {identity.age != null && <span>{String(identity.age)} años</span>}
-                          {identity.healthInsurance && (
+                          {!!identity.healthInsurance && (
                             <span>{String(identity.healthInsurance)}</span>
                           )}
                         </div>
