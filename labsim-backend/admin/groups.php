@@ -59,6 +59,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
         $message = 'Miembro removido';
     }
+    if ($action === 'delete') {
+        $groupId = $_POST['group_id'] ?? '';
+        Database::execute('DELETE FROM group_members WHERE group_id = :gid', [':gid' => $groupId]);
+        Database::execute('DELETE FROM student_groups WHERE id = :id', [':id' => $groupId]);
+        $message = 'Grupo eliminado';
+    }
+    if ($action === 'toggle_active') {
+        $groupId = $_POST['group_id'] ?? '';
+        $g = Database::fetchOne('SELECT is_active FROM student_groups WHERE id = :id', [':id' => $groupId]);
+        if ($g) {
+            $new = $g['is_active'] ? 0 : 1;
+            Database::execute("UPDATE student_groups SET is_active = :a WHERE id = :id", [':a' => $new, ':id' => $groupId]);
+            $message = $new ? 'Grupo activado' : 'Grupo archivado';
+        }
+    }
+    if ($action === 'duplicate') {
+        $groupId = $_POST['group_id'] ?? '';
+        $g = Database::fetchOne('SELECT * FROM student_groups WHERE id = :id', [':id' => $groupId]);
+        if ($g) {
+            $newId = Database::uuid();
+            Database::execute(
+                "INSERT INTO student_groups (id, name, description, institution, created_by)
+                 VALUES (:id, :name, :desc, :inst, :uid)",
+                [':id' => $newId, ':name' => 'Copia de ' . $g['name'], ':desc' => $g['description'], ':inst' => $g['institution'], ':uid' => $auth['sub']]
+            );
+            $message = 'Grupo duplicado';
+        }
+    }
 }
 
 // ─── Vista de detalle de grupo ──────────────────────
@@ -170,7 +198,14 @@ render_table(
             <td>{$g['member_count']}</td>
             <td>$status</td>
             <td>" . date('d M Y', strtotime($g['created_at'])) . "</td>
-            <td><a href='groups.php?id={$g['id']}' class='btn btn-sm btn-outline'>Ver</a></td>
+            <td>
+                <div style='display:flex;gap:4px;flex-wrap:wrap'>
+                <a href='groups.php?id={$g['id']}' class='btn btn-sm btn-outline'>Ver</a>
+                <form method='POST' style='display:inline'><input type='hidden' name='action' value='toggle_active'><input type='hidden' name='group_id' value='{$g['id']}'><button class='btn btn-sm btn-outline'>" . ($g['is_active'] ? 'Archivar' : 'Activar') . "</button></form>
+                <form method='POST' style='display:inline'><input type='hidden' name='action' value='duplicate'><input type='hidden' name='group_id' value='{$g['id']}'><button class='btn btn-sm btn-outline'>Duplicar</button></form>
+                <form method='POST' style='display:inline'><input type='hidden' name='action' value='delete'><input type='hidden' name='group_id' value='{$g['id']}'><button class='btn btn-sm btn-danger' data-confirm='¿Eliminar este grupo y todos sus miembros?'>Eliminar</button></form>
+                </div>
+            </td>
         </tr>";
     }
 );

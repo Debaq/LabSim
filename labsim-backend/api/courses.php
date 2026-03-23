@@ -9,6 +9,9 @@
  * POST   /courses/:id/members        → Inscribir estudiante
  * DELETE /courses/:id/members/:uid   → Quitar estudiante
  * POST   /courses/:id/import         → Bulk import CSV
+ * DELETE /courses/:id                → Eliminar curso
+ * PUT    /courses/:id/archive        → Archivar/desarchivar curso
+ * POST   /courses/:id/duplicate      → Duplicar curso
  */
 
 require_once __DIR__ . '/../core/auth_middleware.php';
@@ -301,6 +304,84 @@ switch (true) {
                 'total' => count($rows),
             ],
         ]);
+        break;
+
+    // ─── ELIMINAR CURSO ─────────────────────────────
+    case $method === 'DELETE' && $id !== null && $action === null:
+        $auth = require_auth(['admin', 'docente']);
+
+        $course = Database::fetchOne('SELECT id, created_by FROM courses WHERE id = :id', [':id' => $id]);
+        if (!$course) error_response('Curso no encontrado', 404);
+
+        if ($auth['role'] !== 'admin' && $auth['sub'] !== $course['created_by']) {
+            error_response('Solo el creador o un admin puede eliminar este curso', 403);
+        }
+
+        // Verificar que no tenga sesiones activas
+        $activeSessions = Database::fetchOne(
+            "SELECT COUNT(*) as count FROM practice_sessions
+             WHERE course_id = :cid AND status IN ('approved','active')",
+            [':cid' => $id]
+        );
+        if (($activeSessions['count'] ?? 0) > 0) {
+            error_response('No se puede eliminar: el curso tiene sesiones activas', 409);
+        }
+
+        Database::execute('DELETE FROM course_members WHERE course_id = :cid', [':cid' => $id]);
+        Database::execute('DELETE FROM courses WHERE id = :id', [':id' => $id]);
+
+        json_response(['message' => 'Curso eliminado']);
+        break;
+
+    // ─── ARCHIVAR/DESARCHIVAR CURSO ─────────────────
+    case $method === 'PUT' && $id !== null && $action === 'archive':
+        $auth = require_auth(['admin', 'docente']);
+
+        $course = Database::fetchOne('SELECT id, is_active FROM courses WHERE id = :id', [':id' => $id]);
+        if (!$course) error_response('Curso no encontrado', 404);
+
+        $newState = $course['is_active'] ? 0 : 1;
+        Database::execute(
+            "UPDATE courses SET is_active = :active WHERE id = :id",
+            [':id' => $id, ':active' => $newState]
+        );
+
+        json_response([
+            'message' => $newState ? 'Curso desarchivado' : 'Curso archivado',
+            'is_active' => $newState,
+        ]);
+        break;
+
+    // ─── DUPLICAR CURSO ─────────────────────────────
+    case $method === 'POST' && $id !== null && $action === 'duplicate':
+        $auth = require_auth(['admin', 'docente']);
+
+        $course = Database::fetchOne('SELECT * FROM courses WHERE id = :id', [':id' => $id]);
+        if (!$course) error_response('Curso no encontrado', 404);
+
+        $newId = Database::uuid();
+        Database::execute(
+            "INSERT INTO courses (id, institution_id, name, code, description, created_by, period)
+             VALUES (:id, :iid, :name, :code, :desc, :creator, :period)",
+            [
+                ':id' => $newId,
+                ':iid' => $course['institution_id'],
+                ':name' => 'Copia de ' . $course['name'],
+                ':code' => $course['code'] ? $course['code'] . '-copia' : null,
+                ':desc' => $course['description'],
+                ':creator' => $auth['sub'],
+                ':period' => $course['period'],
+            ]
+        );
+
+        // Auto-agregar creador como docente
+        Database::execute(
+            "INSERT INTO course_members (course_id, user_id, role) VALUES (:cid, :uid, 'docente')",
+            [':cid' => $newId, ':uid' => $auth['sub']]
+        );
+
+        $new = Database::fetchOne('SELECT * FROM courses WHERE id = :id', [':id' => $newId]);
+        created_response(['course' => $new]);
         break;
 
     default:

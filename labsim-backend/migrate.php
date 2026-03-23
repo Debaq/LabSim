@@ -108,6 +108,7 @@ add_column($db, 'practice_sessions', 'session_type', "TEXT DEFAULT 'conjunto'", 
 add_column($db, 'practice_sessions', 'course_id', "TEXT REFERENCES courses(id)", $isCli);
 add_column($db, 'practice_sessions', 'centro_enabled', "INTEGER DEFAULT 0", $isCli);
 add_column($db, 'practice_sessions', 'end_date', "TEXT", $isCli);
+add_column($db, 'practice_sessions', 'is_archived', "INTEGER NOT NULL DEFAULT 0", $isCli);
 
 // users: institución y número de identificación
 add_column($db, 'users', 'institution_id', "TEXT REFERENCES institutions(id)", $isCli);

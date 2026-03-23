@@ -5,6 +5,7 @@
  * GET    /interconsultations?agenda_item_id=X  → Listar interconsultas
  * POST   /interconsultations                    → Crear interconsulta
  * PUT    /interconsultations/:id                → Responder/actualizar
+ * DELETE /interconsultations/:id                → Eliminar interconsulta
  */
 
 require_once __DIR__ . '/../core/auth_middleware.php';
@@ -108,6 +109,24 @@ switch (true) {
             [':id' => $id]
         );
         json_response(['interconsultation' => $updated]);
+        break;
+
+    // ─── ELIMINAR INTERCONSULTA ────────────────────
+    case $method === 'DELETE' && $id !== null:
+        $auth = require_auth();
+
+        $ic = Database::fetchOne('SELECT id, requester_id FROM interconsultations WHERE id = :id', [':id' => $id]);
+        if (!$ic) {
+            error_response('Interconsulta no encontrada', 404);
+        }
+
+        // Solo el autor o admin/docente puede eliminar
+        if ($auth['role'] === 'estudiante' && $auth['sub'] !== $ic['requester_id']) {
+            error_response('Solo el autor puede eliminar esta interconsulta', 403);
+        }
+
+        Database::execute('DELETE FROM interconsultations WHERE id = :id', [':id' => $id]);
+        json_response(['message' => 'Interconsulta eliminada']);
         break;
 
     default:

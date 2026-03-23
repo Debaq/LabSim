@@ -8,6 +8,8 @@
  * PUT    /cases/:id          → Actualizar caso
  * DELETE /cases/:id          → Eliminar caso
  * PUT    /cases/:id/publish  → Publicar/despublicar caso
+ * PUT    /cases/:id/archive  → Archivar/desarchivar caso
+ * POST   /cases/:id/duplicate → Duplicar caso
  */
 
 require_once __DIR__ . '/../core/auth_middleware.php';
@@ -290,6 +292,38 @@ switch (true) {
             'message' => $newState ? 'Caso archivado' : 'Caso desarchivado',
             'is_archived' => $newState,
         ]);
+        break;
+
+    // ─── DUPLICAR CASO ────────────────────────────────
+    case $method === 'POST' && $id !== null && $action === 'duplicate':
+        $auth = require_auth(['admin', 'docente', 'instructor']);
+
+        $caso = Database::fetchOne('SELECT * FROM cases WHERE id = :id', [':id' => $id]);
+        if (!$caso) {
+            error_response('Caso no encontrado', 404);
+        }
+
+        $newId = Database::uuid();
+        Database::execute(
+            "INSERT INTO cases (id, title, description, author_id, profile_json, schema_version, tags, difficulty, is_published, is_archived)
+             VALUES (:id, :title, :desc, :author, :profile, :schema, :tags, :diff, 0, 0)",
+            [
+                ':id' => $newId,
+                ':title' => 'Copia de ' . $caso['title'],
+                ':desc' => $caso['description'],
+                ':author' => $auth['sub'],
+                ':profile' => $caso['profile_json'],
+                ':schema' => $caso['schema_version'],
+                ':tags' => $caso['tags'],
+                ':diff' => $caso['difficulty'],
+            ]
+        );
+
+        $new = Database::fetchOne('SELECT * FROM cases WHERE id = :id', [':id' => $newId]);
+        $new['profile'] = json_decode($new['profile_json'], true);
+        unset($new['profile_json']);
+
+        created_response(['case' => $new]);
         break;
 
     default:

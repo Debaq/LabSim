@@ -59,6 +59,27 @@
   html {
     @apply font-sans;
   }
+
+  /* DropdownMenu — focus/hover con tema LabSim */
+  [data-slot="dropdown-menu-item"]:not([data-variant="destructive"]):focus,
+  [data-slot="dropdown-menu-item"]:not([data-variant="destructive"]):hover {
+    background-color: var(--ls-input);
+    color: var(--ls-text);
+  }
+  [data-slot="dropdown-menu-sub-trigger"]:focus,
+  [data-slot="dropdown-menu-sub-trigger"]:hover,
+  [data-slot="dropdown-menu-sub-trigger"][data-popup-open],
+  [data-slot="dropdown-menu-sub-trigger"][data-open] {
+    background-color: var(--ls-input);
+    color: var(--ls-text);
+  }
+  [data-slot="dropdown-menu-checkbox-item"]:focus,
+  [data-slot="dropdown-menu-checkbox-item"]:hover,
+  [data-slot="dropdown-menu-radio-item"]:focus,
+  [data-slot="dropdown-menu-radio-item"]:hover {
+    background-color: var(--ls-input);
+    color: var(--ls-text);
+  }
 }
 
 @theme inline {

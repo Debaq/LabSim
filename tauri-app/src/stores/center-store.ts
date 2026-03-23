@@ -68,7 +68,21 @@ interface ChatMessage {
   created_at: string;
 }
 
+interface CentroSession {
+  id: string;
+  title: string;
+  scheduled_date: string | null;
+  end_date: string | null;
+  session_type: string | null;
+  centro_enabled: number;
+  status: string;
+}
+
 interface CenterState {
+  // Selección de centro
+  centroSessions: CentroSession[];
+  centroLoading: boolean;
+
   sessionId: string | null;
   boxes: Box[];
   incidents: Incident[];
@@ -80,6 +94,7 @@ interface CenterState {
   isActive: boolean;
 
   // Acciones principales
+  fetchCentroSessions: () => Promise<void>;
   initCenter: (sessionId: string) => Promise<void>;
   refreshBoxes: () => Promise<void>;
   refreshIncidents: () => Promise<void>;
@@ -118,6 +133,9 @@ let refreshInterval: ReturnType<typeof setInterval> | null = null;
 let incidentInterval: ReturnType<typeof setInterval> | null = null;
 
 export const useCenterStore = create<CenterState>((set, get) => ({
+  centroSessions: [],
+  centroLoading: false,
+
   sessionId: null,
   boxes: [],
   incidents: [],
@@ -127,6 +145,23 @@ export const useCenterStore = create<CenterState>((set, get) => ({
   sessionStartTime: null,
   scheduledIncidents: [],
   isActive: false,
+
+  fetchCentroSessions: async () => {
+    set({ centroLoading: true });
+    try {
+      const result = await invoke<{ items: CentroSession[] }>("api_get_sessions", {});
+      const all = result?.items ?? [];
+      const sessions = all.filter((s) => {
+        const ce = (s as any).centro_enabled ?? (s as any).centroEnabled;
+        return (ce === 1 || ce === true || ce === "1" || ce === "true") && s.status !== "cancelled";
+      });
+      set({ centroSessions: sessions });
+    } catch {
+      set({ centroSessions: [] });
+    } finally {
+      set({ centroLoading: false });
+    }
+  },
 
   initCenter: async (sessionId) => {
     set({ sessionId, sessionStartTime: Date.now(), isActive: true });

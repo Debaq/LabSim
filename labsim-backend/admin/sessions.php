@@ -36,6 +36,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
         $message = 'Sesión completada';
     }
+    if ($action === 'delete' && $sessionId) {
+        Database::execute('DELETE FROM agenda_items WHERE session_id = :sid', [':sid' => $sessionId]);
+        Database::execute('DELETE FROM practice_session_cases WHERE session_id = :sid', [':sid' => $sessionId]);
+        Database::execute('DELETE FROM session_guides WHERE session_id = :sid', [':sid' => $sessionId]);
+        Database::execute('DELETE FROM practice_sessions WHERE id = :id', [':id' => $sessionId]);
+        $message = 'Sesión eliminada';
+    }
+    if ($action === 'toggle_archive' && $sessionId) {
+        $s = Database::fetchOne('SELECT is_archived FROM practice_sessions WHERE id = :id', [':id' => $sessionId]);
+        if ($s) {
+            $new = ($s['is_archived'] ?? 0) ? 0 : 1;
+            Database::execute("UPDATE practice_sessions SET is_archived = :a, updated_at = datetime('now') WHERE id = :id",
+                [':a' => $new, ':id' => $sessionId]);
+            $message = $new ? 'Sesión archivada' : 'Sesión desarchivada';
+        }
+    }
+    if ($action === 'duplicate' && $sessionId) {
+        $s = Database::fetchOne('SELECT * FROM practice_sessions WHERE id = :id', [':id' => $sessionId]);
+        if ($s) {
+            $newId = Database::uuid();
+            Database::execute(
+                "INSERT INTO practice_sessions (id, title, description, created_by, status,
+                    scheduled_date, scheduled_time, duration_minutes, location,
+                    instructions, max_submissions, allow_late_submission, due_date,
+                    session_type, course_id, centro_enabled, end_date)
+                 VALUES (:id, :title, :desc, :uid, 'draft',
+                    :date, :time, :dur, :loc,
+                    :instr, :max, :late, :due,
+                    :stype, :cid, :centro, :edate)",
+                [
+                    ':id' => $newId,
+                    ':title' => 'Copia de ' . $s['title'],
+                    ':desc' => $s['description'],
+                    ':uid' => $auth['sub'],
+                    ':date' => $s['scheduled_date'],
+                    ':time' => $s['scheduled_time'],
+                    ':dur' => $s['duration_minutes'],
+                    ':loc' => $s['location'],
+                    ':instr' => $s['instructions'],
+                    ':max' => $s['max_submissions'],
+                    ':late' => $s['allow_late_submission'],
+                    ':due' => $s['due_date'],
+                    ':stype' => $s['session_type'],
+                    ':cid' => $s['course_id'],
+                    ':centro' => $s['centro_enabled'],
+                    ':edate' => $s['end_date'],
+                ]
+            );
+            // Copiar casos asociados
+            $cases = Database::fetchAll(
+                'SELECT case_id, order_index, is_required FROM practice_session_cases WHERE session_id = :sid',
+                [':sid' => $sessionId]
+            );
+            foreach ($cases as $c) {
+                Database::execute(
+                    "INSERT INTO practice_session_cases (session_id, case_id, order_index, is_required)
+                     VALUES (:sid, :cid, :ord, :req)",
+                    [':sid' => $newId, ':cid' => $c['case_id'], ':ord' => $c['order_index'], ':req' => $c['is_required']]
+                );
+            }
+            $message = 'Sesión duplicada';
+        }
+    }
 }
 
 // Filtros
@@ -93,15 +156,22 @@ render_table(
         $badge = render_badge($s['status'], $statusColors[$s['status']] ?? 'default');
         $date = $s['scheduled_date'] ? date('d M Y', strtotime($s['scheduled_date'])) . ($s['scheduled_time'] ? " {$s['scheduled_time']}" : '') : '—';
 
-        $actions = '';
+        $actions = '<div style="display:flex;gap:4px;flex-wrap:wrap">';
         if ($s['status'] === 'pending_approval') {
-            $actions .= '<form method="POST" style="display:inline"><input type="hidden" name="action" value="approve"><input type="hidden" name="session_id" value="' . $s['id'] . '"><button class="btn btn-sm btn-success">Aprobar</button></form> ';
+            $actions .= '<form method="POST" style="display:inline"><input type="hidden" name="action" value="approve"><input type="hidden" name="session_id" value="' . $s['id'] . '"><button class="btn btn-sm btn-success">Aprobar</button></form>';
             $actions .= '<form method="POST" style="display:inline"><input type="hidden" name="action" value="reject"><input type="hidden" name="session_id" value="' . $s['id'] . '"><button class="btn btn-sm btn-danger" data-confirm="¿Rechazar sesión?">Rechazar</button></form>';
         } elseif ($s['status'] === 'approved') {
             $actions .= '<form method="POST" style="display:inline"><input type="hidden" name="action" value="activate"><input type="hidden" name="session_id" value="' . $s['id'] . '"><button class="btn btn-sm btn-success">Activar</button></form>';
         } elseif ($s['status'] === 'active') {
             $actions .= '<form method="POST" style="display:inline"><input type="hidden" name="action" value="complete"><input type="hidden" name="session_id" value="' . $s['id'] . '"><button class="btn btn-sm btn-outline">Completar</button></form>';
         }
+        $archLabel = ($s['is_archived'] ?? 0) ? 'Desarchivar' : 'Archivar';
+        $actions .= '<form method="POST" style="display:inline"><input type="hidden" name="action" value="toggle_archive"><input type="hidden" name="session_id" value="' . $s['id'] . '"><button class="btn btn-sm btn-outline">' . $archLabel . '</button></form>';
+        $actions .= '<form method="POST" style="display:inline"><input type="hidden" name="action" value="duplicate"><input type="hidden" name="session_id" value="' . $s['id'] . '"><button class="btn btn-sm btn-outline">Duplicar</button></form>';
+        $actions .= '<form method="POST" style="display:inline"><input type="hidden" name="action" value="delete"><input type="hidden" name="session_id" value="' . $s['id'] . '"><button class="btn btn-sm btn-danger" data-confirm="¿Eliminar esta sesión y todos sus datos?">Eliminar</button></form>';
+        $actions .= '</div>';
+
+        $archBadge = ($s['is_archived'] ?? 0) ? ' ' . render_badge('Archivada', 'default') : '';
 
         return "<tr>
             <td><strong>" . htmlspecialchars($s['title']) . "</strong></td>
@@ -110,7 +180,7 @@ render_table(
             <td>$date</td>
             <td>{$s['case_count']}</td>
             <td>{$s['submission_count']}</td>
-            <td>$badge</td>
+            <td>$badge$archBadge</td>
             <td>$actions</td>
         </tr>";
     }

@@ -97,7 +97,7 @@ interface PanelDocenteState {
   // Actividades
   sessions: Session[];
   sessionsLoading: boolean;
-  sessionsTab: "active" | "past";
+  sessionsTab: "active" | "past" | "archived";
 
   // Detalle
   sessionDetail: SessionDetail | null;
@@ -145,6 +145,10 @@ interface PanelDocenteState {
   resetDraft: () => void;
   createSession: (courseId: string) => Promise<string>;
   updateSession: (sessionId: string) => Promise<void>;
+
+  // Acciones sobre actividades
+  archiveSession: (sessionId: string, courseId: string) => Promise<void>;
+  deleteSession: (sessionId: string, courseId: string) => Promise<void>;
 
   // Grupos
   addGroup: () => void;
@@ -412,6 +416,28 @@ export const usePanelDocenteStore = create<PanelDocenteState>()((set, get) => ({
       });
     } finally {
       set({ saving: false });
+    }
+  },
+
+  // ─── Acciones sobre actividades ───────────────────
+
+  archiveSession: async (sessionId, courseId) => {
+    try {
+      await invoke("api_toggle_archive_session", { sessionId });
+      get().fetchSessions(courseId);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
+    }
+  },
+
+  deleteSession: async (sessionId, courseId) => {
+    try {
+      await invoke("api_delete_session", { sessionId });
+      get().fetchSessions(courseId);
+    } catch (e) {
+      set({ error: String(e) });
+      throw e;
     }
   },
 

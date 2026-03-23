@@ -26,6 +26,9 @@ export interface PatientPersonality {
   communicationStyle?: string;    // "detallista" | "breve" | "evasivo"
   toneOfVoice?: string;          // "formal" | "informal" | "coloquial"
   cooperationLevel?: string;     // "total" | "parcial" | "dificil"
+  voiceId?: string;              // "male" | "female" — voz TTS base
+  pitchShift?: number;           // semitonos (-4 a +4)
+  speechRate?: number;           // factor de velocidad (0.75 a 1.3)
 }
 
 export interface PatientClinicalHistory {

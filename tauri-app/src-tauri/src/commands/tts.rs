@@ -157,12 +157,20 @@ pub async fn tts_load_model(
 /// Habla con la voz por defecto o una voz específica.
 /// Retorna la duración del audio en milisegundos para que el frontend
 /// pueda esperar antes de reproducir la siguiente línea.
+///
+/// - `pitch_shift`: semitonos (-4 a +4). Cada semitono = factor 2^(1/12).
+/// - `speech_rate`: factor de velocidad (0.75 a 1.3). 1.0 = normal.
+///
+/// Ambos se aplican modificando la tasa de muestreo de reproducción:
+///   effective_rate = sample_rate × 2^(pitch/12) × speed
 #[tauri::command]
 pub async fn tts_speak(
     tts: State<'_, TtsState>,
     audio: State<'_, AudioState>,
     text: String,
     voice_id: Option<String>,
+    pitch_shift: Option<f64>,
+    speech_rate: Option<f64>,
 ) -> Result<u64, String> {
     let engine = tts.engine.clone();
 
@@ -177,11 +185,17 @@ pub async fn tts_speak(
     .map_err(|e| format!("Error en hilo: {}", e))?
     ?;
 
-    let duration_ms = (samples.len() as u64 * 1000) / sample_rate as u64;
+    // Aplicar modificaciones de voz via sample rate
+    let pitch = pitch_shift.unwrap_or(0.0).clamp(-4.0, 4.0);
+    let rate = speech_rate.unwrap_or(1.0).clamp(0.75, 1.3);
+    let factor = 2.0_f64.powf(pitch / 12.0) * rate;
+    let effective_rate = ((sample_rate as f64) * factor).round() as u32;
+
+    let duration_ms = (samples.len() as u64 * 1000) / effective_rate as u64;
 
     let guard = audio.engine.lock().unwrap();
     let audio_engine = guard.as_ref().ok_or("Motor de audio no disponible")?;
-    audio_engine.play_raw_samples(samples, sample_rate)?;
+    audio_engine.play_raw_samples(samples, effective_rate)?;
 
     Ok(duration_ms)
 }

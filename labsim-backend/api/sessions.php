@@ -11,6 +11,8 @@
  * POST   /sessions/:id/reject              → Rechazar sesión
  * POST   /sessions/:id/activate            → Activar sesión
  * POST   /sessions/:id/complete            → Completar sesión
+ * PUT    /sessions/:id/archive             → Archivar/desarchivar sesión
+ * POST   /sessions/:id/duplicate           → Duplicar sesión
  * POST   /sessions/:id/cases               → Agregar caso a sesión
  * DELETE /sessions/:id/cases/:caseId       → Quitar caso de sesión
  * GET    /sessions/:id/guides              → Lista guías
@@ -409,6 +411,80 @@ switch (true) {
         Database::execute('DELETE FROM session_guides WHERE id = :id', [':id' => $subId]);
 
         json_response(['message' => 'Guía eliminada']);
+        break;
+
+    // ─── ARCHIVAR/DESARCHIVAR SESIÓN ───────────────
+    case $method === 'PUT' && $action === 'archive':
+        $auth = require_auth(['admin', 'docente']);
+
+        $session = Database::fetchOne('SELECT id, is_archived FROM practice_sessions WHERE id = :id', [':id' => $id]);
+        if (!$session) error_response('Sesión no encontrada', 404);
+
+        $newState = ($session['is_archived'] ?? 0) ? 0 : 1;
+        Database::execute(
+            "UPDATE practice_sessions SET is_archived = :arch, updated_at = datetime('now') WHERE id = :id",
+            [':id' => $id, ':arch' => $newState]
+        );
+
+        json_response([
+            'message' => $newState ? 'Sesión archivada' : 'Sesión desarchivada',
+            'is_archived' => $newState,
+        ]);
+        break;
+
+    // ─── DUPLICAR SESIÓN ───────────────────────────
+    case $method === 'POST' && $action === 'duplicate':
+        $auth = require_auth(['admin', 'docente', 'instructor']);
+
+        $session = Database::fetchOne('SELECT * FROM practice_sessions WHERE id = :id', [':id' => $id]);
+        if (!$session) error_response('Sesión no encontrada', 404);
+
+        $newId = Database::uuid();
+        Database::execute(
+            "INSERT INTO practice_sessions (id, title, description, created_by, status,
+                scheduled_date, scheduled_time, duration_minutes, location, group_id,
+                instructions, max_submissions, allow_late_submission, due_date,
+                session_type, course_id, centro_enabled, end_date)
+             VALUES (:id, :title, :desc, :uid, 'draft',
+                :date, :time, :dur, :loc, :gid,
+                :instr, :max, :late, :due,
+                :stype, :cid, :centro, :edate)",
+            [
+                ':id' => $newId,
+                ':title' => 'Copia de ' . $session['title'],
+                ':desc' => $session['description'],
+                ':uid' => $auth['sub'],
+                ':date' => $session['scheduled_date'],
+                ':time' => $session['scheduled_time'],
+                ':dur' => $session['duration_minutes'],
+                ':loc' => $session['location'],
+                ':gid' => null,
+                ':instr' => $session['instructions'],
+                ':max' => $session['max_submissions'],
+                ':late' => $session['allow_late_submission'],
+                ':due' => $session['due_date'],
+                ':stype' => $session['session_type'],
+                ':cid' => $session['course_id'],
+                ':centro' => $session['centro_enabled'],
+                ':edate' => $session['end_date'],
+            ]
+        );
+
+        // Copiar casos asociados
+        $cases = Database::fetchAll(
+            'SELECT case_id, order_index, is_required FROM practice_session_cases WHERE session_id = :sid',
+            [':sid' => $id]
+        );
+        foreach ($cases as $c) {
+            Database::execute(
+                "INSERT INTO practice_session_cases (session_id, case_id, order_index, is_required)
+                 VALUES (:sid, :cid, :ord, :req)",
+                [':sid' => $newId, ':cid' => $c['case_id'], ':ord' => $c['order_index'], ':req' => $c['is_required']]
+            );
+        }
+
+        $new = Database::fetchOne('SELECT * FROM practice_sessions WHERE id = :id', [':id' => $newId]);
+        created_response(['session' => $new]);
         break;
 
     default:

@@ -35,7 +35,17 @@ import {
   BarChart3,
   Clock,
   Repeat,
+  MoreVertical,
+  Archive,
+  ArchiveRestore,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { invoke } from "@tauri-apps/api/core";
 import {
   usePanelDocenteStore,
@@ -260,32 +270,64 @@ function ActivitiesPage({ courseId }: { courseId: string }) {
   const setSessionsTab = usePanelDocenteStore((s) => s.setSessionsTab);
   const navigate = usePanelDocenteStore((s) => s.navigate);
   const fetchSessions = usePanelDocenteStore((s) => s.fetchSessions);
+  const archiveSession = usePanelDocenteStore((s) => s.archiveSession);
+  const deleteSession = usePanelDocenteStore((s) => s.deleteSession);
+  const [confirmDelete, setConfirmDelete] = useState<Session | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const filteredSessions = useMemo(() => {
+    if (sessionsTab === "archived") {
+      return sessions.filter((s) => (s as any).archived_at);
+    }
+    const nonArchived = sessions.filter((s) => !(s as any).archived_at);
     const statusSet = sessionsTab === "active" ? ACTIVE_STATUSES : PAST_STATUSES;
-    return sessions.filter((s) => statusSet.has(s.status));
+    return nonArchived.filter((s) => statusSet.has(s.status));
   }, [sessions, sessionsTab]);
+
+  const handleArchive = async (session: Session) => {
+    setActionLoading(session.id);
+    try {
+      await archiveSession(session.id, courseId);
+      toast.success((session as any).archived_at ? "Actividad restaurada" : "Actividad archivada");
+    } catch {
+      toast.error("Error al archivar actividad");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
+    setActionLoading(confirmDelete.id);
+    try {
+      await deleteSession(confirmDelete.id, courseId);
+      toast.success("Actividad eliminada");
+    } catch {
+      toast.error("Error al eliminar actividad");
+    } finally {
+      setActionLoading(null);
+      setConfirmDelete(null);
+    }
+  };
+
+  const tabClass = (tab: string) =>
+    `rounded-md px-2 py-1 text-[10px] font-medium transition ${
+      sessionsTab === tab ? "bg-orange-500/15 text-orange-400" : "ls-text-muted hover:ls-bg-input"
+    }`;
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex items-center gap-2 border-b ls-border px-3 py-2 shrink-0">
-        {/* Tabs */}
         <div className="flex items-center gap-0.5">
-          <button
-            onClick={() => setSessionsTab("active")}
-            className={`rounded-md px-2 py-1 text-[10px] font-medium transition ${
-              sessionsTab === "active" ? "bg-orange-500/15 text-orange-400" : "ls-text-muted hover:ls-bg-input"
-            }`}
-          >
+          <button onClick={() => setSessionsTab("active")} className={tabClass("active")}>
             Activas
           </button>
-          <button
-            onClick={() => setSessionsTab("past")}
-            className={`rounded-md px-2 py-1 text-[10px] font-medium transition ${
-              sessionsTab === "past" ? "bg-orange-500/15 text-orange-400" : "ls-text-muted hover:ls-bg-input"
-            }`}
-          >
+          <button onClick={() => setSessionsTab("past")} className={tabClass("past")}>
             Pasadas
+          </button>
+          <button onClick={() => setSessionsTab("archived" as any)} className={tabClass("archived")}>
+            <Archive className="inline h-3 w-3 mr-0.5" />
+            Archivadas
           </button>
         </div>
 
@@ -314,7 +356,11 @@ function ActivitiesPage({ courseId }: { courseId: string }) {
           <div className="px-4 py-8 text-center">
             <ClipboardList className="mx-auto h-10 w-10 ls-text-muted opacity-30 mb-3" />
             <p className="text-xs ls-text-muted">
-              {sessionsTab === "active" ? "No hay actividades activas" : "No hay actividades pasadas"}
+              {sessionsTab === "active"
+                ? "No hay actividades activas"
+                : sessionsTab === "past"
+                ? "No hay actividades pasadas"
+                : "No hay actividades archivadas"}
             </p>
           </div>
         ) : (
@@ -323,46 +369,115 @@ function ActivitiesPage({ courseId }: { courseId: string }) {
               <SessionCard
                 key={s.id}
                 session={s}
+                loading={actionLoading === s.id}
                 onClick={() => navigate({ page: "activity-detail", courseId, sessionId: s.id })}
+                onArchive={() => handleArchive(s)}
+                onDelete={() => setConfirmDelete(s)}
               />
             ))}
           </div>
         )}
       </ScrollArea>
+
+      {/* Diálogo confirmar eliminación */}
+      <Dialog open={!!confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Eliminar actividad</DialogTitle>
+          </DialogHeader>
+          <p className="text-xs ls-text-muted">
+            Se eliminará <span className="font-medium ls-text2">{confirmDelete?.title}</span> permanentemente.
+            Los stats e historias de estudiantes se conservan.
+          </p>
+          <DialogFooter>
+            <Button size="sm" variant="outline" onClick={() => setConfirmDelete(null)} className="ls-border ls-text2">
+              Cancelar
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={!!actionLoading}
+            >
+              {actionLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Trash2 className="h-3.5 w-3.5 mr-1" />}
+              Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
 
-function SessionCard({ session, onClick }: { session: Session; onClick: () => void }) {
+function SessionCard({
+  session,
+  loading,
+  onClick,
+  onArchive,
+  onDelete,
+}: {
+  session: Session;
+  loading?: boolean;
+  onClick: () => void;
+  onArchive: () => void;
+  onDelete: () => void;
+}) {
+  const isArchived = !!(session as any).archived_at;
+
   return (
-    <button
-      onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition hover:ls-bg-input"
-    >
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500/10">
-        <ClipboardList className="h-4.5 w-4.5 text-orange-400" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium ls-text2 truncate">{session.title}</span>
-          <Badge variant="outline" className={`text-[9px] px-1 py-0 shrink-0 ${STATUS_COLORS[session.status] ?? "text-zinc-400 bg-zinc-500/10"}`}>
-            {STATUS_LABELS[session.status] ?? session.status}
-          </Badge>
+    <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition hover:ls-bg-input group">
+      <button onClick={onClick} className="flex flex-1 items-center gap-3 min-w-0">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500/10 shrink-0">
+          <ClipboardList className="h-4.5 w-4.5 text-orange-400" />
         </div>
-        <div className="flex items-center gap-2 text-[10px] ls-text-muted">
-          {session.scheduled_date && (
-            <span><CalendarDays className="inline h-3 w-3 mr-0.5" />{session.scheduled_date}</span>
-          )}
-          {session.session_type && (
-            <span>· {session.session_type === "grupal" ? "Grupal" : "Conjunto"}</span>
-          )}
-          {session.case_count > 0 && (
-            <span>· {session.case_count} casos</span>
-          )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium ls-text2 truncate">{session.title}</span>
+            <Badge variant="outline" className={`text-[9px] px-1 py-0 shrink-0 ${STATUS_COLORS[session.status] ?? "text-zinc-400 bg-zinc-500/10"}`}>
+              {STATUS_LABELS[session.status] ?? session.status}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-2 text-[10px] ls-text-muted">
+            {session.scheduled_date && (
+              <span><CalendarDays className="inline h-3 w-3 mr-0.5" />{session.scheduled_date}</span>
+            )}
+            {session.session_type && (
+              <span>· {session.session_type === "grupal" ? "Grupal" : "Conjunto"}</span>
+            )}
+            {session.case_count > 0 && (
+              <span>· {session.case_count} casos</span>
+            )}
+          </div>
         </div>
-      </div>
-      <ChevronRight className="h-4 w-4 ls-text-muted shrink-0" />
-    </button>
+      </button>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          className="opacity-0 group-hover:opacity-100 transition shrink-0 rounded p-1 hover:ls-bg-input"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin ls-text-muted" />
+          ) : (
+            <MoreVertical className="h-4 w-4 ls-text-muted" />
+          )}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={onArchive}>
+            {isArchived ? (
+              <><ArchiveRestore className="mr-2 h-4 w-4" />Restaurar</>
+            ) : (
+              <><Archive className="mr-2 h-4 w-4" />Archivar</>
+            )}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem variant="destructive" onClick={onDelete}>
+            <Trash2 className="mr-2 h-4 w-4" />
+            Eliminar
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }
 
@@ -373,6 +488,10 @@ function ActivityDetailPage({ courseId, sessionId }: { courseId: string; session
   const detailLoading = usePanelDocenteStore((s) => s.detailLoading);
   const navigate = usePanelDocenteStore((s) => s.navigate);
   const openWindow = useUIStore((s) => s.openWindow);
+  const archiveSession = usePanelDocenteStore((s) => s.archiveSession);
+  const deleteSession = usePanelDocenteStore((s) => s.deleteSession);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   // Submission stats (must be before early return for hooks rules)
   const submissionsByStatus = useMemo(() => {
@@ -475,15 +594,54 @@ function ActivityDetailPage({ courseId, sessionId }: { courseId: string; session
       </ScrollArea>
 
       <div className="border-t ls-border px-3 py-2 shrink-0 flex items-center justify-between">
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => openWindow("larissa", "Larissa", "larissa")}
-          className="gap-1.5 ls-border ls-text2"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-          Abrir Larissa
-        </Button>
+        <div className="flex items-center gap-1.5">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => openWindow("larissa", "Larissa", "larissa")}
+            className="gap-1.5 ls-border ls-text2"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            Abrir Larissa
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Button size="sm" variant="outline" className="gap-1.5 ls-border ls-text2">
+                <MoreVertical className="h-3.5 w-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem
+                onClick={async () => {
+                  setActionLoading("archive");
+                  try {
+                    await archiveSession(sessionId, courseId);
+                    toast.success((sessionDetail as any)?.archived_at ? "Actividad restaurada" : "Actividad archivada");
+                    navigate({ page: "activities", courseId });
+                  } catch {
+                    toast.error("Error al archivar");
+                  } finally {
+                    setActionLoading(null);
+                  }
+                }}
+                disabled={!!actionLoading}
+              >
+                {(sessionDetail as any)?.archived_at ? (
+                  <><ArchiveRestore className="mr-2 h-4 w-4" />Restaurar</>
+                ) : (
+                  <><Archive className="mr-2 h-4 w-4" />Archivar</>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" onClick={() => setConfirmDelete(true)}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Eliminar
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
         <Button
           size="sm"
           onClick={() => navigate({ page: "activity-config", courseId, sessionId })}
@@ -493,6 +651,45 @@ function ActivityDetailPage({ courseId, sessionId }: { courseId: string; session
           Configurar
         </Button>
       </div>
+
+      {/* Confirmar eliminación */}
+      <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Eliminar actividad</DialogTitle>
+          </DialogHeader>
+          <p className="text-xs ls-text-muted">
+            Se eliminará <span className="font-medium ls-text2">{sessionDetail?.title}</span> permanentemente.
+            Los stats e historias de estudiantes se conservan.
+          </p>
+          <DialogFooter>
+            <Button size="sm" variant="outline" onClick={() => setConfirmDelete(false)} className="ls-border ls-text2">
+              Cancelar
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              disabled={!!actionLoading}
+              onClick={async () => {
+                setActionLoading("delete");
+                try {
+                  await deleteSession(sessionId, courseId);
+                  toast.success("Actividad eliminada");
+                  navigate({ page: "activities", courseId });
+                } catch {
+                  toast.error("Error al eliminar");
+                } finally {
+                  setActionLoading(null);
+                  setConfirmDelete(false);
+                }
+              }}
+            >
+              {actionLoading === "delete" ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> : <Trash2 className="h-3.5 w-3.5 mr-1" />}
+              Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

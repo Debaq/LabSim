@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCenterStore } from "@/stores/center-store";
 import {
@@ -47,6 +47,7 @@ export function CenterWindow() {
   const isStaff = role === "admin" || role === "docente" || role === "instructor";
 
   const {
+    centroSessions, centroLoading, fetchCentroSessions,
     boxes, incidents, meetings, chatMessages, templates, isActive, scheduledIncidents,
     initCenter, stopCenter, refreshBoxes,
     createBoxes, assignStudentToBox, injectIncident, resolveIncident, discussIncident,
@@ -57,8 +58,10 @@ export function CenterWindow() {
 
   const [view, setView] = useState<View>("overview");
   const [selectedBoxId, setSelectedBoxId] = useState<string | null>(null);
-  const [setupSessionId, setSetupSessionId] = useState("");
-  const [setupBoxCount, setSetupBoxCount] = useState(4);
+
+  useEffect(() => {
+    if (!isActive) fetchCentroSessions();
+  }, [isActive, fetchCentroSessions]);
 
   // Inject form
   const [injectCategory, setInjectCategory] = useState("");
@@ -90,57 +93,57 @@ export function CenterWindow() {
     ? templates.filter((t) => t.category === injectCategory)
     : templates;
 
-  // ─── Sin sesión activa ────────────────────────────
+  // ─── Selección de centro ─────────────────────────
   if (!isActive) {
     return (
-      <div className="flex h-full flex-col items-center justify-center ls-bg p-6 text-center">
-        <Building2 className="w-16 h-16 ls-text-muted mb-4 opacity-30" />
-        <h2 className="text-lg font-semibold ls-text mb-2">Modalidad Centro</h2>
-        <p className="text-sm ls-text-muted max-w-md mb-4">
-          Simula un día de trabajo completo en un centro clínico.
-          Cada estudiante en su box con agenda propia, incidentes y reuniones clínicas.
-        </p>
-
-        {isStaff ? (
-          <div className="w-full max-w-xs space-y-3">
-            <div>
-              <label className="text-xs ls-text-muted block mb-1">ID de sesión práctica</label>
-              <input
-                type="text"
-                value={setupSessionId}
-                onChange={(e) => setSetupSessionId(e.target.value)}
-                placeholder="Pegar ID de sesión..."
-                className="w-full px-3 py-2 text-sm rounded ls-bg-input border ls-border ls-text"
-              />
+      <div className="flex h-full flex-col ls-bg">
+        <div className="flex items-center gap-2 border-b ls-border px-3 py-2 shrink-0">
+          <Building2 className="h-4 w-4 text-amber-400" />
+          <span className="text-xs font-medium ls-text2">Centro Clínico</span>
+          <button onClick={() => fetchCentroSessions()} className="ml-auto ls-text-muted hover:ls-text">
+            <RefreshCw className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-auto">
+          {centroLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
             </div>
-            <div>
-              <label className="text-xs ls-text-muted block mb-1">Cantidad de boxes</label>
-              <input
-                type="number"
-                min={1}
-                max={20}
-                value={setupBoxCount}
-                onChange={(e) => setSetupBoxCount(Number(e.target.value))}
-                className="w-full px-3 py-2 text-sm rounded ls-bg-input border ls-border ls-text"
-              />
+          ) : centroSessions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-12 text-center px-6">
+              <Building2 className="h-12 w-12 ls-text-muted opacity-30" />
+              <div>
+                <p className="text-xs ls-text2">No hay actividades tipo centro</p>
+                <p className="text-[10px] ls-text-muted mt-1">
+                  Crea una actividad grupal con Centro Clínico habilitado en el Panel Docente
+                </p>
+              </div>
             </div>
-            <button
-              onClick={async () => {
-                if (!setupSessionId) return;
-                await initCenter(setupSessionId);
-                await createBoxes(setupBoxCount);
-              }}
-              disabled={!setupSessionId}
-              className="w-full px-4 py-2 text-sm rounded bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-40"
-            >
-              Iniciar Centro
-            </button>
-          </div>
-        ) : (
-          <p className="text-xs ls-text-muted">
-            El docente debe activar la sesión en modo centro.
-          </p>
-        )}
+          ) : (
+            <div className="p-2 space-y-1">
+              {centroSessions.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => initCenter(s.id)}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition hover:ls-bg-input"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10">
+                    <Building2 className="h-5 w-5 text-amber-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-medium ls-text2 truncate block">{s.title}</span>
+                    <div className="flex items-center gap-2 text-[10px] ls-text-muted mt-0.5">
+                      {s.scheduled_date && <span>{s.scheduled_date}</span>}
+                      <span className={`px-1 rounded ${
+                        s.status === "active" ? "bg-emerald-500/10 text-emerald-400" : "bg-zinc-500/10 text-zinc-400"
+                      }`}>{s.status}</span>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -496,9 +499,14 @@ export function CenterWindow() {
   return (
     <div className="h-full overflow-auto ls-bg p-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold ls-text flex items-center gap-2">
-          <Building2 className="w-5 h-5" /> Centro
-        </h2>
+        <div className="flex items-center gap-2">
+          <button onClick={stopCenter} className="text-xs ls-text-muted hover:ls-text flex items-center gap-1">
+            <ChevronLeft className="w-3 h-3" /> Volver
+          </button>
+          <h2 className="text-lg font-semibold ls-text flex items-center gap-2">
+            <Building2 className="w-5 h-5" /> Centro
+          </h2>
+        </div>
         <div className="flex gap-1.5">
           {isStaff && (
             <>

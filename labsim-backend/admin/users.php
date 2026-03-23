@@ -96,6 +96,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    if ($action === 'delete') {
+        $userId = $_POST['user_id'] ?? '';
+        if ($userId === $auth['sub']) {
+            $error = 'No puedes eliminarte a ti mismo';
+        } else {
+            $user = Database::fetchOne('SELECT id FROM users WHERE id = :id', [':id' => $userId]);
+            if ($user) {
+                Database::execute('DELETE FROM refresh_tokens WHERE user_id = :uid', [':uid' => $userId]);
+                Database::execute('DELETE FROM group_members WHERE user_id = :uid', [':uid' => $userId]);
+                Database::execute('DELETE FROM course_members WHERE user_id = :uid', [':uid' => $userId]);
+                Database::execute('DELETE FROM users WHERE id = :id', [':id' => $userId]);
+                $message = 'Usuario eliminado permanentemente';
+            }
+        }
+    }
+
     if ($action === 'reset_password') {
         $userId = $_POST['user_id'] ?? '';
         $newPass = $_POST['new_password'] ?? '';
@@ -178,6 +194,13 @@ render_table(
         }
         $actions .= '<button class="btn btn-sm btn-outline" onclick="editUser(\'' . $u['id'] . '\',\'' . htmlspecialchars($u['username']) . '\',\'' . htmlspecialchars($u['full_name'] ?? '') . '\',\'' . htmlspecialchars($u['email'] ?? '') . '\',\'' . $u['role'] . '\',\'' . htmlspecialchars($u['institution'] ?? '') . '\')">Editar</button>';
         $actions .= '<button class="btn btn-sm btn-outline" onclick="resetPassword(\'' . $u['id'] . '\',\'' . htmlspecialchars($u['username']) . '\')">Reset pass</button>';
+        if ($u['id'] !== $auth['sub']) {
+            $actions .= '<form method="POST" style="display:inline">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="user_id" value="' . $u['id'] . '">
+                <button type="submit" class="btn btn-sm btn-danger" data-confirm="¿Eliminar permanentemente a ' . htmlspecialchars($u['username']) . '? Esta acción no se puede deshacer.">Eliminar</button>
+            </form>';
+        }
         $actions .= '</div>';
 
         return "<tr>

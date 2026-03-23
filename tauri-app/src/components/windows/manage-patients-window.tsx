@@ -111,6 +111,7 @@ export function ManagePatientsWindow() {
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [editingTitle, setEditingTitle] = useState("");
   const [editingCaseId, setEditingCaseId] = useState<string | null>(null);
+  const [editingLocked, setEditingLocked] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [caseToDelete, setCaseToDelete] = useState<CaseSummary | null>(null);
@@ -142,6 +143,7 @@ export function ManagePatientsWindow() {
   const handleNewPatient = useCallback(() => {
     resetData();
     setEditingCaseId(null);
+    setEditingLocked(false);
     setEditingTitle("");
     setViewMode("editor");
   }, [resetData]);
@@ -152,7 +154,8 @@ export function ManagePatientsWindow() {
       const detail = await getCase(c.id);
       loadCaseForEditing(c.id, c.title, detail.profile);
       setEditingCaseId(c.id);
-      setEditingTitle(c.title);
+      setEditingLocked(!!c.is_locked);
+      setEditingTitle(c.is_locked ? `Copia de ${c.title}` : c.title);
       setViewMode("editor");
     } catch (err) {
       toast.error(`Error al cargar caso: ${err}`);
@@ -170,26 +173,29 @@ export function ManagePatientsWindow() {
     const effectiveTitle = editingTitle.trim() || "Paciente sin nombre";
     setSaving(true);
     try {
-      if (editingCaseId) {
+      if (editingCaseId && !editingLocked) {
+        // Caso normal: actualizar
         await invoke("api_update_case", {
           caseId: editingCaseId,
           caseData: { title: effectiveTitle, profile: data },
         });
         toast.success("Caso actualizado");
       } else {
+        // Caso nuevo o bloqueado: crear copia
         const result = await invoke<{ case: { id: string } }>("api_push_case", {
           caseData: { title: effectiveTitle, profile: data },
         });
         setEditingCaseId(result.case.id);
+        setEditingLocked(false);
         usePatientStore.getState().setPatientId(result.case.id);
-        toast.success("Caso creado");
+        toast.success(editingLocked ? "Copia creada" : "Caso creado");
       }
     } catch (err) {
       toast.error(`Error al guardar: ${err}`);
     } finally {
       setSaving(false);
     }
-  }, [editingTitle, editingCaseId, data]);
+  }, [editingTitle, editingCaseId, editingLocked, data]);
 
   const handleDuplicate = useCallback(async (c: CaseSummary) => {
     setActionLoading("duplicate");
@@ -270,6 +276,12 @@ export function ManagePatientsWindow() {
             onChange={(e) => setEditingTitle(e.target.value)}
             className="h-6 max-w-[240px] ls-border ls-bg-input text-xs ls-text placeholder:ls-text-muted"
           />
+          {editingLocked && (
+            <Badge variant="outline" className="gap-1 text-[10px] text-amber-400 bg-amber-500/10 ls-border">
+              <Lock className="h-2.5 w-2.5" />
+              Al guardar se creará una copia
+            </Badge>
+          )}
           <Button
             size="xs"
             onClick={handleSave}
@@ -278,10 +290,12 @@ export function ManagePatientsWindow() {
           >
             {saving ? (
               <Loader2 className="h-3 w-3 animate-spin" />
+            ) : editingLocked ? (
+              <Copy className="h-3 w-3" />
             ) : (
               <Save className="h-3 w-3" />
             )}
-            {editingCaseId ? "Guardar" : "Crear"}
+            {editingLocked ? "Guardar como copia" : editingCaseId ? "Guardar" : "Crear"}
           </Button>
         </div>
 
@@ -355,7 +369,7 @@ export function ManagePatientsWindow() {
       {/* Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Case list */}
-        <div className="w-[300px] shrink-0 border-r ls-border">
+        <div className="h-full w-[300px] shrink-0 overflow-hidden border-r ls-border">
           <ScrollArea className="h-full">
             {loading ? (
               <div className="flex items-center justify-center py-8">
@@ -411,7 +425,7 @@ export function ManagePatientsWindow() {
         </div>
 
         {/* Detail panel */}
-        <div className="flex-1">
+        <div className="h-full flex-1 overflow-hidden">
           {selectedCase ? (
             <ScrollArea className="h-full">
               <div className="p-4">
@@ -472,26 +486,21 @@ export function ManagePatientsWindow() {
 
                 {/* Actions */}
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {selectedCase.is_locked ? (
-                    <div className="flex items-center gap-1.5 rounded-md bg-amber-500/10 px-3 py-1.5 text-xs text-amber-400">
-                      <Lock className="h-3.5 w-3.5" />
-                      Caso de ejemplo — no editable
-                    </div>
-                  ) : (
-                    <Button
-                      size="sm"
-                      onClick={() => handleEdit(selectedCase)}
-                      disabled={actionLoading === "edit"}
-                      className="gap-1.5 bg-purple-600 ls-text hover:bg-purple-500"
-                    >
-                      {actionLoading === "edit" ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Pencil className="h-3.5 w-3.5" />
-                      )}
-                      Editar
-                    </Button>
-                  )}
+                  <Button
+                    size="sm"
+                    onClick={() => handleEdit(selectedCase)}
+                    disabled={actionLoading === "edit"}
+                    className="gap-1.5 bg-purple-600 ls-text hover:bg-purple-500"
+                  >
+                    {actionLoading === "edit" ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : selectedCase.is_locked ? (
+                      <FileText className="h-3.5 w-3.5" />
+                    ) : (
+                      <Pencil className="h-3.5 w-3.5" />
+                    )}
+                    {selectedCase.is_locked ? "Abrir" : "Editar"}
+                  </Button>
 
                   <DropdownMenu>
                     <DropdownMenuTrigger>
@@ -500,11 +509,10 @@ export function ManagePatientsWindow() {
                         Acciones
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="ls-bg ls-border">
+                    <DropdownMenuContent>
                       <DropdownMenuItem
                         onClick={() => handleDuplicate(selectedCase)}
                         disabled={actionLoading === "duplicate"}
-                        className="ls-text2 focus:ls-bg-input focus:ls-text"
                       >
                         <Copy className="mr-2 h-4 w-4" />
                         Duplicar
@@ -514,7 +522,6 @@ export function ManagePatientsWindow() {
                           <DropdownMenuItem
                             onClick={() => handleTogglePublish(selectedCase)}
                             disabled={actionLoading === "publish"}
-                            className="ls-text2 focus:ls-bg-input focus:ls-text"
                           >
                             {selectedCase.is_published ? (
                               <>
@@ -531,7 +538,6 @@ export function ManagePatientsWindow() {
                           <DropdownMenuItem
                             onClick={() => handleToggleArchive(selectedCase)}
                             disabled={actionLoading === "archive"}
-                            className="ls-text2 focus:ls-bg-input focus:ls-text"
                           >
                             {selectedCase.is_archived ? (
                               <>
@@ -545,13 +551,13 @@ export function ManagePatientsWindow() {
                               </>
                             )}
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator className="ls-bg-input" />
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem
+                            variant="destructive"
                             onClick={() => {
                               setCaseToDelete(selectedCase);
                               setDeleteDialogOpen(true);
                             }}
-                            className="text-red-400 focus:bg-red-500/10 focus:text-red-300"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Eliminar

@@ -42,7 +42,7 @@ export function ClinicalLayout() {
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Module Content */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 min-h-0">
         <div className="mx-auto max-w-4xl p-6">
           <ModuleLoader moduleId={activeTab} />
         </div>

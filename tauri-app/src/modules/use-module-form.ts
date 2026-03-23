@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useForm, type DefaultValues, type FieldValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePatientStore, type PatientCore } from "@/stores/patient-store";
 import { toast } from "sonner";
 
 const CORE_KEYS = new Set<string>(["identity", "personality", "clinicalHistory"]);
+const EMPTY: Record<string, unknown> = {};
 
 /**
  * Hook de formulario para módulos del paciente.
@@ -25,8 +26,8 @@ export function useModuleForm<T extends FieldValues>(
 
   const storedData = usePatientStore((s) =>
     isCore
-      ? (s.data.core[moduleKey as keyof PatientCore] ?? {})
-      : (s.data.modules[moduleKey] ?? {}),
+      ? (s.data.core[moduleKey as keyof PatientCore] ?? EMPTY)
+      : (s.data.modules[moduleKey] ?? EMPTY),
   );
   const updateCore = usePatientStore((s) => s.updateCore);
   const updateModule = usePatientStore((s) => s.updateModule);
@@ -39,20 +40,26 @@ export function useModuleForm<T extends FieldValues>(
   });
 
   const { watch, formState: { isDirty } } = form;
-  const values = watch();
 
-  // Auto-save debounced
+  // Auto-save debounced — usar ref para evitar que watch() dispare re-renders infinitos
+  const valuesRef = useRef<FieldValues>({});
+  useEffect(() => {
+    const sub = watch((v) => { valuesRef.current = v; });
+    return () => sub.unsubscribe();
+  }, [watch]);
+
   useEffect(() => {
     if (!isDirty) return;
     const t = setTimeout(() => {
+      const v = valuesRef.current;
       if (isCore) {
-        updateCore(moduleKey as keyof PatientCore, values as Record<string, unknown>);
+        updateCore(moduleKey as keyof PatientCore, v as Record<string, unknown>);
       } else {
-        updateModule(moduleKey, values as Record<string, unknown>);
+        updateModule(moduleKey, v as Record<string, unknown>);
       }
     }, 1500);
     return () => clearTimeout(t);
-  }, [values, isDirty, updateCore, updateModule, moduleKey, isCore]);
+  }, [isDirty, updateCore, updateModule, moduleKey, isCore]);
 
   const onSubmit = (data: FieldValues) => {
     if (isCore) {

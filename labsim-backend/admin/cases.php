@@ -18,8 +18,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     if ($action === 'delete' && $caseId) {
-        Database::execute('DELETE FROM cases WHERE id = :id', [':id' => $caseId]);
-        $message = 'Caso eliminado';
+        // Verificar que no esté en uso en sesiones activas
+        $inUse = Database::fetchOne(
+            "SELECT COUNT(*) as count FROM practice_session_cases psc
+             JOIN practice_sessions ps ON psc.session_id = ps.id
+             WHERE psc.case_id = :cid AND ps.status IN ('approved','active')",
+            [':cid' => $caseId]
+        );
+        if (($inUse['count'] ?? 0) > 0) {
+            $message = 'No se puede eliminar: el caso está asignado a sesiones activas';
+        } else {
+            Database::execute('DELETE FROM cases WHERE id = :id', [':id' => $caseId]);
+            $message = 'Caso eliminado';
+        }
+    }
+    if ($action === 'toggle_archive' && $caseId) {
+        $caso = Database::fetchOne('SELECT is_archived FROM cases WHERE id = :id', [':id' => $caseId]);
+        if ($caso) {
+            $new = ($caso['is_archived'] ?? 0) ? 0 : 1;
+            Database::execute("UPDATE cases SET is_archived = :a, updated_at = datetime('now') WHERE id = :id",
+                [':a' => $new, ':id' => $caseId]);
+            $message = $new ? 'Caso archivado' : 'Caso desarchivado';
+        }
+    }
+    if ($action === 'duplicate' && $caseId) {
+        $caso = Database::fetchOne('SELECT * FROM cases WHERE id = :id', [':id' => $caseId]);
+        if ($caso) {
+            $newId = Database::uuid();
+            Database::execute(
+                "INSERT INTO cases (id, title, description, author_id, profile_json, schema_version, tags, difficulty, is_published, is_archived)
+                 VALUES (:id, :title, :desc, :author, :profile, :schema, :tags, :diff, 0, 0)",
+                [
+                    ':id' => $newId,
+                    ':title' => 'Copia de ' . $caso['title'],
+                    ':desc' => $caso['description'],
+                    ':author' => $auth['sub'],
+                    ':profile' => $caso['profile_json'],
+                    ':schema' => $caso['schema_version'],
+                    ':tags' => $caso['tags'],
+                    ':diff' => $caso['difficulty'],
+                ]
+            );
+            $message = 'Caso duplicado';
+        }
     }
 }
 
@@ -98,17 +139,24 @@ render_table(
         $diffBadge = render_badge($c['difficulty'], $c['difficulty'] === 'hard' ? 'danger' : ($c['difficulty'] === 'easy' ? 'success' : 'warning'));
         $pubBadge = $c['is_published'] ? render_badge('Publicado', 'success') : render_badge('Borrador', 'default');
         $pubLabel = $c['is_published'] ? 'Despublicar' : 'Publicar';
+        $archLabel = ($c['is_archived'] ?? 0) ? 'Desarchivar' : 'Archivar';
+        $archBadge = ($c['is_archived'] ?? 0) ? render_badge('Archivado', 'default') : '';
 
         return "<tr>
             <td><a href='cases.php?id={$c['id']}' style='color:var(--accent)'><strong>" . htmlspecialchars($c['title']) . "</strong></a></td>
             <td>" . htmlspecialchars($c['author_name'] ?? $c['author'] ?? '—') . "</td>
             <td>$diffBadge</td>
             <td>" . htmlspecialchars($c['tags'] ?: '—') . "</td>
-            <td>$pubBadge</td>
+            <td>$pubBadge $archBadge</td>
             <td>" . date('d M Y', strtotime($c['updated_at'])) . "</td>
             <td>
-                <form method='POST' style='display:inline'><input type='hidden' name='action' value='toggle_publish'><input type='hidden' name='case_id' value='{$c['id']}'><button class='btn btn-sm btn-outline'>$pubLabel</button></form>
+                <div style='display:flex;gap:4px;flex-wrap:wrap'>
                 <a href='cases.php?id={$c['id']}' class='btn btn-sm btn-outline'>Ver</a>
+                <form method='POST' style='display:inline'><input type='hidden' name='action' value='toggle_publish'><input type='hidden' name='case_id' value='{$c['id']}'><button class='btn btn-sm btn-outline'>$pubLabel</button></form>
+                <form method='POST' style='display:inline'><input type='hidden' name='action' value='toggle_archive'><input type='hidden' name='case_id' value='{$c['id']}'><button class='btn btn-sm btn-outline'>$archLabel</button></form>
+                <form method='POST' style='display:inline'><input type='hidden' name='action' value='duplicate'><input type='hidden' name='case_id' value='{$c['id']}'><button class='btn btn-sm btn-outline'>Duplicar</button></form>
+                <form method='POST' style='display:inline'><input type='hidden' name='action' value='delete'><input type='hidden' name='case_id' value='{$c['id']}'><button class='btn btn-sm btn-danger' data-confirm='¿Eliminar este caso?'>Eliminar</button></form>
+                </div>
             </td>
         </tr>";
     }
