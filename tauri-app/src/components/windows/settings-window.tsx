@@ -127,17 +127,19 @@ export function SettingsWindow() {
           {page === "tts" && <PageTts
             models={ttsModels} ttsLoaded={ttsLoaded} ttsLoading={ttsLoading}
             downloadingIdx={ttsDownloadingIdx}
+            onLoaded={() => setTtsLoaded(true)}
             autoLoad={autoLoadTts} setAutoLoad={setAutoLoadTts}
             onDownload={async (idx: number, model: TtsModelInfo) => {
               setTtsDownloadingIdx(idx);
               setTtsLoading(true);
+              const voiceId = (model as unknown as { voiceId?: string }).voiceId ?? `tts-${idx}`;
               toast.info(`Descargando ${model.name}...`);
               try {
                 const configPath = await invoke<string>("tts_download_model", { modelIndex: idx });
-                toast.info("Cargando modelo TTS...");
-                await invoke<boolean>("tts_load_model", { configPath });
+                toast.info(`Cargando ${model.name}...`);
+                await invoke<boolean>("tts_load_model", { configPath, voiceId, label: model.name });
                 setTtsLoaded(true);
-                toast.success(`${model.name} — Síntesis de voz lista`);
+                toast.success(`${model.name} lista`);
               } catch (err) { toast.error(`Error: ${err}`); }
               finally { setTtsLoading(false); setTtsDownloadingIdx(null); }
             }} />}
@@ -456,20 +458,72 @@ function PageVoz({ speechLoaded, speechLoading, onLoad, autoLoad, setAutoLoad }:
   </>);
 }
 
-function PageTts({ models, ttsLoaded, ttsLoading, downloadingIdx, onDownload, autoLoad, setAutoLoad }: {
+function PageTts({ models, ttsLoaded, ttsLoading, downloadingIdx, onDownload, onLoaded, autoLoad, setAutoLoad }: {
   models: TtsModelInfo[]; ttsLoaded: boolean; ttsLoading: boolean; downloadingIdx: number | null;
-  onDownload: (idx: number, m: TtsModelInfo) => void; autoLoad: boolean; setAutoLoad: (v: boolean) => void;
+  onDownload: (idx: number, m: TtsModelInfo) => void; onLoaded: () => void; autoLoad: boolean; setAutoLoad: (v: boolean) => void;
 }) {
-  const [testText, setTestText] = useState("");
+  const DEMO_LINES: { voice: string; label: string; text: string }[] = [
+    { voice: "karime", label: "Karime", text: "Señor Martínez... puede pasar a la sala dos, por favor. La audióloga lo está esperando." },
+    { voice: "male", label: "Paciente ♂", text: "Mire... vengo porque hace como tres meses que siento que no escucho bien por el oído derecho. Al principio pensé que se me iba a pasar solo... pero ha ido empeorando. Mi señora me dice que le subo mucho el volumen a la tele. Y a veces escucho como un pitido... sobre todo en la noche, cuando hay silencio." },
+    { voice: "female", label: "Paciente ♀", text: "Doctora... a mí me pasa que cuando estoy en lugares con mucha gente, como en una reunión o en el supermercado... escucho que me hablan pero no entiendo lo que me dicen. Es como si las palabras se mezclaran. Ya me da vergüenza pedir que me repitan las cosas." },
+    { voice: "karime", label: "Karime", text: "Doctora, le aviso que el paciente de las once y media llamó para reagendar. ¿Le dejo la hora del jueves a las diez?" },
+  ];
+  const [testText, setTestText] = useState(DEMO_LINES[1].text);
+  const [testVoice, setTestVoice] = useState("male");
   const [speaking, setSpeaking] = useState(false);
+  const [downloadingAll, setDownloadingAll] = useState(false);
+  const [activeLine, setActiveLine] = useState<number | null>(null);
+
+  const VOICE_COLORS: Record<string, string> = {
+    karime: "text-rose-400",
+    male: "text-blue-400",
+    female: "text-purple-400",
+  };
 
   const handleSpeak = async () => {
     if (!testText.trim()) return;
     setSpeaking(true);
     try {
-      await invoke("tts_speak", { text: testText });
+      const durationMs = await invoke<number>("tts_speak", { text: testText, voiceId: testVoice });
+      // Esperar a que termine de reproducir
+      await new Promise((r) => setTimeout(r, durationMs + 200));
     } catch (err) { toast.error(`Error: ${err}`); }
     finally { setSpeaking(false); }
+  };
+
+  const handlePlayConversation = async () => {
+    setSpeaking(true);
+    try {
+      for (let i = 0; i < DEMO_LINES.length; i++) {
+        const line = DEMO_LINES[i];
+        setActiveLine(i);
+        const durationMs = await invoke<number>("tts_speak", { text: line.text, voiceId: line.voice });
+        // Esperar a que termine el audio + pausa entre personajes
+        await new Promise((r) => setTimeout(r, durationMs + 800));
+        setActiveLine(null);
+      }
+    } catch (err) { toast.error(`Error: ${err}`); }
+    finally { setSpeaking(false); setActiveLine(null); }
+  };
+
+  const handleDownloadAll = async () => {
+    setDownloadingAll(true);
+    for (let i = 0; i < models.length; i++) {
+      const model = models[i];
+      const voiceId = (model as unknown as { voiceId?: string }).voiceId ?? `tts-${i}`;
+      try {
+        toast.info(`Descargando ${model.name}... (${i + 1}/${models.length})`);
+        const configPath = await invoke<string>("tts_download_model", { modelIndex: i });
+        toast.info(`Cargando ${model.name}...`);
+        await invoke<boolean>("tts_load_model", { configPath, voiceId, label: model.name });
+        toast.success(`${model.name} lista`);
+      } catch (err) {
+        toast.error(`Error con ${model.name}: ${err}`);
+      }
+    }
+    onLoaded();
+    setDownloadingAll(false);
+    toast.success("Las 3 voces están listas");
   };
 
   return (<>
@@ -504,27 +558,81 @@ function PageTts({ models, ttsLoaded, ttsLoading, downloadingIdx, onDownload, au
               <div className="flex-1">
                 <p className="text-sm font-medium" style={{ color: "var(--ls-text)" }}>{model.name}</p>
                 <p className="text-xs" style={{ color: "var(--ls-text-muted)" }}>
-                  {model.sizeMb} MB · Offline · CPU
+                  {model.sizeMb} MB · {(model as unknown as { role?: string }).role ?? ""} · Offline
                 </p>
               </div>
             </button>
           );
         })}
       </div>
+      <button onClick={handleDownloadAll} disabled={ttsLoading || downloadingAll}
+        className="mt-2 w-full rounded-lg border px-3 py-2 text-xs font-bold transition hover:opacity-80"
+        style={{ borderColor: "var(--ls-accent)", color: "var(--ls-accent)" }}>
+        {downloadingAll ? "Descargando..." : "Descargar las 3 voces"}
+      </button>
     </Card>
 
     {ttsLoaded && (
       <Card title="Probar voz">
-        <div className="space-y-2">
+        <div className="space-y-3">
+          {/* Selector de voz */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs ls-text-muted">Voz:</span>
+            {[
+              { id: "male", label: "Paciente ♂" },
+              { id: "female", label: "Paciente ♀" },
+              { id: "karime", label: "Karime" },
+            ].map((v) => (
+              <button key={v.id} onClick={() => {
+                setTestVoice(v.id);
+                const line = DEMO_LINES.find((l) => l.voice === v.id);
+                if (line) setTestText(line.text);
+              }}
+                className={cn("rounded border px-2 py-1 text-xs transition",
+                  testVoice === v.id
+                    ? "border-cyan-500/40 bg-cyan-500/20 text-cyan-300 font-bold"
+                    : "ls-border ls-text-muted hover:ls-text2"
+                )}>{v.label}</button>
+            ))}
+          </div>
+
           <textarea value={testText} onChange={(e) => setTestText(e.target.value)}
             placeholder="Escribe algo para escuchar la voz..."
-            className="w-full rounded-lg border p-2 text-sm resize-none h-16 ls-bg-input ls-border ls-text"
+            className="w-full rounded-lg border p-2 text-sm resize-none h-24 ls-bg-input ls-border ls-text"
             style={{ backgroundColor: "var(--ls-input)" }} />
-          <button onClick={handleSpeak} disabled={speaking || !testText.trim()}
-            className="rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:opacity-80"
-            style={{ borderColor: "var(--ls-accent)", color: "var(--ls-accent)" }}>
-            {speaking ? "Hablando..." : "Escuchar"}
-          </button>
+
+          <div className="flex gap-2">
+            <button onClick={handleSpeak} disabled={speaking || !testText.trim()}
+              className="rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:opacity-80"
+              style={{ borderColor: "var(--ls-accent)", color: "var(--ls-accent)" }}>
+              {speaking ? "Hablando..." : "Escuchar"}
+            </button>
+            <button onClick={handlePlayConversation} disabled={speaking}
+              className="rounded-lg border px-3 py-1.5 text-xs font-medium transition hover:opacity-80 ls-border ls-text-muted hover:ls-text2">
+              {speaking && activeLine != null ? "Reproduciendo..." : "Demo conversación"}
+            </button>
+          </div>
+
+          {/* Conversación visual */}
+          {activeLine != null && (
+            <div className="space-y-2 rounded-lg border ls-border p-3" style={{ backgroundColor: "var(--ls-panel-secondary)" }}>
+              {DEMO_LINES.map((line, i) => (
+                <div key={i} className={cn(
+                  "rounded-lg px-3 py-2 text-xs transition-all duration-300",
+                  i === activeLine
+                    ? "opacity-100 ls-bg-input"
+                    : i < (activeLine ?? 0)
+                      ? "opacity-40"
+                      : "opacity-20",
+                )}>
+                  <span className={cn("font-bold", VOICE_COLORS[line.voice] ?? "ls-text")}>
+                    {line.label}:
+                  </span>{" "}
+                  <span className="ls-text">{line.text}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </Card>
     )}

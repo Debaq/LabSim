@@ -425,10 +425,10 @@ function AddStudentDialog({
     if (!search.trim()) return;
     setSearching(true);
     try {
-      const result = await invoke<{ data: Array<{ id: string; username: string; full_name: string | null; student_id_number: string | null }> }>(
+      const result = await invoke<{ items: Array<{ id: string; username: string; full_name: string | null; student_id_number: string | null }> }>(
         "api_list_institution_students", { search: search.trim() }
       );
-      setResults(result?.data ?? []);
+      setResults(result?.items ?? []);
     } catch { setResults([]); }
     finally { setSearching(false); }
   };

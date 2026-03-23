@@ -12,6 +12,7 @@ export interface CaseSummary {
   difficulty: "easy" | "medium" | "hard";
   is_published: number;
   is_archived: number;
+  is_locked: number;
   schema_version: number;
   created_at: string;
   updated_at: string;
@@ -96,15 +97,15 @@ export const useCasesStore = create<CasesState>()((set, get) => ({
       }
 
       const result = await invoke<{
-        data: CaseSummary[];
-        pagination: { page: number; limit: number; total: number; totalPages: number };
+        items: CaseSummary[];
+        pagination: { page: number; limit: number; total: number; pages: number };
       }>("api_list_cases", params);
 
       set({
-        cases: result?.data ?? [],
+        cases: result?.items ?? [],
         totalCases: result?.pagination?.total ?? 0,
         currentPage: result?.pagination?.page ?? 1,
-        totalPages: result?.pagination?.totalPages ?? 1,
+        totalPages: result?.pagination?.pages ?? 1,
       });
     } catch (err) {
       set({ cases: [], error: err instanceof Error ? err.message : String(err) });

@@ -19,6 +19,7 @@ import {
   BotMessageSquare,
   FolderOpen,
   Trash2,
+  LayoutDashboard,
 } from "lucide-react";
 
 interface DesktopItem {
@@ -131,28 +132,20 @@ const desktopItems: DesktopItem[] = [
   },
   // ─── Gestión ───
   {
+    id: "panel-docente",
+    label: "Panel Docente",
+    icon: LayoutDashboard,
+    component: "panel-docente",
+    color: "text-orange-400",
+    roles: ["admin", "docente", "instructor"],
+    group: "gestion",
+  },
+  {
     id: "center",
     label: "Centro",
     icon: Building2,
     component: "center",
     color: "text-amber-400",
-    group: "gestion",
-  },
-  {
-    id: "practice-sessions",
-    label: "Sesiones",
-    icon: ClipboardList,
-    component: "practice-sessions",
-    color: "text-sky-400",
-    group: "gestion",
-  },
-  {
-    id: "courses",
-    label: "Mis Cursos",
-    icon: GraduationCap,
-    component: "courses",
-    color: "text-sky-400",
-    roles: ["admin", "docente", "instructor"],
     group: "gestion",
   },
   {
@@ -202,6 +195,7 @@ export const WINDOW_SIZES: Record<string, { width: number; height: number; x?: n
   "file-explorer": { width: 650, height: 480 },
   "trash": { width: 500, height: 400 },
   "kb-editor": { width: 650, height: 520 },
+  "panel-docente": { width: 820, height: 600 },
 };
 
 interface Props {

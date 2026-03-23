@@ -28,6 +28,7 @@ export const MODULE_IDS = [
   "anamnesis",
   // Módulos clínicos (simuladores)
   "audiometry",
+  "tuning-fork",
   "logoaudiometry",
   "supraliminal",
   "impedance",
@@ -51,6 +52,7 @@ export const MODULE_LABELS: Record<ModuleId, string> = {
   "patient-personality": "Personalidad",
   anamnesis: "Historia Clínica",
   audiometry: "Audiometría",
+  "tuning-fork": "Acumetría",
   logoaudiometry: "Logoaudiometría",
   supraliminal: "Supraliminal",
   impedance: "Impedanciometría",
@@ -77,6 +79,7 @@ export const MODULE_STORE_KEYS: Record<ModuleId, { type: "core" | "module"; key:
   "patient-personality": { type: "core", key: "personality" },
   anamnesis: { type: "core", key: "clinicalHistory" },
   audiometry: { type: "module", key: "audiometry" },
+  "tuning-fork": { type: "module", key: "tuningFork" },
   logoaudiometry: { type: "module", key: "logoaudiometry" },
   supraliminal: { type: "module", key: "supraliminal" },
   impedance: { type: "module", key: "impedance" },

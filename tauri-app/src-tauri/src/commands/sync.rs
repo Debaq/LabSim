@@ -216,6 +216,16 @@ pub async fn api_create_interconsultation(
     api.post("interconsultations", &data).await
 }
 
+/// Responder interconsulta
+#[tauri::command]
+pub async fn api_respond_interconsultation(
+    api: State<'_, ApiClient>,
+    interconsultation_id: String,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.put(&format!("interconsultations/{}", interconsultation_id), &data).await
+}
+
 // ═══════════════════════════════════════════════════
 // CURSOS E INSCRIPCIÓN
 // ═══════════════════════════════════════════════════
@@ -307,6 +317,18 @@ pub async fn api_list_institution_students(
     let mut params = vec!["role=estudiante".to_string()];
     if let Some(s) = search { params.push(format!("search={}", s)); }
     if let Some(iid) = institution_id { params.push(format!("institution_id={}", iid)); }
+    api.get(&format!("users&{}", params.join("&"))).await
+}
+
+/// Buscar usuarios (cualquier rol)
+#[tauri::command]
+pub async fn api_search_users(
+    api: State<'_, ApiClient>,
+    search: String,
+    role: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let mut params = vec![format!("search={}", search)];
+    if let Some(r) = role { params.push(format!("role={}", r)); }
     api.get(&format!("users&{}", params.join("&"))).await
 }
 
@@ -600,6 +622,105 @@ pub async fn api_get_session_detail(
     api.get(&format!("sessions/{}", session_id)).await
 }
 
+/// Crear sesión práctica
+#[tauri::command]
+pub async fn api_create_session(
+    api: State<'_, ApiClient>,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.post("sessions", &data).await
+}
+
+/// Actualizar sesión práctica
+#[tauri::command]
+pub async fn api_update_session(
+    api: State<'_, ApiClient>,
+    session_id: String,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.put(&format!("sessions/{}", session_id), &data).await
+}
+
+/// Activar sesión práctica
+#[tauri::command]
+pub async fn api_activate_session(
+    api: State<'_, ApiClient>,
+    session_id: String,
+) -> Result<serde_json::Value, String> {
+    api.post(&format!("sessions/{}/activate", session_id), &serde_json::json!({})).await
+}
+
+/// Eliminar sesión
+#[tauri::command]
+pub async fn api_delete_session(
+    api: State<'_, ApiClient>,
+    session_id: String,
+) -> Result<serde_json::Value, String> {
+    api.delete(&format!("sessions/{}", session_id)).await
+}
+
+/// Agregar caso a sesión
+#[tauri::command]
+pub async fn api_add_session_case(
+    api: State<'_, ApiClient>,
+    session_id: String,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.post(&format!("sessions/{}/cases", session_id), &data).await
+}
+
+/// Quitar caso de sesión
+#[tauri::command]
+pub async fn api_remove_session_case(
+    api: State<'_, ApiClient>,
+    session_id: String,
+    case_id: String,
+) -> Result<serde_json::Value, String> {
+    api.delete(&format!("sessions/{}/cases/{}", session_id, case_id)).await
+}
+
+/// Listar grupos
+#[tauri::command]
+pub async fn api_list_groups(
+    api: State<'_, ApiClient>,
+    session_id: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let route = match session_id {
+        Some(sid) => format!("groups&sessionId={}", sid),
+        None => "groups".to_string(),
+    };
+    api.get(&route).await
+}
+
+/// Crear grupo
+#[tauri::command]
+pub async fn api_create_group(
+    api: State<'_, ApiClient>,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.post("groups", &data).await
+}
+
+/// Agregar miembro a grupo
+#[tauri::command]
+pub async fn api_add_group_member(
+    api: State<'_, ApiClient>,
+    group_id: String,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.post(&format!("groups/{}/members", group_id), &data).await
+}
+
+/// Quitar miembro de grupo
+#[tauri::command]
+pub async fn api_remove_group_member(
+    api: State<'_, ApiClient>,
+    group_id: String,
+    user_id: String,
+) -> Result<serde_json::Value, String> {
+    api.delete(&format!("groups/{}/members/{}", group_id, user_id)).await
+}
+
 /// Obtener mis entregas
 #[tauri::command]
 pub async fn api_get_submissions(
@@ -886,6 +1007,16 @@ pub async fn api_create_agenda_item(
     item: serde_json::Value,
 ) -> Result<serde_json::Value, String> {
     api.post("agenda", &item).await
+}
+
+/// Actualizar cita de agenda
+#[tauri::command]
+pub async fn api_update_agenda_item(
+    api: State<'_, ApiClient>,
+    item_id: String,
+    data: serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    api.put(&format!("agenda/{}", item_id), &data).await
 }
 
 #[tauri::command]

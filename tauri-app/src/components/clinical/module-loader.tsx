@@ -7,6 +7,7 @@ const modules: Record<ModuleId, React.LazyExoticComponent<React.ComponentType>> 
   "patient-personality": lazy(() => import("@/modules/patient-personality")),
   anamnesis: lazy(() => import("@/modules/anamnesis")),
   audiometry: lazy(() => import("@/modules/audiometry")),
+  "tuning-fork": lazy(() => import("@/modules/tuning-fork")),
   logoaudiometry: lazy(() => import("@/modules/logoaudiometry")),
   supraliminal: lazy(() => import("@/modules/supraliminal")),
   impedance: lazy(() => import("@/modules/impedance")),

@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Check, CheckCheck } from "lucide-react";
 import { ContactAvatar } from "./contact-avatar";
+import { VoiceBubble } from "./voice-bubble";
 
 export interface ChatMessage {
   id: string;
@@ -10,6 +11,9 @@ export interface ChatMessage {
   status?: "sent" | "delivered" | "read";
   avatar?: string;
   senderName?: string;
+  voiceId?: string;
+  isVoice?: boolean;
+  voiceDurationSecs?: number;
 }
 
 interface ChatBubbleProps {
@@ -48,7 +52,19 @@ export function ChatBubble({ message }: ChatBubbleProps) {
             {message.senderName}
           </p>
         )}
-        <p className="whitespace-pre-wrap leading-relaxed">{message.text}</p>
+
+        {/* Contenido: voz o texto */}
+        {message.isVoice ? (
+          <VoiceBubble
+            text={message.text}
+            voiceId={message.voiceId}
+            durationSecs={message.voiceDurationSecs ?? 3}
+            isUser={isUser}
+          />
+        ) : (
+          <p className="whitespace-pre-wrap leading-relaxed">{message.text}</p>
+        )}
+
         <div
           className={cn(
             "mt-1 flex items-center gap-1 text-xs",

@@ -24,6 +24,7 @@ import { KarimeConfigWindow } from "./karime-config-window";
 import { AutorefWindow } from "./autoref-window";
 import { TrashWindow } from "./trash-window";
 import { KBEditorWindow } from "./kb-editor-window";
+import { PanelDocenteWindow } from "./panel-docente-window";
 
 interface Props {
   component: string;
@@ -56,6 +57,7 @@ const componentMap: Record<string, React.ComponentType> = {
   "autoref": AutorefWindow,
   "trash": TrashWindow,
   "kb-editor": KBEditorWindow,
+  "panel-docente": PanelDocenteWindow,
 };
 
 export function WindowContent({ component }: Props) {

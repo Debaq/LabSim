@@ -15,7 +15,7 @@ define('DB_PATH', DATA_PATH . '/labsim_server.db');
 
 // JWT
 define('JWT_SECRET', getenv('LABSIM_JWT_SECRET') ?: 'CHANGE_THIS_IN_PRODUCTION_' . md5(__DIR__));
-define('JWT_ACCESS_TTL', 1800);      // 30 minutos
+define('JWT_ACCESS_TTL', 28800);     // 8 horas
 define('JWT_REFRESH_TTL', 2592000);  // 30 días
 define('JWT_ISSUER', 'labsim-backend');
 define('JWT_ALGORITHM', 'HS256');

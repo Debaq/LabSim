@@ -55,6 +55,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    if ($action === 'edit') {
+        $userId = $_POST['user_id'] ?? '';
+        if ($userId === $auth['sub'] && isset($_POST['role']) && $_POST['role'] !== 'admin') {
+            $error = 'No puedes quitarte el rol admin a ti mismo';
+        } else {
+            $user = Database::fetchOne('SELECT id FROM users WHERE id = :id', [':id' => $userId]);
+            if ($user) {
+                $fields = [];
+                $params = [':id' => $userId];
+
+                if (isset($_POST['full_name'])) {
+                    $fields[] = 'full_name = :fn';
+                    $params[':fn'] = $_POST['full_name'] ?: null;
+                }
+                if (isset($_POST['email'])) {
+                    $fields[] = 'email = :em';
+                    $params[':em'] = $_POST['email'] ?: null;
+                }
+                if (!empty($_POST['role']) && in_array($_POST['role'], ['admin', 'docente', 'instructor', 'estudiante'])) {
+                    $fields[] = 'role = :rl';
+                    $params[':rl'] = $_POST['role'];
+                }
+                if (isset($_POST['institution'])) {
+                    $fields[] = 'institution = :inst';
+                    $params[':inst'] = $_POST['institution'] ?: null;
+                }
+
+                if (!empty($fields)) {
+                    $fields[] = "updated_at = datetime('now')";
+                    Database::execute(
+                        "UPDATE users SET " . implode(', ', $fields) . " WHERE id = :id",
+                        $params
+                    );
+                    $message = 'Usuario actualizado';
+                }
+            } else {
+                $error = 'Usuario no encontrado';
+            }
+        }
+    }
+
     if ($action === 'reset_password') {
         $userId = $_POST['user_id'] ?? '';
         $newPass = $_POST['new_password'] ?? '';
@@ -135,6 +176,7 @@ render_table(
                 <button type="submit" class="btn btn-sm ' . $toggleClass . '" data-confirm="¿' . $toggleLabel . ' a ' . htmlspecialchars($u['username']) . '?">' . $toggleLabel . '</button>
             </form>';
         }
+        $actions .= '<button class="btn btn-sm btn-outline" onclick="editUser(\'' . $u['id'] . '\',\'' . htmlspecialchars($u['username']) . '\',\'' . htmlspecialchars($u['full_name'] ?? '') . '\',\'' . htmlspecialchars($u['email'] ?? '') . '\',\'' . $u['role'] . '\',\'' . htmlspecialchars($u['institution'] ?? '') . '\')">Editar</button>';
         $actions .= '<button class="btn btn-sm btn-outline" onclick="resetPassword(\'' . $u['id'] . '\',\'' . htmlspecialchars($u['username']) . '\')">Reset pass</button>';
         $actions .= '</div>';
 
@@ -219,7 +261,53 @@ render_pagination($pagination['page'], $pagination['pages'], $baseUrl);
     </div>
 </div>
 
+<!-- Modal: Editar usuario -->
+<div id="modal-edit" class="modal-overlay">
+    <div class="modal">
+        <h3>Editar usuario: <span id="edit-username"></span></h3>
+        <form method="POST">
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="user_id" id="edit-user-id">
+            <div class="form-group">
+                <label>Nombre completo</label>
+                <input type="text" name="full_name" id="edit-full-name">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" id="edit-email">
+            </div>
+            <div class="form-group">
+                <label>Rol</label>
+                <select name="role" id="edit-role">
+                    <option value="estudiante">Estudiante</option>
+                    <option value="instructor">Instructor</option>
+                    <option value="docente">Docente</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Institución</label>
+                <input type="text" name="institution" id="edit-institution">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal('modal-edit')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+function editUser(userId, username, fullName, email, role, institution) {
+    document.getElementById('edit-user-id').value = userId;
+    document.getElementById('edit-username').textContent = username;
+    document.getElementById('edit-full-name').value = fullName;
+    document.getElementById('edit-email').value = email;
+    document.getElementById('edit-role').value = role;
+    document.getElementById('edit-institution').value = institution;
+    openModal('modal-edit');
+}
+
 function resetPassword(userId, username) {
     document.getElementById('reset-user-id').value = userId;
     document.getElementById('reset-username').textContent = username;

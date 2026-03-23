@@ -94,6 +94,8 @@ $schemas = [
         tags TEXT DEFAULT '',
         difficulty TEXT DEFAULT 'medium' CHECK (difficulty IN ('easy','medium','hard')),
         is_published INTEGER NOT NULL DEFAULT 0,
+        is_archived INTEGER NOT NULL DEFAULT 0,
+        is_locked INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL DEFAULT (datetime('now')),
         updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     )",
@@ -206,6 +208,10 @@ $schemas = [
         max_submissions INTEGER DEFAULT 1,
         allow_late_submission INTEGER DEFAULT 0,
         due_date TEXT,
+        session_type TEXT DEFAULT 'conjunto' CHECK (session_type IN ('conjunto','grupal')),
+        course_id TEXT REFERENCES courses(id),
+        centro_enabled INTEGER DEFAULT 0,
+        end_date TEXT,
         created_at TEXT DEFAULT (datetime('now')),
         updated_at TEXT DEFAULT (datetime('now'))
     )",

@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { useChatStore, nextMsgId, timeNow, type Contact } from "@/stores/chat-store";
+import { useChatStore, nextMsgId, timeNow, getKarimeStatus, type Contact } from "@/stores/chat-store";
 import { ChatBubble, type ChatMessage as ChatBubbleMsg } from "@/components/chat/chat-bubble";
 import { ChatInput } from "@/components/chat/chat-input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -12,7 +12,6 @@ import {
   WifiOff,
   BrainCircuit,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ContactAvatar } from "@/components/chat/contact-avatar";
 import { HelpBotView } from "@/components/chat/help-bot-view";
@@ -140,7 +139,7 @@ function ConversationView({ contact }: { contact: Contact }) {
   }, []);
 
   const handleSend = useCallback(
-    async (text: string) => {
+    async (text: string, voiceInfo?: { isVoice: boolean; durationSecs: number }) => {
       const userMsg = {
         id: nextMsgId(),
         contactId: contact.id,
@@ -148,6 +147,7 @@ function ConversationView({ contact }: { contact: Contact }) {
         text,
         time: timeNow(),
         status: "read" as const,
+        ...(voiceInfo ? { isVoice: true, voiceDurationSecs: voiceInfo.durationSecs } : {}),
       };
       addMessage(contact.id, userMsg);
       scrollToBottom();
@@ -182,6 +182,36 @@ function ConversationView({ contact }: { contact: Contact }) {
         responseText = pickFallback(contact.personaId);
       }
 
+      // Limpiar símbolos raros del LLM (markdown, emojis de texto, asteriscos, etc.)
+      responseText = responseText
+        .replace(/[*_~`#>|]/g, "")        // markdown
+        .replace(/\[.*?\]/g, "")           // [links]
+        .replace(/\(https?:\/\/.*?\)/g, "") // (urls)
+        .replace(/:\w+:/g, "")             // :emoji_codes:
+        .replace(/\n{3,}/g, "\n\n")        // múltiples saltos
+        .trim();
+
+      // Delay realista — simular que Karime "piensa" y "escribe"
+      const typingDelay = 1200 + Math.min(responseText.length * 15, 3000) + Math.random() * 800;
+      await new Promise((r) => setTimeout(r, typingDelay));
+
+      // Asignar voz según contacto
+      const voiceId = contact.personaId === "karime" ? "karime"
+        : contact.personaId === "patient" ? undefined
+        : undefined;
+
+      // Si el usuario envió voz, Karime responde con voz también
+      const respondWithVoice = voiceInfo?.isVoice && voiceId;
+      let voiceDurationSecs = 0;
+
+      // Pre-generar TTS para conocer la duración si es mensaje de voz
+      if (respondWithVoice) {
+        try {
+          const durationMs = await invoke<number>("tts_speak", { text: responseText, voiceId });
+          voiceDurationSecs = Math.round(durationMs / 1000);
+        } catch { /* TTS no disponible */ }
+      }
+
       const botMsg = {
         id: nextMsgId(),
         contactId: contact.id,
@@ -189,6 +219,8 @@ function ConversationView({ contact }: { contact: Contact }) {
         text: responseText,
         time: timeNow(),
         status: "read" as const,
+        voiceId,
+        ...(respondWithVoice ? { isVoice: true, voiceDurationSecs: Math.max(1, voiceDurationSecs) } : {}),
       };
 
       setTyping(false);
@@ -207,12 +239,15 @@ function ConversationView({ contact }: { contact: Contact }) {
     status: m.status,
     senderName: m.sender === "other" ? contact.name : undefined,
     avatar: m.sender === "other" ? contact.avatar : undefined,
+    voiceId: m.voiceId,
+    isVoice: m.isVoice,
+    voiceDurationSecs: m.voiceDurationSecs,
   }));
 
   return (
-    <div className="flex h-full flex-col ls-bg">
+    <div className="flex h-full flex-col overflow-hidden ls-bg">
       {/* Header */}
-      <div className="flex items-center gap-3 border-b ls-border ls-bg-panel/90 px-3 py-2">
+      <div className="shrink-0 flex items-center gap-3 border-b ls-border ls-bg-panel/90 px-3 py-2">
         <button
           onClick={() => setActiveContact(null)}
           className="rounded p-1 ls-text-muted transition hover:ls-bg-input hover:ls-text"
@@ -228,13 +263,13 @@ function ConversationView({ contact }: { contact: Contact }) {
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold ls-text">{contact.name}</p>
           <p className="text-xs ls-text-muted">
-            {typing ? "escribiendo..." : contact.subtitle}
+            {typing ? "escribiendo..." : contact.id === "karime" ? getKarimeStatus() : contact.subtitle}
           </p>
         </div>
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 min-h-0">
         <div
           className="space-y-3 p-4"
           style={{
@@ -268,7 +303,8 @@ function ConversationView({ contact }: { contact: Contact }) {
 
       {/* Input */}
       <ChatInput
-        onSend={handleSend}
+        onSend={(text) => handleSend(text)}
+        onSendVoice={(text, durationSecs) => handleSend(text, { isVoice: true, durationSecs })}
         placeholder={`Escríbele a ${contact.name}...`}
       />
     </div>

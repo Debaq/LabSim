@@ -143,22 +143,25 @@ switch (true) {
         $body = get_json_body();
 
         $errors = validate_required($body, ['title']);
-        $errors[] = validate_date($body['scheduledDate'] ?? $body['scheduled_date'] ?? null);
-        $errors[] = validate_time($body['scheduledTime'] ?? $body['scheduled_time'] ?? null);
+        $date = $body['scheduledDate'] ?? $body['scheduled_date'] ?? null;
+        $time = $body['scheduledTime'] ?? $body['scheduled_time'] ?? null;
+        if ($date) $errors[] = validate_date($date);
+        if ($time) $errors[] = validate_time($time);
         validate_or_fail($errors);
 
-        // Instructor → pending_approval, docente/admin → approved
-        $status = ($auth['role'] === 'instructor') ? 'pending_approval' : 'approved';
-        $approvedBy = ($auth['role'] !== 'instructor') ? $auth['sub'] : null;
+        $status = 'active';
+        $approvedBy = $auth['sub'];
 
         $sessionId = Database::uuid();
         Database::execute(
             "INSERT INTO practice_sessions (id, title, description, created_by, approved_by, status,
                 scheduled_date, scheduled_time, duration_minutes, location, group_id,
-                instructions, max_submissions, allow_late_submission, due_date)
+                instructions, max_submissions, allow_late_submission, due_date,
+                session_type, course_id, centro_enabled, end_date)
              VALUES (:id, :title, :desc, :uid, :approved, :status,
                 :date, :time, :dur, :loc, :gid,
-                :instr, :max, :late, :due)",
+                :instr, :max, :late, :due,
+                :stype, :cid, :centro, :edate)",
             [
                 ':id' => $sessionId,
                 ':title' => $body['title'],
@@ -175,6 +178,10 @@ switch (true) {
                 ':max' => $body['maxSubmissions'] ?? $body['max_submissions'] ?? 1,
                 ':late' => (int)($body['allowLateSubmission'] ?? $body['allow_late_submission'] ?? 0),
                 ':due' => $body['dueDate'] ?? $body['due_date'] ?? null,
+                ':stype' => $body['sessionType'] ?? $body['session_type'] ?? 'conjunto',
+                ':cid' => $body['courseId'] ?? $body['course_id'] ?? null,
+                ':centro' => (int)($body['centroEnabled'] ?? $body['centro_enabled'] ?? 0),
+                ':edate' => $body['endDate'] ?? $body['end_date'] ?? null,
             ]
         );
 
@@ -201,11 +208,15 @@ switch (true) {
             'title' => 'title', 'description' => 'description', 'location' => 'location',
             'instructions' => 'instructions', 'dueDate' => 'due_date', 'due_date' => 'due_date',
             'scheduledDate' => 'scheduled_date', 'scheduled_date' => 'scheduled_date',
+            'endDate' => 'end_date', 'end_date' => 'end_date',
             'scheduledTime' => 'scheduled_time', 'scheduled_time' => 'scheduled_time',
             'durationMinutes' => 'duration_minutes', 'duration_minutes' => 'duration_minutes',
             'groupId' => 'group_id', 'group_id' => 'group_id',
             'maxSubmissions' => 'max_submissions', 'max_submissions' => 'max_submissions',
             'allowLateSubmission' => 'allow_late_submission', 'allow_late_submission' => 'allow_late_submission',
+            'sessionType' => 'session_type', 'session_type' => 'session_type',
+            'courseId' => 'course_id', 'course_id' => 'course_id',
+            'centroEnabled' => 'centro_enabled', 'centro_enabled' => 'centro_enabled',
         ];
 
         foreach ($body as $key => $value) {
@@ -224,7 +235,7 @@ switch (true) {
         json_response(['session' => Database::fetchOne('SELECT * FROM practice_sessions WHERE id = :id', [':id' => $id])]);
         break;
 
-    // ─── CANCELAR SESIÓN ────────────────────────────
+    // ─── ELIMINAR SESIÓN ────────────────────────────
     case $method === 'DELETE' && $id !== null && $action === null:
         $auth = require_auth(['admin', 'docente', 'instructor']);
 
@@ -232,66 +243,19 @@ switch (true) {
         if (!$session) error_response('Sesión no encontrada', 404);
 
         if ($auth['role'] !== 'admin' && $auth['sub'] !== $session['created_by']) {
-            error_response('Permisos insuficientes', 403);
+            error_response('Solo el creador o un admin puede eliminar esta sesión', 403);
         }
 
-        Database::execute(
-            "UPDATE practice_sessions SET status = 'cancelled', updated_at = datetime('now') WHERE id = :id",
-            [':id' => $id]
-        );
-        json_response(['message' => 'Sesión cancelada']);
-        break;
+        // Eliminar agenda_items vinculados
+        Database::execute('DELETE FROM agenda_items WHERE session_id = :sid', [':sid' => $id]);
+        // Eliminar casos vinculados
+        Database::execute('DELETE FROM practice_session_cases WHERE session_id = :sid', [':sid' => $id]);
+        // Eliminar guías
+        Database::execute('DELETE FROM session_guides WHERE session_id = :sid', [':sid' => $id]);
+        // Eliminar la sesión
+        Database::execute('DELETE FROM practice_sessions WHERE id = :id', [':id' => $id]);
 
-    // ─── APROBAR SESIÓN ─────────────────────────────
-    case $method === 'POST' && $action === 'approve':
-        $auth = require_auth(['admin', 'docente']);
-
-        $session = Database::fetchOne('SELECT id, status FROM practice_sessions WHERE id = :id', [':id' => $id]);
-        if (!$session) error_response('Sesión no encontrada', 404);
-        if ($session['status'] !== 'pending_approval') {
-            error_response('Solo se pueden aprobar sesiones pendientes de aprobación', 400);
-        }
-
-        Database::execute(
-            "UPDATE practice_sessions SET status = 'approved', approved_by = :uid, updated_at = datetime('now') WHERE id = :id",
-            [':id' => $id, ':uid' => $auth['sub']]
-        );
-        json_response(['message' => 'Sesión aprobada']);
-        break;
-
-    // ─── RECHAZAR SESIÓN ────────────────────────────
-    case $method === 'POST' && $action === 'reject':
-        $auth = require_auth(['admin', 'docente']);
-        $body = get_json_body();
-
-        $session = Database::fetchOne('SELECT id, status FROM practice_sessions WHERE id = :id', [':id' => $id]);
-        if (!$session) error_response('Sesión no encontrada', 404);
-        if ($session['status'] !== 'pending_approval') {
-            error_response('Solo se pueden rechazar sesiones pendientes de aprobación', 400);
-        }
-
-        Database::execute(
-            "UPDATE practice_sessions SET status = 'cancelled', updated_at = datetime('now') WHERE id = :id",
-            [':id' => $id]
-        );
-        json_response(['message' => 'Sesión rechazada', 'reason' => $body['reason'] ?? null]);
-        break;
-
-    // ─── ACTIVAR SESIÓN ─────────────────────────────
-    case $method === 'POST' && $action === 'activate':
-        $auth = require_auth(['admin', 'docente', 'instructor']);
-
-        $session = Database::fetchOne('SELECT id, status, created_by FROM practice_sessions WHERE id = :id', [':id' => $id]);
-        if (!$session) error_response('Sesión no encontrada', 404);
-        if (!in_array($session['status'], ['approved'])) {
-            error_response('Solo se pueden activar sesiones aprobadas', 400);
-        }
-
-        Database::execute(
-            "UPDATE practice_sessions SET status = 'active', updated_at = datetime('now') WHERE id = :id",
-            [':id' => $id]
-        );
-        json_response(['message' => 'Sesión activada']);
+        json_response(['message' => 'Sesión eliminada']);
         break;
 
     // ─── COMPLETAR SESIÓN ───────────────────────────

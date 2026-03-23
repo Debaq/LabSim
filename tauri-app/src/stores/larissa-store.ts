@@ -1,6 +1,28 @@
 import { create } from "zustand";
 import { invoke } from "@tauri-apps/api/core";
 
+// ─── Tipos ──────────────────────────────────────────
+
+export interface CaseSummary {
+  id: string;
+  title: string;
+  description: string | null;
+  tags: string;
+  difficulty: string;
+  is_published: number;
+  is_locked: number;
+}
+
+export interface CaseProfile {
+  core?: {
+    identity?: Record<string, unknown>;
+    personality?: Record<string, unknown>;
+    clinicalHistory?: Record<string, unknown>;
+  };
+  modules?: Record<string, Record<string, unknown>>;
+  [key: string]: unknown;
+}
+
 export interface AgendaItem {
   id: string;
   patient_name: string;
@@ -14,7 +36,7 @@ export interface AgendaItem {
   scheduled_date: string;
   scheduled_time: string;
   duration_minutes: number;
-  status: "scheduled" | "in_progress" | "completed" | "cancelled" | "rescheduled" | "no_show";
+  status: string;
   assigned_to: string | null;
   assigned_name: string | null;
   author_name: string | null;
@@ -57,67 +79,228 @@ export interface Interconsultation {
   responded_at: string | null;
 }
 
-export interface CaseProfile {
-  patientInfo: Record<string, unknown>;
-  anamnesis: Record<string, unknown>;
-  [key: string]: Record<string, unknown>;
+export interface AgendaSession {
+  id: string;
+  title: string;
+  scheduled_date: string | null;
+  session_type: string | null;
+  status: string;
+  block_count: number;
 }
 
-type LarissaTab = "evoluciones" | "interconsultas" | "examenes" | "ficha-base";
+// ─── Estado ─────────────────────────────────────────
+
+type MainView = "fichas" | "agenda";
+type AgendaView = "list" | "detail";
+type PatientTab = "ficha-base" | "examenes";
 
 interface LarissaState {
+  // Navegación principal
+  mainView: MainView;
+
+  // Fichas Clínicas
+  patients: CaseSummary[];
+  patientsLoading: boolean;
+  searchQuery: string;
+  selectedPatientId: string | null;
+  patientProfile: CaseProfile | null;
+  patientLoading: boolean;
+  patientTab: PatientTab;
+
   // Agenda
+  agendaSessions: AgendaSession[];
+  agendaSessionsLoading: boolean;
+  agendaView: AgendaView;
+  selectedAgendaSessionId: string | null;
   agendaItems: AgendaItem[];
   agendaLoading: boolean;
-
-  // Selección
   selectedItemId: string | null;
-  selectedCase: CaseProfile | null;
-  caseLoading: boolean;
-
-  // Evoluciones e interconsultas
   evolutions: Evolution[];
   interconsultations: Interconsultation[];
   detailLoading: boolean;
 
-  // UI
-  activeTab: LarissaTab;
+  // Acciones — navegación
+  setMainView: (view: MainView) => void;
 
-  // Acciones
-  setActiveTab: (tab: LarissaTab) => void;
+  // Acciones — fichas
+  fetchPatients: () => Promise<void>;
+  selectPatient: (caseId: string | null) => Promise<void>;
+  setSearchQuery: (q: string) => void;
+  setPatientTab: (tab: PatientTab) => void;
+
+  // Acciones — agenda
+  fetchAgendaSessions: () => Promise<void>;
+  selectAgendaSession: (sessionId: string | null) => Promise<void>;
+  setAgendaView: (view: AgendaView) => void;
+  assignPatientToSlot: (agendaItemId: string, patientName: string, caseId?: string) => Promise<void>;
+  deleteAgendaSession: (sessionId: string) => Promise<void>;
   fetchAgenda: () => Promise<void>;
   selectItem: (id: string | null) => Promise<void>;
   createEvolution: (data: Record<string, string>) => Promise<void>;
   updateEvolution: (id: string, data: Record<string, string>) => Promise<void>;
   createInterconsultation: (data: { targetSpecialty: string; reason: string; priority?: string }) => Promise<void>;
+  respondInterconsultation: (id: string, responseText: string) => Promise<void>;
   refreshDetail: () => Promise<void>;
 }
 
+// ─── Store ──────────────────────────────────────────
+
 export const useLarissaStore = create<LarissaState>()((set, get) => ({
+  mainView: "fichas",
+
+  patients: [],
+  patientsLoading: false,
+  searchQuery: "",
+  selectedPatientId: null,
+  patientProfile: null,
+  patientLoading: false,
+  patientTab: "ficha-base",
+
+  agendaSessions: [],
+  agendaSessionsLoading: false,
+  agendaView: "list" as AgendaView,
+  selectedAgendaSessionId: null,
   agendaItems: [],
   agendaLoading: false,
   selectedItemId: null,
-  selectedCase: null,
-  caseLoading: false,
   evolutions: [],
   interconsultations: [],
   detailLoading: false,
-  activeTab: "evoluciones",
 
-  setActiveTab: (tab) => set({ activeTab: tab }),
+  // ─── Navegación ────────────────────────────────────
+
+  setMainView: (view) => set({ mainView: view }),
+
+  // ─── Fichas Clínicas ──────────────────────────────
+
+  fetchPatients: async () => {
+    set({ patientsLoading: true });
+    try {
+      const result = await invoke<{ items: CaseSummary[] }>(
+        "api_list_cases",
+        { published: "1", limit: 200 },
+      );
+      set({ patients: result?.items ?? [] });
+    } catch {
+      set({ patients: [] });
+    } finally {
+      set({ patientsLoading: false });
+    }
+  },
+
+  selectPatient: async (caseId) => {
+    if (!caseId) {
+      set({ selectedPatientId: null, patientProfile: null });
+      return;
+    }
+    set({ selectedPatientId: caseId, patientLoading: true, patientTab: "ficha-base" });
+    try {
+      const result = await invoke<{ case: { profile: CaseProfile } }>(
+        "api_get_case",
+        { caseId },
+      );
+      set({ patientProfile: result?.case?.profile ?? null });
+    } catch {
+      set({ patientProfile: null });
+    } finally {
+      set({ patientLoading: false });
+    }
+  },
+
+  setSearchQuery: (q) => set({ searchQuery: q }),
+  setPatientTab: (tab) => set({ patientTab: tab }),
+
+  // ─── Agenda ─────────────────────────────────────────
+
+  fetchAgendaSessions: async () => {
+    set({ agendaSessionsLoading: true });
+    try {
+      // Listar sesiones que tienen bloques de agenda
+      const result = await invoke<{ items: Array<{
+        id: string; title: string; scheduled_date: string | null;
+        session_type: string | null; status: string; course_id: string | null;
+      }> }>("api_get_sessions", {});
+      const sessions = result?.items ?? [];
+      // Para cada sesión, contar bloques
+      const allAgenda = await invoke<{ items: AgendaItem[] }>("api_get_agenda", { from: "2020-01-01", to: "2099-12-31" });
+      const allItems = allAgenda?.items ?? [];
+      const countBySession: Record<string, number> = {};
+      for (const item of allItems) {
+        if (item.session_id) countBySession[item.session_id] = (countBySession[item.session_id] ?? 0) + 1;
+      }
+      const agendaSessions: AgendaSession[] = sessions
+        .filter((s) => countBySession[s.id] > 0 || s.status === "approved" || s.status === "active")
+        .map((s) => ({
+          id: s.id,
+          title: s.title,
+          scheduled_date: s.scheduled_date,
+          session_type: s.session_type,
+          status: s.status,
+          block_count: countBySession[s.id] ?? 0,
+        }));
+      set({ agendaSessions });
+    } catch {
+      set({ agendaSessions: [] });
+    } finally {
+      set({ agendaSessionsLoading: false });
+    }
+  },
+
+  selectAgendaSession: async (sessionId) => {
+    if (!sessionId) {
+      set({ selectedAgendaSessionId: null, agendaItems: [], agendaView: "list" });
+      return;
+    }
+    set({ selectedAgendaSessionId: sessionId, agendaLoading: true, agendaView: "detail" });
+    try {
+      const result = await invoke<{ items: AgendaItem[] }>("api_get_agenda", { from: "2020-01-01", to: "2099-12-31" });
+      const items = (result?.items ?? []).filter((a) => a.session_id === sessionId);
+      set({ agendaItems: items });
+    } catch {
+      set({ agendaItems: [] });
+    } finally {
+      set({ agendaLoading: false });
+    }
+  },
+
+  setAgendaView: (view) => set({ agendaView: view }),
+
+  assignPatientToSlot: async (agendaItemId, patientName, caseId) => {
+    await invoke("api_update_agenda_item", {
+      itemId: agendaItemId,
+      data: {
+        patientName,
+        caseId: caseId ?? undefined,
+      },
+    });
+    set((s) => ({
+      agendaItems: s.agendaItems.map((a) =>
+        a.id === agendaItemId
+          ? { ...a, patient_name: patientName, case_id: caseId ?? null }
+          : a
+      ),
+    }));
+  },
+
+  deleteAgendaSession: async (sessionId) => {
+    await invoke("api_delete_session", { sessionId });
+    set((s) => ({
+      agendaSessions: s.agendaSessions.filter((a) => a.id !== sessionId),
+      selectedAgendaSessionId: s.selectedAgendaSessionId === sessionId ? null : s.selectedAgendaSessionId,
+      agendaView: s.selectedAgendaSessionId === sessionId ? "list" as AgendaView : s.agendaView,
+    }));
+  },
 
   fetchAgenda: async () => {
     set({ agendaLoading: true });
     try {
-      // Cargar próximos 60 días
       const today = new Date();
       const future = new Date(today);
       future.setDate(future.getDate() + 60);
       const from = today.toISOString().split("T")[0];
       const to = future.toISOString().split("T")[0];
-
-      const result = await invoke<{ data: AgendaItem[] }>("api_get_agenda", { from, to });
-      set({ agendaItems: result.data ?? [] });
+      const result = await invoke<{ items: AgendaItem[] }>("api_get_agenda", { from, to });
+      set({ agendaItems: result?.items ?? [] });
     } catch {
       set({ agendaItems: [] });
     } finally {
@@ -127,30 +310,10 @@ export const useLarissaStore = create<LarissaState>()((set, get) => ({
 
   selectItem: async (id) => {
     if (!id) {
-      set({ selectedItemId: null, selectedCase: null, evolutions: [], interconsultations: [] });
+      set({ selectedItemId: null, evolutions: [], interconsultations: [] });
       return;
     }
-
-    set({ selectedItemId: id, detailLoading: true, caseLoading: true });
-
-    const item = get().agendaItems.find((a) => a.id === id);
-
-    // Cargar caso vinculado si existe
-    if (item?.case_id) {
-      try {
-        const result = await invoke<{ case: { profile: CaseProfile } }>("api_get_case", {
-          caseId: item.case_id,
-        });
-        set({ selectedCase: result.case.profile ?? null });
-      } catch {
-        set({ selectedCase: null });
-      }
-    } else {
-      set({ selectedCase: null });
-    }
-    set({ caseLoading: false });
-
-    // Cargar evoluciones e interconsultas en paralelo
+    set({ selectedItemId: id, detailLoading: true });
     try {
       const [evosResult, icsResult] = await Promise.all([
         invoke<{ data: Evolution[] }>("api_list_evolutions", { agendaItemId: id }),
@@ -190,15 +353,21 @@ export const useLarissaStore = create<LarissaState>()((set, get) => ({
     await get().refreshDetail();
   },
 
+  respondInterconsultation: async (id, responseText) => {
+    await invoke("api_respond_interconsultation", {
+      interconsultationId: id,
+      data: { responseText },
+    });
+    await get().refreshDetail();
+  },
+
   refreshDetail: async () => {
     const { selectedItemId } = get();
     if (!selectedItemId) return;
     try {
       const [evosResult, icsResult] = await Promise.all([
         invoke<{ data: Evolution[] }>("api_list_evolutions", { agendaItemId: selectedItemId }),
-        invoke<{ data: Interconsultation[] }>("api_list_interconsultations", {
-          agendaItemId: selectedItemId,
-        }),
+        invoke<{ data: Interconsultation[] }>("api_list_interconsultations", { agendaItemId: selectedItemId }),
       ]);
       set({
         evolutions: evosResult.data ?? [],

@@ -37,6 +37,7 @@ import {
   ArrowLeft,
   Save,
   CloudUpload,
+  Lock,
 } from "lucide-react";
 import { useCasesStore, type CaseSummary } from "@/stores/cases-store";
 import { usePatientStore } from "@/stores/patient-store";
@@ -377,6 +378,7 @@ export function ManagePatientsWindow() {
                       }`}
                     >
                       <div className="flex items-center gap-1.5">
+                        {c.is_locked ? <Lock className="h-3 w-3 shrink-0 text-amber-400" /> : null}
                         <span
                           className={`truncate text-xs font-medium ${
                             selectedCaseId === c.id ? "text-purple-300" : "ls-text2"
@@ -470,19 +472,26 @@ export function ManagePatientsWindow() {
 
                 {/* Actions */}
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => handleEdit(selectedCase)}
-                    disabled={actionLoading === "edit"}
-                    className="gap-1.5 bg-purple-600 ls-text hover:bg-purple-500"
-                  >
-                    {actionLoading === "edit" ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <Pencil className="h-3.5 w-3.5" />
-                    )}
-                    Editar
-                  </Button>
+                  {selectedCase.is_locked ? (
+                    <div className="flex items-center gap-1.5 rounded-md bg-amber-500/10 px-3 py-1.5 text-xs text-amber-400">
+                      <Lock className="h-3.5 w-3.5" />
+                      Caso de ejemplo — no editable
+                    </div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      onClick={() => handleEdit(selectedCase)}
+                      disabled={actionLoading === "edit"}
+                      className="gap-1.5 bg-purple-600 ls-text hover:bg-purple-500"
+                    >
+                      {actionLoading === "edit" ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Pencil className="h-3.5 w-3.5" />
+                      )}
+                      Editar
+                    </Button>
+                  )}
 
                   <DropdownMenu>
                     <DropdownMenuTrigger>
@@ -500,51 +509,55 @@ export function ManagePatientsWindow() {
                         <Copy className="mr-2 h-4 w-4" />
                         Duplicar
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleTogglePublish(selectedCase)}
-                        disabled={actionLoading === "publish"}
-                        className="ls-text2 focus:ls-bg-input focus:ls-text"
-                      >
-                        {selectedCase.is_published ? (
-                          <>
-                            <GlobeLock className="mr-2 h-4 w-4" />
-                            Despublicar
-                          </>
-                        ) : (
-                          <>
-                            <Globe className="mr-2 h-4 w-4" />
-                            Publicar
-                          </>
-                        )}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleToggleArchive(selectedCase)}
-                        disabled={actionLoading === "archive"}
-                        className="ls-text2 focus:ls-bg-input focus:ls-text"
-                      >
-                        {selectedCase.is_archived ? (
-                          <>
-                            <ArchiveRestore className="mr-2 h-4 w-4" />
-                            Desarchivar
-                          </>
-                        ) : (
-                          <>
-                            <Archive className="mr-2 h-4 w-4" />
-                            Archivar
-                          </>
-                        )}
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator className="ls-bg-input" />
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setCaseToDelete(selectedCase);
-                          setDeleteDialogOpen(true);
-                        }}
-                        className="text-red-400 focus:bg-red-500/10 focus:text-red-300"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Eliminar
-                      </DropdownMenuItem>
+                      {!selectedCase.is_locked && (
+                        <>
+                          <DropdownMenuItem
+                            onClick={() => handleTogglePublish(selectedCase)}
+                            disabled={actionLoading === "publish"}
+                            className="ls-text2 focus:ls-bg-input focus:ls-text"
+                          >
+                            {selectedCase.is_published ? (
+                              <>
+                                <GlobeLock className="mr-2 h-4 w-4" />
+                                Despublicar
+                              </>
+                            ) : (
+                              <>
+                                <Globe className="mr-2 h-4 w-4" />
+                                Publicar
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleToggleArchive(selectedCase)}
+                            disabled={actionLoading === "archive"}
+                            className="ls-text2 focus:ls-bg-input focus:ls-text"
+                          >
+                            {selectedCase.is_archived ? (
+                              <>
+                                <ArchiveRestore className="mr-2 h-4 w-4" />
+                                Desarchivar
+                              </>
+                            ) : (
+                              <>
+                                <Archive className="mr-2 h-4 w-4" />
+                                Archivar
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator className="ls-bg-input" />
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setCaseToDelete(selectedCase);
+                              setDeleteDialogOpen(true);
+                            }}
+                            className="text-red-400 focus:bg-red-500/10 focus:text-red-300"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>

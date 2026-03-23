@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FolderOpen, File, Folder, ChevronRight, ArrowLeft, Home } from "lucide-react";
+import { File, Folder, ChevronRight, ArrowLeft, Home } from "lucide-react";
 
 interface FsEntry {
   name: string;

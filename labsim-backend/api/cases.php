@@ -75,7 +75,7 @@ switch (true) {
         }
 
         $sql = "SELECT c.id, c.title, c.description, c.author_id, c.tags, c.difficulty,
-                       c.is_published, c.is_archived, c.schema_version, c.created_at, c.updated_at,
+                       c.is_published, c.is_archived, c.is_locked, c.schema_version, c.created_at, c.updated_at,
                        u.username as author_username, u.full_name as author_name
                 FROM cases c
                 LEFT JOIN users u ON c.author_id = u.id
@@ -157,9 +157,13 @@ switch (true) {
         $auth = require_auth(['admin', 'docente', 'instructor']);
         $body = get_json_body();
 
-        $caso = Database::fetchOne('SELECT id, author_id FROM cases WHERE id = :id', [':id' => $id]);
+        $caso = Database::fetchOne('SELECT id, author_id, is_locked FROM cases WHERE id = :id', [':id' => $id]);
         if (!$caso) {
             error_response('Caso no encontrado', 404);
+        }
+
+        if ($caso['is_locked'] ?? 0) {
+            error_response('Este caso está bloqueado y no puede ser editado', 403);
         }
 
         // Solo el autor o admin puede editar
@@ -237,9 +241,13 @@ switch (true) {
     case $method === 'DELETE' && $id !== null && $action === null:
         $auth = require_auth(['admin', 'docente']);
 
-        $caso = Database::fetchOne('SELECT id, author_id FROM cases WHERE id = :id', [':id' => $id]);
+        $caso = Database::fetchOne('SELECT id, author_id, is_locked FROM cases WHERE id = :id', [':id' => $id]);
         if (!$caso) {
             error_response('Caso no encontrado', 404);
+        }
+
+        if ($caso['is_locked'] ?? 0) {
+            error_response('Este caso está bloqueado y no puede ser eliminado', 403);
         }
 
         if ($auth['role'] !== 'admin' && $auth['sub'] !== $caso['author_id']) {

@@ -13,6 +13,11 @@ import {
 import { cn } from "@/lib/utils";
 import { RotateCcw, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { TalkbackPanel } from "@/components/audiometer/talkback-panel";
+import { PatientLed } from "@/components/audiometer/patient-led";
+import { usePatientStore } from "@/stores/patient-store";
+import { simulateAudiometryResponse, type MaskingConfig, type TransducerType as ATrans, type EarSide } from "@/lib/audiometry-patient";
+import type { AudiometryData } from "@/modules/audiometry/schema";
+import { isInstructionCompatible } from "@/lib/audiometer-instructions";
 
 // === Components defined OUTSIDE the main component to avoid re-mounting ===
 function Tb({ on, click, children }: { on: boolean; click: () => void; children: React.ReactNode }) {
@@ -41,6 +46,16 @@ const defaultCh = (out: "right" | "left"): ChannelState => ({
 const I_MARKS = [0, 40, 80, 120].map((v) => ({ value: v, label: `${v}` }));
 const transIdx = (t: string) => t === "bone" ? 1 : t === "free" ? 2 : 0;
 
+const EMPTY_AUDIO: AudiometryData = {
+  umbralesAereos: { oidoDerecho: {}, oidoIzquierdo: {} },
+  umbralesOseos: { oidoDerecho: {}, oidoIzquierdo: {} },
+  ldl: { oidoDerecho: {}, oidoIzquierdo: {} },
+  tipoPerdida: { oidoDerecho: "normal", oidoIzquierdo: "normal" },
+  reclutamiento: { oidoDerecho: false, oidoIzquierdo: false },
+  deterioroTonal: { oidoDerecho: false, oidoIzquierdo: false },
+  patientConfig: { falsePositiveRate: 0.03, falseNegativeRate: 0.02, reactionTimeMs: 350, fatigueFactor: 0.1, seed: 42 },
+};
+
 export function AudiometerPlaceholder() {
   const [ch0, setCh0] = useState<ChannelState>(defaultCh("right"));
   const [ch1, setCh1] = useState<ChannelState>(defaultCh("left"));
@@ -57,7 +72,17 @@ export function AudiometerPlaceholder() {
   const [timerOn, setTimerOn] = useState(false);
   const [talkbackActive, setTalkbackActive] = useState(false);
   const [talkbackLevel, setTalkbackLevel] = useState(10);
+  const [activeInstruction, setActiveInstruction] = useState<string | null>(null);
+  const [activeResponseMode, setActiveResponseMode] = useState<import("@/lib/audiometer-instructions").ResponseMode>("none");
   const tmr = useRef<ReturnType<typeof setInterval>>(undefined);
+
+  // ─── Paciente virtual ─────────────────────────────────
+  const audioData = usePatientStore((s) => (s.data.modules.audiometry ?? EMPTY_AUDIO) as AudiometryData);
+  const patientId = usePatientStore((s) => s.currentPatientId);
+  const [virtualPatient, setVirtualPatient] = useState(true);
+  const [patientLedOn, setPatientLedOn] = useState(false);
+  const patientTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const stimCountRef = useRef(0);
   const v0 = useRef<ReturnType<typeof setInterval>>(undefined);
   const v1 = useRef<ReturnType<typeof setInterval>>(undefined);
   // Pulsatile timers
@@ -216,6 +241,78 @@ export function AudiometerPlaceholder() {
     } catch { /* TTS no cargado */ }
   }, []);
 
+  // ─── Simulación de respuesta del paciente ──────────────
+  // El paciente mantiene presionado su botón mientras escucha el tono.
+  // Se enciende después del tiempo de reacción y se apaga cuando el
+  // estímulo se detiene (con un pequeño delay de release).
+  const lastResponseRef = useRef<{ heard: boolean; reactionTimeMs: number | null }>({ heard: false, reactionTimeMs: null });
+
+  const patientPress = useCallback((chIdx: 0 | 1) => {
+    if (!virtualPatient || !patientId) return;
+    const ch = chIdx === 0 ? ch0Ref.current : ch1Ref.current;
+    const config = audioData.patientConfig ?? EMPTY_AUDIO.patientConfig;
+
+    // Sin instrucción → paciente no sabe qué hacer, no responde
+    if (activeResponseMode === "none") return;
+
+    // Verificar que la instrucción es compatible con lo que se está haciendo
+    const otherCh = chIdx === 0 ? ch1Ref.current : ch0Ref.current;
+    const hasMasking = otherCh.isPlaying && ["nbn", "wn", "sn", "pn"].includes(otherCh.stimulus);
+
+    if (!isInstructionCompatible(activeResponseMode, ch.transducer as "air" | "bone" | "free", hasMasking)) {
+      // Instrucción incorrecta para la prueba → paciente confundido, no responde
+      return;
+    }
+
+    // Determinar masking
+    let masking: MaskingConfig | null = null;
+    if (hasMasking) {
+      masking = {
+        type: otherCh.stimulus as MaskingConfig["type"],
+        level: otherCh.intensity,
+        ear: otherCh.output as EarSide,
+      };
+    }
+
+    stimCountRef.current += 1;
+    const progress = Math.min(1, stimCountRef.current / 80);
+
+    const response = simulateAudiometryResponse(
+      ch.frequency,
+      ch.intensity,
+      ch.transducer as ATrans,
+      ch.output as EarSide,
+      audioData,
+      config,
+      masking,
+      progress,
+      (config.seed ?? 42) + stimCountRef.current * 13 + ch.frequency,
+    );
+
+    lastResponseRef.current = response;
+
+    if (patientTimerRef.current) clearTimeout(patientTimerRef.current);
+    setPatientLedOn(false);
+
+    if (response.heard && response.reactionTimeMs) {
+      patientTimerRef.current = setTimeout(() => {
+        setPatientLedOn(true);
+      }, response.reactionTimeMs);
+    }
+  }, [virtualPatient, patientId, audioData, activeResponseMode]);
+
+  const patientRelease = useCallback(() => {
+    if (!virtualPatient) return;
+    if (patientTimerRef.current) clearTimeout(patientTimerRef.current);
+    if (patientLedOn) {
+      // Paciente suelta su botón ~200-400ms después que el tono para
+      const releaseDelay = 150 + Math.random() * 250;
+      patientTimerRef.current = setTimeout(() => setPatientLedOn(false), releaseDelay);
+    } else {
+      setPatientLedOn(false);
+    }
+  }, [virtualPatient, patientLedOn]);
+
   // Stimulus press/release — reads from refs, no stale closures
   const handleStimPress = useCallback((chIdx: 0 | 1) => {
     const ch = chIdx === 0 ? ch0Ref.current : ch1Ref.current;
@@ -225,11 +322,13 @@ export function AudiometerPlaceholder() {
     if (ch.reversed) {
       stopCh(chIdx);
       if (ch.toneMode === "pulsed") stopPulsatile(chIdx);
+      patientRelease();
     } else {
       startCh(chIdx);
       if (ch.toneMode === "pulsed") startPulsatile(chIdx);
+      patientPress(chIdx);
     }
-  }, [startCh, stopCh, startPulsatile, stopPulsatile, startAlternate]);
+  }, [startCh, stopCh, startPulsatile, stopPulsatile, startAlternate, patientPress, patientRelease]);
 
   const handleStimRelease = useCallback((chIdx: 0 | 1) => {
     const ch = chIdx === 0 ? ch0Ref.current : ch1Ref.current;
@@ -239,11 +338,13 @@ export function AudiometerPlaceholder() {
     if (ch.reversed) {
       startCh(chIdx);
       if (ch.toneMode === "pulsed") startPulsatile(chIdx);
+      patientPress(chIdx);
     } else {
       stopCh(chIdx);
       if (ch.toneMode === "pulsed") stopPulsatile(chIdx);
+      patientRelease();
     }
-  }, [startCh, stopCh, startPulsatile, stopPulsatile, stopAlternate]);
+  }, [startCh, stopCh, startPulsatile, stopPulsatile, stopAlternate, patientPress, patientRelease]);
 
   // Reverse toggle
   const toggleReverse = useCallback((chIdx: 0 | 1) => {
@@ -378,6 +479,12 @@ export function AudiometerPlaceholder() {
         <div className="flex h-6 shrink-0 items-center justify-between ls-bg-panel px-3">
           <span className="text-xs font-bold tracking-[0.2em] ls-text-muted">LABSIM <span className="font-normal ls-text-muted">DA-80</span></span>
           <div className="flex items-center gap-2">
+            <PatientLed active={patientLedOn} />
+            <button onClick={() => setVirtualPatient(!virtualPatient)}
+              className={cn("rounded border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider transition cursor-pointer",
+                virtualPatient ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-400" : "ls-border ls-text-muted")}>
+              {virtualPatient ? "Pac. ON" : "Pac. OFF"}
+            </button>
             <ToggleSwitch value={testMode} onChange={(v) => setTestMode(v as "umbrales" | "logo")} options={[{ value: "umbrales", label: "Umbrales" }, { value: "logo", label: "Logo" }]} />
             <button onClick={() => setShowAG(!showAG)} className="ls-text-muted hover:ls-text-muted">
               {showAG ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
@@ -388,6 +495,20 @@ export function AudiometerPlaceholder() {
 
         <div className="flex flex-1 flex-col gap-2 p-3 overflow-hidden">
           <UnifiedDisplay ch0={ch0} ch1={ch1} frequency={freq} testMode={testMode === "logo" ? "logoaudiometria" : "umbrales"} time={tStr} logoText={logoText} />
+
+          {/* Talkback — visible justo bajo el display */}
+          <TalkbackPanel
+            level={talkbackLevel}
+            onLevelChange={setTalkbackLevel}
+            onCommand={handleTalkbackCommand}
+            isActive={talkbackActive}
+            onToggle={() => setTalkbackActive(!talkbackActive)}
+            activeInstruction={activeInstruction}
+            onInstruction={(inst) => {
+              setActiveInstruction(inst.id);
+              setActiveResponseMode(inst.responseMode);
+            }}
+          />
 
           <div className="flex gap-2">
             <div className="flex-1"><VuMeter level={ch0.vuLevel} active={ch0.isPlaying} height={14} /></div>
@@ -459,13 +580,6 @@ export function AudiometerPlaceholder() {
             )}
           </div>
 
-          <TalkbackPanel
-            level={talkbackLevel}
-            onLevelChange={setTalkbackLevel}
-            onCommand={handleTalkbackCommand}
-            isActive={talkbackActive}
-            onToggle={() => setTalkbackActive(!talkbackActive)}
-          />
         </div>
 
         <div className="flex h-5 shrink-0 items-center justify-between bg-black/25 px-3 text-xs ls-text-muted">

@@ -18,6 +18,12 @@ export interface Message {
   text: string;
   time: string;
   status: "sent" | "delivered" | "read";
+  /** ID de voz TTS para reproducir este mensaje (ej: "karime", "male", "female") */
+  voiceId?: string;
+  /** true si es un mensaje de voz (se muestra como nota de audio, no texto) */
+  isVoice?: boolean;
+  /** Duración del audio en segundos */
+  voiceDurationSecs?: number;
 }
 
 interface ChatState {
@@ -38,12 +44,39 @@ interface ChatState {
   removePatientContact: () => void;
 }
 
+const KARIME_STATUSES = [
+  "Disponible",
+  "En recepción",
+  "Organizando fichas",
+  "Tomando un cafecito",
+  "Agenda del día lista",
+  "Llamando pacientes",
+  "Un día a la vez",
+  "Ordenando la sala de espera",
+  "Hoy es un buen día",
+  "Revisando los horarios",
+  "Escuchando música bajito",
+  "Todo bajo control",
+  "Preparando los informes",
+  "El café está listo",
+  "Lunes con energía",
+  "Viernes al fin",
+  "Siempre sonriendo",
+  "Atendiendo con cariño",
+];
+
+export function getKarimeStatus(): string {
+  // Cambia cada ~10 minutos basado en la hora
+  const idx = Math.floor(Date.now() / (10 * 60 * 1000)) % KARIME_STATUSES.length;
+  return KARIME_STATUSES[idx];
+}
+
 const CONTACTS: Contact[] = [
   {
     id: "karime",
     name: "Karime",
     avatar: "/img_karime.jpeg",
-    subtitle: "Secretaria",
+    subtitle: getKarimeStatus(),
     personaId: "karime",
     color: "from-emerald-400 to-teal-500",
     online: true,
@@ -72,8 +105,9 @@ const INITIAL_CONVERSATIONS: Record<string, Message[]> = {
       id: "k1",
       contactId: "karime",
       sender: "other",
-      text: "Buenos días doc! ☀️ Ya estoy en recepción, la sala está lista.",
+      text: "Buenos días. Ya estoy en recepción, la sala está lista.",
       time: "08:55",
+      voiceId: "karime",
       status: "read",
     },
     {
@@ -82,14 +116,16 @@ const INITIAL_CONVERSATIONS: Record<string, Message[]> = {
       sender: "other",
       text: "El primer paciente ya llegó, es el Sr. Martínez. Viene por audiometría completa, derivado del otorrino.",
       time: "08:58",
+      voiceId: "karime",
       status: "read",
     },
     {
       id: "k3",
       contactId: "karime",
       sender: "other",
-      text: "Ah, y le dejé los informes del paciente de ayer en el escritorio 📋",
+      text: "Le dejé los informes del paciente de ayer en el escritorio.",
       time: "09:00",
+      voiceId: "karime",
       status: "read",
     },
   ],

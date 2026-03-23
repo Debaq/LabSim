@@ -80,7 +80,7 @@ const CORE_KEYS: (keyof PatientCore)[] = ["identity", "personality", "clinicalHi
 
 /** Prefijos de configuración que se copian de módulos clínicos al estudiante */
 const CONFIG_PREFIXES = ["config_", "pathology", "pattern", "strategy", "stimulus", "eye"];
-const CONFIG_EXACT_KEYS = new Set(["patologia", "severidad", "scanPreferido", "calidadSenal", "defecto", "patron", "estrategia", "tamanoEstimulo", "mapaPreferido", "calidadCaptura"]);
+const CONFIG_EXACT_KEYS = new Set(["patologia", "severidad", "scanPreferido", "calidadSenal", "defecto", "patron", "estrategia", "tamanoEstimulo", "mapaPreferido", "calidadCaptura", "tipoPerdida", "reclutamiento", "deterioroTonal", "patientConfig"]);
 
 function isConfigKey(key: string): boolean {
   if (CONFIG_EXACT_KEYS.has(key)) return true;

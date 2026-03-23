@@ -3,7 +3,8 @@ import { useUIStore } from "@/stores/ui-store";
 import { useSyncStore } from "@/stores/sync-store";
 import { useChatStore } from "@/stores/chat-store";
 import { useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +24,8 @@ import {
   User,
   Wifi,
   Volume2,
+  Mic,
+  Loader2,
   Activity,
   ScanEye,
   Layers,
@@ -45,6 +48,7 @@ import {
   Users,
   Trash2,
   BookOpen,
+  LayoutDashboard,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -58,6 +62,7 @@ const WINDOW_ICONS: Record<string, LucideIcon> = {
   vng: Settings,
   vhit: Settings,
   scheimpflug: Settings,
+  "panel-docente": LayoutDashboard,
   courses: ClipboardList,
   supervision: Settings,
   "manage-patients": Stethoscope,
@@ -93,6 +98,65 @@ export function Taskbar() {
   const unreadCounts = useChatStore((s) => s.unreadCounts);
   const totalUnread = Object.values(unreadCounts).reduce((sum, c) => sum + c, 0);
   const [time, setTime] = useState(new Date());
+
+  // ─── Micrófono / Subtítulos ─────────────────────────
+  const [micRecording, setMicRecording] = useState(false);
+  const [micTranscribing] = useState(false);
+  const [subtitle, setSubtitle] = useState<string | null>(null);
+  const [subtitleFading, setSubtitleFading] = useState(false);
+  const subtitleTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const showSubtitle = useCallback((text: string, durationMs = 5000) => {
+    setSubtitle(text);
+    setSubtitleFading(false);
+    if (subtitleTimer.current) clearTimeout(subtitleTimer.current);
+    subtitleTimer.current = setTimeout(() => {
+      setSubtitleFading(true);
+      subtitleTimer.current = setTimeout(() => setSubtitle(null), 700);
+    }, durationMs);
+  }, []);
+
+  // Streaming por chunks: graba ~2s, transcribe, repite mientras esté activo
+  const micLoopRef = useRef(false);
+
+  const runMicLoop = useCallback(async () => {
+    micLoopRef.current = true;
+    setMicRecording(true);
+    showSubtitle("Escuchando...", 60000);
+
+    while (micLoopRef.current) {
+      try {
+        await invoke("speech_start_recording");
+        // Grabar un chunk de ~2.5s
+        await new Promise((r) => setTimeout(r, 2500));
+        if (!micLoopRef.current) break;
+        await invoke("speech_stop_recording");
+
+        const text = await invoke<string>("speech_transcribe", { language: "es" });
+        if (text && text.trim().length > 0 && micLoopRef.current) {
+          showSubtitle(text, 4000);
+        }
+      } catch {
+        if (micLoopRef.current) showSubtitle("(error de micrófono)", 2000);
+        break;
+      }
+    }
+
+    setMicRecording(false);
+  }, [showSubtitle]);
+
+  const toggleMic = useCallback(async () => {
+    if (micRecording) {
+      // Parar el loop
+      micLoopRef.current = false;
+      try { await invoke("speech_stop_recording"); } catch { /* ya parado */ }
+      setMicRecording(false);
+      showSubtitle("Micrófono desactivado", 2000);
+    } else {
+      // Iniciar loop de chunks
+      runMicLoop();
+    }
+  }, [micRecording, showSubtitle, runMicLoop]);
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
@@ -215,11 +279,11 @@ export function Taskbar() {
             <DropdownMenuItem onClick={() => openWindow("larissa", "Larissa", "larissa")} className="ls-text2 focus:ls-bg-input focus:ls-text">
               <ClipboardPen className="mr-2 h-4 w-4 text-cyan-400" />Larissa
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => openWindow("agenda", "Agenda", "agenda", WINDOW_SIZES.agenda)} className="ls-text2 focus:ls-bg-input focus:ls-text">
-              <CalendarDays className="mr-2 h-4 w-4 text-amber-400" />Agenda
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => openWindow("messaging", "Mensajes", "messaging", WINDOW_SIZES.messaging)} className="ls-text2 focus:ls-bg-input focus:ls-text">
               <MessageCircle className="mr-2 h-4 w-4 text-green-400" />Mensajes
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openWindow("practice-sessions", "Mis Sesiones", "practice-sessions")} className="ls-text2 focus:ls-bg-input focus:ls-text">
+              <ClipboardList className="mr-2 h-4 w-4 text-sky-400" />Mis Sesiones
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => openWindow("my-stats", "Mis Estadísticas", "my-stats")} className="ls-text2 focus:ls-bg-input focus:ls-text">
               <BarChart3 className="mr-2 h-4 w-4 text-teal-400" />Mis Estadísticas
@@ -230,14 +294,11 @@ export function Taskbar() {
             {(role === "admin" || role === "docente" || role === "instructor") && (
               <>
                 <p className="px-3 pt-1.5 pb-0.5 text-xs font-bold uppercase tracking-wider ls-text-muted">Gestión</p>
+                <DropdownMenuItem onClick={() => openWindow("panel-docente", "Panel Docente", "panel-docente", WINDOW_SIZES["panel-docente"])} className="ls-text2 focus:ls-bg-input focus:ls-text">
+                  <LayoutDashboard className="mr-2 h-4 w-4 text-orange-400" />Panel Docente
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => openWindow("center", "Centro", "center")} className="ls-text2 focus:ls-bg-input focus:ls-text">
                   <Building2 className="mr-2 h-4 w-4 text-amber-400" />Centro
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => openWindow("practice-sessions", "Sesiones", "practice-sessions")} className="ls-text2 focus:ls-bg-input focus:ls-text">
-                  <ClipboardList className="mr-2 h-4 w-4 text-sky-400" />Sesiones
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => openWindow("courses", "Mis Cursos", "courses")} className="ls-text2 focus:ls-bg-input focus:ls-text">
-                  <GraduationCap className="mr-2 h-4 w-4 text-sky-400" />Mis Cursos
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => openWindow("supervision", "Supervisión", "supervision")} className="ls-text2 focus:ls-bg-input focus:ls-text">
                   <ShieldCheck className="mr-2 h-4 w-4 text-indigo-400" />Supervisión
@@ -294,15 +355,6 @@ export function Taskbar() {
             {totalUnread > 0 ? `Mensajes (${totalUnread} sin leer)` : "Mensajes"}
           </TooltipContent>
         </Tooltip>
-        <Tooltip>
-          <TooltipTrigger
-            onClick={() => openWindow("agenda", "Agenda", "agenda", WINDOW_SIZES.agenda)}
-            className="rounded p-1.5 transition hover:ls-bg-input"
-          >
-            <CalendarDays className="h-4 w-4 text-amber-400" />
-          </TooltipTrigger>
-          <TooltipContent side="top">Agenda</TooltipContent>
-        </Tooltip>
       </div>
 
       {/* Window buttons */}
@@ -331,6 +383,15 @@ export function Taskbar() {
         })}
       </div>
 
+      {/* Subtítulos flotantes — sobre la taskbar, estilo película */}
+      {subtitle && (
+        <div className={`absolute bottom-12 left-1/2 -translate-x-1/2 z-50 pointer-events-none transition-opacity duration-700 ${subtitleFading ? "opacity-0" : "opacity-100"}`}>
+          <span className="bg-black/70 px-4 py-1.5 rounded text-sm text-white/90 shadow-lg">
+            {subtitle}
+          </span>
+        </div>
+      )}
+
       {/* System Tray */}
       <div className="flex items-center gap-2 px-2">
         <Tooltip>
@@ -345,6 +406,18 @@ export function Taskbar() {
             {isOnline === "online" ? "Servidor conectado" :
              isOnline === "checking" ? "Verificando conexión..." :
              "Sin conexión al servidor"}
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger className="cursor-pointer" onClick={toggleMic}>
+            {micTranscribing ? (
+              <Loader2 className="h-3.5 w-3.5 text-amber-400 animate-spin" />
+            ) : (
+              <Mic className={`h-3.5 w-3.5 ${micRecording ? "text-red-400 animate-pulse" : "ls-text-muted"}`} />
+            )}
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            {micRecording ? "Click para detener" : micTranscribing ? "Transcribiendo..." : "Probar micrófono (Whisper)"}
           </TooltipContent>
         </Tooltip>
         <Tooltip>

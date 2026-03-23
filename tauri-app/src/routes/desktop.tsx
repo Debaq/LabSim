@@ -1,13 +1,15 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "@/stores/auth-store";
 import { useUIStore } from "@/stores/ui-store";
+import { useChatStore } from "@/stores/chat-store";
 import "@/stores/theme-store";
 import { DesktopArea } from "@/components/layout/desktop-area";
 import { Taskbar } from "@/components/layout/taskbar";
 import { WindowFrame } from "@/components/layout/window-frame";
 import { WindowContent } from "@/components/windows/window-content";
 import { DesktopContextMenu } from "@/components/layout/desktop-context-menu";
+import { bootstrapAI } from "@/lib/ai-bootstrap";
 
 export default function DesktopPage() {
   const navigate = useNavigate();
@@ -15,10 +17,25 @@ export default function DesktopPage() {
   const windows = useUIStore((s) => s.windows);
   const closeWindow = useUIStore((s) => s.closeWindow);
   const focusWindow = useUIStore((s) => s.focusWindow);
+  const setLlmConnected = useChatStore((s) => s.setLlmConnected);
 
   useEffect(() => {
     if (!isAuthenticated) navigate({ to: "/login" });
   }, [isAuthenticated, navigate]);
+
+  // ─── Carga automática de modelos de IA ────────────
+  const bootstrapRef = useRef(false);
+  useEffect(() => {
+    if (!isAuthenticated || bootstrapRef.current) return;
+    bootstrapRef.current = true;
+
+    bootstrapAI(
+      () => setLlmConnected(true),
+      () => { /* speech ready */ },
+      () => { /* tts ready */ },
+      (msg) => console.log("[AI Bootstrap]", msg),
+    );
+  }, [isAuthenticated, setLlmConnected]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     // Solo en el fondo del escritorio, no en ventanas ni taskbar

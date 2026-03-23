@@ -1,11 +1,17 @@
 use piper_rs::synth::PiperSpeechSynthesizer;
-use std::path::PathBuf;
+use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-pub struct TtsEngine {
-    synth: Option<PiperSpeechSynthesizer>,
-    model_path: Option<PathBuf>,
+struct LoadedVoice {
+    synth: PiperSpeechSynthesizer,
     sample_rate: u32,
+    label: String,
+}
+
+pub struct TtsEngine {
+    voices: HashMap<String, LoadedVoice>,
+    /// Voz activa por defecto (la última cargada, o la seleccionada)
+    default_voice: Option<String>,
 }
 
 unsafe impl Send for TtsEngine {}
@@ -13,22 +19,22 @@ unsafe impl Send for TtsEngine {}
 impl TtsEngine {
     pub fn new() -> Self {
         Self {
-            synth: None,
-            model_path: None,
-            sample_rate: 22050,
+            voices: HashMap::new(),
+            default_voice: None,
         }
     }
 
-    pub fn load_model(&mut self, config_path: &str) -> Result<(), String> {
+    /// Carga un modelo y lo registra con un voice_id (ej: "male", "female")
+    pub fn load_model(&mut self, voice_id: &str, label: &str, config_path: &str) -> Result<(), String> {
         let path = std::path::Path::new(config_path);
         let model = piper_rs::from_config_path(path)
             .map_err(|e| format!("Error cargando modelo Piper: {}", e))?;
 
-        // Read sample rate from config JSON
+        let mut sample_rate = 22050u32;
         if let Ok(json_str) = std::fs::read_to_string(config_path) {
             if let Ok(json) = serde_json::from_str::<serde_json::Value>(&json_str) {
                 if let Some(sr) = json["audio"]["sample_rate"].as_u64() {
-                    self.sample_rate = sr as u32;
+                    sample_rate = sr as u32;
                 }
             }
         }
@@ -36,24 +42,42 @@ impl TtsEngine {
         let synth = PiperSpeechSynthesizer::new(model)
             .map_err(|e| format!("Error creando sintetizador: {}", e))?;
 
-        self.synth = Some(synth);
-        self.model_path = Some(PathBuf::from(config_path));
-        log::info!("Piper TTS cargado: {} ({}Hz)", config_path, self.sample_rate);
+        log::info!("Piper TTS cargado [{}]: {} ({}Hz)", voice_id, config_path, sample_rate);
+
+        self.voices.insert(voice_id.to_string(), LoadedVoice {
+            synth,
+            sample_rate,
+            label: label.to_string(),
+        });
+
+        // Si no hay voz por defecto, usar esta
+        if self.default_voice.is_none() {
+            self.default_voice = Some(voice_id.to_string());
+        }
+
         Ok(())
     }
 
     pub fn is_loaded(&self) -> bool {
-        self.synth.is_some()
+        !self.voices.is_empty()
     }
 
-    pub fn sample_rate(&self) -> u32 {
-        self.sample_rate
+    pub fn loaded_voices(&self) -> Vec<(String, String)> {
+        self.voices.iter().map(|(id, v)| (id.clone(), v.label.clone())).collect()
     }
 
-    pub fn synthesize(&self, text: &str) -> Result<Vec<f32>, String> {
-        let synth = self.synth.as_ref().ok_or("Modelo TTS no cargado")?;
+    /// Sintetiza con la voz por defecto
+    pub fn synthesize(&self, text: &str) -> Result<(Vec<f32>, u32), String> {
+        let voice_id = self.default_voice.as_ref().ok_or("No hay voz cargada")?;
+        self.synthesize_with(voice_id, text)
+    }
 
-        let audio_result = synth.synthesize_parallel(text.to_string(), None)
+    /// Sintetiza con una voz específica
+    pub fn synthesize_with(&self, voice_id: &str, text: &str) -> Result<(Vec<f32>, u32), String> {
+        let voice = self.voices.get(voice_id)
+            .ok_or_else(|| format!("Voz '{}' no cargada", voice_id))?;
+
+        let audio_result = voice.synth.synthesize_parallel(text.to_string(), None)
             .map_err(|e| format!("Error sintetizando: {}", e))?;
 
         let samples: Vec<f32> = audio_result
@@ -67,7 +91,7 @@ impl TtsEngine {
             return Err("No se generó audio".to_string());
         }
 
-        Ok(samples)
+        Ok((samples, voice.sample_rate))
     }
 }
 
