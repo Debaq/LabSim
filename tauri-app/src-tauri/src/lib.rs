@@ -59,6 +59,27 @@ fn resolve_sidecar(name: &str) -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // espeak-ng necesita saber dónde está espeak-ng-data para fonemizar.
+    // En Linux suele estar en /usr/share; en Windows lo empaquetamos junto al .exe.
+    if std::env::var("PIPER_ESPEAKNG_DATA_DIRECTORY").is_err() {
+        let exe_dir = std::env::current_exe()
+            .ok()
+            .and_then(|p| p.parent().map(|d| d.to_path_buf()));
+        if let Some(dir) = &exe_dir {
+            let candidate = dir.join("espeak-ng-data");
+            if candidate.exists() {
+                std::env::set_var("PIPER_ESPEAKNG_DATA_DIRECTORY", dir);
+            }
+        }
+        // Fallback: ubicación estándar en Linux
+        if std::env::var("PIPER_ESPEAKNG_DATA_DIRECTORY").is_err() {
+            let system_path = std::path::Path::new("/usr/share");
+            if system_path.join("espeak-ng-data").exists() {
+                std::env::set_var("PIPER_ESPEAKNG_DATA_DIRECTORY", system_path);
+            }
+        }
+    }
+
     let db = Database::new().expect("Error inicializando base de datos");
 
     let llm_path = resolve_sidecar("labsim-llm");
