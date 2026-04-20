@@ -9,7 +9,7 @@ authors:
     affiliation: "Universidad Austral de Chile"
 identifiers:
   - type: doi
-    value: 10.5281/zenodo.19664005
+    value: 10.5281/zenodo.19664006
     description: "Concept DOI (always points to latest release)"
 repository-code: "https://github.com/Debaq/LabSim"
 url: "https://tmeduca.org/labsim/"

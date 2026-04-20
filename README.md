@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://doi.org/10.5281/zenodo.19664005"><img src="https://zenodo.org/badge/372250246.svg" alt="DOI"></a>
+  <a href="https://doi.org/10.5281/zenodo.19664006"><img src="https://zenodo.org/badge/372250246.svg" alt="DOI"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
 </p>
 
@@ -24,7 +24,7 @@
 
 If you use LabSim in research or teaching, please cite:
 
-> Baier Quezada, N. (2026). *LabSim: Clinical Educational Simulator for Speech and Hearing Sciences*. Zenodo. https://doi.org/10.5281/zenodo.19664005
+> Baier Quezada, N. (2026). *LabSim: Clinical Educational Simulator for Speech and Hearing Sciences*. Zenodo. https://doi.org/10.5281/zenodo.19664006
 
 BibTeX:
 
@@ -35,8 +35,8 @@ BibTeX:
                    Speech and Hearing Sciences}},
   year         = 2026,
   publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.19664005},
-  url          = {https://doi.org/10.5281/zenodo.19664005}
+  doi          = {10.5281/zenodo.19664006},
+  url          = {https://doi.org/10.5281/zenodo.19664006}
 }
 ```
 
