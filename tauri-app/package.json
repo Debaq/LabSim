@@ -1,7 +1,9 @@
 {
   "name": "labsim",
   "private": true,
-  "version": "3.1.1",
+  "version": "3.1.2",
+  "license": "MIT",
+  "author": "Nicolás Baier Quezada",
   "type": "module",
   "scripts": {
     "dev": "vite",

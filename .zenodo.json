@@ -1,0 +1,27 @@
+{
+  "title": "LabSim: Clinical Educational Simulator for Speech and Hearing Sciences",
+  "description": "LabSim is a desktop clinical simulator for healthcare training, focused on speech-language pathology and audiology education. Students operate realistic equipment (audiometer, otoscopy, videonystagmography) with the same knobs, joysticks and workflows as physical instruments. Patients have personality, voice, clinical history and memory of previous encounters, powered by fully local AI (LLM via llama.cpp, speech-to-text with Whisper, text-to-speech with Piper). Teachers design pedagogical activities; a virtual secretary manages the schedule. Multi-tenant architecture supports institutional deployments.",
+  "creators": [
+    {
+      "name": "Baier Quezada, Nicolás",
+      "affiliation": "Universidad Austral de Chile",
+      "orcid": "0000-0003-2818-0990"
+    }
+  ],
+  "keywords": [
+    "speech-language pathology",
+    "audiology",
+    "clinical simulation",
+    "medical education",
+    "healthcare training",
+    "audiometry",
+    "virtual patient",
+    "local AI",
+    "Tauri",
+    "educational technology"
+  ],
+  "license": "MIT",
+  "upload_type": "software",
+  "access_right": "open",
+  "language": "eng"
+}
