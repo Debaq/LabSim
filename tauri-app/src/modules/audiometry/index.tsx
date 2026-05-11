@@ -98,6 +98,20 @@ export default function AudiometryModule() {
   const section = sectionKey(activeType);
   const oido = activeEar === "right" ? "oidoDerecho" : "oidoIzquierdo";
 
+  // PTP (Promedio Tonal Puro) = promedio 500/1000/2000 Hz
+  const ptp = (thr: Record<string, number | null | undefined> | undefined): number | null => {
+    if (!thr) return null;
+    const vals = [500, 1000, 2000]
+      .map((f) => thr[String(f)])
+      .filter((v): v is number => typeof v === "number");
+    if (vals.length === 0) return null;
+    return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+  };
+  const ptpAirR = ptp(data.umbralesAereos?.oidoDerecho);
+  const ptpAirL = ptp(data.umbralesAereos?.oidoIzquierdo);
+  const ptpBoneR = ptp(data.umbralesOseos?.oidoDerecho);
+  const ptpBoneL = ptp(data.umbralesOseos?.oidoIzquierdo);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="flex items-center justify-between">
@@ -258,6 +272,17 @@ export default function AudiometryModule() {
                 className="h-8 ls-border ls-bg-input px-1.5 text-center text-xs ls-text" />
             </div>
           ))}
+        </div>
+      </fieldset>
+
+      {/* PTP (Promedio Tonal Puro): 500/1000/2000 Hz */}
+      <fieldset className="rounded-lg border ls-border ls-bg-input px-4 py-2">
+        <legend className="px-2 text-[10px] font-medium tracking-wider ls-text-muted uppercase">PTP (500/1k/2k Hz)</legend>
+        <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+          <div><span className="text-red-400">OD VA:</span> <span className="ls-text font-mono">{ptpAirR ?? "—"}</span> dB</div>
+          <div><span className="text-blue-400">OI VA:</span> <span className="ls-text font-mono">{ptpAirL ?? "—"}</span> dB</div>
+          <div><span className="text-red-400">OD VO:</span> <span className="ls-text font-mono">{ptpBoneR ?? "—"}</span> dB</div>
+          <div><span className="text-blue-400">OI VO:</span> <span className="ls-text font-mono">{ptpBoneL ?? "—"}</span> dB</div>
         </div>
       </fieldset>
 
