@@ -153,12 +153,14 @@ export default function AnamnesisModule() {
             <Select value={tinnitus ?? "ausente"} onValueChange={(v) => setValue("tinnitus.presencia", v ?? "", { shouldDirty: true })}>
               <SelectTrigger className="ls-border ls-bg-input ls-text"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="ausente">Ausente</SelectItem>
-                <SelectItem value="presente">Presente</SelectItem>
+                <SelectItem value="ausente">Negativo</SelectItem>
+                <SelectItem value="ocasional">Ocasional</SelectItem>
+                <SelectItem value="permanente">Permanente</SelectItem>
+                <SelectItem value="presente">Presente (genérico)</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          {tinnitus === "presente" && (
+          {tinnitus && tinnitus !== "ausente" && (
             <>
               <div className="space-y-1.5">
                 <Label className="ls-text2">Lateralidad</Label>
@@ -174,14 +176,14 @@ export default function AnamnesisModule() {
                 <Select value={watch("tinnitus.tipo") ?? ""} onValueChange={(v) => setValue("tinnitus.tipo", v ?? "", { shouldDirty: true })}>
                   <SelectTrigger className="ls-border ls-bg-input ls-text"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
                   <SelectContent>
-                    {["Tonal agudo", "Tonal grave", "Ruido blanco", "Pulsátil", "Intermitente", "Otro"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    {["Tono", "Tonal agudo", "Tonal grave", "Ruido blanco", "NBN", "Pulsátil", "Intermitente", "Otro"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
             </>
           )}
         </div>
-        {tinnitus === "presente" && (
+        {tinnitus && tinnitus !== "ausente" && (
           <>
             <div className="space-y-1.5">
               <Label className="ls-text2">Severidad (0-10): {watch("tinnitus.severidad") ?? 0}</Label>
