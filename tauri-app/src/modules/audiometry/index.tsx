@@ -255,7 +255,7 @@ export default function AudiometryModule() {
       {/* Audiogram chart */}
       <div className="rounded-lg border ls-border ls-bg-input p-2" style={{ height: 400 }}>
         <AudiogramChart points={points} onPointAdd={handlePointAdd} onPointRemove={handlePointRemove}
-          activeEar={activeEar} activeType={activeType} interactive />
+          activeEar={activeEar} activeType={activeType === "ldl" ? "air" : activeType} interactive={activeType !== "ldl"} />
       </div>
 
       {/* Manual input table */}
