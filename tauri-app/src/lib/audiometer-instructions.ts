@@ -140,7 +140,7 @@ export const INSTRUCTIONS: Instruction[] = [
   // ─── Supraliminal ────────────────────────────
   {
     id: "pitos_fuertes",
-    label: "Pitos fuertes",
+    label: "LDL: pitos fuertes",
     speech: "Ahora le voy a colocar unos pitos fuertes. Van a ser todos fuertes e irán aumentando en volumen. Solo si le molesta, levante la mano.",
     category: "supraliminal",
     responseMode: "loudness",
@@ -148,7 +148,7 @@ export const INSTRUCTIONS: Instruction[] = [
   },
   {
     id: "solo_si_molesta",
-    label: "Solo si molesta",
+    label: "LDL: solo si molesta",
     speech: "Solo si molesta el pito fuerte, levante la mano.",
     category: "supraliminal",
     responseMode: "loudness",

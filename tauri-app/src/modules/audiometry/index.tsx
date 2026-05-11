@@ -27,7 +27,7 @@ export default function AudiometryModule() {
   );
   const { register, handleSubmit, watch, setValue } = form;
   const [activeEar, setActiveEar] = useState<"right" | "left">("right");
-  const [activeType, setActiveType] = useState<"air" | "bone">("air");
+  const [activeType, setActiveType] = useState<"air" | "bone" | "ldl">("air");
   const [showProfile, setShowProfile] = useState(true);
   const [showConfig, setShowConfig] = useState(false);
   const [derivePreview, setDerivePreview] = useState<string | null>(null);
@@ -48,6 +48,9 @@ export default function AudiometryModule() {
       if (val != null) points.push({ frequency: Number(freq), threshold: val, type: "bone", ear, masked: false });
     });
   });
+
+  const sectionKey = (type: "air" | "bone" | "ldl") =>
+    type === "air" ? "umbralesAereos" : type === "bone" ? "umbralesOseos" : "ldl";
 
   const handlePointAdd = useCallback((point: AudiogramPoint) => {
     const oido = point.ear === "right" ? "oidoDerecho" : "oidoIzquierdo";
@@ -91,8 +94,8 @@ export default function AudiometryModule() {
   const showRecruitment = (t: HearingLossType) => t === "sensorioneural-coclear" || t === "mixta";
   const showDecay = (t: HearingLossType) => t === "sensorioneural-retrococlear" || t === "mixta";
 
-  const freqs = activeType === "air" ? ISO_FREQUENCIES : BONE_FREQUENCIES;
-  const section = activeType === "air" ? "umbralesAereos" : "umbralesOseos";
+  const freqs = activeType === "air" ? ISO_FREQUENCIES : activeType === "bone" ? BONE_FREQUENCIES : ISO_FREQUENCIES;
+  const section = sectionKey(activeType);
   const oido = activeEar === "right" ? "oidoDerecho" : "oidoIzquierdo";
 
   return (
@@ -231,6 +234,8 @@ export default function AudiometryModule() {
           onClick={() => setActiveType("air")} className={activeType === "air" ? "ls-bg-input ls-text" : "ls-text-muted"}>Vía Aérea</Button>
         <Button type="button" size="xs" variant={activeType === "bone" ? "default" : "ghost"}
           onClick={() => setActiveType("bone")} className={activeType === "bone" ? "ls-bg-input ls-text" : "ls-text-muted"}>Vía Ósea</Button>
+        <Button type="button" size="xs" variant={activeType === "ldl" ? "default" : "ghost"}
+          onClick={() => setActiveType("ldl")} className={activeType === "ldl" ? "ls-bg-input ls-text" : "ls-text-muted"}>LDL</Button>
       </div>
 
       {/* Audiogram chart */}
@@ -242,7 +247,7 @@ export default function AudiometryModule() {
       {/* Manual input table */}
       <fieldset className="space-y-3 rounded-lg border ls-border ls-bg-input p-4">
         <legend className="px-2 text-xs font-medium tracking-wider ls-text-muted uppercase">
-          {activeType === "air" ? "Umbrales Aéreos" : "Umbrales Óseos"} — {activeEar === "right" ? "Oído Derecho" : "Oído Izquierdo"}
+          {activeType === "air" ? "Umbrales Aéreos" : activeType === "bone" ? "Umbrales Óseos" : "LDL (dB HL)"} — {activeEar === "right" ? "Oído Derecho" : "Oído Izquierdo"}
         </legend>
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-11">
           {freqs.map((freq) => (
