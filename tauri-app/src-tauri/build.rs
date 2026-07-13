@@ -28,9 +28,10 @@ fn copy_espeak_data() {
     // También buscar en el build dir de espeak-rs-sys (share/espeak-ng-data)
     if espeak_data_src.is_none() {
         let out_path = PathBuf::from(&out_dir);
-        // OUT_DIR suele ser target/<profile>/build/<pkg>/out
-        // espeak-rs-sys genera espeak-ng-data en su propio OUT_DIR/share/
-        if let Some(build_root) = out_path.ancestors().nth(3) {
+        // OUT_DIR es <CARGO_TARGET_DIR>/<profile>/build/<pkg>/out.
+        // Subimos 2 niveles para llegar a <CARGO_TARGET_DIR>/<profile>/build,
+        // donde espeak-rs-sys deposita sus propios OUT_DIR con espeak-ng-data.
+        if let Some(build_root) = out_path.ancestors().nth(2) {
             // Buscar en subdirectorios del build
             if let Ok(entries) = std::fs::read_dir(build_root) {
                 for entry in entries.flatten() {
@@ -38,6 +39,12 @@ fn copy_espeak_data() {
                         let candidate = entry.path().join("out").join("share").join("espeak-ng-data");
                         if candidate.exists() && candidate.join("phondata").exists() {
                             espeak_data_src = Some(candidate);
+                            break;
+                        }
+                        // Fallback: a veces cmake pone el dir en out/build/ o out/espeak-ng/
+                        let alt = entry.path().join("out").join("build").join("espeak-ng-data");
+                        if alt.exists() && alt.join("phondata-manifest").exists() {
+                            espeak_data_src = Some(alt);
                             break;
                         }
                     }
