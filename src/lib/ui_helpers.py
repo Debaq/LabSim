@@ -132,12 +132,21 @@ class SubWindow():
         if self.modules.is_full(pos_z):
             show_hide(self.modules, pos_z)
         else:
+            open_count = len(self.mdi_area.subWindowList())
             sub = QMdiSubWindow()
             sub.setWidget(widg)
             widg.lbl_title.setText(name)
             self.mdi_area.addSubWindow(sub)
             if position != [0,0]:
                 pos_x,pos_y = int(position[0]), int(position[1])
+                if open_count > 0:
+                    step = 40
+                    viewport = self.mdi_area.viewport().size()
+                    max_x = max(viewport.width() - size[0], 0)
+                    max_y = max(viewport.height() - size[1], 0)
+                    offset = (open_count * step) % (max(max_x, max_y, step) + step)
+                    pos_x = min(pos_x + offset, max_x)
+                    pos_y = min(pos_y + offset, max_y + 220)
                 sub.move(pos_x,pos_y-220)
             _flags(sub)
             if fix[0]:
@@ -176,7 +185,16 @@ class ToolBar(SubWindow):
         self.subw = subw
 
      ## Funciones para el toolbar
+    def _clear_layout(self, layout):
+        """Elimina todos los widgets contenidos en un layout"""
+        for i in reversed(range(layout.count())):
+            widget = layout.itemAt(i).widget()
+            if widget is not None:
+                widget.deleteLater()
+
     def btns_seccion(self):
+        self._clear_layout(self.layouts[0])
+        self._clear_layout(self.layouts[1])
         active = str()
         for iter_btn, i in enumerate(self.boxs):
             if self.boxs[i][0]:
@@ -238,7 +256,13 @@ class ToolBar(SubWindow):
     def activate_auto(self, name) -> None:
         obj_name = name
         self.activate_subwindow(self.size, obj_name, self.subw[obj_name])
-              
+
+    def close_sub_window(self, name) -> None:
+        """Oculta la subventana con el nombre indicado sin destruir su contenido interior"""
+        _, _, pos_z, *_ = self.apps[name]
+        if self.modules.is_full(pos_z):
+            self.modules.get(pos_z).hide()
+
 
     def changeStateBtnAreas(self, frame:QFrame, b):
         box = self.boxs[b]

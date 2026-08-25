@@ -4,6 +4,6 @@
     "lang" : "ES_cl",
     "styles" : [1, ["normal", "dark"]],
     "online" : false,
-    "test"  : true
+    "test"  : false
     
 }

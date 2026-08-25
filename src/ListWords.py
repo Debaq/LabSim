@@ -63,6 +63,8 @@ class ListWords(QWidget, Ui_ListWords):
                     getattr(self, btn).clicked.connect(self.pushaudio)
 
     def la_super(self, data):
+        if data is None:
+            return
         self.is_response = data['sector'] == "Camara_sono"
         gender = data['gender']
         ide = data['id']

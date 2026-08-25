@@ -53,6 +53,24 @@ class FrameSubMdi(QWidget, UI_frameSubMdi):
 
 
 
+class _MdiViewport(QWidget):
+    def __init__(self, mdi_area):
+        super().__init__()
+        self.mdi_area = mdi_area
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        if self.mdi_area.currentSubWindow() is None:
+            painter = QPainter(self)
+            width = self.width()
+            height = self.height()
+            img = QPixmap(context.get_resource("img/LogoBN.png"))
+            img_x = width/2 - 200/2
+            img_y = height/2 - 200/2
+            painter.drawPixmap(int(img_x), int(img_y), 200, 200, img)
+            painter.end()
+
+
 class MdiArea(QMdiArea):
     def __init__(self):
         super().__init__()
@@ -60,19 +78,7 @@ class MdiArea(QMdiArea):
         self.documentMode = True
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-
-    def paintEvent(self, event):
-        super().paintEvent(event)
-        if self.currentSubWindow() is None:
-
-            painter = QPainter(self.viewport())
-            width = event.rect().width()
-            height = event.rect().height()
-            img = QPixmap(context.get_resource("img/LogoBN.png"))
-            img_x = width/2 - 200/2
-            img_y = height/2 - 200/2
-            painter.drawPixmap(int(img_x), int(img_y), 200, 200, img)
-            painter.end()
+        self.setViewport(_MdiViewport(self))
 
     def move_window(self, event):
         if event.buttons() == Qt.MouseButton.RightButton:

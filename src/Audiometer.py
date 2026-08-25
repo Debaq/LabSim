@@ -248,6 +248,8 @@ class Audiometer(QWidget, Ui_Audiometer):
 
     def la_super(self, data):
         #self.response.set_response(data)
+        if data is None:
+            return
         thr = data if data["sector"] == "camara_sono" else data_basic()
         gender = thr['gender']
         self.gender = "feme" if gender == 0 else "male"

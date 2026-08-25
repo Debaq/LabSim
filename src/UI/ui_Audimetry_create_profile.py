@@ -79,7 +79,6 @@ class Ui_generator_audio(object):
 
         self.radioButton = QRadioButton(generator_audio)
         self.radioButton.setObjectName(u"radioButton")
-        self.radioButton.setEnabled(False)
 
         self.horizontalLayout_10.addWidget(self.radioButton)
 

@@ -126,4 +126,4 @@ class LoginConnect():
         por ahora estan en un json sin encriptación
         
         """
-        return CasesOffline().get_cases(data["user"])
+        return CasesOffline().get_cases()

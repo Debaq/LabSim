@@ -27,46 +27,37 @@ import os
 
 class CasesOffline():
     """
-    Clase para manejar los casos en modo offline
+    Clase para manejar los casos en modo offline.
+    Los casos (definición del paciente/audiometría) son una única base
+    compartida por todos los usuarios: el admin los crea una vez y todos
+    los alumnos leen/atienden la misma definición. Lo que sí es propio de
+    cada alumno (p.ej. si ya atendió el caso) vive aparte, en la agenda
+    (ver `entry_atendido_por` / `marcar_entry_atendido`).
     Func:
-        get_cases: devuelve los casos de un usuario
+        get_cases: devuelve la base de casos completa
     """
     def __init__(self) -> None:
         pass
+
     def get_def_cases(self, case) ->dict:
         cases_file = context.get_resource('cases/labsim.json')
         with codecs.open(cases_file, 'r', 'utf-8') as json_file:
             list_data = json.load(json_file)
         return list_data
 
-    def get_cases(self, username:str) -> dict:
-        """
-        Recupera los casos de un usuario
-        Args:
-            username (str): username del login
-        """
-        if "@" in username:
-            username , _ = username.split('@')
-        base_path = os.path.dirname(os.path.abspath(__file__))  # Directorio del script actual
-        print(base_path)
-        #try:    
-        cases_file = context.get_resource(f'cases/{username}.json')
-        #except FileNotFoundError:
-        #    pass
-            #resource_path = os.path.join(context.app_dir, resource_name)
-
-        with codecs.open(cases_file, 'r', 'utf-8') as json_file:
-            list_data = json.load(json_file)
+    def get_cases(self) -> dict:
+        """Recupera la base de casos compartida."""
+        cases_file = context.get_resource('cases/cases.json')
+        try:
+            with codecs.open(cases_file, 'r', 'utf-8') as json_file:
+                list_data = json.load(json_file)
+        except FileNotFoundError:
+            return {}
         return list_data
 
-    def set_cases(self, username:str, cases:dict) -> None:
-        """
-        Guarda los casos de un usuario
-        Args:
-            username (str): username del login
-            cases (dict): casos del usuario
-        """
-        cases_file = context.get_resource(f'cases/{username}.json')
+    def set_cases(self, cases:dict) -> None:
+        """Guarda la base de casos compartida."""
+        cases_file = context.get_resource('cases/cases.json')
         with codecs.open(cases_file, 'w', 'utf-8') as json_file:
             json.dump(cases, json_file, ensure_ascii=False)
 
@@ -81,7 +72,39 @@ class Shedule:
     def get(self):
         """recupera las prefernecias desde un archivo *.json"""
         #print(self.data[pref])
-        return self.data 
+        return self.data
+
+    def set(self, data:dict) -> None:
+        """guarda la agenda en el archivo *.json"""
+        self.data = data
+        preferences_file = context.get_resource('json/schedule.json')
+        with codecs.open(preferences_file, 'w', 'utf-8') as json_file:
+            json.dump(data, json_file, ensure_ascii=False)
+
+
+def entry_atendido_por(entry, username: str) -> bool:
+    """
+    Indica si `username` ya atendió esta fila de agenda.
+    entry[8] es un dict {username: True}; una fila antigua puede traer
+    un bool plano (formato legado, sin usuario asociado).
+    """
+    if len(entry) <= 8:
+        return False
+    atendido = entry[8]
+    if isinstance(atendido, dict):
+        return bool(atendido.get(username))
+    return bool(atendido)
+
+
+def marcar_entry_atendido(entry, username: str) -> None:
+    """Marca la fila de agenda como atendida por `username`."""
+    if len(entry) <= 8 or not isinstance(entry[8], dict):
+        if len(entry) <= 8:
+            entry.append({})
+        else:
+            entry[8] = {}
+    entry[8][username] = True
+
 
 class Preferences:
     """

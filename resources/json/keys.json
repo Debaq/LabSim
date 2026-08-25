@@ -2,6 +2,14 @@
     "keys_app": {
         "labsim": {
             "key": "4z3kAw==*tsAha/7xYlJfZogukg0TYw==*5XemHmJ5DeZl3lMSQRAeUg==*Np69CEFYYlqqbvkhiUQWzQ==",
+            "permission": 444,
+            "modules": [
+                "A",
+                "Z"
+            ]
+        },
+        "admin": {
+            "key": "m7OYtX4=*bi1Cr8CQxIPTlyEy+4je3A==*lI911AA6pbISgFcHj2gtXA==*ZaYcKoOj0Uvq0ThpxQ6KpQ==",
             "permission": 777,
             "modules": [
                 "A",
