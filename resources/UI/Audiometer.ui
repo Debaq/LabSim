@@ -2299,10 +2299,13 @@
                 <cursorShape>PointingHandCursor</cursorShape>
                </property>
                <property name="toolTip">
-                <string extracomment="Barra espaciadora"/>
+                <string extracomment="V"/>
                </property>
                <property name="text">
                 <string>Estímulo</string>
+               </property>
+               <property name="shortcut">
+                <string>V</string>
                </property>
                <property name="autoRepeat">
                 <bool>false</bool>
@@ -2617,6 +2620,9 @@
                </property>
                <property name="text">
                 <string>Estímulo</string>
+               </property>
+               <property name="shortcut">
+                <string>B</string>
                </property>
               </widget>
              </item>
