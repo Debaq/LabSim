@@ -92,6 +92,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Crea las variables necesarias para el funcionamiento del programa"""
         self.data_login = None
         self.data_current = None
+        self.data_current_key = None
         self.subw = None
         self.sectors_lbl = SECTORS
         self.modules = Storage(len(APPS))
@@ -128,6 +129,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.btn_login.setText("Ingresar")
         self.data_login = None
         self.data_current = None
+        self.data_current_key = None
 
     def _close_sub_windows(self):
         """Cierra todas las subventanas abiertas (excepto LOGIN) y deshidrata sus datos"""
@@ -149,7 +151,11 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 delattr(self, attr)
 
     def atender_paciente(self, key):
-        """Inicia la atención (estado 'atendiendo'), carga el caso e hidrata los módulos"""
+        """
+        Inicia o retoma la atención (estado 'atendiendo'), carga el caso e hidrata
+        los módulos. Se llama tanto la primera vez como al retomar un paciente que
+        ya estaba en atención (tras reabrir la app o al volver desde otro paciente).
+        """
         if self.data_login["permission"] == 777:
             return  # el admin no atiende pacientes, para eso existe un usuario básico de prueba
 
@@ -164,6 +170,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         shedule.set(shedule.data)
 
         self.data_current = CasesOffline().get_cases()[case_id]
+        self.data_current_key = key
 
         if self.subw and "AGENDA" in self.subw:
             self.subw["AGENDA"].obj.refresh()
@@ -189,6 +196,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
         marcar_entry_atendido(entry, self.data_login["user"], nota)
         shedule.set(shedule.data)
+
+        if self.data_current_key == key:
+            self.data_current_key = None
 
         if self.subw and "AGENDA" in self.subw:
             self.subw["AGENDA"].obj.refresh()

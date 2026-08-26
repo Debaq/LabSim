@@ -254,8 +254,13 @@ class Agenda(QWidget, Ui_Form):
 
         if self.is_admin:
             pass  # el admin no atiende pacientes; btn_atender queda oculto/deshabilitado
-        elif estado == "atendiendo":
+        elif estado == "atendiendo" and self._es_atencion_activa(key):
             self.btn_atender.setText("Cerrar atención")
+            self.btn_atender.setEnabled(tiene_caso)
+        elif estado == "atendiendo":
+            # Quedó "atendiendo" pero no está cargado en memoria (reinicio de la app
+            # o el alumno está atendiendo a otro paciente): retomar, no cerrar.
+            self.btn_atender.setText("Atender")
             self.btn_atender.setEnabled(tiene_caso)
         elif estado == "atendido":
             self.btn_atender.setText("Atender")
@@ -380,6 +385,10 @@ class Agenda(QWidget, Ui_Form):
         Shedule().set(self.shedule)
         self.refresh()
 
+    def _es_atencion_activa(self, key):
+        """True si `key` es el paciente que está cargado ahora mismo en los módulos."""
+        return getattr(self.main_window, "data_current_key", None) == key
+
     def atender_paciente(self):
         if self.is_admin or self._selected_row_key is None:
             return
@@ -387,7 +396,7 @@ class Agenda(QWidget, Ui_Form):
         user = self.shedule["agenda_1"][self._selected_row_key]
         estado = entry_estado_por(user, self._current_username())
 
-        if estado == "atendiendo":
+        if estado == "atendiendo" and self._es_atencion_activa(self._selected_row_key):
             self._cerrar_atencion()
             return
 
