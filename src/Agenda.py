@@ -11,19 +11,35 @@
 from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import (QTableWidgetItem, QAbstractItemView,
                                 QDateEdit, QTimeEdit, QPushButton, QMessageBox, QLineEdit,
-                                QDialog, QVBoxLayout, QLabel, QTextEdit, QDialogButtonBox)
-from PySide6.QtCore import QDate, QTime, Qt
+                                QDialog, QVBoxLayout, QLabel, QTextEdit, QDialogButtonBox,
+                                QCheckBox)
+from PySide6.QtCore import QDate, QTime, QDateTime, Qt
 from PySide6.QtGui import QColor
 from UI.Ui_agenda import Ui_Form
-from lib.helpers import Shedule, entry_estado_por
+from lib.helpers import (Shedule, entry_estado_por, CasesOffline,
+                          marcar_entry_no_show, obtener_hora_real_atencion,
+                          entry_esta_cancelada, marcar_entry_cancelada)
 
 
 PENDIENTE_COLOR = QColor(255, 244, 200)
 ATENDIENDO_COLOR = QColor(200, 224, 247)
 ATENDIDO_COLOR = QColor(210, 235, 210)
+NO_SHOW_COLOR = QColor(235, 190, 190)
+CANCELADA_COLOR = QColor(225, 225, 225)
 
 
 NOTE_COL = 7
+
+ANTECEDENTES_LABELS = {
+    "hipoacusia_familiar": "Hipoacusia familiar",
+    "ototoxicos": "Uso de ototóxicos",
+    "trauma_acustico": "Trauma acústico",
+    "otitis": "Otitis",
+    "meningitis": "Meningitis",
+    "tce": "TCE (traumatismo craneoencefálico)",
+    "diabetes": "Diabetes",
+    "hta": "Hipertensión arterial (HTA)",
+}
 
 
 class Agenda(QWidget, Ui_Form):
@@ -38,10 +54,17 @@ class Agenda(QWidget, Ui_Form):
         self._selected_key = None
         self._selected_row_key = None
         self._loading = False
+        self._ver_todas = False
+        self._filtro_texto = ""
 
         self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self._configurar_edicion()
+
+        self.led_buscar = QLineEdit(self)
+        self.led_buscar.setPlaceholderText("Buscar por RUT, nombre o apellido...")
+        self.led_buscar.textChanged.connect(self._on_filtro_changed)
+        self.horizontalLayout.insertWidget(0, self.led_buscar)
 
         self._build_atender_control()
         if self.is_admin:
@@ -68,13 +91,50 @@ class Agenda(QWidget, Ui_Form):
             self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
     def _build_atender_control(self):
+        self.date_selector = QDateEdit(self)
+        self.date_selector.setCalendarPopup(True)
+        self.date_selector.setDate(QDate.currentDate())
+        self.date_selector.dateChanged.connect(self._on_fecha_seleccionada)
+        self.horizontalLayout.insertWidget(1, self.date_selector)
+
+        self.chk_ver_todas = QCheckBox("Ver todas las citas habilitadas", self)
+        self.chk_ver_todas.toggled.connect(self._on_toggle_ver_todas)
+        self.horizontalLayout.insertWidget(2, self.chk_ver_todas)
+
+        self.btn_ver_ficha = QPushButton("Ver ficha", self)
+        self.btn_ver_ficha.setEnabled(False)
+        self.btn_ver_ficha.clicked.connect(self._ver_ficha_paciente)
+        self.horizontalLayout.insertWidget(3, self.btn_ver_ficha)
+
         self.btn_atender = QPushButton("Atender", self)
         self.btn_atender.setEnabled(False)
         self.btn_atender.clicked.connect(self.atender_paciente)
-        self.horizontalLayout.insertWidget(0, self.btn_atender)
+        self.horizontalLayout.insertWidget(4, self.btn_atender)
+
+        self.btn_no_show = QPushButton("No se presentó", self)
+        self.btn_no_show.setEnabled(False)
+        self.btn_no_show.clicked.connect(self._marcar_no_show)
+        self.horizontalLayout.insertWidget(5, self.btn_no_show)
+
         if self.is_admin:
             # El admin no atiende pacientes: para probar la atención se usa un usuario básico.
+            self.date_selector.setVisible(False)
+            self.chk_ver_todas.setVisible(False)
+            self.btn_ver_ficha.setVisible(False)
             self.btn_atender.setVisible(False)
+            self.btn_no_show.setVisible(False)
+
+    def _on_toggle_ver_todas(self, checked):
+        self._ver_todas = checked
+        self.date_selector.setEnabled(not checked)
+        self.populate_shedule()
+
+    def _on_fecha_seleccionada(self, _qdate):
+        self.populate_shedule()
+
+    def _on_filtro_changed(self, texto):
+        self._filtro_texto = texto.strip().lower()
+        self.populate_shedule()
 
     def _build_admin_controls(self):
         self.date_habilitar = QDateEdit(self)
@@ -104,13 +164,18 @@ class Agenda(QWidget, Ui_Form):
         self.btn_guardar_nota.setEnabled(False)
         self.btn_guardar_nota.clicked.connect(self.guardar_nota)
 
-        self.horizontalLayout.insertWidget(1, self.date_habilitar)
-        self.horizontalLayout.insertWidget(2, self.time_habilitar)
-        self.horizontalLayout.insertWidget(3, self.btn_habilitar)
-        self.horizontalLayout.insertWidget(4, self.btn_eliminar)
-        self.horizontalLayout.insertWidget(5, self.btn_ver_editar)
-        self.horizontalLayout.insertWidget(6, self.led_nota)
-        self.horizontalLayout.insertWidget(7, self.btn_guardar_nota)
+        self.btn_cancelar_restaurar = QPushButton("Cancelar cita", self)
+        self.btn_cancelar_restaurar.setEnabled(False)
+        self.btn_cancelar_restaurar.clicked.connect(self._toggle_cancelada)
+
+        self.horizontalLayout.insertWidget(6, self.date_habilitar)
+        self.horizontalLayout.insertWidget(7, self.time_habilitar)
+        self.horizontalLayout.insertWidget(8, self.btn_habilitar)
+        self.horizontalLayout.insertWidget(9, self.btn_eliminar)
+        self.horizontalLayout.insertWidget(10, self.btn_ver_editar)
+        self.horizontalLayout.insertWidget(11, self.btn_cancelar_restaurar)
+        self.horizontalLayout.insertWidget(12, self.led_nota)
+        self.horizontalLayout.insertWidget(13, self.btn_guardar_nota)
 
         self.tableWidget.setColumnCount(8)
         self.tableWidget.setHorizontalHeaderItem(NOTE_COL, QTableWidgetItem("Nota (solo admin)"))
@@ -166,8 +231,20 @@ class Agenda(QWidget, Ui_Form):
     def _visible_keys(self, agenda="agenda_1"):
         rows = self.shedule.get(agenda, {})
         if self.is_admin:
-            return list(rows.keys())
-        return [k for k, v in rows.items() if v[0] and v[1]]
+            keys = list(rows.keys())
+        else:
+            keys = [k for k, v in rows.items() if v[0] and v[1] and not entry_esta_cancelada(v)]
+            if not self._ver_todas:
+                fecha_sel = self.date_selector.date().toString("dd-MM-yy")
+                keys = [k for k in keys if rows[k][0] == fecha_sel]
+
+        if self._filtro_texto:
+            texto = self._filtro_texto
+            keys = [
+                k for k in keys
+                if texto in " ".join(str(x) for x in rows[k][2:7]).lower()
+            ]
+        return keys
 
     def populate_shedule(self, agenda="agenda_1"):
         rows = self.shedule.get(agenda, {})
@@ -186,12 +263,16 @@ class Agenda(QWidget, Ui_Form):
             pendiente = not (user[0] and user[1])
             estado = entry_estado_por(user, username)
             color = None
-            if pendiente:
+            if entry_esta_cancelada(user):
+                color = CANCELADA_COLOR
+            elif pendiente:
                 color = PENDIENTE_COLOR
             elif estado == "atendiendo":
                 color = ATENDIENDO_COLOR
             elif estado == "atendido":
                 color = ATENDIDO_COLOR
+            elif estado == "no_show":
+                color = NO_SHOW_COLOR
             for col_idx in range(min(len(user), core_cols)):
                 item = QTableWidgetItem(user[col_idx])
                 item.setData(Qt.UserRole, key)
@@ -218,6 +299,8 @@ class Agenda(QWidget, Ui_Form):
             self.btn_habilitar.setEnabled(False)
             self.btn_eliminar.setEnabled(False)
             self.btn_ver_editar.setEnabled(False)
+            self.btn_cancelar_restaurar.setText("Cancelar cita")
+            self.btn_cancelar_restaurar.setEnabled(False)
             self.led_nota.setEnabled(False)
             self.led_nota.clear()
             self.btn_guardar_nota.setEnabled(False)
@@ -227,6 +310,8 @@ class Agenda(QWidget, Ui_Form):
     def _reset_atender_button(self):
         self.btn_atender.setText("Atender")
         self.btn_atender.setEnabled(False)
+        self.btn_ver_ficha.setEnabled(False)
+        self.btn_no_show.setEnabled(False)
 
     def _on_selection_changed(self):
         selected_rows = self.tableWidget.selectionModel().selectedRows()
@@ -236,6 +321,8 @@ class Agenda(QWidget, Ui_Form):
                 self.btn_habilitar.setEnabled(False)
                 self.btn_eliminar.setEnabled(False)
                 self.btn_ver_editar.setEnabled(False)
+                self.btn_cancelar_restaurar.setText("Cancelar cita")
+                self.btn_cancelar_restaurar.setEnabled(False)
                 self.led_nota.setEnabled(False)
                 self.led_nota.clear()
                 self.btn_guardar_nota.setEnabled(False)
@@ -269,13 +356,36 @@ class Agenda(QWidget, Ui_Form):
             self.btn_atender.setText("Atender")
             self.btn_atender.setEnabled(tiene_caso and not pendiente)
 
+        if not self.is_admin:
+            self.btn_ver_ficha.setEnabled(tiene_caso)
+
+            fecha_agendada = QDate.fromString(user[0], "dd-MM-yy") if user[0] else QDate()
+            hora_agendada = QTime.fromString(user[1], "HH:mm") if len(user) > 1 else QTime()
+            hora_vencida = (
+                not pendiente and fecha_agendada.isValid() and hora_agendada.isValid()
+                and QDateTime(fecha_agendada, hora_agendada) < QDateTime.currentDateTime()
+            )
+            self.btn_no_show.setEnabled(hora_vencida and estado is None)
+
         if self.is_admin:
+            cancelada = entry_esta_cancelada(user)
             self.btn_habilitar.setEnabled(pendiente)
             self.btn_eliminar.setEnabled(True)
             self.btn_ver_editar.setEnabled(tiene_caso)
+            self.btn_cancelar_restaurar.setText("Restaurar cita" if cancelada else "Cancelar cita")
+            self.btn_cancelar_restaurar.setEnabled(not pendiente)
             self.led_nota.setEnabled(True)
             self.led_nota.setText(user[9] if len(user) > 9 else "")
             self.btn_guardar_nota.setEnabled(True)
+
+    def _existe_choque_horario(self, fecha, hora, excluir_key=None):
+        rows = self.shedule.get("agenda_1", {})
+        for k, v in rows.items():
+            if k == excluir_key or entry_esta_cancelada(v):
+                continue
+            if len(v) > 1 and v[0] == fecha and v[1] == hora:
+                return True
+        return False
 
     def habilitar_paciente(self):
         if self._selected_key is None:
@@ -284,10 +394,33 @@ class Agenda(QWidget, Ui_Form):
         fecha = self.date_habilitar.date().toString("dd-MM-yy")
         hora = self.time_habilitar.time().toString("HH:mm")
 
+        if self._existe_choque_horario(fecha, hora, excluir_key=self._selected_key):
+            QMessageBox.warning(self, "Habilitar paciente", "Ya existe una cita agendada en esa fecha y hora.")
+            return
+
         row = self.shedule["agenda_1"][self._selected_key]
         row[0] = fecha
         row[1] = hora
 
+        Shedule().set(self.shedule)
+        self.refresh()
+
+    def _toggle_cancelada(self):
+        if self._selected_row_key is None:
+            return
+
+        row = self.shedule["agenda_1"][self._selected_row_key]
+        cancelar = not entry_esta_cancelada(row)
+        if cancelar:
+            resp = QMessageBox.question(
+                self, "Cancelar cita",
+                "¿Cancelar esta cita? El registro y el caso asociado se conservan; "
+                "el alumno dejará de verla hasta que se restaure."
+            )
+            if resp != QMessageBox.Yes:
+                return
+
+        marcar_entry_cancelada(row, cancelar)
         Shedule().set(self.shedule)
         self.refresh()
 
@@ -336,11 +469,11 @@ class Agenda(QWidget, Ui_Form):
             return
 
         if col_idx == 0:
-            self._editar_fecha(row)
+            self._editar_fecha(row, key)
         else:
-            self._editar_hora(row)
+            self._editar_hora(row, key)
 
-    def _editar_fecha(self, row):
+    def _editar_fecha(self, row, key):
         dialogo = QDialog(self)
         dialogo.setWindowTitle("Editar fecha")
         layout = QVBoxLayout(dialogo)
@@ -359,11 +492,16 @@ class Agenda(QWidget, Ui_Form):
         if dialogo.exec() != QDialog.Accepted:
             return
 
-        row[0] = date_edit.date().toString("dd-MM-yy")
+        nueva_fecha = date_edit.date().toString("dd-MM-yy")
+        if self._existe_choque_horario(nueva_fecha, row[1], excluir_key=key):
+            QMessageBox.warning(self, "Editar fecha", "Ya existe otra cita en esa fecha y hora.")
+            return
+
+        row[0] = nueva_fecha
         Shedule().set(self.shedule)
         self.refresh()
 
-    def _editar_hora(self, row):
+    def _editar_hora(self, row, key):
         dialogo = QDialog(self)
         dialogo.setWindowTitle("Editar hora")
         layout = QVBoxLayout(dialogo)
@@ -381,7 +519,12 @@ class Agenda(QWidget, Ui_Form):
         if dialogo.exec() != QDialog.Accepted:
             return
 
-        row[1] = time_edit.time().toString("HH:mm")
+        nueva_hora = time_edit.time().toString("HH:mm")
+        if self._existe_choque_horario(row[0], nueva_hora, excluir_key=key):
+            QMessageBox.warning(self, "Editar hora", "Ya existe otra cita en esa fecha y hora.")
+            return
+
+        row[1] = nueva_hora
         Shedule().set(self.shedule)
         self.refresh()
 
@@ -435,3 +578,103 @@ class Agenda(QWidget, Ui_Form):
             if nota:
                 return nota
             QMessageBox.warning(self, "Cerrar atención", "Debes describir la atención realizada.")
+
+    def _marcar_no_show(self):
+        if self.is_admin or self._selected_row_key is None:
+            return
+
+        resp = QMessageBox.question(
+            self, "Marcar inasistencia",
+            "¿Confirmas que el paciente no se presentó a la hora agendada?"
+        )
+        if resp != QMessageBox.Yes:
+            return
+
+        row = self.shedule["agenda_1"][self._selected_row_key]
+        marcar_entry_no_show(row, self._current_username())
+        Shedule().set(self.shedule)
+        self.refresh()
+
+    def _ver_ficha_paciente(self):
+        if self._selected_row_key is None:
+            return
+
+        row = self.shedule["agenda_1"][self._selected_row_key]
+        case_id = row[7] if len(row) > 7 else None
+        if not case_id:
+            QMessageBox.information(
+                self, "Ver ficha", "Este registro no tiene un caso clínico asociado todavía."
+            )
+            return
+
+        caso = CasesOffline().get_cases().get(case_id, {})
+        self._mostrar_dialogo_ficha(row, caso)
+
+    def _mostrar_dialogo_ficha(self, row, caso):
+        dialogo = QDialog(self)
+        dialogo.setWindowTitle("Ficha del paciente")
+        layout = QVBoxLayout(dialogo)
+
+        texto = QTextEdit(dialogo)
+        texto.setReadOnly(True)
+        texto.setHtml(self._render_ficha_html(row, caso))
+        layout.addWidget(texto)
+
+        botones = QDialogButtonBox(QDialogButtonBox.Ok)
+        botones.accepted.connect(dialogo.accept)
+        layout.addWidget(botones)
+
+        dialogo.resize(480, 520)
+        dialogo.exec()
+
+    def _render_ficha_html(self, row, caso):
+        rut = row[2] if len(row) > 2 else ""
+        nombre = row[3] if len(row) > 3 else ""
+        apellidos = row[4] if len(row) > 4 else ""
+        fecha_nac = row[5] if len(row) > 5 else ""
+        procedimiento = row[6] if len(row) > 6 else ""
+        fecha_hora = f"{row[0]} {row[1]}".strip() if len(row) > 1 else ""
+
+        partes = ["<h3>Datos del paciente</h3>"]
+        partes.append(f"<p><b>Nombre:</b> {nombre} {apellidos}<br>"
+                       f"<b>Rut:</b> {rut}<br>"
+                       f"<b>Fecha de nacimiento:</b> {fecha_nac}<br>"
+                       f"<b>Procedimiento:</b> {procedimiento}<br>"
+                       f"<b>Cita agendada:</b> {fecha_hora or 'sin agendar'}</p>")
+
+        anamnesis = caso.get("Anamnesis", {}) if isinstance(caso, dict) else {}
+        antecedentes = anamnesis.get("antecedentes", {}) if isinstance(anamnesis, dict) else {}
+        activos = [label for key, label in ANTECEDENTES_LABELS.items() if antecedentes.get(key)]
+
+        partes.append("<h3>Anamnesis</h3>")
+        if activos:
+            items = "".join(f"<li>{label}</li>" for label in activos)
+            partes.append(f"<p><b>Antecedentes:</b></p><ul>{items}</ul>")
+        else:
+            partes.append("<p><b>Antecedentes:</b> sin antecedentes relevantes.</p>")
+
+        medicamentos = anamnesis.get("medicamentos", "") if isinstance(anamnesis, dict) else ""
+        cirugias = anamnesis.get("cirugias", "") if isinstance(anamnesis, dict) else ""
+        otros = anamnesis.get("otros", "") if isinstance(anamnesis, dict) else ""
+        partes.append(f"<p><b>Medicamentos:</b> {medicamentos or 'No refiere'}<br>"
+                       f"<b>Cirugías:</b> {cirugias or 'No refiere'}</p>")
+        partes.append(f"<p><b>Motivo de consulta / relato clínico:</b><br>{otros or 'Sin registro.'}</p>")
+
+        username = self._current_username()
+        hora_real = obtener_hora_real_atencion(row, username)
+        if hora_real:
+            partes.append("<h3>Puntualidad</h3>")
+            hora_agendada = QTime.fromString(row[1], "HH:mm") if len(row) > 1 else QTime()
+            hora_inicio = QTime.fromString(hora_real, "HH:mm:ss")
+            if hora_agendada.isValid() and hora_inicio.isValid():
+                minutos = hora_agendada.secsTo(hora_inicio) // 60
+                if minutos <= 0:
+                    resumen = "a tiempo"
+                else:
+                    resumen = f"{minutos} min de atraso"
+            else:
+                resumen = ""
+            partes.append(f"<p><b>Hora agendada:</b> {row[1]}<br>"
+                           f"<b>Inicio real:</b> {hora_real} ({resumen})</p>")
+
+        return "".join(partes)

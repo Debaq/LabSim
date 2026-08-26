@@ -12,7 +12,7 @@ import Z
 from base import context
 from lib.h_win import FrameSubMdi, MdiArea
 from lib.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
-                          marcar_entry_atendiendo, marcar_entry_atendido)
+                          marcar_entry_atendiendo, marcar_entry_atendido, entry_esta_cancelada)
 from lib.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min
 from UI.Ui_command_voice_A import Ui_Form as commandVoiceA
 from UI.Ui_CVC import Ui_CVC
@@ -164,6 +164,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         entry = agenda.get(key)
         if entry is None:
             return
+        if entry_esta_cancelada(entry):
+            return  # el admin canceló la cita mientras estaba visible
 
         case_id = entry[7]
         marcar_entry_atendiendo(entry, self.data_login["user"])
