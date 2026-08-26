@@ -249,13 +249,6 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.btn_output_sim_ch1.setDisabled(True)
         self.btn_trans_cl_ch0.setDisabled(True)
         self.btn_trans_cl_ch1.setDisabled(True)
-        self.btn_stim_wn_ch0.setDisabled(True)
-        self.btn_stim_wn_ch1.setDisabled(True)
-        self.btn_stim_nbn_ch0.setDisabled(True)
-        self.btn_stim_pn_ch0.setDisabled(True)
-        self.btn_stim_pn_ch1.setDisabled(True)
-        self.btn_stim_sn_ch0.setDisabled(True)
-        self.btn_stim_fm_ch1.setDisabled(True)
         #self.btn_stim_tone_izq.setDisabled(True)
 
     def la_super(self, data):
