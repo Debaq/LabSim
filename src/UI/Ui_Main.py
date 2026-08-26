@@ -65,7 +65,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_6.addWidget(self.lbl_name)
         self.btn_login = QtWidgets.QPushButton(self.barra)
         self.btn_login.setMinimumSize(QtCore.QSize(0, 20))
-        self.btn_login.setMaximumSize(QtCore.QSize(60, 25))
+        self.btn_login.setMaximumSize(QtCore.QSize(100, 25))
         font = QtGui.QFont()
         font.setPointSize(8)
         self.btn_login.setFont(font)

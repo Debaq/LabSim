@@ -81,7 +81,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.btn_salir.clicked.connect(self.close)
         self.btn_min.clicked.connect(self.showMinimized)
         self.btn_max.clicked.connect(lambda: toggle_max_min(self))
-        self.btn_login.clicked.connect(self.activate_soft)
+        self.btn_login.clicked.connect(self.toggle_login)
 
     def set_mdi_area(self):
         """Crea el objeto mdi_area"""
@@ -121,6 +121,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.data_login = data
             self.refresh_data()
             self.btns_actions()
+
+    def toggle_login(self):
+        """Cierra sesión de inmediato si hay una activa, si no abre la ventana de login"""
+        if self.data_login:
+            self.logout()
+        else:
+            self.activate_subwindow(self.size, "LOGIN", self.subw["LOGIN"])
 
     def logout(self):
         """Cierra la sesión actual"""
