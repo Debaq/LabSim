@@ -1,5 +1,5 @@
 from base import context
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QEvent
 from PySide6.QtGui import QPainter, QPixmap
 from PySide6.QtWidgets import QMdiArea, QWidget, QMenu
 from UI.Ui_frameSubMdi import Ui_Form as UI_frameSubMdi
@@ -53,32 +53,26 @@ class FrameSubMdi(QWidget, UI_frameSubMdi):
 
 
 
-class _MdiViewport(QWidget):
-    def __init__(self, mdi_area):
+class MdiArea(QMdiArea):
+    def __init__(self):
         super().__init__()
-        self.mdi_area = mdi_area
+        self.mousePressEvent = self.move_window
+        self.setDocumentMode(True)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
 
-    def paintEvent(self, event):
-        super().paintEvent(event)
-        if self.mdi_area.currentSubWindow() is None:
-            painter = QPainter(self)
-            width = self.width()
-            height = self.height()
+    def viewportEvent(self, event):
+        result = super().viewportEvent(event)
+        if event.type() == QEvent.Type.Paint:
+            painter = QPainter(self.viewport())
+            width = self.viewport().width()
+            height = self.viewport().height()
             img = QPixmap(context.get_resource("img/LogoBN.png"))
             img_x = width/2 - 200/2
             img_y = height/2 - 200/2
             painter.drawPixmap(int(img_x), int(img_y), 200, 200, img)
             painter.end()
-
-
-class MdiArea(QMdiArea):
-    def __init__(self):
-        super().__init__()
-        self.mousePressEvent = self.move_window
-        self.documentMode = True
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        self.setViewport(_MdiViewport(self))
+        return result
 
     def move_window(self, event):
         if event.buttons() == Qt.MouseButton.RightButton:
