@@ -400,6 +400,8 @@ class Audiometer(QWidget, Ui_Audiometer):
 
                 else:
                     self.stop(ch)
+                if self.state_supra[1] != "pa_pa_pa":
+                    self.toggle_speech(ch, play)
         elif no_alternate:
             self.reverse(ch)
         if btnrev is False and not no_alternate:
@@ -466,7 +468,16 @@ class Audiometer(QWidget, Ui_Audiometer):
             elif self.no_puls(ch):
                 self.play(ch)
                 self.vu_meters[ch].setValue(50)
-        elif self.lbl_revers[ch].text() == "Invertido":
+        else:
+            self.toggle_speech(ch, self.lbl_revers[ch].text() == "Invertido")
+
+    def toggle_speech(self, ch, active):
+        """activa/desactiva el estimulo de habla (logoaudiometria):
+        emite signal_speech con el flag playable y refleja el estado
+        en lbl_warnings. Se usa tanto al alternar Invertir como en
+        cada press/release del btn estimulo (ver Helper_Stim).
+        """
+        if active:
             contra = 0 if ch == 1 else 1
             self.datasignal_speech[1] = True
             int_der = int(self.lbl_intencity[ch].text().split(' dB HL')[0])
