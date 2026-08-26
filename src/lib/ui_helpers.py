@@ -206,7 +206,7 @@ class ToolBar(SubWindow):
                 btn.setCheckable(True)
                 btn.setAutoExclusive(True)
                 self.layouts[0].addWidget(btn)
-                if iter_btn == 1:
+                if iter_btn == 0:
                     active = i
         btn_selec = self.frame.findChild(QPushButton,active)
         btn_selec.setChecked(True)
@@ -232,7 +232,7 @@ class ToolBar(SubWindow):
             state = self.apps[i][5] == "development"
             btn.setDisabled(state)
             btn.setMaximumHeight(25)
-            btn.setMaximumWidth(40)
+            btn.setMinimumWidth(btn.sizeHint().width())
 
     def activate_soft(self) -> None:
         """activa la ventana con el mismo nombre del boton que envia la señal"""
