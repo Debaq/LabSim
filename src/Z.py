@@ -13,6 +13,9 @@ import numpy as np
 
 from UI.Ui_Z_control import Ui_Z_control
 from lib.ZZscreen import ZZscreen
+from lib.ZRscreen import ZRscreen
+from lib.ZDscreen import ZDscreen
+from lib.ZETFscreen import ZETFscreen
 from lib.h_z import changeSide, changeSideText, sideText, printer, date_time
 from lib.z_generator import Z_225
 from lib.helpers import Storage
@@ -25,8 +28,15 @@ class ZControl(QWidget, Ui_Z_control):
         super(ZControl, self).__init__()
         self.setupUi(self)
         self.Z = ZZscreen()
+        self.Z_reflex = ZRscreen()
+        self.Z_decay = ZDscreen()
+        self.Z_etf = ZETFscreen()
 
-        self.Screen_Layout.addWidget(self.Z)
+        self.screens = [self.Z, self.Z_reflex, self.Z_decay, self.Z_etf]
+        self.current_screen = self.Z
+        for screen in self.screens:
+            self.Screen_Layout.addWidget(screen)
+            screen.setVisible(screen is self.Z)
 
         # BUTTONS
         self.btn_side.clicked.connect(self.side_change)
@@ -34,6 +44,28 @@ class ZControl(QWidget, Ui_Z_control):
         self.btn_2.clicked.connect(lambda: self.move(1))
         self.btn_stimulus.clicked.connect(self.timerAnimation)
         self.btn_print.clicked.connect(lambda: printer(self,  self.Z.winId()))
+
+        self.btn_toneDecay.setEnabled(True)
+        self.btn_tymp.clicked.connect(lambda: self.show_screen(self.Z))
+        self.btn_reflex_test.clicked.connect(lambda: self.show_screen(self.Z_reflex))
+        self.btn_toneDecay.clicked.connect(lambda: self.show_screen(self.Z_decay))
+        self.btn_etf.clicked.connect(lambda: self.show_screen(self.Z_etf))
+
+        self.reflex_mode = 'IPSI'
+        self.btn_reflex.setEnabled(False)
+        self.btn_reflex.clicked.connect(self.reflex_mode_change)
+
+        self.leak = self.dial.value()
+        self.dB = 85
+        self.etf_pressure = 0
+        self.reflex_pressure = 0
+        self.dial.setEnabled(True)
+        self.dial.valueChanged.connect(self.dial_change)
+
+        self.btn_up.setEnabled(False)
+        self.btn_up.clicked.connect(lambda: self.updown_change(10))
+        self.btn_down.setEnabled(False)
+        self.btn_down.clicked.connect(lambda: self.updown_change(-10))
 
         self.btn_3.setEnabled(True)
         self.btn_3.clicked.connect(self.direction_change)
@@ -230,6 +262,59 @@ class ZControl(QWidget, Ui_Z_control):
         else:
             self.window_pos_idx = (self.window_pos_idx + 1) % len(self.window_pos_values)
         self.Z.set_window(self.window_neg_values[self.window_neg_idx], self.window_pos_values[self.window_pos_idx])
+
+    def show_screen(self, screen):
+        for s in self.screens:
+            s.setVisible(s is screen)
+        self.current_screen = screen
+        self.btn_reflex.setEnabled(screen is self.Z_reflex)
+        self.btn_up.setEnabled(screen in (self.Z_reflex, self.Z_decay))
+        self.btn_down.setEnabled(screen in (self.Z_reflex, self.Z_decay))
+
+        self.dial.blockSignals(True)
+        if screen is self.Z:
+            self.dial.setMinimum(1)
+            self.dial.setMaximum(20)
+            self.dial.setValue(self.leak)
+        elif screen in (self.Z_reflex, self.Z_decay):
+            self.dial.setMinimum(0)
+            self.dial.setMaximum(120)
+            self.dial.setValue(self.dB)
+        elif screen is self.Z_etf:
+            self.dial.setMinimum(-400)
+            self.dial.setMaximum(200)
+            self.dial.setValue(self.etf_pressure)
+        self.dial.blockSignals(False)
+
+    def dial_change(self, value):
+        if self.current_screen is self.Z:
+            self.leak_change(value)
+        elif self.current_screen in (self.Z_reflex, self.Z_decay):
+            self.dB = value
+            self.Z_reflex.set_intensity(self.dB)
+            self.Z_decay.set_intensity(self.dB)
+        elif self.current_screen is self.Z_etf:
+            self.etf_pressure = value
+            self.Z_etf.set_pressure(self.etf_pressure)
+
+    def reflex_mode_change(self):
+        self.reflex_mode = 'CONTRA' if self.reflex_mode == 'IPSI' else 'IPSI'
+        self.Z_reflex.set_mode(self.reflex_mode)
+
+    def leak_change(self, value):
+        self.leak = value
+        ratio = (value - self.dial.minimum()) / (self.dial.maximum() - self.dial.minimum())
+        r = int(152 + ratio * 100)
+        g = int(152 - ratio * 100)
+        b = int(152 - ratio * 100)
+        self.label.setText(str(value))
+        self.label.setStyleSheet(f"background-color: rgb({r}, {g}, {b});")
+
+    def updown_change(self, delta):
+        if self.current_screen in (self.Z_reflex, self.Z_decay):
+            self.reflex_pressure = min(max(self.reflex_pressure + delta, -400), 200)
+            self.Z_reflex.set_pressure(self.reflex_pressure)
+            self.Z_decay.set_pressure(self.reflex_pressure)
 
     def timeStamp(self):
         time = date_time()

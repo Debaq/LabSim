@@ -29,5 +29,14 @@ class ZRscreen(QWidget, Ui_Z_rscreen):
         ay.setTicks([[(v, str(v)) for v in ticksy ]])
         self.graph.addWidget(pw1)
 
+    def set_mode(self, mode):
+        self.label_22.setText(mode)
+
+    def set_intensity(self, db):
+        self.label_6.setText(f"{db} dB")
+
+    def set_pressure(self, pressure):
+        self.label.setText(f"{pressure} daP")
+
 if __name__ == "__main__":
     pass

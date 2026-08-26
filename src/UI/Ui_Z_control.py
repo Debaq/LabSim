@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'Z_control.ui'
+## Form generated from reading UI file 'Z_controlELMYsq.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.2.0
+## Created by: Qt User Interface Compiler version 6.11.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -33,7 +33,7 @@ class Ui_Z_control(object):
         self.horizontalLayout_6 = QHBoxLayout()
         self.horizontalLayout_6.setSpacing(0)
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_6.addItem(self.horizontalSpacer)
 
@@ -42,8 +42,8 @@ class Ui_Z_control(object):
         self.frame_screen.setMinimumSize(QSize(600, 280))
         self.frame_screen.setMaximumSize(QSize(600, 300))
         self.frame_screen.setStyleSheet(u"background-color: rgb(85, 170, 255);")
-        self.frame_screen.setFrameShape(QFrame.Box)
-        self.frame_screen.setFrameShadow(QFrame.Sunken)
+        self.frame_screen.setFrameShape(QFrame.Shape.Box)
+        self.frame_screen.setFrameShadow(QFrame.Shadow.Sunken)
         self.frame_screen.setLineWidth(3)
         self.Screen_Layout = QHBoxLayout(self.frame_screen)
         self.Screen_Layout.setSpacing(0)
@@ -52,7 +52,7 @@ class Ui_Z_control(object):
 
         self.horizontalLayout_6.addWidget(self.frame_screen)
 
-        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_6.addItem(self.horizontalSpacer_3)
 
@@ -109,8 +109,46 @@ class Ui_Z_control(object):
         self.frame_control.setMaximumSize(QSize(16777215, 200))
         self.horizontalLayout_3 = QHBoxLayout(self.frame_control)
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.horizontalLayout_3.setContentsMargins(10, 0, 10, 0)
+        self.verticalLayout_5 = QVBoxLayout()
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.verticalLayout_5.setContentsMargins(0, -1, -1, -1)
+        self.btn_tymp = QPushButton(self.frame_control)
+        self.btn_tymp.setObjectName(u"btn_tymp")
+        self.btn_tymp.setMaximumSize(QSize(16777215, 25))
+
+        self.verticalLayout_5.addWidget(self.btn_tymp)
+
+        self.btn_reflex_test = QPushButton(self.frame_control)
+        self.btn_reflex_test.setObjectName(u"btn_reflex_test")
+        self.btn_reflex_test.setMaximumSize(QSize(16777215, 25))
+
+        self.verticalLayout_5.addWidget(self.btn_reflex_test)
+
+        self.btn_etf = QPushButton(self.frame_control)
+        self.btn_etf.setObjectName(u"btn_etf")
+        self.btn_etf.setMaximumSize(QSize(16777215, 25))
+
+        self.verticalLayout_5.addWidget(self.btn_etf)
+
+        self.btn_toneDecay = QPushButton(self.frame_control)
+        self.btn_toneDecay.setObjectName(u"btn_toneDecay")
+        self.btn_toneDecay.setEnabled(False)
+        self.btn_toneDecay.setMaximumSize(QSize(16777215, 25))
+        font = QFont()
+        font.setPointSize(8)
+        self.btn_toneDecay.setFont(font)
+
+        self.verticalLayout_5.addWidget(self.btn_toneDecay)
+
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+
+        self.verticalLayout_5.addItem(self.verticalSpacer)
+
+
+        self.horizontalLayout_3.addLayout(self.verticalLayout_5)
+
+        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_3.addItem(self.horizontalSpacer_2)
 
@@ -121,8 +159,6 @@ class Ui_Z_control(object):
         self.dial.setEnabled(False)
         self.dial.setMinimumSize(QSize(100, 100))
         self.dial.setMaximumSize(QSize(100, 100))
-        font = QFont()
-        font.setPointSize(8)
         self.dial.setFont(font)
         self.dial.setMinimum(1)
         self.dial.setMaximum(20)
@@ -209,7 +245,7 @@ class Ui_Z_control(object):
         self.label_7.setObjectName(u"label_7")
         self.label_7.setMaximumSize(QSize(16777215, 25))
         self.label_7.setFont(font)
-        self.label_7.setAlignment(Qt.AlignCenter)
+        self.label_7.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.verticalLayout_2.addWidget(self.label_7)
 
@@ -222,7 +258,7 @@ class Ui_Z_control(object):
         font1.setPointSize(8)
         font1.setBold(False)
         self.label_3.setFont(font1)
-        self.label_3.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.label_3.setAlignment(Qt.AlignmentFlag.AlignRight|Qt.AlignmentFlag.AlignTrailing|Qt.AlignmentFlag.AlignVCenter)
 
         self.horizontalLayout_4.addWidget(self.label_3)
 
@@ -260,7 +296,7 @@ class Ui_Z_control(object):
         self.label_5.setObjectName(u"label_5")
         self.label_5.setMaximumSize(QSize(16777215, 25))
         self.label_5.setFont(font)
-        self.label_5.setAlignment(Qt.AlignCenter)
+        self.label_5.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.verticalLayout_2.addWidget(self.label_5)
 
@@ -274,14 +310,6 @@ class Ui_Z_control(object):
 
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
-        self.btn_toneDecay = QPushButton(self.frame)
-        self.btn_toneDecay.setObjectName(u"btn_toneDecay")
-        self.btn_toneDecay.setEnabled(False)
-        self.btn_toneDecay.setMaximumSize(QSize(16777215, 25))
-        self.btn_toneDecay.setFont(font)
-
-        self.horizontalLayout_5.addWidget(self.btn_toneDecay)
-
 
         self.verticalLayout_2.addLayout(self.horizontalLayout_5)
 
@@ -298,7 +326,7 @@ class Ui_Z_control(object):
 
         self.verticalLayout_2.addLayout(self.horizontalLayout_2)
 
-        self.verticalSpacer_3 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalSpacer_3 = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout_2.addItem(self.verticalSpacer_3)
 
@@ -322,6 +350,10 @@ class Ui_Z_control(object):
         self.btn_4.setText("")
         self.btn_5.setText("")
         self.btn_6.setText("")
+        self.btn_tymp.setText(QCoreApplication.translate("Z_control", u"Timpanograma", None))
+        self.btn_reflex_test.setText(QCoreApplication.translate("Z_control", u"Reflejos", None))
+        self.btn_etf.setText(QCoreApplication.translate("Z_control", u"ETF", None))
+        self.btn_toneDecay.setText(QCoreApplication.translate("Z_control", u"Tone Decay", None))
         self.btn_stimulus.setText(QCoreApplication.translate("Z_control", u"stimulus", None))
         self.label_2.setText(QCoreApplication.translate("Z_control", u"Leak", None))
         self.label.setText("")
@@ -335,7 +367,6 @@ class Ui_Z_control(object):
         self.btn_1000.setText(QCoreApplication.translate("Z_control", u"1000 Hz", None))
         self.label_5.setText(QCoreApplication.translate("Z_control", u"Reflex", None))
         self.btn_reflex.setText(QCoreApplication.translate("Z_control", u"IPSI/CONTRA", None))
-        self.btn_toneDecay.setText(QCoreApplication.translate("Z_control", u"Tone Decay", None))
         self.btn_print.setText(QCoreApplication.translate("Z_control", u"Print", None))
     # retranslateUi
 
