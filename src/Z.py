@@ -35,6 +35,27 @@ class ZControl(QWidget, Ui_Z_control):
         self.btn_stimulus.clicked.connect(self.timerAnimation)
         self.btn_print.clicked.connect(lambda: printer(self,  self.Z.winId()))
 
+        self.btn_3.setEnabled(True)
+        self.btn_3.clicked.connect(self.direction_change)
+        self.btn_5.setEnabled(True)
+        self.btn_5.clicked.connect(lambda: self.window_change('neg'))
+        self.btn_6.setEnabled(True)
+        self.btn_6.clicked.connect(lambda: self.window_change('pos'))
+        self.btn_4.setEnabled(True)
+        self.btn_4.clicked.connect(self.height_change)
+
+        # DIRECTION / WINDOW STATE
+        self.direction = 'pos->neg'
+        self.window_neg_values = [-100, -200, -400, -600]
+        self.window_pos_values = [100, 200, 400, 600]
+        self.window_neg_idx = 2
+        self.window_pos_idx = 1
+        self.Z.set_window(self.window_neg_values[self.window_neg_idx], self.window_pos_values[self.window_pos_idx])
+
+        self.height_values = [1, 2, 5, 8]
+        self.height_idx = 1
+        self.Z.set_height(self.height_values[self.height_idx])
+
         # TIMERS
         self.time_ch0 = QTimer(self)
         self.time_ch0.timeout.connect(self.animation)
@@ -66,11 +87,13 @@ class ZControl(QWidget, Ui_Z_control):
     def preCharger(self):
         side = sideText(f"Z_{self.Z.get_side()}")
         print(self.data)
+        win_neg = self.window_neg_values[self.window_neg_idx]
+        win_pos = self.window_pos_values[self.window_pos_idx]
         if self.store_data[side].is_null(0):
             print(f"side : {side}")
             zGerger = self.data[f"Z_{self.Z.get_side()}"]
             vol = self.data['volume'][side]
-            result = Z_225(letter=zGerger, vol=vol).getDataSet()
+            result = Z_225(letter=zGerger, vol=vol, win_neg=win_neg, win_pos=win_pos).getDataSet()
             self.store_data[side].set(0, result)
             self.new[side] = True
 
@@ -84,7 +107,7 @@ class ZControl(QWidget, Ui_Z_control):
                 c = val[2]
                 p = val[3]
                 vol = val[5]
-            result = Z_225(manual=True, c=c, p=p, vol=vol).getDataSet()
+            result = Z_225(manual=True, c=c, p=p, vol=vol, win_neg=win_neg, win_pos=win_pos).getDataSet()
             self.store_data[side].set(0, result)
             self.new[side] = False
 
@@ -116,6 +139,10 @@ class ZControl(QWidget, Ui_Z_control):
             self.Z.lbl_c.setText(memory[2])
             self.Z.lbl_v.setText(memory[5])
             self.Z.lbl_g.setText(memory[4])
+            try:
+                self.Z.set_gradient_box(float(memory[3]), float(memory[2]))
+            except (ValueError, TypeError):
+                self.Z.set_gradient_box(None, None)
 
     def timerAnimation(self):
         if self.time_ch0.isActive():
@@ -137,9 +164,10 @@ class ZControl(QWidget, Ui_Z_control):
             stop = True
         if not stop:
             idx = self.frame.get(2)
+            data_idx = memory_len - 1 - idx if self.direction == 'neg->pos' else idx
 
-            self.frame.agrege(0, memory[0][idx])
-            self.frame.agrege(1, memory[1][idx])
+            self.frame.agrege(0, memory[0][data_idx])
+            self.frame.agrege(1, memory[1][data_idx])
             self.frame.set(2, idx+1)
 
             if memory_len <= idx+1:
@@ -149,6 +177,10 @@ class ZControl(QWidget, Ui_Z_control):
                 self.Z.lbl_c.setText(memory[2])
                 self.Z.lbl_v.setText(memory[5])
                 self.Z.lbl_g.setText(memory[4])
+                try:
+                    self.Z.set_gradient_box(float(memory[3]), float(memory[2]))
+                except (ValueError, TypeError):
+                    self.Z.set_gradient_box(None, None)
 
             x = self.frame.get(0)
             y = self.frame.get(1)
@@ -164,12 +196,40 @@ class ZControl(QWidget, Ui_Z_control):
             side_text = self.test+side_text
             side = sideText(side_text)
             memory = self.store_data[side].get(0)
-            self.Z.lbl_p.setText(str(pos))
+            self.Z.lbl_p.setText(str(round(pos)))
             c = self.Z.find_nearest(memory[0], pos, memory[1])
             c = round(c, 2)
             self.Z.lbl_c.setText(str(c))
+
+            if c > 0:
+                y_minus = self.Z.find_nearest(memory[0], pos - 50, memory[1])
+                y_plus = self.Z.find_nearest(memory[0], pos + 50, memory[1])
+                gradient = round(min(max((y_minus + y_plus) / (2 * c), 0.0), 1.0), 2)
+            else:
+                gradient = 0.0
+            self.Z.lbl_g.setText(str(gradient))
+            self.Z.set_gradient_box(pos, c)
         except:
             pass
+
+    def direction_change(self):
+        if self.direction == 'pos->neg':
+            self.direction = 'neg->pos'
+            self.Z.set_direction('neg -> pos')
+        else:
+            self.direction = 'pos->neg'
+            self.Z.set_direction('pos -> neg')
+
+    def height_change(self):
+        self.height_idx = (self.height_idx + 1) % len(self.height_values)
+        self.Z.set_height(self.height_values[self.height_idx])
+
+    def window_change(self, side):
+        if side == 'neg':
+            self.window_neg_idx = (self.window_neg_idx + 1) % len(self.window_neg_values)
+        else:
+            self.window_pos_idx = (self.window_pos_idx + 1) % len(self.window_pos_values)
+        self.Z.set_window(self.window_neg_values[self.window_neg_idx], self.window_pos_values[self.window_pos_idx])
 
     def timeStamp(self):
         time = date_time()

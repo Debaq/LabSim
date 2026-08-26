@@ -154,5 +154,5 @@ class Ui_Z_zscreen(object):
         self.label_2.setText(_translate("Z_zscreen", "-->"))
         self.label_6.setText(_translate("Z_zscreen", "pos -> neg"))
         self.label_5.setText(_translate("Z_zscreen", "2 cc"))
-        self.label.setText(_translate("Z_zscreen", "-200 daPa"))
+        self.label.setText(_translate("Z_zscreen", "-400 daPa"))
         self.label_4.setText(_translate("Z_zscreen", "200 daPa"))

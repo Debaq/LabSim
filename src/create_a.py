@@ -5,6 +5,22 @@ from datetime import datetime
 import itertools
 
 
+def _parse_birth_year(date_str):
+    """Año de nacimiento desde 'dd-mm-YYYY' (formato actual) o 'dd-mm-yy'
+    (formato antiguo, ambiguo: solo 2 dígitos de año). Para el formato
+    antiguo, si el año da en el futuro se asume el siglo anterior."""
+    for fmt in ("%d-%m-%Y", "%d-%m-%y"):
+        try:
+            birth = datetime.strptime(date_str, fmt)
+        except ValueError:
+            continue
+        year = birth.year
+        if fmt == "%d-%m-%y" and year > datetime.now().year:
+            year -= 100
+        return year
+    return None
+
+
 class CreateA(QWidget,Ui_generator_audio):
     def __init__(self, username, main_window) -> None:
         super().__init__()
@@ -84,8 +100,10 @@ class CreateA(QWidget,Ui_generator_audio):
         self.radioButton_2.setChecked(case.get("gender") != 0)
 
         try:
-            birth = datetime.strptime(agenda_row[5], "%d-%m-%y")
-            age = datetime.now().year - birth.year
+            birth_year = _parse_birth_year(agenda_row[5])
+            if birth_year is None:
+                raise ValueError
+            age = datetime.now().year - birth_year
         except (ValueError, IndexError):
             age = self.spinBox.minimum()
         self.spinBox.setValue(max(age, self.spinBox.minimum()))
@@ -116,7 +134,10 @@ class CreateA(QWidget,Ui_generator_audio):
         letters = self._read_audiometry()
         extra = self._read_extra_tests()
 
-        case["gender"] = 0 if self.radioButton.isChecked() else 1
+        gender = 0 if self.radioButton.isChecked() else 1
+        age = self.spinBox.value()
+        case["gender"] = gender
+        case["volume"] = [CreatePatient().ear_volume(age, gender), CreatePatient().ear_volume(age, gender), "N/D"]
         case["Aerea"] = letters["a"]
         case["Osea"] = letters["o"]
         case["LDL"] = letters["l"]
@@ -141,7 +162,7 @@ class CreateA(QWidget,Ui_generator_audio):
                 row[4] = f"{apellido1} {apellido2}"
             age = self.spinBox.value()
             birth_year = datetime.now().year - age
-            row[5] = f"01-01-{birth_year % 100:02d}"
+            row[5] = f"01-01-{birth_year:04d}"
             shedule.set(shedule.data)
 
         QMessageBox.information(self, "Editar paciente", f"Paciente {self.led_name.text()} actualizado.")
@@ -210,8 +231,12 @@ class CreateA(QWidget,Ui_generator_audio):
         cases = cases_store.get_cases()
         next_id = str(max((int(k) for k in cases), default=0) + 1)
 
+        gender = 0 if self.radioButton.isChecked() else 1
+        age = self.spinBox.value()
+        patient = CreatePatient()
+
         cases[next_id] = {
-            "gender": 0 if self.radioButton.isChecked() else 1,
+            "gender": gender,
             "id": int(next_id),
             "Aerea": letters["a"],
             "Osea": letters["o"],
@@ -221,7 +246,7 @@ class CreateA(QWidget,Ui_generator_audio):
             "Z_OD": self.cb_z_od.currentText(),
             "Z_OI": self.cb_z_oi.currentText(),
             "sector": "Camara_sono",
-            "volume": [0, 0, "N/D"],
+            "volume": [patient.ear_volume(age, gender), patient.ear_volume(age, gender), "N/D"],
             "UMD": extra["UMD"],
             "SDT": extra["SDT"],
             "Fowler": [[], 0, 0],
@@ -251,7 +276,7 @@ class CreateA(QWidget,Ui_generator_audio):
             str(CreatePatient().rut_from_age(age)),
             f"{nombre1} {nombre2}",
             f"{apellido1} {apellido2}",
-            f"01-01-{birth_year % 100:02d}",
+            f"01-01-{birth_year:04d}",
             "Audiometría",
             case_id,
             {},

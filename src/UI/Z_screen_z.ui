@@ -309,7 +309,7 @@ color: rgb(255, 255, 255);</string>
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>-200 daPa</string>
+         <string>-400 daPa</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

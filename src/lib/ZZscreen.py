@@ -1,5 +1,5 @@
 import pyqtgraph as pg
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QWidget, QGraphicsRectItem
 from PySide6.QtCore import Qt
 import numpy as np
 from UI.Ui_Z_screen_z import Ui_Z_zscreen
@@ -31,6 +31,13 @@ class ZZscreen(QWidget, Ui_Z_zscreen):
         pen1 = pg.mkPen('w', width=1, style=Qt.PenStyle.DashLine)          ## Make a dashed yellow line 2px wide
         self.inf1 = pg.InfiniteLine(movable=False, angle=90, pen=pen1)
         self.pw1.addItem(self.inf1)
+
+        self.gradient_box = QGraphicsRectItem(0, 0, 0, 0)
+        self.gradient_box.setPen(pg.mkPen('y', width=1, style=Qt.PenStyle.DashLine))
+        self.gradient_box.setBrush(pg.mkBrush(255, 255, 0, 25))
+        self.gradient_box.setVisible(False)
+        self.pw1.addItem(self.gradient_box)
+
         self.ploty = self.pw1.plot()
         self.graph.addWidget(self.pw1)
     
@@ -49,6 +56,25 @@ class ZZscreen(QWidget, Ui_Z_zscreen):
         self.inf1.setPos([pos_mark,2])
         return pos_mark
     
+    def set_gradient_box(self, p, c):
+        if p is None or c is None or c <= 0:
+            self.gradient_box.setVisible(False)
+            return
+        self.gradient_box.setRect(p-50, 0, 100, c)
+        self.gradient_box.setVisible(True)
+
+    def set_window(self, neg, pos):
+        self.label.setText(f"{neg} daPa")
+        self.label_4.setText(f"{pos} daPa")
+        self.pw1.setXRange(neg-5, pos+5)
+
+    def set_height(self, cc):
+        self.label_5.setText(f"{cc} cc")
+        self.pw1.setYRange(0, cc)
+
+    def set_direction(self, text):
+        self.label_6.setText(text)
+
     def set_side(self, side):
         self.lbl_side.setText(side)
         
@@ -59,6 +85,7 @@ class ZZscreen(QWidget, Ui_Z_zscreen):
         x = []
         y = []
         self.ploty.setData(x, y, pen='w')
+        self.gradient_box.setVisible(False)
 
     def find_nearest(self, array_in, value, array_out):
         array = np.asarray(array_in)

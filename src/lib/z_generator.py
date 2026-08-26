@@ -1,13 +1,11 @@
 import numpy as np
 import random
-from lib.bezier_prop import Bezier as bezier
 
-#import bezier
 
 class Z_225():
-    def __init__(self, manual=False, letter="A", c=1, p=0, g=1, pmax=200, num_pts=20, vol=1.8, unseal=False):
+    def __init__(self, manual=False, letter="A", c=1, p=0, g=1, pmax=200, num_pts=20, vol=1.8, unseal=False, win_neg=-400, win_pos=200):
 
-        self.input = [letter, c, p, g, vol, pmax, num_pts, unseal]
+        self.input = [letter, c, p, g, vol, pmax, num_pts, unseal, win_neg, win_pos]
         if manual:
             self.create_manual()
         else:
@@ -16,6 +14,8 @@ class Z_225():
     def create_manual(self):
         unseal = self.input[7]
         self.num_pts = self.input[6]
+        self.win_neg = self.input[8]
+        self.win_pos = self.input[9]
         try:
             self.compliance = round(self.input[1], 2)
             self.pressure = self.input[2]
@@ -67,51 +67,51 @@ class Z_225():
     def curve_z(self):
         c = self.compliance
         p = self.pressure
-        g = 0
         pmax = self.pressure_max
         num_pts = self.num_pts
 
-        side_neg = np.asfortranarray([
-            [-pmax+p, p, p],
-            [0.0, g, c], ])
-        side_pos = np.asfortranarray([
-            [p, p, pmax+p],
-            [c, g, 0], ])
+        # Curva en coseno alzado: pendiente cero en ambos extremos de cada
+        # tramo, tanto en el peak como en el empalme con la línea base.
+        # Evita el "nudito"/quiebre filoso que dejaba el bezier anterior
+        # (llegaba y salía del peak en tangente vertical).
+        t = np.linspace(0.0, 1.0, num_pts)
+        x_left = (-pmax + p) + t * pmax
+        y_left = c * (0.5 - 0.5 * np.cos(np.pi * t))
+        x_right = p + t * pmax
+        y_right = c * (0.5 + 0.5 * np.cos(np.pi * t))
 
-        curve1 = bezier.Curve(side_neg, degree=2)
-        curve2 = bezier.Curve(side_pos, degree=2)
-        s_vals = np.linspace(0.0, 1.0, num_pts)
-        point1 = curve1.evaluate_multi(s_vals)
-        point2 = curve2.evaluate_multi(s_vals)
-        flip_point2_x = np.flip(point2[0, :])
-        flip_point2_y = np.flip(point2[1, :])
+        x = np.append(x_left, x_right[1:])
+        y = np.append(y_left, y_right[1:])
 
-        for idx, val in enumerate(point1[0, :]):
-            dif = val - flip_point2_x[idx]
-            if abs(dif) <= 100:
-                hp = idx
-                break
-
-        hp_heigth = c - point1[1, :][hp]
-        hp_widht = flip_point2_x[hp] - point1[0, :][hp]
-
-        hp_size = [hp_heigth, hp_widht]
-        hp = [point1[0, :][hp], point1[1, :][hp]]
-        x = np.append(point1[0, :], point2[0, :])
-        y = np.append(point1[1, :], point2[1, :])
-        x_neg = np.arange(-400, min(x)-10, 10)
-        x_pos = np.arange(400, max(x)+10, 10)
+        x_neg = np.arange(self.win_neg-10, min(x)-10, 10)
+        x_pos = np.arange(max(x)+10, self.win_pos+10, 10)
 
         y_neg = np.zeros(len(x_neg))
         y_pos = np.zeros(len(x_pos))
-        
+
         y = np.append(y_neg,y)
         y = np.append(y,y_pos)
         x = np.append(x_neg, x)
-        x = np.append(x, x_pos)        
-        y_noise = np.random.normal(0, .03, y.shape)
+        x = np.append(x, x_pos)
+
+        noise_std = max(0.005, 0.02 * abs(c))
+        y_noise = np.random.normal(0, noise_std, y.shape)
         y = y + y_noise
+
+        self.gradient = self._calc_gradient(x, y, p, c)
+
         return x, y
+
+    def _calc_gradient(self, x, y, p, c):
+        if not c or c <= 0:
+            return 0.0
+        order = np.argsort(x)
+        xs = x[order]
+        ys = y[order]
+        y_minus = np.interp(p - 50, xs, ys)
+        y_plus = np.interp(p + 50, xs, ys)
+        gradient = (y_minus + y_plus) / (2 * c)
+        return round(min(max(gradient, 0.0), 1.0), 2)
 
 
 

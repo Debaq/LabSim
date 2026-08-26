@@ -373,6 +373,24 @@ class CreatePatient():
         age = (today_date - birth_date).days // 365
         return age, birth_date_month, birth_date_year
 
+    def ear_volume(self, age, gender=0):
+        """
+        Volumen del canal auditivo (Vea) en cm3, según rango etario clínico
+        (Katz, Handbook of Clinical Audiology). En adultos se aplica un
+        rango levemente distinto por sexo (diferencia menor, tamaño de
+        canal promedio algo mayor en hombres).
+        gender: 0 = hombre, 1 = mujer (misma convención usada en create_a.py)
+        """
+        if age <= 5:
+            low, high = 0.30, 0.90
+        elif age <= 12:
+            low, high = 0.40, 1.00
+        elif age <= 17:
+            low, high = 0.60, 1.30
+        else:
+            low, high = (0.9, 2.0) if gender == 0 else (0.8, 1.8)
+        return round(random.uniform(low, high), 2)
+
     def rut_from_age(self, age):
         today_date = datetime.now()
         slope = 3.3363697569700348e-06
