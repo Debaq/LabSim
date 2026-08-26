@@ -102,6 +102,16 @@
     </layout>
    </item>
    <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab_audiometria">
+      <attribute name="title">
+       <string>Audiometría</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_tab1">
+   <item>
     <layout class="QGridLayout" name="gridLayout">
      <item row="2" column="3">
       <widget class="QSpinBox" name="spbox_a_oi_1">
@@ -1105,6 +1115,13 @@
      </property>
     </widget>
    </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_otras">
+      <attribute name="title">
+       <string>Otras Pruebas</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_tab2">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
@@ -1484,6 +1501,541 @@
      </property>
     </widget>
    </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_reflejos">
+      <attribute name="title">
+       <string>Reflejos Acústicos</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_tab3">
+       <item>
+        <widget class="QLabel" name="label_reflex_title">
+         <property name="text">
+          <string>Reflejos Acústicos (dB HL) - dejar en 130 si está ausente. WN (ruido blanco) solo se toma en contralateral</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="gridLayout_reflex">
+         <item row="0" column="1" colspan="2">
+          <widget class="QLabel" name="label_reflex_od">
+           <property name="text">
+            <string>OD</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3" colspan="2">
+          <widget class="QLabel" name="label_reflex_oi">
+           <property name="text">
+            <string>OI</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_reflex_freq_header">
+           <property name="text">
+            <string>Frecuencia (Hz)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLabel" name="label_reflex_ipsi_od">
+           <property name="text">
+            <string>Ipsi</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QLabel" name="label_reflex_contra_od">
+           <property name="text">
+            <string>Contra</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QLabel" name="label_reflex_ipsi_oi">
+           <property name="text">
+            <string>Ipsi</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="4">
+          <widget class="QLabel" name="label_reflex_contra_oi">
+           <property name="text">
+            <string>Contra</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_reflex_f500">
+           <property name="text">
+            <string>500</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QSpinBox" name="spbox_reflex_ipsi_od_0">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QSpinBox" name="spbox_reflex_contra_od_0">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="3">
+          <widget class="QSpinBox" name="spbox_reflex_ipsi_oi_0">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="4">
+          <widget class="QSpinBox" name="spbox_reflex_contra_oi_0">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_reflex_f1000">
+           <property name="text">
+            <string>1000</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QSpinBox" name="spbox_reflex_ipsi_od_1">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QSpinBox" name="spbox_reflex_contra_od_1">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="3">
+          <widget class="QSpinBox" name="spbox_reflex_ipsi_oi_1">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="4">
+          <widget class="QSpinBox" name="spbox_reflex_contra_oi_1">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_reflex_f2000">
+           <property name="text">
+            <string>2000</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QSpinBox" name="spbox_reflex_ipsi_od_2">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="2">
+          <widget class="QSpinBox" name="spbox_reflex_contra_od_2">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="3">
+          <widget class="QSpinBox" name="spbox_reflex_ipsi_oi_2">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="4">
+          <widget class="QSpinBox" name="spbox_reflex_contra_oi_2">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="label_reflex_f4000">
+           <property name="text">
+            <string>4000</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QSpinBox" name="spbox_reflex_ipsi_od_3">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="2">
+          <widget class="QSpinBox" name="spbox_reflex_contra_od_3">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="3">
+          <widget class="QSpinBox" name="spbox_reflex_ipsi_oi_3">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="4">
+          <widget class="QSpinBox" name="spbox_reflex_contra_oi_3">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="label_reflex_wn">
+           <property name="text">
+            <string>WN</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="2">
+          <widget class="QSpinBox" name="spbox_reflex_contra_od_4">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="4">
+          <widget class="QSpinBox" name="spbox_reflex_contra_oi_4">
+           <property name="maximum">
+            <number>130</number>
+           </property>
+           <property name="singleStep">
+            <number>5</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_reflex">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_etf">
+      <attribute name="title">
+       <string>Función Tubaria</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_tab4">
+       <item>
+        <widget class="QLabel" name="label_etf_title">
+         <property name="text">
+          <string>Función Tubaria: Normal/Disfunción tubaria (membrana indemne, Valsalva/Toynbee) o Permeable/No permeable (membrana perforada, manometría directa)</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_etf_od">
+         <item>
+          <widget class="QLabel" name="label_etf_od">
+           <property name="text">
+            <string>OD</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cb_etf_od">
+           <item>
+            <property name="text">
+             <string>Normal</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Disfunción tubaria</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Permeable</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>No permeable</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_etf_oi">
+         <item>
+          <widget class="QLabel" name="label_etf_oi">
+           <property name="text">
+            <string>OI</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cb_etf_oi">
+           <item>
+            <property name="text">
+             <string>Normal</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Disfunción tubaria</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>Permeable</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>No permeable</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_etf">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_historia">
+      <attribute name="title">
+       <string>Historia Clínica</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_tab5">
+       <item>
+        <widget class="QLabel" name="label_historia_title">
+         <property name="text">
+          <string>Antecedentes relevantes para la anamnesis</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="gridLayout_historia">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="chbox_hist_hipoacusia_familiar">
+           <property name="text">
+            <string>Hipoacusia familiar</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="chbox_hist_ototoxicos">
+           <property name="text">
+            <string>Exposición a ototóxicos</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="chbox_hist_trauma_acustico">
+           <property name="text">
+            <string>Exposición a ruido / trauma acústico</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QCheckBox" name="chbox_hist_otitis">
+           <property name="text">
+            <string>Otitis media a repetición</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QCheckBox" name="chbox_hist_meningitis">
+           <property name="text">
+            <string>Meningitis</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QCheckBox" name="chbox_hist_tce">
+           <property name="text">
+            <string>Traumatismo craneoencefálico</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QCheckBox" name="chbox_hist_diabetes">
+           <property name="text">
+            <string>Diabetes</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QCheckBox" name="chbox_hist_hta">
+           <property name="text">
+            <string>Hipertensión arterial</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_medicamentos">
+         <item>
+          <widget class="QLabel" name="label_medicamentos">
+           <property name="text">
+            <string>Medicamentos:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="led_medicamentos"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_cirugias">
+         <item>
+          <widget class="QLabel" name="label_cirugias">
+           <property name="text">
+            <string>Cirugías previas:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="led_cirugias"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_otros_antecedentes">
+         <property name="text">
+          <string>Otros antecedentes relevantes:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTextEdit" name="txt_otros_antecedentes"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_11">
      <item>
@@ -1584,6 +2136,37 @@
   <tabstop>spbox_srt_oi_0</tabstop>
   <tabstop>spbox_umd_oi_0</tabstop>
   <tabstop>spbox_umd_oi_1</tabstop>
+  <tabstop>spbox_reflex_ipsi_od_0</tabstop>
+  <tabstop>spbox_reflex_ipsi_od_1</tabstop>
+  <tabstop>spbox_reflex_ipsi_od_2</tabstop>
+  <tabstop>spbox_reflex_ipsi_od_3</tabstop>
+  <tabstop>spbox_reflex_contra_od_0</tabstop>
+  <tabstop>spbox_reflex_contra_od_1</tabstop>
+  <tabstop>spbox_reflex_contra_od_2</tabstop>
+  <tabstop>spbox_reflex_contra_od_3</tabstop>
+  <tabstop>spbox_reflex_ipsi_oi_0</tabstop>
+  <tabstop>spbox_reflex_ipsi_oi_1</tabstop>
+  <tabstop>spbox_reflex_ipsi_oi_2</tabstop>
+  <tabstop>spbox_reflex_ipsi_oi_3</tabstop>
+  <tabstop>spbox_reflex_contra_oi_0</tabstop>
+  <tabstop>spbox_reflex_contra_oi_1</tabstop>
+  <tabstop>spbox_reflex_contra_oi_2</tabstop>
+  <tabstop>spbox_reflex_contra_oi_3</tabstop>
+  <tabstop>cb_etf_od</tabstop>
+  <tabstop>cb_etf_oi</tabstop>
+  <tabstop>spbox_reflex_contra_od_4</tabstop>
+  <tabstop>spbox_reflex_contra_oi_4</tabstop>
+  <tabstop>chbox_hist_hipoacusia_familiar</tabstop>
+  <tabstop>chbox_hist_ototoxicos</tabstop>
+  <tabstop>chbox_hist_trauma_acustico</tabstop>
+  <tabstop>chbox_hist_otitis</tabstop>
+  <tabstop>chbox_hist_meningitis</tabstop>
+  <tabstop>chbox_hist_tce</tabstop>
+  <tabstop>chbox_hist_diabetes</tabstop>
+  <tabstop>chbox_hist_hta</tabstop>
+  <tabstop>led_medicamentos</tabstop>
+  <tabstop>led_cirugias</tabstop>
+  <tabstop>txt_otros_antecedentes</tabstop>
  </tabstops>
  <resources/>
  <connections/>

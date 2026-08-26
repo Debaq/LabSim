@@ -21,6 +21,18 @@ def _parse_birth_year(date_str):
     return None
 
 
+HIST_CHECKBOXES = [
+    "chbox_hist_hipoacusia_familiar",
+    "chbox_hist_ototoxicos",
+    "chbox_hist_trauma_acustico",
+    "chbox_hist_otitis",
+    "chbox_hist_meningitis",
+    "chbox_hist_tce",
+    "chbox_hist_diabetes",
+    "chbox_hist_hta",
+]
+
+
 class CreateA(QWidget,Ui_generator_audio):
     def __init__(self, username, main_window) -> None:
         super().__init__()
@@ -83,6 +95,13 @@ class CreateA(QWidget,Ui_generator_audio):
                 spin.setValue(spin.minimum())
         self.cb_z_od.setCurrentIndex(0)
         self.cb_z_oi.setCurrentIndex(0)
+        self.cb_etf_od.setCurrentIndex(0)
+        self.cb_etf_oi.setCurrentIndex(0)
+        for name in HIST_CHECKBOXES:
+            getattr(self, name).setChecked(False)
+        self.led_medicamentos.clear()
+        self.led_cirugias.clear()
+        self.txt_otros_antecedentes.clear()
 
     def load_for_edit(self, case_id, agenda_key, agenda_row):
         """Carga un paciente existente en el formulario para verlo/editarlo"""
@@ -120,6 +139,10 @@ class CreateA(QWidget,Ui_generator_audio):
         self.cb_z_od.setCurrentText(case.get("Z_OD", "A"))
         self.cb_z_oi.setCurrentText(case.get("Z_OI", "A"))
 
+        etf = case.get("ETF", ["Normal", "Normal"])
+        self.cb_etf_od.setCurrentText(etf[0])
+        self.cb_etf_oi.setCurrentText(etf[1])
+
         self.btn_create.setText("Guardar cambios")
 
     def _save_edit(self):
@@ -149,6 +172,9 @@ class CreateA(QWidget,Ui_generator_audio):
         case["UMD"] = extra["UMD"]
         case["recruit"] = [self.chbox_recrut_od.isChecked(), self.chbox_recrut_oi.isChecked()]
         case["decay"] = [self.chbox_det_od.isChecked(), self.chbox_det_oi.isChecked()]
+        case["Reflex"] = extra["Reflex"]
+        case["ETF"] = [self.cb_etf_od.currentText(), self.cb_etf_oi.currentText()]
+        case["Anamnesis"] = extra["Anamnesis"]
 
         cases[self._edit_case_id] = case
         cases_store.set_cases(cases)
@@ -214,6 +240,8 @@ class CreateA(QWidget,Ui_generator_audio):
                 {"int": self.spbox_umd_od_0.value(), "percentage": self.spbox_umd_od_1.value()},
                 {"int": self.spbox_umd_oi_0.value(), "percentage": self.spbox_umd_oi_1.value()},
             ],
+            "Reflex": self._read_reflex(),
+            "Anamnesis": self._read_anamnesis(),
         }
 
     def _load_extra_tests(self, case):
@@ -225,6 +253,63 @@ class CreateA(QWidget,Ui_generator_audio):
         self.spbox_umd_od_1.setValue(umd[0]["percentage"])
         self.spbox_umd_oi_0.setValue(umd[1]["int"])
         self.spbox_umd_oi_1.setValue(umd[1]["percentage"])
+        self._load_reflex(case)
+        self._load_anamnesis(case)
+
+    def _read_anamnesis(self):
+        antecedentes = {
+            name[len("chbox_hist_"):]: getattr(self, name).isChecked()
+            for name in HIST_CHECKBOXES
+        }
+        return {
+            "antecedentes": antecedentes,
+            "medicamentos": self.led_medicamentos.text(),
+            "cirugias": self.led_cirugias.text(),
+            "otros": self.txt_otros_antecedentes.toPlainText(),
+        }
+
+    def _load_anamnesis(self, case):
+        anamnesis = case.get("Anamnesis", {})
+        antecedentes = anamnesis.get("antecedentes", {})
+        for name in HIST_CHECKBOXES:
+            key = name[len("chbox_hist_"):]
+            getattr(self, name).setChecked(bool(antecedentes.get(key, False)))
+        self.led_medicamentos.setText(anamnesis.get("medicamentos", ""))
+        self.led_cirugias.setText(anamnesis.get("cirugias", ""))
+        self.txt_otros_antecedentes.setPlainText(anamnesis.get("otros", ""))
+
+    # Frecuencias por modo: contra suma WN (ruido blanco, índice 4), ipsi no se toma con WN.
+    REFLEX_COUNTS = {"ipsi": 4, "contra": 5}
+
+    def _read_reflex(self):
+        """Umbrales de reflejos acústicos (dB HL) por frecuencia (500/1000/2000/4000 Hz + WN
+        en contra), modo (ipsi/contra) y oído. 130 = ausente, mismo criterio que LDL/UMD."""
+        reflex = {"ipsi": [], "contra": []}
+        side = ["od", "oi"]
+        for mode, count in self.REFLEX_COUNTS.items():
+            for n in range(count):
+                temp = [0, 0]
+                for s_idx, s in enumerate(side):
+                    name = f"spbox_reflex_{mode}_{s}_{n}"
+                    spin_obj = self.findChildren(QSpinBox, name)
+                    if spin_obj:
+                        temp[s_idx] = spin_obj[0].value()
+                reflex[mode].append(temp)
+        return reflex
+
+    def _load_reflex(self, case):
+        defaults = {mode: [[130, 130]] * count for mode, count in self.REFLEX_COUNTS.items()}
+        reflex = case.get("Reflex", defaults)
+        side = ["od", "oi"]
+        for mode, count in self.REFLEX_COUNTS.items():
+            values = reflex.get(mode, defaults[mode])
+            for n in range(count):
+                temp = values[n] if n < len(values) else [130, 130]
+                for s_idx, s in enumerate(side):
+                    name = f"spbox_reflex_{mode}_{s}_{n}"
+                    spin_obj = self.findChildren(QSpinBox, name)
+                    if spin_obj:
+                        spin_obj[0].setValue(temp[s_idx])
 
     def _save_case(self, letters, extra):
         cases_store = CasesOffline()
@@ -256,6 +341,9 @@ class CreateA(QWidget,Ui_generator_audio):
             "state_login": 1,
             "recruit": [self.chbox_recrut_od.isChecked(), self.chbox_recrut_oi.isChecked()],
             "decay": [self.chbox_det_od.isChecked(), self.chbox_det_oi.isChecked()],
+            "Reflex": extra["Reflex"],
+            "ETF": [self.cb_etf_od.currentText(), self.cb_etf_oi.currentText()],
+            "Anamnesis": extra["Anamnesis"],
             "tipo": "normal",
         }
         cases_store.set_cases(cases)
