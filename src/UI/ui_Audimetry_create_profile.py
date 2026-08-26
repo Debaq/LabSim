@@ -1028,6 +1028,113 @@ class Ui_generator_audio(object):
 
         self.verticalLayout_2.addLayout(self.horizontalLayout_6)
 
+        self.horizontalLayout_fowler = QHBoxLayout()
+        self.horizontalLayout_fowler.setObjectName(u"horizontalLayout_fowler")
+        self.label_64 = QLabel(self.tab_otras)
+        self.label_64.setObjectName(u"label_64")
+
+        self.horizontalLayout_fowler.addWidget(self.label_64)
+
+        self.cb_fowler_freq = QComboBox(self.tab_otras)
+        self.cb_fowler_freq.addItem("")
+        self.cb_fowler_freq.addItem("")
+        self.cb_fowler_freq.addItem("")
+        self.cb_fowler_freq.addItem("")
+        self.cb_fowler_freq.addItem("")
+        self.cb_fowler_freq.addItem("")
+        self.cb_fowler_freq.addItem("")
+        self.cb_fowler_freq.addItem("")
+        self.cb_fowler_freq.addItem("")
+        self.cb_fowler_freq.setObjectName(u"cb_fowler_freq")
+
+        self.horizontalLayout_fowler.addWidget(self.cb_fowler_freq)
+
+        self.label_65 = QLabel(self.tab_otras)
+        self.label_65.setObjectName(u"label_65")
+
+        self.horizontalLayout_fowler.addWidget(self.label_65)
+
+        self.spbox_fowler_cut_1 = QSpinBox(self.tab_otras)
+        self.spbox_fowler_cut_1.setObjectName(u"spbox_fowler_cut_1")
+        self.spbox_fowler_cut_1.setMaximum(90)
+        self.spbox_fowler_cut_1.setSingleStep(5)
+        self.spbox_fowler_cut_1.setValue(15)
+
+        self.horizontalLayout_fowler.addWidget(self.spbox_fowler_cut_1)
+
+        self.spbox_fowler_cut_2 = QSpinBox(self.tab_otras)
+        self.spbox_fowler_cut_2.setObjectName(u"spbox_fowler_cut_2")
+        self.spbox_fowler_cut_2.setMaximum(90)
+        self.spbox_fowler_cut_2.setSingleStep(5)
+        self.spbox_fowler_cut_2.setValue(30)
+
+        self.horizontalLayout_fowler.addWidget(self.spbox_fowler_cut_2)
+
+        self.spbox_fowler_cut_3 = QSpinBox(self.tab_otras)
+        self.spbox_fowler_cut_3.setObjectName(u"spbox_fowler_cut_3")
+        self.spbox_fowler_cut_3.setMaximum(90)
+        self.spbox_fowler_cut_3.setSingleStep(5)
+        self.spbox_fowler_cut_3.setValue(50)
+
+        self.horizontalLayout_fowler.addWidget(self.spbox_fowler_cut_3)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_fowler)
+
+        self.horizontalLayout_stenger = QHBoxLayout()
+        self.horizontalLayout_stenger.setObjectName(u"horizontalLayout_stenger")
+        self.label_66 = QLabel(self.tab_otras)
+        self.label_66.setObjectName(u"label_66")
+
+        self.horizontalLayout_stenger.addWidget(self.label_66)
+
+        self.chbox_stenger_od = QCheckBox(self.tab_otras)
+        self.chbox_stenger_od.setObjectName(u"chbox_stenger_od")
+
+        self.horizontalLayout_stenger.addWidget(self.chbox_stenger_od)
+
+        self.chbox_stenger_oi = QCheckBox(self.tab_otras)
+        self.chbox_stenger_oi.setObjectName(u"chbox_stenger_oi")
+
+        self.horizontalLayout_stenger.addWidget(self.chbox_stenger_oi)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_stenger)
+
+        self.horizontalLayout_sisi = QHBoxLayout()
+        self.horizontalLayout_sisi.setObjectName(u"horizontalLayout_sisi")
+        self.label_67 = QLabel(self.tab_otras)
+        self.label_67.setObjectName(u"label_67")
+
+        self.horizontalLayout_sisi.addWidget(self.label_67)
+
+        self.label_68 = QLabel(self.tab_otras)
+        self.label_68.setObjectName(u"label_68")
+
+        self.horizontalLayout_sisi.addWidget(self.label_68)
+
+        self.spbox_sisi_od = QSpinBox(self.tab_otras)
+        self.spbox_sisi_od.setObjectName(u"spbox_sisi_od")
+        self.spbox_sisi_od.setMaximum(100)
+        self.spbox_sisi_od.setSingleStep(5)
+
+        self.horizontalLayout_sisi.addWidget(self.spbox_sisi_od)
+
+        self.label_69 = QLabel(self.tab_otras)
+        self.label_69.setObjectName(u"label_69")
+
+        self.horizontalLayout_sisi.addWidget(self.label_69)
+
+        self.spbox_sisi_oi = QSpinBox(self.tab_otras)
+        self.spbox_sisi_oi.setObjectName(u"spbox_sisi_oi")
+        self.spbox_sisi_oi.setMaximum(100)
+        self.spbox_sisi_oi.setSingleStep(5)
+
+        self.horizontalLayout_sisi.addWidget(self.spbox_sisi_oi)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_sisi)
+
 
         self.horizontalLayout_3.addLayout(self.verticalLayout_2)
 
@@ -1622,6 +1729,23 @@ class Ui_generator_audio(object):
         self.cb_z_oi.setItemText(3, QCoreApplication.translate("generator_audio", u"C", None))
         self.cb_z_oi.setItemText(4, QCoreApplication.translate("generator_audio", u"Cs", None))
         self.cb_z_oi.setItemText(5, QCoreApplication.translate("generator_audio", u"B", None))
+        self.label_64.setText(QCoreApplication.translate("generator_audio", u"Fowler", None))
+        self.cb_fowler_freq.setItemText(0, QCoreApplication.translate("generator_audio", u"125", None))
+        self.cb_fowler_freq.setItemText(1, QCoreApplication.translate("generator_audio", u"250", None))
+        self.cb_fowler_freq.setItemText(2, QCoreApplication.translate("generator_audio", u"500", None))
+        self.cb_fowler_freq.setItemText(3, QCoreApplication.translate("generator_audio", u"1000", None))
+        self.cb_fowler_freq.setItemText(4, QCoreApplication.translate("generator_audio", u"2000", None))
+        self.cb_fowler_freq.setItemText(5, QCoreApplication.translate("generator_audio", u"3000", None))
+        self.cb_fowler_freq.setItemText(6, QCoreApplication.translate("generator_audio", u"4000", None))
+        self.cb_fowler_freq.setItemText(7, QCoreApplication.translate("generator_audio", u"6000", None))
+        self.cb_fowler_freq.setItemText(8, QCoreApplication.translate("generator_audio", u"8000", None))
+        self.label_65.setText(QCoreApplication.translate("generator_audio", u"Cortes", None))
+        self.label_66.setText(QCoreApplication.translate("generator_audio", u"Stenger", None))
+        self.chbox_stenger_od.setText(QCoreApplication.translate("generator_audio", u"OD", None))
+        self.chbox_stenger_oi.setText(QCoreApplication.translate("generator_audio", u"OI", None))
+        self.label_67.setText(QCoreApplication.translate("generator_audio", u"SISI %", None))
+        self.label_68.setText(QCoreApplication.translate("generator_audio", u"OD", None))
+        self.label_69.setText(QCoreApplication.translate("generator_audio", u"OI", None))
 
         self.label_63.setText(QCoreApplication.translate("generator_audio", u"Nota: todos los valores deben ser rellenados si alguno no existe en db poner 130 y al porcentaje 0, en el caso de UMD solo poner el valor maximo de discriminaci\u00f3n", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_otras), QCoreApplication.translate("generator_audio", u"Otras Pruebas", None))

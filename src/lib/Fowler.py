@@ -135,7 +135,7 @@ class Fowler:
                 side = int(not self.side_b)
             return equals, side, 4
 
-        return False, 33
+        return False, None, 5
 
 """
 # Datos iniciales

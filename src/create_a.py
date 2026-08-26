@@ -132,11 +132,16 @@ class CreateA(QWidget,Ui_generator_audio):
         self.led_name.clear()
         self.spinBox.setValue(self.spinBox.minimum())
         for chbox in (self.chbox_peg_od, self.chbox_peg_oi, self.chbox_ldl_od, self.chbox_ldl_oi,
-                      self.chbox_recrut_od, self.chbox_recrut_oi, self.chbox_det_od, self.chbox_det_oi):
+                      self.chbox_recrut_od, self.chbox_recrut_oi, self.chbox_det_od, self.chbox_det_oi,
+                      self.chbox_stenger_od, self.chbox_stenger_oi):
             chbox.setChecked(False)
         for spin in self.findChildren(QSpinBox):
             if spin.objectName().startswith("spbox_"):
                 spin.setValue(spin.minimum())
+        self.spbox_fowler_cut_1.setValue(15)
+        self.spbox_fowler_cut_2.setValue(30)
+        self.spbox_fowler_cut_3.setValue(50)
+        self.cb_fowler_freq.setCurrentIndex(0)
         self.cb_z_od.setCurrentIndex(0)
         self.cb_z_oi.setCurrentIndex(0)
         self.cb_etf_od.setCurrentIndex(0)
@@ -219,6 +224,9 @@ class CreateA(QWidget,Ui_generator_audio):
         case["UMD"] = extra["UMD"]
         case["recruit"] = [self.chbox_recrut_od.isChecked(), self.chbox_recrut_oi.isChecked()]
         case["decay"] = [self.chbox_det_od.isChecked(), self.chbox_det_oi.isChecked()]
+        case["Fowler"] = extra["Fowler"]
+        case["Stenger"] = extra["Stenger"]
+        case["SISI"] = extra["SISI"]
         case["Reflex"] = extra["Reflex"]
         case["ETF"] = [self.cb_etf_od.currentText(), self.cb_etf_oi.currentText()]
         case["Anamnesis"] = extra["Anamnesis"]
@@ -288,6 +296,13 @@ class CreateA(QWidget,Ui_generator_audio):
                 {"int": self.spbox_umd_od_0.value(), "percentage": self.spbox_umd_od_1.value()},
                 {"int": self.spbox_umd_oi_0.value(), "percentage": self.spbox_umd_oi_1.value()},
             ],
+            "Fowler": {
+                "freq": self.cb_fowler_freq.currentIndex(),
+                "cuts": [self.spbox_fowler_cut_1.value(), self.spbox_fowler_cut_2.value(),
+                         self.spbox_fowler_cut_3.value()],
+            },
+            "Stenger": [self.chbox_stenger_od.isChecked(), self.chbox_stenger_oi.isChecked()],
+            "SISI": [self.spbox_sisi_od.value(), self.spbox_sisi_oi.value()],
             "Reflex": self._read_reflex(),
             "Anamnesis": self._read_anamnesis(),
         }
@@ -314,6 +329,25 @@ class CreateA(QWidget,Ui_generator_audio):
         self.spbox_umd_od_1.setValue(umd[0]["percentage"])
         self.spbox_umd_oi_0.setValue(umd[1]["int"])
         self.spbox_umd_oi_1.setValue(umd[1]["percentage"])
+
+        fowler = case.get("Fowler", {"freq": 0, "cuts": [15, 30, 50]})
+        if not isinstance(fowler, dict):
+            # formato viejo (lista): se muestra el default, el docente lo reconfigura y se migra al guardar
+            fowler = {"freq": 0, "cuts": [15, 30, 50]}
+        self.cb_fowler_freq.setCurrentIndex(fowler.get("freq") or 0)
+        cuts = fowler.get("cuts", [15, 30, 50])
+        self.spbox_fowler_cut_1.setValue(cuts[0])
+        self.spbox_fowler_cut_2.setValue(cuts[1])
+        self.spbox_fowler_cut_3.setValue(cuts[2])
+
+        stenger = case.get("Stenger", [False, False])
+        self.chbox_stenger_od.setChecked(bool(stenger[0]))
+        self.chbox_stenger_oi.setChecked(bool(stenger[1]))
+
+        sisi = case.get("SISI", [0, 0])
+        self.spbox_sisi_od.setValue(sisi[0])
+        self.spbox_sisi_oi.setValue(sisi[1])
+
         self._load_reflex(case)
         self._load_anamnesis(case)
 
@@ -396,8 +430,9 @@ class CreateA(QWidget,Ui_generator_audio):
             "UMD": extra["UMD"],
             "SDT": extra["SDT"],
             "SRT": extra["SRT"],
-            "Fowler": [[], 0, 0],
-            "Carhart": [False, False],
+            "Fowler": extra["Fowler"],
+            "Stenger": extra["Stenger"],
+            "SISI": extra["SISI"],
             "box": "Box_1",
             "result": 1,
             "state_login": 1,

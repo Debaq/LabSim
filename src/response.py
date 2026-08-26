@@ -25,20 +25,26 @@ in:estimulo out:bool respuesta
 
     
 class ResponseAudiometry():
+    DECAY_HOLD_MS = 6000  # sustituto simulado de los 60s clínicos del test de decaimiento tonal
+
     def __init__(self,obj_audio):
         super().__init__()
         self.data = {}
         self.other_response = Response()
-        self.data['audio']={'stimOn': [False, False], 'freq': 3, 'step': 5, 
-                            'int': [20, 20], 'output': [0, 1],'trans': [0, 0], 
+        self.data['audio']={'stimOn': [False, False], 'freq': 3, 'step': 5,
+                            'int': [20, 20], 'output': [0, 1],'trans': [0, 0],
                             'stim': [0, 3], 'test':'Umbrales', 'contin':['Continuo', 'Continuo']}
-        
+
         self.history_command= []
         self.obj_audio = obj_audio
         self.frecuency =         [125,250, 500,1000,2000,3000,4000,6000,8000]
         self.attenuations = [35, 40,  40,  40, 40,  45,  45,  50, 50]
 
-        
+        self.decay_timer = QTimer()
+        self.decay_timer.setSingleShot(True)
+        self.decay_timer.timeout.connect(self._decay_timeout)
+
+
     def set_case(self,dbdata):
         self.dbdata = dbdata
         self.aerea = [[dbdata['Aerea'][i][0] for i in range(len(dbdata['Aerea']))], 
@@ -54,18 +60,24 @@ class ResponseAudiometry():
         #['dictar_palabras', 'vibrador_+_ruido', 'molesto_o', 'dictar_palabras']
         if uphand:        
             if self.history_command:
-                if self.history_command[0] in ['colocar_fonos', 'colocar_vibrador', 'mano_levantada_en_ruido', 'mano_levantada']:
+                if self.history_command[0] in ['colocar_fonos', 'colocar_vibrador']:
                     self.response_aerea_wout_msk()
+                elif self.history_command[0] == 'mano_levantada':
+                    self.response_decay()
+                elif self.history_command[0] == 'mano_levantada_en_ruido':
+                    self.response_stenger()
                 elif self.history_command[0] =='pitos_fuertes':
                     self.ldl()
                 elif self.history_command[0] =='dos_pitos':
                     self.fowler()
+                elif self.history_command[0] == 'cambie_de_volumen':
+                    self.response_sisi()
                 elif self.history_command[0] =='aerea_+_ruido':
                     self.response_aerea_w_msk()
                 elif self.history_command[0] =='vibrador_+_ruido':
                     self.response_osea_w_msk()
                 elif self.history_command[0] == 'escuche_mi_voz':
-                    
+
                     self.response_sdt()
             else:
                 print("no has dado comando alguno")
@@ -95,6 +107,9 @@ class ResponseAudiometry():
         if 'int' in name:
             value = str_.split(' ')
             self.data['audio']['int'][channel] = int(value[0])
+            if self.history_command and self.history_command[0] == 'mano_levantada' and self.decay_timer.isActive():
+                # el docente subió el nivel: el paciente "reacciona" de nuevo, se reinicia el reloj de adaptación
+                self.decay_timer.start(self.DECAY_HOLD_MS)
         elif 'trans' in name:
             value = trans_list.index(str_)
             self.data['audio']['trans'][channel] = value
@@ -223,28 +238,86 @@ class ResponseAudiometry():
         if self.data['audio']['test'] == 'Umbrales':
             if self.data['audio']['stimOn'].count(True) == 1:
                 stim_on = self.data['audio']['stimOn'].index(True)
-                trans = self.data['audio']['trans'][stim_on]
-                if trans == 0:
-                    output = self.data['audio']['output'][stim_on] #derecho o izquierdo
-                    frecuency = self.data['audio']['freq'] #indice
-                    int_ = self.data['audio']['int'][stim_on]
-                    value = self.dbdata['LDL'][frecuency][output]
-                    verify = True if int_ >= value else False
-                    
-                    if verify:
-                        self.other_response.create_voice_('molesta')
-                else:
-                    print("lo esta haciendo con la osea")
+                output = self.data['audio']['output'][stim_on] #derecho o izquierdo
+                frecuency = self.data['audio']['freq'] #indice
+                int_ = self.data['audio']['int'][stim_on]
+                value = self.dbdata['LDL'][frecuency][output]
+                verify = True if int_ >= value else False
+
+                if verify:
+                    self.other_response.create_voice_('molesta')
 
     def fowler(self):
         if self.data['audio']['test'] == 'Umbrales':
             if all(x == 0 for x in self.data['audio']['stim']):
                 if all(x == 'Alternado' for x in self.data['audio']['contin']):
-                    print(len(self.dbdata['Fowler']))
+                    fdata = self.dbdata.get('Fowler', {'freq': None, 'cuts': [15, 30, 50]})
+                    if not isinstance(fdata, dict):
+                        # formato viejo (lista), caso aun no migrado desde el form: prueba no configurada
+                        return
+                    if fdata['freq'] == self.data['audio']['freq']:
+                        thr = self.dbdata['Aerea'][fdata['freq']]
+                        self.other_response.set_fowler_data(thr[0], thr[1], fdata['cuts'])
 
-                    self.other_response.set_fowler_data(self.dbdata['Fowler'])
+    def response_decay(self):
+        """Test de decaimiento tonal: umbral normal + si el caso marca 'decay'
+        para ese oído, el paciente deja de responder tras sostener el tono."""
+        self.response_aerea_wout_msk()
+        if self.data['audio']['stimOn'].count(True) == 1:
+            stim_on = self.data['audio']['stimOn'].index(True)
+            output = self.data['audio']['output'][stim_on]
+            trans = self.data['audio']['trans'][stim_on]
+            continuo = self.data['audio']['contin'][stim_on] == 'Continuo'
+            decay = self.dbdata.get('decay', [False, False])[output]
+            if trans == 0 and continuo and decay:
+                self.decay_timer.start(self.DECAY_HOLD_MS)
+            else:
+                self.decay_timer.stop()
+        else:
+            self.decay_timer.stop()
 
- 
+    def _decay_timeout(self):
+        self.downHand()  # el paciente "se adapta" y deja de percibir el tono
+
+    def response_stenger(self):
+        """Stenger: tono simultaneo en ambos oidos. Si el oido peor esta
+        marcado como funcional/no organico ('Stenger'), el paciente no
+        responde pese a oir claramente por el oido sano."""
+        if self.data['audio']['test'] != 'Umbrales':
+            return
+        if self.data['audio']['stimOn'].count(True) != 2:
+            return
+        out = self.data['audio']['output']
+        if out[0] == out[1]:
+            return
+        freq = self.data['audio']['freq']
+        thr = self.dbdata['Aerea'][freq]
+        stenger = self.dbdata.get('Stenger', [False, False])
+        worse = 0 if thr[0] > thr[1] else 1
+        better = int(not worse)
+        int_worse = self.data['audio']['int'][out.index(worse)]
+        int_better = self.data['audio']['int'][out.index(better)]
+        audible_worse = int_worse >= thr[worse]
+        audible_better = int_better >= thr[better]
+        if stenger[worse] and audible_worse and audible_better:
+            self.downHand()
+        elif audible_worse or audible_better:
+            self.upHand()
+        else:
+            self.downHand()
+
+    def response_sisi(self):
+        """SISI: cada pulsación del comando simula un incremento de 1dB;
+        la probabilidad de detectarlo es el score % guardado en el caso."""
+        if self.data['audio']['test'] == 'Umbrales':
+            if self.data['audio']['stimOn'].count(True) == 1:
+                stim_on = self.data['audio']['stimOn'].index(True)
+                output = self.data['audio']['output'][stim_on]
+                pct = self.dbdata.get('SISI', [0, 0])[output]
+                if random.randint(1, 100) <= pct:
+                    self.other_response.create_voice_('si')
+
+
     def response_aerea_w_msk(self):
         """
         minimo: UAE - AT - UONE + UANE + CE
@@ -417,13 +490,9 @@ class ResponseAudiometry():
             pass
             #self.obj_audio()
         if rol == 'sonidos_iguales':
-            freq = self.data['audio']['freq']
-            thr = self.dbdata['Aerea_mkg'][freq] #umbrales de ambos oidos
-            self.other_response.fowler_q(1, self.data, thr)
+            self.other_response.fowler_q(1, self.data)
         if rol == "en_qué_oído":
-            freq = self.data['audio']['freq']
-            thr = self.dbdata['Aerea_mkg'][freq]
-            self.other_response.fowler_q(2, self.data, thr)
+            self.other_response.fowler_q(2, self.data)
 
  
                 
