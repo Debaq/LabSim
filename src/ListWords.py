@@ -11,21 +11,26 @@ import itertools
 import random
 
 from PySide6 import QtCore
-from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
+from PySide6.QtMultimedia import QAudioBufferOutput, QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import QWidget
 
+from lib.audio_player import audio_buffer_level
 from lib.h_audio import create_word, create_word_response
 from lib.logoaudiometry import CalculateLogo
 from UI.Ui_ListWord import Ui_ListWords
 
 
 class ListWords(QWidget, Ui_ListWords):
+    # nivel normalizado 0.0-1.0 de la palabra reproducida (no de la respuesta del paciente)
+    level_changed = QtCore.Signal(float)
+
     def __init__(self,data):
         QWidget.__init__(self)
         # Inicialización de la ventana y propiedades
         self.la_super(data)
         self.setupUi(self)
         self.playable = [False, 0, None, False] # playable, intencity, side, with_mkg, es playable solo si esta en invertido
+        self._is_stimulus_playing = False
         self.wait_count = [10, 0]
         self.prev_int = 0
         self.continue_response = True
@@ -45,6 +50,14 @@ class ListWords(QWidget, Ui_ListWords):
         self.output_ch = QAudioOutput()
         self.channel_0 = QMediaPlayer()
         self.channel_0.setAudioOutput(self.output_ch)
+
+        self.buffer_output_ch = QAudioBufferOutput()
+        self.buffer_output_ch.audioBufferReceived.connect(self._on_audio_buffer)
+        self.channel_0.setAudioBufferOutput(self.buffer_output_ch)
+
+    def _on_audio_buffer(self, buffer):
+        if self._is_stimulus_playing:
+            self.level_changed.emit(audio_buffer_level(buffer))
         
         
     def create_timer(self):
@@ -100,9 +113,8 @@ class ListWords(QWidget, Ui_ListWords):
     def soundPlay(self, word):
         self.changecalcule()
         if self.playable[0]:
+            self._is_stimulus_playing = True
             self.channel_0.setSource(word)
-            #self.probe.setSource(self.channel_0)
-            #self.probe.audioBufferProbed.connect(self.processProbe)
             self.channel_0.play()
             self.time_1.start()
             self.lbl_list1.setText(f"Última : {self.text}")
@@ -127,6 +139,8 @@ class ListWords(QWidget, Ui_ListWords):
     def timer(self):
         stat = str(self.channel_0.mediaStatus())
         if stat == "MediaStatus.EndOfMedia":
+            self._is_stimulus_playing = False
+            self.level_changed.emit(0.0)
             self.time_1.stop()
             ran_time = random.randrange(500 , 1100)
             if self.continue_response:

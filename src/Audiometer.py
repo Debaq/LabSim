@@ -179,6 +179,7 @@ class Audiometer(QWidget, Ui_Audiometer):
 
         # Audios channels
         self.players = Player(3)
+        self.players.level_changed.connect(self._on_player_level)
         self.channel_on = [False, False]
         self.monitor(0)
         self.monitor(1)
@@ -317,6 +318,25 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.vu_meters[0].setValue(int(volume_norm))
         self.vu_meters[1].setValue(int(volume_norm))
 
+    def _on_player_level(self, ch, level):
+        """Mueve los vúmetro con el nivel real del audio que está sonando en `ch`."""
+        value = int(level * 100)
+        if ch in (0, 1):
+            self.vu_meters[ch].setStyleSheet(self.vu_meters_colors(value))
+            self.vu_meters[ch].setValue(value)
+        elif ch == 2:
+            # Comando de voz (talkback): no tiene oído asociado, se muestra en ambos.
+            self.set_vumeters_level(level)
+
+    def set_vumeters_level(self, level):
+        """Mueve ambos vúmetro con un mismo nivel (0.0-1.0): usado por comandos de
+        voz y por la reproducción de palabras de Lista de Palabras (no la respuesta
+        del paciente, que no debe mover los vúmetro)."""
+        value = int(level * 100)
+        for vu_meter in self.vu_meters:
+            vu_meter.setStyleSheet(self.vu_meters_colors(value))
+            vu_meter.setValue(value)
+
     def vu_meters_colors(self, level):
         colors = ["#ff557f", "#ffff7f", "#55ff7f"]
         if level <= 50:
@@ -329,6 +349,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         QProgressBar::chunk {}
         background-color: {};
         {}""".format("{", color, "}")
+        return style
 
     # response
     def response_timer(self):

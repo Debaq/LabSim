@@ -236,6 +236,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def connect_signals(self):
         self.subw["CVOICE"].obj.btn_checked.connect(self.subw["A"].obj.supra)
         self.subw["A"].obj.signal_speech.connect(self.speechlist_mode)
+        self.subw["W"].obj.level_changed.connect(self.subw["A"].obj.set_vumeters_level)
 
     def refresh_data(self):
         self.load_sub_windows()
