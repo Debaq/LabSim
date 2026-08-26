@@ -1,9 +1,12 @@
-from PySide6.QtCore import QUrl
+from pathlib import Path
 import random
+import subprocess
+import sys
+
+from PySide6.QtCore import QUrl
 
 from base import context
 from lib.helpers import Preferences
-import sys
 
 class_pref = Preferences()
 stim_list = class_pref.get("stim_list")
@@ -64,10 +67,39 @@ def create_voice(name, gender, idx):
     file = normalize(file)
     return QUrl.fromLocalFile(context.get_resource(file))
 
-def create_word(name):
+# Filtros ffmpeg para dejar la palabra sonando solo en el oído correspondiente:
+# OD = solo canal derecho, OI = solo canal izquierdo.
+_PAN_FILTERS = {
+    "OD": "pan=stereo|c0=0*c0|c1=c0",
+    "OI": "pan=stereo|c0=c0|c1=0*c0",
+}
+
+
+def _panned_word_file(rel_path, side):
+    """Genera (y cachea en resources/audio/_panned) una versión del archivo
+    panneada solo al oído indicado, para que no suene por ambos fonos."""
+    suffix = "OD" if side == 0 else "OI"
+    src = Path(context.get_resource(rel_path))
+    dst = src.parent / "_panned" / f"{src.stem}_{suffix}{src.suffix}"
+    if not dst.exists():
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            subprocess.run(
+                ["ffmpeg", "-y", "-loglevel", "error", "-i", str(src),
+                 "-af", _PAN_FILTERS[suffix], str(dst)],
+                check=True,
+            )
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return str(src)  # ffmpeg no disponible: se reproduce sin pannear
+    return str(dst)
+
+
+def create_word(name, side=None):
     file = f"audio/{name}.mp3"
     file = normalize(file)
-    return QUrl.fromLocalFile(context.get_resource(file))
+    if side is None:
+        return QUrl.fromLocalFile(context.get_resource(file))
+    return QUrl.fromLocalFile(_panned_word_file(file, side))
 
 def create_word_response(name, sex, number):
     file = f"audio/LP_palacios_r_{sex}{number}_{name}.mp3"

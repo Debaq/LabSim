@@ -30,8 +30,10 @@ class ListWords(QWidget, Ui_ListWords):
         self.la_super(data)
         self.setupUi(self)
         self.playable = [False, 0, None, False] # playable, intencity, side, with_mkg, es playable solo si esta en invertido
+        self.channel = 0  # canal (0 o 1) del audiómetro que está corriendo la logoaudiometría
         self._is_stimulus_playing = False
         self.wait_count = [10, 0]
+        self.prev = None
         self.prev_int = 0
         self.continue_response = True
         self.list_response = [
@@ -106,7 +108,7 @@ class ListWords(QWidget, Ui_ListWords):
         self.num  = int(''.join(filter(str.isdigit, self.sender().objectName())))
         self.text = (btn.text()).lower()
         file = f"LP_palacios_1_{self.text}"
-        word = create_word(file)
+        word = create_word(file, self.playable[2])
         self.soundPlay(word)
    
 
@@ -129,6 +131,7 @@ class ListWords(QWidget, Ui_ListWords):
         intencity = state[2]
         side = state[3]
         with_mkg = state[4]
+        self.channel = state[5]
         self.playable[1] = intencity
         self.playable[2] = side
         self.playable[3] = with_mkg
@@ -172,7 +175,7 @@ class ListWords(QWidget, Ui_ListWords):
                 self.prev_int = self.playable[1]
 
     def calculate(self, intencity, side, with_mkg):
-        if intencity is not None:
+        if intencity is not None and self.prev is not None:
             data = self.prev.get(side, with_mkg, intencity)
 
             intencity = max(intencity, 0)

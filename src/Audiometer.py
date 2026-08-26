@@ -54,8 +54,8 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.frecuency_list = create_frecuency(
             frecuency_dict, prueba="Umbrales")
         self.random_response = [0, 0]
-        #activado, reverse, intensidad, side, contrankg
-        self.datasignal_speech = [False, False, None, None, False]
+        #activado, reverse, intensidad, side, contrankg, canal
+        self.datasignal_speech = [False, False, None, None, False, 0]
 
         # Widgets
         # Diales
@@ -256,14 +256,13 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.btn_stim_pn_ch1.setDisabled(True)
         self.btn_stim_sn_ch0.setDisabled(True)
         self.btn_stim_fm_ch1.setDisabled(True)
-        self.btn_stim_speech_ch1.setDisabled(True)
         #self.btn_stim_tone_izq.setDisabled(True)
 
     def la_super(self, data):
         #self.response.set_response(data)
         if data is None:
             return
-        thr = data if data["sector"] == "camara_sono" else data_basic()
+        thr = data if data["sector"] == "Camara_sono" else data_basic()
         gender = thr['gender']
         self.gender = "feme" if gender == 0 else "male"
         self.id = thr['id']
@@ -330,8 +329,7 @@ class Audiometer(QWidget, Ui_Audiometer):
 
     def set_vumeters_level(self, level):
         """Mueve ambos vúmetro con un mismo nivel (0.0-1.0): usado por comandos de
-        voz y por la reproducción de palabras de Lista de Palabras (no la respuesta
-        del paciente, que no debe mover los vúmetro)."""
+        voz, que no tienen oído asociado."""
         value = int(level * 100)
         for vu_meter in self.vu_meters:
             vu_meter.setStyleSheet(self.vu_meters_colors(value))
@@ -426,11 +424,12 @@ class Audiometer(QWidget, Ui_Audiometer):
         label = self.lbl_contin[ch].text()
         return label != tone_list[1]
 
-    def update_logo(self, val):
-        side = self.lbl_output_ch0.text()
+    def update_logo(self, ch, val):
+        side = self.lbl_output[ch].text()
         side = 0 if side == "Derecha" else 1
         self.datasignal_speech[2] = val
         self.datasignal_speech[3] = side
+        self.datasignal_speech[5] = ch
         self.signal_speech.emit(self.datasignal_speech)
 
     def reverse(self, ch):
@@ -467,19 +466,21 @@ class Audiometer(QWidget, Ui_Audiometer):
             elif self.no_puls(ch):
                 self.play(ch)
                 self.vu_meters[ch].setValue(50)
-        elif self.lbl_revers[0].text() == "Invertido":
+        elif self.lbl_revers[ch].text() == "Invertido":
+            contra = 0 if ch == 1 else 1
             self.datasignal_speech[1] = True
-            int_der = int(self.lbl_intencity[0].text().split(' dB HL')[0])
-            side = self.lbl_output_ch0.text()
+            int_der = int(self.lbl_intencity[ch].text().split(' dB HL')[0])
+            side = self.lbl_output[ch].text()
             side = 0 if side == "Derecha" else 1
             self.datasignal_speech[2] = int_der
             self.datasignal_speech[3] = side
+            self.datasignal_speech[5] = ch
 
             self.signal_speech.emit(self.datasignal_speech)
             self.lbl_warnings[ch].setStyleSheet(
                 "background-color: rgb(170, 170, 255);  color : rgb(170, 170, 255);")
             self.lbl_warnings[ch].setText("toc-toc")
-            self.datasignal_speech[4] = self.lbl_revers[1].text() == "Invertido" and self.lbl_stim[1].text() == "Speech Noise"
+            self.datasignal_speech[4] = self.lbl_revers[contra].text() == "Invertido" and self.lbl_stim[contra].text() == "Speech Noise"
 
             self.signal_speech.emit(self.datasignal_speech)
 
@@ -592,6 +593,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.datasignal_speech[0] = stim == 2
         self.datasignal_speech[2] = int(inte_ch0)
         self.datasignal_speech[3] = side
+        self.datasignal_speech[5] = ch
 
         self.signal_speech.emit(self.datasignal_speech)
 
@@ -653,16 +655,11 @@ class Audiometer(QWidget, Ui_Audiometer):
         r_output = output_list[out]
         self.lbl_output[ch].setText(r_output)
 
-        def mod(text):
-            return 0 if text == 'Derecha' else 1
-
-        ch0 = mod(self.lbl_output[0].text())
-        ch1 = mod(self.lbl_output[1].text())
-
-        #self.datasignal_speech[2] = val
-        self.datasignal_speech[3] = ch0
-        self.signal_speech.emit(self.datasignal_speech)
-        #self.response.transmit_(side = [ch0,ch1])
+        if self.lbl_stim[ch].text() == "Habla":
+            side = 0 if self.lbl_output[ch].text() == 'Derecha' else 1
+            self.datasignal_speech[3] = side
+            self.datasignal_speech[5] = ch
+            self.signal_speech.emit(self.datasignal_speech)
         self.reset_channels()
 
     def FrecChange(self, up):
@@ -837,7 +834,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.random_response = [0, 0]
         lbl = self.lbl_stim[ch].text()
         if lbl == "Habla":
-            self.update_logo(data[lvl_ch])
+            self.update_logo(ch, data[lvl_ch])
 
 
 ############## DIALES ################

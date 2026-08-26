@@ -218,12 +218,11 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Carga self.data_current en los módulos ya construidos"""
         if self.data_current is None:
             return
-        try:
-            self.subw_a.obj.la_super(self.data_current)
-            self.subw_z.obj.la_super(self.data_current)
-            self.subw_w.obj.la_super(self.data_current)
-        except AttributeError:
-            pass
+        for attr in ("subw_a", "subw_z", "subw_w"):
+            try:
+                getattr(self, attr).obj.la_super(self.data_current)
+            except AttributeError:
+                pass
 
     def load_sub_windows(self):
         """Carga las subventanas"""
@@ -247,7 +246,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
     def activate_listWords(self):
         if self.subw_a.obj.lbl_prueba.text() == "Logoaudiometría":
-            self.activate_soft("W")
+            self.activate_auto("W")
 
     def speechlist_mode(self, state):
         self.subw["W"].obj.update_state(state)
@@ -255,7 +254,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def connect_signals(self):
         self.subw["CVOICE"].obj.btn_checked.connect(self.subw["A"].obj.supra)
         self.subw["A"].obj.signal_speech.connect(self.speechlist_mode)
-        self.subw["W"].obj.level_changed.connect(self.subw["A"].obj.set_vumeters_level)
+        self.subw["W"].obj.level_changed.connect(
+            lambda level: self.subw["A"].obj._on_player_level(self.subw["W"].obj.channel, level))
 
     def refresh_data(self):
         self.load_sub_windows()
