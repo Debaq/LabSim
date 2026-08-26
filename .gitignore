@@ -19,6 +19,8 @@
 # Ignorar archivos de construcción y distribución
 *.build/
 *.dist/
+/build/
+/dist/
 
 # Ignorar directorios de salida
 **/output/
