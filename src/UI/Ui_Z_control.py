@@ -354,7 +354,7 @@ class Ui_Z_control(object):
         self.btn_reflex_test.setText(QCoreApplication.translate("Z_control", u"Reflejos", None))
         self.btn_etf.setText(QCoreApplication.translate("Z_control", u"ETF", None))
         self.btn_toneDecay.setText(QCoreApplication.translate("Z_control", u"Tone Decay", None))
-        self.btn_stimulus.setText(QCoreApplication.translate("Z_control", u"stimulus", None))
+        self.btn_stimulus.setText(QCoreApplication.translate("Z_control", u"Estimulo", None))
         self.label_2.setText(QCoreApplication.translate("Z_control", u"Leak", None))
         self.label.setText("")
         self.btn_up.setText(QCoreApplication.translate("Z_control", u"up", None))

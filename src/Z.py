@@ -6,8 +6,9 @@
 #               CREADOR : NICOLÁS QUEZADA QUEZADA               #
 #                                                               #
 #################################################################
-from PySide6.QtWidgets import QWidget
-from PySide6.QtCore import QTimer
+from PySide6.QtWidgets import QWidget, QAbstractSlider
+from PySide6.QtGui import QShortcut, QKeySequence
+from PySide6.QtCore import QTimer, Qt
 from datetime import datetime
 import numpy as np
 
@@ -60,12 +61,29 @@ class ZControl(QWidget, Ui_Z_control):
         self.etf_pressure = 0
         self.reflex_pressure = 0
         self.dial.setEnabled(True)
+        self.dial.setTracking(True)
+        self.dial.setSingleStep(5)
         self.dial.valueChanged.connect(self.dial_change)
 
         self.btn_up.setEnabled(False)
         self.btn_up.clicked.connect(lambda: self.updown_change(10))
         self.btn_down.setEnabled(False)
         self.btn_down.clicked.connect(lambda: self.updown_change(-10))
+
+        # SHORTCUTS
+        self.shortcut_dial_down = QShortcut(QKeySequence(Qt.Key_W), self)
+        self.shortcut_dial_down.setAutoRepeat(False)
+        self.shortcut_dial_down.activated.connect(
+            lambda: self.dial.triggerAction(QAbstractSlider.SliderSingleStepSub))
+
+        self.shortcut_dial_up = QShortcut(QKeySequence(Qt.Key_S), self)
+        self.shortcut_dial_up.setAutoRepeat(False)
+        self.shortcut_dial_up.activated.connect(
+            lambda: self.dial.triggerAction(QAbstractSlider.SliderSingleStepAdd))
+
+        self.shortcut_stimulus = QShortcut(QKeySequence(Qt.Key_V), self)
+        self.shortcut_stimulus.setAutoRepeat(False)
+        self.shortcut_stimulus.activated.connect(self.btn_stimulus.click)
 
         self.btn_3.setEnabled(True)
         self.btn_3.clicked.connect(self.direction_change)
@@ -290,6 +308,11 @@ class ZControl(QWidget, Ui_Z_control):
         if self.current_screen is self.Z:
             self.leak_change(value)
         elif self.current_screen in (self.Z_reflex, self.Z_decay):
+            value = round(value / 5) * 5
+            if value != self.dial.value():
+                self.dial.blockSignals(True)
+                self.dial.setValue(value)
+                self.dial.blockSignals(False)
             self.dB = value
             self.Z_reflex.set_intensity(self.dB)
             self.Z_decay.set_intensity(self.dB)

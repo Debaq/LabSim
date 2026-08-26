@@ -213,13 +213,13 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <property name="leftMargin">
-       <number>0</number>
+       <number>10</number>
       </property>
       <property name="topMargin">
        <number>0</number>
       </property>
       <property name="rightMargin">
-       <number>0</number>
+       <number>10</number>
       </property>
       <property name="bottomMargin">
        <number>0</number>
@@ -363,7 +363,7 @@
            </font>
           </property>
           <property name="text">
-           <string>stimulus</string>
+           <string>Estimulo</string>
           </property>
          </widget>
         </item>
