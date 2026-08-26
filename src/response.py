@@ -139,32 +139,71 @@ class ResponseAudiometry():
         """
    
         if self.data['audio']['test'] == 'Logoaudiometría':
-            if 1 <= self.data['audio']['stimOn'].count(True) <= 2:
-
-                ths = self.dbdata['Aerea_mkg']
-                sdt = self.calc_sdt(ths)
-                print(sdt)
+            count = self.data['audio']['stimOn'].count(True)
+            if count == 1:
                 stim_on = self.data['audio']['stimOn'].index(True)
                 #verifica si es habla o ruido
                 if self.data['audio']['stim'][stim_on] == 2: #si es habla el oido que se estimula
-                    #verificar que sea habla y no mkg
+                    sdt = self.dbdata['SDT'] #umbral guardado en el perfil del paciente
                     output = self.data['audio']['output'][stim_on] #derecho o izquierdo
-                    #verificar si necesita mkg, calculo el ptp de la via aerea y osea 
-                    int_ = self.data['audio']['int'][stim_on]                    
+                    int_ = self.data['audio']['int'][stim_on]
                     verify = int_ >= sdt[output]
                     if verify:
                         self.upHand()
+                    else:
+                        self.downHand()
                 else: #si no es habla
                     print("ese es el mkg")
                     self.downHand()
-
+            elif count == 2:
+                self.response_sdt_w_mkg()
 
     def response_sdt_w_mkg(self):
-        pass
+        """
+        Logoaudiometría con enmascaramiento: ruido de habla (Speech Noise) en el oido no estudiado.
+        at fijo en 45, no depende de frecuencia (a diferencia de la via tonal).
+        minimo: int_est - at - uone + uane
+        maximo: at + uoe
+        uae/uane: umbral aereo de habla (SDT guardado en el perfil) del oido estudiado/no estudiado
+        uoe/uone: umbral oseo (predicho por Fletcher, no hay SDT oseo) del oido estudiado/no estudiado
+        """
+        stim = self.data['audio']['stim']
+        output = self.data['audio']['output']
+        if 2 not in stim or 5 not in stim:
+            return
+        ch_habla = stim.index(2)
+        ch_mkg = stim.index(5)
+        if ch_habla == ch_mkg or output[ch_habla] == output[ch_mkg]:
+            return
+
+        o_e = output[ch_habla] #oido estudiado
+        o_n = output[ch_mkg]   #oido enmascarado
+
+        sdt = self.dbdata['SDT'] #umbral guardado en el perfil del paciente
+        sdt_osea = self.calc_sdt(self.dbdata['Osea_mkg'])
+
+        at = 45
+        int_ = self.data['audio']['int'][ch_habla]
+        int_mkg = self.data['audio']['int'][ch_mkg]
+        uae = sdt[o_e]
+        uane = sdt[o_n]
+        uoe = sdt_osea[o_e]
+        uone = sdt_osea[o_n]
+
+        mkg_min = int_ - at - uone + uane
+        mkg_max = at + uoe
+        mkg = sorted([mkg_min, mkg_max])
+
+        threshold = 130 if int_mkg > mkg[1] else uae
+
+        if threshold <= int_:
+            self.upHand()
+        else:
+            self.downHand()
 
     def calc_sdt(self, lista):
-        # Extraer los elementos de la lista desde el índice 1 hasta el 6 (inclusive)
-        sublista = lista[1:7]
+        # Promedio de Fletcher: mejores 2 de 500/1000/2000 Hz (indices 2,3,4)
+        sublista = lista[2:5]
         # Calcular el promedio para a y b
         minimos_a = sorted(item[0] for item in sublista)[:2]
         minimos_b = sorted(item[1] for item in sublista)[:2]
@@ -260,8 +299,10 @@ class ResponseAudiometry():
 
                             if threshold <= int_:
                                 self.upHand()
+                            else:
+                                self.downHand()
 
-                                   
+
                 #print(self.data)
 
                 
@@ -314,8 +355,8 @@ class ResponseAudiometry():
                             threshold = uone
                     if threshold <= int_:
                         self.upHand()
-
-
+                    else:
+                        self.downHand()
 
 
     def oclusive_efect(self, f:int, o:int)->int:
@@ -349,7 +390,9 @@ class ResponseAudiometry():
                 #print(f"la intencidad de estimulación es {int}, el umbral es {value} superaste el umbral {verify}")
                 if verify:
                     self.upHand()
-                
+                else:
+                    self.downHand()
+
             elif self.data['audio']['stimOn'].count(True) == 2:
                 print("escucho en ambos oidos")
                 #deberia tener umbral en el mejor

@@ -50,6 +50,50 @@ class CreateA(QWidget,Ui_generator_audio):
         self.chbox_ldl_od.stateChanged.connect(self.toggle_ldl)
         self.chbox_ldl_oi.stateChanged.connect(self.toggle_ldl)
 
+        self._sdt_manual = [False, False]
+        self._srt_manual = [False, False]
+        self.spbox_sdt_od_0.valueChanged.connect(lambda: self._mark_manual(self._sdt_manual, 0))
+        self.spbox_sdt_oi_0.valueChanged.connect(lambda: self._mark_manual(self._sdt_manual, 1))
+        self.spbox_srt_od_0.valueChanged.connect(lambda: self._mark_manual(self._srt_manual, 0))
+        self.spbox_srt_oi_0.valueChanged.connect(lambda: self._mark_manual(self._srt_manual, 1))
+        for n in range(9):
+            self.findChild(QSpinBox, f"spbox_a_od_{n}").valueChanged.connect(self._recalc_fletcher)
+            self.findChild(QSpinBox, f"spbox_a_oi_{n}").valueChanged.connect(self._recalc_fletcher)
+
+    def _mark_manual(self, flags, idx):
+        flags[idx] = True
+
+    def _air_pairs(self):
+        return [
+            [self.findChild(QSpinBox, f"spbox_a_od_{n}").value(),
+             self.findChild(QSpinBox, f"spbox_a_oi_{n}").value()]
+            for n in range(9)
+        ]
+
+    def _fletcher_avg(self, pairs):
+        """Promedio de Fletcher: mejores 2 de 500/1000/2000 Hz (indices 2,3,4), igual que response.calc_sdt"""
+        sublista = pairs[2:5]
+        result = []
+        for side in (0, 1):
+            minimos = sorted(item[side] for item in sublista)[:2]
+            promedio = sum(minimos) / len(minimos)
+            result.append(int((promedio // 5) * 5))
+        return result
+
+    def _recalc_fletcher(self):
+        fletcher = self._fletcher_avg(self._air_pairs())
+        for idx, side in enumerate(("od", "oi")):
+            if not self._sdt_manual[idx]:
+                spin = getattr(self, f"spbox_sdt_{side}_0")
+                spin.blockSignals(True)
+                spin.setValue(fletcher[idx])
+                spin.blockSignals(False)
+            if not self._srt_manual[idx]:
+                spin = getattr(self, f"spbox_srt_{side}_0")
+                spin.blockSignals(True)
+                spin.setValue(fletcher[idx])
+                spin.blockSignals(False)
+
     def generate_name(self):
         gender = "men" if self.radioButton.isChecked() else "women"
         self._name_parts = CreatePatient().generar_nombre(gender)
@@ -102,6 +146,8 @@ class CreateA(QWidget,Ui_generator_audio):
         self.led_medicamentos.clear()
         self.led_cirugias.clear()
         self.txt_otros_antecedentes.clear()
+        self._sdt_manual = [False, False]
+        self._srt_manual = [False, False]
 
     def load_for_edit(self, case_id, agenda_key, agenda_row):
         """Carga un paciente existente en el formulario para verlo/editarlo"""
@@ -169,6 +215,7 @@ class CreateA(QWidget,Ui_generator_audio):
         case["Z_OD"] = self.cb_z_od.currentText()
         case["Z_OI"] = self.cb_z_oi.currentText()
         case["SDT"] = extra["SDT"]
+        case["SRT"] = extra["SRT"]
         case["UMD"] = extra["UMD"]
         case["recruit"] = [self.chbox_recrut_od.isChecked(), self.chbox_recrut_oi.isChecked()]
         case["decay"] = [self.chbox_det_od.isChecked(), self.chbox_det_oi.isChecked()]
@@ -236,6 +283,7 @@ class CreateA(QWidget,Ui_generator_audio):
     def _read_extra_tests(self):
         return {
             "SDT": [self.spbox_sdt_od_0.value(), self.spbox_sdt_oi_0.value()],
+            "SRT": [self.spbox_srt_od_0.value(), self.spbox_srt_oi_0.value()],
             "UMD": [
                 {"int": self.spbox_umd_od_0.value(), "percentage": self.spbox_umd_od_1.value()},
                 {"int": self.spbox_umd_oi_0.value(), "percentage": self.spbox_umd_oi_1.value()},
@@ -246,8 +294,21 @@ class CreateA(QWidget,Ui_generator_audio):
 
     def _load_extra_tests(self, case):
         sdt = case.get("SDT", [0, 0])
-        self.spbox_sdt_od_0.setValue(sdt[0])
-        self.spbox_sdt_oi_0.setValue(sdt[1])
+        srt = case.get("SRT", [0, 0])
+        for idx, side in enumerate(("od", "oi")):
+            sdt_spin = getattr(self, f"spbox_sdt_{side}_0")
+            srt_spin = getattr(self, f"spbox_srt_{side}_0")
+            # si el valor guardado no calza con el Fletcher ya recalculado desde
+            # los umbrales tonales recien cargados, es porque el docente lo
+            # sobrescribio a mano: se respeta y se bloquea el autocalculo
+            self._sdt_manual[idx] = sdt[idx] != sdt_spin.value()
+            self._srt_manual[idx] = srt[idx] != srt_spin.value()
+            sdt_spin.blockSignals(True)
+            sdt_spin.setValue(sdt[idx])
+            sdt_spin.blockSignals(False)
+            srt_spin.blockSignals(True)
+            srt_spin.setValue(srt[idx])
+            srt_spin.blockSignals(False)
         umd = case.get("UMD", [{"int": 35, "percentage": 100}, {"int": 35, "percentage": 100}])
         self.spbox_umd_od_0.setValue(umd[0]["int"])
         self.spbox_umd_od_1.setValue(umd[0]["percentage"])
@@ -334,6 +395,7 @@ class CreateA(QWidget,Ui_generator_audio):
             "volume": [patient.ear_volume(age, gender), patient.ear_volume(age, gender), "N/D"],
             "UMD": extra["UMD"],
             "SDT": extra["SDT"],
+            "SRT": extra["SRT"],
             "Fowler": [[], 0, 0],
             "Carhart": [False, False],
             "box": "Box_1",
