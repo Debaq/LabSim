@@ -23,3 +23,6 @@
 # Ignorar directorios de salida
 **/output/
 **/output/*
+
+# Ignorar log de debug en runtime
+src/log_file.txt
