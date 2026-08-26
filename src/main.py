@@ -11,7 +11,8 @@ import login as Ui_login
 import Z
 from base import context
 from lib.h_win import FrameSubMdi, MdiArea
-from lib.helpers import CasesOffline, CreatePatient, Preferences, Shedule, Storage, marcar_entry_atendido
+from lib.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
+                          marcar_entry_atendiendo, marcar_entry_atendido)
 from lib.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min
 from UI.Ui_command_voice_A import Ui_Form as commandVoiceA
 from UI.Ui_CVC import Ui_CVC
@@ -148,7 +149,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 delattr(self, attr)
 
     def atender_paciente(self, key):
-        """Marca al paciente como atendido, carga su caso e hidrata los módulos"""
+        """Inicia la atención (estado 'atendiendo'), carga el caso e hidrata los módulos"""
+        if self.data_login["permission"] == 777:
+            return  # el admin no atiende pacientes, para eso existe un usuario básico de prueba
+
         shedule = Shedule()
         agenda = shedule.data.setdefault("agenda_1", {})
         entry = agenda.get(key)
@@ -156,7 +160,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             return
 
         case_id = entry[7]
-        marcar_entry_atendido(entry, self.data_login["user"])
+        marcar_entry_atendiendo(entry, self.data_login["user"])
         shedule.set(shedule.data)
 
         self.data_current = CasesOffline().get_cases()[case_id]
@@ -167,6 +171,29 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self._hydrate_modules()
         if self.data_current:
             self.changeStateBtnAreas(self.frameAction, self.data_current["box"])
+
+        rut = entry[2] if len(entry) > 2 else ""
+        fecha_nac = entry[5] if len(entry) > 5 else ""
+        self.statusbar.showMessage(f"Estás atendiendo a: RUT {rut} — Fecha de nacimiento {fecha_nac}")
+
+    def cerrar_atencion(self, key, nota):
+        """Cierra la atención (estado 'atendido') guardando la nota de atención del estudiante"""
+        if self.data_login["permission"] == 777:
+            return  # el admin no atiende pacientes, para eso existe un usuario básico de prueba
+
+        shedule = Shedule()
+        agenda = shedule.data.setdefault("agenda_1", {})
+        entry = agenda.get(key)
+        if entry is None:
+            return
+
+        marcar_entry_atendido(entry, self.data_login["user"], nota)
+        shedule.set(shedule.data)
+
+        if self.subw and "AGENDA" in self.subw:
+            self.subw["AGENDA"].obj.refresh()
+
+        self.statusbar.clearMessage()
 
     def _hydrate_modules(self):
         """Carga self.data_current en los módulos ya construidos"""

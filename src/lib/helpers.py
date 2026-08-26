@@ -82,28 +82,55 @@ class Shedule:
             json.dump(data, json_file, ensure_ascii=False)
 
 
-def entry_atendido_por(entry, username: str) -> bool:
+def _asegurar_dict_atencion(entry) -> dict:
+    """Garantiza que entry[8] sea un dict {username: {"estado":..., "nota":...}}."""
+    if len(entry) <= 8:
+        entry.append({})
+    elif not isinstance(entry[8], dict):
+        entry[8] = {}
+    return entry[8]
+
+
+def entry_estado_por(entry, username: str) -> str | None:
     """
-    Indica si `username` ya atendió esta fila de agenda.
-    entry[8] es un dict {username: True}; una fila antigua puede traer
-    un bool plano (formato legado, sin usuario asociado).
+    Estado de atención de `username` sobre esta fila: None, "atendiendo" o "atendido".
+    Formato legado: entry[8][username] == True (o entry[8] bool plano) se lee como "atendido".
     """
     if len(entry) <= 8:
-        return False
-    atendido = entry[8]
-    if isinstance(atendido, dict):
-        return bool(atendido.get(username))
-    return bool(atendido)
+        return None
+    atencion = entry[8]
+    if isinstance(atencion, dict):
+        valor = atencion.get(username)
+        if isinstance(valor, dict):
+            return valor.get("estado")
+        return "atendido" if valor else None
+    return "atendido" if atencion else None
 
 
-def marcar_entry_atendido(entry, username: str) -> None:
-    """Marca la fila de agenda como atendida por `username`."""
+def entry_atendido_por(entry, username: str) -> bool:
+    """Indica si `username` ya cerró (atendió por completo) esta fila de agenda."""
+    return entry_estado_por(entry, username) == "atendido"
+
+
+def obtener_nota_atencion(entry, username: str) -> str:
+    """Devuelve el texto de atención registrado por `username` al cerrar la atención."""
     if len(entry) <= 8 or not isinstance(entry[8], dict):
-        if len(entry) <= 8:
-            entry.append({})
-        else:
-            entry[8] = {}
-    entry[8][username] = True
+        return ""
+    valor = entry[8].get(username)
+    return valor.get("nota", "") if isinstance(valor, dict) else ""
+
+
+def marcar_entry_atendiendo(entry, username: str) -> None:
+    """Marca la fila de agenda como en curso de atención por `username`."""
+    atencion = _asegurar_dict_atencion(entry)
+    nota_previa = obtener_nota_atencion(entry, username)
+    atencion[username] = {"estado": "atendiendo", "nota": nota_previa}
+
+
+def marcar_entry_atendido(entry, username: str, nota: str = "") -> None:
+    """Cierra la atención de la fila de agenda por `username`, guardando la nota clínica."""
+    atencion = _asegurar_dict_atencion(entry)
+    atencion[username] = {"estado": "atendido", "nota": nota}
 
 
 class Preferences:
