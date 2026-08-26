@@ -18,7 +18,7 @@ from lib.ZRscreen import ZRscreen
 from lib.ZDscreen import ZDscreen
 from lib.ZETFscreen import ZETFscreen
 from lib.h_z import changeSide, changeSideText, sideText, printer, date_time
-from lib.z_generator import Z_225
+from lib.z_generator import Z_225, Reflex_curve
 from lib.helpers import Storage
 
 print("Z cargado")
@@ -41,9 +41,9 @@ class ZControl(QWidget, Ui_Z_control):
 
         # BUTTONS
         self.btn_side.clicked.connect(self.side_change)
-        self.btn_1.clicked.connect(lambda: self.move(-1))
-        self.btn_2.clicked.connect(lambda: self.move(1))
-        self.btn_stimulus.clicked.connect(self.timerAnimation)
+        self.btn_1.clicked.connect(self.btn1_click)
+        self.btn_2.clicked.connect(self.btn2_click)
+        self.btn_stimulus.clicked.connect(self.stimulus_click)
         self.btn_print.clicked.connect(lambda: printer(self,  self.Z.winId()))
 
         self.btn_toneDecay.setEnabled(True)
@@ -55,6 +55,24 @@ class ZControl(QWidget, Ui_Z_control):
         self.reflex_mode = 'IPSI'
         self.btn_reflex.setEnabled(False)
         self.btn_reflex.clicked.connect(self.reflex_mode_change)
+        self.Z_reflex.start_clicked.connect(self.stimulus_click)
+        self.Z_reflex.ipsi_clicked.connect(lambda: self.set_reflex_mode('IPSI'))
+        self.Z_reflex.contra_clicked.connect(lambda: self.set_reflex_mode('CONTRA'))
+
+        self.reflex_freq_labels = ['500', '1000', '2000', '4000']
+        self.reflex_freq_idx = 0
+        self.Z_reflex.set_freq(self.reflex_freq_labels[self.reflex_freq_idx])
+        self.Z_reflex.set_nbn_enabled(False)
+
+        # Resultados que el ALUMNO va registrando (dB al que probó y obtuvo
+        # respuesta), no el umbral real del caso: el simulador nunca revela
+        # el umbral verdadero, así el alumno puede equivocarse igual que en
+        # un examen real.
+        self.reflex_results = {
+            0: {'IPSI': [None] * 4, 'CONTRA': [None] * 5},
+            1: {'IPSI': [None] * 4, 'CONTRA': [None] * 5},
+        }
+        self.refresh_reflex_table()
 
         self.leak = self.dial.value()
         self.dB = 85
@@ -112,6 +130,8 @@ class ZControl(QWidget, Ui_Z_control):
         self.time_ch1 = QTimer(self)
         self.time_ch1.timeout.connect(self.timeStamp)
         self.time_ch1.start(3000)
+        self.time_reflex = QTimer(self)
+        self.time_reflex.timeout.connect(self.reflex_animate)
 
         # GLOBAL VARIABLE
         self.frame = Storage(3)
@@ -161,6 +181,8 @@ class ZControl(QWidget, Ui_Z_control):
             self.store_data[side].set(0, result)
             self.new[side] = False
 
+        self.update_reflex_volume()
+
     def side_change(self):
         side_text = self.Z.get_side()
         if side_text == 'OD':
@@ -169,6 +191,9 @@ class ZControl(QWidget, Ui_Z_control):
             self.Z.set_side('OD')
         self.refresh()
         self.preCharger()
+        self.Z_reflex.clear_response()
+        self.refresh_reflex_table()
+        self.update_reflex_volume()
         # self.change_screen(self.screen_list[self.last_screen])
 
     def refresh(self):
@@ -285,6 +310,10 @@ class ZControl(QWidget, Ui_Z_control):
         for s in self.screens:
             s.setVisible(s is screen)
         self.current_screen = screen
+        if screen is self.Z_reflex:
+            self.Z_reflex.clear_response()
+            self.refresh_reflex_table()
+            self.update_reflex_volume()
         self.btn_reflex.setEnabled(screen is self.Z_reflex)
         self.btn_up.setEnabled(screen in (self.Z_reflex, self.Z_decay))
         self.btn_down.setEnabled(screen in (self.Z_reflex, self.Z_decay))
@@ -321,8 +350,89 @@ class ZControl(QWidget, Ui_Z_control):
             self.Z_etf.set_pressure(self.etf_pressure)
 
     def reflex_mode_change(self):
-        self.reflex_mode = 'CONTRA' if self.reflex_mode == 'IPSI' else 'IPSI'
+        self.set_reflex_mode('CONTRA' if self.reflex_mode == 'IPSI' else 'IPSI')
+
+    def set_reflex_mode(self, mode):
+        if mode == self.reflex_mode:
+            return
+        self.reflex_mode = mode
+        freqs = self.reflex_freqs_for_mode()
+        if self.reflex_freq_idx >= len(freqs):
+            self.reflex_freq_idx = len(freqs) - 1
         self.Z_reflex.set_mode(self.reflex_mode)
+        self.Z_reflex.set_freq(freqs[self.reflex_freq_idx])
+        self.Z_reflex.set_nbn_enabled(self.reflex_mode == 'CONTRA')
+        self.Z_reflex.clear_response()
+        self.refresh_reflex_table()
+
+    def reflex_freqs_for_mode(self):
+        if self.reflex_mode == 'CONTRA':
+            return self.reflex_freq_labels + ['NBN']
+        return self.reflex_freq_labels
+
+    def btn1_click(self):
+        if self.current_screen is self.Z_reflex:
+            freqs = self.reflex_freqs_for_mode()
+            self.reflex_freq_idx = (self.reflex_freq_idx + 1) % len(freqs)
+            self.Z_reflex.set_freq(freqs[self.reflex_freq_idx])
+            self.Z_reflex.clear_response()
+        elif self.current_screen is self.Z:
+            self.move(-1)
+
+    def btn2_click(self):
+        if self.current_screen is self.Z:
+            self.move(1)
+
+    def stimulus_click(self):
+        if self.current_screen is self.Z_reflex:
+            self.reflex_stimulus()
+        else:
+            self.timerAnimation()
+
+    def reflex_stimulus(self):
+        if not hasattr(self, 'data') or self.data is None or 'Reflex' not in self.data:
+            return
+        side = self.Z.get_side()
+        probe_idx = 0 if side == 'OD' else 1
+        freqs = self.reflex_freqs_for_mode()
+        freq = freqs[self.reflex_freq_idx]
+        row_idx = ['500', '1000', '2000', '4000', 'NBN'].index(freq)
+
+        reflex_data = self.data['Reflex'].get(self.reflex_mode.lower(), [])
+        threshold = reflex_data[row_idx][probe_idx] if row_idx < len(reflex_data) else None
+
+        present = threshold is not None and self.dB >= threshold
+        x, y = Reflex_curve(present=present, dB=self.dB, threshold=threshold).getDataSet()
+
+        self.time_reflex.stop()
+        self.Z_reflex.clear_response()
+        self.reflex_anim_data = (x, y)
+        self.reflex_anim_idx = 1
+        self.reflex_anim_ctx = (probe_idx, row_idx, present)
+        # Ventana completa (2s de traza) se dibuja en 1s reales, como el equipo real.
+        self.time_reflex.start(round(1000 / len(x)))
+
+    def reflex_animate(self):
+        x, y = self.reflex_anim_data
+        idx = self.reflex_anim_idx
+        self.Z_reflex.plot_response(x[:idx + 1], y[:idx + 1])
+        self.reflex_anim_idx += 1
+
+        if self.reflex_anim_idx >= len(x):
+            self.time_reflex.stop()
+            probe_idx, row_idx, present = self.reflex_anim_ctx
+            if present:
+                # Se guarda el dB al que el ALUMNO estimuló, nunca el umbral
+                # real del caso: si prueba muy arriba del umbral verdadero,
+                # ese (impreciso) es el valor que queda registrado.
+                self.reflex_results[probe_idx][self.reflex_mode][row_idx] = self.dB
+                self.refresh_reflex_table()
+
+    def refresh_reflex_table(self):
+        side = self.Z.get_side()
+        probe_idx = 0 if side == 'OD' else 1
+        values = self.reflex_results[probe_idx][self.reflex_mode]
+        self.Z_reflex.set_results(values)
 
     def leak_change(self, value):
         self.leak = value
@@ -338,6 +448,17 @@ class ZControl(QWidget, Ui_Z_control):
             self.reflex_pressure = min(max(self.reflex_pressure + delta, -400), 200)
             self.Z_reflex.set_pressure(self.reflex_pressure)
             self.Z_decay.set_pressure(self.reflex_pressure)
+            self.update_reflex_volume()
+
+    def update_reflex_volume(self):
+        side_text = self.test + self.Z.get_side()
+        side = sideText(side_text)
+        memory = self.store_data[side].get(0)
+        try:
+            c = self.Z.find_nearest(memory[0], self.reflex_pressure, memory[1])
+            self.Z_reflex.set_volume(round(c, 2))
+        except (TypeError, IndexError):
+            self.Z_reflex.set_volume(None)
 
     def timeStamp(self):
         time = date_time()
