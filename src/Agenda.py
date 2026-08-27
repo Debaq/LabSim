@@ -18,7 +18,7 @@ from PySide6.QtGui import QColor
 from UI.Ui_agenda import Ui_Form
 from lib.helpers import (Shedule, entry_estado_por, CasesOffline,
                           marcar_entry_no_show, obtener_hora_real_atencion,
-                          entry_esta_cancelada, marcar_entry_cancelada)
+                          obtener_nota_atencion, entry_esta_cancelada, marcar_entry_cancelada)
 
 
 PENDIENTE_COLOR = QColor(255, 244, 200)
@@ -249,6 +249,7 @@ class Agenda(QWidget, Ui_Form):
     def populate_shedule(self, agenda="agenda_1"):
         rows = self.shedule.get(agenda, {})
         keys = self._visible_keys(agenda)
+        prev_key = self._selected_row_key
 
         self._loading = True
         self.tableWidget.setSortingEnabled(False)
@@ -294,18 +295,28 @@ class Agenda(QWidget, Ui_Form):
         self.tableWidget.setSortingEnabled(True)
         self._loading = False
 
-        self._reset_atender_button()
-        if self.is_admin:
-            self.btn_habilitar.setEnabled(False)
-            self.btn_eliminar.setEnabled(False)
-            self.btn_ver_editar.setEnabled(False)
-            self.btn_cancelar_restaurar.setText("Cancelar cita")
-            self.btn_cancelar_restaurar.setEnabled(False)
-            self.led_nota.setEnabled(False)
-            self.led_nota.clear()
-            self.btn_guardar_nota.setEnabled(False)
-        self._selected_key = None
-        self._selected_row_key = None
+        if prev_key is not None and prev_key in keys:
+            # Re-seleccionar la misma fila tras reconstruir la tabla. Si el índice
+            # de fila no cambió (ej. un solo paciente), itemSelectionChanged no
+            # dispara solo, así que forzamos el recálculo del estado del botón.
+            row_idx = keys.index(prev_key)
+            self.tableWidget.blockSignals(True)
+            self.tableWidget.selectRow(row_idx)
+            self.tableWidget.blockSignals(False)
+            self._on_selection_changed()
+        else:
+            self._reset_atender_button()
+            if self.is_admin:
+                self.btn_habilitar.setEnabled(False)
+                self.btn_eliminar.setEnabled(False)
+                self.btn_ver_editar.setEnabled(False)
+                self.btn_cancelar_restaurar.setText("Cancelar cita")
+                self.btn_cancelar_restaurar.setEnabled(False)
+                self.led_nota.setEnabled(False)
+                self.led_nota.clear()
+                self.btn_guardar_nota.setEnabled(False)
+            self._selected_key = None
+            self._selected_row_key = None
 
     def _reset_atender_button(self):
         self.btn_atender.setText("Atender")
@@ -677,4 +688,49 @@ class Agenda(QWidget, Ui_Form):
             partes.append(f"<p><b>Hora agendada:</b> {row[1]}<br>"
                            f"<b>Inicio real:</b> {hora_real} ({resumen})</p>")
 
+        partes.append("<h3>Historial de atenciones</h3>")
+        historial = self._historial_atenciones(rut)
+        if historial:
+            items = "".join(
+                f"<li><b>{fecha or 'sin fecha'} {hora}</b> — {alumno}: "
+                f"{nota or 'sin comentario'}</li>"
+                for fecha, hora, alumno, nota in historial
+            )
+            partes.append(f"<ul>{items}</ul>")
+        else:
+            partes.append("<p>Sin atenciones cerradas registradas para este paciente.</p>")
+
         return "".join(partes)
+
+    def _historial_atenciones(self, rut):
+        """
+        Recopila, para todas las citas (filas de agenda) del mismo paciente (mismo rut),
+        las atenciones cerradas por cada alumno, ordenadas cronológicamente.
+        Devuelve lista de tuplas (fecha, hora_real, alumno, nota).
+        """
+        username = self._current_username()
+        historial = []
+        for otra_row in self.shedule.get("agenda_1", {}).values():
+            if len(otra_row) <= 2 or otra_row[2] != rut:
+                continue
+            atencion = otra_row[8] if len(otra_row) > 8 and isinstance(otra_row[8], dict) else {}
+            fecha = otra_row[0] if len(otra_row) > 0 else ""
+            for alumno, datos in atencion.items():
+                if not isinstance(datos, dict) or datos.get("estado") != "atendido":
+                    continue
+                if not self.is_admin and alumno != username:
+                    continue
+                nota = datos.get("nota", "")
+                hora_real = datos.get("hora_real", "")
+                historial.append((fecha, hora_real, alumno, nota))
+
+        def _orden(item):
+            fecha, hora_real = item[0], item[1]
+            dt = QDateTime(
+                QDate.fromString(fecha, "dd-MM-yy") if fecha else QDate(),
+                QTime.fromString(hora_real, "HH:mm:ss") if hora_real else QTime(),
+            )
+            return dt
+
+        historial.sort(key=_orden)
+        return historial
