@@ -680,14 +680,19 @@ class Audiometer(QWidget, Ui_Audiometer):
             self.play(1)
 
     def _cycle(self, ch, lbl, options, btns, setter):
-        """avanza al siguiente valor habilitado en la lista, con wraparound"""
+        """avanza al siguiente valor habilitado en la lista, con wraparound.
+        Salta opciones deshabilitadas y tambien las que el setter rechace
+        en silencio por reglas de negocio (ej. Speech Noise sin Habla
+        en el canal contrario)."""
         current = lbl.text()
         idx = options.index(current) if current in options else -1
         n = len(options)
         for i in range(1, n + 1):
             new_idx = (idx + i) % n
-            if btns[new_idx].isEnabled():
-                setter(ch, new_idx)
+            if not btns[new_idx].isEnabled():
+                continue
+            setter(ch, new_idx)
+            if lbl.text() == options[new_idx]:
                 return
 
     def cycle_output(self, ch):
