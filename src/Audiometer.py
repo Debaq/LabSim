@@ -15,9 +15,10 @@ from lib.audio_player import Player
 from lib.h_audio import (calibrate, create_frecuency, create_intency,
                          create_sound, create_word, data_basic)
 from lib.helpers import Preferences
-from PySide6.QtCore import QObject, QTimer, Signal, Slot
+from PySide6.QtCore import QObject, Qt, QTimer, Signal, Slot
 from PySide6.QtGui import QFont, QKeySequence, QShortcut
 from PySide6.QtWidgets import QLabel, QWidget
+from keyboard_monitor import KeyboardMonitor
 from response import ResponseAudiometry as Response
 from UI.Ui_Audiometer import Ui_Audiometer
 
@@ -136,25 +137,16 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.lbl_revers = [self.lbl_rev_ch0, self.lbl_rev_ch1]
 
         # btn stimulus
-        # debounce: teclados/pedales programados pueden mandar varios pares
-        # press/release separados durante una sola pulsación sostenida (ej. "vvvvvv").
-        # El release se retrasa un poco: si llega un nuevo press antes de que
-        # se cumpla el plazo, se cancela el stop y el estímulo sigue sonando.
+        # el firmware manda un solo press y un solo release por pulsación
+        # sostenida (MODO_MANTENER en labsim_keyboard.ino), así que se
+        # conecta directo sin debounce de software.
         self.btn_stims = [self.btn_stim_ch0, self.btn_stim_ch1]
-        self.stim_stop_timers = [QTimer(self), QTimer(self)]
-        for ch in (0, 1):
-            self.stim_stop_timers[ch].setSingleShot(True)
-            self.stim_stop_timers[ch].setInterval(150)
-        self.stim_stop_timers[0].timeout.connect(
-            lambda: self.Helper_Stim(ch=0, play=False))
-        self.stim_stop_timers[1].timeout.connect(
-            lambda: self.Helper_Stim(ch=1, play=False))
-        self.btn_stims[0].pressed.connect(lambda: self.Stim_Debounced_Press(0))
+        self.btn_stims[0].pressed.connect(lambda: self.Helper_Stim(ch=0))
         self.btn_stims[0].released.connect(
-            lambda: self.stim_stop_timers[0].start())
-        self.btn_stims[1].pressed.connect(lambda: self.Stim_Debounced_Press(1))
+            lambda: self.Helper_Stim(ch=0, play=False))
+        self.btn_stims[1].pressed.connect(lambda: self.Helper_Stim(ch=1))
         self.btn_stims[1].released.connect(
-            lambda: self.stim_stop_timers[1].start())
+            lambda: self.Helper_Stim(ch=1, play=False))
 
         # btn trans
         self.btn_trans_aer_ch0.clicked.connect(lambda: self.trans(0, 0))
@@ -228,6 +220,13 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.btn_talkback.clicked.connect(self.talkback)
         self.activate_response = [0, 0]
         self.trans_idx = [0,0]
+
+        # Detección del keyboard LabSim por USB (ver keyboard_monitor.py).
+        # No toca la interfaz: solo deja disponible self.kb_monitor por si
+        # se necesita en el futuro (ej. .is_connected(), señal
+        # connection_changed).
+        self.kb_monitor = KeyboardMonitor(self)
+        self.kb_monitor.start()
 
         # Conectar todos los labels que comienzan con "lbl" al slot
         for attribute_name in dir(self):
@@ -365,14 +364,6 @@ class Audiometer(QWidget, Ui_Audiometer):
                 return not(state), False, 0
 
         self.time_var_response[:3] = func(state, timers, color, end, count)
-
-    def Stim_Debounced_Press(self, ch):
-        # cancela un stop pendiente (ver stim_stop_timers) y solo dispara
-        # el play si el estímulo no estaba ya activo, para no reiniciar el
-        # sonido con cada press repetido de un teclado/pedal ruidoso
-        self.stim_stop_timers[ch].stop()
-        if not self.puls_active[ch]:
-            self.Helper_Stim(ch=ch)
 
     # Reproducir Sonidos
     def Helper_Stim(self, ch, play=True, btnrev=False):
