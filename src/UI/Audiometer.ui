@@ -1556,9 +1556,6 @@
                  <property name="text">
                   <string>1</string>
                  </property>
-                 <property name="shortcut">
-                  <string>1</string>
-                 </property>
                  <property name="checkable">
                   <bool>false</bool>
                  </property>
@@ -1581,9 +1578,6 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>3</string>
-                 </property>
-                 <property name="shortcut">
                   <string>3</string>
                  </property>
                  <property name="checkable">
