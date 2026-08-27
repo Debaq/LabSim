@@ -4,6 +4,16 @@ from PySide6.QtMultimedia import (QAudioBufferOutput, QAudioFormat,
                                    QAudioOutput, QMediaPlayer)
 from functools import partial
 
+from lib.audio_synth import PEAK_REF
+
+# RMS de un tono puro sintetizado a PEAK_REF (ver audio_synth.py): seno de
+# pico PEAK_REF tiene RMS = PEAK_REF/sqrt(2). Se usa como referencia para que
+# un tono a nivel nominal marque 50% en el vúmetro (ver vu_meters_colors en
+# Audiometer.py). Si un tono calibrado marca mas que eso (zona roja), la
+# salida de audio esta descalibrada.
+_TONE_RMS_REF = PEAK_REF / np.sqrt(2.0)
+_LEVEL_GAIN = 0.5 / _TONE_RMS_REF
+
 _SAMPLE_DTYPE = {
     QAudioFormat.SampleFormat.UInt8: np.uint8,
     QAudioFormat.SampleFormat.Int16: np.int16,
@@ -37,7 +47,7 @@ def audio_buffer_level(buffer) -> float:
         normalized = samples.astype(np.float32) / np.iinfo(dtype).max
 
     rms = float(np.sqrt(np.mean(np.square(normalized))))
-    return min(rms * 4.0, 1.0)  # factor de ganancia visual para que el vúmetro se note
+    return min(rms * _LEVEL_GAIN, 1.0)
 
 
 class Player(QObject):
