@@ -15,9 +15,9 @@ from lib.audio_player import Player
 from lib.h_audio import (calibrate, create_frecuency, create_intency,
                          create_sound, create_word, data_basic)
 from lib.helpers import Preferences
-from PySide6.QtCore import QObject, Qt, QTimer, Signal, Slot
+from PySide6.QtCore import QEvent, QObject, Qt, QTimer, Signal, Slot
 from PySide6.QtGui import QFont, QKeySequence, QShortcut
-from PySide6.QtWidgets import QLabel, QWidget
+from PySide6.QtWidgets import QApplication, QLabel, QWidget
 from keyboard_monitor import KeyboardMonitor
 from response import ResponseAudiometry as Response
 from UI.Ui_Audiometer import Ui_Audiometer
@@ -267,6 +267,14 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.kb_monitor = KeyboardMonitor(self)
         self.kb_monitor.start()
 
+        # Shortcuts V/B del btn estimulo: no se usa QPushButton.setShortcut
+        # porque eso dispara animateClick() (press+release fijo ~100ms) sin
+        # importar cuanto se mantenga la tecla apretada en el firmware
+        # (MODO_MANTENER), asi que siempre se comportaba como click rapido.
+        # Con eventFilter se captura el press/release real de la tecla.
+        self._stim_keys = {Qt.Key_V: 0, Qt.Key_B: 1}
+        QApplication.instance().installEventFilter(self)
+
         # Conectar todos los labels que comienzan con "lbl" al slot
         for attribute_name in dir(self):
             if attribute_name.startswith("lbl"):
@@ -274,6 +282,17 @@ class Audiometer(QWidget, Ui_Audiometer):
                 if isinstance(attribute, QLabel):
                     attribute.textChanged.connect(self.on_label_text_changed)
 
+
+    def eventFilter(self, obj, event):
+        if self.isActiveWindow() and event.type() in (QEvent.KeyPress, QEvent.KeyRelease):
+            ch = self._stim_keys.get(event.key())
+            if ch is not None and not event.isAutoRepeat():
+                if event.type() == QEvent.KeyPress:
+                    self.btn_stims[ch].pressed.emit()
+                else:
+                    self.btn_stims[ch].released.emit()
+                return True
+        return super().eventFilter(obj, event)
 
     def on_label_text_changed(self, sender):
         self.response.set_config(sender)

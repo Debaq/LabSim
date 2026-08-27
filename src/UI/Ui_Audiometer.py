@@ -1420,9 +1420,6 @@ class Ui_Audiometer(object):
         self.btn_stim_ch0.setToolTip("")
 #endif // QT_CONFIG(tooltip)
         self.btn_stim_ch0.setText(QCoreApplication.translate("Audiometer", u"Est\u00edmulo", None))
-#if QT_CONFIG(shortcut)
-        self.btn_stim_ch0.setShortcut(QCoreApplication.translate("Audiometer", u"V", None))
-#endif // QT_CONFIG(shortcut)
         self.btn_time_start.setText(QCoreApplication.translate("Audiometer", u"Iniciar", None))
         self.btn_time_stop.setText(QCoreApplication.translate("Audiometer", u"Detener", None))
         self.btn_time_clear.setText(QCoreApplication.translate("Audiometer", u"Borrar", None))
@@ -1443,8 +1440,5 @@ class Ui_Audiometer(object):
         self.btn_puls_ch1.setText(QCoreApplication.translate("Audiometer", u"Pulsado", None))
         self.btn_rever_ch1.setText(QCoreApplication.translate("Audiometer", u"Invertir", None))
         self.btn_stim_ch1.setText(QCoreApplication.translate("Audiometer", u"Est\u00edmulo", None))
-#if QT_CONFIG(shortcut)
-        self.btn_stim_ch1.setShortcut(QCoreApplication.translate("Audiometer", u"B", None))
-#endif // QT_CONFIG(shortcut)
     # retranslateUi
 
