@@ -6,6 +6,7 @@ import sys
 from PySide6.QtCore import QUrl
 
 from base import context
+from lib import audio_synth
 from lib.helpers import Preferences
 
 class_pref = Preferences()
@@ -61,6 +62,13 @@ def create_sound(stim, f, ch):
         stim = stim_list_short[2]
     if stim == stim_list[6]:
         stim = stim_list_short[3]
+
+    # Los tonos y ruidos se sintetizan al vuelo (ver lib/audio_synth.py) en vez
+    # de leerse de mp3 estaticos. Si la sintesis no aplica, se usa el archivo.
+    generated = audio_synth.stimulus_file(
+        stim, f, ch, context.get_resource("audio"))
+    if generated is not None:
+        return QUrl.fromLocalFile(generated)
 
     file = f"audio/{stim}_{f}_{ch}.mp3"
     file = normalize(file)

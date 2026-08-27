@@ -28,3 +28,9 @@
 
 # Ignorar log de debug en runtime
 src/log_file.txt
+
+# Ignorar cache de audio generado en runtime
+# _generated: tonos y ruidos sintetizados por lib/audio_synth.py
+# _panned: palabras panneadas a un solo oido por lib/h_audio.py
+resources/audio/_generated/
+resources/audio/_panned/

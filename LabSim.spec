@@ -56,8 +56,12 @@ os.chmod(run_sh, 0o755)
 # resolves 'resources/...' relative to cwd (dist_dir), so it must live
 # top-level next to the exe, not inside _internal. rsync keeps rebuilds fast
 # by only copying changed files.
+# Los caches de audio (_generated, _panned) se rehacen solos en runtime dentro
+# del dist, asi que no tiene sentido copiarlos y engordar el build.
 subprocess.run(
-    ['rsync', '-a', '--delete', os.path.join(SPECPATH, 'resources') + '/',
+    ['rsync', '-a', '--delete',
+     '--exclude', 'audio/_generated/', '--exclude', 'audio/_panned/',
+     os.path.join(SPECPATH, 'resources') + '/',
      os.path.join(dist_dir, 'resources') + '/'],
     check=True,
 )
