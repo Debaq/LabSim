@@ -16,8 +16,9 @@ from lib.h_audio import (calibrate, create_frecuency, create_intency,
                          create_sound, create_word, data_basic)
 from lib.helpers import Preferences
 from PySide6.QtCore import QEvent, QObject, Qt, QTimer, Signal, Slot
-from PySide6.QtGui import QFont, QKeySequence, QShortcut
-from PySide6.QtWidgets import QApplication, QLabel, QWidget
+from PySide6.QtGui import QFont
+from PySide6.QtWidgets import (QApplication, QLabel, QLineEdit, QPlainTextEdit,
+                               QTextEdit, QWidget)
 from keyboard_monitor import KeyboardMonitor
 from response import ResponseAudiometry as Response
 from UI.Ui_Audiometer import Ui_Audiometer
@@ -72,45 +73,29 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.dial_value_der = self.dial_ch0.value()
         self.dial_value_izq = self.dial_izq.value()
 
-        # Keyboard shorcuts diales
-        self.shcut_dial_up_der = QShortcut(
-            QKeySequence(keyboard_shortcuts[0]), self)
-        self.shcut_dial_up_der.activated.connect(
-            lambda: self.MoveDial(0, True))
-        self.shcut_dial_down_der = QShortcut(
-            QKeySequence(keyboard_shortcuts[1]), self)
-        self.shcut_dial_down_der.activated.connect(
-            lambda: self.MoveDial(0, False))
-
-        self.shcut_dial_up_izq = QShortcut(
-            QKeySequence(keyboard_shortcuts[2]), self)
-        self.shcut_dial_up_izq.activated.connect(
-            lambda: self.MoveDial(1, True))
-        self.shcut_dial_down_izq = QShortcut(
-            QKeySequence(keyboard_shortcuts[3]), self)
-        self.shcut_dial_down_izq.activated.connect(
-            lambda: self.MoveDial(1, False))
-
-        # Shortcuts alternar salida/estimulo/transductor por canal
-        self.shcut_output_ch0 = QShortcut(
-            QKeySequence(keyboard_shortcuts_switch[0]), self)
-        self.shcut_output_ch0.activated.connect(lambda: self.cycle_output(0))
-        self.shcut_stim_ch0 = QShortcut(
-            QKeySequence(keyboard_shortcuts_switch[1]), self)
-        self.shcut_stim_ch0.activated.connect(lambda: self.cycle_stim(0))
-        self.shcut_trans_ch0 = QShortcut(
-            QKeySequence(keyboard_shortcuts_switch[2]), self)
-        self.shcut_trans_ch0.activated.connect(lambda: self.cycle_trans(0))
-
-        self.shcut_output_ch1 = QShortcut(
-            QKeySequence(keyboard_shortcuts_switch[3]), self)
-        self.shcut_output_ch1.activated.connect(lambda: self.cycle_output(1))
-        self.shcut_stim_ch1 = QShortcut(
-            QKeySequence(keyboard_shortcuts_switch[4]), self)
-        self.shcut_stim_ch1.activated.connect(lambda: self.cycle_stim(1))
-        self.shcut_trans_ch1 = QShortcut(
-            QKeySequence(keyboard_shortcuts_switch[5]), self)
-        self.shcut_trans_ch1.activated.connect(lambda: self.cycle_trans(1))
+        # Keyboard shortcuts diales y de alternar salida/estimulo/transductor.
+        # No se usa QShortcut (contexto WindowShortcut): al vivir el
+        # audiometro dentro de una subventana MDI, ese contexto solo se
+        # activa si esa subventana es la subventana MDI activa, y con Z
+        # (impedanciometria) usando las mismas teclas fisicas del teclado
+        # LabSim (S/W/V), al perder el foco interno el shortcut saltaba a
+        # la otra ventana. Se resuelven junto a V/B en el eventFilter
+        # global para que el audiometro siempre tenga prioridad mientras
+        # este abierto, sin depender de cual subventana MDI esta activa.
+        self._dial_keys = {
+            Qt.Key(ord(keyboard_shortcuts[0].upper())): (0, True),
+            Qt.Key(ord(keyboard_shortcuts[1].upper())): (0, False),
+            Qt.Key(ord(keyboard_shortcuts[2].upper())): (1, True),
+            Qt.Key(ord(keyboard_shortcuts[3].upper())): (1, False),
+        }
+        self._switch_keys = {
+            Qt.Key(ord(keyboard_shortcuts_switch[0].upper())): lambda: self.cycle_output(0),
+            Qt.Key(ord(keyboard_shortcuts_switch[1].upper())): lambda: self.cycle_stim(0),
+            Qt.Key(ord(keyboard_shortcuts_switch[2].upper())): lambda: self.cycle_trans(0),
+            Qt.Key(ord(keyboard_shortcuts_switch[3].upper())): lambda: self.cycle_output(1),
+            Qt.Key(ord(keyboard_shortcuts_switch[4].upper())): lambda: self.cycle_stim(1),
+            Qt.Key(ord(keyboard_shortcuts_switch[5].upper())): lambda: self.cycle_trans(1),
+        }
 
         ### Steps and extend
         self.btn_step_1.clicked.connect(lambda: self.step(1))
@@ -284,8 +269,25 @@ class Audiometer(QWidget, Ui_Audiometer):
 
 
     def eventFilter(self, obj, event):
-        if self.isActiveWindow() and event.type() in (QEvent.KeyPress, QEvent.KeyRelease):
-            ch = self._stim_keys.get(event.key())
+        # isVisible() (no isActiveWindow()): el audiometro debe capturar
+        # sus teclas mientras este abierto, sin importar que otra
+        # subventana MDI tenga el foco interno (ver comentario en __init__).
+        if self.isVisible() and event.type() in (QEvent.KeyPress, QEvent.KeyRelease):
+            focus = QApplication.focusWidget()
+            if isinstance(focus, (QLineEdit, QTextEdit, QPlainTextEdit)):
+                return super().eventFilter(obj, event)
+
+            key = event.key()
+            if event.type() == QEvent.KeyPress:
+                if key in self._dial_keys:
+                    ch, up = self._dial_keys[key]
+                    self.MoveDial(ch, up)
+                    return True
+                if key in self._switch_keys:
+                    self._switch_keys[key]()
+                    return True
+
+            ch = self._stim_keys.get(key)
             if ch is not None and not event.isAutoRepeat():
                 if event.type() == QEvent.KeyPress:
                     self.btn_stims[ch].pressed.emit()
