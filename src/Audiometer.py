@@ -25,6 +25,7 @@ from UI.Ui_Audiometer import Ui_Audiometer
 #context
 class_pref = Preferences()
 keyboard_shortcuts = class_pref.get("keyboard_shortcuts")
+keyboard_shortcuts_switch = class_pref.get("keyboard_shortcuts_switch")
 session = class_pref.get("session_pred")
 URL = class_pref.get("API_URL")
 intency_dict = class_pref.get("intency_dict")
@@ -89,6 +90,27 @@ class Audiometer(QWidget, Ui_Audiometer):
             QKeySequence(keyboard_shortcuts[3]), self)
         self.shcut_dial_down_izq.activated.connect(
             lambda: self.MoveDial(1, False))
+
+        # Shortcuts alternar salida/estimulo/transductor por canal
+        self.shcut_output_ch0 = QShortcut(
+            QKeySequence(keyboard_shortcuts_switch[0]), self)
+        self.shcut_output_ch0.activated.connect(lambda: self.cycle_output(0))
+        self.shcut_stim_ch0 = QShortcut(
+            QKeySequence(keyboard_shortcuts_switch[1]), self)
+        self.shcut_stim_ch0.activated.connect(lambda: self.cycle_stim(0))
+        self.shcut_trans_ch0 = QShortcut(
+            QKeySequence(keyboard_shortcuts_switch[2]), self)
+        self.shcut_trans_ch0.activated.connect(lambda: self.cycle_trans(0))
+
+        self.shcut_output_ch1 = QShortcut(
+            QKeySequence(keyboard_shortcuts_switch[3]), self)
+        self.shcut_output_ch1.activated.connect(lambda: self.cycle_output(1))
+        self.shcut_stim_ch1 = QShortcut(
+            QKeySequence(keyboard_shortcuts_switch[4]), self)
+        self.shcut_stim_ch1.activated.connect(lambda: self.cycle_stim(1))
+        self.shcut_trans_ch1 = QShortcut(
+            QKeySequence(keyboard_shortcuts_switch[5]), self)
+        self.shcut_trans_ch1.activated.connect(lambda: self.cycle_trans(1))
 
         ### Steps and extend
         self.btn_step_1.clicked.connect(lambda: self.step(1))
@@ -156,6 +178,23 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.btn_trans_aer_ch1.clicked.connect(lambda: self.trans(1, 0))
         self.btn_trans_ose_ch1.clicked.connect(lambda: self.trans(1, 1))
         self.btn_trans_cl_ch1.clicked.connect(lambda: self.trans(1, 2))
+
+        # Listas ordenadas (igual orden que output_list/stim_list/trans_list)
+        # usadas para alternar via shortcuts, saltando btn deshabilitados
+        self.output_btns = [
+            [self.btn_output_der_ch0, self.btn_output_izq_ch0, self.btn_output_sim_ch0],
+            [self.btn_output_der_ch1, self.btn_output_izq_ch1, self.btn_output_sim_ch1],
+        ]
+        self.stim_btns = [
+            [self.btn_stim_tone_ch0, self.btn_stim_fm_ch0, self.btn_stim_speech_ch0,
+             self.btn_stim_nbn_ch0, self.btn_stim_wn_ch0, self.btn_stim_sn_ch0, self.btn_stim_pn_ch0],
+            [self.btn_stim_tone_ch1, self.btn_stim_fm_ch1, self.btn_stim_speech_ch1,
+             self.btn_stim_nbn_ch1, self.btn_stim_wn_ch1, self.btn_stim_sn_ch1, self.btn_stim_pn_ch1],
+        ]
+        self.trans_btns = [
+            [self.btn_trans_aer_ch0, self.btn_trans_ose_ch0, self.btn_trans_cl_ch0],
+            [self.btn_trans_aer_ch1, self.btn_trans_ose_ch1, self.btn_trans_cl_ch1],
+        ]
 
         # Logo
         self.btn_correcta.clicked.connect(lambda: self.logo_sumA(True))
@@ -639,6 +678,29 @@ class Audiometer(QWidget, Ui_Audiometer):
             self.play(0)
         if ch2 and self.lbl_rev_ch1.text() == reverse_list[1]:
             self.play(1)
+
+    def _cycle(self, ch, lbl, options, btns, setter):
+        """avanza al siguiente valor habilitado en la lista, con wraparound"""
+        current = lbl.text()
+        idx = options.index(current) if current in options else -1
+        n = len(options)
+        for i in range(1, n + 1):
+            new_idx = (idx + i) % n
+            if btns[new_idx].isEnabled():
+                setter(ch, new_idx)
+                return
+
+    def cycle_output(self, ch):
+        self._cycle(ch, self.lbl_output[ch], output_list,
+                    self.output_btns[ch], self.output)
+
+    def cycle_stim(self, ch):
+        self._cycle(ch, self.lbl_stim[ch], stim_list,
+                    self.stim_btns[ch], self.stim)
+
+    def cycle_trans(self, ch):
+        self._cycle(ch, self.lbl_trans[ch], trans_list,
+                    self.trans_btns[ch], self.trans)
 
     def trans(self, ch, trans):
         self.lbl_trans[ch].setText(trans_list[trans])
