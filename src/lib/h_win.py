@@ -23,7 +23,15 @@ class MoveWin():
 
     def move_window(self, _event):
         if Qt.MouseButton.LeftButton and self.move_flag:
-            self.i.move(_event.globalPosition().toPoint() - self.move_position)
+            new_pos = _event.globalPosition().toPoint() - self.move_position
+            mdi_area = self.i.mdiArea()
+            if mdi_area is not None:
+                viewport = mdi_area.viewport()
+                max_x = max(viewport.width() - self.i.width(), 0)
+                max_y = max(viewport.height() - self.i.height(), 0)
+                new_pos.setX(min(max(new_pos.x(), 0), max_x))
+                new_pos.setY(min(max(new_pos.y(), 0), max_y))
+            self.i.move(new_pos)
             _event.accept()
 
     def release_window(self, _event):
@@ -50,6 +58,11 @@ class FrameSubMdi(QWidget, UI_frameSubMdi):
         self.barra.mousePressEvent = movewin.press_window
         self.barra.mouseMoveEvent = movewin.move_window
         self.barra.mouseReleaseEvent = movewin.release_window
+        self.btn_close.clicked.connect(self.hide_window)
+
+    def hide_window(self):
+        """Esconde la subventana (QMdiSubWindow) sin destruirla"""
+        self.parent().hide()
 
 
 

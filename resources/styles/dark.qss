@@ -41,6 +41,19 @@ QWidget#barra QLabel{
 
 }
 
+QWidget#barra QPushButton#btn_close{
+  font: 8pt "Noto Sans";
+  border-radius: 3px;
+  border-width: 0px;
+  color: rgb(255, 255, 255);
+  background-color: transparent;
+}
+
+QWidget#barra QPushButton#btn_close:hover{
+  color: rgb(255, 255, 255);
+  background-color: #a32529;
+}
+
 QGroupBox#frame_Box_1 QPushButton{
   color : white;
   background-color: rgb(255, 0, 0);

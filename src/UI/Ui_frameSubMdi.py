@@ -32,6 +32,16 @@ class Ui_Form(object):
         self.lbl_title.setFont(font)
         self.lbl_title.setObjectName("lbl_title")
         self.horizontalLayout.addWidget(self.lbl_title)
+        spacerItem_barra = QtWidgets.QSpacerItem(20, 20,QtWidgets.QSizePolicy.Policy.Expanding,QtWidgets.QSizePolicy.Policy.Minimum)
+        self.horizontalLayout.addItem(spacerItem_barra)
+        self.btn_close = QtWidgets.QPushButton(self.barra)
+        self.btn_close.setMinimumSize(QtCore.QSize(20, 20))
+        self.btn_close.setMaximumSize(QtCore.QSize(20, 20))
+        font_close = QtGui.QFont()
+        font_close.setPointSize(8)
+        self.btn_close.setFont(font_close)
+        self.btn_close.setObjectName("btn_close")
+        self.horizontalLayout.addWidget(self.btn_close)
         self.verticalLayout_2.addWidget(self.barra)
         self.layout_content = QtWidgets.QVBoxLayout()
         self.layout_content.setContentsMargins(3, -1, 3, -1)
@@ -46,3 +56,4 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
+        self.btn_close.setText(_translate("Form", "✕"))
