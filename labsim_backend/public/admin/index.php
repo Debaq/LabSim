@@ -69,8 +69,7 @@ admin_header('Estado del backend', $me);
 </div>
 <div class="card">
     <p>Gestión de usuarios (alumnos de prueba, admins) en <a href="users.php">Usuarios</a> -- pincha un alumno para ver sus métricas.</p>
-    <p>Crear, editar y cancelar citas de la agenda en <a href="agenda.php">Agenda</a>.</p>
-    <p>Ver los casos clínicos guardados y si quedaron enganchados a una cita en <a href="cases.php">Casos</a>.</p>
+    <p>Agendar, cancelar y eliminar casos/citas en <a href="agenda.php">Agenda</a>.</p>
     <p>Registrar Moodle como plataforma LTI y ver las URLs que necesita en <a href="lti.php">LTI</a>.</p>
 </div>
 <?php

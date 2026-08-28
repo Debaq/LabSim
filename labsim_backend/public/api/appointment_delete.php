@@ -12,6 +12,8 @@ if ($id <= 0) {
     Response::error('Falta id de la cita', 400);
 }
 
+Cases::snapshotBeforeAppointmentDelete($id);
+
 $pdo = Db::get();
 $pdo->beginTransaction();
 $pdo->prepare('DELETE FROM attendances WHERE appointment_id = ?')->execute([$id]);

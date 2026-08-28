@@ -43,7 +43,6 @@ function admin_header(string $title, ?array $currentUser = null): void
         <a href="index.php">Estado</a>
         <a href="users.php">Usuarios</a>
         <a href="agenda.php">Agenda</a>
-        <a href="cases.php">Casos</a>
         <a href="lti.php">LTI</a>
     </div>
     <div>
