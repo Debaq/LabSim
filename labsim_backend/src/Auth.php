@@ -2,6 +2,14 @@
 
 final class Auth
 {
+    // Distinción de nivel dentro de role='admin' (el CHECK de users.role
+    // solo admite 'student'|'admin' -- un tercer rol real requeriría
+    // migrar schema). El docente entra al portal igual que un admin
+    // completo pero requireFullAdminSession() le corta el paso en las
+    // páginas de gestión (Usuarios, LTI, Estado).
+    public const PERMISSION_ADMIN = 777;
+    public const PERMISSION_DOCENTE = 555;
+
     /**
      * Genera un código de 6 dígitos que el alumno escribe en la app de
      * escritorio para vincular la sesión iniciada por LTI en el navegador.
@@ -135,6 +143,17 @@ final class Auth
             unset($_SESSION['admin_user_id']);
             header('Location: login.php');
             exit;
+        }
+        return $user;
+    }
+
+    /** Como requireAdminSession(), pero corta con 403 si es una cuenta docente (permission != admin). */
+    public static function requireFullAdminSession(): array
+    {
+        $user = self::requireAdminSession();
+        if ((int) $user['permission'] !== self::PERMISSION_ADMIN) {
+            http_response_code(403);
+            exit('Requiere permisos de administrador completo.');
         }
         return $user;
     }

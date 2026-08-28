@@ -40,6 +40,14 @@ final class Users
         return (int) $pdo->lastInsertId();
     }
 
+    /** Cambia rol/permiso/nombre de una cuenta existente sin tocar su password_hash. */
+    public static function updateProfile(int $userId, string $role, int $permission, string $displayName): void
+    {
+        Db::get()->prepare(
+            'UPDATE users SET role = ?, permission = ?, display_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+        )->execute([$role, $permission, $displayName, $userId]);
+    }
+
     public static function listAll(): array
     {
         return Db::get()->query(
