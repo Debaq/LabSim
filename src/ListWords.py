@@ -81,10 +81,15 @@ class ListWords(QWidget, Ui_ListWords):
         if data is None:
             return
         self.is_response = data['sector'] == "Camara_sono"
-        gender = data['gender']
-        ide = data['id']
-        self.gender = "feme" if gender == 0 else "male"
-        self.id = ide
+        # TODO: solo existen audios de respuesta grabados como feme1/feme2
+        # (resources/audio/LP_palacios_r_feme{1,2}_*.mp3). No hay voces "male"
+        # grabadas y ningun otro id de ficha tiene voz asociada, asi que
+        # create_word_response fallaba silenciosamente (ffmpeg "No existe el
+        # fichero o el directorio") y parecia que el paciente no respondia.
+        # Mientras no se graben mas voces, forzamos siempre la voz feme1 sin
+        # importar el genero/id real del paciente.
+        self.gender = "feme"
+        self.id = 1
         UMD = data["UMD"]
         self.is_mkg = self.ifMkg(data)
         self.prev = CalculateLogo(data, UMD)
