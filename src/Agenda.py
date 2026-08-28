@@ -8,17 +8,36 @@
 #   NOTA: si no hablas español, no es mi culpa, aprende         #
 #################################################################
 
+import requests
 from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import (QTableWidgetItem, QAbstractItemView,
                                 QDateEdit, QTimeEdit, QPushButton, QMessageBox, QLineEdit,
                                 QDialog, QVBoxLayout, QLabel, QTextEdit, QDialogButtonBox,
                                 QCheckBox)
-from PySide6.QtCore import QDate, QTime, QDateTime, Qt
+from PySide6.QtCore import QDate, QTime, QDateTime, Qt, QThread, Signal
 from PySide6.QtGui import QColor
 from UI.Ui_agenda import Ui_Form
 from lib.helpers import (Shedule, entry_estado_por, CasesOffline,
                           marcar_entry_no_show, obtener_hora_real_atencion,
                           obtener_nota_atencion, entry_esta_cancelada, marcar_entry_cancelada)
+
+
+class _SheduleFetchThread(QThread):
+    """Trae Shedule() (llamada de red) fuera del hilo de UI.
+
+    Mismo patrón silencioso que SyncThread.sync_failed: si el backend no
+    responde, no hay diálogo ni excepción -- se reintenta en el próximo
+    ciclo de polling."""
+    fetched = Signal(dict)
+    failed = Signal(str)
+
+    def run(self):
+        try:
+            data = Shedule().get()
+        except requests.RequestException as exc:
+            self.failed.emit(str(exc))
+            return
+        self.fetched.emit(data)
 
 
 PENDIENTE_COLOR = QColor(255, 244, 200)
@@ -222,6 +241,23 @@ class Agenda(QWidget, Ui_Form):
 
     def refresh(self):
         self.read_shedule()
+        self.populate_shedule()
+
+    def refresh_async(self):
+        """Como refresh(), pero la llamada de red corre en un hilo aparte.
+
+        Usado por el polling de fondo (main._on_backend_sync): ese refresh
+        dispara SIEMPRE una consulta nueva a Shedule() (get_full_state), y si
+        se hacía en el hilo de UI, un backend caído congelaba la ventana
+        completa (timeout SSL de hasta 10s, cada ciclo de sync)."""
+        if getattr(self, "_shedule_fetch_thread", None) is not None and self._shedule_fetch_thread.isRunning():
+            return
+        self._shedule_fetch_thread = _SheduleFetchThread(self)
+        self._shedule_fetch_thread.fetched.connect(self._on_refresh_async_done)
+        self._shedule_fetch_thread.start()
+
+    def _on_refresh_async_done(self, data):
+        self.shedule = data
         self.populate_shedule()
 
     def _current_username(self):

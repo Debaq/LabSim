@@ -170,9 +170,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.sync_thread.start()
 
     def _on_backend_sync(self, _delta):
+        # refresh_async: este callback corre en cada ciclo de polling (15s);
+        # refresh() normal dispara una consulta de red nueva y BLOQUEANTE
+        # (Shedule() -> get_full_state), que con el backend caído congelaba
+        # toda la ventana hasta 10s por ciclo (timeout SSL).
         agenda_win = self.subw.get("AGENDA") if self.subw else None
         if agenda_win is not None:
-            agenda_win.obj.refresh()
+            agenda_win.obj.refresh_async()
 
     def _stop_sync_thread(self):
         if self.sync_thread is not None:
