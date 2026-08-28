@@ -42,7 +42,12 @@ ONLINE = "development" if Preferences.get("test") else Preferences.get("online")
 # la red -- pero solo se sube al backend si ONLINE == "backend" (ver
 # MainWindow._data_login). En otros modos simplemente no se vacía nunca.
 LOCAL_LOG_QUEUE = get_log_queue()
-sys.stdout = Logger(LOG_FILE, log_queue=LOCAL_LOG_QUEUE)
+# Logger sin log_queue: stdout (prints de debug regados por todo el código)
+# ya no se sube al backend -- era 87% del volumen y puro ruido interno
+# ("cambio el sender", "True", [agenda_filter]...). Las acciones reales del
+# alumno (audio_stim_button, z_dial_change, etc.) se suben aparte, con
+# nombre propio, vía log_queue.push() explícito en Audiometer.py y Z.py.
+sys.stdout = Logger(LOG_FILE)
 
 
 class CVC(Ui_CVC):

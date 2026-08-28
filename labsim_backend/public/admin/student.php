@@ -113,6 +113,8 @@ admin_header('Alumno: ' . $student['display_name'], $me);
 
 <div class="card">
     <strong>Últimas 30 acciones (detalle)</strong>
+    &nbsp;·&nbsp;
+    <a href="logs_download.php?id=<?= (int) $studentId ?>">Descargar registro completo (CSV, <?= $totalActions ?>)</a>
     <table>
         <tr><th>Cuándo (cliente)</th><th>Acción</th><th>Payload</th></tr>
         <?php foreach ($recentLogs as $log): ?>
