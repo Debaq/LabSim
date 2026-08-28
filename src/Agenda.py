@@ -69,6 +69,10 @@ class Agenda(QWidget, Ui_Form):
         self.setupUi(self)
 
         self.is_admin = permissions == 777
+        # Docente puede crear pacientes (sección "Agregar" / CREATE_A) pero no
+        # el resto de controles admin de la agenda (editar/eliminar/cancelar
+        # citas, nota interna) -- ese conjunto sigue gateado por is_admin.
+        self.can_create_patient = permissions in (555, 777)
         self.main_window = obj
         self._selected_key = None
         self._selected_row_key = None
@@ -96,7 +100,7 @@ class Agenda(QWidget, Ui_Form):
         self.read_shedule()
         self.populate_shedule()
 
-        if self.is_admin:
+        if self.can_create_patient:
             self.pushButton.setEnabled(True)
             self.pushButton.clicked.connect(lambda:self.create_case(obj))
         else:

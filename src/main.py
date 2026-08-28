@@ -293,6 +293,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
         if self.data_current_key == key:
             self.data_current_key = None
+            self.data_current = None
+            self._hydrate_modules()
 
         if self.subw and "AGENDA" in self.subw:
             self.subw["AGENDA"].obj.refresh()
@@ -300,12 +302,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.statusbar.clearMessage()
 
     def _hydrate_modules(self):
-        """Carga self.data_current en los módulos ya construidos"""
-        if self.data_current is None:
-            return
+        """Carga self.data_current en los módulos ya construidos, o los
+        deshidrata (data_current=None) para que dejen de loguear acciones
+        bajo el caso/paciente ya cerrado."""
         for attr in ("subw_a", "subw_z", "subw_w"):
             try:
-                getattr(self, attr).obj.la_super(self.data_current)
+                getattr(self, attr).obj.la_super(self.data_current, self.data_current_key)
             except AttributeError:
                 pass
 
@@ -317,7 +319,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw_w = FrameSubMdi(ListWords.ListWords(self.data_current))
         self.subw_z = FrameSubMdi(Z.ZControl())
 
-        if self.data_login["permission"] == 777:
+        if self.data_login["permission"] in (555, 777):  # docente y admin, no alumno
             subw_create_a = FrameSubMdi(create_a.CreateA(self.data_login["user"], self))
             self.subw["CREATE_A"] = subw_create_a
 
