@@ -522,11 +522,18 @@ class CreatePatient():
         return round(random.uniform(low, high), 2)
 
     def rut_from_age(self, age):
+        """
+        Rut falso para el paciente sintético. Se agrega azar en el día de
+        nacimiento dentro del año: si dos pacientes distintos tienen la misma
+        edad y quedaran con el mismo rut, _historial_atenciones (Agenda.py)
+        los trataría como el mismo paciente y mezclaría sus notas de atención.
+        """
         today_date = datetime.now()
         slope = 3.3363697569700348e-06
         intercept = 1932.2573852507373
         birth_year = today_date.year - age
-        birth_date_float = birth_year + 0.5  # Asumimos que la persona nació a mitad de año para una aproximación
+        dia_aleatorio = random.randint(0, 364)
+        birth_date_float = birth_year + (dia_aleatorio / 365)
         rut_approx = (birth_date_float - intercept) / slope
         return int(rut_approx)
 

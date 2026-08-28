@@ -466,10 +466,17 @@ class CreateA(QWidget,Ui_generator_audio):
         shedule = Shedule()
         agenda = shedule.data.setdefault("agenda_1", {})
         next_row = str(max((int(k) for k in agenda), default=-1) + 1)
+
+        ruts_existentes = {row[2] for row in agenda.values() if len(row) > 2}
+        patient = CreatePatient()
+        rut = str(patient.rut_from_age(age))
+        while rut in ruts_existentes:
+            rut = str(patient.rut_from_age(age))
+
         agenda[next_row] = [
             "",
             "",
-            str(CreatePatient().rut_from_age(age)),
+            rut,
             f"{nombre1} {nombre2}",
             f"{apellido1} {apellido2}",
             f"01-01-{birth_year:04d}",

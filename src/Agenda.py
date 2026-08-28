@@ -469,8 +469,22 @@ class Agenda(QWidget, Ui_Form):
         if row is None or col >= len(row):
             return
 
+        valor_anterior = row[col]
         row[col] = item.text()
-        Shedule().set(self.shedule)
+        try:
+            Shedule().set(self.shedule)
+        except Exception as e:
+            # En modo backend esto empuja por red (appointment_upsert.php) --
+            # sin este catch, un timeout o un 401 revienta el slot en
+            # silencio: la celda queda mostrando el valor editado pero nunca
+            # llegó al servidor, y el próximo refresh la pisa con el valor
+            # viejo sin que el admin entienda por qué.
+            row[col] = valor_anterior
+            QMessageBox.critical(self, "Editar cita", f"No se pudo guardar en el servidor:\n{e}")
+            self.refresh()
+            return
+
+        self.refresh()
 
     def _on_cell_double_clicked(self, row_idx, col_idx):
         """Doble click en Fecha/Hora abre un selector en vez de edición de texto."""
