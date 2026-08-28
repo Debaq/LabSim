@@ -22,7 +22,40 @@ import codecs
 from base import context
 import random
 from datetime import datetime
+from copy import deepcopy
 import os
+
+from lib.backend.client import BackendClient
+from lib.backend.cases_sync import backend_state_to_cases, diff_and_push_cases
+from lib.backend.shedule_sync import backend_state_to_shedule, diff_and_push_shedule
+
+# Snapshot en memoria de la última foto conocida del backend, para poder
+# diffear en Shedule.set()/CasesOffline.set_cases() y empujar solo lo que
+# cambió. Vive a nivel de módulo porque cada llamador crea una instancia
+# nueva de Shedule()/CasesOffline() en cada lectura/escritura (ver Agenda.py,
+# create_a.py, main.py): no hay una sola instancia larga donde guardarlo.
+_backend_client = None
+_shedule_snapshot = {"agenda_1": {}}
+_cases_snapshot = {}
+
+
+def _online_mode():
+    """Mismo criterio que ONLINE en main.py: 'test' fuerza 'development'."""
+    pref = Preferences()
+    return "development" if pref.get("test") else pref.get("online")
+
+
+def _is_backend_mode() -> bool:
+    return _online_mode() == "backend"
+
+
+def _get_backend_client() -> BackendClient:
+    global _backend_client
+    if _backend_client is None:
+        pref = Preferences()
+        session_file = context.get_resource('json/session.json')
+        _backend_client = BackendClient(pref.get("BACKEND_URL"), session_file)
+    return _backend_client
 
 
 class CasesOffline():
@@ -46,7 +79,18 @@ class CasesOffline():
         return list_data
 
     def get_cases(self) -> dict:
-        """Recupera la base de casos compartida."""
+        """Recupera la base de casos compartida (backend si ONLINE == 'backend', si no local)."""
+        global _cases_snapshot
+        if _is_backend_mode():
+            client = _get_backend_client()
+            data = backend_state_to_cases(client.get_full_state())
+            # deepcopy: quien llama muta el dict que le devolvemos (agrega
+            # casos, edita anidados) -- si _cases_snapshot compartiera
+            # referencia, esa mutación también "cambiaría" el snapshot y
+            # el diff de más abajo nunca vería nada distinto que subir.
+            _cases_snapshot = deepcopy(data)
+            return data
+
         cases_file = context.get_resource('cases/cases.json')
         try:
             with codecs.open(cases_file, 'r', 'utf-8') as json_file:
@@ -56,13 +100,39 @@ class CasesOffline():
         return list_data
 
     def set_cases(self, cases:dict) -> None:
-        """Guarda la base de casos compartida."""
+        """Guarda la base de casos compartida (backend si ONLINE == 'backend', si no local)."""
+        global _cases_snapshot
+        if _is_backend_mode():
+            client = _get_backend_client()
+            diff_and_push_cases(client, cases, _cases_snapshot)
+            _cases_snapshot = deepcopy(cases)
+            return
+
         cases_file = context.get_resource('cases/cases.json')
         with codecs.open(cases_file, 'w', 'utf-8') as json_file:
             json.dump(cases, json_file, ensure_ascii=False)
 
 class Shedule:
     def __init__(self):
+        global _shedule_snapshot
+        if _is_backend_mode():
+            client = _get_backend_client()
+            own_id = (client.user or {}).get("id")
+            own_username = (client.user or {}).get("username", "")
+            state = client.get_full_state()
+            print(f"[shedule_fetch] own_id={own_id!r} own_username={own_username!r} "
+                  f"appointments={len(state.get('appointments', []))} keys={list(state.keys())}")
+            for appt in state.get("appointments", []):
+                print(f"[shedule_fetch]   cita id={appt.get('id')} fecha={appt.get('fecha')!r} "
+                      f"hora={appt.get('hora')!r} cancelada={appt.get('cancelada')!r}")
+            data = backend_state_to_shedule(state, own_id, own_username)
+            # deepcopy por la misma razón que en CasesOffline.get_cases():
+            # self.data se muta en el sitio (nuevas citas, edición de filas)
+            # y sin esto esa mutación se filtraba también al snapshot.
+            _shedule_snapshot = deepcopy(data)
+            self.data = data
+            return
+
         preferences_file = context.get_resource('json/schedule.json')
         with codecs.open(preferences_file, 'r', 'utf-8') as json_file:
             list_data = json.load(json_file)
@@ -75,8 +145,16 @@ class Shedule:
         return self.data
 
     def set(self, data:dict) -> None:
-        """guarda la agenda en el archivo *.json"""
+        """guarda la agenda (backend si ONLINE == 'backend', si no en *.json local)"""
+        global _shedule_snapshot
         self.data = data
+        if _is_backend_mode():
+            client = _get_backend_client()
+            own_username = (client.user or {}).get("username", "")
+            diff_and_push_shedule(client, data, _shedule_snapshot, own_username)
+            _shedule_snapshot = deepcopy(data)
+            return
+
         preferences_file = context.get_resource('json/schedule.json')
         with codecs.open(preferences_file, 'w', 'utf-8') as json_file:
             json.dump(data, json_file, ensure_ascii=False)

@@ -102,7 +102,14 @@ class CreateA(QWidget,Ui_generator_audio):
 
     def create(self):
         if self._edit_case_id is not None:
-            self._save_edit()
+            try:
+                self._save_edit()
+            except Exception as e:
+                # En modo backend esto empuja por red (case_upsert.php /
+                # appointment_upsert.php) -- sin este catch, un timeout o un
+                # 401 revienta el slot en silencio y el admin no se entera
+                # de que el cambio no llegó al servidor.
+                QMessageBox.critical(self, "Editar paciente", f"No se pudo guardar en el servidor:\n{e}")
             return
 
         if not self._name_parts:
@@ -111,8 +118,12 @@ class CreateA(QWidget,Ui_generator_audio):
 
         letters = self._read_audiometry()
         extra = self._read_extra_tests()
-        case_id = self._save_case(letters, extra)
-        self._add_to_agenda(case_id)
+        try:
+            case_id = self._save_case(letters, extra)
+            self._add_to_agenda(case_id)
+        except Exception as e:
+            QMessageBox.critical(self, "Crear paciente", f"No se pudo guardar en el servidor:\n{e}")
+            return
 
         QMessageBox.information(self, "Crear paciente", f"Paciente {self.led_name.text()} creado. Queda pendiente de habilitar en la Agenda (fecha y hora).")
         self.reset_form()

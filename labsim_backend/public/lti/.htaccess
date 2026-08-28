@@ -1,0 +1,8 @@
+# El hosting manda X-Frame-Options: DENY en todas las respuestas (nivel
+# servidor, no viene de nuestro PHP). LTI necesita que Moodle pueda cargar
+# login.php/launch.php dentro de un iframe -- si no, el navegador lo
+# bloquea con "<dominio> rechazó la conexión".
+<IfModule mod_headers.c>
+    Header always unset X-Frame-Options
+    Header always set Content-Security-Policy "frame-ancestors 'self' https://siveducmd.uach.cl"
+</IfModule>

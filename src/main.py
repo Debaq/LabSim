@@ -18,13 +18,14 @@ from UI.Ui_command_voice_A import Ui_Form as commandVoiceA
 from UI.Ui_CVC import Ui_CVC
 from UI.Ui_Main import Ui_MainWindow
 from Logger import Logger
+from lib.backend.client import BackendClient
+from lib.backend.log_queue import LocalLogQueue, LogUploaderThread
+from lib.backend.sync_thread import SyncThread
 
 # Definir la raíz del proyecto
 BASE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = BASE_DIR / 'resources' / 'config' / 'config.json'
 LOG_FILE = BASE_DIR / 'log_file.txt'
-
-sys.stdout = Logger(LOG_FILE)
 
 __VERSION__ = 'v0.9.8'
 Preferences = Preferences()
@@ -34,6 +35,13 @@ BOXS = Preferences.get("BOXS")
 STYLES = Preferences.get("styles")
 LANGUAJE = Preferences.get("lang")
 ONLINE = "development" if Preferences.get("test") else Preferences.get("online")
+
+# Cola local de logs de acciones (ver lib/backend/log_queue.py). Se crea
+# siempre -- escribir en ella es solo un insert sqlite local, nunca toca
+# la red -- pero solo se sube al backend si ONLINE == "backend" (ver
+# MainWindow._data_login). En otros modos simplemente no se vacía nunca.
+LOCAL_LOG_QUEUE = LocalLogQueue(BASE_DIR / 'resources' / 'local_cache' / 'logs.db')
+sys.stdout = Logger(LOG_FILE, log_queue=LOCAL_LOG_QUEUE)
 
 
 class CVC(Ui_CVC):
@@ -97,6 +105,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.sectors_lbl = SECTORS
         self.modules = Storage(len(APPS))
         self.var_list_word = Storage(2)
+        self.log_uploader = None
+        self.sync_thread = None
 
     def create_sub_windows(self):
         """Crea las subventanas"""
@@ -121,6 +131,46 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.data_login = data
             self.refresh_data()
             self.btns_actions()
+            self._start_log_uploader()
+            self._start_sync_thread()
+
+    def _start_log_uploader(self):
+        """Sube en lotes los logs de acciones acumulados (ver log_queue.py).
+        Solo aplica en modo backend y si el login realmente dejó un token."""
+        if ONLINE != "backend":
+            return
+        client = BackendClient(Preferences.get("BACKEND_URL"), context.get_resource('json/session.json'))
+        if not client.is_logged_in():
+            return
+        self.log_uploader = LogUploaderThread(LOCAL_LOG_QUEUE, client)
+        self.log_uploader.start()
+
+    def _stop_log_uploader(self):
+        if self.log_uploader is not None:
+            self.log_uploader.stop()
+            self.log_uploader = None
+
+    def _start_sync_thread(self):
+        """Poll periódico al backend (ver sync_thread.py): si el admin edita
+        la agenda desde otra terminal, esta refresca sola en el próximo ciclo."""
+        if ONLINE != "backend":
+            return
+        client = BackendClient(Preferences.get("BACKEND_URL"), context.get_resource('json/session.json'))
+        if not client.is_logged_in():
+            return
+        self.sync_thread = SyncThread(client)
+        self.sync_thread.sync_ok.connect(self._on_backend_sync)
+        self.sync_thread.start()
+
+    def _on_backend_sync(self, _delta):
+        agenda_win = self.subw.get("AGENDA") if self.subw else None
+        if agenda_win is not None:
+            agenda_win.obj.refresh()
+
+    def _stop_sync_thread(self):
+        if self.sync_thread is not None:
+            self.sync_thread.stop()
+            self.sync_thread = None
 
     def toggle_login(self):
         """Cierra sesión de inmediato si hay una activa, si no abre la ventana de login"""
@@ -131,6 +181,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
     def logout(self):
         """Cierra la sesión actual"""
+        self._stop_log_uploader()
+        self._stop_sync_thread()
         self._close_sub_windows()
         self.lbl_name.setText("")
         self.btn_login.setText("Ingresar")
@@ -276,6 +328,11 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.btn_list_words.setObjectName("btn_W")
         self.btn_list_words.clicked.connect(self.activate_listWords)
         self.layoutAction.addWidget(self.btn_list_words)
+
+    def closeEvent(self, event):
+        self._stop_log_uploader()
+        self._stop_sync_thread()
+        super().closeEvent(event)
 
 
 if __name__ == '__main__':

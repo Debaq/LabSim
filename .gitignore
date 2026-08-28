@@ -37,3 +37,9 @@ src/log_file.txt
 # _panned: palabras panneadas a un solo oido por lib/h_audio.py
 resources/audio/_generated/
 resources/audio/_panned/
+
+# Sesión local de labsim_backend (token del usuario logeado) y cola de logs
+resources/json/session.json
+# **/ y no resources/: LOCAL_LOG_QUEUE en main.py arma la ruta relativa a
+# src/ (via BASE_DIR), no al cwd, así que cae en src/resources/local_cache/
+**/local_cache/

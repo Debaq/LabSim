@@ -28,6 +28,9 @@ class MainLogin(QWidget, Ui_Login):
         self._flag_online = online
         # Inicialización de la ventana y propiedades
         self.setupUi(self)
+        if self._flag_online == "backend":
+            self.Le_name.setPlaceholderText("Usuario admin (vacío si vienes de Moodle)")
+            self.Le_passw.setPlaceholderText("Contraseña, o código de 6 dígitos de Moodle")
         self.btn_login.clicked.connect(self.get)
         self.login_func = LoginConnect()
 
@@ -69,7 +72,9 @@ class MainLogin(QWidget, Ui_Login):
         Return:
             bool: True si hay usuario y contraseña
         """
-        #return True if username.strip() and password.strip() else False
+        code = password.strip()
+        if self._flag_online == "backend" and not username.strip() and code.isdigit() and len(code) == 6:
+            return True  # login de alumno: código de 6 dígitos de Moodle, sin usuario
         return bool(username.strip() and password.strip())
 
     def _disable_widgets(self) -> None:

@@ -236,6 +236,10 @@ class Agenda(QWidget, Ui_Form):
             keys = [k for k, v in rows.items() if v[0] and v[1] and not entry_esta_cancelada(v)]
             if not self._ver_todas:
                 fecha_sel = self.date_selector.date().toString("dd-MM-yy")
+                print(f"[agenda_filter] total_rows={len(rows)} con_fecha_hora={len(keys)} "
+                      f"fecha_sel={fecha_sel!r} ver_todas={self._ver_todas}")
+                for k in keys:
+                    print(f"[agenda_filter]   key={k!r} fecha_fila={rows[k][0]!r} match={rows[k][0] == fecha_sel}")
                 keys = [k for k in keys if rows[k][0] == fecha_sel]
 
         if self._filtro_texto:
