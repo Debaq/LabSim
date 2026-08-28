@@ -58,6 +58,23 @@ def _get_backend_client() -> BackendClient:
     return _backend_client
 
 
+def reset_backend_session() -> None:
+    """Descarta el singleton de BackendClient y los snapshots en memoria.
+
+    func_login.py hace login con una instancia de BackendClient propia
+    (para poder devolver el resultado sync antes de tocar este módulo), así
+    que si ya existía un _backend_client de una sesión anterior (login
+    previo sin pasar por acá, o cambio de usuario), queda con el token
+    viejo en memoria aunque session.json ya tenga el nuevo -- el próximo
+    request pega con el token/rol de la sesión anterior. Llamar esto en
+    cuanto llega un login nuevo fuerza a releer session.json desde cero.
+    """
+    global _backend_client, _shedule_snapshot, _cases_snapshot
+    _backend_client = None
+    _shedule_snapshot = {"agenda_1": {}}
+    _cases_snapshot = {}
+
+
 class CasesOffline():
     """
     Clase para manejar los casos en modo offline.

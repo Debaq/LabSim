@@ -12,7 +12,8 @@ import Z
 from base import context
 from lib.h_win import FrameSubMdi, MdiArea
 from lib.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
-                          marcar_entry_atendiendo, marcar_entry_atendido, entry_esta_cancelada)
+                          marcar_entry_atendiendo, marcar_entry_atendido, entry_esta_cancelada,
+                          reset_backend_session)
 from lib.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min
 from UI.Ui_command_voice_A import Ui_Form as commandVoiceA
 from UI.Ui_CVC import Ui_CVC
@@ -125,6 +126,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if not user:
             self.logout()
         else:
+            reset_backend_session()
             show_hide(self.modules, 0)
             self.lbl_name.setText(f"{user}")
             self.btn_login.setText("Cerrar Sesión")
