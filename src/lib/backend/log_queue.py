@@ -71,6 +71,20 @@ class LocalLogQueue:
             return conn.execute("SELECT COUNT(*) FROM pending_logs").fetchone()[0]
 
 
+_SHARED_QUEUE: "LocalLogQueue | None" = None
+
+
+def get_log_queue() -> "LocalLogQueue":
+    """Cola local compartida (singleton). Usada por los módulos de
+    interacción (Audiometer.py, Z.py) para no depender de un import
+    circular contra main.py -- apunta al mismo sqlite que main.py."""
+    global _SHARED_QUEUE
+    if _SHARED_QUEUE is None:
+        src_dir = Path(__file__).resolve().parents[2]
+        _SHARED_QUEUE = LocalLogQueue(src_dir / 'resources' / 'local_cache' / 'logs.db')
+    return _SHARED_QUEUE
+
+
 class LogUploaderThread(QThread):
     """
     Sube los logs acumulados en lotes (nunca streaming). Si el POST falla
@@ -91,6 +105,12 @@ class LogUploaderThread(QThread):
         while not self.isInterruptionRequested():
             self._flush_once()
             self._wait_interruptible(self._interval_s)
+
+    def flush_now(self) -> None:
+        """Fuerza una subida inmediata (bloqueante) fuera del ciclo normal.
+        Se usa en logout: sin esto el evento de logout queda en la cola
+        local hasta el proximo login, porque el hilo se detiene despues."""
+        self._flush_once()
 
     def _flush_once(self) -> None:
         batch = self._queue.pop_batch(self._batch_size)

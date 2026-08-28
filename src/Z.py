@@ -13,6 +13,7 @@ from datetime import datetime
 import numpy as np
 
 from UI.Ui_Z_control import Ui_Z_control
+from lib.backend.log_queue import get_log_queue
 from lib.ZZscreen import ZZscreen
 from lib.ZRscreen import ZRscreen
 from lib.ZDscreen import ZDscreen
@@ -27,6 +28,8 @@ class ZControl(QWidget, Ui_Z_control):
     def __init__(self,):
         #QWidget.__init__(self)
         super(ZControl, self).__init__()
+        self.log_queue = get_log_queue()
+        self.data = None
         self.setupUi(self)
         self.Z = ZZscreen()
         self.Z_reflex = ZRscreen()
@@ -143,6 +146,15 @@ class ZControl(QWidget, Ui_Z_control):
         self.store_data = [Storage(2), Storage(2)]
         self.new = [True, True]
 
+    def _log(self, action, **payload):
+        """Encola una interacción del alumno en el impedanciómetro (ver
+        lib/backend/log_queue.py): escritura local, se sube al backend
+        en lotes -- no bloquea la UI."""
+        case_id = self.data.get("id") if self.data else None
+        if case_id is not None:
+            payload.setdefault("case_id", case_id)
+        self.log_queue.push(action, payload)
+
     def la_super(self, data):
         if data is None:
             return
@@ -185,6 +197,7 @@ class ZControl(QWidget, Ui_Z_control):
 
     def side_change(self):
         side_text = self.Z.get_side()
+        self._log("z_side_change", side='OI' if side_text == 'OD' else 'OD')
         if side_text == 'OD':
             self.Z.set_side('OI')
         else:
@@ -294,10 +307,12 @@ class ZControl(QWidget, Ui_Z_control):
         else:
             self.direction = 'pos->neg'
             self.Z.set_direction('pos -> neg')
+        self._log("z_direction_change", direction=self.direction)
 
     def height_change(self):
         self.height_idx = (self.height_idx + 1) % len(self.height_values)
         self.Z.set_height(self.height_values[self.height_idx])
+        self._log("z_height_change", height=self.height_values[self.height_idx])
 
     def window_change(self, side):
         if side == 'neg':
@@ -305,8 +320,16 @@ class ZControl(QWidget, Ui_Z_control):
         else:
             self.window_pos_idx = (self.window_pos_idx + 1) % len(self.window_pos_values)
         self.Z.set_window(self.window_neg_values[self.window_neg_idx], self.window_pos_values[self.window_pos_idx])
+        self._log(
+            "z_window_change",
+            side=side,
+            window_neg=self.window_neg_values[self.window_neg_idx],
+            window_pos=self.window_pos_values[self.window_pos_idx],
+        )
 
     def show_screen(self, screen):
+        screen_names = {self.Z: 'tymp', self.Z_reflex: 'reflex', self.Z_decay: 'decay', self.Z_etf: 'etf'}
+        self._log("z_screen_change", screen=screen_names.get(screen, '?'))
         for s in self.screens:
             s.setVisible(s is screen)
         self.current_screen = screen
@@ -335,6 +358,7 @@ class ZControl(QWidget, Ui_Z_control):
 
     def dial_change(self, value):
         if self.current_screen is self.Z:
+            self._log("z_dial_change", screen='tymp', leak=value)
             self.leak_change(value)
         elif self.current_screen in (self.Z_reflex, self.Z_decay):
             value = round(value / 5) * 5
@@ -342,10 +366,12 @@ class ZControl(QWidget, Ui_Z_control):
                 self.dial.blockSignals(True)
                 self.dial.setValue(value)
                 self.dial.blockSignals(False)
+            self._log("z_dial_change", screen='reflex' if self.current_screen is self.Z_reflex else 'decay', dB=value)
             self.dB = value
             self.Z_reflex.set_intensity(self.dB)
             self.Z_decay.set_intensity(self.dB)
         elif self.current_screen is self.Z_etf:
+            self._log("z_dial_change", screen='etf', pressure=value)
             self.etf_pressure = value
             self.Z_etf.set_pressure(self.etf_pressure)
 
@@ -355,6 +381,7 @@ class ZControl(QWidget, Ui_Z_control):
     def set_reflex_mode(self, mode):
         if mode == self.reflex_mode:
             return
+        self._log("z_reflex_mode_change", mode=mode)
         self.reflex_mode = mode
         freqs = self.reflex_freqs_for_mode()
         if self.reflex_freq_idx >= len(freqs):
@@ -374,19 +401,32 @@ class ZControl(QWidget, Ui_Z_control):
         if self.current_screen is self.Z_reflex:
             freqs = self.reflex_freqs_for_mode()
             self.reflex_freq_idx = (self.reflex_freq_idx + 1) % len(freqs)
+            self._log("z_reflex_freq_change", freq=freqs[self.reflex_freq_idx])
             self.Z_reflex.set_freq(freqs[self.reflex_freq_idx])
             self.Z_reflex.clear_response()
         elif self.current_screen is self.Z:
+            self._log("z_move_mark", direction=-1)
             self.move(-1)
 
     def btn2_click(self):
         if self.current_screen is self.Z:
+            self._log("z_move_mark", direction=1)
             self.move(1)
 
     def stimulus_click(self):
         if self.current_screen is self.Z_reflex:
+            freqs = self.reflex_freqs_for_mode()
+            self._log(
+                "z_stimulus_click",
+                screen='reflex',
+                side=self.Z.get_side(),
+                mode=self.reflex_mode,
+                freq=freqs[self.reflex_freq_idx],
+                dB=self.dB,
+            )
             self.reflex_stimulus()
         else:
+            self._log("z_stimulus_click", screen='tymp', side=self.Z.get_side(), leak=self.leak)
             self.timerAnimation()
 
     def reflex_stimulus(self):
@@ -445,6 +485,7 @@ class ZControl(QWidget, Ui_Z_control):
 
     def updown_change(self, delta):
         if self.current_screen in (self.Z_reflex, self.Z_decay):
+            self._log("z_pressure_change", delta=delta)
             self.reflex_pressure = min(max(self.reflex_pressure + delta, -400), 200)
             self.Z_reflex.set_pressure(self.reflex_pressure)
             self.Z_decay.set_pressure(self.reflex_pressure)

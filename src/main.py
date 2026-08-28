@@ -19,7 +19,7 @@ from UI.Ui_CVC import Ui_CVC
 from UI.Ui_Main import Ui_MainWindow
 from Logger import Logger
 from lib.backend.client import BackendClient
-from lib.backend.log_queue import LocalLogQueue, LogUploaderThread
+from lib.backend.log_queue import LogUploaderThread, get_log_queue
 from lib.backend.sync_thread import SyncThread
 
 # Definir la raíz del proyecto
@@ -40,7 +40,7 @@ ONLINE = "development" if Preferences.get("test") else Preferences.get("online")
 # siempre -- escribir en ella es solo un insert sqlite local, nunca toca
 # la red -- pero solo se sube al backend si ONLINE == "backend" (ver
 # MainWindow._data_login). En otros modos simplemente no se vacía nunca.
-LOCAL_LOG_QUEUE = LocalLogQueue(BASE_DIR / 'resources' / 'local_cache' / 'logs.db')
+LOCAL_LOG_QUEUE = get_log_queue()
 sys.stdout = Logger(LOG_FILE, log_queue=LOCAL_LOG_QUEUE)
 
 
@@ -129,6 +129,11 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.lbl_name.setText(f"{user}")
             self.btn_login.setText("Cerrar Sesión")
             self.data_login = data
+            LOCAL_LOG_QUEUE.push("session_login", {
+                "user": data.get("user"),
+                "name": data.get("name"),
+                "permission": data.get("permission"),
+            })
             self.refresh_data()
             self.btns_actions()
             self._start_log_uploader()
@@ -181,9 +186,26 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
     def logout(self):
         """Cierra la sesión actual"""
+        LOCAL_LOG_QUEUE.push("session_logout", {
+            "user": self.data_login.get("user") if self.data_login else None,
+        })
+        if self.log_uploader is not None:
+            # Sube ahora mismo: si esperamos al ciclo normal, este evento
+            # queda en la cola local hasta el próximo login (el hilo se
+            # detiene abajo).
+            self.log_uploader.flush_now()
         self._stop_log_uploader()
         self._stop_sync_thread()
         self._close_sub_windows()
+        login_subw = self.subw.get("LOGIN") if self.subw else None
+        if login_subw is not None:
+            # El login se logueó via toggle_login (btn "Cerrar Sesión"), no
+            # via el btn "Salir" propio de la ventana de login -- por eso
+            # login.py:logout() (que limpia y reactiva los campos) nunca se
+            # ejecuta acá. Sin esto, la próxima vez que se abre la ventana
+            # de login los campos quedan deshabilitados con el usuario
+            # anterior escrito.
+            login_subw.obj._enable_widgets()
         self.lbl_name.setText("")
         self.btn_login.setText("Ingresar")
         self.data_login = None

@@ -20,6 +20,7 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (QApplication, QLabel, QLineEdit, QPlainTextEdit,
                                QTextEdit, QWidget)
 from keyboard_monitor import KeyboardMonitor
+from lib.backend.log_queue import get_log_queue
 from response import ResponseAudiometry as Response
 from UI.Ui_Audiometer import Ui_Audiometer
 
@@ -49,6 +50,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         #super(Audiometer, self).__init__()
         super().__init__()
         self.thr = []
+        self.log_queue = get_log_queue()
         self.response = Response(self)
         #self.response.button.connect(self.respa)
         self.la_super(thr)
@@ -299,6 +301,15 @@ class Audiometer(QWidget, Ui_Audiometer):
     def on_label_text_changed(self, sender):
         self.response.set_config(sender)
 
+    def _log(self, action, **payload):
+        """Encola una interacción del alumno en el audiómetro (ver
+        lib/backend/log_queue.py): escritura local, se sube al backend
+        en lotes -- no bloquea la UI."""
+        case_id = getattr(self, "id", None)
+        if case_id is not None:
+            payload.setdefault("case_id", case_id)
+        self.log_queue.push(action, payload)
+
     def disabled_widgets(self):
         # Disabled BETA
         # self.btn_alternado.setDisabled(True)
@@ -345,6 +356,7 @@ class Audiometer(QWidget, Ui_Audiometer):
             self.activate_response = [1, 0]
 
     def talkback(self):
+        self._log("audio_talkback_press", command=self.state_supra[1] if self.state_supra else None)
         if self.state_supra is not None:
             if self.state_supra[1] != 'pa_pa_pa':
                 self.players.stop_all()
@@ -427,6 +439,17 @@ class Audiometer(QWidget, Ui_Audiometer):
 
     # Reproducir Sonidos
     def Helper_Stim(self, ch, play=True, btnrev=False):
+        if not btnrev:
+            self._log(
+                "audio_stim_button",
+                ch=ch,
+                play=play,
+                freq=self.lbl_freq.text(),
+                intensity=self.lbl_intencity[ch].text(),
+                stim=self.lbl_stim[ch].text(),
+                output=self.lbl_output[ch].text(),
+                trans=self.lbl_trans[ch].text(),
+            )
         no_logo = self.no_Logo(ch)
         no_alternate = self.lbl_contin[0].text() != tone_list[2]
 
@@ -490,7 +513,9 @@ class Audiometer(QWidget, Ui_Audiometer):
         QObject.disconnect(self.btn_stims[ch], None, None, None)
         #self.btn_stims[ch].disconnect()
         #lbl_rev = self.lbl_revers[ch].text()
-        if self.no_Rev(ch):
+        was_rev = self.no_Rev(ch)
+        self._log("audio_reverse_toggle", ch=ch, state=reverse_list[1] if was_rev else reverse_list[0])
+        if was_rev:
             self.lbl_revers[ch].setText(reverse_list[1])
             self.puls_active[ch] = True
 
@@ -612,6 +637,7 @@ class Audiometer(QWidget, Ui_Audiometer):
     # Comandos
     def ext_range(self):
         lbl_ext = self.lbl_ext_ch0.text()
+        self._log("audio_ext_range_toggle", state=lbl_ext != "ext.")
         if lbl_ext == "ext.":
             self.lbl_ext_ch0.setText("")
             #data = {'ext_range': False}
@@ -625,6 +651,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         verify = self.lbl_prueba.text() == test_list[0]
         if verify:
             lbl_hf = self.lbl_ext_ch1.text()
+            self._log("audio_high_frec_toggle", state=lbl_hf != "alt. frec.")
 
             if lbl_hf == "alt. frec.":
                 self.lbl_ext_ch1.setText("")
@@ -637,6 +664,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         ##self.sendData.send(data, online)
 
     def stim(self, ch, stim):
+        self._log("audio_stim_select", ch=ch, stim=stim_list[stim])
         contra = 0 if ch == 1 else 1
             
         inte_ch0 = self.lbl_intencity[ch].text().split(' dB HL')[0]
@@ -729,6 +757,7 @@ class Audiometer(QWidget, Ui_Audiometer):
                     self.trans_btns[ch], self.trans)
 
     def trans(self, ch, trans):
+        self._log("audio_trans_select", ch=ch, trans=trans_list[trans])
         self.lbl_trans[ch].setText(trans_list[trans])
         trans = trans_list.index(self.lbl_trans[ch].text())
         self.trans_idx[ch] = trans
@@ -736,6 +765,7 @@ class Audiometer(QWidget, Ui_Audiometer):
 
     def output(self, ch, out):
         r_output = output_list[out]
+        self._log("audio_output_select", ch=ch, output=r_output)
         self.lbl_output[ch].setText(r_output)
 
         if self.lbl_stim[ch].text() == "Habla":
@@ -774,6 +804,7 @@ class Audiometer(QWidget, Ui_Audiometer):
             new_hz = self.frecuency_list[pos-1]
             fr_pos = pos-1
         #self.response.transmit_(freq=fr_pos)
+        self._log("audio_freq_change", freq=new_hz)
         self.lbl_freq.setText(f"{new_hz} Hz")
         self.lbl_ext_ch0.setText("")
 
@@ -820,6 +851,11 @@ class Audiometer(QWidget, Ui_Audiometer):
         test = self.lbl_prueba.text()
         verify =  test == test_list[1]
         if verify:
+            self._log(
+                "audio_logo_response",
+                correct=plus,
+                intensity=self.lbl_intencity[0].text(),
+            )
             data = self.logo_display()
             count = data[1]+1 if plus else data[1]-1
             count = max(count, 0)
@@ -831,6 +867,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         test = self.lbl_prueba.text()
         verify = test == test_list[1]
         if verify:
+            self._log("audio_logo_reset")
             data = self.logo_display()
             count = 0
             percentage = (100 * count) / data[0]
@@ -853,6 +890,7 @@ class Audiometer(QWidget, Ui_Audiometer):
     def step(self, step=0):
 
         if step > 0:
+            self._log("audio_step_change", step=step)
             self.lbl_step_ch0.setText(f"Pasos: {step} dB ")
             self.lbl_step_ch1.setText(f"Pasos: {step} dB ")
         else:
@@ -905,6 +943,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         else:
             new_int = intency[pos]
         # condicionales para actualizar el display según el dial usado
+        self._log("audio_intensity_change", ch=ch, intensity=new_int, freq=f)
         self.lbl_intencity[ch].setText(f"{new_int} dB HL")
         ch0 = self.lbl_intencity[0].text()
         ch1 = self.lbl_intencity[1].text()
@@ -965,6 +1004,7 @@ class Audiometer(QWidget, Ui_Audiometer):
 
     def alternate_lbl(self):
         if_alternate = self.lbl_contin[0].text()
+        self._log("audio_alternate_toggle", state=not (if_alternate == tone_list[2]))
         if if_alternate == tone_list[2]:
             self.lbl_contin[0].setText(tone_list[0])
             self.lbl_contin[1].setText(tone_list[0])
@@ -1024,6 +1064,7 @@ class Audiometer(QWidget, Ui_Audiometer):
     def pulsatil(self, ch):
         contra = 0 if ch == 1 else 1
         lbl_contra = self.lbl_contin[contra].text()
+        self._log("audio_pulsatil_toggle", ch=ch, state=tone_list[0] if self.if_pulsatil(ch) else tone_list[1])
         if self.if_pulsatil(ch):
             self.lbl_contin[ch].setText(tone_list[0])
         else:
