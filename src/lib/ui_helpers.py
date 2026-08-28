@@ -58,25 +58,20 @@ class MoveWindow():
 
     def set_movewindow(self) -> None:
         """Permite obtener el evento de movimiento de la ventana
-        y llama a la funcion move_window"""
+        y llama a la funcion press_window"""
         self.parent.showMaximized()
-        self.parent.setMouseTracking(True)
-        self.parent.barra.mouseMoveEvent = self.move_window
+        self.parent.barra.mousePressEvent = self.press_window
 
-    def move_window(self, event : QMouseEvent) -> None:
-        """permite mover la ventana con la barra de titulo"""
-        move = False
-        if self.parent.isMaximized(): #Not maximized
-            self.toggle_max_min()
-            move=True
-        if not self.parent.isMaximized(): #Not maximized
-            move = True
-        if move and event.buttons() == Qt.MouseButton.LeftButton:
-            #Move window
-            g_xy = event.globalPosition().toPoint()
-            self.parent.move(g_xy)
+    def press_window(self, event : QMouseEvent) -> None:
+        """Delega el arrastre de la ventana al window manager: este se
+        encarga de restaurar (si estaba maximizada) y seguir el cursor,
+        igual que una barra de titulo nativa"""
+        if event.buttons() == Qt.MouseButton.LeftButton:
+            window = self.parent.windowHandle()
+            if window is not None:
+                window.startSystemMove()
             event.accept()
-            
+
     def toggle_max_min(self):
         if self.parent.isMaximized():
             self.parent.showNormal()
