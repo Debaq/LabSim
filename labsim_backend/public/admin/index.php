@@ -13,6 +13,7 @@ $migrateError = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'migrate') {
     try {
         Db::migrateLtiPlatformsIfNeeded();
+        Db::migrateLtiReplayColumnsIfNeeded();
         $sql = file_get_contents(__DIR__ . '/../../sql/schema.sql');
         $pdo->exec($sql);
         $migrateMessage = 'Schema aplicado correctamente.';

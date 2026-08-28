@@ -108,16 +108,28 @@ final class Lti
     /**
      * Valida el id_token del launch (paso 2 del OIDC) y devuelve los claims.
      * Lanza RuntimeException con un mensaje entendible si algo no calza.
+     *
+     * Si el navegador reenvía el mismo POST (F5, doble clic en el enlace de
+     * vuelta) el state ya fue marcado con un user_id/issued_code por un
+     * launch anterior -- se devuelve ['replay' => true, ...] para que
+     * launch.php reuse/renueve el código en vez de volver a validar el JWT
+     * (que además fallaría: el nonce del id_token ya no calzaría tras un
+     * segundo intento con otro id_token, si Moodle llega a reenviar uno).
      */
     public static function validateLaunch(string $idToken, string $state): array
     {
-        $stmt = Db::get()->prepare('SELECT * FROM lti_states WHERE state = ? AND expires_at > CURRENT_TIMESTAMP');
-        $stmt->execute([$state]);
-        $stateRow = $stmt->fetch();
+        $stateRow = self::findLaunchByState($state);
         if (!$stateRow) {
             throw new RuntimeException('state inválido o expirado');
         }
-        Db::get()->prepare('DELETE FROM lti_states WHERE state = ?')->execute([$state]);
+        if ($stateRow['user_id'] !== null) {
+            return [
+                'replay' => true,
+                'user_id' => (int) $stateRow['user_id'],
+                'issued_code' => $stateRow['issued_code'],
+                'state' => $state,
+            ];
+        }
 
         $stmt = Db::get()->prepare('SELECT * FROM lti_platforms WHERE id = ?');
         $stmt->execute([$stateRow['lti_platform_id']]);
@@ -149,13 +161,19 @@ final class Lti
             throw new RuntimeException('message_type no soportado');
         }
 
-        return ['platform' => $platform, 'claims' => $payload];
+        return ['platform' => $platform, 'claims' => $payload, 'state' => $state];
     }
 
     /**
      * Valida un launch LTI 1.1 (POST directo, firmado OAuth1) y devuelve la
      * plataforma junto con los parámetros. Lanza RuntimeException con un
      * mensaje entendible si algo no calza.
+     *
+     * Mismo replay que validateLaunch() de arriba pero para 1.1: si el
+     * navegador reenvía el mismo POST, el (consumer_key, nonce) ya está
+     * marcado con un user_id/issued_code -- se devuelve ['replay' => true,
+     * ...] en vez de fallar con "nonce reutilizado" al intentar insertarlo
+     * de nuevo.
      */
     public static function validateLaunch11(array $params): array
     {
@@ -168,6 +186,22 @@ final class Lti
             throw new RuntimeException("consumer_key no registrado: {$consumerKey}");
         }
 
+        $nonce = $params['oauth_nonce'] ?? '';
+        if ($nonce === '') {
+            throw new RuntimeException('oauth_nonce faltante');
+        }
+
+        $existing = self::findLaunchByNonce($consumerKey, $nonce);
+        if ($existing !== null && $existing['user_id'] !== null) {
+            return [
+                'replay' => true,
+                'user_id' => (int) $existing['user_id'],
+                'issued_code' => $existing['issued_code'],
+                'consumer_key' => $consumerKey,
+                'nonce' => $nonce,
+            ];
+        }
+
         if (($params['oauth_signature_method'] ?? '') !== 'HMAC-SHA1') {
             throw new RuntimeException('oauth_signature_method no soportado (solo HMAC-SHA1)');
         }
@@ -175,11 +209,9 @@ final class Lti
         if (abs(time() - $timestamp) > 300) {
             throw new RuntimeException('oauth_timestamp fuera de rango');
         }
-        $nonce = $params['oauth_nonce'] ?? '';
-        if ($nonce === '') {
-            throw new RuntimeException('oauth_nonce faltante');
+        if ($existing === null) {
+            self::claimNonce($consumerKey, $nonce);
         }
-        self::consumeNonceOrFail($consumerKey, $nonce);
 
         $url = self::currentUrl();
         if (!OAuth1::verifyRequest($params, 'POST', $url, $platform['shared_secret'])) {
@@ -190,7 +222,7 @@ final class Lti
             throw new RuntimeException('lti_message_type no soportado');
         }
 
-        return ['platform' => $platform, 'params' => $params];
+        return ['platform' => $platform, 'params' => $params, 'consumer_key' => $consumerKey, 'nonce' => $nonce];
     }
 
     /** Crea o actualiza el alumno a partir de los claims de un launch 1.3. */
@@ -241,20 +273,54 @@ final class Lti
         return (int) $pdo->lastInsertId();
     }
 
-    /** Nonce anti-replay OAuth1: falla si ya se vio antes para ese consumer_key. */
-    private static function consumeNonceOrFail(string $consumerKey, string $nonce): void
+    /** Fila de nonce (consumer_key, nonce) ya vista antes, o null si es la primera vez. */
+    public static function findLaunchByNonce(string $consumerKey, string $nonce): ?array
+    {
+        $stmt = Db::get()->prepare('SELECT * FROM lti_oauth_nonces WHERE consumer_key = ? AND nonce = ?');
+        $stmt->execute([$consumerKey, $nonce]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
+    /** Fila de state (LTI 1.3) todavía vigente, o null si no existe/venció. */
+    public static function findLaunchByState(string $state): ?array
+    {
+        $stmt = Db::get()->prepare('SELECT * FROM lti_states WHERE state = ? AND expires_at > CURRENT_TIMESTAMP');
+        $stmt->execute([$state]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
+    /** Marca el nonce de un launch 1.1 con el código emitido, para reconocer un replay después. */
+    public static function markNonceCode(string $consumerKey, string $nonce, int $userId, string $code): void
+    {
+        Db::get()->prepare('UPDATE lti_oauth_nonces SET user_id = ?, issued_code = ? WHERE consumer_key = ? AND nonce = ?')
+            ->execute([$userId, $code, $consumerKey, $nonce]);
+    }
+
+    /** Marca el state de un launch 1.3 con el código emitido, y estira su vencimiento otros 10 min (el alumno sigue con la pestaña abierta refrescando/renovando el código). */
+    public static function markStateCode(string $state, int $userId, string $code): void
+    {
+        Db::get()->prepare(
+            "UPDATE lti_states SET user_id = ?, issued_code = ?, expires_at = datetime(CURRENT_TIMESTAMP, '+10 minutes') WHERE state = ?"
+        )->execute([$userId, $code, $state]);
+    }
+
+    /** Registra un nonce nuevo (primera vez que se ve). */
+    private static function claimNonce(string $consumerKey, string $nonce): void
     {
         $pdo = Db::get();
         try {
             $pdo->prepare('INSERT INTO lti_oauth_nonces (consumer_key, nonce) VALUES (?, ?)')
                 ->execute([$consumerKey, $nonce]);
         } catch (PDOException $e) {
-            // Distingue el choque de PRIMARY KEY (replay real) de cualquier
-            // otro error de SQL (ej. tabla lti_oauth_nonces inexistente si
-            // falta aplicar schema.sql) -- si no, este catch los disfraza
-            // a todos como "replay" y esconde el problema real.
+            // Carrera: dos requests con el mismo nonce llegaron casi a la
+            // vez y ambas pasaron findLaunchByNonce() antes de que la otra
+            // insertara. Extremadamente raro (mismo timestamp+nonce del
+            // mismo launch) -- se ignora, la request que ganó la carrera ya
+            // deja marcado el código en markNonceCode().
             if ($e->getCode() === '23000') {
-                throw new RuntimeException('nonce reutilizado (posible replay)');
+                return;
             }
             throw new RuntimeException('error guardando nonce: ' . $e->getMessage());
         }

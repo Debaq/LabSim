@@ -16,6 +16,7 @@ Auth::requireAdmin();
 
 try {
     Db::migrateLtiPlatformsIfNeeded();
+    Db::migrateLtiReplayColumnsIfNeeded();
     $sql = file_get_contents(__DIR__ . '/../../sql/schema.sql');
     Db::get()->exec($sql);
 } catch (Throwable $e) {

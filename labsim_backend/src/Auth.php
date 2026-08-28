@@ -27,6 +27,42 @@ final class Auth
     }
 
     /**
+     * Código vigente para $userId: si $previousCode sigue sin usarse y no
+     * venció, lo reusa (mismo código en pantalla, no confunde al alumno con
+     * uno nuevo cada vez que recarga); si no, emite uno nuevo. Usado tanto
+     * en el primer launch como al refrescar manualmente o al vencer.
+     */
+    public static function codeForLaunch(int $userId, ?string $previousCode): array
+    {
+        if ($previousCode !== null && self::pairingCodeStillValid($previousCode)) {
+            return ['code' => $previousCode, 'expires_at' => self::pairingCodeExpiry($previousCode), 'renewed' => false];
+        }
+        $code = self::createPairingCode($userId);
+        return ['code' => $code, 'expires_at' => self::pairingCodeExpiry($code), 'renewed' => true];
+    }
+
+    public static function pairingCodeStillValid(string $code): bool
+    {
+        $stmt = Db::get()->prepare('SELECT 1 FROM pairing_codes WHERE code = ? AND used = 0 AND expires_at > CURRENT_TIMESTAMP');
+        $stmt->execute([$code]);
+        return (bool) $stmt->fetch();
+    }
+
+    public static function pairingCodeExpiry(string $code): ?string
+    {
+        $stmt = Db::get()->prepare('SELECT expires_at FROM pairing_codes WHERE code = ?');
+        $stmt->execute([$code]);
+        $value = $stmt->fetchColumn();
+        return $value === false ? null : $value;
+    }
+
+    /** Segundos hasta un datetime de SQLite (UTC, igual que CURRENT_TIMESTAMP) -- nunca negativo. */
+    public static function secondsUntil(string $sqliteDatetime): int
+    {
+        return max(0, (int) strtotime($sqliteDatetime . ' UTC') - time());
+    }
+
+    /**
      * Cambia un código de emparejamiento válido por un token de sesión de la app.
      * Devuelve null si el código no existe, ya se usó o expiró.
      */

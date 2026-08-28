@@ -30,9 +30,15 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_lti_platforms_11
 
 -- Nonces de OAuth1 (launch LTI 1.1), anti-replay. Vida corta: migrate.php
 -- limpia lo viejo de vez en cuando en cada llamada a Lti::validateLaunch11.
+-- user_id/issued_code quedan null hasta que el launch termina de validarse
+-- y emite un código -- si el navegador reenvía el mismo POST (F5), launch.php
+-- usa esas columnas para reconocer el replay y reusar/renovar el código en
+-- vez de fallar con "nonce reutilizado".
 CREATE TABLE IF NOT EXISTS lti_oauth_nonces (
     consumer_key TEXT NOT NULL,
     nonce TEXT NOT NULL,
+    user_id INTEGER REFERENCES users(id),
+    issued_code TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (consumer_key, nonce)
 );
@@ -72,11 +78,16 @@ CREATE TABLE IF NOT EXISTS tokens (
     last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Nonces/state de OIDC (LTI login flow), de vida corta.
+-- Nonces/state de OIDC (LTI login flow), de vida corta. user_id/issued_code
+-- (ver comentario de lti_oauth_nonces arriba) cumplen el mismo rol acá para
+-- el flujo LTI 1.3: reconocer el replay del mismo state/id_token y renovar
+-- expires_at en vez de fallar con "state inválido o expirado".
 CREATE TABLE IF NOT EXISTS lti_states (
     state TEXT PRIMARY KEY,
     nonce TEXT NOT NULL,
     lti_platform_id INTEGER NOT NULL REFERENCES lti_platforms(id),
+    user_id INTEGER REFERENCES users(id),
+    issued_code TEXT,
     expires_at TEXT NOT NULL
 );
 

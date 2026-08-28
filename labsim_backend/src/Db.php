@@ -181,6 +181,30 @@ final class Db
         }
     }
 
+    /**
+     * Agrega user_id/issued_code a lti_states y lti_oauth_nonces si faltan
+     * -- instalaciones de antes de soportar el replay del launch (F5 en la
+     * página de código). CREATE TABLE IF NOT EXISTS de schema.sql no toca
+     * columnas de una tabla que ya existe, por eso el ALTER TABLE acá.
+     */
+    public static function migrateLtiReplayColumnsIfNeeded(): void
+    {
+        $pdo = self::get();
+        self::addColumnIfMissing($pdo, 'lti_states', 'user_id', 'INTEGER REFERENCES users(id)');
+        self::addColumnIfMissing($pdo, 'lti_states', 'issued_code', 'TEXT');
+        self::addColumnIfMissing($pdo, 'lti_oauth_nonces', 'user_id', 'INTEGER REFERENCES users(id)');
+        self::addColumnIfMissing($pdo, 'lti_oauth_nonces', 'issued_code', 'TEXT');
+    }
+
+    private static function addColumnIfMissing(PDO $pdo, string $table, string $column, string $definition): void
+    {
+        $cols = array_column($pdo->query("PRAGMA table_info({$table})")->fetchAll(), 'name');
+        if (in_array($column, $cols, true)) {
+            return;
+        }
+        $pdo->exec("ALTER TABLE {$table} ADD COLUMN {$column} {$definition}");
+    }
+
     private static function anyTableDangling(PDO $pdo): bool
     {
         foreach (['users', 'lti_states', 'tokens', 'pairing_codes', 'attendances', 'action_logs'] as $table) {
