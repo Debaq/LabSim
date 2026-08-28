@@ -672,7 +672,10 @@ class Agenda(QWidget, Ui_Form):
             )
             return
 
-        caso = CasesOffline().get_cases().get(case_id, {})
+        cases = CasesOffline().get_cases()
+        caso = cases.get(case_id, {})
+        print(f"[agenda_ficha] case_id={case_id!r} (type={type(case_id).__name__}) "
+              f"cases_keys_sample={list(cases.keys())[:10]!r} Anamnesis={caso.get('Anamnesis')!r}")
         self._mostrar_dialogo_ficha(row, caso)
 
     def _mostrar_dialogo_ficha(self, row, caso):

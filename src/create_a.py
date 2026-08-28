@@ -167,7 +167,11 @@ class CreateA(QWidget,Ui_generator_audio):
 
     def load_for_edit(self, case_id, agenda_key, agenda_row):
         """Carga un paciente existente en el formulario para verlo/editarlo"""
-        case = CasesOffline().get_cases().get(case_id)
+        cases = CasesOffline().get_cases()
+        case = cases.get(case_id)
+        print(f"[create_a] load_for_edit case_id={case_id!r} (type={type(case_id).__name__}) "
+              f"cases_keys_sample={list(cases.keys())[:10]!r} found={case is not None} "
+              f"Anamnesis={case.get('Anamnesis') if case else None!r}")
         if case is None:
             QMessageBox.warning(self, "Editar paciente", "El caso ya no existe.")
             return
