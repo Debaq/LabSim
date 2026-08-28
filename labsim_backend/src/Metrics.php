@@ -204,6 +204,55 @@ final class Metrics
     }
 
     /**
+     * Cuenta atenciones distintas (case_id/appointment_id únicos, ignora
+     * "modo libre" sin paciente) -- a diferencia de buildSessions(), NO
+     * corta por pausa: un alumno que se queda 10 min pensando con el mismo
+     * paciente sigue siendo UNA atención, no dos. buildSessions() sirve para
+     * el timeline de pausas del admin, no para "cuántos pacientes atendió".
+     */
+    public static function countAttentions(array $decodedLogs): int
+    {
+        return count(self::attentionKeys($decodedLogs));
+    }
+
+    /** Atenciones distintas agrupadas por semana ISO -- mismo criterio que countAttentions(). */
+    public static function attentionsByWeek(array $decodedLogs): array
+    {
+        $weeks = [];
+        foreach ($decodedLogs as $log) {
+            if (!($log['con_paciente'] ?? false)) {
+                continue;
+            }
+            $ts = strtotime((string) $log['client_ts']) ?: 0;
+            $week = date('o-\WW', $ts);
+            $weeks[$week][self::attentionKey($log)] = true;
+        }
+        ksort($weeks);
+        $out = [];
+        foreach ($weeks as $week => $set) {
+            $out[$week] = count($set);
+        }
+        return $out;
+    }
+
+    private static function attentionKey(array $log): string
+    {
+        return ($log['case_id'] ?? '') . '|' . ($log['appointment_id'] ?? '');
+    }
+
+    private static function attentionKeys(array $decodedLogs): array
+    {
+        $keys = [];
+        foreach ($decodedLogs as $log) {
+            if (!($log['con_paciente'] ?? false)) {
+                continue;
+            }
+            $keys[self::attentionKey($log)] = true;
+        }
+        return $keys;
+    }
+
+    /**
      * Sesiones agrupadas por semana ISO (lunes a domingo) -- para ver
      * evolución en el semestre: ¿el delta promedio baja con las semanas?
      */

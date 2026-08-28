@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../../src/Metrics.php';
 
 /**
  * Un JSON crudo de error acá lo ve el alumno en el navegador (esta página
@@ -76,6 +77,95 @@ if ($issued['renewed']) {
 $code = $issued['code'];
 $expiresIn = Auth::secondsUntil($issued['expires_at']);
 
+// Docente/admin promovido a mano desde el panel (ver admin/users.php) --
+// LTI siempre crea la cuenta como role='student', así que esto solo es
+// true si un admin ya lo ascendió antes de este launch. Se abre sesión de
+// portal acá mismo porque el launch LTI ya autenticó al usuario; no tiene
+// contraseña de portal para hacer login normal.
+$stmt = Db::get()->prepare("SELECT role, permission, active FROM users WHERE id = ?");
+$stmt->execute([$userId]);
+$userRow = $stmt->fetch();
+$isPortalUser = $userRow && $userRow['role'] === 'admin' && (int) $userRow['active'] === 1;
+// index.php exige admin completo (777) -- gestión de schema/usuarios/LTI,
+// no es para docente. Docente (555) entra a dashboard.php, que sí acepta
+// requireAdminSession() sin el nivel completo (ver Auth::requireFullAdminSession).
+$portalUrl = $isPortalUser && (int) $userRow['permission'] === Auth::PERMISSION_ADMIN
+    ? '../admin/index.php'
+    : '../admin/dashboard.php';
+if ($isPortalUser) {
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+    $_SESSION['admin_user_id'] = $userId;
+}
+
+// Stats embebidas en la misma pantalla del código (el docente/alumno no
+// entra a la plataforma para verlas -- ver dashboard.php para el detalle
+// completo por sesión, esto es solo el resumen a simple vista).
+if ($isPortalUser) {
+    // Docente/admin: agregado de todos los alumnos (mismo criterio sin
+    // filtro que dashboard.php -- no hay noción de "curso" en el schema,
+    // cada instalación de LabSim es de un solo cliente/institución).
+    // Un ranking top-10 no le dice al docente qué hacer -- lo accionable es
+    // quién no ha partido, cómo va la participación general, y si la
+    // actividad se frenó últimamente.
+    $allStudents = Db::get()->query("SELECT id, display_name FROM users WHERE role = 'student' AND active = 1")->fetchAll();
+    $totalStudents = count($allStudents);
+
+    $rows = Db::get()->query(
+        "SELECT al.* FROM action_logs al JOIN users u ON u.id = al.user_id WHERE u.role = 'student' ORDER BY al.id"
+    )->fetchAll();
+    $logsByUser = [];
+    foreach (Metrics::decodeLogs($rows) as $log) {
+        $logsByUser[(int) $log['user_id']][] = $log;
+    }
+
+    $noActivity = [];
+    $totalAttentions = 0;
+    $activeStudents = 0;
+    foreach ($allStudents as $s) {
+        $n = Metrics::countAttentions($logsByUser[(int) $s['id']] ?? []);
+        if ($n === 0) {
+            $noActivity[] = $s['display_name'];
+        } else {
+            $activeStudents++;
+            $totalAttentions += $n;
+        }
+    }
+    $avgAttentions = $activeStudents > 0 ? round($totalAttentions / $activeStudents, 1) : 0;
+
+    // Últimos 7 días vs los 7 anteriores -- ¿la actividad se frenó? La clave
+    // incluye user_id: la agenda es cola compartida, distintos alumnos
+    // pueden atender la misma cita, cada uno cuenta su propia atención.
+    $recentCutoff = time() - 7 * 86400;
+    $priorCutoff = time() - 14 * 86400;
+    $recentSet = [];
+    $priorSet = [];
+    foreach ($logsByUser as $uid => $logsForUser) {
+        foreach ($logsForUser as $log) {
+            if (!($log['con_paciente'] ?? false)) {
+                continue;
+            }
+            $ts = strtotime((string) $log['client_ts']) ?: 0;
+            $key = $uid . '|' . ($log['case_id'] ?? '') . '|' . ($log['appointment_id'] ?? '');
+            if ($ts >= $recentCutoff) {
+                $recentSet[$key] = true;
+            } elseif ($ts >= $priorCutoff) {
+                $priorSet[$key] = true;
+            }
+        }
+    }
+    $recentAttentions = count($recentSet);
+    $priorAttentions = count($priorSet);
+} else {
+    $stmt = Db::get()->prepare('SELECT * FROM action_logs WHERE user_id = ? ORDER BY id');
+    $stmt->execute([$userId]);
+    $myLogs = Metrics::decodeLogs($stmt->fetchAll());
+    $mySummary = Metrics::summarizeSessions(Metrics::buildSessions($myLogs));
+    $myAttentions = Metrics::countAttentions($myLogs);
+    $myWeeks = Metrics::attentionsByWeek($myLogs);
+}
+
 header('Content-Type: text/html; charset=utf-8');
 ?>
 <!doctype html>
@@ -89,6 +179,12 @@ header('Content-Type: text/html; charset=utf-8');
     .countdown.low { color: #c00; font-weight: bold; }
     button { font-size: 1rem; padding: 0.6rem 1.4rem; margin-top: 1.5rem; cursor: pointer; }
     .status { min-height: 1.2em; color: #555; }
+    .stats { margin-top: 2.5rem; text-align: left; max-width: 560px; margin-left: auto; margin-right: auto; }
+    .stats h2 { font-size: 1.1rem; text-align: center; }
+    .stats-summary, .stats-caption { text-align: center; color: #555; font-size: 0.9rem; }
+    .stats-empty { text-align: center; color: #888; font-size: 0.9rem; }
+    .chart-wrap { max-height: 320px; margin-top: 0.5rem; }
+    .no-activity-list { columns: 2; column-gap: 1.5rem; font-size: 0.9rem; margin: 0.3rem 0; padding-left: 1.2rem; }
 </style>
 </head>
 <body>
@@ -97,8 +193,84 @@ header('Content-Type: text/html; charset=utf-8');
     <p class="code" id="code"><?= htmlspecialchars($code) ?></p>
     <p>Vence en <span id="countdown" class="countdown"><?= $expiresIn ?></span> segundos.</p>
     <button id="refresh" type="button">Generar código nuevo</button>
+    <?php if ($isPortalUser): ?>
+        <a href="<?= htmlspecialchars($portalUrl) ?>" target="_blank" rel="noopener"><button type="button">Ir a plataforma</button></a>
+    <?php endif; ?>
     <p class="status" id="status"></p>
+
+    <div class="stats">
+        <?php if ($isPortalUser): ?>
+            <h2>Actividad de los alumnos</h2>
+            <?php if ($totalStudents === 0): ?>
+                <p class="stats-empty">Todavía no hay alumnos registrados.</p>
+            <?php else: ?>
+                <p class="stats-summary">
+                    <?= $activeStudents ?>/<?= $totalStudents ?> alumnos con al menos un paciente atendido
+                    <?php if ($activeStudents > 0): ?>
+                        · promedio <?= $avgAttentions ?> pacientes por alumno activo
+                    <?php endif; ?>
+                </p>
+                <p class="stats-summary">
+                    <?= $recentAttentions ?> atenciones en los últimos 7 días
+                    <?php if ($priorAttentions > 0): ?>
+                        (<?= $recentAttentions >= $priorAttentions ? '+' : '' ?><?= $recentAttentions - $priorAttentions ?> vs los 7 anteriores)
+                    <?php elseif ($recentAttentions === 0): ?>
+                        · sin actividad esta semana
+                    <?php endif; ?>
+                </p>
+                <?php if ($noActivity): ?>
+                    <p class="stats-caption">Alumnos sin ningún paciente atendido todavía:</p>
+                    <ul class="no-activity-list">
+                        <?php foreach (array_slice($noActivity, 0, 15) as $name): ?>
+                            <li><?= htmlspecialchars($name) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <?php if (count($noActivity) > 15): ?>
+                        <p class="stats-caption">+<?= count($noActivity) - 15 ?> más</p>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <p class="stats-empty">Todos los alumnos han atendido al menos un paciente.</p>
+                <?php endif; ?>
+            <?php endif; ?>
+        <?php elseif ($myAttentions > 0): ?>
+            <h2>Tu actividad</h2>
+            <p class="stats-summary">
+                <?= $myAttentions ?> paciente<?= $myAttentions === 1 ? '' : 's' ?> atendido<?= $myAttentions === 1 ? '' : 's' ?> · <?= round($mySummary['total_duration_s'] / 60, 1) ?> min en total
+                <?php if ($mySummary['avg_delta_s'] !== null): ?>
+                    · <?= $mySummary['avg_delta_s'] ?>s promedio entre acciones
+                <?php endif; ?>
+            </p>
+            <p class="stats-caption">Pacientes atendidos por semana</p>
+            <div class="chart-wrap"><canvas id="statsChart"></canvas></div>
+        <?php endif; ?>
+    </div>
+
+    <?php if (!$isPortalUser && $myAttentions > 0): ?>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <?php endif; ?>
     <script>
+    <?php if (!$isPortalUser && $myAttentions > 0): ?>
+    (function () {
+        var statsCanvas = document.getElementById('statsChart');
+        if (statsCanvas && window.Chart) {
+            new Chart(statsCanvas, {
+                type: 'bar',
+                data: {
+                    labels: <?= json_encode(array_keys($myWeeks)) ?>,
+                    datasets: [{
+                        label: 'Pacientes atendidos',
+                        data: <?= json_encode(array_values($myWeeks)) ?>,
+                        backgroundColor: '#4a7dbd'
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                }
+            });
+        }
+    })();
+    <?php endif; ?>
     (function () {
         var KEY = <?= json_encode($refreshKey) ?>;
         var remaining = <?= $expiresIn ?>;
