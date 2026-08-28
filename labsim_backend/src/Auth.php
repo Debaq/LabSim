@@ -93,6 +93,41 @@ final class Auth
     }
 
     /**
+     * Token de un solo uso para el handoff al portal admin/docente desde el
+     * launch LTI -- launch.php corre dentro del iframe de Moodle (cookie de
+     * tercero, muchos navegadores hoy la descartan) así que NO se puede
+     * confiar en levantar la sesión de portal ahí mismo; en cambio se abre
+     * una pestaña nueva a admin/sso.php?token=... que sí es un request de
+     * primer partido y puede levantar la cookie de sesión sin problema.
+     * Vida corta (60s) y de un solo uso -- no es para reusar, solo para el
+     * primer request de esa pestaña.
+     */
+    public static function issuePortalSsoToken(int $userId): string
+    {
+        $token = bin2hex(random_bytes(32));
+        Db::get()->prepare(
+            "INSERT INTO portal_sso_tokens (token, user_id, expires_at) VALUES (?, ?, datetime(CURRENT_TIMESTAMP, '+60 seconds'))"
+        )->execute([$token, $userId]);
+        return $token;
+    }
+
+    /** Canjea un token de issuePortalSsoToken(): user_id si es válido (sin usar, sin vencer), o null. */
+    public static function consumePortalSsoToken(string $token): ?int
+    {
+        $pdo = Db::get();
+        $stmt = $pdo->prepare(
+            'SELECT user_id FROM portal_sso_tokens WHERE token = ? AND used = 0 AND expires_at > CURRENT_TIMESTAMP'
+        );
+        $stmt->execute([$token]);
+        $userId = $stmt->fetchColumn();
+        if ($userId === false) {
+            return null;
+        }
+        $pdo->prepare('UPDATE portal_sso_tokens SET used = 1 WHERE token = ?')->execute([$token]);
+        return (int) $userId;
+    }
+
+    /**
      * Login local usuario/contraseña. Los alumnos normalmente entran por
      * LTI (sin password_hash), pero una cuenta local puede tener cualquier
      * rol -- por ejemplo un alumno de prueba para probar el flujo de

@@ -69,6 +69,18 @@ CREATE TABLE IF NOT EXISTS pairing_codes (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Token de un solo uso para el handoff desde el launch LTI (dentro del
+-- iframe de Moodle, cookie de tercero) hacia el portal admin/docente
+-- (pestaña nueva, primer partido) -- ver Auth::issuePortalSsoToken() y
+-- admin/sso.php. Vida corta (60s), un solo uso.
+CREATE TABLE IF NOT EXISTS portal_sso_tokens (
+    token TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    expires_at TEXT NOT NULL,
+    used INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Tokens de sesión de la app (bearer opaco, revocable). Reemplaza JWT del
 -- lado app<->backend: más simple de invalidar desde el panel admin.
 CREATE TABLE IF NOT EXISTS tokens (

@@ -82,22 +82,17 @@ $expiresIn = Auth::secondsUntil($issued['expires_at']);
 // true si un admin ya lo ascendió antes de este launch. Se abre sesión de
 // portal acá mismo porque el launch LTI ya autenticó al usuario; no tiene
 // contraseña de portal para hacer login normal.
-$stmt = Db::get()->prepare("SELECT role, permission, active FROM users WHERE id = ?");
+$stmt = Db::get()->prepare("SELECT role, active FROM users WHERE id = ?");
 $stmt->execute([$userId]);
 $userRow = $stmt->fetch();
 $isPortalUser = $userRow && $userRow['role'] === 'admin' && (int) $userRow['active'] === 1;
-// index.php exige admin completo (777) -- gestión de schema/usuarios/LTI,
-// no es para docente. Docente (555) entra a dashboard.php, que sí acepta
-// requireAdminSession() sin el nivel completo (ver Auth::requireFullAdminSession).
-$portalUrl = $isPortalUser && (int) $userRow['permission'] === Auth::PERMISSION_ADMIN
-    ? '../admin/index.php'
-    : '../admin/dashboard.php';
-if ($isPortalUser) {
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-        session_start();
-    }
-    $_SESSION['admin_user_id'] = $userId;
-}
+// launch.php corre dentro del iframe de Moodle -- cookie de tercero, no
+// sirve para levantar la sesión de portal ahí mismo (varios navegadores la
+// descartan). El botón manda a admin/sso.php, que canjea este token de un
+// solo uso en una pestaña nueva (primer partido) y ahí sí levanta la sesión.
+$portalUrl = $isPortalUser
+    ? '../admin/sso.php?token=' . urlencode(Auth::issuePortalSsoToken($userId))
+    : null;
 
 // Stats embebidas en la misma pantalla del código (el docente/alumno no
 // entra a la plataforma para verlas -- ver dashboard.php para el detalle
