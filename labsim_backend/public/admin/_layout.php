@@ -40,10 +40,15 @@ function admin_header(string $title, ?array $currentUser = null): void
 <header>
     <div>
         <span class="brand">LabSim Admin</span>
+        <?php if ($currentUser && (int) $currentUser['permission'] === Auth::PERMISSION_ADMIN): ?>
         <a href="index.php">Estado</a>
         <a href="users.php">Usuarios</a>
-        <a href="agenda.php">Agenda</a>
+        <?php endif; ?>
+        <a href="agenda.php">Fichas Clínicas</a>
+        <a href="dashboard.php">Dashboard</a>
+        <?php if ($currentUser && (int) $currentUser['permission'] === Auth::PERMISSION_ADMIN): ?>
         <a href="lti.php">LTI</a>
+        <?php endif; ?>
     </div>
     <div>
         <?php if ($currentUser): ?>

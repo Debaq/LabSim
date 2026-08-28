@@ -5,7 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 
-$me = Auth::requireAdminSession();
+$me = Auth::requireFullAdminSession();
 $pdo = Db::get();
 
 $migrateMessage = null;
@@ -69,7 +69,7 @@ admin_header('Estado del backend', $me);
 </div>
 <div class="card">
     <p>Gestión de usuarios (alumnos de prueba, admins) en <a href="users.php">Usuarios</a> -- pincha un alumno para ver sus métricas.</p>
-    <p>Agendar, cancelar y eliminar casos/citas en <a href="agenda.php">Agenda</a>.</p>
+    <p>Agendar, cancelar y eliminar casos/citas en <a href="agenda.php">Fichas Clínicas</a>.</p>
     <p>Registrar Moodle como plataforma LTI y ver las URLs que necesita en <a href="lti.php">LTI</a>.</p>
 </div>
 <?php

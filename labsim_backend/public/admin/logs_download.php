@@ -12,7 +12,9 @@ $me = Auth::requireAdminSession();
 $pdo = Db::get();
 
 $studentId = (int) ($_GET['id'] ?? 0);
-$stmt = $pdo->prepare("SELECT username FROM users WHERE id = ? AND role = 'student'");
+// Sin filtro de role: mismo motivo que student.php -- un cambio de rol
+// posterior no debería tapar el registro histórico.
+$stmt = $pdo->prepare('SELECT username FROM users WHERE id = ?');
 $stmt->execute([$studentId]);
 $student = $stmt->fetch();
 
