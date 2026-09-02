@@ -17,7 +17,7 @@
     "AGENDA": [false, "Agenda", 13, [true, true], [900,400], "pre"],
     "CREATE_A":[false, "Nuevo Usuario", 14, [true, true], [900,650], "pre"],
     "CHAT": [false, "Hablar con el paciente", 15, [true, true], [480, 280], "pre"],
-    "AC": [false, "Acumetría", 16, [true, true], [420, 320], "pre"]
+    "AC": [false, "Acumetría", 16, [true, true], [480, 420], "pre"]
 
   },
   "SECTORS": {
