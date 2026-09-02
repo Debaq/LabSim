@@ -16,9 +16,8 @@
     "CVC": [false, "Campo Visual Computarizado", 12, [true, true], [420, 200],"pre"],
     "AGENDA": [false, "Agenda", 13, [true, true], [900,400], "pre"],
     "CREATE_A":[false, "Nuevo Usuario", 14, [true, true], [900,650], "pre"],
-    "CHAT": [false, "Hablar con el paciente", 15, [true, true], [480, 280], "pre"]
-
-   
+    "CHAT": [false, "Hablar con el paciente", 15, [true, true], [480, 280], "pre"],
+    "AC": [false, "Acumetría", 16, [true, true], [420, 320], "pre"]
 
   },
   "SECTORS": {
@@ -31,7 +30,7 @@
   },
   "BOXS": {
     "sala_espera": [true,["AGENDA"], "Sala de Espera"],
-    "Box_1": [true,["A", "Z"], "Box Audiología"],
+    "Box_1": [true,["AC", "A", "Z"], "Box Audiología"],
     "Box_2": [true,["ABR", "VEMP", "EOAS"], "Box Electrofisiología"],
     "Box_3": [true,["VNG", "VHIT", "POS"], "Box Otoneurología"],
     "Box_4": [true,["CVC"], "Box campimetría"]

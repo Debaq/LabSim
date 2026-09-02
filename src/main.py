@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox
 
 from agenda import Agenda, create_a
 from agenda.Agenda import ChatPacienteWidget
-from audiometria import Audiometer, ListWords
+from audiometria import Acumetria, Audiometer, ListWords
 from auth import login as Ui_login
 from impedanciometria import Z
 from core.base import context
@@ -239,7 +239,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         login_subw = self.subw.get("LOGIN") if self.subw else None
         self.subw = {"LOGIN": login_subw} if login_subw else None
 
-        for attr in ("subw_a", "subw_w", "subw_z"):
+        for attr in ("subw_a", "subw_w", "subw_z", "subw_ac"):
             if hasattr(self, attr):
                 delattr(self, attr)
 
@@ -360,7 +360,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Carga self.data_current en los módulos ya construidos, o los
         deshidrata (data_current=None) para que dejen de loguear acciones
         bajo el caso/paciente ya cerrado."""
-        for attr in ("subw_a", "subw_z", "subw_w"):
+        for attr in ("subw_a", "subw_z", "subw_w", "subw_ac"):
             try:
                 getattr(self, attr).obj.la_super(self.data_current, self.data_current_key)
             except AttributeError:
@@ -369,6 +369,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def load_sub_windows(self):
         """Carga las subventanas"""
         self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data_current))
+        self.subw_ac = FrameSubMdi(Acumetria.Acumetria(self.data_current))
         subw_agenda = FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self))
         subw_voice = FrameSubMdi(ComandVoiceA())
         subw_chat = FrameSubMdi(ChatPacienteWidget(self.data_login.get("name")))
@@ -380,6 +381,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.subw["CREATE_A"] = subw_create_a
 
         self.subw["A"] = self.subw_a
+        self.subw["AC"] = self.subw_ac
         self.subw["AGENDA"] = subw_agenda
         self.subw["CVOICE"] = subw_voice
         self.subw["CHAT"] = subw_chat
