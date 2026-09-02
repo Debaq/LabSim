@@ -113,16 +113,51 @@ class CalculateLogo():
 
 
     
-    def get(self, side, mkg, intensity):
-        _mayor = 0 if self.sdt[0] > self.sdt[1] else 1
-        _minor = 1 if _mayor == 0 else 0
-        contra = 1 if side == 0 else 0
-        #estoy en el oído con sdt mayor?
-        #este umd es 45db mayor que el sdt o las oseas?
-        #_need_mkg = True if _minor + 45 < 
+    def get(self, side, mkg, intensity, int_mkg=None):
+        """
+        Devuelve el % de discriminacion que responde el paciente simulado.
 
-        if not mkg:
-            return self.data
+        Mismo modelo de rango [mkg_min, mkg_max] que el resto del sistema
+        (ver response.py _resolve_sdt_threshold): dentro del rango, el
+        oido estudiado responde con su propia curva; sobre el maximo esta
+        sobre-enmascarado (no discrimina nada util); bajo el minimo (o sin
+        activar el ruido) el paciente en realidad esta discriminando con el
+        oido contrario a traves del cruce interaural -> curva sombra.
+        """
+        other = 1 - side
+        rango = self._masking_range(side, other, intensity)
+        int_mkg = int_mkg if (mkg and int_mkg is not None) else 0
+
+        if rango['mkg_min'] <= int_mkg <= rango['mkg_max']:
+            return self.data[side][str(intensity)]
+        elif int_mkg > rango['mkg_max']:
+            return 0
         else:
-            return self.data
-    
+            shadow_intensity = self._clamp_scale(intensity - self.logo_attenuation)
+            return self.data[other][str(shadow_intensity)]
+
+    def _masking_range(self, side, other, intensity):
+        sdt = self.thr.get('SDT', self.sdt)
+        bone = self._bone_sdt()
+        at = self.logo_attenuation
+        uane = sdt[other]
+        uoe = bone[side]
+        uone = bone[other]
+        mkg_min = intensity - at - uone + uane
+        mkg_max = at + uoe
+        mkg_lo, mkg_hi = sorted([mkg_min, mkg_max])
+        return {'mkg_min': mkg_lo, 'mkg_max': mkg_hi}
+
+    def _bone_sdt(self):
+        # Promedio de Fletcher (mejores 2 de 500/1000/2000Hz) sobre Osea_mkg,
+        # igual criterio que response.py:calc_sdt.
+        sublista = self.thr['Osea_mkg'][2:5]
+        minimos_a = sorted(item[0] for item in sublista)[:2]
+        minimos_b = sorted(item[1] for item in sublista)[:2]
+        a = (sum(minimos_a) / len(minimos_a) // 5) * 5
+        b = (sum(minimos_b) / len(minimos_b) // 5) * 5
+        return [a, b]
+
+    def _clamp_scale(self, value):
+        value = max(0, min(100, value))
+        return int(value // 5 * 5)

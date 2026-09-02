@@ -159,10 +159,12 @@ class ResponseAudiometry():
                 stim_on = self.data['audio']['stimOn'].index(True)
                 #verifica si es habla o ruido
                 if self.data['audio']['stim'][stim_on] == 2: #si es habla el oido que se estimula
-                    sdt = self.dbdata['SDT'] #umbral guardado en el perfil del paciente
                     output = self.data['audio']['output'][stim_on] #derecho o izquierdo
+                    o_n = int(not output)
                     int_ = self.data['audio']['int'][stim_on]
-                    verify = int_ >= sdt[output]
+                    # sin canal de mkg -> ruido en 0 (curva sombra si hacia falta enmascarar)
+                    threshold = self._resolve_sdt_threshold(output, o_n, int_, 0)
+                    verify = int_ >= threshold
                     if verify:
                         self.upHand()
                     else:
@@ -194,12 +196,26 @@ class ResponseAudiometry():
         o_e = output[ch_habla] #oido estudiado
         o_n = output[ch_mkg]   #oido enmascarado
 
+        int_ = self.data['audio']['int'][ch_habla]
+        int_mkg = self.data['audio']['int'][ch_mkg]
+
+        threshold = self._resolve_sdt_threshold(o_e, o_n, int_, int_mkg)
+
+        if threshold <= int_:
+            self.upHand()
+        else:
+            self.downHand()
+
+    def _resolve_sdt_threshold(self, o_e, o_n, int_, int_mkg):
+        """
+        Igual que _resolve_masked_threshold pero para logoaudiometria: el
+        rango de mkg depende de la intensidad del estimulo (int_), no solo
+        del oido/frecuencia, por eso no usa _masking_calc.
+        """
         sdt = self.dbdata['SDT'] #umbral guardado en el perfil del paciente
         sdt_osea = self.calc_sdt(self.dbdata['Osea_mkg'])
 
         at = 45
-        int_ = self.data['audio']['int'][ch_habla]
-        int_mkg = self.data['audio']['int'][ch_mkg]
         uae = sdt[o_e]
         uane = sdt[o_n]
         uoe = sdt_osea[o_e]
@@ -207,14 +223,14 @@ class ResponseAudiometry():
 
         mkg_min = int_ - at - uone + uane
         mkg_max = at + uoe
-        mkg = sorted([mkg_min, mkg_max])
+        mkg_lo, mkg_hi = sorted([mkg_min, mkg_max])
 
-        threshold = 130 if int_mkg > mkg[1] else uae
-
-        if threshold <= int_:
-            self.upHand()
+        if mkg_lo <= int_mkg <= mkg_hi:
+            return uae
+        elif int_mkg > mkg_hi:
+            return 130
         else:
-            self.downHand()
+            return min(uae, at + uone)
 
     def calc_sdt(self, lista):
         # Promedio de Fletcher: mejores 2 de 500/1000/2000 Hz (indices 2,3,4)
@@ -318,11 +334,61 @@ class ResponseAudiometry():
                     self.other_response.create_voice_('si')
 
 
+    def _masking_calc(self, via, frecuency, o_e, o_n):
+        """
+        Rango [mkg_min, mkg_max] de ruido de enmascaramiento valido y umbral
+        aparente resultante en cada zona:
+        - dentro del rango: umbral real del oido estudiado (bien enmascarado)
+        - sobre mkg_max: sobre-enmascarado, no responde (130)
+        - bajo mkg_min: sub-enmascarado / sin enmascarar -> "curva sombra":
+          el paciente responde por cruce hacia el oido NO estudiado, no por
+          su propio umbral real.
+
+        En via osea la atenuacion interaural clinica es ~0dB (a diferencia
+        de la via aerea, 35-50dB segun frecuencia), por eso no se usa
+        self.attenuations aqui.
+        """
+        ce = 0
+        if via == 'aerea':
+            uae = self.dbdata['Aerea_mkg'][frecuency][o_e]
+            uane = self.dbdata['Aerea_mkg'][frecuency][o_n]
+            uoe = self.dbdata['Osea_mkg'][frecuency][o_e]
+            uone = self.dbdata['Osea_mkg'][frecuency][o_n]
+            at = self.attenuations[frecuency]
+            mkg_min = uae - at - uone + uane + ce
+            mkg_max = uoe + at
+            real = uae
+            shadow = min(uae, at + uone)
+        elif via == 'osea':
+            uoe = self.dbdata['Osea_mkg'][frecuency][o_e]
+            uone = self.dbdata['Osea_mkg'][frecuency][o_n]
+            uane = self.dbdata['Aerea_mkg'][frecuency][o_n]
+            at = 0
+            eo = self.oclusive_efect(frecuency, o_e)
+            mkg_min = uoe - uone + uane + ce + eo
+            mkg_max = uoe + at
+            real = uoe
+            shadow = min(uoe, uone + at)
+        else:
+            raise ValueError(f"via desconocida: {via}")
+
+        mkg_lo, mkg_hi = sorted([mkg_min, mkg_max])
+        return {'mkg_min': mkg_lo, 'mkg_max': mkg_hi, 'real': real, 'shadow': shadow}
+
+    def _resolve_masked_threshold(self, via, frecuency, o_e, o_n, int_mkg):
+        calc = self._masking_calc(via, frecuency, o_e, o_n)
+        if calc['mkg_min'] <= int_mkg <= calc['mkg_max']:
+            return calc['real']
+        elif int_mkg > calc['mkg_max']:
+            return 130
+        else:
+            return calc['shadow']
+
     def response_aerea_w_msk(self):
         """
         minimo: UAE - AT - UONE + UANE + CE
         maximo: UOE + AT
-        
+
         donde:
         UAE: umbral aereo estudiado
         AT: Atenuación interaural
@@ -341,34 +407,13 @@ class ResponseAudiometry():
                         if self.data['audio']['trans'] == [0,0]:
                             o_e = 0 if self.data['audio']['output'][0] == 0 else 1
                             o_n = int(not o_e)
-                            ch_tone = 0 if self.data['audio']['stim'][0] == 0 else 1   
-                            ch_mkg = int(not ch_tone)                        
+                            ch_tone = 0 if self.data['audio']['stim'][0] == 0 else 1
+                            ch_mkg = int(not ch_tone)
                             print(f"estudio el {o_e} y enmascaro el {o_n}")
-                            trans = self.data['audio']['trans'][o_e]
-                            trans = 'Aerea' if trans == 0 else 'Osea'
                             frecuency = self.data['audio']['freq'] #indice
-                            int_ = self.data['audio']['int'][ch_tone] 
+                            int_ = self.data['audio']['int'][ch_tone]
                             int_mkg = self.data['audio']['int'][ch_mkg]
-                            uae = self.dbdata[trans][frecuency][o_e]
-                            uane = self.dbdata[trans][frecuency][o_n]
-                            ce = 0
-                            at = self.attenuations[frecuency]
-                            uone = self.dbdata['Osea_mkg'][frecuency][o_n]
-                            uoe = self.dbdata['Osea_mkg'][frecuency][o_e]
-                            mkg_min = uae - at - uone + uane + ce
-                            print(f"se calcula el minimo : {uae} - {at} - {uone} + {uane} + {ce}")
-                            mkg_max = uoe + at
-                            mkg = [mkg_min, mkg_max]
-                            mkg.sort()
-                            print(f"minimo y maximo{mkg}, la intensidad del mkg es:{int_mkg}")
-                            if mkg[0] <= int_mkg <= mkg[1]:
-                                threshold = self.dbdata['Aerea_mkg'][frecuency][o_e]
-                                
-                            else:
-                                if int_mkg > mkg[1]:
-                                    threshold = 130
-                                if int_mkg < mkg[0]:
-                                    threshold = uae
+                            threshold = self._resolve_masked_threshold('aerea', frecuency, o_e, o_n, int_mkg)
 
                             if threshold <= int_:
                                 self.upHand()
@@ -378,7 +423,7 @@ class ResponseAudiometry():
 
                 #print(self.data)
 
-                
+
     def response_osea_w_msk(self):
         """
         minimo:
@@ -392,7 +437,7 @@ class ResponseAudiometry():
         UANOE: umbral aereo no estudiado
         CE: coeficiente de enmascaramiento
         EO: efecto de oclusión
-        At: atenuación interaural
+        At: atenuación interaural (~0 en via osea)
         """
         if self.data['audio']['test'] == 'Umbrales':
             if self.data['audio']['stimOn'].count(True) == 2:
@@ -402,30 +447,12 @@ class ResponseAudiometry():
                     o_e = 0 if self.data['audio']['output'][0] == 0 else 1 #solución parche ya que supone que el oido estudiado es el ch 0
                     o_n = int(not o_e)
                     ch_tone = 0 if self.data['audio']['stim'][0] == 0 else 1   #aca se generaria un problema de inmediato con o_e
-                    ch_mkg = int(not ch_tone)                        
+                    ch_mkg = int(not ch_tone)
                     print(f"estudio el {o_e} y enmascaro el {o_n}")
                     frecuency = self.data['audio']['freq'] #indice
-                    int_ = self.data['audio']['int'][ch_tone] 
+                    int_ = self.data['audio']['int'][ch_tone]
                     int_mkg = self.data['audio']['int'][ch_mkg]
-                    uoe = self.dbdata['Osea_mkg'][frecuency][o_e]
-                    uone = self.dbdata['Osea_mkg'][frecuency][o_n]
-                    ce = 0
-                    eo = self.oclusive_efect(frecuency,o_e)
-                    at = self.attenuations[frecuency]
-                    uane = self.dbdata['Aerea_mkg'][frecuency][o_n]
-                    mkg_min = uoe - uone + uane + ce + eo
-                    print(f"se calcula el minimo : {uoe} - {uone} + {uane} + {ce} + {eo}")
-                    mkg_max = uoe + at
-                    mkg = [mkg_min, mkg_max]
-                    mkg.sort()
-                    print(f"minimo y maximo{mkg}, la intensidad del mkg es:{int_mkg}")
-                    if mkg[0] <= int_mkg <= mkg[1]:
-                        threshold = self.dbdata['Osea_mkg'][frecuency][o_e]
-                    else:
-                        if int_mkg > mkg[1]:
-                            threshold = 130
-                        if int_mkg < mkg[0]:
-                            threshold = uone
+                    threshold = self._resolve_masked_threshold('osea', frecuency, o_e, o_n, int_mkg)
                     if threshold <= int_:
                         self.upHand()
                     else:
@@ -452,12 +479,15 @@ class ResponseAudiometry():
             if self.data['audio']['stimOn'].count(True) == 1:
                 stim_on = self.data['audio']['stimOn'].index(True)
                 trans = self.data['audio']['trans'][stim_on]
-                trans_letter = 'Aerea' if trans == 0 else 'Osea'
+                via = 'aerea' if trans == 0 else 'osea'
                 output = self.data['audio']['output'][stim_on] #derecho o izquierdo
+                o_n = int(not output)
                 frecuency = self.data['audio']['freq'] #indice
                 print(frecuency)
                 int_ = self.data['audio']['int'][stim_on]
-                value = self.dbdata[trans_letter][frecuency][output]
+                # sin canal de mkg encendido = ruido de enmascaramiento en 0
+                # (submascarado en cuanto haga falta enmascarar -> curva sombra)
+                value = self._resolve_masked_threshold(via, frecuency, output, o_n, 0)
                 verify = True if int_ >= value else False
 
                 #print(f"la intencidad de estimulación es {int}, el umbral es {value} superaste el umbral {verify}")

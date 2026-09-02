@@ -50,6 +50,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         #super(Audiometer, self).__init__()
         super().__init__()
         self.thr = []
+        self.appointment_id = None
         self.log_queue = get_log_queue()
         self.response = Response(self)
         #self.response.button.connect(self.respa)
@@ -59,8 +60,8 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.frecuency_list = create_frecuency(
             frecuency_dict, prueba="Umbrales")
         self.random_response = [0, 0]
-        #activado, reverse, intensidad, side, contrankg, canal
-        self.datasignal_speech = [False, False, None, None, False, 0]
+        #activado, reverse, intensidad, side, contrankg, canal, int_mkg
+        self.datasignal_speech = [False, False, None, None, False, 0, None]
 
         # Widgets
         # Diales
@@ -308,6 +309,8 @@ class Audiometer(QWidget, Ui_Audiometer):
         case_id = getattr(self, "id", None)
         if case_id is not None:
             payload.setdefault("case_id", case_id)
+        payload.setdefault("appointment_id", getattr(self, "appointment_id", None))
+        payload.setdefault("con_paciente", case_id is not None)
         self.log_queue.push(action, payload)
 
     def disabled_widgets(self):
@@ -321,9 +324,11 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.btn_trans_cl_ch1.setDisabled(True)
         #self.btn_stim_tone_izq.setDisabled(True)
 
-    def la_super(self, data):
+    def la_super(self, data, appointment_id=None):
         #self.response.set_response(data)
+        self.appointment_id = appointment_id
         if data is None:
+            self.id = None  # limpia el caso anterior: sin esto el log seguía marcando al paciente ya cerrado
             return
         thr = data if data["sector"] == "Camara_sono" else data_basic()
         gender = thr['gender']
@@ -493,12 +498,22 @@ class Audiometer(QWidget, Ui_Audiometer):
         label = self.lbl_contin[ch].text()
         return label != tone_list[1]
 
+    def _mkg_intensity(self, ch):
+        """Intensidad (dB) del ruido de enmascaramiento en el canal contrario
+        a ch, o None si ese canal no tiene Speech Noise activo."""
+        contra = 0 if ch == 1 else 1
+        if (self.lbl_revers[contra].text() == "Invertido"
+                and self.lbl_stim[contra].text() == "Speech Noise"):
+            return int(self.lbl_intencity[contra].text().split(' dB HL')[0])
+        return None
+
     def update_logo(self, ch, val):
         side = self.lbl_output[ch].text()
         side = 0 if side == "Derecha" else 1
         self.datasignal_speech[2] = val
         self.datasignal_speech[3] = side
         self.datasignal_speech[5] = ch
+        self.datasignal_speech[6] = self._mkg_intensity(ch)
         self.signal_speech.emit(self.datasignal_speech)
 
     def reverse(self, ch):
@@ -561,6 +576,7 @@ class Audiometer(QWidget, Ui_Audiometer):
                 "background-color: rgb(170, 170, 255);  color : rgb(170, 170, 255);")
             self.lbl_warnings[ch].setText("toc-toc")
             self.datasignal_speech[4] = self.lbl_revers[contra].text() == "Invertido" and self.lbl_stim[contra].text() == "Speech Noise"
+            self.datasignal_speech[6] = self._mkg_intensity(ch)
 
             self.signal_speech.emit(self.datasignal_speech)
 
@@ -957,6 +973,11 @@ class Audiometer(QWidget, Ui_Audiometer):
         lbl = self.lbl_stim[ch].text()
         if lbl == "Habla":
             self.update_logo(ch, data[lvl_ch])
+        elif lbl == "Speech Noise" and self.datasignal_speech[1]:
+            contra = 0 if ch == 1 else 1
+            if self.lbl_stim[contra].text() == "Habla":
+                self.datasignal_speech[6] = self._mkg_intensity(contra)
+                self.signal_speech.emit(self.datasignal_speech)
 
 
 ############## DIALES ################

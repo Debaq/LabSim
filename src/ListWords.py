@@ -29,7 +29,7 @@ class ListWords(QWidget, Ui_ListWords):
         # Inicialización de la ventana y propiedades
         self.la_super(data)
         self.setupUi(self)
-        self.playable = [False, 0, None, False] # playable, intencity, side, with_mkg, es playable solo si esta en invertido
+        self.playable = [False, 0, None, False, None] # playable, intencity, side, with_mkg, int_mkg, es playable solo si esta en invertido
         self.channel = 0  # canal (0 o 1) del audiómetro que está corriendo la logoaudiometría
         self._is_stimulus_playing = False
         self.wait_count = [10, 0]
@@ -77,7 +77,7 @@ class ListWords(QWidget, Ui_ListWords):
                 if btn == f"btn_{letter}{str(i)}":
                     getattr(self, btn).clicked.connect(self.pushaudio)
 
-    def la_super(self, data):
+    def la_super(self, data, appointment_id=None):
         if data is None:
             return
         self.is_response = data['sector'] == "Camara_sono"
@@ -136,12 +136,14 @@ class ListWords(QWidget, Ui_ListWords):
         intencity = state[2]
         side = state[3]
         with_mkg = state[4]
+        int_mkg = state[6] if len(state) > 6 else None
         self.channel = state[5]
         self.playable[1] = intencity
         self.playable[2] = side
         self.playable[3] = with_mkg
+        self.playable[4] = int_mkg
         self.playable[0] = bool(state[1])
-        self.calculate(intencity, side, with_mkg)
+        self.calculate(intencity, side, with_mkg, int_mkg)
         
         
     def timer(self):
@@ -179,13 +181,11 @@ class ListWords(QWidget, Ui_ListWords):
                 #self.calculate(self.playable[2])
                 self.prev_int = self.playable[1]
 
-    def calculate(self, intencity, side, with_mkg):
+    def calculate(self, intencity, side, with_mkg, int_mkg=None):
         if intencity is not None and self.prev is not None:
-            data = self.prev.get(side, with_mkg, intencity)
-
             intencity = max(intencity, 0)
-            data = (data[side][str(intencity)])
-            number_success = int(data / 4)
+            percentage = self.prev.get(side, with_mkg, intencity, int_mkg)
+            number_success = int(percentage / 4)
             self.list_response = self.list_success(number_success)
         
 
