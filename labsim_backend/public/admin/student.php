@@ -104,7 +104,9 @@ admin_header('Alumno: ' . $student['display_name'], $me);
         <tr><td>Atendidos (cerrados)</td><td><strong><?= $estadoCounts['atendido'] ?></strong></td></tr>
         <tr><td>No-show</td><td><strong><?= $estadoCounts['no_show'] ?></strong></td></tr>
         <tr><td>Acciones registradas (total)</td><td><strong><?= $totalActions ?></strong></td></tr>
-        <tr><td>Sesiones</td><td><strong><?= $behaviorStats['n_sessions'] ?></strong></td></tr>
+        <tr><td>Sesiones (login-logout)</td><td><strong><?= Metrics::countLoginSessions($allLogs) ?></strong></td></tr>
+        <tr><td>Atenciones (pacientes distintos)</td><td><strong><?= Metrics::countAttentions($allLogs) ?></strong></td></tr>
+        <tr><td>Bloques de actividad</td><td><strong><?= $behaviorStats['n_sessions'] ?></strong></td></tr>
         <tr><td>Duración total</td><td><strong><?= $behaviorStats['total_duration_s'] ?>s</strong></td></tr>
         <tr><td>Delta promedio entre acciones</td><td><strong><?= $behaviorStats['avg_delta_s'] ?? '—' ?>s</strong></td></tr>
         <tr><td>Pausas largas (≥30s)</td><td><strong<?= $behaviorStats['long_pauses'] > 0 ? ' class="badge-warn"' : '' ?>><?= $behaviorStats['long_pauses'] ?></strong></td></tr>
@@ -123,9 +125,9 @@ admin_header('Alumno: ' . $student['display_name'], $me);
 
 <div class="card">
     <strong>Evolución semanal</strong>
-    <p class="legend">Sesiones y delta promedio por semana -- para ver si el alumno mejora (deltas bajando) con el tiempo.</p>
+    <p class="legend">Bloques de actividad (corte por atención distinta o &gt;5 min de pausa) y delta promedio por semana -- para ver si el alumno mejora (deltas bajando) con el tiempo.</p>
     <table>
-        <tr><th>Semana</th><th>Sesiones</th><th>Delta promedio</th></tr>
+        <tr><th>Semana</th><th>Bloques</th><th>Delta promedio</th></tr>
         <?php $maxSessions = max(array_column($weekly, 'n_sessions') ?: [1]); ?>
         <?php foreach ($weekly as $week => $w): ?>
         <tr>
@@ -144,7 +146,7 @@ admin_header('Alumno: ' . $student['display_name'], $me);
     <strong>Atenciones (<?= count($attendances) ?>)</strong>
     <p class="legend">Comportamiento aislado por cada atención (cita/paciente) -- así un caso no ensucia las métricas de otro cuando el alumno revisó más de uno.</p>
     <table>
-        <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Sesiones</th><th>Duración</th><th>Delta prom.</th><th>Pausas largas</th><th>Hora real</th><th>Nota</th><th>Actualizado</th></tr>
+        <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Bloques</th><th>Duración</th><th>Delta prom.</th><th>Pausas largas</th><th>Hora real</th><th>Nota</th><th>Actualizado</th></tr>
         <?php foreach ($attendances as $a):
             $aStats = $statsByAppt[(int) $a['appointment_id']] ?? null;
         ?>

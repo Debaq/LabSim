@@ -253,6 +253,25 @@ final class Metrics
     }
 
     /**
+     * Cuenta sesiones de uso reales: una por cada session_login (ver
+     * src/main.py, se manda al abrir la app). A diferencia de
+     * buildSessions() (que corta por 5 min de inactividad y por eso
+     * infla el conteo si el alumno se queda pensando en la misma
+     * atención), esto refleja "cuántas veces entró a la app", no
+     * "cuántos bloques de actividad separados por pausa hubo".
+     */
+    public static function countLoginSessions(array $decodedLogs): int
+    {
+        $n = 0;
+        foreach ($decodedLogs as $log) {
+            if ($log['action'] === 'session_login') {
+                $n++;
+            }
+        }
+        return $n;
+    }
+
+    /**
      * Sesiones agrupadas por semana ISO (lunes a domingo) -- para ver
      * evolución en el semestre: ¿el delta promedio baja con las semanas?
      */

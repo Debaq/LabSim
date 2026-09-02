@@ -38,13 +38,15 @@ header('Content-Disposition: attachment; filename="' . $filename . '"');
 
 $out = fopen('php://output', 'w');
 fputcsv($out, ['alumno', $student['display_name']]);
-fputcsv($out, ['sesiones_totales', $total['n_sessions']]);
+fputcsv($out, ['sesiones_login_logout', Metrics::countLoginSessions($logs)]);
+fputcsv($out, ['atenciones_pacientes_distintos', Metrics::countAttentions($logs)]);
+fputcsv($out, ['bloques_actividad', $total['n_sessions']]);
 fputcsv($out, ['duracion_total_s', $total['total_duration_s']]);
 fputcsv($out, ['delta_promedio_s', $total['avg_delta_s'] ?? '']);
 fputcsv($out, ['pausas_largas_ge30s', $total['long_pauses']]);
 fputcsv($out, ['acciones_sin_pausa_0s', $total['no_pause_actions']]);
 fputcsv($out, []);
-fputcsv($out, ['semana', 'sesiones', 'delta_promedio_s']);
+fputcsv($out, ['semana', 'bloques', 'delta_promedio_s']);
 foreach ($weekly as $week => $w) {
     fputcsv($out, [$week, $w['n_sessions'], $w['avg_delta_s'] ?? '']);
 }

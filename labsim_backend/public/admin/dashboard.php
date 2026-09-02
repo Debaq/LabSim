@@ -312,7 +312,7 @@ admin_header('Dashboard de actividad', $me);
     <p class="legend">No es cantidad de logs -- es cómo se comporta: delta promedio entre acciones, cuántas pausas largas (posible duda) y cuántas acciones dispara sin pausa (posible clickeo sin pensar). La barra de distribución va de verde (sin pausa) a rojo (pausa ≥30s).
         <strong>Ojo:</strong> esto suma <strong>todas</strong> las atenciones del alumno (todos los pacientes juntos) -- si revisó más de un caso, pincha su nombre para ver el desglose por atención en su ficha, o usa la tabla "Por paciente / cita" de abajo para entrar directo a una cita puntual.</p>
     <table>
-        <tr><th>Alumno</th><th>Última actividad</th><th>Sesiones</th><th>Duración total</th><th>Delta promedio</th><th>Pausas largas (≥30s)</th><th>Sin pausa (0s)</th><th>Distribución de pausas</th></tr>
+        <tr><th>Alumno</th><th>Última actividad</th><th>Sesiones</th><th>Atenciones</th><th>Bloques</th><th>Duración total</th><th>Delta promedio</th><th>Pausas largas (≥30s)</th><th>Sin pausa (0s)</th><th>Distribución de pausas</th></tr>
         <?php foreach ($studentStats as $uid => $st):
             $student = $studentsById[$uid] ?? null;
             $hist = $studentHist[$uid] ?? [];
@@ -321,6 +321,8 @@ admin_header('Dashboard de actividad', $me);
         <tr>
             <td><a href="student.php?id=<?= $uid ?>"><?= htmlspecialchars($student['display_name'] ?? ('Alumno #' . $uid)) ?></a></td>
             <td><?= htmlspecialchars((string) ($st['last_activity'] ?? '—')) ?></td>
+            <td><?= Metrics::countLoginSessions($byUserLogs[$uid]) ?></td>
+            <td><?= Metrics::countAttentions($byUserLogs[$uid]) ?></td>
             <td><?= $st['n_sessions'] ?></td>
             <td><?= $st['total_duration_s'] ?>s</td>
             <td><?= $st['avg_delta_s'] ?? '—' ?>s</td>
@@ -339,7 +341,7 @@ admin_header('Dashboard de actividad', $me);
         </tr>
         <?php endforeach; ?>
         <?php if (!$studentStats): ?>
-        <tr><td colspan="8" style="color:#888;">Sin actividad registrada todavía.</td></tr>
+        <tr><td colspan="10" style="color:#888;">Sin actividad registrada todavía.</td></tr>
         <?php endif; ?>
     </table>
 </div>
@@ -347,7 +349,7 @@ admin_header('Dashboard de actividad', $me);
 <div class="card">
     <strong>Por paciente / cita</strong>
     <table>
-        <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Alumnos</th><th>Sesiones totales</th></tr>
+        <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Alumnos</th><th>Bloques totales</th></tr>
         <?php foreach ($apptAgg as $aid => $agg):
             $appt = $apptById[$aid] ?? null;
         ?>
