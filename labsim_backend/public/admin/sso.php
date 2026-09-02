@@ -45,9 +45,8 @@ if (!$user || (int) $user['active'] !== 1) {
     render_sso_error('La cuenta no tiene permisos de portal.');
 }
 
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
+Auth::startSession();
+session_regenerate_id(true);
 $_SESSION['admin_user_id'] = $userId;
 
 // index.php exige admin completo (777) -- gestión de schema/usuarios/LTI,

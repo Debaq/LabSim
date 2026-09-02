@@ -180,6 +180,53 @@ final class Auth
         $pdo->exec("DELETE FROM login_attempts WHERE created_at < datetime('now', '-1 day')");
     }
 
+    private const PAIR_EXCHANGE_MAX_ATTEMPTS = 15;
+    private const PAIR_EXCHANGE_WINDOW_SECONDS = 300; // igual al TTL del código
+
+    /**
+     * true si $ip ya acumuló PAIR_EXCHANGE_MAX_ATTEMPTS fallos en los
+     * últimos PAIR_EXCHANGE_WINDOW_SECONDS -- corta pair_exchange.php antes
+     * de tocar la tabla pairing_codes.
+     */
+    public static function pairExchangeBlocked(string $ip): bool
+    {
+        $stmt = Db::get()->prepare(
+            "SELECT COUNT(*) FROM pair_exchange_attempts WHERE ip = ? AND success = 0 AND created_at > datetime('now', '-' || ? || ' seconds')"
+        );
+        $stmt->execute([$ip, self::PAIR_EXCHANGE_WINDOW_SECONDS]);
+        return (int) $stmt->fetchColumn() >= self::PAIR_EXCHANGE_MAX_ATTEMPTS;
+    }
+
+    /** Deja constancia de cada intento (éxito o fallo) -- lo que lee pairExchangeBlocked(). */
+    public static function recordPairExchangeAttempt(string $ip, bool $success): void
+    {
+        $pdo = Db::get();
+        $pdo->prepare('INSERT INTO pair_exchange_attempts (ip, success) VALUES (?, ?)')
+            ->execute([$ip, $success ? 1 : 0]);
+        $pdo->exec("DELETE FROM pair_exchange_attempts WHERE created_at < datetime('now', '-1 day')");
+    }
+
+    /**
+     * session_start() con flags de cookie explícitos (HttpOnly siempre,
+     * Secure si la request llegó por HTTPS, SameSite=Lax) -- sin esto queda
+     * a criterio del php.ini del hosting, que puede no traerlos.
+     */
+    public static function startSession(): void
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            return;
+        }
+        $https = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path' => '/',
+            'secure' => $https,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+        session_start();
+    }
+
     /**
      * Verifica usuario/contraseña de un admin para el portal (navegador,
      * sesión PHP -- no emite un Bearer token, no lo necesita).
@@ -198,9 +245,7 @@ final class Auth
     /** Corta con 403 si no hay una sesión de portal admin válida. */
     public static function requireAdminSession(): array
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
+        self::startSession();
         $userId = $_SESSION['admin_user_id'] ?? null;
         if (!$userId) {
             header('Location: login.php');

@@ -256,3 +256,15 @@ CREATE TABLE IF NOT EXISTS login_attempts (
 );
 CREATE INDEX IF NOT EXISTS idx_login_attempts_ip ON login_attempts(ip, created_at);
 CREATE INDEX IF NOT EXISTS idx_login_attempts_username ON login_attempts(username, created_at);
+
+-- Rate limit de pair_exchange.php: el código de emparejamiento son 6 dígitos
+-- (1M combos) con TTL de 300s -- sin límite de intentos, un atacante puede
+-- automatizar requests durante esos 5 min y robar la sesión de quien esté
+-- emparejando dispositivo. Solo por IP (el código no identifica usuario).
+CREATE TABLE IF NOT EXISTS pair_exchange_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ip TEXT NOT NULL,
+    success INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_pair_exchange_attempts_ip ON pair_exchange_attempts(ip, created_at);

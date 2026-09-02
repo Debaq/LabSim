@@ -79,7 +79,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$alreadyInstalled) {
 
         if ($success !== null) {
             // Autodestrucción: nadie más puede volver a correr el instalador.
-            @unlink(__FILE__);
+            // Si unlink() falla (permisos del hosting), el archivo queda
+            // vivo pero inerte: el guard `!$alreadyInstalled` de arriba (via
+            // is_file($configPath), que ya existe en este punto) bloquea
+            // cualquier POST futuro -- igual se avisa para que se borre a mano.
+            if (!@unlink(__FILE__)) {
+                $success .= ' Aviso: no se pudo autoborrar este instalador (revisa permisos); bórralo a mano por FTP/SSH.';
+                error_log('install.php: no se pudo autoborrar tras instalación exitosa (' . __FILE__ . ')');
+            }
         }
     }
 }
