@@ -25,6 +25,49 @@ final class CaseBuilder
     public const Z_OPTIONS = ['A', 'As', 'Ad', 'C', 'Cs', 'B'];
     public const ETF_OPTIONS = ['Normal', 'Disfunción tubaria', 'Permeable', 'No permeable'];
 
+    // Acumetría (diapasones 500 y 1000 Hz) -- se guarda dentro de
+    // audiometría, no es tab aparte. Rinne es por oído (CA vs CO en ese
+    // oído); Weber es un único resultado por frecuencia (a qué lado
+    // lateraliza, o ninguno). Auto-calculado desde los umbrales tonales ya
+    // cargados (índices 2=500Hz, 3=1000Hz en FREQUENCIES/Aerea/Osea),
+    // modificable a mano por checkbox "auto" (mismo patrón que sdt_auto/
+    // srt_auto con Fletcher).
+    public const ACUMETRIA_FREQS = ['500' => 2, '1000' => 3]; // Hz => índice en FREQUENCIES
+
+    public const RINNE_OPTIONS = ['positivo', 'negativo', 'falso_negativo'];
+    public const RINNE_LABELS = [
+        'positivo' => 'Positivo (CA > CO)',
+        'negativo' => 'Negativo (CO > CA)',
+        'falso_negativo' => 'Falso negativo (hipoacusia sensorioneural profunda, cruce óseo contralateral)',
+    ];
+    // Gap aérea-ósea (dB) desde el cual el Rinne auto-calculado da negativo.
+    public const RINNE_GAP_THRESHOLD = 25;
+
+    public const WEBER_OPTIONS = ['centrado', 'od', 'oi'];
+    public const WEBER_LABELS = [
+        'centrado' => 'Sin lateralización (centrado)',
+        'od' => 'Lateraliza a OD',
+        'oi' => 'Lateraliza a OI',
+    ];
+    // Asimetría de vía ósea (dB) entre oídos desde la cual el Weber
+    // auto-calculado lateraliza (al oído con mejor -- menor dB -- umbral óseo).
+    public const WEBER_ASYMMETRY_THRESHOLD = 10;
+
+    /** Rinne auto: negativo si el gap aérea-ósea de ese oído en esa frecuencia es >= RINNE_GAP_THRESHOLD. "falso_negativo" nunca se auto-calcula, es solo elegible a mano. */
+    public static function rinneAuto(int $air, int $bone): string
+    {
+        return ($air - $bone) >= self::RINNE_GAP_THRESHOLD ? 'negativo' : 'positivo';
+    }
+
+    /** Weber auto: lateraliza al oído con mejor (menor) umbral óseo si la asimetría ósea entre oídos es >= WEBER_ASYMMETRY_THRESHOLD; si no, centrado. */
+    public static function weberAuto(int $boneOd, int $boneOi): string
+    {
+        if (abs($boneOd - $boneOi) < self::WEBER_ASYMMETRY_THRESHOLD) {
+            return 'centrado';
+        }
+        return $boneOd < $boneOi ? 'od' : 'oi';
+    }
+
     // Requisitos clínicos de aplicabilidad de Fowler/I.W.A. (ABLB): oído de
     // referencia dentro de rango normal, oído en estudio sensorioneural
     // (gap aéreo-óseo bajo) y fuera de rango normal, diferencia interaural
@@ -300,6 +343,8 @@ final class CaseBuilder
             'Osea_mkg' => $form['osea'],
             'Z_OD' => $form['z_od'],
             'Z_OI' => $form['z_oi'],
+            'Rinne' => $form['rinne'],
+            'Weber' => $form['weber'],
             'sector' => 'Camara_sono',
             'edad' => $age,
             'volume' => [self::earVolume($age, $gender), self::earVolume($age, $gender), 'N/D'],
@@ -366,6 +411,18 @@ final class CaseBuilder
 
         $v['z_od'] = $data['Z_OD'] ?? 'A';
         $v['z_oi'] = $data['Z_OI'] ?? 'A';
+
+        // Igual que sdt_auto/srt_auto: se muestra el valor guardado tal cual
+        // (rinne_auto/weber_auto quedan sin marcar) -- si quedaran tildados
+        // los checkboxes "auto" el JS los pisaría con el recálculo apenas
+        // cargara la página.
+        $v['rinne_auto'] = [];
+        $v['weber_auto'] = [];
+        foreach (self::ACUMETRIA_FREQS as $hz => $freqIdx) {
+            $v['rinne'][$hz]['od'] = $data['Rinne'][$hz]['od'] ?? 'positivo';
+            $v['rinne'][$hz]['oi'] = $data['Rinne'][$hz]['oi'] ?? 'positivo';
+            $v['weber'][$hz] = $data['Weber'][$hz] ?? 'centrado';
+        }
 
         $umd = $data['UMD'] ?? [];
         $v['umd_int'] = ['od' => (string) ($umd[0]['int'] ?? 35), 'oi' => (string) ($umd[1]['int'] ?? 35)];

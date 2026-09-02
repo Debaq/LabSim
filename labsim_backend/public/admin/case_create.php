@@ -238,6 +238,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $zOi = (string) ($v['z_oi'] ?? 'A');
         $etfOd = (string) ($v['etf_od'] ?? 'Normal');
         $etfOi = (string) ($v['etf_oi'] ?? 'Normal');
+
+        // Acumetría (Rinne/Weber), auto-calculada desde los umbrales tonales
+        // ya cargados arriba ($aerea/$osea, índices de CaseBuilder::ACUMETRIA_FREQS)
+        // salvo que el docente haya destildado el "auto" de ese campo -- mismo
+        // patrón que sdt_auto/srt_auto con Fletcher.
+        $rinne = [];
+        $weber = [];
+        $acumetriaValid = true;
+        foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $freqIdx) {
+            $rinne[$hz] = [];
+            foreach (['od', 'oi'] as $side) {
+                $isAuto = !isset($v['rinne_auto']) || isset($v['rinne_auto'][$hz][$side]);
+                if ($isAuto) {
+                    $rinne[$hz][$side] = CaseBuilder::rinneAuto($aerea[$side][$freqIdx], $osea[$side][$freqIdx]);
+                } else {
+                    $manual = (string) fv($v, ['rinne', $hz, $side], 'positivo');
+                    if (!in_array($manual, CaseBuilder::RINNE_OPTIONS, true)) {
+                        $acumetriaValid = false;
+                    }
+                    $rinne[$hz][$side] = $manual;
+                }
+            }
+            $isWeberAuto = !isset($v['weber_auto']) || isset($v['weber_auto'][$hz]);
+            if ($isWeberAuto) {
+                $weber[$hz] = CaseBuilder::weberAuto($osea['od'][$freqIdx], $osea['oi'][$freqIdx]);
+            } else {
+                $manualWeber = (string) fv($v, ['weber', $hz], 'centrado');
+                if (!in_array($manualWeber, CaseBuilder::WEBER_OPTIONS, true)) {
+                    $acumetriaValid = false;
+                }
+                $weber[$hz] = $manualWeber;
+            }
+        }
         $bonePairs = zip_pairs($osea['od'], $osea['oi']);
         // Qué frecuencias califican para Fowler/I.W.A. se detecta solo de
         // los umbrales -- el alumno puede encontrarlo en cualquiera de
@@ -276,6 +309,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Tipo de timpanograma inválido.';
         } elseif (!in_array($etfOd, CaseBuilder::ETF_OPTIONS, true) || !in_array($etfOi, CaseBuilder::ETF_OPTIONS, true)) {
             $error = 'Valor de ETF inválido.';
+        } elseif (!$acumetriaValid) {
+            $error = 'Valor de Rinne/Weber inválido.';
         } elseif (!in_array($tinnitusLateralidad, CaseBuilder::TINNITUS_LATERALIDAD_OPTIONS, true)) {
             $error = 'Lateralidad del tinnitus inválida.';
         } elseif ($tinnitusLateralidad === 'unilateral' && !in_array($tinnitusOido, ['od', 'oi'], true)) {
@@ -304,6 +339,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'ldl' => zip_pairs($ldl['od'], $ldl['oi']),
                 'z_od' => $zOd,
                 'z_oi' => $zOi,
+                'rinne' => $rinne,
+                'weber' => $weber,
                 'umd' => [
                     ['int' => (int) fv($v, ['umd_int', 'od'], 35), 'percentage' => (int) fv($v, ['umd_pct', 'od'], 100)],
                     ['int' => (int) fv($v, ['umd_int', 'oi'], 35), 'percentage' => (int) fv($v, ['umd_pct', 'oi'], 100)],
@@ -641,6 +678,51 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     </div>
     <?php endforeach; ?>
     <p class="legend">LDL sin marcar = no medido, se guarda como ausente (130) sin importar lo que quede escrito arriba.</p>
+</div>
+
+<div class="card">
+    <strong>Acumetría (Rinne / Weber) &mdash; diapasones 500 y 1000 Hz</strong>
+    <table class="grid-table" style="margin-bottom:0.5rem;">
+        <tr><th></th><?php foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $freqIdx): ?><th><?= $hz ?> Hz</th><?php endforeach; ?></tr>
+        <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
+        <tr>
+            <td class="side-label">Rinne <?= $sideLabel ?></td>
+            <?php foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $freqIdx):
+                $rinneIsAuto = !isset($v['rinne_auto']) || isset($v['rinne_auto'][$hz][$side]);
+                $rinneVal = (string) fv($v, ['rinne', $hz, $side], 'positivo');
+            ?>
+            <td>
+                <select id="rinne_<?= $freqIdx ?>_<?= $side ?>" class="rinne-select" data-freq="<?= $freqIdx ?>" data-side="<?= $side ?>"
+                        name="rinne[<?= $hz ?>][<?= $side ?>]" <?= $rinneIsAuto ? 'disabled' : '' ?>>
+                    <?php foreach (CaseBuilder::RINNE_LABELS as $opt => $optLabel): ?>
+                    <option value="<?= $opt ?>" <?= $rinneVal === $opt ? 'selected' : '' ?>><?= htmlspecialchars($optLabel) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <label class="inline-check"><input type="checkbox" class="rinne-auto-toggle" data-freq="<?= $freqIdx ?>" data-side="<?= $side ?>"
+                       name="rinne_auto[<?= $hz ?>][<?= $side ?>]" <?= $rinneIsAuto ? 'checked' : '' ?>>auto</label>
+            </td>
+            <?php endforeach; ?>
+        </tr>
+        <?php endforeach; ?>
+        <tr>
+            <td class="side-label">Weber</td>
+            <?php foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $freqIdx):
+                $weberIsAuto = !isset($v['weber_auto']) || isset($v['weber_auto'][$hz]);
+                $weberVal = (string) fv($v, ['weber', $hz], 'centrado');
+            ?>
+            <td>
+                <select id="weber_<?= $freqIdx ?>" class="weber-select" data-freq="<?= $freqIdx ?>"
+                        name="weber[<?= $hz ?>]" <?= $weberIsAuto ? 'disabled' : '' ?>>
+                    <?php foreach (CaseBuilder::WEBER_LABELS as $opt => $optLabel): ?>
+                    <option value="<?= $opt ?>" <?= $weberVal === $opt ? 'selected' : '' ?>><?= htmlspecialchars($optLabel) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <label class="inline-check"><input type="checkbox" class="weber-auto-toggle" data-freq="<?= $freqIdx ?>"
+                       name="weber_auto[<?= $hz ?>]" <?= $weberIsAuto ? 'checked' : '' ?>>auto</label>
+            </td>
+            <?php endforeach; ?>
+        </tr>
+    </table>
 </div>
 
 <div class="card">
@@ -1613,6 +1695,65 @@ window.drawReflexPattern = function drawReflexPattern() {
             }
         });
     });
+})();
+
+// Acumetría (Rinne/Weber) auto -- espejo en JS de CaseBuilder::rinneAuto()/
+// weberAuto() (PHP recalcula igual al enviar; esto es solo para que el
+// docente vea el resultado en vivo mientras tipea los umbrales tonales).
+(function () {
+    var RINNE_GAP = <?= CaseBuilder::RINNE_GAP_THRESHOLD ?>;
+    var WEBER_ASYM = <?= CaseBuilder::WEBER_ASYMMETRY_THRESHOLD ?>;
+    var FREQ_IDX = [<?= implode(',', CaseBuilder::ACUMETRIA_FREQS) ?>];
+
+    function threshold(kind, side, n) {
+        var el = document.getElementById(kind + '_' + side + '_' + n);
+        return el ? (parseInt(el.value, 10) || 0) : 0;
+    }
+    function rinneAuto(air, bone) {
+        return (air - bone) >= RINNE_GAP ? 'negativo' : 'positivo';
+    }
+    function weberAuto(boneOd, boneOi) {
+        if (Math.abs(boneOd - boneOi) < WEBER_ASYM) return 'centrado';
+        return boneOd < boneOi ? 'od' : 'oi';
+    }
+
+    function syncAll() {
+        FREQ_IDX.forEach(function (n) {
+            ['od', 'oi'].forEach(function (side) {
+                var auto = document.querySelector('.rinne-auto-toggle[data-freq="' + n + '"][data-side="' + side + '"]');
+                var select = document.getElementById('rinne_' + n + '_' + side);
+                if (!auto || !select) return;
+                if (auto.checked) {
+                    select.value = rinneAuto(threshold('aerea', side, n), threshold('osea', side, n));
+                    select.disabled = true;
+                } else {
+                    select.disabled = false;
+                }
+            });
+            var weberAutoEl = document.querySelector('.weber-auto-toggle[data-freq="' + n + '"]');
+            var weberSelect = document.getElementById('weber_' + n);
+            if (!weberAutoEl || !weberSelect) return;
+            if (weberAutoEl.checked) {
+                weberSelect.value = weberAuto(threshold('osea', 'od', n), threshold('osea', 'oi', n));
+                weberSelect.disabled = true;
+            } else {
+                weberSelect.disabled = false;
+            }
+        });
+    }
+
+    document.querySelectorAll('.rinne-auto-toggle, .weber-auto-toggle').forEach(function (el) {
+        el.addEventListener('change', syncAll);
+    });
+    FREQ_IDX.forEach(function (n) {
+        ['od', 'oi'].forEach(function (side) {
+            var a = document.getElementById('aerea_' + side + '_' + n);
+            var o = document.getElementById('osea_' + side + '_' + n);
+            if (a) a.addEventListener('input', syncAll);
+            if (o) o.addEventListener('input', syncAll);
+        });
+    });
+    syncAll();
 })();
 
 // Filas de Fowler/I.W.A. por frecuencia -- espejo en JS de
