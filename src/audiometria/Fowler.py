@@ -1,3 +1,48 @@
+# Requisitos clínicos de aplicabilidad de Fowler/I.W.A. (ABLB) -- deben
+# coincidir exactamente con CaseBuilder::fowlerValidationError en el backend
+# (labsim_backend/src/CaseBuilder.php). El alumno no sabe de antemano en qué
+# frecuencia el caso "califica" -- puede calificar en más de una -- así que
+# esto se evalúa en vivo contra la frecuencia que el alumno esté probando,
+# no contra un único valor guardado en el caso.
+FOWLER_NORMAL_HL = 20
+FOWLER_SNHL_GAP_MAX = 10
+FOWLER_DIFF_MIN = 20
+FOWLER_DIFF_MAX = 40
+FOWLER_FREQ_MIN_HZ = 250
+FOWLER_FREQ_MAX_HZ = 4000
+FOWLER_FREQUENCIES = [125, 250, 500, 1000, 2000, 3000, 4000, 6000, 8000]
+
+
+def fowler_applicable(freq_idx, air_pair, bone_pair):
+    """True si Fowler/ABLB es clínicamente aplicable en esta frecuencia con
+    estos umbrales: oído de referencia (mejor) en rango normal, oído en
+    estudio sensorioneural y fuera de rango normal, diferencia interaural
+    de 20 a 40 dB, frecuencia entre 250 y 4000 Hz."""
+    if freq_idx < 0 or freq_idx >= len(FOWLER_FREQUENCIES):
+        return False
+    hz = FOWLER_FREQUENCIES[freq_idx]
+    if hz < FOWLER_FREQ_MIN_HZ or hz > FOWLER_FREQ_MAX_HZ:
+        return False
+
+    od, oi = air_pair
+    ref_side = 0 if od <= oi else 1
+    study_side = 1 - ref_side
+    ref_th = air_pair[ref_side]
+    study_th = air_pair[study_side]
+    diff = study_th - ref_th
+
+    if ref_th > FOWLER_NORMAL_HL or study_th <= FOWLER_NORMAL_HL:
+        return False
+    if diff < FOWLER_DIFF_MIN or diff > FOWLER_DIFF_MAX:
+        return False
+
+    gap = study_th - bone_pair[study_side]
+    if gap > FOWLER_SNHL_GAP_MAX:
+        return False
+
+    return True
+
+
 class Fowler:
     def __init__(self) -> None:
         self.th_est = None

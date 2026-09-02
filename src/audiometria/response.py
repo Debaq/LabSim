@@ -3,6 +3,7 @@ from core.helpers import CasesOffline
 from core.helpers import Preferences
 from PySide6.QtCore import QTimer
 from audiometria.response_A import Response
+from audiometria.Fowler import fowler_applicable
 class_pref = Preferences()
 
 c_voice = class_pref.get('command_voice')
@@ -267,13 +268,24 @@ class ResponseAudiometry():
         if self.data['audio']['test'] == 'Umbrales':
             if all(x == 0 for x in self.data['audio']['stim']):
                 if all(x == 'Alternado' for x in self.data['audio']['contin']):
-                    fdata = self.dbdata.get('Fowler', {'freq': None, 'cuts': [15, 30, 50]})
+                    fdata = self.dbdata.get('Fowler', {'cuts': [15, 30, 50]})
                     if not isinstance(fdata, dict) or not fdata.get('enabled', False):
                         # formato viejo (lista) o Fowler no habilitado/aplicable para este caso
                         return
-                    if fdata['freq'] == self.data['audio']['freq']:
-                        thr = self.dbdata['Aerea'][fdata['freq']]
-                        self.other_response.set_fowler_data(thr[0], thr[1], fdata['cuts'], fdata.get('diplacusia', False))
+                    # El alumno no sabe de antemano en qué frecuencia el caso
+                    # "califica" para ABLB -- puede calificar en más de una --
+                    # así que se valida en vivo contra la frecuencia que esté
+                    # probando, no contra una única frecuencia fija del caso.
+                    freq = self.data['audio']['freq']
+                    air_pair = self.dbdata['Aerea'][freq]
+                    bone_pair = self.dbdata['Osea'][freq]
+                    if fowler_applicable(freq, air_pair, bone_pair):
+                        self.other_response.set_fowler_data(air_pair[0], air_pair[1], fdata['cuts'], fdata.get('diplacusia', False))
+                    else:
+                        # frecuencia sin sentido clínico para Fowler: no hay
+                        # con qué comparar, se invalida cualquier engine que
+                        # hubiera quedado de una frecuencia anterior válida
+                        self.other_response.fowler_engine = None
 
     def response_decay(self):
         """Test de decaimiento tonal: umbral normal + si el caso marca 'decay'

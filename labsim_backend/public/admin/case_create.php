@@ -628,7 +628,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <p class="legend" id="fowler-auto-status"></p>
         <label class="inline-check"><input type="checkbox" id="fowler_enabled" name="fowler_enabled" <?= isset($v['fowler_enabled']) ? 'checked' : '' ?>> Fowler aplica en este caso</label>
         <div class="two-col">
-            <label>Frecuencia (250-4000 Hz)
+            <label>Frecuencia de referencia (250-4000 Hz)
                 <select id="fowler_freq" name="fowler_freq">
                     <?php foreach (CaseBuilder::fowlerFreqOptions() as $i): ?>
                     <option value="<?= $i ?>" <?= (int) ($v['fowler_freq'] ?? CaseBuilder::fowlerFreqOptions()[0]) === $i ? 'selected' : '' ?>><?= CaseBuilder::FREQUENCIES[$i] ?> Hz</option>
@@ -642,7 +642,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             </label>
         </div>
         <label class="inline-check"><input type="checkbox" name="diplacusia" <?= isset($v['diplacusia']) ? 'checked' : '' ?>> Paciente refiere diploacusia</label>
-        <p class="legend">Requisitos ABLB: oído de referencia ≤ <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL, oído en estudio &gt; <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL y sensorioneural (gap aéreo-óseo ≤ <?= CaseBuilder::FOWLER_SNHL_GAP_MAX ?> dB), diferencia interaural <?= CaseBuilder::FOWLER_DIFF_MIN ?>-<?= CaseBuilder::FOWLER_DIFF_MAX ?> dB en la frecuencia evaluada.</p>
+        <p class="legend">Esta frecuencia es solo referencial (la de mayor diferencia interaural, informativa para el docente) -- el motor evalúa los mismos requisitos en vivo contra la frecuencia que el alumno esté probando, así que Fowler responde en cualquier frecuencia del caso que también los cumpla, no solo en esta.</p>
+        <p class="legend">Requisitos ABLB: oído de referencia ≤ <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL, oído en estudio &gt; <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL y sensorioneural (gap aéreo-óseo ≤ <?= CaseBuilder::FOWLER_SNHL_GAP_MAX ?> dB), diferencia interaural <?= CaseBuilder::FOWLER_DIFF_MIN ?>-<?= CaseBuilder::FOWLER_DIFF_MAX ?> dB en cada frecuencia evaluada.</p>
     </div>
     <p class="legend">Auto (SDT/SRT) = mejor promedio de 2 de 3 (500/1000/2000 Hz vía aérea), redondeado a múltiplo de 5. Destildar para escribir un valor manual.</p>
 </div>
