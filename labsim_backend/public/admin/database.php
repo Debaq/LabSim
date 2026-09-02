@@ -9,14 +9,18 @@ require_once __DIR__ . '/_layout.php';
 
 /**
  * Todo lo que toca el archivo .sqlite en un solo lugar: aplicar
- * actualizaciones de schema y backups/restaurar. Antes había un botón
- * "Aplicar schema.sql" acá y OTRO en Estado (admin/index.php) haciendo
- * exactamente lo mismo -- confuso y quedaba fácil desincronizarlos (pasó:
- * uno de los dos no tenía la migración de cursos). Ahora Estado es solo
- * lectura y este es el único lugar que escribe sobre el schema/la base.
- * Todo admin completo -- un backup contiene TODO (alumnos, atenciones,
- * notas), y restaurar reemplaza la base viva entera.
+ * actualizaciones de schema, backups/restaurar, y explorar contenido.
+ * Antes había un botón "Aplicar schema.sql" acá y OTRO en Estado
+ * (admin/index.php) haciendo exactamente lo mismo -- confuso y quedaba
+ * fácil desincronizarlos (pasó: uno de los dos no tenía la migración de
+ * cursos). Ahora Estado es solo lectura y este es el único lugar que
+ * escribe sobre el schema/la base. Todo admin completo -- un backup
+ * contiene TODO (alumnos, atenciones, notas), y restaurar reemplaza la
+ * base viva entera.
  */
+
+const EXPLORER_PAGE_SIZE = 50;
+const EXPLORER_MAX_SQL_ROWS = 500;
 
 $me = Auth::requireFullAdminSession();
 $pdo = Db::get();
@@ -70,6 +74,120 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $backups = Backups::list();
+
+/**
+ * --- Explorador de solo lectura (tablas/filas de la base viva o de un
+ * backup, más SQL manual) --- conexión propia (no $pdo de arriba, que es
+ * r/w) con PRAGMA query_only = ON: el motor rechaza cualquier escritura
+ * pase lo que pase en el SQL, aparte de la validación de texto.
+ */
+
+function explorer_open_readonly(string $path, string $label): PDO
+{
+    if (!is_file($path)) {
+        throw new RuntimeException("No se encontró el archivo de {$label}.");
+    }
+    $ro = new PDO('sqlite:' . $path, null, null, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    ]);
+    $ro->exec('PRAGMA query_only = ON');
+    return $ro;
+}
+
+/** true si $sql es un único SELECT/WITH de solo lectura -- defensa extra además de PRAGMA query_only. */
+function explorer_is_safe_select(string $sql): bool
+{
+    $trimmed = rtrim(trim($sql), ";\t\n\r ");
+    if ($trimmed === '' || str_contains($trimmed, ';')) {
+        return false;
+    }
+    if (!preg_match('/^(SELECT|WITH)\b/i', $trimmed)) {
+        return false;
+    }
+    if (preg_match('/\b(INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|REPLACE|ATTACH|DETACH|PRAGMA|VACUUM|REINDEX|TRIGGER)\b/i', $trimmed)) {
+        return false;
+    }
+    return true;
+}
+
+$explorerError = null;
+$explorerSource = (string) ($_GET['source'] ?? 'live');
+$explorerSourceLabel = 'base viva';
+$roPdo = null;
+
+try {
+    if ($explorerSource === 'live') {
+        $roPdo = explorer_open_readonly(Db::config()['db']['path'], 'la base viva');
+    } else {
+        $backupPath = Backups::path($explorerSource); // valida nombre y existencia
+        $explorerSourceLabel = "backup {$explorerSource}";
+        $roPdo = explorer_open_readonly($backupPath, 'ese backup');
+    }
+} catch (Throwable $e) {
+    $explorerError = $e->getMessage();
+    $explorerSource = 'live';
+}
+
+$explorerTables = [];
+if ($roPdo !== null) {
+    try {
+        $explorerTables = $roPdo->query(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
+        )->fetchAll(PDO::FETCH_COLUMN);
+    } catch (Throwable $e) {
+        $explorerError = $e->getMessage();
+    }
+}
+
+$explorerTable = (string) ($_GET['table'] ?? '');
+$explorerColumns = [];
+$explorerRows = [];
+$explorerTotalRows = 0;
+$explorerPage = max(1, (int) ($_GET['page'] ?? 1));
+
+if ($roPdo !== null && $explorerTable !== '' && in_array($explorerTable, $explorerTables, true)) {
+    try {
+        $explorerColumns = array_column($roPdo->query("PRAGMA table_info(\"{$explorerTable}\")")->fetchAll(), 'name');
+        $explorerTotalRows = (int) $roPdo->query("SELECT COUNT(*) FROM \"{$explorerTable}\"")->fetchColumn();
+        $offset = ($explorerPage - 1) * EXPLORER_PAGE_SIZE;
+        $stmt = $roPdo->prepare("SELECT * FROM \"{$explorerTable}\" LIMIT :limit OFFSET :offset");
+        $stmt->bindValue(':limit', EXPLORER_PAGE_SIZE, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        $explorerRows = $stmt->fetchAll();
+    } catch (Throwable $e) {
+        $explorerError = $e->getMessage();
+    }
+} else {
+    $explorerTable = '';
+}
+
+$explorerSqlInput = trim((string) ($_GET['sql'] ?? ''));
+$explorerSqlColumns = [];
+$explorerSqlRows = [];
+$explorerSqlTruncated = false;
+$explorerSqlError = null;
+
+if ($roPdo !== null && $explorerSqlInput !== '') {
+    if (!explorer_is_safe_select($explorerSqlInput)) {
+        $explorerSqlError = 'Solo se permite un único SELECT (o WITH ... SELECT), sin punto y coma ni palabras de escritura.';
+    } else {
+        try {
+            $wrapped = "SELECT * FROM (\n{$explorerSqlInput}\n) LIMIT " . (EXPLORER_MAX_SQL_ROWS + 1);
+            $stmt = $roPdo->query($wrapped);
+            $explorerSqlRows = $stmt->fetchAll();
+            if (count($explorerSqlRows) > EXPLORER_MAX_SQL_ROWS) {
+                $explorerSqlRows = array_slice($explorerSqlRows, 0, EXPLORER_MAX_SQL_ROWS);
+                $explorerSqlTruncated = true;
+            }
+            $explorerSqlColumns = $explorerSqlRows ? array_keys($explorerSqlRows[0]) : [];
+            AdminAudit::log($me, 'db_explorer_query', ['source' => $explorerSource, 'sql' => $explorerSqlInput]);
+        } catch (Throwable $e) {
+            $explorerSqlError = $e->getMessage();
+        }
+    }
+}
 
 admin_header('Base de datos', $me);
 ?>
@@ -135,6 +253,88 @@ admin_header('Base de datos', $me);
         <tr><td colspan="4" style="color:#888;">Ningún backup creado todavía.</td></tr>
         <?php endif; ?>
     </table>
+</div>
+
+<div class="card">
+    <strong>Explorar contenido</strong>
+    <p style="font-size:0.85rem; color:#555;">
+        Navegar tablas y filas de la base viva o de cualquier backup guardado, en modo solo lectura
+        (<code>PRAGMA query_only</code> -- nunca escribe nada), sin restaurar nada primero.
+    </p>
+    <?php if ($explorerError !== null): ?><p class="error"><?= htmlspecialchars($explorerError) ?></p><?php endif; ?>
+
+    <form method="get">
+        <label>Elegir base
+            <select name="source" onchange="this.form.submit()">
+                <option value="live" <?= $explorerSource === 'live' ? 'selected' : '' ?>>Base viva (labsim.sqlite)</option>
+                <?php foreach ($backups as $b): ?>
+                <option value="<?= htmlspecialchars($b['filename']) ?>" <?= $explorerSource === $b['filename'] ? 'selected' : '' ?>>
+                    Backup: <?= htmlspecialchars($b['filename']) ?> (<?= htmlspecialchars($b['created_at']) ?>)
+                </option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <noscript><button type="submit">Cambiar</button></noscript>
+    </form>
+
+    <?php if ($roPdo !== null): ?>
+    <p style="margin-top:1rem;"><strong>Tablas en <?= htmlspecialchars($explorerSourceLabel) ?> (<?= count($explorerTables) ?>)</strong></p>
+    <p>
+        <?php foreach ($explorerTables as $t): ?>
+        <a href="?source=<?= urlencode($explorerSource) ?>&table=<?= urlencode($t) ?>"
+           style="display:inline-block; margin:0.2rem 0.4rem 0.2rem 0; padding:0.2rem 0.6rem; border-radius:4px; background:<?= $t === $explorerTable ? '#1a2744' : '#eef0f4' ?>; color:<?= $t === $explorerTable ? '#fff' : '#1a1a1a' ?>; text-decoration:none; font-size:0.85rem;">
+            <?= htmlspecialchars($t) ?>
+        </a>
+        <?php endforeach; ?>
+        <?php if (!$explorerTables): ?><span style="color:#888;">Sin tablas.</span><?php endif; ?>
+    </p>
+
+    <?php if ($explorerTable !== ''): ?>
+    <p><strong><?= htmlspecialchars($explorerTable) ?></strong> — <?= $explorerTotalRows ?> filas, columnas: <?= htmlspecialchars(implode(', ', $explorerColumns)) ?></p>
+    <div style="overflow-x:auto;">
+    <table>
+        <tr><?php foreach ($explorerColumns as $c): ?><th><?= htmlspecialchars($c) ?></th><?php endforeach; ?></tr>
+        <?php foreach ($explorerRows as $r): ?>
+        <tr><?php foreach ($explorerColumns as $c): ?><td class="mono"><?= htmlspecialchars((string) ($r[$c] ?? '')) ?></td><?php endforeach; ?></tr>
+        <?php endforeach; ?>
+        <?php if (!$explorerRows): ?><tr><td colspan="<?= max(1, count($explorerColumns)) ?>" style="color:#888;">Sin filas.</td></tr><?php endif; ?>
+    </table>
+    </div>
+    <?php $explorerLastPage = max(1, (int) ceil($explorerTotalRows / EXPLORER_PAGE_SIZE)); ?>
+    <p style="font-size:0.85rem;">
+        Página <?= $explorerPage ?> / <?= $explorerLastPage ?>
+        <?php if ($explorerPage > 1): ?> &nbsp;<a href="?source=<?= urlencode($explorerSource) ?>&table=<?= urlencode($explorerTable) ?>&page=<?= $explorerPage - 1 ?>">« Anterior</a><?php endif; ?>
+        <?php if ($explorerPage < $explorerLastPage): ?> &nbsp;<a href="?source=<?= urlencode($explorerSource) ?>&table=<?= urlencode($explorerTable) ?>&page=<?= $explorerPage + 1 ?>">Siguiente »</a><?php endif; ?>
+    </p>
+    <?php endif; ?>
+
+    <p style="margin-top:1.2rem;"><strong>Consulta SQL manual (solo SELECT)</strong></p>
+    <p style="font-size:0.85rem; color:#555;">
+        Corre contra <?= htmlspecialchars($explorerSourceLabel) ?>. Un solo <code>SELECT</code> (o <code>WITH ... SELECT</code>),
+        sin <code>;</code>. Resultados limitados a <?= EXPLORER_MAX_SQL_ROWS ?> filas.
+    </p>
+    <form method="get">
+        <input type="hidden" name="source" value="<?= htmlspecialchars($explorerSource) ?>">
+        <?php if ($explorerTable !== ''): ?><input type="hidden" name="table" value="<?= htmlspecialchars($explorerTable) ?>"><?php endif; ?>
+        <label>SQL
+            <textarea name="sql" rows="4" style="width:100%; padding:0.45rem; font-family:ui-monospace,monospace; font-size:0.85rem;"><?= htmlspecialchars($explorerSqlInput) ?></textarea>
+        </label>
+        <button type="submit">Ejecutar</button>
+    </form>
+    <?php if ($explorerSqlError !== null): ?><p class="error"><?= htmlspecialchars($explorerSqlError) ?></p><?php endif; ?>
+    <?php if ($explorerSqlInput !== '' && $explorerSqlError === null): ?>
+    <div style="overflow-x:auto;">
+    <table>
+        <tr><?php foreach ($explorerSqlColumns as $c): ?><th><?= htmlspecialchars($c) ?></th><?php endforeach; ?></tr>
+        <?php foreach ($explorerSqlRows as $r): ?>
+        <tr><?php foreach ($explorerSqlColumns as $c): ?><td class="mono"><?= htmlspecialchars((string) ($r[$c] ?? '')) ?></td><?php endforeach; ?></tr>
+        <?php endforeach; ?>
+        <?php if (!$explorerSqlRows): ?><tr><td style="color:#888;">Sin resultados.</td></tr><?php endif; ?>
+    </table>
+    </div>
+    <?php if ($explorerSqlTruncated): ?><p style="font-size:0.8rem; color:#888;">Truncado a <?= EXPLORER_MAX_SQL_ROWS ?> filas.</p><?php endif; ?>
+    <?php endif; ?>
+    <?php endif; ?>
 </div>
 
 <div id="restore-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:10;">
