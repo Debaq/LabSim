@@ -191,7 +191,8 @@ if (!$isFullAdmin) {
         $courseScopeSql = " WHERE a.id IS NULL OR a.course_id IS NULL OR a.course_id IN ({$placeholders})";
         $courseScopeParams = $myCourseIds;
     } else {
-        $courseScopeSql = ' WHERE 0'; // docente sin curso asignado: no ve nada todavía
+        // docente sin curso asignado: igual ve biblioteca sin agendar + citas legado sin curso
+        $courseScopeSql = ' WHERE a.id IS NULL OR a.course_id IS NULL';
     }
 }
 $stmt = $pdo->prepare(

@@ -150,8 +150,29 @@ if ($detailId !== null) {
         exit;
     }
 
+    $studentOptions = $pdo->query(
+        "SELECT username, display_name FROM users WHERE role = 'student' AND active = 1 ORDER BY display_name"
+    )->fetchAll();
+    $teacherOptions = $isFullAdmin
+        ? $pdo->query(
+            "SELECT username, display_name FROM users WHERE role = 'admin' AND active = 1 ORDER BY display_name"
+        )->fetchAll()
+        : [];
+
     admin_header('Curso: ' . $course['name'], $me);
     ?>
+    <datalist id="students_datalist">
+        <?php foreach ($studentOptions as $u): ?>
+        <option value="<?= htmlspecialchars($u['username']) ?>"><?= htmlspecialchars($u['display_name']) ?></option>
+        <?php endforeach; ?>
+    </datalist>
+    <?php if ($isFullAdmin): ?>
+    <datalist id="teachers_datalist">
+        <?php foreach ($teacherOptions as $u): ?>
+        <option value="<?= htmlspecialchars($u['username']) ?>"><?= htmlspecialchars($u['display_name']) ?></option>
+        <?php endforeach; ?>
+    </datalist>
+    <?php endif; ?>
     <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
     <?php if ($success !== null): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
 
@@ -212,8 +233,8 @@ if ($detailId !== null) {
         <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="add_teacher">
             <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-            <label style="flex:1; margin:0;">Agregar docente (username)
-                <input type="text" name="username" required>
+            <label style="flex:1; margin:0;">Agregar docente (nombre o username)
+                <input type="text" name="username" list="teachers_datalist" required>
             </label>
             <button type="submit" class="secondary" style="margin-top:0;">Agregar</button>
         </form>
@@ -247,8 +268,8 @@ if ($detailId !== null) {
         <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="add_student">
             <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-            <label style="flex:1; margin:0;">Agregar alumno (username)
-                <input type="text" name="username" required>
+            <label style="flex:1; margin:0;">Agregar alumno (nombre o username)
+                <input type="text" name="username" list="students_datalist" required>
             </label>
             <button type="submit" class="secondary" style="margin-top:0;">Agregar</button>
         </form>
@@ -291,8 +312,8 @@ if ($detailId !== null) {
                 <input type="hidden" name="form_action" value="add_group_member">
                 <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                 <input type="hidden" name="group_id" value="<?= $g['id'] ?>">
-                <label style="flex:1; margin:0;">Agregar al grupo (username, debe estar matriculado en el curso)
-                    <input type="text" name="username" required>
+                <label style="flex:1; margin:0;">Agregar al grupo (nombre o username, debe estar matriculado en el curso)
+                    <input type="text" name="username" list="students_datalist" required>
                 </label>
                 <button type="submit" class="secondary" style="margin-top:0;">Agregar</button>
             </form>
