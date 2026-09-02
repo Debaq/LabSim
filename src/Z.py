@@ -204,6 +204,7 @@ class ZControl(QWidget, Ui_Z_control):
             self.Z.set_side('OD')
         self.refresh()
         self.preCharger()
+        self.Z_reflex.set_side(self.Z.get_side())
         self.Z_reflex.clear_response()
         self.refresh_reflex_table()
         self.update_reflex_volume()
@@ -334,6 +335,7 @@ class ZControl(QWidget, Ui_Z_control):
             s.setVisible(s is screen)
         self.current_screen = screen
         if screen is self.Z_reflex:
+            self.Z_reflex.set_side(self.Z.get_side())
             self.Z_reflex.clear_response()
             self.refresh_reflex_table()
             self.update_reflex_volume()

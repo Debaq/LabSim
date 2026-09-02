@@ -47,6 +47,9 @@ class ZRscreen(QWidget, Ui_Z_rscreen):
     def set_mode(self, mode):
         self.label_22.setText(mode)
 
+    def set_side(self, side):
+        self.label_7.setText(side)
+
     def set_intensity(self, db):
         self.label_6.setText(f"{db} dB")
 
