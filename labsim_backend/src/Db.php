@@ -30,6 +30,18 @@ final class Db
         return self::$pdo;
     }
 
+    /**
+     * Suelta el handle activo -- usado por Backups::restore() antes de
+     * reemplazar el archivo .sqlite en disco, para que este mismo request no
+     * siga con una conexión abierta al archivo viejo. Cualquier Db::get()
+     * posterior en el mismo request abre una conexión nueva (ya contra el
+     * archivo restaurado).
+     */
+    public static function closeForRestore(): void
+    {
+        self::$pdo = null;
+    }
+
     public static function config(): array
     {
         $path = __DIR__ . '/../config/config.php';
@@ -194,6 +206,21 @@ final class Db
         self::addColumnIfMissing($pdo, 'lti_states', 'issued_code', 'TEXT');
         self::addColumnIfMissing($pdo, 'lti_oauth_nonces', 'user_id', 'INTEGER REFERENCES users(id)');
         self::addColumnIfMissing($pdo, 'lti_oauth_nonces', 'issued_code', 'TEXT');
+    }
+
+    /**
+     * course_id/assigned_student_id/assigned_group_id en appointments --
+     * instalaciones de antes de soportar cursos. Nullable: NULL en las 3 es
+     * la cola compartida de siempre (ver comentario en sql/schema.sql sobre
+     * `courses`), así que agregar la columna no cambia el comportamiento de
+     * ninguna cita ya existente.
+     */
+    public static function migrateCoursesIfNeeded(): void
+    {
+        $pdo = self::get();
+        self::addColumnIfMissing($pdo, 'appointments', 'course_id', 'INTEGER REFERENCES courses(id)');
+        self::addColumnIfMissing($pdo, 'appointments', 'assigned_student_id', 'INTEGER REFERENCES users(id)');
+        self::addColumnIfMissing($pdo, 'appointments', 'assigned_group_id', 'INTEGER REFERENCES student_groups(id)');
     }
 
     private static function addColumnIfMissing(PDO $pdo, string $table, string $column, string $definition): void

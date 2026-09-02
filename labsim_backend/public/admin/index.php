@@ -8,20 +8,6 @@ require_once __DIR__ . '/_layout.php';
 $me = Auth::requireFullAdminSession();
 $pdo = Db::get();
 
-$migrateMessage = null;
-$migrateError = null;
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'migrate') {
-    try {
-        Db::migrateLtiPlatformsIfNeeded();
-        Db::migrateLtiReplayColumnsIfNeeded();
-        $sql = file_get_contents(__DIR__ . '/../../sql/schema.sql');
-        $pdo->exec($sql);
-        $migrateMessage = 'Schema aplicado correctamente.';
-    } catch (Throwable $e) {
-        $migrateError = 'Error aplicando schema: ' . $e->getMessage();
-    }
-}
-
 function admin_count(PDO $pdo, string $sql): string
 {
     // Antes de aplicar schema.sql (primera vez, o tras un cambio de schema)
@@ -46,8 +32,6 @@ $counts = [
 
 admin_header('Estado del backend', $me);
 ?>
-<?php if ($migrateMessage !== null): ?><p class="success"><?= htmlspecialchars($migrateMessage) ?></p><?php endif; ?>
-<?php if ($migrateError !== null): ?><p class="error"><?= htmlspecialchars($migrateError) ?></p><?php endif; ?>
 <div class="card">
     <p><strong>Base de datos:</strong> conectada (SQLite, WAL) &nbsp;·&nbsp; <strong>PHP:</strong> <?= htmlspecialchars(PHP_VERSION) ?></p>
     <table>
@@ -57,20 +41,10 @@ admin_header('Estado del backend', $me);
     </table>
 </div>
 <div class="card">
-    <strong>Aplicar schema.sql</strong>
-    <p style="font-size:0.85rem; color:#555;">
-        Idempotente (CREATE TABLE/INDEX IF NOT EXISTS) -- correrlo de nuevo no borra datos.
-        Úsalo después de subir cambios al schema.
-    </p>
-    <form method="post">
-        <input type="hidden" name="form_action" value="migrate">
-        <button type="submit">Aplicar schema.sql</button>
-    </form>
-</div>
-<div class="card">
     <p>Gestión de usuarios (alumnos de prueba, admins) en <a href="users.php">Usuarios</a> -- pincha un alumno para ver sus métricas.</p>
     <p>Agendar, cancelar y eliminar casos/citas en <a href="agenda.php">Fichas Clínicas</a>.</p>
     <p>Registrar Moodle como plataforma LTI y ver las URLs que necesita en <a href="lti.php">LTI</a>.</p>
+    <p>Aplicar actualizaciones de schema y gestionar backups en <a href="database.php">Base de datos</a>.</p>
 </div>
 <?php
 admin_footer();

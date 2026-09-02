@@ -5,9 +5,11 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/Metrics.php';
+require_once __DIR__ . '/../../src/Courses.php';
 
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
+$isFullAdmin = (int) $me['permission'] === Auth::PERMISSION_ADMIN;
 
 $studentId = (int) ($_GET['id'] ?? 0);
 // Sin filtro de role: si el usuario después pasó a docente/admin, su
@@ -15,6 +17,15 @@ $studentId = (int) ($_GET['id'] ?? 0);
 $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
 $stmt->execute([$studentId]);
 $student = $stmt->fetch();
+
+// Docente: solo fichas de alumnos matriculados en su(s) curso(s) -- mismo
+// scoping que dashboard.php/agenda.php.
+if ($student && !$isFullAdmin) {
+    $roster = Courses::rosterUserIds(Courses::teacherCourseIds((int) $me['id']));
+    if (!in_array($studentId, $roster, true)) {
+        $student = null;
+    }
+}
 
 if (!$student) {
     admin_header('Alumno', $me);

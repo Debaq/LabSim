@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
+require_once __DIR__ . '/../../src/Courses.php';
 
 /**
  * Una sola pantalla para casos + citas (antes estaba partido en agenda.php
@@ -14,6 +15,29 @@ require_once __DIR__ . '/_layout.php';
 
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
+$isFullAdmin = (int) $me['permission'] === Auth::PERMISSION_ADMIN;
+$myCourseIds = $isFullAdmin ? null : Courses::teacherCourseIds((int) $me['id']);
+
+// Cursos que este usuario puede asignar al agendar -- admin completo elige
+// cualquiera activo, docente solo el/los suyo(s).
+$availableCourses = $isFullAdmin
+    ? Courses::listActive()
+    : array_values(array_filter(array_map(
+        static fn(int $cid): ?array => ($c = Courses::find($cid)) && $c['active'] ? $c : null,
+        $myCourseIds ?? []
+    )));
+$groupsByCourse = [];
+$studentsByCourse = [];
+foreach ($availableCourses as $ac) {
+    $groupsByCourse[(int) $ac['id']] = array_map(
+        static fn(array $g): array => ['id' => (int) $g['id'], 'name' => $g['name']],
+        Courses::groupsForCourse((int) $ac['id'])
+    );
+    $studentsByCourse[(int) $ac['id']] = array_map(
+        static fn(array $s): array => ['id' => (int) $s['id'], 'name' => $s['display_name']],
+        Courses::students((int) $ac['id'])
+    );
+}
 
 $error = null;
 $success = null;
@@ -38,6 +62,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $procedimiento = trim((string) ($_POST['procedimiento'] ?? '')) ?: 'Audiometría';
         $notaAdmin = trim((string) ($_POST['nota_admin'] ?? ''));
 
+        // Curso/asignación -- obligatorio solo para citas NUEVAS (ver más
+        // abajo, $willInsert); una edición in-place de una cita legado no
+        // se ve forzada a adoptar un curso retroactivamente.
+        $courseId = (int) ($_POST['course_id'] ?? 0) ?: null;
+        $assignMode = (string) ($_POST['assign_mode'] ?? 'course');
+        $assignedStudentId = $assignMode === 'student' ? ((int) ($_POST['assigned_student_id'] ?? 0) ?: null) : null;
+        $assignedGroupId = $assignMode === 'group' ? ((int) ($_POST['assigned_group_id'] ?? 0) ?: null) : null;
+
         if ($caseId === '') {
             $error = 'Falta el caso.';
         } elseif ($fecha !== '' && $hora !== '') {
@@ -45,6 +77,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$fecha, $hora, $appointmentId]);
             if ($stmt->fetch()) {
                 $error = 'Ya existe una cita agendada en esa fecha y hora.';
+            }
+        }
+
+        if ($error === null && $courseId !== null && !$isFullAdmin && (!$myCourseIds || !in_array($courseId, $myCourseIds, true))) {
+            $error = 'No tienes acceso a ese curso.';
+        }
+        if ($error === null && $courseId !== null) {
+            if ($assignedStudentId !== null) {
+                $stmt = $pdo->prepare('SELECT 1 FROM course_students WHERE course_id = ? AND user_id = ?');
+                $stmt->execute([$courseId, $assignedStudentId]);
+                if (!$stmt->fetch()) {
+                    $error = 'El alumno elegido no está matriculado en el curso seleccionado.';
+                }
+            } elseif ($assignedGroupId !== null) {
+                $stmt = $pdo->prepare('SELECT 1 FROM student_groups WHERE id = ? AND course_id = ?');
+                $stmt->execute([$assignedGroupId, $courseId]);
+                if (!$stmt->fetch()) {
+                    $error = 'El grupo elegido no pertenece al curso seleccionado.';
+                }
             }
         }
 
@@ -62,6 +113,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $isNewRound = (bool) $stmt->fetchColumn();
         }
 
+        $willInsert = $appointmentId <= 0 || $isNewRound;
+        if ($error === null && $willInsert && $courseId === null) {
+            $error = 'Falta el curso (obligatorio para citas nuevas).';
+        }
+
         if ($error === null) {
             if ($appointmentId > 0 && !$isNewRound) {
                 $pdo->prepare(
@@ -72,9 +128,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $success = 'Cita actualizada.';
             } else {
                 $pdo->prepare(
-                    'INSERT INTO appointments (fecha, hora, rut, nombre, apellido, fecha_nac, procedimiento, case_id, nota_admin)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-                )->execute([$fecha, $hora, $rut, $nombre, $apellido, $fechaNac, $procedimiento, $caseId, $notaAdmin]);
+                    'INSERT INTO appointments (fecha, hora, rut, nombre, apellido, fecha_nac, procedimiento, case_id, nota_admin, course_id, assigned_student_id, assigned_group_id)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                )->execute([$fecha, $hora, $rut, $nombre, $apellido, $fechaNac, $procedimiento, $caseId, $notaAdmin, $courseId, $assignedStudentId, $assignedGroupId]);
                 $success = $isNewRound ? 'Nueva ronda agendada (se conserva el historial de la anterior).' : 'Caso agendado.';
             }
         }
@@ -118,18 +174,47 @@ function legacy_to_iso(string $legacy): string
 // Última cita de cada caso (si tiene varias, poco común, se usa la más
 // reciente). data trae paciente_snapshot si la cita que tenía se borró --
 // ver Cases::snapshotBeforeAppointmentDelete().
-$cases = $pdo->query(
+// Docente: solo ve casos sin agendar (biblioteca compartida) + citas de
+// su(s) curso(s) + citas legado sin curso (course_id NULL) -- nunca citas
+// de un curso ajeno. Admin completo sin filtro.
+$courseScopeSql = '';
+$courseScopeParams = [];
+if (!$isFullAdmin) {
+    if ($myCourseIds) {
+        $placeholders = implode(',', array_fill(0, count($myCourseIds), '?'));
+        $courseScopeSql = " WHERE a.id IS NULL OR a.course_id IS NULL OR a.course_id IN ({$placeholders})";
+        $courseScopeParams = $myCourseIds;
+    } else {
+        $courseScopeSql = ' WHERE 0'; // docente sin curso asignado: no ve nada todavía
+    }
+}
+$stmt = $pdo->prepare(
     "SELECT c.id, c.data, c.updated_at,
             a.id AS appointment_id, a.fecha, a.hora, a.rut, a.nombre, a.apellido, a.fecha_nac,
-            a.procedimiento, a.cancelada, a.nota_admin,
+            a.procedimiento, a.cancelada, a.nota_admin, a.course_id, a.assigned_student_id, a.assigned_group_id,
             (SELECT COUNT(*) FROM attendances att WHERE att.appointment_id = a.id) AS atenciones_count,
             (SELECT COUNT(*) FROM appointments WHERE case_id = c.id) AS rondas_count
      FROM cases c
      LEFT JOIN appointments a ON a.id = (
          SELECT id FROM appointments WHERE case_id = c.id ORDER BY id DESC LIMIT 1
-     )
+     ){$courseScopeSql}
      ORDER BY CASE WHEN a.fecha IS NULL OR a.fecha = '' THEN 1 ELSE 0 END, a.fecha, a.hora, c.updated_at DESC"
-)->fetchAll();
+);
+$stmt->execute($courseScopeParams);
+$cases = $stmt->fetchAll();
+
+$courseNameById = [];
+foreach ($pdo->query('SELECT id, name FROM courses')->fetchAll() as $cn) {
+    $courseNameById[(int) $cn['id']] = $cn['name'];
+}
+$groupNameById = [];
+foreach ($pdo->query('SELECT id, name FROM student_groups')->fetchAll() as $gn) {
+    $groupNameById[(int) $gn['id']] = $gn['name'];
+}
+$userNameById = [];
+foreach ($pdo->query('SELECT id, display_name FROM users')->fetchAll() as $un) {
+    $userNameById[(int) $un['id']] = $un['display_name'];
+}
 
 $historyCaseId = $_GET['history'] ?? null;
 $historyRows = [];
@@ -253,10 +338,75 @@ admin_header('Fichas Clínicas', $me);
         <label>Nota admin
             <input type="text" name="nota_admin" value="<?= htmlspecialchars($scheduleRow['nota_admin'] ?? '') ?>">
         </label>
+        <?php
+        // "Reagendar" in-place (misma fila, sin ronda nueva) no exige curso --
+        // se puede seguir editando datos de una cita legado sin forzarle uno.
+        $requiresCourse = !$scheduleRow['appointment_id'] || $scheduleIsNewRound;
+        $curCourseId = (int) ($scheduleRow['course_id'] ?? 0);
+        $curAssignMode = $scheduleRow['assigned_student_id'] ? 'student' : ($scheduleRow['assigned_group_id'] ? 'group' : 'course');
+        ?>
+        <label>Curso<?= $requiresCourse ? ' *' : ' (solo aplica a citas/rondas nuevas)' ?>
+            <select name="course_id" id="sched-course" <?= $requiresCourse ? 'required' : '' ?> onchange="onCourseChange()">
+                <option value="">-- selecciona curso --</option>
+                <?php foreach ($availableCourses as $ac): ?>
+                <option value="<?= $ac['id'] ?>" <?= $curCourseId === (int) $ac['id'] ? 'selected' : '' ?>><?= htmlspecialchars($ac['name']) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label>Asignar a
+            <select name="assign_mode" id="sched-assign-mode" onchange="onAssignModeChange()">
+                <option value="course" <?= $curAssignMode === 'course' ? 'selected' : '' ?>>Todo el curso</option>
+                <option value="group" <?= $curAssignMode === 'group' ? 'selected' : '' ?>>Grupo</option>
+                <option value="student" <?= $curAssignMode === 'student' ? 'selected' : '' ?>>Alumno</option>
+            </select>
+        </label>
+        <div id="sched-group-wrap">
+            <label>Grupo
+                <select name="assigned_group_id" id="sched-group" data-selected="<?= (int) ($scheduleRow['assigned_group_id'] ?? 0) ?>"></select>
+            </label>
+        </div>
+        <div id="sched-student-wrap">
+            <label>Alumno
+                <select name="assigned_student_id" id="sched-student" data-selected="<?= (int) ($scheduleRow['assigned_student_id'] ?? 0) ?>"></select>
+            </label>
+        </div>
         <button type="submit"><?= $scheduleIsNewRound ? 'Agendar ronda nueva' : ($scheduleRow['appointment_id'] ? 'Guardar cambios' : 'Agendar') ?></button>
         <a href="agenda.php" style="margin-left:1rem; font-size:0.85rem;">Cancelar</a>
     </form>
 </div>
+<script>
+    var COURSE_GROUPS = <?= json_encode($groupsByCourse) ?>;
+    var COURSE_STUDENTS = <?= json_encode($studentsByCourse) ?>;
+
+    function onCourseChange() {
+        var courseId = document.getElementById('sched-course').value;
+        fillSelect('sched-group', COURSE_GROUPS[courseId] || []);
+        fillSelect('sched-student', COURSE_STUDENTS[courseId] || []);
+    }
+
+    function fillSelect(id, items) {
+        var sel = document.getElementById(id);
+        var keepSelected = sel.dataset.selected || '';
+        sel.innerHTML = '<option value="">-- ninguno --</option>';
+        items.forEach(function (item) {
+            var opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.name;
+            if (String(item.id) === String(keepSelected)) { opt.selected = true; }
+            sel.appendChild(opt);
+        });
+        sel.dataset.selected = '';
+    }
+
+    function onAssignModeChange() {
+        var mode = document.getElementById('sched-assign-mode').value;
+        document.getElementById('sched-group-wrap').style.display = mode === 'group' ? 'block' : 'none';
+        document.getElementById('sched-student-wrap').style.display = mode === 'student' ? 'block' : 'none';
+    }
+
+    onCourseChange();
+    onAssignModeChange();
+</script>
 <?php endif; ?>
 
 <div class="card">
@@ -302,13 +452,29 @@ admin_header('Fichas Clínicas', $me);
         "Agendar" para reingresarlo con esos mismos datos precargados.
     </p>
     <table>
-        <tr><th>ID</th><th>Paciente</th><th>Fecha</th><th>Hora</th><th>Procedimiento</th><th>Estado</th><th>Atenciones</th><th>Rondas</th><th></th></tr>
+        <tr><th>ID</th><th>Paciente</th><th>Fecha</th><th>Hora</th><th>Procedimiento</th><th>Estado</th><th>Curso / asignado a</th><th>Atenciones</th><th>Rondas</th><th></th></tr>
         <?php foreach ($cases as $c): ?>
         <?php
         $data = json_decode($c['data'] ?? '', true);
         $snapshot = is_array($data) ? ($data['paciente_snapshot'] ?? null) : null;
         $nombreVivo = $c['appointment_id'] ? trim(($c['nombre'] ?? '') . ' ' . ($c['apellido'] ?? '')) : '';
         $nombreSnapshot = $snapshot ? trim(($snapshot['nombre'] ?? '') . ' ' . ($snapshot['apellido'] ?? '')) : '';
+
+        $assignLabel = '—';
+        if ($c['appointment_id']) {
+            if ($c['course_id']) {
+                $assignLabel = $courseNameById[(int) $c['course_id']] ?? ('Curso #' . $c['course_id']);
+                if ($c['assigned_student_id']) {
+                    $assignLabel .= ' · ' . ($userNameById[(int) $c['assigned_student_id']] ?? ('Alumno #' . $c['assigned_student_id']));
+                } elseif ($c['assigned_group_id']) {
+                    $assignLabel .= ' · grupo ' . ($groupNameById[(int) $c['assigned_group_id']] ?? ('#' . $c['assigned_group_id']));
+                } else {
+                    $assignLabel .= ' · todo el curso';
+                }
+            } else {
+                $assignLabel = 'cola libre (legado)';
+            }
+        }
         ?>
         <tr>
             <td><?= htmlspecialchars($c['id']) ?></td>
@@ -336,6 +502,7 @@ admin_header('Fichas Clínicas', $me);
                 agendada
                 <?php endif; ?>
             </td>
+            <td style="font-size:0.78rem;"><?= htmlspecialchars($assignLabel) ?></td>
             <td style="font-size:0.8rem;">
                 <?php if ($c['atenciones_count'] > 0): ?>
                 <a href="dashboard.php?appointment_id=<?= (int) $c['appointment_id'] ?>"><?= (int) $c['atenciones_count'] ?> alumno<?= (int) $c['atenciones_count'] === 1 ? '' : 's' ?></a>
@@ -373,7 +540,7 @@ admin_header('Fichas Clínicas', $me);
         </tr>
         <?php endforeach; ?>
         <?php if (!$cases): ?>
-        <tr><td colspan="9" style="color:#888;">Ningún caso guardado todavía.</td></tr>
+        <tr><td colspan="10" style="color:#888;">Ningún caso guardado todavía.</td></tr>
         <?php endif; ?>
     </table>
 </div>

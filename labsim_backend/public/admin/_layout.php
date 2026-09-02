@@ -18,7 +18,7 @@ function admin_header(string $title, ?array $currentUser = null): void
     header a { color: #fff; text-decoration: none; margin-right: 1.2rem; font-size: 0.95rem; opacity: 0.85; }
     header a:hover { opacity: 1; text-decoration: underline; }
     header .brand { font-weight: 700; font-size: 1.05rem; margin-right: 2rem; }
-    main { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; }
+    main { width: 100%; margin: 2rem auto; padding: 0 2rem; }
     h1 { font-size: 1.4rem; }
     table { width: 100%; border-collapse: collapse; margin: 1rem 0; background: #fff; }
     th, td { text-align: left; padding: 0.5rem 0.7rem; border-bottom: 1px solid #e5e5e5; font-size: 0.9rem; }
@@ -44,10 +44,12 @@ function admin_header(string $title, ?array $currentUser = null): void
         <a href="index.php">Estado</a>
         <a href="users.php">Usuarios</a>
         <?php endif; ?>
+        <a href="courses.php">Cursos</a>
         <a href="agenda.php">Fichas Clínicas</a>
         <a href="dashboard.php">Dashboard</a>
         <?php if ($currentUser && (int) $currentUser['permission'] === Auth::PERMISSION_ADMIN): ?>
         <a href="lti.php">LTI</a>
+        <a href="database.php">Base de datos</a>
         <?php endif; ?>
     </div>
     <div>

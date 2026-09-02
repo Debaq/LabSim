@@ -132,7 +132,15 @@ CREATE TABLE IF NOT EXISTS appointments (
     case_id TEXT REFERENCES cases(id),
     nota_admin TEXT NOT NULL DEFAULT '',
     cancelada INTEGER NOT NULL DEFAULT 0,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    -- NULL en las 3 = cola compartida de siempre (comportamiento sin curso).
+    -- Ver Db::migrateCoursesIfNeeded() para instalaciones que ya tenían esta
+    -- tabla sin estas columnas -- acá van inline para que una instalación
+    -- NUEVA (install.php, que solo aplica este schema una vez) las tenga
+    -- de entrada sin depender de esa migración.
+    course_id INTEGER REFERENCES courses(id),
+    assigned_student_id INTEGER REFERENCES users(id),
+    assigned_group_id INTEGER REFERENCES student_groups(id)
 );
 CREATE INDEX IF NOT EXISTS idx_appointments_updated ON appointments (updated_at);
 CREATE INDEX IF NOT EXISTS idx_appointments_fecha ON appointments (fecha);
@@ -172,3 +180,48 @@ CREATE TABLE IF NOT EXISTS app_config (
     v TEXT NOT NULL,                  -- JSON
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Cursos: dos cursos con docentes y casos distintos corriendo en paralelo
+-- sobre la misma instalación no eran posibles antes de esto (todo iba a un
+-- fondo común). appointments.course_id/assigned_* (ver Db::migrateCoursesIfNeeded)
+-- son nullable -- NULL sigue siendo la cola compartida de siempre, esto es
+-- opt-in por cita.
+CREATE TABLE IF NOT EXISTS courses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS course_teachers (
+    course_id INTEGER NOT NULL REFERENCES courses(id),
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    PRIMARY KEY (course_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS idx_course_teachers_user ON course_teachers(user_id);
+
+CREATE TABLE IF NOT EXISTS course_students (
+    course_id INTEGER NOT NULL REFERENCES courses(id),
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    PRIMARY KEY (course_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS idx_course_students_user ON course_students(user_id);
+
+-- Grupos dentro de un curso (p. ej. "5 alumnos citados el mismo día") --
+-- para asignar un mismo paciente/cita a varios alumnos a la vez sin
+-- asignarlos uno por uno.
+CREATE TABLE IF NOT EXISTS student_groups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    course_id INTEGER NOT NULL REFERENCES courses(id),
+    name TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_student_groups_course ON student_groups(course_id);
+
+CREATE TABLE IF NOT EXISTS group_members (
+    group_id INTEGER NOT NULL REFERENCES student_groups(id),
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    PRIMARY KEY (group_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS idx_group_members_user ON group_members(user_id);

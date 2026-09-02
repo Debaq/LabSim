@@ -5,11 +5,27 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/Metrics.php';
+require_once __DIR__ . '/../../src/Courses.php';
 
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
 
-$rows = $pdo->query('SELECT id, user_id, client_ts, action, payload FROM action_logs ORDER BY id')->fetchAll();
+// Docente: acotado al roster de su(s) curso(s) -- admin completo sigue sin
+// filtro. null = sin filtro (admin completo); array (posiblemente vacío) =
+// los únicos user_id que un docente puede ver.
+$isFullAdmin = (int) $me['permission'] === Auth::PERMISSION_ADMIN;
+$allowedStudentIds = $isFullAdmin ? null : Courses::rosterUserIds(Courses::teacherCourseIds((int) $me['id']));
+
+if ($allowedStudentIds === null) {
+    $rows = $pdo->query('SELECT id, user_id, client_ts, action, payload FROM action_logs ORDER BY id')->fetchAll();
+} elseif ($allowedStudentIds) {
+    $placeholders = implode(',', array_fill(0, count($allowedStudentIds), '?'));
+    $stmt = $pdo->prepare("SELECT id, user_id, client_ts, action, payload FROM action_logs WHERE user_id IN ({$placeholders}) ORDER BY id");
+    $stmt->execute($allowedStudentIds);
+    $rows = $stmt->fetchAll();
+} else {
+    $rows = [];
+}
 $logs = Metrics::decodeLogs($rows);
 
 // Sin filtro de role: los action_logs/attendances quedan asociados al user_id
@@ -17,6 +33,12 @@ $logs = Metrics::decodeLogs($rows);
 // actividad histórica no debe volverse "Alumno #N" (y su link a student.php
 // dejaba de servir porque ese query filtraba por role='student').
 $students = $pdo->query('SELECT id, display_name, username FROM users')->fetchAll();
+if ($allowedStudentIds !== null) {
+    $students = array_values(array_filter(
+        $students,
+        static fn(array $s): bool => in_array((int) $s['id'], $allowedStudentIds, true)
+    ));
+}
 $studentsById = [];
 foreach ($students as $s) {
     $studentsById[(int) $s['id']] = $s;
@@ -96,6 +118,13 @@ $dashboardStyle = <<<CSS
     .hist-bar span { height: 100%; display: block; }
     .card-reference { border: 2px solid #2e7d32; }
     .badge-ref { background: #2e7d32; color: #fff; font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 3px; margin-left: 0.4rem; }
+    .dash-grid { display: grid; grid-template-columns: minmax(260px, 420px) 1fr; gap: 1.2rem; align-items: start; }
+    .dash-grid .card { margin-bottom: 0; }
+    .student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 1.2rem; align-items: start; }
+    .student-grid .card { margin-bottom: 0; }
+    @media (max-width: 900px) {
+        .dash-grid { grid-template-columns: 1fr; }
+    }
 CSS;
 
 $appointmentId = isset($_GET['appointment_id']) && $_GET['appointment_id'] !== ''
@@ -113,8 +142,32 @@ if ($appointmentId !== null) {
     // cita futura del mismo caso hereda la misma referencia.
     $referenceKey = $appt && $appt['case_id'] ? 'reference_appointment:' . $appt['case_id'] : null;
 
+    // Estado actual por alumno para esta cita -- distinto de "reagendar"
+    // (agenda.php crea una ronda/cita nueva y conserva el historial): acá se
+    // reabre la MISMA atención in-place, para cuando el alumno cerró pero le
+    // faltó algo o se equivocó, sin generar una entrada nueva de historial.
+    $attByStudent = [];
+    $attStmt = $pdo->prepare('SELECT student_id, estado FROM attendances WHERE appointment_id = ?');
+    $attStmt->execute([$appointmentId]);
+    foreach ($attStmt->fetchAll() as $a) {
+        $attByStudent[(int) $a['student_id']] = $a['estado'];
+    }
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $postAction = (string) ($_POST['form_action'] ?? '');
+
+        if ($postAction === 'reactivate_attendance') {
+            $reactUserId = (int) ($_POST['user_id'] ?? 0);
+            if ($reactUserId > 0) {
+                $pdo->prepare(
+                    "UPDATE attendances SET estado = 'atendiendo', updated_at = CURRENT_TIMESTAMP
+                     WHERE appointment_id = ? AND student_id = ? AND estado IN ('atendido', 'no_show')"
+                )->execute([$appointmentId, $reactUserId]);
+                $attByStudent[$reactUserId] = 'atendiendo';
+            }
+            header('Location: dashboard.php?appointment_id=' . $appointmentId . '#student-' . $reactUserId);
+            exit;
+        }
 
         if ($postAction === 'delete_attendance') {
             // Borra el resultado (atención) de un alumno puntual para esta
@@ -212,6 +265,7 @@ if ($appointmentId !== null) {
     </div>
     <?php endif; ?>
 
+    <div class="student-grid">
     <?php foreach ($byStudent as $uid => $slogs):
         $sessions = Metrics::buildSessions($slogs);
         $stats = Metrics::summarizeSessions($sessions);
@@ -227,6 +281,10 @@ if ($appointmentId !== null) {
             <?php endif; ?>
         </strong>
         <?php if ($isReference): ?><span class="badge-ref">Referencia</span><?php endif; ?>
+        <?php $curEstado = $attByStudent[$uid] ?? null; ?>
+        <?php if ($curEstado !== null): ?>
+        &nbsp;·&nbsp; estado: <strong><?= htmlspecialchars($curEstado) ?></strong>
+        <?php endif; ?>
         &nbsp;·&nbsp; delta promedio: <?= $stats['avg_delta_s'] ?? '—' ?>s
         &nbsp;·&nbsp; <span class="<?= $stats['long_pauses'] > 0 ? 'badge-warn' : '' ?>">pausas largas: <?= $stats['long_pauses'] ?></span>
         &nbsp;·&nbsp; acciones sin pausa (0s): <?= $stats['no_pause_actions'] ?>
@@ -240,6 +298,13 @@ if ($appointmentId !== null) {
             <button type="submit" class="secondary" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;"><?= $isReference ? 'Quitar referencia' : 'Marcar como referencia' ?></button>
         </form>
         <?php endif; ?>
+        <?php if (in_array($curEstado, ['atendido', 'no_show'], true)): ?>
+        <form method="post" class="inline" style="margin-left:0.6rem;" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Reactivar la atención de ' . ($student['display_name'] ?? ('Alumno #' . $uid)) . '? Vuelve a quedar "atendiendo" para que el alumno la retome, sin crear una cita/ronda nueva.'), ENT_QUOTES) ?>);">
+            <input type="hidden" name="form_action" value="reactivate_attendance">
+            <input type="hidden" name="user_id" value="<?= $uid ?>">
+            <button type="submit" class="secondary" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;">Reactivar atención</button>
+        </form>
+        <?php endif; ?>
         <form method="post" class="inline" style="margin-left:0.6rem;" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Eliminar el resultado de ' . ($student['display_name'] ?? ('Alumno #' . $uid)) . ' para esta cita? Se borran su atención y sus acciones registradas para esta cita. No se puede deshacer.'), ENT_QUOTES) ?>);">
             <input type="hidden" name="form_action" value="delete_attendance">
             <input type="hidden" name="user_id" value="<?= $uid ?>">
@@ -251,6 +316,7 @@ if ($appointmentId !== null) {
         <?php endforeach; ?>
     </div>
     <?php endforeach; ?>
+    </div>
     <?php
     admin_footer();
     exit;
@@ -297,6 +363,7 @@ foreach ($logs as $l) {
 admin_header('Dashboard de actividad', $me);
 ?>
 <style><?= $dashboardStyle ?></style>
+<div class="dash-grid" style="margin-bottom: 1.2rem;">
 <div class="card">
     <strong>Resumen global</strong>
     <table>
@@ -305,6 +372,28 @@ admin_header('Dashboard de actividad', $me);
         <tr><td>Alumnos con actividad registrada</td><td><strong><?= count($studentStats) ?></strong></td></tr>
         <tr><td>Citas con actividad registrada</td><td><strong><?= count($apptAgg) ?></strong></td></tr>
     </table>
+</div>
+
+<div class="card">
+    <strong>Por paciente / cita</strong>
+    <table>
+        <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Alumnos</th><th>Bloques totales</th></tr>
+        <?php foreach ($apptAgg as $aid => $agg):
+            $appt = $apptById[$aid] ?? null;
+        ?>
+        <tr>
+            <td><a href="dashboard.php?appointment_id=<?= $aid ?>">#<?= $aid ?></a></td>
+            <td><?= htmlspecialchars(fmt_appt_paciente($appt)) ?></td>
+            <td><?= htmlspecialchars($appt['procedimiento'] ?? '—') ?></td>
+            <td><?= count($agg['students']) ?></td>
+            <td><?= $agg['sessions'] ?></td>
+        </tr>
+        <?php endforeach; ?>
+        <?php if (!$apptAgg): ?>
+        <tr><td colspan="5" style="color:#888;">Sin actividad registrada todavía.</td></tr>
+        <?php endif; ?>
+    </table>
+</div>
 </div>
 
 <div class="card">
@@ -342,27 +431,6 @@ admin_header('Dashboard de actividad', $me);
         <?php endforeach; ?>
         <?php if (!$studentStats): ?>
         <tr><td colspan="10" style="color:#888;">Sin actividad registrada todavía.</td></tr>
-        <?php endif; ?>
-    </table>
-</div>
-
-<div class="card">
-    <strong>Por paciente / cita</strong>
-    <table>
-        <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Alumnos</th><th>Bloques totales</th></tr>
-        <?php foreach ($apptAgg as $aid => $agg):
-            $appt = $apptById[$aid] ?? null;
-        ?>
-        <tr>
-            <td><a href="dashboard.php?appointment_id=<?= $aid ?>">#<?= $aid ?></a></td>
-            <td><?= htmlspecialchars(fmt_appt_paciente($appt)) ?></td>
-            <td><?= htmlspecialchars($appt['procedimiento'] ?? '—') ?></td>
-            <td><?= count($agg['students']) ?></td>
-            <td><?= $agg['sessions'] ?></td>
-        </tr>
-        <?php endforeach; ?>
-        <?php if (!$apptAgg): ?>
-        <tr><td colspan="5" style="color:#888;">Sin actividad registrada todavía.</td></tr>
         <?php endif; ?>
     </table>
 </div>

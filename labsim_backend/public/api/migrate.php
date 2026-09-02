@@ -19,6 +19,9 @@ try {
     Db::migrateLtiReplayColumnsIfNeeded();
     $sql = file_get_contents(__DIR__ . '/../../sql/schema.sql');
     Db::get()->exec($sql);
+    // Después del exec: crea courses/student_groups (REFERENCES de las
+    // columnas nuevas de appointments) si la instalación no las tenía.
+    Db::migrateCoursesIfNeeded();
 } catch (Throwable $e) {
     Response::error('Error aplicando schema: ' . $e->getMessage(), 500);
 }
