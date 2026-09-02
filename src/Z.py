@@ -177,7 +177,7 @@ class ZControl(QWidget, Ui_Z_control):
                 zGerger = self.data[f"Z_{self.Z.get_side()}"]
                 vol = self.data['volume'][side]
             else:
-                zGerger = "A"
+                zGerger = "N"
                 vol = 1.8
             result = Z_225(letter=zGerger, vol=vol, win_neg=win_neg, win_pos=win_pos).getDataSet()
             self.store_data[side].set(0, result)
