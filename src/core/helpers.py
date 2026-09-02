@@ -21,6 +21,7 @@ import json
 import codecs
 from core.base import context
 import random
+import requests
 from datetime import datetime
 from copy import deepcopy
 import os
@@ -74,6 +75,20 @@ def chat_con_paciente(case_id, nombre, edad, procedimiento, history, message, ap
     client = _get_backend_client()
     result = client.llm_chat(case_id, nombre, edad, procedimiento, history, message, appointment_id)
     return result["reply"]
+
+
+def foto_paciente(case_id):
+    """Avatar circular del paciente (bytes PNG) o None si no tiene foto
+    subida o no hay conexión al backend -- a diferencia de chat_con_paciente,
+    acá una falla de red no es un error para quien llama: el avatar es un
+    detalle visual, no bloquea el chat si no se puede traer (se usa un
+    círculo con iniciales como respaldo, ver core/avatar.py)."""
+    if not _is_backend_mode():
+        return None
+    try:
+        return _get_backend_client().get_patient_avatar(case_id)
+    except requests.RequestException:
+        return None
 
 
 def reset_backend_session() -> None:

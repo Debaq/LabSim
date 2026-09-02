@@ -371,7 +371,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data_current))
         subw_agenda = FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self))
         subw_voice = FrameSubMdi(ComandVoiceA())
-        subw_chat = FrameSubMdi(ChatPacienteWidget())
+        subw_chat = FrameSubMdi(ChatPacienteWidget(self.data_login.get("name")))
         self.subw_w = FrameSubMdi(ListWords.ListWords(self.data_current))
         self.subw_z = FrameSubMdi(Z.ZControl())
 

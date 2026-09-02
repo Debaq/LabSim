@@ -62,6 +62,18 @@ class BackendClient:
         resp.raise_for_status()
         return resp.json()
 
+    def _get_bytes(self, path: str, params: dict | None = None) -> bytes | None:
+        """Como _get(), pero para un endpoint que devuelve la imagen cruda
+        (no JSON) -- ver patient_photo.php. None = sin foto (404), que acá
+        no es un error sino el caso normal de un paciente sin foto subida."""
+        resp = requests.get(
+            f"{self._base_url}{path}", params=params, headers=self._headers(), timeout=DEFAULT_TIMEOUT
+        )
+        if resp.status_code == 404:
+            return None
+        resp.raise_for_status()
+        return resp.content
+
     def _post(self, path: str, data: dict, timeout: int = DEFAULT_TIMEOUT) -> dict:
         resp = requests.post(
             f"{self._base_url}{path}", json=data, headers=self._headers(), timeout=timeout
@@ -157,6 +169,11 @@ class BackendClient:
         if appointment_id is not None:
             body["appointment_id"] = appointment_id
         return self._post("/api/llm_chat.php", body, timeout=35)
+
+    def get_patient_avatar(self, case_id: str) -> bytes | None:
+        """Avatar circular del paciente (PNG, ver PatientPhoto::avatarPath en
+        labsim_backend). None si el paciente no tiene foto subida."""
+        return self._get_bytes("/api/patient_photo.php", {"case_id": case_id, "type": "avatar"})
 
     def post_logs_batch(self, entries: list[dict]) -> dict:
         return self._post("/api/logs_batch.php", {"entries": entries})
