@@ -18,6 +18,66 @@ require_once __DIR__ . '/../../src/AdminAudit.php';
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
 
+// Editar un caso existente: ?edit=<id> precarga el formulario con lo ya
+// guardado (reverso de CaseBuilder::buildCaseData). En un POST el id viaja
+// en el campo oculto "case_id" -- $_GET no sobrevive el submit.
+$editId = null;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $editId = trim((string) ($_POST['case_id'] ?? '')) ?: null;
+} elseif (isset($_GET['edit'])) {
+    $editId = trim((string) $_GET['edit']) ?: null;
+}
+$editCase = null;
+if ($editId !== null) {
+    $stmt = $pdo->prepare('SELECT id, data FROM cases WHERE id = ?');
+    $stmt->execute([$editId]);
+    $editCase = $stmt->fetch();
+    if ($editCase === false) {
+        admin_header('Editar caso clínico', $me);
+        echo '<p class="error">El caso ' . htmlspecialchars($editId) . ' no existe.</p>';
+        echo '<p><a href="agenda.php">&larr; Volver</a></p>';
+        admin_footer();
+        exit;
+    }
+}
+$isEdit = $editCase !== null;
+
+// Nombre/edad mostrados solo como referencia -- se editan desde agenda.php
+// (ligados a la cita, no al caso). La edad solo se usa acá para recalcular
+// el volumen del canal auditivo al guardar, no afecta ningún cálculo clínico.
+$editDisplayName = '';
+$editAge = null;
+if ($isEdit) {
+    $stmt = $pdo->prepare(
+        'SELECT nombre, apellido, fecha_nac FROM appointments WHERE case_id = ? ORDER BY id DESC LIMIT 1'
+    );
+    $stmt->execute([$editId]);
+    $appt = $stmt->fetch();
+    $fechaNac = $appt['fecha_nac'] ?? '';
+    if ($appt) {
+        $editDisplayName = trim(($appt['nombre'] ?? '') . ' ' . ($appt['apellido'] ?? ''));
+    }
+    if ($fechaNac === '') {
+        $existingData = json_decode($editCase['data'] ?? '', true);
+        $snapshot = is_array($existingData) ? ($existingData['paciente_snapshot'] ?? []) : [];
+        $fechaNac = $snapshot['fecha_nac'] ?? '';
+        if ($editDisplayName === '') {
+            $editDisplayName = trim(($snapshot['nombre'] ?? '') . ' ' . ($snapshot['apellido'] ?? ''));
+        }
+    }
+    foreach (['d-m-Y', 'd-m-y'] as $fmt) {
+        $birth = DateTime::createFromFormat($fmt, $fechaNac);
+        if ($birth !== false) {
+            $year = (int) $birth->format('Y');
+            if ($fmt === 'd-m-y' && $year > (int) date('Y')) {
+                $year -= 100;
+            }
+            $editAge = max(0, (int) date('Y') - $year);
+            break;
+        }
+    }
+}
+
 /** Lee un valor anidado de un array (ej. $v['aerea']['od'][3]) con default si falta. */
 function fv(array $arr, array $path, $default = null)
 {
@@ -75,7 +135,15 @@ function logogram_y(float $pct): float
 }
 
 $error = null;
-$v = $_POST; // sticky form: se redibuja con lo ya tipeado, tanto al generar nombre como si falla la validación
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $v = $_POST; // sticky form: se redibuja con lo ya tipeado, tanto al generar nombre como si falla la validación
+} elseif ($isEdit) {
+    $existingData = json_decode($editCase['data'] ?? '', true);
+    $v = CaseBuilder::caseDataToForm(is_array($existingData) ? $existingData : []);
+    $v['age'] = (string) ($editAge ?? '');
+} else {
+    $v = [];
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Auth::requireCsrf();
@@ -89,7 +157,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $v['nombre2'] = $n2;
         $v['apellido1'] = $a1;
         $v['apellido2'] = $a2;
-    } elseif ($formAction === 'create_case') {
+    } elseif ($formAction === 'create_case' || $formAction === 'update_case') {
+        $isUpdate = $formAction === 'update_case';
         $age = max(0, (int) ($v['age'] ?? 0));
         $nombre1 = trim((string) ($v['nombre1'] ?? ''));
         $apellido1 = trim((string) ($v['apellido1'] ?? ''));
@@ -139,9 +208,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $etfOi = (string) ($v['etf_oi'] ?? 'Normal');
         $fowlerFreq = (int) ($v['fowler_freq'] ?? 0);
 
-        if ($age <= 0) {
+        if (!$isUpdate && $age <= 0) {
             $error = 'Falta la edad.';
-        } elseif ($nombre1 === '' || $apellido1 === '') {
+        } elseif (!$isUpdate && ($nombre1 === '' || $apellido1 === '')) {
             $error = 'Falta el nombre del paciente (generalo con el botón o escríbelo a mano).';
         } elseif (!in_array($zOd, CaseBuilder::Z_OPTIONS, true) || !in_array($zOi, CaseBuilder::Z_OPTIONS, true)) {
             $error = 'Tipo de timpanograma inválido.';
@@ -157,7 +226,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $antecedentes[$h] = isset($v['hist'][$h]);
             }
 
-            $id = CaseBuilder::nextCaseId($pdo);
+            $id = $isUpdate ? $editId : CaseBuilder::nextCaseId($pdo);
             $data = CaseBuilder::buildCaseData([
                 'gender' => $gender,
                 'id' => $id,
@@ -194,6 +263,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ],
             ]);
 
+            if ($isUpdate) {
+                // Nombre/RUT/fecha de nacimiento no se tocan acá -- viven en
+                // la cita (agenda.php) o, si el caso no tiene cita propia, en
+                // el paciente_snapshot ya guardado, que se conserva tal cual.
+                $priorData = json_decode($editCase['data'] ?? '', true);
+                if (is_array($priorData) && isset($priorData['paciente_snapshot'])) {
+                    $data['paciente_snapshot'] = $priorData['paciente_snapshot'];
+                }
+                $pdo->prepare(
+                    'UPDATE cases SET data = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+                )->execute([json_encode($data, JSON_UNESCAPED_UNICODE), $id]);
+                AdminAudit::log($me, 'case_update', ['case_id' => $id]);
+
+                header('Location: agenda.php');
+                exit;
+            }
+
             // paciente_snapshot: mismo mecanismo que Cases::snapshotBeforeAppointmentDelete
             // -- agenda.php ya sabe leer esta clave para precargar el formulario de
             // agendado cuando el caso todavía no tiene cita propia, así no hay que
@@ -212,7 +298,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 "INSERT INTO cases (id, data, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
                  ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = CURRENT_TIMESTAMP"
             )->execute([$id, json_encode($data, JSON_UNESCAPED_UNICODE)]);
-            AdminAudit::log($me, 'case_create', ['case_id' => $id, 'nombre' => $data['nombre'], 'apellido' => $data['apellido']]);
+            AdminAudit::log($me, 'case_create', ['case_id' => $id, 'nombre' => $nombre1 . ' ' . $nombre2, 'apellido' => $apellido1 . ' ' . $apellido2]);
 
             header('Location: agenda.php?schedule=' . urlencode($id));
             exit;
@@ -220,7 +306,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-admin_header('Crear caso clínico', $me);
+admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico', $me);
 ?>
 <style>
     .grid-table th, .grid-table td { text-align: center; padding: 0.3rem; }
@@ -270,6 +356,7 @@ admin_header('Crear caso clínico', $me);
 
 <form method="post" id="case-form">
 <?= csrf_field() ?>
+<?php if ($isEdit): ?><input type="hidden" name="case_id" value="<?= htmlspecialchars($editId) ?>"><?php endif; ?>
 <div class="tabs" role="tablist">
     <button type="button" class="tab-btn active" data-tab="paciente">Paciente</button>
     <button type="button" class="tab-btn" data-tab="audiometria">Audiometría</button>
@@ -280,11 +367,19 @@ admin_header('Crear caso clínico', $me);
 <div class="tab-panel active" data-tab="paciente">
 <div class="card">
     <strong>Paciente</strong>
+    <?php if ($isEdit): ?>
+    <p style="font-size:0.85rem; color:#555;">
+        Nombre/RUT/fecha de nacimiento no se editan acá -- son datos de la <strong>cita</strong>,
+        se cambian desde <a href="agenda.php">Fichas Clínicas</a> ("Reagendar").
+        <?= $editDisplayName !== '' ? 'Paciente actual: <strong>' . htmlspecialchars($editDisplayName) . '</strong>.' : '' ?>
+    </p>
+    <?php endif; ?>
     <label class="inline-check"><input type="radio" name="gender" value="0" <?= ($v['gender'] ?? '0') === '0' ? 'checked' : '' ?>> Hombre</label>
     <label class="inline-check"><input type="radio" name="gender" value="1" <?= ($v['gender'] ?? '0') === '1' ? 'checked' : '' ?>> Mujer</label>
-    <label>Edad
+    <label>Edad<?= $isEdit ? ' (solo recalcula el volumen del canal auditivo, no cambia la fecha de nacimiento)' : '' ?>
         <input type="number" name="age" min="0" max="110" value="<?= htmlspecialchars((string) ($v['age'] ?? '')) ?>">
     </label>
+    <?php if (!$isEdit): ?>
     <div class="two-col">
         <label>Nombre
             <input type="text" name="nombre1" value="<?= htmlspecialchars((string) ($v['nombre1'] ?? '')) ?>">
@@ -300,6 +395,7 @@ admin_header('Crear caso clínico', $me);
         </label>
     </div>
     <button type="submit" name="form_action" value="generate_name" class="secondary">Generar nombre al azar</button>
+    <?php endif; ?>
 </div>
 </div>
 
@@ -547,7 +643,11 @@ admin_header('Crear caso clínico', $me);
 </div>
 
 <div class="card">
+    <?php if ($isEdit): ?>
+    <button type="submit" name="form_action" value="update_case">Guardar cambios</button>
+    <?php else: ?>
     <button type="submit" name="form_action" value="create_case">Crear caso</button>
+    <?php endif; ?>
     <a href="agenda.php" style="margin-left:1rem; font-size:0.85rem;">Cancelar</a>
 </div>
 </form>

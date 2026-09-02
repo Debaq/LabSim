@@ -135,4 +135,113 @@ final class CaseBuilder
             'tipo' => 'normal',
         ];
     }
+
+    /**
+     * Inverso de buildCaseData(): reconstruye el shape de $_POST que espera
+     * case_create.php a partir de un `cases.data` ya guardado, para
+     * precargar el formulario al editar un caso existente. `age` no se
+     * reconstruye acá (no se guarda en cases.data) -- case_create.php la
+     * resuelve aparte a partir de la cita asociada.
+     */
+    public static function caseDataToForm(array $data): array
+    {
+        $unzip = static function (array $pairs, int $count): array {
+            $od = [];
+            $oi = [];
+            for ($n = 0; $n < $count; $n++) {
+                $od[$n] = (string) ($pairs[$n][0] ?? 0);
+                $oi[$n] = (string) ($pairs[$n][1] ?? 0);
+            }
+            return [$od, $oi];
+        };
+
+        $v = [];
+        $v['gender'] = (string) ($data['gender'] ?? 0);
+
+        $freqCount = count(self::FREQUENCIES);
+        [$aereaOd, $aereaOi] = $unzip($data['Aerea'] ?? [], $freqCount);
+        [$oseaOd, $oseaOi] = $unzip($data['Osea'] ?? [], $freqCount);
+        [$ldlOd, $ldlOi] = $unzip($data['LDL'] ?? [], $freqCount);
+        $v['aerea'] = ['od' => $aereaOd, 'oi' => $aereaOi];
+        $v['osea'] = ['od' => $oseaOd, 'oi' => $oseaOi];
+        $v['ldl'] = ['od' => $ldlOd, 'oi' => $ldlOi];
+
+        // "LDL no medido" se guarda como 130 en las 9 frecuencias (ver
+        // case_create.php) -- si alguna difiere, asumimos que sí se midió.
+        $v['ldl_habilitado'] = [];
+        foreach (['od' => $ldlOd, 'oi' => $ldlOi] as $side => $vals) {
+            foreach ($vals as $val) {
+                if ((int) $val !== 130) {
+                    $v['ldl_habilitado'][$side] = '1';
+                    break;
+                }
+            }
+        }
+
+        $v['z_od'] = $data['Z_OD'] ?? 'A';
+        $v['z_oi'] = $data['Z_OI'] ?? 'A';
+
+        $umd = $data['UMD'] ?? [];
+        $v['umd_int'] = ['od' => (string) ($umd[0]['int'] ?? 35), 'oi' => (string) ($umd[1]['int'] ?? 35)];
+        $v['umd_pct'] = ['od' => (string) ($umd[0]['percentage'] ?? 100), 'oi' => (string) ($umd[1]['percentage'] ?? 100)];
+
+        $sdt = $data['SDT'] ?? [0, 0];
+        $srt = $data['SRT'] ?? [0, 0];
+        $v['sdt'] = ['od' => (string) ($sdt[0] ?? 0), 'oi' => (string) ($sdt[1] ?? 0)];
+        $v['srt'] = ['od' => (string) ($srt[0] ?? 0), 'oi' => (string) ($srt[1] ?? 0)];
+        // Se muestra el valor guardado tal cual -- si quedaran tildados los
+        // checkboxes "auto" el JS los pisaría con el recálculo de Fletcher
+        // apenas cargara la página.
+        $v['sdt_auto'] = [];
+        $v['srt_auto'] = [];
+
+        $fowler = $data['Fowler'] ?? [];
+        $v['fowler_freq'] = (string) ($fowler['freq'] ?? 0);
+        $cuts = $fowler['cuts'] ?? [15, 30, 50];
+        $v['fowler_cut1'] = (string) ($cuts[0] ?? 15);
+        $v['fowler_cut2'] = (string) ($cuts[1] ?? 30);
+        $v['fowler_cut3'] = (string) ($cuts[2] ?? 50);
+
+        $stenger = $data['Stenger'] ?? [false, false];
+        $v['stenger'] = [];
+        if (!empty($stenger[0])) { $v['stenger']['od'] = '1'; }
+        if (!empty($stenger[1])) { $v['stenger']['oi'] = '1'; }
+
+        $sisi = $data['SISI'] ?? [0, 0];
+        $v['sisi'] = ['od' => (string) ($sisi[0] ?? 0), 'oi' => (string) ($sisi[1] ?? 0)];
+
+        $recruit = $data['recruit'] ?? [false, false];
+        $v['recruit'] = [];
+        if (!empty($recruit[0])) { $v['recruit']['od'] = '1'; }
+        if (!empty($recruit[1])) { $v['recruit']['oi'] = '1'; }
+
+        $decay = $data['decay'] ?? [false, false];
+        $v['decay'] = [];
+        if (!empty($decay[0])) { $v['decay']['od'] = '1'; }
+        if (!empty($decay[1])) { $v['decay']['oi'] = '1'; }
+
+        $reflex = $data['Reflex'] ?? [];
+        [$ipsiOd, $ipsiOi] = $unzip($reflex['ipsi'] ?? [], 4);
+        [$contraOd, $contraOi] = $unzip($reflex['contra'] ?? [], 5);
+        $v['reflex_ipsi'] = ['od' => $ipsiOd, 'oi' => $ipsiOi];
+        $v['reflex_contra'] = ['od' => $contraOd, 'oi' => $contraOi];
+
+        $etf = $data['ETF'] ?? ['Normal', 'Normal'];
+        $v['etf_od'] = $etf[0] ?? 'Normal';
+        $v['etf_oi'] = $etf[1] ?? 'Normal';
+
+        $anamnesis = $data['Anamnesis'] ?? [];
+        $antecedentes = $anamnesis['antecedentes'] ?? [];
+        $v['hist'] = [];
+        foreach (self::HIST_CHECKBOXES as $h) {
+            if (!empty($antecedentes[$h])) {
+                $v['hist'][$h] = '1';
+            }
+        }
+        $v['medicamentos'] = $anamnesis['medicamentos'] ?? '';
+        $v['cirugias'] = $anamnesis['cirugias'] ?? '';
+        $v['otros'] = $anamnesis['otros'] ?? '';
+
+        return $v;
+    }
 }

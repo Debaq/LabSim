@@ -528,6 +528,7 @@ admin_header('Fichas Clínicas', $me);
                 <a href="agenda.php?schedule=<?= urlencode($c['id']) ?>" style="font-size:0.8rem;">
                     <?= $c['appointment_id'] ? 'Reagendar' : 'Agendar' ?>
                 </a>
+                <a href="case_create.php?edit=<?= urlencode($c['id']) ?>" style="font-size:0.8rem;">Editar ficha</a>
                 <?php if ($c['appointment_id']): ?>
                 <form method="post" class="inline">
                 <?= csrf_field() ?>
