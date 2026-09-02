@@ -145,6 +145,41 @@ final class Auth
         return self::issueTokenFor((int) $row['id']);
     }
 
+    private const LOGIN_MAX_ATTEMPTS = 5;
+    private const LOGIN_WINDOW_SECONDS = 900; // 15 min
+
+    /**
+     * true si $username o $ip ya acumularon LOGIN_MAX_ATTEMPTS fallos en los
+     * últimos LOGIN_WINDOW_SECONDS -- corta el intento de login.php ANTES de
+     * tocar password_verify(), así un bloqueo no cuesta ni el hash.
+     */
+    public static function loginBlocked(string $username, string $ip): bool
+    {
+        $pdo = Db::get();
+        $windowSql = "created_at > datetime('now', '-' || ? || ' seconds')";
+
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM login_attempts WHERE ip = ? AND success = 0 AND {$windowSql}");
+        $stmt->execute([$ip, self::LOGIN_WINDOW_SECONDS]);
+        if ((int) $stmt->fetchColumn() >= self::LOGIN_MAX_ATTEMPTS) {
+            return true;
+        }
+
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM login_attempts WHERE username = ? AND success = 0 AND {$windowSql}");
+        $stmt->execute([$username, self::LOGIN_WINDOW_SECONDS]);
+        return (int) $stmt->fetchColumn() >= self::LOGIN_MAX_ATTEMPTS;
+    }
+
+    /** Deja constancia de cada intento (éxito o fallo) -- lo que lee loginBlocked(). */
+    public static function recordLoginAttempt(string $username, string $ip, bool $success): void
+    {
+        $pdo = Db::get();
+        $pdo->prepare('INSERT INTO login_attempts (username, ip, success) VALUES (?, ?, ?)')
+            ->execute([$username, $ip, $success ? 1 : 0]);
+        // Purga oportunista de intentos viejos -- evita que la tabla crezca
+        // sin límite sin necesitar un cron aparte para algo tan chico.
+        $pdo->exec("DELETE FROM login_attempts WHERE created_at < datetime('now', '-1 day')");
+    }
+
     /**
      * Verifica usuario/contraseña de un admin para el portal (navegador,
      * sesión PHP -- no emite un Bearer token, no lo necesita).
@@ -191,6 +226,31 @@ final class Auth
             exit('Requiere permisos de administrador completo.');
         }
         return $user;
+    }
+
+    /**
+     * Token CSRF de la sesión de portal admin -- uno por sesión, no por
+     * form. Se genera al primer pedido y se reusa mientras dure la sesión
+     * (session_start() ya lo llamó requireAdminSession()/loginAdmin antes
+     * de esto, así que no hace falta acá).
+     */
+    public static function csrfToken(): string
+    {
+        if (empty($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return $_SESSION['csrf_token'];
+    }
+
+    /** Corta con 403 si el POST no trae el csrf_token de la sesión actual. */
+    public static function requireCsrf(): void
+    {
+        $sent = (string) ($_POST['csrf_token'] ?? '');
+        $expected = (string) ($_SESSION['csrf_token'] ?? '');
+        if ($expected === '' || !hash_equals($expected, $sent)) {
+            http_response_code(403);
+            exit('Token CSRF inválido o ausente. Recarga la página e inténtalo de nuevo.');
+        }
     }
 
     private static function issueTokenFor(int $userId): array

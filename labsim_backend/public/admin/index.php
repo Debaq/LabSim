@@ -3,10 +3,12 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../../src/Backups.php';
 require_once __DIR__ . '/_layout.php';
 
 $me = Auth::requireFullAdminSession();
 $pdo = Db::get();
+$cfg = Db::config();
 
 function admin_count(PDO $pdo, string $sql): string
 {
@@ -30,11 +32,27 @@ $counts = [
     'Tokens de sesión activos' => admin_count($pdo, 'SELECT COUNT(*) FROM tokens'),
 ];
 
+$dbSize = is_file($cfg['db']['path']) ? Backups::formatBytes(filesize($cfg['db']['path'])) : '—';
+$backups = Backups::list(); // ya viene ordenado por fecha, ver Backups::list()
+$lastBackup = $backups[0] ?? null;
+
 admin_header('Estado del backend', $me);
 ?>
 <div class="card">
     <p><strong>Base de datos:</strong> conectada (SQLite, WAL) &nbsp;·&nbsp; <strong>PHP:</strong> <?= htmlspecialchars(PHP_VERSION) ?></p>
     <table>
+        <tr><td>Tamaño de la base de datos</td><td><strong><?= htmlspecialchars($dbSize) ?></strong></td></tr>
+        <tr>
+            <td>Último backup</td>
+            <td>
+                <?php if ($lastBackup): ?>
+                <strong><?= htmlspecialchars($lastBackup['created_at']) ?></strong>
+                <span style="color:#888;">(<?= htmlspecialchars(Backups::formatBytes($lastBackup['size'])) ?>)</span>
+                <?php else: ?>
+                <strong style="color:#a33;">Ninguno todavía</strong>
+                <?php endif; ?>
+            </td>
+        </tr>
         <?php foreach ($counts as $label => $n): ?>
         <tr><td><?= htmlspecialchars($label) ?></td><td><strong><?= $n ?></strong></td></tr>
         <?php endforeach; ?>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Backups.php';
+require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/_layout.php';
 
 /**
@@ -24,6 +25,7 @@ $error = null;
 $success = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    Auth::requireCsrf();
     $action = (string) ($_POST['form_action'] ?? '');
     $filename = (string) ($_POST['filename'] ?? '');
 
@@ -37,12 +39,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // existían de antes (CREATE TABLE IF NOT EXISTS no las toca).
             Db::migrateCoursesIfNeeded();
             $success = 'Schema aplicado correctamente.';
+            AdminAudit::log($me, 'apply_schema');
         } elseif ($action === 'create') {
             $created = Backups::create();
             $success = "Backup creado: {$created}.";
+            AdminAudit::log($me, 'backup_create', ['filename' => $created]);
         } elseif ($action === 'delete') {
             Backups::delete($filename);
             $success = 'Backup eliminado.';
+            AdminAudit::log($me, 'backup_delete', ['filename' => $filename]);
         } elseif ($action === 'restore') {
             // Confirmación escrita a mano (no solo un confirm() de JS) --
             // restaurar reemplaza TODA la base viva, es la acción más
@@ -53,6 +58,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $safetyBackup = Backups::restore($filename);
                 $success = "Base restaurada desde {$filename}. Se guardó el estado anterior como {$safetyBackup} por si esto fue un error.";
+                // Se escribe DESPUÉS de restaurar -- Backups::restore() ya reemplazó
+                // el archivo .sqlite, así que este INSERT cae en la base recién
+                // restaurada (deja registro de que se restauró, visible desde ahí).
+                AdminAudit::log($me, 'backup_restore', ['filename' => $filename, 'safety_backup' => $safetyBackup]);
             }
         }
     } catch (Throwable $e) {
@@ -74,6 +83,7 @@ admin_header('Base de datos', $me);
         Úsalo después de subir cambios al schema. Único lugar del panel que aplica esto.
     </p>
     <form method="post">
+    <?= csrf_field() ?>
         <input type="hidden" name="form_action" value="apply_schema">
         <button type="submit">Aplicar schema.sql</button>
     </form>
@@ -86,6 +96,7 @@ admin_header('Base de datos', $me);
         No hay backups automáticos programados -- este panel es manual, guárdalos con la frecuencia que necesites.
     </p>
     <form method="post">
+    <?= csrf_field() ?>
         <input type="hidden" name="form_action" value="create">
         <button type="submit">Crear backup</button>
     </form>
@@ -112,6 +123,7 @@ admin_header('Base de datos', $me);
                     onclick="openRestore('<?= htmlspecialchars($b['filename'], ENT_QUOTES) ?>')">Restaurar</button>
                 &nbsp;·&nbsp;
                 <form method="post" class="inline" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Eliminar el backup ' . $b['filename'] . '? No se puede deshacer.'), ENT_QUOTES) ?>);">
+                <?= csrf_field() ?>
                     <input type="hidden" name="form_action" value="delete">
                     <input type="hidden" name="filename" value="<?= htmlspecialchars($b['filename']) ?>">
                     <button type="submit" class="danger" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;">Eliminar</button>
@@ -135,6 +147,7 @@ admin_header('Base de datos', $me);
             así que esto mismo se puede deshacer si fue un error.
         </p>
         <form method="post">
+        <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="restore">
             <input type="hidden" name="filename" id="restore-filename-input">
             <label>Escribe el nombre exacto del archivo para confirmar

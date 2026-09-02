@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Users.php';
+require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/_layout.php';
 
 $me = Auth::requireFullAdminSession();
@@ -22,6 +23,7 @@ $roleToPermission = [
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    Auth::requireCsrf();
     $action = $_POST['form_action'] ?? '';
 
     if ($action === 'create') {
@@ -39,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $permission = $roleToPermission[$roleChoice];
             Users::createOrUpdateLocal($role, $username, $displayName, $password, $permission, ['A', 'Z']);
             $success = "Usuario '{$username}' guardado.";
+            AdminAudit::log($me, 'user_create_or_update', ['username' => $username, 'role' => $roleChoice]);
         }
     } elseif ($action === 'update_user') {
         // A diferencia de 'create', esto NO toca password_hash -- cambiar
@@ -56,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $role = $roleChoice === 'student' ? 'student' : 'admin';
             Users::updateProfile($userId, $role, $roleToPermission[$roleChoice], $displayName);
             $success = 'Usuario actualizado.';
+            AdminAudit::log($me, 'user_update', ['user_id' => $userId, 'role' => $roleChoice, 'display_name' => $displayName]);
         }
     } elseif ($action === 'toggle_active') {
         $userId = (int) ($_POST['user_id'] ?? 0);
@@ -63,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($userId > 0) {
             Users::setActive($userId, $active);
             $success = 'Usuario actualizado.';
+            AdminAudit::log($me, $active ? 'user_activate' : 'user_deactivate', ['user_id' => $userId]);
         }
     }
 }
@@ -99,6 +104,7 @@ admin_header('Usuarios', $me);
         Si el usuario ya existe, esto actualiza su contraseña y rol.
     </p>
     <form method="post">
+    <?= csrf_field() ?>
         <input type="hidden" name="form_action" value="create">
         <label>Rol
             <select name="role">
@@ -139,6 +145,7 @@ admin_header('Usuarios', $me);
             <td><?= $u['active'] ? 'sí' : 'no' ?></td>
             <td>
                 <form method="post" class="inline">
+                <?= csrf_field() ?>
                     <input type="hidden" name="form_action" value="toggle_active">
                     <input type="hidden" name="user_id" value="<?= (int) $u['id'] ?>">
                     <input type="hidden" name="active" value="<?= $u['active'] ? '0' : '1' ?>">
@@ -151,6 +158,7 @@ admin_header('Usuarios', $me);
                 <details>
                     <summary>Editar</summary>
                     <form method="post" style="margin-top:0.4rem;">
+                    <?= csrf_field() ?>
                         <input type="hidden" name="form_action" value="update_user">
                         <input type="hidden" name="user_id" value="<?= (int) $u['id'] ?>">
                         <label>Rol

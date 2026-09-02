@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
+require_once __DIR__ . '/../../src/AdminAudit.php';
 
 $me = Auth::requireFullAdminSession();
 
@@ -12,6 +13,7 @@ $success = null;
 $generated11 = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    Auth::requireCsrf();
     $id = $_POST['id'] !== '' ? (int) $_POST['id'] : null;
     $ltiVersion = $_POST['lti_version'] ?? '1.3';
 
@@ -24,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Lti::upsertPlatform11($id, $consumerKey, $sharedSecret);
         $success = $id !== null ? 'Credenciales LTI 1.1 regeneradas.' : 'Herramienta LTI 1.1 creada.';
         $generated11 = ['consumer_key' => $consumerKey, 'shared_secret' => $sharedSecret];
+        AdminAudit::log($me, $id !== null ? 'lti11_regenerate' : 'lti11_create', ['id' => $id]);
     } else {
         $issuer = trim((string) ($_POST['issuer'] ?? ''));
         $clientId = trim((string) ($_POST['client_id'] ?? ''));
@@ -37,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             Lti::upsertPlatform13($id, $issuer, $clientId, $deploymentId, $authLoginUrl, $authTokenUrl ?: $authLoginUrl, $jwksUrl);
             $success = 'Plataforma LTI 1.3 guardada.';
+            AdminAudit::log($me, 'lti13_upsert', ['id' => $id, 'issuer' => $issuer]);
         }
     }
 }
@@ -71,6 +75,7 @@ admin_header('Conexión LTI (Moodle)', $me);
     <?php endif; ?>
 
     <form method="post">
+    <?= csrf_field() ?>
         <input type="hidden" name="id" value="">
         <input type="hidden" name="lti_version" value="1.1">
         <button type="submit">Crear nueva herramienta LTI 1.1</button>
@@ -92,6 +97,7 @@ admin_header('Conexión LTI (Moodle)', $me);
         junto con el <code>Deployment ID</code> (aparece después de guardar la herramienta en Moodle).
     </p>
     <form method="post">
+    <?= csrf_field() ?>
         <input type="hidden" name="id" value="">
         <input type="hidden" name="lti_version" value="1.3">
         <label>Issuer (Platform ID)
@@ -130,6 +136,7 @@ admin_header('Conexión LTI (Moodle)', $me);
             <td>
                 <?php if ($p['version'] === '1.1'): ?>
                 <form method="post" onsubmit="return confirm('Esto invalida el shared secret actual -- hay que actualizarlo en Moodle también. ¿Regenerar?');">
+                <?= csrf_field() ?>
                     <input type="hidden" name="id" value="<?= (int) $p['id'] ?>">
                     <input type="hidden" name="lti_version" value="1.1">
                     <button type="submit">Regenerar</button>

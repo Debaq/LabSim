@@ -49,7 +49,9 @@ function admin_header(string $title, ?array $currentUser = null): void
         <a href="dashboard.php">Dashboard</a>
         <?php if ($currentUser && (int) $currentUser['permission'] === Auth::PERMISSION_ADMIN): ?>
         <a href="lti.php">LTI</a>
+        <a href="tokens.php">Sesiones</a>
         <a href="database.php">Base de datos</a>
+        <a href="audit.php">Auditoría</a>
         <?php endif; ?>
     </div>
     <div>
@@ -62,6 +64,12 @@ function admin_header(string $title, ?array $currentUser = null): void
 <main>
 <h1><?= htmlspecialchars($title) ?></h1>
 <?php
+}
+
+/** Input hidden con el token CSRF de la sesión actual -- va dentro de cada <form method="post">. */
+function csrf_field(): string
+{
+    return '<input type="hidden" name="csrf_token" value="' . htmlspecialchars(Auth::csrfToken()) . '">';
 }
 
 function admin_footer(): void

@@ -15,13 +15,20 @@ $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim((string) ($_POST['username'] ?? ''));
     $password = (string) ($_POST['password'] ?? '');
-    $user = Auth::verifyAdminPassword($username, $password);
-    if ($user === null) {
-        $error = 'Usuario o contraseña incorrectos.';
+    $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+
+    if (Auth::loginBlocked($username, $ip)) {
+        $error = 'Demasiados intentos fallidos. Espera unos minutos e inténtalo de nuevo.';
     } else {
-        $_SESSION['admin_user_id'] = $user['id'];
-        header('Location: index.php');
-        exit;
+        $user = Auth::verifyAdminPassword($username, $password);
+        Auth::recordLoginAttempt($username, $ip, $user !== null);
+        if ($user === null) {
+            $error = 'Usuario o contraseña incorrectos.';
+        } else {
+            $_SESSION['admin_user_id'] = $user['id'];
+            header('Location: index.php');
+            exit;
+        }
     }
 }
 

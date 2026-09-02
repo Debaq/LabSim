@@ -225,3 +225,34 @@ CREATE TABLE IF NOT EXISTS group_members (
     PRIMARY KEY (group_id, user_id)
 );
 CREATE INDEX IF NOT EXISTS idx_group_members_user ON group_members(user_id);
+
+-- Auditoría de acciones admin/docente (crear/eliminar usuario, restaurar
+-- backup, eliminar caso, etc). Separada de action_logs -- esa tabla es el
+-- timeline de comportamiento del alumno dentro de una atención (dashboard.php
+-- la pinta como línea de tiempo) y mezclar ahí acciones de administración
+-- ensuciaría esa vista. admin_user_id nullable a propósito: si el usuario que
+-- hizo la acción se borra después, el registro de auditoría no debe
+-- desaparecer con él.
+CREATE TABLE IF NOT EXISTS admin_audit_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    admin_user_id INTEGER REFERENCES users(id),
+    admin_username TEXT NOT NULL,     -- copia al momento de la acción, sobrevive si se borra el usuario
+    action TEXT NOT NULL,
+    details TEXT,                     -- JSON
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_log_created ON admin_audit_log(created_at);
+
+-- Rate limit de login.php: sin esto, fuerza bruta contra el password de un
+-- admin era trivial (sin límite de intentos). Se cuentan fallos recientes
+-- por IP (protege contra un atacante probando muchos usuarios) y por
+-- username (protege una cuenta puntual de un atacante con varias IPs).
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    ip TEXT NOT NULL,
+    success INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_login_attempts_ip ON login_attempts(ip, created_at);
+CREATE INDEX IF NOT EXISTS idx_login_attempts_username ON login_attempts(username, created_at);

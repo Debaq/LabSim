@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/CaseBuilder.php';
+require_once __DIR__ . '/../../src/AdminAudit.php';
 
 /**
  * Crea un caso clínico completo desde el navegador -- equivalente web de
@@ -44,6 +45,7 @@ $error = null;
 $v = $_POST; // sticky form: se redibuja con lo ya tipeado, tanto al generar nombre como si falla la validación
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    Auth::requireCsrf();
     $formAction = (string) ($v['form_action'] ?? '');
 
     $gender = ($v['gender'] ?? '0') === '1' ? 1 : 0;
@@ -177,6 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 "INSERT INTO cases (id, data, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
                  ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = CURRENT_TIMESTAMP"
             )->execute([$id, json_encode($data, JSON_UNESCAPED_UNICODE)]);
+            AdminAudit::log($me, 'case_create', ['case_id' => $id, 'nombre' => $data['nombre'], 'apellido' => $data['apellido']]);
 
             header('Location: agenda.php?schedule=' . urlencode($id));
             exit;
@@ -200,6 +203,7 @@ admin_header('Crear caso clínico', $me);
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 
 <form method="post" id="case-form">
+<?= csrf_field() ?>
 <div class="card">
     <strong>Paciente</strong>
     <label class="inline-check"><input type="radio" name="gender" value="0" <?= ($v['gender'] ?? '0') === '0' ? 'checked' : '' ?>> Hombre</label>

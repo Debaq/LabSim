@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/Courses.php';
+require_once __DIR__ . '/../../src/AdminAudit.php';
 
 /**
  * Una sola pantalla para casos + citas (antes estaba partido en agenda.php
@@ -43,6 +44,7 @@ $error = null;
 $success = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    Auth::requireCsrf();
     $action = $_POST['form_action'] ?? '';
 
     if ($action === 'schedule') {
@@ -126,12 +128,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      WHERE id = ?'
                 )->execute([$fecha, $hora, $rut, $nombre, $apellido, $fechaNac, $procedimiento, $notaAdmin, $appointmentId]);
                 $success = 'Cita actualizada.';
+                AdminAudit::log($me, 'appointment_update', ['appointment_id' => $appointmentId, 'case_id' => $caseId]);
             } else {
                 $pdo->prepare(
                     'INSERT INTO appointments (fecha, hora, rut, nombre, apellido, fecha_nac, procedimiento, case_id, nota_admin, course_id, assigned_student_id, assigned_group_id)
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
                 )->execute([$fecha, $hora, $rut, $nombre, $apellido, $fechaNac, $procedimiento, $caseId, $notaAdmin, $courseId, $assignedStudentId, $assignedGroupId]);
                 $success = $isNewRound ? 'Nueva ronda agendada (se conserva el historial de la anterior).' : 'Caso agendado.';
+                AdminAudit::log($me, 'appointment_schedule', ['case_id' => $caseId, 'new_round' => $isNewRound]);
             }
         }
     } elseif ($action === 'toggle_cancel') {
@@ -140,6 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pdo->prepare('UPDATE appointments SET cancelada = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
             ->execute([$cancelar ? 1 : 0, $id]);
         $success = $cancelar ? 'Cita cancelada (el caso se conserva).' : 'Cita restaurada.';
+        AdminAudit::log($me, $cancelar ? 'appointment_cancel' : 'appointment_restore', ['appointment_id' => $id]);
     } elseif ($action === 'delete_case') {
         $caseId = trim((string) ($_POST['case_id'] ?? ''));
         if ($caseId !== '') {
@@ -155,6 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare('DELETE FROM cases WHERE id = ?')->execute([$caseId]);
             $pdo->commit();
             $success = 'Caso eliminado.';
+            AdminAudit::log($me, 'case_delete', ['case_id' => $caseId, 'appointments_deleted' => count($appointmentIds)]);
         }
     }
 }
@@ -311,6 +317,7 @@ admin_header('Fichas Clínicas', $me);
     </p>
     <?php endif; ?>
     <form method="post">
+    <?= csrf_field() ?>
         <input type="hidden" name="form_action" value="schedule">
         <input type="hidden" name="case_id" value="<?= htmlspecialchars($scheduleRow['id']) ?>">
         <input type="hidden" name="appointment_id" value="<?= (int) ($scheduleRow['appointment_id'] ?? 0) ?>">
@@ -523,6 +530,7 @@ admin_header('Fichas Clínicas', $me);
                 </a>
                 <?php if ($c['appointment_id']): ?>
                 <form method="post" class="inline">
+                <?= csrf_field() ?>
                     <input type="hidden" name="form_action" value="toggle_cancel">
                     <input type="hidden" name="id" value="<?= (int) $c['appointment_id'] ?>">
                     <input type="hidden" name="cancelada" value="<?= $c['cancelada'] ? '0' : '1' ?>">
@@ -532,6 +540,7 @@ admin_header('Fichas Clínicas', $me);
                 </form>
                 <?php endif; ?>
                 <form method="post" class="inline" onsubmit="return confirm(<?= htmlspecialchars(json_encode("¿Eliminar el caso {$c['id']}" . ($nombreVivo || $nombreSnapshot ? ' (' . ($nombreVivo ?: $nombreSnapshot) . ')' : '') . "? También se eliminan todas sus citas/rondas ({$c['rondas_count']}) y las atenciones registradas. No se puede deshacer."), ENT_QUOTES) ?>);">
+                <?= csrf_field() ?>
                     <input type="hidden" name="form_action" value="delete_case">
                     <input type="hidden" name="case_id" value="<?= htmlspecialchars($c['id']) ?>">
                     <button type="submit" class="danger" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;">Eliminar</button>

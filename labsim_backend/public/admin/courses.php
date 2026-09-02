@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Courses.php';
+require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/_layout.php';
 
 /**
@@ -35,6 +36,7 @@ function require_course_access(int $courseId, bool $isFullAdmin, ?array $myCours
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    Auth::requireCsrf();
     $action = (string) ($_POST['form_action'] ?? '');
     $courseId = (int) ($_POST['course_id'] ?? 0);
 
@@ -48,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Falta el nombre del curso.';
         } else {
             $courseId = Courses::create($name);
+            AdminAudit::log($me, 'course_create', ['course_id' => $courseId, 'name' => $name]);
             header('Location: courses.php?id=' . $courseId);
             exit;
         }
@@ -59,25 +62,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($name !== '') {
                 Courses::rename($courseId, $name);
                 $success = 'Curso actualizado.';
+                AdminAudit::log($me, 'course_rename', ['course_id' => $courseId, 'name' => $name]);
             }
         } elseif ($action === 'toggle_active' && $isFullAdmin) {
             $course = Courses::find($courseId);
             if ($course) {
                 Courses::setActive($courseId, !$course['active']);
                 $success = $course['active'] ? 'Curso archivado.' : 'Curso activado.';
+                AdminAudit::log($me, $course['active'] ? 'course_archive' : 'course_activate', ['course_id' => $courseId]);
             }
         } elseif ($action === 'add_teacher' && $isFullAdmin) {
-            $err = Courses::addMemberByUsername($courseId, trim((string) ($_POST['username'] ?? '')), 'teacher');
-            if ($err) { $error = $err; } else { $success = 'Docente agregado.'; }
+            $username = trim((string) ($_POST['username'] ?? ''));
+            $err = Courses::addMemberByUsername($courseId, $username, 'teacher');
+            if ($err) {
+                $error = $err;
+            } else {
+                $success = 'Docente agregado.';
+                AdminAudit::log($me, 'course_add_teacher', ['course_id' => $courseId, 'username' => $username]);
+            }
         } elseif ($action === 'remove_teacher' && $isFullAdmin) {
-            Courses::removeTeacher($courseId, (int) ($_POST['user_id'] ?? 0));
+            $teacherId = (int) ($_POST['user_id'] ?? 0);
+            Courses::removeTeacher($courseId, $teacherId);
             $success = 'Docente quitado del curso.';
+            AdminAudit::log($me, 'course_remove_teacher', ['course_id' => $courseId, 'user_id' => $teacherId]);
         } elseif ($action === 'add_student') {
-            $err = Courses::addMemberByUsername($courseId, trim((string) ($_POST['username'] ?? '')), 'student');
-            if ($err) { $error = $err; } else { $success = 'Alumno agregado al curso.'; }
+            $username = trim((string) ($_POST['username'] ?? ''));
+            $err = Courses::addMemberByUsername($courseId, $username, 'student');
+            if ($err) {
+                $error = $err;
+            } else {
+                $success = 'Alumno agregado al curso.';
+                AdminAudit::log($me, 'course_add_student', ['course_id' => $courseId, 'username' => $username]);
+            }
         } elseif ($action === 'remove_student') {
-            Courses::removeStudent($courseId, (int) ($_POST['user_id'] ?? 0));
+            $studentId = (int) ($_POST['user_id'] ?? 0);
+            Courses::removeStudent($courseId, $studentId);
             $success = 'Alumno quitado del curso.';
+            AdminAudit::log($me, 'course_remove_student', ['course_id' => $courseId, 'user_id' => $studentId]);
         } elseif ($action === 'create_group') {
             $name = trim((string) ($_POST['name'] ?? ''));
             if ($name === '') {
@@ -85,20 +106,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 Courses::createGroup($courseId, $name);
                 $success = 'Grupo creado.';
+                AdminAudit::log($me, 'group_create', ['course_id' => $courseId, 'name' => $name]);
             }
         } elseif ($action === 'delete_group') {
-            Courses::deleteGroup((int) ($_POST['group_id'] ?? 0));
+            $groupId = (int) ($_POST['group_id'] ?? 0);
+            Courses::deleteGroup($groupId);
             $success = 'Grupo eliminado.';
+            AdminAudit::log($me, 'group_delete', ['course_id' => $courseId, 'group_id' => $groupId]);
         } elseif ($action === 'add_group_member') {
-            $err = Courses::addGroupMemberByUsername(
-                (int) ($_POST['group_id'] ?? 0),
-                $courseId,
-                trim((string) ($_POST['username'] ?? ''))
-            );
-            if ($err) { $error = $err; } else { $success = 'Miembro agregado al grupo.'; }
+            $groupId = (int) ($_POST['group_id'] ?? 0);
+            $username = trim((string) ($_POST['username'] ?? ''));
+            $err = Courses::addGroupMemberByUsername($groupId, $courseId, $username);
+            if ($err) {
+                $error = $err;
+            } else {
+                $success = 'Miembro agregado al grupo.';
+                AdminAudit::log($me, 'group_add_member', ['course_id' => $courseId, 'group_id' => $groupId, 'username' => $username]);
+            }
         } elseif ($action === 'remove_group_member') {
-            Courses::removeGroupMember((int) ($_POST['group_id'] ?? 0), (int) ($_POST['user_id'] ?? 0));
+            $groupId = (int) ($_POST['group_id'] ?? 0);
+            $userId = (int) ($_POST['user_id'] ?? 0);
+            Courses::removeGroupMember($groupId, $userId);
             $success = 'Miembro quitado del grupo.';
+            AdminAudit::log($me, 'group_remove_member', ['course_id' => $courseId, 'group_id' => $groupId, 'user_id' => $userId]);
         }
     }
 }
@@ -136,6 +166,7 @@ if ($detailId !== null) {
         <details style="margin-top:0.6rem;">
             <summary>Editar</summary>
             <form method="post" style="margin-top:0.4rem;">
+            <?= csrf_field() ?>
                 <input type="hidden" name="form_action" value="rename_course">
                 <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                 <label>Nombre
@@ -144,6 +175,7 @@ if ($detailId !== null) {
                 <button type="submit" class="secondary">Guardar</button>
             </form>
             <form method="post" class="inline" style="margin-top:0.6rem;">
+            <?= csrf_field() ?>
                 <input type="hidden" name="form_action" value="toggle_active">
                 <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                 <button type="submit" class="secondary"><?= $course['active'] ? 'Archivar curso' : 'Activar curso' ?></button>
@@ -163,6 +195,7 @@ if ($detailId !== null) {
                 <td><?= htmlspecialchars($t['display_name']) ?></td>
                 <td>
                     <form method="post" class="inline">
+                    <?= csrf_field() ?>
                         <input type="hidden" name="form_action" value="remove_teacher">
                         <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                         <input type="hidden" name="user_id" value="<?= $t['id'] ?>">
@@ -176,6 +209,7 @@ if ($detailId !== null) {
             <?php endif; ?>
         </table>
         <form method="post" style="display:flex; gap:0.6rem; align-items:flex-end; margin-top:0.6rem;">
+        <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="add_teacher">
             <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
             <label style="flex:1; margin:0;">Agregar docente (username)
@@ -196,6 +230,7 @@ if ($detailId !== null) {
                 <td><a href="student.php?id=<?= $s['id'] ?>"><?= htmlspecialchars($s['display_name']) ?></a></td>
                 <td>
                     <form method="post" class="inline" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Quitar a ' . $s['username'] . ' del curso? También lo saca de cualquier grupo del curso.'), ENT_QUOTES) ?>);">
+                    <?= csrf_field() ?>
                         <input type="hidden" name="form_action" value="remove_student">
                         <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                         <input type="hidden" name="user_id" value="<?= $s['id'] ?>">
@@ -209,6 +244,7 @@ if ($detailId !== null) {
             <?php endif; ?>
         </table>
         <form method="post" style="display:flex; gap:0.6rem; align-items:flex-end; margin-top:0.6rem;">
+        <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="add_student">
             <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
             <label style="flex:1; margin:0;">Agregar alumno (username)
@@ -225,6 +261,7 @@ if ($detailId !== null) {
         <div style="border-top:1px solid #e5e5e5; padding-top:0.8rem; margin-top:0.8rem;">
             <strong><?= htmlspecialchars($g['name']) ?></strong> (<?= (int) $g['member_count'] ?> miembros)
             <form method="post" class="inline" style="margin-left:0.6rem;" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Eliminar el grupo ' . $g['name'] . '?'), ENT_QUOTES) ?>);">
+            <?= csrf_field() ?>
                 <input type="hidden" name="form_action" value="delete_group">
                 <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                 <input type="hidden" name="group_id" value="<?= $g['id'] ?>">
@@ -238,6 +275,7 @@ if ($detailId !== null) {
                     <td><?= htmlspecialchars($m['display_name']) ?></td>
                     <td>
                         <form method="post" class="inline">
+                        <?= csrf_field() ?>
                             <input type="hidden" name="form_action" value="remove_group_member">
                             <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                             <input type="hidden" name="group_id" value="<?= $g['id'] ?>">
@@ -249,6 +287,7 @@ if ($detailId !== null) {
                 <?php endforeach; ?>
             </table>
             <form method="post" style="display:flex; gap:0.6rem; align-items:flex-end;">
+            <?= csrf_field() ?>
                 <input type="hidden" name="form_action" value="add_group_member">
                 <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                 <input type="hidden" name="group_id" value="<?= $g['id'] ?>">
@@ -260,6 +299,7 @@ if ($detailId !== null) {
         </div>
         <?php endforeach; ?>
         <form method="post" style="display:flex; gap:0.6rem; align-items:flex-end; margin-top:0.8rem; border-top:1px solid #e5e5e5; padding-top:0.8rem;">
+        <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="create_group">
             <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
             <label style="flex:1; margin:0;">Nuevo grupo (nombre)
@@ -298,6 +338,7 @@ if (!$isFullAdmin) {
 <div class="card">
     <strong>Crear curso</strong>
     <form method="post">
+    <?= csrf_field() ?>
         <input type="hidden" name="form_action" value="create_course">
         <label>Nombre
             <input type="text" name="name" required>

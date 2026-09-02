@@ -6,6 +6,7 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/Metrics.php';
 require_once __DIR__ . '/../../src/Courses.php';
+require_once __DIR__ . '/../../src/AdminAudit.php';
 
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
@@ -154,6 +155,7 @@ if ($appointmentId !== null) {
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        Auth::requireCsrf();
         $postAction = (string) ($_POST['form_action'] ?? '');
 
         if ($postAction === 'reactivate_attendance') {
@@ -164,6 +166,7 @@ if ($appointmentId !== null) {
                      WHERE appointment_id = ? AND student_id = ? AND estado IN ('atendido', 'no_show')"
                 )->execute([$appointmentId, $reactUserId]);
                 $attByStudent[$reactUserId] = 'atendiendo';
+                AdminAudit::log($me, 'attendance_reactivate', ['appointment_id' => $appointmentId, 'student_id' => $reactUserId]);
             }
             header('Location: dashboard.php?appointment_id=' . $appointmentId . '#student-' . $reactUserId);
             exit;
@@ -193,6 +196,7 @@ if ($appointmentId !== null) {
                     $placeholders = implode(',', array_fill(0, count($idsToDelete), '?'));
                     $pdo->prepare("DELETE FROM action_logs WHERE id IN ({$placeholders})")->execute($idsToDelete);
                 }
+                AdminAudit::log($me, 'attendance_delete', ['appointment_id' => $appointmentId, 'student_id' => $delUserId, 'logs_deleted' => count($idsToDelete)]);
             }
             header('Location: dashboard.php?appointment_id=' . $appointmentId);
             exit;
@@ -203,8 +207,10 @@ if ($appointmentId !== null) {
                     "INSERT INTO app_config (k, v) VALUES (?, ?)
                      ON CONFLICT(k) DO UPDATE SET v = excluded.v, updated_at = CURRENT_TIMESTAMP"
                 )->execute([$referenceKey, json_encode(['appointment_id' => $appointmentId, 'user_id' => $refUserId])]);
+                AdminAudit::log($me, 'reference_mark', ['appointment_id' => $appointmentId, 'student_id' => $refUserId]);
             } elseif ($postAction === 'unmark_reference') {
                 $pdo->prepare('DELETE FROM app_config WHERE k = ?')->execute([$referenceKey]);
+                AdminAudit::log($me, 'reference_unmark', ['appointment_id' => $appointmentId]);
             }
         }
     }
@@ -293,6 +299,7 @@ if ($appointmentId !== null) {
         <?php endif; ?>
         <?php if ($referenceKey !== null && (int) $me['permission'] === Auth::PERMISSION_ADMIN): ?>
         <form method="post" class="inline" style="margin-left:0.6rem;">
+        <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="<?= $isReference ? 'unmark_reference' : 'mark_reference' ?>">
             <input type="hidden" name="user_id" value="<?= $uid ?>">
             <button type="submit" class="secondary" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;"><?= $isReference ? 'Quitar referencia' : 'Marcar como referencia' ?></button>
@@ -300,12 +307,14 @@ if ($appointmentId !== null) {
         <?php endif; ?>
         <?php if (in_array($curEstado, ['atendido', 'no_show'], true)): ?>
         <form method="post" class="inline" style="margin-left:0.6rem;" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Reactivar la atención de ' . ($student['display_name'] ?? ('Alumno #' . $uid)) . '? Vuelve a quedar "atendiendo" para que el alumno la retome, sin crear una cita/ronda nueva.'), ENT_QUOTES) ?>);">
+        <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="reactivate_attendance">
             <input type="hidden" name="user_id" value="<?= $uid ?>">
             <button type="submit" class="secondary" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;">Reactivar atención</button>
         </form>
         <?php endif; ?>
         <form method="post" class="inline" style="margin-left:0.6rem;" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Eliminar el resultado de ' . ($student['display_name'] ?? ('Alumno #' . $uid)) . ' para esta cita? Se borran su atención y sus acciones registradas para esta cita. No se puede deshacer.'), ENT_QUOTES) ?>);">
+        <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="delete_attendance">
             <input type="hidden" name="user_id" value="<?= $uid ?>">
             <button type="submit" class="danger" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;">Eliminar resultado</button>
