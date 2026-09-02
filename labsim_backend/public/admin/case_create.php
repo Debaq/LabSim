@@ -41,6 +41,23 @@ function zip_pairs(array $od, array $oi): array
     return $out;
 }
 
+// Geometría del audiograma SVG de más abajo (dibujado en el navegador, ver
+// <script> al final) -- escala logarítmica en frecuencia (así 3000/6000 caen
+// a mitad de camino entre sus octavas, como en un audiograma real) y lineal
+// en dB HL, -10 arriba (mejor audición) a 120 abajo. Mismo plot box (32,10)-(312,276)
+// que usan drawAudiogram()/xPos()/yPos() en JS -- si se cambia acá, cambiar allá también.
+function audiogram_x(float $freq): float
+{
+    $minLog = log(125, 2);
+    $maxLog = log(8000, 2);
+    return 32 + (log($freq, 2) - $minLog) / ($maxLog - $minLog) * 280;
+}
+function audiogram_y(float $db): float
+{
+    $db = max(-10, min(120, $db));
+    return 10 + ($db - (-10)) / 130 * 266;
+}
+
 $error = null;
 $v = $_POST; // sticky form: se redibuja con lo ya tipeado, tanto al generar nombre como si falla la validación
 
@@ -198,12 +215,53 @@ admin_header('Crear caso clínico', $me);
     fieldset { border: 1px solid #e5e5e5; border-radius: 6px; margin: 1rem 0; padding: 0.8rem 1rem; }
     legend { font-weight: 600; padding: 0 0.4rem; }
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    /* Fichas (tabs): cada <div class="tab-panel"> es una pestaña del caso.
+       Sin JS quedan todas visibles apiladas (igual que antes) -- degrada
+       con gracia en vez de esconder campos que el navegador no puede volver
+       a mostrar. */
+    .tabs { display: flex; flex-wrap: wrap; gap: 0.2rem; border-bottom: 2px solid #e5e5e5; margin-bottom: 1.2rem; }
+    .tab-btn { padding: 0.6rem 1.1rem; border: none; background: none; cursor: pointer; font-weight: 600;
+               font-size: 0.9rem; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+    .tab-btn:hover { color: #1a2744; }
+    .tab-btn.active { color: #1a2744; border-bottom-color: #1a2744; }
+    .tab-btn .tab-error-dot { display: inline-block; width: 0.4rem; height: 0.4rem; border-radius: 50%; background: #a33; margin-left: 0.3rem; }
+    body.js-tabs .tab-panel { display: none; }
+    body.js-tabs .tab-panel.active { display: block; }
+
+    /* Ficha Audiometría: gráfico fijo a la izquierda mientras se scrollea
+       la planilla de umbrales a la derecha. */
+    .audiometria-layout { display: grid; grid-template-columns: 300px 1fr; gap: 1.2rem; align-items: start; }
+    .audiogram-card { position: sticky; top: 1rem; }
+    @media (max-width: 960px) {
+        .audiometria-layout { grid-template-columns: 1fr; }
+        .audiogram-card { position: static; }
+    }
+    .audiogram-legend { display: flex; flex-wrap: wrap; gap: 0.7rem; font-size: 0.75rem; color: #555; margin-top: 0.5rem; }
+    .audiogram-legend span { display: inline-flex; align-items: center; gap: 0.3rem; }
+
+    /* Agrupa campos por oído (OD/OI) dentro de una misma card -- reemplaza
+       tener una card aparte por cada tipo de prueba. */
+    .side-block { margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px solid #eee; }
+    .side-block:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+    .side-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 0.8rem; margin-bottom: 0.4rem; }
+    .side-tag { display: inline-block; font-weight: 700; font-size: 0.78rem; padding: 0.2rem 0.55rem; border-radius: 4px; background: #eef0f4; color: #555; }
+    .side-tag.od { color: #b33a3a; }
+    .side-tag.oi { color: #2255aa; }
 </style>
 
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 
 <form method="post" id="case-form">
 <?= csrf_field() ?>
+<div class="tabs" role="tablist">
+    <button type="button" class="tab-btn active" data-tab="paciente">Paciente</button>
+    <button type="button" class="tab-btn" data-tab="audiometria">Audiometría</button>
+    <button type="button" class="tab-btn" data-tab="timpanometria">Timpanometría</button>
+    <button type="button" class="tab-btn" data-tab="anamnesis">Anamnesis</button>
+</div>
+
+<div class="tab-panel active" data-tab="paciente">
 <div class="card">
     <strong>Paciente</strong>
     <label class="inline-check"><input type="radio" name="gender" value="0" <?= ($v['gender'] ?? '0') === '0' ? 'checked' : '' ?>> Hombre</label>
@@ -227,45 +285,77 @@ admin_header('Crear caso clínico', $me);
     </div>
     <button type="submit" name="form_action" value="generate_name" class="secondary">Generar nombre al azar</button>
 </div>
-
-<?php
-$series = ['aerea' => 'Vía aérea', 'osea' => 'Vía ósea', 'ldl' => 'LDL (umbral de disconfort)'];
-foreach ($series as $key => $label):
-?>
-<div class="card">
-    <strong><?= htmlspecialchars($label) ?></strong>
-    <?php if ($key === 'osea'): ?>
-    <label class="inline-check"><input type="checkbox" class="igualar-toggle" data-side="od" name="igualar[od]" <?= isset($v['igualar']['od']) ? 'checked' : '' ?>> Igualar OD a vía aérea</label>
-    <label class="inline-check"><input type="checkbox" class="igualar-toggle" data-side="oi" name="igualar[oi]" <?= isset($v['igualar']['oi']) ? 'checked' : '' ?>> Igualar OI a vía aérea</label>
-    <?php endif; ?>
-    <?php if ($key === 'ldl'): ?>
-    <label class="inline-check"><input type="checkbox" class="ldl-toggle" data-side="od" name="ldl_habilitado[od]" <?= isset($v['ldl_habilitado']['od']) ? 'checked' : '' ?>> Medido OD</label>
-    <label class="inline-check"><input type="checkbox" class="ldl-toggle" data-side="oi" name="ldl_habilitado[oi]" <?= isset($v['ldl_habilitado']['oi']) ? 'checked' : '' ?>> Medido OI</label>
-    <p class="legend">Sin marcar = no medido, se guarda como ausente (130) sin importar lo que quede escrito abajo.</p>
-    <?php endif; ?>
-    <table class="grid-table">
-        <tr><th></th><?php foreach (CaseBuilder::FREQUENCIES as $f): ?><th><?= $f ?> Hz</th><?php endforeach; ?></tr>
-        <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
-        <tr>
-            <td class="side-label"><?= $sideLabel ?></td>
-            <?php foreach (CaseBuilder::FREQUENCIES as $n => $freq):
-                $default = $key === 'ldl' ? 130 : 0;
-                $val = fv($v, [$key, $side, (string) $n], $default);
-            ?>
-            <td><input type="number" step="5" min="-10" max="130"
-                       id="<?= $key ?>_<?= $side ?>_<?= $n ?>"
-                       name="<?= $key ?>[<?= $side ?>][<?= $n ?>]"
-                       value="<?= htmlspecialchars((string) $val) ?>"></td>
-            <?php endforeach; ?>
-        </tr>
-        <?php endforeach; ?>
-    </table>
 </div>
-<?php endforeach; ?>
+
+<div class="tab-panel" data-tab="audiometria">
+<div class="audiometria-layout">
+
+<div class="audiogram-card card">
+    <strong>Audiograma</strong>
+    <svg id="audiogram-svg" viewBox="0 0 320 300" style="width:100%; height:auto; margin-top:0.5rem;">
+        <rect x="32" y="10" width="280" height="266" fill="none" stroke="#ccc"></rect>
+        <?php foreach ([0, 20, 40, 60, 80, 100, 120] as $db):
+            $y = audiogram_y($db);
+        ?>
+        <line x1="32" y1="<?= $y ?>" x2="312" y2="<?= $y ?>" stroke="#eee"></line>
+        <text x="28" y="<?= $y + 3 ?>" text-anchor="end" font-size="8" fill="#666"><?= $db ?></text>
+        <?php endforeach; ?>
+        <?php
+        $freqLabels = [125 => '125', 250 => '250', 500 => '500', 1000 => '1K', 2000 => '2K', 3000 => '3K', 4000 => '4K', 6000 => '6K', 8000 => '8K'];
+        foreach (CaseBuilder::FREQUENCIES as $freq):
+            $x = audiogram_x($freq);
+        ?>
+        <line x1="<?= $x ?>" y1="10" x2="<?= $x ?>" y2="276" stroke="#f2f2f2"></line>
+        <text x="<?= $x ?>" y="288" text-anchor="middle" font-size="8" fill="#666"><?= $freqLabels[$freq] ?></text>
+        <?php endforeach; ?>
+        <text x="4" y="14" font-size="8" fill="#888">dB HL</text>
+        <g id="audiogram-data"></g>
+    </svg>
+    <div class="audiogram-legend">
+        <span><svg width="12" height="12"><circle cx="6" cy="6" r="4" fill="none" stroke="#b33a3a" stroke-width="1.4"></circle></svg> Aérea OD</span>
+        <span><svg width="12" height="12"><line x1="2" y1="2" x2="10" y2="10" stroke="#2255aa" stroke-width="1.4"></line><line x1="2" y1="10" x2="10" y2="2" stroke="#2255aa" stroke-width="1.4"></line></svg> Aérea OI</span>
+        <span><svg width="12" height="12"><polyline points="9,2 3,6 9,10" fill="none" stroke="#b33a3a" stroke-width="1.4"></polyline></svg> Ósea OD</span>
+        <span><svg width="12" height="12"><polyline points="3,2 9,6 3,10" fill="none" stroke="#2255aa" stroke-width="1.4"></polyline></svg> Ósea OI</span>
+    </div>
+    <p class="legend">Se dibuja solo con los valores de vía aérea/ósea de la derecha.</p>
+</div>
+
+<div class="audiometria-fields">
+<?php $seriesShort = ['aerea' => 'Aérea', 'osea' => 'Ósea', 'ldl' => 'LDL']; ?>
+<div class="card">
+    <strong>Umbrales tonales</strong>
+    <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
+    <div class="side-block">
+        <div class="side-heading">
+            <span class="side-tag <?= $side ?>"><?= $sideLabel ?></span>
+            <label class="inline-check"><input type="checkbox" class="igualar-toggle" data-side="<?= $side ?>" name="igualar[<?= $side ?>]" <?= isset($v['igualar'][$side]) ? 'checked' : '' ?>> Igualar ósea a aérea</label>
+            <label class="inline-check"><input type="checkbox" class="ldl-toggle" data-side="<?= $side ?>" name="ldl_habilitado[<?= $side ?>]" <?= isset($v['ldl_habilitado'][$side]) ? 'checked' : '' ?>> LDL medido</label>
+        </div>
+        <table class="grid-table">
+            <tr><th></th><?php foreach (CaseBuilder::FREQUENCIES as $f): ?><th><?= $f ?> Hz</th><?php endforeach; ?></tr>
+            <?php foreach ($seriesShort as $key => $label): ?>
+            <tr>
+                <td class="side-label"><?= $label ?></td>
+                <?php foreach (CaseBuilder::FREQUENCIES as $n => $freq):
+                    $default = $key === 'ldl' ? 130 : 0;
+                    $val = fv($v, [$key, $side, (string) $n], $default);
+                ?>
+                <td><input type="number" step="5" min="-10" max="130"
+                           id="<?= $key ?>_<?= $side ?>_<?= $n ?>"
+                           name="<?= $key ?>[<?= $side ?>][<?= $n ?>]"
+                           value="<?= htmlspecialchars((string) $val) ?>"></td>
+                <?php endforeach; ?>
+            </tr>
+            <?php endforeach; ?>
+        </table>
+    </div>
+    <?php endforeach; ?>
+    <p class="legend">LDL sin marcar = no medido, se guarda como ausente (130) sin importar lo que quede escrito arriba.</p>
+</div>
 
 <div class="card">
-    <strong>SDT / SRT (logoaudiometría)</strong>
-    <table class="grid-table">
+    <strong>Logoaudiometría y pruebas especiales</strong>
+    <table class="grid-table" style="margin-bottom:1rem;">
         <tr><th></th><th>SDT</th><th>SRT</th></tr>
         <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
         <tr>
@@ -281,47 +371,48 @@ foreach ($series as $key => $label):
         </tr>
         <?php endforeach; ?>
     </table>
-    <p class="legend">Auto = mejor promedio de 2 de 3 (500/1000/2000 Hz vía aérea), redondeado a múltiplo de 5. Destildar para escribir un valor manual.</p>
-</div>
 
-<div class="card">
-    <strong>Otras pruebas</strong>
     <div class="two-col">
-        <div>
-            <label>UMD OD (int / %)
-                <input type="number" step="5" name="umd_int[od]" value="<?= htmlspecialchars((string) fv($v, ['umd_int', 'od'], 35)) ?>" style="width:5rem; display:inline-block;">
-                / <input type="number" step="5" name="umd_pct[od]" value="<?= htmlspecialchars((string) fv($v, ['umd_pct', 'od'], 100)) ?>" style="width:5rem; display:inline-block;">
+        <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
+        <div class="side-block">
+            <div class="side-heading"><span class="side-tag <?= $side ?>"><?= $sideLabel ?></span></div>
+            <label>UMD (int / %)
+                <input type="number" step="5" name="umd_int[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_int', $side], 35)) ?>" style="width:5rem; display:inline-block;">
+                / <input type="number" step="5" name="umd_pct[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_pct', $side], 100)) ?>" style="width:5rem; display:inline-block;">
             </label>
-            <label>UMD OI (int / %)
-                <input type="number" step="5" name="umd_int[oi]" value="<?= htmlspecialchars((string) fv($v, ['umd_int', 'oi'], 35)) ?>" style="width:5rem; display:inline-block;">
-                / <input type="number" step="5" name="umd_pct[oi]" value="<?= htmlspecialchars((string) fv($v, ['umd_pct', 'oi'], 100)) ?>" style="width:5rem; display:inline-block;">
-            </label>
-            <label>SISI OD <input type="number" step="5" name="sisi[od]" value="<?= htmlspecialchars((string) fv($v, ['sisi', 'od'], 0)) ?>"></label>
-            <label>SISI OI <input type="number" step="5" name="sisi[oi]" value="<?= htmlspecialchars((string) fv($v, ['sisi', 'oi'], 0)) ?>"></label>
-            <label class="inline-check"><input type="checkbox" name="stenger[od]" <?= isset($v['stenger']['od']) ? 'checked' : '' ?>> Stenger OD</label>
-            <label class="inline-check"><input type="checkbox" name="stenger[oi]" <?= isset($v['stenger']['oi']) ? 'checked' : '' ?>> Stenger OI</label>
-            <label class="inline-check"><input type="checkbox" name="recruit[od]" <?= isset($v['recruit']['od']) ? 'checked' : '' ?>> Reclutamiento OD</label>
-            <label class="inline-check"><input type="checkbox" name="recruit[oi]" <?= isset($v['recruit']['oi']) ? 'checked' : '' ?>> Reclutamiento OI</label>
-            <label class="inline-check"><input type="checkbox" name="decay[od]" <?= isset($v['decay']['od']) ? 'checked' : '' ?>> Decay OD</label>
-            <label class="inline-check"><input type="checkbox" name="decay[oi]" <?= isset($v['decay']['oi']) ? 'checked' : '' ?>> Decay OI</label>
+            <label>SISI <input type="number" step="5" name="sisi[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['sisi', $side], 0)) ?>"></label>
+            <label class="inline-check"><input type="checkbox" name="stenger[<?= $side ?>]" <?= isset($v['stenger'][$side]) ? 'checked' : '' ?>> Stenger</label>
+            <label class="inline-check"><input type="checkbox" name="recruit[<?= $side ?>]" <?= isset($v['recruit'][$side]) ? 'checked' : '' ?>> Reclutamiento</label>
+            <label class="inline-check"><input type="checkbox" name="decay[<?= $side ?>]" <?= isset($v['decay'][$side]) ? 'checked' : '' ?>> Decay</label>
         </div>
-        <div>
-            <label>Fowler -- frecuencia
+        <?php endforeach; ?>
+    </div>
+
+    <div class="side-block">
+        <div class="side-heading"><span class="side-tag">Fowler</span></div>
+        <div class="two-col">
+            <label>Frecuencia
                 <select name="fowler_freq">
                     <?php foreach (CaseBuilder::FREQUENCIES as $i => $f): ?>
                     <option value="<?= $i ?>" <?= (int) ($v['fowler_freq'] ?? 0) === $i ? 'selected' : '' ?>><?= $f ?> Hz</option>
                     <?php endforeach; ?>
                 </select>
             </label>
-            <label>Cortes Fowler
+            <label>Cortes
                 <input type="number" name="fowler_cut1" value="<?= htmlspecialchars((string) ($v['fowler_cut1'] ?? 15)) ?>" style="width:4rem; display:inline-block;">
                 <input type="number" name="fowler_cut2" value="<?= htmlspecialchars((string) ($v['fowler_cut2'] ?? 30)) ?>" style="width:4rem; display:inline-block;">
                 <input type="number" name="fowler_cut3" value="<?= htmlspecialchars((string) ($v['fowler_cut3'] ?? 50)) ?>" style="width:4rem; display:inline-block;">
             </label>
         </div>
     </div>
+    <p class="legend">Auto (SDT/SRT) = mejor promedio de 2 de 3 (500/1000/2000 Hz vía aérea), redondeado a múltiplo de 5. Destildar para escribir un valor manual.</p>
+</div>
 </div>
 
+</div>
+</div>
+
+<div class="tab-panel" data-tab="timpanometria">
 <div class="card">
     <strong>Timpanometría (Z)</strong>
     <div class="two-col">
@@ -376,7 +467,9 @@ foreach ($series as $key => $label):
     </table>
     <?php endforeach; ?>
 </div>
+</div>
 
+<div class="tab-panel" data-tab="anamnesis">
 <div class="card">
     <strong>Anamnesis</strong>
     <?php
@@ -398,6 +491,7 @@ foreach ($series as $key => $label):
         <textarea name="otros" rows="2" style="width:100%; padding:0.45rem; margin-top:0.2rem; border:1px solid #ccc; border-radius:4px;"><?= htmlspecialchars((string) ($v['otros'] ?? '')) ?></textarea>
     </label>
 </div>
+</div>
 
 <div class="card">
     <button type="submit" name="form_action" value="create_case">Crear caso</button>
@@ -406,6 +500,124 @@ foreach ($series as $key => $label):
 </form>
 
 <script>
+// Tabs de fichas -- se activan solo si corre JS (body.js-tabs), así sin JS
+// el form queda igual que antes: todas las secciones apiladas y visibles.
+(function () {
+    var tabButtons = document.querySelectorAll('.tab-btn');
+    var tabPanels = document.querySelectorAll('.tab-panel');
+    if (!tabButtons.length || !tabPanels.length) return;
+
+    document.body.classList.add('js-tabs');
+
+    function activate(name) {
+        tabButtons.forEach(function (btn) { btn.classList.toggle('active', btn.dataset.tab === name); });
+        tabPanels.forEach(function (panel) { panel.classList.toggle('active', panel.dataset.tab === name); });
+    }
+
+    tabButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () { activate(btn.dataset.tab); });
+    });
+
+    // Si el usuario llega con un campo inválido dentro de una ficha oculta,
+    // el navegador la deja invisible y el submit falla en silencio -- al
+    // interceptar el evento se salta a la ficha que tiene el campo inválido.
+    document.getElementById('case-form').addEventListener('invalid', function (e) {
+        var panel = e.target.closest('.tab-panel');
+        if (panel) activate(panel.dataset.tab);
+    }, true);
+})();
+
+// Audiograma: se redibuja solo con lo que hay en los campos de vía
+// aérea/ósea -- mismas coordenadas (log de frecuencia, -10..120 dB HL)
+// que audiogram_x()/audiogram_y() en PHP, que dibujan la grilla fija de
+// fondo. Símbolos clínicos estándar: círculo/cruz = aérea OD/OI (rojo/azul),
+// "<"/">"= ósea OD/OI.
+window.drawAudiogram = (function () {
+    var NS = 'http://www.w3.org/2000/svg';
+    var MIN_LOG = Math.log(125) / Math.LN2;
+    var MAX_LOG = Math.log(8000) / Math.LN2;
+    var FREQS = [125, 250, 500, 1000, 2000, 3000, 4000, 6000, 8000];
+
+    function xPos(freq) { return 32 + (Math.log(freq) / Math.LN2 - MIN_LOG) / (MAX_LOG - MIN_LOG) * 280; }
+    function yPos(db) {
+        db = Math.max(-10, Math.min(120, db));
+        return 10 + (db - (-10)) / 130 * 266;
+    }
+    function readVals(key, side) {
+        var vals = [];
+        for (var n = 0; n < FREQS.length; n++) {
+            var el = document.getElementById(key + '_' + side + '_' + n);
+            vals.push(el ? (parseInt(el.value, 10) || 0) : 0);
+        }
+        return vals;
+    }
+    function makeCross(x, y, color) {
+        var g = document.createElementNS(NS, 'g');
+        var r = 4.5;
+        [[x - r, y - r, x + r, y + r], [x - r, y + r, x + r, y - r]].forEach(function (c) {
+            var l = document.createElementNS(NS, 'line');
+            l.setAttribute('x1', c[0]); l.setAttribute('y1', c[1]); l.setAttribute('x2', c[2]); l.setAttribute('y2', c[3]);
+            l.setAttribute('stroke', color); l.setAttribute('stroke-width', '1.5');
+            g.appendChild(l);
+        });
+        return g;
+    }
+    function makeCircle(x, y, color) {
+        var c = document.createElementNS(NS, 'circle');
+        c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 4.5);
+        c.setAttribute('fill', 'none'); c.setAttribute('stroke', color); c.setAttribute('stroke-width', '1.5');
+        return c;
+    }
+    function makeBracket(x, y, color, dir) {
+        var r = 4.5;
+        var pts = dir === 'left'
+            ? (x + r) + ',' + (y - r) + ' ' + (x - r) + ',' + y + ' ' + (x + r) + ',' + (y + r)
+            : (x - r) + ',' + (y - r) + ' ' + (x + r) + ',' + y + ' ' + (x - r) + ',' + (y + r);
+        var p = document.createElementNS(NS, 'polyline');
+        p.setAttribute('points', pts);
+        p.setAttribute('fill', 'none'); p.setAttribute('stroke', color); p.setAttribute('stroke-width', '1.5');
+        return p;
+    }
+
+    var SERIES = [
+        { key: 'aerea', side: 'od', color: '#b33a3a', line: true, make: makeCircle },
+        { key: 'aerea', side: 'oi', color: '#2255aa', line: true, make: makeCross },
+        { key: 'osea', side: 'od', color: '#b33a3a', line: false, make: function (x, y, c) { return makeBracket(x, y, c, 'left'); } },
+        { key: 'osea', side: 'oi', color: '#2255aa', line: false, make: function (x, y, c) { return makeBracket(x, y, c, 'right'); } },
+    ];
+
+    return function drawAudiogram() {
+        var group = document.getElementById('audiogram-data');
+        if (!group) return;
+        while (group.firstChild) group.removeChild(group.firstChild);
+
+        SERIES.forEach(function (s) {
+            var points = readVals(s.key, s.side).map(function (v, i) { return [xPos(FREQS[i]), yPos(v)]; });
+            if (s.line) {
+                var poly = document.createElementNS(NS, 'polyline');
+                poly.setAttribute('points', points.map(function (p) { return p.join(','); }).join(' '));
+                poly.setAttribute('fill', 'none');
+                poly.setAttribute('stroke', s.color);
+                poly.setAttribute('stroke-width', '1.3');
+                group.appendChild(poly);
+            }
+            points.forEach(function (p) { group.appendChild(s.make(p[0], p[1], s.color)); });
+        });
+    };
+})();
+
+(function () {
+    var form = document.getElementById('case-form');
+    if (!form) return;
+    // Delegado: cubre tipeo directo en vía aérea/ósea. El caso de "igualar"
+    // (que escribe osea.value por JS sin evento input) se cubre aparte,
+    // llamando drawAudiogram() desde syncOsea() más abajo.
+    form.addEventListener('input', function (e) {
+        if (e.target.id && /^(aerea|osea)_/.test(e.target.id)) window.drawAudiogram();
+    });
+    window.drawAudiogram();
+})();
+
 // Ayuda visual en vivo -- el servidor recalcula todo igual al enviar,
 // así que si JS falla el caso igual queda bien formado.
 (function () {
@@ -431,6 +643,7 @@ foreach ($series as $key => $label):
                 var o = document.getElementById('osea_' + side + '_' + n);
                 if (a && o) { o.value = a.value; o.readOnly = true; }
             }
+            if (window.drawAudiogram) window.drawAudiogram();
         }
         function unlockOsea() {
             for (var n = 0; n < 9; n++) {
