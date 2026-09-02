@@ -19,6 +19,12 @@ final class CaseBuilder
     // junto a la frecuencia de matching (se reusa CaseBuilder::FREQUENCIES).
     public const TINNITUS_RUIDO_OPTIONS = ['Silbido', 'Zumbido', 'Siseo', 'Pitido', 'Campanilleo'];
 
+    // Lateralidad del tinnitus -- independiente de permanente/ocasional (un
+    // acufeno unilateral puede ser permanente igual que uno bilateral).
+    // "unilateral" pide oído; "bilateral" admite predominio (asimetría).
+    public const TINNITUS_LATERALIDAD_OPTIONS = ['craneal', 'unilateral', 'bilateral'];
+    public const TINNITUS_PREDOMINIO_OPTIONS = ['igual', 'od', 'oi'];
+
     public static function nextCaseId(PDO $pdo): string
     {
         $max = (int) $pdo->query('SELECT MAX(CAST(id AS INTEGER)) FROM cases')->fetchColumn();
@@ -249,12 +255,14 @@ final class CaseBuilder
 
         $tinnitus = $data['Tinnitus'] ?? [];
         $v['tinnitus'] = [];
-        foreach (['craneal', 'bilateral', 'pulsatil', 'permanente'] as $flag) {
+        foreach (['pulsatil', 'permanente'] as $flag) {
             if (!empty($tinnitus[$flag])) {
                 $v['tinnitus'][$flag] = '1';
             }
         }
+        $v['tinnitus']['lateralidad'] = $tinnitus['lateralidad'] ?? 'craneal';
         $v['tinnitus']['oido'] = $tinnitus['oido'] ?? 'od';
+        $v['tinnitus']['predominio'] = $tinnitus['predominio'] ?? 'igual';
         $v['tinnitus']['ruido'] = $tinnitus['ruido'] ?? self::TINNITUS_RUIDO_OPTIONS[0];
         $v['tinnitus']['frecuencia'] = (string) ($tinnitus['frecuencia'] ?? self::FREQUENCIES[0]);
 

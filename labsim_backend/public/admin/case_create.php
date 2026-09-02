@@ -222,12 +222,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $etfOi = (string) ($v['etf_oi'] ?? 'Normal');
         $fowlerFreq = (int) ($v['fowler_freq'] ?? 0);
 
-        // Acufenometría: craneal/bilateral/pulsátil/permanente son "el
-        // comportamiento" (checkboxes, no excluyentes). Si NO es permanente
-        // (osea, ocasional) el acufeno se ubica en un solo oído -- hay que
-        // saber cuál. Ruido + frecuencia (matching, Hz) son "la forma".
-        $tinnitusPermanente = isset($v['tinnitus']['permanente']);
+        // Acufenometría: lateralidad (craneal/unilateral/bilateral) es
+        // independiente de permanente/ocasional -- un tinnitus unilateral
+        // puede ser permanente igual que uno bilateral. Solo "unilateral"
+        // pide oído; "bilateral" admite predominio (asimetría), opcional.
+        // Pulsátil es otro flag aparte. Ruido + frecuencia (matching, Hz)
+        // son "la forma".
+        $tinnitusLateralidad = (string) ($v['tinnitus']['lateralidad'] ?? 'craneal');
         $tinnitusOido = (string) ($v['tinnitus']['oido'] ?? 'od');
+        $tinnitusPredominio = (string) ($v['tinnitus']['predominio'] ?? 'igual');
+        $tinnitusPermanente = isset($v['tinnitus']['permanente']);
         $tinnitusRuido = (string) ($v['tinnitus']['ruido'] ?? CaseBuilder::TINNITUS_RUIDO_OPTIONS[0]);
         $tinnitusFrecuencia = (int) ($v['tinnitus']['frecuencia'] ?? CaseBuilder::FREQUENCIES[0]);
 
@@ -241,8 +245,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Valor de ETF inválido.';
         } elseif ($fowlerFreq < 0 || $fowlerFreq > 8) {
             $error = 'Frecuencia de Fowler inválida.';
-        } elseif (!$tinnitusPermanente && !in_array($tinnitusOido, ['od', 'oi'], true)) {
-            $error = 'Falta el oído del tinnitus (no es permanente, hay que indicar cuál).';
+        } elseif (!in_array($tinnitusLateralidad, CaseBuilder::TINNITUS_LATERALIDAD_OPTIONS, true)) {
+            $error = 'Lateralidad del tinnitus inválida.';
+        } elseif ($tinnitusLateralidad === 'unilateral' && !in_array($tinnitusOido, ['od', 'oi'], true)) {
+            $error = 'Falta el oído del tinnitus (unilateral, hay que indicar cuál).';
+        } elseif (!in_array($tinnitusPredominio, CaseBuilder::TINNITUS_PREDOMINIO_OPTIONS, true)) {
+            $error = 'Predominio del tinnitus inválido.';
         } elseif (!in_array($tinnitusRuido, CaseBuilder::TINNITUS_RUIDO_OPTIONS, true)) {
             $error = 'Tipo de ruido del tinnitus inválido.';
         } elseif (!in_array($tinnitusFrecuencia, CaseBuilder::FREQUENCIES, true)) {
@@ -285,11 +293,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'etf_od' => $etfOd,
                 'etf_oi' => $etfOi,
                 'tinnitus' => [
-                    'craneal' => isset($v['tinnitus']['craneal']),
-                    'bilateral' => isset($v['tinnitus']['bilateral']),
+                    'lateralidad' => $tinnitusLateralidad,
+                    'oido' => $tinnitusLateralidad === 'unilateral' ? $tinnitusOido : null,
+                    'predominio' => $tinnitusLateralidad === 'bilateral' ? $tinnitusPredominio : null,
                     'pulsatil' => isset($v['tinnitus']['pulsatil']),
                     'permanente' => $tinnitusPermanente,
-                    'oido' => $tinnitusPermanente ? null : $tinnitusOido,
                     'ruido' => $tinnitusRuido,
                     'frecuencia' => $tinnitusFrecuencia,
                 ],
@@ -758,16 +766,33 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <div class="tab-panel" data-tab="tinnitus">
 <div class="card">
     <strong>Tinnitus (acufenometría)</strong>
-    <p class="legend">Comportamiento: craneal/bilateral/pulsátil son independientes entre sí. Si no es permanente, el acufeno se ubica en un solo oído. Forma: tipo de ruido + frecuencia de matching.</p>
-    <label class="inline-check"><input type="checkbox" name="tinnitus[craneal]" <?= isset($v['tinnitus']['craneal']) ? 'checked' : '' ?>> Craneal</label>
-    <label class="inline-check"><input type="checkbox" name="tinnitus[bilateral]" <?= isset($v['tinnitus']['bilateral']) ? 'checked' : '' ?>> Bilateral</label>
-    <label class="inline-check"><input type="checkbox" name="tinnitus[pulsatil]" <?= isset($v['tinnitus']['pulsatil']) ? 'checked' : '' ?>> Pulsátil</label>
-    <label class="inline-check"><input type="checkbox" id="tinnitus-permanente" name="tinnitus[permanente]" <?= isset($v['tinnitus']['permanente']) ? 'checked' : '' ?>> Permanente (sin marcar = ocasional)</label>
+    <p class="legend">Lateralidad y permanente/ocasional son independientes (un tinnitus unilateral puede ser permanente igual que uno bilateral). Unilateral pide oído; bilateral admite predominio (asimetría). Forma: tipo de ruido + frecuencia de matching.</p>
+    <?php $tinLateralidad = $v['tinnitus']['lateralidad'] ?? 'craneal'; ?>
+    <div class="two-col">
+        <label>Lateralidad
+            <select id="tinnitus-lateralidad" name="tinnitus[lateralidad]">
+                <?php $lateralidadLabels = ['craneal' => 'Craneal', 'unilateral' => 'Unilateral', 'bilateral' => 'Bilateral']; ?>
+                <?php foreach ($lateralidadLabels as $opt => $optLabel): ?>
+                <option value="<?= $opt ?>" <?= $tinLateralidad === $opt ? 'selected' : '' ?>><?= $optLabel ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label class="inline-check" style="margin-top:1.4rem;"><input type="checkbox" name="tinnitus[pulsatil]" <?= isset($v['tinnitus']['pulsatil']) ? 'checked' : '' ?>> Pulsátil</label>
+        <label class="inline-check" style="margin-top:1.4rem;"><input type="checkbox" name="tinnitus[permanente]" <?= isset($v['tinnitus']['permanente']) ? 'checked' : '' ?>> Permanente (sin marcar = ocasional)</label>
+    </div>
     <div class="two-col" style="margin-top:0.6rem;">
-        <label id="tinnitus-oido-field">Oído (si no es permanente)
+        <label id="tinnitus-oido-field" data-show-for="unilateral">Oído
             <select name="tinnitus[oido]">
                 <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $opt => $optLabel): ?>
                 <option value="<?= $opt ?>" <?= ($v['tinnitus']['oido'] ?? 'od') === $opt ? 'selected' : '' ?>><?= $optLabel ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label id="tinnitus-predominio-field" data-show-for="bilateral">Predominio
+            <select name="tinnitus[predominio]">
+                <?php $predominioLabels = ['igual' => 'Igual en ambos', 'od' => 'Mayor en OD', 'oi' => 'Mayor en OI']; ?>
+                <?php foreach ($predominioLabels as $opt => $optLabel): ?>
+                <option value="<?= $opt ?>" <?= ($v['tinnitus']['predominio'] ?? 'igual') === $opt ? 'selected' : '' ?>><?= $optLabel ?></option>
                 <?php endforeach; ?>
             </select>
         </label>
@@ -849,6 +874,24 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         var panel = e.target.closest('.tab-panel');
         if (panel) activate(panel.dataset.tab);
     }, true);
+})();
+
+// Tinnitus: oído solo aplica si es unilateral, predominio solo si es
+// bilateral -- sin JS quedan ambos campos visibles (degradan con gracia,
+// el backend ya ignora el que no corresponda según la lateralidad elegida).
+(function () {
+    var select = document.getElementById('tinnitus-lateralidad');
+    if (!select) return;
+    var fields = document.querySelectorAll('[data-show-for]');
+
+    function update() {
+        fields.forEach(function (field) {
+            field.style.display = field.dataset.showFor === select.value ? '' : 'none';
+        });
+    }
+
+    select.addEventListener('change', update);
+    update();
 })();
 
 // Audiograma: se redibuja solo con lo que hay en los campos de vía
