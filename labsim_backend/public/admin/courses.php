@@ -186,7 +186,7 @@ if ($detailId !== null) {
 
     <?php if ($isFullAdmin): ?>
     <div class="card">
-        <strong>Docentes (<?= count($teachers = Courses::teachers($course['id'])) ?>)</strong>
+        <strong>Docentes (<?= count($teachers = Courses::teachers((int) $course['id'])) ?>)</strong>
         <table>
             <tr><th>Usuario</th><th>Nombre</th><th></th></tr>
             <?php foreach ($teachers as $t): ?>
@@ -221,7 +221,7 @@ if ($detailId !== null) {
     <?php endif; ?>
 
     <div class="card">
-        <strong>Alumnos matriculados (<?= count($students = Courses::students($course['id'])) ?>)</strong>
+        <strong>Alumnos matriculados (<?= count($students = Courses::students((int) $course['id'])) ?>)</strong>
         <table>
             <tr><th>Usuario</th><th>Nombre</th><th></th></tr>
             <?php foreach ($students as $s): ?>
@@ -257,7 +257,7 @@ if ($detailId !== null) {
     <div class="card">
         <strong>Grupos</strong>
         <p style="font-size:0.85rem; color:#555;">Para citar a un subgrupo (p. ej. 5 alumnos a la misma hora) sin asignarlos uno por uno en la agenda.</p>
-        <?php foreach (Courses::groupsForCourse($course['id']) as $g): ?>
+        <?php foreach (Courses::groupsForCourse((int) $course['id']) as $g): ?>
         <div style="border-top:1px solid #e5e5e5; padding-top:0.8rem; margin-top:0.8rem;">
             <strong><?= htmlspecialchars($g['name']) ?></strong> (<?= (int) $g['member_count'] ?> miembros)
             <form method="post" class="inline" style="margin-left:0.6rem;" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Eliminar el grupo ' . $g['name'] . '?'), ENT_QUOTES) ?>);">
