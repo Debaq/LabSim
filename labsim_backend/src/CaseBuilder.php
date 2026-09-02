@@ -15,6 +15,10 @@ final class CaseBuilder
     public const Z_OPTIONS = ['A', 'As', 'Ad', 'C', 'Cs', 'B'];
     public const ETF_OPTIONS = ['Normal', 'Disfunción tubaria', 'Permeable', 'No permeable'];
 
+    // Tipo de ruido percibido (acufenometría) -- "la forma" del acufeno,
+    // junto a la frecuencia de matching (se reusa CaseBuilder::FREQUENCIES).
+    public const TINNITUS_RUIDO_OPTIONS = ['Silbido', 'Zumbido', 'Siseo', 'Pitido', 'Campanilleo'];
+
     public static function nextCaseId(PDO $pdo): string
     {
         $max = (int) $pdo->query('SELECT MAX(CAST(id AS INTEGER)) FROM cases')->fetchColumn();
@@ -132,6 +136,7 @@ final class CaseBuilder
             'Reflex' => $form['reflex'],
             'ETF' => [$form['etf_od'], $form['etf_oi']],
             'Anamnesis' => $form['anamnesis'],
+            'Tinnitus' => $form['tinnitus'],
             'tipo' => 'normal',
         ];
     }
@@ -241,6 +246,17 @@ final class CaseBuilder
         $v['medicamentos'] = $anamnesis['medicamentos'] ?? '';
         $v['cirugias'] = $anamnesis['cirugias'] ?? '';
         $v['otros'] = $anamnesis['otros'] ?? '';
+
+        $tinnitus = $data['Tinnitus'] ?? [];
+        $v['tinnitus'] = [];
+        foreach (['craneal', 'bilateral', 'pulsatil', 'permanente'] as $flag) {
+            if (!empty($tinnitus[$flag])) {
+                $v['tinnitus'][$flag] = '1';
+            }
+        }
+        $v['tinnitus']['oido'] = $tinnitus['oido'] ?? 'od';
+        $v['tinnitus']['ruido'] = $tinnitus['ruido'] ?? self::TINNITUS_RUIDO_OPTIONS[0];
+        $v['tinnitus']['frecuencia'] = (string) ($tinnitus['frecuencia'] ?? self::FREQUENCIES[0]);
 
         return $v;
     }

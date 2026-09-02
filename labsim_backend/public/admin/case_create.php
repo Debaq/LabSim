@@ -222,6 +222,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $etfOi = (string) ($v['etf_oi'] ?? 'Normal');
         $fowlerFreq = (int) ($v['fowler_freq'] ?? 0);
 
+        // Acufenometría: craneal/bilateral/pulsátil/permanente son "el
+        // comportamiento" (checkboxes, no excluyentes). Si NO es permanente
+        // (osea, ocasional) el acufeno se ubica en un solo oído -- hay que
+        // saber cuál. Ruido + frecuencia (matching, Hz) son "la forma".
+        $tinnitusPermanente = isset($v['tinnitus']['permanente']);
+        $tinnitusOido = (string) ($v['tinnitus']['oido'] ?? 'od');
+        $tinnitusRuido = (string) ($v['tinnitus']['ruido'] ?? CaseBuilder::TINNITUS_RUIDO_OPTIONS[0]);
+        $tinnitusFrecuencia = (int) ($v['tinnitus']['frecuencia'] ?? CaseBuilder::FREQUENCIES[0]);
+
         if (!$isUpdate && $age <= 0) {
             $error = 'Falta la edad.';
         } elseif (!$isUpdate && ($nombre1 === '' || $apellido1 === '')) {
@@ -232,6 +241,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Valor de ETF inválido.';
         } elseif ($fowlerFreq < 0 || $fowlerFreq > 8) {
             $error = 'Frecuencia de Fowler inválida.';
+        } elseif (!$tinnitusPermanente && !in_array($tinnitusOido, ['od', 'oi'], true)) {
+            $error = 'Falta el oído del tinnitus (no es permanente, hay que indicar cuál).';
+        } elseif (!in_array($tinnitusRuido, CaseBuilder::TINNITUS_RUIDO_OPTIONS, true)) {
+            $error = 'Tipo de ruido del tinnitus inválido.';
+        } elseif (!in_array($tinnitusFrecuencia, CaseBuilder::FREQUENCIES, true)) {
+            $error = 'Frecuencia del tinnitus inválida.';
         }
 
         if ($error === null) {
@@ -269,6 +284,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ],
                 'etf_od' => $etfOd,
                 'etf_oi' => $etfOi,
+                'tinnitus' => [
+                    'craneal' => isset($v['tinnitus']['craneal']),
+                    'bilateral' => isset($v['tinnitus']['bilateral']),
+                    'pulsatil' => isset($v['tinnitus']['pulsatil']),
+                    'permanente' => $tinnitusPermanente,
+                    'oido' => $tinnitusPermanente ? null : $tinnitusOido,
+                    'ruido' => $tinnitusRuido,
+                    'frecuencia' => $tinnitusFrecuencia,
+                ],
                 'anamnesis' => [
                     'antecedentes' => $antecedentes,
                     'medicamentos' => trim((string) ($v['medicamentos'] ?? '')),
@@ -397,6 +421,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <button type="button" class="tab-btn active" data-tab="paciente">Paciente</button>
     <button type="button" class="tab-btn" data-tab="audiometria">Audiometría</button>
     <button type="button" class="tab-btn" data-tab="timpanometria">Timpanometría</button>
+    <button type="button" class="tab-btn" data-tab="tinnitus">Tinnitus</button>
     <button type="button" class="tab-btn" data-tab="anamnesis">Anamnesis</button>
 </div>
 
@@ -727,6 +752,40 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <?php endforeach; ?>
 </div>
 </div>
+</div>
+</div>
+
+<div class="tab-panel" data-tab="tinnitus">
+<div class="card">
+    <strong>Tinnitus (acufenometría)</strong>
+    <p class="legend">Comportamiento: craneal/bilateral/pulsátil son independientes entre sí. Si no es permanente, el acufeno se ubica en un solo oído. Forma: tipo de ruido + frecuencia de matching.</p>
+    <label class="inline-check"><input type="checkbox" name="tinnitus[craneal]" <?= isset($v['tinnitus']['craneal']) ? 'checked' : '' ?>> Craneal</label>
+    <label class="inline-check"><input type="checkbox" name="tinnitus[bilateral]" <?= isset($v['tinnitus']['bilateral']) ? 'checked' : '' ?>> Bilateral</label>
+    <label class="inline-check"><input type="checkbox" name="tinnitus[pulsatil]" <?= isset($v['tinnitus']['pulsatil']) ? 'checked' : '' ?>> Pulsátil</label>
+    <label class="inline-check"><input type="checkbox" id="tinnitus-permanente" name="tinnitus[permanente]" <?= isset($v['tinnitus']['permanente']) ? 'checked' : '' ?>> Permanente (sin marcar = ocasional)</label>
+    <div class="two-col" style="margin-top:0.6rem;">
+        <label id="tinnitus-oido-field">Oído (si no es permanente)
+            <select name="tinnitus[oido]">
+                <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $opt => $optLabel): ?>
+                <option value="<?= $opt ?>" <?= ($v['tinnitus']['oido'] ?? 'od') === $opt ? 'selected' : '' ?>><?= $optLabel ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label>Ruido
+            <select name="tinnitus[ruido]">
+                <?php foreach (CaseBuilder::TINNITUS_RUIDO_OPTIONS as $opt): ?>
+                <option value="<?= $opt ?>" <?= ($v['tinnitus']['ruido'] ?? CaseBuilder::TINNITUS_RUIDO_OPTIONS[0]) === $opt ? 'selected' : '' ?>><?= htmlspecialchars($opt) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label>Frecuencia (Hz, matching)
+            <select name="tinnitus[frecuencia]">
+                <?php foreach (CaseBuilder::FREQUENCIES as $freq): ?>
+                <option value="<?= $freq ?>" <?= (int) ($v['tinnitus']['frecuencia'] ?? CaseBuilder::FREQUENCIES[0]) === $freq ? 'selected' : '' ?>><?= $freq ?> Hz</option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+    </div>
 </div>
 </div>
 
