@@ -35,6 +35,28 @@ def _parse_version(version: str) -> tuple:
     return tuple(int(n) for n in re.findall(r"\d+", version))
 
 
+def _split_build_id(build_id: str):
+    """'0.9.8' -> ((0,9,8), None). '0.9.8-r0ce52be' -> ((0,9,8), '0ce52be').
+    El sufijo de commit sirve para distinguir builds de prueba que no
+    suben la versión (ver scripts/release_pyinstaller.sh)."""
+    base, _, suffix = build_id.lstrip("v").partition("-r")
+    return _parse_version(base), (suffix or None)
+
+
+def _local_build_id(fallback_version: str) -> str:
+    """Lee BUILD_VERSION al lado del ejecutable (lo escribe el script de
+    release). Si no existe -- build vieja, previa a esta feature, o corrida
+    en dev -- cae a __VERSION__."""
+    build_file = Path(sys.executable).resolve().parent / "BUILD_VERSION"
+    try:
+        content = build_file.read_text(encoding="utf-8").strip()
+        if content:
+            return content
+    except OSError:
+        pass
+    return fallback_version
+
+
 def _fetch_releases() -> list:
     req = Request(RELEASES_API, headers={"Accept": "application/vnd.github+json"})
     with urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
@@ -43,9 +65,12 @@ def _fetch_releases() -> list:
 
 def check_for_update(current_version: str):
     """Busca el release 'pyinstaller-v*' más reciente. Si es más nuevo que
-    current_version y trae el asset esperado, devuelve (tag, download_url).
-    Si no hay nada nuevo, o falla la red, devuelve None (nunca revienta:
-    no queremos bloquear el arranque por un lab sin internet)."""
+    el build local y trae el asset esperado, devuelve (tag, download_url).
+    'Más nuevo' es: versión mayor, o misma versión con un sufijo de commit
+    distinto al local (build de prueba re-publicada) -- así una build ya
+    aplicada no se vuelve a ofrecer en cada arranque. Si no hay nada nuevo,
+    o falla la red, devuelve None (nunca revienta: no queremos bloquear el
+    arranque por un lab sin internet)."""
     try:
         releases = _fetch_releases()
     except (URLError, OSError, ValueError, TimeoutError):
@@ -59,8 +84,15 @@ def check_for_update(current_version: str):
         return None
 
     tag = remote["tag_name"]
-    remote_version = tag[len(TAG_PREFIX):]
-    if _parse_version(remote_version) <= _parse_version(current_version.lstrip("v")):
+    remote_build_id = tag[len(TAG_PREFIX):]
+    local_build_id = _local_build_id(current_version)
+
+    remote_v, remote_suffix = _split_build_id(remote_build_id)
+    local_v, local_suffix = _split_build_id(local_build_id)
+
+    if remote_v < local_v:
+        return None
+    if remote_v == local_v and (remote_suffix is None or remote_suffix == local_suffix):
         return None
 
     asset = next(
@@ -95,6 +127,7 @@ rm -rf "$DIST_DIR/_internal"
 cp -a "$NEW_DIST/_internal" "$DIST_DIR/_internal"
 cp -a "$NEW_DIST/LabSim" "$DIST_DIR/LabSim"
 cp -a "$NEW_DIST/run.sh" "$DIST_DIR/run.sh"
+[ -f "$NEW_DIST/BUILD_VERSION" ] && cp -a "$NEW_DIST/BUILD_VERSION" "$DIST_DIR/BUILD_VERSION"
 chmod +x "$DIST_DIR/LabSim" "$DIST_DIR/run.sh"
 
 rm -rf "$(dirname "$NEW_DIST")"
