@@ -43,6 +43,17 @@ def fowler_applicable(freq_idx, air_pair, bone_pair):
     return True
 
 
+# Patrón de reclutamiento -> cortes para Fowler.set_cut(). Debe coincidir
+# exactamente con CaseBuilder::FOWLER_PATTERNS (PHP): 200 = quiebre por
+# sobre la salida práctica del audiómetro, o sea "nunca se alcanza esa zona".
+FOWLER_PATTERNS = {
+    'none': [200, 200, 200],       # sin reclutamiento: crecimiento paralelo, nunca iguala
+    'partial': [15, 200, 200],     # reclutamiento parcial: se acerca pero no cierra del todo
+    'complete': [15, 30, 200],     # reclutamiento completo: iguala sonoridad, no sobrepasa
+    'over': [15, 30, 50],          # sobre-reclutamiento: en niveles altos el oído afectado suena más fuerte
+}
+
+
 class Fowler:
     def __init__(self) -> None:
         self.th_est = None

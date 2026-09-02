@@ -95,28 +95,46 @@ final class CaseBuilder
     }
 
     /**
-     * Infiere automáticamente la frecuencia de Fowler/I.W.A. a partir de los
-     * umbrales ya cargados (Aerea/Osea): recorre 250-4000 Hz y se queda con
-     * la frecuencia válida (ver fowlerValidationError) de mayor diferencia
-     * interaural -- la más claramente evaluable. null si ninguna frecuencia
-     * cumple los requisitos (caso no apto para Fowler).
+     * Todas las frecuencias (250-4000 Hz) donde los umbrales ya cargados
+     * (Aerea/Osea) cumplen los requisitos de Fowler/I.W.A. (ver
+     * fowlerValidationError) -- el caso puede calificar en más de una a la
+     * vez, y el alumno debe poder encontrar cualquiera de ellas, así que el
+     * form pide un patrón de reclutamiento por cada una, no solo una.
      */
-    public static function inferFowlerFreq(array $airPairs, array $bonePairs): ?int
+    public static function fowlerQualifyingFreqs(array $airPairs, array $bonePairs): array
     {
-        $best = null;
-        $bestDiff = -1;
+        $out = [];
         foreach (self::fowlerFreqOptions() as $freq) {
-            if (self::fowlerValidationError($freq, $airPairs, $bonePairs) !== null) {
-                continue;
-            }
-            $air = $airPairs[$freq] ?? [130, 130];
-            $diff = abs((int) $air[0] - (int) $air[1]);
-            if ($diff > $bestDiff) {
-                $bestDiff = $diff;
-                $best = $freq;
+            if (self::fowlerValidationError($freq, $airPairs, $bonePairs) === null) {
+                $out[] = $freq;
             }
         }
-        return $best;
+        return $out;
+    }
+
+    // Patrón de reclutamiento -> cortes que le pasan al motor (Fowler.py):
+    // ver docstring de Fowler.evaluate() para el porqué de estos valores --
+    // en corto, "cuts" son quiebres en dB sobre el umbral del oído en
+    // estudio que delimitan las zonas del algoritmo; un corte >= la salida
+    // máxima práctica del audiómetro (200) equivale a "nunca se alcanza esa
+    // zona". Debe coincidir exactamente con FOWLER_PATTERNS en Fowler.py.
+    public const FOWLER_PATTERNS = [
+        'none' => [200, 200, 200],       // sin reclutamiento: crecimiento paralelo, nunca iguala
+        'partial' => [15, 200, 200],     // reclutamiento parcial: se acerca pero no cierra del todo
+        'complete' => [15, 30, 200],     // reclutamiento completo: iguala sonoridad, no sobrepasa
+        'over' => [15, 30, 50],          // sobre-reclutamiento: en niveles altos el oído afectado suena más fuerte
+    ];
+
+    public const FOWLER_PATTERN_LABELS = [
+        'none' => 'Sin reclutamiento',
+        'partial' => 'Reclutamiento parcial',
+        'complete' => 'Reclutamiento completo',
+        'over' => 'Sobre-reclutamiento',
+    ];
+
+    public static function fowlerCutsForPattern(string $pattern): array
+    {
+        return self::FOWLER_PATTERNS[$pattern] ?? self::FOWLER_PATTERNS['none'];
     }
 
     public static function nextCaseId(PDO $pdo): string
@@ -301,16 +319,14 @@ final class CaseBuilder
         $v['srt_auto'] = [];
 
         $fowler = $data['Fowler'] ?? [];
-        if (!empty($fowler['enabled'])) { $v['fowler_enabled'] = '1'; }
-        // "auto" no estaba en casos guardados antes de esta versión -- se
-        // asume auto=true (comportamiento por defecto) salvo que se haya
-        // guardado explícitamente en false.
-        if (!array_key_exists('auto', $fowler) || $fowler['auto']) { $v['fowler_auto'] = '1'; }
-        $v['fowler_freq'] = (string) ($fowler['freq'] ?? self::fowlerFreqOptions()[0]);
-        $cuts = $fowler['cuts'] ?? [15, 30, 50];
-        $v['fowler_cut1'] = (string) ($cuts[0] ?? 15);
-        $v['fowler_cut2'] = (string) ($cuts[1] ?? 30);
-        $v['fowler_cut3'] = (string) ($cuts[2] ?? 50);
+        // freq/cuts/auto: shape viejo (una sola frecuencia elegida al crear
+        // el caso), ya no se usa -- se ignora silenciosamente si aparece en
+        // un caso guardado con la versión anterior; el patrón por frecuencia
+        // (abajo) es la única fuente de verdad ahora.
+        $v['fowler_pattern'] = [];
+        foreach ((array) ($fowler['patterns'] ?? []) as $freq => $pattern) {
+            $v['fowler_pattern'][(string) $freq] = (string) $pattern;
+        }
         if (!empty($fowler['diplacusia'])) { $v['diplacusia'] = '1'; }
 
         $stenger = $data['Stenger'] ?? [false, false];

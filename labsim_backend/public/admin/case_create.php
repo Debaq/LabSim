@@ -221,15 +221,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $etfOd = (string) ($v['etf_od'] ?? 'Normal');
         $etfOi = (string) ($v['etf_oi'] ?? 'Normal');
         $bonePairs = zip_pairs($osea['od'], $osea['oi']);
-        $fowlerAuto = isset($v['fowler_auto']);
-        if ($fowlerAuto) {
-            $fowlerInferred = CaseBuilder::inferFowlerFreq($airPairs, $bonePairs);
-            $fowlerEnabled = $fowlerInferred !== null;
-            $fowlerFreq = $fowlerInferred ?? (int) ($v['fowler_freq'] ?? CaseBuilder::fowlerFreqOptions()[0]);
-        } else {
-            $fowlerEnabled = isset($v['fowler_enabled']);
-            $fowlerFreq = (int) ($v['fowler_freq'] ?? CaseBuilder::fowlerFreqOptions()[0]);
+        // Qué frecuencias califican para Fowler/I.W.A. se detecta solo de
+        // los umbrales -- el alumno puede encontrarlo en cualquiera de
+        // ellas, así que se pide un patrón de reclutamiento por cada una
+        // (no una única frecuencia "elegida" al crear el caso).
+        $fowlerQualifying = CaseBuilder::fowlerQualifyingFreqs($airPairs, $bonePairs);
+        $fowlerPatterns = [];
+        foreach ($fowlerQualifying as $freq) {
+            $pattern = (string) fv($v, ['fowler_pattern', (string) $freq], 'none');
+            if (!array_key_exists($pattern, CaseBuilder::FOWLER_PATTERNS)) {
+                $pattern = 'none';
+            }
+            $fowlerPatterns[(string) $freq] = $pattern;
         }
+        $fowlerEnabled = count($fowlerPatterns) > 0;
         $fowlerDiplacusia = isset($v['diplacusia']);
 
         // Acufenometría: lateralidad (craneal/unilateral/bilateral) es
@@ -253,10 +258,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Tipo de timpanograma inválido.';
         } elseif (!in_array($etfOd, CaseBuilder::ETF_OPTIONS, true) || !in_array($etfOi, CaseBuilder::ETF_OPTIONS, true)) {
             $error = 'Valor de ETF inválido.';
-        } elseif ($fowlerFreq < 0 || $fowlerFreq > 8) {
-            $error = 'Frecuencia de Fowler inválida.';
-        } elseif (!$fowlerAuto && $fowlerEnabled && ($fowlerError = CaseBuilder::fowlerValidationError($fowlerFreq, $airPairs, $bonePairs)) !== null) {
-            $error = $fowlerError;
         } elseif (!in_array($tinnitusLateralidad, CaseBuilder::TINNITUS_LATERALIDAD_OPTIONS, true)) {
             $error = 'Lateralidad del tinnitus inválida.';
         } elseif ($tinnitusLateralidad === 'unilateral' && !in_array($tinnitusOido, ['od', 'oi'], true)) {
@@ -293,9 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'srt' => $srt,
                 'fowler' => [
                     'enabled' => $fowlerEnabled,
-                    'auto' => $fowlerAuto,
-                    'freq' => $fowlerFreq,
-                    'cuts' => [(int) ($v['fowler_cut1'] ?? 15), (int) ($v['fowler_cut2'] ?? 30), (int) ($v['fowler_cut3'] ?? 50)],
+                    'patterns' => $fowlerPatterns,
                     'diplacusia' => $fowlerDiplacusia,
                 ],
                 'stenger' => [isset($v['stenger']['od']), isset($v['stenger']['oi'])],
@@ -622,28 +621,54 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <?php endforeach; ?>
     </div>
 
+    <?php
+    // Render-time: recalcula qué frecuencias califican para Fowler a partir
+    // de los umbrales ya tipeados en $v (sticky POST o precarga de edición).
+    // Independiente del bloque de procesamiento de arriba (que solo corre
+    // en submit) -- esto es lo que se ve al cargar/editar el form.
+    $fwAerea = ['od' => [], 'oi' => []];
+    $fwOsea = ['od' => [], 'oi' => []];
+    foreach (['od', 'oi'] as $fwSide) {
+        foreach (CaseBuilder::FREQUENCIES as $fwN => $fwFreq) {
+            $fwAerea[$fwSide][] = (int) fv($v, ['aerea', $fwSide, (string) $fwN], 0);
+            $fwOsea[$fwSide][] = (int) fv($v, ['osea', $fwSide, (string) $fwN], 0);
+        }
+    }
+    $fwAirPairs = zip_pairs($fwAerea['od'], $fwAerea['oi']);
+    $fwBonePairs = zip_pairs($fwOsea['od'], $fwOsea['oi']);
+    $fwQualifying = CaseBuilder::fowlerQualifyingFreqs($fwAirPairs, $fwBonePairs);
+    ?>
     <div class="side-block" id="fowler-block">
         <div class="side-heading"><span class="side-tag">Fowler</span></div>
-        <label class="inline-check"><input type="checkbox" id="fowler_auto" name="fowler_auto" <?= (!array_key_exists('fowler_auto', $v) || isset($v['fowler_auto'])) ? 'checked' : '' ?>> Detectar automáticamente desde los umbrales (Aerea/Osea)</label>
-        <p class="legend" id="fowler-auto-status"></p>
-        <label class="inline-check"><input type="checkbox" id="fowler_enabled" name="fowler_enabled" <?= isset($v['fowler_enabled']) ? 'checked' : '' ?>> Fowler aplica en este caso</label>
-        <div class="two-col">
-            <label>Frecuencia de referencia (250-4000 Hz)
-                <select id="fowler_freq" name="fowler_freq">
-                    <?php foreach (CaseBuilder::fowlerFreqOptions() as $i): ?>
-                    <option value="<?= $i ?>" <?= (int) ($v['fowler_freq'] ?? CaseBuilder::fowlerFreqOptions()[0]) === $i ? 'selected' : '' ?>><?= CaseBuilder::FREQUENCIES[$i] ?> Hz</option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
-            <label>Cortes
-                <input type="number" name="fowler_cut1" value="<?= htmlspecialchars((string) ($v['fowler_cut1'] ?? 15)) ?>" style="width:4rem; display:inline-block;">
-                <input type="number" name="fowler_cut2" value="<?= htmlspecialchars((string) ($v['fowler_cut2'] ?? 30)) ?>" style="width:4rem; display:inline-block;">
-                <input type="number" name="fowler_cut3" value="<?= htmlspecialchars((string) ($v['fowler_cut3'] ?? 50)) ?>" style="width:4rem; display:inline-block;">
-            </label>
-        </div>
+        <p class="legend">Se detectan solas las frecuencias (250-4000 Hz) donde los umbrales ya tipeados arriba cumplen los requisitos ABLB -- puede calificar más de una a la vez. Para cada una, indica qué le pasa al paciente al hacer la prueba ahí (por defecto, sin reclutamiento).</p>
+        <table class="grid-table" id="fowler-table" <?= $fwQualifying ? '' : 'hidden' ?>>
+            <thead>
+                <tr><th>Frecuencia</th><th>Diferencia interaural</th><th>Patrón</th></tr>
+            </thead>
+            <tbody id="fowler-rows">
+                <?php foreach ($fwQualifying as $fwFreqIdx):
+                    $fwAir = $fwAirPairs[$fwFreqIdx];
+                    $fwDiff = abs($fwAir[0] - $fwAir[1]);
+                    $fwSelected = (string) fv($v, ['fowler_pattern', (string) $fwFreqIdx], 'none');
+                ?>
+                <tr data-freq="<?= $fwFreqIdx ?>">
+                    <td><?= CaseBuilder::FREQUENCIES[$fwFreqIdx] ?> Hz</td>
+                    <td><?= $fwDiff ?> dB</td>
+                    <td>
+                        <select name="fowler_pattern[<?= $fwFreqIdx ?>]" data-freq="<?= $fwFreqIdx ?>">
+                            <?php foreach (CaseBuilder::FOWLER_PATTERN_LABELS as $fwKey => $fwLabel): ?>
+                            <option value="<?= $fwKey ?>" <?= $fwSelected === $fwKey ? 'selected' : '' ?>><?= $fwLabel ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <p class="legend" id="fowler-none-msg" <?= $fwQualifying ? 'hidden' : '' ?>>Ningún umbral actual cumple los requisitos ABLB -- Fowler queda deshabilitado en este caso.</p>
         <label class="inline-check"><input type="checkbox" name="diplacusia" <?= isset($v['diplacusia']) ? 'checked' : '' ?>> Paciente refiere diploacusia</label>
-        <p class="legend">Esta frecuencia es solo referencial (la de mayor diferencia interaural, informativa para el docente) -- el motor evalúa los mismos requisitos en vivo contra la frecuencia que el alumno esté probando, así que Fowler responde en cualquier frecuencia del caso que también los cumpla, no solo en esta.</p>
         <p class="legend">Requisitos ABLB: oído de referencia ≤ <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL, oído en estudio &gt; <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL y sensorioneural (gap aéreo-óseo ≤ <?= CaseBuilder::FOWLER_SNHL_GAP_MAX ?> dB), diferencia interaural <?= CaseBuilder::FOWLER_DIFF_MIN ?>-<?= CaseBuilder::FOWLER_DIFF_MAX ?> dB en cada frecuencia evaluada.</p>
+        <p class="legend">Sin reclutamiento = el paciente nunca iguala. Parcial = se acerca pero no cierra del todo. Completo = iguala sonoridad. Sobre-reclutamiento = en niveles altos el oído afectado empieza a sonar más fuerte que el sano.</p>
     </div>
     <p class="legend">Auto (SDT/SRT) = mejor promedio de 2 de 3 (500/1000/2000 Hz vía aérea), redondeado a múltiplo de 5. Destildar para escribir un valor manual.</p>
 </div>
@@ -1321,26 +1346,35 @@ window.drawReflexPattern = function drawReflexPattern() {
     });
 })();
 
-// Auto-detección de Fowler/I.W.A. desde los umbrales -- espejo en JS de
-// CaseBuilder::inferFowlerFreq()/fowlerValidationError() (PHP recalcula todo
-// igual al enviar, esto es solo para que el docente vea el resultado en vivo).
+// Filas de Fowler/I.W.A. por frecuencia -- espejo en JS de
+// CaseBuilder::fowlerQualifyingFreqs()/fowlerValidationError() (PHP recalcula
+// todo igual al enviar, esto es solo para que el docente vea en vivo en
+// cuáles frecuencias calificó cada vez que cambia un umbral, y pueda elegir
+// el patrón de reclutamiento en cada una sin perder lo ya elegido).
 (function () {
-    var freqSelect = document.getElementById('fowler_freq');
-    var enabledBox = document.getElementById('fowler_enabled');
-    var autoBox = document.getElementById('fowler_auto');
-    var status = document.getElementById('fowler-auto-status');
-    if (!freqSelect || !enabledBox || !autoBox) return;
+    var table = document.getElementById('fowler-table');
+    var container = document.getElementById('fowler-rows');
+    var noneMsg = document.getElementById('fowler-none-msg');
+    if (!table || !container) return;
 
     var NORMAL_HL = 20, GAP_MAX = 10, DIFF_MIN = 20, DIFF_MAX = 40;
-    var FREQ_INDEXES = [1, 2, 3, 4, 5, 6]; // 250..4000 Hz, mismos índices que CaseBuilder::FREQUENCIES
+    var FREQ_HZ = { 1: 250, 2: 500, 3: 1000, 4: 2000, 5: 3000, 6: 4000 }; // mismos índices que CaseBuilder::FREQUENCIES
+    var FREQ_INDEXES = Object.keys(FREQ_HZ).map(Number);
+    var PATTERNS = [
+        ['none', 'Sin reclutamiento'],
+        ['partial', 'Reclutamiento parcial'],
+        ['complete', 'Reclutamiento completo'],
+        ['over', 'Sobre-reclutamiento']
+    ];
+    var DEFAULT_PATTERN = 'none';
 
     function val(id) {
         var el = document.getElementById(id);
         return el ? (parseInt(el.value, 10) || 0) : 0;
     }
 
-    function inferFreq() {
-        var best = null, bestDiff = -1;
+    function qualifyingFreqs() {
+        var out = [];
         FREQ_INDEXES.forEach(function (i) {
             var od = val('aerea_od_' + i), oi = val('aerea_oi_' + i);
             var refSide = od <= oi ? 'od' : 'oi';
@@ -1351,35 +1385,70 @@ window.drawReflexPattern = function drawReflexPattern() {
             if (refTh > NORMAL_HL || studyTh <= NORMAL_HL || diff < DIFF_MIN || diff > DIFF_MAX) return;
             var boneStudy = val('osea_' + studySide + '_' + i);
             if (studyTh - boneStudy > GAP_MAX) return;
-            if (diff > bestDiff) { bestDiff = diff; best = i; }
+            out.push({ idx: i, diff: diff });
         });
-        return best;
+        return out;
     }
 
-    function sync() {
-        var auto = autoBox.checked;
-        freqSelect.disabled = auto;
-        enabledBox.disabled = auto;
-        if (!auto) { if (status) status.textContent = ''; return; }
-        var freq = inferFreq();
-        if (freq === null) {
-            enabledBox.checked = false;
-            if (status) status.textContent = 'Ningún umbral cumple los requisitos ABLB (250-4000 Hz) -- Fowler queda deshabilitado en este caso.';
-        } else {
-            enabledBox.checked = true;
-            freqSelect.value = String(freq);
-            if (status) status.textContent = 'Frecuencia detectada automáticamente: ' + freqSelect.options[freqSelect.selectedIndex].text + '.';
-        }
+    function rebuild() {
+        // Preserva lo ya elegido en cada fila antes de reconstruir -- si
+        // cambiar un umbral en OTRA frecuencia no debería resetear esta.
+        var current = {};
+        container.querySelectorAll('select[data-freq]').forEach(function (sel) {
+            current[sel.dataset.freq] = sel.value;
+        });
+
+        var qualifying = qualifyingFreqs();
+        container.innerHTML = '';
+
+        qualifying.forEach(function (q) {
+            var tr = document.createElement('tr');
+            tr.dataset.freq = String(q.idx);
+
+            var tdFreq = document.createElement('td');
+            tdFreq.textContent = FREQ_HZ[q.idx] + ' Hz';
+            tr.appendChild(tdFreq);
+
+            var tdDiff = document.createElement('td');
+            tdDiff.textContent = q.diff + ' dB';
+            tr.appendChild(tdDiff);
+
+            var tdSelect = document.createElement('td');
+            var select = document.createElement('select');
+            select.name = 'fowler_pattern[' + q.idx + ']';
+            select.dataset.freq = String(q.idx);
+            PATTERNS.forEach(function (p) {
+                var opt = document.createElement('option');
+                opt.value = p[0];
+                opt.textContent = p[1];
+                select.appendChild(opt);
+            });
+            select.value = current[q.idx] || DEFAULT_PATTERN;
+            tdSelect.appendChild(select);
+            tr.appendChild(tdSelect);
+
+            container.appendChild(tr);
+        });
+
+        table.hidden = qualifying.length === 0;
+        if (noneMsg) { noneMsg.hidden = qualifying.length > 0; }
     }
 
-    autoBox.addEventListener('change', sync);
     FREQ_INDEXES.forEach(function (i) {
         ['aerea_od_', 'aerea_oi_', 'osea_od_', 'osea_oi_'].forEach(function (prefix) {
             var el = document.getElementById(prefix + i);
-            if (el) el.addEventListener('input', sync);
+            if (el) el.addEventListener('input', rebuild);
         });
     });
-    sync();
+    // "Igualar ósea a aérea" copia los valores por JS (sin disparar 'input'
+    // en los campos de ósea) -- sin este listener aparte, activar el toggle
+    // no actualizaba qué frecuencias calificaban hasta que se volvía a
+    // tipear algo. Corre después del listener que hace la copia (registrado
+    // antes en el archivo), así que ya lee los valores de ósea al día.
+    document.querySelectorAll('.igualar-toggle').forEach(function (el) {
+        el.addEventListener('change', rebuild);
+    });
+    rebuild();
 })();
 </script>
 <?php

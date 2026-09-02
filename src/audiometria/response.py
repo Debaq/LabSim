@@ -3,7 +3,7 @@ from core.helpers import CasesOffline
 from core.helpers import Preferences
 from PySide6.QtCore import QTimer
 from audiometria.response_A import Response
-from audiometria.Fowler import fowler_applicable
+from audiometria.Fowler import FOWLER_PATTERNS
 class_pref = Preferences()
 
 c_voice = class_pref.get('command_voice')
@@ -268,24 +268,25 @@ class ResponseAudiometry():
         if self.data['audio']['test'] == 'Umbrales':
             if all(x == 0 for x in self.data['audio']['stim']):
                 if all(x == 'Alternado' for x in self.data['audio']['contin']):
-                    fdata = self.dbdata.get('Fowler', {'cuts': [15, 30, 50]})
-                    if not isinstance(fdata, dict) or not fdata.get('enabled', False):
-                        # formato viejo (lista) o Fowler no habilitado/aplicable para este caso
-                        return
-                    # El alumno no sabe de antemano en qué frecuencia el caso
-                    # "califica" para ABLB -- puede calificar en más de una --
-                    # así que se valida en vivo contra la frecuencia que esté
-                    # probando, no contra una única frecuencia fija del caso.
+                    # Un paciente real siempre responde algo a "¿suenan
+                    # iguales?", en cualquier frecuencia -- si el docente no
+                    # configuró un patrón de reclutamiento para la frecuencia
+                    # que el alumno está probando, se responde como un oído
+                    # normal (sin reclutar), no en silencio. El silencio solo
+                    # tenía sentido para pruebas de umbral (no se oye algo
+                    # bajo el umbral); acá siempre hay algo que comparar.
+                    fdata = self.dbdata.get('Fowler', {})
+                    if not isinstance(fdata, dict):
+                        fdata = {}  # formato viejo (lista), caso aun no migrado
+                    patterns = fdata.get('patterns')
+                    if not isinstance(patterns, dict):
+                        patterns = {}
+
                     freq = self.data['audio']['freq']
+                    pattern = patterns.get(str(freq), 'none')
+                    cuts = FOWLER_PATTERNS.get(pattern, FOWLER_PATTERNS['none'])
                     air_pair = self.dbdata['Aerea'][freq]
-                    bone_pair = self.dbdata['Osea'][freq]
-                    if fowler_applicable(freq, air_pair, bone_pair):
-                        self.other_response.set_fowler_data(air_pair[0], air_pair[1], fdata['cuts'], fdata.get('diplacusia', False))
-                    else:
-                        # frecuencia sin sentido clínico para Fowler: no hay
-                        # con qué comparar, se invalida cualquier engine que
-                        # hubiera quedado de una frecuencia anterior válida
-                        self.other_response.fowler_engine = None
+                    self.other_response.set_fowler_data(air_pair[0], air_pair[1], cuts, fdata.get('diplacusia', False))
 
     def response_decay(self):
         """Test de decaimiento tonal: umbral normal + si el caso marca 'decay'
