@@ -64,6 +64,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $procedimiento = trim((string) ($_POST['procedimiento'] ?? '')) ?: 'Audiometría';
         $notaAdmin = trim((string) ($_POST['nota_admin'] ?? ''));
 
+        // RUT = identificador único del paciente. Se fija recién al primer
+        // agendamiento (acá sí hay holgura para corregirlo); si el caso ya
+        // tuvo una cita antes, se ignora lo tipeado en el form y se mantiene
+        // el RUT ya guardado -- ni un POST manipulado a mano lo cambia.
+        if ($appointmentId > 0) {
+            $stmt = $pdo->prepare('SELECT rut FROM appointments WHERE id = ?');
+            $stmt->execute([$appointmentId]);
+            $existingRut = $stmt->fetchColumn();
+            if ($existingRut !== false) {
+                $rut = (string) $existingRut;
+            }
+        }
+
         // Curso/asignación -- obligatorio solo para citas NUEVAS (ver más
         // abajo, $willInsert); una edición in-place de una cita legado no
         // se ve forzada a adoptar un curso retroactivamente.
@@ -328,8 +341,8 @@ admin_header('Fichas Clínicas', $me);
         <label>Hora
             <input type="time" name="hora" value="<?= htmlspecialchars($scheduleRow['hora'] ?? '') ?>">
         </label>
-        <label>RUT
-            <input type="text" name="rut" value="<?= htmlspecialchars($scheduleRow['rut'] ?? $scheduleSnapshot['rut'] ?? '') ?>">
+        <label>RUT<?= $scheduleRow['appointment_id'] ? ' (fijo desde el primer agendamiento, identifica al paciente)' : '' ?>
+            <input type="text" name="rut" value="<?= htmlspecialchars($scheduleRow['rut'] ?? $scheduleSnapshot['rut'] ?? '') ?>" <?= $scheduleRow['appointment_id'] ? 'readonly' : '' ?>>
         </label>
         <label>Nombre
             <input type="text" name="nombre" value="<?= htmlspecialchars($scheduleRow['nombre'] ?? $scheduleSnapshot['nombre'] ?? '') ?>">

@@ -6,6 +6,7 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/CaseBuilder.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
+require_once __DIR__ . '/../../src/PatientPhoto.php';
 
 /**
  * Crea un caso clínico completo desde el navegador -- equivalente web de
@@ -42,9 +43,11 @@ if ($editId !== null) {
 }
 $isEdit = $editCase !== null;
 
-// Nombre/edad mostrados solo como referencia -- se editan desde agenda.php
-// (ligados a la cita, no al caso). La edad solo se usa acá para recalcular
-// el volumen del canal auditivo al guardar, no afecta ningún cálculo clínico.
+// Nombre mostrado solo como referencia -- se edita desde agenda.php (ligado
+// a la cita, no al caso). La edad SÍ es propia del paciente/caso (se guarda
+// en cases.data como 'edad', ver CaseBuilder::buildCaseData) y no depende en
+// nada de la agenda -- $editAge de acá abajo es solo un fallback para casos
+// viejos guardados antes de que 'edad' existiera en cases.data.
 $editDisplayName = '';
 $editAge = null;
 if ($isEdit) {
@@ -154,7 +157,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 } elseif ($isEdit) {
     $existingData = json_decode($editCase['data'] ?? '', true);
     $v = CaseBuilder::caseDataToForm(is_array($existingData) ? $existingData : []);
-    $v['age'] = (string) ($editAge ?? '');
+    if ($v['age'] === '') {
+        // Caso guardado antes de que 'edad' existiera en cases.data -- fallback
+        // único a la fecha_nac de la cita, solo para no dejar el campo vacío.
+        $v['age'] = (string) ($editAge ?? '');
+    }
 } else {
     $v = [];
 }
@@ -173,6 +180,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $v['apellido2'] = $a2;
     } elseif ($formAction === 'create_case' || $formAction === 'update_case') {
         $isUpdate = $formAction === 'update_case';
+        // Edad = propia del paciente/caso, se guarda en cases.data ('edad').
+        // Editable siempre acá, en creación y en edición -- la agenda no
+        // incide en esto para nada, solo guarda la fecha de la cita.
         $age = max(0, (int) ($v['age'] ?? 0));
         $nombre1 = trim((string) ($v['nombre1'] ?? ''));
         $apellido1 = trim((string) ($v['apellido1'] ?? ''));
@@ -258,7 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $tinnitusRuido = (string) ($v['tinnitus']['ruido'] ?? CaseBuilder::TINNITUS_RUIDO_OPTIONS[0]);
         $tinnitusFrecuencia = (int) ($v['tinnitus']['frecuencia'] ?? CaseBuilder::FREQUENCIES[0]);
 
-        if (!$isUpdate && $age <= 0) {
+        if ($age <= 0) {
             $error = 'Falta la edad.';
         } elseif (!$isUpdate && ($nombre1 === '' || $apellido1 === '')) {
             $error = 'Falta el nombre del paciente (generalo con el botón o escríbelo a mano).';
@@ -443,6 +453,22 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     .reflex-cell.present { background: #3a3a3a; }
     .reflex-cell.present.mark-od { color: #e05c5c; }
     .reflex-cell.present.mark-oi { color: #6fa8e8; }
+
+    /* Foto de paciente: avatar circular + modal de recorte. */
+    .photo-block { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee; }
+    .patient-avatar { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; background: #eee; flex-shrink: 0; }
+    .patient-avatar-empty { display: flex; align-items: center; justify-content: center; color: #999; font-size: 0.7rem; text-align: center; }
+
+    .photo-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100;
+                   display: flex; align-items: center; justify-content: center; }
+    .photo-modal[hidden] { display: none; }
+    .photo-modal-box { background: #fff; border-radius: 8px; padding: 1.2rem; max-width: 22rem; width: 90%; }
+    .photo-crop-viewport { position: relative; width: 280px; height: 280px; margin: 0 auto;
+                            overflow: hidden; background: #333; cursor: grab; touch-action: none; }
+    .photo-crop-viewport:active { cursor: grabbing; }
+    .photo-crop-viewport img { position: absolute; left: 0; top: 0; transform-origin: 0 0; max-width: none; user-select: none; -webkit-user-drag: none; }
+    .photo-crop-ring { position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2000px rgba(0,0,0,0.5); pointer-events: none; }
+    .photo-modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.8rem; }
 </style>
 
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
@@ -471,7 +497,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <?php if ($isEdit): ?><input type="hidden" id="chat-static-name" value="<?= htmlspecialchars($editDisplayName) ?>"><?php endif; ?>
     <label class="inline-check"><input type="radio" name="gender" value="0" <?= ($v['gender'] ?? '0') === '0' ? 'checked' : '' ?>> Hombre</label>
     <label class="inline-check"><input type="radio" name="gender" value="1" <?= ($v['gender'] ?? '0') === '1' ? 'checked' : '' ?>> Mujer</label>
-    <label>Edad<?= $isEdit ? ' (solo recalcula el volumen del canal auditivo, no cambia la fecha de nacimiento)' : '' ?>
+    <label>Edad
         <input type="number" name="age" min="0" max="110" value="<?= htmlspecialchars((string) ($v['age'] ?? '')) ?>">
     </label>
     <?php if (!$isEdit): ?>
@@ -490,6 +516,26 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         </label>
     </div>
     <button type="submit" name="form_action" value="generate_name" class="secondary">Generar nombre al azar</button>
+    <?php endif; ?>
+
+    <?php if ($isEdit): ?>
+    <div class="photo-block">
+        <strong style="display:block; margin-bottom:0.4rem;">Foto</strong>
+        <p id="photo-msg" class="legend" hidden></p>
+        <?php $hasAvatar = PatientPhoto::hasAvatar($editId); ?>
+        <div style="display:flex; align-items:center; gap:1rem;">
+            <img id="patient-avatar-preview" class="patient-avatar"
+                 src="patient_photo.php?case_id=<?= urlencode($editId) ?>&amp;type=avatar&amp;v=<?= time() ?>"
+                 alt="Avatar del paciente" <?= $hasAvatar ? '' : 'hidden' ?>>
+            <div id="patient-avatar-empty" class="patient-avatar patient-avatar-empty" <?= $hasAvatar ? 'hidden' : '' ?>>Sin foto</div>
+            <div>
+                <input type="file" id="patient-photo-input" accept="image/jpeg,image/png,image/webp">
+                <p class="legend">Al elegir una foto se abre un recorte circular -- se guarda una versión reducida completa y el avatar recortado.</p>
+            </div>
+        </div>
+    </div>
+    <?php else: ?>
+    <p class="legend" style="margin-top:1rem;">La foto se sube después de guardar el paciente por primera vez.</p>
     <?php endif; ?>
 </div>
 </div>
@@ -943,6 +989,180 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <a href="agenda.php" style="margin-left:1rem; font-size:0.85rem;">Cancelar</a>
 </div>
 </form>
+
+<?php if ($isEdit): ?>
+<div id="photo-crop-modal" class="photo-modal" hidden>
+    <div class="photo-modal-box">
+        <strong style="display:block; margin-bottom:0.6rem;">Recortar foto</strong>
+        <div class="photo-crop-viewport" id="photo-crop-viewport">
+            <img id="photo-crop-img" alt="">
+            <div class="photo-crop-ring"></div>
+        </div>
+        <input type="range" id="photo-crop-zoom" min="1" max="4" step="0.01" value="1" style="width:100%; margin-top:0.8rem;">
+        <p class="legend" style="text-align:center;">Arrastra para mover, usa el control para acercar/alejar.</p>
+        <div class="photo-modal-actions">
+            <button type="button" id="photo-crop-cancel" class="secondary">Cancelar</button>
+            <button type="button" id="photo-crop-confirm">Guardar foto</button>
+        </div>
+    </div>
+</div>
+<script>
+// Foto de paciente: elegir archivo -> modal de recorte circular (pan/zoom
+// con mouse o touch) -> fetch con FormData a patient_photo_upload.php. El
+// crop se manda como rectángulo (crop_x/y/size) en píxeles de la imagen
+// ORIGINAL -- PatientPhoto::save() hace el recorte real server-side con GD,
+// acá solo se calcula el rectángulo a partir del pan/zoom en pantalla.
+(function () {
+    var fileInput = document.getElementById('patient-photo-input');
+    var modal = document.getElementById('photo-crop-modal');
+    var viewport = document.getElementById('photo-crop-viewport');
+    var img = document.getElementById('photo-crop-img');
+    var zoomSlider = document.getElementById('photo-crop-zoom');
+    var cancelBtn = document.getElementById('photo-crop-cancel');
+    var confirmBtn = document.getElementById('photo-crop-confirm');
+    var avatarPreview = document.getElementById('patient-avatar-preview');
+    var avatarEmpty = document.getElementById('patient-avatar-empty');
+    var msgEl = document.getElementById('photo-msg');
+    if (!fileInput || !modal) { return; }
+
+    var CASE_ID = <?= json_encode($editId) ?>;
+    var VIEWPORT = 280;
+    var naturalW = 0, naturalH = 0, coverScale = 1, scale = 1;
+    var tx = 0, ty = 0;
+    var dragging = false, dragStartX = 0, dragStartY = 0, dragOrigTx = 0, dragOrigTy = 0;
+    var selectedFile = null;
+
+    function clampPan() {
+        var dispW = naturalW * scale;
+        var dispH = naturalH * scale;
+        var minTx = Math.min(0, VIEWPORT - dispW);
+        var minTy = Math.min(0, VIEWPORT - dispH);
+        tx = Math.max(minTx, Math.min(0, tx));
+        ty = Math.max(minTy, Math.min(0, ty));
+    }
+
+    function applyTransform() {
+        img.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+    }
+
+    function openModal(file) {
+        selectedFile = file;
+        img.onload = function () {
+            naturalW = img.naturalWidth;
+            naturalH = img.naturalHeight;
+            coverScale = Math.max(VIEWPORT / naturalW, VIEWPORT / naturalH);
+            scale = coverScale;
+            tx = (VIEWPORT - naturalW * scale) / 2;
+            ty = (VIEWPORT - naturalH * scale) / 2;
+            zoomSlider.value = '1';
+            applyTransform();
+            modal.hidden = false;
+        };
+        img.src = URL.createObjectURL(file);
+    }
+
+    function closeModal() {
+        modal.hidden = true;
+        fileInput.value = '';
+        selectedFile = null;
+    }
+
+    function showMsg(text, isError) {
+        msgEl.textContent = text;
+        msgEl.style.color = isError ? '#a33' : '#2a7a2a';
+        msgEl.hidden = false;
+    }
+
+    fileInput.addEventListener('change', function () {
+        if (fileInput.files && fileInput.files[0]) {
+            openModal(fileInput.files[0]);
+        }
+    });
+
+    cancelBtn.addEventListener('click', closeModal);
+
+    zoomSlider.addEventListener('input', function () {
+        var z = parseFloat(zoomSlider.value);
+        // Ancla el zoom al centro del viewport, no a la esquina.
+        var cx = VIEWPORT / 2, cy = VIEWPORT / 2;
+        var imgCx = (cx - tx) / scale;
+        var imgCy = (cy - ty) / scale;
+        scale = coverScale * z;
+        tx = cx - imgCx * scale;
+        ty = cy - imgCy * scale;
+        clampPan();
+        applyTransform();
+    });
+
+    function pointerDown(x, y) {
+        dragging = true;
+        dragStartX = x; dragStartY = y;
+        dragOrigTx = tx; dragOrigTy = ty;
+    }
+    function pointerMove(x, y) {
+        if (!dragging) { return; }
+        tx = dragOrigTx + (x - dragStartX);
+        ty = dragOrigTy + (y - dragStartY);
+        clampPan();
+        applyTransform();
+    }
+    function pointerUp() { dragging = false; }
+
+    viewport.addEventListener('mousedown', function (e) { pointerDown(e.clientX, e.clientY); });
+    window.addEventListener('mousemove', function (e) { pointerMove(e.clientX, e.clientY); });
+    window.addEventListener('mouseup', pointerUp);
+    viewport.addEventListener('touchstart', function (e) {
+        pointerDown(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    viewport.addEventListener('touchmove', function (e) {
+        pointerMove(e.touches[0].clientX, e.touches[0].clientY);
+        e.preventDefault();
+    }, { passive: false });
+    viewport.addEventListener('touchend', pointerUp);
+
+    confirmBtn.addEventListener('click', function () {
+        if (!selectedFile) { return; }
+        // Recuadro visible en pantalla = el viewport completo (0,0)-(V,V);
+        // se convierte a coordenadas de píxel de la imagen ORIGINAL.
+        var srcSize = VIEWPORT / scale;
+        var srcX = -tx / scale;
+        var srcY = -ty / scale;
+
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Guardando...';
+
+        var fd = new FormData();
+        fd.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
+        fd.append('case_id', CASE_ID);
+        fd.append('crop_x', Math.round(srcX));
+        fd.append('crop_y', Math.round(srcY));
+        fd.append('crop_size', Math.round(srcSize));
+        fd.append('photo', selectedFile);
+
+        fetch('patient_photo_upload.php', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = 'Guardar foto';
+                if (data.ok) {
+                    avatarPreview.src = 'patient_photo.php?case_id=' + encodeURIComponent(CASE_ID) + '&type=avatar&v=' + Date.now();
+                    avatarPreview.hidden = false;
+                    avatarEmpty.hidden = true;
+                    showMsg('Foto actualizada.', false);
+                    closeModal();
+                } else {
+                    showMsg(data.error || 'No se pudo guardar la foto.', true);
+                }
+            })
+            .catch(function () {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = 'Guardar foto';
+                showMsg('Error de red al subir la foto.', true);
+            });
+    });
+})();
+</script>
+<?php endif; ?>
 
 <script>
 // Tabs de fichas -- se activan solo si corre JS (body.js-tabs), así sin JS

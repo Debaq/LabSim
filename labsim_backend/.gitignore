@@ -1,3 +1,4 @@
 config/config.php
 data/*.sqlite
 data/*.sqlite-*
+data/patient_photos/

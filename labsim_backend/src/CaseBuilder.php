@@ -301,6 +301,7 @@ final class CaseBuilder
             'Z_OD' => $form['z_od'],
             'Z_OI' => $form['z_oi'],
             'sector' => 'Camara_sono',
+            'edad' => $age,
             'volume' => [self::earVolume($age, $gender), self::earVolume($age, $gender), 'N/D'],
             'UMD' => $form['umd'],
             'SDT' => $form['sdt'],
@@ -325,9 +326,7 @@ final class CaseBuilder
     /**
      * Inverso de buildCaseData(): reconstruye el shape de $_POST que espera
      * case_create.php a partir de un `cases.data` ya guardado, para
-     * precargar el formulario al editar un caso existente. `age` no se
-     * reconstruye acá (no se guarda en cases.data) -- case_create.php la
-     * resuelve aparte a partir de la cita asociada.
+     * precargar el formulario al editar un caso existente.
      */
     public static function caseDataToForm(array $data): array
     {
@@ -343,6 +342,7 @@ final class CaseBuilder
 
         $v = [];
         $v['gender'] = (string) ($data['gender'] ?? 0);
+        $v['age'] = isset($data['edad']) ? (string) $data['edad'] : '';
 
         $freqCount = count(self::FREQUENCIES);
         [$aereaOd, $aereaOi] = $unzip($data['Aerea'] ?? [], $freqCount);
