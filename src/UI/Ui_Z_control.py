@@ -283,7 +283,6 @@ class Ui_Z_control(object):
 
         self.btn_1000 = QPushButton(self.frame)
         self.btn_1000.setObjectName(u"btn_1000")
-        self.btn_1000.setEnabled(False)
         self.btn_1000.setMaximumSize(QSize(16777215, 25))
         self.btn_1000.setFont(font)
 

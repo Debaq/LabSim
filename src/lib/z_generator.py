@@ -2,10 +2,41 @@ import numpy as np
 import random
 
 
+
+PROBE_1000_POSITIVE_PROB = {
+    'A': 0.95,
+    'Ad': 0.90,
+    'C': 0.85,
+    'Cs': 0.55,
+    'As': 0.25,
+    'B': 0.03,
+    'N': 0.0,
+}
+
+
+def map_letter_for_probe(letter, probe_freq, seed_key=None):
+    """Sonda 1000 Hz (protocolo Interacoustics): clasificación binaria
+    positivo/negativo según presencia de peak, no letra Jerger. No hay campo
+    de caso nuevo -- se deriva de la misma letra Z_OD/Z_OI ya cargada, con
+    gradiente de probabilidad de "positivo" según cuán rígido/móvil es el
+    oído en esa letra (A/Ad/C con peak franco -> casi siempre positivo;
+    As borderline -> mayoría negativo pero no siempre; B/N sin peak -> casi
+    siempre negativo). Se reusa la forma de curva A/B como proxy visual.
+
+    seed_key (paciente, oído, sonda) fija el resultado -- mismo paciente
+    siempre da el mismo positivo/negativo, no una moneda distinta por click."""
+    if probe_freq != '1000':
+        return letter
+    prob = PROBE_1000_POSITIVE_PROB.get(letter, 0.5)
+    draw = random.Random(str(seed_key)).random() if seed_key is not None else random.random()
+    return 'A' if draw < prob else 'B'
+
+
 class Z_225():
-    def __init__(self, manual=False, letter="A", c=1, p=0, g=1, pmax=200, num_pts=20, vol=1.8, unseal=False, win_neg=-400, win_pos=200):
+    def __init__(self, manual=False, letter="A", c=1, p=0, g=1, pmax=200, num_pts=20, vol=1.8, unseal=False, win_neg=-400, win_pos=200, seed_key=None):
 
         self.input = [letter, c, p, g, vol, pmax, num_pts, unseal, win_neg, win_pos]
+        self.seed_key = seed_key
         if manual:
             self.create_manual()
         else:
@@ -37,28 +68,38 @@ class Z_225():
 
     def create_auto(self):
         letter = self.input[0]
+        # rng fija (seed_key = paciente+oído+sonda) para que el mismo
+        # paciente siempre caiga en el mismo punto de la curva; random
+        # global sólo se usa cuando no hay paciente (caso legacy/demo).
+        rng = random.Random(str(self.seed_key)) if self.seed_key is not None else random
         if letter == 'A':
-            c = random.uniform(0.3, 1.6)
-            p = random.randint(-100, 20)
+            c = rng.uniform(0.3, 1.6)
+            p = rng.randint(-100, 20)
         elif letter == 'As':
-            c = random.uniform(0.01, 0.3)
-            p = random.randint(-100, 20)
+            c = rng.uniform(0.01, 0.3)
+            p = rng.randint(-100, 20)
         elif letter == 'Ad':
-            c = random.uniform(1.8, 4.0)
-            p = random.randint(-100, 20)
+            c = rng.uniform(1.8, 4.0)
+            p = rng.randint(-100, 20)
         elif letter == 'C':
-            c = random.uniform(0.3, 1.6)
-            p = random.randint(-400, -100)
+            c = rng.uniform(0.3, 1.6)
+            p = rng.randint(-400, -100)
         elif letter == 'Cs':
-            c = random.uniform(0.01, 1.3)
-            p = random.randint(-400, -100)
+            c = rng.uniform(0.01, 1.3)
+            p = rng.randint(-400, -100)
         elif letter == 'B':
-            c = random.uniform(0.0, 0.003)
-            p = random.randint(-100, 20)
+            c = rng.uniform(0.0, 0.003)
+            p = rng.randint(-100, 20)
         elif letter == 'N':
             c = 0
             p = 0
             self.input[7] = True
+
+        if letter != 'N' and self.seed_key is not None:
+            # jitter mínimo encima del valor estable del paciente -- no
+            # redibuja desde el rango completo cada vez, sólo tiembla un poco
+            c = max(0.0, c * random.uniform(0.97, 1.03))
+            p = p + random.randint(-2, 2)
 
         self.input[1] = c
         self.input[2] = p

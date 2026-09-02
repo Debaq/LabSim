@@ -19,7 +19,7 @@ from lib.ZRscreen import ZRscreen
 from lib.ZDscreen import ZDscreen
 from lib.ZETFscreen import ZETFscreen
 from lib.h_z import changeSide, changeSideText, sideText, printer, date_time
-from lib.z_generator import Z_225, Reflex_curve
+from lib.z_generator import Z_225, Reflex_curve, map_letter_for_probe
 from lib.helpers import Storage
 
 print("Z cargado")
@@ -30,6 +30,7 @@ class ZControl(QWidget, Ui_Z_control):
         super(ZControl, self).__init__()
         self.log_queue = get_log_queue()
         self.data = None
+        self.appointment_id = None
         self.setupUi(self)
         self.Z = ZZscreen()
         self.Z_reflex = ZRscreen()
@@ -43,6 +44,10 @@ class ZControl(QWidget, Ui_Z_control):
             screen.setVisible(screen is self.Z)
 
         # BUTTONS
+        self.probe_freq = '226'
+        self.btn_226.clicked.connect(lambda: self.set_probe_freq('226'))
+        self.btn_1000.clicked.connect(lambda: self.set_probe_freq('1000'))
+
         self.btn_side.clicked.connect(self.side_change)
         self.btn_1.clicked.connect(self.btn1_click)
         self.btn_2.clicked.connect(self.btn2_click)
@@ -153,10 +158,14 @@ class ZControl(QWidget, Ui_Z_control):
         case_id = self.data.get("id") if self.data else None
         if case_id is not None:
             payload.setdefault("case_id", case_id)
+        payload.setdefault("appointment_id", getattr(self, "appointment_id", None))
+        payload.setdefault("con_paciente", case_id is not None)
         self.log_queue.push(action, payload)
 
-    def la_super(self, data):
+    def la_super(self, data, appointment_id=None):
+        self.appointment_id = appointment_id
         if data is None:
+            self.data = None  # limpia el caso anterior: sin esto el log seguía marcando al paciente ya cerrado
             return
         self.data = data
         self.preCharger()
@@ -174,12 +183,15 @@ class ZControl(QWidget, Ui_Z_control):
         if self.store_data[side].is_null(0):
             print(f"side : {side}")
             if self.data is not None:
+                seed_key = (self.data.get('id'), self.Z.get_side(), self.probe_freq)
                 zGerger = self.data[f"Z_{self.Z.get_side()}"]
+                zGerger = map_letter_for_probe(zGerger, self.probe_freq, seed_key=seed_key)
                 vol = self.data['volume'][side]
             else:
+                seed_key = None
                 zGerger = "N"
                 vol = 1.8
-            result = Z_225(letter=zGerger, vol=vol, win_neg=win_neg, win_pos=win_pos).getDataSet()
+            result = Z_225(letter=zGerger, vol=vol, win_neg=win_neg, win_pos=win_pos, seed_key=seed_key).getDataSet()
             self.store_data[side].set(0, result)
             self.new[side] = True
 
@@ -198,6 +210,18 @@ class ZControl(QWidget, Ui_Z_control):
             self.new[side] = False
 
         self.update_reflex_volume()
+
+    def set_probe_freq(self, freq):
+        if freq == self.probe_freq:
+            return
+        self._log("z_probe_freq_change", freq=freq)
+        self.probe_freq = freq
+        self.Z.set_probe_freq(freq)
+        self.store_data[0].clean()
+        self.store_data[1].clean()
+        self.new = [True, True]
+        self.refresh()
+        self.preCharger()
 
     def side_change(self):
         side_text = self.Z.get_side()

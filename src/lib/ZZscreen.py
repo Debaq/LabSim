@@ -77,6 +77,9 @@ class ZZscreen(QWidget, Ui_Z_zscreen):
 
     def set_side(self, side):
         self.lbl_side.setText(side)
+
+    def set_probe_freq(self, freq):
+        self.lbl_probe_freq.setText(f"{freq} Hz")
         
     def get_side(self):
         return self.lbl_side.text()
