@@ -323,9 +323,6 @@ admin_header('Crear caso clínico', $me);
         <span><svg width="12" height="12"><polygon points="6,9 2,3 10,3" fill="#b33a3a" stroke="none"></polygon></svg> LDL OD</span>
         <span><svg width="12" height="12"><polygon points="6,9 2,3 10,3" fill="#2255aa" stroke="none"></polygon></svg> LDL OI</span>
     </div>
-    <p class="legend">Se dibuja solo con vía aérea/ósea/LDL de la derecha. Cambia a símbolo enmascarado
-        cuando la atenuación interaural lo exige (aérea: umbral propio − ósea contralateral ≥ 40 dB;
-        ósea: gap aérea−ósea del mismo oído ≥ 10 dB).</p>
 </div>
 
 <div class="audiometria-fields">
@@ -550,12 +547,14 @@ window.drawAudiogram = (function () {
     var MIN_LOG = Math.log(125) / Math.LN2;
     var MAX_LOG = Math.log(8000) / Math.LN2;
     var FREQS = [125, 250, 500, 1000, 2000, 3000, 4000, 6000, 8000];
-    // Reglas de enmascaramiento (simplificadas, uso docente):
-    // aérea: se enmascara si el umbral aéreo propio supera al óseo del oído
-    // contralateral en >= 40 dB (atenuación interaural típica de audífonos
-    // supraaurales). Ósea: se enmascara si hay gap aéreo-óseo del MISMO oído
-    // >= 10 dB (la atenuación interaural ósea es prácticamente 0).
-    var AIR_INTERAURAL_ATTENUATION = 40;
+    // Reglas de enmascaramiento (simplificadas, uso docente): aérea se
+    // enmascara si el umbral propio supera al óseo del oído contralateral
+    // en >= la atenuación interaural de ESA frecuencia (misma tabla que
+    // ResponseAudiometry.attenuations en src/audiometria/response.py de la
+    // app de escritorio -- ahí simula qué tan bien el auricular aísla al
+    // oído contrario). Ósea se enmascara si hay gap aéreo-óseo del MISMO
+    // oído >= 10 dB (la atenuación interaural ósea es prácticamente 0).
+    var AIR_ATTENUATION_BY_FREQ = [35, 40, 40, 40, 40, 45, 45, 50, 50];
     var BONE_MASKING_GAP = 10;
 
     function xPos(freq) { return 32 + (Math.log(freq) / Math.LN2 - MIN_LOG) / (MAX_LOG - MIN_LOG) * 280; }
@@ -575,7 +574,7 @@ window.drawAudiogram = (function () {
         var t = document.querySelector('.ldl-toggle[data-side="' + side + '"]');
         return !t || t.checked;
     }
-    function airMasked(acSelf, bcOther) { return (acSelf - bcOther) >= AIR_INTERAURAL_ATTENUATION; }
+    function airMasked(acSelf, bcOther, freqIndex) { return (acSelf - bcOther) >= AIR_ATTENUATION_BY_FREQ[freqIndex]; }
     function boneMasked(acSelf, bcSelf) { return (acSelf - bcSelf) >= BONE_MASKING_GAP; }
 
     function makeCross(x, y, color) {
@@ -655,14 +654,15 @@ window.drawAudiogram = (function () {
         var oseaOd = readVals('osea', 'od'), oseaOi = readVals('osea', 'oi');
 
         // Vía aérea: línea + símbolo por punto (enmascarado si el umbral
-        // propio supera en >=40dB al óseo del oído contrario).
+        // propio supera al óseo del oído contrario en >= la atenuación
+        // interaural de esa frecuencia, ver AIR_ATTENUATION_BY_FREQ).
         drawLine(aereaOd, '#b33a3a');
         drawLine(aereaOi, '#2255aa');
         for (var n = 0; n < FREQS.length; n++) {
             var x = xPos(FREQS[n]);
-            var maskedOd = airMasked(aereaOd[n], oseaOi[n]);
+            var maskedOd = airMasked(aereaOd[n], oseaOi[n], n);
             group.appendChild((maskedOd ? makeTriangle : makeCircle)(x, yPos(aereaOd[n]), '#b33a3a'));
-            var maskedOi = airMasked(aereaOi[n], oseaOd[n]);
+            var maskedOi = airMasked(aereaOi[n], oseaOd[n], n);
             group.appendChild((maskedOi ? makeSquare : makeCross)(x, yPos(aereaOi[n]), '#2255aa'));
         }
 
