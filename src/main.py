@@ -447,6 +447,21 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
 
 if __name__ == '__main__':
+    if getattr(sys, 'frozen', False):
+        from core.updater import apply_update_and_restart, check_for_update
+        update = check_for_update(__VERSION__)
+        if update is not None:
+            tag, download_url = update
+            resp = QMessageBox.question(
+                None,
+                "Actualización disponible",
+                f"Hay una nueva versión disponible ({tag}).\n"
+                "¿Actualizar ahora? La aplicación se cerrará y volverá a abrir sola.",
+                QMessageBox.Yes | QMessageBox.No,
+            )
+            if resp == QMessageBox.Yes:
+                apply_update_and_restart(download_url)  # no vuelve
+
     window = MainWindow()
     Preferences.get_style(window)
     window.show()
