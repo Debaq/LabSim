@@ -134,6 +134,20 @@ function logogram_y(float $pct): float
     return 10 + (100 - $pct) / 100 * 266;
 }
 
+// Geometría del timpanograma (compliance vs presión), mismo plot box que el
+// audiograma. X = presión en daPa (-400..200), Y = compliance/admitancia en
+// mL (0..2.5) -- si se cambia acá, cambiar también en drawTympanogram() en JS.
+function tymp_x(float $daPa): float
+{
+    $daPa = max(-400, min(200, $daPa));
+    return 32 + ($daPa - (-400)) / 600 * 280;
+}
+function tymp_y(float $compliance): float
+{
+    $compliance = max(0, min(2.5, $compliance));
+    return 276 - $compliance / 2.5 * 266;
+}
+
 $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $v = $_POST; // sticky form: se redibuja con lo ya tipeado, tanto al generar nombre como si falla la validación
@@ -350,6 +364,22 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     .side-tag { display: inline-block; font-weight: 700; font-size: 0.78rem; padding: 0.2rem 0.55rem; border-radius: 4px; background: #eef0f4; color: #555; }
     .side-tag.od { color: #b33a3a; }
     .side-tag.oi { color: #2255aa; }
+
+    /* Patrón de reflejos: tabla espejada -- columnas ipsi al centro (una
+       junto a la otra), contra hacia afuera, para leer ambos oídos "de
+       frente" como en la ficha en papel. */
+    .reflex-pattern-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.8rem; }
+    .reflex-pattern-table th, .reflex-pattern-table td { text-align: center; padding: 0.35rem 0.2rem; border: 1px solid #ddd; }
+    .reflex-pattern-table td.freq-label { font-weight: 600; background: #f7f7f7; }
+    .reflex-cell { font-weight: 700; color: #999; }
+    .reflex-cell.na { color: #ccc; background: #f5f5f5; }
+    /* Presente = fondo gris oscuro fijo (no varía por lado); el color del
+       "+" marca el oído que recibió el estímulo -- en ipsi coincide con la
+       columna (OD=rojo, OI=azul), en contra es el cruzado (columna OD con
+       estímulo en OI=azul, columna OI con estímulo en OD=rojo). */
+    .reflex-cell.present { background: #3a3a3a; }
+    .reflex-cell.present.mark-od { color: #e05c5c; }
+    .reflex-cell.present.mark-oi { color: #6fa8e8; }
 </style>
 
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
@@ -562,18 +592,93 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 </div>
 
 <div class="tab-panel" data-tab="timpanometria">
+<div class="audiometria-layout">
+
+<div class="audiogram-stack">
+<div class="audiogram-card card">
+    <strong>Timpanograma</strong>
+    <svg id="tympanogram-svg" viewBox="0 0 320 300" style="width:100%; height:auto; margin-top:0.5rem;">
+        <rect x="32" y="10" width="280" height="266" fill="none" stroke="#ccc"></rect>
+        <?php foreach ([0, 0.5, 1, 1.5, 2, 2.5] as $c):
+            $y = tymp_y($c);
+        ?>
+        <line x1="32" y1="<?= $y ?>" x2="312" y2="<?= $y ?>" stroke="#eee"></line>
+        <text x="28" y="<?= $y + 3 ?>" text-anchor="end" font-size="8" fill="#666"><?= $c ?></text>
+        <?php endforeach; ?>
+        <?php foreach ([-400, -300, -200, -100, 0, 100, 200] as $p):
+            $x = tymp_x($p);
+        ?>
+        <line x1="<?= $x ?>" y1="10" x2="<?= $x ?>" y2="276" stroke="#f2f2f2"></line>
+        <text x="<?= $x ?>" y="288" text-anchor="middle" font-size="8" fill="#666"><?= $p ?></text>
+        <?php endforeach; ?>
+        <text x="4" y="14" font-size="8" fill="#888">mL</text>
+        <text x="270" y="288" font-size="8" fill="#888">daPa</text>
+        <g id="tympanogram-data"></g>
+    </svg>
+    <div class="audiogram-legend">
+        <span><svg width="12" height="12"><line x1="1" y1="6" x2="11" y2="6" stroke="#b33a3a" stroke-width="1.6"></line></svg> OD</span>
+        <span><svg width="12" height="12"><line x1="1" y1="6" x2="11" y2="6" stroke="#2255aa" stroke-width="1.6"></line></svg> OI</span>
+    </div>
+    <p class="legend">Curva estilizada según el tipo (Jerger) elegido a la derecha -- no mide presión/compliance real, solo ilustra la forma clínica típica de cada tipo.</p>
+</div>
+
+<div class="audiogram-card card">
+    <strong>Patrón de reflejos</strong>
+    <?php
+    // Filas de frecuencia: ipsi solo tiene 500/1000/2000/4000 (índices 0-3),
+    // WN es exclusivo de contra (índice 4) -- las celdas ipsi de esa fila
+    // quedan marcadas "n/a" (no existe ese dato).
+    $reflexPatternRows = [
+        ['label' => '500 Hz', 'n' => 0, 'hasIpsi' => true],
+        ['label' => '1000 Hz', 'n' => 1, 'hasIpsi' => true],
+        ['label' => '2000 Hz', 'n' => 2, 'hasIpsi' => true],
+        ['label' => '4000 Hz', 'n' => 3, 'hasIpsi' => true],
+        ['label' => 'WN', 'n' => 4, 'hasIpsi' => false],
+    ];
+    ?>
+    <table class="reflex-pattern-table">
+        <tr>
+            <th class="side-tag od">OD Contra</th>
+            <th class="side-tag od">OD Ipsi</th>
+            <th>Frecuencia</th>
+            <th class="side-tag oi">OI Ipsi</th>
+            <th class="side-tag oi">OI Contra</th>
+        </tr>
+        <?php foreach ($reflexPatternRows as $row): ?>
+        <tr>
+            <td class="reflex-cell" data-mode="contra" data-side="od" data-n="<?= $row['n'] ?>"></td>
+            <?php if ($row['hasIpsi']): ?>
+            <td class="reflex-cell" data-mode="ipsi" data-side="od" data-n="<?= $row['n'] ?>"></td>
+            <?php else: ?>
+            <td class="reflex-cell na">&mdash;</td>
+            <?php endif; ?>
+            <td class="freq-label"><?= htmlspecialchars($row['label']) ?></td>
+            <?php if ($row['hasIpsi']): ?>
+            <td class="reflex-cell" data-mode="ipsi" data-side="oi" data-n="<?= $row['n'] ?>"></td>
+            <?php else: ?>
+            <td class="reflex-cell na">&mdash;</td>
+            <?php endif; ?>
+            <td class="reflex-cell" data-mode="contra" data-side="oi" data-n="<?= $row['n'] ?>"></td>
+        </tr>
+        <?php endforeach; ?>
+    </table>
+
+</div>
+</div>
+
+<div class="audiometria-fields">
 <div class="card">
     <strong>Timpanometría (Z)</strong>
     <div class="two-col">
         <label>Z OD
-            <select name="z_od">
+            <select id="z_od" name="z_od">
                 <?php foreach (CaseBuilder::Z_OPTIONS as $opt): ?>
                 <option value="<?= $opt ?>" <?= ($v['z_od'] ?? 'A') === $opt ? 'selected' : '' ?>><?= $opt ?></option>
                 <?php endforeach; ?>
             </select>
         </label>
         <label>Z OI
-            <select name="z_oi">
+            <select id="z_oi" name="z_oi">
                 <?php foreach (CaseBuilder::Z_OPTIONS as $opt): ?>
                 <option value="<?= $opt ?>" <?= ($v['z_oi'] ?? 'A') === $opt ? 'selected' : '' ?>><?= $opt ?></option>
                 <?php endforeach; ?>
@@ -609,12 +714,14 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <tr>
             <td class="side-label"><?= $sideLabel ?></td>
             <?php foreach ($info['freqs'] as $n => $f): ?>
-            <td><input type="number" step="5" name="reflex_<?= $mode ?>[<?= $side ?>][<?= $n ?>]" value="<?= htmlspecialchars((string) fv($v, ['reflex_' . $mode, $side, (string) $n], 130)) ?>"></td>
+            <td><input type="number" step="5" id="reflex_<?= $mode ?>_<?= $side ?>_<?= $n ?>" name="reflex_<?= $mode ?>[<?= $side ?>][<?= $n ?>]" value="<?= htmlspecialchars((string) fv($v, ['reflex_' . $mode, $side, (string) $n], 130)) ?>"></td>
             <?php endforeach; ?>
         </tr>
         <?php endforeach; ?>
     </table>
     <?php endforeach; ?>
+</div>
+</div>
 </div>
 </div>
 
@@ -917,6 +1024,76 @@ window.drawLogogram = (function () {
     };
 })();
 
+// Timpanograma: curva estilizada según el tipo Jerger elegido en Z OD/Z OI
+// -- el form solo guarda la categoría (A/As/Ad/C/Cs/B), no una curva medida,
+// así que se sintetiza una campana gaussiana por tipo. Mismas coordenadas
+// (presión -400..200 daPa, compliance 0..2.5 mL) que tymp_x()/tymp_y() en
+// PHP arriba, que dibujan la grilla fija de fondo.
+window.drawTympanogram = (function () {
+    var NS = 'http://www.w3.org/2000/svg';
+    function xPos(p) { p = Math.max(-400, Math.min(200, p)); return 32 + (p - (-400)) / 600 * 280; }
+    function yPos(c) { c = Math.max(0, Math.min(2.5, c)); return 276 - c / 2.5 * 266; }
+
+    // [posición del pico (daPa), altura del pico (mL), ancho de la campana, línea base]
+    var SHAPES = {
+        A: [0, 0.8, 60, 0.1],
+        As: [0, 0.3, 50, 0.1],
+        Ad: [0, 1.8, 70, 0.1],
+        C: [-150, 0.8, 70, 0.1],
+        Cs: [-150, 0.3, 60, 0.1],
+        B: [0, 0.15, 400, 0.15]
+    };
+
+    function curvePoints(type) {
+        var s = SHAPES[type] || SHAPES.A;
+        var peakPos = s[0], peakHeight = s[1], width = s[2], baseline = s[3];
+        var pts = [];
+        for (var p = -400; p <= 200; p += 10) {
+            var c = baseline + (peakHeight - baseline) * Math.exp(-((p - peakPos) * (p - peakPos)) / (2 * width * width));
+            pts.push([p, c]);
+        }
+        return pts;
+    }
+
+    return function drawTympanogram() {
+        var group = document.getElementById('tympanogram-data');
+        if (!group) return;
+        while (group.firstChild) group.removeChild(group.firstChild);
+
+        [['z_od', '#b33a3a'], ['z_oi', '#2255aa']].forEach(function (pair) {
+            var el = document.getElementById(pair[0]);
+            var pts = curvePoints(el ? el.value : 'A');
+            var poly = document.createElementNS(NS, 'polyline');
+            poly.setAttribute('points', pts.map(function (pt) { return xPos(pt[0]) + ',' + yPos(pt[1]); }).join(' '));
+            poly.setAttribute('fill', 'none');
+            poly.setAttribute('stroke', pair[1]);
+            poly.setAttribute('stroke-width', '1.5');
+            group.appendChild(poly);
+        });
+    };
+})();
+
+// Patrón de reflejos: tabla espejada (ipsi al centro, contra afuera), una
+// celda +/- por frecuencia/modo/oído, leída en vivo de los campos
+// reflex_ipsi/reflex_contra -- presente (valor != 130) rellena con gris
+// oscuro fijo; el color del "+" marca el oído que recibió el estímulo: en
+// ipsi coincide con la columna (OD=rojo, OI=azul), en contra es el
+// cruzado (columna OD con estímulo en OI=azul, columna OI con estímulo en
+// OD=rojo). Ausente (130) queda vacía.
+window.drawReflexPattern = function drawReflexPattern() {
+    document.querySelectorAll('.reflex-cell[data-mode]').forEach(function (cell) {
+        var mode = cell.dataset.mode, side = cell.dataset.side, n = cell.dataset.n;
+        var el = document.getElementById('reflex_' + mode + '_' + side + '_' + n);
+        var val = el ? (parseInt(el.value, 10) || 0) : 130;
+        var present = val < 130;
+        var stimulusSide = mode === 'ipsi' ? side : (side === 'od' ? 'oi' : 'od');
+        cell.textContent = present ? '+' : String.fromCharCode(8722);
+        cell.classList.toggle('present', present);
+        cell.classList.toggle('mark-od', present && stimulusSide === 'od');
+        cell.classList.toggle('mark-oi', present && stimulusSide === 'oi');
+    });
+};
+
 (function () {
     var form = document.getElementById('case-form');
     if (!form) return;
@@ -927,15 +1104,19 @@ window.drawLogogram = (function () {
         if (e.target.id && /^(aerea|osea|ldl)_/.test(e.target.id)) window.drawAudiogram();
         if (e.target.classList && (e.target.classList.contains('sdt-input') || e.target.classList.contains('srt-input')
             || e.target.classList.contains('umd-int-input') || e.target.classList.contains('umd-pct-input'))) window.drawLogogram();
+        if (e.target.id && /^reflex_/.test(e.target.id)) window.drawReflexPattern();
     });
     // El toggle "LDL medido" decide si esa serie se grafica o no, no solo
     // un valor -- necesita su propio listener aparte del 'input' de arriba.
     form.addEventListener('change', function (e) {
         if (e.target.classList && e.target.classList.contains('ldl-toggle')) window.drawAudiogram();
         if (e.target.classList && e.target.classList.contains('recruit-toggle')) window.drawLogogram();
+        if (e.target.id === 'z_od' || e.target.id === 'z_oi') window.drawTympanogram();
     });
     window.drawAudiogram();
     window.drawLogogram();
+    window.drawTympanogram();
+    window.drawReflexPattern();
 })();
 
 // Ayuda visual en vivo -- el servidor recalcula todo igual al enviar,
