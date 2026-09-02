@@ -11,20 +11,15 @@ from PySide6.QtWidgets import (
     QTabWidget, QTextEdit, QVBoxLayout, QWidget,
 )
 
-# Mismas claves/valores que CaseBuilder::RINNE_LABELS / WEBER_LABELS en el
-# backend PHP (labsim_backend/src/CaseBuilder.php) -- si se agrega una
-# opción allá, agregarla acá también.
-RINNE_LABELS = {
-    'positivo': 'Positivo (CA > CO)',
-    'negativo': 'Negativo (CO > CA)',
-    'falso_negativo': 'Falso negativo (hipoacusia sensorioneural profunda, cruce óseo contralateral)',
-}
+# Rinne no expone la etiqueta final (positivo/negativo/falso_negativo) --
+# eso lo concluye el alumno con la respuesta del paciente a la comparación.
+# Weber sí es directo: la lateralización que reporta el paciente ES el
+# hallazgo del examen, no hay nada que inferir aparte.
 WEBER_LABELS = {
     'centrado': 'Sin lateralización (centrado)',
     'od': 'Lateraliza a OD',
     'oi': 'Lateraliza a OI',
 }
-FREQS = (('500', '500 Hz'), ('1000', '1000 Hz'))
 
 
 class Acumetria(QWidget):
@@ -150,7 +145,9 @@ class Acumetria(QWidget):
             self.rinne_log.append("Paciente: Frente al pabellón, y por más tiempo.")
         else:  # negativo y falso_negativo suenan igual para el paciente -- la trampa del falso negativo
             self.rinne_log.append("Paciente: En la mastoides.")
-        self.rinne_log.append(f"Interpretación: {RINNE_LABELS.get(valor, RINNE_LABELS['positivo'])}")
+        # Sin "Interpretación: ..." acá -- si lo da positivo/negativo (o si
+        # es un falso negativo) lo tiene que concluir el alumno con esta
+        # respuesta, no leerlo hecho.
 
     # ---------------------------------------------------------- Weber ----
 
