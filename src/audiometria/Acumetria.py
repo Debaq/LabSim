@@ -86,12 +86,16 @@ class Acumetria(QWidget):
 
         fila_btn = QHBoxLayout()
         self.btn_mastoides = QPushButton("Apoyar en mastoides (vía ósea)")
-        self.btn_conducto = QPushButton("Apoyar frente al conducto (vía aérea)")
+        self.btn_pabellon = QPushButton("Presentar frente al pabellón (vía aérea)")
         self.btn_mastoides.clicked.connect(self._rinne_probar_mastoides)
-        self.btn_conducto.clicked.connect(self._rinne_probar_conducto)
+        self.btn_pabellon.clicked.connect(self._rinne_probar_pabellon)
         fila_btn.addWidget(self.btn_mastoides)
-        fila_btn.addWidget(self.btn_conducto)
+        fila_btn.addWidget(self.btn_pabellon)
         v.addLayout(fila_btn)
+
+        self.btn_comparar = QPushButton("Preguntar: ¿dónde lo escuchas más fuerte?")
+        self.btn_comparar.clicked.connect(self._rinne_comparar)
+        v.addWidget(self.btn_comparar)
 
         self.rinne_log = QTextEdit(tab)
         self.rinne_log.setReadOnly(True)
@@ -107,7 +111,7 @@ class Acumetria(QWidget):
         return hz, lado, lado_label, valor
 
     def _rinne_reset(self):
-        self._rinne_probado = {'mastoides': False, 'conducto': False}
+        self._rinne_probado = {'mastoides': False, 'pabellon': False}
         self.rinne_log.clear()
 
     def _rinne_probar_mastoides(self):
@@ -118,27 +122,34 @@ class Acumetria(QWidget):
         self.rinne_log.append(f"Tú: apoyas el diapasón en la mastoides del oído {lado_label}.")
         self.rinne_log.append("Paciente: Sí, lo escucho.")
         self._rinne_probado['mastoides'] = True
-        self._rinne_evaluar()
 
-    def _rinne_probar_conducto(self):
+    def _rinne_probar_pabellon(self):
         if not self.data:
             self.rinne_log.append("Paciente: (no hay un caso cargado)")
             return
         _, _, lado_label, valor = self._rinne_seleccion()
-        self.rinne_log.append(f"Tú: apoyas el diapasón frente al conducto auditivo del oído {lado_label}.")
+        self.rinne_log.append(f"Tú: presentas el diapasón frente al pabellón auricular del oído {lado_label}.")
         if valor == 'positivo':
-            self.rinne_log.append("Paciente: Sí, y aquí lo escucho más fuerte que en el hueso.")
+            self.rinne_log.append("Paciente: Sí, también lo escucho aquí.")
         elif valor == 'negativo':
-            self.rinne_log.append("Paciente: Lo escucho, pero más débil que en el hueso.")
+            self.rinne_log.append("Paciente: Sí, lo escucho, pero se siente más débil.")
         else:  # falso_negativo
             self.rinne_log.append("Paciente: No... por acá no escucho nada.")
-        self._rinne_probado['conducto'] = True
-        self._rinne_evaluar()
+        self._rinne_probado['pabellon'] = True
 
-    def _rinne_evaluar(self):
-        if not (self._rinne_probado['mastoides'] and self._rinne_probado['conducto']):
+    def _rinne_comparar(self):
+        if not self.data:
+            self.rinne_log.append("Paciente: (no hay un caso cargado)")
+            return
+        if not (self._rinne_probado['mastoides'] and self._rinne_probado['pabellon']):
+            self.rinne_log.append("Tú: (primero hay que probar mastoides y pabellón en este oído/diapasón)")
             return
         _, _, _, valor = self._rinne_seleccion()
+        self.rinne_log.append("Tú: ¿en cuál posición lo escuchas más fuerte?")
+        if valor == 'positivo':
+            self.rinne_log.append("Paciente: Frente al pabellón, y por más tiempo.")
+        else:  # negativo y falso_negativo suenan igual para el paciente -- la trampa del falso negativo
+            self.rinne_log.append("Paciente: En la mastoides.")
         self.rinne_log.append(f"Interpretación: {RINNE_LABELS.get(valor, RINNE_LABELS['positivo'])}")
 
     # ---------------------------------------------------------- Weber ----
