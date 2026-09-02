@@ -313,11 +313,19 @@ admin_header('Crear caso clínico', $me);
     </svg>
     <div class="audiogram-legend">
         <span><svg width="12" height="12"><circle cx="6" cy="6" r="4" fill="none" stroke="#b33a3a" stroke-width="1.4"></circle></svg> Aérea OD</span>
+        <span><svg width="12" height="12"><polygon points="6,2 2,10 10,10" fill="none" stroke="#b33a3a" stroke-width="1.4"></polygon></svg> Aérea OD enmasc.</span>
         <span><svg width="12" height="12"><line x1="2" y1="2" x2="10" y2="10" stroke="#2255aa" stroke-width="1.4"></line><line x1="2" y1="10" x2="10" y2="2" stroke="#2255aa" stroke-width="1.4"></line></svg> Aérea OI</span>
+        <span><svg width="12" height="12"><rect x="2" y="2" width="8" height="8" fill="none" stroke="#2255aa" stroke-width="1.4"></rect></svg> Aérea OI enmasc.</span>
         <span><svg width="12" height="12"><polyline points="9,2 3,6 9,10" fill="none" stroke="#b33a3a" stroke-width="1.4"></polyline></svg> Ósea OD</span>
+        <span><svg width="12" height="12"><polyline points="8,2 3,2 3,10 8,10" fill="none" stroke="#b33a3a" stroke-width="1.4"></polyline></svg> Ósea OD enmasc.</span>
         <span><svg width="12" height="12"><polyline points="3,2 9,6 3,10" fill="none" stroke="#2255aa" stroke-width="1.4"></polyline></svg> Ósea OI</span>
+        <span><svg width="12" height="12"><polyline points="4,2 9,2 9,10 4,10" fill="none" stroke="#2255aa" stroke-width="1.4"></polyline></svg> Ósea OI enmasc.</span>
+        <span><svg width="12" height="12"><polygon points="6,9 2,3 10,3" fill="#b33a3a" stroke="none"></polygon></svg> LDL OD</span>
+        <span><svg width="12" height="12"><polygon points="6,9 2,3 10,3" fill="#2255aa" stroke="none"></polygon></svg> LDL OI</span>
     </div>
-    <p class="legend">Se dibuja solo con los valores de vía aérea/ósea de la derecha.</p>
+    <p class="legend">Se dibuja solo con vía aérea/ósea/LDL de la derecha. Cambia a símbolo enmascarado
+        cuando la atenuación interaural lo exige (aérea: umbral propio − ósea contralateral ≥ 40 dB;
+        ósea: gap aérea−ósea del mismo oído ≥ 10 dB).</p>
 </div>
 
 <div class="audiometria-fields">
@@ -528,15 +536,27 @@ admin_header('Crear caso clínico', $me);
 })();
 
 // Audiograma: se redibuja solo con lo que hay en los campos de vía
-// aérea/ósea -- mismas coordenadas (log de frecuencia, -10..120 dB HL)
+// aérea/ósea/LDL -- mismas coordenadas (log de frecuencia, -10..120 dB HL)
 // que audiogram_x()/audiogram_y() en PHP, que dibujan la grilla fija de
-// fondo. Símbolos clínicos estándar: círculo/cruz = aérea OD/OI (rojo/azul),
-// "<"/">"= ósea OD/OI.
+// fondo. Símbolos clínicos estándar (ASHA): círculo/cruz = aérea OD/OI sin
+// enmascarar, triángulo/cuadrado = aérea OD/OI enmascarada; "<"/">" = ósea
+// OD/OI sin enmascarar, "["/"]" = ósea OD/OI enmascarada; triángulo relleno
+// = LDL. El enmascaramiento no se tipea a mano: se infiere solo de la
+// atenuación interaural (ver reglas en airMasked/boneMasked abajo), mismo
+// criterio que enseña Katz, Handbook of Clinical Audiology (ver también
+// CaseBuilder::earVolume, que cita la misma fuente).
 window.drawAudiogram = (function () {
     var NS = 'http://www.w3.org/2000/svg';
     var MIN_LOG = Math.log(125) / Math.LN2;
     var MAX_LOG = Math.log(8000) / Math.LN2;
     var FREQS = [125, 250, 500, 1000, 2000, 3000, 4000, 6000, 8000];
+    // Reglas de enmascaramiento (simplificadas, uso docente):
+    // aérea: se enmascara si el umbral aéreo propio supera al óseo del oído
+    // contralateral en >= 40 dB (atenuación interaural típica de audífonos
+    // supraaurales). Ósea: se enmascara si hay gap aéreo-óseo del MISMO oído
+    // >= 10 dB (la atenuación interaural ósea es prácticamente 0).
+    var AIR_INTERAURAL_ATTENUATION = 40;
+    var BONE_MASKING_GAP = 10;
 
     function xPos(freq) { return 32 + (Math.log(freq) / Math.LN2 - MIN_LOG) / (MAX_LOG - MIN_LOG) * 280; }
     function yPos(db) {
@@ -551,6 +571,13 @@ window.drawAudiogram = (function () {
         }
         return vals;
     }
+    function isLdlMeasured(side) {
+        var t = document.querySelector('.ldl-toggle[data-side="' + side + '"]');
+        return !t || t.checked;
+    }
+    function airMasked(acSelf, bcOther) { return (acSelf - bcOther) >= AIR_INTERAURAL_ATTENUATION; }
+    function boneMasked(acSelf, bcSelf) { return (acSelf - bcSelf) >= BONE_MASKING_GAP; }
+
     function makeCross(x, y, color) {
         var g = document.createElementNS(NS, 'g');
         var r = 4.5;
@@ -568,52 +595,114 @@ window.drawAudiogram = (function () {
         c.setAttribute('fill', 'none'); c.setAttribute('stroke', color); c.setAttribute('stroke-width', '1.5');
         return c;
     }
-    function makeBracket(x, y, color, dir) {
+    function makeTriangle(x, y, color) {
+        var r = 5;
+        var t = document.createElementNS(NS, 'polygon');
+        t.setAttribute('points', x + ',' + (y - r) + ' ' + (x - r) + ',' + (y + r * 0.8) + ' ' + (x + r) + ',' + (y + r * 0.8));
+        t.setAttribute('fill', 'none'); t.setAttribute('stroke', color); t.setAttribute('stroke-width', '1.5');
+        return t;
+    }
+    function makeSquare(x, y, color) {
+        var r = 4;
+        var rect = document.createElementNS(NS, 'rect');
+        rect.setAttribute('x', x - r); rect.setAttribute('y', y - r);
+        rect.setAttribute('width', 2 * r); rect.setAttribute('height', 2 * r);
+        rect.setAttribute('fill', 'none'); rect.setAttribute('stroke', color); rect.setAttribute('stroke-width', '1.5');
+        return rect;
+    }
+    /** "<"/">" sin enmascarar, "["/"]" enmascarado -- mismo trazo, distinto cierre del ángulo. */
+    function makeBracket(x, y, color, dir, masked) {
         var r = 4.5;
-        var pts = dir === 'left'
-            ? (x + r) + ',' + (y - r) + ' ' + (x - r) + ',' + y + ' ' + (x + r) + ',' + (y + r)
-            : (x - r) + ',' + (y - r) + ' ' + (x + r) + ',' + y + ' ' + (x - r) + ',' + (y + r);
+        var pts;
+        if (!masked) {
+            pts = dir === 'left'
+                ? (x + r) + ',' + (y - r) + ' ' + (x - r) + ',' + y + ' ' + (x + r) + ',' + (y + r)
+                : (x - r) + ',' + (y - r) + ' ' + (x + r) + ',' + y + ' ' + (x - r) + ',' + (y + r);
+        } else {
+            pts = dir === 'left'
+                ? (x + r * 0.6) + ',' + (y - r) + ' ' + (x - r) + ',' + (y - r) + ' ' + (x - r) + ',' + (y + r) + ' ' + (x + r * 0.6) + ',' + (y + r)
+                : (x - r * 0.6) + ',' + (y - r) + ' ' + (x + r) + ',' + (y - r) + ' ' + (x + r) + ',' + (y + r) + ' ' + (x - r * 0.6) + ',' + (y + r);
+        }
         var p = document.createElementNS(NS, 'polyline');
         p.setAttribute('points', pts);
         p.setAttribute('fill', 'none'); p.setAttribute('stroke', color); p.setAttribute('stroke-width', '1.5');
         return p;
     }
-
-    var SERIES = [
-        { key: 'aerea', side: 'od', color: '#b33a3a', line: true, make: makeCircle },
-        { key: 'aerea', side: 'oi', color: '#2255aa', line: true, make: makeCross },
-        { key: 'osea', side: 'od', color: '#b33a3a', line: false, make: function (x, y, c) { return makeBracket(x, y, c, 'left'); } },
-        { key: 'osea', side: 'oi', color: '#2255aa', line: false, make: function (x, y, c) { return makeBracket(x, y, c, 'right'); } },
-    ];
+    function makeLdlMark(x, y, color) {
+        var r = 4;
+        var t = document.createElementNS(NS, 'polygon');
+        t.setAttribute('points', (x - r) + ',' + (y - r * 0.6) + ' ' + (x + r) + ',' + (y - r * 0.6) + ' ' + x + ',' + (y + r * 0.7));
+        t.setAttribute('fill', color); t.setAttribute('stroke', 'none');
+        return t;
+    }
 
     return function drawAudiogram() {
         var group = document.getElementById('audiogram-data');
         if (!group) return;
         while (group.firstChild) group.removeChild(group.firstChild);
 
-        SERIES.forEach(function (s) {
-            var points = readVals(s.key, s.side).map(function (v, i) { return [xPos(FREQS[i]), yPos(v)]; });
-            if (s.line) {
-                var poly = document.createElementNS(NS, 'polyline');
-                poly.setAttribute('points', points.map(function (p) { return p.join(','); }).join(' '));
-                poly.setAttribute('fill', 'none');
-                poly.setAttribute('stroke', s.color);
-                poly.setAttribute('stroke-width', '1.3');
-                group.appendChild(poly);
-            }
-            points.forEach(function (p) { group.appendChild(s.make(p[0], p[1], s.color)); });
-        });
+        function drawLine(vals, color, dashed) {
+            var poly = document.createElementNS(NS, 'polyline');
+            poly.setAttribute('points', vals.map(function (v, i) { return xPos(FREQS[i]) + ',' + yPos(v); }).join(' '));
+            poly.setAttribute('fill', 'none');
+            poly.setAttribute('stroke', color);
+            poly.setAttribute('stroke-width', dashed ? '1' : '1.3');
+            if (dashed) poly.setAttribute('stroke-dasharray', '2,2');
+            group.appendChild(poly);
+        }
+
+        var aereaOd = readVals('aerea', 'od'), aereaOi = readVals('aerea', 'oi');
+        var oseaOd = readVals('osea', 'od'), oseaOi = readVals('osea', 'oi');
+
+        // Vía aérea: línea + símbolo por punto (enmascarado si el umbral
+        // propio supera en >=40dB al óseo del oído contrario).
+        drawLine(aereaOd, '#b33a3a');
+        drawLine(aereaOi, '#2255aa');
+        for (var n = 0; n < FREQS.length; n++) {
+            var x = xPos(FREQS[n]);
+            var maskedOd = airMasked(aereaOd[n], oseaOi[n]);
+            group.appendChild((maskedOd ? makeTriangle : makeCircle)(x, yPos(aereaOd[n]), '#b33a3a'));
+            var maskedOi = airMasked(aereaOi[n], oseaOd[n]);
+            group.appendChild((maskedOi ? makeSquare : makeCross)(x, yPos(aereaOi[n]), '#2255aa'));
+        }
+
+        // Vía ósea: sin línea (convención estándar), enmascarada si hay gap
+        // aéreo-óseo >=10dB en el mismo oído.
+        for (var m = 0; m < FREQS.length; m++) {
+            var x2 = xPos(FREQS[m]);
+            group.appendChild(makeBracket(x2, yPos(oseaOd[m]), '#b33a3a', 'left', boneMasked(aereaOd[m], oseaOd[m])));
+            group.appendChild(makeBracket(x2, yPos(oseaOi[m]), '#2255aa', 'right', boneMasked(aereaOi[m], oseaOi[m])));
+        }
+
+        // LDL: solo si "LDL medido" está activo para ese oído -- si no, el
+        // valor que se guarda es 130 (ausente) sin importar lo escrito, así
+        // que graficarlo igual sería mostrar un dato que nunca se va a guardar.
+        if (isLdlMeasured('od')) {
+            var ldlOd = readVals('ldl', 'od');
+            drawLine(ldlOd, '#b33a3a', true);
+            ldlOd.forEach(function (v, i) { group.appendChild(makeLdlMark(xPos(FREQS[i]), yPos(v), '#b33a3a')); });
+        }
+        if (isLdlMeasured('oi')) {
+            var ldlOi = readVals('ldl', 'oi');
+            drawLine(ldlOi, '#2255aa', true);
+            ldlOi.forEach(function (v, i) { group.appendChild(makeLdlMark(xPos(FREQS[i]), yPos(v), '#2255aa')); });
+        }
     };
 })();
 
 (function () {
     var form = document.getElementById('case-form');
     if (!form) return;
-    // Delegado: cubre tipeo directo en vía aérea/ósea. El caso de "igualar"
-    // (que escribe osea.value por JS sin evento input) se cubre aparte,
-    // llamando drawAudiogram() desde syncOsea() más abajo.
+    // Delegado: cubre tipeo directo en vía aérea/ósea/LDL. El caso de
+    // "igualar" (que escribe osea.value por JS sin evento input) se cubre
+    // aparte, llamando drawAudiogram() desde syncOsea() más abajo.
     form.addEventListener('input', function (e) {
-        if (e.target.id && /^(aerea|osea)_/.test(e.target.id)) window.drawAudiogram();
+        if (e.target.id && /^(aerea|osea|ldl)_/.test(e.target.id)) window.drawAudiogram();
+    });
+    // El toggle "LDL medido" decide si esa serie se grafica o no, no solo
+    // un valor -- necesita su propio listener aparte del 'input' de arriba.
+    form.addEventListener('change', function (e) {
+        if (e.target.classList && e.target.classList.contains('ldl-toggle')) window.drawAudiogram();
     });
     window.drawAudiogram();
 })();
