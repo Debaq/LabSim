@@ -202,9 +202,9 @@ class ZControl(QWidget, Ui_Z_control):
             self.Z.set_side('OI')
         else:
             self.Z.set_side('OD')
+        self.Z_reflex.set_side(self.Z.get_side())
         self.refresh()
         self.preCharger()
-        self.Z_reflex.set_side(self.Z.get_side())
         self.Z_reflex.clear_response()
         self.refresh_reflex_table()
         self.update_reflex_volume()
