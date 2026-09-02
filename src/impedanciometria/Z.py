@@ -464,6 +464,7 @@ class ZControl(QWidget, Ui_Z_control):
             return
         side = self.Z.get_side()
         probe_idx = 0 if side == 'OD' else 1
+        side_key = 'od' if side == 'OD' else 'oi'
         freqs = self.reflex_freqs_for_mode()
         freq = freqs[self.reflex_freq_idx]
         row_idx = ['500', '1000', '2000', '4000', 'NBN'].index(freq)
@@ -472,13 +473,14 @@ class ZControl(QWidget, Ui_Z_control):
         threshold = reflex_data[row_idx][probe_idx] if row_idx < len(reflex_data) else None
 
         present = threshold is not None and self.dB >= threshold
-        x, y = Reflex_curve(present=present, dB=self.dB, threshold=threshold).getDataSet()
+        curve_type = self.data['Reflex'].get('tipo', {}).get(side_key, 'normal')
+        x, y = Reflex_curve(present=present, dB=self.dB, threshold=threshold, curve_type=curve_type).getDataSet()
 
         self.time_reflex.stop()
         self.Z_reflex.clear_response()
         self.reflex_anim_data = (x, y)
         self.reflex_anim_idx = 1
-        self.reflex_anim_ctx = (probe_idx, row_idx, present)
+        self.reflex_anim_ctx = (probe_idx, row_idx, present, curve_type)
         # Ventana completa (2s de traza) se dibuja en 1s reales, como el equipo real.
         self.time_reflex.start(round(1000 / len(x)))
 
@@ -490,8 +492,11 @@ class ZControl(QWidget, Ui_Z_control):
 
         if self.reflex_anim_idx >= len(x):
             self.time_reflex.stop()
-            probe_idx, row_idx, present = self.reflex_anim_ctx
-            if present:
+            probe_idx, row_idx, present, curve_type = self.reflex_anim_ctx
+            # El equipo real solo detecta y marca automáticamente en la tabla
+            # cuando la curva es "normal" (meseta sostenida); invertido/on/
+            # on-off son solo visuales en la pantalla, no gatillan la marca.
+            if present and curve_type == 'normal':
                 # Se guarda el dB al que el ALUMNO estimuló, nunca el umbral
                 # real del caso: si prueba muy arriba del umbral verdadero,
                 # ese (impreciso) es el valor que queda registrado.

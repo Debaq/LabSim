@@ -181,9 +181,10 @@ class Z_225():
 
 
 class Reflex_curve():
-    def __init__(self, present, dB=None, threshold=None, num_pts=100,
+    def __init__(self, present, dB=None, threshold=None, curve_type='normal', num_pts=100,
                  duration=2.0, stim_start=0.5, stim_dur=1.0, max_amp=100):
         self.present = present
+        self.curve_type = curve_type
         t = np.linspace(0.0, duration, num_pts)
         y = np.random.normal(0, 3, num_pts)
 
@@ -192,11 +193,29 @@ class Reflex_curve():
             amp = max_amp * min(1.0, 0.3 + excess / 40)
             in_stim = (t >= stim_start) & (t <= stim_start + stim_dur)
             tt = (t[in_stim] - stim_start) / stim_dur
-            # Flanco abrupto (onset/offset rápido del reflejo) + meseta plana,
-            # no una curva suave tipo seno.
             edge = 0.05
-            shape = np.clip(np.minimum(tt / edge, (1.0 - tt) / edge), 0.0, 1.0)
-            y[in_stim] -= amp * shape
+
+            if curve_type == 'on':
+                # Efecto "on": pico solo al inicio del estímulo, decae a línea
+                # base y no se sostiene (a diferencia de la meseta normal).
+                onset_w = 0.15
+                shape = np.clip(1.0 - tt / onset_w, 0.0, 1.0)
+            elif curve_type == 'on-off':
+                # Efecto "on-off": pico al inicio Y al final del estímulo,
+                # con retorno a línea base entre ambos.
+                edge_w = 0.15
+                onset = np.clip(1.0 - tt / edge_w, 0.0, 1.0)
+                offset = np.clip(1.0 - (1.0 - tt) / edge_w, 0.0, 1.0)
+                shape = np.maximum(onset, offset)
+            else:
+                # normal / invertido: flanco abrupto (onset/offset rápido del
+                # reflejo) + meseta plana sostenida, no una curva suave tipo seno.
+                shape = np.clip(np.minimum(tt / edge, (1.0 - tt) / edge), 0.0, 1.0)
+
+            # invertido refleja la deflexión hacia arriba en vez de hacia abajo;
+            # el resto (normal, on, on-off) usa la dirección normal.
+            sign = 1.0 if curve_type == 'invertido' else -1.0
+            y[in_stim] += sign * amp * shape
 
         self.x = t
         self.y = y

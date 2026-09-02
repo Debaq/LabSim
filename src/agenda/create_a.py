@@ -1,3 +1,7 @@
+# LEGACY: creador de casos de escritorio (Python/PySide6). Se está
+# reemplazando por labsim_backend/public/admin/case_create.php -- las
+# funciones nuevas del modelo de caso (p.ej. tipo de curva de reflejo)
+# se agregan ahí, no acá. No agregar features nuevas a este archivo.
 from agenda.UI.ui_Audimetry_create_profile import Ui_generator_audio
 from PySide6.QtWidgets import QWidget, QSpinBox, QMessageBox
 from core.helpers import CreatePatient, CasesOffline, Shedule

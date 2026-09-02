@@ -137,6 +137,17 @@ final class CaseBuilder
         return self::FOWLER_PATTERNS[$pattern] ?? self::FOWLER_PATTERNS['none'];
     }
 
+    // Tipo de curva del reflejo acústico, por oído -- morfología del trazo
+    // (no la intensidad umbral, que ya se captura en reflex_ipsi/contra).
+    public const REFLEX_CURVE_TYPES = ['normal', 'invertido', 'on', 'on-off'];
+
+    public const REFLEX_CURVE_LABELS = [
+        'normal' => 'Normal',
+        'invertido' => 'Invertido',
+        'on' => 'ON',
+        'on-off' => 'ON-OFF',
+    ];
+
     public static function nextCaseId(PDO $pdo): string
     {
         $max = (int) $pdo->query('SELECT MAX(CAST(id AS INTEGER)) FROM cases')->fetchColumn();
@@ -352,6 +363,11 @@ final class CaseBuilder
         [$contraOd, $contraOi] = $unzip($reflex['contra'] ?? [], 5);
         $v['reflex_ipsi'] = ['od' => $ipsiOd, 'oi' => $ipsiOi];
         $v['reflex_contra'] = ['od' => $contraOd, 'oi' => $contraOi];
+        $reflexTipo = $reflex['tipo'] ?? [];
+        $v['reflex_type'] = [
+            'od' => (string) ($reflexTipo['od'] ?? 'normal'),
+            'oi' => (string) ($reflexTipo['oi'] ?? 'normal'),
+        ];
 
         $etf = $data['ETF'] ?? ['Normal', 'Normal'];
         $v['etf_od'] = $etf[0] ?? 'Normal';

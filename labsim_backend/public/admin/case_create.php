@@ -205,6 +205,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        $reflexType = ['od' => 'normal', 'oi' => 'normal'];
+        foreach (['od', 'oi'] as $side) {
+            $type = (string) fv($v, ['reflex_type', $side], 'normal');
+            if (in_array($type, CaseBuilder::REFLEX_CURVE_TYPES, true)) {
+                $reflexType[$side] = $type;
+            }
+        }
+
         $airPairs = zip_pairs($aerea['od'], $aerea['oi']);
         $fletcher = CaseBuilder::fletcherAvg($airPairs);
         $sdt = [
@@ -304,6 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'reflex' => [
                     'ipsi' => zip_pairs($reflexIpsi['od'], $reflexIpsi['oi']),
                     'contra' => zip_pairs($reflexContra['od'], $reflexContra['oi']),
+                    'tipo' => $reflexType,
                 ],
                 'etf_od' => $etfOd,
                 'etf_oi' => $etfOi,
@@ -805,6 +814,23 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <?php endforeach; ?>
     </table>
     <?php endforeach; ?>
+    <table class="grid-table">
+        <tr><th class="side-label">Tipo de reflejo</th><th>Curva</th></tr>
+        <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel):
+            $reflexTypeSelected = (string) fv($v, ['reflex_type', $side], 'normal');
+        ?>
+        <tr>
+            <td class="side-label"><?= $sideLabel ?></td>
+            <td>
+                <select id="reflex_type_<?= $side ?>" name="reflex_type[<?= $side ?>]">
+                    <?php foreach (CaseBuilder::REFLEX_CURVE_LABELS as $typeKey => $typeLabel): ?>
+                    <option value="<?= $typeKey ?>" <?= $reflexTypeSelected === $typeKey ? 'selected' : '' ?>><?= htmlspecialchars($typeLabel) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    </table>
 </div>
 </div>
 </div>
