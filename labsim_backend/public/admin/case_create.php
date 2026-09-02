@@ -331,6 +331,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'cirugias' => trim((string) ($v['cirugias'] ?? '')),
                     'otros' => trim((string) ($v['otros'] ?? '')),
                 ],
+                'comportamiento' => trim((string) ($v['comportamiento'] ?? '')),
             ]);
 
             if ($isUpdate) {
@@ -467,6 +468,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <?= $editDisplayName !== '' ? 'Paciente actual: <strong>' . htmlspecialchars($editDisplayName) . '</strong>.' : '' ?>
     </p>
     <?php endif; ?>
+    <?php if ($isEdit): ?><input type="hidden" id="chat-static-name" value="<?= htmlspecialchars($editDisplayName) ?>"><?php endif; ?>
     <label class="inline-check"><input type="radio" name="gender" value="0" <?= ($v['gender'] ?? '0') === '0' ? 'checked' : '' ?>> Hombre</label>
     <label class="inline-check"><input type="radio" name="gender" value="1" <?= ($v['gender'] ?? '0') === '1' ? 'checked' : '' ?>> Mujer</label>
     <label>Edad<?= $isEdit ? ' (solo recalcula el volumen del canal auditivo, no cambia la fecha de nacimiento)' : '' ?>
@@ -908,6 +910,27 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <label>Otros antecedentes
         <textarea name="otros" rows="2" style="width:100%; padding:0.45rem; margin-top:0.2rem; border:1px solid #ccc; border-radius:4px;"><?= htmlspecialchars((string) ($v['otros'] ?? '')) ?></textarea>
     </label>
+    <label>Comportamiento del paciente
+        <textarea name="comportamiento" id="chat-comportamiento" rows="2" style="width:100%; padding:0.45rem; margin-top:0.2rem; border:1px solid #ccc; border-radius:4px;" placeholder="Ej: nervioso, minimiza los síntomas, muy hablador, desconfiado, colaborador..."><?= htmlspecialchars((string) ($v['comportamiento'] ?? '')) ?></textarea>
+    </label>
+    <p class="legend">Cómo debe actuar el paciente al conversar con el alumno (tono, actitud) -- va directo al prompt del LLM, junto con la anamnesis de arriba.</p>
+</div>
+
+<div class="card" id="chat-test-card">
+    <strong>Probar conversación con el paciente</strong>
+    <p class="legend">
+        Chatea con el paciente usando lo que ya escribiste en esta ficha (sin necesidad de guardar antes,
+        cada mensaje toma los campos tal como están en ese momento) -- útil para revisar que responda bien
+        antes de asignarlo a un alumno. Requiere tener configurado el LLM en
+        <a href="llm.php" target="_blank">Admin → IA Paciente</a>. Si cambias la anamnesis a mitad de una
+        conversación, reinícala para que el paciente "olvide" lo que dijo con los datos anteriores.
+    </p>
+    <div id="chat-test-log" style="border:1px solid #e5e5e5; border-radius:6px; padding:0.7rem; min-height:3rem; max-height:22rem; overflow-y:auto; margin:0.6rem 0; background:#fafafa; font-size:0.88rem;"></div>
+    <div style="display:flex; gap:0.5rem;">
+        <input type="text" id="chat-test-input" placeholder="Escribe como si fueras el alumno..." style="flex:1; padding:0.45rem; border:1px solid #ccc; border-radius:4px;">
+        <button type="button" id="chat-test-send" class="secondary" style="margin-top:0;">Enviar</button>
+        <button type="button" id="chat-test-reset" class="secondary" style="margin-top:0;">Reiniciar conversación</button>
+    </div>
 </div>
 </div>
 
@@ -1475,6 +1498,130 @@ window.drawReflexPattern = function drawReflexPattern() {
         el.addEventListener('change', rebuild);
     });
     rebuild();
+})();
+
+// Chat de prueba con el paciente (ficha Anamnesis) -- manda a
+// llm_chat_test.php lo que hay AHORA MISMO en el formulario (sin guardar),
+// mismo criterio con el que LlmConfig::buildSystemPrompt() arma el prompt
+// real más adelante en la app. HIST_KEYS espejea CaseBuilder::HIST_CHECKBOXES.
+(function () {
+    var sendBtn = document.getElementById('chat-test-send');
+    var resetBtn = document.getElementById('chat-test-reset');
+    var input = document.getElementById('chat-test-input');
+    var log = document.getElementById('chat-test-log');
+    if (!sendBtn || !input || !log) return;
+
+    var HIST_KEYS = ['hipoacusia_familiar', 'ototoxicos', 'trauma_acustico', 'otitis', 'meningitis', 'tce', 'diabetes', 'hta'];
+    var history = [];
+    var sending = false;
+
+    function fieldValue(name) {
+        var el = document.querySelector('[name="' + name + '"]');
+        return el ? el.value : '';
+    }
+
+    function currentName() {
+        var n1 = document.querySelector('[name="nombre1"]');
+        if (n1) {
+            var parts = [n1.value, fieldValue('nombre2'), fieldValue('apellido1'), fieldValue('apellido2')].filter(function (p) { return p; });
+            if (parts.length) return parts.join(' ');
+        }
+        var staticName = document.getElementById('chat-static-name');
+        return (staticName && staticName.value) || 'el paciente';
+    }
+
+    function currentAntecedentes() {
+        var out = {};
+        HIST_KEYS.forEach(function (key) {
+            var el = document.querySelector('[name="hist[' + key + ']"]');
+            out[key] = !!(el && el.checked);
+        });
+        return out;
+    }
+
+    function currentTinnitus() {
+        return {
+            lateralidad: fieldValue('tinnitus[lateralidad]'),
+            oido: fieldValue('tinnitus[oido]'),
+            predominio: fieldValue('tinnitus[predominio]'),
+            ruido: fieldValue('tinnitus[ruido]'),
+            frecuencia: fieldValue('tinnitus[frecuencia]'),
+            pulsatil: !!document.querySelector('[name="tinnitus[pulsatil]"]:checked'),
+            permanente: !!document.querySelector('[name="tinnitus[permanente]"]:checked'),
+        };
+    }
+
+    function addBubble(role, text) {
+        var wrap = document.createElement('div');
+        wrap.style.margin = '0.4rem 0';
+        var tag = document.createElement('strong');
+        tag.textContent = role === 'user' ? 'Alumno: ' : (role === 'error' ? 'Error: ' : 'Paciente: ');
+        tag.style.color = role === 'user' ? '#1a2744' : (role === 'error' ? '#a33' : '#2e7d32');
+        var body = document.createElement('span');
+        body.textContent = text;
+        wrap.appendChild(tag);
+        wrap.appendChild(body);
+        log.appendChild(wrap);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function send() {
+        var message = input.value.trim();
+        if (!message || sending) return;
+        sending = true;
+        sendBtn.disabled = true;
+        addBubble('user', message);
+        input.value = '';
+
+        var payload = {
+            csrf_token: document.querySelector('input[name="csrf_token"]').value,
+            message: message,
+            history: history,
+            nombre: currentName(),
+            edad: fieldValue('age'),
+            genero: (document.querySelector('input[name="gender"]:checked') || {}).value || '0',
+            antecedentes: currentAntecedentes(),
+            medicamentos: fieldValue('medicamentos'),
+            cirugias: fieldValue('cirugias'),
+            otros: fieldValue('otros'),
+            comportamiento: fieldValue('comportamiento'),
+            tinnitus: currentTinnitus(),
+        };
+
+        fetch('llm_chat_test.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        }).then(function (res) {
+            return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+        }).then(function (result) {
+            if (!result.ok || result.data.error) {
+                addBubble('error', result.data.error || 'Error desconocido.');
+                return;
+            }
+            history.push({ role: 'user', content: message });
+            history.push({ role: 'assistant', content: result.data.reply });
+            addBubble('assistant', result.data.reply);
+        }).catch(function (err) {
+            addBubble('error', 'No se pudo contactar al servidor: ' + err.message);
+        }).finally(function () {
+            sending = false;
+            sendBtn.disabled = false;
+            input.focus();
+        });
+    }
+
+    sendBtn.addEventListener('click', send);
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); send(); }
+    });
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function () {
+            history = [];
+            log.innerHTML = '';
+            input.focus();
+        });
+    }
 })();
 </script>
 <?php

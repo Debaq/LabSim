@@ -181,6 +181,27 @@ CREATE TABLE IF NOT EXISTS app_config (
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Config del LLM que hace de "paciente conversacional" (chat de texto en la
+-- app). Fila única (id=1) -- APARTE de app_config a propósito: app_config
+-- se manda entero a todos los alumnos por sync.php/admin_dump.php, y acá
+-- vive el api_key del proveedor, que no puede llegar al cliente. Solo un
+-- endpoint del backend (que hace el llamado al LLM por el estudiante) debe
+-- leer esta tabla.
+CREATE TABLE IF NOT EXISTS llm_config (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    provider TEXT NOT NULL DEFAULT 'deepseek',
+    api_key TEXT NOT NULL DEFAULT '',
+    api_base_url TEXT NOT NULL DEFAULT 'https://api.deepseek.com',
+    model TEXT NOT NULL DEFAULT 'deepseek-chat',
+    temperature REAL NOT NULL DEFAULT 0.7,
+    max_tokens INTEGER NOT NULL DEFAULT 400,
+    -- Vacío = usa LlmConfig::DEFAULT_PROMPT (ver ese archivo) -- así un
+    -- "restablecer" no requiere guardar el texto largo acá también.
+    system_prompt_template TEXT NOT NULL DEFAULT '',
+    active INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Cursos: dos cursos con docentes y casos distintos corriendo en paralelo
 -- sobre la misma instalación no eran posibles antes de esto (todo iba a un
 -- fondo común). appointments.course_id/assigned_* (ver Db::migrateCoursesIfNeeded)

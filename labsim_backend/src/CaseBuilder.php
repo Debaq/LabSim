@@ -12,6 +12,16 @@ final class CaseBuilder
         'meningitis', 'tce', 'diabetes', 'hta',
     ];
 
+    // Mismas etiquetas que case_create.php pinta junto a cada checkbox --
+    // repetidas acá (en vez de que ese archivo las importe) porque acá las
+    // usa LlmConfig::buildSystemPrompt() para armar el resumen en texto de
+    // los antecedentes marcados, sin acoplarse al archivo del formulario.
+    public const HIST_LABELS = [
+        'hipoacusia_familiar' => 'Hipoacusia familiar', 'ototoxicos' => 'Ototóxicos',
+        'trauma_acustico' => 'Trauma acústico', 'otitis' => 'Otitis', 'meningitis' => 'Meningitis',
+        'tce' => 'TCE', 'diabetes' => 'Diabetes', 'hta' => 'HTA',
+    ];
+
     public const Z_OPTIONS = ['A', 'As', 'Ad', 'C', 'Cs', 'B'];
     public const ETF_OPTIONS = ['Normal', 'Disfunción tubaria', 'Permeable', 'No permeable'];
 
@@ -148,6 +158,47 @@ final class CaseBuilder
         'on-off' => 'ON-OFF',
     ];
 
+    /** Lista en texto de los antecedentes marcados (para el prompt del LLM) -- "ninguno relevante" si no hay ninguno. */
+    public static function antecedentesSummary(array $antecedentes): string
+    {
+        $labels = [];
+        foreach (self::HIST_CHECKBOXES as $key) {
+            if (!empty($antecedentes[$key])) {
+                $labels[] = self::HIST_LABELS[$key];
+            }
+        }
+        return $labels ? implode(', ', $labels) : 'ninguno relevante';
+    }
+
+    /**
+     * Describe en lenguaje natural (nada de Hz/dB) lo que el "paciente"
+     * percibe según los datos de Tinnitus del caso -- para completar
+     * {{tinnitus_desc}} en LlmConfig::DEFAULT_PROMPT. $t viene con el mismo
+     * shape que cases.data.Tinnitus (o el array crudo del form de la ficha).
+     */
+    public static function describeTinnitus(array $t): string
+    {
+        $lateralidad = (string) ($t['lateralidad'] ?? 'craneal');
+        $ruido = mb_strtolower((string) ($t['ruido'] ?? self::TINNITUS_RUIDO_OPTIONS[0]));
+        $permanente = !empty($t['permanente']);
+        $pulsatil = !empty($t['pulsatil']);
+
+        $lugar = 'en la cabeza, sin poder decir bien de qué lado';
+        if ($lateralidad === 'unilateral') {
+            $lugar = 'solo en el oído ' . (($t['oido'] ?? 'od') === 'oi' ? 'izquierdo' : 'derecho');
+        } elseif ($lateralidad === 'bilateral') {
+            $predominio = (string) ($t['predominio'] ?? 'igual');
+            $lugar = $predominio === 'igual'
+                ? 'en ambos oídos por igual'
+                : ('en ambos oídos, más fuerte del lado ' . ($predominio === 'od' ? 'derecho' : 'izquierdo'));
+        }
+
+        $tiempo = $permanente ? 'lo escuchas casi todo el tiempo' : 'te pasa solo de a ratos, no siempre';
+        $pulso = $pulsatil ? ' y a veces sientes que va al compás de tu pulso' : '';
+
+        return "Escuchas un {$ruido} {$lugar}; {$tiempo}{$pulso}.";
+    }
+
     public static function nextCaseId(PDO $pdo): string
     {
         $max = (int) $pdo->query('SELECT MAX(CAST(id AS INTEGER)) FROM cases')->fetchColumn();
@@ -265,6 +316,7 @@ final class CaseBuilder
             'Reflex' => $form['reflex'],
             'ETF' => [$form['etf_od'], $form['etf_oi']],
             'Anamnesis' => $form['anamnesis'],
+            'PatientBehavior' => $form['comportamiento'] ?? '',
             'Tinnitus' => $form['tinnitus'],
             'tipo' => 'normal',
         ];
@@ -384,6 +436,7 @@ final class CaseBuilder
         $v['medicamentos'] = $anamnesis['medicamentos'] ?? '';
         $v['cirugias'] = $anamnesis['cirugias'] ?? '';
         $v['otros'] = $anamnesis['otros'] ?? '';
+        $v['comportamiento'] = $data['PatientBehavior'] ?? '';
 
         $tinnitus = $data['Tinnitus'] ?? [];
         $v['tinnitus'] = [];
