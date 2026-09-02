@@ -15,7 +15,8 @@
     "CVOICE": [false, "Comandos de Voz", 11, [true, true], [420, 200],"pre"],
     "CVC": [false, "Campo Visual Computarizado", 12, [true, true], [420, 200],"pre"],
     "AGENDA": [false, "Agenda", 13, [true, true], [900,400], "pre"],
-    "CREATE_A":[false, "Nuevo Usuario", 14, [true, true], [900,650], "pre"]
+    "CREATE_A":[false, "Nuevo Usuario", 14, [true, true], [900,650], "pre"],
+    "CHAT": [false, "Hablar con el paciente", 15, [true, true], [480, 280], "pre"]
 
    
 

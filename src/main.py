@@ -1,9 +1,10 @@
 from pathlib import Path
 import sys
 from PySide6.QtCore import Qt, Signal, Slot
-from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton
+from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox
 
 from agenda import Agenda, create_a
+from agenda.Agenda import ChatPacienteWidget
 from audiometria import Audiometer, ListWords
 from auth import login as Ui_login
 from impedanciometria import Z
@@ -105,6 +106,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.data_login = None
         self.data_current = None
         self.data_current_key = None
+        self.paciente_actual = None
         self.subw = None
         self.sectors_lbl = SECTORS
         self.modules = Storage(len(APPS))
@@ -220,6 +222,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.data_login = None
         self.data_current = None
         self.data_current_key = None
+        self.paciente_actual = None
 
     def _close_sub_windows(self):
         """Cierra todas las subventanas abiertas (excepto LOGIN) y deshidrata sus datos"""
@@ -275,6 +278,59 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         fecha_nac = entry[5] if len(entry) > 5 else ""
         self.statusbar.showMessage(f"Estás atendiendo a: RUT {rut} — Fecha de nacimiento {fecha_nac}")
 
+        nombre = f"{entry[3] if len(entry) > 3 else ''} {entry[4] if len(entry) > 4 else ''}".strip()
+        procedimiento = entry[6] if len(entry) > 6 else ""
+        try:
+            edad, _, _ = CreatePatient().get_age_from_rut(int(rut))
+        except (TypeError, ValueError):
+            edad = 0
+        try:
+            appointment_id = int(key)
+        except (TypeError, ValueError):
+            appointment_id = None
+        self.paciente_actual = {
+            "case_id": case_id, "nombre": nombre or "el paciente",
+            "edad": edad, "procedimiento": procedimiento, "appointment_id": appointment_id,
+        }
+
+    def atender_paciente_prueba(self, key):
+        """
+        Admin: carga el caso `key` en los módulos (audiómetro, chat con el
+        paciente, etc.) para probarlo. A diferencia de atender_paciente(), NO
+        marca "atendiendo" ni escribe en attendances/agenda -- no deja rastro
+        en la base de datos, es solo para verificar que un caso funciona.
+        """
+        shedule = Shedule()
+        agenda = shedule.data.get("agenda_1", {})
+        entry = agenda.get(key)
+        if entry is None:
+            return
+
+        case_id = entry[7] if len(entry) > 7 else None
+        if not case_id:
+            return
+
+        self.data_current = CasesOffline().get_cases()[case_id]
+        self.data_current_key = key
+
+        self._hydrate_modules()
+        if self.data_current:
+            self.changeStateBtnAreas(self.frameAction, self.data_current["box"])
+
+        rut = entry[2] if len(entry) > 2 else ""
+        nombre = f"{entry[3] if len(entry) > 3 else ''} {entry[4] if len(entry) > 4 else ''}".strip()
+        procedimiento = entry[6] if len(entry) > 6 else ""
+        try:
+            edad, _, _ = CreatePatient().get_age_from_rut(int(rut))
+        except (TypeError, ValueError):
+            edad = 0
+        self.paciente_actual = {
+            "case_id": case_id, "nombre": nombre or "el paciente",
+            "edad": edad, "procedimiento": procedimiento,
+            "appointment_id": None,  # "prueba" -- nunca se guarda el chat de esto
+        }
+        self.statusbar.showMessage(f"[PRUEBA] Caso cargado: {nombre or case_id} (no se guarda atención)")
+
     def cerrar_atencion(self, key, nota):
         """Cierra la atención (estado 'atendido') guardando la nota de atención del estudiante"""
         if self.data_login["permission"] == 777:
@@ -292,6 +348,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if self.data_current_key == key:
             self.data_current_key = None
             self.data_current = None
+            self.paciente_actual = None
             self._hydrate_modules()
 
         if self.subw and "AGENDA" in self.subw:
@@ -314,6 +371,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data_current))
         subw_agenda = FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self))
         subw_voice = FrameSubMdi(ComandVoiceA())
+        subw_chat = FrameSubMdi(ChatPacienteWidget())
         self.subw_w = FrameSubMdi(ListWords.ListWords(self.data_current))
         self.subw_z = FrameSubMdi(Z.ZControl())
 
@@ -324,6 +382,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw["A"] = self.subw_a
         self.subw["AGENDA"] = subw_agenda
         self.subw["CVOICE"] = subw_voice
+        self.subw["CHAT"] = subw_chat
         self.subw["W"] = self.subw_w
         self.subw["Z"] = self.subw_z
         self._hydrate_modules()
@@ -353,6 +412,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             widget = self.layoutAction.itemAt(i).widget()
             if widget is not None:
                 widget.deleteLater()
+        self.btn_chat_paciente = QPushButton("Hablar con el paciente")
+        self.btn_chat_paciente.setObjectName("btn_chat_paciente")
+        self.btn_chat_paciente.clicked.connect(self.abrir_chat_paciente)
+        self.layoutAction.addWidget(self.btn_chat_paciente)
         self.btn_cmd_voice = QPushButton("Comandos de voz")
         self.btn_cmd_voice.setObjectName("btn_CVOICE")
         self.btn_cmd_voice.clicked.connect(self.activate_soft)
@@ -361,6 +424,21 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.btn_list_words.setObjectName("btn_W")
         self.btn_list_words.clicked.connect(self.activate_listWords)
         self.layoutAction.addWidget(self.btn_list_words)
+
+    def abrir_chat_con(self, case_id, nombre, edad, procedimiento, appointment_id=None):
+        """Abre (o trae al frente) la subventana MDI de chat con el paciente,
+        reapuntada al caso indicado. appointment_id=None = no se guarda el
+        chat (ver ChatPacienteWidget.set_paciente)."""
+        self.subw["CHAT"].obj.set_paciente(case_id, nombre, edad, procedimiento, appointment_id)
+        self.activate_auto("CHAT")
+
+    def abrir_chat_paciente(self):
+        """Abre el chat con el paciente simulado por LLM del caso que se está atendiendo."""
+        if not self.paciente_actual:
+            QMessageBox.information(self, "Hablar con el paciente", "No estás atendiendo un paciente.")
+            return
+        p = self.paciente_actual
+        self.abrir_chat_con(p["case_id"], p["nombre"], p["edad"], p["procedimiento"], p.get("appointment_id"))
 
     def closeEvent(self, event):
         self._stop_log_uploader()

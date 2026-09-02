@@ -202,6 +202,23 @@ CREATE TABLE IF NOT EXISTS llm_config (
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Historial de los chats "hablar con el paciente" (LlmChat) -- cada turno
+-- (mensaje del alumno + respuesta del LLM) queda como dos filas, para poder
+-- reconstruir/estudiar la conversación completa por atención más adelante.
+-- Solo se guarda cuando el chat corre dentro de una atención real (ver
+-- llm_chat.php): el "Atender (prueba)" del admin no manda appointment_id
+-- justamente para no dejar rastro de sus pruebas acá.
+CREATE TABLE IF NOT EXISTS llm_chat_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    appointment_id INTEGER NOT NULL REFERENCES appointments(id),
+    student_id INTEGER NOT NULL REFERENCES users(id),
+    case_id TEXT NOT NULL REFERENCES cases(id),
+    role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
+    content TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_llm_chat_logs_appt ON llm_chat_logs (appointment_id, student_id);
+
 -- Cursos: dos cursos con docentes y casos distintos corriendo en paralelo
 -- sobre la misma instalación no eran posibles antes de esto (todo iba a un
 -- fondo común). appointments.course_id/assigned_* (ver Db::migrateCoursesIfNeeded)

@@ -12,14 +12,15 @@ import requests
 from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import (QTableWidgetItem, QAbstractItemView,
                                 QDateEdit, QTimeEdit, QPushButton, QMessageBox, QLineEdit,
-                                QDialog, QVBoxLayout, QLabel, QTextEdit, QDialogButtonBox,
+                                QDialog, QVBoxLayout, QHBoxLayout, QLabel, QTextEdit, QDialogButtonBox,
                                 QCheckBox)
-from PySide6.QtCore import QDate, QTime, QDateTime, Qt, QThread, Signal
+from PySide6.QtCore import QDate, QTime, QDateTime, Qt, QThread, Signal, QTimer
 from PySide6.QtGui import QColor
 from agenda.UI.Ui_agenda import Ui_Form
 from core.helpers import (Shedule, entry_estado_por, CasesOffline,
                           marcar_entry_no_show, obtener_hora_real_atencion,
-                          obtener_nota_atencion, entry_esta_cancelada, marcar_entry_cancelada)
+                          obtener_nota_atencion, entry_esta_cancelada, marcar_entry_cancelada,
+                          chat_con_paciente, CreatePatient)
 
 
 class _SheduleFetchThread(QThread):
@@ -38,6 +39,186 @@ class _SheduleFetchThread(QThread):
             self.failed.emit(str(exc))
             return
         self.fetched.emit(data)
+
+
+class _ChatPacienteThread(QThread):
+    """Manda un turno de chat al backend (llamada de red) fuera del hilo de UI."""
+    respondido = Signal(str)
+    fallo = Signal(str)
+
+    def __init__(self, case_id, nombre, edad, procedimiento, history, message, appointment_id=None, parent=None):
+        super().__init__(parent)
+        self._args = (case_id, nombre, edad, procedimiento, history, message, appointment_id)
+
+    def run(self):
+        try:
+            reply = chat_con_paciente(*self._args)
+        except (RuntimeError, requests.RequestException) as exc:
+            self.fallo.emit(str(exc))
+            return
+        self.respondido.emit(reply)
+
+
+class ChatPacienteWidget(QWidget):
+    """Chat de prueba/entrevista con el paciente simulado por LLM (ver
+    LlmChat.php) -- el alumno conversa para levantar antecedentes/motivo de
+    consulta, igual que haría con un paciente real antes del examen.
+
+    Vive como subventana única del MDI (ver main.py: self.subw["CHAT"]) en
+    vez de un diálogo emergente -- set_paciente() la reapunta a otro caso
+    cada vez que se abre desde una ficha distinta, reseteando la
+    conversación anterior."""
+
+    REINTENTOS_AUTOMATICOS = 1  # 1 reintento silencioso antes de pedirle al alumno que reintente a mano
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._case_id = None
+        self._appointment_id = None
+        self._nombre = "el paciente"
+        self._edad = 0
+        self._procedimiento = ""
+        self._history = []
+        self._thread = None
+        self._mensaje_pendiente = None  # último mensaje enviado, para reintentar sin retipear
+        self._intentos = 0
+
+        layout = QVBoxLayout(self)
+
+        self.lbl_paciente = QLabel(self)
+        self.lbl_paciente.setStyleSheet("font-weight: bold;")
+        layout.addWidget(self.lbl_paciente)
+
+        self.transcript = QTextEdit(self)
+        self.transcript.setReadOnly(True)
+        layout.addWidget(self.transcript)
+
+        self.lbl_estado = QLabel(self)
+        self.lbl_estado.setStyleSheet("color: #888;")
+        self.lbl_estado.hide()
+        layout.addWidget(self.lbl_estado)
+
+        fila_input = QHBoxLayout()
+        self.input = QLineEdit(self)
+        self.input.setPlaceholderText("Escribe tu pregunta al paciente...")
+        self.input.returnPressed.connect(self._enviar)
+        fila_input.addWidget(self.input)
+
+        self.btn_enviar = QPushButton("Enviar", self)
+        self.btn_enviar.clicked.connect(self._enviar)
+        fila_input.addWidget(self.btn_enviar)
+
+        self.btn_reintentar = QPushButton("Reintentar", self)
+        self.btn_reintentar.clicked.connect(self._reintentar_manual)
+        self.btn_reintentar.hide()
+        fila_input.addWidget(self.btn_reintentar)
+
+        layout.addLayout(fila_input)
+
+        self._actualizar_encabezado()
+
+    def set_paciente(self, case_id, nombre, edad, procedimiento, appointment_id=None):
+        """Reapunta el chat a otro caso -- descarta la conversación anterior.
+
+        appointment_id: cita real a la que se asocia lo que se guarde del
+        chat (ver LlmChat.php) -- None = no se guarda nada (p.ej. "Atender
+        (prueba)" del admin, que no debe dejar rastro)."""
+        self._case_id = case_id
+        self._appointment_id = appointment_id
+        self._nombre = nombre or "el paciente"
+        self._edad = edad
+        self._procedimiento = procedimiento
+        self._history = []
+        self._mensaje_pendiente = None
+        self._intentos = 0
+        self.transcript.clear()
+        self._ocultar_estado()
+        self._actualizar_encabezado()
+        self.input.setFocus()
+
+    def _actualizar_encabezado(self):
+        self.lbl_paciente.setText(f"Conversando con {self._nombre} ({self._procedimiento or 'sin motivo registrado'})")
+
+    def _agregar_burbuja(self, rol, texto):
+        etiqueta = "Tú" if rol == "user" else self._nombre
+        self.transcript.append(f"<p><b>{etiqueta}:</b> {texto}</p>")
+
+    def _mostrar_estado(self, texto):
+        self.lbl_estado.setText(texto)
+        self.lbl_estado.show()
+
+    def _ocultar_estado(self):
+        self.lbl_estado.hide()
+        self.btn_reintentar.hide()
+
+    def _enviar(self):
+        mensaje = self.input.text().strip()
+        if not mensaje or self._thread is not None or not self._case_id:
+            return
+        self.input.clear()
+        self._agregar_burbuja("user", mensaje)
+        self._intentos = 0
+        self._despachar(mensaje)
+
+    def _reintentar_manual(self):
+        if self._mensaje_pendiente is None or self._thread is not None:
+            return
+        self._intentos = 0
+        self._despachar(self._mensaje_pendiente)
+
+    def _despachar(self, mensaje):
+        """Manda `mensaje` al backend -- puede ser el recién escrito o un reintento
+        del último que falló (mismo texto, no se duplica burbuja de usuario)."""
+        self._mensaje_pendiente = mensaje
+        self.btn_reintentar.hide()
+        self._mostrar_estado("El paciente está pensando su respuesta…")
+        self.input.setEnabled(False)
+        self.btn_enviar.setEnabled(False)
+
+        case_id_solicitado = self._case_id
+        self._thread = _ChatPacienteThread(
+            self._case_id, self._nombre, self._edad, self._procedimiento,
+            list(self._history), mensaje, appointment_id=self._appointment_id, parent=self,
+        )
+        self._thread.respondido.connect(lambda r: self._on_respuesta(case_id_solicitado, mensaje, r))
+        self._thread.fallo.connect(lambda e: self._on_fallo(case_id_solicitado, mensaje, e))
+        self._thread.finished.connect(self._on_thread_finished)
+        self._thread.start()
+
+    def _on_respuesta(self, case_id_solicitado, mensaje, reply):
+        self.input.setEnabled(True)
+        self.btn_enviar.setEnabled(True)
+        self._mensaje_pendiente = None
+        self._intentos = 0
+        self._ocultar_estado()
+        if case_id_solicitado != self._case_id:
+            return  # el usuario cambió de paciente mientras esperaba la respuesta
+        self._history.append({"role": "user", "content": mensaje})
+        self._history.append({"role": "assistant", "content": reply})
+        self._agregar_burbuja("assistant", reply)
+
+    def _on_fallo(self, case_id_solicitado, mensaje, error):
+        self.input.setEnabled(True)
+        self.btn_enviar.setEnabled(True)
+        if case_id_solicitado != self._case_id:
+            self._ocultar_estado()
+            return
+
+        # Silencioso: nada de diálogos emergentes -- reintenta solo una vez y,
+        # si sigue fallando, deja el mensaje "guardado" en btn_reintentar en
+        # vez de obligar al alumno a retipearlo.
+        print(f"[chat_paciente] fallo (intento {self._intentos + 1}): {error}")
+        if self._intentos < self.REINTENTOS_AUTOMATICOS:
+            self._intentos += 1
+            self._mostrar_estado("Sin respuesta todavía, reintentando…")
+            QTimer.singleShot(1500, lambda: self._despachar(mensaje))
+        else:
+            self._mostrar_estado("El paciente no respondió. Puedes reintentar.")
+            self.btn_reintentar.show()
+
+    def _on_thread_finished(self):
+        self._thread = None
+        self.input.setFocus()
 
 
 PENDIENTE_COLOR = QColor(255, 244, 200)
@@ -179,6 +360,15 @@ class Agenda(QWidget, Ui_Form):
         self.btn_ver_editar.setEnabled(False)
         self.btn_ver_editar.clicked.connect(self.ver_editar_paciente)
 
+        # Al admin no le corresponde "atender" (eso genera historial/atención
+        # real de un alumno) -- esto es solo para probar un caso (audiómetro,
+        # chat con el paciente, etc.) sin dejar ningún rastro en la base de
+        # datos: no marca "atendiendo" ni escribe attendances.
+        self.btn_atender_prueba = QPushButton("Atender (prueba)", self)
+        self.btn_atender_prueba.setEnabled(False)
+        self.btn_atender_prueba.setToolTip("Carga el caso en los módulos para probarlo -- no guarda atención en la base de datos.")
+        self.btn_atender_prueba.clicked.connect(self.atender_paciente_prueba)
+
         self.led_nota = QLineEdit(self)
         self.led_nota.setPlaceholderText("Nota interna (solo admin)")
         self.led_nota.setEnabled(False)
@@ -196,9 +386,10 @@ class Agenda(QWidget, Ui_Form):
         self.horizontalLayout.insertWidget(8, self.btn_habilitar)
         self.horizontalLayout.insertWidget(9, self.btn_eliminar)
         self.horizontalLayout.insertWidget(10, self.btn_ver_editar)
-        self.horizontalLayout.insertWidget(11, self.btn_cancelar_restaurar)
-        self.horizontalLayout.insertWidget(12, self.led_nota)
-        self.horizontalLayout.insertWidget(13, self.btn_guardar_nota)
+        self.horizontalLayout.insertWidget(11, self.btn_atender_prueba)
+        self.horizontalLayout.insertWidget(12, self.btn_cancelar_restaurar)
+        self.horizontalLayout.insertWidget(13, self.led_nota)
+        self.horizontalLayout.insertWidget(14, self.btn_guardar_nota)
 
         self.tableWidget.setColumnCount(8)
         self.tableWidget.setHorizontalHeaderItem(NOTE_COL, QTableWidgetItem("Nota (solo admin)"))
@@ -223,6 +414,22 @@ class Agenda(QWidget, Ui_Form):
         create_win = self.main_window.subw.get("CREATE_A")
         if create_win is not None:
             create_win.obj.load_for_edit(case_id, self._selected_row_key, row)
+
+    def atender_paciente_prueba(self):
+        """Admin: carga el caso seleccionado en los módulos (audiómetro, chat con
+        el paciente, etc.) para probarlo, sin marcar atención ni tocar la base
+        de datos -- ver comentario en btn_atender_prueba."""
+        if self._selected_row_key is None:
+            return
+
+        row = self.shedule["agenda_1"][self._selected_row_key]
+        case_id = row[7] if len(row) > 7 else None
+        if not case_id:
+            QMessageBox.warning(self, "Atender (prueba)", "Este registro no tiene un caso clínico asociado.")
+            return
+
+        if self.main_window is not None and hasattr(self.main_window, "atender_paciente_prueba"):
+            self.main_window.atender_paciente_prueba(self._selected_row_key)
 
     def guardar_nota(self):
         if self._selected_row_key is None:
@@ -354,6 +561,7 @@ class Agenda(QWidget, Ui_Form):
                 self.btn_habilitar.setEnabled(False)
                 self.btn_eliminar.setEnabled(False)
                 self.btn_ver_editar.setEnabled(False)
+                self.btn_atender_prueba.setEnabled(False)
                 self.btn_cancelar_restaurar.setText("Cancelar cita")
                 self.btn_cancelar_restaurar.setEnabled(False)
                 self.led_nota.setEnabled(False)
@@ -376,6 +584,7 @@ class Agenda(QWidget, Ui_Form):
                 self.btn_habilitar.setEnabled(False)
                 self.btn_eliminar.setEnabled(False)
                 self.btn_ver_editar.setEnabled(False)
+                self.btn_atender_prueba.setEnabled(False)
                 self.btn_cancelar_restaurar.setText("Cancelar cita")
                 self.btn_cancelar_restaurar.setEnabled(False)
                 self.led_nota.setEnabled(False)
@@ -427,6 +636,7 @@ class Agenda(QWidget, Ui_Form):
             self.btn_habilitar.setEnabled(pendiente)
             self.btn_eliminar.setEnabled(True)
             self.btn_ver_editar.setEnabled(tiene_caso)
+            self.btn_atender_prueba.setEnabled(tiene_caso)
             self.btn_cancelar_restaurar.setText("Restaurar cita" if cancelada else "Cancelar cita")
             self.btn_cancelar_restaurar.setEnabled(not pendiente)
             self.led_nota.setEnabled(True)
@@ -680,9 +890,9 @@ class Agenda(QWidget, Ui_Form):
         caso = cases.get(case_id, {})
         print(f"[agenda_ficha] case_id={case_id!r} (type={type(case_id).__name__}) "
               f"cases_keys_sample={list(cases.keys())[:10]!r} Anamnesis={caso.get('Anamnesis')!r}")
-        self._mostrar_dialogo_ficha(row, caso)
+        self._mostrar_dialogo_ficha(row, caso, case_id, self._selected_row_key)
 
-    def _mostrar_dialogo_ficha(self, row, caso):
+    def _mostrar_dialogo_ficha(self, row, caso, case_id, appointment_key):
         dialogo = QDialog(self)
         dialogo.setWindowTitle("Ficha del paciente")
         layout = QVBoxLayout(dialogo)
@@ -692,12 +902,32 @@ class Agenda(QWidget, Ui_Form):
         texto.setHtml(self._render_ficha_html(row, caso))
         layout.addWidget(texto)
 
+        btn_chat = QPushButton("Conversar con paciente", dialogo)
+        btn_chat.clicked.connect(lambda: self._abrir_chat_paciente(row, case_id, appointment_key))
+        layout.addWidget(btn_chat)
+
         botones = QDialogButtonBox(QDialogButtonBox.Ok)
         botones.accepted.connect(dialogo.accept)
         layout.addWidget(botones)
 
-        dialogo.resize(480, 520)
+        dialogo.resize(480, 560)
         dialogo.exec()
+
+    def _abrir_chat_paciente(self, row, case_id, appointment_key):
+        rut = row[2] if len(row) > 2 else ""
+        nombre = f"{row[3] if len(row) > 3 else ''} {row[4] if len(row) > 4 else ''}".strip()
+        procedimiento = row[6] if len(row) > 6 else ""
+        try:
+            edad, _, _ = CreatePatient().get_age_from_rut(int(rut))
+        except (TypeError, ValueError):
+            edad = 0
+        try:
+            appointment_id = int(appointment_key)
+        except (TypeError, ValueError):
+            appointment_id = None
+
+        if self.main_window is not None and hasattr(self.main_window, "abrir_chat_con"):
+            self.main_window.abrir_chat_con(case_id, nombre or "el paciente", edad, procedimiento, appointment_id)
 
     def _render_ficha_html(self, row, caso):
         rut = row[2] if len(row) > 2 else ""

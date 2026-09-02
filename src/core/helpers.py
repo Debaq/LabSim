@@ -58,6 +58,24 @@ def _get_backend_client() -> BackendClient:
     return _backend_client
 
 
+def chat_con_paciente(case_id, nombre, edad, procedimiento, history, message, appointment_id=None):
+    """Un turno de chat con el paciente simulado por LLM.
+
+    Solo disponible en modo backend (el LLM vive en el servidor, no en la
+    app offline) -- lanza RuntimeError con mensaje para mostrar al alumno si
+    no lo está. Devuelve el texto de respuesta del paciente.
+
+    appointment_id: cita real a la que se le asocia el chat guardado (ver
+    LlmChat.php) -- None cuando no corresponde dejar rastro (ej. "Atender
+    (prueba)" del admin).
+    """
+    if not _is_backend_mode():
+        raise RuntimeError("El chat con el paciente requiere conexión al servidor.")
+    client = _get_backend_client()
+    result = client.llm_chat(case_id, nombre, edad, procedimiento, history, message, appointment_id)
+    return result["reply"]
+
+
 def reset_backend_session() -> None:
     """Descarta el singleton de BackendClient y los snapshots en memoria.
 

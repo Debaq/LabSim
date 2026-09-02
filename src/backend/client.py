@@ -62,11 +62,22 @@ class BackendClient:
         resp.raise_for_status()
         return resp.json()
 
-    def _post(self, path: str, data: dict) -> dict:
+    def _post(self, path: str, data: dict, timeout: int = DEFAULT_TIMEOUT) -> dict:
         resp = requests.post(
-            f"{self._base_url}{path}", json=data, headers=self._headers(), timeout=DEFAULT_TIMEOUT
+            f"{self._base_url}{path}", json=data, headers=self._headers(), timeout=timeout
         )
-        resp.raise_for_status()
+        try:
+            resp.raise_for_status()
+        except requests.HTTPError as exc:
+            # El backend manda el motivo real en el body ({"error": "..."} --
+            # ver Response::error en labsim_backend) -- sin esto, quien llame
+            # solo ve "502 Server Error: Bad Gateway for url: ..." genérico,
+            # que no dice si fue el LLM, la config o la red.
+            try:
+                detail = resp.json().get("error")
+            except ValueError:
+                detail = None
+            raise requests.HTTPError(detail or str(exc), response=resp) from exc
         return resp.json()
 
     # -- endpoints ------------------------------------------------------
@@ -120,6 +131,32 @@ class BackendClient:
         if nota is not None:
             body["nota"] = nota
         return self._post("/api/attendance_action.php", body)
+
+    def llm_chat(
+        self, case_id: str, nombre: str, edad: int, procedimiento: str,
+        history: list[dict], message: str, appointment_id: int | None = None,
+    ) -> dict:
+        """Turno de chat con el paciente simulado por LLM (ver LlmChat.php).
+
+        Timeout más largo que el resto de endpoints: LlmChat.php espera hasta
+        30s por la respuesta del LLM (CURLOPT_TIMEOUT) -- con el timeout por
+        defecto (10s) el cliente se rendía antes que el propio servidor.
+
+        appointment_id: si se manda, el backend guarda el turno (mensaje +
+        respuesta) en llm_chat_logs contra esa cita/alumno para poder
+        revisarlo después. None = no guardar (usado por "Atender (prueba)").
+        """
+        body = {
+            "case_id": case_id,
+            "nombre": nombre,
+            "edad": edad,
+            "procedimiento": procedimiento,
+            "history": history,
+            "message": message,
+        }
+        if appointment_id is not None:
+            body["appointment_id"] = appointment_id
+        return self._post("/api/llm_chat.php", body, timeout=35)
 
     def post_logs_batch(self, entries: list[dict]) -> dict:
         return self._post("/api/logs_batch.php", {"entries": entries})
