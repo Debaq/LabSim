@@ -58,6 +58,22 @@ function audiogram_y(float $db): float
     return 10 + ($db - (-10)) / 130 * 266;
 }
 
+// Geometría del logoaudiograma (curva de discriminación % vs intensidad),
+// mismo plot box que el audiograma pero ejes lineales en ambos sentidos:
+// X = dB HL (-10..120, igual rango que audiogram_y), Y = % discriminación
+// (0 abajo, 100 arriba) -- si se cambia acá, cambiar también en
+// drawLogogram()/logoX()/logoY() en el <script> de más abajo.
+function logogram_x(float $db): float
+{
+    $db = max(-10, min(120, $db));
+    return 32 + ($db - (-10)) / 130 * 280;
+}
+function logogram_y(float $pct): float
+{
+    $pct = max(0, min(100, $pct));
+    return 10 + (100 - $pct) / 100 * 266;
+}
+
 $error = null;
 $v = $_POST; // sticky form: se redibuja con lo ya tipeado, tanto al generar nombre como si falla la validación
 
@@ -232,10 +248,10 @@ admin_header('Crear caso clínico', $me);
     /* Ficha Audiometría: gráfico fijo a la izquierda mientras se scrollea
        la planilla de umbrales a la derecha. */
     .audiometria-layout { display: grid; grid-template-columns: 300px 1fr; gap: 1.2rem; align-items: start; }
-    .audiogram-card { position: sticky; top: 1rem; }
+    .audiogram-stack { position: sticky; top: 1rem; display: flex; flex-direction: column; gap: 1rem; }
     @media (max-width: 960px) {
         .audiometria-layout { grid-template-columns: 1fr; }
-        .audiogram-card { position: static; }
+        .audiogram-stack { position: static; }
     }
     .audiogram-legend { display: flex; flex-wrap: wrap; gap: 0.7rem; font-size: 0.75rem; color: #555; margin-top: 0.5rem; }
     .audiogram-legend span { display: inline-flex; align-items: center; gap: 0.3rem; }
@@ -290,6 +306,7 @@ admin_header('Crear caso clínico', $me);
 <div class="tab-panel" data-tab="audiometria">
 <div class="audiometria-layout">
 
+<div class="audiogram-stack">
 <div class="audiogram-card card">
     <strong>Audiograma</strong>
     <svg id="audiogram-svg" viewBox="0 0 320 300" style="width:100%; height:auto; margin-top:0.5rem;">
@@ -323,6 +340,37 @@ admin_header('Crear caso clínico', $me);
         <span><svg width="12" height="12"><polygon points="6,9 2,3 10,3" fill="#b33a3a" stroke="none"></polygon></svg> LDL OD</span>
         <span><svg width="12" height="12"><polygon points="6,9 2,3 10,3" fill="#2255aa" stroke="none"></polygon></svg> LDL OI</span>
     </div>
+</div>
+
+<div class="audiogram-card card">
+    <strong>Logoaudiograma</strong>
+    <svg id="logogram-svg" viewBox="0 0 320 300" style="width:100%; height:auto; margin-top:0.5rem;">
+        <rect x="32" y="10" width="280" height="266" fill="none" stroke="#ccc"></rect>
+        <?php foreach ([0, 20, 40, 60, 80, 100] as $pct):
+            $y = logogram_y($pct);
+        ?>
+        <line x1="32" y1="<?= $y ?>" x2="312" y2="<?= $y ?>" stroke="#eee"></line>
+        <text x="28" y="<?= $y + 3 ?>" text-anchor="end" font-size="8" fill="#666"><?= $pct ?></text>
+        <?php endforeach; ?>
+        <?php foreach ([-10, 0, 20, 40, 60, 80, 100, 120] as $db):
+            $x = logogram_x($db);
+        ?>
+        <line x1="<?= $x ?>" y1="10" x2="<?= $x ?>" y2="276" stroke="#f2f2f2"></line>
+        <text x="<?= $x ?>" y="288" text-anchor="middle" font-size="8" fill="#666"><?= $db ?></text>
+        <?php endforeach; ?>
+        <text x="4" y="14" font-size="8" fill="#888">%</text>
+        <text x="270" y="288" font-size="8" fill="#888">dB HL</text>
+        <g id="logogram-data"></g>
+    </svg>
+    <div class="audiogram-legend">
+        <span><svg width="12" height="12"><circle cx="6" cy="6" r="3" fill="#b33a3a" stroke="none"></circle></svg> SDT OD</span>
+        <span><svg width="12" height="12"><circle cx="6" cy="6" r="3" fill="#2255aa" stroke="none"></circle></svg> SDT OI</span>
+        <span><svg width="12" height="12"><line x1="6" y1="1" x2="6" y2="11" stroke="#b33a3a" stroke-width="1.4" stroke-dasharray="2,2"></line></svg> SRT OD</span>
+        <span><svg width="12" height="12"><line x1="6" y1="1" x2="6" y2="11" stroke="#2255aa" stroke-width="1.4" stroke-dasharray="2,2"></line></svg> SRT OI</span>
+        <span><svg width="12" height="12"><polygon points="6,2 2,10 10,10" fill="#b33a3a" stroke="none"></polygon></svg> UMD OD</span>
+        <span><svg width="12" height="12"><polygon points="6,2 2,10 10,10" fill="#2255aa" stroke="none"></polygon></svg> UMD OI</span>
+    </div>
+</div>
 </div>
 
 <div class="audiometria-fields">
@@ -382,12 +430,12 @@ admin_header('Crear caso clínico', $me);
         <div class="side-block">
             <div class="side-heading"><span class="side-tag <?= $side ?>"><?= $sideLabel ?></span></div>
             <label>UMD (int / %)
-                <input type="number" step="5" name="umd_int[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_int', $side], 35)) ?>" style="width:5rem; display:inline-block;">
-                / <input type="number" step="5" name="umd_pct[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_pct', $side], 100)) ?>" style="width:5rem; display:inline-block;">
+                <input type="number" step="5" class="umd-int-input" data-side="<?= $side ?>" name="umd_int[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_int', $side], 35)) ?>" style="width:5rem; display:inline-block;">
+                / <input type="number" step="5" class="umd-pct-input" data-side="<?= $side ?>" name="umd_pct[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_pct', $side], 100)) ?>" style="width:5rem; display:inline-block;">
             </label>
             <label>SISI <input type="number" step="5" name="sisi[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['sisi', $side], 0)) ?>"></label>
             <label class="inline-check"><input type="checkbox" name="stenger[<?= $side ?>]" <?= isset($v['stenger'][$side]) ? 'checked' : '' ?>> Stenger</label>
-            <label class="inline-check"><input type="checkbox" name="recruit[<?= $side ?>]" <?= isset($v['recruit'][$side]) ? 'checked' : '' ?>> Reclutamiento</label>
+            <label class="inline-check"><input type="checkbox" class="recruit-toggle" data-side="<?= $side ?>" name="recruit[<?= $side ?>]" <?= isset($v['recruit'][$side]) ? 'checked' : '' ?>> Reclutamiento</label>
             <label class="inline-check"><input type="checkbox" name="decay[<?= $side ?>]" <?= isset($v['decay'][$side]) ? 'checked' : '' ?>> Decay</label>
         </div>
         <?php endforeach; ?>
@@ -690,6 +738,85 @@ window.drawAudiogram = (function () {
     };
 })();
 
+// Logoaudiograma: curva % discriminación vs intensidad (dB HL), por oído.
+// Mismo plot box que el audiograma pero ejes lineales (ver logogram_x()/
+// logogram_y() en PHP arriba). Curva simplificada para vista previa en vivo
+// -- no replica CalculateLogo.cal_new_umd completo (src/audiometria/
+// logoaudiometry.py de la app de escritorio), pero sigue la misma forma:
+// 0% en SDT, sube hasta UMD(int,%), y desde ahí meseta plana o cae si hay
+// reclutamiento (rollover). SRT se marca aparte como línea vertical, ya que
+// es un umbral de detección, no un punto de la curva de discriminación.
+window.drawLogogram = (function () {
+    var NS = 'http://www.w3.org/2000/svg';
+    function logoX(db) { db = Math.max(-10, Math.min(120, db)); return 32 + (db - (-10)) / 130 * 280; }
+    function logoY(pct) { pct = Math.max(0, Math.min(100, pct)); return 10 + (100 - pct) / 100 * 266; }
+
+    function val(selector, side, def) {
+        var el = document.querySelector(selector + '[data-side="' + side + '"]');
+        return el ? (parseInt(el.value, 10) || 0) : def;
+    }
+
+    function makeDot(x, y, color) {
+        var c = document.createElementNS(NS, 'circle');
+        c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 3);
+        c.setAttribute('fill', color); c.setAttribute('stroke', 'none');
+        return c;
+    }
+    function makeUmdMark(x, y, color) {
+        var r = 4;
+        var t = document.createElementNS(NS, 'polygon');
+        t.setAttribute('points', x + ',' + (y - r) + ' ' + (x - r) + ',' + (y + r * 0.8) + ' ' + (x + r) + ',' + (y + r * 0.8));
+        t.setAttribute('fill', color); t.setAttribute('stroke', 'none');
+        return t;
+    }
+    function makeSrtLine(x, color) {
+        var l = document.createElementNS(NS, 'line');
+        l.setAttribute('x1', x); l.setAttribute('y1', 10); l.setAttribute('x2', x); l.setAttribute('y2', 276);
+        l.setAttribute('stroke', color); l.setAttribute('stroke-width', '1'); l.setAttribute('stroke-dasharray', '2,2');
+        return l;
+    }
+
+    function curvePoints(side) {
+        var sdt = val('.sdt-input', side, 0);
+        var umdInt = val('.umd-int-input', side, 35);
+        var umdPct = val('.umd-pct-input', side, 100);
+        var recruitEl = document.querySelector('.recruit-toggle[data-side="' + side + '"]');
+        var recruit = !!(recruitEl && recruitEl.checked);
+
+        var pts = [[-10, 0], [sdt, 0], [umdInt, umdPct]];
+        pts.push(recruit ? [120, Math.max(0, umdPct - (120 - umdInt) / 5 * 5)] : [120, umdPct]);
+        // Ordenado por dB creciente -- si SDT/UMD quedan invertidos (dato mal
+        // tipeado) igual se dibuja algo coherente en vez de una polyline en zigzag.
+        pts.sort(function (a, b) { return a[0] - b[0]; });
+        return pts;
+    }
+
+    return function drawLogogram() {
+        var group = document.getElementById('logogram-data');
+        if (!group) return;
+        while (group.firstChild) group.removeChild(group.firstChild);
+
+        ['od', 'oi'].forEach(function (side) {
+            var color = side === 'od' ? '#b33a3a' : '#2255aa';
+            var pts = curvePoints(side);
+            var poly = document.createElementNS(NS, 'polyline');
+            poly.setAttribute('points', pts.map(function (p) { return logoX(p[0]) + ',' + logoY(p[1]); }).join(' '));
+            poly.setAttribute('fill', 'none');
+            poly.setAttribute('stroke', color);
+            poly.setAttribute('stroke-width', '1.3');
+            group.appendChild(poly);
+
+            var sdt = val('.sdt-input', side, 0);
+            var srt = val('.srt-input', side, 0);
+            var umdInt = val('.umd-int-input', side, 35);
+            var umdPct = val('.umd-pct-input', side, 100);
+            group.appendChild(makeSrtLine(logoX(srt), color));
+            group.appendChild(makeDot(logoX(sdt), logoY(0), color));
+            group.appendChild(makeUmdMark(logoX(umdInt), logoY(umdPct), color));
+        });
+    };
+})();
+
 (function () {
     var form = document.getElementById('case-form');
     if (!form) return;
@@ -698,13 +825,17 @@ window.drawAudiogram = (function () {
     // aparte, llamando drawAudiogram() desde syncOsea() más abajo.
     form.addEventListener('input', function (e) {
         if (e.target.id && /^(aerea|osea|ldl)_/.test(e.target.id)) window.drawAudiogram();
+        if (e.target.classList && (e.target.classList.contains('sdt-input') || e.target.classList.contains('srt-input')
+            || e.target.classList.contains('umd-int-input') || e.target.classList.contains('umd-pct-input'))) window.drawLogogram();
     });
     // El toggle "LDL medido" decide si esa serie se grafica o no, no solo
     // un valor -- necesita su propio listener aparte del 'input' de arriba.
     form.addEventListener('change', function (e) {
         if (e.target.classList && e.target.classList.contains('ldl-toggle')) window.drawAudiogram();
+        if (e.target.classList && e.target.classList.contains('recruit-toggle')) window.drawLogogram();
     });
     window.drawAudiogram();
+    window.drawLogogram();
 })();
 
 // Ayuda visual en vivo -- el servidor recalcula todo igual al enviar,
@@ -766,6 +897,7 @@ window.drawAudiogram = (function () {
                 if (!auto || !input) return;
                 if (auto.checked) { input.value = fletcher(side); input.readOnly = true; }
                 else { input.readOnly = false; }
+                if (window.drawLogogram) window.drawLogogram();
             }
             if (auto) {
                 auto.addEventListener('change', syncAuto);
