@@ -3,25 +3,23 @@ import sys
 from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton
 
-import Agenda
-import Audiometer
-import create_a
-import ListWords
-import login as Ui_login
-import Z
-from base import context
-from lib.h_win import FrameSubMdi, MdiArea
-from lib.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
+from agenda import Agenda, create_a
+from audiometria import Audiometer, ListWords
+from auth import login as Ui_login
+from impedanciometria import Z
+from core.base import context
+from core.h_win import FrameSubMdi, MdiArea
+from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
                           marcar_entry_atendiendo, marcar_entry_atendido, entry_esta_cancelada,
                           reset_backend_session)
-from lib.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min
-from UI.Ui_command_voice_A import Ui_Form as commandVoiceA
-from UI.Ui_CVC import Ui_CVC
-from UI.Ui_Main import Ui_MainWindow
-from Logger import Logger
-from lib.backend.client import BackendClient
-from lib.backend.log_queue import LogUploaderThread, get_log_queue
-from lib.backend.sync_thread import SyncThread
+from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min
+from audiometria.UI.Ui_command_voice_A import Ui_Form as commandVoiceA
+from cvc.UI.Ui_CVC import Ui_CVC
+from core.UI.Ui_Main import Ui_MainWindow
+from core.Logger import Logger
+from backend.client import BackendClient
+from backend.log_queue import LogUploaderThread, get_log_queue
+from backend.sync_thread import SyncThread
 
 # Definir la raíz del proyecto
 BASE_DIR = Path(__file__).resolve().parent
