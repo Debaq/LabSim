@@ -371,6 +371,12 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     .reflex-pattern-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.8rem; }
     .reflex-pattern-table th, .reflex-pattern-table td { text-align: center; padding: 0.35rem 0.2rem; border: 1px solid #ddd; }
     .reflex-pattern-table td.freq-label { font-weight: 600; background: #f7f7f7; }
+    /* th.od/th.oi con color: NO reusar .side-tag acá -- su display:
+       inline-block rompe el layout de columnas de una tabla (th deja de
+       comportarse como table-cell), que fue justo lo que descuadró el
+       encabezado. */
+    th.reflex-head.od { color: #b33a3a; }
+    th.reflex-head.oi { color: #2255aa; }
     .reflex-cell { font-weight: 700; color: #999; }
     .reflex-cell.na { color: #ccc; background: #f5f5f5; }
     /* Presente = fondo gris oscuro fijo (no varía por lado); el color del
@@ -619,7 +625,6 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <span><svg width="12" height="12"><line x1="1" y1="6" x2="11" y2="6" stroke="#b33a3a" stroke-width="1.6"></line></svg> OD</span>
         <span><svg width="12" height="12"><line x1="1" y1="6" x2="11" y2="6" stroke="#2255aa" stroke-width="1.6"></line></svg> OI</span>
     </div>
-    <p class="legend">Curva estilizada según el tipo (Jerger) elegido a la derecha -- no mide presión/compliance real, solo ilustra la forma clínica típica de cada tipo.</p>
 </div>
 
 <div class="audiogram-card card">
@@ -638,11 +643,11 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     ?>
     <table class="reflex-pattern-table">
         <tr>
-            <th class="side-tag od">OD Contra</th>
-            <th class="side-tag od">OD Ipsi</th>
-            <th>Frecuencia</th>
-            <th class="side-tag oi">OI Ipsi</th>
-            <th class="side-tag oi">OI Contra</th>
+            <th class="reflex-head od">OD Contra</th>
+            <th class="reflex-head od">OD Ipsi</th>
+            <th>Frec.</th>
+            <th class="reflex-head oi">OI Ipsi</th>
+            <th class="reflex-head oi">OI Contra</th>
         </tr>
         <?php foreach ($reflexPatternRows as $row): ?>
         <tr>
