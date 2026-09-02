@@ -220,7 +220,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $zOi = (string) ($v['z_oi'] ?? 'A');
         $etfOd = (string) ($v['etf_od'] ?? 'Normal');
         $etfOi = (string) ($v['etf_oi'] ?? 'Normal');
-        $fowlerFreq = (int) ($v['fowler_freq'] ?? 0);
+        $bonePairs = zip_pairs($osea['od'], $osea['oi']);
+        $fowlerAuto = isset($v['fowler_auto']);
+        if ($fowlerAuto) {
+            $fowlerInferred = CaseBuilder::inferFowlerFreq($airPairs, $bonePairs);
+            $fowlerEnabled = $fowlerInferred !== null;
+            $fowlerFreq = $fowlerInferred ?? (int) ($v['fowler_freq'] ?? CaseBuilder::fowlerFreqOptions()[0]);
+        } else {
+            $fowlerEnabled = isset($v['fowler_enabled']);
+            $fowlerFreq = (int) ($v['fowler_freq'] ?? CaseBuilder::fowlerFreqOptions()[0]);
+        }
+        $fowlerDiplacusia = isset($v['diplacusia']);
 
         // Acufenometría: lateralidad (craneal/unilateral/bilateral) es
         // independiente de permanente/ocasional -- un tinnitus unilateral
@@ -245,6 +255,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Valor de ETF inválido.';
         } elseif ($fowlerFreq < 0 || $fowlerFreq > 8) {
             $error = 'Frecuencia de Fowler inválida.';
+        } elseif (!$fowlerAuto && $fowlerEnabled && ($fowlerError = CaseBuilder::fowlerValidationError($fowlerFreq, $airPairs, $bonePairs)) !== null) {
+            $error = $fowlerError;
         } elseif (!in_array($tinnitusLateralidad, CaseBuilder::TINNITUS_LATERALIDAD_OPTIONS, true)) {
             $error = 'Lateralidad del tinnitus inválida.';
         } elseif ($tinnitusLateralidad === 'unilateral' && !in_array($tinnitusOido, ['od', 'oi'], true)) {
@@ -266,6 +278,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $isUpdate ? $editId : CaseBuilder::nextCaseId($pdo);
             $data = CaseBuilder::buildCaseData([
                 'gender' => $gender,
+                'age' => $age,
                 'id' => $id,
                 'aerea' => $airPairs,
                 'osea' => zip_pairs($osea['od'], $osea['oi']),
@@ -279,8 +292,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'sdt' => $sdt,
                 'srt' => $srt,
                 'fowler' => [
+                    'enabled' => $fowlerEnabled,
+                    'auto' => $fowlerAuto,
                     'freq' => $fowlerFreq,
                     'cuts' => [(int) ($v['fowler_cut1'] ?? 15), (int) ($v['fowler_cut2'] ?? 30), (int) ($v['fowler_cut3'] ?? 50)],
+                    'diplacusia' => $fowlerDiplacusia,
                 ],
                 'stenger' => [isset($v['stenger']['od']), isset($v['stenger']['oi'])],
                 'sisi' => [(int) fv($v, ['sisi', 'od'], 0), (int) fv($v, ['sisi', 'oi'], 0)],
@@ -606,13 +622,16 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <?php endforeach; ?>
     </div>
 
-    <div class="side-block">
+    <div class="side-block" id="fowler-block">
         <div class="side-heading"><span class="side-tag">Fowler</span></div>
+        <label class="inline-check"><input type="checkbox" id="fowler_auto" name="fowler_auto" <?= (!array_key_exists('fowler_auto', $v) || isset($v['fowler_auto'])) ? 'checked' : '' ?>> Detectar automáticamente desde los umbrales (Aerea/Osea)</label>
+        <p class="legend" id="fowler-auto-status"></p>
+        <label class="inline-check"><input type="checkbox" id="fowler_enabled" name="fowler_enabled" <?= isset($v['fowler_enabled']) ? 'checked' : '' ?>> Fowler aplica en este caso</label>
         <div class="two-col">
-            <label>Frecuencia
-                <select name="fowler_freq">
-                    <?php foreach (CaseBuilder::FREQUENCIES as $i => $f): ?>
-                    <option value="<?= $i ?>" <?= (int) ($v['fowler_freq'] ?? 0) === $i ? 'selected' : '' ?>><?= $f ?> Hz</option>
+            <label>Frecuencia (250-4000 Hz)
+                <select id="fowler_freq" name="fowler_freq">
+                    <?php foreach (CaseBuilder::fowlerFreqOptions() as $i): ?>
+                    <option value="<?= $i ?>" <?= (int) ($v['fowler_freq'] ?? CaseBuilder::fowlerFreqOptions()[0]) === $i ? 'selected' : '' ?>><?= CaseBuilder::FREQUENCIES[$i] ?> Hz</option>
                     <?php endforeach; ?>
                 </select>
             </label>
@@ -622,6 +641,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                 <input type="number" name="fowler_cut3" value="<?= htmlspecialchars((string) ($v['fowler_cut3'] ?? 50)) ?>" style="width:4rem; display:inline-block;">
             </label>
         </div>
+        <label class="inline-check"><input type="checkbox" name="diplacusia" <?= isset($v['diplacusia']) ? 'checked' : '' ?>> Paciente refiere diploacusia</label>
+        <p class="legend">Requisitos ABLB: oído de referencia ≤ <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL, oído en estudio &gt; <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL y sensorioneural (gap aéreo-óseo ≤ <?= CaseBuilder::FOWLER_SNHL_GAP_MAX ?> dB), diferencia interaural <?= CaseBuilder::FOWLER_DIFF_MIN ?>-<?= CaseBuilder::FOWLER_DIFF_MAX ?> dB en la frecuencia evaluada.</p>
     </div>
     <p class="legend">Auto (SDT/SRT) = mejor promedio de 2 de 3 (500/1000/2000 Hz vía aérea), redondeado a múltiplo de 5. Destildar para escribir un valor manual.</p>
 </div>
@@ -1297,6 +1318,67 @@ window.drawReflexPattern = function drawReflexPattern() {
             }
         });
     });
+})();
+
+// Auto-detección de Fowler/I.W.A. desde los umbrales -- espejo en JS de
+// CaseBuilder::inferFowlerFreq()/fowlerValidationError() (PHP recalcula todo
+// igual al enviar, esto es solo para que el docente vea el resultado en vivo).
+(function () {
+    var freqSelect = document.getElementById('fowler_freq');
+    var enabledBox = document.getElementById('fowler_enabled');
+    var autoBox = document.getElementById('fowler_auto');
+    var status = document.getElementById('fowler-auto-status');
+    if (!freqSelect || !enabledBox || !autoBox) return;
+
+    var NORMAL_HL = 20, GAP_MAX = 10, DIFF_MIN = 20, DIFF_MAX = 40;
+    var FREQ_INDEXES = [1, 2, 3, 4, 5, 6]; // 250..4000 Hz, mismos índices que CaseBuilder::FREQUENCIES
+
+    function val(id) {
+        var el = document.getElementById(id);
+        return el ? (parseInt(el.value, 10) || 0) : 0;
+    }
+
+    function inferFreq() {
+        var best = null, bestDiff = -1;
+        FREQ_INDEXES.forEach(function (i) {
+            var od = val('aerea_od_' + i), oi = val('aerea_oi_' + i);
+            var refSide = od <= oi ? 'od' : 'oi';
+            var studySide = refSide === 'od' ? 'oi' : 'od';
+            var refTh = refSide === 'od' ? od : oi;
+            var studyTh = studySide === 'od' ? od : oi;
+            var diff = studyTh - refTh;
+            if (refTh > NORMAL_HL || studyTh <= NORMAL_HL || diff < DIFF_MIN || diff > DIFF_MAX) return;
+            var boneStudy = val('osea_' + studySide + '_' + i);
+            if (studyTh - boneStudy > GAP_MAX) return;
+            if (diff > bestDiff) { bestDiff = diff; best = i; }
+        });
+        return best;
+    }
+
+    function sync() {
+        var auto = autoBox.checked;
+        freqSelect.disabled = auto;
+        enabledBox.disabled = auto;
+        if (!auto) { if (status) status.textContent = ''; return; }
+        var freq = inferFreq();
+        if (freq === null) {
+            enabledBox.checked = false;
+            if (status) status.textContent = 'Ningún umbral cumple los requisitos ABLB (250-4000 Hz) -- Fowler queda deshabilitado en este caso.';
+        } else {
+            enabledBox.checked = true;
+            freqSelect.value = String(freq);
+            if (status) status.textContent = 'Frecuencia detectada automáticamente: ' + freqSelect.options[freqSelect.selectedIndex].text + '.';
+        }
+    }
+
+    autoBox.addEventListener('change', sync);
+    FREQ_INDEXES.forEach(function (i) {
+        ['aerea_od_', 'aerea_oi_', 'osea_od_', 'osea_oi_'].forEach(function (prefix) {
+            var el = document.getElementById(prefix + i);
+            if (el) el.addEventListener('input', sync);
+        });
+    });
+    sync();
 })();
 </script>
 <?php

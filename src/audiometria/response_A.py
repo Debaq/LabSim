@@ -183,12 +183,15 @@ class Response(QWidget):
                 self.fowler()
 
 
-    def set_fowler_data(self, thr_od, thr_oi, cuts):
+    def set_fowler_data(self, thr_od, thr_oi, cuts, diplacusia=False):
         """Configura el motor de Fowler/ABLB (audiometria.Fowler.Fowler) con los
-        umbrales aereos del caso y los 3 cortes de reclutamiento del caso."""
+        umbrales aereos del caso, los 3 cortes de reclutamiento y si el caso
+        marca diploacusia (el paciente igualado en sonoridad igual reporta
+        que los tonos no son iguales "en forma"/tono)."""
         self.fowler_engine = FowlerEngine()
         self.fowler_engine.set_th(thr_od, thr_oi)
         self.fowler_engine.set_cut(*cuts)
+        self.fowler_engine.diplacusia = diplacusia
 
     def fowler_q(self, n, data_audio):
         if self.fowler_engine is None:
@@ -204,6 +207,10 @@ class Response(QWidget):
         equals, side, _state = self.fowler_engine.evaluate(int_od, int_oi)
 
         if n == 1:
+            # Balance de sonoridad alcanzado (equals=True) no implica que el
+            # paciente los reporte "iguales" si el caso marca diploacusia:
+            # el paciente responde según si además son iguales en forma/tono.
+            equals = equals and not self.fowler_engine.diplacusia
             self.create_voice_('si' if equals else 'no')
         elif side is not None:
             sides = ["elderecho", "elizquierdo"]

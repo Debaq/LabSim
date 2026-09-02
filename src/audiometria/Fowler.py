@@ -10,6 +10,7 @@ class Fowler:
         self.step3_acum = {'level': None, 'idx': 0, 'steps':[]}
         self.first_reclut = 0
         self.list_recruit = []
+        self.diplacusia = False
 
 
     def set_th(self, th_od:int, th_oi:int) -> None:

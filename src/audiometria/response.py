@@ -268,12 +268,12 @@ class ResponseAudiometry():
             if all(x == 0 for x in self.data['audio']['stim']):
                 if all(x == 'Alternado' for x in self.data['audio']['contin']):
                     fdata = self.dbdata.get('Fowler', {'freq': None, 'cuts': [15, 30, 50]})
-                    if not isinstance(fdata, dict):
-                        # formato viejo (lista), caso aun no migrado desde el form: prueba no configurada
+                    if not isinstance(fdata, dict) or not fdata.get('enabled', False):
+                        # formato viejo (lista) o Fowler no habilitado/aplicable para este caso
                         return
                     if fdata['freq'] == self.data['audio']['freq']:
                         thr = self.dbdata['Aerea'][fdata['freq']]
-                        self.other_response.set_fowler_data(thr[0], thr[1], fdata['cuts'])
+                        self.other_response.set_fowler_data(thr[0], thr[1], fdata['cuts'], fdata.get('diplacusia', False))
 
     def response_decay(self):
         """Test de decaimiento tonal: umbral normal + si el caso marca 'decay'

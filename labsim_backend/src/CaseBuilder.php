@@ -15,6 +15,18 @@ final class CaseBuilder
     public const Z_OPTIONS = ['A', 'As', 'Ad', 'C', 'Cs', 'B'];
     public const ETF_OPTIONS = ['Normal', 'Disfunción tubaria', 'Permeable', 'No permeable'];
 
+    // Requisitos clínicos de aplicabilidad de Fowler/I.W.A. (ABLB): oído de
+    // referencia dentro de rango normal, oído en estudio sensorioneural
+    // (gap aéreo-óseo bajo) y fuera de rango normal, diferencia interaural
+    // acotada, y frecuencia evaluada dentro del rango donde el criterio de
+    // "al menos una frecuencia conservada" tiene sentido clínico.
+    public const FOWLER_NORMAL_HL = 20;      // dB HL: umbral <= esto = "rango normal"
+    public const FOWLER_SNHL_GAP_MAX = 10;   // dB: gap aéreo-óseo máximo para considerar sensorioneural puro
+    public const FOWLER_DIFF_MIN = 20;       // dB: diferencia interaural mínima exigida
+    public const FOWLER_DIFF_MAX = 40;       // dB: diferencia interaural máxima exigida
+    public const FOWLER_FREQ_MIN_HZ = 250;
+    public const FOWLER_FREQ_MAX_HZ = 4000;
+
     // Tipo de ruido percibido (acufenometría) -- "la forma" del acufeno,
     // junto a la frecuencia de matching (se reusa CaseBuilder::FREQUENCIES).
     public const TINNITUS_RUIDO_OPTIONS = ['Silbido', 'Zumbido', 'Siseo', 'Pitido', 'Campanilleo'];
@@ -24,6 +36,88 @@ final class CaseBuilder
     // "unilateral" pide oído; "bilateral" admite predominio (asimetría).
     public const TINNITUS_LATERALIDAD_OPTIONS = ['craneal', 'unilateral', 'bilateral'];
     public const TINNITUS_PREDOMINIO_OPTIONS = ['igual', 'od', 'oi'];
+
+    /** Índices de CaseBuilder::FREQUENCIES dentro del rango válido para Fowler/I.W.A. (250-4000 Hz). */
+    public static function fowlerFreqOptions(): array
+    {
+        $out = [];
+        foreach (self::FREQUENCIES as $i => $hz) {
+            if ($hz >= self::FOWLER_FREQ_MIN_HZ && $hz <= self::FOWLER_FREQ_MAX_HZ) {
+                $out[] = $i;
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * Valida los requisitos clínicos de aplicabilidad del Fowler/I.W.A. (ABLB):
+     *  1) hipoacusia sensorioneural en el oído en estudio (gap aéreo-óseo bajo),
+     *     con el oído de referencia dentro de rango normal en esa frecuencia
+     *     (cubre unilateral-normal-contralateral y bilateral-asimétrico, ya que
+     *     la frecuencia evaluada queda automáticamente como "la conservada");
+     *  2) diferencia interaural de 20 a 40 dB en la frecuencia evaluada;
+     *  3) oído de referencia normal / oído en estudio fuera de rango normal.
+     * $airPairs / $bonePairs: arrays [[od,oi], ...] indexados como FREQUENCIES
+     * (mismo shape que Aerea/Osea en cases.data). Devuelve null si es válido,
+     * o el mensaje de error si no.
+     */
+    public static function fowlerValidationError(int $freq, array $airPairs, array $bonePairs): ?string
+    {
+        $hz = self::FREQUENCIES[$freq] ?? null;
+        if ($hz === null || $hz < self::FOWLER_FREQ_MIN_HZ || $hz > self::FOWLER_FREQ_MAX_HZ) {
+            return 'La frecuencia de Fowler debe estar entre ' . self::FOWLER_FREQ_MIN_HZ . ' y ' . self::FOWLER_FREQ_MAX_HZ . ' Hz.';
+        }
+
+        $air = $airPairs[$freq] ?? [130, 130];
+        $refSide = $air[0] <= $air[1] ? 0 : 1;
+        $studySide = 1 - $refSide;
+        $refTh = (int) $air[$refSide];
+        $studyTh = (int) $air[$studySide];
+        $diff = $studyTh - $refTh;
+
+        if ($refTh > self::FOWLER_NORMAL_HL) {
+            return "El oído de referencia (mejor umbral) debe estar dentro del rango normal (≤ " . self::FOWLER_NORMAL_HL . ' dB HL) en la frecuencia de Fowler.';
+        }
+        if ($studyTh <= self::FOWLER_NORMAL_HL) {
+            return 'El oído en estudio debe tener un umbral fuera del rango normal (> ' . self::FOWLER_NORMAL_HL . ' dB HL) en la frecuencia de Fowler.';
+        }
+        if ($diff < self::FOWLER_DIFF_MIN || $diff > self::FOWLER_DIFF_MAX) {
+            return 'La diferencia entre oídos en la frecuencia de Fowler debe estar entre ' . self::FOWLER_DIFF_MIN . ' y ' . self::FOWLER_DIFF_MAX . " dB (actual: {$diff} dB).";
+        }
+
+        $bone = $bonePairs[$freq] ?? [130, 130];
+        $gap = $studyTh - (int) $bone[$studySide];
+        if ($gap > self::FOWLER_SNHL_GAP_MAX) {
+            return "El oído en estudio debe ser sensorioneural (gap aéreo-óseo ≤ " . self::FOWLER_SNHL_GAP_MAX . " dB); gap actual: {$gap} dB.";
+        }
+
+        return null;
+    }
+
+    /**
+     * Infiere automáticamente la frecuencia de Fowler/I.W.A. a partir de los
+     * umbrales ya cargados (Aerea/Osea): recorre 250-4000 Hz y se queda con
+     * la frecuencia válida (ver fowlerValidationError) de mayor diferencia
+     * interaural -- la más claramente evaluable. null si ninguna frecuencia
+     * cumple los requisitos (caso no apto para Fowler).
+     */
+    public static function inferFowlerFreq(array $airPairs, array $bonePairs): ?int
+    {
+        $best = null;
+        $bestDiff = -1;
+        foreach (self::fowlerFreqOptions() as $freq) {
+            if (self::fowlerValidationError($freq, $airPairs, $bonePairs) !== null) {
+                continue;
+            }
+            $air = $airPairs[$freq] ?? [130, 130];
+            $diff = abs((int) $air[0] - (int) $air[1]);
+            if ($diff > $bestDiff) {
+                $bestDiff = $diff;
+                $best = $freq;
+            }
+        }
+        return $best;
+    }
 
     public static function nextCaseId(PDO $pdo): string
     {
@@ -207,11 +301,17 @@ final class CaseBuilder
         $v['srt_auto'] = [];
 
         $fowler = $data['Fowler'] ?? [];
-        $v['fowler_freq'] = (string) ($fowler['freq'] ?? 0);
+        if (!empty($fowler['enabled'])) { $v['fowler_enabled'] = '1'; }
+        // "auto" no estaba en casos guardados antes de esta versión -- se
+        // asume auto=true (comportamiento por defecto) salvo que se haya
+        // guardado explícitamente en false.
+        if (!array_key_exists('auto', $fowler) || $fowler['auto']) { $v['fowler_auto'] = '1'; }
+        $v['fowler_freq'] = (string) ($fowler['freq'] ?? self::fowlerFreqOptions()[0]);
         $cuts = $fowler['cuts'] ?? [15, 30, 50];
         $v['fowler_cut1'] = (string) ($cuts[0] ?? 15);
         $v['fowler_cut2'] = (string) ($cuts[1] ?? 30);
         $v['fowler_cut3'] = (string) ($cuts[2] ?? 50);
+        if (!empty($fowler['diplacusia'])) { $v['diplacusia'] = '1'; }
 
         $stenger = $data['Stenger'] ?? [false, false];
         $v['stenger'] = [];
