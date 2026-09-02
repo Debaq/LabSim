@@ -173,8 +173,12 @@ class ZControl(QWidget, Ui_Z_control):
         win_pos = self.window_pos_values[self.window_pos_idx]
         if self.store_data[side].is_null(0):
             print(f"side : {side}")
-            zGerger = self.data[f"Z_{self.Z.get_side()}"]
-            vol = self.data['volume'][side]
+            if self.data is not None:
+                zGerger = self.data[f"Z_{self.Z.get_side()}"]
+                vol = self.data['volume'][side]
+            else:
+                zGerger = "A"
+                vol = 1.8
             result = Z_225(letter=zGerger, vol=vol, win_neg=win_neg, win_pos=win_pos).getDataSet()
             self.store_data[side].set(0, result)
             self.new[side] = True
