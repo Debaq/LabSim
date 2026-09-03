@@ -8,15 +8,90 @@ usuario alumno aparte). Lee/marca-leído contra inbox_messages en el backend
 (ver core.helpers.inbox_list/inbox_marcar_leido -> public/api/inbox.php):
 mensajes automáticos sobre el trato a pacientes (ver OirsEvaluator.php) y
 mensajes que un docente mandó a mano desde Admin -> Bandeja de entrada.
-"""
+
+Vive como subventana del MDI (ver main.py: self.subw["INBOX"]), igual que
+Agenda o el chat con el paciente, en vez de un diálogo emergente."""
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QPushButton, QDialog, QVBoxLayout, QTextEdit,
-                                QDialogButtonBox, QListWidget, QListWidgetItem)
+from PySide6.QtWidgets import (QPushButton, QWidget, QVBoxLayout, QTextEdit,
+                                QTableWidget, QTableWidgetItem, QHeaderView,
+                                QAbstractItemView)
 
 from core.helpers import inbox_list, inbox_marcar_leido
 
 BTN_OBJECT_NAME = "btn_bandeja_oirs"
+COLUMNAS = ("De", "Asunto", "Fecha y hora")
+
+
+class InboxWidget(QWidget):
+    """Tabla de mensajes (remitente/asunto/fecha) arriba, cuerpo del
+    seleccionado abajo. refresh() recarga la lista contra el backend --
+    se llama cada vez que se abre la subventana, no solo al crearla."""
+
+    def __init__(self, main_window, parent=None):
+        super().__init__(parent)
+        self._main_window = main_window
+
+        layout = QVBoxLayout(self)
+
+        self.tabla = QTableWidget(0, len(COLUMNAS), self)
+        self.tabla.setHorizontalHeaderLabels(COLUMNAS)
+        self.tabla.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tabla.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tabla.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.tabla.verticalHeader().setVisible(False)
+        self.tabla.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.tabla.itemSelectionChanged.connect(self._mostrar_seleccion)
+        layout.addWidget(self.tabla)
+
+        self.cuerpo = QTextEdit(self)
+        self.cuerpo.setReadOnly(True)
+        layout.addWidget(self.cuerpo)
+
+    def refresh(self):
+        """Recarga los mensajes desde el backend y repuebla la tabla."""
+        items = inbox_list()
+        self.cuerpo.clear()
+        self.tabla.setRowCount(len(items))
+        for row, it in enumerate(items):
+            self._llenar_fila(row, it)
+        self.tabla.resizeColumnsToContents()
+        self.tabla.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        if not items:
+            self.cuerpo.setPlainText("Sin mensajes todavía.")
+        if self._main_window is not None:
+            actualizar_badge(self._main_window)
+
+    def _llenar_fila(self, row, it):
+        remitente = it.get("remitente") or "Sistema"
+        marca = "● " if not it.get("leido") else ""
+        de_item = QTableWidgetItem(f"{marca}{remitente}")
+        asunto_item = QTableWidgetItem(it.get("asunto", ""))
+        fecha_item = QTableWidgetItem(it.get("created_at", ""))
+        for item in (de_item, asunto_item, fecha_item):
+            item.setData(Qt.UserRole, it)
+            if not it.get("leido"):
+                fuente = item.font()
+                fuente.setBold(True)
+                item.setFont(fuente)
+        self.tabla.setItem(row, 0, de_item)
+        self.tabla.setItem(row, 1, asunto_item)
+        self.tabla.setItem(row, 2, fecha_item)
+
+    def _mostrar_seleccion(self):
+        filas = self.tabla.selectionModel().selectedRows()
+        if not filas:
+            return
+        row = filas[0].row()
+        it = self.tabla.item(row, 0).data(Qt.UserRole)
+        self.cuerpo.setPlainText(f"Asunto: {it.get('asunto', '')}\n\n{it.get('cuerpo', '')}")
+        if not it.get("leido"):
+            inbox_marcar_leido(int(it["id"]))
+            it["leido"] = 1
+            self._llenar_fila(row, it)
+            self.tabla.selectRow(row)
+            if self._main_window is not None:
+                actualizar_badge(self._main_window)
 
 
 def crear_boton(main_window, layout):
@@ -58,55 +133,10 @@ def actualizar_badge(main_window):
 
 
 def abrir(main_window):
-    """Diálogo de lectura: lista de mensajes a la izquierda, cuerpo del
-    seleccionado abajo. Marca como leído al abrir uno."""
-    items = inbox_list()
-
-    dialogo = QDialog(main_window)
-    dialogo.setWindowTitle("Bandeja de entrada")
-    layout = QVBoxLayout(dialogo)
-
-    lista = QListWidget(dialogo)
-    layout.addWidget(lista)
-
-    cuerpo = QTextEdit(dialogo)
-    cuerpo.setReadOnly(True)
-    layout.addWidget(cuerpo)
-
-    def _etiqueta(it):
-        marca = "● " if not it.get("leido") else ""
-        return f"{marca}{it.get('asunto', '')} -- {it.get('created_at', '')}"
-
-    for it in items:
-        entry = QListWidgetItem(_etiqueta(it))
-        entry.setData(Qt.UserRole, it)
-        if not it.get("leido"):
-            fuente = entry.font()
-            fuente.setBold(True)
-            entry.setFont(fuente)
-        lista.addItem(entry)
-
-    def _mostrar(entry):
-        it = entry.data(Qt.UserRole)
-        cuerpo.setPlainText(f"Asunto: {it.get('asunto', '')}\n\n{it.get('cuerpo', '')}")
-        if not it.get("leido"):
-            inbox_marcar_leido(int(it["id"]))
-            it["leido"] = 1
-            entry.setData(Qt.UserRole, it)
-            fuente = entry.font()
-            fuente.setBold(False)
-            entry.setFont(fuente)
-            entry.setText(_etiqueta(it))
-            actualizar_badge(main_window)
-
-    lista.itemClicked.connect(_mostrar)
-
-    if not items:
-        cuerpo.setPlainText("Sin mensajes todavía.")
-
-    botones = QDialogButtonBox(QDialogButtonBox.Ok)
-    botones.accepted.connect(dialogo.accept)
-    layout.addWidget(botones)
-
-    dialogo.resize(520, 480)
-    dialogo.exec()
+    """Abre (o trae al frente) la subventana MDI de la bandeja, refrescando
+    su contenido contra el backend -- a diferencia del antiguo diálogo, esta
+    ventana persiste entre aperturas (ver main.py: self.subw["INBOX"])."""
+    subw = main_window.subw.get("INBOX") if main_window.subw else None
+    if subw is not None:
+        subw.obj.refresh()
+    main_window.activate_auto("INBOX")

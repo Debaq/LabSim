@@ -380,6 +380,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         subw_agenda = FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self))
         subw_voice = FrameSubMdi(ComandVoiceA())
         subw_chat = FrameSubMdi(ChatPacienteWidget(self.data_login.get("name")))
+        subw_inbox = FrameSubMdi(inbox.InboxWidget(self))
         self.subw_w = FrameSubMdi(ListWords.ListWords(self.data_current))
         self.subw_z = FrameSubMdi(Z.ZControl())
 
@@ -393,6 +394,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw["AGENDA"] = subw_agenda
         self.subw["CVOICE"] = subw_voice
         self.subw["CHAT"] = subw_chat
+        self.subw["INBOX"] = subw_inbox
         self.subw["W"] = self.subw_w
         self.subw["Z"] = self.subw_z
         self._hydrate_modules()
