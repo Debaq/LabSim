@@ -4,7 +4,7 @@ from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox
 
 from agenda import Agenda, create_a
-from agenda.Agenda import ChatPacienteWidget
+from agenda.ChatPaciente import ChatPacienteWidget
 from audiometria import Acumetria, Audiometer, ListWords
 from auth import login as Ui_login
 from impedanciometria import Z
