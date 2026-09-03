@@ -13,6 +13,30 @@
 set -e
 cd "$(dirname "$0")/.."
 
+# Corre un comando mudo (gh/git contra la red) mostrando un spinner con
+# segundos transcurridos -- sin esto, un paso lento (ej. subir el asset)
+# no imprime nada y parece colgado.
+run_with_spinner() {
+    local msg="$1"; shift
+    "$@" &
+    local pid=$!
+    local spin='|/-\'
+    local i=0
+    local start=$SECONDS
+    while kill -0 "$pid" 2>/dev/null; do
+        printf "\r%s %s (%ss)" "$msg" "${spin:i++%4:1}" "$((SECONDS - start))"
+        sleep 0.2
+    done
+    wait "$pid"
+    local status=$?
+    if [ "$status" -eq 0 ]; then
+        printf "\r%s listo (%ss)          \n" "$msg" "$((SECONDS - start))"
+    else
+        printf "\r%s FALLÓ (%ss)          \n" "$msg" "$((SECONDS - start))"
+    fi
+    return "$status"
+}
+
 CURRENT_VERSION=$(grep -oP "__VERSION__ = 'v\K[^']+" src/main.py)
 if [ -z "$CURRENT_VERSION" ]; then
     echo "No pude leer __VERSION__ desde src/main.py" >&2
@@ -44,20 +68,20 @@ echo "$BUILD_ID" > dist/LabSim/BUILD_VERSION
 
 TAR_PATH="dist/${ASSET_NAME}"
 rm -f "$TAR_PATH"
-tar -C dist -czf "$TAR_PATH" LabSim
+run_with_spinner "Armando ${ASSET_NAME}..." tar -C dist -czf "$TAR_PATH" LabSim
 echo "Armado ${TAR_PATH} ($(du -h "$TAR_PATH" | cut -f1))"
 
 if git rev-parse "$TAG" >/dev/null 2>&1; then
     echo "Tag ${TAG} ya existe localmente"
 else
     git tag "$TAG"
-    git push origin "$TAG"
+    run_with_spinner "Pusheando tag ${TAG}..." git push origin "$TAG"
 fi
 
 if gh release view "$TAG" >/dev/null 2>&1; then
-    gh release upload "$TAG" "$TAR_PATH" --clobber
+    run_with_spinner "Subiendo ${ASSET_NAME} al release..." gh release upload "$TAG" "$TAR_PATH" --clobber
 else
-    gh release create "$TAG" "$TAR_PATH" \
+    run_with_spinner "Creando release ${TAG} y subiendo ${ASSET_NAME}..." gh release create "$TAG" "$TAR_PATH" \
         --title "LabSim ${TAG} (build PyInstaller)" \
         --notes "Build PyInstaller (Linux) de LabSim, build ${BUILD_ID}."
 fi
@@ -70,8 +94,7 @@ OLD_TAGS=$(gh release list --json tagName -q ".[] | select(.tagName | startswith
 if [ -n "$OLD_TAGS" ]; then
     echo "Borrando releases pyinstaller-v* viejos:"
     while IFS= read -r old_tag; do
-        echo "  - ${old_tag}"
-        gh release delete "$old_tag" --yes --cleanup-tag
+        run_with_spinner "  Borrando ${old_tag}..." gh release delete "$old_tag" --yes --cleanup-tag
     done <<< "$OLD_TAGS"
 fi
 
