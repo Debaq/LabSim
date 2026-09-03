@@ -63,6 +63,9 @@ final class Db
     {
         $row['id'] = (int) $row['id'];
         $row['cancelada'] = (bool) $row['cancelada'];
+        if (array_key_exists('patient_id', $row)) {
+            $row['patient_id'] = $row['patient_id'] !== null ? (int) $row['patient_id'] : null;
+        }
         return $row;
     }
 
@@ -221,6 +224,123 @@ final class Db
         self::addColumnIfMissing($pdo, 'appointments', 'course_id', 'INTEGER REFERENCES courses(id)');
         self::addColumnIfMissing($pdo, 'appointments', 'assigned_student_id', 'INTEGER REFERENCES users(id)');
         self::addColumnIfMissing($pdo, 'appointments', 'assigned_group_id', 'INTEGER REFERENCES student_groups(id)');
+    }
+
+    /**
+     * Solo agrega patient_id a appointments/cases (sin tocar `patients` ni
+     * backfillear nada) -- instalaciones de antes de que esa columna
+     * existiera. Llamar SIEMPRE antes de aplicar schema.sql: ese archivo
+     * trae `CREATE INDEX ... ON appointments (patient_id)` / `ON cases
+     * (patient_id)`, que en una base ya existente fallan con "no such
+     * column: patient_id" si la columna no está puesta todavía (mismo
+     * motivo que migrateLtiReplayColumnsIfNeeded se llama antes del exec).
+     */
+    public static function migratePatientColumnsIfNeeded(): void
+    {
+        $pdo = self::get();
+        self::addColumnIfMissing($pdo, 'appointments', 'patient_id', 'INTEGER REFERENCES patients(id)');
+        self::addColumnIfMissing($pdo, 'cases', 'patient_id', 'INTEGER REFERENCES patients(id)');
+    }
+
+    /**
+     * Backfillea `patients` a partir de datos legado -- instalaciones de
+     * antes de que esa tabla existiera (ver sql/schema.sql). Requiere que
+     * `patients` ya exista (la crea el exec de schema.sql) y que
+     * appointments/cases ya tengan patient_id (ver
+     * migratePatientColumnsIfNeeded, llamar ANTES de aplicar schema.sql).
+     * Un patient por cada rut distinto ya usado en appointments (si el mismo
+     * rut tiene nombre/apellido/fecha_nac inconsistentes entre citas viejas,
+     * gana la fila con id más alto -- la más reciente), enlaza cada cita a su
+     * patient, y de ahí enlaza cases.patient_id (primero desde el
+     * paciente_snapshot de casos huérfanos, después espejando el patient_id
+     * de la cita viva más reciente de cada caso). Filas con rut='' quedan sin
+     * patient_id -- no hay forma confiable de identificarlas como la misma
+     * persona, se resuelven la primera vez que alguien las edite a mano.
+     */
+    public static function migratePatientsIfNeeded(): void
+    {
+        $pdo = self::get();
+        self::migratePatientColumnsIfNeeded();
+
+        $pdo->beginTransaction();
+        try {
+            $rows = $pdo->query(
+                "SELECT id, rut, nombre, apellido, fecha_nac FROM appointments WHERE rut <> '' AND patient_id IS NULL ORDER BY id ASC"
+            )->fetchAll();
+
+            $patientIdByRut = [];
+            foreach ($rows as $row) {
+                $rut = $row['rut'];
+                if (!isset($patientIdByRut[$rut])) {
+                    $stmt = $pdo->prepare('SELECT id FROM patients WHERE rut = ?');
+                    $stmt->execute([$rut]);
+                    $existing = $stmt->fetchColumn();
+                    $patientIdByRut[$rut] = $existing !== false ? (int) $existing : null;
+                }
+                if ($patientIdByRut[$rut] === null) {
+                    $pdo->prepare(
+                        'INSERT INTO patients (rut, nombre, apellido, fecha_nac) VALUES (?, ?, ?, ?)'
+                    )->execute([$rut, $row['nombre'], $row['apellido'], $row['fecha_nac']]);
+                    $patientIdByRut[$rut] = (int) $pdo->lastInsertId();
+                } else {
+                    // Fila más reciente de este rut (ORDER BY id ASC, se
+                    // pisa en cada vuelta) -- deja sus datos como los
+                    // vigentes del patient.
+                    $pdo->prepare(
+                        'UPDATE patients SET nombre = ?, apellido = ?, fecha_nac = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+                    )->execute([$row['nombre'], $row['apellido'], $row['fecha_nac'], $patientIdByRut[$rut]]);
+                }
+                $pdo->prepare('UPDATE appointments SET patient_id = ? WHERE id = ?')
+                    ->execute([$patientIdByRut[$rut], $row['id']]);
+            }
+
+            // Casos huérfanos (sin cita viva) que solo tienen paciente_snapshot.
+            $orphanCases = $pdo->query(
+                "SELECT id, data FROM cases WHERE patient_id IS NULL"
+            )->fetchAll();
+            foreach ($orphanCases as $case) {
+                $data = json_decode($case['data'] ?? '', true);
+                $snapshot = is_array($data) ? ($data['paciente_snapshot'] ?? null) : null;
+                $rut = is_array($snapshot) ? (string) ($snapshot['rut'] ?? '') : '';
+                if ($rut === '') {
+                    continue;
+                }
+                if (!isset($patientIdByRut[$rut])) {
+                    $stmt = $pdo->prepare('SELECT id FROM patients WHERE rut = ?');
+                    $stmt->execute([$rut]);
+                    $existing = $stmt->fetchColumn();
+                    if ($existing !== false) {
+                        $patientIdByRut[$rut] = (int) $existing;
+                    } else {
+                        $pdo->prepare(
+                            'INSERT INTO patients (rut, nombre, apellido, fecha_nac) VALUES (?, ?, ?, ?)'
+                        )->execute([
+                            $rut,
+                            (string) ($snapshot['nombre'] ?? ''),
+                            (string) ($snapshot['apellido'] ?? ''),
+                            (string) ($snapshot['fecha_nac'] ?? ''),
+                        ]);
+                        $patientIdByRut[$rut] = (int) $pdo->lastInsertId();
+                    }
+                }
+                $pdo->prepare('UPDATE cases SET patient_id = ? WHERE id = ?')
+                    ->execute([$patientIdByRut[$rut], $case['id']]);
+            }
+
+            // Resto de los casos: espejar desde su cita viva más reciente.
+            $pdo->exec(
+                "UPDATE cases SET patient_id = (
+                    SELECT a.patient_id FROM appointments a
+                    WHERE a.case_id = cases.id AND a.patient_id IS NOT NULL
+                    ORDER BY a.id DESC LIMIT 1
+                ) WHERE patient_id IS NULL"
+            );
+
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
     }
 
     private static function addColumnIfMissing(PDO $pdo, string $table, string $column, string $definition): void

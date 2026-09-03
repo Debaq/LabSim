@@ -17,11 +17,15 @@ Auth::requireAdmin();
 try {
     Db::migrateLtiPlatformsIfNeeded();
     Db::migrateLtiReplayColumnsIfNeeded();
+    Db::migratePatientColumnsIfNeeded();
     $sql = file_get_contents(__DIR__ . '/../../sql/schema.sql');
     Db::get()->exec($sql);
     // Después del exec: crea courses/student_groups (REFERENCES de las
     // columnas nuevas de appointments) si la instalación no las tenía.
     Db::migrateCoursesIfNeeded();
+    // Después de courses: patients ya existe (la creó el exec de arriba),
+    // recién ahí se puede backfillear patient_id en appointments/cases.
+    Db::migratePatientsIfNeeded();
 } catch (Throwable $e) {
     Response::error('Error aplicando schema: ' . $e->getMessage(), 500);
 }

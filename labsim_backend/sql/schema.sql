@@ -111,12 +111,33 @@ CREATE TABLE IF NOT EXISTS lti_states (
 DROP TABLE IF EXISTS agenda;
 DROP TABLE IF EXISTS patients;
 
+-- Se reintroduce acá con diseño distinto al que se dropeó arriba: paciente
+-- como entidad propia, reusada entre citas y casos (antes rut/nombre/
+-- apellido/fecha_nac vivían embebidos y duplicados en cada fila de
+-- appointments, sin forma de editarlos fuera del flujo de agendar). Ver
+-- Db::migratePatientsIfNeeded() para instalaciones que ya tenían
+-- appointments/cases sin patient_id.
+CREATE TABLE IF NOT EXISTS patients (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    rut TEXT NOT NULL DEFAULT '',
+    nombre TEXT NOT NULL DEFAULT '',
+    apellido TEXT NOT NULL DEFAULT '',
+    fecha_nac TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+-- rut='' no es identificador real (citas legado sin rut) -- no debe forzar
+-- unicidad entre esas filas.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_patients_rut ON patients(rut) WHERE rut <> '';
+
 -- Casos clínicos (antes cases.json). id = mismo case_id que ya usa la app.
 CREATE TABLE IF NOT EXISTS cases (
     id TEXT PRIMARY KEY,
     data TEXT NOT NULL,               -- JSON: Anamnesis, audiometría, etc. (definición del caso)
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    patient_id INTEGER REFERENCES patients(id)
 );
+CREATE INDEX IF NOT EXISTS idx_cases_patient_id ON cases(patient_id);
 
 -- Citas de la agenda (antes cada fila de schedule.json["agenda_1"]).
 -- Compartidas: cualquier alumno puede atenderlas (ver attendances abajo).
@@ -124,6 +145,13 @@ CREATE TABLE IF NOT EXISTS appointments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     fecha TEXT NOT NULL DEFAULT '',   -- 'dd-MM-yy', vacío = paciente sin agendar aún
     hora TEXT NOT NULL DEFAULT '',    -- 'HH:mm'
+    -- rut/nombre/apellido/fecha_nac: caché desnormalizada, NO fuente de
+    -- verdad -- la identidad real vive en patients (patient_id abajo) y se
+    -- escribe siempre a través de Patients::upsertByRut()/update(), que
+    -- cascadea el cambio a todas las citas del mismo paciente. Se dejan acá
+    -- (en vez de sacarlas y hacer JOIN en cada lectura) para no tocar
+    -- sync.php/admin_dump.php/dashboard.php/student.php ni el cliente
+    -- Python, que asumen estos 4 nombres de columna tal cual en el JSON.
     rut TEXT NOT NULL DEFAULT '',
     nombre TEXT NOT NULL DEFAULT '',
     apellido TEXT NOT NULL DEFAULT '',
@@ -140,11 +168,13 @@ CREATE TABLE IF NOT EXISTS appointments (
     -- de entrada sin depender de esa migración.
     course_id INTEGER REFERENCES courses(id),
     assigned_student_id INTEGER REFERENCES users(id),
-    assigned_group_id INTEGER REFERENCES student_groups(id)
+    assigned_group_id INTEGER REFERENCES student_groups(id),
+    patient_id INTEGER REFERENCES patients(id)
 );
 CREATE INDEX IF NOT EXISTS idx_appointments_updated ON appointments (updated_at);
 CREATE INDEX IF NOT EXISTS idx_appointments_fecha ON appointments (fecha);
 CREATE INDEX IF NOT EXISTS idx_appointments_rut ON appointments (rut);
+CREATE INDEX IF NOT EXISTS idx_appointments_patient_id ON appointments (patient_id);
 
 -- Progreso de CADA alumno sobre una cita (antes entry[8], el dict por
 -- username). Varios alumnos pueden tener fila propia para la misma cita.

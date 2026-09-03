@@ -6,6 +6,7 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
+require_once __DIR__ . '/../../src/Patients.php';
 
 /**
  * Una sola pantalla para casos + citas (antes estaba partido en agenda.php
@@ -68,12 +69,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // agendamiento (acá sí hay holgura para corregirlo); si el caso ya
         // tuvo una cita antes, se ignora lo tipeado en el form y se mantiene
         // el RUT ya guardado -- ni un POST manipulado a mano lo cambia.
+        $existingPatientId = null;
         if ($appointmentId > 0) {
-            $stmt = $pdo->prepare('SELECT rut FROM appointments WHERE id = ?');
+            $stmt = $pdo->prepare('SELECT rut, patient_id FROM appointments WHERE id = ?');
             $stmt->execute([$appointmentId]);
-            $existingRut = $stmt->fetchColumn();
-            if ($existingRut !== false) {
-                $rut = (string) $existingRut;
+            $existingAppt = $stmt->fetch();
+            if ($existingAppt !== false) {
+                $rut = (string) $existingAppt['rut'];
+                $existingPatientId = $existingAppt['patient_id'] !== null ? (int) $existingAppt['patient_id'] : null;
             }
         }
 
@@ -134,19 +137,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($error === null) {
+            // Un solo punto de entrada para escribir identidad de paciente
+            // (Patients) -- si ya tenía patient_id lo actualiza in-place, si
+            // no (fila legado sin migrar, o rut nuevo) lo resuelve/crea por
+            // rut. Cascadea a todas las citas de ese paciente.
+            if ($existingPatientId !== null) {
+                Patients::update($pdo, $existingPatientId, $rut, $nombre, $apellido, $fechaNac);
+                $patientId = $existingPatientId;
+            } else {
+                $patientId = Patients::upsertByRut($pdo, $rut, $nombre, $apellido, $fechaNac);
+            }
+            $pdo->prepare('UPDATE cases SET patient_id = ? WHERE id = ?')->execute([$patientId, $caseId]);
+
             if ($appointmentId > 0 && !$isNewRound) {
                 $pdo->prepare(
                     'UPDATE appointments SET fecha = ?, hora = ?, rut = ?, nombre = ?, apellido = ?, fecha_nac = ?,
-                            procedimiento = ?, nota_admin = ?, updated_at = CURRENT_TIMESTAMP
+                            procedimiento = ?, nota_admin = ?, patient_id = ?, updated_at = CURRENT_TIMESTAMP
                      WHERE id = ?'
-                )->execute([$fecha, $hora, $rut, $nombre, $apellido, $fechaNac, $procedimiento, $notaAdmin, $appointmentId]);
+                )->execute([$fecha, $hora, $rut, $nombre, $apellido, $fechaNac, $procedimiento, $notaAdmin, $patientId, $appointmentId]);
                 $success = 'Cita actualizada.';
                 AdminAudit::log($me, 'appointment_update', ['appointment_id' => $appointmentId, 'case_id' => $caseId]);
             } else {
                 $pdo->prepare(
-                    'INSERT INTO appointments (fecha, hora, rut, nombre, apellido, fecha_nac, procedimiento, case_id, nota_admin, course_id, assigned_student_id, assigned_group_id)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-                )->execute([$fecha, $hora, $rut, $nombre, $apellido, $fechaNac, $procedimiento, $caseId, $notaAdmin, $courseId, $assignedStudentId, $assignedGroupId]);
+                    'INSERT INTO appointments (fecha, hora, rut, nombre, apellido, fecha_nac, procedimiento, case_id, nota_admin, course_id, assigned_student_id, assigned_group_id, patient_id)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                )->execute([$fecha, $hora, $rut, $nombre, $apellido, $fechaNac, $procedimiento, $caseId, $notaAdmin, $courseId, $assignedStudentId, $assignedGroupId, $patientId]);
                 $success = $isNewRound ? 'Nueva ronda agendada (se conserva el historial de la anterior).' : 'Caso agendado.';
                 AdminAudit::log($me, 'appointment_schedule', ['case_id' => $caseId, 'new_round' => $isNewRound]);
             }

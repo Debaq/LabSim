@@ -7,6 +7,7 @@ require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/CaseBuilder.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/../../src/PatientPhoto.php';
+require_once __DIR__ . '/../../src/Patients.php';
 
 /**
  * Crea un caso clínico completo desde el navegador -- equivalente web de
@@ -43,29 +44,37 @@ if ($editId !== null) {
 }
 $isEdit = $editCase !== null;
 
-// Nombre mostrado solo como referencia -- se edita desde agenda.php (ligado
-// a la cita, no al caso). La edad SÍ es propia del paciente/caso (se guarda
-// en cases.data como 'edad', ver CaseBuilder::buildCaseData) y no depende en
-// nada de la agenda -- $editAge de acá abajo es solo un fallback para casos
-// viejos guardados antes de que 'edad' existiera en cases.data.
-$editDisplayName = '';
+// Paciente real: vive en `patients`, referenciado por cases.patient_id (ver
+// Db::migratePatientsIfNeeded para casos que existían de antes de esa
+// tabla). $editAge de acá abajo es solo un fallback a partir de fecha_nac
+// para casos viejos guardados antes de que 'edad' existiera en cases.data --
+// la edad en sí es propia del caso, no depende del paciente.
+$editPatientId = null;
+$editPatient = null;
 $editAge = null;
+$editFechaNacDisplay = '';
 if ($isEdit) {
-    $stmt = $pdo->prepare(
-        'SELECT nombre, apellido, fecha_nac FROM appointments WHERE case_id = ? ORDER BY id DESC LIMIT 1'
-    );
+    $stmt = $pdo->prepare('SELECT patient_id FROM cases WHERE id = ?');
     $stmt->execute([$editId]);
-    $appt = $stmt->fetch();
-    $fechaNac = $appt['fecha_nac'] ?? '';
-    if ($appt) {
-        $editDisplayName = trim(($appt['nombre'] ?? '') . ' ' . ($appt['apellido'] ?? ''));
+    $pid = $stmt->fetchColumn();
+    $editPatientId = ($pid !== false && $pid !== null) ? (int) $pid : null;
+    if ($editPatientId !== null) {
+        $editPatient = Patients::find($pdo, $editPatientId);
     }
+    $fechaNac = $editPatient['fecha_nac'] ?? '';
     if ($fechaNac === '') {
+        // Caso huérfano nunca migrado a patients (sin patient_id todavía) --
+        // mismo fallback que antes al paciente_snapshot legado.
         $existingData = json_decode($editCase['data'] ?? '', true);
         $snapshot = is_array($existingData) ? ($existingData['paciente_snapshot'] ?? []) : [];
         $fechaNac = $snapshot['fecha_nac'] ?? '';
-        if ($editDisplayName === '') {
-            $editDisplayName = trim(($snapshot['nombre'] ?? '') . ' ' . ($snapshot['apellido'] ?? ''));
+        if ($editPatient === null) {
+            $editPatient = [
+                'rut' => $snapshot['rut'] ?? '',
+                'nombre' => $snapshot['nombre'] ?? '',
+                'apellido' => $snapshot['apellido'] ?? '',
+                'fecha_nac' => $fechaNac,
+            ];
         }
     }
     foreach (['d-m-Y', 'd-m-y'] as $fmt) {
@@ -76,10 +85,12 @@ if ($isEdit) {
                 $year -= 100;
             }
             $editAge = max(0, (int) date('Y') - $year);
+            $editFechaNacDisplay = sprintf('%04d-%02d-%02d', $year, (int) $birth->format('m'), (int) $birth->format('d'));
             break;
         }
     }
 }
+$editDisplayName = $editPatient !== null ? trim(($editPatient['nombre'] ?? '') . ' ' . ($editPatient['apellido'] ?? '')) : '';
 
 /** Lee un valor anidado de un array (ej. $v['aerea']['od'][3]) con default si falta. */
 function fv(array $arr, array $path, $default = null)
@@ -162,6 +173,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // único a la fecha_nac de la cita, solo para no dejar el campo vacío.
         $v['age'] = (string) ($editAge ?? '');
     }
+    $v['rut'] = $editPatient['rut'] ?? '';
+    $v['nombre'] = $editPatient['nombre'] ?? '';
+    $v['apellido'] = $editPatient['apellido'] ?? '';
+    $v['fecha_nac'] = $editFechaNacDisplay;
 } else {
     $v = [];
 }
@@ -305,6 +320,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Falta la edad.';
         } elseif (!$isUpdate && ($nombre1 === '' || $apellido1 === '')) {
             $error = 'Falta el nombre del paciente (generalo con el botón o escríbelo a mano).';
+        } elseif ($isUpdate && (trim((string) ($v['nombre'] ?? '')) === '' || trim((string) ($v['apellido'] ?? '')) === '')) {
+            $error = 'Falta el nombre del paciente.';
         } elseif (!in_array($zOd, CaseBuilder::Z_OPTIONS, true) || !in_array($zOi, CaseBuilder::Z_OPTIONS, true)) {
             $error = 'Tipo de timpanograma inválido.';
         } elseif (!in_array($etfOd, CaseBuilder::ETF_OPTIONS, true) || !in_array($etfOi, CaseBuilder::ETF_OPTIONS, true)) {
@@ -382,17 +399,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             if ($isUpdate) {
-                // Nombre/RUT/fecha de nacimiento no se tocan acá -- viven en
-                // la cita (agenda.php) o, si el caso no tiene cita propia, en
-                // el paciente_snapshot ya guardado, que se conserva tal cual.
-                $priorData = json_decode($editCase['data'] ?? '', true);
-                if (is_array($priorData) && isset($priorData['paciente_snapshot'])) {
-                    $data['paciente_snapshot'] = $priorData['paciente_snapshot'];
+                $editRut = trim((string) ($v['rut'] ?? ''));
+                $editNombre = trim((string) ($v['nombre'] ?? ''));
+                $editApellido = trim((string) ($v['apellido'] ?? ''));
+                $editFechaNacIso = trim((string) ($v['fecha_nac'] ?? ''));
+                $editFechaNacVal = $editFechaNacIso !== '' ? date('d-m-Y', strtotime($editFechaNacIso)) : '';
+
+                if ($editPatientId !== null) {
+                    Patients::update($pdo, $editPatientId, $editRut, $editNombre, $editApellido, $editFechaNacVal);
+                } else {
+                    $editPatientId = Patients::upsertByRut($pdo, $editRut, $editNombre, $editApellido, $editFechaNacVal);
                 }
+
+                // paciente_snapshot: se mantiene sincronizado con patients --
+                // agenda.php lo sigue leyendo para precargar el formulario de
+                // "Agendar" cuando el caso todavía no tiene cita propia (ver
+                // Cases::snapshotBeforeAppointmentDelete).
+                $priorData = json_decode($editCase['data'] ?? '', true);
+                $priorSnapshot = (is_array($priorData) && isset($priorData['paciente_snapshot'])) ? $priorData['paciente_snapshot'] : [];
+                $data['paciente_snapshot'] = array_merge($priorSnapshot, [
+                    'nombre' => $editNombre,
+                    'apellido' => $editApellido,
+                    'rut' => $editRut,
+                    'fecha_nac' => $editFechaNacVal,
+                ]);
+
                 $pdo->prepare(
-                    'UPDATE cases SET data = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
-                )->execute([json_encode($data, JSON_UNESCAPED_UNICODE), $id]);
+                    'UPDATE cases SET data = ?, patient_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+                )->execute([json_encode($data, JSON_UNESCAPED_UNICODE), $editPatientId, $id]);
                 AdminAudit::log($me, 'case_update', ['case_id' => $id]);
+                AdminAudit::log($me, 'patient_update', ['case_id' => $id, 'patient_id' => $editPatientId]);
 
                 header('Location: agenda.php');
                 exit;
@@ -404,19 +440,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // re-tipear nombre/RUT que recién se generaron acá.
             $nombre2 = trim((string) ($v['nombre2'] ?? ''));
             $apellido2 = trim((string) ($v['apellido2'] ?? ''));
+            $snapshotNombre = trim($nombre1 . ' ' . $nombre2);
+            $snapshotApellido = trim($apellido1 . ' ' . $apellido2);
+            $snapshotRut = (string) CaseBuilder::rutFromAge($age);
+            $snapshotFechaNac = sprintf('01-01-%04d', (int) date('Y') - $age);
             $data['paciente_snapshot'] = [
-                'nombre' => trim($nombre1 . ' ' . $nombre2),
-                'apellido' => trim($apellido1 . ' ' . $apellido2),
-                'rut' => (string) CaseBuilder::rutFromAge($age),
-                'fecha_nac' => sprintf('01-01-%04d', (int) date('Y') - $age),
+                'nombre' => $snapshotNombre,
+                'apellido' => $snapshotApellido,
+                'rut' => $snapshotRut,
+                'fecha_nac' => $snapshotFechaNac,
                 'procedimiento' => 'Audiometría',
             ];
 
+            $newPatientId = Patients::upsertByRut($pdo, $snapshotRut, $snapshotNombre, $snapshotApellido, $snapshotFechaNac);
+
             $pdo->prepare(
-                "INSERT INTO cases (id, data, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)
-                 ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = CURRENT_TIMESTAMP"
-            )->execute([$id, json_encode($data, JSON_UNESCAPED_UNICODE)]);
-            AdminAudit::log($me, 'case_create', ['case_id' => $id, 'nombre' => $nombre1 . ' ' . $nombre2, 'apellido' => $apellido1 . ' ' . $apellido2]);
+                "INSERT INTO cases (id, data, updated_at, patient_id) VALUES (?, ?, CURRENT_TIMESTAMP, ?)
+                 ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = CURRENT_TIMESTAMP, patient_id = excluded.patient_id"
+            )->execute([$id, json_encode($data, JSON_UNESCAPED_UNICODE), $newPatientId]);
+            AdminAudit::log($me, 'case_create', ['case_id' => $id, 'nombre' => $snapshotNombre, 'apellido' => $snapshotApellido]);
 
             header('Location: agenda.php?schedule=' . urlencode($id));
             exit;
@@ -524,13 +566,6 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <div class="tab-panel active" data-tab="paciente">
 <div class="card">
     <strong>Paciente</strong>
-    <?php if ($isEdit): ?>
-    <p style="font-size:0.85rem; color:#555;">
-        Nombre/RUT/fecha de nacimiento no se editan acá -- son datos de la <strong>cita</strong>,
-        se cambian desde <a href="agenda.php">Fichas Clínicas</a> ("Reagendar").
-        <?= $editDisplayName !== '' ? 'Paciente actual: <strong>' . htmlspecialchars($editDisplayName) . '</strong>.' : '' ?>
-    </p>
-    <?php endif; ?>
     <?php if ($isEdit): ?><input type="hidden" id="chat-static-name" value="<?= htmlspecialchars($editDisplayName) ?>"><?php endif; ?>
     <label class="inline-check"><input type="radio" name="gender" value="0" <?= ($v['gender'] ?? '0') === '0' ? 'checked' : '' ?>> Hombre</label>
     <label class="inline-check"><input type="radio" name="gender" value="1" <?= ($v['gender'] ?? '0') === '1' ? 'checked' : '' ?>> Mujer</label>
@@ -553,6 +588,22 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         </label>
     </div>
     <button type="submit" name="form_action" value="generate_name" class="secondary">Generar nombre al azar</button>
+    <?php else: ?>
+    <div class="two-col">
+        <label>Nombre
+            <input type="text" name="nombre" value="<?= htmlspecialchars((string) ($v['nombre'] ?? '')) ?>">
+        </label>
+        <label>Apellido
+            <input type="text" name="apellido" value="<?= htmlspecialchars((string) ($v['apellido'] ?? '')) ?>">
+        </label>
+        <label>RUT
+            <input type="text" name="rut" value="<?= htmlspecialchars((string) ($v['rut'] ?? '')) ?>">
+        </label>
+        <label>Fecha de nacimiento
+            <input type="date" name="fecha_nac" value="<?= htmlspecialchars((string) ($v['fecha_nac'] ?? '')) ?>">
+        </label>
+    </div>
+    <p class="legend" style="font-size:0.8rem;">Esto edita al <strong>paciente</strong>: el cambio se aplica también a cualquier otra cita/ronda de la misma persona.</p>
     <?php endif; ?>
 
     <?php if ($isEdit): ?>

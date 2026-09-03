@@ -37,11 +37,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($action === 'apply_schema') {
             Db::migrateLtiPlatformsIfNeeded();
             Db::migrateLtiReplayColumnsIfNeeded();
+            Db::migratePatientColumnsIfNeeded();
             $sql = file_get_contents(__DIR__ . '/../../sql/schema.sql');
             $pdo->exec($sql);
             // Después del exec: agrega columnas nuevas a tablas que ya
             // existían de antes (CREATE TABLE IF NOT EXISTS no las toca).
             Db::migrateCoursesIfNeeded();
+            // Después de courses: patients ya existe (la creó el exec de
+            // arriba), recién ahí se puede backfillear patient_id.
+            Db::migratePatientsIfNeeded();
             $success = 'Schema aplicado correctamente.';
             AdminAudit::log($me, 'apply_schema');
         } elseif ($action === 'create') {
