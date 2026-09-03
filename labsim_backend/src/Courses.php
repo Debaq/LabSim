@@ -88,6 +88,109 @@ final class Courses
         return null;
     }
 
+    /**
+     * Alumnos activos que NO están matriculados en $courseId todavía, con el
+     * nombre del curso Moodle de donde vinieron la última vez si LTI lo
+     * informó (ver user_lti_contexts) -- para buscar/filtrar/agrupar en la
+     * UI de matrícula en bloque en vez de tipear username por username.
+     */
+    public static function enrollableStudents(int $courseId): array
+    {
+        $stmt = Db::get()->prepare(
+            "SELECT u.id, u.username, u.display_name,
+                    (SELECT context_label FROM user_lti_contexts WHERE user_id = u.id ORDER BY last_seen_at DESC LIMIT 1) AS origin
+             FROM users u
+             WHERE u.role = 'student' AND u.active = 1
+               AND u.id NOT IN (SELECT user_id FROM course_students WHERE course_id = ?)
+             ORDER BY u.display_name"
+        );
+        $stmt->execute([$courseId]);
+        return $stmt->fetchAll();
+    }
+
+    /** Matricula varios alumnos ya existentes de una vez (por id). Devuelve cuántos quedaron matriculados. */
+    public static function enrollExistingUsers(int $courseId, array $userIds): int
+    {
+        $stmt = Db::get()->prepare('INSERT OR IGNORE INTO course_students (course_id, user_id) VALUES (?, ?)');
+        $count = 0;
+        foreach ($userIds as $userId) {
+            $userId = (int) $userId;
+            if ($userId <= 0) {
+                continue;
+            }
+            $stmt->execute([$courseId, $userId]);
+            $count += $stmt->rowCount();
+        }
+        return $count;
+    }
+
+    /**
+     * Agrega un alumno al curso por username. Si no existe todavía como
+     * usuario, lo crea como cuenta local (role=student, permission 444) --
+     * con $password si se dio, o con una generada al azar que se devuelve
+     * en el resultado para que el docente se la entregue al alumno.
+     */
+    public static function addOrCreateStudentByUsername(int $courseId, string $username, string $displayName = '', ?string $password = null): array
+    {
+        $username = trim($username);
+        if ($username === '') {
+            return ['status' => 'error', 'username' => $username, 'message' => 'Falta el username.'];
+        }
+
+        $stmt = Db::get()->prepare('SELECT id FROM users WHERE username = ?');
+        $stmt->execute([$username]);
+        $user = $stmt->fetch();
+
+        if ($user) {
+            $userId = (int) $user['id'];
+            Db::get()->prepare('INSERT OR IGNORE INTO course_students (course_id, user_id) VALUES (?, ?)')
+                ->execute([$courseId, $userId]);
+            return ['status' => 'enrolled', 'username' => $username, 'message' => 'Ya existía -- matriculado.'];
+        }
+
+        $generated = null;
+        if ($password === null || $password === '') {
+            $generated = bin2hex(random_bytes(6));
+            $password = $generated;
+        } elseif (strlen($password) < 8) {
+            return ['status' => 'error', 'username' => $username, 'message' => 'No existía y la contraseña indicada tiene menos de 8 caracteres.'];
+        }
+
+        require_once __DIR__ . '/Users.php';
+        $userId = Users::createOrUpdateLocal('student', $username, $displayName !== '' ? $displayName : $username, $password, 444, ['A', 'Z']);
+        Db::get()->prepare('INSERT OR IGNORE INTO course_students (course_id, user_id) VALUES (?, ?)')
+            ->execute([$courseId, $userId]);
+
+        return [
+            'status' => 'created',
+            'username' => $username,
+            'message' => 'Cuenta creada y matriculada.',
+            'password' => $generated,
+        ];
+    }
+
+    /**
+     * Procesa varias líneas "username[, nombre completo][, password]" -- una
+     * por alumno. Cada línea se procesa independiente (no aborta en bloque
+     * si una falla) y se devuelve el resultado de todas para mostrar en la UI.
+     */
+    public static function bulkAddStudents(int $courseId, string $rawText): array
+    {
+        $results = [];
+        foreach (preg_split('/\r\n|\r|\n/', $rawText) as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+            $parts = array_map('trim', explode(',', $line));
+            $username = $parts[0] ?? '';
+            $displayName = $parts[1] ?? '';
+            $password = isset($parts[2]) && $parts[2] !== '' ? $parts[2] : null;
+            $results[] = self::addOrCreateStudentByUsername($courseId, $username, $displayName, $password);
+        }
+        return $results;
+    }
+
     public static function removeTeacher(int $courseId, int $userId): void
     {
         Db::get()->prepare('DELETE FROM course_teachers WHERE course_id = ? AND user_id = ?')

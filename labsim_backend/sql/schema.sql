@@ -105,17 +105,18 @@ CREATE TABLE IF NOT EXISTS lti_states (
 
 -- Primer diseño (agenda con 1 alumno por fila) resultó no calzar con el
 -- modelo real: la agenda es una cola compartida, cualquier alumno puede
--- atender cualquier cita, y cada uno lleva su propio progreso. Se reemplaza
--- por cases/appointments/attendances más abajo. DROP seguro: en el momento
--- de este cambio estas tablas seguían vacías (nada las usaba todavía).
-DROP TABLE IF EXISTS agenda;
-DROP TABLE IF EXISTS patients;
-
--- Se reintroduce acá con diseño distinto al que se dropeó arriba: paciente
--- como entidad propia, reusada entre citas y casos (antes rut/nombre/
--- apellido/fecha_nac vivían embebidos y duplicados en cada fila de
--- appointments, sin forma de editarlos fuera del flujo de agendar). Ver
--- Db::migratePatientsIfNeeded() para instalaciones que ya tenían
+-- atender cualquier cita, y cada uno lleva su propio progreso. Se reemplazó
+-- por cases/appointments/attendances más abajo, y patients se reintrodujo
+-- con diseño distinto (paciente como entidad propia, reusada entre citas y
+-- casos -- antes rut/nombre/apellido/fecha_nac vivían embebidos y
+-- duplicados en cada fila de appointments). Este archivo se re-ejecuta en
+-- cada "aplicar schema" (ver public/api/migrate.php) -- por eso el DROP TABLE
+-- de `agenda`/`patients` que hizo ese cambio la primera vez YA NO va acá:
+-- dejarlo habría vuelto a intentar dropear `patients` en cada corrida
+-- posterior, y una vez que tiene filas reales con cases/appointments
+-- apuntándole por FK, ese DROP truena con "FOREIGN KEY constraint failed"
+-- (o, peor, si foreign_keys llegara a estar OFF, borraría todo sin avisar).
+-- Ver Db::migratePatientsIfNeeded() para instalaciones que ya tenían
 -- appointments/cases sin patient_id.
 CREATE TABLE IF NOT EXISTS patients (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -275,6 +276,40 @@ CREATE TABLE IF NOT EXISTS course_students (
     PRIMARY KEY (course_id, user_id)
 );
 CREATE INDEX IF NOT EXISTS idx_course_students_user ON course_students(user_id);
+
+-- Vincula el "context" de un curso de Moodle (su course_id de Moodle, no el
+-- nuestro) a un curso de LabSim -- una vez vinculado, cada alumno que entra
+-- por el launch LTI de ESE curso de Moodle se matricula solo (ver
+-- Lti::autoEnrollIfMapped, llamado desde lti/launch.php), sin que el
+-- docente tenga que agregarlos uno por uno ni conocer sus usernames. Se
+-- vincula desde admin/courses.php la primera vez que el docente entra por
+-- LTI a un curso de Moodle todavía no mapeado (botón "Ir a plataforma" de
+-- lti/launch.php).
+CREATE TABLE IF NOT EXISTS course_lti_contexts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    lti_platform_id INTEGER NOT NULL REFERENCES lti_platforms(id),
+    context_id TEXT NOT NULL,
+    course_id INTEGER NOT NULL REFERENCES courses(id),
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_course_lti_contexts_ctx ON course_lti_contexts (lti_platform_id, context_id);
+
+-- Última vez que este alumno entró por LTI desde tal contexto de Moodle,
+-- con su nombre humano (context_label) si Moodle lo informó -- permite
+-- agruparlos en admin/courses.php ("todos los que vinieron del curso Moodle
+-- X") aunque ese contexto todavía no esté vinculado a un curso LabSim (ver
+-- course_lti_contexts arriba), y sirve de respaldo si algún deployment de
+-- Moodle no manda context_id: la UI de matrícula también permite buscar y
+-- seleccionar a mano sin depender de esto.
+CREATE TABLE IF NOT EXISTS user_lti_contexts (
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    lti_platform_id INTEGER NOT NULL REFERENCES lti_platforms(id),
+    context_id TEXT NOT NULL,
+    context_label TEXT NOT NULL DEFAULT '',
+    last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, lti_platform_id, context_id)
+);
+CREATE INDEX IF NOT EXISTS idx_user_lti_contexts_ctx ON user_lti_contexts (lti_platform_id, context_id);
 
 -- Grupos dentro de un curso (p. ej. "5 alumnos citados el mismo día") --
 -- para asignar un mismo paciente/cita a varios alumnos a la vez sin

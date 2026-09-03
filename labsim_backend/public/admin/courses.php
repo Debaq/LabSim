@@ -22,6 +22,7 @@ $myCourseIds = $isFullAdmin ? null : Courses::teacherCourseIds((int) $me['id']);
 
 $error = null;
 $success = null;
+$bulkResults = [];
 
 /** Corta la request si $courseId no es un curso que $me pueda administrar. */
 function require_course_access(int $courseId, bool $isFullAdmin, ?array $myCourseIds): void
@@ -87,13 +88,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             AdminAudit::log($me, 'course_remove_teacher', ['course_id' => $courseId, 'user_id' => $teacherId]);
         } elseif ($action === 'add_student') {
             $username = trim((string) ($_POST['username'] ?? ''));
-            $err = Courses::addMemberByUsername($courseId, $username, 'student');
-            if ($err) {
-                $error = $err;
+            $displayName = trim((string) ($_POST['display_name'] ?? ''));
+            $result = Courses::addOrCreateStudentByUsername($courseId, $username, $displayName);
+            if ($result['status'] === 'error') {
+                $error = $result['message'];
             } else {
-                $success = 'Alumno agregado al curso.';
-                AdminAudit::log($me, 'course_add_student', ['course_id' => $courseId, 'username' => $username]);
+                $success = $result['status'] === 'created'
+                    ? "Alumno '{$username}' creado y matriculado. Contraseña temporal: {$result['password']}"
+                    : 'Alumno agregado al curso.';
+                AdminAudit::log($me, 'course_add_student', ['course_id' => $courseId, 'username' => $username, 'status' => $result['status']]);
             }
+        } elseif ($action === 'bulk_add_students') {
+            $raw = (string) ($_POST['bulk_students'] ?? '');
+            $bulkResults = Courses::bulkAddStudents($courseId, $raw);
+            $created = count(array_filter($bulkResults, fn($r) => $r['status'] === 'created'));
+            $enrolled = count(array_filter($bulkResults, fn($r) => $r['status'] === 'enrolled'));
+            $errors = count(array_filter($bulkResults, fn($r) => $r['status'] === 'error'));
+            $success = "{$created} cuenta(s) creada(s), {$enrolled} matriculado(s), {$errors} error(es).";
+            AdminAudit::log($me, 'course_bulk_add_students', ['course_id' => $courseId, 'created' => $created, 'enrolled' => $enrolled, 'errors' => $errors]);
         } elseif ($action === 'remove_student') {
             $studentId = (int) ($_POST['user_id'] ?? 0);
             Courses::removeStudent($courseId, $studentId);
@@ -123,6 +135,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $success = 'Miembro agregado al grupo.';
                 AdminAudit::log($me, 'group_add_member', ['course_id' => $courseId, 'group_id' => $groupId, 'username' => $username]);
             }
+        } elseif ($action === 'bulk_enroll_selected') {
+            $userIds = array_map('intval', (array) ($_POST['user_ids'] ?? []));
+            $n = Courses::enrollExistingUsers($courseId, $userIds);
+            $success = "{$n} alumno(s) matriculado(s).";
+            AdminAudit::log($me, 'course_bulk_enroll', ['course_id' => $courseId, 'count' => $n]);
+        } elseif ($action === 'link_lti_context') {
+            $platformId = (int) ($_POST['lti_platform_id'] ?? 0);
+            $ltiContextId = trim((string) ($_POST['lti_context_id'] ?? ''));
+            if ($platformId <= 0 || $ltiContextId === '') {
+                $error = 'Datos de vínculo inválidos.';
+            } else {
+                Lti::linkContextToCourse($platformId, $ltiContextId, $courseId);
+                $success = 'Curso de Moodle vinculado -- los alumnos que entren por ahí se matricularán solos.';
+                AdminAudit::log($me, 'course_link_lti_context', ['course_id' => $courseId, 'lti_platform_id' => $platformId, 'context_id' => $ltiContextId]);
+            }
         } elseif ($action === 'remove_group_member') {
             $groupId = (int) ($_POST['group_id'] ?? 0);
             $userId = (int) ($_POST['user_id'] ?? 0);
@@ -135,8 +162,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $detailId = isset($_GET['id']) && $_GET['id'] !== '' ? (int) $_GET['id'] : null;
 
-// Docente sin id en la URL: si tiene un solo curso, entra directo a su detalle.
-if ($detailId === null && !$isFullAdmin && $myCourseIds && count($myCourseIds) === 1) {
+// Docente sin id en la URL: si tiene un solo curso, entra directo a su
+// detalle -- salvo que venga a vincular un contexto LTI (ver bloque
+// "link_lti_context" más abajo), que necesita la vista de lista para
+// mostrar el selector de curso.
+$pendingLinkPlatform = (int) ($_GET['link_platform'] ?? 0);
+$pendingLinkContext = (string) ($_GET['link_context'] ?? '');
+$hasPendingLink = $pendingLinkPlatform > 0 && $pendingLinkContext !== '';
+
+if ($detailId === null && !$isFullAdmin && $myCourseIds && count($myCourseIds) === 1 && !$hasPendingLink) {
     $detailId = $myCourseIds[0];
 }
 
@@ -264,15 +298,131 @@ if ($detailId !== null) {
             <tr><td colspan="3" style="color:#888;">Sin alumnos matriculados todavía.</td></tr>
             <?php endif; ?>
         </table>
-        <form method="post" style="display:flex; gap:0.6rem; align-items:flex-end; margin-top:0.6rem;">
-        <?= csrf_field() ?>
-            <input type="hidden" name="form_action" value="add_student">
-            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-            <label style="flex:1; margin:0;">Agregar alumno (nombre o username)
-                <input type="text" name="username" list="students_datalist" required>
-            </label>
-            <button type="submit" class="secondary" style="margin-top:0;">Agregar</button>
-        </form>
+
+        <?php $enrollable = Courses::enrollableStudents((int) $course['id']); ?>
+        <div style="margin-top:0.8rem; border-top:1px solid #e5e5e5; padding-top:0.6rem;">
+            <strong>Matricular alumnos existentes</strong>
+            <?php if (!$enrollable): ?>
+            <p style="color:#888; font-size:0.85rem;">Todos los alumnos activos ya están en este curso.</p>
+            <?php else: ?>
+            <?php
+                $origins = [];
+                foreach ($enrollable as $u) {
+                    $o = trim((string) ($u['origin'] ?? ''));
+                    if ($o !== '') {
+                        $origins[$o] = ($origins[$o] ?? 0) + 1;
+                    }
+                }
+                ksort($origins);
+            ?>
+            <p style="font-size:0.8rem; color:#555;">Busca por nombre o usuario, marca a los que quieras, o usa "seleccionar todos". Si Moodle informó de qué curso vienen, aparecen agrupados abajo -- un clic selecciona a todo ese grupo.</p>
+            <input type="text" id="roster_search" placeholder="Buscar por nombre o usuario..." style="width:100%; margin-bottom:0.5rem;" oninput="rosterFilter()">
+            <?php if ($origins): ?>
+            <div style="margin-bottom:0.5rem;">
+                <?php foreach ($origins as $label => $count): ?>
+                <button type="button" class="secondary" style="margin:0 0.3rem 0.3rem 0; padding:0.15rem 0.5rem; font-size:0.75rem;" onclick="rosterSelectOrigin(<?= htmlspecialchars(json_encode($label), ENT_QUOTES) ?>)">Todos de "<?= htmlspecialchars($label) ?>" (<?= $count ?>)</button>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+            <form method="post" id="roster_form">
+            <?= csrf_field() ?>
+                <input type="hidden" name="form_action" value="bulk_enroll_selected">
+                <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+                <div style="max-height:320px; overflow-y:auto; border:1px solid #e5e5e5;">
+                <table id="roster_table" style="margin:0;">
+                    <tr>
+                        <th><input type="checkbox" id="roster_select_all" onclick="rosterToggleAll(this)" title="Seleccionar todos los visibles"></th>
+                        <th>Usuario</th><th>Nombre</th><th>Origen (Moodle)</th>
+                    </tr>
+                    <?php foreach ($enrollable as $u): ?>
+                    <tr class="roster_row" data-origin="<?= htmlspecialchars((string) ($u['origin'] ?? '')) ?>" data-search="<?= htmlspecialchars(mb_strtolower($u['username'] . ' ' . $u['display_name'] . ' ' . ($u['origin'] ?? ''))) ?>">
+                        <td><input type="checkbox" name="user_ids[]" value="<?= $u['id'] ?>" class="roster_check" onchange="rosterUpdateCount()"></td>
+                        <td><?= htmlspecialchars($u['username']) ?></td>
+                        <td><?= htmlspecialchars($u['display_name']) ?></td>
+                        <td style="color:#888; font-size:0.8rem;"><?= htmlspecialchars($u['origin'] ?: '—') ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </table>
+                </div>
+                <button type="submit" class="secondary" style="margin-top:0.5rem;">Matricular seleccionados (<span id="roster_count">0</span>)</button>
+            </form>
+            <script>
+            (function () {
+                function rows() { return document.querySelectorAll('#roster_table .roster_row'); }
+                window.rosterFilter = function () {
+                    var q = document.getElementById('roster_search').value.toLowerCase();
+                    rows().forEach(function (row) {
+                        row.style.display = row.dataset.search.indexOf(q) === -1 ? 'none' : '';
+                    });
+                };
+                window.rosterSelectOrigin = function (label) {
+                    rows().forEach(function (row) {
+                        if (row.dataset.origin === label) {
+                            row.style.display = '';
+                            row.querySelector('.roster_check').checked = true;
+                        }
+                    });
+                    rosterUpdateCount();
+                };
+                window.rosterToggleAll = function (cb) {
+                    rows().forEach(function (row) {
+                        if (row.style.display !== 'none') {
+                            row.querySelector('.roster_check').checked = cb.checked;
+                        }
+                    });
+                    rosterUpdateCount();
+                };
+                window.rosterUpdateCount = function () {
+                    document.getElementById('roster_count').textContent =
+                        document.querySelectorAll('#roster_table .roster_check:checked').length;
+                };
+            })();
+            </script>
+            <?php endif; ?>
+        </div>
+
+        <details style="margin-top:0.8rem; border-top:1px solid #e5e5e5; padding-top:0.6rem;">
+            <summary>Agregar alumno nuevo o sin Moodle (manual)</summary>
+            <form method="post" style="display:flex; gap:0.6rem; align-items:flex-end; margin-top:0.6rem; flex-wrap:wrap;">
+            <?= csrf_field() ?>
+                <input type="hidden" name="form_action" value="add_student">
+                <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+                <label style="flex:1; margin:0; min-width:220px;">Agregar alumno (nombre o username)
+                    <input type="text" name="username" list="students_datalist" required>
+                </label>
+                <label style="flex:1; margin:0; min-width:220px;">Nombre completo (solo si es alumno nuevo)
+                    <input type="text" name="display_name" placeholder="Se usa si el username no existe todavía">
+                </label>
+                <button type="submit" class="secondary" style="margin-top:0;">Agregar</button>
+            </form>
+            <p style="font-size:0.8rem; color:#888; margin-top:0.4rem;">Si el username no existe todavía, se crea una cuenta nueva automáticamente con contraseña temporal (se muestra al agregar).</p>
+
+            <details style="margin-top:0.8rem; border-top:1px solid #e5e5e5; padding-top:0.6rem;">
+                <summary>Agregar varios alumnos a la vez (por texto)</summary>
+                <form method="post" style="margin-top:0.6rem;">
+                <?= csrf_field() ?>
+                    <input type="hidden" name="form_action" value="bulk_add_students">
+                    <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+                    <label>Uno por línea: <code>username</code>, o <code>username, nombre completo</code>, o <code>username, nombre completo, password</code>
+                        <textarea name="bulk_students" rows="6" style="width:100%; font-family:monospace;" placeholder="jperez&#10;mgonzalez, María González&#10;asilva, Ana Silva, MiClave123"></textarea>
+                    </label>
+                    <p style="font-size:0.8rem; color:#888;">Los que ya existen se matriculan tal cual. Los que no existen se crean con esa contraseña, o con una generada automáticamente si no se indica.</p>
+                    <button type="submit" class="secondary">Procesar lista</button>
+                </form>
+                <?php if ($bulkResults): ?>
+                <table style="margin-top:0.8rem;">
+                    <tr><th>Username</th><th>Resultado</th><th>Contraseña</th></tr>
+                    <?php foreach ($bulkResults as $r): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($r['username']) ?></td>
+                        <td style="color:<?= $r['status'] === 'error' ? '#b00' : '#333' ?>;"><?= htmlspecialchars($r['message']) ?></td>
+                        <td><?= !empty($r['password']) ? '<code>' . htmlspecialchars($r['password']) . '</code>' : '' ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </table>
+                <?php endif; ?>
+            </details>
+        </details>
     </div>
 
     <div class="card">
@@ -354,6 +504,32 @@ if (!$isFullAdmin) {
 ?>
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 <?php if ($success !== null): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
+
+<?php if ($hasPendingLink): ?>
+<div class="card" style="border: 2px solid #4a7dbd;">
+    <strong>Vincular curso de Moodle</strong>
+    <p style="font-size:0.85rem; color:#555;">Entraste desde un curso de Moodle que todavía no está vinculado a ningún curso de LabSim. Vincúlalo una sola vez y cada alumno que entre desde ahí se matriculará solo -- sin que tengas que agregarlos a mano ni conocer sus nombres.</p>
+    <?php if (!$courses): ?>
+    <p style="color:#888;">No tienes ningún curso de LabSim todavía -- créalo primero (o pide que te asignen como docente de uno) y vuelve a entrar desde Moodle.</p>
+    <?php else: ?>
+    <form method="post" style="display:flex; gap:0.6rem; align-items:flex-end;">
+    <?= csrf_field() ?>
+        <input type="hidden" name="form_action" value="link_lti_context">
+        <input type="hidden" name="lti_platform_id" value="<?= $pendingLinkPlatform ?>">
+        <input type="hidden" name="lti_context_id" value="<?= htmlspecialchars($pendingLinkContext) ?>">
+        <label style="flex:1; margin:0;">Curso de LabSim
+            <select name="course_id" required>
+                <option value="">-- elegir --</option>
+                <?php foreach ($courses as $c): ?>
+                <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <button type="submit">Vincular</button>
+    </form>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
 
 <?php if ($isFullAdmin): ?>
 <div class="card">

@@ -273,6 +273,66 @@ final class Lti
         return (int) $pdo->lastInsertId();
     }
 
+    /** ID del curso LabSim vinculado a este contexto de Moodle (ver linkContextToCourse), o null si no está vinculado. */
+    public static function findCourseForContext(int $platformId, ?string $contextId): ?int
+    {
+        if ($contextId === null || $contextId === '') {
+            return null;
+        }
+        $stmt = Db::get()->prepare('SELECT course_id FROM course_lti_contexts WHERE lti_platform_id = ? AND context_id = ?');
+        $stmt->execute([$platformId, $contextId]);
+        $courseId = $stmt->fetchColumn();
+        return $courseId !== false ? (int) $courseId : null;
+    }
+
+    /** Vincula (o revincula) un contexto de Moodle a un curso LabSim -- ver comentario de course_lti_contexts en schema.sql. */
+    public static function linkContextToCourse(int $platformId, string $contextId, int $courseId): void
+    {
+        Db::get()->prepare(
+            'INSERT INTO course_lti_contexts (lti_platform_id, context_id, course_id) VALUES (?, ?, ?)
+             ON CONFLICT (lti_platform_id, context_id) DO UPDATE SET course_id = excluded.course_id'
+        )->execute([$platformId, $contextId, $courseId]);
+    }
+
+    /**
+     * Si $contextId está vinculado a un curso (ver linkContextToCourse) y
+     * $userId es alumno, lo matricula ahí mismo -- así cientos de alumnos
+     * que entran por el mismo curso de Moodle no requieren que el docente
+     * los agregue uno por uno ni sepa sus nombres.
+     */
+    public static function autoEnrollIfMapped(int $platformId, ?string $contextId, int $userId): void
+    {
+        $courseId = self::findCourseForContext($platformId, $contextId);
+        if ($courseId === null) {
+            return;
+        }
+        $stmt = Db::get()->prepare("SELECT 1 FROM users WHERE id = ? AND role = 'student'");
+        $stmt->execute([$userId]);
+        if (!$stmt->fetchColumn()) {
+            return;
+        }
+        Db::get()->prepare('INSERT OR IGNORE INTO course_students (course_id, user_id) VALUES (?, ?)')
+            ->execute([$courseId, $userId]);
+    }
+
+    /**
+     * Deja constancia de que $userId entró por LTI desde este contexto de
+     * Moodle (con su nombre humano si Moodle lo informó) -- ver
+     * user_lti_contexts en schema.sql. No-op si Moodle no manda context_id.
+     */
+    public static function recordContextSighting(int $userId, int $platformId, ?string $contextId, ?string $label): void
+    {
+        if ($contextId === null || $contextId === '') {
+            return;
+        }
+        Db::get()->prepare(
+            'INSERT INTO user_lti_contexts (user_id, lti_platform_id, context_id, context_label, last_seen_at)
+             VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+             ON CONFLICT (user_id, lti_platform_id, context_id) DO UPDATE SET
+                context_label = excluded.context_label, last_seen_at = excluded.last_seen_at'
+        )->execute([$userId, $platformId, $contextId, $label ?? '']);
+    }
+
     /** Fila de nonce (consumer_key, nonce) ya vista antes, o null si es la primera vez. */
     public static function findLaunchByNonce(string $consumerKey, string $nonce): ?array
     {

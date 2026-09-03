@@ -53,5 +53,15 @@ $_SESSION['admin_user_id'] = $userId;
 // no es para docente. Docente (555) entra a dashboard.php (requireAdminSession
 // sin nivel completo), que ya es donde están las métricas por alumno.
 $dest = (int) $user['permission'] === Auth::PERMISSION_ADMIN ? 'index.php' : 'dashboard.php';
+
+// Si launch.php detectó que este curso de Moodle no está vinculado a ningún
+// curso de LabSim, manda directo a courses.php a vincularlo en vez del
+// destino normal -- ver comentario de course_lti_contexts en schema.sql.
+$linkPlatform = (int) ($_GET['link_platform'] ?? 0);
+$linkContext = (string) ($_GET['link_context'] ?? '');
+if ($linkPlatform > 0 && $linkContext !== '') {
+    $dest = 'courses.php?link_platform=' . $linkPlatform . '&link_context=' . urlencode($linkContext);
+}
+
 header('Location: ' . $dest);
 exit;

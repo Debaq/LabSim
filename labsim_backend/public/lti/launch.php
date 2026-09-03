@@ -30,6 +30,11 @@ function render_launch_error(string $message): void
 
 // LTI 1.1 llega como un solo POST directo (firmado OAuth1), sin pasar por
 // login.php; LTI 1.3 llega vía el redirect OIDC (id_token + state).
+// platformId/contextId solo se llenan en un launch no-replay (recién ahí hay
+// claims/params confiables) -- ver Lti::autoEnrollIfMapped/findCourseForContext.
+$platformId = null;
+$contextId = null;
+
 if (isset($_POST['oauth_consumer_key'])) {
     try {
         $result = Lti::validateLaunch11($_POST);
@@ -42,6 +47,11 @@ if (isset($_POST['oauth_consumer_key'])) {
     } else {
         $userId = Lti::upsertStudentFromLti11($result['platform'], $result['params']);
         $previousCode = null;
+        $platformId = (int) $result['platform']['id'];
+        $contextId = $result['params']['context_id'] ?? null;
+        $contextLabel = $result['params']['context_title'] ?? ($result['params']['context_label'] ?? null);
+        Lti::autoEnrollIfMapped($platformId, $contextId, $userId);
+        Lti::recordContextSighting($userId, $platformId, $contextId, $contextLabel);
     }
     $markCode = static fn (string $code) => Lti::markNonceCode($result['consumer_key'], $result['nonce'], $userId, $code);
     $refreshKey = 'nonce:' . $result['consumer_key'] . '|' . $result['nonce'];
@@ -64,6 +74,12 @@ if (isset($_POST['oauth_consumer_key'])) {
     } else {
         $userId = Lti::upsertStudent($result['platform'], $result['claims']);
         $previousCode = null;
+        $platformId = (int) $result['platform']['id'];
+        $contextClaim = $result['claims']['https://purl.imsglobal.org/spec/lti/claim/context'] ?? [];
+        $contextId = $contextClaim['id'] ?? null;
+        $contextLabel = $contextClaim['title'] ?? ($contextClaim['label'] ?? null);
+        Lti::autoEnrollIfMapped($platformId, $contextId, $userId);
+        Lti::recordContextSighting($userId, $platformId, $contextId, $contextLabel);
     }
     $markCode = static fn (string $code) => Lti::markStateCode($state, $userId, $code);
     $refreshKey = 'state:' . $state;
@@ -90,8 +106,15 @@ $isPortalUser = $userRow && $userRow['role'] === 'admin' && (int) $userRow['acti
 // sirve para levantar la sesión de portal ahí mismo (varios navegadores la
 // descartan). El botón manda a admin/sso.php, que canjea este token de un
 // solo uso en una pestaña nueva (primer partido) y ahí sí levanta la sesión.
+// Si este curso de Moodle todavía no está vinculado a un curso de LabSim,
+// se manda al docente/admin directo a courses.php con el contexto en la URL
+// para que lo vincule ahí (una vez) -- ver comentario de course_lti_contexts
+// en schema.sql y el bloque "link_lti_context" en admin/courses.php.
+$needsLtiLink = $isPortalUser && $platformId !== null && $contextId !== null
+    && Lti::findCourseForContext($platformId, $contextId) === null;
 $portalUrl = $isPortalUser
     ? '../admin/sso.php?token=' . urlencode(Auth::issuePortalSsoToken($userId))
+        . ($needsLtiLink ? '&link_platform=' . $platformId . '&link_context=' . urlencode($contextId) : '')
     : null;
 
 // Stats embebidas en la misma pantalla del código (el docente/alumno no
@@ -190,6 +213,9 @@ header('Content-Type: text/html; charset=utf-8');
     <button id="refresh" type="button">Generar código nuevo</button>
     <?php if ($isPortalUser): ?>
         <a href="<?= htmlspecialchars($portalUrl) ?>" target="_blank" rel="noopener"><button type="button">Ir a plataforma</button></a>
+        <?php if ($needsLtiLink): ?>
+            <p class="status">Este curso de Moodle aún no está vinculado a un curso de LabSim -- en la plataforma te pediremos vincularlo (una sola vez).</p>
+        <?php endif; ?>
     <?php endif; ?>
     <p class="status" id="status"></p>
 
