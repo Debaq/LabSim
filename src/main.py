@@ -11,6 +11,7 @@ from impedanciometria import Z
 from core.base import context
 from core.h_win import FrameSubMdi, MdiArea
 from core import inbox
+from core.updater import local_build_id
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
                           marcar_entry_atendiendo, marcar_entry_atendido, entry_esta_cancelada,
                           reset_backend_session)
@@ -29,6 +30,9 @@ CONFIG_PATH = BASE_DIR / 'resources' / 'config' / 'config.json'
 LOG_FILE = BASE_DIR / 'log_file.txt'
 
 __VERSION__ = 'v0.9.8'
+# Build real (con sufijo -r<commit> si aplica) para mostrar en el título --
+# __VERSION__ solo no alcanza porque no sube en cada build de prueba.
+DISPLAY_VERSION = f"v{local_build_id(__VERSION__.lstrip('v'))}"
 Preferences = Preferences()
 APPS = Preferences.get("APP")
 SECTORS = Preferences.get("SECTORS")
@@ -85,8 +89,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
         ToolBar.__init__(self, self.sender, BOXS, APPS, layout, self.frame_sec, self.modules, self.mdi_area, self.size, self.subw)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
-        self.setWindowTitle(f"LabSim {__VERSION__}")
-        self.lbl_title.setText(f"LabSim {__VERSION__}")
+        self.setWindowTitle(f"LabSim {DISPLAY_VERSION}")
+        self.lbl_title.setText(f"LabSim {DISPLAY_VERSION}")
         self.configure_btn()
         MoveWindow(self).set_movewindow()
 

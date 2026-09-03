@@ -43,10 +43,11 @@ def _split_build_id(build_id: str):
     return _parse_version(base), (suffix or None)
 
 
-def _local_build_id(fallback_version: str) -> str:
+def local_build_id(fallback_version: str) -> str:
     """Lee BUILD_VERSION al lado del ejecutable (lo escribe el script de
     release). Si no existe -- build vieja, previa a esta feature, o corrida
-    en dev -- cae a __VERSION__."""
+    en dev -- cae a __VERSION__. Sirve también para mostrar la versión
+    real (con sufijo -r<commit>) en el título de la ventana."""
     build_file = Path(sys.executable).resolve().parent / "BUILD_VERSION"
     try:
         content = build_file.read_text(encoding="utf-8").strip()
@@ -76,19 +77,20 @@ def check_for_update(current_version: str):
     except (URLError, OSError, ValueError, TimeoutError):
         return None
 
-    remote = next(
-        (r for r in releases if r.get("tag_name", "").startswith(TAG_PREFIX)),
-        None,
-    )
-    if remote is None:
+    candidates = [r for r in releases if r.get("tag_name", "").startswith(TAG_PREFIX)]
+    if not candidates:
         return None
+    # La API de GitHub no garantiza orden por fecha en /releases -- hay que
+    # ordenar a mano, si no a veces se toma una release vieja como "la
+    # última" y una build vieja no detecta que hay una más nueva.
+    remote = max(candidates, key=lambda r: r.get("created_at") or "")
 
     tag = remote["tag_name"]
     remote_build_id = tag[len(TAG_PREFIX):]
-    local_build_id = _local_build_id(current_version)
+    local_id = local_build_id(current_version)
 
     remote_v, remote_suffix = _split_build_id(remote_build_id)
-    local_v, local_suffix = _split_build_id(local_build_id)
+    local_v, local_suffix = _split_build_id(local_id)
 
     if remote_v < local_v:
         return None
