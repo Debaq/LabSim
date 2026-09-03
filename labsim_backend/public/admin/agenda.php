@@ -64,19 +64,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fechaNac = $fechaNacIso !== '' ? date('d-m-Y', strtotime($fechaNacIso)) : '';
         $procedimiento = trim((string) ($_POST['procedimiento'] ?? '')) ?: 'Audiometría';
         $notaAdmin = trim((string) ($_POST['nota_admin'] ?? ''));
+        $forceRound = ($_POST['force_round'] ?? '') === '1';
 
-        // RUT = identificador único del paciente. Se fija recién al primer
-        // agendamiento (acá sí hay holgura para corregirlo); si el caso ya
-        // tuvo una cita antes, se ignora lo tipeado en el form y se mantiene
-        // el RUT ya guardado -- ni un POST manipulado a mano lo cambia.
+        // Identidad del paciente = del caso, no de la cita. Se fija recién al
+        // primer agendamiento; si el caso ya tiene un patient_id asociado, se
+        // ignora por completo lo tipeado en el form (RUT/nombre/apellido/fecha
+        // nac) y se usa lo que ya hay guardado -- el área de agendamiento no
+        // es donde se edita la ficha del paciente (eso es case_create.php).
+        // Ni un POST manipulado a mano lo cambia.
         $existingPatientId = null;
-        if ($appointmentId > 0) {
-            $stmt = $pdo->prepare('SELECT rut, patient_id FROM appointments WHERE id = ?');
-            $stmt->execute([$appointmentId]);
-            $existingAppt = $stmt->fetch();
-            if ($existingAppt !== false) {
-                $rut = (string) $existingAppt['rut'];
-                $existingPatientId = $existingAppt['patient_id'] !== null ? (int) $existingAppt['patient_id'] : null;
+        $stmt = $pdo->prepare('SELECT patient_id FROM cases WHERE id = ?');
+        $stmt->execute([$caseId]);
+        $caseRow = $stmt->fetch();
+        if ($caseRow !== false && $caseRow['patient_id'] !== null) {
+            $existingPatientId = (int) $caseRow['patient_id'];
+            $stmt = $pdo->prepare('SELECT rut, nombre, apellido, fecha_nac FROM patients WHERE id = ?');
+            $stmt->execute([$existingPatientId]);
+            $existingPatient = $stmt->fetch();
+            if ($existingPatient !== false) {
+                $rut = (string) $existingPatient['rut'];
+                $nombre = (string) $existingPatient['nombre'];
+                $apellido = (string) $existingPatient['apellido'];
+                $fechaNac = (string) $existingPatient['fecha_nac'];
             }
         }
 
@@ -127,11 +136,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // agrupan por appointment_id). Por eso una "ronda nueva" crea una
         // cita (appointment) nueva en vez de pisar la anterior; si todavía
         // no la atendió nadie, no hay nada que perder y se edita en el sitio.
+        // $forceRound (botón "Nueva cita") fuerza lo mismo a mano: mismo
+        // paciente/caso, pero horario/grupo distinto en paralelo -- sin eso
+        // no había forma de agregar una cita nueva sin pisar la pendiente.
         $isNewRound = false;
         if ($error === null && $appointmentId > 0) {
-            $stmt = $pdo->prepare('SELECT 1 FROM attendances WHERE appointment_id = ? LIMIT 1');
-            $stmt->execute([$appointmentId]);
-            $isNewRound = (bool) $stmt->fetchColumn();
+            if ($forceRound) {
+                $isNewRound = true;
+            } else {
+                $stmt = $pdo->prepare('SELECT 1 FROM attendances WHERE appointment_id = ? LIMIT 1');
+                $stmt->execute([$appointmentId]);
+                $isNewRound = (bool) $stmt->fetchColumn();
+            }
         }
 
         $willInsert = $appointmentId <= 0 || $isNewRound;
@@ -144,12 +160,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($error === null) {
-            // Un solo punto de entrada para escribir identidad de paciente
-            // (Patients) -- si ya tenía patient_id lo actualiza in-place, si
-            // no (fila legado sin migrar, o rut nuevo) lo resuelve/crea por
-            // rut. Cascadea a todas las citas de ese paciente.
+            // Identidad ya resuelta más arriba (fija si el caso ya tenía
+            // patient_id). Solo se crea/resuelve por RUT la primera vez.
             if ($existingPatientId !== null) {
-                Patients::update($pdo, $existingPatientId, $rut, $nombre, $apellido, $fechaNac);
                 $patientId = $existingPatientId;
             } else {
                 $patientId = Patients::upsertByRut($pdo, $rut, $nombre, $apellido, $fechaNac);
@@ -324,12 +337,21 @@ if ($scheduleRow !== null && !$scheduleRow['appointment_id']) {
     $data = json_decode($scheduleRow['data'] ?? '', true);
     $scheduleSnapshot = is_array($data) ? ($data['paciente_snapshot'] ?? []) : [];
 }
+$scheduleForceRound = isset($_GET['force_round']) && $_GET['force_round'] === '1';
 $scheduleIsNewRound = false;
 if ($scheduleRow !== null && $scheduleRow['appointment_id']) {
-    $stmt = $pdo->prepare('SELECT 1 FROM attendances WHERE appointment_id = ? LIMIT 1');
-    $stmt->execute([$scheduleRow['appointment_id']]);
-    $scheduleIsNewRound = (bool) $stmt->fetchColumn();
+    if ($scheduleForceRound) {
+        $scheduleIsNewRound = true;
+    } else {
+        $stmt = $pdo->prepare('SELECT 1 FROM attendances WHERE appointment_id = ? LIMIT 1');
+        $stmt->execute([$scheduleRow['appointment_id']]);
+        $scheduleIsNewRound = (bool) $stmt->fetchColumn();
+    }
 }
+// Identidad del paciente ya fija apenas el caso tuvo una primera cita --
+// nombre/apellido/fecha_nac/rut se editan solo desde "Editar ficha"
+// (case_create.php), nunca desde este formulario de agendamiento.
+$scheduleIdentityLocked = $scheduleRow !== null && (bool) $scheduleRow['appointment_id'];
 
 // Calendario mensual: agrupa las citas vigentes (no canceladas) del mes
 // pedido para dar una vista de ocupación antes de agendar un caso nuevo.
@@ -356,9 +378,24 @@ if ($filterStudentId !== null) {
     $filterStudentGroupIds = array_map('intval', array_column($stmt->fetchAll(), 'group_id'));
 }
 
+// OJO: $cases trae solo la ÚLTIMA cita de cada caso (para la tabla de abajo,
+// que muestra 1 fila por caso + "rondas" como historial). El calendario en
+// cambio tiene que mostrar TODAS las citas vigentes -- un mismo paciente
+// puede tener varias citas en paralelo (horarios/grupos distintos, ver
+// "Nueva cita"), y si acá también se filtrara a la última quedarían
+// invisibles todas menos la más reciente.
+$calStmt = $pdo->prepare(
+    "SELECT a.id AS appointment_id, a.case_id, a.fecha, a.hora, a.nombre, a.apellido,
+            a.course_id, a.assigned_student_id, a.assigned_group_id
+     FROM appointments a
+     WHERE a.cancelada = 0" . ($permissionSql !== '1=1' ? " AND ({$permissionSql})" : '')
+);
+$calStmt->execute($permissionParams);
+$calendarAppointments = $calStmt->fetchAll();
+
 $appointmentsByDay = [];
-foreach ($cases as $c) {
-    if (!$c['appointment_id'] || $c['cancelada'] || $c['fecha'] === '') {
+foreach ($calendarAppointments as $c) {
+    if ($c['fecha'] === '') {
         continue;
     }
     $iso = legacy_to_iso($c['fecha']);
@@ -416,7 +453,13 @@ admin_header('Fichas Clínicas', $me);
         Ojo: en la app del alumno, la Agenda por defecto solo muestra las citas de <strong>hoy</strong>
         (hay un selector de fecha y una casilla "Ver todas las citas habilitadas" para ver otros días).
     </p>
-    <?php if ($scheduleIsNewRound): ?>
+    <?php if ($scheduleForceRound): ?>
+    <p style="font-size:0.85rem; color:#886400;">
+        <strong>Nueva cita</strong> para el mismo paciente -- se crea una cita aparte (horario/grupo propios) sin
+        tocar la que ya tenía agendada. Se puede ver todo el historial del caso con "Ver historial" en la lista de
+        abajo.
+    </p>
+    <?php elseif ($scheduleIsNewRound): ?>
     <p style="font-size:0.85rem; color:#886400;">
         Esta cita ya tiene atenciones registradas -- guardar acá crea una <strong>ronda nueva</strong> (cita distinta)
         en vez de editar la anterior, para no perder el historial de esa ronda. Se puede ver todo el historial del
@@ -428,14 +471,23 @@ admin_header('Fichas Clínicas', $me);
         <input type="hidden" name="form_action" value="schedule">
         <input type="hidden" name="case_id" value="<?= htmlspecialchars($scheduleRow['id']) ?>">
         <input type="hidden" name="appointment_id" value="<?= (int) ($scheduleRow['appointment_id'] ?? 0) ?>">
+        <input type="hidden" name="force_round" value="<?= $scheduleForceRound ? '1' : '0' ?>">
         <label>Fecha (vacío = sin agendar aún)
-            <input type="date" name="fecha" value="<?= htmlspecialchars(legacy_to_iso($scheduleRow['fecha'] ?? '')) ?>">
+            <input type="date" name="fecha" value="<?= $scheduleForceRound ? '' : htmlspecialchars(legacy_to_iso($scheduleRow['fecha'] ?? '')) ?>">
         </label>
         <label>Hora
-            <input type="time" name="hora" value="<?= htmlspecialchars($scheduleRow['hora'] ?? '') ?>">
+            <input type="time" name="hora" value="<?= $scheduleForceRound ? '' : htmlspecialchars($scheduleRow['hora'] ?? '') ?>">
         </label>
-        <label>RUT<?= $scheduleRow['appointment_id'] ? ' (fijo desde el primer agendamiento, identifica al paciente)' : '' ?>
-            <input type="text" name="rut" value="<?= htmlspecialchars($scheduleRow['rut'] ?? $scheduleSnapshot['rut'] ?? '') ?>" <?= $scheduleRow['appointment_id'] ? 'readonly' : '' ?>>
+        <?php if ($scheduleIdentityLocked): ?>
+        <p style="font-size:0.85rem; margin:0.3rem 0; padding:0.4rem 0.6rem; background:#f5f5f5; border-radius:4px;">
+            <strong><?= htmlspecialchars(trim(($scheduleRow['nombre'] ?? '') . ' ' . ($scheduleRow['apellido'] ?? ''))) ?></strong>
+            &nbsp;·&nbsp; RUT <?= htmlspecialchars($scheduleRow['rut'] ?? '') ?>
+            &nbsp;·&nbsp; nac. <?= htmlspecialchars(legacy_to_iso($scheduleRow['fecha_nac'] ?? '')) ?>
+            &nbsp;·&nbsp; <a href="case_create.php?edit=<?= urlencode($scheduleRow['id']) ?>">editar ficha</a>
+        </p>
+        <?php else: ?>
+        <label>RUT
+            <input type="text" name="rut" value="<?= htmlspecialchars($scheduleRow['rut'] ?? $scheduleSnapshot['rut'] ?? '') ?>">
         </label>
         <label>Nombre
             <input type="text" name="nombre" value="<?= htmlspecialchars($scheduleRow['nombre'] ?? $scheduleSnapshot['nombre'] ?? '') ?>">
@@ -446,6 +498,7 @@ admin_header('Fichas Clínicas', $me);
         <label>Fecha de nacimiento
             <input type="date" name="fecha_nac" value="<?= htmlspecialchars(legacy_to_iso($scheduleRow['fecha_nac'] ?? $scheduleSnapshot['fecha_nac'] ?? '')) ?>">
         </label>
+        <?php endif; ?>
         <label>Procedimiento
             <input type="text" name="procedimiento" value="<?= htmlspecialchars($scheduleRow['procedimiento'] ?? $scheduleSnapshot['procedimiento'] ?? 'Audiometría') ?>">
         </label>
@@ -496,7 +549,7 @@ admin_header('Fichas Clínicas', $me);
                 <select name="assigned_student_id" id="sched-student" data-selected="<?= $curStudentId ?>"></select>
             </label>
         </div>
-        <button type="submit"><?= $scheduleIsNewRound ? 'Agendar ronda nueva' : ($scheduleRow['appointment_id'] ? 'Guardar cambios' : 'Agendar') ?></button>
+        <button type="submit"><?= $scheduleForceRound ? 'Agendar cita nueva' : ($scheduleIsNewRound ? 'Agendar ronda nueva' : ($scheduleRow['appointment_id'] ? 'Guardar cambios' : 'Agendar')) ?></button>
         <a href="<?= agenda_url(['schedule' => null]) ?>" style="margin-left:1rem; font-size:0.85rem;">Cancelar</a>
     </form>
 </div>
@@ -600,7 +653,7 @@ admin_header('Fichas Clínicas', $me);
         <div class="cal-day<?= $iso === $today ? ' today' : '' ?>">
             <span class="cal-num"><?= $day ?></span>
             <?php foreach (array_slice($dayAppts, 0, 3) as $a): ?>
-            <a href="<?= agenda_url(['schedule' => $a['id']]) ?>" title="<?= htmlspecialchars(trim($a['hora'] . ' ' . $a['nombre'] . ' ' . $a['apellido'])) ?>">
+            <a href="<?= agenda_url(['schedule' => $a['case_id']]) ?>" title="<?= htmlspecialchars(trim($a['hora'] . ' ' . $a['nombre'] . ' ' . $a['apellido'])) ?>">
                 <?= htmlspecialchars($a['hora']) ?> <?= htmlspecialchars(trim($a['nombre'] . ' ' . $a['apellido'])) ?>
             </a>
             <?php endforeach; ?>
@@ -689,9 +742,12 @@ admin_header('Fichas Clínicas', $me);
                 <?php endif; ?>
             </td>
             <td style="white-space:nowrap;">
-                <a href="<?= agenda_url(['schedule' => $c['id']]) ?>" style="font-size:0.8rem;">
+                <a href="<?= agenda_url(['schedule' => $c['id'], 'force_round' => null]) ?>" style="font-size:0.8rem;">
                     <?= $c['appointment_id'] ? 'Reagendar' : 'Agendar' ?>
                 </a>
+                <?php if ($c['appointment_id']): ?>
+                <a href="<?= agenda_url(['schedule' => $c['id'], 'force_round' => 1]) ?>" style="font-size:0.8rem;">Nueva cita</a>
+                <?php endif; ?>
                 <a href="case_create.php?edit=<?= urlencode($c['id']) ?>" style="font-size:0.8rem;">Editar ficha</a>
                 <?php if ($c['appointment_id']): ?>
                 <form method="post" class="inline">
