@@ -51,6 +51,7 @@ $systemPrompt = LlmConfig::buildSystemPrompt(
         'cirugias' => (string) ($body['cirugias'] ?? ''),
         'otros' => (string) ($body['otros'] ?? ''),
         'comportamiento' => (string) ($body['comportamiento'] ?? ''),
+        'disposicion' => (int) ($body['disposicion'] ?? 0),
     ],
     (array) ($body['tinnitus'] ?? [])
 );

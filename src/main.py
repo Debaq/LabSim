@@ -10,6 +10,7 @@ from auth import login as Ui_login
 from impedanciometria import Z
 from core.base import context
 from core.h_win import FrameSubMdi, MdiArea
+from core import inbox
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
                           marcar_entry_atendiendo, marcar_entry_atendido, entry_esta_cancelada,
                           reset_backend_session)
@@ -182,6 +183,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         agenda_win = self.subw.get("AGENDA") if self.subw else None
         if agenda_win is not None:
             agenda_win.obj.refresh_async()
+        inbox.actualizar_badge(self)
 
     def _stop_sync_thread(self):
         if self.sync_thread is not None:

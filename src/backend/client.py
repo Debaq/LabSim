@@ -170,6 +170,15 @@ class BackendClient:
             body["appointment_id"] = appointment_id
         return self._post("/api/llm_chat.php", body, timeout=35)
 
+    def get_inbox(self) -> dict:
+        """Bandeja de entrada del usuario logueado (ver inbox.php): avisos
+        automáticos sobre el trato a pacientes + mensajes que un docente
+        mandó a mano."""
+        return self._get("/api/inbox.php")
+
+    def mark_inbox_read(self, message_id: int) -> dict:
+        return self._post("/api/inbox.php", {"action": "mark_read", "id": message_id})
+
     def get_patient_avatar(self, case_id: str) -> bytes | None:
         """Avatar circular del paciente (PNG, ver PatientPhoto::avatarPath en
         labsim_backend). None si el paciente no tiene foto subida."""

@@ -20,8 +20,12 @@ try {
     Db::migratePatientColumnsIfNeeded();
     $sql = file_get_contents(__DIR__ . '/../../sql/schema.sql');
     Db::get()->exec($sql);
-    // Después del exec: crea courses/student_groups (REFERENCES de las
-    // columnas nuevas de appointments) si la instalación no las tenía.
+    // Después del exec: llm_config ya existe (el exec de arriba la crea si
+    // la instalación no la tenía) -- recién ahí se le puede agregar la
+    // columna si faltaba en una instalación que sí la tenía pero de antes.
+    Db::migrateLlmOirsPromptIfNeeded();
+    // Crea courses/student_groups (REFERENCES de las columnas nuevas de
+    // appointments) si la instalación no las tenía.
     Db::migrateCoursesIfNeeded();
     // Después de courses: patients ya existe (la creó el exec de arriba),
     // recién ahí se puede backfillear patient_id en appointments/cases.

@@ -27,6 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         LlmConfig::save($current);
         $success = 'Plantilla restablecida al prompt por defecto.';
         AdminAudit::log($me, 'llm_prompt_reset');
+    } elseif ($postAction === 'reset_oirs_prompt') {
+        $current = LlmConfig::get();
+        $current['oirs_prompt_template'] = '';
+        $current['api_key'] = '';
+        LlmConfig::save($current);
+        $success = 'Prompt del evaluador OIRS restablecido al por defecto.';
+        AdminAudit::log($me, 'llm_oirs_prompt_reset');
     } else {
         $model = trim((string) ($_POST['model'] ?? ''));
         $temperature = (float) ($_POST['temperature'] ?? 0.7);
@@ -97,6 +104,7 @@ admin_header('IA Paciente (LLM)', $me);
         </label>
 
         <input type="hidden" name="system_prompt_template" value="<?= htmlspecialchars($config['system_prompt_template']) ?>">
+        <input type="hidden" name="oirs_prompt_template" value="<?= htmlspecialchars($config['oirs_prompt_template']) ?>">
         <button type="submit">Guardar</button>
     </form>
 </div>
@@ -127,6 +135,7 @@ admin_header('IA Paciente (LLM)', $me);
         <input type="hidden" name="temperature" value="<?= htmlspecialchars((string) $config['temperature']) ?>">
         <input type="hidden" name="max_tokens" value="<?= (int) $config['max_tokens'] ?>">
         <?php if ($config['active']): ?><input type="hidden" name="active" value="1"><?php endif; ?>
+        <input type="hidden" name="oirs_prompt_template" value="<?= htmlspecialchars($config['oirs_prompt_template']) ?>">
 
         <label>Plantilla (precargada con el prompt por defecto -- edítala directamente; "Restablecer" abajo la vuelve a este punto de partida)
             <textarea name="system_prompt_template" rows="16" style="width:100%; padding:0.45rem; border:1px solid #ccc; border-radius:4px; font-family:ui-monospace, monospace; font-size:0.85rem;"><?= htmlspecialchars(\LlmConfig::effectivePrompt()) ?></textarea>
@@ -137,6 +146,42 @@ admin_header('IA Paciente (LLM)', $me);
     <form method="post" style="display:inline;" onsubmit="return confirm('¿Restablecer al prompt por defecto? Se pierde la plantilla personalizada.');">
     <?= csrf_field() ?>
         <input type="hidden" name="form_action" value="reset_prompt">
+        <button type="submit" class="secondary">Restablecer al prompt por defecto</button>
+    </form>
+</div>
+
+<div class="card">
+    <strong>Prompt del evaluador OIRS</strong>
+    <p style="font-size:0.85rem; color:#555;">
+        Al cerrar una atención (botón "Atender" -> nota final), esta plantilla decide -- releyendo el chat
+        completo del alumno con el paciente -- si corresponde un reclamo, un mérito, o nada, y redacta el
+        aviso que le llega al alumno en su Bandeja OIRS (ver Admin -> ficha del alumno para revisarlos ahí
+        también). Solo juzga el TRATO recibido, no el conocimiento clínico. Único placeholder disponible:
+        <code>{{disposicion}}</code> (<?= htmlspecialchars(\LlmConfig::PLACEHOLDERS['{{disposicion}}']) ?>).
+        Debe responder JSON estricto -- si editas la plantilla, conserva la instrucción de responder solo
+        <code>{"veredicto": ..., "asunto": ..., "cuerpo": ...}</code> o el aviso dejará de generarse.
+    </p>
+
+    <form method="post">
+    <?= csrf_field() ?>
+        <input type="hidden" name="form_action" value="save">
+        <input type="hidden" name="provider" value="<?= htmlspecialchars($config['provider']) ?>">
+        <input type="hidden" name="api_base_url" value="<?= htmlspecialchars($config['api_base_url']) ?>">
+        <input type="hidden" name="model" value="<?= htmlspecialchars($config['model']) ?>">
+        <input type="hidden" name="temperature" value="<?= htmlspecialchars((string) $config['temperature']) ?>">
+        <input type="hidden" name="max_tokens" value="<?= (int) $config['max_tokens'] ?>">
+        <?php if ($config['active']): ?><input type="hidden" name="active" value="1"><?php endif; ?>
+        <input type="hidden" name="system_prompt_template" value="<?= htmlspecialchars($config['system_prompt_template']) ?>">
+
+        <label>Plantilla del evaluador (precargada con el prompt por defecto -- edítala directamente; "Restablecer" abajo la vuelve a este punto de partida)
+            <textarea name="oirs_prompt_template" rows="16" style="width:100%; padding:0.45rem; border:1px solid #ccc; border-radius:4px; font-family:ui-monospace, monospace; font-size:0.85rem;"><?= htmlspecialchars(\LlmConfig::effectiveOirsPrompt()) ?></textarea>
+        </label>
+        <button type="submit">Guardar plantilla</button>
+    </form>
+
+    <form method="post" style="display:inline;" onsubmit="return confirm('¿Restablecer al prompt por defecto? Se pierde la plantilla personalizada.');">
+    <?= csrf_field() ?>
+        <input type="hidden" name="form_action" value="reset_oirs_prompt">
         <button type="submit" class="secondary">Restablecer al prompt por defecto</button>
     </form>
 </div>

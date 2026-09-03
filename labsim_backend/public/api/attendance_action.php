@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../../src/LlmConfig.php';
+require_once __DIR__ . '/../../src/LlmChat.php';
+require_once __DIR__ . '/../../src/OirsEvaluator.php';
 
 /**
  * Progreso de un alumno sobre una cita compartida (antes entry[8][username]
@@ -44,6 +47,18 @@ switch ($action) {
                 estado = 'atendido', nota = excluded.nota, updated_at = CURRENT_TIMESTAMP"
         );
         $stmt->execute([$appointmentId, $user['id'], $nota]);
+
+        $stmt = $pdo->prepare('SELECT case_id, patient_id FROM appointments WHERE id = ?');
+        $stmt->execute([$appointmentId]);
+        $appt = $stmt->fetch();
+        if ($appt) {
+            OirsEvaluator::evaluate(
+                $appointmentId,
+                (int) $user['id'],
+                $appt['case_id'] !== null ? (string) $appt['case_id'] : null,
+                $appt['patient_id'] !== null ? (int) $appt['patient_id'] : null
+            );
+        }
         break;
 
     case 'no_show':

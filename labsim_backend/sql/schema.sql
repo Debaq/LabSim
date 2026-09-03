@@ -229,6 +229,11 @@ CREATE TABLE IF NOT EXISTS llm_config (
     -- Vacío = usa LlmConfig::DEFAULT_PROMPT (ver ese archivo) -- así un
     -- "restablecer" no requiere guardar el texto largo acá también.
     system_prompt_template TEXT NOT NULL DEFAULT '',
+    -- Vacío = usa LlmConfig::DEFAULT_OIRS_PROMPT -- prompt del evaluador que
+    -- OirsEvaluator llama al cerrar una atención para redactar (o no) un
+    -- aviso (ver inbox_messages abajo). Mismo criterio "vacío = default"
+    -- que system_prompt_template, editable desde Admin -> IA Paciente.
+    oirs_prompt_template TEXT NOT NULL DEFAULT '',
     active INTEGER NOT NULL DEFAULT 0,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -249,6 +254,39 @@ CREATE TABLE IF NOT EXISTS llm_chat_logs (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_llm_chat_logs_appt ON llm_chat_logs (appointment_id, student_id);
+
+-- Bandeja de entrada del alumno: mensajes de dos orígenes distintos en una
+-- sola tabla genérica (no es exclusiva de OIRS).
+--  1) OirsEvaluator::evaluate() -- al cerrar una atención (ver
+--     attendance_action.php, action 'atendido') relee el chat con el
+--     paciente simulado y, si corresponde, deja un aviso tipo 'reclamo' o
+--     'merito' (un veredicto 'neutro' no genera fila). appointment_id y
+--     patient_id identifican de qué atención vino.
+--  2) El docente/admin, a mano, desde Admin -> Bandeja de entrada
+--     (inbox_send.php) -- tipo 'mensaje', a un alumno puntual o a todo un
+--     curso de una vez (una fila por destinatario). appointment_id/patient_id
+--     quedan NULL (no vienen de ninguna atención) y sender_admin_id guarda
+--     quién lo mandó.
+-- `tipo` es TEXT libre (sin CHECK): agregar un tipo nuevo no debe requerir
+-- tocar el schema, solo el código que lo genera y lo muestra.
+CREATE TABLE IF NOT EXISTS inbox_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL REFERENCES users(id),
+    tipo TEXT NOT NULL DEFAULT 'mensaje',
+    remitente TEXT NOT NULL DEFAULT '',
+    asunto TEXT NOT NULL DEFAULT '',
+    cuerpo TEXT NOT NULL DEFAULT '',
+    appointment_id INTEGER REFERENCES appointments(id),
+    patient_id INTEGER REFERENCES patients(id),
+    sender_admin_id INTEGER REFERENCES users(id),
+    leido INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    -- Evita duplicar el aviso automático si el alumno reabre y vuelve a
+    -- cerrar la misma atención -- no aplica a mensajes del docente
+    -- (appointment_id NULL en SQLite nunca choca con otro NULL).
+    UNIQUE (appointment_id, student_id)
+);
+CREATE INDEX IF NOT EXISTS idx_inbox_messages_student ON inbox_messages (student_id, created_at);
 
 -- Cursos: dos cursos con docentes y casos distintos corriendo en paralelo
 -- sobre la misma instalación no eran posibles antes de esto (todo iba a un

@@ -42,6 +42,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->exec($sql);
             // Después del exec: agrega columnas nuevas a tablas que ya
             // existían de antes (CREATE TABLE IF NOT EXISTS no las toca).
+            // llm_config ya existe (el exec de arriba la crea si la
+            // instalación no la tenía) -- recién ahí se le puede agregar
+            // oirs_prompt_template si faltaba.
+            Db::migrateLlmOirsPromptIfNeeded();
             Db::migrateCoursesIfNeeded();
             // Después de courses: patients ya existe (la creó el exec de
             // arriba), recién ahí se puede backfillear patient_id.

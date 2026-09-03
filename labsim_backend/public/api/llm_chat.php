@@ -62,6 +62,7 @@ $systemPrompt = LlmConfig::buildSystemPrompt(
         'cirugias' => (string) ($caseData['Anamnesis']['cirugias'] ?? ''),
         'otros' => (string) ($caseData['Anamnesis']['otros'] ?? ''),
         'comportamiento' => (string) ($caseData['PatientBehavior'] ?? ''),
+        'disposicion' => (int) ($caseData['PatientDisposition'] ?? 0),
     ],
     (array) ($caseData['Tinnitus'] ?? [])
 );

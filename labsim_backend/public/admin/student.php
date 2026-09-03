@@ -53,6 +53,17 @@ foreach ($attendances as $a) {
 }
 
 $stmt = $pdo->prepare(
+    "SELECT m.id, m.tipo, m.remitente, m.asunto, m.cuerpo, m.created_at,
+            a.id AS appointment_id, a.fecha, a.hora, a.procedimiento
+     FROM inbox_messages m
+     LEFT JOIN appointments a ON a.id = m.appointment_id
+     WHERE m.student_id = ?
+     ORDER BY m.created_at DESC"
+);
+$stmt->execute([$studentId]);
+$inboxMessages = $stmt->fetchAll();
+
+$stmt = $pdo->prepare(
     'SELECT action, COUNT(*) AS n, MAX(client_ts) AS last_ts
      FROM action_logs WHERE user_id = ? GROUP BY action ORDER BY n DESC'
 );
@@ -177,6 +188,30 @@ admin_header('Alumno: ' . $student['display_name'], $me);
         <?php endforeach; ?>
         <?php if (!$attendances): ?>
         <tr><td colspan="11" style="color:#888;">Sin atenciones registradas todavía.</td></tr>
+        <?php endif; ?>
+    </table>
+</div>
+
+<?php
+$tipoLabels = ['reclamo' => 'Reclamo', 'merito' => 'Mérito', 'mensaje' => 'Mensaje docente'];
+?>
+<div class="card">
+    <strong>Bandeja de entrada (<?= count($inboxMessages) ?>)</strong>
+    <p class="legend">Avisos automáticos sobre el trato a pacientes (ver Admin -> IA Paciente) y mensajes que algún docente le mandó directo. Misma bandeja que ve el alumno en la app.</p>
+    <table>
+        <tr><th>Tipo</th><th>Remitente</th><th>Cita</th><th>Asunto</th><th>Cuerpo</th><th>Fecha</th></tr>
+        <?php foreach ($inboxMessages as $m): ?>
+        <tr>
+            <td<?= $m['tipo'] === 'reclamo' ? ' class="badge-warn"' : '' ?>><?= htmlspecialchars($tipoLabels[$m['tipo']] ?? $m['tipo']) ?></td>
+            <td><?= htmlspecialchars($m['remitente']) ?></td>
+            <td><?= $m['appointment_id'] ? '#' . (int) $m['appointment_id'] . ' (' . htmlspecialchars($m['fecha'] ?: '—') . ' ' . htmlspecialchars($m['hora'] ?: '') . ') -- ' . htmlspecialchars($m['procedimiento']) : '—' ?></td>
+            <td><?= htmlspecialchars($m['asunto']) ?></td>
+            <td style="font-size:0.85rem;"><?= htmlspecialchars($m['cuerpo']) ?></td>
+            <td><?= htmlspecialchars($m['created_at']) ?></td>
+        </tr>
+        <?php endforeach; ?>
+        <?php if (!$inboxMessages): ?>
+        <tr><td colspan="6" style="color:#888;">Sin mensajes todavía.</td></tr>
         <?php endif; ?>
     </table>
 </div>

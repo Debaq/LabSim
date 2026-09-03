@@ -396,6 +396,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'otros' => trim((string) ($v['otros'] ?? '')),
                 ],
                 'comportamiento' => trim((string) ($v['comportamiento'] ?? '')),
+                'disposicion' => (int) ($v['disposicion'] ?? 0),
             ]);
 
             if ($isUpdate) {
@@ -1093,6 +1094,21 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <textarea name="comportamiento" id="chat-comportamiento" rows="2" style="width:100%; padding:0.45rem; margin-top:0.2rem; border:1px solid #ccc; border-radius:4px;" placeholder="Ej: nervioso, minimiza los síntomas, muy hablador, desconfiado, colaborador..."><?= htmlspecialchars((string) ($v['comportamiento'] ?? '')) ?></textarea>
     </label>
     <p class="legend">Cómo debe actuar el paciente al conversar con el alumno (tono, actitud) -- va directo al prompt del LLM, junto con la anamnesis de arriba.</p>
+    <label>Sensibilidad del paciente
+        <select name="disposicion" id="chat-disposicion">
+            <?php $dispOpts = [
+                -2 => 'Muy quisquilloso/a (se ofende con facilidad)',
+                -1 => 'Algo sensible',
+                0 => 'Normal',
+                1 => 'Cálido/a y agradecido/a',
+                2 => 'Muy positivo/a (elogia con facilidad)',
+            ]; ?>
+            <?php foreach ($dispOpts as $val => $label): ?>
+            <option value="<?= $val ?>" <?= ((string) ($v['disposicion'] ?? '0') === (string) $val) ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
+            <?php endforeach; ?>
+        </select>
+    </label>
+    <p class="legend">Qué tan fácil se ofende o se pone contento este paciente -- define el umbral del aviso OIRS (reclamo/mérito) que puede dejar al cerrar la atención.</p>
 </div>
 
 <div class="card" id="chat-test-card">
@@ -1109,6 +1125,11 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <input type="text" id="chat-test-input" placeholder="Escribe como si fueras el alumno..." style="flex:1; padding:0.45rem; border:1px solid #ccc; border-radius:4px;">
         <button type="button" id="chat-test-send" class="secondary" style="margin-top:0;">Enviar</button>
         <button type="button" id="chat-test-reset" class="secondary" style="margin-top:0;">Reiniciar conversación</button>
+    </div>
+    <div style="margin-top:0.6rem; padding-top:0.6rem; border-top:1px dashed #ddd;">
+        <button type="button" id="oirs-test-btn" class="secondary" style="margin-top:0;">Simular término de sesión (ver veredicto OIRS)</button>
+        <p class="legend">Corre el evaluador de <a href="llm.php" target="_blank">Admin → IA Paciente</a> sobre esta conversación de prueba, tal como se ejecutaría al cerrar una atención real -- útil para ajustar el prompt del evaluador o la sensibilidad del paciente.</p>
+        <div id="oirs-test-result"></div>
     </div>
 </div>
 </div>
@@ -1997,6 +2018,7 @@ window.drawReflexPattern = function drawReflexPattern() {
             cirugias: fieldValue('cirugias'),
             otros: fieldValue('otros'),
             comportamiento: fieldValue('comportamiento'),
+            disposicion: fieldValue('disposicion'),
             tinnitus: currentTinnitus(),
         };
 
@@ -2032,6 +2054,79 @@ window.drawReflexPattern = function drawReflexPattern() {
             history = [];
             log.innerHTML = '';
             input.focus();
+            var result = document.getElementById('oirs-test-result');
+            if (result) result.innerHTML = '';
+        });
+    }
+
+    var oirsBtn = document.getElementById('oirs-test-btn');
+    var oirsResult = document.getElementById('oirs-test-result');
+    if (oirsBtn && oirsResult) {
+        var VEREDICTO_LABELS = {
+            reclamo: { text: 'Reclamo', color: '#a33', bg: '#fbeaea' },
+            merito: { text: 'Mérito', color: '#2e7d32', bg: '#eaf6ea' },
+            neutro: { text: 'Neutro (sin aviso)', color: '#666', bg: '#f0f0f0' },
+        };
+
+        oirsBtn.addEventListener('click', function () {
+            oirsBtn.disabled = true;
+            oirsResult.innerHTML = '<p class="legend">Evaluando…</p>';
+
+            fetch('oirs_test.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    csrf_token: document.querySelector('input[name="csrf_token"]').value,
+                    history: history,
+                    disposicion: fieldValue('disposicion'),
+                }),
+            }).then(function (res) {
+                return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+            }).then(function (result) {
+                if (!result.ok || result.data.error) {
+                    oirsResult.innerHTML = '';
+                    var err = document.createElement('p');
+                    err.style.color = '#a33';
+                    err.textContent = result.data.error || 'Error desconocido.';
+                    oirsResult.appendChild(err);
+                    return;
+                }
+                var v = result.data;
+                var style = VEREDICTO_LABELS[v.veredicto] || VEREDICTO_LABELS.neutro;
+                oirsResult.innerHTML = '';
+
+                var badge = document.createElement('span');
+                badge.textContent = style.text;
+                badge.style.cssText = 'display:inline-block; padding:0.15rem 0.6rem; border-radius:12px; font-weight:600; font-size:0.8rem; color:' + style.color + '; background:' + style.bg + ';';
+                oirsResult.appendChild(badge);
+
+                if (v.veredicto !== 'neutro') {
+                    var mail = document.createElement('div');
+                    mail.style.cssText = 'margin-top:0.5rem; padding:0.7rem; border:1px solid #e5e5e5; border-radius:6px; background:#fafafa; font-size:0.88rem;';
+                    var from = document.createElement('div');
+                    from.style.color = '#888';
+                    from.textContent = 'De: Oficina de Informaciones, Reclamos y Sugerencias (OIRS)';
+                    var subject = document.createElement('div');
+                    subject.style.cssText = 'font-weight:600; margin-top:0.2rem;';
+                    subject.textContent = 'Asunto: ' + v.asunto;
+                    var body = document.createElement('div');
+                    body.style.marginTop = '0.5rem';
+                    body.style.whiteSpace = 'pre-wrap';
+                    body.textContent = v.cuerpo;
+                    mail.appendChild(from);
+                    mail.appendChild(subject);
+                    mail.appendChild(body);
+                    oirsResult.appendChild(mail);
+                }
+            }).catch(function (err) {
+                oirsResult.innerHTML = '';
+                var errEl = document.createElement('p');
+                errEl.style.color = '#a33';
+                errEl.textContent = 'No se pudo contactar al servidor: ' + err.message;
+                oirsResult.appendChild(errEl);
+            }).finally(function () {
+                oirsBtn.disabled = false;
+            });
         });
     }
 })();

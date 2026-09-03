@@ -218,6 +218,21 @@ final class Db
      * `courses`), así que agregar la columna no cambia el comportamiento de
      * ninguna cita ya existente.
      */
+    /**
+     * Agrega oirs_prompt_template a llm_config -- instalaciones de antes de
+     * que existiera el evaluador OIRS (ver OirsEvaluator.php). A diferencia
+     * de migratePatientColumnsIfNeeded, esto SÍ debe llamarse DESPUÉS del
+     * exec de schema.sql: una instalación vieja puede no tener la tabla
+     * llm_config todavía (se agregó recién con el chat), y PRAGMA
+     * table_info() sobre una tabla inexistente no avisa que falta -- el
+     * ALTER TABLE de abajo fallaría con "no such table" si llm_config no
+     * existe aún. El exec la crea primero si hace falta.
+     */
+    public static function migrateLlmOirsPromptIfNeeded(): void
+    {
+        self::addColumnIfMissing(self::get(), 'llm_config', 'oirs_prompt_template', "TEXT NOT NULL DEFAULT ''");
+    }
+
     public static function migrateCoursesIfNeeded(): void
     {
         $pdo = self::get();

@@ -47,6 +47,7 @@ function admin_header(string $title, ?array $currentUser = null): void
         <a href="courses.php">Cursos</a>
         <a href="agenda.php">Fichas Clínicas</a>
         <a href="dashboard.php">Dashboard</a>
+        <a href="inbox_send.php">Bandeja de entrada</a>
         <?php if ($currentUser && (int) $currentUser['permission'] === Auth::PERMISSION_ADMIN): ?>
         <a href="lti.php">LTI</a>
         <a href="llm.php">IA Paciente</a>

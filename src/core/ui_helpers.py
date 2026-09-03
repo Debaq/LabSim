@@ -15,6 +15,7 @@ from PySide6.QtGui import QMouseEvent
 from PySide6.QtWidgets import QPushButton, QLayout, QFrame
 from PySide6.QtWidgets import QMdiSubWindow
 from core.h_win import FrameSubMdi, MdiArea
+from core import inbox
 
 def show_hide(obj:any, pos:int):
     """
@@ -228,6 +229,15 @@ class ToolBar(SubWindow):
             btn.setDisabled(state)
             btn.setMaximumHeight(25)
             btn.setMinimumWidth(btn.sizeHint().width())
+
+        # Bandeja de entrada: al lado del botón de Agenda (misma sección,
+        # "Sala de Espera"), no dentro de la propia Agenda -- visible para
+        # cualquier rol logueado (alumno o docente/admin, este último para
+        # poder probarla sin necesitar un usuario alumno aparte). Se recrea
+        # cada vez que chargeBtnsArea corre (cambio de sección) -- ver
+        # core.inbox.crear_boton().
+        if "AGENDA" in self.boxs[area][1] and self.data_login:
+            inbox.crear_boton(self, self.layouts[1])
 
     def activate_soft(self) -> None:
         """activa la ventana con el mismo nombre del boton que envia la señal"""

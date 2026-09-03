@@ -363,6 +363,7 @@ final class CaseBuilder
             'ETF' => [$form['etf_od'], $form['etf_oi']],
             'Anamnesis' => $form['anamnesis'],
             'PatientBehavior' => $form['comportamiento'] ?? '',
+            'PatientDisposition' => (int) ($form['disposicion'] ?? 0),
             'Tinnitus' => $form['tinnitus'],
             'tipo' => 'normal',
         ];
@@ -494,6 +495,7 @@ final class CaseBuilder
         $v['cirugias'] = $anamnesis['cirugias'] ?? '';
         $v['otros'] = $anamnesis['otros'] ?? '';
         $v['comportamiento'] = $data['PatientBehavior'] ?? '';
+        $v['disposicion'] = (string) ($data['PatientDisposition'] ?? 0);
 
         $tinnitus = $data['Tinnitus'] ?? [];
         $v['tinnitus'] = [];

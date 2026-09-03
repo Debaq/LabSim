@@ -77,6 +77,31 @@ def chat_con_paciente(case_id, nombre, edad, procedimiento, history, message, ap
     return result["reply"]
 
 
+def inbox_list() -> list:
+    """Mensajes de la bandeja de entrada del usuario logueado, más nuevos
+    primero (avisos automáticos sobre el trato a pacientes + mensajes que un
+    docente mandó a mano, ver inbox_messages en el backend).
+
+    Solo disponible en modo backend -- lista vacía si no (nunca lanza, a
+    diferencia de chat_con_paciente: revisar la bandeja no debería poder
+    romper la UI si el backend está caído)."""
+    if not _is_backend_mode():
+        return []
+    try:
+        return _get_backend_client().get_inbox().get("items", [])
+    except requests.RequestException:
+        return []
+
+
+def inbox_marcar_leido(message_id: int) -> None:
+    if not _is_backend_mode():
+        return
+    try:
+        _get_backend_client().mark_inbox_read(message_id)
+    except requests.RequestException:
+        pass
+
+
 def foto_paciente(case_id):
     """Avatar circular del paciente (bytes PNG) o None si no tiene foto
     subida o no hay conexión al backend -- a diferencia de chat_con_paciente,
