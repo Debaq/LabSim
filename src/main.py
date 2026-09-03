@@ -1,7 +1,7 @@
 from pathlib import Path
 import sys
 from PySide6.QtCore import Qt, Signal, Slot
-from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox
+from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox, QProgressDialog
 
 from agenda import Agenda, create_a
 from agenda.ChatPaciente import ChatPacienteWidget
@@ -464,7 +464,35 @@ if __name__ == '__main__':
                 QMessageBox.Yes | QMessageBox.No,
             )
             if resp == QMessageBox.Yes:
-                apply_update_and_restart(download_url)  # no vuelve
+                progress = QProgressDialog("Preparando actualización...", None, 0, 0)
+                progress.setWindowTitle("Actualizando LabSim")
+                progress.setWindowModality(Qt.WindowModal)
+                progress.setCancelButton(None)
+                progress.setMinimumDuration(0)
+                progress.setAutoClose(False)
+                progress.setAutoReset(False)
+                progress.show()
+                context.app.processEvents()
+
+                def on_progress(stage, current, total):
+                    if stage == "download":
+                        if total:
+                            progress.setRange(0, total)
+                            progress.setValue(current)
+                            progress.setLabelText(
+                                f"Descargando actualización... {current // 1024} / {total // 1024} KB"
+                            )
+                        else:
+                            progress.setRange(0, 0)
+                            progress.setLabelText(f"Descargando actualización... {current // 1024} KB")
+                    elif stage == "extract":
+                        progress.setRange(0, 0)
+                        progress.setLabelText("Instalando actualización...")
+                    elif stage == "restart":
+                        progress.setLabelText("Reiniciando LabSim...")
+                    context.app.processEvents()
+
+                apply_update_and_restart(download_url, on_progress=on_progress)  # no vuelve
 
     window = MainWindow()
     Preferences.get_style(window)

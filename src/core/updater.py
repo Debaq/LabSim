@@ -137,18 +137,37 @@ nohup ./run.sh >/dev/null 2>&1 &
 """
 
 
-def apply_update_and_restart(download_url: str) -> None:
+def apply_update_and_restart(download_url: str, on_progress=None) -> None:
     """Descarga el asset, lo extrae, lanza el script que hace el swap una
     vez que este proceso muera, y termina el proceso actual. No vuelve:
-    llama a os._exit al final."""
+    llama a os._exit al final.
+
+    on_progress(stage, current, total), si se pasa, se llama durante cada
+    etapa ('download', 'extract', 'restart') para que el caller (main.py)
+    pueda mostrar una barra de progreso -- sin esto la descarga/extracción
+    queda muda y la ventana parece congelada."""
+    def report(stage, current=0, total=0):
+        if on_progress:
+            on_progress(stage, current, total)
+
     dist_dir = Path(sys.executable).resolve().parent
 
     tmp_dir = Path(tempfile.mkdtemp(prefix="labsim_update_"))
     archive_path = tmp_dir / ASSET_NAME
     req = Request(download_url)
+    report("download", 0, 0)
     with urlopen(req, timeout=60) as resp, open(archive_path, "wb") as f:
-        shutil.copyfileobj(resp, f)
+        total = int(resp.headers.get("Content-Length") or 0)
+        downloaded = 0
+        while True:
+            chunk = resp.read(65536)
+            if not chunk:
+                break
+            f.write(chunk)
+            downloaded += len(chunk)
+            report("download", downloaded, total)
 
+    report("extract", 0, 0)
     extract_dir = tmp_dir / "extracted"
     with tarfile.open(archive_path) as tf:
         tf.extractall(extract_dir)
@@ -164,6 +183,7 @@ def apply_update_and_restart(download_url: str) -> None:
     script_path.write_text(_UPDATER_SCRIPT, encoding="utf-8")
     script_path.chmod(0o755)
 
+    report("restart", 0, 0)
     subprocess.Popen(
         [str(script_path), str(os.getpid()), str(dist_dir), str(new_dist)],
         start_new_session=True,
