@@ -124,6 +124,11 @@ CREATE TABLE IF NOT EXISTS patients (
     nombre TEXT NOT NULL DEFAULT '',
     apellido TEXT NOT NULL DEFAULT '',
     fecha_nac TEXT NOT NULL DEFAULT '',
+    -- Historia clínica base del paciente: texto libre editado por el admin
+    -- en case_create.php (Patients::updateHistoriaClinica). Distinto de
+    -- attendances.nota, que es la nota individual de cada alumno por
+    -- atención -- esa no se toca desde acá.
+    historia_clinica TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

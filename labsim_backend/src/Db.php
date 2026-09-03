@@ -233,6 +233,16 @@ final class Db
         self::addColumnIfMissing(self::get(), 'llm_config', 'oirs_prompt_template', "TEXT NOT NULL DEFAULT ''");
     }
 
+    /**
+     * Agrega historia_clinica a patients -- instalaciones de antes de que
+     * esa columna existiera. CREATE TABLE IF NOT EXISTS de schema.sql no
+     * toca columnas de una tabla que ya existe, por eso el ALTER TABLE acá.
+     */
+    public static function migratePatientHistoriaClinicaIfNeeded(): void
+    {
+        self::addColumnIfMissing(self::get(), 'patients', 'historia_clinica', "TEXT NOT NULL DEFAULT ''");
+    }
+
     public static function migrateCoursesIfNeeded(): void
     {
         $pdo = self::get();

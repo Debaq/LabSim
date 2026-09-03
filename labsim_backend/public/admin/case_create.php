@@ -192,6 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $v['nombre'] = $editPatient['nombre'] ?? '';
     $v['apellido'] = $editPatient['apellido'] ?? '';
     $v['fecha_nac'] = $editFechaNacDisplay;
+    $v['historia_clinica'] = $editPatient['historia_clinica'] ?? '';
 } else {
     $v = [];
 }
@@ -459,6 +460,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $editPatientId = Patients::upsertByRut($pdo, $editRut, $editNombre, $editApellido, $editFechaNacVal);
                 }
+                $editHistoriaClinica = trim((string) ($v['historia_clinica'] ?? ''));
+                Patients::updateHistoriaClinica($pdo, $editPatientId, $editHistoriaClinica);
+                // También va en cases.data (no solo en patients) para que llegue
+                // al cliente de escritorio via sync.php -- ese endpoint sincroniza
+                // cases, no patients. Soporta llaves {{N}} (N = offset en días
+                // respecto a la fecha de la cita, ej. {{-5}}) que Agenda.py
+                // resuelve a una fecha concreta al armar la ficha del alumno.
+                $data['historia_clinica'] = $editHistoriaClinica;
 
                 // paciente_snapshot: se mantiene sincronizado con patients --
                 // agenda.php lo sigue leyendo para precargar el formulario de
@@ -502,6 +511,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
 
             $newPatientId = Patients::upsertByRut($pdo, $snapshotRut, $snapshotNombre, $snapshotApellido, $snapshotFechaNac);
+            $newHistoriaClinica = trim((string) ($v['historia_clinica'] ?? ''));
+            Patients::updateHistoriaClinica($pdo, $newPatientId, $newHistoriaClinica);
+            // Ídem rama de edición más arriba: también en cases.data para sync.php.
+            $data['historia_clinica'] = $newHistoriaClinica;
 
             $pdo->prepare(
                 "INSERT INTO cases (id, data, updated_at, patient_id) VALUES (?, ?, CURRENT_TIMESTAMP, ?)
@@ -677,6 +690,11 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     </div>
     <p class="legend" style="font-size:0.8rem;">Esto edita al <strong>paciente</strong>: el cambio se aplica también a cualquier otra cita/ronda de la misma persona.</p>
     <?php endif; ?>
+
+    <label>Historia clínica
+        <textarea name="historia_clinica" rows="6" style="width:100%; padding:0.45rem; margin-top:0.2rem; border:1px solid #ccc; border-radius:4px;" placeholder="Antecedentes generales, evolución, observaciones del paciente..."><?= htmlspecialchars((string) ($v['historia_clinica'] ?? '')) ?></textarea>
+    </label>
+    <p class="legend" style="font-size:0.8rem;">Historia clínica base del <strong>paciente</strong> (no depende del caso). No incluye las notas individuales de cada alumno por atención -- esas se ven en la agenda/asistencia, no se editan acá.</p>
 
     <div class="photo-block">
         <strong style="display:block; margin-bottom:0.4rem;">Foto</strong>
@@ -1431,8 +1449,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 // Ficha Otoscopia: sin selector de modo -- 1 sola fase ya ES "única"; se
 // agrega/quita fase (solo la última -- así no hay que reindexar archivos
 // en disco), y se sube/borra cada imagen por fetch + FormData (mismo
-// patrón que la foto de paciente, pero sin recorte: OtoscopiaPhoto::save()
-// solo reduce tamaño).
+// patrón que la foto de paciente, pero sin selector de recorte manual:
+// OtoscopiaPhoto::save() recorta un cuadrado centrado y normaliza tamaño).
 (function () {
     var CASE_ID = <?= json_encode($photoCaseId) ?>;
     var countInput = document.getElementById('otoscopia-fase-count');

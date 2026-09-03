@@ -49,9 +49,24 @@ final class Patients
 
     public static function find(PDO $pdo, int $patientId): ?array
     {
-        $stmt = $pdo->prepare('SELECT id, rut, nombre, apellido, fecha_nac FROM patients WHERE id = ?');
+        $stmt = $pdo->prepare('SELECT id, rut, nombre, apellido, fecha_nac, historia_clinica FROM patients WHERE id = ?');
         $stmt->execute([$patientId]);
         $row = $stmt->fetch();
         return $row !== false ? $row : null;
+    }
+
+    /**
+     * Solo toca historia_clinica -- separado de update() para que ningún
+     * caller de update()/upsertByRut() (agenda.php, appointment_upsert.php,
+     * que no conocen este campo) pueda pisarla sin querer con ''. Es texto
+     * libre editado por el admin en case_create.php; distinto de
+     * attendances.nota (nota individual de cada alumno por atención, no se
+     * edita acá).
+     */
+    public static function updateHistoriaClinica(PDO $pdo, int $patientId, string $historiaClinica): void
+    {
+        $pdo->prepare(
+            'UPDATE patients SET historia_clinica = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+        )->execute([$historiaClinica, $patientId]);
     }
 }

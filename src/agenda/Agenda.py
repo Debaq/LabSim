@@ -8,6 +8,7 @@
 #   NOTA: si no hablas español, no es mi culpa, aprende         #
 #################################################################
 
+import re
 import requests
 from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import (QTableWidgetItem, QAbstractItemView,
@@ -49,6 +50,11 @@ CANCELADA_COLOR = QColor(225, 225, 225)
 
 
 NOTE_COL = 7
+
+# Llaves {{N}} dentro de historia_clinica (N = offset en días respecto a la
+# fecha de la cita, puede ser negativo). Ej.: "{{-5}} atendido por ORL" se
+# resuelve a la fecha real 5 días antes de la cita agendada.
+HISTORIA_CLINICA_FECHA_RE = re.compile(r"\{\{([+-]?\d+)\}\}")
 
 ANTECEDENTES_LABELS = {
     "hipoacusia_familiar": "Hipoacusia familiar",
@@ -749,6 +755,22 @@ class Agenda(QWidget, Ui_Form):
         if self.main_window is not None and hasattr(self.main_window, "abrir_chat_con"):
             self.main_window.abrir_chat_con(case_id, nombre or "el paciente", edad, procedimiento, appointment_id)
 
+    def _resolver_fechas_historia_clinica(self, texto, fecha_cita_str):
+        """Reemplaza cada {{N}} en texto por la fecha N días respecto a
+        fecha_cita_str (formato "dd-MM-yy", mismo que row[0]). Si la fecha de
+        la cita no es válida, deja la llave tal cual (mejor eso que una fecha
+        inventada)."""
+        if not texto:
+            return texto
+        fecha_cita = QDate.fromString(fecha_cita_str, "dd-MM-yy") if fecha_cita_str else QDate()
+
+        def _reemplazar(match):
+            if not fecha_cita.isValid():
+                return match.group(0)
+            return fecha_cita.addDays(int(match.group(1))).toString("dd-MM-yyyy")
+
+        return HISTORIA_CLINICA_FECHA_RE.sub(_reemplazar, texto)
+
     def _render_ficha_html(self, row, caso):
         rut = row[2] if len(row) > 2 else ""
         nombre = row[3] if len(row) > 3 else ""
@@ -763,6 +785,12 @@ class Agenda(QWidget, Ui_Form):
                        f"<b>Fecha de nacimiento:</b> {fecha_nac}<br>"
                        f"<b>Procedimiento:</b> {procedimiento}<br>"
                        f"<b>Cita agendada:</b> {fecha_hora or 'sin agendar'}</p>")
+
+        historia_clinica = caso.get("historia_clinica", "") if isinstance(caso, dict) else ""
+        if historia_clinica:
+            historia_resuelta = self._resolver_fechas_historia_clinica(historia_clinica, row[0] if len(row) > 0 else "")
+            partes.append("<h3>Historia clínica</h3>")
+            partes.append(f"<p>{historia_resuelta}</p>")
 
         anamnesis = caso.get("Anamnesis", {}) if isinstance(caso, dict) else {}
         antecedentes = anamnesis.get("antecedentes", {}) if isinstance(anamnesis, dict) else {}
