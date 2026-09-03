@@ -62,4 +62,17 @@ else
         --notes "Build PyInstaller (Linux) de LabSim, build ${BUILD_ID}."
 fi
 
+# Borra cualquier otro release pyinstaller-v* -- el updater viejo instalado
+# en los clientes agarra "el primero que matchea el prefijo" sin ordenar
+# por fecha (ver core/updater.py), así que si queda más de un candidato
+# puede no detectar el más nuevo. Con uno solo, no hay ambigüedad posible.
+OLD_TAGS=$(gh release list --json tagName -q ".[] | select(.tagName | startswith(\"pyinstaller-v\")) | select(.tagName != \"${TAG}\") | .tagName")
+if [ -n "$OLD_TAGS" ]; then
+    echo "Borrando releases pyinstaller-v* viejos:"
+    while IFS= read -r old_tag; do
+        echo "  - ${old_tag}"
+        gh release delete "$old_tag" --yes --cleanup-tag
+    done <<< "$OLD_TAGS"
+fi
+
 echo "Listo: https://github.com/Debaq/LabSim/releases/tag/${TAG}"
