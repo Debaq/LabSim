@@ -7,10 +7,19 @@ assets .deb/.rpm/.AppImage/.exe/.msi). Para no mezclarse con esos, esta
 build usa su propio prefijo de tag: 'pyinstaller-v<version>', con un único
 asset 'LabSim-linux-x86_64.tar.gz' que es el tar de la carpeta dist/LabSim.
 
-Solo se reemplaza el código (LabSim + _internal/ + run.sh). resources/ no
-se toca nunca: ahí vive la data local del usuario en modo offline
-(cases/cases.json, json/schedule.json, local_cache/logs.db, preferencias
-editadas en runtime -- ver core/helpers.py y backend/log_queue.py).
+Reemplaza el código (LabSim + _internal/ + run.sh) y también sincroniza
+resources/ con la versión nueva -- EXCEPTO la data dinámica del usuario en
+modo offline: resources/cases/ (cases.json, labsim.json), resources/local_cache/
+(logs.db, cola de acciones), resources/json/session.json (sesión logueada)
+y resources/json/schedule.json (caché de agenda). Todo lo demás bajo
+resources/ (apps.json y el resto de json/, styles/, img/, font/, UI/,
+audio/) es config/asset estático que se define en el repo y nunca se
+edita en runtime (Preferences.set() ni siquiera está implementado, ver
+core/helpers.py) -- si no se sincronizara, un usuario que se actualiza
+in-place (sin reinstalar desde cero) se quedaría para siempre con el
+apps.json del día que instaló, aunque el código nuevo ya espere entradas
+que ese archivo no tiene (síntoma: KeyError al abrir una ventana nueva
+que ese apps.json viejo no conoce).
 """
 import json
 import os
@@ -109,8 +118,9 @@ def check_for_update(current_version: str):
 
 _UPDATER_SCRIPT = """#!/bin/bash
 # Generado por core/updater.py -- espera a que cierre el proceso viejo,
-# reemplaza codigo (bin + _internal + run.sh) y relanza. resources/ no
-# se toca: ahi vive la data local del usuario.
+# reemplaza codigo (bin + _internal + run.sh), sincroniza resources/
+# (salvo la data dinamica del usuario -- ver docstring del modulo) y
+# relanza.
 set -e
 PID="$1"
 DIST_DIR="$2"
@@ -131,6 +141,34 @@ cp -a "$NEW_DIST/LabSim" "$DIST_DIR/LabSim"
 cp -a "$NEW_DIST/run.sh" "$DIST_DIR/run.sh"
 [ -f "$NEW_DIST/BUILD_VERSION" ] && cp -a "$NEW_DIST/BUILD_VERSION" "$DIST_DIR/BUILD_VERSION"
 chmod +x "$DIST_DIR/LabSim" "$DIST_DIR/run.sh"
+
+# resources/: se sincroniza con la version nueva salvo las carpetas/archivos
+# 100% dinamicos del usuario (cases/, local_cache/, json/session.json,
+# json/schedule.json) -- todo lo demas (apps.json, el resto de json/,
+# styles/, img/, font/, UI/, audio/) es config/asset estatico que debe
+# quedar al dia con cada release, no solo en una instalacion nueva.
+if [ -d "$NEW_DIST/resources" ]; then
+    mkdir -p "$DIST_DIR/resources"
+    for item in "$NEW_DIST/resources"/*; do
+        name="$(basename "$item")"
+        case "$name" in
+            cases|local_cache) continue ;;
+        esac
+        if [ "$name" = "json" ]; then
+            mkdir -p "$DIST_DIR/resources/json"
+            for jf in "$item"/*; do
+                jname="$(basename "$jf")"
+                case "$jname" in
+                    session.json|schedule.json) continue ;;
+                esac
+                cp -a "$jf" "$DIST_DIR/resources/json/$jname"
+            done
+        else
+            rm -rf "$DIST_DIR/resources/$name"
+            cp -a "$item" "$DIST_DIR/resources/$name"
+        fi
+    done
+fi
 
 rm -rf "$(dirname "$NEW_DIST")"
 
