@@ -298,10 +298,19 @@ final class Auth
         }
     }
 
+    private const TOKEN_INACTIVE_DAYS = 30;
+
     private static function issueTokenFor(int $userId): array
     {
+        $pdo = Db::get();
         $token = bin2hex(random_bytes(32));
-        Db::get()->prepare('INSERT INTO tokens (token, user_id) VALUES (?, ?)')->execute([$token, $userId]);
+        $pdo->prepare('INSERT INTO tokens (token, user_id) VALUES (?, ?)')->execute([$token, $userId]);
+        // Purga oportunista de tokens inactivos -- no se puede borrar "todos
+        // menos el último" porque un mismo user entra desde varios
+        // dispositivos a la vez; solo se descartan los que ya nadie usa.
+        $pdo->exec(
+            "DELETE FROM tokens WHERE last_seen_at < datetime('now', '-" . self::TOKEN_INACTIVE_DAYS . " days')"
+        );
         return [
             'token' => $token,
             'user' => self::userProfile($userId),
