@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = BASE_DIR / 'resources' / 'config' / 'config.json'
 LOG_FILE = BASE_DIR / 'log_file.txt'
 
-__VERSION__ = 'v0.9.9'
+__VERSION__ = 'v0.9.8'
 # Build real (con sufijo -r<commit> si aplica) para mostrar en el título --
 # __VERSION__ solo no alcanza porque no sube en cada build de prueba.
 DISPLAY_VERSION = f"v{local_build_id(__VERSION__.lstrip('v'))}"
