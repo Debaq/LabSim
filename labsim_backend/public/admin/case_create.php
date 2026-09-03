@@ -7,6 +7,7 @@ require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/CaseBuilder.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/../../src/PatientPhoto.php';
+require_once __DIR__ . '/../../src/OtoscopiaPhoto.php';
 require_once __DIR__ . '/../../src/Patients.php';
 
 /**
@@ -181,6 +182,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $v = [];
 }
 
+// Otoscopia: el shape de $v['otoscopia'] difiere según de dónde viene --
+// CaseBuilder::caseDataToForm() (carga inicial al editar) entrega
+// ['modo', 'fases' => [['texto'=>...], ...]], mientras que un submit
+// fallido deja $v['otoscopia'] = $_POST tal cual (['modo', 'fase_count',
+// 'texto' => [n => ...]]) para redibujar el form sticky. Se normaliza acá
+// a variables sueltas en vez de forzar un shape único en $v, para no
+// perder los valores ya tipeados si falla la validación.
+$otoscopiaModo = ((string) ($v['otoscopia']['modo'] ?? 'unica')) === 'fases' ? 'fases' : 'unica';
+if (isset($v['otoscopia']['fases']) && is_array($v['otoscopia']['fases'])) {
+    $otoscopiaCount = max(1, count($v['otoscopia']['fases']));
+    $otoscopiaTextoAt = static function (int $n) use ($v): string {
+        return (string) ($v['otoscopia']['fases'][$n]['texto'] ?? '');
+    };
+} else {
+    $otoscopiaCount = max(1, min(CaseBuilder::OTOSCOPIA_MAX_FASES, (int) ($v['otoscopia']['fase_count'] ?? 1)));
+    $otoscopiaTextoAt = static function (int $n) use ($v): string {
+        return (string) fv($v, ['otoscopia', 'texto', (string) $n], '');
+    };
+}
+if ($otoscopiaModo === 'unica') {
+    $otoscopiaCount = 1;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Auth::requireCsrf();
     $formAction = (string) ($v['form_action'] ?? '');
@@ -316,6 +340,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $tinnitusRuido = (string) ($v['tinnitus']['ruido'] ?? CaseBuilder::TINNITUS_RUIDO_OPTIONS[0]);
         $tinnitusFrecuencia = (int) ($v['tinnitus']['frecuencia'] ?? CaseBuilder::FREQUENCIES[0]);
 
+        // Otoscopia: "unica" fuerza siempre 1 sola fase (sin texto), sin
+        // importar qué haya llegado en fase_count -- las imágenes de fases
+        // más allá de la 1 (si las hubo antes de cambiar el modo) quedan
+        // huérfanas en disco pero no se borran solas: cambiar el modo de
+        // vuelta a "fases" las vuelve a mostrar tal cual quedaron.
+        $otoscopiaModo = ((string) ($v['otoscopia']['modo'] ?? 'unica')) === 'fases' ? 'fases' : 'unica';
+        if ($otoscopiaModo === 'unica') {
+            $otoscopiaFases = [['texto' => '']];
+        } else {
+            $otoscopiaCount = max(1, min(CaseBuilder::OTOSCOPIA_MAX_FASES, (int) ($v['otoscopia']['fase_count'] ?? 1)));
+            $otoscopiaFases = [];
+            for ($n = 0; $n < $otoscopiaCount; $n++) {
+                // Fase 1 (índice 0) nunca tiene texto -- todavía no hay
+                // "fase anterior" que describir.
+                $texto = $n === 0 ? '' : trim((string) fv($v, ['otoscopia', 'texto', (string) $n], ''));
+                $otoscopiaFases[] = ['texto' => $texto];
+            }
+        }
+
         if ($age <= 0) {
             $error = 'Falta la edad.';
         } elseif (!$isUpdate && ($nombre1 === '' || $apellido1 === '')) {
@@ -397,6 +440,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ],
                 'comportamiento' => trim((string) ($v['comportamiento'] ?? '')),
                 'disposicion' => (int) ($v['disposicion'] ?? 0),
+                'otoscopia' => [
+                    'modo' => $otoscopiaModo,
+                    'fases' => $otoscopiaFases,
+                ],
             ]);
 
             if ($isUpdate) {
@@ -539,6 +586,16 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     .patient-avatar { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; background: #eee; flex-shrink: 0; }
     .patient-avatar-empty { display: flex; align-items: center; justify-content: center; color: #999; font-size: 0.7rem; text-align: center; }
 
+    /* Ficha Otoscopia: fases apiladas, cada una con imagen OD/OI. */
+    .otoscopia-fase { margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px solid #eee; }
+    .otoscopia-fase:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+    .otoscopia-photo-slot { text-align: center; }
+    .otoscopia-thumb { display: block; width: 100%; max-width: 220px; height: 160px; object-fit: cover;
+                        border-radius: 6px; background: #eee; margin: 0.3rem auto; }
+    .otoscopia-thumb-empty { display: flex; align-items: center; justify-content: center; width: 100%; max-width: 220px;
+                              height: 160px; border-radius: 6px; background: #f2f2f2; color: #999; font-size: 0.78rem;
+                              margin: 0.3rem auto; }
+
     .photo-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100;
                    display: flex; align-items: center; justify-content: center; }
     .photo-modal[hidden] { display: none; }
@@ -558,6 +615,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <?php if ($isEdit): ?><input type="hidden" name="case_id" value="<?= htmlspecialchars($editId) ?>"><?php endif; ?>
 <div class="tabs" role="tablist">
     <button type="button" class="tab-btn active" data-tab="paciente">Paciente</button>
+    <button type="button" class="tab-btn" data-tab="otoscopia">Otoscopia</button>
     <button type="button" class="tab-btn" data-tab="audiometria">Audiometría</button>
     <button type="button" class="tab-btn" data-tab="timpanometria">Timpanometría</button>
     <button type="button" class="tab-btn" data-tab="tinnitus">Tinnitus</button>
@@ -625,6 +683,62 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     </div>
     <?php else: ?>
     <p class="legend" style="margin-top:1rem;">La foto se sube después de guardar el paciente por primera vez.</p>
+    <?php endif; ?>
+</div>
+</div>
+
+<div class="tab-panel" data-tab="otoscopia">
+<div class="card">
+    <strong>Otoscopia</strong>
+    <p class="legend">Única: una imagen por oído, nada más. Por fase: varias tomas en el tiempo por oído -- cada fase (desde la 2ª) lleva un texto libre que describe qué pasó entremedio (ej. "se realizó un lavado ótico"). Qué fase le corresponde ver a cada alumno según su propio avance con este paciente no está implementado todavía (ver TODO.md); por ahora siempre se muestra la fase 1.</p>
+
+    <label style="max-width:16rem;">Modo
+        <select name="otoscopia[modo]" id="otoscopia-modo">
+            <?php foreach (['unica' => 'Única', 'fases' => 'Por fase'] as $modoVal => $modoLabel): ?>
+            <option value="<?= $modoVal ?>" <?= $otoscopiaModo === $modoVal ? 'selected' : '' ?>><?= $modoLabel ?></option>
+            <?php endforeach; ?>
+        </select>
+    </label>
+
+    <input type="hidden" name="otoscopia[fase_count]" id="otoscopia-fase-count" value="<?= $otoscopiaCount ?>">
+    <p id="otoscopia-msg" class="legend" hidden></p>
+
+    <div id="otoscopia-fases">
+        <?php for ($faseIdx = 0; $faseIdx < $otoscopiaCount; $faseIdx++): ?>
+        <div class="otoscopia-fase" data-fase-idx="<?= $faseIdx ?>" <?= ($otoscopiaModo === 'unica' && $faseIdx > 0) ? 'hidden' : '' ?>>
+            <div class="side-heading">
+                <span class="side-tag">Fase <?= $faseIdx + 1 ?></span>
+                <?php if ($faseIdx > 0): ?>
+                <button type="button" class="secondary otoscopia-remove-fase otoscopia-fases-only" data-fase-idx="<?= $faseIdx ?>" <?= $faseIdx === $otoscopiaCount - 1 ? '' : 'hidden' ?>>Quitar esta fase</button>
+                <?php endif; ?>
+            </div>
+            <?php if ($faseIdx > 0): ?>
+            <label>¿Qué pasó desde la fase anterior? (texto libre, se muestra al alumno)
+                <textarea name="otoscopia[texto][<?= $faseIdx ?>]" rows="2"><?= htmlspecialchars($otoscopiaTextoAt($faseIdx)) ?></textarea>
+            </label>
+            <?php endif; ?>
+            <div class="two-col">
+                <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
+                <div class="otoscopia-photo-slot">
+                    <span class="side-tag <?= $side ?>"><?= $sideLabel ?></span><br>
+                    <?php if ($isEdit): $hasOto = OtoscopiaPhoto::has($editId, $side, $faseIdx); ?>
+                    <img class="otoscopia-thumb" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>"
+                         src="otoscopia_photo.php?case_id=<?= urlencode($editId) ?>&amp;side=<?= $side ?>&amp;fase=<?= $faseIdx ?>&amp;v=<?= time() ?>"
+                         alt="Otoscopia <?= $sideLabel ?> fase <?= $faseIdx + 1 ?>" <?= $hasOto ? '' : 'hidden' ?>>
+                    <div class="otoscopia-thumb-empty" <?= $hasOto ? 'hidden' : '' ?>>Sin imagen</div>
+                    <input type="file" class="otoscopia-photo-input" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>" accept="image/jpeg,image/png,image/webp">
+                    <?php else: ?>
+                    <p class="legend">La imagen se sube después de guardar el paciente por primera vez.</p>
+                    <?php endif; ?>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endfor; ?>
+    </div>
+
+    <?php if ($isEdit): ?>
+    <button type="button" id="otoscopia-add-fase" class="secondary otoscopia-fases-only" <?= $otoscopiaModo === 'fases' ? '' : 'hidden' ?>>+ Agregar fase</button>
     <?php endif; ?>
 </div>
 </div>
@@ -1317,6 +1431,166 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 })();
 </script>
 <?php endif; ?>
+
+<script>
+// Ficha Otoscopia: toggle único/por fase, agregar/quitar fase (solo la
+// última -- así no hay que reindexar archivos en disco), y subida/borrado
+// de cada imagen por fetch + FormData (mismo patrón que la foto de
+// paciente, pero sin recorte: OtoscopiaPhoto::save() solo reduce tamaño).
+(function () {
+    var CASE_ID = <?= json_encode($editId) ?>;
+    var modoSelect = document.getElementById('otoscopia-modo');
+    var countInput = document.getElementById('otoscopia-fase-count');
+    var container = document.getElementById('otoscopia-fases');
+    var addBtn = document.getElementById('otoscopia-add-fase');
+    var msgEl = document.getElementById('otoscopia-msg');
+    if (!modoSelect || !countInput || !container) { return; }
+
+    function csrfToken() {
+        var el = document.querySelector('input[name="csrf_token"]');
+        return el ? el.value : '';
+    }
+
+    function showMsg(text, isError) {
+        if (!msgEl) { return; }
+        msgEl.textContent = text;
+        msgEl.style.color = isError ? '#a33' : '#2a7a2a';
+        msgEl.hidden = false;
+    }
+
+    function faseBlocks() {
+        return Array.prototype.slice.call(container.querySelectorAll('.otoscopia-fase'));
+    }
+
+    function applyModo() {
+        var isFases = modoSelect.value === 'fases';
+        faseBlocks().forEach(function (block) {
+            var idx = parseInt(block.getAttribute('data-fase-idx'), 10);
+            block.hidden = !isFases && idx > 0;
+        });
+        document.querySelectorAll('.otoscopia-fases-only').forEach(function (el) {
+            if (el.id === 'otoscopia-add-fase') {
+                el.hidden = !isFases;
+            }
+        });
+        updateRemoveButtons();
+    }
+
+    // Solo la última fase puede quitarse (sin reindexar imágenes en disco).
+    function updateRemoveButtons() {
+        var blocks = faseBlocks();
+        blocks.forEach(function (block, i) {
+            var btn = block.querySelector('.otoscopia-remove-fase');
+            if (btn) {
+                btn.hidden = i !== blocks.length - 1;
+            }
+        });
+    }
+
+    modoSelect.addEventListener('change', applyModo);
+
+    function faseBlockHtml(idx) {
+        var sides = [['od', 'OD'], ['oi', 'OI']];
+        var slots = sides.map(function (s) {
+            var side = s[0], label = s[1];
+            if (!CASE_ID) {
+                return '<div class="otoscopia-photo-slot"><span class="side-tag ' + side + '">' + label + '</span><br>' +
+                    '<p class="legend">La imagen se sube después de guardar el paciente por primera vez.</p></div>';
+            }
+            return '<div class="otoscopia-photo-slot"><span class="side-tag ' + side + '">' + label + '</span><br>' +
+                '<img class="otoscopia-thumb" data-side="' + side + '" data-fase-idx="' + idx + '" hidden alt="Otoscopia ' + label + ' fase ' + (idx + 1) + '">' +
+                '<div class="otoscopia-thumb-empty">Sin imagen</div>' +
+                '<input type="file" class="otoscopia-photo-input" data-side="' + side + '" data-fase-idx="' + idx + '" accept="image/jpeg,image/png,image/webp"></div>';
+        }).join('');
+        return '<div class="otoscopia-fase" data-fase-idx="' + idx + '">' +
+            '<div class="side-heading"><span class="side-tag">Fase ' + (idx + 1) + '</span>' +
+            '<button type="button" class="secondary otoscopia-remove-fase" data-fase-idx="' + idx + '">Quitar esta fase</button></div>' +
+            '<label>¿Qué pasó desde la fase anterior? (texto libre, se muestra al alumno)' +
+            '<textarea name="otoscopia[texto][' + idx + ']" rows="2"></textarea></label>' +
+            '<div class="two-col">' + slots + '</div></div>';
+    }
+
+    if (addBtn) {
+        addBtn.addEventListener('click', function () {
+            var count = parseInt(countInput.value, 10) || 1;
+            if (count >= <?= CaseBuilder::OTOSCOPIA_MAX_FASES ?>) {
+                showMsg('Ya se alcanzó el máximo de fases.', true);
+                return;
+            }
+            var wrapper = document.createElement('div');
+            wrapper.innerHTML = faseBlockHtml(count);
+            container.appendChild(wrapper.firstElementChild);
+            countInput.value = String(count + 1);
+            updateRemoveButtons();
+        });
+    }
+
+    container.addEventListener('click', function (e) {
+        var btn = e.target.closest('.otoscopia-remove-fase');
+        if (!btn) { return; }
+        var blocks = faseBlocks();
+        var idx = parseInt(btn.getAttribute('data-fase-idx'), 10);
+        if (idx !== blocks.length - 1 || idx === 0) { return; } // defensivo: solo la última, nunca la 1ª
+        if (!confirm('¿Quitar la fase ' + (idx + 1) + '? Se borran también sus imágenes.')) { return; }
+
+        var block = blocks[blocks.length - 1];
+        if (CASE_ID) {
+            ['od', 'oi'].forEach(function (side) {
+                var fd = new FormData();
+                fd.append('csrf_token', csrfToken());
+                fd.append('case_id', CASE_ID);
+                fd.append('side', side);
+                fd.append('fase_idx', String(idx));
+                fd.append('action', 'delete');
+                fetch('otoscopia_photo_upload.php', { method: 'POST', body: fd }); // best-effort, no bloquea el UI
+            });
+        }
+        block.remove();
+        countInput.value = String(idx);
+        updateRemoveButtons();
+    });
+
+    // Subida de cada imagen: delegado en el contenedor porque las fases
+    // agregadas después no existían al cargar la página.
+    container.addEventListener('change', function (e) {
+        var input = e.target.closest('.otoscopia-photo-input');
+        if (!input || !input.files || !input.files[0]) { return; }
+        var side = input.getAttribute('data-side');
+        var idx = input.getAttribute('data-fase-idx');
+        var slot = input.closest('.otoscopia-photo-slot');
+        var img = slot.querySelector('.otoscopia-thumb');
+        var empty = slot.querySelector('.otoscopia-thumb-empty');
+
+        var fd = new FormData();
+        fd.append('csrf_token', csrfToken());
+        fd.append('case_id', CASE_ID);
+        fd.append('side', side);
+        fd.append('fase_idx', idx);
+        fd.append('photo', input.files[0]);
+
+        input.disabled = true;
+        fetch('otoscopia_photo_upload.php', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                input.disabled = false;
+                if (data.ok) {
+                    img.src = 'otoscopia_photo.php?case_id=' + encodeURIComponent(CASE_ID) + '&side=' + side + '&fase=' + idx + '&v=' + Date.now();
+                    img.hidden = false;
+                    empty.hidden = true;
+                    showMsg('Imagen actualizada.', false);
+                } else {
+                    showMsg(data.error || 'No se pudo guardar la imagen.', true);
+                }
+            })
+            .catch(function () {
+                input.disabled = false;
+                showMsg('Error de red al subir la imagen.', true);
+            });
+    });
+
+    applyModo();
+})();
+</script>
 
 <script>
 // Tabs de fichas -- se activan solo si corre JS (body.js-tabs), así sin JS

@@ -116,6 +116,19 @@ def foto_paciente(case_id):
         return None
 
 
+def foto_otoscopia(case_id, side, fase=0):
+    """Imagen de otoscopia (bytes JPEG) de un oído/fase puntual, o None si
+    no tiene imagen subida o no hay conexión al backend -- mismo criterio
+    que foto_paciente: una falla de red acá no bloquea la ventana, solo
+    deja el aviso de "sin imagen"."""
+    if not _is_backend_mode():
+        return None
+    try:
+        return _get_backend_client().get_otoscopia_photo(case_id, side, fase)
+    except requests.RequestException:
+        return None
+
+
 def reset_backend_session() -> None:
     """Descarta el singleton de BackendClient y los snapshots en memoria.
 

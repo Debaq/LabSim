@@ -22,6 +22,15 @@ final class CaseBuilder
         'tce' => 'TCE', 'diabetes' => 'Diabetes', 'hta' => 'HTA',
     ];
 
+    // Ficha Otoscopia: "unica" = 1 imagen por oído, fijo. "fases" = varias
+    // tomas en el tiempo por oído (misma cantidad para OD y OI, ver
+    // decisión de diseño), cada una con un texto libre que describe qué
+    // pasó desde la fase anterior (vacío en la fase 1 -- todavía no hay
+    // "anterior"). Qué fase le corresponde ver a cada alumno según su
+    // propio avance con ese paciente: TODO, ver TODO.md.
+    public const OTOSCOPIA_MODES = ['unica', 'fases'];
+    public const OTOSCOPIA_MAX_FASES = 20;
+
     public const Z_OPTIONS = ['A', 'As', 'Ad', 'C', 'Cs', 'B'];
     public const ETF_OPTIONS = ['Normal', 'Disfunción tubaria', 'Permeable', 'No permeable'];
 
@@ -365,6 +374,7 @@ final class CaseBuilder
             'PatientBehavior' => $form['comportamiento'] ?? '',
             'PatientDisposition' => (int) ($form['disposicion'] ?? 0),
             'Tinnitus' => $form['tinnitus'],
+            'Otoscopia' => $form['otoscopia'],
             'tipo' => 'normal',
         ];
     }
@@ -509,6 +519,20 @@ final class CaseBuilder
         $v['tinnitus']['predominio'] = $tinnitus['predominio'] ?? 'igual';
         $v['tinnitus']['ruido'] = $tinnitus['ruido'] ?? self::TINNITUS_RUIDO_OPTIONS[0];
         $v['tinnitus']['frecuencia'] = (string) ($tinnitus['frecuencia'] ?? self::FREQUENCIES[0]);
+
+        $otoscopia = $data['Otoscopia'] ?? [];
+        $otoscopiaModo = ($otoscopia['modo'] ?? 'unica') === 'fases' ? 'fases' : 'unica';
+        $otoscopiaFases = $otoscopia['fases'] ?? [];
+        if (!is_array($otoscopiaFases) || count($otoscopiaFases) === 0) {
+            $otoscopiaFases = [['texto' => '']];
+        }
+        $v['otoscopia'] = [
+            'modo' => $otoscopiaModo,
+            'fases' => array_map(
+                static fn($f) => ['texto' => (string) (is_array($f) ? ($f['texto'] ?? '') : '')],
+                array_values($otoscopiaFases)
+            ),
+        ];
 
         return $v;
     }

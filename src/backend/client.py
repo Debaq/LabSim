@@ -184,5 +184,11 @@ class BackendClient:
         labsim_backend). None si el paciente no tiene foto subida."""
         return self._get_bytes("/api/patient_photo.php", {"case_id": case_id, "type": "avatar"})
 
+    def get_otoscopia_photo(self, case_id: str, side: str, fase: int = 0) -> bytes | None:
+        """Imagen de otoscopia (JPEG, ver OtoscopiaPhoto::path en
+        labsim_backend) de un oído/fase puntual. None si no hay imagen
+        subida para ese oído/fase."""
+        return self._get_bytes("/api/otoscopia_photo.php", {"case_id": case_id, "side": side, "fase": fase})
+
     def post_logs_batch(self, entries: list[dict]) -> dict:
         return self._post("/api/logs_batch.php", {"entries": entries})
