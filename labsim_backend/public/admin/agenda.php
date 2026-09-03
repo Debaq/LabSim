@@ -101,6 +101,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($error === null && $courseId !== null && !$isFullAdmin && (!$myCourseIds || !in_array($courseId, $myCourseIds, true))) {
             $error = 'No tienes acceso a ese curso.';
         }
+        if ($error === null && $courseId === null && ($assignedStudentId !== null || $assignedGroupId !== null)) {
+            $error = 'No se puede asignar a un grupo o alumno sin seleccionar antes un curso.';
+        }
         if ($error === null && $courseId !== null) {
             if ($assignedStudentId !== null) {
                 $stmt = $pdo->prepare('SELECT 1 FROM course_students WHERE course_id = ? AND user_id = ?');
@@ -134,6 +137,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $willInsert = $appointmentId <= 0 || $isNewRound;
         if ($error === null && $willInsert && $courseId === null) {
             $error = 'Falta el curso (obligatorio para citas nuevas).';
+        }
+        if ($error === null && $willInsert && $courseId !== null && $assignedStudentId === null && $assignedGroupId === null) {
+            $error = 'Falta asignar la cita a un grupo o a un alumno específico (obligatorio para citas nuevas; '
+                . '"todo el curso" ya no es una opción de asignación para citas nuevas).';
         }
 
         if ($error === null) {
@@ -205,24 +212,63 @@ function legacy_to_iso(string $legacy): string
     return $d !== false ? $d->format('Y-m-d') : '';
 }
 
+/** Arma un link a agenda.php conservando los GET actuales (mes, filtro de curso/grupo/alumno, etc.). */
+function agenda_url(array $overrides = []): string
+{
+    $params = array_merge($_GET, $overrides);
+    $params = array_filter($params, static fn($v): bool => $v !== null && $v !== '');
+    return 'agenda.php' . ($params ? '?' . http_build_query($params) : '');
+}
+
 // Última cita de cada caso (si tiene varias, poco común, se usa la más
 // reciente). data trae paciente_snapshot si la cita que tenía se borró --
 // ver Cases::snapshotBeforeAppointmentDelete().
 // Docente: solo ve casos sin agendar (biblioteca compartida) + citas de
 // su(s) curso(s) + citas legado sin curso (course_id NULL) -- nunca citas
 // de un curso ajeno. Admin completo sin filtro.
-$courseScopeSql = '';
-$courseScopeParams = [];
+// Filtro de navegación (curso -> grupo/alumno), vía querystring -- separado
+// del permiso de arriba: el permiso dice qué puede ver un docente, el filtro
+// dice qué recorte de eso quiere ver ahora mismo (también sirve de vista de
+// ocupación acotada para el calendario más abajo).
+$availableCourseIds = array_map(static fn(array $c): int => (int) $c['id'], $availableCourses);
+
+$filterCourseId = isset($_GET['filter_course']) && $_GET['filter_course'] !== '' ? (int) $_GET['filter_course'] : null;
+if ($filterCourseId !== null && !in_array($filterCourseId, $availableCourseIds, true)) {
+    $filterCourseId = null; // curso ajeno/inexistente -- se ignora en silencio, es solo navegación
+}
+
+$filterGroupId = null;
+$filterStudentId = null;
+if ($filterCourseId !== null) {
+    $filterGroupId = isset($_GET['filter_group']) && $_GET['filter_group'] !== '' ? (int) $_GET['filter_group'] : null;
+    if ($filterGroupId !== null && !in_array($filterGroupId, array_column($groupsByCourse[$filterCourseId] ?? [], 'id'), true)) {
+        $filterGroupId = null;
+    }
+    $filterStudentId = isset($_GET['filter_student']) && $_GET['filter_student'] !== '' ? (int) $_GET['filter_student'] : null;
+    if ($filterStudentId !== null && !in_array($filterStudentId, array_column($studentsByCourse[$filterCourseId] ?? [], 'id'), true)) {
+        $filterStudentId = null;
+    }
+}
+
+$permissionSql = '1=1';
+$permissionParams = [];
 if (!$isFullAdmin) {
     if ($myCourseIds) {
         $placeholders = implode(',', array_fill(0, count($myCourseIds), '?'));
-        $courseScopeSql = " WHERE a.id IS NULL OR a.course_id IS NULL OR a.course_id IN ({$placeholders})";
-        $courseScopeParams = $myCourseIds;
+        $permissionSql = "(a.course_id IS NULL OR a.course_id IN ({$placeholders}))";
+        $permissionParams = $myCourseIds;
     } else {
         // docente sin curso asignado: igual ve biblioteca sin agendar + citas legado sin curso
-        $courseScopeSql = ' WHERE a.id IS NULL OR a.course_id IS NULL';
+        $permissionSql = 'a.course_id IS NULL';
     }
 }
+
+// Ojo: el filtro de curso/grupo/alumno NO acota esta lista -- "Pacientes
+// registrados" es la biblioteca de casos de TODO el sistema (compartida
+// entre cursos), no algo que pertenezca a un curso. El filtro solo acota
+// el calendario de ocupación más abajo (ver $calendarCases).
+$courseScopeSql = " WHERE a.id IS NULL OR ({$permissionSql})";
+$courseScopeParams = $permissionParams;
 $stmt = $pdo->prepare(
     "SELECT c.id, c.data, c.updated_at,
             a.id AS appointment_id, a.fecha, a.hora, a.rut, a.nombre, a.apellido, a.fecha_nac,
@@ -300,6 +346,16 @@ $today = date('Y-m-d');
 $monthNames = [1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril', 5 => 'mayo', 6 => 'junio',
                7 => 'julio', 8 => 'agosto', 9 => 'septiembre', 10 => 'octubre', 11 => 'noviembre', 12 => 'diciembre'];
 
+// El calendario SÍ se acota al filtro curso/grupo/alumno (a diferencia de la
+// tabla de pacientes) -- acá sirve como vista de ocupación de ese scope. El
+// alumno filtrado puede pertenecer a varios grupos, por eso se resuelven acá.
+$filterStudentGroupIds = [];
+if ($filterStudentId !== null) {
+    $stmt = $pdo->prepare('SELECT group_id FROM group_members WHERE user_id = ?');
+    $stmt->execute([$filterStudentId]);
+    $filterStudentGroupIds = array_map('intval', array_column($stmt->fetchAll(), 'group_id'));
+}
+
 $appointmentsByDay = [];
 foreach ($cases as $c) {
     if (!$c['appointment_id'] || $c['cancelada'] || $c['fecha'] === '') {
@@ -308,6 +364,28 @@ foreach ($cases as $c) {
     $iso = legacy_to_iso($c['fecha']);
     if ($iso === '' || substr($iso, 0, 7) !== $month) {
         continue;
+    }
+    if ($filterCourseId !== null) {
+        $cCourseId = $c['course_id'] !== null ? (int) $c['course_id'] : null;
+        $cGroupId = $c['assigned_group_id'] !== null ? (int) $c['assigned_group_id'] : null;
+        $cStudentId = $c['assigned_student_id'] !== null ? (int) $c['assigned_student_id'] : null;
+        if ($filterStudentId !== null) {
+            // filter_student solo se puede setear junto a un filter_course donde
+            // ya está matriculado (validado más arriba), por eso "todo el curso"
+            // (sin assigned_*) le aplica directo si el curso coincide.
+            $inScope = $cCourseId === null
+                || $cStudentId === $filterStudentId
+                || ($cGroupId !== null && in_array($cGroupId, $filterStudentGroupIds, true))
+                || ($cStudentId === null && $cGroupId === null && $cCourseId === $filterCourseId);
+        } elseif ($filterGroupId !== null) {
+            $inScope = $cGroupId === $filterGroupId
+                || ($cStudentId === null && $cGroupId === null && $cCourseId === $filterCourseId);
+        } else {
+            $inScope = $cCourseId === $filterCourseId;
+        }
+        if (!$inScope) {
+            continue;
+        }
     }
     $appointmentsByDay[$iso][] = $c;
 }
@@ -378,8 +456,18 @@ admin_header('Fichas Clínicas', $me);
         // "Reagendar" in-place (misma fila, sin ronda nueva) no exige curso --
         // se puede seguir editando datos de una cita legado sin forzarle uno.
         $requiresCourse = !$scheduleRow['appointment_id'] || $scheduleIsNewRound;
+        $isBrandNew = !$scheduleRow['appointment_id'];
         $curCourseId = (int) ($scheduleRow['course_id'] ?? 0);
-        $curAssignMode = $scheduleRow['assigned_student_id'] ? 'student' : ($scheduleRow['assigned_group_id'] ? 'group' : 'course');
+        $curGroupId = (int) ($scheduleRow['assigned_group_id'] ?? 0);
+        $curStudentId = (int) ($scheduleRow['assigned_student_id'] ?? 0);
+        // Caso sin cita aún + hay un filtro de curso/grupo/alumno activo en la
+        // pantalla: precarga el form con ese scope en vez de dejarlo en blanco.
+        if ($isBrandNew && $curCourseId === 0 && $filterCourseId !== null) {
+            $curCourseId = $filterCourseId;
+            $curGroupId = $filterGroupId ?? 0;
+            $curStudentId = $filterStudentId ?? 0;
+        }
+        $curAssignMode = $curStudentId ? 'student' : ($curGroupId ? 'group' : ($requiresCourse ? 'group' : 'course'));
         ?>
         <label>Curso<?= $requiresCourse ? ' *' : ' (solo aplica a citas/rondas nuevas)' ?>
             <select name="course_id" id="sched-course" <?= $requiresCourse ? 'required' : '' ?> onchange="onCourseChange()">
@@ -389,25 +477,27 @@ admin_header('Fichas Clínicas', $me);
                 <?php endforeach; ?>
             </select>
         </label>
-        <label>Asignar a
+        <label>Asignar a<?= $requiresCourse ? ' *' : '' ?>
             <select name="assign_mode" id="sched-assign-mode" onchange="onAssignModeChange()">
-                <option value="course" <?= $curAssignMode === 'course' ? 'selected' : '' ?>>Todo el curso</option>
+                <option value="course" <?= $curAssignMode === 'course' ? 'selected' : '' ?> <?= $requiresCourse ? 'disabled' : '' ?>>
+                    Todo el curso<?= $requiresCourse ? ' (solo lectura, valor histórico -- no disponible para citas nuevas)' : '' ?>
+                </option>
                 <option value="group" <?= $curAssignMode === 'group' ? 'selected' : '' ?>>Grupo</option>
                 <option value="student" <?= $curAssignMode === 'student' ? 'selected' : '' ?>>Alumno</option>
             </select>
         </label>
         <div id="sched-group-wrap">
             <label>Grupo
-                <select name="assigned_group_id" id="sched-group" data-selected="<?= (int) ($scheduleRow['assigned_group_id'] ?? 0) ?>"></select>
+                <select name="assigned_group_id" id="sched-group" data-selected="<?= $curGroupId ?>"></select>
             </label>
         </div>
         <div id="sched-student-wrap">
             <label>Alumno
-                <select name="assigned_student_id" id="sched-student" data-selected="<?= (int) ($scheduleRow['assigned_student_id'] ?? 0) ?>"></select>
+                <select name="assigned_student_id" id="sched-student" data-selected="<?= $curStudentId ?>"></select>
             </label>
         </div>
         <button type="submit"><?= $scheduleIsNewRound ? 'Agendar ronda nueva' : ($scheduleRow['appointment_id'] ? 'Guardar cambios' : 'Agendar') ?></button>
-        <a href="agenda.php" style="margin-left:1rem; font-size:0.85rem;">Cancelar</a>
+        <a href="<?= agenda_url(['schedule' => null]) ?>" style="margin-left:1rem; font-size:0.85rem;">Cancelar</a>
     </form>
 </div>
 <script>
@@ -438,6 +528,8 @@ admin_header('Fichas Clínicas', $me);
         var mode = document.getElementById('sched-assign-mode').value;
         document.getElementById('sched-group-wrap').style.display = mode === 'group' ? 'block' : 'none';
         document.getElementById('sched-student-wrap').style.display = mode === 'student' ? 'block' : 'none';
+        document.getElementById('sched-group').required = (mode === 'group');
+        document.getElementById('sched-student').required = (mode === 'student');
     }
 
     onCourseChange();
@@ -446,10 +538,53 @@ admin_header('Fichas Clínicas', $me);
 <?php endif; ?>
 
 <div class="card">
+    <form method="get" style="display:flex; gap:1rem; align-items:flex-end; flex-wrap:wrap;">
+        <input type="hidden" name="month" value="<?= htmlspecialchars($month) ?>">
+        <?php if ($scheduleCaseId !== null): ?><input type="hidden" name="schedule" value="<?= htmlspecialchars($scheduleCaseId) ?>"><?php endif; ?>
+        <label style="margin:0;">Curso
+            <select name="filter_course" onchange="this.form.submit()">
+                <option value="">-- todos<?= $isFullAdmin ? '' : ' (mis cursos)' ?> --</option>
+                <?php foreach ($availableCourses as $ac): ?>
+                <option value="<?= $ac['id'] ?>" <?= $filterCourseId === (int) $ac['id'] ? 'selected' : '' ?>><?= htmlspecialchars($ac['name']) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <?php if ($filterCourseId !== null): ?>
+        <label style="margin:0;">Grupo
+            <select name="filter_group" onchange="document.querySelector('[name=filter_student]').value='';this.form.submit()">
+                <option value="">-- todos --</option>
+                <?php foreach ($groupsByCourse[$filterCourseId] as $g): ?>
+                <option value="<?= $g['id'] ?>" <?= $filterGroupId === $g['id'] ? 'selected' : '' ?>><?= htmlspecialchars($g['name']) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label style="margin:0;">Alumno
+            <select name="filter_student" onchange="document.querySelector('[name=filter_group]').value='';this.form.submit()">
+                <option value="">-- todos --</option>
+                <?php foreach ($studentsByCourse[$filterCourseId] as $s): ?>
+                <option value="<?= $s['id'] ?>" <?= $filterStudentId === $s['id'] ? 'selected' : '' ?>><?= htmlspecialchars($s['name']) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <?php endif; ?>
+        <noscript><button type="submit">Filtrar</button></noscript>
+    </form>
+    <?php if ($filterCourseId !== null): ?>
+    <p style="font-size:0.8rem; color:#555; margin-top:0.5rem;">
+        Calendario acotado a <strong><?= htmlspecialchars($courseNameById[$filterCourseId] ?? '') ?></strong>
+        (la tabla de pacientes de abajo no se filtra -- es la biblioteca completa del sistema)
+        <?php if ($filterGroupId !== null): ?>· grupo <strong><?= htmlspecialchars($groupNameById[$filterGroupId] ?? '') ?></strong> (incluye también citas legado "todo el curso" de este curso, si las hubiera)<?php endif; ?>
+        <?php if ($filterStudentId !== null): ?>· alumno <strong><?= htmlspecialchars($userNameById[$filterStudentId] ?? '') ?></strong> (incluye citas de su grupo, todo el curso o cola global que también le apliquen)<?php endif; ?>
+        &nbsp;·&nbsp; <a href="<?= agenda_url(['filter_course' => null, 'filter_group' => null, 'filter_student' => null]) ?>">Quitar filtro</a>
+    </p>
+    <?php endif; ?>
+</div>
+
+<div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center;">
-        <a href="agenda.php?month=<?= $prevMonth ?>">&larr; anterior</a>
+        <a href="<?= agenda_url(['month' => $prevMonth]) ?>">&larr; anterior</a>
         <strong><?= $monthNames[(int) $monthStart->format('n')] ?> <?= $monthStart->format('Y') ?></strong>
-        <a href="agenda.php?month=<?= $nextMonth ?>">siguiente &rarr;</a>
+        <a href="<?= agenda_url(['month' => $nextMonth]) ?>">siguiente &rarr;</a>
     </div>
     <div class="cal-grid">
         <?php foreach (['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'] as $dow): ?>
@@ -465,7 +600,7 @@ admin_header('Fichas Clínicas', $me);
         <div class="cal-day<?= $iso === $today ? ' today' : '' ?>">
             <span class="cal-num"><?= $day ?></span>
             <?php foreach (array_slice($dayAppts, 0, 3) as $a): ?>
-            <a href="agenda.php?schedule=<?= urlencode($a['id']) ?>" title="<?= htmlspecialchars(trim($a['hora'] . ' ' . $a['nombre'] . ' ' . $a['apellido'])) ?>">
+            <a href="<?= agenda_url(['schedule' => $a['id']]) ?>" title="<?= htmlspecialchars(trim($a['hora'] . ' ' . $a['nombre'] . ' ' . $a['apellido'])) ?>">
                 <?= htmlspecialchars($a['hora']) ?> <?= htmlspecialchars(trim($a['nombre'] . ' ' . $a['apellido'])) ?>
             </a>
             <?php endforeach; ?>
@@ -505,7 +640,7 @@ admin_header('Fichas Clínicas', $me);
                 } elseif ($c['assigned_group_id']) {
                     $assignLabel .= ' · grupo ' . ($groupNameById[(int) $c['assigned_group_id']] ?? ('#' . $c['assigned_group_id']));
                 } else {
-                    $assignLabel .= ' · todo el curso';
+                    $assignLabel .= ' · todo el curso (legado)';
                 }
             } else {
                 $assignLabel = 'cola libre (legado)';
@@ -548,13 +683,13 @@ admin_header('Fichas Clínicas', $me);
             </td>
             <td style="font-size:0.8rem;">
                 <?php if ((int) $c['rondas_count'] > 1): ?>
-                <a href="agenda.php?history=<?= urlencode($c['id']) ?>#historial"><?= (int) $c['rondas_count'] ?> · Ver historial</a>
+                <a href="<?= agenda_url(['history' => $c['id']]) ?>#historial"><?= (int) $c['rondas_count'] ?> · Ver historial</a>
                 <?php else: ?>
                 <?= (int) $c['rondas_count'] ?: '—' ?>
                 <?php endif; ?>
             </td>
             <td style="white-space:nowrap;">
-                <a href="agenda.php?schedule=<?= urlencode($c['id']) ?>" style="font-size:0.8rem;">
+                <a href="<?= agenda_url(['schedule' => $c['id']]) ?>" style="font-size:0.8rem;">
                     <?= $c['appointment_id'] ? 'Reagendar' : 'Agendar' ?>
                 </a>
                 <a href="case_create.php?edit=<?= urlencode($c['id']) ?>" style="font-size:0.8rem;">Editar ficha</a>
@@ -587,7 +722,7 @@ admin_header('Fichas Clínicas', $me);
 <?php if ($historyCaseId !== null): ?>
 <div class="card" id="historial">
     <strong>Historial del caso <?= htmlspecialchars($historyCaseId) ?></strong>
-    &nbsp;·&nbsp; <a href="agenda.php" style="font-size:0.85rem;">Cerrar</a>
+    &nbsp;·&nbsp; <a href="<?= agenda_url(['history' => null]) ?>" style="font-size:0.85rem;">Cerrar</a>
     <p style="font-size:0.85rem; color:#555;">Cada ronda es una cita distinta con su propio historial de atenciones y métricas (no se mezclan entre sí).</p>
     <table>
         <tr><th>Cita</th><th>Fecha</th><th>Hora</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Atenciones</th></tr>
