@@ -18,6 +18,14 @@ function admin_header(string $title, ?array $currentUser = null): void
     header a { color: #fff; text-decoration: none; margin-right: 1.2rem; font-size: 0.95rem; opacity: 0.85; }
     header a:hover { opacity: 1; text-decoration: underline; }
     header .brand { font-weight: 700; font-size: 1.05rem; margin-right: 2rem; }
+    nav.admin-nav { display: flex; align-items: center; }
+    .nav-group { position: relative; margin-right: 1.2rem; }
+    .nav-group > .nav-label { cursor: default; opacity: 0.85; font-size: 0.95rem; }
+    .nav-group:hover > .nav-label { opacity: 1; }
+    .nav-group .nav-dropdown { display: none; position: absolute; top: 100%; left: 0; flex-direction: column; background: #24345c; border-radius: 6px; padding: 0.4rem 0; min-width: 190px; box-shadow: 0 4px 10px rgba(0,0,0,0.25); z-index: 10; }
+    .nav-group:hover .nav-dropdown { display: flex; }
+    .nav-group .nav-dropdown a { margin-right: 0; padding: 0.4rem 0.9rem; }
+    .nav-group .nav-dropdown a:hover { background: rgba(255,255,255,0.08); text-decoration: none; }
     main { width: 100%; margin: 2rem auto; padding: 0 2rem; }
     h1 { font-size: 1.4rem; }
     table { width: 100%; border-collapse: collapse; margin: 1rem 0; background: #fff; }
@@ -40,21 +48,42 @@ function admin_header(string $title, ?array $currentUser = null): void
 <header>
     <div>
         <span class="brand">LabSim Admin</span>
-        <?php if ($currentUser && (int) $currentUser['permission'] === Auth::PERMISSION_ADMIN): ?>
-        <a href="index.php">Estado</a>
-        <a href="users.php">Usuarios</a>
-        <?php endif; ?>
-        <a href="courses.php">Cursos</a>
-        <a href="agenda.php">Fichas Clínicas</a>
-        <a href="dashboard.php">Dashboard</a>
-        <a href="inbox_send.php">Bandeja de entrada</a>
-        <?php if ($currentUser && (int) $currentUser['permission'] === Auth::PERMISSION_ADMIN): ?>
-        <a href="lti.php">LTI</a>
-        <a href="llm.php">IA Paciente</a>
-        <a href="tokens.php">Sesiones</a>
-        <a href="database.php">Base de datos</a>
-        <a href="audit.php">Auditoría</a>
-        <?php endif; ?>
+        <?php $isFullAdmin = $currentUser && (int) $currentUser['permission'] === Auth::PERMISSION_ADMIN; ?>
+        <nav class="admin-nav">
+            <div class="nav-group">
+                <span class="nav-label">Docencia ▾</span>
+                <div class="nav-dropdown">
+                    <a href="courses.php">Cursos</a>
+                    <a href="agenda.php">Fichas Clínicas</a>
+                    <a href="dashboard.php">Dashboard</a>
+                    <a href="inbox_send.php">Bandeja de entrada</a>
+                </div>
+            </div>
+            <?php if ($isFullAdmin): ?>
+            <div class="nav-group">
+                <span class="nav-label">Sistema ▾</span>
+                <div class="nav-dropdown">
+                    <a href="users.php">Usuarios</a>
+                    <a href="tokens.php">Sesiones</a>
+                    <a href="audit.php">Auditoría</a>
+                    <a href="index.php">Estado</a>
+                </div>
+            </div>
+            <div class="nav-group">
+                <span class="nav-label">Integraciones ▾</span>
+                <div class="nav-dropdown">
+                    <a href="lti.php">LTI</a>
+                </div>
+            </div>
+            <div class="nav-group">
+                <span class="nav-label">Datos e IA ▾</span>
+                <div class="nav-dropdown">
+                    <a href="llm.php">IA Paciente</a>
+                    <a href="database.php">Base de datos</a>
+                </div>
+            </div>
+            <?php endif; ?>
+        </nav>
     </div>
     <div>
         <?php if ($currentUser): ?>
