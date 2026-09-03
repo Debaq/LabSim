@@ -2,10 +2,10 @@
 
 ## Otoscopia: derivación + aprobación docente + fase por alumno
 
-Ficha Otoscopia (case_create.php, antes de Audiometría) construida con modo
-"única" (1 imagen OD + 1 imagen OI) y modo "por fase" (N fases, cada una con
-imagen OD + imagen OI + texto libre describiendo qué pasó desde la fase
-anterior — vacío en fase 1). Dato guardado en `cases.data.Otoscopia`.
+Ficha Otoscopia (case_create.php, antes de Audiometría) construida como N
+fases (sin selector de modo aparte: 1 sola fase ya ES "única"), cada una
+con imagen OD + imagen OI + texto libre describiendo qué pasó desde la
+fase anterior — vacío en fase 1. Dato guardado en `cases.data.Otoscopia`.
 
 Dinámica pedagógica real (no implementada aún): el paciente NO es un estado
 compartido igual para todos los alumnos — cada estudiante avanza su propia

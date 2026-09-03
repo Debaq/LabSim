@@ -22,13 +22,12 @@ final class CaseBuilder
         'tce' => 'TCE', 'diabetes' => 'Diabetes', 'hta' => 'HTA',
     ];
 
-    // Ficha Otoscopia: "unica" = 1 imagen por oído, fijo. "fases" = varias
-    // tomas en el tiempo por oído (misma cantidad para OD y OI, ver
-    // decisión de diseño), cada una con un texto libre que describe qué
-    // pasó desde la fase anterior (vacío en la fase 1 -- todavía no hay
-    // "anterior"). Qué fase le corresponde ver a cada alumno según su
-    // propio avance con ese paciente: TODO, ver TODO.md.
-    public const OTOSCOPIA_MODES = ['unica', 'fases'];
+    // Ficha Otoscopia: N tomas en el tiempo por oído (misma cantidad para
+    // OD y OI). 1 sola fase = "única" (no hay selector de modo aparte: el
+    // número de fases mismo lo dice). Cada fase lleva un texto libre que
+    // describe qué pasó desde la fase anterior (vacío en la fase 1 --
+    // todavía no hay "anterior"). Qué fase le corresponde ver a cada
+    // alumno según su propio avance con ese paciente: TODO, ver TODO.md.
     public const OTOSCOPIA_MAX_FASES = 20;
 
     public const Z_OPTIONS = ['A', 'As', 'Ad', 'C', 'Cs', 'B'];
@@ -520,14 +519,15 @@ final class CaseBuilder
         $v['tinnitus']['ruido'] = $tinnitus['ruido'] ?? self::TINNITUS_RUIDO_OPTIONS[0];
         $v['tinnitus']['frecuencia'] = (string) ($tinnitus['frecuencia'] ?? self::FREQUENCIES[0]);
 
+        // 'modo' venía en versiones anteriores de esta ficha (antes de que
+        // se sacara el selector) -- se ignora si aparece en un caso viejo,
+        // el número de fases ya guardadas dice lo mismo sin necesitarlo.
         $otoscopia = $data['Otoscopia'] ?? [];
-        $otoscopiaModo = ($otoscopia['modo'] ?? 'unica') === 'fases' ? 'fases' : 'unica';
         $otoscopiaFases = $otoscopia['fases'] ?? [];
         if (!is_array($otoscopiaFases) || count($otoscopiaFases) === 0) {
             $otoscopiaFases = [['texto' => '']];
         }
         $v['otoscopia'] = [
-            'modo' => $otoscopiaModo,
             'fases' => array_map(
                 static fn($f) => ['texto' => (string) (is_array($f) ? ($f['texto'] ?? '') : '')],
                 array_values($otoscopiaFases)

@@ -100,6 +100,26 @@ final class OtoscopiaPhoto
         }
     }
 
+    /**
+     * Renombra TODAS las imágenes (cualquier oído/fase/formato) subidas con
+     * un id temporal (ver $uploadTempId en case_create.php -- permite subir
+     * otoscopia ANTES de que el caso tenga un case_id real) a su case_id
+     * definitivo. No-op si no hay nada que reclamar (caso nuevo sin
+     * otoscopia subida).
+     */
+    public static function claim(string $tempId, string $realCaseId): void
+    {
+        $tempSafe = self::safeId($tempId);
+        $realSafe = self::safeId($realCaseId);
+        if ($tempSafe === $realSafe) {
+            return;
+        }
+        foreach (glob(self::dir() . '/' . $tempSafe . '_*') ?: [] as $path) {
+            $suffix = substr(basename($path), strlen($tempSafe));
+            rename($path, self::dir() . '/' . $realSafe . $suffix);
+        }
+    }
+
     public static function save(string $caseId, string $side, int $faseIdx, string $tmpPath): void
     {
         if (!extension_loaded('gd')) {

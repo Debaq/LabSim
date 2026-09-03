@@ -50,9 +50,13 @@ if ($faseIdx < 0) {
     exit;
 }
 
+// case_id real (ya guardado) o id temporal (ver $uploadTempId en
+// case_create.php -- permite subir otoscopia ANTES de guardar el caso por
+// primera vez; OtoscopiaPhoto::claim() la reasigna al case_id real al
+// guardar). Los ids temporales siempre empiezan con "tmp".
 $stmt = $pdo->prepare('SELECT id FROM cases WHERE id = ?');
 $stmt->execute([$caseId]);
-if ($stmt->fetchColumn() === false) {
+if ($stmt->fetchColumn() === false && !str_starts_with($caseId, 'tmp')) {
     echo json_encode(['ok' => false, 'error' => 'El caso no existe.']);
     exit;
 }

@@ -67,6 +67,25 @@ final class PatientPhoto
     }
 
     /**
+     * Renombra los archivos subidos con un id temporal (ver $uploadTempId
+     * en case_create.php -- permite subir la foto ANTES de que el caso
+     * tenga un case_id real) a su case_id definitivo. No-op si no hay nada
+     * que reclamar (caso nuevo sin foto subida).
+     */
+    public static function claim(string $tempId, string $realCaseId): void
+    {
+        $tempSafe = self::safeId($tempId);
+        $realSafe = self::safeId($realCaseId);
+        if ($tempSafe === $realSafe) {
+            return;
+        }
+        foreach (glob(self::dir() . '/' . $tempSafe . '_*') ?: [] as $path) {
+            $suffix = substr(basename($path), strlen($tempSafe));
+            rename($path, self::dir() . '/' . $realSafe . $suffix);
+        }
+    }
+
+    /**
      * $cropX/$cropY/$cropSize: recuadro cuadrado en coordenadas de píxel de
      * la imagen ORIGINAL (naturalWidth/Height tal como las ve el navegador),
      * calculado en el modal de recorte -- ver JS en case_create.php.
