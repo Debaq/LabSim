@@ -34,6 +34,6 @@ if (!is_file($path)) {
     exit;
 }
 
-header('Content-Type: image/jpeg');
+header('Content-Type: ' . OtoscopiaPhoto::mimeType($path));
 header('Cache-Control: private, max-age=60');
 readfile($path);

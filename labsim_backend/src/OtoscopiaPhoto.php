@@ -12,10 +12,19 @@ declare(strict_types=1);
  *
  * A diferencia de PatientPhoto no hay recorte circular: solo se reduce el
  * lado mayor a MAX_DIM para no acumular fotos de celular de varios MB.
+ *
+ * Formato de salida: WebP si el GD del servidor lo soporta (~25-35% más
+ * liviano que JPEG a calidad equivalente -- importa acá porque puede haber
+ * varias fotos por caso, una por oído y fase), si no JPEG. Qt no necesita
+ * saber cuál es: QPixmap::loadFromData detecta el formato solo por los
+ * magic bytes. La extensión en el nombre de archivo SÍ importa acá: es lo
+ * que dice con qué formato quedó guardada cada imagen (no hay columna en
+ * la BD que lo registre), así que path()/has()/delete() prueban ambas.
  */
 final class OtoscopiaPhoto
 {
     private const MAX_DIM = 1024;
+    private const FORMATS = ['webp', 'jpg']; // orden de preferencia al buscar cuál existe
 
     public static function dir(): string
     {
@@ -43,12 +52,29 @@ final class OtoscopiaPhoto
         return $side;
     }
 
-    public static function path(string $caseId, string $side, int $faseIdx): string
+    private static function pathForFormat(string $caseId, string $side, int $faseIdx, string $ext): string
     {
         if ($faseIdx < 0) {
             throw new InvalidArgumentException('Índice de fase inválido.');
         }
-        return self::dir() . '/' . self::safeId($caseId) . '_' . self::safeSide($side) . '_' . $faseIdx . '.jpg';
+        return self::dir() . '/' . self::safeId($caseId) . '_' . self::safeSide($side) . '_' . $faseIdx . '.' . $ext;
+    }
+
+    /** Ruta de la imagen que efectivamente existe en disco (webp o jpg, ver FORMATS) -- si ninguna existe, devuelve la ruta jpg (para que is_file() del caller dé false, mismo comportamiento que antes). */
+    public static function path(string $caseId, string $side, int $faseIdx): string
+    {
+        foreach (self::FORMATS as $ext) {
+            $p = self::pathForFormat($caseId, $side, $faseIdx, $ext);
+            if (is_file($p)) {
+                return $p;
+            }
+        }
+        return self::pathForFormat($caseId, $side, $faseIdx, 'jpg');
+    }
+
+    public static function mimeType(string $path): string
+    {
+        return str_ends_with($path, '.webp') ? 'image/webp' : 'image/jpeg';
     }
 
     public static function has(string $caseId, string $side, int $faseIdx): bool
@@ -62,9 +88,15 @@ final class OtoscopiaPhoto
 
     public static function delete(string $caseId, string $side, int $faseIdx): void
     {
-        $p = self::path($caseId, $side, $faseIdx);
-        if (is_file($p)) {
-            unlink($p);
+        try {
+            foreach (self::FORMATS as $ext) {
+                $p = self::pathForFormat($caseId, $side, $faseIdx, $ext);
+                if (is_file($p)) {
+                    unlink($p);
+                }
+            }
+        } catch (InvalidArgumentException $e) {
+            // faseIdx/caseId inválido -- nada que borrar.
         }
     }
 
@@ -103,7 +135,15 @@ final class OtoscopiaPhoto
 
         $dst = imagecreatetruecolor($dstW, $dstH);
         imagecopyresampled($dst, $src, 0, 0, 0, 0, $dstW, $dstH, $w, $h);
-        imagejpeg($dst, self::path($caseId, $side, $faseIdx), 85);
+
+        // Borra lo que hubiera antes (pudo haber quedado en el otro formato
+        // si el soporte de webp del servidor cambió entre subidas).
+        self::delete($caseId, $side, $faseIdx);
+        if (function_exists('imagewebp')) {
+            imagewebp($dst, self::pathForFormat($caseId, $side, $faseIdx, 'webp'), 80);
+        } else {
+            imagejpeg($dst, self::pathForFormat($caseId, $side, $faseIdx, 'jpg'), 85);
+        }
         imagedestroy($dst);
         imagedestroy($src);
     }

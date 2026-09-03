@@ -33,6 +33,6 @@ if (!is_file($path)) {
     Response::error('Sin imagen.', 404);
 }
 
-header('Content-Type: image/jpeg');
+header('Content-Type: ' . OtoscopiaPhoto::mimeType($path));
 header('Cache-Control: private, max-age=300');
 readfile($path);
