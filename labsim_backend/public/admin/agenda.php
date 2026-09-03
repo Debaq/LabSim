@@ -193,6 +193,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ->execute([$cancelar ? 1 : 0, $id]);
         $success = $cancelar ? 'Cita cancelada (el caso se conserva).' : 'Cita restaurada.';
         AdminAudit::log($me, $cancelar ? 'appointment_cancel' : 'appointment_restore', ['appointment_id' => $id]);
+    } elseif ($action === 'delete_appointment') {
+        // Borra UNA cita puntual (p.ej. una de varias en paralelo del mismo
+        // caso) sin tocar el caso ni sus otras citas -- distinto de
+        // delete_case, que elimina el caso completo con todo su historial.
+        $id = (int) ($_POST['id'] ?? 0);
+        if ($id > 0) {
+            $pdo->beginTransaction();
+            $pdo->prepare('DELETE FROM attendances WHERE appointment_id = ?')->execute([$id]);
+            $pdo->prepare('DELETE FROM appointments WHERE id = ?')->execute([$id]);
+            $pdo->commit();
+            $success = 'Cita eliminada (el caso y sus otras citas, si tenía, se conservan).';
+            AdminAudit::log($me, 'appointment_delete', ['appointment_id' => $id]);
+        }
     } elseif ($action === 'delete_case') {
         $caseId = trim((string) ($_POST['case_id'] ?? ''));
         if ($caseId !== '') {
@@ -332,6 +345,21 @@ if ($scheduleCaseId !== null) {
         }
     }
 }
+// $cases solo trae la ÚLTIMA cita del caso -- si viene un "appointment"
+// explícito (link del calendario o del historial, apuntando a una cita
+// puntual que puede no ser la última), se pisan los campos de cita con los
+// de esa fila específica para editar/eliminar la correcta.
+$scheduleAppointmentId = isset($_GET['appointment']) ? (int) $_GET['appointment'] : null;
+if ($scheduleRow !== null && $scheduleAppointmentId !== null) {
+    $stmt = $pdo->prepare('SELECT * FROM appointments WHERE id = ? AND case_id = ?');
+    $stmt->execute([$scheduleAppointmentId, $scheduleRow['id']]);
+    $specificAppt = $stmt->fetch();
+    if ($specificAppt !== false) {
+        $specificApptId = (int) $specificAppt['id'];
+        unset($specificAppt['id']); // no pisar el id del CASO
+        $scheduleRow = array_merge($scheduleRow, $specificAppt, ['appointment_id' => $specificApptId]);
+    }
+}
 $scheduleSnapshot = [];
 if ($scheduleRow !== null && !$scheduleRow['appointment_id']) {
     $data = json_decode($scheduleRow['data'] ?? '', true);
@@ -441,7 +469,6 @@ admin_header('Fichas Clínicas', $me);
     .cal-day.today { border-color: #1a2744; border-width: 2px; }
     .cal-day .cal-num { font-weight: 600; margin-bottom: 0.15rem; display: block; }
     .cal-day a { display: block; text-decoration: none; color: #1a2744; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .cal-day .cal-more { color: #886400; }
 </style>
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 <?php if ($success !== null): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
@@ -550,8 +577,20 @@ admin_header('Fichas Clínicas', $me);
             </label>
         </div>
         <button type="submit"><?= $scheduleForceRound ? 'Agendar cita nueva' : ($scheduleIsNewRound ? 'Agendar ronda nueva' : ($scheduleRow['appointment_id'] ? 'Guardar cambios' : 'Agendar')) ?></button>
-        <a href="<?= agenda_url(['schedule' => null]) ?>" style="margin-left:1rem; font-size:0.85rem;">Cancelar</a>
+        <a href="<?= agenda_url(['schedule' => null, 'appointment' => null, 'force_round' => null]) ?>" style="margin-left:1rem; font-size:0.85rem;">Cancelar</a>
     </form>
+    <?php if ($scheduleRow['appointment_id'] && !$scheduleForceRound): ?>
+    <form method="post" style="display:inline;" onsubmit="return confirm(<?= htmlspecialchars(json_encode(
+        '¿Eliminar esta cita (' . trim(($scheduleRow['fecha'] ?? '') . ' ' . ($scheduleRow['hora'] ?? '')) . ')? '
+        . 'Se borran también las atenciones registradas para ella. El caso y sus otras citas, si tenía, se conservan. '
+        . 'No se puede deshacer.'
+    ), ENT_QUOTES) ?>);">
+    <?= csrf_field() ?>
+        <input type="hidden" name="form_action" value="delete_appointment">
+        <input type="hidden" name="id" value="<?= (int) $scheduleRow['appointment_id'] ?>">
+        <button type="submit" class="danger" style="margin-left:1rem; padding:0.3rem 0.7rem; font-size:0.85rem;">Eliminar esta cita</button>
+    </form>
+    <?php endif; ?>
 </div>
 <script>
     var COURSE_GROUPS = <?= json_encode($groupsByCourse) ?>;
@@ -652,14 +691,11 @@ admin_header('Fichas Clínicas', $me);
         ?>
         <div class="cal-day<?= $iso === $today ? ' today' : '' ?>">
             <span class="cal-num"><?= $day ?></span>
-            <?php foreach (array_slice($dayAppts, 0, 3) as $a): ?>
-            <a href="<?= agenda_url(['schedule' => $a['case_id']]) ?>" title="<?= htmlspecialchars(trim($a['hora'] . ' ' . $a['nombre'] . ' ' . $a['apellido'])) ?>">
+            <?php foreach ($dayAppts as $a): ?>
+            <a href="<?= agenda_url(['schedule' => $a['case_id'], 'appointment' => $a['appointment_id']]) ?>" title="<?= htmlspecialchars(trim($a['hora'] . ' ' . $a['nombre'] . ' ' . $a['apellido'])) ?>">
                 <?= htmlspecialchars($a['hora']) ?> <?= htmlspecialchars(trim($a['nombre'] . ' ' . $a['apellido'])) ?>
             </a>
             <?php endforeach; ?>
-            <?php if (count($dayAppts) > 3): ?>
-            <span class="cal-more">+<?= count($dayAppts) - 3 ?> más</span>
-            <?php endif; ?>
         </div>
         <?php endfor; ?>
     </div>
@@ -742,11 +778,11 @@ admin_header('Fichas Clínicas', $me);
                 <?php endif; ?>
             </td>
             <td style="white-space:nowrap;">
-                <a href="<?= agenda_url(['schedule' => $c['id'], 'force_round' => null]) ?>" style="font-size:0.8rem;">
+                <a href="<?= agenda_url(['schedule' => $c['id'], 'force_round' => null, 'appointment' => null]) ?>" style="font-size:0.8rem;">
                     <?= $c['appointment_id'] ? 'Reagendar' : 'Agendar' ?>
                 </a>
                 <?php if ($c['appointment_id']): ?>
-                <a href="<?= agenda_url(['schedule' => $c['id'], 'force_round' => 1]) ?>" style="font-size:0.8rem;">Nueva cita</a>
+                <a href="<?= agenda_url(['schedule' => $c['id'], 'force_round' => 1, 'appointment' => null]) ?>" style="font-size:0.8rem;">Nueva cita</a>
                 <?php endif; ?>
                 <a href="case_create.php?edit=<?= urlencode($c['id']) ?>" style="font-size:0.8rem;">Editar ficha</a>
                 <?php if ($c['appointment_id']): ?>
@@ -781,7 +817,7 @@ admin_header('Fichas Clínicas', $me);
     &nbsp;·&nbsp; <a href="<?= agenda_url(['history' => null]) ?>" style="font-size:0.85rem;">Cerrar</a>
     <p style="font-size:0.85rem; color:#555;">Cada ronda es una cita distinta con su propio historial de atenciones y métricas (no se mezclan entre sí).</p>
     <table>
-        <tr><th>Cita</th><th>Fecha</th><th>Hora</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Atenciones</th></tr>
+        <tr><th>Cita</th><th>Fecha</th><th>Hora</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Atenciones</th><th></th></tr>
         <?php foreach ($historyRows as $h): ?>
         <tr>
             <td>#<?= (int) $h['id'] ?></td>
@@ -797,10 +833,13 @@ admin_header('Fichas Clínicas', $me);
                 —
                 <?php endif; ?>
             </td>
+            <td style="font-size:0.8rem;">
+                <a href="<?= agenda_url(['schedule' => $historyCaseId, 'appointment' => $h['id']]) ?>">Editar</a>
+            </td>
         </tr>
         <?php endforeach; ?>
         <?php if (!$historyRows): ?>
-        <tr><td colspan="7" style="color:#888;">Este caso no tiene citas.</td></tr>
+        <tr><td colspan="8" style="color:#888;">Este caso no tiene citas.</td></tr>
         <?php endif; ?>
     </table>
 </div>
