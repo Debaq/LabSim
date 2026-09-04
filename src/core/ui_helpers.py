@@ -10,7 +10,7 @@ MoveWindow(parent:object): mueve la ventana a la
 """
 # pylint: disable=no-name-in-module
 
-from PySide6.QtCore import Qt,QSize,QRectF
+from PySide6.QtCore import Qt,QSize,QRectF,QRect
 from PySide6.QtGui import QMouseEvent, QIcon, QPixmap, QPainter, QPen, QColor
 from PySide6.QtWidgets import QPushButton, QLayout, QFrame
 from PySide6.QtWidgets import QMdiSubWindow
@@ -84,6 +84,34 @@ def _flags(obj:any) -> None:
                         Qt.WindowType.FramelessWindowHint|
                         Qt.WindowType.WindowCloseButtonHint |
                         Qt.WindowType.WindowStaysOnTopHint)
+
+def _find_free_position(existing_rects:list, width:int, height:int,
+                        max_x:int, max_y:int) -> tuple:
+    """
+    Busca la posicion libre mas cercana a la esquina superior izquierda
+    donde una subventana de tamaño (width,height) no se superponga con
+    ninguna de existing_rects. Candidatos: origen mas el borde derecho/
+    inferior de cada ventana existente (estilo "shelf packing").
+
+    Returns:
+        tuple(x,y) si encuentra hueco libre, None si no hay espacio
+    """
+    def overlaps(x, y):
+        new_rect = QRect(x, y, width, height)
+        return any(new_rect.intersects(r) for r in existing_rects)
+
+    candidates = {(0, 0)}
+    for rect in existing_rects:
+        candidates.add((rect.right() + 1, rect.top()))
+        candidates.add((rect.left(), rect.bottom() + 1))
+    candidates = sorted(
+        (x, y) for x, y in candidates
+        if 0 <= x <= max_x and 0 <= y <= max_y
+    )
+    for x, y in candidates:
+        if not overlaps(x, y):
+            return x, y
+    return None
 
 def toggle_max_min(obj:object, minimum:tuple=(800,600)) -> None:
     """Permite Maximisar o minimizar la ventana"""
@@ -177,16 +205,30 @@ class SubWindow():
             widg.lbl_title.setText(name)
             self.mdi_area.addSubWindow(sub)
             if position != [0,0]:
-                pos_x,pos_y = int(position[0]), int(position[1])
-                if open_count > 0:
-                    step = 40
-                    viewport = self.mdi_area.viewport().size()
-                    max_x = max(viewport.width() - size[0], 0)
-                    max_y = max(viewport.height() - size[1], 0)
-                    offset = (open_count * step) % (max(max_x, max_y, step) + step)
-                    pos_x = min(pos_x + offset, max_x)
-                    pos_y = min(pos_y + offset, max_y + 220)
-                sub.move(pos_x,pos_y-220)
+                viewport = self.mdi_area.viewport().size()
+                max_x = max(viewport.width() - size[0], 0)
+                max_y = max(viewport.height() - size[1], 0)
+                if open_count == 0:
+                    # sin ventanas abiertas: siempre al centro del mdi
+                    free_pos = None
+                else:
+                    existing_rects = [s.geometry() for s in self.mdi_area.subWindowList()
+                                      if s is not sub]
+                    free_pos = _find_free_position(existing_rects, size[0], size[1],
+                                                   max_x, max_y)
+                if free_pos is not None:
+                    pos_x, pos_y = free_pos
+                else:
+                    # sin espacio libre: apila encima (comportamiento cascada
+                    # anterior), se permite superposicion
+                    pos_x,pos_y = int(position[0]), int(position[1])
+                    if open_count > 0:
+                        step = 40
+                        offset = (open_count * step) % (max(max_x, max_y, step) + step)
+                        pos_x = min(pos_x + offset, max_x)
+                        pos_y = min(pos_y + offset, max_y + 220)
+                    pos_y -= 220
+                sub.move(pos_x,pos_y)
             _flags(sub)
             if fix[0]:
                 sub.setMaximumSize(size[0], size[1])
