@@ -26,6 +26,7 @@ function admin_header(string $title, ?array $currentUser = null): void
     .nav-group:hover .nav-dropdown { display: flex; }
     .nav-group .nav-dropdown a { margin-right: 0; padding: 0.4rem 0.9rem; }
     .nav-group .nav-dropdown a:hover { background: rgba(255,255,255,0.08); text-decoration: none; }
+    .nav-group .nav-dropdown hr { border: none; border-top: 1px solid rgba(255,255,255,0.15); margin: 0.35rem 0; }
     main { width: 100%; margin: 2rem auto; padding: 0 2rem; }
     h1 { font-size: 1.4rem; }
     table { width: 100%; border-collapse: collapse; margin: 1rem 0; background: #fff; }
@@ -53,10 +54,12 @@ function admin_header(string $title, ?array $currentUser = null): void
             <div class="nav-group">
                 <span class="nav-label">Docencia ▾</span>
                 <div class="nav-dropdown">
-                    <a href="courses.php">Cursos</a>
-                    <a href="patients.php">Fichas Clínicas</a>
-                    <a href="agenda.php">Agendas</a>
                     <a href="dashboard.php">Dashboard</a>
+                    <hr>
+                    <a href="agenda.php">Agendas</a>
+                    <a href="patients.php">Fichas Clínicas</a>
+                    <hr>
+                    <a href="courses.php">Cursos</a>
                     <a href="inbox_send.php">Bandeja de entrada</a>
                 </div>
             </div>
@@ -64,10 +67,11 @@ function admin_header(string $title, ?array $currentUser = null): void
             <div class="nav-group">
                 <span class="nav-label">Sistema ▾</span>
                 <div class="nav-dropdown">
+                    <a href="index.php">Estado</a>
+                    <hr>
                     <a href="users.php">Usuarios</a>
                     <a href="tokens.php">Sesiones</a>
                     <a href="audit.php">Auditoría</a>
-                    <a href="index.php">Estado</a>
                 </div>
             </div>
             <div class="nav-group">
