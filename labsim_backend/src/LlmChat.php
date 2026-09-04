@@ -62,7 +62,14 @@ final class LlmChat
 
         $content = $decoded['choices'][0]['message']['content'] ?? null;
         if (!is_string($content) || $content === '') {
-            throw new RuntimeException('El LLM devolvió una respuesta vacía o con formato inesperado.');
+            // Se incluye el body crudo (truncado) para diagnosticar sin
+            // depender de error_log del servidor -- este mensaje solo lo ve
+            // el admin (llm_chat_test.php / oirs_test.php) o queda en el
+            // error_log de OirsEvaluator, nunca llega al alumno.
+            throw new RuntimeException(
+                'El LLM devolvió una respuesta vacía o con formato inesperado. Body crudo: '
+                . substr($response, 0, 1000)
+            );
         }
 
         return $content;
