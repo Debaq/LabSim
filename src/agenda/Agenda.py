@@ -55,6 +55,16 @@ CANCELADA_COLOR = QColor(225, 225, 225)
 HISTORIA_CLINICA_FECHA_RE = re.compile(r"\{\{([+-]?\d+)\}\}")
 
 
+def parse_fecha_agenda(texto):
+    """Parsea una fecha en formato "dd-MM-yy" (año de 2 dígitos, como se
+    guarda en la agenda). QDate::fromString con formato "yy" interpreta
+    00-99 como 1900-1999, así que corregimos al siglo 2000 manualmente."""
+    fecha = QDate.fromString(texto, "dd-MM-yy") if texto else QDate()
+    if fecha.isValid() and fecha.year() < 2000:
+        fecha = fecha.addYears(100)
+    return fecha
+
+
 class FichaClinicaWidget(QWidget):
     """Ficha clínica del paciente. Vive como subventana única del MDI (ver
     main.py: self.subw["FICHA"]) en vez de un diálogo emergente -- set_ficha()
@@ -309,7 +319,7 @@ class Agenda(QWidget, Ui_Form):
 
         self.btn_ver_ficha.setEnabled(tiene_caso)
 
-        fecha_agendada = QDate.fromString(user[0], "dd-MM-yy") if user[0] else QDate()
+        fecha_agendada = parse_fecha_agenda(user[0])
         hora_agendada = QTime.fromString(user[1], "HH:mm") if len(user) > 1 else QTime()
         hora_vencida = (
             not pendiente and fecha_agendada.isValid() and hora_agendada.isValid()
@@ -443,7 +453,7 @@ class Agenda(QWidget, Ui_Form):
         inventada)."""
         if not texto:
             return texto
-        fecha_cita = QDate.fromString(fecha_cita_str, "dd-MM-yy") if fecha_cita_str else QDate()
+        fecha_cita = parse_fecha_agenda(fecha_cita_str)
 
         def _reemplazar(match):
             if not fecha_cita.isValid():
@@ -531,7 +541,7 @@ class Agenda(QWidget, Ui_Form):
         def _orden(item):
             fecha, hora_real = item[0], item[1]
             dt = QDateTime(
-                QDate.fromString(fecha, "dd-MM-yy") if fecha else QDate(),
+                parse_fecha_agenda(fecha),
                 QTime.fromString(hora_real, "HH:mm:ss") if hora_real else QTime(),
             )
             return dt
