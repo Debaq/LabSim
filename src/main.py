@@ -262,7 +262,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         atención al presionar "atender" -- se muestra al centro de la barra
         de botones de equipos/ventanas MDI."""
         self.cronometro_segundos = 0
-        self.lbl_cronometro.setText("00:00")
+        self.lbl_cronometro.setText("00:00:00")
         self.cronometro_timer.start()
 
     def _stop_cronometro(self):
@@ -279,7 +279,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def _tick_cronometro(self):
         self.cronometro_segundos += 1
         minutos, segundos = divmod(self.cronometro_segundos, 60)
-        self.lbl_cronometro.setText(f"{minutos:02d}:{segundos:02d}")
+        horas, minutos = divmod(minutos, 60)
+        self.lbl_cronometro.setText(f"{horas:02d}:{minutos:02d}:{segundos:02d}")
 
     def _close_sub_windows(self):
         """Cierra todas las subventanas abiertas (excepto LOGIN) y deshidrata sus datos"""
