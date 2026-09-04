@@ -195,15 +195,18 @@ class Reflex_curve():
             tt = (t[in_stim] - stim_start) / stim_dur
             edge = 0.05
 
-            if curve_type == 'on':
-                # Efecto "on": pico solo al inicio del estímulo, decae a línea
-                # base y no se sostiene (a diferencia de la meseta normal).
-                onset_w = 0.15
-                shape = np.clip(1.0 - tt / onset_w, 0.0, 1.0)
-            elif curve_type == 'off':
-                # Efecto "off": pico solo al final del estímulo (mirror de "on").
+            if curve_type == 'off':
+                # Efecto "off": línea base plana durante TODO el estímulo (nada
+                # se suma dentro de in_stim); el pico aparece recién después
+                # de apagarse, y regresa sola a la base.
+                shape = np.zeros_like(tt)
                 offset_w = 0.15
-                shape = np.clip(1.0 - (1.0 - tt) / offset_w, 0.0, 1.0)
+                stim_end = stim_start + stim_dur
+                post_dur = offset_w * stim_dur
+                post_mask = (t > stim_end) & (t <= stim_end + post_dur)
+                tp = (t[post_mask] - stim_end) / post_dur
+                post_shape = np.clip(1.0 - tp, 0.0, 1.0)
+                y[post_mask] += -1.0 * amp * post_shape
             elif curve_type == 'on-off':
                 # Efecto "on-off": pico al inicio Y al final del estímulo,
                 # con retorno a línea base entre ambos.
@@ -217,8 +220,9 @@ class Reflex_curve():
                 baseline_bump = np.sin(np.pi * mid_t) ** 2
                 y[in_stim] += 0.24 * amp * baseline_bump
             else:
-                # normal / invertido: flanco abrupto (onset/offset rápido del
-                # reflejo) + meseta plana sostenida, no una curva suave tipo seno.
+                # normal / on / invertido: "on" es sinónimo de "normal" (el ON
+                # real es la meseta sostenida, no un pico transitorio). Flanco
+                # abrupto (onset/offset rápido) + meseta plana sostenida.
                 shape = np.clip(np.minimum(tt / edge, (1.0 - tt) / edge), 0.0, 1.0)
 
             # invertido refleja la deflexión hacia arriba en vez de hacia abajo;
