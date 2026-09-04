@@ -149,11 +149,17 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self._start_log_uploader()
             self._start_sync_thread()
 
+    def _logged_in_client(self):
+        """Cliente del backend con la sesión que dejó el login, o None si ese
+        login no llegó a dejar un token (usado por log_uploader y sync_thread)."""
+        client = BackendClient(Preferences.get("BACKEND_URL"), context.get_resource('json/session.json'))
+        return client if client.is_logged_in() else None
+
     def _start_log_uploader(self):
         """Sube en lotes los logs de acciones acumulados (ver log_queue.py).
         Solo aplica si el login realmente dejó un token."""
-        client = BackendClient(Preferences.get("BACKEND_URL"), context.get_resource('json/session.json'))
-        if not client.is_logged_in():
+        client = self._logged_in_client()
+        if client is None:
             return
         self.log_uploader = LogUploaderThread(LOCAL_LOG_QUEUE, client)
         self.log_uploader.start()
@@ -166,8 +172,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def _start_sync_thread(self):
         """Poll periódico al backend (ver sync_thread.py): si el admin edita
         la agenda desde otra terminal, esta refresca sola en el próximo ciclo."""
-        client = BackendClient(Preferences.get("BACKEND_URL"), context.get_resource('json/session.json'))
-        if not client.is_logged_in():
+        client = self._logged_in_client()
+        if client is None:
             return
         self.sync_thread = SyncThread(client)
         self.sync_thread.sync_ok.connect(self._on_backend_sync)
@@ -251,13 +257,28 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """
         if self.data_login["permission"] == 777:
             return  # el admin no atiende pacientes, para eso existe un usuario básico de prueba
+        self._atender_caso(key, es_prueba=False)
 
+    def atender_paciente_prueba(self, key):
+        """
+        Admin: carga el caso `key` en los módulos (audiómetro, chat con el
+        paciente, etc.) para probarlo. A diferencia de atender_paciente(), NO
+        marca "atendiendo" ni escribe en attendances/agenda -- no deja rastro
+        en la base de datos, es solo para verificar que un caso funciona.
+        """
+        self._atender_caso(key, es_prueba=True)
+
+    def _atender_caso(self, key, *, es_prueba):
+        """Lógica común a atender_paciente() y atender_paciente_prueba() --
+        difieren solo en si se marca "atendiendo" en la agenda/backend y en
+        el appointment_id que queda asociado al chat (ver docstrings de cada
+        una)."""
         shedule = Shedule()
         agenda = shedule.data.setdefault("agenda_1", {})
         entry = agenda.get(key)
         if entry is None:
             return
-        if entry_esta_cancelada(entry):
+        if not es_prueba and entry_esta_cancelada(entry):
             return  # el admin canceló la cita mientras estaba visible
 
         case_id = entry[7] if len(entry) > 7 else None
@@ -267,13 +288,14 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if case_id not in cases:
             return  # el caso fue borrado/no sincronizó -- no dejamos marcar "atendiendo" un caso inexistente
 
-        marcar_entry_atendiendo(entry, self.data_login["user"])
-        shedule.set(shedule.data)
+        if not es_prueba:
+            marcar_entry_atendiendo(entry, self.data_login["user"])
+            shedule.set(shedule.data)
 
         self.data_current = cases[case_id]
         self.data_current_key = key
 
-        if self.subw and "AGENDA" in self.subw:
+        if not es_prueba and self.subw and "AGENDA" in self.subw:
             self.subw["AGENDA"].obj.refresh()
 
         self._hydrate_modules()
@@ -281,64 +303,31 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.changeStateBtnAreas(self.frameAction, self.data_current["box"])
 
         rut = entry[2] if len(entry) > 2 else ""
-        fecha_nac = entry[5] if len(entry) > 5 else ""
-        self.statusbar.showMessage(f"Estás atendiendo a: RUT {rut} — Fecha de nacimiento {fecha_nac}")
-
         nombre = f"{entry[3] if len(entry) > 3 else ''} {entry[4] if len(entry) > 4 else ''}".strip()
         procedimiento = entry[6] if len(entry) > 6 else ""
         try:
             edad, _, _ = CreatePatient().get_age_from_rut(int(rut))
         except (TypeError, ValueError):
             edad = 0
-        try:
-            appointment_id = int(key)
-        except (TypeError, ValueError):
-            appointment_id = None
+
+        if es_prueba:
+            appointment_id = None  # "prueba" -- nunca se guarda el chat de esto
+        else:
+            try:
+                appointment_id = int(key)
+            except (TypeError, ValueError):
+                appointment_id = None
+
         self.paciente_actual = {
             "case_id": case_id, "nombre": nombre or "el paciente",
             "edad": edad, "procedimiento": procedimiento, "appointment_id": appointment_id,
         }
 
-    def atender_paciente_prueba(self, key):
-        """
-        Admin: carga el caso `key` en los módulos (audiómetro, chat con el
-        paciente, etc.) para probarlo. A diferencia de atender_paciente(), NO
-        marca "atendiendo" ni escribe en attendances/agenda -- no deja rastro
-        en la base de datos, es solo para verificar que un caso funciona.
-        """
-        shedule = Shedule()
-        agenda = shedule.data.get("agenda_1", {})
-        entry = agenda.get(key)
-        if entry is None:
-            return
-
-        case_id = entry[7] if len(entry) > 7 else None
-        if not case_id:
-            return
-        cases = CasesOffline().get_cases()
-        if case_id not in cases:
-            return  # el caso fue borrado/no sincronizó
-
-        self.data_current = cases[case_id]
-        self.data_current_key = key
-
-        self._hydrate_modules()
-        if self.data_current:
-            self.changeStateBtnAreas(self.frameAction, self.data_current["box"])
-
-        rut = entry[2] if len(entry) > 2 else ""
-        nombre = f"{entry[3] if len(entry) > 3 else ''} {entry[4] if len(entry) > 4 else ''}".strip()
-        procedimiento = entry[6] if len(entry) > 6 else ""
-        try:
-            edad, _, _ = CreatePatient().get_age_from_rut(int(rut))
-        except (TypeError, ValueError):
-            edad = 0
-        self.paciente_actual = {
-            "case_id": case_id, "nombre": nombre or "el paciente",
-            "edad": edad, "procedimiento": procedimiento,
-            "appointment_id": None,  # "prueba" -- nunca se guarda el chat de esto
-        }
-        self.statusbar.showMessage(f"[PRUEBA] Caso cargado: {nombre or case_id} (no se guarda atención)")
+        if es_prueba:
+            self.statusbar.showMessage(f"[PRUEBA] Caso cargado: {nombre or case_id} (no se guarda atención)")
+        else:
+            fecha_nac = entry[5] if len(entry) > 5 else ""
+            self.statusbar.showMessage(f"Estás atendiendo a: RUT {rut} — Fecha de nacimiento {fecha_nac}")
 
     def cerrar_atencion(self, key, nota):
         """Cierra la atención (estado 'atendido') guardando la nota de atención del estudiante"""
@@ -473,64 +462,75 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         super().closeEvent(event)
 
 
+def _check_and_apply_update():
+    """Busca una versión nueva en GitHub Releases y, si el usuario acepta,
+    la descarga y aplica (reemplaza el build actual y reinicia -- no vuelve
+    si tiene éxito). Solo se llama en build congelada (PyInstaller); en modo
+    dev correr desde código fuente ya es la versión más nueva."""
+    from core.updater import apply_update_and_restart, check_for_update
+    update = check_for_update(__VERSION__)
+    if update is None:
+        return
+    tag, download_url = update
+    resp = QMessageBox.question(
+        None,
+        "Actualización disponible",
+        f"Hay una nueva versión disponible ({tag}).\n"
+        "¿Actualizar ahora? La aplicación se cerrará y volverá a abrir sola.",
+        QMessageBox.Yes | QMessageBox.No,
+    )
+    if resp != QMessageBox.Yes:
+        return
+
+    progress = QProgressDialog("Preparando actualización...", None, 0, 0)
+    progress.setWindowTitle("Actualizando LabSim")
+    progress.setWindowModality(Qt.WindowModal)
+    progress.setCancelButton(None)
+    progress.setMinimumDuration(0)
+    progress.setAutoClose(False)
+    progress.setAutoReset(False)
+    progress.show()
+    context.app.processEvents()
+
+    def on_progress(stage, current, total):
+        if stage == "download":
+            if total:
+                progress.setRange(0, total)
+                progress.setValue(current)
+                progress.setLabelText(
+                    f"Descargando actualización... {current // 1024} / {total // 1024} KB"
+                )
+            else:
+                progress.setRange(0, 0)
+                progress.setLabelText(f"Descargando actualización... {current // 1024} KB")
+        elif stage == "extract":
+            progress.setRange(0, 0)
+            progress.setLabelText("Instalando actualización...")
+        elif stage == "restart":
+            progress.setLabelText("Reiniciando LabSim...")
+        context.app.processEvents()
+
+    try:
+        apply_update_and_restart(download_url, on_progress=on_progress)  # no vuelve si tiene éxito
+    except Exception as exc:
+        # Falla de red o archivo corrupto a mitad de la descarga/extracción:
+        # no dejamos morir la app acá, se sigue con la versión actual instalada.
+        progress.close()
+        QMessageBox.warning(
+            None,
+            "Actualización fallida",
+            f"No se pudo completar la actualización, se abre la versión actual.\n{exc}",
+        )
+    else:
+        # apply_update_and_restart solo vuelve si el asset tenía una
+        # estructura inesperada (no lanzó, no hizo el swap) -- el
+        # dialog quedaría abierto para siempre si no se cierra acá.
+        progress.close()
+
+
 if __name__ == '__main__':
     if getattr(sys, 'frozen', False):
-        from core.updater import apply_update_and_restart, check_for_update
-        update = check_for_update(__VERSION__)
-        if update is not None:
-            tag, download_url = update
-            resp = QMessageBox.question(
-                None,
-                "Actualización disponible",
-                f"Hay una nueva versión disponible ({tag}).\n"
-                "¿Actualizar ahora? La aplicación se cerrará y volverá a abrir sola.",
-                QMessageBox.Yes | QMessageBox.No,
-            )
-            if resp == QMessageBox.Yes:
-                progress = QProgressDialog("Preparando actualización...", None, 0, 0)
-                progress.setWindowTitle("Actualizando LabSim")
-                progress.setWindowModality(Qt.WindowModal)
-                progress.setCancelButton(None)
-                progress.setMinimumDuration(0)
-                progress.setAutoClose(False)
-                progress.setAutoReset(False)
-                progress.show()
-                context.app.processEvents()
-
-                def on_progress(stage, current, total):
-                    if stage == "download":
-                        if total:
-                            progress.setRange(0, total)
-                            progress.setValue(current)
-                            progress.setLabelText(
-                                f"Descargando actualización... {current // 1024} / {total // 1024} KB"
-                            )
-                        else:
-                            progress.setRange(0, 0)
-                            progress.setLabelText(f"Descargando actualización... {current // 1024} KB")
-                    elif stage == "extract":
-                        progress.setRange(0, 0)
-                        progress.setLabelText("Instalando actualización...")
-                    elif stage == "restart":
-                        progress.setLabelText("Reiniciando LabSim...")
-                    context.app.processEvents()
-
-                try:
-                    apply_update_and_restart(download_url, on_progress=on_progress)  # no vuelve si tiene éxito
-                except Exception as exc:
-                    # Falla de red o archivo corrupto a mitad de la descarga/extracción:
-                    # no dejamos morir la app acá, se sigue con la versión actual instalada.
-                    progress.close()
-                    QMessageBox.warning(
-                        None,
-                        "Actualización fallida",
-                        f"No se pudo completar la actualización, se abre la versión actual.\n{exc}",
-                    )
-                else:
-                    # apply_update_and_restart solo vuelve si el asset tenía una
-                    # estructura inesperada (no lanzó, no hizo el swap) -- el
-                    # dialog quedaría abierto para siempre si no se cierra acá.
-                    progress.close()
+        _check_and_apply_update()
 
     window = MainWindow()
     Preferences.get_style(window)
