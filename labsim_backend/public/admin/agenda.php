@@ -753,9 +753,16 @@ admin_header('Agendas', $me);
         <strong>Calendario</strong>
         <a class="btn-link" href="<?= agenda_url(['new' => 1, 'schedule' => null, 'appointment' => null, 'fecha' => null]) ?>">+ Crear nueva cita</a>
     </div>
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.8rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.8rem; gap:0.5rem; flex-wrap:wrap;">
         <a href="<?= agenda_url(['month' => $prevMonth]) ?>">&larr; anterior</a>
         <strong><?= $monthNames[(int) $monthStart->format('n')] ?> <?= $monthStart->format('Y') ?></strong>
+        <form method="get" style="display:inline;" onsubmit="var v=document.getElementById('cal-month-jump').value; if (!v) return false; this.querySelector('[name=month]').value = v;">
+            <?php foreach ($_GET as $k => $v): if ($k === 'month') continue; ?>
+            <input type="hidden" name="<?= htmlspecialchars($k) ?>" value="<?= htmlspecialchars((string) $v) ?>">
+            <?php endforeach; ?>
+            <input type="hidden" name="month" value="">
+            <input type="month" id="cal-month-jump" value="<?= htmlspecialchars($month) ?>" onchange="this.form.requestSubmit()" style="font-size:0.85rem;">
+        </form>
         <a href="<?= agenda_url(['month' => $nextMonth]) ?>">siguiente &rarr;</a>
     </div>
     <div class="cal-grid">
