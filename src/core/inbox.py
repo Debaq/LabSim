@@ -12,6 +12,7 @@ mensajes que un docente mandó a mano desde Admin -> Bandeja de entrada.
 Vive como subventana del MDI (ver main.py: self.subw["INBOX"]), igual que
 Agenda o el chat con el paciente, en vez de un diálogo emergente."""
 
+import shiboken6
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QPushButton, QWidget, QVBoxLayout, QTextEdit,
                                 QTableWidget, QTableWidgetItem, QHeaderView,
@@ -116,7 +117,7 @@ def actualizar_badge(main_window):
     si hay algo nuevo -- llamar en cada ciclo de sync y al cerrar la
     bandeja (por si se marcó algo como leído)."""
     btn = getattr(main_window, "btn_bandeja_oirs", None)
-    if btn is None:
+    if btn is None or not shiboken6.isValid(btn):
         return
     no_leidos = sum(1 for it in inbox_list() if not it.get("leido"))
     if no_leidos:

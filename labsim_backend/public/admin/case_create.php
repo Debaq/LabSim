@@ -628,6 +628,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     .photo-crop-viewport:active { cursor: grabbing; }
     .photo-crop-viewport img { position: absolute; left: 0; top: 0; transform-origin: 0 0; max-width: none; user-select: none; -webkit-user-drag: none; }
     .photo-crop-ring { position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2000px rgba(0,0,0,0.5); pointer-events: none; }
+    .photo-crop-ring.square { border-radius: 0; outline: 2px solid #fff; outline-offset: -2px; }
     .photo-modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.8rem; }
 </style>
 
@@ -755,6 +756,30 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     </div>
 
     <button type="button" id="otoscopia-add-fase" class="secondary">+ Agregar fase</button>
+
+    <!-- Fuente única del markup de un slot/fase vacíos: usado por JS al agregar fase (#otoscopia-add-fase).
+         El render inicial (arriba, PHP) es aparte porque necesita mostrar la foto ya guardada si existe. -->
+    <template id="otoscopia-slot-tpl">
+        <div class="otoscopia-photo-slot">
+            <span class="side-tag"></span><br>
+            <img class="otoscopia-thumb" hidden>
+            <div class="otoscopia-thumb-empty">Sin imagen</div>
+            <input type="file" class="otoscopia-photo-input" accept="image/jpeg,image/png,image/webp">
+            <button type="button" class="secondary otoscopia-delete-photo" hidden>Borrar foto</button>
+        </div>
+    </template>
+    <template id="otoscopia-fase-tpl">
+        <div class="otoscopia-fase">
+            <div class="side-heading">
+                <span class="side-tag">Fase</span>
+                <button type="button" class="secondary otoscopia-remove-fase">Quitar esta fase</button>
+            </div>
+            <label>¿Qué pasó desde la fase anterior? (texto libre, se muestra al alumno)
+                <textarea rows="2"></textarea>
+            </label>
+            <div class="two-col"></div>
+        </div>
+    </template>
 </div>
 </div>
 
@@ -1288,6 +1313,21 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         </div>
     </div>
 </div>
+<div id="otoscopia-crop-modal" class="photo-modal" hidden>
+    <div class="photo-modal-box">
+        <strong style="display:block; margin-bottom:0.6rem;">Recortar foto de otoscopia</strong>
+        <div class="photo-crop-viewport" id="otoscopia-crop-viewport">
+            <img id="otoscopia-crop-img" alt="">
+            <div class="photo-crop-ring square"></div>
+        </div>
+        <input type="range" id="otoscopia-crop-zoom" min="1" max="4" step="0.01" value="1" style="width:100%; margin-top:0.8rem;">
+        <p class="legend" style="text-align:center;">Arrastra para mover, usa el control para acercar/alejar.</p>
+        <div class="photo-modal-actions">
+            <button type="button" id="otoscopia-crop-cancel" class="secondary">Cancelar</button>
+            <button type="button" id="otoscopia-crop-confirm">Guardar foto</button>
+        </div>
+    </div>
+</div>
 <script>
 // Foto de paciente: elegir archivo -> modal de recorte circular (pan/zoom
 // con mouse o touch) -> fetch con FormData a patient_photo_upload.php. El
@@ -1448,9 +1488,10 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <script>
 // Ficha Otoscopia: sin selector de modo -- 1 sola fase ya ES "única"; se
 // agrega/quita fase (solo la última -- así no hay que reindexar archivos
-// en disco), y se sube/borra cada imagen por fetch + FormData (mismo
-// patrón que la foto de paciente, pero sin selector de recorte manual:
-// OtoscopiaPhoto::save() recorta un cuadrado centrado y normaliza tamaño).
+// en disco), y se sube/borra cada imagen por fetch + FormData. Mismo
+// patrón de recorte manual que la foto de paciente (modal de pan/zoom),
+// pero con guía cuadrada (no circular) -- ver #otoscopia-crop-modal y
+// OtoscopiaPhoto::save().
 (function () {
     var CASE_ID = <?= json_encode($photoCaseId) ?>;
     var countInput = document.getElementById('otoscopia-fase-count');
@@ -1458,6 +1499,154 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     var addBtn = document.getElementById('otoscopia-add-fase');
     var msgEl = document.getElementById('otoscopia-msg');
     if (!countInput || !container) { return; }
+
+    // --- Modal de recorte cuadrado (pan/zoom), mismo mecanismo que el de
+    // foto de paciente pero reutilizable para cualquier input de la lista
+    // (se le pasa el <input> pendiente al abrir). ---
+    var cropModal = document.getElementById('otoscopia-crop-modal');
+    var cropViewport = document.getElementById('otoscopia-crop-viewport');
+    var cropImg = document.getElementById('otoscopia-crop-img');
+    var cropZoom = document.getElementById('otoscopia-crop-zoom');
+    var cropCancelBtn = document.getElementById('otoscopia-crop-cancel');
+    var cropConfirmBtn = document.getElementById('otoscopia-crop-confirm');
+    var CROP_VIEWPORT = 280;
+    var naturalW = 0, naturalH = 0, coverScale = 1, scale = 1;
+    var tx = 0, ty = 0;
+    var dragging = false, dragStartX = 0, dragStartY = 0, dragOrigTx = 0, dragOrigTy = 0;
+    var pendingInput = null, pendingFile = null;
+
+    function clampPan() {
+        var dispW = naturalW * scale;
+        var dispH = naturalH * scale;
+        var minTx = Math.min(0, CROP_VIEWPORT - dispW);
+        var minTy = Math.min(0, CROP_VIEWPORT - dispH);
+        tx = Math.max(minTx, Math.min(0, tx));
+        ty = Math.max(minTy, Math.min(0, ty));
+    }
+
+    function applyTransform() {
+        cropImg.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+    }
+
+    function openCropModal(input, file) {
+        pendingInput = input;
+        pendingFile = file;
+        cropImg.onload = function () {
+            naturalW = cropImg.naturalWidth;
+            naturalH = cropImg.naturalHeight;
+            coverScale = Math.max(CROP_VIEWPORT / naturalW, CROP_VIEWPORT / naturalH);
+            scale = coverScale;
+            tx = (CROP_VIEWPORT - naturalW * scale) / 2;
+            ty = (CROP_VIEWPORT - naturalH * scale) / 2;
+            cropZoom.value = '1';
+            applyTransform();
+            cropModal.hidden = false;
+        };
+        cropImg.src = URL.createObjectURL(file);
+    }
+
+    function closeCropModal() {
+        cropModal.hidden = true;
+        if (pendingInput) { pendingInput.value = ''; }
+        pendingInput = null;
+        pendingFile = null;
+    }
+
+    cropCancelBtn.addEventListener('click', closeCropModal);
+
+    cropZoom.addEventListener('input', function () {
+        var z = parseFloat(cropZoom.value);
+        var cx = CROP_VIEWPORT / 2, cy = CROP_VIEWPORT / 2;
+        var imgCx = (cx - tx) / scale;
+        var imgCy = (cy - ty) / scale;
+        scale = coverScale * z;
+        tx = cx - imgCx * scale;
+        ty = cy - imgCy * scale;
+        clampPan();
+        applyTransform();
+    });
+
+    function cropPointerDown(x, y) {
+        dragging = true;
+        dragStartX = x; dragStartY = y;
+        dragOrigTx = tx; dragOrigTy = ty;
+    }
+    function cropPointerMove(x, y) {
+        if (!dragging) { return; }
+        tx = dragOrigTx + (x - dragStartX);
+        ty = dragOrigTy + (y - dragStartY);
+        clampPan();
+        applyTransform();
+    }
+    function cropPointerUp() { dragging = false; }
+
+    cropViewport.addEventListener('mousedown', function (e) { cropPointerDown(e.clientX, e.clientY); });
+    window.addEventListener('mousemove', function (e) { cropPointerMove(e.clientX, e.clientY); });
+    window.addEventListener('mouseup', cropPointerUp);
+    cropViewport.addEventListener('touchstart', function (e) {
+        cropPointerDown(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    cropViewport.addEventListener('touchmove', function (e) {
+        cropPointerMove(e.touches[0].clientX, e.touches[0].clientY);
+        e.preventDefault();
+    }, { passive: false });
+    cropViewport.addEventListener('touchend', cropPointerUp);
+
+    cropConfirmBtn.addEventListener('click', function () {
+        if (!pendingInput || !pendingFile) { return; }
+        var side = pendingInput.getAttribute('data-side');
+        var idx = pendingInput.getAttribute('data-fase-idx');
+        var slot = pendingInput.closest('.otoscopia-photo-slot');
+        var img = slot.querySelector('.otoscopia-thumb');
+        var empty = slot.querySelector('.otoscopia-thumb-empty');
+
+        var srcSize = CROP_VIEWPORT / scale;
+        var srcX = -tx / scale;
+        var srcY = -ty / scale;
+
+        var fd = new FormData();
+        fd.append('csrf_token', csrfToken());
+        fd.append('case_id', CASE_ID);
+        fd.append('side', side);
+        fd.append('fase_idx', idx);
+        fd.append('crop_x', Math.round(srcX));
+        fd.append('crop_y', Math.round(srcY));
+        fd.append('crop_size', Math.round(srcSize));
+        fd.append('photo', pendingFile);
+
+        var input = pendingInput;
+        cropConfirmBtn.disabled = true;
+        cropConfirmBtn.textContent = 'Guardando...';
+        input.disabled = true;
+
+        fetch('otoscopia_photo_upload.php', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                cropConfirmBtn.disabled = false;
+                cropConfirmBtn.textContent = 'Guardar foto';
+                input.disabled = false;
+                if (data.ok) {
+                    img.src = 'otoscopia_photo.php?case_id=' + encodeURIComponent(CASE_ID) + '&side=' + side + '&fase=' + idx + '&v=' + Date.now();
+                    img.hidden = false;
+                    empty.hidden = true;
+                    var delBtn = slot.querySelector('.otoscopia-delete-photo');
+                    if (delBtn) { delBtn.hidden = false; }
+                    showMsg('Imagen actualizada.', false);
+                    cropModal.hidden = true;
+                    input.value = '';
+                    pendingInput = null;
+                    pendingFile = null;
+                } else {
+                    showMsg(data.error || 'No se pudo guardar la imagen.', true);
+                }
+            })
+            .catch(function () {
+                cropConfirmBtn.disabled = false;
+                cropConfirmBtn.textContent = 'Guardar foto';
+                input.disabled = false;
+                showMsg('Error de red al subir la imagen.', true);
+            });
+    });
 
     function csrfToken() {
         var el = document.querySelector('input[name="csrf_token"]');
@@ -1486,22 +1675,38 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         });
     }
 
-    function faseBlockHtml(idx) {
-        var sides = [['od', 'OD'], ['oi', 'OI']];
-        var slots = sides.map(function (s) {
-            var side = s[0], label = s[1];
-            return '<div class="otoscopia-photo-slot"><span class="side-tag ' + side + '">' + label + '</span><br>' +
-                '<img class="otoscopia-thumb" data-side="' + side + '" data-fase-idx="' + idx + '" hidden alt="Otoscopia ' + label + ' fase ' + (idx + 1) + '">' +
-                '<div class="otoscopia-thumb-empty">Sin imagen</div>' +
-                '<input type="file" class="otoscopia-photo-input" data-side="' + side + '" data-fase-idx="' + idx + '" accept="image/jpeg,image/png,image/webp">' +
-                '<button type="button" class="secondary otoscopia-delete-photo" data-side="' + side + '" data-fase-idx="' + idx + '" hidden>Borrar foto</button></div>';
-        }).join('');
-        return '<div class="otoscopia-fase" data-fase-idx="' + idx + '">' +
-            '<div class="side-heading"><span class="side-tag">Fase ' + (idx + 1) + '</span>' +
-            '<button type="button" class="secondary otoscopia-remove-fase" data-fase-idx="' + idx + '">Quitar esta fase</button></div>' +
-            '<label>¿Qué pasó desde la fase anterior? (texto libre, se muestra al alumno)' +
-            '<textarea name="otoscopia[texto][' + idx + ']" rows="2"></textarea></label>' +
-            '<div class="two-col">' + slots + '</div></div>';
+    var slotTpl = document.getElementById('otoscopia-slot-tpl');
+    var faseTpl = document.getElementById('otoscopia-fase-tpl');
+
+    function buildSlot(side, label, idx) {
+        var slot = slotTpl.content.firstElementChild.cloneNode(true);
+        var tag = slot.querySelector('.side-tag');
+        tag.textContent = label;
+        tag.classList.add(side);
+        var img = slot.querySelector('.otoscopia-thumb');
+        img.setAttribute('data-side', side);
+        img.setAttribute('data-fase-idx', idx);
+        img.setAttribute('alt', 'Otoscopia ' + label + ' fase ' + (idx + 1));
+        var input = slot.querySelector('.otoscopia-photo-input');
+        input.setAttribute('data-side', side);
+        input.setAttribute('data-fase-idx', idx);
+        var delBtn = slot.querySelector('.otoscopia-delete-photo');
+        delBtn.setAttribute('data-side', side);
+        delBtn.setAttribute('data-fase-idx', idx);
+        return slot;
+    }
+
+    function buildFaseBlock(idx) {
+        var block = faseTpl.content.firstElementChild.cloneNode(true);
+        block.setAttribute('data-fase-idx', idx);
+        block.querySelector('.side-heading .side-tag').textContent = 'Fase ' + (idx + 1);
+        block.querySelector('.otoscopia-remove-fase').setAttribute('data-fase-idx', idx);
+        block.querySelector('textarea').setAttribute('name', 'otoscopia[texto][' + idx + ']');
+        var twoCol = block.querySelector('.two-col');
+        [['od', 'OD'], ['oi', 'OI']].forEach(function (s) {
+            twoCol.appendChild(buildSlot(s[0], s[1], idx));
+        });
+        return block;
     }
 
     if (addBtn) {
@@ -1511,9 +1716,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                 showMsg('Ya se alcanzó el máximo de fases.', true);
                 return;
             }
-            var wrapper = document.createElement('div');
-            wrapper.innerHTML = faseBlockHtml(count);
-            container.appendChild(wrapper.firstElementChild);
+            container.appendChild(buildFaseBlock(count));
             countInput.value = String(count + 1);
             updateRemoveButtons();
         });
@@ -1544,44 +1747,13 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         updateRemoveButtons();
     });
 
-    // Subida de cada imagen: delegado en el contenedor porque las fases
-    // agregadas después no existían al cargar la página.
+    // Elegir archivo: delegado en el contenedor porque las fases agregadas
+    // después no existían al cargar la página. Abre el modal de recorte en
+    // vez de subir directo -- la subida real ocurre en cropConfirmBtn.
     container.addEventListener('change', function (e) {
         var input = e.target.closest('.otoscopia-photo-input');
         if (!input || !input.files || !input.files[0]) { return; }
-        var side = input.getAttribute('data-side');
-        var idx = input.getAttribute('data-fase-idx');
-        var slot = input.closest('.otoscopia-photo-slot');
-        var img = slot.querySelector('.otoscopia-thumb');
-        var empty = slot.querySelector('.otoscopia-thumb-empty');
-
-        var fd = new FormData();
-        fd.append('csrf_token', csrfToken());
-        fd.append('case_id', CASE_ID);
-        fd.append('side', side);
-        fd.append('fase_idx', idx);
-        fd.append('photo', input.files[0]);
-
-        input.disabled = true;
-        fetch('otoscopia_photo_upload.php', { method: 'POST', body: fd })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                input.disabled = false;
-                if (data.ok) {
-                    img.src = 'otoscopia_photo.php?case_id=' + encodeURIComponent(CASE_ID) + '&side=' + side + '&fase=' + idx + '&v=' + Date.now();
-                    img.hidden = false;
-                    empty.hidden = true;
-                    var delBtn = slot.querySelector('.otoscopia-delete-photo');
-                    if (delBtn) { delBtn.hidden = false; }
-                    showMsg('Imagen actualizada.', false);
-                } else {
-                    showMsg(data.error || 'No se pudo guardar la imagen.', true);
-                }
-            })
-            .catch(function () {
-                input.disabled = false;
-                showMsg('Error de red al subir la imagen.', true);
-            });
+        openCropModal(input, input.files[0]);
     });
 
     container.addEventListener('click', function (e) {

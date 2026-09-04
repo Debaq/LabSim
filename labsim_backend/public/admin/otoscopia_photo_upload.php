@@ -83,8 +83,16 @@ if ($file['size'] > 12 * 1024 * 1024) {
     exit;
 }
 
+$cropX = (float) ($_POST['crop_x'] ?? 0);
+$cropY = (float) ($_POST['crop_y'] ?? 0);
+$cropSize = (float) ($_POST['crop_size'] ?? 0);
+if ($cropSize <= 0) {
+    echo json_encode(['ok' => false, 'error' => 'Falta el recuadro de recorte.']);
+    exit;
+}
+
 try {
-    OtoscopiaPhoto::save($caseId, $side, $faseIdx, $file['tmp_name']);
+    OtoscopiaPhoto::save($caseId, $side, $faseIdx, $file['tmp_name'], $cropX, $cropY, $cropSize);
     AdminAudit::log($me, 'otoscopia_photo_upload', ['case_id' => $caseId, 'side' => $side, 'fase' => $faseIdx]);
     echo json_encode(['ok' => true]);
 } catch (Throwable $e) {

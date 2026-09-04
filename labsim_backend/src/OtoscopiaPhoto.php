@@ -10,12 +10,11 @@ declare(strict_types=1);
  * columnas nuevas en `cases` -- el nombre de archivo es determinista a
  * partir de case_id + oído + índice de fase (0 = fase 1 / única).
  *
- * A diferencia de PatientPhoto no hay selector de recorte manual: se recorta
- * un cuadrado centrado (lado = el menor de ancho/alto) y se reescala a
- * OUTPUT_SIZE fijo. Necesario porque fotos de celular vienen en cualquier
- * proporción -- sin esto, OD y OI quedaban con tamaños/proporciones
- * distintos y la ficha (tanto el editor admin como la app del alumno) se
- * veía dispareja entre ambos oídos y entre casos.
+ * Mismo patrón de recorte manual que PatientPhoto: recuadro CUADRADO (sin
+ * máscara circular, a diferencia del avatar de paciente) en coordenadas de
+ * píxel de la imagen ORIGINAL, calculado en el modal de recorte del admin
+ * en case_create.php (pan/zoom sobre un guía cuadrado) y enviado como
+ * crop_x/crop_y/crop_size.
  *
  * Formato de salida: WebP si el GD del servidor lo soporta (~25-35% más
  * liviano que JPEG a calidad equivalente -- importa acá porque puede haber
@@ -124,7 +123,12 @@ final class OtoscopiaPhoto
         }
     }
 
-    public static function save(string $caseId, string $side, int $faseIdx, string $tmpPath): void
+    /**
+     * $cropX/$cropY/$cropSize: recuadro cuadrado en coordenadas de píxel de
+     * la imagen ORIGINAL (naturalWidth/Height tal como las ve el navegador),
+     * calculado en el modal de recorte -- ver JS en case_create.php.
+     */
+    public static function save(string $caseId, string $side, int $faseIdx, string $tmpPath, float $cropX, float $cropY, float $cropSize): void
     {
         if (!extension_loaded('gd')) {
             throw new RuntimeException('El servidor no tiene la extensión GD -- no se pueden procesar imágenes.');
@@ -153,15 +157,26 @@ final class OtoscopiaPhoto
         $w = imagesx($src);
         $h = imagesy($src);
 
-        // Recorte cuadrado centrado sobre el lado menor -- normaliza
-        // proporción antes de reescalar (ver comentario de clase).
-        $cropSize = min($w, $h);
-        $cropX = (int) round(($w - $cropSize) / 2);
-        $cropY = (int) round(($h - $cropSize) / 2);
+        // El recuadro se calculó en el navegador contra naturalWidth/Height,
+        // pero puede venir levemente afuera por redondeo -- clamp defensivo.
+        $cropSize = max(1.0, min($cropSize, (float) min($w, $h)));
+        $cropX = max(0.0, min($cropX, $w - $cropSize));
+        $cropY = max(0.0, min($cropY, $h - $cropSize));
 
         $size = self::OUTPUT_SIZE;
         $dst = imagecreatetruecolor($size, $size);
-        imagecopyresampled($dst, $src, 0, 0, $cropX, $cropY, $size, $size, $cropSize, $cropSize);
+        imagecopyresampled(
+            $dst,
+            $src,
+            0,
+            0,
+            (int) round($cropX),
+            (int) round($cropY),
+            $size,
+            $size,
+            (int) round($cropSize),
+            (int) round($cropSize)
+        );
 
         // Borra lo que hubiera antes (pudo haber quedado en el otro formato
         // si el soporte de webp del servidor cambió entre subidas).

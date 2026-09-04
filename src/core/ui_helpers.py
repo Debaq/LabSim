@@ -212,6 +212,11 @@ class ToolBar(SubWindow):
     def changeArea(self):
         for i in reversed(range( self.layouts[1].count())):
             self.layouts[1].itemAt(i).widget().deleteLater()
+        # el botón de bandeja se destruye arriba junto al resto de la
+        # sección y solo se recrea si la nueva sección tiene "AGENDA" (ver
+        # chargeBtnsArea) -- invalidar la ref ahora evita que
+        # inbox.actualizar_badge() la use ya destruida en el próximo sync.
+        self.btn_bandeja_oirs = None
         widget = self.sender()
         obj_name = widget.objectName()
         self.chargeBtnsArea(obj_name)

@@ -6,8 +6,8 @@
 #               CREADOR : NICOLÁS QUEZADA QUEZADA               #
 #                                                               #
 #################################################################
-from PySide6.QtCore import Qt, QThread, Signal
-from PySide6.QtGui import QPixmap
+from PySide6.QtCore import QRect, Qt, QThread, Signal
+from PySide6.QtGui import QColor, QPainter, QPen, QPixmap, QRegion
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
 
 from core.helpers import foto_otoscopia
@@ -35,6 +35,94 @@ class _OtoscopiaFetchThread(QThread):
         od = foto_otoscopia(self._case_id, "od", FASE_FIJA)
         oi = foto_otoscopia(self._case_id, "oi", FASE_FIJA)
         self.listo.emit(od, oi)
+
+
+class _OtoscopioVisor(QWidget):
+    """Simula el ocular de un otoscopio real: la foto queda tapada por una
+    máscara negra excepto un círculo que sigue al mouse -- a diferencia de
+    un QLabel con la foto entera visible, el alumno solo ve de a un
+    fragmento circular por vez, como al mirar por el instrumento real."""
+
+    RADIO = 42  # px del círculo "visible" alrededor del cursor
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._pixmap = None
+        self._texto = SIN_IMAGEN_TEXTO
+        self._scaled = None
+        self._scaled_size = None
+        self._mouse_pos = None
+        self.setMinimumSize(220, 220)
+        self.setMouseTracking(True)
+
+    def setPixmap(self, pixmap):
+        self._pixmap = pixmap
+        self._texto = None
+        self._scaled = None
+        self.update()
+
+    def setText(self, texto):
+        self._pixmap = None
+        self._texto = texto
+        self.update()
+
+    def mouseMoveEvent(self, event):
+        self._mouse_pos = event.position().toPoint()
+        self.update()
+        super().mouseMoveEvent(event)
+
+    def leaveEvent(self, event):
+        self._mouse_pos = None
+        self.update()
+        super().leaveEvent(event)
+
+    def _pixmap_escalado(self):
+        # Cachea el escalado -- si no, cada mouseMoveEvent reescalaría la
+        # imagen entera (SmoothTransformation no es gratis).
+        size = self.size()
+        if self._scaled is None or self._scaled_size != size:
+            self._scaled = self._pixmap.scaled(
+                size, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation,
+            )
+            self._scaled_size = size
+        return self._scaled
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        rect = self.rect()
+
+        if self._pixmap is None:
+            painter.fillRect(rect, QColor("#fafafa"))
+            painter.setPen(QPen(QColor("#cccccc")))
+            painter.drawRect(rect.adjusted(0, 0, -1, -1))
+            painter.setPen(QColor("#888888"))
+            painter.drawText(rect, Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap, self._texto or "")
+            painter.end()
+            return
+
+        # Fondo negro (no el gris claro del estado vacío) -- así las franjas
+        # de letterbox (imagen con proporción distinta al widget) quedan del
+        # mismo negro que la máscara, en vez de un marco claro alrededor.
+        painter.fillRect(rect, QColor(0, 0, 0))
+        painter.setPen(QPen(QColor("#444444")))
+        painter.drawRect(rect.adjusted(0, 0, -1, -1))
+
+        scaled = self._pixmap_escalado()
+        img_rect = QRect(0, 0, scaled.width(), scaled.height())
+        img_rect.moveCenter(rect.center())
+        painter.drawPixmap(img_rect.topLeft(), scaled)
+
+        # Máscara: negro en todo salvo el círculo alrededor del mouse (si el
+        # mouse no está encima, queda completamente tapado).
+        mascara = QRegion(rect)
+        if self._mouse_pos is not None:
+            r = self.RADIO
+            circulo = QRect(self._mouse_pos.x() - r, self._mouse_pos.y() - r, r * 2, r * 2)
+            mascara -= QRegion(circulo, QRegion.RegionType.Ellipse)
+        painter.setClipRegion(mascara)
+        painter.fillRect(rect, QColor(0, 0, 0))
+        painter.end()
 
 
 class Otoscopia(QWidget):
@@ -67,12 +155,7 @@ class Otoscopia(QWidget):
         return col
 
     def _build_slot(self):
-        lbl = QLabel(SIN_IMAGEN_TEXTO)
-        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lbl.setMinimumSize(220, 220)
-        lbl.setWordWrap(True)
-        lbl.setStyleSheet("border: 1px solid #ccc; border-radius: 6px; color: #888; background: #fafafa;")
-        return lbl
+        return _OtoscopioVisor()
 
     def la_super(self, data, appointment_id=None):
         """Hidrata (o deshidrata, data=None) el módulo con el caso actual --
@@ -101,9 +184,6 @@ class Otoscopia(QWidget):
             if data:
                 pix = QPixmap()
                 pix.loadFromData(data)
-                lbl.setPixmap(pix.scaled(
-                    lbl.width() or 220, lbl.height() or 220,
-                    Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation,
-                ))
+                lbl.setPixmap(pix)
             else:
                 lbl.setText(SIN_IMAGEN_TEXTO)
