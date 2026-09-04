@@ -20,7 +20,7 @@ $user = Auth::requireUser();
 $pdo = Db::get();
 
 $stmt = $pdo->prepare(
-    "SELECT att.nota, att.hora_real, att.updated_at,
+    "SELECT att.id, att.nota, att.hora_real, att.updated_at,
             a.id AS appointment_id, a.fecha, a.hora, a.nombre, a.apellido, a.procedimiento, a.case_id
      FROM attendances att
      JOIN appointments a ON a.id = att.appointment_id
@@ -29,6 +29,23 @@ $stmt = $pdo->prepare(
 );
 $stmt->execute([$user['id']]);
 $attendances = $stmt->fetchAll();
+
+$attendanceComments = [];
+if ($attendances) {
+    $attIds = array_column($attendances, 'id');
+    $placeholders = implode(',', array_fill(0, count($attIds), '?'));
+    $stmt = $pdo->prepare(
+        "SELECT ac.attendance_id, ac.section, ac.comment, ac.created_at, u.display_name AS teacher_name
+         FROM attendance_comments ac
+         JOIN users u ON u.id = ac.teacher_id
+         WHERE ac.attendance_id IN ($placeholders)
+         ORDER BY ac.id"
+    );
+    $stmt->execute($attIds);
+    foreach ($stmt->fetchAll() as $c) {
+        $attendanceComments[(int) $c['attendance_id']][$c['section']][] = $c;
+    }
+}
 
 $stmt = $pdo->prepare('SELECT user_id, client_ts, action, payload FROM action_logs WHERE user_id = ? ORDER BY id');
 $stmt->execute([$user['id']]);
@@ -69,6 +86,8 @@ foreach ($attendances as $a) {
         'updated_at' => $a['updated_at'],
         'n_chat_messages' => $chatCounts[$apptId] ?? 0,
         'stats' => Metrics::summarizeSessions($group),
+        'evolucion_comments' => $attendanceComments[(int) $a['id']]['evolucion'] ?? [],
+        'procedimiento_comments' => $attendanceComments[(int) $a['id']]['procedimiento'] ?? [],
     ];
 }
 

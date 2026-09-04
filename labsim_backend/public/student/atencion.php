@@ -38,7 +38,7 @@ $pdo = Db::get();
 
 $appointmentId = (int) ($_GET['appointment_id'] ?? 0);
 
-$stmt = $pdo->prepare('SELECT nota, hora_real, updated_at FROM attendances WHERE appointment_id = ? AND student_id = ? AND estado = ?');
+$stmt = $pdo->prepare('SELECT id, nota, hora_real, updated_at FROM attendances WHERE appointment_id = ? AND student_id = ? AND estado = ?');
 $stmt->execute([$appointmentId, $me['id'], 'atendido']);
 $attendance = $stmt->fetch();
 
@@ -105,6 +105,33 @@ if ($log) {
     }
 }
 
+$attendanceComments = ['evolucion' => [], 'procedimiento' => []];
+$stmt = $pdo->prepare(
+    "SELECT ac.section, ac.comment, ac.created_at, u.display_name AS teacher_name
+     FROM attendance_comments ac JOIN users u ON u.id = ac.teacher_id
+     WHERE ac.attendance_id = ? ORDER BY ac.id"
+);
+$stmt->execute([(int) $attendance['id']]);
+foreach ($stmt->fetchAll() as $c) {
+    $attendanceComments[$c['section']][] = $c;
+}
+
+function render_attendance_comments(array $comments): void
+{
+    foreach ($comments as $c) {
+        ?>
+        <div style="display:flex; justify-content:center; margin-top:0.3rem;">
+            <div style="max-width:80%; background:#fff9ea; border:1px solid #f3dfa0; border-radius:10px; padding:0.4rem 0.65rem; font-size:0.85rem;">
+                <span style="display:block; font-size:0.68rem; color:#a3822f; font-weight:600; margin-bottom:0.1rem;">
+                    <?= htmlspecialchars($c['teacher_name']) ?> (docente) · <?= htmlspecialchars($c['created_at']) ?>
+                </span>
+                <?= nl2br(htmlspecialchars($c['comment'])) ?>
+            </div>
+        </div>
+        <?php
+    }
+}
+
 $paciente = trim("{$appointment['nombre']} {$appointment['apellido']}") ?: 'Paciente sin nombre';
 
 student_header($paciente, $me);
@@ -120,6 +147,10 @@ student_header($paciente, $me);
         <b>Inicio real:</b> <?= htmlspecialchars($attendance['hora_real'] ?: '—') ?><br>
         <b>Cerrada:</b> <?= htmlspecialchars($attendance['updated_at']) ?>
     </p>
+    <?php if ($attendanceComments['procedimiento']): ?>
+    <p class="legend" style="margin-top:0.8rem;">Comentarios de tu docente sobre el procedimiento:</p>
+    <?php render_attendance_comments($attendanceComments['procedimiento']); ?>
+    <?php endif; ?>
 </div>
 
 <div class="card">
@@ -134,6 +165,10 @@ student_header($paciente, $me);
     <?php if ($attendance['nota']): ?>
     <h2 style="margin-top:1rem;">Tu evolución registrada</h2>
     <p><?= nl2br(htmlspecialchars($attendance['nota'])) ?></p>
+    <?php endif; ?>
+    <?php if ($attendanceComments['evolucion']): ?>
+    <p class="legend">Comentarios de tu docente sobre tu evolución:</p>
+    <?php render_attendance_comments($attendanceComments['evolucion']); ?>
     <?php endif; ?>
 </div>
 

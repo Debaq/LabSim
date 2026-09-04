@@ -33,11 +33,15 @@ $stmt->execute([$appointmentId]);
 $appointment = $stmt->fetch();
 
 if (!$student || !$appointment) {
-    admin_header('Conversación', $me);
+    admin_header('Atención', $me);
     echo '<p class="error">Alumno o cita no encontrados.</p>';
     admin_footer();
     exit;
 }
+
+$stmt = $pdo->prepare('SELECT id, nota FROM attendances WHERE appointment_id = ? AND student_id = ?');
+$stmt->execute([$appointmentId, $studentId]);
+$attendance = $stmt->fetch();
 
 // Comentario del docente sobre un turno puntual (retroalimentación) -- queda
 // amarrado al id exacto de llm_chat_logs, así se pinta a la misma altura del
@@ -45,9 +49,10 @@ if (!$student || !$appointment) {
 // no reenvíe el comentario.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Auth::requireCsrf();
-    $chatLogId = (int) ($_POST['chat_log_id'] ?? 0);
+    $section = (string) ($_POST['section'] ?? 'chat');
     $comment = trim((string) ($_POST['comment'] ?? ''));
-    if ($comment !== '') {
+    if ($comment !== '' && $section === 'chat') {
+        $chatLogId = (int) ($_POST['chat_log_id'] ?? 0);
         // El chat_log_id debe pertenecer a ESTA cita/alumno (ya scopeados
         // arriba) -- si no, nadie comenta editando el POST en otra atención.
         $stmt = $pdo->prepare('SELECT 1 FROM llm_chat_logs WHERE id = ? AND appointment_id = ? AND student_id = ?');
@@ -56,9 +61,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->prepare('INSERT INTO chat_comments (chat_log_id, teacher_id, comment) VALUES (?, ?, ?)')
                 ->execute([$chatLogId, $me['id'], $comment]);
         }
+    } elseif ($comment !== '' && in_array($section, ['evolucion', 'procedimiento'], true) && $attendance) {
+        // Acá el comentario va sobre la atención completa (no un turno
+        // puntual) -- attendance_id ya viene scopeado por el SELECT de
+        // arriba (appointment_id + student_id), no llega del POST.
+        $pdo->prepare('INSERT INTO attendance_comments (attendance_id, section, teacher_id, comment) VALUES (?, ?, ?, ?)')
+            ->execute([$attendance['id'], $section, $me['id'], $comment]);
     }
     header('Location: chat_detail.php?appointment_id=' . $appointmentId . '&student_id=' . $studentId);
     exit;
+}
+
+$attendanceComments = ['evolucion' => [], 'procedimiento' => []];
+if ($attendance) {
+    $stmt = $pdo->prepare(
+        "SELECT ac.section, ac.comment, ac.created_at, u.display_name AS teacher_name
+         FROM attendance_comments ac
+         JOIN users u ON u.id = ac.teacher_id
+         WHERE ac.attendance_id = ? ORDER BY ac.id"
+    );
+    $stmt->execute([$attendance['id']]);
+    foreach ($stmt->fetchAll() as $c) {
+        $attendanceComments[$c['section']][] = $c;
+    }
 }
 
 $stmt = $pdo->prepare(
@@ -95,7 +120,7 @@ function chat_initials(string $name): string
     return $initials ?: '?';
 }
 
-admin_header('Conversación: ' . $student['display_name'], $me);
+admin_header('Atención: ' . $student['display_name'], $me);
 ?>
 <style>
     .chat-hero {
@@ -164,6 +189,12 @@ admin_header('Conversación: ' . $student['display_name'], $me);
     .comment-form button:hover { background: #b57a0a; }
 
     .chat-empty { text-align: center; color: #9096a2; padding: 2rem 0; }
+
+    .section-panel { background: #fbfbfc; border-radius: 10px; padding: 1rem 1.5rem; margin-bottom: 1.2rem; }
+    .section-panel h3 { margin: 0 0 0.4rem; font-size: 1rem; }
+    .section-panel .section-text { font-size: 0.9rem; line-height: 1.4; white-space: pre-wrap; margin-bottom: 0.8rem; }
+    .section-panel .section-comments { display: flex; flex-direction: column; gap: 0.5rem; max-width: 44rem; margin: 0 0 0.6rem; }
+    .section-panel .comment-form { max-width: 44rem; }
 </style>
 <div class="chat-hero">
     <div>
@@ -176,6 +207,40 @@ admin_header('Conversación: ' . $student['display_name'], $me);
     </div>
     <span class="badge"><?= count($log) ?> mensajes</span>
 </div>
+
+<?php
+function render_section_comments(string $section, string $label, string $text, array $comments): void
+{
+    ?>
+    <div class="card section-panel">
+        <h3><?= htmlspecialchars($label) ?></h3>
+        <div class="section-text"><?= $text !== '' ? nl2br(htmlspecialchars($text)) : '<span style="color:#9096a2;">Sin registro todavía.</span>' ?></div>
+        <div class="section-comments">
+            <?php foreach ($comments as $c): ?>
+            <div class="comment-bubble">
+                <div class="avatar a-teacher" title="Docente"><?= htmlspecialchars(chat_initials($c['teacher_name'])) ?></div>
+                <div class="comment-body">
+                    <span class="chat-meta"><?= htmlspecialchars($c['teacher_name']) ?> · <?= htmlspecialchars($c['created_at']) ?></span>
+                    <?= nl2br(htmlspecialchars($c['comment'])) ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <form method="post" class="comment-form">
+            <?= csrf_field() ?>
+            <input type="hidden" name="section" value="<?= htmlspecialchars($section) ?>">
+            <input type="text" name="comment" placeholder="Comentar <?= $section === 'evolucion' ? 'la evolución' : 'el procedimiento' ?>...">
+            <button type="submit" title="Agregar comentario">+</button>
+        </form>
+    </div>
+    <?php
+}
+
+if ($attendance) {
+    render_section_comments('evolucion', 'Evolución del alumno', (string) $attendance['nota'], $attendanceComments['evolucion']);
+    render_section_comments('procedimiento', 'Procedimiento', (string) $appointment['procedimiento'], $attendanceComments['procedimiento']);
+}
+?>
 
 <div class="card chat-panel">
     <p class="chat-legend">Globos amarillos = retroalimentación docente sobre ese turno puntual. Solo la ve el equipo docente, el alumno no la ve.</p>
@@ -209,6 +274,7 @@ admin_header('Conversación: ' . $student['display_name'], $me);
                 <?php endforeach; ?>
                 <form method="post" class="comment-form">
                     <?= csrf_field() ?>
+                    <input type="hidden" name="section" value="chat">
                     <input type="hidden" name="chat_log_id" value="<?= (int) $turn['id'] ?>">
                     <input type="text" name="comment" placeholder="Comentar este turno...">
                     <button type="submit" title="Agregar comentario">+</button>

@@ -31,6 +31,23 @@ BTN_OBJECT_NAME = "btn_mis_pacientes"
 COLUMNAS = ("Fecha", "Paciente", "Procedimiento")
 
 
+def _render_docente_comments(comments, sobre):
+    if not comments:
+        return ""
+    partes = [f"<h3 style='margin-top:0.8rem;'>Comentarios de tu docente sobre {sobre}</h3>"]
+    for c in comments:
+        comentario = html_lib.escape(c.get("comment", "")).replace("\n", "<br>")
+        cts = html_lib.escape(c.get("created_at", ""))
+        docente = html_lib.escape(c.get("teacher_name", "Docente"))
+        partes.append(
+            '<div style="background:#fff9ea; border:1px solid #f3dfa0; border-radius:8px; '
+            'padding:5px 10px; margin:2px 0;">'
+            f'<span style="color:#a3822f; font-size:8pt; font-weight:bold;">{docente} (docente) · {cts}</span><br>'
+            f'{comentario}</div>'
+        )
+    return "".join(partes)
+
+
 def _fmt_duracion(segundos):
     segundos = int(segundos or 0)
     minutos, seg = divmod(segundos, 60)
@@ -150,6 +167,8 @@ class MisPacientesWidget(QWidget):
                 "<h3>Tu evolución registrada</h3>"
                 f"<p>{html_lib.escape(it['nota']).replace(chr(10), '<br>')}</p>"
             )
+        partes.append(_render_docente_comments(it.get("evolucion_comments"), "tu evolución"))
+        partes.append(_render_docente_comments(it.get("procedimiento_comments"), "el procedimiento"))
         self.texto_resumen.setHtml("".join(partes))
 
     def _mostrar_conversacion(self, it):
