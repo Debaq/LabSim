@@ -179,9 +179,84 @@ if ($isPortalUser) {
     $stmt = Db::get()->prepare('SELECT * FROM action_logs WHERE user_id = ? ORDER BY id');
     $stmt->execute([$userId]);
     $myLogs = Metrics::decodeLogs($stmt->fetchAll());
-    $mySummary = Metrics::summarizeSessions(Metrics::buildSessions($myLogs));
+    $mySessions = Metrics::buildSessions($myLogs);
+    $mySummary = Metrics::summarizeSessions($mySessions);
     $myAttentions = Metrics::countAttentions($myLogs);
     $myWeeks = Metrics::attentionsByWeek($myLogs);
+
+    // Última atención: mismo detalle (timeline por bloques + comportamiento)
+    // que ve el docente en admin/dashboard.php para un alumno puntual, pero
+    // acotado al caso/cita más reciente del propio alumno -- ver
+    // Metrics::buildSessions para el criterio de corte por bloque.
+    $lastAttentionKey = null;
+    $lastAttentionEnd = null;
+    foreach ($mySessions as $s) {
+        if (!$s['con_paciente']) {
+            continue;
+        }
+        if ($lastAttentionEnd === null || $s['end'] > $lastAttentionEnd) {
+            $lastAttentionEnd = $s['end'];
+            $lastAttentionKey = ['appointment_id' => $s['appointment_id'], 'case_id' => $s['case_id']];
+        }
+    }
+    $lastAttentionSessions = [];
+    $lastAttentionAppt = null;
+    if ($lastAttentionKey !== null) {
+        foreach ($mySessions as $s) {
+            if ($s['appointment_id'] === $lastAttentionKey['appointment_id'] && $s['case_id'] === $lastAttentionKey['case_id']) {
+                $lastAttentionSessions[] = $s;
+            }
+        }
+        $lastAttentionStats = Metrics::summarizeSessions($lastAttentionSessions);
+        // Leyenda de colores no interactiva: el alumno ve esto en el iframe
+        // de Moodle (a veces desde el celular), no puede pasar el mouse
+        // sobre cada barra como el docente en dashboard.php -- necesita el
+        // significado de cada color a simple vista.
+        $lastAttentionLegend = [];
+        foreach ($lastAttentionSessions as $s) {
+            foreach ($s['actions'] as $a) {
+                $lastAttentionLegend[(string) $a['action']] = Metrics::actionLabel((string) $a['action']);
+            }
+        }
+        asort($lastAttentionLegend);
+        if ($lastAttentionKey['appointment_id'] !== null) {
+            $stmt = Db::get()->prepare('SELECT nombre, apellido, procedimiento FROM appointments WHERE id = ?');
+            $stmt->execute([(int) $lastAttentionKey['appointment_id']]);
+            $lastAttentionAppt = $stmt->fetch() ?: null;
+        }
+    }
+}
+
+// hue estable por tipo de acción -- mismo criterio que admin/dashboard.php
+// (crc32 del nombre técnico) para que un alumno vea el mismo color que su
+// docente si comparan pantallas.
+function launch_action_hue(string $action): int
+{
+    return crc32($action) % 360;
+}
+
+function render_attention_timeline(array $session): void
+{
+    ?>
+    <div class="session-meta">
+        <?= htmlspecialchars((string) $session['start']) ?> &rarr; <?= htmlspecialchars((string) $session['end']) ?>
+        &nbsp;·&nbsp; <?= $session['n_actions'] ?> acciones &nbsp;·&nbsp; <?= $session['duration_s'] ?>s
+    </div>
+    <div class="timeline">
+        <?php foreach ($session['actions'] as $a):
+            $delta = $a['delta_s'];
+            $w = $delta === null ? 6 : (int) min(max($delta, 0) * 5, 200);
+            $w = max($w, 6);
+            $hue = launch_action_hue((string) $a['action']);
+            $isPause = $delta !== null && $delta >= 30;
+            $title = Metrics::actionLabel((string) $a['action']) . ' · ' . ($delta === null ? 'inicio de sesión' : $delta . 's desde la acción anterior');
+        ?>
+        <div class="tl-seg<?= $isPause ? ' tl-pause' : '' ?>"
+             style="width:<?= $w ?>px; background:hsl(<?= $hue ?>,60%,55%);"
+             title="<?= htmlspecialchars($title) ?>"></div>
+        <?php endforeach; ?>
+    </div>
+    <?php
 }
 
 header('Content-Type: text/html; charset=utf-8');
@@ -203,6 +278,16 @@ header('Content-Type: text/html; charset=utf-8');
     .stats-empty { text-align: center; color: #888; font-size: 0.9rem; }
     .chart-wrap { max-height: 320px; margin-top: 0.5rem; }
     .no-activity-list { columns: 2; column-gap: 1.5rem; font-size: 0.9rem; margin: 0.3rem 0; padding-left: 1.2rem; }
+    .last-attention { margin-top: 1.8rem; }
+    .last-attention h3 { font-size: 1rem; margin-bottom: 0.2rem; }
+    .timeline { display: flex; align-items: flex-end; gap: 2px; height: 34px; padding: 4px 0 8px; overflow-x: auto; }
+    .tl-seg { height: 100%; border-radius: 2px; flex-shrink: 0; }
+    .tl-seg.tl-pause { border-top: 4px solid #c0392b; }
+    .session-meta { font-size: 0.8rem; color: #555; margin: 0.9rem 0 0.1rem; }
+    .badge-warn { color: #a33; font-weight: 600; }
+    .legend-list { list-style: none; padding: 0; margin: 0.4rem 0 0; font-size: 0.82rem; color: #444; }
+    .legend-list li { display: flex; align-items: center; gap: 0.5rem; padding: 0.15rem 0; }
+    .legend-swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -263,6 +348,36 @@ header('Content-Type: text/html; charset=utf-8');
             </p>
             <p class="stats-caption">Pacientes atendidos por semana</p>
             <div class="chart-wrap"><canvas id="statsChart"></canvas></div>
+
+            <?php if ($lastAttentionKey !== null): ?>
+            <div class="last-attention">
+                <h3>Tu última atención</h3>
+                <p class="stats-summary">
+                    <?php if ($lastAttentionAppt): ?>
+                        <?= htmlspecialchars(trim($lastAttentionAppt['nombre'] . ' ' . $lastAttentionAppt['apellido'])) ?: 'Paciente' ?>
+                        · <?= htmlspecialchars($lastAttentionAppt['procedimiento'] ?: '—') ?>
+                    <?php else: ?>
+                        Caso <?= htmlspecialchars((string) ($lastAttentionKey['case_id'] ?? '—')) ?>
+                    <?php endif; ?>
+                </p>
+                <p class="stats-summary">
+                    delta promedio: <?= $lastAttentionStats['avg_delta_s'] ?? '—' ?>s
+                    &nbsp;·&nbsp; <span class="<?= $lastAttentionStats['long_pauses'] > 0 ? 'badge-warn' : '' ?>">pausas largas: <?= $lastAttentionStats['long_pauses'] ?></span>
+                    &nbsp;·&nbsp; sin pausa (0s): <?= $lastAttentionStats['no_pause_actions'] ?>
+                </p>
+                <p class="stats-caption">Cada barra es una acción; ancho = demora desde la anterior. Borde rojo arriba = pausa ≥30s.</p>
+                <?php foreach ($lastAttentionSessions as $s): ?>
+                <?php render_attention_timeline($s); ?>
+                <?php endforeach; ?>
+                <?php if ($lastAttentionLegend): ?>
+                <ul class="legend-list">
+                    <?php foreach ($lastAttentionLegend as $action => $label): ?>
+                    <li><span class="legend-swatch" style="background:hsl(<?= launch_action_hue($action) ?>,60%,55%);"></span><?= htmlspecialchars($label) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
         <?php endif; ?>
     </div>
 
