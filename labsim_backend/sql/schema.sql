@@ -260,6 +260,19 @@ CREATE TABLE IF NOT EXISTS llm_chat_logs (
 );
 CREATE INDEX IF NOT EXISTS idx_llm_chat_logs_appt ON llm_chat_logs (appointment_id, student_id);
 
+-- Retroalimentación del docente sobre un turno puntual de la conversación
+-- (Admin -> Ficha del alumno -> Ver chat, chat_detail.php): un comentario
+-- queda amarrado a la fila exacta de llm_chat_logs a la que responde, para
+-- poder pintarlo a esa misma altura en la vista de la conversación.
+CREATE TABLE IF NOT EXISTS chat_comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    chat_log_id INTEGER NOT NULL REFERENCES llm_chat_logs(id),
+    teacher_id INTEGER NOT NULL REFERENCES users(id),
+    comment TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_chat_comments_log ON chat_comments (chat_log_id);
+
 -- Bandeja de entrada del alumno: mensajes de dos orígenes distintos en una
 -- sola tabla genérica (no es exclusiva de OIRS).
 --  1) OirsEvaluator::evaluate() -- al cerrar una atención (ver

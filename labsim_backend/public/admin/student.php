@@ -168,7 +168,7 @@ admin_header('Alumno: ' . $student['display_name'], $me);
     <strong>Atenciones (<?= count($attendances) ?>)</strong>
     <p class="legend">Comportamiento aislado por cada atención (cita/paciente) -- así un caso no ensucia las métricas de otro cuando el alumno revisó más de uno.</p>
     <table>
-        <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Bloques</th><th>Duración</th><th>Delta prom.</th><th>Pausas largas</th><th>Hora real</th><th>Nota</th><th>Actualizado</th></tr>
+        <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Bloques</th><th>Duración</th><th>Delta prom.</th><th>Pausas largas</th><th>Hora real</th><th>Nota</th><th>Actualizado</th><th>Conversación</th></tr>
         <?php foreach ($attendances as $a):
             $aStats = $statsByAppt[(int) $a['appointment_id']] ?? null;
         ?>
@@ -184,10 +184,11 @@ admin_header('Alumno: ' . $student['display_name'], $me);
             <td><?= htmlspecialchars($a['hora_real'] ?: '—') ?></td>
             <td style="font-size:0.85rem;"><?= htmlspecialchars($a['nota'] ?: '—') ?></td>
             <td><?= htmlspecialchars($a['updated_at']) ?></td>
+            <td><a href="chat_detail.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>">Ver chat</a></td>
         </tr>
         <?php endforeach; ?>
         <?php if (!$attendances): ?>
-        <tr><td colspan="11" style="color:#888;">Sin atenciones registradas todavía.</td></tr>
+        <tr><td colspan="12" style="color:#888;">Sin atenciones registradas todavía.</td></tr>
         <?php endif; ?>
     </table>
 </div>
