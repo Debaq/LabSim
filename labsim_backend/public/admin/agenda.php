@@ -352,6 +352,12 @@ $today = date('Y-m-d');
 $monthNames = [1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril', 5 => 'mayo', 6 => 'junio',
                7 => 'julio', 8 => 'agosto', 9 => 'septiembre', 10 => 'octubre', 11 => 'noviembre', 12 => 'diciembre'];
 
+// Rango de años del selector: año actual +/- 5, ampliado si el mes visto cae afuera.
+$curMonthNum = (int) $monthStart->format('n');
+$curYearNum = (int) $monthStart->format('Y');
+$yearRangeMin = min($curYearNum, (int) date('Y') - 5);
+$yearRangeMax = max($curYearNum, (int) date('Y') + 5);
+
 // El calendario y la lista de citas de abajo SÍ se acotan al filtro
 // curso/grupo/alumno -- acá sirve como vista de ocupación/agenda de ese
 // scope. El alumno filtrado puede pertenecer a varios grupos, por eso se
@@ -756,12 +762,21 @@ admin_header('Agendas', $me);
     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.8rem; gap:0.5rem; flex-wrap:wrap;">
         <a href="<?= agenda_url(['month' => $prevMonth]) ?>">&larr; anterior</a>
         <strong><?= $monthNames[(int) $monthStart->format('n')] ?> <?= $monthStart->format('Y') ?></strong>
-        <form method="get" style="display:inline;" onsubmit="var v=document.getElementById('cal-month-jump').value; if (!v) return false; this.querySelector('[name=month]').value = v;">
+        <form method="get" style="display:flex; gap:0.3rem; align-items:center;" onsubmit="this.querySelector('[name=month]').value = document.getElementById('cal-jump-year').value + '-' + document.getElementById('cal-jump-month').value; return true;">
             <?php foreach ($_GET as $k => $v): if ($k === 'month') continue; ?>
             <input type="hidden" name="<?= htmlspecialchars($k) ?>" value="<?= htmlspecialchars((string) $v) ?>">
             <?php endforeach; ?>
             <input type="hidden" name="month" value="">
-            <input type="month" id="cal-month-jump" value="<?= htmlspecialchars($month) ?>" onchange="this.form.requestSubmit()" style="font-size:0.85rem;">
+            <select id="cal-jump-month" style="font-size:0.85rem;" onchange="this.form.requestSubmit()">
+                <?php foreach ($monthNames as $mn => $mname): ?>
+                <option value="<?= sprintf('%02d', $mn) ?>" <?= $mn === $curMonthNum ? 'selected' : '' ?>><?= ucfirst($mname) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <select id="cal-jump-year" style="font-size:0.85rem;" onchange="this.form.requestSubmit()">
+                <?php for ($y = $yearRangeMin; $y <= $yearRangeMax; $y++): ?>
+                <option value="<?= $y ?>" <?= $y === $curYearNum ? 'selected' : '' ?>><?= $y ?></option>
+                <?php endfor; ?>
+            </select>
         </form>
         <a href="<?= agenda_url(['month' => $nextMonth]) ?>">siguiente &rarr;</a>
     </div>
