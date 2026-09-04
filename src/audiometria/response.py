@@ -216,10 +216,12 @@ class ResponseAudiometry():
         stim = self.data['audio']['stim']
         output = self.data['audio']['output']
         if 2 not in stim or 5 not in stim:
+            self.downHand()
             return
         ch_habla = stim.index(2)
         ch_mkg = stim.index(5)
         if ch_habla == ch_mkg or output[ch_habla] == output[ch_mkg]:
+            self.downHand()
             return
 
         o_e = output[ch_habla] #oido estudiado

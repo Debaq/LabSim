@@ -508,8 +508,11 @@ class Audiometer(QWidget, Ui_Audiometer):
     def update_logo(self, ch, val):
         side = self.lbl_output[ch].text()
         side = 0 if side == "Derecha" else 1
+        contra = 0 if ch == 1 else 1
         self.datasignal_speech[2] = val
         self.datasignal_speech[3] = side
+        self.datasignal_speech[4] = (self.lbl_revers[contra].text() == "Invertido"
+                                      and self.lbl_stim[contra].text() == "Speech Noise")
         self.datasignal_speech[5] = ch
         self.datasignal_speech[6] = self._mkg_intensity(ch)
         self.signal_speech.emit(self.datasignal_speech)
@@ -550,6 +553,13 @@ class Audiometer(QWidget, Ui_Audiometer):
             elif self.no_puls(ch):
                 self.play(ch)
                 self.vu_meters[ch].setValue(50)
+            if lbl == "Speech Noise" and self.datasignal_speech[1]:
+                contra = 0 if ch == 1 else 1
+                if self.lbl_stim[contra].text() == "Habla":
+                    self.datasignal_speech[4] = (self.lbl_revers[ch].text() == "Invertido"
+                                                  and self.lbl_stim[ch].text() == "Speech Noise")
+                    self.datasignal_speech[6] = self._mkg_intensity(contra)
+                    self.signal_speech.emit(self.datasignal_speech)
         else:
             self.toggle_speech(ch, self.lbl_revers[ch].text() == "Invertido")
 
@@ -734,8 +744,10 @@ class Audiometer(QWidget, Ui_Audiometer):
     def reset_channels(self):
         ch1 = self.no_Logo(0)
         ch2 = self.no_Logo(1)
-        self.stop(0)
-        self.stop(1)
+        if ch1:
+            self.stop(0)
+        if ch2:
+            self.stop(1)
 
         if ch1 and self.lbl_rev_ch0.text() == reverse_list[1]:
             self.play(0)
@@ -974,6 +986,8 @@ class Audiometer(QWidget, Ui_Audiometer):
         elif lbl == "Speech Noise" and self.datasignal_speech[1]:
             contra = 0 if ch == 1 else 1
             if self.lbl_stim[contra].text() == "Habla":
+                self.datasignal_speech[4] = (self.lbl_revers[ch].text() == "Invertido"
+                                              and self.lbl_stim[ch].text() == "Speech Noise")
                 self.datasignal_speech[6] = self._mkg_intensity(contra)
                 self.signal_speech.emit(self.datasignal_speech)
 
