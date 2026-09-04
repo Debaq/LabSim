@@ -162,11 +162,6 @@ class Shedule:
         own_id = (client.user or {}).get("id")
         own_username = (client.user or {}).get("username", "")
         state = client.get_full_state()
-        print(f"[shedule_fetch] own_id={own_id!r} own_username={own_username!r} "
-              f"appointments={len(state.get('appointments', []))} keys={list(state.keys())}")
-        for appt in state.get("appointments", []):
-            print(f"[shedule_fetch]   cita id={appt.get('id')} fecha={appt.get('fecha')!r} "
-                  f"hora={appt.get('hora')!r} cancelada={appt.get('cancelada')!r}")
         data = backend_state_to_shedule(state, own_id, own_username)
         # deepcopy por la misma razón que en CasesOffline.get_cases():
         # self.data se muta en el sitio (nuevas citas, edición de filas)

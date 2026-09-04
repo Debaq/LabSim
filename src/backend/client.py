@@ -19,6 +19,10 @@ class BackendClient:
         self._session_file = Path(session_file)
         self.token: str | None = None
         self.user: dict | None = None
+        # Session en vez de requests.get/post sueltos: reusa la conexión TCP/TLS
+        # entre llamadas -- sin esto, SyncThread (polling cada 15s, ver
+        # sync_thread.py) repetía el handshake completo en cada ciclo.
+        self._http = requests.Session()
         self._load_session()
 
     # -- sesión local -----------------------------------------------------
@@ -56,7 +60,7 @@ class BackendClient:
         return {"Authorization": f"Bearer {self.token}"}
 
     def _get(self, path: str, params: dict | None = None) -> dict:
-        resp = requests.get(
+        resp = self._http.get(
             f"{self._base_url}{path}", params=params, headers=self._headers(), timeout=DEFAULT_TIMEOUT
         )
         resp.raise_for_status()
@@ -66,7 +70,7 @@ class BackendClient:
         """Como _get(), pero para un endpoint que devuelve la imagen cruda
         (no JSON) -- ver patient_photo.php. None = sin foto (404), que acá
         no es un error sino el caso normal de un paciente sin foto subida."""
-        resp = requests.get(
+        resp = self._http.get(
             f"{self._base_url}{path}", params=params, headers=self._headers(), timeout=DEFAULT_TIMEOUT
         )
         if resp.status_code == 404:
@@ -75,7 +79,7 @@ class BackendClient:
         return resp.content
 
     def _post(self, path: str, data: dict, timeout: int = DEFAULT_TIMEOUT) -> dict:
-        resp = requests.post(
+        resp = self._http.post(
             f"{self._base_url}{path}", json=data, headers=self._headers(), timeout=timeout
         )
         try:

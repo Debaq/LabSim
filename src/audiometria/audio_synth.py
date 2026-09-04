@@ -78,6 +78,7 @@ BROADBAND_STIMULI = ("WN", "SN", "PN")
 
 _CACHE_DIRNAME = "_generated"
 _fallback_dir = None
+_resolved_cache_dirs: dict[str, Path] = {}
 
 
 # ---------------------------------------------------------------- utilidades
@@ -314,16 +315,25 @@ def _cache_dir(audio_dir):
     """
     global _fallback_dir
 
+    # Cacheado por audio_dir: sin esto, cada estimulo reproducido en un examen
+    # (docenas por sesion) pagaba un mkdir()+access() de mas solo para
+    # confirmar un directorio que ya existia desde la primera vez.
+    cached = _resolved_cache_dirs.get(audio_dir)
+    if cached is not None:
+        return cached
+
     target = Path(audio_dir) / _CACHE_DIRNAME
     try:
         target.mkdir(parents=True, exist_ok=True)
         if os.access(target, os.W_OK):
+            _resolved_cache_dirs[audio_dir] = target
             return target
     except OSError:
         pass
 
     if _fallback_dir is None:
         _fallback_dir = Path(tempfile.mkdtemp(prefix="labsim_audio_"))
+    _resolved_cache_dirs[audio_dir] = _fallback_dir
     return _fallback_dir
 
 
