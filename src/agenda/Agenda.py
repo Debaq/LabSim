@@ -339,7 +339,7 @@ class Agenda(QWidget, Ui_Form):
             # "atendido" de verdad, con la propia cuenta del docente) -- ver
             # main.atender_paciente_base/cerrar_atencion_base.
             if estado == "atendiendo" and self._es_atencion_activa(key):
-                self.btn_atender.setText("Cerrar atención")
+                self.btn_atender.setText("Cerrar/Evolucionar")
                 self.btn_atender.setEnabled(tiene_caso)
             elif estado == "atendiendo":
                 self.btn_atender.setText("Atender")
@@ -356,7 +356,7 @@ class Agenda(QWidget, Ui_Form):
             # se escribe en red, pero el botón sí simula el ciclo completo
             # atender/cerrar (ver atender_paciente() y _cerrar_atencion_prueba()).
             if self._prueba_atendiendo_key == key and self._es_atencion_activa(key):
-                self.btn_atender.setText("Cerrar atención")
+                self.btn_atender.setText("Cerrar/Evolucionar")
                 self.btn_atender.setEnabled(tiene_caso)
             else:
                 self.btn_atender.setText("Atender")
@@ -365,7 +365,7 @@ class Agenda(QWidget, Ui_Form):
                 not (self._prueba_atendiendo_key == key and self._es_atencion_activa(key))
             )
         elif estado == "atendiendo" and self._es_atencion_activa(key):
-            self.btn_atender.setText("Cerrar atención")
+            self.btn_atender.setText("Cerrar/Evolucionar")
             self.btn_atender.setEnabled(tiene_caso)
         elif estado == "atendiendo":
             # Quedó "atendiendo" pero no está cargado en memoria (reinicio de la app
