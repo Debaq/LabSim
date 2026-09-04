@@ -1,6 +1,6 @@
 from pathlib import Path
 import sys
-from PySide6.QtCore import Qt, QSize, Signal, Slot
+from PySide6.QtCore import Qt, QSize, QTimer, Signal, Slot
 from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox, QProgressDialog
 
 from agenda import Agenda
@@ -138,6 +138,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.var_list_word = Storage(2)
         self.log_uploader = None
         self.sync_thread = None
+        self.cronometro_segundos = 0
+        self.cronometro_timer = QTimer(self)
+        self.cronometro_timer.setInterval(1000)
+        self.cronometro_timer.timeout.connect(self._tick_cronometro)
 
     def create_sub_windows(self):
         """Crea las subventanas"""
@@ -235,6 +239,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.log_uploader.flush_now()
         self._stop_log_uploader()
         self._stop_sync_thread()
+        self._reset_cronometro()
         self._close_sub_windows()
         login_subw = self.subw.get("LOGIN") if self.subw else None
         if login_subw is not None:
@@ -251,6 +256,30 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.data_current = None
         self.data_current_key = None
         self.paciente_actual = None
+
+    def _start_cronometro(self):
+        """Arranca (o reinicia si ya venía corriendo) el cronómetro de
+        atención al presionar "atender" -- se muestra al centro de la barra
+        de botones de equipos/ventanas MDI."""
+        self.cronometro_segundos = 0
+        self.lbl_cronometro.setText("00:00")
+        self.cronometro_timer.start()
+
+    def _stop_cronometro(self):
+        """Detiene el cronómetro (al evolucionar) dejando el tiempo final
+        visible hasta el próximo "atender" o el logout"""
+        self.cronometro_timer.stop()
+
+    def _reset_cronometro(self):
+        """Limpia el cronómetro (logout)"""
+        self.cronometro_timer.stop()
+        self.cronometro_segundos = 0
+        self.lbl_cronometro.setText("")
+
+    def _tick_cronometro(self):
+        self.cronometro_segundos += 1
+        minutos, segundos = divmod(self.cronometro_segundos, 60)
+        self.lbl_cronometro.setText(f"{minutos:02d}:{segundos:02d}")
 
     def _close_sub_windows(self):
         """Cierra todas las subventanas abiertas (excepto LOGIN) y deshidrata sus datos"""
@@ -301,6 +330,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.paciente_actual = None
         self._hydrate_modules()
         self.statusbar.showMessage(f"[PRUEBA] Atención cerrada (no se guarda): {nota[:80]}")
+        self._stop_cronometro()
 
     def _atender_caso(self, key, *, es_prueba):
         """Lógica común a atender_paciente() y atender_paciente_prueba() --
@@ -362,6 +392,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         else:
             self.statusbar.showMessage(f"Estás atendiendo a: RUT {rut} — Fecha de nacimiento {entry.fecha_nac}")
 
+        self._start_cronometro()
+
     def cerrar_atencion(self, key, nota):
         """Cierra la atención (estado 'atendido') guardando la nota de atención del estudiante"""
         if self.data_login["permission"] == 777:
@@ -375,6 +407,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
         marcar_entry_atendido(entry, self.data_login["user"], nota)
         shedule.set(shedule.data)
+        self._stop_cronometro()
 
         if self.data_current_key == key:
             self.data_current_key = None
