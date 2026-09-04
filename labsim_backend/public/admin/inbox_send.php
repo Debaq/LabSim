@@ -161,6 +161,23 @@ $misMensajes = $stmtRecibidos->fetchAll();
 $hayPaginaSiguiente = count($misMensajes) > INBOX_POR_PAGINA;
 $misMensajes = array_slice($misMensajes, 0, INBOX_POR_PAGINA);
 
+// Lo que YO he mandado (esta página, avisos manuales) -- cada envío a N
+// destinatarios queda como N filas (mismo asunto/cuerpo/created_at, distinto
+// student_id), así que se agrupan por lote para mostrar un solo renglón por
+// envío con la lista de destinatarios y cuántos lo han leído.
+$stmtEnviados = $pdo->prepare(
+    "SELECT m.asunto, m.cuerpo, m.created_at, COUNT(*) AS n_destinatarios,
+            SUM(m.leido) AS n_leidos, GROUP_CONCAT(u.display_name, ', ') AS destinatarios
+     FROM inbox_messages m
+     JOIN users u ON u.id = m.student_id
+     WHERE m.sender_admin_id = ? AND m.tipo = 'mensaje'
+     GROUP BY m.asunto, m.cuerpo, m.created_at
+     ORDER BY m.created_at DESC
+     LIMIT 50"
+);
+$stmtEnviados->execute([(int) $me['id']]);
+$misEnvios = $stmtEnviados->fetchAll();
+
 admin_header('Bandeja de entrada', $me);
 ?>
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
@@ -199,6 +216,29 @@ admin_header('Bandeja de entrada', $me);
         <?php if ($hayPaginaSiguiente): ?>
         <a href="?pagina=<?= $pagina + 1 ?><?= $selectedCourseId > 0 ? '&course_id=' . $selectedCourseId : '' ?>">Más antiguos »</a>
         <?php endif; ?>
+    </div>
+    <?php endif; ?>
+</div>
+
+<div class="card">
+    <strong>Mensajes enviados</strong>
+    <?php if (!$misEnvios): ?>
+    <p class="legend">Todavía no has mandado mensajes.</p>
+    <?php else: ?>
+    <div style="max-height:24rem; overflow-y:auto; margin-top:0.5rem;">
+        <?php foreach ($misEnvios as $e): ?>
+        <details style="border:1px solid #e5e5e5; border-radius:6px; padding:0.4rem 0.6rem; margin-bottom:0.4rem;">
+            <summary style="cursor:pointer;">
+                <?= htmlspecialchars($e['asunto']) ?>
+                <span class="legend" style="font-weight:400;">
+                    -- <?= (int) $e['n_destinatarios'] ?> destinatario<?= (int) $e['n_destinatarios'] === 1 ? '' : 's' ?>
+                    (<?= (int) $e['n_leidos'] ?> leído<?= (int) $e['n_leidos'] === 1 ? '' : 's' ?>), <?= htmlspecialchars($e['created_at']) ?>
+                </span>
+            </summary>
+            <p style="white-space:pre-wrap; margin:0.5rem 0 0.3rem;"><?= htmlspecialchars($e['cuerpo']) ?></p>
+            <p class="legend" style="margin:0;">Para: <?= htmlspecialchars($e['destinatarios']) ?></p>
+        </details>
+        <?php endforeach; ?>
     </div>
     <?php endif; ?>
 </div>
