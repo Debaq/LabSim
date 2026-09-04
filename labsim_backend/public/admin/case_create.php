@@ -986,7 +986,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             <div class="side-heading"><span class="side-tag <?= $side ?>"><?= $sideLabel ?></span></div>
             <label>UMD (int / %)
                 <input type="number" step="5" class="umd-int-input" data-side="<?= $side ?>" name="umd_int[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_int', $side], 35)) ?>" style="width:5rem; display:inline-block;">
-                / <input type="number" step="5" class="umd-pct-input" data-side="<?= $side ?>" name="umd_pct[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_pct', $side], 100)) ?>" style="width:5rem; display:inline-block;">
+                / <input type="number" step="4" class="umd-pct-input" data-side="<?= $side ?>" name="umd_pct[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_pct', $side], 100)) ?>" style="width:5rem; display:inline-block;">
             </label>
             <label>SISI <input type="number" step="5" name="sisi[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['sisi', $side], 0)) ?>"></label>
             <label class="inline-check"><input type="checkbox" name="stenger[<?= $side ?>]" <?= isset($v['stenger'][$side]) ? 'checked' : '' ?>> Stenger</label>
