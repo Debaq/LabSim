@@ -369,28 +369,25 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data_current))
         self.subw_ac = FrameSubMdi(Acumetria.Acumetria(self.data_current))
         self.subw_ot = FrameSubMdi(Otoscopia.Otoscopia(self.data_current))
-        subw_agenda = FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self))
-        subw_voice = FrameSubMdi(ComandVoiceA())
-        subw_chat = FrameSubMdi(ChatPacienteWidget(self.data_login.get("name")))
-        subw_ficha = FrameSubMdi(Agenda.FichaClinicaWidget())
-        subw_inbox = FrameSubMdi(inbox.InboxWidget(self))
         self.subw_w = FrameSubMdi(ListWords.ListWords(self.data_current))
         self.subw_z = FrameSubMdi(Z.ZControl())
 
-        if self.data_login["permission"] in (555, 777):  # docente y admin, no alumno
-            subw_create_a = FrameSubMdi(create_a.CreateA(self.data_login["user"], self))
-            self.subw["CREATE_A"] = subw_create_a
+        self.subw.update({
+            "A": self.subw_a,
+            "AC": self.subw_ac,
+            "OT": self.subw_ot,
+            "AGENDA": FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self)),
+            "CVOICE": FrameSubMdi(ComandVoiceA()),
+            "CHAT": FrameSubMdi(ChatPacienteWidget(self.data_login.get("name"))),
+            "FICHA": FrameSubMdi(Agenda.FichaClinicaWidget()),
+            "INBOX": FrameSubMdi(inbox.InboxWidget(self)),
+            "W": self.subw_w,
+            "Z": self.subw_z,
+        })
 
-        self.subw["A"] = self.subw_a
-        self.subw["AC"] = self.subw_ac
-        self.subw["OT"] = self.subw_ot
-        self.subw["AGENDA"] = subw_agenda
-        self.subw["CVOICE"] = subw_voice
-        self.subw["CHAT"] = subw_chat
-        self.subw["FICHA"] = subw_ficha
-        self.subw["INBOX"] = subw_inbox
-        self.subw["W"] = self.subw_w
-        self.subw["Z"] = self.subw_z
+        if self.data_login["permission"] in (555, 777):  # docente y admin, no alumno
+            self.subw["CREATE_A"] = FrameSubMdi(create_a.CreateA(self.data_login["user"], self))
+
         self._hydrate_modules()
         self.connect_signals()
 
