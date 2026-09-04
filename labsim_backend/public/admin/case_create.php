@@ -500,8 +500,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $apellido2 = trim((string) ($v['apellido2'] ?? ''));
             $snapshotNombre = trim($nombre1 . ' ' . $nombre2);
             $snapshotApellido = trim($apellido1 . ' ' . $apellido2);
-            $snapshotRut = (string) CaseBuilder::rutFromAge($age);
-            $snapshotFechaNac = sprintf('01-01-%04d', (int) date('Y') - $age);
+            $postedRut = trim((string) ($v['rut'] ?? ''));
+            $postedFechaNacIso = trim((string) ($v['fecha_nac'] ?? ''));
+            $snapshotRut = $postedRut !== '' ? $postedRut : (string) CaseBuilder::rutFromAge($age);
+            $snapshotFechaNac = $postedFechaNacIso !== '' ? date('d-m-Y', strtotime($postedFechaNacIso)) : CaseBuilder::randomFechaNacForAge($age);
             $data['paciente_snapshot'] = [
                 'nombre' => $snapshotNombre,
                 'apellido' => $snapshotApellido,
@@ -546,6 +548,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     fieldset { border: 1px solid #e5e5e5; border-radius: 6px; margin: 1rem 0; padding: 0.8rem 1rem; }
     legend { font-weight: 600; padding: 0 0.4rem; }
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    input[readonly] { background: #eee; color: #555; }
 
     /* Fichas (tabs): cada <div class="tab-panel"> es una pestaña del caso.
        Sin JS quedan todas visibles apiladas (igual que antes) -- degrada
@@ -606,6 +610,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     .photo-block { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee; }
     .patient-avatar { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; background: #eee; flex-shrink: 0; }
     .patient-avatar-empty { display: flex; align-items: center; justify-content: center; color: #999; font-size: 0.7rem; text-align: center; }
+    .patient-avatar-empty[hidden] { display: none; }
 
     /* Ficha Otoscopia: fases apiladas, cada una con imagen OD/OI. */
     .otoscopia-fase { margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px solid #eee; }
@@ -616,6 +621,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     .otoscopia-thumb-empty { display: flex; align-items: center; justify-content: center; width: 100%; max-width: 220px;
                               height: 160px; border-radius: 6px; background: #f2f2f2; color: #999; font-size: 0.78rem;
                               margin: 0.3rem auto; }
+    .otoscopia-thumb[hidden], .otoscopia-thumb-empty[hidden] { display: none; }
     .otoscopia-photo-slot .otoscopia-photo-input { display: block; margin: 0.4rem auto 0.3rem; }
     .otoscopia-delete-photo { color: #a33; }
 
@@ -655,9 +661,17 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <?php if ($isEdit): ?><input type="hidden" id="chat-static-name" value="<?= htmlspecialchars($editDisplayName) ?>"><?php endif; ?>
     <label class="inline-check"><input type="radio" name="gender" value="0" <?= ($v['gender'] ?? '0') === '0' ? 'checked' : '' ?>> Hombre</label>
     <label class="inline-check"><input type="radio" name="gender" value="1" <?= ($v['gender'] ?? '0') === '1' ? 'checked' : '' ?>> Mujer</label>
-    <label>Edad
-        <input type="number" name="age" min="0" max="110" value="<?= htmlspecialchars((string) ($v['age'] ?? '')) ?>">
-    </label>
+    <div class="three-col">
+        <label>Edad
+            <input type="number" name="age" id="patient-age" min="0" max="110" value="<?= htmlspecialchars((string) ($v['age'] ?? '')) ?>">
+        </label>
+        <label>Fecha de nacimiento
+            <input type="text" name="fecha_nac" id="patient-fecha-nac" value="<?= htmlspecialchars((string) ($v['fecha_nac'] ?? '')) ?>" readonly title="Se calcula sola a partir de la edad (día y mes al azar)." placeholder="AAAA-MM-DD">
+        </label>
+        <label>RUT
+            <input type="text" name="rut" id="patient-rut" value="<?= htmlspecialchars((string) ($v['rut'] ?? '')) ?>">
+        </label>
+    </div>
     <?php if (!$isEdit): ?>
     <div class="two-col">
         <label>Nombre
@@ -681,12 +695,6 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         </label>
         <label>Apellido
             <input type="text" name="apellido" value="<?= htmlspecialchars((string) ($v['apellido'] ?? '')) ?>">
-        </label>
-        <label>RUT
-            <input type="text" name="rut" value="<?= htmlspecialchars((string) ($v['rut'] ?? '')) ?>">
-        </label>
-        <label>Fecha de nacimiento
-            <input type="date" name="fecha_nac" value="<?= htmlspecialchars((string) ($v['fecha_nac'] ?? '')) ?>">
         </label>
     </div>
     <p class="legend" style="font-size:0.8rem;">Esto edita al <strong>paciente</strong>: el cambio se aplica también a cualquier otra cita/ronda de la misma persona.</p>
@@ -1328,6 +1336,49 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         </div>
     </div>
 </div>
+<script>
+// Fecha de nacimiento y RUT del paciente: no se tipean a mano -- se derivan
+// de la edad (mismo criterio que CaseBuilder::rutFromAge/randomFechaNacForAge
+// del lado servidor, que es el fallback si JS está deshabilitado). Cada vez
+// que cambia la edad se recalculan: año de nacimiento = año actual - edad,
+// día/mes al azar dentro de ese año. La fecha queda readonly; el RUT sigue
+// editable a mano por si el docente quiere ajustarlo después del cálculo.
+(function () {
+    var ageInput = document.getElementById('patient-age');
+    var fechaInput = document.getElementById('patient-fecha-nac');
+    var rutInput = document.getElementById('patient-rut');
+    if (!ageInput || !fechaInput || !rutInput) { return; }
+
+    // Misma regresión lineal fija que CaseBuilder::rutFromAge (helpers.py
+    // rut_from_age) -- no inventar otra, tiene que dar edades consistentes
+    // con get_age_from_rut del lado cliente.
+    var RUT_SLOPE = 3.3363697569700348e-06;
+    var RUT_INTERCEPT = 1932.2573852507373;
+    var lastAge = null;
+
+    function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+
+    function recompute() {
+        var age = parseInt(ageInput.value, 10);
+        if (!age || age < 0 || age === lastAge) { return; }
+        lastAge = age;
+
+        var currentYear = new Date().getFullYear();
+        var birthYear = currentYear - age;
+        var randomDayOffset = Math.floor(Math.random() * 365);
+        var birthDate = new Date(birthYear, 0, 1 + randomDayOffset);
+        fechaInput.value = birthDate.getFullYear() + '-' + pad2(birthDate.getMonth() + 1) + '-' + pad2(birthDate.getDate());
+
+        var birthDateFloat = birthYear + (randomDayOffset / 365);
+        var rutApprox = Math.trunc((birthDateFloat - RUT_INTERCEPT) / RUT_SLOPE);
+        rutInput.value = String(rutApprox);
+    }
+
+    ageInput.addEventListener('input', recompute);
+    ageInput.addEventListener('change', recompute);
+})();
+</script>
+
 <script>
 // Foto de paciente: elegir archivo -> modal de recorte circular (pan/zoom
 // con mouse o touch) -> fetch con FormData a patient_photo_upload.php. El

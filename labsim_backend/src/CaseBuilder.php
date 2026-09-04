@@ -293,6 +293,20 @@ final class CaseBuilder
         return (int) (($birthDateFloat - $intercept) / $slope);
     }
 
+    /**
+     * Fallback server-side de la fecha de nacimiento a partir de la edad --
+     * el cálculo real vive en JS (case_create.php, recalcula al tipear la
+     * edad); esto solo cubre el caso de que el campo llegue vacío (JS
+     * deshabilitado). Año = año actual - edad, día/mes al azar dentro de
+     * ese año.
+     */
+    public static function randomFechaNacForAge(int $age): string
+    {
+        $birthYear = (int) date('Y') - $age;
+        $randomDay = random_int(0, 364);
+        return date('d-m-Y', mktime(0, 0, 0, 1, 1 + $randomDay, $birthYear));
+    }
+
     /** Mejor 2 de [500,1000,2000 Hz] (índices 2,3,4), promedio, floor a múltiplo de 5. Igual que create_a.py::_fletcher_avg. */
     public static function fletcherAvg(array $airPairs): array
     {
