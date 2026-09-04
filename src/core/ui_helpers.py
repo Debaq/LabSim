@@ -10,12 +10,55 @@ MoveWindow(parent:object): mueve la ventana a la
 """
 # pylint: disable=no-name-in-module
 
-from PySide6.QtCore import Qt,QSize
-from PySide6.QtGui import QMouseEvent
+from PySide6.QtCore import Qt,QSize,QRectF
+from PySide6.QtGui import QMouseEvent, QIcon, QPixmap, QPainter, QPen, QColor
 from PySide6.QtWidgets import QPushButton, QLayout, QFrame
 from PySide6.QtWidgets import QMdiSubWindow
 from core.h_win import FrameSubMdi, MdiArea
 from core import inbox
+
+def titlebar_icon(kind: str, size: int = 14, color: str = "#ffffff") -> QIcon:
+    """
+    Dibuja un icono vectorial simple (min/max/restore/close) para los
+    botones de la barra de título, en vez de usar los iconos nativos del
+    estilo del sistema (quedan con el color y forma del tema del SO, no
+    calzan con la barra oscura de LabSim).
+
+    Args:
+        kind: "min", "max", "restore" o "close"
+        size: lado del icono en px
+        color: color del trazo
+    """
+    pixmap = QPixmap(size, size)
+    pixmap.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(pixmap)
+    painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+    pen = QPen(QColor(color))
+    pen.setWidthF(1.3)
+    pen.setCapStyle(Qt.PenCapStyle.FlatCap)
+    painter.setPen(pen)
+    margin = size * 0.28
+
+    if kind == "min":
+        y = size - margin
+        painter.drawLine(int(margin), int(y), int(size - margin), int(y))
+    elif kind == "max":
+        painter.drawRect(QRectF(margin, margin, size - 2 * margin, size - 2 * margin))
+    elif kind == "restore":
+        offset = size * 0.18
+        front = size - 2 * margin - offset
+        # cuadro de adelante (completo)
+        painter.drawRect(QRectF(margin, margin + offset, front, front))
+        # cuadro de atrás: solo el borde superior y derecho, para no
+        # dibujar encima del cuadro de adelante
+        bx, by = margin + offset, margin
+        painter.drawLine(int(bx), int(by), int(bx + front), int(by))
+        painter.drawLine(int(bx + front), int(by), int(bx + front), int(by + front))
+    elif kind == "close":
+        painter.drawLine(int(margin), int(margin), int(size - margin), int(size - margin))
+        painter.drawLine(int(size - margin), int(margin), int(margin), int(size - margin))
+    painter.end()
+    return QIcon(pixmap)
 
 def show_hide(obj:any, pos:int):
     """

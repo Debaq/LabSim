@@ -1,6 +1,6 @@
 from pathlib import Path
 import sys
-from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtCore import Qt, QSize, Signal, Slot
 from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox, QProgressDialog
 
 from agenda import Agenda
@@ -15,7 +15,7 @@ from core.updater import local_build_id
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
                           marcar_entry_atendiendo, marcar_entry_atendido, entry_esta_cancelada,
                           reset_backend_session)
-from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min
+from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon
 from audiometria.UI.Ui_command_voice_A import Ui_Form as commandVoiceA
 from cvc.UI.Ui_CVC import Ui_CVC
 from core.UI.Ui_Main import Ui_MainWindow
@@ -93,11 +93,33 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         MoveWindow(self).set_movewindow()
 
     def configure_btn(self):
-        """Configura los botones de la ventana"""
+        """Configura los botones de la ventana: iconos propios (dibujados
+        en blanco) en vez de texto (_, O, X) para min/max/cerrar"""
+        icon_size = QSize(14, 14)
+        self.btn_min.setText("")
+        self.btn_min.setIcon(titlebar_icon("min"))
+        self.btn_min.setIconSize(icon_size)
+        self.btn_salir.setText("")
+        self.btn_salir.setIcon(titlebar_icon("close"))
+        self.btn_salir.setIconSize(icon_size)
+        self._update_max_icon()
+
         self.btn_salir.clicked.connect(self.close)
         self.btn_min.clicked.connect(self.showMinimized)
-        self.btn_max.clicked.connect(lambda: toggle_max_min(self))
+        self.btn_max.clicked.connect(self._toggle_max_min)
         self.btn_login.clicked.connect(self.toggle_login)
+
+    def _update_max_icon(self):
+        """Cambia el icono de btn_max entre maximizar/restaurar según el
+        estado actual de la ventana"""
+        kind = "restore" if self.isMaximized() else "max"
+        self.btn_max.setText("")
+        self.btn_max.setIcon(titlebar_icon(kind))
+        self.btn_max.setIconSize(QSize(14, 14))
+
+    def _toggle_max_min(self):
+        toggle_max_min(self)
+        self._update_max_icon()
 
     def set_mdi_area(self):
         """Crea el objeto mdi_area"""
