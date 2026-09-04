@@ -22,15 +22,13 @@ class MainLogin(QWidget, Ui_Login):
 
     data_login_signal = Signal(dict)
 
-    def __init__(self, online) -> None:
+    def __init__(self) -> None:
         QWidget.__init__(self)
 
-        self._flag_online = online
         # Inicialización de la ventana y propiedades
         self.setupUi(self)
-        if self._flag_online == "backend":
-            self.Le_name.setPlaceholderText("Usuario admin (vacío si vienes de Moodle)")
-            self.Le_passw.setPlaceholderText("Contraseña, o código de 6 dígitos de Moodle")
+        self.Le_name.setPlaceholderText("Usuario admin (vacío si vienes de Moodle)")
+        self.Le_passw.setPlaceholderText("Contraseña, o código de 6 dígitos de Moodle")
         self.btn_login.clicked.connect(self.get)
         self.login_func = LoginConnect()
 
@@ -45,7 +43,7 @@ class MainLogin(QWidget, Ui_Login):
         if not self._verify_login(name, passw):
             QMessageBox.critical(self, "Ingreso", "Error de Login")
         else:
-            result = self.login_func.login(name, passw, self._flag_online)
+            result = self.login_func.login(name, passw)
             self._verify_result(result)
 
     def _verify_result(self, result:any) -> None:
@@ -73,7 +71,7 @@ class MainLogin(QWidget, Ui_Login):
             bool: True si hay usuario y contraseña
         """
         code = password.strip()
-        if self._flag_online == "backend" and not username.strip() and code.isdigit() and len(code) == 6:
+        if not username.strip() and code.isdigit() and len(code) == 6:
             return True  # login de alumno: código de 6 dígitos de Moodle, sin usuario
         return bool(username.strip() and password.strip())
 

@@ -1,10 +1,5 @@
 {
-    "API_URL" : "http://localhost/LabSim/module/API.php",
     "BACKEND_URL" : "https://tmeduca.org/labsim/backend/public",
-    "session_pred" : "tunnel",
     "lang" : "ES_cl",
-    "styles" : [1, ["normal", "dark"]],
-    "online" : "backend",
-    "test"  : false
-
+    "styles" : [1, ["normal", "dark"]]
 }

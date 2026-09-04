@@ -1,7 +1,6 @@
 PySide6
 numpy
 requests
-cryptocode
 pyqtgraph
 bezier
 pyudev; sys_platform == "linux"

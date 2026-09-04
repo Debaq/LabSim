@@ -28,8 +28,6 @@ from audiometria.UI.Ui_Audiometer import Ui_Audiometer
 class_pref = Preferences()
 keyboard_shortcuts = class_pref.get("keyboard_shortcuts")
 keyboard_shortcuts_switch = class_pref.get("keyboard_shortcuts_switch")
-session = class_pref.get("session_pred")
-URL = class_pref.get("API_URL")
 intency_dict = class_pref.get("intency_dict")
 frecuency_dict = class_pref.get("frecuency_dict")
 output_list = class_pref.get("output_list")

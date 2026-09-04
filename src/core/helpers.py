@@ -40,16 +40,6 @@ _shedule_snapshot = {"agenda_1": {}}
 _cases_snapshot = {}
 
 
-def _online_mode():
-    """Mismo criterio que ONLINE en main.py: 'test' fuerza 'development'."""
-    pref = Preferences()
-    return "development" if pref.get("test") else pref.get("online")
-
-
-def _is_backend_mode() -> bool:
-    return _online_mode() == "backend"
-
-
 def _get_backend_client() -> BackendClient:
     global _backend_client
     if _backend_client is None:
@@ -60,18 +50,13 @@ def _get_backend_client() -> BackendClient:
 
 
 def chat_con_paciente(case_id, nombre, edad, procedimiento, history, message, appointment_id=None):
-    """Un turno de chat con el paciente simulado por LLM.
-
-    Solo disponible en modo backend (el LLM vive en el servidor, no en la
-    app offline) -- lanza RuntimeError con mensaje para mostrar al alumno si
-    no lo está. Devuelve el texto de respuesta del paciente.
+    """Un turno de chat con el paciente simulado por LLM (vive en el servidor).
+    Devuelve el texto de respuesta del paciente.
 
     appointment_id: cita real a la que se le asocia el chat guardado (ver
     LlmChat.php) -- None cuando no corresponde dejar rastro (ej. "Atender
     (prueba)" del admin).
     """
-    if not _is_backend_mode():
-        raise RuntimeError("El chat con el paciente requiere conexión al servidor.")
     client = _get_backend_client()
     result = client.llm_chat(case_id, nombre, edad, procedimiento, history, message, appointment_id)
     return result["reply"]
@@ -82,11 +67,9 @@ def inbox_list() -> list:
     primero (avisos automáticos sobre el trato a pacientes + mensajes que un
     docente mandó a mano, ver inbox_messages en el backend).
 
-    Solo disponible en modo backend -- lista vacía si no (nunca lanza, a
-    diferencia de chat_con_paciente: revisar la bandeja no debería poder
-    romper la UI si el backend está caído)."""
-    if not _is_backend_mode():
-        return []
+    Lista vacía si falla la red (nunca lanza, a diferencia de
+    chat_con_paciente: revisar la bandeja no debería poder romper la UI si
+    el backend está caído)."""
     try:
         return _get_backend_client().get_inbox().get("items", [])
     except requests.RequestException:
@@ -94,8 +77,6 @@ def inbox_list() -> list:
 
 
 def inbox_marcar_leido(message_id: int) -> None:
-    if not _is_backend_mode():
-        return
     try:
         _get_backend_client().mark_inbox_read(message_id)
     except requests.RequestException:
@@ -108,8 +89,6 @@ def foto_paciente(case_id):
     acá una falla de red no es un error para quien llama: el avatar es un
     detalle visual, no bloquea el chat si no se puede traer (se usa un
     círculo con iniciales como respaldo, ver core/avatar.py)."""
-    if not _is_backend_mode():
-        return None
     try:
         return _get_backend_client().get_patient_avatar(case_id)
     except requests.RequestException:
@@ -121,8 +100,6 @@ def foto_otoscopia(case_id, side, fase=0):
     no tiene imagen subida o no hay conexión al backend -- mismo criterio
     que foto_paciente: una falla de red acá no bloquea la ventana, solo
     deja el aviso de "sin imagen"."""
-    if not _is_backend_mode():
-        return None
     try:
         return _get_backend_client().get_otoscopia_photo(case_id, side, fase)
     except requests.RequestException:
@@ -148,84 +125,54 @@ def reset_backend_session() -> None:
 
 class CasesOffline():
     """
-    Clase para manejar los casos en modo offline.
     Los casos (definición del paciente/audiometría) son una única base
-    compartida por todos los usuarios: el admin los crea una vez y todos
-    los alumnos leen/atienden la misma definición. Lo que sí es propio de
-    cada alumno (p.ej. si ya atendió el caso) vive aparte, en la agenda
-    (ver `entry_atendido_por` / `marcar_entry_atendido`).
+    compartida por todos los usuarios, servida por el backend: el admin los
+    crea una vez y todos los alumnos leen/atienden la misma definición. Lo
+    que sí es propio de cada alumno (p.ej. si ya atendió el caso) vive
+    aparte, en la agenda (ver `entry_atendido_por` / `marcar_entry_atendido`).
     Func:
         get_cases: devuelve la base de casos completa
     """
     def __init__(self) -> None:
         pass
 
-    def get_def_cases(self, case) ->dict:
-        cases_file = context.get_resource('cases/labsim.json')
-        with codecs.open(cases_file, 'r', 'utf-8') as json_file:
-            list_data = json.load(json_file)
-        return list_data
-
     def get_cases(self) -> dict:
-        """Recupera la base de casos compartida (backend si ONLINE == 'backend', si no local)."""
+        """Recupera la base de casos compartida desde el backend."""
         global _cases_snapshot
-        if _is_backend_mode():
-            client = _get_backend_client()
-            data = backend_state_to_cases(client.get_full_state())
-            # deepcopy: quien llama muta el dict que le devolvemos (agrega
-            # casos, edita anidados) -- si _cases_snapshot compartiera
-            # referencia, esa mutación también "cambiaría" el snapshot y
-            # el diff de más abajo nunca vería nada distinto que subir.
-            _cases_snapshot = deepcopy(data)
-            return data
-
-        cases_file = context.get_resource('cases/cases.json')
-        try:
-            with codecs.open(cases_file, 'r', 'utf-8') as json_file:
-                list_data = json.load(json_file)
-        except FileNotFoundError:
-            return {}
-        return list_data
+        client = _get_backend_client()
+        data = backend_state_to_cases(client.get_full_state())
+        # deepcopy: quien llama muta el dict que le devolvemos (agrega
+        # casos, edita anidados) -- si _cases_snapshot compartiera
+        # referencia, esa mutación también "cambiaría" el snapshot y
+        # el diff de más abajo nunca vería nada distinto que subir.
+        _cases_snapshot = deepcopy(data)
+        return data
 
     def set_cases(self, cases:dict) -> None:
-        """Guarda la base de casos compartida (backend si ONLINE == 'backend', si no local)."""
+        """Guarda la base de casos compartida en el backend."""
         global _cases_snapshot
-        if _is_backend_mode():
-            client = _get_backend_client()
-            diff_and_push_cases(client, cases, _cases_snapshot)
-            _cases_snapshot = deepcopy(cases)
-            return
-
-        cases_file = context.get_resource('cases/cases.json')
-        with codecs.open(cases_file, 'w', 'utf-8') as json_file:
-            json.dump(cases, json_file, ensure_ascii=False)
+        client = _get_backend_client()
+        diff_and_push_cases(client, cases, _cases_snapshot)
+        _cases_snapshot = deepcopy(cases)
 
 class Shedule:
     def __init__(self):
         global _shedule_snapshot
-        if _is_backend_mode():
-            client = _get_backend_client()
-            own_id = (client.user or {}).get("id")
-            own_username = (client.user or {}).get("username", "")
-            state = client.get_full_state()
-            print(f"[shedule_fetch] own_id={own_id!r} own_username={own_username!r} "
-                  f"appointments={len(state.get('appointments', []))} keys={list(state.keys())}")
-            for appt in state.get("appointments", []):
-                print(f"[shedule_fetch]   cita id={appt.get('id')} fecha={appt.get('fecha')!r} "
-                      f"hora={appt.get('hora')!r} cancelada={appt.get('cancelada')!r}")
-            data = backend_state_to_shedule(state, own_id, own_username)
-            # deepcopy por la misma razón que en CasesOffline.get_cases():
-            # self.data se muta en el sitio (nuevas citas, edición de filas)
-            # y sin esto esa mutación se filtraba también al snapshot.
-            _shedule_snapshot = deepcopy(data)
-            self.data = data
-            return
-
-        preferences_file = context.get_resource('json/schedule.json')
-        with codecs.open(preferences_file, 'r', 'utf-8') as json_file:
-            list_data = json.load(json_file)
-        self.data = list_data
-
+        client = _get_backend_client()
+        own_id = (client.user or {}).get("id")
+        own_username = (client.user or {}).get("username", "")
+        state = client.get_full_state()
+        print(f"[shedule_fetch] own_id={own_id!r} own_username={own_username!r} "
+              f"appointments={len(state.get('appointments', []))} keys={list(state.keys())}")
+        for appt in state.get("appointments", []):
+            print(f"[shedule_fetch]   cita id={appt.get('id')} fecha={appt.get('fecha')!r} "
+                  f"hora={appt.get('hora')!r} cancelada={appt.get('cancelada')!r}")
+        data = backend_state_to_shedule(state, own_id, own_username)
+        # deepcopy por la misma razón que en CasesOffline.get_cases():
+        # self.data se muta en el sitio (nuevas citas, edición de filas)
+        # y sin esto esa mutación se filtraba también al snapshot.
+        _shedule_snapshot = deepcopy(data)
+        self.data = data
 
     def get(self):
         """recupera las prefernecias desde un archivo *.json"""
@@ -233,19 +180,13 @@ class Shedule:
         return self.data
 
     def set(self, data:dict) -> None:
-        """guarda la agenda (backend si ONLINE == 'backend', si no en *.json local)"""
+        """guarda la agenda en el backend"""
         global _shedule_snapshot
         self.data = data
-        if _is_backend_mode():
-            client = _get_backend_client()
-            own_username = (client.user or {}).get("username", "")
-            diff_and_push_shedule(client, data, _shedule_snapshot, own_username)
-            _shedule_snapshot = deepcopy(data)
-            return
-
-        preferences_file = context.get_resource('json/schedule.json')
-        with codecs.open(preferences_file, 'w', 'utf-8') as json_file:
-            json.dump(data, json_file, ensure_ascii=False)
+        client = _get_backend_client()
+        own_username = (client.user or {}).get("username", "")
+        diff_and_push_shedule(client, data, _shedule_snapshot, own_username)
+        _shedule_snapshot = deepcopy(data)
 
 
 def _asegurar_dict_atencion(entry) -> dict:

@@ -39,12 +39,10 @@ SECTORS = Preferences.get("SECTORS")
 BOXS = Preferences.get("BOXS")
 STYLES = Preferences.get("styles")
 LANGUAJE = Preferences.get("lang")
-ONLINE = "development" if Preferences.get("test") else Preferences.get("online")
 
-# Cola local de logs de acciones (ver lib/backend/log_queue.py). Se crea
-# siempre -- escribir en ella es solo un insert sqlite local, nunca toca
-# la red -- pero solo se sube al backend si ONLINE == "backend" (ver
-# MainWindow._data_login). En otros modos simplemente no se vacía nunca.
+# Cola local de logs de acciones (ver lib/backend/log_queue.py). Es solo un
+# insert sqlite local, nunca toca la red -- se sube al backend en batches
+# vía LogUploaderThread (ver MainWindow._data_login).
 LOCAL_LOG_QUEUE = get_log_queue()
 # Logger sin log_queue: stdout (prints de debug regados por todo el código)
 # ya no se sube al backend -- era 87% del volumen y puro ruido interno
@@ -125,7 +123,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
     def create_sw_login(self):
         """Crea la subventana login"""
-        subw_login = FrameSubMdi(Ui_login.MainLogin(ONLINE))
+        subw_login = FrameSubMdi(Ui_login.MainLogin())
         subw_login.obj.data_login_signal.connect(self._data_login)
         self.subw = {"LOGIN": subw_login}
 
@@ -153,9 +151,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
     def _start_log_uploader(self):
         """Sube en lotes los logs de acciones acumulados (ver log_queue.py).
-        Solo aplica en modo backend y si el login realmente dejó un token."""
-        if ONLINE != "backend":
-            return
+        Solo aplica si el login realmente dejó un token."""
         client = BackendClient(Preferences.get("BACKEND_URL"), context.get_resource('json/session.json'))
         if not client.is_logged_in():
             return
@@ -170,8 +166,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def _start_sync_thread(self):
         """Poll periódico al backend (ver sync_thread.py): si el admin edita
         la agenda desde otra terminal, esta refresca sola en el próximo ciclo."""
-        if ONLINE != "backend":
-            return
         client = BackendClient(Preferences.get("BACKEND_URL"), context.get_resource('json/session.json'))
         if not client.is_logged_in():
             return
@@ -266,11 +260,17 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if entry_esta_cancelada(entry):
             return  # el admin canceló la cita mientras estaba visible
 
-        case_id = entry[7]
+        case_id = entry[7] if len(entry) > 7 else None
+        if not case_id:
+            return
+        cases = CasesOffline().get_cases()
+        if case_id not in cases:
+            return  # el caso fue borrado/no sincronizó -- no dejamos marcar "atendiendo" un caso inexistente
+
         marcar_entry_atendiendo(entry, self.data_login["user"])
         shedule.set(shedule.data)
 
-        self.data_current = CasesOffline().get_cases()[case_id]
+        self.data_current = cases[case_id]
         self.data_current_key = key
 
         if self.subw and "AGENDA" in self.subw:
@@ -315,8 +315,11 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         case_id = entry[7] if len(entry) > 7 else None
         if not case_id:
             return
+        cases = CasesOffline().get_cases()
+        if case_id not in cases:
+            return  # el caso fue borrado/no sincronizó
 
-        self.data_current = CasesOffline().get_cases()[case_id]
+        self.data_current = cases[case_id]
         self.data_current_key = key
 
         self._hydrate_modules()
@@ -461,6 +464,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.abrir_chat_con(p["case_id"], p["nombre"], p["edad"], p["procedimiento"], p.get("appointment_id"))
 
     def closeEvent(self, event):
+        if self.log_uploader is not None:
+            # Igual que en logout(): sin esto, acciones recién logueadas quedan
+            # en la cola local hasta el próximo login si se cierra con la X.
+            self.log_uploader.flush_now()
         self._stop_log_uploader()
         self._stop_sync_thread()
         super().closeEvent(event)
@@ -508,7 +515,22 @@ if __name__ == '__main__':
                         progress.setLabelText("Reiniciando LabSim...")
                     context.app.processEvents()
 
-                apply_update_and_restart(download_url, on_progress=on_progress)  # no vuelve
+                try:
+                    apply_update_and_restart(download_url, on_progress=on_progress)  # no vuelve si tiene éxito
+                except Exception as exc:
+                    # Falla de red o archivo corrupto a mitad de la descarga/extracción:
+                    # no dejamos morir la app acá, se sigue con la versión actual instalada.
+                    progress.close()
+                    QMessageBox.warning(
+                        None,
+                        "Actualización fallida",
+                        f"No se pudo completar la actualización, se abre la versión actual.\n{exc}",
+                    )
+                else:
+                    # apply_update_and_restart solo vuelve si el asset tenía una
+                    # estructura inesperada (no lanzó, no hizo el swap) -- el
+                    # dialog quedaría abierto para siempre si no se cierra acá.
+                    progress.close()
 
     window = MainWindow()
     Preferences.get_style(window)
