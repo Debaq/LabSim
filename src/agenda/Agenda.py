@@ -13,7 +13,7 @@ import requests
 from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import (QTableWidgetItem, QAbstractItemView,
                                 QDateEdit, QPushButton, QMessageBox, QLineEdit,
-                                QDialog, QVBoxLayout, QLabel, QTextEdit, QDialogButtonBox,
+                                QVBoxLayout, QLabel, QTextEdit,
                                 QCheckBox)
 from PySide6.QtCore import QDate, QTime, QDateTime, Qt, QThread, Signal
 from PySide6.QtGui import QColor
@@ -78,19 +78,55 @@ class FichaClinicaWidget(QWidget):
         self.texto.setReadOnly(True)
         layout.addWidget(self.texto)
 
-        self.btn_chat = QPushButton("Conversar con paciente", self)
-        self.btn_chat.clicked.connect(self._on_chat_clicked)
-        layout.addWidget(self.btn_chat)
-
         self._on_chat = None
 
     def set_ficha(self, html, on_chat=None):
         self.texto.setHtml(html)
         self._on_chat = on_chat
 
-    def _on_chat_clicked(self):
-        if self._on_chat is not None:
-            self._on_chat()
+
+class EvolucionWidget(QWidget):
+    """Registro de evolución al cerrar una atención. Vive como subventana
+    única del MDI (ver main.py: self.subw["EVOLUCION"]) en vez de un diálogo
+    emergente -- set_contexto() la reapunta a otro paciente/callback cada vez
+    que se abre desde la agenda (atención real o de prueba)."""
+
+    def __init__(self):
+        super().__init__()
+        layout = QVBoxLayout(self)
+
+        self.lbl_paciente = QLabel(self)
+        layout.addWidget(self.lbl_paciente)
+
+        layout.addWidget(QLabel("Describe la evolución del paciente:", self))
+
+        self.texto = QTextEdit(self)
+        layout.addWidget(self.texto)
+
+        self.btn_guardar = QPushButton("Guardar evolución", self)
+        self.btn_guardar.clicked.connect(self._on_guardar_clicked)
+        layout.addWidget(self.btn_guardar)
+
+        self._on_guardar = None
+
+    def set_contexto(self, nombre_paciente, on_guardar):
+        self.lbl_paciente.setText(f"Paciente: {nombre_paciente}")
+        self.texto.clear()
+        self._on_guardar = on_guardar
+
+    def _on_guardar_clicked(self):
+        nota = self.texto.toPlainText().strip()
+        if not nota:
+            QMessageBox.warning(self, "Evolución", "Debes describir la evolución del paciente.")
+            return
+
+        if self._on_guardar is not None:
+            self._on_guardar(nota)
+        self.texto.clear()
+
+        padre = self.parent()
+        if padre is not None and hasattr(padre, "hide_window"):
+            padre.hide_window()
 
 
 class Agenda(QWidget, Ui_Form):
@@ -107,6 +143,7 @@ class Agenda(QWidget, Ui_Form):
         self._loading = False
         self._ver_todas = False
         self._filtro_texto = ""
+        self._prueba_atendiendo_key = None
 
         self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -300,10 +337,15 @@ class Agenda(QWidget, Ui_Form):
         self._selected_key = key if pendiente else None
 
         if self.is_admin:
-            # Modo prueba: nunca queda "atendiendo", el botón solo depende de
-            # si la cita tiene un caso clínico asociado (ver atender_paciente()).
-            self.btn_atender.setText("Atender")
-            self.btn_atender.setEnabled(tiene_caso)
+            # Modo prueba: no queda "atendiendo" en la agenda ni se escribe en
+            # red, pero el botón sí simula el ciclo completo atender/cerrar
+            # (ver atender_paciente() y _cerrar_atencion_prueba()).
+            if self._prueba_atendiendo_key == key and self._es_atencion_activa(key):
+                self.btn_atender.setText("Cerrar atención")
+                self.btn_atender.setEnabled(tiene_caso)
+            else:
+                self.btn_atender.setText("Atender")
+                self.btn_atender.setEnabled(tiene_caso)
         elif estado == "atendiendo" and self._es_atencion_activa(key):
             self.btn_atender.setText("Cerrar atención")
             self.btn_atender.setEnabled(tiene_caso)
@@ -338,14 +380,22 @@ class Agenda(QWidget, Ui_Form):
             return
 
         if self.is_admin:
-            # Admin: modo prueba -- carga el caso en los módulos sin marcar
-            # "atendiendo" ni escribir attendances (ver main.atender_paciente_prueba).
+            # Admin/profe: modo prueba -- carga el caso en los módulos sin marcar
+            # "atendiendo" ni escribir attendances (ver main.atender_paciente_prueba),
+            # pero el botón simula igual el ciclo completo hasta "Cerrar atención"
+            # para poder probar el flujo del estudiante sin dejar rastro en red.
+            if self._prueba_atendiendo_key == self._selected_row_key and self._es_atencion_activa(self._selected_row_key):
+                self._cerrar_atencion_prueba()
+                return
+
             user = self.shedule["agenda_1"][self._selected_row_key]
             if not user.case_id:
                 QMessageBox.warning(self, "Atender", "Este registro no tiene un caso clínico asociado.")
                 return
             if self.main_window is not None and hasattr(self.main_window, "atender_paciente_prueba"):
                 self.main_window.atender_paciente_prueba(self._selected_row_key)
+                self._prueba_atendiendo_key = self._selected_row_key
+                self._on_selection_changed()
             return
 
         user = self.shedule["agenda_1"][self._selected_row_key]
@@ -359,37 +409,35 @@ class Agenda(QWidget, Ui_Form):
             self.main_window.atender_paciente(self._selected_row_key)
 
     def _cerrar_atencion(self):
-        nota = self._pedir_nota_atencion()
-        if nota is None:
+        """Abre la subventana MDI de evolución; al guardar, cierra la
+        atención real (ver main.abrir_evolucion / main.cerrar_atencion)."""
+        if self.main_window is None or not hasattr(self.main_window, "abrir_evolucion"):
             return
 
-        if self.main_window is not None and hasattr(self.main_window, "cerrar_atencion"):
-            self.main_window.cerrar_atencion(self._selected_row_key, nota)
+        user = self.shedule["agenda_1"][self._selected_row_key]
+        nombre = f"{user.nombre} {user.apellido}".strip()
+        key = self._selected_row_key
 
-    def _pedir_nota_atencion(self):
-        """Pide al estudiante la descripción de la atención realizada. None si cancela."""
-        dialogo = QDialog(self)
-        dialogo.setWindowTitle("Cerrar atención")
-        layout = QVBoxLayout(dialogo)
-        layout.addWidget(QLabel("Describe la atención realizada:"))
+        def _guardar(nota):
+            self.main_window.cerrar_atencion(key, nota)
 
-        texto = QTextEdit(dialogo)
-        layout.addWidget(texto)
+        self.main_window.abrir_evolucion(nombre or "el paciente", _guardar)
 
-        botones = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        botones.accepted.connect(dialogo.accept)
-        botones.rejected.connect(dialogo.reject)
-        layout.addWidget(botones)
+    def _cerrar_atencion_prueba(self):
+        """Admin/profe: misma subventana de evolución, pero sin marcar
+        "atendido" ni escribir nada en red (ver main.cerrar_atencion_prueba)."""
+        if self.main_window is None or not hasattr(self.main_window, "abrir_evolucion"):
+            return
 
-        dialogo.resize(420, 320)
+        user = self.shedule["agenda_1"][self._selected_row_key]
+        nombre = f"{user.nombre} {user.apellido}".strip()
 
-        while True:
-            if dialogo.exec() != QDialog.Accepted:
-                return None
-            nota = texto.toPlainText().strip()
-            if nota:
-                return nota
-            QMessageBox.warning(self, "Cerrar atención", "Debes describir la atención realizada.")
+        def _guardar(nota):
+            self._prueba_atendiendo_key = None
+            self.main_window.cerrar_atencion_prueba(nota)
+            self._on_selection_changed()
+
+        self.main_window.abrir_evolucion(nombre or "el paciente", _guardar)
 
     def _marcar_no_show(self):
         if self._selected_row_key is None:

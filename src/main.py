@@ -290,6 +290,18 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """
         self._atender_caso(key, es_prueba=True)
 
+    def cerrar_atencion_prueba(self, nota):
+        """Admin/profe: descarga el caso de prueba de los módulos, igual que
+        cerrar_atencion(), pero sin marcar "atendido" ni escribir en
+        attendances/agenda -- no deja rastro en la base de datos."""
+        if self.data_login["permission"] != 777:
+            return  # solo admin/profe usan el ciclo de prueba
+        self.data_current_key = None
+        self.data_current = None
+        self.paciente_actual = None
+        self._hydrate_modules()
+        self.statusbar.showMessage(f"[PRUEBA] Atención cerrada (no se guarda): {nota[:80]}")
+
     def _atender_caso(self, key, *, es_prueba):
         """Lógica común a atender_paciente() y atender_paciente_prueba() --
         difieren solo en si se marca "atendiendo" en la agenda/backend y en
@@ -401,6 +413,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "CVOICE": FrameSubMdi(ComandVoiceA()),
             "CHAT": FrameSubMdi(ChatPacienteWidget(self.data_login.get("name"))),
             "FICHA": FrameSubMdi(Agenda.FichaClinicaWidget()),
+            "EVOLUCION": FrameSubMdi(Agenda.EvolucionWidget()),
             "INBOX": FrameSubMdi(inbox.InboxWidget(self)),
             "W": self.subw_w,
             "Z": self.subw_z,
@@ -458,6 +471,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         reapuntada al paciente indicado."""
         self.subw["FICHA"].obj.set_ficha(html, on_chat)
         self.activate_auto("FICHA")
+
+    def abrir_evolucion(self, nombre_paciente, on_guardar):
+        """Abre (o trae al frente) la subventana MDI de evolución, reapuntada
+        al paciente/callback indicado (ver Agenda._cerrar_atencion y
+        Agenda._cerrar_atencion_prueba)."""
+        self.subw["EVOLUCION"].obj.set_contexto(nombre_paciente, on_guardar)
+        self.activate_auto("EVOLUCION")
 
     def abrir_chat_paciente(self):
         """Abre el chat con el paciente simulado por LLM del caso que se está atendiendo."""
