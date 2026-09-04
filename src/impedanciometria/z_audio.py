@@ -125,7 +125,7 @@ class ProbeTone(_FadingPlayer):
 
     def play(self, freq):
         url = _source_for('Tono', freq, _BOTH_EARS)
-        self.start(freq, url, volume=0.3)
+        self.start(freq, url, volume=0.15)
 
 
 class ReflexTone(QObject):
