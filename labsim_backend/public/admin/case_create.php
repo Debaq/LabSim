@@ -644,6 +644,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     .otoscopia-thumb[hidden], .otoscopia-thumb-empty[hidden] { display: none; }
     .otoscopia-photo-slot .otoscopia-photo-input { display: block; margin: 0.4rem auto 0.3rem; }
     .otoscopia-delete-photo { color: #a33; }
+    .otoscopia-download-photo { display: inline-block; margin-left: 0.5rem; font-size: 0.82rem; }
+    .otoscopia-download-photo[hidden] { display: none; }
 
     .photo-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100;
                    display: flex; align-items: center; justify-content: center; }
@@ -742,6 +744,11 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             <div>
                 <input type="file" id="patient-photo-input" accept="image/jpeg,image/png,image/webp">
                 <p class="legend">Al elegir una foto se abre un recorte circular -- se guarda una versión reducida completa y el avatar recortado.</p>
+                <p class="legend">
+                    <a id="patient-download-original" href="patient_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;type=original&amp;download=1" <?= $hasAvatar ? '' : 'hidden' ?>>Descargar foto grande</a>
+                    &nbsp;|&nbsp;
+                    <a id="patient-download-avatar" href="patient_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;type=avatar&amp;download=1" <?= $hasAvatar ? '' : 'hidden' ?>>Descargar foto recortada</a>
+                </p>
             </div>
         </div>
     </div>
@@ -781,6 +788,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                     <div class="otoscopia-thumb-empty" <?= $hasOto ? 'hidden' : '' ?>>Sin imagen</div>
                     <input type="file" class="otoscopia-photo-input" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>" accept="image/jpeg,image/png,image/webp">
                     <button type="button" class="secondary otoscopia-delete-photo" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>" <?= $hasOto ? '' : 'hidden' ?>>Borrar foto</button>
+                    <a class="otoscopia-download-photo" href="otoscopia_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;side=<?= $side ?>&amp;fase=<?= $faseIdx ?>&amp;download=1" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>" <?= $hasOto ? '' : 'hidden' ?>>Descargar</a>
                 </div>
                 <?php endforeach; ?>
             </div>
@@ -799,6 +807,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             <div class="otoscopia-thumb-empty">Sin imagen</div>
             <input type="file" class="otoscopia-photo-input" accept="image/jpeg,image/png,image/webp">
             <button type="button" class="secondary otoscopia-delete-photo" hidden>Borrar foto</button>
+            <a class="otoscopia-download-photo" hidden>Descargar</a>
         </div>
     </template>
     <template id="otoscopia-fase-tpl">
@@ -1447,6 +1456,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     var avatarPreview = document.getElementById('patient-avatar-preview');
     var avatarEmpty = document.getElementById('patient-avatar-empty');
     var msgEl = document.getElementById('photo-msg');
+    var dlOriginal = document.getElementById('patient-download-original');
+    var dlAvatar = document.getElementById('patient-download-avatar');
     if (!fileInput || !modal) { return; }
 
     var CASE_ID = <?= json_encode($photoCaseId) ?>;
@@ -1572,6 +1583,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                     avatarPreview.src = 'patient_photo.php?case_id=' + encodeURIComponent(CASE_ID) + '&type=avatar&v=' + Date.now();
                     avatarPreview.hidden = false;
                     avatarEmpty.hidden = true;
+                    if (dlOriginal) { dlOriginal.hidden = false; }
+                    if (dlAvatar) { dlAvatar.hidden = false; }
                     showMsg('Foto actualizada.', false);
                     closeModal();
                 } else {
@@ -1733,6 +1746,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                     empty.hidden = true;
                     var delBtn = slot.querySelector('.otoscopia-delete-photo');
                     if (delBtn) { delBtn.hidden = false; }
+                    var dlLink = slot.querySelector('.otoscopia-download-photo');
+                    if (dlLink) { dlLink.hidden = false; }
                     showMsg('Imagen actualizada.', false);
                     cropModal.hidden = true;
                     input.value = '';
@@ -1795,6 +1810,10 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         var delBtn = slot.querySelector('.otoscopia-delete-photo');
         delBtn.setAttribute('data-side', side);
         delBtn.setAttribute('data-fase-idx', idx);
+        var dlLink = slot.querySelector('.otoscopia-download-photo');
+        dlLink.setAttribute('data-side', side);
+        dlLink.setAttribute('data-fase-idx', idx);
+        dlLink.href = 'otoscopia_photo.php?case_id=' + encodeURIComponent(CASE_ID) + '&side=' + side + '&fase=' + idx + '&download=1';
         return slot;
     }
 
@@ -1867,6 +1886,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         var slot = btn.closest('.otoscopia-photo-slot');
         var img = slot.querySelector('.otoscopia-thumb');
         var empty = slot.querySelector('.otoscopia-thumb-empty');
+        var dlLink = slot.querySelector('.otoscopia-download-photo');
 
         var fd = new FormData();
         fd.append('csrf_token', csrfToken());
@@ -1885,6 +1905,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                     img.removeAttribute('src');
                     empty.hidden = false;
                     btn.hidden = true;
+                    if (dlLink) { dlLink.hidden = true; }
                     showMsg('Imagen borrada.', false);
                 } else {
                     showMsg(data.error || 'No se pudo borrar la imagen.', true);

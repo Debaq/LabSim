@@ -15,6 +15,7 @@ Auth::requireAdminSession();
 
 $caseId = trim((string) ($_GET['case_id'] ?? ''));
 $type = (string) ($_GET['type'] ?? 'avatar');
+$download = isset($_GET['download']) && $_GET['download'] !== '0';
 
 if ($caseId === '' || !in_array($type, ['avatar', 'original'], true)) {
     http_response_code(400);
@@ -35,4 +36,9 @@ if (!is_file($path)) {
 
 header('Content-Type: ' . ($type === 'avatar' ? 'image/png' : 'image/jpeg'));
 header('Cache-Control: private, max-age=60');
+if ($download) {
+    $ext = $type === 'avatar' ? 'png' : 'jpg';
+    $suffix = $type === 'avatar' ? 'recortada' : 'grande';
+    header('Content-Disposition: attachment; filename="foto_' . $suffix . '_' . preg_replace('/[^A-Za-z0-9_-]/', '', $caseId) . '.' . $ext . '"');
+}
 readfile($path);
