@@ -495,7 +495,7 @@ class ZControl(QWidget, Ui_Z_control):
             probe_idx, row_idx, present, curve_type = self.reflex_anim_ctx
             # El equipo real solo detecta y marca automáticamente en la tabla
             # cuando la curva es "normal" (meseta sostenida); invertido/on/
-            # on-off son solo visuales en la pantalla, no gatillan la marca.
+            # off/on-off son solo visuales en la pantalla, no gatillan la marca.
             if present and curve_type == 'normal':
                 # Se guarda el dB al que el ALUMNO estimuló, nunca el umbral
                 # real del caso: si prueba muy arriba del umbral verdadero,

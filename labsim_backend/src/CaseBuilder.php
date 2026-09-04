@@ -200,12 +200,13 @@ final class CaseBuilder
 
     // Tipo de curva del reflejo acústico, por oído -- morfología del trazo
     // (no la intensidad umbral, que ya se captura en reflex_ipsi/contra).
-    public const REFLEX_CURVE_TYPES = ['normal', 'invertido', 'on', 'on-off'];
+    public const REFLEX_CURVE_TYPES = ['normal', 'invertido', 'on', 'off', 'on-off'];
 
     public const REFLEX_CURVE_LABELS = [
         'normal' => 'Normal',
         'invertido' => 'Invertido',
         'on' => 'ON',
+        'off' => 'OFF',
         'on-off' => 'ON-OFF',
     ];
 

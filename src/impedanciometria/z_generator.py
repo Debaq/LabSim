@@ -200,6 +200,10 @@ class Reflex_curve():
                 # base y no se sostiene (a diferencia de la meseta normal).
                 onset_w = 0.15
                 shape = np.clip(1.0 - tt / onset_w, 0.0, 1.0)
+            elif curve_type == 'off':
+                # Efecto "off": pico solo al final del estímulo (mirror de "on").
+                offset_w = 0.15
+                shape = np.clip(1.0 - (1.0 - tt) / offset_w, 0.0, 1.0)
             elif curve_type == 'on-off':
                 # Efecto "on-off": pico al inicio Y al final del estímulo,
                 # con retorno a línea base entre ambos.
@@ -207,13 +211,18 @@ class Reflex_curve():
                 onset = np.clip(1.0 - tt / edge_w, 0.0, 1.0)
                 offset = np.clip(1.0 - (1.0 - tt) / edge_w, 0.0, 1.0)
                 shape = np.maximum(onset, offset)
+                # entre ambos picos la línea no queda plana en 0: leve
+                # abombamiento positivo y redondeado (fisiológico).
+                mid_t = np.clip((tt - edge_w) / (1.0 - 2 * edge_w), 0.0, 1.0)
+                baseline_bump = np.sin(np.pi * mid_t) ** 2
+                y[in_stim] += 0.24 * amp * baseline_bump
             else:
                 # normal / invertido: flanco abrupto (onset/offset rápido del
                 # reflejo) + meseta plana sostenida, no una curva suave tipo seno.
                 shape = np.clip(np.minimum(tt / edge, (1.0 - tt) / edge), 0.0, 1.0)
 
             # invertido refleja la deflexión hacia arriba en vez de hacia abajo;
-            # el resto (normal, on, on-off) usa la dirección normal.
+            # el resto (normal, on, off, on-off) usa la dirección normal.
             sign = 1.0 if curve_type == 'invertido' else -1.0
             y[in_stim] += sign * amp * shape
 
