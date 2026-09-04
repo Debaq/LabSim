@@ -34,7 +34,7 @@ from backend.shedule_sync import backend_state_to_shedule, diff_and_push_shedule
 # diffear en Shedule.set()/CasesOffline.set_cases() y empujar solo lo que
 # cambió. Vive a nivel de módulo porque cada llamador crea una instancia
 # nueva de Shedule()/CasesOffline() en cada lectura/escritura (ver Agenda.py,
-# create_a.py, main.py): no hay una sola instancia larga donde guardarlo.
+# main.py): no hay una sola instancia larga donde guardarlo.
 _backend_client = None
 _shedule_snapshot = {"agenda_1": {}}
 _cases_snapshot = {}
@@ -523,7 +523,7 @@ class CreatePatient():
         (Katz, Handbook of Clinical Audiology). En adultos se aplica un
         rango levemente distinto por sexo (diferencia menor, tamaño de
         canal promedio algo mayor en hombres).
-        gender: 0 = hombre, 1 = mujer (misma convención usada en create_a.py)
+        gender: 0 = hombre, 1 = mujer
         """
         if age <= 5:
             low, high = 0.30, 0.90

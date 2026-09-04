@@ -15,12 +15,11 @@
     "CVOICE": [false, "Comandos de Voz", 11, [true, true], [420, 200],"pre"],
     "CVC": [false, "Campo Visual Computarizado", 12, [true, true], [420, 200],"pre"],
     "AGENDA": [false, "Agenda", 13, [true, true], [900,400], "pre"],
-    "CREATE_A":[false, "Nuevo Usuario", 14, [true, true], [900,650], "pre"],
-    "CHAT": [false, "Hablar con el paciente", 15, [true, true], [480, 280], "pre"],
-    "AC": [false, "Acumetría", 16, [true, true], [480, 420], "pre"],
-    "OT": [false, "Otoscopia", 17, [true, true], [520, 340], "pre"],
-    "INBOX": [false, "Bandeja de entrada", 18, [true, true], [700, 480], "pre"],
-    "FICHA": [false, "Ficha clínica", 19, [false, true], [480, 560], "pre"]
+    "CHAT": [false, "Hablar con el paciente", 14, [true, true], [480, 280], "pre"],
+    "AC": [false, "Acumetría", 15, [true, true], [480, 420], "pre"],
+    "OT": [false, "Otoscopia", 16, [true, true], [520, 340], "pre"],
+    "INBOX": [false, "Bandeja de entrada", 17, [true, true], [700, 480], "pre"],
+    "FICHA": [false, "Ficha clínica", 18, [false, true], [480, 560], "pre"]
 
   },
   "SECTORS": {

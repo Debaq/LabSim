@@ -3,7 +3,7 @@ import sys
 from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox, QProgressDialog
 
-from agenda import Agenda, create_a
+from agenda import Agenda
 from agenda.ChatPaciente import ChatPacienteWidget
 from audiometria import Acumetria, Audiometer, ListWords, Otoscopia
 from auth import login as Ui_login
@@ -384,9 +384,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "W": self.subw_w,
             "Z": self.subw_z,
         })
-
-        if self.data_login["permission"] in (555, 777):  # docente y admin, no alumno
-            self.subw["CREATE_A"] = FrameSubMdi(create_a.CreateA(self.data_login["user"], self))
 
         self._hydrate_modules()
         self.connect_signals()
