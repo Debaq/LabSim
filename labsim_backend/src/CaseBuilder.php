@@ -49,7 +49,7 @@ final class CaseBuilder
         'falso_negativo' => 'Falso negativo (hipoacusia sensorioneural profunda, cruce óseo contralateral)',
     ];
     // Gap aérea-ósea (dB) desde el cual el Rinne auto-calculado da negativo.
-    public const RINNE_GAP_THRESHOLD = 25;
+    public const RINNE_GAP_THRESHOLD = 15;
 
     public const WEBER_OPTIONS = ['centrado', 'od', 'oi'];
     public const WEBER_LABELS = [
@@ -438,11 +438,9 @@ final class CaseBuilder
         $v['z_oi'] = $data['Z_OI'] ?? 'A';
 
         // Igual que sdt_auto/srt_auto: se muestra el valor guardado tal cual
-        // (rinne_auto/weber_auto quedan sin marcar) -- si quedaran tildados
-        // los checkboxes "auto" el JS los pisaría con el recálculo apenas
-        // cargara la página.
-        $v['rinne_auto'] = [];
-        $v['weber_auto'] = [];
+        // (acumetria_auto queda sin marcar) -- si quedara tildado el checkbox
+        // "auto" el JS lo pisaría con el recálculo apenas cargara la página.
+        $v['acumetria_auto'] = '';
         foreach (self::ACUMETRIA_FREQS as $hz => $freqIdx) {
             $v['rinne'][$hz]['od'] = $data['Rinne'][$hz]['od'] ?? 'positivo';
             $v['rinne'][$hz]['oi'] = $data['Rinne'][$hz]['oi'] ?? 'positivo';

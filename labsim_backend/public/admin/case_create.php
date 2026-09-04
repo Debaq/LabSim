@@ -293,16 +293,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Acumetría (Rinne/Weber), auto-calculada desde los umbrales tonales
         // ya cargados arriba ($aerea/$osea, índices de CaseBuilder::ACUMETRIA_FREQS)
-        // salvo que el docente haya destildado el "auto" de ese campo -- mismo
-        // patrón que sdt_auto/srt_auto con Fletcher.
+        // salvo que el docente haya destildado el único "auto" global de la
+        // tabla (un solo checkbox para las 6 celdas, no uno por celda).
         $rinne = [];
         $weber = [];
         $acumetriaValid = true;
+        $acumetriaIsAuto = isset($v['acumetria_auto']);
         foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $freqIdx) {
             $rinne[$hz] = [];
             foreach (['od', 'oi'] as $side) {
-                $isAuto = !isset($v['rinne_auto']) || isset($v['rinne_auto'][$hz][$side]);
-                if ($isAuto) {
+                if ($acumetriaIsAuto) {
                     $rinne[$hz][$side] = CaseBuilder::rinneAuto($aerea[$side][$freqIdx], $osea[$side][$freqIdx]);
                 } else {
                     $manual = (string) fv($v, ['rinne', $hz, $side], 'positivo');
@@ -312,8 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $rinne[$hz][$side] = $manual;
                 }
             }
-            $isWeberAuto = !isset($v['weber_auto']) || isset($v['weber_auto'][$hz]);
-            if ($isWeberAuto) {
+            if ($acumetriaIsAuto) {
                 $weber[$hz] = CaseBuilder::weberAuto($osea['od'][$freqIdx], $osea['oi'][$freqIdx]);
             } else {
                 $manualWeber = (string) fv($v, ['weber', $hz], 'centrado');
@@ -896,24 +895,32 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 
 <div class="card">
     <strong>Acumetría (Rinne / Weber) &mdash; diapasones 500 y 1000 Hz</strong>
+    <?php
+    // Sticky (POST): checked solo si vino tildado en el submit. Nuevo/editar
+    // (GET): default tildado salvo que caseDataToForm() ya haya puesto '' (edición).
+    $acumetriaIsAuto = $_SERVER['REQUEST_METHOD'] === 'POST'
+        ? isset($v['acumetria_auto'])
+        : (!isset($v['acumetria_auto']) || (bool) $v['acumetria_auto']);
+    ?>
+    <p class="legend">
+        <label class="inline-check"><input type="checkbox" id="acumetria-auto-toggle" name="acumetria_auto" value="1"
+               <?= $acumetriaIsAuto ? 'checked' : '' ?>>auto (calcular Rinne y Weber desde los umbrales tonales)</label>
+    </p>
     <table class="grid-table" style="margin-bottom:0.5rem;">
         <tr><th></th><?php foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $freqIdx): ?><th><?= $hz ?> Hz</th><?php endforeach; ?></tr>
         <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
         <tr>
             <td class="side-label">Rinne <?= $sideLabel ?></td>
             <?php foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $freqIdx):
-                $rinneIsAuto = !isset($v['rinne_auto']) || isset($v['rinne_auto'][$hz][$side]);
                 $rinneVal = (string) fv($v, ['rinne', $hz, $side], 'positivo');
             ?>
             <td>
                 <select id="rinne_<?= $freqIdx ?>_<?= $side ?>" class="rinne-select" data-freq="<?= $freqIdx ?>" data-side="<?= $side ?>"
-                        name="rinne[<?= $hz ?>][<?= $side ?>]" <?= $rinneIsAuto ? 'disabled' : '' ?>>
+                        name="rinne[<?= $hz ?>][<?= $side ?>]" <?= $acumetriaIsAuto ? 'disabled' : '' ?>>
                     <?php foreach (CaseBuilder::RINNE_LABELS as $opt => $optLabel): ?>
                     <option value="<?= $opt ?>" <?= $rinneVal === $opt ? 'selected' : '' ?>><?= htmlspecialchars($optLabel) ?></option>
                     <?php endforeach; ?>
                 </select>
-                <label class="inline-check"><input type="checkbox" class="rinne-auto-toggle" data-freq="<?= $freqIdx ?>" data-side="<?= $side ?>"
-                       name="rinne_auto[<?= $hz ?>][<?= $side ?>]" <?= $rinneIsAuto ? 'checked' : '' ?>>auto</label>
             </td>
             <?php endforeach; ?>
         </tr>
@@ -921,18 +928,15 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <tr>
             <td class="side-label">Weber</td>
             <?php foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $freqIdx):
-                $weberIsAuto = !isset($v['weber_auto']) || isset($v['weber_auto'][$hz]);
                 $weberVal = (string) fv($v, ['weber', $hz], 'centrado');
             ?>
             <td>
                 <select id="weber_<?= $freqIdx ?>" class="weber-select" data-freq="<?= $freqIdx ?>"
-                        name="weber[<?= $hz ?>]" <?= $weberIsAuto ? 'disabled' : '' ?>>
+                        name="weber[<?= $hz ?>]" <?= $acumetriaIsAuto ? 'disabled' : '' ?>>
                     <?php foreach (CaseBuilder::WEBER_LABELS as $opt => $optLabel): ?>
                     <option value="<?= $opt ?>" <?= $weberVal === $opt ? 'selected' : '' ?>><?= htmlspecialchars($optLabel) ?></option>
                     <?php endforeach; ?>
                 </select>
-                <label class="inline-check"><input type="checkbox" class="weber-auto-toggle" data-freq="<?= $freqIdx ?>"
-                       name="weber_auto[<?= $hz ?>]" <?= $weberIsAuto ? 'checked' : '' ?>>auto</label>
             </td>
             <?php endforeach; ?>
         </tr>
@@ -2321,33 +2325,28 @@ window.drawReflexPattern = function drawReflexPattern() {
     }
 
     function syncAll() {
+        var auto = document.getElementById('acumetria-auto-toggle');
+        var isAuto = !!(auto && auto.checked);
         FREQ_IDX.forEach(function (n) {
             ['od', 'oi'].forEach(function (side) {
-                var auto = document.querySelector('.rinne-auto-toggle[data-freq="' + n + '"][data-side="' + side + '"]');
                 var select = document.getElementById('rinne_' + n + '_' + side);
-                if (!auto || !select) return;
-                if (auto.checked) {
+                if (!select) return;
+                if (isAuto) {
                     select.value = rinneAuto(threshold('aerea', side, n), threshold('osea', side, n));
-                    select.disabled = true;
-                } else {
-                    select.disabled = false;
                 }
+                select.disabled = isAuto;
             });
-            var weberAutoEl = document.querySelector('.weber-auto-toggle[data-freq="' + n + '"]');
             var weberSelect = document.getElementById('weber_' + n);
-            if (!weberAutoEl || !weberSelect) return;
-            if (weberAutoEl.checked) {
+            if (!weberSelect) return;
+            if (isAuto) {
                 weberSelect.value = weberAuto(threshold('osea', 'od', n), threshold('osea', 'oi', n));
-                weberSelect.disabled = true;
-            } else {
-                weberSelect.disabled = false;
             }
+            weberSelect.disabled = isAuto;
         });
     }
 
-    document.querySelectorAll('.rinne-auto-toggle, .weber-auto-toggle').forEach(function (el) {
-        el.addEventListener('change', syncAll);
-    });
+    var acumetriaAutoToggle = document.getElementById('acumetria-auto-toggle');
+    if (acumetriaAutoToggle) { acumetriaAutoToggle.addEventListener('change', syncAll); }
     FREQ_IDX.forEach(function (n) {
         ['od', 'oi'].forEach(function (side) {
             var a = document.getElementById('aerea_' + side + '_' + n);
