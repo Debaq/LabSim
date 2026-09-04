@@ -42,7 +42,10 @@ foreach ($availableCourses as $ac) {
 }
 
 $error = null;
-$success = null;
+// Mensaje de éxito sobrevive al redirect post-POST (ver más abajo) que
+// cierra el modal -- si no, se perdía al no haber dónde mostrarlo.
+$success = $_SESSION['agenda_flash_success'] ?? null;
+unset($_SESSION['agenda_flash_success']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Auth::requireCsrf();
@@ -129,26 +132,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // Si la cita que se está reagendando ya tiene atenciones registradas,
-        // editarla en el sitio borraría/mezclaría el historial de esa ronda
-        // (attendances tiene UNIQUE(appointment_id, student_id) con upsert --
-        // ver attendance_action.php -- y las métricas de comportamiento se
-        // agrupan por appointment_id). Por eso una "ronda nueva" crea una
-        // cita (appointment) nueva en vez de pisar la anterior; si todavía
-        // no la atendió nadie, no hay nada que perder y se edita en el sitio.
-        // $forceRound (botón "Nueva cita") fuerza lo mismo a mano: mismo
-        // paciente/caso, pero horario/grupo distinto en paralelo -- sin eso
-        // no había forma de agregar una cita nueva sin pisar la pendiente.
-        $isNewRound = false;
-        if ($error === null && $appointmentId > 0) {
-            if ($forceRound) {
-                $isNewRound = true;
-            } else {
-                $stmt = $pdo->prepare('SELECT 1 FROM attendances WHERE appointment_id = ? LIMIT 1');
-                $stmt->execute([$appointmentId]);
-                $isNewRound = (bool) $stmt->fetchColumn();
-            }
-        }
+        // Editar una cita con atenciones registradas se guarda en el sitio
+        // (mismo appointment_id) igual que cualquier otra -- si el reagendo
+        // mezcla atenciones de fechas distintas bajo el mismo id es cosa del
+        // admin. "Nueva cita" ($forceRound, botón explícito) sigue siendo la
+        // forma de agregar una cita en paralelo para el mismo caso sin pisar
+        // la pendiente, en vez de editarla en el sitio.
+        $isNewRound = $error === null && $appointmentId > 0 && $forceRound;
 
         $willInsert = $appointmentId <= 0 || $isNewRound;
         if ($error === null && $willInsert && $courseId === null) {
@@ -201,6 +191,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $success = 'Cita eliminada (el caso y sus otras citas, si tenía, se conservan).';
             AdminAudit::log($me, 'appointment_delete', ['appointment_id' => $id]);
         }
+    }
+
+    // Sin error: cierra el modal (redirect sin schedule/appointment/new en
+    // la URL) en vez de recargar la misma pantalla con el modal abierto.
+    // Con error se queda en la misma URL para que el modal siga abierto y
+    // el usuario vea qué corregir.
+    if ($error === null) {
+        $_SESSION['agenda_flash_success'] = $success;
+        header('Location: ' . agenda_url([
+            'schedule' => null, 'appointment' => null, 'force_round' => null, 'new' => null, 'fecha' => null,
+        ]));
+        exit;
     }
 }
 
@@ -328,16 +330,7 @@ if ($scheduleRow !== null && !$scheduleRow['appointment_id']) {
     $scheduleSnapshot = is_array($data) ? ($data['paciente_snapshot'] ?? []) : [];
 }
 $scheduleForceRound = isset($_GET['force_round']) && $_GET['force_round'] === '1';
-$scheduleIsNewRound = false;
-if ($scheduleRow !== null && $scheduleRow['appointment_id']) {
-    if ($scheduleForceRound) {
-        $scheduleIsNewRound = true;
-    } else {
-        $stmt = $pdo->prepare('SELECT 1 FROM attendances WHERE appointment_id = ? LIMIT 1');
-        $stmt->execute([$scheduleRow['appointment_id']]);
-        $scheduleIsNewRound = (bool) $stmt->fetchColumn();
-    }
-}
+$scheduleIsNewRound = $scheduleRow !== null && (bool) $scheduleRow['appointment_id'] && $scheduleForceRound;
 // Identidad del paciente ya fija apenas el caso tuvo una primera cita --
 // nombre/apellido/fecha_nac/rut se editan solo desde "Editar ficha"
 // (case_create.php / patients.php), nunca desde este formulario de
