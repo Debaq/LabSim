@@ -123,6 +123,14 @@ class CalculateLogo():
         sobre-enmascarado (no discrimina nada util); bajo el minimo (o sin
         activar el ruido) el paciente en realidad esta discriminando con el
         oido contrario a traves del cruce interaural -> curva sombra.
+
+        La curva sombra usa la intensidad cruda (sin restar la atenuacion
+        interaural): una vez que el estimulo cruza, el oido sano lo recibe
+        practicamente integro, por lo que responde segun su propia curva
+        evaluada en ese nivel absoluto (tipicamente cerca de su techo).
+        Sin enmascarar, el cruce da un puntaje igual o mejor que el real,
+        nunca uno artificialmente bajo (eso es justamente el "engaño"
+        clinico que el enmascaramiento existe para detectar).
         """
         other = 1 - side
         rango = self._masking_range(side, other, intensity)
@@ -133,7 +141,7 @@ class CalculateLogo():
         elif int_mkg > rango['mkg_max']:
             return 0
         else:
-            shadow_intensity = self._clamp_scale(intensity - self.logo_attenuation)
+            shadow_intensity = self._clamp_scale(intensity)
             return self.data[other][str(shadow_intensity)]
 
     def _masking_range(self, side, other, intensity):
