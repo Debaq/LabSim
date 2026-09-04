@@ -63,6 +63,10 @@ $sessions = array_values(array_filter(
     static fn (array $s) => $s['appointment_id'] !== null && (int) $s['appointment_id'] === $appointmentId
 ));
 $stats = Metrics::summarizeSessions($sessions);
+// Duración real (Atender -> Atendido), mismo criterio que admin/student.php
+// -- $stats['total_duration_s'] es action_logs y esconde el rato leyendo el
+// caso antes de tocar el audiómetro/impedanciómetro.
+$duracionS = Metrics::attendanceDurationSeconds($attendance['hora_real'], $attendance['updated_at']);
 
 $historiaClinica = '';
 if ($appointment['patient_id']) {
@@ -157,8 +161,8 @@ student_header($paciente, $me);
     <h2>Comportamiento durante la atención</h2>
     <table>
         <tr><td>Bloques de actividad</td><td><b><?= $stats['n_sessions'] ?></b></td></tr>
-        <tr><td>Duración total</td><td><b><?= $stats['total_duration_s'] ?>s</b></td></tr>
-        <tr><td>Delta promedio entre acciones</td><td><b><?= $stats['avg_delta_s'] ?? '—' ?><?= $stats['avg_delta_s'] !== null ? 's' : '' ?></b></td></tr>
+        <tr><td>Duración total</td><td><b><?= $duracionS !== null ? htmlspecialchars(Metrics::formatDurationHms($duracionS)) : '—' ?></b></td></tr>
+        <tr><td>Delta promedio entre acciones</td><td><b><?= $stats['avg_delta_s'] !== null ? htmlspecialchars(Metrics::formatDurationHms((int) round($stats['avg_delta_s']))) : '—' ?></b></td></tr>
         <tr><td>Pausas largas (&ge;30s)</td><td><b<?= $stats['long_pauses'] > 0 ? ' class="badge-warn"' : '' ?>><?= $stats['long_pauses'] ?></b></td></tr>
         <tr><td>Acciones sin pausa (0s)</td><td><b><?= $stats['no_pause_actions'] ?></b></td></tr>
     </table>

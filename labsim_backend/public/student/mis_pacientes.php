@@ -46,14 +46,18 @@ student_header('Mis pacientes', $me);
     <?php else: ?>
     <div class="table-wrap">
     <table>
-        <tr><th>Fecha</th><th>Paciente</th><th>Procedimiento</th><th>Bloques</th><th>Delta prom.</th><th>Pausas largas</th></tr>
+        <tr><th>Fecha</th><th>Paciente</th><th>Procedimiento</th><th>Duración</th><th>Bloques</th><th>Delta prom.</th><th>Pausas largas</th></tr>
         <?php foreach ($attendances as $a):
             $stats = Metrics::summarizeSessions($sessionsByAppt[(int) $a['appointment_id']] ?? []);
+            // Duración real (Atender -> Atendido), mismo criterio que
+            // admin/student.php -- más confiable que sumar action_logs.
+            $duracionS = Metrics::attendanceDurationSeconds($a['hora_real'], $a['updated_at']);
         ?>
         <tr class="clickable" onclick="location.href='atencion.php?appointment_id=<?= (int) $a['appointment_id'] ?>'">
             <td><?= htmlspecialchars($a['fecha'] ?: '—') ?> <?= htmlspecialchars($a['hora'] ?: '') ?></td>
             <td><?= htmlspecialchars(trim("{$a['nombre']} {$a['apellido']}")) ?: '—' ?></td>
             <td><?= htmlspecialchars($a['procedimiento']) ?></td>
+            <td><?= $duracionS !== null ? htmlspecialchars(Metrics::formatDurationHms($duracionS)) : '—' ?></td>
             <td><?= $stats['n_sessions'] ?></td>
             <td><?= $stats['avg_delta_s'] ?? '—' ?><?= $stats['avg_delta_s'] !== null ? 's' : '' ?></td>
             <td<?= $stats['long_pauses'] > 0 ? ' class="badge-warn"' : '' ?>><?= $stats['long_pauses'] ?></td>

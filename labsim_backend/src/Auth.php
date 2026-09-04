@@ -275,6 +275,9 @@ final class Auth
         $userId = $_SESSION['student_user_id'] ?? null;
         $user = $userId ? self::activeStudentById((int) $userId) : null;
         if (!$user) {
+            $user = self::viewAsStudentFromAdminSession();
+        }
+        if (!$user) {
             unset($_SESSION['student_user_id']);
             http_response_code(403);
             header('Content-Type: text/html; charset=utf-8');
@@ -293,6 +296,27 @@ final class Auth
         $stmt->execute([$userId]);
         $user = $stmt->fetch();
         return $user ?: null;
+    }
+
+    /**
+     * "Ver como alumno" (ver public/admin/ver_como.php): un docente/admin
+     * con sesión de portal activa dejó admin_view_as_id seteado ahí ya
+     * validando el scoping (roster del docente) -- acá solo se revalida que
+     * la sesión de admin siga viva antes de devolver al alumno.
+     */
+    private static function viewAsStudentFromAdminSession(): ?array
+    {
+        $viewAsId = $_SESSION['admin_view_as_id'] ?? null;
+        $adminId = $_SESSION['admin_user_id'] ?? null;
+        if (!$viewAsId || !$adminId) {
+            return null;
+        }
+        $stmt = Db::get()->prepare("SELECT 1 FROM users WHERE id = ? AND role = 'admin' AND active = 1");
+        $stmt->execute([$adminId]);
+        if (!$stmt->fetchColumn()) {
+            return null;
+        }
+        return self::activeStudentById((int) $viewAsId);
     }
 
     /** Como requireAdminSession(), pero corta con 403 si es una cuenta docente (permission != admin). */

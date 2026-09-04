@@ -121,6 +121,7 @@ admin_header('Alumno: ' . $student['display_name'], $me);
         &nbsp;·&nbsp; <span class="mono"><?= htmlspecialchars($student['username']) ?></span>
         &nbsp;·&nbsp; <?= $student['active'] ? 'activo' : 'inactivo' ?>
         &nbsp;·&nbsp; alumno desde <?= htmlspecialchars($student['created_at']) ?>
+        &nbsp;·&nbsp; <a href="ver_como.php?id=<?= (int) $studentId ?>">Ver como alumno →</a>
     </p>
 </div>
 

@@ -12,6 +12,7 @@ declare(strict_types=1);
 function student_header(string $title, array $currentUser): void
 {
     header('Content-Type: text/html; charset=utf-8');
+    $viendoComoAdmin = isset($_SESSION['admin_view_as_id'], $_SESSION['admin_user_id']);
     ?>
 <!doctype html>
 <html lang="es">
@@ -60,6 +61,12 @@ function student_header(string $title, array $currentUser): void
     <div class="brand">LabSim</div>
     <div class="sub"><?= htmlspecialchars($currentUser['display_name']) ?> · Mis pacientes atendidos</div>
 </header>
+<?php if ($viendoComoAdmin): ?>
+<div style="background:#fff3cd; color:#7a5b00; padding:0.5rem 1rem; font-size:0.85rem; text-align:center;">
+    Viendo como <?= htmlspecialchars($currentUser['display_name']) ?> (modo docente, solo lectura)
+    &nbsp;·&nbsp; <a href="../admin/ver_como.php?salir=1" style="color:#7a5b00; font-weight:600;">Volver a la ficha</a>
+</div>
+<?php endif; ?>
 <main>
 <?php
 }
