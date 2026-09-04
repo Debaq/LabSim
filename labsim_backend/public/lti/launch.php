@@ -273,10 +273,12 @@ header('Content-Type: text/html; charset=utf-8');
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LabSim</title>
 <style>
-    body { font-family: sans-serif; text-align: center; margin-top: 4rem; }
-    .code { font-size: 3rem; font-weight: bold; letter-spacing: 0.3em; }
+    * { box-sizing: border-box; }
+    body { font-family: sans-serif; text-align: center; margin: 4rem 1rem 2rem; overflow-x: hidden; }
+    .code { font-size: clamp(1.8rem, 10vw, 3rem); font-weight: bold; letter-spacing: 0.3em; }
     .countdown.low { color: #c00; font-weight: bold; }
     button { font-size: 1rem; padding: 0.6rem 1.4rem; margin-top: 1.5rem; cursor: pointer; }
     .status { min-height: 1.2em; color: #555; }
@@ -296,6 +298,11 @@ header('Content-Type: text/html; charset=utf-8');
     .legend-list { list-style: none; padding: 0; margin: 0.4rem 0 0; font-size: 0.82rem; color: #444; }
     .legend-list li { display: flex; align-items: center; gap: 0.5rem; padding: 0.15rem 0; }
     .legend-swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+
+    @media (max-width: 30rem) {
+        body { margin-top: 2rem; }
+        .no-activity-list { columns: 1; }
+    }
 </style>
 </head>
 <body>

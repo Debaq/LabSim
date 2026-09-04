@@ -44,6 +44,7 @@ student_header('Mis pacientes', $me);
     <?php if (!$attendances): ?>
     <p class="empty">Todavía no has cerrado ninguna atención.</p>
     <?php else: ?>
+    <div class="table-wrap">
     <table>
         <tr><th>Fecha</th><th>Paciente</th><th>Procedimiento</th><th>Bloques</th><th>Delta prom.</th><th>Pausas largas</th></tr>
         <?php foreach ($attendances as $a):
@@ -59,6 +60,7 @@ student_header('Mis pacientes', $me);
         </tr>
         <?php endforeach; ?>
     </table>
+    </div>
     <p class="legend">Pincha una fila para ver el detalle: tu conversación con el paciente (con la retroalimentación
         de tu docente si dejó alguna) y la ficha clínica.</p>
     <?php endif; ?>
