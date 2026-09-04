@@ -62,11 +62,31 @@ final class Patients
      * libre editado por el admin en case_create.php; distinto de
      * attendances.nota (nota individual de cada alumno por atención, no se
      * edita acá).
+     *
+     * Un mismo patient puede tener varios cases (una cita = un case, un
+     * paciente puede reagendarse). historia_clinica vive en patients (fuente
+     * única), pero el cliente de escritorio no sincroniza patients, solo
+     * cases -- por eso hay que cascadear el valor a cases.data['historia_clinica']
+     * de TODOS los cases de este patient, no solo el que se está editando,
+     * o la ficha del paciente en Agenda.py queda con el valor viejo/vacío
+     * cuando se la abre desde una cita distinta a la que se editó.
      */
     public static function updateHistoriaClinica(PDO $pdo, int $patientId, string $historiaClinica): void
     {
         $pdo->prepare(
             'UPDATE patients SET historia_clinica = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
         )->execute([$historiaClinica, $patientId]);
+
+        $stmt = $pdo->prepare('SELECT id, data FROM cases WHERE patient_id = ?');
+        $stmt->execute([$patientId]);
+        foreach ($stmt->fetchAll() as $case) {
+            $data = json_decode($case['data'], true);
+            if (!is_array($data)) {
+                $data = [];
+            }
+            $data['historia_clinica'] = $historiaClinica;
+            $pdo->prepare('UPDATE cases SET data = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+                ->execute([json_encode($data, JSON_UNESCAPED_UNICODE), $case['id']]);
+        }
     }
 }

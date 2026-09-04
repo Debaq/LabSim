@@ -10,8 +10,12 @@ declare(strict_types=1);
  * columnas nuevas en `cases` -- el nombre de archivo es determinista a
  * partir de case_id + oído + índice de fase (0 = fase 1 / única).
  *
- * A diferencia de PatientPhoto no hay recorte circular: solo se reduce el
- * lado mayor a MAX_DIM para no acumular fotos de celular de varios MB.
+ * A diferencia de PatientPhoto no hay selector de recorte manual: se recorta
+ * un cuadrado centrado (lado = el menor de ancho/alto) y se reescala a
+ * OUTPUT_SIZE fijo. Necesario porque fotos de celular vienen en cualquier
+ * proporción -- sin esto, OD y OI quedaban con tamaños/proporciones
+ * distintos y la ficha (tanto el editor admin como la app del alumno) se
+ * veía dispareja entre ambos oídos y entre casos.
  *
  * Formato de salida: WebP si el GD del servidor lo soporta (~25-35% más
  * liviano que JPEG a calidad equivalente -- importa acá porque puede haber
@@ -23,7 +27,7 @@ declare(strict_types=1);
  */
 final class OtoscopiaPhoto
 {
-    private const MAX_DIM = 1024;
+    private const OUTPUT_SIZE = 640; // cuadrado fijo -- normaliza tamaño/proporción entre fotos
     private const FORMATS = ['webp', 'jpg']; // orden de preferencia al buscar cuál existe
 
     public static function dir(): string
@@ -74,7 +78,7 @@ final class OtoscopiaPhoto
 
     public static function mimeType(string $path): string
     {
-        return str_ends_with($path, '.webp') ? 'image/webp' : 'image/jpeg';
+        return substr($path, -5) === '.webp' ? 'image/webp' : 'image/jpeg';
     }
 
     public static function has(string $caseId, string $side, int $faseIdx): bool
@@ -149,12 +153,15 @@ final class OtoscopiaPhoto
         $w = imagesx($src);
         $h = imagesy($src);
 
-        $scale = min(1.0, self::MAX_DIM / max($w, $h));
-        $dstW = max(1, (int) round($w * $scale));
-        $dstH = max(1, (int) round($h * $scale));
+        // Recorte cuadrado centrado sobre el lado menor -- normaliza
+        // proporción antes de reescalar (ver comentario de clase).
+        $cropSize = min($w, $h);
+        $cropX = (int) round(($w - $cropSize) / 2);
+        $cropY = (int) round(($h - $cropSize) / 2);
 
-        $dst = imagecreatetruecolor($dstW, $dstH);
-        imagecopyresampled($dst, $src, 0, 0, 0, 0, $dstW, $dstH, $w, $h);
+        $size = self::OUTPUT_SIZE;
+        $dst = imagecreatetruecolor($size, $size);
+        imagecopyresampled($dst, $src, 0, 0, $cropX, $cropY, $size, $size, $cropSize, $cropSize);
 
         // Borra lo que hubiera antes (pudo haber quedado en el otro formato
         // si el soporte de webp del servidor cambió entre subidas).

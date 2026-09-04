@@ -136,7 +136,7 @@ final class OirsEvaluator
         $clean = trim($raw);
         // El modelo a veces envuelve el JSON en ```json ... ``` pese a la
         // instrucción de no hacerlo -- se pela el fence si aparece.
-        if (str_starts_with($clean, '```')) {
+        if (substr($clean, 0, 3) === '```') {
             $clean = preg_replace('/^```[a-zA-Z]*\n?|```$/', '', $clean);
             $clean = trim((string) $clean);
         }

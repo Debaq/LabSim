@@ -169,6 +169,8 @@ class CreateA(QWidget,Ui_generator_audio):
         self._sdt_manual = [False, False]
         self._srt_manual = [False, False]
 
+    # TODO: limpiar -- sin llamadas desde la app tras sacar "Ver/Editar" de
+    # Agenda.py (la gestión de pacientes/casos ahora vive solo en el backend web).
     def load_for_edit(self, case_id, agenda_key, agenda_row):
         """Carga un paciente existente en el formulario para verlo/editarlo"""
         cases = CasesOffline().get_cases()

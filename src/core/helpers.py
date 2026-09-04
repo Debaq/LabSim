@@ -324,6 +324,8 @@ def entry_esta_cancelada(row) -> bool:
     return len(row) > 10 and row[10] == "cancelada"
 
 
+# TODO: limpiar -- sin llamadas desde la app tras sacar "Cancelar cita" de
+# Agenda.py (la gestión de citas ahora vive solo en el backend web).
 def marcar_entry_cancelada(row, cancelada: bool = True) -> None:
     """Cancela o restaura una cita, conservando el registro y el caso asociado."""
     _asegurar_dict_atencion(row)

@@ -56,7 +56,7 @@ if ($faseIdx < 0) {
 // guardar). Los ids temporales siempre empiezan con "tmp".
 $stmt = $pdo->prepare('SELECT id FROM cases WHERE id = ?');
 $stmt->execute([$caseId]);
-if ($stmt->fetchColumn() === false && !str_starts_with($caseId, 'tmp')) {
+if ($stmt->fetchColumn() === false && substr($caseId, 0, 3) !== 'tmp') {
     echo json_encode(['ok' => false, 'error' => 'El caso no existe.']);
     exit;
 }

@@ -380,6 +380,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         subw_agenda = FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self))
         subw_voice = FrameSubMdi(ComandVoiceA())
         subw_chat = FrameSubMdi(ChatPacienteWidget(self.data_login.get("name")))
+        subw_ficha = FrameSubMdi(Agenda.FichaClinicaWidget())
         subw_inbox = FrameSubMdi(inbox.InboxWidget(self))
         self.subw_w = FrameSubMdi(ListWords.ListWords(self.data_current))
         self.subw_z = FrameSubMdi(Z.ZControl())
@@ -394,6 +395,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw["AGENDA"] = subw_agenda
         self.subw["CVOICE"] = subw_voice
         self.subw["CHAT"] = subw_chat
+        self.subw["FICHA"] = subw_ficha
         self.subw["INBOX"] = subw_inbox
         self.subw["W"] = self.subw_w
         self.subw["Z"] = self.subw_z
@@ -443,6 +445,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         chat (ver ChatPacienteWidget.set_paciente)."""
         self.subw["CHAT"].obj.set_paciente(case_id, nombre, edad, procedimiento, appointment_id)
         self.activate_auto("CHAT")
+
+    def abrir_ficha_con(self, html, on_chat=None):
+        """Abre (o trae al frente) la subventana MDI de ficha clínica,
+        reapuntada al paciente indicado."""
+        self.subw["FICHA"].obj.set_ficha(html, on_chat)
+        self.activate_auto("FICHA")
 
     def abrir_chat_paciente(self):
         """Abre el chat con el paciente simulado por LLM del caso que se está atendiendo."""

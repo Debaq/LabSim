@@ -19,7 +19,8 @@
     "CHAT": [false, "Hablar con el paciente", 15, [true, true], [480, 280], "pre"],
     "AC": [false, "Acumetría", 16, [true, true], [480, 420], "pre"],
     "OT": [false, "Otoscopia", 17, [true, true], [520, 340], "pre"],
-    "INBOX": [false, "Bandeja de entrada", 18, [true, true], [700, 480], "pre"]
+    "INBOX": [false, "Bandeja de entrada", 18, [true, true], [700, 480], "pre"],
+    "FICHA": [false, "Ficha clínica", 19, [false, true], [480, 560], "pre"]
 
   },
   "SECTORS": {

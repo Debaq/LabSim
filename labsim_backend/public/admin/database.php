@@ -108,7 +108,7 @@ function explorer_open_readonly(string $path, string $label): PDO
 function explorer_is_safe_select(string $sql): bool
 {
     $trimmed = rtrim(trim($sql), ";\t\n\r ");
-    if ($trimmed === '' || str_contains($trimmed, ';')) {
+    if ($trimmed === '' || strpos($trimmed, ';') !== false) {
         return false;
     }
     if (!preg_match('/^(SELECT|WITH)\b/i', $trimmed)) {

@@ -52,6 +52,10 @@ class FrameSubMdi(QWidget, UI_frameSubMdi):
         #super(FrameSubMdi, self).__init__()
         super().__init__()
         self.setupUi(self)
+        # QWidget plano no pinta border/background de QSS sin esto (a
+        # diferencia de QFrame, que lo hace solo) -- necesario para el
+        # borde delgado que marca el límite de cada subventana MDI.
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.obj = ui_ui
         self.layout_content.addWidget(self.obj)
         movewin = MoveWin(self)

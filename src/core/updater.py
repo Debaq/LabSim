@@ -126,6 +126,8 @@ PID="$1"
 DIST_DIR="$2"
 NEW_DIST="$3"
 
+shopt -s nullglob dotglob
+
 waited=0
 while kill -0 "$PID" 2>/dev/null; do
     sleep 0.3
@@ -142,6 +144,13 @@ cp -a "$NEW_DIST/run.sh" "$DIST_DIR/run.sh"
 [ -f "$NEW_DIST/BUILD_VERSION" ] && cp -a "$NEW_DIST/BUILD_VERSION" "$DIST_DIR/BUILD_VERSION"
 chmod +x "$DIST_DIR/LabSim" "$DIST_DIR/run.sh"
 
+# De aca en adelante no abortamos mas: el codigo ya quedo actualizado, y si
+# algun item de resources/ falla no queremos perder el resto ni dejar el
+# relanzamiento sin ejecutar (antes, con set -e activo, un solo cp -a que
+# fallara cortaba el loop a mitad de camino y el resto de items nunca se
+# copiaba -- "se salta archivos" silenciosamente).
+set +e
+
 # resources/: se sincroniza con la version nueva salvo las carpetas/archivos
 # 100% dinamicos del usuario (cases/, local_cache/, json/session.json,
 # json/schedule.json) -- todo lo demas (apps.json, el resto de json/,
@@ -149,6 +158,34 @@ chmod +x "$DIST_DIR/LabSim" "$DIST_DIR/run.sh"
 # quedar al dia con cada release, no solo en una instalacion nueva.
 if [ -d "$NEW_DIST/resources" ]; then
     mkdir -p "$DIST_DIR/resources"
+
+    # 1) Borrar en destino lo que ya no existe en el release nuevo (huerfanos
+    #    de una version anterior), salvo la data dinamica del usuario. Antes
+    #    esto no se hacia: un item borrado/renombrado en el release nunca se
+    #    borraba de la instalacion, quedaba basura vieja para siempre.
+    for old_item in "$DIST_DIR/resources"/*; do
+        name="$(basename "$old_item")"
+        case "$name" in
+            cases|local_cache) continue ;;
+        esac
+        if [ ! -e "$NEW_DIST/resources/$name" ]; then
+            rm -rf "$old_item"
+        fi
+    done
+    if [ -d "$DIST_DIR/resources/json" ]; then
+        for old_jf in "$DIST_DIR/resources/json"/*; do
+            jname="$(basename "$old_jf")"
+            case "$jname" in
+                session.json|schedule.json) continue ;;
+            esac
+            if [ ! -e "$NEW_DIST/resources/json/$jname" ]; then
+                rm -f "$old_jf"
+            fi
+        done
+    fi
+
+    # 2) Copiar todo lo nuevo. Antes json/ solo copiaba archivo por archivo
+    #    sin borrar primero (ya cubierto arriba en el paso 1).
     for item in "$NEW_DIST/resources"/*; do
         name="$(basename "$item")"
         case "$name" in
@@ -161,11 +198,11 @@ if [ -d "$NEW_DIST/resources" ]; then
                 case "$jname" in
                     session.json|schedule.json) continue ;;
                 esac
-                cp -a "$jf" "$DIST_DIR/resources/json/$jname"
+                cp -a "$jf" "$DIST_DIR/resources/json/$jname" || echo "labsim-update: fallo copiando json/$jname" >&2
             done
         else
             rm -rf "$DIST_DIR/resources/$name"
-            cp -a "$item" "$DIST_DIR/resources/$name"
+            cp -a "$item" "$DIST_DIR/resources/$name" || echo "labsim-update: fallo copiando resources/$name" >&2
         fi
     done
 fi
