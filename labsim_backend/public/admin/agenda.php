@@ -537,7 +537,8 @@ admin_header('Agendas', $me);
         <input type="hidden" name="appointment_id" value="<?= (int) ($scheduleRow['appointment_id'] ?? 0) ?>">
         <input type="hidden" name="force_round" value="<?= $scheduleForceRound ? '1' : '0' ?>">
         <label>Fecha (vacío = sin agendar aún)
-            <input type="date" name="fecha" value="<?= $scheduleForceRound ? '' : htmlspecialchars($prefillFechaIso ?? legacy_to_iso($scheduleRow['fecha'] ?? '')) ?>">
+            <input type="date" name="fecha" min="2015-01-01" max="<?= date('Y-m-d', strtotime('+2 years')) ?>"
+                   value="<?= $scheduleForceRound ? '' : htmlspecialchars($prefillFechaIso ?? legacy_to_iso($scheduleRow['fecha'] ?? '')) ?>">
         </label>
         <label>Hora
             <input type="time" name="hora" value="<?= $scheduleForceRound ? '' : htmlspecialchars($scheduleRow['hora'] ?? '') ?>">
