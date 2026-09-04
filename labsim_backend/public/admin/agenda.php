@@ -9,10 +9,10 @@ require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/../../src/Patients.php';
 
 /**
- * Una sola pantalla para casos + citas (antes estaba partido en agenda.php
- * y cases.php -- dos lugares para lo mismo era más lío que ayuda). Cada
- * fila es un caso clínico con su cita (si tiene una agendada): agendar,
- * cancelar/restaurar sin perder el caso, o eliminar todo junto.
+ * Configuración de agendas por curso/grupo/alumno: agendar, reagendar,
+ * cancelar/restaurar o eliminar citas, y el calendario mensual de ocupación.
+ * La base de datos de fichas clínicas (todos los pacientes/casos, agendados
+ * o no) vive aparte en patients.php.
  */
 
 $me = Auth::requireAdminSession();
@@ -70,8 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // primer agendamiento; si el caso ya tiene un patient_id asociado, se
         // ignora por completo lo tipeado en el form (RUT/nombre/apellido/fecha
         // nac) y se usa lo que ya hay guardado -- el área de agendamiento no
-        // es donde se edita la ficha del paciente (eso es case_create.php).
-        // Ni un POST manipulado a mano lo cambia.
+        // es donde se edita la ficha del paciente (eso es case_create.php /
+        // patients.php). Ni un POST manipulado a mano lo cambia.
         $existingPatientId = null;
         $stmt = $pdo->prepare('SELECT patient_id FROM cases WHERE id = ?');
         $stmt->execute([$caseId]);
@@ -172,9 +172,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($appointmentId > 0 && !$isNewRound) {
                 $pdo->prepare(
                     'UPDATE appointments SET fecha = ?, hora = ?, rut = ?, nombre = ?, apellido = ?, fecha_nac = ?,
-                            procedimiento = ?, nota_admin = ?, patient_id = ?, updated_at = CURRENT_TIMESTAMP
+                            procedimiento = ?, nota_admin = ?, patient_id = ?,
+                            course_id = COALESCE(?, course_id), assigned_student_id = ?, assigned_group_id = ?,
+                            updated_at = CURRENT_TIMESTAMP
                      WHERE id = ?'
-                )->execute([$fecha, $hora, $rut, $nombre, $apellido, $fechaNac, $procedimiento, $notaAdmin, $patientId, $appointmentId]);
+                )->execute([$fecha, $hora, $rut, $nombre, $apellido, $fechaNac, $procedimiento, $notaAdmin, $patientId, $courseId, $assignedStudentId, $assignedGroupId, $appointmentId]);
                 $success = 'Cita actualizada.';
                 AdminAudit::log($me, 'appointment_update', ['appointment_id' => $appointmentId, 'case_id' => $caseId]);
             } else {
@@ -186,17 +188,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 AdminAudit::log($me, 'appointment_schedule', ['case_id' => $caseId, 'new_round' => $isNewRound]);
             }
         }
-    } elseif ($action === 'toggle_cancel') {
-        $id = (int) ($_POST['id'] ?? 0);
-        $cancelar = ($_POST['cancelada'] ?? '') === '1';
-        $pdo->prepare('UPDATE appointments SET cancelada = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
-            ->execute([$cancelar ? 1 : 0, $id]);
-        $success = $cancelar ? 'Cita cancelada (el caso se conserva).' : 'Cita restaurada.';
-        AdminAudit::log($me, $cancelar ? 'appointment_cancel' : 'appointment_restore', ['appointment_id' => $id]);
     } elseif ($action === 'delete_appointment') {
         // Borra UNA cita puntual (p.ej. una de varias en paralelo del mismo
-        // caso) sin tocar el caso ni sus otras citas -- distinto de
-        // delete_case, que elimina el caso completo con todo su historial.
+        // caso) sin tocar el caso ni sus otras citas -- distinto de eliminar
+        // el caso completo, que se hace desde patients.php.
         $id = (int) ($_POST['id'] ?? 0);
         if ($id > 0) {
             $pdo->beginTransaction();
@@ -205,23 +200,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->commit();
             $success = 'Cita eliminada (el caso y sus otras citas, si tenía, se conservan).';
             AdminAudit::log($me, 'appointment_delete', ['appointment_id' => $id]);
-        }
-    } elseif ($action === 'delete_case') {
-        $caseId = trim((string) ($_POST['case_id'] ?? ''));
-        if ($caseId !== '') {
-            $stmt = $pdo->prepare('SELECT id FROM appointments WHERE case_id = ?');
-            $stmt->execute([$caseId]);
-            $appointmentIds = array_column($stmt->fetchAll(), 'id');
-
-            $pdo->beginTransaction();
-            foreach ($appointmentIds as $appId) {
-                $pdo->prepare('DELETE FROM attendances WHERE appointment_id = ?')->execute([(int) $appId]);
-            }
-            $pdo->prepare('DELETE FROM appointments WHERE case_id = ?')->execute([$caseId]);
-            $pdo->prepare('DELETE FROM cases WHERE id = ?')->execute([$caseId]);
-            $pdo->commit();
-            $success = 'Caso eliminado.';
-            AdminAudit::log($me, 'case_delete', ['case_id' => $caseId, 'appointments_deleted' => count($appointmentIds)]);
         }
     }
 }
@@ -246,16 +224,11 @@ function agenda_url(array $overrides = []): string
     return 'agenda.php' . ($params ? '?' . http_build_query($params) : '');
 }
 
-// Última cita de cada caso (si tiene varias, poco común, se usa la más
-// reciente). data trae paciente_snapshot si la cita que tenía se borró --
-// ver Cases::snapshotBeforeAppointmentDelete().
-// Docente: solo ve casos sin agendar (biblioteca compartida) + citas de
-// su(s) curso(s) + citas legado sin curso (course_id NULL) -- nunca citas
-// de un curso ajeno. Admin completo sin filtro.
-// Filtro de navegación (curso -> grupo/alumno), vía querystring -- separado
-// del permiso de arriba: el permiso dice qué puede ver un docente, el filtro
-// dice qué recorte de eso quiere ver ahora mismo (también sirve de vista de
-// ocupación acotada para el calendario más abajo).
+// Docente: solo ve citas de su(s) curso(s) + citas legado sin curso
+// (course_id NULL) -- nunca citas de un curso ajeno. Admin completo sin
+// filtro. Filtro de navegación (curso -> grupo/alumno) vía querystring,
+// separado del permiso de arriba: el permiso dice qué puede ver un docente,
+// el filtro dice qué recorte de eso quiere ver ahora mismo.
 $availableCourseIds = array_map(static fn(array $c): int => (int) $c['id'], $availableCourses);
 
 $filterCourseId = isset($_GET['filter_course']) && $_GET['filter_course'] !== '' ? (int) $_GET['filter_course'] : null;
@@ -284,31 +257,10 @@ if (!$isFullAdmin) {
         $permissionSql = "(a.course_id IS NULL OR a.course_id IN ({$placeholders}))";
         $permissionParams = $myCourseIds;
     } else {
-        // docente sin curso asignado: igual ve biblioteca sin agendar + citas legado sin curso
+        // docente sin curso asignado: igual ve citas legado sin curso
         $permissionSql = 'a.course_id IS NULL';
     }
 }
-
-// Ojo: el filtro de curso/grupo/alumno NO acota esta lista -- "Pacientes
-// registrados" es la biblioteca de casos de TODO el sistema (compartida
-// entre cursos), no algo que pertenezca a un curso. El filtro solo acota
-// el calendario de ocupación más abajo (ver $calendarCases).
-$courseScopeSql = " WHERE a.id IS NULL OR ({$permissionSql})";
-$courseScopeParams = $permissionParams;
-$stmt = $pdo->prepare(
-    "SELECT c.id, c.data, c.updated_at,
-            a.id AS appointment_id, a.fecha, a.hora, a.rut, a.nombre, a.apellido, a.fecha_nac,
-            a.procedimiento, a.cancelada, a.nota_admin, a.course_id, a.assigned_student_id, a.assigned_group_id,
-            (SELECT COUNT(*) FROM attendances att WHERE att.appointment_id = a.id) AS atenciones_count,
-            (SELECT COUNT(*) FROM appointments WHERE case_id = c.id) AS rondas_count
-     FROM cases c
-     LEFT JOIN appointments a ON a.id = (
-         SELECT id FROM appointments WHERE case_id = c.id ORDER BY id DESC LIMIT 1
-     ){$courseScopeSql}
-     ORDER BY CASE WHEN a.fecha IS NULL OR a.fecha = '' THEN 1 ELSE 0 END, a.fecha, a.hora, c.updated_at DESC"
-);
-$stmt->execute($courseScopeParams);
-$cases = $stmt->fetchAll();
 
 $courseNameById = [];
 foreach ($pdo->query('SELECT id, name FROM courses')->fetchAll() as $cn) {
@@ -335,17 +287,27 @@ if ($historyCaseId !== null) {
     $historyRows = $stmt->fetchAll();
 }
 
+// El caso a agendar/reagendar se busca directo por id (no depende de la
+// lista filtrada de abajo) -- así el link "Agendar" desde patients.php
+// funciona sin importar el filtro curso/grupo/alumno activo acá.
 $scheduleCaseId = $_GET['schedule'] ?? null;
 $scheduleRow = null;
 if ($scheduleCaseId !== null) {
-    foreach ($cases as $c) {
-        if ($c['id'] === $scheduleCaseId) {
-            $scheduleRow = $c;
-            break;
-        }
-    }
+    $stmt = $pdo->prepare(
+        "SELECT c.id, c.data, c.updated_at,
+                a.id AS appointment_id, a.fecha, a.hora, a.rut, a.nombre, a.apellido, a.fecha_nac,
+                a.procedimiento, a.cancelada, a.nota_admin, a.course_id, a.assigned_student_id, a.assigned_group_id
+         FROM cases c
+         LEFT JOIN appointments a ON a.id = (
+             SELECT id FROM appointments WHERE case_id = c.id ORDER BY id DESC LIMIT 1
+         )
+         WHERE c.id = ?"
+    );
+    $stmt->execute([$scheduleCaseId]);
+    $found = $stmt->fetch();
+    $scheduleRow = $found !== false ? $found : null;
 }
-// $cases solo trae la ÚLTIMA cita del caso -- si viene un "appointment"
+// $scheduleRow trae solo la ÚLTIMA cita del caso -- si viene un "appointment"
 // explícito (link del calendario o del historial, apuntando a una cita
 // puntual que puede no ser la última), se pisan los campos de cita con los
 // de esa fila específica para editar/eliminar la correcta.
@@ -378,7 +340,8 @@ if ($scheduleRow !== null && $scheduleRow['appointment_id']) {
 }
 // Identidad del paciente ya fija apenas el caso tuvo una primera cita --
 // nombre/apellido/fecha_nac/rut se editan solo desde "Editar ficha"
-// (case_create.php), nunca desde este formulario de agendamiento.
+// (case_create.php / patients.php), nunca desde este formulario de
+// agendamiento.
 $scheduleIdentityLocked = $scheduleRow !== null && (bool) $scheduleRow['appointment_id'];
 
 // Calendario mensual: agrupa las citas vigentes (no canceladas) del mes
@@ -396,9 +359,10 @@ $today = date('Y-m-d');
 $monthNames = [1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril', 5 => 'mayo', 6 => 'junio',
                7 => 'julio', 8 => 'agosto', 9 => 'septiembre', 10 => 'octubre', 11 => 'noviembre', 12 => 'diciembre'];
 
-// El calendario SÍ se acota al filtro curso/grupo/alumno (a diferencia de la
-// tabla de pacientes) -- acá sirve como vista de ocupación de ese scope. El
-// alumno filtrado puede pertenecer a varios grupos, por eso se resuelven acá.
+// El calendario y la lista de citas de abajo SÍ se acotan al filtro
+// curso/grupo/alumno -- acá sirve como vista de ocupación/agenda de ese
+// scope. El alumno filtrado puede pertenecer a varios grupos, por eso se
+// resuelven acá.
 $filterStudentGroupIds = [];
 if ($filterStudentId !== null) {
     $stmt = $pdo->prepare('SELECT group_id FROM group_members WHERE user_id = ?');
@@ -406,12 +370,35 @@ if ($filterStudentId !== null) {
     $filterStudentGroupIds = array_map('intval', array_column($stmt->fetchAll(), 'group_id'));
 }
 
-// OJO: $cases trae solo la ÚLTIMA cita de cada caso (para la tabla de abajo,
-// que muestra 1 fila por caso + "rondas" como historial). El calendario en
-// cambio tiene que mostrar TODAS las citas vigentes -- un mismo paciente
-// puede tener varias citas en paralelo (horarios/grupos distintos, ver
-// "Nueva cita"), y si acá también se filtrara a la última quedarían
-// invisibles todas menos la más reciente.
+/** Filtro curso/grupo/alumno compartido por el calendario y la lista de citas. */
+function appt_in_filter_scope(
+    ?int $cCourseId,
+    ?int $cGroupId,
+    ?int $cStudentId,
+    ?int $filterCourseId,
+    ?int $filterGroupId,
+    ?int $filterStudentId,
+    array $filterStudentGroupIds
+): bool {
+    if ($filterCourseId === null) {
+        return true;
+    }
+    if ($filterStudentId !== null) {
+        // filter_student solo se puede setear junto a un filter_course donde
+        // ya está matriculado (validado más arriba), por eso "todo el curso"
+        // (sin assigned_*) le aplica directo si el curso coincide.
+        return $cCourseId === null
+            || $cStudentId === $filterStudentId
+            || ($cGroupId !== null && in_array($cGroupId, $filterStudentGroupIds, true))
+            || ($cStudentId === null && $cGroupId === null && $cCourseId === $filterCourseId);
+    }
+    if ($filterGroupId !== null) {
+        return $cGroupId === $filterGroupId
+            || ($cStudentId === null && $cGroupId === null && $cCourseId === $filterCourseId);
+    }
+    return $cCourseId === $filterCourseId;
+}
+
 $calStmt = $pdo->prepare(
     "SELECT a.id AS appointment_id, a.case_id, a.fecha, a.hora, a.nombre, a.apellido,
             a.course_id, a.assigned_student_id, a.assigned_group_id
@@ -430,27 +417,17 @@ foreach ($calendarAppointments as $c) {
     if ($iso === '' || substr($iso, 0, 7) !== $month) {
         continue;
     }
-    if ($filterCourseId !== null) {
-        $cCourseId = $c['course_id'] !== null ? (int) $c['course_id'] : null;
-        $cGroupId = $c['assigned_group_id'] !== null ? (int) $c['assigned_group_id'] : null;
-        $cStudentId = $c['assigned_student_id'] !== null ? (int) $c['assigned_student_id'] : null;
-        if ($filterStudentId !== null) {
-            // filter_student solo se puede setear junto a un filter_course donde
-            // ya está matriculado (validado más arriba), por eso "todo el curso"
-            // (sin assigned_*) le aplica directo si el curso coincide.
-            $inScope = $cCourseId === null
-                || $cStudentId === $filterStudentId
-                || ($cGroupId !== null && in_array($cGroupId, $filterStudentGroupIds, true))
-                || ($cStudentId === null && $cGroupId === null && $cCourseId === $filterCourseId);
-        } elseif ($filterGroupId !== null) {
-            $inScope = $cGroupId === $filterGroupId
-                || ($cStudentId === null && $cGroupId === null && $cCourseId === $filterCourseId);
-        } else {
-            $inScope = $cCourseId === $filterCourseId;
-        }
-        if (!$inScope) {
-            continue;
-        }
+    $inScope = appt_in_filter_scope(
+        $c['course_id'] !== null ? (int) $c['course_id'] : null,
+        $c['assigned_group_id'] !== null ? (int) $c['assigned_group_id'] : null,
+        $c['assigned_student_id'] !== null ? (int) $c['assigned_student_id'] : null,
+        $filterCourseId,
+        $filterGroupId,
+        $filterStudentId,
+        $filterStudentGroupIds
+    );
+    if (!$inScope) {
+        continue;
     }
     $appointmentsByDay[$iso][] = $c;
 }
@@ -459,7 +436,39 @@ foreach ($appointmentsByDay as &$dayList) {
 }
 unset($dayList);
 
-admin_header('Fichas Clínicas', $me);
+// "Nueva cita" (botón de arriba o "+" al pasar el mouse sobre un día del
+// calendario): a diferencia de "Agendar" desde patients.php, acá todavía no
+// se sabe qué caso -- se abre un selector de caso en el modal primero. El
+// día de origen (si vino del "+") viaja en $_GET['fecha'] y se precarga en
+// el form una vez elegido el caso.
+$isNewFlow = isset($_GET['new']) && $scheduleCaseId === null;
+$prefillFechaIso = isset($_GET['fecha']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $_GET['fecha']) ? (string) $_GET['fecha'] : null;
+$caseOptions = [];
+if ($isNewFlow) {
+    $stmt = $pdo->query(
+        "SELECT c.id, c.data, a.nombre, a.apellido, a.fecha, a.cancelada
+         FROM cases c
+         LEFT JOIN appointments a ON a.id = (
+             SELECT id FROM appointments WHERE case_id = c.id ORDER BY id DESC LIMIT 1
+         )
+         ORDER BY c.updated_at DESC"
+    );
+    foreach ($stmt->fetchAll() as $co) {
+        $data = json_decode($co['data'] ?? '', true);
+        $snapshot = is_array($data) ? ($data['paciente_snapshot'] ?? null) : null;
+        $nombre = trim(($co['nombre'] ?? '') . ' ' . ($co['apellido'] ?? ''));
+        if ($nombre === '' && $snapshot) {
+            $nombre = trim(($snapshot['nombre'] ?? '') . ' ' . ($snapshot['apellido'] ?? ''));
+        }
+        $estado = $co['fecha'] ? ($co['cancelada'] ? 'cancelada' : 'agendada') : 'sin agendar';
+        $caseOptions[] = [
+            'id' => $co['id'],
+            'label' => $co['id'] . ' — ' . ($nombre !== '' ? $nombre : 'sin nombre') . ' (' . $estado . ')',
+        ];
+    }
+}
+
+admin_header('Agendas', $me);
 ?>
 <style>
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 0.6rem; }
@@ -469,13 +478,42 @@ admin_header('Fichas Clínicas', $me);
     .cal-day.today { border-color: #1a2744; border-width: 2px; }
     .cal-day .cal-num { font-weight: 600; margin-bottom: 0.15rem; display: block; }
     .cal-day a { display: block; text-decoration: none; color: #1a2744; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cal-day { position: relative; }
+    .cal-day .cal-add {
+        position: absolute; top: 0.2rem; right: 0.2rem; display: none;
+        width: 1.15rem; height: 1.15rem; line-height: 1.1rem; text-align: center;
+        border-radius: 50%; background: #1a2744; color: #fff; font-size: 0.85rem;
+        font-weight: 700; text-decoration: none;
+    }
+    .cal-day:hover .cal-add { display: block; }
+    .btn-link {
+        display: inline-block; padding: 0.5rem 1.1rem; background: #1a2744; color: #fff;
+        border-radius: 4px; text-decoration: none; font-size: 0.9rem;
+    }
+    .btn-link:hover { opacity: 0.9; }
+    .modal-backdrop {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 50;
+        display: flex; align-items: flex-start; justify-content: center;
+        padding: 3rem 1rem; overflow-y: auto;
+    }
+    .modal-box { max-width: 560px; width: 100%; margin: 0; }
+    .modal-box-header { display: flex; justify-content: space-between; align-items: center; }
+    .modal-close { color: #888; text-decoration: none; font-size: 1.2rem; line-height: 1; }
+    .modal-close:hover { color: #333; }
 </style>
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 <?php if ($success !== null): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
 
 <?php if ($scheduleRow !== null): ?>
-<div class="card">
-    <strong><?= $scheduleRow['appointment_id'] ? 'Reagendar caso ' . htmlspecialchars($scheduleRow['id']) : 'Agendar caso ' . htmlspecialchars($scheduleRow['id']) ?></strong>
+<div class="modal-backdrop">
+<div class="card modal-box">
+    <div class="modal-box-header">
+        <strong>
+            <?= $scheduleRow['appointment_id'] ? 'Reagendar caso ' . htmlspecialchars($scheduleRow['id']) : 'Agendar caso ' . htmlspecialchars($scheduleRow['id']) ?>
+            <?php if ($scheduleRow['appointment_id'] && $scheduleRow['cancelada']): ?><span style="color:#a33; font-weight:400; font-size:0.8rem;"> (cancelada)</span><?php endif; ?>
+        </strong>
+        <a class="modal-close" href="<?= agenda_url(['schedule' => null, 'appointment' => null, 'force_round' => null, 'new' => null, 'fecha' => null]) ?>" title="Cerrar">✕</a>
+    </div>
     <p style="font-size:0.85rem; color:#555;">
         Ojo: en la app del alumno, la Agenda por defecto solo muestra las citas de <strong>hoy</strong>
         (hay un selector de fecha y una casilla "Ver todas las citas habilitadas" para ver otros días).
@@ -483,14 +521,14 @@ admin_header('Fichas Clínicas', $me);
     <?php if ($scheduleForceRound): ?>
     <p style="font-size:0.85rem; color:#886400;">
         <strong>Nueva cita</strong> para el mismo paciente -- se crea una cita aparte (horario/grupo propios) sin
-        tocar la que ya tenía agendada. Se puede ver todo el historial del caso con "Ver historial" en la lista de
-        abajo.
+        tocar la que ya tenía agendada. El historial completo del caso se ve desde
+        <a href="patients.php">Fichas Clínicas</a>.
     </p>
     <?php elseif ($scheduleIsNewRound): ?>
     <p style="font-size:0.85rem; color:#886400;">
         Esta cita ya tiene atenciones registradas -- guardar acá crea una <strong>ronda nueva</strong> (cita distinta)
-        en vez de editar la anterior, para no perder el historial de esa ronda. Se puede ver todo el historial del
-        caso con "Ver historial" en la lista de abajo.
+        en vez de editar la anterior, para no perder el historial de esa ronda. El historial completo del caso se ve
+        desde <a href="patients.php">Fichas Clínicas</a>.
     </p>
     <?php endif; ?>
     <form method="post">
@@ -500,7 +538,7 @@ admin_header('Fichas Clínicas', $me);
         <input type="hidden" name="appointment_id" value="<?= (int) ($scheduleRow['appointment_id'] ?? 0) ?>">
         <input type="hidden" name="force_round" value="<?= $scheduleForceRound ? '1' : '0' ?>">
         <label>Fecha (vacío = sin agendar aún)
-            <input type="date" name="fecha" value="<?= $scheduleForceRound ? '' : htmlspecialchars(legacy_to_iso($scheduleRow['fecha'] ?? '')) ?>">
+            <input type="date" name="fecha" value="<?= $scheduleForceRound ? '' : htmlspecialchars($prefillFechaIso ?? legacy_to_iso($scheduleRow['fecha'] ?? '')) ?>">
         </label>
         <label>Hora
             <input type="time" name="hora" value="<?= $scheduleForceRound ? '' : htmlspecialchars($scheduleRow['hora'] ?? '') ?>">
@@ -577,9 +615,10 @@ admin_header('Fichas Clínicas', $me);
             </label>
         </div>
         <button type="submit"><?= $scheduleForceRound ? 'Agendar cita nueva' : ($scheduleIsNewRound ? 'Agendar ronda nueva' : ($scheduleRow['appointment_id'] ? 'Guardar cambios' : 'Agendar')) ?></button>
-        <a href="<?= agenda_url(['schedule' => null, 'appointment' => null, 'force_round' => null]) ?>" style="margin-left:1rem; font-size:0.85rem;">Cancelar</a>
+        <a href="<?= agenda_url(['schedule' => null, 'appointment' => null, 'force_round' => null, 'new' => null, 'fecha' => null]) ?>" style="display:inline-block; margin-left:1rem; padding:0.5rem 0.9rem; border-radius:4px; background:#888; color:#fff; text-decoration:none; font-size:0.9rem;">Cancelar</a>
     </form>
     <?php if ($scheduleRow['appointment_id'] && !$scheduleForceRound): ?>
+    <hr style="margin:1rem 0; border:none; border-top:1px solid #ddd;">
     <form method="post" style="display:inline;" onsubmit="return confirm(<?= htmlspecialchars(json_encode(
         '¿Eliminar esta cita (' . trim(($scheduleRow['fecha'] ?? '') . ' ' . ($scheduleRow['hora'] ?? '')) . ')? '
         . 'Se borran también las atenciones registradas para ella. El caso y sus otras citas, si tenía, se conservan. '
@@ -591,6 +630,7 @@ admin_header('Fichas Clínicas', $me);
         <button type="submit" class="danger" style="margin-left:1rem; padding:0.3rem 0.7rem; font-size:0.85rem;">Eliminar esta cita</button>
     </form>
     <?php endif; ?>
+</div>
 </div>
 <script>
     var COURSE_GROUPS = <?= json_encode($groupsByCourse) ?>;
@@ -629,6 +669,50 @@ admin_header('Fichas Clínicas', $me);
 </script>
 <?php endif; ?>
 
+<?php if ($isNewFlow): ?>
+<div class="modal-backdrop">
+<div class="card modal-box">
+    <div class="modal-box-header">
+        <strong>Nueva cita<?= $prefillFechaIso !== null ? ' — ' . htmlspecialchars($prefillFechaIso) : '' ?></strong>
+        <a class="modal-close" href="<?= agenda_url(['new' => null, 'fecha' => null]) ?>" title="Cerrar">✕</a>
+    </div>
+    <p style="font-size:0.85rem; color:#555;">Elige el caso/paciente al que le vas a agendar la cita.</p>
+    <label>Buscar paciente por nombre
+        <input type="text" id="new-case-search" placeholder="Escribe un nombre..." autocomplete="off" oninput="filterCaseOptions()">
+    </label>
+    <label>Caso / paciente
+        <select id="new-case-picker" size="8" onchange="if (this.value) { location.href = this.options[this.selectedIndex].dataset.href; }">
+            <?php foreach ($caseOptions as $co): ?>
+            <option value="<?= htmlspecialchars($co['id']) ?>"
+                    data-search="<?= htmlspecialchars(mb_strtolower($co['label'])) ?>"
+                    data-href="<?= htmlspecialchars(agenda_url(['schedule' => $co['id'], 'new' => null])) ?>">
+                <?= htmlspecialchars($co['label']) ?>
+            </option>
+            <?php endforeach; ?>
+        </select>
+    </label>
+    <p id="new-case-empty" style="font-size:0.85rem; color:#888; display:none;">Ningún paciente coincide con esa búsqueda.</p>
+    <p style="font-size:0.85rem; color:#555; margin-top:0.8rem;">
+        ¿El paciente todavía no tiene ficha? <a href="case_create.php">Crear ficha nueva</a> primero.
+    </p>
+</div>
+</div>
+<script>
+    function filterCaseOptions() {
+        var q = document.getElementById('new-case-search').value.toLowerCase().trim();
+        var opts = document.querySelectorAll('#new-case-picker option');
+        var anyVisible = false;
+        opts.forEach(function (o) {
+            var match = q === '' || (o.dataset.search || '').indexOf(q) !== -1;
+            o.hidden = !match;
+            if (match) { anyVisible = true; }
+        });
+        document.getElementById('new-case-empty').style.display = anyVisible ? 'none' : 'block';
+    }
+    document.getElementById('new-case-search').focus();
+</script>
+<?php endif; ?>
+
 <div class="card">
     <form method="get" style="display:flex; gap:1rem; align-items:flex-end; flex-wrap:wrap;">
         <input type="hidden" name="month" value="<?= htmlspecialchars($month) ?>">
@@ -663,8 +747,7 @@ admin_header('Fichas Clínicas', $me);
     </form>
     <?php if ($filterCourseId !== null): ?>
     <p style="font-size:0.8rem; color:#555; margin-top:0.5rem;">
-        Calendario acotado a <strong><?= htmlspecialchars($courseNameById[$filterCourseId] ?? '') ?></strong>
-        (la tabla de pacientes de abajo no se filtra -- es la biblioteca completa del sistema)
+        Acotado a <strong><?= htmlspecialchars($courseNameById[$filterCourseId] ?? '') ?></strong>
         <?php if ($filterGroupId !== null): ?>· grupo <strong><?= htmlspecialchars($groupNameById[$filterGroupId] ?? '') ?></strong> (incluye también citas legado "todo el curso" de este curso, si las hubiera)<?php endif; ?>
         <?php if ($filterStudentId !== null): ?>· alumno <strong><?= htmlspecialchars($userNameById[$filterStudentId] ?? '') ?></strong> (incluye citas de su grupo, todo el curso o cola global que también le apliquen)<?php endif; ?>
         &nbsp;·&nbsp; <a href="<?= agenda_url(['filter_course' => null, 'filter_group' => null, 'filter_student' => null]) ?>">Quitar filtro</a>
@@ -674,6 +757,10 @@ admin_header('Fichas Clínicas', $me);
 
 <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center;">
+        <strong>Calendario</strong>
+        <a class="btn-link" href="<?= agenda_url(['new' => 1, 'schedule' => null, 'appointment' => null, 'fecha' => null]) ?>">+ Crear nueva cita</a>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.8rem;">
         <a href="<?= agenda_url(['month' => $prevMonth]) ?>">&larr; anterior</a>
         <strong><?= $monthNames[(int) $monthStart->format('n')] ?> <?= $monthStart->format('Y') ?></strong>
         <a href="<?= agenda_url(['month' => $nextMonth]) ?>">siguiente &rarr;</a>
@@ -691,6 +778,7 @@ admin_header('Fichas Clínicas', $me);
         ?>
         <div class="cal-day<?= $iso === $today ? ' today' : '' ?>">
             <span class="cal-num"><?= $day ?></span>
+            <a class="cal-add" href="<?= agenda_url(['new' => 1, 'fecha' => $iso, 'schedule' => null, 'appointment' => null]) ?>" title="Nueva cita el <?= htmlspecialchars($iso) ?>">+</a>
             <?php foreach ($dayAppts as $a): ?>
             <a href="<?= agenda_url(['schedule' => $a['case_id'], 'appointment' => $a['appointment_id']]) ?>" title="<?= htmlspecialchars(trim($a['hora'] . ' ' . $a['nombre'] . ' ' . $a['apellido'])) ?>">
                 <?= htmlspecialchars($a['hora']) ?> <?= htmlspecialchars(trim($a['nombre'] . ' ' . $a['apellido'])) ?>
@@ -700,115 +788,10 @@ admin_header('Fichas Clínicas', $me);
         <?php endfor; ?>
     </div>
     <p style="font-size:0.85rem; color:#555; margin-top:0.6rem;">
-        Para agendar: crea el caso (o usa uno ya existente en la lista de abajo) y pincha "Agendar" -- ahí se elige fecha y hora.
+        "+ Crear nueva cita" o el <strong>+</strong> que aparece al pasar el mouse sobre un día -- ambos abren el
+        selector de caso/paciente para agendar (ese día queda precargado si vino del "+"). La biblioteca de
+        fichas/pacientes está en <a href="patients.php">Fichas Clínicas</a>.
     </p>
-</div>
-
-<div class="card">
-    <strong>Pacientes registrados (<?= count($cases) ?>)</strong>
-    &nbsp;·&nbsp; <a href="case_create.php">+ Crear caso nuevo</a>
-    <p style="font-size:0.85rem; color:#555;">
-        "Cita eliminada" = el caso perdió su cita (se conserva el nombre que tenía) --
-        "Agendar" para reingresarlo con esos mismos datos precargados.
-    </p>
-    <table>
-        <tr><th>ID</th><th>Paciente</th><th>Fecha</th><th>Hora</th><th>Procedimiento</th><th>Estado</th><th>Curso / asignado a</th><th>Atenciones</th><th>Rondas</th><th></th></tr>
-        <?php foreach ($cases as $c): ?>
-        <?php
-        $data = json_decode($c['data'] ?? '', true);
-        $snapshot = is_array($data) ? ($data['paciente_snapshot'] ?? null) : null;
-        $nombreVivo = $c['appointment_id'] ? trim(($c['nombre'] ?? '') . ' ' . ($c['apellido'] ?? '')) : '';
-        $nombreSnapshot = $snapshot ? trim(($snapshot['nombre'] ?? '') . ' ' . ($snapshot['apellido'] ?? '')) : '';
-
-        $assignLabel = '—';
-        if ($c['appointment_id']) {
-            if ($c['course_id']) {
-                $assignLabel = $courseNameById[(int) $c['course_id']] ?? ('Curso #' . $c['course_id']);
-                if ($c['assigned_student_id']) {
-                    $assignLabel .= ' · ' . ($userNameById[(int) $c['assigned_student_id']] ?? ('Alumno #' . $c['assigned_student_id']));
-                } elseif ($c['assigned_group_id']) {
-                    $assignLabel .= ' · grupo ' . ($groupNameById[(int) $c['assigned_group_id']] ?? ('#' . $c['assigned_group_id']));
-                } else {
-                    $assignLabel .= ' · todo el curso (legado)';
-                }
-            } else {
-                $assignLabel = 'cola libre (legado)';
-            }
-        }
-        ?>
-        <tr>
-            <td><?= htmlspecialchars($c['id']) ?></td>
-            <td>
-                <?php if ($nombreVivo): ?>
-                    <?= htmlspecialchars($nombreVivo) ?>
-                <?php elseif ($nombreSnapshot): ?>
-                    <?= htmlspecialchars($nombreSnapshot) ?>
-                    <span style="color:#886400;"> (cita eliminada<?= !empty($snapshot['cita_eliminada_en']) ? ' el ' . htmlspecialchars($snapshot['cita_eliminada_en']) : '' ?>)</span>
-                <?php else: ?>
-                    <span style="color:#a33;">— sin cita —</span>
-                <?php endif; ?>
-            </td>
-            <td><?= $c['appointment_id'] ? htmlspecialchars($c['fecha'] ?: '—') : '—' ?></td>
-            <td><?= $c['appointment_id'] ? htmlspecialchars($c['hora'] ?: '—') : '—' ?></td>
-            <td><?= $c['appointment_id'] ? htmlspecialchars($c['procedimiento']) : '—' ?></td>
-            <td>
-                <?php if (!$c['appointment_id']): ?>
-                <span style="color:#886400;">sin agendar</span>
-                <?php elseif ($c['cancelada']): ?>
-                <span style="color:#a33;">cancelada</span>
-                <?php elseif ($c['fecha'] === '' || $c['hora'] === ''): ?>
-                <span style="color:#886400;">sin agendar</span>
-                <?php else: ?>
-                agendada
-                <?php endif; ?>
-            </td>
-            <td style="font-size:0.78rem;"><?= htmlspecialchars($assignLabel) ?></td>
-            <td style="font-size:0.8rem;">
-                <?php if ($c['atenciones_count'] > 0): ?>
-                <a href="dashboard.php?appointment_id=<?= (int) $c['appointment_id'] ?>"><?= (int) $c['atenciones_count'] ?> alumno<?= (int) $c['atenciones_count'] === 1 ? '' : 's' ?></a>
-                <?php else: ?>
-                —
-                <?php endif; ?>
-            </td>
-            <td style="font-size:0.8rem;">
-                <?php if ((int) $c['rondas_count'] > 1): ?>
-                <a href="<?= agenda_url(['history' => $c['id']]) ?>#historial"><?= (int) $c['rondas_count'] ?> · Ver historial</a>
-                <?php else: ?>
-                <?= (int) $c['rondas_count'] ?: '—' ?>
-                <?php endif; ?>
-            </td>
-            <td style="white-space:nowrap;">
-                <a href="<?= agenda_url(['schedule' => $c['id'], 'force_round' => null, 'appointment' => null]) ?>" style="font-size:0.8rem;">
-                    <?= $c['appointment_id'] ? 'Reagendar' : 'Agendar' ?>
-                </a>
-                <?php if ($c['appointment_id']): ?>
-                <a href="<?= agenda_url(['schedule' => $c['id'], 'force_round' => 1, 'appointment' => null]) ?>" style="font-size:0.8rem;">Nueva cita</a>
-                <?php endif; ?>
-                <a href="case_create.php?edit=<?= urlencode($c['id']) ?>" style="font-size:0.8rem;">Editar ficha</a>
-                <?php if ($c['appointment_id']): ?>
-                <form method="post" class="inline">
-                <?= csrf_field() ?>
-                    <input type="hidden" name="form_action" value="toggle_cancel">
-                    <input type="hidden" name="id" value="<?= (int) $c['appointment_id'] ?>">
-                    <input type="hidden" name="cancelada" value="<?= $c['cancelada'] ? '0' : '1' ?>">
-                    <button type="submit" class="secondary" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;">
-                        <?= $c['cancelada'] ? 'Restaurar' : 'Cancelar' ?>
-                    </button>
-                </form>
-                <?php endif; ?>
-                <form method="post" class="inline" onsubmit="return confirm(<?= htmlspecialchars(json_encode("¿Eliminar el caso {$c['id']}" . ($nombreVivo || $nombreSnapshot ? ' (' . ($nombreVivo ?: $nombreSnapshot) . ')' : '') . "? También se eliminan todas sus citas/rondas ({$c['rondas_count']}) y las atenciones registradas. No se puede deshacer."), ENT_QUOTES) ?>);">
-                <?= csrf_field() ?>
-                    <input type="hidden" name="form_action" value="delete_case">
-                    <input type="hidden" name="case_id" value="<?= htmlspecialchars($c['id']) ?>">
-                    <button type="submit" class="danger" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;">Eliminar</button>
-                </form>
-            </td>
-        </tr>
-        <?php endforeach; ?>
-        <?php if (!$cases): ?>
-        <tr><td colspan="10" style="color:#888;">Ningún caso guardado todavía.</td></tr>
-        <?php endif; ?>
-    </table>
 </div>
 
 <?php if ($historyCaseId !== null): ?>

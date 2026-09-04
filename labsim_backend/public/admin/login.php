@@ -7,10 +7,7 @@ require_once __DIR__ . '/_layout.php';
 
 Auth::startSession();
 if (!empty($_SESSION['admin_user_id'])) {
-    $stmt = Db::get()->prepare("SELECT permission FROM users WHERE id = ? AND role = 'admin' AND active = 1");
-    $stmt->execute([$_SESSION['admin_user_id']]);
-    $permission = (int) ($stmt->fetchColumn() ?: 0);
-    header('Location: ' . ($permission === Auth::PERMISSION_ADMIN ? 'index.php' : 'courses.php'));
+    header('Location: dashboard.php');
     exit;
 }
 
@@ -33,10 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // ID nuevo post-auth invalida esa sesión pre-fijada.
             session_regenerate_id(true);
             $_SESSION['admin_user_id'] = $user['id'];
-            // Docente (permission 555) no tiene acceso a index.php (Estado,
-            // requireFullAdminSession) -- mandarlo ahí daba 403 en blanco.
-            $landing = (int) $user['permission'] === Auth::PERMISSION_ADMIN ? 'index.php' : 'courses.php';
-            header('Location: ' . $landing);
+            header('Location: dashboard.php');
             exit;
         }
     }

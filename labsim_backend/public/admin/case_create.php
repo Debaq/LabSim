@@ -38,7 +38,7 @@ if ($editId !== null) {
     if ($editCase === false) {
         admin_header('Editar caso clínico', $me);
         echo '<p class="error">El caso ' . htmlspecialchars($editId) . ' no existe.</p>';
-        echo '<p><a href="agenda.php">&larr; Volver</a></p>';
+        echo '<p><a href="patients.php">&larr; Volver</a></p>';
         admin_footer();
         exit;
     }
@@ -505,7 +505,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 AdminAudit::log($me, 'case_update', ['case_id' => $id]);
                 AdminAudit::log($me, 'patient_update', ['case_id' => $id, 'patient_id' => $editPatientId]);
 
-                header('Location: agenda.php');
+                header('Location: patients.php');
                 exit;
             }
 
@@ -1345,7 +1345,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <?php else: ?>
     <button type="submit" name="form_action" value="create_case">Crear caso</button>
     <?php endif; ?>
-    <a href="agenda.php" style="margin-left:1rem; font-size:0.85rem;">Cancelar</a>
+    <a href="patients.php" style="margin-left:1rem; font-size:0.85rem;">Cancelar</a>
 </div>
 </form>
 

@@ -54,7 +54,8 @@ function admin_header(string $title, ?array $currentUser = null): void
                 <span class="nav-label">Docencia ▾</span>
                 <div class="nav-dropdown">
                     <a href="courses.php">Cursos</a>
-                    <a href="agenda.php">Fichas Clínicas</a>
+                    <a href="patients.php">Fichas Clínicas</a>
+                    <a href="agenda.php">Agendas</a>
                     <a href="dashboard.php">Dashboard</a>
                     <a href="inbox_send.php">Bandeja de entrada</a>
                 </div>
