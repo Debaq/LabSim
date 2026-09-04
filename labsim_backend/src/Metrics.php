@@ -50,6 +50,20 @@ final class Metrics
         return ucfirst(str_replace('_', ' ', $action));
     }
 
+    public static function formatDurationHms(int $totalSeconds): string
+    {
+        $h = intdiv($totalSeconds, 3600);
+        $m = intdiv($totalSeconds % 3600, 60);
+        $s = $totalSeconds % 60;
+        if ($h > 0) {
+            return sprintf('%dh %02dm %02ds', $h, $m, $s);
+        }
+        if ($m > 0) {
+            return sprintf('%dm %02ds', $m, $s);
+        }
+        return sprintf('%ds', $s);
+    }
+
     /**
      * Decodifica el payload JSON de una fila de action_logs y expone
      * case_id/appointment_id/con_paciente a nivel de columna -- el cliente
@@ -171,6 +185,68 @@ final class Metrics
             'no_pause_actions' => $noPause,
             'last_activity' => $lastEnd,
         ];
+    }
+
+    /**
+     * Duración de reloj real de un grupo de sesiones (típicamente todos los
+     * bloques de UNA atención): primera acción a última acción, sin
+     * descontar las pausas >5min que buildSessions() usa para cortar
+     * bloques. summarizeSessions() suma solo la duración de cada bloque
+     * (ver total_duration_s) y por eso esconde pausas largas dentro de la
+     * misma atención -- si el alumno se pausó 30min a mitad de camino, esos
+     * 30min no aparecían en ningún lado. Para "¿cuánto duró la atención?"
+     * (lo que un docente cronometra con reloj) hay que usar esta función,
+     * no total_duration_s.
+     */
+    public static function wallClockDurationSeconds(array $sessions): int
+    {
+        if (!$sessions) {
+            return 0;
+        }
+        $start = null;
+        $end = null;
+        foreach ($sessions as $s) {
+            $sStart = strtotime((string) $s['start']) ?: 0;
+            $sEnd = strtotime((string) $s['end']) ?: 0;
+            if ($start === null || $sStart < $start) {
+                $start = $sStart;
+            }
+            if ($end === null || $sEnd > $end) {
+                $end = $sEnd;
+            }
+        }
+        return max(0, $end - $start);
+    }
+
+    /**
+     * Duración real de UNA atención: desde que el alumno presiona "Atender"
+     * (attendances.hora_real, sellado server-side, sobrevive intacto al
+     * UPDATE de "atendido") hasta que la marca "atendido" (updated_at). A
+     * diferencia de wallClockDurationSeconds()/total_duration_s (que
+     * arrancan desde la primera acción en action_logs), esto no se pierde
+     * el tiempo que el alumno pasa leyendo el caso/paciente antes de tocar
+     * el audiómetro o impedanciómetro -- que puede ser varios minutos.
+     * hora_real solo guarda la hora (sin fecha); se asume el mismo día de
+     * updated_at salvo que eso dé un inicio posterior al fin, en cuyo caso
+     * se resta un día (atención que cruzó medianoche).
+     */
+    public static function attendanceDurationSeconds(?string $horaReal, ?string $updatedAt): ?int
+    {
+        if (!$horaReal || !$updatedAt) {
+            return null;
+        }
+        $endTs = strtotime($updatedAt);
+        if ($endTs === false) {
+            return null;
+        }
+        $startTs = strtotime(date('Y-m-d', $endTs) . ' ' . $horaReal);
+        if ($startTs === false) {
+            return null;
+        }
+        if ($startTs > $endTs) {
+            $startTs = strtotime(date('Y-m-d', $endTs - 86400) . ' ' . $horaReal);
+        }
+        return $startTs === false ? null : max(0, $endTs - $startTs);
     }
 
     /**

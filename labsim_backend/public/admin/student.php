@@ -98,7 +98,13 @@ foreach ($sessions as $s) {
 }
 $statsByAppt = [];
 foreach ($sessionsByAppt as $key => $group) {
-    $statsByAppt[$key] = Metrics::summarizeSessions($group);
+    $stats = Metrics::summarizeSessions($group);
+    // total_duration_s de summarizeSessions() suma solo los bloques activos
+    // y esconde pausas >5min dentro de la misma atención (ver
+    // Metrics::wallClockDurationSeconds) -- acá sí queremos el reloj real,
+    // porque es lo que se compara contra "cuánto duró la atención" cronometrado.
+    $stats['total_duration_s'] = Metrics::wallClockDurationSeconds($group);
+    $statsByAppt[$key] = $stats;
 }
 
 admin_header('Alumno: ' . $student['display_name'], $me);
@@ -129,8 +135,8 @@ admin_header('Alumno: ' . $student['display_name'], $me);
         <tr><td>Sesiones (login-logout)</td><td><strong><?= Metrics::countLoginSessions($allLogs) ?></strong></td></tr>
         <tr><td>Atenciones (pacientes distintos)</td><td><strong><?= Metrics::countAttentions($allLogs) ?></strong></td></tr>
         <tr><td>Bloques de actividad</td><td><strong><?= $behaviorStats['n_sessions'] ?></strong></td></tr>
-        <tr><td>Duración total</td><td><strong><?= $behaviorStats['total_duration_s'] ?>s</strong></td></tr>
-        <tr><td>Delta promedio entre acciones</td><td><strong><?= $behaviorStats['avg_delta_s'] ?? '—' ?>s</strong></td></tr>
+        <tr><td>Duración total</td><td><strong><?= htmlspecialchars(Metrics::formatDurationHms((int) $behaviorStats['total_duration_s'])) ?></strong></td></tr>
+        <tr><td>Delta promedio entre acciones</td><td><strong><?= isset($behaviorStats['avg_delta_s']) ? htmlspecialchars(Metrics::formatDurationHms((int) round($behaviorStats['avg_delta_s']))) : '—' ?></strong></td></tr>
         <tr><td>Pausas largas (≥30s)</td><td><strong<?= $behaviorStats['long_pauses'] > 0 ? ' class="badge-warn"' : '' ?>><?= $behaviorStats['long_pauses'] ?></strong></td></tr>
         <tr><td>Acciones sin pausa (0s)</td><td><strong><?= $behaviorStats['no_pause_actions'] ?></strong></td></tr>
     </table>
@@ -155,7 +161,7 @@ admin_header('Alumno: ' . $student['display_name'], $me);
         <tr>
             <td><?= htmlspecialchars($week) ?></td>
             <td><span class="week-bar" style="width:<?= round(($w['n_sessions'] / $maxSessions) * 100, 1) ?>%;"></span><?= $w['n_sessions'] ?></td>
-            <td><?= $w['avg_delta_s'] ?? '—' ?>s</td>
+            <td><?= isset($w['avg_delta_s']) ? htmlspecialchars(Metrics::formatDurationHms((int) round($w['avg_delta_s']))) : '—' ?></td>
         </tr>
         <?php endforeach; ?>
         <?php if (!$weekly): ?>
@@ -171,6 +177,14 @@ admin_header('Alumno: ' . $student['display_name'], $me);
         <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Bloques</th><th>Duración</th><th>Delta prom.</th><th>Pausas largas</th><th>Hora real</th><th>Nota</th><th>Actualizado</th><th>Detalle</th></tr>
         <?php foreach ($attendances as $a):
             $aStats = $statsByAppt[(int) $a['appointment_id']] ?? null;
+            // Duración real (Atender -> Atendido) siempre que esté cerrada;
+            // más confiable que el cálculo por action_logs, que arranca recién
+            // cuando el alumno toca el audiómetro/impedanciómetro y se pierde
+            // el rato leyendo el caso -- ver Metrics::attendanceDurationSeconds.
+            $realDuration = $a['estado'] === 'atendido'
+                ? Metrics::attendanceDurationSeconds($a['hora_real'], $a['updated_at'])
+                : null;
+            $durationS = $realDuration ?? ($aStats['total_duration_s'] ?? null);
         ?>
         <tr>
             <td><a href="dashboard.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>#student-<?= (int) $studentId ?>">#<?= (int) $a['appointment_id'] ?> (<?= htmlspecialchars($a['fecha'] ?: '—') ?> <?= htmlspecialchars($a['hora'] ?: '') ?>)</a></td>
@@ -178,8 +192,8 @@ admin_header('Alumno: ' . $student['display_name'], $me);
             <td><?= htmlspecialchars($a['procedimiento']) ?></td>
             <td><?= htmlspecialchars($a['estado']) ?></td>
             <td><?= $aStats['n_sessions'] ?? '—' ?></td>
-            <td><?= isset($aStats['total_duration_s']) ? $aStats['total_duration_s'] . 's' : '—' ?></td>
-            <td><?= $aStats['avg_delta_s'] ?? '—' ?><?= isset($aStats['avg_delta_s']) ? 's' : '' ?></td>
+            <td><?= $durationS !== null ? htmlspecialchars(Metrics::formatDurationHms((int) $durationS)) : '—' ?></td>
+            <td><?= isset($aStats['avg_delta_s']) ? htmlspecialchars(Metrics::formatDurationHms((int) round($aStats['avg_delta_s']))) : '—' ?></td>
             <td<?= ($aStats['long_pauses'] ?? 0) > 0 ? ' class="badge-warn"' : '' ?>><?= $aStats['long_pauses'] ?? '—' ?></td>
             <td><?= htmlspecialchars($a['hora_real'] ?: '—') ?></td>
             <td style="font-size:0.85rem;"><?= htmlspecialchars($a['nota'] ?: '—') ?></td>

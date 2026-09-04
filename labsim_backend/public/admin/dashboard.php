@@ -74,16 +74,7 @@ function fmt_appt_paciente(?array $appt): string
 
 function fmt_duration_hms(int $totalSeconds): string
 {
-    $h = intdiv($totalSeconds, 3600);
-    $m = intdiv($totalSeconds % 3600, 60);
-    $s = $totalSeconds % 60;
-    if ($h > 0) {
-        return sprintf('%dh %02dm %02ds', $h, $m, $s);
-    }
-    if ($m > 0) {
-        return sprintf('%dm %02ds', $m, $s);
-    }
-    return sprintf('%ds', $s);
+    return Metrics::formatDurationHms($totalSeconds);
 }
 
 // hue estable por tipo de acción -- así "audio_intensity_change" siempre
