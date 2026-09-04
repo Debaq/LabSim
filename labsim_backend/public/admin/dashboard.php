@@ -29,10 +29,22 @@ if ($allowedStudentIds === null) {
 }
 $logs = Metrics::decodeLogs($rows);
 
-// Sin filtro de role: los action_logs/attendances quedan asociados al user_id
-// para siempre: si después se cambia a alguien de alumno a docente, su
-// actividad histórica no debe volverse "Alumno #N" (y su link a student.php
-// dejaba de servir porque ese query filtraba por role='student').
+// Excluye admins/docentes (role='admin') del dashboard: sus acciones de
+// prueba en la app no deben aparecer como "resultados de alumno".
+$adminIds = array_map(
+    'intval',
+    array_column($pdo->query("SELECT id FROM users WHERE role = 'admin'")->fetchAll(), 'id')
+);
+$logs = array_values(array_filter(
+    $logs,
+    static fn(array $l): bool => !in_array((int) $l['user_id'], $adminIds, true)
+));
+
+// Sin filtro adicional de role aquí: los action_logs/attendances de un
+// alumno quedan asociados a su user_id para siempre; si después se cambia
+// de alumno a docente, ya quedó excluido arriba, pero si vuelve a ser
+// alumno su historial no se pierde (y su link a student.php sigue sirviendo
+// porque este query no filtra por role='student').
 $students = $pdo->query('SELECT id, display_name, username FROM users')->fetchAll();
 if ($allowedStudentIds !== null) {
     $students = array_values(array_filter(
@@ -60,6 +72,20 @@ function fmt_appt_paciente(?array $appt): string
     return $nombre !== '' ? $nombre : '—';
 }
 
+function fmt_duration_hms(int $totalSeconds): string
+{
+    $h = intdiv($totalSeconds, 3600);
+    $m = intdiv($totalSeconds % 3600, 60);
+    $s = $totalSeconds % 60;
+    if ($h > 0) {
+        return sprintf('%dh %02dm %02ds', $h, $m, $s);
+    }
+    if ($m > 0) {
+        return sprintf('%dm %02ds', $m, $s);
+    }
+    return sprintf('%ds', $s);
+}
+
 // hue estable por tipo de acción -- así "audio_intensity_change" siempre
 // pinta el mismo color en cualquier sesión/alumno, se puede reconocer el
 // patrón a simple vista en vez de leer cada etiqueta.
@@ -73,7 +99,7 @@ function render_timeline(array $session): void
     ?>
     <div class="session-meta">
         <?= htmlspecialchars((string) $session['start']) ?> &rarr; <?= htmlspecialchars((string) $session['end']) ?>
-        &nbsp;·&nbsp; <?= $session['n_actions'] ?> acciones &nbsp;·&nbsp; <?= $session['duration_s'] ?>s
+        &nbsp;·&nbsp; <?= $session['n_actions'] ?> acciones &nbsp;·&nbsp; <?= htmlspecialchars(fmt_duration_hms((int) $session['duration_s'])) ?>
         <?= $session['con_paciente'] ? '' : ' &nbsp;·&nbsp; <strong>sin paciente (modo libre)</strong>' ?>
     </div>
     <div class="timeline">
@@ -422,7 +448,7 @@ admin_header('Dashboard de actividad', $me);
             <td><?= Metrics::countLoginSessions($byUserLogs[$uid]) ?></td>
             <td><?= Metrics::countAttentions($byUserLogs[$uid]) ?></td>
             <td><?= $st['n_sessions'] ?></td>
-            <td><?= $st['total_duration_s'] ?>s</td>
+            <td><?= htmlspecialchars(fmt_duration_hms((int) $st['total_duration_s'])) ?></td>
             <td><?= $st['avg_delta_s'] ?? '—' ?>s</td>
             <td<?= $st['long_pauses'] > 0 ? ' class="badge-warn"' : '' ?>><?= $st['long_pauses'] ?></td>
             <td><?= $st['no_pause_actions'] ?></td>
