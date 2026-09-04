@@ -779,6 +779,9 @@ admin_header('Agendas', $me);
                 <?php endfor; ?>
             </select>
         </form>
+        <?php if ($month !== date('Y-m')): ?>
+        <a href="<?= agenda_url(['month' => date('Y-m')]) ?>">Hoy</a>
+        <?php endif; ?>
         <a href="<?= agenda_url(['month' => $nextMonth]) ?>">siguiente &rarr;</a>
     </div>
     <div class="cal-grid">
