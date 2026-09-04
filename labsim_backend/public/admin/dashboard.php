@@ -353,8 +353,28 @@ foreach ($logs as $l) {
     $byUserLogs[(int) $l['user_id']][] = $l;
 }
 
+// Duración total por alumno: mismo criterio real por atención que usa
+// student.php (hora_real->updated_at si está cerrada, si no reloj real de
+// bloques) -- summarizeSessions()['total_duration_s'] no sirve acá porque
+// solo suma bloques activos y esconde pausas largas (ver Metrics::wallClockDurationSeconds).
+if ($allowedStudentIds === null) {
+    $attRows = $pdo->query('SELECT student_id, appointment_id, estado, hora_real, updated_at FROM attendances')->fetchAll();
+} elseif ($allowedStudentIds) {
+    $placeholders = implode(',', array_fill(0, count($allowedStudentIds), '?'));
+    $attStmt2 = $pdo->prepare("SELECT student_id, appointment_id, estado, hora_real, updated_at FROM attendances WHERE student_id IN ({$placeholders})");
+    $attStmt2->execute($allowedStudentIds);
+    $attRows = $attStmt2->fetchAll();
+} else {
+    $attRows = [];
+}
+$attByUser = [];
+foreach ($attRows as $a) {
+    $attByUser[(int) $a['student_id']][] = $a;
+}
+
 $studentStats = [];
 $studentHist = [];
+$studentDurationRealS = [];
 $apptAgg = [];
 foreach ($byUserLogs as $uid => $ulogs) {
     $sessions = Metrics::buildSessions($ulogs);
@@ -372,6 +392,21 @@ foreach ($byUserLogs as $uid => $ulogs) {
         $apptAgg[$aid]['students'][$uid] = true;
         $apptAgg[$aid]['sessions'] = ($apptAgg[$aid]['sessions'] ?? 0) + count(Metrics::buildSessions($alogs));
     }
+
+    $userSessionsByAppt = [];
+    foreach (Metrics::buildSessions($ulogs) as $s) {
+        $key = $s['appointment_id'] !== null ? (int) $s['appointment_id'] : 0;
+        $userSessionsByAppt[$key][] = $s;
+    }
+    $durationRealS = 0;
+    foreach ($attByUser[$uid] ?? [] as $att) {
+        $group = $userSessionsByAppt[(int) $att['appointment_id']] ?? null;
+        $realDuration = $att['estado'] === 'atendido'
+            ? Metrics::attendanceDurationSeconds($att['hora_real'], $att['updated_at'])
+            : null;
+        $durationRealS += $realDuration ?? ($group ? Metrics::wallClockDurationSeconds($group) : 0);
+    }
+    $studentDurationRealS[$uid] = $durationRealS;
 }
 uasort($studentStats, static fn(array $a, array $b): int => (string) ($b['last_activity'] ?? '') <=> (string) ($a['last_activity'] ?? ''));
 uasort($apptAgg, static fn(array $a, array $b): int => $b['sessions'] <=> $a['sessions']);
@@ -439,7 +474,7 @@ admin_header('Dashboard de actividad', $me);
             <td><?= Metrics::countLoginSessions($byUserLogs[$uid]) ?></td>
             <td><?= Metrics::countAttentions($byUserLogs[$uid]) ?></td>
             <td><?= $st['n_sessions'] ?></td>
-            <td><?= htmlspecialchars(fmt_duration_hms((int) $st['total_duration_s'])) ?></td>
+            <td><?= htmlspecialchars(fmt_duration_hms($studentDurationRealS[$uid] ?? 0)) ?></td>
             <td><?= $st['avg_delta_s'] ?? '—' ?>s</td>
             <td<?= $st['long_pauses'] > 0 ? ' class="badge-warn"' : '' ?>><?= $st['long_pauses'] ?></td>
             <td><?= $st['no_pause_actions'] ?></td>

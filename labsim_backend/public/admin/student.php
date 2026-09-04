@@ -107,6 +107,20 @@ foreach ($sessionsByAppt as $key => $group) {
     $statsByAppt[$key] = $stats;
 }
 
+// Duración total del resumen: mismo criterio real por atención que usa la
+// tabla "Atenciones" (hora_real->updated_at si está cerrada, si no reloj
+// real de bloques) -- $behaviorStats['total_duration_s'] no sirve acá
+// porque solo suma bloques activos y esconde pausas largas (ver comentario
+// arriba y Metrics::wallClockDurationSeconds).
+$totalDurationRealS = 0;
+foreach ($attendances as $a) {
+    $aStats = $statsByAppt[(int) $a['appointment_id']] ?? null;
+    $realDuration = $a['estado'] === 'atendido'
+        ? Metrics::attendanceDurationSeconds($a['hora_real'], $a['updated_at'])
+        : null;
+    $totalDurationRealS += $realDuration ?? ($aStats['total_duration_s'] ?? 0);
+}
+
 admin_header('Alumno: ' . $student['display_name'], $me);
 ?>
 <style>
@@ -136,7 +150,7 @@ admin_header('Alumno: ' . $student['display_name'], $me);
         <tr><td>Sesiones (login-logout)</td><td><strong><?= Metrics::countLoginSessions($allLogs) ?></strong></td></tr>
         <tr><td>Atenciones (pacientes distintos)</td><td><strong><?= Metrics::countAttentions($allLogs) ?></strong></td></tr>
         <tr><td>Bloques de actividad</td><td><strong><?= $behaviorStats['n_sessions'] ?></strong></td></tr>
-        <tr><td>Duración total</td><td><strong><?= htmlspecialchars(Metrics::formatDurationHms((int) $behaviorStats['total_duration_s'])) ?></strong></td></tr>
+        <tr><td>Duración total</td><td><strong><?= htmlspecialchars(Metrics::formatDurationHms($totalDurationRealS)) ?></strong></td></tr>
         <tr><td>Delta promedio entre acciones</td><td><strong><?= isset($behaviorStats['avg_delta_s']) ? htmlspecialchars(Metrics::formatDurationHms((int) round($behaviorStats['avg_delta_s']))) : '—' ?></strong></td></tr>
         <tr><td>Pausas largas (≥30s)</td><td><strong<?= $behaviorStats['long_pauses'] > 0 ? ' class="badge-warn"' : '' ?>><?= $behaviorStats['long_pauses'] ?></strong></td></tr>
         <tr><td>Acciones sin pausa (0s)</td><td><strong><?= $behaviorStats['no_pause_actions'] ?></strong></td></tr>
