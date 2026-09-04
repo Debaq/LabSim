@@ -196,3 +196,14 @@ class BackendClient:
 
     def post_logs_batch(self, entries: list[dict]) -> dict:
         return self._post("/api/logs_batch.php", {"entries": entries})
+
+    def get_my_attendances(self) -> dict:
+        """Historial propio de pacientes atendidos, con stats de
+        comportamiento por atención (ver my_attendances.php)."""
+        return self._get("/api/my_attendances.php")
+
+    def get_my_chat_history(self, appointment_id: int) -> dict:
+        """Conversación con el paciente simulado de una atención propia,
+        más los comentarios que el docente haya dejado (ver
+        my_chat_history.php)."""
+        return self._get("/api/my_chat_history.php", {"appointment_id": appointment_id})

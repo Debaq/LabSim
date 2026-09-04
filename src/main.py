@@ -11,6 +11,7 @@ from impedanciometria import Z
 from core.base import context
 from core.h_win import FrameSubMdi, MdiArea
 from core import inbox
+from core import mis_pacientes
 from core.updater import local_build_id
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
                           marcar_entry_atendiendo, marcar_entry_atendido, entry_esta_cancelada,
@@ -308,7 +309,20 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         ya estaba en atención (tras reabrir la app o al volver desde otro paciente).
         """
         if self.data_login["permission"] == 777:
-            return  # el admin no atiende pacientes, para eso existe un usuario básico de prueba
+            return  # el admin usa atender_paciente_prueba() o atender_paciente_base()
+        self._atender_caso(key, es_prueba=False)
+
+    def atender_paciente_base(self, key):
+        """
+        Admin/docente con "Guardar esta atención" marcado en la agenda (ver
+        Agenda.chk_guardar_base): mismo ciclo real que atender_paciente() --
+        SÍ marca "atendiendo" y SÍ guarda el chat con el paciente -- pero bajo
+        la propia cuenta del docente, para crear una atención base con la que
+        comparar después a los alumnos. A diferencia de
+        atender_paciente_prueba(), esto deja rastro real en la base de datos.
+        """
+        if self.data_login["permission"] != 777:
+            return  # esta variante es solo para admin/docente
         self._atender_caso(key, es_prueba=False)
 
     def atender_paciente_prueba(self, key):
@@ -398,8 +412,19 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def cerrar_atencion(self, key, nota):
         """Cierra la atención (estado 'atendido') guardando la nota de atención del estudiante"""
         if self.data_login["permission"] == 777:
-            return  # el admin no atiende pacientes, para eso existe un usuario básico de prueba
+            return  # el admin usa cerrar_atencion_prueba() o cerrar_atencion_base()
+        self._cerrar_atencion_real(key, nota)
 
+    def cerrar_atencion_base(self, key, nota):
+        """Contraparte de atender_paciente_base(): cierra de verdad (estado
+        'atendido', chat guardado) la atención base del docente."""
+        if self.data_login["permission"] != 777:
+            return  # esta variante es solo para admin/docente
+        self._cerrar_atencion_real(key, nota)
+
+    def _cerrar_atencion_real(self, key, nota):
+        """Lógica común a cerrar_atencion() (alumno) y cerrar_atencion_base()
+        (docente en modo "guardar base")."""
         shedule = Shedule()
         agenda = shedule.data.setdefault("agenda_1", {})
         entry = agenda.get(key)
@@ -449,6 +474,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "FICHA": FrameSubMdi(Agenda.FichaClinicaWidget()),
             "EVOLUCION": FrameSubMdi(Agenda.EvolucionWidget()),
             "INBOX": FrameSubMdi(inbox.InboxWidget(self)),
+            "MIS_PACIENTES": FrameSubMdi(mis_pacientes.MisPacientesWidget(self)),
             "W": self.subw_w,
             "Z": self.subw_z,
         })

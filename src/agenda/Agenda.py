@@ -8,7 +8,6 @@
 #   NOTA: si no hablas español, no es mi culpa, aprende         #
 #################################################################
 
-import re
 import requests
 from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import (QTableWidgetItem, QAbstractItemView,
@@ -19,9 +18,10 @@ from PySide6.QtCore import QDate, QTime, QDateTime, Qt, QThread, Signal
 from PySide6.QtGui import QColor
 from agenda.UI.Ui_agenda import Ui_Form
 from core.helpers import (Shedule, entry_estado_por, CasesOffline,
-                          marcar_entry_no_show, obtener_hora_real_atencion,
+                          marcar_entry_no_show,
                           obtener_nota_atencion, entry_esta_cancelada,
                           CreatePatient)
+from core.ficha import parse_fecha_agenda, render_ficha_html
 
 
 class _SheduleFetchThread(QThread):
@@ -47,22 +47,6 @@ ATENDIENDO_COLOR = QColor(200, 224, 247)
 ATENDIDO_COLOR = QColor(210, 235, 210)
 NO_SHOW_COLOR = QColor(235, 190, 190)
 CANCELADA_COLOR = QColor(225, 225, 225)
-
-
-# Llaves {{N}} dentro de historia_clinica (N = offset en días respecto a la
-# fecha de la cita, puede ser negativo). Ej.: "{{-5}} atendido por ORL" se
-# resuelve a la fecha real 5 días antes de la cita agendada.
-HISTORIA_CLINICA_FECHA_RE = re.compile(r"\{\{([+-]?\d+)\}\}")
-
-
-def parse_fecha_agenda(texto):
-    """Parsea una fecha en formato "dd-MM-yy" (año de 2 dígitos, como se
-    guarda en la agenda). QDate::fromString con formato "yy" interpreta
-    00-99 como 1900-1999, así que corregimos al siglo 2000 manualmente."""
-    fecha = QDate.fromString(texto, "dd-MM-yy") if texto else QDate()
-    if fecha.isValid() and fecha.year() < 2000:
-        fecha = fecha.addYears(100)
-    return fecha
 
 
 class FichaClinicaWidget(QWidget):
@@ -144,6 +128,7 @@ class Agenda(QWidget, Ui_Form):
         self._ver_todas = False
         self._filtro_texto = ""
         self._prueba_atendiendo_key = None
+        self._guardar_base = False
 
         self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -199,6 +184,20 @@ class Agenda(QWidget, Ui_Form):
             # el filtro por fecha / "ver todas" es solo para el estudiante.
             self.date_selector.setVisible(False)
             self.chk_ver_todas.setVisible(False)
+
+            # Solo admin/docente: elegir si su "Atender" es una prueba sin
+            # rastro (por defecto, ver atender_paciente_prueba) o si queda
+            # guardado de verdad con su propia cuenta (attendances + chat) --
+            # para armar una atención base con la que comparar a los
+            # alumnos después (ver main.atender_paciente_base). Deshabilitado
+            # mientras hay una atención en curso para no cambiar de modo a
+            # mitad de camino.
+            self.chk_guardar_base = QCheckBox("Guardar esta atención (base para comparar)", self)
+            self.chk_guardar_base.toggled.connect(self._on_toggle_guardar_base)
+            self.horizontalLayout.insertWidget(6, self.chk_guardar_base)
+
+    def _on_toggle_guardar_base(self, checked):
+        self._guardar_base = checked
 
     def _on_toggle_ver_todas(self, checked):
         self._ver_todas = checked
@@ -318,6 +317,8 @@ class Agenda(QWidget, Ui_Form):
         self.btn_atender.setEnabled(False)
         self.btn_ver_ficha.setEnabled(False)
         self.btn_no_show.setEnabled(False)
+        if self.is_admin:
+            self.chk_guardar_base.setEnabled(True)
 
     def _on_selection_changed(self):
         selected_rows = self.tableWidget.selectionModel().selectedRows()
@@ -336,16 +337,36 @@ class Agenda(QWidget, Ui_Form):
         self._selected_row_key = key
         self._selected_key = key if pendiente else None
 
-        if self.is_admin:
-            # Modo prueba: no queda "atendiendo" en la agenda ni se escribe en
-            # red, pero el botón sí simula el ciclo completo atender/cerrar
-            # (ver atender_paciente() y _cerrar_atencion_prueba()).
+        if self.is_admin and self._guardar_base:
+            # Guardar base: mismo ciclo real que el alumno (marca "atendiendo"/
+            # "atendido" de verdad, con la propia cuenta del docente) -- ver
+            # main.atender_paciente_base/cerrar_atencion_base.
+            if estado == "atendiendo" and self._es_atencion_activa(key):
+                self.btn_atender.setText("Cerrar atención")
+                self.btn_atender.setEnabled(tiene_caso)
+            elif estado == "atendiendo":
+                self.btn_atender.setText("Atender")
+                self.btn_atender.setEnabled(tiene_caso)
+            elif estado == "atendido":
+                self.btn_atender.setText("Atender")
+                self.btn_atender.setEnabled(False)
+            else:
+                self.btn_atender.setText("Atender")
+                self.btn_atender.setEnabled(tiene_caso)
+            self.chk_guardar_base.setEnabled(not (estado == "atendiendo" and self._es_atencion_activa(key)))
+        elif self.is_admin:
+            # Modo prueba (por defecto): no queda "atendiendo" en la agenda ni
+            # se escribe en red, pero el botón sí simula el ciclo completo
+            # atender/cerrar (ver atender_paciente() y _cerrar_atencion_prueba()).
             if self._prueba_atendiendo_key == key and self._es_atencion_activa(key):
                 self.btn_atender.setText("Cerrar atención")
                 self.btn_atender.setEnabled(tiene_caso)
             else:
                 self.btn_atender.setText("Atender")
                 self.btn_atender.setEnabled(tiene_caso)
+            self.chk_guardar_base.setEnabled(
+                not (self._prueba_atendiendo_key == key and self._es_atencion_activa(key))
+            )
         elif estado == "atendiendo" and self._es_atencion_activa(key):
             self.btn_atender.setText("Cerrar atención")
             self.btn_atender.setEnabled(tiene_caso)
@@ -377,6 +398,10 @@ class Agenda(QWidget, Ui_Form):
 
     def atender_paciente(self):
         if self._selected_row_key is None:
+            return
+
+        if self.is_admin and self._guardar_base:
+            self._atender_paciente_admin_real()
             return
 
         if self.is_admin:
@@ -439,6 +464,41 @@ class Agenda(QWidget, Ui_Form):
 
         self.main_window.abrir_evolucion(nombre or "el paciente", _guardar)
 
+    def _atender_paciente_admin_real(self):
+        """Admin/docente con "Guardar esta atención" marcado: mismo ciclo
+        real que el alumno (marca "atendiendo"/"atendido" de verdad, guarda
+        el chat con el paciente) pero bajo la propia cuenta del docente --
+        ver main.atender_paciente_base/cerrar_atencion_base."""
+        user = self.shedule["agenda_1"][self._selected_row_key]
+        estado = entry_estado_por(user, self._current_username())
+
+        if estado == "atendiendo" and self._es_atencion_activa(self._selected_row_key):
+            self._cerrar_atencion_admin_real()
+            return
+
+        if not user.case_id:
+            QMessageBox.warning(self, "Atender", "Este registro no tiene un caso clínico asociado.")
+            return
+
+        if self.main_window is not None and hasattr(self.main_window, "atender_paciente_base"):
+            self.main_window.atender_paciente_base(self._selected_row_key)
+            self._on_selection_changed()
+
+    def _cerrar_atencion_admin_real(self):
+        """Contraparte de _cerrar_atencion() para el docente en modo
+        "guardar base" (ver main.cerrar_atencion_base)."""
+        if self.main_window is None or not hasattr(self.main_window, "abrir_evolucion"):
+            return
+
+        user = self.shedule["agenda_1"][self._selected_row_key]
+        nombre = f"{user.nombre} {user.apellido}".strip()
+        key = self._selected_row_key
+
+        def _guardar(nota):
+            self.main_window.cerrar_atencion_base(key, nota)
+
+        self.main_window.abrir_evolucion(nombre or "el paciente", _guardar)
+
     def _marcar_no_show(self):
         if self._selected_row_key is None:
             return
@@ -474,7 +534,7 @@ class Agenda(QWidget, Ui_Form):
               f"historia_clinica={caso.get('historia_clinica')!r}")
 
         appointment_key = self._selected_row_key
-        html = self._render_ficha_html(row, caso)
+        html = render_ficha_html(row, caso, self.shedule, self._current_username(), self.is_admin)
         if self.main_window is not None and hasattr(self.main_window, "abrir_ficha_con"):
             self.main_window.abrir_ficha_con(
                 html, lambda: self._abrir_chat_paciente(row, case_id, appointment_key)
@@ -496,105 +556,3 @@ class Agenda(QWidget, Ui_Form):
         if self.main_window is not None and hasattr(self.main_window, "abrir_chat_con"):
             self.main_window.abrir_chat_con(case_id, nombre or "el paciente", edad, procedimiento, appointment_id)
 
-    def _resolver_fechas_historia_clinica(self, texto, fecha_cita_str):
-        """Reemplaza cada {{N}} en texto por la fecha N días respecto a
-        fecha_cita_str (formato "dd-MM-yy", mismo que row.fecha). Si la fecha de
-        la cita no es válida, deja la llave tal cual (mejor eso que una fecha
-        inventada)."""
-        if not texto:
-            return texto
-        fecha_cita = parse_fecha_agenda(fecha_cita_str)
-
-        def _reemplazar(match):
-            if not fecha_cita.isValid():
-                return match.group(0)
-            return fecha_cita.addDays(int(match.group(1))).toString("dd-MM-yyyy")
-
-        return HISTORIA_CLINICA_FECHA_RE.sub(_reemplazar, texto)
-
-    def _render_ficha_html(self, row, caso):
-        rut = row.rut
-        nombre = row.nombre
-        apellidos = row.apellido
-        fecha_nac = row.fecha_nac
-        procedimiento = row.procedimiento
-        fecha_hora = f"{row.fecha} {row.hora}".strip()
-
-        partes = ["<h3>Datos del paciente</h3>"]
-        partes.append(f"<p><b>Nombre:</b> {nombre} {apellidos}<br>"
-                       f"<b>Rut:</b> {rut}<br>"
-                       f"<b>Fecha de nacimiento:</b> {fecha_nac}<br>"
-                       f"<b>Procedimiento:</b> {procedimiento}<br>"
-                       f"<b>Cita agendada:</b> {fecha_hora or 'sin agendar'}</p>")
-
-        username = self._current_username()
-        hora_real = obtener_hora_real_atencion(row, username)
-        if hora_real:
-            partes.append("<h3>Puntualidad</h3>")
-            hora_agendada = QTime.fromString(row.hora, "HH:mm")
-            hora_inicio = QTime.fromString(hora_real, "HH:mm:ss")
-            if hora_agendada.isValid() and hora_inicio.isValid():
-                minutos = hora_agendada.secsTo(hora_inicio) // 60
-                if minutos <= 0:
-                    resumen = "a tiempo"
-                else:
-                    resumen = f"{minutos} min de atraso"
-            else:
-                resumen = ""
-            partes.append(f"<p><b>Hora agendada:</b> {row.hora}<br>"
-                           f"<b>Inicio real:</b> {hora_real} ({resumen})</p>")
-
-        partes.append("<h3>Historial de atenciones</h3>")
-        items = ""
-
-        historia_clinica = caso.get("historia_clinica", "") if isinstance(caso, dict) else ""
-        if historia_clinica:
-            historia_resuelta = self._resolver_fechas_historia_clinica(historia_clinica, row.fecha)
-            items += f"<li><b>Historia clínica:</b> {historia_resuelta}</li>"
-
-        historial = self._historial_atenciones(rut)
-        items += "".join(
-            f"<li><b>{fecha or 'sin fecha'} {hora}</b> — {alumno}: "
-            f"{nota or 'sin comentario'}</li>"
-            for fecha, hora, alumno, nota in historial
-        )
-
-        if items:
-            partes.append(f"<ul>{items}</ul>")
-        else:
-            partes.append("<p>Sin atenciones cerradas registradas para este paciente.</p>")
-
-        return "".join(partes)
-
-    def _historial_atenciones(self, rut):
-        """
-        Recopila, para todas las citas (filas de agenda) del mismo paciente (mismo rut),
-        las atenciones cerradas por cada alumno, ordenadas cronológicamente.
-        Devuelve lista de tuplas (fecha, hora_real, alumno, nota).
-        """
-        username = self._current_username()
-        historial = []
-        for otra_row in self.shedule.get("agenda_1", {}).values():
-            if otra_row.rut != rut:
-                continue
-            atencion = otra_row.atencion
-            fecha = otra_row.fecha
-            for alumno, datos in atencion.items():
-                if not isinstance(datos, dict) or datos.get("estado") != "atendido":
-                    continue
-                if not self.is_admin and alumno != username:
-                    continue
-                nota = datos.get("nota", "")
-                hora_real = datos.get("hora_real", "")
-                historial.append((fecha, hora_real, alumno, nota))
-
-        def _orden(item):
-            fecha, hora_real = item[0], item[1]
-            dt = QDateTime(
-                parse_fecha_agenda(fecha),
-                QTime.fromString(hora_real, "HH:mm:ss") if hora_real else QTime(),
-            )
-            return dt
-
-        historial.sort(key=_orden)
-        return historial

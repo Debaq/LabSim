@@ -83,6 +83,25 @@ def inbox_marcar_leido(message_id: int) -> None:
         pass
 
 
+def mis_atenciones() -> list:
+    """Historial propio de pacientes atendidos, con stats de comportamiento
+    por atención (ver my_attendances.php). Lista vacía si falla la red."""
+    try:
+        return _get_backend_client().get_my_attendances().get("items", [])
+    except requests.RequestException:
+        return []
+
+
+def mi_conversacion(appointment_id: int) -> list:
+    """Conversación con el paciente simulado de una atención propia, con
+    los comentarios que el docente haya dejado por turno (ver
+    my_chat_history.php). Lista vacía si falla la red."""
+    try:
+        return _get_backend_client().get_my_chat_history(appointment_id).get("items", [])
+    except requests.RequestException:
+        return []
+
+
 def foto_paciente(case_id):
     """Avatar circular del paciente (bytes PNG) o None si no tiene foto
     subida o no hay conexión al backend -- a diferencia de chat_con_paciente,

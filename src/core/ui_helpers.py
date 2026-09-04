@@ -16,6 +16,7 @@ from PySide6.QtWidgets import QPushButton, QLayout, QFrame
 from PySide6.QtWidgets import QMdiSubWindow
 from core.h_win import FrameSubMdi, MdiArea
 from core import inbox
+from core import mis_pacientes
 
 def titlebar_icon(kind: str, size: int = 14, color: str = "#ffffff") -> QIcon:
     """
@@ -328,6 +329,11 @@ class ToolBar(SubWindow):
         # core.inbox.crear_boton().
         if "AGENDA" in self.boxs[area][1] and self.data_login:
             inbox.crear_boton(self, self.layouts[1])
+            # "Mis pacientes" (historial propio con stats/conversación/ficha):
+            # solo alumno -- el docente/admin ya tiene su vista equivalente
+            # (y más completa, con todos los alumnos) en el portal web.
+            if self.data_login.get("permission") != 777:
+                mis_pacientes.crear_boton(self, self.layouts[1])
 
     def activate_soft(self) -> None:
         """activa la ventana con el mismo nombre del boton que envia la señal"""
