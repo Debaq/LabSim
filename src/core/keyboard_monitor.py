@@ -7,8 +7,16 @@ uso no se filtra por número de serie: cualquier dispositivo con ese
 VID:PID cuenta como "el keyboard LabSim" conectado.
 """
 
-import pyudev
+import sys
+
 from PySide6.QtCore import QObject, Signal
+
+# pyudev usa netlink de Linux; en Windows/Mac no hay equivalente, así que ahí
+# la detección USB queda deshabilitada (start() siempre reporta "no conectado")
+# en vez de romper el import de toda la app.
+_HAS_PYUDEV = sys.platform.startswith("linux")
+if _HAS_PYUDEV:
+    import pyudev
 
 LABSIM_KEYBOARD_VID = "0483"
 LABSIM_KEYBOARD_PID = "5740"
@@ -20,20 +28,26 @@ class KeyboardMonitor(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._context = pyudev.Context()
         self._connected = False
         self._serial = None
-        monitor = pyudev.Monitor.from_netlink(self._context)
-        monitor.filter_by(subsystem="usb", device_type="usb_device")
-        self._observer = pyudev.MonitorObserver(monitor, callback=self._on_udev_event)
+        self._context = None
+        self._observer = None
+        if _HAS_PYUDEV:
+            self._context = pyudev.Context()
+            monitor = pyudev.Monitor.from_netlink(self._context)
+            monitor.filter_by(subsystem="usb", device_type="usb_device")
+            self._observer = pyudev.MonitorObserver(monitor, callback=self._on_udev_event)
 
     def start(self):
+        if not _HAS_PYUDEV:
+            return False
         self._connected = self._scan_present()
         self._observer.start()
         return self._connected
 
     def stop(self):
-        self._observer.stop()
+        if self._observer:
+            self._observer.stop()
 
     def is_connected(self):
         return self._connected

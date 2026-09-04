@@ -1,0 +1,41 @@
+name: Build Windows (Python)
+
+# Empaqueta LabSim (stack Python/PySide6, no el rewrite Tauri) con PyInstaller
+# para Windows. Se dispara solo con push a esta rama, o manualmente:
+#   gh workflow run build-windows.yml --ref Genera-audio-sintetico-tonos-y-ruidos
+
+on:
+  push:
+    branches: [Genera-audio-sintetico-tonos-y-ruidos]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build PyInstaller
+        run: python -m PyInstaller LabSim.spec --noconfirm
+
+      - name: Empaquetar zip
+        run: Compress-Archive -Path dist/LabSim/* -DestinationPath dist/LabSim-windows-x86_64.zip
+
+      - name: Subir artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: labsim-windows
+          path: dist/LabSim-windows-x86_64.zip
+          if-no-files-found: error

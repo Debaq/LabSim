@@ -1,8 +1,7 @@
-pyside
+PySide6
 numpy
-audiometer
 requests
 cryptocode
 pyqtgraph
 bezier
-pyudev
+pyudev; sys_platform == "linux"
