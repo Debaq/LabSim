@@ -20,6 +20,7 @@ from impedanciometria.ZDscreen import ZDscreen
 from impedanciometria.ZETFscreen import ZETFscreen
 from impedanciometria.h_z import changeSide, changeSideText, sideText, printer, date_time
 from impedanciometria.z_generator import Z_225, Reflex_curve, map_letter_for_probe
+from impedanciometria.z_audio import ProbeTone, ReflexTone
 from core.helpers import Storage
 
 print("Z cargado")
@@ -141,6 +142,11 @@ class ZControl(QWidget, Ui_Z_control):
         self.time_reflex = QTimer(self)
         self.time_reflex.timeout.connect(self.reflex_animate)
 
+        # AUDIO: tono de sonda (timpanograma) y tono/ruido activador (reflejos),
+        # ambos con fundido de entrada/salida (ver impedanciometria/z_audio.py).
+        self.probe_tone = ProbeTone(self)
+        self.reflex_tone = ReflexTone(self)
+
         # GLOBAL VARIABLE
         self.frame = Storage(3)
         self.frame.set(0, list())
@@ -217,6 +223,10 @@ class ZControl(QWidget, Ui_Z_control):
         self._log("z_probe_freq_change", freq=freq)
         self.probe_freq = freq
         self.Z.set_probe_freq(freq)
+        if self.time_ch0.isActive():
+            # barrido en curso: el tono de sonda cambia en caliente, como en
+            # el equipo real (no se corta ni se reinicia el barrido)
+            self.probe_tone.play(freq)
         self.store_data[0].clean()
         self.store_data[1].clean()
         self.new = [True, True]
@@ -233,6 +243,8 @@ class ZControl(QWidget, Ui_Z_control):
         self.Z_reflex.set_side(self.Z.get_side())
         self.refresh()
         self.preCharger()
+        self.time_reflex.stop()
+        self.reflex_tone.stop()
         self.Z_reflex.clear_response()
         self.refresh_reflex_table()
         self.update_reflex_volume()
@@ -264,10 +276,12 @@ class ZControl(QWidget, Ui_Z_control):
     def timerAnimation(self):
         if self.time_ch0.isActive():
             self.time_ch0.stop()
+            self.probe_tone.stop()
         else:
             self.frame.clean()
             self.frame.set(2, 0)
             self.time_ch0.start(75)
+            self.probe_tone.play(self.probe_freq)
 
     def animation(self):
         stop = False
@@ -289,6 +303,7 @@ class ZControl(QWidget, Ui_Z_control):
 
             if memory_len <= idx+1:
                 self.time_ch0.stop()
+                self.probe_tone.stop()
                 self.new[side] = False
                 self.Z.lbl_p.setText(memory[3])
                 self.Z.lbl_c.setText(memory[2])
@@ -305,6 +320,7 @@ class ZControl(QWidget, Ui_Z_control):
             self.Z.update_graph(x, y)
         else:
             self.time_ch0.stop()
+            self.probe_tone.stop()
 
     def move(self, pos):
         pos = self.Z.move_mark(pos)
@@ -361,6 +377,9 @@ class ZControl(QWidget, Ui_Z_control):
         self._log("z_screen_change", screen=screen_names.get(screen, '?'))
         for s in self.screens:
             s.setVisible(s is screen)
+        if self.current_screen is self.Z_reflex and screen is not self.Z_reflex:
+            self.time_reflex.stop()
+            self.reflex_tone.stop()
         self.current_screen = screen
         if screen is self.Z_reflex:
             self.Z_reflex.set_side(self.Z.get_side())
@@ -419,6 +438,8 @@ class ZControl(QWidget, Ui_Z_control):
         self.Z_reflex.set_mode(self.reflex_mode)
         self.Z_reflex.set_freq(freqs[self.reflex_freq_idx])
         self.Z_reflex.set_nbn_enabled(self.reflex_mode == 'CONTRA')
+        self.time_reflex.stop()
+        self.reflex_tone.stop()
         self.Z_reflex.clear_response()
         self.refresh_reflex_table()
 
@@ -433,6 +454,8 @@ class ZControl(QWidget, Ui_Z_control):
             self.reflex_freq_idx = (self.reflex_freq_idx + 1) % len(freqs)
             self._log("z_reflex_freq_change", freq=freqs[self.reflex_freq_idx])
             self.Z_reflex.set_freq(freqs[self.reflex_freq_idx])
+            self.time_reflex.stop()
+            self.reflex_tone.stop()
             self.Z_reflex.clear_response()
         elif self.current_screen is self.Z:
             self._log("z_move_mark", direction=-1)
@@ -482,7 +505,20 @@ class ZControl(QWidget, Ui_Z_control):
         self.reflex_anim_idx = 1
         self.reflex_anim_ctx = (probe_idx, row_idx, present, curve_type)
         # Ventana completa (2s de traza) se dibuja en 1s reales, como el equipo real.
-        self.time_reflex.start(round(1000 / len(x)))
+        tick_ms = round(1000 / len(x))
+        self.time_reflex.start(tick_ms)
+
+        # Rafaga de audio sincronizada con la ventana del estimulo (0.5s-1.5s
+        # de los 2s de traza -> 25%-75% del tiempo real dibujado). El volumen
+        # sube con el dial (asi se nota el "subir de a poco" real) pero nunca
+        # pasa el techo de la salida (ver _MAX_VOLUME en z_audio.py).
+        total_ms = tick_ms * len(x)
+        level = max(0.0, min(1.0, (self.dB - 40) / 80))
+        self.reflex_tone.burst(
+            freq,
+            delay_ms=round(total_ms * 0.25), duration_ms=round(total_ms * 0.5),
+            volume=(0.15 + 0.35 * level),
+        )
 
     def reflex_animate(self):
         x, y = self.reflex_anim_data
