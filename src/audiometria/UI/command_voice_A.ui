@@ -512,6 +512,54 @@
      </attribute>
     </widget>
    </item>
+   <item row="12" column="2">
+    <widget class="QPushButton" name="btn_act20">
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt;VA A ESCUCHAR UN PITO POR UN OÍDO Y UN RUIDO BLANCO POR EL OTRO OÍDO AL MISMO TIEMPO, NECESITO QUE MANTENGA LA MANO LEVANTADA TODO EL MOMENTO QUE ESCUCHE EL PITO, SOLO SI LO DEJA DE ESCUCHAR EL PITO BAJARÁ LA MANO, SI ESCUCHA MÁS BAJO EL PITO MANTENGA LA MANO LEVANTADA. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Ruido blanco contralateral</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="autoExclusive">
+      <bool>true</bool>
+     </property>
+     <attribute name="buttonGroup">
+      <string notr="true">buttonGroup</string>
+     </attribute>
+    </widget>
+   </item>
+   <item row="13" column="2">
+    <widget class="QPushButton" name="btn_act21">
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt;VA A ESCUCHAR UN PITO CONTINUO POR UN OÍDO A LA VEZ, NECESITO QUE MANTENGA LA MANO LEVANTADA TODO EL MOMENTO QUE ESCUCHE EL PITO, SOLO SI LO DEJA DE ESCUCHAR EL PITO BAJARÁ LA MANO, SI ESCUCHA MÁS BAJO EL PITO MANTENGA LA MANO LEVANTADA. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Rosemberg bilateral</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="autoExclusive">
+      <bool>true</bool>
+     </property>
+     <attribute name="buttonGroup">
+      <string notr="true">buttonGroup</string>
+     </attribute>
+    </widget>
+   </item>
    <item row="10" column="2">
     <widget class="QPushButton" name="btn_act9">
      <property name="font">

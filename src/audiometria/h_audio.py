@@ -1,4 +1,5 @@
 from pathlib import Path
+import copy
 import random
 import subprocess
 import sys
@@ -33,18 +34,27 @@ def normalize(s):
     return s
 
 def data_basic():
+    # deepcopy: threshold_basic no puede compartirse tal cual entre las 5
+    # claves -- son listas anidadas mutables, y mutar una (p.ej. al cargar
+    # un umbral) mutaría las otras 4 al ser el mismo objeto
     return {
         'gender' : 0,
         'id'    :   1,
-        'Aerea' : threshold_basic,
-        'Osea' : threshold_basic,
-        'LDL' : threshold_basic,
-        'Aerea_mkg' :threshold_basic,
-        'Osea_mkg' : threshold_basic,
+        'Aerea' : copy.deepcopy(threshold_basic),
+        'Osea' : copy.deepcopy(threshold_basic),
+        'LDL' : copy.deepcopy(threshold_basic),
+        'Aerea_mkg' : copy.deepcopy(threshold_basic),
+        'Osea_mkg' : copy.deepcopy(threshold_basic),
         'Fowler': {'freq': None, 'cuts': [15, 30, 50]},
         'Stenger': [False, False],
         'SISI': [0, 0],
         'decay': [False, False],
+        # deterioro tonal por prueba: lista de [od, oi] en dB, un elemento
+        # por frecuencia del protocolo (Carhart/Rosemberg: 500/1k/2k/4k --
+        # Stat: 500/1k/2k), ver ResponseAudiometry.DECAY_TESTS
+        'Carhart': [[0, 0], [0, 0], [0, 0], [0, 0]],
+        'Stat': [[0, 0], [0, 0], [0, 0]],
+        'Rosemberg': [[0, 0], [0, 0], [0, 0], [0, 0]],
         "Z_OD": "A",
         "Z_OI": "A",
         "sector": "Camara_sono",

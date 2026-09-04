@@ -200,12 +200,13 @@ final class CaseBuilder
 
     // Tipo de curva del reflejo acústico, por oído -- morfología del trazo
     // (no la intensidad umbral, que ya se captura en reflex_ipsi/contra).
-    public const REFLEX_CURVE_TYPES = ['normal', 'invertido', 'on', 'off', 'on-off'];
+    // 'normal' ES el patrón "ON" (meseta sostenida); no existe un tipo "on"
+    // aparte, quedaba duplicado con este.
+    public const REFLEX_CURVE_TYPES = ['normal', 'invertido', 'off', 'on-off'];
 
     public const REFLEX_CURVE_LABELS = [
-        'normal' => 'Normal',
+        'normal' => 'ON',
         'invertido' => 'Invertido',
-        'on' => 'ON',
         'off' => 'OFF',
         'on-off' => 'ON-OFF',
     ];
@@ -382,6 +383,9 @@ final class CaseBuilder
             'state_login' => 1,
             'recruit' => $form['recruit'],
             'decay' => $form['decay'],
+            'Carhart' => $form['carhart'],
+            'Stat' => $form['stat'],
+            'Rosemberg' => $form['rosemberg'],
             'Reflex' => $form['reflex'],
             'ETF' => [$form['etf_od'], $form['etf_oi']],
             'Anamnesis' => $form['anamnesis'],
@@ -485,10 +489,13 @@ final class CaseBuilder
         if (!empty($recruit[0])) { $v['recruit']['od'] = '1'; }
         if (!empty($recruit[1])) { $v['recruit']['oi'] = '1'; }
 
-        $decay = $data['decay'] ?? [false, false];
-        $v['decay'] = [];
-        if (!empty($decay[0])) { $v['decay']['od'] = '1'; }
-        if (!empty($decay[1])) { $v['decay']['oi'] = '1'; }
+        // Conteo fijo (no derivado de count($data[...])): un caso viejo sin
+        // esta clave debe igual rellenar las N frecuencias del protocolo con
+        // 0 (sin deterioro), no quedar con un array vacío.
+        foreach (['carhart' => ['Carhart', 4], 'stat' => ['Stat', 3], 'rosemberg' => ['Rosemberg', 4]] as $formKey => [$dataKey, $count]) {
+            [$od, $oi] = $unzip($data[$dataKey] ?? [], $count);
+            $v[$formKey] = ['od' => $od, 'oi' => $oi];
+        }
 
         $reflex = $data['Reflex'] ?? [];
         [$ipsiOd, $ipsiOi] = $unzip($reflex['ipsi'] ?? [], 4);

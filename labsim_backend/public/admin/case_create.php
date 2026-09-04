@@ -267,6 +267,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        // Deterioro tonal (Carhart/Stat/Rosemberg): dB sobre el umbral aéreo
+        // que hay que subir para sostener el tono 1 min, por frecuencia del
+        // protocolo de cada prueba (ver ResponseAudiometry.DECAY_TESTS).
+        $decayFieldCounts = ['carhart' => 4, 'stat' => 3, 'rosemberg' => 4];
+        $decayPairs = [];
+        foreach ($decayFieldCounts as $mode => $count) {
+            $vals = ['od' => [], 'oi' => []];
+            foreach (['od', 'oi'] as $side) {
+                for ($n = 0; $n < $count; $n++) {
+                    $vals[$side][] = max(0, (int) fv($v, [$mode, $side, (string) $n], 0));
+                }
+            }
+            $decayPairs[$mode] = zip_pairs($vals['od'], $vals['oi']);
+        }
+
         $reflexType = ['od' => 'normal', 'oi' => 'normal'];
         foreach (['od', 'oi'] as $side) {
             $type = (string) fv($v, ['reflex_type', $side], 'normal');
@@ -419,7 +434,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'stenger' => [isset($v['stenger']['od']), isset($v['stenger']['oi'])],
                 'sisi' => [(int) fv($v, ['sisi', 'od'], 0), (int) fv($v, ['sisi', 'oi'], 0)],
                 'recruit' => [isset($v['recruit']['od']), isset($v['recruit']['oi'])],
-                'decay' => [isset($v['decay']['od']), isset($v['decay']['oi'])],
+                'decay' => [false, false], // reemplazado por carhart/stat/rosemberg; se conserva el shape por compatibilidad con casos viejos
+                'carhart' => $decayPairs['carhart'],
+                'stat' => $decayPairs['stat'],
+                'rosemberg' => $decayPairs['rosemberg'],
                 'reflex' => [
                     'ipsi' => zip_pairs($reflexIpsi['od'], $reflexIpsi['oi']),
                     'contra' => zip_pairs($reflexContra['od'], $reflexContra['oi']),
@@ -973,10 +991,31 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             <label>SISI <input type="number" step="5" name="sisi[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['sisi', $side], 0)) ?>"></label>
             <label class="inline-check"><input type="checkbox" name="stenger[<?= $side ?>]" <?= isset($v['stenger'][$side]) ? 'checked' : '' ?>> Stenger</label>
             <label class="inline-check"><input type="checkbox" class="recruit-toggle" data-side="<?= $side ?>" name="recruit[<?= $side ?>]" <?= isset($v['recruit'][$side]) ? 'checked' : '' ?>> Reclutamiento</label>
-            <label class="inline-check"><input type="checkbox" name="decay[<?= $side ?>]" <?= isset($v['decay'][$side]) ? 'checked' : '' ?>> Decay</label>
         </div>
         <?php endforeach; ?>
     </div>
+
+    <p class="legend">Deterioro tonal (Carhart / Stat / Rosemberg): dB que hay que subir sobre el umbral aéreo para que el oído sostenga el tono 1 minuto completo. 0 = sin deterioro (lo sostiene de inmediato). Si nunca alcanza a sostenerlo ni en el techo (salida máxima o LDL, lo que sea menor), pon un valor igual o mayor a ese rango.</p>
+    <?php
+    $decayGroups = [
+        'carhart' => ['label' => 'Carhart', 'freqs' => [500, 1000, 2000, 4000]],
+        'stat' => ['label' => 'Stat', 'freqs' => [500, 1000, 2000]],
+        'rosemberg' => ['label' => 'Rosemberg', 'freqs' => [500, 1000, 2000, 4000]],
+    ];
+    foreach ($decayGroups as $mode => $info):
+    ?>
+    <table class="grid-table" style="margin-bottom:0.5rem;">
+        <tr><th class="side-label"><?= htmlspecialchars($info['label']) ?></th><?php foreach ($info['freqs'] as $f): ?><th><?= $f ?> Hz</th><?php endforeach; ?></tr>
+        <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
+        <tr>
+            <td class="side-label"><?= $sideLabel ?></td>
+            <?php foreach ($info['freqs'] as $n => $f): ?>
+            <td><input type="number" step="5" min="0" name="<?= $mode ?>[<?= $side ?>][<?= $n ?>]" value="<?= htmlspecialchars((string) fv($v, [$mode, $side, (string) $n], 0)) ?>"></td>
+            <?php endforeach; ?>
+        </tr>
+        <?php endforeach; ?>
+    </table>
+    <?php endforeach; ?>
 
     <?php
     // Render-time: recalcula qué frecuencias califican para Fowler a partir
