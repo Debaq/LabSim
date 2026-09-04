@@ -129,6 +129,11 @@ CREATE TABLE IF NOT EXISTS patients (
     -- attendances.nota, que es la nota individual de cada alumno por
     -- atención -- esa no se toca desde acá.
     historia_clinica TEXT NOT NULL DEFAULT '',
+    -- Nota privada del docente (ej. la patología real que representa el
+    -- caso). Solo se edita/lee desde el panel admin (case_create.php) --
+    -- nunca se cascadea a cases.data ni se sincroniza al cliente de
+    -- escritorio, para que jamás llegue a la ficha que ve el alumno.
+    comentario_docente TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

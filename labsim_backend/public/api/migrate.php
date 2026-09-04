@@ -25,6 +25,7 @@ try {
     // columna si faltaba en una instalación que sí la tenía pero de antes.
     Db::migrateLlmOirsPromptIfNeeded();
     Db::migratePatientHistoriaClinicaIfNeeded();
+    Db::migratePatientComentarioDocenteIfNeeded();
     // Crea courses/student_groups (REFERENCES de las columnas nuevas de
     // appointments) si la instalación no las tenía.
     Db::migrateCoursesIfNeeded();

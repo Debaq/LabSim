@@ -444,11 +444,12 @@ $prefillFechaIso = isset($_GET['fecha']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', 
 $caseOptions = [];
 if ($isNewFlow) {
     $stmt = $pdo->query(
-        "SELECT c.id, c.data, a.nombre, a.apellido, a.fecha
+        "SELECT c.id, c.data, a.nombre, a.apellido, a.fecha, p.comentario_docente
          FROM cases c
          LEFT JOIN appointments a ON a.id = (
              SELECT id FROM appointments WHERE case_id = c.id ORDER BY id DESC LIMIT 1
          )
+         LEFT JOIN patients p ON p.id = c.patient_id
          ORDER BY c.updated_at DESC"
     );
     foreach ($stmt->fetchAll() as $co) {
@@ -459,9 +460,14 @@ if ($isNewFlow) {
             $nombre = trim(($snapshot['nombre'] ?? '') . ' ' . ($snapshot['apellido'] ?? ''));
         }
         $estado = $co['fecha'] ? 'agendada' : 'sin agendar';
+        $comentarioDocente = trim((string) ($co['comentario_docente'] ?? ''));
+        $label = $co['id'] . ' — ' . ($nombre !== '' ? $nombre : 'sin nombre') . ' (' . $estado . ')';
+        if ($comentarioDocente !== '') {
+            $label .= ' — 📝 ' . $comentarioDocente;
+        }
         $caseOptions[] = [
             'id' => $co['id'],
-            'label' => $co['id'] . ' — ' . ($nombre !== '' ? $nombre : 'sin nombre') . ' (' . $estado . ')',
+            'label' => $label,
         ];
     }
 }

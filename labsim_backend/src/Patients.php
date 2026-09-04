@@ -49,7 +49,7 @@ final class Patients
 
     public static function find(PDO $pdo, int $patientId): ?array
     {
-        $stmt = $pdo->prepare('SELECT id, rut, nombre, apellido, fecha_nac, historia_clinica FROM patients WHERE id = ?');
+        $stmt = $pdo->prepare('SELECT id, rut, nombre, apellido, fecha_nac, historia_clinica, comentario_docente FROM patients WHERE id = ?');
         $stmt->execute([$patientId]);
         $row = $stmt->fetch();
         return $row !== false ? $row : null;
@@ -88,5 +88,19 @@ final class Patients
             $pdo->prepare('UPDATE cases SET data = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
                 ->execute([json_encode($data, JSON_UNESCAPED_UNICODE), $case['id']]);
         }
+    }
+
+    /**
+     * Solo toca comentario_docente -- nota privada del docente (ej. la
+     * patología real que representa el caso), a diferencia de
+     * historia_clinica NO se cascadea a cases.data ni se sincroniza al
+     * cliente de escritorio: es exclusiva del panel admin, para que nunca
+     * llegue a la ficha que ve el alumno.
+     */
+    public static function updateComentarioDocente(PDO $pdo, int $patientId, string $comentarioDocente): void
+    {
+        $pdo->prepare(
+            'UPDATE patients SET comentario_docente = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+        )->execute([$comentarioDocente, $patientId]);
     }
 }

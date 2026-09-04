@@ -75,69 +75,90 @@ $courseScopeSql = " WHERE a.id IS NULL OR ({$permissionSql})";
 $stmt = $pdo->prepare(
     "SELECT c.id, c.data, c.updated_at,
             a.id AS appointment_id, a.fecha, a.hora, a.rut, a.nombre, a.apellido, a.fecha_nac,
-            a.procedimiento, a.nota_admin, a.course_id, a.assigned_student_id, a.assigned_group_id,
-            (SELECT COUNT(*) FROM attendances att WHERE att.appointment_id = a.id) AS atenciones_count,
+            a.procedimiento, a.nota_admin,
+            p.comentario_docente,
+            -- Suma TODAS las rondas del caso (no solo la última cita) --
+            -- si solo se contara att.appointment_id = a.id (última cita),
+            -- cada reagendamiento hacía parecer que las atenciones de
+            -- rondas previas se \"perdían\" (volvía a 0).
+            (SELECT COUNT(*) FROM attendances att
+                JOIN appointments ap2 ON ap2.id = att.appointment_id
+                WHERE ap2.case_id = c.id) AS atenciones_count,
             (SELECT COUNT(*) FROM appointments WHERE case_id = c.id) AS rondas_count
      FROM cases c
      LEFT JOIN appointments a ON a.id = (
          SELECT id FROM appointments WHERE case_id = c.id ORDER BY id DESC LIMIT 1
-     ){$courseScopeSql}
+     )
+     LEFT JOIN patients p ON p.id = c.patient_id
+     {$courseScopeSql}
      ORDER BY CASE WHEN a.fecha IS NULL OR a.fecha = '' THEN 1 ELSE 0 END, a.fecha, a.hora, c.updated_at DESC"
 );
 $stmt->execute($permissionParams);
 $cases = $stmt->fetchAll();
 
-$courseNameById = [];
-foreach ($pdo->query('SELECT id, name FROM courses')->fetchAll() as $cn) {
-    $courseNameById[(int) $cn['id']] = $cn['name'];
-}
-$groupNameById = [];
-foreach ($pdo->query('SELECT id, name FROM student_groups')->fetchAll() as $gn) {
-    $groupNameById[(int) $gn['id']] = $gn['name'];
-}
-$userNameById = [];
-foreach ($pdo->query('SELECT id, display_name FROM users')->fetchAll() as $un) {
-    $userNameById[(int) $un['id']] = $un['display_name'];
-}
-
 admin_header('Fichas Clínicas', $me);
 ?>
+<style>
+    .btn-link {
+        display: inline-block; padding: 0.5rem 1.1rem; background: #1a2744; color: #fff;
+        border-radius: 4px; text-decoration: none; font-size: 0.9rem; font-weight: 600;
+    }
+    .btn-link:hover { opacity: 0.9; }
+    .patients-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin: 0.9rem 0; }
+    .patients-toolbar input[type="text"] { width: auto; flex: 1 1 240px; margin-top: 0; }
+    .patients-toolbar select { width: auto; margin-top: 0; }
+    .patients-toolbar .toolbar-count { font-size: 0.8rem; color: #666; margin-left: auto; }
+    .action-btn {
+        display: inline-block; padding: 0.15rem 0.5rem; margin: 0 0.15rem 0.15rem 0; font-size: 0.75rem;
+        border-radius: 4px; text-decoration: none; color: #fff; border: none; cursor: pointer; line-height: 1.6;
+    }
+    .action-btn.primary { background: #1a2744; }
+    .action-btn.secondary { background: #888; }
+    .action-btn.danger { background: #a33; }
+    .action-btn:hover { opacity: 0.85; }
+</style>
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 <?php if ($success !== null): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
 
 <div class="card">
-    <strong>Pacientes registrados (<?= count($cases) ?>)</strong>
-    &nbsp;·&nbsp; <a href="case_create.php">+ Crear caso nuevo</a>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <strong>Pacientes registrados (<?= count($cases) ?>)</strong>
+        <a class="btn-link" href="case_create.php">+ Crear caso nuevo</a>
+    </div>
     <p style="font-size:0.85rem; color:#555;">
         Biblioteca completa de fichas del sistema (agendadas o no). Para agendar, reagendar o eliminar citas,
         usa <a href="agenda.php">Agendas</a>.
     </p>
-    <table>
-        <tr><th>ID</th><th>Paciente</th><th>Estado</th><th>Curso / asignado a</th><th>Atenciones</th><th>Rondas</th><th></th></tr>
+    <div class="patients-toolbar">
+        <input type="text" id="patients-search" placeholder="Buscar por nombre, rut o ID..." autocomplete="off" oninput="filterPatientsTable()">
+        <select id="patients-filter-estado" onchange="filterPatientsTable()">
+            <option value="">Todos los estados</option>
+            <option value="agendada">Agendada</option>
+            <option value="sin_agendar">Sin agendar</option>
+        </select>
+        <span class="toolbar-count" id="patients-toolbar-count"></span>
+    </div>
+    <table id="patients-table">
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Comentario</th>
+            <th>Estado</th>
+            <th title="Total de alumnos que han atendido este caso, sumando todas las rondas (citas/reagendos)">Atenciones</th>
+            <th title="Cantidad de veces que este caso fue agendado -- cada reagendamiento suma una ronda nueva">Rondas</th>
+            <th>Acciones</th>
+        </tr>
         <?php foreach ($cases as $c): ?>
         <?php
         $data = json_decode($c['data'] ?? '', true);
         $snapshot = is_array($data) ? ($data['paciente_snapshot'] ?? null) : null;
         $nombreVivo = $c['appointment_id'] ? trim(($c['nombre'] ?? '') . ' ' . ($c['apellido'] ?? '')) : '';
         $nombreSnapshot = $snapshot ? trim(($snapshot['nombre'] ?? '') . ' ' . ($snapshot['apellido'] ?? '')) : '';
-
-        $assignLabel = '—';
-        if ($c['appointment_id']) {
-            if ($c['course_id']) {
-                $assignLabel = $courseNameById[(int) $c['course_id']] ?? ('Curso #' . $c['course_id']);
-                if ($c['assigned_student_id']) {
-                    $assignLabel .= ' · ' . ($userNameById[(int) $c['assigned_student_id']] ?? ('Alumno #' . $c['assigned_student_id']));
-                } elseif ($c['assigned_group_id']) {
-                    $assignLabel .= ' · grupo ' . ($groupNameById[(int) $c['assigned_group_id']] ?? ('#' . $c['assigned_group_id']));
-                } else {
-                    $assignLabel .= ' · todo el curso (legado)';
-                }
-            } else {
-                $assignLabel = 'cola libre (legado)';
-            }
-        }
+        $estadoRow = (!$c['appointment_id'] || $c['fecha'] === '' || $c['hora'] === '') ? 'sin_agendar' : 'agendada';
+        $comentarioDocente = trim((string) ($c['comentario_docente'] ?? ''));
+        $searchBlob = mb_strtolower($c['id'] . ' ' . ($nombreVivo ?: $nombreSnapshot) . ' ' . ($c['rut'] ?? '') . ' ' . $comentarioDocente);
         ?>
-        <tr>
+        <tr data-estado="<?= $estadoRow ?>" data-search="<?= htmlspecialchars($searchBlob) ?>">
             <td><?= htmlspecialchars($c['id']) ?></td>
             <td>
                 <?php if ($nombreVivo): ?>
@@ -149,6 +170,9 @@ admin_header('Fichas Clínicas', $me);
                     <span style="color:#a33;">— sin cita —</span>
                 <?php endif; ?>
             </td>
+            <td style="font-size:0.8rem; color:#a00; max-width:22rem;">
+                <?= $comentarioDocente !== '' ? htmlspecialchars($comentarioDocente) : '<span style="color:#bbb;">—</span>' ?>
+            </td>
             <td>
                 <?php if (!$c['appointment_id']): ?>
                 <span style="color:#886400;">sin agendar</span>
@@ -158,10 +182,9 @@ admin_header('Fichas Clínicas', $me);
                 agendada (<?= htmlspecialchars($c['fecha']) ?> <?= htmlspecialchars($c['hora']) ?>)
                 <?php endif; ?>
             </td>
-            <td style="font-size:0.78rem;"><?= htmlspecialchars($assignLabel) ?></td>
             <td style="font-size:0.8rem;">
-                <?php if ($c['atenciones_count'] > 0): ?>
-                <a href="dashboard.php?appointment_id=<?= (int) $c['appointment_id'] ?>"><?= (int) $c['atenciones_count'] ?> alumno<?= (int) $c['atenciones_count'] === 1 ? '' : 's' ?></a>
+                <?php if ((int) $c['atenciones_count'] > 0): ?>
+                <a href="agenda.php?history=<?= urlencode($c['id']) ?>#historial"><?= (int) $c['atenciones_count'] ?> alumno<?= (int) $c['atenciones_count'] === 1 ? '' : 's' ?></a>
                 <?php else: ?>
                 —
                 <?php endif; ?>
@@ -174,15 +197,15 @@ admin_header('Fichas Clínicas', $me);
                 <?php endif; ?>
             </td>
             <td style="white-space:nowrap;">
-                <a href="agenda.php?schedule=<?= urlencode($c['id']) ?>" style="font-size:0.8rem;">
+                <a href="agenda.php?schedule=<?= urlencode($c['id']) ?>" class="action-btn primary">
                     <?= $c['appointment_id'] ? 'Reagendar' : 'Agendar' ?>
                 </a>
-                <a href="case_create.php?edit=<?= urlencode($c['id']) ?>" style="font-size:0.8rem;">Editar ficha</a>
+                <a href="case_create.php?edit=<?= urlencode($c['id']) ?>" class="action-btn secondary">Editar ficha</a>
                 <form method="post" class="inline" onsubmit="return confirm(<?= htmlspecialchars(json_encode("¿Eliminar el caso {$c['id']}" . ($nombreVivo || $nombreSnapshot ? ' (' . ($nombreVivo ?: $nombreSnapshot) . ')' : '') . "? También se eliminan todas sus citas/rondas ({$c['rondas_count']}) y las atenciones registradas. No se puede deshacer."), ENT_QUOTES) ?>);">
                 <?= csrf_field() ?>
                     <input type="hidden" name="form_action" value="delete_case">
                     <input type="hidden" name="case_id" value="<?= htmlspecialchars($c['id']) ?>">
-                    <button type="submit" class="danger" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;">Eliminar</button>
+                    <button type="submit" class="action-btn danger">Eliminar</button>
                 </form>
             </td>
         </tr>
@@ -192,5 +215,22 @@ admin_header('Fichas Clínicas', $me);
         <?php endif; ?>
     </table>
 </div>
+<script>
+function filterPatientsTable() {
+    var q = document.getElementById('patients-search').value.toLowerCase().trim();
+    var estado = document.getElementById('patients-filter-estado').value;
+    var rows = document.querySelectorAll('#patients-table tr[data-search]');
+    var visible = 0;
+    rows.forEach(function (row) {
+        var matchQ = q === '' || (row.dataset.search || '').indexOf(q) !== -1;
+        var matchEstado = estado === '' || row.dataset.estado === estado;
+        var show = matchQ && matchEstado;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    document.getElementById('patients-toolbar-count').textContent = visible + ' de ' + rows.length;
+}
+filterPatientsTable();
+</script>
 <?php
 admin_footer();

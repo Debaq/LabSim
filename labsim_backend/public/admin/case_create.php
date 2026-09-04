@@ -193,6 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $v['apellido'] = $editPatient['apellido'] ?? '';
     $v['fecha_nac'] = $editFechaNacDisplay;
     $v['historia_clinica'] = $editPatient['historia_clinica'] ?? '';
+    $v['comentario_docente'] = $editPatient['comentario_docente'] ?? '';
 } else {
     $v = [];
 }
@@ -479,6 +480,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $editHistoriaClinica = trim((string) ($v['historia_clinica'] ?? ''));
                 Patients::updateHistoriaClinica($pdo, $editPatientId, $editHistoriaClinica);
+                Patients::updateComentarioDocente($pdo, $editPatientId, trim((string) ($v['comentario_docente'] ?? '')));
                 // También va en cases.data (no solo en patients) para que llegue
                 // al cliente de escritorio via sync.php -- ese endpoint sincroniza
                 // cases, no patients. Soporta llaves {{N}} (N = offset en días
@@ -532,6 +534,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $newPatientId = Patients::upsertByRut($pdo, $snapshotRut, $snapshotNombre, $snapshotApellido, $snapshotFechaNac);
             $newHistoriaClinica = trim((string) ($v['historia_clinica'] ?? ''));
             Patients::updateHistoriaClinica($pdo, $newPatientId, $newHistoriaClinica);
+            Patients::updateComentarioDocente($pdo, $newPatientId, trim((string) ($v['comentario_docente'] ?? '')));
             // Ídem rama de edición más arriba: también en cases.data para sync.php.
             $data['historia_clinica'] = $newHistoriaClinica;
 
@@ -721,6 +724,11 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <textarea name="historia_clinica" rows="6" style="width:100%; padding:0.45rem; margin-top:0.2rem; border:1px solid #ccc; border-radius:4px;" placeholder="Antecedentes generales, evolución, observaciones del paciente..."><?= htmlspecialchars((string) ($v['historia_clinica'] ?? '')) ?></textarea>
     </label>
     <p class="legend" style="font-size:0.8rem;">Historia clínica base del <strong>paciente</strong> (no depende del caso). No incluye las notas individuales de cada alumno por atención -- esas se ven en la agenda/asistencia, no se editan acá.</p>
+
+    <label>Comentario del docente <span style="font-weight:400; color:#a00;">(privado -- el alumno nunca lo ve)</span>
+        <textarea name="comentario_docente" rows="3" style="width:100%; padding:0.45rem; margin-top:0.2rem; border:1px solid #ccc; border-radius:4px;" placeholder="Ej: hipoacusia sensorioneural bilateral leve, caso pensado para practicar enmascaramiento..."><?= htmlspecialchars((string) ($v['comentario_docente'] ?? '')) ?></textarea>
+    </label>
+    <p class="legend" style="font-size:0.8rem;">Nota interna del <strong>paciente</strong> (ej. qué patología representa el caso). Solo la ve el docente en este panel -- no se sincroniza a la ficha del alumno ni al cliente de escritorio.</p>
 
     <div class="photo-block">
         <strong style="display:block; margin-bottom:0.4rem;">Foto</strong>

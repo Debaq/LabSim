@@ -243,6 +243,15 @@ final class Db
         self::addColumnIfMissing(self::get(), 'patients', 'historia_clinica', "TEXT NOT NULL DEFAULT ''");
     }
 
+    /**
+     * Agrega comentario_docente a patients -- instalaciones de antes de que
+     * esa columna existiera. Mismo motivo que migratePatientHistoriaClinicaIfNeeded.
+     */
+    public static function migratePatientComentarioDocenteIfNeeded(): void
+    {
+        self::addColumnIfMissing(self::get(), 'patients', 'comentario_docente', "TEXT NOT NULL DEFAULT ''");
+    }
+
     public static function migrateCoursesIfNeeded(): void
     {
         $pdo = self::get();

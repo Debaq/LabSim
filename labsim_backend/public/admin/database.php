@@ -47,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // oirs_prompt_template si faltaba.
             Db::migrateLlmOirsPromptIfNeeded();
             Db::migratePatientHistoriaClinicaIfNeeded();
+            Db::migratePatientComentarioDocenteIfNeeded();
             Db::migrateCoursesIfNeeded();
             // Después de courses: patients ya existe (la creó el exec de
             // arriba), recién ahí se puede backfillear patient_id.
