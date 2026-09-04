@@ -117,6 +117,14 @@ $portalUrl = $isPortalUser
         . ($needsLtiLink ? '&link_platform=' . $platformId . '&link_context=' . urlencode($contextId) : '')
     : null;
 
+// Mini-portal de alumno (lista de pacientes atendidos + detalle: stats,
+// conversación con comentarios del docente, ficha clínica) -- mismo
+// mecanismo de handoff que $portalUrl arriba (token de un solo uso, ver
+// student/sso.php), pero para role='student' en vez de admin/docente.
+$misPacientesUrl = !$isPortalUser
+    ? '../student/sso.php?token=' . urlencode(Auth::issuePortalSsoToken($userId))
+    : null;
+
 // Stats embebidas en la misma pantalla del código (el docente/alumno no
 // entra a la plataforma para verlas -- ver dashboard.php para el detalle
 // completo por sesión, esto es solo el resumen a simple vista).
@@ -301,6 +309,8 @@ header('Content-Type: text/html; charset=utf-8');
         <?php if ($needsLtiLink): ?>
             <p class="status">Este curso de Moodle aún no está vinculado a un curso de LabSim -- en la plataforma te pediremos vincularlo (una sola vez).</p>
         <?php endif; ?>
+    <?php elseif ($misPacientesUrl !== null): ?>
+        <a href="<?= htmlspecialchars($misPacientesUrl) ?>" target="_blank" rel="noopener"><button type="button">Ver mis pacientes</button></a>
     <?php endif; ?>
     <p class="status" id="status"></p>
 

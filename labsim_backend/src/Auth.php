@@ -262,6 +262,39 @@ final class Auth
         return $user;
     }
 
+    /**
+     * Corta con una página de error si no hay una sesión de portal de
+     * alumno válida (ver public/student/sso.php) -- a diferencia de
+     * requireAdminSession(), no hay login.php para alumno (entra solo por
+     * LTI), así que no tiene sentido redirigir a un form de login: se
+     * manda de vuelta a Moodle.
+     */
+    public static function requireStudentSession(): array
+    {
+        self::startSession();
+        $userId = $_SESSION['student_user_id'] ?? null;
+        $user = $userId ? self::activeStudentById((int) $userId) : null;
+        if (!$user) {
+            unset($_SESSION['student_user_id']);
+            http_response_code(403);
+            header('Content-Type: text/html; charset=utf-8');
+            echo '<!doctype html><html lang="es"><head><meta charset="utf-8"><title>LabSim</title></head>'
+                . '<body style="font-family: sans-serif; text-align: center; margin-top: 4rem;">'
+                . '<h1>Tu sesión venció</h1><p>Vuelve a abrir la actividad desde Moodle y pincha '
+                . '"Ver mis pacientes" de nuevo.</p></body></html>';
+            exit;
+        }
+        return $user;
+    }
+
+    private static function activeStudentById(int $userId): ?array
+    {
+        $stmt = Db::get()->prepare("SELECT * FROM users WHERE id = ? AND role = 'student' AND active = 1");
+        $stmt->execute([$userId]);
+        $user = $stmt->fetch();
+        return $user ?: null;
+    }
+
     /** Como requireAdminSession(), pero corta con 403 si es una cuenta docente (permission != admin). */
     public static function requireFullAdminSession(): array
     {
