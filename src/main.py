@@ -281,7 +281,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if not es_prueba and entry_esta_cancelada(entry):
             return  # el admin canceló la cita mientras estaba visible
 
-        case_id = entry[7] if len(entry) > 7 else None
+        case_id = entry.case_id or None
         if not case_id:
             return
         cases = CasesOffline().get_cases()
@@ -302,9 +302,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if self.data_current:
             self.changeStateBtnAreas(self.frameAction, self.data_current["box"])
 
-        rut = entry[2] if len(entry) > 2 else ""
-        nombre = f"{entry[3] if len(entry) > 3 else ''} {entry[4] if len(entry) > 4 else ''}".strip()
-        procedimiento = entry[6] if len(entry) > 6 else ""
+        rut = entry.rut
+        nombre = f"{entry.nombre} {entry.apellido}".strip()
+        procedimiento = entry.procedimiento
         try:
             edad, _, _ = CreatePatient().get_age_from_rut(int(rut))
         except (TypeError, ValueError):
@@ -326,8 +326,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if es_prueba:
             self.statusbar.showMessage(f"[PRUEBA] Caso cargado: {nombre or case_id} (no se guarda atención)")
         else:
-            fecha_nac = entry[5] if len(entry) > 5 else ""
-            self.statusbar.showMessage(f"Estás atendiendo a: RUT {rut} — Fecha de nacimiento {fecha_nac}")
+            self.statusbar.showMessage(f"Estás atendiendo a: RUT {rut} — Fecha de nacimiento {entry.fecha_nac}")
 
     def cerrar_atencion(self, key, nota):
         """Cierra la atención (estado 'atendido') guardando la nota de atención del estudiante"""

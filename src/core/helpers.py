@@ -189,29 +189,10 @@ class Shedule:
         _shedule_snapshot = deepcopy(data)
 
 
-def _asegurar_dict_atencion(entry) -> dict:
-    """Garantiza que entry[8] sea un dict {username: {"estado":..., "nota":...}}."""
-    if len(entry) <= 8:
-        entry.append({})
-    elif not isinstance(entry[8], dict):
-        entry[8] = {}
-    return entry[8]
-
-
 def entry_estado_por(entry, username: str) -> str | None:
-    """
-    Estado de atención de `username` sobre esta fila: None, "atendiendo" o "atendido".
-    Formato legado: entry[8][username] == True (o entry[8] bool plano) se lee como "atendido".
-    """
-    if len(entry) <= 8:
-        return None
-    atencion = entry[8]
-    if isinstance(atencion, dict):
-        valor = atencion.get(username)
-        if isinstance(valor, dict):
-            return valor.get("estado")
-        return "atendido" if valor else None
-    return "atendido" if atencion else None
+    """Estado de atención de `username` sobre esta fila: None, "atendiendo", "atendido" o "no_show"."""
+    valor = entry.atencion.get(username)
+    return valor.get("estado") if valor else None
 
 
 def entry_atendido_por(entry, username: str) -> bool:
@@ -221,26 +202,21 @@ def entry_atendido_por(entry, username: str) -> bool:
 
 def obtener_nota_atencion(entry, username: str) -> str:
     """Devuelve el texto de atención registrado por `username` al cerrar la atención."""
-    if len(entry) <= 8 or not isinstance(entry[8], dict):
-        return ""
-    valor = entry[8].get(username)
-    return valor.get("nota", "") if isinstance(valor, dict) else ""
+    valor = entry.atencion.get(username)
+    return valor.get("nota", "") if valor else ""
 
 
 def obtener_hora_real_atencion(entry, username: str) -> str:
     """Devuelve la hora real (HH:mm:ss) en que `username` comenzó a atender esta fila."""
-    if len(entry) <= 8 or not isinstance(entry[8], dict):
-        return ""
-    valor = entry[8].get(username)
-    return valor.get("hora_real", "") if isinstance(valor, dict) else ""
+    valor = entry.atencion.get(username)
+    return valor.get("hora_real", "") if valor else ""
 
 
 def marcar_entry_atendiendo(entry, username: str, hora_real: str | None = None) -> None:
     """Marca la fila de agenda como en curso de atención por `username`."""
-    atencion = _asegurar_dict_atencion(entry)
     nota_previa = obtener_nota_atencion(entry, username)
     hora_previa = obtener_hora_real_atencion(entry, username)
-    atencion[username] = {
+    entry.atencion[username] = {
         "estado": "atendiendo",
         "nota": nota_previa,
         "hora_real": hora_previa or hora_real or datetime.now().strftime("%H:%M:%S"),
@@ -249,32 +225,18 @@ def marcar_entry_atendiendo(entry, username: str, hora_real: str | None = None) 
 
 def marcar_entry_atendido(entry, username: str, nota: str = "") -> None:
     """Cierra la atención de la fila de agenda por `username`, guardando la nota clínica."""
-    atencion = _asegurar_dict_atencion(entry)
     hora_real = obtener_hora_real_atencion(entry, username)
-    atencion[username] = {"estado": "atendido", "nota": nota, "hora_real": hora_real}
+    entry.atencion[username] = {"estado": "atendido", "nota": nota, "hora_real": hora_real}
 
 
 def marcar_entry_no_show(entry, username: str, nota: str = "") -> None:
     """Marca que, según `username`, el paciente no se presentó a la hora agendada."""
-    atencion = _asegurar_dict_atencion(entry)
-    atencion[username] = {"estado": "no_show", "nota": nota}
+    entry.atencion[username] = {"estado": "no_show", "nota": nota}
 
 
 def entry_esta_cancelada(row) -> bool:
     """Indica si el admin canceló esta cita (estado global, no por-alumno)."""
-    return len(row) > 10 and row[10] == "cancelada"
-
-
-# TODO: limpiar -- sin llamadas desde la app tras sacar "Cancelar cita" de
-# Agenda.py (la gestión de citas ahora vive solo en el backend web).
-def marcar_entry_cancelada(row, cancelada: bool = True) -> None:
-    """Cancela o restaura una cita, conservando el registro y el caso asociado."""
-    _asegurar_dict_atencion(row)
-    while len(row) <= 9:
-        row.append("")
-    while len(row) <= 10:
-        row.append("")
-    row[10] = "cancelada" if cancelada else ""
+    return row.cancelada
 
 
 class Preferences:

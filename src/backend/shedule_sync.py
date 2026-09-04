@@ -1,26 +1,34 @@
 """
-Traduce entre el formato legado de la agenda (dict de listas posicionales,
-ver lib/helpers.Shedule / entry_* helpers) y las tablas appointments/
+Traduce entre el formato de la agenda en memoria (dict de AgendaEntry, ver
+lib/helpers.Shedule / entry_* helpers) y las tablas appointments/
 attendances del backend. Funciones puras -- sin red, sin Qt -- para poder
 testearlas sin levantar la app.
-
-Fila legada (índices): [fecha, hora, rut, nombre, apellido, fecha_nac,
-procedimiento, case_id, {username: {estado, nota, hora_real}}, nota_admin,
-"cancelada"|""]
 """
+from dataclasses import dataclass, field
 
 ESTADOS_EMPUJABLES = ("atendiendo", "atendido", "no_show")
 
 
-def _get(row, idx, default=""):
-    if row is None or len(row) <= idx:
-        return default
-    valor = row[idx]
-    return default if valor is None else valor
+@dataclass
+class AgendaEntry:
+    """Una fila de la agenda (una cita). Todas las filas se construyen acá
+    (backend_state_to_shedule) -- no hay agenda offline ni filas parciales
+    de un formato anterior que sobrevivan entre sesiones."""
+    fecha: str = ""
+    hora: str = ""
+    rut: str = ""
+    nombre: str = ""
+    apellido: str = ""
+    fecha_nac: str = ""
+    procedimiento: str = ""
+    case_id: str = ""
+    atencion: dict = field(default_factory=dict)  # {username: {estado, nota, hora_real}}
+    nota_admin: str = ""
+    cancelada: bool = False
 
 
 def backend_state_to_shedule(state: dict, own_user_id: int, own_username: str) -> dict:
-    """Arma {"agenda_1": {key: row}} a partir de la respuesta de get_full_state()."""
+    """Arma {"agenda_1": {key: AgendaEntry}} a partir de get_full_state()."""
     id_to_username = {own_user_id: own_username}
     for student in state.get("students", []):
         id_to_username[student["id"]] = student["username"]
@@ -28,19 +36,18 @@ def backend_state_to_shedule(state: dict, own_user_id: int, own_username: str) -
     agenda = {}
     for appt in state.get("appointments", []):
         key = str(appt["id"])
-        agenda[key] = [
-            appt.get("fecha") or "",
-            appt.get("hora") or "",
-            appt.get("rut") or "",
-            appt.get("nombre") or "",
-            appt.get("apellido") or "",
-            appt.get("fecha_nac") or "",
-            appt.get("procedimiento") or "",
-            appt.get("case_id") or "",
-            {},
-            appt.get("nota_admin") or "",
-            "cancelada" if appt.get("cancelada") else "",
-        ]
+        agenda[key] = AgendaEntry(
+            fecha=appt.get("fecha") or "",
+            hora=appt.get("hora") or "",
+            rut=appt.get("rut") or "",
+            nombre=appt.get("nombre") or "",
+            apellido=appt.get("apellido") or "",
+            fecha_nac=appt.get("fecha_nac") or "",
+            procedimiento=appt.get("procedimiento") or "",
+            case_id=appt.get("case_id") or "",
+            nota_admin=appt.get("nota_admin") or "",
+            cancelada=bool(appt.get("cancelada")),
+        )
 
     for att in state.get("attendances", []):
         row = agenda.get(str(att["appointment_id"]))
@@ -49,7 +56,7 @@ def backend_state_to_shedule(state: dict, own_user_id: int, own_username: str) -
         username = id_to_username.get(att["student_id"])
         if username is None:
             continue
-        row[8][username] = {
+        row.atencion[username] = {
             "estado": att.get("estado"),
             "nota": att.get("nota") or "",
             "hora_real": att.get("hora_real") or "",
@@ -58,18 +65,18 @@ def backend_state_to_shedule(state: dict, own_user_id: int, own_username: str) -
     return {"agenda_1": agenda}
 
 
-def _appointment_fields(row):
+def _appointment_fields(row: AgendaEntry):
     return {
-        "fecha": _get(row, 0),
-        "hora": _get(row, 1),
-        "rut": _get(row, 2),
-        "nombre": _get(row, 3),
-        "apellido": _get(row, 4),
-        "fecha_nac": _get(row, 5),
-        "procedimiento": _get(row, 6),
-        "case_id": _get(row, 7) or None,
-        "nota_admin": _get(row, 9),
-        "cancelada": _get(row, 10) == "cancelada",
+        "fecha": row.fecha,
+        "hora": row.hora,
+        "rut": row.rut,
+        "nombre": row.nombre,
+        "apellido": row.apellido,
+        "fecha_nac": row.fecha_nac,
+        "procedimiento": row.procedimiento,
+        "case_id": row.case_id or None,
+        "nota_admin": row.nota_admin,
+        "cancelada": row.cancelada,
     }
 
 
@@ -100,8 +107,8 @@ def diff_and_push_shedule(client, new_shedule: dict, old_shedule: dict, own_user
                 result = client.upsert_appointment(appointment_id, **fields)
                 print(f"[shedule_sync] respuesta: {result!r}")
 
-        atencion_nueva = _get(row, 8, {}) or {}
-        atencion_vieja = _get(old_row, 8, {}) or {}
+        atencion_nueva = row.atencion
+        atencion_vieja = old_row.atencion if old_row is not None else {}
         propia_nueva = atencion_nueva.get(own_username)
         propia_vieja = atencion_vieja.get(own_username)
         if propia_nueva is not None and propia_nueva != propia_vieja:

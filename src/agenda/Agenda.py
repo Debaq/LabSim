@@ -211,16 +211,17 @@ class Agenda(QWidget, Ui_Form):
             # los pacientes/citas (sin filtro por fecha ni por estado).
             keys = list(rows.keys())
         else:
-            keys = [k for k, v in rows.items() if v[0] and v[1] and not entry_esta_cancelada(v)]
+            keys = [k for k, v in rows.items() if v.fecha and v.hora and not entry_esta_cancelada(v)]
             if not self._ver_todas:
                 fecha_sel = self.date_selector.date().toString("dd-MM-yy")
-                keys = [k for k in keys if rows[k][0] == fecha_sel]
+                keys = [k for k in keys if rows[k].fecha == fecha_sel]
 
         if self._filtro_texto:
             texto = self._filtro_texto
             keys = [
                 k for k in keys
-                if texto in " ".join(str(x) for x in rows[k][2:7]).lower()
+                if texto in " ".join((rows[k].rut, rows[k].nombre, rows[k].apellido,
+                                       rows[k].fecha_nac, rows[k].procedimiento)).lower()
             ]
         return keys
 
@@ -234,10 +235,9 @@ class Agenda(QWidget, Ui_Form):
         self.tableWidget.setRowCount(len(keys))
 
         username = self._current_username()
-        core_cols = 7
         for row_idx, key in enumerate(keys):
             user = rows[key]
-            pendiente = not (user[0] and user[1])
+            pendiente = not (user.fecha and user.hora)
             estado = entry_estado_por(user, username)
             color = None
             if entry_esta_cancelada(user):
@@ -250,8 +250,10 @@ class Agenda(QWidget, Ui_Form):
                 color = ATENDIDO_COLOR
             elif estado == "no_show":
                 color = NO_SHOW_COLOR
-            for col_idx in range(min(len(user), core_cols)):
-                item = QTableWidgetItem(user[col_idx])
+            columnas = (user.fecha, user.hora, user.rut, user.nombre,
+                        user.apellido, user.fecha_nac, user.procedimiento)
+            for col_idx, valor in enumerate(columnas):
+                item = QTableWidgetItem(valor)
                 item.setData(Qt.UserRole, key)
                 if color is not None:
                     item.setBackground(color)
@@ -290,9 +292,9 @@ class Agenda(QWidget, Ui_Form):
 
         key = self.tableWidget.item(selected_rows[0].row(), 0).data(Qt.UserRole)
         user = self.shedule["agenda_1"][key]
-        tiene_caso = len(user) > 7 and bool(user[7])
+        tiene_caso = bool(user.case_id)
         estado = entry_estado_por(user, self._current_username())
-        pendiente = not (user[0] and user[1])
+        pendiente = not (user.fecha and user.hora)
 
         self._selected_row_key = key
         self._selected_key = key if pendiente else None
@@ -319,8 +321,8 @@ class Agenda(QWidget, Ui_Form):
 
         self.btn_ver_ficha.setEnabled(tiene_caso)
 
-        fecha_agendada = parse_fecha_agenda(user[0])
-        hora_agendada = QTime.fromString(user[1], "HH:mm") if len(user) > 1 else QTime()
+        fecha_agendada = parse_fecha_agenda(user.fecha)
+        hora_agendada = QTime.fromString(user.hora, "HH:mm")
         hora_vencida = (
             not pendiente and fecha_agendada.isValid() and hora_agendada.isValid()
             and QDateTime(fecha_agendada, hora_agendada) < QDateTime.currentDateTime()
@@ -339,7 +341,7 @@ class Agenda(QWidget, Ui_Form):
             # Admin: modo prueba -- carga el caso en los módulos sin marcar
             # "atendiendo" ni escribir attendances (ver main.atender_paciente_prueba).
             user = self.shedule["agenda_1"][self._selected_row_key]
-            if not (len(user) > 7 and user[7]):
+            if not user.case_id:
                 QMessageBox.warning(self, "Atender", "Este registro no tiene un caso clínico asociado.")
                 return
             if self.main_window is not None and hasattr(self.main_window, "atender_paciente_prueba"):
@@ -410,7 +412,7 @@ class Agenda(QWidget, Ui_Form):
             return
 
         row = self.shedule["agenda_1"][self._selected_row_key]
-        case_id = row[7] if len(row) > 7 else None
+        case_id = row.case_id or None
         if not case_id:
             QMessageBox.information(
                 self, "Ver ficha", "Este registro no tiene un caso clínico asociado todavía."
@@ -431,9 +433,9 @@ class Agenda(QWidget, Ui_Form):
             )
 
     def _abrir_chat_paciente(self, row, case_id, appointment_key):
-        rut = row[2] if len(row) > 2 else ""
-        nombre = f"{row[3] if len(row) > 3 else ''} {row[4] if len(row) > 4 else ''}".strip()
-        procedimiento = row[6] if len(row) > 6 else ""
+        rut = row.rut
+        nombre = f"{row.nombre} {row.apellido}".strip()
+        procedimiento = row.procedimiento
         try:
             edad, _, _ = CreatePatient().get_age_from_rut(int(rut))
         except (TypeError, ValueError):
@@ -448,7 +450,7 @@ class Agenda(QWidget, Ui_Form):
 
     def _resolver_fechas_historia_clinica(self, texto, fecha_cita_str):
         """Reemplaza cada {{N}} en texto por la fecha N días respecto a
-        fecha_cita_str (formato "dd-MM-yy", mismo que row[0]). Si la fecha de
+        fecha_cita_str (formato "dd-MM-yy", mismo que row.fecha). Si la fecha de
         la cita no es válida, deja la llave tal cual (mejor eso que una fecha
         inventada)."""
         if not texto:
@@ -463,12 +465,12 @@ class Agenda(QWidget, Ui_Form):
         return HISTORIA_CLINICA_FECHA_RE.sub(_reemplazar, texto)
 
     def _render_ficha_html(self, row, caso):
-        rut = row[2] if len(row) > 2 else ""
-        nombre = row[3] if len(row) > 3 else ""
-        apellidos = row[4] if len(row) > 4 else ""
-        fecha_nac = row[5] if len(row) > 5 else ""
-        procedimiento = row[6] if len(row) > 6 else ""
-        fecha_hora = f"{row[0]} {row[1]}".strip() if len(row) > 1 else ""
+        rut = row.rut
+        nombre = row.nombre
+        apellidos = row.apellido
+        fecha_nac = row.fecha_nac
+        procedimiento = row.procedimiento
+        fecha_hora = f"{row.fecha} {row.hora}".strip()
 
         partes = ["<h3>Datos del paciente</h3>"]
         partes.append(f"<p><b>Nombre:</b> {nombre} {apellidos}<br>"
@@ -481,7 +483,7 @@ class Agenda(QWidget, Ui_Form):
         hora_real = obtener_hora_real_atencion(row, username)
         if hora_real:
             partes.append("<h3>Puntualidad</h3>")
-            hora_agendada = QTime.fromString(row[1], "HH:mm") if len(row) > 1 else QTime()
+            hora_agendada = QTime.fromString(row.hora, "HH:mm")
             hora_inicio = QTime.fromString(hora_real, "HH:mm:ss")
             if hora_agendada.isValid() and hora_inicio.isValid():
                 minutos = hora_agendada.secsTo(hora_inicio) // 60
@@ -491,7 +493,7 @@ class Agenda(QWidget, Ui_Form):
                     resumen = f"{minutos} min de atraso"
             else:
                 resumen = ""
-            partes.append(f"<p><b>Hora agendada:</b> {row[1]}<br>"
+            partes.append(f"<p><b>Hora agendada:</b> {row.hora}<br>"
                            f"<b>Inicio real:</b> {hora_real} ({resumen})</p>")
 
         partes.append("<h3>Historial de atenciones</h3>")
@@ -499,7 +501,7 @@ class Agenda(QWidget, Ui_Form):
 
         historia_clinica = caso.get("historia_clinica", "") if isinstance(caso, dict) else ""
         if historia_clinica:
-            historia_resuelta = self._resolver_fechas_historia_clinica(historia_clinica, row[0] if len(row) > 0 else "")
+            historia_resuelta = self._resolver_fechas_historia_clinica(historia_clinica, row.fecha)
             items += f"<li><b>Historia clínica:</b> {historia_resuelta}</li>"
 
         historial = self._historial_atenciones(rut)
@@ -525,10 +527,10 @@ class Agenda(QWidget, Ui_Form):
         username = self._current_username()
         historial = []
         for otra_row in self.shedule.get("agenda_1", {}).values():
-            if len(otra_row) <= 2 or otra_row[2] != rut:
+            if otra_row.rut != rut:
                 continue
-            atencion = otra_row[8] if len(otra_row) > 8 and isinstance(otra_row[8], dict) else {}
-            fecha = otra_row[0] if len(otra_row) > 0 else ""
+            atencion = otra_row.atencion
+            fecha = otra_row.fecha
             for alumno, datos in atencion.items():
                 if not isinstance(datos, dict) or datos.get("estado") != "atendido":
                     continue
