@@ -62,7 +62,7 @@ final class Db
     public static function castAppointment(array $row): array
     {
         $row['id'] = (int) $row['id'];
-        $row['cancelada'] = (bool) $row['cancelada'];
+        unset($row['cancelada']);
         if (array_key_exists('patient_id', $row)) {
             $row['patient_id'] = $row['patient_id'] !== null ? (int) $row['patient_id'] : null;
         }

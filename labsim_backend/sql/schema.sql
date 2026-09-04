@@ -165,7 +165,7 @@ CREATE TABLE IF NOT EXISTS appointments (
     procedimiento TEXT NOT NULL DEFAULT '',
     case_id TEXT REFERENCES cases(id),
     nota_admin TEXT NOT NULL DEFAULT '',
-    cancelada INTEGER NOT NULL DEFAULT 0,
+    cancelada INTEGER NOT NULL DEFAULT 0, -- columna sin uso, se dejó de leer/escribir; siempre 0
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     -- NULL en las 3 = cola compartida de siempre (comportamiento sin curso).
     -- Ver Db::migrateCoursesIfNeeded() para instalaciones que ya tenían esta

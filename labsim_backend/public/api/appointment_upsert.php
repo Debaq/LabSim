@@ -27,14 +27,13 @@ $fields = [
     'procedimiento' => (string) ($body['procedimiento'] ?? ''),
     'case_id' => $body['case_id'] ?? null,
     'nota_admin' => (string) ($body['nota_admin'] ?? ''),
-    'cancelada' => !empty($body['cancelada']) ? 1 : 0,
 ];
 
 $pdo = Db::get();
 
-if ($fields['fecha'] !== '' && $fields['hora'] !== '' && !$fields['cancelada']) {
+if ($fields['fecha'] !== '' && $fields['hora'] !== '') {
     $stmt = $pdo->prepare(
-        'SELECT id FROM appointments WHERE fecha = ? AND hora = ? AND cancelada = 0 AND id != ?'
+        'SELECT id FROM appointments WHERE fecha = ? AND hora = ? AND id != ?'
     );
     $stmt->execute([$fields['fecha'], $fields['hora'], $id]);
     if ($stmt->fetch()) {
@@ -63,23 +62,23 @@ if ($existingPatientId !== null) {
 if ($id > 0) {
     $stmt = $pdo->prepare(
         'UPDATE appointments SET fecha = ?, hora = ?, rut = ?, nombre = ?, apellido = ?, fecha_nac = ?,
-                procedimiento = ?, case_id = ?, nota_admin = ?, cancelada = ?, patient_id = ?, updated_at = CURRENT_TIMESTAMP
+                procedimiento = ?, case_id = ?, nota_admin = ?, cancelada = 0, patient_id = ?, updated_at = CURRENT_TIMESTAMP
          WHERE id = ?'
     );
     $stmt->execute([
         $fields['fecha'], $fields['hora'], $fields['rut'], $fields['nombre'], $fields['apellido'],
         $fields['fecha_nac'], $fields['procedimiento'], $fields['case_id'], $fields['nota_admin'],
-        $fields['cancelada'], $patientId, $id,
+        $patientId, $id,
     ]);
 } else {
     $stmt = $pdo->prepare(
-        'INSERT INTO appointments (fecha, hora, rut, nombre, apellido, fecha_nac, procedimiento, case_id, nota_admin, cancelada, patient_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        'INSERT INTO appointments (fecha, hora, rut, nombre, apellido, fecha_nac, procedimiento, case_id, nota_admin, patient_id)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     );
     $stmt->execute([
         $fields['fecha'], $fields['hora'], $fields['rut'], $fields['nombre'], $fields['apellido'],
         $fields['fecha_nac'], $fields['procedimiento'], $fields['case_id'], $fields['nota_admin'],
-        $fields['cancelada'], $patientId,
+        $patientId,
     ]);
     $id = (int) $pdo->lastInsertId();
 }

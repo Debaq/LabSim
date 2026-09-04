@@ -248,11 +248,6 @@ def marcar_entry_no_show(entry, username: str, nota: str = "") -> None:
     entry.atencion[username] = {"estado": "no_show", "nota": nota}
 
 
-def entry_esta_cancelada(row) -> bool:
-    """Indica si el admin canceló esta cita (estado global, no por-alumno)."""
-    return row.cancelada
-
-
 class Preferences:
     """
     Preferencias del programa

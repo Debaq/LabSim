@@ -14,7 +14,7 @@ from core import inbox
 from core import mis_pacientes
 from core.updater import local_build_id
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
-                          marcar_entry_atendiendo, marcar_entry_atendido, entry_esta_cancelada,
+                          marcar_entry_atendiendo, marcar_entry_atendido,
                           reset_backend_session)
 from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon
 from audiometria.UI.Ui_command_voice_A import Ui_Form as commandVoiceA
@@ -357,8 +357,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         entry = agenda.get(key)
         if entry is None:
             return
-        if not es_prueba and entry_esta_cancelada(entry):
-            return  # el admin canceló la cita mientras estaba visible
 
         case_id = entry.case_id or None
         if not case_id:

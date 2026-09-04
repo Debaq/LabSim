@@ -19,7 +19,7 @@ from PySide6.QtGui import QColor
 from agenda.UI.Ui_agenda import Ui_Form
 from core.helpers import (Shedule, entry_estado_por, CasesOffline,
                           marcar_entry_no_show,
-                          obtener_nota_atencion, entry_esta_cancelada,
+                          obtener_nota_atencion,
                           CreatePatient)
 from core.ficha import parse_fecha_agenda, render_ficha_html
 
@@ -46,7 +46,6 @@ PENDIENTE_COLOR = QColor(255, 244, 200)
 ATENDIENDO_COLOR = QColor(200, 224, 247)
 ATENDIDO_COLOR = QColor(210, 235, 210)
 NO_SHOW_COLOR = QColor(235, 190, 190)
-CANCELADA_COLOR = QColor(225, 225, 225)
 
 
 class FichaClinicaWidget(QWidget):
@@ -247,7 +246,7 @@ class Agenda(QWidget, Ui_Form):
             # los pacientes/citas (sin filtro por fecha ni por estado).
             keys = list(rows.keys())
         else:
-            keys = [k for k, v in rows.items() if v.fecha and v.hora and not entry_esta_cancelada(v)]
+            keys = [k for k, v in rows.items() if v.fecha and v.hora]
             if not self._ver_todas:
                 fecha_sel = self.date_selector.date().toString("dd-MM-yy")
                 keys = [k for k in keys if rows[k].fecha == fecha_sel]
@@ -276,9 +275,7 @@ class Agenda(QWidget, Ui_Form):
             pendiente = not (user.fecha and user.hora)
             estado = entry_estado_por(user, username)
             color = None
-            if entry_esta_cancelada(user):
-                color = CANCELADA_COLOR
-            elif pendiente:
+            if pendiente:
                 color = PENDIENTE_COLOR
             elif estado == "atendiendo":
                 color = ATENDIENDO_COLOR

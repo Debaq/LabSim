@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($caseId === '') {
             $error = 'Falta el caso.';
         } elseif ($fecha !== '' && $hora !== '') {
-            $stmt = $pdo->prepare('SELECT id FROM appointments WHERE fecha = ? AND hora = ? AND cancelada = 0 AND id != ?');
+            $stmt = $pdo->prepare('SELECT id FROM appointments WHERE fecha = ? AND hora = ? AND id != ?');
             $stmt->execute([$fecha, $hora, $appointmentId]);
             if ($stmt->fetch()) {
                 $error = 'Ya existe una cita agendada en esa fecha y hora.';
@@ -281,7 +281,7 @@ $historyCaseId = $_GET['history'] ?? null;
 $historyRows = [];
 if ($historyCaseId !== null) {
     $stmt = $pdo->prepare(
-        "SELECT a.id, a.fecha, a.hora, a.procedimiento, a.cancelada, a.nombre, a.apellido,
+        "SELECT a.id, a.fecha, a.hora, a.procedimiento, a.nombre, a.apellido,
                 (SELECT COUNT(*) FROM attendances att WHERE att.appointment_id = a.id) AS atenciones_count
          FROM appointments a WHERE a.case_id = ? ORDER BY a.id DESC"
     );
@@ -298,7 +298,7 @@ if ($scheduleCaseId !== null) {
     $stmt = $pdo->prepare(
         "SELECT c.id, c.data, c.updated_at,
                 a.id AS appointment_id, a.fecha, a.hora, a.rut, a.nombre, a.apellido, a.fecha_nac,
-                a.procedimiento, a.cancelada, a.nota_admin, a.course_id, a.assigned_student_id, a.assigned_group_id
+                a.procedimiento, a.nota_admin, a.course_id, a.assigned_student_id, a.assigned_group_id
          FROM cases c
          LEFT JOIN appointments a ON a.id = (
              SELECT id FROM appointments WHERE case_id = c.id ORDER BY id DESC LIMIT 1
@@ -337,8 +337,8 @@ $scheduleIsNewRound = $scheduleRow !== null && (bool) $scheduleRow['appointment_
 // agendamiento.
 $scheduleIdentityLocked = $scheduleRow !== null && (bool) $scheduleRow['appointment_id'];
 
-// Calendario mensual: agrupa las citas vigentes (no canceladas) del mes
-// pedido para dar una vista de ocupación antes de agendar un caso nuevo.
+// Calendario mensual: agrupa las citas del mes pedido para dar una vista
+// de ocupación antes de agendar un caso nuevo.
 $month = $_GET['month'] ?? date('Y-m');
 if (!preg_match('/^\d{4}-\d{2}$/', $month)) {
     $month = date('Y-m');
@@ -401,8 +401,7 @@ function appt_in_filter_scope(
 $calStmt = $pdo->prepare(
     "SELECT a.id AS appointment_id, a.case_id, a.fecha, a.hora, a.nombre, a.apellido,
             a.course_id, a.assigned_student_id, a.assigned_group_id
-     FROM appointments a
-     WHERE a.cancelada = 0" . ($permissionSql !== '1=1' ? " AND ({$permissionSql})" : '')
+     FROM appointments a" . ($permissionSql !== '1=1' ? " WHERE ({$permissionSql})" : '')
 );
 $calStmt->execute($permissionParams);
 $calendarAppointments = $calStmt->fetchAll();
@@ -445,7 +444,7 @@ $prefillFechaIso = isset($_GET['fecha']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', 
 $caseOptions = [];
 if ($isNewFlow) {
     $stmt = $pdo->query(
-        "SELECT c.id, c.data, a.nombre, a.apellido, a.fecha, a.cancelada
+        "SELECT c.id, c.data, a.nombre, a.apellido, a.fecha
          FROM cases c
          LEFT JOIN appointments a ON a.id = (
              SELECT id FROM appointments WHERE case_id = c.id ORDER BY id DESC LIMIT 1
@@ -459,7 +458,7 @@ if ($isNewFlow) {
         if ($nombre === '' && $snapshot) {
             $nombre = trim(($snapshot['nombre'] ?? '') . ' ' . ($snapshot['apellido'] ?? ''));
         }
-        $estado = $co['fecha'] ? ($co['cancelada'] ? 'cancelada' : 'agendada') : 'sin agendar';
+        $estado = $co['fecha'] ? 'agendada' : 'sin agendar';
         $caseOptions[] = [
             'id' => $co['id'],
             'label' => $co['id'] . ' — ' . ($nombre !== '' ? $nombre : 'sin nombre') . ' (' . $estado . ')',
@@ -509,7 +508,6 @@ admin_header('Agendas', $me);
     <div class="modal-box-header">
         <strong>
             <?= $scheduleRow['appointment_id'] ? 'Reagendar caso ' . htmlspecialchars($scheduleRow['id']) : 'Agendar caso ' . htmlspecialchars($scheduleRow['id']) ?>
-            <?php if ($scheduleRow['appointment_id'] && $scheduleRow['cancelada']): ?><span style="color:#a33; font-weight:400; font-size:0.8rem;"> (cancelada)</span><?php endif; ?>
         </strong>
         <a class="modal-close" href="<?= agenda_url(['schedule' => null, 'appointment' => null, 'force_round' => null, 'new' => null, 'fecha' => null]) ?>" title="Cerrar">✕</a>
     </div>
@@ -819,7 +817,7 @@ admin_header('Agendas', $me);
     &nbsp;·&nbsp; <a href="<?= agenda_url(['history' => null]) ?>" style="font-size:0.85rem;">Cerrar</a>
     <p style="font-size:0.85rem; color:#555;">Cada ronda es una cita distinta con su propio historial de atenciones y métricas (no se mezclan entre sí).</p>
     <table>
-        <tr><th>Cita</th><th>Fecha</th><th>Hora</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Atenciones</th><th></th></tr>
+        <tr><th>Cita</th><th>Fecha</th><th>Hora</th><th>Paciente</th><th>Procedimiento</th><th>Atenciones</th><th></th></tr>
         <?php foreach ($historyRows as $h): ?>
         <tr>
             <td>#<?= (int) $h['id'] ?></td>
@@ -827,7 +825,6 @@ admin_header('Agendas', $me);
             <td><?= htmlspecialchars($h['hora'] ?: '—') ?></td>
             <td><?= htmlspecialchars(trim($h['nombre'] . ' ' . $h['apellido'])) ?: '—' ?></td>
             <td><?= htmlspecialchars($h['procedimiento']) ?></td>
-            <td><?= $h['cancelada'] ? 'cancelada' : 'agendada' ?></td>
             <td>
                 <?php if ((int) $h['atenciones_count'] > 0): ?>
                 <a href="dashboard.php?appointment_id=<?= (int) $h['id'] ?>"><?= (int) $h['atenciones_count'] ?> alumno<?= (int) $h['atenciones_count'] === 1 ? '' : 's' ?></a>

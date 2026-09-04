@@ -24,7 +24,6 @@ class AgendaEntry:
     case_id: str = ""
     atencion: dict = field(default_factory=dict)  # {username: {estado, nota, hora_real}}
     nota_admin: str = ""
-    cancelada: bool = False
 
 
 def backend_state_to_shedule(state: dict, own_user_id: int, own_username: str) -> dict:
@@ -46,7 +45,6 @@ def backend_state_to_shedule(state: dict, own_user_id: int, own_username: str) -
             procedimiento=appt.get("procedimiento") or "",
             case_id=appt.get("case_id") or "",
             nota_admin=appt.get("nota_admin") or "",
-            cancelada=bool(appt.get("cancelada")),
         )
 
     for att in state.get("attendances", []):
@@ -76,7 +74,6 @@ def _appointment_fields(row: AgendaEntry):
         "procedimiento": row.procedimiento,
         "case_id": row.case_id or None,
         "nota_admin": row.nota_admin,
-        "cancelada": row.cancelada,
     }
 
 

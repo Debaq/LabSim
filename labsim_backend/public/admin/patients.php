@@ -75,7 +75,7 @@ $courseScopeSql = " WHERE a.id IS NULL OR ({$permissionSql})";
 $stmt = $pdo->prepare(
     "SELECT c.id, c.data, c.updated_at,
             a.id AS appointment_id, a.fecha, a.hora, a.rut, a.nombre, a.apellido, a.fecha_nac,
-            a.procedimiento, a.cancelada, a.nota_admin, a.course_id, a.assigned_student_id, a.assigned_group_id,
+            a.procedimiento, a.nota_admin, a.course_id, a.assigned_student_id, a.assigned_group_id,
             (SELECT COUNT(*) FROM attendances att WHERE att.appointment_id = a.id) AS atenciones_count,
             (SELECT COUNT(*) FROM appointments WHERE case_id = c.id) AS rondas_count
      FROM cases c
@@ -109,7 +109,7 @@ admin_header('Fichas Clínicas', $me);
     <strong>Pacientes registrados (<?= count($cases) ?>)</strong>
     &nbsp;·&nbsp; <a href="case_create.php">+ Crear caso nuevo</a>
     <p style="font-size:0.85rem; color:#555;">
-        Biblioteca completa de fichas del sistema (agendadas o no). Para agendar, reagendar o cancelar citas,
+        Biblioteca completa de fichas del sistema (agendadas o no). Para agendar, reagendar o eliminar citas,
         usa <a href="agenda.php">Agendas</a>.
     </p>
     <table>
@@ -152,8 +152,6 @@ admin_header('Fichas Clínicas', $me);
             <td>
                 <?php if (!$c['appointment_id']): ?>
                 <span style="color:#886400;">sin agendar</span>
-                <?php elseif ($c['cancelada']): ?>
-                <span style="color:#a33;">cancelada</span>
                 <?php elseif ($c['fecha'] === '' || $c['hora'] === ''): ?>
                 <span style="color:#886400;">sin agendar</span>
                 <?php else: ?>
