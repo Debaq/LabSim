@@ -152,7 +152,7 @@ class MoveWindow():
         else:
             self.parent.showMaximized()
 
-# Códigos de apps.json que el backend deja habilitar/deshabilitar por curso
+# Códigos de módulo que el backend deja habilitar/deshabilitar por curso
 # (ver Courses::MODULES en labsim_backend/src/Courses.php -- mantener
 # sincronizado a mano, viven en repos separados). Cualquier código que NO
 # esté acá (ej. "LOGIN", "MIS_PACIENTES") queda siempre visible: la

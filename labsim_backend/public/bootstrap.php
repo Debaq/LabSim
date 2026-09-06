@@ -8,3 +8,4 @@ require_once __DIR__ . '/../src/Auth.php';
 require_once __DIR__ . '/../src/Lti.php';
 require_once __DIR__ . '/../src/Cases.php';
 require_once __DIR__ . '/../src/Courses.php';
+require_once __DIR__ . '/../src/Layout.php';

@@ -4,7 +4,6 @@
     "config_cvc" : "config_cvc.json",
     "lista_palabras" : "lista_palabras.json",
     "ABR_DATA" :"ABR.json",
-    "APPS" : "apps.json",
     "c_voice" : "command_voice.json"
 
 }

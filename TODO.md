@@ -31,7 +31,8 @@ Pendiente:
       abrir la ficha del paciente según el progreso aprobado de ESE
       alumno, clamp a la última fase disponible si no hay más.
 - [x] Vista de otoscopia en la app de escritorio: botón "Otoscopia" en
-      Box Audiología (a la izquierda de Acumetría, ver resources/json/apps.json
+      Box Audiología (a la izquierda de Acumetría, ver Layout::APPS en
+      labsim_backend/src/Layout.php)
       y src/audiometria/Otoscopia.py) -- muestra la imagen OD/OI lado a
       lado ("Otoscopio sin batería" si no hay imagen subida). Hoy siempre
       trae la fase 1 (índice 0, `FASE_FIJA` en Otoscopia.py) para todos los

@@ -25,6 +25,7 @@ import requests
 from datetime import datetime
 from copy import deepcopy
 import os
+import sys
 
 from backend.client import BackendClient
 from backend.cases_sync import backend_state_to_cases, diff_and_push_cases
@@ -266,8 +267,23 @@ class Preferences:
         self.data = {}
         for i in list_data:
             file = context.get_resource(f'json/{list_data[i]}')
-            with codecs.open(file, 'r', 'utf-8') as json_file:
-                data = json.load(json_file)
+            try:
+                with codecs.open(file, 'r', 'utf-8') as json_file:
+                    data = json.load(json_file)
+            except FileNotFoundError:
+                # json_list.json puede apuntar a archivos que ya no existen
+                # (ej. APPS/apps.json, eliminado cuando el layout pasó al
+                # backend). Skip silencioso para que la app no crashee al
+                # arrancar; el .get() de la clave simplemente devolverá None.
+                # sys.__stderr__ escapa al redirect de Logger que se hace
+                # después en main.py.
+                print(f"[preferences] json faltante, skip: {file}",
+                      file=sys.__stderr__)
+                continue
+            except (ValueError, OSError) as exc:
+                print(f"[preferences] no se pudo leer {file}: {exc}",
+                      file=sys.__stderr__)
+                continue
             self.data.update(data)
 
     def get(self, pref):

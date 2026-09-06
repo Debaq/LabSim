@@ -4,10 +4,11 @@ final class Courses
 {
     /**
      * Copia a mano de los módulos "pre" (listos para usar, no en desarrollo)
-     * de resources/json/apps.json del lado del cliente Python -- el
-     * backend no tiene forma de leer ese archivo (viven en repos/paquetes
-     * distintos). Si se agrega/saca un módulo "pre" en apps.json, actualizar
-     * esto también, o el checklist de courses.php queda desincronizado.
+     * de Layout::APPS del lado del backend -- la lista de módulos bloqueables
+     * por curso no puede vivir en el cliente (un alumno con binario viejo
+     * podría destrabar lo que el docente le bloqueó). Si se agrega/saca un
+     * módulo "pre" en Layout::APPS, actualizar esto también, o el checklist
+     * de courses.php queda desincronizado.
      * "LOGIN" no entra: es la pantalla de ingreso, no un módulo que se
      * pueda bloquear por curso.
      */
@@ -135,10 +136,14 @@ final class Courses
         return $stmt->fetchAll();
     }
 
+    /** Incluye al estudiante demo si el curso tiene uno (ver is_demo) -- quien
+     * llama filtra según lo necesite: admin/courses.php lo separa en su
+     * propia card "Área de pruebas", agenda.php lo deja para poder
+     * asignarle citas igual que a cualquier alumno real. */
     public static function students(int $courseId): array
     {
         $stmt = Db::get()->prepare(
-            'SELECT u.id, u.username, u.display_name FROM course_students cs
+            'SELECT u.id, u.username, u.display_name, u.is_demo FROM course_students cs
              JOIN users u ON u.id = cs.user_id WHERE cs.course_id = ? ORDER BY u.display_name'
         );
         $stmt->execute([$courseId]);
@@ -172,7 +177,7 @@ final class Courses
             "SELECT u.id, u.username, u.display_name,
                     (SELECT context_label FROM user_lti_contexts WHERE user_id = u.id ORDER BY last_seen_at DESC LIMIT 1) AS origin
              FROM users u
-             WHERE u.role = 'student' AND u.active = 1
+             WHERE u.role = 'student' AND u.active = 1 AND u.is_demo = 0
                AND u.id NOT IN (SELECT user_id FROM course_students WHERE course_id = ?)
              ORDER BY u.display_name"
         );
@@ -229,7 +234,7 @@ final class Courses
         }
 
         require_once __DIR__ . '/Users.php';
-        $userId = Users::createOrUpdateLocal('student', $username, $displayName !== '' ? $displayName : $username, $password, 444, ['A', 'Z']);
+        $userId = Users::createOrUpdateLocal('student', $username, $displayName !== '' ? $displayName : $username, $password, 444);
         Db::get()->prepare('INSERT OR IGNORE INTO course_students (course_id, user_id) VALUES (?, ?)')
             ->execute([$courseId, $userId]);
 
@@ -239,6 +244,121 @@ final class Courses
             'message' => 'Cuenta creada y matriculada.',
             'password' => $generated,
         ];
+    }
+
+    /**
+     * Crea el estudiante demo del curso: cuenta local (role=student,
+     * is_demo=1) matriculada normalmente vía course_students -- es "un
+     * alumno más" para todo efecto (se le pueden asignar citas igual que a
+     * cualquier real), salvo que queda excluido de las vistas agregadas por
+     * curso (ver dashboard.php). A lo más uno por curso -- error si
+     * $courseId ya tiene demo_user_id (usar regenerateDemoPassword() para
+     * una credencial nueva sin perder los datos acumulados).
+     */
+    public static function generateDemoStudent(int $courseId): array
+    {
+        $course = self::find($courseId);
+        if (!$course) {
+            return ['status' => 'error', 'message' => 'Curso no encontrado.'];
+        }
+        if ($course['demo_user_id']) {
+            return ['status' => 'error', 'message' => 'Este curso ya tiene un estudiante demo.'];
+        }
+
+        $username = 'demo_curso_' . $courseId;
+        $result = self::addOrCreateStudentByUsername($courseId, $username, 'Estudiante demo', null);
+        if ($result['status'] === 'error') {
+            return $result;
+        }
+
+        $pdo = Db::get();
+        $stmt = $pdo->prepare('SELECT id FROM users WHERE username = ?');
+        $stmt->execute([$username]);
+        $userId = (int) $stmt->fetchColumn();
+        $pdo->prepare('UPDATE users SET is_demo = 1 WHERE id = ?')->execute([$userId]);
+        $pdo->prepare('UPDATE courses SET demo_user_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+            ->execute([$userId, $courseId]);
+
+        return ['status' => 'created', 'username' => $username, 'password' => $result['password'] ?? null];
+    }
+
+    /** Nueva contraseña para el demo existente del curso, sin tocar sus datos. Null si el curso no tiene demo. */
+    public static function regenerateDemoPassword(int $courseId): ?array
+    {
+        $course = self::find($courseId);
+        $userId = $course['demo_user_id'] ?? null;
+        if (!$userId) {
+            return null;
+        }
+        $pdo = Db::get();
+        $stmt = $pdo->prepare('SELECT username FROM users WHERE id = ?');
+        $stmt->execute([$userId]);
+        $username = $stmt->fetchColumn();
+        if ($username === false) {
+            return null;
+        }
+        $password = bin2hex(random_bytes(6));
+        $pdo->prepare('UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+            ->execute([password_hash($password, PASSWORD_DEFAULT), (int) $userId]);
+        return ['username' => $username, 'password' => $password];
+    }
+
+    /**
+     * Borra todo lo que el demo del curso acumuló probando la app (sus
+     * propias citas, atenciones, chats con paciente, comentarios, logs de
+     * acción, bandeja) -- deja la cuenta y su contraseña intactas, para
+     * volver a probar desde cero. No toca patients/cases: son el pool
+     * compartido, no son datos del demo. No-op si el curso no tiene demo.
+     */
+    public static function cleanDemoData(int $courseId): void
+    {
+        $course = self::find($courseId);
+        $userId = $course['demo_user_id'] ?? null;
+        if (!$userId) {
+            return;
+        }
+        $userId = (int) $userId;
+        $pdo = Db::get();
+
+        $stmt = $pdo->prepare('SELECT id FROM appointments WHERE assigned_student_id = ?');
+        $stmt->execute([$userId]);
+        $apptIds = array_map('intval', array_column($stmt->fetchAll(), 'id'));
+
+        $stmt = $pdo->prepare('SELECT id FROM attendances WHERE student_id = ?');
+        $stmt->execute([$userId]);
+        $attIds = array_map('intval', array_column($stmt->fetchAll(), 'id'));
+
+        $stmt = $pdo->prepare('SELECT id FROM llm_chat_logs WHERE student_id = ?');
+        $stmt->execute([$userId]);
+        $chatLogIds = array_map('intval', array_column($stmt->fetchAll(), 'id'));
+
+        $pdo->beginTransaction();
+        try {
+            // Orden por FK (PRAGMA foreign_keys=ON, ver Db::get()): hijos
+            // antes que padres -- chat_comments/attendance_comments antes de
+            // llm_chat_logs/attendances, y esas dos e inbox_messages antes
+            // de appointments.
+            if ($chatLogIds) {
+                $ph = implode(',', array_fill(0, count($chatLogIds), '?'));
+                $pdo->prepare("DELETE FROM chat_comments WHERE chat_log_id IN ({$ph})")->execute($chatLogIds);
+            }
+            if ($attIds) {
+                $ph = implode(',', array_fill(0, count($attIds), '?'));
+                $pdo->prepare("DELETE FROM attendance_comments WHERE attendance_id IN ({$ph})")->execute($attIds);
+            }
+            $pdo->prepare('DELETE FROM llm_chat_logs WHERE student_id = ?')->execute([$userId]);
+            $pdo->prepare('DELETE FROM attendances WHERE student_id = ?')->execute([$userId]);
+            $pdo->prepare('DELETE FROM inbox_messages WHERE student_id = ?')->execute([$userId]);
+            $pdo->prepare('DELETE FROM action_logs WHERE user_id = ?')->execute([$userId]);
+            if ($apptIds) {
+                $ph = implode(',', array_fill(0, count($apptIds), '?'));
+                $pdo->prepare("DELETE FROM appointments WHERE id IN ({$ph})")->execute($apptIds);
+            }
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
     }
 
     /**

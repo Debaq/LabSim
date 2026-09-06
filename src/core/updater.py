@@ -25,14 +25,15 @@ apply_update_and_restart() reemplaza el código (LabSim + _internal/ +
 run.sh) y sincroniza resources/ con la versión nueva -- EXCEPTO la data
 dinámica del usuario: resources/local_cache/ (logs.db, cola de acciones) y
 resources/json/session.json (sesión logueada). Todo lo demás bajo
-resources/ (apps.json y el resto de json/, styles/, img/, font/, UI/,
-audio/) es config/asset estático que se define en el repo y nunca se edita
-en runtime (Preferences.set() ni siquiera está implementado, ver
+resources/ (el resto de json/, styles/, img/, font/, UI/, audio/) es
+config/asset estático que se define en el repo y nunca se edita en
+runtime (Preferences.set() ni siquiera está implementado, ver
 core/helpers.py) -- si no se sincronizara, un usuario que se actualiza
 in-place (sin reinstalar desde cero) se quedaría para siempre con el
-apps.json del día que instaló, aunque el código nuevo ya espere entradas
-que ese archivo no tiene (síntoma: KeyError al abrir una ventana nueva que
-ese apps.json viejo no conoce).
+json/X.json del día que instaló, aunque el código nuevo ya espere
+entradas que ese archivo no tiene (síntoma: KeyError al abrir una
+ventana nueva que
+ese json viejo no conoce).
 """
 import json
 import os
@@ -198,7 +199,7 @@ set +e
 
 # resources/: se sincroniza con la version nueva salvo las carpetas/archivos
 # 100% dinamicos del usuario (local_cache/, json/session.json) -- todo lo
-# demas (apps.json, el resto de json/, styles/, img/, font/, UI/, audio/)
+# demas (el resto de json/, styles/, img/, font/, UI/, audio/)
 # es config/asset estatico que debe quedar al dia con cada release, no solo
 # en una instalacion nueva.
 apply_full() {

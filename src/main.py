@@ -24,6 +24,7 @@ from core.Logger import Logger
 from backend.client import BackendClient
 from backend.log_queue import LogUploaderThread, get_log_queue
 from backend.sync_thread import SyncThread
+from core.app_layout import fetch_layout
 
 # Definir la raíz del proyecto
 BASE_DIR = Path(__file__).resolve().parent
@@ -35,11 +36,31 @@ __VERSION__ = 'v0.9.8'
 # __VERSION__ solo no alcanza porque no sube en cada build de prueba.
 DISPLAY_VERSION = f"v{local_build_id(__VERSION__.lstrip('v'))}"
 Preferences = Preferences()
-APPS = Preferences.get("APP")
-SECTORS = Preferences.get("SECTORS")
-BOXS = Preferences.get("BOXS")
 STYLES = Preferences.get("styles")
 LANGUAJE = Preferences.get("lang")
+
+# Layout (módulos/boxes/sectores) viene del backend. Antes vivía en
+# resources/json/apps.json; ahora se pide por GET /api/layout.php al
+# arrancar. Si la red no responde, la app abre solo con la ventana de
+# login (sin toolbar) -- el usuario no puede operar igual.
+#
+# Fallback mínimo: dejar LOGIN en APPS para que el z-order de la ventana
+# de login siga resuelto. Si no hubiera LOGIN, _close_sub_windows crashea
+# con KeyError.
+_LAYOUT_FALLBACK_APPS = {
+    "LOGIN": [True, "Ingreso", 0, [True, True], [410, 140], "pre"],
+}
+_layout = fetch_layout(Preferences.get("BACKEND_URL"))
+if _layout:
+    APPS = _layout["APP"]
+    SECTORS = _layout["SECTORS"]
+    BOXS = _layout["BOXS"]
+    LAYOUT_AVAILABLE = True
+else:
+    APPS = _LAYOUT_FALLBACK_APPS
+    SECTORS = {}
+    BOXS = {}
+    LAYOUT_AVAILABLE = False
 
 # Cola local de logs de acciones (ver lib/backend/log_queue.py). Es solo un
 # insert sqlite local, nunca toca la red -- se sube al backend en batches
@@ -81,6 +102,19 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.setupUi(self)
         self.cmb_case.setVisible(False)
         self.cmb_case.setEnabled(False)
+        if not LAYOUT_AVAILABLE:
+            # Layout no llegó del backend (sin red, backend caído, respuesta
+            # mal formada). La ventana queda con solo la pantalla de login;
+            # cualquier intento de login va a fallar igual porque depende
+            # del mismo backend. Avisamos una vez para que el usuario sepa
+            # que no es un bug local.
+            QMessageBox.warning(
+                self,
+                "Sin conexión con el servidor",
+                "No se pudo obtener el layout de la aplicación desde el "
+                "backend. La ventana de login quedó disponible, pero no "
+                "podrás operar hasta que el servidor responda.",
+            )
         self.create_variables()
         self.set_mdi_area()
         self.create_sub_windows()
@@ -166,6 +200,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.lbl_name.setText(f"{user}")
             self.btn_login.setText("Cerrar Sesión")
             self.data_login = data
+            self._apply_admin_overrides_if_any()
             LOCAL_LOG_QUEUE.push("session_login", {
                 "user": data.get("user"),
                 "name": data.get("name"),
@@ -175,6 +210,30 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.btns_actions()
             self._start_log_uploader()
             self._start_sync_thread()
+
+    def _apply_admin_overrides_if_any(self):
+        """Admin (permission 777) ve toda la estructura sin filtrar:
+        todos los boxes activos, todos los módulos como "pre" (no gris).
+        El layout llega igual para todos desde /api/layout; este override
+        es local porque la metadata estructural no debería filtrarse por
+        rol -- un admin probando qué hay en cada box no tiene que esperar
+        a que alguien le habilite Box_2 a mano en apps.json.
+        Mutamos self.apps/self.boxs in-place: son los mismos dicts que
+        ToolBar tiene referenciados (Python pasa dict por referencia), y
+        btns_seccion/chargeBtnsArea corren DESPUÉS de este método, así que
+        ven la versión overridden. No-admin: no-op (el filtro por curso
+        sigue pasando por GATED_MODULE_CODES / data_login["modules"])."""
+        if not self.data_login:
+            return
+        if self.data_login.get("permission") != 777:
+            return
+        for box in self.boxs.values():
+            box[0] = True
+        for app in self.apps.values():
+            # índice 5 = state ("pre" / "development"). Forzamos "pre"
+            # para que chargeBtnsArea no haga btn.setDisabled(True).
+            if len(app) > 5:
+                app[5] = "pre"
 
     def _logged_in_client(self):
         """Cliente del backend con la sesión que dejó el login, o None si ese
