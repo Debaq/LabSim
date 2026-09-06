@@ -19,7 +19,8 @@ require_once __DIR__ . '/../bootstrap.php';
  * (lo necesita para el historial por paciente), el alumno solo el suyo.
  */
 
-$user = Auth::requireUser();
+[$user, $platformId, $contextId] = Auth::requireUserWithSession();
+$courseId = $platformId !== null ? Lti::findCourseForContext($platformId, $contextId) : null;
 $since = $_GET['since'] ?? '1970-01-01 00:00:00';
 $pdo = Db::get();
 
@@ -65,13 +66,15 @@ $stmt = $pdo->prepare($attendanceSql);
 $stmt->execute($attendanceParams);
 $attendances = $stmt->fetchAll();
 
-$stmt = $pdo->prepare('SELECT k, v, updated_at FROM app_config WHERE updated_at > ?');
-$stmt->execute([$since]);
-$config = $stmt->fetchAll();
-foreach ($config as &$c) {
-    $c['v'] = json_decode($c['v'], true);
+// Config efectiva (override del curso resuelto si existe, si no el default
+// global) -- ver AppConfig::getEffective(). changedKeysSince() solo filtra
+// qué keys re-mandar; el valor que se manda siempre es el efectivo, nunca
+// la fila cruda (evita que el cliente reciba global y override de la misma
+// key sin saber cuál gana).
+$config = [];
+foreach (AppConfig::changedKeysSince($since, $courseId) as $k) {
+    $config[] = ['k' => $k, 'v' => AppConfig::getEffective($k, $courseId)];
 }
-unset($c);
 
 Response::json([
     'server_time' => (new DateTime())->format('Y-m-d H:i:s'),

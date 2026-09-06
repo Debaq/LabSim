@@ -17,6 +17,7 @@ import random
 import numpy as np
 import scipy.signal as signal
 from core.base import context
+from core import app_config_store
 
 
 # Anchos base (sigma en ms) por onda. Calibrados para FWHM realista
@@ -49,15 +50,55 @@ class ABRGeneratorV3:
 
     def get_baseline_values(self, population='adult_female',
                             stimulus='click', pathway='air_conduction',
-                            freq=None):
+                            freq=None, click_override=None):
+        """
+        Click guarda lat/amp absolutos (editable por curso/caso). Cualquier
+        otro estimulo guarda solo un ratio respecto a click (lat_ratio/
+        amp_ratio) -- nunca su propio absoluto ni un delta -- para que un
+        override de click (config por curso, o desviacion del caso) se
+        propague solo a chirp/burst sin tener que redefinirlos aparte.
+        Sin ratio para esa combinacion poblacion/estimulo -> ratio 1.0
+        (misma forma que click), no una tabla aparte silenciosa.
+
+        click_override: dict {onda: {'lat':.., 'amp':..}} que pisa el default
+        bundleado (resources/abr/normative_data.json) onda por onda -- llega
+        de la config del curso (ver core.app_config_store, key
+        "normative_data.abr", resuelta por el backend en AppConfig.php) via
+        ABR_Curve(). Ondas no listadas en el override usan el default tal cual.
+        """
         pop = self.norms['populations'][population]
+        click = pop[pathway]['click']
+        if click_override:
+            click = {**click, **{
+                wave: {**click.get(wave, {}), **vals}
+                for wave, vals in click_override.items()
+            }}
+        if stimulus == 'click':
+            return click
+
         if stimulus == 'tone_burst':
-            by_freq = pop[pathway]['tone_burst']
-            return by_freq.get(freq or '1000Hz', by_freq['1000Hz'])
-        return pop[pathway].get(stimulus, pop[pathway]['click'])
+            by_freq = pop[pathway].get('tone_burst', {})
+            ratio_block = by_freq.get(freq or '1000Hz')
+        else:
+            ratio_block = pop[pathway].get(stimulus)
+
+        if not ratio_block:
+            return click
+
+        baseline = {}
+        for wave, click_vals in click.items():
+            if wave == 'interpeak':
+                continue
+            ratio = ratio_block.get(wave, {'lat_ratio': 1.0, 'amp_ratio': 1.0})
+            baseline[wave] = {
+                'lat': click_vals['lat'] * ratio.get('lat_ratio', 1.0),
+                'amp': click_vals['amp'] * ratio.get('amp_ratio', 1.0),
+            }
+        return baseline
 
     def calculate_wave_parameters(self, baseline, intensity, threshold,
-                                   pathology, desviaciones=None, repro_shift=0.0):
+                                   pathology, desviaciones=None, repro_shift=0.0,
+                                   click_baseline=None):
         modified = {}
         steps_from_80 = (80 - intensity) / 10
 
@@ -76,10 +117,25 @@ class ABRGeneratorV3:
             calc_lat = base_lat + lat_shift + repro_shift
             if wave == 'I':
                 calc_lat = base_lat + lat_shift * 0.2 + repro_shift
+            # Escala de la desviacion segun estimulo: el caso clinico define
+            # la desviacion pensando en click (estimulo estandar), pero
+            # latencia/amplitud base cambian fuerte con el estimulo (burst
+            # de baja frecuencia agrega ms de recorrido coclear, chirp
+            # sincroniza y sube amplitud). Sin escalar, el mismo delta
+            # absoluto de click quedaria sub/sobre-representado en otros
+            # estimulos. ref = baseline de click misma poblacion/via.
+            lat_scale, amp_scale = 1.0, 1.0
+            if click_baseline and wave in click_baseline:
+                ref_lat = click_baseline[wave]['lat']
+                ref_amp = click_baseline[wave]['amp']
+                if ref_lat:
+                    lat_scale = base_lat / ref_lat
+                if ref_amp:
+                    amp_scale = baseline[wave]['amp'] / ref_amp
             if desviaciones and wave in ['I', 'III', 'V']:
                 key = f"onda_{wave}"
                 if key in desviaciones:
-                    calc_lat += desviaciones[key]['lat']
+                    calc_lat += desviaciones[key]['lat'] * lat_scale
 
             base_amp = baseline[wave]['amp']
             if wave == 'V':
@@ -110,7 +166,7 @@ class ABRGeneratorV3:
             if desviaciones and wave in ['I', 'III', 'V']:
                 key = f"onda_{wave}"
                 if key in desviaciones:
-                    calc_amp += desviaciones[key]['amp']
+                    calc_amp += desviaciones[key]['amp'] * amp_scale
             calc_amp = max(calc_amp, 0.001)
 
             if intensity >= 70:
@@ -411,12 +467,24 @@ class ABRGeneratorV3:
     def generate_curve(self, population, pathology, stimulus_config,
                         technical_config, case_config=None):
         # 1. Baseline normativo
+        pathway = ('air_conduction' if 'pathway' not in stimulus_config
+                   else stimulus_config['pathway'])
+        # Override de click por curso (ver core.app_config_store en el
+        # cliente / AppConfig.php en el backend) -- se propaga aca para que
+        # tanto el baseline del estimulo activo como el de click (usado para
+        # escalar desviaciones) usen el mismo click "editado".
+        click_override = case_config.get('normative_override') if case_config else None
         baseline = self.get_baseline_values(
-            population, stimulus_config['stim'],
-            'air_conduction' if 'pathway' not in stimulus_config
-            else stimulus_config['pathway'],
-            freq=stimulus_config.get('freq'),
+            population, stimulus_config['stim'], pathway,
+            freq=stimulus_config.get('freq'), click_override=click_override,
         )
+        # Baseline de click (misma poblacion/via) para escalar desviaciones
+        # cuando el estimulo activo no es click (ver calculate_wave_parameters).
+        click_baseline = None
+        if stimulus_config['stim'] != 'click':
+            click_baseline = self.get_baseline_values(
+                population, 'click', pathway, click_override=click_override,
+            )
 
         # 2. Umbral
         if case_config and 'umbral' in case_config:
@@ -425,7 +493,8 @@ class ABRGeneratorV3:
             threshold = self.norms['pathology_modifiers'][pathology]['threshold_range'][0]
 
         # 3. Desviaciones (el caso trae un solo set, plano por onda -- no
-        # esta anidado por estimulo, ver CaseBuilder.abrBuild en case_create.php)
+        # esta anidado por estimulo, ver CaseBuilder.abrBuild en case_create.php).
+        # Se escalan por estimulo en calculate_wave_parameters via click_baseline.
         desviaciones = case_config.get('desviaciones') if case_config else None
 
         # 4. FSP del caso
@@ -444,7 +513,7 @@ class ABRGeneratorV3:
         repro_shift = case_config.get('repro_shift', 0.0) if case_config else 0.0
         values, waves_visible = self.calculate_wave_parameters(
             baseline, stimulus_config['int'], threshold, pathology, desviaciones,
-            repro_shift=repro_shift,
+            repro_shift=repro_shift, click_baseline=click_baseline,
         )
 
         # 7. Polaridad + rate
@@ -587,12 +656,21 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom, 
     else:
         var_repro = 0
 
+    # Override de click por curso -- config del docente (ver AppConfig.php),
+    # sincronizada al cliente en core.app_config_store bajo key generica
+    # "normative_data.<examen>" (mismo mecanismo para P300/electrococleografia
+    # a futuro). Un override propio del caso (si case_create.php llega a
+    # exponerlo) manda por sobre el del curso.
+    normative_override = preferences.get('normative_override') or \
+        (app_config_store.get('normative_data.abr') or {}).get('click')
+
     case_config = {
         'desviaciones': preferences.get('desviaciones', {}),
         'fsp_puntos': preferences.get('fsp_puntos', {'800': 2.3, '2000': 2.8}),
         'umbral': preferences.get('umbral', preferences.get('th', 20)),
         'average_objetivo': preferences.get('average_objetivo', 2000),
         'repro_shift': var_repro,
+        'normative_override': normative_override,
     }
 
     t, y, metadata = generator.generate_curve(

@@ -39,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Db::migrateLtiReplayColumnsIfNeeded();
             Db::migratePatientColumnsIfNeeded();
             Db::migrateSessionLtiContextIfNeeded();
+            Db::migrateAppConfigCourseIdIfNeeded();
             Db::migrateDemoStudentIfNeeded();
             $sql = file_get_contents(__DIR__ . '/../../sql/schema.sql');
             $pdo->exec($sql);

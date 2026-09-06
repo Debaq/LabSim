@@ -77,6 +77,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Courses::setEnabledModules($courseId, $codes);
             $success = 'Módulos actualizados.';
             AdminAudit::log($me, 'course_set_modules', ['course_id' => $courseId, 'modules' => Courses::enabledModules($courseId)]);
+        } elseif ($action === 'set_abr_normative') {
+            // Solo I/III/V -- mismas ondas que ya expone case_create.php
+            // (desviaciones); II/IV/VI/VII/MC no son las que un docente
+            // ajusta a mano. Campo vacío = sin override para ese valor
+            // puntual (el generador sigue usando su default local, ver
+            // ABR_generator_v3.py::get_baseline_values). Reemplaza el
+            // override completo cada guardado -- no es un merge con el
+            // anterior, así una onda que se deja vacía a propósito vuelve
+            // a heredar el default.
+            $override = [];
+            foreach (['I', 'III', 'V'] as $wave) {
+                $waveOverride = [];
+                $lat = trim((string) ($_POST['abr_lat_' . $wave] ?? ''));
+                $amp = trim((string) ($_POST['abr_amp_' . $wave] ?? ''));
+                if ($lat !== '' && is_numeric($lat)) {
+                    $waveOverride['lat'] = (float) $lat;
+                }
+                if ($amp !== '' && is_numeric($amp)) {
+                    $waveOverride['amp'] = (float) $amp;
+                }
+                if ($waveOverride) {
+                    $override[$wave] = $waveOverride;
+                }
+            }
+            if ($override) {
+                AppConfig::set('normative_data.abr', ['click' => $override], $courseId);
+                $success = 'Configuración normativa ABR actualizada.';
+            } else {
+                AppConfig::clearCourseOverride('normative_data.abr', $courseId);
+                $success = 'Sin valores marcados -- el curso vuelve a usar el default de la app.';
+            }
+            AdminAudit::log($me, 'course_set_abr_normative', ['course_id' => $courseId, 'override' => $override]);
+        } elseif ($action === 'reset_abr_normative') {
+            AppConfig::clearCourseOverride('normative_data.abr', $courseId);
+            $success = 'Configuración normativa ABR restablecida al default de la app.';
+            AdminAudit::log($me, 'course_reset_abr_normative', ['course_id' => $courseId]);
         } elseif ($action === 'generate_demo_code') {
             $result = Courses::generateDemoAccessCode($courseId);
             $seconds = Auth::secondsUntil($result['expires_at']);
@@ -601,6 +637,50 @@ if ($detailId !== null) {
             <button type="submit" class="btn btn--secondary" style="margin-top:0.6rem;">Guardar módulos</button>
         </form>
     </div>
+
+    <?php if (in_array('ABR', $enabledModules, true)): ?>
+    <div class="card">
+        <strong>Configuración normativa ABR (potenciales evocados)</strong>
+        <p class="help help--mt">
+            Valores de referencia (click, adulto, vía aérea) que usa el generador de curvas del simulador para las ondas I/III/V. Vacío = usa el valor por defecto de la app. Los estímulos chirp/burst se derivan solos a partir de estos valores -- no se editan aparte.
+        </p>
+        <?php $abrOverride = AppConfig::getEffective('normative_data.abr', (int) $course['id'])['click'] ?? []; ?>
+        <form method="post">
+        <?= csrf_field() ?>
+            <input type="hidden" name="form_action" value="set_abr_normative">
+            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:0.6rem 1rem; margin-top:0.4rem;">
+                <?php foreach (['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V'] as $wave => $label): ?>
+                <div>
+                    <strong style="font-weight:600;"><?= $label ?></strong>
+                    <label style="font-weight:normal; display:block; margin-top:0.2rem;">
+                        Latencia (ms)
+                        <input type="number" step="0.01" name="abr_lat_<?= $wave ?>"
+                               value="<?= htmlspecialchars((string) ($abrOverride[$wave]['lat'] ?? '')) ?>" placeholder="default">
+                    </label>
+                    <label style="font-weight:normal; display:block; margin-top:0.2rem;">
+                        Amplitud (µV)
+                        <input type="number" step="0.01" name="abr_amp_<?= $wave ?>"
+                               value="<?= htmlspecialchars((string) ($abrOverride[$wave]['amp'] ?? '')) ?>" placeholder="default">
+                    </label>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <button type="submit" class="btn btn--secondary" style="margin-top:0.6rem;">Guardar configuración</button>
+        </form>
+        <?php if ($abrOverride): ?>
+        <form method="post" style="margin-top:0.5rem;"
+              onsubmit="return confirm('¿Restablecer al valor por defecto de la app? Se pierde la configuración actual del curso.');">
+        <?= csrf_field() ?>
+            <input type="hidden" name="form_action" value="reset_abr_normative">
+            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+            <button type="submit" class="btn btn--danger btn--sm">Volver a default</button>
+        </form>
+        <?php else: ?>
+        <p class="help help--mt">Sin configuración propia -- usando el valor por defecto de la app.</p>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
 
     <div class="card">
         <details>

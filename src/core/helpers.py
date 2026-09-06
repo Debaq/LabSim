@@ -28,6 +28,7 @@ import os
 import sys
 
 from backend.client import BackendClient
+from core import app_config_store
 from backend.cases_sync import backend_state_to_cases, diff_and_push_cases
 from backend.shedule_sync import backend_state_to_shedule, diff_and_push_shedule
 
@@ -182,6 +183,7 @@ class Shedule:
         own_id = (client.user or {}).get("id")
         own_username = (client.user or {}).get("username", "")
         state = client.get_full_state()
+        app_config_store.update_from_sync(state.get("config"))
         data = backend_state_to_shedule(state, own_id, own_username)
         # deepcopy por la misma razón que en CasesOffline.get_cases():
         # self.data se muta en el sitio (nuevas citas, edición de filas)

@@ -279,6 +279,42 @@ final class Db
     }
 
     /**
+     * Reconstruye app_config para soportar override por curso (ver comentario
+     * de esa tabla en sql/schema.sql). La PK vieja era (k) solo: un simple
+     * ALTER TABLE ADD COLUMN course_id no alcanza porque esa PK seguiría
+     * rechazando una fila override que comparte key con la fila global -- hay
+     * que reconstruir la tabla completa. course_id NULL para todo lo
+     * existente no cambia nada (sigue siendo el default global de siempre).
+     * Debe llamarse ANTES de aplicar schema.sql: ese archivo trae
+     * `CREATE UNIQUE INDEX ... ON app_config(k, course_id) ...`, que en una
+     * base ya existente falla con "no such column: course_id" si esta
+     * migración no corrió antes (mismo motivo que migratePatientColumnsIfNeeded).
+     */
+    public static function migrateAppConfigCourseIdIfNeeded(): void
+    {
+        $pdo = self::get();
+        $cols = array_column($pdo->query('PRAGMA table_info(app_config)')->fetchAll(), 'name');
+        if (in_array('course_id', $cols, true)) {
+            return;
+        }
+        $pdo->exec('ALTER TABLE app_config RENAME TO app_config_old');
+        $pdo->exec(
+            'CREATE TABLE app_config (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                k TEXT NOT NULL,
+                course_id INTEGER REFERENCES courses(id),
+                v TEXT NOT NULL,
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )'
+        );
+        $pdo->exec(
+            'INSERT INTO app_config (k, course_id, v, updated_at)
+             SELECT k, NULL, v, updated_at FROM app_config_old'
+        );
+        $pdo->exec('DROP TABLE app_config_old');
+    }
+
+    /**
      * Agrega users.is_demo/courses.demo_user_id -- instalaciones de antes
      * del estudiante demo por curso (ver comentarios de esas columnas en
      * sql/schema.sql). 0/NULL respectivamente no cambia nada de lo ya

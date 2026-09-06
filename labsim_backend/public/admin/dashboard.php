@@ -205,12 +205,12 @@ if ($appointmentId !== null) {
             if ($postAction === 'mark_reference') {
                 $refUserId = (int) ($_POST['user_id'] ?? 0);
                 $pdo->prepare(
-                    "INSERT INTO app_config (k, v) VALUES (?, ?)
-                     ON CONFLICT(k) DO UPDATE SET v = excluded.v, updated_at = CURRENT_TIMESTAMP"
+                    "INSERT INTO app_config (k, course_id, v) VALUES (?, NULL, ?)
+                     ON CONFLICT(k) WHERE course_id IS NULL DO UPDATE SET v = excluded.v, updated_at = CURRENT_TIMESTAMP"
                 )->execute([$referenceKey, json_encode(['appointment_id' => $appointmentId, 'user_id' => $refUserId])]);
                 AdminAudit::log($me, 'reference_mark', ['appointment_id' => $appointmentId, 'student_id' => $refUserId]);
             } elseif ($postAction === 'unmark_reference') {
-                $pdo->prepare('DELETE FROM app_config WHERE k = ?')->execute([$referenceKey]);
+                $pdo->prepare('DELETE FROM app_config WHERE k = ? AND course_id IS NULL')->execute([$referenceKey]);
                 AdminAudit::log($me, 'reference_unmark', ['appointment_id' => $appointmentId]);
             }
         }
@@ -218,7 +218,7 @@ if ($appointmentId !== null) {
 
     $referenceUserId = null;
     if ($referenceKey !== null) {
-        $stmt = $pdo->prepare('SELECT v FROM app_config WHERE k = ?');
+        $stmt = $pdo->prepare('SELECT v FROM app_config WHERE k = ? AND course_id IS NULL');
         $stmt->execute([$referenceKey]);
         $refRaw = $stmt->fetchColumn();
         if ($refRaw) {

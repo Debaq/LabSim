@@ -454,6 +454,22 @@ final class Auth
     }
 
     /**
+     * Como requireAdmin(), pero además devuelve el contexto LTI de la sesión
+     * -- lo necesita admin_dump.php para resolver a qué curso pertenece un
+     * docente (role admin, permission 555, ver labsim_lti_launch_roles) y
+     * así entregarle la config efectiva de ESE curso (ver
+     * Lti::findCourseForContext(), AppConfig::getEffective()).
+     */
+    public static function requireAdminWithSession(): array
+    {
+        [$user, $platformId, $contextId] = self::requireUserWithSession();
+        if ($user['role'] !== 'admin') {
+            Response::error('Requiere permisos de administrador', 403);
+        }
+        return [$user, $platformId, $contextId];
+    }
+
+    /**
      * $courseId: curso resuelto de la sesión de origen (ver
      * issueTokenFor()) -- de ahí sale 'modules', NUNCA de la cuenta en sí
      * (ver comentario de course_modules en sql/schema.sql: la visibilidad de

@@ -13,6 +13,7 @@ from core.base import context
 from core.h_win import FrameSubMdi, MdiArea
 from core import inbox
 from core import mis_pacientes
+from core import app_config_store
 from core.updater import local_build_id
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
                           marcar_entry_atendiendo, marcar_entry_atendido,
@@ -275,6 +276,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if agenda_win is not None:
             agenda_win.obj.refresh_async()
         inbox.actualizar_badge(self)
+        app_config_store.update_from_sync(_delta.get("config"))
 
     def _stop_sync_thread(self):
         if self.sync_thread is not None:

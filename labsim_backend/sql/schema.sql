@@ -263,12 +263,27 @@ CREATE TABLE IF NOT EXISTS action_logs (
 CREATE INDEX IF NOT EXISTS idx_logs_user_ts ON action_logs (user_id, client_ts);
 
 -- Configuración compartida (equivalente a preferences.json / config_*.json,
--- pero editable por el admin y sincronizada a todos).
+-- pero editable por el admin y sincronizada a todos). course_id NULL =
+-- default global; una fila con course_id resuelto override-ea ese default
+-- solo para ese curso (ej. tabla normativa de un examen -- ABR primero,
+-- P300/electrococleografía después -- que un docente puede querer distinta
+-- a la que trae la app por defecto, sin recompilar). El curso se resuelve
+-- en vivo desde el contexto LTI de la sesión (ver Lti::findCourseForContext,
+-- mismo criterio que course_modules), nunca se cachea acá.
 CREATE TABLE IF NOT EXISTS app_config (
-    k TEXT PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    k TEXT NOT NULL,
+    course_id INTEGER REFERENCES courses(id),
     v TEXT NOT NULL,                  -- JSON
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+-- A lo más una fila global por key y una override por (key, curso). No es
+-- una PK compuesta porque SQLite trata cada NULL como distinto en un índice
+-- UNIQUE normal -- (k, course_id) con course_id nullable dejaría crear más
+-- de una fila global por key sin avisar. Mismo patrón que idx_patients_rut
+-- (arriba): índices parciales, uno por lado de la nulidad.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_app_config_global ON app_config(k) WHERE course_id IS NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_app_config_course ON app_config(k, course_id) WHERE course_id IS NOT NULL;
 
 -- Config del LLM que hace de "paciente conversacional" (chat de texto en la
 -- app). Fila única (id=1) -- APARTE de app_config a propósito: app_config
