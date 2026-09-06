@@ -140,6 +140,21 @@ button.danger { background: var(--color-danger); }
  * blanco (contraste WCAG AA consistente en ambos modos). El body y las
  * cards sí cambian. */
 
+/* Tablero de grupos (courses.php): columnas con alumnos arrastrables.
+ * Un alumno pertenece a un solo grupo -- soltarlo en otra columna lo mueve. */
+.group_card {
+  cursor: grab;
+  padding: 0.4rem 0.6rem;
+  margin-bottom: 0.4rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+}
+.group_card:active { cursor: grabbing; }
+.group_dropzone { border-radius: var(--radius-md); transition: outline-color 0.1s ease; }
+.group_dropzone--over { outline: 2px dashed var(--color-primary); outline-offset: 2px; }
+
 /* Breakpoint móvil: comprime header/nav/main, reduce tablas. Espejo del
  * breakpoint de student.css -- admin no lo tenía y quedaba sin adaptar. */
 @media (max-width: 40rem) {

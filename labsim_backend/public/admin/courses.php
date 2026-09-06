@@ -139,16 +139,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Courses::deleteGroup($groupId);
             $success = 'Grupo eliminado.';
             AdminAudit::log($me, 'group_delete', ['course_id' => $courseId, 'group_id' => $groupId]);
-        } elseif ($action === 'add_group_member') {
-            $groupId = (int) ($_POST['group_id'] ?? 0);
-            $username = trim((string) ($_POST['username'] ?? ''));
-            $err = Courses::addGroupMemberByUsername($groupId, $courseId, $username);
-            if ($err) {
-                $error = $err;
-            } else {
-                $success = 'Miembro agregado al grupo.';
-                AdminAudit::log($me, 'group_add_member', ['course_id' => $courseId, 'group_id' => $groupId, 'username' => $username]);
-            }
         } elseif ($action === 'bulk_enroll_selected') {
             $userIds = array_map('intval', (array) ($_POST['user_ids'] ?? []));
             $n = Courses::enrollExistingUsers($courseId, $userIds);
@@ -164,12 +154,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $success = 'Curso de Moodle vinculado -- los alumnos que entren por ahí se matricularán solos.';
                 AdminAudit::log($me, 'course_link_lti_context', ['course_id' => $courseId, 'lti_platform_id' => $platformId, 'context_id' => $ltiContextId]);
             }
-        } elseif ($action === 'remove_group_member') {
-            $groupId = (int) ($_POST['group_id'] ?? 0);
-            $userId = (int) ($_POST['user_id'] ?? 0);
-            Courses::removeGroupMember($groupId, $userId);
-            $success = 'Miembro quitado del grupo.';
-            AdminAudit::log($me, 'group_remove_member', ['course_id' => $courseId, 'group_id' => $groupId, 'user_id' => $userId]);
         }
     }
 }
@@ -253,33 +237,6 @@ if ($detailId !== null) {
         <?php endif; ?>
     </div>
 
-    <div class="card">
-        <strong>Módulos habilitados</strong>
-        <p class="help help--mt">
-            Qué ve un alumno de este curso en la app de escritorio. Sin marcar nada, el curso queda sin módulos habilitados.
-        </p>
-        <?php $enabledModules = Courses::enabledModules((int) $course['id']); ?>
-        <form method="post">
-        <?= csrf_field() ?>
-            <input type="hidden" name="form_action" value="set_modules">
-            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-            <?php foreach (Courses::modulesGroupedByBox() as $boxLabel => $boxModules): ?>
-            <div class="section-sep">
-                <strong><?= htmlspecialchars($boxLabel) ?></strong>
-                <div style="display:flex; flex-wrap:wrap; gap:0.4rem 1.2rem; margin-top:0.4rem;">
-                    <?php foreach ($boxModules as $code => $label): ?>
-                    <label style="font-weight:normal; display:flex; align-items:center; gap:0.3rem; margin:0;">
-                        <input type="checkbox" name="modules[]" value="<?= htmlspecialchars($code) ?>" <?= in_array($code, $enabledModules, true) ? 'checked' : '' ?>>
-                        <?= htmlspecialchars($label) ?>
-                    </label>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-            <?php endforeach; ?>
-            <button type="submit" class="btn btn--secondary" style="margin-top:0.6rem;">Guardar módulos</button>
-        </form>
-    </div>
-
     <?php
         $courseMembers = Courses::students((int) $course['id']);
         $students = array_values(array_filter($courseMembers, static fn($s) => !$s['is_demo']));
@@ -290,177 +247,122 @@ if ($detailId !== null) {
                 break;
             }
         }
+        $enrollable = Courses::enrollableStudents((int) $course['id']);
+        $groups = Courses::groupsForCourse((int) $course['id']);
+        $groupMap = Courses::studentGroupMap((int) $course['id']);
+        $origins = [];
+        foreach ($enrollable as $u) {
+            $o = trim((string) ($u['origin'] ?? ''));
+            if ($o !== '') {
+                $origins[$o] = ($origins[$o] ?? 0) + 1;
+            }
+        }
+        ksort($origins);
     ?>
+
     <div class="card">
-        <strong>Área de pruebas</strong>
+        <strong>Alumnos</strong>
         <p class="help help--mt">
-            Un alumno más del curso para probar la app de punta a punta (agendarle pacientes, atender, etc.) sin tocar datos de alumnos reales. Invisible para los alumnos -- solo docente/admin lo ven acá. Entra con código de 6 dígitos, igual que un alumno LTI -- sin usuario ni contraseña que gestionar.
+            Un solo listado: matriculados y candidatos (alumnos activos que todavía no están en este curso). Busca y marca los que quieras matricular. El grupo de cada uno se asigna abajo, en "Grupos" (arrastrar y soltar).
         </p>
-        <div class="row" style="margin-top:0.5rem;">
-            <form method="post">
-            <?= csrf_field() ?>
-                <input type="hidden" name="form_action" value="generate_demo_code">
-                <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                <button type="submit" class="btn btn--secondary">Generar código de acceso</button>
-            </form>
-            <?php if ($demoStudent !== null): ?>
-            <form method="post" onsubmit="return confirm('¿Borrar todas las citas/atenciones/chats de prueba del demo? La cuenta queda igual.');">
-            <?= csrf_field() ?>
-                <input type="hidden" name="form_action" value="clean_demo">
-                <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                <button type="submit" class="btn btn--danger">Limpiar datos de prueba</button>
-            </form>
-            <?php endif; ?>
-        </div>
-    </div>
-
-    <?php if ($isFullAdmin): ?>
-    <div class="card">
-        <strong>Docentes (<?= count($teachers = Courses::teachers((int) $course['id'])) ?>)</strong>
-        <div class="table-wrap">
-        <table>
-            <tr><th>Usuario</th><th>Nombre</th><th></th></tr>
-            <?php foreach ($teachers as $t): ?>
-            <tr>
-                <td><?= htmlspecialchars($t['username']) ?></td>
-                <td><?= htmlspecialchars($t['display_name']) ?></td>
-                <td>
-                    <form method="post" class="inline">
-                    <?= csrf_field() ?>
-                        <input type="hidden" name="form_action" value="remove_teacher">
-                        <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                        <input type="hidden" name="user_id" value="<?= $t['id'] ?>">
-                        <button type="submit" class="btn btn--danger btn--xs">Quitar</button>
-                    </form>
-                </td>
-            </tr>
+        <input type="text" id="roster_search" placeholder="Buscar por nombre o usuario..." class="input" style="margin:0.6rem 0;" oninput="rosterFilter()">
+        <?php if ($origins): ?>
+        <div style="margin-bottom:0.5rem;">
+            <span class="help help--xs">Filtrar candidatos por curso de Moodle:</span>
+            <?php foreach ($origins as $label => $count): ?>
+            <button type="button" class="btn btn--secondary btn--xs" style="margin:0 0.3rem 0.3rem 0;" onclick="rosterSelectOrigin(<?= htmlspecialchars(json_encode($label), ENT_QUOTES) ?>)">Todos de "<?= htmlspecialchars($label) ?>" (<?= $count ?>)</button>
             <?php endforeach; ?>
-            <?php if (!$teachers): ?>
-            <tr><td colspan="3" class="muted">Sin docentes asignados todavía.</td></tr>
-            <?php endif; ?>
-        </table>
         </div>
-        <form method="post" class="row" style="margin-top:0.6rem;">
+        <?php endif; ?>
+
+        <form method="post" id="roster_form">
         <?= csrf_field() ?>
-            <input type="hidden" name="form_action" value="add_teacher">
+            <input type="hidden" name="form_action" value="bulk_enroll_selected">
             <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-            <label style="flex:1; margin:0;">Agregar docente (nombre o username)
-                <input type="text" name="username" list="teachers_datalist" required>
-            </label>
-            <button type="submit" class="btn btn--secondary btn--sm">Agregar</button>
-        </form>
-    </div>
-    <?php endif; ?>
-
-    <div class="card">
-        <strong>Alumnos matriculados (<?= count($students) ?>)</strong>
-        <div class="table-wrap">
-        <table>
-            <tr><th>Usuario</th><th>Nombre</th><th></th></tr>
-            <?php foreach ($students as $s): ?>
-            <tr>
-                <td><?= htmlspecialchars($s['username']) ?></td>
-                <td><a href="student.php?id=<?= $s['id'] ?>"><?= htmlspecialchars($s['display_name']) ?></a></td>
-                <td>
-                    <form method="post" class="inline" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Quitar a ' . $s['username'] . ' del curso? También lo saca de cualquier grupo del curso.'), ENT_QUOTES) ?>);">
-                    <?= csrf_field() ?>
-                        <input type="hidden" name="form_action" value="remove_student">
-                        <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                        <input type="hidden" name="user_id" value="<?= $s['id'] ?>">
-                        <button type="submit" class="btn btn--danger btn--xs">Quitar</button>
-                    </form>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-            <?php if (!$students): ?>
-            <tr><td colspan="3" class="muted">Sin alumnos matriculados todavía.</td></tr>
-            <?php endif; ?>
-        </table>
-        </div>
-
-        <?php $enrollable = Courses::enrollableStudents((int) $course['id']); ?>
-        <div class="section-sep section-sep--lg">
-            <strong>Matricular alumnos existentes</strong>
-            <?php if (!$enrollable): ?>
-            <p style="color:var(--color-muted); font-size:0.85rem;">Todos los alumnos activos ya están en este curso.</p>
-            <?php else: ?>
-            <?php
-                $origins = [];
-                foreach ($enrollable as $u) {
-                    $o = trim((string) ($u['origin'] ?? ''));
-                    if ($o !== '') {
-                        $origins[$o] = ($origins[$o] ?? 0) + 1;
-                    }
-                }
-                ksort($origins);
-            ?>
-            <p style="font-size:0.8rem; color:var(--color-muted);">Busca por nombre o usuario, marca a los que quieras, o usa "seleccionar todos". Si Moodle informó de qué curso vienen, aparecen agrupados abajo -- un clic selecciona a todo ese grupo.</p>
-            <input type="text" id="roster_search" placeholder="Buscar por nombre o usuario..." class="input" style="margin-bottom:0.5rem;" oninput="rosterFilter()">
-            <?php if ($origins): ?>
-            <div style="margin-bottom:0.5rem;">
-                <?php foreach ($origins as $label => $count): ?>
-                <button type="button" class="btn btn--secondary btn--xs" style="margin:0 0.3rem 0.3rem 0;" onclick="rosterSelectOrigin(<?= htmlspecialchars(json_encode($label), ENT_QUOTES) ?>)">Todos de "<?= htmlspecialchars($label) ?>" (<?= $count ?>)</button>
+            <div class="scrollbox scrollbox--tall pane">
+            <div class="table-wrap">
+            <table id="roster_table" style="margin:0;">
+                <tr>
+                    <th><input type="checkbox" id="roster_select_all" onclick="rosterToggleAll(this)" title="Seleccionar todos los candidatos visibles"></th>
+                    <th>Usuario</th><th>Nombre</th><th>Origen</th><th>Grupos</th><th></th>
+                </tr>
+                <?php foreach ($students as $s): ?>
+                <tr class="roster_row" data-origin="" data-search="<?= htmlspecialchars(mb_strtolower($s['username'] . ' ' . $s['display_name'])) ?>">
+                    <td></td>
+                    <td><?= htmlspecialchars($s['username']) ?></td>
+                    <td><a href="student.php?id=<?= $s['id'] ?>"><?= htmlspecialchars($s['display_name']) ?></a></td>
+                    <td class="help help--xs">—</td>
+                    <td>
+                        <?php $g0 = $groupMap[$s['id']][0] ?? null; ?>
+                        <?php if ($g0): ?>
+                        <span class="tag tag--muted"><?= htmlspecialchars($g0['name']) ?></span>
+                        <?php else: ?>
+                        <span class="help help--xs">sin grupo</span>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <form method="post" class="inline" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Quitar a ' . $s['username'] . ' del curso? También lo saca de cualquier grupo del curso.'), ENT_QUOTES) ?>);">
+                        <?= csrf_field() ?>
+                            <input type="hidden" name="form_action" value="remove_student">
+                            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+                            <input type="hidden" name="user_id" value="<?= $s['id'] ?>">
+                            <button type="submit" class="btn btn--danger btn--xs">Quitar</button>
+                        </form>
+                    </td>
+                </tr>
                 <?php endforeach; ?>
+                <?php foreach ($enrollable as $u): ?>
+                <tr class="roster_row" data-origin="<?= htmlspecialchars((string) ($u['origin'] ?? '')) ?>" data-search="<?= htmlspecialchars(mb_strtolower($u['username'] . ' ' . $u['display_name'] . ' ' . ($u['origin'] ?? ''))) ?>">
+                    <td><input type="checkbox" name="user_ids[]" value="<?= $u['id'] ?>" class="roster_check" onchange="rosterUpdateCount()"></td>
+                    <td><?= htmlspecialchars($u['username']) ?></td>
+                    <td><?= htmlspecialchars($u['display_name']) ?></td>
+                    <td class="help help--xs"><?= htmlspecialchars($u['origin'] ?: '—') ?></td>
+                    <td class="help help--xs">sin matricular</td>
+                    <td></td>
+                </tr>
+                <?php endforeach; ?>
+                <?php if (!$students && !$enrollable): ?>
+                <tr><td colspan="6" class="muted">Sin alumnos matriculados ni candidatos disponibles.</td></tr>
+                <?php endif; ?>
+            </table>
             </div>
-            <?php endif; ?>
-            <form method="post" id="roster_form">
-            <?= csrf_field() ?>
-                <input type="hidden" name="form_action" value="bulk_enroll_selected">
-                <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                <div class="scrollbox scrollbox--tall pane">
-                <div class="table-wrap">
-                <table id="roster_table" style="margin:0;">
-                    <tr>
-                        <th><input type="checkbox" id="roster_select_all" onclick="rosterToggleAll(this)" title="Seleccionar todos los visibles"></th>
-                        <th>Usuario</th><th>Nombre</th><th>Origen (Moodle)</th>
-                    </tr>
-                    <?php foreach ($enrollable as $u): ?>
-                    <tr class="roster_row" data-origin="<?= htmlspecialchars((string) ($u['origin'] ?? '')) ?>" data-search="<?= htmlspecialchars(mb_strtolower($u['username'] . ' ' . $u['display_name'] . ' ' . ($u['origin'] ?? ''))) ?>">
-                        <td><input type="checkbox" name="user_ids[]" value="<?= $u['id'] ?>" class="roster_check" onchange="rosterUpdateCount()"></td>
-                        <td><?= htmlspecialchars($u['username']) ?></td>
-                        <td><?= htmlspecialchars($u['display_name']) ?></td>
-                        <td class="help help--xs"><?= htmlspecialchars($u['origin'] ?: '—') ?></td>
-                    </tr>
-                    <?php endforeach; ?>
-                </table>
-                </div>
-                </div>
-                <button type="submit" class="btn btn--secondary" style="margin-top:0.5rem;">Matricular seleccionados (<span id="roster_count">0</span>)</button>
-            </form>
-            <script>
-            (function () {
-                function rows() { return document.querySelectorAll('#roster_table .roster_row'); }
-                window.rosterFilter = function () {
-                    var q = document.getElementById('roster_search').value.toLowerCase();
-                    rows().forEach(function (row) {
-                        row.style.display = row.dataset.search.indexOf(q) === -1 ? 'none' : '';
-                    });
-                };
-                window.rosterSelectOrigin = function (label) {
-                    rows().forEach(function (row) {
-                        if (row.dataset.origin === label) {
-                            row.style.display = '';
-                            row.querySelector('.roster_check').checked = true;
-                        }
-                    });
-                    rosterUpdateCount();
-                };
-                window.rosterToggleAll = function (cb) {
-                    rows().forEach(function (row) {
-                        if (row.style.display !== 'none') {
-                            row.querySelector('.roster_check').checked = cb.checked;
-                        }
-                    });
-                    rosterUpdateCount();
-                };
-                window.rosterUpdateCount = function () {
-                    document.getElementById('roster_count').textContent =
-                        document.querySelectorAll('#roster_table .roster_check:checked').length;
-                };
-            })();
-            </script>
-            <?php endif; ?>
-        </div>
+            </div>
+            <button type="submit" class="btn btn--secondary" style="margin-top:0.5rem;">Matricular seleccionados (<span id="roster_count">0</span>)</button>
+        </form>
+        <script>
+        (function () {
+            function rows() { return document.querySelectorAll('#roster_table .roster_row'); }
+            window.rosterFilter = function () {
+                var q = document.getElementById('roster_search').value.toLowerCase();
+                rows().forEach(function (row) {
+                    row.style.display = row.dataset.search.indexOf(q) === -1 ? 'none' : '';
+                });
+            };
+            window.rosterSelectOrigin = function (label) {
+                rows().forEach(function (row) {
+                    if (row.dataset.origin === label) {
+                        row.style.display = '';
+                        var cb = row.querySelector('.roster_check');
+                        if (cb) cb.checked = true;
+                    }
+                });
+                rosterUpdateCount();
+            };
+            window.rosterToggleAll = function (cb) {
+                rows().forEach(function (row) {
+                    if (row.style.display !== 'none') {
+                        var rowCb = row.querySelector('.roster_check');
+                        if (rowCb) rowCb.checked = cb.checked;
+                    }
+                });
+                rosterUpdateCount();
+            };
+            window.rosterUpdateCount = function () {
+                document.getElementById('roster_count').textContent =
+                    document.querySelectorAll('#roster_table .roster_check:checked').length;
+            };
+        })();
+        </script>
 
         <details class="section-sep section-sep--lg">
             <summary>Agregar alumno nuevo o sin Moodle (manual)</summary>
@@ -508,53 +410,93 @@ if ($detailId !== null) {
         </details>
     </div>
 
+    <?php if ($isFullAdmin): ?>
+    <div class="card">
+        <strong>Docentes (<?= count($teachers = Courses::teachers((int) $course['id'])) ?>)</strong>
+        <div class="table-wrap">
+        <table>
+            <tr><th>Usuario</th><th>Nombre</th><th></th></tr>
+            <?php foreach ($teachers as $t): ?>
+            <tr>
+                <td><?= htmlspecialchars($t['username']) ?></td>
+                <td><?= htmlspecialchars($t['display_name']) ?></td>
+                <td>
+                    <form method="post" class="inline">
+                    <?= csrf_field() ?>
+                        <input type="hidden" name="form_action" value="remove_teacher">
+                        <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+                        <input type="hidden" name="user_id" value="<?= $t['id'] ?>">
+                        <button type="submit" class="btn btn--danger btn--xs">Quitar</button>
+                    </form>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+            <?php if (!$teachers): ?>
+            <tr><td colspan="3" class="muted">Sin docentes asignados todavía.</td></tr>
+            <?php endif; ?>
+        </table>
+        </div>
+        <form method="post" class="row" style="margin-top:0.6rem;">
+        <?= csrf_field() ?>
+            <input type="hidden" name="form_action" value="add_teacher">
+            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+            <label style="flex:1; margin:0;">Agregar docente (nombre o username)
+                <input type="text" name="username" list="teachers_datalist" required>
+            </label>
+            <button type="submit" class="btn btn--secondary btn--sm">Agregar</button>
+        </form>
+    </div>
+    <?php endif; ?>
+
     <div class="card">
         <strong>Grupos</strong>
-        <p class="muted">Para citar a un subgrupo (p. ej. 5 alumnos a la misma hora) sin asignarlos uno por uno en la agenda.</p>
-        <?php foreach (Courses::groupsForCourse((int) $course['id']) as $g): ?>
-        <div style="border-top:1px solid var(--color-border); padding-top:0.8rem; margin-top:0.8rem;">
-            <strong><?= htmlspecialchars($g['name']) ?></strong> (<?= (int) $g['member_count'] ?> miembros)
-            <form method="post" class="inline" style="margin-left:0.6rem;" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Eliminar el grupo ' . $g['name'] . '?'), ENT_QUOTES) ?>);">
-            <?= csrf_field() ?>
-                <input type="hidden" name="form_action" value="delete_group">
-                <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                <input type="hidden" name="group_id" value="<?= $g['id'] ?>">
-                <button type="submit" class="btn btn--danger btn--xs">Eliminar grupo</button>
-            </form>
-            <div class="table-wrap">
-            <table>
-                <tr><th>Usuario</th><th>Nombre</th><th></th></tr>
-                <?php foreach (Courses::membersOfGroup((int) $g['id']) as $m): ?>
-                <tr>
-                    <td><?= htmlspecialchars($m['username']) ?></td>
-                    <td><?= htmlspecialchars($m['display_name']) ?></td>
-                    <td>
-                        <form method="post" class="inline">
-                        <?= csrf_field() ?>
-                            <input type="hidden" name="form_action" value="remove_group_member">
-                            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                            <input type="hidden" name="group_id" value="<?= $g['id'] ?>">
-                            <input type="hidden" name="user_id" value="<?= $m['id'] ?>">
-                            <button type="submit" class="btn btn--danger btn--xs">Quitar</button>
-                        </form>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </table>
+        <p class="muted">Para citar a un subgrupo (p. ej. 5 alumnos a la misma hora) sin asignarlos uno por uno en la agenda. Un alumno pertenece a un solo grupo a la vez -- arrastralo a otra columna para moverlo, o a "Sin grupo" para sacarlo.</p>
+
+        <?php
+            $groupedIds = [];
+            foreach ($groupMap as $uid => $gs) {
+                if ($gs) {
+                    $groupedIds[$uid] = (int) $gs[0]['id'];
+                }
+            }
+            $unassigned = array_values(array_filter($students, fn($s) => !isset($groupedIds[$s['id']])));
+        ?>
+        <div id="group_board" style="display:flex; gap:0.8rem; overflow-x:auto; padding-bottom:0.4rem; margin-top:0.6rem;">
+            <div class="pane group_column" data-group-id="" style="min-width:200px; flex:1 1 200px;">
+                <strong>Sin grupo (<span class="group_count"><?= count($unassigned) ?></span>)</strong>
+                <div class="group_dropzone" style="min-height:3rem; margin-top:0.5rem;">
+                    <?php foreach ($unassigned as $s): ?>
+                    <div class="group_card" draggable="true" data-user-id="<?= $s['id'] ?>"><?= htmlspecialchars($s['display_name']) ?></div>
+                    <?php endforeach; ?>
+                </div>
             </div>
-            <form method="post" class="row">
-            <?= csrf_field() ?>
-                <input type="hidden" name="form_action" value="add_group_member">
-                <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                <input type="hidden" name="group_id" value="<?= $g['id'] ?>">
-                <label style="flex:1; margin:0;">Agregar al grupo (nombre o username, debe estar matriculado en el curso)
-                    <input type="text" name="username" list="students_datalist" required>
-                </label>
-                <button type="submit" class="btn btn--secondary btn--sm">Agregar</button>
-            </form>
+            <?php foreach ($groups as $g): ?>
+            <div class="pane group_column" data-group-id="<?= $g['id'] ?>" style="min-width:200px; flex:1 1 200px;">
+                <div class="row row--between" style="margin:0; align-items:center;">
+                    <strong><?= htmlspecialchars($g['name']) ?> (<span class="group_count"><?= (int) $g['member_count'] ?></span>)</strong>
+                    <form method="post" class="inline" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Eliminar el grupo ' . $g['name'] . '? Sus miembros quedan sin grupo.'), ENT_QUOTES) ?>);">
+                    <?= csrf_field() ?>
+                        <input type="hidden" name="form_action" value="delete_group">
+                        <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+                        <input type="hidden" name="group_id" value="<?= $g['id'] ?>">
+                        <button type="submit" class="btn btn--danger btn--xs" title="Eliminar grupo">&times;</button>
+                    </form>
+                </div>
+                <div class="group_dropzone" style="min-height:3rem; margin-top:0.5rem;">
+                    <?php foreach ($students as $s): ?>
+                    <?php if (($groupedIds[$s['id']] ?? null) !== (int) $g['id']) continue; ?>
+                    <div class="group_card" draggable="true" data-user-id="<?= $s['id'] ?>"><?= htmlspecialchars($s['display_name']) ?></div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
+            <?php if (!$groups): ?>
+            <p class="muted">Sin grupos creados todavía -- creá uno abajo.</p>
+            <?php endif; ?>
         </div>
-        <?php endforeach; ?>
-        <form method="post" class="row" style="margin-top:0.8rem; border-top:1px solid var(--color-border); padding-top:0.8rem;">
+        <p id="group_board_error" class="error" hidden style="margin-top:0.6rem;"></p>
+
+        <form method="post" class="row" style="margin-top:0.8rem;">
         <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="create_group">
             <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
@@ -563,6 +505,126 @@ if ($detailId !== null) {
             </label>
             <button type="submit" class="btn btn--secondary btn--sm">Crear grupo</button>
         </form>
+
+        <script>
+        (function () {
+            var board = document.getElementById('group_board');
+            if (!board) return;
+            var csrfToken = <?= json_encode(Auth::csrfToken()) ?>;
+            var courseId = <?= (int) $course['id'] ?>;
+            var errorBox = document.getElementById('group_board_error');
+            var dragged = null;
+
+            function updateCounts() {
+                board.querySelectorAll('.group_column').forEach(function (col) {
+                    var count = col.querySelectorAll('.group_card').length;
+                    var label = col.querySelector('.group_count');
+                    if (label) label.textContent = count;
+                });
+            }
+
+            board.querySelectorAll('.group_card').forEach(function (card) {
+                card.addEventListener('dragstart', function () { dragged = card; });
+            });
+
+            board.querySelectorAll('.group_dropzone').forEach(function (zone) {
+                zone.addEventListener('dragover', function (e) {
+                    e.preventDefault();
+                    zone.classList.add('group_dropzone--over');
+                });
+                zone.addEventListener('dragleave', function () {
+                    zone.classList.remove('group_dropzone--over');
+                });
+                zone.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                    zone.classList.remove('group_dropzone--over');
+                    if (!dragged) return;
+
+                    var fromZone = dragged.parentElement;
+                    if (fromZone === zone) return;
+
+                    var userId = dragged.dataset.userId;
+                    var groupId = zone.closest('.group_column').dataset.groupId;
+
+                    zone.appendChild(dragged);
+                    updateCounts();
+                    errorBox.hidden = true;
+
+                    var body = new URLSearchParams();
+                    body.set('csrf_token', csrfToken);
+                    body.set('course_id', courseId);
+                    body.set('user_id', userId);
+                    body.set('group_id', groupId);
+
+                    fetch('group_move.php', { method: 'POST', body: body })
+                        .then(function (r) { return r.json(); })
+                        .then(function (data) {
+                            if (!data.ok) {
+                                throw new Error(data.error || 'No se pudo mover al alumno.');
+                            }
+                        })
+                        .catch(function (err) {
+                            fromZone.appendChild(dragged);
+                            updateCounts();
+                            errorBox.textContent = err.message;
+                            errorBox.hidden = false;
+                        });
+                });
+            });
+        })();
+        </script>
+    </div>
+
+    <div class="card">
+        <strong>Módulos habilitados</strong>
+        <p class="help help--mt">
+            Qué ve un alumno de este curso en la app de escritorio. Sin marcar nada, el curso queda sin módulos habilitados.
+        </p>
+        <?php $enabledModules = Courses::enabledModules((int) $course['id']); ?>
+        <form method="post">
+        <?= csrf_field() ?>
+            <input type="hidden" name="form_action" value="set_modules">
+            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+            <?php foreach (Courses::modulesGroupedByBox() as $boxLabel => $boxModules): ?>
+            <div class="section-sep">
+                <strong><?= htmlspecialchars($boxLabel) ?></strong>
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:0.4rem 1rem; margin-top:0.4rem;">
+                    <?php foreach ($boxModules as $code => $label): ?>
+                    <label style="font-weight:normal; display:flex; align-items:center; gap:0.3rem; margin:0;">
+                        <input type="checkbox" name="modules[]" value="<?= htmlspecialchars($code) ?>" <?= in_array($code, $enabledModules, true) ? 'checked' : '' ?>>
+                        <?= htmlspecialchars($label) ?>
+                    </label>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
+            <button type="submit" class="btn btn--secondary" style="margin-top:0.6rem;">Guardar módulos</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <details>
+        <summary><strong>Área de pruebas</strong></summary>
+        <p class="help help--mt">
+            Un alumno más del curso para probar la app de punta a punta (agendarle pacientes, atender, etc.) sin tocar datos de alumnos reales. Invisible para los alumnos -- solo docente/admin lo ven acá. Entra con código de 6 dígitos, igual que un alumno LTI -- sin usuario ni contraseña que gestionar.
+        </p>
+        <div class="row" style="margin-top:0.5rem;">
+            <form method="post">
+            <?= csrf_field() ?>
+                <input type="hidden" name="form_action" value="generate_demo_code">
+                <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+                <button type="submit" class="btn btn--secondary">Generar código de acceso</button>
+            </form>
+            <?php if ($demoStudent !== null): ?>
+            <form method="post" onsubmit="return confirm('¿Borrar todas las citas/atenciones/chats de prueba del demo? La cuenta queda igual.');">
+            <?= csrf_field() ?>
+                <input type="hidden" name="form_action" value="clean_demo">
+                <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+                <button type="submit" class="btn btn--danger">Limpiar datos de prueba</button>
+            </form>
+            <?php endif; ?>
+        </div>
+        </details>
     </div>
     <?php
     admin_footer();
@@ -634,18 +696,17 @@ if (!$isFullAdmin) {
     <strong>Cursos</strong>
     <div class="table-wrap">
     <table>
-        <tr><th>Nombre</th><th>Estado</th><th>Docentes</th><th>Alumnos</th><th></th></tr>
+        <tr><th>Nombre</th><th>Estado</th><th>Docentes</th><th>Alumnos</th></tr>
         <?php foreach ($courses as $c): ?>
         <tr>
             <td><a href="courses.php?id=<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></a></td>
             <td><?= $c['active'] ? 'activo' : 'archivado' ?></td>
             <td><?= count(Courses::teachers((int) $c['id'])) ?></td>
             <td><?= count(array_filter(Courses::students((int) $c['id']), static fn($s) => !$s['is_demo'])) ?></td>
-            <td><a href="courses.php?id=<?= $c['id'] ?>">Ver</a></td>
         </tr>
         <?php endforeach; ?>
         <?php if (!$courses): ?>
-        <tr><td colspan="5" class="muted">Ningún curso creado todavía.</td></tr>
+        <tr><td colspan="4" class="muted">Ningún curso creado todavía.</td></tr>
         <?php endif; ?>
     </table>
     </div>

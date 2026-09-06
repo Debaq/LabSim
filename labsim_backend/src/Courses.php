@@ -462,6 +462,26 @@ final class Courses
         return $stmt->fetchAll();
     }
 
+    /**
+     * Grupos de cada alumno matriculado en $courseId, para pintar chips en
+     * la tabla de Alumnos sin repetir una tabla de miembros por grupo (ver
+     * admin/courses.php). [user_id => [['id'=>, 'name'=>], ...]].
+     */
+    public static function studentGroupMap(int $courseId): array
+    {
+        $stmt = Db::get()->prepare(
+            'SELECT gm.user_id, g.id, g.name FROM group_members gm
+             JOIN student_groups g ON g.id = gm.group_id
+             WHERE g.course_id = ? ORDER BY g.name'
+        );
+        $stmt->execute([$courseId]);
+        $map = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $map[(int) $row['user_id']][] = ['id' => (int) $row['id'], 'name' => $row['name']];
+        }
+        return $map;
+    }
+
     public static function membersOfGroup(int $groupId): array
     {
         $stmt = Db::get()->prepare(
@@ -490,31 +510,41 @@ final class Courses
         $pdo->prepare('DELETE FROM student_groups WHERE id = ?')->execute([$groupId]);
     }
 
-    /** Agrega al alumno al grupo -- debe ya estar matriculado en el curso del grupo. */
-    public static function addGroupMemberByUsername(int $groupId, int $courseId, string $username): ?string
+    /**
+     * Mueve a $userId al grupo $groupId dentro de $courseId, o lo deja sin
+     * grupo si $groupId es null. Un alumno pertenece como máximo a UN grupo
+     * por curso -- por eso esto primero lo saca de cualquier otro grupo del
+     * mismo curso antes de sumarlo al nuevo (nunca "agrega", siempre
+     * "mueve"). Pensado para el tablero de arrastrar-y-soltar de
+     * admin/courses.php (ver admin/group_move.php).
+     */
+    public static function moveStudentToGroup(int $courseId, int $userId, ?int $groupId): ?string
     {
-        $stmt = Db::get()->prepare('SELECT id FROM users WHERE username = ?');
-        $stmt->execute([$username]);
-        $user = $stmt->fetch();
-        if (!$user) {
-            return "Usuario '{$username}' no encontrado.";
+        if (!self::isStudentOf($userId, $courseId)) {
+            return 'El alumno no está matriculado en este curso.';
         }
-        $userId = (int) $user['id'];
-
-        $stmt = Db::get()->prepare('SELECT 1 FROM course_students WHERE course_id = ? AND user_id = ?');
-        $stmt->execute([$courseId, $userId]);
-        if (!$stmt->fetch()) {
-            return "'{$username}' no está matriculado en este curso todavía -- agrégalo al roster primero.";
+        if ($groupId !== null) {
+            $stmt = Db::get()->prepare('SELECT 1 FROM student_groups WHERE id = ? AND course_id = ?');
+            $stmt->execute([$groupId, $courseId]);
+            if (!$stmt->fetch()) {
+                return 'El grupo no pertenece a este curso.';
+            }
         }
 
-        Db::get()->prepare('INSERT OR IGNORE INTO group_members (group_id, user_id) VALUES (?, ?)')
-            ->execute([$groupId, $userId]);
+        $pdo = Db::get();
+        $pdo->beginTransaction();
+        try {
+            $pdo->prepare(
+                'DELETE FROM group_members WHERE user_id = ? AND group_id IN (SELECT id FROM student_groups WHERE course_id = ?)'
+            )->execute([$userId, $courseId]);
+            if ($groupId !== null) {
+                $pdo->prepare('INSERT INTO group_members (group_id, user_id) VALUES (?, ?)')->execute([$groupId, $userId]);
+            }
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
         return null;
-    }
-
-    public static function removeGroupMember(int $groupId, int $userId): void
-    {
-        Db::get()->prepare('DELETE FROM group_members WHERE group_id = ? AND user_id = ?')
-            ->execute([$groupId, $userId]);
     }
 }
