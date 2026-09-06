@@ -4,15 +4,26 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/ReportFile.php';
-require_once __DIR__ . '/../../src/ReportPdfBuilder.php';
 
 /**
  * Sube (o rehace) el informe de un módulo "de examen" (ABR/EOA/VEMP/
  * electrococleo) para una atención propia -- ver tabla `reports` en
  * schema.sql. multipart/form-data:
- *   attendance_id (int), tipo (string), data (JSON string),
+ *   appointment_id (int), tipo (string), data (JSON string),
  *   image_0 / image_1 / image_lat_int (archivos JPEG, todos opcionales --
  *   el módulo manda los que tenga).
+ *
+ * Recibe appointment_id (no attendance_id): el cliente de escritorio es
+ * offline-first y no siempre conoce el id interno de attendances (fila
+ * creada por attendance_action.php, puede sincronizarse un rato después de
+ * que el alumno empieza a atender) -- acá se resuelve con
+ * (appointment_id, student_id=el del token), igual que hace el resto de la
+ * app para todo lo demás.
+ *
+ * Solo guarda datos+imágenes -- el PDF NO se arma acá. Se genera la
+ * primera vez que alguien lo pide (ver report_pdf.php) y queda cacheado en
+ * disco: evita rehacer el PDF en cada guardado intermedio del alumno
+ * cuando probablemente nadie lo va a descargar todavía.
  *
  * Mientras attendances.estado siga 'atendiendo' esto es un upsert libre
  * (el alumno puede rehacer el informe cuantas veces quiera). Una vez
@@ -24,12 +35,12 @@ const REPORT_IMAGE_SUFFIXES = ['0', '1', 'lat_int'];
 
 $user = Auth::requireUser();
 
-$attendanceId = (int) ($_POST['attendance_id'] ?? 0);
+$appointmentId = (int) ($_POST['appointment_id'] ?? 0);
 $tipo = (string) ($_POST['tipo'] ?? '');
 $dataRaw = (string) ($_POST['data'] ?? '');
 
-if ($attendanceId <= 0) {
-    Response::error('Falta attendance_id.', 400);
+if ($appointmentId <= 0) {
+    Response::error('Falta appointment_id.', 400);
 }
 if (!in_array($tipo, REPORT_TIPOS, true)) {
     Response::error('tipo inválido.', 400);
@@ -42,22 +53,21 @@ if (!is_array($data)) {
 $pdo = Db::get();
 
 $stmt = $pdo->prepare(
-    'SELECT a.id, a.student_id, a.estado, ap.rut, ap.nombre, ap.apellido, ap.fecha_nac
-     FROM attendances a JOIN appointments ap ON ap.id = a.appointment_id
-     WHERE a.id = ?'
+    'SELECT id, estado FROM attendances WHERE appointment_id = ? AND student_id = ?'
 );
-$stmt->execute([$attendanceId]);
+$stmt->execute([$appointmentId, $user['id']]);
 $attendance = $stmt->fetch();
 
 if (!$attendance) {
-    Response::error('Atención no encontrada.', 404);
-}
-if ((int) $attendance['student_id'] !== (int) $user['id']) {
-    Response::error('Esta atención no es tuya.', 403);
+    // Puede ser que attendance_action.php (estado 'atendiendo') todavía no
+    // haya sincronizado desde el cliente -- quien llama (AbrMainWindow)
+    // trata esto como "reintentar más tarde", no como error fatal.
+    Response::error('Todavía no hay una atención registrada para esa cita.', 404);
 }
 if ($attendance['estado'] === 'atendido') {
     Response::error('La atención ya está cerrada, el informe quedó fijo.', 409);
 }
+$attendanceId = (int) $attendance['id'];
 
 // Validar imágenes subidas ANTES de tocar la base -- todo o nada.
 $imageFiles = [];
@@ -88,36 +98,14 @@ $stmt = $pdo->prepare('SELECT id FROM reports WHERE attendance_id = ? AND tipo =
 $stmt->execute([$attendanceId, $tipo]);
 $reportId = (int) $stmt->fetchColumn();
 
-// El PDF queda desactualizado apenas cambia data o alguna imagen -- se
-// reconstruye al vuelo en report_pdf.php. Las imágenes NO se borran en
-// bloque: cada suffix se sobreescribe solo si viene en este request (ver
-// ReportFile::deletePdf()).
+// El PDF (si ya se había generado en una subida anterior) queda
+// desactualizado apenas cambia data o alguna imagen -- se borra acá y se
+// reconstruye recién cuando alguien lo pida (report_pdf.php). Las
+// imágenes NO se borran en bloque: cada suffix se sobreescribe solo si
+// viene en este request (ver ReportFile::deletePdf()).
 ReportFile::deletePdf($reportId);
 foreach ($imageFiles as $suffix => $tmpPath) {
     ReportFile::saveImage($reportId, $suffix, $tmpPath);
-}
-
-$patient = [
-    'rut' => $attendance['rut'],
-    'nombre' => $attendance['nombre'],
-    'apellido' => $attendance['apellido'],
-    'fecha_nac' => $attendance['fecha_nac'],
-];
-
-try {
-    $pdfBytes = ReportPdfBuilder::build(
-        $reportId,
-        $tipo,
-        $data,
-        $patient,
-        (string) $user['display_name'],
-        date('d-m-Y')
-    );
-    file_put_contents(ReportFile::pdfPath($reportId), $pdfBytes);
-} catch (Throwable $e) {
-    // El informe (fila + imágenes) ya quedó guardado -- el PDF se puede
-    // regenerar después (ver report_pdf.php); no tumbamos la subida por esto.
-    Response::json(['ok' => true, 'report_id' => $reportId, 'pdf_error' => $e->getMessage()]);
 }
 
 Response::json(['ok' => true, 'report_id' => $reportId]);

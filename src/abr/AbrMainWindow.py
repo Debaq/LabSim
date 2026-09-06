@@ -25,7 +25,9 @@ from abr.FSP import FSP
 from abr.PdfCreator import PDFCreator
 from abr.UI.AbrAdvanceSettings_ui import Ui_AdvanceSettings
 from abr.UI.AbrMain_ui import Ui_MainWindow
+from backend.client import BackendClient
 from core.base import context
+from core.helpers import Preferences
 from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import QDialog, QMainWindow, QSizePolicy, QSpacerItem
 
@@ -141,6 +143,53 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.abr_oi = abr_data.get('OI') or dict(DEFAULT_ABR_CASE)
         self.data_current = data
         self.reset()
+
+    def submit_report(self):
+        """Sube el informe (curvas marcadas + hallazgos/conclusión + JPEG de
+        los gráficos) al backend -- ver BackendClient.upload_report() /
+        report_upload.php. Se llama al cerrar la atención (main.py::
+        _cerrar_atencion_real), ANTES de que _hydrate_modules() nos saque
+        appointment_id/data_login vía la_super(None).
+
+        Best-effort a propósito: sin conexión, o si la fila 'atendiendo' de
+        attendances todavía no sincronizó desde el cliente (offline-first),
+        esto falla en silencio -- no debe romper el cierre de la atención,
+        que ya se guardó local igual. El alumno no pierde el informe: sigue
+        en pantalla, puede reintentar (ej. reabriendo la atención) o el
+        docente puede pedir que se revise a mano.
+        """
+        if not self.data_login or not self.memory:
+            return
+        try:
+            appointment_id = int(self.appointment_id)
+        except (TypeError, ValueError):
+            return
+
+        temp_dir = context.get_resource("local_cache/abr/temp")
+        exporters = {'0': self.graph_r, '1': self.graph_l, 'lat_int': self.graph_lat_int}
+        images = {}
+        for suffix, exporter in exporters.items():
+            path = os.path.join(temp_dir, f'upload_{suffix}.jpg')
+            try:
+                exporter.export_jpg(path)
+            except Exception as exc:
+                print(f"ABR: no se pudo exportar {suffix} para el informe: {exc}")
+                continue
+            images[suffix] = path
+
+        data = {
+            'curvas': self.memory,
+            'hallazgos': self.report.text_edit_1.toPlainText(),
+            'conclusion': self.report.text_edit_2.toPlainText(),
+        }
+
+        client = BackendClient(Preferences().get("BACKEND_URL"), context.get_resource('json/session.json'))
+        if not client.is_logged_in():
+            return
+        try:
+            client.upload_report(appointment_id, 'ABR', data, images)
+        except Exception as exc:
+            print(f"ABR: no se pudo subir el informe: {exc}")
 
     def reset(self):
         """Limpia completamente los gráficos y la memoria de curvas"""

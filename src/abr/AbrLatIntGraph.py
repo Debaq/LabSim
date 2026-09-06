@@ -111,6 +111,12 @@ class GraphLatInt(pg.GraphicsLayoutWidget):
         output_file = os.path.join(temp_dir, 'LatInt.png')
         export.export(output_file)
 
+    def export_jpg(self, path: str) -> None:
+        """Como export_(), pero a JPEG (para subir el informe al backend --
+        ver ReportFile.php, que solo acepta JPEG para no depender de GD)."""
+        export = exporters.ImageExporter(self.pw)
+        export.export(path)
+
 if __name__ == '__main__':
     import pyqtgraph.examples
     pyqtgraph.examples.run()

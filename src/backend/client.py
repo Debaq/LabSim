@@ -78,10 +78,7 @@ class BackendClient:
         resp.raise_for_status()
         return resp.content
 
-    def _post(self, path: str, data: dict, timeout: int = DEFAULT_TIMEOUT) -> dict:
-        resp = self._http.post(
-            f"{self._base_url}{path}", json=data, headers=self._headers(), timeout=timeout
-        )
+    def _raise_for_status_with_detail(self, resp: requests.Response) -> None:
         try:
             resp.raise_for_status()
         except requests.HTTPError as exc:
@@ -94,6 +91,12 @@ class BackendClient:
             except ValueError:
                 detail = None
             raise requests.HTTPError(detail or str(exc), response=resp) from exc
+
+    def _post(self, path: str, data: dict, timeout: int = DEFAULT_TIMEOUT) -> dict:
+        resp = self._http.post(
+            f"{self._base_url}{path}", json=data, headers=self._headers(), timeout=timeout
+        )
+        self._raise_for_status_with_detail(resp)
         return resp.json()
 
     # -- endpoints ------------------------------------------------------
@@ -207,3 +210,39 @@ class BackendClient:
         más los comentarios que el docente haya dejado (ver
         my_chat_history.php)."""
         return self._get("/api/my_chat_history.php", {"appointment_id": appointment_id})
+
+    def upload_report(
+        self, appointment_id: int, tipo: str, data: dict, images: dict[str, str], timeout: int = 30,
+    ) -> dict:
+        """Sube (o rehace) el informe de un módulo "de examen" (ABR/EOA/VEMP/
+        electrococleo) de una atención propia -- ver report_upload.php. El
+        backend resuelve solo el attendance_id a partir de appointment_id +
+        el usuario del token (no hace falta que el cliente lo conozca --
+        vive puramente del lado del backend, ver schema.sql). `images`:
+        {suffix: ruta} de JPEG ya exportados (suffixes: '0', '1', 'lat_int',
+        todos opcionales -- solo se mandan los que existan).
+
+        Se puede rehacer mientras la atención siga 'atendiendo'; una vez
+        'atendido' el backend lo rechaza (409) -- responsabilidad de quien
+        llama decidir si eso es un error real o no (ver AbrMainWindow)."""
+        opened = []
+        try:
+            files = {}
+            for suffix, path in images.items():
+                f = open(path, "rb")
+                opened.append(f)
+                files[f"image_{suffix}"] = (f"{suffix}.jpg", f, "image/jpeg")
+            form = {
+                "appointment_id": str(appointment_id),
+                "tipo": tipo,
+                "data": json.dumps(data, ensure_ascii=False),
+            }
+            resp = self._http.post(
+                f"{self._base_url}/api/report_upload.php",
+                data=form, files=files, headers=self._headers(), timeout=timeout,
+            )
+            self._raise_for_status_with_detail(resp)
+            return resp.json()
+        finally:
+            for f in opened:
+                f.close()
