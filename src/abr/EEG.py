@@ -20,6 +20,8 @@ class EEG(GraphicsLayoutWidget):
         ax = self.pw.getAxis('bottom')
         ay = self.pw.getAxis('left')
         ax.setStyle(showValues=False)
+        ax.setPen(self.color_pen)
+        ay.setPen(self.color_pen)
         self.x = 0
         self.y = 0
         self.title()

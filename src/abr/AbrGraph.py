@@ -39,7 +39,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         """Set up UI elements for the graph"""
         self.pw = self.addPlot(row=0,col=1)
         self.pw.setRange(yRange=(-3, 3), xRange=(0, 13), disableAutoRange=True)
-        self.grid = pg.GridItem(textPen='white')
+        self.grid = pg.GridItem(pen=self.color_pen, textPen=self.color_pen)
         self.pw.addItem(self.grid)
         self.grid.setTickSpacing(x=[1.0], y=[1.0])
         self.pw.setMouseEnabled(x=False, y=True)

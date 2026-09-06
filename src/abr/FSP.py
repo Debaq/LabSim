@@ -5,6 +5,7 @@ class FSP(pg.GraphicsLayoutWidget):
     def __init__(self, mean=1000):
         super().__init__()
         self.mean = mean
+        self.color_pen = pg.mkColor(0, 0, 0, 255)
         self.setBackground('w')  # Fondo blanco
         self.pw1 = self.addPlot(row=0, col=0)
 
@@ -35,6 +36,8 @@ class FSP(pg.GraphicsLayoutWidget):
         ax = self.pw1.getAxis('bottom')
         ay = self.pw1.getAxis('left')
         ax.setStyle(showValues=False)
+        ax.setPen(self.color_pen)
+        ay.setPen(self.color_pen)
 
         # Agregar título
         self.title()

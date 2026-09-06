@@ -24,7 +24,7 @@ class GraphLatInt(pg.GraphicsLayoutWidget):
 
         self.pw.setRange(yRange=(0, 12), xRange=(0, 100), disableAutoRange=True)
         self.pw.setLabels(left='ms', bottom='dBnHL')
-        grid = pg.GridItem(textPen='white')
+        grid = pg.GridItem(pen=self.color_pen, textPen=self.color_pen)
         self.pw.addItem(grid)
         grid.setTickSpacing(x=[10], y=[1.0])
 
