@@ -261,6 +261,24 @@ final class Db
     }
 
     /**
+     * Agrega lti_platform_id/context_id a pairing_codes/tokens -- instalaciones
+     * de antes de que la sesión guardara el contexto LTI de origen (ver
+     * comentario de esas columnas en sql/schema.sql). NULL en ambas para
+     * cualquier fila ya existente no cambia nada: sigue resolviendo sin
+     * curso asociado, igual que hoy.
+     */
+    public static function migrateSessionLtiContextIfNeeded(): void
+    {
+        $pdo = self::get();
+        self::addColumnIfMissing($pdo, 'pairing_codes', 'lti_platform_id', 'INTEGER REFERENCES lti_platforms(id)');
+        self::addColumnIfMissing($pdo, 'pairing_codes', 'context_id', 'TEXT');
+        self::addColumnIfMissing($pdo, 'tokens', 'lti_platform_id', 'INTEGER REFERENCES lti_platforms(id)');
+        self::addColumnIfMissing($pdo, 'tokens', 'context_id', 'TEXT');
+        self::addColumnIfMissing($pdo, 'lti_states', 'context_id', 'TEXT');
+        self::addColumnIfMissing($pdo, 'lti_oauth_nonces', 'context_id', 'TEXT');
+    }
+
+    /**
      * Solo agrega patient_id a appointments/cases (sin tocar `patients` ni
      * backfillear nada) -- instalaciones de antes de que esa columna
      * existiera. Llamar SIEMPRE antes de aplicar schema.sql: ese archivo

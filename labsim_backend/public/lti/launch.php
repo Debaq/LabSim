@@ -53,7 +53,7 @@ if (isset($_POST['oauth_consumer_key'])) {
         Lti::autoEnrollIfMapped($platformId, $contextId, $userId);
         Lti::recordContextSighting($userId, $platformId, $contextId, $contextLabel);
     }
-    $markCode = static fn (string $code) => Lti::markNonceCode($result['consumer_key'], $result['nonce'], $userId, $code);
+    $markCode = static fn (string $code) => Lti::markNonceCode($result['consumer_key'], $result['nonce'], $userId, $code, $contextId);
     $refreshKey = 'nonce:' . $result['consumer_key'] . '|' . $result['nonce'];
 } else {
     $idToken = $_POST['id_token'] ?? '';
@@ -81,11 +81,11 @@ if (isset($_POST['oauth_consumer_key'])) {
         Lti::autoEnrollIfMapped($platformId, $contextId, $userId);
         Lti::recordContextSighting($userId, $platformId, $contextId, $contextLabel);
     }
-    $markCode = static fn (string $code) => Lti::markStateCode($state, $userId, $code);
+    $markCode = static fn (string $code) => Lti::markStateCode($state, $userId, $code, $contextId);
     $refreshKey = 'state:' . $state;
 }
 
-$issued = Auth::codeForLaunch($userId, $previousCode);
+$issued = Auth::codeForLaunch($userId, $previousCode, $platformId, $contextId);
 if ($issued['renewed']) {
     $markCode($issued['code']);
 }

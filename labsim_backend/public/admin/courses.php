@@ -72,6 +72,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $success = $course['active'] ? 'Curso archivado.' : 'Curso activado.';
                 AdminAudit::log($me, $course['active'] ? 'course_archive' : 'course_activate', ['course_id' => $courseId]);
             }
+        } elseif ($action === 'set_modules') {
+            $codes = array_map('strval', (array) ($_POST['modules'] ?? []));
+            Courses::setEnabledModules($courseId, $codes);
+            $success = 'Módulos actualizados.';
+            AdminAudit::log($me, 'course_set_modules', ['course_id' => $courseId, 'modules' => Courses::enabledModules($courseId)]);
         } elseif ($action === 'add_teacher' && $isFullAdmin) {
             $username = trim((string) ($_POST['username'] ?? ''));
             $err = Courses::addMemberByUsername($courseId, $username, 'teacher');
@@ -237,6 +242,28 @@ if ($detailId !== null) {
             </form>
         </details>
         <?php endif; ?>
+    </div>
+
+    <div class="card">
+        <strong>Módulos habilitados</strong>
+        <p style="font-size:0.8rem; color:#888; margin-top:0.2rem;">
+            Qué ve un alumno de este curso en la app de escritorio. Sin marcar nada, el curso queda sin módulos habilitados.
+        </p>
+        <?php $enabledModules = Courses::enabledModules((int) $course['id']); ?>
+        <form method="post">
+        <?= csrf_field() ?>
+            <input type="hidden" name="form_action" value="set_modules">
+            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+            <div style="display:flex; flex-wrap:wrap; gap:0.4rem 1.2rem;">
+                <?php foreach (Courses::MODULES as $code => $label): ?>
+                <label style="font-weight:normal; display:flex; align-items:center; gap:0.3rem; margin:0;">
+                    <input type="checkbox" name="modules[]" value="<?= htmlspecialchars($code) ?>" <?= in_array($code, $enabledModules, true) ? 'checked' : '' ?>>
+                    <?= htmlspecialchars($label) ?>
+                </label>
+                <?php endforeach; ?>
+            </div>
+            <button type="submit" class="secondary" style="margin-top:0.6rem;">Guardar módulos</button>
+        </form>
     </div>
 
     <?php if ($isFullAdmin): ?>

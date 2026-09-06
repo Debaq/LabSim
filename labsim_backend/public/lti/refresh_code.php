@@ -16,13 +16,17 @@ $key = (string) ($body['key'] ?? '');
 
 $row = null;
 $mark = null;
+$platformId = null;
 if ($kind === 'state') {
     $row = Lti::findLaunchByState($rest);
-    $mark = static fn (string $code, int $userId) => Lti::markStateCode($rest, $userId, $code);
+    $mark = static fn (string $code, int $userId) => Lti::markStateCode($rest, $userId, $code, $row['context_id'] ?? null);
+    $platformId = $row !== null ? (int) $row['lti_platform_id'] : null;
 } elseif ($kind === 'nonce') {
     [$consumerKey, $nonce] = array_pad(explode('|', $rest, 2), 2, '');
     $row = Lti::findLaunchByNonce($consumerKey, $nonce);
-    $mark = static fn (string $code, int $userId) => Lti::markNonceCode($consumerKey, $nonce, $userId, $code);
+    $mark = static fn (string $code, int $userId) => Lti::markNonceCode($consumerKey, $nonce, $userId, $code, $row['context_id'] ?? null);
+    $platform = Lti::findPlatformByConsumerKey($consumerKey);
+    $platformId = $platform !== null ? (int) $platform['id'] : null;
 }
 
 if ($row === null || $row['user_id'] === null) {
@@ -30,7 +34,7 @@ if ($row === null || $row['user_id'] === null) {
 }
 
 $userId = (int) $row['user_id'];
-$issued = Auth::codeForLaunch($userId, $row['issued_code']);
+$issued = Auth::codeForLaunch($userId, $row['issued_code'], $platformId, $row['context_id'] ?? null);
 if ($issued['renewed']) {
     $mark($issued['code'], $userId);
 }

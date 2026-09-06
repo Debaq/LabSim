@@ -2,6 +2,31 @@
 
 final class Courses
 {
+    /**
+     * Copia a mano de los módulos "pre" (listos para usar, no en desarrollo)
+     * de resources/json/apps.json del lado del cliente Python -- el
+     * backend no tiene forma de leer ese archivo (viven en repos/paquetes
+     * distintos). Si se agrega/saca un módulo "pre" en apps.json, actualizar
+     * esto también, o el checklist de courses.php queda desincronizado.
+     * "LOGIN" no entra: es la pantalla de ingreso, no un módulo que se
+     * pueda bloquear por curso.
+     */
+    public const MODULES = [
+        'A' => 'Audiómetro',
+        'W' => 'Lista de Palabras',
+        'Z' => 'Impedanciómetro',
+        'ABR' => 'Potencial evocado auditivo de tronco cerebral',
+        'CVOICE' => 'Comandos de Voz',
+        'CVC' => 'Campo Visual Computarizado',
+        'AGENDA' => 'Agenda',
+        'CHAT' => 'Hablar con el paciente',
+        'AC' => 'Acumetría',
+        'OT' => 'Otoscopia',
+        'INBOX' => 'Bandeja de entrada',
+        'FICHA' => 'Ficha clínica',
+        'EVOLUCION' => 'Evolución',
+    ];
+
     /** Cursos donde $userId es docente (course_teachers). */
     public static function teacherCourseIds(int $userId): array
     {
@@ -20,6 +45,53 @@ final class Courses
         $stmt = Db::get()->prepare("SELECT DISTINCT user_id FROM course_students WHERE course_id IN ({$placeholders})");
         $stmt->execute($courseIds);
         return array_map('intval', array_column($stmt->fetchAll(), 'user_id'));
+    }
+
+    /** true si $userId está matriculado (course_students) en $courseId. */
+    public static function isStudentOf(int $userId, int $courseId): bool
+    {
+        $stmt = Db::get()->prepare('SELECT 1 FROM course_students WHERE course_id = ? AND user_id = ?');
+        $stmt->execute([$courseId, $userId]);
+        return (bool) $stmt->fetchColumn();
+    }
+
+    /**
+     * Códigos de módulo habilitados para $courseId (ver course_modules en
+     * sql/schema.sql). Lista vacía si el docente todavía no configuró nada
+     * -- ese curso no tiene ningún módulo habilitado hasta que lo haga.
+     */
+    public static function enabledModules(int $courseId): array
+    {
+        $stmt = Db::get()->prepare('SELECT module_code FROM course_modules WHERE course_id = ? ORDER BY module_code');
+        $stmt->execute([$courseId]);
+        return array_column($stmt->fetchAll(), 'module_code');
+    }
+
+    /**
+     * Reemplaza por completo el set de módulos habilitados de $courseId.
+     * Códigos que no están en self::MODULES se descartan en silencio -- el
+     * formulario que llama a esto ya solo manda checkboxes con códigos
+     * válidos, esto es el resguardo del lado servidor.
+     */
+    public static function setEnabledModules(int $courseId, array $moduleCodes): void
+    {
+        $pdo = Db::get();
+        $pdo->beginTransaction();
+        try {
+            $pdo->prepare('DELETE FROM course_modules WHERE course_id = ?')->execute([$courseId]);
+            $stmt = $pdo->prepare('INSERT INTO course_modules (course_id, module_code) VALUES (?, ?)');
+            foreach (array_unique($moduleCodes) as $code) {
+                $code = strtoupper(trim((string) $code));
+                if (!array_key_exists($code, self::MODULES)) {
+                    continue;
+                }
+                $stmt->execute([$courseId, $code]);
+            }
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
     }
 
     public static function listActive(): array

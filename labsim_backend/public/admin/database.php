@@ -38,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Db::migrateLtiPlatformsIfNeeded();
             Db::migrateLtiReplayColumnsIfNeeded();
             Db::migratePatientColumnsIfNeeded();
+            Db::migrateSessionLtiContextIfNeeded();
             $sql = file_get_contents(__DIR__ . '/../../sql/schema.sql');
             $pdo->exec($sql);
             // Después del exec: agrega columnas nuevas a tablas que ya

@@ -266,8 +266,8 @@ final class Lti
         }
 
         $stmt = $pdo->prepare(
-            "INSERT INTO users (role, username, display_name, lti_platform_id, lti_sub, permission, modules)
-             VALUES ('student', ?, ?, ?, ?, 444, '[\"A\", \"Z\"]')"
+            "INSERT INTO users (role, username, display_name, lti_platform_id, lti_sub, permission)
+             VALUES ('student', ?, ?, ?, ?, 444)"
         );
         $stmt->execute([$username, $name, $platform['id'], $sub]);
         return (int) $pdo->lastInsertId();
@@ -352,18 +352,18 @@ final class Lti
     }
 
     /** Marca el nonce de un launch 1.1 con el código emitido, para reconocer un replay después. */
-    public static function markNonceCode(string $consumerKey, string $nonce, int $userId, string $code): void
+    public static function markNonceCode(string $consumerKey, string $nonce, int $userId, string $code, ?string $contextId = null): void
     {
-        Db::get()->prepare('UPDATE lti_oauth_nonces SET user_id = ?, issued_code = ? WHERE consumer_key = ? AND nonce = ?')
-            ->execute([$userId, $code, $consumerKey, $nonce]);
+        Db::get()->prepare('UPDATE lti_oauth_nonces SET user_id = ?, issued_code = ?, context_id = ? WHERE consumer_key = ? AND nonce = ?')
+            ->execute([$userId, $code, $contextId, $consumerKey, $nonce]);
     }
 
     /** Marca el state de un launch 1.3 con el código emitido, y estira su vencimiento otros 10 min (el alumno sigue con la pestaña abierta refrescando/renovando el código). */
-    public static function markStateCode(string $state, int $userId, string $code): void
+    public static function markStateCode(string $state, int $userId, string $code, ?string $contextId = null): void
     {
         Db::get()->prepare(
-            "UPDATE lti_states SET user_id = ?, issued_code = ?, expires_at = datetime(CURRENT_TIMESTAMP, '+10 minutes') WHERE state = ?"
-        )->execute([$userId, $code, $state]);
+            "UPDATE lti_states SET user_id = ?, issued_code = ?, context_id = ?, expires_at = datetime(CURRENT_TIMESTAMP, '+10 minutes') WHERE state = ?"
+        )->execute([$userId, $code, $contextId, $state]);
     }
 
     /** Registra un nonce nuevo (primera vez que se ve). */

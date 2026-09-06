@@ -13,11 +13,9 @@ final class Users
         string $username,
         string $displayName,
         string $password,
-        int $permission,
-        array $modules
+        int $permission
     ): int {
         $hash = password_hash($password, PASSWORD_DEFAULT);
-        $modulesJson = json_encode($modules, JSON_UNESCAPED_UNICODE);
         $pdo = Db::get();
 
         $stmt = $pdo->prepare('SELECT id FROM users WHERE username = ?');
@@ -27,16 +25,16 @@ final class Users
         if ($existing) {
             $pdo->prepare(
                 'UPDATE users SET role = ?, display_name = ?, password_hash = ?, permission = ?,
-                        modules = ?, active = 1, updated_at = CURRENT_TIMESTAMP
+                        active = 1, updated_at = CURRENT_TIMESTAMP
                  WHERE id = ?'
-            )->execute([$role, $displayName, $hash, $permission, $modulesJson, $existing['id']]);
+            )->execute([$role, $displayName, $hash, $permission, $existing['id']]);
             return (int) $existing['id'];
         }
 
         $pdo->prepare(
-            'INSERT INTO users (role, username, display_name, password_hash, permission, modules)
-             VALUES (?, ?, ?, ?, ?, ?)'
-        )->execute([$role, $username, $displayName, $hash, $permission, $modulesJson]);
+            'INSERT INTO users (role, username, display_name, password_hash, permission)
+             VALUES (?, ?, ?, ?, ?)'
+        )->execute([$role, $username, $displayName, $hash, $permission]);
         return (int) $pdo->lastInsertId();
     }
 

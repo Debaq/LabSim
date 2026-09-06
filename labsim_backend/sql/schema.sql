@@ -34,11 +34,15 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_lti_platforms_11
 -- y emite un código -- si el navegador reenvía el mismo POST (F5), launch.php
 -- usa esas columnas para reconocer el replay y reusar/renovar el código en
 -- vez de fallar con "nonce reutilizado".
+-- context_id: contexto LTI del launch que generó issued_code -- lo necesita
+-- refresh_code.php para no perder el curso de la sesión al reemitir un
+-- código vencido (ver comentario de pairing_codes.context_id).
 CREATE TABLE IF NOT EXISTS lti_oauth_nonces (
     consumer_key TEXT NOT NULL,
     nonce TEXT NOT NULL,
     user_id INTEGER REFERENCES users(id),
     issued_code TEXT,
+    context_id TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (consumer_key, nonce)
 );
@@ -52,7 +56,7 @@ CREATE TABLE IF NOT EXISTS users (
     lti_platform_id INTEGER REFERENCES lti_platforms(id),
     lti_sub TEXT,                             -- id del usuario en Moodle
     permission INTEGER NOT NULL DEFAULT 444,
-    modules TEXT,                             -- JSON como texto plano (se maneja en PHP)
+    modules TEXT,                             -- OBSOLETA: reemplazada por course_modules, ya no se lee ni se escribe
     active INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -61,9 +65,17 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Códigos de emparejamiento temporales: puente entre el login LTI (navegador)
 -- y la app de escritorio, que no puede recibir el redirect del LMS.
+-- lti_platform_id/context_id: contexto LTI de origen de este código (NULL si
+-- se emitió fuera de un launch, ej. login local). Se resuelve a course_id en
+-- vivo vía Lti::findCourseForContext() al leer config -- no se cachea acá
+-- porque course_lti_contexts es N:1 (varios códigos LTI pueden apuntar al
+-- mismo curso, o relinkearse) y un course_id guardado en la fila se
+-- desincronizaría.
 CREATE TABLE IF NOT EXISTS pairing_codes (
     code TEXT PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id),
+    lti_platform_id INTEGER REFERENCES lti_platforms(id),
+    context_id TEXT,
     expires_at TEXT NOT NULL,
     used INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -83,9 +95,14 @@ CREATE TABLE IF NOT EXISTS portal_sso_tokens (
 
 -- Tokens de sesión de la app (bearer opaco, revocable). Reemplaza JWT del
 -- lado app<->backend: más simple de invalidar desde el panel admin.
+-- lti_platform_id/context_id: mismo criterio que pairing_codes (arriba) --
+-- contexto LTI de origen de esta sesión, NULL si no vino de un launch LTI
+-- (login local admin). El curso se resuelve en vivo, nunca se cachea acá.
 CREATE TABLE IF NOT EXISTS tokens (
     token TEXT PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id),
+    lti_platform_id INTEGER REFERENCES lti_platforms(id),
+    context_id TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -94,12 +111,14 @@ CREATE TABLE IF NOT EXISTS tokens (
 -- (ver comentario de lti_oauth_nonces arriba) cumplen el mismo rol acá para
 -- el flujo LTI 1.3: reconocer el replay del mismo state/id_token y renovar
 -- expires_at en vez de fallar con "state inválido o expirado".
+-- context_id: mismo motivo que lti_oauth_nonces.context_id (arriba).
 CREATE TABLE IF NOT EXISTS lti_states (
     state TEXT PRIMARY KEY,
     nonce TEXT NOT NULL,
     lti_platform_id INTEGER NOT NULL REFERENCES lti_platforms(id),
     user_id INTEGER REFERENCES users(id),
     issued_code TEXT,
+    context_id TEXT,
     expires_at TEXT NOT NULL
 );
 
@@ -353,6 +372,20 @@ CREATE TABLE IF NOT EXISTS course_students (
     PRIMARY KEY (course_id, user_id)
 );
 CREATE INDEX IF NOT EXISTS idx_course_students_user ON course_students(user_id);
+
+-- Módulos de la app de escritorio habilitados para un curso (código = clave
+-- de resources/json/apps.json en el cliente, ej. "A", "Z", "ABR"). La
+-- presencia de una fila es lo que habilita ese módulo -- un curso sin filas
+-- acá no tiene ningún módulo habilitado todavía (el docente debe
+-- configurarlo explícitamente, ver Courses::setEnabledModules()). Reemplaza
+-- a users.modules (columna vieja, ya no se lee ni se escribe: la
+-- visibilidad de módulos es por curso, no por usuario -- un alumno puede
+-- estar en varios cursos con reglas distintas).
+CREATE TABLE IF NOT EXISTS course_modules (
+    course_id INTEGER NOT NULL REFERENCES courses(id),
+    module_code TEXT NOT NULL,
+    PRIMARY KEY (course_id, module_code)
+);
 
 -- Vincula el "context" de un curso de Moodle (su course_id de Moodle, no el
 -- nuestro) a un curso de LabSim -- una vez vinculado, cada alumno que entra

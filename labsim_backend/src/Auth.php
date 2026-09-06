@@ -13,8 +13,13 @@ final class Auth
     /**
      * Genera un código de 6 dígitos que el alumno escribe en la app de
      * escritorio para vincular la sesión iniciada por LTI en el navegador.
+     *
+     * $ltiPlatformId/$contextId: contexto LTI de origen de este launch (ver
+     * comentario de esas columnas en sql/schema.sql) -- viajan hasta el
+     * token de la app en exchangePairingCode() para poder resolver el curso
+     * de la sesión sin cachear un course_id que se desincronizaría.
      */
-    public static function createPairingCode(int $userId): string
+    public static function createPairingCode(int $userId, ?int $ltiPlatformId = null, ?string $contextId = null): string
     {
         $pdo = Db::get();
         $cfg = Db::config();
@@ -27,9 +32,10 @@ final class Auth
         } while ($stmt->fetch());
 
         $stmt = $pdo->prepare(
-            "INSERT INTO pairing_codes (code, user_id, expires_at) VALUES (?, ?, datetime(CURRENT_TIMESTAMP, '+' || ? || ' seconds'))"
+            "INSERT INTO pairing_codes (code, user_id, lti_platform_id, context_id, expires_at)
+             VALUES (?, ?, ?, ?, datetime(CURRENT_TIMESTAMP, '+' || ? || ' seconds'))"
         );
-        $stmt->execute([$code, $userId, $ttl]);
+        $stmt->execute([$code, $userId, $ltiPlatformId, $contextId, $ttl]);
 
         return $code;
     }
@@ -39,13 +45,18 @@ final class Auth
      * venció, lo reusa (mismo código en pantalla, no confunde al alumno con
      * uno nuevo cada vez que recarga); si no, emite uno nuevo. Usado tanto
      * en el primer launch como al refrescar manualmente o al vencer.
+     *
+     * $ltiPlatformId/$contextId solo se usan al emitir un código nuevo -- si
+     * se reusa $previousCode, ese código ya quedó con el contexto del launch
+     * que lo creó (no se actualiza: dos tabs del mismo curso reusando el
+     * mismo código no deberían cambiarle el contexto a mitad de camino).
      */
-    public static function codeForLaunch(int $userId, ?string $previousCode): array
+    public static function codeForLaunch(int $userId, ?string $previousCode, ?int $ltiPlatformId = null, ?string $contextId = null): array
     {
         if ($previousCode !== null && self::pairingCodeStillValid($previousCode)) {
             return ['code' => $previousCode, 'expires_at' => self::pairingCodeExpiry($previousCode), 'renewed' => false];
         }
-        $code = self::createPairingCode($userId);
+        $code = self::createPairingCode($userId, $ltiPlatformId, $contextId);
         return ['code' => $code, 'expires_at' => self::pairingCodeExpiry($code), 'renewed' => true];
     }
 
@@ -79,7 +90,7 @@ final class Auth
         $pdo = Db::get();
 
         $stmt = $pdo->prepare(
-            'SELECT user_id FROM pairing_codes WHERE code = ? AND used = 0 AND expires_at > CURRENT_TIMESTAMP'
+            'SELECT user_id, lti_platform_id, context_id FROM pairing_codes WHERE code = ? AND used = 0 AND expires_at > CURRENT_TIMESTAMP'
         );
         $stmt->execute([$code]);
         $row = $stmt->fetch();
@@ -89,7 +100,11 @@ final class Auth
 
         $pdo->prepare('UPDATE pairing_codes SET used = 1 WHERE code = ?')->execute([$code]);
 
-        return self::issueTokenFor((int) $row['user_id']);
+        return self::issueTokenFor(
+            (int) $row['user_id'],
+            $row['lti_platform_id'] !== null ? (int) $row['lti_platform_id'] : null,
+            $row['context_id']
+        );
     }
 
     /**
@@ -357,20 +372,24 @@ final class Auth
 
     private const TOKEN_INACTIVE_DAYS = 30;
 
-    private static function issueTokenFor(int $userId): array
+    private static function issueTokenFor(int $userId, ?int $ltiPlatformId = null, ?string $contextId = null): array
     {
         $pdo = Db::get();
         $token = bin2hex(random_bytes(32));
-        $pdo->prepare('INSERT INTO tokens (token, user_id) VALUES (?, ?)')->execute([$token, $userId]);
+        $pdo->prepare('INSERT INTO tokens (token, user_id, lti_platform_id, context_id) VALUES (?, ?, ?, ?)')
+            ->execute([$token, $userId, $ltiPlatformId, $contextId]);
         // Purga oportunista de tokens inactivos -- no se puede borrar "todos
         // menos el último" porque un mismo user entra desde varios
         // dispositivos a la vez; solo se descartan los que ya nadie usa.
         $pdo->exec(
             "DELETE FROM tokens WHERE last_seen_at < datetime('now', '-" . self::TOKEN_INACTIVE_DAYS . " days')"
         );
+        $courseId = ($ltiPlatformId !== null && $contextId !== null)
+            ? Lti::findCourseForContext($ltiPlatformId, $contextId)
+            : null;
         return [
             'token' => $token,
-            'user' => self::userProfile($userId),
+            'user' => self::userProfile($userId, $courseId),
         ];
     }
 
@@ -380,6 +399,18 @@ final class Auth
      */
     public static function requireUser(): array
     {
+        [$user] = self::requireUserWithSession();
+        return $user;
+    }
+
+    /**
+     * Como requireUser(), pero además devuelve el contexto LTI de origen de
+     * esta sesión (lti_platform_id/context_id de tokens) -- lo necesita
+     * quien tenga que resolver a qué curso pertenece la sesión actual (ver
+     * Lti::findCourseForContext()) sin repetir el parseo del header acá.
+     */
+    public static function requireUserWithSession(): array
+    {
         $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
         if (!preg_match('/^Bearer\s+(\S+)$/', $header, $m)) {
             Response::error('Falta token de autorización', 401);
@@ -388,17 +419,22 @@ final class Auth
 
         $pdo = Db::get();
         $stmt = $pdo->prepare(
-            'SELECT u.* FROM tokens t JOIN users u ON u.id = t.user_id WHERE t.token = ? AND u.active = 1'
+            'SELECT u.*, t.lti_platform_id AS session_lti_platform_id, t.context_id AS session_context_id
+             FROM tokens t JOIN users u ON u.id = t.user_id WHERE t.token = ? AND u.active = 1'
         );
         $stmt->execute([$token]);
-        $user = $stmt->fetch();
-        if (!$user) {
+        $row = $stmt->fetch();
+        if (!$row) {
             Response::error('Token inválido o expirado', 401);
         }
 
         $pdo->prepare('UPDATE tokens SET last_seen_at = CURRENT_TIMESTAMP WHERE token = ?')->execute([$token]);
 
-        return $user;
+        $sessionPlatformId = $row['session_lti_platform_id'] !== null ? (int) $row['session_lti_platform_id'] : null;
+        $sessionContextId = $row['session_context_id'];
+        unset($row['session_lti_platform_id'], $row['session_context_id']);
+
+        return [$row, $sessionPlatformId, $sessionContextId];
     }
 
     public static function requireAdmin(): array
@@ -410,9 +446,16 @@ final class Auth
         return $user;
     }
 
-    private static function userProfile(int $userId): array
+    /**
+     * $courseId: curso resuelto de la sesión de origen (ver
+     * issueTokenFor()) -- de ahí sale 'modules', NUNCA de la cuenta en sí
+     * (ver comentario de course_modules en sql/schema.sql: la visibilidad de
+     * módulos es por curso, un mismo alumno puede estar en varios cursos con
+     * reglas distintas).
+     */
+    private static function userProfile(int $userId, ?int $courseId = null): array
     {
-        $stmt = Db::get()->prepare('SELECT id, role, username, display_name, permission, modules FROM users WHERE id = ?');
+        $stmt = Db::get()->prepare('SELECT id, role, username, display_name, permission FROM users WHERE id = ?');
         $stmt->execute([$userId]);
         $user = $stmt->fetch();
         // PDO_SQLITE puede devolver columnas numéricas como string según
@@ -420,7 +463,30 @@ final class Auth
         // número, no un string. La app compara `permission == 777` (int)
         // para decidir la vista de agenda admin vs alumno.
         $user['permission'] = (int) $user['permission'];
-        $user['modules'] = json_decode($user['modules'] ?? '[]', true);
+        $user['modules'] = self::resolveModules($userId, $user, $courseId);
         return $user;
+    }
+
+    /**
+     * Módulos visibles en la app de escritorio para esta cuenta en este
+     * curso. Admin completo (777): null -- sin restricción, ve todo.
+     * Cualquier otro caso (docente 555, alumno 444): [] si no hay curso
+     * resuelto para la sesión, o si la cuenta no está asignada a ese curso
+     * (course_teachers/course_students) -- no ve nada hasta ser asignada.
+     * Si está asignada, la lista es exactamente lo que el docente habilitó
+     * para ese curso (puede ser [] también si todavía no configuró nada).
+     */
+    private static function resolveModules(int $userId, array $user, ?int $courseId): ?array
+    {
+        if ((int) $user['permission'] === self::PERMISSION_ADMIN) {
+            return null;
+        }
+        if ($courseId === null) {
+            return [];
+        }
+        $assigned = $user['role'] === 'admin'
+            ? in_array($courseId, Courses::teacherCourseIds($userId), true)
+            : Courses::isStudentOf($userId, $courseId);
+        return $assigned ? Courses::enabledModules($courseId) : [];
     }
 }

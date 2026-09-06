@@ -61,8 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$alreadyInstalled) {
 
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare(
-                "INSERT INTO users (role, username, display_name, password_hash, permission, modules)
-                 VALUES ('admin', ?, ?, ?, 777, '[\"A\", \"Z\"]')"
+                "INSERT INTO users (role, username, display_name, password_hash, permission)
+                 VALUES ('admin', ?, ?, ?, 777)"
             );
             $stmt->execute([$username, $displayName, $hash]);
 

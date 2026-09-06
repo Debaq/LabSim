@@ -11,7 +11,7 @@ Auth::requireAdmin();
 $pdo = Db::get();
 
 $students = $pdo->query(
-    "SELECT id, username, display_name, permission, modules, active FROM users WHERE role = 'student'"
+    "SELECT id, username, display_name, permission, active FROM users WHERE role = 'student'"
 )->fetchAll();
 
 $cases = $pdo->query('SELECT id, data, updated_at FROM cases')->fetchAll();
