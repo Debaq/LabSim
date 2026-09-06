@@ -61,6 +61,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.abr_oi = dict(DEFAULT_ABR_CASE)
 
         self.control = AbrControl()
+        # Sin atención abierta al crear la ventana (recién montada, antes
+        # de cualquier la_super real) -- sin esto se podía capturar sobre
+        # DEFAULT_ABR_CASE sin ningún paciente cargado.
+        self.control.setEnabled(False)
         self.detail = AbrDetail()
         self.report = AbrReport()
         self.table_l = AbrTable(1)
@@ -136,12 +140,19 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
     def la_super(self, data, appointment_id=None):
         """Recibe el caso del paciente en atención (o None al cerrarla/
-        deshidratar), mismo patrón que Audiometer.la_super/Z.la_super."""
+        deshidratar), mismo patrón que Audiometer.la_super/Z.la_super.
+
+        Sin atención abierta (data=None) se bloquea la captura -- antes
+        quedaba DEFAULT_ABR_CASE cargado desde el __init__ y se podía
+        grabar una curva "normal" sin ningún paciente real. DEFAULT_ABR_CASE
+        sigue existiendo solo para el caso REAL que no trae ABR configurado
+        (caso viejo sin actualizar, ver comentario de esa constante)."""
         self.appointment_id = appointment_id
+        self.data_current = data
+        self.control.setEnabled(data is not None)
         abr_data = (data or {}).get('ABR') or {}
         self.abr_od = abr_data.get('OD') or dict(DEFAULT_ABR_CASE)
         self.abr_oi = abr_data.get('OI') or dict(DEFAULT_ABR_CASE)
-        self.data_current = data
         self.reset()
 
     def submit_report(self):
