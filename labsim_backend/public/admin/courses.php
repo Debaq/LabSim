@@ -77,6 +77,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Courses::setEnabledModules($courseId, $codes);
             $success = 'Módulos actualizados.';
             AdminAudit::log($me, 'course_set_modules', ['course_id' => $courseId, 'modules' => Courses::enabledModules($courseId)]);
+        } elseif ($action === 'generate_demo') {
+            $result = Courses::generateDemoStudent($courseId);
+            if ($result['status'] === 'error') {
+                $error = $result['message'];
+            } else {
+                $success = "Estudiante demo creado. Usuario: {$result['username']} -- Contraseña: {$result['password']}";
+                AdminAudit::log($me, 'course_generate_demo', ['course_id' => $courseId, 'username' => $result['username']]);
+            }
+        } elseif ($action === 'regenerate_demo') {
+            $result = Courses::regenerateDemoPassword($courseId);
+            if ($result === null) {
+                $error = 'Este curso no tiene estudiante demo todavía.';
+            } else {
+                $success = "Contraseña nueva. Usuario: {$result['username']} -- Contraseña: {$result['password']}";
+                AdminAudit::log($me, 'course_regenerate_demo', ['course_id' => $courseId, 'username' => $result['username']]);
+            }
+        } elseif ($action === 'clean_demo') {
+            Courses::cleanDemoData($courseId);
+            $success = 'Datos de prueba del demo eliminados (la cuenta y su contraseña siguen igual).';
+            AdminAudit::log($me, 'course_clean_demo', ['course_id' => $courseId]);
         } elseif ($action === 'add_teacher' && $isFullAdmin) {
             $username = trim((string) ($_POST['username'] ?? ''));
             $err = Courses::addMemberByUsername($courseId, $username, 'teacher');
@@ -266,6 +286,48 @@ if ($detailId !== null) {
         </form>
     </div>
 
+    <?php
+        $courseMembers = Courses::students((int) $course['id']);
+        $students = array_values(array_filter($courseMembers, static fn($s) => !$s['is_demo']));
+        $demoStudent = null;
+        foreach ($courseMembers as $s) {
+            if ($s['is_demo']) {
+                $demoStudent = $s;
+                break;
+            }
+        }
+    ?>
+    <div class="card">
+        <strong>Área de pruebas</strong>
+        <p style="font-size:0.8rem; color:#888; margin-top:0.2rem;">
+            Un alumno más del curso para probar la app de punta a punta (agendarle pacientes, atender, etc.) sin tocar datos de alumnos reales. Invisible para los alumnos -- solo docente/admin lo ven acá.
+        </p>
+        <?php if ($demoStudent === null): ?>
+        <form method="post" style="margin-top:0.5rem;">
+        <?= csrf_field() ?>
+            <input type="hidden" name="form_action" value="generate_demo">
+            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+            <button type="submit" class="secondary">Generar estudiante demo</button>
+        </form>
+        <?php else: ?>
+        <p style="margin-top:0.5rem;">Usuario: <code><?= htmlspecialchars($demoStudent['username']) ?></code></p>
+        <div style="display:flex; gap:0.6rem;">
+            <form method="post">
+            <?= csrf_field() ?>
+                <input type="hidden" name="form_action" value="regenerate_demo">
+                <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+                <button type="submit" class="secondary">Generar contraseña nueva</button>
+            </form>
+            <form method="post" onsubmit="return confirm('¿Borrar todas las citas/atenciones/chats de prueba del demo? La cuenta y su contraseña quedan igual.');">
+            <?= csrf_field() ?>
+                <input type="hidden" name="form_action" value="clean_demo">
+                <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+                <button type="submit" class="danger">Limpiar datos de prueba</button>
+            </form>
+        </div>
+        <?php endif; ?>
+    </div>
+
     <?php if ($isFullAdmin): ?>
     <div class="card">
         <strong>Docentes (<?= count($teachers = Courses::teachers((int) $course['id'])) ?>)</strong>
@@ -303,7 +365,7 @@ if ($detailId !== null) {
     <?php endif; ?>
 
     <div class="card">
-        <strong>Alumnos matriculados (<?= count($students = Courses::students((int) $course['id'])) ?>)</strong>
+        <strong>Alumnos matriculados (<?= count($students) ?>)</strong>
         <table>
             <tr><th>Usuario</th><th>Nombre</th><th></th></tr>
             <?php foreach ($students as $s): ?>
@@ -581,7 +643,7 @@ if (!$isFullAdmin) {
             <td><a href="courses.php?id=<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></a></td>
             <td><?= $c['active'] ? 'activo' : 'archivado' ?></td>
             <td><?= count(Courses::teachers((int) $c['id'])) ?></td>
-            <td><?= count(Courses::students((int) $c['id'])) ?></td>
+            <td><?= count(array_filter(Courses::students((int) $c['id']), static fn($s) => !$s['is_demo'])) ?></td>
             <td><a href="courses.php?id=<?= $c['id'] ?>">Ver</a></td>
         </tr>
         <?php endforeach; ?>

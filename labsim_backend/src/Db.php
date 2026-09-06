@@ -279,6 +279,19 @@ final class Db
     }
 
     /**
+     * Agrega users.is_demo/courses.demo_user_id -- instalaciones de antes
+     * del estudiante demo por curso (ver comentarios de esas columnas en
+     * sql/schema.sql). 0/NULL respectivamente no cambia nada de lo ya
+     * existente: ningún usuario/curso queda marcado como demo solo.
+     */
+    public static function migrateDemoStudentIfNeeded(): void
+    {
+        $pdo = self::get();
+        self::addColumnIfMissing($pdo, 'users', 'is_demo', 'INTEGER NOT NULL DEFAULT 0');
+        self::addColumnIfMissing($pdo, 'courses', 'demo_user_id', 'INTEGER REFERENCES users(id)');
+    }
+
+    /**
      * Solo agrega patient_id a appointments/cases (sin tocar `patients` ni
      * backfillear nada) -- instalaciones de antes de que esa columna
      * existiera. Llamar SIEMPRE antes de aplicar schema.sql: ese archivo

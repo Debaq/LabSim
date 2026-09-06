@@ -58,6 +58,12 @@ CREATE TABLE IF NOT EXISTS users (
     permission INTEGER NOT NULL DEFAULT 444,
     modules TEXT,                             -- OBSOLETA: reemplazada por course_modules, ya no se lee ni se escribe
     active INTEGER NOT NULL DEFAULT 1,
+    -- Estudiante demo de un curso (ver courses.demo_user_id más abajo):
+    -- role='student' normal, cuenta como matrícula real, pero se excluye de
+    -- vistas agregadas por curso (dashboard.php) para no ensuciar
+    -- promedios/listados de alumnos reales -- mismo criterio que ya existía
+    -- para excluir role='admin' de esas vistas.
+    is_demo INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (lti_platform_id, lti_sub)
@@ -355,6 +361,10 @@ CREATE TABLE IF NOT EXISTS courses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     active INTEGER NOT NULL DEFAULT 1,
+    -- Estudiante demo de este curso (ver users.is_demo) -- NULL hasta que el
+    -- docente/admin lo genera desde admin/courses.php. A lo más uno por
+    -- curso (ver Courses::generateDemoStudent()).
+    demo_user_id INTEGER REFERENCES users(id),
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

@@ -29,11 +29,13 @@ if ($allowedStudentIds === null) {
 }
 $logs = Metrics::decodeLogs($rows);
 
-// Excluye admins/docentes (role='admin') del dashboard: sus acciones de
-// prueba en la app no deben aparecer como "resultados de alumno".
+// Excluye admins/docentes (role='admin') y al estudiante demo de cada
+// curso (is_demo=1, ver Courses::generateDemoStudent()) del dashboard: sus
+// acciones de prueba en la app no deben aparecer como "resultados de
+// alumno" ni ensuciar los promedios/listados reales.
 $adminIds = array_map(
     'intval',
-    array_column($pdo->query("SELECT id FROM users WHERE role = 'admin'")->fetchAll(), 'id')
+    array_column($pdo->query("SELECT id FROM users WHERE role = 'admin' OR is_demo = 1")->fetchAll(), 'id')
 );
 $logs = array_values(array_filter(
     $logs,
