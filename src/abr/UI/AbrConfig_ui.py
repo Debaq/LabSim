@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'AbrConfig.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.6.0
+## Created by: Qt User Interface Compiler version 6.11.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -29,27 +29,48 @@ class Ui_Abr_Config(object):
         self.gridLayout.setHorizontalSpacing(0)
         self.gridLayout.setVerticalSpacing(3)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
-        self.lbl_int = QLabel(Abr_Config)
-        self.lbl_int.setObjectName(u"lbl_int")
-        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
+        self.lbl_test = QLabel(Abr_Config)
+        self.lbl_test.setObjectName(u"lbl_test")
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.lbl_test.sizePolicy().hasHeightForWidth())
+        self.lbl_test.setSizePolicy(sizePolicy)
+        self.lbl_test.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+
+        self.gridLayout.addWidget(self.lbl_test, 0, 0, 1, 1)
+
+        self.cb_test = QComboBox(Abr_Config)
+        self.cb_test.addItem("")
+        self.cb_test.addItem("")
+        self.cb_test.addItem("")
+        self.cb_test.addItem("")
+        self.cb_test.addItem("")
+        self.cb_test.addItem("")
+        self.cb_test.addItem("")
+        self.cb_test.addItem("")
+        self.cb_test.setObjectName(u"cb_test")
+
+        self.gridLayout.addWidget(self.cb_test, 0, 1, 1, 1)
+
+        self.lbl_int = QLabel(Abr_Config)
+        self.lbl_int.setObjectName(u"lbl_int")
         sizePolicy.setHeightForWidth(self.lbl_int.sizePolicy().hasHeightForWidth())
         self.lbl_int.setSizePolicy(sizePolicy)
         self.lbl_int.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
-        self.gridLayout.addWidget(self.lbl_int, 2, 0, 1, 1)
+        self.gridLayout.addWidget(self.lbl_int, 3, 0, 1, 1)
 
         self.cb_side = QComboBox(Abr_Config)
         self.cb_side.addItem("")
         self.cb_side.addItem("")
         self.cb_side.setObjectName(u"cb_side")
 
-        self.gridLayout.addWidget(self.cb_side, 11, 1, 1, 1)
+        self.gridLayout.addWidget(self.cb_side, 12, 1, 1, 1)
 
-        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
-        self.gridLayout.addItem(self.verticalSpacer, 14, 1, 1, 1)
+        self.gridLayout.addItem(self.verticalSpacer, 15, 1, 1, 1)
 
         self.lbl_pol = QLabel(Abr_Config)
         self.lbl_pol.setObjectName(u"lbl_pol")
@@ -57,7 +78,7 @@ class Ui_Abr_Config(object):
         self.lbl_pol.setSizePolicy(sizePolicy)
         self.lbl_pol.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
-        self.gridLayout.addWidget(self.lbl_pol, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.lbl_pol, 2, 0, 1, 1)
 
         self.lbl_stim = QLabel(Abr_Config)
         self.lbl_stim.setObjectName(u"lbl_stim")
@@ -66,7 +87,7 @@ class Ui_Abr_Config(object):
         self.lbl_stim.setLayoutDirection(Qt.LeftToRight)
         self.lbl_stim.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
-        self.gridLayout.addWidget(self.lbl_stim, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.lbl_stim, 1, 0, 1, 1)
 
         self.cb_filter_down = QComboBox(Abr_Config)
         self.cb_filter_down.addItem("")
@@ -79,7 +100,7 @@ class Ui_Abr_Config(object):
         self.cb_filter_down.addItem("")
         self.cb_filter_down.setObjectName(u"cb_filter_down")
 
-        self.gridLayout.addWidget(self.cb_filter_down, 6, 1, 1, 1)
+        self.gridLayout.addWidget(self.cb_filter_down, 7, 1, 1, 1)
 
         self.lbl_passhigh = QLabel(Abr_Config)
         self.lbl_passhigh.setObjectName(u"lbl_passhigh")
@@ -87,7 +108,7 @@ class Ui_Abr_Config(object):
         self.lbl_passhigh.setSizePolicy(sizePolicy)
         self.lbl_passhigh.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
-        self.gridLayout.addWidget(self.lbl_passhigh, 7, 0, 1, 1)
+        self.gridLayout.addWidget(self.lbl_passhigh, 8, 0, 1, 1)
 
         self.sb_intencity = QSpinBox(Abr_Config)
         self.sb_intencity.setObjectName(u"sb_intencity")
@@ -95,7 +116,7 @@ class Ui_Abr_Config(object):
         self.sb_intencity.setSingleStep(5)
         self.sb_intencity.setValue(70)
 
-        self.gridLayout.addWidget(self.sb_intencity, 2, 1, 1, 1)
+        self.gridLayout.addWidget(self.sb_intencity, 3, 1, 1, 1)
 
         self.cb_filter_up = QComboBox(Abr_Config)
         self.cb_filter_up.addItem("")
@@ -108,7 +129,7 @@ class Ui_Abr_Config(object):
         self.cb_filter_up.addItem("")
         self.cb_filter_up.setObjectName(u"cb_filter_up")
 
-        self.gridLayout.addWidget(self.cb_filter_up, 7, 1, 1, 1)
+        self.gridLayout.addWidget(self.cb_filter_up, 8, 1, 1, 1)
 
         self.cb_stim = QComboBox(Abr_Config)
         self.cb_stim.addItem("")
@@ -120,7 +141,7 @@ class Ui_Abr_Config(object):
         self.cb_stim.addItem("")
         self.cb_stim.setObjectName(u"cb_stim")
 
-        self.gridLayout.addWidget(self.cb_stim, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.cb_stim, 1, 1, 1, 1)
 
         self.label_9 = QLabel(Abr_Config)
         self.label_9.setObjectName(u"label_9")
@@ -128,12 +149,12 @@ class Ui_Abr_Config(object):
         self.label_9.setSizePolicy(sizePolicy)
         self.label_9.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
-        self.gridLayout.addWidget(self.label_9, 11, 0, 1, 1)
+        self.gridLayout.addWidget(self.label_9, 12, 0, 1, 1)
 
         self.btn_stop = QPushButton(Abr_Config)
         self.btn_stop.setObjectName(u"btn_stop")
 
-        self.gridLayout.addWidget(self.btn_stop, 13, 0, 1, 2)
+        self.gridLayout.addWidget(self.btn_stop, 14, 0, 1, 2)
 
         self.lbl_passdown = QLabel(Abr_Config)
         self.lbl_passdown.setObjectName(u"lbl_passdown")
@@ -141,30 +162,30 @@ class Ui_Abr_Config(object):
         self.lbl_passdown.setSizePolicy(sizePolicy)
         self.lbl_passdown.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
-        self.gridLayout.addWidget(self.lbl_passdown, 6, 0, 1, 1)
+        self.gridLayout.addWidget(self.lbl_passdown, 7, 0, 1, 1)
 
         self.label_8 = QLabel(Abr_Config)
         self.label_8.setObjectName(u"label_8")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.label_8.sizePolicy().hasHeightForWidth())
         self.label_8.setSizePolicy(sizePolicy1)
         self.label_8.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
-        self.gridLayout.addWidget(self.label_8, 10, 0, 1, 1)
+        self.gridLayout.addWidget(self.label_8, 11, 0, 1, 1)
 
         self.sb_mskg = QSpinBox(Abr_Config)
         self.sb_mskg.setObjectName(u"sb_mskg")
         self.sb_mskg.setMaximum(100)
         self.sb_mskg.setSingleStep(5)
 
-        self.gridLayout.addWidget(self.sb_mskg, 3, 1, 1, 1)
+        self.gridLayout.addWidget(self.sb_mskg, 4, 1, 1, 1)
 
         self.ch_atten = QCheckBox(Abr_Config)
         self.ch_atten.setObjectName(u"ch_atten")
 
-        self.gridLayout.addWidget(self.ch_atten, 4, 1, 1, 1)
+        self.gridLayout.addWidget(self.ch_atten, 5, 1, 1, 1)
 
         self.lbl_mkg = QLabel(Abr_Config)
         self.lbl_mkg.setObjectName(u"lbl_mkg")
@@ -172,7 +193,7 @@ class Ui_Abr_Config(object):
         self.lbl_mkg.setSizePolicy(sizePolicy)
         self.lbl_mkg.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
-        self.gridLayout.addWidget(self.lbl_mkg, 3, 0, 1, 1)
+        self.gridLayout.addWidget(self.lbl_mkg, 4, 0, 1, 1)
 
         self.lbl_rate = QLabel(Abr_Config)
         self.lbl_rate.setObjectName(u"lbl_rate")
@@ -180,12 +201,12 @@ class Ui_Abr_Config(object):
         self.lbl_rate.setSizePolicy(sizePolicy)
         self.lbl_rate.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
-        self.gridLayout.addWidget(self.lbl_rate, 5, 0, 1, 1)
+        self.gridLayout.addWidget(self.lbl_rate, 6, 0, 1, 1)
 
         self.btn_start = QPushButton(Abr_Config)
         self.btn_start.setObjectName(u"btn_start")
 
-        self.gridLayout.addWidget(self.btn_start, 12, 0, 1, 2)
+        self.gridLayout.addWidget(self.btn_start, 13, 0, 1, 2)
 
         self.sb_prom = QSpinBox(Abr_Config)
         self.sb_prom.setObjectName(u"sb_prom")
@@ -194,13 +215,13 @@ class Ui_Abr_Config(object):
         self.sb_prom.setMaximum(8000)
         self.sb_prom.setSingleStep(10)
 
-        self.gridLayout.addWidget(self.sb_prom, 10, 1, 1, 1)
+        self.gridLayout.addWidget(self.sb_prom, 11, 1, 1, 1)
 
         self.sb_rate = QDoubleSpinBox(Abr_Config)
         self.sb_rate.setObjectName(u"sb_rate")
         self.sb_rate.setDecimals(1)
 
-        self.gridLayout.addWidget(self.sb_rate, 5, 1, 1, 1)
+        self.gridLayout.addWidget(self.sb_rate, 6, 1, 1, 1)
 
         self.cb_pol = QComboBox(Abr_Config)
         self.cb_pol.addItem("")
@@ -208,8 +229,9 @@ class Ui_Abr_Config(object):
         self.cb_pol.addItem("")
         self.cb_pol.setObjectName(u"cb_pol")
 
-        self.gridLayout.addWidget(self.cb_pol, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.cb_pol, 2, 1, 1, 1)
 
+        QWidget.setTabOrder(self.cb_test, self.cb_stim)
         QWidget.setTabOrder(self.cb_stim, self.cb_pol)
         QWidget.setTabOrder(self.cb_pol, self.sb_intencity)
         QWidget.setTabOrder(self.sb_intencity, self.sb_mskg)
@@ -229,6 +251,19 @@ class Ui_Abr_Config(object):
 
     def retranslateUi(self, Abr_Config):
         Abr_Config.setWindowTitle(QCoreApplication.translate("Abr_Config", u"Form", None))
+        self.lbl_test.setText(QCoreApplication.translate("Abr_Config", u"Prueba : ", None))
+        self.cb_test.setItemText(0, QCoreApplication.translate("Abr_Config", u"ABR", None))
+        self.cb_test.setItemText(1, QCoreApplication.translate("Abr_Config", u"ASSR", None))
+        self.cb_test.setItemText(2, QCoreApplication.translate("Abr_Config", u"MLR", None))
+        self.cb_test.setItemText(3, QCoreApplication.translate("Abr_Config", u"P300", None))
+        self.cb_test.setItemText(4, QCoreApplication.translate("Abr_Config", u"MMN", None))
+        self.cb_test.setItemText(5, QCoreApplication.translate("Abr_Config", u"ECochG", None))
+        self.cb_test.setItemText(6, QCoreApplication.translate("Abr_Config", u"CAEP", None))
+        self.cb_test.setItemText(7, QCoreApplication.translate("Abr_Config", u"Stacked ABR", None))
+
+#if QT_CONFIG(statustip)
+        self.cb_test.setStatusTip(QCoreApplication.translate("Abr_Config", u"Tipo de prueba audiol\u00f3gica", None))
+#endif // QT_CONFIG(statustip)
         self.lbl_int.setText(QCoreApplication.translate("Abr_Config", u"Intensidad :", None))
         self.cb_side.setItemText(0, QCoreApplication.translate("Abr_Config", u"OD", None))
         self.cb_side.setItemText(1, QCoreApplication.translate("Abr_Config", u"OI", None))

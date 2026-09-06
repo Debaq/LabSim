@@ -13,6 +13,10 @@ class AbrControl(QWidget, Ui_Abr_Config):
         self.setupUi(self)
         self.config_btn()
         self.randomize_initial_values()
+        # Por ahora solo ABR está implementado; el resto del selector queda
+        # visible pero no seleccionable. Se irán habilitando a medida que
+        # se implemente cada prueba.
+        self.disable_unimplemented_tests()
         # ESTACIÓN 3 OSCE: Todos los estímulos están habilitados
         # self.disable_unimplemented_stimuli()
 
@@ -27,6 +31,16 @@ class AbrControl(QWidget, Ui_Abr_Config):
         self.sb_prom.setValue(random.randrange(200, 4001, 10))
         self.sb_rate.setValue(round(random.uniform(11.1, 61.1), 1))
 
+
+    def disable_unimplemented_tests(self) -> None:
+        """Solo ABR está implementado. El resto del selector queda visible
+        pero no seleccionable; se habilitan a medida que se implemente
+        cada prueba (ASSR, MLR, P300, MMN, ECochG, CAEP, Stacked ABR)."""
+        model = self.cb_test.model()
+        for i in range(self.cb_test.count()):
+            item = model.item(i)
+            if item.text() != "ABR":
+                item.setEnabled(False)
 
     def disable_unimplemented_stimuli(self) -> None:
         """Desactiva estímulos no implementados (chirp, lschirp, burst)
@@ -48,6 +62,7 @@ class AbrControl(QWidget, Ui_Abr_Config):
 
 
     def get_data(self) -> dict:
+        test = self.cb_test.currentText()
         stim = self.cb_stim.currentText()
         pol = self.cb_pol.currentText()
         inty = self.sb_intencity.value()
@@ -59,13 +74,18 @@ class AbrControl(QWidget, Ui_Abr_Config):
         side = self.cb_side.currentText()
         atten = self.ch_atten.isChecked()
 
-        return {"stim":stim, "pol":pol, "int":inty, "mkg":mkg,
+        return {"test":test, "stim":stim, "pol":pol, "int":inty, "mkg":mkg,
                 "rate":rate, "filter_down":filter_passdown,
                 "filter_passhigh": filter_passhigh, "average" : average,
                 "side":side, "atten":atten}
 
     def set_data(self, config: dict) -> None:
         """Aplica configuración a los widgets del control"""
+        if 'test' in config:
+            idx = self.cb_test.findText(config['test'])
+            if idx >= 0:
+                self.cb_test.setCurrentIndex(idx)
+
         if 'stim' in config:
             idx = self.cb_stim.findText(config['stim'])
             if idx >= 0:
@@ -107,6 +127,7 @@ class AbrControl(QWidget, Ui_Abr_Config):
             self.ch_atten.setChecked(config['atten'])
 
     def disabled_all(self, value:bool=True) -> None:
+        self.cb_test.setDisabled(value)
         self.cb_stim.setDisabled(value)
         self.cb_pol.setDisabled(value)
         self.sb_intencity.setDisabled(value)

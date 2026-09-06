@@ -32,7 +32,70 @@
    <property name="verticalSpacing">
     <number>3</number>
    </property>
-   <item row="2" column="0">
+   <item row="0" column="0">
+    <widget class="QLabel" name="lbl_test">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Prueba : </string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QComboBox" name="cb_test">
+     <property name="statusTip">
+      <string>Tipo de prueba audiológica</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>ABR</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>ASSR</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>MLR</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>P300</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>MMN</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>ECochG</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>CAEP</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Stacked ABR</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="3" column="0">
     <widget class="QLabel" name="lbl_int">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -48,7 +111,7 @@
      </property>
     </widget>
    </item>
-   <item row="11" column="1">
+   <item row="12" column="1">
     <widget class="QComboBox" name="cb_side">
      <property name="statusTip">
       <string>Lado de estimulación</string>
@@ -65,7 +128,7 @@
      </item>
     </widget>
    </item>
-   <item row="14" column="1">
+   <item row="15" column="1">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -78,7 +141,7 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="0">
+   <item row="2" column="0">
     <widget class="QLabel" name="lbl_pol">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -94,7 +157,7 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="0">
+   <item row="1" column="0">
     <widget class="QLabel" name="lbl_stim">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -113,7 +176,7 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="1">
+   <item row="7" column="1">
     <widget class="QComboBox" name="cb_filter_down">
      <property name="statusTip">
       <string>Filtro pasa bajo</string>
@@ -160,7 +223,7 @@
      </item>
     </widget>
    </item>
-   <item row="7" column="0">
+   <item row="8" column="0">
     <widget class="QLabel" name="lbl_passhigh">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -176,7 +239,7 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
+   <item row="3" column="1">
     <widget class="QSpinBox" name="sb_intencity">
      <property name="statusTip">
       <string>Intensidad del estímulo</string>
@@ -192,7 +255,7 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="1">
+   <item row="8" column="1">
     <widget class="QComboBox" name="cb_filter_up">
      <property name="statusTip">
       <string>Filtro pasa alto</string>
@@ -239,7 +302,7 @@
      </item>
     </widget>
    </item>
-   <item row="0" column="1">
+   <item row="1" column="1">
     <widget class="QComboBox" name="cb_stim">
      <property name="statusTip">
       <string>Tipo de estímulo</string>
@@ -281,7 +344,7 @@
      </item>
     </widget>
    </item>
-   <item row="11" column="0">
+   <item row="12" column="0">
     <widget class="QLabel" name="label_9">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -297,7 +360,7 @@
      </property>
     </widget>
    </item>
-   <item row="13" column="0" colspan="2">
+   <item row="14" column="0" colspan="2">
     <widget class="QPushButton" name="btn_stop">
      <property name="statusTip">
       <string>Detener Prueba</string>
@@ -307,7 +370,7 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="0">
+   <item row="7" column="0">
     <widget class="QLabel" name="lbl_passdown">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -323,7 +386,7 @@
      </property>
     </widget>
    </item>
-   <item row="10" column="0">
+   <item row="11" column="0">
     <widget class="QLabel" name="label_8">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -339,7 +402,7 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
+   <item row="4" column="1">
     <widget class="QSpinBox" name="sb_mskg">
      <property name="statusTip">
       <string>Intensidad del enmascaramiento</string>
@@ -352,7 +415,7 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="1">
+   <item row="5" column="1">
     <widget class="QCheckBox" name="ch_atten">
      <property name="statusTip">
       <string>Activar atenuador de intensidad en el inicio</string>
@@ -362,7 +425,7 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="0">
+   <item row="4" column="0">
     <widget class="QLabel" name="lbl_mkg">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -378,7 +441,7 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="0">
+   <item row="6" column="0">
     <widget class="QLabel" name="lbl_rate">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -394,7 +457,7 @@
      </property>
     </widget>
    </item>
-   <item row="12" column="0" colspan="2">
+   <item row="13" column="0" colspan="2">
     <widget class="QPushButton" name="btn_start">
      <property name="statusTip">
       <string>Iniciar Prueba</string>
@@ -404,7 +467,7 @@
      </property>
     </widget>
    </item>
-   <item row="10" column="1">
+   <item row="11" column="1">
     <widget class="QSpinBox" name="sb_prom">
      <property name="statusTip">
       <string>Número de promediaciones</string>
@@ -423,7 +486,7 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="1">
+   <item row="6" column="1">
     <widget class="QDoubleSpinBox" name="sb_rate">
      <property name="statusTip">
       <string>Tasa de estimulación</string>
@@ -433,7 +496,7 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="1">
+   <item row="2" column="1">
     <widget class="QComboBox" name="cb_pol">
      <property name="statusTip">
       <string>Polaridad del estímulo</string>
@@ -458,6 +521,7 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>cb_test</tabstop>
   <tabstop>cb_stim</tabstop>
   <tabstop>cb_pol</tabstop>
   <tabstop>sb_intencity</tabstop>
