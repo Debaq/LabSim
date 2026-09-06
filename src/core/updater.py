@@ -4,20 +4,35 @@ Auto-update de la build PyInstaller (onedir, Linux) contra GitHub Releases.
 
 Los releases de este repo se comparten con el rewrite Tauri (tags v3.x,
 assets .deb/.rpm/.AppImage/.exe/.msi). Para no mezclarse con esos, esta
-build usa su propio prefijo de tag: 'pyinstaller-v<version>', con un único
-asset 'LabSim-linux-x86_64.tar.gz' que es el tar de la carpeta dist/LabSim.
+build usa su propio prefijo de tag: 'pyinstaller-v<version>'.
 
-Reemplaza el código (LabSim + _internal/ + run.sh) y también sincroniza
-resources/ con la versión nueva -- EXCEPTO la data dinámica del usuario:
-resources/local_cache/ (logs.db, cola de acciones) y resources/json/session.json
-(sesión logueada). Todo lo demás bajo resources/ (apps.json y el resto de
-json/, styles/, img/, font/, UI/, audio/) es config/asset estático que se
-define en el repo y nunca se edita en runtime (Preferences.set() ni
-siquiera está implementado, ver core/helpers.py) -- si no se sincronizara,
-un usuario que se actualiza in-place (sin reinstalar desde cero) se
-quedaría para siempre con el apps.json del día que instaló, aunque el
-código nuevo ya espere entradas que ese archivo no tiene (síntoma: KeyError
-al abrir una ventana nueva que ese apps.json viejo no conoce).
+Cada release trae hasta dos assets, generados por
+scripts/release_pyinstaller.sh + scripts/update_diff.py:
+- LabSim-linux-x86_64.tar.gz (full): tar completo de dist/LabSim. Siempre
+  presente, es lo que baja un usuario nuevo para instalar de cero.
+- LabSim-linux-x86_64-update.tar.gz (update): solo los archivos que
+  cambiaron respecto a la release inmediatamente anterior, mas
+  __removed__.txt con las rutas que se borraron. Puede faltar (release
+  previa a esta feature, o la primera release nunca tiene "anterior").
+
+check_for_update() arma la cadena de paquetes update entre la build local y
+la más nueva (uno por release intermedia) para no bajar el full de nuevo
+-- 100+MB -- en cada actualización. Si algún eslabón de esa cadena falta,
+o son demasiados saltos (MAX_CHAIN_HOPS), cae a bajar el full de la más
+nueva directamente: más pesado pero siempre correcto.
+
+apply_update_and_restart() reemplaza el código (LabSim + _internal/ +
+run.sh) y sincroniza resources/ con la versión nueva -- EXCEPTO la data
+dinámica del usuario: resources/local_cache/ (logs.db, cola de acciones) y
+resources/json/session.json (sesión logueada). Todo lo demás bajo
+resources/ (apps.json y el resto de json/, styles/, img/, font/, UI/,
+audio/) es config/asset estático que se define en el repo y nunca se edita
+en runtime (Preferences.set() ni siquiera está implementado, ver
+core/helpers.py) -- si no se sincronizara, un usuario que se actualiza
+in-place (sin reinstalar desde cero) se quedaría para siempre con el
+apps.json del día que instaló, aunque el código nuevo ya espere entradas
+que ese archivo no tiene (síntoma: KeyError al abrir una ventana nueva que
+ese apps.json viejo no conoce).
 """
 import json
 import os
@@ -33,9 +48,15 @@ from urllib.request import Request, urlopen
 
 REPO = "Debaq/LabSim"
 TAG_PREFIX = "pyinstaller-v"
-ASSET_NAME = "LabSim-linux-x86_64.tar.gz"
+FULL_ASSET_NAME = "LabSim-linux-x86_64.tar.gz"
+UPDATE_ASSET_NAME = "LabSim-linux-x86_64-update.tar.gz"
 RELEASES_API = f"https://api.github.com/repos/{REPO}/releases"
 REQUEST_TIMEOUT = 5
+# Mas saltos que esto y sale mas a cuenta bajar el full directo -- cada hop
+# es una descarga + extraccion aparte, y encima "muchos hops" suele pasar
+# quien no actualiza hace mucho, donde el full probablemente sea mas chico
+# que la suma de todos los deltas intermedios igual.
+MAX_CHAIN_HOPS = 8
 
 
 def _parse_version(version: str) -> tuple:
@@ -71,14 +92,30 @@ def _fetch_releases() -> list:
         return json.load(resp)
 
 
+def _asset_url(release: dict, name: str):
+    return next(
+        (a.get("browser_download_url") for a in release.get("assets", []) if a.get("name") == name),
+        None,
+    )
+
+
 def check_for_update(current_version: str):
-    """Busca el release 'pyinstaller-v*' más reciente. Si es más nuevo que
-    el build local y trae el asset esperado, devuelve (tag, download_url).
-    'Más nuevo' es: versión mayor, o misma versión con un sufijo de commit
+    """Busca releases 'pyinstaller-v*' más nuevas que el build local.
+
+    'Más nueva' es: versión mayor, o misma versión con un sufijo de commit
     distinto al local (build de prueba re-publicada) -- así una build ya
-    aplicada no se vuelve a ofrecer en cada arranque. Si no hay nada nuevo,
-    o falla la red, devuelve None (nunca revienta: no queremos bloquear el
-    arranque por un lab sin internet)."""
+    aplicada no se vuelve a ofrecer en cada arranque.
+
+    Si hay algo nuevo, devuelve un dict:
+    - {"tag": ..., "build_id": ..., "mode": "chain", "hops": [(tag, update_url), ...]}
+      hops en orden (el más viejo primero) cubre paso a paso desde la build
+      local hasta la más nueva, cada uno un paquete update (diff) chico.
+    - {"tag": ..., "build_id": ..., "mode": "full", "url": ...} si falta
+      algún eslabón de la cadena (release vieja sin paquete update) o hay
+      demasiados saltos (MAX_CHAIN_HOPS) -- baja el full de la más nueva.
+
+    Devuelve None si no hay nada nuevo, o si falla la red (nunca revienta:
+    no queremos bloquear el arranque por un lab sin internet)."""
     try:
         releases = _fetch_releases()
     except (URLError, OSError, ValueError, TimeoutError):
@@ -88,41 +125,61 @@ def check_for_update(current_version: str):
     if not candidates:
         return None
     # La API de GitHub no garantiza orden por fecha en /releases -- hay que
-    # ordenar a mano, si no a veces se toma una release vieja como "la
-    # última" y una build vieja no detecta que hay una más nueva.
-    remote = max(candidates, key=lambda r: r.get("created_at") or "")
+    # ordenar a mano. Este orden es también el orden real de publicación,
+    # que es contra el que scripts/release_pyinstaller.sh calculó cada
+    # paquete update (diff contra "la release inmediatamente anterior por
+    # fecha"), así que hay que respetarlo al armar la cadena de hops.
+    candidates.sort(key=lambda r: r.get("created_at") or "")
 
-    tag = remote["tag_name"]
-    remote_build_id = tag[len(TAG_PREFIX):]
     local_id = local_build_id(current_version)
-
-    remote_v, remote_suffix = _split_build_id(remote_build_id)
     local_v, local_suffix = _split_build_id(local_id)
 
-    if remote_v < local_v:
-        return None
-    if remote_v == local_v and (remote_suffix is None or remote_suffix == local_suffix):
+    def is_newer_than_local(v, suffix):
+        if v > local_v:
+            return True
+        return v == local_v and suffix is not None and suffix != local_suffix
+
+    newer = []
+    for r in candidates:
+        tag = r["tag_name"]
+        v, suffix = _split_build_id(tag[len(TAG_PREFIX):])
+        if is_newer_than_local(v, suffix):
+            newer.append(r)
+
+    if not newer:
         return None
 
-    asset = next(
-        (a for a in remote.get("assets", []) if a.get("name") == ASSET_NAME),
-        None,
-    )
-    if asset is None:
-        return None
+    latest = newer[-1]
+    latest_tag = latest["tag_name"]
+    latest_build_id = latest_tag[len(TAG_PREFIX):]
 
-    return tag, asset["browser_download_url"]
+    hops = []
+    for r in newer:
+        update_url = _asset_url(r, UPDATE_ASSET_NAME)
+        if update_url is None:
+            hops = None
+            break
+        hops.append((r["tag_name"], update_url))
+
+    if hops is not None and len(hops) <= MAX_CHAIN_HOPS:
+        return {"tag": latest_tag, "build_id": latest_build_id, "mode": "chain", "hops": hops}
+
+    full_url = _asset_url(latest, FULL_ASSET_NAME)
+    if full_url is None:
+        return None
+    return {"tag": latest_tag, "build_id": latest_build_id, "mode": "full", "url": full_url}
 
 
 _UPDATER_SCRIPT = """#!/bin/bash
 # Generado por core/updater.py -- espera a que cierre el proceso viejo,
-# reemplaza codigo (bin + _internal + run.sh), sincroniza resources/
-# (salvo la data dinamica del usuario -- ver docstring del modulo) y
-# relanza.
+# aplica los pasos listados en STEPS_FILE en orden (uno por linea, TAB
+# separado: "FULL <dir>" reemplaza codigo+resources entero, "UPDATE <dir>"
+# aplica un paquete diff), escribe BUILD_VERSION y relanza.
 set -e
 PID="$1"
 DIST_DIR="$2"
-NEW_DIST="$3"
+STEPS_FILE="$3"
+FINAL_VERSION="$4"
 
 shopt -s nullglob dotglob
 
@@ -135,18 +192,8 @@ while kill -0 "$PID" 2>/dev/null; do
     fi
 done
 
-rm -rf "$DIST_DIR/_internal"
-cp -a "$NEW_DIST/_internal" "$DIST_DIR/_internal"
-cp -a "$NEW_DIST/LabSim" "$DIST_DIR/LabSim"
-cp -a "$NEW_DIST/run.sh" "$DIST_DIR/run.sh"
-[ -f "$NEW_DIST/BUILD_VERSION" ] && cp -a "$NEW_DIST/BUILD_VERSION" "$DIST_DIR/BUILD_VERSION"
-chmod +x "$DIST_DIR/LabSim" "$DIST_DIR/run.sh"
-
-# De aca en adelante no abortamos mas: el codigo ya quedo actualizado, y si
-# algun item de resources/ falla no queremos perder el resto ni dejar el
-# relanzamiento sin ejecutar (antes, con set -e activo, un solo cp -a que
-# fallara cortaba el loop a mitad de camino y el resto de items nunca se
-# copiaba -- "se salta archivos" silenciosamente).
+# De aca en adelante no abortamos mas: si un item puntual falla no queremos
+# perder el resto de los pasos ni dejar el relanzamiento sin ejecutar.
 set +e
 
 # resources/: se sincroniza con la version nueva salvo las carpetas/archivos
@@ -154,84 +201,113 @@ set +e
 # demas (apps.json, el resto de json/, styles/, img/, font/, UI/, audio/)
 # es config/asset estatico que debe quedar al dia con cada release, no solo
 # en una instalacion nueva.
-if [ -d "$NEW_DIST/resources" ]; then
-    mkdir -p "$DIST_DIR/resources"
+apply_full() {
+    local new_dist="$1"
+    rm -rf "$DIST_DIR/_internal"
+    cp -a "$new_dist/_internal" "$DIST_DIR/_internal"
+    cp -a "$new_dist/LabSim" "$DIST_DIR/LabSim"
+    cp -a "$new_dist/run.sh" "$DIST_DIR/run.sh"
+    chmod +x "$DIST_DIR/LabSim" "$DIST_DIR/run.sh"
 
-    # 1) Borrar en destino lo que ya no existe en el release nuevo (huerfanos
-    #    de una version anterior), salvo la data dinamica del usuario. Antes
-    #    esto no se hacia: un item borrado/renombrado en el release nunca se
-    #    borraba de la instalacion, quedaba basura vieja para siempre.
-    for old_item in "$DIST_DIR/resources"/*; do
-        name="$(basename "$old_item")"
-        case "$name" in
-            local_cache) continue ;;
-        esac
-        if [ ! -e "$NEW_DIST/resources/$name" ]; then
-            rm -rf "$old_item"
-        fi
-    done
-    if [ -d "$DIST_DIR/resources/json" ]; then
-        for old_jf in "$DIST_DIR/resources/json"/*; do
-            jname="$(basename "$old_jf")"
-            case "$jname" in
-                session.json) continue ;;
+    if [ -d "$new_dist/resources" ]; then
+        mkdir -p "$DIST_DIR/resources"
+
+        # 1) Borrar en destino lo que ya no existe en el release nuevo
+        #    (huerfanos de una version anterior), salvo la data dinamica.
+        for old_item in "$DIST_DIR/resources"/*; do
+            name="$(basename "$old_item")"
+            case "$name" in
+                local_cache) continue ;;
             esac
-            if [ ! -e "$NEW_DIST/resources/json/$jname" ]; then
-                rm -f "$old_jf"
+            if [ ! -e "$new_dist/resources/$name" ]; then
+                rm -rf "$old_item"
             fi
         done
-    fi
-
-    # 2) Copiar todo lo nuevo. Antes json/ solo copiaba archivo por archivo
-    #    sin borrar primero (ya cubierto arriba en el paso 1).
-    for item in "$NEW_DIST/resources"/*; do
-        name="$(basename "$item")"
-        case "$name" in
-            local_cache) continue ;;
-        esac
-        if [ "$name" = "json" ]; then
-            mkdir -p "$DIST_DIR/resources/json"
-            for jf in "$item"/*; do
-                jname="$(basename "$jf")"
+        if [ -d "$DIST_DIR/resources/json" ]; then
+            for old_jf in "$DIST_DIR/resources/json"/*; do
+                jname="$(basename "$old_jf")"
                 case "$jname" in
                     session.json) continue ;;
                 esac
-                cp -a "$jf" "$DIST_DIR/resources/json/$jname" || echo "labsim-update: fallo copiando json/$jname" >&2
+                if [ ! -e "$new_dist/resources/json/$jname" ]; then
+                    rm -f "$old_jf"
+                fi
             done
-        else
-            rm -rf "$DIST_DIR/resources/$name"
-            cp -a "$item" "$DIST_DIR/resources/$name" || echo "labsim-update: fallo copiando resources/$name" >&2
         fi
-    done
-fi
 
-rm -rf "$(dirname "$NEW_DIST")"
+        # 2) Copiar todo lo nuevo.
+        for item in "$new_dist/resources"/*; do
+            name="$(basename "$item")"
+            case "$name" in
+                local_cache) continue ;;
+            esac
+            if [ "$name" = "json" ]; then
+                mkdir -p "$DIST_DIR/resources/json"
+                for jf in "$item"/*; do
+                    jname="$(basename "$jf")"
+                    case "$jname" in
+                        session.json) continue ;;
+                    esac
+                    cp -a "$jf" "$DIST_DIR/resources/json/$jname" || echo "labsim-update: fallo copiando json/$jname" >&2
+                done
+            else
+                rm -rf "$DIST_DIR/resources/$name"
+                cp -a "$item" "$DIST_DIR/resources/$name" || echo "labsim-update: fallo copiando resources/$name" >&2
+            fi
+        done
+    fi
+}
+
+# Paquete update (diff): trae solo los archivos nuevos/cambiados, con su
+# ruta relativa a DIST_DIR tal cual, mas __removed__.txt con las rutas que
+# se eliminaron en esa release. A diferencia de apply_full, no toca nada
+# que no este listado -- no hay swap total de _internal/.
+apply_update() {
+    local upd_dir="$1"
+    local removed_file="$upd_dir/__removed__.txt"
+
+    while IFS= read -r -d '' relfile; do
+        rel="${relfile#"$upd_dir"/}"
+        case "$rel" in
+            __removed__.txt) continue ;;
+        esac
+        mkdir -p "$DIST_DIR/$(dirname "$rel")"
+        cp -a "$relfile" "$DIST_DIR/$rel" || echo "labsim-update: fallo copiando $rel" >&2
+    done < <(find "$upd_dir" -type f -print0)
+
+    chmod +x "$DIST_DIR/LabSim" 2>/dev/null
+    chmod +x "$DIST_DIR/run.sh" 2>/dev/null
+
+    if [ -f "$removed_file" ]; then
+        while IFS= read -r rel; do
+            [ -z "$rel" ] && continue
+            case "$rel" in
+                resources/local_cache*|resources/json/session.json) continue ;;
+            esac
+            rm -rf "$DIST_DIR/$rel"
+        done < "$removed_file"
+    fi
+}
+
+while IFS=$'\\t' read -r kind path; do
+    case "$kind" in
+        FULL) apply_full "$path" ;;
+        UPDATE) apply_update "$path" ;;
+    esac
+done < "$STEPS_FILE"
+
+echo "$FINAL_VERSION" > "$DIST_DIR/BUILD_VERSION"
+
+rm -rf "$(dirname "$STEPS_FILE")"
 
 cd "$DIST_DIR"
 nohup ./run.sh >/dev/null 2>&1 &
 """
 
 
-def apply_update_and_restart(download_url: str, on_progress=None) -> None:
-    """Descarga el asset, lo extrae, lanza el script que hace el swap una
-    vez que este proceso muera, y termina el proceso actual. No vuelve:
-    llama a os._exit al final.
-
-    on_progress(stage, current, total), si se pasa, se llama durante cada
-    etapa ('download', 'extract', 'restart') para que el caller (main.py)
-    pueda mostrar una barra de progreso -- sin esto la descarga/extracción
-    queda muda y la ventana parece congelada."""
-    def report(stage, current=0, total=0):
-        if on_progress:
-            on_progress(stage, current, total)
-
-    dist_dir = Path(sys.executable).resolve().parent
-
-    tmp_dir = Path(tempfile.mkdtemp(prefix="labsim_update_"))
-    archive_path = tmp_dir / ASSET_NAME
-    req = Request(download_url)
-    report("download", 0, 0)
-    with urlopen(req, timeout=60) as resp, open(archive_path, "wb") as f:
+def _download(url: str, dest: Path, on_chunk) -> None:
+    req = Request(url)
+    with urlopen(req, timeout=60) as resp, open(dest, "wb") as f:
         total = int(resp.headers.get("Content-Length") or 0)
         downloaded = 0
         while True:
@@ -240,27 +316,73 @@ def apply_update_and_restart(download_url: str, on_progress=None) -> None:
                 break
             f.write(chunk)
             downloaded += len(chunk)
-            report("download", downloaded, total)
+            on_chunk(downloaded, total)
 
-    report("extract", 0, 0)
-    extract_dir = tmp_dir / "extracted"
-    with tarfile.open(archive_path) as tf:
-        tf.extractall(extract_dir)
-    archive_path.unlink()
 
-    new_dist = extract_dir / "LabSim"
-    if not new_dist.is_dir():
-        # asset con estructura inesperada: no arriesgamos el swap
-        shutil.rmtree(tmp_dir, ignore_errors=True)
-        return
+def apply_update_and_restart(update_info: dict, on_progress=None) -> None:
+    """Descarga el/los paquete(s) de update_info (ver check_for_update),
+    los extrae, lanza el script que hace el swap una vez que este proceso
+    muera, y termina el proceso actual. No vuelve si tiene éxito: llama a
+    os._exit al final.
+
+    on_progress(stage, current, total, hop, hops), si se pasa, se llama
+    durante cada etapa ('download', 'extract', 'restart') para que el
+    caller (main.py) pueda mostrar una barra de progreso -- sin esto la
+    descarga/extracción queda muda y la ventana parece congelada. hop/hops
+    identifican qué paquete de la cadena se está bajando (1/1 en modo full)."""
+    def report(stage, current=0, total=0, hop=1, hops=1):
+        if on_progress:
+            on_progress(stage, current, total, hop, hops)
+
+    dist_dir = Path(sys.executable).resolve().parent
+    tmp_dir = Path(tempfile.mkdtemp(prefix="labsim_update_"))
+    steps = []
+
+    if update_info["mode"] == "full":
+        archive_path = tmp_dir / "full.tar.gz"
+        report("download", 0, 0, 1, 1)
+        _download(update_info["url"], archive_path, lambda cur, tot: report("download", cur, tot, 1, 1))
+
+        report("extract", 0, 0, 1, 1)
+        extract_dir = tmp_dir / "full_extracted"
+        with tarfile.open(archive_path) as tf:
+            tf.extractall(extract_dir)
+        archive_path.unlink()
+
+        new_dist = extract_dir / "LabSim"
+        if not new_dist.is_dir():
+            # asset con estructura inesperada: no arriesgamos el swap
+            shutil.rmtree(tmp_dir, ignore_errors=True)
+            return
+        steps.append(("FULL", new_dist))
+    else:
+        hops = update_info["hops"]
+        n = len(hops)
+        for i, (_tag, update_url) in enumerate(hops, start=1):
+            archive_path = tmp_dir / f"update_{i}.tar.gz"
+            report("download", 0, 0, i, n)
+            _download(update_url, archive_path, lambda cur, tot, i=i, n=n: report("download", cur, tot, i, n))
+
+            report("extract", 0, 0, i, n)
+            extract_dir = tmp_dir / f"update_{i}_extracted"
+            with tarfile.open(archive_path) as tf:
+                tf.extractall(extract_dir)
+            archive_path.unlink()
+            steps.append(("UPDATE", extract_dir))
+
+    steps_file = tmp_dir / "steps.tsv"
+    # newline final obligatorio: el script bash lee esto con "while read",
+    # que se salta la ultima linea si el archivo no termina en \n.
+    steps_text = "".join(f"{kind}\t{path}\n" for kind, path in steps)
+    steps_file.write_text(steps_text, encoding="utf-8")
 
     script_path = tmp_dir / "apply_update.sh"
     script_path.write_text(_UPDATER_SCRIPT, encoding="utf-8")
     script_path.chmod(0o755)
 
-    report("restart", 0, 0)
+    report("restart", 0, 0, len(steps), len(steps))
     subprocess.Popen(
-        [str(script_path), str(os.getpid()), str(dist_dir), str(new_dist)],
+        [str(script_path), str(os.getpid()), str(dist_dir), str(steps_file), update_info["build_id"]],
         start_new_session=True,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,

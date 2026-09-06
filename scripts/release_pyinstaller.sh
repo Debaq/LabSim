@@ -9,7 +9,18 @@
 # detecte como nueva sin tener que subir versión cada vez, y no la vuelva
 # a ofrecer una vez aplicada (ver _local_build_id en core/updater.py).
 # Arma dist/LabSim via build.sh, escribe dist/LabSim/BUILD_VERSION, tarea
-# -> LabSim-linux-x86_64.tar.gz y lo sube al release (creandolo si hace falta).
+# -> LabSim-linux-x86_64.tar.gz (paquete full) y lo sube al release
+# (creandolo si hace falta).
+#
+# Ademas arma un paquete de update (diff) contra el manifest de la release
+# anterior (scripts/update_diff.py) -- LabSim-linux-x86_64-update.tar.gz,
+# solo con los archivos que cambiaron. El updater instalado encadena estos
+# paquetes update (uno por release) para llegar a la última versión sin
+# bajar los ~100MB completos cada vez; si a la cadena le falta un eslabón
+# (release vieja sin paquete update, o demasiados saltos) cae solo al full.
+# Por eso las releases viejas ya NO se borran completas: se les poda el
+# asset full (pesado, superado) pero se mantiene el tag y el update asset,
+# que es lo que necesita la cadena. Ver docstring de core/updater.py.
 set -e
 cd "$(dirname "$0")/.."
 
@@ -59,6 +70,8 @@ fi
 
 TAG="pyinstaller-v${BUILD_ID}"
 ASSET_NAME="LabSim-linux-x86_64.tar.gz"
+MANIFEST_NAME="manifest.json"
+UPDATE_ASSET_NAME="LabSim-linux-x86_64-update.tar.gz"
 
 echo "Build: ${BUILD_ID} -> tag ${TAG}"
 
@@ -71,6 +84,32 @@ rm -f "$TAR_PATH"
 run_with_spinner "Armando ${ASSET_NAME}..." tar -C dist -czf "$TAR_PATH" LabSim
 echo "Armado ${TAR_PATH} ($(du -h "$TAR_PATH" | cut -f1))"
 
+python3 scripts/update_diff.py manifest dist/LabSim "dist/${MANIFEST_NAME}"
+
+# Release pyinstaller-v* mas reciente antes de esta (por fecha real de
+# publicacion, igual criterio que usa el updater en el cliente) -- es la
+# base contra la que se calcula el diff.
+PREV_TAG=$(gh release list --json tagName,createdAt \
+    -q "[.[] | select(.tagName | startswith(\"pyinstaller-v\")) | select(.tagName != \"${TAG}\")] | sort_by(.createdAt) | last | .tagName // empty")
+
+UPDATE_TAR=""
+if [ -n "$PREV_TAG" ]; then
+    OLD_MANIFEST="dist/prev_manifest.json"
+    rm -f "$OLD_MANIFEST"
+    if gh release download "$PREV_TAG" -p "$MANIFEST_NAME" -O "$OLD_MANIFEST" >/dev/null 2>&1; then
+        rm -rf dist/update_pkg
+        if python3 scripts/update_diff.py diff dist/LabSim "$OLD_MANIFEST" dist/update_pkg; then
+            UPDATE_TAR="dist/${UPDATE_ASSET_NAME}"
+            run_with_spinner "Armando ${UPDATE_ASSET_NAME}..." tar -C dist/update_pkg -czf "$UPDATE_TAR" .
+            echo "Armado ${UPDATE_TAR} ($(du -h "$UPDATE_TAR" | cut -f1))"
+        fi
+    else
+        echo "Release anterior ${PREV_TAG} no tiene ${MANIFEST_NAME} (previa a esta feature) -- se sube solo el paquete full"
+    fi
+else
+    echo "No hay release pyinstaller-v anterior -- primera build con este sistema, se sube solo el paquete full"
+fi
+
 if git rev-parse "$TAG" >/dev/null 2>&1; then
     echo "Tag ${TAG} ya existe localmente"
 else
@@ -78,23 +117,26 @@ else
     run_with_spinner "Pusheando tag ${TAG}..." git push origin "$TAG"
 fi
 
+ASSETS=("$TAR_PATH" "dist/${MANIFEST_NAME}")
+[ -n "$UPDATE_TAR" ] && ASSETS+=("$UPDATE_TAR")
+
 if gh release view "$TAG" >/dev/null 2>&1; then
-    run_with_spinner "Subiendo ${ASSET_NAME} al release..." gh release upload "$TAG" "$TAR_PATH" --clobber
+    run_with_spinner "Subiendo assets al release..." gh release upload "$TAG" "${ASSETS[@]}" --clobber
 else
-    run_with_spinner "Creando release ${TAG} y subiendo ${ASSET_NAME}..." gh release create "$TAG" "$TAR_PATH" \
+    run_with_spinner "Creando release ${TAG} y subiendo assets..." gh release create "$TAG" "${ASSETS[@]}" \
         --title "LabSim ${TAG} (build PyInstaller)" \
         --notes "Build PyInstaller (Linux) de LabSim, build ${BUILD_ID}."
 fi
 
-# Borra cualquier otro release pyinstaller-v* -- el updater viejo instalado
-# en los clientes agarra "el primero que matchea el prefijo" sin ordenar
-# por fecha (ver core/updater.py), así que si queda más de un candidato
-# puede no detectar el más nuevo. Con uno solo, no hay ambigüedad posible.
+# Ya no se borran releases pyinstaller-v* viejas completas: el tag y el
+# paquete update de cada una son el eslabón que la cadena de updates del
+# cliente necesita para llegar hasta acá desde cualquier versión anterior.
+# Solo se poda el asset full (pesado, superado por el de esta release).
 OLD_TAGS=$(gh release list --json tagName -q ".[] | select(.tagName | startswith(\"pyinstaller-v\")) | select(.tagName != \"${TAG}\") | .tagName")
 if [ -n "$OLD_TAGS" ]; then
-    echo "Borrando releases pyinstaller-v* viejos:"
+    echo "Podando asset full de releases pyinstaller-v* viejas (se mantiene el tag y el paquete update):"
     while IFS= read -r old_tag; do
-        run_with_spinner "  Borrando ${old_tag}..." gh release delete "$old_tag" --yes --cleanup-tag
+        run_with_spinner "  Borrando ${ASSET_NAME} de ${old_tag}..." gh release delete-asset "$old_tag" "$ASSET_NAME" --yes || true
     done <<< "$OLD_TAGS"
 fi
 

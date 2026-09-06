@@ -564,11 +564,16 @@ def _check_and_apply_update():
     update = check_for_update(__VERSION__)
     if update is None:
         return
-    tag, download_url = update
+    tag = update["tag"]
+    if update["mode"] == "chain":
+        n = len(update["hops"])
+        detalle = f"Se aplicará en {n} paso{'s' if n != 1 else ''} (paquetes livianos, solo lo que cambió)."
+    else:
+        detalle = "Se descargará el paquete completo."
     resp = QMessageBox.question(
         None,
         "Actualización disponible",
-        f"Hay una nueva versión disponible ({tag}).\n"
+        f"Hay una nueva versión disponible ({tag}).\n{detalle}\n"
         "¿Actualizar ahora? La aplicación se cerrará y volverá a abrir sola.",
         QMessageBox.Yes | QMessageBox.No,
     )
@@ -585,26 +590,27 @@ def _check_and_apply_update():
     progress.show()
     context.app.processEvents()
 
-    def on_progress(stage, current, total):
+    def on_progress(stage, current, total, hop, hops):
+        paso = f" ({hop}/{hops})" if hops > 1 else ""
         if stage == "download":
             if total:
                 progress.setRange(0, total)
                 progress.setValue(current)
                 progress.setLabelText(
-                    f"Descargando actualización... {current // 1024} / {total // 1024} KB"
+                    f"Descargando actualización{paso}... {current // 1024} / {total // 1024} KB"
                 )
             else:
                 progress.setRange(0, 0)
-                progress.setLabelText(f"Descargando actualización... {current // 1024} KB")
+                progress.setLabelText(f"Descargando actualización{paso}... {current // 1024} KB")
         elif stage == "extract":
             progress.setRange(0, 0)
-            progress.setLabelText("Instalando actualización...")
+            progress.setLabelText(f"Instalando actualización{paso}...")
         elif stage == "restart":
             progress.setLabelText("Reiniciando LabSim...")
         context.app.processEvents()
 
     try:
-        apply_update_and_restart(download_url, on_progress=on_progress)  # no vuelve si tiene éxito
+        apply_update_and_restart(update, on_progress=on_progress)  # no vuelve si tiene éxito
     except Exception as exc:
         # Falla de red o archivo corrupto a mitad de la descarga/extracción:
         # no dejamos morir la app acá, se sigue con la versión actual instalada.
