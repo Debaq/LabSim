@@ -208,7 +208,7 @@ admin_header('Base de datos', $me);
 
 <div class="card">
     <strong>Actualizar schema</strong>
-    <p style="font-size:0.85rem; color:#555;">
+    <p class="muted">
         Idempotente (CREATE TABLE/INDEX IF NOT EXISTS) -- correrlo de nuevo no borra datos.
         Úsalo después de subir cambios al schema. Único lugar del panel que aplica esto.
     </p>
@@ -221,7 +221,7 @@ admin_header('Base de datos', $me);
 
 <div class="card">
     <strong>Crear backup ahora</strong>
-    <p style="font-size:0.85rem; color:#555;">
+    <p class="muted">
         Copia completa de la base (alumnos, cursos, casos, citas, atenciones, logs) al momento de pinchar el botón.
         No hay backups automáticos programados -- este panel es manual, guárdalos con la frecuencia que necesites.
     </p>
@@ -234,11 +234,12 @@ admin_header('Base de datos', $me);
 
 <div class="card">
     <strong>Backups guardados (<?= count($backups) ?>)</strong>
-    <p style="font-size:0.85rem; color:#555;">
+    <p class="muted">
         Viven en <code>data/backups/</code> en el servidor (fuera de la carpeta pública, no accesibles por URL directa).
         Para tener una copia fuera del servidor, descárgalos a tu computador de vez en cuando -- si el hosting completo
         se pierde, los backups que solo viven ahí mismo no sirven de nada.
     </p>
+    <div class="table-wrap">
     <table>
         <tr><th>Fecha</th><th>Archivo</th><th>Tamaño</th><th></th></tr>
         <?php foreach ($backups as $b): ?>
@@ -246,7 +247,7 @@ admin_header('Base de datos', $me);
             <td><?= htmlspecialchars($b['created_at']) ?></td>
             <td class="mono" style="font-size:0.8rem;"><?= htmlspecialchars($b['filename']) ?></td>
             <td><?= htmlspecialchars(Backups::formatBytes($b['size'])) ?></td>
-            <td style="white-space:nowrap;">
+            <td class="nowrap">
                 <a href="backup_download.php?file=<?= urlencode($b['filename']) ?>" style="font-size:0.8rem;">Descargar</a>
                 &nbsp;·&nbsp;
                 <button type="button" class="secondary" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;"
@@ -262,14 +263,15 @@ admin_header('Base de datos', $me);
         </tr>
         <?php endforeach; ?>
         <?php if (!$backups): ?>
-        <tr><td colspan="4" style="color:#888;">Ningún backup creado todavía.</td></tr>
+        <tr><td colspan="4" class="muted">Ningún backup creado todavía.</td></tr>
         <?php endif; ?>
     </table>
+    </div>
 </div>
 
 <div class="card">
     <strong>Explorar contenido</strong>
-    <p style="font-size:0.85rem; color:#555;">
+    <p class="muted">
         Navegar tablas y filas de la base viva o de cualquier backup guardado, en modo solo lectura
         (<code>PRAGMA query_only</code> -- nunca escribe nada), sin restaurar nada primero.
     </p>
@@ -294,26 +296,28 @@ admin_header('Base de datos', $me);
     <p>
         <?php foreach ($explorerTables as $t): ?>
         <a href="?source=<?= urlencode($explorerSource) ?>&table=<?= urlencode($t) ?>"
-           style="display:inline-block; margin:0.2rem 0.4rem 0.2rem 0; padding:0.2rem 0.6rem; border-radius:4px; background:<?= $t === $explorerTable ? '#1a2744' : '#eef0f4' ?>; color:<?= $t === $explorerTable ? '#fff' : '#1a1a1a' ?>; text-decoration:none; font-size:0.85rem;">
+           style="display:inline-block; margin:0.2rem 0.4rem 0.2rem 0; padding:0.2rem 0.6rem; border-radius:var(--radius-md); background:<?= $t === $explorerTable ? 'var(--color-primary)' : 'var(--color-table-head)' ?>; color:<?= $t === $explorerTable ? 'var(--color-primary-contrast)' : 'var(--color-text)' ?>; text-decoration:none; font-size:0.85rem;">
             <?= htmlspecialchars($t) ?>
         </a>
         <?php endforeach; ?>
-        <?php if (!$explorerTables): ?><span style="color:#888;">Sin tablas.</span><?php endif; ?>
+        <?php if (!$explorerTables): ?><span class="muted">Sin tablas.</span><?php endif; ?>
     </p>
 
     <?php if ($explorerTable !== ''): ?>
     <p><strong><?= htmlspecialchars($explorerTable) ?></strong> — <?= $explorerTotalRows ?> filas, columnas: <?= htmlspecialchars(implode(', ', $explorerColumns)) ?></p>
     <div style="overflow-x:auto;">
+    <div class="table-wrap">
     <table>
         <tr><?php foreach ($explorerColumns as $c): ?><th><?= htmlspecialchars($c) ?></th><?php endforeach; ?></tr>
         <?php foreach ($explorerRows as $r): ?>
         <tr><?php foreach ($explorerColumns as $c): ?><td class="mono"><?= htmlspecialchars((string) ($r[$c] ?? '')) ?></td><?php endforeach; ?></tr>
         <?php endforeach; ?>
-        <?php if (!$explorerRows): ?><tr><td colspan="<?= max(1, count($explorerColumns)) ?>" style="color:#888;">Sin filas.</td></tr><?php endif; ?>
+        <?php if (!$explorerRows): ?><tr><td colspan="<?= max(1, count($explorerColumns)) ?>" class="muted">Sin filas.</td></tr><?php endif; ?>
     </table>
     </div>
+    </div>
     <?php $explorerLastPage = max(1, (int) ceil($explorerTotalRows / EXPLORER_PAGE_SIZE)); ?>
-    <p style="font-size:0.85rem;">
+    <p class="help">
         Página <?= $explorerPage ?> / <?= $explorerLastPage ?>
         <?php if ($explorerPage > 1): ?> &nbsp;<a href="?source=<?= urlencode($explorerSource) ?>&table=<?= urlencode($explorerTable) ?>&page=<?= $explorerPage - 1 ?>">« Anterior</a><?php endif; ?>
         <?php if ($explorerPage < $explorerLastPage): ?> &nbsp;<a href="?source=<?= urlencode($explorerSource) ?>&table=<?= urlencode($explorerTable) ?>&page=<?= $explorerPage + 1 ?>">Siguiente »</a><?php endif; ?>
@@ -321,7 +325,7 @@ admin_header('Base de datos', $me);
     <?php endif; ?>
 
     <p style="margin-top:1.2rem;"><strong>Consulta SQL manual (solo SELECT)</strong></p>
-    <p style="font-size:0.85rem; color:#555;">
+    <p class="muted">
         Corre contra <?= htmlspecialchars($explorerSourceLabel) ?>. Un solo <code>SELECT</code> (o <code>WITH ... SELECT</code>),
         sin <code>;</code>. Resultados limitados a <?= EXPLORER_MAX_SQL_ROWS ?> filas.
     </p>
@@ -336,23 +340,25 @@ admin_header('Base de datos', $me);
     <?php if ($explorerSqlError !== null): ?><p class="error"><?= htmlspecialchars($explorerSqlError) ?></p><?php endif; ?>
     <?php if ($explorerSqlInput !== '' && $explorerSqlError === null): ?>
     <div style="overflow-x:auto;">
+    <div class="table-wrap">
     <table>
         <tr><?php foreach ($explorerSqlColumns as $c): ?><th><?= htmlspecialchars($c) ?></th><?php endforeach; ?></tr>
         <?php foreach ($explorerSqlRows as $r): ?>
         <tr><?php foreach ($explorerSqlColumns as $c): ?><td class="mono"><?= htmlspecialchars((string) ($r[$c] ?? '')) ?></td><?php endforeach; ?></tr>
         <?php endforeach; ?>
-        <?php if (!$explorerSqlRows): ?><tr><td style="color:#888;">Sin resultados.</td></tr><?php endif; ?>
+        <?php if (!$explorerSqlRows): ?><tr><td class="muted">Sin resultados.</td></tr><?php endif; ?>
     </table>
     </div>
-    <?php if ($explorerSqlTruncated): ?><p style="font-size:0.8rem; color:#888;">Truncado a <?= EXPLORER_MAX_SQL_ROWS ?> filas.</p><?php endif; ?>
+    </div>
+    <?php if ($explorerSqlTruncated): ?><p class="help">Truncado a <?= EXPLORER_MAX_SQL_ROWS ?> filas.</p><?php endif; ?>
     <?php endif; ?>
     <?php endif; ?>
 </div>
 
 <div id="restore-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:10;">
     <div class="card" style="max-width:480px;">
-        <strong style="color:#a33;">Restaurar backup</strong>
-        <p style="font-size:0.85rem;">
+        <strong style="color:var(--color-danger);">Restaurar backup</strong>
+        <p class="help">
             Vas a restaurar <strong id="restore-filename-label"></strong>. Esto reemplaza <strong>toda</strong> la
             base de datos viva (alumnos, cursos, citas, atenciones, logs -- todo lo que se haya cargado después
             de ese backup se pierde). Se guarda automáticamente un backup del estado actual antes de restaurar,

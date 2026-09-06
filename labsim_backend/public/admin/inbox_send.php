@@ -188,12 +188,12 @@ admin_header('Bandeja de entrada', $me);
     <?php if (!$misMensajes): ?>
     <p class="legend">Sin mensajes todavía.</p>
     <?php else: ?>
-    <div style="max-height:24rem; overflow-y:auto; margin-top:0.5rem;">
+    <div class="scrollbox" style="margin-top:0.5rem;">
         <?php foreach ($misMensajes as $m): ?>
-        <details style="border:1px solid #e5e5e5; border-radius:6px; padding:0.4rem 0.6rem; margin-bottom:0.4rem;" <?= !$m['leido'] ? 'open' : '' ?>>
+        <details class="pane" style="margin-bottom:0.4rem;" <?= !$m['leido'] ? 'open' : '' ?>>
             <summary style="cursor:pointer; <?= !$m['leido'] ? 'font-weight:700;' : '' ?>">
                 <?= !$m['leido'] ? '● ' : '' ?><?= htmlspecialchars($m['asunto']) ?>
-                <span class="legend" style="font-weight:400;">-- <?= htmlspecialchars($m['remitente'] ?: 'Sistema') ?>, <?= htmlspecialchars($m['created_at']) ?></span>
+                <span class="legend" class="normal">-- <?= htmlspecialchars($m['remitente'] ?: 'Sistema') ?>, <?= htmlspecialchars($m['created_at']) ?></span>
             </summary>
             <p style="white-space:pre-wrap; margin:0.5rem 0 0.3rem;"><?= htmlspecialchars($m['cuerpo']) ?></p>
             <?php if (!$m['leido']): ?>
@@ -225,12 +225,12 @@ admin_header('Bandeja de entrada', $me);
     <?php if (!$misEnvios): ?>
     <p class="legend">Todavía no has mandado mensajes.</p>
     <?php else: ?>
-    <div style="max-height:24rem; overflow-y:auto; margin-top:0.5rem;">
+    <div class="scrollbox" style="margin-top:0.5rem;">
         <?php foreach ($misEnvios as $e): ?>
-        <details style="border:1px solid #e5e5e5; border-radius:6px; padding:0.4rem 0.6rem; margin-bottom:0.4rem;">
+        <details class="pane" style="margin-bottom:0.4rem;">
             <summary style="cursor:pointer;">
                 <?= htmlspecialchars($e['asunto']) ?>
-                <span class="legend" style="font-weight:400;">
+                <span class="legend" class="normal">
                     -- <?= (int) $e['n_destinatarios'] ?> destinatario<?= (int) $e['n_destinatarios'] === 1 ? '' : 's' ?>
                     (<?= (int) $e['n_leidos'] ?> leído<?= (int) $e['n_leidos'] === 1 ? '' : 's' ?>), <?= htmlspecialchars($e['created_at']) ?>
                 </span>
@@ -245,7 +245,7 @@ admin_header('Bandeja de entrada', $me);
 
 <div class="card">
     <strong>Enviar mensaje</strong>
-    <p style="font-size:0.85rem; color:#555;">
+    <p class="muted">
         Llega a la misma bandeja de entrada donde el alumno ve los avisos automáticos sobre el trato a
         pacientes (ver <a href="llm.php">Admin → IA Paciente</a>) -- útil para avisos de curso, o para
         probar cómo se ve la bandeja sin esperar a que un alumno cierre una atención de verdad.
@@ -269,11 +269,11 @@ admin_header('Bandeja de entrada', $me);
 
         <div style="display:flex; gap:1.2rem; margin-bottom:0.4rem;">
             <label style="display:flex; align-items:center; gap:0.4rem; font-weight:600;">
-                <input type="radio" name="destinatario" value="alumno" id="dest-alumno" style="width:auto;" checked>
+                <input type="radio" name="destinatario" value="alumno" id="dest-alumno" class="input--auto" checked>
                 Alumnos
             </label>
             <label style="display:flex; align-items:center; gap:0.4rem; font-weight:600;">
-                <input type="radio" name="destinatario" value="docente" id="dest-docente" style="width:auto;" <?= !$teachers ? 'disabled' : '' ?>>
+                <input type="radio" name="destinatario" value="docente" id="dest-docente" class="input--auto" <?= !$teachers ? 'disabled' : '' ?>>
                 Otros docentes del curso
             </label>
         </div>
@@ -281,11 +281,11 @@ admin_header('Bandeja de entrada', $me);
         <div id="bloque-alumnos">
         <div style="display:flex; flex-direction:column; gap:0.3rem;">
             <label style="display:flex; align-items:center; gap:0.5rem; font-weight:600;">
-                <input type="radio" name="modo" value="individual" id="modo-individual" style="width:auto;" checked>
+                <input type="radio" name="modo" value="individual" id="modo-individual" class="input--auto" checked>
                 Alumnos individuales
             </label>
             <label style="display:flex; align-items:center; gap:0.5rem; font-weight:600;">
-                <input type="radio" name="modo" value="grupo" id="modo-grupo" style="width:auto;" <?= !$grupos ? 'disabled' : '' ?>>
+                <input type="radio" name="modo" value="grupo" id="modo-grupo" class="input--auto" <?= !$grupos ? 'disabled' : '' ?>>
                 Grupo
                 <select name="grupo_id" id="sel-grupo" <?= !$grupos ? 'disabled' : '' ?>>
                     <?php foreach ($grupos as $g): ?>
@@ -295,16 +295,16 @@ admin_header('Bandeja de entrada', $me);
                 <?php if (!$grupos): ?><span class="legend">Este curso no tiene grupos todavía.</span><?php endif; ?>
             </label>
             <label style="display:flex; align-items:center; gap:0.5rem; font-weight:600;">
-                <input type="radio" name="modo" value="todos" id="modo-todos" style="width:auto;">
+                <input type="radio" name="modo" value="todos" id="modo-todos" class="input--auto">
                 Todo el curso (<?= count($roster) ?> alumno<?= count($roster) === 1 ? '' : 's' ?>)
             </label>
         </div>
 
-        <div id="roster-box" style="max-height:14rem; overflow-y:auto; border:1px solid #e5e5e5; border-radius:6px; padding:0.5rem; margin-top:0.4rem;">
+        <div id="roster-box" class="scrollbox scrollbox--short pane" style="margin-top:0.4rem;">
             <?php foreach ($roster as $r): ?>
             <label class="inline-check" style="display:block; font-weight:400;">
                 <input type="checkbox" name="student_ids[]" value="<?= (int) $r['id'] ?>" class="chk-alumno">
-                <?= htmlspecialchars($r['display_name']) ?> <span class="mono" style="font-size:0.75rem; color:#888;">(<?= htmlspecialchars($r['username']) ?>)</span>
+                <?= htmlspecialchars($r['display_name']) ?> <span class="mono" class="help help--xs">(<?= htmlspecialchars($r['username']) ?>)</span>
             </label>
             <?php endforeach; ?>
             <?php if (!$roster): ?>
@@ -313,16 +313,16 @@ admin_header('Bandeja de entrada', $me);
         </div>
         </div>
 
-        <div id="bloque-docentes" style="display:none;">
+        <div id="bloque-docentes" class="hidden">
             <label style="display:flex; align-items:center; gap:0.5rem; font-weight:600;">
-                <input type="checkbox" name="todos_docentes" value="1" id="chk-todos-docentes" style="width:auto;">
+                <input type="checkbox" name="todos_docentes" value="1" id="chk-todos-docentes" class="input--auto">
                 Todos los docentes del curso (<?= count($teachers) ?>)
             </label>
-            <div id="teacher-box" style="max-height:14rem; overflow-y:auto; border:1px solid #e5e5e5; border-radius:6px; padding:0.5rem; margin-top:0.4rem;">
+            <div id="teacher-box" class="scrollbox scrollbox--short pane" style="margin-top:0.4rem;">
                 <?php foreach ($teachers as $t): ?>
                 <label class="inline-check" style="display:block; font-weight:400;">
                     <input type="checkbox" name="teacher_ids[]" value="<?= (int) $t['id'] ?>" class="chk-docente">
-                    <?= htmlspecialchars($t['display_name']) ?> <span class="mono" style="font-size:0.75rem; color:#888;">(<?= htmlspecialchars($t['username']) ?>)</span>
+                    <?= htmlspecialchars($t['display_name']) ?> <span class="mono" class="help help--xs">(<?= htmlspecialchars($t['username']) ?>)</span>
                 </label>
                 <?php endforeach; ?>
                 <?php if (!$teachers): ?>
@@ -335,7 +335,7 @@ admin_header('Bandeja de entrada', $me);
             <input type="text" name="asunto" placeholder="Ej: Recordatorio de la próxima clase" required>
         </label>
         <label>Mensaje
-            <textarea name="cuerpo" rows="6" style="width:100%; padding:0.45rem; margin-top:0.2rem; border:1px solid #ccc; border-radius:4px;" required></textarea>
+            <textarea name="cuerpo" rows="6" style="width:100%; padding:0.45rem; margin-top:0.2rem; border:1px solid var(--color-border-strong); border-radius:var(--radius-md);" required></textarea>
         </label>
 
         <button type="submit">Enviar</button>

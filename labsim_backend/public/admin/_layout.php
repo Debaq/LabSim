@@ -2,6 +2,18 @@
 
 declare(strict_types=1);
 
+/** Registra un CSS extra de página para que admin_header lo<link>ee.
+ * Uso: admin_add_css('case.css'); admin_header(...); */
+function admin_add_css(string $filename): void
+{
+    $GLOBALS['__admin_extra_css'][] = $filename;
+}
+
+function admin_extra_css(): array
+{
+    return array_values(array_unique($GLOBALS['__admin_extra_css'] ?? []));
+}
+
 function admin_header(string $title, ?array $currentUser = null): void
 {
     header('Content-Type: text/html; charset=utf-8');
@@ -10,94 +22,100 @@ function admin_header(string $title, ?array $currentUser = null): void
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LabSim Admin - <?= htmlspecialchars($title) ?></title>
-<style>
-    * { box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; margin: 0; color: #1a1a1a; background: #f7f7f8; }
-    header { background: #1a2744; color: #fff; padding: 0.9rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
-    header a { color: #fff; text-decoration: none; margin-right: 1.2rem; font-size: 0.95rem; opacity: 0.85; }
-    header a:hover { opacity: 1; text-decoration: underline; }
-    header .brand { font-weight: 700; font-size: 1.05rem; margin-right: 2rem; }
-    nav.admin-nav { display: flex; align-items: center; }
-    .nav-group { position: relative; margin-right: 1.2rem; }
-    .nav-group > .nav-label { cursor: default; opacity: 0.85; font-size: 0.95rem; }
-    .nav-group:hover > .nav-label { opacity: 1; }
-    .nav-group .nav-dropdown { display: none; position: absolute; top: 100%; left: 0; flex-direction: column; background: #24345c; border-radius: 6px; padding: 0.4rem 0; min-width: 190px; box-shadow: 0 4px 10px rgba(0,0,0,0.25); z-index: 10; }
-    .nav-group:hover .nav-dropdown { display: flex; }
-    .nav-group .nav-dropdown a { margin-right: 0; padding: 0.4rem 0.9rem; }
-    .nav-group .nav-dropdown a:hover { background: rgba(255,255,255,0.08); text-decoration: none; }
-    .nav-group .nav-dropdown hr { border: none; border-top: 1px solid rgba(255,255,255,0.15); margin: 0.35rem 0; }
-    main { width: 100%; margin: 2rem auto; padding: 0 2rem; }
-    h1 { font-size: 1.4rem; }
-    table { width: 100%; border-collapse: collapse; margin: 1rem 0; background: #fff; }
-    th, td { text-align: left; padding: 0.5rem 0.7rem; border-bottom: 1px solid #e5e5e5; font-size: 0.9rem; }
-    th { background: #eef0f4; }
-    form.inline { display: inline; }
-    .card { background: #fff; border-radius: 8px; padding: 1.2rem 1.5rem; margin-bottom: 1.2rem; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
-    label { display: block; margin-top: 0.7rem; font-weight: 600; font-size: 0.85rem; }
-    input, select { width: 100%; padding: 0.45rem; margin-top: 0.2rem; border: 1px solid #ccc; border-radius: 4px; }
-    button { margin-top: 1rem; padding: 0.5rem 1.1rem; cursor: pointer; border: none; border-radius: 4px; background: #1a2744; color: #fff; }
-    button.secondary { background: #888; }
-    button.danger { background: #a33; }
-    .error { background: #fdecea; color: #611a15; padding: 0.6rem 0.8rem; border-radius: 4px; margin-bottom: 1rem; }
-    .success { background: #e8f5e9; color: #1b5e20; padding: 0.6rem 0.8rem; border-radius: 4px; margin-bottom: 1rem; }
-    code { background: #eef0f4; padding: 0.15rem 0.4rem; border-radius: 3px; }
-    .mono { font-family: ui-monospace, monospace; font-size: 0.85rem; word-break: break-all; }
-</style>
+<script>
+// Anti-FOUC: aplica el data-theme ANTES de que se renderice el CSS.
+// Si el usuario eligió "oscuro" en una sesión previa, el primer paint ya es oscuro.
+(function () {
+    try {
+        var t = localStorage.getItem('labsim-theme');
+        if (t === 'dark' || t === 'light') {
+            document.documentElement.dataset.theme = t;
+        }
+    } catch (e) { /* localStorage bloqueado = sin override */ }
+})();
+</script>
+<?php
+// Cache-busting: ?v=filemtime fuerza al browser a re-bajar el CSS cuando
+// se toca. Sin esto, deploys de CSS quedan con cache vieja.
+$cssV = static fn (string $path): string => (string) (@filemtime($path) ?: time());
+?>
+<link rel="stylesheet" href="../css/tokens.css?v=<?= $cssV(__DIR__ . '/../css/tokens.css') ?>">
+<link rel="stylesheet" href="../css/base.css?v=<?= $cssV(__DIR__ . '/../css/base.css') ?>">
+<link rel="stylesheet" href="../css/admin.css?v=<?= $cssV(__DIR__ . '/../css/admin.css') ?>">
+<?php foreach (admin_extra_css() as $css): ?>
+<link rel="stylesheet" href="../css/<?= htmlspecialchars($css) ?>?v=<?= $cssV(__DIR__ . '/../css/' . $css) ?>">
+<?php endforeach; ?>
 </head>
 <body>
+<a href="#main-content" class="skip-link">Saltar al contenido principal</a>
 <header>
     <div>
         <span class="brand">LabSim Admin</span>
         <?php $isFullAdmin = $currentUser && (int) $currentUser['permission'] === Auth::PERMISSION_ADMIN; ?>
         <nav class="admin-nav">
-            <div class="nav-group">
-                <span class="nav-label">Docencia ▾</span>
+            <?php
+            // Marca aria-current en el link de la página actual (lector de
+            // pantalla: "página actual"). Los grupos arrancan siempre
+            // colapsados -- se abren solo al click (ver script en el footer),
+            // así el header se ve igual en toda la app sin importar la sección.
+            $currentPage = basename($_SERVER['PHP_SELF'] ?? '');
+            $ariaCurrent = static fn (string $href): string =>
+                basename(parse_url($href, PHP_URL_PATH) ?: '') === $currentPage
+                    ? ' aria-current="page"' : '';
+            ?>
+            <details class="nav-group" name="labsim-nav">
+                <summary class="nav-label">Docencia<span class="nav-caret">▾</span></summary>
                 <div class="nav-dropdown">
-                    <a href="dashboard.php">Dashboard</a>
+                    <a href="dashboard.php"<?= $ariaCurrent('dashboard.php') ?>>Dashboard</a>
                     <hr>
-                    <a href="agenda.php">Agendas</a>
-                    <a href="patients.php">Fichas Clínicas</a>
+                    <a href="agenda.php"<?= $ariaCurrent('agenda.php') ?>>Agendas</a>
+                    <a href="patients.php"<?= $ariaCurrent('patients.php') ?>>Fichas Clínicas</a>
                     <hr>
-                    <a href="courses.php">Cursos</a>
-                    <a href="inbox_send.php">Bandeja de entrada</a>
+                    <a href="courses.php"<?= $ariaCurrent('courses.php') ?>>Cursos</a>
+                    <a href="inbox_send.php"<?= $ariaCurrent('inbox_send.php') ?>>Bandeja de entrada</a>
                 </div>
-            </div>
+            </details>
             <?php if ($isFullAdmin): ?>
-            <div class="nav-group">
-                <span class="nav-label">Sistema ▾</span>
+            <details class="nav-group" name="labsim-nav">
+                <summary class="nav-label">Sistema<span class="nav-caret">▾</span></summary>
                 <div class="nav-dropdown">
-                    <a href="index.php">Estado</a>
+                    <a href="index.php"<?= $ariaCurrent('index.php') ?>>Estado</a>
                     <hr>
-                    <a href="users.php">Usuarios</a>
-                    <a href="tokens.php">Sesiones</a>
-                    <a href="audit.php">Auditoría</a>
+                    <a href="users.php"<?= $ariaCurrent('users.php') ?>>Usuarios</a>
+                    <a href="tokens.php"<?= $ariaCurrent('tokens.php') ?>>Sesiones</a>
+                    <a href="audit.php"<?= $ariaCurrent('audit.php') ?>>Auditoría</a>
                 </div>
-            </div>
-            <div class="nav-group">
-                <span class="nav-label">Integraciones ▾</span>
+            </details>
+            <details class="nav-group" name="labsim-nav">
+                <summary class="nav-label">Integraciones<span class="nav-caret">▾</span></summary>
                 <div class="nav-dropdown">
-                    <a href="lti.php">LTI</a>
+                    <a href="lti.php"<?= $ariaCurrent('lti.php') ?>>LTI</a>
                 </div>
-            </div>
-            <div class="nav-group">
-                <span class="nav-label">Datos e IA ▾</span>
+            </details>
+            <details class="nav-group" name="labsim-nav">
+                <summary class="nav-label">Datos e IA<span class="nav-caret">▾</span></summary>
                 <div class="nav-dropdown">
-                    <a href="llm.php">IA Paciente</a>
-                    <a href="database.php">Base de datos</a>
+                    <a href="llm.php"<?= $ariaCurrent('llm.php') ?>>IA Paciente</a>
+                    <a href="database.php"<?= $ariaCurrent('database.php') ?>>Base de datos</a>
                 </div>
-            </div>
+            </details>
             <?php endif; ?>
         </nav>
     </div>
-    <div>
+    <div class="row row--center">
         <?php if ($currentUser): ?>
-            <span style="opacity:0.8; margin-right:1rem;"><?= htmlspecialchars($currentUser['display_name']) ?></span>
+            <span style="opacity:0.8;"><?= htmlspecialchars($currentUser['display_name']) ?></span>
             <a href="logout.php">Salir</a>
         <?php endif; ?>
+        <button type="button" id="theme-toggle" class="btn btn--ghost btn--sm" style="margin-top:0; padding:0.3rem 0.6rem;" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema">
+            <span data-theme-icon="light" hidden>☀</span>
+            <span data-theme-icon="dark" hidden>☾</span>
+        </button>
     </div>
 </header>
-<main>
+<main id="main-content">
 <h1><?= htmlspecialchars($title) ?></h1>
 <?php
 }
@@ -112,6 +130,62 @@ function admin_footer(): void
 {
     ?>
 </main>
+<script>
+// Toggle de tema: lee la preferencia actual (explícita o sistema), la invierte,
+// guarda en localStorage. Aplica data-theme al <html> para que el CSS reaccione.
+(function () {
+    var btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+
+    function currentTheme() {
+        var explicit = document.documentElement.dataset.theme;
+        if (explicit === 'dark' || explicit === 'light') return explicit;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function paint() {
+        var t = currentTheme();
+        btn.querySelectorAll('[data-theme-icon]').forEach(function (el) {
+            el.hidden = el.dataset.themeIcon !== t;
+        });
+        btn.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
+    }
+
+    btn.addEventListener('click', function () {
+        var next = currentTheme() === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        try { localStorage.setItem('labsim-theme', next); } catch (e) {}
+        paint();
+    });
+
+    // Si el sistema cambia de tema mientras la página está abierta, sincroniza el icono.
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paint);
+    paint();
+})();
+
+// Nav dropdowns (<details class="nav-group">): <details> nativo no se cierra
+// solo al clickear afuera ni cuando abrís otro -- lo agregamos acá.
+(function () {
+    var groups = document.querySelectorAll('details.nav-group');
+    if (!groups.length) return;
+
+    groups.forEach(function (g) {
+        g.addEventListener('toggle', function () {
+            if (g.open) {
+                groups.forEach(function (other) {
+                    if (other !== g) other.open = false;
+                });
+            }
+        });
+    });
+
+    document.addEventListener('click', function (e) {
+        groups.forEach(function (g) {
+            if (g.open && !g.contains(e.target)) g.open = false;
+        });
+    });
+})();
+</script>
 </body>
 </html>
 <?php

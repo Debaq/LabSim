@@ -124,9 +124,9 @@ function render_attendance_comments(array $comments): void
 {
     foreach ($comments as $c) {
         ?>
-        <div style="display:flex; justify-content:center; margin-top:0.3rem;">
-            <div style="max-width:80%; background:#fff9ea; border:1px solid #f3dfa0; border-radius:10px; padding:0.4rem 0.65rem; font-size:0.85rem;">
-                <span style="display:block; font-size:0.68rem; color:#a3822f; font-weight:600; margin-bottom:0.1rem;">
+        <div class="bubble-row">
+            <div class="bubble-system">
+                <span class="bubble-system-header">
                     <?= htmlspecialchars($c['teacher_name']) ?> (docente) · <?= htmlspecialchars($c['created_at']) ?>
                 </span>
                 <?= nl2br(htmlspecialchars($c['comment'])) ?>
@@ -213,16 +213,16 @@ student_header($paciente, $me);
             <div style="display:flex; justify-content:<?= $role === 'user' ? 'flex-end' : 'flex-start' ?>;">
                 <div style="max-width:80%; padding:0.5rem 0.8rem; border-radius:12px; font-size:0.9rem; white-space:pre-wrap;
                     <?= $role === 'user' ? 'background:#3b5bdb; color:#fff;' : 'background:#fff; border:1px solid #e5e5ea;' ?>">
-                    <span style="display:block; font-size:0.68rem; opacity:0.75; margin-bottom:0.15rem;">
+                    <span class="bubble-system-header--muted">
                         <?= $role === 'assistant' ? 'Paciente' : 'Tú' ?> · <?= htmlspecialchars($turn['created_at']) ?>
                     </span>
                     <?= htmlspecialchars($turn['content']) ?>
                 </div>
             </div>
             <?php foreach ($turnComments as $c): ?>
-            <div style="display:flex; justify-content:center; margin-top:0.3rem;">
-                <div style="max-width:80%; background:#fff9ea; border:1px solid #f3dfa0; border-radius:10px; padding:0.4rem 0.65rem; font-size:0.85rem;">
-                    <span style="display:block; font-size:0.68rem; color:#a3822f; font-weight:600; margin-bottom:0.1rem;">
+            <div class="bubble-row">
+                <div class="bubble-system">
+                    <span class="bubble-system-header">
                         <?= htmlspecialchars($c['teacher_name']) ?> (docente) · <?= htmlspecialchars($c['created_at']) ?>
                     </span>
                     <?= nl2br(htmlspecialchars($c['comment'])) ?>

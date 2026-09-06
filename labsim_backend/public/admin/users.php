@@ -98,7 +98,7 @@ admin_header('Usuarios', $me);
 
 <div class="card">
     <strong>Crear / actualizar usuario local</strong>
-    <p style="font-size:0.85rem; color:#555;">
+    <p class="muted">
         Login con usuario/contraseña, sin pasar por Moodle. Útil para admins reales y para
         cuentas de alumno de prueba (p. ej. <code>labsim</code>) mientras no haya LTI conectado.
         Si el usuario ya existe, esto actualiza su contraseña y rol.
@@ -128,6 +128,7 @@ admin_header('Usuarios', $me);
 
 <div class="card">
     <strong>Usuarios existentes</strong>
+    <div class="table-wrap">
     <table>
         <tr><th>Rol</th><th>Usuario</th><th>Nombre</th><th>LTI</th><th>Activo</th><th></th><th></th></tr>
         <?php foreach ($users as $u): ?>
@@ -178,6 +179,7 @@ admin_header('Usuarios', $me);
         </tr>
         <?php endforeach; ?>
     </table>
+    </div>
 </div>
 <?php
 admin_footer();

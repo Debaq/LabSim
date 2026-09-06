@@ -59,14 +59,14 @@ admin_header('Conexión LTI (Moodle)', $me);
 
 <div class="card">
     <strong>LTI 1.1 (OAuth1) -- más simple, recomendado si 1.3 da problemas</strong>
-    <p style="font-size:0.85rem; color:#555;">
+    <p class="muted">
         Primero crea la herramienta acá abajo (el backend genera las credenciales), después regístrala en Moodle:
         Administración del sitio → Plugins → Herramientas externas → Gestionar herramientas →
         Configurar una herramienta manualmente, versión LTI <strong>1.0/1.1</strong>.
     </p>
 
     <?php if ($generated11 !== null): ?>
-    <div style="background:#fffbe6; border:1px solid #e0c200; padding:0.75rem; margin:0.5rem 0;">
+    <div style="background:var(--color-warn-bg); border:1px solid var(--color-warn-text); padding:0.75rem; margin:0.5rem 0;">
         <strong>Copia esto en Moodle ahora -- el shared secret no se vuelve a mostrar:</strong>
         <p>Tool URL<br><span class="mono"><?= htmlspecialchars($launchUrl) ?></span></p>
         <p>Consumer key<br><span class="mono"><?= htmlspecialchars($generated11['consumer_key']) ?></span></p>
@@ -84,14 +84,14 @@ admin_header('Conexión LTI (Moodle)', $me);
 
 <div class="card">
     <strong>LTI 1.3 (OIDC) -- URLs para registrar LabSim como "herramienta externa" en Moodle</strong>
-    <p style="font-size:0.85rem; color:#555;">
+    <p class="muted">
         Configura una herramienta manualmente, versión LTI 1.3.
     </p>
     <label>Initiate login URL</label>
     <p class="mono"><?= htmlspecialchars($loginUrl) ?></p>
     <label>Redirection URI (Tool launch URL)</label>
     <p class="mono"><?= htmlspecialchars($launchUrl) ?></p>
-    <p style="font-size:0.85rem; color:#555;">
+    <p class="muted">
         Moodle, a cambio, te va a dar <code>Platform ID</code> (issuer), <code>Client ID</code>,
         <code>Public keyset URL</code> (jwks_url) y <code>Access token URL</code> -- pégalos abajo
         junto con el <code>Deployment ID</code> (aparece después de guardar la herramienta en Moodle).
@@ -124,6 +124,7 @@ admin_header('Conexión LTI (Moodle)', $me);
 
 <div class="card">
     <strong>Plataformas registradas</strong>
+    <div class="table-wrap">
     <table>
         <tr><th>Versión</th><th>Issuer / Consumer key</th><th>Client ID</th><th>Deployment ID</th><th>Activa</th><th></th></tr>
         <?php foreach ($platforms as $p): ?>
@@ -146,9 +147,10 @@ admin_header('Conexión LTI (Moodle)', $me);
         </tr>
         <?php endforeach; ?>
         <?php if (!$platforms): ?>
-        <tr><td colspan="6" style="color:#888;">Ninguna registrada todavía.</td></tr>
+        <tr><td colspan="6" class="muted">Ninguna registrada todavía.</td></tr>
         <?php endif; ?>
     </table>
+    </div>
 </div>
 <?php
 admin_footer();

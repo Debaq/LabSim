@@ -63,6 +63,7 @@ admin_header('Estado del backend', $me);
 ?>
 <div class="card">
     <p><strong>Base de datos:</strong> conectada (SQLite, WAL) &nbsp;·&nbsp; <strong>PHP:</strong> <?= htmlspecialchars(PHP_VERSION) ?></p>
+    <div class="table-wrap">
     <table>
         <tr><td>Tamaño de la base de datos</td><td><strong><?= htmlspecialchars($dbSize) ?></strong></td></tr>
         <tr>
@@ -70,9 +71,9 @@ admin_header('Estado del backend', $me);
             <td>
                 <?php if ($lastBackup): ?>
                 <strong><?= htmlspecialchars($lastBackup['created_at']) ?></strong>
-                <span style="color:#888;">(<?= htmlspecialchars(Backups::formatBytes($lastBackup['size'])) ?>)</span>
+                <span class="muted">(<?= htmlspecialchars(Backups::formatBytes($lastBackup['size'])) ?>)</span>
                 <?php else: ?>
-                <strong style="color:#a33;">Ninguno todavía</strong>
+                <strong style="color:var(--color-danger);">Ninguno todavía</strong>
                 <?php endif; ?>
             </td>
         </tr>
@@ -80,30 +81,33 @@ admin_header('Estado del backend', $me);
         <tr><td><?= htmlspecialchars($label) ?></td><td><strong><?= $n ?></strong></td></tr>
         <?php endforeach; ?>
     </table>
+    </div>
 </div>
 <div class="card">
     <p><strong>Módulos PHP</strong></p>
     <?php if ($modulesMissingRequired): ?>
-    <p style="color:#a33;">Faltan módulos obligatorios -- partes del backend no van a funcionar hasta instalarlos en el servidor.</p>
+    <p style="color:var(--color-danger);">Faltan módulos obligatorios -- partes del backend no van a funcionar hasta instalarlos en el servidor.</p>
     <?php endif; ?>
+    <div class="table-wrap">
     <table>
         <?php foreach ($modules as $m): ?>
         <tr>
-            <td style="white-space:nowrap;">
+            <td class="nowrap">
                 <?php if ($m['ok']): ?>
-                <span style="color:#2a7a2a;">✓</span>
+                <span style="color:var(--color-success-text);">✓</span>
                 <?php elseif ($m['required']): ?>
-                <span style="color:#a33; font-weight:700;">✗</span>
+                <span style="color:var(--color-danger); font-weight:700;">✗</span>
                 <?php else: ?>
-                <span style="color:#c90;">✗</span>
+                <span style="color:var(--color-warn-text);">✗</span>
                 <?php endif; ?>
                 <strong><?= htmlspecialchars($m['label']) ?></strong>
-                <?php if (!$m['required']): ?><span style="color:#888; font-size:0.8rem;"> (opcional)</span><?php endif; ?>
+                <?php if (!$m['required']): ?><span style="color:var(--color-muted); font-size:0.8rem;"> (opcional)</span><?php endif; ?>
             </td>
-            <td style="color:#666; font-size:0.85rem;"><?= htmlspecialchars($m['detail']) ?></td>
+            <td style="color:var(--color-muted); font-size:0.85rem;"><?= htmlspecialchars($m['detail']) ?></td>
         </tr>
         <?php endforeach; ?>
     </table>
+    </div>
 </div>
 <div class="card">
     <p>Gestión de usuarios (alumnos de prueba, admins) en <a href="users.php">Usuarios</a> -- pincha un alumno para ver sus métricas.</p>

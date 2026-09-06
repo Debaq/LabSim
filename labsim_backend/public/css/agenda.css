@@ -1,0 +1,80 @@
+/* public/css/agenda.css — admin/agenda.php (calendario mensual + modal de agendar).
+ */
+
+/* Grilla mensual del calendario */
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: var(--space-3);
+}
+.cal-dow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  text-align: center;
+  padding: var(--space-1) 0;
+}
+.cal-day {
+  position: relative;
+  min-height: 4.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.25rem;
+  font-size: 0.75rem;
+  background: var(--color-row-alt);
+}
+.cal-day.empty { background: transparent; border: none; }
+.cal-day.today { border-color: var(--color-primary); border-width: 2px; background: var(--color-primary-soft); }
+.cal-day .cal-num { font-weight: 600; margin-bottom: 0.15rem; display: block; }
+.cal-day a {
+  display: block;
+  text-decoration: none;
+  color: var(--color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-day .cal-add {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.2rem;
+  display: none;
+  width: 1.15rem;
+  height: 1.15rem;
+  line-height: 1.1rem;
+  text-align: center;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.cal-day:hover .cal-add { display: block; }
+
+/* Modal: agendar/reagendar cita. */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 50;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 3rem var(--space-5);
+  overflow-y: auto;
+}
+.modal-box { max-width: 560px; width: 100%; margin: 0; }
+.modal-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-close {
+  color: var(--color-muted);
+  text-decoration: none;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.modal-close:hover { color: var(--color-text); }

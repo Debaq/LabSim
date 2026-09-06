@@ -1,0 +1,153 @@
+/* public/admin/styles.css — estilos del panel de administración.
+ * Se enlaza desde admin/_layout.php además de ../shared/base.css.
+ * Cubre: header con nav dropdown, widgets de formulario, main con padding ancho.
+ */
+
+@import url('./base.css');
+
+/* Header + nav. Dropdown con :hover — funciona en desktop, NO en touch.
+ * Fase 5 lo migra a <details> para soportar tablet/celular. */
+header {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+  color: var(--color-primary-contrast);
+  padding: 0.9rem var(--space-7);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-1);
+}
+header a {
+  color: var(--color-primary-contrast);
+  text-decoration: none;
+  margin-right: var(--space-6);
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+header a:hover { opacity: 1; text-decoration: underline; }
+header .brand {
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-right: var(--space-8);
+}
+
+nav.admin-nav { display: flex; align-items: center; flex-wrap: wrap; }
+
+/* Nav group: <details class="nav-group"><summary class="nav-label">…</summary>
+ * El dropdown se muestra con [open], funciona en touch (no depende de :hover),
+ * accesible por teclado (Enter/Space togglean), sin JS. */
+details.nav-group {
+  display: block;
+  position: relative;
+  margin-right: var(--space-6);
+}
+details.nav-group > summary.nav-label {
+  cursor: pointer;
+  font-size: 0.95rem;
+  list-style: none;
+  user-select: none;
+  display: inline-block;
+}
+details.nav-group > summary.nav-label::-webkit-details-marker { display: none; }
+details.nav-group > summary.nav-label::marker { display: none; content: ''; }
+details.nav-group[open] > summary.nav-label .nav-caret { transform: rotate(180deg); }
+
+.nav-caret {
+  display: inline-block;
+  transition: transform 0.15s ease;
+  margin-left: 0.2rem;
+}
+
+.nav-group .nav-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  flex-direction: column;
+  background: var(--color-primary-hover);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) 0;
+  min-width: 190px;
+  box-shadow: var(--shadow-2);
+  z-index: 10;
+}
+details.nav-group[open] .nav-dropdown { display: flex; }
+.nav-group .nav-dropdown a {
+  margin-right: 0;
+  padding: var(--space-2) 0.9rem;
+  color: var(--color-primary-contrast);
+  opacity: 0.92;
+}
+.nav-group .nav-dropdown a:hover {
+  background: rgba(255,255,255,0.12);
+  text-decoration: none;
+  opacity: 1;
+}
+.nav-group .nav-dropdown a[aria-current="page"] {
+  background: rgba(255,255,255,0.18);
+  font-weight: 600;
+  opacity: 1;
+}
+.nav-group .nav-dropdown hr {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  margin: 0.35rem 0;
+}
+
+/* Main: ancho completo con padding generoso (vs student que usa max-width) */
+main { width: 100%; margin: var(--space-8) auto; padding: 0 var(--space-8); }
+
+/* Formularios: layout vertical clásico. label arriba del input, full-width. */
+form.inline { display: inline; }
+label {
+  display: block;
+  margin-top: 0.7rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+input, select {
+  width: 100%;
+  padding: 0.45rem;
+  margin-top: var(--space-1);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+}
+
+/* .btn-link: eliminado -- los 2 enlaces que lo usaban ("+ Crear caso" en
+ * patients.php, "+ Crear nueva cita" en agenda.php) ahora usan .btn.
+ * Si en el futuro aparece otro <a> con apariencia de botón, usar .btn. */
+
+/* Botones: tres variantes hoy (default primary, secondary, danger).
+ * Mantengo los alias `button.secondary` / `button.danger` para no romper
+ * páginas aún no migradas; el sistema nuevo es .btn + .btn--* abajo. */
+button {
+  margin-top: var(--space-5);
+  padding: 0.5rem 1.1rem;
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+button.secondary { background: var(--color-secondary); }
+button.danger { background: var(--color-danger); }
+
+/* Sistema de botones (.btn + modificadores) y de campos (.field / .input)
+ * vive en base.css. Acá quedan solo los aliases de back-compat y los
+ * estilos admin-specific (nav, header).
+ *
+ * El header y la nav-dropdown usan --color-primary / --color-primary-hover
+ * que NO cambian entre modos -- el header siempre es navy oscuro con texto
+ * blanco (contraste WCAG AA consistente en ambos modos). El body y las
+ * cards sí cambian. */
+
+/* Breakpoint móvil: comprime header/nav/main, reduce tablas. Espejo del
+ * breakpoint de student.css -- admin no lo tenía y quedaba sin adaptar. */
+@media (max-width: 40rem) {
+  header { padding: 0.75rem var(--space-5); flex-wrap: wrap; gap: var(--space-3); }
+  header .brand { margin-right: var(--space-3); }
+  main { padding: 0 var(--space-4); margin: var(--space-5) auto; }
+  .card { padding: 0.9rem var(--space-5); border-radius: var(--radius-lg); }
+  h1 { font-size: 1.15rem; }
+  th, td { padding: var(--space-2) var(--space-3); font-size: 0.82rem; }
+  .nav-group .nav-dropdown { left: auto; right: 0; }
+}

@@ -43,13 +43,13 @@ admin_header('Ingresar');
 <?php endif; ?>
 <div class="card" style="max-width:360px;">
     <form method="post">
-        <label>Usuario
-            <input type="text" name="username" required autofocus>
+        <label class="field-label">Usuario
+            <input class="input" type="text" name="username" required autofocus>
         </label>
-        <label>Contraseña
-            <input type="password" name="password" required>
+        <label class="field-label">Contraseña
+            <input class="input" type="password" name="password" required>
         </label>
-        <button type="submit">Ingresar</button>
+        <button class="btn" type="submit">Ingresar</button>
     </form>
 </div>
 <?php

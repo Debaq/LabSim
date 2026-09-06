@@ -111,6 +111,7 @@ function render_timeline(array $session): void
     </div>
     <details>
         <summary>Ver detalle en tabla</summary>
+        <div class="table-wrap">
         <table>
             <tr><th>Hora</th><th>Acción</th><th>Pausa antes</th></tr>
             <?php foreach ($session['actions'] as $a): ?>
@@ -121,31 +122,12 @@ function render_timeline(array $session): void
             </tr>
             <?php endforeach; ?>
         </table>
+        </div>
     </details>
     <?php
 }
 
-$dashboardStyle = <<<CSS
-    .timeline { display: flex; align-items: flex-end; gap: 2px; height: 34px; padding: 4px 0 8px; overflow-x: auto; }
-    .tl-seg { height: 100%; border-radius: 2px; flex-shrink: 0; }
-    .tl-seg.tl-pause { border-top: 4px solid #c0392b; }
-    .session-meta { font-size: 0.8rem; color: #555; margin: 0.9rem 0 0.1rem; }
-    .legend { font-size: 0.78rem; color: #777; margin-top: 0.4rem; }
-    details summary { cursor: pointer; font-size: 0.82rem; color: #555; margin-top: 0.3rem; }
-    .badge-warn { color: #a33; font-weight: 600; }
-    .card:target { outline: 2px solid #1a2744; }
-    .hist-bar { display: flex; width: 100%; min-width: 8rem; height: 14px; border-radius: 3px; overflow: hidden; background: #eee; }
-    .hist-bar span { height: 100%; display: block; }
-    .card-reference { border: 2px solid #2e7d32; }
-    .badge-ref { background: #2e7d32; color: #fff; font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 3px; margin-left: 0.4rem; }
-    .dash-grid { display: grid; grid-template-columns: minmax(260px, 420px) 1fr; gap: 1.2rem; align-items: start; }
-    .dash-grid .card { margin-bottom: 0; }
-    .student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 1.2rem; align-items: start; }
-    .student-grid .card { margin-bottom: 0; }
-    @media (max-width: 900px) {
-        .dash-grid { grid-template-columns: 1fr; }
-    }
-CSS;
+$dashboardStyle = null; // styles movidos a public/css/dashboard.css
 
 $appointmentId = isset($_GET['appointment_id']) && $_GET['appointment_id'] !== ''
     ? (int) $_GET['appointment_id']
@@ -263,9 +245,9 @@ if ($appointmentId !== null) {
         $byStudent = [$compareUserId => $byStudent[$compareUserId]] + $byStudent;
     }
 
+    admin_add_css('dashboard.css');
     admin_header('Dashboard · Cita #' . $appointmentId, $me);
     ?>
-    <style><?= $dashboardStyle ?></style>
     <div class="card">
         <p><a href="dashboard.php">&larr; Volver al dashboard</a></p>
         <p>
@@ -277,13 +259,13 @@ if ($appointmentId !== null) {
     </div>
 
     <?php if (!$byStudent): ?>
-    <div class="card" style="color:#888;">Sin acciones registradas para esta cita todavía.</div>
+    <div class="card" class="muted">Sin acciones registradas para esta cita todavía.</div>
     <?php endif; ?>
 
     <?php if ($focusStudentId !== null && !isset($byStudent[$focusStudentId])):
         $focusStudent = $studentsById[$focusStudentId] ?? null;
     ?>
-    <div class="card" id="student-<?= $focusStudentId ?>" style="border:1px solid #e0b34d;">
+    <div class="card" id="student-<?= $focusStudentId ?>" style="border:1px solid var(--color-warn-text);">
         <strong><?= htmlspecialchars($focusStudent['display_name'] ?? ('Alumno #' . $focusStudentId)) ?></strong>
         &nbsp;·&nbsp; sin logs registrados para esta cita.
         <p class="legend">Puede ser una atención de antes de que el cliente empezara a mandar <code>appointment_id</code> en cada acción -- revisa la tabla "Acciones por tipo" en el perfil del alumno para ver si igual hay actividad sin cita asociada.</p>
@@ -423,22 +405,25 @@ foreach ($logs as $l) {
     }
 }
 
+admin_add_css('dashboard.css');
 admin_header('Dashboard de actividad', $me);
 ?>
-<style><?= $dashboardStyle ?></style>
 <div class="dash-grid" style="margin-bottom: 1.2rem;">
 <div class="card">
     <strong>Resumen global</strong>
+    <div class="table-wrap">
     <table>
         <tr><td>Acciones con paciente</td><td><strong><?= $totalConPaciente ?></strong></td></tr>
         <tr><td>Acciones sin paciente (modo libre)</td><td><strong><?= $totalSinPaciente ?></strong></td></tr>
         <tr><td>Alumnos con actividad registrada</td><td><strong><?= count($studentStats) ?></strong></td></tr>
         <tr><td>Citas con actividad registrada</td><td><strong><?= count($apptAgg) ?></strong></td></tr>
     </table>
+    </div>
 </div>
 
 <div class="card">
     <strong>Por paciente / cita</strong>
+    <div class="table-wrap">
     <table>
         <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Alumnos</th><th>Bloques totales</th></tr>
         <?php foreach ($apptAgg as $aid => $agg):
@@ -453,9 +438,10 @@ admin_header('Dashboard de actividad', $me);
         </tr>
         <?php endforeach; ?>
         <?php if (!$apptAgg): ?>
-        <tr><td colspan="5" style="color:#888;">Sin actividad registrada todavía.</td></tr>
+        <tr><td colspan="5" class="muted">Sin actividad registrada todavía.</td></tr>
         <?php endif; ?>
     </table>
+    </div>
 </div>
 </div>
 
@@ -463,6 +449,7 @@ admin_header('Dashboard de actividad', $me);
     <strong>Por alumno</strong>
     <p class="legend">No es cantidad de logs -- es cómo se comporta: delta promedio entre acciones, cuántas pausas largas (posible duda) y cuántas acciones dispara sin pausa (posible clickeo sin pensar). La barra de distribución va de verde (sin pausa) a rojo (pausa ≥30s).
         <strong>Ojo:</strong> esto suma <strong>todas</strong> las atenciones del alumno (todos los pacientes juntos) -- si revisó más de un caso, pincha su nombre para ver el desglose por atención en su ficha, o usa la tabla "Por paciente / cita" de abajo para entrar directo a una cita puntual.</p>
+    <div class="table-wrap">
     <table>
         <tr><th>Alumno</th><th>Última actividad</th><th>Sesiones</th><th>Atenciones</th><th>Bloques</th><th>Duración total</th><th>Delta promedio</th><th>Pausas largas (≥30s)</th><th>Sin pausa (0s)</th><th>Distribución de pausas</th></tr>
         <?php foreach ($studentStats as $uid => $st):
@@ -493,9 +480,10 @@ admin_header('Dashboard de actividad', $me);
         </tr>
         <?php endforeach; ?>
         <?php if (!$studentStats): ?>
-        <tr><td colspan="10" style="color:#888;">Sin actividad registrada todavía.</td></tr>
+        <tr><td colspan="10" class="muted">Sin actividad registrada todavía.</td></tr>
         <?php endif; ?>
     </table>
+    </div>
 </div>
 <?php
 admin_footer();

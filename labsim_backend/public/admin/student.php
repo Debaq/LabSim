@@ -121,14 +121,9 @@ foreach ($attendances as $a) {
     $totalDurationRealS += $realDuration ?? ($aStats['total_duration_s'] ?? 0);
 }
 
+admin_add_css('student-detail.css');
 admin_header('Alumno: ' . $student['display_name'], $me);
 ?>
-<style>
-    .week-bar { display: inline-block; height: 10px; background: #1a2744; border-radius: 2px; margin-right: 0.4rem; vertical-align: middle; }
-    .hist-bar { display: flex; width: 100%; max-width: 24rem; height: 16px; border-radius: 3px; overflow: hidden; background: #eee; margin-top: 0.4rem; }
-    .hist-bar span { height: 100%; display: block; }
-    .legend { font-size: 0.78rem; color: #777; margin-top: 0.4rem; }
-</style>
 <div class="card">
     <p>
         <strong><?= htmlspecialchars($student['display_name']) ?></strong>
@@ -142,6 +137,7 @@ admin_header('Alumno: ' . $student['display_name'], $me);
 <div class="card">
     <strong>Resumen</strong>
     <p class="legend">Total acumulado de <strong>todas</strong> las atenciones del alumno (todos los pacientes juntos) -- para ver el detalle caso por caso, revisa la tabla "Atenciones" más abajo.</p>
+    <div class="table-wrap">
     <table>
         <tr><td>Atendiendo (en curso)</td><td><strong><?= $estadoCounts['atendiendo'] ?></strong></td></tr>
         <tr><td>Atendidos (cerrados)</td><td><strong><?= $estadoCounts['atendido'] ?></strong></td></tr>
@@ -155,6 +151,7 @@ admin_header('Alumno: ' . $student['display_name'], $me);
         <tr><td>Pausas largas (≥30s)</td><td><strong<?= $behaviorStats['long_pauses'] > 0 ? ' class="badge-warn"' : '' ?>><?= $behaviorStats['long_pauses'] ?></strong></td></tr>
         <tr><td>Acciones sin pausa (0s)</td><td><strong><?= $behaviorStats['no_pause_actions'] ?></strong></td></tr>
     </table>
+    </div>
     <div class="hist-bar" title="0s: <?= $histogram['0s'] ?? 0 ?> · 1-5s: <?= $histogram['1-5s'] ?? 0 ?> · 6-15s: <?= $histogram['6-15s'] ?? 0 ?> · 16-30s: <?= $histogram['16-30s'] ?? 0 ?> · 30s+: <?= $histogram['30s+'] ?? 0 ?>">
         <?php foreach (['0s' => '#2e7d32', '1-5s' => '#9ccc65', '6-15s' => '#ffb300', '16-30s' => '#fb8c00', '30s+' => '#c0392b'] as $bucket => $color):
             $pct = round((($histogram[$bucket] ?? 0) / $histTotal) * 100, 1);
@@ -169,6 +166,7 @@ admin_header('Alumno: ' . $student['display_name'], $me);
 <div class="card">
     <strong>Evolución semanal</strong>
     <p class="legend">Bloques de actividad (corte por atención distinta o &gt;5 min de pausa) y delta promedio por semana -- para ver si el alumno mejora (deltas bajando) con el tiempo.</p>
+    <div class="table-wrap">
     <table>
         <tr><th>Semana</th><th>Bloques</th><th>Delta promedio</th></tr>
         <?php $maxSessions = max(array_column($weekly, 'n_sessions') ?: [1]); ?>
@@ -180,14 +178,16 @@ admin_header('Alumno: ' . $student['display_name'], $me);
         </tr>
         <?php endforeach; ?>
         <?php if (!$weekly): ?>
-        <tr><td colspan="3" style="color:#888;">Sin datos suficientes todavía.</td></tr>
+        <tr><td colspan="3" class="muted">Sin datos suficientes todavía.</td></tr>
         <?php endif; ?>
     </table>
+    </div>
 </div>
 
 <div class="card">
     <strong>Atenciones (<?= count($attendances) ?>)</strong>
     <p class="legend">Comportamiento aislado por cada atención (cita/paciente) -- así un caso no ensucia las métricas de otro cuando el alumno revisó más de uno.</p>
+    <div class="table-wrap">
     <table>
         <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Bloques</th><th>Duración</th><th>Delta prom.</th><th>Pausas largas</th><th>Hora real</th><th>Nota</th><th>Actualizado</th><th>Detalle</th></tr>
         <?php foreach ($attendances as $a):
@@ -211,15 +211,16 @@ admin_header('Alumno: ' . $student['display_name'], $me);
             <td><?= isset($aStats['avg_delta_s']) ? htmlspecialchars(Metrics::formatDurationHms((int) round($aStats['avg_delta_s']))) : '—' ?></td>
             <td<?= ($aStats['long_pauses'] ?? 0) > 0 ? ' class="badge-warn"' : '' ?>><?= $aStats['long_pauses'] ?? '—' ?></td>
             <td><?= htmlspecialchars($a['hora_real'] ?: '—') ?></td>
-            <td style="font-size:0.85rem;"><?= htmlspecialchars($a['nota'] ?: '—') ?></td>
+            <td class="help"><?= htmlspecialchars($a['nota'] ?: '—') ?></td>
             <td><?= htmlspecialchars($a['updated_at']) ?></td>
             <td><a href="chat_detail.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>">Ver atención</a></td>
         </tr>
         <?php endforeach; ?>
         <?php if (!$attendances): ?>
-        <tr><td colspan="12" style="color:#888;">Sin atenciones registradas todavía.</td></tr>
+        <tr><td colspan="12" class="muted">Sin atenciones registradas todavía.</td></tr>
         <?php endif; ?>
     </table>
+    </div>
 </div>
 
 <?php
@@ -228,6 +229,7 @@ $tipoLabels = ['reclamo' => 'Reclamo', 'merito' => 'Mérito', 'mensaje' => 'Mens
 <div class="card">
     <strong>Bandeja de entrada (<?= count($inboxMessages) ?>)</strong>
     <p class="legend">Avisos automáticos sobre el trato a pacientes (ver Admin -> IA Paciente) y mensajes que algún docente le mandó directo. Misma bandeja que ve el alumno en la app.</p>
+    <div class="table-wrap">
     <table>
         <tr><th>Tipo</th><th>Remitente</th><th>Cita</th><th>Asunto</th><th>Cuerpo</th><th>Fecha</th></tr>
         <?php foreach ($inboxMessages as $m): ?>
@@ -236,31 +238,34 @@ $tipoLabels = ['reclamo' => 'Reclamo', 'merito' => 'Mérito', 'mensaje' => 'Mens
             <td><?= htmlspecialchars($m['remitente']) ?></td>
             <td><?= $m['appointment_id'] ? '#' . (int) $m['appointment_id'] . ' (' . htmlspecialchars($m['fecha'] ?: '—') . ' ' . htmlspecialchars($m['hora'] ?: '') . ') -- ' . htmlspecialchars($m['procedimiento']) : '—' ?></td>
             <td><?= htmlspecialchars($m['asunto']) ?></td>
-            <td style="font-size:0.85rem;"><?= htmlspecialchars($m['cuerpo']) ?></td>
+            <td class="help"><?= htmlspecialchars($m['cuerpo']) ?></td>
             <td><?= htmlspecialchars($m['created_at']) ?></td>
         </tr>
         <?php endforeach; ?>
         <?php if (!$inboxMessages): ?>
-        <tr><td colspan="6" style="color:#888;">Sin mensajes todavía.</td></tr>
+        <tr><td colspan="6" class="muted">Sin mensajes todavía.</td></tr>
         <?php endif; ?>
     </table>
+    </div>
 </div>
 
 <div class="card">
     <strong>Acciones por tipo</strong>
+    <div class="table-wrap">
     <table>
         <tr><th>Acción</th><th>Veces</th><th>Última vez</th></tr>
         <?php foreach ($actionCounts as $ac): ?>
         <tr>
-            <td><?= htmlspecialchars(Metrics::actionLabel($ac['action'])) ?> <span class="mono" style="font-size:0.75rem; color:#888;"><?= htmlspecialchars($ac['action']) ?></span></td>
+            <td><?= htmlspecialchars(Metrics::actionLabel($ac['action'])) ?> <span class="mono" style="font-size:0.75rem; color:var(--color-muted);"><?= htmlspecialchars($ac['action']) ?></span></td>
             <td><?= (int) $ac['n'] ?></td>
             <td><?= htmlspecialchars($ac['last_ts']) ?></td>
         </tr>
         <?php endforeach; ?>
         <?php if (!$actionCounts): ?>
-        <tr><td colspan="3" style="color:#888;">Sin acciones registradas todavía.</td></tr>
+        <tr><td colspan="3" class="muted">Sin acciones registradas todavía.</td></tr>
         <?php endif; ?>
     </table>
+    </div>
 </div>
 
 <div class="card">
@@ -269,6 +274,7 @@ $tipoLabels = ['reclamo' => 'Reclamo', 'merito' => 'Mérito', 'mensaje' => 'Mens
     <a href="logs_download.php?id=<?= (int) $studentId ?>">Descargar registro completo (CSV, <?= $totalActions ?>)</a>
     &nbsp;·&nbsp;
     <a href="dashboard_report.php?student_id=<?= (int) $studentId ?>">Descargar informe de sesiones (CSV)</a>
+    <div class="table-wrap">
     <table>
         <tr><th>Cuándo (cliente)</th><th>Acción</th><th>Payload</th></tr>
         <?php foreach ($recentLogs as $log): ?>
@@ -279,9 +285,10 @@ $tipoLabels = ['reclamo' => 'Reclamo', 'merito' => 'Mérito', 'mensaje' => 'Mens
         </tr>
         <?php endforeach; ?>
         <?php if (!$recentLogs): ?>
-        <tr><td colspan="3" style="color:#888;">Sin acciones registradas todavía.</td></tr>
+        <tr><td colspan="3" class="muted">Sin acciones registradas todavía.</td></tr>
         <?php endif; ?>
     </table>
+    </div>
 </div>
 <?php
 admin_footer();

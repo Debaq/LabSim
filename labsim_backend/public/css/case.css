@@ -1,0 +1,275 @@
+/* public/css/case.css — admin/case_create.php (editor de fichas clínicas:
+ * audiograma, otoscopia, reflejos, foto del paciente, tabs).
+ *
+ * Hex específicos del dominio (rojo OD #b33a3a, azul OI #2255aa) son
+ * convenciones clínicas, no de marca -- se quedan como hex literales.
+ */
+
+/* Grilla compacta (input numérico centrado) */
+.grid-table th, .grid-table td { text-align: center; padding: 0.3rem; }
+.grid-table input[type=number] { width: 4.2rem; padding: 0.2rem; text-align: center; }
+.grid-table th.side-label, .grid-table td.side-label { text-align: left; font-weight: 600; }
+
+/* Checkbox inline (label + checkbox lado a lado sin negrita) */
+.inline-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 400;
+  margin: 0 0 0 var(--space-5);
+}
+.inline-check input { width: auto; margin: 0; }
+
+/* Fieldset agrupador de campos */
+fieldset {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin: var(--space-5) 0;
+  padding: 0.8rem var(--space-5);
+}
+legend { font-weight: 600; padding: 0 var(--space-2); }
+
+/* Layouts de 2 y 3 columnas */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-5); }
+
+input[readonly] { background: var(--color-row-alt); color: var(--color-muted); }
+
+/* Tabs de la ficha (Audiometría, Otoscopia, Reflejos, etc.).
+ * Sin JS, todas las pestañas visibles apiladas -- degrada con gracia. */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  border-bottom: 2px solid var(--color-border);
+  margin-bottom: var(--space-6);
+}
+.tab-btn {
+  padding: 0.6rem 1.1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+.tab-btn:hover { color: var(--color-primary); }
+.tab-btn.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+.tab-btn .tab-error-dot {
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--color-danger);
+  margin-left: 0.3rem;
+}
+body.js-tabs .tab-panel { display: none; }
+body.js-tabs .tab-panel.active { display: block; }
+
+/* Audiometría: gráfico sticky a la izquierda + planilla de umbrales scrollable */
+.audiometria-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1.2rem;
+  align-items: start;
+}
+.audiogram-stack {
+  position: sticky;
+  top: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+@media (max-width: 960px) {
+  .audiometria-layout { grid-template-columns: 1fr; }
+  .audiogram-stack { position: static; }
+}
+
+/* .two-col / .three-col (formulario clínico completo) no colapsaban en
+ * mobile -- inputs quedaban aplastados por debajo de ~600px. */
+@media (max-width: 40rem) {
+  .two-col,
+  .three-col { grid-template-columns: 1fr; }
+}
+.audiogram-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  margin-top: var(--space-3);
+}
+.audiogram-legend span { display: inline-flex; align-items: center; gap: 0.3rem; }
+
+/* Bloque por oído (OD/OI) dentro de una card -- antes había una card por oído */
+.side-block {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--color-border);
+}
+.side-block:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+.side-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+.side-tag {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-md);
+  background: var(--color-table-head);
+  color: var(--color-muted);
+}
+.side-tag.od { color: #b33a3a; }
+.side-tag.oi { color: #2255aa; }
+
+/* Patrón de reflejos: tabla espejada (ipsi al centro, contra afuera).
+ * Hex OD/OI vienen de la convención clínica. */
+.reflex-pattern-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--space-3);
+  font-size: 0.8rem;
+}
+.reflex-pattern-table th, .reflex-pattern-table td {
+  text-align: center;
+  padding: 0.35rem var(--space-1);
+  border: 1px solid var(--color-border);
+}
+.reflex-pattern-table td.freq-label { font-weight: 600; background: var(--color-row-alt); }
+/* NO reusar .side-tag acá: su display:inline-block rompe table-cell */
+th.reflex-head.od { color: #b33a3a; }
+th.reflex-head.oi { color: #2255aa; }
+.reflex-cell { font-weight: 700; color: var(--color-faint); }
+.reflex-cell.na { color: var(--color-border-strong); background: var(--color-row-alt); }
+/* "Presente" = fondo gris fijo, color del "+" según oído estimulado */
+.reflex-cell.present { background: #3a3a3a; }
+.reflex-cell.present.mark-od { color: #e05c5c; }
+.reflex-cell.present.mark-oi { color: #6fa8e8; }
+
+/* Foto del paciente: avatar circular + modal de recorte */
+.photo-block { margin-top: var(--space-5); padding-top: var(--space-5); border-top: 1px solid var(--color-border); }
+.patient-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-row-alt);
+  flex-shrink: 0;
+}
+.patient-avatar-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-faint);
+  font-size: 0.7rem;
+  text-align: center;
+}
+.patient-avatar-empty[hidden] { display: none; }
+
+/* Otoscopia: fases apiladas, cada una con imagen OD/OI */
+.otoscopia-fase {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--color-border);
+}
+.otoscopia-fase:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+.otoscopia-photo-slot { text-align: center; }
+.otoscopia-thumb {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  background: var(--color-row-alt);
+  margin: 0.3rem auto;
+}
+.otoscopia-thumb-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 220px;
+  height: 160px;
+  border-radius: var(--radius-lg);
+  background: var(--color-row-alt);
+  color: var(--color-faint);
+  font-size: 0.78rem;
+  margin: 0.3rem auto;
+}
+.otoscopia-thumb[hidden], .otoscopia-thumb-empty[hidden] { display: none; }
+.otoscopia-photo-slot .otoscopia-photo-input {
+  display: block;
+  margin: var(--space-2) auto 0.3rem;
+}
+.otoscopia-delete-photo { color: var(--color-danger); }
+.otoscopia-download-photo {
+  display: inline-block;
+  margin-left: var(--space-3);
+  font-size: 0.82rem;
+}
+.otoscopia-download-photo[hidden] { display: none; }
+
+/* Modal de recorte de foto */
+.photo-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.photo-modal[hidden] { display: none; }
+.photo-modal-box {
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: 1.2rem;
+  max-width: 22rem;
+  width: 90%;
+}
+.photo-crop-viewport {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #333;
+  cursor: grab;
+  touch-action: none;
+}
+.photo-crop-viewport:active { cursor: grabbing; }
+.photo-crop-viewport img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  max-width: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.photo-crop-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2000px rgba(0,0,0,0.5);
+  pointer-events: none;
+}
+.photo-crop-ring.square {
+  border-radius: 0;
+  outline: 2px solid var(--color-surface);
+  outline-offset: -2px;
+}
+.photo-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}

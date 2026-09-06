@@ -96,36 +96,18 @@ $stmt = $pdo->prepare(
 $stmt->execute($permissionParams);
 $cases = $stmt->fetchAll();
 
+admin_add_css('patients.css');
 admin_header('Fichas Clínicas', $me);
 ?>
-<style>
-    .btn-link {
-        display: inline-block; padding: 0.5rem 1.1rem; background: #1a2744; color: #fff;
-        border-radius: 4px; text-decoration: none; font-size: 0.9rem; font-weight: 600;
-    }
-    .btn-link:hover { opacity: 0.9; }
-    .patients-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin: 0.9rem 0; }
-    .patients-toolbar input[type="text"] { width: auto; flex: 1 1 240px; margin-top: 0; }
-    .patients-toolbar select { width: auto; margin-top: 0; }
-    .patients-toolbar .toolbar-count { font-size: 0.8rem; color: #666; margin-left: auto; }
-    .action-btn {
-        display: inline-block; padding: 0.15rem 0.5rem; margin: 0 0.15rem 0.15rem 0; font-size: 0.75rem;
-        border-radius: 4px; text-decoration: none; color: #fff; border: none; cursor: pointer; line-height: 1.6;
-    }
-    .action-btn.primary { background: #1a2744; }
-    .action-btn.secondary { background: #888; }
-    .action-btn.danger { background: #a33; }
-    .action-btn:hover { opacity: 0.85; }
-</style>
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 <?php if ($success !== null): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
 
 <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div class="row row--between">
         <strong>Pacientes registrados (<?= count($cases) ?>)</strong>
-        <a class="btn-link" href="case_create.php">+ Crear caso nuevo</a>
+        <a class="btn" href="case_create.php">+ Crear caso nuevo</a>
     </div>
-    <p style="font-size:0.85rem; color:#555;">
+    <p class="muted">
         Biblioteca completa de fichas del sistema (agendadas o no). Para agendar, reagendar o eliminar citas,
         usa <a href="agenda.php">Agendas</a>.
     </p>
@@ -138,6 +120,7 @@ admin_header('Fichas Clínicas', $me);
         </select>
         <span class="toolbar-count" id="patients-toolbar-count"></span>
     </div>
+    <div class="table-wrap table-wrap--wide">
     <table id="patients-table">
         <tr>
             <th>ID</th>
@@ -165,19 +148,19 @@ admin_header('Fichas Clínicas', $me);
                     <?= htmlspecialchars($nombreVivo) ?>
                 <?php elseif ($nombreSnapshot): ?>
                     <?= htmlspecialchars($nombreSnapshot) ?>
-                    <span style="color:#886400;"> (cita eliminada<?= !empty($snapshot['cita_eliminada_en']) ? ' el ' . htmlspecialchars($snapshot['cita_eliminada_en']) : '' ?>)</span>
+                    <span class="text-warn"> (cita eliminada<?= !empty($snapshot['cita_eliminada_en']) ? ' el ' . htmlspecialchars($snapshot['cita_eliminada_en']) : '' ?>)</span>
                 <?php else: ?>
-                    <span style="color:#a33;">— sin cita —</span>
+                    <span style="color:var(--color-danger);">— sin cita —</span>
                 <?php endif; ?>
             </td>
-            <td style="font-size:0.8rem; color:#a00; max-width:22rem;">
-                <?= $comentarioDocente !== '' ? htmlspecialchars($comentarioDocente) : '<span style="color:#bbb;">—</span>' ?>
+            <td style="font-size:0.8rem; color:var(--color-danger); max-width:22rem;">
+                <?= $comentarioDocente !== '' ? htmlspecialchars($comentarioDocente) : '<span style="color:var(--color-faint);">—</span>' ?>
             </td>
             <td>
                 <?php if (!$c['appointment_id']): ?>
-                <span style="color:#886400;">sin agendar</span>
+                <span class="text-warn">sin agendar</span>
                 <?php elseif ($c['fecha'] === '' || $c['hora'] === ''): ?>
-                <span style="color:#886400;">sin agendar</span>
+                <span class="text-warn">sin agendar</span>
                 <?php else: ?>
                 agendada (<?= htmlspecialchars($c['fecha']) ?> <?= htmlspecialchars($c['hora']) ?>)
                 <?php endif; ?>
@@ -196,7 +179,7 @@ admin_header('Fichas Clínicas', $me);
                 <?= (int) $c['rondas_count'] ?: '—' ?>
                 <?php endif; ?>
             </td>
-            <td style="white-space:nowrap;">
+            <td class="nowrap">
                 <a href="agenda.php?schedule=<?= urlencode($c['id']) ?>" class="action-btn primary">
                     <?= $c['appointment_id'] ? 'Reagendar' : 'Agendar' ?>
                 </a>
@@ -211,9 +194,10 @@ admin_header('Fichas Clínicas', $me);
         </tr>
         <?php endforeach; ?>
         <?php if (!$cases): ?>
-        <tr><td colspan="7" style="color:#888;">Ningún caso guardado todavía.</td></tr>
+        <tr><td colspan="7" class="muted">Ningún caso guardado todavía.</td></tr>
         <?php endif; ?>
     </table>
+    </div>
 </div>
 <script>
 function filterPatientsTable() {

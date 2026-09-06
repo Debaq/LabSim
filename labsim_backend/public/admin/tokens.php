@@ -48,16 +48,17 @@ admin_header('Sesiones (tokens)', $me);
 <?php if ($success !== null): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
 
 <div class="card">
-    <p style="font-size:0.85rem; color:#555;">
+    <p class="muted">
         Cada fila es un token bearer activo de la app de escritorio (uno por dispositivo/login).
         Revocar corta la sesión de inmediato -- ese dispositivo vuelve a pedir el código de emparejamiento.
         Útil si se perdió un celular/PC o una cuenta quedó comprometida.
     </p>
+    <div class="table-wrap">
     <table>
         <tr><th>Usuario</th><th>Rol</th><th>Creado</th><th>Última actividad</th><th>Token</th><th></th></tr>
         <?php foreach ($tokens as $t): ?>
         <tr>
-            <td><?= htmlspecialchars($t['display_name']) ?> <span style="color:#888;">(<?= htmlspecialchars($t['username']) ?>)</span></td>
+            <td><?= htmlspecialchars($t['display_name']) ?> <span class="muted">(<?= htmlspecialchars($t['username']) ?>)</span></td>
             <td><?= htmlspecialchars($t['role']) ?></td>
             <td><?= htmlspecialchars($t['created_at']) ?></td>
             <td><?= htmlspecialchars($t['last_seen_at']) ?></td>
@@ -73,9 +74,10 @@ admin_header('Sesiones (tokens)', $me);
         </tr>
         <?php endforeach; ?>
         <?php if (!$tokens): ?>
-        <tr><td colspan="6" style="color:#888;">Ninguna sesión activa.</td></tr>
+        <tr><td colspan="6" class="muted">Ninguna sesión activa.</td></tr>
         <?php endif; ?>
     </table>
+    </div>
 </div>
 <?php
 admin_footer();

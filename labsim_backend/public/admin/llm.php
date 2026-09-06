@@ -61,7 +61,7 @@ admin_header('IA Paciente (LLM)', $me);
 
 <div class="card">
     <strong>Conexión al proveedor</strong>
-    <p style="font-size:0.85rem; color:#555;">
+    <p class="muted">
         El alumno conversa por texto con el paciente del caso; el backend hace de puente hacia el LLM
         (la app nunca ve el api_key). Compatible con DeepSeek y cualquier otro backend que hable el
         mismo formato de Chat Completions.
@@ -80,7 +80,7 @@ admin_header('IA Paciente (LLM)', $me);
         <label>API key
             <input type="password" name="api_key" placeholder="Dejar en blanco para no cambiar la actual" autocomplete="off">
         </label>
-        <p class="mono" style="margin-top:0.2rem; color:#555;">Actual: <?= htmlspecialchars($apiKeyHint) ?></p>
+        <p class="mono" style="margin-top:0.2rem; color:var(--color-muted);">Actual: <?= htmlspecialchars($apiKeyHint) ?></p>
 
         <label>Base URL de la API
             <input type="text" name="api_base_url" value="<?= htmlspecialchars($config['api_base_url']) ?>" placeholder="https://api.deepseek.com" required>
@@ -111,17 +111,19 @@ admin_header('IA Paciente (LLM)', $me);
 
 <div class="card">
     <strong>Prompt por defecto del paciente</strong>
-    <p style="font-size:0.85rem; color:#555;">
+    <p class="muted">
         Plantilla que arma el system prompt para cada conversación. Se completa con los datos del
         paciente y de la anamnesis del caso -- usa estas variables donde correspondan:
     </p>
+    <div class="table-wrap">
     <table>
         <tr><th>Variable</th><th>Qué reemplaza</th></tr>
         <?php foreach (\LlmConfig::PLACEHOLDERS as $ph => $desc): ?>
         <tr><td><code><?= htmlspecialchars($ph) ?></code></td><td><?= htmlspecialchars($desc) ?></td></tr>
         <?php endforeach; ?>
     </table>
-    <p style="font-size:0.85rem; color:#555;">
+    </div>
+    <p class="muted">
         El paciente nunca debe saber su diagnóstico ni datos técnicos (dB, Hz, nombres de patologías) --
         solo puede describir lo que siente si se lo preguntan (por ejemplo, si escucha un pitido).
     </p>
@@ -138,7 +140,7 @@ admin_header('IA Paciente (LLM)', $me);
         <input type="hidden" name="oirs_prompt_template" value="<?= htmlspecialchars($config['oirs_prompt_template']) ?>">
 
         <label>Plantilla (precargada con el prompt por defecto -- edítala directamente; "Restablecer" abajo la vuelve a este punto de partida)
-            <textarea name="system_prompt_template" rows="16" style="width:100%; padding:0.45rem; border:1px solid #ccc; border-radius:4px; font-family:ui-monospace, monospace; font-size:0.85rem;"><?= htmlspecialchars(\LlmConfig::effectivePrompt()) ?></textarea>
+            <textarea name="system_prompt_template" rows="16" style="width:100%; padding:0.45rem; border:1px solid var(--color-border-strong); border-radius:var(--radius-md); font-family:var(--font-mono); font-size:0.85rem;"><?= htmlspecialchars(\LlmConfig::effectivePrompt()) ?></textarea>
         </label>
         <button type="submit">Guardar plantilla</button>
     </form>
@@ -152,7 +154,7 @@ admin_header('IA Paciente (LLM)', $me);
 
 <div class="card">
     <strong>Prompt del evaluador OIRS</strong>
-    <p style="font-size:0.85rem; color:#555;">
+    <p class="muted">
         Al cerrar una atención (botón "Atender" -> nota final), esta plantilla decide -- releyendo el chat
         completo del alumno con el paciente -- si corresponde un reclamo, un mérito, o nada, y redacta el
         aviso que le llega al alumno en su Bandeja OIRS (ver Admin -> ficha del alumno para revisarlos ahí
@@ -174,7 +176,7 @@ admin_header('IA Paciente (LLM)', $me);
         <input type="hidden" name="system_prompt_template" value="<?= htmlspecialchars($config['system_prompt_template']) ?>">
 
         <label>Plantilla del evaluador (precargada con el prompt por defecto -- edítala directamente; "Restablecer" abajo la vuelve a este punto de partida)
-            <textarea name="oirs_prompt_template" rows="16" style="width:100%; padding:0.45rem; border:1px solid #ccc; border-radius:4px; font-family:ui-monospace, monospace; font-size:0.85rem;"><?= htmlspecialchars(\LlmConfig::effectiveOirsPrompt()) ?></textarea>
+            <textarea name="oirs_prompt_template" rows="16" style="width:100%; padding:0.45rem; border:1px solid var(--color-border-strong); border-radius:var(--radius-md); font-family:var(--font-mono); font-size:0.85rem;"><?= htmlspecialchars(\LlmConfig::effectiveOirsPrompt()) ?></textarea>
         </label>
         <button type="submit">Guardar plantilla</button>
     </form>

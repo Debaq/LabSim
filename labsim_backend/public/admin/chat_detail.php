@@ -120,82 +120,9 @@ function chat_initials(string $name): string
     return $initials ?: '?';
 }
 
+admin_add_css('chat.css');
 admin_header('Atención: ' . $student['display_name'], $me);
 ?>
-<style>
-    .chat-hero {
-        background: linear-gradient(135deg, #1a2744, #24345c);
-        color: #fff; border-radius: 10px; padding: 1.1rem 1.5rem; margin-bottom: 1.2rem;
-        display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem;
-    }
-    .chat-hero a { color: #cdd8f0; text-decoration: none; font-size: 0.85rem; }
-    .chat-hero a:hover { color: #fff; text-decoration: underline; }
-    .chat-hero h2 { margin: 0.2rem 0 0; font-size: 1.2rem; }
-    .chat-hero .meta { font-size: 0.82rem; color: #aeb9d6; margin-top: 0.15rem; }
-    .chat-hero .badge {
-        background: rgba(255,255,255,0.12); border-radius: 999px; padding: 0.3rem 0.8rem;
-        font-size: 0.8rem; white-space: nowrap;
-    }
-
-    .chat-panel { background: #fbfbfc; border-radius: 10px; padding: 0.5rem 1.5rem 1.5rem; }
-    .chat-legend { font-size: 0.82rem; color: #7a7f8c; margin: 0 0 1rem; }
-
-    .chat-grid { display: flex; flex-direction: column; gap: 1.1rem; width: 88%; max-width: 62rem; margin: 0 auto; }
-    .chat-row { display: flex; align-items: flex-start; gap: 1rem; }
-
-    .bubble-col { flex: 0 0 52%; display: flex; align-items: flex-end; gap: 0.5rem; }
-    .bubble-col.align-user { justify-content: flex-end; }
-    .bubble-col.align-assistant { justify-content: flex-start; }
-    .bubble-col.align-user .avatar { order: 2; }
-
-    .avatar {
-        flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 0.65rem; font-weight: 700; color: #fff;
-    }
-    .avatar.a-user { background: #3b5bdb; }
-    .avatar.a-assistant { background: #6b7280; }
-    .avatar.a-teacher { background: #c98a12; }
-
-    .chat-turn {
-        max-width: calc(100% - 2.2rem); padding: 0.5rem 0.8rem; border-radius: 14px;
-        font-size: 0.88rem; line-height: 1.4; white-space: pre-wrap;
-        box-shadow: 0 1px 1px rgba(0,0,0,0.04);
-    }
-    .chat-turn .chat-meta { display: block; font-size: 0.68rem; margin-bottom: 0.15rem; opacity: 0.75; }
-    .chat-turn.user { background: #3b5bdb; color: #fff; border-bottom-right-radius: 4px; }
-    .chat-turn.user .chat-meta { color: #dbe3ff; }
-    .chat-turn.assistant { background: #fff; border: 1px solid #e5e5ea; border-bottom-left-radius: 4px; }
-    .chat-turn.assistant .chat-meta { color: #9096a2; }
-
-    .comment-col { flex: 1 1 auto; display: flex; flex-direction: column; gap: 0.4rem; padding-top: 0.1rem; min-width: 0; }
-    .comment-bubble {
-        display: flex; gap: 0.5rem; align-items: flex-start;
-        background: #fff9ea; border: 1px solid #f3dfa0; border-radius: 10px; padding: 0.4rem 0.65rem;
-    }
-    .comment-bubble .comment-body { font-size: 0.82rem; line-height: 1.35; white-space: pre-wrap; }
-    .comment-bubble .chat-meta { display: block; font-size: 0.66rem; color: #a3822f; margin-bottom: 0.1rem; }
-
-    .comment-form { display: flex; gap: 0.4rem; align-items: center; }
-    .comment-form input[type="text"] {
-        width: auto; flex: 1 1 auto; padding: 0.35rem 0.6rem; margin: 0;
-        font-size: 0.8rem; border: 1px solid #e2e2e8; border-radius: 999px; background: #fff;
-    }
-    .comment-form input[type="text"]:focus { outline: none; border-color: #c98a12; }
-    .comment-form button {
-        margin: 0; padding: 0; width: 1.7rem; height: 1.7rem; border-radius: 50%;
-        background: #c98a12; color: #fff; font-size: 1rem; line-height: 1; flex: 0 0 auto;
-    }
-    .comment-form button:hover { background: #b57a0a; }
-
-    .chat-empty { text-align: center; color: #9096a2; padding: 2rem 0; }
-
-    .section-panel { background: #fbfbfc; border-radius: 10px; padding: 1rem 1.5rem; margin-bottom: 1.2rem; }
-    .section-panel h3 { margin: 0 0 0.4rem; font-size: 1rem; }
-    .section-panel .section-text { font-size: 0.9rem; line-height: 1.4; white-space: pre-wrap; margin-bottom: 0.8rem; }
-    .section-panel .section-comments { display: flex; flex-direction: column; gap: 0.5rem; max-width: 44rem; margin: 0 0 0.6rem; }
-    .section-panel .comment-form { max-width: 44rem; }
-</style>
 <div class="chat-hero">
     <div>
         <a href="student.php?id=<?= (int) $studentId ?>">&larr; <?= htmlspecialchars($student['display_name']) ?></a>
@@ -214,7 +141,7 @@ function render_section_comments(string $section, string $label, string $text, a
     ?>
     <div class="card section-panel">
         <h3><?= htmlspecialchars($label) ?></h3>
-        <div class="section-text"><?= $text !== '' ? nl2br(htmlspecialchars($text)) : '<span style="color:#9096a2;">Sin registro todavía.</span>' ?></div>
+        <div class="section-text"><?= $text !== '' ? nl2br(htmlspecialchars($text)) : '<span style="color:var(--color-muted);">Sin registro todavía.</span>' ?></div>
         <div class="section-comments">
             <?php foreach ($comments as $c): ?>
             <div class="comment-bubble">

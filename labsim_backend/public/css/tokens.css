@@ -1,0 +1,163 @@
+/* shared/tokens.css — variables globales para admin y student.
+ * Cambiar acá = cambiar la marca entera. Ver docs/propuesta-estilos.md.
+ */
+:root {
+  /* Colores */
+  --color-bg: #f7f7f8;
+  --color-surface: #ffffff;
+  --color-text: #1a1a1a;
+  --color-muted: #6b7280;
+  --color-faint: #aaa;
+  --color-border: #e5e5e5;
+  --color-border-strong: #ccc;
+  --color-row-alt: #f3f5fa;
+  --color-table-head: #eef0f4;
+
+  --color-primary: #641c34;
+  --color-primary-hover: #7f2743;
+  --color-primary-soft: #f6e9ec;
+  --color-primary-contrast: #ffffff;
+
+  --color-secondary: #6b7280;
+
+  --color-success-bg: #e8f5e9;
+  --color-success-text: #1b5e20;
+  --color-danger: #a33;
+  --color-danger-hover: #b5443e;
+  --color-danger-text: #611a15;
+  --color-danger-bg: #fdecea;
+  --color-warn-bg: #fff3cd;
+  --color-warn-text: #7a5b00;
+  --color-info-border: #4a7dbd;
+
+  /* Tipografía */
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, monospace;
+
+  /* Espacios */
+  --space-1: 0.2rem;
+  --space-2: 0.4rem;
+  --space-3: 0.6rem;
+  --space-4: 0.8rem;
+  --space-5: 1rem;
+  --space-6: 1.2rem;
+  --space-7: 1.5rem;
+  --space-8: 2rem;
+
+  /* Radios */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+
+  /* Sombras — tinte vino sutil en vez de negro puro */
+  --shadow-1: 0 1px 2px rgba(58,10,22,0.06), 0 1px 1px rgba(58,10,22,0.04);
+  --shadow-2: 0 10px 24px rgba(58,10,22,0.14), 0 3px 8px rgba(58,10,22,0.08);
+  --shadow-focus: 0 0 0 3px rgba(100,28,52,0.16);
+
+  /* Breakpoints */
+  --bp-sm: 40rem;
+  --bp-md: 56rem;
+  --bp-lg: 72rem;
+}
+
+/* Dark mode automático: si el sistema del usuario dice "dark" y no hay
+ * preferencia explícita guardada en localStorage (data-theme), se aplica.
+ * Tokens redefinen colores, espacios y radios quedan iguales.
+ *
+ * NOTA: --color-primary y --color-primary-hover NO se redefinen -- el
+ * header del admin siempre es vino oscuro con texto blanco, igual en los
+ * dos modos. Cambiarlos aclara el header en dark y el texto blanco se
+ * vuelve ilegible. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #0f172a;
+    --color-surface: #1e293b;
+    --color-text: #e2e8f0;
+    --color-muted: #94a3b8;
+    --color-faint: #64748b;
+    --color-border: #334155;
+    --color-border-strong: #475569;
+    --color-row-alt: #1e293b;
+    --color-table-head: #334155;
+
+    --color-secondary: #94a3b8;
+    --color-primary-soft: #3a1522;
+
+    --color-success-bg: #064e3b;
+    --color-success-text: #6ee7b7;
+    --color-danger: #ef4444;
+    --color-danger-hover: #f87171;
+    --color-danger-text: #fecaca;
+    --color-danger-bg: #450a0a;
+    --color-warn-bg: #78350f;
+    --color-warn-text: #fde68a;
+    --color-info-border: #60a5fa;
+
+    --shadow-1: 0 1px 2px rgba(0,0,0,0.4);
+    --shadow-2: 0 10px 24px rgba(0,0,0,0.55), 0 3px 8px rgba(0,0,0,0.35);
+    --shadow-focus: 0 0 0 3px rgba(127,39,67,0.35);
+  }
+}
+
+/* Dark mode explícito (el usuario eligió "oscuro" via toggle, ignora al sistema). */
+:root[data-theme="dark"] {
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-text: #e2e8f0;
+  --color-muted: #94a3b8;
+  --color-faint: #64748b;
+  --color-border: #334155;
+  --color-border-strong: #475569;
+  --color-row-alt: #1e293b;
+  --color-table-head: #334155;
+
+  --color-secondary: #94a3b8;
+  --color-primary-soft: #3a1522;
+
+  --color-success-bg: #064e3b;
+  --color-success-text: #6ee7b7;
+  --color-danger: #ef4444;
+  --color-danger-hover: #f87171;
+  --color-danger-text: #fecaca;
+  --color-danger-bg: #450a0a;
+  --color-warn-bg: #78350f;
+  --color-warn-text: #fde68a;
+  --color-info-border: #60a5fa;
+
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-2: 0 10px 24px rgba(0,0,0,0.55), 0 3px 8px rgba(0,0,0,0.35);
+  --shadow-focus: 0 0 0 3px rgba(127,39,67,0.35);
+}
+
+/* Light mode explícito (el usuario eligió "claro", ignora al sistema oscuro). */
+:root[data-theme="light"] {
+  /* Los defaults de :root ya son los valores claros; este bloque existe para
+   * ganar especificidad sobre el @media query y forzar el modo claro. */
+  --color-bg: #f7f7f8;
+  --color-surface: #ffffff;
+  --color-text: #1a1a1a;
+  --color-muted: #6b7280;
+  --color-faint: #aaa;
+  --color-border: #e5e5e5;
+  --color-border-strong: #ccc;
+  --color-row-alt: #f3f5fa;
+  --color-table-head: #eef0f4;
+  --color-primary: #641c34;
+  --color-primary-hover: #7f2743;
+  --color-primary-soft: #f6e9ec;
+  --color-primary-contrast: #ffffff;
+  --color-secondary: #6b7280;
+  --color-success-bg: #e8f5e9;
+  --color-success-text: #1b5e20;
+  --color-danger: #a33;
+  --color-danger-hover: #b5443e;
+  --color-danger-text: #611a15;
+  --color-danger-bg: #fdecea;
+  --color-warn-bg: #fff3cd;
+  --color-warn-text: #7a5b00;
+  --color-info-border: #4a7dbd;
+  --shadow-1: 0 1px 2px rgba(58,10,22,0.06), 0 1px 1px rgba(58,10,22,0.04);
+  --shadow-2: 0 10px 24px rgba(58,10,22,0.14), 0 3px 8px rgba(58,10,22,0.08);
+  --shadow-focus: 0 0 0 3px rgba(100,28,52,0.16);
+}

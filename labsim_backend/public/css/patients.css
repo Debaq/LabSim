@@ -1,0 +1,39 @@
+/* public/css/patients.css — admin/patients.php (biblioteca de fichas clínicas).
+ * Toolbar de búsqueda/filtro + botones de acción por fila en la tabla.
+ */
+
+.patients-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0.9rem 0;
+}
+.patients-toolbar input[type="text"] {
+  width: auto;
+  flex: 1 1 240px;
+  margin-top: 0;
+}
+.patients-toolbar select { width: auto; margin-top: 0; }
+.patients-toolbar .toolbar-count {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin-left: auto;
+}
+
+.action-btn {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  margin: 0 0.15rem 0.15rem 0;
+  font-size: 0.75rem;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--color-primary-contrast);
+  border: none;
+  cursor: pointer;
+  line-height: 1.6;
+}
+.action-btn.primary { background: var(--color-primary); }
+.action-btn.secondary { background: var(--color-secondary); }
+.action-btn.danger { background: var(--color-danger); }
+.action-btn:hover { opacity: 0.85; }

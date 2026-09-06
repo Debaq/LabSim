@@ -472,39 +472,9 @@ if ($isNewFlow) {
     }
 }
 
+admin_add_css('agenda.css');
 admin_header('Agendas', $me);
 ?>
-<style>
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 0.6rem; }
-    .cal-dow { font-size: 0.75rem; font-weight: 600; color: #888; text-align: center; padding: 0.2rem 0; }
-    .cal-day { min-height: 4.6rem; border: 1px solid #e5e5e5; border-radius: 4px; padding: 0.25rem; font-size: 0.75rem; background: #fafafa; }
-    .cal-day.empty { background: transparent; border: none; }
-    .cal-day.today { border-color: #1a2744; border-width: 2px; }
-    .cal-day .cal-num { font-weight: 600; margin-bottom: 0.15rem; display: block; }
-    .cal-day a { display: block; text-decoration: none; color: #1a2744; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .cal-day { position: relative; }
-    .cal-day .cal-add {
-        position: absolute; top: 0.2rem; right: 0.2rem; display: none;
-        width: 1.15rem; height: 1.15rem; line-height: 1.1rem; text-align: center;
-        border-radius: 50%; background: #1a2744; color: #fff; font-size: 0.85rem;
-        font-weight: 700; text-decoration: none;
-    }
-    .cal-day:hover .cal-add { display: block; }
-    .btn-link {
-        display: inline-block; padding: 0.5rem 1.1rem; background: #1a2744; color: #fff;
-        border-radius: 4px; text-decoration: none; font-size: 0.9rem;
-    }
-    .btn-link:hover { opacity: 0.9; }
-    .modal-backdrop {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 50;
-        display: flex; align-items: flex-start; justify-content: center;
-        padding: 3rem 1rem; overflow-y: auto;
-    }
-    .modal-box { max-width: 560px; width: 100%; margin: 0; }
-    .modal-box-header { display: flex; justify-content: space-between; align-items: center; }
-    .modal-close { color: #888; text-decoration: none; font-size: 1.2rem; line-height: 1; }
-    .modal-close:hover { color: #333; }
-</style>
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 <?php if ($success !== null): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
 
@@ -517,18 +487,18 @@ admin_header('Agendas', $me);
         </strong>
         <a class="modal-close" href="<?= agenda_url(['schedule' => null, 'appointment' => null, 'force_round' => null, 'new' => null, 'fecha' => null]) ?>" title="Cerrar">✕</a>
     </div>
-    <p style="font-size:0.85rem; color:#555;">
+    <p class="muted">
         Ojo: en la app del alumno, la Agenda por defecto solo muestra las citas de <strong>hoy</strong>
         (hay un selector de fecha y una casilla "Ver todas las citas habilitadas" para ver otros días).
     </p>
     <?php if ($scheduleForceRound): ?>
-    <p style="font-size:0.85rem; color:#886400;">
+    <p class="text-warn">
         <strong>Nueva cita</strong> para el mismo paciente -- se crea una cita aparte (horario/grupo propios) sin
         tocar la que ya tenía agendada. El historial completo del caso se ve desde
         <a href="patients.php">Fichas Clínicas</a>.
     </p>
     <?php elseif ($scheduleIsNewRound): ?>
-    <p style="font-size:0.85rem; color:#886400;">
+    <p class="text-warn">
         Esta cita ya tiene atenciones registradas -- guardar acá crea una <strong>ronda nueva</strong> (cita distinta)
         en vez de editar la anterior, para no perder el historial de esa ronda. El historial completo del caso se ve
         desde <a href="patients.php">Fichas Clínicas</a>.
@@ -548,7 +518,7 @@ admin_header('Agendas', $me);
             <input type="time" name="hora" value="<?= $scheduleForceRound ? '' : htmlspecialchars($scheduleRow['hora'] ?? '') ?>">
         </label>
         <?php if ($scheduleIdentityLocked): ?>
-        <p style="font-size:0.85rem; margin:0.3rem 0; padding:0.4rem 0.6rem; background:#f5f5f5; border-radius:4px;">
+        <p style="font-size:0.85rem; margin:0.3rem 0; padding:0.4rem 0.6rem; background:var(--color-row-alt); border-radius:var(--radius-md);">
             <strong><?= htmlspecialchars(trim(($scheduleRow['nombre'] ?? '') . ' ' . ($scheduleRow['apellido'] ?? ''))) ?></strong>
             &nbsp;·&nbsp; RUT <?= htmlspecialchars($scheduleRow['rut'] ?? '') ?>
             &nbsp;·&nbsp; nac. <?= htmlspecialchars(legacy_to_iso($scheduleRow['fecha_nac'] ?? '')) ?>
@@ -619,10 +589,10 @@ admin_header('Agendas', $me);
             </label>
         </div>
         <button type="submit"><?= $scheduleForceRound ? 'Agendar cita nueva' : ($scheduleIsNewRound ? 'Agendar ronda nueva' : ($scheduleRow['appointment_id'] ? 'Guardar cambios' : 'Agendar')) ?></button>
-        <a href="<?= agenda_url(['schedule' => null, 'appointment' => null, 'force_round' => null, 'new' => null, 'fecha' => null]) ?>" style="display:inline-block; margin-left:1rem; padding:0.5rem 0.9rem; border-radius:4px; background:#888; color:#fff; text-decoration:none; font-size:0.9rem;">Cancelar</a>
+        <a href="<?= agenda_url(['schedule' => null, 'appointment' => null, 'force_round' => null, 'new' => null, 'fecha' => null]) ?>" class="btn btn--secondary" style="margin-left:1rem; text-decoration:none;">Cancelar</a>
     </form>
     <?php if ($scheduleRow['appointment_id'] && !$scheduleForceRound): ?>
-    <hr style="margin:1rem 0; border:none; border-top:1px solid #ddd;">
+    <hr style="margin:1rem 0; border:none; border-top:1px solid var(--color-border);">
     <form method="post" style="display:inline;" onsubmit="return confirm(<?= htmlspecialchars(json_encode(
         '¿Eliminar esta cita (' . trim(($scheduleRow['fecha'] ?? '') . ' ' . ($scheduleRow['hora'] ?? '')) . ')? '
         . 'Se borran también las atenciones registradas para ella. El caso y sus otras citas, si tenía, se conservan. '
@@ -680,7 +650,7 @@ admin_header('Agendas', $me);
         <strong>Nueva cita<?= $prefillFechaIso !== null ? ' — ' . htmlspecialchars($prefillFechaIso) : '' ?></strong>
         <a class="modal-close" href="<?= agenda_url(['new' => null, 'fecha' => null]) ?>" title="Cerrar">✕</a>
     </div>
-    <p style="font-size:0.85rem; color:#555;">Elige el caso/paciente al que le vas a agendar la cita.</p>
+    <p class="muted">Elige el caso/paciente al que le vas a agendar la cita.</p>
     <label>Buscar paciente por nombre
         <input type="text" id="new-case-search" placeholder="Escribe un nombre..." autocomplete="off" oninput="filterCaseOptions()">
     </label>
@@ -695,8 +665,8 @@ admin_header('Agendas', $me);
             <?php endforeach; ?>
         </select>
     </label>
-    <p id="new-case-empty" style="font-size:0.85rem; color:#888; display:none;">Ningún paciente coincide con esa búsqueda.</p>
-    <p style="font-size:0.85rem; color:#555; margin-top:0.8rem;">
+    <p id="new-case-empty" style="font-size:0.85rem; color:var(--color-muted); display:none;">Ningún paciente coincide con esa búsqueda.</p>
+    <p class="muted">
         ¿El paciente todavía no tiene ficha? <a href="case_create.php">Crear ficha nueva</a> primero.
     </p>
 </div>
@@ -750,7 +720,7 @@ admin_header('Agendas', $me);
         <noscript><button type="submit">Filtrar</button></noscript>
     </form>
     <?php if ($filterCourseId !== null): ?>
-    <p style="font-size:0.8rem; color:#555; margin-top:0.5rem;">
+    <p style="font-size:0.8rem; color:var(--color-muted); margin-top:0.5rem;">
         Acotado a <strong><?= htmlspecialchars($courseNameById[$filterCourseId] ?? '') ?></strong>
         <?php if ($filterGroupId !== null): ?>· grupo <strong><?= htmlspecialchars($groupNameById[$filterGroupId] ?? '') ?></strong> (incluye también citas legado "todo el curso" de este curso, si las hubiera)<?php endif; ?>
         <?php if ($filterStudentId !== null): ?>· alumno <strong><?= htmlspecialchars($userNameById[$filterStudentId] ?? '') ?></strong> (incluye citas de su grupo, todo el curso o cola global que también le apliquen)<?php endif; ?>
@@ -760,11 +730,11 @@ admin_header('Agendas', $me);
 </div>
 
 <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div class="row row--between">
         <strong>Calendario</strong>
-        <a class="btn-link" href="<?= agenda_url(['new' => 1, 'schedule' => null, 'appointment' => null, 'fecha' => null]) ?>">+ Crear nueva cita</a>
+        <a class="btn" href="<?= agenda_url(['new' => 1, 'schedule' => null, 'appointment' => null, 'fecha' => null]) ?>">+ Crear nueva cita</a>
     </div>
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.8rem; gap:0.5rem; flex-wrap:wrap;">
+    <div class="row row--between row--gap-sm row--gap-wrap" style="margin-top:0.8rem;">
         <a href="<?= agenda_url(['month' => $prevMonth]) ?>">&larr; anterior</a>
         <strong><?= $monthNames[(int) $monthStart->format('n')] ?> <?= $monthStart->format('Y') ?></strong>
         <form method="get" style="display:flex; gap:0.3rem; align-items:center;" onsubmit="this.querySelector('[name=month]').value = document.getElementById('cal-jump-year').value + '-' + document.getElementById('cal-jump-month').value; return true;">
@@ -772,12 +742,12 @@ admin_header('Agendas', $me);
             <input type="hidden" name="<?= htmlspecialchars($k) ?>" value="<?= htmlspecialchars((string) $v) ?>">
             <?php endforeach; ?>
             <input type="hidden" name="month" value="">
-            <select id="cal-jump-month" style="font-size:0.85rem;" onchange="this.form.requestSubmit()">
+            <select id="cal-jump-month" class="help" onchange="this.form.requestSubmit()">
                 <?php foreach ($monthNames as $mn => $mname): ?>
                 <option value="<?= sprintf('%02d', $mn) ?>" <?= $mn === $curMonthNum ? 'selected' : '' ?>><?= ucfirst($mname) ?></option>
                 <?php endforeach; ?>
             </select>
-            <select id="cal-jump-year" style="font-size:0.85rem;" onchange="this.form.requestSubmit()">
+            <select id="cal-jump-year" class="help" onchange="this.form.requestSubmit()">
                 <?php for ($y = $yearRangeMin; $y <= $yearRangeMax; $y++): ?>
                 <option value="<?= $y ?>" <?= $y === $curYearNum ? 'selected' : '' ?>><?= $y ?></option>
                 <?php endfor; ?>
@@ -810,7 +780,7 @@ admin_header('Agendas', $me);
         </div>
         <?php endfor; ?>
     </div>
-    <p style="font-size:0.85rem; color:#555; margin-top:0.6rem;">
+    <p class="muted">
         "+ Crear nueva cita" o el <strong>+</strong> que aparece al pasar el mouse sobre un día -- ambos abren el
         selector de caso/paciente para agendar (ese día queda precargado si vino del "+"). La biblioteca de
         fichas/pacientes está en <a href="patients.php">Fichas Clínicas</a>.
@@ -820,8 +790,9 @@ admin_header('Agendas', $me);
 <?php if ($historyCaseId !== null): ?>
 <div class="card" id="historial">
     <strong>Historial del caso <?= htmlspecialchars($historyCaseId) ?></strong>
-    &nbsp;·&nbsp; <a href="<?= agenda_url(['history' => null]) ?>" style="font-size:0.85rem;">Cerrar</a>
-    <p style="font-size:0.85rem; color:#555;">Cada ronda es una cita distinta con su propio historial de atenciones y métricas (no se mezclan entre sí).</p>
+    &nbsp;·&nbsp; <a href="<?= agenda_url(['history' => null]) ?>" class="help">Cerrar</a>
+    <p class="muted">Cada ronda es una cita distinta con su propio historial de atenciones y métricas (no se mezclan entre sí).</p>
+    <div class="table-wrap table-wrap--wide">
     <table>
         <tr><th>Cita</th><th>Fecha</th><th>Hora</th><th>Paciente</th><th>Procedimiento</th><th>Atenciones</th><th></th></tr>
         <?php foreach ($historyRows as $h): ?>
@@ -844,9 +815,10 @@ admin_header('Agendas', $me);
         </tr>
         <?php endforeach; ?>
         <?php if (!$historyRows): ?>
-        <tr><td colspan="8" style="color:#888;">Este caso no tiene citas.</td></tr>
+        <tr><td colspan="8" class="muted">Este caso no tiene citas.</td></tr>
         <?php endif; ?>
     </table>
+    </div>
 </div>
 <?php endif; ?>
 <?php

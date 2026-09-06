@@ -241,13 +241,13 @@ if ($detailId !== null) {
                 <label>Nombre
                     <input type="text" name="name" value="<?= htmlspecialchars($course['name']) ?>" required>
                 </label>
-                <button type="submit" class="secondary">Guardar</button>
+                <button type="submit" class="btn btn--secondary">Guardar</button>
             </form>
             <form method="post" class="inline" style="margin-top:0.6rem;">
             <?= csrf_field() ?>
                 <input type="hidden" name="form_action" value="toggle_active">
                 <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                <button type="submit" class="secondary"><?= $course['active'] ? 'Archivar curso' : 'Activar curso' ?></button>
+                <button type="submit" class="btn btn--secondary"><?= $course['active'] ? 'Archivar curso' : 'Activar curso' ?></button>
             </form>
         </details>
         <?php endif; ?>
@@ -255,7 +255,7 @@ if ($detailId !== null) {
 
     <div class="card">
         <strong>Módulos habilitados</strong>
-        <p style="font-size:0.8rem; color:#888; margin-top:0.2rem;">
+        <p class="help help--mt">
             Qué ve un alumno de este curso en la app de escritorio. Sin marcar nada, el curso queda sin módulos habilitados.
         </p>
         <?php $enabledModules = Courses::enabledModules((int) $course['id']); ?>
@@ -264,8 +264,8 @@ if ($detailId !== null) {
             <input type="hidden" name="form_action" value="set_modules">
             <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
             <?php foreach (Courses::modulesGroupedByBox() as $boxLabel => $boxModules): ?>
-            <div style="border-top:1px solid #e5e5e5; padding-top:0.6rem; margin-top:0.6rem;">
-                <strong style="font-size:0.85rem;"><?= htmlspecialchars($boxLabel) ?></strong>
+            <div class="section-sep">
+                <strong><?= htmlspecialchars($boxLabel) ?></strong>
                 <div style="display:flex; flex-wrap:wrap; gap:0.4rem 1.2rem; margin-top:0.4rem;">
                     <?php foreach ($boxModules as $code => $label): ?>
                     <label style="font-weight:normal; display:flex; align-items:center; gap:0.3rem; margin:0;">
@@ -276,7 +276,7 @@ if ($detailId !== null) {
                 </div>
             </div>
             <?php endforeach; ?>
-            <button type="submit" class="secondary" style="margin-top:0.6rem;">Guardar módulos</button>
+            <button type="submit" class="btn btn--secondary" style="margin-top:0.6rem;">Guardar módulos</button>
         </form>
     </div>
 
@@ -293,22 +293,22 @@ if ($detailId !== null) {
     ?>
     <div class="card">
         <strong>Área de pruebas</strong>
-        <p style="font-size:0.8rem; color:#888; margin-top:0.2rem;">
+        <p class="help help--mt">
             Un alumno más del curso para probar la app de punta a punta (agendarle pacientes, atender, etc.) sin tocar datos de alumnos reales. Invisible para los alumnos -- solo docente/admin lo ven acá. Entra con código de 6 dígitos, igual que un alumno LTI -- sin usuario ni contraseña que gestionar.
         </p>
-        <div style="display:flex; gap:0.6rem; margin-top:0.5rem;">
+        <div class="row" style="margin-top:0.5rem;">
             <form method="post">
             <?= csrf_field() ?>
                 <input type="hidden" name="form_action" value="generate_demo_code">
                 <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                <button type="submit" class="secondary">Generar código de acceso</button>
+                <button type="submit" class="btn btn--secondary">Generar código de acceso</button>
             </form>
             <?php if ($demoStudent !== null): ?>
             <form method="post" onsubmit="return confirm('¿Borrar todas las citas/atenciones/chats de prueba del demo? La cuenta queda igual.');">
             <?= csrf_field() ?>
                 <input type="hidden" name="form_action" value="clean_demo">
                 <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                <button type="submit" class="danger">Limpiar datos de prueba</button>
+                <button type="submit" class="btn btn--danger">Limpiar datos de prueba</button>
             </form>
             <?php endif; ?>
         </div>
@@ -317,6 +317,7 @@ if ($detailId !== null) {
     <?php if ($isFullAdmin): ?>
     <div class="card">
         <strong>Docentes (<?= count($teachers = Courses::teachers((int) $course['id'])) ?>)</strong>
+        <div class="table-wrap">
         <table>
             <tr><th>Usuario</th><th>Nombre</th><th></th></tr>
             <?php foreach ($teachers as $t): ?>
@@ -329,29 +330,31 @@ if ($detailId !== null) {
                         <input type="hidden" name="form_action" value="remove_teacher">
                         <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                         <input type="hidden" name="user_id" value="<?= $t['id'] ?>">
-                        <button type="submit" class="danger" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;">Quitar</button>
+                        <button type="submit" class="btn btn--danger btn--xs">Quitar</button>
                     </form>
                 </td>
             </tr>
             <?php endforeach; ?>
             <?php if (!$teachers): ?>
-            <tr><td colspan="3" style="color:#888;">Sin docentes asignados todavía.</td></tr>
+            <tr><td colspan="3" class="muted">Sin docentes asignados todavía.</td></tr>
             <?php endif; ?>
         </table>
-        <form method="post" style="display:flex; gap:0.6rem; align-items:flex-end; margin-top:0.6rem;">
+        </div>
+        <form method="post" class="row" style="margin-top:0.6rem;">
         <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="add_teacher">
             <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
             <label style="flex:1; margin:0;">Agregar docente (nombre o username)
                 <input type="text" name="username" list="teachers_datalist" required>
             </label>
-            <button type="submit" class="secondary" style="margin-top:0;">Agregar</button>
+            <button type="submit" class="btn btn--secondary btn--sm">Agregar</button>
         </form>
     </div>
     <?php endif; ?>
 
     <div class="card">
         <strong>Alumnos matriculados (<?= count($students) ?>)</strong>
+        <div class="table-wrap">
         <table>
             <tr><th>Usuario</th><th>Nombre</th><th></th></tr>
             <?php foreach ($students as $s): ?>
@@ -364,21 +367,22 @@ if ($detailId !== null) {
                         <input type="hidden" name="form_action" value="remove_student">
                         <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                         <input type="hidden" name="user_id" value="<?= $s['id'] ?>">
-                        <button type="submit" class="danger" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;">Quitar</button>
+                        <button type="submit" class="btn btn--danger btn--xs">Quitar</button>
                     </form>
                 </td>
             </tr>
             <?php endforeach; ?>
             <?php if (!$students): ?>
-            <tr><td colspan="3" style="color:#888;">Sin alumnos matriculados todavía.</td></tr>
+            <tr><td colspan="3" class="muted">Sin alumnos matriculados todavía.</td></tr>
             <?php endif; ?>
         </table>
+        </div>
 
         <?php $enrollable = Courses::enrollableStudents((int) $course['id']); ?>
-        <div style="margin-top:0.8rem; border-top:1px solid #e5e5e5; padding-top:0.6rem;">
+        <div class="section-sep section-sep--lg">
             <strong>Matricular alumnos existentes</strong>
             <?php if (!$enrollable): ?>
-            <p style="color:#888; font-size:0.85rem;">Todos los alumnos activos ya están en este curso.</p>
+            <p style="color:var(--color-muted); font-size:0.85rem;">Todos los alumnos activos ya están en este curso.</p>
             <?php else: ?>
             <?php
                 $origins = [];
@@ -390,12 +394,12 @@ if ($detailId !== null) {
                 }
                 ksort($origins);
             ?>
-            <p style="font-size:0.8rem; color:#555;">Busca por nombre o usuario, marca a los que quieras, o usa "seleccionar todos". Si Moodle informó de qué curso vienen, aparecen agrupados abajo -- un clic selecciona a todo ese grupo.</p>
-            <input type="text" id="roster_search" placeholder="Buscar por nombre o usuario..." style="width:100%; margin-bottom:0.5rem;" oninput="rosterFilter()">
+            <p style="font-size:0.8rem; color:var(--color-muted);">Busca por nombre o usuario, marca a los que quieras, o usa "seleccionar todos". Si Moodle informó de qué curso vienen, aparecen agrupados abajo -- un clic selecciona a todo ese grupo.</p>
+            <input type="text" id="roster_search" placeholder="Buscar por nombre o usuario..." class="input" style="margin-bottom:0.5rem;" oninput="rosterFilter()">
             <?php if ($origins): ?>
             <div style="margin-bottom:0.5rem;">
                 <?php foreach ($origins as $label => $count): ?>
-                <button type="button" class="secondary" style="margin:0 0.3rem 0.3rem 0; padding:0.15rem 0.5rem; font-size:0.75rem;" onclick="rosterSelectOrigin(<?= htmlspecialchars(json_encode($label), ENT_QUOTES) ?>)">Todos de "<?= htmlspecialchars($label) ?>" (<?= $count ?>)</button>
+                <button type="button" class="btn btn--secondary btn--xs" style="margin:0 0.3rem 0.3rem 0;" onclick="rosterSelectOrigin(<?= htmlspecialchars(json_encode($label), ENT_QUOTES) ?>)">Todos de "<?= htmlspecialchars($label) ?>" (<?= $count ?>)</button>
                 <?php endforeach; ?>
             </div>
             <?php endif; ?>
@@ -403,7 +407,8 @@ if ($detailId !== null) {
             <?= csrf_field() ?>
                 <input type="hidden" name="form_action" value="bulk_enroll_selected">
                 <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                <div style="max-height:320px; overflow-y:auto; border:1px solid #e5e5e5;">
+                <div class="scrollbox scrollbox--tall pane">
+                <div class="table-wrap">
                 <table id="roster_table" style="margin:0;">
                     <tr>
                         <th><input type="checkbox" id="roster_select_all" onclick="rosterToggleAll(this)" title="Seleccionar todos los visibles"></th>
@@ -414,12 +419,13 @@ if ($detailId !== null) {
                         <td><input type="checkbox" name="user_ids[]" value="<?= $u['id'] ?>" class="roster_check" onchange="rosterUpdateCount()"></td>
                         <td><?= htmlspecialchars($u['username']) ?></td>
                         <td><?= htmlspecialchars($u['display_name']) ?></td>
-                        <td style="color:#888; font-size:0.8rem;"><?= htmlspecialchars($u['origin'] ?: '—') ?></td>
+                        <td class="help help--xs"><?= htmlspecialchars($u['origin'] ?: '—') ?></td>
                     </tr>
                     <?php endforeach; ?>
                 </table>
                 </div>
-                <button type="submit" class="secondary" style="margin-top:0.5rem;">Matricular seleccionados (<span id="roster_count">0</span>)</button>
+                </div>
+                <button type="submit" class="btn btn--secondary" style="margin-top:0.5rem;">Matricular seleccionados (<span id="roster_count">0</span>)</button>
             </form>
             <script>
             (function () {
@@ -456,9 +462,9 @@ if ($detailId !== null) {
             <?php endif; ?>
         </div>
 
-        <details style="margin-top:0.8rem; border-top:1px solid #e5e5e5; padding-top:0.6rem;">
+        <details class="section-sep section-sep--lg">
             <summary>Agregar alumno nuevo o sin Moodle (manual)</summary>
-            <form method="post" style="display:flex; gap:0.6rem; align-items:flex-end; margin-top:0.6rem; flex-wrap:wrap;">
+            <form method="post" class="row" style="margin-top:0.6rem; flex-wrap:wrap;">
             <?= csrf_field() ?>
                 <input type="hidden" name="form_action" value="add_student">
                 <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
@@ -468,33 +474,35 @@ if ($detailId !== null) {
                 <label style="flex:1; margin:0; min-width:220px;">Nombre completo (solo si es alumno nuevo)
                     <input type="text" name="display_name" placeholder="Se usa si el username no existe todavía">
                 </label>
-                <button type="submit" class="secondary" style="margin-top:0;">Agregar</button>
+                <button type="submit" class="btn btn--secondary btn--sm">Agregar</button>
             </form>
-            <p style="font-size:0.8rem; color:#888; margin-top:0.4rem;">Si el username no existe todavía, se crea una cuenta nueva automáticamente con contraseña temporal (se muestra al agregar).</p>
+            <p class="help help--mt-md">Si el username no existe todavía, se crea una cuenta nueva automáticamente con contraseña temporal (se muestra al agregar).</p>
 
-            <details style="margin-top:0.8rem; border-top:1px solid #e5e5e5; padding-top:0.6rem;">
+            <details class="section-sep section-sep--lg">
                 <summary>Agregar varios alumnos a la vez (por texto)</summary>
                 <form method="post" style="margin-top:0.6rem;">
                 <?= csrf_field() ?>
                     <input type="hidden" name="form_action" value="bulk_add_students">
                     <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                     <label>Uno por línea: <code>username</code>, o <code>username, nombre completo</code>, o <code>username, nombre completo, password</code>
-                        <textarea name="bulk_students" rows="6" style="width:100%; font-family:monospace;" placeholder="jperez&#10;mgonzalez, María González&#10;asilva, Ana Silva, MiClave123"></textarea>
+                        <textarea name="bulk_students" rows="6" class="textarea" placeholder="jperez&#10;mgonzalez, María González&#10;asilva, Ana Silva, MiClave123"></textarea>
                     </label>
-                    <p style="font-size:0.8rem; color:#888;">Los que ya existen se matriculan tal cual. Los que no existen se crean con esa contraseña, o con una generada automáticamente si no se indica.</p>
-                    <button type="submit" class="secondary">Procesar lista</button>
+                    <p class="help">Los que ya existen se matriculan tal cual. Los que no existen se crean con esa contraseña, o con una generada automáticamente si no se indica.</p>
+                    <button type="submit" class="btn btn--secondary">Procesar lista</button>
                 </form>
                 <?php if ($bulkResults): ?>
+                <div class="table-wrap">
                 <table style="margin-top:0.8rem;">
                     <tr><th>Username</th><th>Resultado</th><th>Contraseña</th></tr>
                     <?php foreach ($bulkResults as $r): ?>
                     <tr>
                         <td><?= htmlspecialchars($r['username']) ?></td>
-                        <td style="color:<?= $r['status'] === 'error' ? '#b00' : '#333' ?>;"><?= htmlspecialchars($r['message']) ?></td>
+                        <td style="color:<?= $r['status'] === 'error' ? 'var(--color-danger)' : 'var(--color-text)' ?>;"><?= htmlspecialchars($r['message']) ?></td>
                         <td><?= !empty($r['password']) ? '<code>' . htmlspecialchars($r['password']) . '</code>' : '' ?></td>
                     </tr>
                     <?php endforeach; ?>
                 </table>
+                </div>
                 <?php endif; ?>
             </details>
         </details>
@@ -502,17 +510,18 @@ if ($detailId !== null) {
 
     <div class="card">
         <strong>Grupos</strong>
-        <p style="font-size:0.85rem; color:#555;">Para citar a un subgrupo (p. ej. 5 alumnos a la misma hora) sin asignarlos uno por uno en la agenda.</p>
+        <p class="muted">Para citar a un subgrupo (p. ej. 5 alumnos a la misma hora) sin asignarlos uno por uno en la agenda.</p>
         <?php foreach (Courses::groupsForCourse((int) $course['id']) as $g): ?>
-        <div style="border-top:1px solid #e5e5e5; padding-top:0.8rem; margin-top:0.8rem;">
+        <div style="border-top:1px solid var(--color-border); padding-top:0.8rem; margin-top:0.8rem;">
             <strong><?= htmlspecialchars($g['name']) ?></strong> (<?= (int) $g['member_count'] ?> miembros)
             <form method="post" class="inline" style="margin-left:0.6rem;" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Eliminar el grupo ' . $g['name'] . '?'), ENT_QUOTES) ?>);">
             <?= csrf_field() ?>
                 <input type="hidden" name="form_action" value="delete_group">
                 <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                 <input type="hidden" name="group_id" value="<?= $g['id'] ?>">
-                <button type="submit" class="danger" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;">Eliminar grupo</button>
+                <button type="submit" class="btn btn--danger btn--xs">Eliminar grupo</button>
             </form>
+            <div class="table-wrap">
             <table>
                 <tr><th>Usuario</th><th>Nombre</th><th></th></tr>
                 <?php foreach (Courses::membersOfGroup((int) $g['id']) as $m): ?>
@@ -526,13 +535,14 @@ if ($detailId !== null) {
                             <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                             <input type="hidden" name="group_id" value="<?= $g['id'] ?>">
                             <input type="hidden" name="user_id" value="<?= $m['id'] ?>">
-                            <button type="submit" class="danger" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;">Quitar</button>
+                            <button type="submit" class="btn btn--danger btn--xs">Quitar</button>
                         </form>
                     </td>
                 </tr>
                 <?php endforeach; ?>
             </table>
-            <form method="post" style="display:flex; gap:0.6rem; align-items:flex-end;">
+            </div>
+            <form method="post" class="row">
             <?= csrf_field() ?>
                 <input type="hidden" name="form_action" value="add_group_member">
                 <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
@@ -540,18 +550,18 @@ if ($detailId !== null) {
                 <label style="flex:1; margin:0;">Agregar al grupo (nombre o username, debe estar matriculado en el curso)
                     <input type="text" name="username" list="students_datalist" required>
                 </label>
-                <button type="submit" class="secondary" style="margin-top:0;">Agregar</button>
+                <button type="submit" class="btn btn--secondary btn--sm">Agregar</button>
             </form>
         </div>
         <?php endforeach; ?>
-        <form method="post" style="display:flex; gap:0.6rem; align-items:flex-end; margin-top:0.8rem; border-top:1px solid #e5e5e5; padding-top:0.8rem;">
+        <form method="post" class="row" style="margin-top:0.8rem; border-top:1px solid var(--color-border); padding-top:0.8rem;">
         <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="create_group">
             <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
             <label style="flex:1; margin:0;">Nuevo grupo (nombre)
                 <input type="text" name="name" required>
             </label>
-            <button type="submit" class="secondary" style="margin-top:0;">Crear grupo</button>
+            <button type="submit" class="btn btn--secondary btn--sm">Crear grupo</button>
         </form>
     </div>
     <?php
@@ -564,7 +574,7 @@ if ($detailId !== null) {
 if (!$isFullAdmin) {
     admin_header('Cursos', $me);
     if (!$myCourseIds) {
-        echo '<p style="color:#888;">Todavía no estás asignado como docente de ningún curso.</p>';
+        echo '<p class="muted">Todavía no estás asignado como docente de ningún curso.</p>';
         admin_footer();
         exit;
     }
@@ -581,13 +591,13 @@ if (!$isFullAdmin) {
 <?php if ($success !== null): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
 
 <?php if ($hasPendingLink): ?>
-<div class="card" style="border: 2px solid #4a7dbd;">
+<div class="card" style="border: 2px solid var(--color-info-border);">
     <strong>Vincular curso de Moodle</strong>
-    <p style="font-size:0.85rem; color:#555;">Entraste desde un curso de Moodle que todavía no está vinculado a ningún curso de LabSim. Vincúlalo una sola vez y cada alumno que entre desde ahí se matriculará solo -- sin que tengas que agregarlos a mano ni conocer sus nombres.</p>
+    <p class="muted">Entraste desde un curso de Moodle que todavía no está vinculado a ningún curso de LabSim. Vincúlalo una sola vez y cada alumno que entre desde ahí se matriculará solo -- sin que tengas que agregarlos a mano ni conocer sus nombres.</p>
     <?php if (!$courses): ?>
-    <p style="color:#888;">No tienes ningún curso de LabSim todavía -- créalo primero (o pide que te asignen como docente de uno) y vuelve a entrar desde Moodle.</p>
+    <p class="muted">No tienes ningún curso de LabSim todavía -- créalo primero (o pide que te asignen como docente de uno) y vuelve a entrar desde Moodle.</p>
     <?php else: ?>
-    <form method="post" style="display:flex; gap:0.6rem; align-items:flex-end;">
+    <form method="post" class="row">
     <?= csrf_field() ?>
         <input type="hidden" name="form_action" value="link_lti_context">
         <input type="hidden" name="lti_platform_id" value="<?= $pendingLinkPlatform ?>">
@@ -612,16 +622,17 @@ if (!$isFullAdmin) {
     <form method="post">
     <?= csrf_field() ?>
         <input type="hidden" name="form_action" value="create_course">
-        <label>Nombre
-            <input type="text" name="name" required>
+        <label class="field-label">Nombre
+            <input class="input" type="text" name="name" required>
         </label>
-        <button type="submit">Crear</button>
+        <button class="btn" type="submit">Crear</button>
     </form>
 </div>
 <?php endif; ?>
 
 <div class="card">
     <strong>Cursos</strong>
+    <div class="table-wrap">
     <table>
         <tr><th>Nombre</th><th>Estado</th><th>Docentes</th><th>Alumnos</th><th></th></tr>
         <?php foreach ($courses as $c): ?>
@@ -634,9 +645,10 @@ if (!$isFullAdmin) {
         </tr>
         <?php endforeach; ?>
         <?php if (!$courses): ?>
-        <tr><td colspan="5" style="color:#888;">Ningún curso creado todavía.</td></tr>
+        <tr><td colspan="5" class="muted">Ningún curso creado todavía.</td></tr>
         <?php endif; ?>
     </table>
+    </div>
 </div>
 <?php
 admin_footer();
