@@ -227,6 +227,29 @@ CREATE TABLE IF NOT EXISTS attendances (
 CREATE INDEX IF NOT EXISTS idx_attendances_updated ON attendances (updated_at);
 CREATE INDEX IF NOT EXISTS idx_attendances_student ON attendances (student_id);
 
+-- Informes de módulos "de examen" (ABR, EOA, VEMP, electrococleografía...):
+-- a diferencia de audiometría/impedanciometría (que hoy no guardan un
+-- resultado consolidado, solo action_logs), estos módulos SÍ producen un
+-- documento final que hay que persistir y poder descargar como PDF. Un
+-- informe por atención y tipo -- UNIQUE(attendance_id, tipo): el alumno
+-- puede rehacerlo (upsert) mientras la atención sigue 'atendiendo'; una vez
+-- 'atendido' (attendances.estado) queda fijo, lo aplica el endpoint que
+-- escribe acá (report_upload.php), no una constraint de la tabla. La
+-- próxima atención al mismo paciente es un attendance_id nuevo -> informe
+-- nuevo; el historial es simplemente todas las filas de este alumno.
+CREATE TABLE IF NOT EXISTS reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    attendance_id INTEGER NOT NULL REFERENCES attendances(id),
+    tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'EOA', 'VEMP', 'ELECTROCOCLEO')),
+    data TEXT NOT NULL,                -- JSON: latencias/amplitudes marcadas, conclusión escrita
+    -- Sin columna para el nombre del PDF: es determinista a partir de id
+    -- (ver ReportFile::pdfPath()), igual que las imágenes.
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (attendance_id, tipo)
+);
+CREATE INDEX IF NOT EXISTS idx_reports_attendance ON reports (attendance_id);
+
 -- Registro de acciones del estudiante (reemplaza el print a consola).
 -- El cliente junta eventos localmente y los sube en lotes -> nunca streaming.
 CREATE TABLE IF NOT EXISTS action_logs (
