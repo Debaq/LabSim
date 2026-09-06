@@ -33,6 +33,10 @@ final class CaseBuilder
     public const Z_OPTIONS = ['A', 'As', 'Ad', 'C', 'Cs', 'B'];
     public const ETF_OPTIONS = ['Normal', 'Disfunción tubaria', 'Permeable', 'No permeable'];
 
+    // Patología ABR por oído -- ver AbrMainWindow.py::test_test() (llama a
+    // ABR_Curve, que mapea 'transmission' -> 'conductive' internamente).
+    public const ABR_TYPE_OPTIONS = ['normal', 'coclear', 'transmission', 'neural'];
+
     // Acumetría (diapasones 500 y 1000 Hz) -- se guarda dentro de
     // audiometría, no es tab aparte. Rinne es por oído (CA vs CO en ese
     // oído); Weber es un único resultado por frecuencia (a qué lado
@@ -393,6 +397,7 @@ final class CaseBuilder
             'PatientDisposition' => (int) ($form['disposicion'] ?? 0),
             'Tinnitus' => $form['tinnitus'],
             'Otoscopia' => $form['otoscopia'],
+            'ABR' => $form['abr'],
             'tipo' => 'normal',
         ];
     }
@@ -553,6 +558,36 @@ final class CaseBuilder
                 array_values($otoscopiaFases)
             ),
         ];
+
+        $abr = $data['ABR'] ?? [];
+        foreach (['OD' => 'od', 'OI' => 'oi'] as $ladoData => $ladoForm) {
+            $ladoAbr = is_array($abr[$ladoData] ?? null) ? $abr[$ladoData] : [];
+            $desv = is_array($ladoAbr['desviaciones'] ?? null) ? $ladoAbr['desviaciones'] : [];
+            $fsp = is_array($ladoAbr['fsp_puntos'] ?? null) ? $ladoAbr['fsp_puntos'] : [];
+            $ondaVal = static function (array $desv, string $onda, string $campo, $default) {
+                return (string) ($desv[$onda][$campo] ?? $default);
+            };
+            $v['abr'][$ladoForm] = [
+                'type' => in_array($ladoAbr['type'] ?? 'normal', self::ABR_TYPE_OPTIONS, true) ? $ladoAbr['type'] : 'normal',
+                'umbral' => (string) ($ladoAbr['umbral'] ?? 20),
+                'lat_I' => $ondaVal($desv, 'onda_I', 'lat', 0),
+                'amp_I' => $ondaVal($desv, 'onda_I', 'amp', 0),
+                'lat_III' => $ondaVal($desv, 'onda_III', 'lat', 0),
+                'amp_III' => $ondaVal($desv, 'onda_III', 'amp', 0),
+                'lat_V' => $ondaVal($desv, 'onda_V', 'lat', 0),
+                'amp_V' => $ondaVal($desv, 'onda_V', 'amp', 0),
+                'fsp_800' => (string) ($fsp['800'] ?? 2.3),
+                'fsp_2000' => (string) ($fsp['2000'] ?? 2.8),
+                'fsp_obj' => (string) ($fsp['objetivo'] ?? 3.0),
+            ];
+            if (!empty($ladoAbr['repro']) || !isset($ladoAbr['repro'])) {
+                // Default repro=true (caso nuevo sin ABR configurado aún, o
+                // caso viejo de antes de esta clave -- ver DEFAULT_ABR_CASE
+                // en AbrMainWindow.py): solo queda sin marcar si el docente
+                // lo desmarcó explícitamente (repro === false guardado).
+                $v['abr'][$ladoForm]['repro'] = '1';
+            }
+        }
 
         return $v;
     }

@@ -1,11 +1,15 @@
 """Módulo ABR (Potencial Evocado Auditivo de Tronco Cerebral).
 
 Migrado desde simPEATC (Debaq/simPEATC, rama cleanup/fbs-remove) para
-montarse como subventana MDI en LabSim (botón "ABR"). El modo OSCE y el
-chequeo de licencia standalone se sacaron antes de la migración -- ver
-CLAUDE.md de simPEATC para el detalle de esa limpieza.
+montarse como subventana MDI en LabSim (botón "ABR"). El modo OSCE, el
+chequeo de licencia standalone, el timer/ciclo de examen propio (heredado
+de cuando simPEATC corría solo con 2 casos random por sesión) y el banco
+de 30 patologías hardcodeadas (antes en abr/conbinaciones.py) se sacaron
+-- este módulo ahora sigue el mismo patrón que Audiometer/Z: sin
+cronómetro propio, reacciona a la atención abierta en LabSim vía
+la_super(data_current, appointment_id). Cada paciente trae su propia
+definición ABR en cases.data['ABR']['OD'/'OI'] (ver CaseBuilder.php).
 """
-import json
 import os
 
 from abr.ABR_generator_v2 import ABR_Curve
@@ -19,126 +23,39 @@ from abr.AbrTable import AbrTable
 from abr.EEG import EEG
 from abr.FSP import FSP
 from abr.PdfCreator import PDFCreator
-from abr.conbinaciones import elegir_combinacion_especifica, casos, combinaciones
 from abr.UI.AbrAdvanceSettings_ui import Ui_AdvanceSettings
 from abr.UI.AbrMain_ui import Ui_MainWindow
 from core.base import context
-from PySide6.QtCore import QCoreApplication, Qt, QTimer, Signal
-from PySide6.QtGui import QGuiApplication
-from PySide6.QtWidgets import (QComboBox, QDialog, QLabel,
-                               QMainWindow, QPushButton, QSizePolicy,
-                               QSpacerItem, QVBoxLayout,
-                               QMessageBox)
+from PySide6.QtCore import QCoreApplication, QTimer
+from PySide6.QtWidgets import QDialog, QMainWindow, QSizePolicy, QSpacerItem
 
 tr = QCoreApplication.translate
 
-STATE_INIT = "exam"
-TIEMPO_TEST = 40
 TIEMPO_ENTR_PROM = 300
 
-
-class IsOver(QDialog):
-    def __init__(self, parent=None, modo_osce=False, estacion=None):
-        super(IsOver, self).__init__(parent)
-
-        # Configuraciones de la ventana modal
-        self.setWindowTitle("Tiempo Acabado")
-        self.setModal(True)  # Hace la ventana modal
-        self.setFixedSize(350, 150)  # Tamaño fijo de la ventana
-        self.modo_osce = modo_osce
-        self.estacion = estacion
-
-        # Inicialización de Widgets
-        layout = QVBoxLayout(self)
-
-        if modo_osce:
-            if estacion:
-                label = QLabel(f"Estación {estacion} completada.\n\n"
-                              "Por favor, diríjase a la siguiente estación.", self)
-            else:
-                label = QLabel("Tiempo completado.", self)
-            label.setWordWrap(True)
-            next_case_button = QPushButton("Continuar", self)
-        else:
-            label = QLabel("El tiempo se ha acabado, verifique con el docente su caso", self)
-            next_case_button = QPushButton("Siguiente caso", self)
-
-        label.setAlignment(Qt.AlignCenter)
-        next_case_button.clicked.connect(self.on_next_case)
-
-        # Agregar Widgets al layout
-        layout.addWidget(label)
-        layout.addWidget(next_case_button)
-
-    def on_next_case(self):
-        # Acción cuando se hace clic en 'Siguiente caso'
-        print("Preparando el siguiente caso...")
-        self.accept()  # Cierra la ventana modal
-
-    def reject(self):
-        # Evita que se cierre con Escape
-        pass
-
-    def closeEvent(self, event):
-        # Evita que se cierre con Alt+F4
-        event.ignore()
-
-
-
-class CuadroDialogoTest(QDialog):
-    cambio_case = Signal(int)
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle('Selección de casos')
-
-        # Hacer que la ventana sea modal
-        self.setModal(True)
-
-        # Crear el ComboBox y el botón dentro de la ventana de diálogo
-        layout = QVBoxLayout(self)
-
-        self.combo_box = QComboBox()
-        self.create_list(len(combinaciones))
-        layout.addWidget(self.combo_box)
-
-        self.accept_button = QPushButton("Aceptar")
-        self.accept_button.clicked.connect(self.on_accept_clicked)
-        layout.addWidget(self.accept_button)
-        self.center_on_screen()
-
-
-    def center_on_screen(self):
-        # Obtener la resolución de la pantalla
-        screen_resolution = QGuiApplication.primaryScreen().geometry()
-
-        # Calcular la posición central para el diálogo
-        x = (screen_resolution.width() - self.width()) / 2
-        y = (screen_resolution.height() - self.height()) / 2
-
-        # Establecer la posición del diálogo en el centro de la pantalla
-        self.move(x, y)
-
-    def create_list(self, n):
-        for i in range(n):
-            self.combo_box.addItem(f'Caso {i+1}')
-
-    def on_accept_clicked(self):
-        chosen_option = self.combo_box.currentText()
-        print(f"Has seleccionado: {chosen_option}")
-        self.accept()  # Esto cerrará la ventana de diálogo
-        self.cambio_case.emit(self.combo_box.currentIndex())
-        return self.combo_box.currentIndex()
+# Patología de respaldo si el caso del paciente no trae ABR configurado
+# (caso viejo sin actualizar, o mientras no hay atención abierta).
+DEFAULT_ABR_CASE = {
+    'type': 'normal',
+    'repro': True,
+    'umbral': 20,
+    'desviaciones': {},
+    'fsp_puntos': {'800': 2.3, '2000': 2.8, 'objetivo': 3.0},
+}
 
 
 class AbrMainWindow(QMainWindow, Ui_MainWindow):
-    def __init__(self, modo_desarrollo=False, data_login=None) -> None:
+    def __init__(self, data_login=None) -> None:
         QMainWindow.__init__(self)
         self.setupUi(self)
-        self.estacion_desarrollo = modo_desarrollo
         # data_login: dict de la sesión de LabSim (user/name/permission), lo
         # entrega la ventana principal al montar esta subventana MDI.
         self.data_login = data_login
         self.setWindowTitle("ABR")
+        self.data_current = None
+        self.appointment_id = None
+        self.abr_od = dict(DEFAULT_ABR_CASE)
+        self.abr_oi = dict(DEFAULT_ABR_CASE)
 
         self.control = AbrControl()
         self.detail = AbrDetail()
@@ -152,7 +69,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.graph_l = AbrGraph(1)
         self.graph_lat_int = GraphLatInt()
 
-        self.report.type_use = STATE_INIT
+        # "exam" haría que open_save_as_dialog use self.report.case, que ya
+        # no existe (el caso viene de data_current, no de un índice propio).
+        self.report.type_use = "custom"
+        self.report.set_le_eva(self.data_login.get("name", "") if self.data_login else "")
 
         self.layout_abr.addWidget(self.graph_r)
         self.layout_abr.addWidget(self.graph_l)
@@ -169,7 +89,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
         ########Conexiones de slots
         self.actionP_rametros_Avanzados.triggered.connect(self.active_advance_setting)
-        self.actionCambiar_Caso.triggered.connect(self.open_modal)
+        # "Cambiar Caso" ya no aplica (el caso lo trae el paciente en
+        # atención, ver la_super) -- el menú queda sin acción conectada.
         self.table_r.sig_measure_value.connect(self.measure_action)
         self.table_l.sig_measure_value.connect(self.measure_action)
         self.graph_r.sig_data_info.connect(self.measure_data)
@@ -189,26 +110,13 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.detail_all.sig_selected_curve.connect(self.selected_)
         self.btn_scale_minus.clicked.connect(self.scale_graph)
         self.btn_scale_plus.clicked.connect(self.scale_graph)
-
-        self.btn_next_case.hide()
-        self.btn_next_case.clicked.connect(self.force_next)
-
-        # Botón de desarrollo para saltar tiempo
-        self.btn_skip_time_dev.clicked.connect(self.skip_time_dev)
-        if self.estacion_desarrollo:
-            self.btn_skip_time_dev.show()
-            print("🔧 DEV: Botón 'Saltar Tiempo' habilitado")
+        self.btn_next_case.hide()  # sin ciclo de casos propio, no aplica
 
         ######Variables de Estado
         self.control.capture.connect(self.capture_state)
         self.state_capture = "stopped"
         self.capture_timer = QTimer(self)
         self.capture_timer.timeout.connect(self.capture)
-        self.timer = QTimer()
-        self.time_eva = TIEMPO_TEST*60
-        self.segundos_restantes = self.time_eva
-        self.timer.timeout.connect(self.actualizar_tiempo)
-        self.current_case = 0
 
         ######Variables de almacenamiento
         self.setting_current = {}
@@ -222,56 +130,17 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.current_measuring = [None, None]
         self.memory = {}
         self.donde = False
-
-        ##########Data Base
-        self.json_file_path = 'cases.json'
-        self.data = self.cargar_json(self.json_file_path)
-
-        #########TEMP TEST
         self.count_averages = 0
 
-        self.open_modal()
-
-    def force_next(self):
-        self.segundos_restantes = 1
-
-    def skip_time_dev(self):
-        """Método de desarrollo para saltar el tiempo directamente a 0"""
-        if self.estacion_desarrollo:
-            print("🔧 DEV: Saltando tiempo a 0...")
-            self.segundos_restantes = 0
-
-    def actualizar_tiempo(self):
-        minutos = self.segundos_restantes // 60
-        segundos = self.segundos_restantes % 60
-        tiempo_formateado = f"{minutos:02}:{segundos:02}"
-
-        if self.segundos_restantes <= 300:  # Menos de 5 minutos (300 segundos)
-            self.lbl_time.setStyleSheet("color: red;")
-        else:
-            self.lbl_time.setStyleSheet("")  # Restablecer el estilo por defecto
-
-        if self.segundos_restantes <= 1200:
-            self.btn_next_case.show()
-
-        self.lbl_time.setText(tiempo_formateado)
-
-        if self.segundos_restantes == 0:
-            self.timer.stop()
-
-            next = IsOver(self)
-            self.autosave()
-            next.exec()
-            self.reset()
-            self.reset_and_reload()
-            self.case = self.cases[1]
-            self.report.case = self.cases[1]
-        else:
-            self.segundos_restantes -= 1
-
-    def autosave(self):
-        self.report_svg()
-        self.report.save_file_auto()
+    def la_super(self, data, appointment_id=None):
+        """Recibe el caso del paciente en atención (o None al cerrarla/
+        deshidratar), mismo patrón que Audiometer.la_super/Z.la_super."""
+        self.appointment_id = appointment_id
+        abr_data = (data or {}).get('ABR') or {}
+        self.abr_od = abr_data.get('OD') or dict(DEFAULT_ABR_CASE)
+        self.abr_oi = abr_data.get('OI') or dict(DEFAULT_ABR_CASE)
+        self.data_current = data
+        self.reset()
 
     def reset(self):
         """Limpia completamente los gráficos y la memoria de curvas"""
@@ -294,50 +163,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.detail_all.clear_all()
 
         print("   ✓ Reset completado\n")
-
-
-    def reset_and_reload(self):
-
-        if STATE_INIT == "exam":
-            self.current_case += 1
-            if self.current_case < len(self.cases):
-                self.lbl_info.setText(f"Estamos evaluando el caso {self.cases[self.current_case]+1}")
-                self.segundos_restantes = self.time_eva
-                self.btn_next_case.hide()
-                self.timer.start()
-
-
-            else:
-                self.lbl_info.setText(f"Se acabaron los casos, fin de la partida")
-
-        else:
-            self.btn_next_case.setText(f"Estamos evaluando el caso {self.cases+1}")
-            self.btn_next_case.setDisabled(True)
-            self.reset()
-
-    def open_modal(self):
-        # Esta función crea y abre la ventana de diálogo
-
-        if STATE_INIT == "exam":
-            # Antes pedía nombre/id por un QDialog propio (CuadroDialogoExamen).
-            # Ahora el usuario viene de la sesión de LabSim (data_login).
-            self.cases = elegir_combinacion_especifica()
-            nombre_evaluador = self.data_login.get("name", "") if self.data_login else ""
-            self.report.set_le_eva(nombre_evaluador)
-            self.report.case = self.cases[0]
-            self.case = self.cases[0]
-            self.lbl_info.setText(f"Estamos evaluando el caso {self.cases[self.current_case]+1}")
-            self.timer.start(1000)
-        else:
-            dialog = CuadroDialogoTest(self)
-            dialog.cambio_case.connect(self.cambiodecaso)
-            dialog.exec()
-            self.case = dialog.combo_box.currentIndex()
-            self.timer.start(1000)
-
-    def cambiodecaso(self, data):
-        self.cases= data
-        self.reset_and_reload()
 
     def update_delete_curve(self, curve):
         if curve in self.memory:
@@ -592,14 +417,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
         """
 
+        side_idx = 0 if side == "OD" else 1
+        case = self.abr_od if side_idx == 0 else self.abr_oi
 
-        #8, 10, 26
-        side = 0 if side == "OD" else 1
-
-        case = casos(self.case, side)
-
-        if case["repro"] == False:
-            side_letter = 'r' if side == 0 else 'l'
+        if case.get("repro", True) == False:
+            side_letter = 'r' if side_idx == 0 else 'l'
             graph = f"graph_{side_letter}"
             repro_prev = getattr(self, graph).get_data(self.current_setting["int"])
             if repro_prev == None:
@@ -611,13 +433,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         x,y, dx, dy, repro = ABR_Curve(self.current_setting["int"], self.current_setting, case, repro_prev, [(self.count_averages*self.total_averages)*2.5, self.current_setting['average']], done = self.done)
 
         return(x,y),(dx,dy),(0,0),(0,0), repro
-
-################data
-
-    def cargar_json(self, json_file_path):
-        data = context.get_resource(f'abr/{json_file_path}')
-        with open(data, 'r', encoding='utf-8') as archivo:
-            return json.load(archivo)
 
     #########EVENTS
     def closeEvent(self, event):

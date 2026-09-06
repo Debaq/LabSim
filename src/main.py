@@ -508,7 +508,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Carga self.data_current en los módulos ya construidos, o los
         deshidrata (data_current=None) para que dejen de loguear acciones
         bajo el caso/paciente ya cerrado."""
-        for attr in ("subw_a", "subw_z", "subw_w", "subw_ac", "subw_ot"):
+        for attr in ("subw_a", "subw_z", "subw_w", "subw_ac", "subw_ot", "subw_abr"):
             try:
                 getattr(self, attr).obj.la_super(self.data_current, self.data_current_key)
             except AttributeError:
