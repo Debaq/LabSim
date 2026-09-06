@@ -31,6 +31,12 @@ class MainLogin(QWidget, Ui_Login):
         self.Le_passw.setPlaceholderText("Contraseña, o código de 6 dígitos de Moodle")
         self.btn_login.clicked.connect(self.get)
         self.login_func = LoginConnect()
+        self.setTabOrder(self.Le_name, self.Le_passw)
+        self.Le_name.setFocus()
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        self.Le_name.setFocus()
 
     def get(self) -> None:
         """
@@ -104,6 +110,7 @@ class MainLogin(QWidget, Ui_Login):
         if state:
             self.Le_name.setText("")
             self.Le_passw.setText("")
+            self.Le_name.setFocus()
         self.btn_login.setText(label)
         self.btn_login.clicked.disconnect()
         self.btn_login.clicked.connect(func)
