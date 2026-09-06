@@ -158,7 +158,7 @@ class MoveWindow():
 # esté acá (ej. "LOGIN") queda siempre visible: la restricción por curso
 # solo aplica a lo que el docente puede tocar en el panel admin.
 GATED_MODULE_CODES = {
-    "A", "W", "Z", "ABR", "CVOICE", "AGENDA", "CHAT", "AC", "OT",
+    "A", "W", "Z", "ABR", "VEMP", "EOAS", "CVOICE", "AGENDA", "CHAT", "AC", "OT",
     "INBOX", "FICHA", "EVOLUCION", "MIS_PACIENTES",
 }
 
