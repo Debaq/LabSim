@@ -78,32 +78,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $success = 'Módulos actualizados.';
             AdminAudit::log($me, 'course_set_modules', ['course_id' => $courseId, 'modules' => Courses::enabledModules($courseId)]);
         } elseif ($action === 'set_abr_normative') {
-            // Solo I/III/V -- mismas ondas que ya expone case_create.php
-            // (desviaciones); II/IV/VI/VII/MC no son las que un docente
-            // ajusta a mano. Campo vacío = sin override para ese valor
-            // puntual (el generador sigue usando su default local, ver
-            // ABR_generator_v3.py::get_baseline_values). Reemplaza el
-            // override completo cada guardado -- no es un merge con el
-            // anterior, así una onda que se deja vacía a propósito vuelve
-            // a heredar el default.
+            // El click SIEMPRE sale del perfil del paciente (caso, via
+            // 'desviaciones' en case_create.php) -- acá NUNCA se edita click.
+            // Lo que se configura por curso es cuánto se desvía cada
+            // estímulo (chirp/ls-chirp/burst) respecto a ESE click, como
+            // ratio (lat_ratio/amp_ratio) por onda I/III/V -- ver
+            // ABR_generator_v3.py::get_baseline_values. Reemplaza el
+            // override completo cada guardado (no hace merge con el
+            // anterior), así un campo que se deja vacío a propósito vuelve
+            // a heredar el default de la app.
             $override = [];
-            foreach (['I', 'III', 'V'] as $wave) {
-                $waveOverride = [];
-                $lat = trim((string) ($_POST['abr_lat_' . $wave] ?? ''));
-                $amp = trim((string) ($_POST['abr_amp_' . $wave] ?? ''));
-                if ($lat !== '' && is_numeric($lat)) {
-                    $waveOverride['lat'] = (float) $lat;
-                }
-                if ($amp !== '' && is_numeric($amp)) {
-                    $waveOverride['amp'] = (float) $amp;
-                }
-                if ($waveOverride) {
-                    $override[$wave] = $waveOverride;
+            foreach ((array) ($_POST['abr_ratio'] ?? []) as $stimKey => $waves) {
+                foreach ((array) $waves as $wave => $fields) {
+                    $waveOverride = [];
+                    foreach (['lat_ratio', 'amp_ratio'] as $field) {
+                        $val = trim((string) ($fields[$field] ?? ''));
+                        if ($val !== '' && is_numeric($val)) {
+                            $waveOverride[$field] = (float) $val;
+                        }
+                    }
+                    if ($waveOverride) {
+                        $override[(string) $stimKey][(string) $wave] = $waveOverride;
+                    }
                 }
             }
             if ($override) {
-                AppConfig::set('normative_data.abr', ['click' => $override], $courseId);
-                $success = 'Configuración normativa ABR actualizada.';
+                AppConfig::set('normative_data.abr', $override, $courseId);
+                $success = 'Configuración de desviación ABR actualizada.';
             } else {
                 AppConfig::clearCourseOverride('normative_data.abr', $courseId);
                 $success = 'Sin valores marcados -- el curso vuelve a usar el default de la app.';
@@ -640,32 +641,54 @@ if ($detailId !== null) {
 
     <?php if (in_array('ABR', $enabledModules, true)): ?>
     <div class="card">
-        <strong>Configuración normativa ABR (potenciales evocados)</strong>
+        <strong>Desviación de estímulos ABR (potenciales evocados)</strong>
         <p class="help help--mt">
-            Valores de referencia (click, adulto, vía aérea) que usa el generador de curvas del simulador para las ondas I/III/V. Vacío = usa el valor por defecto de la app. Los estímulos chirp/burst se derivan solos a partir de estos valores -- no se editan aparte.
+            El click de cada paciente lo define el caso (case_create.php, campo "desviaciones") -- acá NO se edita click. Esto configura cuánto se desvían chirp/ls-chirp/burst respecto al click de ESE paciente, como factor multiplicador (ratio) por onda -- ej. amp_ratio 1.4 en onda V de "Chirp" = la V del chirp sale 40% más grande que la V (ya ajustada) del click de ese caso. Los campos muestran el valor por defecto de la app; tocalos para sobreescribir, dejalos como están para no cambiar nada.
         </p>
-        <?php $abrOverride = AppConfig::getEffective('normative_data.abr', (int) $course['id'])['click'] ?? []; ?>
+        <?php
+            // Ver ABR_generator_v3.py::get_baseline_values -- valores por
+            // defecto (adult_female, vía aérea) de resources/abr/normative_data.json.
+            // Mantener sincronizado a mano si ese JSON cambia (repos separados).
+            $abrStimDefaults = [
+                'ce_chirp'         => ['label' => 'Chirp',       'I' => ['lat_ratio' => 0.8951, 'amp_ratio' => 2.1429], 'III' => ['lat_ratio' => 0.9783, 'amp_ratio' => 1.4054], 'V' => ['lat_ratio' => 0.9872, 'amp_ratio' => 1.2167]],
+                'ls_chirp'         => ['label' => 'Ls-chirp',    'I' => ['lat_ratio' => 0.9074, 'amp_ratio' => 1.8095], 'III' => ['lat_ratio' => 0.9918, 'amp_ratio' => 1.1892], 'V' => ['lat_ratio' => 0.9963, 'amp_ratio' => 1.0333]],
+                'tone_burst_500Hz'  => ['label' => 'Burst 500Hz', 'I' => ['lat_ratio' => 1.4506, 'amp_ratio' => 1.0476], 'III' => ['lat_ratio' => 1.4538, 'amp_ratio' => 0.7297], 'V' => ['lat_ratio' => 1.4625, 'amp_ratio' => 0.6333]],
+                'tone_burst_1000Hz' => ['label' => 'Burst 1kHz',  'I' => ['lat_ratio' => 1.2037, 'amp_ratio' => 1.2857], 'III' => ['lat_ratio' => 1.2636, 'amp_ratio' => 0.8649], 'V' => ['lat_ratio' => 1.2431, 'amp_ratio' => 0.7167]],
+                'tone_burst_2000Hz' => ['label' => 'Burst 2kHz',  'I' => ['lat_ratio' => 1.0494, 'amp_ratio' => 1.4286], 'III' => ['lat_ratio' => 1.1005, 'amp_ratio' => 0.9459], 'V' => ['lat_ratio' => 1.0969, 'amp_ratio' => 0.7833]],
+                'tone_burst_4000Hz' => ['label' => 'Burst 4kHz',  'I' => ['lat_ratio' => 0.9568, 'amp_ratio' => 1.5238], 'III' => ['lat_ratio' => 1.0326, 'amp_ratio' => 1.0000], 'V' => ['lat_ratio' => 1.0329, 'amp_ratio' => 0.8333]],
+            ];
+            $abrOverride = AppConfig::getEffective('normative_data.abr', (int) $course['id']) ?? [];
+        ?>
         <form method="post">
         <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="set_abr_normative">
             <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:0.6rem 1rem; margin-top:0.4rem;">
-                <?php foreach (['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V'] as $wave => $label): ?>
-                <div>
-                    <strong style="font-weight:600;"><?= $label ?></strong>
-                    <label style="font-weight:normal; display:block; margin-top:0.2rem;">
-                        Latencia (ms)
-                        <input type="number" step="0.01" name="abr_lat_<?= $wave ?>"
-                               value="<?= htmlspecialchars((string) ($abrOverride[$wave]['lat'] ?? '')) ?>" placeholder="default">
-                    </label>
-                    <label style="font-weight:normal; display:block; margin-top:0.2rem;">
-                        Amplitud (µV)
-                        <input type="number" step="0.01" name="abr_amp_<?= $wave ?>"
-                               value="<?= htmlspecialchars((string) ($abrOverride[$wave]['amp'] ?? '')) ?>" placeholder="default">
-                    </label>
+            <?php foreach ($abrStimDefaults as $stimKey => $stimDefaults): ?>
+            <details style="margin-top:0.5rem;">
+                <summary><strong><?= htmlspecialchars($stimDefaults['label']) ?></strong></summary>
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:0.6rem 1rem; margin-top:0.4rem;">
+                    <?php foreach (['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V'] as $wave => $waveLabel): ?>
+                    <?php
+                        $defaults = $stimDefaults[$wave];
+                        $current = $abrOverride[$stimKey][$wave] ?? [];
+                    ?>
+                    <div>
+                        <strong style="font-weight:600;"><?= $waveLabel ?></strong>
+                        <label style="font-weight:normal; display:block; margin-top:0.2rem;">
+                            Ratio latencia
+                            <input type="number" step="0.0001" name="abr_ratio[<?= $stimKey ?>][<?= $wave ?>][lat_ratio]"
+                                   value="<?= htmlspecialchars((string) ($current['lat_ratio'] ?? $defaults['lat_ratio'])) ?>">
+                        </label>
+                        <label style="font-weight:normal; display:block; margin-top:0.2rem;">
+                            Ratio amplitud
+                            <input type="number" step="0.0001" name="abr_ratio[<?= $stimKey ?>][<?= $wave ?>][amp_ratio]"
+                                   value="<?= htmlspecialchars((string) ($current['amp_ratio'] ?? $defaults['amp_ratio'])) ?>">
+                        </label>
+                    </div>
+                    <?php endforeach; ?>
                 </div>
-                <?php endforeach; ?>
-            </div>
+            </details>
+            <?php endforeach; ?>
             <button type="submit" class="btn btn--secondary" style="margin-top:0.6rem;">Guardar configuración</button>
         </form>
         <?php if ($abrOverride): ?>

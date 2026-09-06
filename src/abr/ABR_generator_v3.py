@@ -50,49 +50,49 @@ class ABRGeneratorV3:
 
     def get_baseline_values(self, population='adult_female',
                             stimulus='click', pathway='air_conduction',
-                            freq=None, click_override=None):
+                            freq=None, ratio_override=None):
         """
-        Click guarda lat/amp absolutos (editable por curso/caso). Cualquier
-        otro estimulo guarda solo un ratio respecto a click (lat_ratio/
-        amp_ratio) -- nunca su propio absoluto ni un delta -- para que un
-        override de click (config por curso, o desviacion del caso) se
-        propague solo a chirp/burst sin tener que redefinirlos aparte.
-        Sin ratio para esa combinacion poblacion/estimulo -> ratio 1.0
-        (misma forma que click), no una tabla aparte silenciosa.
+        Click SIEMPRE sale del baseline poblacional tal cual -- el perfil
+        real del paciente lo ajusta aparte via 'desviaciones' del caso (ver
+        calculate_wave_parameters), nunca se pisa desde acá. Cualquier otro
+        estimulo guarda solo un ratio respecto a click (lat_ratio/amp_ratio,
+        nunca su propio absoluto ni un delta): cuanto se desvia chirp/burst
+        del click de ESE paciente. Ese ratio SI es configurable por curso
+        (ratio_override, ver core.app_config_store / AppConfig.php en el
+        backend) -- es comportamiento del estimulo/equipo que el docente
+        calibra, no un dato del paciente. Sin ratio (ni override ni default
+        bundleado) -> 1.0 (misma forma que click).
 
-        click_override: dict {onda: {'lat':.., 'amp':..}} que pisa el default
-        bundleado (resources/abr/normative_data.json) onda por onda -- llega
-        de la config del curso (ver core.app_config_store, key
-        "normative_data.abr", resuelta por el backend en AppConfig.php) via
-        ABR_Curve(). Ondas no listadas en el override usan el default tal cual.
+        ratio_override: dict {stim_key: {onda: {'lat_ratio':.., 'amp_ratio':..}}}
+        -- stim_key = 'ce_chirp'/'ls_chirp'/'tone_burst_<freq>' (ver STIM_MAP).
+        Gana sobre el default bundleado, onda por onda.
         """
         pop = self.norms['populations'][population]
         click = pop[pathway]['click']
-        if click_override:
-            click = {**click, **{
-                wave: {**click.get(wave, {}), **vals}
-                for wave, vals in click_override.items()
-            }}
         if stimulus == 'click':
             return click
 
         if stimulus == 'tone_burst':
-            by_freq = pop[pathway].get('tone_burst', {})
-            ratio_block = by_freq.get(freq or '1000Hz')
+            stim_key = f"tone_burst_{freq or '1000Hz'}"
+            default_ratio_block = pop[pathway].get('tone_burst', {}).get(freq or '1000Hz')
         else:
-            ratio_block = pop[pathway].get(stimulus)
+            stim_key = stimulus
+            default_ratio_block = pop[pathway].get(stimulus)
 
-        if not ratio_block:
-            return click
+        override_block = (ratio_override or {}).get(stim_key)
 
         baseline = {}
         for wave, click_vals in click.items():
             if wave == 'interpeak':
                 continue
-            ratio = ratio_block.get(wave, {'lat_ratio': 1.0, 'amp_ratio': 1.0})
+            ratio = {'lat_ratio': 1.0, 'amp_ratio': 1.0}
+            if default_ratio_block and wave in default_ratio_block:
+                ratio.update(default_ratio_block[wave])
+            if override_block and wave in override_block:
+                ratio.update(override_block[wave])
             baseline[wave] = {
-                'lat': click_vals['lat'] * ratio.get('lat_ratio', 1.0),
-                'amp': click_vals['amp'] * ratio.get('amp_ratio', 1.0),
+                'lat': click_vals['lat'] * ratio['lat_ratio'],
+                'amp': click_vals['amp'] * ratio['amp_ratio'],
             }
         return baseline
 
@@ -469,22 +469,21 @@ class ABRGeneratorV3:
         # 1. Baseline normativo
         pathway = ('air_conduction' if 'pathway' not in stimulus_config
                    else stimulus_config['pathway'])
-        # Override de click por curso (ver core.app_config_store en el
-        # cliente / AppConfig.php en el backend) -- se propaga aca para que
-        # tanto el baseline del estimulo activo como el de click (usado para
-        # escalar desviaciones) usen el mismo click "editado".
-        click_override = case_config.get('normative_override') if case_config else None
+        # Ratio de desviacion por curso (ver core.app_config_store en el
+        # cliente / AppConfig.php en el backend) -- afecta solo como se
+        # desvian chirp/burst respecto al click, nunca el click en si
+        # (eso lo define el caso/paciente via 'desviaciones', mas abajo).
+        ratio_override = case_config.get('ratio_override') if case_config else None
         baseline = self.get_baseline_values(
             population, stimulus_config['stim'], pathway,
-            freq=stimulus_config.get('freq'), click_override=click_override,
+            freq=stimulus_config.get('freq'), ratio_override=ratio_override,
         )
-        # Baseline de click (misma poblacion/via) para escalar desviaciones
-        # cuando el estimulo activo no es click (ver calculate_wave_parameters).
+        # Baseline de click (misma poblacion/via, sin override) para escalar
+        # desviaciones cuando el estimulo activo no es click (ver
+        # calculate_wave_parameters).
         click_baseline = None
         if stimulus_config['stim'] != 'click':
-            click_baseline = self.get_baseline_values(
-                population, 'click', pathway, click_override=click_override,
-            )
+            click_baseline = self.get_baseline_values(population, 'click', pathway)
 
         # 2. Umbral
         if case_config and 'umbral' in case_config:
@@ -656,13 +655,12 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom, 
     else:
         var_repro = 0
 
-    # Override de click por curso -- config del docente (ver AppConfig.php),
-    # sincronizada al cliente en core.app_config_store bajo key generica
-    # "normative_data.<examen>" (mismo mecanismo para P300/electrococleografia
-    # a futuro). Un override propio del caso (si case_create.php llega a
-    # exponerlo) manda por sobre el del curso.
-    normative_override = preferences.get('normative_override') or \
-        (app_config_store.get('normative_data.abr') or {}).get('click')
+    # Ratio de desviacion de chirp/burst por curso -- config del docente
+    # (ver AppConfig.php), sincronizada al cliente en core.app_config_store
+    # bajo key generica "normative_data.<examen>" (mismo mecanismo para
+    # P300/electrococleografia a futuro). Nunca toca click -- eso lo define
+    # el caso via 'desviaciones', abajo.
+    ratio_override = app_config_store.get('normative_data.abr')
 
     case_config = {
         'desviaciones': preferences.get('desviaciones', {}),
@@ -670,7 +668,7 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom, 
         'umbral': preferences.get('umbral', preferences.get('th', 20)),
         'average_objetivo': preferences.get('average_objetivo', 2000),
         'repro_shift': var_repro,
-        'normative_override': normative_override,
+        'ratio_override': ratio_override,
     }
 
     t, y, metadata = generator.generate_curve(
