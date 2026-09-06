@@ -3,6 +3,7 @@ import sys
 from PySide6.QtCore import Qt, QSize, QTimer, Signal, Slot
 from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox, QProgressDialog
 
+from abr.AbrMainWindow import AbrMainWindow
 from agenda import Agenda
 from agenda.ChatPaciente import ChatPacienteWidget
 from audiometria import Acumetria, Audiometer, ListWords, Otoscopia
@@ -357,7 +358,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         login_subw = self.subw.get("LOGIN") if self.subw else None
         self.subw = {"LOGIN": login_subw} if login_subw else None
 
-        for attr in ("subw_a", "subw_w", "subw_z", "subw_ac", "subw_ot"):
+        for attr in ("subw_a", "subw_w", "subw_z", "subw_ac", "subw_ot", "subw_abr"):
             if hasattr(self, attr):
                 delattr(self, attr)
 
@@ -520,11 +521,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw_ot = FrameSubMdi(Otoscopia.Otoscopia(self.data_current))
         self.subw_w = FrameSubMdi(ListWords.ListWords(self.data_current))
         self.subw_z = FrameSubMdi(Z.ZControl())
+        self.subw_abr = FrameSubMdi(AbrMainWindow(data_login=self.data_login))
 
         self.subw.update({
             "A": self.subw_a,
             "AC": self.subw_ac,
             "OT": self.subw_ot,
+            "ABR": self.subw_abr,
             "AGENDA": FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self)),
             "CVOICE": FrameSubMdi(ComandVoiceA()),
             "CHAT": FrameSubMdi(ChatPacienteWidget(self.data_login.get("name"))),

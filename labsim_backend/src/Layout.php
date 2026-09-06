@@ -58,7 +58,7 @@ final class Layout
     public const BOXS = [
         'sala_espera' => [true,  ['AGENDA'],                                          'Sala de Espera'],
         'Box_1'       => [true,  ['OT', 'AC', 'A', 'Z'],                              'Box Audiología'],
-        'Box_2'       => [false, ['ABR', 'VEMP', 'EOAS'],                             'Box Electrofisiología'],
+        'Box_2'       => [true,  ['ABR', 'VEMP', 'EOAS'],                             'Box Electrofisiología'],
         'Box_3'       => [false, ['VNG', 'VHIT', 'POS'],                              'Box Otoneurología'],
         'Box_4'       => [false, ['CVC'],                                             'Box campimetría'],
     ];
