@@ -12,21 +12,54 @@ final class Courses
      * "LOGIN" no entra: es la pantalla de ingreso, no un módulo que se
      * pueda bloquear por curso.
      */
+    // Orden = mismo orden que los boxes de la app (sala de espera, Box
+    // Audiología, Box Electrofisiología, Box campimetría; ver BOXS en
+    // apps.json), y al final los módulos que no viven en ningún box.
     public const MODULES = [
+        'AGENDA' => 'Agenda',
+        'OT' => 'Otoscopia',
+        'AC' => 'Acumetría',
         'A' => 'Audiómetro',
-        'W' => 'Lista de Palabras',
         'Z' => 'Impedanciómetro',
         'ABR' => 'Potencial evocado auditivo de tronco cerebral',
-        'CVOICE' => 'Comandos de Voz',
         'CVC' => 'Campo Visual Computarizado',
-        'AGENDA' => 'Agenda',
+        'W' => 'Lista de Palabras',
+        'CVOICE' => 'Comandos de Voz',
         'CHAT' => 'Hablar con el paciente',
-        'AC' => 'Acumetría',
-        'OT' => 'Otoscopia',
         'INBOX' => 'Bandeja de entrada',
         'FICHA' => 'Ficha clínica',
         'EVOLUCION' => 'Evolución',
+        'MIS_PACIENTES' => 'Mis pacientes',
     ];
+
+    /**
+     * self::MODULES agrupado por box (mismo agrupamiento que ve el alumno
+     * en la app: Layout::BOXS), para que el checklist de courses.php se
+     * pueda mostrar separado visualmente igual que en el cliente en vez de
+     * una lista plana. Los códigos de un box que no están en self::MODULES
+     * (módulos "development", ver Layout::APPS) se omiten; un box sin
+     * ningún módulo bloqueable no aparece. Lo que no vive en ningún box
+     * (CVOICE, CHAT, INBOX, FICHA, EVOLUCION, MIS_PACIENTES) cae al final
+     * bajo "Otros módulos".
+     */
+    public static function modulesGroupedByBox(): array
+    {
+        $groups = [];
+        $used = [];
+        foreach (Layout::BOXS as [, $codes, $boxLabel]) {
+            $codesInModules = array_values(array_filter($codes, fn($c) => array_key_exists($c, self::MODULES)));
+            if (!$codesInModules) {
+                continue;
+            }
+            $groups[$boxLabel] = array_intersect_key(self::MODULES, array_flip($codesInModules));
+            $used += array_flip($codesInModules);
+        }
+        $rest = array_diff_key(self::MODULES, $used);
+        if ($rest) {
+            $groups['Otros módulos'] = $rest;
+        }
+        return $groups;
+    }
 
     /** Cursos donde $userId es docente (course_teachers). */
     public static function teacherCourseIds(int $userId): array

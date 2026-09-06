@@ -263,14 +263,19 @@ if ($detailId !== null) {
         <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="set_modules">
             <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-            <div style="display:flex; flex-wrap:wrap; gap:0.4rem 1.2rem;">
-                <?php foreach (Courses::MODULES as $code => $label): ?>
-                <label style="font-weight:normal; display:flex; align-items:center; gap:0.3rem; margin:0;">
-                    <input type="checkbox" name="modules[]" value="<?= htmlspecialchars($code) ?>" <?= in_array($code, $enabledModules, true) ? 'checked' : '' ?>>
-                    <?= htmlspecialchars($label) ?>
-                </label>
-                <?php endforeach; ?>
+            <?php foreach (Courses::modulesGroupedByBox() as $boxLabel => $boxModules): ?>
+            <div style="border-top:1px solid #e5e5e5; padding-top:0.6rem; margin-top:0.6rem;">
+                <strong style="font-size:0.85rem;"><?= htmlspecialchars($boxLabel) ?></strong>
+                <div style="display:flex; flex-wrap:wrap; gap:0.4rem 1.2rem; margin-top:0.4rem;">
+                    <?php foreach ($boxModules as $code => $label): ?>
+                    <label style="font-weight:normal; display:flex; align-items:center; gap:0.3rem; margin:0;">
+                        <input type="checkbox" name="modules[]" value="<?= htmlspecialchars($code) ?>" <?= in_array($code, $enabledModules, true) ? 'checked' : '' ?>>
+                        <?= htmlspecialchars($label) ?>
+                    </label>
+                    <?php endforeach; ?>
+                </div>
             </div>
+            <?php endforeach; ?>
             <button type="submit" class="secondary" style="margin-top:0.6rem;">Guardar módulos</button>
         </form>
     </div>

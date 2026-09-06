@@ -38,6 +38,7 @@ final class Layout
         'INBOX'      => [false, 'Bandeja de entrada', 17, [true, true], [700, 480], 'pre'],
         'FICHA'      => [false, 'Ficha clínica', 18, [false, true], [480, 560], 'pre'],
         'EVOLUCION'  => [false, 'Evolución', 19, [false, true], [420, 340], 'pre'],
+        'MIS_PACIENTES' => [false, 'Mis pacientes', 20, [true, true], [900, 560], 'pre'],
     ];
 
     public const SECTORS = [
