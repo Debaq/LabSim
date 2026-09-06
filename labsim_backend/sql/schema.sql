@@ -529,3 +529,9 @@ CREATE TABLE IF NOT EXISTS pair_exchange_attempts (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_pair_exchange_attempts_ip ON pair_exchange_attempts(ip, created_at);
+
+-- Limpieza de módulos eliminados de Layout::MODULES. Idempotente: si la fila
+-- ya no existe (caso normal en una instalación fresca), no afecta nada.
+-- Correr manualmente después de deploy si la tabla course_modules tenía
+-- asignaciones previas para módulos que ya no existen.
+DELETE FROM course_modules WHERE module_code = 'CVC';

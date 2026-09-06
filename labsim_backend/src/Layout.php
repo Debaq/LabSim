@@ -32,7 +32,6 @@ final class Layout
         'VHIT'       => [false, 'Video Head Impulse Test', 9, [false, true], [1000, 600], 'development'],
         'POS'        => [false, 'Posturografía', 10, [false, true], [1000, 600], 'development'],
         'CVOICE'     => [false, 'Comandos de Voz', 11, [true, true], [420, 200], 'pre'],
-        'CVC'        => [false, 'Campo Visual Computarizado', 12, [true, true], [420, 200], 'pre'],
         'AGENDA'     => [false, 'Agenda', 13, [true, true], [900, 400], 'pre'],
         'CHAT'       => [false, 'Hablar con el paciente', 14, [true, true], [480, 280], 'pre'],
         'AC'         => [false, 'Acumetría', 15, [true, true], [480, 420], 'pre'],
@@ -49,7 +48,6 @@ final class Layout
         'Z_OI'        => 'Usuario con oliva en OI',
         'none'        => 'Usuario en el Box',
         'ABR'         => 'Usuario en PEATC',
-        'CVC'         => 'Usuario en CVC',
     ];
 
     /**
@@ -62,7 +60,6 @@ final class Layout
         'Box_1'       => [true,  ['OT', 'AC', 'A', 'Z'],                              'Box Audiología'],
         'Box_2'       => [true,  ['ABR', 'VEMP', 'EOAS'],                             'Box Electrofisiología'],
         'Box_3'       => [false, ['VNG', 'VHIT', 'POS'],                              'Box Otoneurología'],
-        'Box_4'       => [false, ['CVC'],                                             'Box campimetría'],
     ];
 
     /** Payload serializable que devuelve GET /api/layout.php. */

@@ -13,8 +13,8 @@ final class Courses
      * pueda bloquear por curso.
      */
     // Orden = mismo orden que los boxes de la app (sala de espera, Box
-    // Audiología, Box Electrofisiología, Box campimetría; ver BOXS en
-    // apps.json), y al final los módulos que no viven en ningún box.
+    // Audiología, Box Electrofisiología; ver BOXS en apps.json), y al final
+    // los módulos que no viven en ningún box.
     public const MODULES = [
         'AGENDA' => 'Agenda',
         'OT' => 'Otoscopia',
@@ -22,7 +22,6 @@ final class Courses
         'A' => 'Audiómetro',
         'Z' => 'Impedanciómetro',
         'ABR' => 'Potencial evocado auditivo de tronco cerebral',
-        'CVC' => 'Campo Visual Computarizado',
         'W' => 'Lista de Palabras',
         'CVOICE' => 'Comandos de Voz',
         'CHAT' => 'Hablar con el paciente',

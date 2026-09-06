@@ -14,13 +14,13 @@ from core.h_win import FrameSubMdi, MdiArea
 from core import inbox
 from core import mis_pacientes
 from core import app_config_store
+from core.module_placeholder import ModulePlaceholder
 from core.updater import local_build_id
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
                           marcar_entry_atendiendo, marcar_entry_atendido,
                           reset_backend_session)
 from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon
 from audiometria.UI.Ui_command_voice_A import Ui_Form as commandVoiceA
-from cvc.UI.Ui_CVC import Ui_CVC
 from core.UI.Ui_Main import Ui_MainWindow
 from core.Logger import Logger
 from backend.client import BackendClient
@@ -74,12 +74,6 @@ LOCAL_LOG_QUEUE = get_log_queue()
 # alumno (audio_stim_button, z_dial_change, etc.) se suben aparte, con
 # nombre propio, vía log_queue.push() explícito en Audiometer.py y Z.py.
 sys.stdout = Logger(LOG_FILE)
-
-
-class CVC(Ui_CVC):
-    def __init__(self):
-        super().__init__()
-        self.setupUi(self)
 
 
 class ComandVoiceA(QWidget, commandVoiceA):
@@ -538,6 +532,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "AC": self.subw_ac,
             "OT": self.subw_ot,
             "ABR": self.subw_abr,
+            # Placeholder: modulo habilitable por curso (courses.php) pero
+            # sin implementacion real todavia -- ver core/module_placeholder.py.
+            "VEMP": FrameSubMdi(ModulePlaceholder(APPS.get("VEMP", [None, "VEMP"])[1])),
+            "EOAS": FrameSubMdi(ModulePlaceholder(APPS.get("EOAS", [None, "EOAS"])[1])),
             "AGENDA": FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self)),
             "CVOICE": FrameSubMdi(ComandVoiceA()),
             "CHAT": FrameSubMdi(ChatPacienteWidget(self.data_login.get("name"))),

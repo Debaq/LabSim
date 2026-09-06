@@ -13,7 +13,6 @@ a estudiantes practicar exámenes y protocolos sin necesidad de hardware real.
 - **ABR** (`ABR.py`, `abr_module.py`): potenciales evocados auditivos de tronco.
 - **Agenda** (`Agenda.py`): gestión de casos y pacientes simulados, con flujo
   tipo ficha clínica.
-- **CVC / Z-meter / MKG**: pruebas complementarias de otoneurología.
 - **ListWords**: gestión de listas de palabras para logoaudiometría.
 
 El programa además soporta un **teclado físico dedicado** (firmware en
