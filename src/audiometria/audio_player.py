@@ -59,6 +59,9 @@ class Player(QObject):
         self.players, self.channels, self.buffer_outputs = self.create_channels(channels)
         self.loop_media = {}  # Diccionario para medios que deben estar en bucle.
         self.current_medias = {}  # Diccionario para el medio actual en cada reproductor.
+        # player -> ch: lookup inverso para emitir level_changed desde
+        # callbacks que solo reciben el player (ej. mediaStatusChanged).
+        self._player_to_ch = {p: i for i, p in enumerate(self.players)}
 
     def create_channels(self, ch: int) -> list:
 
@@ -89,6 +92,14 @@ class Player(QObject):
             if current_media and self.loop_media.get(current_media, False):
                 player.setPosition(0)
                 player.play()
+                return
+            # Audio terminó sin loop: emitir 0 para que el vúmetro vuelva
+            # a 0. Sin esto, audioBufferReceived deja de entregar buffers
+            # y el último RMS queda visible: el vúmetro queda "pegado" en
+            # el último valor hasta el próximo play (visto en audiom.).
+            ch = self._player_to_ch.get(player)
+            if ch is not None:
+                self.level_changed.emit(ch, 0.0)
 
     def stop(self, ch: int) -> None:
         self.players[ch].stop()
