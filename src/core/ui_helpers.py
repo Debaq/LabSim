@@ -205,11 +205,14 @@ class SubWindow():
         width = size().width()
         height = size().height()
         _, name, pos_z, fix, size, _ = self.app[app]
-        width = width/2
-        height = height/2
-        w_submdi=size[0]/2
-        h_submdi=size[1]/2
-        pos = [width-w_submdi, height-h_submdi]
+        if size == "max":
+            pos = [0, 0]
+        else:
+            width = width/2
+            height = height/2
+            w_submdi=size[0]/2
+            h_submdi=size[1]/2
+            pos = [width-w_submdi, height-h_submdi]
         self.create_sub_window(submdi, name, pos_z=pos_z,
                                fix=fix, size=size,position=pos)
 
@@ -235,6 +238,11 @@ class SubWindow():
             sub.setWidget(widg)
             widg.lbl_title.setText(name)
             self.mdi_area.addSubWindow(sub)
+            if size == "max":
+                _flags(sub)
+                sub.showMaximized()
+                self.modules.set(pos_z, sub)
+                return
             if position != [0,0]:
                 viewport = self.mdi_area.viewport().size()
                 max_x = max(viewport.width() - size[0], 0)

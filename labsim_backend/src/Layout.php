@@ -8,8 +8,10 @@
  * la app abre pero solo muestra la ventana de login (no carga toolbar).
  *
  * El shape de cada módulo es la misma tupla que tenía apps.json:
- *   [activo(bool), tooltip(str), z_pos(int), fix(tuple), size(tuple), state(str)]
- * -- donde state ∈ {"pre", "development"}. "pre" = listo para usar,
+ *   [activo(bool), tooltip(str), z_pos(int), fix(tuple), size(tuple|"max"), state(str)]
+ * -- size="max" hace que la subventana abra ocupando todo el mdi (queda
+ * maximizada y Qt la re-ajusta sola si el mdi cambia de tamaño).
+ * state ∈ {"pre", "development"}. "pre" = listo para usar,
  * "development" = gris/deshabilitado en el cliente. El filtro por curso
  * (qué módulos ve cada alumno/docente) sigue aparte en course_modules
  * vía Auth::userProfile; Layout solo describe la estructura, no los
@@ -22,7 +24,7 @@ final class Layout
         'A'          => [false, 'Audiómetro', 1, [true, true], [740, 560], 'pre'],
         'W'          => [false, 'Lista de Palabras', 2, [true, true], [170, 500], 'pre'],
         'Z'          => [false, 'Impedanciómetro', 3, [true, true], [740, 560], 'pre'],
-        'ABR'        => [false, 'Potencial evocado auditivo de tronco cerebral', 4, [false, true], [1000, 600], 'pre'],
+        'ABR'        => [false, 'Potencial evocado auditivo de tronco cerebral', 4, [false, true], 'max', 'pre'],
         'VEMP'       => [false, 'Potenciales evocados vestibulares miogénicos', 5, [false, true], [1000, 600], 'development'],
         'EOAS'       => [false, 'Emisor Otoacústico de Screening', 6, [false, true], [1000, 600], 'development'],
         'EOAC'       => [false, 'Emisor Otoacústico Clínico', 7, [false, true], [1000, 600], 'development'],
