@@ -34,18 +34,6 @@ tr = QCoreApplication.translate
 
 TIEMPO_ENTR_PROM = 300
 
-# Patología de respaldo si el caso del paciente no trae ABR configurado
-# (caso viejo sin actualizar, o mientras no hay atención abierta).
-DEFAULT_ABR_CASE = {
-    'type': 'normal',
-    'repro': True,
-    'repro_var': 0.2,
-    'umbral': 20,
-    'average_objetivo': 2000,
-    'desviaciones': {},
-    'fsp_puntos': {'800': 2.3, '2000': 2.8, 'objetivo': 3.0},
-}
-
 
 class AbrMainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, data_login=None) -> None:
@@ -57,13 +45,16 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.setWindowTitle("ABR")
         self.data_current = None
         self.appointment_id = None
-        self.abr_od = dict(DEFAULT_ABR_CASE)
-        self.abr_oi = dict(DEFAULT_ABR_CASE)
+        # None = sin datos reales para ese oído (sin atención abierta, o
+        # paciente sin ABR configurado en ese lado) -- no hay fallback
+        # sintético, ver graph() para el guard antes de capturar.
+        self.abr_od = None
+        self.abr_oi = None
 
         self.control = AbrControl()
         # Sin atención abierta al crear la ventana (recién montada, antes
-        # de cualquier la_super real) -- sin esto se podía capturar sobre
-        # DEFAULT_ABR_CASE sin ningún paciente cargado.
+        # de cualquier la_super real) -- sin esto se podía capturar sin
+        # ningún paciente cargado.
         self.control.setEnabled(False)
         self.detail = AbrDetail()
         self.report = AbrReport()
@@ -142,17 +133,16 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """Recibe el caso del paciente en atención (o None al cerrarla/
         deshidratar), mismo patrón que Audiometer.la_super/Z.la_super.
 
-        Sin atención abierta (data=None) se bloquea la captura -- antes
-        quedaba DEFAULT_ABR_CASE cargado desde el __init__ y se podía
-        grabar una curva "normal" sin ningún paciente real. DEFAULT_ABR_CASE
-        sigue existiendo solo para el caso REAL que no trae ABR configurado
-        (caso viejo sin actualizar, ver comentario de esa constante)."""
+        Sin datos reales no hay curva -- ni con atención abierta pero sin
+        ABR configurado en ese caso, ni sin atención. self.abr_od/oi quedan
+        en None en ambos casos (sin fallback sintético); graph() corta antes
+        de generar nada si el lado activo no tiene datos."""
         self.appointment_id = appointment_id
         self.data_current = data
         self.control.setEnabled(data is not None)
         abr_data = (data or {}).get('ABR') or {}
-        self.abr_od = abr_data.get('OD') or dict(DEFAULT_ABR_CASE)
-        self.abr_oi = abr_data.get('OI') or dict(DEFAULT_ABR_CASE)
+        self.abr_od = abr_data.get('OD')
+        self.abr_oi = abr_data.get('OI')
         self.reset()
 
     def submit_report(self):
@@ -318,6 +308,13 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         return curve
 
     def graph(self, side):
+        case = self.abr_od if side == "OD" else self.abr_oi
+        if case is None:
+            # Paciente sin ABR configurado en este oído (o sin atención --
+            # aunque eso ya lo bloquea self.control.setEnabled en la_super).
+            # Sin datos reales no se genera nada, ni un ejemplo sintético.
+            self.control.stop_capture()
+            return
         self.done = False
         if self.count_averages == 0:
             self.new_curve(side)
