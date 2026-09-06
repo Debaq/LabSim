@@ -152,6 +152,18 @@ class MoveWindow():
         else:
             self.parent.showMaximized()
 
+# Códigos de apps.json que el backend deja habilitar/deshabilitar por curso
+# (ver Courses::MODULES en labsim_backend/src/Courses.php -- mantener
+# sincronizado a mano, viven en repos separados). Cualquier código que NO
+# esté acá (ej. "LOGIN", "MIS_PACIENTES") queda siempre visible: la
+# restricción por curso solo aplica a lo que el docente puede tocar en el
+# panel admin.
+GATED_MODULE_CODES = {
+    "A", "W", "Z", "ABR", "CVOICE", "CVC", "AGENDA", "CHAT", "AC", "OT",
+    "INBOX", "FICHA", "EVOLUCION",
+}
+
+
 class SubWindow():
     """
     Clase para la sub-ventana"""
@@ -159,6 +171,23 @@ class SubWindow():
         self.app = app
         self.modules = modules
         self.mdi_area = mdi_area
+
+    def _module_visible(self, code: str) -> bool:
+        """True si `code` debe mostrarse/activarse para la sesión actual.
+
+        Solo restringe códigos en GATED_MODULE_CODES -- todo lo demás (ej.
+        "LOGIN", "MIS_PACIENTES") no pasa por config de curso, siempre
+        visible. Antes de loguearse (data_login None) o con 'modules' None
+        (admin completo, ver Auth::userProfile en el backend) tampoco hay
+        restricción.
+        """
+        if code not in GATED_MODULE_CODES:
+            return True
+        data_login = getattr(self, "data_login", None)
+        if not data_login:
+            return True
+        modules = data_login.get("modules")
+        return modules is None or code in modules
 
     def activate_subwindow(self, size:QSize, app:str, submdi: FrameSubMdi) -> None:
         """
@@ -172,6 +201,8 @@ class SubWindow():
             app(str): nombre de la aplicacion
             submdi(FrameSubMdi): objeto de la subventana
         """
+        if not self._module_visible(app):
+            return
         width = size().width()
         height = size().height()
         _, name, pos_z, fix, size, _ = self.app[app]
@@ -309,6 +340,8 @@ class ToolBar(SubWindow):
 
     def chargeBtnsArea(self, area):
         for i in self.boxs[area][1]:
+            if not self._module_visible(i):
+                continue
             btn = QPushButton(f'{i}')
             btn.setObjectName(f"btn_{i}")
             btn.clicked.connect(self.activate_soft)
@@ -327,7 +360,7 @@ class ToolBar(SubWindow):
         # poder probarla sin necesitar un usuario alumno aparte). Se recrea
         # cada vez que chargeBtnsArea corre (cambio de sección) -- ver
         # core.inbox.crear_boton().
-        if "AGENDA" in self.boxs[area][1] and self.data_login:
+        if "AGENDA" in self.boxs[area][1] and self.data_login and self._module_visible("INBOX"):
             inbox.crear_boton(self, self.layouts[1])
             # "Mis pacientes" (historial propio con stats/conversación/ficha):
             # solo alumno -- el docente/admin ya tiene su vista equivalente

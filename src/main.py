@@ -504,18 +504,21 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             widget = self.layoutAction.itemAt(i).widget()
             if widget is not None:
                 widget.deleteLater()
-        self.btn_chat_paciente = QPushButton("Hablar con el paciente")
-        self.btn_chat_paciente.setObjectName("btn_chat_paciente")
-        self.btn_chat_paciente.clicked.connect(self.abrir_chat_paciente)
-        self.layoutAction.addWidget(self.btn_chat_paciente)
-        self.btn_cmd_voice = QPushButton("Comandos de voz")
-        self.btn_cmd_voice.setObjectName("btn_CVOICE")
-        self.btn_cmd_voice.clicked.connect(self.activate_soft)
-        self.layoutAction.addWidget(self.btn_cmd_voice)
-        self.btn_list_words = QPushButton("Listas de Palabras")
-        self.btn_list_words.setObjectName("btn_W")
-        self.btn_list_words.clicked.connect(self.activate_listWords)
-        self.layoutAction.addWidget(self.btn_list_words)
+        if self._module_visible("CHAT"):
+            self.btn_chat_paciente = QPushButton("Hablar con el paciente")
+            self.btn_chat_paciente.setObjectName("btn_chat_paciente")
+            self.btn_chat_paciente.clicked.connect(self.abrir_chat_paciente)
+            self.layoutAction.addWidget(self.btn_chat_paciente)
+        if self._module_visible("CVOICE"):
+            self.btn_cmd_voice = QPushButton("Comandos de voz")
+            self.btn_cmd_voice.setObjectName("btn_CVOICE")
+            self.btn_cmd_voice.clicked.connect(self.activate_soft)
+            self.layoutAction.addWidget(self.btn_cmd_voice)
+        if self._module_visible("W"):
+            self.btn_list_words = QPushButton("Listas de Palabras")
+            self.btn_list_words.setObjectName("btn_W")
+            self.btn_list_words.clicked.connect(self.activate_listWords)
+            self.layoutAction.addWidget(self.btn_list_words)
 
     def abrir_chat_con(self, case_id, nombre, edad, procedimiento, appointment_id=None):
         """Abre (o trae al frente) la subventana MDI de chat con el paciente,

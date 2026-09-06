@@ -40,6 +40,9 @@ class LoginConnect():
             'user': user["username"],
             'name': user["display_name"],
             'permission': user["permission"],
-            'modules': user.get("modules") or [],
+            # None = sin restricción (admin completo, ver Auth::userProfile
+            # en el backend) -- "or []" acá convertiría ese None en [] y
+            # bloquearía al admin, por eso se preserva tal cual.
+            'modules': user.get("modules"),
             'cases': {},
         }
