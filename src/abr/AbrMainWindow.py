@@ -39,6 +39,7 @@ TIEMPO_ENTR_PROM = 300
 DEFAULT_ABR_CASE = {
     'type': 'normal',
     'repro': True,
+    'repro_var': 0.2,
     'umbral': 20,
     'average_objetivo': 2000,
     'desviaciones': {},

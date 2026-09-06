@@ -48,14 +48,16 @@ class ABRGeneratorV3:
     # =====================================================================
 
     def get_baseline_values(self, population='adult_female',
-                            stimulus='click', pathway='air_conduction'):
+                            stimulus='click', pathway='air_conduction',
+                            freq=None):
         pop = self.norms['populations'][population]
-        if stimulus.startswith('tone_burst'):
-            return pop[pathway]['tone_burst']
+        if stimulus == 'tone_burst':
+            by_freq = pop[pathway]['tone_burst']
+            return by_freq.get(freq or '1000Hz', by_freq['1000Hz'])
         return pop[pathway].get(stimulus, pop[pathway]['click'])
 
     def calculate_wave_parameters(self, baseline, intensity, threshold,
-                                   pathology, desviaciones=None):
+                                   pathology, desviaciones=None, repro_shift=0.0):
         modified = {}
         steps_from_80 = (80 - intensity) / 10
 
@@ -68,9 +70,12 @@ class ABRGeneratorV3:
             if wave not in baseline:
                 continue
             base_lat = baseline[wave]['lat']
-            calc_lat = base_lat + lat_shift
+            # repro_shift: jitter de "no reproducible" -- mueve TODO el
+            # complejo junto (misma respuesta neural, timing inconsistente),
+            # no una onda aislada.
+            calc_lat = base_lat + lat_shift + repro_shift
             if wave == 'I':
-                calc_lat = base_lat + lat_shift * 0.2
+                calc_lat = base_lat + lat_shift * 0.2 + repro_shift
             if desviaciones and wave in ['I', 'III', 'V']:
                 key = f"onda_{wave}"
                 if key in desviaciones:
@@ -410,6 +415,7 @@ class ABRGeneratorV3:
             population, stimulus_config['stim'],
             'air_conduction' if 'pathway' not in stimulus_config
             else stimulus_config['pathway'],
+            freq=stimulus_config.get('freq'),
         )
 
         # 2. Umbral
@@ -418,12 +424,9 @@ class ABRGeneratorV3:
         else:
             threshold = self.norms['pathology_modifiers'][pathology]['threshold_range'][0]
 
-        # 3. Desviaciones
-        desviaciones = None
-        if case_config and 'desviaciones' in case_config:
-            stim = stimulus_config['stim']
-            if stim in case_config['desviaciones']:
-                desviaciones = case_config['desviaciones'][stim]
+        # 3. Desviaciones (el caso trae un solo set, plano por onda -- no
+        # esta anidado por estimulo, ver CaseBuilder.abrBuild en case_create.php)
+        desviaciones = case_config.get('desviaciones') if case_config else None
 
         # 4. FSP del caso
         if case_config and 'fsp_puntos' in case_config:
@@ -438,8 +441,10 @@ class ABRGeneratorV3:
         fsp_actual = self.calculate_fsp(current_avg, fsp_800, fsp_2000)
 
         # 6. Parametros de ondas
+        repro_shift = case_config.get('repro_shift', 0.0) if case_config else 0.0
         values, waves_visible = self.calculate_wave_parameters(
             baseline, stimulus_config['int'], threshold, pathology, desviaciones,
+            repro_shift=repro_shift,
         )
 
         # 7. Polaridad + rate
@@ -515,6 +520,18 @@ def _get_generator():
     return _generator
 
 
+# Texto del combo cb_stim (AbrConfig_ui.py) -> (clave en normative_data.json, freq)
+STIM_MAP = {
+    'Click':       ('click', None),
+    'Ls-chirp':    ('ls_chirp', None),
+    'Chirp':       ('ce_chirp', None),
+    'Burst 500Hz': ('tone_burst', '500Hz'),
+    'Burst 1kHz':  ('tone_burst', '1000Hz'),
+    'Burst 2kHz':  ('tone_burst', '2000Hz'),
+    'Burst 4kHz':  ('tone_burst', '4000Hz'),
+}
+
+
 def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom, done):
     """
     Misma firma que V2. Genera curva ABR con modelo morfolgico realista.
@@ -540,8 +557,11 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom, 
     if current_averages >= target_averages:
         current_averages = target_averages
 
+    stim_key, stim_freq = STIM_MAP.get(control_setting['stim'], ('click', None))
+
     stimulus_config = {
-        'stim': 'click',
+        'stim': stim_key,
+        'freq': stim_freq,
         'pol': control_setting['pol'],
         'int': actual_intencity,
         'rate': control_setting['rate'],
@@ -557,11 +577,22 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom, 
         'transducer': 'insert_earphone',
     }
 
+    # Reproducibilidad: si el caso es "no reproducible", cada captura a la
+    # misma intensidad corre el complejo I-V un poco (jitter), en vez de
+    # calcular un numero que despues no se usaba en la curva.
+    repro_var = preferences.get('repro_var', 0.2)
+    if not preferences.get('repro', True):
+        var_repro = random.uniform(-repro_var, repro_var) if repro_prev == 0 \
+                    else -repro_prev + random.uniform(-repro_var / 2, repro_var / 2)
+    else:
+        var_repro = 0
+
     case_config = {
         'desviaciones': preferences.get('desviaciones', {}),
         'fsp_puntos': preferences.get('fsp_puntos', {'800': 2.3, '2000': 2.8}),
         'umbral': preferences.get('umbral', preferences.get('th', 20)),
         'average_objetivo': preferences.get('average_objetivo', 2000),
+        'repro_shift': var_repro,
     }
 
     t, y, metadata = generator.generate_curve(
@@ -571,13 +602,6 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom, 
         technical_config=technical_config,
         case_config=case_config,
     )
-
-    # Reproducibilidad (compatible con firma V2)
-    if not preferences.get('repro', True):
-        var_repro = random.uniform(-0.2, 0.2) if repro_prev == 0 \
-                    else -repro_prev + random.uniform(-0.1, 0.1)
-    else:
-        var_repro = 0
 
     dx = t.copy()
     dy = y.copy()

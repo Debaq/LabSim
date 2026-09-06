@@ -386,6 +386,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             return [
                 'type' => (string) fv($v, ['abr', $lado, 'type'], 'normal'),
                 'repro' => isset($v['abr'][$lado]['repro']),
+                'repro_var' => (float) fv($v, ['abr', $lado, 'repro_var'], 0.2),
                 'umbral' => (int) fv($v, ['abr', $lado, 'umbral'], 20),
                 'average_objetivo' => (int) fv($v, ['abr', $lado, 'average_objetivo'], 2000),
                 'desviaciones' => [
@@ -1255,6 +1256,9 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <label class="inline-check" style="align-self:end;">
             <input type="checkbox" name="abr[<?= $lado ?>][repro]" <?= ($v['abr'][$lado]['repro'] ?? '1') === '1' ? 'checked' : '' ?>>
             Reproducible
+        </label>
+        <label>Jitter si no reproducible (ms)
+            <input type="number" step="0.01" min="0" name="abr[<?= $lado ?>][repro_var]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['repro_var'] ?? '0.2')) ?>">
         </label>
     </div>
     <p class="legend">Promediaciones que el caso realmente necesita para que la onda se vea resuelta (independiente de cuántas pida el alumno en el equipo) -- si el alumno detiene la captura antes de llegar a este número, la curva queda parcialmente sin resolver.</p>
