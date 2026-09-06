@@ -1,6 +1,6 @@
 from PySide6.QtCore import QCoreApplication, Signal, Qt
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import QWidget, QTableWidgetItem
+from PySide6.QtWidgets import QWidget, QTableWidgetItem, QHeaderView
 from abr.UI.AbrTableInfo_ui import Ui_TableData
 
 tr = QCoreApplication.translate
@@ -26,6 +26,11 @@ class AbrTable(QWidget, Ui_TableData):
         for i in tables:
             i.cellClicked.connect(self.on_cell_clicked)
             i.setStyleSheet(s)
+            i.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+            i.resizeColumnsToContents()
+            i.setMaximumWidth(16777215)
+            width = i.verticalHeader().width() + i.horizontalHeader().length() + 2 * i.frameWidth() + 2
+            i.setMinimumWidth(width)
 
         self.label.setText(self.side_text)
 

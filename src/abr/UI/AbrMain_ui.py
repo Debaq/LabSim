@@ -191,7 +191,7 @@ class Ui_MainWindow(object):
         MainWindow.addDockWidget(Qt.LeftDockWidgetArea, self.dock_parameter)
         self.dock_values = QDockWidget(MainWindow)
         self.dock_values.setObjectName(u"dock_values")
-        self.dock_values.setMaximumSize(QSize(180, 524287))
+        self.dock_values.setMaximumSize(QSize(260, 524287))
         self.dock_values.setFeatures(QDockWidget.DockWidgetMovable)
         self.dock_values_contents = QWidget()
         self.dock_values_contents.setObjectName(u"dock_values_contents")

@@ -350,7 +350,7 @@
   <widget class="QDockWidget" name="dock_values">
    <property name="maximumSize">
     <size>
-     <width>180</width>
+     <width>260</width>
      <height>524287</height>
     </size>
    </property>
