@@ -379,6 +379,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $otoscopiaFases[] = ['texto' => $texto];
         }
 
+        // ABR: una patología por oído (ver ABR_TYPE_OPTIONS) -- ya no hay
+        // banco de casos compartido, cada paciente trae la suya (ver
+        // AbrMainWindow.la_super/DEFAULT_ABR_CASE en el cliente).
+        $abrBuild = static function (string $lado) use ($v): array {
+            return [
+                'type' => (string) fv($v, ['abr', $lado, 'type'], 'normal'),
+                'repro' => isset($v['abr'][$lado]['repro']),
+                'umbral' => (int) fv($v, ['abr', $lado, 'umbral'], 20),
+                'desviaciones' => [
+                    'onda_I' => ['lat' => (float) fv($v, ['abr', $lado, 'lat_I'], 0), 'amp' => (float) fv($v, ['abr', $lado, 'amp_I'], 0)],
+                    'onda_III' => ['lat' => (float) fv($v, ['abr', $lado, 'lat_III'], 0), 'amp' => (float) fv($v, ['abr', $lado, 'amp_III'], 0)],
+                    'onda_V' => ['lat' => (float) fv($v, ['abr', $lado, 'lat_V'], 0), 'amp' => (float) fv($v, ['abr', $lado, 'amp_V'], 0)],
+                ],
+                'fsp_puntos' => [
+                    '800' => (float) fv($v, ['abr', $lado, 'fsp_800'], 2.3),
+                    '2000' => (float) fv($v, ['abr', $lado, 'fsp_2000'], 2.8),
+                    'objetivo' => (float) fv($v, ['abr', $lado, 'fsp_obj'], 3.0),
+                ],
+            ];
+        };
+        $abrOd = $abrBuild('od');
+        $abrOi = $abrBuild('oi');
+
         if ($age <= 0) {
             $error = 'Falta la edad.';
         } elseif (!$isUpdate && ($nombre1 === '' || $apellido1 === '')) {
@@ -401,6 +424,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Tipo de ruido del tinnitus inválido.';
         } elseif (!in_array($tinnitusFrecuencia, CaseBuilder::FREQUENCIES, true)) {
             $error = 'Frecuencia del tinnitus inválida.';
+        } elseif (!in_array($abrOd['type'], CaseBuilder::ABR_TYPE_OPTIONS, true) || !in_array($abrOi['type'], CaseBuilder::ABR_TYPE_OPTIONS, true)) {
+            $error = 'Patología ABR inválida.';
         }
 
         if ($error === null) {
@@ -464,6 +489,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'comportamiento' => trim((string) ($v['comportamiento'] ?? '')),
                 'disposicion' => (int) ($v['disposicion'] ?? 0),
                 'otoscopia' => ['fases' => $otoscopiaFases],
+                'abr' => ['OD' => $abrOd, 'OI' => $abrOi],
             ]);
 
             if ($isUpdate) {
@@ -557,108 +583,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+admin_add_css('case.css');
 admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico', $me);
 ?>
-<style>
-    .grid-table th, .grid-table td { text-align: center; padding: 0.3rem; }
-    .grid-table input[type=number] { width: 4.2rem; padding: 0.2rem; text-align: center; }
-    .grid-table th.side-label, .grid-table td.side-label { text-align: left; font-weight: 600; }
-    .inline-check { display: inline-flex; align-items: center; gap: 0.3rem; font-weight: 400; margin: 0 0 0 1rem; }
-    .inline-check input { width: auto; margin: 0; }
-    fieldset { border: 1px solid #e5e5e5; border-radius: 6px; margin: 1rem 0; padding: 0.8rem 1rem; }
-    legend { font-weight: 600; padding: 0 0.4rem; }
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
-    input[readonly] { background: #eee; color: #555; }
-
-    /* Fichas (tabs): cada <div class="tab-panel"> es una pestaña del caso.
-       Sin JS quedan todas visibles apiladas (igual que antes) -- degrada
-       con gracia en vez de esconder campos que el navegador no puede volver
-       a mostrar. */
-    .tabs { display: flex; flex-wrap: wrap; gap: 0.2rem; border-bottom: 2px solid #e5e5e5; margin-bottom: 1.2rem; }
-    .tab-btn { padding: 0.6rem 1.1rem; border: none; background: none; cursor: pointer; font-weight: 600;
-               font-size: 0.9rem; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; }
-    .tab-btn:hover { color: #1a2744; }
-    .tab-btn.active { color: #1a2744; border-bottom-color: #1a2744; }
-    .tab-btn .tab-error-dot { display: inline-block; width: 0.4rem; height: 0.4rem; border-radius: 50%; background: #a33; margin-left: 0.3rem; }
-    body.js-tabs .tab-panel { display: none; }
-    body.js-tabs .tab-panel.active { display: block; }
-
-    /* Ficha Audiometría: gráfico fijo a la izquierda mientras se scrollea
-       la planilla de umbrales a la derecha. */
-    .audiometria-layout { display: grid; grid-template-columns: 300px 1fr; gap: 1.2rem; align-items: start; }
-    .audiogram-stack { position: sticky; top: 1rem; display: flex; flex-direction: column; gap: 1rem; }
-    @media (max-width: 960px) {
-        .audiometria-layout { grid-template-columns: 1fr; }
-        .audiogram-stack { position: static; }
-    }
-    .audiogram-legend { display: flex; flex-wrap: wrap; gap: 0.7rem; font-size: 0.75rem; color: #555; margin-top: 0.5rem; }
-    .audiogram-legend span { display: inline-flex; align-items: center; gap: 0.3rem; }
-
-    /* Agrupa campos por oído (OD/OI) dentro de una misma card -- reemplaza
-       tener una card aparte por cada tipo de prueba. */
-    .side-block { margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px solid #eee; }
-    .side-block:first-child { margin-top: 0; padding-top: 0; border-top: none; }
-    .side-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 0.8rem; margin-bottom: 0.4rem; }
-    .side-tag { display: inline-block; font-weight: 700; font-size: 0.78rem; padding: 0.2rem 0.55rem; border-radius: 4px; background: #eef0f4; color: #555; }
-    .side-tag.od { color: #b33a3a; }
-    .side-tag.oi { color: #2255aa; }
-
-    /* Patrón de reflejos: tabla espejada -- columnas ipsi al centro (una
-       junto a la otra), contra hacia afuera, para leer ambos oídos "de
-       frente" como en la ficha en papel. */
-    .reflex-pattern-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.8rem; }
-    .reflex-pattern-table th, .reflex-pattern-table td { text-align: center; padding: 0.35rem 0.2rem; border: 1px solid #ddd; }
-    .reflex-pattern-table td.freq-label { font-weight: 600; background: #f7f7f7; }
-    /* th.od/th.oi con color: NO reusar .side-tag acá -- su display:
-       inline-block rompe el layout de columnas de una tabla (th deja de
-       comportarse como table-cell), que fue justo lo que descuadró el
-       encabezado. */
-    th.reflex-head.od { color: #b33a3a; }
-    th.reflex-head.oi { color: #2255aa; }
-    .reflex-cell { font-weight: 700; color: #999; }
-    .reflex-cell.na { color: #ccc; background: #f5f5f5; }
-    /* Presente = fondo gris oscuro fijo (no varía por lado); el color del
-       "+" marca el oído que recibió el estímulo -- en ipsi coincide con la
-       columna (OD=rojo, OI=azul), en contra es el cruzado (columna OD con
-       estímulo en OI=azul, columna OI con estímulo en OD=rojo). */
-    .reflex-cell.present { background: #3a3a3a; }
-    .reflex-cell.present.mark-od { color: #e05c5c; }
-    .reflex-cell.present.mark-oi { color: #6fa8e8; }
-
-    /* Foto de paciente: avatar circular + modal de recorte. */
-    .photo-block { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee; }
-    .patient-avatar { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; background: #eee; flex-shrink: 0; }
-    .patient-avatar-empty { display: flex; align-items: center; justify-content: center; color: #999; font-size: 0.7rem; text-align: center; }
-    .patient-avatar-empty[hidden] { display: none; }
-
-    /* Ficha Otoscopia: fases apiladas, cada una con imagen OD/OI. */
-    .otoscopia-fase { margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px solid #eee; }
-    .otoscopia-fase:first-child { margin-top: 0; padding-top: 0; border-top: none; }
-    .otoscopia-photo-slot { text-align: center; }
-    .otoscopia-thumb { display: block; width: 100%; max-width: 220px; height: 160px; object-fit: cover;
-                        border-radius: 6px; background: #eee; margin: 0.3rem auto; }
-    .otoscopia-thumb-empty { display: flex; align-items: center; justify-content: center; width: 100%; max-width: 220px;
-                              height: 160px; border-radius: 6px; background: #f2f2f2; color: #999; font-size: 0.78rem;
-                              margin: 0.3rem auto; }
-    .otoscopia-thumb[hidden], .otoscopia-thumb-empty[hidden] { display: none; }
-    .otoscopia-photo-slot .otoscopia-photo-input { display: block; margin: 0.4rem auto 0.3rem; }
-    .otoscopia-delete-photo { color: #a33; }
-    .otoscopia-download-photo { display: inline-block; margin-left: 0.5rem; font-size: 0.82rem; }
-    .otoscopia-download-photo[hidden] { display: none; }
-
-    .photo-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100;
-                   display: flex; align-items: center; justify-content: center; }
-    .photo-modal[hidden] { display: none; }
-    .photo-modal-box { background: #fff; border-radius: 8px; padding: 1.2rem; max-width: 22rem; width: 90%; }
-    .photo-crop-viewport { position: relative; width: 280px; height: 280px; margin: 0 auto;
-                            overflow: hidden; background: #333; cursor: grab; touch-action: none; }
-    .photo-crop-viewport:active { cursor: grabbing; }
-    .photo-crop-viewport img { position: absolute; left: 0; top: 0; transform-origin: 0 0; max-width: none; user-select: none; -webkit-user-drag: none; }
-    .photo-crop-ring { position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2000px rgba(0,0,0,0.5); pointer-events: none; }
-    .photo-crop-ring.square { border-radius: 0; outline: 2px solid #fff; outline-offset: -2px; }
-    .photo-modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.8rem; }
-</style>
 
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 
@@ -674,6 +601,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <button type="button" class="tab-btn" data-tab="audiometria">Audiometría</button>
     <button type="button" class="tab-btn" data-tab="timpanometria">Timpanometría</button>
     <button type="button" class="tab-btn" data-tab="tinnitus">Tinnitus</button>
+    <button type="button" class="tab-btn" data-tab="abr">ABR</button>
     <button type="button" class="tab-btn" data-tab="anamnesis">Anamnesis</button>
 </div>
 
@@ -719,18 +647,18 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             <input type="text" name="apellido" value="<?= htmlspecialchars((string) ($v['apellido'] ?? '')) ?>">
         </label>
     </div>
-    <p class="legend" style="font-size:0.8rem;">Esto edita al <strong>paciente</strong>: el cambio se aplica también a cualquier otra cita/ronda de la misma persona.</p>
+    <p class="legend" class="help">Esto edita al <strong>paciente</strong>: el cambio se aplica también a cualquier otra cita/ronda de la misma persona.</p>
     <?php endif; ?>
 
     <label>Historia clínica
-        <textarea name="historia_clinica" rows="6" style="width:100%; padding:0.45rem; margin-top:0.2rem; border:1px solid #ccc; border-radius:4px;" placeholder="Antecedentes generales, evolución, observaciones del paciente..."><?= htmlspecialchars((string) ($v['historia_clinica'] ?? '')) ?></textarea>
+        <textarea name="historia_clinica" rows="6" class="input" placeholder="Antecedentes generales, evolución, observaciones del paciente..."><?= htmlspecialchars((string) ($v['historia_clinica'] ?? '')) ?></textarea>
     </label>
-    <p class="legend" style="font-size:0.8rem;">Historia clínica base del <strong>paciente</strong> (no depende del caso). No incluye las notas individuales de cada alumno por atención -- esas se ven en la agenda/asistencia, no se editan acá.</p>
+    <p class="legend" class="help">Historia clínica base del <strong>paciente</strong> (no depende del caso). No incluye las notas individuales de cada alumno por atención -- esas se ven en la agenda/asistencia, no se editan acá.</p>
 
-    <label>Comentario del docente <span style="font-weight:400; color:#a00;">(privado -- el alumno nunca lo ve)</span>
-        <textarea name="comentario_docente" rows="3" style="width:100%; padding:0.45rem; margin-top:0.2rem; border:1px solid #ccc; border-radius:4px;" placeholder="Ej: hipoacusia sensorioneural bilateral leve, caso pensado para practicar enmascaramiento..."><?= htmlspecialchars((string) ($v['comentario_docente'] ?? '')) ?></textarea>
+    <label>Comentario del docente <span style="font-weight:400; color:var(--color-danger);">(privado -- el alumno nunca lo ve)</span>
+        <textarea name="comentario_docente" rows="3" class="input" placeholder="Ej: hipoacusia sensorioneural bilateral leve, caso pensado para practicar enmascaramiento..."><?= htmlspecialchars((string) ($v['comentario_docente'] ?? '')) ?></textarea>
     </label>
-    <p class="legend" style="font-size:0.8rem;">Nota interna del <strong>paciente</strong> (ej. qué patología representa el caso). Solo la ve el docente en este panel -- no se sincroniza a la ficha del alumno ni al cliente de escritorio.</p>
+    <p class="legend" class="help">Nota interna del <strong>paciente</strong> (ej. qué patología representa el caso). Solo la ve el docente en este panel -- no se sincroniza a la ficha del alumno ni al cliente de escritorio.</p>
 
     <div class="photo-block">
         <strong style="display:block; margin-bottom:0.4rem;">Foto</strong>
@@ -906,6 +834,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             <label class="inline-check"><input type="checkbox" class="igualar-toggle" data-side="<?= $side ?>" name="igualar[<?= $side ?>]" <?= isset($v['igualar'][$side]) ? 'checked' : '' ?>> Igualar ósea a aérea</label>
             <label class="inline-check"><input type="checkbox" class="ldl-toggle" data-side="<?= $side ?>" name="ldl_habilitado[<?= $side ?>]" <?= isset($v['ldl_habilitado'][$side]) ? 'checked' : '' ?>> LDL medido</label>
         </div>
+        <div class="table-wrap">
         <table class="grid-table">
             <tr><th></th><?php foreach (CaseBuilder::FREQUENCIES as $f): ?><th><?= $f ?> Hz</th><?php endforeach; ?></tr>
             <?php foreach ($seriesShort as $key => $label): ?>
@@ -923,6 +852,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             </tr>
             <?php endforeach; ?>
         </table>
+        </div>
     </div>
     <?php endforeach; ?>
     <p class="legend">LDL sin marcar = no medido, se guarda como ausente (130) sin importar lo que quede escrito arriba.</p>
@@ -941,6 +871,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <label class="inline-check"><input type="checkbox" id="acumetria-auto-toggle" name="acumetria_auto" value="1"
                <?= $acumetriaIsAuto ? 'checked' : '' ?>>auto (calcular Rinne y Weber desde los umbrales tonales)</label>
     </p>
+    <div class="table-wrap">
     <table class="grid-table" style="margin-bottom:0.5rem;">
         <tr><th></th><?php foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $freqIdx): ?><th><?= $hz ?> Hz</th><?php endforeach; ?></tr>
         <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
@@ -976,10 +907,12 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             <?php endforeach; ?>
         </tr>
     </table>
+    </div>
 </div>
 
 <div class="card">
     <strong>Logoaudiometría y pruebas especiales</strong>
+    <div class="table-wrap">
     <table class="grid-table" style="margin-bottom:1rem;">
         <tr><th></th><th>SDT</th><th>SRT</th></tr>
         <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
@@ -996,14 +929,15 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         </tr>
         <?php endforeach; ?>
     </table>
+    </div>
 
     <div class="two-col">
         <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
         <div class="side-block">
             <div class="side-heading"><span class="side-tag <?= $side ?>"><?= $sideLabel ?></span></div>
             <label>UMD (int / %)
-                <input type="number" step="5" class="umd-int-input" data-side="<?= $side ?>" name="umd_int[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_int', $side], 35)) ?>" style="width:5rem; display:inline-block;">
-                / <input type="number" step="4" class="umd-pct-input" data-side="<?= $side ?>" name="umd_pct[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_pct', $side], 100)) ?>" style="width:5rem; display:inline-block;">
+                <input type="number" step="5" class="umd-int-input" data-side="<?= $side ?>" name="umd_int[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_int', $side], 35)) ?>" class="input input--narrow" style="display:inline-block;">
+                / <input type="number" step="4" class="umd-pct-input" data-side="<?= $side ?>" name="umd_pct[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_pct', $side], 100)) ?>" class="input input--narrow" style="display:inline-block;">
             </label>
             <label>SISI <input type="number" step="5" name="sisi[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['sisi', $side], 0)) ?>"></label>
             <label class="inline-check"><input type="checkbox" name="stenger[<?= $side ?>]" <?= isset($v['stenger'][$side]) ? 'checked' : '' ?>> Stenger</label>
@@ -1021,6 +955,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     ];
     foreach ($decayGroups as $mode => $info):
     ?>
+    <div class="table-wrap">
     <table class="grid-table" style="margin-bottom:0.5rem;">
         <tr><th class="side-label"><?= htmlspecialchars($info['label']) ?></th><?php foreach ($info['freqs'] as $f): ?><th><?= $f ?> Hz</th><?php endforeach; ?></tr>
         <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
@@ -1032,6 +967,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         </tr>
         <?php endforeach; ?>
     </table>
+    </div>
     <?php endforeach; ?>
 
     <?php
@@ -1054,6 +990,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <div class="side-block" id="fowler-block">
         <div class="side-heading"><span class="side-tag">Fowler</span></div>
         <p class="legend">Se detectan solas las frecuencias (250-4000 Hz) donde los umbrales ya tipeados arriba cumplen los requisitos ABLB -- puede calificar más de una a la vez. Para cada una, indica qué le pasa al paciente al hacer la prueba ahí (por defecto, sin reclutamiento).</p>
+        <div class="table-wrap">
         <table class="grid-table" id="fowler-table" <?= $fwQualifying ? '' : 'hidden' ?>>
             <thead>
                 <tr><th>Frecuencia</th><th>Diferencia interaural</th><th>Patrón</th></tr>
@@ -1078,6 +1015,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
         <p class="legend" id="fowler-none-msg" <?= $fwQualifying ? 'hidden' : '' ?>>Ningún umbral actual cumple los requisitos ABLB -- Fowler queda deshabilitado en este caso.</p>
         <label class="inline-check"><input type="checkbox" name="diplacusia" <?= isset($v['diplacusia']) ? 'checked' : '' ?>> Paciente refiere diploacusia</label>
         <p class="legend">Requisitos ABLB: oído de referencia ≤ <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL, oído en estudio &gt; <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL y sensorioneural (gap aéreo-óseo ≤ <?= CaseBuilder::FOWLER_SNHL_GAP_MAX ?> dB), diferencia interaural <?= CaseBuilder::FOWLER_DIFF_MIN ?>-<?= CaseBuilder::FOWLER_DIFF_MAX ?> dB en cada frecuencia evaluada.</p>
@@ -1134,6 +1072,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         ['label' => 'WN', 'n' => 4, 'hasIpsi' => false],
     ];
     ?>
+    <div class="table-wrap">
     <table class="reflex-pattern-table">
         <tr>
             <th class="reflex-head od">OD Contra</th>
@@ -1160,6 +1099,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         </tr>
         <?php endforeach; ?>
     </table>
+    </div>
 
 </div>
 </div>
@@ -1206,6 +1146,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                       'contra' => ['label' => 'Contralateral', 'freqs' => [500, 1000, 2000, 4000, 'WN']]];
     foreach ($reflexGroups as $mode => $info):
     ?>
+    <div class="table-wrap">
     <table class="grid-table">
         <tr><th class="side-label"><?= htmlspecialchars($info['label']) ?></th><?php foreach ($info['freqs'] as $f): ?><th><?= is_int($f) ? $f . ' Hz' : $f ?></th><?php endforeach; ?></tr>
         <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
@@ -1217,7 +1158,9 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         </tr>
         <?php endforeach; ?>
     </table>
+    </div>
     <?php endforeach; ?>
+    <div class="table-wrap">
     <table class="grid-table">
         <tr><th class="side-label">Tipo de reflejo</th><th>Curva</th></tr>
         <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel):
@@ -1235,6 +1178,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         </tr>
         <?php endforeach; ?>
     </table>
+    </div>
 </div>
 </div>
 </div>
@@ -1291,6 +1235,64 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 </div>
 </div>
 
+<div class="tab-panel" data-tab="abr">
+<?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
+<div class="card">
+    <strong>ABR <?= $ladoLabel ?></strong>
+    <p class="legend help">Patología de este oído para el generador de curvas ABR -- no es el resultado del alumno, es lo que el caso simula. Si se deja "Normal" con todo en 0, el oído no tiene hallazgos.</p>
+    <div class="three-col">
+        <label>Patología
+            <select name="abr[<?= $lado ?>][type]">
+                <?php foreach (CaseBuilder::ABR_TYPE_OPTIONS as $opt): ?>
+                <option value="<?= $opt ?>" <?= ($v['abr'][$lado]['type'] ?? 'normal') === $opt ? 'selected' : '' ?>><?= ucfirst($opt) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label>Umbral (dB)
+            <input type="number" name="abr[<?= $lado ?>][umbral]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['umbral'] ?? '20')) ?>">
+        </label>
+        <label class="inline-check" style="align-self:end;">
+            <input type="checkbox" name="abr[<?= $lado ?>][repro]" <?= ($v['abr'][$lado]['repro'] ?? '1') === '1' ? 'checked' : '' ?>>
+            Reproducible
+        </label>
+    </div>
+    <p class="legend">Desviaciones por onda (ms de latencia, µV de amplitud, respecto del valor normativo a esa intensidad)</p>
+    <div class="three-col">
+        <label>Onda I -- latencia
+            <input type="number" step="0.01" name="abr[<?= $lado ?>][lat_I]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['lat_I'] ?? '0')) ?>">
+        </label>
+        <label>Onda III -- latencia
+            <input type="number" step="0.01" name="abr[<?= $lado ?>][lat_III]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['lat_III'] ?? '0')) ?>">
+        </label>
+        <label>Onda V -- latencia
+            <input type="number" step="0.01" name="abr[<?= $lado ?>][lat_V]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['lat_V'] ?? '0')) ?>">
+        </label>
+        <label>Onda I -- amplitud
+            <input type="number" step="0.01" name="abr[<?= $lado ?>][amp_I]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['amp_I'] ?? '0')) ?>">
+        </label>
+        <label>Onda III -- amplitud
+            <input type="number" step="0.01" name="abr[<?= $lado ?>][amp_III]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['amp_III'] ?? '0')) ?>">
+        </label>
+        <label>Onda V -- amplitud
+            <input type="number" step="0.01" name="abr[<?= $lado ?>][amp_V]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['amp_V'] ?? '0')) ?>">
+        </label>
+    </div>
+    <p class="legend">FSP (Fsp progresivo, referencia de la curva)</p>
+    <div class="three-col">
+        <label>FSP @ 800 prom.
+            <input type="number" step="0.01" name="abr[<?= $lado ?>][fsp_800]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['fsp_800'] ?? '2.3')) ?>">
+        </label>
+        <label>FSP @ 2000 prom.
+            <input type="number" step="0.01" name="abr[<?= $lado ?>][fsp_2000]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['fsp_2000'] ?? '2.8')) ?>">
+        </label>
+        <label>FSP objetivo
+            <input type="number" step="0.01" name="abr[<?= $lado ?>][fsp_obj]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['fsp_obj'] ?? '3.0')) ?>">
+        </label>
+    </div>
+</div>
+<?php endforeach; ?>
+</div>
+
 <div class="tab-panel" data-tab="anamnesis">
 <div class="card">
     <strong>Anamnesis</strong>
@@ -1310,10 +1312,10 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <input type="text" name="cirugias" value="<?= htmlspecialchars((string) ($v['cirugias'] ?? '')) ?>">
     </label>
     <label>Otros antecedentes
-        <textarea name="otros" rows="2" style="width:100%; padding:0.45rem; margin-top:0.2rem; border:1px solid #ccc; border-radius:4px;"><?= htmlspecialchars((string) ($v['otros'] ?? '')) ?></textarea>
+        <textarea name="otros" rows="2" class="input"><?= htmlspecialchars((string) ($v['otros'] ?? '')) ?></textarea>
     </label>
     <label>Comportamiento del paciente
-        <textarea name="comportamiento" id="chat-comportamiento" rows="2" style="width:100%; padding:0.45rem; margin-top:0.2rem; border:1px solid #ccc; border-radius:4px;" placeholder="Ej: nervioso, minimiza los síntomas, muy hablador, desconfiado, colaborador..."><?= htmlspecialchars((string) ($v['comportamiento'] ?? '')) ?></textarea>
+        <textarea name="comportamiento" id="chat-comportamiento" rows="2" class="input" placeholder="Ej: nervioso, minimiza los síntomas, muy hablador, desconfiado, colaborador..."><?= htmlspecialchars((string) ($v['comportamiento'] ?? '')) ?></textarea>
     </label>
     <p class="legend">Cómo debe actuar el paciente al conversar con el alumno (tono, actitud) -- va directo al prompt del LLM, junto con la anamnesis de arriba.</p>
     <label>Sensibilidad del paciente
@@ -1342,13 +1344,13 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <a href="llm.php" target="_blank">Admin → IA Paciente</a>. Si cambias la anamnesis a mitad de una
         conversación, reinícala para que el paciente "olvide" lo que dijo con los datos anteriores.
     </p>
-    <div id="chat-test-log" style="border:1px solid #e5e5e5; border-radius:6px; padding:0.7rem; min-height:3rem; max-height:22rem; overflow-y:auto; margin:0.6rem 0; background:#fafafa; font-size:0.88rem;"></div>
+    <div id="chat-test-log" style="border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:0.7rem; min-height:3rem; max-height:22rem; overflow-y:auto; margin:0.6rem 0; background:var(--color-row-alt); font-size:0.88rem;"></div>
     <div style="display:flex; gap:0.5rem;">
-        <input type="text" id="chat-test-input" placeholder="Escribe como si fueras el alumno..." style="flex:1; padding:0.45rem; border:1px solid #ccc; border-radius:4px;">
+        <input type="text" id="chat-test-input" placeholder="Escribe como si fueras el alumno..." style="flex:1; padding:0.45rem; border:1px solid var(--color-border-strong); border-radius:var(--radius-md);">
         <button type="button" id="chat-test-send" class="secondary" style="margin-top:0;">Enviar</button>
         <button type="button" id="chat-test-reset" class="secondary" style="margin-top:0;">Reiniciar conversación</button>
     </div>
-    <div style="margin-top:0.6rem; padding-top:0.6rem; border-top:1px dashed #ddd;">
+    <div class="section-sep" style="border-top:1px dashed var(--color-border);">
         <button type="button" id="oirs-test-btn" class="secondary" style="margin-top:0;">Simular término de sesión (ver veredicto OIRS)</button>
         <p class="legend">Corre el evaluador de <a href="llm.php" target="_blank">Admin → IA Paciente</a> sobre esta conversación de prueba, tal como se ejecutaría al cerrar una atención real -- útil para ajustar el prompt del evaluador o la sensibilidad del paciente.</p>
         <div id="oirs-test-result"></div>
