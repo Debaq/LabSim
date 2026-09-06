@@ -1,3 +1,5 @@
+import random
+
 from PySide6.QtWidgets import QWidget
 from abr.UI.AbrConfig_ui import Ui_Abr_Config
 from PySide6.QtCore import QCoreApplication, Signal
@@ -10,8 +12,20 @@ class AbrControl(QWidget, Ui_Abr_Config):
         QWidget.__init__(self)
         self.setupUi(self)
         self.config_btn()
+        self.randomize_initial_values()
         # ESTACIÓN 3 OSCE: Todos los estímulos están habilitados
         # self.disable_unimplemented_stimuli()
+
+    def randomize_initial_values(self) -> None:
+        """sb_prom y sb_rate no traen 'value' en el .ui -> arrancan en 0.
+        Con promediaciones=0 el generador queda en puro ruido para siempre
+        (ver ABR_generator_v3.calculate_growth, target_avg<=0 -> growth=0).
+        No les ponemos un default fijo "correcto" a proposito -- el alumno
+        tiene que aprender a leer y configurar el equipo, no copiar un
+        numero que ya viene puesto. Se randomiza en un rango realista para
+        que nunca arranque en 0 (bug) pero tampoco en el valor ideal."""
+        self.sb_prom.setValue(random.randrange(200, 4001, 10))
+        self.sb_rate.setValue(round(random.uniform(11.1, 61.1), 1))
 
 
     def disable_unimplemented_stimuli(self) -> None:

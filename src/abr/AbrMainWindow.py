@@ -249,6 +249,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.dock_parameter.setVisible(False)
             self.detail.tabWidget.setCurrentIndex(1)
             self.dock_test.setFixedHeight(400)
+            self.graph_lat_int.clear_graph()
             self.graph_lat_int.plot_data(self.memory)
         elif sender == 2:
             self.dock_values.setVisible(False)

@@ -33,8 +33,17 @@ class GraphLatInt(pg.GraphicsLayoutWidget):
         self.pw.hideButtons()
         ay = self.pw.getAxis('left')
         ay.setStyle(showValues=False)
-        # Inicializar la leyenda
+        # Inicializar la leyenda (solo I, III, V -- ver plot_data)
         self.legend = self.pw.addLegend()
+        # Nota de color por oido: la leyenda muestra simbolo neutro por onda,
+        # el color real (rojo/azul) va en los puntos graficados.
+        note = pg.TextItem(
+            html='<span style="color:#c0392b;">&#9679;</span> OD &nbsp; '
+                 '<span style="color:#2980b9;">&#9679;</span> OI',
+            anchor=(1, 1),
+        )
+        note.setPos(100, 0)
+        self.pw.addItem(note)
     
     def filled_area(self):
         # Valores para crear el área sombreada
@@ -43,6 +52,10 @@ class GraphLatInt(pg.GraphicsLayoutWidget):
         y_top_vals = [9.4,8.9,8.2,7.9,7.2,6.7,6.4,6.1,5.8]
         curve_top = self.pw.plot(x_vals, y_top_vals)
         curve_bottom = self.pw.plot(x_vals, y_bottom_vals)
+        # Marcadas para que remove_points() no las borre junto con los
+        # puntos de captura -- son la banda normativa, fija, no un dato.
+        curve_top.is_band = True
+        curve_bottom.is_band = True
         fill_between = pg.FillBetweenItem(curve_top, curve_bottom)
         #fill_between.setCurves(curve_top, curve_bottom)
         fill_between.setBrush(pg.mkColor(100, 100, 250, 80))
@@ -50,44 +63,73 @@ class GraphLatInt(pg.GraphicsLayoutWidget):
         #self.pw.fillBetween(x_vals, y_bottom_vals, y_top_vals, brush=fill_color)
 
     def plot_data(self, data_dict):
-        # Definición de símbolos y colores para los subsets
+        # Solo I, III y V: son las ondas que realmente se comparan en la
+        # funcion latencia-intensidad clinica (II y IV no se grafican aqui
+        # aunque el alumno las haya marcado en la tabla).
         symbols = {
             'I': 'o',
-            'II': 't',
             'III': 't1',
-            'IV': 't2',
-            'V': 't3'
+            'V': 't3',
         }
         colors = {
-            'OD': 'r',  # Rojo
-            'OI': 'b'   # Azul
+            'OD': (192, 57, 43),   # Rojo
+            'OI': (41, 128, 185),  # Azul
         }
 
-        # Conjunto para mantener el control de los puntos ya graficados
+        # Puntos agrupados por onda: un solo PlotDataItem por onda (no uno
+        # por punto) para que la leyenda tenga exactamente 3 entradas.
+        points = {wave: {'x': [], 'y': [], 'brush': []} for wave in symbols}
         plotted_points = set()
 
-        for curve_key, curve_data in data_dict.items():
-            side = curve_data['side']
-            intensity = curve_data['int']
-            
-            # Verificar si ya se ha graficado un punto con esta intensidad y lado
+        for curve_data in data_dict.values():
+            side = curve_data.get('side')
+            intensity = curve_data.get('int')
+            if side not in colors or intensity is None:
+                continue
+            # Evita graficar dos veces la misma intensidad/oido (repeticion
+            # de la captura a la misma intensidad).
             if (side, intensity) in plotted_points:
-                continue  # Si es así, se salta este punto
+                continue
 
-            for subset, lat_amp in curve_data['LatAmp'].items():
-                y_value = lat_amp[0]
-                if y_value is not None:
-                    # Agregar punto al conjunto de puntos graficados
-                    plotted_points.add((side, intensity))
+            lat_amp_dict = curve_data.get('LatAmp') or {}
+            added_any = False
+            for wave in symbols:
+                lat_amp = lat_amp_dict.get(wave)
+                if not lat_amp or lat_amp[0] is None:
+                    continue
+                points[wave]['x'].append(intensity)
+                points[wave]['y'].append(lat_amp[0])
+                points[wave]['brush'].append(colors[side])
+                added_any = True
 
-                    # Graficar los puntos con la leyenda y color correspondiente
-                    self.pw.plot(
-                        [intensity], [y_value], 
-                        symbol=symbols[subset],
-                        pen=None,  # Sin línea
-                        symbolBrush=(colors[side]),  # Color del símbolo
-                        name=f"{subset} ({side})"
-                    )
+            if added_any:
+                plotted_points.add((side, intensity))
+
+        for wave, symbol in symbols.items():
+            data = points[wave]
+            if not data['x']:
+                continue
+            # Puntos reales, coloreados por oido, sin entrada propia en la
+            # leyenda (el color va en el punto, no en el texto).
+            self.pw.plot(
+                data['x'], data['y'],
+                symbol=symbol,
+                pen=None,
+                symbolBrush=data['brush'],
+                symbolPen=None,
+                symbolSize=9,
+            )
+            # Item "proxy" invisible en datos, solo para que la leyenda
+            # muestre el simbolo de la onda una unica vez.
+            self.pw.plot(
+                [], [],
+                symbol=symbol,
+                pen=None,
+                symbolBrush=(120, 120, 120),
+                symbolPen=None,
+                symbolSize=9,
+                name=wave,
+            )
 
     def clear_graph(self):
         self.legend.clear()
@@ -95,9 +137,9 @@ class GraphLatInt(pg.GraphicsLayoutWidget):
 
     def remove_points(self):
         # Itera sobre los elementos del gráfico
-        for item in self.pw.items:
+        for item in list(self.pw.items):
             # Verifica si el elemento es una instancia de PlotDataItem
-            if isinstance(item, pg.PlotDataItem):
+            if isinstance(item, pg.PlotDataItem) and not getattr(item, 'is_band', False):
                 # Remueve solo los elementos que corresponden a los puntos
                 self.pw.removeItem(item)
     
