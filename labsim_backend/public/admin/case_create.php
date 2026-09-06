@@ -387,6 +387,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'type' => (string) fv($v, ['abr', $lado, 'type'], 'normal'),
                 'repro' => isset($v['abr'][$lado]['repro']),
                 'umbral' => (int) fv($v, ['abr', $lado, 'umbral'], 20),
+                'average_objetivo' => (int) fv($v, ['abr', $lado, 'average_objetivo'], 2000),
                 'desviaciones' => [
                     'onda_I' => ['lat' => (float) fv($v, ['abr', $lado, 'lat_I'], 0), 'amp' => (float) fv($v, ['abr', $lado, 'amp_I'], 0)],
                     'onda_III' => ['lat' => (float) fv($v, ['abr', $lado, 'lat_III'], 0), 'amp' => (float) fv($v, ['abr', $lado, 'amp_III'], 0)],
@@ -1254,6 +1255,12 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <label class="inline-check" style="align-self:end;">
             <input type="checkbox" name="abr[<?= $lado ?>][repro]" <?= ($v['abr'][$lado]['repro'] ?? '1') === '1' ? 'checked' : '' ?>>
             Reproducible
+        </label>
+    </div>
+    <p class="legend">Promediaciones que el caso realmente necesita para que la onda se vea resuelta (independiente de cuántas pida el alumno en el equipo) -- si el alumno detiene la captura antes de llegar a este número, la curva queda parcialmente sin resolver.</p>
+    <div class="three-col">
+        <label>Promediaciones objetivo
+            <input type="number" step="1" min="1" name="abr[<?= $lado ?>][average_objetivo]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['average_objetivo'] ?? '2000')) ?>">
         </label>
     </div>
     <p class="legend">Desviaciones por onda (ms de latencia, µV de amplitud, respecto del valor normativo a esa intensidad)</p>

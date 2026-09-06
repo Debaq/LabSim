@@ -13,10 +13,10 @@ from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QSize, QTime, QUrl, Qt)
 from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
-    QImage, QKeySequence, QLinearGradient, QPainter,
-    QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QHBoxLayout,
-    QLabel, QLineEdit, QPushButton, QSizePolicy,
+    QKeySequence, QLinearGradient, QPalette,
+    QTransform)
+from PySide6.QtWidgets import (QApplication, QGridLayout, QHBoxLayout,
+    QLabel, QLineEdit, QSizePolicy,
     QSpacerItem, QTabWidget, QTextEdit, QVBoxLayout,
     QWidget)
 
@@ -98,44 +98,6 @@ class Ui_AbrReport(object):
         self.tab_2 = QWidget()
         self.tab_2.setObjectName(u"tab_2")
         self.tabWidget.addTab(self.tab_2, "")
-        self.tab_3 = QWidget()
-        self.tab_3.setObjectName(u"tab_3")
-        self.verticalLayout_2 = QVBoxLayout(self.tab_3)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.layout_pdf = QVBoxLayout()
-        self.layout_pdf.setObjectName(u"layout_pdf")
-
-        self.verticalLayout_2.addLayout(self.layout_pdf)
-
-        self.frame = QFrame(self.tab_3)
-        self.frame.setObjectName(u"frame")
-        self.frame.setMaximumSize(QSize(16777215, 30))
-        self.horizontalLayout_2 = QHBoxLayout(self.frame)
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.horizontalLayout_2.setContentsMargins(-1, 0, 0, 0)
-        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.horizontalLayout_2.addItem(self.horizontalSpacer_2)
-
-        self.btn_update = QPushButton(self.frame)
-        self.btn_update.setObjectName(u"btn_update")
-
-        self.horizontalLayout_2.addWidget(self.btn_update)
-
-        self.btn_print = QPushButton(self.frame)
-        self.btn_print.setObjectName(u"btn_print")
-
-        self.horizontalLayout_2.addWidget(self.btn_print)
-
-        self.btn_save = QPushButton(self.frame)
-        self.btn_save.setObjectName(u"btn_save")
-
-        self.horizontalLayout_2.addWidget(self.btn_save)
-
-
-        self.verticalLayout_2.addWidget(self.frame)
-
-        self.tabWidget.addTab(self.tab_3, "")
 
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
 
@@ -174,9 +136,5 @@ class Ui_AbrReport(object):
         self.le_eva.setPlaceholderText(QCoreApplication.translate("AbrReport", u"Evaluador/a", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_1), QCoreApplication.translate("AbrReport", u"Conclusiones", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("AbrReport", u"Esquema", None))
-        self.btn_update.setText(QCoreApplication.translate("AbrReport", u"Actualizar", None))
-        self.btn_print.setText(QCoreApplication.translate("AbrReport", u"Imprimir", None))
-        self.btn_save.setText(QCoreApplication.translate("AbrReport", u"Guardar", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QCoreApplication.translate("AbrReport", u"Previsualizaci\u00f3n", None))
     # retranslateUi
 

@@ -12,7 +12,7 @@ definición ABR en cases.data['ABR']['OD'/'OI'] (ver CaseBuilder.php).
 """
 import os
 
-from abr.ABR_generator_v2 import ABR_Curve
+from abr.ABR_generator_v3 import ABR_Curve
 from abr.AbrControl import AbrControl
 from abr.AbrDetail import AbrDetail
 from abr.AbrDetailAllCurves import AbrDetailAllCurves
@@ -40,6 +40,7 @@ DEFAULT_ABR_CASE = {
     'type': 'normal',
     'repro': True,
     'umbral': 20,
+    'average_objetivo': 2000,
     'desviaciones': {},
     'fsp_puntos': {'800': 2.3, '2000': 2.8, 'objetivo': 3.0},
 }
@@ -105,7 +106,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.graph_l.sig_curve_selected.connect(self.curve_selected)
         self.graph_r.sig_del_curve.connect(self.update_delete_curve)
         self.graph_l.sig_del_curve.connect(self.update_delete_curve)
-        self.report.sig_update_pdf.connect(self.report_svg)
 
         self.tabWidget.currentChanged.connect(self.tab_change)
         self.detail_all.sig_selected_curve.connect(self.selected_)
@@ -329,8 +329,12 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             averages = int(averages)
         if not express:
             if fake:
-                a = 0.52991151  # Parámetro a obtenido del ajuste
-                b = 0.52207181  # Parámetro b obtenido del ajuste
+                # b > 1: superlineal a propósito -- pedir más promediaciones
+                # (caso difícil / mucho ruido) debe sentirse notoriamente
+                # más largo, no solo un poco más. Ancla en 2000 = ~28 ticks
+                # (~8.4s), igual que la calibración vieja (b=0.522).
+                a = 0.0014339
+                b = 1.3
                 return a * (averages**b)
             self.total_averages = averages
         else:
