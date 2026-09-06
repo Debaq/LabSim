@@ -155,12 +155,11 @@ class MoveWindow():
 # Códigos de módulo que el backend deja habilitar/deshabilitar por curso
 # (ver Courses::MODULES en labsim_backend/src/Courses.php -- mantener
 # sincronizado a mano, viven en repos separados). Cualquier código que NO
-# esté acá (ej. "LOGIN", "MIS_PACIENTES") queda siempre visible: la
-# restricción por curso solo aplica a lo que el docente puede tocar en el
-# panel admin.
+# esté acá (ej. "LOGIN") queda siempre visible: la restricción por curso
+# solo aplica a lo que el docente puede tocar en el panel admin.
 GATED_MODULE_CODES = {
     "A", "W", "Z", "ABR", "CVOICE", "CVC", "AGENDA", "CHAT", "AC", "OT",
-    "INBOX", "FICHA", "EVOLUCION",
+    "INBOX", "FICHA", "EVOLUCION", "MIS_PACIENTES",
 }
 
 
@@ -365,7 +364,7 @@ class ToolBar(SubWindow):
             # "Mis pacientes" (historial propio con stats/conversación/ficha):
             # solo alumno -- el docente/admin ya tiene su vista equivalente
             # (y más completa, con todos los alumnos) en el portal web.
-            if self.data_login.get("permission") != 777:
+            if self.data_login.get("permission") != 777 and self._module_visible("MIS_PACIENTES"):
                 mis_pacientes.crear_boton(self, self.layouts[1])
 
     def activate_soft(self) -> None:
