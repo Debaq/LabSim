@@ -4,5 +4,3 @@ requests
 pyqtgraph
 pyudev; sys_platform == "linux"
 scipy
-fpdf
-PyMuPDF

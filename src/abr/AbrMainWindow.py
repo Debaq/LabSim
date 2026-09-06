@@ -22,7 +22,6 @@ from abr.AbrReport import AbrReport
 from abr.AbrTable import AbrTable
 from abr.EEG import EEG
 from abr.FSP import FSP
-from abr.PdfCreator import PDFCreator
 from abr.UI.AbrAdvanceSettings_ui import Ui_AdvanceSettings
 from abr.UI.AbrMain_ui import Ui_MainWindow
 from backend.client import BackendClient
@@ -430,18 +429,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
 ################Report
     def report_svg(self):
-        self.graph_lat_int.export_()
-        self.graph_r.export_()
-        self.graph_l.export_()
-        text1 = self.report.text_edit_1.toHtml()
-        text2 = self.report.text_edit_2.toHtml()
-        temp_dir = context.get_resource("local_cache/abr/temp")
-        image_r = os.path.join(temp_dir, "0.png")
-        image_l = os.path.join(temp_dir, "1.png")
-        image_lat = os.path.join(temp_dir, "LatInt.png")
-        file_pdf = os.path.join(temp_dir, "GFG.pdf")
-        evaluator = self.report.le_eva.text()
-        PDFCreator(title="PEATC", html1=text1, html2=text2, images=[image_r,image_l], image_lat=image_lat,data_dict=self.memory, output=file_pdf, evaluator=evaluator)
+        # Deshabilitado: el PDF ahora se genera en el backend (report_pdf.php)
+        # al primer "descargar", no en el cliente. Ver commit 0ce3e30.
+        return
 
 
 
