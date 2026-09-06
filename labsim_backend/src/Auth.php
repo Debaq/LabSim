@@ -387,6 +387,13 @@ final class Auth
         $courseId = ($ltiPlatformId !== null && $contextId !== null)
             ? Lti::findCourseForContext($ltiPlatformId, $contextId)
             : null;
+        // Sin contexto LTI (login local, código del estudiante demo): si la
+        // cuenta está matriculada en un único curso, se asume ese -- sin
+        // esto un alumno que nunca entró por LTI quedaría bloqueado
+        // (modules=[]) aunque su curso ya tenga módulos habilitados.
+        if ($courseId === null) {
+            $courseId = Courses::singleCourseFor($userId);
+        }
         return [
             'token' => $token,
             'user' => self::userProfile($userId, $courseId),

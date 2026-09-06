@@ -57,6 +57,23 @@ final class Courses
     }
 
     /**
+     * El único curso donde $userId está matriculado, o null si está en
+     * cero o en varios (ambiguo -- sesión multi-curso, sin resolver por
+     * ahora). Fallback de Auth::issueTokenFor() para
+     * sesiones sin contexto LTI (login local, código del estudiante demo):
+     * sin esto, un alumno matriculado por fuera de un launch LTI nunca
+     * resolvería curso y quedaría bloqueado (modules=[]) aunque el docente
+     * ya le haya habilitado módulos a su único curso.
+     */
+    public static function singleCourseFor(int $userId): ?int
+    {
+        $stmt = Db::get()->prepare('SELECT course_id FROM course_students WHERE user_id = ?');
+        $stmt->execute([$userId]);
+        $ids = array_column($stmt->fetchAll(), 'course_id');
+        return count($ids) === 1 ? (int) $ids[0] : null;
+    }
+
+    /**
      * Códigos de módulo habilitados para $courseId (ver course_modules en
      * sql/schema.sql). Lista vacía si el docente todavía no configuró nada
      * -- ese curso no tiene ningún módulo habilitado hasta que lo haga.
@@ -247,60 +264,62 @@ final class Courses
     }
 
     /**
-     * Crea el estudiante demo del curso: cuenta local (role=student,
-     * is_demo=1) matriculada normalmente vía course_students -- es "un
-     * alumno más" para todo efecto (se le pueden asignar citas igual que a
-     * cualquier real), salvo que queda excluido de las vistas agregadas por
-     * curso (ver dashboard.php). A lo más uno por curso -- error si
-     * $courseId ya tiene demo_user_id (usar regenerateDemoPassword() para
-     * una credencial nueva sin perder los datos acumulados).
+     * Garantiza que el curso tenga un estudiante demo y devuelve su
+     * user_id. Cuenta local (role=student, is_demo=1) SIN password_hash --
+     * entra por código de 6 dígitos igual que un alumno LTI, nunca por
+     * usuario/contraseña (ver generateDemoAccessCode()). Idempotente: si ya
+     * existe, no crea nada nuevo. Es "un alumno más" para todo efecto
+     * operativo (se le pueden asignar citas igual que a cualquier real),
+     * salvo que queda excluido de las vistas agregadas por curso (ver
+     * dashboard.php).
      */
-    public static function generateDemoStudent(int $courseId): array
+    private static function ensureDemoStudent(int $courseId): int
     {
         $course = self::find($courseId);
-        if (!$course) {
-            return ['status' => 'error', 'message' => 'Curso no encontrado.'];
-        }
-        if ($course['demo_user_id']) {
-            return ['status' => 'error', 'message' => 'Este curso ya tiene un estudiante demo.'];
+        if ($course && $course['demo_user_id']) {
+            return (int) $course['demo_user_id'];
         }
 
         $username = 'demo_curso_' . $courseId;
-        $result = self::addOrCreateStudentByUsername($courseId, $username, 'Estudiante demo', null);
-        if ($result['status'] === 'error') {
-            return $result;
-        }
-
         $pdo = Db::get();
         $stmt = $pdo->prepare('SELECT id FROM users WHERE username = ?');
         $stmt->execute([$username]);
-        $userId = (int) $stmt->fetchColumn();
-        $pdo->prepare('UPDATE users SET is_demo = 1 WHERE id = ?')->execute([$userId]);
+        $existing = $stmt->fetchColumn();
+        if ($existing !== false) {
+            $userId = (int) $existing;
+        } else {
+            $pdo->prepare(
+                "INSERT INTO users (role, username, display_name, permission, is_demo) VALUES ('student', ?, 'Estudiante demo', 444, 1)"
+            )->execute([$username]);
+            $userId = (int) $pdo->lastInsertId();
+        }
+        $pdo->prepare('INSERT OR IGNORE INTO course_students (course_id, user_id) VALUES (?, ?)')
+            ->execute([$courseId, $userId]);
         $pdo->prepare('UPDATE courses SET demo_user_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
             ->execute([$userId, $courseId]);
 
-        return ['status' => 'created', 'username' => $username, 'password' => $result['password'] ?? null];
+        return $userId;
     }
 
-    /** Nueva contraseña para el demo existente del curso, sin tocar sus datos. Null si el curso no tiene demo. */
-    public static function regenerateDemoPassword(int $courseId): ?array
+    /**
+     * Código de 6 dígitos para entrar como el demo del curso -- mismo
+     * mecanismo que un launch LTI (pairing_codes/Auth::createPairingCode),
+     * se tipea en el mismo campo "código" de la app de escritorio que usa
+     * cualquier alumno real. Se puede pedir uno nuevo las veces que haga
+     * falta (vence en pairing_code_ttl_seconds, ver config.php) -- no hay
+     * contraseña que gestionar ni mostrar una sola vez. Crea el demo del
+     * curso si todavía no existe.
+     */
+    public static function generateDemoAccessCode(int $courseId): array
     {
-        $course = self::find($courseId);
-        $userId = $course['demo_user_id'] ?? null;
-        if (!$userId) {
-            return null;
-        }
-        $pdo = Db::get();
-        $stmt = $pdo->prepare('SELECT username FROM users WHERE id = ?');
-        $stmt->execute([$userId]);
-        $username = $stmt->fetchColumn();
-        if ($username === false) {
-            return null;
-        }
-        $password = bin2hex(random_bytes(6));
-        $pdo->prepare('UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
-            ->execute([password_hash($password, PASSWORD_DEFAULT), (int) $userId]);
-        return ['username' => $username, 'password' => $password];
+        require_once __DIR__ . '/Auth.php';
+        $userId = self::ensureDemoStudent($courseId);
+        $code = Auth::createPairingCode($userId);
+        return [
+            'username' => 'demo_curso_' . $courseId,
+            'code' => $code,
+            'expires_at' => Auth::pairingCodeExpiry($code),
+        ];
     }
 
     /**

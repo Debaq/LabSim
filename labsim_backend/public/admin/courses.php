@@ -77,22 +77,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Courses::setEnabledModules($courseId, $codes);
             $success = 'Módulos actualizados.';
             AdminAudit::log($me, 'course_set_modules', ['course_id' => $courseId, 'modules' => Courses::enabledModules($courseId)]);
-        } elseif ($action === 'generate_demo') {
-            $result = Courses::generateDemoStudent($courseId);
-            if ($result['status'] === 'error') {
-                $error = $result['message'];
-            } else {
-                $success = "Estudiante demo creado. Usuario: {$result['username']} -- Contraseña: {$result['password']}";
-                AdminAudit::log($me, 'course_generate_demo', ['course_id' => $courseId, 'username' => $result['username']]);
-            }
-        } elseif ($action === 'regenerate_demo') {
-            $result = Courses::regenerateDemoPassword($courseId);
-            if ($result === null) {
-                $error = 'Este curso no tiene estudiante demo todavía.';
-            } else {
-                $success = "Contraseña nueva. Usuario: {$result['username']} -- Contraseña: {$result['password']}";
-                AdminAudit::log($me, 'course_regenerate_demo', ['course_id' => $courseId, 'username' => $result['username']]);
-            }
+        } elseif ($action === 'generate_demo_code') {
+            $result = Courses::generateDemoAccessCode($courseId);
+            $seconds = Auth::secondsUntil($result['expires_at']);
+            $success = "Código para entrar como {$result['username']}: {$result['code']} (vence en " . intdiv($seconds, 60) . " min).";
+            AdminAudit::log($me, 'course_generate_demo_code', ['course_id' => $courseId, 'username' => $result['username']]);
         } elseif ($action === 'clean_demo') {
             Courses::cleanDemoData($courseId);
             $success = 'Datos de prueba del demo eliminados (la cuenta y su contraseña siguen igual).';
@@ -300,32 +289,24 @@ if ($detailId !== null) {
     <div class="card">
         <strong>Área de pruebas</strong>
         <p style="font-size:0.8rem; color:#888; margin-top:0.2rem;">
-            Un alumno más del curso para probar la app de punta a punta (agendarle pacientes, atender, etc.) sin tocar datos de alumnos reales. Invisible para los alumnos -- solo docente/admin lo ven acá.
+            Un alumno más del curso para probar la app de punta a punta (agendarle pacientes, atender, etc.) sin tocar datos de alumnos reales. Invisible para los alumnos -- solo docente/admin lo ven acá. Entra con código de 6 dígitos, igual que un alumno LTI -- sin usuario ni contraseña que gestionar.
         </p>
-        <?php if ($demoStudent === null): ?>
-        <form method="post" style="margin-top:0.5rem;">
-        <?= csrf_field() ?>
-            <input type="hidden" name="form_action" value="generate_demo">
-            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-            <button type="submit" class="secondary">Generar estudiante demo</button>
-        </form>
-        <?php else: ?>
-        <p style="margin-top:0.5rem;">Usuario: <code><?= htmlspecialchars($demoStudent['username']) ?></code></p>
-        <div style="display:flex; gap:0.6rem;">
+        <div style="display:flex; gap:0.6rem; margin-top:0.5rem;">
             <form method="post">
             <?= csrf_field() ?>
-                <input type="hidden" name="form_action" value="regenerate_demo">
+                <input type="hidden" name="form_action" value="generate_demo_code">
                 <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                <button type="submit" class="secondary">Generar contraseña nueva</button>
+                <button type="submit" class="secondary">Generar código de acceso</button>
             </form>
-            <form method="post" onsubmit="return confirm('¿Borrar todas las citas/atenciones/chats de prueba del demo? La cuenta y su contraseña quedan igual.');">
+            <?php if ($demoStudent !== null): ?>
+            <form method="post" onsubmit="return confirm('¿Borrar todas las citas/atenciones/chats de prueba del demo? La cuenta queda igual.');">
             <?= csrf_field() ?>
                 <input type="hidden" name="form_action" value="clean_demo">
                 <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
                 <button type="submit" class="danger">Limpiar datos de prueba</button>
             </form>
+            <?php endif; ?>
         </div>
-        <?php endif; ?>
     </div>
 
     <?php if ($isFullAdmin): ?>
