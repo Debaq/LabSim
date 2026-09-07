@@ -404,6 +404,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $abrOd = $abrBuild('od');
         $abrOi = $abrBuild('oi');
 
+        // EOA: patología por oído, mismo shape simplificado (type + umbral)
+        // que ABR usa para su curva -- ver oae_attenuation_db en
+        // src/oae/generators/base.py.
+        $eoasBuild = static function (string $lado) use ($v): array {
+            return [
+                'type' => (string) fv($v, ['eoas', $lado, 'type'], 'normal'),
+                'umbral' => (int) fv($v, ['eoas', $lado, 'umbral'], 20),
+            ];
+        };
+        $eoasOd = $eoasBuild('od');
+        $eoasOi = $eoasBuild('oi');
+
         if ($age <= 0) {
             $error = 'Falta la edad.';
         } elseif (!$isUpdate && ($nombre1 === '' || $apellido1 === '')) {
@@ -428,6 +440,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Frecuencia del tinnitus inválida.';
         } elseif (!in_array($abrOd['type'], CaseBuilder::ABR_TYPE_OPTIONS, true) || !in_array($abrOi['type'], CaseBuilder::ABR_TYPE_OPTIONS, true)) {
             $error = 'Patología ABR inválida.';
+        } elseif (!in_array($eoasOd['type'], CaseBuilder::EOAS_TYPE_OPTIONS, true) || !in_array($eoasOi['type'], CaseBuilder::EOAS_TYPE_OPTIONS, true)) {
+            $error = 'Patología EOA inválida.';
         }
 
         if ($error === null) {
@@ -492,6 +506,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'disposicion' => (int) ($v['disposicion'] ?? 0),
                 'otoscopia' => ['fases' => $otoscopiaFases],
                 'abr' => ['OD' => $abrOd, 'OI' => $abrOi],
+                'eoas' => ['OD' => $eoasOd, 'OI' => $eoasOi],
             ]);
 
             if ($isUpdate) {
@@ -604,6 +619,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <button type="button" class="tab-btn" data-tab="timpanometria">Timpanometría</button>
     <button type="button" class="tab-btn" data-tab="tinnitus">Tinnitus</button>
     <button type="button" class="tab-btn" data-tab="abr">ABR</button>
+    <button type="button" class="tab-btn" data-tab="eoas">EOA</button>
     <button type="button" class="tab-btn" data-tab="anamnesis">Anamnesis</button>
 </div>
 
@@ -1329,6 +1345,29 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             <div id="abr-preview-oi" class="abr-preview"></div>
         </div>
     </div>
+</div>
+</div>
+
+<div class="tab-panel" data-tab="eoas">
+<div class="two-col">
+<?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
+<div class="card">
+    <strong>EOA <?= $ladoLabel ?></strong>
+    <p class="legend help">Patología de este oído para el generador de Emisiones Otoacústicas (TEOAE/DPOAE/SFOAE). "Coclear" y "Transmisión" atenúan la OEA según el umbral (a mayor umbral, más atenuada -- por sobre ~35-40 dB suele quedar bajo el noise floor, REFER). "Neural" deja la OEA normal aunque el umbral esté elevado: la cóclea está intacta, es el contraste clínico con ABR.</p>
+    <div class="three-col">
+        <label>Patología
+            <select name="eoas[<?= $lado ?>][type]">
+                <?php foreach (CaseBuilder::EOAS_TYPE_OPTIONS as $opt): ?>
+                <option value="<?= $opt ?>" <?= ($v['eoas'][$lado]['type'] ?? 'normal') === $opt ? 'selected' : '' ?>><?= ucfirst($opt) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label>Umbral (dB)
+            <input type="number" name="eoas[<?= $lado ?>][umbral]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['umbral'] ?? '20')) ?>">
+        </label>
+    </div>
+</div>
+<?php endforeach; ?>
 </div>
 </div>
 

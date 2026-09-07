@@ -1,0 +1,73 @@
+{
+  "comments": "Normativos por defecto para OEA clínica (TEOAE/DPOAE/SFOAE). El override por curso vive en core.app_config_store bajo 'normative_data.teoae/dpoae/sfoae' (mismo path que ABR). Sin override del curso -> se usan estos defaults + banner amarillo.",
+  "teoae": {
+    "default": {
+      "min_snr_db": 6,
+      "pass_bands_min": 3,
+      "bands_hz": [1000, 1500, 2000, 3000, 4000],
+      "band_halfwidth_ratio": 0.707,
+      "spectrum_low_hz": 500,
+      "spectrum_high_hz": 5000,
+      "expected_response_db": {
+        "1000": 8,
+        "1500": 10,
+        "2000": 12,
+        "3000": 11,
+        "4000": 9
+      },
+      "window_ms": 20,
+      "decay_ms": 8,
+      "noise_floor_db_spl": -30,
+      "default_level_db_spl": 60,
+      "default_n_sweeps": 260,
+      "stim_jitter_db": 0.8,
+      "stim_jitter_tolerance_db": 3.0,
+      "min_reproducibility_pct": 70,
+      "min_stability_pct": 80
+    }
+  },
+  "dpoae": {
+    "default": {
+      "min_dp_above_noise_db": 6,
+      "f2_min_hz": 1000,
+      "f2_max_hz": 6000,
+      "f2_step_hz": 500,
+      "f2_f1_ratio": 1.22,
+      "default_l1_db_spl": 65,
+      "default_l2_db_spl": 55,
+      "peak_f2_hz": 3000,
+      "peak_dp_db_spl": 15,
+      "rolloff_db_per_oct": 24,
+      "noise_floor_db_spl": -20,
+      "growth_rate_db_per_db_l2": 0.6,
+      "l1_l2_penalty_db_per_db": 0.15,
+      "io_l2_min_db_spl": 30,
+      "io_l2_max_db_spl": 75,
+      "io_l2_step_db_spl": 5,
+      "io_f2_hz": 3000
+    }
+  },
+  "sfoae": {
+    "default": {
+      "min_magnitude_db": 0,
+      "default_freq_hz": 1000,
+      "default_level_db_spl": 40,
+      "suppressor_min_db_spl": 0,
+      "suppressor_max_db_spl": 60,
+      "suppressor_step_db_spl": 5,
+      "suppressor_center_db_spl": 40,
+      "reference_freqs_hz": [500, 1000, 1500, 2000, 3000, 4000],
+      "expected_magnitude_db": {
+        "500": 3,
+        "1000": 6,
+        "1500": 6.5,
+        "2000": 5,
+        "3000": 3.5,
+        "4000": 2
+      },
+      "suppression_offset_db": 10,
+      "suppression_slope_db": 6,
+      "phase_slope_db": 8
+    }
+  }
+}

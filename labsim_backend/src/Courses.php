@@ -23,7 +23,7 @@ final class Courses
         'Z' => 'Impedanciómetro',
         'ABR' => 'Potencial evocado auditivo de tronco cerebral',
         'VEMP' => 'Potenciales evocados vestibulares miogénicos',
-        'EOAS' => 'Emisor Otoacústico de Screening',
+        'EOAS' => 'Emisor Otoacústico',
         'W' => 'Lista de Palabras',
         'CVOICE' => 'Comandos de Voz',
         'CHAT' => 'Hablar con el paciente',

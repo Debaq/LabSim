@@ -37,6 +37,13 @@ final class CaseBuilder
     // ABR_Curve, que mapea 'transmission' -> 'conductive' internamente).
     public const ABR_TYPE_OPTIONS = ['normal', 'coclear', 'transmission', 'neural'];
 
+    // Patología EOA (OEA) por oído -- mismas categorías que ABR pero la
+    // OEA responde distinto: 'neural' (neuropatía/retrococlear) mantiene
+    // la OEA normal porque la cóclea está intacta (a diferencia de ABR,
+    // que ahí sí sale alterado). Ver oae_attenuation_db en
+    // src/oae/generators/base.py.
+    public const EOAS_TYPE_OPTIONS = ['normal', 'coclear', 'transmission', 'neural'];
+
     // Acumetría (diapasones 500 y 1000 Hz) -- se guarda dentro de
     // audiometría, no es tab aparte. Rinne es por oído (CA vs CO en ese
     // oído); Weber es un único resultado por frecuencia (a qué lado
@@ -398,6 +405,7 @@ final class CaseBuilder
             'Tinnitus' => $form['tinnitus'],
             'Otoscopia' => $form['otoscopia'],
             'ABR' => $form['abr'],
+            'EOAS' => $form['eoas'],
             'tipo' => 'normal',
         ];
     }
@@ -588,6 +596,16 @@ final class CaseBuilder
                 // lo desmarcó explícitamente (repro === false guardado).
                 $v['abr'][$ladoForm]['repro'] = '1';
             }
+        }
+
+        $eoas = $data['EOAS'] ?? [];
+        foreach (['OD' => 'od', 'OI' => 'oi'] as $ladoData => $ladoForm) {
+            $ladoEoas = is_array($eoas[$ladoData] ?? null) ? $eoas[$ladoData] : [];
+            $ladoEoasType = $ladoEoas['type'] ?? 'normal';
+            $v['eoas'][$ladoForm] = [
+                'type' => in_array($ladoEoasType, self::EOAS_TYPE_OPTIONS, true) ? $ladoEoasType : 'normal',
+                'umbral' => (string) ($ladoEoas['umbral'] ?? 20),
+            ];
         }
 
         return $v;

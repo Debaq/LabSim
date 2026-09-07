@@ -26,7 +26,7 @@ final class Layout
         'Z'          => [false, 'Impedanciómetro', 3, [true, true], [740, 560], 'pre'],
         'ABR'        => [false, 'Potencial evocado auditivo de tronco cerebral', 4, [false, true], 'max', 'pre'],
         'VEMP'       => [false, 'Potenciales evocados vestibulares miogénicos', 5, [false, true], [1000, 600], 'pre'],
-        'EOAS'       => [false, 'Emisor Otoacústico de Screening', 6, [false, true], [1000, 600], 'pre'],
+        'EOAS'       => [false, 'Emisor Otoacústico', 6, [false, true], [1000, 600], 'pre'],
         'EOAC'       => [false, 'Emisor Otoacústico Clínico', 7, [false, true], [1000, 600], 'development'],
         'VNG'        => [false, 'Videonistagmografía', 8, [false, true], [1000, 600], 'development'],
         'VHIT'       => [false, 'Video Head Impulse Test', 9, [false, true], [1000, 600], 'development'],
