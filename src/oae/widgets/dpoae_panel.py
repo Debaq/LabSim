@@ -106,33 +106,42 @@ class DpoaePanel(QWidget):
         self.p_dp.addLegend(offset=(10, 10))
         self.curves_dp = {}
         self.curves_nf = {}
+        self.curves_target = {}
         for ear, color in _EAR_COLOR.items():
+            # Área de ruido: relleno bajo la curva de noise floor (zona
+            # donde una respuesta no es distinguible del ruido de fondo).
+            self.curves_nf[ear] = self.p_dp.plot(
+                pen=pg.mkPen(color, width=1, style=Qt.DashLine), symbol="t", symbolSize=5,
+                symbolBrush=color, name=f"NF {ear}",
+                fillLevel=-80, brush=pg.mkBrush(color[0], color[1], color[2], 45),
+            )
+            # Nivel objetivo POR FRECUENCIA (noise floor + criterio SNR de
+            # ese punto) -- lo que el DP tiene que superar ahí para pasar.
+            # Antes había una sola línea horizontal a "6 dB SPL" que no
+            # tenía sentido: el criterio es relativo al ruido de cada
+            # punto, no un nivel absoluto.
+            self.curves_target[ear] = self.p_dp.plot(
+                pen=pg.mkPen(color, width=1, style=Qt.DotLine), name=f"Objetivo {ear}",
+            )
             self.curves_dp[ear] = self.p_dp.plot(
                 pen=pg.mkPen(color, width=2), symbol="o", symbolSize=7,
                 symbolBrush=color, name=f"DP {ear}",
             )
-            self.curves_nf[ear] = self.p_dp.plot(
-                pen=pg.mkPen(color, width=1, style=Qt.DashLine), symbol="t", symbolSize=5,
-                symbolBrush=color, name=f"NF {ear}",
-            )
-        self.threshold_line = pg.InfiniteLine(
-            pos=self.generator.normative["min_dp_above_noise_db"],
-            angle=0,
-            pen=pg.mkPen((100, 100, 100), width=1, style=Qt.DotLine),
-            label="umbral SNR",
-            labelOpts={"position": 0.95, "color": (100, 100, 100)},
-        )
-        self.p_dp.addItem(self.threshold_line)
 
         self.p_io = self.glw.addPlot(row=1, col=0, title=black_title("Función I/O (crecimiento, f2 fijo @ pico)"))
         self.p_io.setLabel("left", "Nivel DP / NF", units="dB SPL")
         self.p_io.setLabel("bottom", "L2", units="dB SPL")
         self.p_io.setMouseEnabled(x=False, y=False)
         style_plot(self.p_io)
-        self.curve_io_dp = self.p_io.plot(pen=pg.mkPen((192, 57, 43), width=2), symbol="o", symbolSize=6, name="DP")
+        io_color = _EAR_COLOR["OD"]
         self.curve_io_nf = self.p_io.plot(
-            pen=pg.mkPen((120, 120, 120), width=1, style=Qt.DashLine), symbol="t", symbolSize=5, name="NF"
+            pen=pg.mkPen((120, 120, 120), width=1, style=Qt.DashLine), symbol="t", symbolSize=5, name="NF",
+            fillLevel=-80, brush=pg.mkBrush(120, 120, 120, 45),
         )
+        self.curve_io_target = self.p_io.plot(
+            pen=pg.mkPen((120, 120, 120), width=1, style=Qt.DotLine), name="Objetivo",
+        )
+        self.curve_io_dp = self.p_io.plot(pen=pg.mkPen(io_color, width=2), symbol="o", symbolSize=6, name="DP")
 
         self.lbl_summary = QLabel("Pulse 'Iniciar barrido' para generar el DP-gram.")
         right = QWidget()
@@ -183,12 +192,13 @@ class DpoaePanel(QWidget):
         self.lbl_status.setText(f"Generando DP-gram: {ear}, L1={l1:.0f}, L2={l2:.0f}...")
         result = self.generator.generate(l1_db=l1, l2_db=l2, ear=ear, case=case)
         self._results[ear] = result
+        threshold = self.generator.normative["min_dp_above_noise_db"]
         self.curves_dp[ear].setData(result["f2_list"], result["dp_levels_db_spl"])
         self.curves_nf[ear].setData(result["f2_list"], result["noise_floors_db_spl"])
+        self.curves_target[ear].setData(result["f2_list"], result["noise_floors_db_spl"] + threshold)
         all_f2 = np.concatenate([r["f2_list"] for r in self._results.values() if r is not None])
         self.p_dp.setXRange(all_f2.min() * 0.8, all_f2.max() * 1.25)
 
-        threshold = self.generator.normative["min_dp_above_noise_db"]
         snr = result["dp_levels_db_spl"] - result["noise_floors_db_spl"]
         n_pass = int(np.sum(snr >= threshold))
         n_total = len(result["f2_list"])
@@ -220,17 +230,21 @@ class DpoaePanel(QWidget):
         if case is None:
             return
         result = self.generator.generate_io(ear=ear, case=case)
+        threshold = self.generator.normative["min_dp_above_noise_db"]
         self.curve_io_dp.setData(result["l2_list"], result["dp_levels_db_spl"])
         self.curve_io_nf.setData(result["l2_list"], result["noise_floors_db_spl"])
+        self.curve_io_target.setData(result["l2_list"], result["noise_floors_db_spl"] + threshold)
         self.lbl_status.setText(f"Función I/O generada @ {result['f2_hz']:.0f} Hz ({ear}).")
 
     def _on_clear(self):
         for ear in _EAR_COLOR:
             self.curves_dp[ear].clear()
             self.curves_nf[ear].clear()
+            self.curves_target[ear].clear()
             self._results[ear] = None
         self.curve_io_dp.clear()
         self.curve_io_nf.clear()
+        self.curve_io_target.clear()
         self.table.setRowCount(0)
         self.lbl_summary.setText("Pulse 'Iniciar barrido' para generar el DP-gram.")
         self.lbl_status.setText("Listo")
