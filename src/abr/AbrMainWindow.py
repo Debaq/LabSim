@@ -521,6 +521,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
     def capture(self) -> None:
         if self.state_capture == 'record':
+            # El tubo se pinza EN PLENA promediacion (ese es el punto de la
+            # maniobra: ver si lo que esta en pantalla se cae o no), asi
+            # que este flag se relee en cada tick aunque el resto del
+            # setting quede congelado al iniciar la captura.
+            self.current_setting['clamp'] = self.control.ch_clamp.isChecked()
             side = self.current_setting["side"]
             self.graph(side)
             self.memory_curves()

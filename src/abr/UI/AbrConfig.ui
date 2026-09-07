@@ -415,6 +415,16 @@
      </property>
     </widget>
    </item>
+   <item row="9" column="1">
+    <widget class="QCheckBox" name="ch_clamp">
+     <property name="statusTip">
+      <string>Pinzar el tubo del insert: no llega sonido, pero el artefacto eléctrico sigue</string>
+     </property>
+     <property name="text">
+      <string>Pinzar tubo</string>
+     </property>
+    </widget>
+   </item>
    <item row="5" column="1">
     <widget class="QCheckBox" name="ch_atten">
      <property name="statusTip">
@@ -527,6 +537,7 @@
   <tabstop>sb_intencity</tabstop>
   <tabstop>sb_mskg</tabstop>
   <tabstop>ch_atten</tabstop>
+  <tabstop>ch_clamp</tabstop>
   <tabstop>sb_rate</tabstop>
   <tabstop>cb_filter_down</tabstop>
   <tabstop>cb_filter_up</tabstop>

@@ -1006,15 +1006,30 @@ class ABRGenerator:
                                 * max(float(imp_factor), 1e-6)),
             0.25, 1.0))
 
-    def add_transducer_artifact(self, t, transducer='insert_earphone'):
+    def add_transducer_artifact(self, t, transducer='insert_earphone',
+                                intensity=80.0):
+        """Artefacto electrico del estimulo, en los primeros ms.
+
+        No es acustico: es la corriente que va al transductor acoplandose
+        al electrodo, asi que CRECE CON LA INTENSIDAD (mas nivel, mas
+        corriente) y depende de cuan cerca del electrodo este la bobina.
+        Por eso el insert casi no lo tiene -- la bobina queda a 33 cm de
+        tubo del oido -- y el supraaural, apoyado sobre el mastoides, lo
+        tiene entero. A intensidades altas se mete justo donde va la onda
+        I, que es el error que produce: se lee I donde solo hay estimulo.
+
+        La escala es 10^((int-80)/25): la amplitud tabulada es la de 80 dB,
+        a 40 dB no queda nada y a 100 dB es cinco veces mas grande.
+        """
         cfg = {
             'insert_earphone': {'dur': 0.8, 'amp': 0.05},
             'TDH39_headphone': {'dur': 1.2, 'amp': 0.12},
             'bone_vibrator':   {'dur': 1.5, 'amp': 0.20},
         }.get(transducer, {'dur': 0.8, 'amp': 0.05})
+        escala = 10 ** ((float(intensity) - 80.0) / 25.0)
         art = np.zeros_like(t)
         mask = t < cfg['dur']
-        art[mask] = cfg['amp'] * np.exp(-t[mask] * 5)
+        art[mask] = cfg['amp'] * escala * np.exp(-t[mask] * 5)
         return art
 
     def add_baseline_drift(self, t, rng, amplitude=0.04):
@@ -1751,8 +1766,11 @@ class ABRGenerator:
             y_target_b = y_target_b + y_shadow
 
         # 10. Drift LF + artefacto transductor
+        clamp = (bool(technical_config.get('tube_clamped'))
+                 and transducer == 'insert_earphone')
         y_drift = self.add_baseline_drift(t, rng)
-        y_artifact = self.add_transducer_artifact(t, transducer)
+        y_artifact = self.add_transducer_artifact(
+            t, transducer, stimulus_config['int'])
 
         # 11. Curva limpia (sin ruido). La senial NO se escala por cuanto
         # se lleva promediado: en un equipo real esta completa desde el
@@ -1760,6 +1778,24 @@ class ABRGenerator:
         y_clean = y_target + y_drift + y_artifact
         y_clean_a = y_target_a + y_drift + y_artifact
         y_clean_b = y_target_b + y_drift + y_artifact
+
+        # 11b. Tubo pinzado: la maniobra de equipo para saber si lo que se
+        # ve es respuesta o es el estimulo acoplandose al electrodo. Con el
+        # tubo del insert cerrado NO llega sonido a la coclea, asi que
+        # desaparecen la respuesta, la microfonica y la curva sombra --
+        # pero el artefacto electrico sigue, porque la corriente al
+        # transductor no se pinza. Si algo persiste, no era respuesta.
+        # Solo tiene sentido con inserts: el supraaural y el vibrador no
+        # tienen tubo, y que la maniobra no haga nada ahi tambien se
+        # aprende.
+        if clamp:
+            y_clean = y_drift + y_artifact
+            y_clean_a = y_clean.copy()
+            y_clean_b = y_clean.copy()
+            waves_visible = False
+            # Sin estimulo no hay nada que detectar: el FSP es una razon de
+            # varianzas y no puede quedar declarando respuesta presente.
+            fsp_actual = 1.0
 
         # 12. Ruido residual del promediado. El denominador es lo que el
         # CASO necesita (average_objetivo), no lo que el alumno pidio en el
@@ -1810,7 +1846,9 @@ class ABRGenerator:
 
         # 12b. Falsa onda V del caso (si el docente la configuro): entra
         # como ruido de una sola mitad, antes del ruido de fondo, para que
-        # los filtros la traten igual que a todo lo demas.
+        # los filtros la traten igual que a todo lo demas. Sobrevive al
+        # tubo pinzado a proposito: es un artefacto, no una respuesta, y
+        # que siga ahi con el tubo cerrado es justo lo que lo delata.
         falsa_a, falsa_b = self.false_wave(
             t, case_config, accepted, growth_target, rng,
             intensidad=stimulus_config['int'])
@@ -1835,7 +1873,14 @@ class ABRGenerator:
         contra_key = self.contra_channel(technical_config,
                                          stimulus_config.get('side', 'OD'))
         y_contra = None
-        if contra_key and hay_registro:
+        if contra_key and hay_registro and clamp:
+            # Mismo canal, mismo ruido, sin respuesta: el contra tiene que
+            # apagarse con la maniobra igual que el ipsi.
+            y_contra = self.apply_filters(
+                y_clean + ruido_b + red,
+                float(stimulus_config['filter_down']),
+                float(stimulus_config['filter_passhigh']), fs)
+        elif contra_key and hay_registro:
             y_contra_clean = (self.build_target_curve(
                 t, self.contra_values(values), CM_value)
                 + y_drift + y_artifact)
@@ -1918,6 +1963,7 @@ class ABRGenerator:
             'contra_channel': contra_key,
             'residual_noise_nv': residual_nv,
             'recording': hay_registro,
+            'tube_clamped': clamp,
             'mains': bool(sin_tierra or desbalance > IMPEDANCE_BALANCE_LIMIT_KOHM),
             'impedance_max': imp_max,
             'impedance_imbalance': desbalance,
@@ -2051,6 +2097,10 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
     technical_config = default_settings(control_setting.get('test', 'ABR'))
     if technical:
         technical_config.update(technical)
+    # Pinzar el tubo es una maniobra del panel de control (se hace en plena
+    # captura), no un parametro del dialogo de equipo, pero para el
+    # generador es una condicion del registro como cualquier otra.
+    technical_config['tube_clamped'] = bool(control_setting.get('clamp'))
 
     # Oido no evaluado: umbral y patologia propios, para decidir si aparece
     # curva sombra al pasar la atenuacion interaural (ver shadow_values).

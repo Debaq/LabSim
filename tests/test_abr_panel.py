@@ -446,6 +446,33 @@ def test_sub_and_contra_can_be_hidden():
     assert nueva['sub_a'].isVisible() and not nueva['contra'].isVisible()
 
 
+def test_clamping_the_tube_works_mid_capture():
+    """Pinzar el tubo mientras corre el promedio apaga la respuesta.
+
+    El resto del setting se congela al iniciar la captura, pero esta
+    maniobra se hace justamente en vivo: si hubiera que parar y volver a
+    empezar, dejaria de servir para probar lo que hay en pantalla.
+    """
+    if not HAS_UI:
+        return
+    w = _ventana()
+    w.control.sb_intencity.setValue(80)
+    w.control.start_capture()
+    for _ in range(5):
+        w.capture()
+    assert w.last_metadata['tube_clamped'] is False
+    abierto = np.asarray(w.graph_r.data['R1']['ipsi_xy'][1])
+
+    w.control.ch_clamp.setChecked(True)
+    w.capture()
+    assert w.last_metadata['tube_clamped'] is True
+    t = np.asarray(w.graph_r.data['R1']['ipsi_xy'][0])
+    pinzado = np.asarray(w.graph_r.data['R1']['ipsi_xy'][1])
+    ventana_v = (t > 5) & (t < 7)
+    assert pinzado[ventana_v].max() < abierto[ventana_v].max() / 3
+    w.control.stop_capture()
+
+
 # ------------------------------------------------------- tabla con normativa
 
 def test_table_flags_a_late_wave_v():

@@ -99,11 +99,12 @@ class AbrControl(QWidget, Ui_Abr_Config):
         average = self.sb_prom.value()
         side = self.cb_side.currentText()
         atten = self.ch_atten.isChecked()
+        clamp = self.ch_clamp.isChecked()
 
         return {"test":test, "stim":stim, "pol":pol, "int":inty, "mkg":mkg,
                 "rate":rate, "filter_down":filter_passdown,
                 "filter_passhigh": filter_passhigh, "average" : average,
-                "side":side, "atten":atten}
+                "side":side, "atten":atten, "clamp":clamp}
 
     def set_data(self, config: dict) -> None:
         """Aplica configuración a los widgets del control"""
@@ -164,6 +165,8 @@ class AbrControl(QWidget, Ui_Abr_Config):
         self.sb_prom.setDisabled(value)
         self.cb_side.setDisabled(value)
         self.ch_atten.setDisabled(value)
+        # ch_clamp NO se deshabilita a proposito: pinzar el tubo es una
+        # maniobra que se hace mientras el equipo promedia, no antes.
 
     def config_btn(self) -> None:
         self.btn_start.clicked.connect(self.start_capture)

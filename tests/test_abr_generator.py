@@ -1235,6 +1235,130 @@ def test_false_wave_only_in_its_intensity_range():
     assert abs(altura(10)) < 0.01           # por debajo
 
 
+def _curva_tec(intensity=80, transducer='insert_earphone', clamp=False,
+               pathology='normal', neural=None, pol='Alternada', **kw):
+    """Curva con el equipo en cierto estado (transductor, tubo pinzado)."""
+    g = _gen()
+    stim = {'stim': 'click', 'freq': None, 'pol': pol, 'int': intensity,
+            'rate': 21.1, 'filter_down': 3000, 'filter_passhigh': 100,
+            'average': 2000, 'current_avg': 2000, 'pathway': 'air_conduction'}
+    tech = default_settings('ABR')
+    tech.update({'transducer': transducer, 'tube_clamped': clamp})
+    case = {'desviaciones': {}, 'fsp_puntos': {'800': 2.3, '2000': 2.8},
+            'umbral': 20, 'average_objetivo': 2000, 'repro_shift': 0.0,
+            'masking': 0, 'contra': None, 'seed_key': 'caso-1',
+            'capture_id': 'R1', 'neural': neural}
+    case.update(kw)
+    return g.generate_curve('adult_female', pathology, stim, tech, case)
+
+
+# ------------------------------------------ artefacto de estimulo y clamp
+
+def test_stimulus_artifact_grows_with_intensity_and_transducer():
+    """Es electrico: sube con el nivel y el insert casi no lo tiene.
+
+    A intensidades altas cae justo donde va la onda I, que es el error que
+    produce -- se lee I donde solo hay estimulo.
+    """
+    g = _gen()
+    t = np.linspace(0, 12, 500)
+    alto = g.add_transducer_artifact(t, 'TDH39_headphone', 100).max()
+    medio = g.add_transducer_artifact(t, 'TDH39_headphone', 80).max()
+    bajo = g.add_transducer_artifact(t, 'TDH39_headphone', 40).max()
+    assert alto > medio * 4 > bajo * 100, (alto, medio, bajo)
+    # El insert deja la bobina a 33 cm del electrodo.
+    insert = g.add_transducer_artifact(t, 'insert_earphone', 100).max()
+    assert insert < alto / 2, (insert, alto)
+    # Vive en el primer ms, donde se busca la onda I.
+    pico = t[np.argmax(g.add_transducer_artifact(t, 'TDH39_headphone', 100))]
+    assert pico < 1.0, pico
+
+
+def test_clamping_the_tube_kills_the_response_but_not_the_artifact():
+    """La maniobra: sin sonido no hay respuesta, el artefacto sigue.
+
+    Es la prueba de que lo que se ve en los primeros ms no es onda I.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    t, abierto, _ = _curva_tec()
+    _, pinzado, meta = _curva_tec(clamp=True)
+    # La onda V se cae.
+    ventana_v = (t > 5) & (t < 7)
+    assert pinzado[ventana_v].max() < abierto[ventana_v].max() / 3
+    assert meta['tube_clamped'] is True
+    # Sin estimulo el equipo no puede declarar respuesta presente.
+    assert meta['fsp'] == 1.0
+    # Pero el artefacto de estimulo sigue ahi (mismo equipo, misma corriente).
+    _, sup_abierto, _ = _curva_tec(intensity=100, transducer='TDH39_headphone')
+    _, sup_pinzado, _ = _curva_tec(intensity=100, transducer='TDH39_headphone',
+                                   clamp=True)
+    # Filtrado queda bifasico (el pasa-alto le saca el DC), asi que se
+    # mide en valor absoluto: lo que importa es que siga estando.
+    inicio = t < 1.5
+    assert np.abs(sup_pinzado[inicio]).max() > 0.3, np.abs(sup_pinzado[inicio]).max()
+    assert np.abs(sup_abierto[inicio]).max() > 0.3
+
+
+def test_clamping_does_nothing_without_a_tube():
+    """Supraaural y vibrador no tienen tubo que pinzar."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    for transductor in ('TDH39_headphone', 'bone_vibrator'):
+        _, abierto, _ = _curva_tec(transducer=transductor)
+        _, pinzado, meta = _curva_tec(transducer=transductor, clamp=True)
+        assert np.array_equal(abierto, pinzado), transductor
+        assert meta['tube_clamped'] is False
+
+
+def test_clamping_removes_the_microphonic_too():
+    """En neuropatia: la microfonica se va con el sonido, el artefacto no.
+
+    Es la unica forma real de separarlas -- las dos siguen al estimulo y
+    las dos estan en los primeros ms.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    neural = {'microfonica': 'amplificada', 'bloqueo': 'total'}
+    t, abierto, _ = _curva_tec(pathology='neural', neural=neural,
+                               pol='Rarefacción')
+    _, pinzado, _ = _curva_tec(pathology='neural', neural=neural,
+                               pol='Rarefacción', clamp=True)
+    cm = (t > 0.3) & (t < 1.5)
+    assert np.abs(pinzado[cm]).max() < np.abs(abierto[cm]).max() / 2
+
+
+def test_the_false_wave_survives_the_clamp():
+    """Pinzar no la borra: no es respuesta, y por eso se descubre.
+
+    Es la segunda maniobra que la delata, ademas de A/B.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    g = _gen()
+    def altura(clamp):
+        stim = {'stim': 'click', 'freq': None, 'pol': 'Alternada', 'int': 80,
+                'rate': 21.1, 'filter_down': 3000, 'filter_passhigh': 100,
+                'average': 2000, 'current_avg': 2000,
+                'pathway': 'air_conduction'}
+        tech = default_settings('ABR')
+        tech['tube_clamped'] = clamp
+        case = {'desviaciones': {}, 'fsp_puntos': {'800': 2.3, '2000': 2.8},
+                'umbral': 20, 'average_objetivo': 2000, 'repro_shift': 0.0,
+                'masking': 0, 'contra': None, 'seed_key': 'caso-1',
+                'capture_id': 'R1',
+                'falsa_v': {'amp': 0.3, 'lat': 8.5, 'mitad': 'a'}}
+        t, y, meta = g.generate_curve('adult_female', 'normal', stim, tech, case)
+        i = int(np.argmin(np.abs(t - 8.5)))
+        return meta['sub_a'][i]
+    assert altura(True) > 0.3
+    assert abs(altura(True) - altura(False)) < 0.05
+
+
 def test_false_wave_is_off_by_default():
     """Sin configurarla no existe: los casos viejos no cambian."""
     if not HAS_SCIPY:

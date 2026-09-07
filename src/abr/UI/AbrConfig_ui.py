@@ -187,6 +187,11 @@ class Ui_Abr_Config(object):
 
         self.gridLayout.addWidget(self.ch_atten, 5, 1, 1, 1)
 
+        self.ch_clamp = QCheckBox(Abr_Config)
+        self.ch_clamp.setObjectName(u"ch_clamp")
+
+        self.gridLayout.addWidget(self.ch_clamp, 9, 1, 1, 1)
+
         self.lbl_mkg = QLabel(Abr_Config)
         self.lbl_mkg.setObjectName(u"lbl_mkg")
         sizePolicy.setHeightForWidth(self.lbl_mkg.sizePolicy().hasHeightForWidth())
@@ -236,7 +241,8 @@ class Ui_Abr_Config(object):
         QWidget.setTabOrder(self.cb_pol, self.sb_intencity)
         QWidget.setTabOrder(self.sb_intencity, self.sb_mskg)
         QWidget.setTabOrder(self.sb_mskg, self.ch_atten)
-        QWidget.setTabOrder(self.ch_atten, self.sb_rate)
+        QWidget.setTabOrder(self.ch_atten, self.ch_clamp)
+        QWidget.setTabOrder(self.ch_clamp, self.sb_rate)
         QWidget.setTabOrder(self.sb_rate, self.cb_filter_down)
         QWidget.setTabOrder(self.cb_filter_down, self.cb_filter_up)
         QWidget.setTabOrder(self.cb_filter_up, self.sb_prom)
@@ -326,6 +332,10 @@ class Ui_Abr_Config(object):
         self.ch_atten.setStatusTip(QCoreApplication.translate("Abr_Config", u"Activar atenuador de intensidad en el inicio", None))
 #endif // QT_CONFIG(statustip)
         self.ch_atten.setText(QCoreApplication.translate("Abr_Config", u"Atenuador", None))
+#if QT_CONFIG(statustip)
+        self.ch_clamp.setStatusTip(QCoreApplication.translate("Abr_Config", u"Pinzar el tubo del insert: no llega sonido, pero el artefacto el\u00e9ctrico sigue", None))
+#endif // QT_CONFIG(statustip)
+        self.ch_clamp.setText(QCoreApplication.translate("Abr_Config", u"Pinzar tubo", None))
         self.lbl_mkg.setText(QCoreApplication.translate("Abr_Config", u"Masking : ", None))
         self.lbl_rate.setText(QCoreApplication.translate("Abr_Config", u"Tasa : ", None))
 #if QT_CONFIG(statustip)
