@@ -75,8 +75,12 @@ class MainLogin(QWidget, Ui_Login):
         worker = LoginWorker(name, passw)
         worker.moveToThread(thread)
         thread.started.connect(worker.run)
+        # _on_login_finished recibe el result (1 arg); thread.quit/quit no
+        # aceptan args -- usar lambda evita el mismatch de aridad que en
+        # algunas versiones de PySide6 lanza warning o, en el peor caso,
+        # segfault al dispatch del slot cross-thread.
         worker.finished.connect(self._on_login_finished)
-        worker.finished.connect(thread.quit)
+        worker.finished.connect(lambda _result: thread.quit())
         worker.finished.connect(worker.deleteLater)
         thread.finished.connect(thread.deleteLater)
         self._login_thread = thread
