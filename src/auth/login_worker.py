@@ -13,26 +13,31 @@ from auth.func_login import LoginConnect
 
 
 class LoginWorker(QObject):
-    """Ejecuta un único intento de login y emite el resultado.
+    """Ejecuta un único intento de login y deja el resultado en `.result`.
 
-    El shape del resultado es el mismo que devuelve LoginConnect.login():
+    `finished` no lleva argumentos a propósito: el resultado se lee desde
+    el thread de la GUI recién cuando el QThread terminó (ver
+    MainLogin._on_login_finished), así no viaja un objeto Python por una
+    conexión cross-thread mientras el worker todavía está vivo.
+
+    El shape de `.result` es el mismo que devuelve LoginConnect.login():
     dict con datos del usuario si todo OK, o 0 si falló red/credenciales.
-    Eso permite que MainLogin._verify_result(result) se reuse sin cambios.
     """
-    finished = Signal(object)
+    finished = Signal()
 
     def __init__(self, name: str, passw: str):
         super().__init__()
         self._name = name
         self._passw = passw
+        self.result = 0
 
     def run(self) -> None:
         try:
-            result = LoginConnect().login(self._name, self._passw)
+            self.result = LoginConnect().login(self._name, self._passw)
         except Exception:
             # red de seguridad: LoginConnect.login() ya captura
             # RequestException/KeyError, pero cualquier otra excepción
             # inesperada debe terminar como "no se pudo loguear"
             # (mismo path que el catch interno del LoginConnect).
-            result = 0
-        self.finished.emit(result)
+            self.result = 0
+        self.finished.emit()

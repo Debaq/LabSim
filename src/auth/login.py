@@ -75,25 +75,35 @@ class MainLogin(QWidget, Ui_Login):
         worker = LoginWorker(name, passw)
         worker.moveToThread(thread)
         thread.started.connect(worker.run)
-        # _on_login_finished recibe el result (1 arg); thread.quit/quit no
-        # aceptan args -- usar lambda evita el mismatch de aridad que en
-        # algunas versiones de PySide6 lanza warning o, en el peor caso,
-        # segfault al dispatch del slot cross-thread.
-        worker.finished.connect(self._on_login_finished)
-        worker.finished.connect(lambda _result: thread.quit())
-        worker.finished.connect(worker.deleteLater)
+        # OJO con el ciclo de vida (aquí hubo segfault, ver core dumps del
+        # 2026-09-07): NO usar worker.deleteLater(). Ese DeferredDelete se
+        # despacha en el thread del worker y Shiboken destruye ahí el
+        # wrapper Python mientras el thread de la GUI todavía tiene la
+        # referencia y está construyendo la ventana principal -> "QObject:
+        # shared QObject was deleted directly" + SIGSEGV/SIGBUS dentro del
+        # QThread. El worker lo libera Python solo, al soltar la referencia
+        # en _on_login_finished, ya con el thread parado.
+        worker.finished.connect(thread.quit)
+        # El resultado se procesa en thread.finished (ya en el thread GUI y
+        # con el worker detenido), no en worker.finished: así el trabajo
+        # pesado del post-login (load_sub_windows) nunca corre en paralelo
+        # con el thread del worker aún vivo.
+        thread.finished.connect(self._on_login_finished)
         thread.finished.connect(thread.deleteLater)
         self._login_thread = thread
         self._login_worker = worker  # evita GC antes de que termine
         thread.start()
 
-    def _on_login_finished(self, result) -> None:
-        """Slot llamado en el thread de la GUI cuando el worker emite
-        `finished`. Limpia el overlay, libera referencias, y delega al
-        _verify_result existente (mismo path que antes)."""
-        self._show_busy(False)
-        self._login_thread = None
+    def _on_login_finished(self) -> None:
+        """Slot llamado en el thread de la GUI cuando el QThread del login
+        ya terminó. Lee el resultado del worker, suelta las referencias
+        (eso destruye el worker desde este thread, no desde el suyo) y
+        delega al _verify_result existente (mismo path que antes)."""
+        worker = self._login_worker
+        result = worker.result if worker is not None else 0
         self._login_worker = None
+        self._login_thread = None
+        self._show_busy(False)
         self._verify_result(result)
 
     def _show_busy(self, show: bool) -> None:
