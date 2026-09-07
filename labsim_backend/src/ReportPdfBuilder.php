@@ -13,7 +13,11 @@ declare(strict_types=1);
  *   "curvas": { "<nombre>": {"side":"OD","int":80,"average":1000,
  *                             "LatAmp": {"I":[lat,amp], "III":[...], "V":[...]}}, ... },
  *   "hallazgos": "texto plano",
- *   "conclusion": "texto plano"
+ *   "conclusion": "texto plano",
+ *   "tecnica": { condiciones de registro -- equipo, electrodos e
+ *                impedancias, rechazo, criterio FSP y lo que el equipo
+ *                midio (barridos aceptados, FSP, ruido, replicabilidad).
+ *                Opcional: los informes viejos no lo traen. }
  * }
  *
  * Imágenes (todas opcionales -- si no existe el archivo, se omite ese
@@ -63,6 +67,7 @@ final class ReportPdfBuilder
 
         if ($tipo === 'EOA') {
             $y = self::eoaBody($pdf, $reportId, $data, $y, $contentW);
+            $y = self::technicalSection($pdf, $data, $y, $contentW);
             self::textSections($pdf, $data, $y, $contentW);
             return $pdf->output();
         }
@@ -115,10 +120,19 @@ final class ReportPdfBuilder
                 $linea = self::formatCurveLine((string) $nombreCurva, $curva, $wavesDefault);
                 $pdf->text(self::MARGIN, $y, $linea, 9);
                 $y += 14;
+                // Como se registro ESTA curva. El alumno puede cambiar
+                // estimulo, tasa o filtros entre curvas, asi que el
+                // bloque global de condiciones no alcanza.
+                $detalle = self::formatCurveSetup($curva);
+                if ($detalle !== '') {
+                    $pdf->text(self::MARGIN + 12, $y, $detalle, 8);
+                    $y += 12;
+                }
             }
             $y += 10;
         }
 
+        $y = self::technicalSection($pdf, $data, $y, $contentW);
         self::textSections($pdf, $data, $y, $contentW);
 
         return $pdf->output();
@@ -391,6 +405,141 @@ final class ReportPdfBuilder
             'ELECTROCOCLEO' => 'Electrococleografía',
             default => $tipo,
         };
+    }
+
+    /**
+     * Condiciones de registro: COMO se tomo el examen, no que dio.
+     *
+     * Sin esto el informe deja al docente evaluando el resultado sin poder
+     * ver el procedimiento: no hay forma de distinguir un registro bien
+     * hecho de uno tomado con los electrodos a 8 kOhm, sin tierra o con el
+     * rechazo de artefacto apagado. Lo manda el cliente en data['tecnica']
+     * (ver AbrMainWindow.recording_conditions); los informes viejos no lo
+     * traen y el bloque simplemente no se dibuja.
+     */
+    private static function technicalSection(MiniPdf $pdf, array $data, float $y, float $contentW): float
+    {
+        $tec = is_array($data['tecnica'] ?? null) ? $data['tecnica'] : [];
+        if ($tec === []) {
+            return $y;
+        }
+
+        $lineas = [];
+        $equipo = array_filter([
+            self::num($tec['transductor'] ?? null) !== 'N/D' ? "Transductor: {$tec['transductor']}" : null,
+            isset($tec['montaje']) ? "Montaje: {$tec['montaje']}" : null,
+            isset($tec['ventana_ms']) ? 'Ventana: ' . self::num($tec['ventana_ms']) . ' ms' : null,
+        ]);
+        if ($equipo !== []) {
+            $lineas[] = implode('   ', $equipo);
+        }
+
+        $electrodos = is_array($tec['electrodos'] ?? null) ? $tec['electrodos'] : [];
+        $impedancias = is_array($tec['impedancias_kohm'] ?? null) ? $tec['impedancias_kohm'] : [];
+        if ($electrodos !== [] || $impedancias !== []) {
+            $rotulos = ['vertex' => 'Activo', 'right' => 'Ref. der', 'left' => 'Ref. izq', 'ground' => 'Tierra'];
+            $partes = [];
+            foreach ($rotulos as $clave => $rotulo) {
+                $pos = $electrodos[$clave] ?? null;
+                $imp = $impedancias[$clave] ?? null;
+                if ($pos === null && $imp === null) {
+                    continue;
+                }
+                $texto = $rotulo . ' ' . self::num($pos);
+                if ($imp !== null) {
+                    $texto .= ' (' . self::num($imp) . ' kOhm)';
+                }
+                $partes[] = $texto;
+            }
+            if ($partes !== []) {
+                $lineas[] = 'Electrodos: ' . implode('   ', $partes);
+            }
+            if (isset($tec['impedancia_max_kohm'])) {
+                $estado = ($tec['impedancia_en_norma'] ?? false) ? 'dentro de norma' : 'FUERA DE NORMA';
+                $lineas[] = 'Impedancia: peor ' . self::num($tec['impedancia_max_kohm'])
+                    . ' kOhm, desbalance ' . self::num($tec['impedancia_desbalance_kohm'] ?? null)
+                    . ' kOhm - ' . $estado;
+            }
+        }
+
+        $prom = array_filter([
+            array_key_exists('rechazo_artefacto_uv', $tec)
+                ? 'Rechazo de artefacto: ' . ((float) $tec['rechazo_artefacto_uv'] > 0
+                    ? '±' . self::num($tec['rechazo_artefacto_uv']) . ' µV' : 'desactivado')
+                : null,
+            !empty($tec['criterio_fsp']) ? 'Criterio FSP: ' . self::num($tec['criterio_fsp']) : null,
+            isset($tec['ruido_residual_objetivo_nv'])
+                ? 'Ruido objetivo: ' . self::num($tec['ruido_residual_objetivo_nv']) . ' nV' : null,
+        ]);
+        if ($prom !== []) {
+            $lineas[] = implode('   ', $prom);
+        }
+
+        $medido = array_filter([
+            isset($tec['barridos_presentados'])
+                ? "Barridos: {$tec['barridos_presentados']} presentados / "
+                  . ($tec['barridos_aceptados'] ?? 'N/D') . ' aceptados' : null,
+            isset($tec['fsp']) ? 'FSP ' . self::num($tec['fsp']) : null,
+            isset($tec['ruido_residual_nv']) ? 'ruido ' . self::num($tec['ruido_residual_nv']) . ' nV' : null,
+            isset($tec['replicabilidad'])
+                ? 'replicabilidad ' . number_format((float) $tec['replicabilidad'], 2, ',', '')
+                : null,
+        ]);
+        if ($medido !== []) {
+            $lineas[] = implode('   ', $medido);
+        }
+
+        $avisos = [];
+        if (!empty($tec['interferencia_red'])) {
+            $avisos[] = 'interferencia de red (50 Hz)';
+        }
+        if (array_key_exists('canal_contralateral', $tec) && !$tec['canal_contralateral']) {
+            $avisos[] = 'sin canal contralateral';
+        }
+        if ($avisos !== []) {
+            $lineas[] = 'Observaciones del equipo: ' . implode(', ', $avisos);
+        }
+
+        $y = self::ensureSpace($pdf, $y, 22 + count($lineas) * 13);
+        $pdf->text(self::MARGIN, $y, 'Condiciones de registro', 12, true);
+        $y += 18;
+        foreach ($lineas as $linea) {
+            $pdf->text(self::MARGIN, $y, $linea, 9);
+            $y += 13;
+        }
+
+        return $y + 10;
+    }
+
+    /** Parametros con los que se registro una curva puntual. */
+    private static function formatCurveSetup(array $curva): string
+    {
+        $partes = [];
+        if (!empty($curva['stim'])) {
+            $partes[] = (string) $curva['stim'];
+        }
+        if (!empty($curva['pol'])) {
+            $partes[] = (string) $curva['pol'];
+        }
+        if (isset($curva['rate'])) {
+            $partes[] = self::num($curva['rate']) . '/s';
+        }
+        if (isset($curva['filter_passhigh']) || isset($curva['filter_down'])) {
+            $partes[] = self::num($curva['filter_passhigh'] ?? null) . '-'
+                . self::num($curva['filter_down'] ?? null) . ' Hz';
+        }
+        if (!empty($curva['mkg'])) {
+            $partes[] = 'masking ' . self::num($curva['mkg']) . ' dB';
+        }
+        $tec = is_array($curva['tecnica'] ?? null) ? $curva['tecnica'] : [];
+        if (isset($tec['barridos_aceptados'])) {
+            $partes[] = $tec['barridos_aceptados'] . ' barridos aceptados';
+        }
+        if (isset($tec['impedancia_max_kohm'])) {
+            $partes[] = 'imp. máx ' . self::num($tec['impedancia_max_kohm']) . ' kOhm';
+        }
+
+        return $partes === [] ? '' : implode('  ·  ', $partes);
     }
 
     private static function formatCurveLine(string $nombre, array $curva, array $wavesDefault): string
