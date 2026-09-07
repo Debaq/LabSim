@@ -1,8 +1,10 @@
 # pylint: disable=no-name-in-module
-from PySide6.QtCore import Signal
+from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import QMessageBox, QWidget
 
 from auth.func_login import LoginConnect
+from auth.login_busy_dialog import LoginBusyDialog
+from auth.login_worker import LoginWorker
 from auth.UI.Ui_Login import Ui_Login
 
 
@@ -34,6 +36,11 @@ class MainLogin(QWidget, Ui_Login):
         self.setTabOrder(self.Le_name, self.Le_passw)
         self.Le_name.setFocus()
 
+        # Estado del worker async. None cuando no hay login en curso.
+        self._login_thread = None
+        self._login_worker = None
+        self._busy = None
+
     def showEvent(self, event) -> None:
         super().showEvent(event)
         self.Le_name.setFocus()
@@ -48,9 +55,66 @@ class MainLogin(QWidget, Ui_Login):
         passw = self.Le_passw.text()
         if not self._verify_login(name, passw):
             QMessageBox.critical(self, "Ingreso", "Error de Login")
+            return
+        # Si ya hay un login en curso (doble click, Enter repetido), ignorar.
+        if self._login_thread is not None:
+            return
+        self._start_login(name, passw)
+
+    def _start_login(self, name: str, passw: str) -> None:
+        """Lanza LoginWorker en un QThread para no congelar la UI.
+
+        El HTTP a /api/admin_login.php (o /api/pair_exchange.php) puede
+        tardar varios segundos con red lenta; antes esto se ejecutaba
+        sincrónico y la ventana quedaba pegada. Con el worker + overlay
+        (LoginBusyDialog), el usuario ve feedback de progreso y los inputs
+        quedan bloqueados para evitar doble submit.
+        """
+        self._show_busy(True)
+        thread = QThread(self)
+        worker = LoginWorker(name, passw)
+        worker.moveToThread(thread)
+        thread.started.connect(worker.run)
+        worker.finished.connect(self._on_login_finished)
+        worker.finished.connect(thread.quit)
+        worker.finished.connect(worker.deleteLater)
+        thread.finished.connect(thread.deleteLater)
+        self._login_thread = thread
+        self._login_worker = worker  # evita GC antes de que termine
+        thread.start()
+
+    def _on_login_finished(self, result) -> None:
+        """Slot llamado en el thread de la GUI cuando el worker emite
+        `finished`. Limpia el overlay, libera referencias, y delega al
+        _verify_result existente (mismo path que antes)."""
+        self._show_busy(False)
+        self._login_thread = None
+        self._login_worker = None
+        self._verify_result(result)
+
+    def _show_busy(self, show: bool) -> None:
+        """Muestra/oculta el spinner y deshabilita los inputs."""
+        widgets = (self.Le_name, self.Le_passw, self.btn_login)
+        if show:
+            for w in widgets:
+                w.setEnabled(False)
+            self._busy = LoginBusyDialog(self)
+            self._busy.show()
         else:
-            result = self.login_func.login(name, passw)
-            self._verify_result(result)
+            for w in widgets:
+                w.setEnabled(True)
+            if self._busy is not None:
+                self._busy.close_busy()
+                self._busy = None
+
+    def closeEvent(self, event) -> None:
+        """Si hay un login en curso al cerrar la ventana, parar el thread
+        limpio para no dejar zombie ni RuntimeError por emitir a un slot
+        de un widget ya destruido."""
+        if self._login_thread is not None and self._login_thread.isRunning():
+            self._login_thread.quit()
+            self._login_thread.wait(2000)
+        super().closeEvent(event)
 
     def _verify_result(self, result:any) -> None:
         """

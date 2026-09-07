@@ -163,12 +163,34 @@ def check_for_update(current_version: str):
         hops.append((r["tag_name"], update_url))
 
     if hops is not None and len(hops) <= MAX_CHAIN_HOPS:
-        return {"tag": latest_tag, "build_id": latest_build_id, "mode": "chain", "hops": hops}
+        return {
+            "tag": latest_tag,
+            "build_id": latest_build_id,
+            "mode": "chain",
+            "hops": hops,
+            "notes": _extract_notes(latest),
+        }
 
     full_url = _asset_url(latest, FULL_ASSET_NAME)
     if full_url is None:
         return None
-    return {"tag": latest_tag, "build_id": latest_build_id, "mode": "full", "url": full_url}
+    return {
+        "tag": latest_tag,
+        "build_id": latest_build_id,
+        "mode": "full",
+        "url": full_url,
+        "notes": _extract_notes(latest),
+    }
+
+
+def _extract_notes(release: dict) -> str:
+    """Devuelve el body del release de GitHub (markdown) capeado a 1500
+    chars para que el QMessageBox que muestra "¿actualizar?" no se infle.
+    Vacío si el release no trae notas o son solo whitespace."""
+    body = (release.get("body") or "").strip()
+    if len(body) > 1500:
+        body = body[:1500] + "\n[…]"
+    return body
 
 
 _UPDATER_SCRIPT = """#!/bin/bash

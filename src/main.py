@@ -21,7 +21,7 @@ from core.updater import local_build_id
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
                           marcar_entry_atendiendo, marcar_entry_atendido,
                           reset_backend_session)
-from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon
+from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon, style_dialog
 from audiometria.UI.Ui_command_voice_A import Ui_Form as commandVoiceA
 from core.UI.Ui_Main import Ui_MainWindow
 from core.Logger import Logger
@@ -642,18 +642,28 @@ def _check_and_apply_update():
     if update is None:
         return
     tag = update["tag"]
+    notes = update.get("notes") or ""
     if update["mode"] == "chain":
         n = len(update["hops"])
         detalle = f"Se aplicará en {n} paso{'s' if n != 1 else ''} (paquetes livianos, solo lo que cambió)."
     else:
         detalle = "Se descargará el paquete completo."
-    resp = QMessageBox.question(
-        None,
-        "Actualización disponible",
+    # Prompt estilizado: logo + stylesheet del tema + release notes del
+    # GitHub release bajo "Show Details" (colapsable). Antes era un
+    # QMessageBox.question plano sin contexto.
+    prompt = QMessageBox()
+    prompt.setIcon(QMessageBox.Question)
+    prompt.setWindowTitle("Actualización disponible")
+    prompt.setText(
         f"Hay una nueva versión disponible ({tag}).\n{detalle}\n"
-        "¿Actualizar ahora? La aplicación se cerrará y volverá a abrir sola.",
-        QMessageBox.Yes | QMessageBox.No,
+        "¿Actualizar ahora? La aplicación se cerrará y volverá a abrir sola."
     )
+    if notes:
+        prompt.setDetailedText(notes)
+    prompt.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+    prompt.setDefaultButton(QMessageBox.Yes)
+    style_dialog(prompt)
+    resp = prompt.exec()
     if resp != QMessageBox.Yes:
         return
 
@@ -665,6 +675,7 @@ def _check_and_apply_update():
     progress.setAutoClose(False)
     progress.setAutoReset(False)
     progress.show()
+    style_dialog(progress)
     context.app.processEvents()
 
     def on_progress(stage, current, total, hop, hops):
@@ -695,11 +706,15 @@ def _check_and_apply_update():
         # Falla de red o archivo corrupto a mitad de la descarga/extracción:
         # no dejamos morir la app acá, se sigue con la versión actual instalada.
         progress.close()
-        QMessageBox.warning(
-            None,
-            "Actualización fallida",
-            f"No se pudo completar la actualización, se abre la versión actual.\n{exc}",
+        warning = QMessageBox()
+        warning.setIcon(QMessageBox.Warning)
+        warning.setWindowTitle("Actualización fallida")
+        warning.setText(
+            f"No se pudo completar la actualización, se abre la versión actual.\n{exc}"
         )
+        warning.setStandardButtons(QMessageBox.Ok)
+        style_dialog(warning)
+        warning.exec()
     else:
         # apply_update_and_restart solo vuelve si el asset tenía una
         # estructura inesperada (no lanzó, no hizo el swap) -- el
