@@ -673,12 +673,15 @@ def _check_and_apply_update():
             if total:
                 progress.setRange(0, total)
                 progress.setValue(current)
+                cur_mb = current / (1024 * 1024)
+                tot_mb = total / (1024 * 1024)
                 progress.setLabelText(
-                    f"Descargando actualización{paso}... {current // 1024} / {total // 1024} KB"
+                    f"Descargando actualización{paso}... {cur_mb:.1f} / {tot_mb:.1f} MB"
                 )
             else:
                 progress.setRange(0, 0)
-                progress.setLabelText(f"Descargando actualización{paso}... {current // 1024} KB")
+                cur_mb = current / (1024 * 1024)
+                progress.setLabelText(f"Descargando actualización{paso}... {cur_mb:.1f} MB")
         elif stage == "extract":
             progress.setRange(0, 0)
             progress.setLabelText(f"Instalando actualización{paso}...")
