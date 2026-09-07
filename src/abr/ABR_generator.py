@@ -32,6 +32,23 @@ junto con abr/bezier_prop.py):
   de a poco en vez de sortearse entero en cada tick.
 - Ruido sembrado con core.rng.stable_seed: la misma captura del mismo
   paciente se redibuja igual entre aperturas de la app.
+- Subpromedios A/B (barridos pares e impares) e índice de replicabilidad:
+  la replicabilidad se ve EN VIVO, no solo repitiendo la captura. Un caso
+  no reproducible tampoco mantiene el timing dentro de una captura, así
+  que sus dos subpromedios no se pegan nunca.
+- Canal contralateral propio (onda I casi ausente, IV-V separadas, V un
+  poco más tardía), no una copia del ipsi, y solo si ese electrodo está
+  puesto.
+- Monitor de EEG crudo por canal (raw_eeg): el 50 Hz, la impedancia y la
+  tensión del paciente se ven ANTES de promediar, que es cuando se
+  arreglan.
+- El FSP medido cae con los electrodos malos (es una razón de varianzas):
+  antes se podía registrar a 15 kOhm y el equipo declaraba igual
+  "respuesta presente".
+- Rangos normativos y banda latencia-intensidad calculados con la MISMA
+  función latencia-intensidad que dibuja la curva, y para la población del
+  paciente: con una banda fija de adulto, todo neonato quedaba fuera de
+  norma.
 """
 
 import json
@@ -202,6 +219,56 @@ MAINS_NO_GROUND_UV = 3.0
 
 DISCONNECTED = 'No Conectado'
 
+# Canal contralateral: la misma respuesta registrada desde el mastoides del
+# oido NO estimulado. No es otra respuesta -- es el mismo generador visto
+# desde otro vector, y por eso:
+#   - la onda I casi desaparece (la genera el nervio distal, que esta
+#     pegado al electrodo IPSI y lejisimos del contra);
+#   - III-V se conservan (generadores de tronco, mas mediales);
+#   - el complejo IV-V se separa y la V queda un pelo mas tarde y mas ancha.
+# Esa comparacion ipsi/contra es lo que permite lateralizar una lesion de
+# tronco, y es la razon clinica de registrar los dos canales a la vez.
+CONTRA_AMP_FACTOR = {'I': 0.15, 'II': 0.55, 'III': 0.85, 'IV': 0.75, 'V': 0.90}
+CONTRA_LAT_SHIFT = {'I': 0.0, 'II': 0.05, 'III': 0.05, 'IV': -0.10, 'V': 0.15}
+CONTRA_WIDTH_FACTOR = 1.15
+
+# EEG crudo (monitor previo a promediar). Un adulto relajado corre en
+# ~10-15 uV RMS; tenso o con EMG de cuello se va al doble o mas. Es el
+# trazo donde el alumno tiene que ver el 50 Hz y la tension ANTES de
+# promediar, no despues de 2000 barridos.
+EEG_BASELINE_UV = 12.0
+EEG_TENSION_UV = 9.0
+# Lo que el pasa-alto de 100 Hz del ABR se come del zumbido de red y en el
+# monitor crudo (sin filtrar) se ve entero. MAINS_* estan calibrados sobre
+# el residuo post-filtro, ver mains_interference.
+MAINS_RAW_GAIN = 12.0
+# Frecuencia de muestreo del monitor de EEG: no hace falta el fs del
+# promediador (41.6 kHz) para mirar un trazo con 50 Hz y EMG.
+EEG_DISPLAY_FS = 500.0
+
+# Bloques de ruido por tanda. Fijo (no min(64, faltantes)) para que el
+# bloque i sea SIEMPRE el mismo bloque, no dependa de cuantos se pidieron:
+# de eso vive que el trazo se asiente en vez de resortearse, y que los
+# subpromedios A/B (pares/impares) sean estables entre ticks.
+NOISE_TANDA = 64
+
+# Impedancia de referencia (kOhm): el equipo bien puesto de default_settings.
+# Es el punto donde el FSP del caso vale tal cual; de ahi para arriba el
+# ruido sube y el FSP medido cae solo.
+IMPEDANCE_REF_KOHM = 2.0
+
+# Rango de normalidad clinico: +-2 DE alrededor del valor poblacional.
+# El JSON normativo trae las medias, no las desviaciones -- estas son las
+# DE tipicas de click a 80 dB nHL con las que se leen los informes.
+NORM_SD_LIMIT = 2.0
+NORM_LAT_SD = {'I': 0.20, 'II': 0.25, 'III': 0.22, 'IV': 0.28, 'V': 0.25}
+NORM_INTERPEAK_SD = {'I-III': 0.22, 'III-V': 0.22, 'I-V': 0.25}
+# Razon V/I: por debajo de esto la onda V esta desproporcionadamente chica
+# respecto de la I, hallazgo retrococlear clasico.
+NORM_VI_RATIO_MIN = 0.5
+# Diferencia interaural de la onda V que se considera significativa (ms).
+NORM_INTERAURAL_MAX = 0.4
+
 
 def select_population(age=None, gender=None):
     """Poblacion normativa segun el paciente (claves de normative_data.json).
@@ -355,15 +422,7 @@ class ABRGenerator:
             gap = max(threshold - NORMAL_THRESHOLD_REF, 0.0)
         lat_intensity = intensity - gap
 
-        # Pendiente de la funcion latencia-intensidad (onda V, click): ~0.08ms/10dB
-        # cerca del techo (80-70dB, casi plana) y ~0.3ms/10dB de ahi para abajo
-        # -- Hood, "Clinical Applications of the ABR" reporta ~0.3ms/10dB entre
-        # 70 y 50dB. Quiebre en 70 (antes estaba en 60, dejaba el tramo 70-60
-        # con la pendiente plana que no corresponde).
-        if lat_intensity >= 70:
-            lat_shift = (80 - lat_intensity) / 10 * 0.08
-        else:
-            lat_shift = (80 - 70) / 10 * 0.08 + (70 - lat_intensity) / 10 * 0.3
+        lat_shift = self.latency_intensity_shift(lat_intensity)
 
         # Patologia neural (retrococlear): el retraso se acumula de la I
         # hacia la V, o sea prolonga los interpicos I-III/III-V en vez de
@@ -738,7 +797,8 @@ class ABRGenerator:
         return 0.70 * pink + 0.30 * emg
 
     def averaged_noise(self, t, current_avg, target_avg, quality, rng,
-                       imp_factor=1.0, noise_floor_uv=NOISE_FLOOR_UV):
+                       imp_factor=1.0, noise_floor_uv=NOISE_FLOOR_UV,
+                       split=False):
         """Ruido RESIDUAL de un promediado de `current_avg` barridos.
 
         El equipo promedia: la senial esta completa desde el primer barrido
@@ -751,8 +811,13 @@ class ABRGenerator:
         barridos; el residual es el promedio de los bloques ya acumulados.
         Eso da a la vez las dos cosas: RMS ~ 1/sqrt(N), y un trazo que
         cambia de a poco (un bloque nuevo lo mueve 1/m) porque los bloques
-        anteriores son los MISMOS (el rng entrega siempre las filas en el
-        mismo orden desde la misma semilla).
+        anteriores son los MISMOS: cada tanda de NOISE_TANDA bloques sale
+        de su propio rng sembrado con (semilla del caso, indice de tanda),
+        asi que el bloque i no depende de cuantos bloques se pidieron.
+
+        split=True devuelve ademas los dos subpromedios A (bloques pares) y
+        B (impares), que es como un equipo real muestra la replicabilidad
+        mientras promedia.
 
         quality: cuanto ruido trae ESTE paciente (1.0 = tipico). Sale de
         los puntos FSP del caso, no del FSP corriente: el FSP medido es
@@ -761,26 +826,68 @@ class ABRGenerator:
         saltos de 8x al cruzar un tramo en plena captura.
         """
         n = len(t)
-        target = max(float(target_avg), 1.0)
-        block = max(target / NOISE_BLOCKS, 10.0)
-        m = int(np.ceil(max(float(current_avg), 1.0) / block))
-        m = max(min(m, NOISE_BLOCKS * 4), 1)
+        m = self.noise_blocks_done(current_avg, target_avg)
+        escala = self.noise_scale(quality, imp_factor, noise_floor_uv)
+
+        # Semilla de los bloques: UN solo tiro del rng del caso, sin
+        # importar cuantos bloques se pidan. Asi el bloque i es siempre el
+        # mismo bloque (el trazo se asienta) y ademas lo que el rng entregue
+        # despues -- el zumbido de red -- no cambia con la promediacion.
+        semilla = int(rng.integers(1 << 62))
 
         # Se acumula por tandas: con ventanas largas (P300 son 800 ms, o
         # sea decenas de miles de muestras) una matriz m x n entera no
         # entra en memoria, y el promedio por tandas da lo mismo.
-        residual = np.zeros(n)
+        total = np.zeros(n)
+        suma_a = np.zeros(n)
+        suma_b = np.zeros(n)
+        n_a = n_b = 0
         hechos = 0
         while hechos < m:
-            tanda = min(64, m - hechos)
-            residual += self.sweep_noise(n, tanda, rng).sum(axis=0)
-            hechos += tanda
-        residual /= m
+            bloques = self.sweep_noise(
+                n, NOISE_TANDA, np.random.default_rng([semilla, hechos // NOISE_TANDA]))
+            usar = min(NOISE_TANDA, m - hechos)
+            bloques = bloques[:usar]
+            idx = np.arange(hechos, hechos + usar)
+            total += bloques.sum(axis=0)
+            pares = bloques[idx % 2 == 0]
+            impares = bloques[idx % 2 == 1]
+            if len(pares):
+                suma_a += pares.sum(axis=0)
+                n_a += len(pares)
+            if len(impares):
+                suma_b += impares.sum(axis=0)
+                n_b += len(impares)
+            hechos += usar
 
-        # El promedio de m bloques YA tiene RMS 1/sqrt(m): la caida con las
-        # promediaciones sale de ahi. Esta constante solo fija la escala
-        # para que al llegar al objetivo (m = NOISE_BLOCKS) el piso quede
-        # en el ruido residual que declara el equipo, con paciente tipico.
+        residual = total / m * escala
+        if not split:
+            return residual
+        # Subpromedios A/B: barridos pares e impares promediados en
+        # paralelo. Misma senial en los dos (es el mismo paciente), la
+        # mitad de barridos cada uno -> sqrt(2) mas ruido, que es lo que
+        # hace que A y B se peguen recien cuando hay respuesta de verdad.
+        sub_a = suma_a / max(n_a, 1) * escala
+        sub_b = suma_b / max(n_b, 1) * escala if n_b else np.zeros(n)
+        return residual, sub_a, sub_b
+
+    @staticmethod
+    def noise_blocks_done(current_avg, target_avg):
+        """Bloques de ruido ya acumulados para `current_avg` barridos."""
+        target = max(float(target_avg), 1.0)
+        block = max(target / NOISE_BLOCKS, 10.0)
+        m = int(np.ceil(max(float(current_avg), 1.0) / block))
+        return max(min(m, NOISE_BLOCKS * 4), 1)
+
+    @staticmethod
+    def noise_scale(quality, imp_factor, noise_floor_uv=NOISE_FLOOR_UV):
+        """Amplitud del ruido de UN barrido (el promedio ya divide por m).
+
+        El promedio de m bloques YA tiene RMS 1/sqrt(m): la caida con las
+        promediaciones sale de ahi. Esta constante solo fija la escala
+        para que al llegar al objetivo (m = NOISE_BLOCKS) el piso quede
+        en el ruido residual que declara el equipo, con paciente tipico.
+        """
         amp = noise_floor_uv * np.sqrt(NOISE_BLOCKS) * quality * imp_factor
         # El techo existe para que el arranque de la promediacion no se
         # salga de la escala del grafico; NO para tapar unos electrodos
@@ -788,7 +895,7 @@ class ABRGenerator:
         # todo daba el mismo trazo y la regla de los 5 kOhm no se podia
         # mostrar.
         techo = NOISE_MAX_UV * max(imp_factor, 1.0)
-        return residual * min(amp, techo)
+        return min(amp, techo)
 
     # =====================================================================
     # FILTROS (limpios: solo butterworth, sin hacks)
@@ -839,6 +946,30 @@ class ABRGenerator:
         if prom_actual <= 2000:
             return fsp_800 + (fsp_2000 - fsp_800) * (prom_actual - 800) / 1200
         return fsp_2000
+
+    @staticmethod
+    def replicability(sub_a, sub_b):
+        """Indice de replicabilidad entre los dos subpromedios (0-1).
+
+        Correlacion cruzada de A contra B. Con puro ruido los dos
+        subpromedios son independientes y da ~0; a medida que la respuesta
+        emerge por debajo del ruido, la parte comun crece y el indice sube
+        solo como 1/sqrt(N). Un paciente "no reproducible" nunca los pega:
+        la respuesta esta, pero llega con un timing distinto cada vez.
+
+        Se recorta en 0: una correlacion negativa entre subpromedios no es
+        "menos que nada", es ruido igual.
+        """
+        a = np.asarray(sub_a, dtype=float)
+        b = np.asarray(sub_b, dtype=float)
+        if a.size < 2 or b.size < 2:
+            return 0.0
+        a = a - a.mean()
+        b = b - b.mean()
+        denom = np.sqrt(float(a @ a) * float(b @ b))
+        if denom <= 0:
+            return 0.0
+        return float(max(0.0, (a @ b) / denom))
 
     def calculate_growth(self, current_avg, target_avg):
         """
@@ -898,6 +1029,195 @@ class ABRGenerator:
                 factor *= SHADOW_WAVE_I_FACTOR
             v['amp'] *= factor
         return values
+
+    @staticmethod
+    def _shift_latencies(values, dt):
+        """Las mismas ondas corridas dt ms (sin tocar el dict original)."""
+        if not dt:
+            return values
+        return {w: dict(v, lat=v['lat'] + dt) for w, v in values.items()}
+
+    @staticmethod
+    def contra_values(values):
+        """Las mismas ondas vistas desde el mastoides del oido NO estimulado.
+
+        No es una respuesta distinta: es el mismo generador proyectado sobre
+        otro vector de registro. La onda I se pierde (nervio distal, pegado
+        al electrodo ipsi), III-V se conservan y el complejo IV-V se abre.
+        Ver CONTRA_*.
+        """
+        contra = {}
+        for wave, v in values.items():
+            nuevo = dict(v)
+            nuevo['amp'] = v['amp'] * CONTRA_AMP_FACTOR.get(wave, 0.8)
+            nuevo['lat'] = v['lat'] + CONTRA_LAT_SHIFT.get(wave, 0.0)
+            nuevo['width'] = v.get('width', 1.0) * CONTRA_WIDTH_FACTOR
+            contra[wave] = nuevo
+        return contra
+
+    @staticmethod
+    def contra_channel(technical_config, side):
+        """Clave del electrodo de referencia contralateral, o None.
+
+        El canal contra existe solo si ese electrodo esta puesto: si el
+        alumno desconecta A1 y estimula el oido derecho, se queda sin canal
+        contralateral, igual que en el equipo.
+        """
+        ipsi = 'right' if side == 'OD' else 'left'
+        otro = 'left' if ipsi == 'right' else 'right'
+        electrodos = technical_config.get('electrodes') or {}
+        if electrodos.get(otro, 'A1') == DISCONNECTED:
+            return None
+        if electrodos.get('vertex', 'Cz') == DISCONNECTED:
+            return None
+        return otro
+
+    def raw_eeg(self, technical_config, quality=1.0, seed=0, tick=0,
+                duration_ms=300.0, fs=EEG_DISPLAY_FS):
+        """Trozo de EEG CRUDO por canal (R/L), en uV, sin promediar.
+
+        Es el monitor previo del equipo: lo que el alumno tiene que mirar
+        ANTES de apretar promediar. Ahi se ve de una si el paciente esta
+        tenso (EMG), si falta la tierra o si los electrodos quedaron
+        desbalanceados (50 Hz), sin tener que gastar 2000 barridos para
+        enterarse.
+
+        Devuelve {'R': array|None, 'L': array|None, 'rejected_R': bool,
+        'rejected_L': bool, 'rms_R': float, 'rms_L': float}. Canal en None =
+        electrodo desconectado, no hay registro de ese lado.
+        """
+        n = max(int(round(duration_ms * fs / 1000.0)), 8)
+        t = np.linspace(0, duration_ms, n)
+        impedancias = technical_config.get('impedance')
+        if not isinstance(impedancias, dict):
+            valor = 3.0 if impedancias is None else float(impedancias)
+            impedancias = {k: valor for k in ('vertex', 'right', 'left', 'ground')}
+        electrodos = technical_config.get('electrodes') or {}
+
+        def conectado(key):
+            return electrodos.get(key, 'A1') != DISCONNECTED
+
+        sin_tierra = not conectado('ground')
+        reject = float(technical_config.get('artifact_reject_uv') or 0.0)
+        salida = {}
+        for canal, key in (('R', 'right'), ('L', 'left')):
+            if not conectado('vertex') or not conectado(key):
+                salida[canal] = None
+                salida[f'rejected_{canal}'] = False
+                salida[f'rms_{canal}'] = 0.0
+                continue
+            # Cada canal se lee entre el activo y SU referencia: la
+            # impedancia que manda es la peor de las dos, y el desbalance
+            # (lo que rompe el CMRR) es la diferencia entre ellas.
+            imp = [float(impedancias.get('vertex', 3.0)), float(impedancias.get(key, 3.0))]
+            # Relativo al equipo bien puesto (IMPEDANCE_REF_KOHM): a 2 kOhm
+            # el EEG queda en su amplitud fisiologica y de ahi para arriba
+            # crece. impedance_noise_factor esta normalizado contra 4 kOhm
+            # (le sirve al promediador), aca hace falta contra el default.
+            imp_factor = (self.impedance_noise_factor(max(imp))
+                          / self.impedance_noise_factor(IMPEDANCE_REF_KOHM))
+            desbalance = abs(imp[0] - imp[1])
+            # rng propio del canal y del tick: el trazo corre, no se repite.
+            rng = np.random.default_rng([int(seed) & ((1 << 62) - 1),
+                                         int(tick), 0 if canal == 'R' else 1])
+            amp = (EEG_BASELINE_UV + EEG_TENSION_UV * max(quality - 1.0, 0.0)) * imp_factor
+            crudo = self.sweep_noise(n, 1, rng)[0]
+            desvio = float(np.std(crudo)) or 1.0
+            trazo = crudo / desvio * amp
+            trazo = trazo + MAINS_RAW_GAIN * self.mains_interference(
+                t, sin_tierra, desbalance, rng)
+            salida[canal] = trazo
+            salida[f'rms_{canal}'] = float(np.std(trazo))
+            # El rechazo de artefacto no mira el EEG crudo: mira el canal
+            # ya filtrado en la banda del ABR. Sobre el crudo, un EEG normal
+            # de 12 uV RMS cruzaria los +-25 uV en casi todos los barridos y
+            # el equipo no promediaria nunca. Lo que queda arriba de 30 Hz
+            # es el EMG y el zumbido de red -- justo lo que se descarta.
+            banda = self.apply_filters(trazo, 0.0, 30.0, fs)
+            salida[f'rejected_{canal}'] = bool(reject and np.abs(banda).max() > reject)
+        return salida
+
+    def normative_limits(self, population='adult_female', intensity=80,
+                         stimulus='click', pathway='air_conduction', freq=None):
+        """Rangos de normalidad para leer la tabla del alumno.
+
+        Latencias absolutas: valor poblacional corrido por la MISMA funcion
+        latencia-intensidad que usa el generador (una V de 6.4 ms a 40 dB no
+        es tardia, a 80 si), +- NORM_SD_LIMIT desviaciones.
+        Interpicos y razon V/I no dependen de la intensidad.
+        """
+        baseline = self.get_baseline_values(population, stimulus, pathway, freq=freq)
+        lat_shift = self.latency_intensity_shift(intensity)
+        latencias = {}
+        for wave, sd in NORM_LAT_SD.items():
+            if wave not in baseline:
+                continue
+            centro = baseline[wave]['lat'] + lat_shift * LAT_SHIFT_FACTOR.get(wave, 1.0)
+            margen = sd * NORM_SD_LIMIT
+            latencias[wave] = (centro - margen, centro + margen)
+
+        interpicos = {}
+        norm_ip = baseline.get('interpeak') or {}
+        for clave, sd in NORM_INTERPEAK_SD.items():
+            a, b = clave.split('-')
+            if clave in norm_ip:
+                centro = float(norm_ip[clave])
+            elif a in baseline and b in baseline:
+                centro = baseline[b]['lat'] - baseline[a]['lat']
+            else:
+                continue
+            margen = sd * NORM_SD_LIMIT
+            interpicos[clave] = (centro - margen, centro + margen)
+
+        return {
+            'population': population,
+            'intensity': intensity,
+            'lat': latencias,
+            'interpeak': interpicos,
+            'v_i_ratio': (NORM_VI_RATIO_MIN, None),
+            'interaural_v': NORM_INTERAURAL_MAX,
+        }
+
+    @staticmethod
+    def latency_intensity_shift(intensity):
+        """Corrimiento de la funcion latencia-intensidad (ms) respecto de 80 dB.
+
+        Pendiente (onda V, click): ~0.08 ms/10 dB cerca del techo (80-70 dB,
+        casi plana) y ~0.3 ms/10 dB de ahi para abajo -- Hood, "Clinical
+        Applications of the ABR", reporta ~0.3 ms/10 dB entre 70 y 50 dB.
+        Quiebre en 70 (antes estaba en 60, dejaba el tramo 70-60 con la
+        pendiente plana que no corresponde).
+
+        Vive en un solo lugar porque la usan las dos puntas: el generador
+        para dibujar la curva y la banda normativa para juzgarla. Si se
+        separan, el alumno queda fuera de norma por un error de la app.
+        """
+        if intensity >= 70:
+            return (80 - intensity) / 10 * 0.08
+        return (80 - 70) / 10 * 0.08 + (70 - intensity) / 10 * 0.3
+
+    def latency_intensity_band(self, population='adult_female', wave='V',
+                               intensities=None, stimulus='click',
+                               pathway='air_conduction', freq=None):
+        """Banda normativa del grafico latencia-intensidad, por poblacion.
+
+        Fija no sirve: la V de un neonato corre ~1 ms mas tarde que la de un
+        adulto, asi que con una banda de adulto TODO neonato queda fuera de
+        norma y el grafico deja de decir nada.
+        """
+        if intensities is None:
+            intensities = list(range(0, 90, 10))
+        xs, lo, hi = [], [], []
+        for intensidad in intensities:
+            limites = self.normative_limits(population, intensidad, stimulus,
+                                            pathway, freq)
+            rango = limites['lat'].get(wave)
+            if rango is None:
+                continue
+            xs.append(intensidad)
+            lo.append(rango[0])
+            hi.append(rango[1])
+        return xs, lo, hi
 
     def generate_curve(self, population, pathology, stimulus_config,
                         technical_config, case_config=None):
@@ -1004,8 +1324,19 @@ class ABRGenerator:
         t = np.linspace(0, window_ms, n_samples)
         fs = (len(t) - 1) / (t[-1] / 1000.0)
 
-        # 9. Curva objetivo (gaussianas)
-        y_target = self.build_target_curve(t, values, CM_value)
+        # 9. Curva objetivo (gaussianas). Un paciente "no reproducible" no
+        # responde con un timing distinto de una captura a otra nomas:
+        # tampoco lo mantiene DENTRO de una captura, y por eso sus dos
+        # subpromedios no se pegan nunca por mucho que promedie. El jitter
+        # se reparte entre las dos mitades (+/- la mitad cada una) y el
+        # promedio total sigue siendo el punto medio.
+        jitter = float((case_config or {}).get('repro_jitter') or 0.0)
+        values_a = self._shift_latencies(values, jitter / 2)
+        values_b = self._shift_latencies(values, -jitter / 2)
+        y_target_a = self.build_target_curve(t, values_a, CM_value)
+        y_target_b = (y_target_a if not jitter
+                      else self.build_target_curve(t, values_b, CM_value))
+        y_target = (y_target_a + y_target_b) / 2
 
         # 9b. Curva sombra: si el estimulo cruza el craneo por encima de la
         # atenuacion interaural, la coclea del oido NO evaluado tambien
@@ -1026,8 +1357,10 @@ class ABRGenerator:
             for v in shadow_values.values():
                 v['lat'] += lat_offset
                 v['amp'] *= montage_gain
-            y_target = y_target + self.build_target_curve(
-                t, shadow_values, shadow_cm)
+            y_shadow = self.build_target_curve(t, shadow_values, shadow_cm)
+            y_target = y_target + y_shadow
+            y_target_a = y_target_a + y_shadow
+            y_target_b = y_target_b + y_shadow
 
         # 10. Drift LF + artefacto transductor
         y_drift = self.add_baseline_drift(t, rng)
@@ -1037,6 +1370,8 @@ class ABRGenerator:
         # se lleva promediado: en un equipo real esta completa desde el
         # primer barrido y lo que baja es el ruido (ver averaged_noise).
         y_clean = y_target + y_drift + y_artifact
+        y_clean_a = y_target_a + y_drift + y_artifact
+        y_clean_b = y_target_b + y_drift + y_artifact
 
         # 12. Ruido residual del promediado. El denominador es lo que el
         # CASO necesita (average_objetivo), no lo que el alumno pidio en el
@@ -1072,12 +1407,39 @@ class ABRGenerator:
             # amplificar: queda el ruido del amplificador al aire, sin
             # respuesta ninguna por mas que se promedie.
             y_clean = np.zeros_like(t)
+            y_clean_a = np.zeros_like(t)
+            y_clean_b = np.zeros_like(t)
             accepted = 1.0
 
-        y_noisy = y_clean + self.averaged_noise(
+        ruido, ruido_a, ruido_b = self.averaged_noise(
             t, accepted, growth_target, quality, rng, imp_factor, noise_floor,
+            split=True,
         )
-        y_noisy = y_noisy + self.mains_interference(t, sin_tierra, desbalance, rng)
+        red = self.mains_interference(t, sin_tierra, desbalance, rng)
+        y_noisy = y_clean + ruido + red
+
+        # 13. Canal contralateral: el mismo estimulo, el mismo paciente,
+        # leido entre el vertex y el mastoides del oido NO estimulado.
+        # Comparte el ruido del promediado (es el mismo amplificador y el
+        # mismo momento) pero la respuesta llega proyectada distinto.
+        contra_key = self.contra_channel(technical_config,
+                                         stimulus_config.get('side', 'OD'))
+        y_contra = None
+        if contra_key and hay_registro:
+            y_contra_clean = (self.build_target_curve(
+                t, self.contra_values(values), CM_value)
+                + y_drift + y_artifact)
+            if shadow:
+                # La sombra viene de la coclea del otro oido: en el canal
+                # contralateral queda MAS cerca del electrodo, no menos.
+                y_contra_clean = y_contra_clean + self.build_target_curve(
+                    t, shadow_values, shadow_cm)
+            y_contra = self.apply_filters(
+                y_contra_clean + ruido_b + red,
+                float(stimulus_config['filter_down']),
+                float(stimulus_config['filter_passhigh']),
+                fs,
+            )
 
         # 14. Filtros al final (como equipos reales)
         y_final = self.apply_filters(
@@ -1086,6 +1448,38 @@ class ABRGenerator:
             float(stimulus_config['filter_passhigh']),
             fs,
         )
+        # Subpromedios A/B: mismos filtros, misma senial, distinta mitad de
+        # los barridos. Es la replicabilidad EN VIVO -- el criterio con el
+        # que se decide si una onda es respuesta o es ruido, sin tener que
+        # repetir la captura entera.
+        sub_a = self.apply_filters(
+            y_clean_a + ruido_a + red, float(stimulus_config['filter_down']),
+            float(stimulus_config['filter_passhigh']), fs)
+        sub_b = self.apply_filters(
+            y_clean_b + ruido_b + red, float(stimulus_config['filter_down']),
+            float(stimulus_config['filter_passhigh']), fs)
+        repro_index = self.replicability(sub_a, sub_b)
+
+        # Ruido residual REAL de este registro (nV RMS), que es lo que el
+        # equipo muestra al lado del FSP: la diferencia entre los dos
+        # subpromedios es ruido y nada mas (la senial se cancela), asi que
+        # sale de ahi sin tener que separar senial de ruido a mano.
+        residual_nv = float(np.std(sub_a - sub_b) / 2.0 * 1000.0)
+
+        # El FSP del caso esta medido con el equipo bien puesto. Con los
+        # electrodos malos el ruido sube y el FSP CAE solo (es una razon de
+        # varianzas): si no, se podia registrar con 15 kOhm y el equipo
+        # igual declaraba "respuesta presente".
+        escala_ref = self.noise_scale(
+            quality, self.impedance_noise_factor(IMPEDANCE_REF_KOHM), noise_floor)
+        ruido_ref = escala_ref / max(np.sqrt(self.noise_blocks_done(
+            accepted, growth_target)), 1.0)
+        degradacion = max(np.sqrt((float(np.std(ruido)) ** 2
+                                   + float(np.std(red)) ** 2)) / max(ruido_ref, 1e-9), 1.0)
+        # Piso en 1.0: el FSP es una razon de varianzas (senial+ruido
+        # sobre ruido), no puede dar menos que 1 -- por debajo de eso
+        # simplemente no hay nada que detectar.
+        fsp_actual = max(1.0, 1.0 + (fsp_actual - 1.0) / degradacion ** 2)
 
         return t, y_final, {
             'population': population,
@@ -1102,7 +1496,17 @@ class ABRGenerator:
             'transducer': transducer,
             'pathway': pathway,
             'accepted_sweeps': accepted,
+            'rejected_sweeps': max(current_avg - accepted, 0.0),
             'artifact_acceptance': acceptance,
+            # Trazos extra del mismo registro: los dos subpromedios (A/B) y
+            # el canal contralateral. Van en la metadata y no en el retorno
+            # para no romper a quien solo quiere (t, y).
+            'sub_a': sub_a,
+            'sub_b': sub_b,
+            'repro_index': repro_index,
+            'contra': y_contra,
+            'contra_channel': contra_key,
+            'residual_noise_nv': residual_nv,
             'recording': hay_registro,
             'mains': bool(sin_tierra or desbalance > IMPEDANCE_BALANCE_LIMIT_KOHM),
             'impedance_max': imp_max,
@@ -1190,6 +1594,12 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
         electrodos e impedancias, rechazo de artefacto, ruido residual y
         criterio FSP), tal como la entrega AbrAdvanceSettings.get_data().
         Sin esto se usa el equipo de rutina del protocolo.
+
+    Devuelve (t, y_ipsi, t_contra, y_contra, var_repro, metadata). El canal
+    contralateral es None si ese electrodo esta desconectado. La metadata
+    trae lo que el equipo muestra durante la captura y antes no salia de
+    aca: barridos aceptados/rechazados, FSP, ruido residual, subpromedios
+    A/B e indice de replicabilidad.
     """
     generator = _get_generator()
 
@@ -1219,6 +1629,9 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
         'average': target_averages,
         'current_avg': current_averages,
         'pathway': 'air_conduction',
+        # Lado estimulado: decide cual referencia es la ipsi y cual la
+        # contra (ver ABRGenerator.contra_channel).
+        'side': control_setting.get('side', 'OD'),
     }
 
     # Equipo: lo que el alumno dejo en Parametros Avanzados. El fallback es
@@ -1262,6 +1675,9 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
         'umbral': preferences.get('umbral', preferences.get('th', 20)),
         'average_objetivo': preferences.get('average_objetivo', 2000),
         'repro_shift': var_repro,
+        # Jitter DENTRO de la captura: lo que hace que los subpromedios A/B
+        # de un paciente no reproducible no lleguen a pegarse nunca.
+        'repro_jitter': 0.0 if preferences.get('repro', True) else repro_var,
         'ratio_override': ratio_override,
         'masking': control_setting.get('mkg', 0),
         'contra': contra_config,
@@ -1282,6 +1698,52 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
         case_config=case_config,
     )
 
-    dx = t.copy()
-    dy = y.copy()
-    return t, y, dx, dy, var_repro
+    # Canal contralateral: si el electrodo del otro mastoides esta puesto,
+    # el generador entrega su propio trazo (antes esto era una copia exacta
+    # del ipsi, que ademas nadie dibujaba). Sin ese electrodo no hay canal.
+    dy = metadata.get('contra')
+    dx = t.copy() if dy is not None else None
+    return t, y, dx, dy, var_repro, metadata
+
+
+# ----------------------------------------------------------------------
+# Helpers que consume la UI (monitor de EEG, banda normativa, tabla)
+# ----------------------------------------------------------------------
+
+def case_quality(preferences):
+    """Cuanto ruido trae ESTE paciente (1.0 = tipico).
+
+    Misma cuenta que generate_curve: sale de los puntos FSP del caso, que
+    es donde el caso declara "este paciente es ruidoso".
+    """
+    puntos = (preferences or {}).get('fsp_puntos') or {}
+    fsp_2000 = float(puntos.get('2000', 2.8) or 2.8)
+    return float(np.clip(2.8 / max(fsp_2000, 0.5), 0.5, 2.5))
+
+
+def raw_eeg(technical=None, quality=1.0, seed=0, tick=0, duration_ms=300.0,
+            test='ABR'):
+    """Trozo de EEG crudo por canal para el monitor (ver ABRGenerator.raw_eeg)."""
+    technical_config = default_settings(test)
+    if technical:
+        technical_config.update(technical)
+    return _get_generator().raw_eeg(technical_config, quality=quality, seed=seed,
+                                    tick=tick, duration_ms=duration_ms)
+
+
+def normative_limits(patient=None, intensity=80, stim='Click'):
+    """Rangos de normalidad para el paciente en atencion, a esa intensidad."""
+    population = select_population((patient or {}).get('edad'),
+                                   (patient or {}).get('gender'))
+    stim_key, freq = STIM_MAP.get(stim, ('click', None))
+    return _get_generator().normative_limits(population, intensity,
+                                             stim_key, freq=freq)
+
+
+def latency_intensity_band(patient=None, wave='V', stim='Click'):
+    """Banda normativa (x, lo, hi) del grafico latencia-intensidad."""
+    population = select_population((patient or {}).get('edad'),
+                                   (patient or {}).get('gender'))
+    stim_key, freq = STIM_MAP.get(stim, ('click', None))
+    return _get_generator().latency_intensity_band(population, wave,
+                                                   stimulus=stim_key, freq=freq)

@@ -12,6 +12,11 @@ class AbrTable(QWidget, Ui_TableData):
         self.setupUi(self)
         self.side = side
         self.side_text = 'OD' if side == 0 else 'OI'
+        # Rangos de normalidad de ESTE paciente a ESTA intensidad (los
+        # entrega ABR_generator.normative_limits). Sin esto la tabla pinta
+        # el fondo segun el oido y nada mas: no dice si una latencia esta
+        # fuera de rango, que es justamente la lectura clinica.
+        self.norms = None
         self.set_table()
         self.data =   [ ['', ''],
                         ['', ''],
@@ -33,6 +38,79 @@ class AbrTable(QWidget, Ui_TableData):
             i.setMinimumWidth(width)
 
         self.label.setText(self.side_text)
+
+    # ------------------------------------------------------------ normativa
+    WAVE_ROWS = {'I': 0, 'II': 1, 'III': 2, 'IV': 3, 'V': 4}
+    # Filas de tw_inter, en el orden en que las llena calcule_others().
+    INTER_ROWS = {'I-V': 0, 'III-V': 1, 'I-III': 2}
+    RATIO_ROW = 3
+    OUT_COLOR = QColor(255, 120, 120, 170)
+
+    def set_norms(self, norms) -> None:
+        """Fija los rangos normativos y repinta lo que ya este cargado."""
+        self.norms = norms
+        self.check_norms()
+
+    def flag_cell(self, table, row, col, dentro, rango, unidad='ms') -> None:
+        item = table.item(row, col)
+        if item is None:
+            return
+        if dentro or rango is None:
+            item.setBackground(QColor(0, 0, 0, 0))
+            item.setToolTip('')
+            return
+        lo, hi = rango
+        if lo is None:
+            texto = f'esperado ≤ {hi:.2f} {unidad}'
+        elif hi is None:
+            texto = f'esperado ≥ {lo:.2f} {unidad}'
+        else:
+            texto = f'esperado {lo:.2f} – {hi:.2f} {unidad}'
+        item.setBackground(self.OUT_COLOR)
+        item.setToolTip(f'Fuera de rango: {texto}')
+
+    @staticmethod
+    def in_range(valor, rango) -> bool:
+        lo, hi = rango
+        if lo is not None and valor < lo:
+            return False
+        if hi is not None and valor > hi:
+            return False
+        return True
+
+    def check_norms(self) -> None:
+        """Marca latencias, interpicos y razon V/I fuera de rango."""
+        if not self.norms:
+            return
+        latencias = self.norms.get('lat') or {}
+        for wave, row in self.WAVE_ROWS.items():
+            rango = latencias.get(wave)
+            valor = self.data[row][0]
+            if rango is None or not isinstance(valor, (int, float)):
+                self.flag_cell(self.tw_latamp, row, 0, True, None)
+                continue
+            self.flag_cell(self.tw_latamp, row, 0,
+                           self.in_range(valor, rango), rango)
+
+        interpicos = self.norms.get('interpeak') or {}
+        pares = {'I-V': (0, 4), 'III-V': (2, 4), 'I-III': (0, 2)}
+        for clave, row in self.INTER_ROWS.items():
+            rango = interpicos.get(clave)
+            a, b = pares[clave]
+            va, vb = self.data[a][0], self.data[b][0]
+            if rango is None or not isinstance(va, (int, float)) or not isinstance(vb, (int, float)):
+                self.flag_cell(self.tw_inter, row, 0, True, None)
+                continue
+            self.flag_cell(self.tw_inter, row, 0,
+                           self.in_range(abs(vb - va), rango), rango)
+
+        rango = self.norms.get('v_i_ratio')
+        amp_i, amp_v = self.data[0][1], self.data[4][1]
+        if rango and isinstance(amp_i, (int, float)) and isinstance(amp_v, (int, float)) and amp_i:
+            self.flag_cell(self.tw_inter, self.RATIO_ROW, 0,
+                           self.in_range(amp_v / amp_i, rango), rango, unidad='')
+        else:
+            self.flag_cell(self.tw_inter, self.RATIO_ROW, 0, True, None)
 
     def get_color_table(self) -> QColor:
         if self.side == 0:
@@ -102,6 +180,7 @@ class AbrTable(QWidget, Ui_TableData):
             self.cal_rel_v_i()
         else:
             self.erase_cell(3)
+        self.check_norms()
 
     def reset_others(self)->None:
         if self.data[0][0] is None:
@@ -148,10 +227,7 @@ class AbrTable(QWidget, Ui_TableData):
                     self.tw_latamp.setItem(coord[0], 1, QTableWidgetItem(""))
                     self.data[coord[0]][0] = None
                     self.data[coord[0]][1] = None
-                else:
-                    print(data[i][t])
-                    #self.data[coord[0]][0] = None
-                    #self.data[coord[0]][1] = None
+                # else: la marca sigue puesta, no hay nada que borrar.
 
                 self.reset_others()
 

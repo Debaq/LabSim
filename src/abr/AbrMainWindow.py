@@ -12,8 +12,11 @@ definición ABR en cases.data['ABR']['OD'/'OI'] (ver CaseBuilder.php).
 """
 import os
 
-from abr.ABR_generator import ABR_Curve
-from abr.AbrAdvanceSettings import AbrAdvanceSettings, default_settings
+from abr.ABR_generator import (ABR_Curve, ABRGenerator, case_quality,
+                               latency_intensity_band, normative_limits,
+                               raw_eeg)
+from abr.AbrAdvanceSettings import (MONTAGES, TRANSDUCERS, AbrAdvanceSettings,
+                                    default_settings)
 from abr.AbrControl import AbrControl
 from abr.AbrDetail import AbrDetail
 from abr.AbrDetailAllCurves import AbrDetailAllCurves
@@ -27,12 +30,21 @@ from abr.UI.AbrMain_ui import Ui_MainWindow
 from backend.client import BackendClient
 from core.base import context
 from core.helpers import Preferences
+from core.rng import stable_seed
 from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import QMainWindow, QSizePolicy, QSpacerItem
 
 tr = QCoreApplication.translate
 
 TIEMPO_ENTR_PROM = 300
+# Refresco del monitor de EEG crudo. Es el trazo que corre SIEMPRE que hay
+# un paciente cargado, promediando o no: ahi se ve el 50 Hz y la tension
+# antes de gastar 2000 barridos en descubrirlos.
+TIEMPO_EEG = 300
+# Alto del dock de detalle con el monitor abierto. Eran 150 px cuando los
+# dos graficos estaban vacios; con el EEG crudo y el FSP dibujando de
+# verdad, a esa altura no se lee ninguno de los dos.
+ALTO_DOCK_DETALLE = 220
 
 
 class AbrMainWindow(QMainWindow, Ui_MainWindow):
@@ -135,7 +147,28 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # impedancia 3 kOhm y ventana de 12 ms.
         self.technical = default_settings(self.control.cb_test.currentText())
         self.control.cb_test.currentTextChanged.connect(self.test_changed)
+        # Los rangos normativos de la tabla dependen de la intensidad y del
+        # estimulo con que se registro, asi que siguen al panel de control.
+        self.control.sb_intencity.valueChanged.connect(self.apply_norms)
+        self.control.cb_stim.currentTextChanged.connect(self.apply_norms)
         self.control.apply_protocol(self.control.cb_test.currentText())
+
+        # Monitor de EEG crudo: corre siempre que haya paciente, no solo
+        # promediando. self.eeg_tick avanza el trazo (no se repite) y
+        # self.quality es cuanto ruido trae ESTE paciente.
+        self.eeg_tick = 0
+        self.quality = 1.0
+        self.eeg_timer = QTimer(self)
+        self.eeg_timer.timeout.connect(self.refresh_eeg)
+        # Ultima metadata que devolvio el generador: barridos aceptados,
+        # rechazo, FSP, ruido residual, replicabilidad. Antes se calculaba
+        # todo esto y se tiraba (ABR_Curve devolvia solo las curvas).
+        self.last_metadata = {}
+        self.blink = False
+        self.lbl_scale.setText(f"{int(round(self.graph_r.get_scale()))}µV")
+        self.apply_window()
+        self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
+        self.dock_test.setFixedHeight(ALTO_DOCK_DETALLE)
 
     def la_super(self, data, appointment_id=None):
         """Recibe el caso del paciente en atención (o None al cerrarla/
@@ -151,7 +184,152 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         abr_data = (data or {}).get('ABR') or {}
         self.abr_od = abr_data.get('OD')
         self.abr_oi = abr_data.get('OI')
+        # Cuanto ruido trae este paciente: lo mismo que usa el generador
+        # para la curva promediada, para que el EEG crudo y el promedio
+        # cuenten la misma historia.
+        self.quality = case_quality(self.abr_od or self.abr_oi or {})
         self.reset()
+        # La banda normativa del grafico latencia-intensidad sigue a la
+        # poblacion del paciente: con la banda de adulto, un neonato queda
+        # fuera de norma siempre.
+        self.apply_norms()
+        if data is None:
+            self.eeg_timer.stop()
+            self.eeg.clear_trace()
+        else:
+            self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
+            self.eeg_timer.start(TIEMPO_EEG)
+
+    def recording_conditions(self):
+        """Como se esta registrando: equipo + lo que el equipo midio.
+
+        Es la mitad del informe que faltaba. Con solo curvas y conclusion,
+        el docente evalua el resultado pero no el procedimiento: no puede
+        distinguir un informe bien hecho de uno tomado con los electrodos a
+        8 kOhm, sin tierra o con el rechazo apagado.
+        """
+        tec = self.technical
+        meta = self.last_metadata
+        peor, desbalance, ok = ABRGenerator.impedance_report(tec)
+        etiqueta = {v: k for k, v in TRANSDUCERS.items()}
+        montaje = {v: k for k, v in MONTAGES.items()}
+        datos = {
+            'transductor': etiqueta.get(tec.get('transducer'), tec.get('transducer')),
+            'montaje': montaje.get(tec.get('montage'), tec.get('montage')),
+            'ventana_ms': tec.get('window_ms'),
+            'electrodos': dict(tec.get('electrodes') or {}),
+            'impedancias_kohm': dict(tec.get('impedance') or {}),
+            'impedancia_max_kohm': round(float(peor), 1),
+            'impedancia_desbalance_kohm': round(float(desbalance), 1),
+            'impedancia_en_norma': bool(ok),
+            'rechazo_artefacto_uv': tec.get('artifact_reject_uv'),
+            'ruido_residual_objetivo_nv': tec.get('residual_noise_nv'),
+            'criterio_fsp': tec.get('fsp_criterion'),
+        }
+        if meta:
+            datos.update({
+                'barridos_presentados': int(meta.get('current_avg') or 0),
+                'barridos_aceptados': int(meta.get('accepted_sweeps') or 0),
+                'barridos_rechazados': int(meta.get('rejected_sweeps') or 0),
+                'fsp': round(float(meta.get('fsp') or 0), 2),
+                'ruido_residual_nv': round(float(meta.get('residual_noise_nv') or 0), 1),
+                'replicabilidad': round(float(meta.get('repro_index') or 0), 2),
+                'canal_contralateral': bool(meta.get('contra') is not None),
+                'interferencia_red': bool(meta.get('mains')),
+            })
+        return datos
+
+    def apply_norms(self, *_):
+        """Banda normativa y rangos de la tabla, para ESTE paciente."""
+        if self.data_current is None:
+            return
+        stim = self.control.cb_stim.currentText()
+        try:
+            x, lo, hi = latency_intensity_band(self.data_current, 'V', stim)
+        except Exception as exc:      # normativa incompleta para ese estimulo
+            print(f"ABR: sin banda normativa ({exc})")
+            return
+        edad = self.data_current.get('edad')
+        etiqueta = f"Onda V ±2 DE ({edad} años)" if edad is not None else "Onda V ±2 DE"
+        self.graph_lat_int.set_band(x, lo, hi, etiqueta)
+        intensidad = self.control.sb_intencity.value()
+        for tabla in (self.table_r, self.table_l):
+            tabla.set_norms(normative_limits(self.data_current, intensidad, stim))
+
+    def refresh_eeg(self):
+        """Un trozo nuevo de EEG crudo en el monitor de los dos canales."""
+        if self.data_current is None:
+            return
+        self.eeg_tick += 1
+        # stable_seed y no hash(): el trazo del mismo paciente arranca
+        # igual en cualquier proceso (ver core.rng).
+        semilla = stable_seed(self.appointment_id)
+        try:
+            datos = raw_eeg(self.technical, quality=self.quality, seed=semilla,
+                            tick=self.eeg_tick, duration_ms=TIEMPO_EEG,
+                            test=self.control.cb_test.currentText())
+        except Exception as exc:
+            print(f"ABR: no se pudo generar el EEG crudo: {exc}")
+            self.eeg_timer.stop()
+            return
+        self.eeg.push(datos)
+
+    def update_capture_info(self, metadata):
+        """Estado de la captura en curso, como lo muestra un equipo real.
+
+        Barridos presentados vs aceptados (el equipo cuenta los
+        presentados, el promedio avanza con los aceptados), FSP, ruido
+        residual y replicabilidad A/B. Todo esto lo calculaba el generador
+        y no salia de ahi.
+        """
+        presentados = metadata.get('current_avg') or 0
+        aceptados = metadata.get('accepted_sweeps') or 0
+        rechazo = 1.0 - (metadata.get('artifact_acceptance') or 1.0)
+        rate = float(self.current_setting.get('rate') or 21.1)
+        segundos = int(presentados / rate) if rate else 0
+        self.lbl_time.setText(f"{segundos // 60:02d}:{segundos % 60:02d}")
+
+        partes = [f"{self.current_capture_curve}",
+                  f"{self.current_setting.get('int')} dBnHL {self.current_setting.get('side')}",
+                  f"{int(presentados)}/{int(self.current_setting.get('average') or 0)} barridos",
+                  f"aceptados {int(aceptados)}",
+                  f"FSP {metadata.get('fsp', 0):.1f}",
+                  f"ruido {metadata.get('residual_noise_nv', 0):.0f} nV",
+                  f"repro {metadata.get('repro_index', 0):.2f}"]
+        if metadata.get('fsp_criterion') and metadata.get('fsp_pass'):
+            partes.append("respuesta presente")
+        if not metadata.get('recording', True):
+            partes.append("SIN REGISTRO (electrodo desconectado)")
+        if metadata.get('mains'):
+            partes.append("50 Hz")
+        # El equipo real parpadea mientras descarta barridos: sin eso, el
+        # alumno ve el promedio avanzar lento y no sabe por que.
+        if rechazo > 0.01:
+            self.blink = not self.blink
+            marca = "⛔ RECHAZO" if self.blink else "   RECHAZO"
+            partes.append(f"{marca} {rechazo * 100:.0f}%")
+        self.lbl_info.setText("  ·  ".join(str(p) for p in partes))
+
+    def update_detail_info(self, setting):
+        """Panel de detalle: como se registro la curva que se esta mirando.
+
+        Los lbl_info_* estaban en el .ui desde siempre y nadie les escribia
+        nunca.
+        """
+        if not setting:
+            for nombre in ('estim', 'pol', 'int', 'mkg', 'rate', 'filter',
+                           'aver', 'side'):
+                getattr(self.detail, f'lbl_info_{nombre}').setText('')
+            return
+        self.detail.lbl_info_estim.setText(str(setting.get('stim', '')))
+        self.detail.lbl_info_pol.setText(str(setting.get('pol', '')))
+        self.detail.lbl_info_int.setText(f"{setting.get('int', '')} dBnHL")
+        self.detail.lbl_info_mkg.setText(f"{setting.get('mkg', '')} dB")
+        self.detail.lbl_info_rate.setText(f"{setting.get('rate', '')}/s")
+        self.detail.lbl_info_filter.setText(
+            f"{setting.get('filter_passhigh', '')}-{setting.get('filter_down', '')} Hz")
+        self.detail.lbl_info_aver.setText(str(setting.get('average', '')))
+        self.detail.lbl_info_side.setText(str(setting.get('side', '')))
 
     def submit_report(self):
         """Sube el informe (curvas marcadas + hallazgos/conclusión + JPEG de
@@ -188,6 +366,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
         data = {
             'curvas': self.memory,
+            # Condiciones de registro: sin esto el informe dice QUE se
+            # obtuvo pero no COMO, y el procedimiento no se puede evaluar.
+            # Cada curva ademas lleva las suyas (memory[curva]['tecnica']),
+            # porque el alumno puede cambiar el equipo a mitad del examen.
+            'tecnica': self.recording_conditions(),
             'hallazgos': self.report.text_edit_1.toPlainText(),
             'conclusion': self.report.text_edit_2.toPlainText(),
         }
@@ -202,8 +385,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
     def reset(self):
         """Limpia completamente los gráficos y la memoria de curvas"""
-        print("\n🔄 RESET: Limpiando gráficos y memoria...")
-
         # Limpiar completamente ambos gráficos usando el nuevo método
         self.graph_r.limpiar_todo()
         self.graph_l.limpiar_todo()
@@ -220,7 +401,12 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.table_l.clear_all()
         self.detail_all.clear_all()
 
-        print("   ✓ Reset completado\n")
+        # Limpiar panel de detalle y estado de captura
+        self.fmp.clear_curve()
+        self.update_detail_info(None)
+        self.last_metadata = {}
+        self.lbl_info.setText("")
+        self.lbl_time.setText("")
 
     def update_delete_curve(self, curve):
         if curve in self.memory:
@@ -235,9 +421,15 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         try:
             table = f'table_{table_letter}'
             data = self.memory[curve]
-            getattr(self, table).update_latamp_table(data)
         except KeyError:
-            pass
+            return
+        # Los rangos normativos dependen de la intensidad de ESA curva: una
+        # onda V de 6.4 ms a 40 dB es normal y a 80 dB no.
+        if self.data_current is not None:
+            getattr(self, table).set_norms(normative_limits(
+                self.data_current, data.get('int', 80), data.get('stim', 'Click')))
+        getattr(self, table).update_latamp_table(data)
+        self.update_detail_info(data)
 
     def scale_graph(self):
         _,_,direction = self.sender().objectName().split('_')
@@ -271,7 +463,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.dock_values.setVisible(True)
             self.dock_parameter.setVisible(True)
             self.detail.tabWidget.setCurrentIndex(0)
-            self.dock_test.setFixedHeight(150)
+            self.dock_test.setFixedHeight(ALTO_DOCK_DETALLE)
             self.graph_lat_int.clear_graph()
 
 
@@ -280,11 +472,17 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.state_capture = state
             self.current_setting = self.control.get_data()
             self.total_averages = self.fake_averages(self.current_setting["average"])
+            # El FSP arranca de cero en cada captura y contra las
+            # promediaciones que se pidieron, con el criterio de deteccion
+            # que quedo en Parametros Avanzados.
+            if self.count_averages == 0:
+                self.fmp.clear_curve()
+            self.fmp.set_mean(self.current_setting["average"])
+            self.fmp.set_criterion(self.technical.get('fsp_criterion'))
             self.capture_timer.start(TIEMPO_ENTR_PROM)
         elif state == 'stopped':
             self.state_capture = state
             self.capture_timer.stop()
-            print('me detuve')
         else:
             self.state_capture = state
 
@@ -294,7 +492,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.graph(side)
             self.memory_curves()
         elif self.state_capture == 'pause':
-            print("detenido")
+            pass
 
     def get_curve(self, presets):
         pass
@@ -333,14 +531,25 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.done = True
             self.count_averages = 0
             self.control.stop_capture()
-        i_xy, c_xy, a, b, repro = self.test_test(side)
+        i_xy, c_xy, repro, metadata = self.test_test(side)
         intencity = self.current_setting['int']
+        self.last_metadata = metadata
 
-        data_line = {self.current_capture_curve:{"ipsi_xy":i_xy,"contra_xy":c_xy, "a":a, "b":b, "gap":1.8,
-                                                 "repro" : repro, "intencity":intencity, "done" : self.done}}
+        data_line = {self.current_capture_curve: {
+            "ipsi_xy": i_xy,
+            # Canal contralateral: None si ese electrodo esta desconectado.
+            "contra_xy": c_xy,
+            # Subpromedios A/B (pares e impares): la replicabilidad EN VIVO.
+            "sub_a": (i_xy[0], metadata['sub_a']),
+            "sub_b": (i_xy[0], metadata['sub_b']),
+            "repro": repro, "intencity": intencity, "done": self.done}}
         side_letter = 'r' if side == 'OD' else 'l'
         graph = f'graph_{side_letter}'
         getattr(self, graph).create_line(data_line, intencity)
+        self.fmp.push(metadata.get('current_avg', 0), metadata.get('fsp', 0),
+                      metadata.get('residual_noise_nv', 0))
+        self.update_capture_info(metadata)
+        self.update_detail_info(self.current_setting)
 
     def fake_averages(self, averages, fake = True, express = False):
         if isinstance(averages , str):
@@ -415,12 +624,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 if coords is None:
                     # Marca eliminada
                     self.memory[curve_name]['LatAmp'][wave] = [None, None]
-                    print(f"   🗑️  Marca eliminada: {curve_name} - Onda {wave}")
                 else:
                     # Marca creada/actualizada
-                    latencia, amplitud = coords
-                    self.memory[curve_name]['LatAmp'][wave] = [latencia, amplitud]
-                    print(f"   ✓ Marca guardada: {curve_name} - Onda {wave}: Lat={latencia:.2f}ms, Amp={amplitud:.2f}μV")
+                    self.memory[curve_name]['LatAmp'][wave] = list(coords)
 
             # Actualizar la tabla de detalle de todas las curvas
             self.detail_all.process_and_fill_data(self.memory)
@@ -436,6 +642,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         if dialog.exec():
             self.technical = dialog.get_data()
             self.apply_window()
+            # El monitor de EEG tiene que mostrar de inmediato las barras
+            # de rechazo nuevas: es donde el alumno ve el efecto de lo que
+            # acaba de tocar, sin esperar a promediar.
+            self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
 
     def test_changed(self, test):
         """Cambio de prueba en el combo: cada potencial trae su protocolo.
@@ -448,6 +658,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.technical = default_settings(test)
         self.control.apply_protocol(test)
         self.apply_window()
+        self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
 
     def apply_window(self):
         """Los gráficos siguen la ventana de registro del equipo."""
@@ -470,7 +681,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         else:
             name_curve = self.current_capture_curve
             sett = self.current_setting
+            # Se guarda tambien COMO se registro: equipo, impedancias,
+            # rechazo, barridos aceptados. Sin eso el informe cuenta el
+            # resultado pero no el procedimiento (ver submit_report).
             self.memory[name_curve] = dict(sett, **model)
+            self.memory[name_curve]['tecnica'] = self.recording_conditions()
         self.detail_all.process_and_fill_data(self.memory)
 
 ################Report
@@ -519,7 +734,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             repro_prev = 0
 
 
-        x, y, dx, dy, repro = ABR_Curve(
+        x, y, dx, dy, repro, metadata = ABR_Curve(
             self.current_setting["int"], self.current_setting, case, repro_prev,
             [(self.count_averages * self.total_averages) * 2.5, self.current_setting['average']],
             done=self.done,
@@ -532,7 +747,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             technical=self.technical,
         )
 
-        return(x,y),(dx,dy),(0,0),(0,0), repro
+        contra = (dx, dy) if dy is not None else None
+        return (x, y), contra, repro, metadata
 
     #########EVENTS
     def closeEvent(self, event):

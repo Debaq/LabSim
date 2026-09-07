@@ -821,6 +821,228 @@ def test_tone_burst_interpolates_the_waves_it_does_not_describe():
     assert burst['III']['lat'] < burst['IV']['lat'] < burst['V']['lat']
 
 
+# ------------------------------------------ replicabilidad en vivo (A/B)
+
+def test_subaverages_average_to_the_full_curve():
+    """El promedio total es exactamente el punto medio de A y B.
+
+    Son las dos mitades de los mismos barridos: si no promedian al total,
+    lo que se le muestra al alumno como replicabilidad no es el registro
+    que esta mirando.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    t, y, meta = _curva(current=1000)
+    medio = (meta['sub_a'] + meta['sub_b']) / 2
+    assert np.allclose(y, medio, atol=1e-9), float(np.abs(y - medio).max())
+
+
+def test_subaverages_are_noisier_than_the_full_average():
+    """Cada subpromedio lleva la mitad de los barridos: ~sqrt(2) mas ruido."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    t, y, meta = _curva(current=2000)
+    # Cola del registro (>9 ms): ahi no hay respuesta, es ruido y nada mas.
+    cola = t > 9
+    razon = meta['sub_a'][cola].std() / y[cola].std()
+    assert 1.1 < razon < 1.9, razon
+
+
+def test_replicability_rises_with_averaging():
+    """A y B se van pegando a medida que la respuesta emerge del ruido."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    indices = [_curva(current=n)[2]['repro_index'] for n in (100, 500, 2000)]
+    assert indices == sorted(indices), indices
+    assert indices[0] < 0.85 < indices[-1], indices
+
+
+def test_non_reproducible_patient_never_locks_ab():
+    """El caso "no reproducible" tambien lo es DENTRO de una captura.
+
+    Antes el jitter solo corria el complejo entre capturas distintas: los
+    subpromedios de un paciente no reproducible convergian igual que los de
+    uno normal, y "no reproducible" no se veia en vivo por ningun lado.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    g = _gen()
+    def indice(jitter):
+        stim = {'stim': 'click', 'freq': None, 'pol': 'Alternada', 'int': 80,
+                'rate': 21.1, 'filter_down': 3000, 'filter_passhigh': 100,
+                'average': 2000, 'current_avg': 2000,
+                'pathway': 'air_conduction', 'side': 'OD'}
+        case = {'desviaciones': {}, 'fsp_puntos': {'800': 2.3, '2000': 2.8},
+                'umbral': 20, 'average_objetivo': 2000, 'repro_shift': 0.0,
+                'repro_jitter': jitter, 'masking': 0, 'contra': None,
+                'seed_key': 'caso-1', 'capture_id': 'R1'}
+        return g.generate_curve('adult_female', 'normal', stim,
+                                default_settings('ABR'), case)[2]['repro_index']
+    assert indice(0.0) > 0.9
+    assert indice(0.4) < 0.5
+
+
+# ------------------------------------------------------- canal contralateral
+
+def test_contra_channel_loses_wave_I_and_delays_wave_V():
+    """El contra es el mismo generador visto desde el otro mastoides.
+
+    Antes ABR_Curve devolvia una copia exacta del ipsi (dy = y.copy()) y la
+    UI ni la dibujaba.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    t, y, meta = _curva(current=2000)
+    contra = meta['contra']
+    assert contra is not None
+    assert not np.array_equal(contra, y)
+    ventana_i = (t > 1.2) & (t < 2.2)
+    assert contra[ventana_i].max() < 0.5 * y[ventana_i].max()
+    ventana_v = (t > 4.5) & (t < 7.0)
+    lat_ipsi = t[ventana_v][np.argmax(y[ventana_v])]
+    lat_contra = t[ventana_v][np.argmax(contra[ventana_v])]
+    assert 0.05 < lat_contra - lat_ipsi < 0.4, (lat_ipsi, lat_contra)
+
+
+def test_no_contra_channel_without_the_electrode():
+    """Sin el electrodo del otro mastoides no hay canal contralateral."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    from abr.ABR_generator import DISCONNECTED
+    electrodos = {'vertex': 'Cz', 'right': 'A2', 'left': DISCONNECTED,
+                  'ground': 'Fpz'}
+    _, _, meta = _curva(technical={'electrodes': electrodos})
+    assert meta['contra'] is None and meta['contra_channel'] is None
+    # Estimulando el otro oido, ese mismo electrodo pasa a ser el ipsi y el
+    # contra existe.
+    g = _gen()
+    assert g.contra_channel({'electrodes': electrodos}, 'OI') == 'right'
+
+
+# ------------------------------------------------------ rechazos y monitor
+
+def test_rejected_sweeps_are_reported():
+    """Presentados, aceptados y rechazados salen del generador.
+
+    Se calculaban y no salian de ahi: ABR_Curve devolvia solo las curvas,
+    asi que la UI no tenia como mostrar por que el promedio no avanzaba.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    _, _, meta = _curva(current=2000, technical={'artifact_reject_uv': 10.0})
+    assert meta['accepted_sweeps'] < 2000
+    assert abs(meta['accepted_sweeps'] + meta['rejected_sweeps'] - 2000) < 1e-6
+
+
+def test_bad_impedance_drops_the_fsp():
+    """El FSP cae con los electrodos malos, no solo el ruido.
+
+    El FSP es una razon de varianzas: si el ruido sube, baja. Sin esto se
+    podia registrar con 15 kOhm y el equipo declaraba igual "respuesta
+    presente".
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    _, _, bueno = _curva(current=2000)
+    malas = {'vertex': 15.0, 'right': 15.0, 'left': 15.0, 'ground': 15.0}
+    _, _, malo = _curva(current=2000, technical={'impedance': malas})
+    assert malo['fsp'] < bueno['fsp'] * 0.5, (bueno['fsp'], malo['fsp'])
+    assert malo['fsp'] >= 1.0
+    assert malo['residual_noise_nv'] > bueno['residual_noise_nv']
+
+
+def test_raw_eeg_is_physiological():
+    """El monitor crudo corre en decenas de uV, no en el orden de la curva."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    g = _gen()
+    datos = g.raw_eeg(default_settings('ABR'), quality=1.0, seed=7, tick=1)
+    assert 8 < datos['rms_R'] < 20, datos['rms_R']
+    # Un EEG normal NO se pasa del rechazo de artefacto todo el tiempo: el
+    # umbral mira la banda del ABR, no el EEG crudo entero.
+    assert not datos['rejected_R']
+
+
+def test_raw_eeg_shows_mains_without_ground():
+    """Sin tierra el trazo crudo queda montado sobre el zumbido de red."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    from abr.ABR_generator import DISCONNECTED
+    g = _gen()
+    tech = default_settings('ABR')
+    tech['electrodes'] = dict(tech['electrodes'], ground=DISCONNECTED)
+    sin_tierra = g.raw_eeg(tech, seed=7, tick=1)
+    con_tierra = g.raw_eeg(default_settings('ABR'), seed=7, tick=1)
+    assert sin_tierra['rms_R'] > 2 * con_tierra['rms_R']
+    assert sin_tierra['rejected_R']
+
+
+def test_raw_eeg_is_flat_without_electrode():
+    """Electrodo desconectado = canal sin registro, no un EEG limpio."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    from abr.ABR_generator import DISCONNECTED
+    g = _gen()
+    tech = default_settings('ABR')
+    tech['electrodes'] = dict(tech['electrodes'], right=DISCONNECTED)
+    datos = g.raw_eeg(tech, seed=7, tick=1)
+    assert datos['R'] is None and datos['L'] is not None
+
+
+def test_raw_eeg_runs_instead_of_repeating():
+    """Cada tick trae EEG nuevo: es un monitor, no una foto."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    g = _gen()
+    uno = g.raw_eeg(default_settings('ABR'), seed=7, tick=1)['R']
+    dos = g.raw_eeg(default_settings('ABR'), seed=7, tick=2)['R']
+    assert not np.array_equal(uno, dos)
+    # Pero el mismo tick del mismo paciente se repite (seed estable).
+    assert np.array_equal(uno, g.raw_eeg(default_settings('ABR'), seed=7, tick=1)['R'])
+
+
+# ------------------------------------------------------- normativa por caso
+
+def test_normative_band_follows_the_population():
+    """La banda de la onda V sigue a la edad del paciente.
+
+    Con la banda de adulto (fija, escrita a mano) un neonato quedaba
+    SIEMPRE fuera de norma y el grafico latencia-intensidad no decia nada.
+    """
+    g = _gen()
+    _, lo_adulto, _ = g.latency_intensity_band('adult_female')
+    _, lo_neo, _ = g.latency_intensity_band('neonate')
+    assert all(n > a for n, a in zip(lo_neo, lo_adulto))
+
+
+def test_normative_limits_follow_intensity():
+    """Una onda V de 6.4 ms es normal a 40 dB y tardia a 80.
+
+    Es la misma funcion latencia-intensidad que dibuja la curva
+    (latency_intensity_shift), no una tabla aparte.
+    """
+    g = _gen()
+    alto = g.normative_limits('adult_female', 80)['lat']['V']
+    bajo = g.normative_limits('adult_female', 40)['lat']['V']
+    assert bajo[0] < 6.4 < bajo[1], bajo        # a 40 dB, normal
+    assert not (alto[0] <= 6.4 <= alto[1]), alto  # a 80 dB, tardia
+    assert alto[0] < 5.47 < alto[1]
+    ip = g.normative_limits('adult_female', 80)['interpeak']['I-V']
+    assert ip[0] < 4.0 < ip[1]
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_") and callable(fn):

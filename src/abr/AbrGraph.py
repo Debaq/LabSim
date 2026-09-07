@@ -25,15 +25,29 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # etiquetas de curva la siguen, si no un ECochG de 5 ms o un
         # registro de 20 ms quedaban dibujados sobre una regla de 12.
         self.window_ms = 12.0
-        self.configure_pyqtgraph()
-        self.setup_ui_elements()
-        self.colors_side()
-        self.inifine_ab()
         self.act_curve = None
         self.marks = {}
         self.data = {}
         self.curve_int = {}
         self.current_lat = 0
+        # Trazos por curva: promedio, canal contralateral y los dos
+        # subpromedios A/B. Antes habia un solo PlotDataItem por curva y se
+        # lo buscaba por item.name(); con cuatro trazos por curva eso ya no
+        # alcanza (y el contra ni siquiera se dibujaba).
+        self.traces = {}
+        # Escala vertical del grafico, en uV de alto de ventana. Antes el
+        # yRange estaba clavado en (-3, 3) y el apilado en 1.8 uV fijos:
+        # todas las curvas nacian en la MISMA altura (se pisaban hasta que
+        # el alumno las arrastraba a mano) y el gap no seguia a la escala.
+        self.scale_uv = 6.0
+        # Separacion entre curvas como fraccion de la escala. 0.35 deja el
+        # ruido del arranque (hasta ~1.2 uV RMS) sin invadir la curva de
+        # arriba a escala normal.
+        self.gap_ratio = 0.35
+        self.configure_pyqtgraph()
+        self.setup_ui_elements()
+        self.colors_side()
+        self.inifine_ab()
 
     def configure_pyqtgraph(self):
         self.color_background = pg.mkColor(255, 255, 255, 255)
@@ -43,7 +57,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
     def setup_ui_elements(self):
         """Set up UI elements for the graph"""
         self.pw = self.addPlot(row=0,col=1)
-        self.pw.setRange(yRange=(-3, 3), xRange=(0, self.window_ms + 1),
+        self.pw.setRange(yRange=(-self.scale_uv / 2, self.scale_uv / 2),
+                         xRange=(0, self.window_ms + 1),
                          disableAutoRange=True)
         self.grid = pg.GridItem(pen=self.color_pen, textPen=self.color_pen)
         self.pw.addItem(self.grid)
@@ -86,6 +101,27 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.pw.addItem(self.inf_a)
         self.pw.addItem(self.inf_b)
 
+    def next_gap(self):
+        """Altura de la proxima curva: una ranura por DEBAJO de la ultima.
+
+        Hacia abajo y no hacia arriba porque asi se lee un ABR: la
+        intensidad mas alta arriba y las siguientes descendiendo, que es el
+        orden en que se captura y en que se busca el umbral.
+
+        El paso sigue a la escala (gap_ratio de la ventana), asi que al
+        cambiar de escala las curvas se separan o se juntan con ella en vez
+        de quedar clavadas en 1.8 uV.
+        """
+        paso = self.scale_uv * self.gap_ratio
+        if not self.data:
+            return 0.0
+        return min(v.get('gap', 0.0) for v in self.data.values()) - paso
+
+    def apply_view(self):
+        """Rango vertical: una ventana de escala completa mas el apilado."""
+        piso = min((v.get('gap', 0.0) for v in self.data.values()), default=0.0)
+        self.pw.setYRange(piso - self.scale_uv / 2, self.scale_uv / 2, padding=0)
+
     def create_line(self, data, intencity):
         for name, values in data.items():
             if name in self.data: #si la curva ya existe solo se actualiza el grafico correspondiente
@@ -94,21 +130,63 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
             else: #si la curva no existe se crea en self.data y se crea el label que lo acompaña
                 self.act_curve = name
+                values['gap'] = self.next_gap()
                 self.data[name] = values
                 self.marks[name] = {}
                 self.curve_int[name] = intencity
-                y = values['ipsi_xy'][1] + values['gap']
-                self.pw.plot(x=values['ipsi_xy'][0],y=y, pen=self.active_color ,name=name)
-                label = self.create_label(name, intencity, 1.8)
+                self.traces[name] = self.create_traces(name, values)
+                label = self.create_label(name, intencity, values['gap'])
                 self.pw.addItem(label)
-    
+                self.apply_view()
+
+    def create_traces(self, name, values):
+        """Los cuatro trazos de una curva: A/B, contra y promedio.
+
+        Orden de dibujo a proposito: los subpromedios abajo (son el
+        respaldo), el contralateral punteado y el promedio arriba de todo,
+        que es el que el alumno marca.
+        """
+        gap = values['gap']
+        trazos = {}
+        # Subpromedios A/B (barridos pares e impares). Finos y claros: son
+        # la replicabilidad en vivo, no la curva que se informa.
+        color_sub = pg.mkColor(self.active_color)
+        color_sub.setAlpha(90)
+        for clave in ('sub_a', 'sub_b'):
+            xy = values.get(clave)
+            trazos[clave] = self.pw.plot(
+                x=xy[0] if xy else [], y=(np.asarray(xy[1]) + gap) if xy else [],
+                pen=pg.mkPen(color_sub, width=1), name=f'{name}#{clave}')
+        # Canal contralateral (punteado): existe solo si el electrodo del
+        # otro mastoides esta puesto -- si no, el generador manda None.
+        xy = values.get('contra_xy')
+        trazos['contra'] = self.pw.plot(
+            x=xy[0] if xy else [], y=(np.asarray(xy[1]) + gap) if xy else [],
+            pen=pg.mkPen(self.active_color, width=1, style=Qt.PenStyle.DotLine),
+            name=f'{name}#contra')
+        trazos['main'] = self.pw.plot(
+            x=values['ipsi_xy'][0], y=np.asarray(values['ipsi_xy'][1]) + gap,
+            pen=self.active_color, name=name)
+        return trazos
+
     def update_graph(self, graph_name, data):
-        for item in self.pw.listDataItems():
-            if item.name() == graph_name:
-                y = data['ipsi_xy'][1] + self.data[graph_name]['gap']
-                item.setData(x=data['ipsi_xy'][0],y=y)
-                self.get_amplitude()
-                break
+        trazos = self.traces.get(graph_name)
+        if not trazos:
+            return
+        gap = self.data[graph_name]['gap']
+        fuentes = {'main': data.get('ipsi_xy'), 'contra': data.get('contra_xy'),
+                   'sub_a': data.get('sub_a'), 'sub_b': data.get('sub_b')}
+        for clave, xy in fuentes.items():
+            item = trazos.get(clave)
+            if item is None:
+                continue
+            if xy is None:
+                if clave == 'main':
+                    continue
+                item.setData(x=[], y=[])
+                continue
+            item.setData(x=xy[0], y=np.asarray(xy[1]) + gap)
+        self.get_amplitude()
 
     def update_data(self,name ,values):
         for key, val in values.items():
@@ -117,14 +195,18 @@ class AbrGraph(GraphicsLayoutWidgetMod):
                     continue
             self.data[name][key] = val
 
+    def redraw(self, curve):
+        """Redibuja los cuatro trazos de la curva desde self.data."""
+        d = self.data[curve]
+        self.update_graph(curve, {
+            'ipsi_xy': d['ipsi_xy'], 'contra_xy': d.get('contra_xy'),
+            'sub_a': d.get('sub_a'), 'sub_b': d.get('sub_b')})
+
     def drag_curve(self, value):
         gap_y = value['pos'][1]
         curve = value['name']
         self.data[curve]['gap'] = gap_y
-        x = self.data[curve]['ipsi_xy'][0]
-        y = self.data[curve]['ipsi_xy'][1]
-        data = {'ipsi_xy': [x,y]}
-        self.update_graph(curve, data)
+        self.redraw(curve)
         self.move_marks(curve)
 
     def label_html(self,text:str, fill:str) -> str :
@@ -137,11 +219,18 @@ class AbrGraph(GraphicsLayoutWidgetMod):
                 """
     def smooth(self, ev):
         curve = self.act_curve
-        x = self.data[self.act_curve]['ipsi_xy'][0]
-        y = self.data[self.act_curve]['ipsi_xy'][1]
-        y = smooth_curve_gaussian(y, sigma=float(ev))
-        data = {'ipsi_xy': [x,y]}
-        self.update_graph(curve, data)
+        d = self.data[curve]
+        sigma = float(ev)
+        # Se suaviza lo que se ve, incluidos los subpromedios y el contra:
+        # si no, el promedio quedaba liso y A/B con todo el ruido, y la
+        # comparacion visual dejaba de significar nada.
+        datos = {'ipsi_xy': [d['ipsi_xy'][0],
+                             smooth_curve_gaussian(d['ipsi_xy'][1], sigma=sigma)]}
+        for clave in ('contra_xy', 'sub_a', 'sub_b'):
+            xy = d.get(clave)
+            if xy:
+                datos[clave] = [xy[0], smooth_curve_gaussian(xy[1], sigma=sigma)]
+        self.update_graph(curve, datos)
         self.move_marks(curve)
 
 
@@ -156,10 +245,9 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
     def delete_curve(self):
         delete = False
-        for item in self.pw.listDataItems():
-            if item.name() == self.act_curve:
-                self.pw.removeItem(item)
-                delete = True
+        for item in self.traces.pop(self.act_curve, {}).values():
+            self.pw.removeItem(item)
+            delete = True
 
         for item in self.pw.items[:]:
             if isinstance(item, TextItemMod) and item.curve_parent == self.act_curve:
@@ -167,8 +255,12 @@ class AbrGraph(GraphicsLayoutWidgetMod):
                 delete = True
 
         if delete:
+            self.data.pop(self.act_curve, None)
+            self.marks.pop(self.act_curve, None)
+            self.curve_int.pop(self.act_curve, None)
             self.sig_del_curve.emit(self.act_curve)
             self.act_curve = None
+            self.apply_view()
 
         
     def get_active(self):
@@ -176,12 +268,19 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
     def active_curve(self, sender):
         self.act_curve = sender
-        #se selecciona la curva
-        for item in self.pw.listDataItems():
-            if item.name() == self.act_curve:
-                item.setPen(self.active_color)
-            else:
-                item.setPen(self.inactive_color)
+        #se selecciona la curva (y con ella sus subpromedios y su contra)
+        for nombre, trazos in self.traces.items():
+            activa = nombre == self.act_curve
+            color = self.active_color if activa else self.inactive_color
+            sub = pg.mkColor(color)
+            sub.setAlpha(90)
+            for clave, item in trazos.items():
+                if clave == 'main':
+                    item.setPen(pg.mkPen(color))
+                elif clave == 'contra':
+                    item.setPen(pg.mkPen(color, width=1, style=Qt.PenStyle.DotLine))
+                else:
+                    item.setPen(pg.mkPen(sub, width=1))
         #se selecciona el label de la curva
         for item in self.pw.items:
             if isinstance(item, TextItemMod): 
@@ -348,23 +447,40 @@ class AbrGraph(GraphicsLayoutWidgetMod):
                 item.setPos((self.window_ms, 0))
 
     def scale(self, direction):
-        current_scale = self.get_scale()
+        """Cambia la escala vertical, y con ella el apilado.
+
+        El gap de cada curva se reescala en la misma proporcion (incluidas
+        las que el alumno movio a mano): antes la escala cambiaba el rango
+        y dejaba las curvas separadas por los mismos 1.8 uV, asi que al
+        abrir la escala se juntaban todas y al cerrarla se iban de pantalla.
+        """
+        actual = self.scale_uv
         if direction == 'plus':
-            new_scale = min(current_scale * 2, 200)
+            nueva = min(actual * 2, 200)
         elif direction == 'minus':
-            new_scale = max(current_scale / 2, 1)   
+            nueva = max(actual / 2, 1)
         else:
-            new_scale = current_scale
-        if new_scale != current_scale:
-            self.pw.setYRange(-new_scale / 2, new_scale / 2, padding=0) 
+            nueva = actual
+        if nueva != actual:
+            factor = nueva / actual
+            self.scale_uv = nueva
+            for curve, valores in self.data.items():
+                valores['gap'] = valores.get('gap', 0.0) * factor
+                self.redraw(curve)
+                self.move_label(curve)
+                self.move_marks(curve)
+            self.apply_view()
         return self.get_scale()
-       
+
+    def move_label(self, curve):
+        """Deja la etiqueta de intensidad a la altura de su curva."""
+        for item in self.pw.items:
+            if (isinstance(item, TextItemMod) and item.tipo == 'label'
+                    and item.curve_parent == curve):
+                item.setPos(self.window_ms, self.data[curve]['gap'])
+
     def get_scale(self):
-        yAxis = self.pw.getAxis('left')
-        yRange = yAxis.range
-        yTicks = yAxis.tickValues(*yRange, size=1)
-        scale = abs(yRange[0] - yRange[1])
-        return scale
+        return self.scale_uv
         
     def find_nearest(self, array_in, value, array_out):
         array = np.asarray(array_in)
@@ -403,9 +519,9 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.data = {}
         self.marks = {}
         self.curve_int = {}
+        self.traces = {}
         self.act_curve = None
-
-        print(f"   🧹 Gráfico lado {self.side} limpiado completamente")
+        self.apply_view()
 
     def export_(self):
         import os

@@ -46,21 +46,33 @@ class GraphLatInt(pg.GraphicsLayoutWidget):
         self.pw.addItem(note)
     
     def filled_area(self):
-        # Valores para crear el área sombreada
-        x_vals = [0,10,20,30,40,50,60,70,80]
-        y_bottom_vals = [8.6,8.1,7.7,7.3,6.8,6.3,6.0,5.7,5.4]
-        y_top_vals = [9.4,8.9,8.2,7.9,7.2,6.7,6.4,6.1,5.8]
-        curve_top = self.pw.plot(x_vals, y_top_vals)
-        curve_bottom = self.pw.plot(x_vals, y_bottom_vals)
+        """Banda normativa de la onda V. Arranca vacia y la llena set_band().
+
+        Los valores estaban escritos a mano (adulto): con la poblacion
+        normativa siguiendo la edad del paciente, un neonato --cuya onda V
+        corre casi 1 ms mas tarde-- quedaba SIEMPRE fuera de norma y el
+        grafico dejaba de decir nada. Ahora la banda sale del mismo modelo
+        que dibuja la curva (ABR_generator.latency_intensity_band).
+        """
+        self.curve_top = self.pw.plot([], [])
+        self.curve_bottom = self.pw.plot([], [])
         # Marcadas para que remove_points() no las borre junto con los
-        # puntos de captura -- son la banda normativa, fija, no un dato.
-        curve_top.is_band = True
-        curve_bottom.is_band = True
-        fill_between = pg.FillBetweenItem(curve_top, curve_bottom)
-        #fill_between.setCurves(curve_top, curve_bottom)
-        fill_between.setBrush(pg.mkColor(100, 100, 250, 80))
-        self.pw.addItem(fill_between)
-        #self.pw.fillBetween(x_vals, y_bottom_vals, y_top_vals, brush=fill_color)
+        # puntos de captura -- son la banda normativa, no un dato.
+        self.curve_top.is_band = True
+        self.curve_bottom.is_band = True
+        self.fill_between = pg.FillBetweenItem(self.curve_top, self.curve_bottom)
+        self.fill_between.setBrush(pg.mkColor(100, 100, 250, 80))
+        self.pw.addItem(self.fill_between)
+        self.lbl_band = pg.TextItem(text='', color=(70, 70, 160), anchor=(0, 0))
+        self.lbl_band.setPos(2, 11.6)
+        self.pw.addItem(self.lbl_band)
+
+    def set_band(self, x_vals, y_bottom_vals, y_top_vals, etiqueta=''):
+        """Banda normativa de la poblacion del paciente en atencion."""
+        self.curve_bottom.setData(list(x_vals), list(y_bottom_vals))
+        self.curve_top.setData(list(x_vals), list(y_top_vals))
+        self.fill_between.setCurves(self.curve_top, self.curve_bottom)
+        self.lbl_band.setText(etiqueta)
 
     def plot_data(self, data_dict):
         # Solo I, III y V: son las ondas que realmente se comparan en la
