@@ -1,6 +1,6 @@
 """OaeMainWindow - ventana principal del módulo OAE clínico.
 
-QMainWindow + QTabWidget con 3 tabs (TEOAE / DPOAE / SFOAE). Construida en
+QMainWindow + QTabWidget con 4 tabs (TEOAE / DPOAE / SOAE / SFOAE). Construida en
 código (sin .ui) porque es un módulo nuevo y no necesitamos compartir
 diseño con Qt Designer todavía. Mismo patrón que ABR (QMainWindow, módulos
 internos como widgets embebidos) pero más liviano - sin dock widgets, sin
@@ -24,6 +24,7 @@ from PySide6.QtWidgets import (
 
 from oae.widgets.teoae_panel import TeoaePanel
 from oae.widgets.dpoae_panel import DpoaePanel
+from oae.widgets.soae_panel import SoaePanel
 from oae.widgets.sfoae_panel import SfoaePanel
 
 _DEMO_TYPES = ("normal", "coclear", "transmission", "neural")
@@ -60,10 +61,15 @@ class OaeMainWindow(QMainWindow):
         self.tabs.setDocumentMode(True)
         self.teoae_panel = TeoaePanel()
         self.dpoae_panel = DpoaePanel()
+        self.soae_panel = SoaePanel()
         self.sfoae_panel = SfoaePanel()
         self.tabs.addTab(self.teoae_panel, "TEOAE  (Transientes)")
         self.tabs.addTab(self.dpoae_panel, "DPOAE  (Producto de distorsión)")
-        self.tabs.addTab(self.sfoae_panel, "SFOAE  (Espontáneas / Supresión)")
+        # SOAE y SFOAE son pruebas distintas: espontáneas = sin estímulo;
+        # SFOAE = con tono de estímulo y supresor. El tab de SFOAE decía
+        # "Espontáneas", que es el error conceptual que más se arrastra.
+        self.tabs.addTab(self.soae_panel, "SOAE  (Espontáneas)")
+        self.tabs.addTab(self.sfoae_panel, "SFOAE  (Frecuencia de estímulo / Supresión)")
         outer.addWidget(self.tabs, stretch=1)
 
         self.setCentralWidget(central)
@@ -120,14 +126,15 @@ class OaeMainWindow(QMainWindow):
         else:
             case_od = None
             case_oi = None
-        for panel in (self.teoae_panel, self.dpoae_panel, self.sfoae_panel):
+        for panel in (self.teoae_panel, self.dpoae_panel, self.soae_panel,
+                      self.sfoae_panel):
             panel.set_case(case_od, case_oi)
 
     def la_super(self, data, appointment_id=None) -> None:
         """Interfaz estándar de hidratación de módulos (Audiometer, ABR, Z).
 
         Propaga la patología por oído (cases.data['EOAS']['OD'/'OI'],
-        mismo patrón que ABR) a los 3 paneles. Sin atención abierta muestra
+        mismo patrón que ABR) a los 4 paneles. Sin atención abierta muestra
         la barra de modo demo (patología simulada, elegida a mano); con
         atención abierta pero sin EOA configurado para un oído, ese panel
         bloquea la captura -- ver oae_attenuation_db en generators/base.py.

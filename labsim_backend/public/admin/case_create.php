@@ -415,6 +415,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // atenuación por patología: así "más número, peor oído".
                 $desv[(string) $hz] = (float) fv($v, ['eoas', $lado, 'desv', (string) $hz], 0);
             }
+            // SOAE: picos fijados a mano (las filas vacías se ignoran).
+            $soaePicos = CaseBuilder::soaePeaksFromForm(fv($v, ['eoas', $lado, 'soae_peaks'], []));
             return [
                 'type' => (string) fv($v, ['eoas', $lado, 'type'], 'normal'),
                 'umbral' => (int) fv($v, ['eoas', $lado, 'umbral'], CaseBuilder::EOAS_DEFAULTS['umbral']),
@@ -423,6 +425,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'sello_pct' => (int) fv($v, ['eoas', $lado, 'sello_pct'], CaseBuilder::EOAS_DEFAULTS['sello_pct']),
                 'variabilidad_db' => (float) fv($v, ['eoas', $lado, 'variabilidad_db'], CaseBuilder::EOAS_DEFAULTS['variabilidad_db']),
                 'desviaciones' => $desv,
+                'soae_mode' => (string) fv($v, ['eoas', $lado, 'soae_mode'], CaseBuilder::EOAS_DEFAULTS['soae_mode']),
+                'soae_peaks' => $soaePicos,
             ];
         };
         $eoasOd = $eoasBuild('od');
@@ -493,6 +497,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Sello de sonda EOA fuera de rango (5-100%).';
         } elseif ($eoasOd['variabilidad_db'] < 0 || $eoasOi['variabilidad_db'] < 0 || $eoasOd['ruido_db'] < -20 || $eoasOi['ruido_db'] < -20) {
             $error = 'Ruido/variabilidad EOA fuera de rango.';
+        } elseif (!in_array($eoasOd['soae_mode'], CaseBuilder::EOAS_SOAE_MODES, true) || !in_array($eoasOi['soae_mode'], CaseBuilder::EOAS_SOAE_MODES, true)) {
+            $error = 'Modo SOAE inválido.';
+        } elseif (($soaeError = CaseBuilder::soaePeaksError($eoasOd) ?? CaseBuilder::soaePeaksError($eoasOi)) !== null) {
+            $error = $soaeError;
         } elseif (!in_array($vempOd['type'], CaseBuilder::VEMP_TYPE_OPTIONS, true) || !in_array($vempOi['type'], CaseBuilder::VEMP_TYPE_OPTIONS, true)) {
             $error = 'Patología VEMP inválida.';
         }
@@ -1408,7 +1416,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
 <div class="card">
     <strong>EOA <?= $ladoLabel ?></strong>
-    <p class="legend help">Patología de este oído para el generador de Emisiones Otoacústicas (TEOAE/DPOAE/SFOAE). "Coclear" y "Transmisión" atenúan la OEA según el umbral (a mayor umbral, más atenuada -- por sobre ~35-40 dB suele quedar bajo el noise floor, REFER). "Neural" deja la OEA normal aunque el umbral esté elevado: la cóclea está intacta, es el contraste clínico con ABR.</p>
+    <p class="legend help">Patología de este oído para el generador de Emisiones Otoacústicas (TEOAE/DPOAE/SOAE/SFOAE). "Coclear" y "Transmisión" atenúan la OEA según el umbral (a mayor umbral, más atenuada -- por sobre ~35-40 dB suele quedar bajo el noise floor, REFER). "Neural" deja la OEA normal aunque el umbral esté elevado: la cóclea está intacta, es el contraste clínico con ABR.</p>
     <div class="three-col">
         <label>Patología
             <select name="eoas[<?= $lado ?>][type]" class="eoas-type-select" data-lado="<?= $lado ?>">
@@ -1440,7 +1448,37 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         </label>
     </div>
     <p class="legend help">"Atenuación extra" se suma a la que ya calcula la patología (útil para forzar un REFER limpio sin tocar el umbral). "Ruido del paciente" sube el piso de ruido de la captura: un lactante despierto o un adulto que traga deja el DP-grama tapado en graves y baja la reproducibilidad TEOAE, aunque la cóclea esté sana -- es el error de interpretación clásico. "Sello de sonda" es a qué % converge el probe fit (bajo = estímulo débil y captura inestable). "Variabilidad biológica" es la estructura fina: 0 da una curva de libro, 3-4 dB da un registro real.</p>
-    <p class="legend">Perfil por frecuencia -- dB de caída respecto de lo esperado (positivo = OEA más chica). Se aplica a las tres pruebas: bandas TEOAE, puntos del DP-grama y curva de sintonía SFOAE.</p>
+    <p class="legend">Emisiones espontáneas (SOAE) de este oído -- el tab SOAE del emisor registra en silencio y busca picos sobre el piso de ruido.</p>
+    <div class="three-col">
+        <label>SOAE
+            <select name="eoas[<?= $lado ?>][soae_mode]">
+                <?php foreach (CaseBuilder::EOAS_SOAE_MODES as $opt): ?>
+                <option value="<?= $opt ?>" <?= ($v['eoas'][$lado]['soae_mode'] ?? CaseBuilder::EOAS_DEFAULTS['soae_mode']) === $opt ? 'selected' : '' ?>><?= htmlspecialchars(CaseBuilder::EOAS_SOAE_MODE_LABELS[$opt]) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+    </div>
+    <table class="grid-table">
+        <thead>
+        <tr><th>Pico</th><?php for ($i = 1; $i <= CaseBuilder::EOAS_SOAE_MAX_PEAKS; $i++): ?><th><?= $i ?></th><?php endfor; ?></tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td class="side-label">Hz</td>
+            <?php for ($i = 0; $i < CaseBuilder::EOAS_SOAE_MAX_PEAKS; $i++): ?>
+            <td><input type="number" step="1" min="<?= CaseBuilder::EOAS_SOAE_FREQ_MIN ?>" max="<?= CaseBuilder::EOAS_SOAE_FREQ_MAX ?>" placeholder="--" name="eoas[<?= $lado ?>][soae_peaks][<?= $i ?>][hz]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['soae_peaks'][$i]['hz'] ?? '')) ?>"></td>
+            <?php endfor; ?>
+        </tr>
+        <tr>
+            <td class="side-label">dB SPL</td>
+            <?php for ($i = 0; $i < CaseBuilder::EOAS_SOAE_MAX_PEAKS; $i++): ?>
+            <td><input type="number" step="0.5" min="-15" max="30" placeholder="<?= CaseBuilder::EOAS_SOAE_DEFAULT_PEAK_DB ?>" name="eoas[<?= $lado ?>][soae_peaks][<?= $i ?>][db]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['soae_peaks'][$i]['db'] ?? '')) ?>"></td>
+            <?php endfor; ?>
+        </tr>
+        </tbody>
+    </table>
+    <p class="legend help">"Auto" deja que el cliente sortee si este oído tiene SOAE (~45%, algo más en OD) -- estable para el mismo caso, pero no se puede saber de antemano. Para mostrarlas en clase o evaluar sobre un hallazgo fijo usá "Presentes" y cargá los picos: frecuencia en Hz y nivel de la emisión (los SOAE reales rondan 0 dB SPL, rara vez pasan 20; en blanco toma <?= CaseBuilder::EOAS_SOAE_DEFAULT_PEAK_DB ?> dB SPL). "Presentes" sin picos cargados = el cliente los sortea pero garantiza al menos uno. Los picos cargados NO se atenúan por patología ni por sello: el nivel que pongas es el que se va a ver, aunque el ruido del paciente igual puede taparlos. "Ausentes" fuerza un registro sin SOAE (lo normal en coclear/transmisión, y también posible en un oído sano).</p>
+    <p class="legend">Perfil por frecuencia -- dB de caída respecto de lo esperado (positivo = OEA más chica). Se aplica a las cuatro pruebas: bandas TEOAE, puntos del DP-grama, curva de sintonía SFOAE y los picos SOAE sorteados.</p>
     <table class="grid-table">
         <thead>
         <tr><th>Hz</th><?php foreach (CaseBuilder::EOAS_FREQS as $hz): ?><th><?= $hz ?></th><?php endforeach; ?></tr>
@@ -2077,7 +2115,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 // (resources/oae/normative_data.json). Si se tocan allá, tocar acá: esta
 // vista es referencia visual para el docente, el examen real lo genera el
 // cliente -- que además puede tener el normativo overrideado por curso
-// (app_config normative_data.teoae/dpoae/sfoae).
+// (app_config normative_data.teoae/dpoae/soae/sfoae).
 (function () {
     var EOAS_FREQS = <?= json_encode(CaseBuilder::EOAS_FREQS) ?>;
     var EOAS_AUTOFILL = <?= json_encode(CaseBuilder::EOAS_AUTOFILL_DELTAS) ?>;

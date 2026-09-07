@@ -46,9 +46,10 @@ final class CaseBuilder
 
     // Frecuencias del perfil OEA por oído. Es la unión de las bandas que
     // usa cada prueba en el cliente (TEOAE 1-4k, DP-grama 1-8k, SFOAE
-    // 0.5-4k), así el docente configura UNA curva por oído y las tres
-    // pruebas quedan coherentes entre sí (una muesca en 4k aparece en las
-    // tres, como en un paciente real). Ver resources/oae/normative_data.json.
+    // 0.5-4k, SOAE 0.7-4.5k), así el docente configura UNA curva por oído
+    // y las cuatro pruebas quedan coherentes entre sí (una muesca en 4k
+    // aparece en todas, como en un paciente real). Ver
+    // resources/oae/normative_data.json.
     public const EOAS_FREQS = [500, 1000, 1500, 2000, 3000, 4000, 6000, 8000];
 
     // Desviación por frecuencia (dB) preseteada por patología, para el
@@ -64,6 +65,28 @@ final class CaseBuilder
         'neural'       => [500 => 0, 1000 => 0, 1500 => 0, 2000 => 0, 3000 => 0, 4000 => 0, 6000 => 0, 8000 => 0],
     ];
 
+    // SOAE (emisiones espontáneas): solo ~40-50% de los oídos normales
+    // las tienen, así que en 'auto' el cliente las sortea (determinístico
+    // por caso: el mismo paciente da siempre lo mismo). 'presentes' y
+    // 'ausentes' fijan el hallazgo para poder mostrarlo en clase o evaluar
+    // sobre algo que no cambie de oído en oído. Ver true_peaks() en
+    // src/oae/generators/soae.py.
+    public const EOAS_SOAE_MODES = ['auto', 'presentes', 'ausentes'];
+    public const EOAS_SOAE_MODE_LABELS = [
+        'auto' => 'Auto (sorteo por prevalencia)',
+        'presentes' => 'Presentes (forzar)',
+        'ausentes' => 'Ausentes (forzar)',
+    ];
+    // Picos SOAE que el docente puede fijar a mano por oído. Tres alcanza:
+    // un oído real rara vez muestra más de 2-3 picos claros.
+    public const EOAS_SOAE_MAX_PEAKS = 3;
+    public const EOAS_SOAE_FREQ_MIN = 500;
+    public const EOAS_SOAE_FREQ_MAX = 7000;
+    // Nivel por defecto de un pico fijado a mano: en 1-2 kHz deja ~10 dB
+    // sobre el piso, o sea visible sin ser irreal (los SOAE reales rondan
+    // los 0 dB SPL y rara vez pasan de 20).
+    public const EOAS_SOAE_DEFAULT_PEAK_DB = 6.0;
+
     // Defaults del perfil OEA por oído (paciente "limpio": sin atenuación
     // extra, sin ruido agregado, sello de sonda bueno).
     public const EOAS_DEFAULTS = [
@@ -72,6 +95,7 @@ final class CaseBuilder
         'ruido_db' => 0.0,
         'sello_pct' => 85,
         'variabilidad_db' => 2.5,
+        'soae_mode' => 'auto',
     ];
 
     // Patología VEMP por oído -- categorías vestibulares. 'sacular' afecta
@@ -117,6 +141,66 @@ final class CaseBuilder
     public const WEBER_ASYMMETRY_THRESHOLD = 10;
 
     /** Rinne auto: negativo si el gap aérea-ósea de ese oído en esa frecuencia es >= RINNE_GAP_THRESHOLD. "falso_negativo" nunca se auto-calcula, es solo elegible a mano. */
+    /**
+     * Picos SOAE cargados en el formulario -> shape de cases.data.
+     *
+     * Una fila sin Hz se ignora (el docente carga 1 pico y no tres), y el
+     * nivel en blanco toma EOAS_SOAE_DEFAULT_PEAK_DB.
+     */
+    public static function soaePeaksFromForm($rows): array
+    {
+        $picos = [];
+        if (!is_array($rows)) {
+            return $picos;
+        }
+        for ($i = 0; $i < self::EOAS_SOAE_MAX_PEAKS; $i++) {
+            $row = is_array($rows[$i] ?? null) ? $rows[$i] : [];
+            $hz = (float) ($row['hz'] ?? 0);
+            if ($hz <= 0) {
+                continue;
+            }
+            $db = $row['db'] ?? '';
+            $picos[] = [
+                'hz' => $hz,
+                'db' => ($db === '' || $db === null) ? self::EOAS_SOAE_DEFAULT_PEAK_DB : (float) $db,
+            ];
+        }
+        return $picos;
+    }
+
+    /**
+     * Valida los picos SOAE de un oído. Devuelve el mensaje de error o null.
+     *
+     * La separación mínima no es capricho: dos SOAE muy juntos se suprimen
+     * entre sí y no coexisten en un oído real (~0.4 bark, ~6%). Ver
+     * min_peak_spacing_ratio en resources/oae/normative_data.json.
+     */
+    public static function soaePeaksError(array $eoasLado): ?string
+    {
+        $picos = $eoasLado['soae_peaks'] ?? [];
+        if (($eoasLado['soae_mode'] ?? 'auto') === 'ausentes' && $picos !== []) {
+            return 'SOAE en modo "ausentes" no puede tener picos cargados: borrá las frecuencias o cambiá el modo.';
+        }
+        // Ordenados por frecuencia: el docente puede cargarlos en cualquier
+        // orden en el formulario.
+        usort($picos, static fn($a, $b) => $a['hz'] <=> $b['hz']);
+        $hzPrevio = null;
+        foreach ($picos as $pico) {
+            if ($pico['hz'] < self::EOAS_SOAE_FREQ_MIN || $pico['hz'] > self::EOAS_SOAE_FREQ_MAX) {
+                return sprintf('Frecuencia SOAE fuera de rango (%d-%d Hz).',
+                    self::EOAS_SOAE_FREQ_MIN, self::EOAS_SOAE_FREQ_MAX);
+            }
+            if ($pico['db'] < -15 || $pico['db'] > 30) {
+                return 'Nivel SOAE fuera de rango (-15 a 30 dB SPL).';
+            }
+            if ($hzPrevio !== null && (max($pico['hz'], $hzPrevio) / min($pico['hz'], $hzPrevio)) < 1.06) {
+                return 'Dos picos SOAE del mismo oído deben estar separados al menos 6% en frecuencia (se suprimen entre sí).';
+            }
+            $hzPrevio = $pico['hz'];
+        }
+        return null;
+    }
+
     public static function rinneAuto(int $air, int $bone): string
     {
         return ($air - $bone) >= self::RINNE_GAP_THRESHOLD ? 'negativo' : 'positivo';
@@ -655,7 +739,20 @@ final class CaseBuilder
                 'ruido_db' => (string) ($ladoEoas['ruido_db'] ?? self::EOAS_DEFAULTS['ruido_db']),
                 'sello_pct' => (string) ($ladoEoas['sello_pct'] ?? self::EOAS_DEFAULTS['sello_pct']),
                 'variabilidad_db' => (string) ($ladoEoas['variabilidad_db'] ?? self::EOAS_DEFAULTS['variabilidad_db']),
+                'soae_mode' => in_array($ladoEoas['soae_mode'] ?? '', self::EOAS_SOAE_MODES, true)
+                    ? $ladoEoas['soae_mode']
+                    : self::EOAS_DEFAULTS['soae_mode'],
             ];
+            // Picos SOAE fijados a mano (caso viejo: ninguno -> filas
+            // vacías y el cliente decide por prevalencia).
+            $picosSoae = is_array($ladoEoas['soae_peaks'] ?? null) ? array_values($ladoEoas['soae_peaks']) : [];
+            for ($iSoae = 0; $iSoae < self::EOAS_SOAE_MAX_PEAKS; $iSoae++) {
+                $picoSoae = is_array($picosSoae[$iSoae] ?? null) ? $picosSoae[$iSoae] : [];
+                $v['eoas'][$ladoForm]['soae_peaks'][$iSoae] = [
+                    'hz' => isset($picoSoae['hz']) ? (string) $picoSoae['hz'] : '',
+                    'db' => isset($picoSoae['db']) ? (string) $picoSoae['db'] : '',
+                ];
+            }
             // Caso viejo (guardado antes del perfil por frecuencia): las
             // desviaciones no existen y quedan en 0 -- el cliente sigue
             // atenuando solo por type/umbral, igual que antes.

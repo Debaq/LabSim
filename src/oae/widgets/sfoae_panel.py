@@ -1,7 +1,7 @@
 """Panel SFOAE - barrido de supresor + curva de sintonía por frecuencia."""
 import numpy as np
 import pyqtgraph as pg
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
     QButtonGroup,
     QDoubleSpinBox,
@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from oae.generators.base import oae_probe_fit
 from oae.generators.sfoae import SfoaeGenerator
 from oae.widgets.probe_check import ProbeCheckWidget
 from oae.widgets.plot_style import style_plot, black_title
@@ -23,11 +24,14 @@ from oae.widgets.plot_style import style_plot, black_title
 class SfoaePanel(QWidget):
     """Tab SFOAE: barrido de supresor + curva de sintonía."""
 
+    PROBE_CHECK_MS = 2000
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.generator = SfoaeGenerator()
         self.case_od = None
         self.case_oi = None
+        self._pending = None
         self._build_ui()
         self._update_case_gate()
 
@@ -155,6 +159,24 @@ class SfoaePanel(QWidget):
         ear, case = self._current_case()
         if case is None:
             return
+        # El widget de chequeo de sonda estaba en pantalla pero nunca se
+        # arrancaba: acá se corre igual que en TEOAE/DPOAE (con su propio
+        # QTimer, por eso la captura va en un singleShot posterior y no en
+        # la misma vuelta del event loop).
+        self._pending = (ear, case)
+        self.lbl_status.setText("Chequeando sonda...")
+        self.btn_start.setEnabled(False)
+        self.btn_tuning.setEnabled(False)
+        self.probe.start(self.spn_level.value(), oae_probe_fit(case))
+        QTimer.singleShot(self.PROBE_CHECK_MS, self._run_capture)
+
+    def _run_capture(self):
+        if self._pending is None:
+            return
+        ear, case = self._pending
+        self._pending = None
+        self.probe.stop()
+        self._update_case_gate()
         freq = self.spn_freq.value()
         level = self.spn_level.value()
         self.lbl_status.setText(f"Generando SFOAE: {ear}, {freq:.0f} Hz, {level:.0f} dB SPL...")
@@ -181,6 +203,9 @@ class SfoaePanel(QWidget):
         self.lbl_status.setText(f"Curva de sintonía generada ({ear}).")
 
     def _on_clear(self):
+        self._pending = None
+        self.probe.stop()
+        self._update_case_gate()
         self.curve_mag.clear()
         self.curve_phase.clear()
         self.curve_tuning.clear()

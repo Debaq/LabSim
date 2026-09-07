@@ -1,5 +1,5 @@
 {
-  "comments": "Normativos por defecto para OEA clínica (TEOAE/DPOAE/SFOAE). El override por curso vive en core.app_config_store bajo 'normative_data.teoae/dpoae/sfoae' (mismo path que ABR). Sin override del curso -> se usan estos defaults + banner amarillo. teoae.noise_floor_db_spl es el ruido de canal POR BARRIDO (no el piso final): al promediar N barridos baja ~1/sqrt(N), y con 14 dB SPL / 260 barridos un oido normal queda en ~94% de reproducibilidad y 15-21 dB de SNR por banda, que es el rango de un equipo real. dpoae.normal_band_db es el rango normal (p5-p95 aprox.) del nivel DP por f2 que se dibuja como area verde en el DP-grama; dpoae.noise_floor_db_spl es el piso FINAL (con todos los promedios de averages_per_point): durante la captura de cada punto el piso arranca 10*log10(k_max) dB mas arriba y baja al promediar.",
+  "comments": "Normativos por defecto para OEA clínica (TEOAE/DPOAE/SOAE/SFOAE). El override por curso vive en core.app_config_store bajo 'normative_data.teoae/dpoae/soae/sfoae' (mismo path que ABR). Sin override del curso -> se usan estos defaults + banner amarillo. teoae.noise_floor_db_spl es el ruido de canal POR BARRIDO (no el piso final): al promediar N barridos baja ~1/sqrt(N), y con 14 dB SPL / 260 barridos un oido normal queda en ~94% de reproducibilidad y 15-21 dB de SNR por banda, que es el rango de un equipo real. dpoae.normal_band_db es el rango normal (p5-p95 aprox.) del nivel DP por f2 que se dibuja como area verde en el DP-grama; dpoae.noise_floor_db_spl es el piso FINAL (con todos los promedios de averages_per_point): durante la captura de cada punto el piso arranca 10*log10(k_max) dB mas arriba y baja al promediar.",
   "teoae": {
     "default": {
       "min_snr_db": 6,
@@ -80,6 +80,40 @@
       "suppression_offset_db": 10,
       "suppression_slope_db": 6,
       "phase_slope_db": 8
+    }
+  },
+  "soae": {
+    "comments": "SOAE = emisiones ESPONTANEAS (registro en silencio, sin estimulo). prevalence_pct + prevalence_right_ear_factor deciden si ese oido tiene SOAE (no todos los oidos normales los tienen: ~40-50%); peak_* es la distribucion de frecuencia/nivel de los picos (agrupados en 1-2 kHz, mediana cercana a 0 dB SPL, separacion minima ~6% entre picos del mismo oido); min_snr_db (pico sobre el piso local) y min_snr_half_db (reproducible en las dos mitades A/B del registro) son el criterio de deteccion. noise_floor_db_spl es el nivel MEDIO del ruido del conducto: sin estimulo no hay promediacion coherente, asi que promediar NO lo baja -- lo que baja es la dispersion bin a bin (~4.34/sqrt(k) dB), y por eso los picos emergen al final del registro. valid_floor_max_db_spl es el piso medio (1-4 kHz) sobre el cual el registro se informa como no concluyente en vez de 'sin SOAE'.",
+    "default": {
+      "fft_n": 8192,
+      "spectrum_low_hz": 500,
+      "spectrum_high_hz": 7000,
+      "default_record_s": 30,
+      "min_record_s": 10,
+      "max_record_s": 120,
+      "n_frames": 36,
+      "noise_floor_db_spl": -8,
+      "noise_floor_lf_rise_db_per_oct": 9,
+      "noise_floor_hf_rise_db_per_oct": 2,
+      "min_snr_db": 3,
+      "min_snr_half_db": 2,
+      "valid_floor_max_db_spl": 0,
+      "floor_window_bins": 41,
+      "peak_separation_bins": 3,
+      "prevalence_pct": 45,
+      "prevalence_right_ear_factor": 1.15,
+      "peak_count_lambda": 1.4,
+      "max_peaks": 6,
+      "peak_freq_min_hz": 700,
+      "peak_freq_max_hz": 4500,
+      "peak_freq_center_hz": 1500,
+      "peak_freq_spread_oct": 0.7,
+      "min_peak_spacing_ratio": 1.06,
+      "peak_level_mean_db_spl": 2,
+      "peak_level_sd_db": 6,
+      "peak_level_max_db_spl": 20,
+      "peak_level_jitter_db": 0.4,
+      "peak_bandwidth_bins": 1.1
     }
   }
 }
