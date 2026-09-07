@@ -178,6 +178,38 @@
             </widget>
            </item>
            <item>
+            <widget class="QPushButton" name="btn_toggle_sub">
+             <property name="toolTip">
+              <string>Mostrar/ocultar subpromedios A/B</string>
+             </property>
+             <property name="text">
+              <string>AB</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn_toggle_contra">
+             <property name="toolTip">
+              <string>Mostrar/ocultar canal contralateral</string>
+             </property>
+             <property name="text">
+              <string>C</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
             <spacer name="verticalSpacer">
              <property name="orientation">
               <enum>Qt::Vertical</enum>

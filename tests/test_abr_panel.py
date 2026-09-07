@@ -38,6 +38,7 @@ try:
     # core.base crea el QApplication al importarse: va antes de los widgets.
     from core.base import context  # noqa: F401
     from abr.ABR_generator import DISCONNECTED, normative_limits
+    from abr.AbrGraph import AbrGraph
     from abr.AbrMainWindow import AbrMainWindow
     HAS_UI = True
 except ImportError as exc:          # sin PySide6/pyqtgraph/scipy
@@ -403,6 +404,46 @@ def test_no_contra_trace_without_the_electrode():
     _capturar(w, lado='OD')
     _, contra = w.graph_r.traces['R1']['contra'].getData()
     assert contra is None or len(contra) == 0
+
+
+def test_sub_traces_have_their_own_colors():
+    """A verde y B cafe: no el color del canal, que se confundia con el promedio."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    _capturar(w)
+    trazos = w.graph_r.traces['R1']
+    verde = trazos['sub_a'].opts['pen'].color().getRgb()[:3]
+    cafe = trazos['sub_b'].opts['pen'].color().getRgb()[:3]
+    assert verde == AbrGraph.COLOR_SUB_A
+    assert cafe == AbrGraph.COLOR_SUB_B
+    principal = trazos['main'].opts['pen'].color().getRgb()[:3]
+    assert principal not in (verde, cafe)
+    # Seleccionar la curva no les cambia el color, solo la opacidad.
+    w.graph_r.active_curve('R1')
+    assert trazos['sub_a'].opts['pen'].color().getRgb()[:3] == verde
+
+
+def test_sub_and_contra_can_be_hidden():
+    """Los botones AB y C ocultan esos trazos en los dos oidos."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    _capturar(w)
+    w.btn_toggle_sub.setChecked(False)
+    w.btn_toggle_contra.setChecked(False)
+    for g in (w.graph_r, w.graph_l):
+        for curva, trazos in g.traces.items():
+            assert not trazos['sub_a'].isVisible(), curva
+            assert not trazos['sub_b'].isVisible(), curva
+            assert not trazos['contra'].isVisible(), curva
+            assert trazos['main'].isVisible(), curva
+    # Una curva capturada con los trazos ocultos nace oculta.
+    _capturar(w, intensidad=60)
+    nueva = w.graph_r.traces['R2']
+    assert not nueva['sub_a'].isVisible() and not nueva['contra'].isVisible()
+    w.btn_toggle_sub.setChecked(True)
+    assert nueva['sub_a'].isVisible() and not nueva['contra'].isVisible()
 
 
 # ------------------------------------------------------- tabla con normativa

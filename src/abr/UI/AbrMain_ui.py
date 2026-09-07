@@ -111,6 +111,20 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.btn_scale_minus)
 
+        self.btn_toggle_sub = QPushButton(self.verticalFrame)
+        self.btn_toggle_sub.setObjectName(u"btn_toggle_sub")
+        self.btn_toggle_sub.setCheckable(True)
+        self.btn_toggle_sub.setChecked(True)
+
+        self.verticalLayout.addWidget(self.btn_toggle_sub)
+
+        self.btn_toggle_contra = QPushButton(self.verticalFrame)
+        self.btn_toggle_contra.setObjectName(u"btn_toggle_contra")
+        self.btn_toggle_contra.setCheckable(True)
+        self.btn_toggle_contra.setChecked(True)
+
+        self.verticalLayout.addWidget(self.btn_toggle_contra)
+
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.verticalLayout.addItem(self.verticalSpacer)
@@ -244,6 +258,14 @@ class Ui_MainWindow(object):
         self.btn_scale_plus.setText(QCoreApplication.translate("MainWindow", u"+", None))
         self.lbl_scale.setText(QCoreApplication.translate("MainWindow", u"8\u00b5V", None))
         self.btn_scale_minus.setText(QCoreApplication.translate("MainWindow", u"-", None))
+#if QT_CONFIG(tooltip)
+        self.btn_toggle_sub.setToolTip(QCoreApplication.translate("MainWindow", u"Mostrar/ocultar subpromedios A/B", None))
+#endif // QT_CONFIG(tooltip)
+        self.btn_toggle_sub.setText(QCoreApplication.translate("MainWindow", u"AB", None))
+#if QT_CONFIG(tooltip)
+        self.btn_toggle_contra.setToolTip(QCoreApplication.translate("MainWindow", u"Mostrar/ocultar canal contralateral", None))
+#endif // QT_CONFIG(tooltip)
+        self.btn_toggle_contra.setText(QCoreApplication.translate("MainWindow", u"C", None))
         self.lbl_coord_r.setText(QCoreApplication.translate("MainWindow", u"N/D", None))
         self.lbl_coord_l.setText(QCoreApplication.translate("MainWindow", u"N/D", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.abr), QCoreApplication.translate("MainWindow", u"Gr\u00e1ficos", None))

@@ -17,6 +17,11 @@ class AbrGraph(GraphicsLayoutWidgetMod):
     sig_change_value_mark = Signal(dict)
     sig_curve_selected = Signal(str)
 
+    # Verde para el subpromedio A y cafe para el B, iguales en los dos
+    # oidos: no son senial del canal, son la replicabilidad.
+    COLOR_SUB_A = (0, 140, 70)
+    COLOR_SUB_B = (140, 90, 40)
+
     def __init__(self, side):
         super().__init__()
         self.side = side
@@ -35,6 +40,11 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # lo buscaba por item.name(); con cuatro trazos por curva eso ya no
         # alcanza (y el contra ni siquiera se dibujaba).
         self.traces = {}
+        # Los dos subpromedios y el contra se pueden ocultar desde la barra
+        # del grafico: con cuatro trazos por curva y ocho curvas apiladas,
+        # buscar la onda V en el promedio se hace ilegible.
+        self.show_sub = True
+        self.show_contra = True
         # Escala vertical del grafico, en uV de alto de ventana. Antes el
         # yRange estaba clavado en (-3, 3) y el apilado en 1.8 uV fijos:
         # todas las curvas nacian en la MISMA altura (se pisaban hasta que
@@ -71,6 +81,42 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         ay.setStyle(showValues=False)
         view_box = self.pw.getViewBox()
         view_box.setMouseMode(pg.ViewBox.PanMode)
+
+    def pen_for(self, clave, activa=True):
+        """Pen de un trazo segun su tipo y si la curva esta seleccionada.
+
+        Los subpromedios llevan color propio (verde A, cafe B) y no el del
+        canal: con cuatro trazos del mismo tono no se distinguia cual era
+        el promedio y cuales el respaldo. La seleccion en ellos se marca
+        con opacidad, no con color.
+        """
+        if clave in ('sub_a', 'sub_b'):
+            color = pg.mkColor(self.COLOR_SUB_A if clave == 'sub_a'
+                               else self.COLOR_SUB_B)
+            color.setAlpha(255 if activa else 110)
+            return pg.mkPen(color, width=1)
+        base = self.active_color if activa else self.inactive_color
+        if clave == 'contra':
+            return pg.mkPen(base, width=1, style=Qt.PenStyle.DotLine)
+        return pg.mkPen(base)
+
+    def set_sub_visible(self, visible):
+        """Muestra u oculta los subpromedios A/B de todas las curvas."""
+        self.show_sub = bool(visible)
+        self._apply_visibility()
+
+    def set_contra_visible(self, visible):
+        """Muestra u oculta el trazo contralateral de todas las curvas."""
+        self.show_contra = bool(visible)
+        self._apply_visibility()
+
+    def _apply_visibility(self):
+        for trazos in self.traces.values():
+            for clave, item in trazos.items():
+                if clave in ('sub_a', 'sub_b'):
+                    item.setVisible(self.show_sub)
+                elif clave == 'contra':
+                    item.setVisible(self.show_contra)
 
     def colors_side(self):
         if self.side == 0:
@@ -150,23 +196,22 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         trazos = {}
         # Subpromedios A/B (barridos pares e impares). Finos y claros: son
         # la replicabilidad en vivo, no la curva que se informa.
-        color_sub = pg.mkColor(self.active_color)
-        color_sub.setAlpha(90)
         for clave in ('sub_a', 'sub_b'):
             xy = values.get(clave)
             trazos[clave] = self.pw.plot(
                 x=xy[0] if xy else [], y=(np.asarray(xy[1]) + gap) if xy else [],
-                pen=pg.mkPen(color_sub, width=1), name=f'{name}#{clave}')
+                pen=self.pen_for(clave), name=f'{name}#{clave}')
+            trazos[clave].setVisible(self.show_sub)
         # Canal contralateral (punteado): existe solo si el electrodo del
         # otro mastoides esta puesto -- si no, el generador manda None.
         xy = values.get('contra_xy')
         trazos['contra'] = self.pw.plot(
             x=xy[0] if xy else [], y=(np.asarray(xy[1]) + gap) if xy else [],
-            pen=pg.mkPen(self.active_color, width=1, style=Qt.PenStyle.DotLine),
-            name=f'{name}#contra')
+            pen=self.pen_for('contra'), name=f'{name}#contra')
+        trazos['contra'].setVisible(self.show_contra)
         trazos['main'] = self.pw.plot(
             x=values['ipsi_xy'][0], y=np.asarray(values['ipsi_xy'][1]) + gap,
-            pen=self.active_color, name=name)
+            pen=self.pen_for('main'), name=name)
         return trazos
 
     def update_graph(self, graph_name, data):
@@ -271,16 +316,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         #se selecciona la curva (y con ella sus subpromedios y su contra)
         for nombre, trazos in self.traces.items():
             activa = nombre == self.act_curve
-            color = self.active_color if activa else self.inactive_color
-            sub = pg.mkColor(color)
-            sub.setAlpha(90)
             for clave, item in trazos.items():
-                if clave == 'main':
-                    item.setPen(pg.mkPen(color))
-                elif clave == 'contra':
-                    item.setPen(pg.mkPen(color, width=1, style=Qt.PenStyle.DotLine))
-                else:
-                    item.setPen(pg.mkPen(sub, width=1))
+                item.setPen(self.pen_for(clave, activa))
         #se selecciona el label de la curva
         for item in self.pw.items:
             if isinstance(item, TextItemMod): 

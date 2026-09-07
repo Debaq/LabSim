@@ -119,6 +119,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.detail_all.sig_selected_curve.connect(self.selected_)
         self.btn_scale_minus.clicked.connect(self.scale_graph)
         self.btn_scale_plus.clicked.connect(self.scale_graph)
+        self.btn_toggle_sub.toggled.connect(self.toggle_sub)
+        self.btn_toggle_contra.toggled.connect(self.toggle_contra)
         self.btn_next_case.hide()  # sin ciclo de casos propio, no aplica
 
         ######Variables de Estado
@@ -460,6 +462,15 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         value = int(round(value,0))
         value = f"{value}µV"
         self.lbl_scale.setText(value)
+
+    def toggle_sub(self, visible):
+        """Subpromedios A/B a la vista en los dos oidos a la vez."""
+        self.graph_r.set_sub_visible(visible)
+        self.graph_l.set_sub_visible(visible)
+
+    def toggle_contra(self, visible):
+        self.graph_r.set_contra_visible(visible)
+        self.graph_l.set_contra_visible(visible)
 
     def selected_(self, curve):
         letter = 'r' if curve[0] == 'R' else 'l'
