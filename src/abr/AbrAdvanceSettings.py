@@ -23,6 +23,9 @@ from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox,
                                QDoubleSpinBox, QGridLayout, QGroupBox, QLabel,
                                QVBoxLayout)
 
+from abr.ABR_generator import (ABRGenerator, DISCONNECTED,
+                               IMPEDANCE_BALANCE_LIMIT_KOHM,
+                               IMPEDANCE_LIMIT_KOHM)
 from abr.ABR_generator import default_settings as _generator_defaults
 from abr.protocols import get_protocol
 
@@ -43,9 +46,13 @@ MONTAGES = {
     "Timpánico (ECochG)": 'tympanic',
 }
 
-# Posiciones de electrodo. "No Conectado" tiene que seguir escrito igual
-# que ABR_generator.DISCONNECTED.
-POSITIONS = ("A1", "A2", "Cz", "Fz", "Fpz", "Ceja izquierda", "No Conectado")
+# Posiciones de electrodo. La ultima sale del generador para que
+# "desconectado" signifique lo mismo de los dos lados.
+POSITIONS = ("A1", "A2", "Cz", "Fz", "Fpz", "Ceja izquierda", DISCONNECTED)
+
+# Chequeo de impedancias: se marcan en rojo los electrodos fuera de
+# norma, igual que la pantalla previa de un equipo real.
+BAD_STYLE = "background-color: #ffd6d6;"
 
 ARTIFACT_REJECT = {
     "±10 µV (estrecho)": 10.0,
@@ -157,7 +164,14 @@ class AbrAdvanceSettings(QDialog):
             grid.addWidget(combo, row, 1)
             grid.addWidget(spin, row, 2)
             self.electrode_widgets[key] = (combo, spin)
+            combo.currentTextChanged.connect(self.check_impedance)
+            spin.valueChanged.connect(self.check_impedance)
+
+        self.lbl_impedance = QLabel()
+        self.lbl_impedance.setWordWrap(True)
+        grid.addWidget(self.lbl_impedance, len(ELECTRODES), 0, 1, 3)
         layout.addWidget(electrodos)
+        self.check_impedance()
 
         promedio = QGroupBox("Promediación")
         grid = QGridLayout(promedio)
@@ -180,6 +194,50 @@ class AbrAdvanceSettings(QDialog):
         botones.button(QDialogButtonBox.StandardButton.RestoreDefaults).clicked.connect(
             self.restore_defaults)
         layout.addWidget(botones)
+
+    # ------------------------------------------------------- impedancias
+    def check_impedance(self):
+        """Chequeo en vivo contra las dos reglas clinicas.
+
+        Cada electrodo bajo 5 kOhm y las diferencias entre ellos bajo
+        2 kOhm. No es cosmetico: son los dos limites que el generador usa
+        como codo (ver ABR_generator.impedance_noise_factor y
+        mains_interference), asi que lo que se marca en rojo aca es
+        exactamente lo que despues se va a ver como ruido o como zumbido
+        de 50 Hz en el trazo.
+        """
+        # Solo la parte de electrodos: este chequeo corre tambien mientras
+        # se esta construyendo el dialogo, antes de que existan los demas
+        # controles, asi que no puede pedir get_data() entero.
+        electrodos, impedancias = {}, {}
+        for key, (combo, spin) in self.electrode_widgets.items():
+            electrodos[key] = combo.currentText()
+            impedancias[key] = float(spin.value())
+        peor, desbalance, ok = ABRGenerator.impedance_report(
+            {'electrodes': electrodos, 'impedance': impedancias})
+
+        for key, (combo, spin) in self.electrode_widgets.items():
+            conectado = combo.currentText() != DISCONNECTED
+            fuera = conectado and spin.value() > IMPEDANCE_LIMIT_KOHM
+            spin.setStyleSheet(BAD_STYLE if fuera else "")
+
+        if ok:
+            texto = (f"Impedancias correctas (peor {peor:.1f} kΩ, "
+                     f"diferencia {desbalance:.1f} kΩ).")
+        else:
+            problemas = []
+            if peor > IMPEDANCE_LIMIT_KOHM:
+                problemas.append(
+                    f"hay un electrodo en {peor:.1f} kΩ (límite "
+                    f"{IMPEDANCE_LIMIT_KOHM:.0f} kΩ): el registro va a salir ruidoso")
+            if desbalance > IMPEDANCE_BALANCE_LIMIT_KOHM:
+                problemas.append(
+                    f"la diferencia entre electrodos es {desbalance:.1f} kΩ (límite "
+                    f"{IMPEDANCE_BALANCE_LIMIT_KOHM:.0f} kΩ): el amplificador deja "
+                    f"pasar la red eléctrica")
+            texto = "⚠ " + "; ".join(problemas) + "."
+        self.lbl_impedance.setText(texto)
+        self.lbl_impedance.setStyleSheet("" if ok else "color: #b00020;")
 
     # --------------------------------------------------------------- datos
     def restore_defaults(self):
@@ -227,3 +285,4 @@ class AbrAdvanceSettings(QDialog):
                     combo.setCurrentIndex(idx)
             if key in impedancias:
                 spin.setValue(float(impedancias[key]))
+        self.check_impedance()

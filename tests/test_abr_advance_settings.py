@@ -105,6 +105,34 @@ def test_restore_defaults_goes_back_to_the_protocol():
     assert dialog.get_data() == default_settings('ABR')
 
 
+def test_impedance_check_flags_both_clinical_rules():
+    """El diálogo avisa en vivo, como la pantalla de impedancias del equipo."""
+    if not HAS_QT:
+        return
+    dialog = AbrAdvanceSettings(test='ABR')
+    assert "correctas" in dialog.lbl_impedance.text()
+
+    # Regla 1: cada electrodo bajo 5 kOhm.
+    dialog.set_data({'impedance': {'vertex': 6.5, 'right': 2.0, 'left': 2.0,
+                                   'ground': 2.0}})
+    assert "⚠" in dialog.lbl_impedance.text()
+    assert "6.5" in dialog.lbl_impedance.text()
+    assert dialog.electrode_widgets['vertex'][1].styleSheet()      # en rojo
+    assert not dialog.electrode_widgets['right'][1].styleSheet()
+
+    # Regla 2: diferencias bajo 2 kOhm, con todos los electrodos en norma.
+    dialog.set_data({'impedance': {'vertex': 4.5, 'right': 2.0, 'left': 2.0,
+                                   'ground': 2.0}})
+    texto = dialog.lbl_impedance.text()
+    assert "⚠" in texto and "diferencia" in texto
+    assert not dialog.electrode_widgets['vertex'][1].styleSheet()  # 4.5 < 5
+
+    # Justo en los dos límites todavía pasa.
+    dialog.set_data({'impedance': {'vertex': 4.0, 'right': 2.0, 'left': 2.0,
+                                   'ground': 2.0}})
+    assert "correctas" in dialog.lbl_impedance.text()
+
+
 def test_labels_map_to_the_keys_the_generator_uses():
     """Los rótulos en español mapean a las claves del JSON normativo."""
     if not HAS_QT:

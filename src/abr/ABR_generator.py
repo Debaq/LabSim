@@ -167,15 +167,37 @@ EXTRA_MONTAGE_FACTOR = {
 ARTIFACT_REJECT_REF_UV = 18.0
 NO_REJECT_NOISE_FACTOR = 1.4
 
+# Limites clinicos de impedancia de electrodos. No son adorno: son las dos
+# reglas que el alumno tiene que poder justificar mirando el trazo.
+#   - Cada electrodo bajo 5 kOhm: por encima, el contacto es malo y el
+#     ruido del registro se dispara.
+#   - Diferencia entre electrodos bajo 2 kOhm: el amplificador diferencial
+#     rechaza el modo comun (CMRR) solo si las impedancias son parecidas;
+#     desbalanceadas, la red electrica entra como senial diferencial.
+# Los dos limites son codos del modelo, no una pendiente suave: cruzarlos
+# tiene que verse.
+IMPEDANCE_LIMIT_KOHM = 5.0
+IMPEDANCE_BALANCE_LIMIT_KOHM = 2.0
+# Cuanto empeora el ruido por cada kOhm sobre el limite (exponente > 1: se
+# acelera, un electrodo a 20 kOhm es un electrodo despegado). El tope es
+# el electrodo despegado: mas alla de ahi el trazo ya es inservible y da
+# lo mismo cuanto peor sea.
+IMPEDANCE_OVER_EXPONENT = 1.5
+IMPEDANCE_OVER_SCALE = 2.0
+IMPEDANCE_MAX_FACTOR = 12.0
+
 # Interferencia de red (50 Hz en Chile). Aparece cuando los electrodos
 # quedan desbalanceados en impedancia o cuando falta la tierra: es EL
 # artefacto que el alumno tiene que aprender a reconocer y corregir.
 MAINS_HZ = 50.0
 # Calibrados sobre lo que SOBREVIVE al pasa-alto de 100 Hz del ABR: sin
 # tierra el trazo queda claramente montado sobre el zumbido (~0.2 uV RMS,
-# la mitad de una onda V), y un desbalance de electrodos se nota pero no
-# arruina el registro.
-MAINS_UV_PER_KOHM = 0.12
+# la mitad de una onda V).
+# Con el desbalance DENTRO de norma queda un zumbido residual invisible;
+# pasado el limite el CMRR se cae y crece rapido, asi que la diferencia
+# entre 2 y 3 kOhm se ve en pantalla.
+MAINS_UV_PER_KOHM_IN_SPEC = 0.03
+MAINS_UV_PER_KOHM_OVER = 1.2
 MAINS_NO_GROUND_UV = 3.0
 
 DISCONNECTED = 'No Conectado'
@@ -538,12 +560,19 @@ class ABRGenerator:
         return EXTRA_MONTAGE_FACTOR.get(montage, 1.0)
 
     def impedance_noise_factor(self, impedance):
-        """Ruido segun impedancia de electrodos, interpolado.
+        """Ruido segun la impedancia del PEOR electrodo.
 
-        technical_factors.electrode_impedance del JSON da 20 nV a <=3 kOhm,
-        40 nV entre 3 y 5, y 80 nV de 5 a 10. Se interpola en vez de usar
-        tramos: subir un electrodo de 4.9 a 5.1 kOhm no puede duplicar el
-        ruido de golpe.
+        Hasta el limite clinico (5 kOhm) sigue la tabla del JSON
+        (technical_factors.electrode_impedance: 20 nV a <=3 kOhm, 40 nV
+        entre 3 y 5, 80 nV de 5 a 10), interpolada: subir de 2.9 a 3.1 no
+        puede duplicar el ruido de golpe.
+
+        Pasado el limite deja de ser una pendiente y se acelera. Antes esto
+        se interpolaba tambien arriba y ADEMAS np.interp satura fuera de la
+        tabla: 8, 12 y 20 kOhm daban exactamente el mismo trazo, o sea un
+        electrodo despegado se veia igual que uno apenas fuera de norma, y
+        cruzar los 5 kOhm no se notaba (subia 29%). Justo lo que hay que
+        poder mostrarle al alumno.
         """
         tabla = self.norms.get('technical_factors', {}).get('electrode_impedance', {})
         puntos = []
@@ -555,9 +584,40 @@ class ABRGenerator:
         puntos.sort()
         xs = [p[0] for p in puntos]
         ys = [p[1] for p in puntos]
-        nivel = float(np.interp(float(impedance), xs, ys))
+
+        impedance = float(impedance)
+        en_norma = min(impedance, IMPEDANCE_LIMIT_KOHM)
+        nivel = float(np.interp(en_norma, xs, ys))
         referencia = float(np.interp(4.0, xs, ys)) or 0.04
-        return nivel / referencia
+        factor = nivel / referencia
+
+        exceso = max(impedance - IMPEDANCE_LIMIT_KOHM, 0.0)
+        if exceso:
+            factor *= 1.0 + (exceso / IMPEDANCE_OVER_SCALE) ** IMPEDANCE_OVER_EXPONENT
+        return min(factor, IMPEDANCE_MAX_FACTOR)
+
+    @staticmethod
+    def impedance_report(technical_config):
+        """Chequeo de impedancias, como la pantalla previa de un equipo real.
+
+        Devuelve (peor_kohm, desbalance_kohm, dentro_de_norma) segun los dos
+        limites clinicos: cada electrodo bajo IMPEDANCE_LIMIT_KOHM y las
+        diferencias entre ellos bajo IMPEDANCE_BALANCE_LIMIT_KOHM.
+        """
+        impedancias = technical_config.get('impedance')
+        if not isinstance(impedancias, dict):
+            valor = 3.0 if impedancias is None else float(impedancias)
+            impedancias = {'vertex': valor, 'right': valor, 'left': valor,
+                           'ground': valor}
+        electrodos = technical_config.get('electrodes') or {}
+        usados = [k for k in impedancias
+                  if electrodos.get(k, 'A1') != DISCONNECTED]
+        valores = [float(impedancias[k]) for k in usados] or [3.0]
+        peor = max(valores)
+        desbalance = max(valores) - min(valores)
+        ok = (peor <= IMPEDANCE_LIMIT_KOHM
+              and desbalance <= IMPEDANCE_BALANCE_LIMIT_KOHM)
+        return peor, desbalance, ok
 
     @staticmethod
     def electrode_state(technical_config):
@@ -598,7 +658,11 @@ class ABRGenerator:
         bajar el pasa-alto (para mirar potenciales corticales, por ejemplo)
         deja el trazo inservible hasta que se arreglan los electrodos.
         """
-        amp = desbalance * MAINS_UV_PER_KOHM
+        # Dentro de norma el CMRR hace su trabajo y queda un zumbido
+        # residual que no se ve; pasado el limite se cae rapido.
+        en_norma = min(desbalance, IMPEDANCE_BALANCE_LIMIT_KOHM)
+        exceso = max(desbalance - IMPEDANCE_BALANCE_LIMIT_KOHM, 0.0)
+        amp = en_norma * MAINS_UV_PER_KOHM_IN_SPEC + exceso * MAINS_UV_PER_KOHM_OVER
         if sin_tierra:
             amp += MAINS_NO_GROUND_UV
         if amp <= 0:
@@ -718,7 +782,13 @@ class ABRGenerator:
         # para que al llegar al objetivo (m = NOISE_BLOCKS) el piso quede
         # en el ruido residual que declara el equipo, con paciente tipico.
         amp = noise_floor_uv * np.sqrt(NOISE_BLOCKS) * quality * imp_factor
-        return residual * min(amp, NOISE_MAX_UV)
+        # El techo existe para que el arranque de la promediacion no se
+        # salga de la escala del grafico; NO para tapar unos electrodos
+        # malos, asi que sube con ellos. Sin esto, de 6 kOhm para arriba
+        # todo daba el mismo trazo y la regla de los 5 kOhm no se podia
+        # mostrar.
+        techo = NOISE_MAX_UV * max(imp_factor, 1.0)
+        return residual * min(amp, techo)
 
     # =====================================================================
     # FILTROS (limpios: solo butterworth, sin hacks)
@@ -1034,7 +1104,11 @@ class ABRGenerator:
             'accepted_sweeps': accepted,
             'artifact_acceptance': acceptance,
             'recording': hay_registro,
-            'mains': bool(sin_tierra or desbalance),
+            'mains': bool(sin_tierra or desbalance > IMPEDANCE_BALANCE_LIMIT_KOHM),
+            'impedance_max': imp_max,
+            'impedance_imbalance': desbalance,
+            'impedance_ok': (imp_max <= IMPEDANCE_LIMIT_KOHM
+                             and desbalance <= IMPEDANCE_BALANCE_LIMIT_KOHM),
             # Criterio de deteccion configurado en Parametros Avanzados: el
             # equipo declara "respuesta presente" cuando el FSP lo supera.
             'fsp_criterion': technical_config.get('fsp_criterion'),

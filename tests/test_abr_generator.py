@@ -58,8 +58,9 @@ except ImportError:
     sys.modules['scipy.signal'] = fake_signal
 
 from abr.ABR_generator import (  # noqa: E402
-    ABRGenerator, INTERAURAL_ATTENUATION, RATE_REF, STIM_MAP,
-    default_settings, select_population)
+    ABRGenerator, IMPEDANCE_BALANCE_LIMIT_KOHM, IMPEDANCE_LIMIT_KOHM,
+    INTERAURAL_ATTENUATION, RATE_REF, STIM_MAP, default_settings,
+    select_population)
 from abr.protocols import PROTOCOLS, get_protocol  # noqa: E402
 
 NORMS = os.path.join(os.path.dirname(__file__), '..', 'resources', 'abr', 'normative_data.json')
@@ -656,16 +657,91 @@ def test_missing_ground_brings_mains_hum():
     assert y_bajo[t > 9].std() > y_sin[t > 9].std()
 
 
-def test_electrode_impedance_raises_the_noise():
+def _ruido(impedancias):
+    """Ruido de fondo de la curva con esas impedancias (uV RMS)."""
+    t, y, meta = _curva(technical={'impedance': impedancias})
+    return float(y[t > 9].std()), meta
+
+
+def test_impedance_limit_of_5k_is_visible():
+    """Cruzar los 5 kOhm por electrodo tiene que NOTARSE, no subir 30%.
+
+    Es una de las dos reglas que el alumno tiene que poder justificar
+    mirando el trazo, así que el modelo tiene un codo ahí: por debajo sigue
+    la tabla del JSON, por encima se acelera.
+    """
+    g = _gen()
+    # Dentro de norma: pendiente suave.
+    assert g.impedance_noise_factor(2) < g.impedance_noise_factor(4)
+    assert g.impedance_noise_factor(5) / g.impedance_noise_factor(3) < 2.0
+    # Pasado el límite se dispara, y sigue subiendo bien arriba (antes
+    # np.interp saturaba: 8, 12 y 20 kOhm daban el mismo trazo).
+    assert g.impedance_noise_factor(8) > 2.5 * g.impedance_noise_factor(5)
+    assert g.impedance_noise_factor(12) > 2 * g.impedance_noise_factor(8)
+    if not HAS_SCIPY:
+        return
+    todos = lambda k: {e: k for e in ('vertex', 'right', 'left', 'ground')}
+    r5, meta5 = _ruido(todos(5.0))
+    r8, meta8 = _ruido(todos(8.0))
+    r12, _ = _ruido(todos(12.0))
+    assert meta5['impedance_ok'] is True          # 5.0 justo en el límite
+    assert meta8['impedance_ok'] is False
+    assert r8 > 2 * r5, (r5, r8)
+    assert r12 > r8
+    # Con 12 kOhm el ruido es un orden de magnitud peor que en norma: la
+    # onda V (0.5 uV) queda al nivel del piso y el registro es inservible.
+    r2, _ = _ruido(todos(2.0))
+    assert r12 > 6 * r2, (r2, r12)
+
+
+def test_impedance_balance_limit_of_2k_is_visible():
+    """Diferencias sobre 2 kOhm entre electrodos = zumbido de red.
+
+    La otra regla. El desbalance es lo que rompe el rechazo de modo común
+    del amplificador, así que se manifiesta distinto que la impedancia
+    alta: no es más ruido de fondo, es 50 Hz.
+    """
     if not HAS_SCIPY:
         print("  (salteado: sin scipy)")
         return
-    alta = {'vertex': 8.0, 'right': 8.0, 'left': 8.0, 'ground': 8.0}
-    t, y_alta, _ = _curva(technical={'impedance': alta})
-    t, y_baja, _ = _curva()
-    assert y_alta[t > 9].std() > 2 * y_baja[t > 9].std()
+    def con_dif(dif):
+        return _ruido({'vertex': 2.0 + dif, 'right': 2.0, 'left': 2.0,
+                       'ground': 2.0})
+
+    r0, meta0 = con_dif(0.0)
+    r_limite, meta_limite = con_dif(IMPEDANCE_BALANCE_LIMIT_KOHM)
+    r_pasado, meta_pasado = con_dif(IMPEDANCE_BALANCE_LIMIT_KOHM + 1.0)
+
+    # Dentro de norma no hay zumbido (el residual es invisible).
+    assert meta0['mains'] is False and meta_limite['mains'] is False
+    assert r_limite < 2.0 * r0
+    # Pasando el límite salta.
+    assert meta_pasado['mains'] is True
+    assert meta_pasado['impedance_ok'] is False
+    assert r_pasado > 3 * r_limite, (r_limite, r_pasado)
+    # Y sigue creciendo con la diferencia.
+    assert con_dif(4.0)[0] > r_pasado
+
+
+def test_impedance_report_matches_the_two_rules():
+    """El chequeo que muestra el diálogo usa los mismos límites."""
     g = _gen()
-    assert g.impedance_noise_factor(2) < g.impedance_noise_factor(4) < g.impedance_noise_factor(8)
+    peor, dif, ok = g.impedance_report(
+        {'impedance': {'vertex': 4.0, 'right': 3.0, 'left': 2.5, 'ground': 2.0}})
+    assert (peor, dif, ok) == (4.0, 2.0, True)          # justo en los dos límites
+    _, _, ok = g.impedance_report(
+        {'impedance': {'vertex': 5.5, 'right': 5.0, 'left': 5.0, 'ground': 5.0}})
+    assert ok is False                                   # supera 5 kOhm
+    _, _, ok = g.impedance_report(
+        {'impedance': {'vertex': 4.5, 'right': 2.0, 'left': 2.0, 'ground': 2.0}})
+    assert ok is False                                   # desbalance 2.5 kOhm
+    # Un electrodo desconectado no cuenta para el chequeo.
+    peor, dif, ok = g.impedance_report(
+        {'electrodes': {'vertex': 'Cz', 'right': 'A2', 'left': 'No Conectado',
+                        'ground': 'Fpz'},
+         'impedance': {'vertex': 2.0, 'right': 2.5, 'left': 18.0, 'ground': 2.0}})
+    assert peor == 2.5 and ok is True
+    assert IMPEDANCE_LIMIT_KOHM == 5.0 and IMPEDANCE_BALANCE_LIMIT_KOHM == 2.0
 
 
 def test_artifact_rejection_cuts_both_ways():
