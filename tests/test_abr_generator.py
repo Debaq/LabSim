@@ -33,6 +33,7 @@ respuesta de los filtros necesitan scipy real y se saltan si no está.
 """
 
 import os
+import re
 import sys
 import types
 
@@ -59,8 +60,8 @@ except ImportError:
 
 from abr.ABR_generator import (  # noqa: E402
     ABRGenerator, IMPEDANCE_BALANCE_LIMIT_KOHM, IMPEDANCE_LIMIT_KOHM,
-    INTERAURAL_ATTENUATION, RATE_REF, STIM_MAP, default_settings,
-    select_population)
+    INTERAURAL_ATTENUATION, NEURAL_BLOQUEO_OPTIONS, NEURAL_PARAM_DEFAULTS,
+    RATE_REF, STIM_MAP, default_settings, select_population)
 from abr.protocols import PROTOCOLS, get_protocol  # noqa: E402
 
 NORMS = os.path.join(os.path.dirname(__file__), '..', 'resources', 'abr', 'normative_data.json')
@@ -74,12 +75,13 @@ def _gen():
     return ABRGenerator(NORMS)
 
 
-def _params(intensity, threshold=20, pathology='normal', rate=None):
+def _params(intensity, threshold=20, pathology='normal', rate=None,
+            neural=None):
     g = _gen()
     values, _ = g.calculate_wave_parameters(
-        g.get_baseline_values(), intensity, threshold, pathology)
+        g.get_baseline_values(), intensity, threshold, pathology, neural=neural)
     if rate is not None:
-        values = g.apply_rate_effects(values, rate, pathology)
+        values = g.apply_rate_effects(values, rate, pathology, neural)
     return values
 
 
@@ -256,10 +258,10 @@ def test_golden_wave_parameters():
     golden = {
         80: {'I': (1.62, 0.200), 'II': (2.68, 0.103), 'III': (3.68, 0.358),
              'IV': (4.68, 0.257), 'V': (5.47, 0.576)},
-        60: {'I': (1.94, 0.165), 'II': (3.02, 0.080), 'III': (4.03, 0.328),
-             'IV': (5.04, 0.229), 'V': (5.85, 0.534)},
-        40: {'I': (2.45, 0.039), 'II': (3.56, 0.015), 'III': (4.58, 0.227),
-             'IV': (5.62, 0.140), 'V': (6.45, 0.420)},
+        60: {'I': (1.98, 0.165), 'II': (3.06, 0.080), 'III': (4.07, 0.328),
+             'IV': (5.08, 0.229), 'V': (5.89, 0.534)},
+        40: {'I': (2.49, 0.039), 'II': (3.60, 0.015), 'III': (4.62, 0.227),
+             'IV': (5.66, 0.140), 'V': (6.49, 0.420)},
     }
     for intensity, esperado in golden.items():
         v = _params(intensity)
@@ -351,13 +353,77 @@ def test_conductive_shifts_the_whole_complex_in_parallel():
 
 
 def test_cochlear_keeps_normal_latency_at_high_level():
-    """La coclear NO corre la latencia a nivel alto (no hay GAP que atenúe)."""
-    sano = _params(80, threshold=15, pathology='normal')
-    coclear = _params(80, threshold=45, pathology='cochlear')
+    """La coclear converge a la latencia normal cuando el SL es alto.
+
+    "Nivel alto" es nivel de SENSACIÓN alto, no dB absolutos: con umbral 45,
+    100 dB son 55 dB SL y ahí la V tiene que estar donde la de un oído sano.
+    """
+    sano = _params(100, threshold=15, pathology='normal')
+    coclear = _params(100, threshold=45, pathology='cochlear')
     assert abs(coclear['V']['lat'] - sano['V']['lat']) < 0.01
-    # ...y a igual umbral, la conductiva sí se atrasa respecto de la coclear.
-    conduct = _params(80, threshold=45, pathology='conductive')
-    assert conduct['V']['lat'] > coclear['V']['lat'] + 0.4
+    # ...y a igual umbral la conductiva sigue atrasada: el GAP la manda al
+    # tramo empinado de la función (100 dB con 30 de GAP = 70 dB efectivos).
+    conduct = _params(100, threshold=45, pathology='conductive')
+    assert conduct['V']['lat'] > coclear['V']['lat'] + 0.3
+
+
+def test_cochlear_latency_intensity_function_is_steep():
+    """Coclear = función L-I EMPINADA, no la del oído sano.
+
+    Caso detectado probando en la app: paciente coclear, subir de 80 a 100 dB
+    y ver la onda V clavada en la misma latencia. La coclear no tocaba la
+    latencia (solo amplitud), así que su función L-I salía idéntica a la de un
+    oído normal y con la pendiente plana del tramo alto no se movía nada.
+    """
+    umbral = 60
+    lat = {i: _params(i, threshold=umbral, pathology='cochlear')['V']['lat']
+           for i in (80, 90, 100)}
+    # Sube la intensidad -> la V se acorta, y de forma legible en pantalla.
+    assert lat[80] > lat[90] > lat[100]
+    assert lat[80] - lat[100] > 0.4, lat
+    # Cerca del umbral está prolongada respecto del oído sano a la misma
+    # intensidad; a nivel alto (SL 40) converge.
+    sano = {i: _params(i, threshold=15, pathology='normal')['V']['lat']
+            for i in (80, 100)}
+    assert lat[80] - sano[80] > 0.2, (lat[80], sano[80])
+    assert abs(lat[100] - sano[100]) < 0.01, (lat[100], sano[100])
+
+
+def test_high_level_slope_is_readable():
+    """Arriba de 80 dB la función es plana, pero no inmóvil.
+
+    Con 0.08 ms/10 dB, 80 -> 100 movía la V 0.16 ms: menos que el error de
+    lectura del alumno sobre el trazo.
+    """
+    v = {i: _params(i, threshold=15)['V']['lat'] for i in (80, 90, 100)}
+    assert 0.2 <= v[80] - v[100] <= 0.4, v
+
+
+def test_case_deviation_grows_toward_threshold():
+    """La desviación del caso se define a nivel alto y se expresa más abajo.
+
+    Sumada igual a toda intensidad dibujaba un corrimiento paralelo (pinta de
+    conductiva) en cualquier patología.
+    """
+    dev = {'onda_V': {'lat': 0.5, 'amp': 0.0}}
+    g = _gen()
+    base = g.get_baseline_values()
+
+    def delta(intensity):
+        con, _ = g.calculate_wave_parameters(base, intensity, 20, 'normal', dev)
+        sin, _ = g.calculate_wave_parameters(base, intensity, 20, 'normal')
+        return con['V']['lat'] - sin['V']['lat']
+
+    assert abs(delta(80) - 0.5) < 0.01          # anclada a 80 dB
+    assert delta(40) > delta(80) + 0.05         # crece hacia el umbral
+    assert delta(20) < 0.5 * 1.6                # con tope, no explota
+
+
+def test_normative_band_covers_the_high_intensities():
+    """La banda L-I llegaba a 80: los puntos de 90 y 100 quedaban sin norma."""
+    x, lo, hi = _gen().latency_intensity_band()
+    assert max(x) >= 100, x
+    assert all(a < b for a, b in zip(lo, hi))
 
 
 def test_neural_prolongs_interpeaks_and_drops_v_over_i():
@@ -374,6 +440,160 @@ def test_neural_prolongs_interpeaks_and_drops_v_over_i():
 
 
 # ------------------------------------------------------- población (P1)
+
+def test_neural_interpeaks_move_independently():
+    """I-III y III-V son parámetros separados, no un retraso repartido.
+
+    Es la diferencia entre una lesión del nervio (I-III largo) y una pontina
+    alta (III-V largo). Con un perfil único el retraso se repartía siempre
+    igual y los dos cuadros salían iguales.
+    """
+    normal = _params(80, pathology='normal')
+    ip = lambda v: (v['III']['lat'] - v['I']['lat'], v['V']['lat'] - v['III']['lat'])
+    i_iii_n, iii_v_n = ip(normal)
+
+    alto = _params(80, pathology='neural',
+                   neural={'i_iii_ms': 0.8, 'iii_v_ms': 0.0})
+    i_iii_a, iii_v_a = ip(alto)
+    assert abs(i_iii_a - i_iii_n - 0.8) < 1e-9, (i_iii_n, i_iii_a)
+    assert abs(iii_v_a - iii_v_n) < 1e-9, (iii_v_n, iii_v_a)
+
+    bajo = _params(80, pathology='neural',
+                   neural={'i_iii_ms': 0.0, 'iii_v_ms': 0.8})
+    i_iii_b, iii_v_b = ip(bajo)
+    assert abs(i_iii_b - i_iii_n) < 1e-9, (i_iii_n, i_iii_b)
+    assert abs(iii_v_b - iii_v_n - 0.8) < 1e-9, (iii_v_n, iii_v_b)
+
+    # En los dos casos la onda I se queda quieta: nace antes de la lesión.
+    assert alto['I']['lat'] == bajo['I']['lat'] == normal['I']['lat']
+
+
+def test_global_delay_moves_wave_I_too():
+    """Conducción lenta pareja (hipotermia, depresores, prematuro).
+
+    No es una lesión de vía: corre TODO el complejo, onda I incluida, y deja
+    los interpicos intactos. Ningún otro parámetro toca la onda I.
+    """
+    normal = _params(80, pathology='normal')
+    lento = _params(80, pathology='neural',
+                    neural={'i_iii_ms': 0, 'iii_v_ms': 0, 'v_i_factor': 1.0,
+                            'global_delay_ms': 1.0})
+    for wave in ('I', 'III', 'V'):
+        assert abs(lento[wave]['lat'] - normal[wave]['lat'] - 1.0) < 1e-9, wave
+
+
+def test_proximal_block_leaves_only_wave_I():
+    """Cóclea viva, bloqueo proximal: onda I sola y nada después.
+
+    Es también el patrón que se busca en el estudio de muerte encefálica.
+    """
+    g = _gen()
+    valores, visibles = g.calculate_wave_parameters(
+        g.get_baseline_values(), 90, 20, 'neural', neural={'bloqueo': 'post_i'})
+    assert visibles['I']
+    assert not any(ok for wave, ok in visibles.items() if wave != 'I'), visibles
+
+
+def test_total_block_leaves_no_response():
+    """Ausencia total de respuesta con periferia conservada."""
+    g = _gen()
+    for intensity in (100, 80, 60):
+        _, visibles = g.calculate_wave_parameters(
+            g.get_baseline_values(), intensity, 20, 'neural',
+            neural={'bloqueo': 'total'})
+        assert not any(visibles.values()), (intensity, visibles)
+
+
+def test_v_over_i_ratio_is_a_parameter():
+    """La razón V/I se pide por número, no sale fija del perfil."""
+    alta = _params(80, pathology='neural', neural={'v_i_factor': 1.0})
+    baja = _params(80, pathology='neural', neural={'v_i_factor': 0.2})
+    r_alta = alta['V']['amp'] / alta['I']['amp']
+    r_baja = baja['V']['amp'] / baja['I']['amp']
+    assert r_baja < 1.0 < r_alta, (r_baja, r_alta)
+    # La onda I no se toca en ninguno de los dos.
+    assert abs(alta['I']['amp'] - baja['I']['amp']) < 1e-9
+
+
+def test_desync_widens_the_waves():
+    """Morfología pobre: ondas anchas y romas antes de desaparecer."""
+    nitido = _params(80, pathology='neural', neural={'desincronia': 'ninguna'})
+    ancho = _params(80, pathology='neural', neural={'desincronia': 'alta'})
+    assert ancho['V']['width'] > nitido['V']['width'] * 1.5
+
+
+def test_rate_sensitivity_is_graduated():
+    """Fatiga de conducción a tasas altas: graduable, no un interruptor."""
+    def amp_v(sens):
+        return _params(80, pathology='neural', rate=90.0,
+                       neural={'sensibilidad_tasa': sens})['V']['amp']
+    assert amp_v('normal') > amp_v('moderada') > amp_v('severa')
+
+
+def test_microphonic_only_pattern_follows_polarity():
+    """Desincronía: sin ondas, pero con microfónico que invierte.
+
+    Es lo que separa una desincronía de una ausencia de respuesta de verdad:
+    se busca con rarefacción y condensación por separado (con alternada el
+    CM se cancela y no se ve nada).
+    """
+    g = _gen()
+    ansd = {'bloqueo': 'total', 'microfonica': 'amplificada'}
+    valores, visibles = g.calculate_wave_parameters(
+        g.get_baseline_values(), 90, 20, 'neural', neural=ansd)
+    assert not any(visibles.values())
+    _, cm_rar = g.apply_polarity_effects(dict(valores), 'Rarefacción', 'neural', ansd)
+    _, cm_con = g.apply_polarity_effects(dict(valores), 'Condensación', 'neural', ansd)
+    _, cm_alt = g.apply_polarity_effects(dict(valores), 'Alternada', 'neural', ansd)
+    assert cm_rar * cm_con < 0, (cm_rar, cm_con)
+    assert cm_alt is None
+    # Una ausencia de respuesta SIN desincronía no deja microfónico grande.
+    _, cm_mudo = g.apply_polarity_effects(
+        dict(valores), 'Rarefacción', 'neural', {'bloqueo': 'total'})
+    assert abs(cm_rar) > 4 * abs(cm_mudo), (cm_rar, cm_mudo)
+
+
+def test_neural_defaults_reproduce_the_old_single_profile():
+    """Caso guardado antes de los parámetros: dibuja lo de siempre.
+
+    Los defaults (I-III y III-V 0.2 ms, V/I 0.45, tasa severa) son el cuadro
+    que daba el modelo cuando "neural" era uno solo.
+    """
+    viejo = _params(80, pathology='neural')                    # sin parámetros
+    explicito = _params(80, pathology='neural', neural=dict(NEURAL_PARAM_DEFAULTS))
+    raro = _params(80, pathology='neural', neural={'bloqueo': 'no-existe'})
+    for wave in ('I', 'III', 'V'):
+        assert viejo[wave]['lat'] == explicito[wave]['lat'] == raro[wave]['lat']
+        assert viejo[wave]['amp'] == explicito[wave]['amp'] == raro[wave]['amp']
+    # Y la razón V/I sigue dentro del rango que declara normative_data.json.
+    ratio = viejo['V']['amp'] / viejo['I']['amp']
+    rango = _gen().norms['pathology_modifiers']['neural']['amplitude_v_i_ratio']
+    assert rango[0] <= ratio <= rango[1], ratio
+
+
+def test_neural_param_keys_match_the_backend():
+    """Los parámetros del patrón son un contrato entre PHP y Python.
+
+    El backend arma cases.data['ABR'][lado]['neural'] con estas claves; si
+    una se renombra de un solo lado, el generador la ignora en silencio y el
+    caso dibuja el default sin que nadie se entere.
+    """
+    php = os.path.join(os.path.dirname(__file__), '..', 'labsim_backend',
+                       'src', 'CaseBuilder.php')
+    if not os.path.exists(php):
+        print("  (salteado: sin el backend en el checkout)")
+        return
+    with open(php, encoding='utf-8') as fh:
+        texto = fh.read()
+    bloque = texto.split('ABR_NEURAL_DEFAULTS = [', 1)[1].split('];', 1)[0]
+    claves = set(re.findall(r"'([a-z_]+)' =>", bloque))
+    assert claves == set(NEURAL_PARAM_DEFAULTS), (
+        claves ^ set(NEURAL_PARAM_DEFAULTS))
+    # Y los enums que el formulario ofrece tienen que existir en el modelo.
+    bloqueos = set(re.findall(r"'([a-z_]+)'", texto.split(
+        'ABR_NEURAL_BLOQUEO_OPTIONS = [', 1)[1].split('];', 1)[0]))
+    assert bloqueos == set(NEURAL_BLOQUEO_OPTIONS), bloqueos
+
 
 def test_population_follows_age_and_sex():
     assert select_population(None) == 'adult_female'

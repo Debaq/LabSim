@@ -385,6 +385,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $abrBuild = static function (string $lado) use ($v): array {
             return [
                 'type' => (string) fv($v, ['abr', $lado, 'type'], 'normal'),
+                // Patrón retrococlear (ver ABR_NEURAL_DEFAULTS): se guarda
+                // siempre, el generador solo lo mira si type === 'neural'.
+                // Lo que se persiste son los parámetros, nunca la etiqueta
+                // del preset -- la curva no puede depender de un nombre.
+                'neural' => [
+                    'i_iii_ms' => (float) fv($v, ['abr', $lado, 'neural', 'i_iii_ms'], CaseBuilder::ABR_NEURAL_DEFAULTS['i_iii_ms']),
+                    'iii_v_ms' => (float) fv($v, ['abr', $lado, 'neural', 'iii_v_ms'], CaseBuilder::ABR_NEURAL_DEFAULTS['iii_v_ms']),
+                    'global_delay_ms' => (float) fv($v, ['abr', $lado, 'neural', 'global_delay_ms'], CaseBuilder::ABR_NEURAL_DEFAULTS['global_delay_ms']),
+                    'bloqueo' => (string) fv($v, ['abr', $lado, 'neural', 'bloqueo'], CaseBuilder::ABR_NEURAL_DEFAULTS['bloqueo']),
+                    'v_i_factor' => (float) fv($v, ['abr', $lado, 'neural', 'v_i_factor'], CaseBuilder::ABR_NEURAL_DEFAULTS['v_i_factor']),
+                    'microfonica' => (string) fv($v, ['abr', $lado, 'neural', 'microfonica'], CaseBuilder::ABR_NEURAL_DEFAULTS['microfonica']),
+                    'desincronia' => (string) fv($v, ['abr', $lado, 'neural', 'desincronia'], CaseBuilder::ABR_NEURAL_DEFAULTS['desincronia']),
+                    'sensibilidad_tasa' => (string) fv($v, ['abr', $lado, 'neural', 'sensibilidad_tasa'], CaseBuilder::ABR_NEURAL_DEFAULTS['sensibilidad_tasa']),
+                ],
                 'repro' => isset($v['abr'][$lado]['repro']),
                 'repro_var' => (float) fv($v, ['abr', $lado, 'repro_var'], 0.2),
                 'umbral' => (int) fv($v, ['abr', $lado, 'umbral'], 20),
@@ -503,6 +517,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = $soaeError;
         } elseif (!in_array($vempOd['type'], CaseBuilder::VEMP_TYPE_OPTIONS, true) || !in_array($vempOi['type'], CaseBuilder::VEMP_TYPE_OPTIONS, true)) {
             $error = 'Patología VEMP inválida.';
+        } elseif (($neuralError = CaseBuilder::neuralParamsError($abrOd['neural'], 'OD')
+                ?? CaseBuilder::neuralParamsError($abrOi['neural'], 'OI')) !== null) {
+            $error = $neuralError;
+        } elseif (($coherencia = CaseBuilder::normalCoherenceError($abrOd, 'ABR', 'OD')
+                ?? CaseBuilder::normalCoherenceError($abrOi, 'ABR', 'OI')
+                ?? CaseBuilder::normalCoherenceError($eoasOd, 'EOA', 'OD')
+                ?? CaseBuilder::normalCoherenceError($eoasOi, 'EOA', 'OI')
+                // VEMP sin chequeo de umbral: el suyo ronda 60-90 dB nHL.
+                ?? CaseBuilder::normalCoherenceError($vempOd, 'VEMP', 'OD', false)
+                ?? CaseBuilder::normalCoherenceError($vempOi, 'VEMP', 'OI', false)) !== null) {
+            $error = $coherencia;
         }
 
         if ($error === null) {
@@ -1335,6 +1360,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <div class="card">
     <strong>ABR <?= $ladoLabel ?></strong>
     <p class="legend help">Patología de este oído para el generador de curvas ABR -- no es el resultado del alumno, es lo que el caso simula. Si se deja "Normal" con todo en 0, el oído no tiene hallazgos.</p>
+
     <p class="legend help">"Autocompletar" sugiere valores plausibles para la patología elegida, usando el sexo y la edad del paciente (pestaña Paciente), el autor de referencia elegido arriba, y las mismas referencias normativas del generador de curvas. Es un punto de partida al azar -- se puede editar cualquier campo después.</p>
     <div class="three-col">
         <label>Patología
@@ -1357,6 +1383,67 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <label>Jitter si no reproducible (ms)
             <input type="number" step="0.01" min="0" name="abr[<?= $lado ?>][repro_var]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['repro_var'] ?? '0.2')) ?>">
         </label>
+    </div>
+    <?php $vn = $v['abr'][$lado]['neural'] ?? []; ?>
+    <div class="abr-neural-block" data-lado="<?= $lado ?>">
+        <p class="legend">Patrón retrococlear. El PEATC no distingue las entidades entre sí (un schwannoma y un meningioma del ángulo dan el mismo trazado) -- lo que distingue son estos patrones, así que el caso guarda los números, no el diagnóstico. El preset es solo un punto de partida: precarga los valores y después se editan.</p>
+        <div class="three-col">
+            <label>Preset clínico
+                <select class="abr-neural-preset-select" data-lado="<?= $lado ?>">
+                    <option value="">-- elegir --</option>
+                    <?php foreach (CaseBuilder::ABR_NEURAL_PRESETS as $presetKey => $preset): ?>
+                    <option value="<?= $presetKey ?>"><?= htmlspecialchars($preset['label']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+            <label style="align-self:end;">
+                <button type="button" class="secondary abr-neural-preset-btn" data-lado="<?= $lado ?>">Aplicar preset</button>
+            </label>
+        </div>
+        <p class="legend help abr-neural-preset-nota" data-lado="<?= $lado ?>"></p>
+        <div class="three-col">
+            <label>Prolongación I-III (ms)
+                <input type="number" step="0.05" min="0" max="<?= CaseBuilder::ABR_NEURAL_MAX_MS ?>" name="abr[<?= $lado ?>][neural][i_iii_ms]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="i_iii_ms" value="<?= htmlspecialchars((string) ($vn['i_iii_ms'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['i_iii_ms'])) ?>">
+            </label>
+            <label>Prolongación III-V (ms)
+                <input type="number" step="0.05" min="0" max="<?= CaseBuilder::ABR_NEURAL_MAX_MS ?>" name="abr[<?= $lado ?>][neural][iii_v_ms]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="iii_v_ms" value="<?= htmlspecialchars((string) ($vn['iii_v_ms'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['iii_v_ms'])) ?>">
+            </label>
+            <label>Retraso global (ms)
+                <input type="number" step="0.05" min="0" max="<?= CaseBuilder::ABR_NEURAL_MAX_MS ?>" name="abr[<?= $lado ?>][neural][global_delay_ms]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="global_delay_ms" value="<?= htmlspecialchars((string) ($vn['global_delay_ms'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['global_delay_ms'])) ?>">
+            </label>
+            <label>Razón V/I (1 = sin caída)
+                <input type="number" step="0.05" min="0.05" max="1" name="abr[<?= $lado ?>][neural][v_i_factor]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="v_i_factor" value="<?= htmlspecialchars((string) ($vn['v_i_factor'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['v_i_factor'])) ?>">
+            </label>
+            <label>Bloqueo
+                <select name="abr[<?= $lado ?>][neural][bloqueo]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="bloqueo">
+                    <?php foreach (CaseBuilder::ABR_NEURAL_BLOQUEO_OPTIONS as $opt): ?>
+                    <option value="<?= $opt ?>" <?= ($vn['bloqueo'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['bloqueo']) === $opt ? 'selected' : '' ?>><?= htmlspecialchars(CaseBuilder::ABR_NEURAL_BLOQUEO_LABELS[$opt]) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+            <label>Microfónico coclear
+                <select name="abr[<?= $lado ?>][neural][microfonica]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="microfonica">
+                    <?php foreach (CaseBuilder::ABR_NEURAL_MICROFONICA_OPTIONS as $opt): ?>
+                    <option value="<?= $opt ?>" <?= ($vn['microfonica'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['microfonica']) === $opt ? 'selected' : '' ?>><?= htmlspecialchars(CaseBuilder::ABR_NEURAL_MICROFONICA_LABELS[$opt]) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+            <label>Desincronía (morfología)
+                <select name="abr[<?= $lado ?>][neural][desincronia]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="desincronia">
+                    <?php foreach (CaseBuilder::ABR_NEURAL_DESINCRONIA_OPTIONS as $opt): ?>
+                    <option value="<?= $opt ?>" <?= ($vn['desincronia'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['desincronia']) === $opt ? 'selected' : '' ?>><?= ucfirst($opt) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+            <label>Sensibilidad a la tasa
+                <select name="abr[<?= $lado ?>][neural][sensibilidad_tasa]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="sensibilidad_tasa">
+                    <?php foreach (CaseBuilder::ABR_NEURAL_TASA_OPTIONS as $opt): ?>
+                    <option value="<?= $opt ?>" <?= ($vn['sensibilidad_tasa'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['sensibilidad_tasa']) === $opt ? 'selected' : '' ?>><?= ucfirst($opt) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+        </div>
+        <p class="legend help">La diferencia interaural de onda V (IT5) no se configura acá: sale de que los dos oídos tengan patrones distintos. Y la replicabilidad pobre es la casilla "Reproducible" de arriba.</p>
     </div>
     <p class="legend">Promediaciones que el caso realmente necesita para que la onda se vea resuelta (independiente de cuántas pida el alumno en el equipo) -- si el alumno detiene la captura antes de llegar a este número, la curva queda parcialmente sin resolver.</p>
     <div class="three-col">
@@ -1397,7 +1484,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 </div>
 <div class="card">
     <strong>Vista previa: serie 100&rarr;0 dBnHL</strong>
-    <p class="legend help">Simulación simplificada (sin ruido ni promediación) de cómo se vería la serie de intensidades para este oído, según la patología y desviaciones cargadas arriba. Se redibuja solo, en vivo, al tipear. Es referencia visual para el docente -- el generador real (con ruido, FSP y promediación) es el que corre en el equipo del alumno, ver <code>ABR_generator.py</code>.</p>
+    <p class="legend help">Simulación simplificada (sin ruido ni promediación) de cómo se vería la serie de intensidades para este oído, según la patología y las desviaciones cargadas arriba. Se redibuja sola, en vivo, al tipear. Los marcadores verticales señalan dónde queda cada onda y la línea punteada sigue el pico a través de las intensidades (función latencia-intensidad). Es referencia visual para el docente: el generador real, con ruido, FSP y promediación, es el que corre en el equipo del alumno.</p>
     <div class="two-col">
         <div>
             <strong style="color:#b33a3a;">OD</strong>
@@ -1825,15 +1912,19 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             v.average_objetivo = Math.round(rand(1500, 2200));
             v.fsp_800 = 2.3 * rand(0.85, 1.0); v.fsp_2000 = 2.8 * rand(0.85, 1.0); v.fsp_obj = 3.0 * rand(0.85, 1.0);
         } else if (type === 'neural') {
-            // Retrococlear: onda I preservada, III/V retrasadas y de
-            // amplitud reducida (relación V/I baja), mala reproducibilidad.
+            // Retrococlear: las latencias y amplitudes NO se sortean acá.
+            // El patrón (I-III, III-V, razón V/I, bloqueo...) es su propio
+            // juego de parámetros -- ver el bloque "Patrón retrococlear" y
+            // los presets. Si además se cargaran desviaciones por onda, el
+            // efecto se sumaría dos veces. Acá queda solo el ruido de
+            // test-retest y las condiciones de registro.
             v.umbral = Math.round(rand(0, 60));
             v.lat_I = latOffset.I + rand(-0.05, 0.05);
-            v.lat_III = latOffset.III + rand(0.1, 0.3);
-            v.lat_V = latOffset.V + rand(0.3, 0.7);
-            v.amp_I = ampOffset.I + b.I.amp * rand(-0.15, 0.15);
-            v.amp_III = ampOffset.III + b.III.amp * rand(-0.6, -0.2);
-            v.amp_V = ampOffset.V + b.V.amp * rand(-0.7, -0.3);
+            v.lat_III = latOffset.III + rand(-0.05, 0.05);
+            v.lat_V = latOffset.V + rand(-0.05, 0.05);
+            v.amp_I = ampOffset.I + b.I.amp * rand(-0.08, 0.08);
+            v.amp_III = ampOffset.III + b.III.amp * rand(-0.08, 0.08);
+            v.amp_V = ampOffset.V + b.V.amp * rand(-0.08, 0.08);
             v.repro = Math.random() >= 0.6;
             v.repro_var = v.repro ? 0 : rand(0.15, 0.4);
             v.average_objetivo = Math.round(rand(2500, 4000));
@@ -1929,6 +2020,10 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         var typeSel = fieldEl(lado, 'type');
         var type = typeSel ? typeSel.value : 'normal';
         var v = buildValues(type, pickPopulation());
+        // Retrococlear: el patrón se sortea aparte, no como desviaciones de
+        // onda. Un caso al azar es un punto de partida -- para un cuadro
+        // clínico concreto está el selector de presets.
+        if (type === 'neural') { randomizeNeuralPattern(lado); }
         setNum(lado, 'umbral', v.umbral, 0);
         var reproEl = fieldEl(lado, 'repro');
         if (reproEl) { reproEl.checked = v.repro; }
@@ -1954,6 +2049,92 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         if (window.drawAbrPreview) { window.drawAbrPreview(); }
     }
 
+    // Los parámetros del patrón retrococlear solo existen dentro de
+    // "Neural": con coclear o transmisión no hay lesión que tipificar y el
+    // bloque confunde. Se oculta, no se borra -- si el docente vuelve a
+    // Neural recupera lo que tenía, y los valores se siguen enviando (el
+    // generador solo los mira si la patología es neural).
+    function syncNeuralBlockVisibility(lado) {
+        var bloque = document.querySelector('.abr-neural-block[data-lado="' + lado + '"]');
+        if (!bloque) { return; }
+        bloque.style.display = abrPathology(lado) === 'neural' ? '' : 'none';
+    }
+
+    var typeSelects = document.querySelectorAll('.abr-type-select');
+    for (var ts = 0; ts < typeSelects.length; ts++) {
+        syncNeuralBlockVisibility(typeSelects[ts].getAttribute('data-lado'));
+        typeSelects[ts].addEventListener('change', function (e) {
+            syncNeuralBlockVisibility(e.target.getAttribute('data-lado'));
+        });
+    }
+
+    // Presets: precargan los parámetros y quedan editables. La etiqueta NO
+    // se guarda -- el caso persiste los números, así el alumno nunca puede
+    // leer el diagnóstico desde el caso ni la curva depender de un nombre.
+    var ABR_NEURAL_PRESETS = <?= json_encode(CaseBuilder::ABR_NEURAL_PRESETS, JSON_UNESCAPED_UNICODE) ?>;
+
+    function neuralFieldEl(lado, param) {
+        return document.querySelector('.abr-neural-input[data-lado="' + lado + '"][data-param="' + param + '"]');
+    }
+
+    function applyNeuralPreset(lado) {
+        var sel = document.querySelector('.abr-neural-preset-select[data-lado="' + lado + '"]');
+        var nota = document.querySelector('.abr-neural-preset-nota[data-lado="' + lado + '"]');
+        var preset = sel && sel.value ? ABR_NEURAL_PRESETS[sel.value] : null;
+        if (!preset) { if (nota) { nota.textContent = ''; } return; }
+        Object.keys(preset.params).forEach(function (param) {
+            var el = neuralFieldEl(lado, param);
+            if (el) { el.value = preset.params[param]; }
+        });
+        if (nota) { nota.textContent = preset.nota || ''; }
+        if (window.drawAbrPreview) { window.drawAbrPreview(); }
+    }
+
+    // Elegir el preset solo muestra su nota; los valores se pisan al apretar
+    // "Aplicar" -- asi un click de curiosidad no borra un patron ya tipeado.
+    var presetSelects = document.querySelectorAll('.abr-neural-preset-select');
+    for (var ps = 0; ps < presetSelects.length; ps++) {
+        presetSelects[ps].addEventListener('change', function (e) {
+            var lado = e.target.getAttribute('data-lado');
+            var nota = document.querySelector('.abr-neural-preset-nota[data-lado="' + lado + '"]');
+            var preset = e.target.value ? ABR_NEURAL_PRESETS[e.target.value] : null;
+            if (nota) { nota.textContent = preset ? (preset.nota || '') : ''; }
+        });
+    }
+
+    var presetBtns = document.querySelectorAll('.abr-neural-preset-btn');
+    for (var pb = 0; pb < presetBtns.length; pb++) {
+        presetBtns[pb].addEventListener('click', function (e) {
+            applyNeuralPreset(e.currentTarget.getAttribute('data-lado'));
+        });
+    }
+
+    // Sorteo del patrón retrococlear: no un valor fijo "correcto", sino un
+    // caso plausible distinto cada vez (el alumno tiene que leer la curva,
+    // no memorizar el caso). Se sortea DÓNDE está la lesión y después cuánto.
+    function randomizeNeuralPattern(lado) {
+        var proximal = Math.random() < 0.5;   // nervio vs tronco
+        var params = {
+            i_iii_ms: proximal ? rand(0.3, 0.8) : rand(0.0, 0.15),
+            iii_v_ms: proximal ? rand(0.1, 0.4) : rand(0.4, 0.9),
+            global_delay_ms: 0,
+            v_i_factor: rand(0.25, 0.6),
+            bloqueo: 'ninguno',
+            microfonica: 'normal',
+            desincronia: Math.random() < 0.5 ? 'leve' : 'alta',
+            sensibilidad_tasa: Math.random() < 0.7 ? 'severa' : 'moderada'
+        };
+        Object.keys(params).forEach(function (param) {
+            var el = neuralFieldEl(lado, param);
+            if (!el) { return; }
+            el.value = typeof params[param] === 'number' ? params[param].toFixed(2) : params[param];
+        });
+        var sel = document.querySelector('.abr-neural-preset-select[data-lado="' + lado + '"]');
+        var nota = document.querySelector('.abr-neural-preset-nota[data-lado="' + lado + '"]');
+        if (sel) { sel.value = ''; }
+        if (nota) { nota.textContent = ''; }
+    }
+
     var buttons = document.querySelectorAll('.abr-autofill-btn');
     for (var i = 0; i < buttons.length; i++) {
         buttons[i].addEventListener('click', function (e) {
@@ -1969,38 +2150,88 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     // real (que corre server-side/en el cliente con ruido y FSP).
     var WAVE_SIGMA_PREVIEW = { I: 0.22, III: 0.22, V: 0.18 };
     var ABR_PREVIEW_INTENSITIES = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0];
+    // Mismo umbral de visibilidad que usa el generador para decir si una
+    // onda esta presente: por debajo no se le pone marcador.
+    var WAVE_VISIBLE_UV = 0.02;
+    // Piso de la escala automatica de amplitud. Sin esto, una serie sin
+    // respuesta se amplificaria hasta llenar la fila y una linea plana
+    // pareceria una onda.
+    var AMP_SCALE_FLOOR_UV = 0.08;
 
-    // Mismo quiebre que ABRGenerator.calculate_wave_parameters (ABR_generator.py):
-    // ~0.08ms/10dB cerca del techo (80-70dB), ~0.3ms/10dB de ahi para abajo
+    // Constantes espejadas de ABR_generator.py -- si cambian alla, cambian
+    // aca: la previa tiene que mostrar la misma curva que va a ver el
+    // alumno. Antes esta previa iba por su cuenta (amplitud lineal contra
+    // un techo de 80 dB, la onda I con el escalon "disappear_offset" que
+    // el generador ya no tiene, y CERO efecto de la patologia: un ANSD se
+    // dibujaba con ondas normales).
+    var LAT_SHIFT_FACTOR = { I: 0.85, III: 0.92, V: 1.0 };
+    var WAVE_AMP_GROWTH = {
+        I: { sl_min: 20, tau: 13 },
+        III: { sl_min: 5, tau: 16 },
+        V: { sl_min: -4, tau: 20 }
+    };
+    var PATHOLOGY_TAU_FACTOR = { coclear: 0.65 };
+    var NORMAL_THRESHOLD_REF = 15;
+    var COCHLEAR_LI_SL_REF = 40, COCHLEAR_LI_SLOPE = 0.15;
+    var DEV_LI_GAIN = 0.35, DEV_LI_MAX = 1.5;
+    // Reparto del retraso y de la caída de amplitud por onda (espejo de
+    // NEURAL_LAT_SHARE / NEURAL_LAT_SHARE_IIIV / NEURAL_AMP_SHARE).
+    var NEURAL_SHARE_I_III = { I: 0.0, III: 1.0, V: 1.0 };
+    var NEURAL_SHARE_III_V = { I: 0.0, III: 0.0, V: 1.0 };
+    var NEURAL_AMP_SHARE = { I: 0.0, III: 0.5, V: 1.0 };
+    var NEURAL_BLOCK_AMP_FACTOR = 0.02;
+    var NEURAL_DESYNC_WIDTH = { ninguna: 1.0, leve: 1.35, alta: 1.9 };
+
+    function abrPathology(lado) {
+        var el = document.querySelector('[name="abr[' + lado + '][type]"]');
+        return el ? el.value : 'normal';
+    }
+
+    function abrNeuralParams(lado) {
+        var out = {};
+        ['i_iii_ms', 'iii_v_ms', 'global_delay_ms', 'v_i_factor',
+         'bloqueo', 'desincronia'].forEach(function (param) {
+            var el = document.querySelector('.abr-neural-input[data-lado="' + lado + '"][data-param="' + param + '"]');
+            out[param] = el ? el.value : null;
+        });
+        return out;
+    }
+
+    // Mismo quiebre que ABRGenerator.latency_intensity_shift: ~0.12ms/10dB
+    // cerca del techo (sobre 70dB), ~0.3ms/10dB de ahi para abajo
     // (Hood: ~0.3ms/10dB entre 70 y 50dB).
     function latShiftForIntensity(intensity) {
-        var stepsFrom80 = (80 - intensity) / 10;
-        if (intensity >= 70) { return stepsFrom80 * 0.08; }
-        return (80 - 70) / 10 * 0.08 + (70 - intensity) / 10 * 0.3;
+        if (intensity >= 70) { return (80 - intensity) / 10 * 0.12; }
+        return (80 - 70) / 10 * 0.12 + (70 - intensity) / 10 * 0.3;
     }
 
-    function widthFactorForIntensity(intensity) {
-        if (intensity >= 70) { return 1.0; }
-        if (intensity >= 50) { return 1.0 + (70 - intensity) * 0.03; }
-        return 1.6 + (50 - intensity) * 0.05;
+    // Corrimiento con patologia: la transmision atenua el estimulo (GAP) y
+    // corre la funcion en paralelo; la coclear la EMPINA cerca del umbral.
+    function latShiftForCase(intensity, threshold, pathology) {
+        var gap = pathology === 'transmission' ? Math.max(threshold - NORMAL_THRESHOLD_REF, 0) : 0;
+        var shift = latShiftForIntensity(intensity - gap);
+        if (pathology === 'coclear') {
+            shift += COCHLEAR_LI_SLOPE * Math.max(0, COCHLEAR_LI_SL_REF - (intensity - threshold)) / 10;
+        }
+        return shift;
     }
 
-    function ampFactorForWave(wave, intensity, threshold) {
-        if (wave === 'V') {
-            if (intensity >= threshold) {
-                var dbRange = 80 - threshold;
-                if (dbRange <= 0) { return 1.0; }
-                return Math.max(0.05 + 0.95 * ((intensity - threshold) / dbRange), 0.001);
-            }
-            return Math.max(0.05 * (1 - (threshold - intensity) / 10), 0.001);
-        }
-        var disappearAt = wave === 'I' ? 70 : (threshold + 10);
-        if (intensity >= disappearAt) {
-            var dbRange2 = 80 - disappearAt;
-            if (dbRange2 <= 0) { return disappearAt >= 80 ? 1.0 : 0.05; }
-            return Math.max(0.05 + 0.95 * ((intensity - disappearAt) / dbRange2), 0.001);
-        }
-        return Math.max(0.05 * (1 - (disappearAt - intensity) / 10), 0.001);
+    function widthFactorForSl(sl) {
+        if (sl >= 50) { return 1.0; }
+        if (sl >= 30) { return 1.0 + (50 - sl) * 0.03; }
+        return Math.min(1.6 + (30 - sl) * 0.05, 2.6);
+    }
+
+    // Curva de crecimiento saturante sobre el SL, con el codo suave
+    // (softplus) del generador.
+    function ampFactorForWave(wave, sl, pathology) {
+        var growth = WAVE_AMP_GROWTH[wave];
+        var tau = growth.tau * (PATHOLOGY_TAU_FACTOR[pathology] || 1.0);
+        var knee = 0.3 * tau;
+        var x = (sl - growth.sl_min) / knee;
+        // logaddexp(0, x) estable para x grande.
+        var slEff = knee * (x > 30 ? x : Math.log(1 + Math.exp(x)));
+        return 1.0 - Math.exp(-slEff / tau);
     }
 
     function gaussian(t, center, amp, sigma) {
@@ -2011,33 +2242,70 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     function computeWaveValues(lado, pop, intensity) {
         var baseline = resolveBaseline(pop).author;
         var threshold = parseFloat(fieldEl(lado, 'umbral').value) || 0;
-        var latShift = latShiftForIntensity(intensity);
-        var width = widthFactorForIntensity(intensity);
+        var pathology = abrPathology(lado);
+        var neural = pathology === 'neural';
+        var np = neural ? abrNeuralParams(lado) : null;
+        var sl = intensity - threshold;
+        var latShift = latShiftForCase(intensity, threshold, pathology);
+        var devScale = Math.min(1.0 + DEV_LI_GAIN * Math.max(latShift, 0), DEV_LI_MAX);
+        var width = widthFactorForSl(sl);
         var out = {};
         ['I', 'III', 'V'].forEach(function (wave) {
             var deltaLatEl = fieldEl(lado, 'lat_' + wave);
             var deltaAmpEl = fieldEl(lado, 'amp_' + wave);
             var deltaLat = deltaLatEl ? (parseFloat(deltaLatEl.value) || 0) : 0;
             var deltaAmp = deltaAmpEl ? (parseFloat(deltaAmpEl.value) || 0) : 0;
-            var lat = baseline[wave].lat + (wave === 'I' ? latShift * 0.2 : latShift) + deltaLat;
-            var amp = Math.max(baseline[wave].amp * ampFactorForWave(wave, intensity, threshold) + deltaAmp, 0.001);
-            out[wave] = { lat: lat, amp: amp, sigma: WAVE_SIGMA_PREVIEW[wave] * width };
+            var lat = baseline[wave].lat + latShift * LAT_SHIFT_FACTOR[wave] + deltaLat * devScale;
+            var amp = baseline[wave].amp * ampFactorForWave(wave, sl, pathology);
+            var sigmaGain = 1.0;
+            if (neural) {
+                lat += (parseFloat(np.global_delay_ms) || 0)
+                    + (parseFloat(np.i_iii_ms) || 0) * NEURAL_SHARE_I_III[wave]
+                    + (parseFloat(np.iii_v_ms) || 0) * NEURAL_SHARE_III_V[wave];
+                var vi = parseFloat(np.v_i_factor);
+                if (isNaN(vi)) { vi = 1.0; }
+                amp *= Math.max(1.0 - (1.0 - vi) * NEURAL_AMP_SHARE[wave], 0);
+                if (np.bloqueo === 'total' || (np.bloqueo === 'post_i' && wave !== 'I')) {
+                    amp *= NEURAL_BLOCK_AMP_FACTOR;
+                }
+                sigmaGain = NEURAL_DESYNC_WIDTH[np.desincronia] || 1.0;
+            }
+            amp = Math.max(amp + deltaAmp, 0.001);
+            out[wave] = { lat: lat, amp: amp, sigma: WAVE_SIGMA_PREVIEW[wave] * width * sigmaGain };
         });
         return out;
     }
 
-    function buildRowPoints(values, xPos, rowBaseY, ampScale) {
-        var pts = [];
-        for (var t = 0; t <= 12; t += 0.08) {
+    // Traza la suma de las 3 gaussianas y, de paso, devuelve la altura del
+    // trazo en la latencia de cada onda: ahi va el marcador, asi la marca
+    // toca la curva en vez de flotar.
+    function buildRow(values, xPos, rowBaseY, ampScale) {
+        function yAt(t) {
             var y = 0;
-            for (var w = 0; w < 3; w++) {
-                var wave = ['I', 'III', 'V'][w];
+            ['I', 'III', 'V'].forEach(function (wave) {
                 var v = values[wave];
+                // Una onda por debajo del umbral de visibilidad no se
+                // dibuja: si no, el residuo que deja el bloqueo se
+                // amplificaba con la escala automatica y una serie SIN
+                // respuesta mostraba ondulaciones que no existen.
+                if (v.amp <= WAVE_VISIBLE_UV) { return; }
                 y += gaussian(t, v.lat, v.amp, v.sigma);
-            }
-            pts.push(xPos(t).toFixed(1) + ',' + (rowBaseY - y * ampScale).toFixed(1));
+            });
+            return y;
         }
-        return pts.join(' ');
+        var pts = [];
+        for (var t = 0; t <= 12; t += 0.06) {
+            pts.push(xPos(t).toFixed(1) + ',' + (rowBaseY - yAt(t) * ampScale).toFixed(1));
+        }
+        var picos = {};
+        ['I', 'III', 'V'].forEach(function (wave) {
+            picos[wave] = {
+                x: xPos(values[wave].lat),
+                y: rowBaseY - yAt(values[wave].lat) * ampScale,
+                visible: values[wave].amp > WAVE_VISIBLE_UV
+            };
+        });
+        return { points: pts.join(' '), picos: picos };
     }
 
     function renderAbrPreviewSide(lado, color) {
@@ -2048,38 +2316,135 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         var pop = pickPopulation();
         var threshold = parseFloat(umbralEl.value) || 0;
 
-        var marginLeft = 28, marginRight = 8, marginTop = 4, marginBottom = 14;
-        var rowHeight = 19, plotWidth = 380;
+        var marginLeft = 34, marginRight = 12, marginTop = 16, marginBottom = 22;
+        var rowHeight = 26, plotWidth = 380;
         var totalWidth = marginLeft + plotWidth + marginRight;
-        var totalHeight = marginTop + ABR_PREVIEW_INTENSITIES.length * rowHeight + marginBottom;
+        var plotTop = marginTop;
+        var plotBottom = marginTop + ABR_PREVIEW_INTENSITIES.length * rowHeight;
+        var totalHeight = plotBottom + marginBottom;
         function xPos(t) { return marginLeft + (t / 12) * plotWidth; }
 
-        var svg = '<svg viewBox="0 0 ' + totalWidth + ' ' + totalHeight + '" xmlns="http://www.w3.org/2000/svg">';
-        svg += '<defs>';
-        ABR_PREVIEW_INTENSITIES.forEach(function (intensity, i) {
-            svg += '<clipPath id="abr-clip-' + lado + '-' + i + '"><rect x="0" y="' + (marginTop + i * rowHeight) + '" width="' + totalWidth + '" height="' + rowHeight + '"></rect></clipPath>';
+        // Escala vertical automatica: la onda mas grande de TODA la serie
+        // ocupa una fraccion fija de la fila. Con una escala fija, un oido
+        // con amplitudes chicas se veia como una linea plana y uno normal
+        // se salia de la fila.
+        var serie = ABR_PREVIEW_INTENSITIES.map(function (intensity) {
+            return computeWaveValues(lado, pop, intensity);
         });
-        svg += '</defs>';
-        [0, 2, 4, 6, 8, 10, 12].forEach(function (ms) {
-            var x = xPos(ms);
-            svg += '<line x1="' + x + '" y1="' + marginTop + '" x2="' + x + '" y2="' + (totalHeight - marginBottom) + '" stroke="#000" stroke-opacity="0.06"></line>';
-            svg += '<text x="' + x + '" y="' + (totalHeight - marginBottom + 10) + '" font-size="6" text-anchor="middle" fill="currentColor">' + ms + '</text>';
+        var ampMax = 0;
+        serie.forEach(function (values) {
+            ['I', 'III', 'V'].forEach(function (wave) {
+                if (values[wave].amp > ampMax) { ampMax = values[wave].amp; }
+            });
         });
-        svg += '<text x="' + (marginLeft + plotWidth / 2) + '" y="' + (totalHeight - 1) + '" font-size="6" text-anchor="middle" fill="currentColor">ms</text>';
+        // Piso: sin esto, una serie sin respuesta amplificaria el residuo
+        // hasta llenar la fila y una linea plana pareceria una onda.
+        if (ampMax < AMP_SCALE_FLOOR_UV) { ampMax = AMP_SCALE_FLOOR_UV; }
+        var ampScale = (rowHeight * 0.62) / ampMax;
 
+        var svg = '<svg viewBox="0 0 ' + totalWidth + ' ' + totalHeight + '" xmlns="http://www.w3.org/2000/svg">';
+
+        // Grilla de tiempo + eje ms
+        for (var ms = 0; ms <= 12; ms += 1) {
+            var x = xPos(ms);
+            var mayor = ms % 2 === 0;
+            svg += '<line x1="' + x + '" y1="' + plotTop + '" x2="' + x + '" y2="' + plotBottom +
+                '" stroke="#000" stroke-opacity="' + (mayor ? 0.10 : 0.05) + '"></line>';
+            if (mayor) {
+                svg += '<text x="' + x + '" y="' + (plotBottom + 9) + '" font-size="6" text-anchor="middle" fill="currentColor">' + ms + '</text>';
+            }
+        }
+        svg += '<text x="' + (marginLeft + plotWidth / 2) + '" y="' + (totalHeight - 2) + '" font-size="6" text-anchor="middle" fill="currentColor">ms</text>';
+        svg += '<text x="2" y="' + (plotTop - 6) + '" font-size="6" fill="currentColor">dBnHL</text>';
+
+        // Escala de amplitud: una barra de largo conocido dice cuanto es
+        // un microvolt en este dibujo (el zoom cambia con el caso).
+        var refUv = ampMax >= 0.4 ? 0.5 : (ampMax >= 0.15 ? 0.2 : 0.05);
+        var barX = totalWidth - marginRight - 3;
+        var barBottom = plotTop - 4;
+        var barTop = barBottom - refUv * ampScale;
+        svg += '<line x1="' + barX + '" y1="' + barTop + '" x2="' + barX + '" y2="' + barBottom + '" stroke="currentColor" stroke-width="0.8"></line>';
+        svg += '<text x="' + (barX - 3) + '" y="' + (barBottom - 1) + '" font-size="5.5" text-anchor="end" fill="currentColor">' + refUv + ' uV</text>';
+
+        // Sin ondas (bloqueo total): la previa dibuja I/III/V y no hay
+        // ninguna. La linea plana ES el resultado -- se avisa para que no se
+        // lea como "la previa no anda". El microfonico no se grafica aca.
+        if (abrPathology(lado) === 'neural') {
+            var npPrev = abrNeuralParams(lado);
+            var microfonicaEl = neuralFieldEl(lado, 'microfonica');
+            var avisoPrev = npPrev.bloqueo === 'total'
+                ? 'Sin ondas' + (microfonicaEl && microfonicaEl.value === 'amplificada'
+                    ? ': solo microfonico coclear (no se grafica aca)' : '')
+                : (npPrev.bloqueo === 'post_i' ? 'Solo onda I: bloqueo proximal' : '');
+            if (avisoPrev) {
+                // Al pie: arriba chocaba con las etiquetas I/III/V.
+                svg += '<text x="' + marginLeft + '" y="' + (totalHeight - 2) +
+                    '" font-size="6" fill="' + color + '">' + avisoPrev + '</text>';
+            }
+        }
+
+        // Filas: fondo de la fila del umbral, etiqueta de intensidad y trazo.
+        var seguimiento = { I: [], III: [], V: [] };
+        var trazos = '';
         ABR_PREVIEW_INTENSITIES.forEach(function (intensity, i) {
-            var rowBaseY = marginTop + i * rowHeight + rowHeight * 0.78;
+            var rowTop = plotTop + i * rowHeight;
+            var rowBaseY = rowTop + rowHeight * 0.72;
             var isThresholdRow = Math.abs(intensity - Math.round(threshold / 10) * 10) < 0.01;
             if (isThresholdRow) {
-                svg += '<rect x="0" y="' + (marginTop + i * rowHeight) + '" width="' + totalWidth + '" height="' + rowHeight + '" fill="' + color + '" fill-opacity="0.08"></rect>';
+                svg += '<rect x="0" y="' + rowTop + '" width="' + totalWidth + '" height="' + rowHeight +
+                    '" fill="' + color + '" fill-opacity="0.07"></rect>';
             }
-            svg += '<text x="2" y="' + (rowBaseY + 2) + '" font-size="6" fill="' + (isThresholdRow ? color : 'currentColor') +
-                '" font-weight="' + (isThresholdRow ? 'bold' : 'normal') + '">' + intensity + '</text>';
-            var values = computeWaveValues(lado, pop, intensity);
-            var points = buildRowPoints(values, xPos, rowBaseY, 15);
-            svg += '<g clip-path="url(#abr-clip-' + lado + '-' + i + ')"><polyline points="' + points + '" fill="none" stroke="' + color + '" stroke-width="0.9"></polyline></g>';
+            svg += '<line x1="' + marginLeft + '" y1="' + rowBaseY + '" x2="' + (marginLeft + plotWidth) +
+                '" y2="' + rowBaseY + '" stroke="#000" stroke-opacity="0.08"></line>';
+            svg += '<text x="' + (marginLeft - 4) + '" y="' + (rowBaseY + 2) + '" font-size="6.5" text-anchor="end" fill="' +
+                (isThresholdRow ? color : 'currentColor') + '" font-weight="' + (isThresholdRow ? 'bold' : 'normal') + '">' +
+                intensity + '</text>';
+
+            // Latencias de la fila de 80 dB: es el nivel al que el docente
+            // fija los valores absolutos en los campos de arriba, asi que
+            // ver ahi el numero cierra el circulo con lo que acaba de tipear.
+            if (intensity === 80) {
+                var etiquetas = ['I', 'III', 'V'].filter(function (wave) {
+                    return serie[i][wave].amp > WAVE_VISIBLE_UV;
+                }).map(function (wave) {
+                    return wave + ' ' + serie[i][wave].lat.toFixed(2);
+                }).join('   ');
+                if (etiquetas) {
+                    svg += '<text x="' + (marginLeft + plotWidth - 2) + '" y="' + (rowTop + 7) +
+                        '" font-size="5.5" text-anchor="end" fill="' + color + '" fill-opacity="0.75">' +
+                        etiquetas + ' ms</text>';
+                }
+            }
+
+            var fila = buildRow(serie[i], xPos, rowBaseY, ampScale);
+            trazos += '<polyline points="' + fila.points + '" fill="none" stroke="' + color + '" stroke-width="1"></polyline>';
+            ['I', 'III', 'V'].forEach(function (wave) {
+                var pico = fila.picos[wave];
+                if (!pico.visible) { return; }
+                seguimiento[wave].push(pico);
+                // Marcador vertical sobre el pico: baja desde el techo de la
+                // fila hasta tocar la curva.
+                trazos += '<line x1="' + pico.x.toFixed(1) + '" y1="' + (rowTop + 1.5) + '" x2="' + pico.x.toFixed(1) +
+                    '" y2="' + pico.y.toFixed(1) + '" stroke="' + color + '" stroke-width="0.4" stroke-opacity="0.3"></line>';
+                trazos += '<circle cx="' + pico.x.toFixed(1) + '" cy="' + pico.y.toFixed(1) + '" r="0.9" fill="' + color + '"></circle>';
+            });
         });
 
+        // Seguimiento del pico entre intensidades: es la funcion
+        // latencia-intensidad dibujada sobre la propia serie -- lo que hace
+        // evidente si la onda se corre al bajar dB o se queda clavada.
+        ['I', 'III', 'V'].forEach(function (wave) {
+            var puntos = seguimiento[wave];
+            if (puntos.length < 2) { return; }
+            svg += '<polyline points="' + puntos.map(function (p) {
+                return p.x.toFixed(1) + ',' + p.y.toFixed(1);
+            }).join(' ') + '" fill="none" stroke="' + color + '" stroke-width="0.6" stroke-opacity="0.45" stroke-dasharray="2 1.5"></polyline>';
+            var primero = puntos[0];
+            svg += '<text x="' + primero.x.toFixed(1) + '" y="' + (plotTop - 6) + '" font-size="6" text-anchor="middle" fill="' +
+                color + '" font-weight="bold">' + wave + '</text>';
+        });
+
+        svg += trazos;
         svg += '</svg>';
         container.innerHTML = svg;
     }

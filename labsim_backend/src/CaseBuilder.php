@@ -37,6 +37,181 @@ final class CaseBuilder
     // ABR_Curve, que mapea 'transmission' -> 'conductive' internamente).
     public const ABR_TYPE_OPTIONS = ['normal', 'coclear', 'transmission', 'neural'];
 
+    // "Neural" no es un hallazgo ni un catálogo de diagnósticos: es un
+    // conjunto de PATRONES electrofisiológicos que se combinan. El ABR no
+    // separa un schwannoma de un meningioma del ángulo --eso lo dice la
+    // RM-- pero sí separa un I-III largo de un III-V largo, un bloqueo
+    // proximal de una desincronía, o un retraso global de uno selectivo.
+    // Por eso el caso guarda PARÁMETROS, no una etiqueta diagnóstica: la
+    // curva nunca depende del nombre. Las entidades clínicas viven como
+    // presets (ABR_NEURAL_PRESETS) que precargan estos valores en el
+    // formulario y quedan editables; el preset elegido NO se persiste.
+    // Las claves y los defaults tienen que coincidir con
+    // NEURAL_PARAM_DEFAULTS en src/abr/ABR_generator.py.
+    public const ABR_NEURAL_DEFAULTS = [
+        'i_iii_ms' => 0.2,          // prolongación selectiva I-III
+        'iii_v_ms' => 0.2,          // prolongación selectiva III-V
+        'global_delay_ms' => 0.0,   // corre TODO, onda I incluida
+        'bloqueo' => 'ninguno',
+        'v_i_factor' => 0.45,       // amplitud de la V respecto de la I
+        'microfonica' => 'normal',
+        'desincronia' => 'ninguna',
+        'sensibilidad_tasa' => 'severa',
+    ];
+    public const ABR_NEURAL_BLOQUEO_OPTIONS = ['ninguno', 'post_i', 'total'];
+    public const ABR_NEURAL_BLOQUEO_LABELS = [
+        'ninguno' => 'Sin bloqueo',
+        'post_i' => 'Solo onda I (bloqueo proximal)',
+        'total' => 'Ninguna onda',
+    ];
+    public const ABR_NEURAL_MICROFONICA_OPTIONS = ['normal', 'amplificada'];
+    public const ABR_NEURAL_MICROFONICA_LABELS = [
+        'normal' => 'Normal',
+        'amplificada' => 'Amplificada (patrón de desincronía)',
+    ];
+    public const ABR_NEURAL_DESINCRONIA_OPTIONS = ['ninguna', 'leve', 'alta'];
+    public const ABR_NEURAL_TASA_OPTIONS = ['normal', 'moderada', 'severa'];
+
+    // Rangos aceptados de los parámetros numéricos (ms / factor).
+    public const ABR_NEURAL_MAX_MS = 4.0;
+
+    // Entidades clínicas como punto de partida. Varias comparten patrón a
+    // propósito -- el PEATC no las distingue entre sí, las separa la
+    // imagen o la clínica --, y eso es justamente lo que el alumno tiene
+    // que entender. Los valores son plausibles, no dogma: se editan.
+    public const ABR_NEURAL_PRESETS = [
+        'schwannoma' => [
+            'label' => 'Schwannoma vestibular',
+            'nota' => 'I normal, I-V prolongado, V/I caída. Compará el IT5 con el otro oído.',
+            'params' => ['i_iii_ms' => 0.45, 'iii_v_ms' => 0.35, 'global_delay_ms' => 0.0,
+                'bloqueo' => 'ninguno', 'v_i_factor' => 0.40, 'microfonica' => 'normal',
+                'desincronia' => 'leve', 'sensibilidad_tasa' => 'severa'],
+        ],
+        'nf2' => [
+            'label' => 'Neurofibromatosis tipo 2 (bilateral)',
+            'nota' => 'Mismo patrón que el schwannoma, pero hay que cargarlo en LOS DOS oídos: sin asimetría, el IT5 no ayuda.',
+            'params' => ['i_iii_ms' => 0.45, 'iii_v_ms' => 0.35, 'global_delay_ms' => 0.0,
+                'bloqueo' => 'ninguno', 'v_i_factor' => 0.40, 'microfonica' => 'normal',
+                'desincronia' => 'leve', 'sensibilidad_tasa' => 'severa'],
+        ],
+        'angulo' => [
+            'label' => 'Tumor del ángulo pontocerebeloso (meningioma, epidermoide)',
+            'nota' => 'Indistinguible del schwannoma en el PEATC: la diferencia la hace la RM.',
+            'params' => ['i_iii_ms' => 0.40, 'iii_v_ms' => 0.30, 'global_delay_ms' => 0.0,
+                'bloqueo' => 'ninguno', 'v_i_factor' => 0.50, 'microfonica' => 'normal',
+                'desincronia' => 'leve', 'sensibilidad_tasa' => 'moderada'],
+        ],
+        'microvascular' => [
+            'label' => 'Compresión microvascular del VIII par',
+            'nota' => 'Alteración leve, a veces solo visible con tasas altas.',
+            'params' => ['i_iii_ms' => 0.25, 'iii_v_ms' => 0.15, 'global_delay_ms' => 0.0,
+                'bloqueo' => 'ninguno', 'v_i_factor' => 0.70, 'microfonica' => 'normal',
+                'desincronia' => 'ninguna', 'sensibilidad_tasa' => 'moderada'],
+        ],
+        'ansd' => [
+            'label' => 'Neuropatía auditiva / desincronía (ANSD)',
+            'nota' => 'Sin ondas + microfónico que invierte con la polaridad (buscalo con rarefacción y condensación, no con alternada). En la pestaña EOA este oído va "Neural": OEA presentes.',
+            'params' => ['i_iii_ms' => 0.0, 'iii_v_ms' => 0.0, 'global_delay_ms' => 0.0,
+                'bloqueo' => 'total', 'v_i_factor' => 0.45, 'microfonica' => 'amplificada',
+                'desincronia' => 'alta', 'sensibilidad_tasa' => 'severa'],
+        ],
+        'esclerosis_multiple' => [
+            'label' => 'Esclerosis múltiple / desmielinizante',
+            'nota' => 'I-III normal y III-V largo (lesión intraaxial), con fatiga marcada a tasas altas.',
+            'params' => ['i_iii_ms' => 0.05, 'iii_v_ms' => 0.60, 'global_delay_ms' => 0.0,
+                'bloqueo' => 'ninguno', 'v_i_factor' => 0.45, 'microfonica' => 'normal',
+                'desincronia' => 'alta', 'sensibilidad_tasa' => 'severa'],
+        ],
+        'infarto_pontino' => [
+            'label' => 'Infarto pontino / AICA',
+            'nota' => 'III-V muy prolongado o V ausente, según la altura de la lesión.',
+            'params' => ['i_iii_ms' => 0.0, 'iii_v_ms' => 0.70, 'global_delay_ms' => 0.0,
+                'bloqueo' => 'ninguno', 'v_i_factor' => 0.35, 'microfonica' => 'normal',
+                'desincronia' => 'alta', 'sensibilidad_tasa' => 'moderada'],
+        ],
+        'glioma_tronco' => [
+            'label' => 'Glioma de tronco / tumor de fosa posterior',
+            'params' => ['i_iii_ms' => 0.10, 'iii_v_ms' => 0.65, 'global_delay_ms' => 0.0,
+                'bloqueo' => 'ninguno', 'v_i_factor' => 0.35, 'microfonica' => 'normal',
+                'desincronia' => 'alta', 'sensibilidad_tasa' => 'moderada'],
+        ],
+        'chiari_hic' => [
+            'label' => 'Chiari / hipertensión intracraneal / hidrocefalia',
+            'nota' => 'Compresión difusa: algo de todo, sin un interpico dominante.',
+            'params' => ['i_iii_ms' => 0.15, 'iii_v_ms' => 0.45, 'global_delay_ms' => 0.10,
+                'bloqueo' => 'ninguno', 'v_i_factor' => 0.55, 'microfonica' => 'normal',
+                'desincronia' => 'leve', 'sensibilidad_tasa' => 'moderada'],
+        ],
+        'kernicterus' => [
+            'label' => 'Hiperbilirrubinemia neonatal / kernícterus',
+            'nota' => 'Interpicos prolongados y morfología pobre. La forma severa se comporta como ANSD: en ese caso usá ese preset.',
+            'params' => ['i_iii_ms' => 0.40, 'iii_v_ms' => 0.50, 'global_delay_ms' => 0.0,
+                'bloqueo' => 'ninguno', 'v_i_factor' => 0.35, 'microfonica' => 'normal',
+                'desincronia' => 'alta', 'sensibilidad_tasa' => 'severa'],
+        ],
+        'leucodistrofia' => [
+            'label' => 'Leucodistrofia (adrenoleucodistrofia, metacromática, Krabbe)',
+            'nota' => 'Desmielinización difusa: todo prolongado y ondas rostrales que se van perdiendo.',
+            'params' => ['i_iii_ms' => 0.50, 'iii_v_ms' => 0.60, 'global_delay_ms' => 0.20,
+                'bloqueo' => 'ninguno', 'v_i_factor' => 0.35, 'microfonica' => 'normal',
+                'desincronia' => 'alta', 'sensibilidad_tasa' => 'severa'],
+        ],
+        'hereditaria_central' => [
+            'label' => 'Neuropatía hereditaria con compromiso central (CMT, Friedreich)',
+            'params' => ['i_iii_ms' => 0.60, 'iii_v_ms' => 0.50, 'global_delay_ms' => 0.0,
+                'bloqueo' => 'ninguno', 'v_i_factor' => 0.30, 'microfonica' => 'normal',
+                'desincronia' => 'alta', 'sensibilidad_tasa' => 'severa'],
+        ],
+        'siderosis' => [
+            'label' => 'Siderosis superficial del SNC',
+            'params' => ['i_iii_ms' => 0.55, 'iii_v_ms' => 0.40, 'global_delay_ms' => 0.0,
+                'bloqueo' => 'ninguno', 'v_i_factor' => 0.35, 'microfonica' => 'normal',
+                'desincronia' => 'alta', 'sensibilidad_tasa' => 'severa'],
+        ],
+        'toxico_metabolico' => [
+            'label' => 'Tóxico-metabólico (encefalopatía hepática, hipotiroidismo)',
+            'params' => ['i_iii_ms' => 0.20, 'iii_v_ms' => 0.25, 'global_delay_ms' => 0.25,
+                'bloqueo' => 'ninguno', 'v_i_factor' => 0.70, 'microfonica' => 'normal',
+                'desincronia' => 'leve', 'sensibilidad_tasa' => 'moderada'],
+        ],
+        'hipotermia_farmacos' => [
+            'label' => 'Hipotermia / depresores del SNC',
+            'nota' => 'Conducción lenta pareja: corre TODO, onda I incluida, con interpicos normales. Es el único cuadro donde la onda I se mueve.',
+            'params' => ['i_iii_ms' => 0.0, 'iii_v_ms' => 0.0, 'global_delay_ms' => 0.80,
+                'bloqueo' => 'ninguno', 'v_i_factor' => 1.0, 'microfonica' => 'normal',
+                'desincronia' => 'ninguna', 'sensibilidad_tasa' => 'normal'],
+        ],
+        'tec_tronco' => [
+            'label' => 'TEC con lesión de tronco',
+            'params' => ['i_iii_ms' => 0.20, 'iii_v_ms' => 0.60, 'global_delay_ms' => 0.10,
+                'bloqueo' => 'ninguno', 'v_i_factor' => 0.35, 'microfonica' => 'normal',
+                'desincronia' => 'alta', 'sensibilidad_tasa' => 'severa'],
+        ],
+        'bloqueo_proximal' => [
+            'label' => 'Bloqueo proximal (coma, muerte encefálica)',
+            'nota' => 'Cóclea viva: onda I presente y nada después. Es el patrón que se busca en el estudio de muerte encefálica.',
+            'params' => ['i_iii_ms' => 0.0, 'iii_v_ms' => 0.0, 'global_delay_ms' => 0.0,
+                'bloqueo' => 'post_i', 'v_i_factor' => 0.45, 'microfonica' => 'normal',
+                'desincronia' => 'alta', 'sensibilidad_tasa' => 'severa'],
+        ],
+        'prematuro' => [
+            'label' => 'Retraso madurativo del prematuro',
+            'nota' => 'No es patología: es maduración. Antes de usar esto, fijate que la edad del paciente ya elige la población normativa de neonato, que corre la onda V casi 1 ms.',
+            'params' => ['i_iii_ms' => 0.0, 'iii_v_ms' => 0.0, 'global_delay_ms' => 0.60,
+                'bloqueo' => 'ninguno', 'v_i_factor' => 0.80, 'microfonica' => 'normal',
+                'desincronia' => 'leve', 'sensibilidad_tasa' => 'moderada'],
+        ],
+    ];
+
+    // Umbral máximo que puede tener un oído marcado "Normal". Sale de
+    // pathology_modifiers.normal.threshold_range en
+    // resources/abr/normative_data.json (y del equivalente de OEA): por
+    // encima de eso el oído tiene una pérdida y hay que decir de qué tipo,
+    // porque el generador usa la patología --no el umbral-- para decidir
+    // la física de la curva (GAP conductivo, función latencia-intensidad
+    // coclear, interpicos retrococleares). Ver normalCoherenceError().
+    public const NORMAL_MAX_UMBRAL = 25;
+
     // Patología EOA (OEA) por oído -- mismas categorías que ABR pero la
     // OEA responde distinto: 'neural' (neuropatía/retrococlear) mantiene
     // la OEA normal porque la cóclea está intacta (a diferencia de ABR,
@@ -253,6 +428,147 @@ final class CaseBuilder
                 return 'Dos picos SOAE del mismo oído deben estar separados al menos 6% en frecuencia (se suprimen entre sí).';
             }
             $hzPrevio = $pico['hz'];
+        }
+        return null;
+    }
+
+    // Tolerancia por módulo para la coherencia con patología "Normal": un
+    // oído sano igual tiene ruido test-retest, y "Autocompletar" con tipo
+    // Normal lo sortea a propósito (±0.05 ms de latencia, ±8% de amplitud
+    // en ABR -- ver buildValues() en case_create.php). Estos números son el
+    // techo de ese ruido: por encima ya no es variabilidad, es un hallazgo.
+    // 'lat'/'amp' aplican a desviaciones anidadas por onda; 'plano' a las
+    // desviaciones por frecuencia de la OEA (dB). null = no se chequea.
+    public const NORMAL_DEVIATION_TOLERANCE = [
+        'ABR' => ['lat' => 0.10, 'amp' => 0.06, 'plano' => null],
+        'EOA' => ['lat' => null, 'amp' => null, 'plano' => 3.0],
+        // VEMP: solo latencia. Las amplitudes normativas van de 8 uV (OVEMP
+        // n10) a 170 uV (CVEMP n23) -- una tolerancia absoluta única no
+        // significa nada, y el validador no tiene el normativo del subtipo
+        // a mano para hacerla relativa.
+        'VEMP' => ['lat' => 0.5, 'amp' => null, 'plano' => null],
+    ];
+
+    /**
+     * Parámetros del patrón retrococlear fuera de rango, o null si están
+     * bien. Los enums se validan contra las mismas listas que el generador
+     * (NEURAL_PARAM_DEFAULTS en ABR_generator.py); los ms tienen tope
+     * porque una prolongación de 10 ms no es un caso clínico, es un error
+     * de tipeo que deja la onda fuera de la ventana de registro.
+     *
+     * @param array<string,mixed> $neural
+     */
+    public static function neuralParamsError(array $neural, string $lado): ?string
+    {
+        foreach (['i_iii_ms' => 'I-III', 'iii_v_ms' => 'III-V',
+                  'global_delay_ms' => 'Retraso global'] as $clave => $nombre) {
+            $valor = (float) ($neural[$clave] ?? 0);
+            if ($valor < 0 || $valor > self::ABR_NEURAL_MAX_MS) {
+                return sprintf('ABR %s: %s = %s ms fuera de rango (0 a %s).',
+                    $lado, $nombre, (string) $valor, (string) self::ABR_NEURAL_MAX_MS);
+            }
+        }
+        $vi = (float) ($neural['v_i_factor'] ?? 1);
+        if ($vi <= 0 || $vi > 1) {
+            return sprintf('ABR %s: razón V/I = %s fuera de rango (más de 0, hasta 1).', $lado, (string) $vi);
+        }
+        $enums = [
+            'bloqueo' => self::ABR_NEURAL_BLOQUEO_OPTIONS,
+            'microfonica' => self::ABR_NEURAL_MICROFONICA_OPTIONS,
+            'desincronia' => self::ABR_NEURAL_DESINCRONIA_OPTIONS,
+            'sensibilidad_tasa' => self::ABR_NEURAL_TASA_OPTIONS,
+        ];
+        foreach ($enums as $clave => $opciones) {
+            if (!in_array($neural[$clave] ?? '', $opciones, true)) {
+                return sprintf('ABR %s: valor inválido en "%s".', $lado, $clave);
+            }
+        }
+        // Ausencia de respuesta SIN microfónico amplificado es un cuadro
+        // válido (respuesta ausente de verdad), pero al revés no: un
+        // microfónico de desincronía con las ondas presentes no existe --
+        // el CM se ve porque NO hay respuesta neural que lo tape.
+        if (($neural['microfonica'] ?? '') === 'amplificada'
+            && ($neural['bloqueo'] ?? '') === 'ninguno') {
+            return sprintf('ABR %s: el microfónico amplificado es el hallazgo de una desincronía, que va sin ondas -- poné el bloqueo en "Ninguna onda" o dejá el microfónico normal.', $lado);
+        }
+        return null;
+    }
+
+    /**
+     * Un oído marcado "Normal" pero con umbral o desviaciones alteradas.
+     *
+     * El selector de patología no es decorativo: el generador decide con él
+     * la FÍSICA de la curva, no con el umbral. Un ABR "normal" con umbral 60
+     * sale con la función latencia-intensidad de un oído sano, sin
+     * reclutamiento y con las desviaciones sumadas parejas -- o sea un
+     * corrimiento paralelo, que es el hallazgo de una conductiva sin que
+     * haya GAP. El resultado es un oído que no se corresponde con ninguna
+     * patología real y que el alumno no puede clasificar. Ver
+     * calculate_wave_parameters() en src/abr/ABR_generator.py.
+     *
+     * @param array<string,mixed> $cfg  El lado ya armado (abrBuild/eoasBuild/vempBuild).
+     * @param string $modulo            Clave de NORMAL_DEVIATION_TOLERANCE ("ABR"/"EOA"/"VEMP").
+     * @param string $lado              "OD"/"OI".
+     * @param bool $checkUmbral         VEMP no lo chequea: su umbral normal
+     *                                  ronda los 60-90 dB nHL, no los 25.
+     */
+    public static function normalCoherenceError(array $cfg, string $modulo, string $lado, bool $checkUmbral = true): ?string
+    {
+        if (($cfg['type'] ?? 'normal') !== 'normal') {
+            return null;
+        }
+        if ($checkUmbral && (float) ($cfg['umbral'] ?? 0) > self::NORMAL_MAX_UMBRAL) {
+            return sprintf(
+                '%s %s: umbral %s dB con patología "Normal". Sobre %d dB hay que elegir el tipo de pérdida (coclear/transmisión/neural) -- es lo que el generador usa para la física de la curva, no el umbral.',
+                $modulo, $lado, (string) $cfg['umbral'], self::NORMAL_MAX_UMBRAL
+            );
+        }
+        $tol = self::NORMAL_DEVIATION_TOLERANCE[$modulo];
+        $campo = self::deviationOverTolerance($cfg['desviaciones'] ?? [], $tol);
+        if ($campo !== null) {
+            return sprintf(
+                '%s %s: %s está fuera de lo que se explica por variabilidad normal, con patología "Normal". Elegí la patología que corresponde o dejá ese valor en 0.',
+                $modulo, $lado, $campo
+            );
+        }
+        // OEA: la atenuación manual es otra forma de alterar el oído, y no
+        // tiene ruido test-retest que la explique -- se compara contra 0.
+        if (abs((float) ($cfg['atten_db'] ?? 0)) > 1e-9) {
+            return sprintf(
+                '%s %s: atenuación %s dB con patología "Normal". Elegí la patología o dejá la atenuación en 0.',
+                $modulo, $lado, (string) $cfg['atten_db']
+            );
+        }
+        return null;
+    }
+
+    /**
+     * Primera desviación que pasa la tolerancia, descrita para el mensaje
+     * de error, o null si todas entran. Acepta las dos formas que usan los
+     * módulos: anidada por onda (['onda_V' => ['lat' => .., 'amp' => ..]])
+     * y plana por frecuencia (['2000' => 3.5]).
+     *
+     * @param array<string,mixed> $desviaciones
+     * @param array{lat: ?float, amp: ?float, plano: ?float} $tol
+     */
+    private static function deviationOverTolerance(array $desviaciones, array $tol, string $prefijo = ''): ?string
+    {
+        foreach ($desviaciones as $clave => $valor) {
+            $nombre = $prefijo === '' ? (string) $clave : "$prefijo $clave";
+            if (is_array($valor)) {
+                $hallazgo = self::deviationOverTolerance($valor, $tol, $nombre);
+                if ($hallazgo !== null) {
+                    return $hallazgo;
+                }
+                continue;
+            }
+            $limite = $tol[$clave] ?? $tol['plano'];
+            if ($limite === null) {
+                continue;
+            }
+            if (abs((float) $valor) > $limite) {
+                return sprintf('%s = %s', $nombre, (string) $valor);
+            }
         }
         return null;
     }
@@ -764,6 +1080,12 @@ final class CaseBuilder
             $v['abr'][$ladoForm] = [
                 'type' => in_array($ladoAbrType, self::ABR_TYPE_OPTIONS, true) ? $ladoAbrType : 'normal',
                 'umbral' => (string) ($ladoAbr['umbral'] ?? 20),
+                // repro_var y average_objetivo se guardaban (ver abrBuild en
+                // case_create.php) pero no se releían: al editar un caso el
+                // formulario los redibujaba con el default y el docente los
+                // perdía al guardar de nuevo.
+                'repro_var' => (string) ($ladoAbr['repro_var'] ?? 0.2),
+                'average_objetivo' => (string) ($ladoAbr['average_objetivo'] ?? 2000),
                 'lat_I' => $ondaVal($desv, 'onda_I', 'lat', 0),
                 'amp_I' => $ondaVal($desv, 'onda_I', 'amp', 0),
                 'lat_III' => $ondaVal($desv, 'onda_III', 'lat', 0),
@@ -780,6 +1102,13 @@ final class CaseBuilder
                 // en AbrMainWindow.py): solo queda sin marcar si el docente
                 // lo desmarcó explícitamente (repro === false guardado).
                 $v['abr'][$ladoForm]['repro'] = '1';
+            }
+            // Patrón retrococlear: un caso guardado antes de que existiera
+            // no trae la clave y cae en los defaults, que son el cuadro que
+            // dibujaba el generador cuando "neural" era uno solo.
+            $neural = is_array($ladoAbr['neural'] ?? null) ? $ladoAbr['neural'] : [];
+            foreach (self::ABR_NEURAL_DEFAULTS as $clave => $default) {
+                $v['abr'][$ladoForm]['neural'][$clave] = (string) ($neural[$clave] ?? $default);
             }
         }
 

@@ -97,6 +97,26 @@ WAVE_AMP_GROWTH = {
 # elevado (recruitment: true en normative_data.json). Multiplica tau.
 PATHOLOGY_TAU_FACTOR = {'cochlear': 0.65}
 
+# Funcion latencia-intensidad de la perdida COCLEAR. No es la normal (que
+# es lo que hacia antes: la patologia coclear no tocaba la latencia, solo
+# la amplitud) ni el corrimiento paralelo de la conductiva. Cerca del
+# umbral la latencia se alarga desproporcionado y al subir el nivel de
+# sensacion converge a la normal -- por eso la V a nivel alto se ve casi
+# normal pese al umbral elevado, y por eso la curva L-I de una coclear es
+# EMPINADA en vez de corrida. Sin esto, subir de 80 a 100 dB en un caso
+# coclear movia la V 0.16 ms y la funcion salia igual a la de un oido sano.
+# Pendiente extra (ms) por cada 10 dB de SL por debajo de la referencia.
+COCHLEAR_LI_SL_REF = 40.0
+COCHLEAR_LI_SLOPE = 0.15
+
+# Las desviaciones del caso se definen pensando en click a NIVEL ALTO
+# (80 dB, que es como se leen los informes). Sumarlas iguales a toda
+# intensidad dibujaba un corrimiento paralelo -- pinta de conductiva-- en
+# cualquier patologia. La misma alteracion se expresa MAS cerca del umbral,
+# asi que se amplifican con el corrimiento L-I, con tope.
+DEV_LI_GAIN = 0.35
+DEV_LI_MAX = 1.5
+
 # La funcion latencia-intensidad no corre todas las ondas lo mismo: el
 # interpico I-V se ensancha SOLO un poco al bajar la intensidad (0.2-0.4 ms
 # entre 80 y 20 dB). Factor sobre el shift de la onda V. Antes la onda I
@@ -132,6 +152,73 @@ NORMAL_THRESHOLD_REF = 15
 # normative_data.json -> pathology_modifiers.neural.amplitude_v_i_ratio.
 NEURAL_LAT_SHARE = {'I': 0.0, 'II': 0.25, 'III': 0.5, 'IV': 0.75, 'V': 1.0}
 NEURAL_AMP_FACTOR = {'I': 1.0, 'II': 0.85, 'III': 0.75, 'IV': 0.55, 'V': 0.45}
+
+# "Retrococlear" no es UN hallazgo ni un catalogo de diagnosticos: es un
+# puñado de PATRONES electrofisiologicos que se combinan. El ABR no separa
+# un schwannoma de un meningioma del angulo --eso lo dice la RM-- pero si
+# separa un I-III largo de un III-V largo, un bloqueo proximal de una
+# desincronia, o un retraso global de uno selectivo. Por eso el caso no
+# elige "la entidad" sino los parametros del patron, y las entidades viven
+# como presets del formulario docente (ABR_NEURAL_PRESETS en CaseBuilder.php)
+# que los precargan y quedan editables.
+#
+# Cada parametro cubre uno de los patrones que se enseñan:
+#   i_iii_ms          prolongacion selectiva I-III (nervio a puente inferior)
+#   iii_v_ms          prolongacion selectiva III-V (pontino alto/mesencefalo)
+#                     -- los dos juntos dan la prolongacion I-V global
+#   global_delay_ms   TODO el complejo corrido, onda I incluida: no es una
+#                     lesion de via sino conduccion lenta pareja
+#                     (hipotermia, depresores del SNC, prematuro). El resto
+#                     de los parametros deja la I quieta a proposito, porque
+#                     nace antes de cualquier lesion retrococlear.
+#   bloqueo           'post_i' = solo onda I (coclea viva, bloqueo proximal;
+#                     tambien el patron de muerte encefalica), 'total' =
+#                     ninguna respuesta neural.
+#   v_i_factor        amplitud de la V respecto de la I (razon V/I). 1.0 =
+#                     sin caida; 0.45 = la V a menos de la mitad.
+#   microfonica       'amplificada' = queda el microfonico coclear cuando no
+#                     hay ondas. Es lo que separa una desincronia (CM
+#                     presente, invierte con la polaridad) de una ausencia
+#                     de respuesta de verdad.
+#   desincronia       ensancha las ondas y empeora la morfologia.
+#   sensibilidad_tasa cuanto se degrada a tasas altas (fatiga de conduccion,
+#                     el hallazgo de las desmielinizantes).
+#
+# Los defaults son el perfil que tenia el modelo cuando "neural" era un solo
+# cuadro: un caso guardado antes de esto dibuja exactamente lo mismo.
+NEURAL_PARAM_DEFAULTS = {
+    'i_iii_ms': 0.2,
+    'iii_v_ms': 0.2,
+    'global_delay_ms': 0.0,
+    'bloqueo': 'ninguno',
+    'v_i_factor': 0.45,
+    'microfonica': 'normal',
+    'desincronia': 'ninguna',
+    'sensibilidad_tasa': 'severa',
+}
+NEURAL_BLOQUEO_OPTIONS = ('ninguno', 'post_i', 'total')
+# Reparto del retraso hacia las ondas intermedias: la II cae entre I y III,
+# la IV entre III y V.
+NEURAL_LAT_SHARE = {'I': 0.0, 'II': 0.5, 'III': 1.0, 'IV': 1.0, 'V': 1.0}
+NEURAL_LAT_SHARE_IIIV = {'I': 0.0, 'II': 0.0, 'III': 0.0, 'IV': 0.5, 'V': 1.0}
+# Cuanto de la caida de amplitud le toca a cada onda: la I intacta, la V
+# con la caida completa (v_i_factor).
+NEURAL_AMP_SHARE = {'I': 0.0, 'II': 0.25, 'III': 0.5, 'IV': 0.75, 'V': 1.0}
+# Lo que queda de una onda "bloqueada": por debajo del umbral de
+# visibilidad (0.02 uV), no un cero exacto -- el trazo sigue teniendo ruido.
+NEURAL_BLOCK_AMP_FACTOR = 0.02
+NEURAL_DESYNC_WIDTH = {'ninguna': 1.0, 'leve': 1.35, 'alta': 1.9}
+# (latencia, amplitud) sobre el efecto de la tasa. 'severa' es el valor con
+# el que se calibro "rate_effect": "severe" de normative_data.json.
+NEURAL_RATE_FACTORS = {
+    'normal': (1.0, 1.0),
+    'moderada': (1.25, 1.6),
+    'severa': (RATE_NEURAL_LAT_FACTOR, RATE_NEURAL_AMP_FACTOR),
+}
+NEURAL_CM_GAIN = {'normal': 1.0, 'amplificada': 7.0}
+# El CM de una desincronia no es el pulso corto pre-onda I del oido sano:
+# dura lo que dura el estimulo y se sigue viendo donde deberia estar la I.
+NEURAL_CM_SIGMA_GAIN = 3.5
 
 # Atenuacion interaural (dB): cuanto pierde el estimulo al cruzar el craneo
 # hasta la coclea del otro lado. Por debajo de esto no hay curva sombra.
@@ -406,9 +493,25 @@ class ABRGenerator:
                 completo[wave][clave] = valor
         return completo
 
+    @staticmethod
+    def neural_params(neural=None):
+        """Parametros del patron retrococlear, completados con los defaults.
+
+        Un caso guardado antes de que existieran (o con una clave sola)
+        cae en NEURAL_PARAM_DEFAULTS, que es el cuadro que dibujaba el
+        modelo cuando 'neural' era uno solo.
+        """
+        params = dict(NEURAL_PARAM_DEFAULTS)
+        for clave, valor in (neural or {}).items():
+            if clave in params and valor is not None:
+                params[clave] = valor
+        if params['bloqueo'] not in NEURAL_BLOQUEO_OPTIONS:
+            params['bloqueo'] = 'ninguno'
+        return params
+
     def calculate_wave_parameters(self, baseline, intensity, threshold,
                                    pathology, desviaciones=None, repro_shift=0.0,
-                                   click_baseline=None):
+                                   click_baseline=None, neural=None):
         modified = {}
         # Patologia conductiva = el estimulo llega atenuado a una coclea
         # sana, asi que la respuesta es la de un nivel MENOR: toda la
@@ -424,19 +527,28 @@ class ABRGenerator:
 
         lat_shift = self.latency_intensity_shift(lat_intensity)
 
-        # Patologia neural (retrococlear): el retraso se acumula de la I
-        # hacia la V, o sea prolonga los interpicos I-III/III-V en vez de
-        # correr el complejo entero.
-        neural_delay = 0.0
-        if pathology == 'neural':
-            neural_delay = self.norms['pathology_modifiers']['neural'].get(
-                'interpeak_prolongation', 0.4)
-
         # Nivel de sensacion: cuanto por encima del umbral DE ESTE OIDO se
         # esta estimulando. Es lo que manda en amplitud y en ancho de la
         # onda; la intensidad absoluta sola no dice nada (80 dB en un oido
         # con umbral 60 son 20 dB SL, no una respuesta maxima).
         sl = intensity - threshold
+
+        # Coclear: la funcion L-I se empina cerca del umbral (ver
+        # COCHLEAR_LI_SLOPE) y converge a la normal a SL alto.
+        if pathology == 'cochlear':
+            lat_shift += (COCHLEAR_LI_SLOPE
+                          * max(0.0, COCHLEAR_LI_SL_REF - sl) / 10.0)
+
+        # Amplificacion de las desviaciones del caso segun donde cae la
+        # respuesta en la funcion L-I (ver DEV_LI_GAIN).
+        dev_int_scale = min(1.0 + DEV_LI_GAIN * max(lat_shift, 0.0), DEV_LI_MAX)
+
+        # Patologia neural (retrococlear): el retraso se acumula de la I
+        # hacia la V, o sea prolonga los interpicos I-III/III-V en vez de
+        # correr el complejo entero.
+        neural_params = self.neural_params(neural)
+        is_neural = pathology == 'neural'
+
         tau_factor = PATHOLOGY_TAU_FACTOR.get(pathology, 1.0)
 
         for wave in ['I', 'II', 'III', 'IV', 'V']:
@@ -447,8 +559,17 @@ class ABRGenerator:
             # complejo junto (misma respuesta neural, timing inconsistente),
             # no una onda aislada.
             calc_lat = (base_lat + lat_shift * LAT_SHIFT_FACTOR.get(wave, 1.0)
-                        + neural_delay * NEURAL_LAT_SHARE.get(wave, 1.0)
                         + repro_shift)
+            if is_neural:
+                # I-III y III-V se prolongan por separado: es la diferencia
+                # entre una lesion del nervio y una pontina alta. El retraso
+                # global corre TODO, onda I incluida (conduccion lenta
+                # pareja, no lesion de via).
+                calc_lat += (
+                    float(neural_params['global_delay_ms'])
+                    + float(neural_params['i_iii_ms']) * NEURAL_LAT_SHARE.get(wave, 1.0)
+                    + float(neural_params['iii_v_ms']) * NEURAL_LAT_SHARE_IIIV.get(wave, 1.0)
+                )
             # Escala de la desviacion segun estimulo: el caso clinico define
             # la desviacion pensando en click (estimulo estandar), pero
             # latencia/amplitud base cambian fuerte con el estimulo (burst
@@ -467,7 +588,8 @@ class ABRGenerator:
             if desviaciones and wave in ['I', 'III', 'V']:
                 key = f"onda_{wave}"
                 if key in desviaciones:
-                    calc_lat += desviaciones[key]['lat'] * lat_scale
+                    calc_lat += (desviaciones[key]['lat'] * lat_scale
+                                 * dev_int_scale)
 
             # Amplitud = curva de crecimiento saturante sobre el SL (ver
             # WAVE_AMP_GROWTH). Reemplaza el escalon de disappear_offset,
@@ -484,10 +606,17 @@ class ABRGenerator:
             amp_factor = 1.0 - np.exp(-sl_eff / tau)
 
             calc_amp = baseline[wave]['amp'] * amp_factor
-            if pathology == 'neural':
+            if is_neural:
                 # Las ondas rostrales son las que se caen: baja la razon
-                # V/I, que es el otro hallazgo retrococlear clasico.
-                calc_amp *= NEURAL_AMP_FACTOR.get(wave, 1.0)
+                # V/I, repartida de la I (intacta) a la V (v_i_factor).
+                caida = (1.0 - float(neural_params['v_i_factor'])) \
+                    * NEURAL_AMP_SHARE.get(wave, 1.0)
+                calc_amp *= max(1.0 - caida, 0.0)
+                # Bloqueo proximal: la coclea responde (onda I) pero mas
+                # arriba no pasa nada. 'total' no deja ninguna.
+                bloqueo = neural_params['bloqueo']
+                if bloqueo == 'total' or (bloqueo == 'post_i' and wave != 'I'):
+                    calc_amp *= NEURAL_BLOCK_AMP_FACTOR
             if desviaciones and wave in ['I', 'III', 'V']:
                 key = f"onda_{wave}"
                 if key in desviaciones:
@@ -503,6 +632,11 @@ class ABRGenerator:
                 width_factor = 1.0 + (50 - sl) * 0.03
             else:
                 width_factor = min(1.6 + (30 - sl) * 0.05, 2.6)
+            if is_neural:
+                # Morfologia pobre/desincronizada: ondas anchas y romas, que
+                # es lo que se ve antes de que desaparezcan del todo.
+                width_factor *= NEURAL_DESYNC_WIDTH.get(
+                    neural_params['desincronia'], 1.0)
 
             modified[wave] = {
                 'lat': calc_lat,
@@ -512,7 +646,8 @@ class ABRGenerator:
 
         return modified, {w: modified[w]['amp'] > 0.02 for w in modified}
 
-    def apply_polarity_effects(self, values, polarity):
+    def apply_polarity_effects(self, values, polarity, pathology='normal',
+                               neural=None):
         CM_value = None
         if polarity == 'Rarefacción':
             for w in values:
@@ -526,9 +661,15 @@ class ABRGenerator:
             if 'I' in values:
                 values['I']['lat'] += 0.1
             CM_value = 0.15
+        # Con polaridad alternada el CM se cancela (CM_value queda None):
+        # es justamente por eso que una desincronia auditiva se busca con
+        # rarefaccion y condensacion por separado.
+        if CM_value is not None and pathology == 'neural':
+            CM_value *= NEURAL_CM_GAIN.get(
+                self.neural_params(neural)['microfonica'], 1.0)
         return values, CM_value
 
-    def apply_rate_effects(self, values, rate, pathology):
+    def apply_rate_effects(self, values, rate, pathology, neural=None):
         """Efecto de la tasa de estimulacion, continuo y anclado en RATE_REF.
 
         Latencia lineal en la tasa (ms por estimulo/s) y amplitud
@@ -538,9 +679,11 @@ class ABRGenerator:
         y rangos irreales (ver comentario de RATE_REF).
         """
         d_rate = rate - RATE_REF
-        neural = pathology == 'neural'
-        lat_gain = RATE_NEURAL_LAT_FACTOR if neural else 1.0
-        amp_gain = RATE_NEURAL_AMP_FACTOR if neural else 1.0
+        lat_gain, amp_gain = 1.0, 1.0
+        if pathology == 'neural':
+            lat_gain, amp_gain = NEURAL_RATE_FACTORS.get(
+                self.neural_params(neural)['sensibilidad_tasa'],
+                NEURAL_RATE_FACTORS['severa'])
 
         for wave, v in values.items():
             if wave not in RATE_LAT_SLOPE:
@@ -560,7 +703,7 @@ class ABRGenerator:
     def _gaussian(t, center, amp, sigma):
         return amp * np.exp(-0.5 * ((t - center) / sigma) ** 2)
 
-    def build_target_curve(self, t, values, CM_value=None):
+    def build_target_curve(self, t, values, CM_value=None, cm_sigma_gain=1.0):
         """
         Suma de gaussianas:
         - CM: pulso corto pre-I (si polaridad lo activa)
@@ -574,7 +717,8 @@ class ABRGenerator:
         # CM (microfonico coclear) - pulso gaussiano corto pre-onda I
         if CM_value is not None and CM_value != 0:
             cm_lat = values.get('I', {'lat': 1.6})['lat'] / 3
-            y += self._gaussian(t, cm_lat, CM_value * 0.25, sigma=0.06)
+            y += self._gaussian(t, cm_lat, CM_value * 0.25,
+                                sigma=0.06 * cm_sigma_gain)
 
         # Picos positivos I-V
         for wave in ['I', 'II', 'III', 'IV', 'V']:
@@ -1019,6 +1163,7 @@ class ABRGenerator:
             baseline, level, threshold, contra.get('type', 'normal'),
             desviaciones=contra.get('desviaciones'),
             click_baseline=click_baseline,
+            neural=contra.get('neural'),
         )
         for wave, v in values.items():
             factor = SHADOW_AMP_FACTOR
@@ -1182,19 +1327,26 @@ class ABRGenerator:
     def latency_intensity_shift(intensity):
         """Corrimiento de la funcion latencia-intensidad (ms) respecto de 80 dB.
 
-        Pendiente (onda V, click): ~0.08 ms/10 dB cerca del techo (80-70 dB,
-        casi plana) y ~0.3 ms/10 dB de ahi para abajo -- Hood, "Clinical
-        Applications of the ABR", reporta ~0.3 ms/10 dB entre 70 y 50 dB.
-        Quiebre en 70 (antes estaba en 60, dejaba el tramo 70-60 con la
-        pendiente plana que no corresponde).
+        Pendiente (onda V, click): ~0.12 ms/10 dB cerca del techo (por
+        encima de 70 dB, casi plana) y ~0.3 ms/10 dB de ahi para abajo --
+        Hood, "Clinical Applications of the ABR", reporta ~0.3 ms/10 dB
+        entre 70 y 50 dB. Quiebre en 70 (antes estaba en 60, dejaba el
+        tramo 70-60 con la pendiente plana que no corresponde). El tramo
+        alto estaba en 0.08: de 80 a 100 dB la V se movia 0.16 ms, menos
+        que el error de lectura del alumno.
+
+        Es la funcion del oido NORMAL. La perdida coclear la empina cerca
+        del umbral (COCHLEAR_LI_SLOPE) y la conductiva la corre en paralelo
+        (el GAP entra como intensidad efectiva), las dos en
+        calculate_wave_parameters.
 
         Vive en un solo lugar porque la usan las dos puntas: el generador
         para dibujar la curva y la banda normativa para juzgarla. Si se
         separan, el alumno queda fuera de norma por un error de la app.
         """
         if intensity >= 70:
-            return (80 - intensity) / 10 * 0.08
-        return (80 - 70) / 10 * 0.08 + (70 - intensity) / 10 * 0.3
+            return (80 - intensity) / 10 * 0.12
+        return (80 - 70) / 10 * 0.12 + (70 - intensity) / 10 * 0.3
 
     def latency_intensity_band(self, population='adult_female', wave='V',
                                intensities=None, stimulus='click',
@@ -1206,7 +1358,7 @@ class ABRGenerator:
         norma y el grafico deja de decir nada.
         """
         if intensities is None:
-            intensities = list(range(0, 90, 10))
+            intensities = list(range(0, 110, 10))
         xs, lo, hi = [], [], []
         for intensidad in intensities:
             limites = self.normative_limits(population, intensidad, stimulus,
@@ -1286,23 +1438,42 @@ class ABRGenerator:
         rng = np.random.default_rng(stable_seed(
             (case_config or {}).get('seed_key', ''),
             (case_config or {}).get('capture_id', ''),
-            population, pathology, pathway,
+            population, pathology,
+            # El patron retrococlear cambia la respuesta, asi que entra en la
+            # semilla -- pero solo cuando aplica: si entrara siempre,
+            # cambiaria el ruido de todos los casos no neurales.
+            (repr(sorted(self.neural_params(
+                (case_config or {}).get('neural')).items()))
+             if pathology == 'neural' else ''), pathway,
             stimulus_config['stim'], stimulus_config.get('freq'),
             stimulus_config['int'], stimulus_config['pol'],
             stimulus_config['rate'], stimulus_config['filter_down'],
             stimulus_config['filter_passhigh'],
         ))
 
-        # 6. Parametros de ondas
+        # 6. Parametros de ondas. El patron retrococlear no es un enum sino
+        # un juego de parametros (I-III, III-V, bloqueo, razon V/I,
+        # microfonica, desincronia, tasa) -- ver NEURAL_PARAM_DEFAULTS.
         repro_shift = case_config.get('repro_shift', 0.0) if case_config else 0.0
+        neural = (case_config or {}).get('neural')
         values, waves_visible = self.calculate_wave_parameters(
             baseline, stimulus_config['int'], threshold, pathology, desviaciones,
             repro_shift=repro_shift, click_baseline=click_baseline,
+            neural=neural,
         )
 
         # 7. Polaridad + rate
-        values, CM_value = self.apply_polarity_effects(values, stimulus_config['pol'])
-        values = self.apply_rate_effects(values, stimulus_config['rate'], pathology)
+        values, CM_value = self.apply_polarity_effects(
+            values, stimulus_config['pol'], pathology, neural)
+        values = self.apply_rate_effects(values, stimulus_config['rate'],
+                                         pathology, neural)
+        # El microfonico de una desincronia dura lo que dura el estimulo, no
+        # es el pulso corto pre-onda I del oido sano.
+        cm_sigma_gain = (
+            NEURAL_CM_SIGMA_GAIN
+            if pathology == 'neural'
+            and self.neural_params(neural)['microfonica'] == 'amplificada'
+            else 1.0)
 
         # 7b. Ajustes del equipo sobre las ondas: retardo del transductor y
         # montaje de electrodos. Van despues de polaridad/tasa porque son
@@ -1333,9 +1504,11 @@ class ABRGenerator:
         jitter = float((case_config or {}).get('repro_jitter') or 0.0)
         values_a = self._shift_latencies(values, jitter / 2)
         values_b = self._shift_latencies(values, -jitter / 2)
-        y_target_a = self.build_target_curve(t, values_a, CM_value)
+        y_target_a = self.build_target_curve(t, values_a, CM_value,
+                                             cm_sigma_gain)
         y_target_b = (y_target_a if not jitter
-                      else self.build_target_curve(t, values_b, CM_value))
+                      else self.build_target_curve(t, values_b, CM_value,
+                                                   cm_sigma_gain))
         y_target = (y_target_a + y_target_b) / 2
 
         # 9b. Curva sombra: si el estimulo cruza el craneo por encima de la
@@ -1349,11 +1522,15 @@ class ABRGenerator:
             click_baseline=click_baseline, ratio_override=ratio_override,
         )
         if shadow:
+            contra_case = (case_config or {}).get('contra') or {}
             shadow_values, shadow_cm = self.apply_polarity_effects(
-                shadow, stimulus_config['pol'])
+                shadow, stimulus_config['pol'],
+                contra_case.get('type', 'normal'),
+                contra_case.get('neural'))
             shadow_values = self.apply_rate_effects(
                 shadow_values, stimulus_config['rate'],
-                ((case_config or {}).get('contra') or {}).get('type', 'normal'))
+                contra_case.get('type', 'normal'),
+                contra_case.get('neural'))
             for v in shadow_values.values():
                 v['lat'] += lat_offset
                 v['amp'] *= montage_gain
@@ -1649,6 +1826,7 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
         contra_config = {
             'umbral': contra.get('umbral', contra.get('th', 20)),
             'type': PATHOLOGY_MAP.get(contra.get('type', 'normal'), 'normal'),
+            'neural': contra.get('neural'),
             'desviaciones': contra.get('desviaciones', {}),
         }
 
@@ -1679,6 +1857,11 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
         # de un paciente no reproducible no lleguen a pegarse nunca.
         'repro_jitter': 0.0 if preferences.get('repro', True) else repro_var,
         'ratio_override': ratio_override,
+        # Patron retrococlear del caso (I-III, III-V, bloqueo, razon V/I,
+        # microfonica, desincronia, tasa). Los casos guardados antes de que
+        # existiera no lo traen y caen en NEURAL_PARAM_DEFAULTS, que es como
+        # se dibujaban.
+        'neural': preferences.get('neural'),
         'masking': control_setting.get('mkg', 0),
         'contra': contra_config,
         # Semilla estable del ruido: identifica el perfil del oido, no la
