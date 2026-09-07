@@ -408,6 +408,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'falsa_v' => [
                     'amp' => (float) fv($v, ['abr', $lado, 'falsa_v_amp'], 0),
                     'lat' => (float) fv($v, ['abr', $lado, 'falsa_v_lat'], 5.6),
+                    // Rango de intensidades donde aparece: fuera de el la
+                    // serie queda limpia y coherente, que es lo que deja
+                    // usar la migracion de latencia como segunda prueba.
+                    'int_min' => (float) fv($v, ['abr', $lado, 'falsa_v_int_min'], 0),
+                    'int_max' => (float) fv($v, ['abr', $lado, 'falsa_v_int_max'], 120),
                     'mitad' => in_array(fv($v, ['abr', $lado, 'falsa_v_mitad'], 'auto'), ['auto', 'a', 'b'], true)
                         ? (string) fv($v, ['abr', $lado, 'falsa_v_mitad'], 'auto') : 'auto',
                 ],
@@ -1477,13 +1482,19 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <input type="hidden" name="abr[<?= $lado ?>][<?= $abrName ?>]" class="abr-delta-input" data-lado="<?= $lado ?>" data-wave="<?= $abrWave ?>" data-field="<?= $abrField ?>" value="<?= htmlspecialchars((string) ($v['abr'][$lado][$abrName] ?? '0')) ?>">
         <?php endforeach; ?>
     </div>
-    <p class="legend">Falsa onda V. Pico con forma de onda que aparece en UNA sola mitad de los barridos: el promedio lo muestra y los subpromedios A/B lo delatan (uno lo tiene entero, el otro no). No sube el FSP. Amplitud 0 = desactivada; el autocompletar por patologia no la toca, es un ejercicio que se arma a mano.</p>
+    <p class="legend">Falsa onda V. Pico con forma de onda que aparece en UNA sola mitad de los barridos: el promedio lo muestra y los subpromedios A/B lo delatan (uno lo tiene entero, el otro no). No sube el FSP. Acotala a las intensidades donde el alumno busca el umbral: fuera de ese rango la serie queda limpia y se nota que la falsa onda no migra en latencia como una V real. Amplitud 0 = desactivada; el autocompletar por patologia no la toca, es un ejercicio que se arma a mano.</p>
     <div class="three-col">
         <label>Falsa V: amplitud en el promedio (µV)
             <input type="number" step="0.01" min="0" name="abr[<?= $lado ?>][falsa_v_amp]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['falsa_v_amp'] ?? '0')) ?>">
         </label>
         <label>Falsa V: latencia (ms)
             <input type="number" step="0.1" min="0" name="abr[<?= $lado ?>][falsa_v_lat]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['falsa_v_lat'] ?? '5.6')) ?>">
+        </label>
+        <label>Falsa V: desde (dB)
+            <input type="number" step="5" min="0" name="abr[<?= $lado ?>][falsa_v_int_min]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['falsa_v_int_min'] ?? '0')) ?>">
+        </label>
+        <label>Falsa V: hasta (dB)
+            <input type="number" step="5" min="0" name="abr[<?= $lado ?>][falsa_v_int_max]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['falsa_v_int_max'] ?? '120')) ?>">
         </label>
         <label>Falsa V: mitad afectada
             <?php $fvMitad = (string) ($v['abr'][$lado]['falsa_v_mitad'] ?? 'auto'); ?>

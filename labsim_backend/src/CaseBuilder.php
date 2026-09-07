@@ -1092,6 +1092,8 @@ final class CaseBuilder
                 // con amplitud 0, o sea desactivada.
                 'falsa_v_amp' => (string) ($falsaV['amp'] ?? 0),
                 'falsa_v_lat' => (string) ($falsaV['lat'] ?? 5.6),
+                'falsa_v_int_min' => (string) ($falsaV['int_min'] ?? 0),
+                'falsa_v_int_max' => (string) ($falsaV['int_max'] ?? 120),
                 'falsa_v_mitad' => in_array($falsaV['mitad'] ?? 'auto', ['auto', 'a', 'b'], true)
                     ? (string) ($falsaV['mitad'] ?? 'auto') : 'auto',
                 'lat_I' => $ondaVal($desv, 'onda_I', 'lat', 0),

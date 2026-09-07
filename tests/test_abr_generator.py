@@ -1108,14 +1108,15 @@ def test_non_reproducible_patient_never_locks_ab():
 
 # ------------------------------------------------ falsa onda V (artefacto)
 
-def _curva_falsa(amp=0.25, lat=8.5, mitad='a', current=2000, **kw):
+def _curva_falsa(amp=0.25, lat=8.5, mitad='a', current=2000, intensity=80,
+                 rango=None, **kw):
     """Igual que _curva pero con la falsa onda V del caso configurada.
 
     La latencia por defecto es 8.5 ms -- fuera de la respuesta real, para
     que el test mida el artefacto y no la onda V del paciente.
     """
     g = _gen()
-    stim = {'stim': 'click', 'freq': None, 'pol': 'Alternada', 'int': 80,
+    stim = {'stim': 'click', 'freq': None, 'pol': 'Alternada', 'int': intensity,
             'rate': 21.1, 'filter_down': 3000, 'filter_passhigh': 100,
             'average': 2000, 'current_avg': current, 'pathway': 'air_conduction'}
     case = {'desviaciones': {}, 'fsp_puntos': {'800': 2.3, '2000': 2.8},
@@ -1125,6 +1126,8 @@ def _curva_falsa(amp=0.25, lat=8.5, mitad='a', current=2000, **kw):
     case.update(kw)
     if amp:
         case['falsa_v'] = {'amp': amp, 'lat': lat, 'mitad': mitad}
+        if rango:
+            case['falsa_v']['int_min'], case['falsa_v']['int_max'] = rango
     tech = default_settings('ABR')
     return g.generate_curve('adult_female', 'normal', stim, tech, case)
 
@@ -1210,6 +1213,26 @@ def test_false_wave_raises_residual_noise_but_not_fsp():
     _, _, sin = _curva_falsa(amp=0, umbral=90)
     assert con['residual_noise_nv'] > sin['residual_noise_nv'] * 1.5
     assert abs(con['fsp'] - sin['fsp']) < 1e-9
+
+
+def test_false_wave_only_in_its_intensity_range():
+    """Fuera del rango configurado la serie queda limpia.
+
+    Es lo que deja al alumno usar la segunda prueba real: en las curvas
+    donde la falsa onda no esta, la V verdadera migra en latencia con la
+    intensidad -- y la falsa, en las suyas, no se mueve nunca.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    def altura(intensity):
+        t, y, meta = _curva_falsa(intensity=intensity, rango=(20, 40))
+        _, _, base = _curva_falsa(amp=0, intensity=intensity)
+        i = int(np.argmin(np.abs(t - 8.5)))
+        return meta['sub_a'][i] - base['sub_a'][i]
+    assert altura(30) > 0.3                 # dentro del rango
+    assert abs(altura(60)) < 0.01           # por encima
+    assert abs(altura(10)) < 0.01           # por debajo
 
 
 def test_false_wave_is_off_by_default():

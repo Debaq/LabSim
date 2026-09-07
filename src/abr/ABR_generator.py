@@ -794,7 +794,8 @@ class ABRGenerator:
 
         return y
 
-    def false_wave(self, t, case_config, accepted, target_avg, rng):
+    def false_wave(self, t, case_config, accepted, target_avg, rng,
+                   intensidad=None):
         """Pico espureo con forma de onda V, presente en una sola mitad.
 
         Devuelve (mitad_a, mitad_b): lo que se le suma a cada subpromedio.
@@ -813,6 +814,19 @@ class ABRGenerator:
         lat = float(cfg.get('lat') or FALSE_V_LAT_MS)
         if not (0 < lat < float(t[-1])):
             return None, None
+        # Rango de intensidades donde aparece. Sin esto salia en TODA la
+        # serie y siempre en la misma latencia, asi que el alumno no podia
+        # usar la otra prueba real: una onda V migra al bajar la
+        # intensidad, un artefacto se queda quieto. Acotarla a las
+        # intensidades bajas deja la serie coherente arriba y el engano
+        # donde de verdad se busca el umbral.
+        if intensidad is not None:
+            desde = cfg.get('int_min')
+            hasta = cfg.get('int_max')
+            if desde is not None and float(intensidad) < float(desde):
+                return None, None
+            if hasta is not None and float(intensidad) > float(hasta):
+                return None, None
         m = self.noise_blocks_done(accepted, target_avg)
         # `amp` es lo que el docente ve EN EL PROMEDIO (que es (A+B)/2), asi
         # que en la mitad donde vive el artefacto va al doble.
@@ -1798,7 +1812,8 @@ class ABRGenerator:
         # como ruido de una sola mitad, antes del ruido de fondo, para que
         # los filtros la traten igual que a todo lo demas.
         falsa_a, falsa_b = self.false_wave(
-            t, case_config, accepted, growth_target, rng)
+            t, case_config, accepted, growth_target, rng,
+            intensidad=stimulus_config['int'])
         if hay_registro and (falsa_a is not None or falsa_b is not None):
             aporte_a = falsa_a if falsa_a is not None else np.zeros_like(t)
             aporte_b = falsa_b if falsa_b is not None else np.zeros_like(t)
