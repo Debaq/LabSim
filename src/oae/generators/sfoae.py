@@ -6,7 +6,12 @@ nivel supresor para graficar curva de supresión o polar (si quisiéramos
 mostrar I/Q en plano complejo).
 """
 import numpy as np
-from oae.generators.base import OaeGeneratorBase, oae_attenuation_db
+from oae.generators.base import (
+    OaeGeneratorBase,
+    case_fingerprint,
+    oae_attenuation_db,
+    stable_seed,
+)
 
 
 class SfoaeGenerator(OaeGeneratorBase):
@@ -17,8 +22,17 @@ class SfoaeGenerator(OaeGeneratorBase):
         self._rng = np.random.default_rng(self._seed)
 
     def _seed_from_params(self, ear: str = "OD", freq: float | None = None,
-                          level: float | None = None) -> int:
-        return int(abs(hash(("sfoae", ear, freq or 0, level or 0))) % (2**32))
+                          level: float | None = None,
+                          case: dict | None = None) -> int:
+        """Seed de la corrida: oído + probe + PERFIL DEL CASO.
+
+        stable_seed y no hash(): hash() saltea por proceso, así que la
+        curva de supresión del mismo paciente cambiaba entre aperturas
+        de LabSim. El caso entra al seed para que el ruido de la curva sea
+        propio de ese paciente y no un trazo compartido. Ver base.py.
+        """
+        return stable_seed("sfoae", ear, freq or 0, level or 0,
+                           case_fingerprint(case))
 
     def _base_magnitude_db(self, freq_hz: float) -> float:
         """Interpola la magnitud SFOAE esperada en `freq_hz` sobre la curva
@@ -45,7 +59,8 @@ class SfoaeGenerator(OaeGeneratorBase):
         de probe, se necesita más supresor para taparlo -- igual que en
         un equipo real). `case` atenúa la magnitud base según patología.
         """
-        self._rng = np.random.default_rng(self._seed_from_params(ear, freq_hz, level_db))
+        self._rng = np.random.default_rng(
+            self._seed_from_params(ear, freq_hz, level_db, case))
 
         smin = suppressor_min if suppressor_min is not None else self.normative["suppressor_min_db_spl"]
         smax = suppressor_max if suppressor_max is not None else self.normative["suppressor_max_db_spl"]
@@ -88,7 +103,7 @@ class SfoaeGenerator(OaeGeneratorBase):
         fmin = freq_min_hz or ref_freqs[0]
         fmax = freq_max_hz or ref_freqs[-1]
         freqs = np.geomspace(fmin, fmax, n_points)
-        self._rng = np.random.default_rng(self._seed_from_params(ear, fmin, fmax))
+        self._rng = np.random.default_rng(self._seed_from_params(ear, fmin, fmax, case))
         # Atenuación por frecuencia: la curva de sintonía es justamente
         # donde se tiene que ver la muesca del perfil del caso, así que se
         # evalúa punto a punto y no con un único valor global.

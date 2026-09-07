@@ -18,9 +18,11 @@ el piso de ruido baja ~10*log10(k) mientras el DP se estabiliza.
 import numpy as np
 from oae.generators.base import (
     OaeGeneratorBase,
+    case_fingerprint,
     oae_attenuation_db,
     oae_noise_offset_db,
     oae_variability_db,
+    stable_seed,
 )
 
 
@@ -41,8 +43,21 @@ class DpoaeGenerator(OaeGeneratorBase):
         self._rng = np.random.default_rng(self._seed)
 
     def _seed_from_params(self, ear: str = "OD", l1: float | None = None,
-                          l2: float | None = None) -> int:
-        return int(abs(hash(("dpoae", ear, l1 or 0, l2 or 0))) % (2**32))
+                          l2: float | None = None,
+                          case: dict | None = None) -> int:
+        """Seed de la corrida: oído + par L1/L2 + PERFIL DEL CASO.
+
+        stable_seed y no hash(): hash() saltea por proceso y el DP-grama
+        del mismo paciente cambiaba entre aperturas de LabSim (con un
+        punto en el límite, eso mueve el pass/refer). Ver base.py.
+
+        El caso entra al seed porque si no la estructura fina cae en las
+        MISMAS f2 con la misma magnitud para todos los pacientes: los
+        DP-gramas quedaban con la misma silueta, apenas corrida en
+        vertical, y `variabilidad_db` no distinguía un oído de otro.
+        """
+        return stable_seed("dpoae", ear, l1 or 0, l2 or 0,
+                           case_fingerprint(case))
 
     # ------------------------------------------------------------------
     # Normativa
@@ -197,7 +212,7 @@ class DpoaeGenerator(OaeGeneratorBase):
         `case` (dict 'type'/'umbral' del caso clínico) atenúa el DP según
         patología -- ver oae_attenuation_db.
         """
-        rng = np.random.default_rng(self._seed_from_params(ear, l1_db, l2_db))
+        rng = np.random.default_rng(self._seed_from_params(ear, l1_db, l2_db, case))
         self._rng = rng
         ratio = float(self.normative["f2_f1_ratio"])
         min_snr = float(self.normative["min_dp_above_noise_db"])
@@ -258,7 +273,7 @@ class DpoaeGenerator(OaeGeneratorBase):
         DP que se lee de la función de crecimiento.
         """
         f2 = float(f2_hz or self.normative["io_f2_hz"])
-        rng = np.random.default_rng(self._seed_from_params(ear, f2, "io"))
+        rng = np.random.default_rng(self._seed_from_params(ear, f2, "io", case))
         atten = oae_attenuation_db(case, f2)
         min_snr = float(self.normative["min_dp_above_noise_db"])
 

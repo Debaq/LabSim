@@ -15,11 +15,13 @@ cruza el umbral en algún momento de la captura.
 import numpy as np
 from oae.generators.base import (
     OaeGeneratorBase,
+    case_fingerprint,
     oae_attenuation_db,
     oae_noise_offset_db,
     oae_probe_fit,
     oae_probe_loss_db,
     oae_variability_db,
+    stable_seed,
 )
 
 
@@ -49,9 +51,21 @@ class TeoaeGenerator(OaeGeneratorBase):
         self._rng = np.random.default_rng(self._seed)
 
     def _seed_from_params(self, ear: str = "OD", level_db: float | None = None,
-                          n_sweeps: int | None = None) -> int:
-        base = abs(hash(("teoae", ear, level_db or 0, n_sweeps or 0))) % (2**32)
-        return int(base)
+                          n_sweeps: int | None = None,
+                          case: dict | None = None) -> int:
+        """Seed de la captura: oído + parámetros + PERFIL DEL CASO.
+
+        stable_seed y no hash(): hash() saltea por proceso, así que la
+        misma captura cambiaba de una apertura de LabSim a la siguiente
+        (con un SNR borderline eso mueve el PASS/REFER). Ver base.py.
+
+        El caso entra al seed para que el ruido residual y la estructura
+        fina sean propios de ESE paciente: sin él, dos pacientes con el
+        mismo nivel y promedios compartían el trazo de ruido bit a bit
+        (y `variabilidad_db` solo escalaba una curva común).
+        """
+        return stable_seed("teoae", ear, level_db or 0, n_sweeps or 0,
+                           case_fingerprint(case))
 
     def click_stimulus(self, level_db_spl: float, duration_us: float = 80.0) -> np.ndarray:
         """Click Hann-windowed, pico escalado a dB SPL (referencia 1 Pa ≈ 94 dB SPL).
@@ -243,7 +257,8 @@ class TeoaeGenerator(OaeGeneratorBase):
         # Re-seedear para que la misma (level, ear, n_sweeps) → misma curva
         # entre capturas (consistente visualmente), pero distinta entre oídos
         # y entre niveles.
-        rng = np.random.default_rng(self._seed_from_params(ear, level_db, n_sweeps))
+        rng = np.random.default_rng(
+            self._seed_from_params(ear, level_db, n_sweeps, case))
         self._rng = rng
 
         fs = self.SAMPLE_RATE
