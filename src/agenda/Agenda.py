@@ -15,8 +15,9 @@ from PySide6.QtWidgets import (QTableWidgetItem, QAbstractItemView,
                                 QVBoxLayout, QLabel, QTextEdit,
                                 QCheckBox)
 from PySide6.QtCore import QDate, QTime, QDateTime, Qt, QThread, Signal
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QBrush, QColor, QFont, QTextCharFormat
 from agenda.UI.Ui_agenda import Ui_Form
+from core import feriados as feriados_cl
 from core.helpers import (Shedule, entry_estado_por, CasesOffline,
                           es_docente,
                           marcar_entry_no_show,
@@ -50,6 +51,9 @@ NO_SHOW_COLOR = QColor(235, 190, 190)
 # Caso sin ninguna cita en la agenda (AgendaEntry.sin_cita) -- distinto del
 # amarillo PENDIENTE, que es una cita creada pero todavía sin fecha/hora.
 SIN_CITA_COLOR = QColor(232, 224, 240)
+# Feriados legales en el calendario del filtro por fecha (ver core/feriados.py).
+FERIADO_COLOR = QColor(176, 0, 32)
+FERIADO_FONDO = QColor(255, 228, 228)
 
 
 class FichaClinicaWidget(QWidget):
@@ -165,6 +169,7 @@ class Agenda(QWidget, Ui_Form):
         self.date_selector.setDate(QDate.currentDate())
         self.date_selector.dateChanged.connect(self._on_fecha_seleccionada)
         self.horizontalLayout.insertWidget(1, self.date_selector)
+        self._init_feriados()
 
         self.chk_ver_todas = QCheckBox("Ver todas las citas habilitadas", self)
         self.chk_ver_todas.toggled.connect(self._on_toggle_ver_todas)
@@ -210,8 +215,65 @@ class Agenda(QWidget, Ui_Form):
         self.date_selector.setEnabled(not checked)
         self.populate_shedule()
 
-    def _on_fecha_seleccionada(self, _qdate):
+    def _on_fecha_seleccionada(self, qdate):
+        self._actualizar_tooltip_fecha(qdate)
         self.populate_shedule()
+
+    # -- Feriados -----------------------------------------------------------
+    # Marcarlos es puro adorno útil (saber que la fecha que se está mirando
+    # es feriado): si la API no responde y no hay cache ni backup, la agenda
+    # funciona igual, solo que sin colores.
+
+    def _init_feriados(self):
+        """Pinta los feriados que ya se conocen sin tocar la red y, solo si
+        falta alguno, los pide en un hilo aparte."""
+        self._feriados = {}
+        anio = QDate.currentDate().year()
+        self._anios_feriados = (anio, anio + 1)
+
+        conocidos = {}
+        for year in self._anios_feriados:
+            mapa = feriados_cl.feriados_offline(year)
+            if mapa:
+                conocidos[year] = mapa
+        self._aplicar_feriados(conocidos)
+
+        faltantes = [y for y in self._anios_feriados if feriados_cl.load_cache(y) is None]
+        if not faltantes:
+            return
+        self._feriados_thread = feriados_cl.FeriadosThread(faltantes, self)
+        self._feriados_thread.listo.connect(self._aplicar_feriados)
+        self._feriados_thread.start()
+
+    def _aplicar_feriados(self, por_anio):
+        """Pinta {año: {"MM-DD": descripción}} en el calendario emergente."""
+        calendario = self.date_selector.calendarWidget()
+        if calendario is None:
+            return
+
+        base = QTextCharFormat()
+        base.setForeground(QBrush(FERIADO_COLOR))
+        base.setBackground(QBrush(FERIADO_FONDO))
+        base.setFontWeight(QFont.Bold)
+
+        for year, mapa in por_anio.items():
+            self._feriados.setdefault(year, {}).update(mapa)
+            for mmdd, descripcion in mapa.items():
+                fecha = QDate.fromString(f"{year}-{mmdd}", "yyyy-MM-dd")
+                if not fecha.isValid():
+                    continue
+                formato = QTextCharFormat(base)
+                formato.setToolTip(descripcion)
+                calendario.setDateTextFormat(fecha, formato)
+
+        self._actualizar_tooltip_fecha(self.date_selector.date())
+
+    def _descripcion_feriado(self, qdate):
+        return self._feriados.get(qdate.year(), {}).get(qdate.toString("MM-dd"))
+
+    def _actualizar_tooltip_fecha(self, qdate):
+        descripcion = self._descripcion_feriado(qdate)
+        self.date_selector.setToolTip(f"Feriado: {descripcion}" if descripcion else "")
 
     def _on_filtro_changed(self, texto):
         self._filtro_texto = texto.strip().lower()
