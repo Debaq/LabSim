@@ -58,7 +58,20 @@ def _ventana(caso=None, average=2000):
     w.la_super(caso if caso is not None else _caso(), 42)
     w.control.sb_prom.setValue(average)
     w.control.sb_rate.setValue(21.1)
+    # Banda del ABR de rutina: el equipo ARRANCA en 3.3-1000 Hz a propósito
+    # (el alumno tiene que configurarlo), y con esa banda entra 4.7 veces
+    # más ruido -- los tests que no hablan de filtros parten del equipo ya
+    # bien puesto.
+    _banda(w, '100', '3000')
     return w
+
+
+def _banda(w, pasa_alto, pasa_bajo):
+    for combo, texto in ((w.control.cb_filter_up, pasa_alto),
+                         (w.control.cb_filter_down, pasa_bajo)):
+        idx = combo.findText(texto)
+        assert idx >= 0, texto
+        combo.setCurrentIndex(idx)
 
 
 def _capturar(w, intensidad=80, lado='OD'):
@@ -82,7 +95,8 @@ def test_eeg_monitor_draws_both_channels():
     if not HAS_UI:
         return
     w = _ventana()
-    w.refresh_eeg()
+    for _ in range(10):                       # llena la ventana del monitor
+        w.refresh_eeg()
     for canal in ('R', 'L'):
         x, y = w.eeg.curves[canal].getData()
         assert len(y) == w.eeg.n
@@ -114,6 +128,96 @@ def test_eeg_reject_bars_follow_the_equipment():
     assert abs(abajo.value() - (w.eeg.offsets['R'] - 25.0)) < 1e-6
     w.eeg.set_reject(0.0)                     # rechazo desactivado
     assert not arriba.isVisible()
+
+
+def _monitor(w, ticks=10):
+    """Corre el monitor y devuelve (RMS del canal R, trozos con rechazo)."""
+    rms, rechazos = [], 0
+    for _ in range(ticks):
+        w.refresh_eeg()
+        texto = w.eeg.state_text['R'].toPlainText()
+        rms.append(float(texto.split(' µV')[0]))
+        rechazos += 'rechazo' in texto
+    return sum(rms) / len(rms), rechazos
+
+
+def test_eeg_is_clean_when_the_equipment_is_well_placed():
+    """Equipo bien puesto = trazo fino y lejos del rechazo.
+
+    Es la mitad que faltaba: el monitor dibujaba el EEG de banda ancha (12
+    µV RMS), o sea se veía sucio SIEMPRE y cruzando la barra de rechazo,
+    mientras el promedio avanzaba sin problema.
+    """
+    if not HAS_UI:
+        return
+    w = _ventana()
+    rms, rechazos = _monitor(w)
+    assert rms < 4.0, rms                     # banda del ABR, no banda ancha
+    assert rechazos == 0
+    _capturar(w)
+    assert w.last_metadata['artifact_acceptance'] > 0.95
+
+
+def test_dirty_eeg_means_the_average_does_not_advance():
+    """Si el monitor se ensucia, el promedio tiene que sufrir lo mismo.
+
+    Con 8 kOhm el trazo golpea la barra de rechazo: antes el promediador
+    ni miraba la impedancia para rechazar, así que aceptaba el 100% de los
+    barridos con el monitor lleno de artefactos.
+    """
+    if not HAS_UI:
+        return
+    w = _ventana()
+    limpio, _ = _monitor(w)
+    w.technical['impedance'] = dict(w.technical['impedance'], vertex=8.0)
+    sucio, rechazos = _monitor(w)
+    assert sucio > limpio * 2
+    assert rechazos > 0
+    _capturar(w)
+    assert w.last_metadata['artifact_acceptance'] < 0.5
+    assert w.last_metadata['fsp'] < 2.0       # y el FSP no llega a nada
+
+
+def test_eeg_names_the_mains_hum():
+    """Sin tierra el zumbido se ve Y se nombra, antes de promediar.
+
+    A 3 s de ventana el zumbido no se distingue como periódico a ojo, y el
+    FSP se caía igual: el alumno perdía 2000 barridos para enterarse.
+    """
+    if not HAS_UI:
+        return
+    w = _ventana()
+    limpio, _ = _monitor(w)
+    w.technical['electrodes'] = dict(w.technical['electrodes'],
+                                     ground=DISCONNECTED)
+    sucio, _ = _monitor(w)
+    assert sucio > limpio * 2
+    assert '50 Hz' in w.eeg.state_text['R'].toPlainText()
+    _capturar(w)
+    assert w.last_metadata['fsp'] < 2.0
+
+
+def test_the_recording_band_costs_the_same_in_both():
+    """Abrir el pasa-alto ensucia el monitor Y la curva promediada.
+
+    Con 3.3 Hz (donde arranca el combo) entra el EEG de baja frecuencia
+    entero. Antes eso se veía en el monitor y no costaba nada en la curva:
+    el alumno aprendía que los filtros dan lo mismo.
+    """
+    if not HAS_UI:
+        return
+    w = _ventana()
+    base, _ = _monitor(w, ticks=5)
+    _capturar(w)
+    fsp_banda_ok = w.last_metadata['fsp']
+
+    w2 = _ventana()
+    _banda(w2, '3.3', '1000')
+    abierto, _ = _monitor(w2, ticks=5)
+    _capturar(w2)
+    assert abierto > base * 2
+    assert w2.last_metadata['fsp'] < fsp_banda_ok
+    assert w2.last_metadata['residual_noise_nv'] > w.last_metadata['residual_noise_nv']
 
 
 # -------------------------------------------------------------- FSP
@@ -153,6 +257,47 @@ def test_fsp_does_not_cross_an_unreachable_criterion():
     w.technical['fsp_criterion'] = 4.0        # el caso llega a 2.8
     _capturar(w)
     assert w.fmp.crossed_at is None
+
+
+def test_fsp_reads_out_the_state():
+    """El gráfico dice en texto el FSP, el ruido y si hay respuesta.
+
+    Antes eran dos trazos pelados: sin valores en el eje x, sin unidades y
+    sin decir nunca si el equipo ya declaró la respuesta.
+    """
+    if not HAS_UI:
+        return
+    w = _ventana()
+    w.technical['fsp_criterion'] = 2.0
+    _capturar(w)
+    lectura = w.fmp.lbl_read.toPlainText()
+    assert 'FSP' in lectura and 'nV' in lectura, lectura
+    assert 'respuesta presente' in w.fmp.lbl_state.toPlainText()
+    # El eje del ruido sigue al registro en vez de un techo fijo.
+    _, ruido = w.fmp.curve_noise.getData()
+    assert w.fmp.noise_max >= max(ruido)
+
+
+def test_fsp_state_says_when_there_is_no_response():
+    if not HAS_UI:
+        return
+    w = _ventana()
+    w.technical['fsp_criterion'] = 4.0        # el caso llega a 2.8
+    _capturar(w)
+    assert 'sin respuesta' in w.fmp.lbl_state.toPlainText()
+
+
+def test_fsp_clears_between_captures():
+    if not HAS_UI:
+        return
+    w = _ventana()
+    w.technical['fsp_criterion'] = 2.0
+    _capturar(w)
+    w.fmp.clear_curve()
+    assert w.fmp.crossed_at is None
+    assert len(w.fmp.curve_fsp.getData()[0] or []) == 0
+    assert w.fmp.lbl_cross.toPlainText() == ''
+    assert not w.fmp.line_cross.isVisible()
 
 
 # ------------------------------------------------ rechazos y estado visible
@@ -363,3 +508,89 @@ if __name__ == "__main__":
             fn()
             print(f"  {name} OK")
     print("TODOS LOS TESTS PASARON")
+
+
+def test_fsp_is_kept_per_curve():
+    """Al seleccionar una curva ya registrada vuelve SU FSP.
+
+    Antes el gráfico era del equipo, no de la curva: mostraba siempre la
+    última promediación, así que al volver a una curva de 40 dB se veía el
+    FSP de la de 80 y no había forma de comparar con cuántos barridos cruzó
+    el criterio cada una.
+    """
+    if not HAS_UI:
+        return
+    w = _ventana()
+    w.technical['fsp_criterion'] = 2.0
+    _capturar(w, intensidad=80)
+    primera = w.current_capture_curve
+    fsp_80 = list(w.fmp.curve_fsp.getData()[1])
+    cruce_80 = w.fmp.crossed_at
+
+    # Segunda curva con otra cantidad de barridos: otro FSP y otro cruce.
+    w.control.sb_prom.setValue(800)
+    _capturar(w, intensidad=40)
+    segunda = w.current_capture_curve
+    assert segunda != primera
+    assert list(w.fmp.curve_fsp.getData()[1]) != fsp_80
+
+    w.curve_selected(primera)
+    assert list(w.fmp.curve_fsp.getData()[1]) == fsp_80
+    assert w.fmp.mean == 2000
+    assert w.fmp.crossed_at == cruce_80
+    assert w.fmp.line_cross.isVisible()
+    # Y el track viaja en el informe junto a la curva.
+    assert w.memory[primera]['fsp_track']['fsp'] == fsp_80
+
+
+def test_fsp_of_a_deleted_curve_goes_away():
+    if not HAS_UI:
+        return
+    w = _ventana()
+    _capturar(w)
+    curva = w.current_capture_curve
+    w.update_delete_curve(curva)
+    assert curva not in w.fsp_tracks
+    assert w.fmp.get_track()['fsp'] == []
+
+
+def test_fsp_follows_the_curve_being_recorded():
+    """La curva que se esta registrando muestra su FSP creciendo en vivo.
+
+    Y si el alumno se va a mirar el FSP de una curva vieja mientras corre
+    el promedio, ese queda quieto: los puntos nuevos son de la otra curva,
+    no de la que esta mirando.
+    """
+    if not HAS_UI:
+        return
+    w = _ventana()
+    _capturar(w, intensidad=80)
+    vieja = w.current_capture_curve
+    fsp_vieja = list(w.fmp.curve_fsp.getData()[1])
+
+    # Segunda captura, tick a tick.
+    w.control.sb_intencity.setValue(60)
+    w.control.start_capture()
+    for _ in range(4):
+        w.capture()
+    nueva = w.current_capture_curve
+    assert nueva != vieja
+    en_vivo = list(w.fmp.curve_fsp.getData()[1])
+    assert len(en_vivo) == 4                  # crece punto a punto
+    w.capture()
+    assert len(w.fmp.curve_fsp.getData()[1]) == 5
+
+    # Se mira la vieja: el grafico queda en la vieja aunque siga el promedio.
+    w.curve_selected(vieja)
+    assert list(w.fmp.curve_fsp.getData()[1]) == fsp_vieja
+    for _ in range(3):
+        w.capture()
+    assert list(w.fmp.curve_fsp.getData()[1]) == fsp_vieja
+    assert len(w.fsp_tracks[nueva]['fsp']) == 8   # la nueva siguio acumulando
+
+    # Se vuelve a la que se esta registrando: sigue en vivo desde donde va.
+    w.curve_selected(nueva)
+    assert len(w.fmp.curve_fsp.getData()[1]) == 8
+    w.capture()
+    assert len(w.fmp.curve_fsp.getData()[1]) == 9
+    w.control.stop_capture()

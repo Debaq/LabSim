@@ -1,4 +1,4 @@
-"""Monitor de EEG crudo (los dos canales, sin promediar).
+"""Monitor del canal de registro (los dos lados, sin promediar).
 
 Antes esto era un cascaron: dibujaba los ejes, el titulo y las letras R/L y
 nada mas -- nadie le pasaba datos nunca. El problema pedagogico es que sin
@@ -8,24 +8,42 @@ el EMG de un paciente tenso se ven ANTES de apretar promediar, y por eso se
 arreglan antes.
 
 El trazo lo genera ABR_generator.raw_eeg (mismo modelo de impedancias,
-tierra y red que la curva promediada) y lo empuja AbrMainWindow por timer.
+tierra, red, banda de registro y rechazo que la curva promediada) y lo
+empuja AbrMainWindow por timer. Es el canal YA filtrado, que es lo que
+muestra un equipo real: el EEG de banda ancha son ~12 uV RMS y cruzaria la
+barra de rechazo todo el tiempo mientras el promedio avanza sin problema
+-- monitor sucio con examen que registra, que es exactamente lo que no
+tiene que pasar.
+
+La escala sigue al umbral de rechazo: la barra queda siempre a la misma
+altura de la pantalla, asi que "cuanto le falta al trazo para que lo
+descarten" se lee de un vistazo en vez de depender de un rango fijo.
 """
 import numpy as np
 import pyqtgraph as pg
 from PySide6.QtCore import Qt
 from pyqtgraph import GraphicsLayoutWidget
 
-# Ventana visible del monitor (s) y muestreo del display. 500 Hz alcanza
-# de sobra para ver 50 Hz y EMG; el fs del promediador (41.6 kHz) aca no
-# aporta nada y solo cuesta CPU.
+from abr.ABR_generator import EEG_DISPLAY_FS
+
+# Ventana visible del monitor (s). El muestreo sale del generador: 500 Hz
+# no alcanzaba para la banda del ABR (Nyquist 250) -- el EMG que dispara el
+# rechazo vive mas arriba.
 WINDOW_S = 3.0
-FS = 500.0
-# Separacion entre los dos canales, en uV, y rango visible. Un EEG
-# relajado (10-15 uV RMS) ocupa un tercio del carril de su canal y deja
-# lugar para que un paciente tenso o un electrodo malo se salgan de
-# verdad; el margen que sobra arriba y abajo es para los rotulos.
-CHANNEL_OFFSET = 30.0
-RANGE_UV = 90.0
+FS = EEG_DISPLAY_FS
+# Carril de cada canal (uV de medio carril). Sale del umbral de rechazo:
+# la barra queda siempre a REJECT_FRAC del borde, asi que "cuanto le falta
+# al trazo para que lo descarten" se lee de un vistazo y dos estados del
+# equipo se comparan mirando la misma escala. Un canal limpio (~2 uV RMS,
+# picos de 8) ocupa un quinto del carril; uno con 8 kOhm lo desborda.
+REJECT_FRAC = 0.7
+DEFAULT_HALF_UV = 35.0
+MIN_HALF_UV = 10.0
+# Alto total en carriles: 2 son los dos canales, el resto es el margen
+# donde van los rotulos.
+LANE_HEADROOM = 2.5
+# Cuanto del trazo tiene que ser zumbido de red para avisarlo en pantalla.
+MAINS_SHARE = 0.35
 
 
 class EEG(GraphicsLayoutWidget):
@@ -34,11 +52,12 @@ class EEG(GraphicsLayoutWidget):
         color_background = pg.mkColor(255, 255, 255, 255)
         self.color_pen = pg.mkColor(0, 0, 0, 255)
         self.setBackground(color_background)
+        self.setAntialiasing(True)
         self.pw = self.addPlot(row=0, col=0)
         self.n = int(WINDOW_S * FS)
         self.x = np.linspace(0, WINDOW_S, self.n)
-        self.pw.setRange(yRange=(-RANGE_UV, RANGE_UV), xRange=(0, WINDOW_S),
-                         disableAutoRange=True)
+        self.reject_uv = 0.0
+        self.half = DEFAULT_HALF_UV
         self.pw.showGrid(x=False, y=False)
         self.pw.setMouseEnabled(x=False, y=False)
         self.pw.setMenuEnabled(False)
@@ -51,15 +70,19 @@ class EEG(GraphicsLayoutWidget):
         ay.setPen(self.color_pen)
 
         self.buffers = {'R': np.zeros(self.n), 'L': np.zeros(self.n)}
-        self.offsets = {'R': CHANNEL_OFFSET, 'L': -CHANNEL_OFFSET}
+        self.offsets = {'R': self.half, 'L': -self.half}
         self.colors = {'R': pg.mkColor(192, 57, 43), 'L': pg.mkColor(41, 128, 185)}
         self.curves = {}
         self.reject_lines = {}
         self.state_text = {}
         for canal in ('R', 'L'):
+            # A 2 kHz de muestreo la ventana son miles de puntos: sin
+            # downsampling el monitor se come la CPU dibujando pixeles
+            # repetidos.
             self.curves[canal] = self.pw.plot(
                 self.x, self.buffers[canal] + self.offsets[canal],
-                pen=pg.mkPen(self.colors[canal], width=1))
+                pen=pg.mkPen(self.colors[canal], width=1),
+                autoDownsample=True)
             # Barras de rechazo de artefacto: el barrido que las toca se
             # descarta. Es la forma de mostrar por que el promedio no avanza.
             self.reject_lines[canal] = [
@@ -70,14 +93,20 @@ class EEG(GraphicsLayoutWidget):
             # anchor 0 = borde superior del rotulo: el de arriba cuelga
             # hacia abajo y el de abajo hacia arriba, los dos adentro.
             texto = pg.TextItem(text='', color=self.colors[canal],
-                                anchor=(1, 0 if arriba else 1))
-            texto.setPos(WINDOW_S * 0.99,
-                         RANGE_UV * (0.92 if arriba else -0.92))
+                                anchor=(1, 0 if arriba else 1),
+                                fill=pg.mkBrush(255, 255, 255, 210))
             self.pw.addItem(texto)
             self.state_text[canal] = texto
-        self.title()
-        self.side_text()
-        self.reject_uv = 0.0
+        self.lbl_title = pg.TextItem(text='EEG', color=(0, 0, 0), anchor=(0, 0),
+                                     fill=pg.mkBrush(255, 255, 255, 210))
+        self.peaks = {'R': 0.0, 'L': 0.0}
+        self.pw.addItem(self.lbl_title)
+        self.side_labels = {}
+        for canal in ('R', 'L'):
+            texto = pg.TextItem(text=canal, color=self.colors[canal], anchor=(0, 0.5))
+            self.pw.addItem(texto)
+            self.side_labels[canal] = texto
+        self._rescale()
 
     def _reject_line(self, canal, signo):
         linea = pg.InfiniteLine(
@@ -89,31 +118,41 @@ class EEG(GraphicsLayoutWidget):
         self.pw.addItem(linea)
         return linea
 
-    def title(self):
-        text = pg.TextItem(text='EEG', color=(0, 0, 0), anchor=(0, 0))
-        # Arriba a la izquierda, igual que el titulo del FSP, y adentro del
-        # area de dibujo: pegado al borde quedaba cortado.
-        text.setPos(WINDOW_S * 0.01, RANGE_UV * 0.99)
-        self.pw.addItem(text)
-
-    def side_text(self):
+    # ------------------------------------------------------------ escala
+    def _rescale(self):
+        """Carril de cada canal a partir del umbral de rechazo del equipo."""
+        if self.reject_uv:
+            self.half = max(self.reject_uv / REJECT_FRAC, MIN_HALF_UV)
+        else:
+            self.half = DEFAULT_HALF_UV
+        self.offsets = {'R': self.half, 'L': -self.half}
+        # Un poco mas que los dos carriles: el margen de arriba y de abajo
+        # es donde viven los rotulos, adentro del carril tapaban el trazo.
+        rango = LANE_HEADROOM * self.half
+        self.pw.setRange(yRange=(-rango, rango), xRange=(0, WINDOW_S),
+                         disableAutoRange=True)
+        self.lbl_title.setText(f'EEG  ±{self.half:.0f} µV')
+        self.lbl_title.setPos(WINDOW_S * 0.01, rango * 0.99)
         for canal in ('R', 'L'):
-            text = pg.TextItem(text=canal, color=self.colors[canal], anchor=(0, 0.5))
-            text.setPos(0, self.offsets[canal])
-            self.pw.addItem(text)
+            arriba = canal == 'R'
+            self.state_text[canal].setPos(
+                WINDOW_S * 0.99, rango * (0.97 if arriba else -0.97))
+            self.side_labels[canal].setPos(0, self.offsets[canal])
+            for linea in self.reject_lines[canal]:
+                if self.reject_uv:
+                    linea.setPos(self.offsets[canal] + linea.signo * self.reject_uv)
+                linea.setVisible(bool(self.reject_uv))
+            self.curves[canal].setData(
+                self.x, self.buffers[canal] + self.offsets[canal])
 
     # ------------------------------------------------------------- datos
     def set_reject(self, reject_uv):
         """Umbral de rechazo de artefacto del equipo (uV, 0 = desactivado)."""
         self.reject_uv = float(reject_uv or 0.0)
-        for canal, lineas in self.reject_lines.items():
-            for linea in lineas:
-                if self.reject_uv:
-                    linea.setPos(self.offsets[canal] + linea.signo * self.reject_uv)
-                linea.setVisible(bool(self.reject_uv))
+        self._rescale()
 
     def push(self, data):
-        """Agrega el trozo nuevo de EEG y corre la ventana.
+        """Agrega el trozo nuevo del canal y corre la ventana.
 
         `data` es lo que devuelve ABR_generator.raw_eeg: canal en None
         significa electrodo desconectado, y eso se dibuja como lo que es --
@@ -123,15 +162,35 @@ class EEG(GraphicsLayoutWidget):
             trozo = data.get(canal)
             if trozo is None:
                 self.buffers[canal][:] = 0.0
+                self.peaks[canal] = 0.0
                 self.state_text[canal].setText('sin electrodo')
             else:
                 trozo = np.asarray(trozo, dtype=float)
                 largo = min(len(trozo), self.n)
                 self.buffers[canal] = np.roll(self.buffers[canal], -largo)
                 self.buffers[canal][-largo:] = trozo[-largo:]
+                self.peaks[canal] = float(np.abs(self.buffers[canal]).max())
                 rms = data.get(f'rms_{canal}', float(np.std(trozo)))
-                marca = ' ⚠ rechazo' if data.get(f'rejected_{canal}') else ''
-                self.state_text[canal].setText(f'{rms:.0f} µV RMS{marca}')
+                # Rotulo corto: el panel es angosto y el titulo esta en la
+                # otra punta de la misma linea.
+                partes = [f'{rms:.1f} µV']
+                # Distancia al rechazo en numeros: es lo que la barra no
+                # puede decir cuando el trazo es chico y queda fuera de
+                # escala.
+                if self.reject_uv:
+                    partes.append(f'pico {self.peaks[canal]:.0f}/'
+                                  f'{self.reject_uv:.0f}')
+                # El zumbido de red se nombra: es EL artefacto que el
+                # alumno tiene que reconocer, y a esta ventana no se ve
+                # como periodico.
+                red = float(data.get(f'mains_{canal}') or 0.0)
+                if red > MAINS_SHARE * max(rms, 1e-9):
+                    partes.append('⚡50 Hz')
+                if data.get(f'rejected_{canal}'):
+                    tasa = data.get(f'reject_rate_{canal}') or 0.0
+                    partes.append(f'⚠ rechazo {tasa * 100:.0f}%'
+                                  if tasa else '⚠ rechazo')
+                self.state_text[canal].setText(' · '.join(partes))
             self.curves[canal].setData(
                 self.x, self.buffers[canal] + self.offsets[canal])
 

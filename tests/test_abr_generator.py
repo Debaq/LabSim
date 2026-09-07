@@ -1180,16 +1180,46 @@ def test_bad_impedance_drops_the_fsp():
 
 
 def test_raw_eeg_is_physiological():
-    """El monitor crudo corre en decenas de uV, no en el orden de la curva."""
+    """El monitor corre en la BANDA del equipo, no en banda ancha.
+
+    El EEG de banda ancha son ~12 uV RMS y cruzaria los +-25 uV del
+    rechazo casi siempre; lo que un equipo muestra (y lo unico contra lo
+    que tiene sentido comparar el umbral) es el canal ya filtrado, que con
+    los electrodos bien puestos queda en ~2 uV.
+    """
     if not HAS_SCIPY:
         print("  (salteado: sin scipy)")
         return
     g = _gen()
     datos = g.raw_eeg(default_settings('ABR'), quality=1.0, seed=7, tick=1)
-    assert 8 < datos['rms_R'] < 20, datos['rms_R']
-    # Un EEG normal NO se pasa del rechazo de artefacto todo el tiempo: el
-    # umbral mira la banda del ABR, no el EEG crudo entero.
+    assert 1.0 < datos['rms_R'] < 4.0, datos['rms_R']
+    # Un EEG normal NO se pasa del rechazo de artefacto: si lo hiciera, el
+    # promedio tampoco avanzaria (misma cuenta en artifact_acceptance).
     assert not datos['rejected_R']
+
+
+def test_raw_eeg_and_the_average_reject_together():
+    """Monitor sucio = promedio frenado, y al reves.
+
+    Era la incoherencia del modulo: el monitor golpeando la barra de
+    rechazo mientras el promediador aceptaba el 100% de los barridos.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    g = _gen()
+    tech = default_settings('ABR')
+    limpio = g.raw_eeg(tech, quality=1.0, seed=7, tick=1)
+    assert g.artifact_acceptance(tech['artifact_reject_uv'], 1.0,
+                                 g.reject_impedance_factor(2.0)) == 1.0
+    assert not limpio['rejected_R']
+
+    tech['impedance'] = dict(tech['impedance'], vertex=12.0)
+    sucio = g.raw_eeg(tech, quality=1.0, seed=7, tick=1)
+    assert sucio['rms_R'] > 4 * limpio['rms_R']
+    assert sucio['rejected_R']
+    assert g.artifact_acceptance(tech['artifact_reject_uv'], 1.0,
+                                 g.reject_impedance_factor(12.0)) < 0.5
 
 
 def test_raw_eeg_shows_mains_without_ground():
@@ -1204,7 +1234,12 @@ def test_raw_eeg_shows_mains_without_ground():
     sin_tierra = g.raw_eeg(tech, seed=7, tick=1)
     con_tierra = g.raw_eeg(default_settings('ABR'), seed=7, tick=1)
     assert sin_tierra['rms_R'] > 2 * con_tierra['rms_R']
-    assert sin_tierra['rejected_R']
+    assert not con_tierra['mains_R']
+    # El zumbido es la mayor parte de lo que se ve, y NO lo descarta el
+    # rechazo: se cuela bajo el umbral y arruina el promedio igual. Por eso
+    # el monitor ademas lo nombra (ver EEG.push).
+    assert sin_tierra['mains_R'] > 0.5 * sin_tierra['rms_R']
+    assert not sin_tierra['rejected_R']
 
 
 def test_raw_eeg_is_flat_without_electrode():

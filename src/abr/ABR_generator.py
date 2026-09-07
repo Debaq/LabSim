@@ -303,6 +303,13 @@ MAINS_HZ = 50.0
 MAINS_UV_PER_KOHM_IN_SPEC = 0.03
 MAINS_UV_PER_KOHM_OVER = 1.2
 MAINS_NO_GROUND_UV = 3.0
+# En el canal SIN promediar el zumbido es mucho mas grande que el residuo
+# de arriba: 50 Hz no es coherente con el rate del estimulo, asi que el
+# promediado lo reduce (no lo cancela) y lo que queda en la curva es una
+# fraccion de lo que se ve en el monitor. Sin esto la falta de tierra era
+# invisible en el monitor y arruinaba el FSP igual -- el alumno no tenia
+# como enterarse antes de gastar 2000 barridos.
+MAINS_MONITOR_GAIN = 6.0
 
 DISCONNECTED = 'No Conectado'
 
@@ -319,19 +326,44 @@ CONTRA_AMP_FACTOR = {'I': 0.15, 'II': 0.55, 'III': 0.85, 'IV': 0.75, 'V': 0.90}
 CONTRA_LAT_SHIFT = {'I': 0.0, 'II': 0.05, 'III': 0.05, 'IV': -0.10, 'V': 0.15}
 CONTRA_WIDTH_FACTOR = 1.15
 
-# EEG crudo (monitor previo a promediar). Un adulto relajado corre en
-# ~10-15 uV RMS; tenso o con EMG de cuello se va al doble o mas. Es el
-# trazo donde el alumno tiene que ver el 50 Hz y la tension ANTES de
-# promediar, no despues de 2000 barridos.
-EEG_BASELINE_UV = 12.0
-EEG_TENSION_UV = 9.0
-# Lo que el pasa-alto de 100 Hz del ABR se come del zumbido de red y en el
-# monitor crudo (sin filtrar) se ve entero. MAINS_* estan calibrados sobre
-# el residuo post-filtro, ver mains_interference.
-MAINS_RAW_GAIN = 12.0
-# Frecuencia de muestreo del monitor de EEG: no hace falta el fs del
-# promediador (41.6 kHz) para mirar un trazo con 50 Hz y EMG.
-EEG_DISPLAY_FS = 500.0
+# Monitor de EEG previo a promediar. NO es el EEG de banda ancha: un
+# equipo muestra el canal YA filtrado en la banda de registro (100-3000 Hz
+# en ABR), que es tambien la senial sobre la que decide el rechazo de
+# artefacto. Dibujar el crudo era lo que rompia la coherencia del modulo:
+# un EEG normal de 12 uV RMS cruzaba los +-25 uV del rechazo en casi todos
+# los barridos, o sea el monitor se veia siempre sucio mientras el promedio
+# avanzaba lo mas bien -- justo al reves de lo que hay que enseñar.
+#
+# En la banda del ABR un adulto relajado con los electrodos bien puestos
+# queda en ~2 uV RMS: lejos del rechazo, trazo fino. Lo que lo ensucia es
+# lo mismo que ensucia el promedio (paciente tenso, impedancias altas,
+# desbalance/tierra, banda mas ancha), y por eso ahora las dos cosas se
+# mueven juntas.
+EEG_BAND_UV = 2.2
+EEG_TENSION_BAND_UV = 2.0
+# Banda de referencia del ABR de rutina. Al abrir el pasa-alto entra el
+# EEG de baja frecuencia, que es 1/f: bajar de 100 a 30 Hz casi duplica lo
+# que se ve (y ademas deja pasar la fundamental de 50 Hz).
+EEG_HP_REF_HZ = 100.0
+EEG_LP_REF_HZ = 3000.0
+EEG_HP_EXPONENT = 0.5
+EEG_LP_EXPONENT = 0.15
+# Artefactos de movimiento/EMG del monitor: pico respecto del umbral de
+# rechazo (los que el equipo descarta se tienen que VER cruzando la barra)
+# y duracion de la rafaga.
+EEG_BURST_PEAK = (1.05, 2.0)
+EEG_BURST_MS = (10.0, 30.0)
+# Pico de la rafaga con el rechazo apagado: no hay barra contra la cual
+# escalar, pero el paciente se sigue moviendo (y ahi la basura entra al
+# promedio, ver NO_REJECT_NOISE_FACTOR).
+EEG_BURST_NO_REJECT_UV = 45.0
+# Frecuencia de muestreo del monitor. 500 Hz no alcanza para mostrar la
+# banda del ABR (Nyquist 250): a 2 kHz entra hasta ~900 Hz, que es donde
+# vive el EMG que dispara el rechazo.
+EEG_DISPLAY_FS = 2000.0
+# Barridos por segundo de referencia para contar cuantos artefactos caben
+# en un trozo del monitor, si el llamador no pasa el rate del equipo.
+EEG_DEFAULT_RATE = 21.1
 
 # Bloques de ruido por tanda. Fijo (no min(64, faltantes)) para que el
 # bloque i sea SIEMPRE el mismo bloque, no dependa de cuantos se pidieron:
@@ -877,8 +909,19 @@ class ABRGenerator:
                 2 * np.pi * MAINS_HZ * armonico * t / 1000.0 + fase)
         return amp * zumbido
 
+    def reject_impedance_factor(self, impedance):
+        """Cuanto mas seguido cruza el umbral de rechazo por impedancia.
+
+        Dentro de norma (<= IMPEDANCE_LIMIT_KOHM) no cambia nada: el canal
+        crece, pero sigue lejos de los +-25 uV y el equipo promedia igual.
+        Pasado el limite el trazo empieza a golpear la barra, y ahi el
+        promedio se frena -- que es lo que el monitor muestra.
+        """
+        return max(1.0, self.impedance_noise_factor(impedance)
+                   / self.impedance_noise_factor(IMPEDANCE_LIMIT_KOHM))
+
     @staticmethod
-    def artifact_acceptance(reject_uv, quality):
+    def artifact_acceptance(reject_uv, quality, imp_factor=1.0):
         """Fraccion de barridos que sobrevive al rechazo de artefacto.
 
         Un umbral estrecho con un paciente inquieto descarta la mitad de
@@ -886,11 +929,21 @@ class ABRGenerator:
         avanza mucho mas lento, que es exactamente lo que pasa en clinica.
         Con el rechazo apagado no se descarta nada, pero entra basura (ver
         NO_REJECT_NOISE_FACTOR en averaged_noise).
+
+        imp_factor (cuanto mas ruidoso esta el registro que con los
+        electrodos bien puestos, 1.0 = ideal) entra igual que la calidad
+        del paciente: el umbral es fijo en uV, asi que si el canal esta mas
+        grande lo cruza mas seguido. Sin esto el monitor mostraba el trazo
+        golpeando la barra de rechazo con 8 kOhm mientras el promedio
+        avanzaba como si nada -- la incoherencia que hacia que el alumno
+        dejara de mirar el monitor.
         """
         if not reject_uv:
             return 1.0
-        return float(np.clip(float(reject_uv) / (ARTIFACT_REJECT_REF_UV * quality),
-                             0.25, 1.0))
+        return float(np.clip(
+            float(reject_uv) / (ARTIFACT_REJECT_REF_UV * quality
+                                * max(float(imp_factor), 1e-6)),
+            0.25, 1.0))
 
     def add_transducer_artifact(self, t, transducer='insert_earphone'):
         cfg = {
@@ -942,7 +995,7 @@ class ABRGenerator:
 
     def averaged_noise(self, t, current_avg, target_avg, quality, rng,
                        imp_factor=1.0, noise_floor_uv=NOISE_FLOOR_UV,
-                       split=False):
+                       split=False, band_factor=1.0):
         """Ruido RESIDUAL de un promediado de `current_avg` barridos.
 
         El equipo promedia: la senial esta completa desde el primer barrido
@@ -971,7 +1024,8 @@ class ABRGenerator:
         """
         n = len(t)
         m = self.noise_blocks_done(current_avg, target_avg)
-        escala = self.noise_scale(quality, imp_factor, noise_floor_uv)
+        escala = self.noise_scale(quality, imp_factor, noise_floor_uv,
+                                  band_factor)
 
         # Semilla de los bloques: UN solo tiro del rng del caso, sin
         # importar cuantos bloques se pidan. Asi el bloque i es siempre el
@@ -1024,7 +1078,26 @@ class ABRGenerator:
         return max(min(m, NOISE_BLOCKS * 4), 1)
 
     @staticmethod
-    def noise_scale(quality, imp_factor, noise_floor_uv=NOISE_FLOOR_UV):
+    def band_noise_factor(filter_high, filter_low):
+        """Cuanto ruido deja entrar la banda de registro elegida.
+
+        Referencia: la banda del ABR de rutina (100-3000 Hz). Abrir el
+        pasa-alto es lo que mas pesa, porque el EEG es 1/f: a 3.3 Hz (el
+        primer item del combo, o sea con lo que arranca el equipo) entra
+        cinco veces mas ruido que a 100. El pasa-bajo pesa poco, es EMG.
+
+        Lo usan el monitor (raw_eeg) y el promediador: mover los filtros
+        tiene que ensuciar las DOS cosas o el alumno aprende que da lo
+        mismo como los deja.
+        """
+        hp = max(float(filter_high or EEG_HP_REF_HZ), 1.0)
+        lp = max(float(filter_low or EEG_LP_REF_HZ), 1.0)
+        return float((EEG_HP_REF_HZ / hp) ** EEG_HP_EXPONENT
+                     * (lp / EEG_LP_REF_HZ) ** EEG_LP_EXPONENT)
+
+    @staticmethod
+    def noise_scale(quality, imp_factor, noise_floor_uv=NOISE_FLOOR_UV,
+                    band_factor=1.0):
         """Amplitud del ruido de UN barrido (el promedio ya divide por m).
 
         El promedio de m bloques YA tiene RMS 1/sqrt(m): la caida con las
@@ -1032,7 +1105,8 @@ class ABRGenerator:
         para que al llegar al objetivo (m = NOISE_BLOCKS) el piso quede
         en el ruido residual que declara el equipo, con paciente tipico.
         """
-        amp = noise_floor_uv * np.sqrt(NOISE_BLOCKS) * quality * imp_factor
+        amp = (noise_floor_uv * np.sqrt(NOISE_BLOCKS) * quality * imp_factor
+               * max(float(band_factor), 1e-6))
         # El techo existe para que el arranque de la promediacion no se
         # salga de la escala del grafico; NO para tapar unos electrodos
         # malos, asi que sube con ellos. Sin esto, de 6 kOhm para arriba
@@ -1218,8 +1292,9 @@ class ABRGenerator:
         return otro
 
     def raw_eeg(self, technical_config, quality=1.0, seed=0, tick=0,
-                duration_ms=300.0, fs=EEG_DISPLAY_FS):
-        """Trozo de EEG CRUDO por canal (R/L), en uV, sin promediar.
+                duration_ms=300.0, fs=EEG_DISPLAY_FS, filter_high=None,
+                filter_low=None, rate=None):
+        """Trozo del canal de registro por lado (R/L), en uV, sin promediar.
 
         Es el monitor previo del equipo: lo que el alumno tiene que mirar
         ANTES de apretar promediar. Ahi se ve de una si el paciente esta
@@ -1227,12 +1302,29 @@ class ABRGenerator:
         desbalanceados (50 Hz), sin tener que gastar 2000 barridos para
         enterarse.
 
+        Lo que se devuelve es el canal YA FILTRADO en la banda de registro
+        (filter_high/filter_low, los mismos combos del panel de control),
+        que es lo que muestra un equipo real y lo unico contra lo que tiene
+        sentido comparar el umbral de rechazo: el EEG de banda ancha son
+        ~12 uV RMS y cruzaria los +-25 uV todo el tiempo mientras el
+        promedio avanza sin problema.
+
+        El trazo comparte TODOS los terminos con el promediador
+        (`quality` del caso, impedancias, desbalance/tierra, umbral de
+        rechazo): si el monitor se ve sucio, el promedio no avanza y el FSP
+        se queda abajo; si el promedio corre, el monitor esta limpio.
+
         Devuelve {'R': array|None, 'L': array|None, 'rejected_R': bool,
         'rejected_L': bool, 'rms_R': float, 'rms_L': float}. Canal en None =
         electrodo desconectado, no hay registro de ese lado.
         """
         n = max(int(round(duration_ms * fs / 1000.0)), 8)
-        t = np.linspace(0, duration_ms, n)
+        # Margen a los lados que se filtra y se descarta: sin esto el
+        # transitorio de borde del filtro aparece como un salto cada vez
+        # que entra un trozo nuevo al monitor.
+        margen = max(int(round(0.1 * fs)), 16)
+        n_pad = n + 2 * margen
+        t_pad = np.linspace(0, duration_ms * n_pad / n, n_pad)
         impedancias = technical_config.get('impedance')
         if not isinstance(impedancias, dict):
             valor = 3.0 if impedancias is None else float(impedancias)
@@ -1244,6 +1336,19 @@ class ABRGenerator:
 
         sin_tierra = not conectado('ground')
         reject = float(technical_config.get('artifact_reject_uv') or 0.0)
+        # Banda de registro del equipo. El pasa-bajo se limita a lo que el
+        # muestreo del monitor puede mostrar (Nyquist), pero el ANCHO de
+        # banda sigue contando en la amplitud: es el efecto que el alumno
+        # tiene que ver al tocar los filtros.
+        hp = float(filter_high or EEG_HP_REF_HZ)
+        lp = float(filter_low or EEG_LP_REF_HZ)
+        banda = self.band_noise_factor(hp, lp)
+        lp_display = min(lp, fs / 2 * 0.9)
+        # Cuantos barridos se presentan en este trozo: es la cantidad de
+        # oportunidades que tiene el paciente de meter un artefacto.
+        barridos = max(int(round(duration_ms / 1000.0
+                                 * float(rate or EEG_DEFAULT_RATE))), 1)
+
         salida = {}
         for canal, key in (('R', 'right'), ('L', 'left')):
             if not conectado('vertex') or not conectado(key):
@@ -1265,22 +1370,67 @@ class ABRGenerator:
             # rng propio del canal y del tick: el trazo corre, no se repite.
             rng = np.random.default_rng([int(seed) & ((1 << 62) - 1),
                                          int(tick), 0 if canal == 'R' else 1])
-            amp = (EEG_BASELINE_UV + EEG_TENSION_UV * max(quality - 1.0, 0.0)) * imp_factor
-            crudo = self.sweep_noise(n, 1, rng)[0]
-            desvio = float(np.std(crudo)) or 1.0
-            trazo = crudo / desvio * amp
-            trazo = trazo + MAINS_RAW_GAIN * self.mains_interference(
-                t, sin_tierra, desbalance, rng)
+            amp = ((EEG_BAND_UV + EEG_TENSION_BAND_UV * max(quality - 1.0, 0.0))
+                   * imp_factor * banda)
+            # EEG de fondo llevado a la banda del equipo y recien ahi
+            # escalado: la amplitud es la de la banda, no la de banda ancha.
+            crudo = self.sweep_noise(n_pad, 1, rng)[0]
+            crudo = self.apply_filters(crudo, lp_display, hp, fs)[margen:margen + n]
+            trazo = crudo / (float(np.std(crudo)) or 1.0) * amp
+            # Zumbido de red, a la amplitud del canal sin promediar (ver
+            # MAINS_MONITOR_GAIN): a 100 Hz de pasa-alto sobreviven los
+            # armonicos, la fundamental de 50 no -- bajar el pasa-alto la
+            # deja entrar entera, que es justo lo que hay que mostrar.
+            red = MAINS_MONITOR_GAIN * self.mains_interference(
+                t_pad, sin_tierra, desbalance, rng)
+            red = self.apply_filters(red, lp_display, hp, fs)[margen:margen + n]
+            trazo = trazo + red
+            # Artefactos de movimiento/EMG: tantos tiros como barridos entren
+            # en el trozo, con LA MISMA fraccion que el promediador descarta
+            # (paciente + impedancias). Con el rechazo apagado el paciente se
+            # mueve igual -- lo que cambia es que nadie descarta nada y esa
+            # basura entra al promedio, y eso hay que poder verlo.
+            p_artefacto = 1.0 - self.artifact_acceptance(
+                reject or ARTIFACT_REJECT_REF_UV, quality,
+                self.reject_impedance_factor(max(imp)) * banda)
+            artefactos = 0
+            for _ in range(barridos):
+                if rng.random() >= p_artefacto:
+                    continue
+                artefactos += 1
+                trazo = trazo + self._eeg_burst(n, fs, reject, rng)
             salida[canal] = trazo
             salida[f'rms_{canal}'] = float(np.std(trazo))
-            # El rechazo de artefacto no mira el EEG crudo: mira el canal
-            # ya filtrado en la banda del ABR. Sobre el crudo, un EEG normal
-            # de 12 uV RMS cruzaria los +-25 uV en casi todos los barridos y
-            # el equipo no promediaria nunca. Lo que queda arriba de 30 Hz
-            # es el EMG y el zumbido de red -- justo lo que se descarta.
-            banda = self.apply_filters(trazo, 0.0, 30.0, fs)
-            salida[f'rejected_{canal}'] = bool(reject and np.abs(banda).max() > reject)
+            salida[f'peak_{canal}'] = float(np.abs(trazo).max())
+            # Cuanto de lo que se ve es red: a 3 s de ventana el zumbido no
+            # se distingue como periodico a ojo, asi que el monitor lo tiene
+            # que NOMBRAR (un equipo real tambien avisa).
+            salida[f'mains_{canal}'] = float(np.std(red))
+            # El rechazo se decide contra el trazo que se esta mostrando:
+            # la barra del monitor y el contador de barridos aceptados
+            # cuentan la misma historia.
+            salida[f'rejected_{canal}'] = bool(reject and np.abs(trazo).max() > reject)
+            salida[f'reject_rate_{canal}'] = (p_artefacto if reject else 0.0)
         return salida
+
+    @staticmethod
+    def _eeg_burst(n, fs, reject_uv, rng):
+        """Rafaga de EMG/movimiento: lo que el equipo descarta como artefacto.
+
+        Escalada al umbral de rechazo para que se vea cruzando la barra del
+        monitor (con el rechazo apagado no hay barra, pero el paciente se
+        mueve igual y esa basura entra al promedio).
+        """
+        pico = (reject_uv * rng.uniform(*EEG_BURST_PEAK) if reject_uv
+                else EEG_BURST_NO_REJECT_UV * rng.uniform(0.6, 1.4))
+        largo = max(int(rng.uniform(*EEG_BURST_MS) * fs / 1000.0), 4)
+        centro = int(rng.integers(0, n))
+        idx = np.arange(n)
+        sobre = np.exp(-0.5 * ((idx - centro) / (largo / 2.0)) ** 2)
+        emg = rng.standard_normal(n)
+        emg = emg / (float(np.std(emg)) or 1.0)
+        rafaga = sobre * emg
+        return rafaga / (float(np.abs(rafaga).max()) or 1.0) * pico
 
     def normative_limits(self, population='adult_female', intensity=80,
                          stimulus='click', pathway='air_conduction', freq=None):
@@ -1567,8 +1717,17 @@ class ABRGenerator:
         # el alumno controla desde Parametros Avanzados.
         hay_registro, sin_tierra, imp_max, desbalance = self.electrode_state(
             technical_config)
+        # Banda de registro: la MISMA cuenta que ensucia el monitor. Sin
+        # esto, dejar el pasa-alto en 3.3 Hz (como arranca el equipo) se
+        # veia en el EEG y no costaba nada en la curva -- o sea el alumno
+        # aprendia que los filtros dan lo mismo.
+        band_factor = self.band_noise_factor(
+            stimulus_config['filter_passhigh'], stimulus_config['filter_down'])
+        # Lo que cruza el umbral de rechazo: paciente, electrodos fuera de
+        # norma y ancho de banda, los tres terminos que agrandan el canal.
         acceptance = self.artifact_acceptance(
-            technical_config.get('artifact_reject_uv'), quality)
+            technical_config.get('artifact_reject_uv'), quality,
+            self.reject_impedance_factor(imp_max) * band_factor)
         noise_floor = float(technical_config.get('residual_noise_nv') or
                             NOISE_FLOOR_UV * 1000) / 1000.0
         imp_factor = self.impedance_noise_factor(imp_max)
@@ -1590,7 +1749,7 @@ class ABRGenerator:
 
         ruido, ruido_a, ruido_b = self.averaged_noise(
             t, accepted, growth_target, quality, rng, imp_factor, noise_floor,
-            split=True,
+            split=True, band_factor=band_factor,
         )
         red = self.mains_interference(t, sin_tierra, desbalance, rng)
         y_noisy = y_clean + ruido + red
@@ -1905,13 +2064,29 @@ def case_quality(preferences):
 
 
 def raw_eeg(technical=None, quality=1.0, seed=0, tick=0, duration_ms=300.0,
-            test='ABR'):
-    """Trozo de EEG crudo por canal para el monitor (ver ABRGenerator.raw_eeg)."""
+            test='ABR', setting=None):
+    """Trozo del canal de registro para el monitor (ver ABRGenerator.raw_eeg).
+
+    `setting` es lo que devuelve AbrControl.get_data(): de ahi salen la
+    banda de registro y el rate, que son parte del equipo tanto como las
+    impedancias -- el monitor tiene que mostrar la MISMA banda que se va a
+    promediar.
+    """
     technical_config = default_settings(test)
     if technical:
         technical_config.update(technical)
-    return _get_generator().raw_eeg(technical_config, quality=quality, seed=seed,
-                                    tick=tick, duration_ms=duration_ms)
+    setting = setting or {}
+    def _num(clave, defecto):
+        try:
+            return float(setting.get(clave) or defecto)
+        except (TypeError, ValueError):
+            return defecto
+    return _get_generator().raw_eeg(
+        technical_config, quality=quality, seed=seed, tick=tick,
+        duration_ms=duration_ms,
+        filter_high=_num('filter_passhigh', EEG_HP_REF_HZ),
+        filter_low=_num('filter_down', EEG_LP_REF_HZ),
+        rate=_num('rate', EEG_DEFAULT_RATE))
 
 
 def normative_limits(patient=None, intensity=80, stim='Click'):

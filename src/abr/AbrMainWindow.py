@@ -138,6 +138,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.total_averages = 20
         self.current_measuring = [None, None]
         self.memory = {}
+        # FSP por curva: el grafico del dock muestra el de la curva
+        # seleccionada, no solo el de la ultima promediacion.
+        self.fsp_tracks = {}
+        self.fsp_shown = None
         self.donde = False
         self.count_averages = 0
         # Equipo (transductor, ventana, montaje, electrodos, rechazo de
@@ -265,9 +269,13 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # igual en cualquier proceso (ver core.rng).
         semilla = stable_seed(self.appointment_id)
         try:
+            # La banda de registro y el rate salen del panel de control:
+            # el monitor tiene que mostrar la MISMA banda que se promedia,
+            # o el alumno mueve los filtros y no ve nada cambiar.
             datos = raw_eeg(self.technical, quality=self.quality, seed=semilla,
                             tick=self.eeg_tick, duration_ms=TIEMPO_EEG,
-                            test=self.control.cb_test.currentText())
+                            test=self.control.cb_test.currentText(),
+                            setting=self.control.get_data())
         except Exception as exc:
             print(f"ABR: no se pudo generar el EEG crudo: {exc}")
             self.eeg_timer.stop()
@@ -395,6 +403,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
         # Limpiar memoria
         self.memory = {}
+        self.fsp_tracks = {}
+        self.fsp_shown = None
 
         # Limpiar tablas
         self.table_r.clear_all()
@@ -415,9 +425,21 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             getattr(self, table).clear_all()
             self.detail_all.delete_row_by_header(curve)
             del self.memory[curve]
+            self.fsp_tracks.pop(curve, None)
+            if self.fsp_shown == curve:
+                self.fsp_shown = None
+                self.fmp.set_track(None)
 
     def curve_selected(self, curve):
         table_letter = 'r' if curve[0] == 'R' else 'l'
+        # El FSP es de la curva: al seleccionarla se dibuja el suyo (con
+        # cuantos barridos cruzo el criterio ESA). Si es la que se esta
+        # registrando ahora, sigue creciendo en vivo -- ver push_fsp. Va
+        # ANTES del lookup en memory: la curva recien creada todavia no
+        # esta ahi (memory_curves corre despues de graph()) y el FSP en
+        # vivo se quedaba dibujando en la curva anterior.
+        self.fsp_shown = curve
+        self.fmp.set_track(self.fsp_tracks.get(curve))
         try:
             table = f'table_{table_letter}'
             data = self.memory[curve]
@@ -546,10 +568,35 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         side_letter = 'r' if side == 'OD' else 'l'
         graph = f'graph_{side_letter}'
         getattr(self, graph).create_line(data_line, intencity)
-        self.fmp.push(metadata.get('current_avg', 0), metadata.get('fsp', 0),
-                      metadata.get('residual_noise_nv', 0))
+        self.push_fsp(self.current_capture_curve, metadata)
         self.update_capture_info(metadata)
         self.update_detail_info(self.current_setting)
+
+    def push_fsp(self, curve, metadata):
+        """Un punto de FSP para ESA curva, y al grafico si es la que se mira.
+
+        La serie la lleva la ventana y no el widget: mientras se promedia
+        R2 el alumno puede volver a mirar el FSP de R1 sin cortar nada, y
+        si la curva que mira es la que se esta registrando la ve crecer en
+        vivo, punto a punto.
+        """
+        track = self.fsp_tracks.get(curve)
+        if track is None:
+            track = {'sweeps': [], 'fsp': [], 'noise': [],
+                     'mean': int(self.current_setting.get('average') or 0) or None,
+                     'criterion': self.technical.get('fsp_criterion'),
+                     'crossed_at': None}
+            self.fsp_tracks[curve] = track
+        track['sweeps'].append(float(metadata.get('current_avg') or 0))
+        track['fsp'].append(float(metadata.get('fsp') or 0))
+        track['noise'].append(float(metadata.get('residual_noise_nv') or 0))
+        criterio = track.get('criterion')
+        if (criterio and track['crossed_at'] is None
+                and track['fsp'][-1] >= float(criterio)):
+            track['crossed_at'] = track['sweeps'][-1]
+        if self.fsp_shown in (None, curve):
+            self.fsp_shown = curve
+            self.fmp.set_track(track)
 
     def fake_averages(self, averages, fake = True, express = False):
         if isinstance(averages , str):
@@ -686,6 +733,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # resultado pero no el procedimiento (ver submit_report).
             self.memory[name_curve] = dict(sett, **model)
             self.memory[name_curve]['tecnica'] = self.recording_conditions()
+            # Va tambien al informe: el FSP es la evidencia de por que se
+            # corto el promedio en esa curva.
+            self.memory[name_curve]['fsp_track'] = self.fsp_tracks.get(name_curve, {})
         self.detail_all.process_and_fill_data(self.memory)
 
 ################Report
