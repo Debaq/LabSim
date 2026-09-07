@@ -12,9 +12,9 @@ definición ABR en cases.data['ABR']['OD'/'OI'] (ver CaseBuilder.php).
 """
 import os
 
-from abr.ABR_generator import (ABR_Curve, ABRGenerator, case_quality,
-                               latency_intensity_band, normative_limits,
-                               raw_eeg)
+from abr.ABR_generator import (ABR_Curve, ABRGenerator, agitation_factor,
+                               case_quality, latency_intensity_band,
+                               normative_limits, raw_eeg)
 from abr.AbrAdvanceSettings import (MONTAGES, TRANSDUCERS, AbrAdvanceSettings,
                                     default_settings)
 from abr.AbrControl import AbrControl
@@ -274,7 +274,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # La banda de registro y el rate salen del panel de control:
             # el monitor tiene que mostrar la MISMA banda que se promedia,
             # o el alumno mueve los filtros y no ve nada cambiar.
-            datos = raw_eeg(self.technical, quality=self.quality, seed=semilla,
+            datos = raw_eeg(self.technical,
+                            quality=self.quality * self.agitation_now(),
+                            seed=semilla,
                             tick=self.eeg_tick, duration_ms=TIEMPO_EEG,
                             test=self.control.cb_test.currentText(),
                             setting=self.control.get_data())
@@ -283,6 +285,25 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.eeg_timer.stop()
             return
         self.eeg.push(datos)
+
+    def agitation_now(self):
+        """Cuanto se esta moviendo el paciente en este momento.
+
+        Durante la captura el indice es el bloque de promediado que trae la
+        metadata, para que el monitor se ensucie en el MISMO tramo en que
+        el equipo esta descartando barridos. Fuera de la captura el
+        paciente se sigue moviendo igual, asi que el indice es el tick del
+        monitor: quien mira antes de apretar promediar ve con que se va a
+        encontrar.
+        """
+        case = self.abr_od or self.abr_oi or {}
+        if not float(case.get('inquietud') or 0):
+            return 1.0
+        if self.state_capture == 'record' and self.last_metadata:
+            bloque = int(self.last_metadata.get('noise_blocks') or 0)
+        else:
+            bloque = self.eeg_tick
+        return agitation_factor(case, bloque)
 
     def update_capture_info(self, metadata):
         """Estado de la captura en curso, como lo muestra un equipo real.

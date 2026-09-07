@@ -261,6 +261,25 @@ FALSE_V_AMP_UV = 0.25
 # y no pasa nada, que es la leccion opuesta.
 FALSE_V_DECAY_EXP = 0.25
 
+# Agitacion del paciente DURANTE la captura. Hasta aca `quality` era una
+# constante de todo el registro: el paciente estaba igual de quieto en el
+# barrido 1 que en el 2000, asi que el promedio avanzaba parejo y mirar el
+# monitor antes de seguir no cambiaba nada. Con esto la captura tiene
+# tramos: el paciente se mueve, el canal se agranda, el equipo descarta y
+# el promedio se queda quieto hasta que se calma.
+#
+# Un episodio dura AGITATION_RUN_BLOCKS bloques de promediado (con el
+# objetivo partido en NOISE_BLOCKS, son ~2 s de registro a 21/s) y
+# multiplica el canal por AGITATION_GAIN. La probabilidad de que un tramo
+# este agitado es la inquietud del caso: 1.0 = se mueve la mitad del
+# tiempo.
+AGITATION_RUN_BLOCKS = 4
+AGITATION_GAIN = 6.0
+AGITATION_MAX_DUTY = 0.5
+# Por encima de este factor el barrido cruza el umbral de rechazo y el
+# equipo lo descarta entero, en vez de promediarlo sucio.
+AGITATION_REJECT_FACTOR = 2.0
+
 # Muestras por ms del registro: 500 puntos en 12 ms. Se mantiene constante
 # al cambiar la ventana para que fs no dependa del protocolo (~41.6 kHz,
 # rango real de un equipo). Ver technical_config['window_ms'].
@@ -1041,6 +1060,26 @@ class ABRGenerator:
         return amplitude * (np.sin(2 * np.pi * f1 * t / 12) +
                             0.4 * np.sin(2 * np.pi * f2 * t / 12))
 
+    @staticmethod
+    def agitation_run(seed_key, inquietud, bloque):
+        """Factor del canal para ESE bloque de promediado (1.0 = quieto).
+
+        Deterministico por caso y por numero de bloque: el mismo paciente
+        se mueve en los mismos momentos de la captura aunque se cierre la
+        app, y el monitor y el promediador pueden calcularlo por separado
+        sin ponerse de acuerdo (los dos preguntan por el mismo bloque).
+        """
+        inquietud = float(inquietud or 0.0)
+        if inquietud <= 0:
+            return 1.0
+        tramo = int(bloque) // AGITATION_RUN_BLOCKS
+        rng = np.random.default_rng(stable_seed(seed_key, 'agit', tramo))
+        if rng.random() >= min(inquietud, 1.0) * AGITATION_MAX_DUTY:
+            return 1.0
+        # No todos los movimientos son iguales: los hay chicos (traga,
+        # frunce) y los hay de descartar el barrido entero.
+        return 1.0 + (AGITATION_GAIN - 1.0) * float(rng.uniform(0.35, 1.0))
+
     def sweep_noise(self, n, blocks, rng):
         """`blocks` realizaciones independientes de ruido de barrido (n muestras).
 
@@ -1071,7 +1110,8 @@ class ABRGenerator:
 
     def averaged_noise(self, t, current_avg, target_avg, quality, rng,
                        imp_factor=1.0, noise_floor_uv=NOISE_FLOOR_UV,
-                       split=False, band_factor=1.0):
+                       split=False, band_factor=1.0, agitacion=None,
+                       reject_uv=None):
         """Ruido RESIDUAL de un promediado de `current_avg` barridos.
 
         El equipo promedia: la senial esta completa desde el primer barrido
@@ -1097,6 +1137,14 @@ class ABRGenerator:
         consecuencia del ruido residual, usarlo para calcularlo era
         circular -- y ademas venia por tramos, asi que el ruido pegaba
         saltos de 8x al cruzar un tramo en plena captura.
+
+        agitacion: callable(indice de bloque) -> factor del canal en ese
+        tramo (ver agitation_run). Con el rechazo puesto, los bloques que
+        lo cruzan NO entran al promedio -- el trazo se queda quieto
+        mientras el paciente se mueve, y el contador de aceptados deja de
+        subir. Sin rechazo entran igual y ensucian el promedio para
+        siempre, que es exactamente la diferencia que hay que mostrar.
+        Devuelve tambien, en split, cuantos bloques entraron de los m.
         """
         n = len(t)
         m = self.noise_blocks_done(current_avg, target_avg)
@@ -1117,13 +1165,29 @@ class ABRGenerator:
         suma_b = np.zeros(n)
         n_a = n_b = 0
         hechos = 0
+        usados = 0
         while hechos < m:
             bloques = self.sweep_noise(
                 n, NOISE_TANDA, np.random.default_rng([semilla, hechos // NOISE_TANDA]))
             usar = min(NOISE_TANDA, m - hechos)
             bloques = bloques[:usar]
             idx = np.arange(hechos, hechos + usar)
+            if agitacion is not None:
+                factores = np.array([float(agitacion(i)) for i in idx])
+                if reject_uv:
+                    # Barrido que cruza la barra: el equipo lo tira. El
+                    # promedio no mejora ni empeora, se queda donde estaba.
+                    entra = factores <= AGITATION_REJECT_FACTOR
+                    bloques = bloques[entra]
+                    idx = idx[entra]
+                    factores = factores[entra]
+                if len(bloques):
+                    bloques = bloques * factores[:, None]
+            hechos += usar
+            if not len(bloques):
+                continue
             total += bloques.sum(axis=0)
+            usados += len(bloques)
             pares = bloques[idx % 2 == 0]
             impares = bloques[idx % 2 == 1]
             if len(pares):
@@ -1132,9 +1196,11 @@ class ABRGenerator:
             if len(impares):
                 suma_b += impares.sum(axis=0)
                 n_b += len(impares)
-            hechos += usar
 
-        residual = total / m * escala
+        # El denominador son los bloques que ENTRARON, no los que se
+        # presentaron: promediar 2000 barridos de los que se descartaron
+        # 600 deja el ruido de 1400, y ese es el punto.
+        residual = total / max(usados, 1) * escala
         if not split:
             return residual
         # Subpromedios A/B: barridos pares e impares promediados en
@@ -1143,7 +1209,7 @@ class ABRGenerator:
         # hace que A y B se peguen recien cuando hay respuesta de verdad.
         sub_a = suma_a / max(n_a, 1) * escala
         sub_b = suma_b / max(n_b, 1) * escala if n_b else np.zeros(n)
-        return residual, sub_a, sub_b
+        return residual, sub_a, sub_b, usados / max(m, 1)
 
     @staticmethod
     def noise_blocks_done(current_avg, target_avg):
@@ -1654,7 +1720,8 @@ class ABRGenerator:
         # 5. FSP actual
         current_avg = stimulus_config['current_avg']
         target_avg = stimulus_config['average']
-        fsp_actual = self.calculate_fsp(current_avg, fsp_800, fsp_2000)
+        # OJO: se calcula mas abajo, con los barridos que de verdad
+        # entraron al promedio (ver "accepted"), no con los presentados.
 
         # 5b. rng propio de ESTA captura: mismo paciente, mismo oido, mismos
         # parametros y misma curva -> mismo ruido, aunque se cierre y se
@@ -1793,9 +1860,6 @@ class ABRGenerator:
             y_clean_a = y_clean.copy()
             y_clean_b = y_clean.copy()
             waves_visible = False
-            # Sin estimulo no hay nada que detectar: el FSP es una razon de
-            # varianzas y no puede quedar declarando respuesta presente.
-            fsp_actual = 1.0
 
         # 12. Ruido residual del promediado. El denominador es lo que el
         # CASO necesita (average_objetivo), no lo que el alumno pidio en el
@@ -1859,10 +1923,29 @@ class ABRGenerator:
             y_clean_b = y_clean_b + aporte_b
             y_clean = y_clean + (aporte_a + aporte_b) / 2
 
-        ruido, ruido_a, ruido_b = self.averaged_noise(
+        # Agitacion del paciente a lo largo de la captura (ver
+        # agitation_run): la misma serie que ve el monitor de EEG, para que
+        # el trazo sucio y el promedio frenado sean el mismo evento.
+        inquietud = float((case_config or {}).get('inquietud') or 0.0)
+        agitacion = None
+        if inquietud > 0:
+            seed_key = (case_config or {}).get('seed_key', '')
+            agitacion = lambda i: self.agitation_run(seed_key, inquietud, i)
+        ruido, ruido_a, ruido_b, entraron = self.averaged_noise(
             t, accepted, growth_target, quality, rng, imp_factor, noise_floor,
-            split=True, band_factor=band_factor,
+            split=True, band_factor=band_factor, agitacion=agitacion,
+            reject_uv=technical_config.get('artifact_reject_uv'),
         )
+        # Los barridos descartados por moverse no promediaron: el equipo
+        # sigue contando los presentados, pero el FSP y el ruido residual
+        # son los de lo que realmente entro.
+        bloque_actual = self.noise_blocks_done(accepted, growth_target)
+        accepted = accepted * entraron
+        # El FSP sale de los barridos ACEPTADOS: un paciente que se mueve
+        # hace que el equipo cuente 2000 presentados con 1500 promediados,
+        # y el criterio de deteccion tiene que ir con los 1500 -- si no,
+        # descartar barridos saldria gratis.
+        fsp_actual = self.calculate_fsp(accepted, fsp_800, fsp_2000)
         red = self.mains_interference(t, sin_tierra, desbalance, rng)
         y_noisy = y_clean + ruido + red
 
@@ -1935,6 +2018,10 @@ class ABRGenerator:
         # sobre ruido), no puede dar menos que 1 -- por debajo de eso
         # simplemente no hay nada que detectar.
         fsp_actual = max(1.0, 1.0 + (fsp_actual - 1.0) / degradacion ** 2)
+        if clamp:
+            # Sin estimulo no hay nada que detectar: el FSP es una razon de
+            # varianzas y no puede quedar declarando respuesta presente.
+            fsp_actual = 1.0
 
         return t, y_final, {
             'population': population,
@@ -1964,6 +2051,12 @@ class ABRGenerator:
             'residual_noise_nv': residual_nv,
             'recording': hay_registro,
             'tube_clamped': clamp,
+            # Bloque de promediado en curso: con el lo calcula el monitor
+            # de EEG el mismo tramo de agitacion que el promediador, y el
+            # trazo sucio y el promedio frenado quedan sincronizados.
+            'noise_blocks': bloque_actual,
+            'agitation': (float(agitacion(bloque_actual - 1))
+                          if agitacion else 1.0),
             'mains': bool(sin_tierra or desbalance > IMPEDANCE_BALANCE_LIMIT_KOHM),
             'impedance_max': imp_max,
             'impedance_imbalance': desbalance,
@@ -2135,6 +2228,9 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
         # Falsa onda V: artefacto docente que solo delatan los subpromedios
         # A/B (ver false_wave). Los casos guardados antes no la traen.
         'falsa_v': preferences.get('falsa_v'),
+        # Cuanto se mueve el paciente durante la captura (0 = quieto, que
+        # es lo que traen los casos de antes de esto).
+        'inquietud': preferences.get('inquietud', 0),
         'fsp_puntos': preferences.get('fsp_puntos', {'800': 2.3, '2000': 2.8}),
         'umbral': preferences.get('umbral', preferences.get('th', 20)),
         'average_objetivo': preferences.get('average_objetivo', 2000),
@@ -2178,6 +2274,21 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
 # ----------------------------------------------------------------------
 # Helpers que consume la UI (monitor de EEG, banda normativa, tabla)
 # ----------------------------------------------------------------------
+
+def agitation_factor(preferences, block):
+    """Factor de agitacion del caso en ese bloque de promediado.
+
+    Lo usa el monitor de EEG para ensuciar el trazo en EL MISMO tramo en
+    que el promediador esta descartando barridos: si el alumno ve el
+    monitor limpio mientras el promedio no avanza, el equipo le esta
+    mintiendo.
+    """
+    inquietud = float((preferences or {}).get('inquietud') or 0.0)
+    if inquietud <= 0:
+        return 1.0
+    return _get_generator().agitation_run(
+        case_fingerprint(preferences or {}), inquietud, block)
+
 
 def case_quality(preferences):
     """Cuanto ruido trae ESTE paciente (1.0 = tipico).

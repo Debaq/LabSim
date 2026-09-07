@@ -446,6 +446,45 @@ def test_sub_and_contra_can_be_hidden():
     assert nueva['sub_a'].isVisible() and not nueva['contra'].isVisible()
 
 
+def test_the_monitor_gets_dirty_when_the_patient_moves():
+    """El EEG del monitor sigue el mismo tramo de agitacion que el promedio.
+
+    Durante la captura el indice es el bloque de promediado que trae la
+    metadata: el trazo sucio y el promedio frenado son el mismo evento, no
+    dos sorteos distintos.
+    """
+    if not HAS_UI:
+        return
+    caso = _caso()
+    for lado in ('OD', 'OI'):
+        caso['ABR'][lado] = dict(caso['ABR'][lado], inquietud=0.9)
+    w = _ventana(caso)
+    assert w.agitation_now() >= 1.0
+    w.control.sb_intencity.setValue(80)
+    w.control.start_capture()
+    factores = []
+    for _ in range(30):
+        w.capture()
+        factores.append(w.agitation_now())
+        if w.state_capture != 'record':
+            break
+    w.control.stop_capture()
+    assert max(factores) > 2.0, max(factores)     # hubo tramos agitados
+    assert min(factores) == 1.0                   # y tramos quietos
+    # Y el equipo descarto barridos por eso.
+    assert w.last_metadata['accepted_sweeps'] < w.last_metadata['current_avg']
+
+
+def test_a_still_patient_keeps_every_sweep():
+    """Sin inquietud el monitor no inventa movimiento."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    assert w.agitation_now() == 1.0
+    _capturar(w)
+    assert w.last_metadata['agitation'] == 1.0
+
+
 def test_clamping_the_tube_works_mid_capture():
     """Pinzar el tubo mientras corre el promedio apaga la respuesta.
 

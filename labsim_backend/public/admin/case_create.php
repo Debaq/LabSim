@@ -401,6 +401,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ],
                 'repro' => isset($v['abr'][$lado]['repro']),
                 'repro_var' => (float) fv($v, ['abr', $lado, 'repro_var'], 0.2),
+                // Cuanto se mueve el paciente DURANTE la captura (ver
+                // agitation_run en ABR_generator.py). 0 = quieto.
+                'inquietud' => (float) fv($v, ['abr', $lado, 'inquietud'], 0),
                 // Falsa onda V: artefacto que solo se descubre mirando los
                 // subpromedios A/B (ver false_wave en ABR_generator.py).
                 // amp = 0 lo desactiva, que es el default: es un ejercicio
@@ -1398,7 +1401,11 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <label>Jitter si no reproducible (ms)
             <input type="number" step="0.01" min="0" name="abr[<?= $lado ?>][repro_var]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['repro_var'] ?? '0.2')) ?>">
         </label>
+        <label>Inquietud durante la captura (0-1)
+            <input type="number" step="0.1" min="0" max="1" name="abr[<?= $lado ?>][inquietud]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['inquietud'] ?? '0')) ?>">
+        </label>
     </div>
+    <p class="legend help">Inquietud: 0 es un paciente quieto. Por encima de 0 la captura tiene tramos en que el paciente se mueve: el EEG crudo se ensucia, el equipo descarta esos barridos y el promedio se queda quieto hasta que se calma (el contador de aceptados se separa del de presentados). Si el alumno apagó el rechazo de artefacto, en cambio, esa basura entra al promedio y el FSP no cruza nunca.</p>
     <?php $vn = $v['abr'][$lado]['neural'] ?? []; ?>
     <div class="abr-neural-block" data-lado="<?= $lado ?>">
         <p class="legend">Patrón retrococlear. El PEATC no distingue las entidades entre sí (un schwannoma y un meningioma del ángulo dan el mismo trazado) -- lo que distingue son estos patrones, así que el caso guarda los números, no el diagnóstico. El preset es solo un punto de partida: precarga los valores y después se editan.</p>

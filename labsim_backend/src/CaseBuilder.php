@@ -1086,6 +1086,9 @@ final class CaseBuilder
                 // formulario los redibujaba con el default y el docente los
                 // perdía al guardar de nuevo.
                 'repro_var' => (string) ($ladoAbr['repro_var'] ?? 0.2),
+                // Inquietud del paciente durante la captura: los casos
+                // guardados antes de esto quedan en 0 (paciente quieto).
+                'inquietud' => (string) ($ladoAbr['inquietud'] ?? 0),
                 'average_objetivo' => (string) ($ladoAbr['average_objetivo'] ?? 2000),
                 // Falsa onda V (ver false_wave en ABR_generator.py): un caso
                 // guardado antes de que existiera no trae la clave y queda

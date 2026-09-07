@@ -61,7 +61,7 @@ except ImportError:
 from abr.ABR_generator import (  # noqa: E402
     ABRGenerator, IMPEDANCE_BALANCE_LIMIT_KOHM, IMPEDANCE_LIMIT_KOHM,
     INTERAURAL_ATTENUATION, NEURAL_BLOQUEO_OPTIONS, NEURAL_PARAM_DEFAULTS,
-    RATE_REF, STIM_MAP, default_settings, select_population)
+    RATE_REF, STIM_MAP, agitation_factor, default_settings, select_population)
 from abr.protocols import PROTOCOLS, get_protocol  # noqa: E402
 
 NORMS = os.path.join(os.path.dirname(__file__), '..', 'resources', 'abr', 'normative_data.json')
@@ -1250,6 +1250,98 @@ def _curva_tec(intensity=80, transducer='insert_earphone', clamp=False,
             'capture_id': 'R1', 'neural': neural}
     case.update(kw)
     return g.generate_curve('adult_female', pathology, stim, tech, case)
+
+
+# --------------------------------------- agitacion del paciente (tramos)
+
+def _curva_agit(inquietud=0.6, current=2000, reject=25.0, **kw):
+    """Curva de un paciente que se mueve durante la captura."""
+    g = _gen()
+    stim = {'stim': 'click', 'freq': None, 'pol': 'Alternada', 'int': 40,
+            'rate': 21.1, 'filter_down': 3000, 'filter_passhigh': 100,
+            'average': 2000, 'current_avg': current, 'pathway': 'air_conduction'}
+    tech = default_settings('ABR')
+    tech['artifact_reject_uv'] = reject
+    case = {'desviaciones': {}, 'fsp_puntos': {'800': 2.3, '2000': 2.8},
+            'umbral': 20, 'average_objetivo': 2000, 'repro_shift': 0.0,
+            'masking': 0, 'contra': None, 'seed_key': 'caso-1',
+            'capture_id': 'R1', 'inquietud': inquietud}
+    case.update(kw)
+    return g.generate_curve('adult_female', 'normal', stim, tech, case)
+
+
+def test_a_still_patient_is_unchanged():
+    """inquietud 0 = lo de siempre: los casos viejos no se mueven."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    _, con, meta_con = _curva_agit(inquietud=0)
+    _, sin, meta_sin = _curva_agit(inquietud=None)
+    assert np.array_equal(con, sin)
+    assert meta_con['accepted_sweeps'] == meta_sin['accepted_sweeps'] == 2000
+    assert meta_con['agitation'] == 1.0
+
+
+def test_moving_patient_loses_sweeps_to_the_reject():
+    """Con rechazo puesto, los barridos del movimiento no promedian.
+
+    El equipo sigue contando los presentados -- el contador sube igual --
+    pero el promedio avanza con menos, y el FSP va con los que entraron.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    _, _, quieto = _curva_agit(inquietud=0)
+    _, _, movido = _curva_agit(inquietud=0.6)
+    assert movido['accepted_sweeps'] < quieto['accepted_sweeps'] * 0.9
+    assert movido['current_avg'] == quieto['current_avg']    # presentados
+    assert movido['fsp'] < quieto['fsp']
+
+
+def test_without_reject_the_movement_enters_the_average():
+    """Rechazo apagado: la basura entra y el FSP no cruza nunca.
+
+    Es la diferencia que hay que poder mostrar -- apagar el rechazo no
+    "acelera" la prueba, la arruina.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    _, _, con_rechazo = _curva_agit(inquietud=0.6, reject=25.0)
+    _, _, sin_rechazo = _curva_agit(inquietud=0.6, reject=None)
+    assert sin_rechazo['accepted_sweeps'] > con_rechazo['accepted_sweeps']
+    assert sin_rechazo['residual_noise_nv'] > con_rechazo['residual_noise_nv'] * 2
+    assert sin_rechazo['fsp'] < 1.5 < con_rechazo['fsp']
+
+
+def test_agitation_comes_in_runs_and_repeats():
+    """Los episodios duran varios bloques y son los mismos siempre.
+
+    Si cada bloque se sorteara solo, el paciente "tiritaria" en vez de
+    moverse; y si no fuera determinista, el mismo caso se veria distinto
+    en cada corrida y no se podria enseñar sobre el.
+    """
+    serie = [ABRGenerator.agitation_run('caso-1', 0.8, i) for i in range(80)]
+    otra = [ABRGenerator.agitation_run('caso-1', 0.8, i) for i in range(80)]
+    assert serie == otra
+    assert max(serie) > 2.0 and min(serie) == 1.0
+    # Cada tramo es homogeneo: 4 bloques con el mismo factor.
+    for inicio in range(0, 80, 4):
+        assert len(set(serie[inicio:inicio + 4])) == 1
+    # Otro caso, otros momentos.
+    assert serie != [ABRGenerator.agitation_run('caso-2', 0.8, i) for i in range(80)]
+
+
+def test_the_eeg_monitor_shares_the_agitation():
+    """El monitor se ensucia en el MISMO tramo en que se descartan barridos.
+
+    Si el trazo se ve limpio mientras el promedio no avanza, el equipo le
+    esta mintiendo al alumno.
+    """
+    caso = {'fsp_puntos': {'800': 2.3, '2000': 2.8}, 'inquietud': 0.8}
+    factores = [agitation_factor(caso, i) for i in range(80)]
+    assert max(factores) > 2.0
+    assert agitation_factor(dict(caso, inquietud=0), 3) == 1.0
 
 
 # ------------------------------------------ artefacto de estimulo y clamp
