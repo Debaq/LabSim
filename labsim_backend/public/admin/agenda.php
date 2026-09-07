@@ -588,8 +588,10 @@ admin_header('Agendas', $me);
                 <select name="assigned_student_id" id="sched-student" data-selected="<?= $curStudentId ?>"></select>
             </label>
         </div>
-        <button type="submit"><?= $scheduleForceRound ? 'Agendar cita nueva' : ($scheduleIsNewRound ? 'Agendar ronda nueva' : ($scheduleRow['appointment_id'] ? 'Guardar cambios' : 'Agendar')) ?></button>
-        <a href="<?= agenda_url(['schedule' => null, 'appointment' => null, 'force_round' => null, 'new' => null, 'fecha' => null]) ?>" class="btn btn--secondary" style="margin-left:1rem; text-decoration:none;">Cancelar</a>
+        <div class="form-actions-sticky">
+            <button type="submit"><?= $scheduleForceRound ? 'Agendar cita nueva' : ($scheduleIsNewRound ? 'Agendar ronda nueva' : ($scheduleRow['appointment_id'] ? 'Guardar cambios' : 'Agendar')) ?></button>
+            <a href="<?= agenda_url(['schedule' => null, 'appointment' => null, 'force_round' => null, 'new' => null, 'fecha' => null]) ?>" class="btn btn--secondary" style="text-decoration:none;">Cancelar</a>
+        </div>
     </form>
     <?php if ($scheduleRow['appointment_id'] && !$scheduleForceRound): ?>
     <hr style="margin:1rem 0; border:none; border-top:1px solid var(--color-border);">

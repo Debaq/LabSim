@@ -182,7 +182,9 @@ admin_header('Normativas', $me);
                 </div>
                 <?php endforeach; ?>
             </div>
-            <button type="submit" class="btn btn--secondary" style="margin-top:0.6rem;">Guardar</button>
+            <div class="form-actions-sticky">
+                <button type="submit" class="btn btn--secondary">Guardar</button>
+            </div>
         </form>
         <form method="post" style="margin-top:0.4rem;"
               onsubmit="return confirm('¿Eliminar este set de autor? Los casos que ya usaron sus valores no cambian, solo deja de estar disponible para autocompletar.');">
@@ -224,7 +226,9 @@ admin_header('Normativas', $me);
                 </div>
                 <?php endforeach; ?>
             </div>
-            <button type="submit" class="btn btn--secondary" style="margin-top:0.6rem;">Crear set</button>
+            <div class="form-actions-sticky">
+                <button type="submit" class="btn btn--secondary">Crear set</button>
+            </div>
         </form>
     </details>
 </div>

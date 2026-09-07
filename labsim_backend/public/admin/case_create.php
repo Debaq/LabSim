@@ -1397,14 +1397,17 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 </div>
 </div>
 
-<div class="card">
-    <?php if ($isEdit): ?>
+<?php if ($isEdit): ?>
+<div class="form-actions-sticky">
     <button type="submit" name="form_action" value="update_case">Guardar cambios</button>
-    <?php else: ?>
-    <button type="submit" name="form_action" value="create_case">Crear caso</button>
-    <?php endif; ?>
-    <a href="patients.php" style="margin-left:1rem; font-size:0.85rem;">Cancelar</a>
+    <a href="patients.php" style="font-size:0.85rem; text-decoration:none;">Cancelar</a>
 </div>
+<?php else: ?>
+<div class="form-actions-sticky">
+    <button type="submit" name="form_action" value="create_case">Crear caso</button>
+    <a href="patients.php" style="font-size:0.85rem; text-decoration:none;">Cancelar</a>
+</div>
+<?php endif; ?>
 </form>
 
 <div id="photo-crop-modal" class="photo-modal" hidden>

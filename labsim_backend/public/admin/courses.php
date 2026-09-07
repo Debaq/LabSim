@@ -262,7 +262,9 @@ if ($detailId !== null) {
                 <label>Nombre
                     <input type="text" name="name" value="<?= htmlspecialchars($course['name']) ?>" required>
                 </label>
-                <button type="submit" class="btn btn--secondary">Guardar</button>
+                <div class="form-actions-sticky">
+                    <button type="submit" class="btn btn--secondary">Guardar</button>
+                </div>
             </form>
             <form method="post" class="inline" style="margin-top:0.6rem;">
             <?= csrf_field() ?>
@@ -689,7 +691,9 @@ if ($detailId !== null) {
                 </div>
             </details>
             <?php endforeach; ?>
-            <button type="submit" class="btn btn--secondary" style="margin-top:0.6rem;">Guardar configuración</button>
+            <div class="form-actions-sticky">
+                <button type="submit" class="btn btn--secondary">Guardar configuración</button>
+            </div>
         </form>
         <?php if ($abrOverride): ?>
         <form method="post" style="margin-top:0.5rem;"
@@ -790,7 +794,9 @@ if (!$isFullAdmin) {
         <label class="field-label">Nombre
             <input class="input" type="text" name="name" required>
         </label>
-        <button class="btn" type="submit">Crear</button>
+        <div class="form-actions-sticky">
+            <button class="btn" type="submit">Crear</button>
+        </div>
     </form>
 </div>
 <?php endif; ?>

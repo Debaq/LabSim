@@ -122,7 +122,9 @@ admin_header('Usuarios', $me);
         <label>Contraseña (mínimo 8 caracteres)
             <input type="password" name="password" required minlength="8">
         </label>
-        <button type="submit">Guardar</button>
+        <div class="form-actions-sticky">
+            <button type="submit">Guardar</button>
+        </div>
     </form>
 </div>
 

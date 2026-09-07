@@ -101,6 +101,24 @@ main { width: 100%; margin: var(--space-8) auto; padding: 0 var(--space-8); }
 
 /* Formularios: layout vertical clásico. label arriba del input, full-width. */
 form.inline { display: inline; }
+
+/* Footer de acciones sticky: pega el "Guardar / Cancelar" al borde inferior
+ * del viewport mientras se scrollea un form largo. El bg usa --color-surface
+ * (igual que la card que lo contiene) para que no se vea una costura al pasar
+ * el contenido por debajo. z-index 50 queda bajo el header sticky (100). */
+.form-actions-sticky {
+  position: sticky;
+  bottom: 0;
+  margin-top: var(--space-6);
+  padding: var(--space-4) 0;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  flex-wrap: wrap;
+  z-index: 50;
+}
 label {
   display: block;
   margin-top: 0.7rem;

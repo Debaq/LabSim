@@ -105,7 +105,9 @@ admin_header('IA Paciente (LLM)', $me);
 
         <input type="hidden" name="system_prompt_template" value="<?= htmlspecialchars($config['system_prompt_template']) ?>">
         <input type="hidden" name="oirs_prompt_template" value="<?= htmlspecialchars($config['oirs_prompt_template']) ?>">
-        <button type="submit">Guardar</button>
+        <div class="form-actions-sticky">
+            <button type="submit">Guardar</button>
+        </div>
     </form>
 </div>
 
@@ -142,7 +144,9 @@ admin_header('IA Paciente (LLM)', $me);
         <label>Plantilla (precargada con el prompt por defecto -- edítala directamente; "Restablecer" abajo la vuelve a este punto de partida)
             <textarea name="system_prompt_template" rows="16" style="width:100%; padding:0.45rem; border:1px solid var(--color-border-strong); border-radius:var(--radius-md); font-family:var(--font-mono); font-size:0.85rem;"><?= htmlspecialchars(\LlmConfig::effectivePrompt()) ?></textarea>
         </label>
-        <button type="submit">Guardar plantilla</button>
+        <div class="form-actions-sticky">
+            <button type="submit">Guardar plantilla</button>
+        </div>
     </form>
 
     <form method="post" style="display:inline;" onsubmit="return confirm('¿Restablecer al prompt por defecto? Se pierde la plantilla personalizada.');">
@@ -178,7 +182,9 @@ admin_header('IA Paciente (LLM)', $me);
         <label>Plantilla del evaluador (precargada con el prompt por defecto -- edítala directamente; "Restablecer" abajo la vuelve a este punto de partida)
             <textarea name="oirs_prompt_template" rows="16" style="width:100%; padding:0.45rem; border:1px solid var(--color-border-strong); border-radius:var(--radius-md); font-family:var(--font-mono); font-size:0.85rem;"><?= htmlspecialchars(\LlmConfig::effectiveOirsPrompt()) ?></textarea>
         </label>
-        <button type="submit">Guardar plantilla</button>
+        <div class="form-actions-sticky">
+            <button type="submit">Guardar plantilla</button>
+        </div>
     </form>
 
     <form method="post" style="display:inline;" onsubmit="return confirm('¿Restablecer al prompt por defecto? Se pierde la plantilla personalizada.');">

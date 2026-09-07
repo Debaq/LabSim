@@ -118,7 +118,9 @@ admin_header('Conexión LTI (Moodle)', $me);
         <label>JWKS URL (Moodle: "Public keyset URL")
             <input type="text" name="jwks_url" required>
         </label>
-        <button type="submit">Guardar</button>
+        <div class="form-actions-sticky">
+            <button type="submit">Guardar</button>
+        </div>
     </form>
 </div>
 
