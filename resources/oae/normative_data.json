@@ -1,5 +1,5 @@
 {
-  "comments": "Normativos por defecto para OEA clínica (TEOAE/DPOAE/SFOAE). El override por curso vive en core.app_config_store bajo 'normative_data.teoae/dpoae/sfoae' (mismo path que ABR). Sin override del curso -> se usan estos defaults + banner amarillo.",
+  "comments": "Normativos por defecto para OEA clínica (TEOAE/DPOAE/SFOAE). El override por curso vive en core.app_config_store bajo 'normative_data.teoae/dpoae/sfoae' (mismo path que ABR). Sin override del curso -> se usan estos defaults + banner amarillo. teoae.noise_floor_db_spl es el ruido de canal POR BARRIDO (no el piso final): al promediar N barridos baja ~1/sqrt(N), y con 14 dB SPL / 260 barridos un oido normal queda en ~94% de reproducibilidad y 15-21 dB de SNR por banda, que es el rango de un equipo real.",
   "teoae": {
     "default": {
       "min_snr_db": 6,
@@ -17,10 +17,10 @@
       },
       "window_ms": 20,
       "decay_ms": 8,
-      "noise_floor_db_spl": -30,
+      "noise_floor_db_spl": 14,
       "default_level_db_spl": 60,
       "default_n_sweeps": 260,
-      "stim_jitter_db": 0.8,
+      "stim_jitter_db": 0.3,
       "stim_jitter_tolerance_db": 3.0,
       "min_reproducibility_pct": 70,
       "min_stability_pct": 80
