@@ -11,7 +11,7 @@ requiere filtfilt y butter). Verifica:
 
 Para ejecutar el pipeline completo se necesita scipy.signal disponible;
 eso queda fuera del sandbox pero ya fue probado manualmente con el smoke
-test equivalente de ABR_generator_v3.
+test equivalente de ABR_generator.
 """
 
 import sys

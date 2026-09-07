@@ -1397,7 +1397,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 </div>
 <div class="card">
     <strong>Vista previa: serie 100&rarr;0 dBnHL</strong>
-    <p class="legend help">Simulación simplificada (sin ruido ni promediación) de cómo se vería la serie de intensidades para este oído, según la patología y desviaciones cargadas arriba. Se redibuja solo, en vivo, al tipear. Es referencia visual para el docente -- el generador real (con ruido, FSP y promediación) es el que corre en el equipo del alumno, ver <code>ABR_generator_v3.py</code>.</p>
+    <p class="legend help">Simulación simplificada (sin ruido ni promediación) de cómo se vería la serie de intensidades para este oído, según la patología y desviaciones cargadas arriba. Se redibuja solo, en vivo, al tipear. Es referencia visual para el docente -- el generador real (con ruido, FSP y promediación) es el que corre en el equipo del alumno, ver <code>ABR_generator.py</code>.</p>
     <div class="two-col">
         <div>
             <strong style="color:#b33a3a;">OD</strong>
@@ -1735,7 +1735,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 // baseline parte esa población. Los baselines de onda I/III/V (ABR_DEFAULT)
 // y los rangos por patología (threshold_range, wave_I_reduction,
 // interpeak_prolongation, etc.) son los mismos que usa
-// resources/abr/normative_data.json / ABR_generator_v3 -- mantener
+// resources/abr/normative_data.json / ABR_generator -- mantener
 // sincronizado a mano si esos cambian (mismo criterio que la normativa por
 // curso en courses.php). ABR_AUTHOR_CATALOG sale de AppConfig
 // ('abr_reference_authors', global, ver admin/normativas.php).
@@ -1862,7 +1862,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 
     // Los 6 campos de onda se muestran como valor ABSOLUTO a 80dB (lo que el
     // docente quiere fijar), pero se guardan como desviacion respecto del
-    // normativo (lo que espera CaseBuilder.php/ABR_generator_v3.py -- cambiar
+    // normativo (lo que espera CaseBuilder.php/ABR_generator.py -- cambiar
     // ese contrato es un cambio de esquema más grande, no solo de este
     // formulario). El input visible (.abr-abs-input) no tiene name, no se
     // manda; el hidden (.abr-delta-input, mismo name de siempre) es el que
@@ -1962,15 +1962,15 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     }
 
     // Vista previa en vivo: serie 100->0 dBnHL, version limpia (sin ruido,
-    // sin promediacion, sin filtros) de ABRGeneratorV3.calculate_wave_parameters
-    // + build_target_curve (ver src/abr/ABR_generator_v3.py) restringida a
+    // sin promediacion, sin filtros) de ABRGenerator.calculate_wave_parameters
+    // + build_target_curve (ver src/abr/ABR_generator.py) restringida a
     // I/III/V -- las mismas ondas que el formulario deja editar. Solo para
     // que el docente vea el efecto de sus valores, no reemplaza al generador
     // real (que corre server-side/en el cliente con ruido y FSP).
     var WAVE_SIGMA_PREVIEW = { I: 0.22, III: 0.22, V: 0.18 };
     var ABR_PREVIEW_INTENSITIES = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0];
 
-    // Mismo quiebre que ABRGeneratorV3.calculate_wave_parameters (ABR_generator_v3.py):
+    // Mismo quiebre que ABRGenerator.calculate_wave_parameters (ABR_generator.py):
     // ~0.08ms/10dB cerca del techo (80-70dB), ~0.3ms/10dB de ahi para abajo
     // (Hood: ~0.3ms/10dB entre 70 y 50dB).
     function latShiftForIntensity(intensity) {

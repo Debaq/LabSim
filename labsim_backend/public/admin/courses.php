@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Lo que se configura por curso es cuánto se desvía cada
             // estímulo (chirp/ls-chirp/burst) respecto a ESE click, como
             // ratio (lat_ratio/amp_ratio) por onda I/III/V -- ver
-            // ABR_generator_v3.py::get_baseline_values. Reemplaza el
+            // ABR_generator.py::get_baseline_values. Reemplaza el
             // override completo cada guardado (no hace merge con el
             // anterior), así un campo que se deja vacío a propósito vuelve
             // a heredar el default de la app.
@@ -682,7 +682,7 @@ if ($detailId !== null) {
             El click de cada paciente lo define el caso (case_create.php, campo "desviaciones") -- acá NO se edita click. Esto configura cuánto se desvían chirp/ls-chirp/burst respecto al click de ESE paciente, como factor multiplicador (ratio) por onda -- ej. amp_ratio 1.4 en onda V de "Chirp" = la V del chirp sale 40% más grande que la V (ya ajustada) del click de ese caso. Los campos muestran el valor por defecto de la app; tocalos para sobreescribir, dejalos como están para no cambiar nada.
         </p>
         <?php
-            // Ver ABR_generator_v3.py::get_baseline_values -- valores por
+            // Ver ABR_generator.py::get_baseline_values -- valores por
             // defecto (adult_female, vía aérea) de resources/abr/normative_data.json.
             // Mantener sincronizado a mano si ese JSON cambia (repos separados).
             $abrStimDefaults = [

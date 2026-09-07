@@ -23,7 +23,7 @@ class AbrControl(QWidget, Ui_Abr_Config):
     def randomize_initial_values(self) -> None:
         """sb_prom y sb_rate no traen 'value' en el .ui -> arrancan en 0.
         Con promediaciones=0 el generador queda en puro ruido para siempre
-        (ver ABR_generator_v3.calculate_growth, target_avg<=0 -> growth=0).
+        (ver ABR_generator.calculate_growth, target_avg<=0 -> growth=0).
         No les ponemos un default fijo "correcto" a proposito -- el alumno
         tiene que aprender a leer y configurar el equipo, no copiar un
         numero que ya viene puesto. Se randomiza en un rango realista para

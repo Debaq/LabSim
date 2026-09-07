@@ -1,7 +1,7 @@
 """
 VEMP Generator V1 - Modelo morfológico por suma de gaussianas.
 
-Adaptación del pipeline de ABR_generator_v3 a VEMP (CVEMP/OVEMP/MVEMP).
+Adaptación del pipeline de ABR_generator a VEMP (CVEMP/OVEMP/MVEMP).
 Tres subtipos con picos clínicos reales (P13/N23 cervical, N10/P16 ocular,
 P13/N23 masetero), ventana temporal más larga (35ms vs 12ms de ABR), peaks
 más anchos (sigma ~0.4ms vs 0.2ms por ser respuesta electromiogénica, no

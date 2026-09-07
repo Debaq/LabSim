@@ -28,7 +28,7 @@ const ABR_POPULATION_LABELS = [
 ];
 
 // Mismos números que el pseudo-autor "LabSim (default)" hardcodeado en
-// case_create.php y que ABR_generator_v3.py trae de fábrica en
+// case_create.php y que ABR_generator.py trae de fábrica en
 // resources/abr/normative_data.json (población "click", vía aérea).
 // Mantener sincronizado a mano si ese JSON cambia -- es el punto de
 // referencia (offset 0) contra el que se calculan los demás autores.

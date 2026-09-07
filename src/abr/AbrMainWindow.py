@@ -12,7 +12,7 @@ definición ABR en cases.data['ABR']['OD'/'OI'] (ver CaseBuilder.php).
 """
 import os
 
-from abr.ABR_generator_v3 import ABR_Curve
+from abr.ABR_generator import ABR_Curve
 from abr.AbrControl import AbrControl
 from abr.AbrDetail import AbrDetail
 from abr.AbrDetailAllCurves import AbrDetailAllCurves

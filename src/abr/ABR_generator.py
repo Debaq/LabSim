@@ -1,12 +1,13 @@
 """
-ABR Generator V3 - Modelo morfológico realista.
+Generador ABR - Modelo morfológico realista.
 
-Diferencias vs V2:
+Único generador ABR de la app (reemplazó al modelo Bézier previo, borrado
+junto con abr/bezier_prop.py):
 - Ondas = suma de gaussianas centradas en cada latencia (no Bézier).
 - Bézier aplastaba picos y generaba valles profundos entre ondas (1.25-1.6x amp).
-- Valles entre ondas ahora pequenos (~10-20% amp), morfologia ABR real.
+- Valles entre ondas pequenos (~10-20% amp), morfologia ABR real.
 - Baseline comun ~0 con drift LF, no escalonamiento por onda.
-- Ondas VI (trough negativo) y VII (bump tardio) renderizadas con morfologia propia.
+- Ondas VI (trough negativo) y VII (bump tardio) con morfologia propia.
 - Ruido EEG = pink (1/f) + EMG HF, no blanco+butter.
 - FSP como SNR creciente (ruido ~ 1/sqrt(N)), no mezcla lineal caos-objetivo.
 - Filtros = solo butterworth, sin hacks morfológicos.
@@ -34,7 +35,7 @@ WAVE_SIGMA = {
 }
 
 
-class ABRGeneratorV3:
+class ABRGenerator:
     """Generador de curvas ABR con morfologia realista."""
 
     def __init__(self, normative_data_path=None):
@@ -45,7 +46,6 @@ class ABRGeneratorV3:
 
     # =====================================================================
     # VALORES NORMATIVOS Y PARAMETROS POR ONDA
-    # (Misma logica que V2; mantiene compatibilidad con JSON)
     # =====================================================================
 
     def get_baseline_values(self, population='adult_female',
@@ -580,7 +580,7 @@ class ABRGeneratorV3:
 
 
 # ============================================================================
-# Interfaz compatible con V2 (misma firma -> drop-in)
+# Interfaz publica: la usa AbrMainWindow
 # ============================================================================
 
 _generator = None
@@ -589,7 +589,7 @@ _generator = None
 def _get_generator():
     global _generator
     if _generator is None:
-        _generator = ABRGeneratorV3()
+        _generator = ABRGenerator()
     return _generator
 
 
@@ -607,7 +607,7 @@ STIM_MAP = {
 
 def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom, done):
     """
-    Misma firma que V2. Genera curva ABR con modelo morfolgico realista.
+    Genera curva ABR con modelo morfolgico realista.
     """
     generator = _get_generator()
 
