@@ -184,8 +184,15 @@ class SoaeGenerator(OaeGeneratorBase):
             level = float(np.clip(rng.normal(lvl_mean, lvl_sd), -12.0, lvl_max))
             # Patología + perfil por frecuencia + pérdida por sello: un
             # SOAE de 2 dB SPL con 20 dB de atenuación ya no sale del ruido.
-            level -= oae_attenuation_db(case, f)
-            peaks.append({"freq_hz": f, "level_db_spl": level})
+            atten = oae_attenuation_db(case, f)
+            # Los SOAE son el hallazgo más frágil de las cuatro pruebas: se
+            # apagan con daño de CCE mucho antes de que caiga la TEOAE, así
+            # que por sobre max_atten_for_peaks_db el pico directamente no
+            # existe (y no queda a merced de que el sorteo le diera un nivel
+            # alto). Ver la nota de patología en el docstring del módulo.
+            if atten > float(self.normative["max_atten_for_peaks_db"]):
+                continue
+            peaks.append({"freq_hz": f, "level_db_spl": level - atten})
         peaks.sort(key=lambda p: p["freq_hz"])
         return peaks
 

@@ -52,18 +52,74 @@ final class CaseBuilder
     // resources/oae/normative_data.json.
     public const EOAS_FREQS = [500, 1000, 1500, 2000, 3000, 4000, 6000, 8000];
 
-    // Desviación por frecuencia (dB) preseteada por patología, para el
-    // botón "Autocompletar" del formulario: la coclear típica cae en
-    // agudos, la de transmisión atenúa parejo con algo más en graves
-    // (el oído medio transmite peor los graves de vuelta), la neural
-    // deja la OEA intacta. Son valores de partida editables, no fijos
-    // (memoria no_fixed_teaching_defaults: el docente ajusta el caso).
-    public const EOAS_AUTOFILL_DELTAS = [
+    // Tope de atenuación por patología, en dB. Espejo de
+    // MAX_PATHOLOGY_ATTEN_DB en src/oae/generators/base.py (cliente):
+    // pasado ese punto la OEA ya está bajo el piso de ruido.
+    public const EOAS_MAX_PATHOLOGY_ATTEN_DB = 45.0;
+
+    // Perfiles del botón "Autocompletar" del tab EOA, por patología y GRADO.
+    //
+    // Antes esto era una tabla de desviaciones fijas por patología y el
+    // botón NO tocaba el umbral: como el umbral default es 20 dB y la
+    // atenuación coclear arranca sobre 15 dB HL, un caso marcado "coclear"
+    // sin tocar el umbral a mano daba exactamente la misma pantalla que un
+    // normal. De ahí que todos los casos salieran normales y que no
+    // hubiera cocleares de distinto nivel.
+    //
+    // Ahora cada grado define el rango de umbral (dB HL) que se sortea y
+    // cuánto pesa la forma de caída por frecuencia (`shape`, dB por unidad
+    // de escala). Es un punto de partida al azar dentro de un rango
+    // clínicamente razonable -- el docente edita cualquier campo después
+    // (mismo criterio que el autocompletar de ABR, y la memoria de no
+    // fijar defaults "correctos" en lo que el alumno debe aprender a leer).
+    //
+    // `shape` de coclear cae en agudos (las CCE basales son las primeras en
+    // morir); la de transmisión atenúa parejo con algo más en graves (el
+    // oído medio devuelve peor los graves); neural deja la cóclea intacta.
+    public const EOAS_AUTOFILL_SHAPES = [
         'normal'       => [500 => 0, 1000 => 0, 1500 => 0, 2000 => 0, 3000 => 0, 4000 => 0, 6000 => 0, 8000 => 0],
-        'coclear'      => [500 => 0, 1000 => 1, 1500 => 2, 2000 => 3, 3000 => 5, 4000 => 8, 6000 => 10, 8000 => 12],
-        'transmission' => [500 => 6, 1000 => 5, 1500 => 4, 2000 => 4, 3000 => 3, 4000 => 3, 6000 => 3, 8000 => 3],
+        'coclear'      => [500 => 0.4, 1000 => 0.7, 1500 => 1.0, 2000 => 1.4, 3000 => 2.0, 4000 => 2.6, 6000 => 3.2, 8000 => 3.8],
+        'transmission' => [500 => 2.4, 1000 => 2.0, 1500 => 1.7, 2000 => 1.6, 3000 => 1.4, 4000 => 1.3, 6000 => 1.3, 8000 => 1.3],
         'neural'       => [500 => 0, 1000 => 0, 1500 => 0, 2000 => 0, 3000 => 0, 4000 => 0, 6000 => 0, 8000 => 0],
     ];
+
+    // Grados por patología: [clave, etiqueta, rango de umbral dB HL, rango
+    // de escala de la forma, rango de ruido del paciente, rango de sello].
+    // El primer grado de cada patología es el que se usa si el select viene
+    // vacío; "random" (en el formulario) sortea entre todos.
+    public const EOAS_AUTOFILL_GRADES = [
+        'normal' => [
+            ['key' => 'normal', 'label' => 'Normal (OEA presente)',
+             'umbral' => [0, 15], 'scale' => [0, 0.6], 'ruido' => [0, 2], 'sello' => [85, 97]],
+        ],
+        'coclear' => [
+            // Con 1.2 dB/dB sobre 15 dB HL: 22 dB HL -> 8 dB de atenuación
+            // (OEA presente pero chica), 32 -> 20 dB (REFER en agudos),
+            // 50+ -> 42 dB y tope (ausente en todas las bandas).
+            ['key' => 'leve', 'label' => 'Coclear leve (OEA reducida, aún presente)',
+             'umbral' => [20, 27], 'scale' => [0.6, 1.4], 'ruido' => [0, 3], 'sello' => [80, 95]],
+            ['key' => 'moderada', 'label' => 'Coclear moderada (REFER en agudos)',
+             'umbral' => [30, 40], 'scale' => [1.4, 2.4], 'ruido' => [0, 4], 'sello' => [75, 92]],
+            ['key' => 'severa', 'label' => 'Coclear severa (OEA ausente)',
+             'umbral' => [45, 70], 'scale' => [2.4, 3.4], 'ruido' => [0, 4], 'sello' => [70, 92]],
+        ],
+        'transmission' => [
+            ['key' => 'leve', 'label' => 'Transmisión leve (OEA presente y atenuada)',
+             'umbral' => [10, 18], 'scale' => [0.8, 1.6], 'ruido' => [1, 5], 'sello' => [70, 88]],
+            ['key' => 'moderada', 'label' => 'Transmisión moderada (OEA ausente)',
+             'umbral' => [25, 45], 'scale' => [1.6, 2.6], 'ruido' => [1, 6], 'sello' => [60, 85]],
+        ],
+        'neural' => [
+            // La cóclea está sana: la OEA queda normal por más alto que
+            // esté el umbral. Es el contraste con el ABR del mismo caso.
+            ['key' => 'neural', 'label' => 'Neuropatía (OEA conservada, ABR alterado)',
+             'umbral' => [25, 70], 'scale' => [0, 0.6], 'ruido' => [0, 3], 'sello' => [80, 95]],
+        ],
+    ];
+
+    // Jitter (dB) que se suma a cada frecuencia del perfil autocompletado,
+    // para que dos casos del mismo grado no queden calcados.
+    public const EOAS_AUTOFILL_JITTER_DB = 1.2;
 
     // SOAE (emisiones espontáneas): solo ~40-50% de los oídos normales
     // las tienen, así que en 'auto' el cliente las sortea (determinístico

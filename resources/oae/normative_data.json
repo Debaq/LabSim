@@ -61,7 +61,8 @@
   },
   "sfoae": {
     "default": {
-      "min_magnitude_db": 0,
+      "noise_floor_db": -12,
+      "min_snr_db": 6,
       "default_freq_hz": 1000,
       "default_level_db_spl": 40,
       "suppressor_min_db_spl": 0,
@@ -85,6 +86,7 @@
   "soae": {
     "comments": "SOAE = emisiones ESPONTANEAS (registro en silencio, sin estimulo). prevalence_pct + prevalence_right_ear_factor deciden si ese oido tiene SOAE (no todos los oidos normales los tienen: ~40-50%); peak_* es la distribucion de frecuencia/nivel de los picos (agrupados en 1-2 kHz, mediana cercana a 0 dB SPL, separacion minima ~6% entre picos del mismo oido); min_snr_db (pico sobre el piso local) y min_snr_half_db (reproducible en las dos mitades A/B del registro) son el criterio de deteccion. noise_floor_db_spl es el nivel MEDIO del ruido del conducto: sin estimulo no hay promediacion coherente, asi que promediar NO lo baja -- lo que baja es la dispersion bin a bin (~4.34/sqrt(k) dB), y por eso los picos emergen al final del registro. valid_floor_max_db_spl es el piso medio (1-4 kHz) sobre el cual el registro se informa como no concluyente en vez de 'sin SOAE'.",
     "default": {
+      "max_atten_for_peaks_db": 10,
       "fft_n": 8192,
       "spectrum_low_hz": 500,
       "spectrum_high_hz": 7000,

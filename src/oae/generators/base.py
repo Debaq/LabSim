@@ -104,6 +104,13 @@ class OaeGeneratorBase:
         self._seed = seed if seed is not None else self._seed_from_params()
 
 
+# Tope de la atenuación por patología. Una emisión normal ronda 8-15 dB
+# sobre un piso de ruido de -20: 45 dB de atenuación ya la deja muy por
+# debajo del piso (AUSENTE en cualquier prueba), y más que eso no cambia
+# nada en pantalla.
+MAX_PATHOLOGY_ATTEN_DB = 45.0
+
+
 def _case_num(case: dict | None, key: str, default: float) -> float:
     """Lee un número del perfil EOA del caso, tolerando casos viejos.
 
@@ -154,8 +161,9 @@ def oae_freq_delta_db(case: dict | None, freq_hz: float | None) -> float:
 def oae_probe_fit(case: dict | None) -> float | None:
     """Sello de sonda objetivo (0-1) configurado para este oído, o None.
 
-    None = el caso no lo trae (caso viejo o modo demo): el probe check
-    sortea un sello bueno como antes y no se penaliza el nivel.
+    None = el caso no lo trae (caso viejo, guardado antes del perfil por
+    oído): el probe check sortea un sello bueno como antes y no se
+    penaliza el nivel.
     """
     if not case:
         return None
@@ -205,12 +213,16 @@ def oae_attenuation_db(case_ear: dict | None, freq_hz: float | None = None) -> f
 
     1) Patología (`type` + `umbral`, mismo shape que ABR):
        - normal: sin atenuación.
-       - coclear: daño de células ciliadas externas -> clínicamente la OEA
-         ya no es rescatable por sobre ~35-40 dB HL, así que la pendiente es
-         pronunciada (3 dB de atenuación por dB de umbral sobre 20 dB HL)
-         para que el REFER aparezca en ese rango, no recién a 55+ dB HL.
+       - coclear: daño de células ciliadas externas. 1.2 dB de atenuación
+         por dB de umbral sobre 15 dB HL, así la OEA sale presente pero
+         reducida en 20-25 dB HL, parcial en 30, y ausente sobre 35-40 dB
+         HL (que es donde la clínica la da por perdida). Con los 3 dB/dB
+         anteriores el salto de "presente" a "ausente" ocurría en 7 dB de
+         umbral (20->27): no había forma de armar una coclear leve,
+         moderada y severa que se vieran distintas en pantalla.
        - transmission: la pérdida conductiva atenúa la ida Y la vuelta del
-         sonido por el oído medio (~2.5x el umbral aprox.).
+         sonido por el oído medio (2 dB/dB sobre 8 dB HL): una conductiva
+         mínima deja la OEA presente y chica, una de 20+ dB la borra.
        - neural: cóclea intacta (neuropatía/retrococlear) -> la OEA se
          mantiene normal aunque el umbral conductual esté elevado. Es el
          contraste clínico clave con ABR (que sí sale alterado en 'neural').
@@ -218,15 +230,19 @@ def oae_attenuation_db(case_ear: dict | None, freq_hz: float | None = None) -> f
        más la pérdida por sello de sonda (ver oae_probe_loss_db).
     3) El perfil por frecuencia, si el llamador pasa `freq_hz` (ver
        oae_freq_delta_db) -- así una muesca en 4 kHz no aplana toda la curva.
+
+    La atenuación por patología se topa en MAX_PATHOLOGY_ATTEN_DB: pasado
+    ese punto la OEA ya está bajo el piso de ruido, y seguir restando solo
+    daba números irreales (un umbral de 70 daba 150 dB de atenuación).
     """
     if not case_ear:
         return 0.0
     tipo = case_ear.get("type", "normal")
     umbral = float(case_ear.get("umbral", 20) or 0)
     if tipo == "coclear":
-        patologia = max(0.0, umbral - 20.0) * 3.0
+        patologia = min(max(0.0, umbral - 15.0) * 1.2, MAX_PATHOLOGY_ATTEN_DB)
     elif tipo == "transmission":
-        patologia = max(0.0, umbral) * 2.5
+        patologia = min(max(0.0, umbral - 8.0) * 2.0, MAX_PATHOLOGY_ATTEN_DB)
     else:
         patologia = 0.0
     return (patologia

@@ -1428,10 +1428,18 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <label>Umbral (dB)
             <input type="number" name="eoas[<?= $lado ?>][umbral]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['umbral'] ?? (string) CaseBuilder::EOAS_DEFAULTS['umbral'])) ?>">
         </label>
+        <label>Grado a sortear
+            <select name="eoas_grade[<?= $lado ?>]" class="eoas-grade-select" data-lado="<?= $lado ?>">
+                <option value="random">Aleatorio (sortea grado)</option>
+            </select>
+        </label>
+    </div>
+    <div class="three-col">
         <label style="align-self:end;">&nbsp;
             <button type="button" class="secondary eoas-autofill-btn" data-lado="<?= $lado ?>">Autocompletar según patología</button>
         </label>
     </div>
+    <p class="legend help">"Autocompletar" sortea un caso plausible del grado elegido: umbral, perfil por frecuencia y condiciones de registro (ruido, sello, variabilidad). Las opciones de grado cambian según la patología -- en coclear van de leve (OEA presente pero reducida) a severa (ausente). Es un punto de partida al azar, no un valor fijo: se puede editar cualquier campo después. El grado NO se guarda en el caso, solo los números que deja escritos.</p>
     <p class="legend">Condiciones de registro de este oído -- lo que hace que dos pacientes con la misma cóclea no den la misma pantalla.</p>
     <div class="three-col">
         <label>Atenuación extra (dB)
@@ -2118,7 +2126,10 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 // (app_config normative_data.teoae/dpoae/soae/sfoae).
 (function () {
     var EOAS_FREQS = <?= json_encode(CaseBuilder::EOAS_FREQS) ?>;
-    var EOAS_AUTOFILL = <?= json_encode(CaseBuilder::EOAS_AUTOFILL_DELTAS) ?>;
+    var EOAS_SHAPES = <?= json_encode(CaseBuilder::EOAS_AUTOFILL_SHAPES) ?>;
+    var EOAS_GRADES = <?= json_encode(CaseBuilder::EOAS_AUTOFILL_GRADES, JSON_UNESCAPED_UNICODE) ?>;
+    var EOAS_JITTER = <?= CaseBuilder::EOAS_AUTOFILL_JITTER_DB ?>;
+    var EOAS_MAX_ATTEN = <?= CaseBuilder::EOAS_MAX_PATHOLOGY_ATTEN_DB ?>;
     var DP = {
         f2List: [1000, 1500, 2000, 3000, 4000, 6000, 8000],
         peakF2: 3000, peakDb: 12, rollLow: 4, rollHigh: 7,
@@ -2151,10 +2162,12 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         return document.querySelector('[name="eoas[' + lado + '][desv][' + hz + ']"]');
     }
 
-    // Mismo criterio que oae_attenuation_db() en src/oae/generators/base.py.
+    // Mismo criterio que oae_attenuation_db() en src/oae/generators/base.py
+    // (1.2 dB/dB sobre 15 dB HL en coclear, 2 sobre 8 en transmisión, con
+    // tope EOAS_MAX_PATHOLOGY_ATTEN_DB). Si se toca allá, tocar acá.
     function pathologyAtten(type, umbral) {
-        if (type === 'coclear') { return Math.max(0, umbral - 20) * 3; }
-        if (type === 'transmission') { return Math.max(0, umbral) * 2.5; }
+        if (type === 'coclear') { return Math.min(Math.max(0, umbral - 15) * 1.2, EOAS_MAX_ATTEN); }
+        if (type === 'transmission') { return Math.min(Math.max(0, umbral - 8) * 2, EOAS_MAX_ATTEN); }
         return 0;
     }
 
@@ -2213,14 +2226,71 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         return resp - nf;
     }
 
+    function eoasRand(min, max) { return min + Math.random() * (max - min); }
+
+    function gradesFor(type) {
+        return EOAS_GRADES[type] || EOAS_GRADES['normal'];
+    }
+
+    // Grado elegido en el select del oído; "random" (o un valor que ya no
+    // exista para esa patología) sortea entre los grados de la patología.
+    function pickGrade(lado) {
+        var grades = gradesFor(typeVal(lado));
+        var sel = document.querySelector('[name="eoas_grade[' + lado + ']"]');
+        var key = sel ? sel.value : 'random';
+        for (var i = 0; i < grades.length; i++) {
+            if (grades[i].key === key) { return grades[i]; }
+        }
+        return grades[Math.floor(Math.random() * grades.length)];
+    }
+
+    // Rellena el select de grado con los grados de la patología actual.
+    // Se llama al cargar y cada vez que cambia la patología del oído.
+    function syncGradeOptions(lado) {
+        var sel = document.querySelector('[name="eoas_grade[' + lado + ']"]');
+        if (!sel) { return; }
+        var grades = gradesFor(typeVal(lado));
+        var previo = sel.value;
+        var html = '<option value="random">Aleatorio (sortea grado)</option>';
+        for (var i = 0; i < grades.length; i++) {
+            html += '<option value="' + grades[i].key + '">' + grades[i].label + '</option>';
+        }
+        sel.innerHTML = html;
+        sel.value = 'random';
+        for (var j = 0; j < grades.length; j++) {
+            if (grades[j].key === previo) { sel.value = previo; }
+        }
+    }
+
+    function setNumField(lado, field, value, decimals) {
+        var el = numField(lado, field);
+        if (el) { el.value = decimals ? value.toFixed(decimals) : String(Math.round(value)); }
+    }
+
+    // "Autocompletar": sortea un caso plausible del grado elegido -- umbral,
+    // perfil por frecuencia y condiciones de registro. Antes solo escribía
+    // desviaciones fijas y dejaba el umbral en 20, así que un "coclear"
+    // recién creado no se distinguía de un normal en ninguna de las cuatro
+    // pruebas. Es un punto de partida al azar, editable campo a campo.
     function autofillEoas(lado) {
         var type = typeVal(lado);
-        var deltas = EOAS_AUTOFILL[type] || EOAS_AUTOFILL['normal'];
+        var grade = pickGrade(lado);
+        var shape = EOAS_SHAPES[type] || EOAS_SHAPES['normal'];
+        var scale = eoasRand(grade.scale[0], grade.scale[1]);
+        setNumField(lado, 'umbral', eoasRand(grade.umbral[0], grade.umbral[1]));
         for (var i = 0; i < EOAS_FREQS.length; i++) {
             var hz = EOAS_FREQS[i];
             var el = desvInput(lado, hz);
-            if (el) { el.value = deltas[String(hz)] !== undefined ? deltas[String(hz)] : 0; }
+            if (!el) { continue; }
+            var base = shape[String(hz)] !== undefined ? shape[String(hz)] : 0;
+            var jitter = eoasRand(-EOAS_JITTER, EOAS_JITTER);
+            el.value = Math.max(0, base * scale + jitter).toFixed(1);
         }
+        // Condiciones de registro: son las que hacen que dos pacientes con
+        // la misma cóclea no den la misma pantalla.
+        setNumField(lado, 'ruido_db', eoasRand(grade.ruido[0], grade.ruido[1]), 1);
+        setNumField(lado, 'sello_pct', eoasRand(grade.sello[0], grade.sello[1]));
+        setNumField(lado, 'variabilidad_db', eoasRand(1.5, 3.5), 1);
         drawEoaPreview();
     }
 
@@ -2323,6 +2393,15 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     for (var i = 0; i < eoasButtons.length; i++) {
         eoasButtons[i].addEventListener('click', function (e) {
             autofillEoas(e.target.getAttribute('data-lado'));
+        });
+    }
+    // Los grados dependen de la patología del oído: se recargan al cambiarla
+    // (una coclear tiene leve/moderada/severa, una neural una sola).
+    var eoasTypeSelects = document.querySelectorAll('.eoas-type-select');
+    for (var t = 0; t < eoasTypeSelects.length; t++) {
+        syncGradeOptions(eoasTypeSelects[t].getAttribute('data-lado'));
+        eoasTypeSelects[t].addEventListener('change', function (e) {
+            syncGradeOptions(e.target.getAttribute('data-lado'));
         });
     }
     drawEoaPreview();
