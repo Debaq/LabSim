@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from oae.generators.base import oae_probe_fit
 from oae.generators.teoae import TeoaeGenerator
 from oae.widgets.probe_check import ProbeCheckWidget
 from oae.widgets.plot_style import style_plot, black_title
@@ -313,7 +314,7 @@ class TeoaePanel(QWidget):
         self.lbl_status.setText("Chequeando sonda...")
         self.btn_start.setEnabled(False)
         self.btn_stop.setEnabled(True)
-        self.probe.start(self.spn_level.value())
+        self.probe.start(self.spn_level.value(), oae_probe_fit(case))
         # Chequeo de sonda animado real (QTimer del probe) antes de generar
         # la captura -- generate() es síncrono y bloquea el loop de eventos,
         # así que si se llama en la misma vuelta el timer del probe nunca

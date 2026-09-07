@@ -36,8 +36,8 @@ legend { font-weight: 600; padding: 0 var(--space-2); }
 input[readonly] { background: var(--color-row-alt); color: var(--color-muted); }
 
 /* Preview ABR (case_create.php): serie de curvas 100->0 dBnHL, una por oído */
-.abr-preview { width: 100%; overflow-x: auto; }
-.abr-preview svg { width: 100%; height: auto; display: block; }
+.abr-preview, .eoa-preview { width: 100%; overflow-x: auto; }
+.abr-preview svg, .eoa-preview svg { width: 100%; height: auto; display: block; }
 
 /* Tabs de la ficha (Audiometría, Otoscopia, Reflejos, etc.).
  * Sin JS, todas las pestañas visibles apiladas -- degrada con gracia. */

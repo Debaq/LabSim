@@ -62,14 +62,24 @@ class ProbeCheckWidget(QWidget):
         self._running = False
         self._rng = np.random.default_rng()
 
-    def start(self, level_db: float = 60.0):
+    def start(self, level_db: float = 60.0, fit_target: float | None = None):
+        """`fit_target` (0-1) es el sello que el docente configuró para ese
+        oído en el caso (EOAS['sello_pct']). Sin caso configurado se sortea
+        un sello bueno, como antes."""
         if self._running:
             return
         self.level_db = float(level_db)
+        if fit_target is None:
+            self.target_fit = float(self._rng.uniform(0.72, 0.95))
+        else:
+            # Variación chica alrededor del objetivo: dos inserciones del
+            # mismo paciente no dan el mismo sello exacto.
+            self.target_fit = float(np.clip(
+                self._rng.normal(float(fit_target), 0.03), 0.05, 1.0))
         # El sello arranca flojo y se acomoda: el alumno ve el trazo crecer y
         # estabilizarse, que es lo que pasa al insertar la sonda de verdad.
-        self.fit_quality = float(self._rng.uniform(0.2, 0.4))
-        self.target_fit = float(self._rng.uniform(0.72, 0.95))
+        self.fit_quality = float(min(self._rng.uniform(0.2, 0.4),
+                                     self.target_fit))
         self.timer.start(self.TICK_MS)
         self._running = True
 

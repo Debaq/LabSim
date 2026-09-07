@@ -34,6 +34,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from oae.generators.base import oae_probe_fit
 from oae.generators.dpoae import DpoaeGenerator
 from oae.widgets.probe_check import ProbeCheckWidget
 from oae.widgets.plot_style import style_plot, black_title
@@ -366,7 +367,7 @@ class DpoaePanel(QWidget):
         self.lbl_status.setText("Chequeando sonda...")
         self.btn_start.setEnabled(False)
         self.btn_stop.setEnabled(True)
-        self.probe.start(self.spn_l2.value())
+        self.probe.start(self.spn_l2.value(), oae_probe_fit(case))
         # El probe check corre con su propio QTimer: si generamos la captura
         # en esta misma vuelta del event loop, la animación de la sonda no
         # alcanza a pintar ni un frame (mismo patrón que TEOAE).

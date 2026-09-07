@@ -16,7 +16,12 @@ el piso de ruido baja ~10*log10(k) mientras el DP se estabiliza.
   mismo formato de puntos, para que se construya en la misma corrida.
 """
 import numpy as np
-from oae.generators.base import OaeGeneratorBase, oae_attenuation_db
+from oae.generators.base import (
+    OaeGeneratorBase,
+    oae_attenuation_db,
+    oae_noise_offset_db,
+    oae_variability_db,
+)
 
 
 class DpoaeGenerator(OaeGeneratorBase):
@@ -67,16 +72,19 @@ class DpoaeGenerator(OaeGeneratorBase):
         lr = np.log2(ref)
         return np.interp(lf, lr, low), np.interp(lf, lr, high)
 
-    def _noise_floor_db(self, f2_hz: float) -> float:
+    def _noise_floor_db(self, f2_hz: float, case: dict | None = None) -> float:
         """Piso de ruido final esperado en ese f2.
 
         El ruido en el conducto es de baja frecuencia: el piso sube hacia
         los graves (por eso en un DP-grama real el punto de 1 kHz es el
         que más seguido queda tapado por ruido) y es plano en agudos.
+        `case` puede subirlo parejo (paciente inquieto -- ver
+        oae_noise_offset_db).
         """
         nf = float(self.normative["noise_floor_db_spl"])
         rise = float(self.normative["noise_floor_lf_rise_db_per_oct"])
-        return nf + rise * max(0.0, np.log2(2000.0 / f2_hz))
+        return (nf + rise * max(0.0, np.log2(2000.0 / f2_hz))
+                + oae_noise_offset_db(case))
 
     def _clean_dp_db(self, f2_hz: float, l1_db: float, l2_db: float,
                      atten_db: float) -> float:
@@ -191,16 +199,21 @@ class DpoaeGenerator(OaeGeneratorBase):
         """
         rng = np.random.default_rng(self._seed_from_params(ear, l1_db, l2_db))
         self._rng = rng
-        atten = oae_attenuation_db(case)
         ratio = float(self.normative["f2_f1_ratio"])
         min_snr = float(self.normative["min_dp_above_noise_db"])
+        # Estructura fina del DP-grama: cuánto se aparta punto a punto de la
+        # curva teórica. Configurable por caso (0 = curva de libro).
+        var_db = oae_variability_db(case, 1.5)
 
         points = []
         for f2 in self.f2_list():
-            clean = self._clean_dp_db(f2, l1_db, l2_db, atten)
-            # Variación biológica del punto (estructura fina de la OEA).
-            clean += rng.normal(0, 1.5)
-            nf_final = self._noise_floor_db(f2) + rng.normal(0, 1.5)
+            # La atenuación se pide POR f2: además de la patología, el caso
+            # puede traer un perfil por frecuencia (muesca en 4 kHz, caída
+            # en agudos), que se aplana si se calcula una sola vez.
+            clean = self._clean_dp_db(f2, l1_db, l2_db,
+                                      oae_attenuation_db(case, f2))
+            clean += rng.normal(0, var_db)
+            nf_final = self._noise_floor_db(f2, case) + rng.normal(0, 1.5)
             frames = self._point_frames(f2, l1_db, l2_db, clean, nf_final, rng)
             final = frames[-1]
             points.append({
@@ -246,7 +259,7 @@ class DpoaeGenerator(OaeGeneratorBase):
         """
         f2 = float(f2_hz or self.normative["io_f2_hz"])
         rng = np.random.default_rng(self._seed_from_params(ear, f2, "io"))
-        atten = oae_attenuation_db(case)
+        atten = oae_attenuation_db(case, f2)
         min_snr = float(self.normative["min_dp_above_noise_db"])
 
         l2_list = np.arange(
@@ -255,7 +268,7 @@ class DpoaeGenerator(OaeGeneratorBase):
             self.normative["io_l2_step_db_spl"],
             dtype=float,
         )
-        nf_final = self._noise_floor_db(f2) + rng.normal(0, 1.0)
+        nf_final = self._noise_floor_db(f2, case) + rng.normal(0, 1.0)
         ratio = float(self.normative["f2_f1_ratio"])
         points = []
         for l2 in l2_list:

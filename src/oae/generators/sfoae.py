@@ -52,7 +52,7 @@ class SfoaeGenerator(OaeGeneratorBase):
         sstep = suppressor_step if suppressor_step is not None else self.normative["suppressor_step_db_spl"]
         suppressor_levels = np.arange(smin, smax + 0.1, sstep)
 
-        base_magnitude = self._base_magnitude_db(freq_hz) - oae_attenuation_db(case)
+        base_magnitude = self._base_magnitude_db(freq_hz) - oae_attenuation_db(case, freq_hz)
         base_magnitude = max(0.0, base_magnitude)
         offset = self.normative["suppression_offset_db"]
         slope = self.normative["suppression_slope_db"]
@@ -89,7 +89,10 @@ class SfoaeGenerator(OaeGeneratorBase):
         fmax = freq_max_hz or ref_freqs[-1]
         freqs = np.geomspace(fmin, fmax, n_points)
         self._rng = np.random.default_rng(self._seed_from_params(ear, fmin, fmax))
-        atten = oae_attenuation_db(case)
-        magnitudes = np.array([self._base_magnitude_db(f) for f in freqs]) - atten
+        # Atenuación por frecuencia: la curva de sintonía es justamente
+        # donde se tiene que ver la muesca del perfil del caso, así que se
+        # evalúa punto a punto y no con un único valor global.
+        magnitudes = np.array([self._base_magnitude_db(f) - oae_attenuation_db(case, f)
+                               for f in freqs])
         magnitudes = np.clip(magnitudes, 0.0, None) + self._rng.normal(0, 0.2, size=freqs.shape)
         return {"freqs": freqs, "magnitude_db": magnitudes}

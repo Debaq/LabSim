@@ -44,6 +44,36 @@ final class CaseBuilder
     // src/oae/generators/base.py.
     public const EOAS_TYPE_OPTIONS = ['normal', 'coclear', 'transmission', 'neural'];
 
+    // Frecuencias del perfil OEA por oído. Es la unión de las bandas que
+    // usa cada prueba en el cliente (TEOAE 1-4k, DP-grama 1-8k, SFOAE
+    // 0.5-4k), así el docente configura UNA curva por oído y las tres
+    // pruebas quedan coherentes entre sí (una muesca en 4k aparece en las
+    // tres, como en un paciente real). Ver resources/oae/normative_data.json.
+    public const EOAS_FREQS = [500, 1000, 1500, 2000, 3000, 4000, 6000, 8000];
+
+    // Desviación por frecuencia (dB) preseteada por patología, para el
+    // botón "Autocompletar" del formulario: la coclear típica cae en
+    // agudos, la de transmisión atenúa parejo con algo más en graves
+    // (el oído medio transmite peor los graves de vuelta), la neural
+    // deja la OEA intacta. Son valores de partida editables, no fijos
+    // (memoria no_fixed_teaching_defaults: el docente ajusta el caso).
+    public const EOAS_AUTOFILL_DELTAS = [
+        'normal'       => [500 => 0, 1000 => 0, 1500 => 0, 2000 => 0, 3000 => 0, 4000 => 0, 6000 => 0, 8000 => 0],
+        'coclear'      => [500 => 0, 1000 => 1, 1500 => 2, 2000 => 3, 3000 => 5, 4000 => 8, 6000 => 10, 8000 => 12],
+        'transmission' => [500 => 6, 1000 => 5, 1500 => 4, 2000 => 4, 3000 => 3, 4000 => 3, 6000 => 3, 8000 => 3],
+        'neural'       => [500 => 0, 1000 => 0, 1500 => 0, 2000 => 0, 3000 => 0, 4000 => 0, 6000 => 0, 8000 => 0],
+    ];
+
+    // Defaults del perfil OEA por oído (paciente "limpio": sin atenuación
+    // extra, sin ruido agregado, sello de sonda bueno).
+    public const EOAS_DEFAULTS = [
+        'umbral' => 20,
+        'atten_db' => 0.0,
+        'ruido_db' => 0.0,
+        'sello_pct' => 85,
+        'variabilidad_db' => 2.5,
+    ];
+
     // Patología VEMP por oído -- categorías vestibulares. 'sacular' afecta
     // CVEMP (P13/N23 sobre SCM), 'utricular' afecta OVEMP (N10/P16 sobre
     // oblicuo inferior), 'neural' afecta ambos (neuropatía vestibular).
@@ -617,10 +647,21 @@ final class CaseBuilder
         foreach (['OD' => 'od', 'OI' => 'oi'] as $ladoData => $ladoForm) {
             $ladoEoas = is_array($eoas[$ladoData] ?? null) ? $eoas[$ladoData] : [];
             $ladoEoasType = $ladoEoas['type'] ?? 'normal';
+            $desvEoas = is_array($ladoEoas['desviaciones'] ?? null) ? $ladoEoas['desviaciones'] : [];
             $v['eoas'][$ladoForm] = [
                 'type' => in_array($ladoEoasType, self::EOAS_TYPE_OPTIONS, true) ? $ladoEoasType : 'normal',
-                'umbral' => (string) ($ladoEoas['umbral'] ?? 20),
+                'umbral' => (string) ($ladoEoas['umbral'] ?? self::EOAS_DEFAULTS['umbral']),
+                'atten_db' => (string) ($ladoEoas['atten_db'] ?? self::EOAS_DEFAULTS['atten_db']),
+                'ruido_db' => (string) ($ladoEoas['ruido_db'] ?? self::EOAS_DEFAULTS['ruido_db']),
+                'sello_pct' => (string) ($ladoEoas['sello_pct'] ?? self::EOAS_DEFAULTS['sello_pct']),
+                'variabilidad_db' => (string) ($ladoEoas['variabilidad_db'] ?? self::EOAS_DEFAULTS['variabilidad_db']),
             ];
+            // Caso viejo (guardado antes del perfil por frecuencia): las
+            // desviaciones no existen y quedan en 0 -- el cliente sigue
+            // atenuando solo por type/umbral, igual que antes.
+            foreach (self::EOAS_FREQS as $hzEoas) {
+                $v['eoas'][$ladoForm]['desv'][(string) $hzEoas] = (string) ($desvEoas[(string) $hzEoas] ?? 0);
+            }
         }
 
         $vemp = $data['VEMP'] ?? [];

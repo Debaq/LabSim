@@ -13,7 +13,14 @@ real: el ruido baja ~1/sqrt(k), la reproducibilidad sube, y el SNR por banda
 cruza el umbral en algún momento de la captura.
 """
 import numpy as np
-from oae.generators.base import OaeGeneratorBase, oae_attenuation_db
+from oae.generators.base import (
+    OaeGeneratorBase,
+    oae_attenuation_db,
+    oae_noise_offset_db,
+    oae_probe_fit,
+    oae_probe_loss_db,
+    oae_variability_db,
+)
 
 
 class TeoaeGenerator(OaeGeneratorBase):
@@ -65,9 +72,14 @@ class TeoaeGenerator(OaeGeneratorBase):
     # ------------------------------------------------------------------
     # Síntesis de la respuesta "limpia" (sin ruido)
     # ------------------------------------------------------------------
-    def _component_levels_db(self, freqs_hz: np.ndarray, atten_db: float) -> np.ndarray:
+    def _component_levels_db(self, freqs_hz: np.ndarray,
+                             case: dict | None) -> np.ndarray:
         """Nivel esperado (dB SPL) por componente, interpolado en log-frecuencia
-        sobre expected_response_db y con caída fuera del rango de bandas."""
+        sobre expected_response_db y con caída fuera del rango de bandas.
+
+        La atenuación del caso se pide POR componente: el perfil por
+        frecuencia del paciente (muesca en 4 kHz, caída en agudos) tiene
+        que deformar el espectro, no bajarlo parejo."""
         bands = np.array(self.normative["bands_hz"], dtype=float)
         expected = self.normative["expected_response_db"]
         levels = np.array([float(expected.get(str(int(b)), 5)) for b in bands])
@@ -76,16 +88,18 @@ class TeoaeGenerator(OaeGeneratorBase):
         interp = np.interp(lf, lb, levels)
         below = np.clip(lb[0] - lf, 0.0, None)
         above = np.clip(lf - lb[-1], 0.0, None)
-        return interp - self.SKIRT_DB_PER_OCTAVE * (below + above) - atten_db
+        atten = np.array([oae_attenuation_db(case, f) for f in freqs_hz])
+        return interp - self.SKIRT_DB_PER_OCTAVE * (below + above) - atten
 
-    def _synth_clean(self, t: np.ndarray, atten_db: float, rng) -> np.ndarray:
+    def _synth_clean(self, t: np.ndarray, case: dict | None, rng) -> np.ndarray:
         lo = float(self.normative["spectrum_low_hz"])
         hi = float(self.normative["spectrum_high_hz"])
         n_comp = max(8, int(round(self.COMPONENTS_PER_OCTAVE * np.log2(hi / lo))))
         fc = np.logspace(np.log10(lo), np.log10(hi), n_comp)
 
-        amp = 10 ** ((self._component_levels_db(fc, atten_db) - 94) / 20)
-        amp = amp * 10 ** (rng.normal(0, self.FINE_STRUCTURE_SD_DB, n_comp) / 20)
+        amp = 10 ** ((self._component_levels_db(fc, case) - 94) / 20)
+        fine_sd = oae_variability_db(case, self.FINE_STRUCTURE_SD_DB)
+        amp = amp * 10 ** (rng.normal(0, fine_sd, n_comp) / 20)
         # N componentes de fase aleatoria dentro de una banda suman en potencia
         # (RMS = a*sqrt(N/2)); dividir por sqrt(N_banda) deja el RMS de la banda
         # igual al de una sinusoide de amplitud 10**((L-94)/20), que es lo que
@@ -238,19 +252,30 @@ class TeoaeGenerator(OaeGeneratorBase):
         t = np.arange(n_samples) / fs
         n_sweeps = max(2, int(n_sweeps))
 
-        clean = self._synth_clean(t, oae_attenuation_db(case), rng)
+        clean = self._synth_clean(t, case, rng)
 
         # Ruido de canal por barrido. Al promediar k barridos baja ~1/sqrt(k):
-        # eso es lo que hace que la captura "se construya" en pantalla.
-        noise_std = 10 ** ((self.normative["noise_floor_db_spl"] - 94) / 20)
+        # eso es lo que hace que la captura "se construya" en pantalla. El
+        # caso puede subirlo (paciente inquieto): mismo oído, misma cóclea,
+        # pero REFER por ruido -- ver oae_noise_offset_db.
+        noise_db = (self.normative["noise_floor_db_spl"]
+                    + oae_noise_offset_db(case))
+        noise_std = 10 ** ((noise_db - 94) / 20)
         noise = self._shaped_noise(rng, n_sweeps, n_samples, noise_std)
         # Split-buffer A/B como el equipo real: barridos pares a A, impares a B.
         cum_all = np.cumsum(noise, axis=0)
         cum_a = np.cumsum(noise[0::2], axis=0)
         cum_b = np.cumsum(noise[1::2], axis=0)
 
+        # Sello de sonda: con la sonda floja llega menos estímulo al conducto
+        # (20*log10 del fit, igual que el probe check) y el nivel es más
+        # inestable, así que la barra de estabilidad del panel baja.
+        fit = oae_probe_fit(case)
         jitter_db = self.normative["stim_jitter_db"]
-        click_levels = rng.normal(level_db, jitter_db, size=n_sweeps)
+        if fit is not None:
+            jitter_db *= 1.0 + 2.0 * (1.0 - fit)
+        click_levels = rng.normal(level_db - oae_probe_loss_db(case),
+                                  jitter_db, size=n_sweeps)
 
         window = np.hanning(n_samples)
         coherent_gain = window.sum() / 2
