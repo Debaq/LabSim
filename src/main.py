@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 import sys
 import requests
 from PySide6.QtCore import Qt, QSize, QTimer, Signal, Slot
@@ -29,7 +30,8 @@ from core.Logger import Logger
 from backend.client import BackendClient
 from backend.log_queue import LogUploaderThread, get_log_queue
 from backend.sync_thread import SyncThread
-from core.app_layout import fetch_layout
+from core import app_layout
+from core.app_layout import LayoutRetryThread, fetch_layout
 
 # Definir la raíz del proyecto
 BASE_DIR = Path(__file__).resolve().parent
@@ -46,16 +48,19 @@ LANGUAJE = Preferences.get("lang")
 
 # Layout (módulos/boxes/sectores) viene del backend. Antes vivía en
 # resources/json/apps.json; ahora se pide por GET /api/layout.php al
-# arrancar. Si la red no responde, la app abre solo con la ventana de
-# login (sin toolbar) -- el usuario no puede operar igual.
+# arrancar, y cada respuesta buena queda cacheada en
+# resources/local_cache/layout.json (ver core/app_layout.py). Sin red se
+# abre con esa copia: la app queda operativa igual, en modo offline, y un
+# thread reintenta en background para volver a "online" sin reiniciar.
 #
-# Fallback mínimo: dejar LOGIN en APPS para que el z-order de la ventana
-# de login siga resuelto. Si no hubiera LOGIN, _close_sub_windows crashea
-# con KeyError.
+# Fallback mínimo (solo instalación nueva que nunca llegó a conectarse):
+# dejar LOGIN en APPS para que el z-order de la ventana de login siga
+# resuelto. Si no hubiera LOGIN, _close_sub_windows crashea con KeyError.
 _LAYOUT_FALLBACK_APPS = {
     "LOGIN": [True, "Ingreso", 0, [True, True], [410, 140], "pre"],
 }
-_layout = fetch_layout(Preferences.get("BACKEND_URL"))
+BACKEND_URL = Preferences.get("BACKEND_URL")
+_layout = fetch_layout(BACKEND_URL)
 if _layout:
     APPS = _layout["APP"]
     SECTORS = _layout["SECTORS"]
@@ -66,6 +71,9 @@ else:
     SECTORS = {}
     BOXS = {}
     LAYOUT_AVAILABLE = False
+# 'network' (backend respondió), 'cache' (copia local, modo offline) o
+# None (no hay layout de ninguna parte).
+LAYOUT_SOURCE = app_layout.last_source
 
 # Cola local de logs de acciones (ver lib/backend/log_queue.py). Es solo un
 # insert sqlite local, nunca toca la red -- se sube al backend en batches
@@ -101,23 +109,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.setupUi(self)
         self.cmb_case.setVisible(False)
         self.cmb_case.setEnabled(False)
-        if not LAYOUT_AVAILABLE:
-            # Layout no llegó del backend (sin red, backend caído, respuesta
-            # mal formada). La ventana queda con solo la pantalla de login;
-            # cualquier intento de login va a fallar igual porque depende
-            # del mismo backend. Avisamos una vez para que el usuario sepa
-            # que no es un bug local.
-            detalle = ""
-            err = getattr(fetch_layout, "last_error", None)
-            if err is not None:
-                detalle = f"\nDetalle: {err.phase} — {err.detail}"
-            QMessageBox.warning(
-                self,
-                "Sin conexión con el servidor",
-                "No se pudo obtener el layout de la aplicación desde el "
-                "backend. La ventana de login quedó disponible, pero no "
-                "podrás operar hasta que el servidor responda." + detalle,
-            )
         self.create_variables()
         self.set_mdi_area()
         self.create_sub_windows()
@@ -129,6 +120,108 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.lbl_title.setText(f"LabSim {DISPLAY_VERSION}")
         self.configure_btn()
         MoveWindow(self).set_movewindow()
+        self._setup_layout_status()
+
+    def _setup_layout_status(self):
+        """Avisa (o no) según de dónde salió el layout, y deja un reintento
+        en background si no vino del backend.
+
+        - 'network': todo normal, nada que decir.
+        - 'cache': la app está operativa con la copia local; solo se marca
+          "sin conexión" en el título. No se interrumpe con un modal: sin
+          layout fresco no se pierde nada, el layout casi nunca cambia.
+        - None: no hay layout ni cache (instalación nueva que nunca se
+          conectó). Ahí sí el aviso duro, porque solo queda el login."""
+        self._layout_retry = None
+        if LAYOUT_SOURCE == "network":
+            return
+
+        detalle = ""
+        err = app_layout.last_error
+        if err is not None:
+            detalle = f"\nDetalle: {err.phase} — {err.detail}"
+
+        if LAYOUT_SOURCE == "cache":
+            self._set_offline_title(True)
+            print(f"[layout] backend sin respuesta, se usa la cache local.{detalle}")
+        else:
+            warning = QMessageBox(self)
+            warning.setIcon(QMessageBox.Warning)
+            warning.setWindowTitle("Sin conexión con el servidor")
+            warning.setText(
+                "No se pudo obtener la configuración de módulos desde el "
+                "servidor y este equipo todavía no tiene una copia local "
+                "(es la primera vez que se abre sin conexión).\n\n"
+                "Queda solo la ventana de ingreso. La app sigue "
+                "reintentando sola: cuando el servidor responda te avisa "
+                "para reiniciar y quedar operativo." + detalle
+            )
+            warning.setStandardButtons(QMessageBox.Ok)
+            style_dialog(warning)
+            warning.exec()
+
+        self._start_layout_retry()
+
+    def _set_offline_title(self, offline):
+        """Marca el modo offline en el título -- único indicador cuando la
+        app está corriendo con el layout cacheado."""
+        base = f"LabSim {DISPLAY_VERSION}"
+        text = f"{base}  ·  sin conexión" if offline else base
+        self.setWindowTitle(text)
+        self.lbl_title.setText(text)
+
+    def _start_layout_retry(self):
+        if not BACKEND_URL:
+            return
+        self._layout_retry = LayoutRetryThread(BACKEND_URL, parent=self)
+        self._layout_retry.recovered.connect(self._on_layout_recovered)
+        self._layout_retry.start()
+
+    def _on_layout_recovered(self, data):
+        """El backend volvió. Si el layout fresco es igual al que ya está
+        cargado (el caso normal: el layout casi nunca cambia) alcanza con
+        sacar el aviso. Si cambió, o si arrancamos sin layout, hay que
+        reiniciar -- la toolbar se arma una sola vez en __init__."""
+        self._layout_retry = None
+        self._set_offline_title(False)
+        igual = (
+            LAYOUT_AVAILABLE
+            and data.get("APP") == APPS
+            and data.get("BOXS") == BOXS
+            and data.get("SECTORS") == SECTORS
+        )
+        if igual:
+            print("[layout] conexión restablecida, cache al día")
+            return
+        ask = QMessageBox(self)
+        ask.setIcon(QMessageBox.Information)
+        ask.setWindowTitle("Conexión restablecida")
+        ask.setText(
+            "El servidor volvió a responder y la configuración de módulos "
+            "cambió. Hay que reiniciar LabSim para aplicarla.\n\n"
+            "¿Reiniciar ahora?"
+        )
+        ask.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        ask.setDefaultButton(QMessageBox.Yes)
+        style_dialog(ask)
+        if ask.exec() == QMessageBox.Yes:
+            self._restart_app()
+
+    def _restart_app(self):
+        """Relanza el proceso. La cache local ya quedó escrita por el
+        reintento, así que el arranque nuevo levanta con el layout fresco
+        aunque la red se caiga de nuevo en el medio."""
+        self.close()
+        if getattr(sys, "frozen", False):
+            os.execv(sys.executable, [sys.executable] + sys.argv[1:])
+        else:
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+
+    def _stop_layout_retry(self):
+        if self._layout_retry is not None:
+            self._layout_retry.stop()
+            self._layout_retry.wait(2000)
+            self._layout_retry = None
 
     def configure_btn(self):
         """Configura los botones de la ventana: iconos propios (dibujados
@@ -176,6 +269,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.var_list_word = Storage(2)
         self.log_uploader = None
         self.sync_thread = None
+        self._layout_retry = None
         self.cronometro_segundos = 0
         self.cronometro_timer = QTimer(self)
         self.cronometro_timer.setInterval(1000)
@@ -520,10 +614,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self._stop_cronometro()
 
         if self.data_current_key == key:
-            # Antes de deshidratar: los módulos "de examen" (hoy solo ABR)
-            # suben su informe mientras todavía tienen appointment_id/
-            # data_login -- _hydrate_modules() de abajo se los saca.
-            for attr in ("subw_abr", "subw_vemp"):
+            # Antes de deshidratar: los módulos "de examen" suben su informe
+            # mientras todavía tienen appointment_id/data_login --
+            # _hydrate_modules() de abajo se los saca.
+            for attr in ("subw_abr", "subw_vemp", "subw_eoas"):
                 try:
                     getattr(self, attr).obj.submit_report()
                 except AttributeError:
@@ -657,6 +751,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.log_uploader.flush_now()
         self._stop_log_uploader()
         self._stop_sync_thread()
+        self._stop_layout_retry()
         super().closeEvent(event)
 
 
