@@ -1426,7 +1426,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             </select>
         </label>
         <label>Umbral (dB)
-            <input type="number" name="eoas[<?= $lado ?>][umbral]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['umbral'] ?? (string) CaseBuilder::EOAS_DEFAULTS['umbral'])) ?>">
+            <input type="number" step="any" name="eoas[<?= $lado ?>][umbral]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['umbral'] ?? (string) CaseBuilder::EOAS_DEFAULTS['umbral'])) ?>">
         </label>
         <label>Grado a sortear
             <select name="eoas_grade[<?= $lado ?>]" class="eoas-grade-select" data-lado="<?= $lado ?>">
@@ -1443,16 +1443,16 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <p class="legend">Condiciones de registro de este oído -- lo que hace que dos pacientes con la misma cóclea no den la misma pantalla.</p>
     <div class="three-col">
         <label>Atenuación extra (dB)
-            <input type="number" step="0.5" name="eoas[<?= $lado ?>][atten_db]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['atten_db'] ?? (string) CaseBuilder::EOAS_DEFAULTS['atten_db'])) ?>">
+            <input type="number" step="any" name="eoas[<?= $lado ?>][atten_db]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['atten_db'] ?? (string) CaseBuilder::EOAS_DEFAULTS['atten_db'])) ?>">
         </label>
         <label>Ruido del paciente (dB)
-            <input type="number" step="0.5" min="-20" name="eoas[<?= $lado ?>][ruido_db]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['ruido_db'] ?? (string) CaseBuilder::EOAS_DEFAULTS['ruido_db'])) ?>">
+            <input type="number" step="any" min="-20" name="eoas[<?= $lado ?>][ruido_db]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['ruido_db'] ?? (string) CaseBuilder::EOAS_DEFAULTS['ruido_db'])) ?>">
         </label>
         <label>Sello de sonda (%)
             <input type="number" step="1" min="5" max="100" name="eoas[<?= $lado ?>][sello_pct]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['sello_pct'] ?? (string) CaseBuilder::EOAS_DEFAULTS['sello_pct'])) ?>">
         </label>
         <label>Variabilidad biológica (dB)
-            <input type="number" step="0.1" min="0" name="eoas[<?= $lado ?>][variabilidad_db]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['variabilidad_db'] ?? (string) CaseBuilder::EOAS_DEFAULTS['variabilidad_db'])) ?>">
+            <input type="number" step="any" min="0" name="eoas[<?= $lado ?>][variabilidad_db]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['variabilidad_db'] ?? (string) CaseBuilder::EOAS_DEFAULTS['variabilidad_db'])) ?>">
         </label>
     </div>
     <p class="legend help">"Atenuación extra" se suma a la que ya calcula la patología (útil para forzar un REFER limpio sin tocar el umbral). "Ruido del paciente" sube el piso de ruido de la captura: un lactante despierto o un adulto que traga deja el DP-grama tapado en graves y baja la reproducibilidad TEOAE, aunque la cóclea esté sana -- es el error de interpretación clásico. "Sello de sonda" es a qué % converge el probe fit (bajo = estímulo débil y captura inestable). "Variabilidad biológica" es la estructura fina: 0 da una curva de libro, 3-4 dB da un registro real.</p>
@@ -1480,7 +1480,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <tr>
             <td class="side-label">dB SPL</td>
             <?php for ($i = 0; $i < CaseBuilder::EOAS_SOAE_MAX_PEAKS; $i++): ?>
-            <td><input type="number" step="0.5" min="-15" max="30" placeholder="<?= CaseBuilder::EOAS_SOAE_DEFAULT_PEAK_DB ?>" name="eoas[<?= $lado ?>][soae_peaks][<?= $i ?>][db]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['soae_peaks'][$i]['db'] ?? '')) ?>"></td>
+            <td><input type="number" step="any" min="-15" max="30" placeholder="<?= CaseBuilder::EOAS_SOAE_DEFAULT_PEAK_DB ?>" name="eoas[<?= $lado ?>][soae_peaks][<?= $i ?>][db]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['soae_peaks'][$i]['db'] ?? '')) ?>"></td>
             <?php endfor; ?>
         </tr>
         </tbody>
@@ -1495,7 +1495,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <tr>
             <td class="side-label">Δ dB</td>
             <?php foreach (CaseBuilder::EOAS_FREQS as $hz): ?>
-            <td><input type="number" step="0.5" class="eoas-desv-input" data-lado="<?= $lado ?>" data-hz="<?= $hz ?>" name="eoas[<?= $lado ?>][desv][<?= $hz ?>]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['desv'][(string) $hz] ?? '0')) ?>"></td>
+            <td><input type="number" step="any" class="eoas-desv-input" data-lado="<?= $lado ?>" data-hz="<?= $hz ?>" name="eoas[<?= $lado ?>][desv][<?= $hz ?>]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['desv'][(string) $hz] ?? '0')) ?>"></td>
             <?php endforeach; ?>
         </tr>
         </tbody>
