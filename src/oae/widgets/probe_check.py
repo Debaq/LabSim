@@ -34,7 +34,7 @@ class ProbeCheckWidget(QWidget):
         layout.addWidget(self.level_label)
         self.level = QProgressBar()
         self.level.setRange(0, 100)
-        self.level.setValue(40)
+        self.level.setValue(0)
         layout.addWidget(self.level)
         self.status_label = QLabel("Sonda: sin chequear")
         layout.addWidget(self.status_label)
@@ -55,7 +55,12 @@ class ProbeCheckWidget(QWidget):
         if self._running:
             self.timer.stop()
             self._running = False
-            self.status_label.setText("Sonda: detenido")
+        # Sin captura corriendo no hay señal que mostrar -- antes quedaba
+        # pegado en lo último que haya marcado _tick (o en 40% "a mano" si
+        # nunca había arrancado), como si la sonda siguiera detectando algo.
+        self.level.setValue(0)
+        self.curve.clear()
+        self.status_label.setText("Sonda: sin chequear")
 
     def _tick(self):
         self.phase += 0.25
