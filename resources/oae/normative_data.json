@@ -1,5 +1,5 @@
 {
-  "comments": "Normativos por defecto para OEA clínica (TEOAE/DPOAE/SFOAE). El override por curso vive en core.app_config_store bajo 'normative_data.teoae/dpoae/sfoae' (mismo path que ABR). Sin override del curso -> se usan estos defaults + banner amarillo. teoae.noise_floor_db_spl es el ruido de canal POR BARRIDO (no el piso final): al promediar N barridos baja ~1/sqrt(N), y con 14 dB SPL / 260 barridos un oido normal queda en ~94% de reproducibilidad y 15-21 dB de SNR por banda, que es el rango de un equipo real.",
+  "comments": "Normativos por defecto para OEA clínica (TEOAE/DPOAE/SFOAE). El override por curso vive en core.app_config_store bajo 'normative_data.teoae/dpoae/sfoae' (mismo path que ABR). Sin override del curso -> se usan estos defaults + banner amarillo. teoae.noise_floor_db_spl es el ruido de canal POR BARRIDO (no el piso final): al promediar N barridos baja ~1/sqrt(N), y con 14 dB SPL / 260 barridos un oido normal queda en ~94% de reproducibilidad y 15-21 dB de SNR por banda, que es el rango de un equipo real. dpoae.normal_band_db es el rango normal (p5-p95 aprox.) del nivel DP por f2 que se dibuja como area verde en el DP-grama; dpoae.noise_floor_db_spl es el piso FINAL (con todos los promedios de averages_per_point): durante la captura de cada punto el piso arranca 10*log10(k_max) dB mas arriba y baja al promediar.",
   "teoae": {
     "default": {
       "min_snr_db": 6,
@@ -29,19 +29,31 @@
   "dpoae": {
     "default": {
       "min_dp_above_noise_db": 6,
-      "f2_min_hz": 1000,
-      "f2_max_hz": 6000,
-      "f2_step_hz": 500,
+      "f2_list_hz": [1000, 1500, 2000, 3000, 4000, 6000, 8000],
+      "pass_points_min": 4,
       "f2_f1_ratio": 1.22,
       "default_l1_db_spl": 65,
       "default_l2_db_spl": 55,
       "peak_f2_hz": 3000,
-      "peak_dp_db_spl": 15,
-      "rolloff_db_per_oct": 24,
-      "noise_floor_db_spl": -20,
-      "growth_rate_db_per_db_l2": 0.6,
+      "peak_dp_db_spl": 12,
+      "rolloff_low_db_per_oct": 4,
+      "rolloff_high_db_per_oct": 7,
+      "noise_floor_db_spl": -22,
+      "noise_floor_lf_rise_db_per_oct": 8,
+      "growth_rate_db_per_db_l2": 0.25,
+      "growth_rate_low_db_per_db_l2": 0.9,
       "l1_l2_penalty_db_per_db": 0.15,
-      "io_l2_min_db_spl": 30,
+      "normal_band_db": {
+        "1000": [-5, 13],
+        "1500": [-3, 15],
+        "2000": [-1, 16],
+        "3000": [0, 17],
+        "4000": [-1, 16],
+        "6000": [-4, 13],
+        "8000": [-8, 9]
+      },
+      "averages_per_point": [1, 2, 4, 8, 16, 32],
+      "io_l2_min_db_spl": 20,
       "io_l2_max_db_spl": 75,
       "io_l2_step_db_spl": 5,
       "io_f2_hz": 3000
