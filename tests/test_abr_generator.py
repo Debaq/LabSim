@@ -1106,6 +1106,137 @@ def test_non_reproducible_patient_never_locks_ab():
     assert indice(0.4) < 0.5
 
 
+# ------------------------------------------------ falsa onda V (artefacto)
+
+def _curva_falsa(amp=0.25, lat=8.5, mitad='a', current=2000, **kw):
+    """Igual que _curva pero con la falsa onda V del caso configurada.
+
+    La latencia por defecto es 8.5 ms -- fuera de la respuesta real, para
+    que el test mida el artefacto y no la onda V del paciente.
+    """
+    g = _gen()
+    stim = {'stim': 'click', 'freq': None, 'pol': 'Alternada', 'int': 80,
+            'rate': 21.1, 'filter_down': 3000, 'filter_passhigh': 100,
+            'average': 2000, 'current_avg': current, 'pathway': 'air_conduction'}
+    case = {'desviaciones': {}, 'fsp_puntos': {'800': 2.3, '2000': 2.8},
+            'umbral': 20, 'average_objetivo': 2000, 'repro_shift': 0.0,
+            'masking': 0, 'contra': None, 'seed_key': 'caso-1',
+            'capture_id': 'R1'}
+    case.update(kw)
+    if amp:
+        case['falsa_v'] = {'amp': amp, 'lat': lat, 'mitad': mitad}
+    tech = default_settings('ABR')
+    return g.generate_curve('adult_female', 'normal', stim, tech, case)
+
+
+def test_false_wave_lives_in_one_half_only():
+    """El artefacto esta entero en un subpromedio y nada en el otro.
+
+    Es la unica pista que tiene el alumno: en el promedio se ve una onda
+    plausible, y solo comparando A con B se descubre que no replica.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    t, y, meta = _curva_falsa(mitad='a')
+    _, y0, base = _curva_falsa(amp=0)
+    i = int(np.argmin(np.abs(t - 8.5)))
+    en_a = meta['sub_a'][i] - base['sub_a'][i]
+    en_b = meta['sub_b'][i] - base['sub_b'][i]
+    assert en_a > 0.3, en_a                      # entero en A
+    assert abs(en_b) < 0.01, en_b                # nada en B
+    # En el promedio, la mitad: es (A+B)/2 y el artefacto vive en una sola.
+    assert abs((y[i] - y0[i]) - en_a / 2) < 0.01
+
+    # La otra mitad, con el mismo caso salvo el lado elegido.
+    t, y, meta = _curva_falsa(mitad='b')
+    assert abs(meta['sub_a'][i] - base['sub_a'][i]) < 0.01
+    assert meta['sub_b'][i] - base['sub_b'][i] > 0.3
+
+
+def test_false_wave_looks_like_a_real_wave_v():
+    """Tiene el ancho de una onda V: no se descarta por la forma."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    t, y, meta = _curva_falsa(amp=0.4)
+    _, y0, _ = _curva_falsa(amp=0)
+    solo = y - y0
+    ventana = (t > 7.5) & (t < 9.5)
+    pico = t[ventana][np.argmax(solo[ventana])]
+    assert abs(pico - 8.5) < 0.2, pico
+    # Ancho a media altura del orden de una onda V (sigma 0.18 ms).
+    media = solo[ventana].max() / 2
+    ancho = float(np.sum(solo[ventana] > media) * (t[1] - t[0]))
+    assert 0.25 < ancho < 0.7, ancho
+
+
+def test_false_wave_fades_with_averaging_but_not_as_fast_as_noise():
+    """Promediar mas la achica -- si no, hacer lo correcto no serviria.
+
+    Pero promedia peor que el ruido de fondo (es de baja frecuencia), asi
+    que sigue ahi el tiempo suficiente para que el ejercicio exista.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    def altura(n):
+        t, y, meta = _curva_falsa(current=n)
+        _, _, base = _curva_falsa(amp=0, current=n)
+        i = int(np.argmin(np.abs(t - 8.5)))
+        return meta['sub_a'][i] - base['sub_a'][i]
+    poco, medio, mucho = altura(200), altura(2000), altura(8000)
+    assert poco > medio > mucho, (poco, medio, mucho)
+    assert poco / mucho < 4.0, poco / mucho     # cae, pero no se borra
+
+
+def test_false_wave_raises_residual_noise_but_not_fsp():
+    """Sube el ruido residual y NO toca el FSP.
+
+    El residual sale de A - B, donde el artefacto no se cancela: el equipo
+    reporta mas ruido, que es la pista numerica coherente. El FSP no se
+    mueve porque es del caso -- si subiera, el equipo estaria declarando
+    respuesta presente sobre un artefacto.
+
+    El indice de replicabilidad global NO sirve de pista: es una
+    correlacion sobre los 12 ms enteros, dominada por el drift comun a las
+    dos mitades. Por eso el ejercicio es mirar A y B en la latencia de la
+    onda, no leer un numero.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    _, _, con = _curva_falsa(lat=5.6, umbral=90)
+    _, _, sin = _curva_falsa(amp=0, umbral=90)
+    assert con['residual_noise_nv'] > sin['residual_noise_nv'] * 1.5
+    assert abs(con['fsp'] - sin['fsp']) < 1e-9
+
+
+def test_false_wave_is_off_by_default():
+    """Sin configurarla no existe: los casos viejos no cambian."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    _, y0, _ = _curva_falsa(amp=0)
+    _, y1, _ = _curva_falsa(amp=0.0, lat=8.5)
+    assert np.array_equal(y0, y1)
+    g = _gen()
+    for cfg in ({}, {'falsa_v': None}, {'falsa_v': {'amp': 0}},
+                {'falsa_v': {'amp': 0.3, 'lat': 99}}):   # fuera de ventana
+        stim = {'stim': 'click', 'freq': None, 'pol': 'Alternada', 'int': 80,
+                'rate': 21.1, 'filter_down': 3000, 'filter_passhigh': 100,
+                'average': 2000, 'current_avg': 2000,
+                'pathway': 'air_conduction'}
+        case = {'desviaciones': {}, 'fsp_puntos': {'800': 2.3, '2000': 2.8},
+                'umbral': 20, 'average_objetivo': 2000, 'repro_shift': 0.0,
+                'masking': 0, 'contra': None, 'seed_key': 'caso-1',
+                'capture_id': 'R1'}
+        case.update(cfg)
+        _, y, _ = g.generate_curve('adult_female', 'normal', stim,
+                                   default_settings('ABR'), case)
+        assert np.allclose(y, y0), cfg
+
+
 # ------------------------------------------------------- canal contralateral
 
 def test_contra_channel_loses_wave_I_and_delays_wave_V():

@@ -401,6 +401,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ],
                 'repro' => isset($v['abr'][$lado]['repro']),
                 'repro_var' => (float) fv($v, ['abr', $lado, 'repro_var'], 0.2),
+                // Falsa onda V: artefacto que solo se descubre mirando los
+                // subpromedios A/B (ver false_wave en ABR_generator.py).
+                // amp = 0 lo desactiva, que es el default: es un ejercicio
+                // que el docente arma a proposito, no algo del paciente.
+                'falsa_v' => [
+                    'amp' => (float) fv($v, ['abr', $lado, 'falsa_v_amp'], 0),
+                    'lat' => (float) fv($v, ['abr', $lado, 'falsa_v_lat'], 5.6),
+                    'mitad' => in_array(fv($v, ['abr', $lado, 'falsa_v_mitad'], 'auto'), ['auto', 'a', 'b'], true)
+                        ? (string) fv($v, ['abr', $lado, 'falsa_v_mitad'], 'auto') : 'auto',
+                ],
                 'umbral' => (int) fv($v, ['abr', $lado, 'umbral'], 20),
                 'average_objetivo' => (int) fv($v, ['abr', $lado, 'average_objetivo'], 2000),
                 'desviaciones' => [
@@ -1466,6 +1476,23 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         </label>
         <input type="hidden" name="abr[<?= $lado ?>][<?= $abrName ?>]" class="abr-delta-input" data-lado="<?= $lado ?>" data-wave="<?= $abrWave ?>" data-field="<?= $abrField ?>" value="<?= htmlspecialchars((string) ($v['abr'][$lado][$abrName] ?? '0')) ?>">
         <?php endforeach; ?>
+    </div>
+    <p class="legend">Falsa onda V. Pico con forma de onda que aparece en UNA sola mitad de los barridos: el promedio lo muestra y los subpromedios A/B lo delatan (uno lo tiene entero, el otro no). No sube el FSP. Amplitud 0 = desactivada; el autocompletar por patologia no la toca, es un ejercicio que se arma a mano.</p>
+    <div class="three-col">
+        <label>Falsa V: amplitud en el promedio (µV)
+            <input type="number" step="0.01" min="0" name="abr[<?= $lado ?>][falsa_v_amp]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['falsa_v_amp'] ?? '0')) ?>">
+        </label>
+        <label>Falsa V: latencia (ms)
+            <input type="number" step="0.1" min="0" name="abr[<?= $lado ?>][falsa_v_lat]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['falsa_v_lat'] ?? '5.6')) ?>">
+        </label>
+        <label>Falsa V: mitad afectada
+            <?php $fvMitad = (string) ($v['abr'][$lado]['falsa_v_mitad'] ?? 'auto'); ?>
+            <select name="abr[<?= $lado ?>][falsa_v_mitad]">
+                <?php foreach (['auto' => 'Al azar', 'a' => 'Subpromedio A', 'b' => 'Subpromedio B'] as $fvKey => $fvLabel): ?>
+                <option value="<?= $fvKey ?>" <?= $fvMitad === $fvKey ? 'selected' : '' ?>><?= $fvLabel ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
     </div>
     <p class="legend">FSP (Fsp progresivo, referencia de la curva)</p>
     <div class="three-col">

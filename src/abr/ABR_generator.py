@@ -246,6 +246,21 @@ NOISE_BLOCKS = 200
 # sale de la escala del grafico y deja de leerse como ruido.
 NOISE_MAX_UV = 1.2
 
+# Falsa onda V: pico de ruido con forma de onda que el docente pone a
+# proposito para que el alumno tenga que decidir con los subpromedios A/B y
+# no leyendo el promedio. Vive en UNA sola mitad de los barridos (el ruido
+# no se reparte parejo entre pares e impares), asi que en el promedio se ve
+# a la mitad de su amplitud, en un subpromedio entera y en el otro nada --
+# que es exactamente como se delata un artefacto en un equipo real.
+FALSE_V_LAT_MS = 5.6            # zona de la onda V a intensidades medias
+FALSE_V_AMP_UV = 0.25
+# La amplitud configurada es la que queda AL LLEGAR al average objetivo.
+# Hacia atras crece como m^-0.25 (al arrancar la promediacion, ~3.8x): un
+# artefacto de baja frecuencia promedia peor que 1/sqrt(N), pero promedia.
+# Sin este decaimiento el alumno hace lo correcto -- seguir promediando --
+# y no pasa nada, que es la leccion opuesta.
+FALSE_V_DECAY_EXP = 0.25
+
 # Muestras por ms del registro: 500 puntos en 12 ms. Se mantiene constante
 # al cambiar la ventana para que fs no dependa del protocolo (~41.6 kHz,
 # rango real de un equipo). Ver technical_config['window_ms'].
@@ -778,6 +793,38 @@ class ABRGenerator:
             y += self._gaussian(t, lat_VII, v['amp'] * 0.18, sigma=WAVE_SIGMA['VII'])
 
         return y
+
+    def false_wave(self, t, case_config, accepted, target_avg, rng):
+        """Pico espureo con forma de onda V, presente en una sola mitad.
+
+        Devuelve (mitad_a, mitad_b): lo que se le suma a cada subpromedio.
+        El promedio es (A+B)/2, asi que la falsa onda aparece ahi con la
+        mitad de la amplitud sola, sin tener que sumarla aparte.
+
+        No toca el FSP (que es del caso): queda FSP bajo + onda visible +
+        A/B que no se pegan, tres pistas coherentes en vez de una.
+        """
+        cfg = (case_config or {}).get('falsa_v')
+        if not isinstance(cfg, dict):
+            return None, None
+        amp = float(cfg.get('amp') or 0.0)
+        if amp <= 0:
+            return None, None
+        lat = float(cfg.get('lat') or FALSE_V_LAT_MS)
+        if not (0 < lat < float(t[-1])):
+            return None, None
+        m = self.noise_blocks_done(accepted, target_avg)
+        # `amp` es lo que el docente ve EN EL PROMEDIO (que es (A+B)/2), asi
+        # que en la mitad donde vive el artefacto va al doble.
+        escala = 2 * amp * (NOISE_BLOCKS / max(m, 1)) ** FALSE_V_DECAY_EXP
+        # Mismo ancho que una onda V real: si fuera mas angosto o mas ancho
+        # se descartaria por la forma y el ejercicio dejaria de ser sobre
+        # la replicabilidad.
+        pico = self._gaussian(t, lat, escala, sigma=WAVE_SIGMA['V'])
+        mitad = str(cfg.get('mitad') or 'auto').lower()
+        if mitad not in ('a', 'b'):
+            mitad = 'a' if rng.random() < 0.5 else 'b'
+        return (pico, None) if mitad == 'a' else (None, pico)
 
     # =====================================================================
     # ARTEFACTOS Y RUIDO
@@ -1747,6 +1794,18 @@ class ABRGenerator:
             y_clean_b = np.zeros_like(t)
             accepted = 1.0
 
+        # 12b. Falsa onda V del caso (si el docente la configuro): entra
+        # como ruido de una sola mitad, antes del ruido de fondo, para que
+        # los filtros la traten igual que a todo lo demas.
+        falsa_a, falsa_b = self.false_wave(
+            t, case_config, accepted, growth_target, rng)
+        if hay_registro and (falsa_a is not None or falsa_b is not None):
+            aporte_a = falsa_a if falsa_a is not None else np.zeros_like(t)
+            aporte_b = falsa_b if falsa_b is not None else np.zeros_like(t)
+            y_clean_a = y_clean_a + aporte_a
+            y_clean_b = y_clean_b + aporte_b
+            y_clean = y_clean + (aporte_a + aporte_b) / 2
+
         ruido, ruido_a, ruido_b = self.averaged_noise(
             t, accepted, growth_target, quality, rng, imp_factor, noise_floor,
             split=True, band_factor=band_factor,
@@ -2008,6 +2067,9 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
 
     case_config = {
         'desviaciones': preferences.get('desviaciones', {}),
+        # Falsa onda V: artefacto docente que solo delatan los subpromedios
+        # A/B (ver false_wave). Los casos guardados antes no la traen.
+        'falsa_v': preferences.get('falsa_v'),
         'fsp_puntos': preferences.get('fsp_puntos', {'800': 2.3, '2000': 2.8}),
         'umbral': preferences.get('umbral', preferences.get('th', 20)),
         'average_objetivo': preferences.get('average_objetivo', 2000),

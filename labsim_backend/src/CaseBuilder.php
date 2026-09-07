@@ -1073,6 +1073,7 @@ final class CaseBuilder
             $ladoAbr = is_array($abr[$ladoData] ?? null) ? $abr[$ladoData] : [];
             $desv = is_array($ladoAbr['desviaciones'] ?? null) ? $ladoAbr['desviaciones'] : [];
             $fsp = is_array($ladoAbr['fsp_puntos'] ?? null) ? $ladoAbr['fsp_puntos'] : [];
+            $falsaV = is_array($ladoAbr['falsa_v'] ?? null) ? $ladoAbr['falsa_v'] : [];
             $ondaVal = static function (array $desv, string $onda, string $campo, $default) {
                 return (string) ($desv[$onda][$campo] ?? $default);
             };
@@ -1086,6 +1087,13 @@ final class CaseBuilder
                 // perdía al guardar de nuevo.
                 'repro_var' => (string) ($ladoAbr['repro_var'] ?? 0.2),
                 'average_objetivo' => (string) ($ladoAbr['average_objetivo'] ?? 2000),
+                // Falsa onda V (ver false_wave en ABR_generator.py): un caso
+                // guardado antes de que existiera no trae la clave y queda
+                // con amplitud 0, o sea desactivada.
+                'falsa_v_amp' => (string) ($falsaV['amp'] ?? 0),
+                'falsa_v_lat' => (string) ($falsaV['lat'] ?? 5.6),
+                'falsa_v_mitad' => in_array($falsaV['mitad'] ?? 'auto', ['auto', 'a', 'b'], true)
+                    ? (string) ($falsaV['mitad'] ?? 'auto') : 'auto',
                 'lat_I' => $ondaVal($desv, 'onda_I', 'lat', 0),
                 'amp_I' => $ondaVal($desv, 'onda_I', 'amp', 0),
                 'lat_III' => $ondaVal($desv, 'onda_III', 'lat', 0),
