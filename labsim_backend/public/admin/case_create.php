@@ -416,6 +416,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $eoasOd = $eoasBuild('od');
         $eoasOi = $eoasBuild('oi');
 
+        // VEMP: patología vestibular por oído. El subtipo (CVEMP cervical,
+        // OVEMP ocular, MVEMP masetero) define qué picos se observan (ver
+        // VEMP_PEAKS); los 4 peaks siempre se rinden en el form porque
+        // simplificar con sub-bloques por subtipo haría el form más frágil
+        // y no aporta nada pedagógico (el docente los edita y el cliente
+        // usa solo los del subtipo activo).
+        $vempBuild = static function (string $lado) use ($v): array {
+            $subtipo = (string) fv($v, ['vemp', $lado, 'subtipo'], 'CVEMP');
+            if (!in_array($subtipo, CaseBuilder::VEMP_SUBTIPOS, true)) {
+                $subtipo = 'CVEMP';
+            }
+            $peaks = CaseBuilder::VEMP_PEAKS[$subtipo];
+            $desv = [];
+            // siempre persistimos los 4 picos aunque el subtipo use solo 2;
+            // los picos no usados quedan con lat=0/amp=0 (no molestan).
+            foreach (['p13', 'n23', 'n10', 'p16'] as $pico) {
+                $desv[$pico] = [
+                    'lat' => (float) fv($v, ['vemp', $lado, "lat_{$pico}"], 0),
+                    'amp' => (float) fv($v, ['vemp', $lado, "amp_{$pico}"], 0),
+                ];
+            }
+            return [
+                'subtipo' => $subtipo,
+                'type' => (string) fv($v, ['vemp', $lado, 'type'], 'normal'),
+                'repro' => isset($v['vemp'][$lado]['repro']),
+                'repro_var' => (float) fv($v, ['vemp', $lado, 'repro_var'], 0.2),
+                'umbral' => (int) fv($v, ['vemp', $lado, 'umbral'], 60),
+                'average_objetivo' => (int) fv($v, ['vemp', $lado, 'average_objetivo'], 200),
+                'desviaciones' => $desv,
+                'peaks' => $peaks,
+            ];
+        };
+        $vempOd = $vempBuild('od');
+        $vempOi = $vempBuild('oi');
+
         if ($age <= 0) {
             $error = 'Falta la edad.';
         } elseif (!$isUpdate && ($nombre1 === '' || $apellido1 === '')) {
@@ -442,6 +477,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Patología ABR inválida.';
         } elseif (!in_array($eoasOd['type'], CaseBuilder::EOAS_TYPE_OPTIONS, true) || !in_array($eoasOi['type'], CaseBuilder::EOAS_TYPE_OPTIONS, true)) {
             $error = 'Patología EOA inválida.';
+        } elseif (!in_array($vempOd['type'], CaseBuilder::VEMP_TYPE_OPTIONS, true) || !in_array($vempOi['type'], CaseBuilder::VEMP_TYPE_OPTIONS, true)) {
+            $error = 'Patología VEMP inválida.';
         }
 
         if ($error === null) {
@@ -507,6 +544,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'otoscopia' => ['fases' => $otoscopiaFases],
                 'abr' => ['OD' => $abrOd, 'OI' => $abrOi],
                 'eoas' => ['OD' => $eoasOd, 'OI' => $eoasOi],
+                'vemp' => ['OD' => $vempOd, 'OI' => $vempOi],
             ]);
 
             if ($isUpdate) {
@@ -620,6 +658,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <button type="button" class="tab-btn" data-tab="tinnitus">Tinnitus</button>
     <button type="button" class="tab-btn" data-tab="abr">ABR</button>
     <button type="button" class="tab-btn" data-tab="eoas">EOA</button>
+    <button type="button" class="tab-btn" data-tab="vemp">VEMP</button>
     <button type="button" class="tab-btn" data-tab="anamnesis">Anamnesis</button>
 </div>
 
@@ -1365,6 +1404,64 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <label>Umbral (dB)
             <input type="number" name="eoas[<?= $lado ?>][umbral]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['umbral'] ?? '20')) ?>">
         </label>
+    </div>
+</div>
+<?php endforeach; ?>
+</div>
+</div>
+
+<div class="tab-panel" data-tab="vemp">
+<div class="two-col">
+<?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
+<?php $vSubtipo = (string) ($v['vemp'][$lado]['subtipo'] ?? 'CVEMP'); ?>
+<div class="card">
+    <strong>VEMP <?= $ladoLabel ?></strong>
+    <p class="legend help">Patología vestibular de este oído para el generador de VEMP. El subtipo define el músculo donde se mide y por lo tanto los picos que el alumno va a marcar (CVEMP cervical: P13/N23 sobre SCM; OVEMP ocular: N10/P16 sobre oblicuo inferior; MVEMP masetero: P13/N23 sobre masetero). Los 4 picos se rinden siempre; el cliente usa solo los del subtipo activo.</p>
+    <div class="three-col">
+        <label>Subtipo
+            <select name="vemp[<?= $lado ?>][subtipo]" class="vemp-subtipo-select" data-lado="<?= $lado ?>">
+                <?php foreach (CaseBuilder::VEMP_SUBTIPOS as $sub): ?>
+                <option value="<?= $sub ?>" <?= $vSubtipo === $sub ? 'selected' : '' ?>><?= $sub ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label>Patología
+            <select name="vemp[<?= $lado ?>][type]">
+                <?php foreach (CaseBuilder::VEMP_TYPE_OPTIONS as $opt): ?>
+                <option value="<?= $opt ?>" <?= ($v['vemp'][$lado]['type'] ?? 'normal') === $opt ? 'selected' : '' ?>><?= ucfirst($opt) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label>Umbral (dB)
+            <input type="number" name="vemp[<?= $lado ?>][umbral]" value="<?= htmlspecialchars((string) ($v['vemp'][$lado]['umbral'] ?? '60')) ?>">
+        </label>
+        <label class="inline-check" style="align-self:end;">
+            <input type="checkbox" name="vemp[<?= $lado ?>][repro]" <?= ($v['vemp'][$lado]['repro'] ?? '1') === '1' ? 'checked' : '' ?>>
+            Reproducible
+        </label>
+        <label>Jitter si no reproducible (ms)
+            <input type="number" step="0.01" min="0" name="vemp[<?= $lado ?>][repro_var]" value="<?= htmlspecialchars((string) ($v['vemp'][$lado]['repro_var'] ?? '0.2')) ?>">
+        </label>
+        <label>Promediaciones objetivo
+            <input type="number" step="1" min="1" name="vemp[<?= $lado ?>][average_objetivo]" value="<?= htmlspecialchars((string) ($v['vemp'][$lado]['average_objetivo'] ?? '200')) ?>">
+        </label>
+    </div>
+    <p class="legend">Desviaciones por pico (latencia ms / amplitud µV) -- valores absolutos que el generador espera a 80 dB. Los picos irrelevantes para el subtipo activo se guardan igual pero el cliente los ignora.</p>
+    <div class="three-col">
+        <?php
+        $vempWaveFields = [
+            ['p13', 'lat', 'P13 -- latencia'], ['p13', 'amp', 'P13 -- amplitud'],
+            ['n23', 'lat', 'N23 -- latencia'], ['n23', 'amp', 'N23 -- amplitud'],
+            ['n10', 'lat', 'N10 -- latencia'], ['n10', 'amp', 'N10 -- amplitud'],
+            ['p16', 'lat', 'P16 -- latencia'], ['p16', 'amp', 'P16 -- amplitud'],
+        ];
+        foreach ($vempWaveFields as [$vempWave, $vempField, $vempLabel]):
+            $vempName = $vempField . '_' . $vempWave;
+        ?>
+        <label><?= $vempLabel ?>
+            <input type="number" step="0.01" name="vemp[<?= $lado ?>][<?= $vempName ?>]" value="<?= htmlspecialchars((string) ($v['vemp'][$lado][$vempName] ?? '0')) ?>">
+        </label>
+        <?php endforeach; ?>
     </div>
 </div>
 <?php endforeach; ?>

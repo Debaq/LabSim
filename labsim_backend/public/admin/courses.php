@@ -114,6 +114,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             AppConfig::clearCourseOverride('normative_data.abr', $courseId);
             $success = 'Configuración normativa ABR restablecida al default de la app.';
             AdminAudit::log($me, 'course_reset_abr_normative', ['course_id' => $courseId]);
+        } elseif ($action === 'set_vemp_normative') {
+            // VEMP usa baselines ABSOLUTOS por pico (a diferencia de ABR
+            // donde el click lo define el paciente y el resto son ratios).
+            // Esto es porque VEMP depende del equipo/estímulo y no del
+            // paciente -- la patología del paciente se aplica aparte vía
+            // 'desviaciones' en case_create.php (mismo concepto que ABR).
+            // Shape: {subtipo: {pico: {lat: float, amp: float}}}
+            $override = [];
+            foreach ((array) ($_POST['vemp_baseline'] ?? []) as $subtipo => $picos) {
+                foreach ((array) $picos as $pico => $fields) {
+                    $picoOverride = [];
+                    foreach (['lat', 'amp'] as $field) {
+                        $val = trim((string) ($fields[$field] ?? ''));
+                        if ($val !== '' && is_numeric($val)) {
+                            $picoOverride[$field] = (float) $val;
+                        }
+                    }
+                    if ($picoOverride) {
+                        $override[(string) $subtipo][(string) $pico] = $picoOverride;
+                    }
+                }
+            }
+            if ($override) {
+                AppConfig::set('normative_data.vemp', $override, $courseId);
+                $success = 'Configuración normativa VEMP actualizada.';
+            } else {
+                AppConfig::clearCourseOverride('normative_data.vemp', $courseId);
+                $success = 'Sin valores marcados -- el curso vuelve a usar el default de la app.';
+            }
+            AdminAudit::log($me, 'course_set_vemp_normative', ['course_id' => $courseId, 'override' => $override]);
+        } elseif ($action === 'reset_vemp_normative') {
+            AppConfig::clearCourseOverride('normative_data.vemp', $courseId);
+            $success = 'Configuración normativa VEMP restablecida al default de la app.';
+            AdminAudit::log($me, 'course_reset_vemp_normative', ['course_id' => $courseId]);
         } elseif ($action === 'generate_demo_code') {
             $result = Courses::generateDemoAccessCode($courseId);
             $seconds = Auth::secondsUntil($result['expires_at']);
@@ -700,6 +734,85 @@ if ($detailId !== null) {
               onsubmit="return confirm('¿Restablecer al valor por defecto de la app? Se pierde la configuración actual del curso.');">
         <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="reset_abr_normative">
+            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+            <button type="submit" class="btn btn--danger btn--sm">Volver a default</button>
+        </form>
+        <?php else: ?>
+        <p class="help help--mt">Sin configuración propia -- usando el valor por defecto de la app.</p>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <?php if (in_array('VEMP', $enabledModules, true)): ?>
+    <div class="card">
+        <strong>Normativa VEMP (potenciales evocados vestibulares miogénicos)</strong>
+        <p class="help help--mt">
+            VEMP ajusta el baseline por pico/subtipo (a diferencia de ABR, donde el click lo define el paciente y el resto son ratios -- acá el baseline es del equipo). Acá se sobreescriben los absolutos de latencia/amplitud por pico, por subtipo (CVEMP cervical sobre SCM, OVEMP ocular sobre oblicuo inferior, MVEMP masetero). El paciente en sí desvía aparte vía "desviaciones" en case_create.php. Los campos muestran el default de la app; tocarlos sobreescribe, dejarlos como están hereda el default.
+        </p>
+        <?php
+            // Defaults sincronizados a mano con
+            // resources/vemp/normative_data.json (adult_female / 500Hz).
+            $vempDefaults = [
+                'CVEMP' => [
+                    'label' => 'CVEMP (cervical / SCM)',
+                    'picos' => [
+                        'p13' => ['lat' => 12.8, 'amp' => 135.0],
+                        'n23' => ['lat' => 22.5, 'amp' => 185.0],
+                    ],
+                ],
+                'OVEMP' => [
+                    'label' => 'OVEMP (ocular / oblicuo inferior)',
+                    'picos' => [
+                        'n10' => ['lat' => 9.8, 'amp' => 8.5],
+                        'p16' => ['lat' => 15.8, 'amp' => 11.5],
+                    ],
+                ],
+                'MVEMP' => [
+                    'label' => 'MVEMP (masetero -- experimental)',
+                    'picos' => [
+                        'p13' => ['lat' => 12.8, 'amp' => 45.0],
+                        'n23' => ['lat' => 22.5, 'amp' => 60.0],
+                    ],
+                ],
+            ];
+            $vempOverride = AppConfig::getEffective('normative_data.vemp', (int) $course['id']) ?? [];
+        ?>
+        <form method="post">
+        <?= csrf_field() ?>
+            <input type="hidden" name="form_action" value="set_vemp_normative">
+            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+            <?php foreach ($vempDefaults as $subtipo => $subDefaults): ?>
+            <details style="margin-top:0.5rem;">
+                <summary><strong><?= htmlspecialchars($subDefaults['label']) ?></strong></summary>
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:0.6rem 1rem; margin-top:0.4rem;">
+                    <?php foreach ($subDefaults['picos'] as $pico => $defaults): ?>
+                    <?php $current = $vempOverride[$subtipo][$pico] ?? []; ?>
+                    <div>
+                        <strong style="font-weight:600;"><?= strtoupper($pico) ?></strong>
+                        <label style="font-weight:normal; display:block; margin-top:0.2rem;">
+                            Latencia (ms)
+                            <input type="number" step="0.01" name="vemp_baseline[<?= $subtipo ?>][<?= $pico ?>][lat]"
+                                   value="<?= htmlspecialchars((string) ($current['lat'] ?? $defaults['lat'])) ?>">
+                        </label>
+                        <label style="font-weight:normal; display:block; margin-top:0.2rem;">
+                            Amplitud (µV)
+                            <input type="number" step="0.01" name="vemp_baseline[<?= $subtipo ?>][<?= $pico ?>][amp]"
+                                   value="<?= htmlspecialchars((string) ($current['amp'] ?? $defaults['amp'])) ?>">
+                        </label>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </details>
+            <?php endforeach; ?>
+            <div class="form-actions-sticky">
+                <button type="submit" class="btn btn--secondary">Guardar configuración</button>
+            </div>
+        </form>
+        <?php if ($vempOverride): ?>
+        <form method="post" style="margin-top:0.5rem;"
+              onsubmit="return confirm('¿Restablecer al valor por defecto de la app? Se pierde la configuración actual del curso.');">
+        <?= csrf_field() ?>
+            <input type="hidden" name="form_action" value="reset_vemp_normative">
             <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
             <button type="submit" class="btn btn--danger btn--sm">Volver a default</button>
         </form>

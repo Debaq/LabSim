@@ -1,0 +1,116 @@
+{
+  "comments": "VEMP baselines (latencia en ms, amplitud en µV absolutos a 80 dB SPL tone burst 500 Hz, vía aérea). Subtipos: CVEMP cervical (SCM), OVEMP ocular (oblicuo inferior), MVEMP masetero.",
+  "populations": {
+    "adult_male": {
+      "age_range": [18, 50],
+      "sex": "M",
+      "air_conduction": {
+        "tone_burst": {
+          "500Hz": {
+            "CVEMP": {"p13": {"lat": 13.0, "amp": 120.0}, "n23": {"lat": 23.0, "amp": 170.0}},
+            "OVEMP": {"n10": {"lat": 10.0, "amp": 8.0},   "p16": {"lat": 16.0, "amp": 11.0}},
+            "MVEMP": {"p13": {"lat": 13.0, "amp": 40.0},  "n23": {"lat": 23.0, "amp": 55.0}}
+          },
+          "1000Hz": {
+            "CVEMP": {"p13": {"lat": 14.2, "amp": 95.0},  "n23": {"lat": 24.5, "amp": 140.0}},
+            "OVEMP": {"n10": {"lat": 11.0, "amp": 6.5},   "p16": {"lat": 17.0, "amp": 9.0}},
+            "MVEMP": {"p13": {"lat": 14.0, "amp": 32.0},  "n23": {"lat": 24.0, "amp": 45.0}}
+          }
+        }
+      }
+    },
+    "adult_female": {
+      "age_range": [18, 50],
+      "sex": "F",
+      "air_conduction": {
+        "tone_burst": {
+          "500Hz": {
+            "CVEMP": {"p13": {"lat": 12.8, "amp": 135.0}, "n23": {"lat": 22.5, "amp": 185.0}},
+            "OVEMP": {"n10": {"lat": 9.8,  "amp": 8.5},   "p16": {"lat": 15.8, "amp": 11.5}},
+            "MVEMP": {"p13": {"lat": 12.8, "amp": 45.0},  "n23": {"lat": 22.5, "amp": 60.0}}
+          },
+          "1000Hz": {
+            "CVEMP": {"p13": {"lat": 14.0, "amp": 105.0}, "n23": {"lat": 24.0, "amp": 150.0}},
+            "OVEMP": {"n10": {"lat": 10.8, "amp": 7.0},   "p16": {"lat": 16.8, "amp": 9.5}},
+            "MVEMP": {"p13": {"lat": 13.8, "amp": 36.0},  "n23": {"lat": 23.8, "amp": 48.0}}
+          }
+        }
+      }
+    },
+    "child": {
+      "age_range": [6, 17],
+      "air_conduction": {
+        "tone_burst": {
+          "500Hz": {
+            "CVEMP": {"p13": {"lat": 11.5, "amp": 150.0}, "n23": {"lat": 21.0, "amp": 210.0}},
+            "OVEMP": {"n10": {"lat": 8.8,  "amp": 10.0},  "p16": {"lat": 14.5, "amp": 13.0}},
+            "MVEMP": {"p13": {"lat": 11.5, "amp": 50.0},  "n23": {"lat": 21.0, "amp": 68.0}}
+          }
+        }
+      }
+    },
+    "elderly": {
+      "age_range": [65, 90],
+      "air_conduction": {
+        "tone_burst": {
+          "500Hz": {
+            "CVEMP": {"p13": {"lat": 14.5, "amp": 85.0},  "n23": {"lat": 24.5, "amp": 120.0}},
+            "OVEMP": {"n10": {"lat": 11.5, "amp": 5.5},   "p16": {"lat": 17.5, "amp": 8.0}},
+            "MVEMP": {"p13": {"lat": 14.5, "amp": 28.0},  "n23": {"lat": 24.5, "amp": 38.0}}
+          }
+        }
+      }
+    }
+  },
+  "pathology_modifiers": {
+    "normal": {
+      "threshold_range": [0, 25],
+      "wave_presence": {"p13": true, "n23": true, "n10": true, "p16": true},
+      "amplitude_v_reproduction_ratio": [1.5, 2.5],
+      "reproducibility": "excellent",
+      "rate_effect": "minimal"
+    },
+    "sacular": {
+      "threshold_range": [40, 90],
+      "cvemp_p13_amp_reduction": 0.25,
+      "cvemp_n23_amp_reduction": 0.30,
+      "cvemp_p13_lat_prolongation_ms": 1.5,
+      "wave_presence": {"p13": true, "n23": true, "n10": true, "p16": true},
+      "ovemp_unchanged": true,
+      "reproducibility": "fair"
+    },
+    "utricular": {
+      "threshold_range": [40, 90],
+      "ovemp_n10_amp_reduction": 0.20,
+      "ovemp_p16_amp_reduction": 0.25,
+      "ovemp_n10_lat_prolongation_ms": 1.2,
+      "wave_presence": {"p13": true, "n23": true, "n10": true, "p16": true},
+      "cvemp_unchanged": true,
+      "reproducibility": "fair"
+    },
+    "neural": {
+      "threshold_range": [0, 60],
+      "interpeak_prolongation_ms": 1.5,
+      "morphology_distortion": true,
+      "amplitude_reduction_uniform": 0.40,
+      "wave_presence": {"p13": true, "n23": true, "n10": true, "p16": true},
+      "reproducibility": "poor",
+      "rate_effect": "severe"
+    }
+  },
+  "stimulus_modifiers": {
+    "tone_burst": {
+      "500Hz": {"default": true, "freq_hz": 500},
+      "1000Hz": {"freq_hz": 1000}
+    }
+  },
+  "physiological_modifiers": {
+    "age": {
+      "elderly_additional_p13_lat_ms": 1.5,
+      "elderly_amp_reduction": 0.15
+    },
+    "sex": {
+      "female_amp_boost": 1.10
+    }
+  }
+}

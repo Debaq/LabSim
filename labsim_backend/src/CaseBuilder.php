@@ -44,6 +44,20 @@ final class CaseBuilder
     // src/oae/generators/base.py.
     public const EOAS_TYPE_OPTIONS = ['normal', 'coclear', 'transmission', 'neural'];
 
+    // Patología VEMP por oído -- categorías vestibulares. 'sacular' afecta
+    // CVEMP (P13/N23 sobre SCM), 'utricular' afecta OVEMP (N10/P16 sobre
+    // oblicuo inferior), 'neural' afecta ambos (neuropatía vestibular).
+    // Ver VEMP_generator_v1.py::calculate_wave_parameters.
+    public const VEMP_TYPE_OPTIONS = ['normal', 'sacular', 'utricular', 'neural'];
+    public const VEMP_SUBTIPOS = ['CVEMP', 'OVEMP', 'MVEMP'];
+
+    // Picos por subtipo (orden de aparición en curva/tabla/PDF).
+    public const VEMP_PEAKS = [
+        'CVEMP' => ['p13', 'n23'],
+        'OVEMP' => ['n10', 'p16'],
+        'MVEMP' => ['p13', 'n23'],
+    ];
+
     // Acumetría (diapasones 500 y 1000 Hz) -- se guarda dentro de
     // audiometría, no es tab aparte. Rinne es por oído (CA vs CO en ese
     // oído); Weber es un único resultado por frecuencia (a qué lado
@@ -406,6 +420,7 @@ final class CaseBuilder
             'Otoscopia' => $form['otoscopia'],
             'ABR' => $form['abr'],
             'EOAS' => $form['eoas'],
+            'VEMP' => $form['vemp'],
             'tipo' => 'normal',
         ];
     }
@@ -606,6 +621,36 @@ final class CaseBuilder
                 'type' => in_array($ladoEoasType, self::EOAS_TYPE_OPTIONS, true) ? $ladoEoasType : 'normal',
                 'umbral' => (string) ($ladoEoas['umbral'] ?? 20),
             ];
+        }
+
+        $vemp = $data['VEMP'] ?? [];
+        foreach (['OD' => 'od', 'OI' => 'oi'] as $ladoData => $ladoForm) {
+            $ladoVemp = is_array($vemp[$ladoData] ?? null) ? $vemp[$ladoData] : [];
+            $desv = is_array($ladoVemp['desviaciones'] ?? null) ? $ladoVemp['desviaciones'] : [];
+            $ladoVempType = $ladoVemp['type'] ?? 'normal';
+            $subtipo = $ladoVemp['subtipo'] ?? 'CVEMP';
+            if (!in_array($subtipo, self::VEMP_SUBTIPOS, true)) {
+                $subtipo = 'CVEMP';
+            }
+            $peaks = self::VEMP_PEAKS[$subtipo];
+            $ladoFormArr = [
+                'subtipo' => $subtipo,
+                'type' => in_array($ladoVempType, self::VEMP_TYPE_OPTIONS, true) ? $ladoVempType : 'normal',
+                'umbral' => (string) ($ladoVemp['umbral'] ?? 60),
+                'repro_var' => (string) ($ladoVemp['repro_var'] ?? 0.2),
+                'average_objetivo' => (string) ($ladoVemp['average_objetivo'] ?? 200),
+            ];
+            foreach ($peaks as $pico) {
+                $ladoFormArr["lat_{$pico}"] = (string) ($desv[$pico]['lat'] ?? 0);
+                $ladoFormArr["amp_{$pico}"] = (string) ($desv[$pico]['amp'] ?? 0);
+            }
+            if (!empty($ladoVemp['repro']) || !isset($ladoVemp['repro'])) {
+                // Default repro=true (caso nuevo sin VEMP configurado aún):
+                // solo queda sin marcar si el docente lo desmarcó
+                // explícitamente (repro === false guardado).
+                $ladoFormArr['repro'] = '1';
+            }
+            $v['vemp'][$ladoForm] = $ladoFormArr;
         }
 
         return $v;

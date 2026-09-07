@@ -5,6 +5,7 @@ from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox, QP
 
 from abr.AbrMainWindow import AbrMainWindow
 from oae.OaeMainWindow import OaeMainWindow
+from vemp.VempMainWindow import VempMainWindow
 from agenda import Agenda
 from agenda.ChatPaciente import ChatPacienteWidget
 from audiometria import Acumetria, Audiometer, ListWords, Otoscopia
@@ -355,7 +356,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         login_subw = self.subw.get("LOGIN") if self.subw else None
         self.subw = {"LOGIN": login_subw} if login_subw else None
 
-        for attr in ("subw_a", "subw_w", "subw_z", "subw_ac", "subw_ot", "subw_abr", "subw_eoas"):
+        for attr in ("subw_a", "subw_w", "subw_z", "subw_ac", "subw_ot", "subw_abr", "subw_eoas", "subw_vemp"):
             if hasattr(self, attr):
                 delattr(self, attr)
 
@@ -494,7 +495,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             # Antes de deshidratar: los módulos "de examen" (hoy solo ABR)
             # suben su informe mientras todavía tienen appointment_id/
             # data_login -- _hydrate_modules() de abajo se los saca.
-            for attr in ("subw_abr",):
+            for attr in ("subw_abr", "subw_vemp"):
                 try:
                     getattr(self, attr).obj.submit_report()
                 except AttributeError:
@@ -513,7 +514,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Carga self.data_current en los módulos ya construidos, o los
         deshidrata (data_current=None) para que dejen de loguear acciones
         bajo el caso/paciente ya cerrado."""
-        for attr in ("subw_a", "subw_z", "subw_w", "subw_ac", "subw_ot", "subw_abr", "subw_eoas"):
+        for attr in ("subw_a", "subw_z", "subw_w", "subw_ac", "subw_ot", "subw_abr", "subw_eoas", "subw_vemp"):
             try:
                 getattr(self, attr).obj.la_super(self.data_current, self.data_current_key)
             except AttributeError:
@@ -528,6 +529,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw_z = FrameSubMdi(Z.ZControl())
         self.subw_abr = FrameSubMdi(AbrMainWindow(data_login=self.data_login))
         self.subw_eoas = FrameSubMdi(OaeMainWindow(data_login=self.data_login))
+        self.subw_vemp = FrameSubMdi(VempMainWindow(data_login=self.data_login))
 
         self.subw.update({
             "A": self.subw_a,
@@ -536,7 +538,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "ABR": self.subw_abr,
             # Placeholder: modulo habilitable por curso (courses.php) pero
             # sin implementacion real todavia -- ver core/module_placeholder.py.
-            "VEMP": FrameSubMdi(ModulePlaceholder(APPS.get("VEMP", [None, "VEMP"])[1])),
+            "VEMP": self.subw_vemp,
             "EOAS": self.subw_eoas,
             "AGENDA": FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self)),
             "CVOICE": FrameSubMdi(ComandVoiceA()),

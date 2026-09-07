@@ -82,6 +82,13 @@ final class ReportPdfBuilder
 
         // Tabla simple de latencias/amplitudes por curva (si hay datos).
         $curvas = is_array($data['curvas'] ?? null) ? $data['curvas'] : [];
+        // Lista de picos a iterar: cliente VEMP la manda en data['waves'];
+        // si falta (informes viejos ABR) usa default I/III/V. Acepta también
+        // override por curva (curva['waves']) si una curva puntual midió
+        // otro set (ej. cambian de CVEMP a OVEMP a mitad del examen).
+        $wavesDefault = is_array($data['waves'] ?? null) && $data['waves'] !== []
+            ? array_map('strval', $data['waves'])
+            : ['I', 'III', 'V'];
         if (count($curvas) > 0) {
             $pdf->text(self::MARGIN, $y, 'Latencias y amplitudes', 12, true);
             $y += 18;
@@ -89,7 +96,7 @@ final class ReportPdfBuilder
                 if (!is_array($curva)) {
                     continue;
                 }
-                $linea = self::formatCurveLine((string) $nombreCurva, $curva);
+                $linea = self::formatCurveLine((string) $nombreCurva, $curva, $wavesDefault);
                 $pdf->text(self::MARGIN, $y, $linea, 9);
                 $y += 14;
             }
@@ -125,7 +132,7 @@ final class ReportPdfBuilder
         };
     }
 
-    private static function formatCurveLine(string $nombre, array $curva): string
+    private static function formatCurveLine(string $nombre, array $curva, array $wavesDefault): string
     {
         $side = (string) ($curva['side'] ?? '');
         $int = $curva['int'] ?? null;
@@ -144,7 +151,12 @@ final class ReportPdfBuilder
 
         $ondas = [];
         $latAmp = is_array($curva['LatAmp'] ?? null) ? $curva['LatAmp'] : [];
-        foreach (['I', 'III', 'V'] as $onda) {
+        // Lista de picos a iterar: override por curva si viene, si no el
+        // default del informe (data['waves'] o ['I','III','V'] para ABR).
+        $waves = is_array($curva['waves'] ?? null) && $curva['waves'] !== []
+            ? array_map('strval', $curva['waves'])
+            : $wavesDefault;
+        foreach ($waves as $onda) {
             $par = $latAmp[$onda] ?? null;
             if (is_array($par) && $par[0] !== null) {
                 $lat = is_numeric($par[0]) ? number_format((float) $par[0], 2) : (string) $par[0];
