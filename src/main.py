@@ -106,12 +106,16 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             # cualquier intento de login va a fallar igual porque depende
             # del mismo backend. Avisamos una vez para que el usuario sepa
             # que no es un bug local.
+            detalle = ""
+            err = getattr(fetch_layout, "last_error", None)
+            if err is not None:
+                detalle = f"\nDetalle: {err.phase} — {err.detail}"
             QMessageBox.warning(
                 self,
                 "Sin conexión con el servidor",
                 "No se pudo obtener el layout de la aplicación desde el "
                 "backend. La ventana de login quedó disponible, pero no "
-                "podrás operar hasta que el servidor responda.",
+                "podrás operar hasta que el servidor responda." + detalle,
             )
         self.create_variables()
         self.set_mdi_area()
