@@ -24,6 +24,12 @@ class AgendaEntry:
     case_id: str = ""
     atencion: dict = field(default_factory=dict)  # {username: {estado, nota, hora_real}}
     nota_admin: str = ""
+    # True = fila sintética de un caso que NO tiene ninguna cita en
+    # appointments (paciente "sin agendar", ver _cases_sin_cita). Existe solo
+    # para que el docente lo vea/pruebe desde la agenda: no tiene
+    # appointment_id, así que nunca se empuja al backend (ver
+    # diff_and_push_shedule) ni admite atenciones reales.
+    sin_cita: bool = False
 
 
 def backend_state_to_shedule(state: dict, own_user_id: int, own_username: str) -> dict:
@@ -60,7 +66,41 @@ def backend_state_to_shedule(state: dict, own_user_id: int, own_username: str) -
             "hora_real": att.get("hora_real") or "",
         }
 
+    agenda.update(_cases_sin_cita(state, agenda))
+
     return {"agenda_1": agenda}
+
+
+def _cases_sin_cita(state: dict, agenda: dict) -> dict:
+    """Filas sintéticas para los casos que no tienen ninguna cita.
+
+    La agenda se arma de appointments, así que un caso creado en el panel y
+    todavía no agendado no aparecía en ninguna parte del cliente (sí en
+    admin/patients.php). El docente los necesita ver para probarlos, así que
+    se agregan como filas "sin agendar", con la identidad del paciente que
+    manda el backend en cases (paciente_*) o, si el caso quedó huérfano de
+    una cita borrada, con el snapshot que guardó esa cita.
+
+    La key es "case:<id>" (no un id de appointments) -- ver AgendaEntry.sin_cita.
+    """
+    con_cita = {row.case_id for row in agenda.values() if row.case_id}
+
+    filas = {}
+    for case in state.get("cases", []):
+        case_id = str(case["id"])
+        if case_id in con_cita:
+            continue
+        data = case.get("data")
+        snapshot = data.get("paciente_snapshot") or {} if isinstance(data, dict) else {}
+        filas[f"case:{case_id}"] = AgendaEntry(
+            rut=case.get("paciente_rut") or snapshot.get("rut") or "",
+            nombre=case.get("paciente_nombre") or snapshot.get("nombre") or "",
+            apellido=case.get("paciente_apellido") or snapshot.get("apellido") or "",
+            fecha_nac=case.get("paciente_fecha_nac") or snapshot.get("fecha_nac") or "",
+            case_id=case_id,
+            sin_cita=True,
+        )
+    return filas
 
 
 def _appointment_fields(row: AgendaEntry):
@@ -89,6 +129,8 @@ def diff_and_push_shedule(client, new_shedule: dict, old_shedule: dict, own_user
     old_agenda = old_shedule.get("agenda_1", {})
 
     for key, row in new_agenda.items():
+        if row.sin_cita:
+            continue  # caso sin cita: no hay appointment_id que actualizar
         old_row = old_agenda.get(key)
         fields = _appointment_fields(row)
 
@@ -113,6 +155,8 @@ def diff_and_push_shedule(client, new_shedule: dict, old_shedule: dict, own_user
             if estado in ESTADOS_EMPUJABLES:
                 client.post_attendance_action(appointment_id, estado, nota=propia_nueva.get("nota", ""))
 
-    for key in old_agenda:
+    for key, old_row in old_agenda.items():
+        if old_row.sin_cita:
+            continue  # nunca existió como cita (p.ej. el caso recién se agendó)
         if key not in new_agenda:
             client.delete_appointment(int(key))

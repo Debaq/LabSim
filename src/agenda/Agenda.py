@@ -18,6 +18,7 @@ from PySide6.QtCore import QDate, QTime, QDateTime, Qt, QThread, Signal
 from PySide6.QtGui import QColor
 from agenda.UI.Ui_agenda import Ui_Form
 from core.helpers import (Shedule, entry_estado_por, CasesOffline,
+                          es_docente,
                           marcar_entry_no_show,
                           obtener_nota_atencion,
                           CreatePatient)
@@ -46,6 +47,9 @@ PENDIENTE_COLOR = QColor(255, 244, 200)
 ATENDIENDO_COLOR = QColor(200, 224, 247)
 ATENDIDO_COLOR = QColor(210, 235, 210)
 NO_SHOW_COLOR = QColor(235, 190, 190)
+# Caso sin ninguna cita en la agenda (AgendaEntry.sin_cita) -- distinto del
+# amarillo PENDIENTE, que es una cita creada pero todavía sin fecha/hora.
+SIN_CITA_COLOR = QColor(232, 224, 240)
 
 
 class FichaClinicaWidget(QWidget):
@@ -119,7 +123,10 @@ class Agenda(QWidget, Ui_Form):
         super().__init__()
         self.setupUi(self)
 
-        self.is_admin = permissions == 777
+        # Admin (777) y docente (555) comparten la misma vista de agenda:
+        # ven TODAS las citas (sin filtro por fecha) más los casos que aún no
+        # tienen cita (filas sin_cita, ver backend_state_to_shedule).
+        self.is_admin = es_docente(permissions)
         self.main_window = obj
         self._selected_key = None
         self._selected_row_key = None
@@ -275,21 +282,31 @@ class Agenda(QWidget, Ui_Form):
             pendiente = not (user.fecha and user.hora)
             estado = entry_estado_por(user, username)
             color = None
-            if pendiente:
+            tooltip = ""
+            if user.sin_cita:
+                # Caso creado en el panel que todavía no se agendó a nadie:
+                # el docente lo ve para poder probarlo, pero no se puede
+                # atender de verdad (no hay cita a la que colgar la atención).
+                color = SIN_CITA_COLOR
+                tooltip = "Caso sin cita: solo se puede probar, no queda registro."
+            elif pendiente:
                 color = PENDIENTE_COLOR
+                tooltip = "Cita creada sin fecha ni hora."
             elif estado == "atendiendo":
                 color = ATENDIENDO_COLOR
             elif estado == "atendido":
                 color = ATENDIDO_COLOR
             elif estado == "no_show":
                 color = NO_SHOW_COLOR
-            columnas = (user.fecha, user.hora, user.rut, user.nombre,
+            columnas = (user.fecha or "sin agendar", user.hora, user.rut, user.nombre,
                         user.apellido, user.fecha_nac, user.procedimiento)
             for col_idx, valor in enumerate(columnas):
                 item = QTableWidgetItem(valor)
                 item.setData(Qt.UserRole, key)
                 if color is not None:
                     item.setBackground(color)
+                if tooltip:
+                    item.setToolTip(tooltip)
                 item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                 self.tableWidget.setItem(row_idx, col_idx, item)
         self.tableWidget.setSortingEnabled(True)
@@ -334,7 +351,18 @@ class Agenda(QWidget, Ui_Form):
         self._selected_row_key = key
         self._selected_key = key if pendiente else None
 
-        if self.is_admin and self._guardar_base:
+        if self.is_admin and user.sin_cita:
+            # Sin cita no hay appointment_id: attendances no lo puede
+            # referenciar, así que "guardar base" no aplica y el único ciclo
+            # posible es el de prueba (ver atender_paciente()).
+            self.chk_guardar_base.setEnabled(False)
+            self.chk_guardar_base.setToolTip(
+                "Este caso no está agendado: solo se puede probar, no se guarda la atención."
+            )
+        elif self.is_admin:
+            self.chk_guardar_base.setToolTip("")
+
+        if self.is_admin and self._guardar_base and not user.sin_cita:
             # Guardar base: mismo ciclo real que el alumno (marca "atendiendo"/
             # "atendido" de verdad, con la propia cuenta del docente) -- ver
             # main.atender_paciente_base/cerrar_atencion_base.
@@ -351,6 +379,14 @@ class Agenda(QWidget, Ui_Form):
                 self.btn_atender.setText("Atender")
                 self.btn_atender.setEnabled(tiene_caso)
             self.chk_guardar_base.setEnabled(not (estado == "atendiendo" and self._es_atencion_activa(key)))
+        elif self.is_admin and user.sin_cita:
+            # Modo prueba forzado (ver arriba): el checkbox ya quedó
+            # deshabilitado, acá solo se decide el botón.
+            if self._prueba_atendiendo_key == key and self._es_atencion_activa(key):
+                self.btn_atender.setText("Cerrar/Evolucionar")
+            else:
+                self.btn_atender.setText("Atender (prueba)")
+            self.btn_atender.setEnabled(tiene_caso)
         elif self.is_admin:
             # Modo prueba (por defecto): no queda "atendiendo" en la agenda ni
             # se escribe en red, pero el botón sí simula el ciclo completo
@@ -397,7 +433,9 @@ class Agenda(QWidget, Ui_Form):
         if self._selected_row_key is None:
             return
 
-        if self.is_admin and self._guardar_base:
+        sin_cita = self.shedule["agenda_1"][self._selected_row_key].sin_cita
+
+        if self.is_admin and self._guardar_base and not sin_cita:
             self._atender_paciente_admin_real()
             return
 

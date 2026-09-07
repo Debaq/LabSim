@@ -21,6 +21,7 @@ from core import app_config_store
 from core.module_placeholder import ModulePlaceholder
 from core.updater import local_build_id
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
+                          es_docente,
                           marcar_entry_atendiendo, marcar_entry_atendido,
                           reset_backend_session)
 from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon, style_dialog
@@ -488,8 +489,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         los módulos. Se llama tanto la primera vez como al retomar un paciente que
         ya estaba en atención (tras reabrir la app o al volver desde otro paciente).
         """
-        if self.data_login["permission"] == 777:
-            return  # el admin usa atender_paciente_prueba() o atender_paciente_base()
+        if es_docente(self.data_login["permission"]):
+            return  # admin/docente usan atender_paciente_prueba() o atender_paciente_base()
         self._atender_caso(key, es_prueba=False)
 
     def atender_paciente_base(self, key):
@@ -501,7 +502,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         comparar después a los alumnos. A diferencia de
         atender_paciente_prueba(), esto deja rastro real en la base de datos.
         """
-        if self.data_login["permission"] != 777:
+        if not es_docente(self.data_login["permission"]):
             return  # esta variante es solo para admin/docente
         self._atender_caso(key, es_prueba=False)
 
@@ -518,7 +519,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Admin/profe: descarga el caso de prueba de los módulos, igual que
         cerrar_atencion(), pero sin marcar "atendido" ni escribir en
         attendances/agenda -- no deja rastro en la base de datos."""
-        if self.data_login["permission"] != 777:
+        if not es_docente(self.data_login["permission"]):
             return  # solo admin/profe usan el ciclo de prueba
         self.data_current_key = None
         self.data_current = None
@@ -589,14 +590,14 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
     def cerrar_atencion(self, key, nota):
         """Cierra la atención (estado 'atendido') guardando la nota de atención del estudiante"""
-        if self.data_login["permission"] == 777:
-            return  # el admin usa cerrar_atencion_prueba() o cerrar_atencion_base()
+        if es_docente(self.data_login["permission"]):
+            return  # admin/docente usan cerrar_atencion_prueba() o cerrar_atencion_base()
         self._cerrar_atencion_real(key, nota)
 
     def cerrar_atencion_base(self, key, nota):
         """Contraparte de atender_paciente_base(): cierra de verdad (estado
         'atendido', chat guardado) la atención base del docente."""
-        if self.data_login["permission"] != 777:
+        if not es_docente(self.data_login["permission"]):
             return  # esta variante es solo para admin/docente
         self._cerrar_atencion_real(key, nota)
 

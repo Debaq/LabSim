@@ -15,7 +15,17 @@ $students = $pdo->query(
     "SELECT id, username, display_name, permission, active FROM users WHERE role = 'student'"
 )->fetchAll();
 
-$cases = $pdo->query('SELECT id, data, updated_at FROM cases')->fetchAll();
+// Identidad del paciente junto al caso: la app de escritorio arma con esto
+// las filas "sin agendar" de la agenda (casos sin cita, ver
+// backend_state_to_shedule). NUNCA se seleccionan comentario_docente ni
+// historia_clinica de patients -- eso no sale del panel admin.
+$cases = $pdo->query(
+    'SELECT c.id, c.data, c.updated_at,
+            p.rut AS paciente_rut, p.nombre AS paciente_nombre,
+            p.apellido AS paciente_apellido, p.fecha_nac AS paciente_fecha_nac
+       FROM cases c
+       LEFT JOIN patients p ON p.id = c.patient_id'
+)->fetchAll();
 foreach ($cases as &$c) {
     $c['data'] = json_decode($c['data'], true);
 }

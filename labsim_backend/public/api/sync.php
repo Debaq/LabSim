@@ -48,7 +48,18 @@ if ($user['role'] === 'admin') {
 }
 $appointments = Db::castAppointments($stmt->fetchAll());
 
-$stmt = $pdo->prepare('SELECT id, data, updated_at FROM cases WHERE updated_at > ?');
+// paciente_*: identidad del paciente dueño del caso (patients), que la app
+// necesita para mostrar los casos SIN cita en la agenda del docente (ver
+// backend_state_to_shedule). Nunca se manda comentario_docente ni
+// historia_clinica -- esos no salen del panel admin.
+$stmt = $pdo->prepare(
+    'SELECT c.id, c.data, c.updated_at,
+            p.rut AS paciente_rut, p.nombre AS paciente_nombre,
+            p.apellido AS paciente_apellido, p.fecha_nac AS paciente_fecha_nac
+       FROM cases c
+       LEFT JOIN patients p ON p.id = c.patient_id
+      WHERE c.updated_at > ?'
+);
 $stmt->execute([$since]);
 $cases = $stmt->fetchAll();
 foreach ($cases as &$c) {

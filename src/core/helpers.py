@@ -41,6 +41,15 @@ _backend_client = None
 _shedule_snapshot = {"agenda_1": {}}
 _cases_snapshot = {}
 
+# Permisos con vista de docente (ver Auth.php: PERMISSION_ADMIN 777 /
+# PERMISSION_DOCENTE 555). Los dos ven la agenda completa y atienden en modo
+# prueba o "base"; el alumno (444) no.
+PERMISOS_DOCENTE = (777, 555)
+
+
+def es_docente(permission) -> bool:
+    return permission in PERMISOS_DOCENTE
+
 
 def _get_backend_client() -> BackendClient:
     global _backend_client
