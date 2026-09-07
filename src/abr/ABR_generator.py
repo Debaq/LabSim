@@ -10,7 +10,16 @@ junto con abr/bezier_prop.py):
 - Ondas VI (trough negativo) y VII (bump tardio) con morfologia propia.
 - Ruido EEG = pink (1/f) + EMG HF, no blanco+butter.
 - FSP como SNR creciente (ruido ~ 1/sqrt(N)), no mezcla lineal caos-objetivo.
-- Filtros = solo butterworth, sin hacks morfológicos.
+- Filtros = solo butterworth (SOS), sin hacks morfológicos, con el fs real
+  del eje temporal (~41.6 kHz) y no un 20000 fijo que corría cada corte
+  2.08x arriba del rótulo.
+- Amplitud gobernada por el nivel de sensación (SL = intensidad - umbral),
+  saturante, no normalizada contra un techo fijo de 80 dB: un oído con
+  umbral 60 ya no muestra a 80 dB la amplitud de un oído sano.
+- Las ondas se apagan con un codo suave, sin el escalón de disappear_offset
+  que borraba la onda I de golpe a 70 dB.
+- Tasa de estimulación continua y anclada en 21.1/s, con magnitudes
+  clínicas (onda V: ~+0.5 ms y -25% entre 11 y 91/s).
 """
 
 import json
@@ -33,6 +42,52 @@ WAVE_SIGMA = {
     'VI':  0.22,   # trough negativo
     'VII': 0.40,   # bump tardio, mas ancho
 }
+
+# Crecimiento de amplitud por NIVEL DE SENSACION (SL = intensidad - umbral).
+#   amp_factor = 1 - exp(-(SL - sl_min) / tau)
+# Saturante y anclado al umbral del oido, no lineal contra un techo fijo de
+# 80 dB: antes un oido con umbral 60 mostraba a 80 dB la amplitud normativa
+# COMPLETA (0.6 uV de onda V a 20 dB SL), que es el aspecto de un oido sano.
+#   sl_min = SL desde el que la onda empieza a emerger. I y II necesitan mas
+#            nivel que V -- por eso son las primeras que se pierden al bajar.
+#   tau    = que tan rapido satura.
+# Calibrado para que a ~60 dB SL (oido normal estimulado a 80 dB, que es
+# como estan medidos los valores del JSON normativo) el factor sea ~0.95.
+WAVE_AMP_GROWTH = {
+    'I':   {'sl_min': 20, 'tau': 13},   # la primera en perderse (~40 dB SL)
+    'II':  {'sl_min': 22, 'tau': 14},
+    'III': {'sl_min': 5,  'tau': 16},
+    'IV':  {'sl_min': 8,  'tau': 17},
+    'V':   {'sl_min': -4, 'tau': 20},   # sigue presente en el umbral mismo
+}
+
+# Reclutamiento: en perdida coclear la amplitud crece mas rapido con el SL,
+# por eso a nivel alto la onda V puede verse casi normal pese al umbral
+# elevado (recruitment: true en normative_data.json). Multiplica tau.
+PATHOLOGY_TAU_FACTOR = {'cochlear': 0.65}
+
+# La funcion latencia-intensidad no corre todas las ondas lo mismo: el
+# interpico I-V se ensancha SOLO un poco al bajar la intensidad (0.2-0.4 ms
+# entre 80 y 20 dB). Factor sobre el shift de la onda V. Antes la onda I
+# usaba 0.2 y el resto 1.0 -> I-V pasaba de 3.85 a 5.11 ms, imposible.
+LAT_SHIFT_FACTOR = {'I': 0.85, 'II': 0.90, 'III': 0.92, 'IV': 0.96, 'V': 1.0}
+
+# Tasa de estimulacion. Los valores normativos se miden a ~21.1/s (tasa
+# clinica tipica) -- ese es el ancla: ahi el modelo no toca nada. Por
+# encima la latencia crece lineal (ms por estimulo/s) y la amplitud cae
+# exponencial; por debajo el efecto se invierte suave. Todo continuo: antes
+# habia tramos 15/50/60/70 con saltos (la onda II pasaba de 0.110 a 0.006
+# uV entre 55 y 60/s) y rangos irreales (onda V variaba 6.4x en amplitud y
+# 1.1 ms en latencia entre 11 y 90/s; lo real es ~25-30% y ~0.4-0.6 ms).
+RATE_REF = 21.1
+RATE_LAT_SLOPE = {'I': 0.0025, 'II': 0.0035, 'III': 0.0045,
+                  'IV': 0.0055, 'V': 0.0060}
+RATE_AMP_DECAY = {'I': 0.0060, 'II': 0.0070, 'III': 0.0045,
+                  'IV': 0.0060, 'V': 0.0035}
+# Patologia neural = mala resistencia a tasas altas ("rate_effect": "severe"
+# en normative_data.json): mismo modelo, decaimiento y corrimiento mayores.
+RATE_NEURAL_AMP_FACTOR = 2.2
+RATE_NEURAL_LAT_FACTOR = 1.5
 
 
 class ABRGenerator:
@@ -112,6 +167,13 @@ class ABRGenerator:
         else:
             lat_shift = (80 - 70) / 10 * 0.08 + (70 - intensity) / 10 * 0.3
 
+        # Nivel de sensacion: cuanto por encima del umbral DE ESTE OIDO se
+        # esta estimulando. Es lo que manda en amplitud y en ancho de la
+        # onda; la intensidad absoluta sola no dice nada (80 dB en un oido
+        # con umbral 60 son 20 dB SL, no una respuesta maxima).
+        sl = intensity - threshold
+        tau_factor = PATHOLOGY_TAU_FACTOR.get(pathology, 1.0)
+
         for wave in ['I', 'II', 'III', 'IV', 'V']:
             if wave not in baseline:
                 continue
@@ -119,9 +181,8 @@ class ABRGenerator:
             # repro_shift: jitter de "no reproducible" -- mueve TODO el
             # complejo junto (misma respuesta neural, timing inconsistente),
             # no una onda aislada.
-            calc_lat = base_lat + lat_shift + repro_shift
-            if wave == 'I':
-                calc_lat = base_lat + lat_shift * 0.2 + repro_shift
+            calc_lat = (base_lat + lat_shift * LAT_SHIFT_FACTOR.get(wave, 1.0)
+                        + repro_shift)
             # Escala de la desviacion segun estimulo: el caso clinico define
             # la desviacion pensando en click (estimulo estandar), pero
             # latencia/amplitud base cambian fuerte con el estimulo (burst
@@ -142,44 +203,36 @@ class ABRGenerator:
                 if key in desviaciones:
                     calc_lat += desviaciones[key]['lat'] * lat_scale
 
-            base_amp = baseline[wave]['amp']
-            if wave == 'V':
-                if intensity >= threshold:
-                    db_range = 80 - threshold
-                    if db_range == 0:
-                        amp_factor = 1.0
-                    else:
-                        amp_factor = 0.05 + 0.95 * ((intensity - threshold) / db_range)
-                else:
-                    db_below = threshold - intensity
-                    amp_factor = max(0.05 * (1 - db_below / 10), 0.001)
-            else:
-                disappear_offset = {'I': 70, 'II': 70,
-                                    'III': threshold + 10, 'IV': threshold + 8}
-                disappear_at = disappear_offset.get(wave, threshold + 10)
-                if intensity >= disappear_at:
-                    db_range = 80 - disappear_at
-                    if db_range <= 0:
-                        amp_factor = 1.0 if disappear_at >= 80 else 0.05
-                    else:
-                        amp_factor = 0.05 + 0.95 * ((intensity - disappear_at) / db_range)
-                else:
-                    db_below = disappear_at - intensity
-                    amp_factor = max(0.05 * (1 - db_below / 10), 0.001)
+            # Amplitud = curva de crecimiento saturante sobre el SL (ver
+            # WAVE_AMP_GROWTH). Reemplaza el escalon de disappear_offset,
+            # que borraba la onda I de golpe a 70 dB (0.21 -> 0.011 uV en un
+            # paso) cuando en un oido normal la I se sigue viendo hasta
+            # 50-60 dB.
+            growth = WAVE_AMP_GROWTH[wave]
+            tau = growth['tau'] * tau_factor
+            # Codo suave (softplus) en vez de max(x, 0): la onda se apaga
+            # de forma gradual al acercarse a su sl_min en vez de cortarse
+            # seco. logaddexp para que no reviente con exponentes grandes.
+            knee = 0.3 * tau
+            sl_eff = knee * np.logaddexp(0.0, (sl - growth['sl_min']) / knee)
+            amp_factor = 1.0 - np.exp(-sl_eff / tau)
 
-            calc_amp = base_amp * amp_factor
+            calc_amp = baseline[wave]['amp'] * amp_factor
             if desviaciones and wave in ['I', 'III', 'V']:
                 key = f"onda_{wave}"
                 if key in desviaciones:
                     calc_amp += desviaciones[key]['amp'] * amp_scale
             calc_amp = max(calc_amp, 0.001)
 
-            if intensity >= 70:
+            # Ensanchamiento cerca del umbral, tambien por SL (antes iba
+            # contra la intensidad absoluta: un oido con perdida no
+            # ensanchaba nunca).
+            if sl >= 50:
                 width_factor = 1.0
-            elif intensity >= 50:
-                width_factor = 1.0 + (70 - intensity) * 0.03
+            elif sl >= 30:
+                width_factor = 1.0 + (50 - sl) * 0.03
             else:
-                width_factor = 1.6 + (50 - intensity) * 0.05
+                width_factor = min(1.6 + (30 - sl) * 0.05, 2.6)
 
             modified[wave] = {
                 'lat': calc_lat,
@@ -187,7 +240,7 @@ class ABRGenerator:
                 'width': width_factor,
             }
 
-        return modified, {w: True for w in ['I', 'II', 'III', 'IV', 'V']}
+        return modified, {w: modified[w]['amp'] > 0.02 for w in modified}
 
     def apply_polarity_effects(self, values, polarity):
         CM_value = None
@@ -206,67 +259,27 @@ class ABRGenerator:
         return values, CM_value
 
     def apply_rate_effects(self, values, rate, pathology):
-        if rate <= 15:
-            if 'I' in values:
-                values['I']['lat'] -= 0.35
-                values['I']['amp'] *= 1.70
-            if 'II' in values:
-                values['II']['amp'] *= 1.50
-            if 'III' in values:
-                values['III']['lat'] -= 0.25
-                values['III']['amp'] *= 1.50
-            if 'IV' in values:
-                values['IV']['amp'] *= 1.40
-            if 'V' in values:
-                values['V']['lat'] -= 0.35
-                values['V']['amp'] *= 1.60
-        elif 15 < rate <= 50:
-            factor = (rate - 15) / 35
-            if 'I' in values:
-                values['I']['lat'] += -0.35 * (1 - factor)
-                values['I']['amp'] *= 1.70 - 0.70 * factor
-            if 'II' in values:
-                values['II']['amp'] *= 1.50 - 0.50 * factor
-            if 'III' in values:
-                values['III']['lat'] += -0.25 * (1 - factor)
-                values['III']['amp'] *= 1.50 - 0.50 * factor
-            if 'IV' in values:
-                values['IV']['amp'] *= 1.40 - 0.40 * factor
-            if 'V' in values:
-                values['V']['lat'] += -0.35 * (1 - factor)
-                values['V']['amp'] *= 1.60 - 0.60 * factor
-        else:
-            if rate <= 70:
-                factor = (rate - 50) / 20
-            else:
-                factor = min(1.0 + (rate - 70) / 30, 1.5)
-            if 'I' in values:
-                values['I']['lat'] += 0.40 * factor
-                values['I']['amp'] *= max(1.0 - 0.70 * factor, 0.001)
-            if 'III' in values:
-                values['III']['lat'] += 0.40 * factor
-                values['III']['amp'] *= max(1.0 - 0.50 * factor, 0.001)
-            if 'V' in values:
-                values['V']['lat'] += 0.50 * factor
-                values['V']['amp'] *= max(1.0 - 0.50 * factor, 0.001)
-            if 'II' in values:
-                if rate >= 60:
-                    values['II']['amp'] *= 0.05
-                else:
-                    df = (rate - 50) / 10
-                    values['II']['amp'] *= max(1.0 - 0.95 * df, 0.05)
-            if 'IV' in values:
-                if rate >= 60:
-                    values['IV']['amp'] *= 0.05
-                else:
-                    df = (rate - 50) / 10
-                    values['IV']['amp'] *= max(1.0 - 0.95 * df, 0.05)
+        """Efecto de la tasa de estimulacion, continuo y anclado en RATE_REF.
 
-        if pathology == 'neural' and 10 < rate < 30:
-            if 'II' in values:
-                values['II']['amp'] *= 0.30
-            if 'IV' in values:
-                values['IV']['amp'] *= 0.30
+        Latencia lineal en la tasa (ms por estimulo/s) y amplitud
+        exponencial decreciente, ambas por onda: la I es la mas sensible a
+        la tasa y la V la que mejor aguanta, que es justo lo que se ensena.
+        Sin escalones ni tramos: el modelo viejo tenia quiebres en 15/50/60
+        y rangos irreales (ver comentario de RATE_REF).
+        """
+        d_rate = rate - RATE_REF
+        neural = pathology == 'neural'
+        lat_gain = RATE_NEURAL_LAT_FACTOR if neural else 1.0
+        amp_gain = RATE_NEURAL_AMP_FACTOR if neural else 1.0
+
+        for wave, v in values.items():
+            if wave not in RATE_LAT_SLOPE:
+                continue
+            v['lat'] += RATE_LAT_SLOPE[wave] * d_rate * lat_gain
+            decay = np.exp(-RATE_AMP_DECAY[wave] * amp_gain * d_rate)
+            # Techo bajo (tasas lentas suben poco la amplitud) y piso: ni a
+            # 91/s la respuesta desaparece del todo en un oido normal.
+            v['amp'] *= float(np.clip(decay, 0.15, 1.20))
         return values
 
     # =====================================================================
@@ -418,11 +431,21 @@ class ABRGenerator:
     # FILTROS (limpios: solo butterworth, sin hacks)
     # =====================================================================
 
-    def apply_filters(self, y, filter_low, filter_high, fs=20000):
-        """
-        Solo butterworth pasa-bajo + pasa-alto.
-        Los efectos morfológicos (ensanchamiento, drift) son parte
-        del modelo de ruido, no del filtro.
+    def apply_filters(self, y, filter_low, filter_high, fs):
+        """Butterworth pasa-bajo + pasa-alto, en secciones de segundo orden.
+
+        fs LLEGA CALCULADA del eje temporal real (ver generate_curve): 500
+        puntos en 12 ms son ~41.6 kHz, no los 20000 fijos que habia antes.
+        Con ese fs equivocado todo corte quedaba 2.08x arriba del rotulo
+        (pasa-alto de 100 Hz filtrando en ~208 Hz, pasa-bajo de 1500 en
+        ~3120): el alumno movia los filtros y veia la mitad del efecto.
+
+        SOS en vez de (b, a): con cortes normalizados tan chicos
+        (3.3 Hz / 20.8 kHz = 1.6e-4) la forma transfer-function de orden 6
+        queda mal condicionada y el filtro devuelve basura.
+
+        Los efectos morfologicos (ensanchamiento, drift) son parte del
+        modelo de ruido, no del filtro.
         """
         nyq = fs / 2
         out = y.copy()
@@ -430,15 +453,14 @@ class ABRGenerator:
         if 0 < filter_low < nyq:
             low_n = min(filter_low / nyq, 0.99)
             order = 4 if filter_low >= 3000 else (5 if filter_low >= 2000 else 6)
-            b, a = signal.butter(order, low_n, 'low')
-            out = signal.filtfilt(b, a, out)
+            sos = signal.butter(order, low_n, 'low', output='sos')
+            out = signal.sosfiltfilt(sos, out)
 
         if filter_high > 0:
-            high_n = max(filter_high / nyq, 1e-4)
-            high_n = min(high_n, 0.99)
+            high_n = min(max(filter_high / nyq, 1e-5), 0.99)
             order = 6 if filter_high >= 150 else (5 if filter_high >= 50 else 4)
-            b, a = signal.butter(order, high_n, 'high')
-            out = signal.filtfilt(b, a, out)
+            sos = signal.butter(order, high_n, 'high', output='sos')
+            out = signal.sosfiltfilt(sos, out)
 
         return out
 
@@ -524,8 +546,11 @@ class ABRGenerator:
         values, CM_value = self.apply_polarity_effects(values, stimulus_config['pol'])
         values = self.apply_rate_effects(values, stimulus_config['rate'], pathology)
 
-        # 8. Eje temporal
+        # 8. Eje temporal (12 ms). fs sale de aca, no de una constante:
+        # 500 puntos en 12 ms = ~41.6 kHz, dentro del rango real de un
+        # equipo ABR (20-50 kHz).
         t = np.linspace(0, 12, 500)
+        fs = (len(t) - 1) / (t[-1] / 1000.0)
 
         # 9. Curva objetivo (gaussianas)
         y_target = self.build_target_curve(t, values, CM_value)
@@ -566,6 +591,7 @@ class ABRGenerator:
             y_noisy,
             float(stimulus_config['filter_down']),
             float(stimulus_config['filter_passhigh']),
+            fs,
         )
 
         return t, y_final, {
