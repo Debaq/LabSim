@@ -20,6 +20,13 @@ Y las "P1":
    el ruido (1/sqrt(N)), con un trazo que se asienta en vez de parpadear.
 10. Ruido reproducible entre ejecuciones (core.rng.stable_seed).
 
+Y la configuración del equipo (Parámetros Avanzados), que antes se dibujaba
+pero no la leía nadie:
+11. Ventana de registro, transductor, montaje, electrodos e impedancias,
+    rechazo de artefacto, ruido residual objetivo.
+12. Protocolos por potencial evocado (abr/protocols.py) y todos los
+    estímulos del combo funcionando en todas las poblaciones.
+
 Sin scipy en el sandbox: se stubea para poder importar el módulo y correr
 todo lo que es matemática de parámetros. Los tests del pipeline y de la
 respuesta de los filtros necesitan scipy real y se saltan si no está.
@@ -51,7 +58,9 @@ except ImportError:
     sys.modules['scipy.signal'] = fake_signal
 
 from abr.ABR_generator import (  # noqa: E402
-    ABRGenerator, INTERAURAL_ATTENUATION, RATE_REF, select_population)
+    ABRGenerator, INTERAURAL_ATTENUATION, RATE_REF, STIM_MAP,
+    default_settings, select_population)
+from abr.protocols import PROTOCOLS, get_protocol  # noqa: E402
 
 NORMS = os.path.join(os.path.dirname(__file__), '..', 'resources', 'abr', 'normative_data.json')
 
@@ -262,13 +271,14 @@ def test_golden_wave_parameters():
 
 def _curva(intensity=80, threshold=20, pathology='normal', population='adult_female',
            current=2000, target=2000, masking=0, contra=None, capture='R1',
-           seed_key='caso-1', fsp=(2.3, 2.8)):
+           seed_key='caso-1', fsp=(2.3, 2.8), technical=None, filter_high=100):
     """Corre generate_curve con un caso completo (necesita scipy)."""
     g = _gen()
     stim = {'stim': 'click', 'freq': None, 'pol': 'Alternada', 'int': intensity,
-            'rate': 21.1, 'filter_down': 3000, 'filter_passhigh': 100,
+            'rate': 21.1, 'filter_down': 3000, 'filter_passhigh': filter_high,
             'average': target, 'current_avg': current, 'pathway': 'air_conduction'}
-    tech = {'impedance': 3.0, 'transducer': 'insert_earphone'}
+    tech = default_settings('ABR')
+    tech.update(technical or {})
     case = {'desviaciones': {}, 'fsp_puntos': {'800': fsp[0], '2000': fsp[1]},
             'umbral': threshold, 'average_objetivo': target, 'repro_shift': 0.0,
             'masking': masking, 'contra': contra,
@@ -476,7 +486,7 @@ def test_residual_noise_falls_as_one_over_sqrt_n():
         return
     g = _gen()
     def residual(n):
-        ruido = g.averaged_noise(T_AXIS, n, 2000, 1.0, np.random.default_rng(11), 3.0)
+        ruido = g.averaged_noise(T_AXIS, n, 2000, 1.0, np.random.default_rng(11))
         return float(g.apply_filters(ruido, 3000.0, 100.0, FS).std())
 
     r_bajo, r_alto = residual(125), residual(2000)
@@ -528,6 +538,211 @@ def test_capture_is_reproducible_across_runs():
     assert not np.array_equal(a, otro_caso)
     _, otra_curva, _ = _curva(capture='R7')
     assert not np.array_equal(a, otra_curva)
+
+
+# ------------------------------------------------- protocolos y equipo (P2)
+
+def test_protocol_table_covers_every_test_in_the_combo():
+    """Los 8 potenciales del combo cb_test tienen protocolo descrito."""
+    esperados = {'ABR', 'ASSR', 'MLR', 'P300', 'MMN', 'ECochG', 'CAEP',
+                 'Stacked ABR'}
+    assert esperados == set(PROTOCOLS)
+    # Solo ABR tiene generador; el resto queda descrito pero deshabilitado.
+    assert {n for n, p in PROTOCOLS.items() if p.implemented} == {'ABR'}
+    for nombre, p in PROTOCOLS.items():
+        assert p.window_ms > 0, nombre
+        assert p.filter_high < p.filter_low, nombre     # pasa-alto < pasa-bajo
+        assert p.averages > 0 and p.rate > 0, nombre
+        assert p.stimuli, nombre
+
+
+def test_defaults_follow_the_protocol():
+    """El equipo arranca en el montaje de rutina de cada prueba."""
+    abr = default_settings('ABR')
+    assert abr['window_ms'] == get_protocol('ABR').window_ms
+    assert abr['montage'] == 'vertex_mastoid'
+    ecochg = default_settings('ECochG')
+    assert ecochg['window_ms'] == 5           # ventana corta: MC, PS y PA
+    assert ecochg['montage'] == 'tympanic'
+    assert default_settings('P300')['window_ms'] == 800
+    # Una prueba desconocida no puede reventar: cae en el protocolo de ABR.
+    assert default_settings('no existe')['window_ms'] == abr['window_ms']
+
+
+def test_window_sets_the_time_axis_without_moving_fs():
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    for ventana in (6.0, 12.0, 20.0):
+        t, y, meta = _curva(technical={'window_ms': ventana})
+        assert abs(t[-1] - ventana) < 1e-9
+        fs = (len(t) - 1) / (t[-1] / 1000.0)
+        assert abs(fs - FS) / FS < 0.01, (ventana, fs)
+        assert meta['window_ms'] == ventana
+
+
+def test_supraaural_makes_everything_earlier():
+    """Sin el tubo del inserto, el complejo aparece ~0.9 ms antes."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    t_ins, y_ins, _ = _curva()
+    t_tdh, y_tdh, meta = _curva(technical={'transducer': 'TDH39_headphone'})
+    adelanto = t_ins[np.argmax(y_ins)] - t_tdh[np.argmax(y_tdh)]
+    assert 0.7 < adelanto < 1.1, adelanto
+    assert meta['pathway'] == 'air_conduction'
+
+
+def test_bone_vibrator_switches_to_bone_conduction():
+    """El vibrador óseo no es otro fono: tiene su propio bloque normativo."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    _, _, meta = _curva(technical={'transducer': 'bone_vibrator'})
+    assert meta['pathway'] == 'bone_conduction'
+
+
+def test_montage_scales_amplitude():
+    """Fz-mastoides recoge menos que Cz-mastoides (0.7 en el JSON)."""
+    g = _gen()
+    factor = g.montage_factor('forehead_mastoid')
+    assert abs(factor - 0.7) < 1e-9
+    assert g.montage_factor('vertex_mastoid') == 1.0
+    assert g.montage_factor('tympanic') > 1.0        # ECochG: mucho más grande
+    if not HAS_SCIPY:
+        return
+    _, y_cz, _ = _curva()
+    _, y_fz, _ = _curva(technical={'montage': 'forehead_mastoid'})
+    assert y_fz.max() < y_cz.max()
+
+
+def test_disconnected_active_electrode_leaves_no_response():
+    """Sin activo no hay diferencia de potencial: solo ruido, por más que promedie."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    electrodos = {'vertex': 'No Conectado', 'right': 'A2', 'left': 'A1',
+                  'ground': 'Fpz'}
+    t, y, meta = _curva(technical={'electrodes': electrodos})
+    _, y_ok, _ = _curva()
+    assert meta['recording'] is False
+    assert y[t > 9].std() > 5 * y_ok[t > 9].std()
+
+    # Y sobre todo: no hay onda. Con respuesta real el pico cae siempre en
+    # la misma latencia; acá cada captura lo pone en otro lado, que es como
+    # se reconoce que lo que se está viendo es ruido.
+    def picos(**kw):
+        return [_curva(capture=f"R{i}", **kw)[0][np.argmax(_curva(capture=f"R{i}", **kw)[1])]
+                for i in range(1, 4)]
+    sin_electrodo = picos(technical={'electrodes': electrodos})
+    con_electrodo = picos()
+    assert max(sin_electrodo) - min(sin_electrodo) > 0.5, sin_electrodo
+    assert max(con_electrodo) - min(con_electrodo) < 0.2, con_electrodo
+
+
+def test_missing_ground_brings_mains_hum():
+    """Sin tierra entra la red: el zumbido se ve pese al pasa-alto de 100 Hz."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    electrodos = {'vertex': 'Cz', 'right': 'A2', 'left': 'A1',
+                  'ground': 'No Conectado'}
+    t, y_sin, meta = _curva(technical={'electrodes': electrodos})
+    t, y_ok, _ = _curva()
+    assert meta['mains'] is True
+    assert y_sin[t > 9].std() > 5 * y_ok[t > 9].std()
+    # Y con un pasa-alto más bajo (potenciales corticales) es peor todavía.
+    t, y_bajo, _ = _curva(technical={'electrodes': electrodos}, filter_high=33)
+    assert y_bajo[t > 9].std() > y_sin[t > 9].std()
+
+
+def test_electrode_impedance_raises_the_noise():
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    alta = {'vertex': 8.0, 'right': 8.0, 'left': 8.0, 'ground': 8.0}
+    t, y_alta, _ = _curva(technical={'impedance': alta})
+    t, y_baja, _ = _curva()
+    assert y_alta[t > 9].std() > 2 * y_baja[t > 9].std()
+    g = _gen()
+    assert g.impedance_noise_factor(2) < g.impedance_noise_factor(4) < g.impedance_noise_factor(8)
+
+
+def test_artifact_rejection_cuts_both_ways():
+    """Umbral estrecho: promedio lento. Rechazo apagado: entra basura."""
+    g = _gen()
+    assert g.artifact_acceptance(25, 1.0) == 1.0          # habitual, no descarta
+    assert g.artifact_acceptance(10, 1.0) < 0.7           # estrecho
+    # Con un paciente inquieto el mismo umbral descarta más.
+    assert g.artifact_acceptance(25, 2.0) < g.artifact_acceptance(25, 1.0)
+    assert g.artifact_acceptance(0, 1.0) == 1.0           # desactivado
+    if not HAS_SCIPY:
+        return
+    t, y_habitual, _ = _curva()
+    t, y_estrecho, meta = _curva(technical={'artifact_reject_uv': 10.0})
+    t, y_sin, _ = _curva(technical={'artifact_reject_uv': 0.0})
+    assert meta['artifact_acceptance'] < 1.0
+    assert meta['accepted_sweeps'] < 2000
+    assert y_estrecho[t > 9].std() > y_habitual[t > 9].std()
+    assert y_sin[t > 9].std() > y_habitual[t > 9].std()
+
+
+def test_residual_noise_target_sets_the_floor():
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    t, y_40, _ = _curva(technical={'residual_noise_nv': 40})
+    t, y_120, _ = _curva(technical={'residual_noise_nv': 120})
+    razon = y_120[t > 9].std() / y_40[t > 9].std()
+    assert 2.0 < razon < 4.0, razon
+
+
+def test_fsp_criterion_is_reported():
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    _, _, meta = _curva(technical={'fsp_criterion': 4.0}, fsp=(2.3, 2.8))
+    assert meta['fsp_criterion'] == 4.0
+    assert meta['fsp_pass'] is False            # el caso llega a 2.8, no a 4.0
+    _, _, meta = _curva(technical={'fsp_criterion': 2.0})
+    assert meta['fsp_pass'] is True
+
+
+# ---------------------------------------------------------- estímulos (P2)
+
+def test_every_stimulus_works_in_every_population():
+    """Los 7 estímulos del combo dan ondas ordenadas en las 5 poblaciones."""
+    g = _gen()
+    for poblacion in ('adult_female', 'adult_male', 'child', 'neonate', 'elderly'):
+        for etiqueta, (stim, freq) in STIM_MAP.items():
+            base = g.get_baseline_values(poblacion, stim, 'air_conduction', freq=freq)
+            lats = [base[w]['lat'] for w in ('I', 'II', 'III', 'IV', 'V')]
+            assert lats == sorted(lats), (poblacion, etiqueta, lats)
+            assert 2.0 < lats[-1] < 12.0, (poblacion, etiqueta, lats[-1])
+            assert all(base[w]['amp'] > 0 for w in ('I', 'III', 'V'))
+
+
+def test_stimulus_ratios_fall_back_to_the_adult_block():
+    """Poblaciones sin ese estímulo en el JSON usan los ratios del adulto.
+
+    El neonato solo trae click y ce_chirp: sin el fallback, pedir un burst
+    devolvía los valores del click, o sea el estímulo no hacía nada.
+    """
+    g = _gen()
+    click = g.get_baseline_values('neonate', 'click', 'air_conduction')
+    burst = g.get_baseline_values('neonate', 'tone_burst', 'air_conduction', freq='500Hz')
+    ls = g.get_baseline_values('neonate', 'ls_chirp', 'air_conduction')
+    assert burst['V']['lat'] > click['V']['lat'] + 1.0   # 500 Hz llega mucho después
+    assert ls['V']['lat'] < click['V']['lat']            # el chirp sincroniza
+
+
+def test_tone_burst_interpolates_the_waves_it_does_not_describe():
+    """Los bloques de burst solo traen I, III y V: II y IV se interpolan."""
+    g = _gen()
+    burst = g.get_baseline_values('adult_female', 'tone_burst',
+                                  'air_conduction', freq='500Hz')
+    assert burst['I']['lat'] < burst['II']['lat'] < burst['III']['lat']
+    assert burst['III']['lat'] < burst['IV']['lat'] < burst['V']['lat']
 
 
 if __name__ == "__main__":

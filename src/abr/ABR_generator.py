@@ -40,6 +40,7 @@ import numpy as np
 import scipy.signal as signal
 from core.base import context
 from core import app_config_store
+from abr.protocols import get_protocol
 from core.rng import case_fingerprint, stable_seed
 
 
@@ -141,6 +142,44 @@ NOISE_BLOCKS = 200
 # sale de la escala del grafico y deja de leerse como ruido.
 NOISE_MAX_UV = 1.2
 
+# Muestras por ms del registro: 500 puntos en 12 ms. Se mantiene constante
+# al cambiar la ventana para que fs no dependa del protocolo (~41.6 kHz,
+# rango real de un equipo). Ver technical_config['window_ms'].
+SAMPLES_PER_MS = 500 / 12
+
+# El tubo del fono de insercion retrasa el sonido ~0.9 ms y los valores
+# normativos estan medidos CON insertos: al pasar a supraaural todo el
+# complejo aparece 0.9 ms antes. Es el ajuste que en clinica se hace de
+# cabeza al comparar informes de equipos distintos.
+TRANSDUCER_LATENCY_MS = {
+    'insert_earphone': 0.0,
+    'TDH39_headphone': -0.9,
+    'bone_vibrator': 0.0,   # via osea: tiene su propio bloque normativo
+}
+
+# Montajes fuera de technical_factors.electrode_montage del JSON.
+EXTRA_MONTAGE_FACTOR = {
+    'tympanic': 2.5,        # ECochG: electrodo en la membrana, todo mas grande
+}
+
+# Rechazo de artefacto: un umbral estrecho descarta mas barridos (el
+# promedio avanza mas lento) y uno ancho deja entrar barridos sucios.
+ARTIFACT_REJECT_REF_UV = 18.0
+NO_REJECT_NOISE_FACTOR = 1.4
+
+# Interferencia de red (50 Hz en Chile). Aparece cuando los electrodos
+# quedan desbalanceados en impedancia o cuando falta la tierra: es EL
+# artefacto que el alumno tiene que aprender a reconocer y corregir.
+MAINS_HZ = 50.0
+# Calibrados sobre lo que SOBREVIVE al pasa-alto de 100 Hz del ABR: sin
+# tierra el trazo queda claramente montado sobre el zumbido (~0.2 uV RMS,
+# la mitad de una onda V), y un desbalance de electrodos se nota pero no
+# arruina el registro.
+MAINS_UV_PER_KOHM = 0.12
+MAINS_NO_GROUND_UV = 3.0
+
+DISCONNECTED = 'No Conectado'
+
 
 def select_population(age=None, gender=None):
     """Poblacion normativa segun el paciente (claves de normative_data.json).
@@ -203,17 +242,33 @@ class ABRGenerator:
         Gana sobre el default bundleado, onda por onda.
         """
         pop = self.norms['populations'][population]
-        click = pop[pathway]['click']
+        via = pop.get(pathway) or pop['air_conduction']
+        click = via['click']
         if stimulus == 'click':
             return click
 
         if stimulus == 'tone_burst':
             stim_key = f"tone_burst_{freq or '1000Hz'}"
-            default_ratio_block = pop[pathway].get('tone_burst', {}).get(freq or '1000Hz')
+            default_ratio_block = (via.get('tone_burst') or {}).get(freq or '1000Hz')
         else:
             stim_key = stimulus
-            default_ratio_block = pop[pathway].get(stimulus)
+            default_ratio_block = via.get(stimulus)
 
+        # El JSON no describe todos los estimulos en todas las poblaciones
+        # (neonato solo trae click y ce_chirp, por ejemplo). Sin esto, pedir
+        # un burst de 500 Hz en un neonato devolvia los valores del click en
+        # silencio, o sea el estimulo no hacia NADA. Los ratios son una
+        # propiedad del estimulo mucho mas que de la poblacion, asi que se
+        # caen a los del adulto en vez de inventarse un 1.0.
+        if not default_ratio_block:
+            fallback = (self.norms['populations']['adult_female'].get(pathway)
+                        or self.norms['populations']['adult_female']['air_conduction'])
+            if stimulus == 'tone_burst':
+                default_ratio_block = (fallback.get('tone_burst') or {}).get(freq or '1000Hz')
+            else:
+                default_ratio_block = fallback.get(stimulus)
+
+        default_ratio_block = self._complete_ratio_block(default_ratio_block, click)
         override_block = (ratio_override or {}).get(stim_key)
 
         baseline = {}
@@ -230,6 +285,37 @@ class ABRGenerator:
                 'amp': click_vals['amp'] * ratio['amp_ratio'],
             }
         return baseline
+
+    @staticmethod
+    def _complete_ratio_block(block, click):
+        """Rellena las ondas que el bloque de ratios no describe.
+
+        Los bloques de tone_burst solo traen I, III y V (son las que se
+        miden en clinica). Dejar II y IV en 1.0 daba una curva imposible:
+        un burst de 500 Hz corria la I y la III casi un ms y dejaba la II
+        clavada en la latencia del click, cruzandose con ellas. Se
+        interpola por posicion de onda entre las descritas.
+        """
+        if not block:
+            return block
+        orden = [w for w in ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'] if w in click]
+        idx_con = [i for i, w in enumerate(orden)
+                   if w in block and isinstance(block[w], dict)]
+        if not idx_con or len(idx_con) == len(orden):
+            return block
+
+        completo = dict(block)
+        for clave in ('lat_ratio', 'amp_ratio'):
+            xs = idx_con
+            ys = [float(block[orden[i]].get(clave, 1.0)) for i in idx_con]
+            for i, wave in enumerate(orden):
+                if i in idx_con:
+                    continue
+                valor = float(np.interp(i, xs, ys))
+                completo.setdefault(wave, {})
+                completo[wave] = dict(completo[wave])
+                completo[wave][clave] = valor
+        return completo
 
     def calculate_wave_parameters(self, baseline, intensity, threshold,
                                    pathology, desviaciones=None, repro_shift=0.0,
@@ -440,6 +526,105 @@ class ABRGenerator:
     # ARTEFACTOS Y RUIDO
     # =====================================================================
 
+    # =====================================================================
+    # CONFIGURACION TECNICA (transductor, montaje, electrodos, rechazo)
+    # =====================================================================
+
+    def montage_factor(self, montage):
+        """Factor de amplitud del montaje (Cz-mastoides = 1.0)."""
+        tabla = self.norms.get('technical_factors', {}).get('electrode_montage', {})
+        if montage in tabla:
+            return float(tabla[montage].get('amplitude_factor', 1.0))
+        return EXTRA_MONTAGE_FACTOR.get(montage, 1.0)
+
+    def impedance_noise_factor(self, impedance):
+        """Ruido segun impedancia de electrodos, interpolado.
+
+        technical_factors.electrode_impedance del JSON da 20 nV a <=3 kOhm,
+        40 nV entre 3 y 5, y 80 nV de 5 a 10. Se interpola en vez de usar
+        tramos: subir un electrodo de 4.9 a 5.1 kOhm no puede duplicar el
+        ruido de golpe.
+        """
+        tabla = self.norms.get('technical_factors', {}).get('electrode_impedance', {})
+        puntos = []
+        for grado in tabla.values():
+            lo, hi = grado.get('range', [0, 0])
+            puntos.append(((lo + hi) / 2.0, float(grado.get('noise_level', 0.04))))
+        if not puntos:
+            return 1.0
+        puntos.sort()
+        xs = [p[0] for p in puntos]
+        ys = [p[1] for p in puntos]
+        nivel = float(np.interp(float(impedance), xs, ys))
+        referencia = float(np.interp(4.0, xs, ys)) or 0.04
+        return nivel / referencia
+
+    @staticmethod
+    def electrode_state(technical_config):
+        """Que pasa con los electrodos: (hay_registro, sin_tierra, desbalance).
+
+        - El vertex (activo) o las dos referencias desconectadas dejan el
+          registro en nada: no hay diferencia de potencial que amplificar.
+        - Sin tierra el amplificador no rechaza el modo comun y entra la
+          red electrica.
+        - El desbalance de impedancia entre activo y referencia es lo que
+          convierte esa interferencia en 50 Hz visible en el trazo.
+        """
+        electrodos = technical_config.get('electrodes') or {}
+        impedancias = technical_config.get('impedance')
+        if not isinstance(impedancias, dict):
+            valor = 3.0 if impedancias is None else float(impedancias)
+            impedancias = {k: valor for k in ('vertex', 'right', 'left', 'ground')}
+
+        def conectado(key):
+            return electrodos.get(key, 'A1') != DISCONNECTED
+
+        activo = conectado('vertex') if electrodos else True
+        referencias = [k for k in ('right', 'left') if conectado(k)] if electrodos else ['right']
+        hay_registro = activo and bool(referencias)
+        sin_tierra = bool(electrodos) and not conectado('ground')
+
+        usados = ['vertex'] + referencias if hay_registro else list(impedancias)
+        valores = [float(impedancias.get(k, 3.0)) for k in usados] or [3.0]
+        desbalance = max(valores) - min(valores)
+        return hay_registro, sin_tierra, max(valores), desbalance
+
+    def mains_interference(self, t, sin_tierra, desbalance, rng):
+        """Zumbido de red por desbalance de electrodos o falta de tierra.
+
+        Con los armonicos, no solo la fundamental: a 50 Hz el pasa-alto de
+        100 Hz del ABR se la come entera, y en un equipo real el zumbido
+        igual se ve. Lo que sobrevive al filtro son 150 y 250 Hz, y por eso
+        bajar el pasa-alto (para mirar potenciales corticales, por ejemplo)
+        deja el trazo inservible hasta que se arreglan los electrodos.
+        """
+        amp = desbalance * MAINS_UV_PER_KOHM
+        if sin_tierra:
+            amp += MAINS_NO_GROUND_UV
+        if amp <= 0:
+            return np.zeros_like(t)
+        zumbido = np.zeros_like(t)
+        for armonico, peso in ((1, 1.0), (3, 0.5), (5, 0.3)):
+            fase = rng.uniform(0, 2 * np.pi)
+            zumbido += peso * np.sin(
+                2 * np.pi * MAINS_HZ * armonico * t / 1000.0 + fase)
+        return amp * zumbido
+
+    @staticmethod
+    def artifact_acceptance(reject_uv, quality):
+        """Fraccion de barridos que sobrevive al rechazo de artefacto.
+
+        Un umbral estrecho con un paciente inquieto descarta la mitad de
+        los barridos: el contador del equipo sube igual pero el promedio
+        avanza mucho mas lento, que es exactamente lo que pasa en clinica.
+        Con el rechazo apagado no se descarta nada, pero entra basura (ver
+        NO_REJECT_NOISE_FACTOR en averaged_noise).
+        """
+        if not reject_uv:
+            return 1.0
+        return float(np.clip(float(reject_uv) / (ARTIFACT_REJECT_REF_UV * quality),
+                             0.25, 1.0))
+
     def add_transducer_artifact(self, t, transducer='insert_earphone'):
         cfg = {
             'insert_earphone': {'dur': 0.8, 'amp': 0.05},
@@ -489,7 +674,7 @@ class ABRGenerator:
         return 0.70 * pink + 0.30 * emg
 
     def averaged_noise(self, t, current_avg, target_avg, quality, rng,
-                       impedance=3.0):
+                       imp_factor=1.0, noise_floor_uv=NOISE_FLOOR_UV):
         """Ruido RESIDUAL de un promediado de `current_avg` barridos.
 
         El equipo promedia: la senial esta completa desde el primer barrido
@@ -517,21 +702,22 @@ class ABRGenerator:
         m = int(np.ceil(max(float(current_avg), 1.0) / block))
         m = max(min(m, NOISE_BLOCKS * 4), 1)
 
-        residual = self.sweep_noise(n, m, rng).mean(axis=0)
-
-        # Impedancia de electrodos (peor = mas ruido).
-        if impedance < 3:
-            imp = 0.5
-        elif impedance <= 5:
-            imp = 1.0
-        else:
-            imp = 1.5
+        # Se acumula por tandas: con ventanas largas (P300 son 800 ms, o
+        # sea decenas de miles de muestras) una matriz m x n entera no
+        # entra en memoria, y el promedio por tandas da lo mismo.
+        residual = np.zeros(n)
+        hechos = 0
+        while hechos < m:
+            tanda = min(64, m - hechos)
+            residual += self.sweep_noise(n, tanda, rng).sum(axis=0)
+            hechos += tanda
+        residual /= m
 
         # El promedio de m bloques YA tiene RMS 1/sqrt(m): la caida con las
         # promediaciones sale de ahi. Esta constante solo fija la escala
         # para que al llegar al objetivo (m = NOISE_BLOCKS) el piso quede
-        # en NOISE_FLOOR_UV con paciente y electrodos tipicos.
-        amp = NOISE_FLOOR_UV * np.sqrt(NOISE_BLOCKS) * quality * imp
+        # en el ruido residual que declara el equipo, con paciente tipico.
+        amp = noise_floor_uv * np.sqrt(NOISE_BLOCKS) * quality * imp_factor
         return residual * min(amp, NOISE_MAX_UV)
 
     # =====================================================================
@@ -645,9 +831,14 @@ class ABRGenerator:
 
     def generate_curve(self, population, pathology, stimulus_config,
                         technical_config, case_config=None):
-        # 1. Baseline normativo
+        # 1. Baseline normativo. El vibrador oseo no es "otro transductor
+        # de aire": estimula la coclea directo y tiene su propio bloque
+        # normativo (bone_conduction), asi que la via la manda el equipo.
+        transducer = technical_config.get('transducer', 'insert_earphone')
         pathway = ('air_conduction' if 'pathway' not in stimulus_config
                    else stimulus_config['pathway'])
+        if transducer == 'bone_vibrator':
+            pathway = 'bone_conduction'
         # Ratio de desviacion por curso (ver core.app_config_store en el
         # cliente / AppConfig.php en el backend) -- afecta solo como se
         # desvian chirp/burst respecto al click, nunca el click en si
@@ -676,7 +867,7 @@ class ABRGenerator:
             threshold = self.norms['pathology_modifiers'][pathology]['threshold_range'][0]
 
         masking = float((case_config or {}).get('masking') or 0.0)
-        ia = INTERAURAL_ATTENUATION.get(technical_config.get('transducer'), 65.0)
+        ia = INTERAURAL_ATTENUATION.get(transducer, 65.0)
         if masking > 0:
             threshold = max(threshold, masking - ia)
 
@@ -723,10 +914,24 @@ class ABRGenerator:
         values, CM_value = self.apply_polarity_effects(values, stimulus_config['pol'])
         values = self.apply_rate_effects(values, stimulus_config['rate'], pathology)
 
-        # 8. Eje temporal (12 ms). fs sale de aca, no de una constante:
-        # 500 puntos en 12 ms = ~41.6 kHz, dentro del rango real de un
-        # equipo ABR (20-50 kHz).
-        t = np.linspace(0, 12, 500)
+        # 7b. Ajustes del equipo sobre las ondas: retardo del transductor y
+        # montaje de electrodos. Van despues de polaridad/tasa porque son
+        # del registro, no del paciente.
+        lat_offset = TRANSDUCER_LATENCY_MS.get(transducer, 0.0)
+        montage_gain = self.montage_factor(
+            technical_config.get('montage', 'vertex_mastoid'))
+        if lat_offset or montage_gain != 1.0:
+            for v in values.values():
+                v['lat'] += lat_offset
+                v['amp'] *= montage_gain
+
+        # 8. Eje temporal. La ventana la fija el protocolo (12 ms en ABR,
+        # 5 en ECochG, cientos en los corticales -- ver abr/protocols.py) y
+        # las muestras por ms se mantienen para que fs no dependa de eso:
+        # ~41.6 kHz, dentro del rango real de un equipo (20-50 kHz).
+        window_ms = float(technical_config.get('window_ms') or 12)
+        n_samples = max(int(round(window_ms * SAMPLES_PER_MS)), 64)
+        t = np.linspace(0, window_ms, n_samples)
         fs = (len(t) - 1) / (t[-1] / 1000.0)
 
         # 9. Curva objetivo (gaussianas)
@@ -748,12 +953,15 @@ class ABRGenerator:
             shadow_values = self.apply_rate_effects(
                 shadow_values, stimulus_config['rate'],
                 ((case_config or {}).get('contra') or {}).get('type', 'normal'))
+            for v in shadow_values.values():
+                v['lat'] += lat_offset
+                v['amp'] *= montage_gain
             y_target = y_target + self.build_target_curve(
                 t, shadow_values, shadow_cm)
 
         # 10. Drift LF + artefacto transductor
         y_drift = self.add_baseline_drift(t, rng)
-        y_artifact = self.add_transducer_artifact(t, technical_config['transducer'])
+        y_artifact = self.add_transducer_artifact(t, transducer)
 
         # 11. Curva limpia (sin ruido). La senial NO se escala por cuanto
         # se lleva promediado: en un equipo real esta completa desde el
@@ -772,10 +980,34 @@ class ABRGenerator:
         # es un paciente ruidoso (se mueve, tensa el cuello) y su curva
         # tarda mas en limpiarse.
         quality = float(np.clip(2.8 / max(fsp_2000, 0.5), 0.5, 2.5))
+
+        # Estado de los electrodos y rechazo de artefacto: es la parte que
+        # el alumno controla desde Parametros Avanzados.
+        hay_registro, sin_tierra, imp_max, desbalance = self.electrode_state(
+            technical_config)
+        acceptance = self.artifact_acceptance(
+            technical_config.get('artifact_reject_uv'), quality)
+        noise_floor = float(technical_config.get('residual_noise_nv') or
+                            NOISE_FLOOR_UV * 1000) / 1000.0
+        imp_factor = self.impedance_noise_factor(imp_max)
+        if not technical_config.get('artifact_reject_uv'):
+            imp_factor *= NO_REJECT_NOISE_FACTOR
+
+        # Barridos que realmente entraron al promedio: el equipo cuenta los
+        # presentados, no los aceptados.
+        accepted = current_avg * acceptance
+
+        if not hay_registro:
+            # Sin electrodo activo o sin ninguna referencia no hay nada que
+            # amplificar: queda el ruido del amplificador al aire, sin
+            # respuesta ninguna por mas que se promedie.
+            y_clean = np.zeros_like(t)
+            accepted = 1.0
+
         y_noisy = y_clean + self.averaged_noise(
-            t, current_avg, growth_target, quality, rng,
-            technical_config.get('impedance', 3.0),
+            t, accepted, growth_target, quality, rng, imp_factor, noise_floor,
         )
+        y_noisy = y_noisy + self.mains_interference(t, sin_tierra, desbalance, rng)
 
         # 14. Filtros al final (como equipos reales)
         y_final = self.apply_filters(
@@ -796,6 +1028,18 @@ class ABRGenerator:
             'threshold': threshold,
             'masking': masking,
             'shadow': bool(shadow),
+            'window_ms': window_ms,
+            'transducer': transducer,
+            'pathway': pathway,
+            'accepted_sweeps': accepted,
+            'artifact_acceptance': acceptance,
+            'recording': hay_registro,
+            'mains': bool(sin_tierra or desbalance),
+            # Criterio de deteccion configurado en Parametros Avanzados: el
+            # equipo declara "respuesta presente" cuando el FSP lo supera.
+            'fsp_criterion': technical_config.get('fsp_criterion'),
+            'fsp_pass': (fsp_actual >= technical_config['fsp_criterion']
+                         if technical_config.get('fsp_criterion') else None),
         }
 
 
@@ -804,6 +1048,26 @@ class ABRGenerator:
 # ============================================================================
 
 _generator = None
+
+
+def default_settings(test='ABR'):
+    """Equipo de rutina del protocolo, sin depender de Qt.
+
+    AbrAdvanceSettings.default_settings vive en el modulo del dialogo (que
+    importa PySide6); el generador no puede depender de la UI, asi que la
+    tabla base sale de abr.protocols y se arma aca.
+    """
+    protocol = get_protocol(test)
+    return {
+        'transducer': 'insert_earphone',
+        'window_ms': protocol.window_ms,
+        'montage': protocol.montage,
+        'electrodes': {'vertex': 'Cz', 'right': 'A2', 'left': 'A1', 'ground': 'Fpz'},
+        'impedance': {'vertex': 2.0, 'right': 2.0, 'left': 2.0, 'ground': 2.0},
+        'artifact_reject_uv': 25.0,
+        'residual_noise_nv': 40.0,
+        'fsp_criterion': 3.1,
+    }
 
 
 def _get_generator():
@@ -836,7 +1100,7 @@ PATHOLOGY_MAP = {
 
 
 def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
-              done, patient=None, contra=None, capture_id=""):
+              done, patient=None, contra=None, capture_id="", technical=None):
     """
     Genera curva ABR con modelo morfolgico realista.
 
@@ -848,6 +1112,10 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
     capture_id: nombre de la curva ("R1", "L2"...). Entra en la semilla del
         ruido: la misma curva se redibuja igual entre aperturas de la app,
         pero dos capturas de la misma intensidad salen distintas.
+    technical: configuracion del equipo (transductor, ventana, montaje,
+        electrodos e impedancias, rechazo de artefacto, ruido residual y
+        criterio FSP), tal como la entrega AbrAdvanceSettings.get_data().
+        Sin esto se usa el equipo de rutina del protocolo.
     """
     generator = _get_generator()
 
@@ -879,10 +1147,13 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
         'pathway': 'air_conduction',
     }
 
-    technical_config = {
-        'impedance': 3.0,
-        'transducer': 'insert_earphone',
-    }
+    # Equipo: lo que el alumno dejo en Parametros Avanzados. El fallback es
+    # el montaje de rutina del protocolo (ver abr.protocols), no un dict
+    # fijo -- cuando cuelguen los otros potenciales de esta ventana, cada
+    # uno trae su ventana de registro y su montaje.
+    technical_config = default_settings(control_setting.get('test', 'ABR'))
+    if technical:
+        technical_config.update(technical)
 
     # Oido no evaluado: umbral y patologia propios, para decidir si aparece
     # curva sombra al pasar la atenuacion interaural (ver shadow_values).

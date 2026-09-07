@@ -13,6 +13,7 @@ definición ABR en cases.data['ABR']['OD'/'OI'] (ver CaseBuilder.php).
 import os
 
 from abr.ABR_generator import ABR_Curve
+from abr.AbrAdvanceSettings import AbrAdvanceSettings, default_settings
 from abr.AbrControl import AbrControl
 from abr.AbrDetail import AbrDetail
 from abr.AbrDetailAllCurves import AbrDetailAllCurves
@@ -22,13 +23,12 @@ from abr.AbrReport import AbrReport
 from abr.AbrTable import AbrTable
 from abr.EEG import EEG
 from abr.FSP import FSP
-from abr.UI.AbrAdvanceSettings_ui import Ui_AdvanceSettings
 from abr.UI.AbrMain_ui import Ui_MainWindow
 from backend.client import BackendClient
 from core.base import context
 from core.helpers import Preferences
 from PySide6.QtCore import QCoreApplication, QTimer
-from PySide6.QtWidgets import QDialog, QMainWindow, QSizePolicy, QSpacerItem
+from PySide6.QtWidgets import QMainWindow, QSizePolicy, QSpacerItem
 
 tr = QCoreApplication.translate
 
@@ -128,6 +128,14 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.memory = {}
         self.donde = False
         self.count_averages = 0
+        # Equipo (transductor, ventana, montaje, electrodos, rechazo de
+        # artefacto...). Arranca en el montaje de rutina del protocolo y lo
+        # edita el alumno en Parametros Avanzados. Antes el dialogo se abria
+        # y se descartaba: el generador quedaba fijo en fono de insercion,
+        # impedancia 3 kOhm y ventana de 12 ms.
+        self.technical = default_settings(self.control.cb_test.currentText())
+        self.control.cb_test.currentTextChanged.connect(self.test_changed)
+        self.control.apply_protocol(self.control.cb_test.currentText())
 
     def la_super(self, data, appointment_id=None):
         """Recibe el caso del paciente en atención (o None al cerrarla/
@@ -418,10 +426,34 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.detail_all.process_and_fill_data(self.memory)
 
     def active_advance_setting(self):
-        self.dialog = QDialog(self)
-        self.ui = Ui_AdvanceSettings()
-        self.ui.setupUi(self.dialog)
-        self.dialog.exec()
+        """Parametros Avanzados: configuracion del EQUIPO, no del paciente.
+
+        Lo que se acepte aca entra en la proxima captura (ver test_test);
+        las curvas ya tomadas no se recalculan, igual que en un equipo real.
+        """
+        dialog = AbrAdvanceSettings(self.technical,
+                                    self.control.cb_test.currentText(), self)
+        if dialog.exec():
+            self.technical = dialog.get_data()
+            self.apply_window()
+
+    def test_changed(self, test):
+        """Cambio de prueba en el combo: cada potencial trae su protocolo.
+
+        Solo se reajusta el equipo (ventana de registro, montaje) y los
+        estimulos con sentido clinico. Tasa y promediaciones NO se tocan a
+        proposito: son los controles que el alumno tiene que aprender a
+        configurar (ver AbrControl.randomize_initial_values).
+        """
+        self.technical = default_settings(test)
+        self.control.apply_protocol(test)
+        self.apply_window()
+
+    def apply_window(self):
+        """Los gráficos siguen la ventana de registro del equipo."""
+        ventana = self.technical.get('window_ms', 12)
+        self.graph_r.set_windows(ventana)
+        self.graph_l.set_windows(ventana)
 
 ################INTERCAMBIO
     def memory_curves(self, value=None, side=None):
@@ -497,6 +529,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             patient=self.data_current,
             contra=contra,
             capture_id=self.current_capture_curve,
+            technical=self.technical,
         )
 
         return(x,y),(dx,dy),(0,0),(0,0), repro

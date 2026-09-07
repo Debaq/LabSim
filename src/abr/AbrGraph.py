@@ -20,6 +20,11 @@ class AbrGraph(GraphicsLayoutWidgetMod):
     def __init__(self, side):
         super().__init__()
         self.side = side
+        # Ventana de registro en ms. La fija el protocolo/Parametros
+        # Avanzados (ver set_windows): el eje X, los cursores A/B y las
+        # etiquetas de curva la siguen, si no un ECochG de 5 ms o un
+        # registro de 20 ms quedaban dibujados sobre una regla de 12.
+        self.window_ms = 12.0
         self.configure_pyqtgraph()
         self.setup_ui_elements()
         self.colors_side()
@@ -38,7 +43,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
     def setup_ui_elements(self):
         """Set up UI elements for the graph"""
         self.pw = self.addPlot(row=0,col=1)
-        self.pw.setRange(yRange=(-3, 3), xRange=(0, 13), disableAutoRange=True)
+        self.pw.setRange(yRange=(-3, 3), xRange=(0, self.window_ms + 1),
+                         disableAutoRange=True)
         self.grid = pg.GridItem(pen=self.color_pen, textPen=self.color_pen)
         self.pw.addItem(self.grid)
         self.grid.setTickSpacing(x=[1.0], y=[1.0])
@@ -63,7 +69,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             self.inactive_color = pg.mkColor(112, 142, 199, 255)
             self.inactive_fill_color = '#708EC7'
     
-    def inifine_ab(self, pos_A = 0, pos_B = 12):
+    def inifine_ab(self, pos_A = 0, pos_B = None):
+        pos_B = self.window_ms if pos_B is None else pos_B
         #Variables internas
         pen1 = pg.mkPen('b', width=1, style=Qt.PenStyle.DashLine)
         opst = {'position':0.9, 'color': (255,255,255), 'fill': (0,0,0,255), 'movable': True}
@@ -144,7 +151,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         text = TextItemMod(name=key, tipo='label', curve_parent= key, html=lbl, border="w")
         text.sigDragged.connect(self.drag_curve)
         text.sigPositionChangeStarted.connect(self.active_curve)
-        text.setPos(12, h)
+        text.setPos(self.window_ms, h)
         return text
 
     def delete_curve(self):
@@ -199,9 +206,9 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         lat_a = self.inf_a.getXPos()
         lat_b = self.inf_b.getXPos()
 
-        # Asegurarse de que las líneas no superen los límites de 0 y 12
-        lat_a = max(0, min(12, lat_a))
-        lat_b = max(0, min(12, lat_b))
+        # Asegurarse de que las líneas no se salgan de la ventana
+        lat_a = max(0, min(self.window_ms, lat_a))
+        lat_b = max(0, min(self.window_ms, lat_b))
 
         # Establecer las posiciones corregidas
         self.inf_a.setPos((lat_a, 0))
@@ -327,8 +334,18 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
 
     ###############HELPERS
-    def set_windows(self, ms:int) -> None:
-        self.pw.setXRange(ms)
+    def set_windows(self, ms: float) -> None:
+        """Ajusta el eje a la ventana de registro configurada en el equipo.
+
+        setXRange quiere (min, max); con un solo argumento no hacia nada,
+        y de hecho nadie llamaba a este helper.
+        """
+        self.window_ms = float(ms)
+        self.pw.setXRange(0, self.window_ms + self.window_ms * 0.08,
+                          padding=0)
+        for item in (getattr(self, 'inf_a', None), getattr(self, 'inf_b', None)):
+            if item is not None and item.getXPos() > self.window_ms:
+                item.setPos((self.window_ms, 0))
 
     def scale(self, direction):
         current_scale = self.get_scale()

@@ -2,6 +2,7 @@ import random
 
 from PySide6.QtWidgets import QWidget
 from abr.UI.AbrConfig_ui import Ui_Abr_Config
+from abr.protocols import PROTOCOLS, get_protocol
 from PySide6.QtCore import QCoreApplication, Signal
 
 tr = QCoreApplication.translate
@@ -33,14 +34,39 @@ class AbrControl(QWidget, Ui_Abr_Config):
 
 
     def disable_unimplemented_tests(self) -> None:
-        """Solo ABR está implementado. El resto del selector queda visible
-        pero no seleccionable; se habilitan a medida que se implemente
-        cada prueba (ASSR, MLR, P300, MMN, ECochG, CAEP, Stacked ABR)."""
+        """Deja seleccionables solo las pruebas con generador detrás.
+
+        Quién tiene generador lo dice abr/protocols.py (`implemented`), no
+        una lista escrita acá: el resto ya tiene su protocolo descrito y se
+        habilita solo cuando aparezca su generador."""
         model = self.cb_test.model()
         for i in range(self.cb_test.count()):
             item = model.item(i)
-            if item.text() != "ABR":
+            protocol = PROTOCOLS.get(item.text())
+            if protocol is None or not protocol.implemented:
                 item.setEnabled(False)
+                if protocol is not None:
+                    item.setToolTip(f"{protocol.note} (en desarrollo)")
+
+    def apply_protocol(self, test: str) -> None:
+        """Deja seleccionables los estímulos que esta prueba usa en clínica.
+
+        No toca tasa ni promediaciones a propósito: son los controles que el
+        alumno tiene que aprender a configurar (ver randomize_initial_values).
+        """
+        protocol = get_protocol(test)
+        model = self.cb_stim.model()
+        for i in range(self.cb_stim.count()):
+            item = model.item(i)
+            permitido = not protocol.stimuli or item.text() in protocol.stimuli
+            item.setEnabled(permitido)
+            if not permitido:
+                item.setToolTip(f"{item.text()} no se usa en {protocol.name}")
+        if not model.item(self.cb_stim.currentIndex()).isEnabled():
+            for i in range(self.cb_stim.count()):
+                if model.item(i).isEnabled():
+                    self.cb_stim.setCurrentIndex(i)
+                    break
 
     def disable_unimplemented_stimuli(self) -> None:
         """Desactiva estímulos no implementados (chirp, lschirp, burst)
