@@ -77,6 +77,22 @@ class TeoaeGenerator(OaeGeneratorBase):
         noise_per_sweep = self._rng.normal(0, noise_std, size=(n_sweeps, n_samples))
         waveform = clean + noise_per_sweep.mean(axis=0)
 
+        # Checkpoints de promedio acumulado: en un equipo real el trazo se
+        # ve construyendo/estabilizando a medida que se acumulan barridos
+        # (el ruido va bajando ~1/sqrt(n)), no aparece de golpe. El caller
+        # anima pasando por estos snapshots antes de mostrar el resultado
+        # final (que es exactamente el último checkpoint).
+        n_checkpoints = int(np.clip(n_sweeps, 4, 24))
+        checkpoint_ns = np.unique(
+            np.linspace(1, n_sweeps, n_checkpoints).astype(int)
+        )
+        checkpoint_ns[-1] = n_sweeps
+        cum_noise_mean = np.cumsum(noise_per_sweep, axis=0) / np.arange(1, n_sweeps + 1)[:, None]
+        sweep_checkpoints = [
+            {"n_sweeps": int(k), "waveform": clean + cum_noise_mean[k - 1]}
+            for k in checkpoint_ns
+        ]
+
         # Split buffer A/B: primera mitad vs segunda mitad de sweeps
         half = n_sweeps // 2
         a_noise = self._rng.normal(0, noise_std, size=(half, n_samples))
@@ -89,8 +105,15 @@ class TeoaeGenerator(OaeGeneratorBase):
             a = clean + a_noise.mean(axis=0)
             b = clean + b_noise.mean(axis=0)
 
-        # FFT
-        spectrum = np.abs(np.fft.rfft(waveform * np.hanning(n_samples)))
+        # FFT. Ganancia coherente de la ventana Hann: para un tono puro
+        # windowed, |FFT[bin]| ≈ amplitud_pa * sum(window)/2, así que hay
+        # que deshacer ese factor para volver a Pascales reales antes de
+        # convertir a dB SPL (ref 20 µPa) -- si no, el espectro queda en
+        # dB "crudo" sin referencia (valores tipo -90 dB en vez del rango
+        # real -5..+20 dB SPL que muestra un equipo real).
+        window = np.hanning(n_samples)
+        coherent_gain = window.sum() / 2
+        spectrum = np.abs(np.fft.rfft(waveform * window)) / coherent_gain
         freqs = np.fft.rfftfreq(n_samples, 1 / fs)
 
         # Espectro de la diferencia A-B: la señal común a ambos buffers se
@@ -100,7 +123,7 @@ class TeoaeGenerator(OaeGeneratorBase):
         # DENTRO de la banda de la señal, que sobreestima el SNR con pocos
         # bins por sesgo de estadística de orden).
         diff = (a - b) / 2
-        spectrum_diff = np.abs(np.fft.rfft(diff * np.hanning(n_samples)))
+        spectrum_diff = np.abs(np.fft.rfft(diff * window)) / coherent_gain
 
         snr_per_band = {}
         pass_per_band = {}
@@ -135,7 +158,7 @@ class TeoaeGenerator(OaeGeneratorBase):
         spec_lo = self.normative["spectrum_low_hz"]
         spec_hi = self.normative["spectrum_high_hz"]
         spec_mask = (freqs >= spec_lo) & (freqs <= spec_hi)
-        spectrum_db = 20 * np.log10(spectrum[spec_mask] + 1e-12)
+        spectrum_db = 20 * np.log10(spectrum[spec_mask] / 20e-6 + 1e-12)
         freqs_plot = freqs[spec_mask]
 
         # % Reproducibilidad: correlación de Pearson entre buffers A/B, el
@@ -167,6 +190,8 @@ class TeoaeGenerator(OaeGeneratorBase):
         return {
             "time_ms": t * 1000,
             "waveform": waveform,
+            "sweep_checkpoints": sweep_checkpoints,
+            "n_sweeps": n_sweeps,
             "spectrum_db": spectrum_db,
             "freqs": freqs_plot,
             "snr_per_band": snr_per_band,

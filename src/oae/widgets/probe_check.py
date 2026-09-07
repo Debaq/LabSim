@@ -43,8 +43,10 @@ class ProbeCheckWidget(QWidget):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self._tick)
         self.t = np.arange(200)
-        self.phase = 0.0
+        self.scroll = 0
+        self.fit_quality = 0.6
         self._running = False
+        self._rng = np.random.default_rng()
 
     def start(self):
         if not self._running:
@@ -63,13 +65,28 @@ class ProbeCheckWidget(QWidget):
         self.status_label.setText("Sonda: sin chequear")
 
     def _tick(self):
-        self.phase += 0.25
-        # Onda senoidal con modulación lenta (simula respiración/ruido ambiente)
-        carrier = np.sin(self.t * 0.3 + self.phase)
-        envelope = 0.55 + 0.35 * np.sin(self.phase * 0.4)
-        y = carrier * envelope
+        # TEOAE se evoca con clicks (transientes), no con un tono continuo:
+        # el chequeo de sonda tiene que mostrar eso -- un tren de clicks
+        # cortos que pasan en el tiempo (como un osciloscopio en vivo),
+        # no una onda continua modulada tipo "respiración".
+        period = 40
+        click_width = 14
+        self.scroll = (self.scroll + 5) % period
+        phase_in_period = (self.t + self.scroll) % period
+        carrier = np.where(
+            phase_in_period < click_width,
+            np.sin(2 * np.pi * phase_in_period / 6) * np.exp(-phase_in_period / 4.5),
+            0.0,
+        )
+        # Sello de la sonda varía lento (random walk acotado), simula
+        # ajuste real en el canal en vez de un valor fijo o sinusoidal.
+        self.fit_quality = float(
+            np.clip(self.fit_quality + self._rng.normal(0, 0.03), 0.1, 1.0)
+        )
+        noise = self._rng.normal(0, 0.03, size=self.t.shape)
+        y = carrier * self.fit_quality + noise
         self.curve.setData(self.t, y)
-        peak_pct = int(abs(envelope) * 100)
+        peak_pct = int(self.fit_quality * 100)
         self.level.setValue(peak_pct)
         if peak_pct < 30:
             status = "Sonda: floja / sin sello"

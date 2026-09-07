@@ -9,7 +9,7 @@ Derecha: GraphicsLayoutWidget con 3 gráficos principales + 2 secundarios:
 """
 import numpy as np
 import pyqtgraph as pg
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QButtonGroup,
@@ -37,9 +37,15 @@ class TeoaePanel(QWidget):
         super().__init__(parent)
         self.generator = TeoaeGenerator()
         self._last_result = None
+        self._pending = None
+        self._anim_checkpoints = []
+        self._anim_idx = 0
+        self._anim_ear = None
         self.case_od = None
         self.case_oi = None
         self._build_ui()
+        self._anim_timer = QTimer(self)
+        self._anim_timer.timeout.connect(self._anim_tick)
         self._update_case_gate()
 
     def _build_ui(self):
@@ -150,7 +156,10 @@ class TeoaePanel(QWidget):
         self.p_snr.setLabel("left", "SNR", units="dB")
         self.p_snr.setLabel("bottom", "Frecuencia", units="Hz")
         self.p_snr.setMouseEnabled(x=False, y=False)
-        self.p_snr.setLogMode(x=True, y=False)
+        # Sin setLogMode: BarGraphItem no se auto-transforma a log como sí
+        # hace PlotDataItem (curve_spec), y setXRange más abajo pasa Hz
+        # lineales -- mezclar ambos rompe el eje (rango absurdo, barras
+        # invisibles). Bandas son pocas y discretas, lineal alcanza.
         style_plot(self.p_snr)
         self.bars_snr = pg.BarGraphItem(x=[], height=[], width=0.15, brush=(41, 128, 185))
         self.p_snr.addItem(self.bars_snr)
@@ -218,26 +227,58 @@ class TeoaePanel(QWidget):
         if case is None:
             self.lbl_status.setText(f"Sin atención abierta o EOA no configurado para {ear}.")
 
+    PROBE_CHECK_MS = 1800
+    SWEEP_ANIM_MS = 90
+
     def _on_start(self):
         ear, case = self._current_case()
         if case is None:
             return
-        level = self.spn_level.value()
-        n = self.spn_n.value()
-        self.lbl_status.setText(f"Capturando: {ear}, {level:.0f} dB SPL, {n} promedios...")
+        self._pending = (ear, case, self.spn_level.value(), self.spn_n.value())
+        self.lbl_status.setText("Chequeando sonda...")
         self.btn_start.setEnabled(False)
         self.btn_stop.setEnabled(True)
         self.probe.start()
-        # Captura síncrona (sintético, sin audio device)
+        # Chequeo de sonda animado real (QTimer del probe) antes de generar
+        # la captura -- antes generate() corría síncrono en la misma llamada
+        # y bloqueaba el loop de eventos, así que el timer nunca pintaba un
+        # frame (la animación jamás se veía).
+        QTimer.singleShot(self.PROBE_CHECK_MS, self._run_capture)
+
+    def _run_capture(self):
+        if self._pending is None:
+            return
+        ear, case, level, n = self._pending
+        self._pending = None
+        self.probe.stop()
         result = self.generator.generate(level_db=level, n_sweeps=n, ear=ear, case=case)
         self._last_result = result
-        self._render_result(result, ear)
-        self.btn_start.setEnabled(True)
-        self.btn_stop.setEnabled(False)
-        self.probe.stop()
-        self.lbl_status.setText("Captura completa")
+        self._anim_ear = ear
+        self._anim_checkpoints = result["sweep_checkpoints"]
+        self._anim_idx = 0
+        self._anim_timer.start(self.SWEEP_ANIM_MS)
+        self._anim_tick()
+
+    def _anim_tick(self):
+        checkpoints = self._anim_checkpoints
+        result = self._last_result
+        if self._anim_idx >= len(checkpoints):
+            self._anim_timer.stop()
+            self._render_result(result, self._anim_ear)
+            self.btn_start.setEnabled(True)
+            self.btn_stop.setEnabled(False)
+            self.lbl_status.setText("Captura completa")
+            return
+        cp = checkpoints[self._anim_idx]
+        self.curve_response.setData(result["time_ms"], cp["waveform"] * 1e6)
+        self.lbl_status.setText(
+            f"Promediando barridos: {cp['n_sweeps']}/{result['n_sweeps']}..."
+        )
+        self._anim_idx += 1
 
     def _on_stop(self):
+        self._pending = None
+        self._anim_timer.stop()
         self.probe.stop()
         self.btn_start.setEnabled(True)
         self.btn_stop.setEnabled(False)
@@ -269,16 +310,33 @@ class TeoaePanel(QWidget):
         self.curve_response.setData(t, result["waveform"] * 1e6)
         self.curve_a.setData(t, a * 1e6)
         self.curve_b.setData(t, b * 1e6)
-        # Spectrum
+        # Spectrum. setXRange explícito en log10 (no confiar solo en
+        # autoRange -- ver comentario en el shading de bandas más abajo
+        # sobre por qué un item no-log-aware puede desbordarlo).
         self.curve_spec.setData(result["freqs"], result["spectrum_db"])
+        self.p_spec.setXRange(
+            np.log10(self.generator.normative["spectrum_low_hz"]),
+            np.log10(self.generator.normative["spectrum_high_hz"]),
+            padding=0.02,
+        )
         # Sombrear bandas TEOAE
         for region in self.bands_regions:
             self.p_spec.removeItem(region)
         self.bands_regions.clear()
         for band_hz in self.generator.normative["bands_hz"]:
             ratio = self.generator.normative["band_halfwidth_ratio"]
+            # p_spec está en logMode x=True: curve_spec se autotransforma a
+            # log10 internamente (PlotDataItem), pero LinearRegionItem NO
+            # tiene setLogMode y toma sus "values" tal cual como coordenadas
+            # de la escena. Si le pasamos Hz lineales (350..5600), esos
+            # límites lineales entran al cálculo de autoRange del ViewBox
+            # junto a la curva ya-log (rango ~2.7..3.7) y el autoRange se
+            # estira para cubrir ambos: la curva real queda aplastada en una
+            # franja invisible contra el borde. Hay que pasarle los límites
+            # ya en log10 para que coincidan con el sistema de coordenadas
+            # real de la escena.
             region = pg.LinearRegionItem(
-                values=[band_hz * ratio, band_hz / ratio],
+                values=[np.log10(band_hz * ratio), np.log10(band_hz / ratio)],
                 orientation="vertical",
                 brush=(41, 128, 185, 30),
                 pen=pg.mkPen((41, 128, 185, 80)),
