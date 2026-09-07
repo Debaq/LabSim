@@ -42,10 +42,32 @@ run_with_spinner() {
     local status=$?
     if [ "$status" -eq 0 ]; then
         printf "\r%s listo (%ss)          \n" "$msg" "$((SECONDS - start))"
+    elif [ "$status" -eq 2 ]; then
+        # Convención propia (ver delete_asset_if_present): "no había nada
+        # que hacer", no una falla real -- no lo mezclamos con FALLÓ.
+        printf "\r%s omitido: ya no existe (%ss)          \n" "$msg" "$((SECONDS - start))"
     else
         printf "\r%s FALLÓ (%ss)          \n" "$msg" "$((SECONDS - start))"
     fi
     return "$status"
+}
+
+# gh release delete-asset devuelve error si el asset ya no está en la
+# release -- pasa seguido acá porque el script es idempotente y una
+# corrida anterior ya lo pudo haber podado. Sin esto, cada corrida
+# vuelve a intentar contra TODAS las releases viejas y reporta "FALLÓ"
+# para las que ya están podadas, que no es una falla real.
+delete_asset_if_present() {
+    local tag="$1" asset="$2"
+    local out
+    if out=$(gh release delete-asset "$tag" "$asset" --yes 2>&1); then
+        return 0
+    fi
+    if echo "$out" | grep -qi "not found"; then
+        return 2
+    fi
+    echo "$out" >&2
+    return 1
 }
 
 CURRENT_VERSION=$(grep -oP "__VERSION__ = 'v\K[^']+" src/main.py)
@@ -136,7 +158,7 @@ OLD_TAGS=$(gh release list --json tagName -q ".[] | select(.tagName | startswith
 if [ -n "$OLD_TAGS" ]; then
     echo "Podando asset full de releases pyinstaller-v* viejas (se mantiene el tag y el paquete update):"
     while IFS= read -r old_tag; do
-        run_with_spinner "  Borrando ${ASSET_NAME} de ${old_tag}..." gh release delete-asset "$old_tag" "$ASSET_NAME" --yes || true
+        run_with_spinner "  Borrando ${ASSET_NAME} de ${old_tag}..." delete_asset_if_present "$old_tag" "$ASSET_NAME" || true
     done <<< "$OLD_TAGS"
 fi
 
