@@ -1,5 +1,6 @@
 from pathlib import Path
 import sys
+import requests
 from PySide6.QtCore import Qt, QSize, QTimer, Signal, Slot
 from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox, QProgressDialog
 
@@ -208,7 +209,30 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 "name": data.get("name"),
                 "permission": data.get("permission"),
             })
-            self.refresh_data()
+            try:
+                self.refresh_data()
+            except requests.RequestException as exc:
+                # Servidor caído/inestable justo después del login (ver
+                # BackendClient: nunca se cuelga, propaga la excepción) --
+                # sin este catch, el traceback subía sin manejar y Qt
+                # dejaba la ventana principal en un estado roto. Avisamos
+                # y devolvemos la ventana de login para reintentar, en vez
+                # de crashear.
+                QMessageBox.warning(
+                    self,
+                    "Sin conexión con el servidor",
+                    "Se inició sesión, pero no se pudo cargar la información "
+                    "desde el backend (agenda, casos, etc.). Verifica tu "
+                    "conexión e intenta ingresar nuevamente."
+                    f"\nDetalle: {exc}",
+                )
+                self.data_login = None
+                self.lbl_name.setText("")
+                self.btn_login.setText("Ingresar")
+                login_subw = self.subw.get("LOGIN") if self.subw else None
+                if login_subw is not None:
+                    login_subw.obj._enable_widgets()
+                return
             self.btns_actions()
             self._start_log_uploader()
             self._start_sync_thread()
