@@ -567,8 +567,9 @@ final class CaseBuilder
             $ondaVal = static function (array $desv, string $onda, string $campo, $default) {
                 return (string) ($desv[$onda][$campo] ?? $default);
             };
+            $ladoAbrType = $ladoAbr['type'] ?? 'normal';
             $v['abr'][$ladoForm] = [
-                'type' => in_array($ladoAbr['type'] ?? 'normal', self::ABR_TYPE_OPTIONS, true) ? $ladoAbr['type'] : 'normal',
+                'type' => in_array($ladoAbrType, self::ABR_TYPE_OPTIONS, true) ? $ladoAbrType : 'normal',
                 'umbral' => (string) ($ladoAbr['umbral'] ?? 20),
                 'lat_I' => $ondaVal($desv, 'onda_I', 'lat', 0),
                 'amp_I' => $ondaVal($desv, 'onda_I', 'amp', 0),

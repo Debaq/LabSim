@@ -15,6 +15,9 @@ header {
   justify-content: space-between;
   align-items: center;
   box-shadow: var(--shadow-1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 header a {
   color: var(--color-primary-contrast);
@@ -68,7 +71,7 @@ details.nav-group[open] > summary.nav-label .nav-caret { transform: rotate(180de
   padding: var(--space-2) 0;
   min-width: 190px;
   box-shadow: var(--shadow-2);
-  z-index: 10;
+  z-index: 101;
 }
 details.nav-group[open] .nav-dropdown { display: flex; }
 .nav-group .nav-dropdown a {

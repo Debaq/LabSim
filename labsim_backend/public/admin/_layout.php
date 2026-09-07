@@ -101,6 +101,12 @@ $cssV = static fn (string $path): string => (string) (@filemtime($path) ?: time(
                     <a href="database.php"<?= $ariaCurrent('database.php') ?>>Base de datos</a>
                 </div>
             </details>
+            <details class="nav-group" name="labsim-nav">
+                <summary class="nav-label">Configuración<span class="nav-caret">▾</span></summary>
+                <div class="nav-dropdown">
+                    <a href="normativas.php"<?= $ariaCurrent('normativas.php') ?>>Normativas</a>
+                </div>
+            </details>
             <?php endif; ?>
         </nav>
     </div>

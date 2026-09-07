@@ -1238,17 +1238,35 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 </div>
 
 <div class="tab-panel" data-tab="abr">
+<?php $abrAuthorCatalog = AppConfig::getEffective('abr_reference_authors', null) ?? []; ?>
+<div class="card">
+    <strong>Autocompletar ABR</strong>
+    <p class="legend help">Autor/set de referencia para los botones "Autocompletar" de abajo (uno solo para todo el paciente, ambos oídos). Cada autor puede reportar baselines de latencia/amplitud levemente distintos según la población -- se configuran en <a href="normativas.php">Configuración &rsaquo; Normativas</a>. No queda guardado en el caso, solo se usa para calcular la sugerencia; los números finales sí quedan en cada campo.</p>
+    <label style="max-width:22em;">Autor de referencia
+        <select id="abr-author-select">
+            <option value="__default__">LabSim (default)</option>
+            <?php foreach ($abrAuthorCatalog as $authorId => $author): ?>
+            <option value="<?= htmlspecialchars($authorId) ?>"><?= htmlspecialchars($author['label'] ?? $authorId) ?></option>
+            <?php endforeach; ?>
+        </select>
+    </label>
+</div>
+<div class="two-col">
 <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
 <div class="card">
     <strong>ABR <?= $ladoLabel ?></strong>
     <p class="legend help">Patología de este oído para el generador de curvas ABR -- no es el resultado del alumno, es lo que el caso simula. Si se deja "Normal" con todo en 0, el oído no tiene hallazgos.</p>
+    <p class="legend help">"Autocompletar" sugiere valores plausibles para la patología elegida, usando el sexo y la edad del paciente (pestaña Paciente), el autor de referencia elegido arriba, y las mismas referencias normativas del generador de curvas. Es un punto de partida al azar -- se puede editar cualquier campo después.</p>
     <div class="three-col">
         <label>Patología
-            <select name="abr[<?= $lado ?>][type]">
+            <select name="abr[<?= $lado ?>][type]" class="abr-type-select" data-lado="<?= $lado ?>">
                 <?php foreach (CaseBuilder::ABR_TYPE_OPTIONS as $opt): ?>
                 <option value="<?= $opt ?>" <?= ($v['abr'][$lado]['type'] ?? 'normal') === $opt ? 'selected' : '' ?>><?= ucfirst($opt) ?></option>
                 <?php endforeach; ?>
             </select>
+        </label>
+        <label style="align-self:end;">
+            <button type="button" class="secondary abr-autofill-btn" data-lado="<?= $lado ?>">Autocompletar según patología</button>
         </label>
         <label>Umbral (dB)
             <input type="number" name="abr[<?= $lado ?>][umbral]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['umbral'] ?? '20')) ?>">
@@ -1267,26 +1285,21 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             <input type="number" step="1" min="1" name="abr[<?= $lado ?>][average_objetivo]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['average_objetivo'] ?? '2000')) ?>">
         </label>
     </div>
-    <p class="legend">Desviaciones por onda (ms de latencia, µV de amplitud, respecto del valor normativo a esa intensidad)</p>
+    <p class="legend">Valor de la onda a 80 dB (ms de latencia, µV de amplitud) -- precargado con el normativo de la población/autor elegidos arriba, edítelo para fijar el valor real del paciente. El generador calcula solo el resto de la serie de intensidades a partir de este punto.</p>
     <div class="three-col">
-        <label>Onda I -- latencia
-            <input type="number" step="0.01" name="abr[<?= $lado ?>][lat_I]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['lat_I'] ?? '0')) ?>">
+        <?php
+        $abrWaveFields = [
+            ['I', 'lat', 'Onda I -- latencia'], ['III', 'lat', 'Onda III -- latencia'], ['V', 'lat', 'Onda V -- latencia'],
+            ['I', 'amp', 'Onda I -- amplitud'], ['III', 'amp', 'Onda III -- amplitud'], ['V', 'amp', 'Onda V -- amplitud'],
+        ];
+        foreach ($abrWaveFields as [$abrWave, $abrField, $abrLabel]):
+            $abrName = $abrField . '_' . $abrWave;
+        ?>
+        <label><?= $abrLabel ?>
+            <input type="number" step="0.01" class="abr-abs-input" data-lado="<?= $lado ?>" data-wave="<?= $abrWave ?>" data-field="<?= $abrField ?>">
         </label>
-        <label>Onda III -- latencia
-            <input type="number" step="0.01" name="abr[<?= $lado ?>][lat_III]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['lat_III'] ?? '0')) ?>">
-        </label>
-        <label>Onda V -- latencia
-            <input type="number" step="0.01" name="abr[<?= $lado ?>][lat_V]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['lat_V'] ?? '0')) ?>">
-        </label>
-        <label>Onda I -- amplitud
-            <input type="number" step="0.01" name="abr[<?= $lado ?>][amp_I]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['amp_I'] ?? '0')) ?>">
-        </label>
-        <label>Onda III -- amplitud
-            <input type="number" step="0.01" name="abr[<?= $lado ?>][amp_III]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['amp_III'] ?? '0')) ?>">
-        </label>
-        <label>Onda V -- amplitud
-            <input type="number" step="0.01" name="abr[<?= $lado ?>][amp_V]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['amp_V'] ?? '0')) ?>">
-        </label>
+        <input type="hidden" name="abr[<?= $lado ?>][<?= $abrName ?>]" class="abr-delta-input" data-lado="<?= $lado ?>" data-wave="<?= $abrWave ?>" data-field="<?= $abrField ?>" value="<?= htmlspecialchars((string) ($v['abr'][$lado][$abrName] ?? '0')) ?>">
+        <?php endforeach; ?>
     </div>
     <p class="legend">FSP (Fsp progresivo, referencia de la curva)</p>
     <div class="three-col">
@@ -1302,6 +1315,21 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     </div>
 </div>
 <?php endforeach; ?>
+</div>
+<div class="card">
+    <strong>Vista previa: serie 100&rarr;0 dBnHL</strong>
+    <p class="legend help">Simulación simplificada (sin ruido ni promediación) de cómo se vería la serie de intensidades para este oído, según la patología y desviaciones cargadas arriba. Se redibuja solo, en vivo, al tipear. Es referencia visual para el docente -- el generador real (con ruido, FSP y promediación) es el que corre en el equipo del alumno, ver <code>ABR_generator_v3.py</code>.</p>
+    <div class="two-col">
+        <div>
+            <strong style="color:#b33a3a;">OD</strong>
+            <div id="abr-preview-od" class="abr-preview"></div>
+        </div>
+        <div>
+            <strong style="color:#2255aa;">OI</strong>
+            <div id="abr-preview-oi" class="abr-preview"></div>
+        </div>
+    </div>
+</div>
 </div>
 
 <div class="tab-panel" data-tab="anamnesis">
@@ -1449,6 +1477,394 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 
     ageInput.addEventListener('input', recompute);
     ageInput.addEventListener('change', recompute);
+})();
+</script>
+
+<script>
+// Autocompletar ABR: sugiere desviaciones/umbral/FSP plausibles para la
+// patología elegida en cada oído, usando sexo+edad del paciente para elegir
+// la población de referencia y el autor elegido arriba para elegir DE QUÉ
+// baseline parte esa población. Los baselines de onda I/III/V (ABR_DEFAULT)
+// y los rangos por patología (threshold_range, wave_I_reduction,
+// interpeak_prolongation, etc.) son los mismos que usa
+// resources/abr/normative_data.json / ABR_generator_v3 -- mantener
+// sincronizado a mano si esos cambian (mismo criterio que la normativa por
+// curso en courses.php). ABR_AUTHOR_CATALOG sale de AppConfig
+// ('abr_reference_authors', global, ver admin/normativas.php).
+// Es una sugerencia al azar dentro de un rango clínicamente razonable, no un
+// valor fijo -- el docente la edita después.
+(function () {
+    var ABR_DEFAULT_POPULATIONS = {
+        adult_male:   { I: { lat: 1.65, amp: 0.30 }, III: { lat: 3.85, amp: 0.35 }, V: { lat: 5.70, amp: 0.50 } },
+        adult_female: { I: { lat: 1.62, amp: 0.21 }, III: { lat: 3.68, amp: 0.37 }, V: { lat: 5.47, amp: 0.60 } },
+        child:        { I: { lat: 1.58, amp: 0.28 }, III: { lat: 3.78, amp: 0.33 }, V: { lat: 5.60, amp: 0.48 } },
+        neonate:      { I: { lat: 2.10, amp: 0.20 }, III: { lat: 4.70, amp: 0.24 }, V: { lat: 6.80, amp: 0.35 } },
+        elderly:      { I: { lat: 1.75, amp: 0.27 }, III: { lat: 4.00, amp: 0.32 }, V: { lat: 5.90, amp: 0.45 } }
+    };
+    var ABR_AUTHOR_CATALOG = <?= json_encode($abrAuthorCatalog, JSON_UNESCAPED_UNICODE) ?>;
+
+    function rand(min, max) { return min + Math.random() * (max - min); }
+
+    function pickPopulation() {
+        var ageInput = document.getElementById('patient-age');
+        var age = ageInput ? parseFloat(ageInput.value) : NaN;
+        if (isNaN(age)) { age = 30; }
+        var genderChecked = document.querySelector('input[name="gender"]:checked');
+        var isFemale = !!genderChecked && genderChecked.value === '1';
+        if (age <= 0.25) { return 'neonate'; }
+        if (age <= 12) { return 'child'; }
+        if (age >= 60) { return 'elderly'; }
+        return isFemale ? 'adult_female' : 'adult_male';
+    }
+
+    // Baseline "real" a usar para esta población: la del autor elegido,
+    // completada campo a campo con el default donde el autor no definió
+    // esa onda/población (autor incompleto = no obliga a cargar los 30
+    // campos para poder usarlo).
+    function resolveBaseline(pop) {
+        var d = ABR_DEFAULT_POPULATIONS[pop];
+        var authorSelect = document.getElementById('abr-author-select');
+        var authorId = authorSelect ? authorSelect.value : '__default__';
+        var author = ABR_AUTHOR_CATALOG[authorId];
+        var authorPop = author && author.populations ? author.populations[pop] : null;
+        var out = {};
+        ['I', 'III', 'V'].forEach(function (wave) {
+            var aw = authorPop ? authorPop[wave] : null;
+            out[wave] = {
+                lat: aw && aw.lat !== undefined ? aw.lat : d[wave].lat,
+                amp: aw && aw.amp !== undefined ? aw.amp : d[wave].amp
+            };
+        });
+        return { def: d, author: out };
+    }
+
+    // Cada rango viene de pathology_modifiers en normative_data.json; las
+    // desviaciones de latencia son deltas en ms sobre el baseline DEL AUTOR
+    // elegido (más el offset autor-vs-default, para que el cliente -que
+    // siempre suma la desviación sobre SU propio default- reconstruya el
+    // valor absoluto del autor). Las de amplitud son fracción del baseline
+    // del autor (así el mismo % de reducción da un delta distinto en un
+    // adulto que en un neonato, o entre autores).
+    function buildValues(type, pop) {
+        var baseline = resolveBaseline(pop);
+        var d = baseline.def, b = baseline.author;
+        var latOffset = { I: b.I.lat - d.I.lat, III: b.III.lat - d.III.lat, V: b.V.lat - d.V.lat };
+        var ampOffset = { I: b.I.amp - d.I.amp, III: b.III.amp - d.III.amp, V: b.V.amp - d.V.amp };
+        var v = {
+            umbral: 20, repro: true, repro_var: 0, average_objetivo: 1500,
+            lat_I: 0, lat_III: 0, lat_V: 0, amp_I: 0, amp_III: 0, amp_V: 0,
+            fsp_800: 2.3, fsp_2000: 2.8, fsp_obj: 3.0
+        };
+        if (type === 'coclear') {
+            // Sensorial: umbral elevado (recruitment), onda I reducida,
+            // onda V preservada relativa a I, latencias casi normales a
+            // intensidad supraumbral.
+            v.umbral = Math.round(rand(30, 90));
+            v.lat_I = latOffset.I + rand(0, 0.15); v.lat_III = latOffset.III + rand(0, 0.15); v.lat_V = latOffset.V + rand(0, 0.15);
+            v.amp_I = ampOffset.I + b.I.amp * rand(-0.5, -0.2);
+            v.amp_III = ampOffset.III + b.III.amp * rand(-0.2, 0.05);
+            v.amp_V = ampOffset.V + b.V.amp * rand(-0.05, 0.15);
+            v.average_objetivo = Math.round(rand(1500, 2500));
+            v.fsp_800 = 2.3 * rand(0.8, 1.0); v.fsp_2000 = 2.8 * rand(0.8, 1.0); v.fsp_obj = 3.0 * rand(0.8, 1.0);
+        } else if (type === 'transmission') {
+            // Conductivo: desplazamiento uniforme de latencia y reducción
+            // uniforme de amplitud en I/III/V -- interpicos quedan normales.
+            var shift = rand(0.15, 0.35);
+            var ampFactor = rand(-0.4, -0.2);
+            v.umbral = Math.round(rand(20, 60));
+            v.lat_I = latOffset.I + shift; v.lat_III = latOffset.III + shift; v.lat_V = latOffset.V + shift;
+            v.amp_I = ampOffset.I + b.I.amp * ampFactor; v.amp_III = ampOffset.III + b.III.amp * ampFactor; v.amp_V = ampOffset.V + b.V.amp * ampFactor;
+            v.average_objetivo = Math.round(rand(1500, 2200));
+            v.fsp_800 = 2.3 * rand(0.85, 1.0); v.fsp_2000 = 2.8 * rand(0.85, 1.0); v.fsp_obj = 3.0 * rand(0.85, 1.0);
+        } else if (type === 'neural') {
+            // Retrococlear: onda I preservada, III/V retrasadas y de
+            // amplitud reducida (relación V/I baja), mala reproducibilidad.
+            v.umbral = Math.round(rand(0, 60));
+            v.lat_I = latOffset.I + rand(-0.05, 0.05);
+            v.lat_III = latOffset.III + rand(0.1, 0.3);
+            v.lat_V = latOffset.V + rand(0.3, 0.7);
+            v.amp_I = ampOffset.I + b.I.amp * rand(-0.15, 0.15);
+            v.amp_III = ampOffset.III + b.III.amp * rand(-0.6, -0.2);
+            v.amp_V = ampOffset.V + b.V.amp * rand(-0.7, -0.3);
+            v.repro = Math.random() >= 0.6;
+            v.repro_var = v.repro ? 0 : rand(0.15, 0.4);
+            v.average_objetivo = Math.round(rand(2500, 4000));
+            v.fsp_800 = rand(1.2, 1.8); v.fsp_2000 = rand(1.6, 2.2); v.fsp_obj = rand(2.0, 2.6);
+        } else {
+            // Normal: sin hallazgos, solo ruido de test-retest.
+            v.umbral = Math.round(rand(0, 20));
+            v.lat_I = latOffset.I + rand(-0.05, 0.05); v.lat_III = latOffset.III + rand(-0.05, 0.05); v.lat_V = latOffset.V + rand(-0.05, 0.05);
+            v.amp_I = ampOffset.I + b.I.amp * rand(-0.08, 0.08);
+            v.amp_III = ampOffset.III + b.III.amp * rand(-0.08, 0.08);
+            v.amp_V = ampOffset.V + b.V.amp * rand(-0.08, 0.08);
+            v.average_objetivo = Math.round(rand(1200, 1800));
+            v.fsp_800 = 2.3 + rand(-0.1, 0.1); v.fsp_2000 = 2.8 + rand(-0.1, 0.1); v.fsp_obj = 3.0 + rand(-0.1, 0.1);
+        }
+        return v;
+    }
+
+    function fieldEl(lado, field) {
+        return document.querySelector('[name="abr[' + lado + '][' + field + ']"]');
+    }
+
+    function setNum(lado, field, value, decimals) {
+        var el = fieldEl(lado, field);
+        if (el) { el.value = value.toFixed(decimals); }
+    }
+
+    // Los 6 campos de onda se muestran como valor ABSOLUTO a 80dB (lo que el
+    // docente quiere fijar), pero se guardan como desviacion respecto del
+    // normativo (lo que espera CaseBuilder.php/ABR_generator_v3.py -- cambiar
+    // ese contrato es un cambio de esquema más grande, no solo de este
+    // formulario). El input visible (.abr-abs-input) no tiene name, no se
+    // manda; el hidden (.abr-delta-input, mismo name de siempre) es el que
+    // se envía.
+    var ABR_WAVE_FIELDS = [['I', 'lat'], ['III', 'lat'], ['V', 'lat'], ['I', 'amp'], ['III', 'amp'], ['V', 'amp']];
+
+    function absFieldEl(lado, wave, field) {
+        return document.querySelector('.abr-abs-input[data-lado="' + lado + '"][data-wave="' + wave + '"][data-field="' + field + '"]');
+    }
+
+    function deltaFieldEl(lado, wave, field) {
+        return fieldEl(lado, field + '_' + wave);
+    }
+
+    // Normativo -> lo que se muestra. Se llama al cargar la pagina y despues
+    // de "Autocompletar" (que recalcula la desviacion sugerida).
+    function syncAbsFromDelta(lado) {
+        var baseline = resolveBaseline(pickPopulation()).author;
+        ABR_WAVE_FIELDS.forEach(function (pair) {
+            var wave = pair[0], field = pair[1];
+            var absEl = absFieldEl(lado, wave, field);
+            var deltaEl = deltaFieldEl(lado, wave, field);
+            if (!absEl || !deltaEl) { return; }
+            var delta = parseFloat(deltaEl.value) || 0;
+            absEl.value = (baseline[wave][field] + delta).toFixed(2);
+        });
+    }
+
+    // Lo que se muestra -> desviacion real a guardar. Se llama al tipear un
+    // valor absoluto (ese campo) o al cambiar la poblacion de referencia
+    // (todos, ver mas abajo) -- en ese caso el valor absoluto que el docente
+    // ya fijo queda igual, se recalcula la desviacion contra el nuevo
+    // normativo.
+    function syncDeltaFromAbs(lado, wave, field) {
+        var baseline = resolveBaseline(pickPopulation()).author;
+        var absEl = absFieldEl(lado, wave, field);
+        var deltaEl = deltaFieldEl(lado, wave, field);
+        if (!absEl || !deltaEl) { return; }
+        var absVal = parseFloat(absEl.value);
+        if (isNaN(absVal)) { return; }
+        deltaEl.value = (absVal - baseline[wave][field]).toFixed(4);
+    }
+
+    // Cambio de poblacion (edad/sexo/autor): un campo que el docente jamas
+    // tipeo a mano (data-touched) sigue mostrando "el normativo" -- se
+    // actualiza al normativo nuevo, la desviacion guardada (probablemente 0)
+    // no cambia. Un campo que SI se tipeo mantiene el numero absoluto fijo
+    // -- se recalcula la desviacion contra el normativo nuevo para que ese
+    // numero no se mueva.
+    function onAbrPopulationChange() {
+        ['od', 'oi'].forEach(function (lado) {
+            ABR_WAVE_FIELDS.forEach(function (pair) {
+                var absEl = absFieldEl(lado, pair[0], pair[1]);
+                if (absEl && absEl.dataset.touched === '1') {
+                    syncDeltaFromAbs(lado, pair[0], pair[1]);
+                }
+            });
+            syncAbsFromDelta(lado);
+        });
+        window.drawAbrPreview();
+    }
+
+    function autofillAbr(lado) {
+        var typeSel = fieldEl(lado, 'type');
+        var type = typeSel ? typeSel.value : 'normal';
+        var v = buildValues(type, pickPopulation());
+        setNum(lado, 'umbral', v.umbral, 0);
+        var reproEl = fieldEl(lado, 'repro');
+        if (reproEl) { reproEl.checked = v.repro; }
+        setNum(lado, 'repro_var', v.repro_var, 2);
+        setNum(lado, 'average_objetivo', v.average_objetivo, 0);
+        setNum(lado, 'lat_I', v.lat_I, 2);
+        setNum(lado, 'lat_III', v.lat_III, 2);
+        setNum(lado, 'lat_V', v.lat_V, 2);
+        setNum(lado, 'amp_I', v.amp_I, 2);
+        setNum(lado, 'amp_III', v.amp_III, 2);
+        setNum(lado, 'amp_V', v.amp_V, 2);
+        setNum(lado, 'fsp_800', v.fsp_800, 2);
+        setNum(lado, 'fsp_2000', v.fsp_2000, 2);
+        setNum(lado, 'fsp_obj', v.fsp_obj, 2);
+        // La sugerencia es relativa a la poblacion actual (no un numero que
+        // el docente fijo a mano) -- vuelve a seguir el normativo si despues
+        // cambia edad/sexo/autor, ver onAbrPopulationChange.
+        ABR_WAVE_FIELDS.forEach(function (pair) {
+            var absEl = absFieldEl(lado, pair[0], pair[1]);
+            if (absEl) { delete absEl.dataset.touched; }
+        });
+        syncAbsFromDelta(lado);
+        if (window.drawAbrPreview) { window.drawAbrPreview(); }
+    }
+
+    var buttons = document.querySelectorAll('.abr-autofill-btn');
+    for (var i = 0; i < buttons.length; i++) {
+        buttons[i].addEventListener('click', function (e) {
+            autofillAbr(e.currentTarget.getAttribute('data-lado'));
+        });
+    }
+
+    // Vista previa en vivo: serie 100->0 dBnHL, version limpia (sin ruido,
+    // sin promediacion, sin filtros) de ABRGeneratorV3.calculate_wave_parameters
+    // + build_target_curve (ver src/abr/ABR_generator_v3.py) restringida a
+    // I/III/V -- las mismas ondas que el formulario deja editar. Solo para
+    // que el docente vea el efecto de sus valores, no reemplaza al generador
+    // real (que corre server-side/en el cliente con ruido y FSP).
+    var WAVE_SIGMA_PREVIEW = { I: 0.22, III: 0.22, V: 0.18 };
+    var ABR_PREVIEW_INTENSITIES = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0];
+
+    // Mismo quiebre que ABRGeneratorV3.calculate_wave_parameters (ABR_generator_v3.py):
+    // ~0.08ms/10dB cerca del techo (80-70dB), ~0.3ms/10dB de ahi para abajo
+    // (Hood: ~0.3ms/10dB entre 70 y 50dB).
+    function latShiftForIntensity(intensity) {
+        var stepsFrom80 = (80 - intensity) / 10;
+        if (intensity >= 70) { return stepsFrom80 * 0.08; }
+        return (80 - 70) / 10 * 0.08 + (70 - intensity) / 10 * 0.3;
+    }
+
+    function widthFactorForIntensity(intensity) {
+        if (intensity >= 70) { return 1.0; }
+        if (intensity >= 50) { return 1.0 + (70 - intensity) * 0.03; }
+        return 1.6 + (50 - intensity) * 0.05;
+    }
+
+    function ampFactorForWave(wave, intensity, threshold) {
+        if (wave === 'V') {
+            if (intensity >= threshold) {
+                var dbRange = 80 - threshold;
+                if (dbRange <= 0) { return 1.0; }
+                return Math.max(0.05 + 0.95 * ((intensity - threshold) / dbRange), 0.001);
+            }
+            return Math.max(0.05 * (1 - (threshold - intensity) / 10), 0.001);
+        }
+        var disappearAt = wave === 'I' ? 70 : (threshold + 10);
+        if (intensity >= disappearAt) {
+            var dbRange2 = 80 - disappearAt;
+            if (dbRange2 <= 0) { return disappearAt >= 80 ? 1.0 : 0.05; }
+            return Math.max(0.05 + 0.95 * ((intensity - disappearAt) / dbRange2), 0.001);
+        }
+        return Math.max(0.05 * (1 - (disappearAt - intensity) / 10), 0.001);
+    }
+
+    function gaussian(t, center, amp, sigma) {
+        var z = (t - center) / sigma;
+        return amp * Math.exp(-0.5 * z * z);
+    }
+
+    function computeWaveValues(lado, pop, intensity) {
+        var baseline = resolveBaseline(pop).author;
+        var threshold = parseFloat(fieldEl(lado, 'umbral').value) || 0;
+        var latShift = latShiftForIntensity(intensity);
+        var width = widthFactorForIntensity(intensity);
+        var out = {};
+        ['I', 'III', 'V'].forEach(function (wave) {
+            var deltaLatEl = fieldEl(lado, 'lat_' + wave);
+            var deltaAmpEl = fieldEl(lado, 'amp_' + wave);
+            var deltaLat = deltaLatEl ? (parseFloat(deltaLatEl.value) || 0) : 0;
+            var deltaAmp = deltaAmpEl ? (parseFloat(deltaAmpEl.value) || 0) : 0;
+            var lat = baseline[wave].lat + (wave === 'I' ? latShift * 0.2 : latShift) + deltaLat;
+            var amp = Math.max(baseline[wave].amp * ampFactorForWave(wave, intensity, threshold) + deltaAmp, 0.001);
+            out[wave] = { lat: lat, amp: amp, sigma: WAVE_SIGMA_PREVIEW[wave] * width };
+        });
+        return out;
+    }
+
+    function buildRowPoints(values, xPos, rowBaseY, ampScale) {
+        var pts = [];
+        for (var t = 0; t <= 12; t += 0.08) {
+            var y = 0;
+            for (var w = 0; w < 3; w++) {
+                var wave = ['I', 'III', 'V'][w];
+                var v = values[wave];
+                y += gaussian(t, v.lat, v.amp, v.sigma);
+            }
+            pts.push(xPos(t).toFixed(1) + ',' + (rowBaseY - y * ampScale).toFixed(1));
+        }
+        return pts.join(' ');
+    }
+
+    function renderAbrPreviewSide(lado, color) {
+        var container = document.getElementById('abr-preview-' + lado);
+        if (!container) { return; }
+        var umbralEl = fieldEl(lado, 'umbral');
+        if (!umbralEl) { return; }
+        var pop = pickPopulation();
+        var threshold = parseFloat(umbralEl.value) || 0;
+
+        var marginLeft = 28, marginRight = 8, marginTop = 4, marginBottom = 14;
+        var rowHeight = 19, plotWidth = 380;
+        var totalWidth = marginLeft + plotWidth + marginRight;
+        var totalHeight = marginTop + ABR_PREVIEW_INTENSITIES.length * rowHeight + marginBottom;
+        function xPos(t) { return marginLeft + (t / 12) * plotWidth; }
+
+        var svg = '<svg viewBox="0 0 ' + totalWidth + ' ' + totalHeight + '" xmlns="http://www.w3.org/2000/svg">';
+        svg += '<defs>';
+        ABR_PREVIEW_INTENSITIES.forEach(function (intensity, i) {
+            svg += '<clipPath id="abr-clip-' + lado + '-' + i + '"><rect x="0" y="' + (marginTop + i * rowHeight) + '" width="' + totalWidth + '" height="' + rowHeight + '"></rect></clipPath>';
+        });
+        svg += '</defs>';
+        [0, 2, 4, 6, 8, 10, 12].forEach(function (ms) {
+            var x = xPos(ms);
+            svg += '<line x1="' + x + '" y1="' + marginTop + '" x2="' + x + '" y2="' + (totalHeight - marginBottom) + '" stroke="#000" stroke-opacity="0.06"></line>';
+            svg += '<text x="' + x + '" y="' + (totalHeight - marginBottom + 10) + '" font-size="6" text-anchor="middle" fill="currentColor">' + ms + '</text>';
+        });
+        svg += '<text x="' + (marginLeft + plotWidth / 2) + '" y="' + (totalHeight - 1) + '" font-size="6" text-anchor="middle" fill="currentColor">ms</text>';
+
+        ABR_PREVIEW_INTENSITIES.forEach(function (intensity, i) {
+            var rowBaseY = marginTop + i * rowHeight + rowHeight * 0.78;
+            var isThresholdRow = Math.abs(intensity - Math.round(threshold / 10) * 10) < 0.01;
+            if (isThresholdRow) {
+                svg += '<rect x="0" y="' + (marginTop + i * rowHeight) + '" width="' + totalWidth + '" height="' + rowHeight + '" fill="' + color + '" fill-opacity="0.08"></rect>';
+            }
+            svg += '<text x="2" y="' + (rowBaseY + 2) + '" font-size="6" fill="' + (isThresholdRow ? color : 'currentColor') +
+                '" font-weight="' + (isThresholdRow ? 'bold' : 'normal') + '">' + intensity + '</text>';
+            var values = computeWaveValues(lado, pop, intensity);
+            var points = buildRowPoints(values, xPos, rowBaseY, 15);
+            svg += '<g clip-path="url(#abr-clip-' + lado + '-' + i + ')"><polyline points="' + points + '" fill="none" stroke="' + color + '" stroke-width="0.9"></polyline></g>';
+        });
+
+        svg += '</svg>';
+        container.innerHTML = svg;
+    }
+
+    window.drawAbrPreview = function () {
+        renderAbrPreviewSide('od', '#b33a3a');
+        renderAbrPreviewSide('oi', '#2255aa');
+    };
+
+    var abrPreviewForm = document.getElementById('case-form');
+    if (abrPreviewForm) {
+        abrPreviewForm.addEventListener('input', function (e) {
+            if (e.target.name && /^abr\[/.test(e.target.name)) { window.drawAbrPreview(); }
+            if (e.target.classList && e.target.classList.contains('abr-abs-input')) {
+                e.target.dataset.touched = '1';
+                syncDeltaFromAbs(e.target.getAttribute('data-lado'), e.target.getAttribute('data-wave'), e.target.getAttribute('data-field'));
+                window.drawAbrPreview();
+            }
+        });
+        abrPreviewForm.addEventListener('change', function (e) {
+            if (e.target.name === 'gender') { onAbrPopulationChange(); return; }
+            if (e.target.name && /^abr\[/.test(e.target.name)) { window.drawAbrPreview(); }
+        });
+    }
+    var abrAuthorSelectEl = document.getElementById('abr-author-select');
+    if (abrAuthorSelectEl) { abrAuthorSelectEl.addEventListener('change', onAbrPopulationChange); }
+    var abrAgeEl = document.getElementById('patient-age');
+    if (abrAgeEl) {
+        abrAgeEl.addEventListener('input', onAbrPopulationChange);
+        abrAgeEl.addEventListener('change', onAbrPopulationChange);
+    }
+    ['od', 'oi'].forEach(syncAbsFromDelta);
+    window.drawAbrPreview();
 })();
 </script>
 

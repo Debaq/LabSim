@@ -100,12 +100,17 @@ class ABRGeneratorV3:
                                    pathology, desviaciones=None, repro_shift=0.0,
                                    click_baseline=None):
         modified = {}
+        # Pendiente de la funcion latencia-intensidad (onda V, click): ~0.08ms/10dB
+        # cerca del techo (80-70dB, casi plana) y ~0.3ms/10dB de ahi para abajo
+        # -- Hood, "Clinical Applications of the ABR" reporta ~0.3ms/10dB entre
+        # 70 y 50dB. Quiebre en 70 (antes estaba en 60, dejaba el tramo 70-60
+        # con la pendiente plana que no corresponde).
         steps_from_80 = (80 - intensity) / 10
 
-        if intensity >= 60:
+        if intensity >= 70:
             lat_shift = steps_from_80 * 0.08
         else:
-            lat_shift = (80 - 60) / 10 * 0.08 + (60 - intensity) / 10 * 0.3
+            lat_shift = (80 - 70) / 10 * 0.08 + (70 - intensity) / 10 * 0.3
 
         for wave in ['I', 'II', 'III', 'IV', 'V']:
             if wave not in baseline:
