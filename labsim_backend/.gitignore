@@ -4,3 +4,4 @@ data/*.sqlite-*
 data/patient_photos/
 data/otoscopia_photos/
 data/reports/
+data/feriados_*.json

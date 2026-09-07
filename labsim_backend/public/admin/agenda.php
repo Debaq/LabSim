@@ -7,6 +7,7 @@ require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/../../src/Patients.php';
+require_once __DIR__ . '/../../src/Feriados.php';
 
 /**
  * Configuración de agendas por curso/grupo/alumno: agendar, reagendar,
@@ -349,6 +350,13 @@ $nextMonth = (clone $monthStart)->modify('+1 month')->format('Y-m');
 $daysInMonth = (int) $monthStart->format('t');
 $firstWeekday = (int) $monthStart->format('N'); // 1=lunes .. 7=domingo
 $today = date('Y-m-d');
+// Feriados del mes visible (y del año en curso, para el aviso del modal de
+// agendar). Ver src/Feriados.php: si la API no responde y no hay cache ni
+// backup queda [] y el calendario se dibuja igual, sin marcas.
+$feriadosDelMes = Feriados::delAnio((int) $monthStart->format('Y'));
+$feriadosParaJs = Feriados::porFecha([
+    (int) $monthStart->format('Y'), (int) date('Y'), (int) date('Y') + 1,
+]);
 $monthNames = [1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril', 5 => 'mayo', 6 => 'junio',
                7 => 'julio', 8 => 'agosto', 9 => 'septiembre', 10 => 'octubre', 11 => 'noviembre', 12 => 'diciembre'];
 
@@ -511,9 +519,24 @@ admin_header('Agendas', $me);
         <input type="hidden" name="appointment_id" value="<?= (int) ($scheduleRow['appointment_id'] ?? 0) ?>">
         <input type="hidden" name="force_round" value="<?= $scheduleForceRound ? '1' : '0' ?>">
         <label>Fecha (vacío = sin agendar aún)
-            <input type="date" name="fecha" min="2015-01-01" max="<?= date('Y-m-d', strtotime('+2 years')) ?>"
-                   value="<?= $scheduleForceRound ? '' : htmlspecialchars($prefillFechaIso ?? legacy_to_iso($scheduleRow['fecha'] ?? '')) ?>">
+            <input type="date" name="fecha" id="schedule-fecha" min="2015-01-01" max="<?= date('Y-m-d', strtotime('+2 years')) ?>"
+                   value="<?= $scheduleForceRound ? '' : htmlspecialchars($prefillFechaIso ?? legacy_to_iso($scheduleRow['fecha'] ?? '')) ?>"
+                   oninput="avisarFeriado()">
         </label>
+        <!-- Aviso, no bloqueo: puede haber una razón para agendar un feriado
+             (recuperativo), pero no puede pasar sin que el docente lo vea. -->
+        <p id="schedule-feriado" class="feriado-aviso" hidden></p>
+        <script>
+        const FERIADOS = <?= json_encode($feriadosParaJs, JSON_UNESCAPED_UNICODE) ?>;
+        function avisarFeriado() {
+            const input = document.getElementById('schedule-fecha');
+            const aviso = document.getElementById('schedule-feriado');
+            const feriado = FERIADOS[input.value];
+            aviso.hidden = !feriado;
+            aviso.textContent = feriado ? '\u26a0 Ese día es feriado: ' + feriado : '';
+        }
+        avisarFeriado();
+        </script>
         <label>Hora
             <input type="time" name="hora" value="<?= $scheduleForceRound ? '' : htmlspecialchars($scheduleRow['hora'] ?? '') ?>">
         </label>
@@ -770,9 +793,14 @@ admin_header('Agendas', $me);
         <?php for ($day = 1; $day <= $daysInMonth; $day++):
             $iso = sprintf('%s-%02d', $month, $day);
             $dayAppts = $appointmentsByDay[$iso] ?? [];
+            $feriado = $feriadosDelMes[substr($iso, 5)] ?? null;
         ?>
-        <div class="cal-day<?= $iso === $today ? ' today' : '' ?>">
+        <div class="cal-day<?= $iso === $today ? ' today' : '' ?><?= $feriado !== null ? ' holiday' : '' ?>"
+             <?= $feriado !== null ? 'title="Feriado: ' . htmlspecialchars($feriado) . '"' : '' ?>>
             <span class="cal-num"><?= $day ?></span>
+            <?php if ($feriado !== null): ?>
+            <span class="cal-holiday"><?= htmlspecialchars($feriado) ?></span>
+            <?php endif; ?>
             <a class="cal-add" href="<?= agenda_url(['new' => 1, 'fecha' => $iso, 'schedule' => null, 'appointment' => null]) ?>" title="Nueva cita el <?= htmlspecialchars($iso) ?>">+</a>
             <?php foreach ($dayAppts as $a): ?>
             <a href="<?= agenda_url(['schedule' => $a['case_id'], 'appointment' => $a['appointment_id']]) ?>" title="<?= htmlspecialchars(trim($a['hora'] . ' ' . $a['nombre'] . ' ' . $a['apellido'])) ?>">
