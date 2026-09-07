@@ -472,6 +472,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
         side_idx = 0 if side == "OD" else 1
         case = self.abr_od if side_idx == 0 else self.abr_oi
+        # Oido no evaluado: el generador lo necesita para la curva sombra
+        # (estimulo que cruza el craneo por sobre la atenuacion interaural
+        # y hace responder a la otra coclea si no esta enmascarada).
+        contra = self.abr_oi if side_idx == 0 else self.abr_od
 
         if case.get("repro", True) == False:
             side_letter = 'r' if side_idx == 0 else 'l'
@@ -483,7 +487,17 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             repro_prev = 0
 
 
-        x,y, dx, dy, repro = ABR_Curve(self.current_setting["int"], self.current_setting, case, repro_prev, [(self.count_averages*self.total_averages)*2.5, self.current_setting['average']], done = self.done)
+        x, y, dx, dy, repro = ABR_Curve(
+            self.current_setting["int"], self.current_setting, case, repro_prev,
+            [(self.count_averages * self.total_averages) * 2.5, self.current_setting['average']],
+            done=self.done,
+            # data_current trae 'edad' y 'gender' del paciente (ver
+            # CaseBuilder.buildCaseData): con eso el generador elige la
+            # poblacion normativa en vez de asumir siempre mujer adulta.
+            patient=self.data_current,
+            contra=contra,
+            capture_id=self.current_capture_curve,
+        )
 
         return(x,y),(dx,dy),(0,0),(0,0), repro
 

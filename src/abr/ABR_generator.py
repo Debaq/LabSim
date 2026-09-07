@@ -20,6 +20,18 @@ junto con abr/bezier_prop.py):
   que borraba la onda I de golpe a 70 dB.
 - Tasa de estimulación continua y anclada en 21.1/s, con magnitudes
   clínicas (onda V: ~+0.5 ms y -25% entre 11 y 91/s).
+- La patología entra en la física, no solo en el umbral: conductiva =
+  corrimiento paralelo por el GAP (interpicos intactos), neural =
+  interpicos prolongados y razón V/I caída, coclear = reclutamiento.
+- Enmascaramiento real: curva sombra del oído no evaluado cuando el
+  estímulo cruza el cráneo, y sobreenmascaramiento cuando vuelve.
+- Población normativa según edad/sexo del paciente (neonato, niño,
+  adulto por sexo, adulto mayor), no siempre adult_female.
+- Promediación como en un equipo: la señal está completa desde el primer
+  barrido y lo que cae es el ruido (1/sqrt(N)), con el trazo asentándose
+  de a poco en vez de sortearse entero en cada tick.
+- Ruido sembrado con core.rng.stable_seed: la misma captura del mismo
+  paciente se redibuja igual entre aperturas de la app.
 """
 
 import json
@@ -28,6 +40,7 @@ import numpy as np
 import scipy.signal as signal
 from core.base import context
 from core import app_config_store
+from core.rng import case_fingerprint, stable_seed
 
 
 # Anchos base (sigma en ms) por onda. Calibrados para FWHM realista
@@ -88,6 +101,73 @@ RATE_AMP_DECAY = {'I': 0.0060, 'II': 0.0070, 'III': 0.0045,
 # en normative_data.json): mismo modelo, decaimiento y corrimiento mayores.
 RATE_NEURAL_AMP_FACTOR = 2.2
 RATE_NEURAL_LAT_FACTOR = 1.5
+
+# Umbral de referencia de un oido sano (dB nHL). Lo que un oido tiene por
+# ENCIMA de esto, en patologia conductiva, es GAP: atenuacion pura del
+# estimulo antes de llegar a la coclea.
+NORMAL_THRESHOLD_REF = 15
+
+# Patologia neural (retrococlear): prolongacion de interpicos repartida
+# desde la I (que no se mueve, es el nervio distal) hacia la V, y caida de
+# amplitud de las ondas rostrales. Con estos factores la razon V/I cae de
+# ~2.9 a ~1.3, dentro del rango [0.5, 1.5] que declara
+# normative_data.json -> pathology_modifiers.neural.amplitude_v_i_ratio.
+NEURAL_LAT_SHARE = {'I': 0.0, 'II': 0.25, 'III': 0.5, 'IV': 0.75, 'V': 1.0}
+NEURAL_AMP_FACTOR = {'I': 1.0, 'II': 0.85, 'III': 0.75, 'IV': 0.55, 'V': 0.45}
+
+# Atenuacion interaural (dB): cuanto pierde el estimulo al cruzar el craneo
+# hasta la coclea del otro lado. Por debajo de esto no hay curva sombra.
+# Insertos aislan mucho mas que los supraaurales, que es justamente el
+# argumento clinico para usarlos.
+INTERAURAL_ATTENUATION = {
+    'insert_earphone': 65.0,
+    'TDH39_headphone': 45.0,
+    'bone_vibrator': 0.0,     # el vibrador oseo estimula las dos cocleas
+}
+# La respuesta del oido NO evaluado se registra desde un montaje pensado
+# para el otro lado: llega mas chica y sobre todo sin onda I reconocible.
+SHADOW_AMP_FACTOR = 0.7
+SHADOW_WAVE_I_FACTOR = 0.3
+
+# Ruido residual del promediado (uV RMS) con FSP y electrodos ideales, al
+# llegar al average objetivo del caso. NOISE_BLOCKS = en cuantos bloques se
+# parte ese objetivo: el residual es el promedio de los bloques ya
+# acumulados, asi que cae como 1/sqrt(N) y ADEMAS evoluciona de a poco
+# (agregar un bloque mueve el trazo 1/m), en vez de sortearse entero de
+# nuevo en cada tick como antes.
+NOISE_FLOOR_UV = 0.055
+NOISE_BLOCKS = 200
+# Techo de seguridad del ruido al arrancar la promediacion: mas que esto se
+# sale de la escala del grafico y deja de leerse como ruido.
+NOISE_MAX_UV = 1.2
+
+
+def select_population(age=None, gender=None):
+    """Poblacion normativa segun el paciente (claves de normative_data.json).
+
+    gender: 0 = hombre, 1 = mujer (mismo criterio que cases.data['gender']
+    en CaseBuilder.php). Sin edad -> adult_female, que era el valor fijo
+    que usaba el modulo antes de esto.
+
+    Las franjas del JSON dejan huecos (neonate 0-0.25, child 2-12,
+    adult 18-50, elderly 60-85); acá se cubren completas porque un paciente
+    de 1, 15 o 55 anios existe igual. Un lactante se aproxima con 'child'
+    (la via auditiva ya madura cerca de los 18 meses) y 13-17 tambien,
+    porque a esa edad las latencias ya son practicamente de adulto.
+    """
+    if age is None:
+        return 'adult_female'
+    try:
+        age = float(age)
+    except (TypeError, ValueError):
+        return 'adult_female'
+    if age < 1:
+        return 'neonate'
+    if age < 18:
+        return 'child'
+    if age >= 60:
+        return 'elderly'
+    return 'adult_male' if str(gender) == '0' else 'adult_female'
 
 
 class ABRGenerator:
@@ -155,17 +235,35 @@ class ABRGenerator:
                                    pathology, desviaciones=None, repro_shift=0.0,
                                    click_baseline=None):
         modified = {}
+        # Patologia conductiva = el estimulo llega atenuado a una coclea
+        # sana, asi que la respuesta es la de un nivel MENOR: toda la
+        # funcion latencia-intensidad se corre a la derecha en paralelo,
+        # con los interpicos intactos. Ese corrimiento paralelo es el
+        # hallazgo que distingue conductiva de coclear en el grafico
+        # latencia-intensidad, y antes no existia (la patologia entraba
+        # solo por el umbral, que unicamente afectaba amplitud).
+        gap = 0.0
+        if pathology == 'conductive':
+            gap = max(threshold - NORMAL_THRESHOLD_REF, 0.0)
+        lat_intensity = intensity - gap
+
         # Pendiente de la funcion latencia-intensidad (onda V, click): ~0.08ms/10dB
         # cerca del techo (80-70dB, casi plana) y ~0.3ms/10dB de ahi para abajo
         # -- Hood, "Clinical Applications of the ABR" reporta ~0.3ms/10dB entre
         # 70 y 50dB. Quiebre en 70 (antes estaba en 60, dejaba el tramo 70-60
         # con la pendiente plana que no corresponde).
-        steps_from_80 = (80 - intensity) / 10
-
-        if intensity >= 70:
-            lat_shift = steps_from_80 * 0.08
+        if lat_intensity >= 70:
+            lat_shift = (80 - lat_intensity) / 10 * 0.08
         else:
-            lat_shift = (80 - 70) / 10 * 0.08 + (70 - intensity) / 10 * 0.3
+            lat_shift = (80 - 70) / 10 * 0.08 + (70 - lat_intensity) / 10 * 0.3
+
+        # Patologia neural (retrococlear): el retraso se acumula de la I
+        # hacia la V, o sea prolonga los interpicos I-III/III-V en vez de
+        # correr el complejo entero.
+        neural_delay = 0.0
+        if pathology == 'neural':
+            neural_delay = self.norms['pathology_modifiers']['neural'].get(
+                'interpeak_prolongation', 0.4)
 
         # Nivel de sensacion: cuanto por encima del umbral DE ESTE OIDO se
         # esta estimulando. Es lo que manda en amplitud y en ancho de la
@@ -182,6 +280,7 @@ class ABRGenerator:
             # complejo junto (misma respuesta neural, timing inconsistente),
             # no una onda aislada.
             calc_lat = (base_lat + lat_shift * LAT_SHIFT_FACTOR.get(wave, 1.0)
+                        + neural_delay * NEURAL_LAT_SHARE.get(wave, 1.0)
                         + repro_shift)
             # Escala de la desviacion segun estimulo: el caso clinico define
             # la desviacion pensando en click (estimulo estandar), pero
@@ -218,6 +317,10 @@ class ABRGenerator:
             amp_factor = 1.0 - np.exp(-sl_eff / tau)
 
             calc_amp = baseline[wave]['amp'] * amp_factor
+            if pathology == 'neural':
+                # Las ondas rostrales son las que se caen: baja la razon
+                # V/I, que es el otro hallazgo retrococlear clasico.
+                calc_amp *= NEURAL_AMP_FACTOR.get(wave, 1.0)
             if desviaciones and wave in ['I', 'III', 'V']:
                 key = f"onda_{wave}"
                 if key in desviaciones:
@@ -348,74 +451,75 @@ class ABRGenerator:
         art[mask] = cfg['amp'] * np.exp(-t[mask] * 5)
         return art
 
-    def add_baseline_drift(self, t, amplitude=0.04):
-        """Drift LF suave. Frecuencia aleatoria para variar entre capturas."""
-        f1 = random.uniform(0.4, 1.2)
-        f2 = random.uniform(0.15, 0.4)
+    def add_baseline_drift(self, t, rng, amplitude=0.04):
+        """Drift LF suave. La frecuencia sale del rng del caso: varia entre
+        capturas distintas pero se repite si el alumno reabre la app y toma
+        la misma captura otra vez."""
+        f1 = rng.uniform(0.4, 1.2)
+        f2 = rng.uniform(0.15, 0.4)
         return amplitude * (np.sin(2 * np.pi * f1 * t / 12) +
                             0.4 * np.sin(2 * np.pi * f2 * t / 12))
 
-    def pink_noise(self, n, scale=1.0):
+    def sweep_noise(self, n, blocks, rng):
+        """`blocks` realizaciones independientes de ruido de barrido (n muestras).
+
+        Devuelve una matriz (blocks, n) de RMS 1. Pink (EEG de fondo, 1/f)
+        70% + EMG (musculo, HF) 30%, igual que antes, pero generadas de una
+        sola vez para poder promediarlas.
         """
-        Ruido 1/f via FFT (pink spectrum). EMG separado en add_eeg_noise.
-        """
-        white = np.random.normal(0, 1, n)
-        fft = np.fft.rfft(white)
+        white = rng.standard_normal((blocks, n))
+        fft = np.fft.rfft(white, axis=1)
         freqs = np.fft.rfftfreq(n)
-        # 1/f scaling, omitir DC
-        fft[1:] /= np.sqrt(freqs[1:])
-        fft[0] = 0
-        pink = np.fft.irfft(fft, n)
-        std = np.std(pink)
-        return scale * pink / std if std > 0 else np.zeros(n)
+        fft[:, 1:] /= np.sqrt(freqs[1:])
+        fft[:, 0] = 0
+        pink = np.fft.irfft(fft, n, axis=1)
+        std = np.std(pink, axis=1, keepdims=True)
+        pink = np.divide(pink, std, out=np.zeros_like(pink), where=std > 0)
 
-    def add_eeg_noise(self, t, current_avg, target_avg, fsp_actual, impedance=3.0):
-        """
-        Ruido realista:
-        - Pink (LF: drift + EEG background) ~70%
-        - EMG (HF muscle artifact) ~30%
-        Escala = SNR(1/sqrt(N)) * FSP * impedancia.
-        """
-        n = len(t)
-        pink = self.pink_noise(n, 1.0)
-
-        # EMG (musculo) - ruido pasa-altos
-        emg = np.random.normal(0, 1, n)
+        emg = rng.standard_normal((blocks, n))
         if n > 12:
-            nyq = 0.5
-            cutoff = min(0.4, nyq * 0.99)
             try:
-                b, a = signal.butter(4, cutoff, 'high')
-                emg = signal.filtfilt(b, a, emg)
-                std = np.std(emg)
-                emg = emg / std if std > 0 else emg
+                sos = signal.butter(4, 0.4, 'high', output='sos')
+                emg = signal.sosfiltfilt(sos, emg, axis=1)
+                std = np.std(emg, axis=1, keepdims=True)
+                emg = np.divide(emg, std, out=np.zeros_like(emg), where=std > 0)
             except Exception:
                 pass
 
-        noise = 0.70 * pink + 0.30 * emg
+        return 0.70 * pink + 0.30 * emg
 
-        # SNR: ruido cae como 1/sqrt(promedaciones), pero nunca a cero
-        # (equipo real siempre deja un piso de ruido visible, incluso a
-        # 2000+ promediaciones).
-        safe_target = max(target_avg, 1)
-        snr_reduction = np.sqrt(max(current_avg, 1) / safe_target)
-        snr_reduction = min(snr_reduction, 0.92)
+    def averaged_noise(self, t, current_avg, target_avg, quality, rng,
+                       impedance=3.0):
+        """Ruido RESIDUAL de un promediado de `current_avg` barridos.
 
-        # FSP mapping (factor de mejora segun calidad del caso)
-        fsp_scale = {
-            (0.0, 1.0): 1.0,
-            (1.0, 1.5): 0.7,
-            (1.5, 2.0): 0.45,
-            (2.0, 2.5): 0.25,
-            (2.5, 99):  0.12,
-        }
-        scale = 0.4
-        for (lo, hi), s in fsp_scale.items():
-            if lo <= fsp_actual < hi:
-                scale = s
-                break
+        El equipo promedia: la senial esta completa desde el primer barrido
+        y lo que baja es el ruido, como 1/sqrt(N). El modelo viejo hacia lo
+        contrario (escalaba la senial con `growth`) y ademas sorteaba ruido
+        nuevo e independiente en cada tick, asi que el trazo parpadeaba
+        entero cada 300 ms en vez de irse asentando.
 
-        # Impedancia (peor = mas ruido)
+        Aca el objetivo del caso se parte en NOISE_BLOCKS bloques de
+        barridos; el residual es el promedio de los bloques ya acumulados.
+        Eso da a la vez las dos cosas: RMS ~ 1/sqrt(N), y un trazo que
+        cambia de a poco (un bloque nuevo lo mueve 1/m) porque los bloques
+        anteriores son los MISMOS (el rng entrega siempre las filas en el
+        mismo orden desde la misma semilla).
+
+        quality: cuanto ruido trae ESTE paciente (1.0 = tipico). Sale de
+        los puntos FSP del caso, no del FSP corriente: el FSP medido es
+        consecuencia del ruido residual, usarlo para calcularlo era
+        circular -- y ademas venia por tramos, asi que el ruido pegaba
+        saltos de 8x al cruzar un tramo en plena captura.
+        """
+        n = len(t)
+        target = max(float(target_avg), 1.0)
+        block = max(target / NOISE_BLOCKS, 10.0)
+        m = int(np.ceil(max(float(current_avg), 1.0) / block))
+        m = max(min(m, NOISE_BLOCKS * 4), 1)
+
+        residual = self.sweep_noise(n, m, rng).mean(axis=0)
+
+        # Impedancia de electrodos (peor = mas ruido).
         if impedance < 3:
             imp = 0.5
         elif impedance <= 5:
@@ -423,9 +527,12 @@ class ABRGenerator:
         else:
             imp = 1.5
 
-        base_amp = 0.06
-        amp = base_amp * (1.0 - snr_reduction) * scale * imp
-        return noise * amp
+        # El promedio de m bloques YA tiene RMS 1/sqrt(m): la caida con las
+        # promediaciones sale de ahi. Esta constante solo fija la escala
+        # para que al llegar al objetivo (m = NOISE_BLOCKS) el piso quede
+        # en NOISE_FLOOR_UV con paciente y electrodos tipicos.
+        amp = NOISE_FLOOR_UV * np.sqrt(NOISE_BLOCKS) * quality * imp
+        return residual * min(amp, NOISE_MAX_UV)
 
     # =====================================================================
     # FILTROS (limpios: solo butterworth, sin hacks)
@@ -491,6 +598,51 @@ class ABRGenerator:
     # ORQUESTADOR
     # =====================================================================
 
+    def shadow_values(self, population, pathway, stimulus_config, masking, ia,
+                      case_config, click_baseline=None, ratio_override=None):
+        """Respuesta de la coclea del oido NO evaluado, o None si no cruza.
+
+        Al otro oido le llega el estimulo atenuado por el craneo
+        (INTERAURAL_ATTENUATION). Si eso queda sobre su umbral, responde y
+        el registro lo recoge: la curva sombra. El enmascaramiento que se
+        pone en ese oido le sube el umbral, asi que con suficiente masking
+        la sombra desaparece.
+
+        Se ve como una respuesta de baja intensidad (latencia larga,
+        amplitud chica) porque, para esa coclea, ES de baja intensidad --
+        no hay que forzar nada aparte del montaje (SHADOW_*).
+        """
+        contra = (case_config or {}).get('contra')
+        if not contra:
+            return None
+        # ia = 0 es el vibrador oseo: no hay atenuacion que cruzar, las dos
+        # cocleas reciben lo mismo y la sombra sale siempre que no este
+        # enmascarada. Por eso no se corta aca.
+
+        level = stimulus_config['int'] - ia
+        threshold = max(float(contra.get('umbral', 20)), float(masking))
+        if level <= threshold:
+            return None
+
+        baseline = self.get_baseline_values(
+            population, stimulus_config['stim'], pathway,
+            freq=stimulus_config.get('freq'), ratio_override=ratio_override,
+        )
+        values, _ = self.calculate_wave_parameters(
+            baseline, level, threshold, contra.get('type', 'normal'),
+            desviaciones=contra.get('desviaciones'),
+            click_baseline=click_baseline,
+        )
+        for wave, v in values.items():
+            factor = SHADOW_AMP_FACTOR
+            if wave == 'I':
+                # La onda I es generada por el nervio del lado estimulado;
+                # con el montaje puesto en el otro oido practicamente no
+                # aparece, y esa es la pista de que la curva es sombra.
+                factor *= SHADOW_WAVE_I_FACTOR
+            v['amp'] *= factor
+        return values
+
     def generate_curve(self, population, pathology, stimulus_config,
                         technical_config, case_config=None):
         # 1. Baseline normativo
@@ -512,11 +664,21 @@ class ABRGenerator:
         if stimulus_config['stim'] != 'click':
             click_baseline = self.get_baseline_values(population, 'click', pathway)
 
-        # 2. Umbral
+        # 2. Umbral del oido evaluado. El enmascaramiento que se le pone al
+        # OTRO oido tambien cruza el craneo de vuelta: si lo que llega
+        # (mkg - IA) supera el umbral de este oido, lo esta enmascarando a
+        # el -- sobreenmascaramiento, y la respuesta se degrada. Sale gratis
+        # subiendo el umbral efectivo, porque la amplitud ya va por nivel
+        # de sensacion.
         if case_config and 'umbral' in case_config:
             threshold = case_config['umbral']
         else:
             threshold = self.norms['pathology_modifiers'][pathology]['threshold_range'][0]
+
+        masking = float((case_config or {}).get('masking') or 0.0)
+        ia = INTERAURAL_ATTENUATION.get(technical_config.get('transducer'), 65.0)
+        if masking > 0:
+            threshold = max(threshold, masking - ia)
 
         # 3. Desviaciones (el caso trae un solo set, plano por onda -- no
         # esta anidado por estimulo, ver CaseBuilder.abrBuild en case_create.php).
@@ -534,6 +696,21 @@ class ABRGenerator:
         current_avg = stimulus_config['current_avg']
         target_avg = stimulus_config['average']
         fsp_actual = self.calculate_fsp(current_avg, fsp_800, fsp_2000)
+
+        # 5b. rng propio de ESTA captura: mismo paciente, mismo oido, mismos
+        # parametros y misma curva -> mismo ruido, aunque se cierre y se
+        # vuelva a abrir LabSim (stable_seed usa blake2b, no hash(), ver
+        # core.rng). Capturas distintas del mismo caso siguen saliendo
+        # distintas porque el id de curva entra en la semilla.
+        rng = np.random.default_rng(stable_seed(
+            (case_config or {}).get('seed_key', ''),
+            (case_config or {}).get('capture_id', ''),
+            population, pathology, pathway,
+            stimulus_config['stim'], stimulus_config.get('freq'),
+            stimulus_config['int'], stimulus_config['pol'],
+            stimulus_config['rate'], stimulus_config['filter_down'],
+            stimulus_config['filter_passhigh'],
+        ))
 
         # 6. Parametros de ondas
         repro_shift = case_config.get('repro_shift', 0.0) if case_config else 0.0
@@ -555,34 +732,48 @@ class ABRGenerator:
         # 9. Curva objetivo (gaussianas)
         y_target = self.build_target_curve(t, values, CM_value)
 
+        # 9b. Curva sombra: si el estimulo cruza el craneo por encima de la
+        # atenuacion interaural, la coclea del oido NO evaluado tambien
+        # responde y el electrodo la registra igual. Con enmascaramiento
+        # suficiente en ese oido desaparece, que es exactamente el ejercicio
+        # (estimular fuerte un oido muerto y ver "respuesta" hasta que se
+        # enmascara). Antes el spinbox de masking se leia y se tiraba.
+        shadow = self.shadow_values(
+            population, pathway, stimulus_config, masking, ia, case_config,
+            click_baseline=click_baseline, ratio_override=ratio_override,
+        )
+        if shadow:
+            shadow_values, shadow_cm = self.apply_polarity_effects(
+                shadow, stimulus_config['pol'])
+            shadow_values = self.apply_rate_effects(
+                shadow_values, stimulus_config['rate'],
+                ((case_config or {}).get('contra') or {}).get('type', 'normal'))
+            y_target = y_target + self.build_target_curve(
+                t, shadow_values, shadow_cm)
+
         # 10. Drift LF + artefacto transductor
-        y_drift = self.add_baseline_drift(t)
+        y_drift = self.add_baseline_drift(t, rng)
         y_artifact = self.add_transducer_artifact(t, technical_config['transducer'])
 
-        # 11. Curva limpia (sin ruido)
+        # 11. Curva limpia (sin ruido). La senial NO se escala por cuanto
+        # se lleva promediado: en un equipo real esta completa desde el
+        # primer barrido y lo que baja es el ruido (ver averaged_noise).
         y_clean = y_target + y_drift + y_artifact
 
-        # 12. Growth: a mas promediaciones, target mas visible.
-        # El denominador es lo que el CASO realmente necesita
-        # (average_objetivo), no lo que el alumno pidio en el equipo -- si
-        # el alumno detiene la captura antes de eso, la onda queda
-        # parcialmente sin resolver aunque el equipo diga "listo".
+        # 12. Ruido residual del promediado. El denominador es lo que el
+        # CASO necesita (average_objetivo), no lo que el alumno pidio en el
+        # equipo: si detiene antes, la curva queda enterrada en ruido
+        # aunque el equipo diga "listo".
         growth_target = target_avg
         if case_config and case_config.get('average_objetivo'):
             growth_target = case_config['average_objetivo']
         growth = self.calculate_growth(current_avg, growth_target)
-        # Mezcla suave con curva caotica al inicio (solo si growth < 1)
-        if growth < 1.0:
-            chaos_amp = (1 - growth) * 0.4
-            chaos = np.random.normal(0, chaos_amp, t.shape)
-            chaos = signal.filtfilt(*signal.butter(3, 0.2, 'low'), chaos)
-            y_signal = growth * y_clean + chaos
-        else:
-            y_signal = y_clean
-
-        # 13. Ruido EEG segun FSP/SNR
-        y_noisy = y_signal + self.add_eeg_noise(
-            t, current_avg, target_avg, fsp_actual,
+        # Calidad de registro del paciente: un caso con FSP objetivo bajo
+        # es un paciente ruidoso (se mueve, tensa el cuello) y su curva
+        # tarda mas en limpiarse.
+        quality = float(np.clip(2.8 / max(fsp_2000, 0.5), 0.5, 2.5))
+        y_noisy = y_clean + self.averaged_noise(
+            t, current_avg, growth_target, quality, rng,
             technical_config.get('impedance', 3.0),
         )
 
@@ -602,6 +793,9 @@ class ABRGenerator:
             'target_avg': target_avg,
             'fsp': fsp_actual,
             'growth': growth,
+            'threshold': threshold,
+            'masking': masking,
+            'shadow': bool(shadow),
         }
 
 
@@ -631,19 +825,33 @@ STIM_MAP = {
 }
 
 
-def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom, done):
+# Tipo de patologia del caso (como lo guarda CaseBuilder.abrBuild) ->
+# clave de normative_data.json.
+PATHOLOGY_MAP = {
+    'normal': 'normal',
+    'coclear': 'cochlear',
+    'transmission': 'conductive',
+    'neural': 'neural',
+}
+
+
+def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
+              done, patient=None, contra=None, capture_id=""):
     """
     Genera curva ABR con modelo morfolgico realista.
+
+    patient: dict del paciente en atencion (cases.data) -- de ahi salen
+        'edad' y 'gender' para elegir la poblacion normativa. Sin esto se
+        usa adult_female, que es lo que el modulo asumia siempre.
+    contra: perfil ABR del oido NO evaluado (cases.data['ABR'][otro lado]),
+        para la curva sombra cuando el estimulo cruza el craneo.
+    capture_id: nombre de la curva ("R1", "L2"...). Entra en la semilla del
+        ruido: la misma curva se redibuja igual entre aperturas de la app,
+        pero dos capturas de la misma intensidad salen distintas.
     """
     generator = _get_generator()
 
-    pathology_map = {
-        'normal': 'normal',
-        'coclear': 'cochlear',
-        'transmission': 'conductive',
-        'neural': 'neural',
-    }
-    pathology = pathology_map.get(preferences.get('type', 'normal'), 'normal')
+    pathology = PATHOLOGY_MAP.get(preferences.get('type', 'normal'), 'normal')
 
     if done and prom[0] == 0:
         current_averages = prom[1]
@@ -676,6 +884,16 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom, 
         'transducer': 'insert_earphone',
     }
 
+    # Oido no evaluado: umbral y patologia propios, para decidir si aparece
+    # curva sombra al pasar la atenuacion interaural (ver shadow_values).
+    contra_config = None
+    if contra:
+        contra_config = {
+            'umbral': contra.get('umbral', contra.get('th', 20)),
+            'type': PATHOLOGY_MAP.get(contra.get('type', 'normal'), 'normal'),
+            'desviaciones': contra.get('desviaciones', {}),
+        }
+
     # Reproducibilidad: si el caso es "no reproducible", cada captura a la
     # misma intensidad corre el complejo I-V un poco (jitter), en vez de
     # calcular un numero que despues no se usaba en la curva.
@@ -700,10 +918,19 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom, 
         'average_objetivo': preferences.get('average_objetivo', 2000),
         'repro_shift': var_repro,
         'ratio_override': ratio_override,
+        'masking': control_setting.get('mkg', 0),
+        'contra': contra_config,
+        # Semilla estable del ruido: identifica el perfil del oido, no la
+        # corrida. Ver core.rng.stable_seed.
+        'seed_key': case_fingerprint(preferences),
+        'capture_id': capture_id,
     }
 
+    population = select_population((patient or {}).get('edad'),
+                                   (patient or {}).get('gender'))
+
     t, y, metadata = generator.generate_curve(
-        population='adult_female',
+        population=population,
         pathology=pathology,
         stimulus_config=stimulus_config,
         technical_config=technical_config,

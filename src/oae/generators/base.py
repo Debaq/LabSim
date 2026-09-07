@@ -5,12 +5,12 @@ Si hay override del curso en core.app_config_store[normative_data.<tipo>] lo
 mezcla con los defaults (los overrideados ganan, pero las keys que falten
 caen al default bundled -- mismo patrón que ABR).
 """
-import hashlib
 import json
 
 import numpy as np
 
 from core.base import context
+from core.rng import case_fingerprint, stable_seed  # noqa: F401
 
 
 # Recursos empaquetados: context.get_resource resuelve tanto en dev como en
@@ -19,37 +19,9 @@ from core.base import context
 _NORMATIVE_PATH = "oae/normative_data.json"
 
 
-def stable_seed(*parts) -> int:
-    """Seed reproducible ENTRE ejecuciones de la app (0 .. 2**32-1).
-
-    hash() de Python saltea el hash de str/bytes con PYTHONHASHSEED, que es
-    aleatorio por proceso: con hash() el mismo paciente y los mismos
-    parámetros dan otra captura cada vez que se abre LabSim. Eso no es
-    "otra realización de ruido" para el alumno -- puede mover un PASS/REFER
-    borderline, y en SOAE cambiaba directamente si el oído tenía emisiones.
-    blake2b es determinística en cualquier proceso y máquina; digest_size=4
-    ya deja el entero en el rango que acepta np.random.default_rng.
-    """
-    raw = "|".join(str(p) for p in parts).encode("utf-8")
-    return int.from_bytes(hashlib.blake2b(raw, digest_size=4).digest(), "big")
-
-
-def case_fingerprint(case: dict | None) -> str:
-    """Clave estable del perfil EOA del oído, ordenada y en texto.
-
-    El caso llega como dict (no se puede hashear directo) y se ordena para
-    que el mismo caso dé siempre la misma clave y dos casos distintos den
-    capturas distintas.
-    """
-    if not case:
-        return ""
-    partes = []
-    for k, v in sorted(case.items()):
-        if isinstance(v, dict):
-            v = ";".join(f"{a}={b}" for a, b in sorted(v.items()))
-        partes.append(f"{k}={v}")
-    return "|".join(partes)
-
+# stable_seed/case_fingerprint viven en core.rng desde que ABR tambien los
+# usa (ver ABR_generator). Se reexportan aca para no tocar los imports de
+# los 4 generadores OAE ni los tests que los importan desde este modulo.
 
 def _deep_merge(base: dict, override: dict) -> dict:
     """Override gana, recursivo en dicts. Override NO es mutado."""

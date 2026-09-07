@@ -11,6 +11,15 @@ Cubren las correcciones "P0" del modelo:
 5. El efecto de la tasa es continuo (sin quiebres en 15/50/60/70) y de
    magnitud fisiológica.
 
+Y las "P1":
+6. Física de patología: conductiva = corrimiento paralelo por el GAP,
+   neural = interpicos prolongados y razón V/I caída.
+7. Enmascaramiento: curva sombra del oído no evaluado y sobreenmascaramiento.
+8. Población normativa según edad/sexo del paciente, no siempre adult_female.
+9. Promediación: la señal está completa desde el principio y lo que cae es
+   el ruido (1/sqrt(N)), con un trazo que se asienta en vez de parpadear.
+10. Ruido reproducible entre ejecuciones (core.rng.stable_seed).
+
 Sin scipy en el sandbox: se stubea para poder importar el módulo y correr
 todo lo que es matemática de parámetros. Los tests del pipeline y de la
 respuesta de los filtros necesitan scipy real y se saltan si no está.
@@ -41,7 +50,8 @@ except ImportError:
     sys.modules['scipy'] = scipy
     sys.modules['scipy.signal'] = fake_signal
 
-from abr.ABR_generator import ABRGenerator, RATE_REF  # noqa: E402
+from abr.ABR_generator import (  # noqa: E402
+    ABRGenerator, INTERAURAL_ATTENUATION, RATE_REF, select_population)
 
 NORMS = os.path.join(os.path.dirname(__file__), '..', 'resources', 'abr', 'normative_data.json')
 
@@ -248,7 +258,25 @@ def test_golden_wave_parameters():
             assert abs(v[wave]['amp'] - amp) < 0.001, (intensity, wave, v[wave]['amp'])
 
 
-# ---------------------------------------------------------------- pipeline
+# --------------------------------------------------------------- pipeline
+
+def _curva(intensity=80, threshold=20, pathology='normal', population='adult_female',
+           current=2000, target=2000, masking=0, contra=None, capture='R1',
+           seed_key='caso-1', fsp=(2.3, 2.8)):
+    """Corre generate_curve con un caso completo (necesita scipy)."""
+    g = _gen()
+    stim = {'stim': 'click', 'freq': None, 'pol': 'Alternada', 'int': intensity,
+            'rate': 21.1, 'filter_down': 3000, 'filter_passhigh': 100,
+            'average': target, 'current_avg': current, 'pathway': 'air_conduction'}
+    tech = {'impedance': 3.0, 'transducer': 'insert_earphone'}
+    case = {'desviaciones': {}, 'fsp_puntos': {'800': fsp[0], '2000': fsp[1]},
+            'umbral': threshold, 'average_objetivo': target, 'repro_shift': 0.0,
+            'masking': masking, 'contra': contra,
+            'seed_key': seed_key, 'capture_id': capture}
+    return g.generate_curve(population, pathology, stim, tech, case)
+
+
+# ------------------------------------------------------ pipeline (P0)
 
 def test_pipeline_produces_a_wave_V_where_it_should():
     if not HAS_SCIPY:
@@ -292,6 +320,214 @@ def test_pipeline_low_intensity_is_smaller_and_later():
     lat_bajo, amp_bajo = corrida(40)
     assert lat_bajo > lat_alto
     assert amp_bajo < amp_alto
+
+
+# ------------------------------------------------------- patología (P1)
+
+def test_conductive_shifts_the_whole_complex_in_parallel():
+    """GAP conductivo = estímulo atenuado: todo se atrasa, interpicos intactos.
+
+    Es el hallazgo que separa conductiva de coclear en el gráfico
+    latencia-intensidad. Antes la patología no tocaba la latencia: una
+    conductiva a 80 dB salía con latencias de oído sano.
+    """
+    sano = _params(80, threshold=15, pathology='normal')
+    conduct = _params(80, threshold=45, pathology='conductive')
+    assert conduct['V']['lat'] - sano['V']['lat'] > 0.5
+    i_v_sano = sano['V']['lat'] - sano['I']['lat']
+    i_v_cond = conduct['V']['lat'] - conduct['I']['lat']
+    assert abs(i_v_cond - i_v_sano) < 0.15, (i_v_sano, i_v_cond)
+
+
+def test_cochlear_keeps_normal_latency_at_high_level():
+    """La coclear NO corre la latencia a nivel alto (no hay GAP que atenúe)."""
+    sano = _params(80, threshold=15, pathology='normal')
+    coclear = _params(80, threshold=45, pathology='cochlear')
+    assert abs(coclear['V']['lat'] - sano['V']['lat']) < 0.01
+    # ...y a igual umbral, la conductiva sí se atrasa respecto de la coclear.
+    conduct = _params(80, threshold=45, pathology='conductive')
+    assert conduct['V']['lat'] > coclear['V']['lat'] + 0.4
+
+
+def test_neural_prolongs_interpeaks_and_drops_v_over_i():
+    """Retrococlear: I-V largo y razón V/I dentro del rango del JSON."""
+    normal = _params(80, pathology='normal')
+    neural = _params(80, pathology='neural')
+    i_v_normal = normal['V']['lat'] - normal['I']['lat']
+    i_v_neural = neural['V']['lat'] - neural['I']['lat']
+    assert i_v_neural - i_v_normal >= 0.3, (i_v_normal, i_v_neural)
+    assert abs(neural['I']['lat'] - normal['I']['lat']) < 1e-9  # la I no se mueve
+    ratio = neural['V']['amp'] / neural['I']['amp']
+    rango = _gen().norms['pathology_modifiers']['neural']['amplitude_v_i_ratio']
+    assert rango[0] <= ratio <= rango[1], ratio
+
+
+# ------------------------------------------------------- población (P1)
+
+def test_population_follows_age_and_sex():
+    assert select_population(None) == 'adult_female'
+    assert select_population(0) == 'neonate'
+    assert select_population(0.2) == 'neonate'
+    assert select_population(1) == 'child'
+    assert select_population(9) == 'child'
+    assert select_population(30, 0) == 'adult_male'
+    assert select_population(30, 1) == 'adult_female'
+    assert select_population(70, 0) == 'elderly'
+    assert select_population("no es una edad") == 'adult_female'
+
+
+def test_neonate_has_a_longer_wave_V_than_an_adult():
+    """Vía auditiva inmadura: la onda V del neonato llega bastante después."""
+    g = _gen()
+    def lat_v(pop):
+        valores, _ = g.calculate_wave_parameters(
+            g.get_baseline_values(population=pop), 80, 20, 'normal')
+        return valores['V']['lat']
+    assert lat_v('neonate') - lat_v('adult_female') > 0.8
+    assert lat_v('elderly') > lat_v('adult_female')
+
+
+# --------------------------------------------------- enmascaramiento (P1)
+
+def test_shadow_curve_appears_when_the_stimulus_crosses_the_skull():
+    """Oído muerto estimulado fuerte: responde el otro y se registra igual."""
+    g = _gen()
+    ia = INTERAURAL_ATTENUATION['insert_earphone']
+    stim = {'stim': 'click', 'freq': None, 'int': 90, 'pathway': 'air_conduction'}
+    caso = {'contra': {'umbral': 15, 'type': 'normal'}}
+    sombra = g.shadow_values('adult_female', 'air_conduction', stim, 0, ia, caso)
+    assert sombra is not None
+    # Es una respuesta de bajo nivel para esa cóclea: latencia larga.
+    normal = _params(90)
+    assert sombra['V']['lat'] > normal['V']['lat'] + 0.5
+    # Y sin onda I reconocible, que es la pista de que es sombra.
+    assert sombra['I']['amp'] < 0.5 * sombra['V']['amp']
+
+
+def test_masking_kills_the_shadow_curve():
+    g = _gen()
+    ia = INTERAURAL_ATTENUATION['insert_earphone']
+    stim = {'stim': 'click', 'freq': None, 'int': 90, 'pathway': 'air_conduction'}
+    caso = {'contra': {'umbral': 15, 'type': 'normal'}}
+    # Lo que cruza son 90 - 65 = 25 dB: con 40 de masking el otro oído no oye.
+    assert g.shadow_values('adult_female', 'air_conduction', stim, 40, ia, caso) is None
+    assert g.shadow_values('adult_female', 'air_conduction', stim, 0, ia, caso) is not None
+
+
+def test_no_shadow_below_interaural_attenuation():
+    """A 60 dB con insertos no cruza nada, aunque el otro oído sea normal."""
+    g = _gen()
+    ia = INTERAURAL_ATTENUATION['insert_earphone']
+    stim = {'stim': 'click', 'freq': None, 'int': 60, 'pathway': 'air_conduction'}
+    caso = {'contra': {'umbral': 15, 'type': 'normal'}}
+    assert g.shadow_values('adult_female', 'air_conduction', stim, 0, ia, caso) is None
+
+
+def test_shadow_shows_up_in_the_curve():
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    contra = {'umbral': 15, 'type': 'normal'}
+    # Oído evaluado sin respuesta (umbral 95), otro oído sano.
+    _, _, meta_sin = _curva(intensity=90, threshold=95, pathology='cochlear',
+                            contra=contra, masking=0)
+    _, _, meta_con = _curva(intensity=90, threshold=95, pathology='cochlear',
+                            contra=contra, masking=45)
+    assert meta_sin['shadow'] is True
+    assert meta_con['shadow'] is False
+
+
+def test_overmasking_degrades_the_test_ear():
+    """Demasiado masking cruza de vuelta y enmascara el oído evaluado."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    contra = {'umbral': 20, 'type': 'normal'}
+    _, y_sin, meta_sin = _curva(intensity=60, threshold=20, contra=contra, masking=0)
+    _, y_over, meta_over = _curva(intensity=60, threshold=20, contra=contra, masking=100)
+    assert meta_sin['threshold'] == 20
+    assert meta_over['threshold'] > 20          # umbral efectivo elevado
+    assert y_over.max() < y_sin.max()
+
+
+# ----------------------------------------------------- promediación (P1)
+
+def test_signal_does_not_grow_with_averaging():
+    """La amplitud de la onda no depende de cuánto se lleve promediado.
+
+    Antes se escalaba la señal por `growth`, así que a mitad de captura la
+    onda V medía la mitad: en un equipo real está completa desde el primer
+    barrido y lo que baja es el ruido.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    t_med, y_med, _ = _curva(current=600, target=2000)
+    t_fin, y_fin, _ = _curva(current=2000, target=2000)
+    pico_med = y_med[(t_med > 4.5) & (t_med < 6.5)].max()
+    pico_fin = y_fin[(t_fin > 4.5) & (t_fin < 6.5)].max()
+    assert abs(pico_med - pico_fin) < 0.35 * pico_fin, (pico_med, pico_fin)
+
+
+def test_residual_noise_falls_as_one_over_sqrt_n():
+    """El ruido residual cae ~1/sqrt(N) y termina en el orden de 40 nV."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    g = _gen()
+    def residual(n):
+        ruido = g.averaged_noise(T_AXIS, n, 2000, 1.0, np.random.default_rng(11), 3.0)
+        return float(g.apply_filters(ruido, 3000.0, 100.0, FS).std())
+
+    r_bajo, r_alto = residual(125), residual(2000)
+    esperado = np.sqrt(2000 / 125)              # = 4
+    assert 0.6 * esperado <= r_bajo / r_alto <= 1.6 * esperado, (r_bajo, r_alto)
+    assert 0.01 < r_alto < 0.10, r_alto         # piso del equipo, en uV
+
+
+def test_trace_settles_instead_of_flickering():
+    """Dos ticks seguidos comparten el ruido ya acumulado."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    _, y1, _ = _curva(current=1000)
+    _, y2, _ = _curva(current=1175)             # el tick siguiente
+    _, y3, _ = _curva(current=1000, capture='R2')
+    assert np.corrcoef(y1, y2)[0, 1] > 0.9      # se asienta
+    assert np.corrcoef(y1, y3)[0, 1] < np.corrcoef(y1, y2)[0, 1]
+
+
+def test_stopping_early_leaves_a_noisier_curve():
+    """Parar antes del average que el caso necesita deja más ruido."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    # La señal es la misma en las tres (mismo caso, misma semilla), así que
+    # la distancia contra una corrida muy promediada es ruido y nada más.
+    _, y_corto, _ = _curva(current=1000, target=4000)
+    _, y_completo, _ = _curva(current=4000, target=4000)
+    _, y_ref, _ = _curva(current=16000, target=4000)
+    ruido_corto = np.std(y_corto - y_ref)
+    ruido_completo = np.std(y_completo - y_ref)
+    assert ruido_corto > 1.5 * ruido_completo, (ruido_corto, ruido_completo)
+
+
+def test_capture_is_reproducible_across_runs():
+    """Mismo caso, mismos parámetros, misma curva: mismo trazo.
+
+    hash() de Python no sirve para esto (saltea por proceso); el ruido va
+    sembrado con core.rng.stable_seed.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    _, a, _ = _curva()
+    _, b, _ = _curva()
+    assert np.array_equal(a, b)
+    _, otro_caso, _ = _curva(seed_key='caso-2')
+    assert not np.array_equal(a, otro_caso)
+    _, otra_curva, _ = _curva(capture='R7')
+    assert not np.array_equal(a, otra_curva)
 
 
 if __name__ == "__main__":
