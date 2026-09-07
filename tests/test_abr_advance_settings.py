@@ -105,32 +105,42 @@ def test_restore_defaults_goes_back_to_the_protocol():
     assert dialog.get_data() == default_settings('ABR')
 
 
-def test_impedance_check_flags_both_clinical_rules():
-    """El diálogo avisa en vivo, como la pantalla de impedancias del equipo."""
+def test_the_dialog_gives_no_hints():
+    """El diálogo no le avisa nada al alumno: eso lo lee en el trazo.
+
+    Ni mensajes de impedancia fuera de norma, ni valores en rojo, ni notas
+    de qué estímulo conviene. Configurar mal los electrodos tiene que
+    manifestarse como ruido o zumbido en la curva y que el alumno lo
+    diagnostique, no como un cartel que le diga qué hizo mal.
+    """
     if not HAS_QT:
         return
+    from PySide6.QtWidgets import QLabel
+
     dialog = AbrAdvanceSettings(test='ABR')
-    assert "correctas" in dialog.lbl_impedance.text()
-
-    # Regla 1: cada electrodo bajo 5 kOhm.
-    dialog.set_data({'impedance': {'vertex': 6.5, 'right': 2.0, 'left': 2.0,
+    dialog.set_data({'impedance': {'vertex': 9.0, 'right': 2.0, 'left': 2.0,
                                    'ground': 2.0}})
-    assert "⚠" in dialog.lbl_impedance.text()
-    assert "6.5" in dialog.lbl_impedance.text()
-    assert dialog.electrode_widgets['vertex'][1].styleSheet()      # en rojo
-    assert not dialog.electrode_widgets['right'][1].styleSheet()
 
-    # Regla 2: diferencias bajo 2 kOhm, con todos los electrodos en norma.
-    dialog.set_data({'impedance': {'vertex': 4.5, 'right': 2.0, 'left': 2.0,
-                                   'ground': 2.0}})
-    texto = dialog.lbl_impedance.text()
-    assert "⚠" in texto and "diferencia" in texto
-    assert not dialog.electrode_widgets['vertex'][1].styleSheet()  # 4.5 < 5
+    # Ningún spinbox se pinta según su valor.
+    for _, spin in dialog.electrode_widgets.values():
+        assert not spin.styleSheet(), spin.value()
 
-    # Justo en los dos límites todavía pasa.
-    dialog.set_data({'impedance': {'vertex': 4.0, 'right': 2.0, 'left': 2.0,
-                                   'ground': 2.0}})
-    assert "correctas" in dialog.lbl_impedance.text()
+    # Ningún texto del diálogo menciona límites, consecuencias ni consejos,
+    # y ningún rótulo delata cuál es el valor "bueno" (nada de "estándar",
+    # "habitual" ni "recomendado" al lado de una opción).
+    prohibido = ('kΩ)', 'límite', 'ruidoso', 'red eléctrica', '⚠',
+                 'conviene', 'umbrales por frecuencia',
+                 'estándar', 'habitual', 'recomend', 'normal)')
+    textos = [w.text() for w in dialog.findChildren(QLabel)]
+    for combo in (dialog.cb_transducer, dialog.cb_montage, dialog.cb_reject,
+                  dialog.cb_noise, dialog.cb_fsp):
+        textos += [combo.itemText(i) for i in range(combo.count())]
+    for combo, _ in dialog.electrode_widgets.values():
+        textos += [combo.itemText(i) for i in range(combo.count())]
+
+    for texto in textos:
+        for palabra in prohibido:
+            assert palabra.lower() not in texto.lower(), (texto, palabra)
 
 
 def test_labels_map_to_the_keys_the_generator_uses():
