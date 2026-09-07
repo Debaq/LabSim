@@ -267,8 +267,15 @@ class Agenda(QWidget, Ui_Form):
                 calendario.setDateTextFormat(fecha, formato)
 
         self._actualizar_tooltip_fecha(self.date_selector.date())
+        # La primera pasada corre desde _build_atender_control, antes de que
+        # exista self.shedule; la que llega por red sí tiene que repintar la
+        # tabla para marcar las citas que caen en feriado.
+        if getattr(self, "shedule", None) is not None:
+            self.populate_shedule()
 
     def _descripcion_feriado(self, qdate):
+        if not qdate.isValid():
+            return None
         return self._feriados.get(qdate.year(), {}).get(qdate.toString("MM-dd"))
 
     def _actualizar_tooltip_fecha(self, qdate):
@@ -360,6 +367,13 @@ class Agenda(QWidget, Ui_Form):
                 color = ATENDIDO_COLOR
             elif estado == "no_show":
                 color = NO_SHOW_COLOR
+            # Cita agendada en feriado: se avisa en la celda de la fecha (no
+            # en toda la fila) para no tapar el color de estado. Es un error
+            # del docente al agendar, no del alumno -- nadie va a atender ese
+            # día, así que tiene que saltar a la vista en la tabla, que es lo
+            # único que ve el docente (su vista esconde el date_selector).
+            feriado = self._descripcion_feriado(parse_fecha_agenda(user.fecha))
+
             columnas = (user.fecha or "sin agendar", user.hora, user.rut, user.nombre,
                         user.apellido, user.fecha_nac, user.procedimiento)
             for col_idx, valor in enumerate(columnas):
@@ -369,6 +383,11 @@ class Agenda(QWidget, Ui_Form):
                     item.setBackground(color)
                 if tooltip:
                     item.setToolTip(tooltip)
+                if feriado and col_idx == 0:
+                    item.setText(f"⚠ {valor}")
+                    item.setBackground(FERIADO_FONDO)
+                    item.setForeground(FERIADO_COLOR)
+                    item.setToolTip(f"Agendada en feriado: {feriado}")
                 item.setFlags(item.flags() & ~Qt.ItemIsEditable)
                 self.tableWidget.setItem(row_idx, col_idx, item)
         self.tableWidget.setSortingEnabled(True)
