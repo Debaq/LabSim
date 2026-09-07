@@ -103,9 +103,13 @@ def _asset_url(release: dict, name: str):
 def check_for_update(current_version: str):
     """Busca releases 'pyinstaller-v*' más nuevas que el build local.
 
-    'Más nueva' es: versión mayor, o misma versión con un sufijo de commit
-    distinto al local (build de prueba re-publicada) -- así una build ya
-    aplicada no se vuelve a ofrecer en cada arranque.
+    'Más nueva' = publicada después que la release que corresponde al
+    build local, según el orden por fecha de publicación (el mismo con el
+    que se calcularon los diffs). Si el build local no corresponde a
+    ninguna release (dev, o release borrada) solo cuentan las versiones
+    mayores, más la última si comparte versión con otro sufijo de commit
+    (build de prueba re-publicada) -- y en ese caso solo se ofrece full,
+    porque no se sabe desde qué punto de la cadena se está saltando.
 
     Si hay algo nuevo, devuelve un dict:
     - {"tag": ..., "build_id": ..., "mode": "chain", "hops": [(tag, update_url), ...]}
@@ -132,20 +136,36 @@ def check_for_update(current_version: str):
     # fecha"), así que hay que respetarlo al armar la cadena de hops.
     candidates.sort(key=lambda r: r.get("created_at") or "")
 
-    local_id = local_build_id(current_version)
+    local_id = local_build_id(current_version).lstrip("v")
     local_v, local_suffix = _split_build_id(local_id)
 
-    def is_newer_than_local(v, suffix):
-        if v > local_v:
-            return True
-        return v == local_v and suffix is not None and suffix != local_suffix
+    def build_id_of(release):
+        return release["tag_name"][len(TAG_PREFIX):]
 
-    newer = []
-    for r in candidates:
-        tag = r["tag_name"]
-        v, suffix = _split_build_id(tag[len(TAG_PREFIX):])
-        if is_newer_than_local(v, suffix):
-            newer.append(r)
+    # Lo que corre localmente es, casi siempre, una release publicada: la
+    # ubicamos por build_id en la lista ya ordenada por fecha. Todo lo que
+    # viene DESPUES en esa lista es lo nuevo. Comparar por versión no
+    # alcanza: las builds de prueba comparten versión (0.9.8-r<commit>) y
+    # el sufijo de commit no tiene orden, así que "sufijo distinto" daba
+    # por nuevas también a las releases anteriores -- y como las más viejas
+    # no tienen paquete update, la cadena se rompía siempre y caía al full.
+    local_index = next(
+        (i for i, r in enumerate(candidates) if build_id_of(r) == local_id), None
+    )
+
+    if local_index is not None:
+        newer = candidates[local_index + 1:]
+        chain_ok = True
+    else:
+        # Build que no corresponde a ninguna release (corrida en dev, o
+        # release borrada): no sabemos en qué punto de la cadena estamos,
+        # así que los diffs no son aplicables -- solo full.
+        chain_ok = False
+        newer = [r for r in candidates if _split_build_id(build_id_of(r))[0] > local_v]
+        if not newer:
+            last_v, last_suffix = _split_build_id(build_id_of(candidates[-1]))
+            if last_v == local_v and last_suffix is not None and last_suffix != local_suffix:
+                newer = [candidates[-1]]
 
     if not newer:
         return None
@@ -154,13 +174,14 @@ def check_for_update(current_version: str):
     latest_tag = latest["tag_name"]
     latest_build_id = latest_tag[len(TAG_PREFIX):]
 
-    hops = []
-    for r in newer:
-        update_url = _asset_url(r, UPDATE_ASSET_NAME)
-        if update_url is None:
-            hops = None
-            break
-        hops.append((r["tag_name"], update_url))
+    hops = [] if chain_ok else None
+    if hops is not None:
+        for r in newer:
+            update_url = _asset_url(r, UPDATE_ASSET_NAME)
+            if update_url is None:
+                hops = None
+                break
+            hops.append((r["tag_name"], update_url))
 
     if hops is not None and len(hops) <= MAX_CHAIN_HOPS:
         return {
