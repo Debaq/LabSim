@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
 
 from oae.generators.dpoae import DpoaeGenerator
 from oae.widgets.probe_check import ProbeCheckWidget
+from oae.widgets.plot_style import style_plot, black_title
 
 _EAR_COLOR = {"OD": (192, 57, 43), "OI": (41, 128, 185)}
 
@@ -96,12 +97,12 @@ class DpoaePanel(QWidget):
         # Derecha: DP-gram arriba (binaural), función I/O abajo
         self.glw = pg.GraphicsLayoutWidget()
         self.glw.setBackground((255, 255, 255))
-        self.p_dp = self.glw.addPlot(row=0, col=0, title="DP-gram (f2 vs nivel DP) -- OD/OI superpuestos")
+        self.p_dp = self.glw.addPlot(row=0, col=0, title=black_title("DP-gram (f2 vs nivel DP) -- OD/OI superpuestos"))
         self.p_dp.setLabel("left", "Nivel DP / Noise floor", units="dB SPL")
         self.p_dp.setLabel("bottom", "f2", units="Hz")
-        self.p_dp.showGrid(x=True, y=True, alpha=0.3)
         self.p_dp.setLogMode(x=True, y=False)
         self.p_dp.setMouseEnabled(x=False, y=False)
+        style_plot(self.p_dp)
         self.p_dp.addLegend(offset=(10, 10))
         self.curves_dp = {}
         self.curves_nf = {}
@@ -123,11 +124,11 @@ class DpoaePanel(QWidget):
         )
         self.p_dp.addItem(self.threshold_line)
 
-        self.p_io = self.glw.addPlot(row=1, col=0, title="Función I/O (crecimiento, f2 fijo @ pico)")
+        self.p_io = self.glw.addPlot(row=1, col=0, title=black_title("Función I/O (crecimiento, f2 fijo @ pico)"))
         self.p_io.setLabel("left", "Nivel DP / NF", units="dB SPL")
         self.p_io.setLabel("bottom", "L2", units="dB SPL")
-        self.p_io.showGrid(x=True, y=True, alpha=0.3)
         self.p_io.setMouseEnabled(x=False, y=False)
+        style_plot(self.p_io)
         self.curve_io_dp = self.p_io.plot(pen=pg.mkPen((192, 57, 43), width=2), symbol="o", symbolSize=6, name="DP")
         self.curve_io_nf = self.p_io.plot(
             pen=pg.mkPen((120, 120, 120), width=1, style=Qt.DashLine), symbol="t", symbolSize=5, name="NF"

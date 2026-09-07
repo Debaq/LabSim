@@ -9,6 +9,8 @@ import pyqtgraph as pg
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QLabel, QProgressBar, QVBoxLayout, QWidget
 
+from oae.widgets.plot_style import style_plot
+
 
 class ProbeCheckWidget(QWidget):
     """Forma de onda continua + barra de nivel peak."""
@@ -19,11 +21,13 @@ class ProbeCheckWidget(QWidget):
         layout.setContentsMargins(4, 4, 4, 4)
         layout.addWidget(QLabel("Chequeo de sonda (probe fit)"))
         self.plot = pg.PlotWidget()
+        self.plot.setBackground((255, 255, 255))
         self.plot.setYRange(-1.0, 1.0)
         self.plot.setXRange(0, 200)
         self.plot.setMouseEnabled(x=False, y=False)
         self.plot.setMenuEnabled(False)
         self.plot.hideButtons()
+        style_plot(self.plot.getPlotItem(), grid_alpha=0.3)
         self.curve = self.plot.plot(pen=pg.mkPen((41, 128, 185), width=2))
         layout.addWidget(self.plot)
         self.level_label = QLabel("Nivel peak:")

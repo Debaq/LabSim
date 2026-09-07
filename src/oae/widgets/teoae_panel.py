@@ -1,11 +1,11 @@
 """Panel TEOAE.
 
 Izquierda: controles (nivel dB SPL, # promedios, oído OD/OI, botón Iniciar).
-Derecha: GraphicsLayoutWidget 2x2 con:
-  - TL: forma de onda promediada + split A/B
-  - TR: espectro FFT con bandas marcadas
-  - BL: barras SNR por banda + umbral 6 dB
-  - BR: pass/refer + contador de bandas
+Derecha: GraphicsLayoutWidget con 3 gráficos principales + 2 secundarios:
+  - Respuesta: forma de onda promediada completa
+  - A / B: buffers split para chequeo visual de reproducibilidad
+  - Fourier: espectro FFT con bandas marcadas
+  - SNR por banda + umbral, y resultado PASS/REFER
 """
 import numpy as np
 import pyqtgraph as pg
@@ -27,6 +27,7 @@ from PySide6.QtWidgets import (
 
 from oae.generators.teoae import TeoaeGenerator
 from oae.widgets.probe_check import ProbeCheckWidget
+from oae.widgets.plot_style import style_plot, black_title
 
 
 class TeoaePanel(QWidget):
@@ -113,36 +114,44 @@ class TeoaePanel(QWidget):
         left_layout.addWidget(metrics_box)
         left_layout.addStretch(1)
 
-        # ---------- DERECHA: plots 2x2 ----------
+        # ---------- DERECHA: 3 gráficos principales (fila 0) + 2 secundarios (fila 1) ----------
         self.glw = pg.GraphicsLayoutWidget()
         self.glw.setBackground((255, 255, 255))
 
-        # TL: waveform
-        self.p_wave = self.glw.addPlot(row=0, col=0, title="Forma de onda promediada (A/B)")
+        # (0,0): Respuesta -- forma de onda promediada completa (única curva)
+        self.p_response = self.glw.addPlot(row=0, col=0, title=black_title("Respuesta"))
+        self.p_response.setLabel("left", "Amplitud", units="Pa")
+        self.p_response.setLabel("bottom", "Tiempo", units="ms")
+        self.p_response.setMouseEnabled(x=False, y=False)
+        style_plot(self.p_response)
+        self.curve_response = self.p_response.plot(pen=pg.mkPen((0, 0, 0), width=2))
+
+        # (0,1): A vs B -- split buffer, chequeo visual de reproducibilidad
+        self.p_wave = self.glw.addPlot(row=0, col=1, title=black_title("A / B"))
         self.p_wave.setLabel("left", "Amplitud", units="Pa")
         self.p_wave.setLabel("bottom", "Tiempo", units="ms")
-        self.p_wave.showGrid(x=True, y=True, alpha=0.3)
         self.p_wave.setMouseEnabled(x=False, y=False)
+        style_plot(self.p_wave)
         self.curve_a = self.p_wave.plot(pen=pg.mkPen((192, 57, 43), width=2), name="A")
         self.curve_b = self.p_wave.plot(pen=pg.mkPen((41, 128, 185), width=2, style=Qt.DashLine), name="B")
 
-        # TR: spectrum
-        self.p_spec = self.glw.addPlot(row=0, col=1, title="Espectro FFT")
+        # (0,2): Fourier -- espectro FFT con bandas marcadas
+        self.p_spec = self.glw.addPlot(row=0, col=2, title=black_title("Fourier"))
         self.p_spec.setLabel("left", "Nivel", units="dB SPL")
         self.p_spec.setLabel("bottom", "Frecuencia", units="Hz")
-        self.p_spec.showGrid(x=True, y=True, alpha=0.3)
         self.p_spec.setMouseEnabled(x=False, y=False)
         self.p_spec.setLogMode(x=True, y=False)
+        style_plot(self.p_spec)
         self.curve_spec = self.p_spec.plot(pen=pg.mkPen((0, 0, 0), width=1), name="spec")
         self.bands_regions = []
 
-        # BL: SNR por banda
-        self.p_snr = self.glw.addPlot(row=1, col=0, title="SNR por banda (umbral 6 dB)")
+        # (1, 0-1): SNR por banda
+        self.p_snr = self.glw.addPlot(row=1, col=0, colspan=2, title=black_title("SNR por banda (umbral 6 dB)"))
         self.p_snr.setLabel("left", "SNR", units="dB")
         self.p_snr.setLabel("bottom", "Frecuencia", units="Hz")
-        self.p_snr.showGrid(x=True, y=True, alpha=0.3)
         self.p_snr.setMouseEnabled(x=False, y=False)
         self.p_snr.setLogMode(x=True, y=False)
+        style_plot(self.p_snr)
         self.bars_snr = pg.BarGraphItem(x=[], height=[], width=0.15, brush=(41, 128, 185))
         self.p_snr.addItem(self.bars_snr)
         self.threshold_line = pg.InfiniteLine(
@@ -154,8 +163,8 @@ class TeoaePanel(QWidget):
         )
         self.p_snr.addItem(self.threshold_line)
 
-        # BR: pass/refer
-        self.p_result = self.glw.addPlot(row=1, col=1, title="Resultado")
+        # (1,2): pass/refer
+        self.p_result = self.glw.addPlot(row=1, col=2, title=black_title("Resultado"))
         self.p_result.hideAxis("left")
         self.p_result.hideAxis("bottom")
         self.p_result.setMouseEnabled(x=False, y=False)
@@ -235,6 +244,7 @@ class TeoaePanel(QWidget):
         self.lbl_status.setText("Detenido")
 
     def _on_clear(self):
+        self.curve_response.clear()
         self.curve_a.clear()
         self.curve_b.clear()
         self.curve_spec.clear()
@@ -251,11 +261,12 @@ class TeoaePanel(QWidget):
         self.lbl_status.setText("Listo")
 
     def _render_result(self, result: dict, ear: str):
-        # Waveform A/B
+        # Respuesta + Waveform A/B
         t = result["time_ms"]
         a = result["wave_a"]
         b = result["wave_b"]
         # Escalar a µPa (1 Pa = 1e6 µPa) para visualización
+        self.curve_response.setData(t, result["waveform"] * 1e6)
         self.curve_a.setData(t, a * 1e6)
         self.curve_b.setData(t, b * 1e6)
         # Spectrum

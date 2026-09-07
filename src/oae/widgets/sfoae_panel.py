@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
 
 from oae.generators.sfoae import SfoaeGenerator
 from oae.widgets.probe_check import ProbeCheckWidget
+from oae.widgets.plot_style import style_plot, black_title
 
 
 class SfoaePanel(QWidget):
@@ -82,28 +83,28 @@ class SfoaePanel(QWidget):
         # Derecha
         self.glw = pg.GraphicsLayoutWidget()
         self.glw.setBackground((255, 255, 255))
-        self.p_mag = self.glw.addPlot(row=0, col=0, title="Magnitud SFOAE vs nivel supresor")
+        self.p_mag = self.glw.addPlot(row=0, col=0, title=black_title("Magnitud SFOAE vs nivel supresor"))
         self.p_mag.setLabel("left", "Magnitud", units="dB")
         self.p_mag.setLabel("bottom", "Nivel supresor", units="dB SPL")
-        self.p_mag.showGrid(x=True, y=True, alpha=0.3)
         self.p_mag.setMouseEnabled(x=False, y=False)
+        style_plot(self.p_mag)
         self.curve_mag = self.p_mag.plot(pen=pg.mkPen((41, 128, 185), width=2),
                                           symbol="o", symbolSize=6)
 
-        self.p_phase = self.glw.addPlot(row=1, col=0, title="Fase SFOAE vs nivel supresor")
+        self.p_phase = self.glw.addPlot(row=1, col=0, title=black_title("Fase SFOAE vs nivel supresor"))
         self.p_phase.setLabel("left", "Fase", units="°")
         self.p_phase.setLabel("bottom", "Nivel supresor", units="dB SPL")
-        self.p_phase.showGrid(x=True, y=True, alpha=0.3)
         self.p_phase.setMouseEnabled(x=False, y=False)
+        style_plot(self.p_phase)
         self.curve_phase = self.p_phase.plot(pen=pg.mkPen((192, 57, 43), width=2),
                                              symbol="s", symbolSize=6)
 
-        self.p_tuning = self.glw.addPlot(row=2, col=0, title="Curva de sintonía (magnitud esperada vs frecuencia probe)")
+        self.p_tuning = self.glw.addPlot(row=2, col=0, title=black_title("Curva de sintonía (magnitud esperada vs frecuencia probe)"))
         self.p_tuning.setLabel("left", "Magnitud", units="dB")
         self.p_tuning.setLabel("bottom", "Frecuencia probe", units="Hz")
-        self.p_tuning.showGrid(x=True, y=True, alpha=0.3)
         self.p_tuning.setMouseEnabled(x=False, y=False)
         self.p_tuning.setLogMode(x=True, y=False)
+        style_plot(self.p_tuning)
         self.curve_tuning = self.p_tuning.plot(pen=pg.mkPen((39, 174, 96), width=2))
         self.probe_freq_marker = pg.InfiniteLine(
             angle=90, pen=pg.mkPen((150, 150, 150), width=1, style=Qt.DotLine)
