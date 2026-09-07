@@ -31,7 +31,14 @@ require_once __DIR__ . '/../../src/ReportFile.php';
  */
 
 const REPORT_TIPOS = ['ABR', 'EOA', 'VEMP', 'ELECTROCOCLEO'];
-const REPORT_IMAGE_SUFFIXES = ['0', '1', 'lat_int'];
+// '0'/'1'/'lat_int': OD/OI/latencia-intensidad de ABR y VEMP. Los
+// <prueba>_<oido> son de EOA, que no tiene "un" gráfico por oído sino uno
+// por prueba (TEOAE/DPOAE/SOAE/SFOAE) y oído -- ver OaeMainWindow.
+const REPORT_IMAGE_SUFFIXES = [
+    '0', '1', 'lat_int',
+    'teoae_od', 'teoae_oi', 'dpoae_od', 'dpoae_oi',
+    'soae_od', 'soae_oi', 'sfoae_od', 'sfoae_oi',
+];
 
 $user = Auth::requireUser();
 

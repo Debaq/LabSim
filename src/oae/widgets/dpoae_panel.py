@@ -72,6 +72,9 @@ class DpoaePanel(QWidget):
         self._pending = None
         self._committed = []
         self._io_committed = []
+        # Resumen + captura por oído para el informe (ver report_summary()).
+        self._report = {}
+        self._shots = {}
         self._build_ui()
         self._anim_timer = QTimer(self)
         self._anim_timer.timeout.connect(self._anim_tick)
@@ -474,6 +477,57 @@ class DpoaePanel(QWidget):
             f"{n_pass}/{n_total} puntos pasan (criterio SNR >= {threshold} dB, "
             f"mínimo {min_pass} puntos){thr_txt}"
         )
+        self._store_report(ear, n_pass, n_total, verdict, io,
+                           partial=status_text == "Detenido")
+
+    # ------------------------------------------------------------------
+    # Informe
+    # ------------------------------------------------------------------
+    def _store_report(self, ear, n_pass, n_total, verdict, io, partial=False):
+        umbral_l2 = None
+        if self._io_committed:
+            measured = [p["l2_db"] for p in self._io_committed if p["passed"]]
+            if measured:
+                umbral_l2 = float(min(measured))
+        self._report[ear] = {
+            "l1_db": self.spn_l1.value(),
+            "l2_db": self.spn_l2.value(),
+            "puntos": [
+                {
+                    "f2_hz": round(float(p["f2_hz"]), 0),
+                    "dp_db": round(float(p["dp_db"]), 1),
+                    "nf_db": round(float(p["nf_db"]), 1),
+                    "snr_db": round(float(p["snr_db"]), 1),
+                    "pass": bool(p["passed"]),
+                }
+                for p in self._committed
+            ],
+            "n_pass": int(n_pass),
+            "n_total": int(n_total),
+            "veredicto": verdict,
+            "io_f2_hz": round(float(io["f2_hz"]), 0) if io.get("f2_hz") else None,
+            "io_umbral_l2_db": umbral_l2,
+            "parcial": bool(partial),
+        }
+        self._shots[ear] = self.glw.grab()
+
+    def reset_all(self):
+        """Descarta capturas y datos de informe (cambio de paciente).
+
+        Sin esto, las capturas de un paciente seguían en pantalla -- y en el
+        payload del informe -- al abrir la atención del siguiente.
+        """
+        self._report.clear()
+        self._shots.clear()
+        self._on_clear()
+
+    def report_summary(self):
+        """Dict {oído: resumen} de lo capturado (para el informe)."""
+        return dict(self._report)
+
+    def report_shots(self):
+        """Dict {oído: QPixmap} con la captura de los gráficos por oído."""
+        return dict(self._shots)
 
     # ------------------------------------------------------------------
     # Render
@@ -578,6 +632,8 @@ class DpoaePanel(QWidget):
             self._clear_ear_curves(ear)
             self._results[ear] = None
             self._io_results[ear] = None
+            self._report.pop(ear, None)
+            self._shots.pop(ear, None)
         self.curve_io_dp.clear()
         self.curve_io_nf.clear()
         self.curve_io_target.clear()

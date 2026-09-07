@@ -62,6 +62,9 @@ class SoaePanel(QWidget):
         self._frames = []
         self._anim_idx = 0
         self._anim_ear = None
+        # Resumen + captura por oído para el informe (ver report_summary()).
+        self._report = {}
+        self._shots = {}
         self._build_ui()
         self._anim_timer = QTimer(self)
         self._anim_timer.timeout.connect(self._anim_tick)
@@ -348,8 +351,63 @@ class SoaePanel(QWidget):
             return
         self._render_frame(frame)
         self._render_verdict(frame, partial)
+        self._store_report(frame, partial)
+
+    # ------------------------------------------------------------------
+    # Informe
+    # ------------------------------------------------------------------
+    def _store_report(self, frame, partial: bool = False):
+        ear = self._anim_ear
+        if ear is None or frame is None or self._result is None:
+            return
+        floor = self._mean_floor_db(frame)
+        peaks = frame.get("peaks", [])
+        self._report[ear] = {
+            "duracion_s": round(float(frame.get("elapsed_s", 0.0)), 1),
+            "duracion_programada_s": round(float(self._result["record_s"]), 1),
+            "piso_medio_db_spl": round(floor, 1),
+            "piso_max_valido_db_spl": float(
+                self.generator.normative["valid_floor_max_db_spl"]),
+            "criterio_snr_db": float(self.generator.normative["min_snr_db"]),
+            "picos": [
+                {
+                    "freq_hz": round(float(pk["freq_hz"]), 1),
+                    "nivel_db_spl": round(float(pk["level_db_spl"]), 1),
+                    "piso_db_spl": round(float(pk["floor_db_spl"]), 1),
+                    "snr_db": round(float(pk["snr_db"]), 1),
+                }
+                for pk in peaks
+            ],
+            "presentes": bool(peaks),
+            "concluyente": bool(
+                peaks or floor <= float(
+                    self.generator.normative["valid_floor_max_db_spl"])),
+            "parcial": bool(partial),
+        }
+        self._shots[ear] = self.glw.grab()
+
+    def reset_all(self):
+        """Descarta capturas y datos de informe (cambio de paciente).
+
+        Sin esto, las capturas de un paciente seguían en pantalla -- y en el
+        payload del informe -- al abrir la atención del siguiente.
+        """
+        self._report.clear()
+        self._shots.clear()
+        self._on_clear()
+
+    def report_summary(self):
+        """Dict {oído: resumen} de lo registrado (para el informe)."""
+        return dict(self._report)
+
+    def report_shots(self):
+        """Dict {oído: QPixmap} con la captura de los gráficos por oído."""
+        return dict(self._shots)
 
     def _on_clear(self):
+        ear, _case = self._current_case()
+        self._report.pop(ear, None)
+        self._shots.pop(ear, None)
         self._anim_timer.stop()
         self.probe.stop()
         self._frames = []

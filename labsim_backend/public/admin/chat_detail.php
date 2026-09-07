@@ -86,6 +86,21 @@ if ($attendance) {
     }
 }
 
+// Informes de módulos de examen que el alumno subió en esta atención
+// (EOA/ABR/VEMP...) -- el PDF se sirve en admin/report_pdf.php.
+$reports = [];
+if ($attendance) {
+    $stmt = $pdo->prepare('SELECT id, tipo, updated_at FROM reports WHERE attendance_id = ? ORDER BY tipo');
+    $stmt->execute([$attendance['id']]);
+    $reports = $stmt->fetchAll();
+}
+$reportLabels = [
+    'ABR' => 'PEATC (ABR)',
+    'EOA' => 'Emisiones otoacústicas',
+    'VEMP' => 'VEMP',
+    'ELECTROCOCLEO' => 'Electrococleografía',
+];
+
 $stmt = $pdo->prepare(
     'SELECT id, role, content, created_at FROM llm_chat_logs
      WHERE appointment_id = ? AND student_id = ? ORDER BY id'
@@ -168,6 +183,22 @@ if ($attendance) {
     render_section_comments('procedimiento', 'Procedimiento', (string) $appointment['procedimiento'], $attendanceComments['procedimiento']);
 }
 ?>
+
+<?php if ($reports): ?>
+<div class="card section-panel">
+    <h3>Informes del alumno</h3>
+    <table>
+        <tr><th>Examen</th><th>Actualizado</th><th></th></tr>
+        <?php foreach ($reports as $r): ?>
+        <tr>
+            <td><?= htmlspecialchars($reportLabels[$r['tipo']] ?? $r['tipo']) ?></td>
+            <td><?= htmlspecialchars($r['updated_at']) ?></td>
+            <td><a href="report_pdf.php?id=<?= (int) $r['id'] ?>" target="_blank">Ver PDF</a></td>
+        </tr>
+        <?php endforeach; ?>
+    </table>
+</div>
+<?php endif; ?>
 
 <div class="card chat-panel">
     <p class="chat-legend">Globos amarillos = retroalimentación docente sobre ese turno puntual. Solo la ve el equipo docente, el alumno no la ve.</p>

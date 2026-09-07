@@ -58,6 +58,13 @@ class TeoaePanel(QWidget):
         self._anim_ear = None
         self.case_od = None
         self.case_oi = None
+        self._last_level = None
+        self._last_n = None
+        # Resumen + captura de pantalla POR OÍDO para el informe: el panel
+        # muestra un oído a la vez, así que sin esto el informe solo podría
+        # llevar la última captura hecha.
+        self._report = {}
+        self._shots = {}
         self._build_ui()
         self._anim_timer = QTimer(self)
         self._anim_timer.timeout.connect(self._anim_tick)
@@ -326,6 +333,8 @@ class TeoaePanel(QWidget):
             return
         ear, case, level, n = self._pending
         self._pending = None
+        self._last_level = level
+        self._last_n = n
         self.probe.stop()
         # Duración = # barridos / tasa de clicks, con tope para no dejar al
         # alumno mirando 40 s con 2000 promedios.
@@ -378,6 +387,56 @@ class TeoaePanel(QWidget):
             return
         self._render_frame(frame)
         self._render_verdict(frame, self._anim_ear)
+        self._store_report(frame, partial=status_text == "Detenido")
+
+    def _store_report(self, frame, partial=False):
+        """Guarda el resumen + la captura del oído recién medido (informe)."""
+        ear = self._anim_ear
+        if ear is None or frame is None or self._last_result is None:
+            return
+        bands = self._last_result.get("bands_hz") or self.generator.normative["bands_hz"]
+        snr = frame.get("snr_per_band", [])
+        passed = frame.get("pass_per_band", [])
+        self._report[ear] = {
+            "nivel_click_db_spl": self._last_level,
+            "n_promedios": self._last_n,
+            "n_barridos": int(frame.get("n_sweeps", 0)),
+            "bandas": [
+                {
+                    "hz": float(hz),
+                    "snr_db": round(float(snr[i]), 1) if i < len(snr) else None,
+                    "pass": bool(passed[i]) if i < len(passed) else None,
+                }
+                for i, hz in enumerate(bands)
+            ],
+            "n_pass": int(frame.get("n_pass", 0)),
+            "n_bandas": int(self._last_result.get("n_bands", len(bands))),
+            "overall_pass": bool(frame.get("overall_pass", False)),
+            "reproducibilidad_pct": round(float(frame.get("reproducibility_pct", 0.0)), 1),
+            "estabilidad_pct": round(float(frame.get("stability_pct", 0.0)), 1),
+            "respuesta_db": round(float(frame.get("total_response_db", 0.0)), 1),
+            "ruido_db": round(float(frame.get("total_noise_db", 0.0)), 1),
+            "parcial": bool(partial),
+        }
+        self._shots[ear] = self.glw.grab()
+
+    def reset_all(self):
+        """Descarta capturas y datos de informe (cambio de paciente).
+
+        Sin esto, las capturas de un paciente seguían en pantalla -- y en el
+        payload del informe -- al abrir la atención del siguiente.
+        """
+        self._report.clear()
+        self._shots.clear()
+        self._on_clear()
+
+    def report_summary(self):
+        """Dict {oído: resumen} de lo capturado (para el informe)."""
+        return dict(self._report)
+
+    def report_shots(self):
+        """Dict {oído: QPixmap} con la captura de los gráficos por oído."""
+        return dict(self._shots)
 
     def _on_stop(self):
         was_running = self._anim_timer.isActive()
@@ -391,6 +450,9 @@ class TeoaePanel(QWidget):
         self._finish_capture(frame, "Detenido")
 
     def _on_clear(self):
+        ear, _case = self._current_case()
+        self._report.pop(ear, None)
+        self._shots.pop(ear, None)
         self._anim_timer.stop()
         self._frames = []
         self._anim_idx = 0

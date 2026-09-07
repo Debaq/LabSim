@@ -109,6 +109,21 @@ if ($log) {
     }
 }
 
+// Informes de módulos de examen (EOA/ABR/VEMP...) que el alumno subió en
+// esta atención -- el PDF se sirve en informe.php.
+$stmt = $pdo->prepare(
+    'SELECT id, tipo, updated_at FROM reports WHERE attendance_id = ? ORDER BY tipo'
+);
+$stmt->execute([(int) $attendance['id']]);
+$reports = $stmt->fetchAll();
+
+$reportLabels = [
+    'ABR' => 'PEATC (ABR)',
+    'EOA' => 'Emisiones otoacústicas',
+    'VEMP' => 'VEMP',
+    'ELECTROCOCLEO' => 'Electrococleografía',
+];
+
 $attendanceComments = ['evolucion' => [], 'procedimiento' => []];
 $stmt = $pdo->prepare(
     "SELECT ac.section, ac.comment, ac.created_at, u.display_name AS teacher_name
@@ -173,6 +188,24 @@ student_header($paciente, $me);
     <?php if ($attendanceComments['evolucion']): ?>
     <p class="legend">Comentarios de tu docente sobre tu evolución:</p>
     <?php render_attendance_comments($attendanceComments['evolucion']); ?>
+    <?php endif; ?>
+</div>
+
+<div class="card">
+    <h2>Tus informes</h2>
+    <?php if (!$reports): ?>
+    <p class="empty">No subiste ningún informe en esta atención.</p>
+    <?php else: ?>
+    <table>
+        <tr><th>Examen</th><th>Última actualización</th><th></th></tr>
+        <?php foreach ($reports as $r): ?>
+        <tr>
+            <td><?= htmlspecialchars($reportLabels[$r['tipo']] ?? $r['tipo']) ?></td>
+            <td><?= htmlspecialchars($r['updated_at']) ?></td>
+            <td><a href="informe.php?id=<?= (int) $r['id'] ?>" target="_blank">Ver PDF</a></td>
+        </tr>
+        <?php endforeach; ?>
+    </table>
     <?php endif; ?>
 </div>
 

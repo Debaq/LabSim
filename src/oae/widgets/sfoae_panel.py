@@ -51,6 +51,9 @@ class SfoaePanel(QWidget):
         self._tuning = None
         self._sup_committed = []
         self._tun_committed = []
+        # Resumen + captura por oído para el informe (ver report_summary()).
+        self._report = {}
+        self._shots = {}
         self._build_ui()
         self._anim_timer = QTimer(self)
         self._anim_timer.timeout.connect(self._anim_tick)
@@ -327,6 +330,56 @@ class SfoaePanel(QWidget):
             f"piso de {noise:.1f} dB (SNR {snr:.1f} dB, criterio {min_snr:.0f} dB)"
             f"{tun_txt}"
         )
+        self._store_report(ear, max_mag, noise, snr, min_snr, verdict,
+                           partial=status_text == "Detenido")
+
+    # ------------------------------------------------------------------
+    # Informe
+    # ------------------------------------------------------------------
+    def _store_report(self, ear, max_mag, noise, snr, min_snr, verdict,
+                      partial=False):
+        best_tun = (max(self._tun_committed, key=lambda p: p["magnitude_db"])
+                    if self._tun_committed else None)
+        self._report[ear] = {
+            "freq_probe_hz": round(float(self._result["freq_hz"]), 0),
+            "nivel_probe_db_spl": round(float(self._result["level_db_spl"]), 1),
+            "magnitud_max_db": round(float(max_mag), 1),
+            "piso_db": round(float(noise), 1),
+            "snr_db": round(float(snr), 1),
+            "criterio_snr_db": round(float(min_snr), 1),
+            "veredicto": verdict,
+            "supresion": [
+                {
+                    "supresor_db_spl": round(float(pt["suppressor_db"]), 0),
+                    "magnitud_db": round(float(pt["magnitude_db"]), 1),
+                    "fase_deg": round(float(pt["phase_deg"]), 1),
+                }
+                for pt in self._sup_committed
+            ],
+            "sintonia_max_db": round(float(best_tun["magnitude_db"]), 1) if best_tun else None,
+            "sintonia_freq_hz": round(float(best_tun["freq_hz"]), 0) if best_tun else None,
+            "sintonia_puntos": len(self._tun_committed),
+            "parcial": bool(partial),
+        }
+        self._shots[ear] = self.glw.grab()
+
+    def reset_all(self):
+        """Descarta capturas y datos de informe (cambio de paciente).
+
+        Sin esto, las capturas de un paciente seguían en pantalla -- y en el
+        payload del informe -- al abrir la atención del siguiente.
+        """
+        self._report.clear()
+        self._shots.clear()
+        self._on_clear()
+
+    def report_summary(self):
+        """Dict {oído: resumen} de lo capturado (para el informe)."""
+        return dict(self._report)
+
+    def report_shots(self):
+        """Dict {oído: QPixmap} con la captura de los gráficos por oído."""
+        return dict(self._shots)
 
     # ------------------------------------------------------------------
     # Render
@@ -364,6 +417,9 @@ class SfoaePanel(QWidget):
             [p["magnitude_db"] for p in self._tun_committed])
 
     def _on_clear(self):
+        ear, _case = self._current_case()
+        self._report.pop(ear, None)
+        self._shots.pop(ear, None)
         self._pending = None
         self._anim_timer.stop()
         self.probe.stop()
