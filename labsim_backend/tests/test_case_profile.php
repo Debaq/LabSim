@@ -171,3 +171,67 @@ $p = CaseProfile::normalize($conPerfil);
 t_close($p['OD']['cce_pct'], 35.0, 0.01, 'Perfil guardado: cce_pct se respeta');
 t_true($p['auto']['abr'], 'Perfil guardado: auto encendido se respeta');
 t_true(!$p['auto']['reflex'], 'Perfil guardado: un módulo ausente del mapa queda en manual');
+
+// ---------------------------------------------------------------------
+// Reflejo acústico: dos oídos, dos preguntas distintas.
+// ---------------------------------------------------------------------
+
+$dNormal = CaseProfile::decompose($normal, $normal, 0, 100.0);
+$dCoclear40 = CaseProfile::decompose($plana40, $plana40, 0, 100.0);
+$dRetro40 = CaseProfile::decompose($plana40, $plana40, 0, 0.0);
+$dCond = CaseProfile::decompose($aereaCond, $oseaCond, 0, 100.0);
+$sinRetro = CaseBuilder::ABR_NEURAL_DEFAULTS;
+
+t_eq(CaseProfile::reflexThreshold($dNormal, $dNormal, 'A', 100.0, $sinRetro, 1000), 85,
+    'Oído sano: reflejo a 85 dB HL');
+
+// Metz: la coclear NO sube el umbral del reflejo en proporción a la pérdida.
+t_eq(CaseProfile::reflexThreshold($dNormal, $dCoclear40, 'A', 100.0, $sinRetro, 1000), 85,
+    'Coclear de 40 dB: el reflejo sigue en 85 -- el SL se achicó a 45 dB (Metz)');
+
+// Misma pérdida, sitio distinto: el reflejo se cae.
+t_eq(CaseProfile::reflexThreshold($dNormal, $dRetro40, 'A', 0.0, $sinRetro, 1000),
+    CaseProfile::REFLEX_ABSENT_DB,
+    'Retrococlear de 40 dB: reflejo ausente con el mismo audiograma que la coclear');
+
+// El oído medio de la SONDA decide si se puede ver, aunque el estimulado esté sano.
+t_eq(CaseProfile::reflexThreshold($dCond, $dNormal, 'A', 100.0, $sinRetro, 1000),
+    CaseProfile::REFLEX_ABSENT_DB,
+    'Gap en el oído sonda: no se registra el reflejo aunque el estimulado esté sano');
+t_eq(CaseProfile::reflexThreshold($dNormal, $dNormal, 'B', 100.0, $sinRetro, 1000),
+    CaseProfile::REFLEX_ABSENT_DB,
+    'Timpanograma B en la sonda: reflejo no registrable');
+t_eq(CaseProfile::reflexThreshold($dNormal, $dNormal, 'As', 100.0, $sinRetro, 1000),
+    CaseProfile::REFLEX_ABSENT_DB,
+    'Timpanograma As (rígido, otoesclerosis) en la sonda: reflejo no registrable');
+
+// El gap del oído ESTIMULADO es atenuación pura y se suma entero.
+$dGap15 = CaseProfile::decompose(audiograma([125 => 15]), audiograma([125 => 0]), 0, 100.0);
+t_eq(CaseProfile::reflexThreshold($dNormal, $dGap15, 'A', 100.0, $sinRetro, 1000), 100,
+    'Gap de 15 dB en el oído estimulado: el reflejo sube esos 15 dB');
+
+// Schwannoma chico: audiograma casi normal y el reflejo ya se cae.
+$schwannoma = CaseBuilder::ABR_NEURAL_PRESETS['schwannoma']['params'];
+t_eq(CaseProfile::reflexThreshold($dNormal, $dNormal, 'A', 100.0, $schwannoma, 1000), 100,
+    'Patrón retrococlear con audiograma normal: reflejo elevado');
+$ansdParams = CaseBuilder::ABR_NEURAL_PRESETS['ansd']['params'];
+t_eq(CaseProfile::reflexThreshold($dNormal, $dNormal, 'A', 0.0, $ansdParams, 1000),
+    CaseProfile::REFLEX_ABSENT_DB,
+    'ANSD: sin ondas no hay arco reflejo, ausente a cualquier nivel');
+
+// Ruido de banda estrecha (fila NBN del contra): se juzga sobre el promedio.
+t_eq(CaseProfile::reflexThreshold($dNormal, $dNormal, 'A', 100.0, $sinRetro, 'NBN'), 85,
+    'Fila NBN: mismo criterio, sobre el promedio 500-4000');
+
+// ---------------------------------------------------------------------
+// Deterioro tonal.
+// ---------------------------------------------------------------------
+
+t_eq(CaseProfile::toneDecay($dNormal, 100.0, $sinRetro, 2000), 0,
+    'Oído sano: sin deterioro tonal');
+t_eq(CaseProfile::toneDecay($dCoclear40, 100.0, $sinRetro, 2000), 5,
+    'Coclear: adaptación mínima, dentro de lo normal');
+t_eq(CaseProfile::toneDecay($dRetro40, 0.0, $sinRetro, 2000), 30,
+    'Retrococlear: hay que subir 30 dB para sostener el tono');
+t_eq(CaseProfile::toneDecay($dNormal, 100.0, $schwannoma, 2000), 30,
+    'Patrón retro con umbrales normales: deterioro igual -- es cuando la prueba vale la pena');

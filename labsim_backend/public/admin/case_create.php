@@ -355,6 +355,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $fowlerEnabled = count($fowlerPatterns) > 0;
         $fowlerDiplacusia = isset($v['diplacusia']);
+        // Supraliminares: en variables (y no leídas inline más abajo) porque
+        // la proyección del perfil las puede reescribir.
+        $sisiVals = [(int) fv($v, ['sisi', 'od'], 0), (int) fv($v, ['sisi', 'oi'], 0)];
+        $recruitVals = [isset($v['recruit']['od']), isset($v['recruit']['oi'])];
 
         // Acufenometría: lateralidad (craneal/unilateral/bilateral) es
         // independiente de permanente/ocasional -- un tinnitus unilateral
@@ -501,6 +505,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'auto' => $perfilAuto,
         ];
 
+        // Descomposición del audiograma por oído: aérea, ósea, gap, y el
+        // reparto del componente sensorioneural entre cóclea y retro según
+        // `cce_pct`. Todas las proyecciones de abajo salen de acá.
+        $decomp = [];
+        foreach ([['OD', 0], ['OI', 1]] as [$ladoData, $sideIdx]) {
+            $decomp[$ladoData] = CaseProfile::decompose(
+                $airPairs, $bonePairs, $sideIdx, $perfil[$ladoData]['cce_pct']
+            );
+        }
+
         // Proyección del ABR: umbral POR ESTÍMULO, derivado del audiograma.
         //
         // Es lo que faltaba para poder evaluar por frecuencia. Con un solo
@@ -512,14 +526,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // El escalar se sigue emitiendo, alineado al click, para el cliente
         // viejo y para cualquier código que todavía lo lea.
         if ($perfilAuto['abr']) {
-            foreach ([['OD', 0], ['OI', 1]] as [$ladoData, $sideIdx]) {
-                $decomp = CaseProfile::decompose(
-                    $airPairs, $bonePairs, $sideIdx, $perfil[$ladoData]['cce_pct']
-                );
-                $porEstimulo = CaseProfile::abrThresholds($decomp, 'air_conduction');
+            foreach (['OD', 'OI'] as $ladoData) {
+                $porEstimulo = CaseProfile::abrThresholds($decomp[$ladoData], 'air_conduction');
                 $abrDerivado = [
+                    // El tipo decide la física de la curva (corrimiento
+                    // paralelo de la conductiva, pendiente L-I de la
+                    // coclear, interpicos del retro), así que derivar el
+                    // umbral y dejar el tipo a mano deja curvas que no se
+                    // corresponden con ningún oído.
+                    'type' => CaseProfile::derivedType(
+                        $decomp[$ladoData], $perfil[$ladoData]['cce_pct'], $perfil[$ladoData]['retro']
+                    ),
                     'umbral_por_estimulo' => $porEstimulo,
-                    'umbral_por_estimulo_oseo' => CaseProfile::abrThresholds($decomp, 'bone_conduction'),
+                    'umbral_por_estimulo_oseo' => CaseProfile::abrThresholds($decomp[$ladoData], 'bone_conduction'),
                     'umbral' => $porEstimulo['click'],
                 ];
                 if ($ladoData === 'OD') {
@@ -527,6 +546,101 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $abrOi = array_merge($abrOi, $abrDerivado);
                 }
+            }
+        }
+
+        // Proyección de la OEA: el perfil por frecuencia sale del componente
+        // CCE y del gap. `retro_sn` no entra -- la cóclea está viva -- así
+        // que la neuropatía sale sola: OEA presentes con el umbral elevado.
+        //
+        // El `umbral` de EOA se pone en 0 a propósito: el cliente suma la
+        // atenuación por patología (type + umbral, ver oae_attenuation_db en
+        // src/oae/generators/base.py) A LO QUE VENGA en `desviaciones`. Si
+        // se dejara el umbral, la misma pérdida se descontaría dos veces,
+        // una por cada ley. Con la proyección encendida hay una sola curva,
+        // que es todo el punto.
+        if ($perfilAuto['eoas']) {
+            foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoData) {
+                $eoasDerivado = [
+                    'type' => CaseProfile::derivedType(
+                        $decomp[$ladoData], $perfil[$ladoData]['cce_pct'], $perfil[$ladoData]['retro']
+                    ),
+                    'umbral' => 0,
+                    'desviaciones' => CaseProfile::oaeDeviations($decomp[$ladoData]),
+                ];
+                if ($lado === 'od') {
+                    $eoasOd = array_merge($eoasOd, $eoasDerivado);
+                } else {
+                    $eoasOi = array_merge($eoasOi, $eoasDerivado);
+                }
+            }
+        }
+
+        // Proyección del reflejo acústico. Son dos oídos por medición: la
+        // sonda decide si el reflejo se puede VER (oído medio) y el oído
+        // estimulado decide a qué NIVEL aparece (cóclea y nervio). En ipsi
+        // son el mismo; en contra, la sonda va en este oído y el estímulo
+        // entra por el contrario (ver reflex_stimulus() en Z.py, que indexa
+        // las filas por el oído de la sonda).
+        if ($perfilAuto['reflex']) {
+            $tympPorLado = ['OD' => $zOd, 'OI' => $zOi];
+            foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoData) {
+                $otroLado = $ladoData === 'OD' ? 'OI' : 'OD';
+                $ipsiVals = [];
+                foreach (CaseProfile::REFLEX_FREQS_IPSI as $hzReflex) {
+                    $ipsiVals[] = CaseProfile::reflexThreshold(
+                        $decomp[$ladoData], $decomp[$ladoData], $tympPorLado[$ladoData],
+                        $perfil[$ladoData]['cce_pct'], $perfil[$ladoData]['retro'], $hzReflex
+                    );
+                }
+                $contraVals = [];
+                foreach (CaseProfile::REFLEX_FREQS_CONTRA as $hzReflex) {
+                    $contraVals[] = CaseProfile::reflexThreshold(
+                        $decomp[$ladoData], $decomp[$otroLado], $tympPorLado[$ladoData],
+                        $perfil[$otroLado]['cce_pct'], $perfil[$otroLado]['retro'], $hzReflex
+                    );
+                }
+                $reflexIpsi[$lado] = $ipsiVals;
+                $reflexContra[$lado] = $contraVals;
+            }
+        }
+
+        // Proyección de las supraliminares: reclutamiento (Fowler, SISI) y
+        // deterioro tonal. Miden lo mismo desde dos lados -- el
+        // reclutamiento es el signo de la lesión de CCE, el deterioro
+        // tonal el del nervio -- así que las dos salen de `cce_pct` y no
+        // pueden contradecirse entre sí.
+        if ($perfilAuto['recruit']) {
+            $recPorLado = [];
+            foreach (['OD' => 0, 'OI' => 1] as $ladoData => $idx) {
+                $recPorLado[$ladoData] = CaseProfile::recruitment(
+                    $perfil[$ladoData]['cce_pct'], $decomp[$ladoData]
+                );
+                $sisiVals[$idx] = $recPorLado[$ladoData]['sisi_pct'];
+                $recruitVals[$idx] = $recPorLado[$ladoData]['recruit'];
+            }
+            // Fowler compara dos oídos: el patrón es el del oído EN ESTUDIO
+            // (el peor en esa frecuencia), que es de quien se juzga el
+            // crecimiento de sonoridad.
+            foreach ($fowlerPatterns as $freqFowler => $_) {
+                $idxFreq = (int) $freqFowler;
+                $estudio = ($airPairs[$idxFreq][0] ?? 0) >= ($airPairs[$idxFreq][1] ?? 0) ? 'OD' : 'OI';
+                $fowlerPatterns[(string) $freqFowler] = $recPorLado[$estudio]['pattern'];
+            }
+            // Deterioro tonal, por las frecuencias del protocolo de cada
+            // prueba (mismos índices que ResponseAudiometry.DECAY_TESTS).
+            $decayFreqIdx = ['carhart' => [2, 3, 4, 6], 'stat' => [2, 3, 4], 'rosemberg' => [2, 3, 4, 6]];
+            foreach ($decayFreqIdx as $mode => $indices) {
+                $vals = ['od' => [], 'oi' => []];
+                foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoData) {
+                    foreach ($indices as $idxFreq) {
+                        $vals[$lado][] = CaseProfile::toneDecay(
+                            $decomp[$ladoData], $perfil[$ladoData]['cce_pct'],
+                            $perfil[$ladoData]['retro'], CaseBuilder::FREQUENCIES[$idxFreq]
+                        );
+                    }
+                }
+                $decayPairs[$mode] = zip_pairs($vals['od'], $vals['oi']);
             }
         }
 
@@ -604,10 +718,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (($neuralError = CaseBuilder::neuralParamsError($abrOd['neural'], 'OD')
                 ?? CaseBuilder::neuralParamsError($abrOi['neural'], 'OI')) !== null) {
             $error = $neuralError;
-        } elseif (($coherencia = CaseBuilder::normalCoherenceError($abrOd, 'ABR', 'OD')
-                ?? CaseBuilder::normalCoherenceError($abrOi, 'ABR', 'OI')
-                ?? CaseBuilder::normalCoherenceError($eoasOd, 'EOA', 'OD')
-                ?? CaseBuilder::normalCoherenceError($eoasOi, 'EOA', 'OI')
+        // La coherencia se chequea sobre lo que el docente escribió a mano.
+        // Un módulo derivado del perfil no puede contradecirse a sí mismo, y
+        // además su umbral ya no está en la misma unidad que este chequeo
+        // (el del ABR es dB nHL, no dB HL).
+        } elseif (($coherencia = CaseBuilder::normalCoherenceError($abrOd, 'ABR', 'OD', !$perfilAuto['abr'])
+                ?? CaseBuilder::normalCoherenceError($abrOi, 'ABR', 'OI', !$perfilAuto['abr'])
+                ?? ($perfilAuto['eoas'] ? null : CaseBuilder::normalCoherenceError($eoasOd, 'EOA', 'OD'))
+                ?? ($perfilAuto['eoas'] ? null : CaseBuilder::normalCoherenceError($eoasOi, 'EOA', 'OI'))
                 // VEMP sin chequeo de umbral: el suyo ronda 60-90 dB nHL.
                 ?? CaseBuilder::normalCoherenceError($vempOd, 'VEMP', 'OD', false)
                 ?? CaseBuilder::normalCoherenceError($vempOi, 'VEMP', 'OI', false)) !== null) {
@@ -644,8 +762,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'diplacusia' => $fowlerDiplacusia,
                 ],
                 'stenger' => [isset($v['stenger']['od']), isset($v['stenger']['oi'])],
-                'sisi' => [(int) fv($v, ['sisi', 'od'], 0), (int) fv($v, ['sisi', 'oi'], 0)],
-                'recruit' => [isset($v['recruit']['od']), isset($v['recruit']['oi'])],
+                'sisi' => $sisiVals,
+                'recruit' => $recruitVals,
                 'decay' => [false, false], // reemplazado por carhart/stat/rosemberg; se conserva el shape por compatibilidad con casos viejos
                 'carhart' => $decayPairs['carhart'],
                 'stat' => $decayPairs['stat'],
@@ -784,17 +902,6 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <?php else: ?><input type="hidden" name="upload_temp_id" value="<?= htmlspecialchars($uploadTempId) ?>">
 <?php endif; ?>
 <?php $photoCaseId = $isEdit ? $editId : $uploadTempId; ?>
-<?php
-// Los módulos que ya tienen su propio control visible (hoy solo ABR, en su
-// pestaña) NO van acá: dos inputs con el mismo name se pisarían.
-$perfilAutoConUI = ['abr'];
-foreach (CaseProfile::AUTO_MODULES as $moduloAuto):
-    if (in_array($moduloAuto, $perfilAutoConUI, true) || !fv($v, ['perfil', 'auto', $moduloAuto], null)) {
-        continue;
-    }
-?>
-<input type="hidden" name="perfil[auto][<?= $moduloAuto ?>]" value="1">
-<?php endforeach; ?>
 <div class="tabs" role="tablist">
     <button type="button" class="tab-btn active" data-tab="paciente">Paciente</button>
     <button type="button" class="tab-btn" data-tab="otoscopia">Otoscopia</button>
@@ -1236,15 +1343,31 @@ foreach (CaseProfile::AUTO_MODULES as $moduloAuto):
     <strong>Perfil auditivo</strong>
     <p class="legend help">Dónde está la lesión de este paciente. El audiograma de la pestaña anterior ya dice cuánta pérdida hay y cuánta es conductiva, frecuencia por frecuencia; lo único que no puede decir es qué parte del componente sensorioneural es coclear y qué parte es retrococlear. Eso se define acá, una vez, y desde acá se proyecta a los exámenes que tengan la casilla de derivación encendida.</p>
     <p class="legend help">Sin ninguna casilla marcada nada cambia: cada pestaña se sigue cargando a mano, como siempre. La derivación existe para que el caso no se contradiga solo (una OEA normal con un gap de 40 dB, un ABR normal con un audiograma profundo), no para impedir armar un caso incoherente a propósito -- el Stenger, la falsa onda V y la simulación necesitan esa incoherencia.</p>
+    <p class="legend">Qué exámenes se derivan del perfil</p>
+    <div class="three-col">
+        <label class="inline-check">
+            <input type="checkbox" id="perfil-auto-abr" name="perfil[auto][abr]" value="1" <?= fv($v, ['perfil', 'auto', 'abr'], null) ? 'checked' : '' ?>>
+            ABR: umbral por estímulo
+        </label>
+        <label class="inline-check">
+            <input type="checkbox" name="perfil[auto][eoas]" value="1" <?= fv($v, ['perfil', 'auto', 'eoas'], null) ? 'checked' : '' ?>>
+            OEA: perfil por frecuencia
+        </label>
+        <label class="inline-check">
+            <input type="checkbox" name="perfil[auto][reflex]" value="1" <?= fv($v, ['perfil', 'auto', 'reflex'], null) ? 'checked' : '' ?>>
+            Reflejos acústicos
+        </label>
+        <label class="inline-check">
+            <input type="checkbox" name="perfil[auto][recruit]" value="1" <?= fv($v, ['perfil', 'auto', 'recruit'], null) ? 'checked' : '' ?>>
+            Supraliminares (Fowler, SISI, deterioro tonal)
+        </label>
+    </div>
+    <p class="legend help">OEA: la atenuación pasa a salir del componente coclear y del gap, frecuencia por frecuencia -- los campos del tab EOA se sobrescriben al guardar. Reflejos: la sonda decide si el reflejo se ve (oído medio) y el oído estimulado a qué nivel aparece; una coclear no sube el umbral en proporción a la pérdida (Metz) y una retrococlear sí. Supraliminares: reclutamiento y deterioro tonal miden lo mismo desde dos lados, así que salen del mismo número y no pueden contradecirse.</p>
 </div>
 <div class="card">
     <strong>Umbral por estímulo, derivado del audiograma</strong>
     <p class="legend help">Con esto encendido, el umbral del ABR deja de ser un número por oído y pasa a calcularse por estímulo desde la audiometría del caso: el burst de 500 Hz responde según el umbral en 500, el de 4 kHz según el de 4 kHz, el click según la base coclear (2-4 kHz) y el chirp con más peso en los graves. Es lo que permite pedir una evaluación frecuencia específica en una hipoacusia descendente. La vía ósea usa los umbrales óseos, así que el gap conductivo del ABR sale del audiograma solo.</p>
     <p class="legend help">Los números de la tabla están en dB nHL, no en dB HL: incluyen la corrección conductual-electrofisiológica (+20 dB en 500 Hz, +15 en 1 k, +10 en 2 k, +5 en 4 k, +10 el click, +5 el chirp). Por eso un oído de 0 dB HL igual muestra 20 dB nHL con burst de 500 -- convertir nHL a eHL es parte de lo que el alumno tiene que hacer.</p>
-    <label class="inline-check">
-        <input type="checkbox" id="perfil-auto-abr" name="perfil[auto][abr]" value="1" <?= fv($v, ['perfil', 'auto', 'abr'], null) ? 'checked' : '' ?>>
-        Derivar el umbral del ABR desde el audiograma
-    </label>
     <div id="abr-threshold-preview" hidden>
         <table class="reflex-pattern-table" style="margin-top:0.6rem;">
             <thead>

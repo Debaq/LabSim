@@ -50,6 +50,15 @@ final class CaseProfile
      * Es el mismo mecanismo que ya existe en el formulario para
      * Rinne/Weber (`acumetria_auto`) y SDT/SRT (`sdt_auto`/`srt_auto`): no
      * se inventa nada, se generaliza.
+     *
+     * - abr:     tipo de patología y umbral por estímulo (aéreo y óseo).
+     * - eoas:    tipo y desviación por frecuencia de la OEA.
+     * - reflex:  umbrales del reflejo acústico, ipsi y contra.
+     * - recruit: supraliminares -- reclutamiento (Fowler, SISI) y
+     *            deterioro tonal (Carhart/Stat/Rosemberg). Van juntas
+     *            porque miden el mismo eje desde los dos lados: el
+     *            reclutamiento es el signo de la lesión de CCE y el
+     *            deterioro tonal el del nervio.
      */
     public const AUTO_MODULES = ['abr', 'eoas', 'reflex', 'recruit'];
 
@@ -457,6 +466,170 @@ final class CaseProfile
             return ['pattern' => 'partial', 'sisi_pct' => 50, 'recruit' => true];
         }
         return ['pattern' => 'none', 'sisi_pct' => 10, 'recruit' => false];
+    }
+
+    // ---------------------------------------------------------------
+    // Reflejo acustico
+    // ---------------------------------------------------------------
+
+    /**
+     * Frecuencias de cada modo, en el orden de las filas de
+     * cases.data['Reflex'] (ver reflex_stimulus() en Z.py, que indexa
+     * ['500','1000','2000','4000','NBN']). 'NBN' es ruido de banda
+     * estrecha: no tiene una frecuencia, se juzga sobre el promedio.
+     */
+    public const REFLEX_FREQS_IPSI = [500, 1000, 2000, 4000];
+    public const REFLEX_FREQS_CONTRA = [500, 1000, 2000, 4000, 'NBN'];
+
+    /** Valor con el que el caso marca "reflejo ausente" (fuera de escala). */
+    public const REFLEX_ABSENT_DB = 130;
+
+    /**
+     * Umbral del reflejo en un oído sano: ~85 dB HL, o sea 85 dB de nivel
+     * de sensación. Ese SL enorme es lo que hace al reflejo útil: en una
+     * hipoacusia coclear NO sube en proporción a la pérdida, y el SL se
+     * achica -- es el reclutamiento de Metz.
+     */
+    public const REFLEX_NORMAL_DB = 85.0;
+
+    /** SL mínimo del reflejo en un oído coclear (reclutamiento de Metz). */
+    public const REFLEX_METZ_SL_DB = 25.0;
+
+    /**
+     * Cuánto sube el umbral del reflejo por dB de pérdida RETROCOCLEAR.
+     * A diferencia de la coclear, acá sube dB a dB (o peor): el reflejo se
+     * pierde temprano, que es el hallazgo que lo separa de una coclear con
+     * el mismo audiograma.
+     */
+    public const REFLEX_RETRO_SLOPE = 1.0;
+
+    /**
+     * Penalización fija (dB) cuando el ABR muestra patrón retrococlear.
+     * Un schwannoma chico con audiograma normal igual eleva o abole el
+     * reflejo: la lesión está en la vía del arco reflejo, no en el umbral.
+     */
+    public const REFLEX_RETRO_PENALTY_DB = 15.0;
+
+    /** Salida máxima del canal de reflejo: por encima, "ausente". */
+    public const REFLEX_MAX_DB = 110.0;
+
+    /**
+     * Gap aéreo-óseo en el oído SONDA desde el cual el reflejo no se puede
+     * registrar. No es que no ocurra: el oído medio rígido no deja ver el
+     * cambio de admitancia.
+     */
+    public const REFLEX_PROBE_GAP_DB = 10.0;
+
+    /**
+     * Timpanogramas del oído SONDA que abolen el reflejo registrable.
+     * B (plano, ocupación) y As (rígido, otoesclerosis) no dejan ver el
+     * cambio de admitancia; Cs es la versión rígida y retraída.
+     */
+    public const REFLEX_PROBE_TYMP_ABSENT = ['B', 'As', 'Cs'];
+
+    /**
+     * Umbral del reflejo acústico (dB HL) para una frecuencia, o
+     * REFLEX_ABSENT_DB si no se registra.
+     *
+     * Son DOS oídos: la sonda mide en uno y el estímulo entra por otro
+     * (el mismo en ipsi, el contrario en contra). El oído medio de la
+     * SONDA decide si el reflejo se puede ver; la cóclea y el nervio del
+     * oído ESTIMULADO deciden a qué nivel aparece. Confundir los dos es
+     * exactamente el error que el patrón de reflejos existe para enseñar.
+     *
+     * @param array $decompProbe  decompose() del oído donde va la sonda
+     * @param array $decompStim   decompose() del oído estimulado
+     * @param string $tympProbe   tipo de timpanograma del oído sonda (Z_OD/Z_OI)
+     * @param array<string,mixed> $retroStim patrón retrococlear del oído estimulado
+     * @param int|string $hz      frecuencia, o 'NBN' para el ruido de banda
+     */
+    public static function reflexThreshold(
+        array $decompProbe,
+        array $decompStim,
+        string $tympProbe,
+        float $ccePctStim,
+        array $retroStim,
+        $hz
+    ): int {
+        // 1. ¿Se puede registrar? Lo decide el oído medio de la sonda.
+        if (in_array($tympProbe, self::REFLEX_PROBE_TYMP_ABSENT, true)) {
+            return self::REFLEX_ABSENT_DB;
+        }
+        $gapProbe = $hz === 'NBN'
+            ? self::coreAverage($decompProbe['gap'])
+            : (self::levelAt($decompProbe['gap'], (float) $hz) ?? 0.0);
+        if ($gapProbe >= self::REFLEX_PROBE_GAP_DB) {
+            return self::REFLEX_ABSENT_DB;
+        }
+
+        // 2. Un bloqueo o una desincronía del lado estimulado no dejan
+        // llegar la señal al núcleo: no hay reflejo a ningún nivel.
+        $retro = self::normalizeRetro($retroStim);
+        if ($retro['bloqueo'] !== 'ninguno' || $retro['desincronia'] === 'alta') {
+            return self::REFLEX_ABSENT_DB;
+        }
+
+        // 3. ¿A qué nivel aparece? Lo decide el oído estimulado.
+        if ($hz === 'NBN') {
+            $sn = self::coreAverage($decompStim['sn']);
+            $gapStim = self::coreAverage($decompStim['gap']);
+        } else {
+            $sn = self::levelAt($decompStim['sn'], (float) $hz) ?? 0.0;
+            $gapStim = self::levelAt($decompStim['gap'], (float) $hz) ?? 0.0;
+        }
+        $cce = $sn * self::clamp($ccePctStim, 0.0, 100.0) / 100.0;
+        $retroSn = $sn - $cce;
+
+        // Coclear: el umbral NO sigue a la pérdida hasta que el SL se
+        // achica al mínimo (Metz). Retrococlear: sube dB a dB desde el
+        // primer decibel. Manda el mecanismo que más lo eleva.
+        $porCoclear = max(self::REFLEX_NORMAL_DB, $cce + self::REFLEX_METZ_SL_DB);
+        $porRetro = self::REFLEX_NORMAL_DB + $retroSn * self::REFLEX_RETRO_SLOPE
+            + (self::retroActivo($retroStim) ? self::REFLEX_RETRO_PENALTY_DB : 0.0);
+        // El gap del oído estimulado es atenuación pura: se suma entero.
+        $umbral = max($porCoclear, $porRetro) + $gapStim;
+
+        if ($umbral > self::REFLEX_MAX_DB) {
+            return self::REFLEX_ABSENT_DB;
+        }
+        return (int) (round($umbral / 5) * 5);
+    }
+
+    // ---------------------------------------------------------------
+    // Deterioro tonal (Carhart / Stat / Rosemberg)
+    // ---------------------------------------------------------------
+
+    /**
+     * dB que hay que subir sobre el umbral para sostener el tono un minuto.
+     *
+     * Es el signo retrococlear clásico: una cóclea dañada mantiene el tono
+     * (deterioro de 0-10 dB), un nervio enfermo lo pierde y hay que subir
+     * 25-30 dB o más. Por eso depende del componente retro, no del umbral.
+     *
+     * @param array $decomp Salida de decompose()
+     * @param array<string,mixed> $retro Patrón retrococlear
+     */
+    public static function toneDecay(array $decomp, float $ccePct, array $retro, $hz): int
+    {
+        // El patrón retro manda aunque el audiograma esté limpio: un
+        // schwannoma chico da deterioro tonal con umbrales normales, y ese
+        // es justamente el caso en que la prueba vale la pena.
+        if (self::retroActivo($retro)) {
+            return 30;
+        }
+        $sn = self::levelAt($decomp['sn'], (float) $hz) ?? 0.0;
+        if ($sn <= 0.0) {
+            return 0;
+        }
+        $retroSn = $sn * (1.0 - self::clamp($ccePct, 0.0, 100.0) / 100.0);
+        if ($retroSn >= 30.0) {
+            return 30;
+        }
+        if ($retroSn >= 15.0) {
+            return 20;
+        }
+        // Coclear puro: adaptación mínima, dentro de lo normal.
+        return $sn > self::SN_NORMAL_DB ? 5 : 0;
     }
 
     /**
