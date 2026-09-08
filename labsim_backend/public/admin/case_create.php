@@ -404,6 +404,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Cuanto se mueve el paciente DURANTE la captura (ver
                 // agitation_run en ABR_generator.py). 0 = quieto.
                 'inquietud' => (float) fv($v, ['abr', $lado, 'inquietud'], 0),
+                // Reflejo post-auricular (miogenico, ~13 ms): 0 = no
+                // aparece. Ver postauricular_reflex en ABR_generator.py.
+                'pam' => (float) fv($v, ['abr', $lado, 'pam'], 0),
                 // Falsa onda V: artefacto que solo se descubre mirando los
                 // subpromedios A/B (ver false_wave en ABR_generator.py).
                 // amp = 0 lo desactiva, que es el default: es un ejercicio
@@ -1404,8 +1407,12 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <label>Inquietud durante la captura (0-1)
             <input type="number" step="0.1" min="0" max="1" name="abr[<?= $lado ?>][inquietud]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['inquietud'] ?? '0')) ?>">
         </label>
+        <label>Reflejo post-auricular PAM (0-1)
+            <input type="number" step="0.1" min="0" max="1" name="abr[<?= $lado ?>][pam]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['pam'] ?? '0')) ?>">
+        </label>
     </div>
     <p class="legend help">Inquietud: 0 es un paciente quieto. Por encima de 0 la captura tiene tramos en que el paciente se mueve: el EEG crudo se ensucia, el equipo descarta esos barridos y el promedio se queda quieto hasta que se calma (el contador de aceptados se separa del de presentados). Si el alumno apagó el rechazo de artefacto, en cambio, esa basura entra al promedio y el FSP no cruza nunca.</p>
+    <p class="legend help">PAM: contracción del músculo auricular posterior ante sonido fuerte. Aparece sobre 60 dB, crece con el nivel y sale a los 13 ms, o sea fuera del complejo I-V y casi fuera de la ventana de rutina. Ojo que es el contraejemplo de la falsa onda V: se promedia como una respuesta, así que replica en A y B -- lo delatan la latencia, el tamaño (µV, no décimas) y que se va si el paciente relaja el cuello o se sube el pasa-alto.</p>
     <?php $vn = $v['abr'][$lado]['neural'] ?? []; ?>
     <div class="abr-neural-block" data-lado="<?= $lado ?>">
         <p class="legend">Patrón retrococlear. El PEATC no distingue las entidades entre sí (un schwannoma y un meningioma del ángulo dan el mismo trazado) -- lo que distingue son estos patrones, así que el caso guarda los números, no el diagnóstico. El preset es solo un punto de partida: precarga los valores y después se editan.</p>

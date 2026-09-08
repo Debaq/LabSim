@@ -280,6 +280,23 @@ AGITATION_MAX_DUTY = 0.5
 # equipo lo descarta entero, en vez de promediarlo sucio.
 AGITATION_REJECT_FACTOR = 2.0
 
+# Reflejo post-auricular (PAM): contraccion del musculo auricular
+# posterior ante un sonido fuerte. Es miogenico, no neural, pero se
+# PROMEDIA como cualquier respuesta -- aparece igual en los dos
+# subpromedios --, asi que A/B no lo delata: lo delatan la latencia (12-14
+# ms, fuera de todo el complejo I-V), el tamanio (uV, no decimas) y que se
+# va cuando el paciente relaja el cuello. Es el contraejemplo de la falsa
+# onda V, y por eso vale la pena tenerlo: la replicabilidad no alcanza
+# para todo.
+#
+# Aparece solo con sonido fuerte (es un reflejo, tiene umbral) y crece con
+# el nivel; el pasa-alto se lo come porque es lento.
+PAM_LAT_MS = 13.0
+PAM_SIGMA_MS = 1.1
+PAM_MIN_DB = 60.0
+PAM_FULL_DB = 100.0
+PAM_AMP_UV = 3.5
+
 # Muestras por ms del registro: 500 puntos en 12 ms. Se mantiene constante
 # al cambiar la ventana para que fs no dependa del protocolo (~41.6 kHz,
 # rango real de un equipo). Ver technical_config['window_ms'].
@@ -1050,6 +1067,28 @@ class ABRGenerator:
         mask = t < cfg['dur']
         art[mask] = cfg['amp'] * escala * np.exp(-t[mask] * 5)
         return art
+
+    def postauricular_reflex(self, t, pam, intensity):
+        """Onda miogenica tardia del musculo auricular posterior.
+
+        Bifasica y ancha (es musculo, no nervio) alrededor de los 13 ms,
+        asi que en la ventana de rutina de 12 ms apenas asoma la subida y
+        recien se ve entera cuando el alumno abre la ventana. No toca el
+        FSP: el equipo no la mide como respuesta, y ese es justamente el
+        problema -- la mide el alumno con el cursor.
+        """
+        pam = float(pam or 0.0)
+        if pam <= 0:
+            return np.zeros_like(t)
+        sobre_umbral = float(intensity) - PAM_MIN_DB
+        if sobre_umbral <= 0:
+            return np.zeros_like(t)
+        escala = (pam * PAM_AMP_UV
+                  * min(sobre_umbral / (PAM_FULL_DB - PAM_MIN_DB), 1.0))
+        onda = self._gaussian(t, PAM_LAT_MS, escala, sigma=PAM_SIGMA_MS)
+        onda += self._gaussian(t, PAM_LAT_MS + 2.4, -0.55 * escala,
+                               sigma=PAM_SIGMA_MS * 1.2)
+        return onda
 
     def add_baseline_drift(self, t, rng, amplitude=0.04):
         """Drift LF suave. La frecuencia sale del rng del caso: varia entre
@@ -1842,9 +1881,14 @@ class ABRGenerator:
         # 11. Curva limpia (sin ruido). La senial NO se escala por cuanto
         # se lleva promediado: en un equipo real esta completa desde el
         # primer barrido y lo que baja es el ruido (ver averaged_noise).
-        y_clean = y_target + y_drift + y_artifact
-        y_clean_a = y_target_a + y_drift + y_artifact
-        y_clean_b = y_target_b + y_drift + y_artifact
+        # Reflejo post-auricular: se promedia como cualquier respuesta, o
+        # sea entra por igual en el promedio y en los dos subpromedios.
+        # Que A/B NO lo delate es el punto (ver postauricular_reflex).
+        y_pam = self.postauricular_reflex(
+            t, (case_config or {}).get('pam'), stimulus_config['int'])
+        y_clean = y_target + y_drift + y_artifact + y_pam
+        y_clean_a = y_target_a + y_drift + y_artifact + y_pam
+        y_clean_b = y_target_b + y_drift + y_artifact + y_pam
 
         # 11b. Tubo pinzado: la maniobra de equipo para saber si lo que se
         # ve es respuesta o es el estimulo acoplandose al electrodo. Con el
@@ -2231,6 +2275,8 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
         # Cuanto se mueve el paciente durante la captura (0 = quieto, que
         # es lo que traen los casos de antes de esto).
         'inquietud': preferences.get('inquietud', 0),
+        # Reflejo post-auricular (miogenico, ~13 ms): 0 = no aparece.
+        'pam': preferences.get('pam', 0),
         'fsp_puntos': preferences.get('fsp_puntos', {'800': 2.3, '2000': 2.8}),
         'umbral': preferences.get('umbral', preferences.get('th', 20)),
         'average_objetivo': preferences.get('average_objetivo', 2000),

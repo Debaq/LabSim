@@ -1344,6 +1344,101 @@ def test_the_eeg_monitor_shares_the_agitation():
     assert agitation_factor(dict(caso, inquietud=0), 3) == 1.0
 
 
+# ------------------------------------------ reflejo post-auricular (PAM)
+
+def _curva_pam(pam=0.8, intensity=90, window=20.0, filter_high=100,
+               clamp=False, **kw):
+    """Curva con reflejo post-auricular, en ventana larga para verlo."""
+    g = _gen()
+    stim = {'stim': 'click', 'freq': None, 'pol': 'Alternada', 'int': intensity,
+            'rate': 21.1, 'filter_down': 3000, 'filter_passhigh': filter_high,
+            'average': 2000, 'current_avg': 2000, 'pathway': 'air_conduction'}
+    tech = default_settings('ABR')
+    tech['window_ms'] = window
+    tech['tube_clamped'] = clamp
+    case = {'desviaciones': {}, 'fsp_puntos': {'800': 2.3, '2000': 2.8},
+            'umbral': 20, 'average_objetivo': 2000, 'repro_shift': 0.0,
+            'masking': 0, 'contra': None, 'seed_key': 'caso-1',
+            'capture_id': 'R1', 'pam': pam}
+    case.update(kw)
+    return g.generate_curve('adult_female', 'normal', stim, tech, case)
+
+
+def test_pam_is_late_big_and_needs_a_loud_click():
+    """13 ms, en uV, y solo con sonido fuerte: es un reflejo, tiene umbral."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    t, y, _ = _curva_pam(intensity=90)
+    tardio = t > 10
+    pico = t[tardio][np.argmax(y[tardio])]
+    assert abs(pico - 13.0) < 1.5, pico
+    assert y[tardio].max() > 0.8, y[tardio].max()   # uV, no decimas
+    # Por debajo del umbral del reflejo no hay nada.
+    _, bajo, _ = _curva_pam(intensity=50)
+    assert bajo[tardio].max() < 0.2, bajo[tardio].max()
+    # Y crece con el nivel.
+    _, medio, _ = _curva_pam(intensity=75)
+    assert medio[tardio].max() < y[tardio].max()
+
+
+def test_pam_replicates_in_both_subaverages():
+    """El contraejemplo de la falsa onda V: A/B NO lo delata.
+
+    Se promedia como cualquier respuesta, asi que aparece igual en las dos
+    mitades. Lo delatan la latencia y el tamanio, no la replicabilidad.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    t, y, meta = _curva_pam()
+    i = int(np.argmin(np.abs(t - 13.0)))
+    assert meta['sub_a'][i] > 0.8 and meta['sub_b'][i] > 0.8
+    assert abs(meta['sub_a'][i] - meta['sub_b'][i]) < 0.3
+
+
+def test_pam_does_not_move_the_fsp():
+    """El equipo no lo mide como respuesta -- lo mide el alumno con el cursor."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    _, _, con = _curva_pam(pam=0.8)
+    _, _, sin = _curva_pam(pam=0)
+    assert abs(con['fsp'] - sin['fsp']) < 1e-9
+
+
+def test_pam_shrinks_with_a_higher_high_pass():
+    """Es lento: subir el pasa-alto se lo come, y eso es una maniobra."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    t, abierto, _ = _curva_pam(filter_high=30)
+    _, cerrado, _ = _curva_pam(filter_high=300)
+    tardio = t > 10
+    assert cerrado[tardio].max() < abierto[tardio].max() / 2
+
+
+def test_pam_barely_fits_the_routine_window():
+    """En 12 ms apenas asoma: se ve entero cuando se abre la ventana."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    t12, corta, _ = _curva_pam(window=12.0)
+    t20, larga, _ = _curva_pam(window=20.0)
+    assert corta.max() < larga[t20 > 10].max()
+
+
+def test_clamping_the_tube_removes_the_pam():
+    """Sin sonido no hay reflejo: la maniobra tambien lo apaga."""
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    t, abierto, _ = _curva_pam()
+    _, pinzado, _ = _curva_pam(clamp=True)
+    tardio = t > 10
+    assert pinzado[tardio].max() < abierto[tardio].max() / 3
+
+
 # ------------------------------------------ artefacto de estimulo y clamp
 
 def test_stimulus_artifact_grows_with_intensity_and_transducer():

@@ -1089,6 +1089,7 @@ final class CaseBuilder
                 // Inquietud del paciente durante la captura: los casos
                 // guardados antes de esto quedan en 0 (paciente quieto).
                 'inquietud' => (string) ($ladoAbr['inquietud'] ?? 0),
+                'pam' => (string) ($ladoAbr['pam'] ?? 0),
                 'average_objetivo' => (string) ($ladoAbr['average_objetivo'] ?? 2000),
                 // Falsa onda V (ver false_wave en ABR_generator.py): un caso
                 // guardado antes de que existiera no trae la clave y queda
