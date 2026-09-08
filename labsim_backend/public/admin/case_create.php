@@ -785,17 +785,6 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <?php endif; ?>
 <?php $photoCaseId = $isEdit ? $editId : $uploadTempId; ?>
 <?php
-// Perfil auditivo sin UI todavía (fase 3 del roadmap: tab propio con el
-// slider de cce_pct, el patrón retro y los checkboxes de proyección
-// automática). Hasta entonces viaja oculto para no perderse al editar un
-// caso: sin esto, abrir y guardar un caso con perfil cargado lo volvería a
-// inferir desde cero y apagaría los `auto`.
-foreach (['od', 'oi'] as $ladoPerfil):
-    $ccePerfil = fv($v, ['perfil', $ladoPerfil, 'cce_pct'], '');
-?>
-<input type="hidden" name="perfil[<?= $ladoPerfil ?>][cce_pct]" value="<?= htmlspecialchars((string) $ccePerfil) ?>">
-<?php endforeach; ?>
-<?php
 // Los módulos que ya tienen su propio control visible (hoy solo ABR, en su
 // pestaña) NO van acá: dos inputs con el mismo name se pisarían.
 $perfilAutoConUI = ['abr'];
@@ -810,6 +799,7 @@ foreach (CaseProfile::AUTO_MODULES as $moduloAuto):
     <button type="button" class="tab-btn active" data-tab="paciente">Paciente</button>
     <button type="button" class="tab-btn" data-tab="otoscopia">Otoscopia</button>
     <button type="button" class="tab-btn" data-tab="audiometria">Audiometría</button>
+    <button type="button" class="tab-btn" data-tab="perfil">Perfil auditivo</button>
     <button type="button" class="tab-btn" data-tab="timpanometria">Timpanometría</button>
     <button type="button" class="tab-btn" data-tab="tinnitus">Tinnitus</button>
     <button type="button" class="tab-btn" data-tab="abr">ABR</button>
@@ -1241,6 +1231,111 @@ foreach (CaseProfile::AUTO_MODULES as $moduloAuto):
 </div>
 </div>
 
+<div class="tab-panel" data-tab="perfil">
+<div class="card">
+    <strong>Perfil auditivo</strong>
+    <p class="legend help">Dónde está la lesión de este paciente. El audiograma de la pestaña anterior ya dice cuánta pérdida hay y cuánta es conductiva, frecuencia por frecuencia; lo único que no puede decir es qué parte del componente sensorioneural es coclear y qué parte es retrococlear. Eso se define acá, una vez, y desde acá se proyecta a los exámenes que tengan la casilla de derivación encendida.</p>
+    <p class="legend help">Sin ninguna casilla marcada nada cambia: cada pestaña se sigue cargando a mano, como siempre. La derivación existe para que el caso no se contradiga solo (una OEA normal con un gap de 40 dB, un ABR normal con un audiograma profundo), no para impedir armar un caso incoherente a propósito -- el Stenger, la falsa onda V y la simulación necesitan esa incoherencia.</p>
+</div>
+<div class="card">
+    <strong>Umbral por estímulo, derivado del audiograma</strong>
+    <p class="legend help">Con esto encendido, el umbral del ABR deja de ser un número por oído y pasa a calcularse por estímulo desde la audiometría del caso: el burst de 500 Hz responde según el umbral en 500, el de 4 kHz según el de 4 kHz, el click según la base coclear (2-4 kHz) y el chirp con más peso en los graves. Es lo que permite pedir una evaluación frecuencia específica en una hipoacusia descendente. La vía ósea usa los umbrales óseos, así que el gap conductivo del ABR sale del audiograma solo.</p>
+    <p class="legend help">Los números de la tabla están en dB nHL, no en dB HL: incluyen la corrección conductual-electrofisiológica (+20 dB en 500 Hz, +15 en 1 k, +10 en 2 k, +5 en 4 k, +10 el click, +5 el chirp). Por eso un oído de 0 dB HL igual muestra 20 dB nHL con burst de 500 -- convertir nHL a eHL es parte de lo que el alumno tiene que hacer.</p>
+    <label class="inline-check">
+        <input type="checkbox" id="perfil-auto-abr" name="perfil[auto][abr]" value="1" <?= fv($v, ['perfil', 'auto', 'abr'], null) ? 'checked' : '' ?>>
+        Derivar el umbral del ABR desde el audiograma
+    </label>
+    <div id="abr-threshold-preview" hidden>
+        <table class="reflex-pattern-table" style="margin-top:0.6rem;">
+            <thead>
+                <tr>
+                    <th>Estímulo</th>
+                    <th>OD aérea</th><th>OD ósea</th>
+                    <th>OI aérea</th><th>OI ósea</th>
+                </tr>
+            </thead>
+            <tbody id="abr-threshold-rows"></tbody>
+        </table>
+        <p class="legend help">El campo "Umbral (dB)" de cada oído queda de solo lectura: lo escribe esta tabla (con el valor del click, que es lo que mostraría un ABR de rutina).</p>
+    </div>
+</div>
+<div class="two-col">
+<?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
+<div class="card">
+    <strong>Oído <?= $ladoLabel ?></strong>
+    <div class="three-col">
+        <label>Proporción coclear del componente sensorioneural (%)
+            <input type="number" step="5" min="0" max="100" name="perfil[<?= $lado ?>][cce_pct]" value="<?= htmlspecialchars((string) fv($v, ['perfil', $lado, 'cce_pct'], '100')) ?>">
+        </label>
+    </div>
+    <p class="legend help">100 % = pérdida coclear pura: las células ciliadas externas están dañadas, la OEA cae con el umbral y hay reclutamiento. 0 % = pérdida retrococlear pura: la cóclea está viva, la OEA se conserva con el umbral elevado y el ABR es el que se desarma -- es la neuropatía auditiva, y ese contraste entre OEA y ABR es el hallazgo. Los valores intermedios reparten la pérdida entre los dos sitios.</p>
+    <p class="legend help">Esto no toca el audiograma: la pérdida en dB la fija la pestaña Audiometría. Acá se dice de qué está hecha esa pérdida.</p>
+    <?php $vn = $v['abr'][$lado]['neural'] ?? []; ?>
+    <div class="abr-neural-block" data-lado="<?= $lado ?>">
+        <p class="legend">Patrón retrococlear. El PEATC no distingue las entidades entre sí (un schwannoma y un meningioma del ángulo dan el mismo trazado) -- lo que distingue son estos patrones, así que el caso guarda los números, no el diagnóstico. El preset es solo un punto de partida: precarga los valores y después se editan.</p>
+        <div class="three-col">
+            <label>Preset clínico
+                <select class="abr-neural-preset-select" data-lado="<?= $lado ?>">
+                    <option value="">-- elegir --</option>
+                    <?php foreach (CaseBuilder::ABR_NEURAL_PRESETS as $presetKey => $preset): ?>
+                    <option value="<?= $presetKey ?>"><?= htmlspecialchars($preset['label']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+            <label style="align-self:end;">
+                <button type="button" class="secondary abr-neural-preset-btn" data-lado="<?= $lado ?>">Aplicar preset</button>
+            </label>
+        </div>
+        <p class="legend help abr-neural-preset-nota" data-lado="<?= $lado ?>"></p>
+        <div class="three-col">
+            <label>Prolongación I-III (ms)
+                <input type="number" step="0.05" min="0" max="<?= CaseBuilder::ABR_NEURAL_MAX_MS ?>" name="abr[<?= $lado ?>][neural][i_iii_ms]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="i_iii_ms" value="<?= htmlspecialchars((string) ($vn['i_iii_ms'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['i_iii_ms'])) ?>">
+            </label>
+            <label>Prolongación III-V (ms)
+                <input type="number" step="0.05" min="0" max="<?= CaseBuilder::ABR_NEURAL_MAX_MS ?>" name="abr[<?= $lado ?>][neural][iii_v_ms]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="iii_v_ms" value="<?= htmlspecialchars((string) ($vn['iii_v_ms'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['iii_v_ms'])) ?>">
+            </label>
+            <label>Retraso global (ms)
+                <input type="number" step="0.05" min="0" max="<?= CaseBuilder::ABR_NEURAL_MAX_MS ?>" name="abr[<?= $lado ?>][neural][global_delay_ms]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="global_delay_ms" value="<?= htmlspecialchars((string) ($vn['global_delay_ms'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['global_delay_ms'])) ?>">
+            </label>
+            <label>Razón V/I (1 = sin caída)
+                <input type="number" step="0.05" min="0.05" max="1" name="abr[<?= $lado ?>][neural][v_i_factor]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="v_i_factor" value="<?= htmlspecialchars((string) ($vn['v_i_factor'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['v_i_factor'])) ?>">
+            </label>
+            <label>Bloqueo
+                <select name="abr[<?= $lado ?>][neural][bloqueo]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="bloqueo">
+                    <?php foreach (CaseBuilder::ABR_NEURAL_BLOQUEO_OPTIONS as $opt): ?>
+                    <option value="<?= $opt ?>" <?= ($vn['bloqueo'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['bloqueo']) === $opt ? 'selected' : '' ?>><?= htmlspecialchars(CaseBuilder::ABR_NEURAL_BLOQUEO_LABELS[$opt]) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+            <label>Microfónico coclear
+                <select name="abr[<?= $lado ?>][neural][microfonica]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="microfonica">
+                    <?php foreach (CaseBuilder::ABR_NEURAL_MICROFONICA_OPTIONS as $opt): ?>
+                    <option value="<?= $opt ?>" <?= ($vn['microfonica'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['microfonica']) === $opt ? 'selected' : '' ?>><?= htmlspecialchars(CaseBuilder::ABR_NEURAL_MICROFONICA_LABELS[$opt]) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+            <label>Desincronía (morfología)
+                <select name="abr[<?= $lado ?>][neural][desincronia]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="desincronia">
+                    <?php foreach (CaseBuilder::ABR_NEURAL_DESINCRONIA_OPTIONS as $opt): ?>
+                    <option value="<?= $opt ?>" <?= ($vn['desincronia'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['desincronia']) === $opt ? 'selected' : '' ?>><?= ucfirst($opt) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+            <label>Sensibilidad a la tasa
+                <select name="abr[<?= $lado ?>][neural][sensibilidad_tasa]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="sensibilidad_tasa">
+                    <?php foreach (CaseBuilder::ABR_NEURAL_TASA_OPTIONS as $opt): ?>
+                    <option value="<?= $opt ?>" <?= ($vn['sensibilidad_tasa'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['sensibilidad_tasa']) === $opt ? 'selected' : '' ?>><?= ucfirst($opt) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+        </div>
+        <p class="legend help">La diferencia interaural de onda V (IT5) no se configura acá: sale de que los dos oídos tengan patrones distintos. Y la replicabilidad pobre es la casilla "Reproducible" de arriba.</p>
+    </div>
+</div>
+<?php endforeach; ?>
+</div>
+</div>
+
 <div class="tab-panel" data-tab="timpanometria">
 <div class="audiometria-layout">
 
@@ -1462,28 +1557,6 @@ foreach (CaseProfile::AUTO_MODULES as $moduloAuto):
         </select>
     </label>
 </div>
-<div class="card">
-    <strong>Umbral por estímulo, derivado del audiograma</strong>
-    <p class="legend help">Con esto encendido, el umbral del ABR deja de ser un número por oído y pasa a calcularse por estímulo desde la audiometría del caso: el burst de 500 Hz responde según el umbral en 500, el de 4 kHz según el de 4 kHz, el click según la base coclear (2-4 kHz) y el chirp con más peso en los graves. Es lo que permite pedir una evaluación frecuencia específica en una hipoacusia descendente. La vía ósea usa los umbrales óseos, así que el gap conductivo del ABR sale del audiograma solo.</p>
-    <p class="legend help">Los números de la tabla están en dB nHL, no en dB HL: incluyen la corrección conductual-electrofisiológica (+20 dB en 500 Hz, +15 en 1 k, +10 en 2 k, +5 en 4 k, +10 el click, +5 el chirp). Por eso un oído de 0 dB HL igual muestra 20 dB nHL con burst de 500 -- convertir nHL a eHL es parte de lo que el alumno tiene que hacer.</p>
-    <label class="inline-check">
-        <input type="checkbox" id="perfil-auto-abr" name="perfil[auto][abr]" value="1" <?= fv($v, ['perfil', 'auto', 'abr'], null) ? 'checked' : '' ?>>
-        Derivar el umbral del ABR desde el audiograma
-    </label>
-    <div id="abr-threshold-preview" hidden>
-        <table class="reflex-pattern-table" style="margin-top:0.6rem;">
-            <thead>
-                <tr>
-                    <th>Estímulo</th>
-                    <th>OD aérea</th><th>OD ósea</th>
-                    <th>OI aérea</th><th>OI ósea</th>
-                </tr>
-            </thead>
-            <tbody id="abr-threshold-rows"></tbody>
-        </table>
-        <p class="legend help">El campo "Umbral (dB)" de cada oído queda de solo lectura: lo escribe esta tabla (con el valor del click, que es lo que mostraría un ABR de rutina).</p>
-    </div>
-</div>
 <div class="two-col">
 <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
 <div class="card">
@@ -1521,67 +1594,7 @@ foreach (CaseProfile::AUTO_MODULES as $moduloAuto):
     </div>
     <p class="legend help">Inquietud: 0 es un paciente quieto. Por encima de 0 la captura tiene tramos en que el paciente se mueve: el EEG crudo se ensucia, el equipo descarta esos barridos y el promedio se queda quieto hasta que se calma (el contador de aceptados se separa del de presentados). Si el alumno apagó el rechazo de artefacto, en cambio, esa basura entra al promedio y el FSP no cruza nunca.</p>
     <p class="legend help">PAM: contracción del músculo auricular posterior ante sonido fuerte. Aparece sobre 60 dB, crece con el nivel y sale a los 13 ms, o sea fuera del complejo I-V y casi fuera de la ventana de rutina. Ojo que es el contraejemplo de la falsa onda V: se promedia como una respuesta, así que replica en A y B -- lo delatan la latencia, el tamaño (µV, no décimas) y que se va si el paciente relaja el cuello o se sube el pasa-alto.</p>
-    <?php $vn = $v['abr'][$lado]['neural'] ?? []; ?>
-    <div class="abr-neural-block" data-lado="<?= $lado ?>">
-        <p class="legend">Patrón retrococlear. El PEATC no distingue las entidades entre sí (un schwannoma y un meningioma del ángulo dan el mismo trazado) -- lo que distingue son estos patrones, así que el caso guarda los números, no el diagnóstico. El preset es solo un punto de partida: precarga los valores y después se editan.</p>
-        <div class="three-col">
-            <label>Preset clínico
-                <select class="abr-neural-preset-select" data-lado="<?= $lado ?>">
-                    <option value="">-- elegir --</option>
-                    <?php foreach (CaseBuilder::ABR_NEURAL_PRESETS as $presetKey => $preset): ?>
-                    <option value="<?= $presetKey ?>"><?= htmlspecialchars($preset['label']) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
-            <label style="align-self:end;">
-                <button type="button" class="secondary abr-neural-preset-btn" data-lado="<?= $lado ?>">Aplicar preset</button>
-            </label>
-        </div>
-        <p class="legend help abr-neural-preset-nota" data-lado="<?= $lado ?>"></p>
-        <div class="three-col">
-            <label>Prolongación I-III (ms)
-                <input type="number" step="0.05" min="0" max="<?= CaseBuilder::ABR_NEURAL_MAX_MS ?>" name="abr[<?= $lado ?>][neural][i_iii_ms]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="i_iii_ms" value="<?= htmlspecialchars((string) ($vn['i_iii_ms'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['i_iii_ms'])) ?>">
-            </label>
-            <label>Prolongación III-V (ms)
-                <input type="number" step="0.05" min="0" max="<?= CaseBuilder::ABR_NEURAL_MAX_MS ?>" name="abr[<?= $lado ?>][neural][iii_v_ms]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="iii_v_ms" value="<?= htmlspecialchars((string) ($vn['iii_v_ms'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['iii_v_ms'])) ?>">
-            </label>
-            <label>Retraso global (ms)
-                <input type="number" step="0.05" min="0" max="<?= CaseBuilder::ABR_NEURAL_MAX_MS ?>" name="abr[<?= $lado ?>][neural][global_delay_ms]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="global_delay_ms" value="<?= htmlspecialchars((string) ($vn['global_delay_ms'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['global_delay_ms'])) ?>">
-            </label>
-            <label>Razón V/I (1 = sin caída)
-                <input type="number" step="0.05" min="0.05" max="1" name="abr[<?= $lado ?>][neural][v_i_factor]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="v_i_factor" value="<?= htmlspecialchars((string) ($vn['v_i_factor'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['v_i_factor'])) ?>">
-            </label>
-            <label>Bloqueo
-                <select name="abr[<?= $lado ?>][neural][bloqueo]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="bloqueo">
-                    <?php foreach (CaseBuilder::ABR_NEURAL_BLOQUEO_OPTIONS as $opt): ?>
-                    <option value="<?= $opt ?>" <?= ($vn['bloqueo'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['bloqueo']) === $opt ? 'selected' : '' ?>><?= htmlspecialchars(CaseBuilder::ABR_NEURAL_BLOQUEO_LABELS[$opt]) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
-            <label>Microfónico coclear
-                <select name="abr[<?= $lado ?>][neural][microfonica]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="microfonica">
-                    <?php foreach (CaseBuilder::ABR_NEURAL_MICROFONICA_OPTIONS as $opt): ?>
-                    <option value="<?= $opt ?>" <?= ($vn['microfonica'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['microfonica']) === $opt ? 'selected' : '' ?>><?= htmlspecialchars(CaseBuilder::ABR_NEURAL_MICROFONICA_LABELS[$opt]) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
-            <label>Desincronía (morfología)
-                <select name="abr[<?= $lado ?>][neural][desincronia]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="desincronia">
-                    <?php foreach (CaseBuilder::ABR_NEURAL_DESINCRONIA_OPTIONS as $opt): ?>
-                    <option value="<?= $opt ?>" <?= ($vn['desincronia'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['desincronia']) === $opt ? 'selected' : '' ?>><?= ucfirst($opt) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
-            <label>Sensibilidad a la tasa
-                <select name="abr[<?= $lado ?>][neural][sensibilidad_tasa]" class="abr-neural-input" data-lado="<?= $lado ?>" data-param="sensibilidad_tasa">
-                    <?php foreach (CaseBuilder::ABR_NEURAL_TASA_OPTIONS as $opt): ?>
-                    <option value="<?= $opt ?>" <?= ($vn['sensibilidad_tasa'] ?? CaseBuilder::ABR_NEURAL_DEFAULTS['sensibilidad_tasa']) === $opt ? 'selected' : '' ?>><?= ucfirst($opt) ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </label>
-        </div>
-        <p class="legend help">La diferencia interaural de onda V (IT5) no se configura acá: sale de que los dos oídos tengan patrones distintos. Y la replicabilidad pobre es la casilla "Reproducible" de arriba.</p>
-    </div>
+    <p class="legend help">El patrón retrococlear (I-III, III-V, bloqueo, razón V/I, microfónico, desincronía, sensibilidad a la tasa) se configura ahora en la pestaña <strong>Perfil auditivo</strong>, junto al resto del sitio de la lesión: los mismos parámetros gobiernan lo que se ve en el ABR y lo que NO se ve en la OEA, así que vivían mal acá adentro.</p>
     <p class="legend">Promediaciones que el caso realmente necesita para que la onda se vea resuelta (independiente de cuántas pida el alumno en el equipo) -- si el alumno detiene la captura antes de llegar a este número, la curva queda parcialmente sin resolver.</p>
     <div class="three-col">
         <label>Promediaciones objetivo
@@ -2074,6 +2087,15 @@ foreach (CaseProfile::AUTO_MODULES as $moduloAuto):
     // "Igualar ósea a aérea" copia valores sin disparar 'input' en cada campo.
     document.addEventListener('change', function (e) {
         if (e.target.name && /^igualar\[/.test(e.target.name)) render();
+    });
+    // El autocompletar del tab ABR escribe el umbral escalar: con la
+    // proyección encendida ese campo lo manda esta tabla, así que se
+    // reescribe después (si no, la pantalla muestra un valor que el
+    // servidor va a descartar).
+    document.addEventListener('click', function (e) {
+        if (e.target.classList && e.target.classList.contains('abr-autofill-btn')) {
+            setTimeout(render, 0);
+        }
     });
     render();
 })();
