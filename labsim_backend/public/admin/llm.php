@@ -101,7 +101,8 @@ admin_header('IA Paciente (LLM)', $me);
         <label>Máximo de tokens del borrador de anamnesis
             <input type="number" name="anamnesis_max_tokens" value="<?= (int) $config['anamnesis_max_tokens'] ?>" min="1" max="16000" step="1">
         </label>
-        <p class="legend help">Va aparte porque son dos tareas distintas: el chat contesta una frase hablada y con 400 sobra, mientras que el borrador devuelve un JSON completo que ya ocupa varios cientos. Si el modelo es de razonamiento (piensa antes de escribir, como deepseek-v4-flash), gasta el presupuesto ANTES de responder: con poco margen devuelve el razonamiento cortado y la respuesta vacía. Ante ese error, subí este número, no el de arriba.</p>
+        <p class="legend help">Va aparte porque son dos tareas distintas: el chat contesta una frase hablada y con 400 sobra, mientras que el borrador devuelve un JSON completo que ya ocupa varios cientos. Si el modelo es de razonamiento (piensa antes de escribir, como deepseek-v4-flash), gasta el presupuesto ANTES de responder y puede irse a varios miles de tokens en una tarea chica. Si falla igual, el borrador reintenta solo una vez con el triple; ante el segundo error subí este número, no el de arriba.</p>
+        <p class="legend help">Para esta tarea conviene un modelo <strong>sin</strong> razonamiento (deepseek-chat, por ejemplo): la anamnesis no necesita que el modelo delibere, y uno que razona tarda más, cuesta más y falla por presupuesto. El modelo es uno solo para todo, así que si el chat con el paciente te anda bien con el que tenés, la alternativa es dejarle más aire acá.</p>
 
         <label style="display:flex; align-items:center; gap:0.5rem; font-weight:600;">
             <input type="checkbox" name="active" value="1" style="width:auto;" <?= $config['active'] ? 'checked' : '' ?>>

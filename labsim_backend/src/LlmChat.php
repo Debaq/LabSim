@@ -5,6 +5,18 @@
 // "Class 'LlmConfig' not found" recién al apretar el botón.
 require_once __DIR__ . '/LlmConfig.php';
 
+/**
+ * El modelo se quedó sin presupuesto ANTES de escribir la respuesta.
+ *
+ * Tiene clase propia porque es la única falla del LLM que quien llama puede
+ * arreglar solo: reintentar con más tokens. Las demás (sin api_key, red
+ * caída, HTTP de error) no se arreglan reintentando, así que distinguirlas
+ * por el texto del mensaje sería frágil justo donde importa.
+ */
+final class LlmBudgetException extends RuntimeException
+{
+}
+
 final class LlmChat
 {
     /**
@@ -109,7 +121,7 @@ final class LlmChat
         $razonamiento = (string) ($decoded['choices'][0]['message']['reasoning_content'] ?? '');
         $corte = (string) ($decoded['choices'][0]['finish_reason'] ?? '');
         if ($razonamiento !== '' || $corte === 'length') {
-            throw new RuntimeException(sprintf(
+            throw new LlmBudgetException(sprintf(
                 'El modelo "%s" se quedó sin tokens razonando y no alcanzó a escribir la respuesta (límite actual: %d). Subí "%s" en Admin -> IA Paciente, o elegí un modelo sin razonamiento para esta tarea.',
                 $model, $maxTokens, $campoTokens
             ));

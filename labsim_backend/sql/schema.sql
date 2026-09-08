@@ -305,7 +305,7 @@ CREATE TABLE IF NOT EXISTS llm_config (
     -- varios cientos y un modelo de razonamiento gasta el presupuesto
     -- ANTES de escribir -- con 400 devuelve el razonamiento cortado y el
     -- content vacío.
-    anamnesis_max_tokens INTEGER NOT NULL DEFAULT 2000,
+    anamnesis_max_tokens INTEGER NOT NULL DEFAULT 6000,
     -- Vacío = usa LlmConfig::DEFAULT_PROMPT (ver ese archivo) -- así un
     -- "restablecer" no requiere guardar el texto largo acá también.
     system_prompt_template TEXT NOT NULL DEFAULT '',

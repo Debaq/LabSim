@@ -41,6 +41,25 @@ final class AnamnesisDraft
     }
 
     /**
+     * Techo del reintento automático. Un modelo de razonamiento puede
+     * gastar varios miles de tokens pensando una tarea chica, y cuánto
+     * exactamente no se sabe de antemano: depende del caso. En vez de
+     * hacer que el docente adivine el número subiéndolo de a poco, se
+     * reintenta una vez con el triple, hasta acá.
+     */
+    public const MAX_TOKENS_REINTENTO = 12000;
+
+    /**
+     * Presupuesto del reintento: el triple, con techo. Si ya se pidió el
+     * techo o más, devuelve lo mismo y quien llama no reintenta -- volver a
+     * gastar el mismo presupuesto que ya falló no lleva a ningún lado.
+     */
+    public static function retryBudget(int $presupuesto): int
+    {
+        return max($presupuesto, min(self::MAX_TOKENS_REINTENTO, $presupuesto * 3));
+    }
+
+    /**
      * Instrucciones fijas del generador. Van como system prompt: describen
      * la tarea y el formato, nunca el caso (eso va en el mensaje de
      * usuario, armado por describeCase()).
@@ -151,8 +170,23 @@ TXT;
      */
     public static function generate(array $data): array
     {
-        $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], self::describeCase($data), self::maxTokens(),
-                              'Máximo de tokens del borrador de anamnesis');
+        $prompt = self::describeCase($data);
+        $presupuesto = self::maxTokens();
+        try {
+            $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], $prompt, $presupuesto,
+                                  'Máximo de tokens del borrador de anamnesis');
+        } catch (LlmBudgetException $e) {
+            // Un solo reintento con más aire. Cuánto razona el modelo
+            // depende del caso, así que el número "correcto" no existe:
+            // pedirle al docente que lo vaya subiendo a mano es hacerle
+            // pagar nuestro problema.
+            $reintento = self::retryBudget($presupuesto);
+            if ($reintento <= $presupuesto) {
+                throw $e;
+            }
+            $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], $prompt, $reintento,
+                                  'Máximo de tokens del borrador de anamnesis');
+        }
         $draft = self::parse($raw);
         if ($draft === null) {
             throw new RuntimeException(

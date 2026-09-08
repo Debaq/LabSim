@@ -59,3 +59,40 @@ $raro = ['choices' => []];
 $msg = excepcion(fn() => LlmChat::extractContent($raro, '{"algo":"inesperado"}', 'x', 400));
 t_true(strpos($msg, 'Body crudo') !== false, 'Shape desconocido: se muestra el body para diagnosticar');
 t_true(strpos($msg, 'inesperado') !== false, 'Y el body va de verdad, no truncado a cero');
+
+// ---------------------------------------------------------------------
+// Reintento del borrador de anamnesis cuando el modelo razona de más.
+// ---------------------------------------------------------------------
+
+require_once __DIR__ . '/../src/AnamnesisDraft.php';
+
+t_eq(AnamnesisDraft::retryBudget(2000), 6000, 'El reintento pide el triple');
+t_eq(AnamnesisDraft::retryBudget(6000), 12000, 'Con el default nuevo, el reintento llega al techo');
+t_eq(AnamnesisDraft::retryBudget(10000), AnamnesisDraft::MAX_TOKENS_REINTENTO,
+    'El triple se corta en el techo, no se dispara');
+t_eq(AnamnesisDraft::retryBudget(20000), 20000,
+    'Si ya se pidió más que el techo, no se reintenta con menos');
+t_true(AnamnesisDraft::retryBudget(AnamnesisDraft::MAX_TOKENS_REINTENTO) <= AnamnesisDraft::MAX_TOKENS_REINTENTO,
+    'En el techo el reintento no aporta nada y quien llama corta');
+
+// La falla de presupuesto tiene clase propia: es la única que se arregla
+// reintentando, y distinguirla por el texto del mensaje sería frágil.
+$razonando2 = ['choices' => [['message' => ['content' => '', 'reasoning_content' => 'pensando...']]]];
+$clase = '';
+try {
+    LlmChat::extractContent($razonando2, '{}', 'm', 400);
+} catch (Throwable $e) {
+    $clase = get_class($e);
+}
+t_eq($clase, 'LlmBudgetException', 'Sin presupuesto lanza LlmBudgetException');
+t_true(is_subclass_of('LlmBudgetException', 'RuntimeException'),
+    'Y sigue siendo RuntimeException: quien no la distingue la sigue atrapando igual');
+
+$otro = ['choices' => []];
+$clase = '';
+try {
+    LlmChat::extractContent($otro, '{}', 'm', 400);
+} catch (Throwable $e) {
+    $clase = get_class($e);
+}
+t_eq($clase, 'RuntimeException', 'Un shape raro NO es falla de presupuesto: reintentar no lo arregla');

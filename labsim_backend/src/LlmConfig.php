@@ -11,7 +11,7 @@ final class LlmConfig
      * sobra, mientras que acá el JSON completo ya ocupa varios cientos y un
      * modelo de razonamiento gasta presupuesto ANTES de escribir.
      */
-    public const ANAMNESIS_MAX_TOKENS_DEFAULT = 2000;
+    public const ANAMNESIS_MAX_TOKENS_DEFAULT = 6000;
 
     // Base URL por defecto de cada proveedor -- deepseek expone una API
     // compatible con el formato Chat Completions de OpenAI, así que
