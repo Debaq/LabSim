@@ -2261,7 +2261,18 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                 // Texto nuevo: nadie lo leyó todavía.
                 verificado.checked = false;
                 bloque.hidden = false;
-                estado.textContent = 'Borrador listo. Leelo y verificalo antes de guardar (el relato quedó en la pestaña Paciente).';
+                // El consumo a la vista: en un modelo de razonamiento el
+                // grueso son tokens de pensamiento que no se ven en el
+                // texto, y sin esto no hay forma de notar que un borrador
+                // costó veinte veces más que otro.
+                var u = data.uso || {};
+                var costo = u.total
+                    ? ' — ' + u.total + ' tokens'
+                        + (u.razonamiento ? ' (' + u.razonamiento + ' de razonamiento)' : '')
+                        + (u.intentos > 1 ? ', ' + u.intentos + ' intentos' : '')
+                    : '';
+                estado.textContent = 'Borrador listo. Leelo y verificalo antes de guardar'
+                    + ' (el relato quedó en la pestaña Paciente).' + costo;
             })
             .catch(function (err) { estado.textContent = 'Error: ' + err.message; })
             .finally(function () { boton.disabled = false; });

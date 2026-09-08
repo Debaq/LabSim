@@ -669,5 +669,7 @@ t_eq(AnamnesisDraft::parse('{"antecedentes":[]}')['historia_clinica'], '',
 // El prompt tiene que pedirlo explícitamente, que es lo que faltaba.
 t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, 'historia_clinica') !== false,
     'El prompt nombra el campo del relato');
-t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, 'NUNCA va vacía') !== false,
+t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, 'nunca va vacía') !== false,
     'Y dice que no puede quedar vacío: todo paciente consultó por algo');
+t_true(strlen(AnamnesisDraft::SYSTEM_PROMPT) < 1600,
+    'Y se mantiene corto: es lo único del input que controlamos, y en un modelo de razonamiento también es menos para masticar');

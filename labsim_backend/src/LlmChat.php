@@ -27,6 +27,25 @@ final class LlmChat
     public const TIMEOUT_DEFAULT_S = 30;
 
     /**
+     * Consumo de la última llamada, tal como lo reporta la API en `usage`.
+     *
+     * Estático y no en el valor de retorno para no cambiarle la firma a los
+     * tres llamadores que solo quieren el texto. Sirve para dejar de
+     * adivinar de dónde sale la factura: en un modelo de razonamiento casi
+     * todo el gasto son tokens de pensamiento que no se ven en la
+     * respuesta, así que mirar el texto que volvió no dice nada.
+     *
+     * @var array<string,int>
+     */
+    private static array $lastUsage = [];
+
+    /** Consumo de la última llamada: prompt, completion, razonamiento y total. */
+    public static function lastUsage(): array
+    {
+        return self::$lastUsage;
+    }
+
+    /**
      * Normaliza las opciones de una tarea contra los defaults. Las claves
      * desconocidas se ignoran en silencio: es configuración de código, no
      * entrada de usuario.
@@ -136,6 +155,17 @@ final class LlmChat
             $apiMsg = is_array($decoded) ? ($decoded['error']['message'] ?? null) : null;
             throw new RuntimeException("El LLM respondió con error HTTP {$status}: " . ($apiMsg ?? $response));
         }
+
+        // `usage` es opcional en el protocolo: si el proveedor no lo manda,
+        // queda vacío y quien lo muestra decide qué decir.
+        $usage = is_array($decoded['usage'] ?? null) ? $decoded['usage'] : [];
+        self::$lastUsage = [
+            'prompt' => (int) ($usage['prompt_tokens'] ?? 0),
+            'completion' => (int) ($usage['completion_tokens'] ?? 0),
+            // DeepSeek lo reporta anidado; otros proveedores lo omiten.
+            'razonamiento' => (int) ($usage['completion_tokens_details']['reasoning_tokens'] ?? 0),
+            'total' => (int) ($usage['total_tokens'] ?? 0),
+        ];
 
         return self::extractContent(
             is_array($decoded) ? $decoded : [], (string) $response,

@@ -101,9 +101,14 @@ try {
     exit;
 }
 
+// Se audita el consumo, no solo que se pidió: con un modelo de razonamiento
+// casi todo el gasto son tokens de pensamiento que no aparecen en el texto,
+// así que mirar el borrador no dice nada de lo que costó.
+$uso = AnamnesisDraft::lastUsage();
 AdminAudit::log($me, 'anamnesis_ai_draft', [
     'case_id' => (string) ($payload['case_id'] ?? ''),
     'edad' => $data['edad'],
-]);
+    'modelo' => AnamnesisDraft::model(),
+] + $uso);
 
-echo json_encode(['ok' => true, 'borrador' => $borrador], JSON_UNESCAPED_UNICODE);
+echo json_encode(['ok' => true, 'borrador' => $borrador, 'uso' => $uso], JSON_UNESCAPED_UNICODE);

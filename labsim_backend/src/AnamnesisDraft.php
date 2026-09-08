@@ -48,6 +48,28 @@ final class AnamnesisDraft
         return max(1, (int) LlmConfig::get()['anamnesis_max_tokens']);
     }
 
+    /**
+     * Consumo del último borrador, sumando los intentos.
+     *
+     * @var array<string,int>
+     */
+    private static array $usoAcumulado = [];
+
+    /** Suma el consumo del intento recién hecho al del borrador. */
+    private static function acumularUso(): void
+    {
+        foreach (LlmChat::lastUsage() as $clave => $valor) {
+            self::$usoAcumulado[$clave] = (self::$usoAcumulado[$clave] ?? 0) + $valor;
+        }
+        self::$usoAcumulado['intentos'] = (self::$usoAcumulado['intentos'] ?? 0) + 1;
+    }
+
+    /** Lo que costó el último borrador, intentos fallidos incluidos. */
+    public static function lastUsage(): array
+    {
+        return self::$usoAcumulado;
+    }
+
     /** Modelo efectivo de esta tarea: el propio, o el general si está vacío. */
     public static function model(): string
     {
@@ -108,40 +130,31 @@ final class AnamnesisDraft
      * usuario, armado por describeCase()).
      */
     public const SYSTEM_PROMPT = <<<'TXT'
-Sos un fonoaudiólogo clínico que redacta la anamnesis de un paciente para un
-caso de simulación docente. Te dan los hallazgos audiológicos ya definidos y
-tenés que escribir los antecedentes que los EXPLICAN de manera plausible.
+Redactás la anamnesis de un paciente para un caso de simulación de
+fonoaudiología. Te doy los hallazgos ya definidos; escribí los antecedentes
+que los explican de forma plausible.
 
-Reglas:
-- La anamnesis tiene que ser COHERENTE con los hallazgos, no repetirlos. No
-  menciones umbrales, dB, ni nombres de exámenes: eso lo mide el alumno.
-- No inventes diagnósticos ya hechos ni digas qué tiene el paciente. La
-  anamnesis es lo que el paciente cuenta y lo que figura en su historia.
-- Escribí en español de Chile, en tercera persona, breve y clínico.
-- "historia_clinica" NUNCA va vacía: todo paciente consultó por algo.
-  Escribí el motivo de consulta, hace cuánto empezó, cómo evolucionó y en
-  qué situaciones le molesta. Dos a cuatro oraciones.
-- Marcá los antecedentes que expliquen los hallazgos de forma plausible y
-  frecuente en la vida real (exposición a ruido recreacional o laboral,
-  otitis a repetición en la infancia, uso de ototóxicos). No los dejes
-  todos en falso solo por prudencia: si algo explica el cuadro, marcalo.
-- Un paciente sin hallazgos igual tiene un motivo de consulta, y puede no
-  tener ningún antecedente: ahí "antecedentes" va vacío pero
-  "historia_clinica" no.
-- Medicamentos y cirugías sí van vacíos si no corresponden: no rellenes.
-- "comportamiento" describe cómo actúa el paciente al conversar (tono,
-  actitud), no su patología ni su motivo de consulta.
+- No menciones umbrales, dB ni nombres de exámenes: eso lo mide el alumno.
+- No digas qué tiene el paciente ni des un diagnóstico.
+- Español de Chile, tercera persona, breve y clínico.
+- "historia_clinica" nunca va vacía: motivo de consulta, hace cuánto, cómo
+  evolucionó y cuándo molesta. Dos a cuatro oraciones.
+- Marcá los antecedentes que expliquen el cuadro y sean frecuentes en la
+  vida real (ruido recreacional o laboral, otitis en la infancia,
+  ototóxicos). No los dejes todos en falso por prudencia.
+- Un paciente sin hallazgos igual consultó por algo: ahí "antecedentes" va
+  vacío pero "historia_clinica" no.
+- "medicamentos" y "cirugias" sí van vacíos si no corresponden.
+- "comportamiento": cómo actúa al conversar (tono, actitud), no su
+  patología ni su motivo de consulta.
 
-No razones en voz alta ni expliques tu respuesta: escribí el JSON directo.
-
-Respondé SOLO con un objeto JSON, sin ```, con exactamente estas claves:
-{"historia_clinica": "", "antecedentes": [...], "medicamentos": "",
+Respondé solo el JSON, sin ```:
+{"historia_clinica": "", "antecedentes": [], "medicamentos": "",
  "cirugias": "", "otros": "", "comportamiento": "", "disposicion": 0}
 
-"antecedentes" es una lista con las claves que correspondan, de esta lista
-cerrada y ninguna otra: hipoacusia_familiar, ototoxicos, trauma_acustico,
-otitis, meningitis, tce, diabetes, hta.
-"disposicion" es un entero de -2 (muy quisquilloso) a 2 (muy positivo).
+"antecedentes" sale de esta lista cerrada y ninguna otra: hipoacusia_familiar,
+ototoxicos, trauma_acustico, otitis, meningitis, tce, diabetes, hta.
+"disposicion": entero de -2 (muy quisquilloso) a 2 (muy positivo).
 TXT;
 
     /**
@@ -225,9 +238,16 @@ TXT;
         $prompt = self::describeCase($data);
         $presupuesto = self::maxTokens();
         $modelo = self::model();
+        self::$usoAcumulado = [];
         try {
             $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], $prompt, self::opciones($presupuesto, $modelo));
+            self::acumularUso();
         } catch (LlmBudgetException $e) {
+            // El intento que falló igual se factura -- en un modelo de
+            // razonamiento son miles de tokens de pensamiento tirados. Se
+            // suma para que el número que se audita sea lo que de verdad
+            // costó el borrador, no solo el intento que salió bien.
+            self::acumularUso();
             // Un solo reintento con más aire. Cuánto razona el modelo
             // depende del caso, así que el número "correcto" no existe:
             // pedirle al docente que lo vaya subiendo a mano es hacerle
@@ -237,6 +257,7 @@ TXT;
                 throw $e;
             }
             $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], $prompt, self::opciones($reintento, $modelo));
+            self::acumularUso();
         }
         $draft = self::parse($raw);
         if ($draft === null) {
