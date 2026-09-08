@@ -102,3 +102,30 @@ t_eq($clase, 'RuntimeException', 'Un shape raro NO es falla de presupuesto: rein
 // botón.
 t_true(AnamnesisDraft::TIMEOUT_S > LlmChat::TIMEOUT_DEFAULT_S,
     'El borrador espera más que el chat con el paciente');
+
+// ---------------------------------------------------------------------
+// Opciones por tarea: cada una pisa lo que la config fija para el chat.
+// ---------------------------------------------------------------------
+
+$op = AnamnesisDraft::opciones(6000, 'deepseek-chat');
+t_eq($op['max_tokens'], 6000, 'El presupuesto pedido viaja en las opciones');
+t_eq($op['timeout'], AnamnesisDraft::TIMEOUT_S, 'Y su propia espera');
+t_eq($op['campo_tokens'], 'Máximo de tokens del borrador de anamnesis',
+    'Y el rótulo del campo que hay que subir, que no es el del chat');
+t_eq($op['model'], 'deepseek-chat',
+    'Y su propio modelo: la tarea no tiene por qué usar el del chat con el paciente');
+
+$vacias = LlmChat::opcionesTarea([]);
+t_eq($vacias['model'], null, 'Sin opciones, el modelo lo pone la configuración general');
+t_eq($vacias['max_tokens'], null, 'Y el presupuesto también');
+t_eq($vacias['campo_tokens'], 'Máximo de tokens por respuesta',
+    'El rótulo por defecto apunta al campo del chat');
+
+// "Vacío = usa el general" es la semántica del campo en Admin -> IA
+// Paciente: un modelo en blanco no puede llegar a la API como modelo "".
+foreach (['', '   '] as $blanco) {
+    t_eq(LlmChat::opcionesTarea(['model' => $blanco])['model'], null,
+        'Un modelo en blanco cae al general, no viaja vacío a la API');
+}
+t_eq(LlmChat::opcionesTarea(['model' => ' deepseek-chat '])['model'], 'deepseek-chat',
+    'El modelo se recorta: un espacio pegado no es otro modelo');

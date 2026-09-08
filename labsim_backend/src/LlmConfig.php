@@ -161,6 +161,7 @@ PROMPT;
                 'temperature' => 0.7,
                 'max_tokens' => 400,
                 'anamnesis_max_tokens' => self::ANAMNESIS_MAX_TOKENS_DEFAULT,
+                'anamnesis_model' => '',
                 'system_prompt_template' => '',
                 'oirs_prompt_template' => '',
                 'active' => 0,
@@ -174,6 +175,9 @@ PROMPT;
         // borrador de anamnesis saldría con 0 tokens de presupuesto.
         $row['anamnesis_max_tokens'] = (int) ($row['anamnesis_max_tokens'] ?? 0)
             ?: self::ANAMNESIS_MAX_TOKENS_DEFAULT;
+        // Vacío = usa el modelo general (misma convención que las
+        // plantillas de prompt: vacío significa "el default", no "nada").
+        $row['anamnesis_model'] = trim((string) ($row['anamnesis_model'] ?? ''));
         $row['active'] = (int) $row['active'];
         // oirs_prompt_template puede faltar si todavía no se aplicó el
         // schema (columna nueva, ver Db::migrateLlmOirsPromptIfNeeded) --
@@ -182,6 +186,13 @@ PROMPT;
         // simple warning de índice indefinido.
         $row['oirs_prompt_template'] = (string) ($row['oirs_prompt_template'] ?? '');
         return $row;
+    }
+
+    /** Modelo efectivo del borrador de anamnesis: el propio, o el general si está vacío. */
+    public static function effectiveAnamnesisModel(): string
+    {
+        $cfg = self::get();
+        return $cfg['anamnesis_model'] !== '' ? $cfg['anamnesis_model'] : (string) $cfg['model'];
     }
 
     /** Plantilla efectiva: la guardada, o DEFAULT_PROMPT si el admin la dejó vacía. */
@@ -268,8 +279,8 @@ PROMPT;
 
         $pdo = Db::get();
         $pdo->prepare(
-            "INSERT INTO llm_config (id, provider, api_key, api_base_url, model, temperature, max_tokens, anamnesis_max_tokens, system_prompt_template, oirs_prompt_template, active, updated_at)
-             VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            "INSERT INTO llm_config (id, provider, api_key, api_base_url, model, temperature, max_tokens, anamnesis_max_tokens, anamnesis_model, system_prompt_template, oirs_prompt_template, active, updated_at)
+             VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
              ON CONFLICT(id) DO UPDATE SET
                 provider = excluded.provider,
                 api_key = excluded.api_key,
@@ -278,6 +289,7 @@ PROMPT;
                 temperature = excluded.temperature,
                 max_tokens = excluded.max_tokens,
                 anamnesis_max_tokens = excluded.anamnesis_max_tokens,
+                anamnesis_model = excluded.anamnesis_model,
                 system_prompt_template = excluded.system_prompt_template,
                 oirs_prompt_template = excluded.oirs_prompt_template,
                 active = excluded.active,
@@ -290,6 +302,7 @@ PROMPT;
             (float) ($data['temperature'] ?? 0.7),
             max(1, (int) ($data['max_tokens'] ?? 400)),
             max(1, (int) ($data['anamnesis_max_tokens'] ?? self::ANAMNESIS_MAX_TOKENS_DEFAULT)),
+            trim((string) ($data['anamnesis_model'] ?? '')),
             trim((string) ($data['system_prompt_template'] ?? '')),
             trim((string) ($data['oirs_prompt_template'] ?? '')),
             !empty($data['active']) ? 1 : 0,

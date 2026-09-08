@@ -306,6 +306,12 @@ CREATE TABLE IF NOT EXISTS llm_config (
     -- ANTES de escribir -- con 400 devuelve el razonamiento cortado y el
     -- content vacío.
     anamnesis_max_tokens INTEGER NOT NULL DEFAULT 6000,
+    -- Modelo propio del borrador de anamnesis. Vacío = usa `model`, el
+    -- general. Existe porque las dos tareas piden cosas opuestas: el chat
+    -- con el paciente se beneficia de un modelo que razona, y el borrador
+    -- solo tiene que devolver un JSON de seis campos -- ahí razonar es
+    -- tiempo, plata y fallas por presupuesto, sin mejorar el resultado.
+    anamnesis_model TEXT NOT NULL DEFAULT '',
     -- Vacío = usa LlmConfig::DEFAULT_PROMPT (ver ese archivo) -- así un
     -- "restablecer" no requiere guardar el texto largo acá también.
     system_prompt_template TEXT NOT NULL DEFAULT '',

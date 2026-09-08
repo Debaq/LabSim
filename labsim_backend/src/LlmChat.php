@@ -27,6 +27,25 @@ final class LlmChat
     public const TIMEOUT_DEFAULT_S = 30;
 
     /**
+     * Normaliza las opciones de una tarea contra los defaults. Las claves
+     * desconocidas se ignoran en silencio: es configuración de código, no
+     * entrada de usuario.
+     *
+     * @param array<string,mixed> $opciones
+     * @return array{model: ?string, max_tokens: ?int, timeout: ?int, campo_tokens: string}
+     */
+    public static function opcionesTarea(array $opciones): array
+    {
+        return [
+            'model' => isset($opciones['model']) && trim((string) $opciones['model']) !== ''
+                ? trim((string) $opciones['model']) : null,
+            'max_tokens' => isset($opciones['max_tokens']) ? (int) $opciones['max_tokens'] : null,
+            'timeout' => isset($opciones['timeout']) ? (int) $opciones['timeout'] : null,
+            'campo_tokens' => (string) ($opciones['campo_tokens'] ?? 'Máximo de tokens por respuesta'),
+        ];
+    }
+
+    /**
      * Llama al endpoint Chat Completions (formato OpenAI, el mismo que
      * habla DeepSeek) con el system prompt + historial + mensaje nuevo, y
      * devuelve el texto de respuesta. Lanza RuntimeException con un mensaje
@@ -39,19 +58,21 @@ final class LlmChat
      * respuesta) necesita más aire: sin esto devuelve `content` vacío con
      * todo el pensamiento adentro de `reasoning_content`.
      *
-     * `$campoTokens` es el rótulo del campo que hay que subir en
-     * Admin -> IA Paciente si el presupuesto no alcanza. Hay más de uno y
-     * subir el que no es no arregla nada, así que el error lo nombra.
-     *
-     * `$timeoutSegundos` es lo mismo pero para la espera: una tarea que
-     * corre sin nadie mirando puede darse el lujo de esperar bastante más
-     * que el chat, y un modelo de razonamiento lo necesita.
+     * `$opciones` deja que cada tarea pise lo que la configuración fija
+     * para el chat con el paciente (ver opcionesTarea): `model`,
+     * `max_tokens`, `timeout` y `campo_tokens`. Van en un array y no como
+     * parámetros sueltos porque ya eran cuatro y la llamada se volvía
+     * ilegible; los llamadores que no pisan nada siguen escribiéndose con
+     * tres argumentos.
      */
     public static function reply(string $systemPrompt, array $history, string $userMessage,
-                                 ?int $maxTokens = null,
-                                 string $campoTokens = 'Máximo de tokens por respuesta',
-                                 ?int $timeoutSegundos = null): string
+                                 array $opciones = []): string
     {
+        $cfgTarea = self::opcionesTarea($opciones);
+        $maxTokens = $cfgTarea['max_tokens'];
+        $campoTokens = $cfgTarea['campo_tokens'];
+        $timeoutSegundos = $cfgTarea['timeout'];
+        $modeloTarea = $cfgTarea['model'];
         $cfg = LlmConfig::get();
         if ($cfg['api_key'] === '') {
             throw new RuntimeException('Falta configurar el api_key del LLM en Admin -> IA Paciente.');
@@ -66,8 +87,9 @@ final class LlmChat
         }
         $messages[] = ['role' => 'user', 'content' => $userMessage];
 
+        $modelo = $modeloTarea ?? (string) $cfg['model'];
         $payload = json_encode([
-            'model' => $cfg['model'],
+            'model' => $modelo,
             'messages' => $messages,
             'temperature' => $cfg['temperature'],
             'max_tokens' => $maxTokens ?? $cfg['max_tokens'],
@@ -102,7 +124,7 @@ final class LlmChat
             if ($curlErrno === CURLE_OPERATION_TIMEDOUT) {
                 throw new RuntimeException(sprintf(
                     'El modelo "%s" no alcanzó a responder en %d segundos. Los modelos de razonamiento tardan bastante más en tareas largas: probá con uno sin razonamiento (deepseek-chat, por ejemplo) en Admin -> IA Paciente.',
-                    (string) $cfg['model'], $timeoutSegundos ?? self::TIMEOUT_DEFAULT_S
+                    $modelo, $timeoutSegundos ?? self::TIMEOUT_DEFAULT_S
                 ));
             }
             throw new RuntimeException('No se pudo conectar con el LLM: ' . $curlError);
@@ -117,7 +139,7 @@ final class LlmChat
 
         return self::extractContent(
             is_array($decoded) ? $decoded : [], (string) $response,
-            (string) $cfg['model'], (int) ($maxTokens ?? $cfg['max_tokens']), $campoTokens
+            $modelo, (int) ($maxTokens ?? $cfg['max_tokens']), $campoTokens
         );
     }
 

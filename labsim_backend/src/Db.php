@@ -241,6 +241,7 @@ final class Db
     public static function migrateLlmAnamnesisTokensIfNeeded(): void
     {
         self::addColumnIfMissing(self::get(), 'llm_config', 'anamnesis_max_tokens', 'INTEGER NOT NULL DEFAULT 6000');
+        self::addColumnIfMissing(self::get(), 'llm_config', 'anamnesis_model', "TEXT NOT NULL DEFAULT ''");
     }
 
     /**

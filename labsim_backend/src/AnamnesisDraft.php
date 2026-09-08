@@ -40,6 +40,12 @@ final class AnamnesisDraft
         return max(1, (int) LlmConfig::get()['anamnesis_max_tokens']);
     }
 
+    /** Modelo efectivo de esta tarea: el propio, o el general si está vacío. */
+    public static function model(): string
+    {
+        return LlmConfig::effectiveAnamnesisModel();
+    }
+
     /**
      * Techo del reintento automático. Un modelo de razonamiento puede
      * gastar varios miles de tokens pensando una tarea chica, y cuánto
@@ -56,6 +62,27 @@ final class AnamnesisDraft
      * de razonamiento generando varios miles de tokens no entra en 30.
      */
     public const TIMEOUT_S = 90;
+
+    /**
+     * Lo que esta tarea pisa de la configuración del chat: su modelo, su
+     * presupuesto, su espera y el rótulo del campo que hay que subir si el
+     * presupuesto no alcanza.
+     *
+     * Recibe modelo y presupuesto en vez de leerlos: así queda pura (se
+     * testea sin base) y generate() consulta la configuración una sola vez
+     * en lugar de una por intento.
+     *
+     * @return array<string,mixed>
+     */
+    public static function opciones(int $presupuesto, string $modelo): array
+    {
+        return [
+            'model' => $modelo,
+            'max_tokens' => $presupuesto,
+            'timeout' => self::TIMEOUT_S,
+            'campo_tokens' => 'Máximo de tokens del borrador de anamnesis',
+        ];
+    }
 
     /**
      * Presupuesto del reintento: el triple, con techo. Si ya se pidió el
@@ -180,9 +207,9 @@ TXT;
     {
         $prompt = self::describeCase($data);
         $presupuesto = self::maxTokens();
+        $modelo = self::model();
         try {
-            $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], $prompt, $presupuesto,
-                                  'Máximo de tokens del borrador de anamnesis', self::TIMEOUT_S);
+            $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], $prompt, self::opciones($presupuesto, $modelo));
         } catch (LlmBudgetException $e) {
             // Un solo reintento con más aire. Cuánto razona el modelo
             // depende del caso, así que el número "correcto" no existe:
@@ -192,8 +219,7 @@ TXT;
             if ($reintento <= $presupuesto) {
                 throw $e;
             }
-            $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], $prompt, $reintento,
-                                  'Máximo de tokens del borrador de anamnesis', self::TIMEOUT_S);
+            $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], $prompt, self::opciones($reintento, $modelo));
         }
         $draft = self::parse($raw);
         if ($draft === null) {
