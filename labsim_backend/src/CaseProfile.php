@@ -58,9 +58,11 @@ final class CaseProfile
      *            deterioro tonal (Carhart/Stat/Rosemberg). Van juntas
      *            porque miden el mismo eje desde los dos lados: el
      *            reclutamiento es el signo de la lesión de CCE y el
-     *            deterioro tonal el del nervio.
+     *            deterioro tonal el del nervio. Incluye el LDL, que es la
+     *            expresión audiométrica del mismo fenómeno.
+     * - logo:    logoaudiometría -- máxima discriminación y a qué nivel.
      */
-    public const AUTO_MODULES = ['abr', 'eoas', 'reflex', 'recruit'];
+    public const AUTO_MODULES = ['abr', 'eoas', 'reflex', 'recruit', 'logo'];
 
     /** Frecuencias sobre las que se promedia para clasificar el oído (Hz). */
     public const CORE_FREQS = [500, 1000, 2000, 4000];
@@ -166,24 +168,28 @@ final class CaseProfile
             'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 5, 3000 => 5, 4000 => 5, 6000 => 10, 8000 => 10],
             'sn_scale' => [0.0, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
         ],
         'coclear_agudos' => [
             'label' => 'Coclear en agudos (descendente)',
             'sn_shape' => [125 => 0, 250 => 0, 500 => 5, 1000 => 10, 2000 => 25, 3000 => 35, 4000 => 45, 6000 => 50, 8000 => 55],
             'sn_scale' => [0.6, 1.5], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
         ],
         'muesca_4k' => [
             'label' => 'Muesca en 4 kHz (trauma acústico)',
             'sn_shape' => [125 => 0, 250 => 0, 500 => 0, 1000 => 5, 2000 => 10, 3000 => 30, 4000 => 45, 6000 => 35, 8000 => 20],
             'sn_scale' => [0.7, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
         ],
         'coclear_plana' => [
             'label' => 'Coclear plana',
             'sn_shape' => [125 => 40, 250 => 40, 500 => 45, 1000 => 45, 2000 => 45, 3000 => 45, 4000 => 50, 6000 => 50, 8000 => 50],
             'sn_scale' => [0.6, 1.5], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
         ],
         'conductiva' => [
             'label' => 'Conductiva (otitis media / otoesclerosis)',
@@ -192,6 +198,9 @@ final class CaseProfile
             'gap_shape' => [125 => 40, 250 => 40, 500 => 38, 1000 => 32, 2000 => 28, 3000 => 26, 4000 => 25, 6000 => 25, 8000 => 25],
             'gap_scale' => [0.5, 1.2],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            // B = ocupación (otitis media), As = oído medio rígido
+            // (otoesclerosis). Los dos dan gap; cuál sale decide el sorteo.
+            'z' => ['B', 'As'], 'etf' => 'Disfunción tubaria',
         ],
         'mixta' => [
             'label' => 'Mixta',
@@ -200,18 +209,21 @@ final class CaseProfile
             'gap_shape' => [125 => 30, 250 => 30, 500 => 28, 1000 => 25, 2000 => 22, 3000 => 20, 4000 => 20, 6000 => 20, 8000 => 20],
             'gap_scale' => [0.6, 1.1],
             'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['B', 'As'], 'etf' => 'Disfunción tubaria',
         ],
         'retrococlear' => [
             'label' => 'Retrococlear (schwannoma vestibular)',
             'sn_shape' => [125 => 10, 250 => 10, 500 => 15, 1000 => 20, 2000 => 30, 3000 => 40, 4000 => 45, 6000 => 50, 8000 => 55],
             'sn_scale' => [0.5, 1.2], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [10, 35], 'retro' => 'schwannoma', 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
         ],
         'neuropatia' => [
             'label' => 'Neuropatía auditiva / desincronía (ANSD)',
             'sn_shape' => [125 => 45, 250 => 45, 500 => 50, 1000 => 50, 2000 => 50, 3000 => 50, 4000 => 55, 6000 => 55, 8000 => 55],
             'sn_scale' => [0.6, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [0, 10], 'retro' => 'ansd', 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
         ],
     ];
 
@@ -549,6 +561,174 @@ final class CaseProfile
     }
 
     // ---------------------------------------------------------------
+    // Logoaudiometria
+    // ---------------------------------------------------------------
+
+    /**
+     * Frecuencias que fijan el NIVEL del habla (las mismas de Fletcher,
+     * que ya usan fletcherAvg/SRT).
+     */
+    public const SPEECH_FREQS = [500, 1000, 2000];
+
+    /**
+     * Peso de cada frecuencia en la DISCRIMINACIÓN, que no es lo mismo que
+     * el nivel: las consonantes viven en 2-4 kHz. Con el promedio de
+     * Fletcher a secas, una descendente con graves conservados daba 100% de
+     * discriminación -- y una caída en agudos es justo la que se come las
+     * consonantes y deja al paciente diciendo "oigo pero no entiendo".
+     */
+    public const SPEECH_WEIGHTS = [500 => 0.15, 1000 => 0.25, 2000 => 0.30, 4000 => 0.30];
+
+    /**
+     * Caída de la discriminación por dB de pérdida, según el sitio.
+     *
+     * La coclear pierde discriminación despacio y en proporción a la
+     * pérdida: 40 dB deja ~85%, que sigue siendo funcional. La
+     * retrococlear la pierde mucho más rápido y desproporcionadamente al
+     * audiograma -- es la DISOCIACIÓN AUDIO-VERBAL, el signo retrococlear
+     * más clásico que hay, y sin esto el caso no lo puede mostrar.
+     */
+    public const LOGO_CCE_SLOPE = 0.8;
+    public const LOGO_CCE_KNEE_DB = 20.0;
+    public const LOGO_RETRO_SLOPE = 1.8;
+    public const LOGO_RETRO_KNEE_DB = 10.0;
+
+    /** Cuánto por encima del umbral del habla se alcanza el máximo. */
+    public const LOGO_SL_DB = 35.0;
+    /** Salida máxima practicable del canal de habla. */
+    public const LOGO_MAX_DB = 110.0;
+
+    /**
+     * Máxima discriminación del oído y a qué intensidad se alcanza.
+     *
+     * El gap NO baja el porcentaje: una conductiva no distorsiona, solo
+     * atenúa. Lo que hace es correr la curva a la derecha, así que entra
+     * en la intensidad y no en el máximo.
+     *
+     * El porcentaje se cuantiza a múltiplos de 4 porque es la grilla que
+     * usa el motor del logoaudiograma (`por_logo` en
+     * src/audiometria/logoaudiometry.py); un valor fuera de la grilla
+     * revienta el índice al armar la curva.
+     *
+     * El reclutamiento (rollover: la curva CAE pasado el máximo) no se
+     * decide acá -- sale del flag `recruit`, que ya deriva recruitment().
+     *
+     * @param array $decomp Salida de decompose()
+     * @return array{pct:int, int:int}
+     */
+    public static function discrimination(array $decomp, float $ccePct, array $retro): array
+    {
+        $ccePct = self::clamp($ccePct, 0.0, 100.0);
+        // Para el porcentaje manda la banda de las consonantes; para la
+        // intensidad a la que se alcanza, el promedio de Fletcher.
+        $snDiscrim = self::weightedAverage($decomp['sn'], self::SPEECH_WEIGHTS);
+        $sn = self::speechAverage($decomp['sn']);
+        $gap = self::speechAverage($decomp['gap']);
+        $cce = $snDiscrim * $ccePct / 100.0;
+        $retroSn = $snDiscrim - $cce;
+
+        $porCoclear = max(0.0, $cce - self::LOGO_CCE_KNEE_DB) * self::LOGO_CCE_SLOPE;
+        $porRetro = max(0.0, $retroSn - self::LOGO_RETRO_KNEE_DB) * self::LOGO_RETRO_SLOPE;
+        // Un patrón retrococlear cargado castiga la discriminación aunque
+        // el audiograma esté limpio: un schwannoma chico se delata así.
+        if (self::retroActivo($retro)) {
+            $porRetro += 20.0;
+        }
+        $pct = self::clamp(100.0 - $porCoclear - $porRetro, 0.0, 100.0);
+
+        return [
+            'pct' => (int) (round($pct / 4) * 4),
+            'int' => (int) self::clamp(
+                round(($sn + $gap + self::LOGO_SL_DB) / 5) * 5, 0.0, self::LOGO_MAX_DB
+            ),
+        ];
+    }
+
+    // ---------------------------------------------------------------
+    // Campo dinamico (LDL)
+    // ---------------------------------------------------------------
+
+    /**
+     * Nivel de disconfort en un oído sano (dB HL). Es casi constante: no
+     * sube con la pérdida coclear, y ESE es el punto -- el umbral sube, el
+     * LDL no, y el campo dinámico se estrecha solo. El reclutamiento no
+     * hay que dibujarlo, cae de la física.
+     */
+    public const LDL_NORMAL_DB = 100.0;
+    /** Campo dinámico mínimo que deja una cóclea dañada. */
+    public const LDL_MIN_RANGE_DB = 10.0;
+    /** Campo dinámico de un oído SIN reclutamiento (retrococlear). */
+    public const LDL_FULL_RANGE_DB = 95.0;
+    /** Tope del audiómetro para el LDL. 130 es el centinela de "no medido". */
+    public const LDL_MAX_DB = 120.0;
+
+    /**
+     * Curva de LDL por frecuencia (dB HL).
+     *
+     * Coclear: el LDL se queda donde está y el campo dinámico se cierra.
+     * Retrococlear: el LDL sube con el umbral, el campo dinámico se
+     * conserva y no hay reclutamiento. Conductiva: todo corrido por el
+     * gap, porque el oído medio atenúa también lo fuerte.
+     *
+     * @param array $decomp Salida de decompose()
+     * @return array<int,int> índice de CaseBuilder::FREQUENCIES -> dB HL
+     */
+    public static function ldlCurve(array $decomp, float $ccePct): array
+    {
+        $fraccionRetro = 1.0 - self::clamp($ccePct, 0.0, 100.0) / 100.0;
+        $rango = self::LDL_MIN_RANGE_DB
+            + (self::LDL_FULL_RANGE_DB - self::LDL_MIN_RANGE_DB) * $fraccionRetro;
+
+        $out = [];
+        foreach (CaseBuilder::FREQUENCIES as $i => $hz) {
+            $sn = $decomp['sn'][$hz] ?? 0.0;
+            $gap = $decomp['gap'][$hz] ?? 0.0;
+            $ldl = $gap + max(self::LDL_NORMAL_DB, $sn + $rango);
+            $out[$i] = (int) self::clamp(round($ldl / 5) * 5, 0.0, self::LDL_MAX_DB);
+        }
+        return $out;
+    }
+
+    /**
+     * Promedio ponderado de una curva (Hz => dB).
+     *
+     * @param array<int,float> $curva
+     * @param array<int,float> $pesos Hz => peso
+     */
+    public static function weightedAverage(array $curva, array $pesos): float
+    {
+        $suma = 0.0;
+        $peso = 0.0;
+        foreach ($pesos as $hz => $w) {
+            $nivel = self::levelAt($curva, (float) $hz);
+            if ($nivel !== null) {
+                $suma += $nivel * $w;
+                $peso += $w;
+            }
+        }
+        return $peso > 0 ? $suma / $peso : 0.0;
+    }
+
+    /**
+     * Promedio de una curva (Hz => dB) en la zona del habla.
+     *
+     * @param array<int,float> $curva
+     */
+    public static function speechAverage(array $curva): float
+    {
+        $suma = 0.0;
+        $n = 0;
+        foreach (self::SPEECH_FREQS as $hz) {
+            $nivel = self::levelAt($curva, (float) $hz);
+            if ($nivel !== null) {
+                $suma += $nivel;
+                $n++;
+            }
+        }
+        return $n > 0 ? $suma / $n : 0.0;
+    }
+
+    // ---------------------------------------------------------------
     // Reflejo acustico
     // ---------------------------------------------------------------
 
@@ -675,6 +855,29 @@ final class CaseProfile
         return (int) (round($umbral / 5) * 5);
     }
 
+    /**
+     * Morfología de la curva del reflejo (ver CaseBuilder::REFLEX_CURVE_TYPES).
+     *
+     * Solo se deriva el patrón OFF, que es el decay del reflejo: la
+     * contracción no se sostiene y cae durante la estimulación. Es signo
+     * retrococlear, del mismo eje que el deterioro tonal.
+     *
+     * 'invertido' y 'on-off' se dejan siempre al docente a propósito: el
+     * primero es un artefacto de registro (sonda mal sellada, presión mal
+     * compensada) y el segundo un hallazgo puntual; ninguno se deduce del
+     * sitio de la lesión, y sortearlos solo agregaría ruido al caso.
+     *
+     * @param array<string,mixed> $retro
+     */
+    public static function reflexCurveType(array $decomp, float $ccePct, array $retro): string
+    {
+        if (self::retroActivo($retro)) {
+            return 'off';
+        }
+        $retroSn = self::coreMax($decomp['sn']) * (1.0 - self::clamp($ccePct, 0.0, 100.0) / 100.0);
+        return $retroSn >= 30.0 ? 'off' : 'normal';
+    }
+
     // ---------------------------------------------------------------
     // Deterioro tonal (Carhart / Stat / Rosemberg)
     // ---------------------------------------------------------------
@@ -753,8 +956,10 @@ final class CaseProfile
 
         $abr = [];
         $eoas = [];
-        $reflex = ['ipsi' => [], 'contra' => []];
+        $reflex = ['ipsi' => [], 'contra' => [], 'tipo' => []];
         $recPorLado = [];
+        $logo = [];
+        $ldl = [];
         foreach (['od' => 'OD', 'oi' => 'OI'] as $ladoForm => $lado) {
             $ccePct = (float) ($perfil[$lado]['cce_pct'] ?? self::DEFAULT_CCE_PCT);
             $retro = self::normalizeRetro($perfil[$lado]['retro'] ?? []);
@@ -801,8 +1006,11 @@ final class CaseProfile
             }
             $reflex['ipsi'][$ladoForm] = $ipsi;
             $reflex['contra'][$ladoForm] = $contra;
+            $reflex['tipo'][$ladoForm] = self::reflexCurveType($decomp[$lado], $ccePct, $retro);
 
             $recPorLado[$lado] = self::recruitment($ccePct, $decomp[$lado]);
+            $logo[$lado] = self::discrimination($decomp[$lado], $ccePct, $retro);
+            $ldl[$ladoForm] = self::ldlCurve($decomp[$lado], $ccePct);
         }
 
         // Fowler compara dos oídos: el patrón es el del oído EN ESTUDIO (el
@@ -840,7 +1048,11 @@ final class CaseProfile
                 'recruit' => [$recPorLado['OD']['recruit'], $recPorLado['OI']['recruit']],
                 'fowler' => $fowler,
                 'decay' => $decay,
+                // El LDL va con el reclutamiento: es su expresión
+                // audiométrica, el umbral sube y el disconfort no.
+                'ldl' => $ldl,
             ],
+            'logo' => $logo,
         ];
     }
 
@@ -856,6 +1068,10 @@ final class CaseProfile
      */
     public const WARN_OAE_DB = 15.0;
     public const WARN_ABR_DB = 25.0;
+    /** Gap desde el cual un timpanograma A es una contradicción. */
+    public const WARN_TYMP_GAP_DB = 20.0;
+    /** Gap por debajo del cual un timpanograma B es una contradicción. */
+    public const WARN_TYMP_NO_GAP_DB = 10.0;
 
     /**
      * Contradicciones entre lo que el docente cargó a mano y lo que el
@@ -923,6 +1139,26 @@ final class CaseProfile
                         break;
                     }
                 }
+            }
+
+            // --- Oído medio: el timpanograma nunca se deriva (qué curva
+            // sale depende de la patología concreta, no del audiograma),
+            // así que es el único lugar donde la contradicción solo se
+            // puede avisar. Y es la que más se escapa: un gap de 40 dB con
+            // timpanograma A no existe.
+            $tymp = (string) ($tympPorLado[$lado] ?? 'A');
+            $gapMax = self::coreMax($decomp['gap']);
+            if ($tymp === 'A' && $gapMax >= self::WARN_TYMP_GAP_DB) {
+                $avisos[] = sprintf(
+                    'Timpanometría %s: curva A (oído medio normal) con un gap aéreo-óseo de %d dB. Un oído medio que funciona no produce gap -- elegí B (ocupación), As (rígido), Ad (hipercompliante) o C, o sacá el gap del audiograma.',
+                    $lado, (int) round($gapMax)
+                );
+            }
+            if ($tymp === 'B' && $gapMax < self::WARN_TYMP_NO_GAP_DB) {
+                $avisos[] = sprintf(
+                    'Timpanometría %s: curva B (oído medio ocupado o sin movilidad) con gap de %d dB. Una ocupación siempre deja gap: cargalo en la vía aérea o cambiá el timpanograma.',
+                    $lado, (int) round($gapMax)
+                );
             }
 
             // --- Reflejos: presencia, que es el hallazgo que se lee primero.

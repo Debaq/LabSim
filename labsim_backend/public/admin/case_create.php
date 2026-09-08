@@ -361,6 +361,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Supraliminares: en variables (y no leídas inline más abajo) porque
         // la proyección del perfil las puede reescribir.
         $sisiVals = [(int) fv($v, ['sisi', 'od'], 0), (int) fv($v, ['sisi', 'oi'], 0)];
+        // Logoaudiometría: máxima discriminación por oído, en variable por
+        // lo mismo que las supraliminares (la proyección la puede pisar).
+        $umd = [
+            ['int' => (int) fv($v, ['umd_int', 'od'], 35), 'percentage' => (int) fv($v, ['umd_pct', 'od'], 100)],
+            ['int' => (int) fv($v, ['umd_int', 'oi'], 35), 'percentage' => (int) fv($v, ['umd_pct', 'oi'], 100)],
+        ];
         $recruitVals = [isset($v['recruit']['od']), isset($v['recruit']['oi'])];
 
         // Acufenometría: lateralidad (craneal/unilateral/bilateral) es
@@ -528,6 +534,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($perfilAuto['reflex']) {
             $reflexIpsi = $proyeccion['reflex']['ipsi'];
             $reflexContra = $proyeccion['reflex']['contra'];
+            $reflexType = $proyeccion['reflex']['tipo'];
         }
         if ($perfilAuto['recruit']) {
             $sisiVals = $proyeccion['recruit']['sisi'];
@@ -542,6 +549,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($proyeccion['recruit']['decay'] as $modoDecay => $valsDecay) {
                 $decayPairs[$modoDecay] = zip_pairs($valsDecay['od'], $valsDecay['oi']);
             }
+            // El LDL es la expresión audiométrica del reclutamiento: el
+            // umbral sube y el disconfort no. Derivado, siempre está medido
+            // (el 130 de "no medido" dejaría el hallazgo invisible).
+            $ldl = $proyeccion['recruit']['ldl'];
+        }
+        if ($perfilAuto['logo']) {
+            $umd = [
+                ['int' => $proyeccion['logo']['OD']['int'], 'percentage' => $proyeccion['logo']['OD']['pct']],
+                ['int' => $proyeccion['logo']['OI']['int'], 'percentage' => $proyeccion['logo']['OI']['pct']],
+            ];
         }
 
         // VEMP: patología vestibular por oído. El subtipo (CVEMP cervical,
@@ -666,10 +683,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'z_oi' => $zOi,
                 'rinne' => $rinne,
                 'weber' => $weber,
-                'umd' => [
-                    ['int' => (int) fv($v, ['umd_int', 'od'], 35), 'percentage' => (int) fv($v, ['umd_pct', 'od'], 100)],
-                    ['int' => (int) fv($v, ['umd_int', 'oi'], 35), 'percentage' => (int) fv($v, ['umd_pct', 'oi'], 100)],
-                ],
+                'umd' => $umd,
                 'sdt' => $sdt,
                 'srt' => $srt,
                 'fowler' => [
@@ -958,10 +972,16 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         </label>
         <label class="inline-check">
             <input type="checkbox" name="perfil[auto][recruit]" value="1" <?= fv($v, ['perfil', 'auto', 'recruit'], null) ? 'checked' : '' ?>>
-            Supraliminares (Fowler, SISI, deterioro tonal)
+            Supraliminares (Fowler, SISI, deterioro tonal, LDL)
+        </label>
+        <label class="inline-check">
+            <input type="checkbox" name="perfil[auto][logo]" value="1" <?= fv($v, ['perfil', 'auto', 'logo'], null) ? 'checked' : '' ?>>
+            Logoaudiometría (máxima discriminación)
         </label>
     </div>
-    <p class="legend help">OEA: la atenuación pasa a salir del componente coclear y del gap, frecuencia por frecuencia -- los campos del tab EOA se sobrescriben al guardar. Reflejos: la sonda decide si el reflejo se ve (oído medio) y el oído estimulado a qué nivel aparece; una coclear no sube el umbral en proporción a la pérdida (Metz) y una retrococlear sí. Supraliminares: reclutamiento y deterioro tonal miden lo mismo desde dos lados, así que salen del mismo número y no pueden contradecirse.</p>
+    <p class="legend help">OEA: la atenuación pasa a salir del componente coclear y del gap, frecuencia por frecuencia. Reflejos: la sonda decide si el reflejo se ve (oído medio) y el oído estimulado a qué nivel aparece; una coclear no sube el umbral en proporción a la pérdida (Metz) y una retrococlear sí, y el patrón OFF --el reflejo que no se sostiene-- sale del componente retro. Supraliminares: reclutamiento, deterioro tonal y LDL miden el mismo eje desde tres lados, así que salen del mismo número y no pueden contradecirse; el LDL no sube con la pérdida coclear, y por eso el campo dinámico se cierra solo.</p>
+    <p class="legend help">Logoaudiometría: la discriminación máxima cae despacio en una coclear y se desploma en una retrococlear, muy por debajo de lo que predice el audiograma -- es la disociación audio-verbal. El gap no la baja: una conductiva no distorsiona, solo pide más intensidad. El rollover (la curva que cae pasado el máximo) ya venía del reclutamiento.</p>
+    <p class="legend help">El timpanograma no se deriva: qué curva sale depende de la patología concreta (B ocupación, As rígido, Ad hipercompliante, C retracción) y esa es una decisión clínica, no una cuenta. Lo que sí se hace es avisar si contradice al gap.</p>
 </div>
 <div class="card">
     <strong>Umbral por estímulo, derivado del audiograma</strong>
@@ -2077,8 +2097,10 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         abr: ['abr[od][type]', 'abr[oi][type]', 'abr[od][umbral]', 'abr[oi][umbral]'],
         eoas: ['eoas[od][type]', 'eoas[oi][type]', 'eoas[od][umbral]', 'eoas[oi][umbral]',
                'eoas[od][desv]', 'eoas[oi][desv]'],
-        reflex: ['reflex_ipsi[', 'reflex_contra['],
-        recruit: ['sisi[', 'recruit[', 'fowler_pattern[', 'carhart[', 'stat[', 'rosemberg[']
+        reflex: ['reflex_ipsi[', 'reflex_contra[', 'reflex_type['],
+        recruit: ['sisi[', 'recruit[', 'fowler_pattern[', 'carhart[', 'stat[', 'rosemberg[',
+                  'ldl[', 'ldl_habilitado['],
+        logo: ['umd_int[', 'umd_pct[']
     };
 
     function elementos(prefijos) {
@@ -2175,6 +2197,17 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             igualar.checked = false;
         }
 
+        // Oído medio: el gap y el timpanograma tienen que contar la misma
+        // historia. Sin esto el cuadro "Conductiva" salía con 35 dB de gap
+        // y curva A, o sea con la contradicción adentro desde el sorteo.
+        var z = document.getElementById('z_' + lado);
+        if (z) {
+            var opciones = afectado && esc.z && esc.z.length ? esc.z : ['A'];
+            z.value = opciones[Math.floor(Math.random() * opciones.length)];
+        }
+        var etf = document.querySelector('select[name="etf_' + lado + '"]');
+        if (etf) { etf.value = afectado && esc.etf ? esc.etf : 'Normal'; }
+
         var cce = document.querySelector('input[name="perfil[' + lado + '][cce_pct]"]');
         if (cce) {
             cce.value = afectado
@@ -2223,7 +2256,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         });
 
         // Un caso sorteado nace coherente: las proyecciones se encienden.
-        ['abr', 'eoas', 'reflex', 'recruit'].forEach(function (modulo) {
+        <?= json_encode(CaseProfile::AUTO_MODULES) ?>.forEach(function (modulo) {
             var chk = document.querySelector('input[name="perfil[auto][' + modulo + ']"]');
             if (chk) {
                 chk.checked = true;
@@ -2263,6 +2296,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     var ORDEN = ['tone_burst_500Hz', 'tone_burst_1000Hz', 'tone_burst_2000Hz',
                  'tone_burst_4000Hz', 'click', 'ce_chirp', 'ls_chirp'];
 
+    var MODULOS = <?= json_encode(CaseProfile::AUTO_MODULES) ?>;
     var preview = document.getElementById('abr-threshold-preview');
     var tbody = document.getElementById('abr-threshold-rows');
 
@@ -2293,7 +2327,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             perfil[lado] = { cce_pct: cce ? cce.value : 100, retro: retro };
         });
         var auto = {};
-        ['abr', 'eoas', 'reflex', 'recruit'].forEach(function (m) { auto[m] = autoOn(m); });
+        MODULOS.forEach(function (m) { auto[m] = autoOn(m); });
         var zOd = campo('z_od'), zOi = campo('z_oi');
         return {
             aerea: { od: curva('aerea', 'od'), oi: curva('aerea', 'oi') },
@@ -2358,6 +2392,9 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                     });
                 });
             });
+            ['od', 'oi'].forEach(function (lado) {
+                setVal('reflex_type[' + lado + ']', p.reflex.tipo[lado]);
+            });
             // La tabla-resumen de reflejos se dibuja desde los inputs.
             if (window.drawReflexPattern) { window.drawReflexPattern(); }
         }
@@ -2378,6 +2415,25 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                     });
                 });
             });
+            ['od', 'oi'].forEach(function (lado) {
+                (p.recruit.ldl[lado] || []).forEach(function (valor, n) {
+                    setVal('ldl[' + lado + '][' + n + ']', valor);
+                });
+                // Derivado, el LDL siempre está medido: dejarlo en "no
+                // medido" esconde justo el hallazgo del reclutamiento.
+                var medido = campo('ldl_habilitado[' + lado + ']');
+                if (medido) { medido.checked = true; }
+            });
+            if (window.drawAudiogram) { window.drawAudiogram(); }
+        }
+
+        if (autoOn('logo')) {
+            ['od', 'oi'].forEach(function (lado) {
+                var lo = lado.toUpperCase();
+                setVal('umd_int[' + lado + ']', p.logo[lo].int);
+                setVal('umd_pct[' + lado + ']', p.logo[lo].pct);
+            });
+            if (window.drawLogogram) { window.drawLogogram(); }
         }
     }
 
@@ -2385,7 +2441,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     function proyectar() {
         // Sin ningún módulo derivado no hay nada que pintar: el formulario
         // es del docente y no se le toca ni un campo.
-        if (!['abr', 'eoas', 'reflex', 'recruit'].some(autoOn)) {
+        if (!MODULOS.some(autoOn)) {
             if (preview) { preview.hidden = true; }
             return;
         }

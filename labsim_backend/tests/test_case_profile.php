@@ -304,8 +304,29 @@ $perfilAuto['auto'] = ['abr' => true, 'eoas' => true, 'reflex' => true, 'recruit
 t_eq(CaseProfile::warnings($decompCoclear, $perfilAuto,
         ['OD' => $abrNormal, 'OI' => $abrNormal],
         ['OD' => $eoasNormal, 'OI' => $eoasNormal],
-        $reflexPresente, ['OD' => 'B', 'OI' => 'A']),
+        $reflexPresente, $tympNormal),
     [], 'Con todo derivado no se avisa nada: el perfil es la fuente');
+
+// El timpanograma es la excepción: no se deriva de nada (qué curva sale
+// depende de la patología concreta, no del audiograma), así que su
+// contradicción con el gap se avisa siempre, con o sin módulos derivados.
+$avisos = CaseProfile::warnings($decompSanos, $perfilAuto,
+    ['OD' => $abrNormal, 'OI' => $abrNormal],
+    ['OD' => $eoasNormal, 'OI' => $eoasNormal],
+    $reflexPresente, ['OD' => 'B', 'OI' => 'A']);
+t_true(strpos(implode(' ', $avisos), 'Timpanometría OD') !== false,
+    'Curva B sin gap: se avisa aunque todo esté derivado');
+$avisos = CaseProfile::warnings(['OD' => $dCond, 'OI' => $dNormal], $perfilAuto,
+    ['OD' => $abrNormal, 'OI' => $abrNormal],
+    ['OD' => $eoasNormal, 'OI' => $eoasNormal],
+    $reflexPresente, $tympNormal);
+t_true(strpos(implode(' ', $avisos), 'curva A') !== false,
+    'Gap de 40 dB con timpanograma A: la contradicción que más se escapaba');
+$avisos = CaseProfile::warnings(['OD' => $dCond, 'OI' => $dNormal], $perfilAuto,
+    ['OD' => $abrNormal, 'OI' => $abrNormal],
+    ['OD' => $eoasNormal, 'OI' => $eoasNormal],
+    $reflexPresente, ['OD' => 'B', 'OI' => 'A']);
+t_eq($avisos, [], 'Gap de 40 dB con curva B: coherente, sin aviso');
 
 // La ley de atenuación cargada tiene que ser la misma que la del cliente.
 $cargada = CaseProfile::loadedOaeAttenuation(['type' => 'coclear', 'umbral' => 40, 'desviaciones' => []]);
@@ -421,3 +442,74 @@ foreach ($p['recruit']['fowler'] as $freqIdx => $patron) {
 // Un oído sin pérdida no puede tener reflejos ausentes ni deterioro tonal.
 t_eq($p['reflex']['ipsi']['oi'], [85, 85, 85, 85], 'project(): el oído sano tiene reflejos normales');
 t_eq($p['recruit']['decay']['carhart']['oi'], [0, 0, 0, 0], 'project(): el oído sano no tiene deterioro tonal');
+
+// ---------------------------------------------------------------------
+// Logoaudiometría: la disociación audio-verbal.
+// ---------------------------------------------------------------------
+
+$logoSano = CaseProfile::discrimination($dNormal, 100.0, $sinRetro);
+t_eq($logoSano['pct'], 100, 'Oído sano: 100% de discriminación');
+
+$logoCoclear = CaseProfile::discrimination($dCoclear40, 100.0, $sinRetro);
+$logoRetro = CaseProfile::discrimination($dRetro40, 0.0, $sinRetro);
+t_true($logoCoclear['pct'] >= 80,
+    'Coclear de 40 dB: discriminación reducida pero funcional (~84%)');
+t_true($logoRetro['pct'] < 60,
+    'Retrococlear de 40 dB: discriminación muy por debajo de lo que predice el audiograma');
+t_true($logoCoclear['pct'] - $logoRetro['pct'] >= 25,
+    'Mismo audiograma, sitio distinto: eso es la disociación audio-verbal, y sin esto el caso no la podía mostrar');
+t_eq($logoCoclear['pct'] % 4, 0,
+    'El porcentaje cae en la grilla de por_logo (múltiplos de 4): fuera de ella el motor del logograma revienta');
+
+// Schwannoma con audiograma limpio: la discriminación igual se cae.
+$logoSchwannoma = CaseProfile::discrimination($dNormal, 100.0, $schwannoma);
+t_true($logoSchwannoma['pct'] < 85,
+    'Patrón retro con umbrales normales: discriminación caída igual');
+
+// El gap no distorsiona, solo atenúa: no baja el máximo, lo corre a la derecha.
+$logoCond = CaseProfile::discrimination($dCond, 100.0, $sinRetro);
+t_eq($logoCond['pct'], 100, 'Conductiva: la discriminación máxima no cae, una conductiva no distorsiona');
+t_true($logoCond['int'] > $logoSano['int'] + 25,
+    'Conductiva: el máximo se alcanza mucho más fuerte');
+
+// ---------------------------------------------------------------------
+// LDL: el reclutamiento no se dibuja, cae de la física.
+// ---------------------------------------------------------------------
+
+$ldlSano = CaseProfile::ldlCurve($dNormal, 100.0);
+$ldlCoclear = CaseProfile::ldlCurve($dCoclear40, 100.0);
+$ldlRetro = CaseProfile::ldlCurve($dCoclear40, 0.0);
+t_eq($ldlSano[3], (int) CaseProfile::LDL_NORMAL_DB, 'Oído sano: LDL en 100 dB');
+t_eq($ldlCoclear[3], (int) CaseProfile::LDL_NORMAL_DB,
+    'Coclear: el LDL NO sube con la pérdida -- el umbral sube y el campo dinámico se cierra solo');
+t_true($ldlRetro[3] > $ldlCoclear[3],
+    'Retrococlear: mismo umbral, LDL más alto, campo dinámico conservado (sin reclutamiento)');
+t_true($ldlCoclear[3] <= CaseProfile::LDL_MAX_DB, 'El LDL no pasa el tope del audiómetro');
+$ldlCond = CaseProfile::ldlCurve($dCond, 100.0);
+t_true($ldlCond[3] > $ldlSano[3],
+    'Conductiva: el oído medio atenúa también lo fuerte, el LDL sube con el gap');
+
+// ---------------------------------------------------------------------
+// Morfología de la curva del reflejo.
+// ---------------------------------------------------------------------
+
+t_eq(CaseProfile::reflexCurveType($dNormal, 100.0, $sinRetro), 'normal',
+    'Oído sano: curva de reflejo normal (ON sostenido)');
+t_eq(CaseProfile::reflexCurveType($dCoclear40, 100.0, $sinRetro), 'normal',
+    'Coclear: sin decay del reflejo');
+t_eq(CaseProfile::reflexCurveType($dRetro40, 0.0, $sinRetro), 'off',
+    'Retrococlear: patrón OFF, el reflejo no se sostiene');
+t_eq(CaseProfile::reflexCurveType($dNormal, 100.0, $schwannoma), 'off',
+    'Patrón retro cargado: decay aunque el audiograma esté limpio');
+foreach (['normal', 'off'] as $tipoRef) {
+    t_true(in_array($tipoRef, CaseBuilder::REFLEX_CURVE_TYPES, true),
+        "El tipo derivado '$tipoRef' es uno de los que acepta el formulario");
+}
+
+// project() los trae todos.
+$p = CaseProfile::project($paresAsim, $paresAsim, $perfilCoclearOD, ['OD' => 'A', 'OI' => 'A']);
+t_true(isset($p['logo']['OD']['pct'], $p['logo']['OD']['int']), 'project(): trae la logoaudiometría');
+t_eq(count($p['recruit']['ldl']['od']), count(CaseBuilder::FREQUENCIES), 'project(): trae el LDL completo');
+t_eq($p['reflex']['tipo']['oi'], 'normal', 'project(): trae la morfología del reflejo por oído');
+t_true($p['logo']['OD']['pct'] < $p['logo']['OI']['pct'],
+    'project(): el oído dañado discrimina menos que el sano');

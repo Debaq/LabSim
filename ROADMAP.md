@@ -144,12 +144,57 @@ Derivados de `cce_pct` en las frecuencias que califican
 `cce_pct >= 80` → `complete`, SISI 80-100%, `recruit` true;
 `50-79` → `partial`, SISI 40-60%; `< 50` → `none`, SISI 0-20%.
 
-### 6. Ya derivados hoy (precedente del patrón)
+### 6. Logoaudiometría (`UMD`)
+
+Máxima discriminación y a qué nivel se alcanza. El porcentaje cae despacio
+en una coclear (`0.8 dB/dB` sobre 20 dB) y se desploma en una retrococlear
+(`1.8 dB/dB` sobre 10 dB, más 20 puntos fijos si hay patrón retro cargado):
+esa diferencia **es** la disociación audio-verbal, el signo retrococlear más
+clásico que hay, y sin esto el caso no la podía mostrar.
+
+El porcentaje pesa 2-4 kHz (`SPEECH_WEIGHTS`), no el promedio de Fletcher:
+las consonantes viven ahí, y con Fletcher a secas una descendente daba 100%
+de discriminación. El nivel del máximo sí usa Fletcher + 35 dB. El gap no
+baja el porcentaje — una conductiva no distorsiona — solo corre la curva.
+
+El rollover ya venía del flag `recruit`, que deriva la sección 5
+(`logoaudiometry.py:89`): media mecánica ya respondía al perfil y la otra
+media no.
+
+### 7. LDL / campo dinámico
+
+`LDL_NORMAL_DB = 100`, y **no sube con la pérdida coclear**: el umbral sube,
+el disconfort no, y el campo dinámico se cierra solo. El reclutamiento no
+hay que dibujarlo, cae de la física. En una retrococlear el LDL sí acompaña
+al umbral (campo dinámico conservado, `LDL_FULL_RANGE_DB = 95`), y el gap
+corre todo hacia arriba porque el oído medio atenúa también lo fuerte.
+
+### 8. Morfología de la curva del reflejo
+
+Solo se deriva el patrón **OFF** (el reflejo que no se sostiene: decay,
+signo retrococlear del mismo eje que el deterioro tonal). `invertido` y
+`on-off` quedan siempre al docente: el primero es un artefacto de registro
+y el segundo un hallazgo puntual, ninguno se deduce del sitio de la lesión.
+
+### 9. Ya derivados hoy (precedente del patrón)
 
 `Rinne`/`Weber` (`rinneAuto`/`weberAuto` + checkbox `acumetria_auto`),
 `SDT`/`SRT` (Fletcher + `sdt_auto`/`srt_auto`). El mecanismo de
 "auto con override manual" **ya existe en este formulario**; el trabajo es
 generalizarlo, no inventarlo.
+
+## Lo que NO se deriva, y por qué
+
+- **Timpanograma y ETF.** Qué curva sale depende de la patología concreta
+  (B ocupación, As rígido, Ad hipercompliante, C retracción) y es una
+  decisión clínica, no una cuenta. Se avisa si contradice al gap: curva A
+  con gap ≥ 20 dB, o curva B con gap < 10 dB.
+- **VEMP.** El perfil no tiene eje vestibular. Un schwannoma deja el ABR
+  desarmado y el VEMP normal si nadie lo toca. Agregar ese eje es otro
+  refactor.
+- **Parámetros de onda del ABR** (latencias y amplitudes onda por onda,
+  FSP) y **ruido/sello de la OEA**: los sortean los "Autocompletar", que
+  por eso siguen existiendo.
 
 ## Lo que tiene que seguir pudiendo romperse
 
