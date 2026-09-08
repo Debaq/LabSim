@@ -713,6 +713,138 @@ final class CaseProfile
     }
 
     // ---------------------------------------------------------------
+    // Proyeccion completa
+    // ---------------------------------------------------------------
+
+    /**
+     * Índices de CaseBuilder::FREQUENCIES del protocolo de cada prueba de
+     * deterioro tonal. Mismos que ResponseAudiometry.DECAY_TESTS en
+     * src/audiometria/response.py.
+     */
+    public const DECAY_FREQ_IDX = [
+        'carhart' => [2, 3, 4, 6],      // 500, 1000, 2000, 4000
+        'stat' => [2, 3, 4],            // 500, 1000, 2000
+        'rosemberg' => [2, 3, 4, 6],
+    ];
+
+    /**
+     * Todo lo que el perfil proyecta, de una sola pasada.
+     *
+     * Devuelve los cuatro módulos completos SIN mirar `auto`: quién aplica
+     * qué lo decide el llamador. Así la misma función sirve para guardar
+     * (case_create.php aplica solo lo derivado) y para la vista previa en
+     * vivo (case_project.php devuelve todo y el navegador pinta lo que
+     * corresponde) -- una sola implementación de cada ley, que es el punto
+     * entero de este refactor.
+     *
+     * @param array $airPairs   cases.data['Aerea']
+     * @param array $bonePairs  cases.data['Osea']
+     * @param array $perfil     normalize()
+     * @param array<string,string> $tympPorLado ['OD' => 'A', 'OI' => 'B']
+     */
+    public static function project(array $airPairs, array $bonePairs, array $perfil, array $tympPorLado): array
+    {
+        $decomp = [];
+        foreach (['OD' => 0, 'OI' => 1] as $lado => $sideIdx) {
+            $decomp[$lado] = self::decompose(
+                $airPairs, $bonePairs, $sideIdx, (float) ($perfil[$lado]['cce_pct'] ?? self::DEFAULT_CCE_PCT)
+            );
+        }
+
+        $abr = [];
+        $eoas = [];
+        $reflex = ['ipsi' => [], 'contra' => []];
+        $recPorLado = [];
+        foreach (['od' => 'OD', 'oi' => 'OI'] as $ladoForm => $lado) {
+            $ccePct = (float) ($perfil[$lado]['cce_pct'] ?? self::DEFAULT_CCE_PCT);
+            $retro = self::normalizeRetro($perfil[$lado]['retro'] ?? []);
+            $otro = $lado === 'OD' ? 'OI' : 'OD';
+
+            $porEstimulo = self::abrThresholds($decomp[$lado], 'air_conduction');
+            $abr[$lado] = [
+                // El tipo decide la física de la curva (corrimiento paralelo
+                // de la conductiva, pendiente L-I de la coclear, interpicos
+                // del retro): derivar el umbral y dejar el tipo a mano deja
+                // curvas que no se corresponden con ningún oído.
+                'type' => self::derivedType($decomp[$lado], $ccePct, $retro),
+                'umbral' => $porEstimulo['click'],
+                'umbral_por_estimulo' => $porEstimulo,
+                'umbral_por_estimulo_oseo' => self::abrThresholds($decomp[$lado], 'bone_conduction'),
+            ];
+
+            // El `umbral` de la OEA va en 0 a propósito: el cliente suma su
+            // ley por patología (type + umbral, ver oae_attenuation_db en
+            // src/oae/generators/base.py) A LO QUE VENGA en `desviaciones`.
+            // Con el umbral cargado, la misma pérdida se descontaría dos
+            // veces. Derivado hay una sola curva, que es el punto.
+            $eoas[$lado] = [
+                'type' => self::derivedType($decomp[$lado], $ccePct, $retro),
+                'umbral' => 0,
+                'desviaciones' => self::oaeDeviations($decomp[$lado]),
+            ];
+
+            $tymp = (string) ($tympPorLado[$lado] ?? 'A');
+            $ipsi = [];
+            foreach (self::REFLEX_FREQS_IPSI as $hz) {
+                $ipsi[] = self::reflexThreshold($decomp[$lado], $decomp[$lado], $tymp, $ccePct, $retro, $hz);
+            }
+            // Contra: la sonda va en ESTE oído y el estímulo entra por el
+            // contrario (ver reflex_stimulus() en Z.py, que indexa las filas
+            // por el oído de la sonda).
+            $contra = [];
+            foreach (self::REFLEX_FREQS_CONTRA as $hz) {
+                $contra[] = self::reflexThreshold(
+                    $decomp[$lado], $decomp[$otro], $tymp,
+                    (float) ($perfil[$otro]['cce_pct'] ?? self::DEFAULT_CCE_PCT),
+                    self::normalizeRetro($perfil[$otro]['retro'] ?? []), $hz
+                );
+            }
+            $reflex['ipsi'][$ladoForm] = $ipsi;
+            $reflex['contra'][$ladoForm] = $contra;
+
+            $recPorLado[$lado] = self::recruitment($ccePct, $decomp[$lado]);
+        }
+
+        // Fowler compara dos oídos: el patrón es el del oído EN ESTUDIO (el
+        // peor en esa frecuencia), que es de quien se juzga el crecimiento
+        // de sonoridad. Las frecuencias que califican salen solas de los
+        // umbrales, igual que en el formulario.
+        $fowler = [];
+        foreach (CaseBuilder::fowlerQualifyingFreqs($airPairs, $bonePairs) as $freqIdx) {
+            $estudio = ($airPairs[$freqIdx][0] ?? 0) >= ($airPairs[$freqIdx][1] ?? 0) ? 'OD' : 'OI';
+            $fowler[(string) $freqIdx] = $recPorLado[$estudio]['pattern'];
+        }
+
+        $decay = [];
+        foreach (self::DECAY_FREQ_IDX as $modo => $indices) {
+            $decay[$modo] = ['od' => [], 'oi' => []];
+            foreach (['od' => 'OD', 'oi' => 'OI'] as $ladoForm => $lado) {
+                foreach ($indices as $freqIdx) {
+                    $decay[$modo][$ladoForm][] = self::toneDecay(
+                        $decomp[$lado],
+                        (float) ($perfil[$lado]['cce_pct'] ?? self::DEFAULT_CCE_PCT),
+                        self::normalizeRetro($perfil[$lado]['retro'] ?? []),
+                        CaseBuilder::FREQUENCIES[$freqIdx]
+                    );
+                }
+            }
+        }
+
+        return [
+            'decomp' => $decomp,
+            'abr' => $abr,
+            'eoas' => $eoas,
+            'reflex' => $reflex,
+            'recruit' => [
+                'sisi' => [$recPorLado['OD']['sisi_pct'], $recPorLado['OI']['sisi_pct']],
+                'recruit' => [$recPorLado['OD']['recruit'], $recPorLado['OI']['recruit']],
+                'fowler' => $fowler,
+                'decay' => $decay,
+            ],
+        ];
+    }
+
+    // ---------------------------------------------------------------
     // Avisos de incoherencia entre modulos
     // ---------------------------------------------------------------
 

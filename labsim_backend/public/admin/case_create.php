@@ -508,142 +508,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'auto' => $perfilAuto,
         ];
 
-        // Descomposición del audiograma por oído: aérea, ósea, gap, y el
-        // reparto del componente sensorioneural entre cóclea y retro según
-        // `cce_pct`. Todas las proyecciones de abajo salen de acá.
-        $decomp = [];
-        foreach ([['OD', 0], ['OI', 1]] as [$ladoData, $sideIdx]) {
-            $decomp[$ladoData] = CaseProfile::decompose(
-                $airPairs, $bonePairs, $sideIdx, $perfil[$ladoData]['cce_pct']
-            );
-        }
+        // Todo lo que el perfil proyecta, calculado de una pasada (ver
+        // CaseProfile::project). La misma función alimenta la vista previa
+        // en vivo del formulario, vía admin/case_project.php: una sola
+        // implementación de cada ley.
+        $proyeccion = CaseProfile::project($airPairs, $bonePairs, $perfil, ['OD' => $zOd, 'OI' => $zOi]);
+        $decomp = $proyeccion['decomp'];
 
-        // Proyección del ABR: umbral POR ESTÍMULO, derivado del audiograma.
-        //
-        // Es lo que faltaba para poder evaluar por frecuencia. Con un solo
-        // `umbral` escalar por oído, una hipoacusia descendente respondía
-        // igual a un burst de 500 Hz que a uno de 4 kHz (el estímulo solo
-        // movía latencias, ver get_baseline_values en ABR_generator.py) y
-        // el ejercicio no tenía nada que descubrir.
-        //
-        // El escalar se sigue emitiendo, alineado al click, para el cliente
-        // viejo y para cualquier código que todavía lo lea.
+        // Qué se aplica y qué no lo dicen los `auto`: un módulo en manual
+        // sigue siendo del docente, incluso si el perfil predice otra cosa.
         if ($perfilAuto['abr']) {
-            foreach (['OD', 'OI'] as $ladoData) {
-                $porEstimulo = CaseProfile::abrThresholds($decomp[$ladoData], 'air_conduction');
-                $abrDerivado = [
-                    // El tipo decide la física de la curva (corrimiento
-                    // paralelo de la conductiva, pendiente L-I de la
-                    // coclear, interpicos del retro), así que derivar el
-                    // umbral y dejar el tipo a mano deja curvas que no se
-                    // corresponden con ningún oído.
-                    'type' => CaseProfile::derivedType(
-                        $decomp[$ladoData], $perfil[$ladoData]['cce_pct'], $perfil[$ladoData]['retro']
-                    ),
-                    'umbral_por_estimulo' => $porEstimulo,
-                    'umbral_por_estimulo_oseo' => CaseProfile::abrThresholds($decomp[$ladoData], 'bone_conduction'),
-                    'umbral' => $porEstimulo['click'],
-                ];
-                if ($ladoData === 'OD') {
-                    $abrOd = array_merge($abrOd, $abrDerivado);
-                } else {
-                    $abrOi = array_merge($abrOi, $abrDerivado);
-                }
-            }
+            $abrOd = array_merge($abrOd, $proyeccion['abr']['OD']);
+            $abrOi = array_merge($abrOi, $proyeccion['abr']['OI']);
         }
-
-        // Proyección de la OEA: el perfil por frecuencia sale del componente
-        // CCE y del gap. `retro_sn` no entra -- la cóclea está viva -- así
-        // que la neuropatía sale sola: OEA presentes con el umbral elevado.
-        //
-        // El `umbral` de EOA se pone en 0 a propósito: el cliente suma la
-        // atenuación por patología (type + umbral, ver oae_attenuation_db en
-        // src/oae/generators/base.py) A LO QUE VENGA en `desviaciones`. Si
-        // se dejara el umbral, la misma pérdida se descontaría dos veces,
-        // una por cada ley. Con la proyección encendida hay una sola curva,
-        // que es todo el punto.
         if ($perfilAuto['eoas']) {
-            foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoData) {
-                $eoasDerivado = [
-                    'type' => CaseProfile::derivedType(
-                        $decomp[$ladoData], $perfil[$ladoData]['cce_pct'], $perfil[$ladoData]['retro']
-                    ),
-                    'umbral' => 0,
-                    'desviaciones' => CaseProfile::oaeDeviations($decomp[$ladoData]),
-                ];
-                if ($lado === 'od') {
-                    $eoasOd = array_merge($eoasOd, $eoasDerivado);
-                } else {
-                    $eoasOi = array_merge($eoasOi, $eoasDerivado);
-                }
-            }
+            $eoasOd = array_merge($eoasOd, $proyeccion['eoas']['OD']);
+            $eoasOi = array_merge($eoasOi, $proyeccion['eoas']['OI']);
         }
-
-        // Proyección del reflejo acústico. Son dos oídos por medición: la
-        // sonda decide si el reflejo se puede VER (oído medio) y el oído
-        // estimulado decide a qué NIVEL aparece (cóclea y nervio). En ipsi
-        // son el mismo; en contra, la sonda va en este oído y el estímulo
-        // entra por el contrario (ver reflex_stimulus() en Z.py, que indexa
-        // las filas por el oído de la sonda).
         if ($perfilAuto['reflex']) {
-            $tympPorLado = ['OD' => $zOd, 'OI' => $zOi];
-            foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoData) {
-                $otroLado = $ladoData === 'OD' ? 'OI' : 'OD';
-                $ipsiVals = [];
-                foreach (CaseProfile::REFLEX_FREQS_IPSI as $hzReflex) {
-                    $ipsiVals[] = CaseProfile::reflexThreshold(
-                        $decomp[$ladoData], $decomp[$ladoData], $tympPorLado[$ladoData],
-                        $perfil[$ladoData]['cce_pct'], $perfil[$ladoData]['retro'], $hzReflex
-                    );
-                }
-                $contraVals = [];
-                foreach (CaseProfile::REFLEX_FREQS_CONTRA as $hzReflex) {
-                    $contraVals[] = CaseProfile::reflexThreshold(
-                        $decomp[$ladoData], $decomp[$otroLado], $tympPorLado[$ladoData],
-                        $perfil[$otroLado]['cce_pct'], $perfil[$otroLado]['retro'], $hzReflex
-                    );
-                }
-                $reflexIpsi[$lado] = $ipsiVals;
-                $reflexContra[$lado] = $contraVals;
-            }
+            $reflexIpsi = $proyeccion['reflex']['ipsi'];
+            $reflexContra = $proyeccion['reflex']['contra'];
         }
-
-        // Proyección de las supraliminares: reclutamiento (Fowler, SISI) y
-        // deterioro tonal. Miden lo mismo desde dos lados -- el
-        // reclutamiento es el signo de la lesión de CCE, el deterioro
-        // tonal el del nervio -- así que las dos salen de `cce_pct` y no
-        // pueden contradecirse entre sí.
         if ($perfilAuto['recruit']) {
-            $recPorLado = [];
-            foreach (['OD' => 0, 'OI' => 1] as $ladoData => $idx) {
-                $recPorLado[$ladoData] = CaseProfile::recruitment(
-                    $perfil[$ladoData]['cce_pct'], $decomp[$ladoData]
-                );
-                $sisiVals[$idx] = $recPorLado[$ladoData]['sisi_pct'];
-                $recruitVals[$idx] = $recPorLado[$ladoData]['recruit'];
-            }
-            // Fowler compara dos oídos: el patrón es el del oído EN ESTUDIO
-            // (el peor en esa frecuencia), que es de quien se juzga el
-            // crecimiento de sonoridad.
+            $sisiVals = $proyeccion['recruit']['sisi'];
+            $recruitVals = $proyeccion['recruit']['recruit'];
+            // Solo las frecuencias que el formulario ya reconoció como
+            // calificantes: la proyección no agrega ni saca ninguna.
             foreach ($fowlerPatterns as $freqFowler => $_) {
-                $idxFreq = (int) $freqFowler;
-                $estudio = ($airPairs[$idxFreq][0] ?? 0) >= ($airPairs[$idxFreq][1] ?? 0) ? 'OD' : 'OI';
-                $fowlerPatterns[(string) $freqFowler] = $recPorLado[$estudio]['pattern'];
-            }
-            // Deterioro tonal, por las frecuencias del protocolo de cada
-            // prueba (mismos índices que ResponseAudiometry.DECAY_TESTS).
-            $decayFreqIdx = ['carhart' => [2, 3, 4, 6], 'stat' => [2, 3, 4], 'rosemberg' => [2, 3, 4, 6]];
-            foreach ($decayFreqIdx as $mode => $indices) {
-                $vals = ['od' => [], 'oi' => []];
-                foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoData) {
-                    foreach ($indices as $idxFreq) {
-                        $vals[$lado][] = CaseProfile::toneDecay(
-                            $decomp[$ladoData], $perfil[$ladoData]['cce_pct'],
-                            $perfil[$ladoData]['retro'], CaseBuilder::FREQUENCIES[$idxFreq]
-                        );
-                    }
+                if (isset($proyeccion['recruit']['fowler'][(string) $freqFowler])) {
+                    $fowlerPatterns[(string) $freqFowler] = $proyeccion['recruit']['fowler'][(string) $freqFowler];
                 }
-                $decayPairs[$mode] = zip_pairs($vals['od'], $vals['oi']);
+            }
+            foreach ($proyeccion['recruit']['decay'] as $modoDecay => $valsDecay) {
+                $decayPairs[$modoDecay] = zip_pairs($valsDecay['od'], $valsDecay['oi']);
             }
         }
 
@@ -2256,14 +2153,14 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         });
     }
 
-    function sortearLado(esc, lado, afectado) {
+    function sortearLado(esc, lado, afectado, escalas, asimetria) {
         // El oído sano de un cuadro unilateral no es "cero": es un oído
         // normal, con su propia variabilidad.
-        var escalaSn = afectado ? entre(esc.sn_scale[0], esc.sn_scale[1]) : entre(0, 0.8);
         var formaSn = afectado ? esc.sn_shape : ESCENARIOS.normal.sn_shape;
-        var sn = curvaDeForma(formaSn, escalaSn);
+        var escalaSn = afectado ? escalas.sn : entre(0, 0.8);
+        var sn = curvaDeForma(formaSn, escalaSn).map(function (v) { return v + asimetria; });
         var gap = afectado && esc.gap_shape && Object.keys(esc.gap_shape).length
-            ? curvaDeForma(esc.gap_shape, entre(esc.gap_scale[0], esc.gap_scale[1]))
+            ? curvaDeForma(esc.gap_shape, escalas.gap)
             : FREQS.map(function () { return 0; });
 
         var osea = sn.map(aCinco);
@@ -2306,8 +2203,23 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 
         var unilateral = esc.lateralidad === 'unilateral';
         var afectado = Math.random() < 0.5 ? 'od' : 'oi';
+        // La escala se sortea UNA vez para todo el paciente, no una por
+        // oído: con una escala por lado, una presbiacusia bilateral podía
+        // salir con 27 dB en un oído y 67 en el otro, o sea una asimetría
+        // enorme --que es un hallazgo, no ruido-- en un cuadro que se
+        // define por ser simétrico.
+        var escalas = {
+            sn: entre(esc.sn_scale[0], esc.sn_scale[1]),
+            gap: entre(esc.gap_scale[0], esc.gap_scale[1])
+        };
+        // La asimetría interaural que SÍ corresponde: unos pocos dB en un
+        // oído al azar. En los cuadros unilaterales la asimetría real la da
+        // el oído sano, así que acá no se agrega nada.
+        var peor = Math.random() < 0.5 ? 'od' : 'oi';
+        var asimetria = unilateral ? 0 : entre(0, 8);
         ['od', 'oi'].forEach(function (lado) {
-            sortearLado(esc, lado, !unilateral || lado === afectado);
+            sortearLado(esc, lado, !unilateral || lado === afectado, escalas,
+                        lado === peor ? asimetria : 0);
         });
 
         // Un caso sorteado nace coherente: las proyecciones se encienden.
@@ -2319,89 +2231,93 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             }
         });
         if (window.drawAudiogram) { window.drawAudiogram(); }
-        if (window.drawAbrPreview) { window.drawAbrPreview(); }
+        if (window.drawReflexPattern) { window.drawReflexPattern(); }
+        // Trae de una la proyección del caso recién sorteado: OEA, reflejos
+        // y supraliminares se llenan solos, no al guardar.
+        if (window.proyectarPerfil) { window.proyectarPerfil(); }
     });
 })();
 </script>
 
 <script>
-// Umbral ABR por estímulo: vista previa de lo que va a guardar el servidor.
+// Vista previa en vivo de la proyección del perfil auditivo.
 //
-// Las constantes NO se re-tipean acá -- se serializan desde CaseProfile,
-// que es donde vive la fórmula y lo que corren los tests (a diferencia del
-// resto de los previews de esta página, que sí mantienen copias a mano).
-// Si cambia la ley, cambia sola en los dos lados.
+// Las fórmulas NO se reimplementan acá: se le piden a admin/case_project.php,
+// que llama al mismo CaseProfile::project() que corre al guardar. Antes esto
+// era una copia en JS de la ley del ABR, y las otras tres (OEA, reflejos,
+// supraliminares) directamente no se veían hasta guardar y reabrir el caso:
+// el docente sorteaba un caso y la pestaña EOA seguía mostrando lo viejo.
 (function () {
-    var PESOS = <?= json_encode(CaseProfile::STIM_WEIGHTS) ?>;
-    var CORR = <?= json_encode(CaseProfile::STIM_NHL_CORRECTION) ?>;
-    var PASO = <?= (int) CaseProfile::ABR_STEP_DB ?>;
-    var MAX = <?= (int) CaseProfile::ABR_MAX_DB ?>;
+    var CSRF = <?= json_encode(Auth::csrfToken()) ?>;
     var FREQS = <?= json_encode(CaseBuilder::FREQUENCIES) ?>;
+    var EOAS_FREQS = <?= json_encode(CaseBuilder::EOAS_FREQS) ?>;
+    var NEURAL_PARAMS = <?= json_encode(array_keys(CaseBuilder::ABR_NEURAL_DEFAULTS)) ?>;
+    var DECAY_MODES = <?= json_encode(array_keys(CaseProfile::DECAY_FREQ_IDX)) ?>;
     var ETIQUETAS = {
         'click': 'Click', 'ce_chirp': 'CE-chirp', 'ls_chirp': 'Ls-chirp',
         'tone_burst_500Hz': 'Burst 500 Hz', 'tone_burst_1000Hz': 'Burst 1 kHz',
         'tone_burst_2000Hz': 'Burst 2 kHz', 'tone_burst_4000Hz': 'Burst 4 kHz'
     };
-    // Mismo orden que la tabla de arriba: graves a agudos, después los de
-    // banda ancha, que es como se lee un protocolo frecuencia específica.
+    // Graves a agudos y después los de banda ancha, que es como se lee un
+    // protocolo frecuencia específica.
     var ORDEN = ['tone_burst_500Hz', 'tone_burst_1000Hz', 'tone_burst_2000Hz',
                  'tone_burst_4000Hz', 'click', 'ce_chirp', 'ls_chirp'];
 
-    var check = document.getElementById('perfil-auto-abr');
     var preview = document.getElementById('abr-threshold-preview');
     var tbody = document.getElementById('abr-threshold-rows');
-    if (!check || !preview || !tbody) return;
 
-    /** Curva Hz -> dB de un oído, leída de los inputs del audiograma. */
+    function campo(name) { return document.querySelector('#case-form [name="' + name + '"]'); }
+    function autoOn(modulo) {
+        var chk = campo('perfil[auto][' + modulo + ']');
+        return !!(chk && chk.checked);
+    }
     function curva(clave, lado) {
-        var out = {};
+        var out = [];
         for (var n = 0; n < FREQS.length; n++) {
             var el = document.getElementById(clave + '_' + lado + '_' + n);
-            out[FREQS[n]] = el ? (parseInt(el.value, 10) || 0) : 0;
+            out.push(el ? (parseInt(el.value, 10) || 0) : 0);
         }
         return out;
     }
 
-    /** Ósea nunca peor que la aérea -- mismo truncado que CaseProfile::decompose. */
-    function osea(lado) {
-        var aire = curva('aerea', lado), hueso = curva('osea', lado);
-        var out = {};
-        for (var hz in aire) { out[hz] = Math.min(hueso[hz], aire[hz]); }
-        return out;
-    }
-
-    function umbral(curvaHz, stim) {
-        var suma = 0, peso = 0;
-        var pesos = PESOS[stim];
-        for (var hz in pesos) {
-            suma += (curvaHz[hz] || 0) * pesos[hz];
-            peso += pesos[hz];
-        }
-        var nhl = (peso > 0 ? suma / peso : 0) + CORR[stim];
-        return Math.max(0, Math.min(MAX, Math.round(nhl / PASO) * PASO));
-    }
-
-    function render() {
-        preview.hidden = !check.checked;
-        // El umbral escalar lo pasa a escribir la proyección: se deja
-        // visible (el docente tiene que ver qué quedó) pero no editable.
+    /** Lo que hay cargado en el formulario ahora mismo, sin guardar nada. */
+    function estado() {
+        var perfil = {};
         ['od', 'oi'].forEach(function (lado) {
-            var campo = document.querySelector('input[name="abr[' + lado + '][umbral]"]');
-            if (campo) { campo.readOnly = check.checked; }
+            var cce = campo('perfil[' + lado + '][cce_pct]');
+            var retro = {};
+            NEURAL_PARAMS.forEach(function (param) {
+                var el = document.querySelector('.abr-neural-input[data-lado="' + lado + '"][data-param="' + param + '"]');
+                if (el) { retro[param] = el.value; }
+            });
+            perfil[lado] = { cce_pct: cce ? cce.value : 100, retro: retro };
         });
-        if (!check.checked) return;
-
-        var curvas = {
-            od_aire: curva('aerea', 'od'), od_hueso: osea('od'),
-            oi_aire: curva('aerea', 'oi'), oi_hueso: osea('oi')
+        var auto = {};
+        ['abr', 'eoas', 'reflex', 'recruit'].forEach(function (m) { auto[m] = autoOn(m); });
+        var zOd = campo('z_od'), zOi = campo('z_oi');
+        return {
+            aerea: { od: curva('aerea', 'od'), oi: curva('aerea', 'oi') },
+            osea: { od: curva('osea', 'od'), oi: curva('osea', 'oi') },
+            perfil: perfil, auto: auto,
+            z: { od: zOd ? zOd.value : 'A', oi: zOi ? zOi.value : 'A' }
         };
+    }
+
+    function setVal(name, valor) {
+        var el = campo(name);
+        if (el && valor !== undefined && valor !== null) { el.value = valor; }
+    }
+
+    function pintarTablaAbr(abr) {
+        if (!preview || !tbody) return;
         tbody.innerHTML = '';
         ORDEN.forEach(function (stim) {
             var tr = document.createElement('tr');
-            var celdas = [ETIQUETAS[stim]];
-            ['od_aire', 'od_hueso', 'oi_aire', 'oi_hueso'].forEach(function (k) {
-                celdas.push(umbral(curvas[k], stim) + ' dB nHL');
-            });
+            var celdas = [ETIQUETAS[stim],
+                abr.OD.umbral_por_estimulo[stim] + ' dB nHL',
+                abr.OD.umbral_por_estimulo_oseo[stim] + ' dB nHL',
+                abr.OI.umbral_por_estimulo[stim] + ' dB nHL',
+                abr.OI.umbral_por_estimulo_oseo[stim] + ' dB nHL'];
             celdas.forEach(function (texto, i) {
                 var td = document.createElement(i === 0 ? 'th' : 'td');
                 td.textContent = texto;
@@ -2409,31 +2325,104 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             });
             tbody.appendChild(tr);
         });
-        // El escalar guardado es el del click, igual que en el servidor.
-        ['od', 'oi'].forEach(function (lado) {
-            var campo = document.querySelector('input[name="abr[' + lado + '][umbral]"]');
-            if (campo) { campo.value = umbral(curvas[lado + '_aire'], 'click'); }
-        });
     }
 
-    check.addEventListener('change', render);
+    function hidratar(p) {
+        if (preview) { preview.hidden = !autoOn('abr'); }
+
+        if (autoOn('abr')) {
+            pintarTablaAbr(p.abr);
+            ['od', 'oi'].forEach(function (lado) {
+                var lo = lado.toUpperCase();
+                setVal('abr[' + lado + '][type]', p.abr[lo].type);
+                setVal('abr[' + lado + '][umbral]', p.abr[lo].umbral);
+            });
+        }
+
+        if (autoOn('eoas')) {
+            ['od', 'oi'].forEach(function (lado) {
+                var lo = lado.toUpperCase();
+                setVal('eoas[' + lado + '][type]', p.eoas[lo].type);
+                setVal('eoas[' + lado + '][umbral]', p.eoas[lo].umbral);
+                EOAS_FREQS.forEach(function (hz) {
+                    setVal('eoas[' + lado + '][desv][' + hz + ']', p.eoas[lo].desviaciones[hz]);
+                });
+            });
+        }
+
+        if (autoOn('reflex')) {
+            ['ipsi', 'contra'].forEach(function (modo) {
+                ['od', 'oi'].forEach(function (lado) {
+                    (p.reflex[modo][lado] || []).forEach(function (valor, n) {
+                        setVal('reflex_' + modo + '[' + lado + '][' + n + ']', valor);
+                    });
+                });
+            });
+            // La tabla-resumen de reflejos se dibuja desde los inputs.
+            if (window.drawReflexPattern) { window.drawReflexPattern(); }
+        }
+
+        if (autoOn('recruit')) {
+            ['od', 'oi'].forEach(function (lado, i) {
+                setVal('sisi[' + lado + ']', p.recruit.sisi[i]);
+                var chk = campo('recruit[' + lado + ']');
+                if (chk) { chk.checked = !!p.recruit.recruit[i]; }
+            });
+            Object.keys(p.recruit.fowler).forEach(function (freqIdx) {
+                setVal('fowler_pattern[' + freqIdx + ']', p.recruit.fowler[freqIdx]);
+            });
+            DECAY_MODES.forEach(function (modo) {
+                ['od', 'oi'].forEach(function (lado) {
+                    (p.recruit.decay[modo][lado] || []).forEach(function (valor, n) {
+                        setVal(modo + '[' + lado + '][' + n + ']', valor);
+                    });
+                });
+            });
+        }
+    }
+
+    var pendiente = null;
+    function proyectar() {
+        // Sin ningún módulo derivado no hay nada que pintar: el formulario
+        // es del docente y no se le toca ni un campo.
+        if (!['abr', 'eoas', 'reflex', 'recruit'].some(autoOn)) {
+            if (preview) { preview.hidden = true; }
+            return;
+        }
+        var body = new URLSearchParams();
+        body.set('csrf_token', CSRF);
+        body.set('payload', JSON.stringify(estado()));
+        fetch('case_project.php', { method: 'POST', body: body })
+            .then(function (r) { return r.json(); })
+            .then(function (data) { if (data.ok) { hidratar(data.proyeccion); } })
+            .catch(function () { /* sin conexión el formulario sigue usable a mano */ });
+    }
+    function proyectarPronto() {
+        clearTimeout(pendiente);
+        pendiente = setTimeout(proyectar, 350);
+    }
+    // El sorteo escribe el audiograma completo y necesita repintar ya.
+    window.proyectarPerfil = proyectar;
+
     document.addEventListener('input', function (e) {
-        if (e.target.id && /^(aerea|osea)_/.test(e.target.id)) render();
-    });
-    // "Igualar ósea a aérea" copia valores sin disparar 'input' en cada campo.
-    document.addEventListener('change', function (e) {
-        if (e.target.name && /^igualar\[/.test(e.target.name)) render();
-    });
-    // El autocompletar del tab ABR escribe el umbral escalar: con la
-    // proyección encendida ese campo lo manda esta tabla, así que se
-    // reescribe después (si no, la pantalla muestra un valor que el
-    // servidor va a descartar).
-    document.addEventListener('click', function (e) {
-        if (e.target.classList && e.target.classList.contains('abr-autofill-btn')) {
-            setTimeout(render, 0);
+        var id = e.target.id || '';
+        var name = e.target.getAttribute('name') || '';
+        if (/^(aerea|osea)_/.test(id) || /^perfil\[(od|oi)\]\[cce_pct\]$/.test(name)
+            || (e.target.classList && e.target.classList.contains('abr-neural-input'))) {
+            proyectarPronto();
         }
     });
-    render();
+    document.addEventListener('change', function (e) {
+        var name = e.target.getAttribute('name') || '';
+        if (/^perfil\[auto\]\[/.test(name) || /^igualar\[/.test(name)
+            || name === 'z_od' || name === 'z_oi'
+            || (e.target.classList && e.target.classList.contains('abr-neural-input'))) {
+            // Debounce también acá: el sorteo enciende las cuatro casillas
+            // de un saque y no hacen falta cuatro viajes al servidor.
+            proyectarPronto();
+        }
+    });
+    proyectar();
 })();
 </script>
 

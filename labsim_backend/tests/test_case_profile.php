@@ -371,3 +371,53 @@ t_eq(CaseProfile::derivedType($dDesc, 100.0), 'coclear',
     'Y aun así se clasifica coclear: manda la frecuencia dañada, no el promedio');
 t_true(CaseProfile::recruitment(100.0, $dDesc)['recruit'],
     'Mismo criterio para el reclutamiento: se busca donde está el daño');
+
+// ---------------------------------------------------------------------
+// project(): la misma pasada que corre al guardar y en la vista previa.
+// ---------------------------------------------------------------------
+
+$perfilCoclearOD = [
+    'version' => 1,
+    'OD' => ['cce_pct' => 100.0, 'retro' => CaseBuilder::ABR_NEURAL_DEFAULTS],
+    'OI' => ['cce_pct' => 100.0, 'retro' => CaseBuilder::ABR_NEURAL_DEFAULTS],
+    'auto' => ['abr' => true, 'eoas' => true, 'reflex' => true, 'recruit' => true],
+];
+// OD descendente, OI sano: pares [od, oi] armados a mano.
+$paresAsim = [];
+foreach (CaseBuilder::FREQUENCIES as $i => $hz) {
+    $paresAsim[] = [$descendente[$i][0], 0];
+}
+$p = CaseProfile::project($paresAsim, $paresAsim, $perfilCoclearOD, ['OD' => 'A', 'OI' => 'A']);
+
+foreach (['decomp', 'abr', 'eoas', 'reflex', 'recruit'] as $clave) {
+    t_true(isset($p[$clave]), "project() devuelve '$clave'");
+}
+t_eq($p['abr']['OD']['type'], 'coclear', 'project(): OD descendente sale coclear');
+t_eq($p['abr']['OI']['type'], 'normal', 'project(): OI sano sale normal');
+t_eq($p['abr']['OD']['umbral_por_estimulo']['tone_burst_4000Hz'], 75,
+    'project(): el umbral por estímulo es el mismo que abrThresholds');
+t_eq($p['abr']['OD']['umbral'], $p['abr']['OD']['umbral_por_estimulo']['click'],
+    'project(): el escalar queda alineado al click');
+t_eq($p['eoas']['OD']['umbral'], 0,
+    'project(): el umbral de EOA va en 0 -- la atenuación sale del perfil, no de la ley por patología');
+t_eq(count($p['reflex']['ipsi']['od']), count(CaseProfile::REFLEX_FREQS_IPSI),
+    'project(): 4 filas de reflejo ipsi');
+t_eq(count($p['reflex']['contra']['od']), count(CaseProfile::REFLEX_FREQS_CONTRA),
+    'project(): 5 filas de reflejo contra (incluye NBN)');
+t_eq(count($p['recruit']['decay']['stat']['od']), 3, 'project(): el Stat tiene 3 frecuencias');
+t_eq(count($p['recruit']['decay']['carhart']['od']), 4, 'project(): el Carhart tiene 4');
+t_true($p['recruit']['sisi'][0] > $p['recruit']['sisi'][1],
+    'project(): el SISI del oído dañado es más alto que el del sano');
+
+// Fowler: con un oído sano y otro con 45 dB de diferencia, califica y el
+// patrón es el del oído EN ESTUDIO (el peor).
+t_true(count($p['recruit']['fowler']) > 0,
+    'project(): un caso asimétrico califica para Fowler en alguna frecuencia');
+foreach ($p['recruit']['fowler'] as $freqIdx => $patron) {
+    t_true(array_key_exists($patron, CaseBuilder::FOWLER_PATTERNS),
+        "project(): el patrón de Fowler en el índice $freqIdx es uno de los válidos");
+}
+
+// Un oído sin pérdida no puede tener reflejos ausentes ni deterioro tonal.
+t_eq($p['reflex']['ipsi']['oi'], [85, 85, 85, 85], 'project(): el oído sano tiene reflejos normales');
+t_eq($p['recruit']['decay']['carhart']['oi'], [0, 0, 0, 0], 'project(): el oído sano no tiene deterioro tonal');
