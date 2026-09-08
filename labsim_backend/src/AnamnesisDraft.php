@@ -28,6 +28,17 @@ final class AnamnesisDraft
     public const MAX_TEXTO = 400;
 
     /**
+     * Presupuesto de tokens de esta llamada, aparte del configurado.
+     *
+     * El de la configuración (400 por defecto) está dimensionado para las
+     * respuestas cortas del chat del paciente. Acá no alcanza: el JSON
+     * completo ya ocupa varios cientos, y un modelo de RAZONAMIENTO gasta
+     * presupuesto pensando ANTES de escribir -- con 400 devuelve el
+     * razonamiento cortado a la mitad y `content` vacío.
+     */
+    public const MAX_TOKENS = 2000;
+
+    /**
      * Instrucciones fijas del generador. Van como system prompt: describen
      * la tarea y el formato, nunca el caso (eso va en el mensaje de
      * usuario, armado por describeCase()).
@@ -47,6 +58,8 @@ Reglas:
   Un paciente sano no toma medicamentos ni tuvo cirugías: no rellenes.
 - "comportamiento" describe cómo actúa el paciente al conversar (tono,
   actitud), no su patología.
+
+No razones en voz alta ni expliques tu respuesta: escribí el JSON directo.
 
 Respondé SOLO con un objeto JSON, sin ```, con exactamente estas claves:
 {"antecedentes": [...], "medicamentos": "", "cirugias": "", "otros": "",
@@ -136,7 +149,7 @@ TXT;
      */
     public static function generate(array $data): array
     {
-        $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], self::describeCase($data));
+        $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], self::describeCase($data), self::MAX_TOKENS);
         $draft = self::parse($raw);
         if ($draft === null) {
             throw new RuntimeException(
