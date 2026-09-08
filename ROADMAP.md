@@ -206,9 +206,28 @@ solo lo que el perfil **no puede** calcular y quedó en su default:
   (nunca se corrió el autocompletar): la curva sale con la morfología de un
   oído sano.
 - VEMP normal sin tocar en un caso con patrón retrococlear cargado.
+- **Anamnesis redactada por el LLM y todavía sin verificar.**
 
-No revisa lo que puede estar vacío con razón: anamnesis, texto de
-otoscopia, comportamiento del paciente.
+No revisa lo que puede estar vacío con razón: anamnesis escrita a mano,
+texto de otoscopia, comportamiento del paciente.
+
+### Anamnesis con IA
+
+`AnamnesisDraft` le pide al LLM los antecedentes que **explican** los
+hallazgos ya cargados (una muesca en 4 kHz pide exposición a ruido; una
+conductiva con timpanograma B, otitis a repetición). El prompt recibe los
+hallazgos en prosa, nunca los umbrales en dB ni el nombre de los exámenes:
+eso lo tiene que medir el alumno.
+
+Lo que vuelve es texto escrito por un tercero y se trata como tal: los
+antecedentes se filtran contra la lista cerrada de `HIST_CHECKBOXES` (uno
+inventado se descarta en silencio), los textos se recortan a 400 caracteres
+y la disposición se acota al rango del selector.
+
+**La verificación es obligatoria, no una sugerencia**: `Anamnesis.ia`
+guarda `generado`/`verificado` más quién y cuándo, y mientras `verificado`
+sea false el caso no se guarda ni se cita. Regenerar limpia la casilla — el
+texto nuevo no lo leyó nadie.
 
 Se aplica en tres lugares:
 

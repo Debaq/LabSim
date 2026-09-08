@@ -582,3 +582,72 @@ t_true(strpos(implode(' ', $faltan), 'VEMP OI') === false,
 
 // Un caso viejo, sin las claves nuevas, no debe explotar ni inventar faltas.
 t_eq(CaseCompleteness::pending([]), [], 'Un cases.data vacío no genera pendientes falsos');
+
+// ---------------------------------------------------------------------
+// Borrador de anamnesis por LLM: lo que vuelve del modelo es texto ajeno.
+// ---------------------------------------------------------------------
+
+require_once __DIR__ . '/../src/AnamnesisDraft.php';
+
+$b = AnamnesisDraft::parse('{"antecedentes":["trauma_acustico","ototoxicos"],"medicamentos":"gentamicina IV hace 3 años","cirugias":"","otros":"trabajó 20 años en construcción","comportamiento":"colaborador","disposicion":1}');
+t_true($b !== null, 'Un JSON bien formado se parsea');
+t_true($b['antecedentes']['trauma_acustico'], 'Marca el antecedente que pidió el modelo');
+t_true(!$b['antecedentes']['diabetes'], 'Deja en false los que no pidió');
+t_eq(count($b['antecedentes']), count(CaseBuilder::HIST_CHECKBOXES),
+    'Devuelve las 8 claves, no solo las marcadas');
+t_eq($b['disposicion'], 1, 'La disposición pasa como entero');
+
+// Lista cerrada: un antecedente inventado no entra a la ficha.
+$b = AnamnesisDraft::parse('{"antecedentes":["trauma_acustico","tabaquismo","covid"],"disposicion":0}');
+t_true(!array_key_exists('tabaquismo', $b['antecedentes']),
+    'Un antecedente que el modelo inventó se descarta: la lista es cerrada');
+t_true($b['antecedentes']['trauma_acustico'], 'Los válidos del mismo lote sí entran');
+
+// Rangos y tamaños: el modelo no llena la ficha ni se sale de escala.
+$b = AnamnesisDraft::parse('{"antecedentes":[],"otros":"' . str_repeat('x', 900) . '","disposicion":99}');
+t_eq(mb_strlen($b['otros']), AnamnesisDraft::MAX_TEXTO, 'El texto se recorta a MAX_TEXTO');
+t_eq($b['disposicion'], 2, 'La disposición se acota al rango del selector');
+$b = AnamnesisDraft::parse('{"antecedentes":[],"disposicion":-99}');
+t_eq($b['disposicion'], -2, 'Y por abajo también');
+
+// El modelo a veces envuelve el JSON pese a la instrucción.
+$b = AnamnesisDraft::parse("```json\n{\"antecedentes\":[\"otitis\"],\"disposicion\":0}\n```");
+t_true($b !== null && $b['antecedentes']['otitis'], 'Se pela el fence de ``` como en OirsEvaluator');
+t_eq(AnamnesisDraft::parse('lo siento, no puedo'), null, 'Una respuesta que no es JSON devuelve null');
+
+// El prompt describe hallazgos, no números crudos ni nombres de examen.
+$casoDesc = [
+    'edad' => 34, 'gender' => 0,
+    'Aerea' => $descendente, 'Osea' => $descendente,
+    'Z_OD' => 'A', 'Z_OI' => 'A',
+];
+$desc = AnamnesisDraft::describeCase($casoDesc);
+t_true(strpos($desc, '34 años') !== false, 'El prompt lleva la edad');
+t_true(strpos($desc, 'agudas') !== false, 'Describe la forma de la pérdida, no la lista de umbrales');
+t_true(strpos($desc, 'dB') === false, 'No le pasa dB al modelo: los umbrales los mide el alumno');
+
+$casoCondDesc = $casoDesc;
+$casoCondDesc['Aerea'] = $aereaCond;
+$casoCondDesc['Osea'] = $oseaCond;
+$casoCondDesc['Z_OD'] = 'B';
+$desc = AnamnesisDraft::describeCase($casoCondDesc);
+t_true(strpos($desc, 'oído medio') !== false, 'Una conductiva se describe como problema de oído medio');
+t_true(strpos($desc, 'timpanograma tipo B') !== false, 'El timpanograma anormal entra al prompt');
+
+// ---------------------------------------------------------------------
+// Y la verificación es obligatoria.
+// ---------------------------------------------------------------------
+
+$casoIa = $casoSano;
+$casoIa['Anamnesis'] = ['ia' => ['generado' => true, 'verificado' => false]];
+$faltan = CaseCompleteness::pendingTexts($casoIa);
+t_true(strpos(implode(' ', $faltan), 'Anamnesis') !== false,
+    'Borrador de IA sin verificar: el caso no está listo');
+
+$casoIa['Anamnesis']['ia']['verificado'] = true;
+t_eq(CaseCompleteness::pending($casoIa), [], 'Verificado, deja de estar pendiente');
+
+$casoManual = $casoSano;
+$casoManual['Anamnesis'] = ['medicamentos' => 'ninguno'];
+t_eq(CaseCompleteness::pending($casoManual), [],
+    'Una anamnesis escrita a mano no pide verificación: el chequeo es solo para lo que escribió el modelo');

@@ -676,6 +676,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $antecedentes[$h] = isset($v['hist'][$h]);
             }
 
+            // Estado del borrador de IA. `generado` lo pone el JS al traer
+            // el borrador; `verificado` sale de la casilla que el docente
+            // tilda después de leerlo, y se limpia sola al regenerar (el
+            // texto nuevo no lo leyó nadie todavía). Se guarda quién y
+            // cuándo: si el caso sale mal, hay a quién preguntarle.
+            $iaGenerado = !empty($v['anamnesis_ia']['generado']);
+            $iaVerificado = $iaGenerado && !empty($v['anamnesis_ia']['verificado']);
+            $anamnesisIa = [
+                'generado' => $iaGenerado,
+                'verificado' => $iaVerificado,
+                'generado_en' => trim((string) fv($v, ['anamnesis_ia', 'generado_en'], '')),
+                'verificado_por' => $iaVerificado ? (string) ($me['username'] ?? $me['id'] ?? '') : '',
+                'verificado_en' => $iaVerificado ? date('c') : '',
+            ];
+
             $id = $isUpdate ? $editId : CaseBuilder::nextCaseId($pdo);
             $data = CaseBuilder::buildCaseData([
                 'gender' => $gender,
@@ -724,6 +739,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'medicamentos' => trim((string) ($v['medicamentos'] ?? '')),
                     'cirugias' => trim((string) ($v['cirugias'] ?? '')),
                     'otros' => trim((string) ($v['otros'] ?? '')),
+                    // Trazabilidad del borrador escrito por el LLM. Sin
+                    // `verificado` en true el caso no se guarda ni se cita
+                    // (ver CaseCompleteness): el modelo puede inventar una
+                    // cirugía que no existe, y eso le llega al alumno como
+                    // parte del caso.
+                    'ia' => $anamnesisIa,
                 ],
                 'comportamiento' => trim((string) ($v['comportamiento'] ?? '')),
                 'disposicion' => (int) ($v['disposicion'] ?? 0),
@@ -1956,6 +1977,27 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 
 <div class="tab-panel" data-tab="anamnesis">
 <div class="card">
+    <strong>Redactar la anamnesis con IA</strong>
+    <p class="legend help">Escribe los antecedentes que EXPLICAN los hallazgos que ya cargaste: una muesca en 4 kHz pide exposición a ruido, una conductiva con timpanograma B pide otitis a repetición, una neuropatía en un recién nacido pide hiperbilirrubinemia. No inventa el diagnóstico ni menciona umbrales -- eso lo tiene que medir el alumno.</p>
+    <p class="legend help"><strong>Es un borrador y hay que leerlo.</strong> El modelo puede inventar una cirugía que no existe o un fármaco que no es ototóxico, y eso le llega al alumno como parte del caso, indistinguible de lo que escribiste vos. Hasta que tildes la verificación, el caso no se guarda ni se puede citar.</p>
+    <button type="button" class="secondary" id="anamnesis-ia-btn">Redactar borrador con IA</button>
+    <span id="anamnesis-ia-estado" class="legend"></span>
+
+    <input type="hidden" name="anamnesis_ia[generado]" id="anamnesis-ia-generado" value="<?= fv($v, ['anamnesis_ia', 'generado'], '') ? '1' : '' ?>">
+    <input type="hidden" name="anamnesis_ia[generado_en]" id="anamnesis-ia-generado-en" value="<?= htmlspecialchars((string) fv($v, ['anamnesis_ia', 'generado_en'], '')) ?>">
+
+    <div id="anamnesis-ia-verificacion" <?= fv($v, ['anamnesis_ia', 'generado'], '') ? '' : 'hidden' ?> style="border-left:4px solid #b00; padding-left:0.6rem; margin-top:0.6rem;">
+        <label class="inline-check">
+            <input type="checkbox" name="anamnesis_ia[verificado]" id="anamnesis-ia-verificado" value="1" <?= fv($v, ['anamnesis_ia', 'verificado'], '') ? 'checked' : '' ?>>
+            Leí el borrador y verifico que es clínicamente correcto para este caso
+        </label>
+        <?php if (fv($v, ['anamnesis_ia', 'verificado_por'], '')): ?>
+        <p class="legend help">Verificado por <?= htmlspecialchars((string) fv($v, ['anamnesis_ia', 'verificado_por'], '')) ?><?= fv($v, ['anamnesis_ia', 'verificado_en'], '') ? ' el ' . htmlspecialchars((string) fv($v, ['anamnesis_ia', 'verificado_en'], '')) : '' ?>.</p>
+        <?php endif; ?>
+        <p class="legend help">Volver a generar borra la verificación: el texto nuevo no lo leyó nadie.</p>
+    </div>
+</div>
+<div class="card">
     <strong>Anamnesis</strong>
     <?php
     $histLabels = [
@@ -2111,6 +2153,110 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 
     ageInput.addEventListener('input', recompute);
     ageInput.addEventListener('change', recompute);
+})();
+</script>
+
+<script>
+// Borrador de anamnesis por LLM.
+//
+// Trae el texto y lo deja en los campos, pero NO lo da por bueno: enciende
+// la casilla de verificación y la deja sin tildar. Mientras siga así, el
+// servidor no guarda el caso ni la agenda lo cita (CaseCompleteness). El
+// modelo puede inventar una cirugía que no existe, y al alumno le llega
+// indistinguible de lo que escribió el docente.
+(function () {
+    var CSRF = <?= json_encode(Auth::csrfToken()) ?>;
+    var HIST = <?= json_encode(CaseBuilder::HIST_CHECKBOXES) ?>;
+    var FREQS = <?= json_encode(CaseBuilder::FREQUENCIES) ?>;
+    var NEURAL_PARAMS = <?= json_encode(array_keys(CaseBuilder::ABR_NEURAL_DEFAULTS)) ?>;
+
+    var boton = document.getElementById('anamnesis-ia-btn');
+    var estado = document.getElementById('anamnesis-ia-estado');
+    var bloque = document.getElementById('anamnesis-ia-verificacion');
+    var generado = document.getElementById('anamnesis-ia-generado');
+    var generadoEn = document.getElementById('anamnesis-ia-generado-en');
+    var verificado = document.getElementById('anamnesis-ia-verificado');
+    if (!boton || !bloque || !generado || !verificado) return;
+
+    function campo(name) { return document.querySelector('#case-form [name="' + name + '"]'); }
+    function curva(clave, lado) {
+        var out = [];
+        for (var n = 0; n < FREQS.length; n++) {
+            var el = document.getElementById(clave + '_' + lado + '_' + n);
+            out.push(el ? (parseInt(el.value, 10) || 0) : 0);
+        }
+        return out;
+    }
+
+    /** Solo los hallazgos: el prompt no ve el resto de la ficha. */
+    function estadoClinico() {
+        var perfil = {};
+        ['od', 'oi'].forEach(function (lado) {
+            var cce = campo('perfil[' + lado + '][cce_pct]');
+            var retro = {};
+            NEURAL_PARAMS.forEach(function (param) {
+                var el = document.querySelector('.abr-neural-input[data-lado="' + lado + '"][data-param="' + param + '"]');
+                if (el) { retro[param] = el.value; }
+            });
+            perfil[lado] = { cce_pct: cce ? cce.value : 100, retro: retro };
+        });
+        var edad = campo('age'), genero = document.querySelector('#case-form [name="gender"]:checked');
+        var zOd = campo('z_od'), zOi = campo('z_oi');
+        var tinnitus = {};
+        ['lateralidad', 'oido', 'predominio', 'ruido'].forEach(function (k) {
+            var el = campo('tinnitus[' + k + ']');
+            if (el) { tinnitus[k] = el.value; }
+        });
+        ['pulsatil', 'permanente'].forEach(function (k) {
+            var el = campo('tinnitus[' + k + ']');
+            if (el && el.checked) { tinnitus[k] = true; }
+        });
+        return {
+            case_id: (campo('case_id') || {}).value || '',
+            edad: edad ? parseInt(edad.value, 10) || 0 : 0,
+            gender: genero ? parseInt(genero.value, 10) || 0 : 0,
+            aerea: { od: curva('aerea', 'od'), oi: curva('aerea', 'oi') },
+            osea: { od: curva('osea', 'od'), oi: curva('osea', 'oi') },
+            z: { od: zOd ? zOd.value : 'A', oi: zOi ? zOi.value : 'A' },
+            perfil: perfil,
+            tinnitus: tinnitus
+        };
+    }
+
+    function aplicar(b) {
+        HIST.forEach(function (clave) {
+            var chk = campo('hist[' + clave + ']');
+            if (chk) { chk.checked = !!b.antecedentes[clave]; }
+        });
+        ['medicamentos', 'cirugias', 'otros', 'comportamiento'].forEach(function (k) {
+            var el = campo(k);
+            if (el) { el.value = b[k] || ''; }
+        });
+        var disp = campo('disposicion');
+        if (disp) { disp.value = b.disposicion; }
+    }
+
+    boton.addEventListener('click', function () {
+        boton.disabled = true;
+        estado.textContent = 'Redactando...';
+        var body = new URLSearchParams();
+        body.set('csrf_token', CSRF);
+        body.set('payload', JSON.stringify(estadoClinico()));
+        fetch('case_anamnesis_ai.php', { method: 'POST', body: body })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data.ok) { throw new Error(data.error || 'No se pudo redactar.'); }
+                aplicar(data.borrador);
+                generado.value = '1';
+                if (generadoEn) { generadoEn.value = new Date().toISOString(); }
+                // Texto nuevo: nadie lo leyó todavía.
+                verificado.checked = false;
+                bloque.hidden = false;
+                estado.textContent = 'Borrador listo. Leelo y verificalo antes de guardar.';
+            })
+            .catch(function (err) { estado.textContent = 'Error: ' + err.message; })
+            .finally(function () { boton.disabled = false; });
+    });
 })();
 </script>
 

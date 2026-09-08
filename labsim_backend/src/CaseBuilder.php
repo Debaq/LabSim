@@ -1044,6 +1044,17 @@ final class CaseBuilder
                 $v['hist'][$h] = '1';
             }
         }
+        // Estado del borrador de IA: se relee tal cual, así un caso ya
+        // verificado no vuelve a pedir verificación al editarlo (y uno sin
+        // verificar sigue bloqueado hasta que alguien lo lea).
+        $ia = is_array($anamnesis['ia'] ?? null) ? $anamnesis['ia'] : [];
+        $v['anamnesis_ia'] = [
+            'generado' => !empty($ia['generado']) ? '1' : '',
+            'verificado' => !empty($ia['verificado']) ? '1' : '',
+            'generado_en' => (string) ($ia['generado_en'] ?? ''),
+            'verificado_por' => (string) ($ia['verificado_por'] ?? ''),
+            'verificado_en' => (string) ($ia['verificado_en'] ?? ''),
+        ];
         $v['medicamentos'] = $anamnesis['medicamentos'] ?? '';
         $v['cirugias'] = $anamnesis['cirugias'] ?? '';
         $v['otros'] = $anamnesis['otros'] ?? '';

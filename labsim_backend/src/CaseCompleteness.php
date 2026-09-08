@@ -19,9 +19,11 @@ require_once __DIR__ . '/CaseProfile.php';
  * lugares donde importa: el editor (no se sale de la edición con esto
  * pendiente) y la agenda (no se cita un paciente así).
  *
- * A propósito NO revisa lo que puede estar vacío con razón: la anamnesis,
- * el texto de otoscopia, el comportamiento del paciente. Un caso puede no
- * tener nada de eso y seguir siendo un caso.
+ * A propósito NO revisa lo que puede estar vacío con razón: la anamnesis
+ * escrita a mano, el texto de otoscopia, el comportamiento del paciente. Un
+ * caso puede no tener nada de eso y seguir siendo un caso. La excepción es
+ * la anamnesis que escribió el LLM: eso no está vacío, está sin leer, y es
+ * lo contrario de opcional (ver AnamnesisDraft).
  */
 final class CaseCompleteness
 {
@@ -106,6 +108,19 @@ final class CaseCompleteness
                     ),
                 ];
             }
+        }
+
+        // --- Anamnesis escrita por el LLM: no entra al caso sin que un
+        // docente la haya leído. El modelo puede inventar una cirugía que
+        // no existe o un fármaco que no es ototóxico, y eso le llega al
+        // alumno como parte del caso, indistinguible de lo que escribió el
+        // docente. Ver AnamnesisDraft.
+        $ia = is_array(($data['Anamnesis'] ?? [])['ia'] ?? null) ? $data['Anamnesis']['ia'] : [];
+        if (!empty($ia['generado']) && empty($ia['verificado'])) {
+            $pendientes[] = [
+                'tab' => 'anamnesis',
+                'texto' => 'Anamnesis: el borrador lo escribió el modelo de lenguaje y todavía nadie lo verificó. Leelo y tildá la casilla de verificación -- lo que quede acá le llega al alumno como parte del caso.',
+            ];
         }
 
         return $pendientes;
