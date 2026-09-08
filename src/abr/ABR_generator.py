@@ -297,6 +297,14 @@ PAM_MIN_DB = 60.0
 PAM_FULL_DB = 100.0
 PAM_AMP_UV = 3.5
 
+# SN10: el valle lento que sigue a la onda V. Lento de verdad (un ancho
+# de gaussiana de ~0.55 ms contra los 0.18 de una onda neural) y grande
+# -- casi la mitad de V --, porque de eso dependen las dos cosas que
+# hace: dar el valle contra el que se mide la amplitud de V, y ser lo
+# primero que se pierde cuando el pasa-alto sube.
+SN10_SIGMA_MS = 0.55
+SN10_AMP_RATIO = 0.45
+
 # Muestras por ms del registro: 500 puntos en 12 ms. Se mantiene constante
 # al cambiar la ventana para que fs no dependa del protocolo (~41.6 kHz,
 # rango real de un equipo). Ver technical_config['window_ms'].
@@ -811,15 +819,22 @@ class ABRGenerator:
             sigma = WAVE_SIGMA[wave] * v.get('width', 1.0)
             y += self._gaussian(t, v['lat'], v['amp'], sigma=sigma)
 
-        # Trough negativo VI (despues de V, ~SN10)
+        # SN10: el valle negativo lento que sigue a la onda V. Era una
+        # gaussiana tan angosta como las ondas neurales (sigma_V * 1.3) y
+        # eso lo volvia otra ondita mas; el SN10 real es lento -- dura
+        # varios ms -- y es la mitad de la amplitud de V. Importa por dos
+        # cosas: la amplitud de V se mide de pico a valle CONTRA el SN10,
+        # y al ser lento es lo primero que se lleva un pasa-alto mal
+        # puesto, asi que subirlo achica la amplitud medida sin tocar la
+        # latencia -- el error de medir con la banda equivocada y comparar
+        # contra la normativa igual.
         if 'V' in values:
             v = values['V']
             amp_V = v['amp']
             sigma_V = WAVE_SIGMA['V'] * v.get('width', 1.0)
-            # Latency VI ~ V + 1.0-1.5 ms (proporcional al ancho de V)
-            lat_VI = v['lat'] + 0.9 + sigma_V * 2
-            # Trough ~30% de V (negativo)
-            y += self._gaussian(t, lat_VI, -amp_V * 0.30, sigma=sigma_V * 1.3)
+            lat_sn10 = v['lat'] + 0.9 + sigma_V * 2
+            y += self._gaussian(t, lat_sn10, -amp_V * SN10_AMP_RATIO,
+                                sigma=SN10_SIGMA_MS * v.get('width', 1.0))
 
         # VII: bump tardio pequeno (opcional, amp ~15% V)
         if 'V' in values:

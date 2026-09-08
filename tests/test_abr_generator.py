@@ -979,8 +979,14 @@ def test_artifact_rejection_cuts_both_ways():
     t, y_sin, _ = _curva(technical={'artifact_reject_uv': 0.0})
     assert meta['artifact_acceptance'] < 1.0
     assert meta['accepted_sweeps'] < 2000
-    assert y_estrecho[t > 9].std() > y_habitual[t > 9].std()
-    assert y_sin[t > 9].std() > y_habitual[t > 9].std()
+    # El ruido se mide como lo mide el equipo (A - B, donde la senial se
+    # cancela) y no con la desviacion de la cola del trazo: ahi tambien
+    # hay SN10 y onda VII, y la comparacion terminaba dependiendo de
+    # cuanta senial quedaba en esos ultimos milisegundos.
+    _, _, meta_habitual = _curva()
+    _, _, meta_sin = _curva(technical={'artifact_reject_uv': 0.0})
+    assert meta['residual_noise_nv'] > meta_habitual['residual_noise_nv']
+    assert meta_sin['residual_noise_nv'] > meta_habitual['residual_noise_nv']
 
 
 def test_residual_noise_target_sets_the_floor():
@@ -1063,10 +1069,11 @@ def test_subaverages_are_noisier_than_the_full_average():
     if not HAS_SCIPY:
         print("  (salteado: sin scipy)")
         return
-    t, y, meta = _curva(current=2000)
-    # Cola del registro (>9 ms): ahi no hay respuesta, es ruido y nada mas.
-    cola = t > 9
-    razon = meta['sub_a'][cola].std() / y[cola].std()
+    # Curva sin respuesta (estimulo bajo el umbral): asi el trazo entero
+    # es ruido y nada mas. Medirlo en la cola del registro ya no sirve:
+    # ahi tambien viven el SN10 y la onda VII.
+    t, y, meta = _curva(intensity=20, threshold=60, current=2000)
+    razon = meta['sub_a'].std() / y.std()
     assert 1.1 < razon < 1.9, razon
 
 
@@ -1250,6 +1257,53 @@ def _curva_tec(intensity=80, transducer='insert_earphone', clamp=False,
             'capture_id': 'R1', 'neural': neural}
     case.update(kw)
     return g.generate_curve('adult_female', pathology, stim, tech, case)
+
+
+# ------------------------------------------------- SN10 y banda mal puesta
+
+def test_sn10_is_slow_and_deep():
+    """El valle que sigue a la V es lento y grande, no otra ondita.
+
+    De el dependen las dos cosas: la amplitud de V se mide de pico a valle
+    contra el SN10, y por ser lento es lo primero que se lleva un
+    pasa-alto mal puesto.
+    """
+    g = _gen()
+    valores = _params(80)
+    y = g.build_target_curve(T_AXIS, valores)
+    lat_v = valores['V']['lat']
+    valle = (T_AXIS > lat_v) & (T_AXIS < lat_v + 3.5)
+    fondo = T_AXIS[valle][np.argmin(y[valle])]
+    assert lat_v + 0.8 < fondo < lat_v + 2.2, fondo
+    profundidad = -y[valle].min()
+    assert profundidad > valores['V']['amp'] * 0.3, profundidad
+    # Ancho a media profundidad: mas de un ms, o sea mas lento que una
+    # onda neural (que dura decimas).
+    ancho = float(np.sum(y[valle] < y[valle].min() / 2)
+                  * (T_AXIS[1] - T_AXIS[0]))
+    assert ancho > 0.8, ancho
+
+
+def test_a_high_high_pass_eats_the_amplitude_not_the_latency():
+    """Subir el pasa-alto achica la amplitud medida y deja la latencia.
+
+    Es el error de medir con la banda equivocada y comparar igual contra
+    la normativa: la onda sigue donde estaba, pero es la mitad de alta.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    def pico_valle(hp):
+        t, y, _ = _curva(filter_high=hp)
+        zona = (t > 4) & (t < 9)
+        return t[zona][np.argmax(y[zona])], y[zona].max() - y[zona].min()
+    lat_ok, pv_ok = pico_valle(100)
+    lat_mal, pv_mal = pico_valle(300)
+    assert pv_mal < pv_ok * 0.85, (pv_ok, pv_mal)
+    assert abs(lat_mal - lat_ok) < 0.2, (lat_ok, lat_mal)
+    # Y con el pasa-alto en 750 no queda casi nada que medir.
+    _, pv_peor = pico_valle(750)
+    assert pv_peor < pv_mal
 
 
 # --------------------------------------- agitacion del paciente (tramos)
@@ -1528,20 +1582,25 @@ def test_the_false_wave_survives_the_clamp():
         return
     g = _gen()
     def altura(clamp):
-        stim = {'stim': 'click', 'freq': None, 'pol': 'Alternada', 'int': 80,
-                'rate': 21.1, 'filter_down': 3000, 'filter_passhigh': 100,
-                'average': 2000, 'current_avg': 2000,
-                'pathway': 'air_conduction'}
-        tech = default_settings('ABR')
-        tech['tube_clamped'] = clamp
-        case = {'desviaciones': {}, 'fsp_puntos': {'800': 2.3, '2000': 2.8},
-                'umbral': 20, 'average_objetivo': 2000, 'repro_shift': 0.0,
-                'masking': 0, 'contra': None, 'seed_key': 'caso-1',
-                'capture_id': 'R1',
-                'falsa_v': {'amp': 0.3, 'lat': 8.5, 'mitad': 'a'}}
-        t, y, meta = g.generate_curve('adult_female', 'normal', stim, tech, case)
-        i = int(np.argmin(np.abs(t - 8.5)))
-        return meta['sub_a'][i]
+        """Cuanto aporta la falsa onda en 8.5 ms, con y sin ella."""
+        def corre(con_falsa):
+            stim = {'stim': 'click', 'freq': None, 'pol': 'Alternada',
+                    'int': 80, 'rate': 21.1, 'filter_down': 3000,
+                    'filter_passhigh': 100, 'average': 2000,
+                    'current_avg': 2000, 'pathway': 'air_conduction'}
+            tech = default_settings('ABR')
+            tech['tube_clamped'] = clamp
+            case = {'desviaciones': {}, 'fsp_puntos': {'800': 2.3, '2000': 2.8},
+                    'umbral': 20, 'average_objetivo': 2000, 'repro_shift': 0.0,
+                    'masking': 0, 'contra': None, 'seed_key': 'caso-1',
+                    'capture_id': 'R1'}
+            if con_falsa:
+                case['falsa_v'] = {'amp': 0.3, 'lat': 8.5, 'mitad': 'a'}
+            t, y, meta = g.generate_curve('adult_female', 'normal', stim,
+                                          tech, case)
+            i = int(np.argmin(np.abs(t - 8.5)))
+            return meta['sub_a'][i]
+        return corre(True) - corre(False)
     assert altura(True) > 0.3
     assert abs(altura(True) - altura(False)) < 0.05
 
