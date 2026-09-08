@@ -234,6 +234,16 @@ final class Db
     }
 
     /**
+     * Agrega anamnesis_max_tokens a llm_config -- instalaciones de antes de
+     * que el borrador de anamnesis tuviera presupuesto propio. Mismo motivo
+     * que migrateLlmOirsPromptIfNeeded.
+     */
+    public static function migrateLlmAnamnesisTokensIfNeeded(): void
+    {
+        self::addColumnIfMissing(self::get(), 'llm_config', 'anamnesis_max_tokens', 'INTEGER NOT NULL DEFAULT 2000');
+    }
+
+    /**
      * Agrega historia_clinica a patients -- instalaciones de antes de que
      * esa columna existiera. CREATE TABLE IF NOT EXISTS de schema.sql no
      * toca columnas de una tabla que ya existe, por eso el ALTER TABLE acá.

@@ -32,12 +32,20 @@ $razonando = ['choices' => [['index' => 0, 'message' => [
     'role' => 'assistant', 'content' => '',
     'reasoning_content' => 'We need to produce an anamnesis for a 20-year-old woman...',
 ]]]];
-$msg = excepcion(fn() => LlmChat::extractContent($razonando, '{"raw":1}', 'deepseek-v4-flash', 400));
+$msg = excepcion(fn() => LlmChat::extractContent($razonando, '{"raw":1}', 'deepseek-v4-flash', 400,
+    'Máximo de tokens del borrador de anamnesis'));
 t_true(strpos($msg, 'sin tokens razonando') !== false,
     'Modelo de razonamiento sin presupuesto: el error nombra la causa real');
 t_true(strpos($msg, 'deepseek-v4-flash') !== false, 'Y nombra el modelo configurado');
 t_true(strpos($msg, '400') !== false, 'Y el límite que se aplicó, que es lo que hay que subir');
 t_true(strpos($msg, 'Body crudo') === false, 'Ya no vuelca el body: no le sirve a nadie acá');
+t_true(strpos($msg, 'borrador de anamnesis') !== false,
+    'Y nombra el campo que hay que subir: hay más de uno y subir el que no es no arregla nada');
+
+// Sin decir la tarea, el mensaje apunta al campo del chat, que es el default.
+$msg = excepcion(fn() => LlmChat::extractContent($razonando, '{}', 'x', 400));
+t_true(strpos($msg, 'Máximo de tokens por respuesta') !== false,
+    'Sin rótulo, el error apunta al campo del chat');
 
 // finish_reason "length" sin reasoning_content es el mismo problema.
 $cortado = ['choices' => [['index' => 0, 'finish_reason' => 'length',

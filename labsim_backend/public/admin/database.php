@@ -49,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // instalación no la tenía) -- recién ahí se le puede agregar
             // oirs_prompt_template si faltaba.
             Db::migrateLlmOirsPromptIfNeeded();
+            Db::migrateLlmAnamnesisTokensIfNeeded();
             Db::migratePatientHistoriaClinicaIfNeeded();
             Db::migratePatientComentarioDocenteIfNeeded();
             Db::migrateCoursesIfNeeded();

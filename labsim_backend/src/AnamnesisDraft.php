@@ -28,15 +28,17 @@ final class AnamnesisDraft
     public const MAX_TEXTO = 400;
 
     /**
-     * Presupuesto de tokens de esta llamada, aparte del configurado.
-     *
-     * El de la configuración (400 por defecto) está dimensionado para las
-     * respuestas cortas del chat del paciente. Acá no alcanza: el JSON
-     * completo ya ocupa varios cientos, y un modelo de RAZONAMIENTO gasta
-     * presupuesto pensando ANTES de escribir -- con 400 devuelve el
+     * Presupuesto de tokens de esta tarea. Tiene su propio campo en
+     * Admin -> IA Paciente (`anamnesis_max_tokens`), aparte del del chat:
+     * el chat contesta una frase hablada y con 400 sobra, mientras que acá
+     * el JSON completo ya ocupa varios cientos y un modelo de RAZONAMIENTO
+     * gasta presupuesto pensando ANTES de escribir -- con 400 devuelve el
      * razonamiento cortado a la mitad y `content` vacío.
      */
-    public const MAX_TOKENS = 2000;
+    public static function maxTokens(): int
+    {
+        return max(1, (int) LlmConfig::get()['anamnesis_max_tokens']);
+    }
 
     /**
      * Instrucciones fijas del generador. Van como system prompt: describen
@@ -149,7 +151,8 @@ TXT;
      */
     public static function generate(array $data): array
     {
-        $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], self::describeCase($data), self::MAX_TOKENS);
+        $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], self::describeCase($data), self::maxTokens(),
+                              'Máximo de tokens del borrador de anamnesis');
         $draft = self::parse($raw);
         if ($draft === null) {
             throw new RuntimeException(

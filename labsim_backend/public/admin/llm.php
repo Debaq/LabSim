@@ -94,9 +94,14 @@ admin_header('IA Paciente (LLM)', $me);
             <input type="number" name="temperature" value="<?= htmlspecialchars((string) $config['temperature']) ?>" min="0" max="2" step="0.1">
         </label>
 
-        <label>Máximo de tokens por respuesta
+        <label>Máximo de tokens por respuesta (chat con el paciente)
             <input type="number" name="max_tokens" value="<?= (int) $config['max_tokens'] ?>" min="1" max="4000" step="1">
         </label>
+
+        <label>Máximo de tokens del borrador de anamnesis
+            <input type="number" name="anamnesis_max_tokens" value="<?= (int) $config['anamnesis_max_tokens'] ?>" min="1" max="16000" step="1">
+        </label>
+        <p class="legend help">Va aparte porque son dos tareas distintas: el chat contesta una frase hablada y con 400 sobra, mientras que el borrador devuelve un JSON completo que ya ocupa varios cientos. Si el modelo es de razonamiento (piensa antes de escribir, como deepseek-v4-flash), gasta el presupuesto ANTES de responder: con poco margen devuelve el razonamiento cortado y la respuesta vacía. Ante ese error, subí este número, no el de arriba.</p>
 
         <label style="display:flex; align-items:center; gap:0.5rem; font-weight:600;">
             <input type="checkbox" name="active" value="1" style="width:auto;" <?= $config['active'] ? 'checked' : '' ?>>
@@ -138,6 +143,7 @@ admin_header('IA Paciente (LLM)', $me);
         <input type="hidden" name="model" value="<?= htmlspecialchars($config['model']) ?>">
         <input type="hidden" name="temperature" value="<?= htmlspecialchars((string) $config['temperature']) ?>">
         <input type="hidden" name="max_tokens" value="<?= (int) $config['max_tokens'] ?>">
+        <input type="hidden" name="anamnesis_max_tokens" value="<?= (int) $config['anamnesis_max_tokens'] ?>">
         <?php if ($config['active']): ?><input type="hidden" name="active" value="1"><?php endif; ?>
         <input type="hidden" name="oirs_prompt_template" value="<?= htmlspecialchars($config['oirs_prompt_template']) ?>">
 
@@ -176,6 +182,7 @@ admin_header('IA Paciente (LLM)', $me);
         <input type="hidden" name="model" value="<?= htmlspecialchars($config['model']) ?>">
         <input type="hidden" name="temperature" value="<?= htmlspecialchars((string) $config['temperature']) ?>">
         <input type="hidden" name="max_tokens" value="<?= (int) $config['max_tokens'] ?>">
+        <input type="hidden" name="anamnesis_max_tokens" value="<?= (int) $config['anamnesis_max_tokens'] ?>">
         <?php if ($config['active']): ?><input type="hidden" name="active" value="1"><?php endif; ?>
         <input type="hidden" name="system_prompt_template" value="<?= htmlspecialchars($config['system_prompt_template']) ?>">
 

@@ -299,6 +299,13 @@ CREATE TABLE IF NOT EXISTS llm_config (
     model TEXT NOT NULL DEFAULT 'deepseek-chat',
     temperature REAL NOT NULL DEFAULT 0.7,
     max_tokens INTEGER NOT NULL DEFAULT 400,
+    -- Presupuesto propio del borrador de anamnesis (ver AnamnesisDraft). No
+    -- puede compartir max_tokens con el chat: ahí 400 alcanza y sobra para
+    -- una respuesta hablada, mientras que acá el JSON completo ya ocupa
+    -- varios cientos y un modelo de razonamiento gasta el presupuesto
+    -- ANTES de escribir -- con 400 devuelve el razonamiento cortado y el
+    -- content vacío.
+    anamnesis_max_tokens INTEGER NOT NULL DEFAULT 2000,
     -- Vacío = usa LlmConfig::DEFAULT_PROMPT (ver ese archivo) -- así un
     -- "restablecer" no requiere guardar el texto largo acá también.
     system_prompt_template TEXT NOT NULL DEFAULT '',

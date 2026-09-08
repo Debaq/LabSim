@@ -4,6 +4,15 @@ final class LlmConfig
 {
     public const PROVIDERS = ['deepseek', 'openai_compatible'];
 
+    /**
+     * Presupuesto por defecto del borrador de anamnesis (ver
+     * AnamnesisDraft). Va aparte de `max_tokens` porque son dos tareas
+     * distintas: el chat del paciente contesta una frase hablada y con 400
+     * sobra, mientras que acá el JSON completo ya ocupa varios cientos y un
+     * modelo de razonamiento gasta presupuesto ANTES de escribir.
+     */
+    public const ANAMNESIS_MAX_TOKENS_DEFAULT = 2000;
+
     // Base URL por defecto de cada proveedor -- deepseek expone una API
     // compatible con el formato Chat Completions de OpenAI, así que
     // "openai_compatible" cubre cualquier otro backend que hable ese mismo
@@ -151,6 +160,7 @@ PROMPT;
                 'model' => 'deepseek-chat',
                 'temperature' => 0.7,
                 'max_tokens' => 400,
+                'anamnesis_max_tokens' => self::ANAMNESIS_MAX_TOKENS_DEFAULT,
                 'system_prompt_template' => '',
                 'oirs_prompt_template' => '',
                 'active' => 0,
@@ -159,6 +169,11 @@ PROMPT;
         }
         $row['temperature'] = (float) $row['temperature'];
         $row['max_tokens'] = (int) $row['max_tokens'];
+        // Puede faltar si todavía no se aplicó el schema (columna nueva,
+        // ver Db::migrateLlmAnamnesisTokensIfNeeded): sin este default el
+        // borrador de anamnesis saldría con 0 tokens de presupuesto.
+        $row['anamnesis_max_tokens'] = (int) ($row['anamnesis_max_tokens'] ?? 0)
+            ?: self::ANAMNESIS_MAX_TOKENS_DEFAULT;
         $row['active'] = (int) $row['active'];
         // oirs_prompt_template puede faltar si todavía no se aplicó el
         // schema (columna nueva, ver Db::migrateLlmOirsPromptIfNeeded) --
@@ -246,10 +261,15 @@ PROMPT;
             $apiKey = self::get()['api_key'];
         }
 
+        // La columna es nueva: sin esto, guardar la configuración en una
+        // instalación que todavía no aplicó el schema revienta con "no such
+        // column". Es idempotente y esto lo corre un admin, no un alumno.
+        Db::migrateLlmAnamnesisTokensIfNeeded();
+
         $pdo = Db::get();
         $pdo->prepare(
-            "INSERT INTO llm_config (id, provider, api_key, api_base_url, model, temperature, max_tokens, system_prompt_template, oirs_prompt_template, active, updated_at)
-             VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            "INSERT INTO llm_config (id, provider, api_key, api_base_url, model, temperature, max_tokens, anamnesis_max_tokens, system_prompt_template, oirs_prompt_template, active, updated_at)
+             VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
              ON CONFLICT(id) DO UPDATE SET
                 provider = excluded.provider,
                 api_key = excluded.api_key,
@@ -257,6 +277,7 @@ PROMPT;
                 model = excluded.model,
                 temperature = excluded.temperature,
                 max_tokens = excluded.max_tokens,
+                anamnesis_max_tokens = excluded.anamnesis_max_tokens,
                 system_prompt_template = excluded.system_prompt_template,
                 oirs_prompt_template = excluded.oirs_prompt_template,
                 active = excluded.active,
@@ -268,6 +289,7 @@ PROMPT;
             trim((string) ($data['model'] ?? '')) ?: 'deepseek-chat',
             (float) ($data['temperature'] ?? 0.7),
             max(1, (int) ($data['max_tokens'] ?? 400)),
+            max(1, (int) ($data['anamnesis_max_tokens'] ?? self::ANAMNESIS_MAX_TOKENS_DEFAULT)),
             trim((string) ($data['system_prompt_template'] ?? '')),
             trim((string) ($data['oirs_prompt_template'] ?? '')),
             !empty($data['active']) ? 1 : 0,

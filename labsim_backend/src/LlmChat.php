@@ -19,9 +19,14 @@ final class LlmChat
      * un modelo de razonamiento, que gasta presupuesto ANTES de escribir la
      * respuesta) necesita más aire: sin esto devuelve `content` vacío con
      * todo el pensamiento adentro de `reasoning_content`.
+     *
+     * `$campoTokens` es el rótulo del campo que hay que subir en
+     * Admin -> IA Paciente si el presupuesto no alcanza. Hay más de uno y
+     * subir el que no es no arregla nada, así que el error lo nombra.
      */
     public static function reply(string $systemPrompt, array $history, string $userMessage,
-                                 ?int $maxTokens = null): string
+                                 ?int $maxTokens = null,
+                                 string $campoTokens = 'Máximo de tokens por respuesta'): string
     {
         $cfg = LlmConfig::get();
         if ($cfg['api_key'] === '') {
@@ -74,7 +79,7 @@ final class LlmChat
 
         return self::extractContent(
             is_array($decoded) ? $decoded : [], (string) $response,
-            (string) $cfg['model'], (int) ($maxTokens ?? $cfg['max_tokens'])
+            (string) $cfg['model'], (int) ($maxTokens ?? $cfg['max_tokens']), $campoTokens
         );
     }
 
@@ -88,7 +93,8 @@ final class LlmChat
      * @param array<string,mixed> $decoded Body ya parseado
      * @param string $rawBody Body crudo, para el mensaje de último recurso
      */
-    public static function extractContent(array $decoded, string $rawBody, string $model, int $maxTokens): string
+    public static function extractContent(array $decoded, string $rawBody, string $model, int $maxTokens,
+                                          string $campoTokens = 'Máximo de tokens por respuesta'): string
     {
         $content = $decoded['choices'][0]['message']['content'] ?? null;
         if (is_string($content) && $content !== '') {
@@ -104,8 +110,8 @@ final class LlmChat
         $corte = (string) ($decoded['choices'][0]['finish_reason'] ?? '');
         if ($razonamiento !== '' || $corte === 'length') {
             throw new RuntimeException(sprintf(
-                'El modelo "%s" se quedó sin tokens razonando y no alcanzó a escribir la respuesta (límite actual: %d). Subí "Máximo de tokens" en Admin -> IA Paciente, o elegí un modelo sin razonamiento para esta tarea.',
-                $model, $maxTokens
+                'El modelo "%s" se quedó sin tokens razonando y no alcanzó a escribir la respuesta (límite actual: %d). Subí "%s" en Admin -> IA Paciente, o elegí un modelo sin razonamiento para esta tarea.',
+                $model, $maxTokens, $campoTokens
             ));
         }
 
