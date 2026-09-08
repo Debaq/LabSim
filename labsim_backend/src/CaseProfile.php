@@ -21,6 +21,10 @@
  *
  * Ver ROADMAP.md en la raíz del repo para el plan completo.
  */
+// Las frecuencias, los defaults del patrón retro y las bandas de la OEA son
+// las de CaseBuilder: el perfil proyecta sobre ellas, no define otras.
+require_once __DIR__ . '/CaseBuilder.php';
+
 final class CaseProfile
 {
     /** Versión del shape de `cases.data['Perfil']`. */

@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/CaseBuilder.php';
+require_once __DIR__ . '/../../src/CaseProfile.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/../../src/PatientPhoto.php';
 require_once __DIR__ . '/../../src/OtoscopiaPhoto.php';
@@ -467,6 +468,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $eoasOd = $eoasBuild('od');
         $eoasOi = $eoasBuild('oi');
 
+        // Perfil auditivo: el sitio de la lesión (ver src/CaseProfile.php y
+        // ROADMAP.md). El audiograma ya dice cuánta pérdida hay y cuánta es
+        // conductiva; lo único que no puede decir es qué parte del
+        // componente sensorioneural es coclear y cuál retrococlear. Eso es
+        // `cce_pct`, y con `retro` es todo lo que el perfil agrega.
+        //
+        // Todavía no tiene UI propia (fase 3 del roadmap): viaja en inputs
+        // ocultos y, en un caso que nunca lo tuvo, se infiere de la
+        // patología ya cargada. Los `auto` arrancan apagados, así un caso
+        // existente no cambia de comportamiento por abrirlo y guardarlo.
+        $perfilLados = [];
+        foreach ([['od', 'OD', $abrOd, $eoasOd], ['oi', 'OI', $abrOi, $eoasOi]] as [$lado, $ladoData, $abrLado, $eoasLado]) {
+            $ccePost = fv($v, ['perfil', $lado, 'cce_pct'], null);
+            $perfilLados[$ladoData] = [
+                'cce_pct' => ($ccePost === null || $ccePost === '')
+                    ? CaseProfile::inferCcePct($abrLado, $eoasLado)
+                    : max(0.0, min(100.0, (float) $ccePost)),
+                // El patrón retrococlear sigue viviendo en el tab ABR hasta
+                // la fase 3: son los MISMOS inputs, no dos verdades.
+                'retro' => CaseProfile::normalizeRetro($abrLado['neural']),
+            ];
+        }
+        $perfilAuto = [];
+        foreach (CaseProfile::AUTO_MODULES as $moduloAuto) {
+            $perfilAuto[$moduloAuto] = (bool) fv($v, ['perfil', 'auto', $moduloAuto], false);
+        }
+        $perfil = [
+            'version' => CaseProfile::VERSION,
+            'OD' => $perfilLados['OD'],
+            'OI' => $perfilLados['OI'],
+            'auto' => $perfilAuto,
+        ];
+
         // VEMP: patología vestibular por oído. El subtipo (CVEMP cervical,
         // OVEMP ocular, MVEMP masetero) define qué picos se observan (ver
         // VEMP_PEAKS); los 4 peaks siempre se rinden en el form porque
@@ -612,6 +646,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'comportamiento' => trim((string) ($v['comportamiento'] ?? '')),
                 'disposicion' => (int) ($v['disposicion'] ?? 0),
                 'otoscopia' => ['fases' => $otoscopiaFases],
+                'perfil' => $perfil,
                 'abr' => ['OD' => $abrOd, 'OI' => $abrOi],
                 'eoas' => ['OD' => $eoasOd, 'OI' => $eoasOi],
                 'vemp' => ['OD' => $vempOd, 'OI' => $vempOi],
@@ -720,6 +755,22 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <?php else: ?><input type="hidden" name="upload_temp_id" value="<?= htmlspecialchars($uploadTempId) ?>">
 <?php endif; ?>
 <?php $photoCaseId = $isEdit ? $editId : $uploadTempId; ?>
+<?php
+// Perfil auditivo sin UI todavía (fase 3 del roadmap: tab propio con el
+// slider de cce_pct, el patrón retro y los checkboxes de proyección
+// automática). Hasta entonces viaja oculto para no perderse al editar un
+// caso: sin esto, abrir y guardar un caso con perfil cargado lo volvería a
+// inferir desde cero y apagaría los `auto`.
+foreach (['od', 'oi'] as $ladoPerfil):
+    $ccePerfil = fv($v, ['perfil', $ladoPerfil, 'cce_pct'], '');
+?>
+<input type="hidden" name="perfil[<?= $ladoPerfil ?>][cce_pct]" value="<?= htmlspecialchars((string) $ccePerfil) ?>">
+<?php endforeach; ?>
+<?php foreach (CaseProfile::AUTO_MODULES as $moduloAuto): ?>
+<?php if (fv($v, ['perfil', 'auto', $moduloAuto], null)): ?>
+<input type="hidden" name="perfil[auto][<?= $moduloAuto ?>]" value="1">
+<?php endif; ?>
+<?php endforeach; ?>
 <div class="tabs" role="tablist">
     <button type="button" class="tab-btn active" data-tab="paciente">Paciente</button>
     <button type="button" class="tab-btn" data-tab="otoscopia">Otoscopia</button>

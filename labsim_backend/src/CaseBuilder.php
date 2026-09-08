@@ -1,5 +1,9 @@
 <?php
 
+// Las derivaciones del perfil auditivo viven aparte (CaseProfile), pero
+// caseDataToForm() las necesita para releer un caso guardado.
+require_once __DIR__ . '/CaseProfile.php';
+
 final class CaseBuilder
 {
     // Mismas 9 frecuencias que usa el audiómetro (Fowler en create_a.py
@@ -904,6 +908,12 @@ final class CaseBuilder
             'PatientDisposition' => (int) ($form['disposicion'] ?? 0),
             'Tinnitus' => $form['tinnitus'],
             'Otoscopia' => $form['otoscopia'],
+            // Perfil auditivo: sitio de la lesión por oído (ver
+            // src/CaseProfile.php). No lo lee ningún cliente todavía -- es
+            // la fuente desde la que se proyectan los exámenes que tengan
+            // `auto` encendido. Un caso creado desde create_a.py (la app de
+            // escritorio) no lo trae, y CaseProfile::normalize() lo infiere.
+            'Perfil' => $form['perfil'],
             'ABR' => $form['abr'],
             'EOAS' => $form['eoas'],
             'VEMP' => $form['vemp'],
@@ -1067,6 +1077,23 @@ final class CaseBuilder
                 array_values($otoscopiaFases)
             ),
         ];
+
+        // Perfil auditivo: se relee normalizado, así un caso guardado antes
+        // de que existiera entra al formulario con el `cce_pct` inferido de
+        // su patología y todos los `auto` apagados, en vez de perderse al
+        // guardar de nuevo. Ver CaseProfile::normalize().
+        $perfil = CaseProfile::normalize($data);
+        foreach (['OD' => 'od', 'OI' => 'oi'] as $ladoData => $ladoForm) {
+            $v['perfil'][$ladoForm]['cce_pct'] = (string) $perfil[$ladoData]['cce_pct'];
+        }
+        $v['perfil']['auto'] = [];
+        foreach ($perfil['auto'] as $moduloAuto => $activo) {
+            if ($activo) {
+                // Mismo shape que los otros checkboxes del form (presente =
+                // marcado): un módulo en manual no aparece en $_POST.
+                $v['perfil']['auto'][$moduloAuto] = '1';
+            }
+        }
 
         $abr = $data['ABR'] ?? [];
         foreach (['OD' => 'od', 'OI' => 'oi'] as $ladoData => $ladoForm) {
