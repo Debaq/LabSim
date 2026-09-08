@@ -1399,6 +1399,46 @@ class ABRGenerator:
     # ORQUESTADOR
     # =====================================================================
 
+    @staticmethod
+    def stim_key(stim, freq=None):
+        """Clave del estimulo tal como la indexan el normativo y el caso.
+
+        Misma forma que arma get_baseline_values: 'click', 'ce_chirp',
+        'ls_chirp' o 'tone_burst_<freq>'.
+        """
+        if stim == 'tone_burst':
+            return f"tone_burst_{freq or '1000Hz'}"
+        return stim
+
+    def case_threshold(self, case_config, stimulus_config, pathway, pathology):
+        """Umbral del oido para ESTE estimulo, en dB nHL.
+
+        El caso trae una tabla por estimulo cuando el docente derivo el ABR
+        del audiograma (ver CaseProfile::abrThresholds en el backend): sin
+        ella el umbral era un escalar por oido y una hipoacusia descendente
+        respondia igual a un burst de 500 Hz que a uno de 4 kHz --el
+        estimulo solo movia latencias, ver get_baseline_values-- asi que la
+        evaluacion frecuencia especifica no tenia nada que encontrar.
+
+        La via osea tiene su propia tabla, calculada sobre los umbrales
+        oseos: el gap conductivo del ABR sale del audiograma solo.
+
+        Fallback en cascada: tabla del estimulo -> escalar 'umbral' del caso
+        (todos los casos guardados antes de esto) -> minimo normativo de la
+        patologia.
+        """
+        if case_config:
+            clave = ('umbral_por_estimulo_oseo' if pathway == 'bone_conduction'
+                     else 'umbral_por_estimulo')
+            tabla = case_config.get(clave) or {}
+            valor = tabla.get(self.stim_key(stimulus_config['stim'],
+                                            stimulus_config.get('freq')))
+            if valor is not None:
+                return float(valor)
+            if 'umbral' in case_config:
+                return float(case_config['umbral'])
+        return self.norms['pathology_modifiers'][pathology]['threshold_range'][0]
+
     def shadow_values(self, population, pathway, stimulus_config, masking, ia,
                       case_config, click_baseline=None, ratio_override=None):
         """Respuesta de la coclea del oido NO evaluado, o None si no cruza.
@@ -1421,7 +1461,13 @@ class ABRGenerator:
         # enmascarada. Por eso no se corta aca.
 
         level = stimulus_config['int'] - ia
-        threshold = max(float(contra.get('umbral', 20)), float(masking))
+        # El oido no evaluado tiene su propia tabla por estimulo: si no, un
+        # paciente con una sola coclea descendente daba sombra a 4 kHz
+        # cuando su umbral ahi es 80.
+        threshold = max(
+            self.case_threshold(contra, stimulus_config, pathway,
+                                contra.get('type', 'normal')),
+            float(masking))
         if level <= threshold:
             return None
 
@@ -1749,10 +1795,7 @@ class ABRGenerator:
         # el -- sobreenmascaramiento, y la respuesta se degrada. Sale gratis
         # subiendo el umbral efectivo, porque la amplitud ya va por nivel
         # de sensacion.
-        if case_config and 'umbral' in case_config:
-            threshold = case_config['umbral']
-        else:
-            threshold = self.norms['pathology_modifiers'][pathology]['threshold_range'][0]
+        threshold = self.case_threshold(case_config, stimulus_config, pathway, pathology)
 
         masking = float((case_config or {}).get('masking') or 0.0)
         ia = INTERAURAL_ATTENUATION.get(transducer, 65.0)
@@ -2260,6 +2303,9 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
     if contra:
         contra_config = {
             'umbral': contra.get('umbral', contra.get('th', 20)),
+            # Tabla por estimulo del oido no evaluado (ver case_threshold).
+            'umbral_por_estimulo': contra.get('umbral_por_estimulo'),
+            'umbral_por_estimulo_oseo': contra.get('umbral_por_estimulo_oseo'),
             'type': PATHOLOGY_MAP.get(contra.get('type', 'normal'), 'normal'),
             'neural': contra.get('neural'),
             'desviaciones': contra.get('desviaciones', {}),
@@ -2294,6 +2340,11 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
         'pam': preferences.get('pam', 0),
         'fsp_puntos': preferences.get('fsp_puntos', {'800': 2.3, '2000': 2.8}),
         'umbral': preferences.get('umbral', preferences.get('th', 20)),
+        # Umbral por estimulo derivado del audiograma del caso (ver
+        # case_threshold). Los casos guardados antes de esto no lo traen y
+        # caen en el escalar de arriba, que es como se comportaban.
+        'umbral_por_estimulo': preferences.get('umbral_por_estimulo'),
+        'umbral_por_estimulo_oseo': preferences.get('umbral_por_estimulo_oseo'),
         'average_objetivo': preferences.get('average_objetivo', 2000),
         'repro_shift': var_repro,
         # Jitter DENTRO de la captura: lo que hace que los subpromedios A/B

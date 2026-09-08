@@ -501,6 +501,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'auto' => $perfilAuto,
         ];
 
+        // Proyección del ABR: umbral POR ESTÍMULO, derivado del audiograma.
+        //
+        // Es lo que faltaba para poder evaluar por frecuencia. Con un solo
+        // `umbral` escalar por oído, una hipoacusia descendente respondía
+        // igual a un burst de 500 Hz que a uno de 4 kHz (el estímulo solo
+        // movía latencias, ver get_baseline_values en ABR_generator.py) y
+        // el ejercicio no tenía nada que descubrir.
+        //
+        // El escalar se sigue emitiendo, alineado al click, para el cliente
+        // viejo y para cualquier código que todavía lo lea.
+        if ($perfilAuto['abr']) {
+            foreach ([['OD', 0], ['OI', 1]] as [$ladoData, $sideIdx]) {
+                $decomp = CaseProfile::decompose(
+                    $airPairs, $bonePairs, $sideIdx, $perfil[$ladoData]['cce_pct']
+                );
+                $porEstimulo = CaseProfile::abrThresholds($decomp, 'air_conduction');
+                $abrDerivado = [
+                    'umbral_por_estimulo' => $porEstimulo,
+                    'umbral_por_estimulo_oseo' => CaseProfile::abrThresholds($decomp, 'bone_conduction'),
+                    'umbral' => $porEstimulo['click'],
+                ];
+                if ($ladoData === 'OD') {
+                    $abrOd = array_merge($abrOd, $abrDerivado);
+                } else {
+                    $abrOi = array_merge($abrOi, $abrDerivado);
+                }
+            }
+        }
+
         // VEMP: patología vestibular por oído. El subtipo (CVEMP cervical,
         // OVEMP ocular, MVEMP masetero) define qué picos se observan (ver
         // VEMP_PEAKS); los 4 peaks siempre se rinden en el form porque
@@ -766,10 +795,16 @@ foreach (['od', 'oi'] as $ladoPerfil):
 ?>
 <input type="hidden" name="perfil[<?= $ladoPerfil ?>][cce_pct]" value="<?= htmlspecialchars((string) $ccePerfil) ?>">
 <?php endforeach; ?>
-<?php foreach (CaseProfile::AUTO_MODULES as $moduloAuto): ?>
-<?php if (fv($v, ['perfil', 'auto', $moduloAuto], null)): ?>
+<?php
+// Los módulos que ya tienen su propio control visible (hoy solo ABR, en su
+// pestaña) NO van acá: dos inputs con el mismo name se pisarían.
+$perfilAutoConUI = ['abr'];
+foreach (CaseProfile::AUTO_MODULES as $moduloAuto):
+    if (in_array($moduloAuto, $perfilAutoConUI, true) || !fv($v, ['perfil', 'auto', $moduloAuto], null)) {
+        continue;
+    }
+?>
 <input type="hidden" name="perfil[auto][<?= $moduloAuto ?>]" value="1">
-<?php endif; ?>
 <?php endforeach; ?>
 <div class="tabs" role="tablist">
     <button type="button" class="tab-btn active" data-tab="paciente">Paciente</button>
@@ -1427,6 +1462,28 @@ foreach (['od', 'oi'] as $ladoPerfil):
         </select>
     </label>
 </div>
+<div class="card">
+    <strong>Umbral por estímulo, derivado del audiograma</strong>
+    <p class="legend help">Con esto encendido, el umbral del ABR deja de ser un número por oído y pasa a calcularse por estímulo desde la audiometría del caso: el burst de 500 Hz responde según el umbral en 500, el de 4 kHz según el de 4 kHz, el click según la base coclear (2-4 kHz) y el chirp con más peso en los graves. Es lo que permite pedir una evaluación frecuencia específica en una hipoacusia descendente. La vía ósea usa los umbrales óseos, así que el gap conductivo del ABR sale del audiograma solo.</p>
+    <p class="legend help">Los números de la tabla están en dB nHL, no en dB HL: incluyen la corrección conductual-electrofisiológica (+20 dB en 500 Hz, +15 en 1 k, +10 en 2 k, +5 en 4 k, +10 el click, +5 el chirp). Por eso un oído de 0 dB HL igual muestra 20 dB nHL con burst de 500 -- convertir nHL a eHL es parte de lo que el alumno tiene que hacer.</p>
+    <label class="inline-check">
+        <input type="checkbox" id="perfil-auto-abr" name="perfil[auto][abr]" value="1" <?= fv($v, ['perfil', 'auto', 'abr'], null) ? 'checked' : '' ?>>
+        Derivar el umbral del ABR desde el audiograma
+    </label>
+    <div id="abr-threshold-preview" hidden>
+        <table class="reflex-pattern-table" style="margin-top:0.6rem;">
+            <thead>
+                <tr>
+                    <th>Estímulo</th>
+                    <th>OD aérea</th><th>OD ósea</th>
+                    <th>OI aérea</th><th>OI ósea</th>
+                </tr>
+            </thead>
+            <tbody id="abr-threshold-rows"></tbody>
+        </table>
+        <p class="legend help">El campo "Umbral (dB)" de cada oído queda de solo lectura: lo escribe esta tabla (con el valor del click, que es lo que mostraría un ABR de rutina).</p>
+    </div>
+</div>
 <div class="two-col">
 <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
 <div class="card">
@@ -1915,6 +1972,110 @@ foreach (['od', 'oi'] as $ladoPerfil):
 
     ageInput.addEventListener('input', recompute);
     ageInput.addEventListener('change', recompute);
+})();
+</script>
+
+<script>
+// Umbral ABR por estímulo: vista previa de lo que va a guardar el servidor.
+//
+// Las constantes NO se re-tipean acá -- se serializan desde CaseProfile,
+// que es donde vive la fórmula y lo que corren los tests (a diferencia del
+// resto de los previews de esta página, que sí mantienen copias a mano).
+// Si cambia la ley, cambia sola en los dos lados.
+(function () {
+    var PESOS = <?= json_encode(CaseProfile::STIM_WEIGHTS) ?>;
+    var CORR = <?= json_encode(CaseProfile::STIM_NHL_CORRECTION) ?>;
+    var PASO = <?= (int) CaseProfile::ABR_STEP_DB ?>;
+    var MAX = <?= (int) CaseProfile::ABR_MAX_DB ?>;
+    var FREQS = <?= json_encode(CaseBuilder::FREQUENCIES) ?>;
+    var ETIQUETAS = {
+        'click': 'Click', 'ce_chirp': 'CE-chirp', 'ls_chirp': 'Ls-chirp',
+        'tone_burst_500Hz': 'Burst 500 Hz', 'tone_burst_1000Hz': 'Burst 1 kHz',
+        'tone_burst_2000Hz': 'Burst 2 kHz', 'tone_burst_4000Hz': 'Burst 4 kHz'
+    };
+    // Mismo orden que la tabla de arriba: graves a agudos, después los de
+    // banda ancha, que es como se lee un protocolo frecuencia específica.
+    var ORDEN = ['tone_burst_500Hz', 'tone_burst_1000Hz', 'tone_burst_2000Hz',
+                 'tone_burst_4000Hz', 'click', 'ce_chirp', 'ls_chirp'];
+
+    var check = document.getElementById('perfil-auto-abr');
+    var preview = document.getElementById('abr-threshold-preview');
+    var tbody = document.getElementById('abr-threshold-rows');
+    if (!check || !preview || !tbody) return;
+
+    /** Curva Hz -> dB de un oído, leída de los inputs del audiograma. */
+    function curva(clave, lado) {
+        var out = {};
+        for (var n = 0; n < FREQS.length; n++) {
+            var el = document.getElementById(clave + '_' + lado + '_' + n);
+            out[FREQS[n]] = el ? (parseInt(el.value, 10) || 0) : 0;
+        }
+        return out;
+    }
+
+    /** Ósea nunca peor que la aérea -- mismo truncado que CaseProfile::decompose. */
+    function osea(lado) {
+        var aire = curva('aerea', lado), hueso = curva('osea', lado);
+        var out = {};
+        for (var hz in aire) { out[hz] = Math.min(hueso[hz], aire[hz]); }
+        return out;
+    }
+
+    function umbral(curvaHz, stim) {
+        var suma = 0, peso = 0;
+        var pesos = PESOS[stim];
+        for (var hz in pesos) {
+            suma += (curvaHz[hz] || 0) * pesos[hz];
+            peso += pesos[hz];
+        }
+        var nhl = (peso > 0 ? suma / peso : 0) + CORR[stim];
+        return Math.max(0, Math.min(MAX, Math.round(nhl / PASO) * PASO));
+    }
+
+    function render() {
+        preview.hidden = !check.checked;
+        // El umbral escalar lo pasa a escribir la proyección: se deja
+        // visible (el docente tiene que ver qué quedó) pero no editable.
+        ['od', 'oi'].forEach(function (lado) {
+            var campo = document.querySelector('input[name="abr[' + lado + '][umbral]"]');
+            if (campo) { campo.readOnly = check.checked; }
+        });
+        if (!check.checked) return;
+
+        var curvas = {
+            od_aire: curva('aerea', 'od'), od_hueso: osea('od'),
+            oi_aire: curva('aerea', 'oi'), oi_hueso: osea('oi')
+        };
+        tbody.innerHTML = '';
+        ORDEN.forEach(function (stim) {
+            var tr = document.createElement('tr');
+            var celdas = [ETIQUETAS[stim]];
+            ['od_aire', 'od_hueso', 'oi_aire', 'oi_hueso'].forEach(function (k) {
+                celdas.push(umbral(curvas[k], stim) + ' dB nHL');
+            });
+            celdas.forEach(function (texto, i) {
+                var td = document.createElement(i === 0 ? 'th' : 'td');
+                td.textContent = texto;
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+        // El escalar guardado es el del click, igual que en el servidor.
+        ['od', 'oi'].forEach(function (lado) {
+            var campo = document.querySelector('input[name="abr[' + lado + '][umbral]"]');
+            if (campo) { campo.value = umbral(curvas[lado + '_aire'], 'click'); }
+        });
+    }
+
+    check.addEventListener('change', render);
+    document.addEventListener('input', function (e) {
+        if (e.target.id && /^(aerea|osea)_/.test(e.target.id)) render();
+    });
+    // "Igualar ósea a aérea" copia valores sin disparar 'input' en cada campo.
+    document.addEventListener('change', function (e) {
+        if (e.target.name && /^igualar\[/.test(e.target.name)) render();
+    });
+    render();
 })();
 </script>
 

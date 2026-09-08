@@ -1822,6 +1822,120 @@ def test_normative_limits_follow_intensity():
     assert ip[0] < 4.0 < ip[1]
 
 
+# ------------------------------- umbral por estimulo (perfil auditivo)
+
+# Tabla como la que emite CaseProfile::abrThresholds en el backend para una
+# hipoacusia descendente (graves conservados, 4 kHz en 70 dB HL).
+DESCENDENTE = {
+    'tone_burst_500Hz': 30, 'tone_burst_1000Hz': 30,
+    'tone_burst_2000Hz': 50, 'tone_burst_4000Hz': 75,
+    'click': 65, 'ce_chirp': 50, 'ls_chirp': 50,
+}
+
+
+def _stim(stim, freq=None):
+    return {'stim': stim, 'freq': freq, 'int': 60, 'pathway': 'air_conduction'}
+
+
+def test_threshold_falls_back_to_the_scalar_without_a_table():
+    """Caso guardado antes del perfil: sigue leyendo el umbral escalar."""
+    g = _gen()
+    caso = {'umbral': 45}
+    for stim, freq in (('click', None), ('tone_burst', '500Hz')):
+        assert g.case_threshold(caso, _stim(stim, freq), 'air_conduction',
+                                'normal') == 45
+
+
+def test_threshold_falls_back_to_the_norm_without_a_case():
+    """Sin caso no se inventa nada: el minimo normativo de la patologia."""
+    g = _gen()
+    esperado = g.norms['pathology_modifiers']['normal']['threshold_range'][0]
+    assert g.case_threshold(None, _stim('click'), 'air_conduction',
+                            'normal') == esperado
+
+
+def test_threshold_is_frequency_specific():
+    """El problema que motivo el perfil: 500 Hz y 4 kHz tienen que diferir.
+
+    Antes el caso traia un solo umbral por oido y el estimulo solo movia
+    latencias (get_baseline_values), asi que una hipoacusia descendente
+    respondia igual a un burst de 500 que a uno de 4 kHz.
+    """
+    g = _gen()
+    caso = {'umbral': 65, 'umbral_por_estimulo': DESCENDENTE}
+    b500 = g.case_threshold(caso, _stim('tone_burst', '500Hz'),
+                            'air_conduction', 'cochlear')
+    b4k = g.case_threshold(caso, _stim('tone_burst', '4000Hz'),
+                           'air_conduction', 'cochlear')
+    assert b500 == 30
+    assert b4k == 75
+    assert b4k - b500 == 45
+
+
+def test_click_follows_the_cochlear_base_not_the_low_frequencies():
+    """El click de una descendente sale elevado aunque los graves esten bien."""
+    g = _gen()
+    caso = {'umbral': 65, 'umbral_por_estimulo': DESCENDENTE}
+    click = g.case_threshold(caso, _stim('click'), 'air_conduction', 'cochlear')
+    b500 = g.case_threshold(caso, _stim('tone_burst', '500Hz'),
+                            'air_conduction', 'cochlear')
+    assert click > b500 + 30
+
+
+def test_bone_pathway_uses_its_own_table():
+    """Conductiva: la via osea tiene su propia tabla, y ahi esta el gap."""
+    g = _gen()
+    caso = {
+        'umbral': 55,
+        'umbral_por_estimulo': {'click': 55},
+        'umbral_por_estimulo_oseo': {'click': 15},
+    }
+    stim = _stim('click')
+    assert g.case_threshold(caso, stim, 'air_conduction', 'conductive') == 55
+    assert g.case_threshold(caso, stim, 'bone_conduction', 'conductive') == 15
+
+
+def test_response_dies_in_the_high_frequencies_of_a_descending_loss():
+    """Misma intensidad, dos estimulos: en 4 kHz no queda nivel de sensacion."""
+    g = _gen()
+    base = g.get_baseline_values()
+    intensidad = 60
+    v500, _ = g.calculate_wave_parameters(
+        base, intensidad, DESCENDENTE['tone_burst_500Hz'], 'cochlear')
+    v4k, visibles = g.calculate_wave_parameters(
+        base, intensidad, DESCENDENTE['tone_burst_4000Hz'], 'cochlear')
+    # 30 dB SL contra -15 dB SL: la V de 4 kHz tiene que quedar muy por
+    # debajo, que es lo que el alumno lee como "no hay respuesta".
+    assert v4k['V']['amp'] < 0.2 * v500['V']['amp']
+
+
+def test_shadow_curve_uses_the_contralateral_table():
+    """El oido no evaluado tambien responde por frecuencia.
+
+    Con un contralateral descendente, un burst de 4 kHz que cruza el craneo
+    no puede dar sombra: para esa coclea el nivel queda bajo su umbral.
+    """
+    g = _gen()
+    ia = INTERAURAL_ATTENUATION['insert_earphone']
+    contra = {'umbral': 30, 'type': 'normal', 'umbral_por_estimulo': DESCENDENTE}
+    caso = {'contra': contra}
+    grave = {'stim': 'tone_burst', 'freq': '500Hz', 'int': 100,
+             'pathway': 'air_conduction'}
+    agudo = dict(grave, freq='4000Hz')
+    assert g.shadow_values('adult_female', 'air_conduction', grave, 0, ia,
+                           caso) is not None
+    assert g.shadow_values('adult_female', 'air_conduction', agudo, 0, ia,
+                           caso) is None
+
+
+def test_stim_key_matches_the_normative_keys():
+    """La clave del caso y la del normativo tienen que ser la misma."""
+    g = _gen()
+    for etiqueta, (stim, freq) in STIM_MAP.items():
+        clave = g.stim_key(stim, freq)
+        assert clave in DESCENDENTE, (etiqueta, clave)
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_") and callable(fn):

@@ -179,8 +179,8 @@ producir el mismo JSON que antes. Es el criterio de no-regresión de la fase 1.
 | # | Qué | Toca | Estado |
 |---|---|---|---|
 | 0 | `CaseProfile.php`: derivaciones puras + runner de tests PHP | `src/CaseProfile.php`, `tests/` | ✅ |
-| 1 | `Perfil` persistido en `cases.data`, inferido de casos viejos, releído al editar | `CaseBuilder.php`, `case_create.php` | ☐ |
-| 2 | **Umbral ABR por estímulo** (el pedido original) | `CaseProfile.php`, `ABR_generator.py`, `AbrMainWindow.py` | ☐ |
+| 1 | `Perfil` persistido en `cases.data`, inferido de casos viejos, releído al editar | `CaseBuilder.php`, `case_create.php` | ✅ |
+| 2 | **Umbral ABR por estímulo** (el pedido original) | `CaseProfile.php`, `ABR_generator.py`, `case_create.php` | ✅ |
 | 3 | Tab "Perfil auditivo": `cce_pct` + `retro` (se mudan del tab ABR) + checkboxes `auto` | `case_create.php` | ☐ |
 | 4 | Proyecciones restantes: OEA, reflejos, reclutamiento, Carhart | `CaseProfile.php`, `case_create.php` | ☐ |
 | 5 | `normalCoherenceError` → avisos de desvío del perfil, no errores duros | `CaseBuilder.php`, `case_create.php` | ☐ |
