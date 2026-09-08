@@ -1,5 +1,10 @@
 <?php
 
+// No hay autoloader: la dependencia se declara donde se usa. Hasta ahora
+// la cargaba cada llamador a mano, así que un endpoint nuevo moría con
+// "Class 'LlmConfig' not found" recién al apretar el botón.
+require_once __DIR__ . '/LlmConfig.php';
+
 final class LlmChat
 {
     /**
