@@ -1979,6 +1979,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <div class="card">
     <strong>Redactar la anamnesis con IA</strong>
     <p class="legend help">Escribe los antecedentes que EXPLICAN los hallazgos que ya cargaste: una muesca en 4 kHz pide exposición a ruido, una conductiva con timpanograma B pide otitis a repetición, una neuropatía en un recién nacido pide hiperbilirrubinemia. No inventa el diagnóstico ni menciona umbrales -- eso lo tiene que medir el alumno.</p>
+    <p class="legend help">Escribe el relato (motivo de consulta, hace cuánto, en qué situaciones molesta) en <strong>Historia clínica</strong>, que está en la pestaña Paciente, y acá los antecedentes, medicamentos, cirugías, comportamiento y sensibilidad.</p>
     <p class="legend help"><strong>Es un borrador y hay que leerlo.</strong> El modelo puede inventar una cirugía que no existe o un fármaco que no es ototóxico, y eso le llega al alumno como parte del caso, indistinguible de lo que escribiste vos. Hasta que tildes la verificación, el caso no se guarda ni se puede citar.</p>
     <button type="button" class="secondary" id="anamnesis-ia-btn">Redactar borrador con IA</button>
     <span id="anamnesis-ia-estado" class="legend"></span>
@@ -2224,6 +2225,12 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     }
 
     function aplicar(b) {
+        // El relato va a la pestaña Paciente, no a Anamnesis: es historia
+        // del paciente, no del caso. Es además el campo que hace útil al
+        // borrador -- sin él, un paciente sin antecedentes formales
+        // quedaba con la ficha vacía.
+        var relato = campo('historia_clinica');
+        if (relato && b.historia_clinica) { relato.value = b.historia_clinica; }
         HIST.forEach(function (clave) {
             var chk = campo('hist[' + clave + ']');
             if (chk) { chk.checked = !!b.antecedentes[clave]; }
@@ -2254,7 +2261,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                 // Texto nuevo: nadie lo leyó todavía.
                 verificado.checked = false;
                 bloque.hidden = false;
-                estado.textContent = 'Borrador listo. Leelo y verificalo antes de guardar.';
+                estado.textContent = 'Borrador listo. Leelo y verificalo antes de guardar (el relato quedó en la pestaña Paciente).';
             })
             .catch(function (err) { estado.textContent = 'Error: ' + err.message; })
             .finally(function () { boton.disabled = false; });

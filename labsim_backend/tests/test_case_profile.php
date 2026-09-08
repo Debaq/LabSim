@@ -651,3 +651,23 @@ $casoManual = $casoSano;
 $casoManual['Anamnesis'] = ['medicamentos' => 'ninguno'];
 t_eq(CaseCompleteness::pending($casoManual), [],
     'Una anamnesis escrita a mano no pide verificación: el chequeo es solo para lo que escribió el modelo');
+
+// El relato: el campo que faltaba. Sin él, un paciente sin antecedentes
+// formales (una normoyente joven con acúfeno) dejaba la ficha vacía, y el
+// modelo metía lo único que podía decir en "comportamiento".
+$b = AnamnesisDraft::parse('{"historia_clinica":"Consulta por zumbido en ambos oídos de 4 meses de evolución, más notorio al acostarse. Asiste a conciertos con frecuencia y usa audífonos varias horas al día.","antecedentes":["trauma_acustico"],"comportamiento":"tranquila, colaboradora","disposicion":0}');
+t_true(strpos($b['historia_clinica'], 'zumbido') !== false, 'El relato se parsea');
+t_true($b['antecedentes']['trauma_acustico'],
+    'Y el antecedente que lo explica: exposición recreacional a ruido');
+t_eq(mb_strlen(AnamnesisDraft::parse('{"historia_clinica":"' . str_repeat('x', 2000) . '"}')['historia_clinica']),
+    AnamnesisDraft::MAX_RELATO, 'El relato se recorta a su propio tope');
+t_true(AnamnesisDraft::MAX_RELATO > AnamnesisDraft::MAX_TEXTO,
+    'Y ese tope es mayor que el de los campos cortos: es el único narrativo');
+t_eq(AnamnesisDraft::parse('{"antecedentes":[]}')['historia_clinica'], '',
+    'Si el modelo no lo manda, queda vacío -- no se inventa nada del lado nuestro');
+
+// El prompt tiene que pedirlo explícitamente, que es lo que faltaba.
+t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, 'historia_clinica') !== false,
+    'El prompt nombra el campo del relato');
+t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, 'NUNCA va vacía') !== false,
+    'Y dice que no puede quedar vacío: todo paciente consultó por algo');

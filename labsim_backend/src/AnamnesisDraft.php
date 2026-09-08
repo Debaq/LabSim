@@ -28,6 +28,14 @@ final class AnamnesisDraft
     public const MAX_TEXTO = 400;
 
     /**
+     * Tope del relato (historia clínica). Más largo que los demás porque
+     * es el único campo narrativo: motivo de consulta, hace cuánto, en qué
+     * situaciones molesta. Sin él la anamnesis de un paciente sin
+     * antecedentes formales queda vacía, que es exactamente lo que pasaba.
+     */
+    public const MAX_RELATO = 1200;
+
+    /**
      * Presupuesto de tokens de esta tarea. Tiene su propio campo en
      * Admin -> IA Paciente (`anamnesis_max_tokens`), aparte del del chat:
      * el chat contesta una frase hablada y con 400 sobra, mientras que acá
@@ -110,16 +118,25 @@ Reglas:
 - No inventes diagnósticos ya hechos ni digas qué tiene el paciente. La
   anamnesis es lo que el paciente cuenta y lo que figura en su historia.
 - Escribí en español de Chile, en tercera persona, breve y clínico.
-- Si un campo no corresponde a este paciente, devolvelo como string vacío.
-  Un paciente sano no toma medicamentos ni tuvo cirugías: no rellenes.
+- "historia_clinica" NUNCA va vacía: todo paciente consultó por algo.
+  Escribí el motivo de consulta, hace cuánto empezó, cómo evolucionó y en
+  qué situaciones le molesta. Dos a cuatro oraciones.
+- Marcá los antecedentes que expliquen los hallazgos de forma plausible y
+  frecuente en la vida real (exposición a ruido recreacional o laboral,
+  otitis a repetición en la infancia, uso de ototóxicos). No los dejes
+  todos en falso solo por prudencia: si algo explica el cuadro, marcalo.
+- Un paciente sin hallazgos igual tiene un motivo de consulta, y puede no
+  tener ningún antecedente: ahí "antecedentes" va vacío pero
+  "historia_clinica" no.
+- Medicamentos y cirugías sí van vacíos si no corresponden: no rellenes.
 - "comportamiento" describe cómo actúa el paciente al conversar (tono,
-  actitud), no su patología.
+  actitud), no su patología ni su motivo de consulta.
 
 No razones en voz alta ni expliques tu respuesta: escribí el JSON directo.
 
 Respondé SOLO con un objeto JSON, sin ```, con exactamente estas claves:
-{"antecedentes": [...], "medicamentos": "", "cirugias": "", "otros": "",
- "comportamiento": "", "disposicion": 0}
+{"historia_clinica": "", "antecedentes": [...], "medicamentos": "",
+ "cirugias": "", "otros": "", "comportamiento": "", "disposicion": 0}
 
 "antecedentes" es una lista con las claves que correspondan, de esta lista
 cerrada y ninguna otra: hipoacusia_familiar, ototoxicos, trauma_acustico,
@@ -199,9 +216,9 @@ TXT;
      * no se puede parsear, lanza RuntimeException con algo legible.
      *
      * @param array<string,mixed> $data cases.data
-     * @return array{antecedentes:array<string,bool>, medicamentos:string,
-     *               cirugias:string, otros:string, comportamiento:string,
-     *               disposicion:int}
+     * @return array{historia_clinica:string, antecedentes:array<string,bool>,
+     *               medicamentos:string, cirugias:string, otros:string,
+     *               comportamiento:string, disposicion:int}
      */
     public static function generate(array $data): array
     {
@@ -261,6 +278,7 @@ TXT;
         };
 
         return [
+            'historia_clinica' => mb_substr(trim((string) ($json['historia_clinica'] ?? '')), 0, self::MAX_RELATO),
             'antecedentes' => $antecedentes,
             'medicamentos' => $texto($json['medicamentos'] ?? ''),
             'cirugias' => $texto($json['cirugias'] ?? ''),
