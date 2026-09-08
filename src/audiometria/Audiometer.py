@@ -270,16 +270,28 @@ class Audiometer(QWidget, Ui_Audiometer):
 
 
     def eventFilter(self, obj, event):
+        # El filtro esta instalado en QApplication: recibe TODOS los eventos
+        # de TODOS los objetos. Por eso lo primero es el chequeo mas barato
+        # posible (el tipo de evento) y se sale con return False: si aca se
+        # hace cualquier llamada a Qt (isVisible(), focusWidget(), ...) se
+        # agrega un frame de Python por cada evento anidado que Qt despacha
+        # durante layout/pintado (ej. la cadena de sizeHint/boundingRect de
+        # pyqtgraph), y eso revienta el limite de recursion con
+        # "Error calling Python override of QWidget::eventFilter()".
+        event_type = event.type()
+        if event_type not in (QEvent.KeyPress, QEvent.KeyRelease):
+            return False
+
         # isVisible() (no isActiveWindow()): el audiometro debe capturar
         # sus teclas mientras este abierto, sin importar que otra
         # subventana MDI tenga el foco interno (ver comentario en __init__).
-        if self.isVisible() and event.type() in (QEvent.KeyPress, QEvent.KeyRelease):
+        if self.isVisible():
             focus = QApplication.focusWidget()
             if isinstance(focus, (QLineEdit, QTextEdit, QPlainTextEdit)):
-                return super().eventFilter(obj, event)
+                return False
 
             key = event.key()
-            if event.type() == QEvent.KeyPress:
+            if event_type == QEvent.KeyPress:
                 if key in self._dial_keys:
                     ch, up = self._dial_keys[key]
                     self.MoveDial(ch, up)
@@ -290,12 +302,12 @@ class Audiometer(QWidget, Ui_Audiometer):
 
             ch = self._stim_keys.get(key)
             if ch is not None and not event.isAutoRepeat():
-                if event.type() == QEvent.KeyPress:
+                if event_type == QEvent.KeyPress:
                     self.btn_stims[ch].pressed.emit()
                 else:
                     self.btn_stims[ch].released.emit()
                 return True
-        return super().eventFilter(obj, event)
+        return False
 
     def on_label_text_changed(self, sender):
         self.response.set_config(sender)

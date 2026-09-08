@@ -685,6 +685,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw["W"].obj.update_state(state)
 
     def connect_signals(self):
+        self.subw["A"].visibility_changed.connect(self._on_audiometro_visibility)
         self.subw["CVOICE"].obj.btn_checked.connect(self.subw["A"].obj.supra)
         self.subw["A"].obj.signal_speech.connect(self.speechlist_mode)
         self.subw["W"].obj.level_changed.connect(
@@ -701,6 +702,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             widget = self.layoutAction.itemAt(i).widget()
             if widget is not None:
                 widget.deleteLater()
+        # los botones se recrean abajo: las refs viejas quedan apuntando a
+        # widgets ya destruidos (_update_action_buttons las usa)
+        self.btn_cmd_voice = None
+        self.btn_list_words = None
         if self._module_visible("CHAT"):
             self.btn_chat_paciente = QPushButton("Hablar con el paciente")
             self.btn_chat_paciente.setObjectName("btn_chat_paciente")
@@ -716,6 +721,28 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.btn_list_words.setObjectName("btn_W")
             self.btn_list_words.clicked.connect(self.activate_listWords)
             self.layoutAction.addWidget(self.btn_list_words)
+        self._update_action_buttons()
+
+    def _on_audiometro_visibility(self, visible):
+        """Al esconder el audiómetro se van con él sus accesorios: listas de
+        palabras y comandos de voz operan sobre sus canales, solos no sirven."""
+        self._update_action_buttons()
+        if visible:
+            return
+        for name in ("W", "CVOICE"):
+            if name in self.apps and name in self.subw:
+                self.close_sub_window(name)
+
+    def _update_action_buttons(self):
+        """Comandos de voz y Listas de palabras son controles del audiómetro
+        (dictan/reproducen por sus canales): sin el audiómetro abierto no
+        tienen sentido, así que se muestran solo con él a la vista."""
+        subw_a = self.subw.get("A") if self.subw else None
+        con_audiometro = subw_a is not None and subw_a.isVisible()
+        for btn in (getattr(self, "btn_cmd_voice", None),
+                    getattr(self, "btn_list_words", None)):
+            if btn is not None:
+                btn.setVisible(con_audiometro)
 
     def abrir_chat_con(self, case_id, nombre, edad, procedimiento, appointment_id=None):
         """Abre (o trae al frente) la subventana MDI de chat con el paciente,

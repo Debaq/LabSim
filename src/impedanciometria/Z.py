@@ -23,7 +23,6 @@ from impedanciometria.z_generator import Z_225, Reflex_curve, map_letter_for_pro
 from impedanciometria.z_audio import ProbeTone, ReflexTone
 from core.helpers import Storage
 
-print("Z cargado")
 
 class ZControl(QWidget, Ui_Z_control):
     def __init__(self,):

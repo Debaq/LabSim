@@ -13,7 +13,7 @@ MoveWindow(parent:object): mueve la ventana a la
 from PySide6.QtCore import Qt,QSize,QRectF,QRect
 from PySide6.QtGui import QMouseEvent, QIcon, QPixmap, QPainter, QPen, QColor
 from PySide6.QtWidgets import QPushButton, QLayout, QFrame
-from PySide6.QtWidgets import QMdiSubWindow
+from PySide6.QtWidgets import QMdiArea, QMdiSubWindow
 from core.h_win import FrameSubMdi, MdiArea
 from core import inbox
 from core import mis_pacientes
@@ -94,6 +94,63 @@ def titlebar_icon(kind: str, size: int = 14, color: str = "#ffffff") -> QIcon:
     painter.end()
     return QIcon(pixmap)
 
+# Marca (propiedad dinamica de la QMdiSubWindow) de los modulos que ocupan
+# todo el MDI -- ver fit_full_window().
+FULL_WINDOW_PROP = "labsim_full"
+
+
+def is_full_window(sub) -> bool:
+    """True si la subventana es de las que ocupan todo el MDI"""
+    return bool(sub.property(FULL_WINDOW_PROP))
+
+
+def fit_full_window(sub) -> None:
+    """Estira la subventana a todo el viewport del MDI y la manda al fondo.
+
+    No se usa showMaximized(): QMdiArea propaga el estado maximizado a la
+    siguiente subventana que se abra (la nueva sale maximizada y la vieja
+    pierde el estado y queda del tamaño minimo). Estirando la geometria a
+    mano, los modulos "max" (ABR/VEMP/EOAS) quedan siempre a pantalla
+    completa y cualquier otro modulo se abre encima, en su tamaño normal.
+    """
+    mdi = sub.mdiArea()
+    if mdi is None:
+        return
+    viewport = mdi.viewport().size()
+    sub.setGeometry(0, 0, viewport.width(), viewport.height())
+
+
+def raise_window(sub) -> None:
+    """Trae la subventana al frente y reordena el resto.
+
+    Los modulos full (ABR/VEMP/EOAS) van siempre por debajo de los normales:
+    el examen ocupa el fondo de la pantalla y lo que se abra despues (agenda,
+    ficha, chat) queda encima. Ademas son excluyentes entre si -- ocupan toda
+    la pantalla y se pisarian -- asi que abrir uno esconde al otro.
+    """
+    mdi = sub.mdiArea()
+    if mdi is None:
+        sub.raise_()
+        return
+    if is_full_window(sub):
+        for other in mdi.subWindowList():
+            if other is not sub and is_full_window(other) and not other.isHidden():
+                other.hide()
+        fit_full_window(sub)
+    stack = [s for s in mdi.subWindowList(QMdiArea.WindowOrder.StackingOrder)
+             if not s.isHidden() and s is not sub]
+    fulls = [s for s in stack if is_full_window(s)]
+    normals = [s for s in stack if not is_full_window(s)]
+    if is_full_window(sub):
+        ordered = fulls + [sub] + normals
+    else:
+        ordered = fulls + normals + [sub]
+    for win in ordered:
+        win.raise_()
+    if not is_full_window(sub) or not normals:
+        mdi.setActiveSubWindow(sub)
+
+
 def show_hide(obj:any, pos:int):
     """
     Muestra o esconde la subventana que se encuentre en obj según su indice
@@ -103,6 +160,7 @@ def show_hide(obj:any, pos:int):
     """
     if obj.get(pos).isHidden():
         obj.get(pos).show()
+        raise_window(obj.get(pos))
     else:
         obj.get(pos).hide()
 
@@ -266,14 +324,19 @@ class SubWindow():
         if self.modules.is_full(pos_z):
             show_hide(self.modules, pos_z)
         else:
-            open_count = len(self.mdi_area.subWindowList())
+            # Las subventanas a pantalla completa no cuentan: si contaran,
+            # nunca habria hueco libre y todo se abriria en cascada.
+            open_count = len([s for s in self.mdi_area.subWindowList()
+                              if not is_full_window(s) and not s.isHidden()])
             sub = QMdiSubWindow()
             sub.setWidget(widg)
             widg.lbl_title.setText(name)
             self.mdi_area.addSubWindow(sub)
             if size == "max":
                 _flags(sub)
-                sub.showMaximized()
+                sub.setProperty(FULL_WINDOW_PROP, True)
+                sub.show()
+                raise_window(sub)
                 self.modules.set(pos_z, sub)
                 return
             if position != [0,0]:
@@ -285,7 +348,8 @@ class SubWindow():
                     free_pos = None
                 else:
                     existing_rects = [s.geometry() for s in self.mdi_area.subWindowList()
-                                      if s is not sub]
+                                      if s is not sub and not is_full_window(s)
+                                      and not s.isHidden()]
                     free_pos = _find_free_position(existing_rects, size[0], size[1],
                                                    max_x, max_y)
                 if free_pos is not None:
@@ -308,6 +372,7 @@ class SubWindow():
                 sub.setMinimumSize(size[0], size[1])
                 sub.resize(size[0], size[1])
             sub.show()
+            raise_window(sub)
             list_wi = self.mdi_area.subWindowList()
             self.modules.set(pos_z, list_wi[-1])
 

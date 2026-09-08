@@ -1,7 +1,7 @@
 from core.base import context
-from PySide6.QtCore import Qt, QEvent
+from PySide6.QtCore import Qt, QEvent, QTimer, Signal
 from PySide6.QtGui import QPainter, QPixmap
-from PySide6.QtWidgets import QMdiArea, QWidget, QMenu
+from PySide6.QtWidgets import QMdiArea, QWidget
 from core.UI.Ui_frameSubMdi import Ui_Form as UI_frameSubMdi
 
 
@@ -48,6 +48,11 @@ class FrameSubMdi(QWidget, UI_frameSubMdi):
         QWidget ([type]): clase Qwidget
         UI_frameSubMdi ([type]): clase Ui del Mdi
     """
+    # Se emite cuando la subventana se muestra/esconde (el hide() de la
+    # QMdiSubWindow llega al widget como QHideEvent). La usa main.py para
+    # mostrar los botones que solo aplican con cierto modulo abierto.
+    visibility_changed = Signal(bool)
+
     def __init__(self, ui_ui):
         #super(FrameSubMdi, self).__init__()
         super().__init__()
@@ -68,15 +73,48 @@ class FrameSubMdi(QWidget, UI_frameSubMdi):
         """Esconde la subventana (QMdiSubWindow) sin destruirla"""
         self.parent().hide()
 
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.visibility_changed.emit(True)
+
+    def hideEvent(self, event):
+        super().hideEvent(event)
+        self.visibility_changed.emit(False)
+
 
 
 class MdiArea(QMdiArea):
     def __init__(self):
         super().__init__()
-        self.mousePressEvent = self.move_window
         self.setDocumentMode(True)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        # Al clickear un modulo full Qt lo trae al frente y taparia a los
+        # modulos normales abiertos encima: se los vuelve a subir.
+        self.subWindowActivated.connect(self._keep_full_below)
+
+    def _keep_full_below(self, sub):
+        if sub is None:
+            return
+        # Diferido: Qt sube la subventana activada despues de emitir la
+        # señal, asi que reordenar aca mismo no sirve.
+        QTimer.singleShot(0, self._restack_full)
+
+    def _restack_full(self):
+        """Deja los modulos full por debajo de todos los normales, sin
+        alterar el orden entre estos (la activa queda al frente)."""
+        from core.ui_helpers import is_full_window
+        stack = [s for s in self.subWindowList(QMdiArea.WindowOrder.StackingOrder)
+                 if not s.isHidden()]
+        if not any(is_full_window(s) for s in stack):
+            return
+        normals = [s for s in stack if not is_full_window(s)]
+        active = self.activeSubWindow()
+        if active in normals:
+            normals.remove(active)
+            normals.append(active)
+        for win in normals:
+            win.raise_()
 
     def viewportEvent(self, event):
         result = super().viewportEvent(event)
@@ -91,20 +129,15 @@ class MdiArea(QMdiArea):
             painter.end()
         return result
 
-    def move_window(self, event):
-        if event.buttons() == Qt.MouseButton.RightButton:
-            context_menu = QMenu(self)
-            ordenar = context_menu.addMenu("Ordenar")
-            ordenar.addAction("Cascada", self.cascadeSubWindows)
-            ordenar.addAction("Azulejos", self.tileSubWindows)
-            ordenar.addAction("Cerrar todo", self.closeAll)
-            context_menu.exec(self.mapToGlobal(event.pos()))
+    def resizeEvent(self, event):
+        """Reajusta los modulos a pantalla completa (ABR/VEMP/EOAS): su
+        geometria se maneja a mano (ver ui_helpers.fit_full_window), asi
+        que no siguen solos el resize del MDI."""
+        super().resizeEvent(event)
+        self._refit_full()
 
-    def closeAll(self):
-        i = self.parent().parent().parent()
-        try:
-            for j in i.Modules.length(True):
-                if i.Modules.get(j) != None:
-                    i.Modules.get(j).hide()
-        except AttributeError:
-            print("No existe modulos")
+    def _refit_full(self):
+        from core.ui_helpers import fit_full_window, is_full_window
+        for sub in self.subWindowList():
+            if is_full_window(sub) and not sub.isHidden():
+                fit_full_window(sub)
