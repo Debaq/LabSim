@@ -183,7 +183,7 @@ producir el mismo JSON que antes. Es el criterio de no-regresión de la fase 1.
 | 2 | **Umbral ABR por estímulo** (el pedido original) | `CaseProfile.php`, `ABR_generator.py`, `case_create.php` | ✅ |
 | 3 | Tab "Perfil auditivo": `cce_pct` + `retro` (se mudan del tab ABR) + checkboxes `auto` | `case_create.php` | ✅ |
 | 4 | Proyecciones restantes: OEA, reflejos, reclutamiento, deterioro tonal | `CaseProfile.php`, `case_create.php` | ✅ |
-| 5 | `normalCoherenceError` → avisos de desvío del perfil, no errores duros | `CaseBuilder.php`, `case_create.php` | ☐ |
+| 5 | Avisos de desvío del perfil (no errores duros), con confirmación explícita | `CaseProfile.php`, `case_create.php` | ✅ |
 | 6 | Un solo randomizador de perfil; se retiran los dos autocompletar | `case_create.php`, `CaseBuilder.php` | ☐ |
 
 Las fases 0-2 resuelven el problema que originó todo esto y no tocan ningún

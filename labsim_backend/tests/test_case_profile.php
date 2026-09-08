@@ -235,3 +235,80 @@ t_eq(CaseProfile::toneDecay($dRetro40, 0.0, $sinRetro, 2000), 30,
     'Retrococlear: hay que subir 30 dB para sostener el tono');
 t_eq(CaseProfile::toneDecay($dNormal, 100.0, $schwannoma, 2000), 30,
     'Patrón retro con umbrales normales: deterioro igual -- es cuando la prueba vale la pena');
+
+// ---------------------------------------------------------------------
+// Avisos: contradicciones que hoy no las caza nadie.
+// ---------------------------------------------------------------------
+
+$perfilManual = [
+    'version' => 1,
+    'OD' => ['cce_pct' => 100.0, 'retro' => CaseBuilder::ABR_NEURAL_DEFAULTS],
+    'OI' => ['cce_pct' => 100.0, 'retro' => CaseBuilder::ABR_NEURAL_DEFAULTS],
+    'auto' => ['abr' => false, 'eoas' => false, 'reflex' => false, 'recruit' => false],
+];
+$eoasNormal = ['type' => 'normal', 'umbral' => 20, 'desviaciones' => []];
+$abrNormal = ['type' => 'normal', 'umbral' => 20];
+$reflexPresente = [
+    'ipsi' => ['od' => [85, 85, 85, 85], 'oi' => [85, 85, 85, 85]],
+    'contra' => ['od' => [85, 85, 85, 85, 85], 'oi' => [85, 85, 85, 85, 85]],
+];
+$tympNormal = ['OD' => 'A', 'OI' => 'A'];
+$decompSanos = ['OD' => $dNormal, 'OI' => $dNormal];
+
+t_eq(CaseProfile::warnings($decompSanos, $perfilManual,
+        ['OD' => $abrNormal, 'OI' => $abrNormal],
+        ['OD' => $eoasNormal, 'OI' => $eoasNormal],
+        $reflexPresente, $tympNormal),
+    [], 'Paciente sano y coherente: ningún aviso');
+
+// OEA normales con una coclear de 40 dB: imposible, y hoy se guarda sin chistar.
+$decompCoclear = ['OD' => $dCoclear40, 'OI' => $dNormal];
+$avisos = CaseProfile::warnings($decompCoclear, $perfilManual,
+    ['OD' => $abrNormal, 'OI' => $abrNormal],
+    ['OD' => $eoasNormal, 'OI' => $eoasNormal],
+    $reflexPresente, $tympNormal);
+t_true(count($avisos) > 0, 'OEA presente con coclear de 40 dB: hay aviso');
+t_true(strpos(implode(' ', $avisos), 'OEA OD') !== false, 'El aviso nombra el examen y el oído');
+
+// La misma OEA con la lesión puesta en el nervio deja de ser contradictoria.
+$perfilRetro = $perfilManual;
+$perfilRetro['OD']['cce_pct'] = 0.0;
+$decompRetro = ['OD' => $dRetro40, 'OI' => $dNormal];
+$avisos = CaseProfile::warnings($decompRetro, $perfilRetro,
+    ['OD' => $abrNormal, 'OI' => $abrNormal],
+    ['OD' => $eoasNormal, 'OI' => $eoasNormal],
+    $reflexPresente, $tympNormal);
+t_true(!in_array(true, array_map(fn($a) => strpos($a, 'OEA') === 0, $avisos), true),
+    'La misma OEA conservada con cce_pct 0 ya no contradice nada: es una neuropatía');
+
+// Reflejos presentes con timpanograma B.
+$avisos = CaseProfile::warnings($decompSanos, $perfilManual,
+    ['OD' => $abrNormal, 'OI' => $abrNormal],
+    ['OD' => $eoasNormal, 'OI' => $eoasNormal],
+    $reflexPresente, ['OD' => 'B', 'OI' => 'A']);
+t_true(count($avisos) > 0, 'Reflejos presentes con timpanograma B: hay aviso');
+
+// ABR mucho mejor que el audiograma: el patrón de la simulación.
+$decompProfunda = ['OD' => CaseProfile::decompose(audiograma([125 => 70]), audiograma([125 => 70]), 0, 100.0),
+                   'OI' => $dNormal];
+$avisos = CaseProfile::warnings($decompProfunda, $perfilManual,
+    ['OD' => $abrNormal, 'OI' => $abrNormal],
+    ['OD' => ['type' => 'coclear', 'umbral' => 70, 'desviaciones' => []], 'OI' => $eoasNormal],
+    $reflexPresente, $tympNormal);
+t_true(strpos(implode(' ', $avisos), 'ABR OD') !== false,
+    'ABR de 20 dB con audiograma de 70: hay aviso');
+
+// Un módulo derivado no puede contradecirse: no se lo revisa.
+$perfilAuto = $perfilManual;
+$perfilAuto['auto'] = ['abr' => true, 'eoas' => true, 'reflex' => true, 'recruit' => true];
+t_eq(CaseProfile::warnings($decompCoclear, $perfilAuto,
+        ['OD' => $abrNormal, 'OI' => $abrNormal],
+        ['OD' => $eoasNormal, 'OI' => $eoasNormal],
+        $reflexPresente, ['OD' => 'B', 'OI' => 'A']),
+    [], 'Con todo derivado no se avisa nada: el perfil es la fuente');
+
+// La ley de atenuación cargada tiene que ser la misma que la del cliente.
+$cargada = CaseProfile::loadedOaeAttenuation(['type' => 'coclear', 'umbral' => 40, 'desviaciones' => []]);
+t_close($cargada['2000'], 30.0, 0.05, 'loadedOaeAttenuation replica oae_attenuation_db (1.2 dB/dB sobre 15)');
+$cargada = CaseProfile::loadedOaeAttenuation(['type' => 'neural', 'umbral' => 70, 'desviaciones' => []]);
+t_close($cargada['2000'], 0.0, 0.01, 'Neural no atenúa la OEA por más alto que esté el umbral');

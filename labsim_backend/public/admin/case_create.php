@@ -179,6 +179,9 @@ function tymp_y(float $compliance): float
 }
 
 $error = null;
+// Avisos de incoherencia con el perfil auditivo (ver CaseProfile::warnings).
+// Solo se llenan en un POST de guardado; en GET el formulario se dibuja limpio.
+$avisosPerfil = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $v = $_POST; // sticky form: se redibuja con lo ya tipeado, tanto al generar nombre como si falla la validación
 } elseif ($isEdit) {
@@ -732,7 +735,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = $coherencia;
         }
 
-        if ($error === null) {
+        // Incoherencias entre lo cargado a mano y lo que predice el perfil.
+        // Avisan, no bloquean: un caso puede ser incoherente a propósito (el
+        // Stenger y la simulación lo NECESITAN). Por eso se muestran una vez
+        // y se guardan igual tildando la casilla -- pero el docente tiene que
+        // haberlos leído, que es lo que hoy no pasa en ningún lado.
+        $avisosPerfil = [];
+        if ($error === null && !isset($v['perfil_confirmar'])) {
+            $avisosPerfil = CaseProfile::warnings(
+                $decomp, $perfil,
+                ['OD' => $abrOd, 'OI' => $abrOi],
+                ['OD' => $eoasOd, 'OI' => $eoasOi],
+                ['ipsi' => $reflexIpsi, 'contra' => $reflexContra],
+                ['OD' => $zOd, 'OI' => $zOi]
+            );
+        }
+
+        if ($error === null && $avisosPerfil === []) {
             $antecedentes = [];
             foreach (CaseBuilder::HIST_CHECKBOXES as $h) {
                 $antecedentes[$h] = isset($v['hist'][$h]);
@@ -895,6 +914,17 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 ?>
 
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
+<?php if (!empty($avisosPerfil)): ?>
+<div class="card" style="border-left:4px solid #7a5b00;">
+    <strong>El caso no coincide con el perfil auditivo</strong>
+    <ul>
+        <?php foreach ($avisosPerfil as $aviso): ?>
+        <li><?= htmlspecialchars($aviso) ?></li>
+        <?php endforeach; ?>
+    </ul>
+    <p class="legend help">Corregí lo que corresponda, o marcá la casilla y volvé a guardar si la incoherencia es parte del ejercicio (simulación, Stenger, falsa onda V).</p>
+</div>
+<?php endif; ?>
 
 <form method="post" id="case-form">
 <?= csrf_field() ?>
@@ -2024,6 +2054,15 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     </div>
 </div>
 </div>
+
+<?php if (!empty($avisosPerfil)): ?>
+<div class="card" style="border-left:4px solid #7a5b00;">
+    <label class="inline-check">
+        <input type="checkbox" name="perfil_confirmar" value="1">
+        La incoherencia es intencional: guardar igual
+    </label>
+</div>
+<?php endif; ?>
 
 <?php if ($isEdit): ?>
 <div class="form-actions-sticky">

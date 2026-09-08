@@ -632,6 +632,157 @@ final class CaseProfile
         return $sn > self::SN_NORMAL_DB ? 5 : 0;
     }
 
+    // ---------------------------------------------------------------
+    // Avisos de incoherencia entre modulos
+    // ---------------------------------------------------------------
+
+    /**
+     * Diferencia (dB) desde la cual un examen cargado a mano se considera
+     * en desacuerdo con lo que predice el perfil. Generosos a propósito:
+     * el objetivo es cazar el caso imposible (OEA normales con un gap de
+     * 40 dB), no discutir 10 dB con el docente.
+     */
+    public const WARN_OAE_DB = 15.0;
+    public const WARN_ABR_DB = 25.0;
+
+    /**
+     * Contradicciones entre lo que el docente cargó a mano y lo que el
+     * perfil predice.
+     *
+     * Solo mira los módulos que NO están derivados: uno derivado no puede
+     * contradecirse a sí mismo. Y devuelve avisos, no errores: un caso
+     * puede ser incoherente a propósito (Stenger, simulación, falsa onda V)
+     * y eso tiene que seguir siendo posible. Ver ROADMAP.md.
+     *
+     * @param array<string,array> $decompPorLado ['OD' => decompose(), 'OI' => ...]
+     * @param array<string,mixed> $perfil        normalize()
+     * @param array<string,array> $abr           ['OD' => lado ya armado, ...]
+     * @param array<string,array> $eoas          idem
+     * @param array{ipsi:array,contra:array} $reflex  filas por modo, ['od'=>[], 'oi'=>[]]
+     * @param array<string,string> $tympPorLado  ['OD' => 'A', 'OI' => 'B']
+     * @return list<string>
+     */
+    public static function warnings(
+        array $decompPorLado,
+        array $perfil,
+        array $abr,
+        array $eoas,
+        array $reflex,
+        array $tympPorLado
+    ): array {
+        $avisos = [];
+        $auto = $perfil['auto'] ?? [];
+
+        foreach (['OD', 'OI'] as $lado) {
+            $decomp = $decompPorLado[$lado] ?? null;
+            if ($decomp === null) {
+                continue;
+            }
+            $ccePct = (float) ($perfil[$lado]['cce_pct'] ?? self::DEFAULT_CCE_PCT);
+            $retro = self::normalizeRetro($perfil[$lado]['retro'] ?? []);
+
+            // --- ABR: el umbral cargado contra el que predice el audiograma.
+            if (empty($auto['abr']) && isset($abr[$lado]['umbral'])) {
+                $esperado = self::abrThresholds($decomp)['click'];
+                $cargado = (float) $abr[$lado]['umbral'];
+                if (abs($cargado - $esperado) > self::WARN_ABR_DB) {
+                    $avisos[] = sprintf(
+                        'ABR %s: umbral cargado %s dB, pero el audiograma predice ~%d dB nHL con click. %s',
+                        $lado, (string) $cargado, $esperado,
+                        $cargado < $esperado
+                            ? 'Un ABR mucho mejor que el audiograma es el patrón de la simulación (o de un audiograma mal cargado).'
+                            : 'Un ABR mucho peor que el audiograma solo se explica por una desincronía.'
+                    );
+                }
+            }
+
+            // --- OEA: la emisión cargada contra la que sobrevive al daño.
+            if (empty($auto['eoas']) && isset($eoas[$lado])) {
+                $esperadas = self::oaeDeviations($decomp);
+                $cargadas = self::loadedOaeAttenuation($eoas[$lado]);
+                foreach ([2000, 4000] as $hz) {
+                    $dif = ($esperadas[(string) $hz] ?? 0.0) - ($cargadas[(string) $hz] ?? 0.0);
+                    if ($dif > self::WARN_OAE_DB) {
+                        $avisos[] = sprintf(
+                            'OEA %s en %d Hz: cargada como presente (%d dB de atenuación), pero con esta pérdida y este gap se esperan ~%d dB. Una OEA conservada con la cóclea dañada solo pasa si la lesión es retrococlear (bajá cce_pct).',
+                            $lado, $hz, (int) round($cargadas[(string) $hz] ?? 0.0),
+                            (int) round($esperadas[(string) $hz] ?? 0.0)
+                        );
+                        break;
+                    }
+                }
+            }
+
+            // --- Reflejos: presencia, que es el hallazgo que se lee primero.
+            if (empty($auto['reflex'])) {
+                $otro = $lado === 'OD' ? 'OI' : 'OD';
+                $ladoForm = strtolower($lado);
+                foreach (['ipsi' => self::REFLEX_FREQS_IPSI,
+                          'contra' => self::REFLEX_FREQS_CONTRA] as $modo => $freqs) {
+                    $filas = $reflex[$modo][$ladoForm] ?? [];
+                    foreach ($freqs as $i => $hz) {
+                        if (!isset($filas[$i])) {
+                            continue;
+                        }
+                        $estimulado = $modo === 'ipsi' ? $lado : $otro;
+                        $esperado = self::reflexThreshold(
+                            $decomp,
+                            $decompPorLado[$estimulado] ?? $decomp,
+                            (string) ($tympPorLado[$lado] ?? 'A'),
+                            (float) ($perfil[$estimulado]['cce_pct'] ?? self::DEFAULT_CCE_PCT),
+                            self::normalizeRetro($perfil[$estimulado]['retro'] ?? []),
+                            $hz
+                        );
+                        $cargadoPresente = (float) $filas[$i] < self::REFLEX_ABSENT_DB;
+                        if ($esperado === self::REFLEX_ABSENT_DB && $cargadoPresente) {
+                            $avisos[] = sprintf(
+                                'Reflejo %s %s en %s: cargado como presente, pero con este oído medio y esta pérdida no debería registrarse.',
+                                $modo, $lado, is_int($hz) ? $hz . ' Hz' : (string) $hz
+                            );
+                            break 2;
+                        }
+                    }
+                }
+            }
+            unset($ccePct, $retro);
+        }
+
+        return $avisos;
+    }
+
+    /**
+     * Atenuación de la OEA que implica un lado ya cargado a mano, por
+     * frecuencia. Réplica de oae_attenuation_db() en
+     * src/oae/generators/base.py: la ley por patología (type + umbral) MÁS
+     * el perfil por frecuencia, que es como los suma el cliente.
+     *
+     * @param array<string,mixed> $eoasLado
+     * @return array<string,float>
+     */
+    public static function loadedOaeAttenuation(array $eoasLado): array
+    {
+        $tipo = (string) ($eoasLado['type'] ?? 'normal');
+        $umbral = (float) ($eoasLado['umbral'] ?? 0);
+        if ($tipo === 'coclear') {
+            $patologia = min(max(0.0, $umbral - self::OAE_CCE_KNEE_DB) * self::OAE_CCE_SLOPE,
+                             self::OAE_MAX_ATTEN_DB);
+        } elseif ($tipo === 'transmission') {
+            $patologia = min(max(0.0, $umbral - self::OAE_GAP_KNEE_DB) * self::OAE_GAP_SLOPE,
+                             self::OAE_MAX_ATTEN_DB);
+        } else {
+            // 'neural' deja la cóclea intacta: la OEA no se atenúa.
+            $patologia = 0.0;
+        }
+        $patologia += (float) ($eoasLado['atten_db'] ?? 0);
+
+        $desv = is_array($eoasLado['desviaciones'] ?? null) ? $eoasLado['desviaciones'] : [];
+        $out = [];
+        foreach (CaseBuilder::EOAS_FREQS as $hz) {
+            $out[(string) $hz] = $patologia + (float) ($desv[(string) $hz] ?? 0);
+        }
+        return $out;
+    }
+
     /**
      * Promedio de una curva (Hz => dB) en CORE_FREQS.
      *
