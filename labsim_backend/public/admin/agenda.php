@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/../../src/Patients.php';
 require_once __DIR__ . '/../../src/Feriados.php';
+require_once __DIR__ . '/../../src/CaseCompleteness.php';
 
 /**
  * Configuración de agendas por curso/grupo/alumno: agendar, reagendar,
@@ -51,6 +52,8 @@ unset($_SESSION['agenda_flash_success']);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Auth::requireCsrf();
     $action = $_POST['form_action'] ?? '';
+    // Caso que dejó el error, para poder ofrecer el link a completarlo.
+    $errorCaseId = null;
 
     if ($action === 'schedule') {
         $caseId = trim((string) ($_POST['case_id'] ?? ''));
@@ -108,6 +111,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$fecha, $hora, $appointmentId]);
             if ($stmt->fetch()) {
                 $error = 'Ya existe una cita agendada en esa fecha y hora.';
+            }
+        }
+
+        // Un caso al que le falta lo que no se puede calcular (curva
+        // timpanométrica, ETF, morfología de onda del ABR, VEMP con patrón
+        // retro) no se cita: el alumno se encontraría con un paciente que
+        // no cierra. Se corrige en el editor del caso, no acá.
+        if ($error === null) {
+            $stmt = $pdo->prepare('SELECT data FROM cases WHERE id = ?');
+            $stmt->execute([$caseId]);
+            $dataRaw = $stmt->fetchColumn();
+            if ($dataRaw !== false) {
+                $dataCaso = json_decode((string) $dataRaw, true);
+                $faltantes = CaseCompleteness::pendingTexts(is_array($dataCaso) ? $dataCaso : []);
+                if ($faltantes !== []) {
+                    $error = 'El caso ' . $caseId . ' está incompleto y no se puede citar: '
+                        . implode(' | ', $faltantes);
+                    $errorCaseId = $caseId;
+                }
             }
         }
 
@@ -483,7 +505,11 @@ if ($isNewFlow) {
 admin_add_css('agenda.css');
 admin_header('Agendas', $me);
 ?>
-<?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
+<?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?>
+    <?php if (!empty($errorCaseId)): ?>
+    <a href="case_create.php?edit=<?= urlencode((string) $errorCaseId) ?>">Completar el caso &rarr;</a>
+    <?php endif; ?>
+</p><?php endif; ?>
 <?php if ($success !== null): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
 
 <?php if ($scheduleRow !== null): ?>

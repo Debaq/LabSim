@@ -196,6 +196,39 @@ generalizarlo, no inventarlo.
   FSP) y **ruido/sello de la OEA**: los sortean los "Autocompletar", que
   por eso siguen existiendo.
 
+## Completitud: lo que no se calcula, se exige
+
+`CaseCompleteness::pending()` es el criterio único de "caso listo". Revisa
+solo lo que el perfil **no puede** calcular y quedó en su default:
+
+- Timpanograma en A con gap ≥ 20 dB, o curva B/C/Cs con la ETF en "Normal".
+- ABR con patología distinta de normal y las seis desviaciones de onda en 0
+  (nunca se corrió el autocompletar): la curva sale con la morfología de un
+  oído sano.
+- VEMP normal sin tocar en un caso con patrón retrococlear cargado.
+
+No revisa lo que puede estar vacío con razón: anamnesis, texto de
+otoscopia, comportamiento del paciente.
+
+Se aplica en tres lugares:
+
+1. **El editor no guarda** con esto pendiente (distinto de los avisos de
+   incoherencia, que sí se guardan tildando una casilla: aquellos pueden
+   SER el ejercicio, esto es un dato que falta).
+2. **La agenda no cita** un caso incompleto, y ofrece el link para
+   completarlo.
+3. **`patients.php` lo marca** como "incompleto", con el detalle en el
+   tooltip. Buscar "incompleto" junta todos los que hay que arreglar.
+
+Además el editor avisa antes de salir con cambios sin guardar
+(`beforeunload` + confirmación propia en "Cancelar").
+
+**Ojo con los casos que ya existen**: cualquiera con audiograma conductivo y
+timpanograma A, o con patología de ABR sin desviaciones cargadas, pasa a ser
+incitable hasta que se complete. No hay forma de medir cuántos son sin la
+base de producción. Por eso el marcador de `patients.php` va primero: se ve
+la lista antes de que el portón moleste.
+
 ## Lo que tiene que seguir pudiendo romperse
 
 No todo se proyecta, y forzar coherencia mataría la mitad de los ejercicios:

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
+require_once __DIR__ . '/../../src/CaseCompleteness.php';
 require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 
@@ -139,7 +140,16 @@ admin_header('Fichas Clínicas', $me);
         $nombreSnapshot = $snapshot ? trim(($snapshot['nombre'] ?? '') . ' ' . ($snapshot['apellido'] ?? '')) : '';
         $estadoRow = (!$c['appointment_id'] || $c['fecha'] === '' || $c['hora'] === '') ? 'sin_agendar' : 'agendada';
         $comentarioDocente = trim((string) ($c['comentario_docente'] ?? ''));
-        $searchBlob = mb_strtolower($c['id'] . ' ' . ($nombreVivo ?: $nombreSnapshot) . ' ' . ($c['rut'] ?? '') . ' ' . $comentarioDocente);
+        // Lo que el perfil no puede calcular y nadie decidió todavía. Un
+        // caso así no se puede citar (ver agenda.php), así que se marca acá
+        // para que aparezca como trabajo pendiente y no como sorpresa al
+        // intentar agendarlo. Ver CaseCompleteness.
+        $faltantesRow = CaseCompleteness::pendingTexts(is_array($data) ? $data : []);
+        // "incompleto" entra al blob de búsqueda: con el buscador que ya
+        // existe alcanza para juntar todos los casos que hay que completar,
+        // sin agregar otro filtro a la barra.
+        $searchBlob = mb_strtolower($c['id'] . ' ' . ($nombreVivo ?: $nombreSnapshot) . ' ' . ($c['rut'] ?? '')
+            . ' ' . $comentarioDocente . ($faltantesRow !== [] ? ' incompleto' : ''));
         ?>
         <tr data-estado="<?= $estadoRow ?>" data-search="<?= htmlspecialchars($searchBlob) ?>">
             <td><?= htmlspecialchars($c['id']) ?></td>
@@ -157,6 +167,11 @@ admin_header('Fichas Clínicas', $me);
                 <?= $comentarioDocente !== '' ? htmlspecialchars($comentarioDocente) : '<span style="color:var(--color-faint);">—</span>' ?>
             </td>
             <td>
+                <?php if ($faltantesRow !== []): ?>
+                <span style="color:var(--color-danger); font-weight:600;"
+                      title="<?= htmlspecialchars(implode("\n", $faltantesRow)) ?>">incompleto</span>
+                <br>
+                <?php endif; ?>
                 <?php if (!$c['appointment_id']): ?>
                 <span class="text-warn">sin agendar</span>
                 <?php elseif ($c['fecha'] === '' || $c['hora'] === ''): ?>

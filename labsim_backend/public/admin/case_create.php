@@ -6,6 +6,7 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/CaseBuilder.php';
 require_once __DIR__ . '/../../src/CaseProfile.php';
+require_once __DIR__ . '/../../src/CaseCompleteness.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/../../src/PatientPhoto.php';
 require_once __DIR__ . '/../../src/OtoscopiaPhoto.php';
@@ -182,6 +183,10 @@ $error = null;
 // Avisos de incoherencia con el perfil auditivo (ver CaseProfile::warnings).
 // Solo se llenan en un POST de guardado; en GET el formulario se dibuja limpio.
 $avisosPerfil = [];
+// Datos que el perfil no puede calcular y el docente todavía no decidió
+// (ver CaseCompleteness). Bloquean el guardado: no es una incoherencia
+// opcional, es un caso incompleto.
+$faltantes = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $v = $_POST; // sticky form: se redibuja con lo ya tipeado, tanto al generar nombre como si falla la validación
 } elseif ($isEdit) {
@@ -729,6 +734,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'vemp' => ['OD' => $vempOd, 'OI' => $vempOi],
             ]);
 
+            // Lo que no se puede calcular tiene que estar decidido antes de
+            // que el caso salga del editor: un timpanograma en A con 40 dB
+            // de gap, o un ABR "coclear" con la morfología de onda de un
+            // oído sano, le llegan al alumno como un paciente que no cierra
+            // y el docente no se entera nunca. Ver CaseCompleteness.
+            //
+            // No es lo mismo que $avisosPerfil: aquellos son incoherencias
+            // que pueden SER el ejercicio (Stenger, falsa onda V) y se
+            // guardan tildando una casilla. Esto es un dato que falta, y no
+            // hay caso sin él.
+            $faltantes = CaseCompleteness::pendingTexts($data);
+        }
+
+        if ($error === null && $avisosPerfil === [] && $faltantes === []) {
             if ($isUpdate) {
                 $editRut = trim((string) ($v['rut'] ?? ''));
                 $editNombre = trim((string) ($v['nombre'] ?? ''));
@@ -825,6 +844,17 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 ?>
 
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
+<?php if (!empty($faltantes)): ?>
+<div class="card" style="border-left:4px solid #b00;">
+    <strong>Falta decidir lo que el perfil no puede calcular</strong>
+    <ul>
+        <?php foreach ($faltantes as $falta): ?>
+        <li><?= htmlspecialchars($falta) ?></li>
+        <?php endforeach; ?>
+    </ul>
+    <p class="legend help">Esto no es opcional y no se guarda igual: son datos clínicos que ninguna cuenta puede sacar del audiograma. Sin ellos el alumno se encuentra con un paciente que no cierra, y vos no te enterás.</p>
+</div>
+<?php endif; ?>
 <?php if (!empty($avisosPerfil)): ?>
 <div class="card" style="border-left:4px solid #7a5b00;">
     <strong>El caso no coincide con el perfil auditivo</strong>
@@ -2081,6 +2111,44 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 
     ageInput.addEventListener('input', recompute);
     ageInput.addEventListener('change', recompute);
+})();
+</script>
+
+<script>
+// No salir de la edición con cambios sin guardar.
+//
+// El bloqueo de datos faltantes vive en el servidor (CaseCompleteness), y
+// solo puede actuar cuando el docente aprieta Guardar. Lo que se escapaba
+// era el otro camino: tocar el caso, irse por "Cancelar" o cerrar la
+// pestaña, y dejarlo a medias sin que nadie lo mire nunca más.
+(function () {
+    var form = document.getElementById('case-form');
+    if (!form) return;
+    var sucio = false;
+    var guardando = false;
+
+    form.addEventListener('input', function () { sucio = true; });
+    form.addEventListener('change', function () { sucio = true; });
+    form.addEventListener('submit', function () { guardando = true; });
+
+    window.addEventListener('beforeunload', function (e) {
+        if (!sucio || guardando) return;
+        // El texto lo pone el navegador; lo que importa es preventDefault.
+        e.preventDefault();
+        e.returnValue = '';
+    });
+
+    // "Cancelar" es un <a>, no dispara submit: se pregunta a mano para
+    // poder decir de qué se trata en vez del texto genérico del navegador.
+    document.addEventListener('click', function (e) {
+        var link = e.target.closest ? e.target.closest('a[href$="patients.php"]') : null;
+        if (!link || !sucio) return;
+        if (!window.confirm('Hay cambios sin guardar en este caso. Si salís ahora se pierden.')) {
+            e.preventDefault();
+        } else {
+            guardando = true;   // evita la segunda pregunta del navegador
+        }
+    });
 })();
 </script>
 

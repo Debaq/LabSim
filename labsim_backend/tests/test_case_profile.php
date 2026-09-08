@@ -513,3 +513,72 @@ t_eq(count($p['recruit']['ldl']['od']), count(CaseBuilder::FREQUENCIES), 'projec
 t_eq($p['reflex']['tipo']['oi'], 'normal', 'project(): trae la morfología del reflejo por oído');
 t_true($p['logo']['OD']['pct'] < $p['logo']['OI']['pct'],
     'project(): el oído dañado discrimina menos que el sano');
+
+// ---------------------------------------------------------------------
+// Completitud: lo que el docente tiene que decidir porque no se calcula.
+// ---------------------------------------------------------------------
+
+require_once __DIR__ . '/../src/CaseCompleteness.php';
+
+$abrCompleto = [
+    'type' => 'coclear', 'umbral' => 40,
+    'desviaciones' => ['onda_I' => ['lat' => 0.3, 'amp' => -0.1],
+                       'onda_III' => ['lat' => 0.2, 'amp' => 0],
+                       'onda_V' => ['lat' => 0.25, 'amp' => -0.05]],
+];
+$casoSano = [
+    'Aerea' => $normal, 'Osea' => $normal,
+    'Z_OD' => 'A', 'Z_OI' => 'A', 'ETF' => ['Normal', 'Normal'],
+    'ABR' => ['OD' => ['type' => 'normal', 'desviaciones' => []], 'OI' => ['type' => 'normal', 'desviaciones' => []]],
+    'VEMP' => ['OD' => ['type' => 'normal'], 'OI' => ['type' => 'normal']],
+];
+t_eq(CaseCompleteness::pending($casoSano), [], 'Caso normal completo: nada pendiente');
+
+// Conductivo con el timpanograma sin tocar: el default más fácil de dejar.
+$casoCond = $casoSano;
+$casoCond['Aerea'] = $aereaCond;
+$casoCond['Osea'] = $oseaCond;
+$casoCond['ABR'] = ['OD' => $abrCompleto, 'OI' => $abrCompleto];
+$faltan = CaseCompleteness::pendingTexts($casoCond);
+t_true(count($faltan) >= 2, 'Gap de 40 dB con curva A: pendiente en los dos oídos');
+t_true(strpos(implode(' ', $faltan), 'Timpanometría OD') !== false,
+    'El pendiente nombra el examen y el oído');
+t_eq(CaseCompleteness::pending($casoCond)[0]['tab'], 'timpanometria',
+    'El pendiente dice en qué pestaña se arregla');
+
+// Con la curva elegida, queda la ETF por decidir.
+$casoCond['Z_OD'] = 'B';
+$casoCond['Z_OI'] = 'B';
+$faltan = CaseCompleteness::pendingTexts($casoCond);
+t_true(strpos(implode(' ', $faltan), 'Función tubaria') !== false,
+    'Timpanograma B con ETF "Normal": falta decidir la trompa');
+$casoCond['ETF'] = ['No permeable', 'No permeable'];
+t_eq(CaseCompleteness::pending($casoCond), [], 'Con la curva y la ETF decididas, el caso conductivo está completo');
+
+// ABR con patología pero sin morfología: la curva sale como la de un sano.
+$casoAbr = $casoSano;
+$casoAbr['ABR'] = ['OD' => ['type' => 'coclear', 'umbral' => 40, 'desviaciones' => []],
+                   'OI' => ['type' => 'normal', 'desviaciones' => []]];
+$faltan = CaseCompleteness::pendingTexts($casoAbr);
+t_true(strpos(implode(' ', $faltan), 'ABR OD') !== false,
+    'ABR con patología y desviaciones en 0: falta correr el autocompletar');
+$casoAbr['ABR']['OD'] = $abrCompleto;
+t_eq(CaseCompleteness::pending($casoAbr), [], 'Con las ondas cargadas, el ABR deja de estar pendiente');
+
+// VEMP: el perfil no tiene eje vestibular, así que alguien tiene que decidir.
+$casoRetro = $casoSano;
+$casoRetro['Perfil'] = [
+    'version' => 1,
+    'OD' => ['cce_pct' => 20.0, 'retro' => CaseBuilder::ABR_NEURAL_PRESETS['schwannoma']['params']],
+    'OI' => ['cce_pct' => 100.0, 'retro' => CaseBuilder::ABR_NEURAL_DEFAULTS],
+    'auto' => ['abr' => true, 'eoas' => true, 'reflex' => true, 'recruit' => true, 'logo' => true],
+];
+$casoRetro['ABR']['OD'] = ['type' => 'neural', 'desviaciones' => $abrCompleto['desviaciones']];
+$faltan = CaseCompleteness::pendingTexts($casoRetro);
+t_true(strpos(implode(' ', $faltan), 'VEMP OD') !== false,
+    'Patrón retrococlear con VEMP normal sin tocar: falta decidir lo vestibular');
+t_true(strpos(implode(' ', $faltan), 'VEMP OI') === false,
+    'El oído sin patrón retro no pide nada en VEMP');
+
+// Un caso viejo, sin las claves nuevas, no debe explotar ni inventar faltas.
+t_eq(CaseCompleteness::pending([]), [], 'Un cases.data vacío no genera pendientes falsos');
