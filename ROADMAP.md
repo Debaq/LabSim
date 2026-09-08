@@ -178,6 +178,10 @@ producir el mismo JSON que antes. Es el criterio de no-regresión de la fase 1.
 
 ## Fases
 
+Las seis están hechas en `feat/perfil-auditivo-unificado`. Nada se probó todavía
+en el formulario real corriendo contra la base: los tests cubren las
+derivaciones y el cliente, no la página.
+
 | # | Qué | Toca | Estado |
 |---|---|---|---|
 | 0 | `CaseProfile.php`: derivaciones puras + runner de tests PHP | `src/CaseProfile.php`, `tests/` | ✅ |
