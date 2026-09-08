@@ -312,3 +312,62 @@ $cargada = CaseProfile::loadedOaeAttenuation(['type' => 'coclear', 'umbral' => 4
 t_close($cargada['2000'], 30.0, 0.05, 'loadedOaeAttenuation replica oae_attenuation_db (1.2 dB/dB sobre 15)');
 $cargada = CaseProfile::loadedOaeAttenuation(['type' => 'neural', 'umbral' => 70, 'desviaciones' => []]);
 t_close($cargada['2000'], 0.0, 0.01, 'Neural no atenúa la OEA por más alto que esté el umbral');
+
+// ---------------------------------------------------------------------
+// Escenarios de sorteo: el JS los consume tal cual, así que el shape importa.
+// ---------------------------------------------------------------------
+
+foreach (CaseProfile::SCENARIOS as $clave => $esc) {
+    foreach (['label', 'sn_shape', 'sn_scale', 'gap_shape', 'gap_scale', 'cce_pct', 'retro', 'lateralidad'] as $campo) {
+        t_true(array_key_exists($campo, $esc), "Escenario '$clave': tiene la clave '$campo'");
+    }
+    t_true(in_array($esc['lateralidad'], ['bilateral', 'unilateral'], true),
+        "Escenario '$clave': lateralidad válida");
+    t_eq(array_keys($esc['sn_shape']), CaseBuilder::FREQUENCIES,
+        "Escenario '$clave': la forma sensorioneural cubre las 9 frecuencias del audiograma");
+    if ($esc['gap_shape'] !== []) {
+        t_eq(array_keys($esc['gap_shape']), CaseBuilder::FREQUENCIES,
+            "Escenario '$clave': la forma del gap cubre las 9 frecuencias");
+    }
+    if ($esc['retro'] !== null) {
+        t_true(isset(CaseBuilder::ABR_NEURAL_PRESETS[$esc['retro']]),
+            "Escenario '$clave': el preset retro '{$esc['retro']}' existe");
+    }
+}
+
+// Cada escenario tiene que clasificar como lo que dice ser: si el sorteo
+// produce un cuadro y el perfil lo lee como otro, el caso nace incoherente.
+$esperado = [
+    'normal' => 'normal', 'coclear_agudos' => 'coclear', 'muesca_4k' => 'coclear',
+    'coclear_plana' => 'coclear', 'conductiva' => 'transmission', 'mixta' => 'transmission',
+    'retrococlear' => 'neural', 'neuropatia' => 'neural',
+];
+foreach (CaseProfile::SCENARIOS as $clave => $esc) {
+    // Escala media, sin jitter: el centro del cuadro.
+    $escala = (($esc['sn_scale'][0] + $esc['sn_scale'][1]) / 2) ?: 1.0;
+    $escalaGap = ($esc['gap_scale'][0] + $esc['gap_scale'][1]) / 2;
+    $sn = [];
+    $aire = [];
+    foreach (CaseBuilder::FREQUENCIES as $hz) {
+        $s = ($esc['sn_shape'][$hz] ?? 0) * $escala;
+        $g = ($esc['gap_shape'][$hz] ?? 0) * $escalaGap;
+        $sn[$hz] = $s;
+        $aire[$hz] = $s + $g;
+    }
+    $cce = ($esc['cce_pct'][0] + $esc['cce_pct'][1]) / 2;
+    $retro = $esc['retro'] !== null ? CaseBuilder::ABR_NEURAL_PRESETS[$esc['retro']]['params'] : [];
+    $d = CaseProfile::decompose(audiograma($aire), audiograma($sn), 0, $cce);
+    t_eq(CaseProfile::derivedType($d, $cce, $retro), $esperado[$clave],
+        "Escenario '$clave': el perfil lo clasifica como '{$esperado[$clave]}'");
+}
+
+// La descendente NO es un oído normal aunque el promedio 500-4000 dé 22 dB:
+// clasificar por promedio se comía el caso que motivó todo el perfil.
+$suave = audiograma([125 => 0, 250 => 0, 500 => 5, 1000 => 10, 2000 => 25, 3000 => 35, 4000 => 45, 6000 => 50, 8000 => 55]);
+$dDesc = CaseProfile::decompose($suave, $suave, 0, 100.0);
+t_true(CaseProfile::coreAverage($dDesc['sn']) <= CaseProfile::SN_NORMAL_DB,
+    'La descendente promedia dentro de lo normal en 500-4000');
+t_eq(CaseProfile::derivedType($dDesc, 100.0), 'coclear',
+    'Y aun así se clasifica coclear: manda la frecuencia dañada, no el promedio');
+t_true(CaseProfile::recruitment(100.0, $dDesc)['recruit'],
+    'Mismo criterio para el reclutamiento: se busca donde está el daño');

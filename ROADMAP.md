@@ -105,10 +105,12 @@ eHL para estimar el audiograma.
 
 ### 2. Tipo de patología ABR/EOA (`type`)
 
-Derivado, por oído, con el promedio 500-4000:
+Derivado, por oído, con el **máximo** en 500-4000 (no el promedio: una
+descendente con 500 y 1000 conservados promedia dentro de lo normal y se
+clasificaba como oído sano, que es justo el caso que motivó todo esto):
 
-- `gap_medio >= 15` → `transmission`
-- si no y `sn_medio <= 25` y sin retro cargado → `normal`
+- `gap_max >= 15` → `transmission`
+- si no y `sn_max <= 25` y sin retro cargado → `normal`
 - si no y `cce_pct >= 60` → `coclear`
 - si no → `neural`
 
@@ -184,10 +186,19 @@ producir el mismo JSON que antes. Es el criterio de no-regresión de la fase 1.
 | 3 | Tab "Perfil auditivo": `cce_pct` + `retro` (se mudan del tab ABR) + checkboxes `auto` | `case_create.php` | ✅ |
 | 4 | Proyecciones restantes: OEA, reflejos, reclutamiento, deterioro tonal | `CaseProfile.php`, `case_create.php` | ✅ |
 | 5 | Avisos de desvío del perfil (no errores duros), con confirmación explícita | `CaseProfile.php`, `case_create.php` | ✅ |
-| 6 | Un solo randomizador de perfil; se retiran los dos autocompletar | `case_create.php`, `CaseBuilder.php` | ☐ |
+| 6 | Sorteo de cuadro clínico completo desde el perfil | `CaseProfile.php`, `case_create.php` | ✅ |
 
 Las fases 0-2 resuelven el problema que originó todo esto y no tocan ningún
 caso guardado. De la 3 en adelante cambia el formulario.
+
+**Corrección sobre el plan original de la fase 6:** los dos "Autocompletar"
+NO se retiran. El perfil subsume la parte donde se contradecían — umbral y
+patología — pero cada uno sigue sorteando cosas que el perfil no describe y
+que el generador necesita: latencias y amplitudes onda por onda y FSP en el
+ABR, ruido del paciente y sello de sonda en la OEA. Sacarlos hubiera borrado
+ese detalle. Lo que se agrega es el sorteo de **cuadro clínico** en la
+pestaña Perfil, que escribe audiograma + sitio de lesión + patrón retro de
+una vez y enciende las derivaciones.
 
 ## Riesgos
 

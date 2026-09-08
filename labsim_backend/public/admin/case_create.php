@@ -1373,6 +1373,23 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <strong>Perfil auditivo</strong>
     <p class="legend help">Dónde está la lesión de este paciente. El audiograma de la pestaña anterior ya dice cuánta pérdida hay y cuánta es conductiva, frecuencia por frecuencia; lo único que no puede decir es qué parte del componente sensorioneural es coclear y qué parte es retrococlear. Eso se define acá, una vez, y desde acá se proyecta a los exámenes que tengan la casilla de derivación encendida.</p>
     <p class="legend help">Sin ninguna casilla marcada nada cambia: cada pestaña se sigue cargando a mano, como siempre. La derivación existe para que el caso no se contradiga solo (una OEA normal con un gap de 40 dB, un ABR normal con un audiograma profundo), no para impedir armar un caso incoherente a propósito -- el Stenger, la falsa onda V y la simulación necesitan esa incoherencia.</p>
+    <p class="legend">Sortear un cuadro clínico completo</p>
+    <div class="three-col">
+        <label>Cuadro
+            <select id="perfil-escenario">
+                <?php foreach (CaseProfile::SCENARIOS as $escKey => $esc): ?>
+                <option value="<?= htmlspecialchars($escKey) ?>"><?= htmlspecialchars($esc['label']) ?></option>
+                <?php endforeach; ?>
+                <option value="__random__">Al azar entre todos</option>
+            </select>
+        </label>
+        <label style="align-self:end;">
+            <button type="button" class="secondary" id="perfil-sortear">Sortear caso</button>
+        </label>
+    </div>
+    <p class="legend help">Escribe el audiograma completo (aérea y ósea, los dos oídos), el sitio de la lesión y el patrón retrococlear si corresponde, y enciende las derivaciones. La forma es la del cuadro elegido pero la magnitud se sortea, así dos casos del mismo cuadro no salen calcados. Después se edita cualquier campo a mano.</p>
+    <p class="legend help">Los "Autocompletar" de ABR y EOA siguen donde estaban y siguen sirviendo: sortean lo que el perfil no describe (latencias y amplitudes onda por onda, FSP, ruido del paciente, sello de la sonda). Lo que ya no hace falta es usarlos para fijar el umbral y la patología, que es donde se contradecían entre sí.</p>
+
     <p class="legend">Qué exámenes se derivan del perfil</p>
     <div class="three-col">
         <label class="inline-check">
@@ -2147,6 +2164,109 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 
     ageInput.addEventListener('input', recompute);
     ageInput.addEventListener('change', recompute);
+})();
+</script>
+
+<script>
+// Sorteo del perfil: escribe el audiograma, el sitio de la lesión y el
+// patrón retro de un cuadro clínico completo, coherentes entre sí.
+//
+// Reemplaza el uso que se le daba a los dos "Autocompletar" para fijar
+// umbral y patología -- cada uno sorteaba por su lado y podían dejar el ABR
+// coclear y la OEA neural en el mismo oído. Los escenarios se serializan
+// desde CaseProfile::SCENARIOS, no se re-tipean acá.
+(function () {
+    var ESCENARIOS = <?= json_encode(CaseProfile::SCENARIOS, JSON_UNESCAPED_UNICODE) ?>;
+    var FREQS = <?= json_encode(CaseBuilder::FREQUENCIES) ?>;
+    var JITTER_DB = 4;   // ruido por frecuencia: ningún audiograma real es liso
+
+    var boton = document.getElementById('perfil-sortear');
+    var selector = document.getElementById('perfil-escenario');
+    if (!boton || !selector) return;
+
+    function entre(a, b) { return a + Math.random() * (b - a); }
+    function aCinco(x) { return Math.max(0, Math.min(120, Math.round(x / 5) * 5)); }
+
+    function escribir(clave, lado, valores) {
+        for (var n = 0; n < FREQS.length; n++) {
+            var el = document.getElementById(clave + '_' + lado + '_' + n);
+            if (el) { el.value = valores[n]; }
+        }
+    }
+
+    /** Curva de un oído a partir de la forma del cuadro, con escala y jitter. */
+    function curvaDeForma(forma, escala) {
+        return FREQS.map(function (hz) {
+            var base = (forma && forma[hz] !== undefined) ? forma[hz] : 0;
+            return base * escala + entre(-JITTER_DB, JITTER_DB);
+        });
+    }
+
+    function sortearLado(esc, lado, afectado) {
+        // El oído sano de un cuadro unilateral no es "cero": es un oído
+        // normal, con su propia variabilidad.
+        var escalaSn = afectado ? entre(esc.sn_scale[0], esc.sn_scale[1]) : entre(0, 0.8);
+        var formaSn = afectado ? esc.sn_shape : ESCENARIOS.normal.sn_shape;
+        var sn = curvaDeForma(formaSn, escalaSn);
+        var gap = afectado && esc.gap_shape && Object.keys(esc.gap_shape).length
+            ? curvaDeForma(esc.gap_shape, entre(esc.gap_scale[0], esc.gap_scale[1]))
+            : FREQS.map(function () { return 0; });
+
+        var osea = sn.map(aCinco);
+        var aerea = sn.map(function (v, i) { return aCinco(v + Math.max(0, gap[i])); });
+        // La ósea nunca puede quedar peor que la aérea después de redondear.
+        osea = osea.map(function (v, i) { return Math.min(v, aerea[i]); });
+        escribir('aerea', lado, aerea);
+        escribir('osea', lado, osea);
+        // "Igualar ósea a aérea" pisaría la ósea recién sorteada al guardar.
+        var igualar = document.querySelector('.igualar-toggle[data-side="' + lado + '"]');
+        if (igualar && igualar.checked && gap.some(function (g) { return g > 0; })) {
+            igualar.checked = false;
+        }
+
+        var cce = document.querySelector('input[name="perfil[' + lado + '][cce_pct]"]');
+        if (cce) {
+            cce.value = afectado
+                ? Math.round(entre(esc.cce_pct[0], esc.cce_pct[1]) / 5) * 5
+                : 100;
+        }
+
+        // Patrón retrococlear: solo en el oído afectado. El preset precarga
+        // los valores y después se editan (nunca se persiste su nombre).
+        var sel = document.querySelector('.abr-neural-preset-select[data-lado="' + lado + '"]');
+        var btn = document.querySelector('.abr-neural-preset-btn[data-lado="' + lado + '"]');
+        if (sel && btn && afectado && esc.retro) {
+            sel.value = esc.retro;
+            btn.click();
+        }
+    }
+
+    boton.addEventListener('click', function () {
+        var claves = Object.keys(ESCENARIOS);
+        var clave = selector.value === '__random__'
+            ? claves[Math.floor(Math.random() * claves.length)]
+            : selector.value;
+        var esc = ESCENARIOS[clave];
+        if (!esc) return;
+        if (selector.value === '__random__') { selector.value = clave; }
+
+        var unilateral = esc.lateralidad === 'unilateral';
+        var afectado = Math.random() < 0.5 ? 'od' : 'oi';
+        ['od', 'oi'].forEach(function (lado) {
+            sortearLado(esc, lado, !unilateral || lado === afectado);
+        });
+
+        // Un caso sorteado nace coherente: las proyecciones se encienden.
+        ['abr', 'eoas', 'reflex', 'recruit'].forEach(function (modulo) {
+            var chk = document.querySelector('input[name="perfil[auto][' + modulo + ']"]');
+            if (chk) {
+                chk.checked = true;
+                chk.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+        if (window.drawAudiogram) { window.drawAudiogram(); }
+        if (window.drawAbrPreview) { window.drawAbrPreview(); }
+    });
 })();
 </script>
 

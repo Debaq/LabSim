@@ -142,6 +142,80 @@ final class CaseProfile
     public const OAE_MAX_ATTEN_DB = 45.0;
 
     /**
+     * Cuadros clínicos para sortear un caso coherente de una sola vez.
+     *
+     * Reemplazan al par de "Autocompletar" independientes de ABR y EOA, que
+     * sorteaban cada uno por su lado y ya podían contradecirse entre sí (uno
+     * podía dejar el ABR coclear y el otro la OEA neural en el mismo oído).
+     * Acá se sortea EL OÍDO -- forma del audiograma, gap, sitio de la
+     * lesión -- y de ahí sale todo lo demás por proyección.
+     *
+     * `sn_shape`/`gap_shape` son formas relativas en dB por frecuencia; la
+     * escala se sortea dentro de `*_scale`, así dos casos del mismo cuadro
+     * no salen calcados (mismo criterio que EOAS_AUTOFILL_GRADES, y la razón
+     * de no fijar un valor "correcto" en lo que el alumno debe aprender a
+     * leer).
+     *
+     * `lateralidad`: 'bilateral' carga los dos oídos, 'unilateral' sortea
+     * cuál y deja el otro sano -- que es lo que hace falta para que el IT5,
+     * el Weber y el Fowler tengan con qué comparar.
+     */
+    public const SCENARIOS = [
+        'normal' => [
+            'label' => 'Normal',
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 5, 3000 => 5, 4000 => 5, 6000 => 10, 8000 => 10],
+            'sn_scale' => [0.0, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+        ],
+        'coclear_agudos' => [
+            'label' => 'Coclear en agudos (descendente)',
+            'sn_shape' => [125 => 0, 250 => 0, 500 => 5, 1000 => 10, 2000 => 25, 3000 => 35, 4000 => 45, 6000 => 50, 8000 => 55],
+            'sn_scale' => [0.6, 1.5], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+        ],
+        'muesca_4k' => [
+            'label' => 'Muesca en 4 kHz (trauma acústico)',
+            'sn_shape' => [125 => 0, 250 => 0, 500 => 0, 1000 => 5, 2000 => 10, 3000 => 30, 4000 => 45, 6000 => 35, 8000 => 20],
+            'sn_scale' => [0.7, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+        ],
+        'coclear_plana' => [
+            'label' => 'Coclear plana',
+            'sn_shape' => [125 => 40, 250 => 40, 500 => 45, 1000 => 45, 2000 => 45, 3000 => 45, 4000 => 50, 6000 => 50, 8000 => 50],
+            'sn_scale' => [0.6, 1.5], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+        ],
+        'conductiva' => [
+            'label' => 'Conductiva (otitis media / otoesclerosis)',
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 10, 3000 => 10, 4000 => 10, 6000 => 10, 8000 => 10],
+            'sn_scale' => [0.0, 1.2],
+            'gap_shape' => [125 => 40, 250 => 40, 500 => 38, 1000 => 32, 2000 => 28, 3000 => 26, 4000 => 25, 6000 => 25, 8000 => 25],
+            'gap_scale' => [0.5, 1.2],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+        ],
+        'mixta' => [
+            'label' => 'Mixta',
+            'sn_shape' => [125 => 25, 250 => 25, 500 => 30, 1000 => 30, 2000 => 35, 3000 => 40, 4000 => 45, 6000 => 45, 8000 => 45],
+            'sn_scale' => [0.7, 1.3],
+            'gap_shape' => [125 => 30, 250 => 30, 500 => 28, 1000 => 25, 2000 => 22, 3000 => 20, 4000 => 20, 6000 => 20, 8000 => 20],
+            'gap_scale' => [0.6, 1.1],
+            'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+        ],
+        'retrococlear' => [
+            'label' => 'Retrococlear (schwannoma vestibular)',
+            'sn_shape' => [125 => 10, 250 => 10, 500 => 15, 1000 => 20, 2000 => 30, 3000 => 40, 4000 => 45, 6000 => 50, 8000 => 55],
+            'sn_scale' => [0.5, 1.2], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [10, 35], 'retro' => 'schwannoma', 'lateralidad' => 'unilateral',
+        ],
+        'neuropatia' => [
+            'label' => 'Neuropatía auditiva / desincronía (ANSD)',
+            'sn_shape' => [125 => 45, 250 => 45, 500 => 50, 1000 => 50, 2000 => 50, 3000 => 50, 4000 => 55, 6000 => 55, 8000 => 55],
+            'sn_scale' => [0.6, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [0, 10], 'retro' => 'ansd', 'lateralidad' => 'bilateral',
+        ],
+    ];
+
+    /**
      * Perfil normalizado a partir de un `cases.data` cualquiera.
      *
      * Un caso guardado antes de que el perfil existiera no trae la clave:
@@ -364,8 +438,12 @@ final class CaseProfile
      */
     public static function derivedType(array $decomp, float $ccePct, array $retro = []): string
     {
-        $gap = self::coreAverage($decomp['gap']);
-        $sn = self::coreAverage($decomp['sn']);
+        // Máximo y no promedio: una hipoacusia descendente con 500 y 1000
+        // conservados promedia dentro de lo normal y se clasificaba como
+        // oído sano, que es exactamente el caso que el perfil existe para
+        // representar. Un oído es normal solo si NINGUNA frecuencia se sale.
+        $gap = self::coreMax($decomp['gap']);
+        $sn = self::coreMax($decomp['sn']);
 
         if ($gap >= self::GAP_CONDUCTIVO_DB) {
             return 'transmission';
@@ -456,7 +534,9 @@ final class CaseProfile
     {
         // Sin pérdida sensorioneural no hay reclutamiento que mostrar, por
         // más "coclear" que diga el perfil: no hay CCE dañadas.
-        if (self::coreAverage($decomp['sn']) <= self::SN_NORMAL_DB) {
+        // Máximo, por lo mismo que derivedType: el reclutamiento de una
+        // descendente se busca en la frecuencia dañada, no en el promedio.
+        if (self::coreMax($decomp['sn']) <= self::SN_NORMAL_DB) {
             return ['pattern' => 'none', 'sisi_pct' => 0, 'recruit' => false];
         }
         if ($ccePct >= 80.0) {
@@ -801,6 +881,23 @@ final class CaseProfile
             $n++;
         }
         return $n > 0 ? $suma / $n : 0.0;
+    }
+
+    /**
+     * Máximo de una curva (Hz => dB) en CORE_FREQS.
+     *
+     * @param array<int,float> $curva
+     */
+    public static function coreMax(array $curva): float
+    {
+        $max = 0.0;
+        foreach (self::CORE_FREQS as $hz) {
+            $nivel = self::levelAt($curva, (float) $hz);
+            if ($nivel !== null) {
+                $max = max($max, $nivel);
+            }
+        }
+        return $max;
     }
 
     private static function clamp(float $valor, float $min, float $max): float
