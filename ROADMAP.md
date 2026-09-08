@@ -92,8 +92,13 @@ Pesos `w` (suman 1):
 | `ce_chirp` / `ls_chirp` | 0.15 | 0.20 | 0.25 | — | 0.40 |
 
 Corrección conductual (dB HL) → electrofisiológico (dB nHL), `corr_nHL`:
-burst 500 `+15`, burst 1k `+10`, burst 2k `+5`, burst 4k `+5`, click `0`,
-chirp `-5` (el chirp sincroniza mejor y baja algo el umbral).
+burst 500 `+20`, burst 1k `+15`, burst 2k `+10`, burst 4k `+5`, click `+10`,
+chirp `+5` (sincroniza mejor toda la partición coclear y baja algo el umbral).
+Son los factores de corrección de la práctica clínica, usados al revés: en el
+box se **restan** del nHL medido para estimar el audiograma; acá se **suman**,
+porque el caso se define en dB HL y hay que producir lo que el equipo muestra.
+Que un oído de 0 dB HL dé 20 dB nHL en burst de 500 no es un error, es el
+hallazgo.
 
 Esto es contenido pedagógico, no plomería: el alumno tiene que convertir nHL a
 eHL para estimar el audiograma.
@@ -173,7 +178,7 @@ producir el mismo JSON que antes. Es el criterio de no-regresión de la fase 1.
 
 | # | Qué | Toca | Estado |
 |---|---|---|---|
-| 0 | `CaseProfile.php`: derivaciones puras + runner de tests PHP | `src/CaseProfile.php`, `tests/` | ☐ |
+| 0 | `CaseProfile.php`: derivaciones puras + runner de tests PHP | `src/CaseProfile.php`, `tests/` | ✅ |
 | 1 | `Perfil` persistido en `cases.data`, inferido de casos viejos, releído al editar | `CaseBuilder.php`, `case_create.php` | ☐ |
 | 2 | **Umbral ABR por estímulo** (el pedido original) | `CaseProfile.php`, `ABR_generator.py`, `AbrMainWindow.py` | ☐ |
 | 3 | Tab "Perfil auditivo": `cce_pct` + `retro` (se mudan del tab ABR) + checkboxes `auto` | `case_create.php` | ☐ |
