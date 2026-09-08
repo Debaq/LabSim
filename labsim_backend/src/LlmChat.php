@@ -20,6 +20,13 @@ final class LlmBudgetException extends RuntimeException
 final class LlmChat
 {
     /**
+     * Segundos de espera por defecto. Dimensionado para el chat con el
+     * paciente, donde hay un alumno mirando la pantalla: si el modelo no
+     * contestó en 30 segundos, la conversación ya se rompió igual.
+     */
+    public const TIMEOUT_DEFAULT_S = 30;
+
+    /**
      * Llama al endpoint Chat Completions (formato OpenAI, el mismo que
      * habla DeepSeek) con el system prompt + historial + mensaje nuevo, y
      * devuelve el texto de respuesta. Lanza RuntimeException con un mensaje
@@ -35,10 +42,15 @@ final class LlmChat
      * `$campoTokens` es el rótulo del campo que hay que subir en
      * Admin -> IA Paciente si el presupuesto no alcanza. Hay más de uno y
      * subir el que no es no arregla nada, así que el error lo nombra.
+     *
+     * `$timeoutSegundos` es lo mismo pero para la espera: una tarea que
+     * corre sin nadie mirando puede darse el lujo de esperar bastante más
+     * que el chat, y un modelo de razonamiento lo necesita.
      */
     public static function reply(string $systemPrompt, array $history, string $userMessage,
                                  ?int $maxTokens = null,
-                                 string $campoTokens = 'Máximo de tokens por respuesta'): string
+                                 string $campoTokens = 'Máximo de tokens por respuesta',
+                                 ?int $timeoutSegundos = null): string
     {
         $cfg = LlmConfig::get();
         if ($cfg['api_key'] === '') {
@@ -71,14 +83,28 @@ final class LlmChat
                 'Content-Type: application/json',
                 'Authorization: Bearer ' . $cfg['api_key'],
             ],
-            CURLOPT_TIMEOUT => 30,
+            CURLOPT_TIMEOUT => $timeoutSegundos ?? self::TIMEOUT_DEFAULT_S,
         ]);
         $response = curl_exec($ch);
         $curlError = curl_error($ch);
+        // Se captura ANTES de cerrar: curl_close no invalida el handle en
+        // PHP 8, pero depender de eso es pedir un bug silencioso el día que
+        // cambie.
+        $curlErrno = curl_errno($ch);
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         if ($response === false) {
+            // El timeout se distingue del resto de fallas de red porque se
+            // arregla distinto: no es que el servidor no esté, es que el
+            // modelo tarda más de lo que se le dio. Decir solo "operation
+            // timed out" deja al admin sin saber qué tocar.
+            if ($curlErrno === CURLE_OPERATION_TIMEDOUT) {
+                throw new RuntimeException(sprintf(
+                    'El modelo "%s" no alcanzó a responder en %d segundos. Los modelos de razonamiento tardan bastante más en tareas largas: probá con uno sin razonamiento (deepseek-chat, por ejemplo) en Admin -> IA Paciente.',
+                    (string) $cfg['model'], $timeoutSegundos ?? self::TIMEOUT_DEFAULT_S
+                ));
+            }
             throw new RuntimeException('No se pudo conectar con el LLM: ' . $curlError);
         }
 

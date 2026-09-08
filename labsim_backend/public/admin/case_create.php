@@ -2238,7 +2238,9 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 
     boton.addEventListener('click', function () {
         boton.disabled = true;
-        estado.textContent = 'Redactando...';
+        // Puede tardar: un modelo de razonamiento genera miles de tokens
+        // antes de escribir, y si se queda corto el servidor reintenta.
+        estado.textContent = 'Redactando... (puede tardar un minuto o dos)';
         var body = new URLSearchParams();
         body.set('csrf_token', CSRF);
         body.set('payload', JSON.stringify(estadoClinico()));

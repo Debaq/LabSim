@@ -21,6 +21,13 @@ require_once __DIR__ . '/../../src/AdminAudit.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
+// Un modelo de razonamiento puede tardar minutos, y el borrador reintenta
+// una vez: el límite de PHP (30 s en muchas instalaciones) cortaría antes
+// que el timeout de curl y el docente vería una página en blanco en vez del
+// error. Ojo que el servidor web puede tener su propio corte por delante
+// (proxy_read_timeout en nginx, FastCGI) que desde acá no se toca.
+@set_time_limit(AnamnesisDraft::TIMEOUT_S * 2 + 60);
+
 $me = Auth::requireAdminSession();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

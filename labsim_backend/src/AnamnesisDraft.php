@@ -50,6 +50,14 @@ final class AnamnesisDraft
     public const MAX_TOKENS_REINTENTO = 12000;
 
     /**
+     * Segundos de espera de esta tarea. Los 30 del chat están puestos
+     * porque ahí hay un alumno mirando la pantalla; acá el docente aprieta
+     * un botón y espera, así que se puede aguantar bastante más. Un modelo
+     * de razonamiento generando varios miles de tokens no entra en 30.
+     */
+    public const TIMEOUT_S = 90;
+
+    /**
      * Presupuesto del reintento: el triple, con techo. Si ya se pidió el
      * techo o más, devuelve lo mismo y quien llama no reintenta -- volver a
      * gastar el mismo presupuesto que ya falló no lleva a ningún lado.
@@ -174,7 +182,7 @@ TXT;
         $presupuesto = self::maxTokens();
         try {
             $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], $prompt, $presupuesto,
-                                  'Máximo de tokens del borrador de anamnesis');
+                                  'Máximo de tokens del borrador de anamnesis', self::TIMEOUT_S);
         } catch (LlmBudgetException $e) {
             // Un solo reintento con más aire. Cuánto razona el modelo
             // depende del caso, así que el número "correcto" no existe:
@@ -185,7 +193,7 @@ TXT;
                 throw $e;
             }
             $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], $prompt, $reintento,
-                                  'Máximo de tokens del borrador de anamnesis');
+                                  'Máximo de tokens del borrador de anamnesis', self::TIMEOUT_S);
         }
         $draft = self::parse($raw);
         if ($draft === null) {

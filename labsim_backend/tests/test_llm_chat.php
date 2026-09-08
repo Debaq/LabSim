@@ -96,3 +96,9 @@ try {
     $clase = get_class($e);
 }
 t_eq($clase, 'RuntimeException', 'Un shape raro NO es falla de presupuesto: reintentar no lo arregla');
+
+// El timeout de esta tarea tiene que ser mayor que el del chat: el chat lo
+// mira un alumno en vivo, el borrador lo espera un docente que apretó un
+// botón.
+t_true(AnamnesisDraft::TIMEOUT_S > LlmChat::TIMEOUT_DEFAULT_S,
+    'El borrador espera más que el chat con el paciente');
