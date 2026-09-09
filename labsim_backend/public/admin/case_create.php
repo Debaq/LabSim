@@ -264,7 +264,6 @@ $dispOpts = [
     1 => 'Cálido/a y agradecido/a',
     2 => 'Muy positivo/a (elogia con facilidad)',
 ];
-$salaAforo = (string) ($v['sala_aforo'] ?? Sala::AFORO_DEFAULT);
 $salaInformante = (string) ($v['sala_informante'] ?? 'p1');
 $pacienteConciencia = (string) ($v['paciente_conciencia'] ?? Sala::RASGOS_DEFAULT['conciencia']);
 $pacienteConfiabilidad = (string) ($v['paciente_confiabilidad'] ?? Sala::RASGOS_DEFAULT['confiabilidad']);
@@ -1041,19 +1040,12 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <div class="tab-panel" data-tab="sala">
 <div class="card">
     <strong>Sala de atención</strong>
-    <p class="legend help">Quiénes entran al box con el paciente. Un lactante no cuenta su historia: la cuenta la madre. Un menor de 14 años no se atiende solo. Y hay adultos que niegan lo que el acompañante ve todos los días -- ese desacuerdo <em>es</em> el hallazgo clínico del caso, y el alumno tiene que darse cuenta de a quién le está preguntando.</p>
-    <p class="legend help">Un caso sin acompañantes se comporta exactamente como antes: una conversación con el paciente y nadie más.</p>
-
-    <div class="three-col">
-        <label>Acompañantes que caben en el box
-            <input type="number" name="sala_aforo" min="1" max="6" value="<?= htmlspecialchars($salaAforo) ?>">
-        </label>
-    </div>
-    <p class="legend">Si el caso trae más gente que cupo, el alumno tiene que decidir a quién hace pasar. A la madre y al padre no se les puede pedir que salgan del box.</p>
+    <p class="legend help">Quiénes vienen con el paciente. Un lactante no cuenta su historia: la cuenta la madre. Un menor de 14 años no se atiende solo. Y hay adultos que niegan lo que el acompañante ve todos los días -- ese desacuerdo <em>es</em> el hallazgo clínico del caso, y el alumno tiene que darse cuenta de a quién le está preguntando.</p>
+    <p class="legend help">El alumno no elige a quién le habla con un menú: lo dice escribiendo ("mamita, ¿su hijo escucha bien?", "prefiero que me conteste él") y responde quien corresponda. Un caso sin acompañantes se comporta exactamente como antes: una conversación con el paciente y nadie más.</p>
 
     <div class="section-sep" style="border-top:1px dashed var(--color-border);">
         <strong>El paciente en la entrevista</strong>
-        <p class="legend help">Su comportamiento y su sensibilidad se editan en la pestaña Anamnesis. Acá va solo lo que cambia cuando hay alguien más en la sala.</p>
+        <p class="legend help">Su comportamiento y su sensibilidad se editan en la pestaña Anamnesis. Acá va solo lo que cambia cuando viene acompañado.</p>
         <div class="two-col">
             <label>Conciencia de su problema (0-100)
                 <input type="number" name="paciente_conciencia" min="0" max="100" value="<?= htmlspecialchars($pacienteConciencia) ?>">
@@ -1062,17 +1054,18 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                 <input type="number" name="paciente_confiabilidad" min="0" max="100" value="<?= htmlspecialchars($pacienteConfiabilidad) ?>">
             </label>
         </div>
-        <p class="legend">Bajo <?= Sala::CONCIENCIA_BAJA ?> de conciencia el paciente niega o minimiza lo suyo ("yo escucho bien, hablan bajo") y el acompañante que sí lo nota se mete a corregirlo. Confiabilidad baja = confunde fechas y detalles, pero los cuenta con seguridad.</p>
+        <p class="legend">Bajo <?= Sala::CONCIENCIA_BAJA ?> de conciencia el paciente niega o minimiza lo suyo ("yo escucho bien, hablan bajo") y el acompañante que sí lo nota se mete a corregirlo. Bajo <?= Sala::CONFIABILIDAD_BAJA ?> de confiabilidad confunde fechas y detalles, pero los cuenta con seguridad.</p>
         <label class="inline-check">
             <input type="radio" name="sala_informante" value="p1" <?= $salaInformante === 'p1' ? 'checked' : '' ?>> El paciente es quien cuenta la historia
         </label>
-        <p class="legend">El informante principal es quien contesta cuando el alumno pregunta al aire, sin dirigirse a nadie. En un lactante no puede ser el paciente.</p>
+        <p class="legend">Quien lleva la voz cantante: el que contesta cuando el alumno pregunta al aire, sin dirigirse a nadie. En un lactante no puede ser el paciente.</p>
     </div>
 </div>
 
 <div class="card">
     <strong>Acompañantes</strong>
     <p class="legend help">Cada uno responde por sí mismo, con su propia foto y su propia versión. Sabe lo que el paciente no puede saber: fechas, remedios, cómo fue el parto.</p>
+    <p class="legend">La tendencia a interrumpir es lo que decide si esta persona contesta por el paciente o espera su turno.</p>
     <?php
     // Una sola definición de fila para los dos usos: las que ya tiene el
     // caso y la plantilla que clona el navegador al agregar a alguien. El
@@ -1109,7 +1102,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                         <option value="1" <?= (int) ($ac['genero'] ?? 0) === 1 ? 'selected' : '' ?>>Mujer</option>
                     </select>
                 </label>
-                <label>Tendencia a interrumpir (0-100)
+                <label>Tendencia a contestar por el paciente (0-100)
                     <input type="number" name="sala_interrumpe[]" min="0" max="100" value="<?= htmlspecialchars((string) ($ac['interrumpe'] ?? Sala::RASGOS_DEFAULT['interrumpe'])) ?>">
                 </label>
                 <label>Confiabilidad de su relato (0-100)

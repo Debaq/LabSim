@@ -74,27 +74,21 @@ def sala_del_caso(case_id, nombre="", edad=0):
         return []
 
 
-def chat_con_paciente(case_id, nombre, edad, procedimiento, history, message, appointment_id=None,
-                      dirigido_a="", silenciados=None, fuera=None, salida_solicitada=""):
-    """Un turno de chat con la sala del caso (vive en el servidor, ver
-    Sala.php). Devuelve el dict completo del backend: `respuestas` (una por
-    cada persona que habló en el turno), `sala` (quién está en el box),
-    `silenciados`, `avisos`.
+def chat_con_paciente(case_id, nombre, edad, procedimiento, history, message, appointment_id=None):
+    """Un turno de chat con el paciente y quienes lo acompañan (vive en el
+    servidor, ver Sala.php). Devuelve el dict del backend: `respuestas` (una
+    por cada persona que habló en el turno) y `sala` (quiénes están).
 
     Devuelve el dict y no el texto porque un turno puede tener más de una
-    voz: el paciente que niega y la esposa que lo corrige son dos burbujas
-    distintas, con distinta cara y distinto nombre.
+    voz: el paciente que minimiza y la esposa que lo desmiente son dos
+    burbujas distintas, con distinta cara y distinto nombre.
 
     appointment_id: cita real a la que se le asocia el chat guardado (ver
     LlmChat.php) -- None cuando no corresponde dejar rastro (ej. "Atender
     (prueba)" del admin).
     """
     client = _get_backend_client()
-    return client.llm_chat(
-        case_id, nombre, edad, procedimiento, history, message, appointment_id,
-        dirigido_a=dirigido_a, silenciados=silenciados, fuera=fuera,
-        salida_solicitada=salida_solicitada,
-    )
+    return client.llm_chat(case_id, nombre, edad, procedimiento, history, message, appointment_id)
 
 
 def inbox_list() -> list:

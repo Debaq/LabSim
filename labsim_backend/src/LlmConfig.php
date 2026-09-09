@@ -1,8 +1,8 @@
 <?php
 
-// Igual que en LlmChat: la dependencia se declara donde se usa. El bloque
-// de sala del prompt (ver bloqueSala) necesita Sala para saber quién está
-// en el box y qué puede contar cada uno por su edad.
+// Igual que en LlmChat: la dependencia se declara donde se usa. El prompt
+// de la sala (ver buildSalaPrompt) necesita Sala para describirle al modelo
+// quién está en la consulta y qué puede contar cada uno por su edad.
 require_once __DIR__ . '/Sala.php';
 
 final class LlmConfig
@@ -62,23 +62,6 @@ final class LlmConfig
         2 => 'Eres una persona muy positiva y efusiva: agradeces con facilidad el buen trato, incluso ante gestos pequeños de amabilidad o una buena explicación.',
     ];
 
-    /**
-     * Por qué le toca hablar a esta persona en este turno (ver
-     * Sala::turno). Es la línea que convierte una regla del motor en algo
-     * que el modelo puede actuar: sin ella, un acompañante al que le toca
-     * corregir al paciente igual contestaría como si le hubieran
-     * preguntado a él, y se pierde la escena.
-     */
-    public const MOTIVO_TURNO = [
-        'responde' => 'te preguntaron a ti y sabes la respuesta: contesta lo que te preguntaron.',
-        'no_sabe' => 'te preguntaron a ti, pero eso no está a tu alcance: dilo con tus palabras y en una frase corta ("no sé", "eso lo sabe mi mamá", "no me acuerdo").',
-        'no_verbal' => 'no hablas. Responde SOLO con una acotación de conducta observable entre paréntesis y en una línea, por ejemplo: (se queda mirando el juguete y no gira hacia el ruido). Nada más.',
-        'interrumpe' => 'no te preguntaron a ti, pero te metes igual en la conversación. Breve.',
-        'aporta_dato' => 'no te preguntaron a ti, pero el otro no puede saber eso y tú sí: das el dato tú.',
-        'corrige' => 'el paciente está minimizando o negando lo que le pasa. Lo desmientes con ejemplos concretos de la vida diaria, sin pelear con él.',
-        'contradice' => 'tienes tu propia versión de esto y no calza con lo que se acaba de decir. La cuentas igual, sin ceder.',
-    ];
-
     // Prompt por defecto: instruye al modelo a actuar como el paciente del
     // caso, usando solo lo que un paciente real sabría de sí mismo
     // (síntomas, antecedentes) y nunca datos técnicos ni el diagnóstico
@@ -118,6 +101,92 @@ Reglas estrictas:
 6. Si te preguntan algo que no tiene relación con tu consulta o tus
    síntomas, responde brevemente como lo haría un paciente distraído y
    vuelve al tema de tu consulta.
+PROMPT;
+
+    /**
+     * Placeholders de la plantilla de la sala. {{sala}} es el que hace el
+     * trabajo: lo arma buildSalaPrompt con la ficha de cada persona.
+     */
+    public const SALA_PLACEHOLDERS = [
+        '{{sala}}' => 'Ficha de cada persona presente: quién es, qué edad tiene, qué puede contar, cómo se comporta y su propia versión de los hechos',
+        '{{procedimiento}}' => 'Motivo de la cita agendada',
+        '{{antecedentes}}' => 'Antecedentes médicos marcados en la anamnesis, en lista',
+        '{{medicamentos}}' => 'Medicamentos que toma el paciente',
+        '{{cirugias}}' => 'Cirugías previas del paciente',
+        '{{otros_antecedentes}}' => 'Lo que se puede contar del paciente: vida, trabajo, rutina, desde cuándo lo nota, qué preocupa',
+        '{{tinnitus_desc}}' => 'Descripción en lenguaje natural del acúfeno del caso (o "no reporta" si no tiene)',
+    ];
+
+    /**
+     * Prompt por defecto cuando el paciente viene acompañado: el modelo
+     * interpreta a TODOS y decide en cada turno quién contesta.
+     *
+     * Que lo decida el modelo y no una tabla de reglas es a propósito: el
+     * alumno escribe "mamita, ¿su hijo escucha bien?" o "prefiero que me
+     * conteste él", y eso lo entiende un modelo leyendo la frase, no un
+     * clasificador de palabras clave. Lo que sí queda fijado por el caso es
+     * QUIÉN es cada uno y qué sabe -- eso va en {{sala}}, lo escribe el
+     * docente, y es lo que hace que la contradicción entre la madre y el
+     * hijo sea del caso y no del azar.
+     *
+     * La respuesta se pide en JSON porque cada intervención tiene que poder
+     * pintarse con la cara y el nombre de quien la dijo (ver llm_chat.php).
+     */
+    public const DEFAULT_SALA_PROMPT = <<<'PROMPT'
+Vas a interpretar una consulta de salud completa: no a una persona, sino a
+todas las que están en el box con el estudiante. El estudiante escribe, y tú
+decides quién de ellas contesta y qué dice.
+
+Motivo de la cita: {{procedimiento}}
+
+Quiénes están, en orden:
+{{sala}}
+
+Historia clínica que se maneja en esta consulta (quién la sabe depende de
+cada persona, ver arriba):
+- Antecedentes médicos: {{antecedentes}}
+- Medicamentos: {{medicamentos}}
+- Cirugías previas: {{cirugias}}
+- Lo que se puede contar del paciente: {{otros_antecedentes}}
+- Sobre ruidos o pitidos en el oído: {{tinnitus_desc}}
+
+Cómo decidir quién habla:
+1. Si el estudiante se dirige a alguien -- por su nombre, por su rol
+   ("mamita", "señora", "don Luis"), o porque la pregunta claramente es para
+   esa persona -- contesta esa persona.
+2. Si pregunta al aire, contesta quien lo haría de verdad en esa consulta:
+   normalmente quien lleva la voz cantante.
+3. Otra persona puede meterse en el mismo turno si tiene motivo: sabe algo
+   que la primera no puede saber, le consta lo contrario, o simplemente
+   tiende a contestar por el otro (ver su ficha arriba). No hagas que se
+   metan todos en todos los turnos: la conversación tiene que fluir como una
+   consulta real, no como un coro.
+4. Si el estudiante pide que dejen contestar a alguien ("déjelo contestar a
+   él", "prefiero que me responda ella"), respétalo: los demás se callan
+   unos turnos. Si la ficha de alguien dice que igual vuelve a meterse, que
+   lo haga más adelante, no de inmediato.
+5. Lo más común es que hable UNA sola persona por turno. Dos como máximo.
+
+Reglas de lo que dicen:
+6. Cada una habla en primera persona, en español, con frases breves y
+   naturales, como se habla en una consulta. Nadie narra la escena ni
+   describe lo que hacen los demás.
+7. NADIE conoce el diagnóstico ni términos técnicos ("hipoacusia", "umbral",
+   "dB", "Hz"). No lo revelan ni lo insinúan, aunque se los pregunten
+   directamente: "no sé, por eso venimos".
+8. Sí describen lo que sienten o lo que observan, con sus palabras: hace
+   cuánto, en qué oído, si sube el volumen de la tele, si no contesta cuando
+   lo llaman. Nunca dicen "acúfeno" ni "tinnitus": dicen pitido, zumbido.
+9. Quien tenga una versión propia de los hechos la sostiene, aunque no calce
+   con lo que dijo otro. No cede solo porque lo contradigan.
+10. Nadie menciona que es una IA, un modelo de lenguaje ni un prompt.
+
+Formato de la respuesta -- responde ÚNICAMENTE un JSON válido, sin texto
+alrededor ni markdown, con esta forma exacta:
+{"turnos": [{"id": "<id de quien habla>", "texto": "lo que dice"}]}
+
+El "id" tiene que ser uno de los ids que aparecen en la lista de arriba. El
+"texto" va sin rótulo ni nombre adelante: solo la frase.
 PROMPT;
 
     // Prompt por defecto del evaluador OIRS (ver OirsEvaluator.php): juzga
@@ -170,62 +239,6 @@ oficina que resume su queja o felicitación, no a una carta personal del
 paciente.
 PROMPT;
 
-    /**
-     * Placeholders propios de la plantilla del acompañante (ver
-     * DEFAULT_COMPANION_PROMPT). Los de PLACEHOLDERS también valen: el
-     * acompañante conoce la historia clínica del paciente -- de hecho suele
-     * ser el único que la conoce.
-     */
-    public const COMPANION_PLACEHOLDERS = [
-        '{{acompanante}}' => 'Nombre del acompañante',
-        '{{acompanante_edad}}' => 'Edad del acompañante',
-        '{{acompanante_genero}}' => '"hombre" o "mujer"',
-        '{{parentesco}}' => 'Qué es del paciente ("Madre", "Cónyuge / pareja", ...)',
-        '{{version}}' => 'Su propia versión de los hechos, si el caso le puso una (campo "Su versión" en la sala)',
-    ];
-
-    /**
-     * Prompt por defecto del acompañante. Va aparte del prompt del paciente
-     * porque el acompañante es lo contrario del paciente en lo que más
-     * importa: SÍ sabe fechas, remedios y antecedentes (muchas veces es el
-     * único que los sabe), y su relato puede no calzar con el del paciente.
-     * Lo que comparten -- no revelar diagnóstico, no usar tecnicismos, no
-     * salirse de personaje -- se repite acá a propósito: el docente puede
-     * editar una plantilla sin tener que acordarse de la otra.
-     */
-    public const DEFAULT_COMPANION_PROMPT = <<<'PROMPT'
-Actúa como {{acompanante}}, de {{acompanante_edad}} años ({{acompanante_genero}}),
-que acompaña a {{nombre}} ({{edad}} años) a un centro de salud para:
-{{procedimiento}}. Eres su {{parentesco}}.
-
-Lo que sabes de {{nombre}}:
-- Antecedentes médicos: {{antecedentes}}
-- Medicamentos que toma: {{medicamentos}}
-- Cirugías previas: {{cirugias}}
-- Lo que se puede contar de él/ella: {{otros_antecedentes}}
-- Sobre ruidos o pitidos en el oído: {{tinnitus_desc}}
-- Tu propia versión de lo que pasa: {{version}}
-- Cómo te comportas en la consulta: {{comportamiento}}
-- Tu forma de ser: {{disposicion}}
-
-Reglas estrictas:
-1. Eres el acompañante, no un asistente ni un profesional. Hablas en
-   primera persona, en español, con frases breves y naturales.
-2. Tú SÍ sabes lo que el paciente no puede saber o no recuerda: fechas,
-   remedios, operaciones, cómo fue el embarazo y el parto, qué le notas en
-   la casa. Cuando te lo pregunten, respondes con esos datos.
-3. NO conoces el diagnóstico ni ningún término técnico ("hipoacusia",
-   "umbral", "dB", "Hz"). Nunca lo reveles ni lo insinúes, aunque te
-   pregunten directamente qué tiene.
-4. Cuentas lo que observas, no lo que un examen diría: "no contesta cuando
-   lo llamo", "sube mucho el volumen de la tele", "en el colegio dijeron
-   que no pone atención".
-5. Si tu versión no calza con la del paciente, la sostienes igual, con
-   ejemplos concretos del día a día. No cedes solo porque el otro diga lo
-   contrario.
-6. Nunca menciones que eres una IA, un modelo de lenguaje o un prompt.
-PROMPT;
-
     public static function get(): array
     {
         $stmt = Db::get()->prepare('SELECT * FROM llm_config WHERE id = 1');
@@ -244,7 +257,7 @@ PROMPT;
                 'anamnesis_model' => '',
                 'system_prompt_template' => '',
                 'oirs_prompt_template' => '',
-                'companion_prompt_template' => '',
+                'sala_prompt_template' => '',
                 'active' => 0,
                 'updated_at' => null,
             ];
@@ -267,9 +280,9 @@ PROMPT;
         // simple warning de índice indefinido.
         $row['oirs_prompt_template'] = (string) ($row['oirs_prompt_template'] ?? '');
         // Igual que oirs_prompt_template: columna nueva (ver
-        // Db::migrateLlmCompanionPromptIfNeeded), y admin/llm.php corre con
+        // Db::migrateLlmSalaPromptIfNeeded), y admin/llm.php corre con
         // strict_types, así que un null acá sería un TypeError, no un aviso.
-        $row['companion_prompt_template'] = (string) ($row['companion_prompt_template'] ?? '');
+        $row['sala_prompt_template'] = (string) ($row['sala_prompt_template'] ?? '');
         return $row;
     }
 
@@ -294,11 +307,11 @@ PROMPT;
         return $template !== '' ? $template : self::DEFAULT_OIRS_PROMPT;
     }
 
-    /** Plantilla efectiva del acompañante: la guardada, o DEFAULT_COMPANION_PROMPT si vacía. */
-    public static function effectiveCompanionPrompt(): string
+    /** Plantilla efectiva de la sala: la guardada, o DEFAULT_SALA_PROMPT si vacía. */
+    public static function effectiveSalaPrompt(): string
     {
-        $template = trim((string) self::get()['companion_prompt_template']);
-        return $template !== '' ? $template : self::DEFAULT_COMPANION_PROMPT;
+        $template = trim((string) self::get()['sala_prompt_template']);
+        return $template !== '' ? $template : self::DEFAULT_SALA_PROMPT;
     }
 
     /** System prompt final del evaluador OIRS para un nivel de disposición dado. */
@@ -353,108 +366,77 @@ PROMPT;
     }
 
     /**
-     * System prompt de UNA persona de la sala para UN turno (ver Sala.php).
+     * System prompt de una consulta con acompañantes: la plantilla de sala
+     * con la ficha de cada persona ya escrita en {{sala}}.
      *
-     * Va por persona y no un solo prompt "eres la sala entera" porque el
-     * docente arma cada personaje por separado en el caso: si el modelo
-     * decidiera solo quién habla y qué sabe cada uno, la contradicción
-     * entre la madre y el niño -- que es el hallazgo que se quiere enseñar
-     * -- saldría distinta en cada corrida y no sería del caso.
+     * Un caso sin acompañantes no pasa por acá: sigue usando
+     * buildSystemPrompt(), el prompt del paciente de toda la vida, y
+     * contestando en texto plano. No es solo compatibilidad -- es la enorme
+     * mayoría de los casos, y no hay razón para pagarle a un JSON ni
+     * arriesgar un parseo por una conversación de una sola voz.
      *
-     * $ctx: paciente_nombre, paciente_edad, paciente_genero, procedimiento,
-     * anamnesis (mismo shape que buildSystemPrompt) y tinnitus.
-     * $motivo: por qué habla esta persona en este turno (ver Sala::turno).
+     * $ctx: procedimiento, anamnesis y tinnitus (mismo shape que
+     * buildSystemPrompt).
      */
-    public static function buildPersonaPrompt(array $persona, array $sala, array $ctx, string $motivo): string
+    public static function buildSalaPrompt(array $sala, array $ctx): string
     {
         $anamnesis = (array) ($ctx['anamnesis'] ?? []);
-        $tinnitus = (array) ($ctx['tinnitus'] ?? []);
 
-        // {{nombre}}/{{edad}} son SIEMPRE el paciente, en las dos
-        // plantillas: es lo que ya significaban y lo que el docente espera
-        // al editarlas. Quien habla se identifica con {{acompanante}}.
-        $vars = [
-            '{{nombre}}' => (string) ($ctx['paciente_nombre'] ?? 'el paciente'),
-            '{{edad}}' => (string) ($ctx['paciente_edad'] ?? ''),
-            '{{genero}}' => (int) ($ctx['paciente_genero'] ?? 0) === 1 ? 'mujer' : 'hombre',
+        return self::fillPlaceholders(self::effectiveSalaPrompt(), [
+            '{{sala}}' => self::fichasDeSala($sala),
             '{{procedimiento}}' => trim((string) ($ctx['procedimiento'] ?? '')) ?: 'una evaluación audiológica',
             '{{antecedentes}}' => CaseBuilder::antecedentesSummary((array) ($anamnesis['antecedentes'] ?? [])),
             '{{medicamentos}}' => trim((string) ($anamnesis['medicamentos'] ?? '')) ?: 'ninguno',
             '{{cirugias}}' => trim((string) ($anamnesis['cirugias'] ?? '')) ?: 'ninguna',
             '{{otros_antecedentes}}' => trim((string) ($anamnesis['otros'] ?? '')) ?: 'nada en particular',
-            '{{tinnitus_desc}}' => CaseBuilder::describeTinnitus($tinnitus),
-            // Comportamiento y forma de ser son de QUIEN habla, no del
-            // paciente: la madre ansiosa y el hijo callado son dos personas
-            // distintas aunque compartan la historia clínica.
-            '{{comportamiento}}' => $persona['comportamiento'] !== '' ? $persona['comportamiento'] : 'colaborador y tranquilo',
-            '{{disposicion}}' => self::dispositionLabel((int) $persona['disposicion']),
-        ];
-
-        if ($persona['es_paciente']) {
-            $base = self::fillPlaceholders(self::effectivePrompt(), $vars);
-        } else {
-            $vars['{{acompanante}}'] = $persona['nombre'] !== '' ? $persona['nombre'] : 'el acompañante';
-            $vars['{{acompanante_edad}}'] = (string) $persona['edad'];
-            $vars['{{acompanante_genero}}'] = $persona['genero'] === 1 ? 'mujer' : 'hombre';
-            $vars['{{parentesco}}'] = Sala::ROLES[$persona['rol']] ?? 'Acompañante';
-            $vars['{{version}}'] = $persona['version'] !== ''
-                ? $persona['version']
-                : 'la misma que cuenta el paciente, no tienes nada distinto que agregar';
-            $base = self::fillPlaceholders(self::effectiveCompanionPrompt(), $vars);
-        }
-
-        return $base . "\n\n" . self::bloqueSala($persona, $sala, $motivo);
+            '{{tinnitus_desc}}' => CaseBuilder::describeTinnitus((array) ($ctx['tinnitus'] ?? [])),
+        ]);
     }
 
     /**
-     * Bloque que se le pega a TODA persona de la sala: quiénes están, qué
-     * puede contar por su edad, y por qué le toca hablar este turno.
+     * La ficha de cada persona para el prompt: quién es, qué puede contar
+     * por su edad, cómo se mete en la conversación y qué sostiene.
      *
-     * Se anexa por código en vez de vivir dentro de las plantillas
-     * editables porque son reglas del mecanismo, no del personaje: una
-     * plantilla guardada hace meses no las tendría, y sin ellas el modelo
-     * escribe los diálogos de los demás o se identifica solo, que rompe el
-     * chat grupal entero.
+     * Los rasgos que el docente puso como números (interrumpe, conciencia,
+     * confiabilidad) salen acá en palabras: un 70 no le dice nada al modelo,
+     * "tiende a contestar por el paciente" sí.
      */
-    public static function bloqueSala(array $persona, array $sala, string $motivo): string
+    public static function fichasDeSala(array $sala): string
     {
         $lineas = [];
-        foreach (Sala::presentes($sala) as $p) {
-            $quien = $p['id'] === $persona['id'] ? ' <- eres tú' : '';
-            $lineas[] = '- ' . Sala::etiqueta($p) . ', ' . $p['edad'] . ' años' . $quien;
+        foreach ($sala['personas'] as $p) {
+            $quien = Sala::etiqueta($p) . ', ' . $p['edad'] . ' años';
+            $quien .= $p['genero'] === 1 ? ', mujer' : ', hombre';
+
+            $ficha = ["- id \"{$p['id']}\": {$quien}."];
+            $ficha[] = '  Qué puede contar: ' . Sala::CAPACIDAD_DESC[Sala::capacidad((int) $p['edad'])];
+
+            if ($p['informante']) {
+                $ficha[] = '  Es quien lleva la voz cantante: si nadie en particular tiene la palabra, habla esta persona.';
+            }
+            if (!$p['es_paciente']) {
+                $ficha[] = '  Sabe lo que el paciente no puede saber o no recuerda: fechas, remedios, operaciones, '
+                    . 'cómo fue el embarazo y el parto, y qué le nota en la casa.';
+                $ficha[] = '  En la conversación: ' . Sala::INTERRUMPE_DESC[Sala::nivelInterrupcion((int) $p['interrumpe'])];
+            }
+            if ($p['es_paciente'] && $p['conciencia'] < Sala::CONCIENCIA_BAJA) {
+                $ficha[] = '  No cree tener un problema: dice que escucha bien y le echa la culpa a otra cosa '
+                    . '(que hablan bajo, que la tele está mala). No cede fácil aunque lo contradigan.';
+            }
+            if ($p['confiabilidad'] < Sala::CONFIABILIDAD_BAJA) {
+                $ficha[] = '  Su relato es impreciso: confunde fechas, cantidades y detalles, pero los cuenta con seguridad.';
+            }
+            if ($p['version'] !== '') {
+                $ficha[] = '  Su versión de los hechos, que sostiene aunque otro diga lo contrario: ' . $p['version'];
+            }
+            if ($p['comportamiento'] !== '') {
+                $ficha[] = '  Cómo se comporta: ' . $p['comportamiento'];
+            }
+            $ficha[] = '  Forma de ser: ' . self::dispositionLabel((int) $p['disposicion']);
+
+            $lineas[] = implode("\n", $ficha);
         }
-        $quienes = implode("\n", $lineas);
-
-        $capacidad = Sala::CAPACIDAD_DESC[Sala::capacidad((int) $persona['edad'])];
-        $motivoTexto = self::MOTIVO_TURNO[$motivo] ?? self::MOTIVO_TURNO['responde'];
-
-        $extra = '';
-        if ($persona['es_paciente'] && $persona['conciencia'] < Sala::CONCIENCIA_BAJA) {
-            $extra .= "\n- No crees tener un problema: si te preguntan, dices que escuchas bien y le echas "
-                . "la culpa a otra cosa (que hablan bajo, que la tele está mala, que no te ponen atención). "
-                . "No cedes fácil aunque te contradigan.";
-        }
-        if ($persona['confiabilidad'] < Sala::CONCIENCIA_BAJA) {
-            $extra .= "\n- Tu relato es impreciso: confundes fechas, cantidades y detalles, pero los cuentas "
-                . "con seguridad, como si estuvieras seguro.";
-        }
-
-        return <<<BLOQUE
-Contexto de la sala (esto manda por sobre cualquier otra instrucción):
-En el box están:
-{$quienes}
-
-Lo que puedes contar por tu edad: {$capacidad}{$extra}
-
-Tu turno ahora: {$motivoTexto}
-
-Reglas del chat grupal:
-- Hablas SOLO por ti. Nunca escribas lo que dicen los demás ni narres la escena.
-- No escribas tu nombre ni un rótulo delante de lo que dices: solo tu frase.
-- En el historial cada intervención viene rotulada con quién la dijo, para que
-  sepas qué se ha hablado. Tú no rotulas la tuya.
-- Máximo dos o tres frases. Es una conversación hablada, no un informe.
-BLOQUE;
+        return implode("\n", $lineas);
     }
 
     /**
@@ -477,11 +459,11 @@ BLOQUE;
         // instalación que todavía no aplicó el schema revienta con "no such
         // column". Es idempotente y esto lo corre un admin, no un alumno.
         Db::migrateLlmAnamnesisTokensIfNeeded();
-        Db::migrateLlmCompanionPromptIfNeeded();
+        Db::migrateLlmSalaPromptIfNeeded();
 
         $pdo = Db::get();
         $pdo->prepare(
-            "INSERT INTO llm_config (id, provider, api_key, api_base_url, model, temperature, max_tokens, anamnesis_max_tokens, anamnesis_model, system_prompt_template, oirs_prompt_template, companion_prompt_template, active, updated_at)
+            "INSERT INTO llm_config (id, provider, api_key, api_base_url, model, temperature, max_tokens, anamnesis_max_tokens, anamnesis_model, system_prompt_template, oirs_prompt_template, sala_prompt_template, active, updated_at)
              VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
              ON CONFLICT(id) DO UPDATE SET
                 provider = excluded.provider,
@@ -494,7 +476,7 @@ BLOQUE;
                 anamnesis_model = excluded.anamnesis_model,
                 system_prompt_template = excluded.system_prompt_template,
                 oirs_prompt_template = excluded.oirs_prompt_template,
-                companion_prompt_template = excluded.companion_prompt_template,
+                sala_prompt_template = excluded.sala_prompt_template,
                 active = excluded.active,
                 updated_at = CURRENT_TIMESTAMP"
         )->execute([
@@ -508,7 +490,7 @@ BLOQUE;
             trim((string) ($data['anamnesis_model'] ?? '')),
             trim((string) ($data['system_prompt_template'] ?? '')),
             trim((string) ($data['oirs_prompt_template'] ?? '')),
-            trim((string) ($data['companion_prompt_template'] ?? '')),
+            trim((string) ($data['sala_prompt_template'] ?? '')),
             !empty($data['active']) ? 1 : 0,
         ]);
     }

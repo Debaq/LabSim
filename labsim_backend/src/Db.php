@@ -245,28 +245,28 @@ final class Db
     }
 
     /**
-     * Agrega companion_prompt_template a llm_config y las columnas de
-     * hablante a llm_chat_logs -- instalaciones anteriores al chat grupal
-     * (ver Sala.php). Mismo motivo y mismo orden de llamada que
-     * migrateLlmOirsPromptIfNeeded: después del exec de schema.sql.
+     * Agrega sala_prompt_template a llm_config y las columnas de hablante a
+     * llm_chat_logs -- instalaciones anteriores a que el paciente pudiera
+     * venir acompañado (ver Sala.php). Mismo motivo y mismo orden de
+     * llamada que migrateLlmOirsPromptIfNeeded: después del exec de
+     * schema.sql.
      */
     public static function migrateSalaIfNeeded(): void
     {
         $pdo = self::get();
-        self::addColumnIfMissing($pdo, 'llm_config', 'companion_prompt_template', "TEXT NOT NULL DEFAULT ''");
+        self::migrateLlmSalaPromptIfNeeded();
         self::addColumnIfMissing($pdo, 'llm_chat_logs', 'speaker_id', "TEXT NOT NULL DEFAULT ''");
         self::addColumnIfMissing($pdo, 'llm_chat_logs', 'speaker_label', "TEXT NOT NULL DEFAULT ''");
-        self::addColumnIfMissing($pdo, 'llm_chat_logs', 'addressed_to', "TEXT NOT NULL DEFAULT ''");
     }
 
     /**
-     * Agrega companion_prompt_template a llm_config -- alias histórico de
-     * migrateSalaIfNeeded para el llamador de LlmConfig::save(), que solo
-     * necesita esa columna.
+     * Solo la columna de la plantilla: es lo único que necesita
+     * LlmConfig::save(), que puede correr antes de que nadie haya aplicado
+     * el schema.
      */
-    public static function migrateLlmCompanionPromptIfNeeded(): void
+    public static function migrateLlmSalaPromptIfNeeded(): void
     {
-        self::addColumnIfMissing(self::get(), 'llm_config', 'companion_prompt_template', "TEXT NOT NULL DEFAULT ''");
+        self::addColumnIfMissing(self::get(), 'llm_config', 'sala_prompt_template', "TEXT NOT NULL DEFAULT ''");
     }
 
     /**

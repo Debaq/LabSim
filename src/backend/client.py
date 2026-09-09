@@ -162,28 +162,23 @@ class BackendClient:
     def llm_chat(
         self, case_id: str, nombre: str, edad: int, procedimiento: str,
         history: list[dict], message: str, appointment_id: int | None = None,
-        dirigido_a: str = "", silenciados: dict | None = None,
-        fuera: list | None = None, salida_solicitada: str = "",
     ) -> dict:
-        """Turno de chat con la sala del caso (ver Sala.php y llm_chat.php).
+        """Turno de chat con el paciente y quienes lo acompañan (ver
+        Sala.php y llm_chat.php). Devuelve `respuestas`: una entrada por
+        cada persona que habló en el turno, con quién la dijo.
 
-        Timeout más largo que el resto de endpoints: el servidor espera
-        hasta 30s por CADA persona que hable en el turno (son hasta dos: el
-        destinatario y quien lo interrumpa), así que acá se espera por las
-        dos -- con el timeout por defecto (10s) el cliente se rendía antes
-        que el propio servidor.
+        A quién le habla el alumno no se manda como parámetro: va dicho en
+        el propio mensaje ("mamita, ¿su hijo escucha bien?") y lo resuelve
+        el modelo, que es quien puede leerlo.
 
-        dirigido_a: id de la persona a la que el alumno le habla; vacío =
-        pregunta al aire y contesta el informante principal.
-        silenciados / fuera: estado de la sala (a quién se contuvo y por
-        cuántos turnos, quién quedó fuera del box). El endpoint no tiene
-        sesión, así que el estado vive acá y viaja en cada turno.
-        salida_solicitada: pedirle a alguien que salga del box. Es un turno
-        sin mensaje -- no llama al LLM, pero queda en el registro.
+        Timeout más largo que el resto de endpoints: LlmChat.php espera
+        hasta 30s por la respuesta del LLM (CURLOPT_TIMEOUT) -- con el
+        timeout por defecto (10s) el cliente se rendía antes que el propio
+        servidor.
 
         appointment_id: si se manda, el backend guarda el turno (mensaje +
-        cada respuesta, con quién habló) en llm_chat_logs contra esa cita/
-        alumno. None = no guardar (usado por "Atender (prueba)").
+        cada intervención, con quién habló) en llm_chat_logs contra esa
+        cita/alumno. None = no guardar (usado por "Atender (prueba)").
         """
         body = {
             "case_id": case_id,
@@ -192,16 +187,10 @@ class BackendClient:
             "procedimiento": procedimiento,
             "history": history,
             "message": message,
-            "dirigido_a": dirigido_a,
-            "silenciados": silenciados or {},
-            "fuera": fuera or [],
         }
-        if salida_solicitada:
-            body["salida_solicitada"] = salida_solicitada
         if appointment_id is not None:
             body["appointment_id"] = appointment_id
-        # Dos personas hablando = dos llamadas al modelo, una tras otra.
-        return self._post("/api/llm_chat.php", body, timeout=70)
+        return self._post("/api/llm_chat.php", body, timeout=35)
 
     def get_inbox(self) -> dict:
         """Bandeja de entrada del usuario logueado (ver inbox.php): avisos

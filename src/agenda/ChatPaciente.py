@@ -9,7 +9,7 @@
 #################################################################
 
 import requests
-from PySide6.QtWidgets import QWidget, QComboBox, QMenu
+from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, QLabel, QTextEdit
 from PySide6.QtCore import QThread, Signal, QTimer, QUrl
 from PySide6.QtGui import QTextDocument
@@ -22,20 +22,14 @@ class _ChatPacienteThread(QThread):
     respondido = Signal(dict)
     fallo = Signal(str)
 
-    def __init__(self, case_id, nombre, edad, procedimiento, history, message, appointment_id=None,
-                 dirigido_a="", silenciados=None, fuera=None, salida_solicitada="", parent=None):
+    def __init__(self, case_id, nombre, edad, procedimiento, history, message,
+                 appointment_id=None, parent=None):
         super().__init__(parent)
         self._args = (case_id, nombre, edad, procedimiento, history, message, appointment_id)
-        self._kwargs = {
-            "dirigido_a": dirigido_a,
-            "silenciados": silenciados or {},
-            "fuera": fuera or [],
-            "salida_solicitada": salida_solicitada,
-        }
 
     def run(self):
         try:
-            resultado = chat_con_paciente(*self._args, **self._kwargs)
+            resultado = chat_con_paciente(*self._args)
         except (RuntimeError, requests.RequestException) as exc:
             self.fallo.emit(str(exc))
             return
@@ -76,15 +70,16 @@ class _AvatarFetchThread(QThread):
 
 
 class ChatPacienteWidget(QWidget):
-    """Chat de entrevista con la sala del caso: el paciente y quienes lo
-    acompañan, todos simulados por LLM (ver Sala.php y LlmChat.php).
+    """Chat de entrevista con el paciente y quienes lo acompañan, todos
+    simulados por LLM (ver Sala.php y LlmChat.php).
 
     No es un chat 1 a 1 con etiquetas: un lactante no cuenta su historia y
     la cuenta la madre, y un adulto que niega su hipoacusia es desmentido
-    por quien vive con él. El alumno elige a quién le pregunta, pero los
-    demás pueden meterse igual -- aprender a manejar eso (contener al que
-    contesta por el otro, preguntarle al que sí puede saber) es parte de lo
-    que se está evaluando.
+    por quien vive con él. El alumno no elige a quién le habla con un
+    control aparte: lo dice escribiendo ("mamita, ¿su hijo escucha bien?")
+    y contesta quien corresponda, igual que en una consulta. Manejar eso
+    -- contener al que responde por el otro, preguntarle al que sí puede
+    saber -- es parte de lo que se está evaluando.
 
     Vive como subventana única del MDI (ver main.py: self.subw["CHAT"]) en
     vez de un diálogo emergente -- set_paciente() la reapunta a otro caso
@@ -111,12 +106,10 @@ class ChatPacienteWidget(QWidget):
         self._mensaje_pendiente = None  # último mensaje enviado, para reintentar sin retipear
         self._intentos = 0
 
-        # Estado de la sala. El endpoint del chat no tiene sesión (cada turno
-        # manda el historial completo), así que esto vive acá y viaja en cada
-        # turno: a quién se contuvo y por cuántos turnos, quién quedó fuera.
+        # Quiénes están en la consulta. Solo se usa para mostrar: la cara y
+        # el nombre de cada burbuja, y el encabezado. Quién contesta cada
+        # pregunta lo decide el modelo, no el cliente.
         self._sala = []
-        self._silenciados = {}
-        self._fuera = []
         self._avatares = set()  # personas que ya tienen imagen cargada en el documento
 
         layout = QVBoxLayout(self)
@@ -125,23 +118,6 @@ class ChatPacienteWidget(QWidget):
         self.lbl_paciente.setStyleSheet("font-weight: bold;")
         self.lbl_paciente.setWordWrap(True)
         layout.addWidget(self.lbl_paciente)
-
-        fila_sala = QHBoxLayout()
-        fila_sala.addWidget(QLabel("Le hablo a:", self))
-        self.combo_destino = QComboBox(self)
-        self.combo_destino.setMinimumWidth(200)
-        fila_sala.addWidget(self.combo_destino)
-
-        self.btn_salir = QPushButton("Pedir que salga…", self)
-        self.btn_salir.setToolTip(
-            "Pedirle a un acompañante que espere afuera del box.\n"
-            "Al padre y a la madre no se les puede impedir estar presentes."
-        )
-        self.btn_salir.clicked.connect(self._menu_salida)
-        fila_sala.addWidget(self.btn_salir)
-        fila_sala.addStretch()
-        layout.addLayout(fila_sala)
-        self._fila_sala_widgets = (self.combo_destino, self.btn_salir)
 
         self.transcript = QTextEdit(self)
         self.transcript.setReadOnly(True)
@@ -197,8 +173,6 @@ class ChatPacienteWidget(QWidget):
         self._mensaje_pendiente = None
         self._intentos = 0
         self._sala = []
-        self._silenciados = {}
-        self._fuera = []
         self._avatares = set()  # transcript.clear() más abajo borra también los avatares
         self.transcript.clear()  # ¡también borra los recursos (avatares) del documento, no solo el texto!
         self._ocultar_estado()
@@ -207,7 +181,6 @@ class ChatPacienteWidget(QWidget):
         # Respaldo mientras no llega la sala: el paciente con sus iniciales,
         # que es exactamente el chat 1 a 1 de antes.
         self._asegurar_avatar(self._PACIENTE_ID, self._nombre)
-        self._poblar_destinos()
         self._pedir_sala()
         self.input.setFocus()
 
@@ -224,77 +197,22 @@ class ChatPacienteWidget(QWidget):
         if case_id_solicitado != self._case_id:
             return  # el alumno cambió de paciente mientras se pedía
         self._aplicar_sala(sala)
-        for persona in self._presentes():
+        for persona in self._sala:
             self._asegurar_avatar(persona["id"], persona["etiqueta"])
 
     def _aplicar_sala(self, sala):
-        """Guarda la sala que devolvió el backend y repinta el encabezado y
-        el selector. El backend es la autoridad: si el alumno pidió sacar a
-        alguien que no se puede sacar, esa persona vuelve marcada como
-        presente."""
+        """Guarda quiénes están en la consulta, para poder ponerle cara y
+        nombre a cada burbuja."""
         if not sala:
             return
         self._sala = sala
-        self._fuera = [p["id"] for p in sala if not p["presente"]]
         self._actualizar_encabezado()
-        self._poblar_destinos()
-
-    def _presentes(self):
-        return [p for p in self._sala if p["presente"]]
 
     def _persona(self, persona_id):
         for p in self._sala:
             if p["id"] == persona_id:
                 return p
         return None
-
-    def _poblar_destinos(self):
-        """Selector de a quién le habla el alumno. Con una sola persona en
-        la sala (el caso de siempre) no hay nada que elegir, así que la fila
-        entera se esconde en vez de dejar un combo de un solo ítem."""
-        presentes = self._presentes()
-        anterior = self.combo_destino.currentData()
-
-        self.combo_destino.blockSignals(True)
-        self.combo_destino.clear()
-        self.combo_destino.addItem("A la sala (a quien corresponda)", "")
-        for p in presentes:
-            etiqueta = p["etiqueta"]
-            if not p["habla"]:
-                etiqueta += " — no habla todavía"
-            elif p["informante"]:
-                etiqueta += " — cuenta la historia"
-            self.combo_destino.addItem(etiqueta, p["id"])
-        idx = self.combo_destino.findData(anterior)
-        self.combo_destino.setCurrentIndex(max(0, idx))
-        self.combo_destino.blockSignals(False)
-
-        hay_sala = len(presentes) > 1 or len(self._sala) > 1
-        for w in self._fila_sala_widgets:
-            w.setVisible(hay_sala)
-        self.btn_salir.setEnabled(any(not p["obligatorio"] for p in presentes))
-
-    def _menu_salida(self):
-        """A quién se le puede pedir que espere afuera. El paciente y sus
-        padres no aparecen: no es una opción que el alumno tenga."""
-        menu = QMenu(self)
-        for p in self._presentes():
-            if p["obligatorio"]:
-                continue
-            accion = menu.addAction(p["etiqueta"])
-            accion.triggered.connect(lambda _=False, pid=p["id"]: self._pedir_salida(pid))
-        if menu.isEmpty():
-            menu.addAction("Nadie puede salir del box").setEnabled(False)
-        menu.exec(self.btn_salir.mapToGlobal(self.btn_salir.rect().bottomLeft()))
-
-    def _pedir_salida(self, persona_id):
-        if self._thread is not None or not self._case_id:
-            return
-        persona = self._persona(persona_id)
-        if persona is None:
-            return
-        self._agregar_sistema(f"Le pides a {persona['etiqueta']} que espere afuera del box.")
-        self._despachar("", salida_solicitada=persona_id)
 
     # -----------------------------------------------------------------
     # Avatares
@@ -352,13 +270,9 @@ class ChatPacienteWidget(QWidget):
     # -----------------------------------------------------------------
 
     def _actualizar_encabezado(self):
-        presentes = self._presentes()
-        if len(presentes) > 1:
-            quienes = ", ".join(p["etiqueta"] for p in presentes)
-            texto = f"En el box: {quienes} ({self._procedimiento or 'sin motivo registrado'})"
-            fuera = [p["etiqueta"] for p in self._sala if not p["presente"]]
-            if fuera:
-                texto += " — esperando afuera: " + ", ".join(fuera)
+        if len(self._sala) > 1:
+            quienes = ", ".join(p["etiqueta"] for p in self._sala)
+            texto = f"Atendiendo a {quienes} ({self._procedimiento or 'sin motivo registrado'})"
         else:
             texto = f"Conversando con {self._nombre} ({self._procedimiento or 'sin motivo registrado'})"
         self.lbl_paciente.setText(texto)
@@ -397,14 +311,6 @@ class ChatPacienteWidget(QWidget):
         )
         self._al_final()
 
-    def _agregar_sistema(self, texto):
-        """Lo que pasa en el box y no lo dice nadie: alguien sale, o el
-        backend rechaza sacar a un padre."""
-        self.transcript.append(
-            f'<p align="center" style="color:#7a7a7a; font-size:8pt; margin:6px 0;"><i>{texto}</i></p>'
-        )
-        self._al_final()
-
     def _al_final(self):
         barra = self.transcript.verticalScrollBar()
         barra.setValue(barra.maximum())
@@ -436,23 +342,19 @@ class ChatPacienteWidget(QWidget):
         self._intentos = 0
         self._despachar(self._mensaje_pendiente)
 
-    def _despachar(self, mensaje, salida_solicitada=""):
+    def _despachar(self, mensaje):
         """Manda `mensaje` al backend -- puede ser el recién escrito o un reintento
         del último que falló (mismo texto, no se duplica burbuja de usuario)."""
-        self._mensaje_pendiente = mensaje or None
+        self._mensaje_pendiente = mensaje
         self.btn_reintentar.hide()
-        if not salida_solicitada:
-            self._mostrar_estado("Están pensando su respuesta…")
+        self._mostrar_estado("Pensando la respuesta…")
         self.input.setEnabled(False)
         self.btn_enviar.setEnabled(False)
 
         case_id_solicitado = self._case_id
         self._thread = _ChatPacienteThread(
             self._case_id, self._nombre, self._edad, self._procedimiento,
-            list(self._history), mensaje, appointment_id=self._appointment_id,
-            dirigido_a=self.combo_destino.currentData() or "",
-            silenciados=dict(self._silenciados), fuera=list(self._fuera),
-            salida_solicitada=salida_solicitada, parent=self,
+            list(self._history), mensaje, appointment_id=self._appointment_id, parent=self,
         )
         self._thread.respondido.connect(lambda r: self._on_respuesta(case_id_solicitado, mensaje, r))
         self._thread.fallo.connect(lambda e: self._on_fallo(case_id_solicitado, mensaje, e))
@@ -469,13 +371,7 @@ class ChatPacienteWidget(QWidget):
             return  # el usuario cambió de paciente mientras esperaba la respuesta
 
         self._aplicar_sala(resultado.get("sala") or [])
-        self._silenciados = resultado.get("silenciados") or {}
-
-        for aviso in resultado.get("avisos") or []:
-            self._agregar_sistema(aviso)
-
-        if mensaje:
-            self._history.append({"role": "user", "content": mensaje})
+        self._history.append({"role": "user", "content": mensaje})
         for r in resultado.get("respuestas") or []:
             etiqueta = r.get("etiqueta") or self._nombre
             persona_id = r.get("persona_id") or self._PACIENTE_ID
@@ -498,7 +394,7 @@ class ChatPacienteWidget(QWidget):
         # si sigue fallando, deja el mensaje "guardado" en btn_reintentar en
         # vez de obligar al alumno a retipearlo.
         print(f"[chat_paciente] fallo (intento {self._intentos + 1}): {error}")
-        if mensaje and self._intentos < self.REINTENTOS_AUTOMATICOS:
+        if self._intentos < self.REINTENTOS_AUTOMATICOS:
             self._intentos += 1
             self._mostrar_estado("Sin respuesta todavía, reintentando…")
             QTimer.singleShot(1500, lambda: self._despachar(mensaje))
