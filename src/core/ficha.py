@@ -177,11 +177,18 @@ def render_ficha_html(row, caso, shedule, username, is_admin):
         # Escapado: son textos libres (historia del caso, nota del alumno) y
         # un "<" suelto rompía el resto de la ficha sin dejar rastro de por
         # qué -- una otoscopia que dice "conducto <2 mm", por ejemplo.
+        # El alumno ve todas las entradas IGUAL: una ficha real no distingue
+        # "lo que traía el paciente" de "lo que escribí yo", y marcarlo rompe
+        # el realismo que la ficha aporta. El docente sí ve quién escribió
+        # cada nota -- ahí la ficha es una herramienta de corrección, no el
+        # registro que el alumno está aprendiendo a leer.
         items = "".join(
-            "<li><b>{fecha} {hora}</b>{quien} — {texto}</li>".format(
+            "<li><b>{fecha}{hora}</b>{quien} — {texto}</li>".format(
                 fecha=html.escape(e["fecha"] or "sin fecha"),
-                hora=html.escape(e["hora"]),
-                quien=f" {html.escape(e['alumno'])}" if e["alumno"] else "",
+                # Las entradas del caso no tienen hora: sin esto quedaba un
+                # espacio colgando dentro del <b>.
+                hora=f" {html.escape(e['hora'])}" if e["hora"] else "",
+                quien=f" {html.escape(e['alumno'])}" if (is_admin and e["alumno"]) else "",
                 texto=html.escape(e["texto"] or "sin comentario"),
             )
             for e in entradas

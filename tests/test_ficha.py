@@ -41,6 +41,12 @@ HISTORIA = (
 )
 
 
+def _shedule_con_atencion(row, alumno, nota):
+    """Un shedule con una atención cerrada de `alumno` sobre ese paciente."""
+    row.atencion = {alumno: {"estado": "atendido", "nota": nota, "hora_real": "09:12:00"}}
+    return {"agenda_1": {1: row}}
+
+
 def _ficha(historia):
     row = FilaFalsa()
     caso = {"historia_clinica": historia}
@@ -101,6 +107,26 @@ def test_dos_atenciones_el_mismo_dia_se_ordenan_por_hora():
 def test_una_atencion_sin_fecha_es_la_de_ahora_y_va_al_final():
     entradas = linea_tiempo(HISTORIA, "10-09-26", [("", "", "a", "Sin fecha.")])
     assert entradas[-1]["texto"] == "Sin fecha."
+
+
+def test_el_alumno_ve_todas_las_entradas_iguales():
+    """Marcar cuál escribió él rompe el realismo de la ficha."""
+    row = FilaFalsa()
+    caso = {"historia_clinica": HISTORIA}
+    shedule = _shedule_con_atencion(row, "alumno1", "Se realiza audiometría.")
+    html = render_ficha_html(row, caso, shedule, "alumno1", False)
+    assert "Se realiza audiometría." in html
+    assert "alumno1" not in html, "el alumno no se ve a sí mismo rotulado en su ficha"
+    assert "tu atención" not in html.lower()
+
+
+def test_el_docente_si_ve_quien_escribio_cada_nota():
+    """Para el docente la ficha es herramienta de corrección, no el registro."""
+    row = FilaFalsa()
+    caso = {"historia_clinica": HISTORIA}
+    shedule = _shedule_con_atencion(row, "alumno1", "Se realiza audiometría.")
+    html = render_ficha_html(row, caso, shedule, "docente", True)
+    assert "alumno1" in html
 
 
 def test_sin_historia_ni_atenciones_lo_dice():

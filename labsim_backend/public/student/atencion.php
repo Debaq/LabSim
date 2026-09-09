@@ -203,17 +203,20 @@ student_header($paciente, $me);
     // la evolución que escribiste va DESPUÉS de lo que le pasó al paciente
     // antes de llegar, que es como se lee una ficha de verdad. Antes eran
     // dos listas separadas y la tuya se ordenaba por la fecha como string.
+    //
+    // Todas las entradas se ven IGUAL a propósito: una ficha real no
+    // distingue "lo que trajo el paciente" de "lo que escribí yo", y
+    // marcarlo rompe justo el realismo que la ficha aporta.
     $lineaTiempo = HistoriaClinica::lineaTiempo($historiaClinica, $appointment['fecha'], $historial);
     ?>
-    <p class="legend">Historial completo de este paciente, con tus atenciones incluidas:</p>
+    <p class="legend">Historial de este paciente:</p>
     <?php if (!$lineaTiempo): ?>
     <p class="empty">Sin historial registrado para este paciente.</p>
     <?php else: ?>
     <ul>
         <?php foreach ($lineaTiempo as $e): ?>
-        <li<?= $e['propia'] ? ' style="font-weight:500;"' : '' ?>>
-            <b><?= htmlspecialchars($e['fecha'] ?: 'sin fecha') ?> <?= htmlspecialchars($e['hora']) ?></b>
-            <?= $e['propia'] ? '<span class="legend">(tu atención)</span>' : '' ?> —
+        <li>
+            <b><?= htmlspecialchars($e['fecha'] ?: 'sin fecha') ?><?= $e['hora'] !== '' ? ' ' . htmlspecialchars($e['hora']) : '' ?></b> —
             <?= htmlspecialchars($e['texto'] ?: 'sin comentario') ?>
         </li>
         <?php endforeach; ?>
