@@ -953,7 +953,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <?php endif; ?>
 
     <label>Historia clínica
-        <textarea name="historia_clinica" rows="6" class="input" placeholder="Antecedentes generales, evolución, observaciones del paciente..."><?= htmlspecialchars((string) ($v['historia_clinica'] ?? '')) ?></textarea>
+        <textarea name="historia_clinica" rows="6" class="input" placeholder="{{-20}} Nace de 38 semanas, parto vaginal, 3.240 g. Screening auditivo: refiere OD.&#10;{{-5}} Control con pediatra, se deriva a evaluación auditiva."><?= htmlspecialchars((string) ($v['historia_clinica'] ?? '')) ?></textarea>
     </label>
     <p class="legend" class="help">Las <strong>atenciones previas</strong> del paciente: qué le hicieron antes de llegar acá y qué se encontró, una por línea y de la más antigua a la más reciente. Es del <strong>paciente</strong>, no del caso. No incluye las notas individuales de cada alumno por atención -- esas se ven en la agenda/asistencia, no se editan acá.</p>
     <p class="legend" class="help">Las fechas no se escriben a mano: poné <code>{{-N}}</code> al principio de la línea, donde N son los <strong>días antes</strong> de la cita que va a atender el alumno, y la app lo reemplaza por la fecha real. Así el mismo caso sirve en cualquier fecha. Ejemplos: <code>{{-5}}</code> hace cinco días, <code>{{-30}}</code> hace un mes, <code>{{-730}}</code> hace dos años. En un recién nacido, el nacimiento es la primera línea: <code>{{-20}} Nace de 38 semanas, parto vaginal, 3.240 g. Screening auditivo: refiere OD.</code></p>

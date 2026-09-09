@@ -4,6 +4,7 @@
 (core.mis_pacientes) -- ambos parten de la misma fila de agenda + caso, solo
 cambia de dónde sacan `shedule` (en memoria vs. recién pedido al backend)."""
 
+import html
 import re
 
 from PySide6.QtCore import QDate, QTime, QDateTime
@@ -114,18 +115,32 @@ def render_ficha_html(row, caso, shedule, username, is_admin):
         partes.append(f"<p><b>Hora agendada:</b> {row.hora}<br>"
                        f"<b>Inicio real:</b> {hora_real} ({resumen})</p>")
 
-    partes.append("<h3>Historial de atenciones</h3>")
-    items = ""
-
+    # Atenciones previas del paciente: lo que le hicieron ANTES de llegar,
+    # una por línea en el campo. Va en su propia sección porque no son
+    # atenciones de alumnos -- son parte del caso, y el alumno las lee para
+    # saber de dónde viene el paciente.
     historia_clinica = caso.get("historia_clinica", "") if isinstance(caso, dict) else ""
     if historia_clinica:
         historia_resuelta = resolver_fechas_historia_clinica(historia_clinica, row.fecha)
-        items += f"<li><b>Historia clínica:</b> {historia_resuelta}</li>"
+        # Una línea del campo = un ítem. Interpolado crudo, los saltos de
+        # línea colapsaban y las tres o cuatro atenciones quedaban como un
+        # solo párrafo corrido.
+        lineas = [l.strip() for l in historia_resuelta.splitlines() if l.strip()]
+        if lineas:
+            partes.append("<h3>Atenciones previas</h3>")
+            partes.append("<ul>" + "".join(
+                f"<li>{html.escape(linea)}</li>" for linea in lineas
+            ) + "</ul>")
+
+    partes.append("<h3>Historial de atenciones</h3>")
+    items = ""
 
     historial = historial_atenciones(shedule, rut, username, is_admin)
+    # Escapado: son textos libres (nota del alumno, nombre) y un "<" suelto
+    # rompía el resto de la ficha sin dejar rastro de por qué.
     items += "".join(
-        f"<li><b>{fecha or 'sin fecha'} {hora}</b> — {alumno}: "
-        f"{nota or 'sin comentario'}</li>"
+        f"<li><b>{html.escape(fecha or 'sin fecha')} {html.escape(hora)}</b> — "
+        f"{html.escape(alumno)}: {html.escape(nota or 'sin comentario')}</li>"
         for fecha, hora, alumno, nota in historial
     )
 
