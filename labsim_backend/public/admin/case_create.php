@@ -1027,7 +1027,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <button type="button" id="perfil-generar">Generar caso</button>
         <span id="armado-estado" class="legend"></span>
     </div>
-    <p class="legend help">Generar <strong>pisa</strong> el audiograma, la timpanometría, el perfil, el ABR y la OEA de los dos oídos, y el nombre del paciente. No toca la edad, el RUT, la foto, la historia clínica, la sala, la otoscopia, el tinnitus, el VEMP ni la anamnesis.</p>
+    <p class="legend help">Generar <strong>pisa</strong> el audiograma, la timpanometría, el perfil, el ABR y la OEA de los dos oídos, y el nombre del paciente. No toca la edad, el RUT, la foto, la historia clínica, la otoscopia, el tinnitus, el VEMP ni la anamnesis.</p>
+    <p class="legend help">Si el paciente es <strong>menor de 18</strong> y la sala está vacía, le agrega la madre: un menor no llega solo, y ella aporta lo que el niño no puede contar por más que hable bien --embarazo, parto, screening neonatal, colegio--. Hasta los 13 la historia la cuenta ella; de 14 a 17 la cuenta el paciente y ella completa. Cuánto se mete y cuánto le creemos varían en cada generación. Si la sala <em>ya</em> tiene gente, no la toca.</p>
     <p class="legend help">Al editar un caso que ya existe, el nombre NO se toca: ahí el nombre es del paciente y cambiarlo afectaría a todas sus otras citas.</p>
     <p class="legend help">Lo que queda para decidir a mano después es lo que ninguna cuenta puede sacar del audiograma: el VEMP, y el detalle fino de la función tubaria. El editor los reclama al guardar si quedaron sin tocar.</p>
 </div>
@@ -2701,6 +2702,59 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         return nom[0] + ' ' + ape[0];
     }
 
+    /**
+     * Agrega la madre cuando el paciente es menor de edad.
+     *
+     * Un menor no llega solo a la consulta, y el acompañante aporta lo que el
+     * niño no puede contar por más que hable bien: embarazo, parto, screening
+     * neonatal, hitos del desarrollo, cómo le va en el colegio. Sin esto el
+     * alumno se encontraba con un paciente de 10 años que cuenta la mitad de
+     * su historia y nadie que cuente la otra mitad.
+     *
+     * Quién lleva la voz cantante depende de la edad (ver Sala::capacidad):
+     * hasta los 13 la historia la cuenta la madre y el niño aporta; de 14 a
+     * 17 la cuenta el paciente y la madre completa.
+     *
+     * NO toca una sala que ya tenga gente: volver a apretar Generar para
+     * resortear el audiograma no puede borrar una sala armada a mano.
+     */
+    function agregarAcompanante(apellido) {
+        var edad = edadActual();
+        if (edad >= 18) { return null; }
+        var filas = document.getElementById('sala-rows');
+        var addBtn = document.getElementById('sala-add');
+        if (!filas || !addBtn || filas.querySelector('.sala-row')) { return null; }
+
+        addBtn.click();   // reusa la plantilla y el id de persona del bloque de Sala
+        var row = filas.querySelector('.sala-row:last-child');
+        if (!row) { return null; }
+
+        function set(name, valor) {
+            var el = row.querySelector('[name="' + name + '"]');
+            if (el) { el.value = valor; }
+        }
+        var nombres = NOMBRES.nombres_mujeres || [];
+        var nombre = nombres.length ? alAzar(nombres) : 'Madre';
+        set('sala_rol[]', 'madre');
+        set('sala_nombre[]', apellido ? nombre + ' ' + apellido : nombre);
+        set('sala_genero[]', '1');
+        // La madre de un niño de 10 no tiene 10 + 2 años: el rango sale de
+        // una edad materna plausible al momento del parto.
+        set('sala_edad[]', String(edad + Math.round(entre(25, 38))));
+        // Cuánto se mete y cuánto le creemos varían en cada generación: dos
+        // casos del mismo cuadro tienen que dar entrevistas distintas, si no
+        // el alumno memoriza la dinámica en vez de leerla.
+        set('sala_interrumpe[]', String(Math.round(entre(25, 85))));
+        set('sala_confiabilidad[]', String(Math.round(entre(60, 95))));
+
+        // Hasta los 13 la historia la cuenta ella; de 14 a 17 el paciente.
+        if (edad <= 13) {
+            var radio = row.querySelector('input[name="sala_informante"]');
+            if (radio) { radio.checked = true; }
+        }
+        return nombre;
+    }
+
     function edadActual() {
         var el = document.getElementById('patient-age');
         var n = el ? parseInt(el.value, 10) : NaN;
@@ -3036,9 +3090,12 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         if (window.proyectarPerfil) { window.proyectarPerfil(); }
 
         var nombre = generarNombre();
+        var apellido = document.querySelector('#case-form [name="apellido1"]');
+        var madre = agregarAcompanante(apellido ? apellido.value : '');
         if (estado) {
             estado.textContent = 'Listo: ' + (nombre ? nombre + ' -- ' : '') +
                 'OD ' + escOd.label + ', OI ' + escOi.label +
+                (madre ? '. Es menor: viene con su madre (' + madre + '), revisá la pestaña Sala' : '') +
                 '. Revisalo en Audiometría antes de guardar.';
         }
     });
