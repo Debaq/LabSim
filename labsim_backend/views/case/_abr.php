@@ -30,7 +30,7 @@
 <div class="card">
     <strong>ABR <?= $ladoLabel ?></strong>
     <p class="help">Patología de este oído para el generador de curvas ABR -- no es el resultado del alumno, es lo que el caso simula. Si se deja "Normal" con todo en 0, el oído no tiene hallazgos.</p>
-    <p class="derivado-aviso" data-derivado="abr" hidden>La patología y el umbral de este oído los escribe el <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>, porque la casilla <em>ABR: umbral por estímulo</em> está encendida: quedan grises y se recalculan al guardar. Para editarlos a mano hay que apagar esa casilla.</p>
+    <p class="derivado-aviso" data-derivado="abr" hidden>La patología y el umbral de este oído los sugiere el <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>, porque la casilla <em>ABR: umbral por estímulo</em> está encendida: se escriben solos con lo que predice el perfil y <strong>se pueden editar</strong>: lo que quede en pantalla es lo que se guarda. Cambiar el audiograma o el perfil vuelve a sugerir y pisa lo editado a mano; para que no se toquen más, apagar esa casilla.</p>
 
     <p class="help">Latencias y amplitudes onda por onda. "Volver a sortear" toma la patología y el umbral que ya tiene este oído --que los fija el perfil, no este botón-- y le calcula ondas plausibles con el sexo, la edad y el autor de referencia. Es un punto de partida al azar: cualquier campo se edita después.</p>
     <button type="button" class="secondary abr-autofill-btn" data-lado="<?= $lado ?>" style="margin-top:0;">Volver a sortear las ondas de este oído</button>

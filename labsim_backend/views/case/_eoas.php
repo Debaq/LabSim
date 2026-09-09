@@ -17,7 +17,7 @@
 <div class="card">
     <strong>EOA <?= $ladoLabel ?></strong>
     <p class="help">Patología de este oído para el generador de Emisiones Otoacústicas (TEOAE/DPOAE/SOAE/SFOAE). "Coclear" y "Transmisión" atenúan la emisión en función del umbral: por sobre ~35-40 dB la dejan bajo el piso de ruido y el registro sale REFER. "Neural" no la atenúa aunque el umbral esté alto, así que el registro sale PASS con el ABR alterado.</p>
-    <p class="derivado-aviso" data-derivado="eoas" hidden>La patología, el umbral y el perfil por frecuencia de este oído los escribe el <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>, porque la casilla <em>OEA: perfil por frecuencia</em> está encendida: quedan grises y se recalculan al guardar. Para editarlos a mano hay que apagar esa casilla.</p>
+    <p class="derivado-aviso" data-derivado="eoas" hidden>La patología, el umbral y el perfil por frecuencia de este oído los sugiere el <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>, porque la casilla <em>OEA: perfil por frecuencia</em> está encendida: se escriben solos con lo que predice el perfil y <strong>se pueden editar</strong>: lo que quede en pantalla es lo que se guarda. Cambiar el audiograma o el perfil vuelve a sugerir y pisa lo editado a mano; para que no se toquen más, apagar esa casilla.</p>
     <div class="three-col">
         <label>Patología
             <select name="eoas[<?= $lado ?>][type]" class="eoas-type-select" data-lado="<?= $lado ?>">

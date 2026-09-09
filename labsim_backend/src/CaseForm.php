@@ -308,45 +308,28 @@ final class CaseForm
         $proyeccion = CaseProfile::project($airPairs, $bonePairs, $perfil, ['OD' => $zOd, 'OI' => $zOi]);
         $decomp = $proyeccion['decomp'];
 
-        // Qué se aplica y qué no lo dicen los `auto`: un módulo en manual
-        // sigue siendo del docente, incluso si el perfil predice otra cosa.
+        // La derivación es una SUGERENCIA, no una fuente que pise al
+        // docente. Con el módulo en automático la proyección ya está en el
+        // formulario --la escribe case/profile-preview.js en vivo, contra
+        // este mismo CaseProfile::project()-- así que lo que llega en el
+        // POST ES la proyección, salvo donde el docente la haya corregido a
+        // mano. Y esa corrección es justo lo que hay que respetar: el caso
+        // incoherente a propósito (Stenger, falsa onda V, simulación) se
+        // arma editando un examen derivado, no apagando la casilla.
+        //
+        // Por eso lo posteado gana y la proyección solo aporta las claves
+        // que el formulario no tiene cómo mandar: el umbral por estímulo
+        // del ABR, aéreo y óseo, que no es un campo sino una tabla.
         if ($perfilAuto['abr']) {
-            $abrOd = array_merge($abrOd, $proyeccion['abr']['OD']);
-            $abrOi = array_merge($abrOi, $proyeccion['abr']['OI']);
+            $abrOd = array_merge($proyeccion['abr']['OD'], $abrOd);
+            $abrOi = array_merge($proyeccion['abr']['OI'], $abrOi);
         }
         if ($perfilAuto['eoas']) {
-            $eoasOd = array_merge($eoasOd, $proyeccion['eoas']['OD']);
-            $eoasOi = array_merge($eoasOi, $proyeccion['eoas']['OI']);
+            $eoasOd = array_merge($proyeccion['eoas']['OD'], $eoasOd);
+            $eoasOi = array_merge($proyeccion['eoas']['OI'], $eoasOi);
         }
-        if ($perfilAuto['reflex']) {
-            $reflexIpsi = $proyeccion['reflex']['ipsi'];
-            $reflexContra = $proyeccion['reflex']['contra'];
-            $reflexType = $proyeccion['reflex']['tipo'];
-        }
-        if ($perfilAuto['recruit']) {
-            $sisiVals = $proyeccion['recruit']['sisi'];
-            $recruitVals = $proyeccion['recruit']['recruit'];
-            // Solo las frecuencias que el formulario ya reconoció como
-            // calificantes: la proyección no agrega ni saca ninguna.
-            foreach ($fowlerPatterns as $freqFowler => $_) {
-                if (isset($proyeccion['recruit']['fowler'][(string) $freqFowler])) {
-                    $fowlerPatterns[(string) $freqFowler] = $proyeccion['recruit']['fowler'][(string) $freqFowler];
-                }
-            }
-            foreach ($proyeccion['recruit']['decay'] as $modoDecay => $valsDecay) {
-                $decayPairs[$modoDecay] = self::zip($valsDecay['od'], $valsDecay['oi']);
-            }
-            // El LDL es la expresión audiométrica del reclutamiento: el
-            // umbral sube y el disconfort no. Derivado, siempre está medido
-            // (el 130 de "no medido" dejaría el hallazgo invisible).
-            $ldl = $proyeccion['recruit']['ldl'];
-        }
-        if ($perfilAuto['logo']) {
-            $umd = [
-                ['int' => $proyeccion['logo']['OD']['int'], 'percentage' => $proyeccion['logo']['OD']['pct']],
-                ['int' => $proyeccion['logo']['OI']['int'], 'percentage' => $proyeccion['logo']['OI']['pct']],
-            ];
-        }
+        // Reflejos, supraliminares y logoaudiometría no necesitan ni eso:
+        // cada número que proyectan tiene su campo en el formulario.
 
         // VEMP: patología vestibular por oído, y los tres subtipos armados
         // por separado (ver parseVemp).

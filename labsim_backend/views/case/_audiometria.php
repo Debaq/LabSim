@@ -170,6 +170,8 @@
 
 <div class="card">
     <strong>Logoaudiometría y pruebas especiales</strong>
+    <p class="derivado-aviso" data-derivado="logo" hidden>La máxima discriminación (UMD) y a qué intensidad se alcanza las sugiere el <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>, porque la casilla <em>Logoaudiometría</em> está encendida: se escriben solos con lo que predice el perfil y <strong>se pueden editar</strong>: lo que quede en pantalla es lo que se guarda. Cambiar el audiograma o el perfil vuelve a sugerir y pisa lo editado a mano; para que no se toquen más, apagar esa casilla.</p>
+    <p class="derivado-aviso" data-derivado="recruit" hidden>El SISI, el reclutamiento, el Fowler, el deterioro tonal y el LDL los sugiere el <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>, porque la casilla <em>Supraliminares</em> está encendida: se escriben solos con lo que predice el perfil y <strong>se pueden editar</strong>: lo que quede en pantalla es lo que se guarda. Cambiar el audiograma o el perfil vuelve a sugerir y pisa lo editado a mano; para que no se toquen más, apagar esa casilla.</p>
     <div class="table-wrap">
     <table class="grid-table" style="margin-bottom:1rem;">
         <tr><th></th><th>SDT</th><th>SRT</th></tr>

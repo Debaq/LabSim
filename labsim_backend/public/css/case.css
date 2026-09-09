@@ -108,7 +108,7 @@ body.js-tabs .tab-panel.active { display: block; }
 /* Link que salta a otra pestaña (pendientes, punteros entre fichas) */
 .tab-link { cursor: pointer; }
 
-/* Aviso de campo derivado: el gris del input no explica quién lo apagó. */
+/* Aviso de módulo derivado: de dónde salieron esos números y qué los mueve. */
 .derivado-aviso {
   margin: var(--space-2) 0 var(--space-4);
   padding: var(--space-3) var(--space-4);

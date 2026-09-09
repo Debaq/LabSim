@@ -11,7 +11,7 @@ require_once __DIR__ . '/../src/CaseForm.php';
  * ejercitarlo era abrir el navegador y guardar un caso. Estos tests cubren
  * lo que decidía en silencio: la acumetría automática, "igualar ósea a
  * aérea", el LDL deshabilitado, la fase 1 de otoscopia sin texto, y qué
- * pisa la proyección del perfil cuando un módulo está en automático.
+ * aporta la proyección del perfil sin pisar lo que mandó el docente.
  *
  * CaseForm no toca la base salvo para reservar el id del caso nuevo, así
  * que alcanza con un PDO de mentira -- este entorno no tiene pdo_sqlite.
@@ -190,17 +190,23 @@ t_true(count($cfSinConfirmar->avisos) > 0, 'Sin confirmar, la incoherencia con e
 t_true(!$cfSinConfirmar->ok(), 'Un aviso sin leer no deja guardar todavía');
 t_eq($cfRun($cfSordera)->avisos, [], 'Tildada la casilla, los mismos avisos dejan pasar el caso');
 
-// Módulo en manual: el ABR queda como lo dejó el docente. En automático, la
-// proyección lo reescribe -- que es justo lo que el docente no puede ver
-// mirando la pantalla, y por eso hay un test.
+// La derivación sugiere, no manda: el formulario ya llega con la proyección
+// encima (la escribe case/profile-preview.js), así que al guardar gana lo
+// posteado, encendida o no la casilla. Lo único que la proyección sigue
+// aportando es lo que el formulario no tiene cómo mandar: el umbral por
+// estímulo del ABR.
 $cfAbr = ['abr' => ['od' => ['umbral' => '20'], 'oi' => ['umbral' => '20']]];
 $cfManual = $cfRun($cfSordera + $cfAbr);
 t_eq($cfManual->data['ABR']['OD']['umbral'], 20, 'Perfil en manual: el umbral del ABR es del docente');
 t_eq($cfManual->data['ABR']['OD']['type'], 'normal', 'Perfil en manual: la patología del ABR es del docente');
+t_true(!isset($cfManual->data['ABR']['OD']['umbral_por_estimulo']),
+    'Perfil en manual: no hay umbral por estímulo');
 
 $cfAuto = $cfRun($cfSordera + $cfAbr + ['perfil' => ['auto' => ['abr' => '1']]]);
-t_eq($cfAuto->data['ABR']['OD']['umbral'], 65, 'Perfil en automático: la proyección pisa el umbral del ABR');
-t_eq($cfAuto->data['ABR']['OD']['type'], 'coclear', 'Perfil en automático: y también la patología');
+t_eq($cfAuto->data['ABR']['OD']['umbral'], 20, 'Perfil en automático: la corrección a mano del umbral se respeta');
+t_eq($cfAuto->data['ABR']['OD']['type'], 'normal', 'Perfil en automático: y también la de la patología');
+t_true(isset($cfAuto->data['ABR']['OD']['umbral_por_estimulo']['click']),
+    'Perfil en automático: la proyección igual aporta el umbral por estímulo');
 
 // --- Id del caso ----------------------------------------------------------
 

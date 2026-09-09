@@ -124,6 +124,7 @@
 
 <div class="card">
     <strong>Reflejos acústicos (dB HL, 130 = ausente)</strong>
+    <p class="derivado-aviso" data-derivado="reflex" hidden>Los umbrales y el tipo de curva los sugiere el <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>, porque la casilla <em>Reflejos acústicos</em> está encendida: se escriben solos con lo que predice el perfil y <strong>se pueden editar</strong>: lo que quede en pantalla es lo que se guarda. Cambiar el audiograma o el perfil vuelve a sugerir y pisa lo editado a mano; para que no se toquen más, apagar esa casilla.</p>
     <?php
     $reflexGroups = ['ipsi' => ['label' => 'Ipsilateral', 'freqs' => [500, 1000, 2000, 4000]],
                       'contra' => ['label' => 'Contralateral', 'freqs' => [500, 1000, 2000, 4000, 'WN']]];
