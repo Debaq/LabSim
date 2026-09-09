@@ -16,7 +16,7 @@
 <?php foreach (CaseBuilder::LADOS as $lado => $ladoLabel): ?>
 <div class="card">
     <strong>EOA <?= $ladoLabel ?></strong>
-    <p class="help">Patología de este oído para el generador de Emisiones Otoacústicas (TEOAE/DPOAE/SOAE/SFOAE). "Coclear" y "Transmisión" atenúan la OEA según el umbral (a mayor umbral, más atenuada -- por sobre ~35-40 dB suele quedar bajo el noise floor, REFER). "Neural" deja la OEA normal aunque el umbral esté elevado: la cóclea está intacta, es el contraste clínico con ABR.</p>
+    <p class="help">Patología de este oído para el generador de Emisiones Otoacústicas (TEOAE/DPOAE/SOAE/SFOAE). "Coclear" y "Transmisión" atenúan la emisión en función del umbral: por sobre ~35-40 dB la dejan bajo el piso de ruido y el registro sale REFER. "Neural" no la atenúa aunque el umbral esté alto, así que el registro sale PASS con el ABR alterado.</p>
     <p class="derivado-aviso" data-derivado="eoas" hidden>La patología, el umbral y el perfil por frecuencia de este oído los escribe el <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>, porque la casilla <em>OEA: perfil por frecuencia</em> está encendida: quedan grises y se recalculan al guardar. Para editarlos a mano hay que apagar esa casilla.</p>
     <div class="three-col">
         <label>Patología
@@ -56,7 +56,7 @@
             <input type="number" step="any" min="0" name="eoas[<?= $lado ?>][variabilidad_db]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['variabilidad_db'] ?? (string) CaseBuilder::EOAS_DEFAULTS['variabilidad_db'])) ?>">
         </label>
     </div>
-    <p class="help">"Atenuación extra" se suma a la que ya calcula la patología (útil para forzar un REFER limpio sin tocar el umbral). "Ruido del paciente" sube el piso de ruido de la captura: un lactante despierto o un adulto que traga deja el DP-grama tapado en graves y baja la reproducibilidad TEOAE, aunque la cóclea esté sana -- es el error de interpretación clásico. "Sello de sonda" es a qué % converge el probe fit (bajo = estímulo débil y captura inestable). "Variabilidad biológica" es la estructura fina: 0 da una curva de libro, 3-4 dB da un registro real.</p>
+    <p class="help">"Atenuación extra" se suma a la que ya calcula la patología (útil para forzar un REFER limpio sin tocar el umbral). "Ruido del paciente" sube el piso de ruido de la captura: tapa el DP-grama en graves y baja la reproducibilidad TEOAE <strong>sin tocar la cóclea</strong>, así que sirve para armar un registro malo en un oído sano. "Sello de sonda" es a qué % converge el probe fit (bajo = estímulo débil y captura inestable). "Variabilidad biológica" es la estructura fina: 0 da una curva de libro, 3-4 dB da un registro real.</p>
     <p class="help">Emisiones espontáneas (SOAE) de este oído -- el tab SOAE del emisor registra en silencio y busca picos sobre el piso de ruido.</p>
     <div class="three-col">
         <label>SOAE

@@ -60,7 +60,7 @@
         </label>
     </div>
     <p class="help">Inquietud: 0 es un paciente quieto. Por encima de 0 la captura tiene tramos en que el paciente se mueve: el EEG crudo se ensucia, el equipo descarta esos barridos y el promedio se queda quieto hasta que se calma (el contador de aceptados se separa del de presentados). Si el alumno apagó el rechazo de artefacto, en cambio, esa basura entra al promedio y el FSP no cruza nunca.</p>
-    <p class="help">PAM: contracción del músculo auricular posterior ante sonido fuerte. Aparece sobre 60 dB, crece con el nivel y sale a los 13 ms, o sea fuera del complejo I-V y casi fuera de la ventana de rutina. Ojo que es el contraejemplo de la falsa onda V: se promedia como una respuesta, así que replica en A y B -- lo delatan la latencia, el tamaño (µV, no décimas) y que se va si el paciente relaja el cuello o se sube el pasa-alto.</p>
+    <p class="help">PAM: 0 lo desactiva. Por encima de 0 se agrega el potencial miogénico a partir de 60 dB, creciendo con el nivel y centrado en 13 ms. A diferencia de la falsa onda V, se promedia como respuesta y <strong>replica en A y B</strong>: si lo que querés es un artefacto que los subpromedios delaten, ese es el campo de abajo, no éste.</p>
     <p class="help">El patrón retrococlear (I-III, III-V, bloqueo, razón V/I, microfónico, desincronía, sensibilidad a la tasa) se configura en la pestaña <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>, junto al resto del sitio de la lesión: los mismos parámetros gobiernan lo que se ve en el ABR y lo que NO se ve en la OEA.</p>
     <p class="help">Promediaciones que el caso realmente necesita para que la onda se vea resuelta (independiente de cuántas pida el alumno en el equipo) -- si el alumno detiene la captura antes de llegar a este número, la curva queda parcialmente sin resolver.</p>
     <div class="three-col">
@@ -84,7 +84,7 @@
         <input type="hidden" name="abr[<?= $lado ?>][<?= $abrName ?>]" class="abr-delta-input" data-lado="<?= $lado ?>" data-wave="<?= $abrWave ?>" data-field="<?= $abrField ?>" value="<?= htmlspecialchars((string) ($v['abr'][$lado][$abrName] ?? '0')) ?>">
         <?php endforeach; ?>
     </div>
-    <p class="help">Falsa onda V. Pico con forma de onda que aparece en UNA sola mitad de los barridos: el promedio lo muestra y los subpromedios A/B lo delatan (uno lo tiene entero, el otro no). No sube el FSP. Acotala a las intensidades donde el alumno busca el umbral: fuera de ese rango la serie queda limpia y se nota que la falsa onda no migra en latencia como una V real. Amplitud 0 = desactivada; el autocompletar por patologia no la toca, es un ejercicio que se arma a mano.</p>
+    <p class="help">Falsa onda V. Se inyecta en UNA sola mitad de los barridos: el promedio la muestra, los subpromedios A/B la delatan (uno la tiene entera, el otro no) y no sube el FSP. La latencia que fijes es fija --no migra al bajar la intensidad-- y el rango acota en qué intensidades aparece; fuera de ese rango la serie queda limpia. Amplitud 0 = desactivada. El autocompletar por patología no la toca: se arma a mano.</p>
     <div class="three-col">
         <label>Falsa V: amplitud en el promedio (µV)
             <input type="number" step="0.01" min="0" name="abr[<?= $lado ?>][falsa_v_amp]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['falsa_v_amp'] ?? '0')) ?>">

@@ -41,14 +41,14 @@
             Logoaudiometría (máxima discriminación)
         </label>
     </div>
-    <p class="help">OEA: la atenuación pasa a salir del componente coclear y del gap, frecuencia por frecuencia. Reflejos: la sonda decide si el reflejo se ve (oído medio) y el oído estimulado a qué nivel aparece; una coclear no sube el umbral en proporción a la pérdida (Metz) y una retrococlear sí, y el patrón OFF --el reflejo que no se sostiene-- sale del componente retro. Supraliminares: reclutamiento, deterioro tonal y LDL miden el mismo eje desde tres lados, así que salen del mismo número y no pueden contradecirse; el LDL no sube con la pérdida coclear, y por eso el campo dinámico se cierra solo.</p>
-    <p class="help">Logoaudiometría: la discriminación máxima cae despacio en una coclear y se desploma en una retrococlear, muy por debajo de lo que predice el audiograma -- es la disociación audio-verbal. El gap no la baja: una conductiva no distorsiona, solo pide más intensidad. El rollover (la curva que cae pasado el máximo) ya venía del reclutamiento.</p>
+    <p class="help"><strong>OEA</strong>: la atenuación por frecuencia pasa a calcularse del componente coclear y del gap. <strong>Reflejos</strong>: el oído de la sonda decide si el reflejo se ve y el estimulado a qué nivel aparece; el umbral se separa del esperado según cuánto haya de coclear y cuánto de retro, y el patrón OFF sale del componente retro. <strong>Supraliminares</strong>: reclutamiento, deterioro tonal y LDL se escriben desde el mismo número, así que no pueden contradecirse entre sí.</p>
+    <p class="help"><strong>Logoaudiometría</strong>: la discriminación máxima y a qué nivel se alcanza se calculan del componente retro, no del promedio tonal. El gap no la baja, solo corre la curva a más intensidad. El rollover no sale de acá: ya venía del reclutamiento.</p>
     <p class="help">El timpanograma no se deriva: qué curva sale depende de la patología concreta (B ocupación, As rígido, Ad hipercompliante, C retracción) y esa es una decisión clínica, no una cuenta. Lo que sí se hace es avisar si contradice al gap.</p>
 </div>
 <div class="card">
     <strong>Umbral por estímulo, derivado del audiograma</strong>
     <p class="help">Con esto encendido, el umbral del ABR deja de ser un número por oído y pasa a calcularse por estímulo desde la audiometría del caso: el burst de 500 Hz responde según el umbral en 500, el de 4 kHz según el de 4 kHz, el click según la base coclear (2-4 kHz) y el chirp con más peso en los graves. Es lo que permite pedir una evaluación frecuencia específica en una hipoacusia descendente. La vía ósea usa los umbrales óseos, así que el gap conductivo del ABR sale del audiograma solo.</p>
-    <p class="help">Los números de la tabla están en dB nHL, no en dB HL: incluyen la corrección conductual-electrofisiológica (+20 dB en 500 Hz, +15 en 1 k, +10 en 2 k, +5 en 4 k, +10 el click, +5 el chirp). Por eso un oído de 0 dB HL igual muestra 20 dB nHL con burst de 500 -- convertir nHL a eHL es parte de lo que el alumno tiene que hacer.</p>
+    <p class="help">Los números de la tabla están en dB nHL, no en dB HL: incluyen la corrección conductual-electrofisiológica (+20 dB en 500 Hz, +15 en 1 k, +10 en 2 k, +5 en 4 k, +10 el click, +5 el chirp). Por eso un oído de 0 dB HL igual muestra 20 dB nHL con burst de 500: la tabla no está mal, está en otra unidad.</p>
     <div id="abr-threshold-preview" hidden>
         <table class="reflex-pattern-table" style="margin-top:0.6rem;">
             <thead>
@@ -72,11 +72,11 @@
             <input type="number" step="5" min="0" max="100" name="perfil[<?= $lado ?>][cce_pct]" value="<?= htmlspecialchars((string) fv($v, ['perfil', $lado, 'cce_pct'], '100')) ?>">
         </label>
     </div>
-    <p class="help">100 % = pérdida coclear pura: las células ciliadas externas están dañadas, la OEA cae con el umbral y hay reclutamiento. 0 % = pérdida retrococlear pura: la cóclea está viva, la OEA se conserva con el umbral elevado y el ABR es el que se desarma -- es la neuropatía auditiva, y ese contraste entre OEA y ABR es el hallazgo. Los valores intermedios reparten la pérdida entre los dos sitios.</p>
+    <p class="help">100 % = pérdida coclear pura: las células ciliadas externas están dañadas, la OEA cae con el umbral y hay reclutamiento. 0 % = pérdida retrococlear pura: la OEA se proyecta conservada con el umbral elevado y lo que se desarma es el ABR. Los valores intermedios reparten la pérdida entre los dos sitios, y cada examen derivado lee la parte que le toca.</p>
     <p class="help">Esto no toca el audiograma: la pérdida en dB la fija la pestaña Audiometría. Acá se dice de qué está hecha esa pérdida.</p>
     <?php $vn = $v['abr'][$lado]['neural'] ?? []; ?>
     <div class="abr-neural-block" data-lado="<?= $lado ?>">
-        <p class="help">Patrón retrococlear. El PEATC no distingue las entidades entre sí (un schwannoma y un meningioma del ángulo dan el mismo trazado) -- lo que distingue son estos patrones, así que el caso guarda los números, no el diagnóstico. El preset es solo un punto de partida: precarga los valores y después se editan.</p>
+        <p class="help">Patrón retrococlear. El caso guarda estos <strong>números</strong>, nunca el nombre del preset: así el alumno no puede leer un diagnóstico desde el caso ni la curva depende de una etiqueta. El preset es solo un punto de partida -- precarga los valores y después se editan uno por uno.</p>
         <div class="three-col">
             <label>Preset clínico
                 <select class="abr-neural-preset-select" data-lado="<?= $lado ?>">
