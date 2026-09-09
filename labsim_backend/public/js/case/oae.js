@@ -286,5 +286,13 @@
             syncGradeOptions(e.target.getAttribute('data-lado'));
         });
     }
+    // El generador lo llama directo, después de que la proyección escribió
+    // la patología del oído. La proyección setea el .value del selector sin
+    // disparar 'change', así que los grados hay que recargarlos acá: si no,
+    // el sorteo elige entre los grados de la patología anterior.
+    window.eoasAutofill = function (lado) {
+        syncGradeOptions(lado);
+        autofillEoas(lado);
+    };
     drawEoaPreview();
 })();

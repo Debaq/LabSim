@@ -21,7 +21,7 @@
 
 <div class="card">
     <strong>Paciente</strong>
-    <p class="help">El <strong>sexo</strong> decide el nombre, que lo escribe "Generar caso" junto con el resto. La <strong>edad</strong> pesa más: fija la fecha de nacimiento y el RUT, elige la población de referencia del ABR --un neonato no tiene las latencias de un adulto--, es obligatoria para la anamnesis con IA, y define <strong>qué es normal</strong> en este paciente (ver abajo).</p>
+    <p class="help">El <strong>sexo</strong> decide el nombre, que lo escribe "Generar caso" junto con el resto. La <strong>edad</strong> pesa más: fija la fecha de nacimiento y el RUT, elige la población de referencia del ABR, es obligatoria para la anamnesis con IA, y fija el piso por edad que se suma a todos los cuadros (ver abajo).</p>
     <p class="help">Son los mismos campos de <a href="#" class="tab-link" data-goto-tab="paciente">Paciente</a>, no una copia: cambiarlos en cualquiera de los dos lados los cambia en el otro. El RUT, la foto y la historia clínica se cargan allá.</p>
     <div class="three-col">
         <label>Sexo
@@ -38,7 +38,7 @@
 
 <div class="card">
     <strong>El cuadro clínico, oído por oído</strong>
-    <p class="help"><strong>Cada oído lleva lo suyo.</strong> Un paciente puede tener el OD sano y una otitis en el OI, o una presbiacusia de un lado y un schwannoma del otro. El oído que no tiene nada se pide con "Normal para la edad", que no es un cero.</p>
+    <p class="help"><strong>Cada oído se elige por separado</strong>: categoría, cuadro y grado propios. El oído sin hallazgos se pide con "Normal para la edad", que no escribe ceros sino el piso por edad más la variabilidad.</p>
 
     <label class="inline-check" style="margin-left:0;">
         <input type="checkbox" id="armado-igualar" checked>
@@ -71,30 +71,35 @@
     </div>
 
     <p class="help">La <strong>categoría</strong> dice dónde está la lesión y filtra los cuadros. El <strong>cuadro</strong> da la forma de la curva; el <strong>grado</strong>, cuánto. Elegido el grado se escala la forma completa --lo sensorioneural y el gap con el mismo factor-- hasta que el promedio caiga en el rango pedido: la proporción entre conductivo y sensorioneural es del cuadro y no cambia con el grado.</p>
-    <p class="help">Cada cuadro ofrece solo los grados que puede dar sin dejar de ser ese cuadro. Una conductiva pura no pasa de moderada porque la vía ósea le pone techo (más que eso ya es mixta); una muesca de 4 kHz no es una hipoacusia severa por promedio; un descendente puro no llega a severa sin aplanarse.</p>
-    <p class="help">El grado se mide sobre el <strong>promedio de <?= implode(', ', CaseProfile::GRADE_FREQS) ?> Hz en vía aérea</strong> (BIAP). Audición normal hasta 20 dB HL, así que el leve arranca en 21. <strong>Ojo:</strong> el equipo le muestra al alumno el promedio de Fletcher (mejores 2 de 500, 1000 y 2000), que ignora 4 kHz -- en un descendente el número que él calcule va a dar más bajo que el grado con que armaste el caso. Es la diferencia entre las dos escalas, no un error.</p>
+    <p class="help">El selector de grado ofrece solo los que ese cuadro puede dar: la lista sale del cuadro, no es la misma para todos. Algunos además traen un techo en dB que recorta el grado aunque figure en la lista.</p>
+    <p class="help">El grado se mide sobre el <strong>promedio de <?= implode(', ', CaseProfile::GRADE_FREQS) ?> Hz en vía aérea</strong> (BIAP). Audición normal hasta 20 dB HL, así que el leve arranca en 21. <strong>Ojo:</strong> el equipo le muestra al alumno el promedio de Fletcher (mejores 2 de 500, 1000 y 2000), que ignora 4 kHz. En los cuadros descendentes el número del equipo va a dar más bajo que el grado que pediste acá: son dos escalas distintas, no un error.</p>
 
     <div class="section-sep" style="border-top:1px dashed var(--color-border);">
         <button type="button" id="perfil-generar">Generar caso</button>
         <span id="armado-estado" class="help"></span>
     </div>
-    <p class="help">Generar <strong>pisa</strong> el audiograma, la timpanometría, el perfil, el ABR y la OEA de los dos oídos, y el nombre del paciente. No toca la edad, el RUT, la foto, la historia clínica, la otoscopia, el tinnitus, el VEMP ni la anamnesis.</p>
-    <p class="help">Si el paciente es <strong>menor de 18</strong> y la sala está vacía, le agrega la madre: un menor no llega solo, y ella aporta lo que el niño no puede contar por más que hable bien --embarazo, parto, screening neonatal, colegio--. Hasta los 13 la historia la cuenta ella; de 14 a 17 la cuenta el paciente y ella completa. Cuánto se mete y cuánto le creemos varían en cada generación. Si la sala <em>ya</em> tiene gente, no la toca.</p>
+    <p class="help">Generar <strong>pisa</strong> el audiograma, la timpanometría, el perfil, el ABR, la OEA y el VEMP de los dos oídos, el tinnitus, los rasgos del paciente en la entrevista, el nombre y el comentario del docente. No toca la edad, el RUT, la foto, la historia clínica, la otoscopia ni la anamnesis.</p>
+    <p class="help">El <strong>comentario del docente</strong> (en <a href="#" class="tab-link" data-goto-tab="paciente">Paciente</a>, privado) queda escrito con el cuadro y el grado que salieron, nada más. Apenas escribas ahí, el campo pasa a ser tuyo y Generar deja de tocarlo.</p>
+    <p class="help">La <strong>acumetría</strong> y el <strong>SDT/SRT</strong> vuelven a "auto", así se recalculan desde el audiograma nuevo en vez de quedar con los del anterior. Se destildan de vuelta en <a href="#" class="tab-link" data-goto-tab="audiometria">Audiometría</a>.</p>
+    <p class="help">Si el paciente es <strong>menor de 18</strong> y la sala está vacía, le agrega la madre en <a href="#" class="tab-link" data-goto-tab="sala">Sala</a>, con nombre, edad y rasgos sorteados --distintos en cada generación, para que dos casos del mismo cuadro no den la misma entrevista--. Hasta los 13 la deja como informante principal; de 14 a 17 el informante sigue siendo el paciente. Si la sala <em>ya</em> tiene gente, no la toca.</p>
     <p class="help">Al editar un caso que ya existe, el nombre NO se toca: ahí el nombre es del paciente y cambiarlo afectaría a todas sus otras citas.</p>
-    <p class="help">Lo que queda para decidir a mano después es lo que ninguna cuenta puede sacar del audiograma: el VEMP, y el detalle fino de la función tubaria. El editor los reclama al guardar si quedaron sin tocar.</p>
+    <p class="help">El <strong>VEMP</strong> queda escrito en <a href="#" class="tab-link" data-goto-tab="vemp">VEMP</a>: la patología del oído y el umbral de los tres subtipos, con la casilla de "ya decidí" tildada. El umbral sale de un rango por cuadro, salvo en las conductivas y mixtas, donde sale del gap que se acaba de generar. Las desviaciones por onda vuelven a 0.</p>
+    <p class="help">Los cuadros sin eje vestibular cargado --entre ellos la súbita y la ototóxica-- salen con VEMP normal, y eso es lo que el generador escribe, no un pendiente que quedó. Si el caso pide otra cosa, se carga a mano en la pestaña.</p>
+    <p class="help">El <strong>tinnitus</strong> se sortea con la probabilidad que tenga el cuadro, así que dos casos del mismo cuadro pueden salir uno con acúfeno y otro sin. La lateralidad sale de a cuántos oídos les tocó un cuadro con acúfeno; el ruido y la frecuencia de matching, del cuadro. Pulsátil nunca se genera: se marca a mano en <a href="#" class="tab-link" data-goto-tab="tinnitus">Tinnitus</a>. El estado de acá arriba dice qué salió.</p>
+    <p class="help">La <strong>conciencia</strong> y la <strong>confiabilidad</strong> del paciente (en <a href="#" class="tab-link" data-goto-tab="sala">Sala</a>) se sortean en vez de quedar en el valor por defecto, y el rango de conciencia lo corre el cuadro. Van al prompt del LLM: son de lo que más cambia la entrevista, y calcados en todos los casos el alumno la memoriza. Lo mismo con el comportamiento y la sensibilidad de la madre.</p>
+    <p class="help">Lo que queda para decidir a mano después es el detalle fino de la función tubaria. El editor lo reclama al guardar si quedó sin tocar.</p>
 </div>
 
 <div class="card">
     <strong>Lo normal depende de la edad</strong>
-    <p class="help">Un niño de 10 que oye bien da 0 dB en todas las frecuencias. Un hombre de 70 que también oye bien llega a 30 dB en 4 kHz, y sigue siendo <strong>normal para su edad</strong>. Por eso el umbral mediano de <a href="https://www.iso.org/standard/42916.html" target="_blank" rel="noopener">ISO 7029</a> se suma como piso a todos los cuadros, no solo al normal: un señor de 70 con una otitis media tiene la otitis <em>y</em> su presbiacusia.</p>
-    <p class="help">Esto es lo que hace posible el ejercicio de decidir si una presbiacusia es más de lo esperable para la edad, que con todos los "normales" en 0 no se podía plantear.</p>
+    <p class="help">El umbral mediano de <a href="https://www.iso.org/standard/42916.html" target="_blank" rel="noopener">ISO 7029</a> para la edad y el sexo cargados se suma como <strong>piso a todos los cuadros</strong>, no solo al normal: el cuadro que elegís se apila encima. La tabla de abajo muestra el piso que se está usando ahora mismo, y se actualiza al cambiar edad o sexo.</p>
     <div id="armado-norma-edad" class="help"></div>
 </div>
 
 <div class="card">
     <strong>Después de generar: la anamnesis con IA</strong>
     <p class="gen-step-dest">Escribe en <a href="#" class="tab-link" data-goto-tab="anamnesis">11. Anamnesis</a></p>
-    <p class="help"><strong>Esto va al final, aparte, y a propósito.</strong> El modelo escribe los antecedentes que EXPLICAN los hallazgos que ya están cargados: una muesca en 4 kHz pide exposición a ruido, una otitis a repetición pide una conductiva con timpanograma B, una neuropatía en un recién nacido pide hiperbilirrubinemia. Con la ficha vacía no tiene nada que explicar, así que se aprieta después de generar el caso y de revisarlo.</p>
+    <p class="help"><strong>Esto va al final, aparte, y a propósito.</strong> El modelo lee los hallazgos que ya están cargados (audiograma, timpanograma, perfil, tinnitus, edad) y escribe los antecedentes que los explican. Con la ficha vacía no tiene nada que leer, así que este botón va después de generar el caso y de revisarlo.</p>
     <p class="help">No inventa el diagnóstico ni menciona umbrales -- eso lo tiene que medir el alumno. Las derivaciones las escribe por el estudio ("se deriva a evaluación auditiva", "a BERA"), nunca por la profesión de quien atiende. Las <strong>atenciones previas</strong> no salen de acá: se escriben a mano en Historia clínica (<a href="#" class="tab-link" data-goto-tab="paciente">Paciente</a>), con las fechas relativas <code>{{-N}}</code>.</p>
     <p class="help"><strong>Es un borrador y hay que leerlo.</strong> El modelo puede inventar una cirugía que no existe o un fármaco que no es ototóxico, y eso le llega al alumno como parte del caso, indistinguible de lo que escribiste vos. Al terminar te deja en <a href="#" class="tab-link" data-goto-tab="anamnesis">Anamnesis</a> para que lo leas: hasta que tildes la verificación ahí, el caso no se guarda.</p>
     <button type="button" class="secondary" id="anamnesis-ia-btn">Redactar borrador con IA</button>

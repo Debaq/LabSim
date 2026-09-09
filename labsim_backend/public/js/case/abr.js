@@ -198,14 +198,20 @@
         window.drawAbrPreview();
     }
 
-    function autofillAbr(lado) {
+    /**
+     * `conservarNeural`: no re-sortear el patrón retrococlear. Lo usa el
+     * generador de casos, que ya lo dejó puesto desde el cuadro clínico
+     * (el preset del escenario, o los defaults si el cuadro no es retro) --
+     * volver a sortearlo acá le borraba justo lo que define al schwannoma.
+     */
+    function autofillAbr(lado, conservarNeural) {
         var typeSel = fieldEl(lado, 'type');
         var type = typeSel ? typeSel.value : 'normal';
         var v = buildValues(type, pickPopulation());
         // Retrococlear: el patrón se sortea aparte, no como desviaciones de
         // onda. Un caso al azar es un punto de partida -- para un cuadro
         // clínico concreto está el selector de presets.
-        if (type === 'neural') { randomizeNeuralPattern(lado); }
+        if (type === 'neural' && !conservarNeural) { randomizeNeuralPattern(lado); }
         setNum(lado, 'umbral', v.umbral, 0);
         var reproEl = fieldEl(lado, 'repro');
         if (reproEl) { reproEl.checked = v.repro; }
@@ -323,6 +329,10 @@
             autofillAbr(e.currentTarget.getAttribute('data-lado'));
         });
     }
+    // El generador lo llama directo, no clickeando el botón: necesita
+    // pasar `conservarNeural` y correr DESPUÉS de que la proyección haya
+    // escrito la patología de este oído (ver case/generator.js).
+    window.abrAutofill = autofillAbr;
 
     // Vista previa en vivo: serie 100->0 dBnHL, version limpia (sin ruido,
     // sin promediacion, sin filtros) de ABRGenerator.calculate_wave_parameters
@@ -331,7 +341,26 @@
     // que el docente vea el efecto de sus valores, no reemplaza al generador
     // real (que corre server-side/en el cliente con ruido y FSP).
     var WAVE_SIGMA_PREVIEW = { I: 0.22, III: 0.22, V: 0.18 };
-    var ABR_PREVIEW_INTENSITIES = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0];
+    // La serie baja hasta UNA fila debajo del umbral y ahí corta, que es
+    // como se busca un umbral en la clínica: se desciende hasta que la
+    // respuesta desaparece y se confirma un nivel más abajo. Dibujarla
+    // siempre hasta 0 gastaba, en un oído con umbral 40, cuatro filas de
+    // línea plana -- y las filas son alto: con menos, cada una se hace más
+    // alta y la amplitud de la onda se lee mejor.
+    var ABR_PREVIEW_TOP = 100, ABR_PREVIEW_STEP = 10, ABR_PREVIEW_FLOOR = 0;
+    // Alto del área de dibujo. Se reparte entre las filas que haya, así que
+    // cortar la serie en el umbral se traduce en filas más altas en vez de
+    // en un gráfico más chico. (11 x 26 = el alto fijo que tenía antes.)
+    var ABR_PREVIEW_PLOT_H = 286;
+    var ABR_ROW_H_MIN = 22, ABR_ROW_H_MAX = 52;
+
+    function abrPreviewIntensities(threshold) {
+        var piso = Math.round(threshold / ABR_PREVIEW_STEP) * ABR_PREVIEW_STEP - ABR_PREVIEW_STEP;
+        piso = Math.max(ABR_PREVIEW_FLOOR, Math.min(piso, ABR_PREVIEW_TOP));
+        var out = [];
+        for (var dB = ABR_PREVIEW_TOP; dB >= piso; dB -= ABR_PREVIEW_STEP) { out.push(dB); }
+        return out;
+    }
     // Mismo umbral de visibilidad que usa el generador para decir si una
     // onda esta presente: por debajo no se le pone marcador.
     var WAVE_VISIBLE_UV = 0.02;
@@ -498,11 +527,14 @@
         var pop = pickPopulation();
         var threshold = parseFloat(umbralEl.value) || 0;
 
+        var intensidades = abrPreviewIntensities(threshold);
         var marginLeft = 34, marginRight = 12, marginTop = 16, marginBottom = 22;
-        var rowHeight = 26, plotWidth = 380;
+        var rowHeight = Math.max(ABR_ROW_H_MIN,
+            Math.min(ABR_ROW_H_MAX, ABR_PREVIEW_PLOT_H / intensidades.length));
+        var plotWidth = 380;
         var totalWidth = marginLeft + plotWidth + marginRight;
         var plotTop = marginTop;
-        var plotBottom = marginTop + ABR_PREVIEW_INTENSITIES.length * rowHeight;
+        var plotBottom = marginTop + intensidades.length * rowHeight;
         var totalHeight = plotBottom + marginBottom;
         function xPos(t) { return marginLeft + (t / 12) * plotWidth; }
 
@@ -510,7 +542,7 @@
         // ocupa una fraccion fija de la fila. Con una escala fija, un oido
         // con amplitudes chicas se veia como una linea plana y uno normal
         // se salia de la fila.
-        var serie = ABR_PREVIEW_INTENSITIES.map(function (intensity) {
+        var serie = intensidades.map(function (intensity) {
             return computeWaveValues(lado, pop, intensity);
         });
         var ampMax = 0;
@@ -568,7 +600,7 @@
         // Filas: fondo de la fila del umbral, etiqueta de intensidad y trazo.
         var seguimiento = { I: [], III: [], V: [] };
         var trazos = '';
-        ABR_PREVIEW_INTENSITIES.forEach(function (intensity, i) {
+        intensidades.forEach(function (intensity, i) {
             var rowTop = plotTop + i * rowHeight;
             var rowBaseY = rowTop + rowHeight * 0.72;
             var isThresholdRow = Math.abs(intensity - Math.round(threshold / 10) * 10) < 0.01;

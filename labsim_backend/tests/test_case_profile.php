@@ -792,3 +792,88 @@ foreach (['otitis_media', 'otoesclerosis', 'perforacion', 'disfuncion_tubaria', 
 }
 t_eq(CaseProfile::SCENARIOS['muesca_4k']['grados'], ['leve'],
      'Muesca de 4 kHz: por promedio no pasa de leve, y ese es el punto del cuadro');
+
+// --- El eje vestibular de los cuadros -------------------------------------
+
+// Todo cuadro con `vemp` tiene que declarar una patología del catálogo, y
+// las dos formas de umbral (rango por subtipo / atado al gap) son
+// excluyentes: mezclarlas dejaría dos fuentes para el mismo número.
+foreach (CaseProfile::SCENARIOS as $escKey => $esc) {
+    if (!isset($esc['vemp'])) {
+        continue;
+    }
+    $vempCfg = $esc['vemp'];
+    t_true(in_array($vempCfg['type'] ?? '', CaseBuilder::VEMP_TYPE_OPTIONS, true),
+        "Cuadro {$escKey}: la patología VEMP está en el catálogo");
+    t_true(!(isset($vempCfg['umbral']) && !empty($vempCfg['umbral_gap'])),
+        "Cuadro {$escKey}: el umbral del VEMP sale del rango o del gap, no de los dos");
+    foreach ((array) ($vempCfg['umbral'] ?? []) as $vempSub => $rango) {
+        t_true(in_array($vempSub, CaseBuilder::VEMP_SUBTIPOS, true),
+            "Cuadro {$escKey}: '{$vempSub}' es un subtipo de VEMP que existe");
+        t_true(is_array($rango) && count($rango) === 2 && $rango[0] <= $rango[1],
+            "Cuadro {$escKey}/{$vempSub}: el rango de umbral va de menor a mayor");
+    }
+}
+
+// El schwannoma nace del nervio vestibular: no puede salir con VEMP normal.
+t_eq(CaseProfile::SCENARIOS['schwannoma']['vemp']['type'], 'neural',
+    'El schwannoma vestibular desarma el VEMP');
+// Y la ANSD al revés: el VEMP conservado es el hallazgo que la separa de un
+// compromiso del VIII completo.
+t_eq(CaseProfile::SCENARIOS['neuropatia']['vemp']['type'], 'normal',
+    'La ANSD deja el VEMP conservado a propósito');
+
+// Un caso con patrón retro y el VEMP declarado normal a propósito ya no se
+// reclama: es lo que arma el generador para la ANSD.
+$ansd = [
+    'Perfil' => [
+        'version' => 1,
+        'OD' => ['cce_pct' => 5.0, 'retro' => ['iii_v_ms' => 0.8] + CaseBuilder::ABR_NEURAL_DEFAULTS],
+        'OI' => ['cce_pct' => 100.0, 'retro' => CaseBuilder::ABR_NEURAL_DEFAULTS],
+        'auto' => [],
+    ],
+    'VEMP' => ['OD' => ['type' => 'normal', 'decidido' => true], 'OI' => ['type' => 'normal']],
+];
+$faltanAnsd = CaseCompleteness::pendingTexts($ansd);
+t_true(strpos(implode(' ', $faltanAnsd), 'VEMP OD') === false,
+    'Un VEMP normal marcado como decidido no se reclama (es el hallazgo de la ANSD)');
+
+// --- Ejes de acúfeno y de conciencia --------------------------------------
+
+foreach (CaseProfile::SCENARIOS as $escKey => $esc) {
+    if (isset($esc['tinnitus'])) {
+        $tinCfg = $esc['tinnitus'];
+        t_true($tinCfg['prob'] > 0 && $tinCfg['prob'] <= 1,
+            "Cuadro {$escKey}: la probabilidad de acúfeno es una probabilidad");
+        t_true(!empty($tinCfg['ruido']), "Cuadro {$escKey}: hay al menos un tipo de ruido");
+        foreach ($tinCfg['ruido'] as $tinRuido) {
+            t_true(in_array($tinRuido, CaseBuilder::TINNITUS_RUIDO_OPTIONS, true),
+                "Cuadro {$escKey}: '{$tinRuido}' está en el catálogo de ruidos");
+        }
+        foreach ($tinCfg['frecuencia'] as $tinHz) {
+            t_true(in_array($tinHz, CaseBuilder::FREQUENCIES, true),
+                "Cuadro {$escKey}: {$tinHz} Hz es una frecuencia del audiómetro");
+        }
+        t_true($tinCfg['permanente'] >= 0 && $tinCfg['permanente'] <= 1,
+            "Cuadro {$escKey}: la probabilidad de permanente es una probabilidad");
+    }
+    if (isset($esc['conciencia'])) {
+        $conc = $esc['conciencia'];
+        t_true(count($conc) === 2 && $conc[0] <= $conc[1] && $conc[0] >= 0 && $conc[1] <= 100,
+            "Cuadro {$escKey}: el rango de conciencia va de menor a mayor dentro de 0-100");
+    }
+}
+
+// Ningún cuadro puede prometer acúfeno siempre: dos casos del mismo cuadro
+// tienen que poder salir uno con y otro sin, o el alumno memoriza la
+// asociación en vez de preguntarla.
+foreach (CaseProfile::SCENARIOS as $escKey => $esc) {
+    t_true(!isset($esc['tinnitus']) || $esc['tinnitus']['prob'] < 1.0,
+        "Cuadro {$escKey}: el acúfeno nunca es seguro");
+}
+
+// Los cuadros de instalación lenta bajan la conciencia y los bruscos la
+// suben: es lo que hace que el paciente conteste "yo escucho bien".
+t_true(CaseProfile::SCENARIOS['presbiacusia']['conciencia'][1]
+     < CaseProfile::SCENARIOS['subita']['conciencia'][0],
+    'La presbiacusia deja menos conciencia del problema que la súbita');

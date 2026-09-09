@@ -281,6 +281,31 @@ final class CaseProfile
      * otro. El oído sano se pide con 'normal', que no es un cero: es un oído
      * normal con la variabilidad y la edad que le corresponden.
      *
+     * `vemp` es el eje vestibular del cuadro, y NO todos lo tienen: los que
+     * no traen la clave se generan con un VEMP normal. Lleva `type` (la
+     * patología del oído) y, o bien `umbral` con un rango por subtipo, o
+     * bien `umbral_gap` para las conductivas -- ahí el VEMP aéreo se apaga
+     * porque el oído medio no deja pasar el estímulo, así que el umbral
+     * sube tanto como el gap en vez de un rango fijo.
+     *
+     * Que un cuadro no traiga `vemp` es una decisión, no un olvido. La
+     * súbita y la ototóxica se dejan normales a propósito: el compromiso
+     * vestibular en las dos es real pero variable caso a caso, y armarlo
+     * como regla le enseñaría al alumno una asociación que no existe. El
+     * docente lo pone a mano cuando el caso lo pide.
+     *
+     * `tinnitus` es la probabilidad de que el cuadro traiga acúfeno, con el
+     * tipo de ruido y las frecuencias de matching entre las que sortear. Es
+     * probabilidad y no un sí/no: dos casos del mismo cuadro tienen que
+     * poder salir uno con acúfeno y otro sin. La LATERALIDAD no está acá --
+     * sale de a cuántos oídos les tocó el cuadro al generar.
+     *
+     * `conciencia` es el rango del rasgo homónimo del paciente en la
+     * entrevista (ver Sala::RASGOS_DEFAULT), y solo aparece en los cuadros
+     * que lo corren del rango general: los de instalación lenta lo bajan
+     * --el paciente contesta que oye bien-- y los de instalación brusca lo
+     * suben. Sin la clave, el generador sortea en el rango general.
+     *
      * `lateralidad` no decide nada por sí sola -- es la sugerencia que el
      * editor le hace al otro oído cuando se elige este cuadro: 'unilateral'
      * propone dejar el contrario normal (que es lo que hace falta para que
@@ -296,6 +321,9 @@ final class CaseProfile
             'sn_scale' => [0.0, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal', 'grados' => [],
+            'tinnitus' => ['prob' => 0.05, 'ruido' => ['Zumbido', 'Siseo'],
+                           'frecuencia' => [4000, 6000], 'permanente' => 0.3],
+            'conciencia' => [60, 90],
         ],
 
         // --- Conductivas ------------------------------------------------
@@ -312,6 +340,13 @@ final class CaseProfile
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
             'z' => ['B'], 'etf' => 'Disfunción tubaria',
             'grados' => ['leve', 'moderada'], 'max_db' => 60,
+            // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
+            // hay lesión vestibular (type normal), lo que sube es el umbral
+            // -- y sube tanto como el gap, que ya está en el audiograma.
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'tinnitus' => ['prob' => 0.3, 'ruido' => ['Zumbido'],
+                           'frecuencia' => [250, 500], 'permanente' => 0.3],
+            'conciencia' => [70, 95],
         ],
         'otoesclerosis' => [
             'label' => 'Otoesclerosis',
@@ -325,6 +360,12 @@ final class CaseProfile
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'bilateral',
             'z' => ['As'], 'etf' => 'Normal',
             'grados' => ['leve', 'moderada'], 'max_db' => 60,
+            // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
+            // hay lesión vestibular (type normal), lo que sube es el umbral
+            // -- y sube tanto como el gap, que ya está en el audiograma.
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'tinnitus' => ['prob' => 0.55, 'ruido' => ['Zumbido', 'Campanilleo'],
+                           'frecuencia' => [250, 500, 1000], 'permanente' => 0.5],
         ],
         'perforacion' => [
             'label' => 'Perforación timpánica',
@@ -340,6 +381,11 @@ final class CaseProfile
             // Una perforación subtotal, con la cadena ya comprometida, llega
             // a 55 dB de gap; más que eso es otra cosa, no el agujero.
             'grados' => ['leve', 'moderada'], 'max_db' => 55,
+            // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
+            // hay lesión vestibular (type normal), lo que sube es el umbral
+            // -- y sube tanto como el gap, que ya está en el audiograma.
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'conciencia' => [70, 95],
         ],
         'disfuncion_tubaria' => [
             'label' => 'Disfunción tubaria (presión negativa)',
@@ -351,6 +397,10 @@ final class CaseProfile
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'bilateral',
             'z' => ['C', 'Cs'], 'etf' => 'Disfunción tubaria',
             'grados' => ['leve'], 'max_db' => 40,
+            // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
+            // hay lesión vestibular (type normal), lo que sube es el umbral
+            // -- y sube tanto como el gap, que ya está en el audiograma.
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
         ],
         'tapon_cerumen' => [
             'label' => 'Tapón de cerumen',
@@ -365,6 +415,11 @@ final class CaseProfile
             // cuadro leve por definición, y de ahí que sorprenda tanto al
             // paciente cuando se lo sacan.
             'grados' => ['leve'], 'max_db' => 40,
+            // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
+            // hay lesión vestibular (type normal), lo que sube es el umbral
+            // -- y sube tanto como el gap, que ya está en el audiograma.
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'conciencia' => [70, 95],
         ],
 
         // --- Sensoriales (cocleares puras) ------------------------------
@@ -379,6 +434,9 @@ final class CaseProfile
             // Para llevarla a severa habría que subir 500 y 1000, y entonces
             // ya no es descendente, es plana.
             'grados' => ['leve', 'moderada'],
+            'tinnitus' => ['prob' => 0.55, 'ruido' => ['Pitido', 'Siseo'],
+                           'frecuencia' => [4000, 6000, 8000], 'permanente' => 0.6],
+            'conciencia' => [25, 55],
         ],
         'muesca_4k' => [
             'label' => 'Muesca en 4 kHz (trauma acústico)',
@@ -390,6 +448,9 @@ final class CaseProfile
             // La muesca es un hallazgo en 3-6 kHz con el resto conservado:
             // por promedio no pasa de leve, y ese es el punto del cuadro.
             'grados' => ['leve'],
+            'tinnitus' => ['prob' => 0.75, 'ruido' => ['Pitido', 'Silbido'],
+                           'frecuencia' => [3000, 4000, 6000], 'permanente' => 0.6],
+            'conciencia' => [25, 55],
         ],
         'coclear_plana' => [
             'label' => 'Coclear plana',
@@ -399,6 +460,9 @@ final class CaseProfile
             'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal',
             'grados' => ['leve', 'moderada', 'severa', 'profunda'],
+            'tinnitus' => ['prob' => 0.45, 'ruido' => ['Zumbido', 'Siseo'],
+                           'frecuencia' => [2000, 4000], 'permanente' => 0.6],
+            'conciencia' => [40, 70],
         ],
         'meniere' => [
             'label' => 'Ménière (ascendente, graves)',
@@ -414,6 +478,13 @@ final class CaseProfile
             // ascendente con agudos conservados no promedia más alto sin
             // dejar de ser ascendente.
             'grados' => ['leve', 'moderada'],
+            // Hidrops saccular: el cVEMP se apaga y el oVEMP, que mide el
+            // utrículo por el nervio superior, se conserva mejor.
+            'vemp' => ['type' => 'sacular',
+                       'umbral' => ['CVEMP' => [80, 95], 'OVEMP' => [60, 72], 'MVEMP' => [80, 95]]],
+            'tinnitus' => ['prob' => 0.85, 'ruido' => ['Zumbido'],
+                           'frecuencia' => [125, 250, 500], 'permanente' => 0.5],
+            'conciencia' => [80, 100],
         ],
         'subita' => [
             'label' => 'Hipoacusia súbita',
@@ -423,6 +494,9 @@ final class CaseProfile
             'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'unilateral',
             'z' => ['A'], 'etf' => 'Normal',
             'grados' => ['moderada', 'severa', 'profunda'],
+            'tinnitus' => ['prob' => 0.7, 'ruido' => ['Pitido', 'Zumbido'],
+                           'frecuencia' => [2000, 4000, 6000], 'permanente' => 0.8],
+            'conciencia' => [85, 100],
         ],
         'ototoxica' => [
             'label' => 'Ototóxica (agudos, bilateral simétrica)',
@@ -437,6 +511,9 @@ final class CaseProfile
             // el promedio no llega a moderada, y subirlos la aplanaría --
             // justo la pendiente que hace sospechar el ototóxico.
             'grados' => ['leve'],
+            'tinnitus' => ['prob' => 0.65, 'ruido' => ['Pitido', 'Siseo'],
+                           'frecuencia' => [4000, 6000, 8000], 'permanente' => 0.7],
+            'conciencia' => [30, 60],
         ],
 
         // --- Neurales (retrococleares puras) ----------------------------
@@ -456,6 +533,14 @@ final class CaseProfile
             // este cuadro enseña es la disociación (audiograma moderado con
             // ABR desarmado y OEA conservada), no la profundidad.
             'grados' => ['leve', 'moderada'],
+            // El schwannoma nace del nervio VESTIBULAR: el VEMP se desarma
+            // de los dos lados de la división, y ese hallazgo suele llegar
+            // antes que el audiograma.
+            'vemp' => ['type' => 'neural',
+                       'umbral' => ['CVEMP' => [82, 95], 'OVEMP' => [80, 95], 'MVEMP' => [85, 95]]],
+            'tinnitus' => ['prob' => 0.65, 'ruido' => ['Pitido', 'Zumbido'],
+                           'frecuencia' => [2000, 4000], 'permanente' => 0.7],
+            'conciencia' => [70, 95],
         ],
         'neuropatia' => [
             'label' => 'Neuropatía auditiva / desincronía (ANSD)',
@@ -465,6 +550,12 @@ final class CaseProfile
             'cce_pct' => [0, 10], 'retro' => 'ansd', 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal',
             'grados' => ['leve', 'moderada', 'severa', 'profunda'],
+            // VEMP CONSERVADO, y es a propósito: en la ANSD la lesión es de
+            // la vía auditiva y el nervio vestibular queda indemne. Un ABR
+            // desarmado con VEMP normal es lo que separa esto de un
+            // compromiso del VIII completo.
+            'vemp' => ['type' => 'normal',
+                       'umbral' => ['CVEMP' => [55, 70], 'OVEMP' => [60, 75], 'MVEMP' => [65, 80]]],
         ],
 
         // --- Sensorioneurales (los dos componentes a la vez) ------------
@@ -478,6 +569,12 @@ final class CaseProfile
             'cce_pct' => [20, 80], 'retro' => 'microvascular', 'lateralidad' => 'unilateral',
             'z' => ['A'], 'etf' => 'Normal',
             'grados' => ['leve', 'moderada', 'severa'],
+            // Microvascular: compromiso neural parcial, más leve que el del
+            // schwannoma.
+            'vemp' => ['type' => 'neural',
+                       'umbral' => ['CVEMP' => [70, 85], 'OVEMP' => [70, 85], 'MVEMP' => [75, 90]]],
+            'tinnitus' => ['prob' => 0.5, 'ruido' => ['Pitido', 'Zumbido'],
+                           'frecuencia' => [2000, 4000], 'permanente' => 0.6],
         ],
 
         // --- Mixtas (conductiva + sensorioneural) -----------------------
@@ -491,6 +588,12 @@ final class CaseProfile
             'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'unilateral',
             'z' => ['B'], 'etf' => 'Disfunción tubaria',
             'grados' => ['leve', 'moderada', 'severa', 'profunda'],
+            // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
+            // hay lesión vestibular (type normal), lo que sube es el umbral
+            // -- y sube tanto como el gap, que ya está en el audiograma.
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'tinnitus' => ['prob' => 0.45, 'ruido' => ['Zumbido', 'Siseo'],
+                           'frecuencia' => [500, 1000, 2000], 'permanente' => 0.5],
         ],
         'mixta_otoesclerosis' => [
             'label' => 'Otoesclerosis avanzada (con daño coclear)',
@@ -502,6 +605,12 @@ final class CaseProfile
             'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'bilateral',
             'z' => ['As'], 'etf' => 'Normal',
             'grados' => ['leve', 'moderada', 'severa', 'profunda'],
+            // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
+            // hay lesión vestibular (type normal), lo que sube es el umbral
+            // -- y sube tanto como el gap, que ya está en el audiograma.
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'tinnitus' => ['prob' => 0.55, 'ruido' => ['Zumbido', 'Campanilleo'],
+                           'frecuencia' => [250, 500, 1000], 'permanente' => 0.5],
         ],
     ];
 

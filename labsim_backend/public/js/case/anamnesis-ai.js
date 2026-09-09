@@ -43,8 +43,15 @@
         });
         var edad = campo('age'), genero = document.querySelector('#case-form [name="gender"]:checked');
         var zOd = campo('z_od'), zOi = campo('z_oi');
-        var tinnitus = {};
-        ['lateralidad', 'oido', 'predominio', 'ruido'].forEach(function (k) {
+        // `presente` va SIEMPRE, tildado o no: es la clave que mira
+        // CaseBuilder::tinnitusPresente(). Sin ella el servidor caía al
+        // heurístico de los casos viejos (que adivina el acúfeno desde la
+        // lateralidad y el ruido) y fallaba en los dos sentidos -- un
+        // acúfeno craneal con los valores por defecto no llegaba al prompt,
+        // y uno destildado que había dejado la lateralidad en unilateral sí.
+        var presente = campo('tinnitus[presente]');
+        var tinnitus = { presente: !!(presente && presente.checked) };
+        ['lateralidad', 'oido', 'predominio', 'ruido', 'frecuencia'].forEach(function (k) {
             var el = campo('tinnitus[' + k + ']');
             if (el) { tinnitus[k] = el.value; }
         });

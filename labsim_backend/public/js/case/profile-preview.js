@@ -163,17 +163,22 @@
     }
 
     var pendiente = null;
+    /**
+     * Devuelve una promesa que se resuelve cuando el formulario YA tiene la
+     * proyección encima. El generador la encadena: las ondas del ABR se
+     * sortean por patología, y la patología la decide esta proyección.
+     */
     function proyectar() {
         // Sin ningún módulo derivado no hay nada que pintar: el formulario
         // es del docente y no se le toca ni un campo.
         if (!MODULOS.some(autoOn)) {
             if (preview) { preview.hidden = true; }
-            return;
+            return Promise.resolve();
         }
         var body = new URLSearchParams();
         body.set('csrf_token', CSRF);
         body.set('payload', JSON.stringify(estado()));
-        fetch('case_project.php', { method: 'POST', body: body })
+        return fetch('case_project.php', { method: 'POST', body: body })
             .then(function (r) { return r.json(); })
             .then(function (data) { if (data.ok) { hidratar(data.proyeccion); } })
             .catch(function () { /* sin conexión el formulario sigue usable a mano */ });
