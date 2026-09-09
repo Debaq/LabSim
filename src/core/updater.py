@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-Auto-update de la build PyInstaller (onedir, Linux) contra GitHub Releases.
+Auto-update de la build PyInstaller (onedir) contra GitHub Releases.
+
+Dos estrategias segun plataforma:
+- Linux: swap in-place de los archivos del dist (paquetes tar.gz, con
+  cadena de diffs; todo lo que sigue de este docstring).
+- Windows: baja el instalador Inno de la release mas nueva y lo corre en
+  silencio. No hay diffs ni swap manual -- los DLL de _internal/ estan
+  tomados por el proceso que corre y solo el instalador (Restart Manager)
+  puede reemplazarlos. Ver installer/labsim.iss.
 
 Los releases de este repo se comparten con el rewrite Tauri (tags v3.x,
 assets .deb/.rpm/.AppImage/.exe/.msi). Para no mezclarse con esos, esta
@@ -51,6 +59,11 @@ REPO = "Debaq/LabSim"
 TAG_PREFIX = "pyinstaller-v"
 FULL_ASSET_NAME = "LabSim-linux-x86_64.tar.gz"
 UPDATE_ASSET_NAME = "LabSim-linux-x86_64-update.tar.gz"
+# Windows no usa la cadena de paquetes update: baja el instalador Inno de la
+# release mas nueva y lo corre en silencio (ver check_for_update). Por eso el
+# script de release solo mantiene este asset en la ultima release.
+SETUP_ASSET_NAME = "LabSim-windows-x86_64-setup.exe"
+IS_WINDOWS = sys.platform.startswith("win")
 RELEASES_API = f"https://api.github.com/repos/{REPO}/releases"
 REQUEST_TIMEOUT = 5
 # Mas saltos que esto y sale mas a cuenta bajar el full directo -- cada hop
@@ -118,6 +131,8 @@ def check_for_update(current_version: str):
     - {"tag": ..., "build_id": ..., "mode": "full", "url": ...} si falta
       algún eslabón de la cadena (release vieja sin paquete update) o hay
       demasiados saltos (MAX_CHAIN_HOPS) -- baja el full de la más nueva.
+    - {"tag": ..., "build_id": ..., "mode": "setup", "url": ...} en Windows,
+      siempre: el instalador de la release más nueva.
 
     Devuelve None si no hay nada nuevo, o si falla la red (nunca revienta:
     no queremos bloquear el arranque por un lab sin internet)."""
@@ -173,6 +188,23 @@ def check_for_update(current_version: str):
     latest = newer[-1]
     latest_tag = latest["tag_name"]
     latest_build_id = latest_tag[len(TAG_PREFIX):]
+
+    if IS_WINDOWS:
+        # El swap in-place que hace la cadena/full de Linux no es posible en
+        # Windows: los DLL de _internal/ estan tomados por el proceso que
+        # corre. El instalador resuelve las dos cosas -- cierra la instancia
+        # via Restart Manager y reemplaza los archivos -- asi que en Windows
+        # el update ES el setup completo, sin diffs.
+        setup_url = _asset_url(latest, SETUP_ASSET_NAME)
+        if setup_url is None:
+            return None
+        return {
+            "tag": latest_tag,
+            "build_id": latest_build_id,
+            "mode": "setup",
+            "url": setup_url,
+            "notes": _extract_notes(latest),
+        }
 
     hops = [] if chain_ok else None
     if hops is not None:
@@ -381,6 +413,32 @@ def apply_update_and_restart(update_info: dict, on_progress=None) -> None:
     dist_dir = Path(sys.executable).resolve().parent
     tmp_dir = Path(tempfile.mkdtemp(prefix="labsim_update_"))
     steps = []
+
+    if update_info["mode"] == "setup":
+        # Windows: el instalador hace todo el trabajo. Se lanza desacoplado
+        # (DETACHED_PROCESS) porque acto seguido este proceso se muere, y con
+        # /LAUNCH=1, que en installer/labsim.iss relanza LabSim al terminar.
+        # tmp_dir NO se borra: el .exe que esta corriendo vive ahi.
+        setup_path = tmp_dir / SETUP_ASSET_NAME
+        report("download", 0, 0, 1, 1)
+        _download(update_info["url"], setup_path, lambda cur, tot: report("download", cur, tot, 1, 1))
+
+        report("restart", 0, 0, 1, 1)
+        flags = getattr(subprocess, "DETACHED_PROCESS", 0) | getattr(
+            subprocess, "CREATE_NEW_PROCESS_GROUP", 0
+        )
+        subprocess.Popen(
+            [
+                str(setup_path),
+                "/SILENT",
+                "/CLOSEAPPLICATIONS",
+                "/NORESTART",
+                "/LAUNCH=1",
+            ],
+            creationflags=flags,
+            close_fds=True,
+        )
+        os._exit(0)
 
     if update_info["mode"] == "full":
         archive_path = tmp_dir / "full.tar.gz"

@@ -1,13 +1,24 @@
 name: Build Windows (Python)
 
 # Empaqueta LabSim (stack Python/PySide6, no el rewrite Tauri) con PyInstaller
-# para Windows. Se dispara solo con push a esta rama, o manualmente:
-#   gh workflow run build-windows.yml --ref Genera-audio-sintetico-tonos-y-ruidos
+# para Windows y arma el instalador Inno Setup (installer/labsim.iss).
+#
+# Lo dispara scripts/release_pyinstaller.sh al publicar una release
+# pyinstaller-v*, pasandole el commit exacto y el build_id, para que el .exe
+# de Windows y el .tar.gz de Linux salgan del mismo codigo. A mano:
+#   gh workflow run build-windows.yml -f sha=$(git rev-parse HEAD) -f build_id=0.9.8-rXXXXXXX
 
 on:
-  push:
-    branches: [Genera-audio-sintetico-tonos-y-ruidos]
   workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Commit a compilar (default: HEAD de la rama elegida)'
+        required: false
+        default: ''
+      build_id:
+        description: 'build_id que va en BUILD_VERSION (ej: 0.9.8-r1a2b3c4)'
+        required: false
+        default: ''
 
 jobs:
   build-windows:
@@ -15,6 +26,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha || github.sha }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -30,12 +43,55 @@ jobs:
       - name: Build PyInstaller
         run: python -m PyInstaller LabSim.spec --noconfirm
 
-      - name: Empaquetar zip
+      # El updater compara BUILD_VERSION contra el tag de la release mas
+      # nueva; sin este archivo la build se ve como "dev" y siempre se
+      # ofreceria actualizar. Si no vino build_id (corrida manual), cae a
+      # __VERSION__ de src/main.py.
+      - name: Escribir BUILD_VERSION
+        id: version
+        shell: pwsh
+        run: |
+          $ver = (Select-String -Path src/main.py -Pattern "__VERSION__ = 'v([^']+)'").Matches[0].Groups[1].Value
+          $buildId = "${{ inputs.build_id }}"
+          if ([string]::IsNullOrWhiteSpace($buildId)) { $buildId = $ver }
+          Set-Content -Path dist/LabSim/BUILD_VERSION -Value $buildId -NoNewline
+          "build_id=$buildId" >> $env:GITHUB_OUTPUT
+          "num_version=$ver" >> $env:GITHUB_OUTPUT
+          Write-Host "BUILD_VERSION=$buildId (VersionInfo $ver)"
+
+      - name: Instalar Inno Setup si falta
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            choco install innosetup -y --no-progress
+          }
+          if (-not (Test-Path $iscc)) { throw "No encontre ISCC.exe en $iscc" }
+          "ISCC=$iscc" >> $env:GITHUB_ENV
+
+      - name: Compilar instalador
+        shell: pwsh
+        run: |
+          & "$env:ISCC" /DMyAppVersion="${{ steps.version.outputs.build_id }}" `
+                        /DNumVersion="${{ steps.version.outputs.num_version }}" `
+                        installer\labsim.iss
+
+      # Portable: mismo dist sin instalar, para labs donde no se puede
+      # ejecutar un instalador. No se adjunta a la release (peso), queda
+      # como artifact del run.
+      - name: Empaquetar zip portable
         run: Compress-Archive -Path dist/LabSim/* -DestinationPath dist/LabSim-windows-x86_64.zip
 
-      - name: Subir artifact
+      - name: Subir instalador
         uses: actions/upload-artifact@v4
         with:
-          name: labsim-windows
+          name: labsim-windows-setup
+          path: dist/LabSim-windows-x86_64-setup.exe
+          if-no-files-found: error
+
+      - name: Subir portable
+        uses: actions/upload-artifact@v4
+        with:
+          name: labsim-windows-portable
           path: dist/LabSim-windows-x86_64.zip
           if-no-files-found: error

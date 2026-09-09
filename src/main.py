@@ -817,6 +817,8 @@ def _check_and_apply_update():
     if update["mode"] == "chain":
         n = len(update["hops"])
         detalle = f"Se aplicará en {n} paso{'s' if n != 1 else ''} (paquetes livianos, solo lo que cambió)."
+    elif update["mode"] == "setup":
+        detalle = "Se descargará el instalador y se ejecutará sin preguntar nada más."
     else:
         detalle = "Se descargará el paquete completo."
     # Prompt estilizado: logo + stylesheet del tema + release notes del

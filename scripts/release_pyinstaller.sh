@@ -12,6 +12,13 @@
 # -> LabSim-linux-x86_64.tar.gz (paquete full) y lo sube al release
 # (creandolo si hace falta).
 #
+# En paralelo dispara el workflow build-windows.yml (GitHub Actions) sobre
+# el MISMO commit, espera a que termine y adjunta a la release el instalador
+# Inno que produce -- LabSim-windows-x86_64-setup.exe. En Windows el updater
+# no usa la cadena de diffs: baja ese instalador y lo corre en silencio, asi
+# que solo la release mas nueva necesita tenerlo. SKIP_WINDOWS=1 lo saltea
+# (release solo Linux, mas rapida para probar).
+#
 # Ademas arma un paquete de update (diff) contra el manifest de la release
 # anterior (scripts/update_diff.py) -- LabSim-linux-x86_64-update.tar.gz,
 # solo con los archivos que cambiaron. El updater instalado encadena estos
@@ -97,6 +104,48 @@ UPDATE_ASSET_NAME="LabSim-linux-x86_64-update.tar.gz"
 
 echo "Build: ${BUILD_ID} -> tag ${TAG}"
 
+SETUP_ASSET_NAME="LabSim-windows-x86_64-setup.exe"
+WIN_WORKFLOW="build-windows.yml"
+SHA=$(git rev-parse HEAD)
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+WIN_RUN_ID=""
+
+# El build de Windows se dispara ACA, antes del build local: son ~3 min en
+# el runner que corren en paralelo con PyInstaller local, y recien se espera
+# el resultado al final, con la release ya creada.
+if [ "${SKIP_WINDOWS:-0}" = "1" ]; then
+    echo "SKIP_WINDOWS=1 -- no se dispara el build de Windows"
+else
+    # El workflow hace checkout del SHA exacto (para que el .exe salga del
+    # mismo codigo que el .tar.gz), asi que el commit tiene que estar en
+    # origin antes de disparar.
+    run_with_spinner "Pusheando ${BRANCH} a origin..." git push origin "HEAD:${BRANCH}"
+    run_with_spinner "Disparando build de Windows..." gh workflow run "$WIN_WORKFLOW" \
+        --ref "$BRANCH" -f sha="$SHA" -f build_id="$BUILD_ID"
+
+    # gh workflow run no devuelve el id del run: hay que buscarlo, y tarda
+    # unos segundos en aparecer en la API. Si hubo dispatches previos sobre
+    # el mismo commit (corrida repetida del script), el mas nuevo es el
+    # nuestro.
+    for _ in $(seq 1 20); do
+        WIN_RUN_ID=$(gh run list --workflow "$WIN_WORKFLOW" --event workflow_dispatch --limit 20 \
+            --json databaseId,headSha,createdAt \
+            -q "[.[] | select(.headSha == \"${SHA}\")] | sort_by(.createdAt) | last | .databaseId // empty" \
+            2>/dev/null) || WIN_RUN_ID=""
+        # 'test && break' no sirve aca: con set -e, el test fallido en la
+        # ultima linea del cuerpo del loop mata el script.
+        if [ -n "$WIN_RUN_ID" ]; then
+            break
+        fi
+        sleep 3
+    done
+    if [ -n "$WIN_RUN_ID" ]; then
+        echo "Build de Windows corriendo: https://github.com/Debaq/LabSim/actions/runs/${WIN_RUN_ID}"
+    else
+        echo "No pude ubicar el run de Windows -- sigo con Linux, revisalo a mano" >&2
+    fi
+fi
+
 ./build.sh
 
 echo "$BUILD_ID" > dist/LabSim/BUILD_VERSION
@@ -150,6 +199,25 @@ else
         --notes "Build PyInstaller (Linux) de LabSim, build ${BUILD_ID}."
 fi
 
+WIN_OK=0
+if [ -n "$WIN_RUN_ID" ]; then
+    echo "Esperando el build de Windows (run ${WIN_RUN_ID})..."
+    if gh run watch "$WIN_RUN_ID" --exit-status --interval 15; then
+        rm -rf dist/win
+        if run_with_spinner "Bajando ${SETUP_ASSET_NAME}..." \
+                gh run download "$WIN_RUN_ID" -n labsim-windows-setup -D dist/win; then
+            echo "Instalador: dist/win/${SETUP_ASSET_NAME} ($(du -h "dist/win/${SETUP_ASSET_NAME}" | cut -f1))"
+            run_with_spinner "Subiendo ${SETUP_ASSET_NAME} al release..." \
+                gh release upload "$TAG" "dist/win/${SETUP_ASSET_NAME}" --clobber
+            WIN_OK=1
+        fi
+    else
+        echo "El build de Windows FALLÓ -- la release queda solo con Linux." >&2
+        echo "  Log: gh run view ${WIN_RUN_ID} --log-failed" >&2
+        echo "  Reintento: gh workflow run ${WIN_WORKFLOW} --ref ${BRANCH} -f sha=${SHA} -f build_id=${BUILD_ID}" >&2
+    fi
+fi
+
 # Ya no se borran releases pyinstaller-v* viejas completas: el tag y el
 # paquete update de cada una son el eslabón que la cadena de updates del
 # cliente necesita para llegar hasta acá desde cualquier versión anterior.
@@ -159,6 +227,12 @@ if [ -n "$OLD_TAGS" ]; then
     echo "Podando asset full de releases pyinstaller-v* viejas (se mantiene el tag y el paquete update):"
     while IFS= read -r old_tag; do
         run_with_spinner "  Borrando ${ASSET_NAME} de ${old_tag}..." delete_asset_if_present "$old_tag" "$ASSET_NAME" || true
+        # El instalador de Windows es siempre completo y el updater solo mira
+        # la release mas nueva: los viejos no le sirven a nadie. Solo se podan
+        # si el de esta release ya subio, para no dejar cero instaladores.
+        if [ "$WIN_OK" = "1" ]; then
+            run_with_spinner "  Borrando ${SETUP_ASSET_NAME} de ${old_tag}..." delete_asset_if_present "$old_tag" "$SETUP_ASSET_NAME" || true
+        fi
     done <<< "$OLD_TAGS"
 fi
 
