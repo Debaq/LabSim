@@ -472,7 +472,7 @@
       </font>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt;VA SENTIR UN RUIDO FUERTE POR EL OÍDO Y UN PITO POR EL MISMO OÍDO, NECESITO QUE MANTENGA LA MANO LEVANTADA TODO EL MOMENTO QUE ESCUCHE EL PITO, SOLO SI LO DEJA DE ESCUCHAR EL PITO BAJARÁ LA MANO, SI ESCUCHA MÁS BAJO EL PITO MANTENGA LA MANO LEVANTADA. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt;VA A ESCUCHAR UN PITO POR UN OÍDO Y, POR EL OTRO OÍDO, UN RUIDO. NO LE HAGA CASO AL RUIDO. MANTENGA LA MANO LEVANTADA TODO EL RATO QUE ESCUCHE EL PITO, AUNQUE SE ESCUCHE MÁS BAJITO. BAJE LA MANO SOLO SI EL PITO DESAPARECE DEL TODO. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string>Mano levantada en ruido</string>
@@ -520,7 +520,7 @@
       </font>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt;VA A ESCUCHAR UN PITO POR UN OÍDO Y UN RUIDO BLANCO POR EL OTRO OÍDO AL MISMO TIEMPO, NECESITO QUE MANTENGA LA MANO LEVANTADA TODO EL MOMENTO QUE ESCUCHE EL PITO, SOLO SI LO DEJA DE ESCUCHAR EL PITO BAJARÁ LA MANO, SI ESCUCHA MÁS BAJO EL PITO MANTENGA LA MANO LEVANTADA. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt;LE VOY A PONER UN PITO FUERTE POR UN OÍDO Y, POR EL OTRO OÍDO, UN RUIDO. AL RUIDO NO LE HAGA CASO. MANTENGA LA MANO LEVANTADA TODO EL RATO QUE ESCUCHE EL PITO, AUNQUE SE VAYA HACIENDO MÁS BAJITO. BAJE LA MANO SOLO SI EL PITO DESAPARECE DEL TODO. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string>Ruido blanco contralateral</string>
@@ -544,7 +544,7 @@
       </font>
      </property>
      <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt;VA A ESCUCHAR UN PITO CONTINUO POR UN OÍDO A LA VEZ, NECESITO QUE MANTENGA LA MANO LEVANTADA TODO EL MOMENTO QUE ESCUCHE EL PITO, SOLO SI LO DEJA DE ESCUCHAR EL PITO BAJARÁ LA MANO, SI ESCUCHA MÁS BAJO EL PITO MANTENGA LA MANO LEVANTADA. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt;VA A ESCUCHAR UN PITO CONTINUO, UN OÍDO A LA VEZ. MANTENGA LA MANO LEVANTADA TODO EL RATO QUE LO ESCUCHE, AUNQUE SE VAYA HACIENDO MÁS BAJITO. BAJE LA MANO SOLO SI EL PITO DESAPARECE DEL TODO. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string>Rosemberg bilateral</string>

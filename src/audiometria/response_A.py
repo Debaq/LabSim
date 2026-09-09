@@ -72,7 +72,7 @@ class Response(QWidget):
             self.state = "L_UMD_X"
         elif cmd == "pitos_fuertes":
             self.state = "S_LDL_X"
-        elif cmd == "Aerea_+_ruido":
+        elif cmd == "aerea_+_ruido":
             self.state = "THR_A_MKG"
         elif cmd == "colocar_vibrador":
             self.state = "THR_O_X"
@@ -85,7 +85,11 @@ class Response(QWidget):
         elif cmd == "mano_levantada":
             self.state = "S_CARHART_X"
         elif cmd == "mano_levantada_en_ruido":
+            self.state = "S_STENGER_X"
+        elif cmd == "ruido_blanco_contralateral":
             self.state = "S_STAT_X"
+        elif cmd == "rosemberg_bilateral":
+            self.state = "S_ROSEMBERG_X"
         elif cmd == "sonidos_iguales":
             self.fowler_questions("sonidos_iguales", 1)
             print("y por por aca")

@@ -1,0 +1,318 @@
+LISTA DE GRABACION - LabSim (paciente nuevo + examinador)
+======================================================================
+
+Reemplazar <VOZ> por el id del locutor nuevo: feme3, male1, etc.
+(gender = 'feme' o 'male', id = numero. Ej: feme3, male1)
+
+FORMATO
+  - mp3, mono, centrado (el software pannea a OD/OI solo)
+  - mismo nivel RMS en todas las palabras (la intensidad la pone el equipo)
+  - nombre en minusculas, sin tildes ni n, espacios = _
+  - carpeta destino: resources/audio/
+
+TOTAL PACIENTE: 100 palabras + 3 'none' + 5 respuestas cortas = 108
+                (+ 7 opcionales, bloque 4)
+TOTAL EXAMINADOR: 23 frases (bloque 5) - voz unica, sin sufijo
+                  de esas, 3 hay que grabar si o si: 2 que faltan
+                  y 1 con el texto corregido (ver estados)
+
+
+######################################################################
+BLOQUE 1 - REPETICION DE PALABRAS (logoaudiometria)
+######################################################################
+
+El paciente REPITE la palabra que escucho. Tono neutro, sin pregunta.
+Archivo: LP_palacios_r_<VOZ>_<palabra>.mp3
+
+----------------------------------------------------------------------
+LISTA 1  (25 palabras)
+----------------------------------------------------------------------
+  1. [ ] Verde         ->  LP_palacios_r_<VOZ>_verde.mp3
+  2. [ ] Aire          ->  LP_palacios_r_<VOZ>_aire.mp3
+  3. [ ] Joya          ->  LP_palacios_r_<VOZ>_joya.mp3
+  4. [ ] Queso         ->  LP_palacios_r_<VOZ>_queso.mp3
+  5. [ ] Bronce        ->  LP_palacios_r_<VOZ>_bronce.mp3
+  6. [ ] Campo         ->  LP_palacios_r_<VOZ>_campo.mp3
+  7. [ ] Lana          ->  LP_palacios_r_<VOZ>_lana.mp3
+  8. [ ] Dedo          ->  LP_palacios_r_<VOZ>_dedo.mp3
+  9. [ ] Chispa        ->  LP_palacios_r_<VOZ>_chispa.mp3
+ 10. [ ] Lentes        ->  LP_palacios_r_<VOZ>_lentes.mp3
+ 11. [ ] Hilo          ->  LP_palacios_r_<VOZ>_hilo.mp3
+ 12. [ ] Cuentas       ->  LP_palacios_r_<VOZ>_cuentas.mp3
+ 13. [ ] Gente         ->  LP_palacios_r_<VOZ>_gente.mp3
+ 14. [ ] Mango         ->  LP_palacios_r_<VOZ>_mango.mp3
+ 15. [ ] Nadie         ->  LP_palacios_r_<VOZ>_nadie.mp3
+ 16. [ ] Pila          ->  LP_palacios_r_<VOZ>_pila.mp3
+ 17. [ ] Resta         ->  LP_palacios_r_<VOZ>_resta.mp3
+ 18. [ ] Fibra         ->  LP_palacios_r_<VOZ>_fibra.mp3
+ 19. [ ] Sueldo        ->  LP_palacios_r_<VOZ>_sueldo.mp3
+ 20. [ ] Doce          ->  LP_palacios_r_<VOZ>_doce.mp3
+ 21. [ ] Serio         ->  LP_palacios_r_<VOZ>_serio.mp3
+ 22. [ ] Nunca         ->  LP_palacios_r_<VOZ>_nunca.mp3
+ 23. [ ] Lima          ->  LP_palacios_r_<VOZ>_lima.mp3
+ 24. [ ] Susto         ->  LP_palacios_r_<VOZ>_susto.mp3
+ 25. [ ] Extra         ->  LP_palacios_r_<VOZ>_extra.mp3
+
+----------------------------------------------------------------------
+LISTA 2  (25 palabras)
+----------------------------------------------------------------------
+ 26. [ ] Leña          ->  LP_palacios_r_<VOZ>_lena.mp3
+ 27. [ ] Parque        ->  LP_palacios_r_<VOZ>_parque.mp3
+ 28. [ ] Grano         ->  LP_palacios_r_<VOZ>_grano.mp3
+ 29. [ ] Leyes         ->  LP_palacios_r_<VOZ>_leyes.mp3
+ 30. [ ] Balde         ->  LP_palacios_r_<VOZ>_balde.mp3
+ 31. [ ] Rueda         ->  LP_palacios_r_<VOZ>_rueda.mp3
+ 32. [ ] Cinco         ->  LP_palacios_r_<VOZ>_cinco.mp3
+ 33. [ ] Viaje         ->  LP_palacios_r_<VOZ>_viaje.mp3
+ 34. [ ] Falda         ->  LP_palacios_r_<VOZ>_falda.mp3
+ 35. [ ] Dientes       ->  LP_palacios_r_<VOZ>_dientes.mp3
+ 36. [ ] Micro         ->  LP_palacios_r_<VOZ>_micro.mp3
+ 37. [ ] Chicle        ->  LP_palacios_r_<VOZ>_chicle.mp3
+ 38. [ ] Mundo         ->  LP_palacios_r_<VOZ>_mundo.mp3
+ 39. [ ] Once          ->  LP_palacios_r_<VOZ>_once.mp3
+ 40. [ ] Piso          ->  LP_palacios_r_<VOZ>_piso.mp3
+ 41. [ ] Risa          ->  LP_palacios_r_<VOZ>_risa.mp3
+ 42. [ ] Meses         ->  LP_palacios_r_<VOZ>_meses.mp3
+ 43. [ ] Santo         ->  LP_palacios_r_<VOZ>_santo.mp3
+ 44. [ ] Trueno        ->  LP_palacios_r_<VOZ>_trueno.mp3
+ 45. [ ] Pasto         ->  LP_palacios_r_<VOZ>_pasto.mp3
+ 46. [ ] Alga          ->  LP_palacios_r_<VOZ>_alga.mp3
+ 47. [ ] Suerte        ->  LP_palacios_r_<VOZ>_suerte.mp3
+ 48. [ ] Tía           ->  LP_palacios_r_<VOZ>_tia.mp3
+ 49. [ ] Bono          ->  LP_palacios_r_<VOZ>_bono.mp3
+ 50. [ ] Rienda        ->  LP_palacios_r_<VOZ>_rienda.mp3
+
+----------------------------------------------------------------------
+LISTA 3  (25 palabras)
+----------------------------------------------------------------------
+ 51. [ ] Barco         ->  LP_palacios_r_<VOZ>_barco.mp3
+ 52. [ ] Libro         ->  LP_palacios_r_<VOZ>_libro.mp3
+ 53. [ ] Brazo         ->  LP_palacios_r_<VOZ>_brazo.mp3
+ 54. [ ] Pescado       ->  LP_palacios_r_<VOZ>_pescado.mp3
+ 55. [ ] Puerta        ->  LP_palacios_r_<VOZ>_puerta.mp3
+ 56. [ ] Pelota        ->  LP_palacios_r_<VOZ>_pelota.mp3
+ 57. [ ] Amigo         ->  LP_palacios_r_<VOZ>_amigo.mp3
+ 58. [ ] Automóvil     ->  LP_palacios_r_<VOZ>_automovil.mp3
+ 59. [ ] Palo          ->  LP_palacios_r_<VOZ>_palo.mp3
+ 60. [ ] Mamadera      ->  LP_palacios_r_<VOZ>_mamadera.mp3
+ 61. [ ] Silla         ->  LP_palacios_r_<VOZ>_silla.mp3
+ 62. [ ] Plato         ->  LP_palacios_r_<VOZ>_plato.mp3
+ 63. [ ] Taza          ->  LP_palacios_r_<VOZ>_taza.mp3
+ 64. [ ] Ventana       ->  LP_palacios_r_<VOZ>_ventana.mp3
+ 65. [ ] Avión         ->  LP_palacios_r_<VOZ>_avion.mp3
+ 66. [ ] Escuela       ->  LP_palacios_r_<VOZ>_escuela.mp3
+ 67. [ ] Perro         ->  LP_palacios_r_<VOZ>_perro.mp3
+ 68. [ ] Guagua        ->  LP_palacios_r_<VOZ>_guagua.mp3
+ 69. [ ] Hospital      ->  LP_palacios_r_<VOZ>_hospital.mp3
+ 70. [ ] Mesa          ->  LP_palacios_r_<VOZ>_mesa.mp3
+ 71. [ ] Hermano       ->  LP_palacios_r_<VOZ>_hermano.mp3
+ 72. [ ] Cielo         ->  LP_palacios_r_<VOZ>_cielo.mp3
+ 73. [ ] Estufa        ->  LP_palacios_r_<VOZ>_estufa.mp3
+ 74. [ ] León          ->  LP_palacios_r_<VOZ>_leon.mp3
+ 75. [ ] Luna          ->  LP_palacios_r_<VOZ>_luna.mp3
+
+----------------------------------------------------------------------
+LISTA 4  (25 palabras)
+----------------------------------------------------------------------
+ 76. [ ] Sol           ->  LP_palacios_r_<VOZ>_sol.mp3
+ 77. [ ] Montaña       ->  LP_palacios_r_<VOZ>_montana.mp3
+ 78. [ ] Cortina       ->  LP_palacios_r_<VOZ>_cortina.mp3
+ 79. [ ] Moto          ->  LP_palacios_r_<VOZ>_moto.mp3
+ 80. [ ] Loza          ->  LP_palacios_r_<VOZ>_loza.mp3
+ 81. [ ] Cuaderno      ->  LP_palacios_r_<VOZ>_cuaderno.mp3
+ 82. [ ] Flor          ->  LP_palacios_r_<VOZ>_flor.mp3
+ 83. [ ] Reloj         ->  LP_palacios_r_<VOZ>_reloj.mp3
+ 84. [ ] Tren          ->  LP_palacios_r_<VOZ>_tren.mp3
+ 85. [ ] Leche         ->  LP_palacios_r_<VOZ>_leche.mp3
+ 86. [ ] Cuchara       ->  LP_palacios_r_<VOZ>_cuchara.mp3
+ 87. [ ] Tierra        ->  LP_palacios_r_<VOZ>_tierra.mp3
+ 88. [ ] Anillo        ->  LP_palacios_r_<VOZ>_anillo.mp3
+ 89. [ ] Payaso        ->  LP_palacios_r_<VOZ>_payaso.mp3
+ 90. [ ] Hoja          ->  LP_palacios_r_<VOZ>_hoja.mp3
+ 91. [ ] Compañero     ->  LP_palacios_r_<VOZ>_companero.mp3
+ 92. [ ] Delantal      ->  LP_palacios_r_<VOZ>_delantal.mp3
+ 93. [ ] Cama          ->  LP_palacios_r_<VOZ>_cama.mp3
+ 94. [ ] Pan           ->  LP_palacios_r_<VOZ>_pan.mp3
+ 95. [ ] Árbol         ->  LP_palacios_r_<VOZ>_arbol.mp3
+ 96. [ ] Bandera       ->  LP_palacios_r_<VOZ>_bandera.mp3
+ 97. [ ] Colegio       ->  LP_palacios_r_<VOZ>_colegio.mp3
+ 98. [ ] Mantel        ->  LP_palacios_r_<VOZ>_mantel.mp3
+ 99. [ ] Televisión    ->  LP_palacios_r_<VOZ>_television.mp3
+100. [ ] Camión        ->  LP_palacios_r_<VOZ>_camion.mp3
+
+
+######################################################################
+BLOQUE 2 - RESPUESTAS ERRONEAS (obligatorias)
+######################################################################
+
+Se usan cuando el item sale MAL. El paciente contesta cualquier cosa que
+NO sea la palabra: una palabra parecida, un 'que?', un balbuceo dudoso.
+Deben sonar genericas: sirven para cualquier palabra de cualquier lista.
+
+101. [ ] respuesta errada 1  ->  LP_palacios_r_<VOZ>_none1.mp3
+102. [ ] respuesta errada 2  ->  LP_palacios_r_<VOZ>_none2.mp3
+103. [ ] respuesta errada 3  ->  LP_palacios_r_<VOZ>_none3.mp3
+
+
+######################################################################
+BLOQUE 3 - RESPUESTAS CORTAS (obligatorias)
+######################################################################
+
+Archivo: <nombre>_<VOZ>.mp3   (ojo: OTRO patron, sin LP_palacios_r_)
+
+104. [ ] "Si"                  ->  si_<VOZ>.mp3
+         Fowler: los dos sonidos se escuchan iguales.
+105. [ ] "No"                  ->  no_<VOZ>.mp3
+         Fowler: no se escuchan iguales. Tambien LDL: no molesta.
+106. [ ] "El derecho"          ->  elderecho_<VOZ>.mp3
+         Fowler: el sonido del oido derecho se escucha mas fuerte.
+107. [ ] "El izquierdo"        ->  elizquierdo_<VOZ>.mp3
+         Fowler: el sonido del oido izquierdo se escucha mas fuerte.
+108. [ ] "Molesta"             ->  molesta_<VOZ>.mp3
+         LDL: el tono llego al umbral de molestia.
+
+
+######################################################################
+BLOQUE 4 - OPCIONALES (grabados en feme2, hoy sin cablear en el software)
+######################################################################
+
+Grabar solo si queres paridad con la voz feme2 existente.
+
+  [ ] "Estoy cansado/a" v1     ->  cansado1_<VOZ>.mp3
+  [ ] "Estoy cansado/a" v2     ->  cansado2_<VOZ>.mp3
+  [ ] "Estoy cansado/a" v3     ->  cansado3_<VOZ>.mp3
+  [ ] "Estoy cansado/a" v4     ->  cansado4_<VOZ>.mp3
+  [ ] "Estoy cansado/a" v5     ->  cansado5_<VOZ>.mp3
+       5 variantes distintas de queja por fatiga durante el examen.
+  [ ] "Deja de escucharse"     ->  dejaescucharse_<VOZ>.mp3
+       El tono desaparecio (deterioro tonal / Carhart).
+  [ ] "Se escucha mas bajito"  ->  seescuchamasbajito_<VOZ>.mp3
+       El tono sigue pero bajo de intensidad.
+
+
+######################################################################
+BLOQUE 5 - VOZ DEL EXAMINADOR (talkback)
+######################################################################
+
+Set unico, NO lleva sufijo de voz: el archivo se llama igual que el boton.
+Es la voz del fonoaudiologo hablando al paciente por el talkback.
+Carpeta: resources/audio/
+
+Estados:
+  (FALTA)    no existe el mp3, hoy el boton suena mudo
+  (REGRABAR) el mp3 existe pero el texto cambio, hay que rehacerlo
+  (ya existe) sin cambios, no se toca
+
+  1. [ ] boton "Colocar fonos"  ->  colocar_fonos.mp3   (ya existe)
+         LE VOY A COLOCAR ESTOS FONOS, POR ESTOS FONOS USTED VA A
+         ESCUCHAR UNOS PITOS, CADA PITO QUE ESCUCHE NECESITO QUE LEVANTE
+         LA MANO, AUNQUE SUENEN MUY PEQUEÑOS, ME AVISA TODOS LOS PITOS
+         QUE ESCUCHE.
+
+  2. [ ] boton "Aerea + ruido"  ->  aerea_+_ruido.mp3   (ya existe)
+         AHORA VA ESCUCHAR UN RUIDO POR LA OTRA OREJITA, NECESITO QUE NO
+         LE HAGA CASO A ESE RUIDO Y ME SIGA AVISANDO LOS SONIDOS DE ESTA
+         OREJITA
+
+  3. [ ] boton "Colocar vibrador"  ->  colocar_vibrador.mp3   (ya existe)
+         LE VOY A COLOCAR ESTE APARATO DETRÁS DE SU OREJA, NECESITO QUE
+         ME AVISE LOS PITOS IGUAL QUE AL COMIENZO DEL EXAMEN, AUNQUE
+         SUENEN MUY BAJOS.
+
+  4. [ ] boton "vibrador + ruido"  ->  vibrador_+_ruido.mp3   (ya existe)
+         LE VOY A COLOCAR ESTE APARATO DETRÁS DE SU OREJA, NECESITO QUE
+         ME AVISE LOS PITOS AUNQUE SUENEN MUY BAJITOS. POR LA OTRA OREJA
+         VA UN RUIDO, A ESE RUIDO NECESITO QUE NO LE HAGA CASO Y ME SIGA
+         AVISANDO LOS PITOS QUE ESCUCHE.
+
+  5. [ ] boton "Mano levantada"  ->  mano_levantada.mp3   (ya existe)
+         VA A ESCUCHAR UN PITO CONTINUO, NECESITO QUE MANTENGA LA MANO
+         LEVANTADA TODO EL MOMENTO QUE ESCUCHE EL PITO. SI LO DEJA DE
+         ESCUCHAR BAJA LA MANO. SI LO ESCUCHA MÁS DESPACIO MANTENGA LA
+         MANO LEVANTADA.
+
+  6. [ ] boton "Mano levantada en ruido"  ->  mano_levantada_en_ruido.mp3   (REGRABAR)
+         VA A ESCUCHAR UN PITO POR UN OÍDO Y, POR EL OTRO OÍDO, UN RUIDO.
+         NO LE HAGA CASO AL RUIDO. MANTENGA LA MANO LEVANTADA TODO EL
+         RATO QUE ESCUCHE EL PITO, AUNQUE SE ESCUCHE MÁS BAJITO. BAJE LA
+         MANO SOLO SI EL PITO DESAPARECE DEL TODO.
+
+  7. [ ] boton "Rosemberg bilateral"  ->  rosemberg_bilateral.mp3   (FALTA)
+         VA A ESCUCHAR UN PITO CONTINUO, UN OÍDO A LA VEZ. MANTENGA LA
+         MANO LEVANTADA TODO EL RATO QUE LO ESCUCHE, AUNQUE SE VAYA
+         HACIENDO MÁS BAJITO. BAJE LA MANO SOLO SI EL PITO DESAPARECE DEL
+         TODO.
+
+  8. [ ] boton "Ruido blanco contralateral"  ->  ruido_blanco_contralateral.mp3   (FALTA)
+         LE VOY A PONER UN PITO FUERTE POR UN OÍDO Y, POR EL OTRO OÍDO,
+         UN RUIDO. AL RUIDO NO LE HAGA CASO. MANTENGA LA MANO LEVANTADA
+         TODO EL RATO QUE ESCUCHE EL PITO, AUNQUE SE VAYA HACIENDO MÁS
+         BAJITO. BAJE LA MANO SOLO SI EL PITO DESAPARECE DEL TODO.
+
+  9. [ ] boton "¿Dejo de escuchar?"  ->  dejo_de_escuchar.mp3   (ya existe)
+         ¿LO DEJÓ DE ESCUCHAR?
+
+ 10. [ ] boton "Dos pitos"  ->  dos_pitos.mp3   (ya existe)
+         VA A ESCUCHAR DOS PITOS, DE FORMA ALTERNADA, UN OÍDO PRIMERO Y
+         OTRO DESPUÉS. NECESITO QUE ME DIGA SI LOS ESCUCHA IGUAL EN
+         VOLUMEN O UNO MÁS FUERTE QUE OTRO.
+
+ 11. [ ] boton "¿Sonidos iguales?"  ->  sonidos_iguales.mp3   (ya existe)
+         ¿LOS ESCUCHO IGUALES?
+
+ 12. [ ] boton "¿En qué oído?"  ->  en_que_oido.mp3   (ya existe)
+         ¿QUÉ OÍDO ESCUCHO MÁS FUERTE?
+
+ 13. [ ] boton "Cambie de volumen"  ->  cambie_de_volumen.mp3   (ya existe)
+         VA ESCUCHAR UN PITO DE FORMA CONTINUA. NECESITO QUE ME AVISE
+         CUANDO ESE PITO CAMBIE DE VOLUMEN LEVANTANDO LA MANO CADA VEZ
+         QUE OCURRA.
+
+ 14. [ ] boton "Escuche mi voz"  ->  escuche_mi_voz.mp3   (ya existe)
+         APENAS ESCUCHE MI VOZ, LEVANTE LA MANO.
+
+ 15. [ ] boton "pa pa pa"  ->  pa_pa_pa.mp3   (ya existe)
+         "PA PA PA PA PA..." repetido de forma continua y pareja. Se usa
+         para buscar el umbral de deteccion de la voz (SDT), no lleva
+         instruccion.
+
+ 16. [ ] boton "Dictar palabras"  ->  dictar_palabras.mp3   (ya existe)
+         AHORA LE VOY A DICTAR UNAS PALABRAS, NECESITO QUE LAS REPITA EN
+         VOZ ALTA Y REPITA SOLO LO QUE ENTIENDA.
+
+ 17. [ ] boton "¿Escucha?"  ->  escucha.mp3   (ya existe)
+         ¿ME ESCUCHA?
+
+ 18. [ ] boton "¿No entiende?"  ->  no_entiende.mp3   (ya existe)
+         ¿ESCUCHA PERO NO ENTIENDE?
+
+ 19. [ ] boton "¿Muy fuerte?"  ->  muy_fuerte.mp3   (ya existe)
+         ¿ESTA MUY FUERTE MI VOZ?
+
+ 20. [ ] boton "¿Molesta?"  ->  molesta.mp3   (ya existe)
+         ¿MOLESTA CUANDO LE HABLO?
+
+ 21. [ ] boton "Pitos fuertes"  ->  pitos_fuertes.mp3   (ya existe)
+         AHORA LE VOY A COLOCAR UNOS PITOS FUERTES, VAN A HACER TODOS
+         FUERTES E IRÁN AUMENTANDO EN VOLUMEN, SERÁN CADA VEZ MÁS
+         FUERTES. NECESITO QUE ME AVISE SI ALGUNO DE ESOS PITOS FUERTES A
+         USTED LE MOLESTA.
+
+ 22. [ ] boton "Solo si molesta"  ->  solo_si_molesta.mp3   (ya existe)
+         SOLO SI MOLESTA EL PITO FUERTE LEVANTE LA MANO.
+
+ 23. [ ] boton "Molesto ¿o?"  ->  molesto_o.mp3   (ya existe)
+         ¿ESE SONIDO LE MOLESTO O SOLO LO ESCUCHO FUERTE?
+
+El boton "Silencio" no reproduce audio: no se graba.
+
+######################################################################
+NOTA TECNICA
+######################################################################
+
+Hoy el codigo esta hardcodeado a feme1 (palabras) y feme2 (respuestas
+cortas) porque no habia mas voces grabadas:
+  src/audiometria/ListWords.py:88-92   -> self.gender='feme'; self.id=1
+  src/audiometria/response_A.py:248    -> create_voice(texto,'feme',2)
+Cuando este completo el set del paciente nuevo hay que sacar ese parche
+para que la voz salga del gender/id de la ficha del caso.
