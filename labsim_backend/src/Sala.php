@@ -7,9 +7,8 @@ declare(strict_types=1);
  *
  * Hasta ahora un caso era exactamente una persona y el chat era 1 a 1. Eso
  * deja fuera la mitad de la clínica real: el lactante no habla y todo lo
- * cuenta la madre; al menor de 14 la ley lo obliga a venir acompañado; al
- * adulto mayor que niega su hipoacusia lo desmiente la esposa que sí la
- * nota. Ese contraste entre lo que el paciente dice y lo que el acompañante
+ * cuenta la madre; el adulto mayor que niega su hipoacusia lo desmiente la
+ * esposa que sí la nota. Ese contraste entre lo que el paciente dice y lo que el acompañante
  * afirma ES el hallazgo clínico, y sin acompañantes no existe.
  *
  * Este archivo es solo el elenco: quién es cada uno, qué sabe y cómo se
@@ -27,13 +26,6 @@ declare(strict_types=1);
 final class Sala
 {
     public const VERSION = 1;
-
-    /**
-     * Edad bajo la cual el paciente NO puede ser atendido solo (Chile: el
-     * menor de 14 requiere acompañante adulto). Es una regla del caso, no
-     * una preferencia: CaseCompleteness la reclama como pendiente.
-     */
-    public const EDAD_ACOMPANANTE_OBLIGATORIO = 14;
 
     /**
      * Roles posibles. `paciente` es un rol más y no una entidad aparte: es
@@ -213,15 +205,20 @@ final class Sala
      *
      * Si el docente no marcó a nadie, se elige solo: el paciente si su edad
      * le da para contar su historia, y si no el primer acompañante adulto.
-     * Un lactante sin acompañante quedaría como informante de sí mismo, que
-     * es absurdo pero irrepresentable de otra forma -- para eso está la
-     * validación de CaseCompleteness.
+     * Un lactante que viene solo termina siendo informante de sí mismo, que
+     * es absurdo pero irrepresentable de otra forma -- eso lo reclama
+     * problemas(), porque deja al alumno sin nadie a quien preguntarle.
      */
     private static function asignarInformante(array $personas): array
     {
         $idx = null;
         foreach ($personas as $k => $p) {
-            if ($p['informante']) {
+            // Un lactante marcado como quien cuenta la historia se corrige
+            // solo si hay alguien más que sí habla: no se avisa ni se
+            // bloquea nada, simplemente el prompt no puede decirle al
+            // modelo que lleva la voz cantante alguien que no produce
+            // frases.
+            if ($p['informante'] && self::capacidad((int) $p['edad']) !== self::CAP_NULO) {
                 $idx = $idx ?? $k;
             }
             $personas[$k]['informante'] = false;
@@ -505,40 +502,35 @@ final class Sala
      * Problemas de la sala de un caso, en texto para el docente. Vacío =
      * la sala está bien armada.
      *
+     * Deliberadamente NO valida quién acompaña a quién. Que un menor venga
+     * con un adulto, o que el padre pueda estar presente, son
+     * recomendaciones y formalidades, no requisitos: un menor se atiende
+     * solo si se puede atender solo. Bloquear un caso por eso sería
+     * inventar una regla que en la práctica no existe.
+     *
+     * Lo único que sí se reclama es lo que deja el ejercicio sin salida:
+     * un paciente que por su edad no habla y que además viene solo. Ahí no
+     * hay nadie que pueda contar la historia y el alumno se queda frente a
+     * una consulta muda.
+     *
      * @return array<int,string>
      */
     public static function problemas(array $sala): array
     {
-        $problemas = [];
         $paciente = self::paciente($sala);
         if ($paciente === null) {
             return ['La sala no tiene paciente.'];
         }
 
-        $acompanantesAdultos = 0;
-        foreach ($sala['personas'] as $p) {
-            if (!$p['es_paciente'] && $p['edad'] >= 18) {
-                $acompanantesAdultos++;
-            }
-            if ($p['nombre'] === '') {
-                $problemas[] = 'Hay alguien sin nombre (' . (self::ROLES[$p['rol']] ?? 'acompañante') . ').';
-            }
+        if (self::capacidad((int) $paciente['edad']) === self::CAP_NULO
+            && !self::tieneAcompanantes($sala)) {
+            return [sprintf(
+                'El paciente tiene %d años y viene solo: por su edad no puede contar nada, '
+                . 'así que no hay con quién levantar la historia. Agrega a quien lo trae.',
+                (int) $paciente['edad']
+            )];
         }
 
-        if ($paciente['edad'] < self::EDAD_ACOMPANANTE_OBLIGATORIO && $acompanantesAdultos === 0) {
-            $problemas[] = sprintf(
-                'El paciente tiene %d años: bajo los %d debe venir con un acompañante adulto.',
-                $paciente['edad'],
-                self::EDAD_ACOMPANANTE_OBLIGATORIO
-            );
-        }
-
-        // Una guagua no puede ser su propio informante: el relato tiene que
-        // salir de alguien que hable.
-        if (self::capacidad($paciente['edad']) === self::CAP_NULO && $paciente['informante']) {
-            $problemas[] = 'El paciente no habla por su edad: marca a un acompañante como quien cuenta la historia.';
-        }
-
-        return $problemas;
+        return [];
     }
 }

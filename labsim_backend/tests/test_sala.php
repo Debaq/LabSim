@@ -97,28 +97,40 @@ t_eq(Sala::paciente($conSala)['nombre'], 'Benjamín',
     'El nombre real del paciente es el de la cita, no el guardado en la sala');
 
 // -- Validación ---------------------------------------------------------
+// A propósito casi no hay: quién acompaña a quién son recomendaciones, no
+// requisitos, y un menor se atiende solo si se puede atender solo.
 
 t_eq(Sala::problemas(sala_lactante()), [], 'Lactante con madre: sala válida');
 
 $menorSolo = Sala::normalize(['personas' => [
     ['id' => 'p1', 'rol' => 'paciente', 'nombre' => 'Beni', 'edad' => 9, 'es_paciente' => true],
 ]]);
-$problemas = Sala::problemas($menorSolo);
-t_true(count($problemas) > 0, 'Menor de 14 sin acompañante: la sala está mal armada');
-t_true(strpos($problemas[0], '14') !== false, 'Y el aviso nombra el límite legal');
+t_eq(Sala::problemas($menorSolo), [],
+    'Un menor que viene solo no es un caso incompleto: no hay regla que lo impida');
 
+$adolescenteSolo = Sala::normalize(['personas' => [
+    ['id' => 'p1', 'rol' => 'paciente', 'nombre' => 'Cata', 'edad' => 15, 'es_paciente' => true],
+]]);
+t_eq(Sala::problemas($adolescenteSolo), [], 'Ni un adolescente solo');
+
+// Lo único que sí deja el ejercicio sin salida: nadie puede hablar.
+$guaguaSola = Sala::normalize(['personas' => [
+    ['id' => 'p1', 'rol' => 'paciente', 'nombre' => 'Benja', 'edad' => 1, 'es_paciente' => true],
+]]);
+$problemas = Sala::problemas($guaguaSola);
+t_eq(count($problemas), 1, 'Una guagua sola deja al alumno sin nadie a quien preguntarle');
+t_true(strpos($problemas[0], 'viene solo') !== false, 'Y el aviso dice por qué');
+
+// Marcar de informante a quien no habla se corrige solo, sin avisar: el
+// prompt no puede decir que lleva la voz cantante alguien que no habla.
 $guaguaInformante = Sala::normalize(['personas' => [
     ['id' => 'p1', 'rol' => 'paciente', 'nombre' => 'Benja', 'edad' => 1,
      'es_paciente' => true, 'informante' => true],
     ['id' => 'p2', 'rol' => 'madre', 'nombre' => 'Rosa', 'edad' => 32],
 ]]);
-// A propósito no se corrige solo: quién cuenta la historia es una decisión
-// del docente, y dejarla mal puesta en silencio daría una consulta en la que
-// el relato clínico sale de alguien que no habla.
-$problemasGuagua = Sala::problemas($guaguaInformante);
-t_eq(count($problemasGuagua), 1, 'Una guagua marcada como quien cuenta la historia queda pendiente');
-t_true(strpos($problemasGuagua[0], 'no habla por su edad') !== false,
-    'Y el aviso dice que hay que marcar a un acompañante');
+t_true(Sala::persona($guaguaInformante, 'p2')['informante'],
+    'Marcar de informante a una guagua pasa la voz cantante a la madre');
+t_eq(Sala::problemas($guaguaInformante), [], 'Y no queda nada pendiente por eso');
 
 // -- Formulario del editor: ida y vuelta --------------------------------
 

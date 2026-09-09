@@ -1040,7 +1040,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <div class="tab-panel" data-tab="sala">
 <div class="card">
     <strong>Sala de atención</strong>
-    <p class="legend help">Quiénes vienen con el paciente. Un lactante no cuenta su historia: la cuenta la madre. Un menor de 14 años no se atiende solo. Y hay adultos que niegan lo que el acompañante ve todos los días -- ese desacuerdo <em>es</em> el hallazgo clínico del caso, y el alumno tiene que darse cuenta de a quién le está preguntando.</p>
+    <p class="legend help">Quiénes vienen con el paciente. Un lactante no cuenta su historia: la cuenta la madre. Y hay adultos que niegan lo que el acompañante ve todos los días -- ese desacuerdo <em>es</em> el hallazgo clínico del caso, y el alumno tiene que darse cuenta de a quién le está preguntando.</p>
     <p class="legend help">El alumno no elige a quién le habla con un menú: lo dice escribiendo ("mamita, ¿su hijo escucha bien?", "prefiero que me conteste él") y responde quien corresponda. Un caso sin acompañantes se comporta exactamente como antes: una conversación con el paciente y nadie más.</p>
 
     <div class="section-sep" style="border-top:1px dashed var(--color-border);">

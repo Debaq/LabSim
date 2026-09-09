@@ -124,9 +124,11 @@ final class CaseCompleteness
             ];
         }
 
-        // --- Sala: quién viene con el paciente. Un menor de 14 no se
-        // atiende solo, y a una guagua no se le puede dejar de informante
-        // de sí misma -- el caso quedaría sin nadie que cuente la historia.
+        // --- Sala: quién viene con el paciente (ver Sala::problemas). No
+        // se valida quién acompaña a quién -- eso son recomendaciones, no
+        // requisitos. Lo único que se reclama es un paciente que por su
+        // edad no habla y encima viene solo: ahí no hay con quién levantar
+        // la historia.
         //
         // Solo se revisa si el caso YA tiene sala guardada. Un caso anterior
         // al chat grupal (o creado desde create_a.py) no la tiene, y
