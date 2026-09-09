@@ -5,33 +5,17 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/Metrics.php';
+require_once __DIR__ . '/../../src/HistoriaClinica.php';
 
 /**
  * Detalle de una atención propia ya cerrada: stats de comportamiento, ficha
- * clínica (historia_clinica + tu propio historial con ese paciente) y la
+ * clínica (las atenciones previas del caso y las tuyas en una sola línea de
+ * tiempo, ver HistoriaClinica::lineaTiempo) y la
  * conversación con el paciente simulado, con la retroalimentación que tu
  * docente haya dejado turno a turno (chat_comments) -- todo solo lectura,
  * scopeado a la sesión de alumno (ver sso.php), nunca a otro appointment_id
  * o student_id que no sea el propio.
  */
-
-// Llaves {{N}} dentro de historia_clinica (N = offset en días respecto a la
-// fecha de la cita) -- mismo criterio que agenda.Agenda/core.ficha en la app.
-function resolver_fechas_historia_clinica(string $texto, ?string $fechaCitaStr): string
-{
-    if ($texto === '' || !$fechaCitaStr) {
-        return $texto;
-    }
-    $fechaCita = DateTime::createFromFormat('d-m-y', $fechaCitaStr);
-    if (!$fechaCita) {
-        return $texto;
-    }
-    return preg_replace_callback('/\{\{([+-]?\d+)\}\}/', static function (array $m) use ($fechaCita) {
-        $fecha = clone $fechaCita;
-        $fecha->modify(((int) $m[1] >= 0 ? '+' : '') . (int) $m[1] . ' days');
-        return $fecha->format('d-m-Y');
-    }, $texto);
-}
 
 $me = Auth::requireStudentSession();
 $pdo = Db::get();
@@ -80,8 +64,7 @@ if ($appointment['patient_id']) {
     $stmt = $pdo->prepare(
         "SELECT att2.nota, att2.hora_real, a2.fecha
          FROM attendances att2 JOIN appointments a2 ON a2.id = att2.appointment_id
-         WHERE att2.student_id = ? AND att2.estado = 'atendido' AND a2.patient_id = ?
-         ORDER BY a2.fecha, a2.hora"
+         WHERE att2.student_id = ? AND att2.estado = 'atendido' AND a2.patient_id = ?"
     );
     $stmt->execute([$me['id'], (int) $appointment['patient_id']]);
     $historial = $stmt->fetchAll();
@@ -215,17 +198,24 @@ student_header($paciente, $me);
         <b>Rut:</b> <?= htmlspecialchars($appointment['rut'] ?: '—') ?><br>
         <b>Fecha de nacimiento:</b> <?= htmlspecialchars($appointment['fecha_nac'] ?: '—') ?>
     </p>
-    <?php if ($historiaClinica): ?>
-    <p><b>Historia clínica:</b> <?= nl2br(htmlspecialchars(resolver_fechas_historia_clinica($historiaClinica, $appointment['fecha']))) ?></p>
-    <?php endif; ?>
-    <p class="legend">Tu historial con este paciente (otras atenciones tuyas que hayas cerrado):</p>
-    <?php if (!$historial): ?>
-    <p class="empty">Esta es la primera vez que lo atendiste.</p>
+    <?php
+    // Atenciones previas del caso y las tuyas, en una sola línea de tiempo:
+    // la evolución que escribiste va DESPUÉS de lo que le pasó al paciente
+    // antes de llegar, que es como se lee una ficha de verdad. Antes eran
+    // dos listas separadas y la tuya se ordenaba por la fecha como string.
+    $lineaTiempo = HistoriaClinica::lineaTiempo($historiaClinica, $appointment['fecha'], $historial);
+    ?>
+    <p class="legend">Historial completo de este paciente, con tus atenciones incluidas:</p>
+    <?php if (!$lineaTiempo): ?>
+    <p class="empty">Sin historial registrado para este paciente.</p>
     <?php else: ?>
     <ul>
-        <?php foreach ($historial as $h): ?>
-        <li><b><?= htmlspecialchars($h['fecha'] ?: 'sin fecha') ?> <?= htmlspecialchars($h['hora_real']) ?></b> —
-            <?= htmlspecialchars($h['nota'] ?: 'sin comentario') ?></li>
+        <?php foreach ($lineaTiempo as $e): ?>
+        <li<?= $e['propia'] ? ' style="font-weight:500;"' : '' ?>>
+            <b><?= htmlspecialchars($e['fecha'] ?: 'sin fecha') ?> <?= htmlspecialchars($e['hora']) ?></b>
+            <?= $e['propia'] ? '<span class="legend">(tu atención)</span>' : '' ?> —
+            <?= htmlspecialchars($e['texto'] ?: 'sin comentario') ?>
+        </li>
         <?php endforeach; ?>
     </ul>
     <?php endif; ?>

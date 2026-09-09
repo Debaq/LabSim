@@ -81,6 +81,55 @@ def historial_atenciones(shedule, rut, username, is_admin):
     return historial
 
 
+# Fecha ya resuelta al principio de una línea de la historia clínica.
+HISTORIA_LINEA_RE = re.compile(r"^(\d{2}-\d{2}-\d{4})\s*(.*)$", re.S)
+
+# Claves de orden para lo que no trae fecha legible: una línea de la historia
+# clínica va al principio (el docente la escribió antes de todo lo demás) y
+# una atención sin fecha es la de ahora, así que va al final.
+_ORDEN_PRIMERO = QDateTime(QDate(1, 1, 1), QTime(0, 0))
+_ORDEN_ULTIMO = QDateTime(QDate(9999, 12, 31), QTime(23, 59))
+
+
+def linea_tiempo(historia_clinica, fecha_cita, historial):
+    """Atenciones previas del caso + atenciones cerradas, en un solo orden.
+
+    Devuelve dicts {fecha, hora, alumno, texto}: `alumno` vacío en las
+    entradas que vienen de la historia clínica del caso, que no son de
+    nadie en particular.
+    """
+    entradas = []
+
+    for linea in resolver_fechas_historia_clinica(historia_clinica or "", fecha_cita).splitlines():
+        linea = linea.strip()
+        if not linea:
+            continue
+        match = HISTORIA_LINEA_RE.match(linea)
+        fecha = match.group(1) if match else ""
+        texto = match.group(2).strip() if match else linea
+        orden = QDateTime(QDate.fromString(fecha, "dd-MM-yyyy"), QTime(0, 0)) if fecha else None
+        entradas.append((orden if orden and orden.isValid() else _ORDEN_PRIMERO,
+                         {"fecha": fecha, "hora": "", "alumno": "", "texto": texto}))
+
+    for fecha, hora_real, alumno, nota in historial:
+        fecha_q = parse_fecha_agenda(fecha)
+        orden = QDateTime(
+            fecha_q,
+            QTime.fromString(hora_real, "HH:mm:ss") if hora_real else QTime(0, 0),
+        )
+        # La agenda guarda "dd-MM-yy" y la historia clínica queda en
+        # "dd-MM-yyyy": mezclados en una misma lista se leen como si fueran
+        # formatos distintos de fechas distintas.
+        fecha_txt = fecha_q.toString("dd-MM-yyyy") if fecha_q.isValid() else fecha
+        entradas.append((orden if fecha_q.isValid() else _ORDEN_ULTIMO,
+                         {"fecha": fecha_txt, "hora": hora_real, "alumno": alumno, "texto": nota}))
+
+    # sorted es estable: a igual fecha, la historia del caso queda antes que
+    # las atenciones, que es el orden en que se cargaron.
+    entradas.sort(key=lambda par: par[0])
+    return [dato for _, dato in entradas]
+
+
 def render_ficha_html(row, caso, shedule, username, is_admin):
     """Arma el HTML de la ficha clínica para `row` (AgendaEntry) + `caso`
     (dict del caso clínico) -- datos del paciente, puntualidad de esta cita
@@ -115,38 +164,30 @@ def render_ficha_html(row, caso, shedule, username, is_admin):
         partes.append(f"<p><b>Hora agendada:</b> {row.hora}<br>"
                        f"<b>Inicio real:</b> {hora_real} ({resumen})</p>")
 
-    # Atenciones previas del paciente: lo que le hicieron ANTES de llegar,
-    # una por línea en el campo. Va en su propia sección porque no son
-    # atenciones de alumnos -- son parte del caso, y el alumno las lee para
-    # saber de dónde viene el paciente.
+    # Una sola línea de tiempo: lo que le hicieron al paciente antes de
+    # llegar (historia clínica del caso) y las atenciones cerradas, en orden.
+    # La evolución que escribió el alumno tiene que quedar DESPUÉS de las
+    # atenciones previas, que es como se lee una ficha de verdad.
     historia_clinica = caso.get("historia_clinica", "") if isinstance(caso, dict) else ""
-    if historia_clinica:
-        historia_resuelta = resolver_fechas_historia_clinica(historia_clinica, row.fecha)
-        # Una línea del campo = un ítem. Interpolado crudo, los saltos de
-        # línea colapsaban y las tres o cuatro atenciones quedaban como un
-        # solo párrafo corrido.
-        lineas = [l.strip() for l in historia_resuelta.splitlines() if l.strip()]
-        if lineas:
-            partes.append("<h3>Atenciones previas</h3>")
-            partes.append("<ul>" + "".join(
-                f"<li>{html.escape(linea)}</li>" for linea in lineas
-            ) + "</ul>")
+    entradas = linea_tiempo(historia_clinica, row.fecha,
+                            historial_atenciones(shedule, rut, username, is_admin))
 
-    partes.append("<h3>Historial de atenciones</h3>")
-    items = ""
-
-    historial = historial_atenciones(shedule, rut, username, is_admin)
-    # Escapado: son textos libres (nota del alumno, nombre) y un "<" suelto
-    # rompía el resto de la ficha sin dejar rastro de por qué.
-    items += "".join(
-        f"<li><b>{html.escape(fecha or 'sin fecha')} {html.escape(hora)}</b> — "
-        f"{html.escape(alumno)}: {html.escape(nota or 'sin comentario')}</li>"
-        for fecha, hora, alumno, nota in historial
-    )
-
-    if items:
+    partes.append("<h3>Historial del paciente</h3>")
+    if entradas:
+        # Escapado: son textos libres (historia del caso, nota del alumno) y
+        # un "<" suelto rompía el resto de la ficha sin dejar rastro de por
+        # qué -- una otoscopia que dice "conducto <2 mm", por ejemplo.
+        items = "".join(
+            "<li><b>{fecha} {hora}</b>{quien} — {texto}</li>".format(
+                fecha=html.escape(e["fecha"] or "sin fecha"),
+                hora=html.escape(e["hora"]),
+                quien=f" {html.escape(e['alumno'])}" if e["alumno"] else "",
+                texto=html.escape(e["texto"] or "sin comentario"),
+            )
+            for e in entradas
+        )
         partes.append(f"<ul>{items}</ul>")
     else:
-        partes.append("<p>Sin atenciones cerradas registradas para este paciente.</p>")
+        partes.append("<p>Sin historial registrado para este paciente.</p>")
 
     return "".join(partes)
