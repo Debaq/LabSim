@@ -711,3 +711,65 @@ foreach (['fonoaudiolog', 'otorrinolaring', 'tecnólogo médico', 'tecnologo med
 }
 t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, 'evaluación auditiva') !== false,
     'Y dice explícitamente cómo escribir una derivación: por el estudio');
+
+// ---------------------------------------------------------------------
+// Grados de hipoacusia por cuadro (GRADES / SCENARIOS['grados']).
+//
+// El editor escala la forma del cuadro con UN factor hasta que el promedio
+// BIAP caiga en el rango del grado pedido. Eso solo funciona mientras
+// ninguna frecuencia DEL PROMEDIO sature: si 4 kHz llega al tope de la
+// audiometría, subir la escala ya no sube el promedio y el cuadro se aplana
+// --deja de ser el cuadro que se eligió--. Estos tests son el contrato entre
+// las formas de SCENARIOS y las listas `grados`: tocar una `sn_shape` sin
+// revisar la otra deja al docente un grado que el generador no puede dar.
+// ---------------------------------------------------------------------
+
+/** Techo del promedio BIAP para un cuadro, sin saturar ninguna del promedio. */
+function techoBiap(array $esc): float
+{
+    $suma = 0.0;
+    $peor = 0.0;
+    foreach (CaseProfile::GRADE_FREQS as $hz) {
+        $v = ($esc['sn_shape'][$hz] ?? 0) + ($esc['gap_shape'][$hz] ?? 0);
+        $suma += $v;
+        $peor = max($peor, (float) $v);
+    }
+    $base = $suma / count(CaseProfile::GRADE_FREQS);
+    // 115 dB = MAX_DB en el JS del generador (case_create.php).
+    $porSaturacion = $peor > 0 ? $base * (115.0 / $peor) : INF;
+    return min($porSaturacion, (float) ($esc['max_db'] ?? INF));
+}
+
+t_eq(CaseProfile::GRADE_FREQS, [500, 1000, 2000, 4000], 'GRADE_FREQS: promedio BIAP');
+t_eq(CaseProfile::GRADES['leve']['rango'][0], 21,
+     'La audición normal en Chile llega a 20 dB HL: el grado leve arranca en 21');
+
+foreach (CaseProfile::SCENARIOS as $clave => $esc) {
+    t_true(isset($esc['grados']) && is_array($esc['grados']),
+           "Cuadro '{$clave}': declara `grados` (lista vacía si no tiene)");
+
+    foreach ($esc['grados'] as $grado) {
+        t_true(isset(CaseProfile::GRADES[$grado]),
+               "Cuadro '{$clave}': el grado '{$grado}' existe en GRADES");
+        // Alcanzable con margen: si el techo apenas roza el piso del rango,
+        // todos los casos de ese grado salen calcados en el mínimo.
+        $piso = CaseProfile::GRADES[$grado]['rango'][0];
+        t_true(techoBiap($esc) >= $piso + 10,
+               sprintf("Cuadro '%s': el grado '%s' (desde %d dB) es alcanzable -- techo %.0f dB",
+                       $clave, $grado, $piso, techoBiap($esc)));
+    }
+}
+
+// El oído sano no tiene grado de hipoacusia: es lo que hace que el select
+// quede apagado en vez de ofrecer una lista vacía.
+t_eq(CaseProfile::SCENARIOS['normal']['grados'], [],
+     "El cuadro 'normal' no tiene grados");
+
+// Techos que son decisiones clínicas, no accidentes de la forma: si alguien
+// sube el gap de la conductiva, este test avisa antes que el aula.
+t_eq(CaseProfile::SCENARIOS['conductiva']['max_db'], 60,
+     'Conductiva pura: techo de 60 dB (la vía ósea le pone límite al gap)');
+t_true(!in_array('severa', CaseProfile::SCENARIOS['conductiva']['grados'], true),
+       'Conductiva pura: no llega a severa (más que eso ya es mixta)');
+t_eq(CaseProfile::SCENARIOS['muesca_4k']['grados'], ['leve'],
+     'Muesca de 4 kHz: por promedio no pasa de leve, y ese es el punto del cuadro');

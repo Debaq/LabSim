@@ -144,6 +144,41 @@ final class CaseProfile
     public const OAE_MAX_ATTEN_DB = 45.0;
 
     /**
+     * Frecuencias sobre las que se mide el grado de la hipoacusia: promedio
+     * BIAP de 500, 1000, 2000 y 4000 Hz en vía aérea.
+     *
+     * NO es el promedio de Fletcher (mejores 2 de 500/1k/2k) que el equipo le
+     * muestra al alumno --ver response.py-- y eso es a propósito: Fletcher
+     * ignora 4 kHz, así que una hipoacusia descendente le da 7 dB y quedaría
+     * "normal" por promedio. Con Fletcher, pedirle grado a un cuadro de
+     * agudos obliga a multiplicar la forma por diez, los agudos saturan en
+     * 120 y el cuadro pierde justamente la pendiente que enseña.
+     *
+     * Consecuencia a tener presente: el número que el alumno promedie en el
+     * equipo va a dar más bajo que el grado con que se armó el caso, en los
+     * cuadros descendentes. Es la diferencia real entre las dos escalas, no
+     * un error del simulador.
+     */
+    public const GRADE_FREQS = [500, 1000, 2000, 4000];
+
+    /**
+     * Grados de hipoacusia por promedio tonal (BIAP, dB HL).
+     *
+     * La audición normal en Chile llega hasta 20 dB HL inclusive, así que el
+     * grado leve arranca en 21 y no hay un grado "normal": un oído sin
+     * hipoacusia se pide con el cuadro 'normal', que no tiene grados.
+     *
+     * `max_db` en un cuadro (ver SCENARIOS) recorta el techo del grado cuando
+     * la fisiología lo exige.
+     */
+    public const GRADES = [
+        'leve'     => ['label' => 'Leve (21-40 dB)',      'rango' => [21, 40]],
+        'moderada' => ['label' => 'Moderada (41-70 dB)',  'rango' => [41, 70]],
+        'severa'   => ['label' => 'Severa (71-90 dB)',    'rango' => [71, 90]],
+        'profunda' => ['label' => 'Profunda (91-110 dB)', 'rango' => [91, 110]],
+    ];
+
+    /**
      * Cuadros clínicos para sortear un caso coherente de una sola vez.
      *
      * Reemplazan al par de "Autocompletar" independientes de ABR y EOA, que
@@ -153,14 +188,36 @@ final class CaseProfile
      * lesión -- y de ahí sale todo lo demás por proyección.
      *
      * `sn_shape`/`gap_shape` son formas relativas en dB por frecuencia; la
-     * escala se sortea dentro de `*_scale`, así dos casos del mismo cuadro
-     * no salen calcados (mismo criterio que EOAS_AUTOFILL_GRADES, y la razón
-     * de no fijar un valor "correcto" en lo que el alumno debe aprender a
-     * leer).
+     * escala se elige al azar dentro de `*_scale`, así dos casos del mismo
+     * cuadro no salen calcados (mismo criterio que EOAS_AUTOFILL_GRADES, y la
+     * razón de no fijar un valor "correcto" en lo que el alumno debe aprender
+     * a leer).
      *
-     * `lateralidad`: 'bilateral' carga los dos oídos, 'unilateral' sortea
-     * cuál y deja el otro sano -- que es lo que hace falta para que el IT5,
-     * el Weber y el Fowler tengan con qué comparar.
+     * `grados` es qué grados de GRADES puede producir el cuadro sin dejar de
+     * ser ese cuadro, y la lista NO es genérica: es clínica. Una conductiva
+     * pura no llega a severa porque la vía ósea le pone techo (ver `max_db`);
+     * una muesca de 4 kHz no es una hipoacusia severa por promedio, y forzarla
+     * a serlo la convertiría en una plana; un descendente puro no sube el
+     * promedio más allá de moderada sin aplanarse. El cuadro 'normal' no tiene
+     * grados: un oído sano no tiene grado de hipoacusia.
+     *
+     * Al elegir un grado, el editor escala la forma completa --componente
+     * sensorioneural Y gap juntos, con el mismo factor-- hasta que el promedio
+     * BIAP caiga en el rango pedido. La proporción entre lo conductivo y lo
+     * sensorioneural es del cuadro y no cambia con el grado.
+     *
+     * `max_db` es el techo físico del promedio, en los cuadros que lo tienen.
+     *
+     * El cuadro se elige POR OÍDO en el editor: un paciente puede tener el OD
+     * sano y una conductiva en el OI, o una coclear de un lado y un
+     * schwannoma del otro. El oído sano se pide con el cuadro 'normal', que
+     * no es un cero: es un oído normal con su propia variabilidad.
+     *
+     * `lateralidad` ya no decide nada por sí sola -- es la sugerencia que el
+     * editor le hace al otro oído cuando se elige este cuadro: 'unilateral'
+     * propone dejar el contrario normal (que es lo que hace falta para que el
+     * IT5, el Weber y el Fowler tengan con qué comparar), 'bilateral' propone
+     * repetirlo. Cualquiera de las dos se pisa eligiendo a mano.
      */
     public const SCENARIOS = [
         'normal' => [
@@ -168,7 +225,7 @@ final class CaseProfile
             'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 5, 3000 => 5, 4000 => 5, 6000 => 10, 8000 => 10],
             'sn_scale' => [0.0, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'bilateral',
-            'z' => ['A'], 'etf' => 'Normal',
+            'z' => ['A'], 'etf' => 'Normal', 'grados' => [],
         ],
         'coclear_agudos' => [
             'label' => 'Coclear en agudos (descendente)',
@@ -176,6 +233,10 @@ final class CaseProfile
             'sn_scale' => [0.6, 1.5], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal',
+            // Descendente pura: los graves normales tiran el promedio abajo.
+            // Para llevarla a severa habría que subir 500 y 1000, y entonces
+            // ya no es descendente, es plana.
+            'grados' => ['leve', 'moderada'],
         ],
         'muesca_4k' => [
             'label' => 'Muesca en 4 kHz (trauma acústico)',
@@ -183,6 +244,9 @@ final class CaseProfile
             'sn_scale' => [0.7, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal',
+            // La muesca es un hallazgo en 3-6 kHz con el resto conservado:
+            // por promedio no pasa de leve, y ese es el punto del cuadro.
+            'grados' => ['leve'],
         ],
         'coclear_plana' => [
             'label' => 'Coclear plana',
@@ -190,6 +254,7 @@ final class CaseProfile
             'sn_scale' => [0.6, 1.5], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada', 'severa', 'profunda'],
         ],
         'conductiva' => [
             'label' => 'Conductiva (otitis media / otoesclerosis)',
@@ -199,8 +264,12 @@ final class CaseProfile
             'gap_scale' => [0.5, 1.2],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
             // B = ocupación (otitis media), As = oído medio rígido
-            // (otoesclerosis). Los dos dan gap; cuál sale decide el sorteo.
+            // (otoesclerosis). Los dos dan gap; cuál sale al azar.
             'z' => ['B', 'As'], 'etf' => 'Disfunción tubaria',
+            // Una conductiva pura no pasa de ~60 dB: la cóclea está sana y la
+            // vía ósea sigue respondiendo, así que el gap tiene techo. Más
+            // que eso ya no es conductiva, es mixta.
+            'grados' => ['leve', 'moderada'], 'max_db' => 60,
         ],
         'mixta' => [
             'label' => 'Mixta',
@@ -210,6 +279,9 @@ final class CaseProfile
             'gap_scale' => [0.6, 1.1],
             'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'unilateral',
             'z' => ['B', 'As'], 'etf' => 'Disfunción tubaria',
+            // El componente sensorioneural no tiene el techo del gap: una
+            // mixta profunda es aérea ~95 con ósea ~70, que se mide bien.
+            'grados' => ['leve', 'moderada', 'severa', 'profunda'],
         ],
         'retrococlear' => [
             'label' => 'Retrococlear (schwannoma vestibular)',
@@ -217,6 +289,14 @@ final class CaseProfile
             'sn_scale' => [0.5, 1.2], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [10, 35], 'retro' => 'schwannoma', 'lateralidad' => 'unilateral',
             'z' => ['A'], 'etf' => 'Normal',
+            // Con esta forma descendente el promedio no pasa de ~70 sin que
+            // 4 kHz sature, y saturarla la aplanaría: dejaría de ser el
+            // descendente asimétrico que hace sospechar el retro. Lo que este
+            // cuadro enseña es la disociación (audiograma moderado con ABR
+            // desarmado y OEA conservada), no la profundidad. Para una severa
+            // retrococlear se arma con 'coclear_plana' severa y se baja el
+            // cce_pct a mano en Perfil auditivo.
+            'grados' => ['leve', 'moderada'],
         ],
         'neuropatia' => [
             'label' => 'Neuropatía auditiva / desincronía (ANSD)',
@@ -224,6 +304,7 @@ final class CaseProfile
             'sn_scale' => [0.6, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [0, 10], 'retro' => 'ansd', 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada', 'severa', 'profunda'],
         ],
     ];
 

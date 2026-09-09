@@ -815,7 +815,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // que pueden SER el ejercicio (Stenger, falsa onda V) y se
             // guardan tildando una casilla. Esto es un dato que falta, y no
             // hay caso sin él.
-            $faltantes = CaseCompleteness::pendingTexts($data);
+            // pending() (y no pendingTexts) porque cada pendiente sabe en qué
+            // pestaña se arregla: el listado de abajo salta ahí y le pinta el
+            // punto rojo a la pestaña.
+            $faltantes = CaseCompleteness::pending($data);
         }
 
         if ($error === null && $avisosPerfil === [] && $faltantes === []) {
@@ -916,14 +919,14 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 <?php if (!empty($faltantes)): ?>
-<div class="card" style="border-left:4px solid #b00;">
+<div class="card pendientes-card">
     <strong>Falta decidir lo que el perfil no puede calcular</strong>
     <ul>
         <?php foreach ($faltantes as $falta): ?>
-        <li><?= htmlspecialchars($falta) ?></li>
+        <li><a href="#" class="tab-link" data-goto-tab="<?= htmlspecialchars($falta['tab']) ?>"><?= htmlspecialchars($falta['texto']) ?></a></li>
         <?php endforeach; ?>
     </ul>
-    <p class="legend help">Esto no es opcional y no se guarda igual: son datos clínicos que ninguna cuenta puede sacar del audiograma. Sin ellos el alumno se encuentra con un paciente que no cierra, y vos no te enterás.</p>
+    <p class="legend help">Esto no es opcional y no se guarda igual: son datos clínicos que ninguna cuenta puede sacar del audiograma. Sin ellos el alumno se encuentra con un paciente que no cierra, y vos no te enterás. Cliqueá cada línea para ir a la pestaña donde se arregla.</p>
 </div>
 <?php endif; ?>
 <?php if (!empty($avisosPerfil)): ?>
@@ -945,20 +948,149 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <?php endif; ?>
 <?php $photoCaseId = $isEdit ? $editId : $uploadTempId; ?>
 <div class="tabs" role="tablist">
-    <button type="button" class="tab-btn active" data-tab="paciente">Paciente</button>
-    <button type="button" class="tab-btn" data-tab="sala">Sala</button>
-    <button type="button" class="tab-btn" data-tab="perfil">Perfil auditivo</button>
-    <button type="button" class="tab-btn" data-tab="otoscopia">Otoscopia</button>
-    <button type="button" class="tab-btn" data-tab="audiometria">Audiometría</button>
-    <button type="button" class="tab-btn" data-tab="timpanometria">Timpanometría</button>
-    <button type="button" class="tab-btn" data-tab="tinnitus">Tinnitus</button>
-    <button type="button" class="tab-btn" data-tab="abr">ABR</button>
-    <button type="button" class="tab-btn" data-tab="eoas">EOA</button>
-    <button type="button" class="tab-btn" data-tab="vemp">VEMP</button>
-    <button type="button" class="tab-btn" data-tab="anamnesis">Anamnesis</button>
+    <button type="button" class="tab-btn<?= $isEdit ? '' : ' active' ?>" data-tab="armado">Armado rápido</button>
+    <span class="tab-group">Quién es</span>
+    <button type="button" class="tab-btn<?= $isEdit ? ' active' : '' ?>" data-tab="paciente">1. Paciente</button>
+    <button type="button" class="tab-btn" data-tab="sala">2. Sala</button>
+    <span class="tab-group">El caso</span>
+    <button type="button" class="tab-btn" data-tab="perfil">3. Perfil auditivo</button>
+    <span class="tab-group">Exámenes</span>
+    <button type="button" class="tab-btn" data-tab="audiometria">4. Audiometría</button>
+    <button type="button" class="tab-btn" data-tab="otoscopia">5. Otoscopia</button>
+    <button type="button" class="tab-btn" data-tab="timpanometria">6. Timpanometría</button>
+    <button type="button" class="tab-btn" data-tab="abr">7. ABR</button>
+    <button type="button" class="tab-btn" data-tab="eoas">8. EOA</button>
+    <button type="button" class="tab-btn" data-tab="vemp">9. VEMP</button>
+    <button type="button" class="tab-btn" data-tab="tinnitus">10. Tinnitus</button>
+    <span class="tab-group">Entrevista</span>
+    <button type="button" class="tab-btn" data-tab="anamnesis">11. Anamnesis</button>
 </div>
 
-<div class="tab-panel active" data-tab="paciente">
+<div class="tab-panel<?= $isEdit ? '' : ' active' ?>" data-tab="armado">
+<div class="card">
+    <strong>Armado rápido</strong>
+    <p class="legend help">Todo lo que LabSim puede escribir solo, junto y en el orden en que conviene usarlo. Antes cada uno de estos botones vivía escondido dentro de la pestaña que llenaba, y había que saber que existía.</p>
+    <p class="legend help">Nada de esto es obligatorio: un caso se arma entero a mano, pestaña por pestaña. Y nada de esto es definitivo: lo que estos botones escriben queda en los campos de cada pestaña y se edita como si lo hubieras tipeado.</p>
+</div>
+
+<?php if (!$isEdit): ?>
+<div class="gen-step">
+    <div class="gen-step-num">1</div>
+    <div class="gen-step-body card">
+        <strong>Identidad del paciente</strong>
+        <p class="gen-step-dest">Escribe en <a href="#" class="tab-link" data-goto-tab="paciente">1. Paciente</a></p>
+        <p class="legend help">Nombre, segundo nombre y apellidos al azar según el sexo elegido en <a href="#" class="tab-link" data-goto-tab="paciente">Paciente</a>. La edad, el RUT y la foto se cargan ahí a mano -- la fecha de nacimiento se calcula sola desde la edad.</p>
+        <p class="legend help">Guarda el formulario y lo vuelve a dibujar con lo que ya tipeaste, así se puede apretar varias veces hasta que salga un nombre que convenza.</p>
+        <button type="submit" name="form_action" value="generate_name" class="secondary">Generar nombre al azar</button>
+    </div>
+</div>
+<?php endif; ?>
+
+<div class="gen-step">
+    <div class="gen-step-num"><?= $isEdit ? '1' : '2' ?></div>
+    <div class="gen-step-body card">
+        <strong>El cuadro clínico, oído por oído</strong>
+        <p class="gen-step-dest">Escribe en <a href="#" class="tab-link" data-goto-tab="perfil">3. Perfil auditivo</a> · <a href="#" class="tab-link" data-goto-tab="audiometria">4. Audiometría</a></p>
+        <p class="legend help">El punto de partida real del caso: escribe el audiograma entero (aérea y ósea), el sitio de la lesión, el timpanograma y el patrón retrococlear si corresponde, y enciende las derivaciones del <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>.</p>
+        <p class="legend help"><strong>Cada oído lleva su propio cuadro.</strong> Un paciente puede tener el OD sano y una conductiva en el OI, o una coclear de un lado y un schwannoma del otro. Poné "Normal" en el oído que no tiene nada: no es un cero, es un oído normal con su propia variabilidad.</p>
+        <div class="two-col">
+        <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
+            <div class="two-col">
+                <label>Cuadro <?= $ladoLabel ?>
+                    <select class="perfil-escenario" data-lado="<?= $lado ?>">
+                        <?php foreach (CaseProfile::SCENARIOS as $escKey => $esc): ?>
+                        <option value="<?= htmlspecialchars($escKey) ?>"><?= htmlspecialchars($esc['label']) ?></option>
+                        <?php endforeach; ?>
+                        <option value="__random__">Cualquiera (al azar)</option>
+                    </select>
+                </label>
+                <label>Grado <?= $ladoLabel ?>
+                    <select class="perfil-grado" data-lado="<?= $lado ?>">
+                        <option value="random">Cualquiera (al azar)</option>
+                    </select>
+                </label>
+            </div>
+        <?php endforeach; ?>
+        </div>
+        <button type="button" class="secondary" id="perfil-generar">Generar cuadro clínico</button>
+        <p class="legend help">La <strong>forma</strong> de la curva es la del cuadro; el <strong>grado</strong> es cuánto. Elegido el grado, se escala la forma completa --lo sensorioneural y el gap con el mismo factor-- hasta que el promedio caiga en el rango pedido: la proporción entre conductivo y sensorioneural es del cuadro y no cambia con el grado. Dentro del grado la magnitud sigue variando, así dos pacientes de la misma línea no salen calcados.</p>
+        <p class="legend help">El grado se mide sobre el <strong>promedio de <?= implode(', ', CaseProfile::GRADE_FREQS) ?> Hz en vía aérea</strong> (BIAP). Audición normal hasta 20 dB HL, así que el grado leve arranca en 21 y un oído sano se pide con el cuadro "Normal", que no tiene grado. <strong>Ojo:</strong> el equipo le muestra al alumno el promedio de Fletcher (mejores 2 de 500, 1000 y 2000), que ignora 4 kHz -- en un descendente el número que él calcule va a dar más bajo que el grado con que armaste el caso. Es la diferencia entre las dos escalas, no un error.</p>
+        <p class="legend help">Cada cuadro ofrece solo los grados que puede dar sin dejar de ser ese cuadro. Una conductiva pura no pasa de moderada porque la vía ósea le pone techo (más que eso ya es mixta); una muesca de 4 kHz no es una hipoacusia severa por promedio; un descendente puro no llega a severa sin aplanarse.</p>
+        <p class="legend help">Con el mismo cuadro en los dos oídos la magnitud se reparte pareja (una presbiacusia bilateral es simétrica por definición, más unos pocos dB de asimetría); con cuadros distintos cada oído se calcula por su cuenta.</p>
+        <p class="legend help">Revisá después el resultado en <a href="#" class="tab-link" data-goto-tab="audiometria">Audiometría</a> y en <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>: generar pisa lo que hubiera cargado ahí, en los dos oídos.</p>
+        <p class="legend help">Lo que esto NO decide es la función tubaria fina y el VEMP: qué corresponde depende de la patología concreta y esa es una decisión clínica, no una cuenta. El editor las reclama al guardar si quedaron sin tocar.</p>
+    </div>
+</div>
+
+<div class="gen-step">
+    <div class="gen-step-num"><?= $isEdit ? '2' : '3' ?></div>
+    <div class="gen-step-body card">
+        <strong>Ondas del ABR, oído por oído</strong>
+        <p class="gen-step-dest">Escribe en <a href="#" class="tab-link" data-goto-tab="abr">7. ABR</a></p>
+        <p class="legend help">Genera latencias y amplitudes onda por onda, FSP y condiciones de captura para la patología que tenga elegida cada oído en <a href="#" class="tab-link" data-goto-tab="abr">ABR</a>, usando el sexo y la edad del paciente. El umbral y la patología no salen de acá: los fija el perfil (paso <?= $isEdit ? '1' : '2' ?>).</p>
+        <?php $abrAuthorCatalog = AppConfig::getEffective('abr_reference_authors', null) ?? []; ?>
+        <div class="three-col">
+            <label>Autor de referencia
+                <select id="abr-author-select">
+                    <option value="__default__">LabSim (default)</option>
+                    <?php foreach ($abrAuthorCatalog as $authorId => $author): ?>
+                    <option value="<?= htmlspecialchars($authorId) ?>"><?= htmlspecialchars($author['label'] ?? $authorId) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+            <label style="align-self:end;">
+                <button type="button" class="secondary abr-autofill-btn" data-lado="od">Autocompletar OD</button>
+            </label>
+            <label style="align-self:end;">
+                <button type="button" class="secondary abr-autofill-btn" data-lado="oi">Autocompletar OI</button>
+            </label>
+        </div>
+        <p class="legend help">El autor vale para todo el paciente, los dos oídos. Cada autor reporta baselines de latencia/amplitud levemente distintos según la población -- se configuran en <a href="normativas.php">Configuración &rsaquo; Normativas</a>. No queda guardado en el caso, solo se usa para calcular la sugerencia; los números finales sí quedan en cada campo.</p>
+    </div>
+</div>
+
+<div class="gen-step">
+    <div class="gen-step-num"><?= $isEdit ? '3' : '4' ?></div>
+    <div class="gen-step-body card">
+        <strong>Emisiones otoacústicas, oído por oído</strong>
+        <p class="gen-step-dest">Escribe en <a href="#" class="tab-link" data-goto-tab="eoas">8. EOA</a></p>
+        <p class="legend help">Genera un caso plausible del grado elegido: umbral, perfil por frecuencia y condiciones de registro (ruido del paciente, sello de la sonda, variabilidad biológica). Las opciones de grado cambian según la patología que tenga cada oído en <a href="#" class="tab-link" data-goto-tab="eoas">EOA</a> -- en coclear van de leve (OEA presente pero reducida) a severa (ausente).</p>
+        <div class="two-col">
+        <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
+            <div class="three-col">
+                <label>Grado <?= $ladoLabel ?>
+                    <select name="eoas_grade[<?= $lado ?>]" class="eoas-grade-select" data-lado="<?= $lado ?>">
+                        <option value="random">Cualquiera (al azar)</option>
+                    </select>
+                </label>
+                <label style="align-self:end;">
+                    <button type="button" class="secondary eoas-autofill-btn" data-lado="<?= $lado ?>">Autocompletar <?= $ladoLabel ?></button>
+                </label>
+            </div>
+        <?php endforeach; ?>
+        </div>
+        <p class="legend help">El grado NO se guarda en el caso, solo los números que deja escritos.</p>
+    </div>
+</div>
+
+<div class="gen-step">
+    <div class="gen-step-num"><?= $isEdit ? '4' : '5' ?></div>
+    <div class="gen-step-body card">
+        <strong>La anamnesis, con IA</strong>
+        <p class="gen-step-dest">Escribe en <a href="#" class="tab-link" data-goto-tab="anamnesis">11. Anamnesis</a></p>
+        <p class="legend help"><strong>Este es el último paso a propósito.</strong> El modelo escribe los antecedentes que EXPLICAN los hallazgos que ya cargaste: una muesca en 4 kHz pide exposición a ruido, una conductiva con timpanograma B pide otitis a repetición, una neuropatía en un recién nacido pide hiperbilirrubinemia. Con la ficha vacía no tiene nada que explicar.</p>
+        <p class="legend help">No inventa el diagnóstico ni menciona umbrales -- eso lo tiene que medir el alumno. Las derivaciones las escribe por el estudio ("se deriva a evaluación auditiva", "a BERA"), nunca por la profesión de quien atiende.</p>
+        <p class="legend help">Las <strong>atenciones previas</strong> del paciente no salen de acá: se escriben a mano en Historia clínica (<a href="#" class="tab-link" data-goto-tab="paciente">Paciente</a>), con las fechas relativas <code>{{-N}}</code> que usa LabSim.</p>
+        <p class="legend help"><strong>Es un borrador y hay que leerlo.</strong> El modelo puede inventar una cirugía que no existe o un fármaco que no es ototóxico, y eso le llega al alumno como parte del caso, indistinguible de lo que escribiste vos. Al terminar de redactar te deja en <a href="#" class="tab-link" data-goto-tab="anamnesis">Anamnesis</a> para que lo leas: hasta que tildes la verificación ahí, el caso no se guarda.</p>
+        <button type="button" class="secondary" id="anamnesis-ia-btn">Redactar borrador con IA</button>
+        <span id="anamnesis-ia-estado" class="legend"></span>
+        <input type="hidden" name="anamnesis_ia[generado]" id="anamnesis-ia-generado" value="<?= fv($v, ['anamnesis_ia', 'generado'], '') ? '1' : '' ?>">
+        <input type="hidden" name="anamnesis_ia[generado_en]" id="anamnesis-ia-generado-en" value="<?= htmlspecialchars((string) fv($v, ['anamnesis_ia', 'generado_en'], '')) ?>">
+    </div>
+</div>
+</div>
+
+<div class="tab-panel<?= $isEdit ? ' active' : '' ?>" data-tab="paciente">
 <div class="card">
     <strong>Paciente</strong>
     <?php if ($isEdit): ?><input type="hidden" id="chat-static-name" value="<?= htmlspecialchars($editDisplayName) ?>"><?php endif; ?>
@@ -990,7 +1122,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             <input type="text" name="apellido2" value="<?= htmlspecialchars((string) ($v['apellido2'] ?? '')) ?>">
         </label>
     </div>
-    <button type="submit" name="form_action" value="generate_name" class="secondary">Generar nombre al azar</button>
+    <p class="legend help">El nombre al azar se genera desde <a href="#" class="tab-link" data-goto-tab="armado">Armado rápido</a>, junto con el resto de los autocompletados.</p>
     <?php else: ?>
     <div class="two-col">
         <label>Nombre
@@ -1157,22 +1289,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <strong>Perfil auditivo</strong>
     <p class="legend help">Dónde está la lesión de este paciente. El audiograma (pestaña Audiometría) ya dice cuánta pérdida hay y cuánta es conductiva, frecuencia por frecuencia; lo único que no puede decir es qué parte del componente sensorioneural es coclear y qué parte es retrococlear. Eso se define acá, una vez, y desde acá se proyecta a los exámenes que tengan la casilla de derivación encendida.</p>
     <p class="legend help">Sin ninguna casilla marcada nada cambia: cada pestaña se sigue cargando a mano, como siempre. La derivación existe para que el caso no se contradiga solo (una OEA normal con un gap de 40 dB, un ABR normal con un audiograma profundo), no para impedir armar un caso incoherente a propósito -- el Stenger, la falsa onda V y la simulación necesitan esa incoherencia.</p>
-    <p class="legend">Sortear un cuadro clínico completo</p>
-    <div class="three-col">
-        <label>Cuadro
-            <select id="perfil-escenario">
-                <?php foreach (CaseProfile::SCENARIOS as $escKey => $esc): ?>
-                <option value="<?= htmlspecialchars($escKey) ?>"><?= htmlspecialchars($esc['label']) ?></option>
-                <?php endforeach; ?>
-                <option value="__random__">Al azar entre todos</option>
-            </select>
-        </label>
-        <label style="align-self:end;">
-            <button type="button" class="secondary" id="perfil-sortear">Sortear caso</button>
-        </label>
-    </div>
-    <p class="legend help">Escribe el audiograma completo (aérea y ósea, los dos oídos), el sitio de la lesión y el patrón retrococlear si corresponde, y enciende las derivaciones. La forma es la del cuadro elegido pero la magnitud se sortea, así dos casos del mismo cuadro no salen calcados. Después se edita cualquier campo a mano.</p>
-    <p class="legend help">Los "Autocompletar" de ABR y EOA siguen donde estaban y siguen sirviendo: sortean lo que el perfil no describe (latencias y amplitudes onda por onda, FSP, ruido del paciente, sello de la sonda). Lo que ya no hace falta es usarlos para fijar el umbral y la patología, que es donde se contradecían entre sí.</p>
+    <p class="legend help">El cuadro clínico de cada oído (que escribe el audiograma, el sitio de la lesión, el timpanograma y estas mismas casillas) se genera desde <a href="#" class="tab-link" data-goto-tab="armado">Armado rápido</a>. Acá se edita el resultado, o se arma el perfil a mano.</p>
 
     <p class="legend">Qué exámenes se derivan del perfil</p>
     <div class="three-col">
@@ -1293,76 +1410,6 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     </div>
 </div>
 <?php endforeach; ?>
-</div>
-</div>
-
-<div class="tab-panel" data-tab="otoscopia">
-<div class="card">
-    <strong>Otoscopia</strong>
-    <p class="legend">Una sola fase (la de por defecto) = una imagen por oído, nada más. Agregar una 2ª fase en adelante es lo que la convierte en "por fase": cada fase desde la 2ª lleva un texto libre que describe qué pasó entremedio (ej. "se realizó un lavado ótico"). Qué fase le corresponde ver a cada alumno según su propio avance con este paciente no está implementado todavía (ver TODO.md); por ahora siempre se muestra la fase 1.</p>
-
-    <input type="hidden" name="otoscopia[fase_count]" id="otoscopia-fase-count" value="<?= $otoscopiaCount ?>">
-    <p id="otoscopia-msg" class="legend" hidden></p>
-
-    <div id="otoscopia-fases">
-        <?php for ($faseIdx = 0; $faseIdx < $otoscopiaCount; $faseIdx++): ?>
-        <div class="otoscopia-fase" data-fase-idx="<?= $faseIdx ?>">
-            <div class="side-heading">
-                <span class="side-tag">Fase <?= $faseIdx + 1 ?></span>
-                <?php if ($faseIdx > 0): ?>
-                <button type="button" class="secondary otoscopia-remove-fase" data-fase-idx="<?= $faseIdx ?>" <?= $faseIdx === $otoscopiaCount - 1 ? '' : 'hidden' ?>>Quitar esta fase</button>
-                <?php endif; ?>
-            </div>
-            <?php if ($faseIdx > 0): ?>
-            <label>¿Qué pasó desde la fase anterior? (texto libre, se muestra al alumno)
-                <textarea name="otoscopia[texto][<?= $faseIdx ?>]" rows="2"><?= htmlspecialchars($otoscopiaTextoAt($faseIdx)) ?></textarea>
-            </label>
-            <?php endif; ?>
-            <div class="two-col">
-                <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
-                <div class="otoscopia-photo-slot">
-                    <span class="side-tag <?= $side ?>"><?= $sideLabel ?></span><br>
-                    <?php $hasOto = OtoscopiaPhoto::has($photoCaseId, $side, $faseIdx); ?>
-                    <img class="otoscopia-thumb" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>"
-                         src="otoscopia_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;side=<?= $side ?>&amp;fase=<?= $faseIdx ?>&amp;v=<?= time() ?>"
-                         alt="Otoscopia <?= $sideLabel ?> fase <?= $faseIdx + 1 ?>" <?= $hasOto ? '' : 'hidden' ?>>
-                    <div class="otoscopia-thumb-empty" <?= $hasOto ? 'hidden' : '' ?>>Sin imagen</div>
-                    <input type="file" class="otoscopia-photo-input" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>" accept="image/jpeg,image/png,image/webp">
-                    <button type="button" class="secondary otoscopia-delete-photo" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>" <?= $hasOto ? '' : 'hidden' ?>>Borrar foto</button>
-                    <a class="otoscopia-download-photo" href="otoscopia_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;side=<?= $side ?>&amp;fase=<?= $faseIdx ?>&amp;download=1" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>" <?= $hasOto ? '' : 'hidden' ?>>Descargar</a>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-        <?php endfor; ?>
-    </div>
-
-    <button type="button" id="otoscopia-add-fase" class="secondary">+ Agregar fase</button>
-
-    <!-- Fuente única del markup de un slot/fase vacíos: usado por JS al agregar fase (#otoscopia-add-fase).
-         El render inicial (arriba, PHP) es aparte porque necesita mostrar la foto ya guardada si existe. -->
-    <template id="otoscopia-slot-tpl">
-        <div class="otoscopia-photo-slot">
-            <span class="side-tag"></span><br>
-            <img class="otoscopia-thumb" hidden>
-            <div class="otoscopia-thumb-empty">Sin imagen</div>
-            <input type="file" class="otoscopia-photo-input" accept="image/jpeg,image/png,image/webp">
-            <button type="button" class="secondary otoscopia-delete-photo" hidden>Borrar foto</button>
-            <a class="otoscopia-download-photo" hidden>Descargar</a>
-        </div>
-    </template>
-    <template id="otoscopia-fase-tpl">
-        <div class="otoscopia-fase">
-            <div class="side-heading">
-                <span class="side-tag">Fase</span>
-                <button type="button" class="secondary otoscopia-remove-fase">Quitar esta fase</button>
-            </div>
-            <label>¿Qué pasó desde la fase anterior? (texto libre, se muestra al alumno)
-                <textarea rows="2"></textarea>
-            </label>
-            <div class="two-col"></div>
-        </div>
-    </template>
 </div>
 </div>
 
@@ -1641,6 +1688,76 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 </div>
 </div>
 
+<div class="tab-panel" data-tab="otoscopia">
+<div class="card">
+    <strong>Otoscopia</strong>
+    <p class="legend">Una sola fase (la de por defecto) = una imagen por oído, nada más. Agregar una 2ª fase en adelante es lo que la convierte en "por fase": cada fase desde la 2ª lleva un texto libre que describe qué pasó entremedio (ej. "se realizó un lavado ótico"). Qué fase le corresponde ver a cada alumno según su propio avance con este paciente no está implementado todavía (ver TODO.md); por ahora siempre se muestra la fase 1.</p>
+
+    <input type="hidden" name="otoscopia[fase_count]" id="otoscopia-fase-count" value="<?= $otoscopiaCount ?>">
+    <p id="otoscopia-msg" class="legend" hidden></p>
+
+    <div id="otoscopia-fases">
+        <?php for ($faseIdx = 0; $faseIdx < $otoscopiaCount; $faseIdx++): ?>
+        <div class="otoscopia-fase" data-fase-idx="<?= $faseIdx ?>">
+            <div class="side-heading">
+                <span class="side-tag">Fase <?= $faseIdx + 1 ?></span>
+                <?php if ($faseIdx > 0): ?>
+                <button type="button" class="secondary otoscopia-remove-fase" data-fase-idx="<?= $faseIdx ?>" <?= $faseIdx === $otoscopiaCount - 1 ? '' : 'hidden' ?>>Quitar esta fase</button>
+                <?php endif; ?>
+            </div>
+            <?php if ($faseIdx > 0): ?>
+            <label>¿Qué pasó desde la fase anterior? (texto libre, se muestra al alumno)
+                <textarea name="otoscopia[texto][<?= $faseIdx ?>]" rows="2"><?= htmlspecialchars($otoscopiaTextoAt($faseIdx)) ?></textarea>
+            </label>
+            <?php endif; ?>
+            <div class="two-col">
+                <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
+                <div class="otoscopia-photo-slot">
+                    <span class="side-tag <?= $side ?>"><?= $sideLabel ?></span><br>
+                    <?php $hasOto = OtoscopiaPhoto::has($photoCaseId, $side, $faseIdx); ?>
+                    <img class="otoscopia-thumb" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>"
+                         src="otoscopia_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;side=<?= $side ?>&amp;fase=<?= $faseIdx ?>&amp;v=<?= time() ?>"
+                         alt="Otoscopia <?= $sideLabel ?> fase <?= $faseIdx + 1 ?>" <?= $hasOto ? '' : 'hidden' ?>>
+                    <div class="otoscopia-thumb-empty" <?= $hasOto ? 'hidden' : '' ?>>Sin imagen</div>
+                    <input type="file" class="otoscopia-photo-input" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>" accept="image/jpeg,image/png,image/webp">
+                    <button type="button" class="secondary otoscopia-delete-photo" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>" <?= $hasOto ? '' : 'hidden' ?>>Borrar foto</button>
+                    <a class="otoscopia-download-photo" href="otoscopia_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;side=<?= $side ?>&amp;fase=<?= $faseIdx ?>&amp;download=1" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>" <?= $hasOto ? '' : 'hidden' ?>>Descargar</a>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endfor; ?>
+    </div>
+
+    <button type="button" id="otoscopia-add-fase" class="secondary">+ Agregar fase</button>
+
+    <!-- Fuente única del markup de un slot/fase vacíos: usado por JS al agregar fase (#otoscopia-add-fase).
+         El render inicial (arriba, PHP) es aparte porque necesita mostrar la foto ya guardada si existe. -->
+    <template id="otoscopia-slot-tpl">
+        <div class="otoscopia-photo-slot">
+            <span class="side-tag"></span><br>
+            <img class="otoscopia-thumb" hidden>
+            <div class="otoscopia-thumb-empty">Sin imagen</div>
+            <input type="file" class="otoscopia-photo-input" accept="image/jpeg,image/png,image/webp">
+            <button type="button" class="secondary otoscopia-delete-photo" hidden>Borrar foto</button>
+            <a class="otoscopia-download-photo" hidden>Descargar</a>
+        </div>
+    </template>
+    <template id="otoscopia-fase-tpl">
+        <div class="otoscopia-fase">
+            <div class="side-heading">
+                <span class="side-tag">Fase</span>
+                <button type="button" class="secondary otoscopia-remove-fase">Quitar esta fase</button>
+            </div>
+            <label>¿Qué pasó desde la fase anterior? (texto libre, se muestra al alumno)
+                <textarea rows="2"></textarea>
+            </label>
+            <div class="two-col"></div>
+        </div>
+    </template>
+</div>
+</div>
+
 <div class="tab-panel" data-tab="timpanometria">
 <div class="audiometria-layout">
 
@@ -1797,78 +1914,15 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 </div>
 </div>
 
-<div class="tab-panel" data-tab="tinnitus">
-<div class="card">
-    <strong>Tinnitus (acufenometría)</strong>
-    <p class="legend">Lateralidad y permanente/ocasional son independientes (un tinnitus unilateral puede ser permanente igual que uno bilateral). Unilateral pide oído; bilateral admite predominio (asimetría). Forma: tipo de ruido + frecuencia de matching.</p>
-    <?php $tinLateralidad = $v['tinnitus']['lateralidad'] ?? 'craneal'; ?>
-    <div class="two-col">
-        <label>Lateralidad
-            <select id="tinnitus-lateralidad" name="tinnitus[lateralidad]">
-                <?php $lateralidadLabels = ['craneal' => 'Craneal', 'unilateral' => 'Unilateral', 'bilateral' => 'Bilateral']; ?>
-                <?php foreach ($lateralidadLabels as $opt => $optLabel): ?>
-                <option value="<?= $opt ?>" <?= $tinLateralidad === $opt ? 'selected' : '' ?>><?= $optLabel ?></option>
-                <?php endforeach; ?>
-            </select>
-        </label>
-        <label class="inline-check" style="margin-top:1.4rem;"><input type="checkbox" name="tinnitus[pulsatil]" <?= isset($v['tinnitus']['pulsatil']) ? 'checked' : '' ?>> Pulsátil</label>
-        <label class="inline-check" style="margin-top:1.4rem;"><input type="checkbox" name="tinnitus[permanente]" <?= isset($v['tinnitus']['permanente']) ? 'checked' : '' ?>> Permanente (sin marcar = ocasional)</label>
-    </div>
-    <div class="two-col" style="margin-top:0.6rem;">
-        <label id="tinnitus-oido-field" data-show-for="unilateral">Oído
-            <select name="tinnitus[oido]">
-                <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $opt => $optLabel): ?>
-                <option value="<?= $opt ?>" <?= ($v['tinnitus']['oido'] ?? 'od') === $opt ? 'selected' : '' ?>><?= $optLabel ?></option>
-                <?php endforeach; ?>
-            </select>
-        </label>
-        <label id="tinnitus-predominio-field" data-show-for="bilateral">Predominio
-            <select name="tinnitus[predominio]">
-                <?php $predominioLabels = ['igual' => 'Igual en ambos', 'od' => 'Mayor en OD', 'oi' => 'Mayor en OI']; ?>
-                <?php foreach ($predominioLabels as $opt => $optLabel): ?>
-                <option value="<?= $opt ?>" <?= ($v['tinnitus']['predominio'] ?? 'igual') === $opt ? 'selected' : '' ?>><?= $optLabel ?></option>
-                <?php endforeach; ?>
-            </select>
-        </label>
-        <label>Ruido
-            <select name="tinnitus[ruido]">
-                <?php foreach (CaseBuilder::TINNITUS_RUIDO_OPTIONS as $opt): ?>
-                <option value="<?= $opt ?>" <?= ($v['tinnitus']['ruido'] ?? CaseBuilder::TINNITUS_RUIDO_OPTIONS[0]) === $opt ? 'selected' : '' ?>><?= htmlspecialchars($opt) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </label>
-        <label>Frecuencia (Hz, matching)
-            <select name="tinnitus[frecuencia]">
-                <?php foreach (CaseBuilder::FREQUENCIES as $freq): ?>
-                <option value="<?= $freq ?>" <?= (int) ($v['tinnitus']['frecuencia'] ?? CaseBuilder::FREQUENCIES[0]) === $freq ? 'selected' : '' ?>><?= $freq ?> Hz</option>
-                <?php endforeach; ?>
-            </select>
-        </label>
-    </div>
-</div>
-</div>
-
 <div class="tab-panel" data-tab="abr">
-<?php $abrAuthorCatalog = AppConfig::getEffective('abr_reference_authors', null) ?? []; ?>
-<div class="card">
-    <strong>Autocompletar ABR</strong>
-    <p class="legend help">Autor/set de referencia para los botones "Autocompletar" de abajo (uno solo para todo el paciente, ambos oídos). Cada autor puede reportar baselines de latencia/amplitud levemente distintos según la población -- se configuran en <a href="normativas.php">Configuración &rsaquo; Normativas</a>. No queda guardado en el caso, solo se usa para calcular la sugerencia; los números finales sí quedan en cada campo.</p>
-    <label style="max-width:22em;">Autor de referencia
-        <select id="abr-author-select">
-            <option value="__default__">LabSim (default)</option>
-            <?php foreach ($abrAuthorCatalog as $authorId => $author): ?>
-            <option value="<?= htmlspecialchars($authorId) ?>"><?= htmlspecialchars($author['label'] ?? $authorId) ?></option>
-            <?php endforeach; ?>
-        </select>
-    </label>
-</div>
 <div class="two-col">
 <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
 <div class="card">
     <strong>ABR <?= $ladoLabel ?></strong>
     <p class="legend help">Patología de este oído para el generador de curvas ABR -- no es el resultado del alumno, es lo que el caso simula. Si se deja "Normal" con todo en 0, el oído no tiene hallazgos.</p>
+    <p class="derivado-aviso" data-derivado="abr" hidden>La patología y el umbral de este oído los escribe el <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>, porque la casilla <em>ABR: umbral por estímulo</em> está encendida: quedan grises y se recalculan al guardar. Para editarlos a mano hay que apagar esa casilla.</p>
 
-    <p class="legend help">"Autocompletar" sugiere valores plausibles para la patología elegida, usando el sexo y la edad del paciente (pestaña Paciente), el autor de referencia elegido arriba, y las mismas referencias normativas del generador de curvas. Es un punto de partida al azar -- se puede editar cualquier campo después.</p>
+    <p class="legend help">Las latencias y amplitudes onda por onda se generan desde <a href="#" class="tab-link" data-goto-tab="armado">Armado rápido</a> (ahí también se elige el autor de referencia). Acá se editan a mano.</p>
     <div class="three-col">
         <label>Patología
             <select name="abr[<?= $lado ?>][type]" class="abr-type-select" data-lado="<?= $lado ?>">
@@ -1876,9 +1930,6 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                 <option value="<?= $opt ?>" <?= ($v['abr'][$lado]['type'] ?? 'normal') === $opt ? 'selected' : '' ?>><?= ucfirst($opt) ?></option>
                 <?php endforeach; ?>
             </select>
-        </label>
-        <label style="align-self:end;">
-            <button type="button" class="secondary abr-autofill-btn" data-lado="<?= $lado ?>">Autocompletar según patología</button>
         </label>
         <label>Umbral (dB)
             <input type="number" name="abr[<?= $lado ?>][umbral]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['umbral'] ?? '20')) ?>">
@@ -1982,6 +2033,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <div class="card">
     <strong>EOA <?= $ladoLabel ?></strong>
     <p class="legend help">Patología de este oído para el generador de Emisiones Otoacústicas (TEOAE/DPOAE/SOAE/SFOAE). "Coclear" y "Transmisión" atenúan la OEA según el umbral (a mayor umbral, más atenuada -- por sobre ~35-40 dB suele quedar bajo el noise floor, REFER). "Neural" deja la OEA normal aunque el umbral esté elevado: la cóclea está intacta, es el contraste clínico con ABR.</p>
+    <p class="derivado-aviso" data-derivado="eoas" hidden>La patología, el umbral y el perfil por frecuencia de este oído los escribe el <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>, porque la casilla <em>OEA: perfil por frecuencia</em> está encendida: quedan grises y se recalculan al guardar. Para editarlos a mano hay que apagar esa casilla.</p>
     <div class="three-col">
         <label>Patología
             <select name="eoas[<?= $lado ?>][type]" class="eoas-type-select" data-lado="<?= $lado ?>">
@@ -1993,18 +2045,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <label>Umbral (dB)
             <input type="number" step="any" name="eoas[<?= $lado ?>][umbral]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['umbral'] ?? (string) CaseBuilder::EOAS_DEFAULTS['umbral'])) ?>">
         </label>
-        <label>Grado a sortear
-            <select name="eoas_grade[<?= $lado ?>]" class="eoas-grade-select" data-lado="<?= $lado ?>">
-                <option value="random">Aleatorio (sortea grado)</option>
-            </select>
-        </label>
     </div>
-    <div class="three-col">
-        <label style="align-self:end;">&nbsp;
-            <button type="button" class="secondary eoas-autofill-btn" data-lado="<?= $lado ?>">Autocompletar según patología</button>
-        </label>
-    </div>
-    <p class="legend help">"Autocompletar" sortea un caso plausible del grado elegido: umbral, perfil por frecuencia y condiciones de registro (ruido, sello, variabilidad). Las opciones de grado cambian según la patología -- en coclear van de leve (OEA presente pero reducida) a severa (ausente). Es un punto de partida al azar, no un valor fijo: se puede editar cualquier campo después. El grado NO se guarda en el caso, solo los números que deja escritos.</p>
+    <p class="legend help">El umbral, el perfil por frecuencia y las condiciones de registro se generan desde <a href="#" class="tab-link" data-goto-tab="armado">Armado rápido</a> (ahí se elige el grado). Acá se editan a mano.</p>
     <p class="legend">Condiciones de registro de este oído -- lo que hace que dos pacientes con la misma cóclea no den la misma pantalla.</p>
     <div class="three-col">
         <label>Atenuación extra (dB)
@@ -2050,7 +2092,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         </tr>
         </tbody>
     </table>
-    <p class="legend help">"Auto" deja que el cliente sortee si este oído tiene SOAE (~45%, algo más en OD) -- estable para el mismo caso, pero no se puede saber de antemano. Para mostrarlas en clase o evaluar sobre un hallazgo fijo usá "Presentes" y cargá los picos: frecuencia en Hz y nivel de la emisión (los SOAE reales rondan 0 dB SPL, rara vez pasan 20; en blanco toma <?= CaseBuilder::EOAS_SOAE_DEFAULT_PEAK_DB ?> dB SPL). "Presentes" sin picos cargados = el cliente los sortea pero garantiza al menos uno. Los picos cargados NO se atenúan por patología ni por sello: el nivel que pongas es el que se va a ver, aunque el ruido del paciente igual puede taparlos. "Ausentes" fuerza un registro sin SOAE (lo normal en coclear/transmisión, y también posible en un oído sano).</p>
+    <p class="legend help">"Auto" deja que el cliente decida al azar si este oído tiene SOAE (~45%, algo más en OD) -- estable para el mismo caso, pero no se puede saber de antemano. Para mostrarlas en clase o evaluar sobre un hallazgo fijo usá "Presentes" y cargá los picos: frecuencia en Hz y nivel de la emisión (los SOAE reales rondan 0 dB SPL, rara vez pasan 20; en blanco toma <?= CaseBuilder::EOAS_SOAE_DEFAULT_PEAK_DB ?> dB SPL). "Presentes" sin picos cargados = el cliente los genera al azar pero garantiza al menos uno. Los picos cargados NO se atenúan por patología ni por sello: el nivel que pongas es el que se va a ver, aunque el ruido del paciente igual puede taparlos. "Ausentes" fuerza un registro sin SOAE (lo normal en coclear/transmisión, y también posible en un oído sano).</p>
     <p class="legend">Perfil por frecuencia -- dB de caída respecto de lo esperado (positivo = OEA más chica). Se aplica a las cuatro pruebas: bandas TEOAE, puntos del DP-grama, curva de sintonía SFOAE y los picos SOAE sorteados.</p>
     <table class="grid-table">
         <thead>
@@ -2142,19 +2184,62 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 </div>
 </div>
 
+<div class="tab-panel" data-tab="tinnitus">
+<div class="card">
+    <strong>Tinnitus (acufenometría)</strong>
+    <p class="legend">Lateralidad y permanente/ocasional son independientes (un tinnitus unilateral puede ser permanente igual que uno bilateral). Unilateral pide oído; bilateral admite predominio (asimetría). Forma: tipo de ruido + frecuencia de matching.</p>
+    <?php $tinLateralidad = $v['tinnitus']['lateralidad'] ?? 'craneal'; ?>
+    <div class="two-col">
+        <label>Lateralidad
+            <select id="tinnitus-lateralidad" name="tinnitus[lateralidad]">
+                <?php $lateralidadLabels = ['craneal' => 'Craneal', 'unilateral' => 'Unilateral', 'bilateral' => 'Bilateral']; ?>
+                <?php foreach ($lateralidadLabels as $opt => $optLabel): ?>
+                <option value="<?= $opt ?>" <?= $tinLateralidad === $opt ? 'selected' : '' ?>><?= $optLabel ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label class="inline-check" style="margin-top:1.4rem;"><input type="checkbox" name="tinnitus[pulsatil]" <?= isset($v['tinnitus']['pulsatil']) ? 'checked' : '' ?>> Pulsátil</label>
+        <label class="inline-check" style="margin-top:1.4rem;"><input type="checkbox" name="tinnitus[permanente]" <?= isset($v['tinnitus']['permanente']) ? 'checked' : '' ?>> Permanente (sin marcar = ocasional)</label>
+    </div>
+    <div class="two-col" style="margin-top:0.6rem;">
+        <label id="tinnitus-oido-field" data-show-for="unilateral">Oído
+            <select name="tinnitus[oido]">
+                <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $opt => $optLabel): ?>
+                <option value="<?= $opt ?>" <?= ($v['tinnitus']['oido'] ?? 'od') === $opt ? 'selected' : '' ?>><?= $optLabel ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label id="tinnitus-predominio-field" data-show-for="bilateral">Predominio
+            <select name="tinnitus[predominio]">
+                <?php $predominioLabels = ['igual' => 'Igual en ambos', 'od' => 'Mayor en OD', 'oi' => 'Mayor en OI']; ?>
+                <?php foreach ($predominioLabels as $opt => $optLabel): ?>
+                <option value="<?= $opt ?>" <?= ($v['tinnitus']['predominio'] ?? 'igual') === $opt ? 'selected' : '' ?>><?= $optLabel ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label>Ruido
+            <select name="tinnitus[ruido]">
+                <?php foreach (CaseBuilder::TINNITUS_RUIDO_OPTIONS as $opt): ?>
+                <option value="<?= $opt ?>" <?= ($v['tinnitus']['ruido'] ?? CaseBuilder::TINNITUS_RUIDO_OPTIONS[0]) === $opt ? 'selected' : '' ?>><?= htmlspecialchars($opt) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label>Frecuencia (Hz, matching)
+            <select name="tinnitus[frecuencia]">
+                <?php foreach (CaseBuilder::FREQUENCIES as $freq): ?>
+                <option value="<?= $freq ?>" <?= (int) ($v['tinnitus']['frecuencia'] ?? CaseBuilder::FREQUENCIES[0]) === $freq ? 'selected' : '' ?>><?= $freq ?> Hz</option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+    </div>
+</div>
+</div>
+
 <div class="tab-panel" data-tab="anamnesis">
 <div class="card">
-    <strong>Redactar la anamnesis con IA</strong>
-    <p class="legend help">Escribe los antecedentes que EXPLICAN los hallazgos que ya cargaste: una muesca en 4 kHz pide exposición a ruido, una conductiva con timpanograma B pide otitis a repetición, una neuropatía en un recién nacido pide hiperbilirrubinemia. No inventa el diagnóstico ni menciona umbrales -- eso lo tiene que medir el alumno.</p>
-    <p class="legend help">Escribe las <strong>atenciones previas</strong> del paciente en Historia clínica (pestaña Paciente), con las fechas relativas <code>{{-N}}</code> que usa LabSim, y acá los antecedentes, lo que el paciente cuenta de sí mismo, medicamentos, cirugías, comportamiento y sensibilidad. Las derivaciones se escriben por el estudio ("se deriva a evaluación auditiva", "a BERA"), nunca por la profesión de quien atiende.</p>
-    <p class="legend help"><strong>Es un borrador y hay que leerlo.</strong> El modelo puede inventar una cirugía que no existe o un fármaco que no es ototóxico, y eso le llega al alumno como parte del caso, indistinguible de lo que escribiste vos. Hasta que tildes la verificación, el caso no se guarda ni se puede citar.</p>
-    <button type="button" class="secondary" id="anamnesis-ia-btn">Redactar borrador con IA</button>
-    <span id="anamnesis-ia-estado" class="legend"></span>
-
-    <input type="hidden" name="anamnesis_ia[generado]" id="anamnesis-ia-generado" value="<?= fv($v, ['anamnesis_ia', 'generado'], '') ? '1' : '' ?>">
-    <input type="hidden" name="anamnesis_ia[generado_en]" id="anamnesis-ia-generado-en" value="<?= htmlspecialchars((string) fv($v, ['anamnesis_ia', 'generado_en'], '')) ?>">
-
-    <div id="anamnesis-ia-verificacion" <?= fv($v, ['anamnesis_ia', 'generado'], '') ? '' : 'hidden' ?> style="border-left:4px solid #b00; padding-left:0.6rem; margin-top:0.6rem;">
+    <strong>El borrador de IA hay que leerlo</strong>
+    <p class="legend help">Lo escribe el modelo desde <a href="#" class="tab-link" data-goto-tab="armado">Armado rápido</a> y queda en los campos de abajo. Puede inventar una cirugía que no existe o un fármaco que no es ototóxico, y eso le llega al alumno como parte del caso, indistinguible de lo que escribiste vos.</p>
+    <div id="anamnesis-ia-verificacion" <?= fv($v, ['anamnesis_ia', 'generado'], '') ? '' : 'hidden' ?> style="border-left:4px solid var(--color-danger); padding-left:0.6rem; margin-top:0.6rem;">
         <label class="inline-check">
             <input type="checkbox" name="anamnesis_ia[verificado]" id="anamnesis-ia-verificado" value="1" <?= fv($v, ['anamnesis_ia', 'verificado'], '') ? 'checked' : '' ?>>
             Leí el borrador y verifico que es clínicamente correcto para este caso
@@ -2162,8 +2247,10 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <?php if (fv($v, ['anamnesis_ia', 'verificado_por'], '')): ?>
         <p class="legend help">Verificado por <?= htmlspecialchars((string) fv($v, ['anamnesis_ia', 'verificado_por'], '')) ?><?= fv($v, ['anamnesis_ia', 'verificado_en'], '') ? ' el ' . htmlspecialchars((string) fv($v, ['anamnesis_ia', 'verificado_en'], '')) : '' ?>.</p>
         <?php endif; ?>
-        <p class="legend help">Volver a generar borra la verificación: el texto nuevo no lo leyó nadie.</p>
+        <p class="legend help">Volver a generar borra la verificación: el texto nuevo no lo leyó nadie. Hasta que esté tildada, el caso no se guarda.</p>
     </div>
+    <p class="legend" id="anamnesis-ia-estado-eco" hidden></p>
+    <p class="legend help" id="anamnesis-ia-sin-borrador" <?= fv($v, ['anamnesis_ia', 'generado'], '') ? 'hidden' : '' ?>>Este caso no tiene borrador de IA pendiente: lo de abajo se escribió a mano.</p>
 </div>
 <div class="card">
     <strong>Anamnesis</strong>
@@ -2222,6 +2309,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     </div>
 </div>
 </div>
+
 
 <?php if (!empty($avisosPerfil)): ?>
 <div class="card" style="border-left:4px solid #7a5b00;">
@@ -2422,6 +2510,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                 // Texto nuevo: nadie lo leyó todavía.
                 verificado.checked = false;
                 bloque.hidden = false;
+                var sinBorrador = document.getElementById('anamnesis-ia-sin-borrador');
+                if (sinBorrador) { sinBorrador.hidden = true; }
                 // El consumo a la vista: en un modelo de razonamiento el
                 // grueso son tokens de pensamiento que no se ven en el
                 // texto, y sin esto no hay forma de notar que un borrador
@@ -2432,8 +2522,17 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                         + (u.razonamiento ? ' (' + u.razonamiento + ' de razonamiento)' : '')
                         + (u.intentos > 1 ? ', ' + u.intentos + ' intentos' : '')
                     : '';
-                estado.textContent = 'Borrador listo. Leelo y verificalo antes de guardar'
-                    + ' (las atenciones previas quedaron en la pestaña Paciente).' + costo;
+                estado.textContent = 'Borrador listo' + costo + '.';
+                var eco = document.getElementById('anamnesis-ia-estado-eco');
+                if (eco) {
+                    eco.textContent = 'Borrador recién redactado' + costo
+                        + '. Las atenciones previas quedaron en la pestaña Paciente.';
+                    eco.hidden = false;
+                }
+                // El botón vive en "Armado rápido" y el texto que hay que leer
+                // está en Anamnesis: sin este salto el docente tilda la
+                // verificación sin haber visto nunca lo que el modelo escribió.
+                if (window.gotoTab) { window.gotoTab('anamnesis'); }
             })
             .catch(function (err) { estado.textContent = 'Error: ' + err.message; })
             .finally(function () { boton.disabled = false; });
@@ -2525,6 +2624,13 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             el.style.opacity = chk.checked ? '0.6' : '';
             el.title = chk.checked ? 'Derivado del perfil auditivo -- se reescribe al guardar' : '';
         });
+        // El gris y el `title` no alcanzan: hay que decir POR QUÉ el campo no
+        // se deja editar y dónde se apaga. Sin esto el docente encuentra el
+        // selector de patología del ABR apagado y no tiene forma de saber que
+        // lo apagó la casilla del perfil.
+        document.querySelectorAll('.derivado-aviso[data-derivado="' + modulo + '"]').forEach(function (aviso) {
+            aviso.hidden = !chk.checked;
+        });
     }
 
     Object.keys(CAMPOS).forEach(function (modulo) {
@@ -2536,21 +2642,38 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 </script>
 
 <script>
-// Sorteo del perfil: escribe el audiograma, el sitio de la lesión y el
+// Generador del perfil: escribe el audiograma, el sitio de la lesión y el
 // patrón retro de un cuadro clínico completo, coherentes entre sí.
 //
 // Reemplaza el uso que se le daba a los dos "Autocompletar" para fijar
-// umbral y patología -- cada uno sorteaba por su lado y podían dejar el ABR
+// umbral y patología -- cada uno resolvía por su lado y podían dejar el ABR
 // coclear y la OEA neural en el mismo oído. Los escenarios se serializan
 // desde CaseProfile::SCENARIOS, no se re-tipean acá.
+//
+// UN CUADRO POR OÍDO. Antes había un solo selector para todo el paciente y
+// la `lateralidad` del escenario decidía a cuál de los dos oídos le tocaba
+// la lesión, al azar: no se podía pedir "OD sano, OI conductiva", ni menos
+// una coclear de un lado y un schwannoma del otro. Ahora el docente elige
+// los dos, y el oído sano se pide poniéndole el cuadro "Normal" (que no es
+// un cero: es un oído normal con su propia variabilidad).
 (function () {
     var ESCENARIOS = <?= json_encode(CaseProfile::SCENARIOS, JSON_UNESCAPED_UNICODE) ?>;
+    var NEURAL_DEFAULTS = <?= json_encode(CaseBuilder::ABR_NEURAL_DEFAULTS, JSON_UNESCAPED_UNICODE) ?>;
+    var GRADES = <?= json_encode(CaseProfile::GRADES, JSON_UNESCAPED_UNICODE) ?>;
+    var GRADE_FREQS = <?= json_encode(CaseProfile::GRADE_FREQS) ?>;
+    // Techo de la audiometría. Si una frecuencia del promedio satura, subir
+    // más la escala ya no sube el promedio: el grado pedido no se alcanza y
+    // el cuadro se aplana. Por eso el objetivo se recorta antes de escalar.
+    var MAX_DB = 115;
     var FREQS = <?= json_encode(CaseBuilder::FREQUENCIES) ?>;
     var JITTER_DB = 4;   // ruido por frecuencia: ningún audiograma real es liso
 
-    var boton = document.getElementById('perfil-sortear');
-    var selector = document.getElementById('perfil-escenario');
-    if (!boton || !selector) return;
+    var boton = document.getElementById('perfil-generar');
+    var selectores = {};
+    document.querySelectorAll('.perfil-escenario').forEach(function (sel) {
+        selectores[sel.getAttribute('data-lado')] = sel;
+    });
+    if (!boton || !selectores.od || !selectores.oi) return;
 
     function entre(a, b) { return a + Math.random() * (b - a); }
     function aCinco(x) { return Math.max(0, Math.min(120, Math.round(x / 5) * 5)); }
@@ -2570,13 +2693,9 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         });
     }
 
-    function sortearLado(esc, lado, afectado, escalas, asimetria) {
-        // El oído sano de un cuadro unilateral no es "cero": es un oído
-        // normal, con su propia variabilidad.
-        var formaSn = afectado ? esc.sn_shape : ESCENARIOS.normal.sn_shape;
-        var escalaSn = afectado ? escalas.sn : entre(0, 0.8);
-        var sn = curvaDeForma(formaSn, escalaSn).map(function (v) { return v + asimetria; });
-        var gap = afectado && esc.gap_shape && Object.keys(esc.gap_shape).length
+    function generarLado(esc, lado, escalas, asimetria) {
+        var sn = curvaDeForma(esc.sn_shape, escalas.sn).map(function (v) { return v + asimetria; });
+        var gap = esc.gap_shape && Object.keys(esc.gap_shape).length
             ? curvaDeForma(esc.gap_shape, escalas.gap)
             : FREQS.map(function () { return 0; });
 
@@ -2586,7 +2705,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         osea = osea.map(function (v, i) { return Math.min(v, aerea[i]); });
         escribir('aerea', lado, aerea);
         escribir('osea', lado, osea);
-        // "Igualar ósea a aérea" pisaría la ósea recién sorteada al guardar.
+        // "Igualar ósea a aérea" pisaría la ósea recién generada al guardar.
         var igualar = document.querySelector('.igualar-toggle[data-side="' + lado + '"]');
         if (igualar && igualar.checked && gap.some(function (g) { return g > 0; })) {
             igualar.checked = false;
@@ -2594,63 +2713,222 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 
         // Oído medio: el gap y el timpanograma tienen que contar la misma
         // historia. Sin esto el cuadro "Conductiva" salía con 35 dB de gap
-        // y curva A, o sea con la contradicción adentro desde el sorteo.
+        // y curva A, o sea con la contradicción adentro desde el arranque.
         var z = document.getElementById('z_' + lado);
         if (z) {
-            var opciones = afectado && esc.z && esc.z.length ? esc.z : ['A'];
+            var opciones = esc.z && esc.z.length ? esc.z : ['A'];
             z.value = opciones[Math.floor(Math.random() * opciones.length)];
         }
         var etf = document.querySelector('select[name="etf_' + lado + '"]');
-        if (etf) { etf.value = afectado && esc.etf ? esc.etf : 'Normal'; }
+        if (etf) { etf.value = esc.etf || 'Normal'; }
 
         var cce = document.querySelector('input[name="perfil[' + lado + '][cce_pct]"]');
-        if (cce) {
-            cce.value = afectado
-                ? Math.round(entre(esc.cce_pct[0], esc.cce_pct[1]) / 5) * 5
-                : 100;
-        }
+        if (cce) { cce.value = Math.round(entre(esc.cce_pct[0], esc.cce_pct[1]) / 5) * 5; }
 
-        // Patrón retrococlear: solo en el oído afectado. El preset precarga
-        // los valores y después se editan (nunca se persiste su nombre).
+        // Patrón retrococlear. Con `retro` se aplica el preset (precarga los
+        // valores y después se editan; nunca se persiste su nombre).
+        //
+        // Sin `retro` hay que LIMPIAR el patrón a los defaults: no alcanza
+        // con no tocarlo. Pedir "OI normal" después de haber generado un
+        // schwannoma dejaba los interpicos prolongados de la vuelta anterior
+        // en un oído que acaba de declararse sano. No se puede hacer con el
+        // preset ("normal" no es una de las opciones de ABR_NEURAL_PRESETS),
+        // así que se escriben los defaults directo.
         var sel = document.querySelector('.abr-neural-preset-select[data-lado="' + lado + '"]');
         var btn = document.querySelector('.abr-neural-preset-btn[data-lado="' + lado + '"]');
-        if (sel && btn && afectado && esc.retro) {
+        var nota = document.querySelector('.abr-neural-preset-nota[data-lado="' + lado + '"]');
+        if (esc.retro && sel && btn) {
             sel.value = esc.retro;
             btn.click();
+        } else {
+            Object.keys(NEURAL_DEFAULTS).forEach(function (param) {
+                var el = document.querySelector(
+                    '.abr-neural-input[data-lado="' + lado + '"][data-param="' + param + '"]');
+                if (el) { el.value = NEURAL_DEFAULTS[param]; }
+            });
+            if (sel) { sel.value = ''; }
+            if (nota) { nota.textContent = ''; }
+            if (window.drawAbrPreview) { window.drawAbrPreview(); }
         }
     }
 
-    boton.addEventListener('click', function () {
-        var claves = Object.keys(ESCENARIOS);
-        var clave = selector.value === '__random__'
-            ? claves[Math.floor(Math.random() * claves.length)]
-            : selector.value;
-        var esc = ESCENARIOS[clave];
-        if (!esc) return;
-        if (selector.value === '__random__') { selector.value = clave; }
+    // Sugerencia para el otro oído (ver `lateralidad` en CaseProfile). Elegir
+    // "Conductiva" en el OD deja el OI en Normal, que es la forma en que ese
+    // cuadro se presenta; elegir "Coclear en agudos" lo repite, porque una
+    // presbiacusia no es de un solo lado. Solo se propone mientras el docente
+    // no haya tocado el otro selector: a partir de ahí manda él.
+    var tocado = { od: false, oi: false };
+    ['od', 'oi'].forEach(function (lado) {
+        var otro = lado === 'od' ? 'oi' : 'od';
+        selectores[lado].addEventListener('change', function () {
+            tocado[lado] = true;
+            if (tocado[otro]) { return; }
+            var esc = ESCENARIOS[selectores[lado].value];
+            if (!esc) { return; }
+            selectores[otro].value = esc.lateralidad === 'unilateral' ? 'normal' : selectores[lado].value;
+            sincronizarGrados(otro);
+        });
+        // Los grados dependen del cuadro: cambiar de cuadro recarga la lista.
+        selectores[lado].addEventListener('change', function () { sincronizarGrados(lado); });
+    });
 
-        var unilateral = esc.lateralidad === 'unilateral';
-        var afectado = Math.random() < 0.5 ? 'od' : 'oi';
-        // La escala se sortea UNA vez para todo el paciente, no una por
-        // oído: con una escala por lado, una presbiacusia bilateral podía
-        // salir con 27 dB en un oído y 67 en el otro, o sea una asimetría
-        // enorme --que es un hallazgo, no ruido-- en un cuadro que se
-        // define por ser simétrico.
-        var escalas = {
+    var grados = {};
+    document.querySelectorAll('.perfil-grado').forEach(function (sel) {
+        grados[sel.getAttribute('data-lado')] = sel;
+    });
+
+    /** Promedio BIAP de la vía aérea que dan estas escalas, sin jitter. */
+    function biapCon(esc, escalas) {
+        var suma = 0;
+        GRADE_FREQS.forEach(function (hz) {
+            suma += (esc.sn_shape[hz] || 0) * escalas.sn
+                  + ((esc.gap_shape || {})[hz] || 0) * escalas.gap;
+        });
+        return suma / GRADE_FREQS.length;
+    }
+
+    /** La peor frecuencia DEL PROMEDIO con estas escalas. */
+    function peorCon(esc, escalas) {
+        var peor = 0;
+        GRADE_FREQS.forEach(function (hz) {
+            peor = Math.max(peor, (esc.sn_shape[hz] || 0) * escalas.sn
+                                + ((esc.gap_shape || {})[hz] || 0) * escalas.gap);
+        });
+        return peor;
+    }
+
+    /**
+     * Techo real del promedio para este cuadro: hasta dónde puede escalarse
+     * sin que sature una frecuencia DEL PROMEDIO. Los agudos que quedan fuera
+     * del promedio sí pueden llegar al tope --un descendente con 8 kHz en el
+     * límite es un audiograma real-- pero si satura 4 kHz el promedio deja de
+     * responder a la escala y el grado pedido no se alcanza nunca.
+     */
+    function techoDe(esc, escalas) {
+        var peor = peorCon(esc, escalas);
+        var porSaturacion = peor > 0 ? biapCon(esc, escalas) * (MAX_DB / peor) : Infinity;
+        return Math.min(porSaturacion, esc.max_db || Infinity);
+    }
+
+    /** Opciones de grado del cuadro elegido (las que ese cuadro puede dar). */
+    function sincronizarGrados(lado) {
+        var sel = grados[lado];
+        if (!sel) { return; }
+        var esc = ESCENARIOS[selectores[lado].value];
+        var lista = (esc && esc.grados) || [];
+        var previo = sel.value;
+        var html = '<option value="random">Cualquiera (al azar)</option>';
+        lista.forEach(function (clave) {
+            if (GRADES[clave]) { html += '<option value="' + clave + '">' + GRADES[clave].label + '</option>'; }
+        });
+        sel.innerHTML = html;
+        sel.value = lista.indexOf(previo) !== -1 ? previo : 'random';
+        // Un oído sano no tiene grado de hipoacusia: el cuadro 'normal' no
+        // trae ninguno, y "Cualquiera (al azar)" en un cuadro sin grados
+        // tampoco elige nada. El select queda apagado en vez de ofrecer una
+        // lista vacía que igual se puede desplegar.
+        sel.disabled = lista.length === 0;
+        sel.style.opacity = lista.length === 0 ? '0.6' : '';
+        sel.title = lista.length === 0 ? 'Este cuadro no tiene grado de hipoacusia' : '';
+    }
+
+    /**
+     * Corrige las escalas para que el promedio BIAP caiga en el grado pedido.
+     *
+     * El factor es UNO SOLO para las dos escalas: la proporción entre el
+     * componente conductivo y el sensorioneural la define el cuadro, no el
+     * grado. Escalando solo lo sensorioneural, subirle el grado a una
+     * conductiva la convertiría en una mixta.
+     *
+     * `asimetria` son los dB que se le van a sumar DESPUÉS a este oído: se
+     * descuentan del objetivo, porque si no un "leve" con 8 dB de asimetría
+     * terminaba midiendo como moderada.
+     */
+    function ajustarAlGrado(esc, escalas, claveGrado, asimetria) {
+        var lista = esc.grados || [];
+        if (!lista.length) { return escalas; }
+        var clave = claveGrado;
+        if (clave === 'random' || lista.indexOf(clave) === -1) {
+            clave = lista[Math.floor(Math.random() * lista.length)];
+        }
+        // El objetivo se busca DENTRO del rango, no en sus bordes: el jitter
+        // por frecuencia (+-4 dB) y el redondeo a 5 corren el promedio final
+        // unos dB, y un "leve" apuntado a 40 terminaba midiendo 45, o sea
+        // moderada. El margen se achica en los rangos angostos para no
+        // quedarse sin dónde elegir.
+        var rango = GRADES[clave].rango;
+        var margen = Math.min(JITTER_DB + 1, (rango[1] - rango[0]) / 4);
+        var min = rango[0] + margen - asimetria;
+        var max = Math.min(rango[1] - margen, techoDe(esc, escalas)) - asimetria;
+        var objetivo = max <= min ? Math.max(min, max) : entre(min, max);
+
+        var actual = biapCon(esc, escalas);
+        if (actual < 1) { return escalas; }   // cuadro sin pérdida: nada que escalar
+        var factor = objetivo / actual;
+        return { sn: escalas.sn * factor, gap: escalas.gap * factor };
+    }
+
+    /** Escenario elegido para un oído, resolviendo "Cualquiera (al azar)". */
+    function escenarioDe(lado) {
+        var sel = selectores[lado];
+        var clave = sel.value;
+        if (clave === '__random__') {
+            var claves = Object.keys(ESCENARIOS);
+            clave = claves[Math.floor(Math.random() * claves.length)];
+            sel.value = clave;   // el docente tiene que poder ver qué salió
+            sincronizarGrados(lado);   // el cuadro nuevo trae sus propios grados
+        }
+        return ESCENARIOS[clave] ? clave : null;
+    }
+
+    function escalasDe(esc) {
+        return {
             sn: entre(esc.sn_scale[0], esc.sn_scale[1]),
             gap: entre(esc.gap_scale[0], esc.gap_scale[1])
         };
-        // La asimetría interaural que SÍ corresponde: unos pocos dB en un
-        // oído al azar. En los cuadros unilaterales la asimetría real la da
-        // el oído sano, así que acá no se agrega nada.
-        var peor = Math.random() < 0.5 ? 'od' : 'oi';
-        var asimetria = unilateral ? 0 : entre(0, 8);
-        ['od', 'oi'].forEach(function (lado) {
-            sortearLado(esc, lado, !unilateral || lado === afectado, escalas,
-                        lado === peor ? asimetria : 0);
-        });
+    }
 
-        // Un caso sorteado nace coherente: las proyecciones se encienden.
+    sincronizarGrados('od');
+    sincronizarGrados('oi');
+
+    boton.addEventListener('click', function () {
+        var claveOd = escenarioDe('od');
+        var claveOi = escenarioDe('oi');
+        if (!claveOd || !claveOi) return;
+        var escOd = ESCENARIOS[claveOd], escOi = ESCENARIOS[claveOi];
+        var gradoOd = grados.od ? grados.od.value : 'random';
+        var gradoOi = grados.oi ? grados.oi.value : 'random';
+
+        // Mismo cuadro Y mismo grado en los dos oídos = un solo cálculo para
+        // el paciente. Resolviendo cada oído por separado, una presbiacusia
+        // bilateral moderada podía salir con 43 dB en un oído y 68 en el
+        // otro: una asimetría enorme --que es un hallazgo, no ruido-- en un
+        // cuadro que se define por ser simétrico. Con cuadros o grados
+        // DISTINTOS no hay nada que emparejar: cada oído tiene su propia
+        // lesión y su propia magnitud.
+        var simetrico = claveOd === claveOi && gradoOd === gradoOi;
+
+        // La asimetría interaural de unos pocos dB solo tiene sentido en el
+        // caso simétrico: es la variación biológica normal entre los dos
+        // oídos de la misma persona. Con cuadros distintos la asimetría real
+        // ya la dan los cuadros.
+        var peor = Math.random() < 0.5 ? 'od' : 'oi';
+        var asimetria = simetrico ? entre(0, 8) : 0;
+
+        var escalas;
+        if (simetrico) {
+            // El objetivo se centra descontando media asimetría: un oído
+            // queda por encima y el otro por debajo, y el par cae dentro del
+            // grado en vez de que uno de los dos se salga por arriba.
+            escalas = ajustarAlGrado(escOd, escalasDe(escOd), gradoOd, asimetria / 2);
+            generarLado(escOd, 'od', escalas, peor === 'od' ? asimetria : 0);
+            generarLado(escOi, 'oi', escalas, peor === 'oi' ? asimetria : 0);
+        } else {
+            generarLado(escOd, 'od', ajustarAlGrado(escOd, escalasDe(escOd), gradoOd, 0), 0);
+            generarLado(escOi, 'oi', ajustarAlGrado(escOi, escalasDe(escOi), gradoOi, 0), 0);
+        }
+
+        // Un caso generado nace coherente: las proyecciones se encienden.
         <?= json_encode(CaseProfile::AUTO_MODULES) ?>.forEach(function (modulo) {
             var chk = document.querySelector('input[name="perfil[auto][' + modulo + ']"]');
             if (chk) {
@@ -2660,7 +2938,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         });
         if (window.drawAudiogram) { window.drawAudiogram(); }
         if (window.drawReflexPattern) { window.drawReflexPattern(); }
-        // Trae de una la proyección del caso recién sorteado: OEA, reflejos
+        // Trae de una la proyección del caso recién generado: OEA, reflejos
         // y supraliminares se llenan solos, no al guardar.
         if (window.proyectarPerfil) { window.proyectarPerfil(); }
     });
@@ -2674,7 +2952,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 // que llama al mismo CaseProfile::project() que corre al guardar. Antes esto
 // era una copia en JS de la ley del ABR, y las otras tres (OEA, reflejos,
 // supraliminares) directamente no se veían hasta guardar y reabrir el caso:
-// el docente sorteaba un caso y la pestaña EOA seguía mostrando lo viejo.
+// el docente generaba un caso y la pestaña EOA seguía mostrando lo viejo.
 (function () {
     var CSRF = <?= json_encode(Auth::csrfToken()) ?>;
     var FREQS = <?= json_encode(CaseBuilder::FREQUENCIES) ?>;
@@ -2852,7 +3130,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         clearTimeout(pendiente);
         pendiente = setTimeout(proyectar, 350);
     }
-    // El sorteo escribe el audiograma completo y necesita repintar ya.
+    // Generar el cuadro escribe el audiograma completo y necesita repintar ya.
     window.proyectarPerfil = proyectar;
 
     document.addEventListener('input', function (e) {
@@ -2868,7 +3146,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         if (/^perfil\[auto\]\[/.test(name) || /^igualar\[/.test(name)
             || name === 'z_od' || name === 'z_oi'
             || (e.target.classList && e.target.classList.contains('abr-neural-input'))) {
-            // Debounce también acá: el sorteo enciende las cuatro casillas
+            // Debounce también acá: generar el cuadro enciende las cuatro casillas
             // de un saque y no hacen falta cuatro viajes al servidor.
             proyectarPronto();
         }
@@ -3678,7 +3956,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         if (!sel) { return; }
         var grades = gradesFor(typeVal(lado));
         var previo = sel.value;
-        var html = '<option value="random">Aleatorio (sortea grado)</option>';
+        var html = '<option value="random">Cualquiera (al azar)</option>';
         for (var i = 0; i < grades.length; i++) {
             html += '<option value="' + grades[i].key + '">' + grades[i].label + '</option>';
         }
@@ -4406,10 +4684,35 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     function activate(name) {
         tabButtons.forEach(function (btn) { btn.classList.toggle('active', btn.dataset.tab === name); });
         tabPanels.forEach(function (panel) { panel.classList.toggle('active', panel.dataset.tab === name); });
+        window.scrollTo(0, 0);
     }
+
+    // Los autocompletados viven todos en "Armado rápido" y las pestañas que
+    // llenan quedan en otra parte, así que la ficha necesita mandarse sola de
+    // una pestaña a otra: los <a class="tab-link" data-goto-tab="..."> del
+    // texto y el salto después de redactar la anamnesis con IA.
+    window.gotoTab = activate;
 
     tabButtons.forEach(function (btn) {
         btn.addEventListener('click', function () { activate(btn.dataset.tab); });
+    });
+
+    document.addEventListener('click', function (e) {
+        var link = e.target.closest('.tab-link[data-goto-tab]');
+        if (!link) return;
+        e.preventDefault();
+        activate(link.getAttribute('data-goto-tab'));
+    });
+
+    // Punto rojo en la pestaña que tiene algo pendiente (CaseCompleteness
+    // devuelve el `tab` de cada faltante). Sin esto el docente lee la lista
+    // de arriba y después tiene que adivinar dónde estaba cada cosa.
+    document.querySelectorAll('.pendientes-card [data-goto-tab]').forEach(function (link) {
+        var btn = document.querySelector('.tab-btn[data-tab="' + link.getAttribute('data-goto-tab') + '"]');
+        if (!btn || btn.querySelector('.tab-error-dot')) return;
+        var dot = document.createElement('span');
+        dot.className = 'tab-error-dot';
+        btn.appendChild(dot);
     });
 
     // Si el usuario llega con un campo inválido dentro de una ficha oculta,
