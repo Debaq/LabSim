@@ -357,6 +357,52 @@ final class CaseBuilder
         'MVEMP' => ['p13', 'n23'],
     ];
 
+    /**
+     * Cómo se nombra cada VEMP en la ficha y en los avisos del editor.
+     *
+     * Los tres se arman siempre. No hay un selector de "cuál es el de este
+     * caso" porque el que elige es el ALUMNO, en el equipo: configurar uno
+     * solo dejaba los otros dos normales pasara lo que pasara, y bastaba
+     * cambiar el combo para que la patología desapareciera.
+     */
+    public const VEMP_SUBTIPO_LABELS = [
+        'CVEMP' => 'cVEMP -- cervical',
+        'OVEMP' => 'oVEMP -- ocular',
+        'MVEMP' => 'mVEMP -- masetero',
+    ];
+
+    /** Umbral (dB) por defecto de cada VEMP en un oído sano. */
+    public const VEMP_DEFAULTS = [
+        'CVEMP' => ['umbral' => 60, 'average_objetivo' => 200],
+        'OVEMP' => ['umbral' => 65, 'average_objetivo' => 300],
+        'MVEMP' => ['umbral' => 70, 'average_objetivo' => 300],
+    ];
+    public const VEMP_REPRO_VAR_DEFAULT = 0.2;
+
+    /**
+     * Normativa del VEMP: latencias y amplitudes medianas por población y
+     * subtipo, y los modificadores por patología.
+     *
+     * Es el MISMO archivo que carga VEMPGeneratorV1 en la app de escritorio
+     * (resources/vemp/normative_data.json). Acá se lee para dibujar la vista
+     * previa de la ficha: sin estos números la previa sería una curva
+     * inventada que no se parece a la que el alumno va a ver en el equipo.
+     *
+     * Mismo mecanismo (y misma copia por deployable) que nameBank().
+     */
+    public static function vempNormative(): array
+    {
+        $path = __DIR__ . '/../resources/vemp/normative_data.json';
+        $norm = is_file($path) ? json_decode((string) file_get_contents($path), true) : null;
+        if (!is_array($norm)) {
+            return ['populations' => [], 'pathology_modifiers' => []];
+        }
+        return [
+            'populations' => $norm['populations'] ?? [],
+            'pathology_modifiers' => $norm['pathology_modifiers'] ?? [],
+        ];
+    }
+
     // Acumetría (diapasones 500 y 1000 Hz) -- se guarda dentro de
     // audiometría, no es tab aparte. Rinne es por oído (CA vs CO en ese
     // oído); Weber es un único resultado por frecuencia (a qué lado
@@ -526,6 +572,39 @@ final class CaseBuilder
      * @param bool $checkUmbral         VEMP no lo chequea: su umbral normal
      *                                  ronda los 60-90 dB nHL, no los 25.
      */
+    /**
+     * Coherencia del VEMP de un oído, subtipo por subtipo.
+     *
+     * La patología es del oído pero las desviaciones son de cada VEMP, así
+     * que el chequeo de "patología Normal con ondas alteradas" hay que
+     * hacerlo tres veces y decir en cuál de los tres está el problema: un
+     * "VEMP OD" a secas mandaba al docente a buscar entre seis campos.
+     *
+     * Sin chequeo de umbral (el del VEMP ronda 60-90 dB y no es comparable
+     * con el de los otros módulos) -- ver normalCoherenceError.
+     */
+    public static function vempCoherenceError(array $cfg, string $lado): ?string
+    {
+        if (($cfg['type'] ?? 'normal') !== 'normal') {
+            return null;
+        }
+        foreach (self::VEMP_SUBTIPOS as $subtipo) {
+            $sub = is_array($cfg['subtipos'][$subtipo] ?? null) ? $cfg['subtipos'][$subtipo] : [];
+            // El subtipo va en el LADO y no en el módulo: el módulo es la
+            // clave de NORMAL_DEVIATION_TOLERANCE, y decorarlo la rompe.
+            $error = self::normalCoherenceError(
+                ['type' => 'normal', 'desviaciones' => $sub['desviaciones'] ?? []],
+                'VEMP',
+                $lado . ' (' . self::VEMP_SUBTIPO_LABELS[$subtipo] . ')',
+                false
+            );
+            if ($error !== null) {
+                return $error;
+            }
+        }
+        return null;
+    }
+
     public static function normalCoherenceError(array $cfg, string $modulo, string $lado, bool $checkUmbral = true): ?string
     {
         if (($cfg['type'] ?? 'normal') !== 'normal') {
@@ -1257,32 +1336,56 @@ final class CaseBuilder
             }
         }
 
+        // VEMP: los tres subtipos por oído (ver CaseForm::parseVemp).
+        //
+        // Un caso guardado ANTES de que fueran tres traía un solo subtipo
+        // (`subtipo`) con sus valores en la raíz del oído. Se los queda el
+        // subtipo que el caso decía, y los otros dos arrancan en default:
+        // no había nada configurado en ellos, y suponer que el cVEMP del
+        // caso viejo describe también al ocular sería inventar un hallazgo
+        // que el docente nunca cargó.
         $vemp = $data['VEMP'] ?? [];
         foreach (['OD' => 'od', 'OI' => 'oi'] as $ladoData => $ladoForm) {
             $ladoVemp = is_array($vemp[$ladoData] ?? null) ? $vemp[$ladoData] : [];
-            $desv = is_array($ladoVemp['desviaciones'] ?? null) ? $ladoVemp['desviaciones'] : [];
             $ladoVempType = $ladoVemp['type'] ?? 'normal';
-            $subtipo = $ladoVemp['subtipo'] ?? 'CVEMP';
-            if (!in_array($subtipo, self::VEMP_SUBTIPOS, true)) {
-                $subtipo = 'CVEMP';
+            $legado = $ladoVemp['subtipo'] ?? null;
+            if (!in_array($legado, self::VEMP_SUBTIPOS, true)) {
+                $legado = null;
             }
-            $peaks = self::VEMP_PEAKS[$subtipo];
+            $guardados = is_array($ladoVemp['subtipos'] ?? null) ? $ladoVemp['subtipos'] : [];
+
             $ladoFormArr = [
-                'subtipo' => $subtipo,
                 'type' => in_array($ladoVempType, self::VEMP_TYPE_OPTIONS, true) ? $ladoVempType : 'normal',
-                'umbral' => (string) ($ladoVemp['umbral'] ?? 60),
-                'repro_var' => (string) ($ladoVemp['repro_var'] ?? 0.2),
-                'average_objetivo' => (string) ($ladoVemp['average_objetivo'] ?? 200),
             ];
-            foreach ($peaks as $pico) {
-                $ladoFormArr["lat_{$pico}"] = (string) ($desv[$pico]['lat'] ?? 0);
-                $ladoFormArr["amp_{$pico}"] = (string) ($desv[$pico]['amp'] ?? 0);
+            if (!empty($ladoVemp['decidido'])) {
+                $ladoFormArr['decidido'] = '1';
             }
-            if (!empty($ladoVemp['repro']) || !isset($ladoVemp['repro'])) {
-                // Default repro=true (caso nuevo sin VEMP configurado aún):
-                // solo queda sin marcar si el docente lo desmarcó
-                // explícitamente (repro === false guardado).
-                $ladoFormArr['repro'] = '1';
+            foreach (self::VEMP_SUBTIPOS as $subtipo) {
+                $def = self::VEMP_DEFAULTS[$subtipo];
+                if (is_array($guardados[$subtipo] ?? null)) {
+                    $sub = $guardados[$subtipo];
+                } elseif ($legado === $subtipo) {
+                    $sub = $ladoVemp;   // caso viejo: sus valores estaban en la raíz
+                } else {
+                    $sub = [];
+                }
+                $desv = is_array($sub['desviaciones'] ?? null) ? $sub['desviaciones'] : [];
+                $subForm = [
+                    'umbral' => (string) ($sub['umbral'] ?? $def['umbral']),
+                    'repro_var' => (string) ($sub['repro_var'] ?? self::VEMP_REPRO_VAR_DEFAULT),
+                    'average_objetivo' => (string) ($sub['average_objetivo'] ?? $def['average_objetivo']),
+                ];
+                foreach (self::VEMP_PEAKS[$subtipo] as $pico) {
+                    $subForm["lat_{$pico}"] = (string) ($desv[$pico]['lat'] ?? 0);
+                    $subForm["amp_{$pico}"] = (string) ($desv[$pico]['amp'] ?? 0);
+                }
+                if (!empty($sub['repro']) || !isset($sub['repro'])) {
+                    // Default repro=true (subtipo nunca configurado): solo
+                    // queda sin marcar si el docente lo desmarcó él
+                    // (repro === false guardado).
+                    $subForm['repro'] = '1';
+                }
+                $ladoFormArr[$subtipo] = $subForm;
             }
             $v['vemp'][$ladoForm] = $ladoFormArr;
         }

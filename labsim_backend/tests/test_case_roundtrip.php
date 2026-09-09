@@ -41,3 +41,82 @@ $v = CaseBuilder::caseDataToForm($conNeural);
 t_eq($v['abr']['od']['neural']['iii_v_ms'], '0.6', 'El patrón retro del tab ABR se relee sin cambios');
 t_eq($v['abr']['od']['neural']['bloqueo'], CaseBuilder::ABR_NEURAL_DEFAULTS['bloqueo'],
     'Las claves ausentes del patrón retro caen en los defaults del generador');
+
+// =====================================================================
+// VEMP: tres subtipos por oído
+// =====================================================================
+
+// Caso guardado con el shape nuevo: cada subtipo se relee con lo suyo.
+$conVemp = $viejo;
+$conVemp['VEMP'] = [
+    'OD' => [
+        'type' => 'sacular',
+        'subtipos' => [
+            'CVEMP' => ['umbral' => 45, 'repro' => false, 'repro_var' => 0.4,
+                        'average_objetivo' => 250,
+                        'desviaciones' => ['p13' => ['lat' => 1.5, 'amp' => -90.0],
+                                           'n23' => ['lat' => 0.0, 'amp' => -55.0]]],
+            'OVEMP' => ['umbral' => 65, 'repro' => true, 'repro_var' => 0.2,
+                        'average_objetivo' => 300,
+                        'desviaciones' => ['n10' => ['lat' => 0.0, 'amp' => 0.0],
+                                           'p16' => ['lat' => 0.0, 'amp' => 0.0]]],
+            'MVEMP' => ['umbral' => 70, 'repro' => true, 'repro_var' => 0.2,
+                        'average_objetivo' => 300,
+                        'desviaciones' => ['p13' => ['lat' => 0.3, 'amp' => -10.0],
+                                           'n23' => ['lat' => 0.0, 'amp' => 0.0]]],
+        ],
+    ],
+    'OI' => ['type' => 'normal'],
+];
+$v = CaseBuilder::caseDataToForm($conVemp);
+t_eq($v['vemp']['od']['type'], 'sacular', 'VEMP: la patología es del oído, una sola');
+t_eq($v['vemp']['od']['CVEMP']['umbral'], '45', 'VEMP: cada subtipo relee su umbral');
+t_eq($v['vemp']['od']['OVEMP']['umbral'], '65', 'VEMP: el umbral del ocular no es el del cervical');
+t_true(!isset($v['vemp']['od']['CVEMP']['repro']),
+    'VEMP: un subtipo marcado como no reproducible vuelve sin la casilla');
+t_eq($v['vemp']['od']['OVEMP']['repro'], '1', 'VEMP: reproducible vuelve tildado');
+// El punto de separarlos: cVEMP y mVEMP comparten los nombres de pico y
+// antes se pisaban en los mismos cuatro campos.
+t_eq($v['vemp']['od']['CVEMP']['amp_p13'], '-90', 'VEMP: P13 del cervical');
+t_eq($v['vemp']['od']['MVEMP']['amp_p13'], '-10', 'VEMP: P13 del masetero NO es el del cervical');
+
+// Oído sin nada guardado: los tres arrancan en su propio default.
+t_eq($v['vemp']['oi']['CVEMP']['umbral'], (string) CaseBuilder::VEMP_DEFAULTS['CVEMP']['umbral'],
+    'VEMP: un oído sin configurar cae en el default de cada subtipo');
+t_eq($v['vemp']['oi']['MVEMP']['average_objetivo'], (string) CaseBuilder::VEMP_DEFAULTS['MVEMP']['average_objetivo'],
+    'VEMP: las promediaciones por defecto son las del subtipo, no una sola para los tres');
+
+// Caso viejo (un solo subtipo, valores en la raíz del oído): se los queda
+// el subtipo que el caso decía y los otros dos arrancan limpios -- no había
+// nada cargado en ellos, y copiárselos inventaría un hallazgo.
+$vempLegado = $viejo;
+$vempLegado['VEMP'] = [
+    'OD' => [
+        'subtipo' => 'OVEMP',
+        'type' => 'utricular',
+        'umbral' => 85,
+        'repro' => true,
+        'repro_var' => 0.3,
+        'average_objetivo' => 400,
+        'desviaciones' => ['n10' => ['lat' => 1.2, 'amp' => -6.0], 'p16' => ['lat' => 0.0, 'amp' => 0.0],
+                           'p13' => ['lat' => 0.0, 'amp' => 0.0], 'n23' => ['lat' => 0.0, 'amp' => 0.0]],
+    ],
+    'OI' => ['type' => 'normal'],
+];
+$v = CaseBuilder::caseDataToForm($vempLegado);
+t_eq($v['vemp']['od']['type'], 'utricular', 'VEMP legado: la patología se conserva');
+t_eq($v['vemp']['od']['OVEMP']['umbral'], '85', 'VEMP legado: el umbral va al subtipo que el caso decía');
+t_eq($v['vemp']['od']['OVEMP']['amp_n10'], '-6', 'VEMP legado: las ondas también');
+t_eq($v['vemp']['od']['CVEMP']['umbral'], (string) CaseBuilder::VEMP_DEFAULTS['CVEMP']['umbral'],
+    'VEMP legado: los otros dos subtipos arrancan en default, no copian al guardado');
+t_eq($v['vemp']['od']['CVEMP']['amp_p13'], '0',
+    'VEMP legado: los picos de un subtipo nunca configurado quedan en 0');
+
+// El flag "ya decidí lo vestibular" sobrevive el viaje. Sin él,
+// CaseCompleteness no puede distinguir un VEMP normal que ES el hallazgo
+// (la ANSD) de una ficha que nadie abrió.
+$vempDecidido = $viejo;
+$vempDecidido['VEMP'] = ['OD' => ['type' => 'normal', 'decidido' => true], 'OI' => ['type' => 'normal']];
+$v = CaseBuilder::caseDataToForm($vempDecidido);
+t_eq($v['vemp']['od']['decidido'], '1', 'VEMP: el flag de decidido vuelve tildado');
+t_true(!isset($v['vemp']['oi']['decidido']), 'VEMP: el oído sin decidir no trae el flag');

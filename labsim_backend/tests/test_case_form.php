@@ -72,8 +72,13 @@ t_eq($cfRun(['etf_oi' => 'chanta'])->error, 'Valor de ETF inválido.', 'ETF fuer
 t_eq($cfRun(['abr' => ['od' => ['type' => 'inventada']]])->error, 'Patología ABR inválida.', 'Patología ABR fuera del catálogo');
 t_eq($cfRun(['eoas' => ['od' => ['sello_pct' => '3']]])->error,
     'Sello de sonda EOA fuera de rango (5-100%).', 'Sello de sonda por debajo del mínimo');
-t_eq($cfRun(['tinnitus' => ['lateralidad' => 'unilateral', 'oido' => '']])->error,
+// `presente` va explícito: desde que el acúfeno es opcional, un bloque de
+// tinnitus sin esa casilla no se valida (el paciente no tiene acúfeno y da
+// igual lo que digan los otros campos).
+t_eq($cfRun(['tinnitus' => ['presente' => '1', 'lateralidad' => 'unilateral', 'oido' => '']])->error,
     'Falta el oído del tinnitus (unilateral, hay que indicar cuál).', 'Tinnitus unilateral sin oído');
+t_eq($cfRun(['tinnitus' => ['lateralidad' => 'unilateral', 'oido' => '']])->error, null,
+    'Sin la casilla "tiene tinnitus" no se valida nada del acúfeno');
 
 // Rinne/Weber a mano: el "auto" global apagado deja que el docente escriba,
 // pero solo valores del catálogo.
@@ -180,3 +185,39 @@ t_eq(CaseForm::val(['a' => ['b' => 0]], ['a', 'b'], 'def'), 0, 'val: un 0 es un 
 t_eq(CaseForm::zip([1, 2], [3, 4]), [[1, 3], [2, 4]], 'zip: arma los pares [OD, OI]');
 t_eq(CaseForm::zip([1, 2], [3]), [[1, 3], [2, 0]], 'zip: sin contraparte, el OI queda en 0');
 t_eq(CaseForm::zip([], []), [], 'zip: vacío da vacío');
+
+
+// --- VEMP: los tres subtipos ----------------------------------------------
+
+$cfVemp = $cfRun([
+    'vemp' => [
+        'od' => [
+            'type' => 'sacular',
+            'CVEMP' => ['umbral' => '45', 'repro' => '1', 'lat_p13' => '1.5', 'amp_p13' => '-90'],
+            'OVEMP' => ['umbral' => '65'],
+            'MVEMP' => ['umbral' => '70', 'amp_p13' => '-10'],
+        ],
+    ],
+])->data['VEMP'];
+t_eq($cfVemp['OD']['type'], 'sacular', 'VEMP: una patología por oído');
+t_eq($cfVemp['OD']['subtipos']['CVEMP']['umbral'], 45, 'VEMP: el umbral del cervical');
+t_eq($cfVemp['OD']['subtipos']['OVEMP']['umbral'], 65, 'VEMP: el umbral del ocular es otro');
+t_eq($cfVemp['OD']['subtipos']['CVEMP']['desviaciones']['p13']['amp'], -90.0, 'VEMP: P13 del cervical');
+t_eq($cfVemp['OD']['subtipos']['MVEMP']['desviaciones']['p13']['amp'], -10.0,
+    'VEMP: P13 del masetero es independiente del cervical (mismo nombre, otro músculo)');
+t_eq($cfVemp['OD']['subtipos']['OVEMP']['peaks'], ['n10', 'p16'], 'VEMP: el ocular lleva sus propios picos');
+t_true(!isset($cfVemp['OD']['subtipos']['OVEMP']['repro']) || $cfVemp['OD']['subtipos']['OVEMP']['repro'] === false,
+    'VEMP: la casilla no tildada de un subtipo no arrastra la del otro');
+// Los subtipos que el POST no menciona igual se persisten, en su default.
+t_eq($cfVemp['OI']['subtipos']['CVEMP']['umbral'], CaseBuilder::VEMP_DEFAULTS['CVEMP']['umbral'],
+    'VEMP: un oído que el POST no toca queda en los defaults de cada subtipo');
+
+// Coherencia: patología Normal con ondas cargadas se reclama, y dice en
+// CUÁL de los tres VEMP está el problema.
+$cfVempIncoherente = $cfRun([
+    'vemp' => ['od' => ['type' => 'normal', 'MVEMP' => ['lat_p13' => '3.0']]],
+])->error;
+t_true($cfVempIncoherente !== null && strpos($cfVempIncoherente, 'mVEMP') !== false,
+    'VEMP: la incoherencia nombra el subtipo donde está el problema');
+t_eq($cfRun(['vemp' => ['od' => ['type' => 'normal', 'MVEMP' => ['lat_p13' => '0']]]])->error, null,
+    'VEMP: patología normal con las ondas en 0 guarda sin chistar');

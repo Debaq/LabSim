@@ -98,13 +98,26 @@ final class CaseCompleteness
             // --- VEMP: el perfil no tiene eje vestibular. Si el caso tiene
             // patrón retrococlear, alguien tiene que decir qué pasa acá.
             $vempLado = is_array(($data['VEMP'] ?? [])[$lado] ?? null) ? $data['VEMP'][$lado] : [];
+            // Las desviaciones viven en cada subtipo (`subtipos`); en un caso
+            // guardado antes de que fueran tres estaban en la raíz del oído,
+            // y allZero() tiene que mirar los dos lugares para no reclamarle
+            // un VEMP a un caso viejo que sí lo tenía cargado.
+            $vempDesv = [$vempLado['desviaciones'] ?? []];
+            foreach ((array) ($vempLado['subtipos'] ?? []) as $vempSub) {
+                $vempDesv[] = is_array($vempSub) ? ($vempSub['desviaciones'] ?? []) : [];
+            }
+            // `decidido` es la salida para el normal que SÍ es un hallazgo:
+            // en la neuropatía auditiva el VEMP conservado con el ABR
+            // desarmado es lo que localiza la lesión, y reclamárselo obligaba
+            // a inventarle una alteración vestibular para poder guardar.
             if (CaseProfile::retroActivo($perfil[$lado]['retro'] ?? [])
+                && empty($vempLado['decidido'])
                 && ($vempLado['type'] ?? 'normal') === 'normal'
-                && self::allZero($vempLado['desviaciones'] ?? [])) {
+                && self::allZero($vempDesv)) {
                 $pendientes[] = [
                     'tab' => 'vemp',
                     'texto' => sprintf(
-                        'VEMP %s: el caso tiene patrón retrococlear cargado y el VEMP quedó normal sin tocar. El perfil no cubre lo vestibular: decidí si la lesión lo compromete o no.',
+                        'VEMP %s: el caso tiene patrón retrococlear cargado y el VEMP quedó normal sin tocar. El perfil no cubre lo vestibular: decidí si la lesión lo compromete o no, y si la respuesta es que no, tildá "Ya decidí qué pasa en el VEMP de este oído".',
                         $lado
                     ),
                 ];

@@ -381,6 +381,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // del POST y no antes: un guardado exitoso redirige sin dibujar el formulario,
 // y esta consulta no haría falta.
 $abrAuthorCatalog = AppConfig::getEffective('abr_reference_authors', null) ?? [];
+// Normativa VEMP del curso (courses.php -> "Normativa VEMP"): pisa lat/amp
+// por pico y subtipo. La vista previa tiene que dibujar con la del curso,
+// que es la que va a usar el equipo -- ver VEMP_generator_v1, que la aplica
+// después de calcular las ondas.
+$vempBaselineOverride = AppConfig::getEffective('normative_data.vemp', null) ?? [];
 
 admin_add_css('case.css');
 // El JS de esta página vive en public/js/case/*.js y se emite al final del
@@ -397,6 +402,7 @@ admin_add_js('case/generator.js');
 admin_add_js('case/profile-preview.js');
 admin_add_js('case/abr.js');
 admin_add_js('case/oae.js');
+admin_add_js('case/vemp.js');
 admin_add_js('case/patient-photo.js');
 admin_add_js('case/sala.js');
 admin_add_js('case/otoscopia.js');
@@ -577,6 +583,14 @@ window.CASE_CONST = <?= json_encode([
     'eoasGrades' => CaseBuilder::EOAS_AUTOFILL_GRADES,
     'eoasJitter' => CaseBuilder::EOAS_AUTOFILL_JITTER_DB,
     'eoasMaxAtten' => CaseBuilder::EOAS_MAX_PATHOLOGY_ATTEN_DB,
+    'vempSubtipos' => CaseBuilder::VEMP_SUBTIPOS,
+    'vempPeaks' => CaseBuilder::VEMP_PEAKS,
+    'vempDefaults' => CaseBuilder::VEMP_DEFAULTS,
+    // Mismo JSON que carga VEMPGeneratorV1 en la app (fuera de public/: no
+    // se puede pedir por HTTP, viaja serializado acá, igual que el banco de
+    // nombres) -- lo usa la vista previa de la ficha VEMP.
+    'vempNormative' => CaseBuilder::vempNormative(),
+    'vempBaselineOverride' => $vempBaselineOverride,
     'escenarios' => CaseProfile::SCENARIOS,
     'categorias' => CaseProfile::CATEGORIAS,
     'grades' => CaseProfile::GRADES,

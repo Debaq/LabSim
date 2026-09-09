@@ -340,12 +340,8 @@ final class CaseForm
             ];
         }
 
-        // VEMP: patología vestibular por oído. El subtipo (CVEMP cervical,
-        // OVEMP ocular, MVEMP masetero) define qué picos se observan (ver
-        // VEMP_PEAKS); los 4 peaks siempre se rinden en el form porque
-        // simplificar con sub-bloques por subtipo haría el form más frágil
-        // y no aporta nada pedagógico (el docente los edita y el cliente
-        // usa solo los del subtipo activo).
+        // VEMP: patología vestibular por oído, y los tres subtipos armados
+        // por separado (ver parseVemp).
         $vempOd = self::parseVemp($v, 'od');
         $vempOi = self::parseVemp($v, 'oi');
 
@@ -397,8 +393,9 @@ final class CaseForm
                 ?? ($perfilAuto['eoas'] ? null : CaseBuilder::normalCoherenceError($eoasOd, 'EOA', 'OD'))
                 ?? ($perfilAuto['eoas'] ? null : CaseBuilder::normalCoherenceError($eoasOi, 'EOA', 'OI'))
                 // VEMP sin chequeo de umbral: el suyo ronda 60-90 dB nHL.
-                ?? CaseBuilder::normalCoherenceError($vempOd, 'VEMP', 'OD', false)
-                ?? CaseBuilder::normalCoherenceError($vempOi, 'VEMP', 'OI', false)) !== null) {
+                // Subtipo por subtipo: las desviaciones viven en cada uno.
+                ?? CaseBuilder::vempCoherenceError($vempOd, 'OD')
+                ?? CaseBuilder::vempCoherenceError($vempOi, 'OI')) !== null) {
             $error = $coherencia;
         }
 
@@ -622,32 +619,58 @@ final class CaseForm
             ];
     }
 
-    /** Un oído de VEMP desde el POST (ver VEMP_PEAKS). */
+    /**
+     * Un oído de VEMP desde el POST: los TRES subtipos, cada uno con lo suyo.
+     *
+     * `type` (la patología) es del oído y no del subtipo: es el órgano el
+     * que está lesionado, y qué VEMP lo muestra lo decide la anatomía --
+     * VEMPGeneratorV1 ya cruza patología x subtipo (sacular pega en cVEMP,
+     * utricular en oVEMP, neural en los dos). Una patología por subtipo
+     * dejaría armar un oído con el sáculo enfermo según el cVEMP y sano
+     * según el mVEMP, que miden el mismo órgano.
+     *
+     * Todo lo demás sí es por subtipo. El umbral sobre todo: la disociación
+     * entre el umbral cervical y el ocular ES el hallazgo en la dehiscencia
+     * (los dos bajos) y en la neuritis del nervio superior (oVEMP ausente
+     * con cVEMP normal). Y las desviaciones no podían no serlo: cVEMP y
+     * mVEMP comparten los nombres de pico (p13/n23) y hasta acá se pisaban
+     * en los mismos cuatro campos.
+     */
     private static function parseVemp(array $v, string $lado): array
     {
-            $subtipo = (string) self::val($v, ['vemp', $lado, 'subtipo'], 'CVEMP');
-            if (!in_array($subtipo, CaseBuilder::VEMP_SUBTIPOS, true)) {
-                $subtipo = 'CVEMP';
-            }
-            $peaks = CaseBuilder::VEMP_PEAKS[$subtipo];
-            $desv = [];
-            // siempre persistimos los 4 picos aunque el subtipo use solo 2;
-            // los picos no usados quedan con lat=0/amp=0 (no molestan).
-            foreach (['p13', 'n23', 'n10', 'p16'] as $pico) {
-                $desv[$pico] = [
-                    'lat' => (float) self::val($v, ['vemp', $lado, "lat_{$pico}"], 0),
-                    'amp' => (float) self::val($v, ['vemp', $lado, "amp_{$pico}"], 0),
+            $subtipos = [];
+            foreach (CaseBuilder::VEMP_SUBTIPOS as $subtipo) {
+                $desv = [];
+                foreach (CaseBuilder::VEMP_PEAKS[$subtipo] as $pico) {
+                    $desv[$pico] = [
+                        'lat' => (float) self::val($v, ['vemp', $lado, $subtipo, "lat_{$pico}"], 0),
+                        'amp' => (float) self::val($v, ['vemp', $lado, $subtipo, "amp_{$pico}"], 0),
+                    ];
+                }
+                $def = CaseBuilder::VEMP_DEFAULTS[$subtipo];
+                $subtipos[$subtipo] = [
+                    'peaks' => CaseBuilder::VEMP_PEAKS[$subtipo],
+                    'umbral' => (int) self::val($v, ['vemp', $lado, $subtipo, 'umbral'], $def['umbral']),
+                    'repro' => isset($v['vemp'][$lado][$subtipo]['repro']),
+                    'repro_var' => (float) self::val(
+                        $v, ['vemp', $lado, $subtipo, 'repro_var'], CaseBuilder::VEMP_REPRO_VAR_DEFAULT
+                    ),
+                    'average_objetivo' => (int) self::val(
+                        $v, ['vemp', $lado, $subtipo, 'average_objetivo'], $def['average_objetivo']
+                    ),
+                    'desviaciones' => $desv,
                 ];
             }
             return [
-                'subtipo' => $subtipo,
                 'type' => (string) self::val($v, ['vemp', $lado, 'type'], 'normal'),
-                'repro' => isset($v['vemp'][$lado]['repro']),
-                'repro_var' => (float) self::val($v, ['vemp', $lado, 'repro_var'], 0.2),
-                'umbral' => (int) self::val($v, ['vemp', $lado, 'umbral'], 60),
-                'average_objetivo' => (int) self::val($v, ['vemp', $lado, 'average_objetivo'], 200),
-                'desviaciones' => $desv,
-                'peaks' => $peaks,
+                // "Alguien miró lo vestibular de este oído". Hace falta
+                // porque un VEMP normal puede ser el hallazgo -- en la ANSD
+                // el VEMP conservado ES el dato -- y sin esto
+                // CaseCompleteness no puede distinguir un normal decidido
+                // de la ficha que nadie abrió. Lo tilda el armado rápido y
+                // lo tilda el docente al tocar cualquier campo del oído.
+                'decidido' => isset($v['vemp'][$lado]['decidido']),
+                'subtipos' => $subtipos,
             ];
     }
 }

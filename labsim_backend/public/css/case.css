@@ -43,8 +43,9 @@ input:disabled, select:disabled { background: var(--color-row-alt); color: var(-
 .bloque-apagado { opacity: 0.55; }
 
 /* Preview ABR (case_create.php): serie de curvas 100->0 dBnHL, una por oído */
-.abr-preview, .eoa-preview { width: 100%; overflow-x: auto; }
-.abr-preview svg, .eoa-preview svg { width: 100%; height: auto; display: block; }
+.abr-preview, .eoa-preview, .vemp-preview { width: 100%; overflow-x: auto; }
+.abr-preview svg, .eoa-preview svg, .vemp-preview svg { width: 100%; height: auto; display: block; }
+.vemp-preview { margin-top: 0.4rem; }
 
 /* Tabs de la ficha (Audiometría, Otoscopia, Reflejos, etc.).
  * Sin JS, todas las pestañas visibles apiladas -- degrada con gracia. */
