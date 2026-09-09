@@ -438,6 +438,10 @@ admin_add_js('case/chat-test.js');
 // Después de tabs.js: usa window.gotoTab para mandar al Resumen cuando se
 // intenta guardar con fichas sin revisar.
 admin_add_js('case/resumen.js');
+// Último: usa window.gotoTab (tabs.js) y window.resumenDestildar (resumen.js),
+// y que se cargue al final es lo que hace que los autocompletados que corren
+// al abrir la página no avisen nada (todavía no existe su función).
+admin_add_js('case/auto-cambios.js');
 admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico', $me);
 ?>
 
@@ -497,6 +501,13 @@ $tabsGrupoActual = null;
 <?php endforeach; ?>
         </div>
     </div>
+</div>
+
+<div id="auto-cambios" class="auto-cambios" hidden>
+    <strong>Se reescribieron otras fichas</strong>
+    <p id="auto-cambios-texto"></p>
+    <div id="auto-cambios-links" class="auto-cambios-links"></div>
+    <button type="button" id="auto-cambios-cerrar" class="secondary">Ya las revisé</button>
 </div>
 
 <?php include __DIR__ . '/../../views/case/_armado.php'; ?>

@@ -110,8 +110,13 @@ final class CaseForm
                 $osea[$lado][] = (int) self::val($v, ['osea', $lado, (string) $n], 0);
                 $ldl[$lado][] = (int) self::val($v, ['ldl', $lado, (string) $n], 130);
             }
-            if (isset($v['igualar'][$lado])) {
-                $osea[$lado] = $aerea[$lado]; // "igualar ósea a aérea", igual que equal_osea en create_a.py
+            // "Igualar ósea a aérea" (equal_osea en create_a.py) también
+            // sugiere y nada más: el JS copia la aérea encima de la ósea en
+            // vivo y los campos quedan editables, así que lo que llega en el
+            // POST manda. Solo se copia acá si la ósea no vino del todo (un
+            // POST armado a mano, sin el formulario).
+            if (isset($v['igualar'][$lado]) && !isset($v['osea'][$lado])) {
+                $osea[$lado] = $aerea[$lado];
             }
             if (!isset($v['ldl_habilitado'][$lado])) {
                 $ldl[$lado] = array_fill(0, count(CaseBuilder::FREQUENCIES), 130); // deshabilitado = ausente
@@ -154,24 +159,30 @@ final class CaseForm
 
         $airPairs = self::zip($aerea['od'], $aerea['oi']);
         $fletcher = CaseBuilder::fletcherAvg($airPairs);
-        $sdt = [
-            isset($v['sdt_auto']['od']) ? $fletcher[0] : (int) self::val($v, ['sdt', 'od'], 0),
-            isset($v['sdt_auto']['oi']) ? $fletcher[1] : (int) self::val($v, ['sdt', 'oi'], 0),
-        ];
-        $srt = [
-            isset($v['srt_auto']['od']) ? $fletcher[0] : (int) self::val($v, ['srt', 'od'], 0),
-            isset($v['srt_auto']['oi']) ? $fletcher[1] : (int) self::val($v, ['srt', 'oi'], 0),
-        ];
+        // SDT/SRT "auto (Fletcher)": el JS escribe el promedio en el campo y
+        // lo deja editable, así que gana lo posteado. El cálculo de acá es
+        // el respaldo para un POST sin ese campo.
+        $sdt = [];
+        $srt = [];
+        foreach (['od' => 0, 'oi' => 1] as $lado => $i) {
+            foreach ([['sdt', &$sdt], ['srt', &$srt]] as [$clave, &$destino]) {
+                $posteado = self::val($v, [$clave, $lado], null);
+                $destino[] = ($posteado === null && isset($v[$clave . '_auto'][$lado]))
+                    ? $fletcher[$i] : (int) ($posteado ?? 0);
+            }
+            unset($destino);
+        }
 
         $zOd = (string) ($v['z_od'] ?? 'A');
         $zOi = (string) ($v['z_oi'] ?? 'A');
         $etfOd = (string) ($v['etf_od'] ?? 'Normal');
         $etfOi = (string) ($v['etf_oi'] ?? 'Normal');
 
-        // Acumetría (Rinne/Weber), auto-calculada desde los umbrales tonales
-        // ya cargados arriba ($aerea/$osea, índices de CaseBuilder::ACUMETRIA_FREQS)
-        // salvo que el docente haya destildado el único "auto" global de la
-        // tabla (un solo checkbox para las 6 celdas, no uno por celda).
+        // Acumetría (Rinne/Weber). El "auto" global de la tabla (un solo
+        // checkbox para las 6 celdas) la calcula desde los umbrales tonales
+        // ya cargados arriba, pero lo hace en el formulario: acá gana lo
+        // posteado, que es lo que el docente dejó en pantalla. El cálculo
+        // de este lado es el respaldo para un POST que no traiga la celda.
         $rinne = [];
         $weber = [];
         $acumetriaValid = true;
@@ -179,25 +190,29 @@ final class CaseForm
         foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $freqIdx) {
             $rinne[$hz] = [];
             foreach (['od', 'oi'] as $lado) {
-                if ($acumetriaIsAuto) {
-                    $rinne[$hz][$lado] = CaseBuilder::rinneAuto($aerea[$lado][$freqIdx], $osea[$lado][$freqIdx]);
-                } else {
-                    $manual = (string) self::val($v, ['rinne', $hz, $lado], 'positivo');
-                    if (!in_array($manual, CaseBuilder::RINNE_OPTIONS, true)) {
-                        $acumetriaValid = false;
-                    }
-                    $rinne[$hz][$lado] = $manual;
+                $manual = self::val($v, ['rinne', $hz, $lado], null);
+                if ($manual === null) {
+                    $rinne[$hz][$lado] = $acumetriaIsAuto
+                        ? CaseBuilder::rinneAuto($aerea[$lado][$freqIdx], $osea[$lado][$freqIdx])
+                        : 'positivo';
+                    continue;
                 }
-            }
-            if ($acumetriaIsAuto) {
-                $weber[$hz] = CaseBuilder::weberAuto($osea['od'][$freqIdx], $osea['oi'][$freqIdx]);
-            } else {
-                $manualWeber = (string) self::val($v, ['weber', $hz], 'centrado');
-                if (!in_array($manualWeber, CaseBuilder::WEBER_OPTIONS, true)) {
+                if (!in_array((string) $manual, CaseBuilder::RINNE_OPTIONS, true)) {
                     $acumetriaValid = false;
                 }
-                $weber[$hz] = $manualWeber;
+                $rinne[$hz][$lado] = (string) $manual;
             }
+            $manualWeber = self::val($v, ['weber', $hz], null);
+            if ($manualWeber === null) {
+                $weber[$hz] = $acumetriaIsAuto
+                    ? CaseBuilder::weberAuto($osea['od'][$freqIdx], $osea['oi'][$freqIdx])
+                    : 'centrado';
+                continue;
+            }
+            if (!in_array((string) $manualWeber, CaseBuilder::WEBER_OPTIONS, true)) {
+                $acumetriaValid = false;
+            }
+            $weber[$hz] = (string) $manualWeber;
         }
         $bonePairs = self::zip($osea['od'], $osea['oi']);
         // Qué frecuencias califican para Fowler/I.W.A. se detecta solo de

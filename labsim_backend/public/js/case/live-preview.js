@@ -1,6 +1,14 @@
 // Ayuda visual en vivo -- el servidor recalcula todo igual al enviar,
 // así que si JS falla el caso igual queda bien formado.
 (function () {
+    // Estos autocompletados escriben campos de Audiometría, casi siempre
+    // desde otra pestaña (el generador de Armado rápido tipea la aérea):
+    // ver case/auto-cambios.js.
+    function avisar(motivo) {
+        if (window.avisarCambioAutomatico) {
+            window.avisarCambioAutomatico(['audiometria'], motivo);
+        }
+    }
     function pairAvgFloor5(a, b) {
         var vals = [a, b].sort(function (x, y) { return x - y; });
         var avg = (vals[0] + vals[1]) / 2;
@@ -15,24 +23,26 @@
     }
 
     ['od', 'oi'].forEach(function (side) {
+        // "Igualar ósea a aérea" copia y nada más: la ósea queda editable
+        // (antes quedaba readOnly, y una casilla que traba no es una
+        // sugerencia -- ver case/derived-fields.js).
         var igualar = document.querySelector('.igualar-toggle[data-side="' + side + '"]');
         function syncOsea() {
             if (!igualar || !igualar.checked) return;
+            var cambio = false;
             for (var n = 0; n < 9; n++) {
                 var a = document.getElementById('aerea_' + side + '_' + n);
                 var o = document.getElementById('osea_' + side + '_' + n);
-                if (a && o) { o.value = a.value; o.readOnly = true; }
+                if (a && o) {
+                    if (o.value !== a.value) { cambio = true; }
+                    o.value = a.value;
+                }
             }
             if (window.drawAudiogram) window.drawAudiogram();
-        }
-        function unlockOsea() {
-            for (var n = 0; n < 9; n++) {
-                var o = document.getElementById('osea_' + side + '_' + n);
-                if (o) { o.readOnly = false; }
-            }
+            if (cambio) { avisar('"igualar ósea a aérea" reescribió la vía ósea'); }
         }
         if (igualar) {
-            igualar.addEventListener('change', function () { igualar.checked ? syncOsea() : unlockOsea(); });
+            igualar.addEventListener('change', syncOsea);
             for (var n = 0; n < 9; n++) {
                 var a = document.getElementById('aerea_' + side + '_' + n);
                 if (a) { a.addEventListener('input', syncOsea); }
@@ -55,8 +65,16 @@
             var input = document.querySelector('.' + kind + '-input[data-side="' + side + '"]');
             function syncAuto() {
                 if (!auto || !input) return;
-                if (auto.checked) { input.value = fletcher(side); input.readOnly = true; }
-                else { input.readOnly = false; }
+                // Escribe el promedio de Fletcher y deja el campo editable:
+                // el docente puede correr el SDT/SRT del promedio tonal (que
+                // es justo el hallazgo de la simulación y del retrococlear).
+                if (auto.checked) {
+                    var nuevo = String(fletcher(side));
+                    if (input.value !== nuevo) {
+                        input.value = nuevo;
+                        avisar('el auto de Fletcher reescribió el ' + kind.toUpperCase());
+                    }
+                }
                 if (window.drawLogogram) window.drawLogogram();
             }
             if (auto) {

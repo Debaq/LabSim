@@ -62,9 +62,25 @@
         };
     }
 
+    // Qué ficha muestra cada módulo derivado: es lo que se avisa cuando la
+    // proyección reescribe algo que no está en la pestaña abierta.
+    var TAB_DE_MODULO = { abr: 'abr', eoas: 'eoas', reflex: 'timpanometria',
+                          recruit: 'audiometria', logo: 'audiometria' };
+    // Módulo que se está hidratando y fichas que cambiaron de verdad en esta
+    // pasada (escribir el mismo número que ya estaba no es un cambio).
+    var moduloActual = null;
+    var tabsTocadas = {};
+    var primeraPasada = true;
+
+    function marcarTocado() {
+        var tab = TAB_DE_MODULO[moduloActual];
+        if (tab) { tabsTocadas[tab] = true; }
+    }
     function setVal(name, valor) {
         var el = campo(name);
-        if (el && valor !== undefined && valor !== null) { el.value = valor; }
+        if (!el || valor === undefined || valor === null) { return; }
+        if (String(el.value) !== String(valor)) { marcarTocado(); }
+        el.value = valor;
     }
 
     function pintarTablaAbr(abr) {
@@ -88,8 +104,10 @@
 
     function hidratar(p) {
         if (preview) { preview.hidden = !autoOn('abr'); }
+        tabsTocadas = {};
 
         if (autoOn('abr')) {
+            moduloActual = 'abr';
             pintarTablaAbr(p.abr);
             ['od', 'oi'].forEach(function (lado) {
                 var lo = lado.toUpperCase();
@@ -99,6 +117,7 @@
         }
 
         if (autoOn('eoas')) {
+            moduloActual = 'eoas';
             ['od', 'oi'].forEach(function (lado) {
                 var lo = lado.toUpperCase();
                 setVal('eoas[' + lado + '][type]', p.eoas[lo].type);
@@ -110,6 +129,7 @@
         }
 
         if (autoOn('reflex')) {
+            moduloActual = 'reflex';
             ['ipsi', 'contra'].forEach(function (modo) {
                 ['od', 'oi'].forEach(function (lado) {
                     (p.reflex[modo][lado] || []).forEach(function (valor, n) {
@@ -125,9 +145,11 @@
         }
 
         if (autoOn('recruit')) {
+            moduloActual = 'recruit';
             ['od', 'oi'].forEach(function (lado, i) {
                 setVal('sisi[' + lado + ']', p.recruit.sisi[i]);
                 var chk = campo('recruit[' + lado + ']');
+                if (chk && chk.checked !== !!p.recruit.recruit[i]) { marcarTocado(); }
                 if (chk) { chk.checked = !!p.recruit.recruit[i]; }
             });
             Object.keys(p.recruit.fowler).forEach(function (freqIdx) {
@@ -153,6 +175,7 @@
         }
 
         if (autoOn('logo')) {
+            moduloActual = 'logo';
             ['od', 'oi'].forEach(function (lado) {
                 var lo = lado.toUpperCase();
                 setVal('umd_int[' + lado + ']', p.logo[lo].int);
@@ -160,6 +183,15 @@
             });
             if (window.drawLogogram) { window.drawLogogram(); }
         }
+        moduloActual = null;
+
+        // La primera proyección es la de abrir el caso: pone en pantalla lo
+        // que el caso ya tenía guardado, así que no hay nada que revisar.
+        var tabs = Object.keys(tabsTocadas);
+        if (tabs.length && !primeraPasada && window.avisarCambioAutomatico) {
+            window.avisarCambioAutomatico(tabs, 'el perfil auditivo volvió a derivar');
+        }
+        primeraPasada = false;
     }
 
     var pendiente = null;

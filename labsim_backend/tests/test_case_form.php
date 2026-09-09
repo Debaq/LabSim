@@ -113,10 +113,17 @@ $cfF = $cfRun(['aerea' => ['od' => array_fill(0, 9, 50), 'oi' => array_fill(0, 9
                'osea' => ['od' => array_fill(0, 9, 50), 'oi' => array_fill(0, 9, 5)]]);
 t_eq($cfF->data['Weber']['500'], 'oi', 'Weber auto: lateraliza al oído con mejor ósea');
 
-// "Igualar ósea a aérea" borra el gap, y con él el Rinne negativo.
+// "Igualar ósea a aérea" sugiere: la copia la hace el formulario en vivo y
+// deja la ósea editable, así que al guardar gana la ósea posteada. Sin ósea
+// en el POST (uno armado a mano) el respaldo de acá sí copia, y con la copia
+// se va el gap y el Rinne pasa a positivo.
 $cfF = $cfRun($cfConductiva + ['igualar' => ['od' => '1']]);
-t_eq($cfF->data['Osea'][0], [60, 5], 'Igualar: la ósea de ese oído copia la aérea');
-t_eq($cfF->data['Rinne']['500']['od'], 'positivo', 'Igualar: sin gap el Rinne pasa a positivo');
+t_eq($cfF->data['Osea'][0], [10, 5], 'Igualar: la ósea corregida a mano se respeta');
+t_eq($cfF->data['Rinne']['500']['od'], 'negativo', 'Igualar: el gap posteado sigue dando Rinne negativo');
+
+$cfF = $cfRun(['aerea' => $cfConductiva['aerea'], 'igualar' => ['od' => '1']]);
+t_eq($cfF->data['Osea'][0], [60, 0], 'Igualar sin ósea en el POST: copia la aérea');
+t_eq($cfF->data['Rinne']['500']['od'], 'positivo', 'Igualar sin ósea: sin gap el Rinne pasa a positivo');
 
 // El LDL sin tildar es "no medido" (130), no un 0 que se lea como disconfort
 // a volumen mínimo.

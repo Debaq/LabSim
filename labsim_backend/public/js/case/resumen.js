@@ -184,6 +184,23 @@
         }
     }
 
+    /**
+     * Destilda las fichas que un autocompletado acaba de reescribir.
+     *
+     * Editar a mano ya destilda (alEditar), pero un campo escrito por JS no
+     * dispara ningún evento: sin esto la ficha quedaba "revisada" con otros
+     * números adentro. La llama case/auto-cambios.js.
+     */
+    window.resumenDestildar = function (tabs) {
+        var cambio = false;
+        (tabs || []).forEach(function (tab) {
+            var check = panel.querySelector('.resumen-check[data-tab="' + tab + '"]');
+            if (check && check.checked) { check.checked = false; cambio = true; }
+        });
+        pintarEstados();
+        if (cambio) { pintarContador(); }
+    };
+
     /** Generar un caso nuevo destilda todo: es otro caso (ver generator.js). */
     window.resumenDestildarTodo = function () {
         checks.forEach(function (c) { c.checked = false; });

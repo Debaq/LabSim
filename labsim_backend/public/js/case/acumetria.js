@@ -1,6 +1,7 @@
 // Acumetría (Rinne/Weber) auto -- espejo en JS de CaseBuilder::rinneAuto()/
-// weberAuto() (PHP recalcula igual al enviar; esto es solo para que el
-// docente vea el resultado en vivo mientras tipea los umbrales tonales).
+// weberAuto(). Con el auto encendido escribe las 6 celdas mientras el
+// docente tipea los umbrales tonales, y las deja editables: al guardar gana
+// lo que quedó en pantalla (ver CaseForm, "acá gana lo posteado").
 (function () {
     var RINNE_GAP = window.CASE_CONST.rinneGap;
     var WEBER_ASYM = window.CASE_CONST.weberAsym;
@@ -21,22 +22,27 @@
     function syncAll() {
         var auto = document.getElementById('acumetria-auto-toggle');
         var isAuto = !!(auto && auto.checked);
+        var cambio = false;
+        function escribir(select, valor) {
+            if (!select || select.value === valor) { return; }
+            select.value = valor;
+            cambio = true;
+        }
         FREQ_IDX.forEach(function (n) {
             ['od', 'oi'].forEach(function (side) {
                 var select = document.getElementById('rinne_' + n + '_' + side);
-                if (!select) return;
-                if (isAuto) {
-                    select.value = rinneAuto(threshold('aerea', side, n), threshold('osea', side, n));
-                }
-                select.disabled = isAuto;
+                if (!select || !isAuto) return;
+                escribir(select, rinneAuto(threshold('aerea', side, n), threshold('osea', side, n)));
             });
             var weberSelect = document.getElementById('weber_' + n);
-            if (!weberSelect) return;
-            if (isAuto) {
-                weberSelect.value = weberAuto(threshold('osea', 'od', n), threshold('osea', 'oi', n));
-            }
-            weberSelect.disabled = isAuto;
+            if (!weberSelect || !isAuto) return;
+            escribir(weberSelect, weberAuto(threshold('osea', 'od', n), threshold('osea', 'oi', n)));
         });
+        // La acumetría vive en Audiometría, pero la reescriben umbrales que
+        // se tipean en cualquier lado (el generador, por ejemplo).
+        if (cambio && window.avisarCambioAutomatico) {
+            window.avisarCambioAutomatico(['audiometria'], 'la acumetría automática se recalculó');
+        }
     }
 
     var acumetriaAutoToggle = document.getElementById('acumetria-auto-toggle');

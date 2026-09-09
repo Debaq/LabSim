@@ -343,12 +343,10 @@
         var aerea = sn.map(function (v, i) { return aCinco(v + Math.max(0, gap[i])); });
         // La ósea nunca puede quedar peor que la aérea después de redondear.
         osea = osea.map(function (v, i) { return Math.min(v, aerea[i]); });
-        // "Igualar ósea a aérea" pisaría la ósea recién generada al guardar.
-        // Se apaga ANTES de escribir: su listener copia la aérea encima de
-        // la ósea en cuanto ve un 'input', y ahora escribir() dispara uno.
-        // El 'change' no es decorativo -- es lo que devuelve los campos de
-        // ósea a editables (ver case/live-preview.js): apagando la casilla
-        // en silencio quedaban readOnly con el toggle ya destildado.
+        // "Igualar ósea a aérea" pisaría la ósea recién generada: su listener
+        // copia la aérea encima de la ósea en cuanto ve un 'input', y
+        // escribir() dispara uno. Por eso se apaga ANTES de escribir, con un
+        // 'change' de verdad para que el resto del formulario se entere.
         var ig = document.querySelector('.igualar-toggle[data-side="' + lado + '"]');
         if (ig && ig.checked && gap.some(function (g) { return g > 0; })) {
             ig.checked = false;
@@ -630,12 +628,12 @@
         });
         if (grados[lado]) { grados[lado].addEventListener('change', espejar); }
     });
+    // "Los dos oídos iguales" copia el cuadro de OD en OI y nada más: los
+    // selectores de OI siguen habilitados (antes quedaban disabled, y una
+    // casilla que traba no es una sugerencia -- ver case/derived-fields.js).
+    // Cambiar OD vuelve a espejar, así que la diferencia se carga después.
     if (igualar) {
         igualar.addEventListener('change', function () {
-            document.querySelectorAll('.side-block[data-lado="oi"] select').forEach(function (s) {
-                s.disabled = igualar.checked || (s.classList.contains('perfil-grado') && s.disabled);
-                s.style.opacity = igualar.checked ? '0.6' : '';
-            });
             if (igualar.checked) { categorias.od.dispatchEvent(new Event('change', { bubbles: true })); }
         });
     }
