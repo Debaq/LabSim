@@ -632,8 +632,8 @@
     }
 
     window.drawAbrPreview = function () {
-        renderAbrPreviewSide('od', '#b33a3a');
-        renderAbrPreviewSide('oi', '#2255aa');
+        renderAbrPreviewSide('od', window.sideColor('od'));
+        renderAbrPreviewSide('oi', window.sideColor('oi'));
     };
 
     var abrPreviewForm = document.getElementById('case-form');

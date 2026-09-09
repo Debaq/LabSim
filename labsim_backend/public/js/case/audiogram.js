@@ -122,22 +122,22 @@ window.drawAudiogram = (function () {
         // Vía aérea: línea + símbolo por punto (enmascarado si el umbral
         // propio supera al óseo del oído contrario en >= la atenuación
         // interaural de esa frecuencia, ver AIR_ATTENUATION_BY_FREQ).
-        drawLine(aereaOd, '#b33a3a');
-        drawLine(aereaOi, '#2255aa');
+        drawLine(aereaOd, window.sideColor('od'));
+        drawLine(aereaOi, window.sideColor('oi'));
         for (var n = 0; n < FREQS.length; n++) {
             var x = xPos(FREQS[n]);
             var maskedOd = airMasked(aereaOd[n], oseaOi[n], n);
-            group.appendChild((maskedOd ? makeTriangle : makeCircle)(x, yPos(aereaOd[n]), '#b33a3a'));
+            group.appendChild((maskedOd ? makeTriangle : makeCircle)(x, yPos(aereaOd[n]), window.sideColor('od')));
             var maskedOi = airMasked(aereaOi[n], oseaOd[n], n);
-            group.appendChild((maskedOi ? makeSquare : makeCross)(x, yPos(aereaOi[n]), '#2255aa'));
+            group.appendChild((maskedOi ? makeSquare : makeCross)(x, yPos(aereaOi[n]), window.sideColor('oi')));
         }
 
         // Vía ósea: sin línea (convención estándar), enmascarada si hay gap
         // aéreo-óseo >=10dB en el mismo oído.
         for (var m = 0; m < FREQS.length; m++) {
             var x2 = xPos(FREQS[m]);
-            group.appendChild(makeBracket(x2, yPos(oseaOd[m]), '#b33a3a', 'left', boneMasked(aereaOd[m], oseaOd[m])));
-            group.appendChild(makeBracket(x2, yPos(oseaOi[m]), '#2255aa', 'right', boneMasked(aereaOi[m], oseaOi[m])));
+            group.appendChild(makeBracket(x2, yPos(oseaOd[m]), window.sideColor('od'), 'left', boneMasked(aereaOd[m], oseaOd[m])));
+            group.appendChild(makeBracket(x2, yPos(oseaOi[m]), window.sideColor('oi'), 'right', boneMasked(aereaOi[m], oseaOi[m])));
         }
 
         // LDL: solo si "LDL medido" está activo para ese oído -- si no, el
@@ -145,13 +145,13 @@ window.drawAudiogram = (function () {
         // que graficarlo igual sería mostrar un dato que nunca se va a guardar.
         if (isLdlMeasured('od')) {
             var ldlOd = readVals('ldl', 'od');
-            drawLine(ldlOd, '#b33a3a', true);
-            ldlOd.forEach(function (v, i) { group.appendChild(makeLdlMark(xPos(FREQS[i]), yPos(v), '#b33a3a')); });
+            drawLine(ldlOd, window.sideColor('od'), true);
+            ldlOd.forEach(function (v, i) { group.appendChild(makeLdlMark(xPos(FREQS[i]), yPos(v), window.sideColor('od'))); });
         }
         if (isLdlMeasured('oi')) {
             var ldlOi = readVals('ldl', 'oi');
-            drawLine(ldlOi, '#2255aa', true);
-            ldlOi.forEach(function (v, i) { group.appendChild(makeLdlMark(xPos(FREQS[i]), yPos(v), '#2255aa')); });
+            drawLine(ldlOi, window.sideColor('oi'), true);
+            ldlOi.forEach(function (v, i) { group.appendChild(makeLdlMark(xPos(FREQS[i]), yPos(v), window.sideColor('oi'))); });
         }
     };
 })();

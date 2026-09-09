@@ -257,8 +257,8 @@
     }
 
     function drawEoaPreview() {
-        renderEoaSide('od', '#b33a3a');
-        renderEoaSide('oi', '#2255aa');
+        renderEoaSide('od', window.sideColor('od'));
+        renderEoaSide('oi', window.sideColor('oi'));
     }
     window.drawEoaPreview = drawEoaPreview;
 

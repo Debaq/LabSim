@@ -34,7 +34,7 @@ window.drawTympanogram = (function () {
         if (!group) return;
         while (group.firstChild) group.removeChild(group.firstChild);
 
-        [['z_od', '#b33a3a'], ['z_oi', '#2255aa']].forEach(function (pair) {
+        [['z_od', window.sideColor('od')], ['z_oi', window.sideColor('oi')]].forEach(function (pair) {
             var el = document.getElementById(pair[0]);
             var pts = curvePoints(el ? el.value : 'A');
             var poly = document.createElementNS(NS, 'polyline');

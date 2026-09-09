@@ -1,9 +1,19 @@
 /* public/css/case.css — admin/case_create.php (editor de fichas clínicas:
  * audiograma, otoscopia, reflejos, foto del paciente, tabs).
  *
- * Hex específicos del dominio (rojo OD #b33a3a, azul OI #2255aa) son
- * convenciones clínicas, no de marca -- se quedan como hex literales.
+ * Hex específicos del dominio (rojo OD, azul OI) son convenciones clínicas,
+ * no de marca: por eso NO viven en tokens.css junto a --color-primary. Pero
+ * son una constante sola, y estaban escrita 43 veces entre este archivo, el
+ * SVG que arma case_create.php y el que arma public/js/case/*.js. Se definen
+ * acá una vez; el JS las lee con getComputedStyle (ver case/side-color.js).
  */
+:root {
+  --color-od: #b33a3a;
+  --color-oi: #2255aa;
+  /* Variantes claras para fondo oscuro fijo (celda de reflejos presente). */
+  --color-od-soft: #e05c5c;
+  --color-oi-soft: #6fa8e8;
+}
 
 /* Grilla compacta (input numérico centrado) */
 .grid-table th, .grid-table td { text-align: center; padding: 0.3rem; }
@@ -233,8 +243,8 @@ main:has(.form-actions-sticky) { padding-bottom: 6rem; }
   background: var(--color-table-head);
   color: var(--color-muted);
 }
-.side-tag.od { color: #b33a3a; }
-.side-tag.oi { color: #2255aa; }
+.side-tag.od { color: var(--color-od); }
+.side-tag.oi { color: var(--color-oi); }
 
 /* Patrón de reflejos: tabla espejada (ipsi al centro, contra afuera).
  * Hex OD/OI vienen de la convención clínica. */
@@ -251,14 +261,14 @@ main:has(.form-actions-sticky) { padding-bottom: 6rem; }
 }
 .reflex-pattern-table td.freq-label { font-weight: 600; background: var(--color-row-alt); }
 /* NO reusar .side-tag acá: su display:inline-block rompe table-cell */
-th.reflex-head.od { color: #b33a3a; }
-th.reflex-head.oi { color: #2255aa; }
+th.reflex-head.od { color: var(--color-od); }
+th.reflex-head.oi { color: var(--color-oi); }
 .reflex-cell { font-weight: 700; color: var(--color-faint); }
 .reflex-cell.na { color: var(--color-border-strong); background: var(--color-row-alt); }
 /* "Presente" = fondo gris fijo, color del "+" según oído estimulado */
 .reflex-cell.present { background: #3a3a3a; }
-.reflex-cell.present.mark-od { color: #e05c5c; }
-.reflex-cell.present.mark-oi { color: #6fa8e8; }
+.reflex-cell.present.mark-od { color: var(--color-od-soft); }
+.reflex-cell.present.mark-oi { color: var(--color-oi-soft); }
 
 /* Foto del paciente: avatar circular + modal de recorte */
 .photo-block { margin-top: var(--space-5); padding-top: var(--space-5); border-top: 1px solid var(--color-border); }
@@ -380,3 +390,15 @@ th.reflex-head.oi { color: #2255aa; }
   gap: var(--space-3);
   margin-top: var(--space-4);
 }
+/* Color del oído por clase, no por atributo SVG ni style= inline: los
+   símbolos de las leyendas (círculo OD, cruz OI...) los dibuja PHP con
+   <circle>/<polygon>, y `stroke="var(--color-od)"` no existe -- un atributo
+   de presentación no resuelve var(). Por clase sí. */
+.sym-od { stroke: var(--color-od); }
+.sym-oi { stroke: var(--color-oi); }
+.sym-od-fill { fill: var(--color-od); }
+.sym-oi-fill { fill: var(--color-oi); }
+
+/* Solo el color del oído, sin la píldora de .side-tag (títulos sueltos). */
+.od-text { color: var(--color-od); }
+.oi-text { color: var(--color-oi); }

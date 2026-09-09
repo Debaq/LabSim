@@ -57,7 +57,7 @@ window.drawLogogram = (function () {
         while (group.firstChild) group.removeChild(group.firstChild);
 
         ['od', 'oi'].forEach(function (side) {
-            var color = side === 'od' ? '#b33a3a' : '#2255aa';
+            var color = window.sideColor(side);
             var pts = curvePoints(side);
             var poly = document.createElementNS(NS, 'polyline');
             poly.setAttribute('points', pts.map(function (p) { return logoX(p[0]) + ',' + logoY(p[1]); }).join(' '));

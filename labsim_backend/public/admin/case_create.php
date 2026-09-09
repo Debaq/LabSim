@@ -376,9 +376,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 admin_add_css('case.css');
 // El JS de esta página vive en public/js/case/*.js y se emite al final del
-// <body> EN ESTE ORDEN (admin_footer). El orden importa: audiogram/logogram/
+// <body> EN ESTE ORDEN (admin_footer). El orden importa: side-color publica
+// window.sideColor, que usa todo lo que dibuja; audiogram/logogram/
 // tympanogram/reflex-pattern publican window.drawAudiogram y compañía, y
 // live-preview las llama apenas carga -- así que van antes que ella.
+admin_add_js('case/side-color.js');
 admin_add_js('case/age-rut.js');
 admin_add_js('case/anamnesis-ai.js');
 admin_add_js('case/unsaved-guard.js');
@@ -895,16 +897,16 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <g id="audiogram-data"></g>
     </svg>
     <div class="audiogram-legend">
-        <span><svg width="12" height="12"><circle cx="6" cy="6" r="4" fill="none" stroke="#b33a3a" stroke-width="1.4"></circle></svg> Aérea OD</span>
-        <span><svg width="12" height="12"><polygon points="6,2 2,10 10,10" fill="none" stroke="#b33a3a" stroke-width="1.4"></polygon></svg> Aérea OD enmasc.</span>
-        <span><svg width="12" height="12"><line x1="2" y1="2" x2="10" y2="10" stroke="#2255aa" stroke-width="1.4"></line><line x1="2" y1="10" x2="10" y2="2" stroke="#2255aa" stroke-width="1.4"></line></svg> Aérea OI</span>
-        <span><svg width="12" height="12"><rect x="2" y="2" width="8" height="8" fill="none" stroke="#2255aa" stroke-width="1.4"></rect></svg> Aérea OI enmasc.</span>
-        <span><svg width="12" height="12"><polyline points="9,2 3,6 9,10" fill="none" stroke="#b33a3a" stroke-width="1.4"></polyline></svg> Ósea OD</span>
-        <span><svg width="12" height="12"><polyline points="8,2 3,2 3,10 8,10" fill="none" stroke="#b33a3a" stroke-width="1.4"></polyline></svg> Ósea OD enmasc.</span>
-        <span><svg width="12" height="12"><polyline points="3,2 9,6 3,10" fill="none" stroke="#2255aa" stroke-width="1.4"></polyline></svg> Ósea OI</span>
-        <span><svg width="12" height="12"><polyline points="4,2 9,2 9,10 4,10" fill="none" stroke="#2255aa" stroke-width="1.4"></polyline></svg> Ósea OI enmasc.</span>
-        <span><svg width="12" height="12"><polygon points="6,9 2,3 10,3" fill="#b33a3a" stroke="none"></polygon></svg> LDL OD</span>
-        <span><svg width="12" height="12"><polygon points="6,9 2,3 10,3" fill="#2255aa" stroke="none"></polygon></svg> LDL OI</span>
+        <span><svg width="12" height="12"><circle cx="6" cy="6" r="4" fill="none" class="sym-od" stroke-width="1.4"></circle></svg> Aérea OD</span>
+        <span><svg width="12" height="12"><polygon points="6,2 2,10 10,10" fill="none" class="sym-od" stroke-width="1.4"></polygon></svg> Aérea OD enmasc.</span>
+        <span><svg width="12" height="12"><line x1="2" y1="2" x2="10" y2="10" class="sym-oi" stroke-width="1.4"></line><line x1="2" y1="10" x2="10" y2="2" class="sym-oi" stroke-width="1.4"></line></svg> Aérea OI</span>
+        <span><svg width="12" height="12"><rect x="2" y="2" width="8" height="8" fill="none" class="sym-oi" stroke-width="1.4"></rect></svg> Aérea OI enmasc.</span>
+        <span><svg width="12" height="12"><polyline points="9,2 3,6 9,10" fill="none" class="sym-od" stroke-width="1.4"></polyline></svg> Ósea OD</span>
+        <span><svg width="12" height="12"><polyline points="8,2 3,2 3,10 8,10" fill="none" class="sym-od" stroke-width="1.4"></polyline></svg> Ósea OD enmasc.</span>
+        <span><svg width="12" height="12"><polyline points="3,2 9,6 3,10" fill="none" class="sym-oi" stroke-width="1.4"></polyline></svg> Ósea OI</span>
+        <span><svg width="12" height="12"><polyline points="4,2 9,2 9,10 4,10" fill="none" class="sym-oi" stroke-width="1.4"></polyline></svg> Ósea OI enmasc.</span>
+        <span><svg width="12" height="12"><polygon points="6,9 2,3 10,3" class="sym-od-fill" stroke="none"></polygon></svg> LDL OD</span>
+        <span><svg width="12" height="12"><polygon points="6,9 2,3 10,3" class="sym-oi-fill" stroke="none"></polygon></svg> LDL OI</span>
     </div>
 </div>
 
@@ -929,12 +931,12 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <g id="logogram-data"></g>
     </svg>
     <div class="audiogram-legend">
-        <span><svg width="12" height="12"><circle cx="6" cy="6" r="3" fill="#b33a3a" stroke="none"></circle></svg> SDT OD</span>
-        <span><svg width="12" height="12"><circle cx="6" cy="6" r="3" fill="#2255aa" stroke="none"></circle></svg> SDT OI</span>
-        <span><svg width="12" height="12"><line x1="6" y1="1" x2="6" y2="11" stroke="#b33a3a" stroke-width="1.4" stroke-dasharray="2,2"></line></svg> SRT OD</span>
-        <span><svg width="12" height="12"><line x1="6" y1="1" x2="6" y2="11" stroke="#2255aa" stroke-width="1.4" stroke-dasharray="2,2"></line></svg> SRT OI</span>
-        <span><svg width="12" height="12"><polygon points="6,2 2,10 10,10" fill="#b33a3a" stroke="none"></polygon></svg> UMD OD</span>
-        <span><svg width="12" height="12"><polygon points="6,2 2,10 10,10" fill="#2255aa" stroke="none"></polygon></svg> UMD OI</span>
+        <span><svg width="12" height="12"><circle cx="6" cy="6" r="3" class="sym-od-fill" stroke="none"></circle></svg> SDT OD</span>
+        <span><svg width="12" height="12"><circle cx="6" cy="6" r="3" class="sym-oi-fill" stroke="none"></circle></svg> SDT OI</span>
+        <span><svg width="12" height="12"><line x1="6" y1="1" x2="6" y2="11" class="sym-od" stroke-width="1.4" stroke-dasharray="2,2"></line></svg> SRT OD</span>
+        <span><svg width="12" height="12"><line x1="6" y1="1" x2="6" y2="11" class="sym-oi" stroke-width="1.4" stroke-dasharray="2,2"></line></svg> SRT OI</span>
+        <span><svg width="12" height="12"><polygon points="6,2 2,10 10,10" class="sym-od-fill" stroke="none"></polygon></svg> UMD OD</span>
+        <span><svg width="12" height="12"><polygon points="6,2 2,10 10,10" class="sym-oi-fill" stroke="none"></polygon></svg> UMD OI</span>
     </div>
 </div>
 </div>
@@ -1239,8 +1241,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <g id="tympanogram-data"></g>
     </svg>
     <div class="audiogram-legend">
-        <span><svg width="12" height="12"><line x1="1" y1="6" x2="11" y2="6" stroke="#b33a3a" stroke-width="1.6"></line></svg> OD</span>
-        <span><svg width="12" height="12"><line x1="1" y1="6" x2="11" y2="6" stroke="#2255aa" stroke-width="1.6"></line></svg> OI</span>
+        <span><svg width="12" height="12"><line x1="1" y1="6" x2="11" y2="6" class="sym-od" stroke-width="1.6"></line></svg> OD</span>
+        <span><svg width="12" height="12"><line x1="1" y1="6" x2="11" y2="6" class="sym-oi" stroke-width="1.6"></line></svg> OI</span>
     </div>
 </div>
 
@@ -1487,11 +1489,11 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <p class="legend help">Simulación simplificada (sin ruido ni promediación) de cómo se vería la serie de intensidades para este oído, según la patología y las desviaciones cargadas arriba. Se redibuja sola, en vivo, al tipear. Los marcadores verticales señalan dónde queda cada onda y la línea punteada sigue el pico a través de las intensidades (función latencia-intensidad). Es referencia visual para el docente: el generador real, con ruido, FSP y promediación, es el que corre en el equipo del alumno.</p>
     <div class="two-col">
         <div>
-            <strong style="color:#b33a3a;">OD</strong>
+            <strong class="od-text">OD</strong>
             <div id="abr-preview-od" class="abr-preview"></div>
         </div>
         <div>
-            <strong style="color:#2255aa;">OI</strong>
+            <strong class="oi-text">OI</strong>
             <div id="abr-preview-oi" class="abr-preview"></div>
         </div>
     </div>
@@ -1596,11 +1598,11 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <p class="legend help">Simulación simplificada (sin ruido por barrido ni promediación) de lo que va a ver el alumno con esta configuración. Arriba el nivel DP por f2 contra el área normal y el piso de ruido; abajo el SNR por banda TEOAE con la línea de criterio (6 dB): banda bajo la línea = REFER. El generador real corre en el cliente, ver <code>src/oae/generators/</code>.</p>
     <div class="two-col">
         <div>
-            <strong style="color:#b33a3a;">OD</strong>
+            <strong class="od-text">OD</strong>
             <div id="eoa-preview-od" class="eoa-preview"></div>
         </div>
         <div>
-            <strong style="color:#2255aa;">OI</strong>
+            <strong class="oi-text">OI</strong>
             <div id="eoa-preview-oi" class="eoa-preview"></div>
         </div>
     </div>
