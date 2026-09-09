@@ -4,6 +4,12 @@
 # rewrite Tauri (v3.x) para no mezclarse en el mismo listado de tags.
 #
 # Uso: ./scripts/release_pyinstaller.sh
+# Antes de tocar nada verifica que se pueda publicar: rama main, sin cambios
+# sin commitear y sin quedar atras de origin/main. El instalador de Windows
+# lo compila un runner desde el SHA, asi que lo que no este commiteado y
+# pusheado no entra en el .exe aunque si este en el .tar.gz de Linux, y las
+# dos cosas se suben a la misma release. ALLOW_DIRTY=1 saltea el chequeo
+# (build de prueba).
 # Pregunta si subir __VERSION__ (src/main.py). Si se mantiene, tagea con
 # sufijo '-r<commit corto>' (build de prueba) para que el updater la
 # detecte como nueva sin tener que subir versión cada vez, y no la vuelva
@@ -77,6 +83,59 @@ delete_asset_if_present() {
     return 1
 }
 
+# El .exe de Windows no sale de esta máquina: el workflow hace checkout del
+# SHA en un runner limpio. Todo lo que no esté commiteado y pusheado NO entra
+# en esa build, así que un árbol sucio produce en silencio un instalador
+# distinto del .tar.gz de Linux que se sube a la misma release. Por eso se
+# corta acá y no más adelante: antes de tocar src/main.py y antes de buildear.
+verificar_arbol_publicable() {
+    BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+    if [ "$BRANCH" != "main" ]; then
+        echo "Estás en '${BRANCH}', no en main. Los releases salen de main." >&2
+        echo "  (ALLOW_DIRTY=1 lo saltea, para un build de prueba)" >&2
+        return 1
+    fi
+
+    if ! git diff --quiet || ! git diff --cached --quiet; then
+        echo "Hay cambios sin commitear -- no entrarían en el build de Windows:" >&2
+        git status --short --untracked-files=no >&2
+        return 1
+    fi
+
+    # Los archivos nuevos sin agregar sí son un aviso y no un corte: casi
+    # siempre son dist/, notas o pruebas que no van al release.
+    local nuevos
+    nuevos=$(git ls-files --others --exclude-standard)
+    if [ -n "$nuevos" ]; then
+        echo "Aviso: archivos nuevos sin agregar (no van al build):"
+        echo "$nuevos" | sed 's/^/  /'
+    fi
+
+    run_with_spinner "Consultando origin/main..." git fetch origin main
+
+    local atras
+    atras=$(git rev-list --count HEAD..origin/main)
+    if [ "$atras" -gt 0 ]; then
+        echo "origin/main tiene ${atras} commit(s) que no están acá: haz git pull antes de publicar." >&2
+        return 1
+    fi
+
+    local adelante
+    adelante=$(git rev-list --count origin/main..HEAD)
+    if [ "$adelante" -gt 0 ]; then
+        echo "main está ${adelante} commit(s) adelante de origin -- se pushean antes de buildear."
+    fi
+    return 0
+}
+
+if [ "${ALLOW_DIRTY:-0}" = "1" ]; then
+    echo "ALLOW_DIRTY=1 -- build de prueba: el instalador de Windows puede no coincidir con este código"
+    BRANCH=$(git rev-parse --abbrev-ref HEAD)
+elif ! verificar_arbol_publicable; then
+    exit 1
+fi
+
 CURRENT_VERSION=$(grep -oP "__VERSION__ = 'v\K[^']+" src/main.py)
 if [ -z "$CURRENT_VERSION" ]; then
     echo "No pude leer __VERSION__ desde src/main.py" >&2
@@ -107,8 +166,12 @@ echo "Build: ${BUILD_ID} -> tag ${TAG}"
 SETUP_ASSET_NAME="LabSim-windows-x86_64-setup.exe"
 WIN_WORKFLOW="build-windows.yml"
 SHA=$(git rev-parse HEAD)
-BRANCH=$(git rev-parse --abbrev-ref HEAD)
 WIN_RUN_ID=""
+
+# Se pushea siempre, no solo cuando hay build de Windows: el updater encadena
+# los paquetes de update de cada release, así que el commit del que salió cada
+# una tiene que existir en origin para poder reconstruirla.
+run_with_spinner "Pusheando ${BRANCH} a origin..." git push origin "HEAD:${BRANCH}"
 
 # El build de Windows se dispara ACA, antes del build local: son ~3 min en
 # el runner que corren en paralelo con PyInstaller local, y recien se espera
@@ -117,9 +180,7 @@ if [ "${SKIP_WINDOWS:-0}" = "1" ]; then
     echo "SKIP_WINDOWS=1 -- no se dispara el build de Windows"
 else
     # El workflow hace checkout del SHA exacto (para que el .exe salga del
-    # mismo codigo que el .tar.gz), asi que el commit tiene que estar en
-    # origin antes de disparar.
-    run_with_spinner "Pusheando ${BRANCH} a origin..." git push origin "HEAD:${BRANCH}"
+    # mismo codigo que el .tar.gz) -- ya se pusheo arriba.
     run_with_spinner "Disparando build de Windows..." gh workflow run "$WIN_WORKFLOW" \
         --ref "$BRANCH" -f sha="$SHA" -f build_id="$BUILD_ID"
 
