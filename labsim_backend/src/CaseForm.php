@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/CaseBuilder.php';
 require_once __DIR__ . '/CaseProfile.php';
 require_once __DIR__ . '/CaseCompleteness.php';
+require_once __DIR__ . '/CaseReview.php';
 require_once __DIR__ . '/Sala.php';
 
 /**
@@ -27,6 +28,8 @@ final class CaseForm
     public array $avisos = [];
     /** Datos que faltan decidir; sí bloquean (ver CaseCompleteness::pending). */
     public array $faltantes = [];
+    /** Fichas que nadie declaró revisadas; también bloquean (ver CaseReview). */
+    public array $sinRevisar = [];
     /** cases.data listo para persistir; [] si no se llegó a armar. */
     public array $data = [];
     /** Id del caso: el que se editaba, o el que se reservó recién. '' si no se llegó. */
@@ -37,10 +40,14 @@ final class CaseForm
     public string $nombre1 = '';
     public string $apellido1 = '';
 
-    /** Se guarda solo si no hay error, ni avisos sin confirmar, ni faltantes. */
+    /**
+     * Se guarda solo si no hay error, ni avisos sin confirmar, ni faltantes,
+     * ni fichas sin revisar.
+     */
     public function ok(): bool
     {
-        return $this->error === null && $this->avisos === [] && $this->faltantes === [];
+        return $this->error === null && $this->avisos === []
+            && $this->faltantes === [] && $this->sinRevisar === [];
     }
 
     /** Lee un valor anidado de un array (ej. $v['aerea']['od'][3]) con default si falta. */
@@ -82,6 +89,7 @@ final class CaseForm
         $error = null;
         $avisosPerfil = [];
         $faltantes = [];
+        $sinRevisar = [];
         $data = [];
         $id = '';
 
@@ -509,6 +517,10 @@ final class CaseForm
                 'abr' => ['OD' => $abrOd, 'OI' => $abrOi],
                 'eoas' => ['OD' => $eoasOd, 'OI' => $eoasOi],
                 'vemp' => ['OD' => $vempOd, 'OI' => $vempOi],
+                // La pasada final del docente por el Resumen: qué fichas
+                // dio por buenas. Va adentro del caso, no al lado -- ver
+                // más abajo, es lo último que bloquea el guardado.
+                'revision' => CaseReview::fromPost($v, $me),
             ]);
 
             // Lo que no se puede calcular tiene que estar decidido antes de
@@ -525,10 +537,22 @@ final class CaseForm
             // pestaña se arregla: el listado de abajo salta ahí y le pinta el
             // punto rojo a la pestaña.
             $faltantes = CaseCompleteness::pending($data);
+
+            // Y la revisión ficha por ficha: el caso no sale del editor sin
+            // que alguien haya mirado las once y dicho que están así porque
+            // sí. Es lo que hace que un caso generado al azar no pueda
+            // guardarse sin que nadie lo lea.
+            //
+            // Va después de $faltantes a propósito: una ficha revisada
+            // apaga sus pendientes (CaseCompleteness::pending filtra por
+            // CaseReview::revisada), así que el docente ve la lista de lo
+            // que el editor le reclama ANTES de tildar, no después.
+            $sinRevisar = CaseReview::sinRevisar($data);
         }
         $f->error = $error;
         $f->avisos = $avisosPerfil;
         $f->faltantes = $faltantes;
+        $f->sinRevisar = $sinRevisar;
         $f->data = $data;
         $f->caseId = (string) $id;
         $f->age = $age;
@@ -663,13 +687,11 @@ final class CaseForm
             }
             return [
                 'type' => (string) self::val($v, ['vemp', $lado, 'type'], 'normal'),
-                // "Alguien miró lo vestibular de este oído". Hace falta
-                // porque un VEMP normal puede ser el hallazgo -- en la ANSD
-                // el VEMP conservado ES el dato -- y sin esto
-                // CaseCompleteness no puede distinguir un normal decidido
-                // de la ficha que nadie abrió. Lo tilda el armado rápido y
-                // lo tilda el docente al tocar cualquier campo del oído.
-                'decidido' => isset($v['vemp'][$lado]['decidido']),
+                // Acá vivía `decidido`, la casilla "ya decidí qué pasa en el
+                // VEMP de este oído": lo que hoy dice la revisión de la
+                // ficha VEMP en el Resumen, para las once fichas y en un
+                // solo lugar (ver CaseReview). Los casos guardados con ella
+                // la conservan y siguen contando como revisados.
                 'subtipos' => $subtipos,
             ];
     }

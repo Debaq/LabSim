@@ -16,6 +16,7 @@
     <strong>VEMP</strong>
     <p class="help"><strong>Los tres se arman siempre</strong>, y no hay selector de subtipo acá: el que elige cuál correr es el <strong>alumno</strong>, en el equipo. Configurar uno solo dejaba los otros dos normales pasara lo que pasara.</p>
     <p class="help">La <strong>patología va una sola vez</strong>, para el oído. El generador la aplica al subtipo que corresponde: <em>sacular</em> sobre el cVEMP, <em>utricular</em> sobre el oVEMP, <em>neural</em> sobre los dos. El que no toca queda con la respuesta que le dé su propio umbral.</p>
+    <p class="help">Un VEMP normal <strong>puede ser el hallazgo</strong> --en la neuropatía auditiva, el VEMP conservado con el ABR desarmado es lo que localiza la lesión--, así que el editor no puede distinguirlo solo de una ficha que nadie abrió. Lo que los separa es la revisión: dar esta ficha por revisada en <a href="#" class="tab-link" data-goto-tab="resumen">Resumen</a> dice que el normal es la respuesta.</p>
     <p class="help">El <strong>umbral</strong> y las <strong>ondas</strong> son de cada VEMP por separado. El cVEMP y el mVEMP comparten los nombres de los picos (P13/N23), así que cada uno lleva sus propios campos: hasta acá se pisaban en los mismos cuatro.</p>
 </div>
 
@@ -31,19 +32,6 @@
         </select>
     </label>
     <p class="help">Con "Normal" las ondas tienen que quedar en 0: un VEMP alterado con patología normal es un caso que se contradice y el editor lo reclama al guardar.</p>
-
-    <?php
-    // Sticky (POST): una casilla destildada no viaja, así que ahí manda
-    // isset() y no el valor precargado.
-    $vempDecidido = $_SERVER['REQUEST_METHOD'] === 'POST'
-        ? isset($v['vemp'][$lado]['decidido'])
-        : !empty($v['vemp'][$lado]['decidido']);
-    ?>
-    <label class="inline-check" style="margin-left:0;">
-        <input type="checkbox" value="1" name="vemp[<?= $lado ?>][decidido]" <?= $vempDecidido ? 'checked' : '' ?>>
-        Ya decidí qué pasa en el VEMP de este oído
-    </label>
-    <p class="help">El editor reclama el VEMP de todo caso con patrón retrococlear cargado. Tildá esto cuando el VEMP normal <strong>sea</strong> la respuesta: es lo único que lo distingue de una ficha que nadie abrió, y sin la casilla el caso no se guarda. La tilda sola "Generar caso" (<a href="#" class="tab-link" data-goto-tab="armado">Armado rápido</a>).</p>
 
     <?php foreach (CaseBuilder::VEMP_SUBTIPOS as $subtipo):
         $def = CaseBuilder::VEMP_DEFAULTS[$subtipo];

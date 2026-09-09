@@ -6,6 +6,8 @@ require_once __DIR__ . '/CaseProfile.php';
 // La sala del caso (paciente + acompañantes) se guarda dentro de
 // cases.data, así que buildCaseData()/caseDataToForm() la necesitan.
 require_once __DIR__ . '/Sala.php';
+// Qué fichas declaró revisadas el docente: también viaja en cases.data.
+require_once __DIR__ . '/CaseReview.php';
 
 final class CaseBuilder
 {
@@ -1047,6 +1049,11 @@ final class CaseBuilder
             'ABR' => $form['abr'],
             'EOAS' => $form['eoas'],
             'VEMP' => $form['vemp'],
+            // Qué fichas del editor dio por revisadas el docente antes de
+            // guardar, y quién (ver CaseReview). No lo lee ningún cliente:
+            // es la trazabilidad de la revisión, y lo que evita que el
+            // editor le vuelva a reclamar una decisión ya tomada.
+            'Revision' => $form['revision'] ?? [],
             'tipo' => 'normal',
         ];
     }
@@ -1357,9 +1364,6 @@ final class CaseBuilder
             $ladoFormArr = [
                 'type' => in_array($ladoVempType, self::VEMP_TYPE_OPTIONS, true) ? $ladoVempType : 'normal',
             ];
-            if (!empty($ladoVemp['decidido'])) {
-                $ladoFormArr['decidido'] = '1';
-            }
             foreach (self::VEMP_SUBTIPOS as $subtipo) {
                 $def = self::VEMP_DEFAULTS[$subtipo];
                 if (is_array($guardados[$subtipo] ?? null)) {
@@ -1389,6 +1393,10 @@ final class CaseBuilder
             }
             $v['vemp'][$ladoForm] = $ladoFormArr;
         }
+
+        // Las tildes del Resumen, para que reeditar un caso ya revisado no
+        // pida revisarlo de nuevo entero (ver CaseReview::toForm).
+        $v['revisado'] = CaseReview::toForm($data);
 
         return $v;
     }

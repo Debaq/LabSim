@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/CaseProfile.php';
+require_once __DIR__ . '/CaseReview.php';
 require_once __DIR__ . '/Sala.php';
 
 /**
@@ -19,6 +20,14 @@ require_once __DIR__ . '/Sala.php';
  * Esta clase es el criterio único de "caso listo", y lo usan los dos
  * lugares donde importa: el editor (no se sale de la edición con esto
  * pendiente) y la agenda (no se cita un paciente así).
+ *
+ * Un pendiente se apaga de dos maneras: arreglando el dato, o declarando
+ * revisada la ficha en el Resumen del editor (ver CaseReview). Lo segundo
+ * es una decisión del docente sobre su propio caso -- "el timpanograma en A
+ * con ese gap es lo que quiero" es una respuesta válida, y el editor no
+ * está para discutirla. La única que no se apaga tildando es la anamnesis
+ * que escribió el modelo: ahí lo que falta no es una decisión clínica sino
+ * que alguien haya leído un texto que se inventó una máquina.
  *
  * A propósito NO revisa lo que puede estar vacío con razón: la anamnesis
  * escrita a mano, el texto de otoscopia, el comportamiento del paciente. Un
@@ -39,8 +48,9 @@ final class CaseCompleteness
      * Lo que le falta al caso, listo para mostrar.
      *
      * @param array<string,mixed> $data cases.data
-     * @return list<array{tab:string, texto:string}> `tab` es la pestaña de
-     *         case_create.php donde se arregla.
+     * @return list<array{tab:string, texto:string, aceptable?:bool}> `tab`
+     *         es la pestaña de case_create.php donde se arregla;
+     *         `aceptable` en false marca lo que NO alcanza con revisar.
      */
     public static function pending(array $data): array
     {
@@ -106,7 +116,12 @@ final class CaseCompleteness
             foreach ((array) ($vempLado['subtipos'] ?? []) as $vempSub) {
                 $vempDesv[] = is_array($vempSub) ? ($vempSub['desviaciones'] ?? []) : [];
             }
-            // `decidido` es la salida para el normal que SÍ es un hallazgo:
+            // `decidido` (por oído, casilla de la ficha VEMP) es el
+            // antecesor de la revisión por ficha y sigue valiendo para los
+            // casos que se guardaron con él. Los nuevos lo apagan tildando
+            // VEMP en el Resumen -- ver el filtro del final.
+            //
+            // La salida existe porque el normal a veces SÍ es el hallazgo:
             // en la neuropatía auditiva el VEMP conservado con el ABR
             // desarmado es lo que localiza la lesión, y reclamárselo obligaba
             // a inventarle una alteración vestibular para poder guardar.
@@ -117,7 +132,7 @@ final class CaseCompleteness
                 $pendientes[] = [
                     'tab' => 'vemp',
                     'texto' => sprintf(
-                        'VEMP %s: el caso tiene patrón retrococlear cargado y el VEMP quedó normal sin tocar. El perfil no cubre lo vestibular: decidí si la lesión lo compromete o no, y si la respuesta es que no, tildá "Ya decidí qué pasa en el VEMP de este oído".',
+                        'VEMP %s: el caso tiene patrón retrococlear cargado y el VEMP quedó normal sin tocar. El perfil no cubre lo vestibular: decidí si la lesión lo compromete o no, y si la respuesta es que no, dalo por revisado en el Resumen -- un VEMP normal puede ser el hallazgo.',
                         $lado
                     ),
                 ];
@@ -134,6 +149,12 @@ final class CaseCompleteness
             $pendientes[] = [
                 'tab' => 'anamnesis',
                 'texto' => 'Anamnesis: el borrador lo escribió el modelo de lenguaje y todavía nadie lo verificó. Leelo y tildá la casilla de verificación -- lo que quede acá le llega al alumno como parte del caso.',
+                // No se apaga desde el Resumen: la revisión por ficha dice
+                // "miré esto y está bien", y acá lo que hace falta es
+                // exactamente eso pero sobre el texto, en la ficha, con la
+                // casilla que ya existe. Aceptarlo de lejos sería tildar
+                // que se leyó algo que no se abrió.
+                'aceptable' => false,
             ];
         }
 
@@ -155,7 +176,13 @@ final class CaseCompleteness
             }
         }
 
-        return $pendientes;
+        // Las fichas que el docente ya declaró revisadas en el Resumen no
+        // se reclaman: miró el estado y lo aceptó como está.
+        return array_values(array_filter(
+            $pendientes,
+            static fn(array $p) => ($p['aceptable'] ?? true) === false
+                || !CaseReview::revisada($data, $p['tab'])
+        ));
     }
 
     /** Solo los textos, para un mensaje de una línea por ítem. */

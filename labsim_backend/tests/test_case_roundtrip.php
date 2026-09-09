@@ -112,11 +112,24 @@ t_eq($v['vemp']['od']['CVEMP']['umbral'], (string) CaseBuilder::VEMP_DEFAULTS['C
 t_eq($v['vemp']['od']['CVEMP']['amp_p13'], '0',
     'VEMP legado: los picos de un subtipo nunca configurado quedan en 0');
 
-// El flag "ya decidí lo vestibular" sobrevive el viaje. Sin él,
-// CaseCompleteness no puede distinguir un VEMP normal que ES el hallazgo
-// (la ANSD) de una ficha que nadie abrió.
+// La revisión ficha por ficha vuelve tildada al reeditar (ver CaseReview).
+$revisado = $viejo;
+$revisado['Revision'] = ['tabs' => ['vemp' => true, 'abr' => false]];
+$v = CaseBuilder::caseDataToForm($revisado);
+t_eq($v['revisado']['vemp'], '1', 'Revisión: la ficha revisada vuelve tildada');
+t_true(!isset($v['revisado']['abr']), 'Revisión: la ficha sin revisar no trae el flag');
+
+// El flag viejo "ya decidí lo vestibular" (por oído, casilla de la ficha
+// VEMP) cuenta como la ficha VEMP revisada: un caso guardado con él no
+// tiene por qué volver a pasar por el Resumen para eso.
 $vempDecidido = $viejo;
-$vempDecidido['VEMP'] = ['OD' => ['type' => 'normal', 'decidido' => true], 'OI' => ['type' => 'normal']];
+$vempDecidido['VEMP'] = [
+    'OD' => ['type' => 'normal', 'decidido' => true],
+    'OI' => ['type' => 'normal', 'decidido' => true],
+];
 $v = CaseBuilder::caseDataToForm($vempDecidido);
-t_eq($v['vemp']['od']['decidido'], '1', 'VEMP: el flag de decidido vuelve tildado');
-t_true(!isset($v['vemp']['oi']['decidido']), 'VEMP: el oído sin decidir no trae el flag');
+t_eq($v['revisado']['vemp'], '1', 'VEMP legado: "decidido" en los dos oídos vale como ficha revisada');
+$vempMedio = $viejo;
+$vempMedio['VEMP'] = ['OD' => ['type' => 'normal', 'decidido' => true], 'OI' => ['type' => 'normal']];
+$v = CaseBuilder::caseDataToForm($vempMedio);
+t_true(!isset($v['revisado']['vemp']), 'VEMP legado: con un solo oído decidido la ficha sigue sin revisar');

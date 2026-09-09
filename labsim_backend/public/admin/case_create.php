@@ -7,6 +7,7 @@ require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/CaseBuilder.php';
 require_once __DIR__ . '/../../src/CaseProfile.php';
 require_once __DIR__ . '/../../src/CaseCompleteness.php';
+require_once __DIR__ . '/../../src/CaseReview.php';
 require_once __DIR__ . '/../../src/CaseForm.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/../../src/PatientPhoto.php';
@@ -183,6 +184,9 @@ $avisosPerfil = [];
 // (ver CaseCompleteness). Bloquean el guardado: no es una incoherencia
 // opcional, es un caso incompleto.
 $faltantes = [];
+// Fichas que nadie dio por revisadas en el Resumen (ver CaseReview).
+// También bloquean, y son lo último que queda por hacer en un caso.
+$sinRevisar = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $v = $_POST; // sticky form: se redibuja con lo ya tipeado, tanto al generar nombre como si falla la validación
 } elseif ($isEdit) {
@@ -276,6 +280,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = $form->error;
         $avisosPerfil = $form->avisos;
         $faltantes = $form->faltantes;
+        $sinRevisar = $form->sinRevisar;
 
         if ($form->ok()) {
             $data = $form->data;
@@ -381,6 +386,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // del POST y no antes: un guardado exitoso redirige sin dibujar el formulario,
 // y esta consulta no haría falta.
 $abrAuthorCatalog = AppConfig::getEffective('abr_reference_authors', null) ?? [];
+// Lo que el editor le reclama al caso, agrupado por ficha: lo muestra el
+// Resumen en la fila que corresponde. En un POST son los que acaba de
+// calcular CaseForm; al abrir un caso a editar, los del caso guardado --
+// si no, el Resumen recién diría qué falta después de intentar guardar.
+$pendientesPorTab = [];
+$pendientesResumen = $faltantes;
+if ($pendientesResumen === [] && $isEdit) {
+    $dataGuardada = json_decode($editCase['data'] ?? '', true);
+    $pendientesResumen = CaseCompleteness::pending(is_array($dataGuardada) ? $dataGuardada : []);
+}
+foreach ($pendientesResumen as $pendiente) {
+    $pendientesPorTab[$pendiente['tab']][] = $pendiente;
+}
 // Normativa VEMP del curso (courses.php -> "Normativa VEMP"): pisa lat/amp
 // por pico y subtipo. La vista previa tiene que dibujar con la del curso,
 // que es la que va a usar el equipo -- ver VEMP_generator_v1, que la aplica
@@ -417,6 +435,9 @@ admin_add_js('case/live-preview.js');
 admin_add_js('case/acumetria.js');
 admin_add_js('case/fowler.js');
 admin_add_js('case/chat-test.js');
+// Después de tabs.js: usa window.gotoTab para mandar al Resumen cuando se
+// intenta guardar con fichas sin revisar.
+admin_add_js('case/resumen.js');
 admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico', $me);
 ?>
 
@@ -429,7 +450,13 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <li><a href="#" class="tab-link" data-goto-tab="<?= htmlspecialchars($falta['tab']) ?>"><?= htmlspecialchars($falta['texto']) ?></a></li>
         <?php endforeach; ?>
     </ul>
-    <p class="help">Esto no es opcional y no se guarda igual: son datos clínicos que ninguna cuenta puede sacar del audiograma. Sin ellos el alumno se encuentra con un paciente que no cierra, y vos no te enterás. Cliqueá cada línea para ir a la pestaña donde se arregla.</p>
+    <p class="help">Son datos clínicos que ninguna cuenta puede sacar del audiograma: si quedan en el default, el alumno se encuentra con un paciente que no cierra y vos no te enterás. Cliqueá cada línea para ir a la pestaña donde se arregla, o dala por revisada en <a href="#" class="tab-link" data-goto-tab="resumen">Resumen</a> si es así a propósito -- salvo el borrador de anamnesis escrito por IA, que se verifica leyéndolo en su ficha.</p>
+</div>
+<?php endif; ?>
+<?php if (!empty($sinRevisar)): ?>
+<div class="card pendientes-card">
+    <strong>Falta revisar <?= count($sinRevisar) ?> <?= count($sinRevisar) === 1 ? 'ficha' : 'fichas' ?></strong>
+    <p class="help">El caso no se guarda hasta que alguien haya mirado cada ficha y la haya dado por buena. Se hace en <a href="#" class="tab-link" data-goto-tab="resumen">Resumen</a>, que muestra el estado de todas juntas: <?= htmlspecialchars(implode(', ', $sinRevisar)) ?>.</p>
 </div>
 <?php endif; ?>
 <?php if (!empty($avisosPerfil)): ?>
@@ -450,42 +477,24 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <?php else: ?><input type="hidden" name="upload_temp_id" value="<?= htmlspecialchars($uploadTempId) ?>">
 <?php endif; ?>
 <?php $photoCaseId = $isEdit ? $editId : $uploadTempId; ?>
+<?php
+// La barra sale de CaseReview::TABS (misma fuente que usa el Resumen para
+// listar las fichas): escrita a mano acá, el Resumen podía listar una ficha
+// que ya no existe, o dejar de listar una recién agregada. Los números de
+// las fichas revisables ("4. Audiometría") también salen de ahí, del orden.
+$tabsGrupoActual = null;
+?>
 <div class="tabs" role="tablist">
+<?php foreach (CaseReview::TABS as $tabKey => $tabMeta): ?>
+    <?php if ($tabMeta['grupo'] !== $tabsGrupoActual): ?>
+        <?= $tabsGrupoActual === null ? '' : "</div>\n    </div>" ?>
     <div class="tab-group">
-        <span class="tab-group-label">Empezar acá</span>
+        <span class="tab-group-label"><?= htmlspecialchars($tabMeta['grupo']) ?></span>
         <div class="tab-group-btns">
-            <button type="button" class="tab-btn<?= $isEdit ? '' : ' active' ?>" data-tab="armado">Armado rápido</button>
-        </div>
-    </div>
-    <div class="tab-group">
-        <span class="tab-group-label">Quién es</span>
-        <div class="tab-group-btns">
-            <button type="button" class="tab-btn<?= $isEdit ? ' active' : '' ?>" data-tab="paciente">1. Paciente</button>
-            <button type="button" class="tab-btn" data-tab="sala">2. Sala</button>
-        </div>
-    </div>
-    <div class="tab-group">
-        <span class="tab-group-label">El caso</span>
-        <div class="tab-group-btns">
-            <button type="button" class="tab-btn" data-tab="perfil">3. Perfil auditivo</button>
-        </div>
-    </div>
-    <div class="tab-group">
-        <span class="tab-group-label">Exámenes</span>
-        <div class="tab-group-btns">
-            <button type="button" class="tab-btn" data-tab="audiometria">4. Audiometría</button>
-            <button type="button" class="tab-btn" data-tab="otoscopia">5. Otoscopia</button>
-            <button type="button" class="tab-btn" data-tab="timpanometria">6. Timpanometría</button>
-            <button type="button" class="tab-btn" data-tab="abr">7. ABR</button>
-            <button type="button" class="tab-btn" data-tab="eoas">8. EOA</button>
-            <button type="button" class="tab-btn" data-tab="vemp">9. VEMP</button>
-            <button type="button" class="tab-btn" data-tab="tinnitus">10. Tinnitus</button>
-        </div>
-    </div>
-    <div class="tab-group">
-        <span class="tab-group-label">Entrevista</span>
-        <div class="tab-group-btns">
-            <button type="button" class="tab-btn" data-tab="anamnesis">11. Anamnesis</button>
+        <?php $tabsGrupoActual = $tabMeta['grupo']; ?>
+    <?php endif; ?>
+            <button type="button" class="tab-btn<?= ($isEdit ? $tabKey === 'paciente' : $tabKey === 'armado') ? ' active' : '' ?>" data-tab="<?= $tabKey ?>"><?= htmlspecialchars(CaseReview::label($tabKey)) ?></button>
+<?php endforeach; ?>
         </div>
     </div>
 </div>
@@ -502,6 +511,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <?php include __DIR__ . '/../../views/case/_vemp.php'; ?>
 <?php include __DIR__ . '/../../views/case/_tinnitus.php'; ?>
 <?php include __DIR__ . '/../../views/case/_anamnesis.php'; ?>
+<?php include __DIR__ . '/../../views/case/_resumen.php'; ?>
 
 
 <?php if (!empty($avisosPerfil)): ?>

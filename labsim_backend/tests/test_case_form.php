@@ -60,6 +60,14 @@ $cfRun = static function (array $extra = []) use ($cfPost, $cfPdo, $cfMe): CaseF
     return CaseForm::fromPost($cfPost($extra), $cfPdo, $cfMe, null, false);
 };
 
+/**
+ * Las once fichas dadas por revisadas (ver CaseReview): lo que tilda el
+ * docente en el Resumen antes de guardar. No entra en el POST base a
+ * propósito -- la mayoría de estos tests miran qué queda en cases.data, y
+ * revisar una ficha apaga los pendientes que el editor le reclama.
+ */
+$cfRevisado = ['revisado' => array_fill_keys(array_keys(CaseReview::revisables()), '1')];
+
 // --- Validaciones que bloquean el guardado ---------------------------------
 
 t_eq(CaseForm::fromPost(['age' => '0'], $cfPdo, $cfMe, null, false)->error,
@@ -131,9 +139,42 @@ t_true(!$cfF->ok(), 'Un borrador de IA sin verificar bloquea el guardado');
 t_eq(array_column($cfF->faltantes, 'tab'), ['anamnesis'], 'El pendiente apunta a la pestaña Anamnesis');
 t_eq($cfF->data['Anamnesis']['ia']['verificado'], false, 'Sin tildar, el borrador no queda verificado');
 
-$cfF = $cfRun(['anamnesis_ia' => ['generado' => '1', 'verificado' => '1']]);
-t_true($cfF->ok(), 'Verificado, el caso con borrador de IA se guarda');
+$cfF = $cfRun(array_merge($cfRevisado, ['anamnesis_ia' => ['generado' => '1', 'verificado' => '1']]));
+t_true($cfF->ok(), 'Verificado y revisado, el caso con borrador de IA se guarda');
 t_eq($cfF->data['Anamnesis']['ia']['verificado_por'], 'docente', 'Queda quién lo verificó');
+
+// Y el borrador sin verificar NO se acepta desde el Resumen: tildar la ficha
+// dice "miré esto", y acá lo que falta es exactamente eso, sobre un texto
+// que escribió una máquina.
+$cfF = $cfRun(array_merge($cfRevisado, ['anamnesis_ia' => ['generado' => '1']]));
+t_eq(array_column($cfF->faltantes, 'tab'), ['anamnesis'],
+    'Anamnesis de IA: revisar la ficha no reemplaza verificar el borrador');
+t_true(!$cfF->ok(), 'Con el borrador sin verificar el caso sigue sin guardarse');
+
+// --- Revisión ficha por ficha (Resumen) -----------------------------------
+
+$cfSinRevisar = $cfRun();
+t_true(!$cfSinRevisar->ok(), 'Un caso sin revisar no se guarda, aunque no le falte ningún dato');
+t_eq(count($cfSinRevisar->sinRevisar), count(CaseReview::revisables()),
+    'Sin tildar nada, faltan por revisar las once fichas');
+t_eq($cfRun($cfRevisado)->sinRevisar, [], 'Tildadas las once, no queda nada por revisar');
+t_eq(array_keys($cfRun(array_merge($cfRevisado, ['revisado' => ['paciente' => '1']]))->sinRevisar),
+    array_values(array_diff(array_keys(CaseReview::revisables()), ['paciente'])),
+    'La lista dice exactamente qué fichas quedaron sin tildar');
+
+// Lo que se guarda es la revisión, no un puntaje: qué fichas y quién.
+$cfRevF = $cfRun($cfRevisado);
+t_eq($cfRevF->data['Revision']['tabs']['vemp'], true, 'La revisión viaja a cases.data');
+t_eq($cfRevF->data['Revision']['by'], 'docente', 'Y queda quién la hizo');
+
+// Revisar una ficha acepta lo que el editor le reclamaba: un timpanograma en
+// A con 40 dB de gap es un pendiente hasta que el docente dice que es así.
+$cfGap = ['aerea' => ['od' => array_fill(0, 9, 45), 'oi' => array_fill(0, 9, 0)],
+          'osea' => ['od' => array_fill(0, 9, 0), 'oi' => array_fill(0, 9, 0)]];
+t_true(in_array('timpanometria', array_column($cfRun($cfGap)->faltantes, 'tab'), true),
+    'El gap con timpanograma en A se reclama');
+t_true(!in_array('timpanometria', array_column($cfRun(array_merge($cfGap, $cfRevisado))->faltantes, 'tab'), true),
+    'Revisada la ficha, el mismo caso deja de reclamarlo');
 
 // --- Perfil auditivo ------------------------------------------------------
 

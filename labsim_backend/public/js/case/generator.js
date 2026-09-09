@@ -542,9 +542,6 @@
                 });
             });
         });
-
-        var decidido = document.querySelector('#case-form [name="vemp[' + lado + '][decidido]"]');
-        if (decidido) { decidido.checked = true; }
     }
 
     /**
@@ -755,12 +752,19 @@
         var nombre = generarNombre();
         var apellido = document.querySelector('#case-form [name="apellido1"]');
         var madre = agregarAcompanante(apellido ? apellido.value : '');
+
+        // Lo que estaba dado por revisado era el caso anterior: este es
+        // otro y hay que recorrerlo de nuevo. El Resumen no se entera solo
+        // porque generar escribe los campos por código, sin disparar los
+        // eventos que destildan la ficha que se edita a mano.
+        if (window.resumenDestildarTodo) { window.resumenDestildarTodo(); }
+
         if (estado) {
             estado.textContent = 'Listo: ' + (nombre ? nombre + ' -- ' : '') +
                 'OD ' + escOd.label + ', OI ' + escOi.label +
                 (tinnitus ? '. Con acúfeno (' + tinnitus + ')' : '. Sin acúfeno') +
                 (madre ? '. Es menor: viene con su madre (' + madre + '), revisá la pestaña Sala' : '') +
-                '. Revisalo en Audiometría antes de guardar.';
+                '. Revisalo ficha por ficha en Resumen antes de guardar.';
         }
     });
 

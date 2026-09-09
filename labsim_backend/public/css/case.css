@@ -156,6 +156,35 @@ main:has(.form-actions-sticky) { padding-bottom: 6rem; }
 .pendientes-card { border-left: 4px solid var(--color-danger); }
 .pendientes-card li { margin-bottom: var(--space-2); }
 
+/* Pestaña "Resumen": una fila por ficha del caso (ver views/case/_resumen.php).
+ * La tilde a la izquierda es la acción --dar la ficha por revisada-- y el
+ * estado del medio es lo que se está aceptando al tildarla. */
+.resumen-row {
+  display: grid;
+  grid-template-columns: minmax(11rem, auto) 1fr auto;
+  gap: var(--space-4);
+  align-items: start;
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--color-border);
+}
+.resumen-row:first-child { border-top: none; }
+.resumen-label { font-weight: 600; }
+.resumen-detalle { min-width: 0; }
+.resumen-estado { color: var(--color-muted); font-size: 0.85rem; }
+/* La ficha con algo sin decidir se marca en el borde, no con el fondo: el
+ * rojo entero convierte una lista de once en una pantalla de alarma. */
+.resumen-row.con-pendiente { border-left: 3px solid var(--color-danger); padding-left: var(--space-3); }
+.resumen-pendientes { margin: var(--space-2) 0 0; padding-left: 1.1rem; color: var(--color-danger); font-size: 0.85rem; }
+.resumen-alerta-inline { color: var(--color-danger); }
+.resumen-row.revisada .resumen-label { color: var(--color-muted); }
+.resumen-ir { font-size: 0.85rem; white-space: nowrap; }
+.resumen-contador { margin-top: var(--space-3); font-weight: 600; color: var(--color-danger); }
+.resumen-contador.completo { color: var(--color-muted); font-weight: 400; }
+
+@media (max-width: 700px) {
+  .resumen-row { grid-template-columns: 1fr; }
+}
+
 /* Pestaña "Armado rápido": pasos numerados, uno por generador. Los botones
  * de autocompletado vivían escondidos dentro de la ficha que llenaban --
  * acá se ven todos juntos y en el orden en que conviene usarlos. */
