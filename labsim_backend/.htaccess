@@ -1,0 +1,22 @@
+# El docroot del hosting apunta a esta carpeta (labsim/backend/), no a
+# public/ -- sin esto, sql/schema.sql, config/config.php y data/*.sqlite
+# quedan descargables directo por URL. Bloquea todo acá; public/.htaccess
+# vuelve a permitir solo lo que va abajo de public/.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>
+
+# Excepción: index.php solo redirige a public/admin/login.php, no expone nada.
+<Files "index.php">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
+</Files>

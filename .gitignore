@@ -1,7 +1,45 @@
+# Ignorar archivos compilados de Python
 *.pyc
-software/LabSim/target/
+
+# Ignorar todos los directorios __pycache__ en cualquier nivel
 **/__pycache__/
 **/__pycache__/*
 
+# Ignorar configuraciones específicas de VSCode
 .vscode/settings.json
 /.vscode
+
+# Ignorar directorio de destino
+/target
+
+# Ignorar directorio .qt_for_python
+/qt_for_python
+.qt_for_python/
+
+# Ignorar archivos de construcción y distribución
+*.build/
+*.dist/
+/build/
+/dist/
+
+# Ignorar directorios de salida
+**/output/
+**/output/*
+
+# Ignorar log de debug en runtime
+src/log_file.txt
+
+# Ignorar configuración local de Claude Code
+/.claude/
+
+# Ignorar cache de audio generado en runtime
+# _generated: tonos y ruidos sintetizados por lib/audio_synth.py
+# _panned: palabras panneadas a un solo oido por lib/h_audio.py
+resources/audio/_generated/
+resources/audio/_panned/
+
+# Sesión local de labsim_backend (token del usuario logeado) y cola de logs
+resources/json/session.json
+# **/ y no resources/: LOCAL_LOG_QUEUE en main.py arma la ruta relativa a
+# src/ (via BASE_DIR), no al cwd, así que cae en src/resources/local_cache/
+**/local_cache/

@@ -1,0 +1,395 @@
+/* public/css/case.css — admin/case_create.php (editor de fichas clínicas:
+ * audiograma, otoscopia, reflejos, foto del paciente, tabs).
+ *
+ * Hex específicos del dominio (rojo OD, azul OI) son convenciones clínicas,
+ * no de marca: por eso NO viven en tokens.css junto a --color-primary. Pero
+ * son una constante sola, y estaban escrita 43 veces entre este archivo, el
+ * SVG que arma case_create.php y el que arma public/js/case/*.js. Se definen
+ * acá una vez; el JS las lee con getComputedStyle (ver case/side-color.js).
+ */
+:root {
+  --color-od: #b33a3a;
+  --color-oi: #2255aa;
+  /* Variantes claras para fondo oscuro fijo (celda de reflejos presente). */
+  --color-od-soft: #e05c5c;
+  --color-oi-soft: #6fa8e8;
+}
+
+/* Grilla compacta (input numérico centrado) */
+.grid-table th, .grid-table td { text-align: center; padding: 0.3rem; }
+.grid-table input[type=number] { width: 4.2rem; padding: 0.2rem; text-align: center; }
+.grid-table th.side-label, .grid-table td.side-label { text-align: left; font-weight: 600; }
+
+/* Checkbox inline (label + checkbox lado a lado sin negrita) */
+/* Fieldset agrupador de campos */
+fieldset {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin: var(--space-5) 0;
+  padding: 0.8rem var(--space-5);
+}
+legend { font-weight: 600; padding: 0 var(--space-2); }
+
+/* Layouts de 2 y 3 columnas */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-5); }
+
+input[readonly] { background: var(--color-row-alt); color: var(--color-muted); }
+
+/* Preview ABR (case_create.php): serie de curvas 100->0 dBnHL, una por oído */
+.abr-preview, .eoa-preview { width: 100%; overflow-x: auto; }
+.abr-preview svg, .eoa-preview svg { width: 100%; height: auto; display: block; }
+
+/* Tabs de la ficha (Audiometría, Otoscopia, Reflejos, etc.).
+ * Sin JS, todas las pestañas visibles apiladas -- degrada con gracia. */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  border-bottom: 2px solid var(--color-border);
+  margin-bottom: var(--space-6);
+}
+.tab-btn {
+  padding: 0.6rem 1.1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+.tab-btn:hover { color: var(--color-primary); }
+.tab-btn.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+.tab-btn .tab-error-dot {
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--color-danger);
+  margin-left: 0.3rem;
+}
+body.js-tabs .tab-panel { display: none; }
+body.js-tabs .tab-panel.active { display: block; }
+
+/* Etiqueta de grupo entre pestañas (Quién es / El caso / Exámenes /
+ * Entrevista): las 12 pestañas son un flujo, no una lista plana. */
+.tab-group {
+  align-self: center;
+  padding: 0 var(--space-3) 0 var(--space-4);
+  border-left: 1px solid var(--color-border);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+.tab-group:first-child { border-left: none; padding-left: 0; }
+
+/* Link que salta a otra pestaña (pendientes, punteros entre fichas) */
+.tab-link { cursor: pointer; }
+
+/* Aviso de campo derivado: el gris del input no explica quién lo apagó. */
+.derivado-aviso {
+  margin: var(--space-2) 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-row-alt);
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+/* Barra de acciones del editor de fichas: fija al borde inferior de la
+ * ventana, no sticky.
+ *
+ * `position: sticky` la suelta cuando su contenedor --el <form>-- se acaba, y
+ * la barra es el último hijo del form: en las pestañas cortas el form termina
+ * antes del borde de la pantalla y la barra queda a media página, y al llegar
+ * al final del scroll se despega siempre. En un formulario de 11 pestañas que
+ * se llena de a poco, el "Crear caso" tiene que estar SIEMPRE a la vista.
+ *
+ * El override vive acá y no en admin.css porque case.css lo carga solo
+ * case_create.php: courses.php y llm.php tienen cuatro `.form-actions-sticky`
+ * cada una y con `fixed` se apilarían todas en el mismo borde. Acá hay una
+ * sola (la de crear o la de editar, nunca las dos). */
+.form-actions-sticky {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin-top: 0;
+  padding: var(--space-4) var(--space-8);
+  box-shadow: 0 -2px 8px rgb(0 0 0 / 8%);
+  /* Capa de composición propia. Sin esto, con el zoom del navegador en un
+   * valor fraccionario (90%, 110%...) Chrome deja de repintar la barra al
+   * scrollear: el layout queda bien --elementFromPoint la encuentra, el rect
+   * da el borde inferior exacto-- pero en pantalla no hay nada, y vuelve solo
+   * al forzar un repintado (cambiar el zoom, redimensionar). Promoverla a su
+   * propia capa lo evita. Va en la barra, nunca en un ancestro: ahí crearía
+   * un bloque contenedor y rompería el `fixed`. */
+  will-change: transform;
+}
+/* Sitio para la barra: sin esto tapa el último campo del formulario, que
+ * además suele ser el que se está llenando. */
+main:has(.form-actions-sticky) { padding-bottom: 6rem; }
+
+.pendientes-card { border-left: 4px solid var(--color-danger); }
+.pendientes-card li { margin-bottom: var(--space-2); }
+
+/* Pestaña "Armado rápido": pasos numerados, uno por generador. Los botones
+ * de autocompletado vivían escondidos dentro de la ficha que llenaban --
+ * acá se ven todos juntos y en el orden en que conviene usarlos. */
+.gen-step {
+  display: grid;
+  grid-template-columns: 2.2rem 1fr;
+  gap: var(--space-4);
+  align-items: start;
+  margin-bottom: var(--space-6);
+}
+.gen-step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  margin-top: var(--space-6);
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.gen-step-body { margin: 0; }
+/* Adónde va a parar lo que escribe el paso: sin esto el número del paso se
+ * confunde con el número de la pestaña, que es otra numeración. */
+.gen-step-dest {
+  margin: var(--space-1) 0 var(--space-3);
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}
+.gen-step-body button { margin-top: var(--space-3); }
+@media (max-width: 40rem) {
+  .gen-step { grid-template-columns: 1fr; gap: var(--space-2); }
+  .gen-step-num { margin-top: 0; }
+}
+
+/* Audiometría: gráfico sticky a la izquierda + planilla de umbrales scrollable */
+.audiometria-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1.2rem;
+  align-items: start;
+}
+.audiogram-stack {
+  position: sticky;
+  top: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+@media (max-width: 960px) {
+  .audiometria-layout { grid-template-columns: 1fr; }
+  .audiogram-stack { position: static; }
+}
+
+/* .two-col / .three-col (formulario clínico completo) no colapsaban en
+ * mobile -- inputs quedaban aplastados por debajo de ~600px. */
+@media (max-width: 40rem) {
+  .two-col,
+  .three-col { grid-template-columns: 1fr; }
+}
+.audiogram-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  margin-top: var(--space-3);
+}
+.audiogram-legend span { display: inline-flex; align-items: center; gap: 0.3rem; }
+
+/* Bloque por oído (OD/OI) dentro de una card -- antes había una card por oído */
+.side-block {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--color-border);
+}
+.side-block:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+.side-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+.side-tag {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-md);
+  background: var(--color-table-head);
+  color: var(--color-muted);
+}
+.side-tag.od { color: var(--color-od); }
+.side-tag.oi { color: var(--color-oi); }
+
+/* Patrón de reflejos: tabla espejada (ipsi al centro, contra afuera).
+ * Hex OD/OI vienen de la convención clínica. */
+.reflex-pattern-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--space-3);
+  font-size: 0.8rem;
+}
+.reflex-pattern-table th, .reflex-pattern-table td {
+  text-align: center;
+  padding: 0.35rem var(--space-1);
+  border: 1px solid var(--color-border);
+}
+.reflex-pattern-table td.freq-label { font-weight: 600; background: var(--color-row-alt); }
+/* NO reusar .side-tag acá: su display:inline-block rompe table-cell */
+th.reflex-head.od { color: var(--color-od); }
+th.reflex-head.oi { color: var(--color-oi); }
+.reflex-cell { font-weight: 700; color: var(--color-faint); }
+.reflex-cell.na { color: var(--color-border-strong); background: var(--color-row-alt); }
+/* "Presente" = fondo gris fijo, color del "+" según oído estimulado */
+.reflex-cell.present { background: #3a3a3a; }
+.reflex-cell.present.mark-od { color: var(--color-od-soft); }
+.reflex-cell.present.mark-oi { color: var(--color-oi-soft); }
+
+/* Foto del paciente: avatar circular + modal de recorte */
+.photo-block { margin-top: var(--space-5); padding-top: var(--space-5); border-top: 1px solid var(--color-border); }
+.patient-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-row-alt);
+  flex-shrink: 0;
+}
+.patient-avatar-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-faint);
+  font-size: 0.7rem;
+  text-align: center;
+}
+.patient-avatar-empty[hidden] { display: none; }
+
+/* Otoscopia: fases apiladas, cada una con imagen OD/OI */
+.otoscopia-fase {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--color-border);
+}
+.otoscopia-fase:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+.otoscopia-photo-slot { text-align: center; }
+.otoscopia-thumb {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  background: var(--color-row-alt);
+  margin: 0.3rem auto;
+}
+.otoscopia-thumb-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 220px;
+  height: 160px;
+  border-radius: var(--radius-lg);
+  background: var(--color-row-alt);
+  color: var(--color-faint);
+  font-size: 0.78rem;
+  margin: 0.3rem auto;
+}
+.otoscopia-thumb[hidden], .otoscopia-thumb-empty[hidden] { display: none; }
+.otoscopia-photo-slot .otoscopia-photo-input {
+  display: block;
+  margin: var(--space-2) auto 0.3rem;
+}
+.otoscopia-delete-photo { color: var(--color-danger); }
+.otoscopia-download-photo {
+  display: inline-block;
+  margin-left: var(--space-3);
+  font-size: 0.82rem;
+}
+.otoscopia-download-photo[hidden] { display: none; }
+
+/* Modal de recorte de foto */
+.photo-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.photo-modal[hidden] { display: none; }
+.photo-modal-box {
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: 1.2rem;
+  max-width: 22rem;
+  width: 90%;
+}
+.photo-crop-viewport {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #333;
+  cursor: grab;
+  touch-action: none;
+}
+.photo-crop-viewport:active { cursor: grabbing; }
+.photo-crop-viewport img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  max-width: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.photo-crop-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2000px rgba(0,0,0,0.5);
+  pointer-events: none;
+}
+.photo-crop-ring.square {
+  border-radius: 0;
+  outline: 2px solid var(--color-surface);
+  outline-offset: -2px;
+}
+.photo-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+/* Color del oído por clase, no por atributo SVG ni style= inline: los
+   símbolos de las leyendas (círculo OD, cruz OI...) los dibuja PHP con
+   <circle>/<polygon>, y `stroke="var(--color-od)"` no existe -- un atributo
+   de presentación no resuelve var(). Por clase sí. */
+.sym-od { stroke: var(--color-od); }
+.sym-oi { stroke: var(--color-oi); }
+.sym-od-fill { fill: var(--color-od); }
+.sym-oi-fill { fill: var(--color-oi); }
+
+/* Solo el color del oído, sin la píldora de .side-tag (títulos sueltos). */
+.od-text { color: var(--color-od); }
+.oi-text { color: var(--color-oi); }

@@ -1,0 +1,270 @@
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/_layout.php';
+require_once __DIR__ . '/../../src/Metrics.php';
+require_once __DIR__ . '/../../src/HistoriaClinica.php';
+
+/**
+ * Detalle de una atención propia ya cerrada: stats de comportamiento, ficha
+ * clínica (las atenciones previas del caso y las tuyas en una sola línea de
+ * tiempo, ver HistoriaClinica::lineaTiempo) y la
+ * conversación con el paciente simulado, con la retroalimentación que tu
+ * docente haya dejado turno a turno (chat_comments) -- todo solo lectura,
+ * scopeado a la sesión de alumno (ver sso.php), nunca a otro appointment_id
+ * o student_id que no sea el propio.
+ */
+
+$me = Auth::requireStudentSession();
+$pdo = Db::get();
+
+$appointmentId = (int) ($_GET['appointment_id'] ?? 0);
+
+$stmt = $pdo->prepare('SELECT id, nota, hora_real, updated_at FROM attendances WHERE appointment_id = ? AND student_id = ? AND estado = ?');
+$stmt->execute([$appointmentId, $me['id'], 'atendido']);
+$attendance = $stmt->fetch();
+
+$stmt = $pdo->prepare(
+    'SELECT id, fecha, hora, rut, nombre, apellido, fecha_nac, procedimiento, patient_id
+     FROM appointments WHERE id = ?'
+);
+$stmt->execute([$appointmentId]);
+$appointment = $stmt->fetch();
+
+if (!$attendance || !$appointment) {
+    student_header('Atención', $me);
+    echo '<p class="error">No encontramos esa atención.</p><p><a class="back" href="mis_pacientes.php">&larr; Volver</a></p>';
+    student_footer();
+    exit;
+}
+
+$stmt = $pdo->prepare('SELECT user_id, client_ts, action, payload FROM action_logs WHERE user_id = ? ORDER BY id');
+$stmt->execute([$me['id']]);
+$sessions = array_values(array_filter(
+    Metrics::buildSessions(Metrics::decodeLogs($stmt->fetchAll())),
+    static fn (array $s) => $s['appointment_id'] !== null && (int) $s['appointment_id'] === $appointmentId
+));
+$stats = Metrics::summarizeSessions($sessions);
+// Duración real (Atender -> Atendido), mismo criterio que admin/student.php
+// -- $stats['total_duration_s'] es action_logs y esconde el rato leyendo el
+// caso antes de tocar el audiómetro/impedanciómetro.
+$duracionS = Metrics::attendanceDurationSeconds($attendance['hora_real'], $attendance['updated_at']);
+
+$historiaClinica = '';
+if ($appointment['patient_id']) {
+    $stmt = $pdo->prepare('SELECT historia_clinica FROM patients WHERE id = ?');
+    $stmt->execute([(int) $appointment['patient_id']]);
+    $historiaClinica = (string) ($stmt->fetchColumn() ?: '');
+}
+
+$historial = [];
+if ($appointment['patient_id']) {
+    $stmt = $pdo->prepare(
+        "SELECT att2.nota, att2.hora_real, a2.fecha
+         FROM attendances att2 JOIN appointments a2 ON a2.id = att2.appointment_id
+         WHERE att2.student_id = ? AND att2.estado = 'atendido' AND a2.patient_id = ?"
+    );
+    $stmt->execute([$me['id'], (int) $appointment['patient_id']]);
+    $historial = $stmt->fetchAll();
+}
+
+$stmt = $pdo->prepare(
+    'SELECT id, role, content, speaker_label, created_at FROM llm_chat_logs
+     WHERE appointment_id = ? AND student_id = ? ORDER BY id'
+);
+$stmt->execute([$appointmentId, $me['id']]);
+$log = $stmt->fetchAll();
+
+$comments = [];
+if ($log) {
+    $logIds = array_column($log, 'id');
+    $placeholders = implode(',', array_fill(0, count($logIds), '?'));
+    $stmt = $pdo->prepare(
+        "SELECT c.chat_log_id, c.comment, c.created_at, u.display_name AS teacher_name
+         FROM chat_comments c JOIN users u ON u.id = c.teacher_id
+         WHERE c.chat_log_id IN ($placeholders) ORDER BY c.id"
+    );
+    $stmt->execute($logIds);
+    foreach ($stmt->fetchAll() as $c) {
+        $comments[(int) $c['chat_log_id']][] = $c;
+    }
+}
+
+// Informes de módulos de examen (EOA/ABR/VEMP...) que el alumno subió en
+// esta atención -- el PDF se sirve en informe.php.
+$stmt = $pdo->prepare(
+    'SELECT id, tipo, updated_at FROM reports WHERE attendance_id = ? ORDER BY tipo'
+);
+$stmt->execute([(int) $attendance['id']]);
+$reports = $stmt->fetchAll();
+
+$reportLabels = [
+    'ABR' => 'PEATC (ABR)',
+    'EOA' => 'Emisiones otoacústicas',
+    'VEMP' => 'VEMP',
+    'ELECTROCOCLEO' => 'Electrococleografía',
+];
+
+$attendanceComments = ['evolucion' => [], 'procedimiento' => []];
+$stmt = $pdo->prepare(
+    "SELECT ac.section, ac.comment, ac.created_at, u.display_name AS teacher_name
+     FROM attendance_comments ac JOIN users u ON u.id = ac.teacher_id
+     WHERE ac.attendance_id = ? ORDER BY ac.id"
+);
+$stmt->execute([(int) $attendance['id']]);
+foreach ($stmt->fetchAll() as $c) {
+    $attendanceComments[$c['section']][] = $c;
+}
+
+function render_attendance_comments(array $comments): void
+{
+    foreach ($comments as $c) {
+        ?>
+        <div class="bubble-row">
+            <div class="bubble-system">
+                <span class="bubble-system-header">
+                    <?= htmlspecialchars($c['teacher_name']) ?> (docente) · <?= htmlspecialchars($c['created_at']) ?>
+                </span>
+                <?= nl2br(htmlspecialchars($c['comment'])) ?>
+            </div>
+        </div>
+        <?php
+    }
+}
+
+$paciente = trim("{$appointment['nombre']} {$appointment['apellido']}") ?: 'Paciente sin nombre';
+
+student_header($paciente, $me);
+?>
+<a class="back" href="mis_pacientes.php">&larr; Mis pacientes</a>
+<h1><?= htmlspecialchars($paciente) ?></h1>
+
+<div class="card">
+    <h2>Datos de la atención</h2>
+    <p>
+        <b>Procedimiento:</b> <?= htmlspecialchars($appointment['procedimiento'] ?: '—') ?><br>
+        <b>Cita:</b> <?= htmlspecialchars($appointment['fecha'] ?: '—') ?> <?= htmlspecialchars($appointment['hora'] ?: '') ?><br>
+        <b>Inicio real:</b> <?= htmlspecialchars($attendance['hora_real'] ?: '—') ?><br>
+        <b>Cerrada:</b> <?= htmlspecialchars($attendance['updated_at']) ?>
+    </p>
+    <?php if ($attendanceComments['procedimiento']): ?>
+    <p class="legend" style="margin-top:0.8rem;">Comentarios de tu docente sobre el procedimiento:</p>
+    <?php render_attendance_comments($attendanceComments['procedimiento']); ?>
+    <?php endif; ?>
+</div>
+
+<div class="card">
+    <h2>Comportamiento durante la atención</h2>
+    <table>
+        <tr><td>Bloques de actividad</td><td><b><?= $stats['n_sessions'] ?></b></td></tr>
+        <tr><td>Duración total</td><td><b><?= $duracionS !== null ? htmlspecialchars(Metrics::formatDurationHms($duracionS)) : '—' ?></b></td></tr>
+        <tr><td>Delta promedio entre acciones</td><td><b><?= $stats['avg_delta_s'] !== null ? htmlspecialchars(Metrics::formatDurationHms((int) round($stats['avg_delta_s']))) : '—' ?></b></td></tr>
+        <tr><td>Pausas largas (&ge;30s)</td><td><b<?= $stats['long_pauses'] > 0 ? ' class="badge-warn"' : '' ?>><?= $stats['long_pauses'] ?></b></td></tr>
+        <tr><td>Acciones sin pausa (0s)</td><td><b><?= $stats['no_pause_actions'] ?></b></td></tr>
+    </table>
+    <?php if ($attendance['nota']): ?>
+    <h2 style="margin-top:1rem;">Tu evolución registrada</h2>
+    <p><?= nl2br(htmlspecialchars($attendance['nota'])) ?></p>
+    <?php endif; ?>
+    <?php if ($attendanceComments['evolucion']): ?>
+    <p class="legend">Comentarios de tu docente sobre tu evolución:</p>
+    <?php render_attendance_comments($attendanceComments['evolucion']); ?>
+    <?php endif; ?>
+</div>
+
+<div class="card">
+    <h2>Tus informes</h2>
+    <?php if (!$reports): ?>
+    <p class="empty">No subiste ningún informe en esta atención.</p>
+    <?php else: ?>
+    <table>
+        <tr><th>Examen</th><th>Última actualización</th><th></th></tr>
+        <?php foreach ($reports as $r): ?>
+        <tr>
+            <td><?= htmlspecialchars($reportLabels[$r['tipo']] ?? $r['tipo']) ?></td>
+            <td><?= htmlspecialchars($r['updated_at']) ?></td>
+            <td><a href="informe.php?id=<?= (int) $r['id'] ?>" target="_blank">Ver PDF</a></td>
+        </tr>
+        <?php endforeach; ?>
+    </table>
+    <?php endif; ?>
+</div>
+
+<div class="card">
+    <h2>Ficha clínica</h2>
+    <p>
+        <b>Rut:</b> <?= htmlspecialchars($appointment['rut'] ?: '—') ?><br>
+        <b>Fecha de nacimiento:</b> <?= htmlspecialchars($appointment['fecha_nac'] ?: '—') ?>
+    </p>
+    <?php
+    // Atenciones previas del caso y las tuyas, en una sola línea de tiempo:
+    // la evolución que escribiste va DESPUÉS de lo que le pasó al paciente
+    // antes de llegar, que es como se lee una ficha de verdad. Antes eran
+    // dos listas separadas y la tuya se ordenaba por la fecha como string.
+    //
+    // Todas las entradas se ven IGUAL a propósito: una ficha real no
+    // distingue "lo que trajo el paciente" de "lo que escribí yo", y
+    // marcarlo rompe justo el realismo que la ficha aporta.
+    $lineaTiempo = HistoriaClinica::lineaTiempo($historiaClinica, $appointment['fecha'], $historial);
+    ?>
+    <p class="legend">Historial de este paciente:</p>
+    <?php if (!$lineaTiempo): ?>
+    <p class="empty">Sin historial registrado para este paciente.</p>
+    <?php else: ?>
+    <ul>
+        <?php foreach ($lineaTiempo as $e): ?>
+        <li>
+            <b><?= htmlspecialchars($e['fecha'] ?: 'sin fecha') ?><?= $e['hora'] !== '' ? ' ' . htmlspecialchars($e['hora']) : '' ?></b> —
+            <?= htmlspecialchars($e['texto'] ?: 'sin comentario') ?>
+        </li>
+        <?php endforeach; ?>
+    </ul>
+    <?php endif; ?>
+</div>
+
+<div class="card">
+    <h2>Conversación con el paciente</h2>
+    <p class="legend">Los globos amarillos son retroalimentación de tu docente sobre ese turno puntual -- solo la ve el equipo docente hasta que se comparte contigo acá.</p>
+    <?php if (!$log): ?>
+    <p class="empty">Sin conversación registrada para esta atención.</p>
+    <?php else: ?>
+    <div style="display:flex; flex-direction:column; gap:1rem; width:100%; max-width:44rem; margin:0 auto;">
+        <?php foreach ($log as $turn):
+            $role = $turn['role'] === 'assistant' ? 'assistant' : 'user';
+            $turnComments = $comments[(int) $turn['id']] ?? [];
+        ?>
+        <div>
+            <div style="display:flex; justify-content:<?= $role === 'user' ? 'flex-end' : 'flex-start' ?>;">
+                <div style="max-width:80%; padding:0.5rem 0.8rem; border-radius:12px; font-size:0.9rem; white-space:pre-wrap;
+                    <?= $role === 'user' ? 'background:#3b5bdb; color:#fff;' : 'background:#fff; border:1px solid #e5e5ea;' ?>">
+                    <span class="bubble-system-header--muted">
+                        <?php
+                        // En un caso con acompañantes la conversación tiene
+                        // varias voces; las anteriores al chat grupal no
+                        // traen etiqueta y siguen diciendo "Paciente".
+                        $hablante = trim((string) ($turn['speaker_label'] ?? '')) ?: 'Paciente';
+                        ?>
+                        <?= htmlspecialchars($role === 'assistant' ? $hablante : 'Tú') ?> · <?= htmlspecialchars($turn['created_at']) ?>
+                    </span>
+                    <?= htmlspecialchars($turn['content']) ?>
+                </div>
+            </div>
+            <?php foreach ($turnComments as $c): ?>
+            <div class="bubble-row">
+                <div class="bubble-system">
+                    <span class="bubble-system-header">
+                        <?= htmlspecialchars($c['teacher_name']) ?> (docente) · <?= htmlspecialchars($c['created_at']) ?>
+                    </span>
+                    <?= nl2br(htmlspecialchars($c['comment'])) ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+</div>
+<?php
+student_footer();

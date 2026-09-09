@@ -1,0 +1,121 @@
+{
+  "comments": "Normativos por defecto para OEA clínica (TEOAE/DPOAE/SOAE/SFOAE). El override por curso vive en core.app_config_store bajo 'normative_data.teoae/dpoae/soae/sfoae' (mismo path que ABR). Sin override del curso -> se usan estos defaults + banner amarillo. teoae.noise_floor_db_spl es el ruido de canal POR BARRIDO (no el piso final): al promediar N barridos baja ~1/sqrt(N), y con 14 dB SPL / 260 barridos un oido normal queda en ~94% de reproducibilidad y 15-21 dB de SNR por banda, que es el rango de un equipo real. dpoae.normal_band_db es el rango normal (p5-p95 aprox.) del nivel DP por f2 que se dibuja como area verde en el DP-grama; dpoae.noise_floor_db_spl es el piso FINAL (con todos los promedios de averages_per_point): durante la captura de cada punto el piso arranca 10*log10(k_max) dB mas arriba y baja al promediar.",
+  "teoae": {
+    "default": {
+      "min_snr_db": 6,
+      "pass_bands_min": 3,
+      "bands_hz": [1000, 1500, 2000, 3000, 4000],
+      "band_halfwidth_ratio": 0.707,
+      "spectrum_low_hz": 500,
+      "spectrum_high_hz": 5000,
+      "expected_response_db": {
+        "1000": 8,
+        "1500": 10,
+        "2000": 12,
+        "3000": 11,
+        "4000": 9
+      },
+      "window_ms": 20,
+      "decay_ms": 8,
+      "noise_floor_db_spl": 14,
+      "default_level_db_spl": 60,
+      "default_n_sweeps": 260,
+      "stim_jitter_db": 0.3,
+      "stim_jitter_tolerance_db": 3.0,
+      "min_reproducibility_pct": 70,
+      "min_stability_pct": 80
+    }
+  },
+  "dpoae": {
+    "default": {
+      "min_dp_above_noise_db": 6,
+      "f2_list_hz": [1000, 1500, 2000, 3000, 4000, 6000, 8000],
+      "pass_points_min": 4,
+      "f2_f1_ratio": 1.22,
+      "default_l1_db_spl": 65,
+      "default_l2_db_spl": 55,
+      "peak_f2_hz": 3000,
+      "peak_dp_db_spl": 12,
+      "rolloff_low_db_per_oct": 4,
+      "rolloff_high_db_per_oct": 7,
+      "noise_floor_db_spl": -22,
+      "noise_floor_lf_rise_db_per_oct": 8,
+      "growth_rate_db_per_db_l2": 0.25,
+      "growth_rate_low_db_per_db_l2": 0.9,
+      "l1_l2_penalty_db_per_db": 0.15,
+      "normal_band_db": {
+        "1000": [-5, 13],
+        "1500": [-3, 15],
+        "2000": [-1, 16],
+        "3000": [0, 17],
+        "4000": [-1, 16],
+        "6000": [-4, 13],
+        "8000": [-8, 9]
+      },
+      "averages_per_point": [1, 2, 4, 8, 16, 32],
+      "io_l2_min_db_spl": 20,
+      "io_l2_max_db_spl": 75,
+      "io_l2_step_db_spl": 5,
+      "io_f2_hz": 3000
+    }
+  },
+  "sfoae": {
+    "default": {
+      "noise_floor_db": -12,
+      "min_snr_db": 6,
+      "default_freq_hz": 1000,
+      "default_level_db_spl": 40,
+      "suppressor_min_db_spl": 0,
+      "suppressor_max_db_spl": 60,
+      "suppressor_step_db_spl": 5,
+      "suppressor_center_db_spl": 40,
+      "reference_freqs_hz": [500, 1000, 1500, 2000, 3000, 4000],
+      "expected_magnitude_db": {
+        "500": 3,
+        "1000": 6,
+        "1500": 6.5,
+        "2000": 5,
+        "3000": 3.5,
+        "4000": 2
+      },
+      "suppression_offset_db": 10,
+      "suppression_slope_db": 6,
+      "phase_slope_db": 8
+    }
+  },
+  "soae": {
+    "comments": "SOAE = emisiones ESPONTANEAS (registro en silencio, sin estimulo). prevalence_pct + prevalence_right_ear_factor deciden si ese oido tiene SOAE (no todos los oidos normales los tienen: ~40-50%); peak_* es la distribucion de frecuencia/nivel de los picos (agrupados en 1-2 kHz, mediana cercana a 0 dB SPL, separacion minima ~6% entre picos del mismo oido); min_snr_db (pico sobre el piso local) y min_snr_half_db (reproducible en las dos mitades A/B del registro) son el criterio de deteccion. noise_floor_db_spl es el nivel MEDIO del ruido del conducto: sin estimulo no hay promediacion coherente, asi que promediar NO lo baja -- lo que baja es la dispersion bin a bin (~4.34/sqrt(k) dB), y por eso los picos emergen al final del registro. valid_floor_max_db_spl es el piso medio (1-4 kHz) sobre el cual el registro se informa como no concluyente en vez de 'sin SOAE'.",
+    "default": {
+      "max_atten_for_peaks_db": 10,
+      "fft_n": 8192,
+      "spectrum_low_hz": 500,
+      "spectrum_high_hz": 7000,
+      "default_record_s": 30,
+      "min_record_s": 10,
+      "max_record_s": 120,
+      "n_frames": 36,
+      "noise_floor_db_spl": -8,
+      "noise_floor_lf_rise_db_per_oct": 9,
+      "noise_floor_hf_rise_db_per_oct": 2,
+      "min_snr_db": 3,
+      "min_snr_half_db": 2,
+      "valid_floor_max_db_spl": 0,
+      "floor_window_bins": 41,
+      "peak_separation_bins": 3,
+      "prevalence_pct": 45,
+      "prevalence_right_ear_factor": 1.15,
+      "peak_count_lambda": 1.4,
+      "max_peaks": 6,
+      "peak_freq_min_hz": 700,
+      "peak_freq_max_hz": 4500,
+      "peak_freq_center_hz": 1500,
+      "peak_freq_spread_oct": 0.7,
+      "min_peak_spacing_ratio": 1.06,
+      "peak_level_mean_db_spl": 2,
+      "peak_level_sd_db": 6,
+      "peak_level_max_db_spl": 20,
+      "peak_level_jitter_db": 0.4,
+      "peak_bandwidth_bins": 1.1
+    }
+  }
+}

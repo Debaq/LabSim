@@ -1,0 +1,7 @@
+{
+    "preferences" : "preferences.json",
+    "config_audiometer" : "config_audiometer.json",
+    "lista_palabras" : "lista_palabras.json",
+    "c_voice" : "command_voice.json"
+
+}

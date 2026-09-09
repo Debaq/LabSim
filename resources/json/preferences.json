@@ -1,0 +1,5 @@
+{
+    "BACKEND_URL" : "https://tmeduca.org/labsim/backend/public",
+    "lang" : "ES_cl",
+    "styles" : [1, ["normal", "dark"]]
+}

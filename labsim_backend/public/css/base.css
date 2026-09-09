@@ -1,0 +1,367 @@
+/* shared/base.css — reset + tipografía + componentes comunes a admin y student.
+ * Importar vía @import url('../shared/base.css'); al tope de un styles.css específico,
+ * o enlazar directo desde el _layout.php.
+ */
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: var(--font-sans);
+  margin: 0;
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: var(--color-primary); }
+
+h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 var(--space-5); }
+
+code {
+  background: var(--color-table-head);
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+}
+
+/* Cards: contenedor blanco estándar */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6) var(--space-7);
+  margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-1);
+}
+
+/* Mensajes flash */
+.error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-5);
+}
+.success {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-5);
+}
+
+/* Bloque monoespaciado (URLs, IDs, payloads) */
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  word-break: break-all;
+}
+
+/* Tablas: estilo base. admin y student extienden con .table-wrap / tr.clickable. */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--space-5) 0;
+  background: var(--color-surface);
+}
+th, td {
+  text-align: left;
+  padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.9rem;
+}
+th {
+  background: var(--color-table-head);
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-muted);
+}
+
+/* Wrapper responsivo: scroll horizontal en pantallas chicas sin romper el
+ * layout. min-width fuerza el ancho mínimo para que la tabla no colapse;
+ * si tu tabla es de 4 columnas chicas podés usar .table-wrap--narrow. */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.table-wrap > table { margin: 0; }
+.table-wrap--narrow > table { min-width: 30rem; }
+.table-wrap--wide > table { min-width: 48rem; }
+
+/* Utilidades — patrones que se repetían verbatim en style="..." inline.
+ * Usar en vez de duplicar el hex/spacing en cada página. */
+
+/* Texto gris secundario (descripciones, captions, celdas vacías) */
+.muted { color: var(--color-muted); }
+
+/* Texto de ayuda debajo de un input, encabezado de card, nota al pie.
+ * Variantes --mt / --mt-sm controlan el espaciado según el contexto. */
+.help {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+.help--mt    { margin-top: var(--space-1); }
+.help--mt-md { margin-top: var(--space-3); }
+
+/* Checkbox con su label al lado, sin negrita. Vivía en case.css, que carga
+   una sola página; inbox_send.php lo usaba sin poder verlo. */
+.inline-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 400;
+  margin: 0 0 0 var(--space-5);
+}
+.inline-check input { width: auto; margin: 0; }
+
+/* Valor que pide atención en una tabla o ficha. Estaba duplicado idéntico en
+   dashboard.css y student.css, y admin/student.php no cargaba ninguna. */
+.badge-warn { color: var(--color-danger); font-weight: 600; }
+
+/* Separador visual entre secciones dentro de una card o entre cards.
+ * Variante --lg para cuando ya hay otro margin-top:0.8rem inline. */
+.section-sep {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-3);
+  margin-top: var(--space-3);
+}
+.section-sep--lg {
+  padding-top: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+/* Fila de formulario: label + input + botón en línea horizontal.
+ * .grow hace que el campo crezca y el botón quede a la derecha. */
+.row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.row > .grow { flex: 1 1 12rem; min-width: 0; }
+
+/* Lista de tags/pills (estado "archivado", "activo", etc.) */
+.tag {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background: var(--color-border);
+  color: var(--color-text);
+  font-weight: 500;
+}
+.tag--success { background: var(--color-success-bg); color: var(--color-success-text); }
+.tag--warn    { background: var(--color-warn-bg);    color: var(--color-warn-text); }
+.tag--muted   { background: var(--color-border);     color: var(--color-muted); }
+
+/* Estado vacío de tabla/lista: "Sin alumnos matriculados todavía." */
+.empty-state {
+  color: var(--color-muted);
+  text-align: center;
+  padding: var(--space-5) 0;
+}
+
+/* Layout y comportamiento */
+.hidden { display: none !important; }
+.normal { font-weight: normal; }
+
+/* Scroll vertical contenido (logs, listados largos, historial) */
+.scrollbox { max-height: 24rem; overflow-y: auto; }
+.scrollbox--short { max-height: 14rem; }
+.scrollbox--tall { max-height: 32rem; }
+
+/* Pane: caja con borde fino y padding chico (logs, bloques de código) */
+.pane {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) var(--space-3);
+}
+
+/* Input compacto (toolbar junto a otros elementos): rompe el width:100% global */
+.input--auto { width: auto !important; }
+/* Numérico corto en línea con su par (ej. "UMD (int / %)"): sin esto el
+   input, select { width:100% } global los apila a lo ancho. */
+.input--narrow { width: 5rem; }
+
+/* Help aún más chico para notas al pie muy pequeñas */
+.help--xs { font-size: 0.75rem; }
+
+/* ===== Sistema de botones (.btn + modificadores) =====
+ * Vive en base para que tanto admin como student puedan usarlo (ej: el
+ * theme-toggle del header). Las páginas viejas siguen usando los aliases
+ * `button.secondary` / `button.danger` que viven en admin.css. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.1rem;
+  margin: 0;
+  font: inherit;
+  font-weight: 500;
+  line-height: 1.2;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  cursor: pointer;
+  box-shadow: var(--shadow-1);
+  transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
+}
+.btn:hover { background: var(--color-primary-hover); transform: translateY(-1px); box-shadow: var(--shadow-2); }
+.btn:active { transform: translateY(0); box-shadow: var(--shadow-1); }
+.btn:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn--secondary { background: var(--color-secondary); }
+.btn--secondary:hover { background: #6f6f6f; }
+.btn--danger { background: var(--color-danger); }
+.btn--danger:hover { background: var(--color-danger-hover); }
+.btn--ghost {
+  background: transparent;
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
+  box-shadow: none;
+}
+.btn--ghost:hover { background: var(--color-row-alt); box-shadow: none; }
+
+.btn--sm { padding: 0.3rem 0.7rem; font-size: 0.85rem; }
+.btn--xs { padding: 0.15rem 0.5rem; font-size: 0.72rem; }
+.btn--block { display: flex; width: 100%; }
+
+/* ===== Sistema de campos de formulario =====
+ * .field provee el espaciado vertical entre grupos; .field-label /
+ * .input / .select / .textarea dan el look. El `input, select { width:100% }`
+ * global sigue activo para inputs pelados -- .input lo override con margin:0. */
+.field {
+  display: block;
+  margin-top: var(--space-4);
+}
+.field-label,
+.field > label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin: 0 0 var(--space-1);
+}
+.input,
+.select,
+.textarea {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  margin: 0;
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.textarea { font-family: var(--font-mono); resize: vertical; }
+.input:focus-visible,
+.select:focus-visible,
+.textarea:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-focus);
+}
+
+/* Checkbox inline (label + input lado a lado, sin negrita) */
+.field-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-weight: normal;
+}
+
+/* Lista de checkboxes en grilla */
+.checkbox-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin-top: var(--space-2);
+}
+.checkbox-list label {
+  font-weight: normal;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Variantes de layout horizontal cuando .row no alcanza */
+.row--center   { align-items: center; }
+.row--between  { justify-content: space-between; }
+.row--gap-lg   { gap: var(--space-5); }
+.row--gap-sm   { gap: var(--space-1); }
+.row--baseline { align-items: baseline; }
+
+/* Texto de aviso (vínculo LTI pendiente, acción que requiere atención).
+ * Color ámbar oscuro sobre fondo claro = 4.6:1 ✓ WCAG AA. */
+.text-warn {
+  font-size: 0.85rem;
+  color: #886400;
+}
+:root[data-theme="dark"] .text-warn { color: #fde68a; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .text-warn { color: #fde68a; }
+}
+
+/* Imágenes responsivas: width:100% + height:auto para que escale sin deformar */
+.img-fluid {
+  width: 100%;
+  height: auto;
+}
+
+/* No wrap de texto (botones con texto largo, badges) */
+.nowrap { white-space: nowrap; }
+
+/* ===== Accesibilidad ===== */
+
+/* Focus-visible global: indica al usuario con teclado dónde está parado.
+ * No afecta al click con mouse (:focus-visible solo aplica con teclado). */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible,
+details:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+/* Links dentro del header oscuro no necesitan outline blanco -- el primary
+ * del admin en dark (#6b96d3) tiene contraste suficiente sobre el surface. */
+
+/* Skip-link: primer tab de la página salta directo al <main>. Escondido
+ * visualmente hasta que recibe foco. Importante para usuarios que navegan
+ * con teclado o lector de pantalla. */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: var(--space-3);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  z-index: 100;
+  text-decoration: none;
+  font-weight: 600;
+}
+.skip-link:focus { top: var(--space-3); }
+
+/* Respeto a usuarios que pidieron reducir movimiento (vestibular, etc.).
+ * Apaga transitions y animations; scroll instantáneo. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,94 @@
+/* public/student/styles.css — mini-portal del alumno (mis_pacientes, atencion).
+ * Se enlaza desde student/_layout.php además de ../shared/base.css.
+ * Pensado mobile-first: el alumno abre esto desde el celular.
+ */
+
+@import url('./base.css');
+
+/* Header simple (sin nav, sin dropdown) */
+header {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+  color: var(--color-primary-contrast);
+  padding: 0.9rem var(--space-6);
+  box-shadow: var(--shadow-1);
+}
+header .brand { font-weight: 700; font-size: 1.05rem; }
+header .sub { opacity: 0.8; font-size: 0.85rem; margin-top: 0.1rem; }
+
+/* Main: max-width para que no se estire en pantallas grandes */
+main {
+  width: 100%;
+  max-width: 62rem;
+  margin: var(--space-6) auto;
+  padding: 0 var(--space-5) var(--space-9);
+}
+
+h1 { font-size: 1.25rem; word-break: break-word; }
+
+a.back {
+  display: inline-block;
+  margin-bottom: var(--space-5);
+  color: var(--color-primary);
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+a.back:hover { text-decoration: underline; }
+
+/* Tablas responsivas: .table-wrap vive en shared/base.css.
+ * Acá solo agregamos variantes para anchos específicos del portal alumno. */
+
+/* Filas clickeables (ir al detalle del paciente) */
+tr.clickable { cursor: pointer; }
+tr.clickable:hover { background: var(--color-row-alt); }
+
+/* Card con encabezado h2 */
+.card {
+  max-width: 100%;
+  padding: var(--space-5) var(--space-6);
+}
+.card h2 { font-size: 1rem; margin: 0 0 var(--space-3); }
+
+/* Utilidades específicas del portal alumno */
+.legend { font-size: 0.8rem; color: var(--color-muted); }
+.empty { color: var(--color-muted); text-align: center; padding: var(--space-8) 0; }
+
+/* Burbujas de chat (atencion.php). Lado izquierdo = IA/mensajes del sistema,
+ * derecha = mensajes del alumno. Los colores hex son fijos del paleta del
+ * chat; el contraste con el fondo del alumno está OK pero no escala a dark
+ * mode -- si activás modo oscuro habría que redefinir estos hex. */
+.bubble-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.3rem;
+}
+.bubble-row--user { justify-content: flex-end; }
+.bubble-system {
+  max-width: 80%;
+  background: #fff9ea;
+  border: 1px solid #f3dfa0;
+  border-radius: 10px;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.85rem;
+}
+.bubble-system-header {
+  display: block;
+  font-size: 0.68rem;
+  color: #a3822f;
+  font-weight: 600;
+  margin-bottom: 0.1rem;
+}
+.bubble-system-header--muted {
+  display: block;
+  font-size: 0.68rem;
+  opacity: 0.75;
+  margin-bottom: 0.15rem;
+}
+
+/* Breakpoint móvil: comprime paddings y reduce tipografía de tablas */
+@media (max-width: 40rem) {
+  header { padding: 0.75rem var(--space-5); }
+  main { padding: 0 var(--space-3) 2.5rem; margin-top: var(--space-5); }
+  .card { padding: 0.9rem var(--space-5); border-radius: var(--radius-lg); }
+  h1 { font-size: 1.1rem; }
+  th, td { padding: var(--space-2) var(--space-3); font-size: 0.82rem; }
+}
