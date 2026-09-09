@@ -101,6 +101,32 @@ body.js-tabs .tab-panel.active { display: block; }
   color: var(--color-muted);
 }
 
+/* Barra de acciones del editor de fichas: fija al borde inferior de la
+ * ventana, no sticky.
+ *
+ * `position: sticky` la suelta cuando su contenedor --el <form>-- se acaba, y
+ * la barra es el último hijo del form: en las pestañas cortas el form termina
+ * antes del borde de la pantalla y la barra queda a media página, y al llegar
+ * al final del scroll se despega siempre. En un formulario de 11 pestañas que
+ * se llena de a poco, el "Crear caso" tiene que estar SIEMPRE a la vista.
+ *
+ * El override vive acá y no en admin.css porque case.css lo carga solo
+ * case_create.php: courses.php y llm.php tienen cuatro `.form-actions-sticky`
+ * cada una y con `fixed` se apilarían todas en el mismo borde. Acá hay una
+ * sola (la de crear o la de editar, nunca las dos). */
+.form-actions-sticky {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin-top: 0;
+  padding: var(--space-4) var(--space-8);
+  box-shadow: 0 -2px 8px rgb(0 0 0 / 8%);
+}
+/* Sitio para la barra: sin esto tapa el último campo del formulario, que
+ * además suele ser el que se está llenando. */
+main:has(.form-actions-sticky) { padding-bottom: 6rem; }
+
 .pendientes-card { border-left: 4px solid var(--color-danger); }
 .pendientes-card li { margin-bottom: var(--space-2); }
 

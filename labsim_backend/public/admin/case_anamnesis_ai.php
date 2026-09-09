@@ -89,7 +89,7 @@ $data = [
 
 if ($data['edad'] <= 0) {
     http_response_code(422);
-    echo json_encode(['ok' => false, 'error' => 'Falta la edad del paciente (pestaña Paciente): la anamnesis depende de ella.']);
+    echo json_encode(['ok' => false, 'error' => 'Falta la edad del paciente (Armado rápido, paso 1): la anamnesis depende de ella.']);
     exit;
 }
 

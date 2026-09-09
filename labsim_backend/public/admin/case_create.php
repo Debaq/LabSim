@@ -979,8 +979,20 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <div class="gen-step-body card">
         <strong>Identidad del paciente</strong>
         <p class="gen-step-dest">Escribe en <a href="#" class="tab-link" data-goto-tab="paciente">1. Paciente</a></p>
-        <p class="legend help">Nombre, segundo nombre y apellidos al azar según el sexo elegido en <a href="#" class="tab-link" data-goto-tab="paciente">Paciente</a>. La edad, el RUT y la foto se cargan ahí a mano -- la fecha de nacimiento se calcula sola desde la edad.</p>
-        <p class="legend help">Guarda el formulario y lo vuelve a dibujar con lo que ya tipeaste, así se puede apretar varias veces hasta que salga un nombre que convenza.</p>
+        <p class="legend help"><strong>Sexo y edad van acá porque los usan los pasos de abajo, no solo el nombre.</strong> El sexo decide el nombre que sale. La edad decide la fecha de nacimiento y el RUT (se calculan solos), la población de referencia del ABR --un neonato no tiene las latencias de un adulto-- y es obligatoria para la anamnesis con IA, que sin ella ni siquiera corre.</p>
+        <p class="legend help">Son los mismos campos de <a href="#" class="tab-link" data-goto-tab="paciente">Paciente</a>, no una copia: cambiarlos en cualquiera de los dos lados los cambia en el otro. El resto de la identidad --RUT, foto, historia clínica-- se carga allá.</p>
+        <p class="legend help">Generar el nombre guarda el formulario y lo vuelve a dibujar con lo que ya tipeaste, así se puede apretar varias veces hasta que salga uno que convenza.</p>
+        <div class="two-col">
+            <label>Sexo
+                <select id="armado-gender">
+                    <option value="0" <?= ($v['gender'] ?? '0') === '0' ? 'selected' : '' ?>>Hombre</option>
+                    <option value="1" <?= ($v['gender'] ?? '0') === '1' ? 'selected' : '' ?>>Mujer</option>
+                </select>
+            </label>
+            <label>Edad
+                <input type="number" id="armado-age" min="0" max="110" value="<?= htmlspecialchars((string) ($v['age'] ?? '')) ?>">
+            </label>
+        </div>
         <button type="submit" name="form_action" value="generate_name" class="secondary">Generar nombre al azar</button>
     </div>
 </div>
@@ -4668,6 +4680,55 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     });
 
     updateRemoveButtons();
+})();
+</script>
+
+<script>
+// El sexo decide el nombre que sortea "Generar nombre al azar", así que el
+// campo tiene que estar al lado del botón: mandar al docente a otra pestaña
+// para elegirlo y volver es exactamente lo que "Armado rápido" vino a sacar.
+//
+// El campo que viaja en el POST sigue siendo el radio de la pestaña Paciente
+// --uno solo, sin duplicar el name-- y este select lo espeja en los dos
+// sentidos. Sin JS el select no hace nada y el radio sigue estando donde
+// estuvo siempre.
+(function () {
+    var sel = document.getElementById('armado-gender');
+    var radios = document.querySelectorAll('#case-form input[name="gender"]');
+    if (sel && radios.length) {
+        sel.addEventListener('change', function () {
+            radios.forEach(function (r) { r.checked = r.value === sel.value; });
+        });
+        radios.forEach(function (r) {
+            r.addEventListener('change', function () { if (r.checked) { sel.value = r.value; } });
+        });
+        // Estado inicial: manda el radio, que es el que trae el valor del POST.
+        radios.forEach(function (r) { if (r.checked) { sel.value = r.value; } });
+    }
+
+    // La edad, igual: espejo del input de Paciente, que es el que viaja en el
+    // POST. Acá hay que reemitir los eventos además de copiar el valor -- de
+    // la edad cuelgan la fecha de nacimiento, el RUT y la población de
+    // referencia del ABR, y todos escuchan 'input'/'change' sobre ese input.
+    // Copiar el .value en silencio dejaría un paciente de 2 meses con el RUT
+    // y las latencias de un adulto.
+    var edad = document.getElementById('armado-age');
+    var edadReal = document.getElementById('patient-age');
+    if (!edad || !edadReal) { return; }
+
+    var propagando = false;
+    function espejar(desde, hacia) {
+        if (propagando) { return; }
+        propagando = true;
+        hacia.value = desde.value;
+        hacia.dispatchEvent(new Event('input', { bubbles: true }));
+        hacia.dispatchEvent(new Event('change', { bubbles: true }));
+        propagando = false;
+    }
+    ['input', 'change'].forEach(function (ev) {
+        edad.addEventListener(ev, function () { espejar(edad, edadReal); });
+        edadReal.addEventListener(ev, function () { espejar(edadReal, edad); });
+    });
 })();
 </script>
 
