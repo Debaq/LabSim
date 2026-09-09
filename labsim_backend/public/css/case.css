@@ -122,6 +122,14 @@ body.js-tabs .tab-panel.active { display: block; }
   margin-top: 0;
   padding: var(--space-4) var(--space-8);
   box-shadow: 0 -2px 8px rgb(0 0 0 / 8%);
+  /* Capa de composición propia. Sin esto, con el zoom del navegador en un
+   * valor fraccionario (90%, 110%...) Chrome deja de repintar la barra al
+   * scrollear: el layout queda bien --elementFromPoint la encuentra, el rect
+   * da el borde inferior exacto-- pero en pantalla no hay nada, y vuelve solo
+   * al forzar un repintado (cambiar el zoom, redimensionar). Promoverla a su
+   * propia capa lo evita. Va en la barra, nunca en un ancestro: ahí crearía
+   * un bloque contenedor y rompería el `fixed`. */
+  will-change: transform;
 }
 /* Sitio para la barra: sin esto tapa el último campo del formulario, que
  * además suele ser el que se está llenando. */
