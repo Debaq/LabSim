@@ -507,8 +507,13 @@ final class Auth
         if ($courseId === null) {
             return [];
         }
+        // El docente cuenta como asignado por cualquiera de las dos vías:
+        // course_teachers, o course_students si su cuenta fue creada por
+        // LTI como alumno (así la crea siempre el launch) y recién después
+        // un admin la ascendió a role='admin' -- en ese caso la matrícula
+        // vieja es la única constancia de a qué curso pertenece.
         $assigned = $user['role'] === 'admin'
-            ? in_array($courseId, Courses::teacherCourseIds($userId), true)
+            ? (Courses::isTeacherOf($userId, $courseId) || Courses::isStudentOf($userId, $courseId))
             : Courses::isStudentOf($userId, $courseId);
         return $assigned ? Courses::enabledModules($courseId) : [];
     }

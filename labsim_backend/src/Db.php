@@ -297,6 +297,44 @@ final class Db
     }
 
     /**
+     * Docentes que quedaron en el roster de alumnos: LTI crea toda cuenta
+     * como role='student' y el ascenso a docente (role='admin', permission
+     * 555) es posterior, así que su fila vieja de course_students nunca se
+     * limpiaba. Consecuencias: Auth::resolveModules los buscaba en
+     * course_teachers y les devolvía modules=[] (pestañas visibles, ningún
+     * equipo), y Courses::rosterUserIds los contaba como alumnos del curso.
+     * Esto los mueve de course_students a course_teachers, curso por curso.
+     * El admin completo (777) no se toca: ve todo sin restricción y su
+     * matrícula, si la tiene, es deliberada (probar el flujo de alumno).
+     * Devuelve cuántas filas movió (0 si no había nada que arreglar).
+     */
+    public static function migrateTeacherRosterIfNeeded(): int
+    {
+        $pdo = self::get();
+        $sel = "SELECT cs.course_id, cs.user_id FROM course_students cs
+                JOIN users u ON u.id = cs.user_id
+                WHERE u.role = 'admin' AND u.permission <> 777";
+        $rows = $pdo->query($sel)->fetchAll();
+        if (!$rows) {
+            return 0;
+        }
+        $pdo->beginTransaction();
+        try {
+            $ins = $pdo->prepare('INSERT OR IGNORE INTO course_teachers (course_id, user_id) VALUES (?, ?)');
+            $del = $pdo->prepare('DELETE FROM course_students WHERE course_id = ? AND user_id = ?');
+            foreach ($rows as $row) {
+                $ins->execute([(int) $row['course_id'], (int) $row['user_id']]);
+                $del->execute([(int) $row['course_id'], (int) $row['user_id']]);
+            }
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+        return count($rows);
+    }
+
+    /**
      * Agrega lti_platform_id/context_id a pairing_codes/tokens -- instalaciones
      * de antes de que la sesión guardara el contexto LTI de origen (ver
      * comentario de esas columnas en sql/schema.sql). NULL en ambas para

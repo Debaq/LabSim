@@ -329,8 +329,30 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                     login_subw.obj._enable_widgets()
                 return
             self.btns_actions()
+            self._warn_if_no_modules()
             self._start_log_uploader()
             self._start_sync_thread()
+
+    def _warn_if_no_modules(self):
+        """Aviso explícito cuando el backend devuelve modules=[]: la sesión
+        entra bien y las secciones (boxes) se dibujan igual, pero ningún
+        equipo queda visible (ver SubWindow._module_visible) y la ventana
+        parece cargada a medias sin decir por qué. Pasa cuando la cuenta no
+        quedó asignada a ningún curso, o cuando ese curso todavía no tiene
+        módulos habilitados en el panel admin."""
+        if not self.data_login:
+            return
+        modules = self.data_login.get("modules")
+        if modules is None or modules:
+            return
+        QMessageBox.warning(
+            self,
+            "Sin módulos habilitados",
+            "Iniciaste sesión, pero tu cuenta no tiene ningún módulo "
+            "habilitado: se ven las secciones, pero no los equipos.\n\n"
+            "Revisa en el panel admin (Cursos) que tu usuario esté asignado "
+            "al curso y que ese curso tenga módulos habilitados.",
+        )
 
     def _apply_admin_overrides_if_any(self):
         """Admin (permission 777) ve toda la estructura sin filtrar:

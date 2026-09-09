@@ -90,6 +90,14 @@ final class Courses
         return (bool) $stmt->fetchColumn();
     }
 
+    /** true si $userId es docente (course_teachers) de $courseId. */
+    public static function isTeacherOf(int $userId, int $courseId): bool
+    {
+        $stmt = Db::get()->prepare('SELECT 1 FROM course_teachers WHERE course_id = ? AND user_id = ?');
+        $stmt->execute([$courseId, $userId]);
+        return (bool) $stmt->fetchColumn();
+    }
+
     /**
      * El único curso donde $userId está matriculado, o null si está en
      * cero o en varios (ambiguo -- sesión multi-curso, sin resolver por
@@ -101,8 +109,15 @@ final class Courses
      */
     public static function singleCourseFor(int $userId): ?int
     {
-        $stmt = Db::get()->prepare('SELECT course_id FROM course_students WHERE user_id = ?');
-        $stmt->execute([$userId]);
+        // Docentes incluidos (course_teachers): una cuenta de docente entra
+        // a la app de escritorio con usuario/contraseña (login local, sin
+        // contexto LTI) y sin esta rama quedaba con modules=[] -- pestañas
+        // visibles pero ningún equipo habilitado.
+        $stmt = Db::get()->prepare(
+            'SELECT course_id FROM course_students WHERE user_id = ?
+             UNION SELECT course_id FROM course_teachers WHERE user_id = ?'
+        );
+        $stmt->execute([$userId, $userId]);
         $ids = array_column($stmt->fetchAll(), 'course_id');
         return count($ids) === 1 ? (int) $ids[0] : null;
     }
@@ -213,6 +228,14 @@ final class Courses
         $table = $kind === 'teacher' ? 'course_teachers' : 'course_students';
         Db::get()->prepare("INSERT OR IGNORE INTO {$table} (course_id, user_id) VALUES (?, ?)")
             ->execute([$courseId, (int) $user['id']]);
+        if ($kind === 'teacher') {
+            // Nadie es docente y alumno del mismo curso: si quedaba
+            // matriculado (cuenta creada por LTI como alumno y ascendida
+            // después), sale del roster para no contarlo entre los alumnos
+            // (ver rosterUserIds()).
+            Db::get()->prepare('DELETE FROM course_students WHERE course_id = ? AND user_id = ?')
+                ->execute([$courseId, (int) $user['id']]);
+        }
         return null;
     }
 

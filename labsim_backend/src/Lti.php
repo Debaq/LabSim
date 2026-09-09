@@ -295,10 +295,11 @@ final class Lti
     }
 
     /**
-     * Si $contextId está vinculado a un curso (ver linkContextToCourse) y
-     * $userId es alumno, lo matricula ahí mismo -- así cientos de alumnos
-     * que entran por el mismo curso de Moodle no requieren que el docente
-     * los agregue uno por uno ni sepa sus nombres.
+     * Si $contextId está vinculado a un curso (ver linkContextToCourse),
+     * deja asignado a $userId en ese curso segun su rol: alumno a
+     * course_students (asi cientos de alumnos que entran por el mismo curso
+     * de Moodle no requieren que el docente los agregue uno por uno ni sepa
+     * sus nombres) y docente a course_teachers.
      */
     public static function autoEnrollIfMapped(int $platformId, ?string $contextId, int $userId): void
     {
@@ -306,9 +307,34 @@ final class Lti
         if ($courseId === null) {
             return;
         }
-        $stmt = Db::get()->prepare("SELECT 1 FROM users WHERE id = ? AND role = 'student'");
+        $stmt = Db::get()->prepare('SELECT role, permission FROM users WHERE id = ?');
         $stmt->execute([$userId]);
-        if (!$stmt->fetchColumn()) {
+        $user = $stmt->fetch();
+        if (!$user) {
+            return;
+        }
+        // Docente (role admin ascendido a mano, permission 555): se agrega a
+        // course_teachers del curso desde donde lanza. Sin esto entraba a la
+        // app con modules=[] (pestañas sí, equipos no) hasta que alguien lo
+        // agregara al curso a mano en admin/courses.php. El admin completo
+        // (777) no se agrega: ya ve todo sin restricción y solo ensuciaría
+        // la lista de docentes del curso.
+        if ($user['role'] === 'admin') {
+            require_once __DIR__ . '/Auth.php';
+            if ((int) $user['permission'] === Auth::PERMISSION_ADMIN) {
+                return;
+            }
+            Db::get()->prepare('INSERT OR IGNORE INTO course_teachers (course_id, user_id) VALUES (?, ?)')
+                ->execute([$courseId, $userId]);
+            // Si venía matriculado como alumno (LTI crea toda cuenta como
+            // role='student'; el ascenso a docente es posterior), sale del
+            // roster: si no, el docente aparece como alumno del curso en
+            // listados y estadísticas (ver Courses::rosterUserIds()).
+            Db::get()->prepare('DELETE FROM course_students WHERE course_id = ? AND user_id = ?')
+                ->execute([$courseId, $userId]);
+            return;
+        }
+        if ($user['role'] !== 'student') {
             return;
         }
         Db::get()->prepare('INSERT OR IGNORE INTO course_students (course_id, user_id) VALUES (?, ?)')

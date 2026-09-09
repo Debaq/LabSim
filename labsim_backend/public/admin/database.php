@@ -57,7 +57,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Después de courses: patients ya existe (la creó el exec de
             // arriba), recién ahí se puede backfillear patient_id.
             Db::migratePatientsIfNeeded();
+            // Después de courses/patients: no depende de ellas, pero sí de
+            // que course_teachers exista (la crea el exec de arriba).
+            $movedTeachers = Db::migrateTeacherRosterIfNeeded();
             $success = 'Schema aplicado correctamente.';
+            if ($movedTeachers > 0) {
+                $success .= " Se movieron {$movedTeachers} matrícula(s) de docentes del roster de alumnos a docentes del curso.";
+            }
             AdminAudit::log($me, 'apply_schema');
         } elseif ($action === 'create') {
             $created = Backups::create();
