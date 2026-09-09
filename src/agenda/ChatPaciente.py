@@ -377,9 +377,13 @@ class ChatPacienteWidget(QWidget):
             persona_id = r.get("persona_id") or self._PACIENTE_ID
             texto = r.get("texto", "")
             # El historial va rotulado: el backend se lo pasa así a cada
-            # personaje para que sepa quién dijo qué (ver llm_chat.php).
+            # personaje para que sepa quién dijo qué (ver llm_chat.php). Va
+            # el id además de la etiqueta porque es lo que el modelo tiene
+            # que escribir para decir quién habla; con solo el nombre volvía
+            # a contestar rotulando el texto y las frases quedaban sin dueño.
             self._history.append({
-                "role": "assistant", "content": texto, "speaker_label": etiqueta,
+                "role": "assistant", "content": texto,
+                "speaker_label": etiqueta, "speaker_id": r.get("persona_id", ""),
             })
             self._burbuja_persona(persona_id, etiqueta, texto)
 

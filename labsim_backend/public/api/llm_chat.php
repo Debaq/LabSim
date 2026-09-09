@@ -104,6 +104,13 @@ if ($acompanado) {
 // El historial va rotulado con quién dijo cada cosa: con más de una persona
 // en la consulta, un "assistant" pelado no le dice al modelo si eso lo dijo
 // el paciente o la madre, y las voces empiezan a mezclarse.
+//
+// Con acompañantes se le devuelve EN EL MISMO JSON que se le pide escribir.
+// Antes se le devolvía como "Sofía García (Madre): buenas tardes", y el
+// modelo copiaba ese formato: contestaba con el nombre pegado adelante del
+// texto y sin el id, así que la frase quedaba sin dueño y se le atribuía a
+// quien lleva la voz cantante. El historial es el ejemplo más fuerte que
+// tiene: si ahí ve ids, escribe ids.
 $history = [];
 foreach ((array) ($body['history'] ?? []) as $h) {
     $content = trim((string) ($h['content'] ?? ''));
@@ -111,10 +118,23 @@ foreach ((array) ($body['history'] ?? []) as $h) {
         continue;
     }
     $esAlumno = ($h['role'] ?? '') !== 'assistant';
-    $label = trim((string) ($h['speaker_label'] ?? ''));
+    if ($esAlumno || !$acompanado) {
+        $history[] = ['role' => $esAlumno ? 'user' : 'assistant', 'content' => $content];
+        continue;
+    }
+
+    // El cliente manda speaker_id desde que existe la sala; los historiales
+    // que solo traen la etiqueta ("Sofía García (Madre)") se resuelven igual.
+    $persona = Sala::persona($sala, trim((string) ($h['speaker_id'] ?? '')))
+        ?? Sala::resolver($sala, (string) ($h['speaker_label'] ?? ''))
+        ?? Sala::informante($sala);
+    [, $content] = Sala::separaRotulo($sala, $content);
     $history[] = [
-        'role' => $esAlumno ? 'user' : 'assistant',
-        'content' => (!$esAlumno && $label !== '' && $acompanado) ? "{$label}: {$content}" : $content,
+        'role' => 'assistant',
+        'content' => json_encode(
+            ['turnos' => [['id' => $persona['id'] ?? '', 'texto' => $content]]],
+            JSON_UNESCAPED_UNICODE
+        ),
     ];
 }
 
@@ -125,7 +145,7 @@ try {
 }
 
 $respuestas = $acompanado
-    ? intervencionesDesdeJson($raw, $sala)
+    ? Sala::intervenciones($raw, $sala)
     : [['persona_id' => '', 'etiqueta' => '', 'texto' => $raw]];
 
 if ($appointmentId > 0) {
@@ -150,59 +170,3 @@ Response::json([
     'respuestas' => $respuestas,
     'sala' => Sala::paraCliente($sala),
 ]);
-
-/**
- * Lee el JSON con el que el modelo dice quién habló ({"turnos":[{"id","texto"}]}).
- *
- * Si el JSON no viene o los ids no son de esta consulta, NO se pierde el
- * turno: lo que haya escrito se muestra como intervención de quien lleva la
- * voz cantante. Una conversación que se corta porque el modelo se comió una
- * llave es peor que una atribuida al que más probablemente hablaba.
- *
- * @return list<array{persona_id: string, etiqueta: string, texto: string}>
- */
-function intervencionesDesdeJson(string $raw, array $sala): array
-{
-    $clean = trim($raw);
-    // El modelo a veces envuelve el JSON en ```json ... ``` pese a la
-    // instrucción de no hacerlo -- se pela el fence si aparece (mismo
-    // criterio que OirsEvaluator::parseVerdict).
-    if (substr($clean, 0, 3) === '```') {
-        $clean = trim((string) preg_replace('/^```[a-zA-Z]*\n?|```$/', '', $clean));
-    }
-
-    $data = json_decode($clean, true);
-    $turnos = is_array($data) ? ($data['turnos'] ?? null) : null;
-
-    $out = [];
-    if (is_array($turnos)) {
-        foreach ($turnos as $t) {
-            $texto = trim((string) ($t['texto'] ?? ''));
-            if ($texto === '') {
-                continue;
-            }
-            // Id inventado o mal escrito: la frase igual sirve, se le
-            // atribuye a quien lleva la voz cantante en vez de tirarla.
-            $persona = Sala::persona($sala, trim((string) ($t['id'] ?? ''))) ?? Sala::informante($sala);
-            if ($persona === null) {
-                continue;
-            }
-            $out[] = [
-                'persona_id' => $persona['id'],
-                'etiqueta' => Sala::etiqueta($persona),
-                'texto' => $texto,
-            ];
-        }
-    }
-
-    if ($out) {
-        return $out;
-    }
-
-    $informante = Sala::informante($sala);
-    return [[
-        'persona_id' => $informante['id'] ?? '',
-        'etiqueta' => $informante !== null ? Sala::etiqueta($informante) : '',
-        'texto' => $clean !== '' ? $clean : $raw,
-    ]];
-}

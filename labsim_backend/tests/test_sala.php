@@ -197,3 +197,86 @@ t_true(strpos($fichasBebe, 'guagua') !== false, 'A un lactante se le dice que no
 t_true(strpos($fichasBebe, 'entre paréntesis') !== false, 'Y que lo suyo es conducta observable');
 t_true(strpos($fichasBebe, 'Sabe lo que el paciente no puede saber') !== false,
     'A la madre se le dice que ella sí maneja fechas, remedios y parto');
+
+// -- Leer a quién le atribuyó el modelo cada frase ----------------------
+// El modelo no siempre entrega el JSON pedido: manda el nombre donde iba el
+// id, deja el rótulo pegado al texto o contesta en texto plano. Cuando eso
+// pasaba, TODO se atribuía a quien lleva la voz cantante: el alumno le
+// preguntaba la edad al paciente y la respuesta salía con la cara de la
+// madre.
+
+/** Sala del caso que destapó el problema: niño de 5 + madre que responde por él. */
+function sala_pepe(): array
+{
+    return Sala::normalize(['personas' => [
+        ['id' => 'p1', 'rol' => 'paciente', 'nombre' => 'Pepe Andrés García Contreras',
+         'edad' => 5, 'es_paciente' => true],
+        ['id' => 'p2', 'rol' => 'madre', 'nombre' => 'Sofía García', 'edad' => 33,
+         'genero' => 1, 'interrumpe' => 80, 'informante' => true],
+    ]]);
+}
+
+$sala = sala_pepe();
+
+$r = Sala::intervenciones('{"turnos":[{"id":"p1","texto":"Tengo cinco."}]}', $sala);
+t_eq(count($r), 1, 'JSON normal: un turno');
+t_eq($r[0]['persona_id'], 'p1', 'Y habla quien dice el id');
+
+$r = Sala::intervenciones("```json\n{\"turnos\":[{\"id\":\"p2\",\"texto\":\"Cumplió en marzo.\"}]}\n```", $sala);
+t_eq($r[0]['persona_id'], 'p2', 'El JSON envuelto en markdown igual se lee');
+
+$r = Sala::intervenciones('Claro: {"turnos":[{"id":"p1","texto":"Tengo cinco."}]} Espero que sirva.', $sala);
+t_eq($r[0]['persona_id'], 'p1', 'Y el JSON envuelto en prosa también');
+
+// El caso real: el modelo pone el nombre donde iba el id.
+$r = Sala::intervenciones('{"turnos":[{"id":"Pepe Andrés García Contreras","texto":"Tengo cinco."}]}', $sala);
+t_eq($r[0]['persona_id'], 'p1', 'El nombre completo en vez del id: habla el paciente igual');
+
+$r = Sala::intervenciones('{"turnos":[{"id":"Pepe","texto":"Tengo cinco."}]}', $sala);
+t_eq($r[0]['persona_id'], 'p1', 'El nombre de pila también');
+
+$r = Sala::intervenciones('{"turnos":[{"id":"la madre","texto":"Cumplió cinco en marzo."}]}', $sala);
+t_eq($r[0]['persona_id'], 'p2', 'Y el rol dicho con artículo');
+
+// El otro caso real: el rótulo viene pegado adentro del texto.
+$r = Sala::intervenciones('{"turnos":[{"id":"p2","texto":"Pepe Andrés García Contreras: Tengo cinco."}]}', $sala);
+t_eq($r[0]['persona_id'], 'p1', 'El rótulo pegado al texto manda sobre un id equivocado');
+t_eq($r[0]['texto'], 'Tengo cinco.', 'Y el rótulo no se muestra en la burbuja');
+
+$r = Sala::intervenciones('{"turnos":[{"id":"p1","texto":"**Pepe:** Tengo cinco."}]}', $sala);
+t_eq($r[0]['texto'], 'Tengo cinco.', 'El rótulo en negrita markdown también se saca');
+
+$r = Sala::intervenciones('{"turnos":[{"id":"p1","texto":"Le dije: no escucho bien."}]}', $sala);
+t_eq($r[0]['texto'], 'Le dije: no escucho bien.',
+    'Unos dos puntos que no son un rótulo no se tocan');
+
+// Sin JSON: texto plano rotulado por líneas.
+$r = Sala::intervenciones("Pepe: Tengo cinco.\nSofía García (Madre): Cumplió en marzo.", $sala);
+t_eq(count($r), 2, 'Texto plano rotulado: una intervención por línea');
+t_eq($r[0]['persona_id'], 'p1', 'La primera es del paciente');
+t_eq($r[1]['persona_id'], 'p2', 'La segunda de la madre');
+t_eq($r[1]['texto'], 'Cumplió en marzo.', 'Sin el rótulo adelante');
+
+$r = Sala::intervenciones("Sofía: Buenas tardes.\nLo traigo por el pediatra.", $sala);
+t_eq(count($r), 1, 'Una línea sin rótulo sigue siendo de quien habló recién');
+t_eq($r[0]['texto'], 'Buenas tardes. Lo traigo por el pediatra.', 'Y se pega a su frase');
+
+// Nada reconocible: no se pierde el turno.
+$r = Sala::intervenciones('Buenas tardes, lo traigo por el pediatra.', $sala);
+t_eq(count($r), 1, 'Texto suelto sin rótulo: no se pierde');
+t_eq($r[0]['persona_id'], 'p2', 'Se le atribuye a quien lleva la voz cantante');
+
+$r = Sala::intervenciones('{"turnos":[{"id":"p1","texto":"   "}]}', $sala);
+t_eq(count($r), 1, 'Un turno vacío no deja una burbuja en blanco');
+t_eq($r[0]['persona_id'], 'p2', 'Cae al informante como cualquier respuesta ilegible');
+
+// Shapes vecinos que el modelo produce solo.
+$r = Sala::intervenciones('{"id":"p1","texto":"Tengo cinco."}', $sala);
+t_eq($r[0]['persona_id'], 'p1', 'Un turno suelto, sin la lista alrededor');
+$r = Sala::intervenciones('[{"id":"p1","texto":"Tengo cinco."}]', $sala);
+t_eq($r[0]['persona_id'], 'p1', 'La lista pelada, sin la clave turnos');
+
+// -- resolver() / separaRotulo() a secas --------------------------------
+t_eq(Sala::resolver(sala_negador(), 'P2')['id'], 'p2', 'El id no distingue mayúsculas');
+t_eq(Sala::resolver(sala_negador(), 'Ana (Cónyuge / pareja)')['id'], 'p2', 'La etiqueta completa resuelve');
+t_eq(Sala::resolver(sala_negador(), 'no existe'), null, 'Un rótulo ajeno a la consulta no resuelve a nadie');

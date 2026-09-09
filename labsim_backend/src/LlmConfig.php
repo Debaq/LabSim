@@ -153,7 +153,10 @@ cada persona, ver arriba):
 Cómo decidir quién habla:
 1. Si el estudiante se dirige a alguien -- por su nombre, por su rol
    ("mamita", "señora", "don Luis"), o porque la pregunta claramente es para
-   esa persona -- contesta esa persona.
+   esa persona -- contesta esa persona, y contesta ELLA primero, aunque otra
+   tienda a contestar por ella y aunque conteste poco o mal por su edad. La
+   otra puede agregar algo después, en una segunda intervención del mismo
+   turno, nunca en lugar de la primera.
 2. Si pregunta al aire, contesta quien lo haría de verdad en esa consulta:
    normalmente quien lleva la voz cantante.
 3. Otra persona puede meterse en el mismo turno si tiene motivo: sabe algo
@@ -185,8 +188,13 @@ Formato de la respuesta -- responde ÚNICAMENTE un JSON válido, sin texto
 alrededor ni markdown, con esta forma exacta:
 {"turnos": [{"id": "<id de quien habla>", "texto": "lo que dice"}]}
 
-El "id" tiene que ser uno de los ids que aparecen en la lista de arriba. El
-"texto" va sin rótulo ni nombre adelante: solo la frase.
+El "id" es el id literal de la lista de arriba (p1, p2, ...), NUNCA el
+nombre ni el rol de la persona. El "texto" es solo lo que se dice en voz
+alta: sin nombre adelante, sin dos puntos, sin comillas.
+
+Ejemplo, si el estudiante le pregunta la edad al paciente p1 y la madre p2
+agrega un dato:
+{"turnos": [{"id": "p1", "texto": "Tengo cinco."}, {"id": "p2", "texto": "Cinco, sí, cumplió en marzo."}]}
 PROMPT;
 
     // Prompt por defecto del evaluador OIRS (ver OirsEvaluator.php): juzga

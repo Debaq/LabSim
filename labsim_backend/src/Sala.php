@@ -11,10 +11,11 @@ declare(strict_types=1);
  * esposa que sí la nota. Ese contraste entre lo que el paciente dice y lo que el acompañante
  * afirma ES el hallazgo clínico, y sin acompañantes no existe.
  *
- * Este archivo es solo el elenco: quién es cada uno, qué sabe y cómo se
+ * Este archivo es el elenco: quién es cada uno, qué sabe y cómo se
  * comporta. NO decide quién contesta cada pregunta -- eso lo resuelve el
  * modelo leyendo la conversación (ver LlmConfig::buildSalaPrompt y
- * llm_chat.php). Si el alumno escribe "mamita, ¿su hijo escucha bien?",
+ * llm_chat.php); acá solo se LEE a quién le atribuyó cada frase
+ * (intervenciones()), que es distinto y sí tiene que ser determinista. Si el alumno escribe "mamita, ¿su hijo escucha bien?",
  * contesta la madre porque el mensaje lo dice, no porque una tabla de
  * palabras clave lo haya clasificado.
  *
@@ -354,6 +355,244 @@ final class Sala
             }
         }
         return $sala['personas'][0] ?? null;
+    }
+
+    /**
+     * Encuentra a quién se refiere un rótulo suelto: el `id` que devolvió el
+     * modelo, o el nombre con el que escribió la frase.
+     *
+     * Existe porque el modelo no siempre respeta el id: escribe "Sofía",
+     * "la madre" o el nombre completo del paciente donde se le pidió "p2".
+     * Buscar solo por id exacto dejaba esas frases sin dueño y todas
+     * terminaban atribuidas a quien lleva la voz cantante -- el alumno le
+     * preguntaba la edad a Pepe y la respuesta salía con la cara de la mamá.
+     *
+     * Se busca de lo más específico a lo menos: id, nombre o etiqueta
+     * completa, rol, y por último un solo nombre de pila.
+     */
+    public static function resolver(array $sala, string $texto): ?array
+    {
+        $clave = self::claveComparable($texto);
+        if ($clave === '') {
+            return null;
+        }
+
+        foreach ($sala['personas'] as $p) {
+            if (self::claveComparable($p['id']) === $clave) {
+                return $p;
+            }
+        }
+        foreach ($sala['personas'] as $p) {
+            $candidatos = [$p['nombre'], self::etiqueta($p), self::ROLES[$p['rol']] ?? '', $p['rol']];
+            foreach ($candidatos as $c) {
+                if ($c !== '' && self::claveComparable((string) $c) === $clave) {
+                    return $p;
+                }
+            }
+        }
+        // "la madre", "el paciente": el rol dicho con artículo.
+        foreach ($sala['personas'] as $p) {
+            $rol = self::claveComparable(self::ROLES[$p['rol']] ?? '');
+            if ($rol !== '' && preg_match('/^(el|la|mi|su)\s+' . preg_quote($rol, '/') . '$/', $clave)) {
+                return $p;
+            }
+        }
+        // Nombre de pila solo, que es como se llama a alguien en una consulta.
+        foreach ($sala['personas'] as $p) {
+            foreach (preg_split('/\s+/', self::claveComparable($p['nombre'])) ?: [] as $parte) {
+                if ($parte !== '' && $parte === $clave) {
+                    return $p;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Separa el rótulo que el modelo a veces deja pegado al principio de la
+     * frase ("Sofía García (Madre): buenas tardes") del texto hablado.
+     *
+     * Devuelve [persona o null, texto sin rótulo]. Si el rótulo no
+     * corresponde a nadie de esta consulta no se toca nada: puede ser parte
+     * de la frase ("le dije: no escucho").
+     *
+     * @return array{0: array<string,mixed>|null, 1: string}
+     */
+    public static function separaRotulo(array $sala, string $texto): array
+    {
+        $limpio = trim($texto);
+        // El modelo a veces lo pone en negrita markdown: **Sofía:** ...
+        if (preg_match('/^\*\*(.{1,80}?)\*\*\s*:?\s*(.*)$/su', $limpio, $m)
+            && ($persona = self::resolver($sala, $m[1])) !== null) {
+            return [$persona, trim($m[2])];
+        }
+        if (!preg_match('/^([^:\n]{1,80}):\s*(.+)$/su', $limpio, $m)) {
+            return [null, $limpio];
+        }
+        $persona = self::resolver($sala, $m[1]);
+        return $persona !== null ? [$persona, trim($m[2])] : [null, $limpio];
+    }
+
+    /** Minúsculas sin tildes ni puntuación: para comparar rótulos escritos a mano. */
+    private static function claveComparable(string $texto): string
+    {
+        $t = mb_strtolower(trim($texto), 'UTF-8');
+        $t = strtr($t, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n']);
+        $t = preg_replace('/[^a-z0-9 ]+/u', ' ', $t) ?? '';
+        return trim((string) preg_replace('/\s+/', ' ', $t));
+    }
+
+    /**
+     * Lee el JSON con el que el modelo dice quién habló ({"turnos":[{"id","texto"}]}).
+     *
+     * Es deliberadamente tolerante, porque un modelo conversacional no entrega
+     * siempre el mismo shape y perder el turno es peor que cualquier rareza de
+     * formato:
+     *
+     * - Envuelve el JSON en ```json ... ```: se pela el fence.
+     * - Deja texto antes o después de las llaves: se recorta al bloque JSON.
+     * - Manda el nombre donde iba el id ("Sofía", "la madre", "Pepe Andrés
+     *   García Contreras"): lo resuelve resolver().
+     * - Deja el rótulo pegado dentro del texto ("Sofía: buenas tardes"): se
+     *   separa, y ese rótulo es quien habla aunque el id diga otra cosa.
+     * - Contesta en texto plano rotulado por líneas: cada línea que empieza con
+     *   alguien de esta consulta se vuelve una intervención suya.
+     *
+     * Recién si nada de eso da con alguien se atribuye todo a quien lleva la voz
+     * cantante: una conversación cortada porque el modelo se comió una llave es
+     * peor que una atribuida al que más probablemente hablaba.
+     *
+     * @return list<array{persona_id: string, etiqueta: string, texto: string}>
+     */
+    public static function intervenciones(string $raw, array $sala): array
+    {
+        $clean = trim($raw);
+        // El modelo a veces envuelve el JSON en ```json ... ``` pese a la
+        // instrucción de no hacerlo -- se pela el fence si aparece (mismo
+        // criterio que OirsEvaluator::parseVerdict).
+        if (substr($clean, 0, 3) === '```') {
+            $clean = trim((string) preg_replace('/^```[a-zA-Z]*\n?|```$/', '', $clean));
+        }
+
+        $turnos = self::turnosDelJson($clean);
+        $out = [];
+        foreach ($turnos as $t) {
+            $texto = trim((string) ($t['texto'] ?? ''));
+            if ($texto === '') {
+                continue;
+            }
+            [$porRotulo, $texto] = self::separaRotulo($sala, $texto);
+            if ($texto === '') {
+                continue;
+            }
+            // Manda el rótulo que venía dentro de la frase: si el modelo
+            // escribió "Pepe: tengo cinco" bajo el id de la madre, quien
+            // habla es Pepe y el id es el que se equivocó. Recién después
+            // vale el id, y al final quien lleva la voz cantante.
+            $persona = $porRotulo
+                ?? self::resolver($sala, (string) ($t['id'] ?? ''))
+                ?? self::informante($sala);
+            if ($persona === null) {
+                continue;
+            }
+            $out[] = [
+                'persona_id' => $persona['id'],
+                'etiqueta' => self::etiqueta($persona),
+                'texto' => $texto,
+            ];
+        }
+
+        if ($out) {
+            return $out;
+        }
+
+        $out = self::intervencionesDesdeTextoPlano($clean, $sala);
+        if ($out) {
+            return $out;
+        }
+
+        $informante = self::informante($sala);
+        return [[
+            'persona_id' => $informante['id'] ?? '',
+            'etiqueta' => $informante !== null ? self::etiqueta($informante) : '',
+            'texto' => $clean !== '' ? $clean : $raw,
+        ]];
+    }
+
+    /**
+     * Turnos de una respuesta que se supone JSON, aceptando los shapes vecinos
+     * que el modelo produce solo: {"turnos":[...]}, la lista pelada, un turno
+     * suelto {"id","texto"}, o el JSON envuelto en prosa.
+     *
+     * @return list<array<string,mixed>>
+     */
+    private static function turnosDelJson(string $clean): array
+    {
+        $data = json_decode($clean, true);
+        if (!is_array($data)) {
+            // "Claro, acá va: { ... }" -- se recorta al bloque de llaves.
+            $ini = strpos($clean, '{');
+            $fin = strrpos($clean, '}');
+            if ($ini !== false && $fin !== false && $fin > $ini) {
+                $data = json_decode(substr($clean, $ini, $fin - $ini + 1), true);
+            }
+        }
+        if (!is_array($data)) {
+            return [];
+        }
+
+        $turnos = $data['turnos'] ?? $data;
+        if (isset($turnos['texto'])) {
+            $turnos = [$turnos];  // un turno suelto, sin la lista alrededor
+        }
+        if (!is_array($turnos)) {
+            return [];
+        }
+
+        $out = [];
+        foreach ($turnos as $t) {
+            if (is_array($t) && isset($t['texto'])) {
+                $out[] = $t;
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * Respuesta en texto plano rotulada por líneas ("Sofía: buenas tardes"),
+     * que es como contesta el modelo cuando ignora el formato JSON. Las líneas
+     * sin rótulo siguen siendo de quien habló recién.
+     *
+     * Devuelve vacío si ninguna línea nombra a alguien de esta consulta: ahí no
+     * hay nada que atribuir y decide quien llama.
+     *
+     * @return list<array{persona_id: string, etiqueta: string, texto: string}>
+     */
+    private static function intervencionesDesdeTextoPlano(string $texto, array $sala): array
+    {
+        $out = [];
+        foreach (preg_split('/\R+/', $texto) ?: [] as $linea) {
+            $linea = trim($linea);
+            if ($linea === '') {
+                continue;
+            }
+            [$persona, $frase] = self::separaRotulo($sala, $linea);
+            if ($persona === null) {
+                if ($out) {
+                    $out[count($out) - 1]['texto'] = trim($out[count($out) - 1]['texto'] . ' ' . $frase);
+                }
+                continue;
+            }
+            if ($frase === '') {
+                continue;
+            }
+            $out[] = [
+                'persona_id' => $persona['id'],
+                'etiqueta' => self::etiqueta($persona),
+                'texto' => $frase,
+            ];
+        }
+        return $out;
     }
 
     /** ¿Hay alguien además del paciente? Decide si el chat es grupal o 1 a 1. */
