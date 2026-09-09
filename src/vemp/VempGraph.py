@@ -81,6 +81,11 @@ class VempGraph(pg.GraphicsLayoutWidget):
         self.pw.setLabel('bottom', 'ms')
         self.pw.getAxis('left').setStyle(showValues=False)
         self.pw.getViewBox().setMouseMode(pg.ViewBox.PanMode)
+        # Sin auto-range: el eje del examen no se reacomoda solo cada vez
+        # que entra una curva (se ve como si el gráfico creciera con una
+        # animación). La escala la manejan apply_view() y scale().
+        self.pw.enableAutoRange(x=False, y=False)
+        self.pw.setAutoVisible(x=False, y=False)
         self.apply_view()
 
     def _colors_side(self):

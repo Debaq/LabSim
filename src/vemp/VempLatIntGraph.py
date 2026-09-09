@@ -47,8 +47,6 @@ class VempLatIntGraph(pg.GraphicsLayoutWidget):
         self.pw = self.addPlot(row=0, col=0)
         self.pw.setLabel('bottom', 'dB SPL')
         self.pw.setLabel('left', 'Latencia (ms)')
-        self.pw.setXRange(INT_MIN, INT_MAX)
-        self.pw.setYRange(0, 30)
         self.grid = pg.GridItem(pen=color, textPen=color)
         self.pw.addItem(self.grid)
         self.grid.setTickSpacing(x=[10.0], y=[5.0])
@@ -59,12 +57,51 @@ class VempLatIntGraph(pg.GraphicsLayoutWidget):
         self.pw_amp = self.addPlot(row=1, col=0)
         self.pw_amp.setLabel('bottom', 'dB SPL')
         self.pw_amp.setLabel('left', 'Amplitud p-p (µV)')
-        self.pw_amp.setXRange(INT_MIN, INT_MAX)
         self.grid_amp = pg.GridItem(pen=color, textPen=color)
         self.pw_amp.addItem(self.grid_amp)
         self.grid_amp.setTickSpacing(x=[10.0])
         self.pw_amp.setMouseEnabled(x=False, y=True)
         self.pw_amp.setMenuEnabled(False)
+
+        # El rango es FIJO y se pone a mano. Con el auto-range de pyqtgraph
+        # encendido, cada item que se agrega (las dos líneas de cada banda,
+        # el relleno, cada scatter) dispara un reajuste, y como pyqtgraph
+        # los aplica de a uno el gráfico se ve crecer solo, como si tuviera
+        # una animación. Un eje de un examen no se mueve mientras se mira.
+        for plot in (self.pw, self.pw_amp):
+            plot.enableAutoRange(x=False, y=False)
+            plot.setAutoVisible(x=False, y=False)
+            plot.hideButtons()          # el botón "A" vuelve a autoescalar
+        self.set_rango_latencia()
+        self.set_rango_amplitud()
+
+    def set_rango_latencia(self, lo=0.0, hi=30.0):
+        self.pw.setRange(xRange=(INT_MIN, INT_MAX), yRange=(lo, hi),
+                         padding=0, disableAutoRange=True)
+
+    def set_rango_amplitud(self, medido=None):
+        """Escala de amplitud: se fija una vez, no la mueve el auto-range.
+
+        El piso es la amplitud pico-pico normativa del subtipo, así que un
+        examen sin respuesta se ve chico y no amplificado hasta llenar el
+        gráfico; si lo medido es mayor (paciente que contrajo de más), manda
+        lo medido para que el punto entre en pantalla.
+        """
+        amps = [abs(b.get('amp', 0.0)) for b in (self.baseline or {}).values()]
+        normativa = sum(amps) if amps else 100.0
+        hi = max(float(normativa), float(medido or 0.0), 1.0) * 1.15
+        self.pw_amp.setRange(xRange=(INT_MIN, INT_MAX), yRange=(0, hi),
+                             padding=0, disableAutoRange=True)
+        self.grid_amp.setTickSpacing(x=[10.0], y=[self._paso(hi)])
+
+    @staticmethod
+    def _paso(rango):
+        """Un paso de grilla legible para ~6 divisiones."""
+        crudo = rango / 6.0
+        for paso in (1, 2, 5, 10, 20, 25, 50, 100, 200, 500):
+            if crudo <= paso:
+                return float(paso)
+        return crudo
 
     # =====================================================================
     # Banda normativa
@@ -103,10 +140,12 @@ class VempLatIntGraph(pg.GraphicsLayoutWidget):
             self.pw.addItem(fill)
             self._bandas += [top, bot, fill]
         # Rango vertical alrededor de la banda: con 0-35 fijo, un oVEMP
-        # (9-16 ms) quedaba apretado en el tercio de abajo.
+        # (9-16 ms) quedaba apretado en el tercio de abajo. Se calcula acá y
+        # queda quieto -- el eje no se reacomoda al agregar puntos.
         lats = [b['lat'] for b in self.baseline.values() if 'lat' in b]
         if lats:
-            self.pw.setYRange(max(0, min(lats) - 6), max(lats) + 6, padding=0)
+            self.set_rango_latencia(max(0.0, min(lats) - 6), max(lats) + 6)
+        self.set_rango_amplitud()
 
     # =====================================================================
     # Puntos
@@ -153,6 +192,10 @@ class VempLatIntGraph(pg.GraphicsLayoutWidget):
                 brush=[pg.mkBrush(*c) for c in pts['brush']],
                 name=pico.upper())
             self.pw.addItem(scatter)
+
+        medido = max((max(serie.values()) for serie in crecimiento.values() if serie),
+                     default=0.0)
+        self.set_rango_amplitud(medido)
 
         for lado, serie in crecimiento.items():
             if not serie:

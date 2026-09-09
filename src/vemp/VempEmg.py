@@ -43,6 +43,10 @@ class VempEmg(QWidget):
         self.plot.setMenuEnabled(False)
         self.plot.hideButtons()
         self.plot.getAxis('bottom').setStyle(showValues=False)
+        # El eje del monitor es fijo: si autoescala, la altura del trazo
+        # deja de significar cuánto está contrayendo el paciente.
+        self.plot.enableAutoRange(x=False, y=False)
+        self.plot.setXRange(0, N_MUESTRAS - 1, padding=0)
         self.plot.setLabel('left', 'µV')
         self.plot.setFixedHeight(90)
         layout.addWidget(self.plot)
