@@ -604,8 +604,8 @@ t_true(!array_key_exists('tabaquismo', $b['antecedentes']),
 t_true($b['antecedentes']['trauma_acustico'], 'Los válidos del mismo lote sí entran');
 
 // Rangos y tamaños: el modelo no llena la ficha ni se sale de escala.
-$b = AnamnesisDraft::parse('{"antecedentes":[],"otros":"' . str_repeat('x', 900) . '","disposicion":99}');
-t_eq(mb_strlen($b['otros']), AnamnesisDraft::MAX_TEXTO, 'El texto se recorta a MAX_TEXTO');
+$b = AnamnesisDraft::parse('{"antecedentes":[],"medicamentos":"' . str_repeat('x', 900) . '","disposicion":99}');
+t_eq(mb_strlen($b['medicamentos']), AnamnesisDraft::MAX_TEXTO, 'Los campos cortos se recortan a MAX_TEXTO');
 t_eq($b['disposicion'], 2, 'La disposición se acota al rango del selector');
 $b = AnamnesisDraft::parse('{"antecedentes":[],"disposicion":-99}');
 t_eq($b['disposicion'], -2, 'Y por abajo también');
@@ -671,5 +671,16 @@ t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, 'historia_clinica') !== false,
     'El prompt nombra el campo del relato');
 t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, 'nunca va vacía') !== false,
     'Y dice que no puede quedar vacío: todo paciente consultó por algo');
-t_true(strlen(AnamnesisDraft::SYSTEM_PROMPT) < 1600,
-    'Y se mantiene corto: es lo único del input que controlamos, y en un modelo de razonamiento también es menos para masticar');
+t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, '"otros" TAMPOCO va vacío') !== false,
+    'Y que "otros" tampoco: de ahí sale lo que el paciente cuenta en el chat');
+t_true(strlen(AnamnesisDraft::SYSTEM_PROMPT) < 2600,
+    'El prompt se mantiene acotado -- es lo único del input que controlamos -- pero sin recortar reglas que hacen falta');
+
+// "otros" es narrativo como el relato, no un campo corto: de ahí sale todo
+// lo que el paciente contesta en el chat, y con 400 caracteres hablaba en
+// monosílabos.
+$b = AnamnesisDraft::parse('{"otros":"' . str_repeat('x', 2000) . '"}');
+t_eq(mb_strlen($b['otros']), AnamnesisDraft::MAX_RELATO,
+    '"otros" usa el tope narrativo, no el de los campos cortos');
+$b = AnamnesisDraft::parse('{"otros":"Trabaja en un taller mecánico desde los 18. Los fines de semana toca en una banda. Dice que lo nota más de noche, cuando se acuesta."}');
+t_true(strpos($b['otros'], 'taller') !== false, 'Y se parsea tal cual lo escribió el modelo');

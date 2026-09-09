@@ -2015,9 +2015,10 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <label>Cirugías
         <input type="text" name="cirugias" value="<?= htmlspecialchars((string) ($v['cirugias'] ?? '')) ?>">
     </label>
-    <label>Otros antecedentes
-        <textarea name="otros" rows="2" class="input"><?= htmlspecialchars((string) ($v['otros'] ?? '')) ?></textarea>
+    <label>Otros antecedentes -- lo que el paciente cuenta si le preguntan
+        <textarea name="otros" rows="5" class="input" placeholder="En qué trabaja, cómo es su día, qué hace en su tiempo libre, desde cuándo lo nota, en qué situaciones le molesta más, qué le preocupa, qué ya probó..."><?= htmlspecialchars((string) ($v['otros'] ?? '')) ?></textarea>
     </label>
+    <p class="legend">De acá sale <strong>todo lo que el paciente tiene para decir</strong> en la conversación con el alumno (entra al prompt como <code>{{otros_antecedentes}}</code>). Vacío, el paciente contesta en monosílabos y no hay nada que entrevistar. No es la historia clínica: esa la lee el alumno en la ficha, esto lo cuenta el paciente solo si se lo preguntan.</p>
     <label>Comportamiento del paciente
         <textarea name="comportamiento" id="chat-comportamiento" rows="2" class="input" placeholder="Ej: nervioso, minimiza los síntomas, muy hablador, desconfiado, colaborador..."><?= htmlspecialchars((string) ($v['comportamiento'] ?? '')) ?></textarea>
     </label>

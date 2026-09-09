@@ -142,8 +142,16 @@ que los explican de forma plausible.
 - Marcá los antecedentes que expliquen el cuadro y sean frecuentes en la
   vida real (ruido recreacional o laboral, otitis en la infancia,
   ototóxicos). No los dejes todos en falso por prudencia.
-- Un paciente sin hallazgos igual consultó por algo: ahí "antecedentes" va
-  vacío pero "historia_clinica" no.
+- "otros" TAMPOCO va vacío nunca, y no son antecedentes médicos: es lo que
+  el paciente sabe de sí mismo y puede contar cuando el alumno le
+  pregunte. En qué trabaja, cómo es su día, qué hace en su tiempo libre,
+  desde cuándo lo nota, en qué situaciones le molesta más, qué le
+  preocupa, si alguien de la casa se lo hizo notar, qué ya probó. Cuatro o
+  cinco oraciones con detalles concretos: de acá sale todo lo que el
+  paciente tiene para decir en la conversación, y sin esto contesta en
+  monosílabos y el alumno no tiene qué entrevistar.
+- Un paciente sin hallazgos igual consultó por algo: ahí "antecedentes"
+  puede ir vacío, pero "historia_clinica" y "otros" no.
 - "medicamentos" y "cirugias" sí van vacíos si no corresponden.
 - "comportamiento": cómo actúa al conversar (tono, actitud), no su
   patología ni su motivo de consulta.
@@ -151,6 +159,9 @@ que los explican de forma plausible.
 Respondé solo el JSON, sin ```:
 {"historia_clinica": "", "antecedentes": [], "medicamentos": "",
  "cirugias": "", "otros": "", "comportamiento": "", "disposicion": 0}
+
+"historia_clinica" es lo que lee el alumno en la ficha; "otros" es lo que el
+paciente cuenta si le preguntan. No repitas uno en el otro.
 
 "antecedentes" sale de esta lista cerrada y ninguna otra: hipoacusia_familiar,
 ototoxicos, trauma_acustico, otitis, meningitis, tce, diabetes, hta.
@@ -300,10 +311,13 @@ TXT;
 
         return [
             'historia_clinica' => mb_substr(trim((string) ($json['historia_clinica'] ?? '')), 0, self::MAX_RELATO),
+            // "otros" también es narrativo: es de donde el paciente saca lo
+            // que cuenta en el chat con el alumno. Con 400 caracteres
+            // contestaba en monosílabos.
             'antecedentes' => $antecedentes,
             'medicamentos' => $texto($json['medicamentos'] ?? ''),
             'cirugias' => $texto($json['cirugias'] ?? ''),
-            'otros' => $texto($json['otros'] ?? ''),
+            'otros' => mb_substr(trim((string) ($json['otros'] ?? '')), 0, self::MAX_RELATO),
             'comportamiento' => $texto($json['comportamiento'] ?? ''),
             'disposicion' => max(-2, min(2, (int) ($json['disposicion'] ?? 0))),
         ];
