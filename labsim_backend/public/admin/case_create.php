@@ -445,22 +445,43 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <?php endif; ?>
 <?php $photoCaseId = $isEdit ? $editId : $uploadTempId; ?>
 <div class="tabs" role="tablist">
-    <button type="button" class="tab-btn<?= $isEdit ? '' : ' active' ?>" data-tab="armado">Armado rápido</button>
-    <span class="tab-group">Quién es</span>
-    <button type="button" class="tab-btn<?= $isEdit ? ' active' : '' ?>" data-tab="paciente">1. Paciente</button>
-    <button type="button" class="tab-btn" data-tab="sala">2. Sala</button>
-    <span class="tab-group">El caso</span>
-    <button type="button" class="tab-btn" data-tab="perfil">3. Perfil auditivo</button>
-    <span class="tab-group">Exámenes</span>
-    <button type="button" class="tab-btn" data-tab="audiometria">4. Audiometría</button>
-    <button type="button" class="tab-btn" data-tab="otoscopia">5. Otoscopia</button>
-    <button type="button" class="tab-btn" data-tab="timpanometria">6. Timpanometría</button>
-    <button type="button" class="tab-btn" data-tab="abr">7. ABR</button>
-    <button type="button" class="tab-btn" data-tab="eoas">8. EOA</button>
-    <button type="button" class="tab-btn" data-tab="vemp">9. VEMP</button>
-    <button type="button" class="tab-btn" data-tab="tinnitus">10. Tinnitus</button>
-    <span class="tab-group">Entrevista</span>
-    <button type="button" class="tab-btn" data-tab="anamnesis">11. Anamnesis</button>
+    <div class="tab-group">
+        <span class="tab-group-label">Empezar acá</span>
+        <div class="tab-group-btns">
+            <button type="button" class="tab-btn<?= $isEdit ? '' : ' active' ?>" data-tab="armado">Armado rápido</button>
+        </div>
+    </div>
+    <div class="tab-group">
+        <span class="tab-group-label">Quién es</span>
+        <div class="tab-group-btns">
+            <button type="button" class="tab-btn<?= $isEdit ? ' active' : '' ?>" data-tab="paciente">1. Paciente</button>
+            <button type="button" class="tab-btn" data-tab="sala">2. Sala</button>
+        </div>
+    </div>
+    <div class="tab-group">
+        <span class="tab-group-label">El caso</span>
+        <div class="tab-group-btns">
+            <button type="button" class="tab-btn" data-tab="perfil">3. Perfil auditivo</button>
+        </div>
+    </div>
+    <div class="tab-group">
+        <span class="tab-group-label">Exámenes</span>
+        <div class="tab-group-btns">
+            <button type="button" class="tab-btn" data-tab="audiometria">4. Audiometría</button>
+            <button type="button" class="tab-btn" data-tab="otoscopia">5. Otoscopia</button>
+            <button type="button" class="tab-btn" data-tab="timpanometria">6. Timpanometría</button>
+            <button type="button" class="tab-btn" data-tab="abr">7. ABR</button>
+            <button type="button" class="tab-btn" data-tab="eoas">8. EOA</button>
+            <button type="button" class="tab-btn" data-tab="vemp">9. VEMP</button>
+            <button type="button" class="tab-btn" data-tab="tinnitus">10. Tinnitus</button>
+        </div>
+    </div>
+    <div class="tab-group">
+        <span class="tab-group-label">Entrevista</span>
+        <div class="tab-group-btns">
+            <button type="button" class="tab-btn" data-tab="anamnesis">11. Anamnesis</button>
+        </div>
+    </div>
 </div>
 
 <?php include __DIR__ . '/../../views/case/_armado.php'; ?>

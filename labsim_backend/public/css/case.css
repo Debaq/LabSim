@@ -45,7 +45,8 @@ input[readonly] { background: var(--color-row-alt); color: var(--color-muted); }
 .tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1);
+  align-items: flex-end;
+  gap: var(--space-2) var(--space-5);
   border-bottom: 2px solid var(--color-border);
   margin-bottom: var(--space-6);
 }
@@ -73,20 +74,29 @@ input[readonly] { background: var(--color-row-alt); color: var(--color-muted); }
 body.js-tabs .tab-panel { display: none; }
 body.js-tabs .tab-panel.active { display: block; }
 
-/* Etiqueta de grupo entre pestañas (Quién es / El caso / Exámenes /
- * Entrevista): las 12 pestañas son un flujo, no una lista plana. */
+/* Grupo de pestañas (Quién es / El caso / Exámenes / Entrevista): las 12
+ * pestañas son un flujo, no una lista plana. La etiqueta va ARRIBA de sus
+ * pestañas y no dentro de la fila: intercalada entre los botones se leía
+ * como una pestaña rota que no responde al click. */
 .tab-group {
-  align-self: center;
-  padding: 0 var(--space-3) 0 var(--space-4);
-  border-left: 1px solid var(--color-border);
-  font-size: 0.68rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.tab-group-label {
+  padding: 0 1.1rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--color-muted);
   white-space: nowrap;
 }
-.tab-group:first-child { border-left: none; padding-left: 0; }
+.tab-group-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
 
 /* Link que salta a otra pestaña (pendientes, punteros entre fichas) */
 .tab-link { cursor: pointer; }
@@ -218,6 +228,10 @@ main:has(.form-actions-sticky) { padding-bottom: 6rem; }
   border-top: 1px solid var(--color-border);
 }
 .side-block:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+/* En dos columnas (armado rápido) el separador es la grilla, no una línea:
+ * el border-top le tocaba solo al OI --que no es first-child-- y le bajaba
+ * la columna entera respecto del OD. */
+.two-col > .side-block { margin-top: 0; padding-top: 0; border-top: none; }
 .side-heading {
   display: flex;
   align-items: center;
