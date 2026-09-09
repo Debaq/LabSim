@@ -5,10 +5,10 @@ Auto-update de la build PyInstaller (onedir) contra GitHub Releases.
 Dos estrategias segun plataforma:
 - Linux: swap in-place de los archivos del dist (paquetes tar.gz, con
   cadena de diffs; todo lo que sigue de este docstring).
-- Windows: baja el instalador Inno de la release mas nueva y lo corre en
-  silencio. No hay diffs ni swap manual -- los DLL de _internal/ estan
-  tomados por el proceso que corre y solo el instalador (Restart Manager)
-  puede reemplazarlos. Ver installer/labsim.iss.
+- Windows: baja el instalador Inno de la release mas nueva QUE TENGA
+  instalador y lo corre en silencio. No hay diffs ni swap manual -- los DLL
+  de _internal/ estan tomados por el proceso que corre y solo el instalador
+  (Restart Manager) puede reemplazarlos. Ver installer/labsim.iss.
 
 Los releases de este repo se comparten con el rewrite Tauri (tags v3.x,
 assets .deb/.rpm/.AppImage/.exe/.msi). Para no mezclarse con esos, esta
@@ -59,9 +59,10 @@ REPO = "Debaq/LabSim"
 TAG_PREFIX = "pyinstaller-v"
 FULL_ASSET_NAME = "LabSim-linux-x86_64.tar.gz"
 UPDATE_ASSET_NAME = "LabSim-linux-x86_64-update.tar.gz"
-# Windows no usa la cadena de paquetes update: baja el instalador Inno de la
-# release mas nueva y lo corre en silencio (ver check_for_update). Por eso el
-# script de release solo mantiene este asset en la ultima release.
+# Windows no usa la cadena de paquetes update: baja el instalador Inno y lo
+# corre en silencio (ver check_for_update). Por eso el script de release solo
+# mantiene este asset en las ultimas releases; el cliente busca hacia atras si
+# a la mas nueva le falta (build de Windows caida, o SKIP_WINDOWS=1).
 SETUP_ASSET_NAME = "LabSim-windows-x86_64-setup.exe"
 IS_WINDOWS = sys.platform.startswith("win")
 RELEASES_API = f"https://api.github.com/repos/{REPO}/releases"
@@ -132,7 +133,8 @@ def check_for_update(current_version: str):
       algún eslabón de la cadena (release vieja sin paquete update) o hay
       demasiados saltos (MAX_CHAIN_HOPS) -- baja el full de la más nueva.
     - {"tag": ..., "build_id": ..., "mode": "setup", "url": ...} en Windows,
-      siempre: el instalador de la release más nueva.
+      siempre: el instalador de la release más nueva que tenga uno. Puede no
+      ser la última: el .exe lo compila un runner aparte y puede faltar.
 
     Devuelve None si no hay nada nuevo, o si falla la red (nunca revienta:
     no queremos bloquear el arranque por un lab sin internet)."""
@@ -195,16 +197,25 @@ def check_for_update(current_version: str):
         # corre. El instalador resuelve las dos cosas -- cierra la instancia
         # via Restart Manager y reemplaza los archivos -- asi que en Windows
         # el update ES el setup completo, sin diffs.
-        setup_url = _asset_url(latest, SETUP_ASSET_NAME)
-        if setup_url is None:
-            return None
-        return {
-            "tag": latest_tag,
-            "build_id": latest_build_id,
-            "mode": "setup",
-            "url": setup_url,
-            "notes": _extract_notes(latest),
-        }
+        #
+        # Se busca hacia atras la release mas nueva que TENGA instalador: el
+        # .exe lo compila un runner aparte (build-windows.yml) y puede faltar
+        # -- el workflow fallo, o la release se publico con SKIP_WINDOWS=1.
+        # Mirando solo la ultima, esas releases dejaban a Windows sin
+        # actualizacion y sin aviso, cuando la anterior si servia para
+        # ponerlos al dia.
+        for r in reversed(newer):
+            setup_url = _asset_url(r, SETUP_ASSET_NAME)
+            if setup_url is None:
+                continue
+            return {
+                "tag": r["tag_name"],
+                "build_id": r["tag_name"][len(TAG_PREFIX):],
+                "mode": "setup",
+                "url": setup_url,
+                "notes": _extract_notes(r),
+            }
+        return None
 
     hops = [] if chain_ok else None
     if hops is not None:
