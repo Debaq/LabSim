@@ -34,7 +34,10 @@ final class LlmConfig
         '{{antecedentes}}' => 'Antecedentes médicos marcados en la anamnesis, en lista',
         '{{medicamentos}}' => 'Medicamentos que toma (texto libre de la anamnesis)',
         '{{cirugias}}' => 'Cirugías previas (texto libre de la anamnesis)',
-        '{{otros_antecedentes}}' => 'Campo "otros" de la anamnesis',
+        // El nombre del placeholder queda como está: renombrarlo rompería
+        // las plantillas que los cursos ya tengan guardadas. Lo que cambia
+        // es la descripción, que era la que no decía para qué sirve.
+        '{{otros_antecedentes}}' => 'Lo que el paciente cuenta de sí mismo si le preguntan: vida, trabajo, rutina, desde cuándo lo nota, qué le preocupa (campo "Lo que el paciente cuenta de sí mismo" en Anamnesis)',
         '{{tinnitus_desc}}' => 'Descripción en lenguaje natural del acúfeno del caso (o "no reporta" si no tiene)',
         '{{comportamiento}}' => 'Cómo se comporta el paciente (campo "Comportamiento" de la ficha, en Anamnesis)',
         '{{disposicion}}' => 'Qué tan fácil se ofende o se pone contento el paciente (campo "Sensibilidad" de la ficha)',
@@ -66,7 +69,7 @@ Quién eres:
 - Antecedentes médicos: {{antecedentes}}
 - Medicamentos que tomas: {{medicamentos}}
 - Cirugías previas: {{cirugias}}
-- Otros antecedentes: {{otros_antecedentes}}
+- Lo que puedes contar de ti si te preguntan: {{otros_antecedentes}}
 - Sobre ruidos/pitidos en el oído (acúfenos/tinnitus): {{tinnitus_desc}}
 - Cómo te comportas en la consulta: {{comportamiento}}
 - Tu forma de ser: {{disposicion}}
@@ -248,7 +251,11 @@ PROMPT;
             '{{antecedentes}}' => CaseBuilder::antecedentesSummary((array) ($anamnesis['antecedentes'] ?? [])),
             '{{medicamentos}}' => trim((string) ($anamnesis['medicamentos'] ?? '')) ?: 'ninguno',
             '{{cirugias}}' => trim((string) ($anamnesis['cirugias'] ?? '')) ?: 'ninguna',
-            '{{otros_antecedentes}}' => trim((string) ($anamnesis['otros'] ?? '')) ?: 'ninguno',
+            // "ninguno" quedaba raro con la nueva redacción de esa línea
+            // ("Lo que puedes contar de ti si te preguntan: ninguno") y le
+            // decía al modelo que no tiene nada que contar, que es
+            // exactamente el paciente monosilábico que se quiere evitar.
+            '{{otros_antecedentes}}' => trim((string) ($anamnesis['otros'] ?? '')) ?: 'nada en particular',
             '{{tinnitus_desc}}' => CaseBuilder::describeTinnitus($tinnitus),
             '{{comportamiento}}' => trim((string) ($anamnesis['comportamiento'] ?? '')) ?: 'colaborador y tranquilo',
             '{{disposicion}}' => self::dispositionLabel((int) ($anamnesis['disposicion'] ?? 0)),
