@@ -1,5 +1,60 @@
 # TODO
 
+## VEMP en el cliente: leer el shape nuevo (BLOQUEANTE)
+
+El backend ya guarda los tres subtipos por oído (commit "la ficha VEMP arma
+los tres subtipos"), pero `src/vemp/` sigue leyendo el shape viejo. **Hasta
+que se haga este pase, el módulo VEMP no encuentra los datos de ningún caso
+creado o re-guardado desde el editor nuevo**: `VempMainWindow.la_super()`
+busca `vemp_data['OD']['umbral' | 'desviaciones' | 'repro' | ...]` en la raíz
+del oído, y esas claves ya no están ahí.
+
+Shape actual de `cases.data['VEMP'][<OD|OI>]`:
+
+```
+{
+  'type': 'normal'|'sacular'|'utricular'|'neural',   # del OÍDO, no del subtipo
+  'decidido': bool,                                  # el docente/armado ya miró lo vestibular
+  'subtipos': {
+     'CVEMP'|'OVEMP'|'MVEMP': {
+        'peaks': ['p13','n23'] | ['n10','p16'],
+        'umbral': int, 'repro': bool, 'repro_var': float,
+        'average_objetivo': int,
+        'desviaciones': {<pico>: {'lat': float, 'amp': float}},
+     }
+  }
+}
+```
+
+Pendiente:
+- [ ] `VempMainWindow._finalize_capture()`: armar el `case` que recibe
+      `VEMP_Curve` desde `vemp_<lado>['subtipos'][self.subtipo]`, con el
+      `type` que sigue viviendo en la raíz del oído. Hoy pasa el dict del
+      oído entero y el generador no encuentra ni umbral ni desviaciones.
+- [ ] `VempMainWindow.la_super()`: sacar la preselección del combo desde
+      `vemp_data[...]['subtipo']`. Esa clave ya no existe y el subtipo lo
+      elige el alumno, que era el punto de la ficha nueva.
+- [ ] Compatibilidad con casos viejos: si el oído NO trae `subtipos`, leer
+      las claves de la raíz para el subtipo que declare `subtipo` (mismo
+      criterio que `CaseBuilder::caseDataToForm`), y default para los otros
+      dos. Sin esto los casos ya guardados dejan de abrir.
+- [ ] Polaridad de los picos en `build_target_curve()`: hoy suma las dos
+      gaussianas POSITIVAS, así que dibuja dos jorobas del mismo lado en vez
+      de la morfología bifásica P13(+)/N23(-). La vista previa del backend
+      (`public/js/case/vemp.js`) ya la aplica sacando el signo de la inicial
+      del pico; mientras no se corrija acá, la previa y el equipo no dibujan
+      lo mismo.
+- [ ] Tope de intensidad en `calculate_wave_parameters()`: `amp_factor`
+      interpola entre el umbral y 80 dB y NO extrapola. Con umbral 85 a
+      100 dB devuelve 1930 µV, catorce veces la amplitud normativa. Si el
+      equipo deja subir de 80, hay que acotarlo (la previa del backend lo
+      esquiva arrancando la serie en 80).
+- [ ] Revisar `VempReport`/`ReportPdfBuilder`: el informe lista los picos
+      desde `data['waves']` que manda el cliente, así que probablemente no
+      necesite cambios -- confirmarlo con un informe real, no de memoria.
+- [ ] Correr el módulo con un caso creado desde el editor nuevo. Nada de
+      esto se probó en la app.
+
 ## Otoscopia: derivación + aprobación docente + fase por alumno
 
 Ficha Otoscopia (case_create.php, antes de Audiometría) construida como N
