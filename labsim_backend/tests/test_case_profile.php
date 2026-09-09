@@ -359,10 +359,24 @@ foreach (CaseProfile::SCENARIOS as $clave => $esc) {
 // Cada escenario tiene que clasificar como lo que dice ser: si el sorteo
 // produce un cuadro y el perfil lo lee como otro, el caso nace incoherente.
 $esperado = [
-    'normal' => 'normal', 'coclear_agudos' => 'coclear', 'muesca_4k' => 'coclear',
-    'coclear_plana' => 'coclear', 'conductiva' => 'transmission', 'mixta' => 'transmission',
-    'retrococlear' => 'neural', 'neuropatia' => 'neural',
+    'normal' => 'normal',
+    // Conductivas: la cóclea sana, el gap manda.
+    'otitis_media' => 'transmission', 'otoesclerosis' => 'transmission',
+    'perforacion' => 'transmission', 'disfuncion_tubaria' => 'transmission',
+    'tapon_cerumen' => 'transmission',
+    // Sensoriales: coclear puro.
+    'presbiacusia' => 'coclear', 'muesca_4k' => 'coclear', 'coclear_plana' => 'coclear',
+    'meniere' => 'coclear', 'subita' => 'coclear', 'ototoxica' => 'coclear',
+    // Neurales: la cóclea viva y el ABR desarmado.
+    'schwannoma' => 'neural', 'neuropatia' => 'neural',
+    // Los dos componentes a la vez: con cce en el medio pesa el retro, que es
+    // lo que el generador de curvas tiene que dibujar.
+    'sensorioneural' => 'neural',
+    // Mixtas: el gap sigue mandando sobre el tipo que ve el generador.
+    'mixta_otitis_cronica' => 'transmission', 'mixta_otoesclerosis' => 'transmission',
 ];
+t_eq(array_keys($esperado), array_keys(CaseProfile::SCENARIOS),
+    'La tabla de clasificación esperada cubre todos los cuadros del catálogo');
 foreach (CaseProfile::SCENARIOS as $clave => $esc) {
     // Escala media, sin jitter: el centro del cuadro.
     $escala = (($esc['sn_scale'][0] + $esc['sn_scale'][1]) / 2) ?: 1.0;
@@ -767,9 +781,14 @@ t_eq(CaseProfile::SCENARIOS['normal']['grados'], [],
 
 // Techos que son decisiones clínicas, no accidentes de la forma: si alguien
 // sube el gap de la conductiva, este test avisa antes que el aula.
-t_eq(CaseProfile::SCENARIOS['conductiva']['max_db'], 60,
-     'Conductiva pura: techo de 60 dB (la vía ósea le pone límite al gap)');
-t_true(!in_array('severa', CaseProfile::SCENARIOS['conductiva']['grados'], true),
-       'Conductiva pura: no llega a severa (más que eso ya es mixta)');
+foreach (['otitis_media', 'otoesclerosis', 'perforacion', 'disfuncion_tubaria', 'tapon_cerumen'] as $cond) {
+    t_true(isset(CaseProfile::SCENARIOS[$cond]['max_db']),
+           "Conductiva '{$cond}': declara techo (la vía ósea le pone límite al gap)");
+    t_true(!in_array('severa', CaseProfile::SCENARIOS[$cond]['grados'], true)
+           && !in_array('profunda', CaseProfile::SCENARIOS[$cond]['grados'], true),
+           "Conductiva '{$cond}': no llega a severa ni profunda (más que eso ya es mixta)");
+    t_eq(CaseProfile::SCENARIOS[$cond]['cce_pct'], [100, 100],
+         "Conductiva '{$cond}': la cóclea está sana (cce 100 %)");
+}
 t_eq(CaseProfile::SCENARIOS['muesca_4k']['grados'], ['leve'],
      'Muesca de 4 kHz: por promedio no pasa de leve, y ese es el punto del cuadro');

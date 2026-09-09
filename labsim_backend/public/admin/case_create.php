@@ -969,136 +969,96 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <div class="tab-panel<?= $isEdit ? '' : ' active' ?>" data-tab="armado">
 <div class="card">
     <strong>Armado rápido</strong>
-    <p class="legend help">Todo lo que LabSim puede escribir solo, junto y en el orden en que conviene usarlo. Antes cada uno de estos botones vivía escondido dentro de la pestaña que llenaba, y había que saber que existía.</p>
-    <p class="legend help">Nada de esto es obligatorio: un caso se arma entero a mano, pestaña por pestaña. Y nada de esto es definitivo: lo que estos botones escriben queda en los campos de cada pestaña y se edita como si lo hubieras tipeado.</p>
+    <p class="legend help">Se configura todo acá y se genera de una sola vez: el audiograma completo (aérea y ósea, los dos oídos), el timpanograma, la función tubaria, el sitio de la lesión, el patrón retrococlear, las ondas del ABR y las emisiones otoacústicas. Un botón, un caso entero y coherente.</p>
+    <p class="legend help">No hay que elegir nada dos veces. Lo que decís acá sobre el oído define todo lo demás por proyección: la OEA sale del componente coclear, los reflejos del oído medio y del sitio de la lesión, los supraliminares del mismo número. Antes había que fijar el grado de la OEA por separado, y era la forma más fácil de armar un caso que se contradice a sí mismo.</p>
+    <p class="legend help">Nada de esto es obligatorio ni definitivo: un caso se arma entero a mano, pestaña por pestaña, y lo que el botón escribe queda en los campos de cada pestaña y se edita igual que si lo hubieras tipeado.</p>
 </div>
 
-<?php if (!$isEdit): ?>
-<div class="gen-step">
-    <div class="gen-step-num">1</div>
-    <div class="gen-step-body card">
-        <strong>Identidad del paciente</strong>
-        <p class="gen-step-dest">Escribe en <a href="#" class="tab-link" data-goto-tab="paciente">1. Paciente</a></p>
-        <p class="legend help"><strong>Sexo y edad van acá porque los usan los pasos de abajo, no solo el nombre.</strong> El sexo decide el nombre que sale. La edad decide la fecha de nacimiento y el RUT (se calculan solos), la población de referencia del ABR --un neonato no tiene las latencias de un adulto-- y es obligatoria para la anamnesis con IA, que sin ella ni siquiera corre.</p>
-        <p class="legend help">Son los mismos campos de <a href="#" class="tab-link" data-goto-tab="paciente">Paciente</a>, no una copia: cambiarlos en cualquiera de los dos lados los cambia en el otro. El resto de la identidad --RUT, foto, historia clínica-- se carga allá.</p>
-        <p class="legend help">Generar el nombre guarda el formulario y lo vuelve a dibujar con lo que ya tipeaste, así se puede apretar varias veces hasta que salga uno que convenza.</p>
-        <div class="two-col">
-            <label>Sexo
-                <select id="armado-gender">
-                    <option value="0" <?= ($v['gender'] ?? '0') === '0' ? 'selected' : '' ?>>Hombre</option>
-                    <option value="1" <?= ($v['gender'] ?? '0') === '1' ? 'selected' : '' ?>>Mujer</option>
-                </select>
-            </label>
-            <label>Edad
-                <input type="number" id="armado-age" min="0" max="110" value="<?= htmlspecialchars((string) ($v['age'] ?? '')) ?>">
-            </label>
-        </div>
-        <button type="submit" name="form_action" value="generate_name" class="secondary">Generar nombre al azar</button>
-    </div>
-</div>
-<?php endif; ?>
-
-<div class="gen-step">
-    <div class="gen-step-num"><?= $isEdit ? '1' : '2' ?></div>
-    <div class="gen-step-body card">
-        <strong>El cuadro clínico, oído por oído</strong>
-        <p class="gen-step-dest">Escribe en <a href="#" class="tab-link" data-goto-tab="perfil">3. Perfil auditivo</a> · <a href="#" class="tab-link" data-goto-tab="audiometria">4. Audiometría</a></p>
-        <p class="legend help">El punto de partida real del caso: escribe el audiograma entero (aérea y ósea), el sitio de la lesión, el timpanograma y el patrón retrococlear si corresponde, y enciende las derivaciones del <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>.</p>
-        <p class="legend help"><strong>Cada oído lleva su propio cuadro.</strong> Un paciente puede tener el OD sano y una conductiva en el OI, o una coclear de un lado y un schwannoma del otro. Poné "Normal" en el oído que no tiene nada: no es un cero, es un oído normal con su propia variabilidad.</p>
-        <div class="two-col">
-        <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
-            <div class="two-col">
-                <label>Cuadro <?= $ladoLabel ?>
-                    <select class="perfil-escenario" data-lado="<?= $lado ?>">
-                        <?php foreach (CaseProfile::SCENARIOS as $escKey => $esc): ?>
-                        <option value="<?= htmlspecialchars($escKey) ?>"><?= htmlspecialchars($esc['label']) ?></option>
-                        <?php endforeach; ?>
-                        <option value="__random__">Cualquiera (al azar)</option>
-                    </select>
-                </label>
-                <label>Grado <?= $ladoLabel ?>
-                    <select class="perfil-grado" data-lado="<?= $lado ?>">
-                        <option value="random">Cualquiera (al azar)</option>
-                    </select>
-                </label>
-            </div>
-        <?php endforeach; ?>
-        </div>
-        <button type="button" class="secondary" id="perfil-generar">Generar cuadro clínico</button>
-        <p class="legend help">La <strong>forma</strong> de la curva es la del cuadro; el <strong>grado</strong> es cuánto. Elegido el grado, se escala la forma completa --lo sensorioneural y el gap con el mismo factor-- hasta que el promedio caiga en el rango pedido: la proporción entre conductivo y sensorioneural es del cuadro y no cambia con el grado. Dentro del grado la magnitud sigue variando, así dos pacientes de la misma línea no salen calcados.</p>
-        <p class="legend help">El grado se mide sobre el <strong>promedio de <?= implode(', ', CaseProfile::GRADE_FREQS) ?> Hz en vía aérea</strong> (BIAP). Audición normal hasta 20 dB HL, así que el grado leve arranca en 21 y un oído sano se pide con el cuadro "Normal", que no tiene grado. <strong>Ojo:</strong> el equipo le muestra al alumno el promedio de Fletcher (mejores 2 de 500, 1000 y 2000), que ignora 4 kHz -- en un descendente el número que él calcule va a dar más bajo que el grado con que armaste el caso. Es la diferencia entre las dos escalas, no un error.</p>
-        <p class="legend help">Cada cuadro ofrece solo los grados que puede dar sin dejar de ser ese cuadro. Una conductiva pura no pasa de moderada porque la vía ósea le pone techo (más que eso ya es mixta); una muesca de 4 kHz no es una hipoacusia severa por promedio; un descendente puro no llega a severa sin aplanarse.</p>
-        <p class="legend help">Con el mismo cuadro en los dos oídos la magnitud se reparte pareja (una presbiacusia bilateral es simétrica por definición, más unos pocos dB de asimetría); con cuadros distintos cada oído se calcula por su cuenta.</p>
-        <p class="legend help">Revisá después el resultado en <a href="#" class="tab-link" data-goto-tab="audiometria">Audiometría</a> y en <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>: generar pisa lo que hubiera cargado ahí, en los dos oídos.</p>
-        <p class="legend help">Lo que esto NO decide es la función tubaria fina y el VEMP: qué corresponde depende de la patología concreta y esa es una decisión clínica, no una cuenta. El editor las reclama al guardar si quedaron sin tocar.</p>
+<div class="card">
+    <strong>Paciente</strong>
+    <p class="legend help">El <strong>sexo</strong> decide el nombre que sale. La <strong>edad</strong> pesa más: fija la fecha de nacimiento y el RUT, elige la población de referencia del ABR --un neonato no tiene las latencias de un adulto--, es obligatoria para la anamnesis con IA, y define <strong>qué es normal</strong> en este paciente (ver abajo).</p>
+    <p class="legend help">Son los mismos campos de <a href="#" class="tab-link" data-goto-tab="paciente">Paciente</a>, no una copia: cambiarlos en cualquiera de los dos lados los cambia en el otro. El RUT, la foto y la historia clínica se cargan allá.</p>
+    <div class="three-col">
+        <label>Sexo
+            <select id="armado-gender">
+                <option value="0" <?= ($v['gender'] ?? '0') === '0' ? 'selected' : '' ?>>Hombre</option>
+                <option value="1" <?= ($v['gender'] ?? '0') === '1' ? 'selected' : '' ?>>Mujer</option>
+            </select>
+        </label>
+        <label>Edad
+            <input type="number" id="armado-age" min="0" max="110" value="<?= htmlspecialchars((string) ($v['age'] ?? '')) ?>">
+        </label>
+        <?php if (!$isEdit): ?>
+        <label style="align-self:end;">
+            <button type="submit" name="form_action" value="generate_name" class="secondary" style="margin-top:0;">Generar nombre al azar</button>
+        </label>
+        <?php endif; ?>
     </div>
 </div>
 
-<div class="gen-step">
-    <div class="gen-step-num"><?= $isEdit ? '2' : '3' ?></div>
-    <div class="gen-step-body card">
-        <strong>Ondas del ABR, oído por oído</strong>
-        <p class="gen-step-dest">Escribe en <a href="#" class="tab-link" data-goto-tab="abr">7. ABR</a></p>
-        <p class="legend help">Genera latencias y amplitudes onda por onda, FSP y condiciones de captura para la patología que tenga elegida cada oído en <a href="#" class="tab-link" data-goto-tab="abr">ABR</a>, usando el sexo y la edad del paciente. El umbral y la patología no salen de acá: los fija el perfil (paso <?= $isEdit ? '1' : '2' ?>).</p>
-        <?php $abrAuthorCatalog = AppConfig::getEffective('abr_reference_authors', null) ?? []; ?>
-        <div class="three-col">
-            <label>Autor de referencia
-                <select id="abr-author-select">
-                    <option value="__default__">LabSim (default)</option>
-                    <?php foreach ($abrAuthorCatalog as $authorId => $author): ?>
-                    <option value="<?= htmlspecialchars($authorId) ?>"><?= htmlspecialchars($author['label'] ?? $authorId) ?></option>
+<div class="card">
+    <strong>El cuadro clínico, oído por oído</strong>
+    <p class="legend help"><strong>Cada oído lleva lo suyo.</strong> Un paciente puede tener el OD sano y una otitis en el OI, o una presbiacusia de un lado y un schwannoma del otro. El oído que no tiene nada se pide con "Normal para la edad", que no es un cero.</p>
+
+    <label class="inline-check" style="margin-left:0;">
+        <input type="checkbox" id="armado-igualar" checked>
+        Los dos oídos iguales
+    </label>
+    <p class="legend help">Con esto marcado, lo que elijas en el OD se copia al OI --que es el caso de la mayoría de los cuadros bilaterales-- y los dos oídos comparten magnitud, con unos pocos dB de asimetría biológica. Destildalo para un caso unilateral o asimétrico.</p>
+
+    <div class="two-col">
+    <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
+        <div class="side-block" data-lado="<?= $lado ?>">
+            <div class="side-heading"><strong>Oído <?= $ladoLabel ?></strong></div>
+            <label>Categoría
+                <select class="perfil-categoria" data-lado="<?= $lado ?>">
+                    <?php foreach (CaseProfile::CATEGORIAS as $catKey => $catLabel): ?>
+                    <option value="<?= htmlspecialchars($catKey) ?>"><?= htmlspecialchars($catLabel) ?></option>
                     <?php endforeach; ?>
+                    <option value="__random__">Cualquiera (al azar)</option>
                 </select>
             </label>
-            <label style="align-self:end;">
-                <button type="button" class="secondary abr-autofill-btn" data-lado="od">Autocompletar OD</button>
+            <label>Cuadro
+                <select class="perfil-escenario" data-lado="<?= $lado ?>"></select>
             </label>
-            <label style="align-self:end;">
-                <button type="button" class="secondary abr-autofill-btn" data-lado="oi">Autocompletar OI</button>
+            <label>Grado
+                <select class="perfil-grado" data-lado="<?= $lado ?>">
+                    <option value="random">Cualquiera (al azar)</option>
+                </select>
             </label>
         </div>
-        <p class="legend help">El autor vale para todo el paciente, los dos oídos. Cada autor reporta baselines de latencia/amplitud levemente distintos según la población -- se configuran en <a href="normativas.php">Configuración &rsaquo; Normativas</a>. No queda guardado en el caso, solo se usa para calcular la sugerencia; los números finales sí quedan en cada campo.</p>
+    <?php endforeach; ?>
     </div>
+
+    <p class="legend help">La <strong>categoría</strong> dice dónde está la lesión y filtra los cuadros. El <strong>cuadro</strong> da la forma de la curva; el <strong>grado</strong>, cuánto. Elegido el grado se escala la forma completa --lo sensorioneural y el gap con el mismo factor-- hasta que el promedio caiga en el rango pedido: la proporción entre conductivo y sensorioneural es del cuadro y no cambia con el grado.</p>
+    <p class="legend help">Cada cuadro ofrece solo los grados que puede dar sin dejar de ser ese cuadro. Una conductiva pura no pasa de moderada porque la vía ósea le pone techo (más que eso ya es mixta); una muesca de 4 kHz no es una hipoacusia severa por promedio; un descendente puro no llega a severa sin aplanarse.</p>
+    <p class="legend help">El grado se mide sobre el <strong>promedio de <?= implode(', ', CaseProfile::GRADE_FREQS) ?> Hz en vía aérea</strong> (BIAP). Audición normal hasta 20 dB HL, así que el leve arranca en 21. <strong>Ojo:</strong> el equipo le muestra al alumno el promedio de Fletcher (mejores 2 de 500, 1000 y 2000), que ignora 4 kHz -- en un descendente el número que él calcule va a dar más bajo que el grado con que armaste el caso. Es la diferencia entre las dos escalas, no un error.</p>
+
+    <div class="section-sep" style="border-top:1px dashed var(--color-border);">
+        <button type="button" id="perfil-generar">Generar caso</button>
+        <span id="armado-estado" class="legend"></span>
+    </div>
+    <p class="legend help">Generar <strong>pisa</strong> el audiograma, la timpanometría, el perfil, el ABR y la OEA de los dos oídos. No toca la identidad, la historia clínica, la sala, la otoscopia, el tinnitus, el VEMP ni la anamnesis.</p>
+    <p class="legend help">Lo que queda para decidir a mano después es lo que ninguna cuenta puede sacar del audiograma: el VEMP, y el detalle fino de la función tubaria. El editor los reclama al guardar si quedaron sin tocar.</p>
 </div>
 
-<div class="gen-step">
-    <div class="gen-step-num"><?= $isEdit ? '3' : '4' ?></div>
-    <div class="gen-step-body card">
-        <strong>Emisiones otoacústicas, oído por oído</strong>
-        <p class="gen-step-dest">Escribe en <a href="#" class="tab-link" data-goto-tab="eoas">8. EOA</a></p>
-        <p class="legend help">Genera un caso plausible del grado elegido: umbral, perfil por frecuencia y condiciones de registro (ruido del paciente, sello de la sonda, variabilidad biológica). Las opciones de grado cambian según la patología que tenga cada oído en <a href="#" class="tab-link" data-goto-tab="eoas">EOA</a> -- en coclear van de leve (OEA presente pero reducida) a severa (ausente).</p>
-        <div class="two-col">
-        <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
-            <div class="three-col">
-                <label>Grado <?= $ladoLabel ?>
-                    <select name="eoas_grade[<?= $lado ?>]" class="eoas-grade-select" data-lado="<?= $lado ?>">
-                        <option value="random">Cualquiera (al azar)</option>
-                    </select>
-                </label>
-                <label style="align-self:end;">
-                    <button type="button" class="secondary eoas-autofill-btn" data-lado="<?= $lado ?>">Autocompletar <?= $ladoLabel ?></button>
-                </label>
-            </div>
-        <?php endforeach; ?>
-        </div>
-        <p class="legend help">El grado NO se guarda en el caso, solo los números que deja escritos.</p>
-    </div>
+<div class="card">
+    <strong>Lo normal depende de la edad</strong>
+    <p class="legend help">Un niño de 10 que oye bien da 0 dB en todas las frecuencias. Un hombre de 70 que también oye bien llega a 30 dB en 4 kHz, y sigue siendo <strong>normal para su edad</strong>. Por eso el umbral mediano de <a href="https://www.iso.org/standard/42916.html" target="_blank" rel="noopener">ISO 7029</a> se suma como piso a todos los cuadros, no solo al normal: un señor de 70 con una otitis media tiene la otitis <em>y</em> su presbiacusia.</p>
+    <p class="legend help">Esto es lo que hace posible el ejercicio de decidir si una presbiacusia es más de lo esperable para la edad, que con todos los "normales" en 0 no se podía plantear.</p>
+    <div id="armado-norma-edad" class="legend"></div>
 </div>
 
-<div class="gen-step">
-    <div class="gen-step-num"><?= $isEdit ? '4' : '5' ?></div>
-    <div class="gen-step-body card">
-        <strong>La anamnesis, con IA</strong>
-        <p class="gen-step-dest">Escribe en <a href="#" class="tab-link" data-goto-tab="anamnesis">11. Anamnesis</a></p>
-        <p class="legend help"><strong>Este es el último paso a propósito.</strong> El modelo escribe los antecedentes que EXPLICAN los hallazgos que ya cargaste: una muesca en 4 kHz pide exposición a ruido, una conductiva con timpanograma B pide otitis a repetición, una neuropatía en un recién nacido pide hiperbilirrubinemia. Con la ficha vacía no tiene nada que explicar.</p>
-        <p class="legend help">No inventa el diagnóstico ni menciona umbrales -- eso lo tiene que medir el alumno. Las derivaciones las escribe por el estudio ("se deriva a evaluación auditiva", "a BERA"), nunca por la profesión de quien atiende.</p>
-        <p class="legend help">Las <strong>atenciones previas</strong> del paciente no salen de acá: se escriben a mano en Historia clínica (<a href="#" class="tab-link" data-goto-tab="paciente">Paciente</a>), con las fechas relativas <code>{{-N}}</code> que usa LabSim.</p>
-        <p class="legend help"><strong>Es un borrador y hay que leerlo.</strong> El modelo puede inventar una cirugía que no existe o un fármaco que no es ototóxico, y eso le llega al alumno como parte del caso, indistinguible de lo que escribiste vos. Al terminar de redactar te deja en <a href="#" class="tab-link" data-goto-tab="anamnesis">Anamnesis</a> para que lo leas: hasta que tildes la verificación ahí, el caso no se guarda.</p>
-        <button type="button" class="secondary" id="anamnesis-ia-btn">Redactar borrador con IA</button>
-        <span id="anamnesis-ia-estado" class="legend"></span>
-        <input type="hidden" name="anamnesis_ia[generado]" id="anamnesis-ia-generado" value="<?= fv($v, ['anamnesis_ia', 'generado'], '') ? '1' : '' ?>">
-        <input type="hidden" name="anamnesis_ia[generado_en]" id="anamnesis-ia-generado-en" value="<?= htmlspecialchars((string) fv($v, ['anamnesis_ia', 'generado_en'], '')) ?>">
-    </div>
+<div class="card">
+    <strong>Después de generar: la anamnesis con IA</strong>
+    <p class="gen-step-dest">Escribe en <a href="#" class="tab-link" data-goto-tab="anamnesis">11. Anamnesis</a></p>
+    <p class="legend help"><strong>Esto va al final, aparte, y a propósito.</strong> El modelo escribe los antecedentes que EXPLICAN los hallazgos que ya están cargados: una muesca en 4 kHz pide exposición a ruido, una otitis a repetición pide una conductiva con timpanograma B, una neuropatía en un recién nacido pide hiperbilirrubinemia. Con la ficha vacía no tiene nada que explicar, así que se aprieta después de generar el caso y de revisarlo.</p>
+    <p class="legend help">No inventa el diagnóstico ni menciona umbrales -- eso lo tiene que medir el alumno. Las derivaciones las escribe por el estudio ("se deriva a evaluación auditiva", "a BERA"), nunca por la profesión de quien atiende. Las <strong>atenciones previas</strong> no salen de acá: se escriben a mano en Historia clínica (<a href="#" class="tab-link" data-goto-tab="paciente">Paciente</a>), con las fechas relativas <code>{{-N}}</code>.</p>
+    <p class="legend help"><strong>Es un borrador y hay que leerlo.</strong> El modelo puede inventar una cirugía que no existe o un fármaco que no es ototóxico, y eso le llega al alumno como parte del caso, indistinguible de lo que escribiste vos. Al terminar te deja en <a href="#" class="tab-link" data-goto-tab="anamnesis">Anamnesis</a> para que lo leas: hasta que tildes la verificación ahí, el caso no se guarda.</p>
+    <button type="button" class="secondary" id="anamnesis-ia-btn">Redactar borrador con IA</button>
+    <span id="anamnesis-ia-estado" class="legend"></span>
+    <input type="hidden" name="anamnesis_ia[generado]" id="anamnesis-ia-generado" value="<?= fv($v, ['anamnesis_ia', 'generado'], '') ? '1' : '' ?>">
+    <input type="hidden" name="anamnesis_ia[generado_en]" id="anamnesis-ia-generado-en" value="<?= htmlspecialchars((string) fv($v, ['anamnesis_ia', 'generado_en'], '')) ?>">
 </div>
 </div>
 
@@ -1927,6 +1887,20 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 </div>
 
 <div class="tab-panel" data-tab="abr">
+<?php $abrAuthorCatalog = AppConfig::getEffective('abr_reference_authors', null) ?? []; ?>
+<div class="card">
+    <strong>Autor de referencia</strong>
+    <p class="legend help">Set normativo con el que se calculan las ondas, uno solo para todo el paciente. Cada autor reporta baselines de latencia y amplitud levemente distintos según la población -- se configuran en <a href="normativas.php">Configuración &rsaquo; Normativas</a>. No queda guardado en el caso, solo se usa para calcular; los números finales sí quedan en cada campo.</p>
+    <label style="max-width:22em;">Autor
+        <select id="abr-author-select">
+            <option value="__default__">LabSim (default)</option>
+            <?php foreach ($abrAuthorCatalog as $authorId => $author): ?>
+            <option value="<?= htmlspecialchars($authorId) ?>"><?= htmlspecialchars($author['label'] ?? $authorId) ?></option>
+            <?php endforeach; ?>
+        </select>
+    </label>
+    <p class="legend help">Las ondas ya las escribió <a href="#" class="tab-link" data-goto-tab="armado">Armado rápido</a> al generar el caso. Los botones de acá abajo son para volver a sortearlas de un oído sin regenerar todo -- por ejemplo después de cambiar el autor.</p>
+</div>
 <div class="two-col">
 <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
 <div class="card">
@@ -1934,7 +1908,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <p class="legend help">Patología de este oído para el generador de curvas ABR -- no es el resultado del alumno, es lo que el caso simula. Si se deja "Normal" con todo en 0, el oído no tiene hallazgos.</p>
     <p class="derivado-aviso" data-derivado="abr" hidden>La patología y el umbral de este oído los escribe el <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>, porque la casilla <em>ABR: umbral por estímulo</em> está encendida: quedan grises y se recalculan al guardar. Para editarlos a mano hay que apagar esa casilla.</p>
 
-    <p class="legend help">Las latencias y amplitudes onda por onda se generan desde <a href="#" class="tab-link" data-goto-tab="armado">Armado rápido</a> (ahí también se elige el autor de referencia). Acá se editan a mano.</p>
+    <p class="legend help">Latencias y amplitudes onda por onda. "Volver a sortear" toma la patología y el umbral que ya tiene este oído --que los fija el perfil, no este botón-- y le calcula ondas plausibles con el sexo, la edad y el autor de referencia. Es un punto de partida al azar: cualquier campo se edita después.</p>
+    <button type="button" class="secondary abr-autofill-btn" data-lado="<?= $lado ?>" style="margin-top:0;">Volver a sortear las ondas de este oído</button>
     <div class="three-col">
         <label>Patología
             <select name="abr[<?= $lado ?>][type]" class="abr-type-select" data-lado="<?= $lado ?>">
@@ -2058,7 +2033,17 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             <input type="number" step="any" name="eoas[<?= $lado ?>][umbral]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['umbral'] ?? (string) CaseBuilder::EOAS_DEFAULTS['umbral'])) ?>">
         </label>
     </div>
-    <p class="legend help">El umbral, el perfil por frecuencia y las condiciones de registro se generan desde <a href="#" class="tab-link" data-goto-tab="armado">Armado rápido</a> (ahí se elige el grado). Acá se editan a mano.</p>
+    <p class="legend help">El umbral y el perfil por frecuencia los escribe el perfil auditivo, derivados del audiograma y del componente coclear: no hay que elegir el grado de la OEA aparte, y por eso este oído no puede contradecir a su propia audiometría. Lo que el botón sortea son las <strong>condiciones de registro</strong> (ruido del paciente, sello de la sonda, variabilidad), que sí son del caso y no se derivan de nada.</p>
+    <div class="two-col">
+        <label>Grado a sortear
+            <select name="eoas_grade[<?= $lado ?>]" class="eoas-grade-select" data-lado="<?= $lado ?>">
+                <option value="random">Cualquiera (al azar)</option>
+            </select>
+        </label>
+        <label style="align-self:end;">
+            <button type="button" class="secondary eoas-autofill-btn" data-lado="<?= $lado ?>" style="margin-top:0;">Volver a sortear este oído</button>
+        </label>
+    </div>
     <p class="legend">Condiciones de registro de este oído -- lo que hace que dos pacientes con la misma cóclea no den la misma pantalla.</p>
     <div class="three-col">
         <label>Atenuación extra (dB)
@@ -2654,41 +2639,71 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 </script>
 
 <script>
-// Generador del perfil: escribe el audiograma, el sitio de la lesión y el
-// patrón retro de un cuadro clínico completo, coherentes entre sí.
+// Generador del caso: un solo botón escribe el audiograma completo, el
+// timpanograma, la función tubaria, el sitio de la lesión, el patrón
+// retrococlear, las ondas del ABR y las emisiones -- todo coherente entre sí.
 //
-// Reemplaza el uso que se le daba a los dos "Autocompletar" para fijar
-// umbral y patología -- cada uno resolvía por su lado y podían dejar el ABR
-// coclear y la OEA neural en el mismo oído. Los escenarios se serializan
-// desde CaseProfile::SCENARIOS, no se re-tipean acá.
+// Antes eran cuatro botones en cuatro pasos, cada uno pidiendo una decisión
+// que ya estaba tomada (el grado de la OEA aparte del audiograma, por
+// ejemplo) y sin mostrar resultado hasta el final. Elegir dos veces lo mismo
+// era además la forma más fácil de dejar un caso que se contradice solo.
 //
-// UN CUADRO POR OÍDO. Antes había un solo selector para todo el paciente y
-// la `lateralidad` del escenario decidía a cuál de los dos oídos le tocaba
-// la lesión, al azar: no se podía pedir "OD sano, OI conductiva", ni menos
-// una coclear de un lado y un schwannoma del otro. Ahora el docente elige
-// los dos, y el oído sano se pide poniéndole el cuadro "Normal" (que no es
-// un cero: es un oído normal con su propia variabilidad).
+// El catálogo se serializa desde CaseProfile::SCENARIOS, no se re-tipea acá.
 (function () {
     var ESCENARIOS = <?= json_encode(CaseProfile::SCENARIOS, JSON_UNESCAPED_UNICODE) ?>;
+    var CATEGORIAS = <?= json_encode(CaseProfile::CATEGORIAS, JSON_UNESCAPED_UNICODE) ?>;
     var NEURAL_DEFAULTS = <?= json_encode(CaseBuilder::ABR_NEURAL_DEFAULTS, JSON_UNESCAPED_UNICODE) ?>;
     var GRADES = <?= json_encode(CaseProfile::GRADES, JSON_UNESCAPED_UNICODE) ?>;
     var GRADE_FREQS = <?= json_encode(CaseProfile::GRADE_FREQS) ?>;
+    var ISO7029 = <?= json_encode(CaseProfile::ISO7029_COEF) ?>;
+    var ISO7029_EDAD_BASE = <?= (int) CaseProfile::ISO7029_EDAD_BASE ?>;
+    var FREQS = <?= json_encode(CaseBuilder::FREQUENCIES) ?>;
+    var AUTO_MODULES = <?= json_encode(CaseProfile::AUTO_MODULES) ?>;
+    var JITTER_DB = 4;   // ruido por frecuencia: ningún audiograma real es liso
     // Techo de la audiometría. Si una frecuencia del promedio satura, subir
     // más la escala ya no sube el promedio: el grado pedido no se alcanza y
-    // el cuadro se aplana. Por eso el objetivo se recorta antes de escalar.
+    // el cuadro se aplana.
     var MAX_DB = 115;
-    var FREQS = <?= json_encode(CaseBuilder::FREQUENCIES) ?>;
-    var JITTER_DB = 4;   // ruido por frecuencia: ningún audiograma real es liso
 
     var boton = document.getElementById('perfil-generar');
-    var selectores = {};
-    document.querySelectorAll('.perfil-escenario').forEach(function (sel) {
-        selectores[sel.getAttribute('data-lado')] = sel;
-    });
+    var estado = document.getElementById('armado-estado');
+    var igualar = document.getElementById('armado-igualar');
+    var tablaNorma = document.getElementById('armado-norma-edad');
+    var categorias = {}, selectores = {}, grados = {};
+    document.querySelectorAll('.perfil-categoria').forEach(function (s) { categorias[s.dataset.lado] = s; });
+    document.querySelectorAll('.perfil-escenario').forEach(function (s) { selectores[s.dataset.lado] = s; });
+    document.querySelectorAll('.perfil-grado').forEach(function (s) { grados[s.dataset.lado] = s; });
     if (!boton || !selectores.od || !selectores.oi) return;
 
     function entre(a, b) { return a + Math.random() * (b - a); }
     function aCinco(x) { return Math.max(0, Math.min(120, Math.round(x / 5) * 5)); }
+    function alAzar(lista) { return lista[Math.floor(Math.random() * lista.length)]; }
+
+    function edadActual() {
+        var el = document.getElementById('patient-age');
+        var n = el ? parseInt(el.value, 10) : NaN;
+        return isNaN(n) ? 30 : Math.max(0, n);
+    }
+    function generoActual() {
+        var chk = document.querySelector('#case-form input[name="gender"]:checked');
+        return chk && chk.value === '1' ? 1 : 0;
+    }
+
+    /**
+     * Umbral mediano esperable a esta edad (ISO 7029), por frecuencia.
+     * Misma fórmula que CaseProfile::ageNorm -- si se toca una, tocar la otra.
+     */
+    function normaEdad() {
+        var delta = Math.max(0, edadActual() - ISO7029_EDAD_BASE);
+        var cuadrado = delta * delta;
+        var idx = generoActual() === 1 ? 1 : 0;
+        var out = {};
+        FREQS.forEach(function (hz) {
+            var c = ISO7029[hz];
+            out[hz] = c ? c[idx] * 0.001 * cuadrado : 0;
+        });
+        return out;
+    }
 
     function escribir(clave, lado, valores) {
         for (var n = 0; n < FREQS.length; n++) {
@@ -2697,128 +2712,32 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         }
     }
 
-    /** Curva de un oído a partir de la forma del cuadro, con escala y jitter. */
-    function curvaDeForma(forma, escala) {
-        return FREQS.map(function (hz) {
-            var base = (forma && forma[hz] !== undefined) ? forma[hz] : 0;
-            return base * escala + entre(-JITTER_DB, JITTER_DB);
-        });
-    }
-
-    function generarLado(esc, lado, escalas, asimetria) {
-        var sn = curvaDeForma(esc.sn_shape, escalas.sn).map(function (v) { return v + asimetria; });
-        var gap = esc.gap_shape && Object.keys(esc.gap_shape).length
-            ? curvaDeForma(esc.gap_shape, escalas.gap)
-            : FREQS.map(function () { return 0; });
-
-        var osea = sn.map(aCinco);
-        var aerea = sn.map(function (v, i) { return aCinco(v + Math.max(0, gap[i])); });
-        // La ósea nunca puede quedar peor que la aérea después de redondear.
-        osea = osea.map(function (v, i) { return Math.min(v, aerea[i]); });
-        escribir('aerea', lado, aerea);
-        escribir('osea', lado, osea);
-        // "Igualar ósea a aérea" pisaría la ósea recién generada al guardar.
-        var igualar = document.querySelector('.igualar-toggle[data-side="' + lado + '"]');
-        if (igualar && igualar.checked && gap.some(function (g) { return g > 0; })) {
-            igualar.checked = false;
-        }
-
-        // Oído medio: el gap y el timpanograma tienen que contar la misma
-        // historia. Sin esto el cuadro "Conductiva" salía con 35 dB de gap
-        // y curva A, o sea con la contradicción adentro desde el arranque.
-        var z = document.getElementById('z_' + lado);
-        if (z) {
-            var opciones = esc.z && esc.z.length ? esc.z : ['A'];
-            z.value = opciones[Math.floor(Math.random() * opciones.length)];
-        }
-        var etf = document.querySelector('select[name="etf_' + lado + '"]');
-        if (etf) { etf.value = esc.etf || 'Normal'; }
-
-        var cce = document.querySelector('input[name="perfil[' + lado + '][cce_pct]"]');
-        if (cce) { cce.value = Math.round(entre(esc.cce_pct[0], esc.cce_pct[1]) / 5) * 5; }
-
-        // Patrón retrococlear. Con `retro` se aplica el preset (precarga los
-        // valores y después se editan; nunca se persiste su nombre).
-        //
-        // Sin `retro` hay que LIMPIAR el patrón a los defaults: no alcanza
-        // con no tocarlo. Pedir "OI normal" después de haber generado un
-        // schwannoma dejaba los interpicos prolongados de la vuelta anterior
-        // en un oído que acaba de declararse sano. No se puede hacer con el
-        // preset ("normal" no es una de las opciones de ABR_NEURAL_PRESETS),
-        // así que se escriben los defaults directo.
-        var sel = document.querySelector('.abr-neural-preset-select[data-lado="' + lado + '"]');
-        var btn = document.querySelector('.abr-neural-preset-btn[data-lado="' + lado + '"]');
-        var nota = document.querySelector('.abr-neural-preset-nota[data-lado="' + lado + '"]');
-        if (esc.retro && sel && btn) {
-            sel.value = esc.retro;
-            btn.click();
-        } else {
-            Object.keys(NEURAL_DEFAULTS).forEach(function (param) {
-                var el = document.querySelector(
-                    '.abr-neural-input[data-lado="' + lado + '"][data-param="' + param + '"]');
-                if (el) { el.value = NEURAL_DEFAULTS[param]; }
-            });
-            if (sel) { sel.value = ''; }
-            if (nota) { nota.textContent = ''; }
-            if (window.drawAbrPreview) { window.drawAbrPreview(); }
-        }
-    }
-
-    // Sugerencia para el otro oído (ver `lateralidad` en CaseProfile). Elegir
-    // "Conductiva" en el OD deja el OI en Normal, que es la forma en que ese
-    // cuadro se presenta; elegir "Coclear en agudos" lo repite, porque una
-    // presbiacusia no es de un solo lado. Solo se propone mientras el docente
-    // no haya tocado el otro selector: a partir de ahí manda él.
-    var tocado = { od: false, oi: false };
-    ['od', 'oi'].forEach(function (lado) {
-        var otro = lado === 'od' ? 'oi' : 'od';
-        selectores[lado].addEventListener('change', function () {
-            tocado[lado] = true;
-            if (tocado[otro]) { return; }
-            var esc = ESCENARIOS[selectores[lado].value];
-            if (!esc) { return; }
-            selectores[otro].value = esc.lateralidad === 'unilateral' ? 'normal' : selectores[lado].value;
-            sincronizarGrados(otro);
-        });
-        // Los grados dependen del cuadro: cambiar de cuadro recarga la lista.
-        selectores[lado].addEventListener('change', function () { sincronizarGrados(lado); });
-    });
-
-    var grados = {};
-    document.querySelectorAll('.perfil-grado').forEach(function (sel) {
-        grados[sel.getAttribute('data-lado')] = sel;
-    });
-
-    /** Promedio BIAP de la vía aérea que dan estas escalas, sin jitter. */
-    function biapCon(esc, escalas) {
+    // --- Grado -------------------------------------------------------------
+    // El promedio se mide sobre la curva AÉREA final, que es la norma por edad
+    // más la forma escalada. Como la norma no depende de la escala, el factor
+    // sale de una ecuación lineal en vez de a tanteo:
+    //     BIAP(norma) + k * BIAP(forma) = objetivo
+    function promedioDe(fn) {
         var suma = 0;
-        GRADE_FREQS.forEach(function (hz) {
-            suma += (esc.sn_shape[hz] || 0) * escalas.sn
-                  + ((esc.gap_shape || {})[hz] || 0) * escalas.gap;
-        });
+        GRADE_FREQS.forEach(function (hz) { suma += fn(hz); });
         return suma / GRADE_FREQS.length;
     }
-
-    /** La peor frecuencia DEL PROMEDIO con estas escalas. */
-    function peorCon(esc, escalas) {
-        var peor = 0;
-        GRADE_FREQS.forEach(function (hz) {
-            peor = Math.max(peor, (esc.sn_shape[hz] || 0) * escalas.sn
-                                + ((esc.gap_shape || {})[hz] || 0) * escalas.gap);
-        });
-        return peor;
+    function formaAerea(esc, escalas, hz) {
+        return (esc.sn_shape[hz] || 0) * escalas.sn + ((esc.gap_shape || {})[hz] || 0) * escalas.gap;
     }
 
-    /**
-     * Techo real del promedio para este cuadro: hasta dónde puede escalarse
-     * sin que sature una frecuencia DEL PROMEDIO. Los agudos que quedan fuera
-     * del promedio sí pueden llegar al tope --un descendente con 8 kHz en el
-     * límite es un audiograma real-- pero si satura 4 kHz el promedio deja de
-     * responder a la escala y el grado pedido no se alcanza nunca.
-     */
-    function techoDe(esc, escalas) {
-        var peor = peorCon(esc, escalas);
-        var porSaturacion = peor > 0 ? biapCon(esc, escalas) * (MAX_DB / peor) : Infinity;
+    /** Hasta dónde puede escalarse sin que sature una frecuencia DEL promedio. */
+    function techoDe(esc, escalas, norma) {
+        var peorForma = 0, peorNorma = 0, biapForma, biapNorma;
+        GRADE_FREQS.forEach(function (hz) {
+            var f = formaAerea(esc, escalas, hz);
+            if (f > peorForma) { peorForma = f; peorNorma = norma[hz] || 0; }
+        });
+        biapForma = promedioDe(function (hz) { return formaAerea(esc, escalas, hz); });
+        biapNorma = promedioDe(function (hz) { return norma[hz] || 0; });
+        var porSaturacion = peorForma > 0
+            ? biapNorma + biapForma * ((MAX_DB - peorNorma) / peorForma)
+            : Infinity;
         return Math.min(porSaturacion, esc.max_db || Infinity);
     }
 
@@ -2836,12 +2755,29 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         sel.innerHTML = html;
         sel.value = lista.indexOf(previo) !== -1 ? previo : 'random';
         // Un oído sano no tiene grado de hipoacusia: el cuadro 'normal' no
-        // trae ninguno, y "Cualquiera (al azar)" en un cuadro sin grados
-        // tampoco elige nada. El select queda apagado en vez de ofrecer una
-        // lista vacía que igual se puede desplegar.
+        // trae ninguno y el select queda apagado en vez de ofrecer una lista
+        // vacía que igual se puede desplegar.
         sel.disabled = lista.length === 0;
         sel.style.opacity = lista.length === 0 ? '0.6' : '';
         sel.title = lista.length === 0 ? 'Este cuadro no tiene grado de hipoacusia' : '';
+    }
+
+    /** Cuadros de la categoría elegida. */
+    function sincronizarCuadros(lado) {
+        var sel = selectores[lado];
+        var cat = categorias[lado] ? categorias[lado].value : '__random__';
+        var previo = sel.value;
+        var html = '';
+        var hay = [];
+        Object.keys(ESCENARIOS).forEach(function (clave) {
+            if (cat !== '__random__' && ESCENARIOS[clave].categoria !== cat) { return; }
+            hay.push(clave);
+            html += '<option value="' + clave + '">' + ESCENARIOS[clave].label + '</option>';
+        });
+        if (hay.length > 1) { html += '<option value="__random__">Cualquiera (al azar)</option>'; }
+        sel.innerHTML = html;
+        sel.value = hay.indexOf(previo) !== -1 ? previo : (hay[0] || '');
+        sincronizarGrados(lado);
     }
 
     /**
@@ -2856,41 +2792,30 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
      * descuentan del objetivo, porque si no un "leve" con 8 dB de asimetría
      * terminaba midiendo como moderada.
      */
-    function ajustarAlGrado(esc, escalas, claveGrado, asimetria) {
+    function ajustarAlGrado(esc, escalas, claveGrado, asimetria, norma) {
         var lista = esc.grados || [];
         if (!lista.length) { return escalas; }
         var clave = claveGrado;
-        if (clave === 'random' || lista.indexOf(clave) === -1) {
-            clave = lista[Math.floor(Math.random() * lista.length)];
-        }
-        // El objetivo se busca DENTRO del rango, no en sus bordes: el jitter
-        // por frecuencia (+-4 dB) y el redondeo a 5 corren el promedio final
-        // unos dB, y un "leve" apuntado a 40 terminaba midiendo 45, o sea
-        // moderada. El margen se achica en los rangos angostos para no
-        // quedarse sin dónde elegir.
+        if (clave === 'random' || lista.indexOf(clave) === -1) { clave = alAzar(lista); }
+
+        // El objetivo se busca DENTRO del rango: el jitter por frecuencia y el
+        // redondeo a 5 corren el promedio final unos dB, y un "leve" apuntado
+        // a 40 terminaba midiendo 45, o sea moderada.
         var rango = GRADES[clave].rango;
         var margen = Math.min(JITTER_DB + 1, (rango[1] - rango[0]) / 4);
         var min = rango[0] + margen - asimetria;
-        var max = Math.min(rango[1] - margen, techoDe(esc, escalas)) - asimetria;
+        var max = Math.min(rango[1] - margen, techoDe(esc, escalas, norma)) - asimetria;
         var objetivo = max <= min ? Math.max(min, max) : entre(min, max);
 
-        var actual = biapCon(esc, escalas);
-        if (actual < 1) { return escalas; }   // cuadro sin pérdida: nada que escalar
-        var factor = objetivo / actual;
+        var biapNorma = promedioDe(function (hz) { return norma[hz] || 0; });
+        var biapForma = promedioDe(function (hz) { return formaAerea(esc, escalas, hz); });
+        if (biapForma < 1) { return escalas; }
+        // Con la norma por edad ya por encima del objetivo el factor daría
+        // negativo: un cuadro no puede dejar al paciente oyendo MEJOR que su
+        // mediana por edad. Se deja el mínimo y el grado real sale mayor al
+        // pedido, que es la verdad clínica.
+        var factor = Math.max(0.05, (objetivo - biapNorma) / biapForma);
         return { sn: escalas.sn * factor, gap: escalas.gap * factor };
-    }
-
-    /** Escenario elegido para un oído, resolviendo "Cualquiera (al azar)". */
-    function escenarioDe(lado) {
-        var sel = selectores[lado];
-        var clave = sel.value;
-        if (clave === '__random__') {
-            var claves = Object.keys(ESCENARIOS);
-            clave = claves[Math.floor(Math.random() * claves.length)];
-            sel.value = clave;   // el docente tiene que poder ver qué salió
-            sincronizarGrados(lado);   // el cuadro nuevo trae sus propios grados
-        }
-        return ESCENARIOS[clave] ? clave : null;
     }
 
     function escalasDe(esc) {
@@ -2900,60 +2825,204 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         };
     }
 
-    sincronizarGrados('od');
-    sincronizarGrados('oi');
+    function generarLado(esc, lado, escalas, asimetria, norma) {
+        // La curva final = umbral mediano por edad + forma del cuadro. Un
+        // señor de 70 con una otitis tiene la otitis Y su presbiacusia.
+        var sn = FREQS.map(function (hz) {
+            return (norma[hz] || 0) + (esc.sn_shape[hz] || 0) * escalas.sn
+                 + entre(-JITTER_DB, JITTER_DB) + asimetria;
+        });
+        var gap = FREQS.map(function (hz) {
+            if (!esc.gap_shape || !Object.keys(esc.gap_shape).length) { return 0; }
+            return (esc.gap_shape[hz] || 0) * escalas.gap + entre(-JITTER_DB, JITTER_DB);
+        });
 
+        var osea = sn.map(aCinco);
+        var aerea = sn.map(function (v, i) { return aCinco(v + Math.max(0, gap[i])); });
+        // La ósea nunca puede quedar peor que la aérea después de redondear.
+        osea = osea.map(function (v, i) { return Math.min(v, aerea[i]); });
+        escribir('aerea', lado, aerea);
+        escribir('osea', lado, osea);
+        // "Igualar ósea a aérea" pisaría la ósea recién generada al guardar.
+        var ig = document.querySelector('.igualar-toggle[data-side="' + lado + '"]');
+        if (ig && ig.checked && gap.some(function (g) { return g > 0; })) { ig.checked = false; }
+
+        // Oído medio: el gap y el timpanograma tienen que contar la misma
+        // historia. Sin esto una conductiva salía con 35 dB de gap y curva A.
+        var z = document.getElementById('z_' + lado);
+        if (z) { z.value = alAzar(esc.z && esc.z.length ? esc.z : ['A']); }
+        var etf = document.querySelector('select[name="etf_' + lado + '"]');
+        if (etf) { etf.value = esc.etf || 'Normal'; }
+
+        var cce = document.querySelector('input[name="perfil[' + lado + '][cce_pct]"]');
+        if (cce) { cce.value = Math.round(entre(esc.cce_pct[0], esc.cce_pct[1]) / 5) * 5; }
+
+        // Patrón retrococlear. Sin `retro` hay que LIMPIARLO a los defaults:
+        // pedir "OI normal" después de un schwannoma dejaba los interpicos
+        // prolongados de la vuelta anterior en un oído recién declarado sano.
+        // No se puede con el preset ("normal" no existe en ABR_NEURAL_PRESETS).
+        var sel = document.querySelector('.abr-neural-preset-select[data-lado="' + lado + '"]');
+        var btn = document.querySelector('.abr-neural-preset-btn[data-lado="' + lado + '"]');
+        var nota = document.querySelector('.abr-neural-preset-nota[data-lado="' + lado + '"]');
+        if (esc.retro && sel && btn) {
+            sel.value = esc.retro;
+            btn.click();
+        } else {
+            Object.keys(NEURAL_DEFAULTS).forEach(function (param) {
+                var el = document.querySelector(
+                    '.abr-neural-input[data-lado="' + lado + '"][data-param="' + param + '"]');
+                if (el) { el.value = NEURAL_DEFAULTS[param]; }
+            });
+            if (sel) { sel.value = ''; }
+            if (nota) { nota.textContent = ''; }
+        }
+    }
+
+    /** Cuadro elegido para un oído, resolviendo "Cualquiera (al azar)". */
+    function escenarioDe(lado) {
+        var cat = categorias[lado];
+        if (cat && cat.value === '__random__') {
+            cat.value = alAzar(Object.keys(CATEGORIAS));
+            sincronizarCuadros(lado);
+        }
+        var sel = selectores[lado];
+        if (sel.value === '__random__') {
+            var opciones = [].slice.call(sel.options)
+                .map(function (o) { return o.value; })
+                .filter(function (v) { return v !== '__random__'; });
+            sel.value = alAzar(opciones);   // el docente tiene que ver qué salió
+            sincronizarGrados(lado);
+        }
+        return ESCENARIOS[sel.value] ? sel.value : null;
+    }
+
+    // --- Cableado de los selectores ----------------------------------------
+    ['od', 'oi'].forEach(function (lado) {
+        var otro = lado === 'od' ? 'oi' : 'od';
+        function espejar() {
+            if (!igualar || !igualar.checked || lado !== 'od') { return; }
+            if (categorias[otro]) { categorias[otro].value = categorias.od.value; }
+            sincronizarCuadros(otro);
+            selectores[otro].value = selectores.od.value;
+            sincronizarGrados(otro);
+            if (grados[otro] && grados.od) { grados[otro].value = grados.od.value; }
+        }
+        if (categorias[lado]) {
+            categorias[lado].addEventListener('change', function () {
+                sincronizarCuadros(lado);
+                espejar();
+            });
+        }
+        selectores[lado].addEventListener('change', function () {
+            sincronizarGrados(lado);
+            // Sugerencia para el otro oído cuando NO están igualados (ver
+            // `lateralidad`): un cuadro unilateral propone dejar el contrario
+            // normal, uno bilateral propone repetirlo.
+            if (igualar && igualar.checked) { espejar(); return; }
+            var esc = ESCENARIOS[selectores[lado].value];
+            if (!esc || !categorias[otro]) { return; }
+            if (esc.lateralidad === 'unilateral') {
+                categorias[otro].value = 'normal';
+                sincronizarCuadros(otro);
+            }
+        });
+        if (grados[lado]) { grados[lado].addEventListener('change', espejar); }
+    });
+    if (igualar) {
+        igualar.addEventListener('change', function () {
+            document.querySelectorAll('.side-block[data-lado="oi"] select').forEach(function (s) {
+                s.disabled = igualar.checked || (s.classList.contains('perfil-grado') && s.disabled);
+                s.style.opacity = igualar.checked ? '0.6' : '';
+            });
+            if (igualar.checked) { categorias.od.dispatchEvent(new Event('change', { bubbles: true })); }
+        });
+    }
+
+    /** Tabla de lo que es normal a esta edad, para que se vea antes de generar. */
+    function pintarNorma() {
+        if (!tablaNorma) { return; }
+        var norma = normaEdad();
+        var cols = [500, 1000, 2000, 4000, 8000];
+        var html = '<table class="reflex-pattern-table" style="margin-top:0.4rem;"><thead><tr><th>Umbral normal a los ' +
+                   edadActual() + ' años</th>';
+        cols.forEach(function (hz) { html += '<th>' + (hz >= 1000 ? (hz / 1000) + ' k' : hz) + '</th>'; });
+        html += '</tr></thead><tbody><tr><td>dB HL (mediana ISO 7029)</td>';
+        cols.forEach(function (hz) { html += '<td>' + Math.round(norma[hz] || 0) + '</td>'; });
+        html += '</tr></tbody></table>';
+        tablaNorma.innerHTML = html;
+    }
+    ['patient-age', 'armado-age'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) { ['input', 'change'].forEach(function (ev) { el.addEventListener(ev, pintarNorma); }); }
+    });
+    document.querySelectorAll('#case-form input[name="gender"], #armado-gender').forEach(function (el) {
+        el.addEventListener('change', pintarNorma);
+    });
+
+    // --- El botón ----------------------------------------------------------
     boton.addEventListener('click', function () {
         var claveOd = escenarioDe('od');
         var claveOi = escenarioDe('oi');
-        if (!claveOd || !claveOi) return;
+        if (!claveOd || !claveOi) { return; }
         var escOd = ESCENARIOS[claveOd], escOi = ESCENARIOS[claveOi];
         var gradoOd = grados.od ? grados.od.value : 'random';
         var gradoOi = grados.oi ? grados.oi.value : 'random';
+        var norma = normaEdad();
 
-        // Mismo cuadro Y mismo grado en los dos oídos = un solo cálculo para
-        // el paciente. Resolviendo cada oído por separado, una presbiacusia
-        // bilateral moderada podía salir con 43 dB en un oído y 68 en el
-        // otro: una asimetría enorme --que es un hallazgo, no ruido-- en un
-        // cuadro que se define por ser simétrico. Con cuadros o grados
-        // DISTINTOS no hay nada que emparejar: cada oído tiene su propia
-        // lesión y su propia magnitud.
+        // Mismo cuadro Y mismo grado = un solo cálculo para el paciente.
+        // Resolviendo cada oído por separado, una presbiacusia bilateral
+        // moderada podía salir con 43 dB en un oído y 68 en el otro: una
+        // asimetría enorme --que es un hallazgo, no ruido-- en un cuadro que
+        // se define por ser simétrico.
         var simetrico = claveOd === claveOi && gradoOd === gradoOi;
-
-        // La asimetría interaural de unos pocos dB solo tiene sentido en el
-        // caso simétrico: es la variación biológica normal entre los dos
-        // oídos de la misma persona. Con cuadros distintos la asimetría real
-        // ya la dan los cuadros.
         var peor = Math.random() < 0.5 ? 'od' : 'oi';
         var asimetria = simetrico ? entre(0, 8) : 0;
 
-        var escalas;
         if (simetrico) {
             // El objetivo se centra descontando media asimetría: un oído
-            // queda por encima y el otro por debajo, y el par cae dentro del
-            // grado en vez de que uno de los dos se salga por arriba.
-            escalas = ajustarAlGrado(escOd, escalasDe(escOd), gradoOd, asimetria / 2);
-            generarLado(escOd, 'od', escalas, peor === 'od' ? asimetria : 0);
-            generarLado(escOi, 'oi', escalas, peor === 'oi' ? asimetria : 0);
+            // queda arriba y el otro abajo, y el par cae dentro del grado.
+            var esc = ajustarAlGrado(escOd, escalasDe(escOd), gradoOd, asimetria / 2, norma);
+            generarLado(escOd, 'od', esc, peor === 'od' ? asimetria : 0, norma);
+            generarLado(escOi, 'oi', esc, peor === 'oi' ? asimetria : 0, norma);
         } else {
-            generarLado(escOd, 'od', ajustarAlGrado(escOd, escalasDe(escOd), gradoOd, 0), 0);
-            generarLado(escOi, 'oi', ajustarAlGrado(escOi, escalasDe(escOi), gradoOi, 0), 0);
+            generarLado(escOd, 'od', ajustarAlGrado(escOd, escalasDe(escOd), gradoOd, 0, norma), 0, norma);
+            generarLado(escOi, 'oi', ajustarAlGrado(escOi, escalasDe(escOi), gradoOi, 0, norma), 0, norma);
         }
 
         // Un caso generado nace coherente: las proyecciones se encienden.
-        <?= json_encode(CaseProfile::AUTO_MODULES) ?>.forEach(function (modulo) {
+        AUTO_MODULES.forEach(function (modulo) {
             var chk = document.querySelector('input[name="perfil[auto][' + modulo + ']"]');
             if (chk) {
                 chk.checked = true;
                 chk.dispatchEvent(new Event('change', { bubbles: true }));
             }
         });
+
+        // Ondas del ABR y condiciones de registro de la OEA: es lo único que
+        // el perfil NO puede derivar del audiograma (morfología onda por onda,
+        // ruido del paciente, sello de la sonda), y sin esto el caso se
+        // guardaba con las ondas de un oído sano y CaseCompleteness lo
+        // reclamaba. Va acá y no en un botón aparte: es parte de generar.
+        document.querySelectorAll('.abr-autofill-btn, .eoas-autofill-btn').forEach(function (b) { b.click(); });
+
         if (window.drawAudiogram) { window.drawAudiogram(); }
+        if (window.drawTympanogram) { window.drawTympanogram(); }
         if (window.drawReflexPattern) { window.drawReflexPattern(); }
-        // Trae de una la proyección del caso recién generado: OEA, reflejos
-        // y supraliminares se llenan solos, no al guardar.
+        // La proyección va ÚLTIMA: pisa el tipo, el umbral y las desviaciones
+        // de OEA y ABR con lo que dice el perfil, así el autofill de arriba
+        // aporta solo lo que el perfil no describe.
         if (window.proyectarPerfil) { window.proyectarPerfil(); }
+
+        if (estado) {
+            estado.textContent = 'Listo: OD ' + escOd.label + ', OI ' + escOi.label +
+                '. Revisalo en Audiometría antes de guardar.';
+        }
     });
+
+    // --- Arranque ----------------------------------------------------------
+    ['od', 'oi'].forEach(sincronizarCuadros);
+    pintarNorma();
+    if (igualar) { igualar.dispatchEvent(new Event('change', { bubbles: true })); }
 })();
 </script>
 

@@ -179,56 +179,198 @@ final class CaseProfile
     ];
 
     /**
-     * Cuadros clínicos para sortear un caso coherente de una sola vez.
+     * Umbral mediano por edad y sexo -- ISO 7029.
      *
-     * Reemplazan al par de "Autocompletar" independientes de ABR y EOA, que
-     * sorteaban cada uno por su lado y ya podían contradecirse entre sí (uno
-     * podía dejar el ABR coclear y el otro la OEA neural en el mismo oído).
-     * Acá se sortea EL OÍDO -- forma del audiograma, gap, sitio de la
-     * lesión -- y de ahí sale todo lo demás por proyección.
+     * La norma da la desviación mediana del umbral respecto de un adulto
+     * joven otológicamente normal, como `a * (edad - 18)^2` con un
+     * coeficiente por frecuencia distinto para hombres y mujeres (los agudos
+     * se deterioran antes y más rápido en hombres). Debajo de los 18 la
+     * desviación es 0.
+     *
+     * Está acá porque "normal" no es un audiograma plano en 0 para todo el
+     * mundo: un niño de 10 que oye bien da 0 dB en todas las frecuencias, y
+     * un hombre de 70 que también oye bien --normal PARA SU EDAD-- llega a
+     * 30 dB en 4 kHz. Generar los dos iguales le enseñaba al alumno una
+     * normalidad que no existe, y hacía imposible el ejercicio de decidir si
+     * una presbiacusia es más de lo esperable para la edad.
+     *
+     * Se suma como piso a TODOS los cuadros, no solo al normal: un señor de
+     * 70 con una otitis media tiene la otitis Y su presbiacusia.
+     *
+     * Coeficientes x10^-3, [hombre, mujer].
+     */
+    public const ISO7029_COEF = [
+        125  => [3.00,  3.00],
+        250  => [3.00,  3.00],
+        500  => [3.55,  3.55],
+        1000 => [3.50,  3.50],
+        2000 => [5.35,  4.40],
+        3000 => [8.60,  5.60],
+        4000 => [11.30, 6.00],
+        6000 => [11.90, 8.85],
+        8000 => [13.50, 10.50],
+    ];
+
+    /** Edad desde la cual ISO 7029 empieza a contar la desviación. */
+    public const ISO7029_EDAD_BASE = 18;
+
+    /**
+     * Umbral mediano esperable a esta edad, por frecuencia (dB HL).
+     *
+     * @param int $edad años
+     * @param int $gender 0 hombre, 1 mujer (mismo código que el formulario)
+     * @return array<int,float> Hz => dB
+     */
+    public static function ageNorm(int $edad, int $gender): array
+    {
+        $delta = max(0, $edad - self::ISO7029_EDAD_BASE);
+        $cuadrado = $delta * $delta;
+        $idx = $gender === 1 ? 1 : 0;
+
+        $out = [];
+        foreach (self::ISO7029_COEF as $hz => $coef) {
+            $out[$hz] = round($coef[$idx] * 0.001 * $cuadrado, 1);
+        }
+        return $out;
+    }
+
+    /**
+     * Categorías del catálogo, en el orden en que se muestran.
+     *
+     * Sensorial, neural y sensorioneural son tres categorías distintas y no
+     * un paraguas con subgrupos: se separan por `cce_pct`, que es el eje que
+     * el resto del perfil ya usa para proyectar. Sensorial es coclear puro
+     * (100), neural es retrococlear puro (0) y sensorioneural es el caso con
+     * los dos componentes, que es donde el alumno tiene que separarlos --la
+     * OEA dice cuánto hay de coclear y el ABR cuánto de retro--.
+     */
+    public const CATEGORIAS = [
+        'normal'         => 'Normal',
+        'conductiva'     => 'Conductiva',
+        'sensorial'      => 'Sensorial (coclear)',
+        'neural'         => 'Neural (retrococlear)',
+        'sensorioneural' => 'Sensorioneural (coclear + neural)',
+        'mixta'          => 'Mixta (conductiva + sensorioneural)',
+    ];
+
+    /**
+     * Cuadros clínicos para generar un caso coherente de una sola vez.
      *
      * `sn_shape`/`gap_shape` son formas relativas en dB por frecuencia; la
-     * escala se elige al azar dentro de `*_scale`, así dos casos del mismo
-     * cuadro no salen calcados (mismo criterio que EOAS_AUTOFILL_GRADES, y la
-     * razón de no fijar un valor "correcto" en lo que el alumno debe aprender
-     * a leer).
+     * escala sale del grado pedido (ver GRADES y el generador en
+     * case_create.php), que la ajusta para que el promedio BIAP caiga en el
+     * rango. Sobre eso se suma el piso por edad de ageNorm(), así que dos
+     * pacientes del mismo cuadro y grado no salen calcados ni ignoran los
+     * años que tienen.
+     *
+     * `categoria` agrupa el catálogo en el selector (ver CATEGORIAS).
      *
      * `grados` es qué grados de GRADES puede producir el cuadro sin dejar de
      * ser ese cuadro, y la lista NO es genérica: es clínica. Una conductiva
-     * pura no llega a severa porque la vía ósea le pone techo (ver `max_db`);
-     * una muesca de 4 kHz no es una hipoacusia severa por promedio, y forzarla
-     * a serlo la convertiría en una plana; un descendente puro no sube el
-     * promedio más allá de moderada sin aplanarse. El cuadro 'normal' no tiene
-     * grados: un oído sano no tiene grado de hipoacusia.
-     *
-     * Al elegir un grado, el editor escala la forma completa --componente
-     * sensorioneural Y gap juntos, con el mismo factor-- hasta que el promedio
-     * BIAP caiga en el rango pedido. La proporción entre lo conductivo y lo
-     * sensorioneural es del cuadro y no cambia con el grado.
+     * pura no llega a severa porque la vía ósea le pone techo (ver
+     * `max_db`); una muesca de 4 kHz no es una hipoacusia severa por
+     * promedio, y forzarla a serlo la convertiría en una plana; un
+     * descendente puro no sube el promedio más allá de moderada sin
+     * aplanarse. El cuadro 'normal' no tiene grados: un oído sano no tiene
+     * grado de hipoacusia.
      *
      * `max_db` es el techo físico del promedio, en los cuadros que lo tienen.
      *
-     * El cuadro se elige POR OÍDO en el editor: un paciente puede tener el OD
-     * sano y una conductiva en el OI, o una coclear de un lado y un
-     * schwannoma del otro. El oído sano se pide con el cuadro 'normal', que
-     * no es un cero: es un oído normal con su propia variabilidad.
+     * El cuadro se elige POR OÍDO: un paciente puede tener el OD sano y una
+     * conductiva en el OI, o una coclear de un lado y un schwannoma del
+     * otro. El oído sano se pide con 'normal', que no es un cero: es un oído
+     * normal con la variabilidad y la edad que le corresponden.
      *
-     * `lateralidad` ya no decide nada por sí sola -- es la sugerencia que el
+     * `lateralidad` no decide nada por sí sola -- es la sugerencia que el
      * editor le hace al otro oído cuando se elige este cuadro: 'unilateral'
-     * propone dejar el contrario normal (que es lo que hace falta para que el
-     * IT5, el Weber y el Fowler tengan con qué comparar), 'bilateral' propone
-     * repetirlo. Cualquiera de las dos se pisa eligiendo a mano.
+     * propone dejar el contrario normal (que es lo que hace falta para que
+     * el IT5, el Weber y el Fowler tengan con qué comparar), 'bilateral'
+     * propone repetirlo. Las dos se pisan eligiendo a mano.
      */
     public const SCENARIOS = [
+        // --- Normal -----------------------------------------------------
         'normal' => [
-            'label' => 'Normal',
-            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 5, 3000 => 5, 4000 => 5, 6000 => 10, 8000 => 10],
+            'label' => 'Normal para la edad',
+            'categoria' => 'normal',
+            'sn_shape' => [125 => 3, 250 => 3, 500 => 3, 1000 => 3, 2000 => 3, 3000 => 3, 4000 => 3, 6000 => 5, 8000 => 5],
             'sn_scale' => [0.0, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal', 'grados' => [],
         ],
-        'coclear_agudos' => [
-            'label' => 'Coclear en agudos (descendente)',
+
+        // --- Conductivas ------------------------------------------------
+        // Todas con cce_pct 100: la cóclea está sana y el problema es de
+        // transmisión. Lo que las distingue entre sí es la curva
+        // timpanométrica y la forma del gap, no su magnitud.
+        'otitis_media' => [
+            'label' => 'Otitis media con efusión',
+            'categoria' => 'conductiva',
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 8, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
+            'sn_scale' => [0.0, 1.2],
+            'gap_shape' => [125 => 40, 250 => 40, 500 => 38, 1000 => 32, 2000 => 28, 3000 => 26, 4000 => 25, 6000 => 25, 8000 => 25],
+            'gap_scale' => [0.5, 1.2],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['B'], 'etf' => 'Disfunción tubaria',
+            'grados' => ['leve', 'moderada'], 'max_db' => 60,
+        ],
+        'otoesclerosis' => [
+            'label' => 'Otoesclerosis',
+            'categoria' => 'conductiva',
+            // Muesca de Carhart: la ósea cae en 2 kHz por el artefacto
+            // mecánico del estribo fijo, no por daño coclear.
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 8, 1000 => 10, 2000 => 18, 3000 => 12, 4000 => 8, 6000 => 8, 8000 => 8],
+            'sn_scale' => [0.4, 1.2],
+            'gap_shape' => [125 => 40, 250 => 40, 500 => 35, 1000 => 30, 2000 => 20, 3000 => 22, 4000 => 25, 6000 => 25, 8000 => 25],
+            'gap_scale' => [0.5, 1.2],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['As'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'], 'max_db' => 60,
+        ],
+        'perforacion' => [
+            'label' => 'Perforación timpánica',
+            'categoria' => 'conductiva',
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 5, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
+            'sn_scale' => [0.0, 1.2],
+            // Gap grande en graves y chico en agudos: perder superficie
+            // vibrátil se nota sobre todo abajo.
+            'gap_shape' => [125 => 40, 250 => 38, 500 => 32, 1000 => 25, 2000 => 18, 3000 => 15, 4000 => 12, 6000 => 12, 8000 => 12],
+            'gap_scale' => [0.4, 1.1],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['B'], 'etf' => 'Normal',
+            // Una perforación subtotal, con la cadena ya comprometida, llega
+            // a 55 dB de gap; más que eso es otra cosa, no el agujero.
+            'grados' => ['leve', 'moderada'], 'max_db' => 55,
+        ],
+        'disfuncion_tubaria' => [
+            'label' => 'Disfunción tubaria (presión negativa)',
+            'categoria' => 'conductiva',
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 5, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
+            'sn_scale' => [0.0, 1.0],
+            'gap_shape' => [125 => 25, 250 => 25, 500 => 22, 1000 => 18, 2000 => 15, 3000 => 12, 4000 => 12, 6000 => 12, 8000 => 12],
+            'gap_scale' => [0.4, 1.1],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['C', 'Cs'], 'etf' => 'Disfunción tubaria',
+            'grados' => ['leve'], 'max_db' => 40,
+        ],
+        'tapon_cerumen' => [
+            'label' => 'Tapón de cerumen',
+            'categoria' => 'conductiva',
+            'sn_shape' => [125 => 3, 250 => 3, 500 => 3, 1000 => 3, 2000 => 5, 3000 => 5, 4000 => 5, 6000 => 8, 8000 => 8],
+            'sn_scale' => [0.0, 1.0],
+            'gap_shape' => [125 => 30, 250 => 30, 500 => 28, 1000 => 25, 2000 => 25, 3000 => 25, 4000 => 25, 6000 => 28, 8000 => 30],
+            'gap_scale' => [0.3, 1.0],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['As'], 'etf' => 'Normal',
+            // Un tapón, aunque ocluya del todo, no pasa de ~40 dB: es el
+            // cuadro leve por definición, y de ahí que sorprenda tanto al
+            // paciente cuando se lo sacan.
+            'grados' => ['leve'], 'max_db' => 40,
+        ],
+
+        // --- Sensoriales (cocleares puras) ------------------------------
+        'presbiacusia' => [
+            'label' => 'Presbiacusia (descendente en agudos)',
+            'categoria' => 'sensorial',
             'sn_shape' => [125 => 0, 250 => 0, 500 => 5, 1000 => 10, 2000 => 25, 3000 => 35, 4000 => 45, 6000 => 50, 8000 => 55],
             'sn_scale' => [0.6, 1.5], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'bilateral',
@@ -240,6 +382,7 @@ final class CaseProfile
         ],
         'muesca_4k' => [
             'label' => 'Muesca en 4 kHz (trauma acústico)',
+            'categoria' => 'sensorial',
             'sn_shape' => [125 => 0, 250 => 0, 500 => 0, 1000 => 5, 2000 => 10, 3000 => 30, 4000 => 45, 6000 => 35, 8000 => 20],
             'sn_scale' => [0.7, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'bilateral',
@@ -250,60 +393,114 @@ final class CaseProfile
         ],
         'coclear_plana' => [
             'label' => 'Coclear plana',
+            'categoria' => 'sensorial',
             'sn_shape' => [125 => 40, 250 => 40, 500 => 45, 1000 => 45, 2000 => 45, 3000 => 45, 4000 => 50, 6000 => 50, 8000 => 50],
             'sn_scale' => [0.6, 1.5], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal',
             'grados' => ['leve', 'moderada', 'severa', 'profunda'],
         ],
-        'conductiva' => [
-            'label' => 'Conductiva (otitis media / otoesclerosis)',
-            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 10, 3000 => 10, 4000 => 10, 6000 => 10, 8000 => 10],
-            'sn_scale' => [0.0, 1.2],
-            'gap_shape' => [125 => 40, 250 => 40, 500 => 38, 1000 => 32, 2000 => 28, 3000 => 26, 4000 => 25, 6000 => 25, 8000 => 25],
-            'gap_scale' => [0.5, 1.2],
-            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
-            // B = ocupación (otitis media), As = oído medio rígido
-            // (otoesclerosis). Los dos dan gap; cuál sale al azar.
-            'z' => ['B', 'As'], 'etf' => 'Disfunción tubaria',
-            // Una conductiva pura no pasa de ~60 dB: la cóclea está sana y la
-            // vía ósea sigue respondiendo, así que el gap tiene techo. Más
-            // que eso ya no es conductiva, es mixta.
-            'grados' => ['leve', 'moderada'], 'max_db' => 60,
+        'meniere' => [
+            'label' => 'Ménière (ascendente, graves)',
+            'categoria' => 'sensorial',
+            // Al revés que la presbiacusia: el hidrops pega en los graves y
+            // los agudos se conservan. Fluctuante en la clínica; el caso
+            // guarda una foto del momento.
+            'sn_shape' => [125 => 50, 250 => 50, 500 => 45, 1000 => 35, 2000 => 25, 3000 => 20, 4000 => 20, 6000 => 20, 8000 => 20],
+            'sn_scale' => [0.6, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [95, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            // El hidrops se estaciona en el rango moderado: la curva
+            // ascendente con agudos conservados no promedia más alto sin
+            // dejar de ser ascendente.
+            'grados' => ['leve', 'moderada'],
         ],
-        'mixta' => [
-            'label' => 'Mixta',
-            'sn_shape' => [125 => 25, 250 => 25, 500 => 30, 1000 => 30, 2000 => 35, 3000 => 40, 4000 => 45, 6000 => 45, 8000 => 45],
-            'sn_scale' => [0.7, 1.3],
-            'gap_shape' => [125 => 30, 250 => 30, 500 => 28, 1000 => 25, 2000 => 22, 3000 => 20, 4000 => 20, 6000 => 20, 8000 => 20],
-            'gap_scale' => [0.6, 1.1],
+        'subita' => [
+            'label' => 'Hipoacusia súbita',
+            'categoria' => 'sensorial',
+            'sn_shape' => [125 => 55, 250 => 55, 500 => 60, 1000 => 60, 2000 => 60, 3000 => 62, 4000 => 65, 6000 => 65, 8000 => 65],
+            'sn_scale' => [0.6, 1.5], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'unilateral',
-            'z' => ['B', 'As'], 'etf' => 'Disfunción tubaria',
-            // El componente sensorioneural no tiene el techo del gap: una
-            // mixta profunda es aérea ~95 con ósea ~70, que se mide bien.
-            'grados' => ['leve', 'moderada', 'severa', 'profunda'],
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['moderada', 'severa', 'profunda'],
         ],
-        'retrococlear' => [
-            'label' => 'Retrococlear (schwannoma vestibular)',
+        'ototoxica' => [
+            'label' => 'Ototóxica (agudos, bilateral simétrica)',
+            'categoria' => 'sensorial',
+            // Empieza por la base coclear y baja: más abrupta que la
+            // presbiacusia y sin la asimetría del trauma acústico.
+            'sn_shape' => [125 => 0, 250 => 0, 500 => 0, 1000 => 5, 2000 => 20, 3000 => 45, 4000 => 60, 6000 => 70, 8000 => 75],
+            'sn_scale' => [0.6, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            // Más abrupta todavía que la presbiacusia: con 500 y 1000 intactos
+            // el promedio no llega a moderada, y subirlos la aplanaría --
+            // justo la pendiente que hace sospechar el ototóxico.
+            'grados' => ['leve'],
+        ],
+
+        // --- Neurales (retrococleares puras) ----------------------------
+        // cce_pct bajo: la cóclea está viva, la OEA se conserva con el
+        // umbral elevado y lo que se desarma es el ABR. Ese contraste ES el
+        // hallazgo.
+        'schwannoma' => [
+            'label' => 'Schwannoma vestibular',
+            'categoria' => 'neural',
             'sn_shape' => [125 => 10, 250 => 10, 500 => 15, 1000 => 20, 2000 => 30, 3000 => 40, 4000 => 45, 6000 => 50, 8000 => 55],
             'sn_scale' => [0.5, 1.2], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [10, 35], 'retro' => 'schwannoma', 'lateralidad' => 'unilateral',
             'z' => ['A'], 'etf' => 'Normal',
             // Con esta forma descendente el promedio no pasa de ~70 sin que
             // 4 kHz sature, y saturarla la aplanaría: dejaría de ser el
-            // descendente asimétrico que hace sospechar el retro. Lo que este
-            // cuadro enseña es la disociación (audiograma moderado con ABR
-            // desarmado y OEA conservada), no la profundidad. Para una severa
-            // retrococlear se arma con 'coclear_plana' severa y se baja el
-            // cce_pct a mano en Perfil auditivo.
+            // descendente asimétrico que hace sospechar el retro. Lo que
+            // este cuadro enseña es la disociación (audiograma moderado con
+            // ABR desarmado y OEA conservada), no la profundidad.
             'grados' => ['leve', 'moderada'],
         ],
         'neuropatia' => [
             'label' => 'Neuropatía auditiva / desincronía (ANSD)',
+            'categoria' => 'neural',
             'sn_shape' => [125 => 45, 250 => 45, 500 => 50, 1000 => 50, 2000 => 50, 3000 => 50, 4000 => 55, 6000 => 55, 8000 => 55],
             'sn_scale' => [0.6, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [0, 10], 'retro' => 'ansd', 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada', 'severa', 'profunda'],
+        ],
+
+        // --- Sensorioneurales (los dos componentes a la vez) ------------
+        'sensorioneural' => [
+            'label' => 'Coclear con componente retrococlear',
+            'categoria' => 'sensorioneural',
+            'sn_shape' => [125 => 30, 250 => 30, 500 => 35, 1000 => 40, 2000 => 45, 3000 => 50, 4000 => 55, 6000 => 55, 8000 => 55],
+            'sn_scale' => [0.6, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            // El punto del cuadro: ni 100 ni 0. La OEA dice cuánto hay de
+            // coclear y el ABR cuánto de retro, y separarlos es el ejercicio.
+            'cce_pct' => [20, 80], 'retro' => 'microvascular', 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada', 'severa'],
+        ],
+
+        // --- Mixtas (conductiva + sensorioneural) -----------------------
+        'mixta_otitis_cronica' => [
+            'label' => 'Otitis crónica con daño coclear',
+            'categoria' => 'mixta',
+            'sn_shape' => [125 => 25, 250 => 25, 500 => 30, 1000 => 30, 2000 => 35, 3000 => 40, 4000 => 45, 6000 => 45, 8000 => 45],
+            'sn_scale' => [0.7, 1.3],
+            'gap_shape' => [125 => 30, 250 => 30, 500 => 28, 1000 => 25, 2000 => 22, 3000 => 20, 4000 => 20, 6000 => 20, 8000 => 20],
+            'gap_scale' => [0.6, 1.1],
+            'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['B'], 'etf' => 'Disfunción tubaria',
+            'grados' => ['leve', 'moderada', 'severa', 'profunda'],
+        ],
+        'mixta_otoesclerosis' => [
+            'label' => 'Otoesclerosis avanzada (con daño coclear)',
+            'categoria' => 'mixta',
+            'sn_shape' => [125 => 30, 250 => 30, 500 => 35, 1000 => 38, 2000 => 45, 3000 => 42, 4000 => 40, 6000 => 45, 8000 => 45],
+            'sn_scale' => [0.7, 1.3],
+            'gap_shape' => [125 => 30, 250 => 30, 500 => 28, 1000 => 22, 2000 => 15, 3000 => 18, 4000 => 20, 6000 => 20, 8000 => 20],
+            'gap_scale' => [0.5, 1.1],
+            'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['As'], 'etf' => 'Normal',
             'grados' => ['leve', 'moderada', 'severa', 'profunda'],
         ],
     ];
