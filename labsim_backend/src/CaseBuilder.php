@@ -815,7 +815,7 @@ final class CaseBuilder
 
     /**
      * Fallback server-side de la fecha de nacimiento a partir de la edad --
-     * el cálculo real vive en JS (case_create.php, recalcula al tipear la
+     * el cálculo real vive en JS (case/age-rut.js, recalcula al tipear la
      * edad); esto solo cubre el caso de que el campo llegue vacío (JS
      * deshabilitado). Año = año actual - edad, día/mes al azar dentro de
      * ese año.
