@@ -14,8 +14,9 @@
     var avatarPreview = document.getElementById('patient-avatar-preview');
     var avatarEmpty = document.getElementById('patient-avatar-empty');
     var msgEl = document.getElementById('photo-msg');
-    var dlOriginal = document.getElementById('patient-download-original');
-    var dlAvatar = document.getElementById('patient-download-avatar');
+    // El parrafo entero, no cada enlace: entre los dos hay un "|" de texto
+    // suelto que ocultando solo los <a> quedaba flotando en la ficha.
+    var dlLinks = document.getElementById('patient-download-links');
     if (!fileInput || !modal) { return; }
 
     var CASE_ID = window.CASE_CONST.caseId;
@@ -169,8 +170,7 @@
                     pendingEmpty.hidden = true;
                     // Los enlaces de descarga son del bloque del paciente:
                     // un acompañante no los tiene.
-                    if (pendingPersona === '' && dlOriginal) { dlOriginal.hidden = false; }
-                    if (pendingPersona === '' && dlAvatar) { dlAvatar.hidden = false; }
+                    if (pendingPersona === '' && dlLinks) { dlLinks.hidden = false; }
                     showMsg('Foto actualizada.', false);
                     closeModal();
                 } else {

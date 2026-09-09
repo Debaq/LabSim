@@ -79,10 +79,14 @@
             <div>
                 <input type="file" id="patient-photo-input" accept="image/jpeg,image/png,image/webp">
                 <p class="help">Al elegir una foto se abre un recorte circular -- se guarda una versión reducida completa y el avatar recortado.</p>
-                <p class="help">
-                    <a id="patient-download-original" href="patient_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;type=original&amp;download=1" <?= $hasAvatar ? '' : 'hidden' ?>>Descargar foto grande</a>
+                <!-- El "|" que separa los dos enlaces es texto suelto, no un
+                     elemento: ocultando cada <a> por separado quedaba flotando
+                     solo en un paciente sin foto. Se oculta el parrafo entero,
+                     que ademas es lo unico que hay adentro. -->
+                <p class="help" id="patient-download-links" <?= $hasAvatar ? '' : 'hidden' ?>>
+                    <a id="patient-download-original" href="patient_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;type=original&amp;download=1">Descargar foto grande</a>
                     &nbsp;|&nbsp;
-                    <a id="patient-download-avatar" href="patient_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;type=avatar&amp;download=1" <?= $hasAvatar ? '' : 'hidden' ?>>Descargar foto recortada</a>
+                    <a id="patient-download-avatar" href="patient_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;type=avatar&amp;download=1">Descargar foto recortada</a>
                 </p>
             </div>
         </div>
