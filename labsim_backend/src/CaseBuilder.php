@@ -842,27 +842,30 @@ final class CaseBuilder
         return $result;
     }
 
-    /** Nombre + apellido al azar del banco compartido con la app de escritorio (resources/json/names.json). */
-    public static function randomName(string $gender): array
+    /**
+     * Banco de nombres y apellidos, compartido con la app de escritorio
+     * (resources/names.json).
+     *
+     * Devuelve el banco crudo y no un nombre ya elegido porque quien sortea
+     * es el editor, en JS: el nombre se escribe junto con el resto del caso
+     * al apretar "Generar caso", sin recargar la página. Sortearlo también
+     * acá serían dos implementaciones de lo mismo, y la del servidor no la
+     * llamaría nadie.
+     *
+     * @return array{nombres_hombres:list<string>, nombres_mujeres:list<string>, apellidos:list<string>}
+     */
+    public static function nameBank(): array
     {
         $path = __DIR__ . '/../resources/names.json';
-        $bank = json_decode((string) file_get_contents($path), true) ?? [];
-        $nombres = $gender === 'men' ? ($bank['nombres_hombres'] ?? []) : ($bank['nombres_mujeres'] ?? []);
-        $apellidos = $bank['apellidos'] ?? [];
-
-        if (!$nombres || !$apellidos) {
-            return ['Paciente', 'De Prueba', 'Apellido', 'Uno'];
+        $bank = is_file($path) ? json_decode((string) file_get_contents($path), true) : null;
+        if (!is_array($bank)) {
+            $bank = [];
         }
-
-        $nombre1 = $nombres[array_rand($nombres)];
-        $nombre2Pool = array_values(array_diff($nombres, [$nombre1]));
-        $nombre2 = $nombre2Pool ? $nombre2Pool[array_rand($nombre2Pool)] : $nombre1;
-
-        $apellido1 = $apellidos[array_rand($apellidos)];
-        $apellido2Pool = array_values(array_diff($apellidos, [$apellido1]));
-        $apellido2 = $apellido2Pool ? $apellido2Pool[array_rand($apellido2Pool)] : $apellido1;
-
-        return [$nombre1, $nombre2, $apellido1, $apellido2];
+        return [
+            'nombres_hombres' => array_values($bank['nombres_hombres'] ?? []),
+            'nombres_mujeres' => array_values($bank['nombres_mujeres'] ?? []),
+            'apellidos' => array_values($bank['apellidos'] ?? []),
+        ];
     }
 
     /**

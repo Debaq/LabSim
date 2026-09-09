@@ -274,13 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $gender = ($v['gender'] ?? '0') === '1' ? 1 : 0;
 
-    if ($formAction === 'generate_name') {
-        [$n1, $n2, $a1, $a2] = CaseBuilder::randomName($gender === 0 ? 'men' : 'women');
-        $v['nombre1'] = $n1;
-        $v['nombre2'] = $n2;
-        $v['apellido1'] = $a1;
-        $v['apellido2'] = $a2;
-    } elseif ($formAction === 'create_case' || $formAction === 'update_case') {
+    if ($formAction === 'create_case' || $formAction === 'update_case') {
         $isUpdate = $formAction === 'update_case';
         // Edad = propia del paciente/caso, se guarda en cases.data ('edad').
         // Editable siempre acá, en creación y en edición -- la agenda no
@@ -644,7 +638,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($age <= 0) {
             $error = 'Falta la edad.';
         } elseif (!$isUpdate && ($nombre1 === '' || $apellido1 === '')) {
-            $error = 'Falta el nombre del paciente (generalo con el botón o escríbelo a mano).';
+            $error = 'Falta el nombre del paciente: generalo con "Generar caso" (Armado rápido) o escribilo a mano en la pestaña Paciente.';
         } elseif ($isUpdate && (trim((string) ($v['nombre'] ?? '')) === '' || trim((string) ($v['apellido'] ?? '')) === '')) {
             $error = 'Falta el nombre del paciente.';
         } elseif (!in_array($zOd, CaseBuilder::Z_OPTIONS, true) || !in_array($zOi, CaseBuilder::Z_OPTIONS, true)) {
@@ -976,7 +970,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 
 <div class="card">
     <strong>Paciente</strong>
-    <p class="legend help">El <strong>sexo</strong> decide el nombre que sale. La <strong>edad</strong> pesa más: fija la fecha de nacimiento y el RUT, elige la población de referencia del ABR --un neonato no tiene las latencias de un adulto--, es obligatoria para la anamnesis con IA, y define <strong>qué es normal</strong> en este paciente (ver abajo).</p>
+    <p class="legend help">El <strong>sexo</strong> decide el nombre, que lo escribe "Generar caso" junto con el resto -- ya no hay un botón aparte para eso. La <strong>edad</strong> pesa más: fija la fecha de nacimiento y el RUT, elige la población de referencia del ABR --un neonato no tiene las latencias de un adulto--, es obligatoria para la anamnesis con IA, y define <strong>qué es normal</strong> en este paciente (ver abajo).</p>
     <p class="legend help">Son los mismos campos de <a href="#" class="tab-link" data-goto-tab="paciente">Paciente</a>, no una copia: cambiarlos en cualquiera de los dos lados los cambia en el otro. El RUT, la foto y la historia clínica se cargan allá.</p>
     <div class="three-col">
         <label>Sexo
@@ -988,11 +982,6 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <label>Edad
             <input type="number" id="armado-age" min="0" max="110" value="<?= htmlspecialchars((string) ($v['age'] ?? '')) ?>">
         </label>
-        <?php if (!$isEdit): ?>
-        <label style="align-self:end;">
-            <button type="submit" name="form_action" value="generate_name" class="secondary" style="margin-top:0;">Generar nombre al azar</button>
-        </label>
-        <?php endif; ?>
     </div>
 </div>
 
@@ -1038,7 +1027,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <button type="button" id="perfil-generar">Generar caso</button>
         <span id="armado-estado" class="legend"></span>
     </div>
-    <p class="legend help">Generar <strong>pisa</strong> el audiograma, la timpanometría, el perfil, el ABR y la OEA de los dos oídos. No toca la identidad, la historia clínica, la sala, la otoscopia, el tinnitus, el VEMP ni la anamnesis.</p>
+    <p class="legend help">Generar <strong>pisa</strong> el audiograma, la timpanometría, el perfil, el ABR y la OEA de los dos oídos, y el nombre del paciente. No toca la edad, el RUT, la foto, la historia clínica, la sala, la otoscopia, el tinnitus, el VEMP ni la anamnesis.</p>
+    <p class="legend help">Al editar un caso que ya existe, el nombre NO se toca: ahí el nombre es del paciente y cambiarlo afectaría a todas sus otras citas.</p>
     <p class="legend help">Lo que queda para decidir a mano después es lo que ninguna cuenta puede sacar del audiograma: el VEMP, y el detalle fino de la función tubaria. El editor los reclama al guardar si quedaron sin tocar.</p>
 </div>
 
@@ -2659,6 +2649,9 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     var ISO7029_EDAD_BASE = <?= (int) CaseProfile::ISO7029_EDAD_BASE ?>;
     var FREQS = <?= json_encode(CaseBuilder::FREQUENCIES) ?>;
     var AUTO_MODULES = <?= json_encode(CaseProfile::AUTO_MODULES) ?>;
+    // Banco compartido con la app de escritorio (resources/names.json, fuera
+    // de public/: no se puede pedir por HTTP, viaja serializado acá).
+    var NOMBRES = <?= json_encode(CaseBuilder::nameBank(), JSON_UNESCAPED_UNICODE) ?>;
     var JITTER_DB = 4;   // ruido por frecuencia: ningún audiograma real es liso
     // Techo de la audiometría. Si una frecuencia del promedio satura, subir
     // más la escala ya no sube el promedio: el grado pedido no se alcanza y
@@ -2678,6 +2671,35 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     function entre(a, b) { return a + Math.random() * (b - a); }
     function aCinco(x) { return Math.max(0, Math.min(120, Math.round(x / 5) * 5)); }
     function alAzar(lista) { return lista[Math.floor(Math.random() * lista.length)]; }
+
+    /**
+     * Nombre al azar según el sexo elegido.
+     *
+     * Solo en creación: al editar, los campos son `nombre`/`apellido` y
+     * escriben sobre el PACIENTE, así que regenerarlos le cambiaría el nombre
+     * en todas sus otras citas. Ahí se deja lo que haya.
+     */
+    function generarNombre() {
+        var n1 = document.querySelector('#case-form [name="nombre1"]');
+        if (!n1) { return null; }   // modo edición
+        var pila = generoActual() === 1 ? NOMBRES.nombres_mujeres : NOMBRES.nombres_hombres;
+        var apellidos = NOMBRES.apellidos;
+        if (!pila || !pila.length || !apellidos || !apellidos.length) { return null; }
+
+        function dosDistintos(lista) {
+            var a = alAzar(lista);
+            var resto = lista.filter(function (x) { return x !== a; });
+            return [a, resto.length ? alAzar(resto) : a];
+        }
+        var nom = dosDistintos(pila);
+        var ape = dosDistintos(apellidos);
+        var campos = { nombre1: nom[0], nombre2: nom[1], apellido1: ape[0], apellido2: ape[1] };
+        Object.keys(campos).forEach(function (k) {
+            var el = document.querySelector('#case-form [name="' + k + '"]');
+            if (el) { el.value = campos[k]; }
+        });
+        return nom[0] + ' ' + ape[0];
+    }
 
     function edadActual() {
         var el = document.getElementById('patient-age');
@@ -3013,8 +3035,10 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         // aporta solo lo que el perfil no describe.
         if (window.proyectarPerfil) { window.proyectarPerfil(); }
 
+        var nombre = generarNombre();
         if (estado) {
-            estado.textContent = 'Listo: OD ' + escOd.label + ', OI ' + escOi.label +
+            estado.textContent = 'Listo: ' + (nombre ? nombre + ' -- ' : '') +
+                'OD ' + escOd.label + ', OI ' + escOi.label +
                 '. Revisalo en Audiometría antes de guardar.';
         }
     });
