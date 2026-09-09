@@ -208,14 +208,21 @@ class VempLatIntGraph(pg.GraphicsLayoutWidget):
                              symbolBrush=pg.mkBrush(*color), name=lado)
 
     def clear_graph(self):
-        for item in self.pw.listDataItems():
-            if not getattr(item, 'is_band', False):
-                self.pw.removeItem(item)
+        # La leyenda se limpia A MANO. pyqtgraph la llena solo (todo item
+        # con name() entra al agregarlo) pero removeItem no lo saca de ahí:
+        # sin este clear, cada vuelta a la pestaña repetía las entradas y la
+        # leyenda crecía hacia abajo tapando el gráfico. Mismo arreglo que
+        # en AbrLatIntGraph.clear_graph().
+        if self.legend is not None:
+            self.legend.clear()
         for item in list(self.pw.items):
-            if isinstance(item, pg.ScatterPlotItem):
+            if getattr(item, 'is_band', False):
+                continue
+            if isinstance(item, (pg.PlotDataItem, pg.ScatterPlotItem)):
                 self.pw.removeItem(item)
-        for item in self.pw_amp.listDataItems():
-            self.pw_amp.removeItem(item)
+        for item in list(self.pw_amp.items):
+            if isinstance(item, (pg.PlotDataItem, pg.ScatterPlotItem)):
+                self.pw_amp.removeItem(item)
 
     def export_jpg(self, path):
         """Exporta el plot como JPEG (usado por submit_report)."""
