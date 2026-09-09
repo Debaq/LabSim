@@ -416,21 +416,51 @@ final class Sala
      * corresponde a nadie de esta consulta no se toca nada: puede ser parte
      * de la frase ("le dije: no escucho").
      *
+     * Los rótulos se pelan mientras haya: el modelo llega a anidarlos --
+     * "Sofía García (Madre): Pepe Andrés García Contreras: bien, un poco
+     * nervioso" -- y ahí quien habla es el de más adentro. Pelar uno solo
+     * dejaba la frase con el nombre del hijo escrita adentro y la cara de la
+     * madre en la burbuja, que es justo el error que esto viene a arreglar.
+     *
      * @return array{0: array<string,mixed>|null, 1: string}
      */
     public static function separaRotulo(array $sala, string $texto): array
     {
         $limpio = trim($texto);
+        $persona = null;
+
+        // Tope de vueltas: el texto se acorta en cada una, pero un rótulo
+        // repetido no puede colgar el turno de un alumno.
+        for ($i = 0; $i < 4; $i++) {
+            [$quien, $resto] = self::pelaUnRotulo($sala, $limpio);
+            if ($quien === null || $resto === '') {
+                break;
+            }
+            $persona = $quien;
+            $limpio = $resto;
+        }
+
+        return [$persona, $limpio];
+    }
+
+    /**
+     * Una sola vuelta de separaRotulo(): el rótulo más externo, si es de
+     * alguien de esta consulta.
+     *
+     * @return array{0: array<string,mixed>|null, 1: string}
+     */
+    private static function pelaUnRotulo(array $sala, string $texto): array
+    {
         // El modelo a veces lo pone en negrita markdown: **Sofía:** ...
-        if (preg_match('/^\*\*(.{1,80}?)\*\*\s*:?\s*(.*)$/su', $limpio, $m)
+        if (preg_match('/^\*\*(.{1,80}?)\*\*\s*:?\s*(.*)$/su', $texto, $m)
             && ($persona = self::resolver($sala, $m[1])) !== null) {
             return [$persona, trim($m[2])];
         }
-        if (!preg_match('/^([^:\n]{1,80}):\s*(.+)$/su', $limpio, $m)) {
-            return [null, $limpio];
+        if (!preg_match('/^([^:\n]{1,80}):\s*(.+)$/su', $texto, $m)) {
+            return [null, $texto];
         }
         $persona = self::resolver($sala, $m[1]);
-        return $persona !== null ? [$persona, trim($m[2])] : [null, $limpio];
+        return $persona !== null ? [$persona, trim($m[2])] : [null, $texto];
     }
 
     /** Minúsculas sin tildes ni puntuación: para comparar rótulos escritos a mano. */
@@ -481,25 +511,15 @@ final class Sala
             if ($texto === '') {
                 continue;
             }
-            [$porRotulo, $texto] = self::separaRotulo($sala, $texto);
-            if ($texto === '') {
-                continue;
+            // El id es solo el candidato por defecto: manda el rótulo que
+            // venga dentro de la frase. Si el modelo escribió "Pepe: tengo
+            // cinco" bajo el id de la madre, quien habla es Pepe y el id es
+            // el que se equivocó. Y si metió a dos en el mismo turno, cada
+            // línea rotulada se vuelve su propia burbuja.
+            $porId = self::resolver($sala, (string) ($t['id'] ?? '')) ?? self::informante($sala);
+            foreach (self::intervencionesDesdeTextoPlano($texto, $sala, $porId) as $i) {
+                $out[] = $i;
             }
-            // Manda el rótulo que venía dentro de la frase: si el modelo
-            // escribió "Pepe: tengo cinco" bajo el id de la madre, quien
-            // habla es Pepe y el id es el que se equivocó. Recién después
-            // vale el id, y al final quien lleva la voz cantante.
-            $persona = $porRotulo
-                ?? self::resolver($sala, (string) ($t['id'] ?? ''))
-                ?? self::informante($sala);
-            if ($persona === null) {
-                continue;
-            }
-            $out[] = [
-                'persona_id' => $persona['id'],
-                'etiqueta' => self::etiqueta($persona),
-                'texto' => $texto,
-            ];
         }
 
         if ($out) {
@@ -559,16 +579,20 @@ final class Sala
     }
 
     /**
-     * Respuesta en texto plano rotulada por líneas ("Sofía: buenas tardes"),
-     * que es como contesta el modelo cuando ignora el formato JSON. Las líneas
-     * sin rótulo siguen siendo de quien habló recién.
+     * Respuesta rotulada por líneas ("Sofía: buenas tardes"), que es como
+     * contesta el modelo cuando ignora el formato JSON -- y también como
+     * escribe adentro de un turno cuando mete a dos personas en uno solo.
+     * Las líneas sin rótulo siguen siendo de quien habló recién.
      *
-     * Devuelve vacío si ninguna línea nombra a alguien de esta consulta: ahí no
-     * hay nada que atribuir y decide quien llama.
+     * $default es de quién son las líneas que no traen rótulo antes de que
+     * hable alguien: el dueño del turno cuando esto lee un turno del JSON, y
+     * null cuando lee la respuesta entera. Con null se devuelve vacío si
+     * nadie de la consulta aparece rotulado, y decide quien llama.
      *
      * @return list<array{persona_id: string, etiqueta: string, texto: string}>
      */
-    private static function intervencionesDesdeTextoPlano(string $texto, array $sala): array
+    private static function intervencionesDesdeTextoPlano(string $texto, array $sala,
+                                                          ?array $default = null): array
     {
         $out = [];
         foreach (preg_split('/\R+/', $texto) ?: [] as $linea) {
@@ -577,13 +601,17 @@ final class Sala
                 continue;
             }
             [$persona, $frase] = self::separaRotulo($sala, $linea);
-            if ($persona === null) {
-                if ($out) {
-                    $out[count($out) - 1]['texto'] = trim($out[count($out) - 1]['texto'] . ' ' . $frase);
-                }
+            if ($frase === '') {
                 continue;
             }
-            if ($frase === '') {
+            // Sigue hablando el mismo: la frase se pega a su burbuja en vez
+            // de partirla en dos por un salto de línea.
+            if ($persona === null && $out) {
+                $out[count($out) - 1]['texto'] = trim($out[count($out) - 1]['texto'] . ' ' . $frase);
+                continue;
+            }
+            $persona = $persona ?? $default;
+            if ($persona === null) {
                 continue;
             }
             $out[] = [

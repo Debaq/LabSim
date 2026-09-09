@@ -280,3 +280,31 @@ t_eq($r[0]['persona_id'], 'p1', 'La lista pelada, sin la clave turnos');
 t_eq(Sala::resolver(sala_negador(), 'P2')['id'], 'p2', 'El id no distingue mayúsculas');
 t_eq(Sala::resolver(sala_negador(), 'Ana (Cónyuge / pareja)')['id'], 'p2', 'La etiqueta completa resuelve');
 t_eq(Sala::resolver(sala_negador(), 'no existe'), null, 'Un rótulo ajeno a la consulta no resuelve a nadie');
+
+// Rótulo anidado: el modelo rotula con el dueño del turno y adentro vuelve a
+// rotular con quien de verdad habla. Pelar uno solo dejaba la burbuja con la
+// cara de la madre y el nombre del hijo escrito adentro.
+$r = Sala::intervenciones(
+    '{"turnos":[{"id":"p2","texto":"Sofía García (Madre): Pepe Andrés García Contreras: Bien, un poco nervioso."}]}',
+    $sala
+);
+t_eq(count($r), 1, 'Rótulo anidado: sigue siendo un turno');
+t_eq($r[0]['persona_id'], 'p1', 'Habla el de más adentro, no el del rótulo externo');
+t_eq($r[0]['texto'], 'Bien, un poco nervioso.', 'Y no queda ningún nombre en la frase');
+
+$r = Sala::intervenciones("Sofía: Pepe: Bien, un poco nervioso.", $sala);
+t_eq($r[0]['persona_id'], 'p1', 'Lo mismo en la respuesta en texto plano');
+
+// Dos personas dentro de un mismo turno del JSON.
+$r = Sala::intervenciones(
+    '{"turnos":[{"id":"p1","texto":"Bien.\nSofía García (Madre): Está nervioso, no durmió."}]}',
+    $sala
+);
+t_eq(count($r), 2, 'Dos voces en un turno: dos burbujas');
+t_eq($r[0]['persona_id'], 'p1', 'Lo primero es del dueño del turno');
+t_eq($r[0]['texto'], 'Bien.', 'Sin arrastrar lo que dijo la otra');
+t_eq($r[1]['persona_id'], 'p2', 'Y lo rotulado es de quien lo firma');
+
+$r = Sala::intervenciones('{"turnos":[{"id":"p1","texto":"Bien.\nUn poco nervioso."}]}', $sala);
+t_eq(count($r), 1, 'Un salto de línea sin rótulo no parte la burbuja');
+t_eq($r[0]['texto'], 'Bien. Un poco nervioso.', 'La frase sigue entera');
