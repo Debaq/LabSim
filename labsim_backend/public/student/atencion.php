@@ -71,7 +71,7 @@ if ($appointment['patient_id']) {
 }
 
 $stmt = $pdo->prepare(
-    'SELECT id, role, content, created_at FROM llm_chat_logs
+    'SELECT id, role, content, speaker_label, created_at FROM llm_chat_logs
      WHERE appointment_id = ? AND student_id = ? ORDER BY id'
 );
 $stmt->execute([$appointmentId, $me['id']]);
@@ -240,7 +240,13 @@ student_header($paciente, $me);
                 <div style="max-width:80%; padding:0.5rem 0.8rem; border-radius:12px; font-size:0.9rem; white-space:pre-wrap;
                     <?= $role === 'user' ? 'background:#3b5bdb; color:#fff;' : 'background:#fff; border:1px solid #e5e5ea;' ?>">
                     <span class="bubble-system-header--muted">
-                        <?= $role === 'assistant' ? 'Paciente' : 'Tú' ?> · <?= htmlspecialchars($turn['created_at']) ?>
+                        <?php
+                        // En un caso con acompañantes la conversación tiene
+                        // varias voces; las anteriores al chat grupal no
+                        // traen etiqueta y siguen diciendo "Paciente".
+                        $hablante = trim((string) ($turn['speaker_label'] ?? '')) ?: 'Paciente';
+                        ?>
+                        <?= htmlspecialchars($role === 'assistant' ? $hablante : 'Tú') ?> · <?= htmlspecialchars($turn['created_at']) ?>
                     </span>
                     <?= htmlspecialchars($turn['content']) ?>
                 </div>

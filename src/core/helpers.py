@@ -60,17 +60,41 @@ def _get_backend_client() -> BackendClient:
     return _backend_client
 
 
-def chat_con_paciente(case_id, nombre, edad, procedimiento, history, message, appointment_id=None):
-    """Un turno de chat con el paciente simulado por LLM (vive en el servidor).
-    Devuelve el texto de respuesta del paciente.
+def sala_del_caso(case_id, nombre="", edad=0):
+    """Quiénes están en el box de un caso (ver Sala.php en el backend), para
+    armar el selector de destinatario al abrir el chat.
+
+    Lista vacía si falla la red: sin sala el chat sigue funcionando como el
+    1 a 1 de siempre (se le pregunta al aire y contesta quien corresponda),
+    que es mejor que no dejar conversar.
+    """
+    try:
+        return _get_backend_client().get_case_sala(case_id, nombre, edad).get("sala", [])
+    except requests.RequestException:
+        return []
+
+
+def chat_con_paciente(case_id, nombre, edad, procedimiento, history, message, appointment_id=None,
+                      dirigido_a="", silenciados=None, fuera=None, salida_solicitada=""):
+    """Un turno de chat con la sala del caso (vive en el servidor, ver
+    Sala.php). Devuelve el dict completo del backend: `respuestas` (una por
+    cada persona que habló en el turno), `sala` (quién está en el box),
+    `silenciados`, `avisos`.
+
+    Devuelve el dict y no el texto porque un turno puede tener más de una
+    voz: el paciente que niega y la esposa que lo corrige son dos burbujas
+    distintas, con distinta cara y distinto nombre.
 
     appointment_id: cita real a la que se le asocia el chat guardado (ver
     LlmChat.php) -- None cuando no corresponde dejar rastro (ej. "Atender
     (prueba)" del admin).
     """
     client = _get_backend_client()
-    result = client.llm_chat(case_id, nombre, edad, procedimiento, history, message, appointment_id)
-    return result["reply"]
+    return client.llm_chat(
+        case_id, nombre, edad, procedimiento, history, message, appointment_id,
+        dirigido_a=dirigido_a, silenciados=silenciados, fuera=fuera,
+        salida_solicitada=salida_solicitada,
+    )
 
 
 def inbox_list() -> list:
@@ -113,14 +137,14 @@ def mi_conversacion(appointment_id: int) -> list:
         return []
 
 
-def foto_paciente(case_id):
+def foto_paciente(case_id, persona=""):
     """Avatar circular del paciente (bytes PNG) o None si no tiene foto
     subida o no hay conexión al backend -- a diferencia de chat_con_paciente,
     acá una falla de red no es un error para quien llama: el avatar es un
     detalle visual, no bloquea el chat si no se puede traer (se usa un
     círculo con iniciales como respaldo, ver core/avatar.py)."""
     try:
-        return _get_backend_client().get_patient_avatar(case_id)
+        return _get_backend_client().get_patient_avatar(case_id, persona)
     except requests.RequestException:
         return None
 

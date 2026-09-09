@@ -102,7 +102,7 @@ $reportLabels = [
 ];
 
 $stmt = $pdo->prepare(
-    'SELECT id, role, content, created_at FROM llm_chat_logs
+    'SELECT id, role, content, speaker_label, created_at FROM llm_chat_logs
      WHERE appointment_id = ? AND student_id = ? ORDER BY id'
 );
 $stmt->execute([$appointmentId, $studentId]);
@@ -209,11 +209,17 @@ if ($attendance) {
         ?>
         <div class="chat-row">
             <div class="bubble-col align-<?= $role ?>">
+                <?php
+                // Quién habló: en un caso con acompañantes la misma
+                // conversación tiene varias voces. Las filas anteriores al
+                // chat grupal no traen etiqueta y siguen diciendo "Paciente".
+                $hablante = trim((string) ($turn['speaker_label'] ?? '')) ?: 'Paciente';
+                ?>
                 <?php if ($role === 'assistant'): ?>
-                <div class="avatar a-assistant" title="Paciente">P</div>
+                <div class="avatar a-assistant" title="<?= htmlspecialchars($hablante) ?>"><?= htmlspecialchars(chat_initials($hablante)) ?></div>
                 <?php endif; ?>
                 <div class="chat-turn <?= $role ?>">
-                    <span class="chat-meta"><?= $role === 'assistant' ? 'Paciente' : 'Alumno' ?> · <?= htmlspecialchars($turn['created_at']) ?></span>
+                    <span class="chat-meta"><?= htmlspecialchars($role === 'assistant' ? $hablante : 'Alumno') ?> · <?= htmlspecialchars($turn['created_at']) ?></span>
                     <?= htmlspecialchars($turn['content']) ?>
                 </div>
                 <?php if ($role === 'user'): ?>

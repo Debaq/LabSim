@@ -320,6 +320,11 @@ CREATE TABLE IF NOT EXISTS llm_config (
     -- aviso (ver inbox_messages abajo). Mismo criterio "vacío = default"
     -- que system_prompt_template, editable desde Admin -> IA Paciente.
     oirs_prompt_template TEXT NOT NULL DEFAULT '',
+    -- Vacío = usa LlmConfig::DEFAULT_COMPANION_PROMPT -- prompt de los
+    -- acompañantes de la sala (madre, cónyuge, cuidador; ver Sala.php). Va
+    -- aparte del prompt del paciente porque el acompañante sabe justo lo
+    -- que el paciente no puede saber: fechas, remedios, cómo fue el parto.
+    companion_prompt_template TEXT NOT NULL DEFAULT '',
     active INTEGER NOT NULL DEFAULT 0,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -337,6 +342,18 @@ CREATE TABLE IF NOT EXISTS llm_chat_logs (
     case_id TEXT NOT NULL REFERENCES cases(id),
     role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
     content TEXT NOT NULL,
+    -- Quién habló, ahora que en la sala hay más de una persona (ver
+    -- Sala.php): id de la persona dentro del caso + su etiqueta ya armada
+    -- ("Rosa (madre)"). Se guarda la etiqueta y no solo el id porque la
+    -- sala del caso puede editarse después y la conversación tiene que
+    -- seguir leyéndose como ocurrió. Vacío en las filas anteriores al chat
+    -- grupal y en los turnos del alumno (role='user').
+    speaker_id TEXT NOT NULL DEFAULT '',
+    speaker_label TEXT NOT NULL DEFAULT '',
+    -- A quién le habló el alumno en ese turno (id de persona, o '' si
+    -- preguntó al aire). Es dato evaluable por sí solo: preguntarle al
+    -- lactante lo que sabe la madre es un error de entrevista.
+    addressed_to TEXT NOT NULL DEFAULT '',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_llm_chat_logs_appt ON llm_chat_logs (appointment_id, student_id);

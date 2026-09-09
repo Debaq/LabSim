@@ -15,6 +15,8 @@ Auth::requireAdminSession();
 
 $caseId = trim((string) ($_GET['case_id'] ?? ''));
 $type = (string) ($_GET['type'] ?? 'avatar');
+// Persona de la sala (ver Sala.php); vacío = el paciente.
+$personaId = trim((string) ($_GET['persona'] ?? ''));
 $download = isset($_GET['download']) && $_GET['download'] !== '0';
 
 if ($caseId === '' || !in_array($type, ['avatar', 'original'], true)) {
@@ -23,7 +25,8 @@ if ($caseId === '' || !in_array($type, ['avatar', 'original'], true)) {
 }
 
 try {
-    $path = $type === 'avatar' ? PatientPhoto::avatarPath($caseId) : PatientPhoto::originalPath($caseId);
+    $key = PatientPhoto::key($caseId, $personaId);
+    $path = $type === 'avatar' ? PatientPhoto::avatarPath($key) : PatientPhoto::originalPath($key);
 } catch (InvalidArgumentException $e) {
     http_response_code(400);
     exit;

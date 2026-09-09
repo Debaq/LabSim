@@ -23,7 +23,7 @@ if ($appointmentId <= 0) {
 }
 
 $stmt = $pdo->prepare(
-    'SELECT id, role, content, created_at FROM llm_chat_logs
+    'SELECT id, role, content, speaker_label, created_at FROM llm_chat_logs
      WHERE appointment_id = ? AND student_id = ? ORDER BY id'
 );
 $stmt->execute([$appointmentId, $user['id']]);
@@ -52,6 +52,9 @@ foreach ($log as $turn) {
         'id' => (int) $turn['id'],
         'role' => $turn['role'],
         'content' => $turn['content'],
+        // Quién habló (ver Sala.php). Vacío en las conversaciones anteriores
+        // al chat grupal y en los turnos del alumno.
+        'speaker_label' => (string) ($turn['speaker_label'] ?? ''),
         'created_at' => $turn['created_at'],
         'comments' => $comments[(int) $turn['id']] ?? [],
     ];

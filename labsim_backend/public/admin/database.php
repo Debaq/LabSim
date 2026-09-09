@@ -50,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // oirs_prompt_template si faltaba.
             Db::migrateLlmOirsPromptIfNeeded();
             Db::migrateLlmAnamnesisTokensIfNeeded();
+            Db::migrateSalaIfNeeded();
             Db::migratePatientHistoriaClinicaIfNeeded();
             Db::migratePatientComentarioDocenteIfNeeded();
             Db::migrateCoursesIfNeeded();

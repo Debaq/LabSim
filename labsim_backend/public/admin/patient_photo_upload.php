@@ -33,6 +33,9 @@ try {
 }
 
 $caseId = trim((string) ($_POST['case_id'] ?? ''));
+// Persona de la sala a la que pertenece la foto (ver Sala.php). Vacío = el
+// paciente, que conserva la clave histórica del caso.
+$personaId = trim((string) ($_POST['persona'] ?? ''));
 $cropX = (float) ($_POST['crop_x'] ?? 0);
 $cropY = (float) ($_POST['crop_y'] ?? 0);
 $cropSize = (float) ($_POST['crop_size'] ?? 0);
@@ -69,7 +72,7 @@ if ($cropSize <= 0) {
 }
 
 try {
-    PatientPhoto::save($caseId, $file['tmp_name'], $cropX, $cropY, $cropSize);
+    PatientPhoto::save(PatientPhoto::key($caseId, $personaId), $file['tmp_name'], $cropX, $cropY, $cropSize);
     AdminAudit::log($me, 'patient_photo_upload', ['case_id' => $caseId]);
     echo json_encode(['ok' => true]);
 } catch (Throwable $e) {

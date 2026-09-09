@@ -151,19 +151,39 @@ class BackendClient:
             body["nota"] = nota
         return self._post("/api/attendance_action.php", body)
 
+    def get_case_sala(self, case_id: str, nombre: str = "", edad: int = 0) -> dict:
+        """Quiénes están en el box de un caso (ver case_sala.php). Se pide
+        al abrir el chat, antes del primer mensaje: el alumno tiene que ver
+        con quién viene el paciente al entrar, no enterarse después."""
+        return self._get(
+            "/api/case_sala.php", {"case_id": case_id, "nombre": nombre, "edad": edad}
+        )
+
     def llm_chat(
         self, case_id: str, nombre: str, edad: int, procedimiento: str,
         history: list[dict], message: str, appointment_id: int | None = None,
+        dirigido_a: str = "", silenciados: dict | None = None,
+        fuera: list | None = None, salida_solicitada: str = "",
     ) -> dict:
-        """Turno de chat con el paciente simulado por LLM (ver LlmChat.php).
+        """Turno de chat con la sala del caso (ver Sala.php y llm_chat.php).
 
-        Timeout más largo que el resto de endpoints: LlmChat.php espera hasta
-        30s por la respuesta del LLM (CURLOPT_TIMEOUT) -- con el timeout por
-        defecto (10s) el cliente se rendía antes que el propio servidor.
+        Timeout más largo que el resto de endpoints: el servidor espera
+        hasta 30s por CADA persona que hable en el turno (son hasta dos: el
+        destinatario y quien lo interrumpa), así que acá se espera por las
+        dos -- con el timeout por defecto (10s) el cliente se rendía antes
+        que el propio servidor.
+
+        dirigido_a: id de la persona a la que el alumno le habla; vacío =
+        pregunta al aire y contesta el informante principal.
+        silenciados / fuera: estado de la sala (a quién se contuvo y por
+        cuántos turnos, quién quedó fuera del box). El endpoint no tiene
+        sesión, así que el estado vive acá y viaja en cada turno.
+        salida_solicitada: pedirle a alguien que salga del box. Es un turno
+        sin mensaje -- no llama al LLM, pero queda en el registro.
 
         appointment_id: si se manda, el backend guarda el turno (mensaje +
-        respuesta) en llm_chat_logs contra esa cita/alumno para poder
-        revisarlo después. None = no guardar (usado por "Atender (prueba)").
+        cada respuesta, con quién habló) en llm_chat_logs contra esa cita/
+        alumno. None = no guardar (usado por "Atender (prueba)").
         """
         body = {
             "case_id": case_id,
@@ -172,10 +192,16 @@ class BackendClient:
             "procedimiento": procedimiento,
             "history": history,
             "message": message,
+            "dirigido_a": dirigido_a,
+            "silenciados": silenciados or {},
+            "fuera": fuera or [],
         }
+        if salida_solicitada:
+            body["salida_solicitada"] = salida_solicitada
         if appointment_id is not None:
             body["appointment_id"] = appointment_id
-        return self._post("/api/llm_chat.php", body, timeout=35)
+        # Dos personas hablando = dos llamadas al modelo, una tras otra.
+        return self._post("/api/llm_chat.php", body, timeout=70)
 
     def get_inbox(self) -> dict:
         """Bandeja de entrada del usuario logueado (ver inbox.php): avisos
@@ -186,10 +212,14 @@ class BackendClient:
     def mark_inbox_read(self, message_id: int) -> dict:
         return self._post("/api/inbox.php", {"action": "mark_read", "id": message_id})
 
-    def get_patient_avatar(self, case_id: str) -> bytes | None:
-        """Avatar circular del paciente (PNG, ver PatientPhoto::avatarPath en
-        labsim_backend). None si el paciente no tiene foto subida."""
-        return self._get_bytes("/api/patient_photo.php", {"case_id": case_id, "type": "avatar"})
+    def get_patient_avatar(self, case_id: str, persona: str = "") -> bytes | None:
+        """Avatar circular de alguien de la sala del caso (PNG, ver
+        PatientPhoto::avatarPath en labsim_backend). None si no tiene foto
+        subida. persona vacío = el paciente, que conserva la clave
+        histórica del caso; cada acompañante va con su id (ver Sala.php)."""
+        return self._get_bytes(
+            "/api/patient_photo.php", {"case_id": case_id, "type": "avatar", "persona": persona}
+        )
 
     def get_otoscopia_photo(self, case_id: str, side: str, fase: int = 0) -> bytes | None:
         """Imagen de otoscopia (JPEG, ver OtoscopiaPhoto::path en

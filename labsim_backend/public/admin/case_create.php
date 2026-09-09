@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/../../src/PatientPhoto.php';
 require_once __DIR__ . '/../../src/OtoscopiaPhoto.php';
 require_once __DIR__ . '/../../src/Patients.php';
+require_once __DIR__ . '/../../src/Sala.php';
 
 /**
  * Crea un caso clínico completo desde el navegador -- equivalente web de
@@ -227,6 +228,46 @@ if (isset($v['otoscopia']['fases']) && is_array($v['otoscopia']['fases'])) {
         return (string) fv($v, ['otoscopia', 'texto', (string) $n], '');
     };
 }
+
+// Sala: quién viene con el paciente (ver Sala.php). Mismo problema de
+// shape que otoscopia -- al editar, $v trae 'acompanantes' ya armado por
+// Sala::toForm(); en un submit fallido trae los arrays paralelos crudos del
+// POST (sala_rol[], sala_nombre[], ...). Se normaliza acá a una lista de
+// filas para que la tabla se dibuje igual en los dos casos.
+if (isset($v['acompanantes']) && is_array($v['acompanantes'])) {
+    $salaRows = $v['acompanantes'];
+} else {
+    $salaRows = [];
+    foreach (array_keys((array) ($v['sala_rol'] ?? [])) as $i) {
+        $campoSala = static fn(string $k, $def = '') => ((array) ($v[$k] ?? []))[$i] ?? $def;
+        $salaRows[] = [
+            'id' => (string) $campoSala('sala_id'),
+            'rol' => (string) $campoSala('sala_rol', 'madre'),
+            'nombre' => (string) $campoSala('sala_nombre'),
+            'edad' => (string) $campoSala('sala_edad', ''),
+            'genero' => (int) $campoSala('sala_genero', 0),
+            'interrumpe' => (int) $campoSala('sala_interrumpe', Sala::RASGOS_DEFAULT['interrumpe']),
+            'confiabilidad' => (int) $campoSala('sala_confiabilidad', Sala::RASGOS_DEFAULT['confiabilidad']),
+            'version' => (string) $campoSala('sala_version'),
+            'comportamiento' => (string) $campoSala('sala_comportamiento'),
+            'disposicion' => (int) $campoSala('sala_disposicion', 0),
+        ];
+    }
+}
+// Escala de sensibilidad (cases.data PatientDisposition / disposicion de
+// cada acompañante). Vive acá y no en cada pestaña porque la usan dos: el
+// paciente en Anamnesis y cada acompañante en Sala.
+$dispOpts = [
+    -2 => 'Muy quisquilloso/a (se ofende con facilidad)',
+    -1 => 'Algo sensible',
+    0 => 'Normal',
+    1 => 'Cálido/a y agradecido/a',
+    2 => 'Muy positivo/a (elogia con facilidad)',
+];
+$salaAforo = (string) ($v['sala_aforo'] ?? Sala::AFORO_DEFAULT);
+$salaInformante = (string) ($v['sala_informante'] ?? 'p1');
+$pacienteConciencia = (string) ($v['paciente_conciencia'] ?? Sala::RASGOS_DEFAULT['conciencia']);
+$pacienteConfiabilidad = (string) ($v['paciente_confiabilidad'] ?? Sala::RASGOS_DEFAULT['confiabilidad']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Auth::requireCsrf();
@@ -748,6 +789,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ],
                 'comportamiento' => trim((string) ($v['comportamiento'] ?? '')),
                 'disposicion' => (int) ($v['disposicion'] ?? 0),
+                // El paciente no viaja en las filas de la sala: sus datos
+                // ya están en este mismo formulario y tener dos verdades
+                // para la misma persona es pedir que se contradigan.
+                'sala' => Sala::fromForm($v, [
+                    'nombre' => trim((string) ($v['nombre'] ?? ($v['nombre1'] ?? ''))),
+                    'edad' => $age,
+                    'genero' => $gender,
+                    'comportamiento' => trim((string) ($v['comportamiento'] ?? '')),
+                    'disposicion' => (int) ($v['disposicion'] ?? 0),
+                ]),
                 'otoscopia' => ['fases' => $otoscopiaFases],
                 'perfil' => $perfil,
                 'abr' => ['OD' => $abrOd, 'OI' => $abrOi],
@@ -896,6 +947,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <?php $photoCaseId = $isEdit ? $editId : $uploadTempId; ?>
 <div class="tabs" role="tablist">
     <button type="button" class="tab-btn active" data-tab="paciente">Paciente</button>
+    <button type="button" class="tab-btn" data-tab="sala">Sala</button>
     <button type="button" class="tab-btn" data-tab="perfil">Perfil auditivo</button>
     <button type="button" class="tab-btn" data-tab="otoscopia">Otoscopia</button>
     <button type="button" class="tab-btn" data-tab="audiometria">Audiometría</button>
@@ -983,6 +1035,127 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             </div>
         </div>
     </div>
+</div>
+</div>
+
+<div class="tab-panel" data-tab="sala">
+<div class="card">
+    <strong>Sala de atención</strong>
+    <p class="legend help">Quiénes entran al box con el paciente. Un lactante no cuenta su historia: la cuenta la madre. Un menor de 14 años no se atiende solo. Y hay adultos que niegan lo que el acompañante ve todos los días -- ese desacuerdo <em>es</em> el hallazgo clínico del caso, y el alumno tiene que darse cuenta de a quién le está preguntando.</p>
+    <p class="legend help">Un caso sin acompañantes se comporta exactamente como antes: una conversación con el paciente y nadie más.</p>
+
+    <div class="three-col">
+        <label>Acompañantes que caben en el box
+            <input type="number" name="sala_aforo" min="1" max="6" value="<?= htmlspecialchars($salaAforo) ?>">
+        </label>
+    </div>
+    <p class="legend">Si el caso trae más gente que cupo, el alumno tiene que decidir a quién hace pasar. A la madre y al padre no se les puede pedir que salgan del box.</p>
+
+    <div class="section-sep" style="border-top:1px dashed var(--color-border);">
+        <strong>El paciente en la entrevista</strong>
+        <p class="legend help">Su comportamiento y su sensibilidad se editan en la pestaña Anamnesis. Acá va solo lo que cambia cuando hay alguien más en la sala.</p>
+        <div class="two-col">
+            <label>Conciencia de su problema (0-100)
+                <input type="number" name="paciente_conciencia" min="0" max="100" value="<?= htmlspecialchars($pacienteConciencia) ?>">
+            </label>
+            <label>Confiabilidad de su relato (0-100)
+                <input type="number" name="paciente_confiabilidad" min="0" max="100" value="<?= htmlspecialchars($pacienteConfiabilidad) ?>">
+            </label>
+        </div>
+        <p class="legend">Bajo <?= Sala::CONCIENCIA_BAJA ?> de conciencia el paciente niega o minimiza lo suyo ("yo escucho bien, hablan bajo") y el acompañante que sí lo nota se mete a corregirlo. Confiabilidad baja = confunde fechas y detalles, pero los cuenta con seguridad.</p>
+        <label class="inline-check">
+            <input type="radio" name="sala_informante" value="p1" <?= $salaInformante === 'p1' ? 'checked' : '' ?>> El paciente es quien cuenta la historia
+        </label>
+        <p class="legend">El informante principal es quien contesta cuando el alumno pregunta al aire, sin dirigirse a nadie. En un lactante no puede ser el paciente.</p>
+    </div>
+</div>
+
+<div class="card">
+    <strong>Acompañantes</strong>
+    <p class="legend help">Cada uno responde por sí mismo, con su propia foto y su propia versión. Sabe lo que el paciente no puede saber: fechas, remedios, cómo fue el parto.</p>
+    <?php
+    // Una sola definición de fila para los dos usos: las que ya tiene el
+    // caso y la plantilla que clona el navegador al agregar a alguien. El
+    // id de persona es lo que amarra la foto (ver PatientPhoto::key), así
+    // que en la plantilla va como marcador y el JS lo reemplaza por uno
+    // nuevo -- si dependiera de la posición, borrar una fila de más arriba
+    // le correría la cara a todos los demás.
+    $salaRowHtml = static function (array $ac, string $pid) use ($photoCaseId, $salaInformante, $dispOpts): string {
+        $hasFoto = $pid !== '__ID__' && PatientPhoto::hasAvatar(PatientPhoto::key($photoCaseId, $pid));
+        ob_start();
+        ?>
+        <div class="sala-row" data-persona="<?= htmlspecialchars($pid) ?>" style="border:1px solid var(--color-border); border-radius:var(--radius-md); padding:0.8rem; margin-bottom:0.8rem;">
+            <input type="hidden" name="sala_id[]" value="<?= htmlspecialchars($pid) ?>">
+            <div class="three-col">
+                <label>Qué es del paciente
+                    <select name="sala_rol[]">
+                        <?php foreach (Sala::ROLES as $rolKey => $rolLabel): ?>
+                            <?php if ($rolKey === 'paciente') { continue; } ?>
+                            <option value="<?= $rolKey ?>" <?= ((string) ($ac['rol'] ?? 'madre')) === $rolKey ? 'selected' : '' ?>><?= htmlspecialchars($rolLabel) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label>Nombre
+                    <input type="text" name="sala_nombre[]" value="<?= htmlspecialchars((string) ($ac['nombre'] ?? '')) ?>">
+                </label>
+                <label>Edad
+                    <input type="number" name="sala_edad[]" min="0" max="110" value="<?= htmlspecialchars((string) ($ac['edad'] ?? '')) ?>">
+                </label>
+            </div>
+            <div class="three-col">
+                <label>Género
+                    <select name="sala_genero[]">
+                        <option value="0" <?= (int) ($ac['genero'] ?? 0) === 0 ? 'selected' : '' ?>>Hombre</option>
+                        <option value="1" <?= (int) ($ac['genero'] ?? 0) === 1 ? 'selected' : '' ?>>Mujer</option>
+                    </select>
+                </label>
+                <label>Tendencia a interrumpir (0-100)
+                    <input type="number" name="sala_interrumpe[]" min="0" max="100" value="<?= htmlspecialchars((string) ($ac['interrumpe'] ?? Sala::RASGOS_DEFAULT['interrumpe'])) ?>">
+                </label>
+                <label>Confiabilidad de su relato (0-100)
+                    <input type="number" name="sala_confiabilidad[]" min="0" max="100" value="<?= htmlspecialchars((string) ($ac['confiabilidad'] ?? Sala::RASGOS_DEFAULT['confiabilidad'])) ?>">
+                </label>
+            </div>
+            <label>Su versión de los hechos
+                <textarea name="sala_version[]" rows="2" class="input" placeholder="Ej: no escucha nada hace años, sube la tele al máximo y contesta cualquier cosa."><?= htmlspecialchars((string) ($ac['version'] ?? '')) ?></textarea>
+            </label>
+            <p class="legend">Lo que ESTA persona sostiene, aunque el paciente diga otra cosa. Con esto escrito, se mete a contradecir cuando el tema sale en la conversación.</p>
+            <div class="two-col">
+                <label>Comportamiento
+                    <input type="text" name="sala_comportamiento[]" value="<?= htmlspecialchars((string) ($ac['comportamiento'] ?? '')) ?>" placeholder="Ej: ansiosa, contesta por él, apurada...">
+                </label>
+                <label>Sensibilidad
+                    <select name="sala_disposicion[]">
+                        <?php foreach ($dispOpts as $dVal => $dLabel): ?>
+                            <option value="<?= $dVal ?>" <?= (int) ($ac['disposicion'] ?? 0) === $dVal ? 'selected' : '' ?>><?= htmlspecialchars($dLabel) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+            </div>
+            <div style="display:flex; align-items:center; gap:1rem; margin-top:0.6rem;">
+                <img class="patient-avatar sala-avatar" src="patient_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;persona=<?= urlencode($pid) ?>&amp;type=avatar&amp;v=<?= time() ?>" alt="" <?= $hasFoto ? '' : 'hidden' ?>>
+                <div class="patient-avatar patient-avatar-empty sala-avatar-empty" <?= $hasFoto ? 'hidden' : '' ?>>Sin foto</div>
+                <div>
+                    <input type="file" class="sala-photo-input" data-persona="<?= htmlspecialchars($pid) ?>" accept="image/jpeg,image/png,image/webp">
+                    <label class="inline-check">
+                        <input type="radio" name="sala_informante" value="<?= htmlspecialchars($pid) ?>" <?= $salaInformante === $pid ? 'checked' : '' ?>> Es quien cuenta la historia
+                    </label>
+                </div>
+                <button type="button" class="secondary sala-remove" style="margin-left:auto;">Quitar</button>
+            </div>
+        </div>
+        <?php
+        return (string) ob_get_clean();
+    };
+    ?>
+    <div id="sala-rows">
+        <?php foreach ($salaRows as $idx => $ac): ?>
+            <?= $salaRowHtml($ac, (string) ($ac['id'] ?? ('p' . ($idx + 2)))) ?>
+        <?php endforeach; ?>
+    </div>
+    <template id="sala-row-tpl"><?= $salaRowHtml([], '__ID__') ?></template>
+    <button type="button" id="sala-add" class="secondary">Agregar acompañante</button>
+    <p class="legend">La foto se puede subir apenas se agrega la fila, antes de guardar el caso.</p>
 </div>
 </div>
 
@@ -2026,13 +2199,6 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <p class="legend">Cómo debe actuar el paciente al conversar con el alumno (tono, actitud) -- va directo al prompt del LLM, junto con la anamnesis de arriba.</p>
     <label>Sensibilidad del paciente
         <select name="disposicion" id="chat-disposicion">
-            <?php $dispOpts = [
-                -2 => 'Muy quisquilloso/a (se ofende con facilidad)',
-                -1 => 'Algo sensible',
-                0 => 'Normal',
-                1 => 'Cálido/a y agradecido/a',
-                2 => 'Muy positivo/a (elogia con facilidad)',
-            ]; ?>
             <?php foreach ($dispOpts as $val => $label): ?>
             <option value="<?= $val ?>" <?= ((string) ($v['disposicion'] ?? '0') === (string) $val) ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
             <?php endforeach; ?>
@@ -3703,6 +3869,13 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     var tx = 0, ty = 0;
     var dragging = false, dragStartX = 0, dragStartY = 0, dragOrigTx = 0, dragOrigTy = 0;
     var selectedFile = null;
+    // Quién es el dueño de la foto que se está recortando: el paciente
+    // (persona '') o un acompañante de la sala. El modal es uno solo -- lo
+    // que cambia es a qué fila vuelve la miniatura cuando termina.
+    var pendingInput = fileInput;
+    var pendingPersona = '';
+    var pendingPreview = avatarPreview;
+    var pendingEmpty = avatarEmpty;
 
     function clampPan() {
         var dispW = naturalW * scale;
@@ -3717,8 +3890,12 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         img.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
     }
 
-    function openModal(file) {
+    function openModal(file, input, persona, preview, empty) {
         selectedFile = file;
+        pendingInput = input;
+        pendingPersona = persona;
+        pendingPreview = preview;
+        pendingEmpty = empty;
         img.onload = function () {
             naturalW = img.naturalWidth;
             naturalH = img.naturalHeight;
@@ -3735,7 +3912,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 
     function closeModal() {
         modal.hidden = true;
-        fileInput.value = '';
+        if (pendingInput) { pendingInput.value = ''; }
         selectedFile = null;
     }
 
@@ -3747,8 +3924,21 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 
     fileInput.addEventListener('change', function () {
         if (fileInput.files && fileInput.files[0]) {
-            openModal(fileInput.files[0]);
+            openModal(fileInput.files[0], fileInput, '', avatarPreview, avatarEmpty);
         }
+    });
+
+    // Delegado: las filas de la sala se agregan y se borran en caliente, así
+    // que no se les puede colgar el listener una sola vez al cargar.
+    document.addEventListener('change', function (e) {
+        var input = e.target;
+        if (!input.classList || !input.classList.contains('sala-photo-input')) { return; }
+        if (!input.files || !input.files[0]) { return; }
+        var row = input.closest('.sala-row');
+        openModal(
+            input.files[0], input, input.dataset.persona,
+            row.querySelector('.sala-avatar'), row.querySelector('.sala-avatar-empty')
+        );
     });
 
     cancelBtn.addEventListener('click', closeModal);
@@ -3806,6 +3996,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         var fd = new FormData();
         fd.append('csrf_token', document.querySelector('input[name="csrf_token"]').value);
         fd.append('case_id', CASE_ID);
+        fd.append('persona', pendingPersona);
         fd.append('crop_x', Math.round(srcX));
         fd.append('crop_y', Math.round(srcY));
         fd.append('crop_size', Math.round(srcSize));
@@ -3817,11 +4008,14 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                 confirmBtn.disabled = false;
                 confirmBtn.textContent = 'Guardar foto';
                 if (data.ok) {
-                    avatarPreview.src = 'patient_photo.php?case_id=' + encodeURIComponent(CASE_ID) + '&type=avatar&v=' + Date.now();
-                    avatarPreview.hidden = false;
-                    avatarEmpty.hidden = true;
-                    if (dlOriginal) { dlOriginal.hidden = false; }
-                    if (dlAvatar) { dlAvatar.hidden = false; }
+                    pendingPreview.src = 'patient_photo.php?case_id=' + encodeURIComponent(CASE_ID)
+                        + '&persona=' + encodeURIComponent(pendingPersona) + '&type=avatar&v=' + Date.now();
+                    pendingPreview.hidden = false;
+                    pendingEmpty.hidden = true;
+                    // Los enlaces de descarga son del bloque del paciente:
+                    // un acompañante no los tiene.
+                    if (pendingPersona === '' && dlOriginal) { dlOriginal.hidden = false; }
+                    if (pendingPersona === '' && dlAvatar) { dlAvatar.hidden = false; }
                     showMsg('Foto actualizada.', false);
                     closeModal();
                 } else {
@@ -3833,6 +4027,54 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                 confirmBtn.textContent = 'Guardar foto';
                 showMsg('Error de red al subir la foto.', true);
             });
+    });
+})();
+</script>
+
+<script>
+// Sala: agregar/quitar acompañantes. Cada fila se clona de la plantilla
+// (#sala-row-tpl, renderizada por PHP para no tener dos versiones del mismo
+// HTML) y estrena un id de persona propio, que es con lo que se guarda su
+// foto (ver PatientPhoto::key) y con lo que se marca al informante. Los ids
+// nunca se reciclan ni se reindexan: si se reindexaran, borrar una fila le
+// pondría a un acompañante la cara de otro.
+(function () {
+    var container = document.getElementById('sala-rows');
+    var tpl = document.getElementById('sala-row-tpl');
+    var addBtn = document.getElementById('sala-add');
+    if (!container || !tpl || !addBtn) { return; }
+
+    function nuevoId() {
+        // Alfanumérico y corto: Sala::safeId() descarta lo demás y lo
+        // recorta a 16, y el id termina siendo parte de un nombre de
+        // archivo en disco.
+        return 'a' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36);
+    }
+
+    addBtn.addEventListener('click', function () {
+        var id = nuevoId();
+        var html = tpl.innerHTML.split('__ID__').join(id);
+        var wrap = document.createElement('div');
+        wrap.innerHTML = html;
+        var row = wrap.querySelector('.sala-row');
+        container.appendChild(row);
+        var nombre = row.querySelector('input[name="sala_nombre[]"]');
+        if (nombre) { nombre.focus(); }
+    });
+
+    container.addEventListener('click', function (e) {
+        if (!e.target.classList.contains('sala-remove')) { return; }
+        var row = e.target.closest('.sala-row');
+        if (!row) { return; }
+        var eraInformante = row.querySelector('input[name="sala_informante"]:checked');
+        row.remove();
+        // Si se fue el informante principal, la historia la cuenta el
+        // paciente: dejar la sala sin nadie marcado haría que el backend lo
+        // eligiera solo, y el docente no vería por qué.
+        if (eraInformante) {
+            var delPaciente = document.querySelector('input[name="sala_informante"][value="p1"]');
+            if (delPaciente) { delPaciente.checked = true; }
+        }
     });
 })();
 </script>

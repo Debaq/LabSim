@@ -17,13 +17,16 @@ Auth::requireUser();
 
 $caseId = trim((string) ($_GET['case_id'] ?? ''));
 $type = (string) ($_GET['type'] ?? 'avatar');
+// Persona de la sala (ver Sala.php); vacío = el paciente.
+$personaId = trim((string) ($_GET['persona'] ?? ''));
 
 if ($caseId === '' || !in_array($type, ['avatar', 'original'], true)) {
     Response::error('Falta case_id o type inválido.', 400);
 }
 
 try {
-    $path = $type === 'avatar' ? PatientPhoto::avatarPath($caseId) : PatientPhoto::originalPath($caseId);
+    $key = PatientPhoto::key($caseId, $personaId);
+    $path = $type === 'avatar' ? PatientPhoto::avatarPath($key) : PatientPhoto::originalPath($key);
 } catch (InvalidArgumentException $e) {
     Response::error('case_id inválido.', 400);
 }

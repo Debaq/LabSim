@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/CaseProfile.php';
+require_once __DIR__ . '/Sala.php';
 
 /**
  * Qué le falta a un caso para poder atenderse.
@@ -121,6 +122,22 @@ final class CaseCompleteness
                 'tab' => 'anamnesis',
                 'texto' => 'Anamnesis: el borrador lo escribió el modelo de lenguaje y todavía nadie lo verificó. Leelo y tildá la casilla de verificación -- lo que quede acá le llega al alumno como parte del caso.',
             ];
+        }
+
+        // --- Sala: quién viene con el paciente. Un menor de 14 no se
+        // atiende solo, y a una guagua no se le puede dejar de informante
+        // de sí misma -- el caso quedaría sin nadie que cuente la historia.
+        //
+        // Solo se revisa si el caso YA tiene sala guardada. Un caso anterior
+        // al chat grupal (o creado desde create_a.py) no la tiene, y
+        // reclamarle un acompañante que nunca se le pudo cargar dejaría de
+        // golpe sin agendar a todos los casos pediátricos que ya existen.
+        // Guardar el caso una vez desde el editor le escribe la sala, y de
+        // ahí en adelante sí se valida.
+        if (!empty($data['Sala']['personas'])) {
+            foreach (Sala::problemas(Sala::desde($data)) as $problema) {
+                $pendientes[] = ['tab' => 'sala', 'texto' => 'Sala: ' . $problema];
+            }
         }
 
         return $pendientes;

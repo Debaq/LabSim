@@ -29,6 +29,14 @@ def _color_por(nombre):
     return _PALETTE[idx]
 
 
+def color_por_nombre(nombre):
+    """Color determinístico de una persona, el mismo que usa su avatar de
+    iniciales. Lo usa el chat para pintar el nombre de quien habla: con
+    varias personas en la sala, el color es lo que deja seguir quién dijo
+    qué sin leer cada etiqueta."""
+    return _color_por(nombre)
+
+
 def avatar_iniciales(nombre, size=32):
     """Círculo de color con las iniciales del nombre -- fallback cuando no
     hay foto (o mientras se está pidiendo al backend)."""

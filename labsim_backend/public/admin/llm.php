@@ -27,6 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         LlmConfig::save($current);
         $success = 'Plantilla restablecida al prompt por defecto.';
         AdminAudit::log($me, 'llm_prompt_reset');
+    } elseif ($postAction === 'reset_companion_prompt') {
+        $current = LlmConfig::get();
+        $current['companion_prompt_template'] = '';
+        $current['api_key'] = '';
+        LlmConfig::save($current);
+        $success = 'Prompt del acompañante restablecido al por defecto.';
+        AdminAudit::log($me, 'llm_companion_prompt_reset');
     } elseif ($postAction === 'reset_oirs_prompt') {
         $current = LlmConfig::get();
         $current['oirs_prompt_template'] = '';
@@ -116,6 +123,7 @@ admin_header('IA Paciente (LLM)', $me);
 
         <input type="hidden" name="system_prompt_template" value="<?= htmlspecialchars($config['system_prompt_template']) ?>">
         <input type="hidden" name="oirs_prompt_template" value="<?= htmlspecialchars($config['oirs_prompt_template']) ?>">
+        <input type="hidden" name="companion_prompt_template" value="<?= htmlspecialchars($config['companion_prompt_template']) ?>">
         <div class="form-actions-sticky">
             <button type="submit">Guardar</button>
         </div>
@@ -153,6 +161,7 @@ admin_header('IA Paciente (LLM)', $me);
         <input type="hidden" name="anamnesis_model" value="<?= htmlspecialchars((string) $config['anamnesis_model']) ?>">
         <?php if ($config['active']): ?><input type="hidden" name="active" value="1"><?php endif; ?>
         <input type="hidden" name="oirs_prompt_template" value="<?= htmlspecialchars($config['oirs_prompt_template']) ?>">
+        <input type="hidden" name="companion_prompt_template" value="<?= htmlspecialchars($config['companion_prompt_template']) ?>">
 
         <label>Plantilla (precargada con el prompt por defecto -- edítala directamente; "Restablecer" abajo la vuelve a este punto de partida)
             <textarea name="system_prompt_template" rows="16" style="width:100%; padding:0.45rem; border:1px solid var(--color-border-strong); border-radius:var(--radius-md); font-family:var(--font-mono); font-size:0.85rem;"><?= htmlspecialchars(\LlmConfig::effectivePrompt()) ?></textarea>
@@ -165,6 +174,61 @@ admin_header('IA Paciente (LLM)', $me);
     <form method="post" style="display:inline;" onsubmit="return confirm('¿Restablecer al prompt por defecto? Se pierde la plantilla personalizada.');">
     <?= csrf_field() ?>
         <input type="hidden" name="form_action" value="reset_prompt">
+        <button type="submit" class="secondary">Restablecer al prompt por defecto</button>
+    </form>
+</div>
+
+<div class="card">
+    <strong>Prompt del acompañante</strong>
+    <p class="muted">
+        Quien viene con el paciente (madre, cónyuge, cuidador -- ver la pestaña Sala del editor de casos).
+        Va aparte del prompt del paciente porque sabe justo lo que el paciente no puede saber: fechas,
+        remedios, cirugías, cómo fue el embarazo y el parto, y qué le nota en la casa. Tampoco conoce el
+        diagnóstico ni los términos técnicos.
+    </p>
+    <p class="muted">
+        Sirven todas las variables del paciente (la tabla de más arriba: <code>{{nombre}}</code> y
+        <code>{{edad}}</code> siguen siendo los del paciente) más estas:
+    </p>
+    <div class="table-wrap">
+    <table>
+        <tr><th>Variable</th><th>Qué reemplaza</th></tr>
+        <?php foreach (\LlmConfig::COMPANION_PLACEHOLDERS as $ph => $desc): ?>
+        <tr><td><code><?= htmlspecialchars($ph) ?></code></td><td><?= htmlspecialchars($desc) ?></td></tr>
+        <?php endforeach; ?>
+    </table>
+    </div>
+    <p class="muted">
+        A las dos plantillas se les agrega solo, por código, quiénes están en el box, qué puede contar cada
+        uno según su edad y por qué le toca hablar en ese turno. Eso no se edita acá: son las reglas del
+        chat grupal, no del personaje.
+    </p>
+
+    <form method="post">
+    <?= csrf_field() ?>
+        <input type="hidden" name="form_action" value="save">
+        <input type="hidden" name="provider" value="<?= htmlspecialchars($config['provider']) ?>">
+        <input type="hidden" name="api_base_url" value="<?= htmlspecialchars($config['api_base_url']) ?>">
+        <input type="hidden" name="model" value="<?= htmlspecialchars($config['model']) ?>">
+        <input type="hidden" name="temperature" value="<?= htmlspecialchars((string) $config['temperature']) ?>">
+        <input type="hidden" name="max_tokens" value="<?= (int) $config['max_tokens'] ?>">
+        <input type="hidden" name="anamnesis_max_tokens" value="<?= (int) $config['anamnesis_max_tokens'] ?>">
+        <input type="hidden" name="anamnesis_model" value="<?= htmlspecialchars((string) $config['anamnesis_model']) ?>">
+        <?php if ($config['active']): ?><input type="hidden" name="active" value="1"><?php endif; ?>
+        <input type="hidden" name="system_prompt_template" value="<?= htmlspecialchars($config['system_prompt_template']) ?>">
+        <input type="hidden" name="oirs_prompt_template" value="<?= htmlspecialchars($config['oirs_prompt_template']) ?>">
+
+        <label>Plantilla del acompañante (precargada con el prompt por defecto -- edítala directamente; "Restablecer" abajo la vuelve a este punto de partida)
+            <textarea name="companion_prompt_template" rows="16" style="width:100%; padding:0.45rem; border:1px solid var(--color-border-strong); border-radius:var(--radius-md); font-family:var(--font-mono); font-size:0.85rem;"><?= htmlspecialchars(\LlmConfig::effectiveCompanionPrompt()) ?></textarea>
+        </label>
+        <div class="form-actions-sticky">
+            <button type="submit">Guardar plantilla</button>
+        </div>
+    </form>
+
+    <form method="post" style="display:inline;" onsubmit="return confirm('¿Restablecer al prompt por defecto? Se pierde la plantilla personalizada.');">
+    <?= csrf_field() ?>
+        <input type="hidden" name="form_action" value="reset_companion_prompt">
         <button type="submit" class="secondary">Restablecer al prompt por defecto</button>
     </form>
 </div>
@@ -193,6 +257,7 @@ admin_header('IA Paciente (LLM)', $me);
         <input type="hidden" name="anamnesis_model" value="<?= htmlspecialchars((string) $config['anamnesis_model']) ?>">
         <?php if ($config['active']): ?><input type="hidden" name="active" value="1"><?php endif; ?>
         <input type="hidden" name="system_prompt_template" value="<?= htmlspecialchars($config['system_prompt_template']) ?>">
+        <input type="hidden" name="companion_prompt_template" value="<?= htmlspecialchars($config['companion_prompt_template']) ?>">
 
         <label>Plantilla del evaluador (precargada con el prompt por defecto -- edítala directamente; "Restablecer" abajo la vuelve a este punto de partida)
             <textarea name="oirs_prompt_template" rows="16" style="width:100%; padding:0.45rem; border:1px solid var(--color-border-strong); border-radius:var(--radius-md); font-family:var(--font-mono); font-size:0.85rem;"><?= htmlspecialchars(\LlmConfig::effectiveOirsPrompt()) ?></textarea>

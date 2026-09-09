@@ -38,6 +38,22 @@ final class PatientPhoto
         return $safe;
     }
 
+    /**
+     * Clave de archivo de la foto de UNA persona de la sala (ver Sala.php).
+     * El paciente conserva la clave histórica (el case_id pelado) para que
+     * las fotos ya subidas sigan encontrándose; cada acompañante cuelga del
+     * mismo case_id con su id de persona pegado.
+     *
+     * Que el acompañante comparta prefijo con el caso no es casual:
+     * claim() mueve con un glob sobre ese prefijo, así que las fotos de
+     * toda la sala se reclaman juntas cuando el caso deja de ser temporal.
+     */
+    public static function key(string $caseId, string $personaId = ''): string
+    {
+        $persona = preg_replace('/[^A-Za-z0-9]/', '', $personaId) ?? '';
+        return $persona === '' ? $caseId : $caseId . '__' . $persona;
+    }
+
     public static function originalPath(string $caseId): string
     {
         return self::dir() . '/' . self::safeId($caseId) . '_original.jpg';

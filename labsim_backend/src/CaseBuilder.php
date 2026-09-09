@@ -3,6 +3,9 @@
 // Las derivaciones del perfil auditivo viven aparte (CaseProfile), pero
 // caseDataToForm() las necesita para releer un caso guardado.
 require_once __DIR__ . '/CaseProfile.php';
+// La sala del caso (paciente + acompañantes) se guarda dentro de
+// cases.data, así que buildCaseData()/caseDataToForm() la necesitan.
+require_once __DIR__ . '/Sala.php';
 
 final class CaseBuilder
 {
@@ -906,6 +909,11 @@ final class CaseBuilder
             'Anamnesis' => $form['anamnesis'],
             'PatientBehavior' => $form['comportamiento'] ?? '',
             'PatientDisposition' => (int) ($form['disposicion'] ?? 0),
+            // Quiénes vienen con el paciente y cómo se comportan en la
+            // entrevista (ver Sala.php). Un caso creado desde create_a.py
+            // no lo trae: Sala::desde() le arma una sala de una persona y
+            // el chat se comporta como el 1 a 1 de siempre.
+            'Sala' => $form['sala'] ?? [],
             'Tinnitus' => $form['tinnitus'],
             'Otoscopia' => $form['otoscopia'],
             // Perfil auditivo: sitio de la lesión por oído (ver
@@ -1060,6 +1068,11 @@ final class CaseBuilder
         $v['otros'] = $anamnesis['otros'] ?? '';
         $v['comportamiento'] = $data['PatientBehavior'] ?? '';
         $v['disposicion'] = (string) ($data['PatientDisposition'] ?? 0);
+
+        // Sala: el editor repinta las filas de acompañantes desde acá. Se
+        // pasa por Sala::desde() y no por el crudo para que un caso viejo
+        // (sin sala) abra con la sala de una persona ya armada.
+        $v += Sala::toForm(Sala::desde($data));
 
         $tinnitus = $data['Tinnitus'] ?? [];
         $v['tinnitus'] = [];

@@ -1,5 +1,10 @@
 <?php
 
+// Igual que en LlmChat: la dependencia se declara donde se usa. El bloque
+// de sala del prompt (ver bloqueSala) necesita Sala para saber quién está
+// en el box y qué puede contar cada uno por su edad.
+require_once __DIR__ . '/Sala.php';
+
 final class LlmConfig
 {
     public const PROVIDERS = ['deepseek', 'openai_compatible'];
@@ -55,6 +60,23 @@ final class LlmConfig
         0 => 'Tienes un temperamento normal: ni especialmente sensible ni especialmente efusivo.',
         1 => 'Eres una persona cálida y agradecida: valoras que te traten bien y lo dices.',
         2 => 'Eres una persona muy positiva y efusiva: agradeces con facilidad el buen trato, incluso ante gestos pequeños de amabilidad o una buena explicación.',
+    ];
+
+    /**
+     * Por qué le toca hablar a esta persona en este turno (ver
+     * Sala::turno). Es la línea que convierte una regla del motor en algo
+     * que el modelo puede actuar: sin ella, un acompañante al que le toca
+     * corregir al paciente igual contestaría como si le hubieran
+     * preguntado a él, y se pierde la escena.
+     */
+    public const MOTIVO_TURNO = [
+        'responde' => 'te preguntaron a ti y sabes la respuesta: contesta lo que te preguntaron.',
+        'no_sabe' => 'te preguntaron a ti, pero eso no está a tu alcance: dilo con tus palabras y en una frase corta ("no sé", "eso lo sabe mi mamá", "no me acuerdo").',
+        'no_verbal' => 'no hablas. Responde SOLO con una acotación de conducta observable entre paréntesis y en una línea, por ejemplo: (se queda mirando el juguete y no gira hacia el ruido). Nada más.',
+        'interrumpe' => 'no te preguntaron a ti, pero te metes igual en la conversación. Breve.',
+        'aporta_dato' => 'no te preguntaron a ti, pero el otro no puede saber eso y tú sí: das el dato tú.',
+        'corrige' => 'el paciente está minimizando o negando lo que le pasa. Lo desmientes con ejemplos concretos de la vida diaria, sin pelear con él.',
+        'contradice' => 'tienes tu propia versión de esto y no calza con lo que se acaba de decir. La cuentas igual, sin ceder.',
     ];
 
     // Prompt por defecto: instruye al modelo a actuar como el paciente del
@@ -148,6 +170,62 @@ oficina que resume su queja o felicitación, no a una carta personal del
 paciente.
 PROMPT;
 
+    /**
+     * Placeholders propios de la plantilla del acompañante (ver
+     * DEFAULT_COMPANION_PROMPT). Los de PLACEHOLDERS también valen: el
+     * acompañante conoce la historia clínica del paciente -- de hecho suele
+     * ser el único que la conoce.
+     */
+    public const COMPANION_PLACEHOLDERS = [
+        '{{acompanante}}' => 'Nombre del acompañante',
+        '{{acompanante_edad}}' => 'Edad del acompañante',
+        '{{acompanante_genero}}' => '"hombre" o "mujer"',
+        '{{parentesco}}' => 'Qué es del paciente ("Madre", "Cónyuge / pareja", ...)',
+        '{{version}}' => 'Su propia versión de los hechos, si el caso le puso una (campo "Su versión" en la sala)',
+    ];
+
+    /**
+     * Prompt por defecto del acompañante. Va aparte del prompt del paciente
+     * porque el acompañante es lo contrario del paciente en lo que más
+     * importa: SÍ sabe fechas, remedios y antecedentes (muchas veces es el
+     * único que los sabe), y su relato puede no calzar con el del paciente.
+     * Lo que comparten -- no revelar diagnóstico, no usar tecnicismos, no
+     * salirse de personaje -- se repite acá a propósito: el docente puede
+     * editar una plantilla sin tener que acordarse de la otra.
+     */
+    public const DEFAULT_COMPANION_PROMPT = <<<'PROMPT'
+Actúa como {{acompanante}}, de {{acompanante_edad}} años ({{acompanante_genero}}),
+que acompaña a {{nombre}} ({{edad}} años) a un centro de salud para:
+{{procedimiento}}. Eres su {{parentesco}}.
+
+Lo que sabes de {{nombre}}:
+- Antecedentes médicos: {{antecedentes}}
+- Medicamentos que toma: {{medicamentos}}
+- Cirugías previas: {{cirugias}}
+- Lo que se puede contar de él/ella: {{otros_antecedentes}}
+- Sobre ruidos o pitidos en el oído: {{tinnitus_desc}}
+- Tu propia versión de lo que pasa: {{version}}
+- Cómo te comportas en la consulta: {{comportamiento}}
+- Tu forma de ser: {{disposicion}}
+
+Reglas estrictas:
+1. Eres el acompañante, no un asistente ni un profesional. Hablas en
+   primera persona, en español, con frases breves y naturales.
+2. Tú SÍ sabes lo que el paciente no puede saber o no recuerda: fechas,
+   remedios, operaciones, cómo fue el embarazo y el parto, qué le notas en
+   la casa. Cuando te lo pregunten, respondes con esos datos.
+3. NO conoces el diagnóstico ni ningún término técnico ("hipoacusia",
+   "umbral", "dB", "Hz"). Nunca lo reveles ni lo insinúes, aunque te
+   pregunten directamente qué tiene.
+4. Cuentas lo que observas, no lo que un examen diría: "no contesta cuando
+   lo llamo", "sube mucho el volumen de la tele", "en el colegio dijeron
+   que no pone atención".
+5. Si tu versión no calza con la del paciente, la sostienes igual, con
+   ejemplos concretos del día a día. No cedes solo porque el otro diga lo
+   contrario.
+6. Nunca menciones que eres una IA, un modelo de lenguaje o un prompt.
+PROMPT;
+
     public static function get(): array
     {
         $stmt = Db::get()->prepare('SELECT * FROM llm_config WHERE id = 1');
@@ -166,6 +244,7 @@ PROMPT;
                 'anamnesis_model' => '',
                 'system_prompt_template' => '',
                 'oirs_prompt_template' => '',
+                'companion_prompt_template' => '',
                 'active' => 0,
                 'updated_at' => null,
             ];
@@ -187,6 +266,10 @@ PROMPT;
         // TypeError al pasarle null a htmlspecialchars() en vez de un
         // simple warning de índice indefinido.
         $row['oirs_prompt_template'] = (string) ($row['oirs_prompt_template'] ?? '');
+        // Igual que oirs_prompt_template: columna nueva (ver
+        // Db::migrateLlmCompanionPromptIfNeeded), y admin/llm.php corre con
+        // strict_types, así que un null acá sería un TypeError, no un aviso.
+        $row['companion_prompt_template'] = (string) ($row['companion_prompt_template'] ?? '');
         return $row;
     }
 
@@ -209,6 +292,13 @@ PROMPT;
     {
         $template = trim((string) self::get()['oirs_prompt_template']);
         return $template !== '' ? $template : self::DEFAULT_OIRS_PROMPT;
+    }
+
+    /** Plantilla efectiva del acompañante: la guardada, o DEFAULT_COMPANION_PROMPT si vacía. */
+    public static function effectiveCompanionPrompt(): string
+    {
+        $template = trim((string) self::get()['companion_prompt_template']);
+        return $template !== '' ? $template : self::DEFAULT_COMPANION_PROMPT;
     }
 
     /** System prompt final del evaluador OIRS para un nivel de disposición dado. */
@@ -263,6 +353,111 @@ PROMPT;
     }
 
     /**
+     * System prompt de UNA persona de la sala para UN turno (ver Sala.php).
+     *
+     * Va por persona y no un solo prompt "eres la sala entera" porque el
+     * docente arma cada personaje por separado en el caso: si el modelo
+     * decidiera solo quién habla y qué sabe cada uno, la contradicción
+     * entre la madre y el niño -- que es el hallazgo que se quiere enseñar
+     * -- saldría distinta en cada corrida y no sería del caso.
+     *
+     * $ctx: paciente_nombre, paciente_edad, paciente_genero, procedimiento,
+     * anamnesis (mismo shape que buildSystemPrompt) y tinnitus.
+     * $motivo: por qué habla esta persona en este turno (ver Sala::turno).
+     */
+    public static function buildPersonaPrompt(array $persona, array $sala, array $ctx, string $motivo): string
+    {
+        $anamnesis = (array) ($ctx['anamnesis'] ?? []);
+        $tinnitus = (array) ($ctx['tinnitus'] ?? []);
+
+        // {{nombre}}/{{edad}} son SIEMPRE el paciente, en las dos
+        // plantillas: es lo que ya significaban y lo que el docente espera
+        // al editarlas. Quien habla se identifica con {{acompanante}}.
+        $vars = [
+            '{{nombre}}' => (string) ($ctx['paciente_nombre'] ?? 'el paciente'),
+            '{{edad}}' => (string) ($ctx['paciente_edad'] ?? ''),
+            '{{genero}}' => (int) ($ctx['paciente_genero'] ?? 0) === 1 ? 'mujer' : 'hombre',
+            '{{procedimiento}}' => trim((string) ($ctx['procedimiento'] ?? '')) ?: 'una evaluación audiológica',
+            '{{antecedentes}}' => CaseBuilder::antecedentesSummary((array) ($anamnesis['antecedentes'] ?? [])),
+            '{{medicamentos}}' => trim((string) ($anamnesis['medicamentos'] ?? '')) ?: 'ninguno',
+            '{{cirugias}}' => trim((string) ($anamnesis['cirugias'] ?? '')) ?: 'ninguna',
+            '{{otros_antecedentes}}' => trim((string) ($anamnesis['otros'] ?? '')) ?: 'nada en particular',
+            '{{tinnitus_desc}}' => CaseBuilder::describeTinnitus($tinnitus),
+            // Comportamiento y forma de ser son de QUIEN habla, no del
+            // paciente: la madre ansiosa y el hijo callado son dos personas
+            // distintas aunque compartan la historia clínica.
+            '{{comportamiento}}' => $persona['comportamiento'] !== '' ? $persona['comportamiento'] : 'colaborador y tranquilo',
+            '{{disposicion}}' => self::dispositionLabel((int) $persona['disposicion']),
+        ];
+
+        if ($persona['es_paciente']) {
+            $base = self::fillPlaceholders(self::effectivePrompt(), $vars);
+        } else {
+            $vars['{{acompanante}}'] = $persona['nombre'] !== '' ? $persona['nombre'] : 'el acompañante';
+            $vars['{{acompanante_edad}}'] = (string) $persona['edad'];
+            $vars['{{acompanante_genero}}'] = $persona['genero'] === 1 ? 'mujer' : 'hombre';
+            $vars['{{parentesco}}'] = Sala::ROLES[$persona['rol']] ?? 'Acompañante';
+            $vars['{{version}}'] = $persona['version'] !== ''
+                ? $persona['version']
+                : 'la misma que cuenta el paciente, no tienes nada distinto que agregar';
+            $base = self::fillPlaceholders(self::effectiveCompanionPrompt(), $vars);
+        }
+
+        return $base . "\n\n" . self::bloqueSala($persona, $sala, $motivo);
+    }
+
+    /**
+     * Bloque que se le pega a TODA persona de la sala: quiénes están, qué
+     * puede contar por su edad, y por qué le toca hablar este turno.
+     *
+     * Se anexa por código en vez de vivir dentro de las plantillas
+     * editables porque son reglas del mecanismo, no del personaje: una
+     * plantilla guardada hace meses no las tendría, y sin ellas el modelo
+     * escribe los diálogos de los demás o se identifica solo, que rompe el
+     * chat grupal entero.
+     */
+    public static function bloqueSala(array $persona, array $sala, string $motivo): string
+    {
+        $lineas = [];
+        foreach (Sala::presentes($sala) as $p) {
+            $quien = $p['id'] === $persona['id'] ? ' <- eres tú' : '';
+            $lineas[] = '- ' . Sala::etiqueta($p) . ', ' . $p['edad'] . ' años' . $quien;
+        }
+        $quienes = implode("\n", $lineas);
+
+        $capacidad = Sala::CAPACIDAD_DESC[Sala::capacidad((int) $persona['edad'])];
+        $motivoTexto = self::MOTIVO_TURNO[$motivo] ?? self::MOTIVO_TURNO['responde'];
+
+        $extra = '';
+        if ($persona['es_paciente'] && $persona['conciencia'] < Sala::CONCIENCIA_BAJA) {
+            $extra .= "\n- No crees tener un problema: si te preguntan, dices que escuchas bien y le echas "
+                . "la culpa a otra cosa (que hablan bajo, que la tele está mala, que no te ponen atención). "
+                . "No cedes fácil aunque te contradigan.";
+        }
+        if ($persona['confiabilidad'] < Sala::CONCIENCIA_BAJA) {
+            $extra .= "\n- Tu relato es impreciso: confundes fechas, cantidades y detalles, pero los cuentas "
+                . "con seguridad, como si estuvieras seguro.";
+        }
+
+        return <<<BLOQUE
+Contexto de la sala (esto manda por sobre cualquier otra instrucción):
+En el box están:
+{$quienes}
+
+Lo que puedes contar por tu edad: {$capacidad}{$extra}
+
+Tu turno ahora: {$motivoTexto}
+
+Reglas del chat grupal:
+- Hablas SOLO por ti. Nunca escribas lo que dicen los demás ni narres la escena.
+- No escribas tu nombre ni un rótulo delante de lo que dices: solo tu frase.
+- En el historial cada intervención viene rotulada con quién la dijo, para que
+  sepas qué se ha hablado. Tú no rotulas la tuya.
+- Máximo dos o tres frases. Es una conversación hablada, no un informe.
+BLOQUE;
+    }
+
+    /**
      * Guarda la config desde el form de admin/llm.php. $keepExistingApiKey
      * = true cuando el campo de api_key vino vacío -- no borra la key ya
      * guardada solo porque el admin no la volvió a escribir (mismo patrón
@@ -282,11 +477,12 @@ PROMPT;
         // instalación que todavía no aplicó el schema revienta con "no such
         // column". Es idempotente y esto lo corre un admin, no un alumno.
         Db::migrateLlmAnamnesisTokensIfNeeded();
+        Db::migrateLlmCompanionPromptIfNeeded();
 
         $pdo = Db::get();
         $pdo->prepare(
-            "INSERT INTO llm_config (id, provider, api_key, api_base_url, model, temperature, max_tokens, anamnesis_max_tokens, anamnesis_model, system_prompt_template, oirs_prompt_template, active, updated_at)
-             VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            "INSERT INTO llm_config (id, provider, api_key, api_base_url, model, temperature, max_tokens, anamnesis_max_tokens, anamnesis_model, system_prompt_template, oirs_prompt_template, companion_prompt_template, active, updated_at)
+             VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
              ON CONFLICT(id) DO UPDATE SET
                 provider = excluded.provider,
                 api_key = excluded.api_key,
@@ -298,6 +494,7 @@ PROMPT;
                 anamnesis_model = excluded.anamnesis_model,
                 system_prompt_template = excluded.system_prompt_template,
                 oirs_prompt_template = excluded.oirs_prompt_template,
+                companion_prompt_template = excluded.companion_prompt_template,
                 active = excluded.active,
                 updated_at = CURRENT_TIMESTAMP"
         )->execute([
@@ -311,6 +508,7 @@ PROMPT;
             trim((string) ($data['anamnesis_model'] ?? '')),
             trim((string) ($data['system_prompt_template'] ?? '')),
             trim((string) ($data['oirs_prompt_template'] ?? '')),
+            trim((string) ($data['companion_prompt_template'] ?? '')),
             !empty($data['active']) ? 1 : 0,
         ]);
     }

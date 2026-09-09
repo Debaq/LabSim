@@ -42,7 +42,7 @@ final class OirsEvaluator
         }
 
         $stmt = Db::get()->prepare(
-            "SELECT role, content FROM llm_chat_logs
+            "SELECT role, content, speaker_label FROM llm_chat_logs
              WHERE appointment_id = ? AND student_id = ? ORDER BY id"
         );
         $stmt->execute([$appointmentId, $studentId]);
@@ -125,7 +125,12 @@ final class OirsEvaluator
     {
         $transcript = '';
         foreach ($log as $turn) {
-            $who = $turn['role'] === 'assistant' ? 'Paciente' : 'Alumno';
+            // Con acompañantes en la sala, el trato se juzga sobre quién
+            // recibió qué: no es lo mismo cortar a la madre que cortar al
+            // paciente. Sin etiqueta (conversaciones anteriores al chat
+            // grupal) se lee "Paciente", como siempre.
+            $etiqueta = trim((string) ($turn['speaker_label'] ?? ''));
+            $who = $turn['role'] === 'assistant' ? ($etiqueta !== '' ? $etiqueta : 'Paciente') : 'Alumno';
             $transcript .= "{$who}: {$turn['content']}\n";
         }
         return $transcript;
