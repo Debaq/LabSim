@@ -955,7 +955,8 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <label>Historia clínica
         <textarea name="historia_clinica" rows="6" class="input" placeholder="Antecedentes generales, evolución, observaciones del paciente..."><?= htmlspecialchars((string) ($v['historia_clinica'] ?? '')) ?></textarea>
     </label>
-    <p class="legend" class="help">Historia clínica base del <strong>paciente</strong> (no depende del caso). No incluye las notas individuales de cada alumno por atención -- esas se ven en la agenda/asistencia, no se editan acá.</p>
+    <p class="legend" class="help">Las <strong>atenciones previas</strong> del paciente: qué le hicieron antes de llegar acá y qué se encontró, una por línea y de la más antigua a la más reciente. Es del <strong>paciente</strong>, no del caso. No incluye las notas individuales de cada alumno por atención -- esas se ven en la agenda/asistencia, no se editan acá.</p>
+    <p class="legend" class="help">Las fechas no se escriben a mano: poné <code>{{-N}}</code> al principio de la línea, donde N son los <strong>días antes</strong> de la cita que va a atender el alumno, y la app lo reemplaza por la fecha real. Así el mismo caso sirve en cualquier fecha. Ejemplos: <code>{{-5}}</code> hace cinco días, <code>{{-30}}</code> hace un mes, <code>{{-730}}</code> hace dos años. En un recién nacido, el nacimiento es la primera línea: <code>{{-20}} Nace de 38 semanas, parto vaginal, 3.240 g. Screening auditivo: refiere OD.</code></p>
 
     <label>Comentario del docente <span style="font-weight:400; color:var(--color-danger);">(privado -- el alumno nunca lo ve)</span>
         <textarea name="comentario_docente" rows="3" class="input" placeholder="Ej: hipoacusia sensorioneural bilateral leve, caso pensado para practicar enmascaramiento..."><?= htmlspecialchars((string) ($v['comentario_docente'] ?? '')) ?></textarea>
@@ -1979,7 +1980,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <div class="card">
     <strong>Redactar la anamnesis con IA</strong>
     <p class="legend help">Escribe los antecedentes que EXPLICAN los hallazgos que ya cargaste: una muesca en 4 kHz pide exposición a ruido, una conductiva con timpanograma B pide otitis a repetición, una neuropatía en un recién nacido pide hiperbilirrubinemia. No inventa el diagnóstico ni menciona umbrales -- eso lo tiene que medir el alumno.</p>
-    <p class="legend help">Escribe el relato (motivo de consulta, hace cuánto, en qué situaciones molesta) en <strong>Historia clínica</strong>, que está en la pestaña Paciente, y acá los antecedentes, medicamentos, cirugías, comportamiento y sensibilidad.</p>
+    <p class="legend help">Escribe las <strong>atenciones previas</strong> del paciente en Historia clínica (pestaña Paciente), con las fechas relativas <code>{{-N}}</code> que usa LabSim, y acá los antecedentes, lo que el paciente cuenta de sí mismo, medicamentos, cirugías, comportamiento y sensibilidad.</p>
     <p class="legend help"><strong>Es un borrador y hay que leerlo.</strong> El modelo puede inventar una cirugía que no existe o un fármaco que no es ototóxico, y eso le llega al alumno como parte del caso, indistinguible de lo que escribiste vos. Hasta que tildes la verificación, el caso no se guarda ni se puede citar.</p>
     <button type="button" class="secondary" id="anamnesis-ia-btn">Redactar borrador con IA</button>
     <span id="anamnesis-ia-estado" class="legend"></span>
@@ -2273,7 +2274,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                         + (u.intentos > 1 ? ', ' + u.intentos + ' intentos' : '')
                     : '';
                 estado.textContent = 'Borrador listo. Leelo y verificalo antes de guardar'
-                    + ' (el relato quedó en la pestaña Paciente).' + costo;
+                    + ' (las atenciones previas quedaron en la pestaña Paciente).' + costo;
             })
             .catch(function (err) { estado.textContent = 'Error: ' + err.message; })
             .finally(function () { boton.disabled = false; });

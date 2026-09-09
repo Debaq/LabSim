@@ -655,26 +655,40 @@ t_eq(CaseCompleteness::pending($casoManual), [],
 // El relato: el campo que faltaba. Sin él, un paciente sin antecedentes
 // formales (una normoyente joven con acúfeno) dejaba la ficha vacía, y el
 // modelo metía lo único que podía decir en "comportamiento".
-$b = AnamnesisDraft::parse('{"historia_clinica":"Consulta por zumbido en ambos oídos de 4 meses de evolución, más notorio al acostarse. Asiste a conciertos con frecuencia y usa audífonos varias horas al día.","antecedentes":["trauma_acustico"],"comportamiento":"tranquila, colaboradora","disposicion":0}');
-t_true(strpos($b['historia_clinica'], 'zumbido') !== false, 'El relato se parsea');
-t_true($b['antecedentes']['trauma_acustico'],
-    'Y el antecedente que lo explica: exposición recreacional a ruido');
-t_eq(mb_strlen(AnamnesisDraft::parse('{"historia_clinica":"' . str_repeat('x', 2000) . '"}')['historia_clinica']),
-    AnamnesisDraft::MAX_RELATO, 'El relato se recorta a su propio tope');
-t_true(AnamnesisDraft::MAX_RELATO > AnamnesisDraft::MAX_TEXTO,
-    'Y ese tope es mayor que el de los campos cortos: es el único narrativo');
+// La historia clínica NO es el motivo de consulta: son las atenciones
+// previas del paciente, fechadas con llaves {{-N}} que la app resuelve
+// contra la fecha de la cita (ver resolver_fechas_historia_clinica en
+// src/core/ficha.py). Es lo que el alumno lee en la ficha antes de atender.
+$b = AnamnesisDraft::parse('{"historia_clinica":"{{-20}} Nace de 38 semanas, parto vaginal, 3.240 g. Screening auditivo: refiere OD.\n{{-5}} Control con pediatra, deriva a fonoaudiología.","antecedentes":[],"comportamiento":"tranquila","disposicion":0}');
+t_true(strpos($b['historia_clinica'], '{{-20}}') !== false,
+    'Las llaves de fecha llegan intactas: las resuelve el cliente, no nosotros');
+t_true(substr_count($b['historia_clinica'], '{{-') === 2, 'Una atención por línea, cada una con su fecha');
+t_eq(mb_strlen(AnamnesisDraft::parse('{"historia_clinica":"' . str_repeat('x', 3000) . '"}')['historia_clinica']),
+    AnamnesisDraft::MAX_HISTORIA, 'La historia se recorta a su propio tope');
+t_true(AnamnesisDraft::MAX_HISTORIA > AnamnesisDraft::MAX_RELATO,
+    'Y es el tope más grande: son varias atenciones fechadas, no un párrafo');
 t_eq(AnamnesisDraft::parse('{"antecedentes":[]}')['historia_clinica'], '',
-    'Si el modelo no lo manda, queda vacío -- no se inventa nada del lado nuestro');
+    'Si el modelo no la manda, queda vacía -- no se inventa nada del lado nuestro');
 
-// El prompt tiene que pedirlo explícitamente, que es lo que faltaba.
-t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, 'historia_clinica') !== false,
-    'El prompt nombra el campo del relato');
-t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, 'nunca va vacía') !== false,
-    'Y dice que no puede quedar vacío: todo paciente consultó por algo');
+// El prompt tiene que explicar las dos cosas que nadie puede adivinar: el
+// significado del campo y la sintaxis de las fechas.
+t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, 'ATENCIONES PREVIAS') !== false,
+    'El prompt dice qué es la historia clínica, que no es el motivo de consulta');
+t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, '{{-N}}') !== false,
+    'Y la sintaxis de fecha relativa, que es propia de LabSim');
+t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, 'screening auditivo') !== false,
+    'Y qué poner en un recién nacido, que es donde la historia más importa');
 t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, '"otros" TAMPOCO va vacío') !== false,
-    'Y que "otros" tampoco: de ahí sale lo que el paciente cuenta en el chat');
-t_true(strlen(AnamnesisDraft::SYSTEM_PROMPT) < 2600,
+    'Y que "otros" tampoco va vacío: de ahí sale lo que el paciente cuenta en el chat');
+t_true(strlen(AnamnesisDraft::SYSTEM_PROMPT) < 3400,
     'El prompt se mantiene acotado -- es lo único del input que controlamos -- pero sin recortar reglas que hacen falta');
+
+// Un lactante no puede describirse como "de 0 años": es justo el caso donde
+// la historia clínica (nacimiento, peso, screening) es lo que importa.
+$desc = AnamnesisDraft::describeCase(['edad' => 0, 'gender' => 1,
+    'Aerea' => $normal, 'Osea' => $normal, 'Z_OD' => 'A', 'Z_OI' => 'A']);
+t_true(strpos($desc, 'lactante') !== false, 'Edad 0 se describe como lactante, no como "0 años"');
+t_true(strpos($desc, '0 años') === false, 'Y no se le manda un absurdo al modelo');
 
 // "otros" es narrativo como el relato, no un campo corto: de ahí sale todo
 // lo que el paciente contesta en el chat, y con 400 caracteres hablaba en

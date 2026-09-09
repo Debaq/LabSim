@@ -28,12 +28,18 @@ final class AnamnesisDraft
     public const MAX_TEXTO = 400;
 
     /**
-     * Tope del relato (historia clínica). Más largo que los demás porque
-     * es el único campo narrativo: motivo de consulta, hace cuánto, en qué
-     * situaciones molesta. Sin él la anamnesis de un paciente sin
-     * antecedentes formales queda vacía, que es exactamente lo que pasaba.
+     * Tope de los campos narrativos: lo que el paciente cuenta de sí mismo
+     * ("otros"). Sin espacio no hay material de entrevista y el paciente
+     * contesta en monosílabos.
      */
     public const MAX_RELATO = 1200;
+
+    /**
+     * Tope de la historia clínica. Es el más largo porque son varias
+     * atenciones fechadas, no un párrafo: un lactante puede traer
+     * nacimiento, screening, control de pediatra y derivación.
+     */
+    public const MAX_HISTORIA = 2000;
 
     /**
      * Presupuesto de tokens de esta tarea. Tiene su propio campo en
@@ -137,8 +143,19 @@ que los explican de forma plausible.
 - No menciones umbrales, dB ni nombres de exámenes: eso lo mide el alumno.
 - No digas qué tiene el paciente ni des un diagnóstico.
 - Español de Chile, tercera persona, breve y clínico.
-- "historia_clinica" nunca va vacía: motivo de consulta, hace cuánto, cómo
-  evolucionó y cuándo molesta. Dos a cuatro oraciones.
+- "historia_clinica" es el registro de ATENCIONES PREVIAS, como una ficha
+  clínica real: qué le hicieron al paciente antes de llegar acá y qué se
+  encontró. No es el motivo de consulta ni lo que el paciente cuenta.
+  Cada atención va en su propia línea y empieza con una llave {{-N}},
+  donde N son los DÍAS ANTES de esta consulta; la app la reemplaza por la
+  fecha real. Ejemplo: "{{-45}} Control con pediatra, sin hallazgos."
+  De 2 a 5 líneas, de la más antigua a la más reciente.
+  En un recién nacido o lactante la primera línea es el nacimiento, con
+  peso, semanas de gestación, tipo de parto, complicaciones si hubo y el
+  resultado del screening auditivo. Un nacimiento hace un mes es {{-30}};
+  algo de hace dos años, {{-730}}.
+  Registrá hechos y qué hizo cada profesional. No nombres el diagnóstico
+  audiológico que el alumno tiene que descubrir.
 - Marcá los antecedentes que expliquen el cuadro y sean frecuentes en la
   vida real (ruido recreacional o laboral, otitis en la infancia,
   ototóxicos). No los dejes todos en falso por prudencia.
@@ -150,8 +167,8 @@ que los explican de forma plausible.
   cinco oraciones con detalles concretos: de acá sale todo lo que el
   paciente tiene para decir en la conversación, y sin esto contesta en
   monosílabos y el alumno no tiene qué entrevistar.
-- Un paciente sin hallazgos igual consultó por algo: ahí "antecedentes"
-  puede ir vacío, pero "historia_clinica" y "otros" no.
+- Un paciente sin hallazgos igual tiene historia y tiene qué contar: ahí
+  "antecedentes" puede ir vacío, pero "historia_clinica" y "otros" no.
 - "medicamentos" y "cirugias" sí van vacíos si no corresponden.
 - "comportamiento": cómo actúa al conversar (tono, actitud), no su
   patología ni su motivo de consulta.
@@ -160,8 +177,9 @@ Respondé solo el JSON, sin ```:
 {"historia_clinica": "", "antecedentes": [], "medicamentos": "",
  "cirugias": "", "otros": "", "comportamiento": "", "disposicion": 0}
 
-"historia_clinica" es lo que lee el alumno en la ficha; "otros" es lo que el
-paciente cuenta si le preguntan. No repitas uno en el otro.
+"historia_clinica" son las atenciones previas fechadas que lee el alumno en
+la ficha; "otros" es lo que el paciente cuenta de su vida si le preguntan.
+No repitas uno en el otro.
 
 "antecedentes" sale de esta lista cerrada y ninguna otra: hipoacusia_familiar,
 ototoxicos, trauma_acustico, otitis, meningitis, tce, diabetes, hta.
@@ -186,7 +204,14 @@ TXT;
         $airPairs = is_array($data['Aerea'] ?? null) ? $data['Aerea'] : [];
         $bonePairs = is_array($data['Osea'] ?? null) ? $data['Osea'] : [];
 
-        $lineas = ["Paciente: {$genero} de {$edad} años."];
+        // La edad se guarda en años enteros, así que un bebé llega como 0.
+        // Decirle "de 0 años" al modelo daba historias absurdas, y es justo
+        // el caso donde la historia clínica más importa (nacimiento, peso,
+        // screening auditivo).
+        $quien = $edad === 0
+            ? "{$genero}, lactante de menos de un año"
+            : "{$genero} de {$edad} años";
+        $lineas = ["Paciente: {$quien}."];
 
         foreach (['OD' => 0, 'OI' => 1] as $lado => $idx) {
             $ccePct = (float) ($perfil[$lado]['cce_pct'] ?? 100.0);
@@ -310,7 +335,7 @@ TXT;
         };
 
         return [
-            'historia_clinica' => mb_substr(trim((string) ($json['historia_clinica'] ?? '')), 0, self::MAX_RELATO),
+            'historia_clinica' => mb_substr(trim((string) ($json['historia_clinica'] ?? '')), 0, self::MAX_HISTORIA),
             // "otros" también es narrativo: es de donde el paciente saca lo
             // que cuenta en el chat con el alumno. Con 400 caracteres
             // contestaba en monosílabos.
