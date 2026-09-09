@@ -207,6 +207,7 @@
     </div>
 
     <p class="help">Deterioro tonal (Carhart / Stat / Rosemberg): dB que hay que subir sobre el umbral aéreo para que el oído sostenga el tono 1 minuto completo. 0 = sin deterioro (lo sostiene de inmediato). Si nunca alcanza a sostenerlo ni en el techo (salida máxima o LDL, lo que sea menor), pon un valor igual o mayor a ese rango.</p>
+    <p class="help">Cada prueba usa ese número distinto, porque el software las administra como se administran de verdad: en el <b>Carhart</b> cada subida de 5 dB reinicia el minuto; en el <b>Rosemberg</b> el minuto es total y subir el nivel no devuelve tiempo, así que con el mismo valor el alumno llega más arriba en dB; el <b>Stat</b> se administra a un nivel fijo de 100 dB HL con ruido blanco contralateral, sin escalar, así que ahí el valor solo decide si el oído aguanta el minuto a ese nivel (queda positivo si supera 100 dB HL menos el umbral aéreo).</p>
     <?php
     $decayGroups = [
         'carhart' => ['label' => 'Carhart', 'freqs' => [500, 1000, 2000, 4000]],

@@ -1,4 +1,6 @@
 import random
+import time
+
 from core.helpers import CasesOffline
 from core.helpers import Preferences
 from PySide6.QtCore import QTimer
@@ -36,17 +38,31 @@ class ResponseAudiometry():
     # aéreo (igual que colocar_fonos); 'white_noise' = ruido blanco
     # obligatorio; None = sin exigencia (Rosemberg es bilateral pero cada
     # oído se evalúa solo, uno a la vez).
+    # 'fixed_level': el tono se presenta a un nivel unico de protocolo y no se
+    # escala (Stat). 'cumulative': el minuto es total desde que empezo la
+    # prueba y NO se reinicia al subir dB (Rosemberg); sin la marca, cada
+    # subida reinicia el reloj (Carhart).
     DECAY_TESTS = {
         'mano_levantada': {                  # Carhart
             'data_key': 'Carhart', 'frequencies': [2, 3, 4, 6], 'contra': 'mask',
         },
         'ruido_blanco_contralateral': {       # Stat
             'data_key': 'Stat', 'frequencies': [2, 3, 4], 'contra': 'white_noise',
+            'fixed_level': True,
         },
         'rosemberg_bilateral': {              # Rosemberg
             'data_key': 'Rosemberg', 'frequencies': [2, 3, 4, 6], 'contra': None,
+            'cumulative': True,
         },
     }
+
+    # Stat (Jerger): tono continuo a nivel fijo alto -- 110 dB SPL, que en
+    # supraaural queda alrededor de 100 dB HL -- durante un minuto, con ruido
+    # blanco contralateral. No se busca umbral ni se sube de a 5 dB como en el
+    # Carhart: o sostiene el minuto a ese nivel (negativo) o no (positivo).
+    STAT_LEVEL_DB = 100
+    STAT_LEVEL_TOL = 5     # +-5 dB HL: sigue siendo "administrado a nivel"
+    STAT_NOISE_MIN_DB = 80  # ruido contralateral bajo este nivel no enmascara
 
     def __init__(self,obj_audio):
         super().__init__()
@@ -64,6 +80,10 @@ class ResponseAudiometry():
         self.decay_timer = QTimer()
         self.decay_timer.setSingleShot(True)
         self.decay_timer.timeout.connect(self._decay_timeout)
+        # corrida en curso de una prueba acumulativa (Rosemberg): guarda con
+        # que prueba/oido/frecuencia empezo y cuando, para que subir dB no
+        # devuelva el minuto entero
+        self._decay_run = {}
 
 
     def set_case(self,dbdata):
@@ -132,13 +152,6 @@ class ResponseAudiometry():
         if 'int' in name:
             value = str_.split(' ')
             self.data['audio']['int'][channel] = int(value[0])
-            if (self.history_command and self.history_command[0] in self.DECAY_TESTS
-                    and self.data['audio']['stimOn'][channel]
-                    and self.data['audio']['stim'][channel] == 0):
-                # el docente cambió el nivel del tono estudiado: se recalcula
-                # todo de nuevo (si subió lo suficiente puede sostener el
-                # minuto; si no, se reinicia el reloj de adaptación)
-                self.response_tone_decay(self.history_command[0])
         elif 'trans' in name:
             value = trans_list.index(str_)
             self.data['audio']['trans'][channel] = value
@@ -166,6 +179,14 @@ class ResponseAudiometry():
             #print(f"la prueba es {self.data['audio']['test']}")
         elif 'contin' in name:
             self.data['audio']['contin'][channel] = str_
+
+        if ('stimOn' not in name and self.history_command
+                and self.history_command[0] in self.DECAY_TESTS):
+            # cualquier cambio del equipo mientras corre un deterioro tonal lo
+            # recalcula: subir el tono, mover el ruido contralateral, cambiar
+            # de oído o de frecuencia. ('stimOn' no entra porque ya pasó por
+            # response_(), que rutea a la prueba que corresponda.)
+            self.response_tone_decay(self.history_command[0])
 
         #print(self.data['audio'])
 
@@ -329,31 +350,71 @@ class ResponseAudiometry():
         data = self.dbdata.get(cfg['data_key']) or []
         return data[pos][ear] if pos < len(data) else 0
 
-    def response_tone_decay(self, command):
-        """Motor genérico de deterioro tonal (Carhart/Stat/Rosemberg): tono
-        puro continuo a nivel fijo, se sostiene la mano mientras se percibe.
-        Si el oído "decae" a ese nivel, la baja antes del minuto real
-        (DECAY_HOLD_MS) y hay que subir STEP_DB y reintentar, hasta el
-        techo (salida máxima del equipo o LDL, lo que sea menor). Si llega
-        al techo sin sostener el minuto, se deja constancia en log -- el
-        cálculo de la velocidad de deterioro (dB subidos / min transcurridos)
-        se deja al alumno, no hay una fórmula clínica única para eso."""
-        cfg = self.DECAY_TESTS[command]
-        if self.data['audio']['stimOn'].count(True) < 1:
-            self.decay_timer.stop()
-            return
+    def _tone_channel(self):
+        """Canal que lleva el tono puro. No sirve `stimOn.index(True)`: en las
+        pruebas con ruido contralateral hay dos canales encendidos y el tono
+        puede estar en cualquiera de los dos."""
+        tones = [ch for ch in (0, 1)
+                 if self.data['audio']['stimOn'][ch]
+                 and self.data['audio']['stim'][ch] == 0]
+        return tones[0] if len(tones) == 1 else None
 
-        stim_on = self.data['audio']['stimOn'].index(True)
-        if self.data['audio']['stim'][stim_on] != 0:  # 0 = Tono puro
-            self.decay_timer.stop()
-            self.downHand()
+    def _decay_abort(self):
+        """Corta la corrida: sin tono válido no hay prueba que cronometrar."""
+        self.decay_timer.stop()
+        self._decay_run = {}
+        self.downHand()
+
+    def _decay_elapsed_ms(self, cfg, command, ear, freq, int_):
+        """Milisegundos que lleva corriendo esta presentación, medidos en
+        tiempo real, no en llamadas al motor.
+
+        Importa porque el alumno cronometra por fuera (el reloj del audiómetro
+        o uno de pulsera): el minuto que él mide y el que corre acá tienen que
+        ser el mismo. Por eso el reloj arranca una sola vez por presentación y
+        cada recálculo re-arma el timer con lo que QUEDA, en vez de regalar el
+        minuto entero de nuevo. Sin esto, mover cualquier perilla del equipo
+        (transductor, continuo/pulsado, la frecuencia y volver) reiniciaba la
+        cuenta y el paciente sostenía el tono más rato del que marca el
+        cronómetro del alumno.
+
+        Qué reinicia la cuenta es lo único que cambia entre pruebas:
+        - Carhart: cambiar el nivel (cada subida de 5 dB abre un minuto nuevo).
+        - Rosemberg y Stat: solo cambiar de oído o de frecuencia; el nivel no,
+          porque ahí el minuto es total.
+        """
+        key = (command, ear, freq)
+        if not (cfg.get('cumulative') or cfg.get('fixed_level')):
+            key = key + (int_,)
+        if self._decay_run.get('key') != key:
+            self._decay_run = {'key': key, 'start': time.monotonic()}
+            return 0
+        return (time.monotonic() - self._decay_run['start']) * 1000
+
+    def response_tone_decay(self, command):
+        """Motor de deterioro tonal (Carhart/Stat/Rosemberg): tono puro
+        continuo, se sostiene la mano mientras se percibe. El caso guarda,
+        por prueba/frecuencia/oído, cuántos dB sobre el umbral hacen falta
+        para sostener el minuto (`_decay_total`).
+
+        Las tres se administran distinto y el motor las trata distinto:
+
+        - Carhart: se sube de a STEP_DB y cada subida reinicia el minuto.
+        - Rosemberg: se sube igual, pero el minuto es total y no se reinicia.
+        - Stat: nivel único de protocolo (STAT_LEVEL_DB) con ruido blanco
+          contralateral; no se escala. Fuera de ese nivel el paciente sigue
+          respondiendo por audibilidad, pero la prueba no entrega resultado.
+        """
+        cfg = self.DECAY_TESTS[command]
+        stim_on = self._tone_channel()
+        if stim_on is None:
+            self._decay_abort()
             return
 
         continuo = self.data['audio']['contin'][stim_on] == 'Continuo'
         via_aerea = self.data['audio']['trans'][stim_on] == 0
         if not (continuo and via_aerea):
-            self.decay_timer.stop()
-            self.downHand()
+            self._decay_abort()
             return
 
         other = int(not stim_on)
@@ -363,33 +424,55 @@ class ResponseAudiometry():
         int_ = self.data['audio']['int'][stim_on]
 
         decay_total = self._decay_total(cfg, freq, ear)
-        if decay_total is None:
-            self.decay_timer.stop()
-            self.downHand()
+        if decay_total is None:  # frecuencia fuera del protocolo de la prueba
+            self._decay_abort()
             return
 
         if cfg['contra'] == 'white_noise':
-            contra_ok = (self.data['audio']['stimOn'][other]
-                         and self.data['audio']['output'][other] == o_n
-                         and self.data['audio']['stim'][other] == 4)  # 4 = Ruido blanco
-            if not contra_ok:
-                self.decay_timer.stop()
-                self.downHand()
+            noise_on = (self.data['audio']['stimOn'][other]
+                        and self.data['audio']['output'][other] == o_n
+                        and self.data['audio']['stim'][other] == 4)  # 4 = Ruido blanco
+            noise_lvl = self.data['audio']['int'][other] if noise_on else 0
+            if not noise_on or noise_lvl < self.STAT_NOISE_MIN_DB:
+                # a 100 dB HL el tono cruza al otro oído: sin ruido blanco que
+                # lo tape, lo que se mida no es de este oído
+                self._decay_abort()
                 return
-            int_mkg = 0
+            # el nivel del ruido del Stat lo fija el protocolo, no el alumno:
+            # a 90 dB sobre un oido normal la formula de enmascaramiento lo
+            # daria por sobre-enmascarado, cuando en el test real el tono va a
+            # 100 dB y se oye igual. Por eso aca se usa directo el umbral real
+            # del oido estudiado en vez de pasar por _resolve_masked_threshold.
+            int_mkg = None
         elif cfg['contra'] == 'mask':
             contra_on = self.data['audio']['stimOn'][other] and self.data['audio']['output'][other] == o_n
             int_mkg = self.data['audio']['int'][other] if contra_on else 0
         else:
             int_mkg = 0
 
-        threshold = self._resolve_masked_threshold('aerea', freq, ear, o_n, int_mkg)
+        if int_mkg is None:
+            threshold = self._masking_calc('aerea', freq, ear, o_n)['real']
+        else:
+            threshold = self._resolve_masked_threshold('aerea', freq, ear, o_n, int_mkg)
         if int_ < threshold:
-            self.decay_timer.stop()
-            self.downHand()
+            self._decay_abort()
             return
 
-        ceiling = min(self.MAX_OUTPUT_DB, self.dbdata['LDL'][freq][ear])
+        side = 'OD' if ear == 0 else 'OI'
+        if cfg.get('fixed_level') and abs(int_ - self.STAT_LEVEL_DB) > self.STAT_LEVEL_TOL:
+            # el Stat no se busca subiendo: administrado a otro nivel el
+            # paciente oye el tono (está sobre su umbral) pero no se evalúa
+            # adaptación, así el alumno no obtiene un resultado que no
+            # corresponde al test
+            self.decay_timer.stop()
+            self._decay_run = {}
+            self.upHand()
+            print(f"[Stat] {side} {self.frecuency[freq]}Hz: presentado a {int_}dB HL, "
+                  f"el test se administra a {self.STAT_LEVEL_DB}dB HL "
+                  f"(+-{self.STAT_LEVEL_TOL}); sin resultado válido")
+            return
+
+        elapsed_ms = self._decay_elapsed_ms(cfg, command, ear, freq, int_)
         extra = int_ - threshold
 
         if extra >= decay_total:
@@ -398,19 +481,38 @@ class ResponseAudiometry():
             self.upHand()
             return
 
-        # tiempo que sostiene a este nivel: proporcional a qué tan cerca está
-        # de decay_total (no todo-o-nada) -- así el alumno, cronómetro en
-        # mano (btn_time_start/stop de la UI), ve que a más dB sostiene más
-        # rato y puede calcular la velocidad de deterioro él mismo en vez de
-        # que quede fija en "60s o nada" en cualquier nivel insuficiente
-        hold_ms = int(self.DECAY_HOLD_MS * extra / decay_total)
-        self.upHand()
-        self.decay_timer.start(hold_ms)
+        # el hold que sigue se re-arma con el tiempo que QUEDA de esta
+        # presentación, no con el minuto entero: un recálculo por mover otra
+        # perilla no puede alargarle la vida al tono
 
+        # tiempo que sostiene a este nivel: proporcional a qué tan cerca está
+        # de decay_total (no todo-o-nada) -- así el alumno, cronómetro en mano
+        # (btn_time_start/stop del audiómetro, o el reloj que tenga: son
+        # relojes manuales, nadie los sincroniza con esto), ve que a más dB
+        # sostiene más rato y puede calcular la velocidad de deterioro él
+        # mismo, en vez de que quede fija en "60s o nada" en cualquier nivel
+        # insuficiente. Por eso estos milisegundos tienen que ser tiempo real.
+        hold_ms = int(self.DECAY_HOLD_MS * extra / decay_total) - elapsed_ms
+        if hold_ms <= 0:
+            # el tiempo que este nivel daba ya se consumió (en Rosemberg,
+            # además, el minuto siguió corriendo mientras se subía el nivel)
+            self.decay_timer.stop()
+            self.downHand()
+            return
+
+        self.upHand()
+        self.decay_timer.start(int(hold_ms))
+
+        if cfg.get('fixed_level'):
+            print(f"[Stat] {side} {self.frecuency[freq]}Hz: a {int_}dB HL sostiene "
+                  f"~{hold_ms/1000:.1f}s de {self.DECAY_HOLD_MS/1000:.0f}s -> positivo")
+            return
+
+        ceiling = min(self.MAX_OUTPUT_DB, self.dbdata['LDL'][freq][ear])
         if int_ >= ceiling:
             # techo (salida máxima o disconfort): este es el último nivel
             # posible, sostiene hold_ms y luego la mano baja para siempre
-            print(f"[{cfg['data_key']}] {'OD' if ear == 0 else 'OI'} {self.frecuency[freq]}Hz: "
+            print(f"[{cfg['data_key']}] {side} {self.frecuency[freq]}Hz: "
                   f"llega al techo ({ceiling}dB HL), sostiene ~{hold_ms/1000:.1f}s de "
                   f"{self.DECAY_HOLD_MS/1000:.0f}s sin lograr el minuto completo")
 
