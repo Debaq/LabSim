@@ -194,8 +194,8 @@
         <div class="side-block">
             <div class="side-heading"><span class="side-tag <?= $lado ?>"><?= $ladoLabel ?></span></div>
             <label>UMD (int / %)
-                <input type="number" step="5" class="umd-int-input" data-side="<?= $lado ?>" name="umd_int[<?= $lado ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_int', $lado], 35)) ?>" class="input input--narrow" style="display:inline-block;">
-                / <input type="number" step="4" class="umd-pct-input" data-side="<?= $lado ?>" name="umd_pct[<?= $lado ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_pct', $lado], 100)) ?>" class="input input--narrow" style="display:inline-block;">
+                <input type="number" step="5" class="umd-int-input input input--narrow" data-side="<?= $lado ?>" name="umd_int[<?= $lado ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_int', $lado], 35)) ?>" style="display:inline-block;">
+                / <input type="number" step="4" class="umd-pct-input input input--narrow" data-side="<?= $lado ?>" name="umd_pct[<?= $lado ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_pct', $lado], 100)) ?>" style="display:inline-block;">
             </label>
             <label>SISI <input type="number" step="5" name="sisi[<?= $lado ?>]" value="<?= htmlspecialchars((string) fv($v, ['sisi', $lado], 0)) ?>"></label>
             <label class="inline-check"><input type="checkbox" name="stenger[<?= $lado ?>]" <?= isset($v['stenger'][$lado]) ? 'checked' : '' ?>> Stenger</label>

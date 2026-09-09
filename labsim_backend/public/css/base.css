@@ -108,6 +108,21 @@ th {
 .help--mt    { margin-top: var(--space-1); }
 .help--mt-md { margin-top: var(--space-3); }
 
+/* Checkbox con su label al lado, sin negrita. Vivía en case.css, que carga
+   una sola página; inbox_send.php lo usaba sin poder verlo. */
+.inline-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 400;
+  margin: 0 0 0 var(--space-5);
+}
+.inline-check input { width: auto; margin: 0; }
+
+/* Valor que pide atención en una tabla o ficha. Estaba duplicado idéntico en
+   dashboard.css y student.css, y admin/student.php no cargaba ninguna. */
+.badge-warn { color: var(--color-danger); font-weight: 600; }
+
 /* Separador visual entre secciones dentro de una card o entre cards.
  * Variante --lg para cuando ya hay otro margin-top:0.8rem inline. */
 .section-sep {
@@ -169,6 +184,9 @@ th {
 
 /* Input compacto (toolbar junto a otros elementos): rompe el width:100% global */
 .input--auto { width: auto !important; }
+/* Numérico corto en línea con su par (ej. "UMD (int / %)"): sin esto el
+   input, select { width:100% } global los apila a lo ancho. */
+.input--narrow { width: 5rem; }
 
 /* Help aún más chico para notas al pie muy pequeñas */
 .help--xs { font-size: 0.75rem; }

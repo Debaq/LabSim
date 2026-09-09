@@ -50,7 +50,6 @@ tr.clickable:hover { background: var(--color-row-alt); }
 
 /* Utilidades específicas del portal alumno */
 .legend { font-size: 0.8rem; color: var(--color-muted); }
-.badge-warn { color: var(--color-danger); font-weight: 600; }
 .empty { color: var(--color-muted); text-align: center; padding: var(--space-8) 0; }
 
 /* Burbujas de chat (atencion.php). Lado izquierdo = IA/mensajes del sistema,

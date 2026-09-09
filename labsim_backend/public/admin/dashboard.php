@@ -259,7 +259,7 @@ if ($appointmentId !== null) {
     </div>
 
     <?php if (!$byStudent): ?>
-    <div class="card" class="muted">Sin acciones registradas para esta cita todavía.</div>
+    <div class="card muted">Sin acciones registradas para esta cita todavía.</div>
     <?php endif; ?>
 
     <?php if ($focusStudentId !== null && !isset($byStudent[$focusStudentId])):

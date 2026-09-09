@@ -34,7 +34,7 @@ admin_header('Auditoría', $me);
         <tr><th>Fecha</th><th>Admin</th><th>Acción</th><th>Detalles</th></tr>
         <?php foreach ($rows as $r): ?>
         <tr>
-            <td class="mono" class="nowrap" style="font-size:0.8rem;"><?= htmlspecialchars($r['created_at']) ?></td>
+            <td class="mono nowrap" style="font-size:0.8rem;"><?= htmlspecialchars($r['created_at']) ?></td>
             <td><?= htmlspecialchars($r['admin_username']) ?></td>
             <td><?= htmlspecialchars($r['action']) ?></td>
             <td class="mono" style="font-size:0.78rem;"><?= htmlspecialchars($r['details'] ?? '') ?></td>

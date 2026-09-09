@@ -21,15 +21,6 @@
 .grid-table th.side-label, .grid-table td.side-label { text-align: left; font-weight: 600; }
 
 /* Checkbox inline (label + checkbox lado a lado sin negrita) */
-.inline-check {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-weight: 400;
-  margin: 0 0 0 var(--space-5);
-}
-.inline-check input { width: auto; margin: 0; }
-
 /* Fieldset agrupador de campos */
 fieldset {
   border: 1px solid var(--color-border);

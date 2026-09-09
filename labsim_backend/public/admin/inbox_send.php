@@ -186,14 +186,14 @@ admin_header('Bandeja de entrada', $me);
 <div class="card">
     <strong>Mensajes recibidos<?= $noLeidos > 0 ? " ({$noLeidos} sin leer)" : '' ?></strong>
     <?php if (!$misMensajes): ?>
-    <p class="legend">Sin mensajes todavía.</p>
+    <p class="help">Sin mensajes todavía.</p>
     <?php else: ?>
     <div class="scrollbox" style="margin-top:0.5rem;">
         <?php foreach ($misMensajes as $m): ?>
         <details class="pane" style="margin-bottom:0.4rem;" <?= !$m['leido'] ? 'open' : '' ?>>
             <summary style="cursor:pointer; <?= !$m['leido'] ? 'font-weight:700;' : '' ?>">
                 <?= !$m['leido'] ? '● ' : '' ?><?= htmlspecialchars($m['asunto']) ?>
-                <span class="legend" class="normal">-- <?= htmlspecialchars($m['remitente'] ?: 'Sistema') ?>, <?= htmlspecialchars($m['created_at']) ?></span>
+                <span class="help normal">-- <?= htmlspecialchars($m['remitente'] ?: 'Sistema') ?>, <?= htmlspecialchars($m['created_at']) ?></span>
             </summary>
             <p style="white-space:pre-wrap; margin:0.5rem 0 0.3rem;"><?= htmlspecialchars($m['cuerpo']) ?></p>
             <?php if (!$m['leido']): ?>
@@ -223,20 +223,20 @@ admin_header('Bandeja de entrada', $me);
 <div class="card">
     <strong>Mensajes enviados</strong>
     <?php if (!$misEnvios): ?>
-    <p class="legend">Todavía no has mandado mensajes.</p>
+    <p class="help">Todavía no has mandado mensajes.</p>
     <?php else: ?>
     <div class="scrollbox" style="margin-top:0.5rem;">
         <?php foreach ($misEnvios as $e): ?>
         <details class="pane" style="margin-bottom:0.4rem;">
             <summary style="cursor:pointer;">
                 <?= htmlspecialchars($e['asunto']) ?>
-                <span class="legend" class="normal">
+                <span class="help normal">
                     -- <?= (int) $e['n_destinatarios'] ?> destinatario<?= (int) $e['n_destinatarios'] === 1 ? '' : 's' ?>
                     (<?= (int) $e['n_leidos'] ?> leído<?= (int) $e['n_leidos'] === 1 ? '' : 's' ?>), <?= htmlspecialchars($e['created_at']) ?>
                 </span>
             </summary>
             <p style="white-space:pre-wrap; margin:0.5rem 0 0.3rem;"><?= htmlspecialchars($e['cuerpo']) ?></p>
-            <p class="legend" style="margin:0;">Para: <?= htmlspecialchars($e['destinatarios']) ?></p>
+            <p class="help" style="margin:0;">Para: <?= htmlspecialchars($e['destinatarios']) ?></p>
         </details>
         <?php endforeach; ?>
     </div>
@@ -251,7 +251,7 @@ admin_header('Bandeja de entrada', $me);
         probar cómo se ve la bandeja sin esperar a que un alumno cierre una atención de verdad.
     </p>
     <?php if (!$courses): ?>
-    <p class="legend">No tienes cursos todavía -- créalos o pide que te agreguen en <a href="courses.php">Cursos</a>.</p>
+    <p class="help">No tienes cursos todavía -- créalos o pide que te agreguen en <a href="courses.php">Cursos</a>.</p>
     <?php else: ?>
     <form method="get" style="margin-bottom:0.5rem;">
         <label>Curso
@@ -292,7 +292,7 @@ admin_header('Bandeja de entrada', $me);
                     <option value="<?= (int) $g['id'] ?>"><?= htmlspecialchars($g['name']) ?> (<?= (int) $g['member_count'] ?>)</option>
                     <?php endforeach; ?>
                 </select>
-                <?php if (!$grupos): ?><span class="legend">Este curso no tiene grupos todavía.</span><?php endif; ?>
+                <?php if (!$grupos): ?><span class="help">Este curso no tiene grupos todavía.</span><?php endif; ?>
             </label>
             <label style="display:flex; align-items:center; gap:0.5rem; font-weight:600;">
                 <input type="radio" name="modo" value="todos" id="modo-todos" class="input--auto">
@@ -304,11 +304,11 @@ admin_header('Bandeja de entrada', $me);
             <?php foreach ($roster as $r): ?>
             <label class="inline-check" style="display:block; font-weight:400;">
                 <input type="checkbox" name="student_ids[]" value="<?= (int) $r['id'] ?>" class="chk-alumno">
-                <?= htmlspecialchars($r['display_name']) ?> <span class="mono" class="help help--xs">(<?= htmlspecialchars($r['username']) ?>)</span>
+                <?= htmlspecialchars($r['display_name']) ?> <span class="mono help help--xs">(<?= htmlspecialchars($r['username']) ?>)</span>
             </label>
             <?php endforeach; ?>
             <?php if (!$roster): ?>
-            <p class="legend">Este curso no tiene alumnos matriculados todavía.</p>
+            <p class="help">Este curso no tiene alumnos matriculados todavía.</p>
             <?php endif; ?>
         </div>
         </div>
@@ -322,11 +322,11 @@ admin_header('Bandeja de entrada', $me);
                 <?php foreach ($teachers as $t): ?>
                 <label class="inline-check" style="display:block; font-weight:400;">
                     <input type="checkbox" name="teacher_ids[]" value="<?= (int) $t['id'] ?>" class="chk-docente">
-                    <?= htmlspecialchars($t['display_name']) ?> <span class="mono" class="help help--xs">(<?= htmlspecialchars($t['username']) ?>)</span>
+                    <?= htmlspecialchars($t['display_name']) ?> <span class="mono help help--xs">(<?= htmlspecialchars($t['username']) ?>)</span>
                 </label>
                 <?php endforeach; ?>
                 <?php if (!$teachers): ?>
-                <p class="legend">No hay otros docentes en este curso todavía.</p>
+                <p class="help">No hay otros docentes en este curso todavía.</p>
                 <?php endif; ?>
             </div>
         </div>
