@@ -14,6 +14,24 @@ function admin_extra_css(): array
     return array_values(array_unique($GLOBALS['__admin_extra_css'] ?? []));
 }
 
+/** Registra un JS extra de página; admin_footer lo emite al final del <body>,
+ * en el orden en que se registró. Uso: admin_add_js('case/tabs.js'); */
+function admin_add_js(string $filename): void
+{
+    $GLOBALS['__admin_extra_js'][] = $filename;
+}
+
+function admin_extra_js(): array
+{
+    return array_values(array_unique($GLOBALS['__admin_extra_js'] ?? []));
+}
+
+/** ?v=filemtime: sin esto un deploy de CSS/JS queda con cache vieja. */
+function admin_asset_version(string $path): string
+{
+    return (string) (@filemtime($path) ?: time());
+}
+
 function admin_header(string $title, ?array $currentUser = null): void
 {
     header('Content-Type: text/html; charset=utf-8');
@@ -36,16 +54,11 @@ function admin_header(string $title, ?array $currentUser = null): void
     } catch (e) { /* localStorage bloqueado = sin override */ }
 })();
 </script>
-<?php
-// Cache-busting: ?v=filemtime fuerza al browser a re-bajar el CSS cuando
-// se toca. Sin esto, deploys de CSS quedan con cache vieja.
-$cssV = static fn (string $path): string => (string) (@filemtime($path) ?: time());
-?>
-<link rel="stylesheet" href="../css/tokens.css?v=<?= $cssV(__DIR__ . '/../css/tokens.css') ?>">
-<link rel="stylesheet" href="../css/base.css?v=<?= $cssV(__DIR__ . '/../css/base.css') ?>">
-<link rel="stylesheet" href="../css/admin.css?v=<?= $cssV(__DIR__ . '/../css/admin.css') ?>">
+<link rel="stylesheet" href="../css/tokens.css?v=<?= admin_asset_version(__DIR__ . '/../css/tokens.css') ?>">
+<link rel="stylesheet" href="../css/base.css?v=<?= admin_asset_version(__DIR__ . '/../css/base.css') ?>">
+<link rel="stylesheet" href="../css/admin.css?v=<?= admin_asset_version(__DIR__ . '/../css/admin.css') ?>">
 <?php foreach (admin_extra_css() as $css): ?>
-<link rel="stylesheet" href="../css/<?= htmlspecialchars($css) ?>?v=<?= $cssV(__DIR__ . '/../css/' . $css) ?>">
+<link rel="stylesheet" href="../css/<?= htmlspecialchars($css) ?>?v=<?= admin_asset_version(__DIR__ . '/../css/' . $css) ?>">
 <?php endforeach; ?>
 </head>
 <body>
@@ -192,6 +205,9 @@ function admin_footer(): void
     });
 })();
 </script>
+<?php foreach (admin_extra_js() as $js): ?>
+<script src="../js/<?= htmlspecialchars($js) ?>?v=<?= admin_asset_version(__DIR__ . '/../js/' . $js) ?>"></script>
+<?php endforeach; ?>
 </body>
 </html>
 <?php
