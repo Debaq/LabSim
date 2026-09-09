@@ -12,7 +12,7 @@
     "msg_about" :[
         "AudioSim es un sistema de simulación de evaluaciones auditivas con aires de muy poco código.<p>",
         "Esta es aún una versión BETA asi que apenas funciona, una lástima, pero vealo como una propuesta de interés.<p>",
-        "Si usted no posee una cuenta o un archivo de pruebas contacte con: Nicolás Quezada Baier (<a href='mailto:david.avila@uach.cl'>david.avila@uach.cl</a>)"
+        "Si usted no posee una cuenta o un archivo de pruebas contacte con: Nicolás Baier Quezada (<a href='mailto:david.avila@uach.cl'>david.avila@uach.cl</a>)"
        ],
     "error" : "ERROR",
     "warning" : "Advertencia",

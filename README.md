@@ -61,4 +61,4 @@ icons/          Íconos de la aplicación
 
 ## Licencia
 
-MIT © Nicolás Quezada Baier
+MIT © Nicolás Baier Quezada
