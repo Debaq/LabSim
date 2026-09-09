@@ -15,7 +15,7 @@
 <div class="card">
     <strong>Perfil auditivo</strong>
     <p class="help">Dónde está la lesión de este paciente. El audiograma (pestaña Audiometría) ya dice cuánta pérdida hay y cuánta es conductiva, frecuencia por frecuencia; lo único que no puede decir es qué parte del componente sensorioneural es coclear y qué parte es retrococlear. Eso se define acá, una vez, y desde acá se proyecta a los exámenes que tengan la casilla de derivación encendida.</p>
-    <p class="help">Sin ninguna casilla marcada nada cambia: cada pestaña se sigue cargando a mano, como siempre. La derivación existe para que el caso no se contradiga solo (una OEA normal con un gap de 40 dB, un ABR normal con un audiograma profundo), no para impedir armar un caso incoherente a propósito -- el Stenger, la falsa onda V y la simulación necesitan esa incoherencia.</p>
+    <p class="help">Sin ninguna casilla marcada nada se deriva: cada pestaña se carga a mano. La derivación existe para que el caso no se contradiga solo (una OEA normal con un gap de 40 dB, un ABR normal con un audiograma profundo), no para impedir armar un caso incoherente a propósito -- el Stenger, la falsa onda V y la simulación necesitan esa incoherencia.</p>
     <p class="help">El cuadro clínico de cada oído (que escribe el audiograma, el sitio de la lesión, el timpanograma y estas mismas casillas) se genera desde <a href="#" class="tab-link" data-goto-tab="armado">Armado rápido</a>. Acá se edita el resultado, o se arma el perfil a mano.</p>
 
     <p class="help">Qué exámenes se derivan del perfil</p>

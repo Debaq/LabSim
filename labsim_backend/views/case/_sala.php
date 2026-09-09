@@ -15,7 +15,7 @@
 <div class="card">
     <strong>Sala de atención</strong>
     <p class="help">Quiénes vienen con el paciente. Un lactante no cuenta su historia: la cuenta la madre. Y hay adultos que niegan lo que el acompañante ve todos los días -- ese desacuerdo <em>es</em> el hallazgo clínico del caso, y el alumno tiene que darse cuenta de a quién le está preguntando.</p>
-    <p class="help">El alumno no elige a quién le habla con un menú: lo dice escribiendo ("mamita, ¿su hijo escucha bien?", "prefiero que me conteste él") y responde quien corresponda. Un caso sin acompañantes se comporta exactamente como antes: una conversación con el paciente y nadie más.</p>
+    <p class="help">El alumno no elige a quién le habla con un menú: lo dice escribiendo ("mamita, ¿su hijo escucha bien?", "prefiero que me conteste él") y responde quien corresponda. Un caso sin acompañantes es una conversación con el paciente y nadie más.</p>
 
     <div class="section-sep" style="border-top:1px dashed var(--color-border);">
         <strong>El paciente en la entrevista</strong>

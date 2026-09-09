@@ -17,7 +17,7 @@
 <?php $vSubtipo = (string) ($v['vemp'][$lado]['subtipo'] ?? 'CVEMP'); ?>
 <div class="card">
     <strong>VEMP <?= $ladoLabel ?></strong>
-    <p class="help">Patología vestibular de este oído para el generador de VEMP. El subtipo define el músculo donde se mide y por lo tanto los picos que el alumno va a marcar (CVEMP cervical: P13/N23 sobre SCM; OVEMP ocular: N10/P16 sobre oblicuo inferior; MVEMP masetero: P13/N23 sobre masetero). Los 4 picos se rinden siempre; el cliente usa solo los del subtipo activo.</p>
+    <p class="help">Patología vestibular de este oído para el generador de VEMP. El subtipo define el músculo donde se mide y por lo tanto los picos que el alumno va a marcar (CVEMP cervical: P13/N23 sobre SCM; OVEMP ocular: N10/P16 sobre oblicuo inferior; MVEMP masetero: P13/N23 sobre masetero). Los 4 picos se cargan siempre; el alumno solo ve los del subtipo activo.</p>
     <div class="three-col">
         <label>Subtipo
             <select name="vemp[<?= $lado ?>][subtipo]" class="vemp-subtipo-select" data-lado="<?= $lado ?>">
@@ -47,7 +47,7 @@
             <input type="number" step="1" min="1" name="vemp[<?= $lado ?>][average_objetivo]" value="<?= htmlspecialchars((string) ($v['vemp'][$lado]['average_objetivo'] ?? '200')) ?>">
         </label>
     </div>
-    <p class="help">Desviaciones por pico (latencia ms / amplitud µV) -- valores absolutos que el generador espera a 80 dB. Los picos irrelevantes para el subtipo activo se guardan igual pero el cliente los ignora.</p>
+    <p class="help">Desviaciones por pico (latencia ms / amplitud µV) -- valores absolutos que el generador espera a 80 dB. Los picos que no correspondan al subtipo activo se guardan igual, pero no se usan.</p>
     <div class="three-col">
         <?php
         $vempWaveFields = [

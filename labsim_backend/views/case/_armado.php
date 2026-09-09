@@ -15,13 +15,13 @@
 <div class="card">
     <strong>Armado rápido</strong>
     <p class="help">Se configura todo acá y se genera de una sola vez: el audiograma completo (aérea y ósea, los dos oídos), el timpanograma, la función tubaria, el sitio de la lesión, el patrón retrococlear, las ondas del ABR y las emisiones otoacústicas. Un botón, un caso entero y coherente.</p>
-    <p class="help">No hay que elegir nada dos veces. Lo que decís acá sobre el oído define todo lo demás por proyección: la OEA sale del componente coclear, los reflejos del oído medio y del sitio de la lesión, los supraliminares del mismo número. Antes había que fijar el grado de la OEA por separado, y era la forma más fácil de armar un caso que se contradice a sí mismo.</p>
+    <p class="help">No hay que elegir nada dos veces. Lo que decís acá sobre el oído define todo lo demás por proyección: la OEA sale del componente coclear, los reflejos del oído medio y del sitio de la lesión, los supraliminares del mismo número. El grado de la OEA no se fija aparte, justamente para que el caso no pueda contradecirse a sí mismo.</p>
     <p class="help">Nada de esto es obligatorio ni definitivo: un caso se arma entero a mano, pestaña por pestaña, y lo que el botón escribe queda en los campos de cada pestaña y se edita igual que si lo hubieras tipeado.</p>
 </div>
 
 <div class="card">
     <strong>Paciente</strong>
-    <p class="help">El <strong>sexo</strong> decide el nombre, que lo escribe "Generar caso" junto con el resto -- ya no hay un botón aparte para eso. La <strong>edad</strong> pesa más: fija la fecha de nacimiento y el RUT, elige la población de referencia del ABR --un neonato no tiene las latencias de un adulto--, es obligatoria para la anamnesis con IA, y define <strong>qué es normal</strong> en este paciente (ver abajo).</p>
+    <p class="help">El <strong>sexo</strong> decide el nombre, que lo escribe "Generar caso" junto con el resto. La <strong>edad</strong> pesa más: fija la fecha de nacimiento y el RUT, elige la población de referencia del ABR --un neonato no tiene las latencias de un adulto--, es obligatoria para la anamnesis con IA, y define <strong>qué es normal</strong> en este paciente (ver abajo).</p>
     <p class="help">Son los mismos campos de <a href="#" class="tab-link" data-goto-tab="paciente">Paciente</a>, no una copia: cambiarlos en cualquiera de los dos lados los cambia en el otro. El RUT, la foto y la historia clínica se cargan allá.</p>
     <div class="three-col">
         <label>Sexo

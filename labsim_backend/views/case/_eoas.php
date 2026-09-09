@@ -30,7 +30,7 @@
             <input type="number" step="any" name="eoas[<?= $lado ?>][umbral]" value="<?= htmlspecialchars((string) ($v['eoas'][$lado]['umbral'] ?? (string) CaseBuilder::EOAS_DEFAULTS['umbral'])) ?>">
         </label>
     </div>
-    <p class="help">El umbral y el perfil por frecuencia los escribe el perfil auditivo, derivados del audiograma y del componente coclear: no hay que elegir el grado de la OEA aparte, y por eso este oído no puede contradecir a su propia audiometría. Lo que el botón sortea son las <strong>condiciones de registro</strong> (ruido del paciente, sello de la sonda, variabilidad), que sí son del caso y no se derivan de nada.</p>
+    <p class="help">El umbral y el perfil por frecuencia los escribe el perfil auditivo, derivados del audiograma y del componente coclear: el grado de la OEA no se elige acá, y por eso este oído no puede contradecir a su propia audiometría. Lo que el botón sortea son las <strong>condiciones de registro</strong> (ruido del paciente, sello de la sonda, variabilidad), que sí son del caso y no se derivan de nada.</p>
     <div class="two-col">
         <label>Grado a sortear
             <select name="eoas_grade[<?= $lado ?>]" class="eoas-grade-select" data-lado="<?= $lado ?>">
@@ -86,7 +86,7 @@
         </tr>
         </tbody>
     </table>
-    <p class="help">"Auto" deja que el cliente decida al azar si este oído tiene SOAE (~45%, algo más en OD) -- estable para el mismo caso, pero no se puede saber de antemano. Para mostrarlas en clase o evaluar sobre un hallazgo fijo usá "Presentes" y cargá los picos: frecuencia en Hz y nivel de la emisión (los SOAE reales rondan 0 dB SPL, rara vez pasan 20; en blanco toma <?= CaseBuilder::EOAS_SOAE_DEFAULT_PEAK_DB ?> dB SPL). "Presentes" sin picos cargados = el cliente los genera al azar pero garantiza al menos uno. Los picos cargados NO se atenúan por patología ni por sello: el nivel que pongas es el que se va a ver, aunque el ruido del paciente igual puede taparlos. "Ausentes" fuerza un registro sin SOAE (lo normal en coclear/transmisión, y también posible en un oído sano).</p>
+    <p class="help">"Auto" sortea al azar si este oído tiene SOAE (~45%, algo más en OD) -- estable para el mismo caso, pero no se puede saber de antemano. Para mostrarlas en clase o evaluar sobre un hallazgo fijo usá "Presentes" y cargá los picos: frecuencia en Hz y nivel de la emisión (los SOAE reales rondan 0 dB SPL, rara vez pasan 20; en blanco toma <?= CaseBuilder::EOAS_SOAE_DEFAULT_PEAK_DB ?> dB SPL). "Presentes" sin picos cargados = se sortean al azar, pero garantiza al menos uno. Los picos cargados NO se atenúan por patología ni por sello: el nivel que pongas es el que se va a ver, aunque el ruido del paciente igual puede taparlos. "Ausentes" fuerza un registro sin SOAE (lo normal en coclear/transmisión, y también posible en un oído sano).</p>
     <p class="help">Perfil por frecuencia -- dB de caída respecto de lo esperado (positivo = OEA más chica). Se aplica a las cuatro pruebas: bandas TEOAE, puntos del DP-grama, curva de sintonía SFOAE y los picos SOAE sorteados.</p>
     <table class="grid-table">
         <thead>
@@ -106,7 +106,7 @@
 </div>
 <div class="card">
     <strong>Vista previa: DP-grama y bandas TEOAE</strong>
-    <p class="help">Simulación simplificada (sin ruido por barrido ni promediación) de lo que va a ver el alumno con esta configuración. Arriba el nivel DP por f2 contra el área normal y el piso de ruido; abajo el SNR por banda TEOAE con la línea de criterio (6 dB): banda bajo la línea = REFER. El generador real corre en el cliente, ver <code>src/oae/generators/</code>.</p>
+    <p class="help">Simulación simplificada (sin ruido por barrido ni promediación) de lo que va a ver el alumno con esta configuración. Arriba el nivel DP por f2 contra el área normal y el piso de ruido; abajo el SNR por banda TEOAE con la línea de criterio (6 dB): banda bajo la línea = REFER.</p>
     <div class="two-col">
         <div>
             <strong class="od-text">OD</strong>

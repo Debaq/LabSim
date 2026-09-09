@@ -14,7 +14,7 @@
 <div class="tab-panel" data-tab="otoscopia">
 <div class="card">
     <strong>Otoscopia</strong>
-    <p class="help">Una sola fase (la de por defecto) = una imagen por oído, nada más. Agregar una 2ª fase en adelante es lo que la convierte en "por fase": cada fase desde la 2ª lleva un texto libre que describe qué pasó entremedio (ej. "se realizó un lavado ótico"). Qué fase le corresponde ver a cada alumno según su propio avance con este paciente no está implementado todavía (ver TODO.md); por ahora siempre se muestra la fase 1.</p>
+    <p class="help">Una sola fase (la de por defecto) = una imagen por oído, nada más. Agregar una 2ª fase en adelante es lo que la convierte en "por fase": cada fase desde la 2ª lleva un texto libre que describe qué pasó entremedio (ej. "se realizó un lavado ótico"). Por ahora todos los alumnos ven la fase 1: la fase no avanza sola con el progreso de cada uno, así que las siguientes sirven para preparar el caso, no para mostrárselas todavía.</p>
 
     <input type="hidden" name="otoscopia[fase_count]" id="otoscopia-fase-count" value="<?= $otoscopiaCount ?>">
     <p id="otoscopia-msg" class="help" hidden></p>
