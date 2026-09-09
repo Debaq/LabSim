@@ -491,7 +491,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <p class="legend help">Con esto marcado, lo que elijas en el OD se copia al OI --que es el caso de la mayoría de los cuadros bilaterales-- y los dos oídos comparten magnitud, con unos pocos dB de asimetría biológica. Destildalo para un caso unilateral o asimétrico.</p>
 
     <div class="two-col">
-    <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
+    <?php foreach (CaseBuilder::LADOS as $lado => $ladoLabel): ?>
         <div class="side-block" data-lado="<?= $lado ?>">
             <div class="side-heading"><strong>Oído <?= $ladoLabel ?></strong></div>
             <label>Categoría
@@ -795,7 +795,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     </div>
 </div>
 <div class="two-col">
-<?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
+<?php foreach (CaseBuilder::LADOS as $lado => $ladoLabel): ?>
 <div class="card">
     <strong>Oído <?= $ladoLabel ?></strong>
     <div class="three-col">
@@ -945,12 +945,12 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <?php $seriesShort = ['aerea' => 'Aérea', 'osea' => 'Ósea', 'ldl' => 'LDL']; ?>
 <div class="card">
     <strong>Umbrales tonales</strong>
-    <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
+    <?php foreach (CaseBuilder::LADOS as $lado => $ladoLabel): ?>
     <div class="side-block">
         <div class="side-heading">
-            <span class="side-tag <?= $side ?>"><?= $sideLabel ?></span>
-            <label class="inline-check"><input type="checkbox" class="igualar-toggle" data-side="<?= $side ?>" name="igualar[<?= $side ?>]" <?= isset($v['igualar'][$side]) ? 'checked' : '' ?>> Igualar ósea a aérea</label>
-            <label class="inline-check"><input type="checkbox" class="ldl-toggle" data-side="<?= $side ?>" name="ldl_habilitado[<?= $side ?>]" <?= isset($v['ldl_habilitado'][$side]) ? 'checked' : '' ?>> LDL medido</label>
+            <span class="side-tag <?= $lado ?>"><?= $ladoLabel ?></span>
+            <label class="inline-check"><input type="checkbox" class="igualar-toggle" data-side="<?= $lado ?>" name="igualar[<?= $lado ?>]" <?= isset($v['igualar'][$lado]) ? 'checked' : '' ?>> Igualar ósea a aérea</label>
+            <label class="inline-check"><input type="checkbox" class="ldl-toggle" data-side="<?= $lado ?>" name="ldl_habilitado[<?= $lado ?>]" <?= isset($v['ldl_habilitado'][$lado]) ? 'checked' : '' ?>> LDL medido</label>
         </div>
         <div class="table-wrap">
         <table class="grid-table">
@@ -960,11 +960,11 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
                 <td class="side-label"><?= $label ?></td>
                 <?php foreach (CaseBuilder::FREQUENCIES as $n => $freq):
                     $default = $key === 'ldl' ? 130 : 0;
-                    $val = fv($v, [$key, $side, (string) $n], $default);
+                    $val = fv($v, [$key, $lado, (string) $n], $default);
                 ?>
                 <td><input type="number" step="5" min="-10" max="130"
-                           id="<?= $key ?>_<?= $side ?>_<?= $n ?>"
-                           name="<?= $key ?>[<?= $side ?>][<?= $n ?>]"
+                           id="<?= $key ?>_<?= $lado ?>_<?= $n ?>"
+                           name="<?= $key ?>[<?= $lado ?>][<?= $n ?>]"
                            value="<?= htmlspecialchars((string) $val) ?>"></td>
                 <?php endforeach; ?>
             </tr>
@@ -992,15 +992,15 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <div class="table-wrap">
     <table class="grid-table" style="margin-bottom:0.5rem;">
         <tr><th></th><?php foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $freqIdx): ?><th><?= $hz ?> Hz</th><?php endforeach; ?></tr>
-        <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
+        <?php foreach (CaseBuilder::LADOS as $lado => $ladoLabel): ?>
         <tr>
-            <td class="side-label">Rinne <?= $sideLabel ?></td>
+            <td class="side-label">Rinne <?= $ladoLabel ?></td>
             <?php foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $freqIdx):
-                $rinneVal = (string) fv($v, ['rinne', $hz, $side], 'positivo');
+                $rinneVal = (string) fv($v, ['rinne', $hz, $lado], 'positivo');
             ?>
             <td>
-                <select id="rinne_<?= $freqIdx ?>_<?= $side ?>" class="rinne-select" data-freq="<?= $freqIdx ?>" data-side="<?= $side ?>"
-                        name="rinne[<?= $hz ?>][<?= $side ?>]" <?= $acumetriaIsAuto ? 'disabled' : '' ?>>
+                <select id="rinne_<?= $freqIdx ?>_<?= $lado ?>" class="rinne-select" data-freq="<?= $freqIdx ?>" data-side="<?= $lado ?>"
+                        name="rinne[<?= $hz ?>][<?= $lado ?>]" <?= $acumetriaIsAuto ? 'disabled' : '' ?>>
                     <?php foreach (CaseBuilder::RINNE_LABELS as $opt => $optLabel): ?>
                     <option value="<?= $opt ?>" <?= $rinneVal === $opt ? 'selected' : '' ?>><?= htmlspecialchars($optLabel) ?></option>
                     <?php endforeach; ?>
@@ -1033,16 +1033,16 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <div class="table-wrap">
     <table class="grid-table" style="margin-bottom:1rem;">
         <tr><th></th><th>SDT</th><th>SRT</th></tr>
-        <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
+        <?php foreach (CaseBuilder::LADOS as $lado => $ladoLabel): ?>
         <tr>
-            <td class="side-label"><?= $sideLabel ?></td>
+            <td class="side-label"><?= $ladoLabel ?></td>
             <td>
-                <input type="number" step="5" class="sdt-input" data-side="<?= $side ?>" name="sdt[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['sdt', $side], 0)) ?>">
-                <label class="inline-check"><input type="checkbox" class="auto-toggle" data-target="sdt-input" data-side="<?= $side ?>" name="sdt_auto[<?= $side ?>]" <?= !isset($v['sdt_auto']) || isset($v['sdt_auto'][$side]) ? 'checked' : '' ?>>auto (Fletcher)</label>
+                <input type="number" step="5" class="sdt-input" data-side="<?= $lado ?>" name="sdt[<?= $lado ?>]" value="<?= htmlspecialchars((string) fv($v, ['sdt', $lado], 0)) ?>">
+                <label class="inline-check"><input type="checkbox" class="auto-toggle" data-target="sdt-input" data-side="<?= $lado ?>" name="sdt_auto[<?= $lado ?>]" <?= !isset($v['sdt_auto']) || isset($v['sdt_auto'][$lado]) ? 'checked' : '' ?>>auto (Fletcher)</label>
             </td>
             <td>
-                <input type="number" step="5" class="srt-input" data-side="<?= $side ?>" name="srt[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['srt', $side], 0)) ?>">
-                <label class="inline-check"><input type="checkbox" class="auto-toggle" data-target="srt-input" data-side="<?= $side ?>" name="srt_auto[<?= $side ?>]" <?= !isset($v['srt_auto']) || isset($v['srt_auto'][$side]) ? 'checked' : '' ?>>auto (Fletcher)</label>
+                <input type="number" step="5" class="srt-input" data-side="<?= $lado ?>" name="srt[<?= $lado ?>]" value="<?= htmlspecialchars((string) fv($v, ['srt', $lado], 0)) ?>">
+                <label class="inline-check"><input type="checkbox" class="auto-toggle" data-target="srt-input" data-side="<?= $lado ?>" name="srt_auto[<?= $lado ?>]" <?= !isset($v['srt_auto']) || isset($v['srt_auto'][$lado]) ? 'checked' : '' ?>>auto (Fletcher)</label>
             </td>
         </tr>
         <?php endforeach; ?>
@@ -1050,16 +1050,16 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     </div>
 
     <div class="two-col">
-        <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
+        <?php foreach (CaseBuilder::LADOS as $lado => $ladoLabel): ?>
         <div class="side-block">
-            <div class="side-heading"><span class="side-tag <?= $side ?>"><?= $sideLabel ?></span></div>
+            <div class="side-heading"><span class="side-tag <?= $lado ?>"><?= $ladoLabel ?></span></div>
             <label>UMD (int / %)
-                <input type="number" step="5" class="umd-int-input" data-side="<?= $side ?>" name="umd_int[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_int', $side], 35)) ?>" class="input input--narrow" style="display:inline-block;">
-                / <input type="number" step="4" class="umd-pct-input" data-side="<?= $side ?>" name="umd_pct[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_pct', $side], 100)) ?>" class="input input--narrow" style="display:inline-block;">
+                <input type="number" step="5" class="umd-int-input" data-side="<?= $lado ?>" name="umd_int[<?= $lado ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_int', $lado], 35)) ?>" class="input input--narrow" style="display:inline-block;">
+                / <input type="number" step="4" class="umd-pct-input" data-side="<?= $lado ?>" name="umd_pct[<?= $lado ?>]" value="<?= htmlspecialchars((string) fv($v, ['umd_pct', $lado], 100)) ?>" class="input input--narrow" style="display:inline-block;">
             </label>
-            <label>SISI <input type="number" step="5" name="sisi[<?= $side ?>]" value="<?= htmlspecialchars((string) fv($v, ['sisi', $side], 0)) ?>"></label>
-            <label class="inline-check"><input type="checkbox" name="stenger[<?= $side ?>]" <?= isset($v['stenger'][$side]) ? 'checked' : '' ?>> Stenger</label>
-            <label class="inline-check"><input type="checkbox" class="recruit-toggle" data-side="<?= $side ?>" name="recruit[<?= $side ?>]" <?= isset($v['recruit'][$side]) ? 'checked' : '' ?>> Reclutamiento</label>
+            <label>SISI <input type="number" step="5" name="sisi[<?= $lado ?>]" value="<?= htmlspecialchars((string) fv($v, ['sisi', $lado], 0)) ?>"></label>
+            <label class="inline-check"><input type="checkbox" name="stenger[<?= $lado ?>]" <?= isset($v['stenger'][$lado]) ? 'checked' : '' ?>> Stenger</label>
+            <label class="inline-check"><input type="checkbox" class="recruit-toggle" data-side="<?= $lado ?>" name="recruit[<?= $lado ?>]" <?= isset($v['recruit'][$lado]) ? 'checked' : '' ?>> Reclutamiento</label>
         </div>
         <?php endforeach; ?>
     </div>
@@ -1076,11 +1076,11 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <div class="table-wrap">
     <table class="grid-table" style="margin-bottom:0.5rem;">
         <tr><th class="side-label"><?= htmlspecialchars($info['label']) ?></th><?php foreach ($info['freqs'] as $f): ?><th><?= $f ?> Hz</th><?php endforeach; ?></tr>
-        <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
+        <?php foreach (CaseBuilder::LADOS as $lado => $ladoLabel): ?>
         <tr>
-            <td class="side-label"><?= $sideLabel ?></td>
+            <td class="side-label"><?= $ladoLabel ?></td>
             <?php foreach ($info['freqs'] as $n => $f): ?>
-            <td><input type="number" step="5" min="0" name="<?= $mode ?>[<?= $side ?>][<?= $n ?>]" value="<?= htmlspecialchars((string) fv($v, [$mode, $side, (string) $n], 0)) ?>"></td>
+            <td><input type="number" step="5" min="0" name="<?= $mode ?>[<?= $lado ?>][<?= $n ?>]" value="<?= htmlspecialchars((string) fv($v, [$mode, $lado, (string) $n], 0)) ?>"></td>
             <?php endforeach; ?>
         </tr>
         <?php endforeach; ?>
@@ -1169,17 +1169,17 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             </label>
             <?php endif; ?>
             <div class="two-col">
-                <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
+                <?php foreach (CaseBuilder::LADOS as $lado => $ladoLabel): ?>
                 <div class="otoscopia-photo-slot">
-                    <span class="side-tag <?= $side ?>"><?= $sideLabel ?></span><br>
-                    <?php $hasOto = OtoscopiaPhoto::has($photoCaseId, $side, $faseIdx); ?>
-                    <img class="otoscopia-thumb" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>"
-                         src="otoscopia_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;side=<?= $side ?>&amp;fase=<?= $faseIdx ?>&amp;v=<?= time() ?>"
-                         alt="Otoscopia <?= $sideLabel ?> fase <?= $faseIdx + 1 ?>" <?= $hasOto ? '' : 'hidden' ?>>
+                    <span class="side-tag <?= $lado ?>"><?= $ladoLabel ?></span><br>
+                    <?php $hasOto = OtoscopiaPhoto::has($photoCaseId, $lado, $faseIdx); ?>
+                    <img class="otoscopia-thumb" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>"
+                         src="otoscopia_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;side=<?= $lado ?>&amp;fase=<?= $faseIdx ?>&amp;v=<?= time() ?>"
+                         alt="Otoscopia <?= $ladoLabel ?> fase <?= $faseIdx + 1 ?>" <?= $hasOto ? '' : 'hidden' ?>>
                     <div class="otoscopia-thumb-empty" <?= $hasOto ? 'hidden' : '' ?>>Sin imagen</div>
-                    <input type="file" class="otoscopia-photo-input" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>" accept="image/jpeg,image/png,image/webp">
-                    <button type="button" class="secondary otoscopia-delete-photo" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>" <?= $hasOto ? '' : 'hidden' ?>>Borrar foto</button>
-                    <a class="otoscopia-download-photo" href="otoscopia_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;side=<?= $side ?>&amp;fase=<?= $faseIdx ?>&amp;download=1" data-side="<?= $side ?>" data-fase-idx="<?= $faseIdx ?>" <?= $hasOto ? '' : 'hidden' ?>>Descargar</a>
+                    <input type="file" class="otoscopia-photo-input" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>" accept="image/jpeg,image/png,image/webp">
+                    <button type="button" class="secondary otoscopia-delete-photo" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>" <?= $hasOto ? '' : 'hidden' ?>>Borrar foto</button>
+                    <a class="otoscopia-download-photo" href="otoscopia_photo.php?case_id=<?= urlencode($photoCaseId) ?>&amp;side=<?= $lado ?>&amp;fase=<?= $faseIdx ?>&amp;download=1" data-side="<?= $lado ?>" data-fase-idx="<?= $faseIdx ?>" <?= $hasOto ? '' : 'hidden' ?>>Descargar</a>
                 </div>
                 <?php endforeach; ?>
             </div>
@@ -1337,11 +1337,11 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <div class="table-wrap">
     <table class="grid-table">
         <tr><th class="side-label"><?= htmlspecialchars($info['label']) ?></th><?php foreach ($info['freqs'] as $f): ?><th><?= is_int($f) ? $f . ' Hz' : $f ?></th><?php endforeach; ?></tr>
-        <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel): ?>
+        <?php foreach (CaseBuilder::LADOS as $lado => $ladoLabel): ?>
         <tr>
-            <td class="side-label"><?= $sideLabel ?></td>
+            <td class="side-label"><?= $ladoLabel ?></td>
             <?php foreach ($info['freqs'] as $n => $f): ?>
-            <td><input type="number" step="5" id="reflex_<?= $mode ?>_<?= $side ?>_<?= $n ?>" name="reflex_<?= $mode ?>[<?= $side ?>][<?= $n ?>]" value="<?= htmlspecialchars((string) fv($v, ['reflex_' . $mode, $side, (string) $n], 130)) ?>"></td>
+            <td><input type="number" step="5" id="reflex_<?= $mode ?>_<?= $lado ?>_<?= $n ?>" name="reflex_<?= $mode ?>[<?= $lado ?>][<?= $n ?>]" value="<?= htmlspecialchars((string) fv($v, ['reflex_' . $mode, $lado, (string) $n], 130)) ?>"></td>
             <?php endforeach; ?>
         </tr>
         <?php endforeach; ?>
@@ -1351,13 +1351,13 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <div class="table-wrap">
     <table class="grid-table">
         <tr><th class="side-label">Tipo de reflejo</th><th>Curva</th></tr>
-        <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $side => $sideLabel):
-            $reflexTypeSelected = (string) fv($v, ['reflex_type', $side], 'normal');
+        <?php foreach (CaseBuilder::LADOS as $lado => $ladoLabel):
+            $reflexTypeSelected = (string) fv($v, ['reflex_type', $lado], 'normal');
         ?>
         <tr>
-            <td class="side-label"><?= $sideLabel ?></td>
+            <td class="side-label"><?= $ladoLabel ?></td>
             <td>
-                <select id="reflex_type_<?= $side ?>" name="reflex_type[<?= $side ?>]">
+                <select id="reflex_type_<?= $lado ?>" name="reflex_type[<?= $lado ?>]">
                     <?php foreach (CaseBuilder::REFLEX_CURVE_LABELS as $typeKey => $typeLabel): ?>
                     <option value="<?= $typeKey ?>" <?= $reflexTypeSelected === $typeKey ? 'selected' : '' ?>><?= htmlspecialchars($typeLabel) ?></option>
                     <?php endforeach; ?>
@@ -1388,7 +1388,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <p class="legend help">Las ondas ya las escribió <a href="#" class="tab-link" data-goto-tab="armado">Armado rápido</a> al generar el caso. Los botones de acá abajo son para volver a sortearlas de un oído sin regenerar todo -- por ejemplo después de cambiar el autor.</p>
 </div>
 <div class="two-col">
-<?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
+<?php foreach (CaseBuilder::LADOS as $lado => $ladoLabel): ?>
 <div class="card">
     <strong>ABR <?= $ladoLabel ?></strong>
     <p class="legend help">Patología de este oído para el generador de curvas ABR -- no es el resultado del alumno, es lo que el caso simula. Si se deja "Normal" con todo en 0, el oído no tiene hallazgos.</p>
@@ -1502,7 +1502,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 
 <div class="tab-panel" data-tab="eoas">
 <div class="two-col">
-<?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
+<?php foreach (CaseBuilder::LADOS as $lado => $ladoLabel): ?>
 <div class="card">
     <strong>EOA <?= $ladoLabel ?></strong>
     <p class="legend help">Patología de este oído para el generador de Emisiones Otoacústicas (TEOAE/DPOAE/SOAE/SFOAE). "Coclear" y "Transmisión" atenúan la OEA según el umbral (a mayor umbral, más atenuada -- por sobre ~35-40 dB suele quedar bajo el noise floor, REFER). "Neural" deja la OEA normal aunque el umbral esté elevado: la cóclea está intacta, es el contraste clínico con ABR.</p>
@@ -1611,7 +1611,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 
 <div class="tab-panel" data-tab="vemp">
 <div class="two-col">
-<?php foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $ladoLabel): ?>
+<?php foreach (CaseBuilder::LADOS as $lado => $ladoLabel): ?>
 <?php $vSubtipo = (string) ($v['vemp'][$lado]['subtipo'] ?? 'CVEMP'); ?>
 <div class="card">
     <strong>VEMP <?= $ladoLabel ?></strong>
@@ -1687,7 +1687,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
     <div class="two-col" style="margin-top:0.6rem;">
         <label id="tinnitus-oido-field" data-show-for="unilateral">Oído
             <select name="tinnitus[oido]">
-                <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $opt => $optLabel): ?>
+                <?php foreach (CaseBuilder::LADOS as $opt => $optLabel): ?>
                 <option value="<?= $opt ?>" <?= ($v['tinnitus']['oido'] ?? 'od') === $opt ? 'selected' : '' ?>><?= $optLabel ?></option>
                 <?php endforeach; ?>
             </select>

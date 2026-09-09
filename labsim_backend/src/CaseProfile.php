@@ -1238,7 +1238,7 @@ final class CaseProfile
         $recPorLado = [];
         $logo = [];
         $ldl = [];
-        foreach (['od' => 'OD', 'oi' => 'OI'] as $ladoForm => $lado) {
+        foreach (CaseBuilder::LADOS as $ladoForm => $lado) {
             $ccePct = (float) ($perfil[$lado]['cce_pct'] ?? self::DEFAULT_CCE_PCT);
             $retro = self::normalizeRetro($perfil[$lado]['retro'] ?? []);
             $otro = $lado === 'OD' ? 'OI' : 'OD';
@@ -1304,7 +1304,7 @@ final class CaseProfile
         $decay = [];
         foreach (self::DECAY_FREQ_IDX as $modo => $indices) {
             $decay[$modo] = ['od' => [], 'oi' => []];
-            foreach (['od' => 'OD', 'oi' => 'OI'] as $ladoForm => $lado) {
+            foreach (CaseBuilder::LADOS as $ladoForm => $lado) {
                 foreach ($indices as $freqIdx) {
                     $decay[$modo][$ladoForm][] = self::toneDecay(
                         $decomp[$lado],

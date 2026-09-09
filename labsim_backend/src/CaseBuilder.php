@@ -14,6 +14,13 @@ final class CaseBuilder
     // posición en este array, no por el valor Hz.
     public const FREQUENCIES = [125, 250, 500, 1000, 2000, 3000, 4000, 6000, 8000];
 
+    /**
+     * Los dos oídos: clave del formulario => etiqueta, que es además la
+     * clave con la que viajan en cases.data ('OD'/'OI'). El literal estaba
+     * escrito 15 veces entre el editor y la vista previa del perfil.
+     */
+    public const LADOS = ['od' => 'OD', 'oi' => 'OI'];
+
     public const HIST_CHECKBOXES = [
         'hipoacusia_familiar', 'ototoxicos', 'trauma_acustico', 'otitis',
         'meningitis', 'tce', 'diabetes', 'hta',

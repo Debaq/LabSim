@@ -96,28 +96,28 @@ final class CaseForm
         $aerea = ['od' => [], 'oi' => []];
         $osea = ['od' => [], 'oi' => []];
         $ldl = ['od' => [], 'oi' => []];
-        foreach (['od', 'oi'] as $side) {
+        foreach (['od', 'oi'] as $lado) {
             foreach (CaseBuilder::FREQUENCIES as $n => $freq) {
-                $aerea[$side][] = (int) self::val($v, ['aerea', $side, (string) $n], 0);
-                $osea[$side][] = (int) self::val($v, ['osea', $side, (string) $n], 0);
-                $ldl[$side][] = (int) self::val($v, ['ldl', $side, (string) $n], 130);
+                $aerea[$lado][] = (int) self::val($v, ['aerea', $lado, (string) $n], 0);
+                $osea[$lado][] = (int) self::val($v, ['osea', $lado, (string) $n], 0);
+                $ldl[$lado][] = (int) self::val($v, ['ldl', $lado, (string) $n], 130);
             }
-            if (isset($v['igualar'][$side])) {
-                $osea[$side] = $aerea[$side]; // "igualar ósea a aérea", igual que equal_osea en create_a.py
+            if (isset($v['igualar'][$lado])) {
+                $osea[$lado] = $aerea[$lado]; // "igualar ósea a aérea", igual que equal_osea en create_a.py
             }
-            if (!isset($v['ldl_habilitado'][$side])) {
-                $ldl[$side] = array_fill(0, count(CaseBuilder::FREQUENCIES), 130); // deshabilitado = ausente
+            if (!isset($v['ldl_habilitado'][$lado])) {
+                $ldl[$lado] = array_fill(0, count(CaseBuilder::FREQUENCIES), 130); // deshabilitado = ausente
             }
         }
 
         $reflexIpsi = ['od' => [], 'oi' => []];
         $reflexContra = ['od' => [], 'oi' => []];
-        foreach (['od', 'oi'] as $side) {
+        foreach (['od', 'oi'] as $lado) {
             for ($n = 0; $n < 4; $n++) {
-                $reflexIpsi[$side][] = (int) self::val($v, ['reflex_ipsi', $side, (string) $n], 130);
+                $reflexIpsi[$lado][] = (int) self::val($v, ['reflex_ipsi', $lado, (string) $n], 130);
             }
             for ($n = 0; $n < 5; $n++) {
-                $reflexContra[$side][] = (int) self::val($v, ['reflex_contra', $side, (string) $n], 130);
+                $reflexContra[$lado][] = (int) self::val($v, ['reflex_contra', $lado, (string) $n], 130);
             }
         }
 
@@ -128,19 +128,19 @@ final class CaseForm
         $decayPairs = [];
         foreach ($decayFieldCounts as $mode => $count) {
             $vals = ['od' => [], 'oi' => []];
-            foreach (['od', 'oi'] as $side) {
+            foreach (['od', 'oi'] as $lado) {
                 for ($n = 0; $n < $count; $n++) {
-                    $vals[$side][] = max(0, (int) self::val($v, [$mode, $side, (string) $n], 0));
+                    $vals[$lado][] = max(0, (int) self::val($v, [$mode, $lado, (string) $n], 0));
                 }
             }
             $decayPairs[$mode] = self::zip($vals['od'], $vals['oi']);
         }
 
         $reflexType = ['od' => 'normal', 'oi' => 'normal'];
-        foreach (['od', 'oi'] as $side) {
-            $type = (string) self::val($v, ['reflex_type', $side], 'normal');
+        foreach (['od', 'oi'] as $lado) {
+            $type = (string) self::val($v, ['reflex_type', $lado], 'normal');
             if (in_array($type, CaseBuilder::REFLEX_CURVE_TYPES, true)) {
-                $reflexType[$side] = $type;
+                $reflexType[$lado] = $type;
             }
         }
 
@@ -170,15 +170,15 @@ final class CaseForm
         $acumetriaIsAuto = isset($v['acumetria_auto']);
         foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $freqIdx) {
             $rinne[$hz] = [];
-            foreach (['od', 'oi'] as $side) {
+            foreach (['od', 'oi'] as $lado) {
                 if ($acumetriaIsAuto) {
-                    $rinne[$hz][$side] = CaseBuilder::rinneAuto($aerea[$side][$freqIdx], $osea[$side][$freqIdx]);
+                    $rinne[$hz][$lado] = CaseBuilder::rinneAuto($aerea[$lado][$freqIdx], $osea[$lado][$freqIdx]);
                 } else {
-                    $manual = (string) self::val($v, ['rinne', $hz, $side], 'positivo');
+                    $manual = (string) self::val($v, ['rinne', $hz, $lado], 'positivo');
                     if (!in_array($manual, CaseBuilder::RINNE_OPTIONS, true)) {
                         $acumetriaValid = false;
                     }
-                    $rinne[$hz][$side] = $manual;
+                    $rinne[$hz][$lado] = $manual;
                 }
             }
             if ($acumetriaIsAuto) {

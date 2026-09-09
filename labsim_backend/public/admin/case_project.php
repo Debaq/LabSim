@@ -62,7 +62,7 @@ $bonePairs = $pares($payload['osea']['od'] ?? [], $payload['osea']['oi'] ?? []);
 // que todavía no se guardó. normalizeRetro() rellena lo que falte con los
 // defaults que comparte con el generador.
 $perfil = ['version' => CaseProfile::VERSION];
-foreach (['od' => 'OD', 'oi' => 'OI'] as $ladoForm => $lado) {
+foreach (CaseBuilder::LADOS as $ladoForm => $lado) {
     $cce = $payload['perfil'][$ladoForm]['cce_pct'] ?? CaseProfile::DEFAULT_CCE_PCT;
     $perfil[$lado] = [
         'cce_pct' => max(0.0, min(100.0, (float) $cce)),
