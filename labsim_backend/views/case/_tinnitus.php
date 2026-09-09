@@ -14,6 +14,12 @@
 <div class="tab-panel" data-tab="tinnitus">
 <div class="card">
     <strong>Tinnitus (acufenometría)</strong>
+    <p class="help">La mayoría de los pacientes no tiene acúfeno: la ficha arranca sin tinnitus y hay que marcarlo para que aparezca. Sin la casilla, el paciente responde que no escucha ruidos ni pitidos y la acufenometría no es parte del caso.</p>
+    <label class="inline-check" style="margin-left:0;">
+        <input type="checkbox" id="tinnitus-presente" name="tinnitus[presente]" value="1" <?= !empty($v['tinnitus']['presente']) ? 'checked' : '' ?>>
+        Este paciente tiene tinnitus
+    </label>
+    <div id="tinnitus-campos">
     <p class="help">Lateralidad y permanente/ocasional son independientes (un tinnitus unilateral puede ser permanente igual que uno bilateral). Unilateral pide oído; bilateral admite predominio (asimetría). Forma: tipo de ruido + frecuencia de matching.</p>
     <?php $tinLateralidad = $v['tinnitus']['lateralidad'] ?? 'craneal'; ?>
     <div class="two-col">
@@ -58,6 +64,7 @@
                 <?php endforeach; ?>
             </select>
         </label>
+    </div>
     </div>
 </div>
 </div>

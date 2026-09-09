@@ -623,6 +623,35 @@ final class CaseBuilder
     public const TINNITUS_LATERALIDAD_OPTIONS = ['craneal', 'unilateral', 'bilateral'];
     public const TINNITUS_PREDOMINIO_OPTIONS = ['igual', 'od', 'oi'];
 
+    /**
+     * Si el paciente tiene acúfeno. Lo normal es que NO tenga: la casilla de
+     * la ficha arranca apagada.
+     *
+     * Los casos guardados antes de que existiera la casilla no traen
+     * 'presente' y todos tienen un bloque de tinnitus, porque la ficha
+     * obligaba a elegir una lateralidad. Para esos vale la forma del dato:
+     * si quedó exactamente en el default que nadie tocó (craneal, silbido,
+     * la primera frecuencia, ni pulsátil ni permanente) el acúfeno no era
+     * del caso; cualquier otra combinación la eligió el docente y se
+     * respeta.
+     */
+    public static function tinnitusPresente(array $t): bool
+    {
+        if ($t === []) {
+            return false;
+        }
+        if (array_key_exists('presente', $t)) {
+            return !empty($t['presente']);
+        }
+        return !(
+            ($t['lateralidad'] ?? 'craneal') === 'craneal'
+            && ($t['ruido'] ?? self::TINNITUS_RUIDO_OPTIONS[0]) === self::TINNITUS_RUIDO_OPTIONS[0]
+            && (int) ($t['frecuencia'] ?? self::FREQUENCIES[0]) === self::FREQUENCIES[0]
+            && empty($t['pulsatil'])
+            && empty($t['permanente'])
+        );
+    }
+
     /** Índices de CaseBuilder::FREQUENCIES dentro del rango válido para Fowler/I.W.A. (250-4000 Hz). */
     public static function fowlerFreqOptions(): array
     {
@@ -756,6 +785,10 @@ final class CaseBuilder
      */
     public static function describeTinnitus(array $t): string
     {
+        if (!self::tinnitusPresente($t)) {
+            return 'No escuchas ruidos ni pitidos en los oídos.';
+        }
+
         $lateralidad = (string) ($t['lateralidad'] ?? 'craneal');
         $ruido = mb_strtolower((string) ($t['ruido'] ?? self::TINNITUS_RUIDO_OPTIONS[0]));
         $permanente = !empty($t['permanente']);
@@ -1086,6 +1119,9 @@ final class CaseBuilder
 
         $tinnitus = $data['Tinnitus'] ?? [];
         $v['tinnitus'] = [];
+        if (self::tinnitusPresente((array) $tinnitus)) {
+            $v['tinnitus']['presente'] = '1';
+        }
         foreach (['pulsatil', 'permanente'] as $flag) {
             if (!empty($tinnitus[$flag])) {
                 $v['tinnitus'][$flag] = '1';

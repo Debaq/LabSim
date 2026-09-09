@@ -35,6 +35,12 @@ legend { font-weight: 600; padding: 0 var(--space-2); }
 .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-5); }
 
 input[readonly] { background: var(--color-row-alt); color: var(--color-muted); }
+input:disabled, select:disabled { background: var(--color-row-alt); color: var(--color-muted); cursor: not-allowed; }
+
+/* Bloque entero apagado por una casilla que lo gobierna (ej. la ficha de
+ * tinnitus cuando el paciente no tiene acúfeno): los controles ya salen en
+ * gris por :disabled, esto apaga también los textos y las etiquetas. */
+.bloque-apagado { opacity: 0.55; }
 
 /* Preview ABR (case_create.php): serie de curvas 100->0 dBnHL, una por oído */
 .abr-preview, .eoa-preview { width: 100%; overflow-x: auto; }

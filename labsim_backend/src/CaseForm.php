@@ -218,12 +218,18 @@ final class CaseForm
         ];
         $recruitVals = [isset($v['recruit']['od']), isset($v['recruit']['oi'])];
 
-        // Acufenometría: lateralidad (craneal/unilateral/bilateral) es
+        // Acufenometría: lo normal es que el paciente NO tenga acúfeno, así
+        // que la ficha arranca con la casilla apagada y el resto de los
+        // campos deshabilitados (no llegan en el POST y caen en su default,
+        // que igual no se valida ni se guarda si no hay tinnitus).
+        //
+        // Con tinnitus: lateralidad (craneal/unilateral/bilateral) es
         // independiente de permanente/ocasional -- un tinnitus unilateral
         // puede ser permanente igual que uno bilateral. Solo "unilateral"
         // pide oído; "bilateral" admite predominio (asimetría), opcional.
         // Pulsátil es otro flag aparte. Ruido + frecuencia (matching, Hz)
         // son "la forma".
+        $tinnitusPresente = isset($v['tinnitus']['presente']);
         $tinnitusLateralidad = (string) ($v['tinnitus']['lateralidad'] ?? 'craneal');
         $tinnitusOido = (string) ($v['tinnitus']['oido'] ?? 'od');
         $tinnitusPredominio = (string) ($v['tinnitus']['predominio'] ?? 'igual');
@@ -355,15 +361,15 @@ final class CaseForm
             $error = 'Valor de ETF inválido.';
         } elseif (!$acumetriaValid) {
             $error = 'Valor de Rinne/Weber inválido.';
-        } elseif (!in_array($tinnitusLateralidad, CaseBuilder::TINNITUS_LATERALIDAD_OPTIONS, true)) {
+        } elseif ($tinnitusPresente && !in_array($tinnitusLateralidad, CaseBuilder::TINNITUS_LATERALIDAD_OPTIONS, true)) {
             $error = 'Lateralidad del tinnitus inválida.';
-        } elseif ($tinnitusLateralidad === 'unilateral' && !in_array($tinnitusOido, ['od', 'oi'], true)) {
+        } elseif ($tinnitusPresente && $tinnitusLateralidad === 'unilateral' && !in_array($tinnitusOido, ['od', 'oi'], true)) {
             $error = 'Falta el oído del tinnitus (unilateral, hay que indicar cuál).';
-        } elseif (!in_array($tinnitusPredominio, CaseBuilder::TINNITUS_PREDOMINIO_OPTIONS, true)) {
+        } elseif ($tinnitusPresente && !in_array($tinnitusPredominio, CaseBuilder::TINNITUS_PREDOMINIO_OPTIONS, true)) {
             $error = 'Predominio del tinnitus inválido.';
-        } elseif (!in_array($tinnitusRuido, CaseBuilder::TINNITUS_RUIDO_OPTIONS, true)) {
+        } elseif ($tinnitusPresente && !in_array($tinnitusRuido, CaseBuilder::TINNITUS_RUIDO_OPTIONS, true)) {
             $error = 'Tipo de ruido del tinnitus inválido.';
-        } elseif (!in_array($tinnitusFrecuencia, CaseBuilder::FREQUENCIES, true)) {
+        } elseif ($tinnitusPresente && !in_array($tinnitusFrecuencia, CaseBuilder::FREQUENCIES, true)) {
             $error = 'Frecuencia del tinnitus inválida.';
         } elseif (!in_array($abrOd['type'], CaseBuilder::ABR_TYPE_OPTIONS, true) || !in_array($abrOi['type'], CaseBuilder::ABR_TYPE_OPTIONS, true)) {
             $error = 'Patología ABR inválida.';
@@ -467,7 +473,8 @@ final class CaseForm
                 ],
                 'etf_od' => $etfOd,
                 'etf_oi' => $etfOi,
-                'tinnitus' => [
+                'tinnitus' => $tinnitusPresente ? [
+                    'presente' => true,
                     'lateralidad' => $tinnitusLateralidad,
                     'oido' => $tinnitusLateralidad === 'unilateral' ? $tinnitusOido : null,
                     'predominio' => $tinnitusLateralidad === 'bilateral' ? $tinnitusPredominio : null,
@@ -475,7 +482,7 @@ final class CaseForm
                     'permanente' => $tinnitusPermanente,
                     'ruido' => $tinnitusRuido,
                     'frecuencia' => $tinnitusFrecuencia,
-                ],
+                ] : ['presente' => false],
                 'anamnesis' => [
                     'antecedentes' => $antecedentes,
                     'medicamentos' => trim((string) ($v['medicamentos'] ?? '')),

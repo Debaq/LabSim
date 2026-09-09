@@ -38,7 +38,12 @@
     }
 
     function currentTinnitus() {
+        // 'presente' va explícito: con la casilla apagada los campos quedan
+        // deshabilitados pero conservan lo que tuviera el caso, y sin este
+        // flag el paciente de prueba contestaría por un acúfeno que la ficha
+        // ya no tiene.
         return {
+            presente: !!document.querySelector('#tinnitus-presente:checked'),
             lateralidad: fieldValue('tinnitus[lateralidad]'),
             oido: fieldValue('tinnitus[oido]'),
             predominio: fieldValue('tinnitus[predominio]'),

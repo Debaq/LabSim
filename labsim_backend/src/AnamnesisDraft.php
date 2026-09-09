@@ -255,7 +255,7 @@ TXT;
         }
 
         $tinnitus = is_array($data['Tinnitus'] ?? null) ? $data['Tinnitus'] : [];
-        if ($tinnitus !== []) {
+        if (CaseBuilder::tinnitusPresente($tinnitus)) {
             $lineas[] = 'Acúfeno: ' . CaseBuilder::describeTinnitus($tinnitus);
         }
 
