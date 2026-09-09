@@ -29,10 +29,14 @@ jobs:
         with:
           ref: ${{ inputs.sha || github.sha }}
 
+      # Misma version que el build local de Linux (build.sh / env micromamba
+      # 'labsim'), para no debuggear diferencias de runtime entre plataformas.
+      # PySide6 entra por wheel abi3 (cp310-abi3) y numpy/scipy tienen cp314
+      # win_amd64.
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.14'
 
       - name: Instalar dependencias
         run: |
