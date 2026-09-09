@@ -136,9 +136,9 @@ final class AnamnesisDraft
      * usuario, armado por describeCase()).
      */
     public const SYSTEM_PROMPT = <<<'TXT'
-Redactás la anamnesis de un paciente para un caso de simulación de
-fonoaudiología. Te doy los hallazgos ya definidos; escribí los antecedentes
-que los explican de forma plausible.
+Redactás la anamnesis de un paciente para un caso clínico de simulación de
+evaluación auditiva. Te doy los hallazgos ya definidos; escribí los
+antecedentes que los explican de forma plausible.
 
 - No menciones umbrales, dB ni nombres de exámenes: eso lo mide el alumno.
 - No digas qué tiene el paciente ni des un diagnóstico.
@@ -149,6 +149,12 @@ que los explican de forma plausible.
   Cada atención va en su propia línea y empieza con una llave {{-N}},
   donde N son los DÍAS ANTES de esta consulta; la app la reemplaza por la
   fecha real. Ejemplo: "{{-45}} Control con pediatra, sin hallazgos."
+- Nunca nombres la profesión de quien atiende ni de quien deriva. En Chile
+  quién realiza cada evaluación es materia sensible y el caso no la fija.
+  Escribí el ESTUDIO al que se deriva: "se deriva a evaluación auditiva",
+  "a evaluación vestibular", "a evaluación electrofisiológica", "a BERA".
+  Podés nombrar médicos por su especialidad clínica (pediatra, neurólogo)
+  cuando corresponda a la historia.
   De 2 a 5 líneas, de la más antigua a la más reciente.
   En un recién nacido o lactante la primera línea es el nacimiento, con
   peso, semanas de gestación, tipo de parto, complicaciones si hubo y el

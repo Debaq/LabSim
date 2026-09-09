@@ -659,7 +659,7 @@ t_eq(CaseCompleteness::pending($casoManual), [],
 // previas del paciente, fechadas con llaves {{-N}} que la app resuelve
 // contra la fecha de la cita (ver resolver_fechas_historia_clinica en
 // src/core/ficha.py). Es lo que el alumno lee en la ficha antes de atender.
-$b = AnamnesisDraft::parse('{"historia_clinica":"{{-20}} Nace de 38 semanas, parto vaginal, 3.240 g. Screening auditivo: refiere OD.\n{{-5}} Control con pediatra, deriva a fonoaudiología.","antecedentes":[],"comportamiento":"tranquila","disposicion":0}');
+$b = AnamnesisDraft::parse('{"historia_clinica":"{{-20}} Nace de 38 semanas, parto vaginal, 3.240 g. Screening auditivo: refiere OD.\n{{-5}} Control con pediatra, se deriva a evaluación auditiva.","antecedentes":[],"comportamiento":"tranquila","disposicion":0}');
 t_true(strpos($b['historia_clinica'], '{{-20}}') !== false,
     'Las llaves de fecha llegan intactas: las resuelve el cliente, no nosotros');
 t_true(substr_count($b['historia_clinica'], '{{-') === 2, 'Una atención por línea, cada una con su fecha');
@@ -698,3 +698,16 @@ t_eq(mb_strlen($b['otros']), AnamnesisDraft::MAX_RELATO,
     '"otros" usa el tope narrativo, no el de los campos cortos');
 $b = AnamnesisDraft::parse('{"otros":"Trabaja en un taller mecánico desde los 18. Los fines de semana toca en una banda. Dice que lo nota más de noche, cuando se acuesta."}');
 t_true(strpos($b['otros'], 'taller') !== false, 'Y se parsea tal cual lo escribió el modelo');
+
+// En Chile quién realiza cada evaluación es materia sensible y el caso no la
+// fija: las derivaciones se nombran por el ESTUDIO, no por la profesión.
+foreach (['fonoaudiolog', 'otorrinolaring', 'tecnólogo médico', 'tecnologo medico'] as $profesion) {
+    t_true(mb_stripos(AnamnesisDraft::SYSTEM_PROMPT, $profesion) === false,
+        "El prompt del borrador no nombra la profesión ('$profesion')");
+    t_true(mb_stripos(LlmConfig::DEFAULT_PROMPT, $profesion) === false,
+        "El prompt del paciente tampoco ('$profesion')");
+    t_true(mb_stripos(LlmConfig::DEFAULT_OIRS_PROMPT, $profesion) === false,
+        "Ni el del evaluador OIRS ('$profesion')");
+}
+t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, 'evaluación auditiva') !== false,
+    'Y dice explícitamente cómo escribir una derivación: por el estudio');

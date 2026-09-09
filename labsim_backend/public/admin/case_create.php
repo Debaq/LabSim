@@ -1980,7 +1980,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <div class="card">
     <strong>Redactar la anamnesis con IA</strong>
     <p class="legend help">Escribe los antecedentes que EXPLICAN los hallazgos que ya cargaste: una muesca en 4 kHz pide exposición a ruido, una conductiva con timpanograma B pide otitis a repetición, una neuropatía en un recién nacido pide hiperbilirrubinemia. No inventa el diagnóstico ni menciona umbrales -- eso lo tiene que medir el alumno.</p>
-    <p class="legend help">Escribe las <strong>atenciones previas</strong> del paciente en Historia clínica (pestaña Paciente), con las fechas relativas <code>{{-N}}</code> que usa LabSim, y acá los antecedentes, lo que el paciente cuenta de sí mismo, medicamentos, cirugías, comportamiento y sensibilidad.</p>
+    <p class="legend help">Escribe las <strong>atenciones previas</strong> del paciente en Historia clínica (pestaña Paciente), con las fechas relativas <code>{{-N}}</code> que usa LabSim, y acá los antecedentes, lo que el paciente cuenta de sí mismo, medicamentos, cirugías, comportamiento y sensibilidad. Las derivaciones se escriben por el estudio ("se deriva a evaluación auditiva", "a BERA"), nunca por la profesión de quien atiende.</p>
     <p class="legend help"><strong>Es un borrador y hay que leerlo.</strong> El modelo puede inventar una cirugía que no existe o un fármaco que no es ototóxico, y eso le llega al alumno como parte del caso, indistinguible de lo que escribiste vos. Hasta que tildes la verificación, el caso no se guarda ni se puede citar.</p>
     <button type="button" class="secondary" id="anamnesis-ia-btn">Redactar borrador con IA</button>
     <span id="anamnesis-ia-estado" class="legend"></span>
