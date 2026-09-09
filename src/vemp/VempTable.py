@@ -1,102 +1,152 @@
 """
 Tabla de latencias/amplitudes para VEMP.
 
-Adaptación de AbrTable: las filas cambian según el subtipo activo
-(CVEMP/MVEMP → p13/n23, OVEMP → n10/p16). set_peak_labels() reconstruye
-las filas; el alumno marca los valores haciendo click y el gráfico se los
-devuelve via medida de cursores A/A'.
+Las filas cambian con el subtipo activo (CVEMP/MVEMP -> p13/n23, OVEMP ->
+n10/p16) más una fila que el alumno no llena: la AMPLITUD PICO-PICO, que es
+la que se informa en un VEMP y la que entra en la razón de asimetría. Se
+calcula sola en cuanto los dos picos están marcados -- pedirla a mano
+invitaba a informar la amplitud absoluta de un solo pico, que no se usa.
+
+El alumno llena las otras celdas como en el ABR: pone el cursor A sobre el
+pico, hace clic en la celda y el gráfico devuelve el valor y dibuja la marca.
 """
 
-from PySide6.QtCore import Signal, Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import QWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QLabel
-
+from PySide6.QtWidgets import (QHeaderView, QLabel, QTableWidget,
+                               QTableWidgetItem, QVBoxLayout, QWidget)
 
 COLOR_OD = QColor(255, 200, 200)  # rosa-rojo (OD)
 COLOR_OI = QColor(200, 200, 255)  # lila-azul (OI)
 
+FILA_P2P = 'p2p'
+
 
 class VempTable(QWidget):
-    sig_measure_value = Signal(dict)  # {'od': {'p13_L': None}} cuando pide valor
+    # {'side': 0|1, 'pico': 'p13', 'campo': 'L'|'A'}
+    sig_measure_value = Signal(dict)
 
-    def __init__(self, side, parent=None):
-        """
-        side: 0 = OD, 1 = OI
-        peak_labels: lista de nombres de picos (['p13','n23'] o ['n10','p16'])
-        """
+    def __init__(self, side, peak_labels=None, parent=None):
+        """side: 0 = OD, 1 = OI"""
         super().__init__(parent)
         self.side = side
         self.side_text = 'OD' if side == 0 else 'OI'
-        self.peak_labels = ['p13', 'n23']  # default CVEMP
-        self.data = self._init_data()
+        self.peak_labels = list(peak_labels or ['p13', 'n23'])
 
         layout = QVBoxLayout(self)
-        layout.addWidget(QLabel(f'Latencias / Amplitudes ({self.side_text})'))
+        layout.setContentsMargins(2, 2, 2, 2)
+        self.lbl_titulo = QLabel(f'{self.side_text} -- sin curva')
+        layout.addWidget(self.lbl_titulo)
 
-        self.tw_latamp = QTableWidget(len(self.peak_labels), 2)
+        self.tw_latamp = QTableWidget(0, 2)
         self.tw_latamp.setHorizontalHeaderLabels(['Latencia (ms)', 'Amplitud (µV)'])
-        self.tw_latamp.verticalHeader().setVisible(False)
+        self.tw_latamp.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.tw_latamp.cellClicked.connect(self._on_cell_clicked)
-        self._refresh_rows()
+        color = COLOR_OD if self.side == 0 else COLOR_OI
+        self.tw_latamp.setStyleSheet(
+            f'QTableWidget {{ background-color: {color.name()}; }}')
         layout.addWidget(self.tw_latamp)
+        self._refresh_rows()
 
-    def _init_data(self):
-        return [['', ''] for _ in self.peak_labels]
+    # =====================================================================
+    # Filas
+    # =====================================================================
+
+    def _filas(self):
+        return self.peak_labels + [FILA_P2P]
+
+    def _etiqueta(self, fila):
+        if fila == FILA_P2P:
+            return '-'.join(p.upper() for p in self.peak_labels)
+        return fila.upper()
 
     def _refresh_rows(self):
-        self.tw_latamp.setRowCount(len(self.peak_labels))
-        for i, pico in enumerate(self.peak_labels):
-            header = QTableWidgetItem(pico.upper())
+        filas = self._filas()
+        self.tw_latamp.setRowCount(len(filas))
+        for i, fila in enumerate(filas):
+            header = QTableWidgetItem(self._etiqueta(fila))
             header.setFlags(header.flags() & ~Qt.ItemIsEditable)
             self.tw_latamp.setVerticalHeaderItem(i, header)
-        # Restyle background
-        color = COLOR_OD if self.side == 0 else COLOR_OI
-        self.tw_latamp.setStyleSheet(f'QTableWidget {{ background-color: {color.name()}; }}')
+            for col in (0, 1):
+                item = QTableWidgetItem('')
+                item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                self.tw_latamp.setItem(i, col, item)
+        # La fila pico-pico no tiene latencia y no se pide a mano.
+        self.tw_latamp.item(len(filas) - 1, 0).setText('--')
 
     def set_peak_labels(self, labels):
         """Cambia los picos que muestra la tabla (al cambiar subtipo)."""
-        if labels == self.peak_labels:
+        if list(labels) == self.peak_labels:
             return
         self.peak_labels = list(labels)
-        self.data = self._init_data()
         self._refresh_rows()
 
-    def _on_cell_clicked(self, row, column):
-        if row < 0 or row >= len(self.peak_labels):
+    def set_titulo(self, curva=None, intensidad=None, subtipo=None):
+        if curva is None:
+            self.lbl_titulo.setText(f'{self.side_text} -- sin curva')
             return
-        pico = self.peak_labels[row]
-        col = 'L' if column == 0 else 'A'
-        key = f'{pico}_{col}'
-        self.sig_measure_value.emit({f'{self.side_text.lower()}': {key: None}})
+        partes = [self.side_text, str(curva)]
+        if intensidad is not None:
+            partes.append(f'{intensidad} dB')
+        if subtipo:
+            partes.append(subtipo)
+        self.lbl_titulo.setText(' · '.join(partes))
 
-    def set_data(self, data):
-        """data: dict {pico: [lat, amp]}; actualiza la fila correspondiente."""
-        if not isinstance(data, dict):
+    # =====================================================================
+    # Datos
+    # =====================================================================
+
+    def _on_cell_clicked(self, row, column):
+        filas = self._filas()
+        if row < 0 or row >= len(filas):
             return
-        for i, pico in enumerate(self.peak_labels):
-            if pico in data:
-                vals = data[pico]
-                if isinstance(vals, (list, tuple)) and len(vals) >= 2:
-                    self.data[i][0] = str(round(vals[0], 2)) if vals[0] is not None else ''
-                    self.data[i][1] = str(round(vals[1], 2)) if vals[1] is not None else ''
-                    self.tw_latamp.setItem(i, 0, QTableWidgetItem(self.data[i][0]))
-                    self.tw_latamp.setItem(i, 1, QTableWidgetItem(self.data[i][1]))
+        fila = filas[row]
+        if fila == FILA_P2P:
+            return   # se calcula sola con las dos marcas
+        self.sig_measure_value.emit({
+            'side': self.side,
+            'pico': fila,
+            'campo': 'L' if column == 0 else 'A',
+        })
+
+    def set_latamp(self, latamp):
+        """latamp: {pico: [lat, amp]}. Rellena filas y la pico-pico."""
+        latamp = latamp or {}
+        filas = self._filas()
+        for i, fila in enumerate(filas):
+            if fila == FILA_P2P:
+                continue
+            vals = latamp.get(fila) or [None, None]
+            lat, amp = (list(vals) + [None, None])[:2]
+            self.tw_latamp.item(i, 0).setText('' if lat is None else f'{lat:.2f}')
+            self.tw_latamp.item(i, 1).setText('' if amp is None else f'{amp:.1f}')
+        p2p = self.peak_to_peak(latamp)
+        self.tw_latamp.item(len(filas) - 1, 1).setText(
+            '' if p2p is None else f'{p2p:.1f}')
+
+    def peak_to_peak(self, latamp):
+        """Amplitud pico-pico entre los dos picos del subtipo, si están los dos.
+
+        Es una resta con signo (P13 arriba, N23 abajo): el valor absoluto de
+        la diferencia, no la suma de dos módulos.
+        """
+        latamp = latamp or {}
+        amps = []
+        for pico in self.peak_labels:
+            vals = latamp.get(pico)
+            if not vals or vals[1] is None:
+                return None
+            amps.append(float(vals[1]))
+        if len(amps) < 2:
+            return None
+        return abs(amps[0] - amps[1])
 
     def clear_all(self):
-        self.data = self._init_data()
-        for i in range(len(self.peak_labels)):
-            for j in [0, 1]:
-                self.tw_latamp.setItem(i, j, QTableWidgetItem(''))
-
-    def request_values(self, key):
-        """key: 'p13_L' etc; emite la señal que el main window conecta al gráfico."""
-        self.sig_measure_value.emit({f'{self.side_text.lower()}': {key: None}})
-
-    def update_latamp_table(self, latamp_dict):
-        """latamp_dict: {'LatAmp': {'p13': [lat,amp], ...}}; actualiza filas."""
-        if not isinstance(latamp_dict, dict):
-            return
-        la = latamp_dict.get('LatAmp', latamp_dict)
-        for i, pico in enumerate(self.peak_labels):
-            if pico in la:
-                self.set_data({pico: la[pico]})
+        for i in range(self.tw_latamp.rowCount()):
+            for col in (0, 1):
+                item = self.tw_latamp.item(i, col)
+                if item is not None:
+                    item.setText('')
+        if self.tw_latamp.rowCount():
+            self.tw_latamp.item(self.tw_latamp.rowCount() - 1, 0).setText('--')
+        self.set_titulo(None)

@@ -10,12 +10,15 @@
 // (resources/vemp/normative_data.json), serializado en CASE_CONST: los
 // números no se re-tipean acá.
 //
-// UNA diferencia a propósito con el generador de la app: acá la polaridad
-// sale del nombre del pico (p13 hacia arriba, n23 hacia abajo). El
-// generador suma las dos gaussianas positivas y dibuja dos jorobas del
-// mismo lado, que no es la morfología bifásica de un VEMP. Cuando se toque
-// la app hay que corregirlo allá; mientras tanto la previa muestra la
-// respuesta que los números describen, no la que el generador dibuja mal.
+// La polaridad sale del nombre del pico (p13 hacia arriba, n23 hacia
+// abajo). El generador de la app hace lo mismo desde el pase de VEMP en el
+// cliente: antes sumaba las dos gaussianas positivas y dibujaba dos
+// jorobas del mismo lado, así que la previa y el equipo no mostraban la
+// misma morfología.
+//
+// Lo que la previa NO muestra, porque no es del caso sino de cómo se toma
+// el examen: la contracción del músculo (sin ECM contraído no hay cVEMP),
+// el ruido y la promediación. Eso vive en el equipo del alumno.
 (function () {
     var NORM = window.CASE_CONST.vempNormative || {};
     var POBLACIONES = NORM.populations || {};
@@ -30,37 +33,33 @@
     var WAVE_SIGMA = { p13: 0.40, n23: 0.45, n10: 0.35, p16: 0.40 };
     // Ventana del registro: 35 ms, como la del equipo.
     var T_MAX = 35;
-    // Serie de intensidades. Tiene que ser una serie y no una sola fila:
-    // la amplitud sale de (intensidad - umbral) normalizada por
-    // (80 - umbral), así que A 80 dB DA LO MISMO cualquier umbral -- el
-    // campo no movía nada en la pantalla. En la serie el umbral se ve
-    // donde la respuesta se apaga, que es como se lee.
+    // Serie de intensidades. Tiene que ser una serie y no una sola fila: la
+    // amplitud sale del nivel de sensación (intensidad - umbral), así que
+    // en una sola fila el campo umbral no se vería mover nada. En la serie
+    // el umbral se ve donde la respuesta se apaga, que es como se lee.
     //
-    // Arranca EN 80 y no más arriba a propósito: la normativa está definida
-    // a 80 dB y esa fórmula interpola entre el umbral y 80, no extrapola.
-    // Pedirle 100 dB con umbral 85 devuelve 1930 µV, catorce veces la
-    // amplitud normativa. (El generador de la app tiene la misma fórmula
-    // sin tope: si el equipo deja subir de 80, allá pasa lo mismo.)
-    //
-    // Y baja hasta UNA fila debajo del umbral, no hasta el final: es como
-    // se busca un umbral en la clínica --se desciende hasta que la
-    // respuesta desaparece y se confirma un nivel más abajo-- y las filas
-    // que sobran son alto desperdiciado. Con menos filas cada una se hace
-    // más alta, que es donde se lee la amplitud.
-    var VEMP_TOP = 80, VEMP_STEP = 10, VEMP_FLOOR = 30;
+    // La serie va del umbral + SL_SATURACION (donde la respuesta ya está en
+    // su amplitud normativa) hasta una fila por debajo del umbral, que es
+    // como se busca un umbral en la clínica: se desciende hasta que la
+    // respuesta desaparece y se confirma un nivel más abajo. Cuatro filas,
+    // así cada una queda alta, que es donde se lee la amplitud.
+    var VEMP_STEP = 10, VEMP_TECHO = 110, VEMP_FLOOR = 40;
+    // El VEMP crece ~20 dB sobre el umbral y satura -- MISMO valor que
+    // SL_SATURACION_DB en VEMP_generator_v1.py. Antes se normalizaba por
+    // (80 - umbral), que a 80 dB daba lo mismo con cualquier umbral y por
+    // encima de 80 extrapolaba sin techo: umbral 85 a 100 dB devolvía
+    // 1930 µV, catorce veces la amplitud normativa.
+    var SL_SATURACION = 20;
     // Alto del área de dibujo, repartido entre las filas que haya (5 x 26
     // = el alto fijo que tenía antes).
     var VEMP_PLOT_H = 130;
     var VEMP_FILA_H_MIN = 22, VEMP_FILA_H_MAX = 52;
-    // La normativa está definida a 80 dB: es la fila donde el docente ve
-    // los números que acaba de tipear.
-    var INTENSIDAD_REF = 80;
-
     function intensidadesDe(umbral) {
-        var piso = Math.round(umbral / VEMP_STEP) * VEMP_STEP - VEMP_STEP;
-        piso = Math.max(VEMP_FLOOR, Math.min(piso, VEMP_TOP));
+        var base = Math.round(umbral / VEMP_STEP) * VEMP_STEP;
+        var techo = Math.min(base + SL_SATURACION, VEMP_TECHO);
+        var piso = Math.max(base - VEMP_STEP, VEMP_FLOOR);
         var out = [];
-        for (var dB = VEMP_TOP; dB >= piso; dB -= VEMP_STEP) { out.push(dB); }
+        for (var dB = techo; dB >= piso; dB -= VEMP_STEP) { out.push(dB); }
         return out;
     }
 
@@ -112,12 +111,13 @@
             var lat = base[pico].lat + latShift;
             var amp = base[pico].amp;
 
-            // Amplitud lineal con (intensidad - umbral), piso de ruido.
-            if (INTENSIDAD >= umbral) {
-                var rango = Math.max(80 - umbral, 1);
-                amp *= 0.05 + 0.95 * ((INTENSIDAD - umbral) / rango);
+            // Amplitud: crece con el nivel de sensación y satura; por
+            // debajo del umbral, piso de ruido.
+            var sl = INTENSIDAD - umbral;
+            if (sl >= 0) {
+                amp *= 0.05 + 0.95 * Math.min(sl / SL_SATURACION, 1);
             } else {
-                amp *= Math.max(0.05 * (1 - (umbral - INTENSIDAD) / 10), 0.001);
+                amp *= Math.max(0.05 * (1 + sl / 10), 0.001);
             }
 
             // Patología: el cruce patología x subtipo es el hallazgo.
@@ -252,9 +252,10 @@
             }
             svg += '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="1.1"/>';
 
-            // Los picos se etiquetan solo en la fila de referencia: en las
-            // otras se superpondrían con el trazo de la fila de al lado.
-            if (dB === INTENSIDAD_REF) {
+            // Los picos se etiquetan solo en la fila de arriba (la de mayor
+            // intensidad, donde la respuesta está saturada): en las otras se
+            // superpondrían con el trazo de la fila de al lado.
+            if (i === 0) {
                 picos.forEach(function (p) {
                     if (p.lat < 0 || p.lat > T_MAX) { return; }
                     svg += '<text x="' + xPos(p.lat).toFixed(1) + '" y="' +
@@ -268,12 +269,13 @@
                '" font-size="6.5" fill="currentColor" fill-opacity="0.6">dB / escala ' +
                ampMax.toFixed(ampMax < 20 ? 1 : 0) + ' µV</text>';
         svg += '</svg>';
-        // Un umbral arriba del techo de la serie da una previa plana, que es
-        // la lectura correcta (respuesta ausente) pero parece un gráfico
-        // roto si no se dice.
-        if (umbral > VEMP_TOP) {
-            svg += '<p class="help">Umbral ' + umbral + ' dB: por encima de la serie, no hay respuesta en ' +
-                   'ninguna intensidad. Es un VEMP ausente, no un gráfico vacío.</p>';
+        // Un umbral por encima de lo que el equipo puede dar deja al alumno
+        // sin ninguna intensidad con respuesta. Es un VEMP ausente y es un
+        // caso válido, pero conviene que el docente sepa que lo armó así.
+        if (umbral > VEMP_TECHO - 5) {
+            svg += '<p class="help">Umbral ' + umbral + ' dB: el equipo llega a ' + VEMP_TECHO +
+                   ' dB, así que este VEMP va a salir ausente en todas las intensidades. ' +
+                   'Es un hallazgo válido, no un gráfico vacío.</p>';
         }
         caja.innerHTML = svg;
     }

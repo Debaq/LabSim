@@ -14,6 +14,9 @@ declare(strict_types=1);
  *                             "LatAmp": {"I":[lat,amp], "III":[...], "V":[...]}}, ... },
  *   "hallazgos": "texto plano",
  *   "conclusion": "texto plano",
+ *   "asimetria": {"subtipo":"CVEMP","od":..,"oi":..,"ratio":..} -- solo
+ *                 VEMP, con las amplitudes pico-pico marcadas por el
+ *                 alumno (ver VempMainWindow::asimetria),
  *   "tecnica": { condiciones de registro -- equipo, electrodos e
  *                impedancias, rechazo, criterio FSP y lo que el equipo
  *                midio (barridos aceptados, FSP, ruido, replicabilidad).
@@ -130,6 +133,21 @@ final class ReportPdfBuilder
                 }
             }
             $y += 10;
+        }
+
+        // Razón de asimetría (VEMP): la manda el cliente ya calculada con
+        // las amplitudes pico-pico que marcó el alumno. Se imprime el
+        // número y las dos amplitudes, sin lectura -- qué asimetría es
+        // patológica lo dice quien informa.
+        $asim = is_array($data['asimetria'] ?? null) ? $data['asimetria'] : [];
+        if (isset($asim['ratio']) && is_numeric($asim['ratio'])) {
+            $y = self::ensureSpace($pdf, $y, 34);
+            $pdf->text(self::MARGIN, $y, 'Razón de asimetría', 12, true);
+            $y += 18;
+            $pdf->text(self::MARGIN, $y, trim((string) ($asim['subtipo'] ?? '')) . '  '
+                . self::num($asim['ratio']) . '%  (OD ' . self::num($asim['od'] ?? null)
+                . ' µV / OI ' . self::num($asim['oi'] ?? null) . ' µV pico-pico)', 9);
+            $y += 24;
         }
 
         $y = self::technicalSection($pdf, $data, $y, $contentW);
@@ -530,6 +548,25 @@ final class ReportPdfBuilder
         }
         if (!empty($curva['mkg'])) {
             $partes[] = 'masking ' . self::num($curva['mkg']) . ' dB';
+        }
+        // VEMP: el estímulo es tone burst (la frecuencia va en 'freq') y
+        // sin la maniobra y el EMG con el que se registró, una respuesta
+        // ausente no se puede distinguir de un paciente que no contrajo.
+        if (!empty($curva['freq'])) {
+            $partes[] = 'tone burst ' . $curva['freq'];
+        }
+        if (!empty($curva['maniobra'])) {
+            $partes[] = (string) $curva['maniobra'];
+        }
+        if (isset($curva['emg_uv'])) {
+            $emg = 'EMG ' . self::num($curva['emg_uv']) . ' µV';
+            if (array_key_exists('emg_ok', $curva) && !$curva['emg_ok']) {
+                $emg .= ' (FUERA DE RANGO)';
+            }
+            $partes[] = $emg;
+        }
+        if (isset($curva['p2p']) && is_numeric($curva['p2p'])) {
+            $partes[] = 'p-p ' . self::num($curva['p2p']) . ' µV';
         }
         $tec = is_array($curva['tecnica'] ?? null) ? $curva['tecnica'] : [];
         if (isset($tec['barridos_aceptados'])) {

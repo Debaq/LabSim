@@ -1,59 +1,40 @@
 # TODO
 
-## VEMP en el cliente: leer el shape nuevo (BLOQUEANTE)
+## VEMP en el cliente: probar en la app (pendiente)
 
-El backend ya guarda los tres subtipos por oído (commit "la ficha VEMP arma
-los tres subtipos"), pero `src/vemp/` sigue leyendo el shape viejo. **Hasta
-que se haga este pase, el módulo VEMP no encuentra los datos de ningún caso
-creado o re-guardado desde el editor nuevo**: `VempMainWindow.la_super()`
-busca `vemp_data['OD']['umbral' | 'desviaciones' | 'repro' | ...]` en la raíz
-del oído, y esas claves ya no están ahí.
+El pase por `src/vemp/` está hecho: el módulo lee el shape nuevo
+(`cases.data['VEMP'][lado]['subtipos'][subtipo]`, con compatibilidad hacia
+los casos viejos), dibuja la morfología bifásica, ya no extrapola la
+amplitud por encima de 80 dB y el examen se puede completar (un oído por
+vez, promediación en vivo, picos marcables, tabla y lat-int poblados,
+razón de asimetría en el informe).
 
-Shape actual de `cases.data['VEMP'][<OD|OI>]`:
-
-```
-{
-  'type': 'normal'|'sacular'|'utricular'|'neural',   # del OÍDO, no del subtipo
-  'decidido': bool,                                  # el docente/armado ya miró lo vestibular
-  'subtipos': {
-     'CVEMP'|'OVEMP'|'MVEMP': {
-        'peaks': ['p13','n23'] | ['n10','p16'],
-        'umbral': int, 'repro': bool, 'repro_var': float,
-        'average_objetivo': int,
-        'desviaciones': {<pico>: {'lat': float, 'amp': float}},
-     }
-  }
-}
-```
+Lo que se agregó y no estaba: **la maniobra del paciente**. La amplitud del
+VEMP escala con el EMG tónico del músculo registrador (ECM en el cVEMP,
+mirada superior en el oVEMP, mordida en el mVEMP): con el paciente relajado
+no hay respuesta. El combo arranca SIEMPRE en la posición sin contracción
+--no es un default correcto precargado-- y el monitor de EMG muestra el
+nivel y la banda válida. Ver `VEMP_generator_v1.MANIOBRAS` y `VempEmg.py`.
 
 Pendiente:
-- [ ] `VempMainWindow._finalize_capture()`: armar el `case` que recibe
-      `VEMP_Curve` desde `vemp_<lado>['subtipos'][self.subtipo]`, con el
-      `type` que sigue viviendo en la raíz del oído. Hoy pasa el dict del
-      oído entero y el generador no encuentra ni umbral ni desviaciones.
-- [ ] `VempMainWindow.la_super()`: sacar la preselección del combo desde
-      `vemp_data[...]['subtipo']`. Esa clave ya no existe y el subtipo lo
-      elige el alumno, que era el punto de la ficha nueva.
-- [ ] Compatibilidad con casos viejos: si el oído NO trae `subtipos`, leer
-      las claves de la raíz para el subtipo que declare `subtipo` (mismo
-      criterio que `CaseBuilder::caseDataToForm`), y default para los otros
-      dos. Sin esto los casos ya guardados dejan de abrir.
-- [ ] Polaridad de los picos en `build_target_curve()`: hoy suma las dos
-      gaussianas POSITIVAS, así que dibuja dos jorobas del mismo lado en vez
-      de la morfología bifásica P13(+)/N23(-). La vista previa del backend
-      (`public/js/case/vemp.js`) ya la aplica sacando el signo de la inicial
-      del pico; mientras no se corrija acá, la previa y el equipo no dibujan
-      lo mismo.
-- [ ] Tope de intensidad en `calculate_wave_parameters()`: `amp_factor`
-      interpola entre el umbral y 80 dB y NO extrapola. Con umbral 85 a
-      100 dB devuelve 1930 µV, catorce veces la amplitud normativa. Si el
-      equipo deja subir de 80, hay que acotarlo (la previa del backend lo
-      esquiva arrancando la serie en 80).
-- [ ] Revisar `VempReport`/`ReportPdfBuilder`: el informe lista los picos
-      desde `data['waves']` que manda el cliente, así que probablemente no
-      necesite cambios -- confirmarlo con un informe real, no de memoria.
-- [ ] Correr el módulo con un caso creado desde el editor nuevo. Nada de
-      esto se probó en la app.
+- [ ] **Correr el módulo con un caso creado desde el editor nuevo.** Nada
+      de esto se probó en la app: acá no hay PySide6/pyqtgraph/scipy, así
+      que lo único ejecutado es el generador (tests/test_vemp_generator.py,
+      con filtros pasa-todo). Toda la UI --captura, cursores, marcas,
+      apilado, escalas, export a JPEG-- está sin ejecutar una sola vez.
+- [ ] Confirmar el PDF con un informe real: `ReportPdfBuilder` ya imprime
+      maniobra/EMG/pico-pico por curva y el bloque de asimetría, pero eso
+      se leyó en el código, no se generó un PDF.
+- [ ] Rangos normativos en la tabla (como `normative_limits` en el ABR):
+      hoy la tabla muestra lo medido sin referencia. El JSON normativo no
+      trae desviación estándar por pico, así que primero hay que decidir de
+      dónde sale la tolerancia (la banda de la lat-int usa un valor
+      declarado, `TOLERANCIA_LAT_MS = 1.5`, y lo dice).
+- [ ] Umbral del VEMP como dato del informe: hoy el alumno lo deduce de la
+      serie pero no hay dónde anotarlo.
+- [ ] `impedance` está fija en 3.0 kOhm (no hay diálogo de parámetros
+      avanzados como en el ABR). Si se agrega, entra por
+      `control_setting['impedance']`, que el generador ya lee.
 
 ## Otoscopia: derivación + aprobación docente + fase por alumno
 

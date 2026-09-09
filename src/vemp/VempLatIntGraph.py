@@ -1,110 +1,179 @@
 """
-Gráfico latencia-intensidad para VEMP.
+Latencia-intensidad y crecimiento de amplitud del VEMP.
 
-Réplica de AbrLatIntGraph con peak_labels parametrizable. Banda normativa
-fija (placeholder, los rangos reales deberían venir de normative_data.json
-en una iteración futura -- por ahora el patrón es mostrar el rango clínico
-aceptado).
+Dos gráficos en la misma pestaña porque en un VEMP la lectura por
+intensidad es sobre todo de AMPLITUD: la latencia casi no se mueve
+(~0.05 ms/10 dB, ver LAT_SLOPE_MS_10DB) y lo que dice dónde está el umbral
+es la amplitud pico-pico cayéndose hasta desaparecer.
+
+- Arriba: latencia de cada pico vs intensidad, con la banda normativa.
+- Abajo: amplitud pico-pico vs intensidad, un trazo por oído. Sin banda a
+  propósito: la amplitud absoluta depende de cuánto contrajo el paciente
+  (ver VempEmg), así que una banda fija ahí mentiría.
+
+La banda de latencia sale de la MISMA normativa que genera las curvas
+(resources/vemp/normative_data.json), corrida por la pendiente del
+generador. El JSON no trae desviación estándar por pico, así que la
+tolerancia es un valor declarado acá (TOLERANCIA_LAT_MS) y no un ±2 DE que
+no tenemos: es una referencia de lectura, no un criterio normativo.
 """
 
 import pyqtgraph as pg
-from PySide6.QtWidgets import QWidget
+import pyqtgraph.exporters  # noqa: F401  (registra ImageExporter)
+
+from vemp.VEMP_generator_v1 import (INTENSIDAD_REF, LAT_SLOPE_MS_10DB,
+                                    SUBTIPO_PEAKS)
+
+TOLERANCIA_LAT_MS = 1.5
+INT_MIN, INT_MAX = 30, 100
+
+SIMBOLOS = {'p13': 'o', 'n23': 't1', 'n10': 't', 'p16': 't3'}
+COLOR_LADO = {'OD': (192, 57, 43), 'OI': (41, 128, 185)}
 
 
 class VempLatIntGraph(pg.GraphicsLayoutWidget):
     def __init__(self, peak_labels=None, parent=None):
         super().__init__(parent)
-        self.peak_labels = peak_labels or ['p13', 'n23']
+        self.peak_labels = list(peak_labels or SUBTIPO_PEAKS['CVEMP'])
+        self.subtipo = 'CVEMP'
+        self.baseline = {}
+        self._bandas = []
+        self.setBackground('w')
         self._setup()
 
     def _setup(self):
-        self.pw = self.addPlot()
-        self.pw.setLabel('bottom', 'dB SPL')
-        self.pw.setLabel('left', 'ms')
-        self.pw.setXRange(0, 100)
-        self.pw.setYRange(0, 35)
-        # Grid explícito con tick spacing (estilo ABR): x cada 10dB, y cada 2ms.
-        self._color_pen = pg.mkColor(0, 0, 0, 255)
-        self._grid = pg.GridItem(pen=self._color_pen, textPen=self._color_pen)
-        self.pw.addItem(self._grid)
-        self._grid.setTickSpacing(x=[10.0], y=[2.0])
-        self.pw.setMouseEnabled(x=False, y=True)
+        color = pg.mkColor(0, 0, 0, 255)
 
-        # Banda normativa placeholder (rangos clínicos aproximados por pico)
-        self._filled_area()
+        self.pw = self.addPlot(row=0, col=0)
+        self.pw.setLabel('bottom', 'dB SPL')
+        self.pw.setLabel('left', 'Latencia (ms)')
+        self.pw.setXRange(INT_MIN, INT_MAX)
+        self.pw.setYRange(0, 30)
+        self.grid = pg.GridItem(pen=color, textPen=color)
+        self.pw.addItem(self.grid)
+        self.grid.setTickSpacing(x=[10.0], y=[5.0])
+        self.pw.setMouseEnabled(x=False, y=True)
+        self.pw.setMenuEnabled(False)
         self.legend = self.pw.addLegend(offset=(10, 10))
 
-    def _filled_area(self):
-        # Banda genérica alrededor del baseline de cada pico (placeholder).
-        # En una iteración futura, leer rangos reales de normative_data.json.
-        bandas = {
-            'p13': ([(0, 14.5), (100, 12.0)], [(0, 11.5), (100, 14.0)]),
-            'n23': ([(0, 25.0), (100, 21.0)], [(0, 21.0), (100, 25.0)]),
-            'n10': ([(0, 11.5), (100, 9.0)],  [(0, 9.0),  (100, 11.5)]),
-            'p16': ([(0, 18.0), (100, 14.5)], [(0, 14.5), (100, 18.0)]),
-        }
+        self.pw_amp = self.addPlot(row=1, col=0)
+        self.pw_amp.setLabel('bottom', 'dB SPL')
+        self.pw_amp.setLabel('left', 'Amplitud p-p (µV)')
+        self.pw_amp.setXRange(INT_MIN, INT_MAX)
+        self.grid_amp = pg.GridItem(pen=color, textPen=color)
+        self.pw_amp.addItem(self.grid_amp)
+        self.grid_amp.setTickSpacing(x=[10.0])
+        self.pw_amp.setMouseEnabled(x=False, y=True)
+        self.pw_amp.setMenuEnabled(False)
+
+    # =====================================================================
+    # Banda normativa
+    # =====================================================================
+
+    def set_subtipo(self, subtipo, baseline=None):
+        """Cambia los picos y redibuja la banda con la normativa de ESTE
+        paciente (la que el generador usa para sus curvas)."""
+        self.subtipo = subtipo
+        self.peak_labels = list(SUBTIPO_PEAKS.get(subtipo, ['p13', 'n23']))
+        self.baseline = baseline or {}
+        self._draw_bands()
+
+    def _draw_bands(self):
+        for item in self._bandas:
+            self.pw.removeItem(item)
+        self._bandas = []
+        if not self.baseline:
+            return
         for pico in self.peak_labels:
-            if pico not in bandas:
+            base = self.baseline.get(pico)
+            if not base:
                 continue
-            (top_pts, bot_pts) = bandas[pico]
-            xs_top = [p[0] for p in top_pts]
-            ys_top = [p[1] for p in top_pts]
-            xs_bot = [p[0] for p in bot_pts]
-            ys_bot = [p[1] for p in bot_pts]
-            top = self.pw.plot(xs_top, ys_top, pen=pg.mkPen((100, 100, 200, 100), width=1))
-            bot = self.pw.plot(xs_bot, ys_bot, pen=pg.mkPen((100, 100, 200, 100), width=1))
+            xs = [INT_MIN, INT_MAX]
+            # Misma pendiente con la que el generador corre las latencias.
+            lats = [base['lat'] + (INTENSIDAD_REF - x) / 10 * LAT_SLOPE_MS_10DB
+                    for x in xs]
+            top = self.pw.plot(xs, [l + TOLERANCIA_LAT_MS for l in lats],
+                               pen=pg.mkPen((100, 100, 200, 100), width=1))
+            bot = self.pw.plot(xs, [l - TOLERANCIA_LAT_MS for l in lats],
+                               pen=pg.mkPen((100, 100, 200, 100), width=1))
             top.is_band = True
             bot.is_band = True
             fill = pg.FillBetweenItem(top, bot)
             fill.setBrush(pg.mkBrush(100, 100, 250, 60))
             self.pw.addItem(fill)
+            self._bandas += [top, bot, fill]
+        # Rango vertical alrededor de la banda: con 0-35 fijo, un oVEMP
+        # (9-16 ms) quedaba apretado en el tercio de abajo.
+        lats = [b['lat'] for b in self.baseline.values() if 'lat' in b]
+        if lats:
+            self.pw.setYRange(max(0, min(lats) - 6), max(lats) + 6, padding=0)
 
-    def plot_data(self, data_dict):
-        """data_dict: {curve_name: {'side','int','LatAmp':{pico:[lat,amp]}}}"""
-        # Limpia puntos anteriores (preserva bandas)
-        for item in list(self.pw.listDataItems()):
-            if not getattr(item, 'is_band', False):
-                self.pw.removeItem(item)
+    # =====================================================================
+    # Puntos
+    # =====================================================================
 
-        symbols = {'p13': 'o', 'n23': 't1', 'n10': 't', 'p16': 't3'}
-        colors = {'OD': (192, 57, 43), 'OI': (41, 128, 185)}
-        points = {p: {'x': [], 'y': [], 'brush': []} for p in self.peak_labels}
+    def plot_data(self, data_dict, subtipo=None):
+        """data_dict: la memoria de curvas del módulo. Se dibujan solo las
+        del subtipo activo: latencias arriba, amplitud pico-pico abajo."""
+        subtipo = subtipo or self.subtipo
+        self.clear_graph()
 
-        for name, info in (data_dict or {}).items():
-            if not isinstance(info, dict):
+        puntos = {p: {'x': [], 'y': [], 'brush': []} for p in self.peak_labels}
+        crecimiento = {'OD': {}, 'OI': {}}
+
+        for _, info in (data_dict or {}).items():
+            if not isinstance(info, dict) or info.get('subtipo') != subtipo:
                 continue
-            side = info.get('side', 'OD')
-            intensity = info.get('int')
-            la = info.get('LatAmp', {})
-            if intensity is None:
+            intensidad = info.get('int')
+            if intensidad is None:
                 continue
-            for pico, vals in la.items():
-                if pico not in self.peak_labels or not isinstance(vals, (list, tuple)):
+            lado = info.get('side', 'OD')
+            latamp = info.get('LatAmp') or {}
+            for pico, vals in latamp.items():
+                if pico not in puntos or not isinstance(vals, (list, tuple)):
                     continue
-                lat = vals[0] if vals[0] is not None else None
-                if lat is None:
+                if vals[0] is None:
                     continue
-                points[pico]['x'].append(intensity)
-                points[pico]['y'].append(lat)
-                points[pico]['brush'].append(colors.get(side, (100, 100, 100)))
+                puntos[pico]['x'].append(intensidad)
+                puntos[pico]['y'].append(vals[0])
+                puntos[pico]['brush'].append(COLOR_LADO.get(lado, (100, 100, 100)))
+            p2p = info.get('p2p')
+            if p2p is not None and lado in crecimiento:
+                # Una curva por intensidad: si hay repetición, queda la mayor
+                # (es la que el alumno informa).
+                previo = crecimiento[lado].get(intensidad)
+                crecimiento[lado][intensidad] = max(p2p, previo) if previo else p2p
 
-        for pico, pts in points.items():
-            if pts['x']:
-                pen = pg.mkPen(width=0)
-                symbol = symbols.get(pico, 'o')
-                brushes = [pg.mkBrush(*c) for c in pts['brush']]
-                scatter = pg.ScatterPlotItem(
-                    x=pts['x'], y=pts['y'], pen=pen, symbol=symbol,
-                    size=10, brush=brushes,
-                )
-                self.pw.addItem(scatter)
+        for pico, pts in puntos.items():
+            if not pts['x']:
+                continue
+            scatter = pg.ScatterPlotItem(
+                x=pts['x'], y=pts['y'], pen=pg.mkPen(width=0),
+                symbol=SIMBOLOS.get(pico, 'o'), size=10,
+                brush=[pg.mkBrush(*c) for c in pts['brush']],
+                name=pico.upper())
+            self.pw.addItem(scatter)
+
+        for lado, serie in crecimiento.items():
+            if not serie:
+                continue
+            xs = sorted(serie)
+            ys = [serie[x] for x in xs]
+            color = COLOR_LADO[lado]
+            self.pw_amp.plot(xs, ys, pen=pg.mkPen(color, width=2),
+                             symbol='o', symbolSize=8,
+                             symbolBrush=pg.mkBrush(*color), name=lado)
 
     def clear_graph(self):
-        for item in list(self.pw.listDataItems()):
+        for item in self.pw.listDataItems():
             if not getattr(item, 'is_band', False):
                 self.pw.removeItem(item)
+        for item in list(self.pw.items):
+            if isinstance(item, pg.ScatterPlotItem):
+                self.pw.removeItem(item)
+        for item in self.pw_amp.listDataItems():
+            self.pw_amp.removeItem(item)
 
     def export_jpg(self, path):
         """Exporta el plot como JPEG (usado por submit_report)."""
-        exporter = pg.exporters.ImageExporter(self.pw)
-        exporter.export(path)
+        pg.exporters.ImageExporter(self.pw.scene()).export(path)

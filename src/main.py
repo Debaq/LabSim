@@ -659,8 +659,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "AC": self.subw_ac,
             "OT": self.subw_ot,
             "ABR": self.subw_abr,
-            # Placeholder: modulo habilitable por curso (courses.php) pero
-            # sin implementacion real todavia -- ver core/module_placeholder.py.
             "VEMP": self.subw_vemp,
             "EOAS": self.subw_eoas,
             "AGENDA": FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self)),

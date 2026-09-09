@@ -7,6 +7,24 @@ P13/N23 masetero), ventana temporal más larga (35ms vs 12ms de ABR), peaks
 más anchos (sigma ~0.4ms vs 0.2ms por ser respuesta electromiogénica, no
 neural). Polaridad y rate con menos efectos que ABR porque el examen VEMP
 es casi siempre monoaural, ~5 Hz, polaridad rarefacción fija.
+
+Lo que un VEMP tiene y un ABR no, y por eso está modelado acá:
+
+- La MORFOLOGÍA ES BIFÁSICA. P13 va hacia arriba y N23 hacia abajo (N10
+  abajo y P16 arriba en el ocular): la inicial del pico ES su polaridad.
+  El módulo sumaba dos gaussianas positivas y dibujaba dos jorobas del
+  mismo lado, que no es un VEMP.
+- La respuesta VIVE DE LA CONTRACCIÓN MUSCULAR. Sin ECM contraído no hay
+  cVEMP, sin mirada superior no hay oVEMP: la amplitud escala con el EMG
+  tónico del músculo (ver MANIOBRAS/emg_gain). Es el error clásico del
+  alumno y hasta acá el generador asumía siempre contracción perfecta.
+- La AMPLITUD CRECE SOBRE EL UMBRAL Y SATURA (~20 dB de SL). La fórmula
+  vieja normalizaba por (80 - umbral) y con umbrales altos extrapolaba:
+  umbral 85 a 100 dB devolvía 1930 µV, catorce veces la normativa.
+- El RUIDO ES PROPORCIONAL A LA RESPUESTA del subtipo. El cVEMP ronda los
+  150 µV y el oVEMP los 10: un ruido absoluto de 0.1 µV dejaba las dos
+  curvas perfectas desde el primer barrido y la promediación no servía
+  para nada.
 """
 
 import json
@@ -34,6 +52,152 @@ SUBTIPO_PEAKS = {
     'OVEMP': ['n10', 'p16'],   # ocular, oblicuo inferior
     'MVEMP': ['p13', 'n23'],   # masetero (experimental)
 }
+
+SUBTIPOS = ['CVEMP', 'OVEMP', 'MVEMP']
+
+# Defaults por subtipo -- los MISMOS de CaseBuilder::VEMP_DEFAULTS. Se usan
+# para los casos viejos, que traían un solo subtipo configurado (ver
+# case_for_subtipo).
+SUBTIPO_DEFAULTS = {
+    'CVEMP': {'umbral': 60, 'average_objetivo': 200},
+    'OVEMP': {'umbral': 65, 'average_objetivo': 300},
+    'MVEMP': {'umbral': 70, 'average_objetivo': 300},
+}
+REPRO_VAR_DEFAULT = 0.2
+
+# Intensidad a la que está definida la normativa y ancho del crecimiento.
+INTENSIDAD_REF = 80
+# El VEMP crece sobre el umbral y satura: a 20 dB de SL ya está en la
+# amplitud normativa. Fijo, y no (80 - umbral): esa normalización hacía que
+# la amplitud a 80 dB fuera la misma con cualquier umbral (el campo no movía
+# nada) y extrapolaba sin techo por encima de 80.
+SL_SATURACION_DB = 20
+# Pendiente latencia-intensidad: mucho más plana que la del ABR.
+LAT_SLOPE_MS_10DB = 0.05
+
+# Ventana de registro. El N23 cae a 23 ms, así que 35 ms es lo mínimo que
+# muestra la respuesta completa.
+VENTANA_MS = 35
+N_PUNTOS = 800
+
+# Maniobra del paciente por subtipo -> EMG tónico del músculo registrador,
+# en µV RMS. La normativa está medida con el músculo contraído (EMG_REF):
+# con el paciente relajado la respuesta no aparece, que es exactamente el
+# error que el alumno tiene que aprender a no cometer.
+#
+# El primer valor de cada subtipo es la posición SIN contracción: es el
+# default del control a propósito (no un valor "correcto" precargado).
+MANIOBRAS = {
+    'CVEMP': [
+        ('Relajado (decúbito)', 8.0),
+        ('Rotación cefálica', 55.0),
+        ('Elevación de la cabeza', 95.0),
+    ],
+    'OVEMP': [
+        ('Mirada al frente', 6.0),
+        ('Mirada superior ~30°', 45.0),
+    ],
+    'MVEMP': [
+        ('Mandíbula relajada', 5.0),
+        ('Mordida sostenida', 60.0),
+    ],
+}
+# EMG al que corresponde la amplitud normativa de cada subtipo.
+EMG_REF = {'CVEMP': 55.0, 'OVEMP': 45.0, 'MVEMP': 60.0}
+# Rango de EMG aceptable para dar el registro por válido (el equipo real
+# muestra esta banda y rechaza barridos fuera de ella).
+EMG_BANDA = {'CVEMP': (30.0, 150.0), 'OVEMP': (20.0, 120.0), 'MVEMP': (25.0, 140.0)}
+
+
+def peak_sign(pico):
+    """Polaridad del pico: la dice su inicial (p13 arriba, n23 abajo)."""
+    return -1.0 if str(pico).lower().startswith('n') else 1.0
+
+
+def select_population(age=None, gender=None):
+    """Población normativa del paciente (claves de normative_data.json).
+
+    gender: 0 = hombre, 1 = mujer (mismo criterio que cases.data['gender']).
+    MISMO criterio que la vista previa del backend (public/js/case/vemp.js):
+    la edad manda sobre el sexo, que solo separa a los adultos. Sin edad ->
+    adult_female, que era el valor fijo que usaba el módulo antes de esto.
+    """
+    if age is None:
+        return 'adult_female'
+    try:
+        age = float(age)
+    except (TypeError, ValueError):
+        return 'adult_female'
+    if age < 18:
+        return 'child'
+    if age >= 65:
+        return 'elderly'
+    return 'adult_male' if str(gender) == '0' else 'adult_female'
+
+
+def maniobras_de(subtipo):
+    """Nombres de maniobra disponibles para el subtipo (orden del combo)."""
+    return [nombre for nombre, _ in MANIOBRAS.get(subtipo, MANIOBRAS['CVEMP'])]
+
+
+def emg_de_maniobra(subtipo, maniobra):
+    """EMG tónico (µV RMS) que produce esa maniobra. Sin maniobra válida,
+    la primera de la lista -- que es la posición SIN contracción."""
+    opciones = MANIOBRAS.get(subtipo, MANIOBRAS['CVEMP'])
+    for nombre, nivel in opciones:
+        if nombre == maniobra:
+            return nivel
+    return opciones[0][1]
+
+
+def emg_en_banda(subtipo, emg):
+    """¿El EMG registrado alcanza para dar el registro por válido?"""
+    lo, hi = EMG_BANDA.get(subtipo, EMG_BANDA['CVEMP'])
+    return lo <= float(emg) <= hi
+
+
+def case_for_subtipo(ear, subtipo):
+    """El caso de UN VEMP: lo del subtipo + el `type`, que es del oído.
+
+    cases.data['VEMP'][OD|OI] guarda la patología en la raíz del oído (es el
+    órgano el que está lesionado) y todo lo demás por subtipo, bajo
+    `subtipos` (ver CaseForm::parseVemp).
+
+    Compatibilidad con casos guardados antes de que fueran tres: traían un
+    solo `subtipo` con sus valores en la raíz del oído. Se los queda el
+    subtipo que el caso declaraba y los otros dos arrancan en su default --
+    MISMO criterio que CaseBuilder::caseDataToForm, para que la app y el
+    editor lean el mismo caso viejo igual.
+
+    Devuelve None si el oído no tiene VEMP configurado: sin datos reales no
+    se genera nada (ver VempMainWindow.graph).
+    """
+    if not isinstance(ear, dict) or not ear:
+        return None
+    if subtipo not in SUBTIPO_PEAKS:
+        subtipo = 'CVEMP'
+    guardados = ear.get('subtipos')
+    sub = None
+    if isinstance(guardados, dict) and isinstance(guardados.get(subtipo), dict):
+        sub = guardados[subtipo]
+    elif str(ear.get('subtipo') or '').upper() == subtipo:
+        sub = ear      # caso viejo: sus valores estaban en la raíz del oído
+    sub = sub or {}
+
+    default = SUBTIPO_DEFAULTS[subtipo]
+    desviaciones = sub.get('desviaciones') if isinstance(sub.get('desviaciones'), dict) else {}
+    return {
+        'type': ear.get('type', 'normal'),
+        'subtipo': subtipo,
+        'peaks': list(SUBTIPO_PEAKS[subtipo]),
+        'umbral': int(sub.get('umbral', default['umbral'])),
+        'repro': bool(sub.get('repro', True)),
+        'repro_var': float(sub.get('repro_var', REPRO_VAR_DEFAULT)),
+        'average_objetivo': int(sub.get('average_objetivo', default['average_objetivo'])),
+        # Solo los picos de ESTE subtipo: cVEMP y mVEMP comparten los
+        # nombres (p13/n23) y en el shape nuevo cada uno trae los suyos.
+        'desviaciones': {p: dict(desviaciones.get(p) or {}) for p in SUBTIPO_PEAKS[subtipo]},
+    }
 
 
 class VEMPGeneratorV1:
@@ -70,23 +234,40 @@ class VEMPGeneratorV1:
             baseline = (self.norms['populations']['adult_female']
                             ['air_conduction']['tone_burst']['500Hz']
                             .get(subtipo, {}))
-        # Boost por sexo (mujeres tienen amplitudes un poco más altas).
+        # Copia: el boost por sexo multiplicaba EL JSON EN MEMORIA, así que
+        # cada llamada devolvía amplitudes un 10% más altas que la anterior.
+        baseline = {p: dict(v) for p, v in baseline.items()}
         if population == 'adult_female' and 'physiological_modifiers' in self.norms:
             boost = self.norms['physiological_modifiers'].get('sex', {}).get('female_amp_boost', 1.0)
             for pico in baseline:
                 baseline[pico]['amp'] *= boost
         return baseline
 
+    @staticmethod
+    def amp_reference(baseline):
+        """Amplitud de referencia del subtipo: la del pico más grande.
+
+        Es la escala de TODO lo demás (ruido, drift, caos de promediación).
+        Sin esto el ruido era absoluto y el oVEMP (10 µV) salía tan limpio
+        como el cVEMP (170 µV).
+        """
+        amps = [abs(v.get('amp', 0.0)) for v in (baseline or {}).values()]
+        return max(amps) if amps else 1.0
+
     def calculate_wave_parameters(self, baseline, intensity, threshold,
                                   pathology, subtipo, desviaciones=None,
-                                  repro_shift=0.0):
+                                  repro_shift=0.0, emg_gain=1.0):
         """
         Pendiente VEMP latencia-intensidad es más plana que ABR (~0.05ms/10dB).
         VEMP usa sólo tone burst (no click) así que no aplica el escalado por
         estímulo de ABR.
+
+        emg_gain: cuánto contrajo el paciente respecto de la contracción con
+        la que está medida la normativa. Multiplica la amplitud entera, que
+        es lo que hace un VEMP de verdad.
         """
-        steps_from_80 = (80 - intensity) / 10
-        lat_shift = steps_from_80 * 0.05
+        steps_from_ref = (INTENSIDAD_REF - intensity) / 10
+        lat_shift = steps_from_ref * LAT_SLOPE_MS_10DB
 
         modified = {}
         peaks = SUBTIPO_PEAKS.get(subtipo, ['p13', 'n23'])
@@ -99,13 +280,13 @@ class VEMPGeneratorV1:
 
             calc_lat = base_lat + lat_shift + repro_shift
 
-            # Amplitud: lineal con (intensidad - umbral), piso de ruido.
-            if intensity >= threshold:
-                db_range = max(80 - threshold, 1)
-                amp_factor = 0.05 + 0.95 * ((intensity - threshold) / db_range)
+            # Amplitud: crece con el nivel de sensación (intensidad sobre el
+            # umbral) y satura; por debajo del umbral, piso de ruido.
+            sl = intensity - threshold
+            if sl >= 0:
+                amp_factor = 0.05 + 0.95 * min(sl / SL_SATURACION_DB, 1.0)
             else:
-                db_below = threshold - intensity
-                amp_factor = max(0.05 * (1 - db_below / 10), 0.001)
+                amp_factor = max(0.05 * (1 + sl / 10), 0.001)
 
             calc_amp = base_amp * amp_factor
 
@@ -131,10 +312,17 @@ class VEMPGeneratorV1:
             # Desviaciones del caso (docente las editó en case_create.php).
             # Shape: {'p13': {'lat': X, 'amp': Y}, ...}
             if desviaciones and pico in desviaciones:
-                calc_lat += desviaciones[pico].get('lat', 0)
-                calc_amp += desviaciones[pico].get('amp', 0)
+                calc_lat += desviaciones[pico].get('lat', 0) or 0
+                calc_amp += desviaciones[pico].get('amp', 0) or 0
 
-            calc_amp = max(calc_amp, 0.001)
+            # La contracción del músculo, al final: escala la respuesta que
+            # los números del caso describen, no la reemplaza.
+            calc_amp *= emg_gain
+
+            # La polaridad la dice la inicial del pico -- va acá, después de
+            # las desviaciones (que el docente escribe en magnitud), igual
+            # que en la vista previa del backend.
+            calc_amp = max(abs(calc_amp), 0.001) * peak_sign(pico)
             modified[pico] = {
                 'lat': calc_lat,
                 'amp': calc_amp,
@@ -152,7 +340,9 @@ class VEMPGeneratorV1:
         return amp * np.exp(-0.5 * ((t - center) / sigma) ** 2)
 
     def build_target_curve(self, t, values, subtipo):
-        """Suma de gaussianas por pico, sin CM ni trough post-VI (VEMP es más simple)."""
+        """Suma de gaussianas por pico. La amplitud ya viene con signo
+        (ver calculate_wave_parameters), así que el trazo sale bifásico:
+        P13 arriba y N23 abajo, no dos jorobas del mismo lado."""
         y = np.zeros_like(t)
         peaks = SUBTIPO_PEAKS.get(subtipo, ['p13', 'n23'])
         for pico in peaks:
@@ -167,12 +357,12 @@ class VEMPGeneratorV1:
     # ARTEFACTOS Y RUIDO
     # =====================================================================
 
-    def add_baseline_drift(self, t, amplitude=0.04):
-        """Drift LF suave, igual que ABR."""
+    def add_baseline_drift(self, t, amp_ref=1.0, amplitude=0.02):
+        """Drift LF suave, proporcional a la respuesta del subtipo."""
         f1 = random.uniform(0.4, 1.2)
         f2 = random.uniform(0.15, 0.4)
-        return amplitude * (np.sin(2 * np.pi * f1 * t / 35) +
-                            0.4 * np.sin(2 * np.pi * f2 * t / 35))
+        return amplitude * amp_ref * (np.sin(2 * np.pi * f1 * t / VENTANA_MS) +
+                                      0.4 * np.sin(2 * np.pi * f2 * t / VENTANA_MS))
 
     def pink_noise(self, n, scale=1.0):
         white = np.random.normal(0, 1, n)
@@ -184,8 +374,14 @@ class VEMPGeneratorV1:
         std = np.std(pink)
         return scale * pink / std if std > 0 else np.zeros(n)
 
-    def add_emg_noise(self, t, current_avg, target_avg, impedance=3.0):
-        """VEMP = EMG casi puro (respuesta muscular). Más EMG (HF), menos pink."""
+    def add_emg_noise(self, t, current_avg, target_avg, impedance=3.0,
+                      amp_ref=1.0, emg_ratio=1.0):
+        """VEMP = EMG casi puro (respuesta muscular). Más EMG (HF), menos pink.
+
+        El nivel es proporcional a la respuesta del subtipo (amp_ref) y a lo
+        contraído que esté el músculo: contraer más levanta la respuesta,
+        pero también el ruido del que hay que sacarla promediando.
+        """
         n = len(t)
         emg = np.random.normal(0, 1, n)
         if n > 12:
@@ -202,10 +398,10 @@ class VEMPGeneratorV1:
         pink = self.pink_noise(n, 1.0) * 0.20  # mucho menos pink que ABR
         noise = 0.80 * emg + 0.20 * pink
 
-        # SNR ~ 1/sqrt(N), piso 0.92 como ABR
+        # SNR ~ 1/sqrt(N): el residual baja con la raíz de los barridos.
         safe_target = max(target_avg, 1)
         snr_reduction = np.sqrt(max(current_avg, 1) / safe_target)
-        snr_reduction = min(snr_reduction, 0.92)
+        snr_reduction = min(snr_reduction, 0.94)
 
         if impedance < 3:
             imp = 0.5
@@ -214,7 +410,9 @@ class VEMPGeneratorV1:
         else:
             imp = 1.5
 
-        base_amp = 0.10  # VEMP es más ruidoso que ABR (EMG)
+        # Ruido crudo: casi la mitad de la respuesta del subtipo. Con un
+        # valor absoluto (0.10 µV) el cVEMP salía perfecto de entrada.
+        base_amp = 0.45 * amp_ref * np.sqrt(max(emg_ratio, 0.05))
         amp = base_amp * (1.0 - snr_reduction) * imp
         return noise * amp
 
@@ -253,6 +451,7 @@ class VEMPGeneratorV1:
         # 1. Baseline normativo
         freq = stimulus_config.get('freq', '500Hz')
         baseline = self.get_baseline_values(population, subtipo, freq=freq)
+        amp_ref = self.amp_reference(baseline)
 
         # 2. Override por curso (key 'normative_data.vemp' en app_config_store).
         # Mismo patrón genérico que ABR item 8 -- el docente puede ajustar
@@ -274,52 +473,65 @@ class VEMPGeneratorV1:
         target_avg = stimulus_config['average']
         target_objetivo = (case_config or {}).get('average_objetivo') or target_avg
 
-        # 6. Parámetros de ondas
+        # 6. Contracción del músculo registrador. Sin ella no hay respuesta.
+        emg_level = float(technical_config.get('emg_uv', EMG_REF.get(subtipo, 55.0)))
+        emg_ref = EMG_REF.get(subtipo, 55.0)
+        emg_ratio = emg_level / emg_ref if emg_ref else 1.0
+        # Techo 1.6: contraer más sube la respuesta, pero el músculo satura
+        # (y el ruido sube igual, ver add_emg_noise).
+        emg_gain = max(min(emg_ratio, 1.6), 0.0)
+
+        # 7. Parámetros de ondas
         repro_shift = (case_config or {}).get('repro_shift', 0.0)
         values, waves_visible = self.calculate_wave_parameters(
             baseline, stimulus_config['int'], threshold, pathology, subtipo,
             desviaciones=desviaciones, repro_shift=repro_shift,
+            emg_gain=emg_gain,
         )
 
         # Override por curso: aplica después de calculate_wave_parameters
         # pisando lat/amp con los del override del docente.
-        if baseline_override:
-            for pico, ovr in baseline_override.items():
-                if pico in values:
+        # Shape {subtipo: {pico: {lat, amp}}}, la que guarda courses.php.
+        # Antes se iteraba el dict entero como si fuera {pico: ...}, así que
+        # el override del curso no llegaba nunca a ningún pico.
+        if isinstance(baseline_override, dict):
+            for pico, ovr in (baseline_override.get(subtipo) or {}).items():
+                if pico in values and isinstance(ovr, dict):
                     if 'lat' in ovr:
                         values[pico]['lat'] = ovr['lat']
                     if 'amp' in ovr:
-                        values[pico]['amp'] = ovr['amp']
+                        values[pico]['amp'] = abs(ovr['amp']) * peak_sign(pico)
 
-        # 7. Eje temporal: VEMP llega hasta ~30ms (peak N23 a 23ms)
-        t = np.linspace(0, 35, 800)
+        # 8. Eje temporal: VEMP llega hasta ~30ms (peak N23 a 23ms)
+        t = np.linspace(0, VENTANA_MS, N_PUNTOS)
 
-        # 8. Curva objetivo
+        # 9. Curva objetivo
         y_target = self.build_target_curve(t, values, subtipo)
 
-        # 9. Drift LF
-        y_drift = self.add_baseline_drift(t)
+        # 10. Drift LF
+        y_drift = self.add_baseline_drift(t, amp_ref=amp_ref)
 
-        # 10. Curva limpia
+        # 11. Curva limpia
         y_clean = y_target + y_drift
 
-        # 11. Growth por promediación
+        # 12. Growth por promediación
         growth = self.calculate_growth(current_avg, target_objetivo)
         if growth < 1.0:
-            chaos_amp = (1 - growth) * 0.4
-            chaos = np.random.normal(0, chaos_amp, t.shape)
+            chaos_amp = (1 - growth) * 0.25 * amp_ref
+            chaos = np.random.normal(0, max(chaos_amp, 1e-6), t.shape)
             chaos = signal.filtfilt(*signal.butter(3, 0.2, 'low'), chaos)
             y_signal = growth * y_clean + chaos
         else:
             y_signal = y_clean
 
-        # 12. Ruido EMG
+        # 13. Ruido EMG
         y_noisy = y_signal + self.add_emg_noise(
             t, current_avg, target_avg,
             technical_config.get('impedance', 3.0),
+            amp_ref=amp_ref, emg_ratio=emg_ratio,
         )
 
-        # 13. Filtros
+        # 14. Filtros
         y_final = self.apply_filters(
             y_noisy,
             float(stimulus_config.get('filter_down', 1500)),
@@ -334,6 +546,10 @@ class VEMPGeneratorV1:
             'current_avg': current_avg,
             'target_avg': target_avg,
             'growth': growth,
+            'amp_ref': amp_ref,
+            'emg_uv': emg_level,
+            'emg_ratio': emg_ratio,
+            'emg_ok': emg_en_banda(subtipo, emg_level),
         }
 
 
@@ -352,15 +568,22 @@ def _get_generator():
     return _generator
 
 
-def VEMP_Curve(actual_intencity, control_setting, case, repro_prev, prom, done):
+def VEMP_Curve(actual_intencity, control_setting, case, repro_prev, prom, done,
+               patient=None):
     """
     Genera curva VEMP. Misma firma que ABR_Curve.
 
     control_setting: dict con 'pol', 'rate', 'filter_down', 'filter_passhigh',
-                     'average', 'subtipo' (CVEMP/OVEMP/MVEMP).
-    case: dict con 'type', 'repro', 'repro_var', 'umbral', 'average_objetivo',
-          'desviaciones' (shape {'p13':{'lat','amp'},...}).
+                     'average', 'subtipo' (CVEMP/OVEMP/MVEMP), 'freq',
+                     'maniobra'.
+    case: el VEMP de UN subtipo de UN oído -- lo arma case_for_subtipo() a
+          partir de cases.data['VEMP'][OD|OI], que guarda `type` en la raíz
+          del oído y el resto bajo `subtipos`.
     prom: tupla (current_avg_rel, target_avg) -- misma convención que ABR.
+    patient: cases.data del paciente en atención; de ahí salen edad y sexo
+             para elegir la población normativa (antes: siempre mujer adulta).
+
+    Devuelve (x, y, dx, dy, var_repro, metadata).
     """
     generator = _get_generator()
 
@@ -387,9 +610,10 @@ def VEMP_Curve(actual_intencity, control_setting, case, repro_prev, prom, done):
     if current_averages >= target_averages:
         current_averages = target_averages
 
+    freq = str(control_setting.get('freq', '500Hz'))
     stimulus_config = {
         'stim': 'tone_burst',
-        'freq': '500Hz',
+        'freq': freq,
         'pol': control_setting.get('pol', 'Rarefacción'),
         'int': actual_intencity,
         'rate': control_setting.get('rate', 5.0),
@@ -401,12 +625,15 @@ def VEMP_Curve(actual_intencity, control_setting, case, repro_prev, prom, done):
     }
 
     technical_config = {
-        'impedance': 3.0,
+        'impedance': float(control_setting.get('impedance', 3.0)),
         'transducer': 'insert_earphone',
+        # La maniobra del paciente ES un parámetro técnico del registro:
+        # decide cuánto EMG hay bajo el electrodo (ver MANIOBRAS).
+        'emg_uv': emg_de_maniobra(subtipo, control_setting.get('maniobra')),
     }
 
     # Reproducibilidad: jitter igual que ABR
-    repro_var = case.get('repro_var', 0.2)
+    repro_var = case.get('repro_var', REPRO_VAR_DEFAULT)
     if not case.get('repro', True):
         var_repro = random.uniform(-repro_var, repro_var) if repro_prev == 0 \
                     else -repro_prev + random.uniform(-repro_var / 2, repro_var / 2)
@@ -418,14 +645,18 @@ def VEMP_Curve(actual_intencity, control_setting, case, repro_prev, prom, done):
 
     case_config = {
         'desviaciones': case.get('desviaciones', {}),
-        'umbral': case.get('umbral', 60),
-        'average_objetivo': case.get('average_objetivo', 200),
+        'umbral': case.get('umbral', SUBTIPO_DEFAULTS[subtipo]['umbral']),
+        'average_objetivo': case.get('average_objetivo',
+                                     SUBTIPO_DEFAULTS[subtipo]['average_objetivo']),
         'repro_shift': var_repro,
         'baseline_override': baseline_override,
     }
 
+    population = select_population((patient or {}).get('edad'),
+                                   (patient or {}).get('gender'))
+
     t, y, metadata = generator.generate_curve(
-        population='adult_female',
+        population=population,
         pathology=pathology,
         subtipo=subtipo,
         stimulus_config=stimulus_config,
@@ -435,4 +666,4 @@ def VEMP_Curve(actual_intencity, control_setting, case, repro_prev, prom, done):
 
     dx = t.copy()
     dy = y.copy()
-    return t, y, dx, dy, var_repro
+    return t, y, dx, dy, var_repro, metadata
