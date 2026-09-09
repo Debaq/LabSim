@@ -14,19 +14,19 @@
 <div class="tab-panel" data-tab="anamnesis">
 <div class="card">
     <strong>El borrador de IA hay que leerlo</strong>
-    <p class="legend help">Lo escribe el modelo desde <a href="#" class="tab-link" data-goto-tab="armado">Armado rápido</a> y queda en los campos de abajo. Puede inventar una cirugía que no existe o un fármaco que no es ototóxico, y eso le llega al alumno como parte del caso, indistinguible de lo que escribiste vos.</p>
+    <p class="help">Lo escribe el modelo desde <a href="#" class="tab-link" data-goto-tab="armado">Armado rápido</a> y queda en los campos de abajo. Puede inventar una cirugía que no existe o un fármaco que no es ototóxico, y eso le llega al alumno como parte del caso, indistinguible de lo que escribiste vos.</p>
     <div id="anamnesis-ia-verificacion" <?= fv($v, ['anamnesis_ia', 'generado'], '') ? '' : 'hidden' ?> style="border-left:4px solid var(--color-danger); padding-left:0.6rem; margin-top:0.6rem;">
         <label class="inline-check">
             <input type="checkbox" name="anamnesis_ia[verificado]" id="anamnesis-ia-verificado" value="1" <?= fv($v, ['anamnesis_ia', 'verificado'], '') ? 'checked' : '' ?>>
             Leí el borrador y verifico que es clínicamente correcto para este caso
         </label>
         <?php if (fv($v, ['anamnesis_ia', 'verificado_por'], '')): ?>
-        <p class="legend help">Verificado por <?= htmlspecialchars((string) fv($v, ['anamnesis_ia', 'verificado_por'], '')) ?><?= fv($v, ['anamnesis_ia', 'verificado_en'], '') ? ' el ' . htmlspecialchars((string) fv($v, ['anamnesis_ia', 'verificado_en'], '')) : '' ?>.</p>
+        <p class="help">Verificado por <?= htmlspecialchars((string) fv($v, ['anamnesis_ia', 'verificado_por'], '')) ?><?= fv($v, ['anamnesis_ia', 'verificado_en'], '') ? ' el ' . htmlspecialchars((string) fv($v, ['anamnesis_ia', 'verificado_en'], '')) : '' ?>.</p>
         <?php endif; ?>
-        <p class="legend help">Volver a generar borra la verificación: el texto nuevo no lo leyó nadie. Hasta que esté tildada, el caso no se guarda.</p>
+        <p class="help">Volver a generar borra la verificación: el texto nuevo no lo leyó nadie. Hasta que esté tildada, el caso no se guarda.</p>
     </div>
-    <p class="legend" id="anamnesis-ia-estado-eco" hidden></p>
-    <p class="legend help" id="anamnesis-ia-sin-borrador" <?= fv($v, ['anamnesis_ia', 'generado'], '') ? 'hidden' : '' ?>>Este caso no tiene borrador de IA pendiente: lo de abajo se escribió a mano.</p>
+    <p class="help" id="anamnesis-ia-estado-eco" hidden></p>
+    <p class="help" id="anamnesis-ia-sin-borrador" <?= fv($v, ['anamnesis_ia', 'generado'], '') ? 'hidden' : '' ?>>Este caso no tiene borrador de IA pendiente: lo de abajo se escribió a mano.</p>
 </div>
 <div class="card">
     <strong>Anamnesis</strong>
@@ -48,11 +48,11 @@
     <label>Lo que el paciente cuenta de sí mismo
         <textarea name="otros" rows="5" class="input" placeholder="En qué trabaja, cómo es su día, qué hace en su tiempo libre, desde cuándo lo nota, en qué situaciones le molesta más, qué le preocupa, qué ya probó..."><?= htmlspecialchars((string) ($v['otros'] ?? '')) ?></textarea>
     </label>
-    <p class="legend">Su vida, su trabajo, su rutina, desde cuándo lo nota, en qué situaciones le molesta, qué le preocupa, qué ya probó. De acá sale <strong>todo lo que el paciente tiene para responder</strong> cuando el alumno lo entrevista: vacío contesta en monosílabos y no hay nada que preguntarle. No es la historia clínica (esa la lee el alumno en la ficha) ni la lista de antecedentes de arriba: es lo que esta persona cuenta si se lo preguntan.</p>
+    <p class="help">Su vida, su trabajo, su rutina, desde cuándo lo nota, en qué situaciones le molesta, qué le preocupa, qué ya probó. De acá sale <strong>todo lo que el paciente tiene para responder</strong> cuando el alumno lo entrevista: vacío contesta en monosílabos y no hay nada que preguntarle. No es la historia clínica (esa la lee el alumno en la ficha) ni la lista de antecedentes de arriba: es lo que esta persona cuenta si se lo preguntan.</p>
     <label>Comportamiento del paciente
         <textarea name="comportamiento" id="chat-comportamiento" rows="2" class="input" placeholder="Ej: nervioso, minimiza los síntomas, muy hablador, desconfiado, colaborador..."><?= htmlspecialchars((string) ($v['comportamiento'] ?? '')) ?></textarea>
     </label>
-    <p class="legend">Cómo debe actuar el paciente al conversar con el alumno (tono, actitud) -- va directo al prompt del LLM, junto con la anamnesis de arriba.</p>
+    <p class="help">Cómo debe actuar el paciente al conversar con el alumno (tono, actitud) -- va directo al prompt del LLM, junto con la anamnesis de arriba.</p>
     <label>Sensibilidad del paciente
         <select name="disposicion" id="chat-disposicion">
             <?php foreach ($dispOpts as $val => $label): ?>
@@ -60,12 +60,12 @@
             <?php endforeach; ?>
         </select>
     </label>
-    <p class="legend">Qué tan fácil se ofende o se pone contento este paciente -- define el umbral del aviso OIRS (reclamo/mérito) que puede dejar al cerrar la atención.</p>
+    <p class="help">Qué tan fácil se ofende o se pone contento este paciente -- define el umbral del aviso OIRS (reclamo/mérito) que puede dejar al cerrar la atención.</p>
 </div>
 
 <div class="card" id="chat-test-card">
     <strong>Probar conversación con el paciente</strong>
-    <p class="legend">
+    <p class="help">
         Chatea con el paciente usando lo que ya escribiste en esta ficha (sin necesidad de guardar antes,
         cada mensaje toma los campos tal como están en ese momento) -- útil para revisar que responda bien
         antes de asignarlo a un alumno. Requiere tener configurado el LLM en
@@ -80,7 +80,7 @@
     </div>
     <div class="section-sep" style="border-top:1px dashed var(--color-border);">
         <button type="button" id="oirs-test-btn" class="secondary" style="margin-top:0;">Simular término de sesión (ver veredicto OIRS)</button>
-        <p class="legend">Corre el evaluador de <a href="llm.php" target="_blank">Admin → IA Paciente</a> sobre esta conversación de prueba, tal como se ejecutaría al cerrar una atención real -- útil para ajustar el prompt del evaluador o la sensibilidad del paciente.</p>
+        <p class="help">Corre el evaluador de <a href="llm.php" target="_blank">Admin → IA Paciente</a> sobre esta conversación de prueba, tal como se ejecutaría al cerrar una atención real -- útil para ajustar el prompt del evaluador o la sensibilidad del paciente.</p>
         <div id="oirs-test-result"></div>
     </div>
 </div>

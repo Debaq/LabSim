@@ -423,7 +423,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <li><a href="#" class="tab-link" data-goto-tab="<?= htmlspecialchars($falta['tab']) ?>"><?= htmlspecialchars($falta['texto']) ?></a></li>
         <?php endforeach; ?>
     </ul>
-    <p class="legend help">Esto no es opcional y no se guarda igual: son datos clínicos que ninguna cuenta puede sacar del audiograma. Sin ellos el alumno se encuentra con un paciente que no cierra, y vos no te enterás. Cliqueá cada línea para ir a la pestaña donde se arregla.</p>
+    <p class="help">Esto no es opcional y no se guarda igual: son datos clínicos que ninguna cuenta puede sacar del audiograma. Sin ellos el alumno se encuentra con un paciente que no cierra, y vos no te enterás. Cliqueá cada línea para ir a la pestaña donde se arregla.</p>
 </div>
 <?php endif; ?>
 <?php if (!empty($avisosPerfil)): ?>
@@ -434,7 +434,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
         <li><?= htmlspecialchars($aviso) ?></li>
         <?php endforeach; ?>
     </ul>
-    <p class="legend help">Corregí lo que corresponda, o marcá la casilla y volvé a guardar si la incoherencia es parte del ejercicio (simulación, Stenger, falsa onda V).</p>
+    <p class="help">Corregí lo que corresponda, o marcá la casilla y volvé a guardar si la incoherencia es parte del ejercicio (simulación, Stenger, falsa onda V).</p>
 </div>
 <?php endif; ?>
 
@@ -507,7 +507,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             <div class="photo-crop-ring"></div>
         </div>
         <input type="range" id="photo-crop-zoom" min="1" max="4" step="0.01" value="1" style="width:100%; margin-top:0.8rem;">
-        <p class="legend" style="text-align:center;">Arrastra para mover, usa el control para acercar/alejar.</p>
+        <p class="help" style="text-align:center;">Arrastra para mover, usa el control para acercar/alejar.</p>
         <div class="photo-modal-actions">
             <button type="button" id="photo-crop-cancel" class="secondary">Cancelar</button>
             <button type="button" id="photo-crop-confirm">Guardar foto</button>
@@ -522,7 +522,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
             <div class="photo-crop-ring square"></div>
         </div>
         <input type="range" id="otoscopia-crop-zoom" min="1" max="4" step="0.01" value="1" style="width:100%; margin-top:0.8rem;">
-        <p class="legend" style="text-align:center;">Arrastra para mover, usa el control para acercar/alejar.</p>
+        <p class="help" style="text-align:center;">Arrastra para mover, usa el control para acercar/alejar.</p>
         <div class="photo-modal-actions">
             <button type="button" id="otoscopia-crop-cancel" class="secondary">Cancelar</button>
             <button type="button" id="otoscopia-crop-confirm">Guardar foto</button>

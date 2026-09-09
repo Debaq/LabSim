@@ -14,7 +14,7 @@
 <div class="tab-panel" data-tab="tinnitus">
 <div class="card">
     <strong>Tinnitus (acufenometría)</strong>
-    <p class="legend">Lateralidad y permanente/ocasional son independientes (un tinnitus unilateral puede ser permanente igual que uno bilateral). Unilateral pide oído; bilateral admite predominio (asimetría). Forma: tipo de ruido + frecuencia de matching.</p>
+    <p class="help">Lateralidad y permanente/ocasional son independientes (un tinnitus unilateral puede ser permanente igual que uno bilateral). Unilateral pide oído; bilateral admite predominio (asimetría). Forma: tipo de ruido + frecuencia de matching.</p>
     <?php $tinLateralidad = $v['tinnitus']['lateralidad'] ?? 'craneal'; ?>
     <div class="two-col">
         <label>Lateralidad

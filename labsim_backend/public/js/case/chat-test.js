@@ -135,7 +135,7 @@
 
         oirsBtn.addEventListener('click', function () {
             oirsBtn.disabled = true;
-            oirsResult.innerHTML = '<p class="legend">Evaluando…</p>';
+            oirsResult.innerHTML = '<p class="help">Evaluando…</p>';
 
             fetch('oirs_test.php', {
                 method: 'POST',

@@ -14,12 +14,12 @@
 <div class="tab-panel" data-tab="sala">
 <div class="card">
     <strong>Sala de atención</strong>
-    <p class="legend help">Quiénes vienen con el paciente. Un lactante no cuenta su historia: la cuenta la madre. Y hay adultos que niegan lo que el acompañante ve todos los días -- ese desacuerdo <em>es</em> el hallazgo clínico del caso, y el alumno tiene que darse cuenta de a quién le está preguntando.</p>
-    <p class="legend help">El alumno no elige a quién le habla con un menú: lo dice escribiendo ("mamita, ¿su hijo escucha bien?", "prefiero que me conteste él") y responde quien corresponda. Un caso sin acompañantes se comporta exactamente como antes: una conversación con el paciente y nadie más.</p>
+    <p class="help">Quiénes vienen con el paciente. Un lactante no cuenta su historia: la cuenta la madre. Y hay adultos que niegan lo que el acompañante ve todos los días -- ese desacuerdo <em>es</em> el hallazgo clínico del caso, y el alumno tiene que darse cuenta de a quién le está preguntando.</p>
+    <p class="help">El alumno no elige a quién le habla con un menú: lo dice escribiendo ("mamita, ¿su hijo escucha bien?", "prefiero que me conteste él") y responde quien corresponda. Un caso sin acompañantes se comporta exactamente como antes: una conversación con el paciente y nadie más.</p>
 
     <div class="section-sep" style="border-top:1px dashed var(--color-border);">
         <strong>El paciente en la entrevista</strong>
-        <p class="legend help">Su comportamiento y su sensibilidad se editan en la pestaña Anamnesis. Acá va solo lo que cambia cuando viene acompañado.</p>
+        <p class="help">Su comportamiento y su sensibilidad se editan en la pestaña Anamnesis. Acá va solo lo que cambia cuando viene acompañado.</p>
         <div class="two-col">
             <label>Conciencia de su problema (0-100)
                 <input type="number" name="paciente_conciencia" min="0" max="100" value="<?= htmlspecialchars($pacienteConciencia) ?>">
@@ -28,18 +28,18 @@
                 <input type="number" name="paciente_confiabilidad" min="0" max="100" value="<?= htmlspecialchars($pacienteConfiabilidad) ?>">
             </label>
         </div>
-        <p class="legend">Bajo <?= Sala::CONCIENCIA_BAJA ?> de conciencia el paciente niega o minimiza lo suyo ("yo escucho bien, hablan bajo") y el acompañante que sí lo nota se mete a corregirlo. Bajo <?= Sala::CONFIABILIDAD_BAJA ?> de confiabilidad confunde fechas y detalles, pero los cuenta con seguridad.</p>
+        <p class="help">Bajo <?= Sala::CONCIENCIA_BAJA ?> de conciencia el paciente niega o minimiza lo suyo ("yo escucho bien, hablan bajo") y el acompañante que sí lo nota se mete a corregirlo. Bajo <?= Sala::CONFIABILIDAD_BAJA ?> de confiabilidad confunde fechas y detalles, pero los cuenta con seguridad.</p>
         <label class="inline-check">
             <input type="radio" name="sala_informante" value="p1" <?= $salaInformante === 'p1' ? 'checked' : '' ?>> El paciente es quien cuenta la historia
         </label>
-        <p class="legend">Quien lleva la voz cantante: el que contesta cuando el alumno pregunta al aire, sin dirigirse a nadie. En un lactante no puede ser el paciente.</p>
+        <p class="help">Quien lleva la voz cantante: el que contesta cuando el alumno pregunta al aire, sin dirigirse a nadie. En un lactante no puede ser el paciente.</p>
     </div>
 </div>
 
 <div class="card">
     <strong>Acompañantes</strong>
-    <p class="legend help">Cada uno responde por sí mismo, con su propia foto y su propia versión. Sabe lo que el paciente no puede saber: fechas, remedios, cómo fue el parto.</p>
-    <p class="legend">La tendencia a interrumpir es lo que decide si esta persona contesta por el paciente o espera su turno.</p>
+    <p class="help">Cada uno responde por sí mismo, con su propia foto y su propia versión. Sabe lo que el paciente no puede saber: fechas, remedios, cómo fue el parto.</p>
+    <p class="help">La tendencia a interrumpir es lo que decide si esta persona contesta por el paciente o espera su turno.</p>
     <?php
     // Una sola definición de fila para los dos usos: las que ya tiene el
     // caso y la plantilla que clona el navegador al agregar a alguien. El
@@ -86,7 +86,7 @@
             <label>Su versión de los hechos
                 <textarea name="sala_version[]" rows="2" class="input" placeholder="Ej: no escucha nada hace años, sube la tele al máximo y contesta cualquier cosa."><?= htmlspecialchars((string) ($ac['version'] ?? '')) ?></textarea>
             </label>
-            <p class="legend">Lo que ESTA persona sostiene, aunque el paciente diga otra cosa. Con esto escrito, se mete a contradecir cuando el tema sale en la conversación.</p>
+            <p class="help">Lo que ESTA persona sostiene, aunque el paciente diga otra cosa. Con esto escrito, se mete a contradecir cuando el tema sale en la conversación.</p>
             <div class="two-col">
                 <label>Comportamiento
                     <input type="text" name="sala_comportamiento[]" value="<?= htmlspecialchars((string) ($ac['comportamiento'] ?? '')) ?>" placeholder="Ej: ansiosa, contesta por él, apurada...">
@@ -122,6 +122,6 @@
     </div>
     <template id="sala-row-tpl"><?= $salaRowHtml([], '__ID__') ?></template>
     <button type="button" id="sala-add" class="secondary">Agregar acompañante</button>
-    <p class="legend">La foto se puede subir apenas se agrega la fila, antes de guardar el caso.</p>
+    <p class="help">La foto se puede subir apenas se agrega la fila, antes de guardar el caso.</p>
 </div>
 </div>

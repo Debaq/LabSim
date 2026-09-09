@@ -113,7 +113,7 @@
         </div>
     </div>
     <?php endforeach; ?>
-    <p class="legend">LDL sin marcar = no medido, se guarda como ausente (130) sin importar lo que quede escrito arriba.</p>
+    <p class="help">LDL sin marcar = no medido, se guarda como ausente (130) sin importar lo que quede escrito arriba.</p>
 </div>
 
 <div class="card">
@@ -125,7 +125,7 @@
         ? isset($v['acumetria_auto'])
         : (!isset($v['acumetria_auto']) || (bool) $v['acumetria_auto']);
     ?>
-    <p class="legend">
+    <p class="help">
         <label class="inline-check"><input type="checkbox" id="acumetria-auto-toggle" name="acumetria_auto" value="1"
                <?= $acumetriaIsAuto ? 'checked' : '' ?>>auto (calcular Rinne y Weber desde los umbrales tonales)</label>
     </p>
@@ -204,7 +204,7 @@
         <?php endforeach; ?>
     </div>
 
-    <p class="legend">Deterioro tonal (Carhart / Stat / Rosemberg): dB que hay que subir sobre el umbral aéreo para que el oído sostenga el tono 1 minuto completo. 0 = sin deterioro (lo sostiene de inmediato). Si nunca alcanza a sostenerlo ni en el techo (salida máxima o LDL, lo que sea menor), pon un valor igual o mayor a ese rango.</p>
+    <p class="help">Deterioro tonal (Carhart / Stat / Rosemberg): dB que hay que subir sobre el umbral aéreo para que el oído sostenga el tono 1 minuto completo. 0 = sin deterioro (lo sostiene de inmediato). Si nunca alcanza a sostenerlo ni en el techo (salida máxima o LDL, lo que sea menor), pon un valor igual o mayor a ese rango.</p>
     <?php
     $decayGroups = [
         'carhart' => ['label' => 'Carhart', 'freqs' => [500, 1000, 2000, 4000]],
@@ -247,7 +247,7 @@
     ?>
     <div class="side-block" id="fowler-block">
         <div class="side-heading"><span class="side-tag">Fowler</span></div>
-        <p class="legend">Se detectan solas las frecuencias (250-4000 Hz) donde los umbrales ya tipeados arriba cumplen los requisitos ABLB -- puede calificar más de una a la vez. Para cada una, indica qué le pasa al paciente al hacer la prueba ahí (por defecto, sin reclutamiento).</p>
+        <p class="help">Se detectan solas las frecuencias (250-4000 Hz) donde los umbrales ya tipeados arriba cumplen los requisitos ABLB -- puede calificar más de una a la vez. Para cada una, indica qué le pasa al paciente al hacer la prueba ahí (por defecto, sin reclutamiento).</p>
         <div class="table-wrap">
         <table class="grid-table" id="fowler-table" <?= $fwQualifying ? '' : 'hidden' ?>>
             <thead>
@@ -274,12 +274,12 @@
             </tbody>
         </table>
         </div>
-        <p class="legend" id="fowler-none-msg" <?= $fwQualifying ? 'hidden' : '' ?>>Ningún umbral actual cumple los requisitos ABLB -- Fowler queda deshabilitado en este caso.</p>
+        <p class="help" id="fowler-none-msg" <?= $fwQualifying ? 'hidden' : '' ?>>Ningún umbral actual cumple los requisitos ABLB -- Fowler queda deshabilitado en este caso.</p>
         <label class="inline-check"><input type="checkbox" name="diplacusia" <?= isset($v['diplacusia']) ? 'checked' : '' ?>> Paciente refiere diploacusia</label>
-        <p class="legend">Requisitos ABLB: oído de referencia ≤ <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL, oído en estudio &gt; <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL y sensorioneural (gap aéreo-óseo ≤ <?= CaseBuilder::FOWLER_SNHL_GAP_MAX ?> dB), diferencia interaural <?= CaseBuilder::FOWLER_DIFF_MIN ?>-<?= CaseBuilder::FOWLER_DIFF_MAX ?> dB en cada frecuencia evaluada.</p>
-        <p class="legend">Sin reclutamiento = el paciente nunca iguala. Parcial = se acerca pero no cierra del todo. Completo = iguala sonoridad. Sobre-reclutamiento = en niveles altos el oído afectado empieza a sonar más fuerte que el sano.</p>
+        <p class="help">Requisitos ABLB: oído de referencia ≤ <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL, oído en estudio &gt; <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL y sensorioneural (gap aéreo-óseo ≤ <?= CaseBuilder::FOWLER_SNHL_GAP_MAX ?> dB), diferencia interaural <?= CaseBuilder::FOWLER_DIFF_MIN ?>-<?= CaseBuilder::FOWLER_DIFF_MAX ?> dB en cada frecuencia evaluada.</p>
+        <p class="help">Sin reclutamiento = el paciente nunca iguala. Parcial = se acerca pero no cierra del todo. Completo = iguala sonoridad. Sobre-reclutamiento = en niveles altos el oído afectado empieza a sonar más fuerte que el sano.</p>
     </div>
-    <p class="legend">Auto (SDT/SRT) = mejor promedio de 2 de 3 (500/1000/2000 Hz vía aérea), redondeado a múltiplo de 5. Destildar para escribir un valor manual.</p>
+    <p class="help">Auto (SDT/SRT) = mejor promedio de 2 de 3 (500/1000/2000 Hz vía aérea), redondeado a múltiplo de 5. Destildar para escribir un valor manual.</p>
 </div>
 </div>
 
