@@ -19,9 +19,28 @@
         return boneOd < boneOi ? 'od' : 'oi';
     }
 
+    /**
+     * Ningún diapasón queda bloqueado, ni con el auto encendido: el auto
+     * muestra el cálculo, no lo impone, y al guardar gana lo que quedó en
+     * pantalla. Se fuerza acá además de en la vista porque un select
+     * `disabled` tampoco se postea, así que dejarlo bloqueado no es solo
+     * incómodo: es perder lo que el docente escribió.
+     */
+    function desbloquear() {
+        FREQ_IDX.forEach(function (n) {
+            ['od', 'oi'].forEach(function (side) {
+                var r = document.getElementById('rinne_' + n + '_' + side);
+                if (r) { r.disabled = false; }
+            });
+            var w = document.getElementById('weber_' + n);
+            if (w) { w.disabled = false; }
+        });
+    }
+
     function syncAll() {
         var auto = document.getElementById('acumetria-auto-toggle');
         var isAuto = !!(auto && auto.checked);
+        desbloquear();
         var cambio = false;
         function escribir(select, valor) {
             if (!select || select.value === valor) { return; }

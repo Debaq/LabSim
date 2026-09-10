@@ -129,6 +129,12 @@
         <label class="inline-check"><input type="checkbox" id="acumetria-auto-toggle" name="acumetria_auto" value="1"
                <?= $acumetriaIsAuto ? 'checked' : '' ?>>auto (calcular Rinne y Weber desde los umbrales tonales)</label>
     </p>
+    <?php // Las 6 celdas quedan EDITABLES con el auto encendido, igual que el
+          // resto de lo que sugiere el formulario: el auto muestra el cálculo,
+          // no lo impone. Estaban con `disabled` mientras el auto estuviera
+          // tildado, y al destildarlo nadie las volvía a habilitar: quedaban
+          // muertas hasta recargar la página. ?>
+    <p class="help">Con <em>auto</em> encendido se escriben solas desde los umbrales y <strong>se pueden editar</strong>: lo que quede en pantalla es lo que se guarda. Volver a tocar un umbral las recalcula y pisa lo editado a mano; para que no se toquen más, apagar la casilla.</p>
     <div class="table-wrap">
     <table class="grid-table" style="margin-bottom:0.5rem;">
         <tr><th></th><?php foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $freqIdx): ?><th><?= $hz ?> Hz</th><?php endforeach; ?></tr>
@@ -140,7 +146,7 @@
             ?>
             <td>
                 <select id="rinne_<?= $freqIdx ?>_<?= $lado ?>" class="rinne-select" data-freq="<?= $freqIdx ?>" data-side="<?= $lado ?>"
-                        name="rinne[<?= $hz ?>][<?= $lado ?>]" <?= $acumetriaIsAuto ? 'disabled' : '' ?>>
+                        name="rinne[<?= $hz ?>][<?= $lado ?>]">
                     <?php foreach (CaseBuilder::RINNE_LABELS as $opt => $optLabel): ?>
                     <option value="<?= $opt ?>" <?= $rinneVal === $opt ? 'selected' : '' ?>><?= htmlspecialchars($optLabel) ?></option>
                     <?php endforeach; ?>
@@ -156,7 +162,7 @@
             ?>
             <td>
                 <select id="weber_<?= $freqIdx ?>" class="weber-select" data-freq="<?= $freqIdx ?>"
-                        name="weber[<?= $hz ?>]" <?= $acumetriaIsAuto ? 'disabled' : '' ?>>
+                        name="weber[<?= $hz ?>]">
                     <?php foreach (CaseBuilder::WEBER_LABELS as $opt => $optLabel): ?>
                     <option value="<?= $opt ?>" <?= $weberVal === $opt ? 'selected' : '' ?>><?= htmlspecialchars($optLabel) ?></option>
                     <?php endforeach; ?>
