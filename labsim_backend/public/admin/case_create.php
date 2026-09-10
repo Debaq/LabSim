@@ -616,6 +616,7 @@ window.CASE_CONST = <?= json_encode([
     'categorias' => CaseProfile::CATEGORIAS,
     'grades' => CaseProfile::GRADES,
     'gradeFreqs' => CaseProfile::GRADE_FREQS,
+    'gapMaxDb' => CaseProfile::GAP_MAX_DB,
     'iso7029' => CaseProfile::ISO7029_COEF,
     'iso7029EdadBase' => CaseProfile::ISO7029_EDAD_BASE,
     'autoModules' => CaseProfile::AUTO_MODULES,

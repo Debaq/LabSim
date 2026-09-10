@@ -42,6 +42,16 @@
     // más la escala ya no sube el promedio: el grado pedido no se alcanza y
     // el cuadro se aplana.
     var MAX_DB = 115;
+    // Techo de la transmisión (CaseProfile::GAP_MAX_DB). El oído medio solo
+    // puede dejar de aportar lo que aporta: anulado del todo, la vía ósea le
+    // pone piso a la aérea y el gap se para ahí. Cada cuadro declara el suyo,
+    // más bajo; este es el tope y el que rige si no lo declara.
+    var GAP_MAX_DB = window.CASE_CONST.gapMaxDb || 60;
+
+    /** Hasta dónde puede llegar el gap de este cuadro, en dB. */
+    function techoGap(esc) {
+        return Math.min(esc.gap_max_db || GAP_MAX_DB, GAP_MAX_DB);
+    }
 
     var boton = document.getElementById('perfil-generar');
     var estado = document.getElementById('armado-estado');
@@ -223,7 +233,19 @@
         return (esc.sn_shape[hz] || 0) * escalas.sn + ((esc.gap_shape || {})[hz] || 0) * escalas.gap;
     }
 
-    /** Hasta dónde puede escalarse sin que sature una frecuencia DEL promedio. */
+    /**
+     * Hasta dónde puede escalarse el cuadro, en dB de promedio BIAP.
+     *
+     * Tres topes, y manda el más bajo:
+     *  - saturación: que no se pase de MAX_DB ninguna frecuencia DEL promedio;
+     *  - `max_db`: el techo clínico del promedio que declara el cuadro;
+     *  - el gap: que ninguna frecuencia pase de techoGap(). Este último hace
+     *    falta porque el factor del grado escala la forma COMPLETA -- sin él,
+     *    pedirle "moderada" a una otitis le ponía 68 dB de gap en 125 Hz para
+     *    que el promedio llegara, y eso ya no es un oído medio, es un error.
+     *    Se mide sobre TODAS las frecuencias, no solo las del promedio: el
+     *    gap se desborda en los graves, que no entran en el BIAP.
+     */
     function techoDe(esc, escalas, norma) {
         var peorForma = 0, peorNorma = 0, biapForma, biapNorma;
         GRADE_FREQS.forEach(function (hz) {
@@ -235,7 +257,14 @@
         var porSaturacion = peorForma > 0
             ? biapNorma + biapForma * ((MAX_DB - peorNorma) / peorForma)
             : Infinity;
-        return Math.min(porSaturacion, esc.max_db || Infinity);
+        var peorGap = 0;
+        FREQS.forEach(function (hz) {
+            peorGap = Math.max(peorGap, ((esc.gap_shape || {})[hz] || 0) * escalas.gap);
+        });
+        var porGap = peorGap > 0
+            ? biapNorma + biapForma * (techoGap(esc) / peorGap)
+            : Infinity;
+        return Math.min(porSaturacion, porGap, esc.max_db || Infinity);
     }
 
     /** Opciones de grado del cuadro elegido (las que ese cuadro puede dar). */
@@ -334,9 +363,14 @@
             return (norma[hz] || 0) + (esc.sn_shape[hz] || 0) * escalas.sn
                  + entre(-JITTER_DB, JITTER_DB) + asimetria;
         });
+        // El recorte es el que garantiza el techo: techoDe() ya mantiene el
+        // grado dentro de lo posible, pero el jitter por frecuencia y una
+        // norma por edad alta todavía podían empujar el gap un poco más
+        // arriba de lo que ese oído medio puede atenuar.
         var gap = FREQS.map(function (hz) {
             if (!esc.gap_shape || !Object.keys(esc.gap_shape).length) { return 0; }
-            return (esc.gap_shape[hz] || 0) * escalas.gap + entre(-JITTER_DB, JITTER_DB);
+            var v = (esc.gap_shape[hz] || 0) * escalas.gap + entre(-JITTER_DB, JITTER_DB);
+            return Math.min(v, techoGap(esc));
         });
 
         var osea = sn.map(aCinco);

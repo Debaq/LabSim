@@ -132,6 +132,23 @@ final class CaseProfile
     public const CCE_COCLEAR_PCT = 60.0;
 
     /**
+     * Máxima pérdida por transmisión, en dB: el gap aéreo-óseo no puede
+     * pasar de acá por mucho que se agrave el cuadro del oído medio.
+     *
+     * El oído medio solo puede dejar de aportar lo que aporta: anulado por
+     * completo --cadena interrumpida con tímpano indemne-- el sonido sigue
+     * llegando a la cóclea por vía ósea a través del cráneo, y esa ruta le
+     * pone piso a la curva aérea. De ahí el techo clásico de la conductiva
+     * pura en 60 dB: más gap que eso no es un oído medio peor, es un
+     * audiograma mal armado (o una ósea mal enmascarada).
+     *
+     * Cada cuadro declara además su propio `gap_max_db` en SCENARIOS, que es
+     * más bajo: un tapón no atenúa como una disyunción de cadena. Este valor
+     * es el tope de todos y el que se usa si un cuadro no declara el suyo.
+     */
+    public const GAP_MAX_DB = 60.0;
+
+    /**
      * Ley de atenuación de la OEA. Espejo de oae_attenuation_db() en
      * src/oae/generators/base.py -- si cambia allá, cambia acá.
      * Coclear: 1.2 dB de atenuación por dB de pérdida CCE sobre 15 dB HL.
@@ -276,6 +293,16 @@ final class CaseProfile
      *
      * `max_db` es el techo físico del promedio, en los cuadros que lo tienen.
      *
+     * `gap_max_db` es el techo del GAP por frecuencia, que es otra cosa: el
+     * promedio lo puede subir la vía ósea (una mixta), el gap no --lo limita
+     * cuánta transmisión puede perder ese oído medio y nada más (ver
+     * GAP_MAX_DB)--. Hace falta porque el grado escala la forma entera: sin
+     * techo, pedirle "moderada" a una otitis le ponía 68 dB de gap en 125 Hz
+     * para que el promedio BIAP llegara, o 83 dB a una perforación. El
+     * generador lo usa dos veces: recorta el grado alcanzable del cuadro
+     * (techoDe) y recorta el gap frecuencia por frecuencia al escribirlo.
+     * Todo cuadro con `gap_shape` lo declara.
+     *
      * El cuadro se elige POR OÍDO: un paciente puede tener el OD sano y una
      * conductiva en el OI, o una coclear de un lado y un schwannoma del
      * otro. El oído sano se pide con 'normal', que no es un cero: es un oído
@@ -329,7 +356,9 @@ final class CaseProfile
         // --- Conductivas ------------------------------------------------
         // Todas con cce_pct 100: la cóclea está sana y el problema es de
         // transmisión. Lo que las distingue entre sí es la curva
-        // timpanométrica y la forma del gap, no su magnitud.
+        // timpanométrica, la forma del gap y cuánta transmisión puede perder
+        // ese oído medio (`gap_max_db`): un tapón no atenúa como una cadena
+        // interrumpida, y ninguno pasa de GAP_MAX_DB.
         'otitis_media' => [
             'label' => 'Otitis media con efusión',
             'categoria' => 'conductiva',
@@ -339,7 +368,12 @@ final class CaseProfile
             'gap_scale' => [0.5, 1.2],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
             'z' => ['B'], 'etf' => 'Disfunción tubaria',
-            'grados' => ['leve', 'moderada'], 'max_db' => 60,
+            // La efusión sola llega a ~50 dB de gap en los graves, y con esta
+            // forma (graves peor que agudos) el promedio BIAP no alcanza la
+            // moderada sin pedirle al oído medio más atenuación de la que
+            // puede dar. Una otitis que mide moderada ya tiene la cadena
+            // comprometida: eso es 'mixta_otitis_cronica' o una disyunción.
+            'grados' => ['leve'], 'max_db' => 45, 'gap_max_db' => 50,
             // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
             // hay lesión vestibular (type normal), lo que sube es el umbral
             // -- y sube tanto como el gap, que ya está en el audiograma.
@@ -359,13 +393,104 @@ final class CaseProfile
             'gap_scale' => [0.5, 1.2],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'bilateral',
             'z' => ['As'], 'etf' => 'Normal',
-            'grados' => ['leve', 'moderada'], 'max_db' => 60,
+            // El estribo fijo del todo es el otro cuadro que llega a la
+            // conductiva máxima: de ahí que sea una de las dos que alcanza la
+            // moderada sin dejar de ser conductiva pura.
+            'grados' => ['leve', 'moderada'], 'max_db' => 60, 'gap_max_db' => 60,
             // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
             // hay lesión vestibular (type normal), lo que sube es el umbral
             // -- y sube tanto como el gap, que ya está en el audiograma.
             'vemp' => ['type' => 'normal', 'umbral_gap' => true],
             'tinnitus' => ['prob' => 0.55, 'ruido' => ['Zumbido', 'Campanilleo'],
                            'frecuencia' => [250, 500, 1000], 'permanente' => 0.5],
+        ],
+        'disyuncion_cadena' => [
+            'label' => 'Disyunción de cadena osicular',
+            'categoria' => 'conductiva',
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 8, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
+            'sn_scale' => [0.0, 1.2],
+            // Gap PLANO y grande: la cadena desarticulada (típicamente la
+            // articulación incudo-estapedial) deja de conducir en todas las
+            // frecuencias por igual, no solo en los graves como la efusión o
+            // la perforación. Esa planitud es el hallazgo que la separa del
+            // resto de las conductivas, no solo su magnitud.
+            'gap_shape' => [125 => 52, 250 => 55, 500 => 58, 1000 => 58, 2000 => 55, 3000 => 52, 4000 => 50, 6000 => 50, 8000 => 50],
+            'gap_scale' => [0.6, 1.0],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            // Tímpano indemne y cadena suelta: el oído medio queda hipermóvil
+            // (Ad), y con ese gap el reflejo no se registra (ver
+            // reflexThreshold: REFLEX_PROBE_GAP_DB).
+            'z' => ['Ad'], 'etf' => 'Normal',
+            // Es LA conductiva máxima: con la cadena interrumpida el oído
+            // medio no aporta nada y el gap se para en el techo de 60 dB.
+            'grados' => ['leve', 'moderada'], 'max_db' => 60, 'gap_max_db' => 60,
+            // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
+            // hay lesión vestibular (type normal), lo que sube es el umbral
+            // -- y sube tanto como el gap, que ya está en el audiograma.
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'tinnitus' => ['prob' => 0.35, 'ruido' => ['Zumbido'],
+                           'frecuencia' => [250, 500], 'permanente' => 0.3],
+            // Instalación brusca (trauma, barotrauma, postquirúrgica): el
+            // paciente sabe el día y la hora en que dejó de oír.
+            'conciencia' => [85, 100],
+        ],
+        'fractura_cadena' => [
+            'label' => 'Fractura de cadena osicular',
+            'categoria' => 'conductiva',
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 8, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
+            'sn_scale' => [0.0, 1.2],
+            // La misma planitud de la disyunción pero a media máquina: el
+            // hueso fracturado (mango del martillo, crura del estribo) sigue
+            // transmitiendo algo, así que el gap es parcial. La diferencia
+            // con la disyunción completa es de magnitud y de timpanograma, y
+            // separarlas es el ejercicio.
+            'gap_shape' => [125 => 32, 250 => 34, 500 => 35, 1000 => 35, 2000 => 32, 3000 => 30, 4000 => 30, 6000 => 30, 8000 => 30],
+            'gap_scale' => [0.5, 1.1],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            // Puede quedar normal o algo hipermóvil: la cadena está dañada,
+            // no suelta.
+            'z' => ['A', 'Ad'], 'etf' => 'Normal',
+            // Transmisión parcial: no llega al gap de la disyunción, y por
+            // promedio se queda en leve.
+            'grados' => ['leve'], 'max_db' => 45, 'gap_max_db' => 40,
+            // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
+            // hay lesión vestibular (type normal), lo que sube es el umbral
+            // -- y sube tanto como el gap, que ya está en el audiograma.
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'tinnitus' => ['prob' => 0.35, 'ruido' => ['Zumbido', 'Campanilleo'],
+                           'frecuencia' => [500, 1000], 'permanente' => 0.3],
+            // Igual que la disyunción: pasó de un golpe.
+            'conciencia' => [85, 100],
+        ],
+        'fractura_longitudinal' => [
+            'label' => 'Fractura longitudinal de peñasco',
+            'categoria' => 'conductiva',
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 8, 3000 => 10, 4000 => 10, 6000 => 12, 8000 => 12],
+            'sn_scale' => [0.0, 1.2],
+            // El trazo corre PARALELO al eje del peñasco y se mete por el oído
+            // medio: hemotímpano, desgarro timpánico, a veces la cadena
+            // luxada. El laberinto queda afuera, así que la cóclea está sana
+            // y la pérdida es de transmisión -- y por eso suele recuperarse
+            // cuando se reabsorbe la sangre.
+            'gap_shape' => [125 => 45, 250 => 45, 500 => 42, 1000 => 38, 2000 => 35, 3000 => 32, 4000 => 30, 6000 => 30, 8000 => 30],
+            'gap_scale' => [0.5, 1.1],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            // Hemotímpano: la caja ocupada por sangre da curva plana, igual
+            // que una efusión. Lo que cambia es la historia, no la curva.
+            'z' => ['B'], 'etf' => 'Normal',
+            // Por promedio se queda en leve: el gap del hemotímpano no pasa
+            // de ~50 dB en los graves y los agudos quedan mucho mejor. Si la
+            // fractura además luxó la cadena, el cuadro a elegir es
+            // 'disyuncion_cadena', que es lo que mide ese oído.
+            'grados' => ['leve'], 'max_db' => 50, 'gap_max_db' => 50,
+            // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
+            // hay lesión vestibular (type normal), lo que sube es el umbral
+            // -- y sube tanto como el gap, que ya está en el audiograma.
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'tinnitus' => ['prob' => 0.4, 'ruido' => ['Zumbido'],
+                           'frecuencia' => [250, 500], 'permanente' => 0.3],
+            // Pasó de un golpe y con otorragia: el paciente sabe el momento.
+            'conciencia' => [85, 100],
         ],
         'perforacion' => [
             'label' => 'Perforación timpánica',
@@ -379,8 +504,11 @@ final class CaseProfile
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
             'z' => ['B'], 'etf' => 'Normal',
             // Una perforación subtotal, con la cadena ya comprometida, llega
-            // a 55 dB de gap; más que eso es otra cosa, no el agujero.
-            'grados' => ['leve', 'moderada'], 'max_db' => 55,
+            // a 55 dB de gap en los graves; más que eso es otra cosa, no el
+            // agujero. Con los agudos casi indemnes el promedio BIAP se
+            // queda en leve: una perforación que mide moderada en promedio
+            // está contando la cadena, no la membrana.
+            'grados' => ['leve'], 'max_db' => 45, 'gap_max_db' => 55,
             // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
             // hay lesión vestibular (type normal), lo que sube es el umbral
             // -- y sube tanto como el gap, que ya está en el audiograma.
@@ -396,7 +524,10 @@ final class CaseProfile
             'gap_scale' => [0.4, 1.1],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'bilateral',
             'z' => ['C', 'Cs'], 'etf' => 'Disfunción tubaria',
-            'grados' => ['leve'], 'max_db' => 40,
+            // Presión negativa sin líquido: el tímpano retraído pierde hasta
+            // ~40 dB en los graves y no más -- de ahí para arriba ya hay
+            // efusión, y entonces el cuadro es 'otitis_media'.
+            'grados' => ['leve'], 'max_db' => 35, 'gap_max_db' => 40,
             // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
             // hay lesión vestibular (type normal), lo que sube es el umbral
             // -- y sube tanto como el gap, que ya está en el audiograma.
@@ -414,7 +545,7 @@ final class CaseProfile
             // Un tapón, aunque ocluya del todo, no pasa de ~40 dB: es el
             // cuadro leve por definición, y de ahí que sorprenda tanto al
             // paciente cuando se lo sacan.
-            'grados' => ['leve'], 'max_db' => 40,
+            'grados' => ['leve'], 'max_db' => 40, 'gap_max_db' => 40,
             // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
             // hay lesión vestibular (type normal), lo que sube es el umbral
             // -- y sube tanto como el gap, que ya está en el audiograma.
@@ -497,6 +628,33 @@ final class CaseProfile
             'tinnitus' => ['prob' => 0.7, 'ruido' => ['Pitido', 'Zumbido'],
                            'frecuencia' => [2000, 4000, 6000], 'permanente' => 0.8],
             'conciencia' => [85, 100],
+        ],
+        'fractura_transversal' => [
+            'label' => 'Fractura transversal de peñasco',
+            'categoria' => 'sensorial',
+            // El trazo cruza PERPENDICULAR al eje y parte el laberinto (y a
+            // menudo el CAI): cóclea destruida, anacusia o casi, vértigo
+            // intenso con nistagmo. Es la otra cara de la longitudinal y por
+            // eso no está entre las conductivas: acá el oído medio puede
+            // estar impecable --tímpano normal, curva A-- y el oído no oye.
+            'sn_shape' => [125 => 90, 250 => 90, 500 => 92, 1000 => 92, 2000 => 92, 3000 => 92, 4000 => 95, 6000 => 95, 8000 => 95],
+            'sn_scale' => [0.8, 1.2], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            // La cóclea está muerta, no desincronizada: las OEA se van con
+            // ella (cce 100) y el ABR no tiene de dónde salir.
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['severa', 'profunda'],
+            // Arreflexia vestibular del lado: se lleva el laberinto completo,
+            // así que los DOS VEMP se apagan. Se modela con 'neural' porque
+            // es el único type del catálogo que pega en cVEMP y oVEMP a la
+            // vez ('sacular' y 'utricular' tocan uno cada uno) -- la lesión
+            // acá es laberíntica, no del nervio.
+            'vemp' => ['type' => 'neural',
+                       'umbral' => ['CVEMP' => [92, 95], 'OVEMP' => [92, 95], 'MVEMP' => [92, 95]]],
+            'tinnitus' => ['prob' => 0.6, 'ruido' => ['Pitido', 'Zumbido'],
+                           'frecuencia' => [2000, 4000], 'permanente' => 0.8],
+            // Instalación brusca y dramática: nadie duda de cuándo fue.
+            'conciencia' => [90, 100],
         ],
         'ototoxica' => [
             'label' => 'Ototóxica (agudos, bilateral simétrica)',
@@ -587,7 +745,11 @@ final class CaseProfile
             'gap_scale' => [0.6, 1.1],
             'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'unilateral',
             'z' => ['B'], 'etf' => 'Disfunción tubaria',
+            // Acá el promedio SÍ puede llegar a profunda, porque lo sube la
+            // ósea (el daño coclear) y no el gap. La cadena erosionada de una
+            // otitis crónica sí llega a 55 dB de transmisión.
             'grados' => ['leve', 'moderada', 'severa', 'profunda'],
+            'gap_max_db' => 55,
             // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
             // hay lesión vestibular (type normal), lo que sube es el umbral
             // -- y sube tanto como el gap, que ya está en el audiograma.
@@ -604,7 +766,10 @@ final class CaseProfile
             'gap_scale' => [0.5, 1.1],
             'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'bilateral',
             'z' => ['As'], 'etf' => 'Normal',
+            // Igual que la otra mixta: el grado alto lo pone la ósea, no el
+            // gap, que sigue topado por lo que el estribo fijo puede atenuar.
             'grados' => ['leve', 'moderada', 'severa', 'profunda'],
+            'gap_max_db' => 55,
             // El VEMP aéreo lo apaga el oído medio: el estímulo no llega. No
             // hay lesión vestibular (type normal), lo que sube es el umbral
             // -- y sube tanto como el gap, que ya está en el audiograma.

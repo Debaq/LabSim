@@ -362,11 +362,13 @@ $esperado = [
     'normal' => 'normal',
     // Conductivas: la cóclea sana, el gap manda.
     'otitis_media' => 'transmission', 'otoesclerosis' => 'transmission',
-    'perforacion' => 'transmission', 'disfuncion_tubaria' => 'transmission',
+    'disyuncion_cadena' => 'transmission', 'fractura_cadena' => 'transmission',
+    'fractura_longitudinal' => 'transmission', 'perforacion' => 'transmission', 'disfuncion_tubaria' => 'transmission',
     'tapon_cerumen' => 'transmission',
     // Sensoriales: coclear puro.
     'presbiacusia' => 'coclear', 'muesca_4k' => 'coclear', 'coclear_plana' => 'coclear',
-    'meniere' => 'coclear', 'subita' => 'coclear', 'ototoxica' => 'coclear',
+    'meniere' => 'coclear', 'subita' => 'coclear',
+    'fractura_transversal' => 'coclear', 'ototoxica' => 'coclear',
     // Neurales: la cóclea viva y el ABR desarmado.
     'schwannoma' => 'neural', 'neuropatia' => 'neural',
     // Los dos componentes a la vez: con cce en el medio pesa el retro, que es
@@ -738,7 +740,12 @@ t_true(strpos(AnamnesisDraft::SYSTEM_PROMPT, 'evaluación auditiva') !== false,
 // revisar la otra deja al docente un grado que el generador no puede dar.
 // ---------------------------------------------------------------------
 
-/** Techo del promedio BIAP para un cuadro, sin saturar ninguna del promedio. */
+/**
+ * Techo del promedio BIAP para un cuadro: los tres topes de techoDe() en el
+ * JS del generador -- saturación de la audiometría, `max_db` y el techo de la
+ * transmisión (`gap_max_db`), que es el que impide que subirle el grado a una
+ * conductiva le ponga un gap que ningún oído medio puede dar.
+ */
 function techoBiap(array $esc): float
 {
     $suma = 0.0;
@@ -751,7 +758,19 @@ function techoBiap(array $esc): float
     $base = $suma / count(CaseProfile::GRADE_FREQS);
     // 115 dB = MAX_DB en el JS del generador (case_create.php).
     $porSaturacion = $peor > 0 ? $base * (115.0 / $peor) : INF;
-    return min($porSaturacion, (float) ($esc['max_db'] ?? INF));
+    // El gap se desborda en los graves, que NO entran en el promedio: el peor
+    // se busca sobre las nueve frecuencias.
+    $peorGap = $esc['gap_shape'] ? max($esc['gap_shape']) : 0;
+    $porGap = $peorGap > 0
+        ? $base * (techoGapDe($esc) / $peorGap)
+        : INF;
+    return min($porSaturacion, $porGap, (float) ($esc['max_db'] ?? INF));
+}
+
+/** Techo de la transmisión del cuadro (espejo de techoGap() en el JS). */
+function techoGapDe(array $esc): float
+{
+    return min((float) ($esc['gap_max_db'] ?? CaseProfile::GAP_MAX_DB), CaseProfile::GAP_MAX_DB);
 }
 
 t_eq(CaseProfile::GRADE_FREQS, [500, 1000, 2000, 4000], 'GRADE_FREQS: promedio BIAP');
@@ -781,7 +800,8 @@ t_eq(CaseProfile::SCENARIOS['normal']['grados'], [],
 
 // Techos que son decisiones clínicas, no accidentes de la forma: si alguien
 // sube el gap de la conductiva, este test avisa antes que el aula.
-foreach (['otitis_media', 'otoesclerosis', 'perforacion', 'disfuncion_tubaria', 'tapon_cerumen'] as $cond) {
+foreach (['otitis_media', 'otoesclerosis', 'disyuncion_cadena', 'fractura_cadena',
+          'fractura_longitudinal', 'perforacion', 'disfuncion_tubaria', 'tapon_cerumen'] as $cond) {
     t_true(isset(CaseProfile::SCENARIOS[$cond]['max_db']),
            "Conductiva '{$cond}': declara techo (la vía ósea le pone límite al gap)");
     t_true(!in_array('severa', CaseProfile::SCENARIOS[$cond]['grados'], true)
@@ -792,6 +812,51 @@ foreach (['otitis_media', 'otoesclerosis', 'perforacion', 'disfuncion_tubaria', 
 }
 t_eq(CaseProfile::SCENARIOS['muesca_4k']['grados'], ['leve'],
      'Muesca de 4 kHz: por promedio no pasa de leve, y ese es el punto del cuadro');
+
+// --- El techo de la transmisión -------------------------------------------
+// La máxima pérdida que puede dar un oído medio: con la cadena interrumpida
+// el sonido sigue entrando por vía ósea y la aérea no baja más. Sin este
+// techo, el factor que alcanza el grado escalaba la forma entera y una otitis
+// "moderada" salía con 68 dB de gap en 125 Hz (una perforación, con 83).
+foreach (CaseProfile::SCENARIOS as $clave => $esc) {
+    if ($esc['gap_shape'] === []) {
+        t_true(!isset($esc['gap_max_db']),
+               "Cuadro '{$clave}': sin gap no declara techo de transmisión");
+        continue;
+    }
+    t_true(isset($esc['gap_max_db']),
+           "Cuadro '{$clave}': declara `gap_max_db` (techo del gap por frecuencia)");
+    t_true($esc['gap_max_db'] <= CaseProfile::GAP_MAX_DB,
+           sprintf("Cuadro '%s': el techo del gap (%s dB) no pasa de GAP_MAX_DB (%d dB)",
+                   $clave, $esc['gap_max_db'], CaseProfile::GAP_MAX_DB));
+    // El techo tiene que ser alcanzable por la forma del cuadro: uno que no
+    // lo roza nunca no lo está declarando, lo está decorando.
+    $escalaGap = ($esc['gap_scale'][0] + $esc['gap_scale'][1]) / 2;
+    t_true(max($esc['gap_shape']) * $escalaGap <= $esc['gap_max_db'],
+           sprintf("Cuadro '%s': la forma base del gap (%.0f dB) no arranca ya sobre su techo (%s dB)",
+                   $clave, max($esc['gap_shape']) * $escalaGap, $esc['gap_max_db']));
+
+    // Y el grado más alto que declara no puede exigir más gap que el techo:
+    // eso es exactamente lo que comprueba techoBiap() incluyendo $porGap.
+    foreach ($esc['grados'] as $grado) {
+        $piso = CaseProfile::GRADES[$grado]['rango'][0];
+        $gapNecesario = max($esc['gap_shape']) * techoBiap($esc)
+                      / max(1e-9, array_sum(array_map(
+                            fn ($hz) => ($esc['sn_shape'][$hz] ?? 0) + ($esc['gap_shape'][$hz] ?? 0),
+                            CaseProfile::GRADE_FREQS)) / count(CaseProfile::GRADE_FREQS));
+        t_true($gapNecesario <= techoGapDe($esc) + 0.01,
+               sprintf("Cuadro '%s', grado '%s' (desde %d dB): el gap que necesita (%.0f dB) cabe en el techo (%.0f dB)",
+                       $clave, $grado, $piso, $gapNecesario, techoGapDe($esc)));
+    }
+}
+
+// La disyunción de cadena es LA conductiva máxima: si alguien le sube el gap
+// a otro cuadro por encima de ella, este test avisa.
+foreach (CaseProfile::SCENARIOS as $clave => $esc) {
+    if ($esc['gap_shape'] === [] || $esc['categoria'] !== 'conductiva') { continue; }
+    t_true($esc['gap_max_db'] <= CaseProfile::SCENARIOS['disyuncion_cadena']['gap_max_db'],
+           "Conductiva '{$clave}': no atenúa más que una cadena interrumpida");
+}
 
 // --- El eje vestibular de los cuadros -------------------------------------
 
