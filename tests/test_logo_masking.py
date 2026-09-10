@@ -159,3 +159,37 @@ class TipoDeRuidoLogoTest(unittest.TestCase):
         r_nbn = self.logo._masking_range(0, 1, 90, STIM_NBN)
         self.assertEqual(r_nbn['mkg_min'] - r_sn['mkg_min'],
                          CE_LOGO[STIM_NBN])
+
+
+class CurvaSombraTest(unittest.TestCase):
+    """La curva sombra tiene que ser progresiva: sube con la intensidad, no
+    aparece entera de golpe. El paciente con un oído muerto 'discrimina' con
+    el sano sólo cuando el habla supera la atenuación interaural y llega a
+    ese oído con suficiente nivel de sensación."""
+
+    def setUp(self):
+        self.logo = logo(CASO_ANACUSIA_OD)
+
+    def test_bajo_la_atenuacion_interaural_no_hay_nada(self):
+        for inten in (40, 45, 50):
+            self.assertEqual(self.logo.get(0, False, inten, None), 0,
+                             f"a {inten} dB el habla no debería cruzar")
+
+    def test_sube_de_a_poco_con_la_intensidad(self):
+        curva = [self.logo.get(0, False, i, None) for i in range(50, 101, 10)]
+        self.assertEqual(curva, sorted(curva))
+        self.assertLess(curva[1], curva[-1])
+
+    def test_la_sombra_es_la_curva_del_oido_sano_al_nivel_que_le_llega(self):
+        """No es un 100% por decreto: es lo que ese oído da al nivel que
+        efectivamente le llega (intensidad menos atenuación interaural)."""
+        self.assertEqual(self.logo.get(0, False, 90, None),
+                         self.logo.data[1]["45"])
+        self.assertEqual(self.logo.get(0, False, 70, None),
+                         self.logo.data[1]["25"])
+
+    def test_el_oido_anacusico_no_discrimina_por_si_mismo(self):
+        """Regresión: la escala arranca en 1 y los tramos que no se recorren
+        --UMD fuera de la escala-- quedaban con ese valor crudo, así que un
+        oído muerto 'discriminaba' 1% en los niveles altos."""
+        self.assertEqual(set(self.logo.data[0].values()), {0})

@@ -54,8 +54,28 @@ class CalculateLogo():
                                            max_response_ear, recruit[idx])
                     end_flag = False
 
+            self._rellenar_cola(result[idx])
             #print(f"{zero_sdt},{sdt_umd},{umd_end}")
         return result
+
+    def _rellenar_cola(self, curva):
+        """Arrastra el ultimo valor calculado sobre los que quedaron sin
+        calcular.
+
+        La escala arranca inicializada en 1 (scale_htl) y los tramos se van
+        pisando a medida que se recorren los cortes. Si el UMD cae fuera de
+        la escala --UMD a 110 dB, por ejemplo, cuando la curva llega hasta
+        100-- el ultimo tramo nunca se recorre y quedan puntos con ese 1
+        crudo: un oido anacusico terminaba 'discriminando' 1% en 95 y 100 dB.
+        No se ve en las 25 palabras (int(1/4) = 0) pero ensucia la curva y el
+        panel del docente.
+        """
+        ultimo = 0
+        for clave in sorted(curva, key=int):
+            if curva[clave] == 1:
+                curva[clave] = ultimo
+            else:
+                ultimo = curva[clave]
     
     def cal_range_zero_sdt(self, data:dict, rangex:list):
         for idx, i_result in enumerate(data):

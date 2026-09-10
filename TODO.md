@@ -374,3 +374,45 @@ Pendiente:
 - [ ] Decidir si el equipo debería impedir directamente elegir un ruido que
       no corresponde a la prueba, o si tiene más valor pedagógico que el
       alumno lo elija mal y vea que necesita más nivel.
+
+## Curva sombra en logoaudiometría: atenuación interaural plana
+
+`CalculateLogo.get` usa una atenuación interaural única de 45 dB para todo
+el espectro del habla: lo que cruza al oído contralateral se evalúa en su
+curva a `intensidad - 45`, sin más. Con eso, un OD anacúsico con OI normal
+da la progresión:
+
+| habla en el OD | llega al OI | discrimina |
+|---|---|---|
+| 50 dB |  5 dB |   0% |
+| 60 dB | 15 dB |   4% |
+| 70 dB | 25 dB |  40% |
+| 80 dB | 35 dB |  80% |
+| 90 dB | 45 dB | 100% |
+
+El 100% no está puesto a mano: es lo que ese OI da a 45 dB, porque su UMD
+es 100% a 40 dB. La curva sombra es progresiva y sale de la curva real del
+oído que recibe el cruce.
+
+Lo que **no** está modelado: el cráneo no transmite plano. La atenuación
+interaural por vía ósea es menor en los graves y mayor en los agudos (del
+orden de 40 dB en 250 Hz y 50-55 dB en 4000 Hz). El habla que cruza llega
+filtrada, con menos consonantes, así que la discriminación por curva sombra
+debería ser algo peor que la que ese mismo oído lograría con habla
+presentada directamente al mismo nivel de sensación.
+
+Se dejó plano a propósito: el fenómeno clínico que el alumno tiene que
+detectar es justamente que **el paciente con un oído muerto repite palabras
+casi perfecto sin enmascarar**, y por eso el enmascaramiento es obligatorio
+en logoaudiometría. Penalizar la sombra con un número inventado diluye ese
+engaño sin ganar nada verificable.
+
+Pendiente:
+- [ ] Si se quiere el filtrado, la forma honesta es una atenuación
+      interaural del habla por bandas en vez de un escalar (hoy
+      `logo_attenuation = 45`), y derivar la penalidad de ahí en vez de
+      restar un porcentaje fijo. Entra con los parámetros configurables por
+      curso.
+- [ ] Preguntarle a la docente qué discriminación espera de una curva
+      sombra en un caso de anacusia unilateral: es la forma más directa de
+      calibrar esto sin inventar.
