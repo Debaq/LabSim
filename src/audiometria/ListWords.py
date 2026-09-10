@@ -26,15 +26,22 @@ class ListWords(QWidget, Ui_ListWords):
 
     def __init__(self,data):
         QWidget.__init__(self)
-        # Inicialización de la ventana y propiedades
+        # Inicialización de la ventana y propiedades.
+        # OJO con el orden: la_super() es la que arma self.prev con el caso,
+        # así que los defaults van ANTES. Estaban después y lo pisaban con
+        # None: el caso que llega por el constructor se perdía y calculate()
+        # salía sin hacer nada hasta que main._hydrate_modules volviera a
+        # llamar la_super().
+        self.prev = None
+        self.prev_int = 0
         self.la_super(data)
         self.setupUi(self)
-        self.playable = [False, 0, None, False, None] # playable, intencity, side, with_mkg, int_mkg, es playable solo si esta en invertido
+        # playable, intencity, side, with_mkg, int_mkg, stim_mkg
+        # (es playable solo si esta en invertido)
+        self.playable = [False, 0, None, False, None, None]
         self.channel = 0  # canal (0 o 1) del audiómetro que está corriendo la logoaudiometría
         self._is_stimulus_playing = False
         self.wait_count = [10, 0]
-        self.prev = None
-        self.prev_int = 0
         self.continue_response = True
         self.list_response = [
                             0,0,0,0,0,0,0,0,0,0,
@@ -137,13 +144,16 @@ class ListWords(QWidget, Ui_ListWords):
         side = state[3]
         with_mkg = state[4]
         int_mkg = state[6] if len(state) > 6 else None
+        # tipo de ruido enmascarante: no todos rinden igual sobre el habla
+        stim_mkg = state[7] if len(state) > 7 else None
         self.channel = state[5]
         self.playable[1] = intencity
         self.playable[2] = side
         self.playable[3] = with_mkg
         self.playable[4] = int_mkg
+        self.playable[5] = stim_mkg
         self.playable[0] = bool(state[1])
-        self.calculate(intencity, side, with_mkg, int_mkg)
+        self.calculate(intencity, side, with_mkg, int_mkg, stim_mkg)
         
         
     def timer(self):
@@ -181,10 +191,11 @@ class ListWords(QWidget, Ui_ListWords):
                 #self.calculate(self.playable[2])
                 self.prev_int = self.playable[1]
 
-    def calculate(self, intencity, side, with_mkg, int_mkg=None):
+    def calculate(self, intencity, side, with_mkg, int_mkg=None, stim_mkg=None):
         if intencity is not None and self.prev is not None:
             intencity = max(intencity, 0)
-            percentage = self.prev.get(side, with_mkg, intencity, int_mkg)
+            percentage = self.prev.get(side, with_mkg, intencity, int_mkg,
+                                       stim_mkg)
             number_success = int(percentage / 4)
             self.list_response = self.list_success(number_success)
         

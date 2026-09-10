@@ -6,6 +6,9 @@ from core.helpers import Preferences
 from PySide6.QtCore import QTimer
 from audiometria.response_A import Response
 from audiometria.Fowler import FOWLER_PATTERNS
+from audiometria.masking_params import (  # re-export: los usan
+    CE_TONAL, RUIDOS_ENMASCARANTES, STIM_HABLA, STIM_NBN,      # noqa: F401
+    STIM_PN, STIM_SN, STIM_TONO, STIM_WN, ce_tonal)            # el panel y los tests
 class_pref = Preferences()
 
 c_voice = class_pref.get('command_voice')
@@ -444,16 +447,22 @@ class ResponseAudiometry():
             # 100 dB y se oye igual. Por eso aca se usa directo el umbral real
             # del oido estudiado en vez de pasar por _resolve_masked_threshold.
             int_mkg = None
+            ce = 0
         elif cfg['contra'] == 'mask':
-            contra_on = self.data['audio']['stimOn'][other] and self.data['audio']['output'][other] == o_n
-            int_mkg = self.data['audio']['int'][other] if contra_on else 0
+            # el tipo de ruido tambien cuenta aca: enmascarar con blanco
+            # exige mas nivel que con NBN (ver CE_TONAL)
+            ruido = self._canal_ruido(o_n)
+            int_mkg = self.data['audio']['int'][ruido[0]] if ruido else 0
+            ce = ruido[2] if ruido else 0
         else:
             int_mkg = 0
+            ce = 0
 
         if int_mkg is None:
             threshold = self._masking_calc('aerea', freq, ear, o_n)['real']
         else:
-            threshold = self._resolve_masked_threshold('aerea', freq, ear, o_n, int_mkg)
+            threshold = self._resolve_masked_threshold('aerea', freq, ear, o_n,
+                                                       int_mkg, ce)
         if int_ < threshold:
             self._decay_abort()
             return
@@ -558,7 +567,7 @@ class ResponseAudiometry():
                     self.other_response.create_voice_('si')
 
 
-    def _masking_calc(self, via, frecuency, o_e, o_n):
+    def _masking_calc(self, via, frecuency, o_e, o_n, ce=0):
         """
         Rango [mkg_min, mkg_max] de ruido de enmascaramiento valido y umbral
         aparente resultante en cada zona:
@@ -572,7 +581,6 @@ class ResponseAudiometry():
         de la via aerea, 35-50dB segun frecuencia), por eso no se usa
         self.attenuations aqui.
         """
-        ce = 0
         if via == 'aerea':
             uae = self.dbdata['Aerea_mkg'][frecuency][o_e]
             uane = self.dbdata['Aerea_mkg'][frecuency][o_n]
@@ -588,9 +596,19 @@ class ResponseAudiometry():
             uone = self.dbdata['Osea_mkg'][frecuency][o_n]
             uane = self.dbdata['Aerea_mkg'][frecuency][o_n]
             at = 0
-            eo = self.oclusive_efect(frecuency, o_e)
+            # El auricular con el ruido va en el oido NO estudiado: es ese el
+            # que queda ocluido y el que oye mejor el tono oseo cruzado, asi
+            # que hace falta mas ruido para taparlo. Evaluarlo en el oido
+            # estudiado daba el efecto en el oido equivocado.
+            eo = self.oclusive_efect(frecuency, o_n)
             mkg_min = uoe - uone + uane + ce + eo
-            mkg_max = uoe + at
+            # El tono oseo cruza sin atenuacion (at=0), pero el RUIDO se
+            # entrega por auricular en el oido no estudiado: para volver a
+            # tapar al estudiado tiene que cruzar por via aerea, o sea
+            # perdiendo la atenuacion interaural aerea. Usar at=0 aqui daba
+            # un maximo igual al umbral oseo del estudiado, casi siempre por
+            # debajo del minimo, y el rango terminaba invertido.
+            mkg_max = uoe + self.attenuations[frecuency]
             real = uoe
             shadow = min(uoe, uone + at)
         else:
@@ -599,8 +617,25 @@ class ResponseAudiometry():
         mkg_lo, mkg_hi = sorted([mkg_min, mkg_max])
         return {'mkg_min': mkg_lo, 'mkg_max': mkg_hi, 'real': real, 'shadow': shadow}
 
-    def _resolve_masked_threshold(self, via, frecuency, o_e, o_n, int_mkg):
-        calc = self._masking_calc(via, frecuency, o_e, o_n)
+    def _canal_ruido(self, o_n):
+        """Canal encendido que esta entregando ruido en el oido `o_n`.
+
+        Devuelve (canal, stim, ce) o None. Antes solo se reconocia el NBN y
+        cualquier otro ruido se ignoraba en silencio: el alumno enmascaraba
+        con ruido blanco, escuchaba el ruido, y el paciente respondia como si
+        no hubiera nada. Ahora enmascaran los cuatro, cada uno con su CE.
+        """
+        audio = self.data['audio']
+        for ch in (0, 1):
+            if (audio['stimOn'][ch] and audio['output'][ch] == o_n
+                    and audio['stim'][ch] in RUIDOS_ENMASCARANTES):
+                stim = audio['stim'][ch]
+                return ch, stim, ce_tonal(stim)
+        return None
+
+    def _resolve_masked_threshold(self, via, frecuency, o_e, o_n, int_mkg,
+                                  ce=0):
+        calc = self._masking_calc(via, frecuency, o_e, o_n, ce)
         if calc['mkg_min'] <= int_mkg <= calc['mkg_max']:
             return calc['real']
         elif int_mkg > calc['mkg_max']:
@@ -626,18 +661,22 @@ class ResponseAudiometry():
             if self.data['audio']['stimOn'].count(True) == 2:
                 #{'audio': {'stimOn': [True, True], 'freq': 3, 'step': 5, 'int': [25, 20], 'output': [0, 1], 'trans': [0, 0], 'stim': [0, 3], 'test': 'Tono', 'contin': ['Continuo', 'Continuo']}}
                 #No existe una logica de cuando le pongan mkg pero en realidad no lo necesite
-                if 3 in self.data['audio']['stim']:
+                if any(s in self.data['audio']['stim']
+                       for s in RUIDOS_ENMASCARANTES):
                     if self.data['audio']['output'][0] != self.data['audio']['output'][1]:
                         if self.data['audio']['trans'] == [0,0]:
                             o_e = 0 if self.data['audio']['output'][0] == 0 else 1
                             o_n = int(not o_e)
                             ch_tone = 0 if self.data['audio']['stim'][0] == 0 else 1
-                            ch_mkg = int(not ch_tone)
-                            print(f"estudio el {o_e} y enmascaro el {o_n}")
+                            ruido = self._canal_ruido(o_n)
+                            if ruido is None:
+                                return
+                            ch_mkg, _stim, ce = ruido
                             frecuency = self.data['audio']['freq'] #indice
                             int_ = self.data['audio']['int'][ch_tone]
                             int_mkg = self.data['audio']['int'][ch_mkg]
-                            threshold = self._resolve_masked_threshold('aerea', frecuency, o_e, o_n, int_mkg)
+                            threshold = self._resolve_masked_threshold(
+                                'aerea', frecuency, o_e, o_n, int_mkg, ce)
 
                             if threshold <= int_:
                                 self.upHand()
@@ -666,17 +705,21 @@ class ResponseAudiometry():
         if self.data['audio']['test'] == 'Umbrales':
             if self.data['audio']['stimOn'].count(True) == 2:
                 print(self.data)
-                if 3 in self.data['audio']['stim'] and 1 in self.data['audio']['trans']:
-                    print("todo ok")
+                if (any(s in self.data['audio']['stim']
+                        for s in RUIDOS_ENMASCARANTES)
+                        and 1 in self.data['audio']['trans']):
                     o_e = 0 if self.data['audio']['output'][0] == 0 else 1 #solución parche ya que supone que el oido estudiado es el ch 0
                     o_n = int(not o_e)
                     ch_tone = 0 if self.data['audio']['stim'][0] == 0 else 1   #aca se generaria un problema de inmediato con o_e
-                    ch_mkg = int(not ch_tone)
-                    print(f"estudio el {o_e} y enmascaro el {o_n}")
+                    ruido = self._canal_ruido(o_n)
+                    if ruido is None:
+                        return
+                    ch_mkg, _stim, ce = ruido
                     frecuency = self.data['audio']['freq'] #indice
                     int_ = self.data['audio']['int'][ch_tone]
                     int_mkg = self.data['audio']['int'][ch_mkg]
-                    threshold = self._resolve_masked_threshold('osea', frecuency, o_e, o_n, int_mkg)
+                    threshold = self._resolve_masked_threshold(
+                        'osea', frecuency, o_e, o_n, int_mkg, ce)
                     if threshold <= int_:
                         self.upHand()
                     else:
@@ -684,17 +727,29 @@ class ResponseAudiometry():
 
 
     def oclusive_efect(self, f:int, o:int)->int:
-        list_values = [15,15,15,10,0,0,0,0,0]
+        """Efecto oclusivo del oido `o`: cuanto mejora su audicion por via
+        osea al taparlo con el auricular.
+
+        Ocurre solo en frecuencias graves y solo si ese oido tiene el oido
+        medio sano: la oclusion atrapa la energia que normalmente escapa por
+        el conducto. Un oido con patologia de transmision ya se comporta como
+        ocluido, asi que no gana nada mas (por eso Bing es negativo cuando
+        hay gap: es el mismo fenomeno).
+        """
+        # Indices: 125, 250, 500, 1000, 2000, 3000, 4000, 6000, 8000 Hz.
+        # Estos son los valores que ensena la docente y se dejan tal cual a
+        # proposito. Ojo: la mayoria de las tablas publicadas para supraaural
+        # crecen hacia los graves (250 > 500 > 1000) en vez de quedar planas
+        # de 125 a 500; queda pendiente preguntarle la fuente antes de
+        # tocarlos (ver TODO.md).
+        list_values = [15, 15, 15, 10, 0, 0, 0, 0, 0]
+        if f >= len(list_values):
+            return 0  # alta frecuencia: fuera de la via osea clinica
         value_oclusive = list_values[f]
         uone = self.dbdata['Osea_mkg'][f][o]
         uane = self.dbdata['Aerea_mkg'][f][o]
-        diff = uane - uone
-        if diff < 0:
-            return 0
-        elif 0 <= diff <= 5:
-            return 0
-        elif diff > 5:
-            return value_oclusive
+        gap = uane - uone
+        return 0 if gap > 5 else value_oclusive
 
 
     def response_aerea_wout_msk(self):

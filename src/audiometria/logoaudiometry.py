@@ -1,6 +1,8 @@
 
 import copy
 
+from audiometria.masking_params import ce_logo
+
 class CalculateLogo():
     def __init__(self, thr, umd):
         self.thr = thr
@@ -113,46 +115,74 @@ class CalculateLogo():
 
 
     
-    def get(self, side, mkg, intensity, int_mkg=None):
+    def get(self, side, mkg, intensity, int_mkg=None, stim_mkg=None):
         """
         Devuelve el % de discriminacion que responde el paciente simulado.
 
-        Mismo modelo de rango [mkg_min, mkg_max] que el resto del sistema
-        (ver response.py _resolve_sdt_threshold): dentro del rango, el
-        oido estudiado responde con su propia curva; sobre el maximo esta
-        sobre-enmascarado (no discrimina nada util); bajo el minimo (o sin
-        activar el ruido) el paciente en realidad esta discriminando con el
-        oido contrario a traves del cruce interaural -> curva sombra.
+        El paciente contesta con lo que mejor entienda, no con lo que el
+        examinador cree estar estudiando: se calculan las dos vias por las
+        que le puede llegar el habla y se devuelve la mejor.
 
-        La curva sombra usa la intensidad cruda (sin restar la atenuacion
-        interaural): una vez que el estimulo cruza, el oido sano lo recibe
-        practicamente integro, por lo que responde segun su propia curva
-        evaluada en ese nivel absoluto (tipicamente cerca de su techo).
-        Sin enmascarar, el cruce da un puntaje igual o mejor que el real,
-        nunca uno artificialmente bajo (eso es justamente el "engaño"
-        clinico que el enmascaramiento existe para detectar).
+          - oido estudiado: su propia curva, corrida hacia arriba si el
+            ruido puesto en el contralateral cruza de vuelta y lo tapa
+            (sobre-enmascaramiento);
+          - oido contralateral: el habla cruza por via osea con la
+            atenuacion interaural (45 dB), asi que solo llega si la
+            intensidad la supera, y el ruido que haya en ese oido la
+            enmascara.
+
+        El cruce solo puede sumar, nunca empeorar lo que discrimina el oido
+        estudiado: sin enmascarar, el paciente responde igual o mejor que
+        lo real (ese es el "engaño" clinico que el enmascaramiento existe
+        para detectar), y enmascarar de mas solo puede tapar.
+
+        `stim_mkg` es el indice de stim_list del ruido puesto (ver
+        masking_params): sin dato se asume el que corresponde a la prueba.
         """
         other = 1 - side
-        rango = self._masking_range(side, other, intensity)
         int_mkg = int_mkg if (mkg and int_mkg is not None) else 0
+        at = self.logo_attenuation
+        bone = self._bone_sdt()
+        gap = self._air_bone_gap()
 
-        if rango['mkg_min'] <= int_mkg <= rango['mkg_max']:
-            return self.data[side][str(intensity)]
-        elif int_mkg > rango['mkg_max']:
-            return 0
-        else:
-            shadow_intensity = self._clamp_scale(intensity)
-            return self.data[other][str(shadow_intensity)]
+        # El tipo de ruido importa: el habla ocupa todo el espectro, asi que
+        # el ruido conformado al habla (speech noise) es el que rinde, y una
+        # banda estrecha deja pasar casi todo. El CE descuenta esa perdida de
+        # eficiencia del nivel que realmente enmascara.
+        ruido = int_mkg - ce_logo(stim_mkg) if int_mkg else 0
 
-    def _masking_range(self, side, other, intensity):
+        # el ruido del contralateral cruza con la misma atenuacion interaural
+        # y enmascara al oido estudiado por encima de su umbral oseo
+        shift_e = max(0, (ruido - at) - bone[side])
+        propio = self._curve(side, intensity - shift_e)
+
+        # el habla cruzada llega a la coclea contralateral a (intensity - at);
+        # la curva del contralateral esta en dB HL aereos, de ahi el + gap.
+        # El ruido, aereo, llega a esa misma coclea atenuado por su gap.
+        shift_ne = max(0, (ruido - gap[other]) - bone[other])
+        cruce = self._curve(other, intensity - at + gap[other] - shift_ne)
+
+        return max(propio, cruce)
+
+    def _curve(self, side, intensity):
+        return self.data[side][str(self._clamp_scale(intensity))]
+
+    def _air_bone_gap(self):
+        """Gap aereo-oseo de habla por oido (SDT - Fletcher oseo)."""
+        sdt = self.thr.get('SDT', self.sdt)
+        bone = self._bone_sdt()
+        return [max(0, sdt[i] - bone[i]) for i in (0, 1)]
+
+    def _masking_range(self, side, other, intensity, stim_mkg=None):
+        ce = ce_logo(stim_mkg)
         sdt = self.thr.get('SDT', self.sdt)
         bone = self._bone_sdt()
         at = self.logo_attenuation
         uane = sdt[other]
         uoe = bone[side]
         uone = bone[other]
-        mkg_min = intensity - at - uone + uane
-        mkg_max = at + uoe
+        mkg_min = intensity - at - uone + uane + ce
+        mkg_max = at + uoe + ce
         mkg_lo, mkg_hi = sorted([mkg_min, mkg_max])
         return {'mkg_min': mkg_lo, 'mkg_max': mkg_hi}
 

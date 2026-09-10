@@ -11,6 +11,7 @@
 import numpy as np
 #from audiometria.response_A import Response
 from audiometria.audio_player import Player
+from audiometria.masking_params import es_ruido
 #from lib.API_connector import API, PostData
 from audiometria.h_audio import (calibrate, create_frecuency, create_intency,
                          create_sound, create_word, data_basic)
@@ -58,8 +59,8 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.frecuency_list = create_frecuency(
             frecuency_dict, prueba="Umbrales")
         self.random_response = [0, 0]
-        #activado, reverse, intensidad, side, contrankg, canal, int_mkg
-        self.datasignal_speech = [False, False, None, None, False, 0, None]
+        #activado, reverse, intensidad, side, contrankg, canal, int_mkg, stim_mkg
+        self.datasignal_speech = [False, False, None, None, False, 0, None, None]
 
         # Widgets
         # Diales
@@ -508,14 +509,36 @@ class Audiometer(QWidget, Ui_Audiometer):
         label = self.lbl_contin[ch].text()
         return label != tone_list[1]
 
+    def _stim_index(self, ch):
+        """Indice de stim_list del estimulo del canal ch (None si no figura)."""
+        try:
+            return stim_list.index(self.lbl_stim[ch].text())
+        except ValueError:
+            return None
+
+    def _mkg_on(self, ch):
+        """True si el canal ch esta entregando un ruido enmascarante.
+
+        Antes se exigia literalmente "Speech Noise": enmascarar la
+        logoaudiometria con NBN, ruido blanco o pink sonaba pero no llegaba
+        al motor, igual que pasaba en la via tonal. Ahora entran los cuatro,
+        cada uno con su CE (ver masking_params.CE_LOGO).
+        """
+        return (self.lbl_revers[ch].text() == "Invertido"
+                and es_ruido(self._stim_index(ch)))
+
     def _mkg_intensity(self, ch):
         """Intensidad (dB) del ruido de enmascaramiento en el canal contrario
-        a ch, o None si ese canal no tiene Speech Noise activo."""
+        a ch, o None si ese canal no tiene un ruido activo."""
         contra = 0 if ch == 1 else 1
-        if (self.lbl_revers[contra].text() == "Invertido"
-                and self.lbl_stim[contra].text() == "Speech Noise"):
+        if self._mkg_on(contra):
             return int(self.lbl_intencity[contra].text().split(' dB HL')[0])
         return None
+
+    def _mkg_stim(self, ch):
+        """Indice de stim_list del ruido en el canal contrario a ch."""
+        contra = 0 if ch == 1 else 1
+        return self._stim_index(contra) if self._mkg_on(contra) else None
 
     def update_logo(self, ch, val):
         side = self.lbl_output[ch].text()
@@ -523,10 +546,10 @@ class Audiometer(QWidget, Ui_Audiometer):
         contra = 0 if ch == 1 else 1
         self.datasignal_speech[2] = val
         self.datasignal_speech[3] = side
-        self.datasignal_speech[4] = (self.lbl_revers[contra].text() == "Invertido"
-                                      and self.lbl_stim[contra].text() == "Speech Noise")
+        self.datasignal_speech[4] = self._mkg_on(contra)
         self.datasignal_speech[5] = ch
         self.datasignal_speech[6] = self._mkg_intensity(ch)
+        self.datasignal_speech[7] = self._mkg_stim(ch)
         self.signal_speech.emit(self.datasignal_speech)
 
     def reverse(self, ch):
@@ -565,12 +588,12 @@ class Audiometer(QWidget, Ui_Audiometer):
             elif self.no_puls(ch):
                 self.play(ch)
                 self.vu_meters[ch].setValue(50)
-            if lbl == "Speech Noise" and self.datasignal_speech[1]:
+            if es_ruido(self._stim_index(ch)) and self.datasignal_speech[1]:
                 contra = 0 if ch == 1 else 1
                 if self.lbl_stim[contra].text() == "Habla":
-                    self.datasignal_speech[4] = (self.lbl_revers[ch].text() == "Invertido"
-                                                  and self.lbl_stim[ch].text() == "Speech Noise")
+                    self.datasignal_speech[4] = self._mkg_on(ch)
                     self.datasignal_speech[6] = self._mkg_intensity(contra)
+                    self.datasignal_speech[7] = self._mkg_stim(contra)
                     self.signal_speech.emit(self.datasignal_speech)
         else:
             self.toggle_speech(ch, self.lbl_revers[ch].text() == "Invertido")
