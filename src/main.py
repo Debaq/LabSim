@@ -11,6 +11,7 @@ from vemp.VempMainWindow import VempMainWindow
 from agenda import Agenda
 from agenda.ChatPaciente import ChatPacienteWidget
 from audiometria import Acumetria, Audiometer, ListWords, Otoscopia
+from audiometria.DebugMkg import DebugMkgDialog
 from auth import login as Ui_login
 from impedanciometria import Z
 from core.base import context
@@ -264,6 +265,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.data_current = None
         self.data_current_key = None
         self.paciente_actual = None
+        self.debug_mkg_dialog = None
         self.subw = None
         self.sectors_lbl = SECTORS
         self.modules = Storage(len(APPS))
@@ -456,6 +458,11 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             login_subw.obj._enable_widgets()
         self.lbl_name.setText("")
         self.btn_login.setText("Ingresar")
+        if self.debug_mkg_dialog is not None:
+            # el panel muestra los umbrales del caso: no puede sobrevivir al
+            # cierre de sesión
+            self.debug_mkg_dialog.close()
+            self.debug_mkg_dialog = None
         self.data_login = None
         self.data_current = None
         self.data_current_key = None
@@ -726,6 +733,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         # widgets ya destruidos (_update_action_buttons las usa)
         self.btn_cmd_voice = None
         self.btn_list_words = None
+        self.btn_debug_mkg = None
         if self._module_visible("CHAT"):
             self.btn_chat_paciente = QPushButton("Hablar con el paciente")
             self.btn_chat_paciente.setObjectName("btn_chat_paciente")
@@ -741,7 +749,28 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.btn_list_words.setObjectName("btn_W")
             self.btn_list_words.clicked.connect(self.activate_listWords)
             self.layoutAction.addWidget(self.btn_list_words)
+        if es_docente((self.data_login or {}).get("permission")):
+            # Panel de depuración: umbrales *_mkg cargados y rangos de
+            # enmascaramiento en vivo. Solo admin/docente -- al alumno le
+            # entregaría las respuestas del caso.
+            self.btn_debug_mkg = QPushButton("Depurar enmascaramiento")
+            self.btn_debug_mkg.setObjectName("btn_debug_mkg")
+            self.btn_debug_mkg.clicked.connect(self.abrir_debug_mkg)
+            self.layoutAction.addWidget(self.btn_debug_mkg)
         self._update_action_buttons()
+
+    def abrir_debug_mkg(self):
+        """Abre (o trae al frente) el panel de depuración de
+        enmascaramiento. No modal: se deja abierto al lado del audiómetro
+        para ver cómo cambian los rangos al mover las perillas."""
+        if not es_docente((self.data_login or {}).get("permission")):
+            return
+        if getattr(self, "debug_mkg_dialog", None) is None:
+            self.debug_mkg_dialog = DebugMkgDialog(self)
+        self.debug_mkg_dialog.show()
+        self.debug_mkg_dialog.raise_()
+        self.debug_mkg_dialog.activateWindow()
+        self.debug_mkg_dialog.refresh()
 
     def _on_audiometro_visibility(self, visible):
         """Al esconder el audiómetro se van con él sus accesorios: listas de
