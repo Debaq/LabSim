@@ -300,6 +300,14 @@ final class CaseWaveforms
      */
     public static function serieIntensidades(float $umbral, float $maximo = 80.0, float $paso = 20.0): array
     {
+        // Un umbral por encima del tope de la escala significa que no hubo
+        // respuesta en todo el barrido: la serie es el nivel máximo, plano.
+        // Dibujar un trazo rotulado "115 dB" mostraría un nivel que el
+        // equipo no puede dar.
+        if ($umbral >= $maximo) {
+            return [$maximo];
+        }
+
         $niveles = [];
         for ($i = $maximo; $i > $umbral + 1; $i -= $paso) {
             $niveles[] = $i;
@@ -344,6 +352,36 @@ final class CaseWaveforms
             'MVEMP' => ['p13' => [14.5, 28.0], 'n23' => [24.5, 38.0]],
         ],
     ];
+
+    /**
+     * Fracción de la amplitud normativa por debajo de la cual se considera
+     * que NO hay respuesta: el trazo no se marca y la tabla dice "no se
+     * observa" en vez de un número. Rotular un pico sobre una línea plana
+     * enseña a marcar lo que no está.
+     */
+    public const VEMP_MIN_FRACCION = 0.15;
+
+    /**
+     * ¿Hay respuesta a esa intensidad? Se compara contra la amplitud que
+     * daría el mismo subtipo con la respuesta saturada, así el criterio vale
+     * igual para el cervical (cientos de µV) que para el ocular (unidades).
+     *
+     * @param array<string,array{lat:float,amp:float}> $picos
+     */
+    public static function hayRespuestaVemp(string $subtipo, array $picos, string $poblacion = 'adult_female'): bool
+    {
+        $base = self::VEMP_BASE[$poblacion] ?? self::VEMP_BASE['adult_female'];
+        $definicion = $base[$subtipo] ?? $base['CVEMP'];
+        $plena = 0.0;
+        foreach ($definicion as [, $amp]) {
+            $plena += abs((float) $amp);
+        }
+        $medida = 0.0;
+        foreach ($picos as $pico) {
+            $medida += abs((float) $pico['amp']);
+        }
+        return $plena > 0 && $medida / $plena >= self::VEMP_MIN_FRACCION;
+    }
 
     /** Ancho de cada pico (ms). */
     public const VEMP_SIGMA = 3.2;

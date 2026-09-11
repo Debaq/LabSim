@@ -96,6 +96,15 @@ foreach ($trazo as [$t, $v]) {
 }
 t_close($maxT, $alto['V']['lat'], 0.3, 'El pico más alto del trazo cae donde está la onda V');
 
+// Un umbral por encima del tope de la escala = sin respuesta en todo el
+// barrido: la serie es el máximo y nada más.
+t_eq(CaseWaveforms::serieIntensidades(115, 100.0, 10.0), [100.0],
+    'Con el umbral sobre la escala se dibuja solo el nivel máximo');
+t_true(!CaseWaveforms::hayRespuestaVemp('CVEMP', CaseWaveforms::picosVemp('CVEMP', 100, 115)),
+    'Y a ese nivel no hay respuesta que marcar');
+t_true(CaseWaveforms::hayRespuestaVemp('CVEMP', CaseWaveforms::picosVemp('CVEMP', 100, 60)),
+    'Con un umbral normal sí la hay');
+
 $serie = CaseWaveforms::serieIntensidades(45);
 t_true(in_array(45.0, $serie, true), 'La serie de intensidades siempre incluye el umbral');
 t_true(max($serie) <= 80.0, 'Y arranca en 80 dB nHL');

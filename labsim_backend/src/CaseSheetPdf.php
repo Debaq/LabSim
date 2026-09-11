@@ -46,15 +46,6 @@ final class CaseSheetPdf
     private const ASCENDENTE = 0.8;
 
     /**
-     * Fracción de la respuesta a nivel alto desde la cual un pico del VEMP
-     * se rotula. Cerca del umbral la respuesta se apaga, y ponerle "p13" a
-     * una línea plana enseñaría a marcar lo que no está. Va como fracción y
-     * no en µV porque las amplitudes normativas cambian dos órdenes de
-     * magnitud entre el cervical (cientos) y el ocular (unidades).
-     */
-    private const VEMP_MARCA_MIN_FRACCION = 0.08;
-
-    /**
      * El logo del backend, en JPEG. El original de la app es
      * resources/img/LogoBN.png (raíz del repo), que no se despliega con el
      * backend y además es PNG: MiniPdf solo lleva JPEG y convertirlo en cada
@@ -1542,27 +1533,24 @@ final class CaseSheetPdf
                 $umbral = (float) ($sub['umbral'] ?? CaseBuilder::VEMP_DEFAULTS[$subtipo]['umbral']);
                 $desv = is_array($sub['desviaciones'] ?? null) ? $sub['desviaciones'] : [];
 
-                // El corte de rotulado sale de la respuesta a nivel alto de
-                // ESTE subtipo, no de un µV fijo: el cervical se mide en
-                // cientos de µV y el ocular en unidades.
-                $refPico = 0.0;
-                foreach (CaseWaveforms::picosVemp($subtipo, 100.0, $umbral, $desv, $poblacion) as $pico) {
-                    $refPico = max($refPico, abs((float) $pico['amp']));
-                }
-
                 $series = [];
                 foreach (CaseWaveforms::serieIntensidades($umbral, 100.0, 10.0) as $nivel) {
                     $pts = CaseWaveforms::trazoVemp($subtipo, $nivel, $umbral, $desv, 40.0, 200, $poblacion);
+                    $picosNivel = CaseWaveforms::picosVemp($subtipo, $nivel, $umbral, $desv, $poblacion);
                     $marcas = [];
-                    foreach (CaseWaveforms::picosVemp($subtipo, $nivel, $umbral, $desv, $poblacion) as $nombre => $pico) {
-                        // El valor se lee del TRAZO y no de la gaussiana del
-                        // pico: p13 y n23 están a 10 ms y se solapan, así que
-                        // la marca tiene que caer sobre la línea dibujada.
-                        $valor = self::valorEn($pts, $pico['lat']);
-                        if (abs($valor) < $refPico * self::VEMP_MARCA_MIN_FRACCION) {
-                            continue;
+                    // Sin respuesta a ese nivel no se marca nada: un trazo
+                    // plano con "p13" encima enseña a marcar lo que no está.
+                    if (CaseWaveforms::hayRespuestaVemp($subtipo, $picosNivel, $poblacion)) {
+                        foreach ($picosNivel as $nombre => $pico) {
+                            // El valor se lee del TRAZO y no de la gaussiana
+                            // del pico: p13 y n23 están a 10 ms y se solapan,
+                            // así que la marca tiene que caer sobre la línea.
+                            $marcas[] = [
+                                't' => $pico['lat'],
+                                'v' => self::valorEn($pts, $pico['lat']),
+                                'texto' => $nombre,
+                            ];
                         }
-                        $marcas[] = ['t' => $pico['lat'], 'v' => $valor, 'texto' => $nombre];
                     }
                     $series[] = [
                         'rotulo' => self::db($nivel),
@@ -1609,15 +1597,25 @@ final class CaseSheetPdf
                 // A 100 dB, que es el nivel al que se informa la amplitud.
                 $picos100[$subtipo][$ladoForm] = CaseWaveforms::picosVemp($subtipo, 100.0, $umbral, $desv, $poblacion);
                 $picos100[$subtipo][$ladoForm . '_umbral'] = $umbral;
-                $pp[$ladoForm] = self::picoAPico($picos100[$subtipo][$ladoForm]);
+                $picos100[$subtipo][$ladoForm . '_hay'] = CaseWaveforms::hayRespuestaVemp(
+                    $subtipo,
+                    $picos100[$subtipo][$ladoForm],
+                    $poblacion
+                );
+                $pp[$ladoForm] = $picos100[$subtipo][$ladoForm . '_hay']
+                    ? self::picoAPico($picos100[$subtipo][$ladoForm])
+                    : null;
             }
+            $hayLosDos = $pp['od'] !== null && $pp['oi'] !== null;
             $filas[] = [
                 CaseBuilder::VEMP_SUBTIPO_LABELS[$subtipo],
                 self::db($picos100[$subtipo]['od_umbral']) . ' dB',
                 self::db($picos100[$subtipo]['oi_umbral']) . ' dB',
-                number_format($pp['od'], 1),
-                number_format($pp['oi'], 1),
-                self::asimetria($pp['od'], $pp['oi']),
+                $pp['od'] === null ? 'no se observa' : number_format($pp['od'], 1),
+                $pp['oi'] === null ? 'no se observa' : number_format($pp['oi'], 1),
+                // Sin respuesta en un lado no hay razón que calcular: no es
+                // una asimetría de 100 %, es que falta el dato.
+                $hayLosDos ? self::asimetria($pp['od'], $pp['oi']) : '--',
             ];
         }
         $this->tabla($filas, [0.22, 0.14, 0.14, 0.17, 0.17, 0.16], true);
@@ -1626,13 +1624,17 @@ final class CaseSheetPdf
         $filas = [['A 100 dB', 'OD lat (ms)', 'OD amp (µV)', 'OI lat (ms)', 'OI amp (µV)']];
         foreach (CaseBuilder::VEMP_SUBTIPOS as $subtipo) {
             foreach (CaseBuilder::VEMP_PEAKS[$subtipo] as $pico) {
-                $filas[] = [
-                    $subtipo . ' ' . $pico,
-                    number_format($picos100[$subtipo]['od'][$pico]['lat'], 1),
-                    number_format($picos100[$subtipo]['od'][$pico]['amp'], 1),
-                    number_format($picos100[$subtipo]['oi'][$pico]['lat'], 1),
-                    number_format($picos100[$subtipo]['oi'][$pico]['amp'], 1),
-                ];
+                $fila = [$subtipo . ' ' . $pico];
+                foreach (['od', 'oi'] as $ladoForm) {
+                    if (!$picos100[$subtipo][$ladoForm . '_hay']) {
+                        $fila[] = 'no se observa';
+                        $fila[] = '';
+                        continue;
+                    }
+                    $fila[] = number_format($picos100[$subtipo][$ladoForm][$pico]['lat'], 1);
+                    $fila[] = number_format($picos100[$subtipo][$ladoForm][$pico]['amp'], 1);
+                }
+                $filas[] = $fila;
             }
         }
         $this->tabla($filas, [0.24, 0.19, 0.19, 0.19, 0.19], true);
