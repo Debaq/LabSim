@@ -66,6 +66,13 @@ final class CaseWaveforms
     /** Diferencia interaural de la onda V que se considera significativa (ms). */
     public const NORM_INTERAURAL_V_MS = 0.4;
 
+    /**
+     * Razón V/I mínima normal: por debajo la onda V está desproporcionadamente
+     * chica respecto de la I, que es el hallazgo retrococlear clásico.
+     * NORM_VI_RATIO_MIN en ABR_generator.py.
+     */
+    public const NORM_VI_RATIO_MIN = 0.5;
+
     /** Ancho (sigma, ms) de cada onda. WAVE_SIGMA en ABR_generator.py. */
     public const SIGMA = ['I' => 0.22, 'III' => 0.22, 'V' => 0.18];
 
@@ -135,7 +142,12 @@ final class CaseWaveforms
             $ip[$clave] = [$interpicos[$clave] - $margen, $interpicos[$clave] + $margen];
         }
 
-        return ['lat' => $lat, 'interpeak' => $ip, 'interaural_v' => self::NORM_INTERAURAL_V_MS];
+        return [
+            'lat' => $lat,
+            'interpeak' => $ip,
+            'interaural_v' => self::NORM_INTERAURAL_V_MS,
+            'v_i_min' => self::NORM_VI_RATIO_MIN,
+        ];
     }
 
     /**

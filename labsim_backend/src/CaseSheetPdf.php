@@ -1025,6 +1025,29 @@ final class CaseSheetPdf
                 '',
             ];
         }
+        // La razón V/I va con los demás valores medidos, en la columna de
+        // amplitud: es una razón entre amplitudes.
+        $filas[] = [
+            'Razón V/I',
+            '',
+            self::razonVI($ondas80['od'], $limites['v_i_min']),
+            '',
+            self::razonVI($ondas80['oi'], $limites['v_i_min']),
+        ];
+
+        // Y la diferencia interaural de la V, que no es de un oído sino de
+        // la comparación: valor único, en la primera columna de valores.
+        $vOd = $ondas80['od']['V'];
+        $vOi = $ondas80['oi']['V'];
+        $hayIT5 = $vOd['amp'] >= CaseWaveforms::AMP_VISIBLE && $vOi['amp'] >= CaseWaveforms::AMP_VISIBLE;
+        $it5 = $hayIT5 ? abs($vOd['lat'] - $vOi['lat']) : null;
+        $filas[] = [
+            'Dif. interaural V (IT5)',
+            $it5 === null ? '--' : number_format($it5, 2) . ($it5 > $limites['interaural_v'] ? ' *' : ''),
+            '',
+            '',
+            '',
+        ];
         $yTablas2 = $this->y;
         $fin80 = $this->tablaEn(self::MARGEN, $yTablas2, $anchoTabla, $filas, [0.36, 0.16, 0.16, 0.16, 0.16], true);
 
@@ -1078,7 +1101,7 @@ final class CaseSheetPdf
         // sexo, con la latencia corrida por la misma función L-I que dibuja
         // la curva. Son los mismos límites con los que el módulo juzga la
         // tabla del alumno.
-        $filas = [['Referencia · ' . self::poblacionLabel($poblacion) . ' · 80 dB', 'Normal (ms)']];
+        $filas = [['Referencia · ' . self::poblacionLabel($poblacion) . ' · 80 dB', 'Normal']];
         foreach (['I', 'III', 'V'] as $onda) {
             $filas[] = ['Onda ' . $onda, self::rango($limites['lat'][$onda])];
         }
@@ -1086,23 +1109,13 @@ final class CaseSheetPdf
             $filas[] = ['Interpico ' . $clave, self::rango($limites['interpeak'][$clave])];
         }
 
-        // Diferencia interaural de la onda V (IT5): no es de un oído, es de
-        // la comparación, así que va con la referencia y no en la tabla de
-        // valores.
-        $vOd = $ondas80['od']['V'];
-        $vOi = $ondas80['oi']['V'];
-        $hayIT5 = $vOd['amp'] >= CaseWaveforms::AMP_VISIBLE && $vOi['amp'] >= CaseWaveforms::AMP_VISIBLE;
-        $it5 = $hayIT5 ? abs($vOd['lat'] - $vOi['lat']) : null;
-        $filas[] = [
-            'Dif. interaural V (IT5)',
-            'hasta ' . number_format($limites['interaural_v'], 2)
-            . '   |   medida: ' . ($it5 === null ? '--' : number_format($it5, 2) . ($it5 > $limites['interaural_v'] ? ' *' : '')),
-        ];
+        $filas[] = ['Razón V/I', number_format($limites['v_i_min'], 2) . ' o más'];
+        $filas[] = ['Dif. interaural V (IT5)', 'hasta ' . number_format($limites['interaural_v'], 2)];
 
         $yRef = $this->y;
         $finRef = $this->tablaEn(self::MARGEN, $yRef, $anchoTabla, $filas, [0.46, 0.54], true);
         $this->y = $finRef + 4;
-        $this->parrafo('* por sobre la referencia.', 6.5);
+        $this->parrafo('* fuera de la referencia (la razón V/I, por debajo).', 6.5);
 
         // Las desviaciones cargadas a mano, solo si hay alguna: en cero no
         // dicen nada y los valores de arriba ya las llevan aplicadas.
@@ -1158,6 +1171,21 @@ final class CaseSheetPdf
             $datos[] = 'pulsátil';
         }
         return $frase . '  [' . implode(' · ', array_filter($datos)) . ']';
+    }
+
+    /**
+     * Razón V/I medida. Hace falta que la I se vea: sin ella no hay razón
+     * que calcular, y no es lo mismo que una razón baja.
+     */
+    private static function razonVI(array $ondas, float $minimo): string
+    {
+        if ($ondas['I']['amp'] < CaseWaveforms::AMP_VISIBLE || $ondas['V']['amp'] < CaseWaveforms::AMP_VISIBLE) {
+            return '--';
+        }
+        $razon = $ondas['V']['amp'] / $ondas['I']['amp'];
+        // Acá el asterisco marca lo que queda POR DEBAJO: una V chica
+        // respecto de la I es el hallazgo, no una V grande.
+        return number_format($razon, 2) . ($razon < $minimo ? ' *' : '');
     }
 
     /** Agrega el asterisco si el valor se pasa del techo normativo. */
