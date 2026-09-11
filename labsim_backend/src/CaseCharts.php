@@ -234,11 +234,7 @@ final class CaseCharts
             }
             $pdf->polyline($pts, 0.8, $color, self::TRAZO_LDL);
             foreach ($pts as $pt) {
-                $pdf->polygon(
-                    [[$pt[0] - 3, $pt[1] - 1.8], [$pt[0] + 3, $pt[1] - 1.8], [$pt[0], $pt[1] + 2.2]],
-                    null,
-                    $color
-                );
+                self::symbol($pdf, $lado === 'od' ? 'ldl_od' : 'ldl_oi', $pt[0], $pt[1], $color);
             }
         }
     }
@@ -259,7 +255,8 @@ final class CaseCharts
             case 'osea_oi':     self::corchete($pdf, $x, $y, $color, 'der', false); break;
             case 'osea_od_m':   self::corchete($pdf, $x, $y, $color, 'izq', true); break;
             case 'osea_oi_m':   self::corchete($pdf, $x, $y, $color, 'der', true); break;
-            case 'ldl':         $pdf->polygon([[$x - 3, $y - 1.8], [$x + 3, $y - 1.8], [$x, $y + 2.2]], null, $color); break;
+            case 'ldl_od':      self::ldl($pdf, $x, $y, $color, -1); break;
+            case 'ldl_oi':      self::ldl($pdf, $x, $y, $color, 1); break;
         }
     }
 
@@ -280,7 +277,8 @@ final class CaseCharts
             ['osea_oi', 'Ósea OI', self::COLOR_OI],
             ['osea_od_m', 'Ósea OD enmascarada', self::COLOR_OD],
             ['osea_oi_m', 'Ósea OI enmascarada', self::COLOR_OI],
-            ['ldl', 'LDL (línea de guiones)', self::COLOR_ROTULO],
+            ['ldl_od', 'LDL OD (línea de guiones)', self::COLOR_OD],
+            ['ldl_oi', 'LDL OI', self::COLOR_OI],
         ] as [$clave, $texto, $color]) {
             self::symbol($pdf, $clave, $x + 4, $y - 2, $color);
             $pdf->text($x + 14, $y, $texto, 7, false, '#333333');
@@ -970,6 +968,34 @@ final class CaseCharts
     private static function num(float $v): string
     {
         return abs($v - round($v)) < 0.05 ? (string) (int) round($v) : number_format($v, 1);
+    }
+
+    /**
+     * LDL: triángulo RECTÁNGULO con el cateto vertical mirando a la línea de
+     * la frecuencia -- el OD a su izquierda y el OI a su derecha, separados
+     * un pelo para que no se monten sobre ella ni entre sí.
+     *
+     * @param int $lado -1 a la izquierda de la línea (OD), 1 a la derecha (OI)
+     */
+    private static function ldl(MiniPdf $pdf, float $x, float $y, string $color, int $lado): void
+    {
+        $separacion = 1.6;
+        $alto = 5.4;
+        $ancho = 4.6;
+
+        // Cateto vertical pegado (con su aire) a la línea; el ángulo recto
+        // abajo y la hipotenusa cerrando hacia afuera y hacia arriba.
+        $xCateto = $x + $lado * $separacion;
+        $xPunta = $xCateto + $lado * $ancho;
+        $pdf->polygon(
+            [
+                [$xCateto, $y - $alto / 2],
+                [$xCateto, $y + $alto / 2],
+                [$xPunta, $y + $alto / 2],
+            ],
+            null,
+            $color
+        );
     }
 
     private static function cruz(MiniPdf $pdf, float $x, float $y, string $color): void
