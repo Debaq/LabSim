@@ -75,6 +75,16 @@ final class CaseCharts
     public const FREQS_OSEA = [250, 500, 1000, 2000, 3000, 4000];
 
     /**
+     * Valor con el que el caso marca que NO hay umbral en esa frecuencia:
+     * no se midió, o no hubo respuesta. No es un umbral de 130 dB.
+     *
+     * Importa porque el eje llega a 120: sin este corte, un 130 se dibujaba
+     * recortado contra el borde y se leía como un umbral profundo, y la
+     * línea lo unía con sus vecinos como si fuera parte de la curva.
+     */
+    public const SIN_UMBRAL_DB = 130;
+
+    /**
      * Límite de la audición normal (dB HL). En Chile llega hasta 20 dB HL
      * inclusive, así que el grado leve arranca en 21 -- es el mismo número
      * que `CaseProfile::GRADES['leve']` (y un test comprueba que sigan de
@@ -152,42 +162,39 @@ final class CaseCharts
         }
         for ($db = -10; $db <= 120; $db += 10) {
             $lineY = $fy((float) $db);
-            $limite = $db === self::LIMITE_NORMALIDAD_DB;
+            // Las dos líneas que se buscan al leer un audiograma: el 0 dB HL
+            // y el límite de la audición normal.
+            $marcada = $db === 0 || $db === self::LIMITE_NORMALIDAD_DB;
             $pdf->line(
                 $px,
                 $lineY,
                 $px + $pw,
                 $lineY,
-                $limite ? 1.4 : 0.4,
-                $limite ? self::COLOR_LIMITE_NORMAL : self::COLOR_GRID
+                $marcada ? 1.4 : 0.4,
+                $marcada ? self::COLOR_LIMITE_NORMAL : self::COLOR_GRID
             );
             if ($db % 20 === 0) {
-                $pdf->textRight($px - 3, $lineY + 2, (string) $db, 5.5, false, $limite ? self::COLOR_LIMITE_NORMAL : self::COLOR_ROTULO);
+                $pdf->textRight($px - 3, $lineY + 2, (string) $db, 5.5, false, $marcada ? self::COLOR_LIMITE_NORMAL : self::COLOR_ROTULO);
             }
         }
         $pdf->rect($px, $py, $pw, $ph, 0.7, self::COLOR_GRID_FUERTE);
         $pdf->text($x, $y + $h - 1, 'dB HL / Hz', 5.5, false, self::COLOR_ROTULO);
 
-        // Vía aérea: línea continua + símbolo por punto.
+        // Vía aérea: línea continua + símbolo por punto. La línea se parte
+        // en las frecuencias sin umbral en vez de saltarlas de largo.
         foreach (['od' => self::COLOR_OD, 'oi' => self::COLOR_OI] as $lado => $color) {
-            $pts = [];
-            foreach ($freqs as $i => $hz) {
-                $pts[] = [$fx((float) $hz), $fy((float) ($aerea[$lado][$i] ?? 0))];
+            foreach (self::tramosConUmbral($aerea[$lado] ?? [], $freqs, $fx, $fy) as $tramo) {
+                $pdf->polyline($tramo, 1.1, $color);
             }
-            $pdf->polyline($pts, 1.1, $color);
         }
         // Vía ósea: unida con línea punteada, por oído, y SOLO en las
         // frecuencias donde se mide (ver FREQS_OSEA). Se dibuja antes que
         // los símbolos para que el corchete quede encima de la línea.
+        $freqsOsea = array_filter($freqs, static fn ($hz): bool => in_array($hz, self::FREQS_OSEA, true));
         foreach (['od' => self::COLOR_OD, 'oi' => self::COLOR_OI] as $lado => $color) {
-            $pts = [];
-            foreach ($freqs as $i => $hz) {
-                if (!in_array($hz, self::FREQS_OSEA, true)) {
-                    continue;
-                }
-                $pts[] = [$fx((float) $hz), $fy((float) ($osea[$lado][$i] ?? 0))];
+            foreach (self::tramosConUmbral($osea[$lado] ?? [], $freqsOsea, $fx, $fy) as $tramo) {
+                $pdf->polyline($tramo, 0.9, $color, self::TRAZO_OSEA);
             }
-            $pdf->polyline($pts, 0.9, $color, self::TRAZO_OSEA);
         }
 
         foreach ($freqs as $i => $hz) {
@@ -199,22 +206,30 @@ final class CaseCharts
 
             $enmascaradaOd = ($aOd - $oOi) >= self::ATENUACION_AEREA_POR_FREQ[$i];
             $enmascaradaOi = ($aOi - $oOd) >= self::ATENUACION_AEREA_POR_FREQ[$i];
-            if ($enmascaradaOd) {
-                self::triangulo($pdf, $cx, $fy($aOd), self::COLOR_OD, false);
-            } else {
-                $pdf->circle($cx, $fy($aOd), 3.4, self::COLOR_OD, null, 1.1);
+            if ($aOd < self::SIN_UMBRAL_DB) {
+                if ($enmascaradaOd) {
+                    self::triangulo($pdf, $cx, $fy($aOd), self::COLOR_OD, false);
+                } else {
+                    $pdf->circle($cx, $fy($aOd), 3.4, self::COLOR_OD, null, 1.1);
+                }
             }
-            if ($enmascaradaOi) {
-                $pdf->rect($cx - 3, $fy($aOi) - 3, 6, 6, 1.1, self::COLOR_OI);
-            } else {
-                self::cruz($pdf, $cx, $fy($aOi), self::COLOR_OI);
+            if ($aOi < self::SIN_UMBRAL_DB) {
+                if ($enmascaradaOi) {
+                    $pdf->rect($cx - 3, $fy($aOi) - 3, 6, 6, 1.1, self::COLOR_OI);
+                } else {
+                    self::cruz($pdf, $cx, $fy($aOi), self::COLOR_OI);
+                }
             }
 
             // Ósea enmascarada si hay gap >= 10 dB en el mismo oído (la
             // atenuación interaural ósea es ~0). Solo donde se mide.
             if (in_array($hz, self::FREQS_OSEA, true)) {
-                self::corchete($pdf, $cx, $fy($oOd), self::COLOR_OD, 'izq', ($aOd - $oOd) >= self::GAP_ENMASCARA_OSEA);
-                self::corchete($pdf, $cx, $fy($oOi), self::COLOR_OI, 'der', ($aOi - $oOi) >= self::GAP_ENMASCARA_OSEA);
+                if ($oOd < self::SIN_UMBRAL_DB) {
+                    self::corchete($pdf, $cx, $fy($oOd), self::COLOR_OD, 'izq', ($aOd - $oOd) >= self::GAP_ENMASCARA_OSEA);
+                }
+                if ($oOi < self::SIN_UMBRAL_DB) {
+                    self::corchete($pdf, $cx, $fy($oOi), self::COLOR_OI, 'der', ($aOi - $oOi) >= self::GAP_ENMASCARA_OSEA);
+                }
             }
         }
 
@@ -225,16 +240,13 @@ final class CaseCharts
             if (empty($ldlMedido[$lado])) {
                 continue;
             }
-            $pts = [];
-            foreach ($freqs as $i => $hz) {
-                if (!in_array($hz, self::FREQS_OSEA, true)) {
-                    continue;
+            // El 130 acá es "no se buscó el LDL en esta frecuencia": ni
+            // símbolo ni tramo de línea.
+            foreach (self::tramosConUmbral($ldl[$lado] ?? [], $freqsOsea, $fx, $fy) as $tramo) {
+                $pdf->polyline($tramo, 0.8, $color, self::TRAZO_LDL);
+                foreach ($tramo as $pt) {
+                    self::symbol($pdf, $lado === 'od' ? 'ldl_od' : 'ldl_oi', $pt[0], $pt[1], $color);
                 }
-                $pts[] = [$fx((float) $hz), $fy((float) ($ldl[$lado][$i] ?? 130))];
-            }
-            $pdf->polyline($pts, 0.8, $color, self::TRAZO_LDL);
-            foreach ($pts as $pt) {
-                self::symbol($pdf, $lado === 'od' ? 'ldl_od' : 'ldl_oi', $pt[0], $pt[1], $color);
             }
         }
     }
@@ -947,6 +959,38 @@ final class CaseCharts
     // -----------------------------------------------------------------
     // Interno
     // -----------------------------------------------------------------
+
+    /**
+     * Parte una serie en los tramos que SÍ tienen umbral. Los huecos no se
+     * unen: una línea que cruza por encima de una frecuencia sin respuesta
+     * inventa un umbral que nadie midió.
+     *
+     * @param array<int,float> $valores por índice de frecuencia
+     * @param array<int,int> $freqs frecuencias a considerar (en orden)
+     * @param callable $fx Hz -> x
+     * @param callable $fy dB -> y
+     * @return array<int,array<int,array{0:float,1:float}>> tramos de puntos
+     */
+    private static function tramosConUmbral(array $valores, array $freqs, callable $fx, callable $fy): array
+    {
+        $tramos = [];
+        $actual = [];
+        foreach ($freqs as $i => $hz) {
+            $valor = (float) ($valores[$i] ?? 0);
+            if ($valor >= self::SIN_UMBRAL_DB) {
+                if (count($actual) > 0) {
+                    $tramos[] = $actual;
+                    $actual = [];
+                }
+                continue;
+            }
+            $actual[] = [$fx((float) $hz), $fy($valor)];
+        }
+        if (count($actual) > 0) {
+            $tramos[] = $actual;
+        }
+        return $tramos;
+    }
 
     /** Área de dibujo dentro del recuadro, descontando los rótulos de los ejes. */
     private static function plotBox(float $x, float $y, float $w, float $h): array

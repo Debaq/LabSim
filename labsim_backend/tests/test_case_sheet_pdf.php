@@ -148,6 +148,44 @@ $pdfVacio = CaseSheetPdf::build('VACIO', []);
 t_true(strpos($pdfVacio, '%PDF-1.4') === 0, 'Una ficha vacía igual genera un PDF');
 t_true(strpos($pdfVacio, 'Sin cita asociada') !== false, 'Sin paciente, la ficha lo dice en vez de fallar');
 
+// --- Un umbral que no existe no se dibuja ni se promedia ---------------
+//
+// 130 es "no se midió" o "no hubo respuesta", no un umbral de 130 dB. El eje
+// del audiograma llega a 120: sin este corte se dibujaba recortado contra el
+// borde, la línea lo unía con sus vecinos y entraba al promedio.
+
+t_eq(CaseCharts::SIN_UMBRAL_DB, 130, 'El valor que marca "sin umbral" es el 130 con el que guarda el caso');
+
+// Un hueco FUERA del promedio (6k y 8k) no cambia los promedios, así que no
+// hay nada que avisar.
+$huecoAgudos = ficha_caso_demo();
+foreach ([7, 8] as $i) {
+    $huecoAgudos['Aerea'][$i][1] = 130;
+}
+$pdfAgudos = CaseSheetPdf::build('HUECOS', $huecoAgudos);
+t_true(strpos($pdfAgudos, '%PDF-1.4') === 0, 'Un caso con frecuencias sin umbral igual genera la ficha');
+t_true(strpos($pdfAgudos, 'frecuencias sin umbral') === false,
+    'Un hueco fuera del promedio no dispara el aviso: los promedios no cambian');
+
+// Uno DENTRO del promedio sí: ahí el número sale de tres frecuencias y no de
+// cuatro, y eso hay que decirlo.
+$huecoEnPromedio = ficha_caso_demo();
+$huecoEnPromedio['Aerea'][6][1] = 130;
+$pdfHueco = CaseSheetPdf::build('HUECOS', $huecoEnPromedio);
+t_true(strpos($pdfHueco, 'frecuencias sin umbral') !== false,
+    'Sin umbral en 4k, la ficha avisa que el promedio va con las que responden');
+
+// El promedio ignora las frecuencias sin umbral en vez de meter 130 en la
+// cuenta, que daría un promedio que nadie puede informar.
+$promedio = new ReflectionMethod('CaseSheetPdf', 'promedio');
+$promedio->setAccessible(true);
+t_close($promedio->invoke(null, [0, 0, 20, 30, 40, 0, 50, 0, 0], [2, 3, 4, 6]), 35.0, 0.01,
+    'Sin huecos, el promedio es el de las cuatro frecuencias');
+t_close($promedio->invoke(null, [0, 0, 20, 30, 40, 0, 130, 0, 0], [2, 3, 4, 6]), 30.0, 0.01,
+    'Con 4k sin umbral, promedia las otras tres y no mete el 130');
+t_eq($promedio->invoke(null, array_fill(0, 9, 130), [2, 3, 4, 6]), null,
+    'Sin ninguna frecuencia con umbral no hay promedio que informar');
+
 // --- Las curvas que se sintetizan --------------------------------------
 
 // Timpanograma: la curva sale del TIPO, y cada tipo tiene que dar la forma

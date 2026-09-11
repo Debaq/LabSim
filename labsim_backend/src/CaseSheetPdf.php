@@ -296,10 +296,15 @@ final class CaseSheetPdf
                 'biapOsea' => self::promedio($osea[$ladoForm], [2, 3, 4, 6]),
                 'cce' => (float) $perfil[$lado]['cce_pct'],
                 'retroActivo' => CaseProfile::retroActivo($retro),
+                'huecos' => self::hayHuecos($aerea[$ladoForm], [2, 3, 4, 6])
+                    || self::hayHuecos($osea[$ladoForm], [2, 3, 4, 6]),
             ];
         }
 
         $filas[] = ['Clasificación', self::tipoLabel($porLado['od']['tipo']), self::tipoLabel($porLado['oi']['tipo'])];
+        $gap = static function (?float $aereo, ?float $oseo): ?float {
+            return $aereo === null || $oseo === null ? null : $aereo - $oseo;
+        };
         $filas[] = [
             'PTP aéreo (500-1k-2k Hz)',
             self::promedio2($porLado['od']['ptp']),
@@ -307,8 +312,8 @@ final class CaseSheetPdf
         ];
         $filas[] = [
             'Promedio BIAP aéreo (500-1k-2k-4k Hz)',
-            self::promedio2($porLado['od']['biap']) . '  (' . self::grado($porLado['od']['biap']) . ')',
-            self::promedio2($porLado['oi']['biap']) . '  (' . self::grado($porLado['oi']['biap']) . ')',
+            self::promedio2($porLado['od']['biap']) . self::conGrado($porLado['od']['biap']),
+            self::promedio2($porLado['oi']['biap']) . self::conGrado($porLado['oi']['biap']),
         ];
         $filas[] = [
             'Promedio BIAP óseo (500-1k-2k-4k Hz)',
@@ -317,8 +322,8 @@ final class CaseSheetPdf
         ];
         $filas[] = [
             'Gap aéreo-óseo (500-1k-2k-4k Hz)',
-            self::promedio2($porLado['od']['biap'] - $porLado['od']['biapOsea']),
-            self::promedio2($porLado['oi']['biap'] - $porLado['oi']['biapOsea']),
+            self::promedio2($gap($porLado['od']['biap'], $porLado['od']['biapOsea'])),
+            self::promedio2($gap($porLado['oi']['biap'], $porLado['oi']['biapOsea'])),
         ];
         $filas[] = [
             'Componente coclear (CCE)',
@@ -339,8 +344,11 @@ final class CaseSheetPdf
                 $autos[] = $modulo;
             }
         }
+        $aviso = $porLado['od']['huecos'] || $porLado['oi']['huecos']
+            ? 'Hay frecuencias sin umbral: los promedios se calculan solo con las que responden. '
+            : '';
         $this->parrafo(
-            'Módulos derivados del perfil: '
+            $aviso . 'Módulos derivados del perfil: '
             . ($autos === [] ? 'ninguno (todo cargado a mano)' : implode(', ', $autos)) . '.',
             7.5
         );
@@ -2093,14 +2101,40 @@ final class CaseSheetPdf
         return ['od' => $od, 'oi' => $oi];
     }
 
-    /** @param array<int,float> $vals @param array<int,int> $indices */
-    private static function promedio(array $vals, array $indices): float
+    /**
+     * Promedio de las frecuencias que SÍ tienen umbral.
+     *
+     * Un 130 no es un umbral de 130 dB: es "no se midió" o "no hubo
+     * respuesta", y meterlo en la cuenta inventa un promedio que nadie
+     * puede informar. Devuelve null si no queda ninguna.
+     *
+     * @param array<int,float> $vals
+     * @param array<int,int> $indices
+     */
+    private static function promedio(array $vals, array $indices): ?float
     {
         $suma = 0.0;
+        $cuantas = 0;
         foreach ($indices as $i) {
-            $suma += (float) ($vals[$i] ?? 0);
+            $valor = (float) ($vals[$i] ?? 0);
+            if ($valor >= CaseCharts::SIN_UMBRAL_DB) {
+                continue;
+            }
+            $suma += $valor;
+            $cuantas++;
         }
-        return $indices === [] ? 0.0 : $suma / count($indices);
+        return $cuantas === 0 ? null : $suma / $cuantas;
+    }
+
+    /** ¿Alguna de esas frecuencias quedó sin umbral? */
+    private static function hayHuecos(array $vals, array $indices): bool
+    {
+        foreach ($indices as $i) {
+            if ((float) ($vals[$i] ?? 0) >= CaseCharts::SIN_UMBRAL_DB) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static function grado(float $promedio): string
@@ -2201,10 +2235,19 @@ final class CaseSheetPdf
      * 42.5 sale "42.5" y 40 sale "40". El grado se lee sobre este mismo
      * valor, no sobre uno redondeado.
      */
-    private static function promedio2(float $v): string
+    private static function promedio2(?float $v): string
     {
+        if ($v === null) {
+            return 'sin umbral';
+        }
         $redondeado = round($v, 2);
         return rtrim(rtrim(number_format($redondeado, 2, '.', ''), '0'), '.');
+    }
+
+    /** El grado entre paréntesis, cuando hay promedio del que leerlo. */
+    private static function conGrado(?float $promedio): string
+    {
+        return $promedio === null ? '' : '  (' . self::grado($promedio) . ')';
     }
 
     private static function pct(float $v): string
