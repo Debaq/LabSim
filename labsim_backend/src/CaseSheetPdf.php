@@ -191,23 +191,23 @@ final class CaseSheetPdf
         $filas[] = ['Clasificación', self::tipoLabel($porLado['od']['tipo']), self::tipoLabel($porLado['oi']['tipo'])];
         $filas[] = [
             'PTP aéreo (500-1k-2k Hz)',
-            self::db5($porLado['od']['ptp']),
-            self::db5($porLado['oi']['ptp']),
+            self::promedio2($porLado['od']['ptp']),
+            self::promedio2($porLado['oi']['ptp']),
         ];
         $filas[] = [
             'Promedio BIAP aéreo (500-1k-2k-4k Hz)',
-            self::db5($porLado['od']['biap']) . '  (' . self::grado(self::paso5($porLado['od']['biap'])) . ')',
-            self::db5($porLado['oi']['biap']) . '  (' . self::grado(self::paso5($porLado['oi']['biap'])) . ')',
+            self::promedio2($porLado['od']['biap']) . '  (' . self::grado($porLado['od']['biap']) . ')',
+            self::promedio2($porLado['oi']['biap']) . '  (' . self::grado($porLado['oi']['biap']) . ')',
         ];
         $filas[] = [
             'Promedio BIAP óseo (500-1k-2k-4k Hz)',
-            self::db5($porLado['od']['biapOsea']),
-            self::db5($porLado['oi']['biapOsea']),
+            self::promedio2($porLado['od']['biapOsea']),
+            self::promedio2($porLado['oi']['biapOsea']),
         ];
         $filas[] = [
             'Gap aéreo-óseo (500-1k-2k-4k Hz)',
-            self::db5($porLado['od']['biap'] - $porLado['od']['biapOsea']),
-            self::db5($porLado['oi']['biap'] - $porLado['oi']['biapOsea']),
+            self::promedio2($porLado['od']['biap'] - $porLado['od']['biapOsea']),
+            self::promedio2($porLado['oi']['biap'] - $porLado['oi']['biapOsea']),
         ];
         $filas[] = [
             'Componente coclear (CCE)',
@@ -1530,18 +1530,14 @@ final class CaseSheetPdf
     }
 
     /**
-     * Al paso del audiómetro: 5 dB. Un promedio de umbrales da decimales
-     * (42.5), pero ningún audiómetro los puede presentar, así que informar
-     * "42" sugiere una precisión que el examen no tiene.
+     * Promedio tal cual, con hasta dos decimales y sin ceros de relleno:
+     * 42.5 sale "42.5" y 40 sale "40". El grado se lee sobre este mismo
+     * valor, no sobre uno redondeado.
      */
-    private static function paso5(float $v): float
+    private static function promedio2(float $v): string
     {
-        return round($v / 5) * 5;
-    }
-
-    private static function db5(float $v): string
-    {
-        return (string) (int) self::paso5($v);
+        $redondeado = round($v, 2);
+        return rtrim(rtrim(number_format($redondeado, 2, '.', ''), '0'), '.');
     }
 
     private static function pct(float $v): string
