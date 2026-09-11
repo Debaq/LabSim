@@ -596,20 +596,26 @@ final class CaseSheetPdf
         $volumen = is_array($data['volume'] ?? null) ? $data['volume'] : [];
         $etf = is_array($data['ETF'] ?? null) ? $data['ETF'] : ['Normal', 'Normal'];
 
-        // Los dos oídos en la misma escala: el equipo tiene un solo botón de
-        // altura, así que el alumno los va a ver así y comparar uno con otro
-        // de un vistazo sólo funciona si el eje es el mismo.
-        $escala = CaseCharts::escalaTimpanograma(
-            CaseCharts::valoresTimpanograma((string) ($data['Z_OD'] ?? 'A'))['estatica'],
-            CaseCharts::valoresTimpanograma((string) ($data['Z_OI'] ?? 'A'))['estatica']
-        );
-
         foreach ([
             ['od', 'OD', (string) ($data['Z_OD'] ?? 'A'), CaseCharts::COLOR_OD, self::MARGEN, (string) ($volumen[0] ?? 'N/D'), (string) ($etf[0] ?? 'Normal')],
             ['oi', 'OI', (string) ($data['Z_OI'] ?? 'A'), CaseCharts::COLOR_OI, self::MARGEN + $ancho + 20, (string) ($volumen[1] ?? 'N/D'), (string) ($etf[1] ?? 'Normal')],
         ] as [$lado, $rotulo, $tipo, $color, $x, $vol, $etfLado]) {
             $this->pdf->text($x, $this->y + self::ASCENDENTE * 8, $rotulo . ' - curva tipo ' . $tipo, 8, true, $color);
-            CaseCharts::tympanogram($this->pdf, $x, $this->y + 11, $ancho, $alto, $tipo, $color, $escala);
+            // El eje llega a 2 mL, que es lo que trae el equipo: un pico más
+            // alto se sale por arriba ahí y acá igual, así que se avisa en
+            // vez de cambiarle la escala a esta ficha sola.
+            $picoMl = CaseCharts::valoresTimpanograma($tipo)['estatica'];
+            if ($picoMl > CaseCharts::ESCALA_TIMPANOGRAMA_ML) {
+                $this->pdf->textRight(
+                    $x + $ancho,
+                    $this->y + self::ASCENDENTE * 8,
+                    'pico sobre 2 mL, fuera de escala',
+                    7,
+                    false,
+                    self::GRIS_TEXTO
+                );
+            }
+            CaseCharts::tympanogram($this->pdf, $x, $this->y + 11, $ancho, $alto, $tipo, $color);
             $this->pdf->text(
                 $x,
                 $this->y + $alto + 20,
@@ -696,6 +702,9 @@ final class CaseSheetPdf
         $gradiente = static function (array $v): string {
             return number_format($v['gradiente'], 2);
         };
+        $gradienteEquipo = static function (array $v): string {
+            return number_format($v['gradiente_equipo'], 2);
+        };
 
         $filasZ = [
             ['Timpanograma', 'OD', 'OI'],
@@ -703,6 +712,7 @@ final class CaseSheetPdf
             ['Compliance estática', $compliance($vOd), $compliance($vOi)],
             ['Presión del pico', $presion($vOd), $presion($vOi)],
             ['Gradiente', $gradiente($vOd), $gradiente($vOi)],
+            ['Gradiente en el equipo', $gradienteEquipo($vOd), $gradienteEquipo($vOi)],
             ['Volumen del CAE', (string) ($volumen[0] ?? 'N/D') . ' mL', (string) ($volumen[1] ?? 'N/D') . ' mL'],
             ['Función tubaria', (string) ($etf[0] ?? 'Normal'), (string) ($etf[1] ?? 'Normal')],
         ];
@@ -724,10 +734,11 @@ final class CaseSheetPdf
         );
         $this->parrafo(
             'El caso guarda sólo la letra de Jerger: la compliance y la presión las sortea el equipo '
-            . 'dentro del rango de arriba, distintas para cada paciente, y la curva dibujada usa el '
-            . 'centro. El recuadro amarillo es el que el equipo usa para la gradiente --alto del pico '
-            . 'por 100 daPa a su alrededor-- y la gradiente es cuánto de ese alto conserva la curva en '
-            . 'los bordes. Como el ancho de la curva es fijo, da 0,85 en cualquier curva con pico.',
+            . 'dentro del rango de arriba, distintas para cada paciente, y la curva de acá usa el centro. '
+            . 'El recuadro amarillo es de donde sale la gradiente --alto del pico por 100 daPa a su '
+            . 'alrededor--, que es cuánto de ese alto conserva la curva en los bordes. La segunda fila '
+            . 'es la que va a leer el alumno: el equipo dibuja todas las curvas con el mismo ancho, así '
+            . 'que ahí da 0,85 en cualquier curva con pico y no distingue una letra de otra.',
             7
         );
     }

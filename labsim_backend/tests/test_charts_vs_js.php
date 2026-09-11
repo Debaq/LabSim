@@ -120,28 +120,22 @@ foreach (CaseCharts::FORMAS_TIMPANOGRAMA as $tipo => $forma) {
 $rangoPresion = js_numeros($tympJs, '/p = Math\.max\((-?\d+), Math\.min\((\d+), p\)\)/', 'el rango de presión');
 t_eq($rangoPresion, [-400.0, 200.0], 'El timpanograma va de -400 a 200 daPa en los dos lados');
 
-// La forma la fijan estos tres números: si el editor cambia el semiancho o
-// el muestreo, su curva deja de ser la que dibuja la ficha y la que genera
-// la app del alumno.
-t_eq(js_numeros($tympJs, '/PRESSURE_MAX = (\d+)/', 'el semiancho de la curva'),
-    [(float) CaseCharts::PRESION_MAX_TIMPANOGRAMA],
-    'El editor y la ficha usan el mismo semiancho de curva');
-t_eq(js_numeros($tympJs, '/NUM_PTS = (\d+)/', 'los puntos por tramo'),
-    [(float) CaseCharts::PUNTOS_TIMPANOGRAMA],
-    'El editor y la ficha muestrean la curva con los mismos puntos');
+$anchosJs = js_numeros($tympJs, '/WIDTHS = \{([^}]*)\}/', 'los anchos de curva');
+t_eq($anchosJs, array_values(array_map('floatval', CaseCharts::ANCHOS_TIMPANOGRAMA)),
+    'El editor y la ficha abren la curva lo mismo en cada tipo');
+
+$rangoCompliance = js_numeros($tympJs, '/c = Math\.max\((\d+), Math\.min\((\d+(?:\.\d+)?), c\)\)/', 'el rango de compliance');
+t_eq($rangoCompliance, [0.0, (float) CaseCharts::ESCALA_TIMPANOGRAMA_ML],
+    'El timpanograma usa la misma escala fija de mL en el editor y en el PDF');
+
 t_eq(js_numeros($tympJs, '/GRADIENT_DELTA = (\d+)/', 'el delta de la gradiente'),
     [(float) CaseCharts::GRADIENTE_DELTA_DAPA],
-    'La ventana de gradiente se lee a la misma distancia del pico');
-t_eq(js_numeros($tympJs, '/HEIGHTS = \[([^\]]*)\]/', 'los topes del eje'),
-    array_map('floatval', CaseCharts::ALTURAS_TIMPANOGRAMA),
-    'El editor ofrece los mismos topes de compliance que la ficha y el equipo');
+    'La ventana de gradiente se lee a la misma distancia del pico en los dos lados');
 
-// El coseno alzado es lo que le da al ápice su punta y a la base su empalme
-// plano: si alguien vuelve a la gaussiana o al bezier, las tres curvas
-// (app, editor y ficha) dejan de ser la misma.
-t_true(preg_match('/0\.5 - 0\.5 \* Math\.cos\(Math\.PI \* t\)/', $tympJs) === 1
-    && preg_match('/0\.5 \+ 0\.5 \* Math\.cos\(Math\.PI \* t\)/', $tympJs) === 1,
-    'El editor dibuja el timpanograma con el coseno alzado de la app');
+// El ápice va en punta en los dos lados: si uno vuelve a la gaussiana, la
+// curva del editor deja de ser la del PDF.
+t_true(preg_match('/Math\.exp\(-Math\.abs\(p - v\.p\) \/ v\.width\)/', $tympJs) === 1,
+    'El editor dibuja el timpanograma con el ápice en punta (exponencial de |distancia|)');
 
 // --- Rollover del logoaudiograma (logogram.js) --------------------------
 

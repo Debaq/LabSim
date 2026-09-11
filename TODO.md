@@ -812,8 +812,17 @@ una curva ancha y 0 una en punta.
       algo. Toca `Z_225.curve_z` y, en espejo, `CaseCharts::curvaTimpanograma`
       y `public/js/case/tympanogram.js`.
 - [ ] Decidir si se informa la gradiente clásica (1 - esta) o se deja la del
-      equipo. Hoy la ficha muestra la del equipo, que es la que el alumno lee
+      equipo. Hoy la ficha muestra las dos: la de la curva impresa, que sí
+      distingue los tipos, y abajo la del equipo, que es la que el alumno lee
       en pantalla.
+
+Decisión del 2026-09-11: la ficha **no** dibuja la curva de la app. Se probó
+--el coseno alzado de ancho fijo, redondeado en el ápice-- y se volvió a la
+curva impresa de siempre: ápice en punta, ancho por letra, eje fijo de 0 a
+2 mL. Un timpanograma en papel se lee así, y esa es la convención de la
+ficha; un Ad se sale por arriba de los 2 mL y se avisa en el rótulo, igual
+que pasa en el equipo si el alumno no sube el cc. El costo es que hay dos
+gradientes, y por eso están las dos filas.
 
 ### La compliance y la presión del timpanograma no se pueden anticipar
 

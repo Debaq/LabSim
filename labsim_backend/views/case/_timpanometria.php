@@ -19,14 +19,12 @@
     <strong>Timpanograma</strong>
     <svg id="tympanogram-svg" viewBox="0 0 320 300" style="width:100%; height:auto; margin-top:0.5rem;">
         <rect x="32" y="10" width="280" height="266" fill="none" stroke="#ccc"></rect>
-        <?php // Cuatro divisiones; el tope lo pone tympanogram.js según la
-        // curva, igual que el botón cc del equipo (CaseCharts::ALTURAS_TIMPANOGRAMA),
-        // así que las etiquetas se reescriben ahí y acá van con el default.
-        foreach ([0, 0.5, 1, 1.5, 2] as $n => $c):
+        <?php // Escala fija 0-2 mL, la misma que el PDF (CaseCharts::ESCALA_TIMPANOGRAMA_ML).
+        foreach ([0, 0.5, 1, 1.5, 2] as $c):
             $y = tymp_y($c);
         ?>
         <line x1="32" y1="<?= $y ?>" x2="312" y2="<?= $y ?>" stroke="#eee"></line>
-        <text x="28" y="<?= $y + 3 ?>" text-anchor="end" font-size="8" fill="#666" class="tymp-ytick" data-frac="<?= $n / 4 ?>"><?= $c ?></text>
+        <text x="28" y="<?= $y + 3 ?>" text-anchor="end" font-size="8" fill="#666"><?= $c ?></text>
         <?php endforeach; ?>
         <?php foreach ([-400, -300, -200, -100, 0, 100, 200] as $p):
             $x = tymp_x($p);

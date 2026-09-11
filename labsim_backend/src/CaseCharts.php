@@ -104,10 +104,12 @@ final class CaseCharts
      * línea base]. Espejo de SHAPES en public/js/case/tympanogram.js.
      */
     /**
-     * Tope por defecto del eje Y del timpanograma (mL): es el que trae el
-     * equipo al abrirse (height_values[1] en src/impedanciometria/Z.py). Un
-     * Ad no cabe ahí y el alumno tiene que subir la escala, así que la ficha
-     * hace lo mismo (ver escalaTimpanograma) en vez de recortar la curva.
+     * Tope del eje Y del timpanograma (mL). Fijo: los dos oídos y todas las
+     * fichas se leen en la misma escala, que es lo que permite comparar una
+     * con otra de un vistazo. Coincide además con el que trae el equipo al
+     * abrirse (height_values[1] en src/impedanciometria/Z.py). Un Ad alto se
+     * sale por arriba, igual que en el equipo si el alumno no sube el cc: la
+     * ficha lo dice en el rótulo en vez de cambiar la escala.
      */
     public const ESCALA_TIMPANOGRAMA_ML = 2.0;
 
@@ -147,8 +149,20 @@ final class CaseCharts
      */
     public const GRADIENTE_DELTA_DAPA = 50.0;
 
-    /** Topes del eje de compliance que ofrece el equipo (botón cc). */
-    public const ALTURAS_TIMPANOGRAMA = [1.0, 2.0, 5.0, 8.0];
+    /**
+     * Ancho de la curva impresa, en daPa (constante de caída de la
+     * exponencial). No sale de la app --ahí el ancho es fijo-- sino de cómo
+     * se imprime un timpanograma: el ápice va en punta y el ancho es parte
+     * del hallazgo, un As rígido abre más que un Ad.
+     */
+    public const ANCHOS_TIMPANOGRAMA = [
+        'A'  => 60.0,
+        'As' => 50.0,
+        'Ad' => 70.0,
+        'C'  => 70.0,
+        'Cs' => 60.0,
+        'B'  => 400.0,
+    ];
 
     /** Amarillo de la ventana de gradiente, el mismo que usa el equipo. */
     public const COLOR_GRADIENTE = '#b08900';
@@ -383,14 +397,11 @@ final class CaseCharts
         float $w,
         float $h,
         string $tipo,
-        string $color,
-        ?float $tope = null
+        string $color
     ): void {
         [$px, $py, $pw, $ph] = self::plotBox($x, $y, $w, $h);
         $v = self::valoresTimpanograma($tipo);
-        if ($tope === null) {
-            $tope = self::escalaTimpanograma($v['estatica']);
-        }
+        $tope = self::ESCALA_TIMPANOGRAMA_ML;
         $aire = $pw * self::AIRE_EJE;
         $util = $pw - 2 * $aire;
         $fx = static fn (float $daPa): float => $px + $aire + (max(-400.0, min(200.0, $daPa)) + 400) / 600 * $util;
@@ -415,15 +426,12 @@ final class CaseCharts
             $pdf->line($lineX, $py, $lineX, $py + $ph, 0.4, $daPa === 0 ? self::COLOR_GRID_FUERTE : self::COLOR_GRID);
             $pdf->textCenter($lineX, $py + $ph + self::EJE_INF - 3, (string) $daPa, 5.0, false, self::COLOR_ROTULO);
         }
-        // Cuatro divisiones sobre la escala elegida.
+        // Cuatro divisiones de 0,5 mL sobre la escala fija.
         for ($n = 0; $n <= 4; $n++) {
             $ml = $tope * $n / 4;
             $lineY = $fy($ml);
             $pdf->line($px, $lineY, $px + $pw, $lineY, 0.4, self::COLOR_GRID);
-            // Dos decimales sólo si el paso los necesita: con tope 1 mL las
-            // divisiones caen en 0,25 y "0,3" sería un rótulo mentiroso.
-            $decimales = fmod($tope, 2.0) === 0.0 ? 1 : 2;
-            $pdf->textRight($px - 3, $lineY + 2, number_format($ml, $decimales), 5.0, false, self::COLOR_ROTULO);
+            $pdf->textRight($px - 3, $lineY + 2, number_format($ml, 1), 5.0, false, self::COLOR_ROTULO);
         }
         $pdf->rect($px, $py, $pw, $ph, 0.7, self::COLOR_GRID_FUERTE);
         $pdf->text($x, $y + 6, 'mL / daPa', 5.0, false, self::COLOR_ROTULO);
@@ -482,7 +490,11 @@ final class CaseCharts
             'p_max' => $pMax,
             'pico_dapa' => $pico,
             'estatica' => $estatica,
-            'gradiente' => self::gradienteTimpanograma($estatica, $pico),
+            'ancho_dapa' => self::ANCHOS_TIMPANOGRAMA[$tipo] ?? self::ANCHOS_TIMPANOGRAMA['A'],
+            // Dos gradientes, porque son dos curvas: la impresa acá arriba y
+            // la que genera el equipo. Ver gradienteTimpanograma().
+            'gradiente' => self::gradienteDe(self::tympanogramPoints($tipo), $estatica, $pico),
+            'gradiente_equipo' => self::gradienteTimpanograma($estatica, $pico),
             // Sin pico no hay presión que informar: el tipo B es plano por
             // definición y su "pico" sería el primer punto del barrido.
             'plana' => $estatica <= 0.0,
@@ -495,39 +507,26 @@ final class CaseCharts
      * src/impedanciometria/Z.py). Ojo con el sentido: acá 1 es una curva
      * ancha y 0 una en punta, al revés de la gradiente clásica.
      *
-     * Se mide sobre los MISMOS puntos que se dibujan --interpolando entre
-     * ellos, como hace find_nearest-- y no sobre la fórmula, para que el
-     * número de la ficha sea el que se lee en el gráfico.
+     * Esta versión la mide sobre la curva que genera la app --la de ancho
+     * fijo-- así que es el número que va a leer el alumno en la pantalla del
+     * equipo, no el que se lee en la curva impresa de la ficha.
      */
     public static function gradienteTimpanograma(float $compliance, float $pico): float
+    {
+        return self::gradienteDe(self::curvaTimpanograma($compliance, $pico), $compliance, $pico);
+    }
+
+    /** La misma cuenta, sobre los puntos que se le pasen. */
+    private static function gradienteDe(array $pts, float $compliance, float $pico): float
     {
         if ($compliance <= 0.0) {
             return 0.0;
         }
-        $pts = self::curvaTimpanograma($compliance, $pico);
         $menos = self::interpolar($pts, $pico - self::GRADIENTE_DELTA_DAPA);
         $mas = self::interpolar($pts, $pico + self::GRADIENTE_DELTA_DAPA);
         $g = ($menos + $mas) / (2 * $compliance);
 
         return round(max(0.0, min(1.0, $g)), 2);
-    }
-
-    /**
-     * Tope de compliance con el que hay que mirar esta curva: el primero de
-     * los que ofrece el equipo donde el pico entre completo.
-     */
-    public static function escalaTimpanograma(float ...$compliances): float
-    {
-        $alto = $compliances ? max($compliances) : 0.0;
-        foreach (self::ALTURAS_TIMPANOGRAMA as $tope) {
-            if ($alto <= $tope) {
-                return $tope;
-            }
-        }
-
-        $topes = self::ALTURAS_TIMPANOGRAMA;
-
-        return (float) $topes[count($topes) - 1];
     }
 
     /** Valor de la curva en una presión cualquiera, interpolando linealmente. */
@@ -588,24 +587,22 @@ final class CaseCharts
      */
     public static function tympanogramPoints(string $tipo): array
     {
-        $v = self::valoresTimpanograma($tipo);
-        $pts = self::curvaTimpanograma($v['estatica'], (float) $v['pico_dapa']);
+        $forma = self::FORMAS_TIMPANOGRAMA[$tipo] ?? self::FORMAS_TIMPANOGRAMA['A'];
+        [$cMin, $cMax, $pMin, $pMax] = $forma;
+        $altura = round(($cMin + $cMax) / 2, 2);
+        $pico = round(($pMin + $pMax) / 2);
+        $ancho = self::ANCHOS_TIMPANOGRAMA[$tipo] ?? self::ANCHOS_TIMPANOGRAMA['A'];
 
-        // Línea base a los dos costados, hasta el final de la ventana, como
-        // hace el equipo: el barrido empieza y termina en 0, no en el pie de
-        // la curva.
-        $inicio = $pts[0][0];
-        $fin = $pts[count($pts) - 1][0];
-        $izq = [];
-        for ($p = -400.0; $p < $inicio; $p += 10.0) {
-            $izq[] = [$p, 0.0];
-        }
-        $der = [];
-        for ($p = $fin + 10.0; $p <= 200.0; $p += 10.0) {
-            $der[] = [$p, 0.0];
+        // Exponencial de |distancia| y no una gaussiana ni el coseno alzado
+        // de la app: el timpanograma impreso tiene el ápice EN PUNTA, y es
+        // así como se lee en una ficha. El paso es de 5 daPa porque con 10
+        // el muestreo recortaba la punta.
+        $pts = [];
+        for ($p = -400.0; $p <= 200.0; $p += 5.0) {
+            $pts[] = [$p, $altura * exp(-abs($p - $pico) / $ancho)];
         }
 
-        return array_merge($izq, $pts, $der);
+        return $pts;
     }
 
     // -----------------------------------------------------------------

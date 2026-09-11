@@ -224,43 +224,41 @@ t_true(max(array_column(CaseCharts::tympanogramPoints('As'), 1))
 $curvaB = array_column(CaseCharts::tympanogramPoints('B'), 1);
 t_true(max($curvaB) - min($curvaB) < 0.1, 'B es plana: no tiene pico que buscar');
 
-// La forma es el coseno alzado de la app: llega y sale del ápice con
-// pendiente cero, y también empalma con la línea base sin quiebre. Lo que
-// cae de verdad es la mitad del flanco. Antes la ficha dibujaba un ápice en
-// punta, que no es lo que ve el alumno.
-$curvaA = CaseCharts::curvaTimpanograma(0.95, -40.0);
+// El ápice va en punta, no redondeado: la pendiente justo al lado del pico
+// tiene que ser MUCHO mayor que la de una gaussiana, que ahí llega plana.
+$curvaA = CaseCharts::tympanogramPoints('A');
 $iPico = 0;
 foreach ($curvaA as $i => $pt) {
     if ($pt[1] > $curvaA[$iPico][1]) { $iPico = $i; }
 }
-$caida = static fn (array $c, int $i): float => abs($c[$i][1] - $c[$i + 1][1]);
-$mitadFlanco = (int) round($iPico / 2);
-t_true($caida($curvaA, $iPico) < $caida($curvaA, $mitadFlanco),
-    'El ápice llega con pendiente cero: el coseno alzado no hace punta');
-t_true($caida($curvaA, 0) < $caida($curvaA, $mitadFlanco),
-    'Y el pie de la curva empalma con la línea base sin quiebre');
+$pendienteJuntoAlPico = abs($curvaA[$iPico][1] - $curvaA[$iPico + 1][1]);
+$pendienteLejos = abs($curvaA[$iPico + 12][1] - $curvaA[$iPico + 13][1]);
+t_true($pendienteJuntoAlPico > $pendienteLejos,
+    'La curva cae más rápido junto al ápice que lejos: el pico es una punta, no una loma');
 
-// La gradiente se calcula como en el equipo (Z.move): altura a +-50 daPa
-// del pico sobre la altura del pico, entre 0 y 1. Con el semiancho fijo de
-// la app da 0.85 para cualquier curva con pico -- es un número que NO
-// discrimina tipos, y la ficha tiene que mostrar eso y no otra cosa.
+// La escala del eje es fija: los dos oídos y todas las fichas se leen igual.
+t_eq(CaseCharts::ESCALA_TIMPANOGRAMA_ML, 2.0, 'El timpanograma se dibuja siempre de 0 a 2 mL');
+
+// Dos gradientes, y las dos con la cuenta del equipo (Z.move): altura a +-50
+// daPa del pico sobre la altura del pico, entre 0 y 1.
+//  - 'gradiente' sale de la curva IMPRESA, así que distingue los tipos.
+//  - 'gradiente_equipo' sale de la curva de la app, que tiene ancho fijo, y
+//    por eso da 0,85 en cualquier curva con pico. Es la que va a leer el
+//    alumno en pantalla y la ficha tiene que anticiparla tal cual.
 foreach (CaseBuilder::Z_OPTIONS as $tipo) {
     $v = CaseCharts::valoresTimpanograma($tipo);
-    t_true($v['gradiente'] >= 0.0 && $v['gradiente'] <= 1.0,
-        "Timpanograma {$tipo}: la gradiente queda entre 0 y 1");
+    foreach (['gradiente', 'gradiente_equipo'] as $clave) {
+        t_true($v[$clave] >= 0.0 && $v[$clave] <= 1.0,
+            "Timpanograma {$tipo}: la {$clave} queda entre 0 y 1");
+    }
     if (!$v['plana']) {
-        t_close($v['gradiente'], 0.85, 0.02,
-            "Timpanograma {$tipo}: la gradiente es la que calcula el equipo");
+        t_close($v['gradiente_equipo'], 0.85, 0.02,
+            "Timpanograma {$tipo}: la gradiente del equipo es la que calcula Z.move");
     }
 }
 t_eq(CaseCharts::gradienteTimpanograma(0.0, 0.0), 0.0, 'Sin compliance no hay gradiente que calcular');
-
-// La escala sube cuando la curva no cabe, como el botón cc del equipo.
-t_eq(CaseCharts::escalaTimpanograma(0.95), 1.0, 'Una curva chica se lee en el tope de 1 mL');
-t_eq(CaseCharts::escalaTimpanograma(1.6), 2.0, 'Una A alta necesita el tope de 2 mL');
-t_eq(CaseCharts::escalaTimpanograma(CaseCharts::valoresTimpanograma('Ad')['estatica']), 5.0,
-    'Un Ad no cabe en 2 mL: la ficha sube la escala en vez de recortar la curva');
-t_eq(CaseCharts::escalaTimpanograma(99.0), 8.0, 'Por encima de todo, queda el tope más alto');
+t_true(CaseCharts::valoresTimpanograma('As')['gradiente'] < CaseCharts::valoresTimpanograma('Ad')['gradiente'],
+    'En la curva impresa la gradiente sí distingue: un Ad abre más que un As');
 
 // Logoaudiograma: con reclutamiento la curva CAE pasada la UMD (rollover),
 // y sin él se queda en meseta. Es el hallazgo que el gráfico tiene que
