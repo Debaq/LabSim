@@ -125,7 +125,7 @@ function admin_header(string $title, ?array $currentUser = null): void
     </div>
     <div class="row row--center">
         <?php if ($currentUser): ?>
-            <span style="opacity:0.8;"><?= htmlspecialchars($currentUser['display_name']) ?></span>
+            <a href="perfil.php" title="Mi perfil: usuario y contraseña para la app"<?= $currentPage === 'perfil.php' ? ' aria-current="page"' : '' ?>><?= htmlspecialchars($currentUser['display_name']) ?></a>
             <a href="logout.php">Salir</a>
         <?php endif; ?>
         <button type="button" id="theme-toggle" class="btn btn--ghost btn--sm" style="margin-top:0; padding:0.3rem 0.6rem;" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema">

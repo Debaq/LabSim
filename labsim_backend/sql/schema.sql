@@ -52,7 +52,12 @@ CREATE TABLE IF NOT EXISTS users (
     role TEXT NOT NULL CHECK (role IN ('student', 'admin')),
     username TEXT NOT NULL UNIQUE,
     display_name TEXT NOT NULL,
-    password_hash TEXT,                       -- solo admin (login local, no LTI)
+    password_hash TEXT,                       -- login local (app de escritorio y portal); una cuenta LTI nace sin él
+    -- 1 = el usuario eligió su nombre de login en admin/perfil.php, así que
+    -- un launch LTI ya NO lo reescribe (ver Lti::upsertStudentBySub). Sin
+    -- esto, cada entrada por Moodle le cambiaba el usuario de la app por
+    -- debajo al docente que se había armado uno para tipear.
+    username_locked INTEGER NOT NULL DEFAULT 0,
     lti_platform_id INTEGER REFERENCES lti_platforms(id),
     lti_sub TEXT,                             -- id del usuario en Moodle
     permission INTEGER NOT NULL DEFAULT 444,

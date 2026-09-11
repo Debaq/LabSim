@@ -435,6 +435,15 @@ final class Db
      * sql/schema.sql). 0/NULL respectivamente no cambia nada de lo ya
      * existente: ningún usuario/curso queda marcado como demo solo.
      */
+    /**
+     * Agrega users.username_locked -- instalaciones de antes de que el
+     * docente pudiera elegir su usuario de login en admin/perfil.php.
+     */
+    public static function migrateProfileLoginIfNeeded(): void
+    {
+        self::addColumnIfMissing(self::get(), 'users', 'username_locked', 'INTEGER NOT NULL DEFAULT 0');
+    }
+
     public static function migrateDemoStudentIfNeeded(): void
     {
         $pdo = self::get();

@@ -103,6 +103,11 @@ admin_header('Usuarios', $me);
         cuentas de alumno de prueba (p. ej. <code>labsim</code>) mientras no haya LTI conectado.
         Si el usuario ya existe, esto actualiza su contraseña y rol.
     </p>
+    <p class="muted">
+        Un docente que ya entró por Moodle no necesita que le crees la cuenta acá: se pone su propia contraseña
+        (y ve cuál es su usuario) desde <a href="perfil.php">Mi perfil</a>, el link con su nombre arriba a la
+        derecha. Esto es para crear cuentas locales o para reemplazarle la contraseña a quien la olvidó.
+    </p>
     <form method="post">
     <?= csrf_field() ?>
         <input type="hidden" name="form_action" value="create">

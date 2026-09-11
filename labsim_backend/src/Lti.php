@@ -256,12 +256,20 @@ final class Lti
         // mantiene único agregando el sub entre paréntesis.
         $username = $email ?: "{$name} ({$platform['id']}:{$sub})";
 
-        $stmt = $pdo->prepare('SELECT id FROM users WHERE lti_platform_id = ? AND lti_sub = ?');
+        $stmt = $pdo->prepare('SELECT id, username_locked FROM users WHERE lti_platform_id = ? AND lti_sub = ?');
         $stmt->execute([$platform['id'], $sub]);
         $row = $stmt->fetch();
         if ($row) {
-            $pdo->prepare('UPDATE users SET display_name = ?, username = ? WHERE id = ?')
-                ->execute([$name, $username, $row['id']]);
+            // username_locked: la persona eligió su usuario de login en
+            // admin/perfil.php para entrar a la app con contraseña. Moodle
+            // sigue mandando el nombre a mostrar, pero el usuario es suyo.
+            if ((int) ($row['username_locked'] ?? 0) === 1) {
+                $pdo->prepare('UPDATE users SET display_name = ? WHERE id = ?')
+                    ->execute([$name, $row['id']]);
+            } else {
+                $pdo->prepare('UPDATE users SET display_name = ?, username = ? WHERE id = ?')
+                    ->execute([$name, $username, $row['id']]);
+            }
             return (int) $row['id'];
         }
 
