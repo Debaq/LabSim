@@ -59,7 +59,7 @@ final class CaseSheetPdf
      */
     private const LOGO = __DIR__ . '/../resources/img/logo.jpg';
 
-    /** Marca del pie, en todas las páginas. */
+    /** Marca del pie, en todas las páginas. El año es el de impresión. */
     private const PIE_TEXTO = 'Desarrollado con LabSim %s para la simulación en evaluación auditiva y vestibular';
 
     private const GRIS_TITULO = '#222222';
@@ -108,10 +108,9 @@ final class CaseSheetPdf
     {
         $nombre = trim((string) ($patient['nombre'] ?? ''));
         $fecha = $fecha !== '' ? $fecha : date('d-m-Y');
-        // El año del pie es el de emisión, no el de hoy: una ficha impresa
-        // el año que viene no se firma sola con el año que viene.
-        $anio = preg_match('/(\d{4})/', $fecha, $m) === 1 ? $m[1] : date('Y');
-        $doc = new self($caseId, 'Ficha #' . $caseId . ($nombre !== '' ? ' - ' . $nombre : ''), $anio);
+        // El año del pie es el de la impresión, no el del caso: la marca
+        // dice cuándo se generó este papel.
+        $doc = new self($caseId, 'Ficha #' . $caseId . ($nombre !== '' ? ' - ' . $nombre : ''), date('Y'));
         $doc->portada($caseId, $data, $patient, $emisor, $fecha);
         $doc->resumenPorOido($data);
         // La historia antes que los exámenes, como se lee una ficha: quién

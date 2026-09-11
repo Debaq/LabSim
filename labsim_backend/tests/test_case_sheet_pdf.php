@@ -91,13 +91,12 @@ foreach ([
 // Y los datos del caso, no solo los rótulos.
 t_true(strpos($pdfDemo, '#CASO-TEST') !== false, 'El PDF identifica el caso con su numeral');
 
-// Marca y numeración: el pie va en TODAS las páginas, y el año es el de
-// emisión (no el de hoy: una ficha impresa el año que viene no se firma sola
-// con el año que viene).
+// Marca y numeración: el pie va en TODAS las páginas, con el año en que se
+// imprime el PDF (la marca dice cuándo se generó este papel).
 t_eq(substr_count($pdfDemo, 'Desarrollado con LabSim'), 6,
     'La marca del pie está en las seis páginas');
-t_true(strpos($pdfDemo, 'LabSim 2026 para la simulaci') !== false,
-    'El pie lleva el año de emisión de la ficha');
+t_true(strpos($pdfDemo, 'LabSim ' . date('Y') . ' para la simulaci') !== false,
+    'El pie lleva el año en que se imprime');
 
 // El logo es un JPEG incrustado: si el archivo se pierde, la ficha sale
 // igual (PdfImage devuelve null) pero esto avisa.
