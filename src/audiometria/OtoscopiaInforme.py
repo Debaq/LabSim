@@ -378,7 +378,9 @@ class _PanelOido(QWidget):
             btn = QPushButton(etiqueta)
             btn.setCheckable(True)
             btn.setStyleSheet(
-                f"QPushButton {{ border: 1px solid {color}; padding: 3px; }}"
+                # 3 px: con 1 px el color del hallazgo casi no se veía en
+                # el botón, que es la única leyenda de qué color es cada uno.
+                f"QPushButton {{ border: 3px solid {color}; border-radius: 4px; padding: 3px; }}"
                 f"QPushButton:checked {{ background-color: {color}; color: white; }}"
             )
             btn.clicked.connect(lambda checked, c=clave: self._set_hallazgo(c if checked else None))
