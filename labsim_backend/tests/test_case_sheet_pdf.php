@@ -90,6 +90,18 @@ foreach ([
 
 // Y los datos del caso, no solo los rótulos.
 t_true(strpos($pdfDemo, 'CASO-TEST') !== false, 'El PDF identifica el caso');
+
+// Marca y numeración: el pie va en TODAS las páginas, y el año es el de
+// emisión (no el de hoy: una ficha impresa el año que viene no se firma sola
+// con el año que viene).
+t_eq(substr_count($pdfDemo, 'Desarrollado con LabSim'), 6,
+    'La marca del pie está en las seis páginas');
+t_true(strpos($pdfDemo, 'LabSim 2026 para la simulaci') !== false,
+    'El pie lleva el año de emisión de la ficha');
+
+// El logo es un JPEG incrustado: si el archivo se pierde, la ficha sale
+// igual (PdfImage devuelve null) pero esto avisa.
+t_true(substr_count($pdfDemo, '/Subtype /Image') >= 1, 'El logo se incrusta en la portada');
 t_true(strpos($pdfDemo, 'curva tipo As') !== false, 'El timpanograma dice el tipo del oído');
 // Los paréntesis delimitan las cadenas en un content stream, así que MiniPdf
 // los escapa: en los bytes del PDF "(-)" aparece como "\(-\)".

@@ -33,8 +33,8 @@ require_once __DIR__ . '/CaseOae.php';
 final class CaseSheetPdf
 {
     private const MARGEN = 40.0;
-    /** Y a partir de la cual hay que cortar la página. */
-    private const PIE = 40.0;
+    /** Y a partir de la cual hay que cortar la página (deja lugar al pie). */
+    private const PIE = 46.0;
 
     /**
      * Alto de la letra sobre la línea base, como fracción del cuerpo. La Y
@@ -50,6 +50,17 @@ final class CaseSheetPdf
      * enseñaría a marcar lo que no está.
      */
     private const VEMP_MARCA_MIN_UV = 0.05;
+
+    /**
+     * El logo del backend, en JPEG. El original de la app es
+     * resources/img/LogoBN.png (raíz del repo), que no se despliega con el
+     * backend y además es PNG: MiniPdf solo lleva JPEG y convertirlo en cada
+     * pedido obligaría a tener GD en el hosting. Se guarda ya convertido.
+     */
+    private const LOGO = __DIR__ . '/../resources/img/logo.jpg';
+
+    /** Marca del pie, en todas las páginas. */
+    private const PIE_TEXTO = 'Desarrollado con LabSim %s para la simulación en evaluación auditiva y vestibular';
 
     private const GRIS_TITULO = '#222222';
     private const GRIS_TEXTO = '#333333';
@@ -74,14 +85,18 @@ final class CaseSheetPdf
     private float $anchoContenido;
     private string $encabezadoCorrido;
     private string $caseId;
+    private string $anio;
+    private int $pagina = 1;
 
-    private function __construct(string $caseId, string $encabezadoCorrido)
+    private function __construct(string $caseId, string $encabezadoCorrido, string $anio)
     {
+        $this->anio = $anio;
         $this->pdf = new MiniPdf();
         $this->anchoContenido = $this->pdf->pageWidth() - 2 * self::MARGEN;
         $this->y = self::MARGEN;
         $this->caseId = $caseId;
         $this->encabezadoCorrido = $encabezadoCorrido;
+        $this->pie();
     }
 
     /**
@@ -92,8 +107,12 @@ final class CaseSheetPdf
     public static function build(string $caseId, array $data, array $patient = [], string $emisor = '', string $fecha = ''): string
     {
         $nombre = trim((string) ($patient['nombre'] ?? ''));
-        $doc = new self($caseId, 'Ficha ' . $caseId . ($nombre !== '' ? ' - ' . $nombre : ''));
-        $doc->portada($caseId, $data, $patient, $emisor, $fecha !== '' ? $fecha : date('d-m-Y'));
+        $fecha = $fecha !== '' ? $fecha : date('d-m-Y');
+        // El año del pie es el de emisión, no el de hoy: una ficha impresa
+        // el año que viene no se firma sola con el año que viene.
+        $anio = preg_match('/(\d{4})/', $fecha, $m) === 1 ? $m[1] : date('Y');
+        $doc = new self($caseId, 'Ficha ' . $caseId . ($nombre !== '' ? ' - ' . $nombre : ''), $anio);
+        $doc->portada($caseId, $data, $patient, $emisor, $fecha);
         $doc->resumenPorOido($data);
         // La historia antes que los exámenes, como se lee una ficha: quién
         // es el paciente y qué cuenta, y recién después qué mide cada
@@ -128,9 +147,17 @@ final class CaseSheetPdf
 
     private function portada(string $caseId, array $data, array $patient, string $emisor, string $fecha): void
     {
-        $this->pdf->text(self::MARGEN, $this->y + 4, 'Ficha del caso', 19, true, self::GRIS_TITULO);
+        $xTitulo = self::MARGEN;
+        $logo = PdfImage::jpegBytes(self::LOGO);
+        if ($logo !== null) {
+            // Alineado con el alto del título, no con el borde de la hoja.
+            $lado = 26.0;
+            $this->pdf->imageJpeg($logo['data'], $logo['w'], $logo['h'], 'logo', self::MARGEN, $this->y - 9, $lado, $lado);
+            $xTitulo += $lado + 9;
+        }
+        $this->pdf->text($xTitulo, $this->y + 4, 'Ficha del caso', 19, true, self::GRIS_TITULO);
         $this->pdf->textRight(self::MARGEN + $this->anchoContenido, $this->y + 4, $caseId, 13, true, self::GRIS_SUAVE);
-        $this->y += 14;
+        $this->y += 16;
         $this->pdf->line(self::MARGEN, $this->y, self::MARGEN + $this->anchoContenido, $this->y, 1.2, self::GRIS_TITULO);
         $this->y += 16;
 
@@ -256,7 +283,7 @@ final class CaseSheetPdf
 
     private function audiometria(array $data): void
     {
-        $this->titulo('Audiometría tonal', 200.0);
+        $this->titulo('Audiometría tonal', 190.0);
 
         $aerea = self::desarmar($data['Aerea'] ?? []);
         $osea = self::desarmar($data['Osea'] ?? []);
@@ -268,8 +295,8 @@ final class CaseSheetPdf
             $ldlMedido[$lado] = count(array_filter($ldl[$lado], static fn ($v) => (int) $v !== 130)) > 0;
         }
 
-        $alto = 168.0;
-        $this->espacio($alto + 24);
+        $alto = 158.0;
+        $this->espacio($alto + 22);
         CaseCharts::audiogram($this->pdf, self::MARGEN, $this->y, $this->anchoContenido * 0.62, $alto, $aerea, $osea, $ldl, $ldlMedido);
 
         // Al lado del gráfico, la leyenda de símbolos: un audiograma sin
@@ -581,7 +608,7 @@ final class CaseSheetPdf
 
     private function logoaudiometria(array $data): void
     {
-        $this->titulo('Logoaudiometría', 100.0);
+        $this->titulo('Logoaudiometría', 96.0);
 
         $umd = is_array($data['UMD'] ?? null) ? $data['UMD'] : [];
         $sdt = is_array($data['SDT'] ?? null) ? $data['SDT'] : [0, 0];
@@ -599,8 +626,8 @@ final class CaseSheetPdf
             ];
         }
 
-        $alto = 100.0;
-        $this->espacio($alto + 28);
+        $alto = 96.0;
+        $this->espacio($alto + 26);
         CaseCharts::logogram($this->pdf, self::MARGEN, $this->y, $this->anchoContenido * 0.55, $alto, $porLado);
         CaseCharts::legend($this->pdf, self::MARGEN + 26, $this->y + $alto + 8, 'SRT = vertical punteada, UMD = triángulo');
 
@@ -1379,9 +1406,32 @@ final class CaseSheetPdf
         if ($this->y <= self::MARGEN + 1) {
             return;
         }
+        $this->abrirPagina();
+    }
+
+    /**
+     * Página nueva con su encabezado corrido, su pie y su número.
+     *
+     * El número se escribe al abrir cada página y sin total: MiniPdf
+     * escribe las páginas a medida que se llenan y no hay una segunda
+     * pasada donde se pudiera saber cuántas son.
+     */
+    private function abrirPagina(): void
+    {
         $this->pdf->addPage();
+        $this->pagina++;
         $this->y = self::MARGEN;
         $this->pdf->text(self::MARGEN, $this->y - 12, $this->encabezadoCorrido, 7, false, self::GRIS_SUAVE);
+        $this->pie();
+    }
+
+    /** Marca y número de página, al pie. */
+    private function pie(): void
+    {
+        $y = $this->pdf->pageHeight() - 24;
+        $this->pdf->line(self::MARGEN, $y - 8, self::MARGEN + $this->anchoContenido, $y - 8, 0.3, '#dddddd');
+        $this->pdf->text(self::MARGEN, $y, sprintf(self::PIE_TEXTO, $this->anio), 6, false, self::GRIS_SUAVE);
+        $this->pdf->textRight(self::MARGEN + $this->anchoContenido, $y, (string) $this->pagina, 6.5, true, self::GRIS_SUAVE);
     }
 
     /** Corta la página si lo que viene no entra. */
@@ -1390,9 +1440,7 @@ final class CaseSheetPdf
         if ($this->y + $necesario <= $this->pdf->pageHeight() - self::PIE) {
             return;
         }
-        $this->pdf->addPage();
-        $this->y = self::MARGEN;
-        $this->pdf->text(self::MARGEN, $this->y - 12, $this->encabezadoCorrido, 7, false, self::GRIS_SUAVE);
+        $this->abrirPagina();
     }
 
     /**
