@@ -40,6 +40,8 @@ from backend.shedule_sync import backend_state_to_shedule, diff_and_push_shedule
 _backend_client = None
 _shedule_snapshot = {"agenda_1": {}}
 _cases_snapshot = {}
+# None = todavía no se leyó session.json (ver sesion_es_docente).
+_sesion_docente = None
 
 # Permisos con vista de docente (ver Auth.php: PERMISSION_ADMIN 777 /
 # PERMISSION_DOCENTE 555). Los dos ven la agenda completa y atienden en modo
@@ -49,6 +51,39 @@ PERMISOS_DOCENTE = (777, 555)
 
 def es_docente(permission) -> bool:
     return permission in PERMISOS_DOCENTE
+
+
+def sesion_es_docente() -> bool:
+    """True si la sesión guardada en session.json es de docente/admin.
+
+    Mira el archivo y no data_login porque quien necesita esto son módulos
+    sueltos (impedanciómetro, respuestas del paciente) que reciben el caso
+    pero nunca el usuario. Sin sesión (todavía en el login) devuelve False:
+    el criterio seguro es no imprimir.
+    """
+    global _sesion_docente
+    if _sesion_docente is None:
+        try:
+            with open(context.get_resource('json/session.json'), encoding='utf-8') as archivo:
+                usuario = json.load(archivo).get('user') or {}
+            _sesion_docente = es_docente(usuario.get('permission'))
+        except (OSError, json.JSONDecodeError, AttributeError):
+            _sesion_docente = False
+    return _sesion_docente
+
+
+def debug_print(*args, **kwargs) -> None:
+    """print() que solo sale si atiende un docente/admin.
+
+    Varios módulos vuelcan el caso entero a consola para depurar (el dict
+    con umbrales, tipo de curva timpanométrica, LDL, historia clínica...).
+    Para el alumno eso es la respuesta del ejercicio servida antes de
+    medir -- y no basta con que la ventana de consola no se vea: todo lo
+    que pasa por print() queda además en el archivo de log local (ver
+    core/Logger.py). Con esto, para el alumno directamente no se imprime.
+    """
+    if sesion_es_docente():
+        print(*args, **kwargs)
 
 
 def _get_backend_client() -> BackendClient:
@@ -165,8 +200,11 @@ def reset_backend_session() -> None:
     request pega con el token/rol de la sesión anterior. Llamar esto en
     cuanto llega un login nuevo fuerza a releer session.json desde cero.
     """
-    global _backend_client, _shedule_snapshot, _cases_snapshot
+    global _backend_client, _shedule_snapshot, _cases_snapshot, _sesion_docente
     _backend_client = None
+    # El permiso cacheado es de la sesión anterior: con otro usuario
+    # logueado, un alumno heredaría los volcados a consola del docente.
+    _sesion_docente = None
     _shedule_snapshot = {"agenda_1": {}}
     _cases_snapshot = {}
 

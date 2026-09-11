@@ -21,7 +21,7 @@ from impedanciometria.ZETFscreen import ZETFscreen
 from impedanciometria.h_z import changeSide, changeSideText, sideText, printer, date_time
 from impedanciometria.z_generator import Z_225, Reflex_curve, map_letter_for_probe
 from impedanciometria.z_audio import ProbeTone, ReflexTone
-from core.helpers import Storage
+from core.helpers import Storage, debug_print
 
 
 class ZControl(QWidget, Ui_Z_control):
@@ -182,11 +182,13 @@ class ZControl(QWidget, Ui_Z_control):
 
     def preCharger(self):
         side = sideText(f"Z_{self.Z.get_side()}")
-        print(self.data)
+        # El caso entero (umbrales, letra del timpanograma, volumen): para
+        # el alumno es la respuesta del ejercicio, ver helpers.debug_print.
+        debug_print(self.data)
         win_neg = self.window_neg_values[self.window_neg_idx]
         win_pos = self.window_pos_values[self.window_pos_idx]
         if self.store_data[side].is_null(0):
-            print(f"side : {side}")
+            debug_print(f"side : {side}")
             if self.data is not None:
                 seed_key = (self.data.get('id'), self.Z.get_side(), self.probe_freq)
                 zGerger = self.data[f"Z_{self.Z.get_side()}"]

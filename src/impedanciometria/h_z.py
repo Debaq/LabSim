@@ -1,6 +1,8 @@
 from PySide6.QtWidgets import QApplication, QFileDialog
 from datetime import datetime
 
+from core.helpers import debug_print
+
 
 def printer(self, widget):
     screen = QApplication.primaryScreen()
@@ -33,7 +35,7 @@ def changeSideText(side):
 
 
 def sideText(side):
-    print(side)
+    debug_print(side)
     _,text = side.split('_')
     if text == 'OD':
         result = 0

@@ -941,3 +941,25 @@ porción cada vez menor de la foto.
       cierra la atención, se pierde (sube best-effort, como los demás
       módulos). Distinto de ABR/EOA, ahí el informe al menos queda en
       pantalla para reintentar.
+
+## Consola: los volcados de depuración solo para docente (2026-09-11)
+
+Al empezar a atender, el impedanciómetro imprimía el caso entero
+(`Z.preCharger` → `print(self.data)`: umbrales, letra del timpanograma,
+volumen) y el motor de respuestas del paciente iba imprimiendo umbrales,
+LDL y decisiones a medida que el alumno estimulaba. Para el alumno eso es
+la respuesta del ejercicio servida antes de medir, y no alcanza con que la
+consola no se vea: todo lo que pasa por `print()` queda además en el log
+local (`core/Logger.py`).
+
+`helpers.debug_print()` imprime solo si la sesión guardada es docente/admin
+(lee `session.json`, cachea el permiso y lo invalida en
+`reset_backend_session()`, que corre en cada login). Sin sesión no imprime:
+el criterio seguro es callar. Se pasaron a `debug_print` los volcados de
+`Z.py`, `h_z.py`, `response.py`, `Fowler.py` y el de la ficha en
+`Agenda.py`.
+
+- [ ] Los `print()` de los módulos de examen que quedan (ABR, EOA, VEMP)
+      son mensajes de error, no volcados de datos, y siguen saliendo para
+      todos. Si algún día imprimen datos del caso, tienen que pasar por
+      `debug_print` también.

@@ -18,7 +18,7 @@ from PySide6.QtCore import QDate, QTime, QDateTime, Qt, QThread, Signal
 from PySide6.QtGui import QBrush, QColor, QFont, QTextCharFormat
 from agenda.UI.Ui_agenda import Ui_Form
 from core import feriados as feriados_cl
-from core.helpers import (Shedule, entry_estado_por, CasesOffline,
+from core.helpers import (Shedule, entry_estado_por, CasesOffline, debug_print,
                           es_docente,
                           marcar_entry_no_show,
                           obtener_nota_atencion,
@@ -645,7 +645,7 @@ class Agenda(QWidget, Ui_Form):
 
         cases = CasesOffline().get_cases()
         caso = cases.get(case_id, {})
-        print(f"[agenda_ficha] case_id={case_id!r} (type={type(case_id).__name__}) "
+        debug_print(f"[agenda_ficha] case_id={case_id!r} (type={type(case_id).__name__}) "
               f"cases_keys_sample={list(cases.keys())[:10]!r} "
               f"historia_clinica={caso.get('historia_clinica')!r}")
 

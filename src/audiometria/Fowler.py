@@ -1,3 +1,5 @@
+from core.helpers import debug_print
+
 # Requisitos clínicos de aplicabilidad de Fowler/I.W.A. (ABLB) -- deben
 # coincidir exactamente con CaseBuilder::fowlerValidationError en el backend
 # (labsim_backend/src/CaseBuilder.php). El alumno no sabe de antemano en qué
@@ -84,7 +86,7 @@ class Fowler:
         self.cuts[0] = self.th_est + cut_1 #reclutamiento parcial
         self.cuts[1] = self.th_est + cut_2 #reclutamiento
         self.cuts[2] = self.th_est + cut_3 #sobre reclutamiento
-        print(self.cuts)
+        debug_print(self.cuts)
         
 
     def define_ints(self, ints:list) -> None:

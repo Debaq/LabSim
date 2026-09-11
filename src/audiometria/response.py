@@ -1,7 +1,7 @@
 import random
 import time
 
-from core.helpers import CasesOffline
+from core.helpers import CasesOffline, debug_print
 from core.helpers import Preferences
 from PySide6.QtCore import QTimer
 from audiometria.response_A import Response
@@ -97,10 +97,10 @@ class ResponseAudiometry():
                       [dbdata['Osea'][i][1] for i in range(len(dbdata['Osea']))]]
         
     def response_(self):
-        print(f">>>{self.history_command}")
+        debug_print(f">>>{self.history_command}")
         list_ = [0,1,2]
         uphand = any(elem in self.data['audio']['stim'] for elem in list_)
-        print(uphand)
+        debug_print(uphand)
         #['dictar_palabras', 'vibrador_+_ruido', 'molesto_o', 'dictar_palabras']
         if uphand:        
             if self.history_command:
@@ -128,7 +128,7 @@ class ResponseAudiometry():
 
                     self.response_sdt()
             else:
-                print("no has dado comando alguno")
+                debug_print("no has dado comando alguno")
         else:
             pass
         try:  
@@ -139,12 +139,12 @@ class ResponseAudiometry():
             elif  self.history_command[0] == 'vibrador_+_ruido' and self.data['audio']['stimOn'].count(True) < 2:
                 self.downHand()
         except IndexError:
-            print("no has dado comando alguno")
+            debug_print("no has dado comando alguno")
 
 
         
     def set_config(self, data):
-        print("cambio el sender")
+        debug_print("cambio el sender")
         name = data.objectName()
         str_ = data.text()
         name = name.split('_')
@@ -223,7 +223,7 @@ class ResponseAudiometry():
                     else:
                         self.downHand()
                 else: #si no es habla
-                    print("ese es el mkg")
+                    debug_print("ese es el mkg")
                     self.downHand()
             elif count == 2:
                 self.response_sdt_w_mkg()
@@ -476,7 +476,7 @@ class ResponseAudiometry():
             self.decay_timer.stop()
             self._decay_run = {}
             self.upHand()
-            print(f"[Stat] {side} {self.frecuency[freq]}Hz: presentado a {int_}dB HL, "
+            debug_print(f"[Stat] {side} {self.frecuency[freq]}Hz: presentado a {int_}dB HL, "
                   f"el test se administra a {self.STAT_LEVEL_DB}dB HL "
                   f"(+-{self.STAT_LEVEL_TOL}); sin resultado válido")
             return
@@ -513,7 +513,7 @@ class ResponseAudiometry():
         self.decay_timer.start(int(hold_ms))
 
         if cfg.get('fixed_level'):
-            print(f"[Stat] {side} {self.frecuency[freq]}Hz: a {int_}dB HL sostiene "
+            debug_print(f"[Stat] {side} {self.frecuency[freq]}Hz: a {int_}dB HL sostiene "
                   f"~{hold_ms/1000:.1f}s de {self.DECAY_HOLD_MS/1000:.0f}s -> positivo")
             return
 
@@ -521,7 +521,7 @@ class ResponseAudiometry():
         if int_ >= ceiling:
             # techo (salida máxima o disconfort): este es el último nivel
             # posible, sostiene hold_ms y luego la mano baja para siempre
-            print(f"[{cfg['data_key']}] {side} {self.frecuency[freq]}Hz: "
+            debug_print(f"[{cfg['data_key']}] {side} {self.frecuency[freq]}Hz: "
                   f"llega al techo ({ceiling}dB HL), sostiene ~{hold_ms/1000:.1f}s de "
                   f"{self.DECAY_HOLD_MS/1000:.0f}s sin lograr el minuto completo")
 
@@ -704,7 +704,7 @@ class ResponseAudiometry():
         """
         if self.data['audio']['test'] == 'Umbrales':
             if self.data['audio']['stimOn'].count(True) == 2:
-                print(self.data)
+                debug_print(self.data)
                 if (any(s in self.data['audio']['stim']
                         for s in RUIDOS_ENMASCARANTES)
                         and 1 in self.data['audio']['trans']):
@@ -762,7 +762,7 @@ class ResponseAudiometry():
                 output = self.data['audio']['output'][stim_on] #derecho o izquierdo
                 o_n = int(not output)
                 frecuency = self.data['audio']['freq'] #indice
-                print(frecuency)
+                debug_print(frecuency)
                 int_ = self.data['audio']['int'][stim_on]
                 # sin canal de mkg encendido = ruido de enmascaramiento en 0
                 # (submascarado en cuanto haga falta enmascarar -> curva sombra)
@@ -776,7 +776,7 @@ class ResponseAudiometry():
                     self.downHand()
 
             elif self.data['audio']['stimOn'].count(True) == 2:
-                print("escucho en ambos oidos")
+                debug_print("escucho en ambos oidos")
                 #deberia tener umbral en el mejor
         
     def Action(self, action):
@@ -792,9 +792,9 @@ class ResponseAudiometry():
             self.history_command.insert(0, rol)
             while len(self.history_command) > max_list:
                 self.history_command.pop()
-            print(self.history_command)
+            debug_print(self.history_command)
         if rol == 'pa_pa_pa':
-            print("ahora somos papapa")
+            debug_print("ahora somos papapa")
         if rol == 'dictar_palabras':
             pass
             #self.obj_audio()
