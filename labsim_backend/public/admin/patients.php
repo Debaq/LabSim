@@ -198,6 +198,10 @@ admin_header('Fichas Clínicas', $me);
                 <a href="agenda.php?schedule=<?= urlencode($c['id']) ?>" class="action-btn primary">
                     <?= $c['appointment_id'] ? 'Reagendar' : 'Agendar' ?>
                 </a>
+                <?php if ($c['appointment_id']): ?>
+                <a href="agenda.php?schedule=<?= urlencode($c['id']) ?>&amp;force_round=1" class="action-btn secondary"
+                   title="Cita nueva para este paciente, sin tocar la que ya tiene agendada">+ Otra cita</a>
+                <?php endif; ?>
                 <a href="case_create.php?edit=<?= urlencode($c['id']) ?>" class="action-btn secondary">Editar ficha</a>
                 <a href="case_sheet_pdf.php?id=<?= urlencode($c['id']) ?>" class="action-btn secondary" target="_blank" rel="noopener"
                    title="Ficha completa en PDF: perfil, audiograma, impedanciometría, acumetría, logoaudiometría, supraliminares, ABR, OEA y VEMP">PDF</a>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Patients.php';
+require_once __DIR__ . '/../../src/Appointments.php';
 
 /**
  * Crea o edita una cita de agenda. Sin id (o id <= 0) crea una nueva.
@@ -31,14 +32,30 @@ $fields = [
 
 $pdo = Db::get();
 
-if ($fields['fecha'] !== '' && $fields['hora'] !== '') {
-    $stmt = $pdo->prepare(
-        'SELECT id FROM appointments WHERE fecha = ? AND hora = ? AND id != ?'
-    );
-    $stmt->execute([$fields['fecha'], $fields['hora'], $id]);
-    if ($stmt->fetch()) {
-        Response::error('Ya existe una cita agendada en esa fecha y hora', 409);
+// El choque es por audiencia, no por fecha/hora global: el mismo paciente puede
+// repetirse el mismo día a otra hora, y dos grupos distintos pueden atender a la
+// misma hora. Ver Appointments. La asignación (curso/grupo/alumno) no viaja en
+// este endpoint -- se conserva la de la cita, y una cita creada desde el cliente
+// nace sin curso (cola global legado).
+$asignacion = ['course_id' => null, 'assigned_group_id' => null, 'assigned_student_id' => null];
+if ($id > 0) {
+    $stmt = $pdo->prepare('SELECT course_id, assigned_group_id, assigned_student_id FROM appointments WHERE id = ?');
+    $stmt->execute([$id]);
+    $guardada = $stmt->fetch();
+    if ($guardada !== false) {
+        $asignacion = [
+            'course_id' => $guardada['course_id'],
+            'assigned_group_id' => $guardada['assigned_group_id'],
+            'assigned_student_id' => $guardada['assigned_student_id'],
+        ];
     }
+}
+$choque = Appointments::buscarChoque($pdo, array_merge($asignacion, [
+    'fecha' => $fields['fecha'],
+    'hora' => $fields['hora'],
+]), $id);
+if ($choque !== null) {
+    Response::error(Appointments::textoChoque($pdo, $choque), 409);
 }
 
 // Un solo punto de entrada para escribir identidad de paciente (Patients) --

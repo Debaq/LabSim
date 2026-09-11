@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/../../src/Patients.php';
 require_once __DIR__ . '/../../src/Feriados.php';
 require_once __DIR__ . '/../../src/CaseCompleteness.php';
+require_once __DIR__ . '/../../src/Appointments.php';
 
 /**
  * Configuración de agendas por curso/grupo/alumno: agendar, reagendar,
@@ -106,12 +107,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($caseId === '') {
             $error = 'Falta el caso.';
-        } elseif ($fecha !== '' && $hora !== '') {
-            $stmt = $pdo->prepare('SELECT id FROM appointments WHERE fecha = ? AND hora = ? AND id != ?');
-            $stmt->execute([$fecha, $hora, $appointmentId]);
-            if ($stmt->fetch()) {
-                $error = 'Ya existe una cita agendada en esa fecha y hora.';
-            }
         }
 
         // Un caso al que le falta lo que no se puede calcular (curva
@@ -152,6 +147,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$stmt->fetch()) {
                     $error = 'El grupo elegido no pertenece al curso seleccionado.';
                 }
+            }
+        }
+
+        if ($error === null) {
+            // Editar una cita legado sin curso no obliga a elegir uno (el UPDATE
+            // hace COALESCE): para el choque vale el que ya tiene guardado.
+            $courseIdEfectivo = $courseId;
+            if ($courseIdEfectivo === null && $appointmentId > 0) {
+                $stmt = $pdo->prepare('SELECT course_id FROM appointments WHERE id = ?');
+                $stmt->execute([$appointmentId]);
+                $cursoGuardado = $stmt->fetchColumn();
+                $courseIdEfectivo = ($cursoGuardado !== false && $cursoGuardado !== null) ? (int) $cursoGuardado : null;
+            }
+            $choque = Appointments::buscarChoque($pdo, [
+                'fecha' => $fecha,
+                'hora' => $hora,
+                'course_id' => $courseIdEfectivo,
+                'assigned_group_id' => $assignedGroupId,
+                'assigned_student_id' => $assignedStudentId,
+            ], $appointmentId);
+            if ($choque !== null) {
+                $error = Appointments::textoChoque($pdo, $choque);
             }
         }
 
@@ -353,6 +370,12 @@ if ($scheduleRow !== null && !$scheduleRow['appointment_id']) {
     $scheduleSnapshot = is_array($data) ? ($data['paciente_snapshot'] ?? []) : [];
 }
 $scheduleForceRound = isset($_GET['force_round']) && $_GET['force_round'] === '1';
+$scheduleAppointmentsCount = 0;
+if ($scheduleRow !== null) {
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM appointments WHERE case_id = ?');
+    $stmt->execute([$scheduleRow['id']]);
+    $scheduleAppointmentsCount = (int) $stmt->fetchColumn();
+}
 $scheduleIsNewRound = $scheduleRow !== null && (bool) $scheduleRow['appointment_id'] && $scheduleForceRound;
 // Identidad del paciente ya fija apenas el caso tuvo una primera cita --
 // nombre/apellido/fecha_nac/rut se editan solo desde "Editar ficha"
@@ -517,7 +540,11 @@ admin_header('Agendas', $me);
 <div class="card modal-box">
     <div class="modal-box-header">
         <strong>
+            <?php if ($scheduleIsNewRound): ?>
+            Nueva cita para el caso <?= htmlspecialchars($scheduleRow['id']) ?>
+            <?php else: ?>
             <?= $scheduleRow['appointment_id'] ? 'Reagendar caso ' . htmlspecialchars($scheduleRow['id']) : 'Agendar caso ' . htmlspecialchars($scheduleRow['id']) ?>
+            <?php endif; ?>
         </strong>
         <a class="modal-close" href="<?= agenda_url(['schedule' => null, 'appointment' => null, 'force_round' => null, 'new' => null, 'fecha' => null]) ?>" title="Cerrar">✕</a>
     </div>
@@ -525,17 +552,15 @@ admin_header('Agendas', $me);
         Ojo: en la app del alumno, la Agenda por defecto solo muestra las citas de <strong>hoy</strong>
         (hay un selector de fecha y una casilla "Ver todas las citas habilitadas" para ver otros días).
     </p>
-    <?php if ($scheduleForceRound): ?>
+    <?php if ($scheduleIsNewRound): ?>
     <p class="text-warn">
-        <strong>Nueva cita</strong> para el mismo paciente -- se crea una cita aparte (horario/grupo propios) sin
-        tocar la que ya tenía agendada. El historial completo del caso se ve desde
-        <a href="patients.php">Fichas Clínicas</a>.
-    </p>
-    <?php elseif ($scheduleIsNewRound): ?>
-    <p class="text-warn">
-        Esta cita ya tiene atenciones registradas -- guardar acá crea una <strong>ronda nueva</strong> (cita distinta)
-        en vez de editar la anterior, para no perder el historial de esa ronda. El historial completo del caso se ve
-        desde <a href="patients.php">Fichas Clínicas</a>.
+        <strong>Cita nueva</strong> para el mismo paciente -- se crea una fila aparte (fecha/hora, curso y grupo
+        propios) sin tocar las que ya tenía agendadas, y con su propio historial de atenciones. El historial
+        completo del caso se ve desde <a href="patients.php">Fichas Clínicas</a>.
+        <?php if ($scheduleAppointmentsCount > 0): ?>
+        Este caso ya tiene <?= (int) $scheduleAppointmentsCount ?> cita<?= $scheduleAppointmentsCount === 1 ? '' : 's' ?>
+        (<a href="<?= agenda_url(['history' => $scheduleRow['id']]) ?>#historial">ver historial</a>).
+        <?php endif; ?>
     </p>
     <?php endif; ?>
     <form method="post">
@@ -546,7 +571,7 @@ admin_header('Agendas', $me);
         <input type="hidden" name="force_round" value="<?= $scheduleForceRound ? '1' : '0' ?>">
         <label>Fecha (vacío = sin agendar aún)
             <input type="date" name="fecha" id="schedule-fecha" min="2015-01-01" max="<?= date('Y-m-d', strtotime('+2 years')) ?>"
-                   value="<?= $scheduleForceRound ? '' : htmlspecialchars($prefillFechaIso ?? legacy_to_iso($scheduleRow['fecha'] ?? '')) ?>"
+                   value="<?= htmlspecialchars($prefillFechaIso ?? ($scheduleForceRound ? '' : legacy_to_iso($scheduleRow['fecha'] ?? ''))) ?>"
                    oninput="avisarFeriado()">
         </label>
         <!-- Aviso, no bloqueo: puede haber una razón para agendar un feriado
@@ -644,6 +669,11 @@ admin_header('Agendas', $me);
     </form>
     <?php if ($scheduleRow['appointment_id'] && !$scheduleForceRound): ?>
     <hr style="margin:1rem 0; border:none; border-top:1px solid var(--color-border);">
+    <p style="font-size:0.85rem; margin:0 0 0.6rem;">
+        Guardar acá <strong>edita esta misma cita</strong>. Para citar otra vez al mismo paciente (otro día, otra
+        hora, o el mismo día para otro grupo) sin alterar esta:
+        <a href="<?= agenda_url(['schedule' => $scheduleRow['id'], 'appointment' => $scheduleRow['appointment_id'], 'force_round' => 1, 'fecha' => null]) ?>">agendar una cita nueva &rarr;</a>
+    </p>
     <form method="post" style="display:inline;" onsubmit="return confirm(<?= htmlspecialchars(json_encode(
         '¿Eliminar esta cita (' . trim(($scheduleRow['fecha'] ?? '') . ' ' . ($scheduleRow['hora'] ?? '')) . ')? '
         . 'Se borran también las atenciones registradas para ella. El caso y sus otras citas, si tenía, se conservan. '
@@ -710,7 +740,7 @@ admin_header('Agendas', $me);
             <?php foreach ($caseOptions as $co): ?>
             <option value="<?= htmlspecialchars($co['id']) ?>"
                     data-search="<?= htmlspecialchars(mb_strtolower($co['label'])) ?>"
-                    data-href="<?= htmlspecialchars(agenda_url(['schedule' => $co['id'], 'new' => null])) ?>">
+                    data-href="<?= htmlspecialchars(agenda_url(['schedule' => $co['id'], 'new' => null, 'force_round' => 1])) ?>">
                 <?= htmlspecialchars($co['label']) ?>
             </option>
             <?php endforeach; ?>
