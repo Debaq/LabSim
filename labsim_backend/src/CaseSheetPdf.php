@@ -616,7 +616,25 @@ final class CaseSheetPdf
             ];
         }
         $anchoReflejos = $this->anchoContenido * 0.56;
-        $finReflejos = $this->tablaEn(self::MARGEN, $yTablasZ, $anchoReflejos, $filas, [0.22, 0.19, 0.2, 0.19, 0.2], true);
+        // En CONTRA el estímulo entra por el oído opuesto al de la sonda, así
+        // que esas dos columnas --encabezado incluido-- llevan el color del
+        // oído estimulado y no el de la columna. Es la misma convención con
+        // la que el editor pinta el patrón (public/js/case/reflex-pattern.js).
+        $finReflejos = $this->tablaEn(
+            self::MARGEN,
+            $yTablasZ,
+            $anchoReflejos,
+            $filas,
+            [0.22, 0.19, 0.2, 0.19, 0.2],
+            true,
+            [
+                0 => CaseCharts::COLOR_OI,
+                1 => CaseCharts::COLOR_OD,
+                2 => '',
+                3 => CaseCharts::COLOR_OI,
+                4 => CaseCharts::COLOR_OD,
+            ]
+        );
 
         // Al lado, los números de la curva. La ficha guarda solo el tipo
         // Jerger, así que compliance, presión y ancho salen de la misma
@@ -963,7 +981,9 @@ final class CaseSheetPdf
                         ? sprintf(' · falsa onda V %s µV a %s ms', (string) $falsaV['amp'], (string) ($falsaV['lat'] ?? 5.6))
                         : ''
                 ),
-                6.5
+                6.5,
+                null,
+                $ladoForm === 'od' ? CaseCharts::COLOR_OD : CaseCharts::COLOR_OI
             );
         }
     }
@@ -1070,16 +1090,18 @@ final class CaseSheetPdf
             );
 
             // Debajo, qué banda pasa y cuál no: es el PASS/REFER del equipo.
-            $resumen = [];
-            foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $tag) {
+            // Cada oído con su color, como todo el resto de la ficha.
+            $xResumen = $x;
+            foreach (['od' => CaseCharts::COLOR_OD, 'oi' => CaseCharts::COLOR_OI] as $lado => $colorLado) {
                 $pasan = 0;
                 foreach ($pruebas[$lado][$clave]['bandas'] as $banda) {
                     $pasan += $banda['pasa'] ? 1 : 0;
                 }
                 $total = count($pruebas[$lado][$clave]['bandas']);
-                $resumen[] = $tag . ': ' . $pasan . '/' . $total . ' bandas sobre el ruido';
+                $texto = strtoupper($lado) . ': ' . $pasan . '/' . $total . ' sobre el ruido';
+                $this->pdf->text($xResumen, $this->y + $alto + 18, $texto, 6, false, $colorLado);
+                $xResumen += $this->pdf->textWidth($texto, 6) + 12;
             }
-            $this->pdf->text($x, $this->y + $alto + 18, implode('   ·   ', $resumen), 6, false, self::GRIS_TEXTO);
         }
 
         // SOAE: el cuarto examen, que no lleva estímulo. Lo que hay que ver
@@ -1106,13 +1128,15 @@ final class CaseSheetPdf
                                 : $oct * CaseOae::SOAE['piso_subida_agudo_db_oct']);
             }
         );
-        $modos = [];
-        foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $tag) {
+        $xModo = $x;
+        foreach (['od' => CaseCharts::COLOR_OD, 'oi' => CaseCharts::COLOR_OI] as $lado => $colorLado) {
             $modo = $soae[$lado]['modo'];
             $picos = count($soae[$lado]['picos']);
-            $modos[] = $tag . ': ' . $modo . ($picos > 0 ? " ({$picos} pico" . ($picos === 1 ? '' : 's') . ' fijado' . ($picos === 1 ? '' : 's') . ')' : '');
+            $texto = strtoupper($lado) . ': ' . $modo
+                . ($picos > 0 ? " ({$picos} pico" . ($picos === 1 ? '' : 's') . ' fijado' . ($picos === 1 ? '' : 's') . ')' : '');
+            $this->pdf->text($xModo, $this->y + $alto + 18, $texto, 6, false, $colorLado);
+            $xModo += $this->pdf->textWidth($texto, 6) + 12;
         }
-        $this->pdf->text($x, $this->y + $alto + 18, implode('   ·   ', $modos), 6, false, self::GRIS_TEXTO);
 
         // Al lado del SOAE, los parámetros del oído.
         $filas = [['', 'OD', 'OI']];
@@ -1518,7 +1542,7 @@ final class CaseSheetPdf
         $this->y += 12;
     }
 
-    private function parrafo(string $texto, float $size = 8, ?float $ancho = null): void
+    private function parrafo(string $texto, float $size = 8, ?float $ancho = null, ?string $color = null): void
     {
         $this->espacio(($size * 1.35) * 2);
         $base = $this->y + self::ASCENDENTE * $size;
@@ -1530,7 +1554,7 @@ final class CaseSheetPdf
             $size,
             false,
             0,
-            self::GRIS_TEXTO
+            $color ?? self::GRIS_TEXTO
         );
         $this->y = $fin - self::ASCENDENTE * $size + 2;
     }
@@ -1607,8 +1631,15 @@ final class CaseSheetPdf
      * Tabla en una posición arbitraria (para poner una al lado de un
      * gráfico). Devuelve la Y del final, y NO toca la del documento.
      */
-    private function tablaEn(float $x, float $y, float $ancho, array $filas, array $anchos, bool $conCabecera = false): float
-    {
+    private function tablaEn(
+        float $x,
+        float $y,
+        float $ancho,
+        array $filas,
+        array $anchos,
+        bool $conCabecera = false,
+        array $coloresColumna = []
+    ): float {
         $altoFila = 12.0;
         foreach ($filas as $i => $fila) {
             $esCabecera = $conCabecera && $i === 0;
@@ -1619,13 +1650,23 @@ final class CaseSheetPdf
             foreach (array_values($fila) as $j => $celda) {
                 $anchoCol = $ancho * (float) ($anchos[$j] ?? (1 / max(1, count($fila))));
                 $primera = $j === 0;
+                // El color del oído manda sobre el gris: leer una ficha es
+                // ir saltando entre OD y OI, y el color es lo que permite
+                // hacerlo sin volver a la cabecera. Una columna puede pedir
+                // el suyo (los reflejos contra van cruzados).
+                $color = array_key_exists($j, $coloresColumna)
+                    ? $coloresColumna[$j]
+                    : self::colorDeOido((string) $celda);
+                if ($color === null || $color === '') {
+                    $color = $esCabecera ? self::GRIS_TITULO : self::GRIS_TEXTO;
+                }
                 $this->pdf->text(
                     $cx + 3,
                     $y + $altoFila - 3.5,
                     (string) $celda,
                     7.2,
                     $esCabecera || $primera,
-                    $esCabecera ? self::GRIS_TITULO : self::GRIS_TEXTO
+                    $color
                 );
                 $cx += $anchoCol;
             }
@@ -1732,6 +1773,20 @@ final class CaseSheetPdf
             }
         }
         return $mejor;
+    }
+
+    /**
+     * Color del oído que nombra un texto, o null si no nombra ninguno (o
+     * los dos). Con límites de palabra: "sin vía ósea" no es un OD.
+     */
+    private static function colorDeOido(string $texto): ?string
+    {
+        $od = preg_match('/\bOD\b/', $texto) === 1;
+        $oi = preg_match('/\bOI\b/', $texto) === 1;
+        if ($od === $oi) {
+            return null;
+        }
+        return $od ? CaseCharts::COLOR_OD : CaseCharts::COLOR_OI;
     }
 
     /** Umbral del reflejo, o (-) cuando no hay respuesta en toda la escala. */
