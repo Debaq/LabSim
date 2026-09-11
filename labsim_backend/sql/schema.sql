@@ -240,7 +240,7 @@ CREATE INDEX IF NOT EXISTS idx_attendances_student ON attendances (student_id);
 CREATE TABLE IF NOT EXISTS reports (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     attendance_id INTEGER NOT NULL REFERENCES attendances(id),
-    tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'EOA', 'VEMP', 'ELECTROCOCLEO')),
+    tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'OTOSCOPIA')),
     data TEXT NOT NULL,                -- JSON: latencias/amplitudes marcadas, conclusión escrita
     -- Sin columna para el nombre del PDF: es determinista a partir de id
     -- (ver ReportFile::pdfPath()), igual que las imágenes.

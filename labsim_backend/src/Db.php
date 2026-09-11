@@ -389,6 +389,47 @@ final class Db
     }
 
     /**
+     * Amplía el CHECK de reports.tipo para aceptar 'OTOSCOPIA' (informe de
+     * otoscopia por cuadrantes que sube el alumno desde el módulo de
+     * otoscopia). SQLite no permite modificar un CHECK con ALTER TABLE:
+     * hay que reconstruir la tabla y copiar las filas, como en
+     * migrateAppConfigCourseIdIfNeeded. Debe llamarse ANTES de aplicar
+     * schema.sql, que recrea el índice de la tabla.
+     */
+    public static function migrateReportsOtoscopiaIfNeeded(): void
+    {
+        $pdo = self::get();
+        $stmt = $pdo->prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'reports'");
+        $stmt->execute();
+        $sql = (string) $stmt->fetchColumn();
+        // Tabla todavía inexistente (instalación nueva): la crea schema.sql
+        // ya con el CHECK nuevo, no hay nada que migrar.
+        if ($sql === '' || strpos($sql, 'OTOSCOPIA') !== false) {
+            return;
+        }
+        $pdo->exec('ALTER TABLE reports RENAME TO reports_old');
+        $pdo->exec(
+            "CREATE TABLE reports (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                attendance_id INTEGER NOT NULL REFERENCES attendances(id),
+                tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'OTOSCOPIA')),
+                data TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE (attendance_id, tipo)
+            )"
+        );
+        // Se conservan los id: el PDF y las imágenes en disco se nombran a
+        // partir de reports.id (ver ReportFile::pdfPath()), reasignarlos
+        // dejaría cada informe apuntando a los archivos de otro.
+        $pdo->exec(
+            'INSERT INTO reports (id, attendance_id, tipo, data, created_at, updated_at)
+             SELECT id, attendance_id, tipo, data, created_at, updated_at FROM reports_old'
+        );
+        $pdo->exec('DROP TABLE reports_old');
+    }
+
+    /**
      * Agrega users.is_demo/courses.demo_user_id -- instalaciones de antes
      * del estudiante demo por curso (ver comentarios de esas columnas en
      * sql/schema.sql). 0/NULL respectivamente no cambia nada de lo ya

@@ -886,3 +886,45 @@ pantalla. Por eso siguen siendo dos gradientes y dos filas.
       convención la define el docente, pero dar vuelta la resta en
       `Z_225._calc_gradient`, `Z.move` y `CaseCharts::gradienteDe` es todo
       lo que hace falta.
+
+## Otoscopia: cono del espéculo e informe por cuadrantes (2026-09-11)
+
+La ventana de otoscopia pasó a tener dos pestañas. "Otoscopio" es lo de
+siempre (las dos fotos tapadas salvo el círculo que sigue al mouse) más dos
+botones de tamaño de cono: pediátrico (radio 42 px, lo que se veía hasta
+ahora) y adulto (84 px, el doble de diámetro). "Informe" es nueva: el
+esquema de la membrana timpánica por oído, con los cuatro cuadrantes y la
+pars flácida clickeables, una paleta de ocho hallazgos, las casillas del
+CAE y observaciones libres.
+
+El esquema y las claves (`anterior_superior`, `perforation`, `cae_cerumen`,
+…) son los de OtoReport (proyecto aparte, `src/components/otoscopy/`) a
+propósito: es la misma herramienta que el alumno va a usar en clínica, y
+así un informe de LabSim se puede leer con lo que ya existe allá.
+
+Decisiones que se tomaron sin preguntar:
+
+- El informe viaja por el camino que ya existe para ABR/EOA/VEMP
+  (`report_upload.php`, tabla `reports`) con un tipo nuevo `OTOSCOPIA`, y
+  el docente lo ve como PDF desde admin/chat_detail.php igual que los
+  otros. La alternativa era una tabla propia y una vista HTML aparte:
+  misma información, el doble de superficie nueva.
+- No se suben imágenes con este informe: lo que el alumno informa son las
+  marcas, y la foto del caso ya la tiene el backend (`OtoscopiaPhoto.php`).
+- El CHECK de `reports.tipo` no se puede ampliar con ALTER TABLE en
+  SQLite: `Db::migrateReportsOtoscopiaIfNeeded()` reconstruye la tabla
+  conservando los id (el PDF y las imágenes en disco se nombran a partir
+  de `reports.id`). Corre desde admin → Base de datos → Aplicar schema.
+  **Hasta que eso no se corra en el hosting, subir un informe de otoscopia
+  falla con CHECK constraint.**
+
+- [ ] Falta probarlo contra el backend real: el guardado se probó sin
+      sesión (dice "no hay sesión iniciada con el servidor") y el PDF con
+      el builder directo, no con una atención de verdad.
+- [ ] No hay otoscopía neumática (movilidad de la membrana) ni checklist
+      de hallazgos de membrana sin localización, que OtoReport sí tiene.
+      Se dejó fuera porque el módulo de LabSim no simula insuflación.
+- [ ] El informe no se guarda local: si el alumno lo llena sin conexión y
+      cierra la atención, se pierde (sube best-effort, como los demás
+      módulos). Distinto de ABR/EOA, ahí el informe al menos queda en
+      pantalla para reintentar.

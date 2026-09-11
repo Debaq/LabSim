@@ -6,11 +6,21 @@
 #               CREADOR : NICOLÁS QUEZADA QUEZADA               #
 #                                                               #
 #################################################################
+from audiometria.OtoscopiaInforme import InformeOtoscopia
+from backend.client import BackendClient
+from core.base import context
+from core.helpers import Preferences, foto_otoscopia
 from PySide6.QtCore import QRect, Qt, QThread, Signal
 from PySide6.QtGui import QColor, QPainter, QPen, QPixmap, QRegion
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
-
-from core.helpers import foto_otoscopia
+from PySide6.QtWidgets import (
+    QButtonGroup,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
 SIN_IMAGEN_TEXTO = "Otoscopio sin batería"
 
@@ -43,10 +53,12 @@ class _OtoscopioVisor(QWidget):
     un QLabel con la foto entera visible, el alumno solo ve de a un
     fragmento circular por vez, como al mirar por el instrumento real."""
 
-    RADIO = 42  # px del círculo "visible" alrededor del cursor
+    RADIO_PEDIATRICO = 42  # px del círculo "visible" alrededor del cursor
+    RADIO_ADULTO = RADIO_PEDIATRICO * 2  # cono adulto: el doble de diámetro
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self._radio = self.RADIO_PEDIATRICO
         self._pixmap = None
         self._texto = SIN_IMAGEN_TEXTO
         self._scaled = None
@@ -59,6 +71,13 @@ class _OtoscopioVisor(QWidget):
         self._pixmap = pixmap
         self._texto = None
         self._scaled = None
+        self.update()
+
+    def setRadio(self, radio):
+        """Cambia el diámetro del campo visible (tamaño del cono)."""
+        if radio == self._radio:
+            return
+        self._radio = radio
         self.update()
 
     def setText(self, texto):
@@ -117,7 +136,7 @@ class _OtoscopioVisor(QWidget):
         # mouse no está encima, queda completamente tapado).
         mascara = QRegion(rect)
         if self._mouse_pos is not None:
-            r = self.RADIO
+            r = self._radio
             circulo = QRect(self._mouse_pos.x() - r, self._mouse_pos.y() - r, r * 2, r * 2)
             mascara -= QRegion(circulo, QRegion.RegionType.Ellipse)
         painter.setClipRegion(mascara)
@@ -138,13 +157,53 @@ class Otoscopia(QWidget):
         self._fetch_thread = None
         self._case_id_pedido = None
 
-        layout = QHBoxLayout(self)
-        self.lbl_od = self._build_slot()
-        self.lbl_oi = self._build_slot()
-        layout.addLayout(self._build_columna("Oído derecho (OD)", self.lbl_od))
-        layout.addLayout(self._build_columna("Oído izquierdo (OI)", self.lbl_oi))
+        layout = QVBoxLayout(self)
+        self.tabs = QTabWidget()
+        self.tabs.addTab(self._build_tab_otoscopio(), "Otoscopio")
+        self.informe = InformeOtoscopia()
+        self.informe.guardar_pedido.connect(self._guardar_informe)
+        self.tabs.addTab(self.informe, "Informe")
+        layout.addWidget(self.tabs)
 
         self.la_super(thr)
+
+    def _build_tab_otoscopio(self):
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        fila_visores = QHBoxLayout()
+        self.lbl_od = self._build_slot()
+        self.lbl_oi = self._build_slot()
+        fila_visores.addLayout(self._build_columna("Oído derecho (OD)", self.lbl_od))
+        fila_visores.addLayout(self._build_columna("Oído izquierdo (OI)", self.lbl_oi))
+        layout.addLayout(fila_visores)
+        layout.addLayout(self._build_conos())
+        return tab
+
+    def _build_conos(self):
+        """Elección del espéculo: el pediátrico deja el campo visible chico
+        (lo de siempre) y el de adulto lo duplica en diámetro."""
+        fila = QHBoxLayout()
+        self.grupo_conos = QButtonGroup(self)
+        self.grupo_conos.setExclusive(True)
+        self.btn_cono_pediatrico = QPushButton("Cono pediátrico")
+        self.btn_cono_adulto = QPushButton("Cono adulto")
+        for btn, radio in (
+            (self.btn_cono_pediatrico, _OtoscopioVisor.RADIO_PEDIATRICO),
+            (self.btn_cono_adulto, _OtoscopioVisor.RADIO_ADULTO),
+        ):
+            btn.setCheckable(True)
+            self.grupo_conos.addButton(btn)
+            btn.clicked.connect(lambda _checked=False, r=radio: self._set_cono(r))
+        self.btn_cono_pediatrico.setChecked(True)
+        fila.addStretch(1)
+        fila.addWidget(self.btn_cono_pediatrico)
+        fila.addWidget(self.btn_cono_adulto)
+        fila.addStretch(1)
+        return fila
+
+    def _set_cono(self, radio):
+        self.lbl_od.setRadio(radio)
+        self.lbl_oi.setRadio(radio)
 
     def _build_columna(self, titulo, label):
         col = QVBoxLayout()
@@ -163,6 +222,10 @@ class Otoscopia(QWidget):
         MainWindow._hydrate_modules() cada vez que cambia el caso activo."""
         self.data = data
         self.appointment_id = appointment_id
+        # El informe es de ESTE paciente: al cambiar de caso (o al
+        # deshidratar) se limpia, si no el alumno arranca el siguiente con
+        # los cuadrantes del anterior marcados.
+        self.informe.limpiar()
         self.lbl_od.setText(SIN_IMAGEN_TEXTO)
         self.lbl_oi.setText(SIN_IMAGEN_TEXTO)
 
@@ -187,3 +250,42 @@ class Otoscopia(QWidget):
                 lbl.setPixmap(pix)
             else:
                 lbl.setText(SIN_IMAGEN_TEXTO)
+
+    def _guardar_informe(self):
+        """Botón "Guardar informe": misma subida que al cerrar la atención,
+        pero acá el alumno ve qué pasó (el cierre es best-effort silencioso)."""
+        if self.appointment_id is None:
+            self.informe.set_estado("Sin una atención abierta no hay dónde guardar el informe.")
+            return
+        ok, detalle = self._subir_informe()
+        self.informe.set_estado("Informe guardado." if ok else f"No se pudo guardar: {detalle}")
+
+    def submit_report(self):
+        """Sube el informe al cerrar la atención -- lo llama main.py::
+        _cerrar_atencion_real ANTES de deshidratar (mismo patrón que
+        AbrMainWindow.submit_report). Best-effort: sin conexión falla en
+        silencio, el cierre de la atención no se rompe por esto."""
+        if self.appointment_id is None or not self.informe.tiene_algo():
+            return
+        ok, detalle = self._subir_informe()
+        if not ok:
+            print(f"Otoscopia: no se pudo subir el informe: {detalle}")
+
+    def _subir_informe(self):
+        """(ok, detalle). Sube el informe tipo 'OTOSCOPIA' -- sin imágenes:
+        lo que el alumno informa son las marcas por cuadrante, la foto del
+        caso ya la tiene el backend (ver OtoscopiaPhoto.php)."""
+        try:
+            appointment_id = int(self.appointment_id)
+        except (TypeError, ValueError):
+            return False, "la cita no tiene un id válido"
+        client = BackendClient(
+            Preferences().get("BACKEND_URL"), context.get_resource("json/session.json")
+        )
+        if not client.is_logged_in():
+            return False, "no hay sesión iniciada con el servidor"
+        try:
+            client.upload_report(appointment_id, "OTOSCOPIA", self.informe.to_dict(), {})
+        except Exception as exc:
+            return False, str(exc)
+        return True, ""

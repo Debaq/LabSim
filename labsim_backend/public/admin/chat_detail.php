@@ -99,6 +99,7 @@ $reportLabels = [
     'EOA' => 'Emisiones otoacústicas',
     'VEMP' => 'VEMP',
     'ELECTROCOCLEO' => 'Electrococleografía',
+    'OTOSCOPIA' => 'Otoscopia (informe por cuadrantes)',
 ];
 
 $stmt = $pdo->prepare(

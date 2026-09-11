@@ -41,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Db::migrateSessionLtiContextIfNeeded();
             Db::migrateAppConfigCourseIdIfNeeded();
             Db::migrateDemoStudentIfNeeded();
+            Db::migrateReportsOtoscopiaIfNeeded();
             $sql = file_get_contents(__DIR__ . '/../../sql/schema.sql');
             $pdo->exec($sql);
             // Después del exec: agrega columnas nuevas a tablas que ya

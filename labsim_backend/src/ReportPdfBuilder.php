@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Arma el PDF de un informe (ABR/EOA/VEMP/electrococleo) a partir de
+ * Arma el PDF de un informe (ABR/EOA/VEMP/electrococleo/otoscopia) a partir de
  * `reports.data` (JSON: curvas + hallazgos + conclusión) y las imágenes ya
  * guardadas en ReportFile -- usa MiniPdf, no delega a ninguna librería.
  *
@@ -73,6 +73,12 @@ final class ReportPdfBuilder
         $y += 16;
         $pdf->text(self::MARGIN, $y, "Evaluador: {$evaluatorName}   Fecha informe: {$fecha}", 10);
         $y += 24;
+
+        if ($tipo === 'OTOSCOPIA') {
+            $y = self::otoscopiaBody($pdf, $data, $y, $contentW);
+            self::textSections($pdf, $data, $y, $contentW);
+            return $pdf->output();
+        }
 
         if ($tipo === 'EOA') {
             $y = self::eoaBody($pdf, $reportId, $data, $y, $contentW);
@@ -160,6 +166,95 @@ final class ReportPdfBuilder
         self::textSections($pdf, $data, $y, $contentW);
 
         return $pdf->output();
+    }
+
+    /**
+     * Cuerpo del informe de otoscopia: qué marcó el alumno en cada
+     * cuadrante de la membrana, más el CAE y sus observaciones, por oído.
+     * Shape que manda el cliente (ver OtoscopiaInforme.InformeOtoscopia):
+     * {"od": {"cuadrantes": {"anterior_superior": "perforation", ...},
+     *         "cae": ["cae_cerumen", ...], "observaciones": "texto"},
+     *  "oi": {...}}
+     * Las claves son las de OtoReport (proyecto aparte) a propósito -- acá
+     * se traducen a texto clínico para el PDF que lee el docente.
+     */
+    private static function otoscopiaBody(MiniPdf $pdf, array $data, float $y, float $contentW): float
+    {
+        // Mapas y no match(): el hosting corre PHP 7.4 (ver tipoLabel).
+        $cuadrantes = [
+            'anterior_superior' => 'Anterosuperior',
+            'anterior_inferior' => 'Anteroinferior',
+            'posterior_superior' => 'Posterosuperior',
+            'posterior_inferior' => 'Posteroinferior',
+            'pars_flaccida' => 'Pars flácida',
+        ];
+        $hallazgos = [
+            'retraction' => 'Retracción',
+            'perforation' => 'Perforación',
+            'effusion' => 'Efusión',
+            'tympanosclerosis' => 'Timpanoesclerosis',
+            'cholesteatoma' => 'Colesteatoma',
+            'inflammation' => 'Inflamación',
+            'tube' => 'Tubo',
+            'myringitis' => 'Miringitis',
+        ];
+        $cae = [
+            'cae_normal' => 'Normal',
+            'cae_cerumen' => 'Cerumen',
+            'cae_edema' => 'Edema',
+            'cae_otorrhea' => 'Otorrea',
+            'cae_exostosis' => 'Exostosis',
+        ];
+
+        foreach (['od' => 'Oído derecho (OD)', 'oi' => 'Oído izquierdo (OI)'] as $lado => $titulo) {
+            $oido = is_array($data[$lado] ?? null) ? $data[$lado] : [];
+            $y = self::ensureSpace($pdf, $y, 60);
+            $pdf->text(self::MARGIN, $y, $titulo, 12, true);
+            $y += 18;
+
+            $marcas = is_array($oido['cuadrantes'] ?? null) ? $oido['cuadrantes'] : [];
+            if ($marcas === []) {
+                $pdf->text(self::MARGIN + 12, $y, 'Membrana timpánica: sin hallazgos marcados.', 9);
+                $y += 14;
+            } else {
+                // Recorre el mapa (no las marcas) para que el orden sea
+                // siempre el mismo, entre por donde entre el alumno.
+                foreach ($cuadrantes as $clave => $nombre) {
+                    if (!isset($marcas[$clave])) {
+                        continue;
+                    }
+                    $hallazgo = (string) $marcas[$clave];
+                    $etiqueta = $hallazgos[$hallazgo] ?? $hallazgo;
+                    $y = self::ensureSpace($pdf, $y, 14);
+                    $pdf->text(self::MARGIN + 12, $y, "{$nombre}: {$etiqueta}", 9);
+                    $y += 14;
+                }
+            }
+
+            $marcadosCae = [];
+            foreach (is_array($oido['cae'] ?? null) ? $oido['cae'] : [] as $clave) {
+                $marcadosCae[] = $cae[(string) $clave] ?? (string) $clave;
+            }
+            $y = self::ensureSpace($pdf, $y, 14);
+            $pdf->text(
+                self::MARGIN + 12,
+                $y,
+                'CAE: ' . ($marcadosCae === [] ? 'sin evaluar' : implode(', ', $marcadosCae)),
+                9
+            );
+            $y += 14;
+
+            $obs = trim((string) ($oido['observaciones'] ?? ''));
+            if ($obs !== '') {
+                $y = self::ensureSpace($pdf, $y, 30);
+                $pdf->text(self::MARGIN + 12, $y, 'Observaciones:', 9, true);
+                $y += 14;
+                $y = $pdf->textBlock(self::MARGIN + 12, $y, $obs, $contentW - 12, 9);
+            }
+            $y += 16;
+        }
+
+        return $y;
     }
 
     /** Hallazgos + conclusión (mismo bloque para todos los tipos de informe). */
@@ -437,6 +532,7 @@ final class ReportPdfBuilder
             'EOA' => 'Emisiones Otoacústicas',
             'VEMP' => 'Potenciales Evocados Vestibulares Miogénicos',
             'ELECTROCOCLEO' => 'Electrococleografía',
+            'OTOSCOPIA' => 'Otoscopia',
         ];
         return $etiquetas[$tipo] ?? $tipo;
     }
