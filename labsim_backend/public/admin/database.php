@@ -35,33 +35,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         if ($action === 'apply_schema') {
-            Db::migrateLtiPlatformsIfNeeded();
-            Db::migrateLtiReplayColumnsIfNeeded();
-            Db::migratePatientColumnsIfNeeded();
-            Db::migrateSessionLtiContextIfNeeded();
-            Db::migrateAppConfigCourseIdIfNeeded();
-            Db::migrateDemoStudentIfNeeded();
-            Db::migrateProfileLoginIfNeeded();
-            Db::migrateReportsOtoscopiaIfNeeded();
-            $sql = file_get_contents(__DIR__ . '/../../sql/schema.sql');
-            $pdo->exec($sql);
-            // Después del exec: agrega columnas nuevas a tablas que ya
-            // existían de antes (CREATE TABLE IF NOT EXISTS no las toca).
-            // llm_config ya existe (el exec de arriba la crea si la
-            // instalación no la tenía) -- recién ahí se le puede agregar
-            // oirs_prompt_template si faltaba.
-            Db::migrateLlmOirsPromptIfNeeded();
-            Db::migrateLlmAnamnesisTokensIfNeeded();
-            Db::migrateSalaIfNeeded();
-            Db::migratePatientHistoriaClinicaIfNeeded();
-            Db::migratePatientComentarioDocenteIfNeeded();
-            Db::migrateCoursesIfNeeded();
-            // Después de courses: patients ya existe (la creó el exec de
-            // arriba), recién ahí se puede backfillear patient_id.
-            Db::migratePatientsIfNeeded();
-            // Después de courses/patients: no depende de ellas, pero sí de
-            // que course_teachers exista (la crea el exec de arriba).
-            $movedTeachers = Db::migrateTeacherRosterIfNeeded();
+            // Cada paso etiquetado: si uno truena (p.ej. "database table is
+            // locked" con la app o un launch LTI escribiendo al mismo tiempo),
+            // el error dice CUÁL fue en vez de dejar un SQLSTATE suelto sin
+            // pista de dónde se cortó la migración.
+            // La app de escritorio y los launches LTI siguen escribiendo
+            // mientras esto corre: 5 s (el default de Db::get) es poco para
+            // una migración que reescribe tablas. Sube solo en este request.
+            $pdo->exec('PRAGMA busy_timeout = 15000');
+            $pasos = [
+                'plataformas LTI' => static fn() => Db::migrateLtiPlatformsIfNeeded(),
+                'anti-replay LTI' => static fn() => Db::migrateLtiReplayColumnsIfNeeded(),
+                'patient_id en citas y casos' => static fn() => Db::migratePatientColumnsIfNeeded(),
+                'contexto LTI de la sesión' => static fn() => Db::migrateSessionLtiContextIfNeeded(),
+                'config por curso' => static fn() => Db::migrateAppConfigCourseIdIfNeeded(),
+                'alumno demo' => static fn() => Db::migrateDemoStudentIfNeeded(),
+                'login propio del docente' => static fn() => Db::migrateProfileLoginIfNeeded(),
+                'otoscopía en informes' => static fn() => Db::migrateReportsOtoscopiaIfNeeded(),
+                // El schema en sí: crea las tablas que falten. Va en el medio
+                // porque los pasos de abajo agregan columnas a tablas que
+                // recién acá existen (CREATE TABLE IF NOT EXISTS no toca una
+                // tabla que ya estaba, de ahí los ALTER de antes y después).
+                'schema.sql' => static function () use ($pdo): void {
+                    $pdo->exec((string) file_get_contents(__DIR__ . '/../../sql/schema.sql'));
+                },
+                'prompt OIRS' => static fn() => Db::migrateLlmOirsPromptIfNeeded(),
+                'tokens de anamnesis' => static fn() => Db::migrateLlmAnamnesisTokensIfNeeded(),
+                'sala del caso' => static fn() => Db::migrateSalaIfNeeded(),
+                'historia clínica del paciente' => static fn() => Db::migratePatientHistoriaClinicaIfNeeded(),
+                'comentario docente del paciente' => static fn() => Db::migratePatientComentarioDocenteIfNeeded(),
+                'cursos en citas' => static fn() => Db::migrateCoursesIfNeeded(),
+                // Después de cursos: patients ya existe (la creó schema.sql),
+                // recién ahí se puede backfillear patient_id.
+                'backfill de pacientes' => static fn() => Db::migratePatientsIfNeeded(),
+            ];
+            foreach ($pasos as $nombre => $paso) {
+                try {
+                    $paso();
+                } catch (Throwable $e) {
+                    throw new RuntimeException("Falló el paso \"{$nombre}\": " . $e->getMessage(), 0, $e);
+                }
+            }
+            // Aparte del resto: devuelve cuántas matrículas movió.
+            try {
+                $movedTeachers = Db::migrateTeacherRosterIfNeeded();
+            } catch (Throwable $e) {
+                throw new RuntimeException('Falló el paso "roster de docentes": ' . $e->getMessage(), 0, $e);
+            }
             $success = 'Schema aplicado correctamente.';
             if ($movedTeachers > 0) {
                 $success .= " Se movieron {$movedTeachers} matrícula(s) de docentes del roster de alumnos a docentes del curso.";

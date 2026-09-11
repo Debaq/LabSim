@@ -574,7 +574,47 @@ final class Db
         if (in_array($column, $cols, true)) {
             return;
         }
-        $pdo->exec("ALTER TABLE {$table} ADD COLUMN {$column} {$definition}");
+        $sql = "ALTER TABLE {$table} ADD COLUMN {$column} {$definition}";
+        try {
+            $pdo->exec($sql);
+        } catch (PDOException $e) {
+            // "database table is locked" (SQLITE_LOCKED, error 6): esta misma
+            // conexión tiene un cursor abierto sobre la tabla -- basta con un
+            // SELECT del que se leyó una fila y no se agotó (fetch() sin
+            // fetchAll()) para que el motor rechace el cambio de esquema. Una
+            // conexión limpia no arrastra esos cursores; en WAL un lector no
+            // bloquea a este escritor.
+            if (!self::esBloqueoDeTabla($e)) {
+                throw $e;
+            }
+            $otra = self::nuevaConexion();
+            $otra->exec($sql);
+        }
+    }
+
+    /** ¿La excepción es SQLITE_LOCKED/SQLITE_BUSY y no un error real de SQL? */
+    private static function esBloqueoDeTabla(PDOException $e): bool
+    {
+        $codigo = (int) ($e->errorInfo[1] ?? 0);
+        return $codigo === 5 || $codigo === 6;
+    }
+
+    /**
+     * Conexión nueva al mismo archivo, con los mismos PRAGMA. No reemplaza a
+     * self::$pdo -- es para operaciones que no pueden convivir con los
+     * cursores abiertos de la conexión del request (ver addColumnIfMissing).
+     */
+    private static function nuevaConexion(): PDO
+    {
+        $cfg = self::config();
+        $pdo = new PDO('sqlite:' . $cfg['db']['path'], null, null, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_STRINGIFY_FETCHES => false,
+        ]);
+        $pdo->exec('PRAGMA foreign_keys = ON');
+        $pdo->exec('PRAGMA busy_timeout = 15000');
+        return $pdo;
     }
 
     private static function anyTableDangling(PDO $pdo): bool
