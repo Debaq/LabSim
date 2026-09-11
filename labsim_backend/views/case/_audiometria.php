@@ -52,8 +52,8 @@
         <span><svg width="12" height="12"><polyline points="8,2 3,2 3,10 8,10" fill="none" class="sym-od" stroke-width="1.4"></polyline></svg> Ósea OD enmasc.</span>
         <span><svg width="12" height="12"><polyline points="3,2 9,6 3,10" fill="none" class="sym-oi" stroke-width="1.4"></polyline></svg> Ósea OI</span>
         <span><svg width="12" height="12"><polyline points="4,2 9,2 9,10 4,10" fill="none" class="sym-oi" stroke-width="1.4"></polyline></svg> Ósea OI enmasc.</span>
-        <span><svg width="12" height="12"><polygon points="6,9 2,3 10,3" class="sym-od-fill" stroke="none"></polygon></svg> LDL OD</span>
-        <span><svg width="12" height="12"><polygon points="6,9 2,3 10,3" class="sym-oi-fill" stroke="none"></polygon></svg> LDL OI</span>
+        <span><svg width="12" height="12"><polygon points="7,3 7,9 2,9" class="sym-od-fill" stroke="none"></polygon></svg> LDL OD</span>
+        <span><svg width="12" height="12"><polygon points="5,3 5,9 10,9" class="sym-oi-fill" stroke="none"></polygon></svg> LDL OI</span>
     </div>
 </div>
 

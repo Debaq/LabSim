@@ -75,14 +75,19 @@ final class CaseCharts
     public const FREQS_OSEA = [250, 500, 1000, 2000, 3000, 4000];
 
     /**
-     * Valor con el que el caso marca que NO hay umbral en esa frecuencia:
-     * no se midió, o no hubo respuesta. No es un umbral de 130 dB.
+     * Valor con el que el caso marca que en esa frecuencia NO HUBO
+     * RESPUESTA: el paciente no oyó ni al máximo del audiómetro. Espejo de
+     * CaseProfile::SIN_RESPUESTA_DB.
      *
-     * Importa porque el eje llega a 120: sin este corte, un 130 se dibujaba
-     * recortado contra el borde y se leía como un umbral profundo, y la
-     * línea lo unía con sus vecinos como si fuera parte de la curva.
+     * No es lo mismo que "no se midió": un umbral que no se buscó no se
+     * dibuja, y uno que no respondió SÍ, con su símbolo en el nivel máximo
+     * probado y una flecha hacia abajo -- y sin unirse a la curva, porque
+     * no es un punto de ella.
      */
     public const SIN_UMBRAL_DB = 130;
+
+    /** Máximo que entrega el audiómetro: ahí se dibuja el "no responde". */
+    public const NIVEL_MAXIMO_DB = 120;
 
     /**
      * Límite de la audición normal (dB HL). En Chile llega hasta 20 dB HL
@@ -142,7 +147,9 @@ final class CaseCharts
         array $ldl,
         array $ldlMedido
     ): void {
-        [$px, $py, $pw, $ph] = self::plotBox($x, $y, $w, $h);
+        // Margen inferior mayor que el resto: los símbolos de "no responde"
+        // se dibujan en 120 dB y la flecha les cuelga por debajo.
+        [$px, $py, $pw, $ph] = self::plotBox($x, $y, $w, $h, 20.0);
         $freqs = CaseBuilder::FREQUENCIES;
         $minLog = log(125, 2);
         $maxLog = log(8000, 2);
@@ -206,29 +213,42 @@ final class CaseCharts
 
             $enmascaradaOd = ($aOd - $oOi) >= self::ATENUACION_AEREA_POR_FREQ[$i];
             $enmascaradaOi = ($aOi - $oOd) >= self::ATENUACION_AEREA_POR_FREQ[$i];
-            if ($aOd < self::SIN_UMBRAL_DB) {
-                if ($enmascaradaOd) {
-                    self::triangulo($pdf, $cx, $fy($aOd), self::COLOR_OD, false);
-                } else {
-                    $pdf->circle($cx, $fy($aOd), 3.4, self::COLOR_OD, null, 1.1);
-                }
+            // Sin respuesta: el mismo símbolo, en el nivel máximo probado y
+            // con la flecha hacia abajo.
+            $yAOd = $aOd >= self::SIN_UMBRAL_DB ? $fy((float) self::NIVEL_MAXIMO_DB) : $fy($aOd);
+            $yAOi = $aOi >= self::SIN_UMBRAL_DB ? $fy((float) self::NIVEL_MAXIMO_DB) : $fy($aOi);
+
+            if ($enmascaradaOd) {
+                self::triangulo($pdf, $cx, $yAOd, self::COLOR_OD, false);
+            } else {
+                $pdf->circle($cx, $yAOd, 3.4, self::COLOR_OD, null, 1.1);
             }
-            if ($aOi < self::SIN_UMBRAL_DB) {
-                if ($enmascaradaOi) {
-                    $pdf->rect($cx - 3, $fy($aOi) - 3, 6, 6, 1.1, self::COLOR_OI);
-                } else {
-                    self::cruz($pdf, $cx, $fy($aOi), self::COLOR_OI);
-                }
+            if ($aOd >= self::SIN_UMBRAL_DB) {
+                self::flechaAbajo($pdf, $cx, $yAOd, self::COLOR_OD, -1);
+            }
+
+            if ($enmascaradaOi) {
+                $pdf->rect($cx - 3, $yAOi - 3, 6, 6, 1.1, self::COLOR_OI);
+            } else {
+                self::cruz($pdf, $cx, $yAOi, self::COLOR_OI);
+            }
+            if ($aOi >= self::SIN_UMBRAL_DB) {
+                self::flechaAbajo($pdf, $cx, $yAOi, self::COLOR_OI, 1);
             }
 
             // Ósea enmascarada si hay gap >= 10 dB en el mismo oído (la
             // atenuación interaural ósea es ~0). Solo donde se mide.
             if (in_array($hz, self::FREQS_OSEA, true)) {
-                if ($oOd < self::SIN_UMBRAL_DB) {
-                    self::corchete($pdf, $cx, $fy($oOd), self::COLOR_OD, 'izq', ($aOd - $oOd) >= self::GAP_ENMASCARA_OSEA);
+                $yOOd = $oOd >= self::SIN_UMBRAL_DB ? $fy((float) self::NIVEL_MAXIMO_DB) : $fy($oOd);
+                $yOOi = $oOi >= self::SIN_UMBRAL_DB ? $fy((float) self::NIVEL_MAXIMO_DB) : $fy($oOi);
+
+                self::corchete($pdf, $cx, $yOOd, self::COLOR_OD, 'izq', ($aOd - $oOd) >= self::GAP_ENMASCARA_OSEA);
+                if ($oOd >= self::SIN_UMBRAL_DB) {
+                    self::flechaAbajo($pdf, $cx, $yOOd, self::COLOR_OD, -1);
                 }
-                if ($oOi < self::SIN_UMBRAL_DB) {
-                    self::corchete($pdf, $cx, $fy($oOi), self::COLOR_OI, 'der', ($aOi - $oOi) >= self::GAP_ENMASCARA_OSEA);
+                self::corchete($pdf, $cx, $yOOi, self::COLOR_OI, 'der', ($aOi - $oOi) >= self::GAP_ENMASCARA_OSEA);
+                if ($oOi >= self::SIN_UMBRAL_DB) {
+                    self::flechaAbajo($pdf, $cx, $yOOi, self::COLOR_OI, 1);
                 }
             }
         }
@@ -240,12 +260,24 @@ final class CaseCharts
             if (empty($ldlMedido[$lado])) {
                 continue;
             }
-            // El 130 acá es "no se buscó el LDL en esta frecuencia": ni
-            // símbolo ni tramo de línea.
+            // La línea solo une los niveles que se alcanzaron.
             foreach (self::tramosConUmbral($ldl[$lado] ?? [], $freqsOsea, $fx, $fy) as $tramo) {
                 $pdf->polyline($tramo, 0.8, $color, self::TRAZO_LDL);
-                foreach ($tramo as $pt) {
-                    self::symbol($pdf, $lado === 'od' ? 'ldl_od' : 'ldl_oi', $pt[0], $pt[1], $color);
+            }
+            // Y el símbolo va en todas, con flecha donde no hubo disconfort
+            // dentro de la escala: el LDL está más abajo de lo que se pudo
+            // presentar.
+            $clave = $lado === 'od' ? 'ldl_od' : 'ldl_oi';
+            foreach ($freqs as $i => $hz) {
+                if (!in_array($hz, self::FREQS_OSEA, true)) {
+                    continue;
+                }
+                $valor = (float) ($ldl[$lado][$i] ?? self::SIN_UMBRAL_DB);
+                $sinRespuesta = $valor >= self::SIN_UMBRAL_DB;
+                $yPt = $fy($sinRespuesta ? (float) self::NIVEL_MAXIMO_DB : $valor);
+                self::symbol($pdf, $clave, $fx((float) $hz), $yPt, $color);
+                if ($sinRespuesta) {
+                    self::flechaAbajo($pdf, $fx((float) $hz), $yPt, $color, $lado === 'od' ? -1 : 1);
                 }
             }
         }
@@ -993,13 +1025,13 @@ final class CaseCharts
     }
 
     /** Área de dibujo dentro del recuadro, descontando los rótulos de los ejes. */
-    private static function plotBox(float $x, float $y, float $w, float $h): array
+    private static function plotBox(float $x, float $y, float $w, float $h, float $ejeInf = self::EJE_INF): array
     {
         return [
             $x + self::EJE_IZQ,
             $y + self::EJE_SUP,
             max(10.0, $w - self::EJE_IZQ - 2),
-            max(10.0, $h - self::EJE_SUP - self::EJE_INF),
+            max(10.0, $h - self::EJE_SUP - $ejeInf),
         ];
     }
 
@@ -1040,6 +1072,28 @@ final class CaseCharts
             null,
             $color
         );
+    }
+
+    /**
+     * Flecha colgando del símbolo: "no respondió a este nivel, el umbral
+     * está más abajo de lo que el audiómetro alcanza".
+     *
+     * Va en diagonal hacia afuera --el OD a la izquierda, el OI a la
+     * derecha-- como se anota a mano, y así no se le encima al símbolo del
+     * otro oído cuando los dos quedan sin respuesta en la misma frecuencia.
+     *
+     * @param int $lado -1 hacia la izquierda (OD), 1 hacia la derecha (OI)
+     */
+    private static function flechaAbajo(MiniPdf $pdf, float $x, float $y, string $color, int $lado = -1): void
+    {
+        $largo = 7.0;
+        $desde = [$x + $lado * 2.6, $y + 3.4];
+        $hasta = [$desde[0] + $lado * $largo * 0.7, $desde[1] + $largo];
+        $pdf->line($desde[0], $desde[1], $hasta[0], $hasta[1], 1.1, $color);
+
+        // Punta: dos trazos cortos abriéndose desde el extremo.
+        $pdf->line($hasta[0], $hasta[1], $hasta[0] - $lado * 3.4, $hasta[1] - 0.6, 1.1, $color);
+        $pdf->line($hasta[0], $hasta[1], $hasta[0] - $lado * 0.6, $hasta[1] - 3.4, 1.1, $color);
     }
 
     private static function cruz(MiniPdf $pdf, float $x, float $y, string $color): void

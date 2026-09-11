@@ -34,6 +34,14 @@ window.drawAudiogram = (function () {
     // CaseCharts::FREQS_OSEA, que recorta lo mismo en el PDF.
     var BONE_FREQS = [250, 500, 1000, 2000, 3000, 4000];
     function boneMeasured(i) { return BONE_FREQS.indexOf(FREQS[i]) !== -1; }
+    // 130 no es un umbral: es "no respondió al máximo del audiómetro". Se
+    // dibuja el símbolo de siempre en el máximo (120) con una flecha hacia
+    // abajo, y ese punto NO se une a los demás. Mismo criterio que
+    // CaseCharts::SIN_UMBRAL_DB/NIVEL_MAXIMO_DB en el PDF de la ficha.
+    var NO_RESPONSE_DB = 130;
+    var MAX_LEVEL_DB = 120;
+    function noResponse(v) { return v >= NO_RESPONSE_DB; }
+    function plotDb(v) { return noResponse(v) ? MAX_LEVEL_DB : v; }
 
     function xPos(freq) { return 32 + (Math.log(freq) / Math.LN2 - MIN_LOG) / (MAX_LOG - MIN_LOG) * 280; }
     function yPos(db) {
@@ -105,10 +113,36 @@ window.drawAudiogram = (function () {
         p.setAttribute('fill', 'none'); p.setAttribute('stroke', color); p.setAttribute('stroke-width', '1.5');
         return p;
     }
-    function makeLdlMark(x, y, color) {
-        var r = 4;
+    /**
+     * Flecha del "no responde", en diagonal hacia afuera (OD a la izquierda,
+     * OI a la derecha) para que los dos oídos no se encimen en la misma
+     * frecuencia. Espejo de CaseCharts::flechaAbajo.
+     */
+    function makeNoResponseArrow(x, y, color, lado) {
+        var g = document.createElementNS(NS, 'g');
+        var largo = 7;
+        var x0 = x + lado * 2.6, y0 = y + 3.4;
+        var x1 = x0 + lado * largo * 0.7, y1 = y0 + largo;
+        [[x0, y0, x1, y1], [x1, y1, x1 - lado * 3.4, y1 - 0.6], [x1, y1, x1 - lado * 0.6, y1 - 3.4]].forEach(function (c) {
+            var l = document.createElementNS(NS, 'line');
+            l.setAttribute('x1', c[0]); l.setAttribute('y1', c[1]); l.setAttribute('x2', c[2]); l.setAttribute('y2', c[3]);
+            l.setAttribute('stroke', color); l.setAttribute('stroke-width', '1.1');
+            g.appendChild(l);
+        });
+        return g;
+    }
+
+    /**
+     * LDL: triángulo rectángulo con el cateto vertical mirando a la línea de
+     * la frecuencia -- el OD queda a su izquierda y el OI a su derecha, con
+     * una separación mínima para que no se peguen. Espejo de CaseCharts::ldl.
+     */
+    function makeLdlMark(x, y, color, side) {
+        var lado = side === 'od' ? -1 : 1;
+        var sep = 1.6, alto = 5.4, ancho = 4.6;
+        var xc = x + lado * sep, xp = xc + lado * ancho;
         var t = document.createElementNS(NS, 'polygon');
-        t.setAttribute('points', (x - r) + ',' + (y - r * 0.6) + ' ' + (x + r) + ',' + (y - r * 0.6) + ' ' + x + ',' + (y + r * 0.7));
+        t.setAttribute('points', xc + ',' + (y - alto / 2) + ' ' + xc + ',' + (y + alto / 2) + ' ' + xp + ',' + (y + alto / 2));
         t.setAttribute('fill', color); t.setAttribute('stroke', 'none');
         return t;
     }
@@ -118,19 +152,29 @@ window.drawAudiogram = (function () {
         if (!group) return;
         while (group.firstChild) group.removeChild(group.firstChild);
 
+        // Une los puntos, cortando en cada frecuencia sin respuesta: un
+        // umbral que no existe no puede ser extremo de un segmento.
         function drawLine(vals, color, dash, soloOsea) {
-            var puntos = [];
+            var tramos = [], actual = [];
             vals.forEach(function (v, i) {
                 if (soloOsea && !boneMeasured(i)) { return; }
-                puntos.push(xPos(FREQS[i]) + ',' + yPos(v));
+                if (noResponse(v)) {
+                    if (actual.length > 1) { tramos.push(actual); }
+                    actual = [];
+                    return;
+                }
+                actual.push(xPos(FREQS[i]) + ',' + yPos(v));
             });
-            var poly = document.createElementNS(NS, 'polyline');
-            poly.setAttribute('points', puntos.join(' '));
-            poly.setAttribute('fill', 'none');
-            poly.setAttribute('stroke', color);
-            poly.setAttribute('stroke-width', dash ? '1' : '1.3');
-            if (dash) poly.setAttribute('stroke-dasharray', dash);
-            group.appendChild(poly);
+            if (actual.length > 1) { tramos.push(actual); }
+            tramos.forEach(function (puntos) {
+                var poly = document.createElementNS(NS, 'polyline');
+                poly.setAttribute('points', puntos.join(' '));
+                poly.setAttribute('fill', 'none');
+                poly.setAttribute('stroke', color);
+                poly.setAttribute('stroke-width', dash ? '1' : '1.3');
+                if (dash) poly.setAttribute('stroke-dasharray', dash);
+                group.appendChild(poly);
+            });
         }
 
         var aereaOd = readVals('aerea', 'od'), aereaOi = readVals('aerea', 'oi');
@@ -143,10 +187,13 @@ window.drawAudiogram = (function () {
         drawLine(aereaOi, window.sideColor('oi'));
         for (var n = 0; n < FREQS.length; n++) {
             var x = xPos(FREQS[n]);
+            var yOd = yPos(plotDb(aereaOd[n])), yOi = yPos(plotDb(aereaOi[n]));
             var maskedOd = airMasked(aereaOd[n], oseaOi[n], n);
-            group.appendChild((maskedOd ? makeTriangle : makeCircle)(x, yPos(aereaOd[n]), window.sideColor('od')));
+            group.appendChild((maskedOd ? makeTriangle : makeCircle)(x, yOd, window.sideColor('od')));
+            if (noResponse(aereaOd[n])) { group.appendChild(makeNoResponseArrow(x, yOd, window.sideColor('od'), -1)); }
             var maskedOi = airMasked(aereaOi[n], oseaOd[n], n);
-            group.appendChild((maskedOi ? makeSquare : makeCross)(x, yPos(aereaOi[n]), window.sideColor('oi')));
+            group.appendChild((maskedOi ? makeSquare : makeCross)(x, yOi, window.sideColor('oi')));
+            if (noResponse(aereaOi[n])) { group.appendChild(makeNoResponseArrow(x, yOi, window.sideColor('oi'), 1)); }
         }
 
         // Vía ósea: unida con línea punteada, y enmascarada si hay gap
@@ -157,26 +204,28 @@ window.drawAudiogram = (function () {
         for (var m = 0; m < FREQS.length; m++) {
             if (!boneMeasured(m)) { continue; }
             var x2 = xPos(FREQS[m]);
-            group.appendChild(makeBracket(x2, yPos(oseaOd[m]), window.sideColor('od'), 'left', boneMasked(aereaOd[m], oseaOd[m])));
-            group.appendChild(makeBracket(x2, yPos(oseaOi[m]), window.sideColor('oi'), 'right', boneMasked(aereaOi[m], oseaOi[m])));
+            var yBOd = yPos(plotDb(oseaOd[m])), yBOi = yPos(plotDb(oseaOi[m]));
+            group.appendChild(makeBracket(x2, yBOd, window.sideColor('od'), 'left', boneMasked(aereaOd[m], oseaOd[m])));
+            if (noResponse(oseaOd[m])) { group.appendChild(makeNoResponseArrow(x2, yBOd, window.sideColor('od'), -1)); }
+            group.appendChild(makeBracket(x2, yBOi, window.sideColor('oi'), 'right', boneMasked(aereaOi[m], oseaOi[m])));
+            if (noResponse(oseaOi[m])) { group.appendChild(makeNoResponseArrow(x2, yBOi, window.sideColor('oi'), 1)); }
         }
 
         // LDL: solo si "LDL medido" está activo para ese oído -- si no, el
         // valor que se guarda es 130 (ausente) sin importar lo escrito, así
         // que graficarlo igual sería mostrar un dato que nunca se va a guardar.
-        if (isLdlMeasured('od')) {
-            var ldlOd = readVals('ldl', 'od');
-            drawLine(ldlOd, window.sideColor('od'), LDL_DASH, true);
-            ldlOd.forEach(function (v, i) {
-                if (boneMeasured(i)) { group.appendChild(makeLdlMark(xPos(FREQS[i]), yPos(v), window.sideColor('od'))); }
+        ['od', 'oi'].forEach(function (side) {
+            if (!isLdlMeasured(side)) { return; }
+            var color = window.sideColor(side);
+            var lado = side === 'od' ? -1 : 1;
+            var vals = readVals('ldl', side);
+            drawLine(vals, color, LDL_DASH, true);
+            vals.forEach(function (v, i) {
+                if (!boneMeasured(i)) { return; }
+                var x3 = xPos(FREQS[i]), y3 = yPos(plotDb(v));
+                group.appendChild(makeLdlMark(x3, y3, color, side));
+                if (noResponse(v)) { group.appendChild(makeNoResponseArrow(x3, y3, color, lado)); }
             });
-        }
-        if (isLdlMeasured('oi')) {
-            var ldlOi = readVals('ldl', 'oi');
-            drawLine(ldlOi, window.sideColor('oi'), LDL_DASH, true);
-            ldlOi.forEach(function (v, i) {
-                if (boneMeasured(i)) { group.appendChild(makeLdlMark(xPos(FREQS[i]), yPos(v), window.sideColor('oi'))); }
-            });
-        }
+        });
     };
 })();
