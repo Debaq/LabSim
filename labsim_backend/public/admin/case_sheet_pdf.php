@@ -81,7 +81,8 @@ try {
     exit('No se pudo generar el PDF: ' . htmlspecialchars($e->getMessage()));
 }
 
-$nombreArchivo = 'ficha_' . preg_replace('/[^A-Za-z0-9_-]/', '_', (string) $caso['id']) . '.pdf';
+// Mismo nombre que el título del documento: caso, paciente y RUT.
+$nombreArchivo = 'ficha_' . CaseSheetPdf::identificador((string) $caso['id'], $patient) . '.pdf';
 header('Content-Type: application/pdf');
 header('Content-Disposition: inline; filename="' . $nombreArchivo . '"');
 header('Content-Length: ' . strlen($pdfBytes));

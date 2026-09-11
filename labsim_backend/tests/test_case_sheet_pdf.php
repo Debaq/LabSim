@@ -101,6 +101,18 @@ t_true(strpos($pdfDemo, 'LabSim ' . date('Y') . ' para la simulaci') !== false,
 // El logo es un JPEG incrustado: si el archivo se pierde, la ficha sale
 // igual (PdfImage devuelve null) pero esto avisa.
 t_true(substr_count($pdfDemo, '/Subtype /Image') >= 1, 'El logo se incrusta en la portada');
+
+// Identidad del archivo: el visor mostraba el nombre del script que sirve el
+// PDF, y la descarga un "ficha_9.pdf" que no decía de quién era.
+t_true(strpos($pdfDemo, '/Title (CASO-TEST_A_Perez_11111111-1)') !== false,
+    'El documento se titula con el caso, el paciente y su RUT');
+t_eq(CaseSheetPdf::identificador('9', ['nombre' => 'Ana María', 'apellido' => 'Pérez González', 'rut' => '11.111.111-1']),
+    '9_AM_Perez_Gonzalez_11111111-1',
+    'Iniciales de los nombres, apellidos completos y el RUT sin puntos');
+t_eq(CaseSheetPdf::identificador('7'), '7', 'Sin paciente queda solo el número de caso');
+t_eq(CaseSheetPdf::identificador('12', ['nombre' => 'Juan', 'apellido' => 'Muñoz', 'rut' => '9.876.543-K']),
+    '12_J_Munoz_9876543-K',
+    'Sin tildes ni eñes: el nombre tiene que sobrevivir a cualquier sistema de archivos');
 t_true(strpos($pdfDemo, 'curva tipo As') !== false, 'El timpanograma dice el tipo del oído');
 // Los paréntesis delimitan las cadenas en un content stream, así que MiniPdf
 // los escapa: en los bytes del PDF "(-)" aparece como "\(-\)".

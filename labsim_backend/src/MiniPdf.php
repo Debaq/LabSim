@@ -33,6 +33,8 @@ final class MiniPdf
     /** @var array<int, array<int, string>> imágenes usadas por cada página: [pageIndex => [xobjName => imageObjKey]] */
     private array $pageImages = [];
     private string $currentStream = '';
+    /** Título del documento: lo que muestra el visor en la pestaña. */
+    private string $titulo = '';
     private array $currentPageImages = [];
     /** @var array<string, array{width:int,height:int,colorSpace:string,bits:int,data:string}> */
     private array $images = [];
@@ -390,6 +392,15 @@ final class MiniPdf
         $this->currentStream .= sprintf("q %.2F 0 0 %.2F %.2F %.2F cm /%s Do Q\n", $w, $h, $x, $pdfY, $name);
     }
 
+    /**
+     * Título del documento (diccionario /Info). Sin esto el visor muestra el
+     * nombre del archivo o el de la URL, que es el del script que lo sirve.
+     */
+    public function setTitle(string $titulo): void
+    {
+        $this->titulo = $titulo;
+    }
+
     public function pageWidth(): float
     {
         return $this->pageW;
@@ -463,6 +474,15 @@ final class MiniPdf
         $objects[$pagesNum] = sprintf("<< /Type /Pages /Kids [%s] /Count %d >>", $kids, count($pageNums));
         $objects[$catalogNum] = "<< /Type /Catalog /Pages {$pagesNum} 0 R >>";
 
+        $infoNum = 0;
+        if ($this->titulo !== '') {
+            $infoNum = $nextObj++;
+            $objects[$infoNum] = sprintf(
+                "<< /Title (%s) /Producer (LabSim) >>",
+                self::esc(self::toWinAnsi($this->titulo))
+            );
+        }
+
         ksort($objects, SORT_NUMERIC);
 
         $out = "%PDF-1.4\n";
@@ -479,7 +499,8 @@ final class MiniPdf
         for ($n = 1; $n < $total; $n++) {
             $out .= sprintf("%010d 00000 n \n", $offsets[$n] ?? 0);
         }
-        $out .= "trailer\n<< /Size {$total} /Root {$catalogNum} 0 R >>\nstartxref\n{$xrefOffset}\n%%EOF";
+        $info = $infoNum > 0 ? " /Info {$infoNum} 0 R" : '';
+        $out .= "trailer\n<< /Size {$total} /Root {$catalogNum} 0 R{$info} >>\nstartxref\n{$xrefOffset}\n%%EOF";
 
         return $out;
     }

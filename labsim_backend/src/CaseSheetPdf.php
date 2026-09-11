@@ -100,6 +100,54 @@ final class CaseSheetPdf
     }
 
     /**
+     * Identidad de la ficha para el título del documento y el nombre del
+     * archivo: número de caso, paciente y RUT, separados por guiones bajos.
+     *
+     * El paciente va abreviado --iniciales de los nombres y los apellidos
+     * completos-- porque el nombre entero hace un archivo impresentable, y
+     * el RUT va sin puntos: el punto en un nombre de archivo se lee como
+     * extensión. Todo sin tildes ni eñes, por el mismo motivo.
+     *
+     * @param array{nombre?:string,apellido?:string,rut?:string} $patient
+     */
+    public static function identificador(string $caseId, array $patient = []): string
+    {
+        $partes = [self::soloArchivo($caseId)];
+
+        $iniciales = '';
+        foreach (preg_split('/\s+/', trim((string) ($patient['nombre'] ?? ''))) ?: [] as $nombre) {
+            if ($nombre !== '') {
+                $iniciales .= mb_strtoupper(mb_substr($nombre, 0, 1));
+            }
+        }
+        if ($iniciales !== '') {
+            $partes[] = self::soloArchivo($iniciales);
+        }
+        foreach (preg_split('/\s+/', trim((string) ($patient['apellido'] ?? ''))) ?: [] as $apellido) {
+            if ($apellido !== '') {
+                $partes[] = self::soloArchivo($apellido);
+            }
+        }
+
+        $rut = str_replace('.', '', trim((string) ($patient['rut'] ?? '')));
+        if ($rut !== '' && $rut !== 'N/D') {
+            $partes[] = self::soloArchivo($rut);
+        }
+
+        return implode('_', array_filter($partes, static fn (string $p): bool => $p !== ''));
+    }
+
+    /** Deja solo lo que sobrevive a un nombre de archivo, sin tildes. */
+    private static function soloArchivo(string $texto): string
+    {
+        $texto = strtr($texto, [
+            'á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n',
+            'Á' => 'A', 'É' => 'E', 'Í' => 'I', 'Ó' => 'O', 'Ú' => 'U', 'Ü' => 'U', 'Ñ' => 'N',
+        ]);
+        return trim((string) preg_replace('/[^A-Za-z0-9-]+/', '', $texto));
+    }
+
+    /**
      * @param array<string,mixed> $data cases.data
      * @param array{nombre?:string,rut?:string,fecha_nac?:string} $patient
      * @return string bytes del PDF
@@ -111,6 +159,9 @@ final class CaseSheetPdf
         // El año del pie es el de la impresión, no el del caso: la marca
         // dice cuándo se generó este papel.
         $doc = new self($caseId, 'Ficha #' . $caseId . ($nombre !== '' ? ' - ' . $nombre : ''), date('Y'));
+        // Lo que el visor muestra en la pestaña. Sin esto queda el nombre
+        // del script que sirve el PDF (case_sheet_pdf.pdf).
+        $doc->pdf->setTitle(self::identificador($caseId, $patient));
         $doc->portada($caseId, $data, $patient, $emisor, $fecha);
         $doc->resumenPorOido($data);
         // La historia antes que los exámenes, como se lee una ficha: quién
@@ -149,14 +200,15 @@ final class CaseSheetPdf
         $xTitulo = self::MARGEN;
         $logo = PdfImage::jpegBytes(self::LOGO);
         if ($logo !== null) {
-            // Alineado con el alto del título, no con el borde de la hoja.
-            $lado = 26.0;
-            $this->pdf->imageJpeg($logo['data'], $logo['w'], $logo['h'], 'logo', self::MARGEN, $this->y - 9, $lado, $lado);
+            // Alineado con el alto del título, no con el borde de la hoja,
+            // y con aire hasta la línea del encabezado.
+            $lado = 22.0;
+            $this->pdf->imageJpeg($logo['data'], $logo['w'], $logo['h'], 'logo', self::MARGEN, $this->y - 14, $lado, $lado);
             $xTitulo += $lado + 9;
         }
         $this->pdf->text($xTitulo, $this->y + 4, 'Ficha del caso', 19, true, self::GRIS_TITULO);
         $this->pdf->textRight(self::MARGEN + $this->anchoContenido, $this->y + 4, '#' . $caseId, 13, true, self::GRIS_SUAVE);
-        $this->y += 16;
+        $this->y += 20;
         $this->pdf->line(self::MARGEN, $this->y, self::MARGEN + $this->anchoContenido, $this->y, 1.2, self::GRIS_TITULO);
         $this->y += 16;
 
