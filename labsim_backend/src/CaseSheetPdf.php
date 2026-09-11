@@ -14,6 +14,7 @@ require_once __DIR__ . '/Sala.php';
 require_once __DIR__ . '/CaseMasking.php';
 require_once __DIR__ . '/CaseWaveforms.php';
 require_once __DIR__ . '/CaseOae.php';
+require_once __DIR__ . '/CaseCompleteness.php';
 
 /**
  * El PDF de la ficha completa de un caso: todo lo que el docente cargó (o
@@ -247,6 +248,26 @@ final class CaseSheetPdf
             ['Emitido', $fecha . ($emisor !== '' ? '  ·  ' . $emisor : '')],
         ]);
         $this->y += 6;
+
+        // Lo que el caso todavía no decidió. El docente que apoya en vivo
+        // tiene que saber si va a encontrarse con un examen a medio armar
+        // antes de que se lo encuentre el alumno.
+        $pendientes = CaseCompleteness::pendingTexts($data);
+        if ($pendientes !== []) {
+            $this->pdf->text(
+                self::MARGEN,
+                $this->y + self::ASCENDENTE * 8,
+                'Este caso tiene ' . count($pendientes) . ' ' . (count($pendientes) === 1 ? 'ficha sin decidir' : 'fichas sin decidir') . ':',
+                8,
+                true,
+                CaseCharts::COLOR_OD
+            );
+            $this->y += 12;
+            foreach ($pendientes as $pendiente) {
+                $this->parrafo('- ' . $pendiente, 7.5);
+            }
+            $this->y += 4;
+        }
     }
 
     /**
@@ -334,7 +355,7 @@ final class CaseSheetPdf
 
     private function audiometria(array $data): void
     {
-        $this->titulo('Audiometría tonal', 190.0);
+        $this->titulo('Audiometría tonal', 176.0);
 
         $aerea = self::desarmar($data['Aerea'] ?? []);
         $osea = self::desarmar($data['Osea'] ?? []);
@@ -346,8 +367,8 @@ final class CaseSheetPdf
             $ldlMedido[$lado] = count(array_filter($ldl[$lado], static fn ($v) => (int) $v !== 130)) > 0;
         }
 
-        $alto = 158.0;
-        $this->espacio($alto + 22);
+        $alto = 148.0;
+        $this->espacio($alto + 20);
         CaseCharts::audiogram($this->pdf, self::MARGEN, $this->y, $this->anchoContenido * 0.62, $alto, $aerea, $osea, $ldl, $ldlMedido);
 
         // Al lado del gráfico, la leyenda de símbolos: un audiograma sin
@@ -427,7 +448,7 @@ final class CaseSheetPdf
         $this->y = $finMax + 4;
 
         $this->parrafo(
-            'Rango con la meseta entre paréntesis; (-) = ese umbral no cruza. Aérea: mín = UAE - AI - UONE '
+            'Rango con la meseta entre paréntesis; / = ese umbral no cruza. Aérea: mín = UAE - AI - UONE '
             . '+ UANE, máx = UOE + AI. Ósea: mín = UOE - UONE + UANE + efecto oclusivo, máx = UOE + AI. '
             . 'Calculado con NBN (CE 0).',
             6.5
@@ -677,7 +698,7 @@ final class CaseSheetPdf
 
     private function logoaudiometria(array $data): void
     {
-        $this->titulo('Logoaudiometría', 96.0);
+        $this->titulo('Logoaudiometría', 88.0);
 
         $umd = is_array($data['UMD'] ?? null) ? $data['UMD'] : [];
         $sdt = is_array($data['SDT'] ?? null) ? $data['SDT'] : [0, 0];
@@ -695,8 +716,8 @@ final class CaseSheetPdf
             ];
         }
 
-        $alto = 96.0;
-        $this->espacio($alto + 26);
+        $alto = 88.0;
+        $this->espacio($alto + 24);
         CaseCharts::logogram($this->pdf, self::MARGEN, $this->y, $this->anchoContenido * 0.55, $alto, $porLado);
         CaseCharts::legend($this->pdf, self::MARGEN + 26, $this->y + $alto + 8, 'SRT = vertical punteada, UMD = triángulo');
 
@@ -725,7 +746,35 @@ final class CaseSheetPdf
         $filas[] = ['SISI', self::pct((float) ($sisi[0] ?? 0)), self::pct((float) ($sisi[1] ?? 0))];
         $filas[] = ['Reclutamiento', !empty($recruit[0]) ? 'Presente' : 'Ausente', !empty($recruit[1]) ? 'Presente' : 'Ausente'];
         $filas[] = ['Stenger', !empty($stenger[0]) ? 'Positivo' : 'Negativo', !empty($stenger[1]) ? 'Positivo' : 'Negativo'];
-        $this->tabla($filas, [0.36, 0.32, 0.32], true);
+        $this->tabla($filas, [0.36, 0.32, 0.32], true, 0.62);
+
+        // El LDL en números: es la expresión audiométrica del reclutamiento
+        // y en el audiograma solo se puede estimar a ojo. Solo el oído que
+        // lo tiene medido -- sin medir se guarda 130 en las nueve.
+        $ldl = self::desarmar($data['LDL'] ?? []);
+        $filasLdl = [];
+        foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $tag) {
+            if (count(array_filter($ldl[$lado], static fn ($v): bool => (int) $v !== 130)) === 0) {
+                continue;
+            }
+            $fila = [$tag];
+            foreach (CaseBuilder::FREQUENCIES as $i => $hz) {
+                $fila[] = in_array($hz, CaseCharts::FREQS_OSEA, true) ? self::db((float) $ldl[$lado][$i]) : '';
+            }
+            $filasLdl[] = $fila;
+        }
+        if ($filasLdl !== []) {
+            $cabecera = ['LDL (dB HL)'];
+            foreach (CaseBuilder::FREQUENCIES as $hz) {
+                $cabecera[] = in_array($hz, CaseCharts::FREQS_OSEA, true) ? self::hz($hz) : '';
+            }
+            $cols = count($cabecera);
+            $this->tabla(
+                array_merge([$cabecera], $filasLdl),
+                array_merge([0.2], array_fill(0, $cols - 1, 0.8 / ($cols - 1))),
+                true
+            );
+        }
 
         // Fowler: el patrón es por FRECUENCIA, no uno por oído -- compara los
         // dos y por eso solo existe donde la asimetría califica. Lo que se
@@ -811,7 +860,6 @@ final class CaseSheetPdf
             $xDecay += $anchoDecay + 10;
         }
         $this->y = $finDecay + 4;
-        $this->parrafo('Deterioro tonal en dB de caída sostenida.', 7);
     }
 
     /**
@@ -1067,6 +1115,34 @@ final class CaseSheetPdf
         }
     }
 
+    /**
+     * Acúfeno: la frase que escucha el paciente, y detrás los datos con los
+     * que el alumno va a tener que cuadrar su acufenometría.
+     */
+    private static function acufeno(array $tinnitus): string
+    {
+        $frase = CaseBuilder::describeTinnitus($tinnitus);
+        if (!CaseBuilder::tinnitusPresente($tinnitus)) {
+            return $frase;
+        }
+        $datos = [
+            (string) ($tinnitus['ruido'] ?? ''),
+            self::hz((int) ($tinnitus['frecuencia'] ?? 0)) . ' Hz',
+            (string) ($tinnitus['lateralidad'] ?? 'craneal'),
+        ];
+        if (($tinnitus['lateralidad'] ?? '') === 'unilateral') {
+            $datos[] = strtoupper((string) ($tinnitus['oido'] ?? 'od'));
+        }
+        if (($tinnitus['lateralidad'] ?? '') === 'bilateral' && ($tinnitus['predominio'] ?? 'igual') !== 'igual') {
+            $datos[] = 'predomina ' . strtoupper((string) $tinnitus['predominio']);
+        }
+        $datos[] = empty($tinnitus['permanente']) ? 'ocasional' : 'permanente';
+        if (!empty($tinnitus['pulsatil'])) {
+            $datos[] = 'pulsátil';
+        }
+        return $frase . '  [' . implode(' · ', array_filter($datos)) . ']';
+    }
+
     /** Latencia de una onda a ese nivel, o -- si no se ve. */
     private static function ms(array $onda): string
     {
@@ -1245,8 +1321,12 @@ final class CaseSheetPdf
         foreach (['od' => CaseCharts::COLOR_OD, 'oi' => CaseCharts::COLOR_OI] as $lado => $colorLado) {
             $modo = $soae[$lado]['modo'];
             $picos = count($soae[$lado]['picos']);
+            $detalle = [];
+            foreach ($soae[$lado]['picos'] as $pico) {
+                $detalle[] = self::hz((int) $pico['hz']) . ' Hz ' . self::db((float) $pico['db']) . ' dB';
+            }
             $texto = strtoupper($lado) . ': ' . $modo
-                . ($picos > 0 ? " ({$picos} pico" . ($picos === 1 ? '' : 's') . ' fijado' . ($picos === 1 ? '' : 's') . ')' : '');
+                . ($detalle !== [] ? ' (' . implode(', ', $detalle) . ')' : '');
             $this->pdf->text($xModo, $this->y + $alto + 18, $texto, 6, false, $colorLado);
             $xModo += $this->pdf->textWidth($texto, 6) + 12;
         }
@@ -1448,8 +1528,23 @@ final class CaseSheetPdf
             ['Medicamentos', (string) ($anamnesis['medicamentos'] ?? '')],
             ['Cirugías', (string) ($anamnesis['cirugias'] ?? '')],
             ['Otros', (string) ($anamnesis['otros'] ?? '')],
-            ['Acúfeno', CaseBuilder::describeTinnitus((array) ($data['Tinnitus'] ?? []))],
+            ['Acúfeno', self::acufeno((array) ($data['Tinnitus'] ?? []))],
         ]);
+
+        // Si el texto lo escribió la IA, el docente tiene que saberlo antes
+        // de apoyarse en él -- y si alguien lo leyó y lo dio por bueno.
+        $ia = is_array($anamnesis['ia'] ?? null) ? $anamnesis['ia'] : [];
+        if (!empty($ia['generado'])) {
+            $verificado = !empty($ia['verificado'])
+                ? 'verificado' . (($ia['verificado_por'] ?? '') !== '' ? ' por ' . $ia['verificado_por'] : '')
+                    . (($ia['verificado_en'] ?? '') !== '' ? ' el ' . $ia['verificado_en'] : '')
+                : 'SIN verificar';
+            $this->campos([[
+                'Borrador IA',
+                'La anamnesis la escribió la IA'
+                . (($ia['generado_en'] ?? '') !== '' ? ' el ' . $ia['generado_en'] : '') . '; ' . $verificado . '.',
+            ]]);
+        }
 
         $this->subtitulo('En la consulta');
         $this->campos([
@@ -1885,8 +1980,10 @@ final class CaseSheetPdf
      */
     private static function celdaMkg(array $via): string
     {
+        // "/" y no "(-)": en los reflejos el guión entre paréntesis es un
+        // RESULTADO --ausente-- y acá significa que no hay nada que hacer.
         if (!$via['cruza']) {
-            return '(-)';
+            return '/';
         }
         if ($via['dilema']) {
             return 'DILEMA (' . self::db($via['meseta']) . ')';

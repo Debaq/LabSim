@@ -114,6 +114,19 @@ t_eq(CaseSheetPdf::identificador('12', ['nombre' => 'Juan', 'apellido' => 'Muño
     '12_J_Munoz_9876543-K',
     'Sin tildes ni eñes: el nombre tiene que sobrevivir a cualquier sistema de archivos');
 t_true(strpos($pdfDemo, 'curva tipo As') !== false, 'El timpanograma dice el tipo del oído');
+
+// La hoja es el único apoyo del docente mientras el alumno atiende: tiene
+// que traer lo que el caso decidió Y lo que dejó sin decidir.
+t_true(strpos($pdfDemo, 'sin decidir') !== false,
+    'La portada avisa de las fichas que el caso no terminó de decidir');
+t_true(strpos($pdfDemo, '500 Hz') !== false && strpos($pdfDemo, 'Zumbido') !== false,
+    'El acúfeno trae los datos con los que se cuadra la acufenometría, no solo la frase del paciente');
+t_true(strpos($pdfDemo, 'Interpico I-V') !== false,
+    'El ABR informa los interpicos a 80 dB');
+t_true(strpos($pdfDemo, 'FSP objetivo') !== false && strpos($pdfDemo, 'Alcanza el objetivo') !== false,
+    'El ABR dice qué FSP logra y si llega al objetivo');
+t_true(strpos($pdfDemo, 'aplicada') !== false,
+    'La OEA informa la caída por banda que termina aplicando el cliente');
 // Los paréntesis delimitan las cadenas en un content stream, así que MiniPdf
 // los escapa: en los bytes del PDF "(-)" aparece como "\(-\)".
 t_true(strpos($pdfDemo, '\\(-\\)') !== false, 'Un reflejo fuera de escala se imprime (-), no 130 dB');
