@@ -89,43 +89,15 @@ foreach ([
 // Y los datos del caso, no solo los rótulos.
 t_true(strpos($pdfDemo, 'CASO-TEST') !== false, 'El PDF identifica el caso');
 t_true(strpos($pdfDemo, 'curva tipo As') !== false, 'El timpanograma dice el tipo del oído');
-t_true(strpos($pdfDemo, 'ausente') !== false, 'Un reflejo fuera de escala se imprime "ausente", no 130 dB');
+// Los paréntesis delimitan las cadenas en un content stream, así que MiniPdf
+// los escapa: en los bytes del PDF "(-)" aparece como "\(-\)".
+t_true(strpos($pdfDemo, '\\(-\\)') !== false, 'Un reflejo fuera de escala se imprime (-), no 130 dB');
 
 // Un caso vacío (recién creado, sin nada cargado) tiene que salir igual: el
 // PDF no puede ser lo que se rompa cuando alguien imprime una ficha a medias.
 $pdfVacio = CaseSheetPdf::build('VACIO', []);
 t_true(strpos($pdfVacio, '%PDF-1.4') === 0, 'Una ficha vacía igual genera un PDF');
 t_true(strpos($pdfVacio, 'Sin cita asociada') !== false, 'Sin paciente, la ficha lo dice en vez de fallar');
-
-// --- La versión para el alumno -----------------------------------------
-//
-// Mismo caso, sin lo que resuelve el ejercicio: el perfil (dónde está la
-// lesión) y los mandos del generador. Lo que el alumno podría medir él
-// mismo se queda.
-
-$pdfAlumno = CaseSheetPdf::build('CASO-TEST', ficha_caso_demo(), ['nombre' => 'Ana'], 'Docente', '10-09-2026', true);
-
-t_true(strpos($pdfAlumno, '%PDF-1.4') === 0, 'La versión del alumno también es un PDF');
-foreach ([
-    'Perfil auditivo' => 'el perfil dice dónde está la lesión',
-    'Componente coclear' => 'el % de CCE es la respuesta del ejercicio',
-    'Patrón retrococlear' => 'los interpicos son mandos del generador',
-    'Captura: promediaciones' => 'las condiciones de captura son del generador',
-    'Desviaciones por onda' => 'las desviaciones por onda son del generador',
-    'Sello (%)' => 'el sello de la sonda es un mando del generador',
-    // Sin acento: el PDF guarda el texto en WinAnsi, no en UTF-8.
-    'patolog' => 'la patología declarada de ABR, OEA y VEMP es la respuesta',
-    'umbral cargado' => 'el umbral que el docente fijó es lo que hay que medir',
-] as $prohibido => $porque) {
-    t_true(strpos($pdfAlumno, $prohibido) === false,
-        "La versión del alumno no muestra '{$prohibido}': {$porque}");
-}
-foreach (['Audiometr', 'Acumetr', 'Impedanciometr', 'Logoaudiometr', 'Otoscopia'] as $queda) {
-    t_true(strpos($pdfAlumno, $queda) !== false,
-        "La versión del alumno conserva la sección '{$queda}'");
-}
-t_true(strlen($pdfAlumno) < strlen($pdfDemo),
-    'La versión del alumno pesa menos que la del docente: le falta contenido, no formato');
 
 // --- Las curvas que se sintetizan --------------------------------------
 
@@ -134,7 +106,8 @@ t_true(strlen($pdfAlumno) < strlen($pdfDemo),
 // una curva en el editor y otra en el PDF.
 foreach (CaseBuilder::Z_OPTIONS as $tipo) {
     $pts = CaseCharts::tympanogramPoints($tipo);
-    t_eq(count($pts), 61, "Timpanograma {$tipo}: cubre -400..200 daPa de 10 en 10");
+    // Paso de 5 daPa: con 10 el muestreo recortaba la punta del ápice.
+    t_eq(count($pts), 121, "Timpanograma {$tipo}: cubre -400..200 daPa de 5 en 5");
     if ($tipo === 'B') {
         // B no tiene pico: su hallazgo es no tenerlo, y se comprueba abajo.
         continue;
@@ -153,6 +126,25 @@ t_true(max(array_column(CaseCharts::tympanogramPoints('As'), 1))
     'As es más chata que A (rigidez)');
 $curvaB = array_column(CaseCharts::tympanogramPoints('B'), 1);
 t_true(max($curvaB) - min($curvaB) < 0.1, 'B es plana: no tiene pico que buscar');
+
+// El ápice va en punta, no redondeado: la pendiente justo al lado del pico
+// tiene que ser MUCHO mayor que la de una gaussiana, que ahí llega plana.
+$curvaA = CaseCharts::tympanogramPoints('A');
+$iPico = 0;
+foreach ($curvaA as $i => $pt) {
+    if ($pt[1] > $curvaA[$iPico][1]) { $iPico = $i; }
+}
+$pendienteJuntoAlPico = abs($curvaA[$iPico][1] - $curvaA[$iPico + 1][1]);
+$pendienteLejos = abs($curvaA[$iPico + 12][1] - $curvaA[$iPico + 13][1]);
+t_true($pendienteJuntoAlPico > $pendienteLejos,
+    'La curva cae más rápido junto al ápice que lejos: el pico es una punta, no una loma');
+
+// Y la escala del eje es fija: los dos oídos y todas las fichas se leen igual.
+t_eq(CaseCharts::ESCALA_TIMPANOGRAMA_ML, 2.0, 'El timpanograma se dibuja siempre de 0 a 2 mL');
+foreach (CaseBuilder::Z_OPTIONS as $tipoZ) {
+    t_true(max(array_column(CaseCharts::tympanogramPoints($tipoZ), 1)) <= CaseCharts::ESCALA_TIMPANOGRAMA_ML,
+        "Timpanograma {$tipoZ}: su pico cabe en la escala fija");
+}
 
 // Logoaudiograma: con reclutamiento la curva CAE pasada la UMD (rollover),
 // y sin él se queda en meseta. Es el hallazgo que el gráfico tiene que

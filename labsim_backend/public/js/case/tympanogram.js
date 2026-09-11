@@ -1,14 +1,17 @@
 // Timpanograma: curva estilizada según el tipo Jerger elegido en Z OD/Z OI
 // -- el form solo guarda la categoría (A/As/Ad/C/Cs/B), no una curva medida,
-// así que se sintetiza una campana gaussiana por tipo. Mismas coordenadas
-// (presión -400..200 daPa, compliance 0..2.5 mL) que tymp_x()/tymp_y() en
-// PHP arriba, que dibujan la grilla fija de fondo.
+// así que se sintetiza una por tipo. El ápice va EN PUNTA (exponencial de la
+// distancia al pico, no gaussiana): un timpanograma real no tiene la loma
+// redondeada que dibujaba la campana. Mismas coordenadas (presión -400..200
+// daPa, compliance 0..2 mL) que tymp_x()/tymp_y() en PHP arriba, que dibujan
+// la grilla fija de fondo, y misma forma que CaseCharts::tympanogramPoints
+// en el PDF de la ficha.
 window.drawTympanogram = (function () {
     var NS = 'http://www.w3.org/2000/svg';
     function xPos(p) { p = Math.max(-400, Math.min(200, p)); return 32 + (p - (-400)) / 600 * 280; }
-    function yPos(c) { c = Math.max(0, Math.min(2.5, c)); return 276 - c / 2.5 * 266; }
+    function yPos(c) { c = Math.max(0, Math.min(2, c)); return 276 - c / 2 * 266; }
 
-    // [posición del pico (daPa), altura del pico (mL), ancho de la campana, línea base]
+    // [posición del pico (daPa), altura del pico (mL), ancho, línea base]
     var SHAPES = {
         A: [0, 0.8, 60, 0.1],
         As: [0, 0.3, 50, 0.1],
@@ -22,8 +25,8 @@ window.drawTympanogram = (function () {
         var s = SHAPES[type] || SHAPES.A;
         var peakPos = s[0], peakHeight = s[1], width = s[2], baseline = s[3];
         var pts = [];
-        for (var p = -400; p <= 200; p += 10) {
-            var c = baseline + (peakHeight - baseline) * Math.exp(-((p - peakPos) * (p - peakPos)) / (2 * width * width));
+        for (var p = -400; p <= 200; p += 5) {
+            var c = baseline + (peakHeight - baseline) * Math.exp(-Math.abs(p - peakPos) / width);
             pts.push([p, c]);
         }
         return pts;

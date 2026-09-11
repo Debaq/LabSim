@@ -16,17 +16,12 @@ require_once __DIR__ . '/../../src/CaseSheetPdf.php';
  *
  * Visibilidad: la misma de patients.php -- un docente no puede bajar la
  * ficha de un caso agendado en un curso ajeno.
- *
- * `?modo=alumno` baja la versión repartible: sin el perfil auditivo (dónde
- * está la lesión) ni los mandos del generador. Cuándo se reparte lo decide
- * el docente; el parámetro solo recorta lo que el PDF muestra.
  */
 
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
 
 $caseId = trim((string) ($_GET['id'] ?? ''));
-$paraAlumno = ($_GET['modo'] ?? '') === 'alumno';
 if ($caseId === '') {
     http_response_code(400);
     exit('Falta id.');
@@ -79,16 +74,14 @@ try {
         $data,
         $patient,
         (string) ($me['display_name'] ?? ''),
-        date('d-m-Y'),
-        $paraAlumno
+        date('d-m-Y')
     );
 } catch (Throwable $e) {
     http_response_code(500);
     exit('No se pudo generar el PDF: ' . htmlspecialchars($e->getMessage()));
 }
 
-$nombreArchivo = 'ficha_' . preg_replace('/[^A-Za-z0-9_-]/', '_', (string) $caso['id'])
-    . ($paraAlumno ? '_alumno' : '') . '.pdf';
+$nombreArchivo = 'ficha_' . preg_replace('/[^A-Za-z0-9_-]/', '_', (string) $caso['id']) . '.pdf';
 header('Content-Type: application/pdf');
 header('Content-Disposition: inline; filename="' . $nombreArchivo . '"');
 header('Content-Length: ' . strlen($pdfBytes));

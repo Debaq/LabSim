@@ -164,7 +164,8 @@ function logogram_y(float $pct): float
 
 // Geometría del timpanograma (compliance vs presión), mismo plot box que el
 // audiograma. X = presión en daPa (-400..200), Y = compliance/admitancia en
-// mL (0..2.5) -- si se cambia acá, cambiar también en case/tympanogram.js.
+// mL (0..2, escala fija) -- si se cambia acá, cambiar también en
+// case/tympanogram.js y en CaseCharts::ESCALA_TIMPANOGRAMA_ML.
 function tymp_x(float $daPa): float
 {
     $daPa = max(-400, min(200, $daPa));
@@ -172,8 +173,8 @@ function tymp_x(float $daPa): float
 }
 function tymp_y(float $compliance): float
 {
-    $compliance = max(0, min(2.5, $compliance));
-    return 276 - $compliance / 2.5 * 266;
+    $compliance = max(0, min(2.0, $compliance));
+    return 276 - $compliance / 2.0 * 266;
 }
 
 $error = null;
@@ -448,11 +449,7 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <?php if ($isEdit): ?>
 <p class="row row--between">
     <span class="muted">Ficha guardada: se puede imprimir tal como está guardada (los cambios sin guardar no salen en el PDF).</span>
-    <span>
-        <a class="btn" href="case_sheet_pdf.php?id=<?= urlencode($editId) ?>" target="_blank" rel="noopener">Ficha completa en PDF</a>
-        <a class="btn" href="case_sheet_pdf.php?id=<?= urlencode($editId) ?>&amp;modo=alumno" target="_blank" rel="noopener"
-           title="Sin el perfil auditivo ni los parámetros del generador">Versión para el alumno</a>
-    </span>
+    <a class="btn" href="case_sheet_pdf.php?id=<?= urlencode($editId) ?>" target="_blank" rel="noopener">Ficha completa en PDF</a>
 </p>
 <?php endif; ?>
 

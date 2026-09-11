@@ -1,6 +1,11 @@
 // Logoaudiograma: curva % discriminación vs intensidad (dB HL), por oído.
 // Mismo plot box que el audiograma pero ejes lineales (ver logogram_x()/
-// logogram_y() en PHP arriba). Curva simplificada para vista previa en vivo
+// logogram_y() en PHP arriba). Se dibuja REDONDEADA, como en un informe: la
+// quebrada de segmentos rectos era un artefacto de unir los puntos con
+// polyline. Las tangentes son las de Fritsch-Carlson (cúbica monótona), las
+// mismas que CaseCharts::curvaSuave usa para el PDF -- monótona y no un
+// spline cualquiera porque la curva no puede pasar de 100 % ni bajar de 0.
+// Curva simplificada para vista previa en vivo
 // -- no replica CalculateLogo.cal_new_umd completo (src/audiometria/
 // logoaudiometry.py de la app de escritorio), pero sigue la misma forma:
 // 0% en SDT, sube hasta UMD(int,%), y desde ahí meseta plana o cae si hay
@@ -51,6 +56,51 @@ window.drawLogogram = (function () {
         return pts;
     }
 
+    /**
+     * Puntos -> path SVG con bezier cúbicas que pasan por todos ellos.
+     * Espejo de CaseCharts::curvaSuave(): mismas tangentes, misma forma.
+     */
+    function smoothPath(pts) {
+        var limpios = [];
+        pts.forEach(function (p) {
+            if (!limpios.length || Math.abs(p[0] - limpios[limpios.length - 1][0]) > 1e-9) { limpios.push(p); }
+        });
+        var n = limpios.length;
+        if (n < 2) { return ''; }
+
+        var d = [], i;
+        for (i = 0; i < n - 1; i++) {
+            d[i] = (limpios[i + 1][1] - limpios[i][1]) / (limpios[i + 1][0] - limpios[i][0]);
+        }
+        var m = [d[0]];
+        for (i = 1; i < n - 1; i++) { m[i] = (d[i - 1] + d[i]) / 2; }
+        m[n - 1] = d[n - 2];
+
+        // Monotonía tramo a tramo: anula la tangente en máximos y mínimos, que
+        // es lo que redondea el rollover sin pasarse del 100 %.
+        for (i = 0; i < n - 1; i++) {
+            if (Math.abs(d[i]) < 1e-12) { m[i] = 0; m[i + 1] = 0; continue; }
+            var a = m[i] / d[i], b = m[i + 1] / d[i];
+            if (a < 0) { m[i] = 0; a = 0; }
+            if (b < 0) { m[i + 1] = 0; b = 0; }
+            var suma = a * a + b * b;
+            if (suma > 9) {
+                var t = 3 / Math.sqrt(suma);
+                m[i] = t * a * d[i];
+                m[i + 1] = t * b * d[i];
+            }
+        }
+
+        var path = 'M ' + limpios[0][0].toFixed(2) + ' ' + limpios[0][1].toFixed(2);
+        for (i = 0; i < n - 1; i++) {
+            var h = limpios[i + 1][0] - limpios[i][0];
+            path += ' C ' + (limpios[i][0] + h / 3).toFixed(2) + ' ' + (limpios[i][1] + m[i] * h / 3).toFixed(2)
+                  + ', ' + (limpios[i + 1][0] - h / 3).toFixed(2) + ' ' + (limpios[i + 1][1] - m[i + 1] * h / 3).toFixed(2)
+                  + ', ' + limpios[i + 1][0].toFixed(2) + ' ' + limpios[i + 1][1].toFixed(2);
+        }
+        return path;
+    }
+
     return function drawLogogram() {
         var group = document.getElementById('logogram-data');
         if (!group) return;
@@ -58,13 +108,13 @@ window.drawLogogram = (function () {
 
         ['od', 'oi'].forEach(function (side) {
             var color = window.sideColor(side);
-            var pts = curvePoints(side);
-            var poly = document.createElementNS(NS, 'polyline');
-            poly.setAttribute('points', pts.map(function (p) { return logoX(p[0]) + ',' + logoY(p[1]); }).join(' '));
-            poly.setAttribute('fill', 'none');
-            poly.setAttribute('stroke', color);
-            poly.setAttribute('stroke-width', '1.3');
-            group.appendChild(poly);
+            var pts = curvePoints(side).map(function (p) { return [logoX(p[0]), logoY(p[1])]; });
+            var curva = document.createElementNS(NS, 'path');
+            curva.setAttribute('d', smoothPath(pts));
+            curva.setAttribute('fill', 'none');
+            curva.setAttribute('stroke', color);
+            curva.setAttribute('stroke-width', '1.3');
+            group.appendChild(curva);
 
             var sdt = val('.sdt-input', side, 0);
             var srt = val('.srt-input', side, 0);

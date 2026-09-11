@@ -214,6 +214,38 @@ final class MiniPdf
     }
 
     /**
+     * Curva por segmentos bezier cúbicos. Cada segmento es
+     * [x0,y0, c1x,c1y, c2x,c2y, x1,y1] en coordenadas de la API; el punto
+     * final de uno es el inicial del siguiente.
+     *
+     * La usa la curva de discriminación, que en un informe real se dibuja
+     * redondeada y no como una quebrada (ver CaseCharts::curvaSuave).
+     *
+     * @param array<int,array<int,float>> $segmentos
+     */
+    public function bezier(array $segmentos, float $width = 1.0, ?string $color = null, ?array $dash = null): void
+    {
+        $segmentos = array_values(array_filter($segmentos, static fn ($s) => is_array($s) && count($s) >= 8));
+        if ($segmentos === []) {
+            return;
+        }
+        $ops = sprintf("%.2F w%s\n", $width, self::dashOp($dash));
+        $ops .= sprintf("%.2F %.2F m\n", $segmentos[0][0], $this->pageH - $segmentos[0][1]);
+        foreach ($segmentos as $s) {
+            $ops .= sprintf(
+                "%.2F %.2F %.2F %.2F %.2F %.2F c\n",
+                $s[2],
+                $this->pageH - $s[3],
+                $s[4],
+                $this->pageH - $s[5],
+                $s[6],
+                $this->pageH - $s[7]
+            );
+        }
+        $this->wrapped($ops . "S\n", $color, null);
+    }
+
+    /**
      * Círculo por cuatro bezier (el PDF no tiene primitiva de arco). La
      * constante 0.5523 es la razón conocida que hace que una bezier cúbica
      * aproxime un cuarto de circunferencia.

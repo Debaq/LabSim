@@ -1,7 +1,10 @@
 // Audiograma: se redibuja solo con lo que hay en los campos de vía
 // aérea/ósea/LDL -- mismas coordenadas (log de frecuencia, -10..120 dB HL)
 // que audiogram_x()/audiogram_y() en PHP, que dibujan la grilla fija de
-// fondo. Símbolos clínicos estándar (ASHA): círculo/cruz = aérea OD/OI sin
+// fondo. La aérea va con línea llena, la ósea unida con PUNTOS y el LDL con
+// guiones más largos, para que las dos discontinuas no se confundan (los
+// mismos patrones están en CaseCharts::TRAZO_OSEA/TRAZO_LDL, que dibuja el
+// PDF de la ficha). Símbolos clínicos estándar (ASHA): círculo/cruz = aérea OD/OI sin
 // enmascarar, triángulo/cuadrado = aérea OD/OI enmascarada; "<"/">" = ósea
 // OD/OI sin enmascarar, "["/"]" = ósea OD/OI enmascarada; triángulo relleno
 // = LDL. El enmascaramiento no se tipea a mano: se infiere solo de la
@@ -22,6 +25,15 @@ window.drawAudiogram = (function () {
     // oído >= 10 dB (la atenuación interaural ósea es prácticamente 0).
     var AIR_ATTENUATION_BY_FREQ = [35, 40, 40, 40, 40, 45, 45, 50, 50];
     var BONE_MASKING_GAP = 10;
+    // [marca, espacio] en unidades del SVG -- espejo de CaseCharts::TRAZO_*.
+    var BONE_DASH = '1,2';
+    var LDL_DASH = '3,2';
+    // Vía ósea y LDL se miden de 250 a 4000 Hz: ni 125 ni 6000/8000 se
+    // prueban por vía ósea (el vibrador no entrega nivel útil ahí y la
+    // vibración táctil se confunde con audición). Espejo de
+    // CaseCharts::FREQS_OSEA, que recorta lo mismo en el PDF.
+    var BONE_FREQS = [250, 500, 1000, 2000, 3000, 4000];
+    function boneMeasured(i) { return BONE_FREQS.indexOf(FREQS[i]) !== -1; }
 
     function xPos(freq) { return 32 + (Math.log(freq) / Math.LN2 - MIN_LOG) / (MAX_LOG - MIN_LOG) * 280; }
     function yPos(db) {
@@ -106,13 +118,18 @@ window.drawAudiogram = (function () {
         if (!group) return;
         while (group.firstChild) group.removeChild(group.firstChild);
 
-        function drawLine(vals, color, dashed) {
+        function drawLine(vals, color, dash, soloOsea) {
+            var puntos = [];
+            vals.forEach(function (v, i) {
+                if (soloOsea && !boneMeasured(i)) { return; }
+                puntos.push(xPos(FREQS[i]) + ',' + yPos(v));
+            });
             var poly = document.createElementNS(NS, 'polyline');
-            poly.setAttribute('points', vals.map(function (v, i) { return xPos(FREQS[i]) + ',' + yPos(v); }).join(' '));
+            poly.setAttribute('points', puntos.join(' '));
             poly.setAttribute('fill', 'none');
             poly.setAttribute('stroke', color);
-            poly.setAttribute('stroke-width', dashed ? '1' : '1.3');
-            if (dashed) poly.setAttribute('stroke-dasharray', '2,2');
+            poly.setAttribute('stroke-width', dash ? '1' : '1.3');
+            if (dash) poly.setAttribute('stroke-dasharray', dash);
             group.appendChild(poly);
         }
 
@@ -132,9 +149,13 @@ window.drawAudiogram = (function () {
             group.appendChild((maskedOi ? makeSquare : makeCross)(x, yPos(aereaOi[n]), window.sideColor('oi')));
         }
 
-        // Vía ósea: sin línea (convención estándar), enmascarada si hay gap
-        // aéreo-óseo >=10dB en el mismo oído.
+        // Vía ósea: unida con línea punteada, y enmascarada si hay gap
+        // aéreo-óseo >=10dB en el mismo oído. La línea se dibuja antes que
+        // los corchetes para que el símbolo quede encima.
+        drawLine(oseaOd, window.sideColor('od'), BONE_DASH, true);
+        drawLine(oseaOi, window.sideColor('oi'), BONE_DASH, true);
         for (var m = 0; m < FREQS.length; m++) {
+            if (!boneMeasured(m)) { continue; }
             var x2 = xPos(FREQS[m]);
             group.appendChild(makeBracket(x2, yPos(oseaOd[m]), window.sideColor('od'), 'left', boneMasked(aereaOd[m], oseaOd[m])));
             group.appendChild(makeBracket(x2, yPos(oseaOi[m]), window.sideColor('oi'), 'right', boneMasked(aereaOi[m], oseaOi[m])));
@@ -145,13 +166,17 @@ window.drawAudiogram = (function () {
         // que graficarlo igual sería mostrar un dato que nunca se va a guardar.
         if (isLdlMeasured('od')) {
             var ldlOd = readVals('ldl', 'od');
-            drawLine(ldlOd, window.sideColor('od'), true);
-            ldlOd.forEach(function (v, i) { group.appendChild(makeLdlMark(xPos(FREQS[i]), yPos(v), window.sideColor('od'))); });
+            drawLine(ldlOd, window.sideColor('od'), LDL_DASH, true);
+            ldlOd.forEach(function (v, i) {
+                if (boneMeasured(i)) { group.appendChild(makeLdlMark(xPos(FREQS[i]), yPos(v), window.sideColor('od'))); }
+            });
         }
         if (isLdlMeasured('oi')) {
             var ldlOi = readVals('ldl', 'oi');
-            drawLine(ldlOi, window.sideColor('oi'), true);
-            ldlOi.forEach(function (v, i) { group.appendChild(makeLdlMark(xPos(FREQS[i]), yPos(v), window.sideColor('oi'))); });
+            drawLine(ldlOi, window.sideColor('oi'), LDL_DASH, true);
+            ldlOi.forEach(function (v, i) {
+                if (boneMeasured(i)) { group.appendChild(makeLdlMark(xPos(FREQS[i]), yPos(v), window.sideColor('oi'))); }
+            });
         }
     };
 })();

@@ -19,11 +19,18 @@
     <strong>Audiograma</strong>
     <svg id="audiogram-svg" viewBox="0 0 320 300" style="width:100%; height:auto; margin-top:0.5rem;">
         <rect x="32" y="10" width="280" height="266" fill="none" stroke="#ccc"></rect>
-        <?php foreach ([0, 20, 40, 60, 80, 100, 120] as $db):
+        <?php
+        // La audición normal llega hasta 20 dB HL inclusive (por eso el grado
+        // leve arranca en 21, ver CaseProfile::GRADES): esa línea va gruesa,
+        // porque es la que se busca primero al leer un audiograma. Lo mismo
+        // hace el PDF de la ficha (CaseCharts::LIMITE_NORMALIDAD_DB).
+        $limiteNormal = CaseProfile::GRADES['leve']['rango'][0] - 1;
+        foreach ([0, 20, 40, 60, 80, 100, 120] as $db):
             $y = audiogram_y($db);
+            $esLimite = $db === $limiteNormal;
         ?>
-        <line x1="32" y1="<?= $y ?>" x2="312" y2="<?= $y ?>" stroke="#eee"></line>
-        <text x="28" y="<?= $y + 3 ?>" text-anchor="end" font-size="8" fill="#666"><?= $db ?></text>
+        <line x1="32" y1="<?= $y ?>" x2="312" y2="<?= $y ?>" stroke="<?= $esLimite ? '#555' : '#eee' ?>" stroke-width="<?= $esLimite ? '1.6' : '1' ?>"></line>
+        <text x="28" y="<?= $y + 3 ?>" text-anchor="end" font-size="8" fill="<?= $esLimite ? '#555' : '#666' ?>"<?= $esLimite ? ' font-weight="bold"' : '' ?>><?= $db ?></text>
         <?php endforeach; ?>
         <?php
         $freqLabels = [125 => '125', 250 => '250', 500 => '500', 1000 => '1K', 2000 => '2K', 3000 => '3K', 4000 => '4K', 6000 => '6K', 8000 => '8K'];

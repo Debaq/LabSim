@@ -578,12 +578,28 @@ Pendiente:
       sin cachear (una foto se reemplaza desde el editor, y un JPEG guardado
       al lado quedaría mostrando la vieja). Sin GD, o con una foto ilegible,
       se omite esa foto en vez de tumbar la ficha.
-- [x] Versión para el alumno (2026-09-10): `?modo=alumno`, con botón propio
-      en las dos pantallas. Saca el perfil auditivo (dónde está la lesión, el
-      %CCE), la patología declarada de ABR/OEA/VEMP, el umbral cargado, el
-      patrón retrococlear, las desviaciones por onda, las condiciones de
-      captura y los mandos de la OEA. Queda lo que el alumno podría medir.
-      **Cuándo repartirlo lo decide el docente**: el parámetro solo recorta.
+- Versión "para el alumno" del PDF: **descartada** (2026-09-10). Se llegó a
+      implementar (`?modo=alumno`, recortando perfil y mandos del generador)
+      y el docente la sacó: no hay caso de uso. La ficha es del docente y se
+      imprime entera. No reintroducir sin que la pida.
+- [x] Revisión del docente sobre el PDF, 2026-09-10 (todo aplicado en el PDF
+      **y** en la vista previa del editor donde correspondía):
+      ósea unida con línea punteada y LDL con guiones más largos (dos
+      discontinuas distintas); ósea y LDL solo de 250 a 4000 Hz, que es
+      donde se miden; línea de 20 dB gruesa marcando el límite de la
+      audición normal (sale de `CaseProfile::GRADES`, no de un 20 escrito a
+      mano); logoaudiograma redondeado con cúbica monótona (Fritsch-Carlson,
+      que no se pasa de 100 % ni baja de 0); promedios al paso de 5 dB y con
+      las frecuencias entre paréntesis; timpanograma con eje Y al doble del
+      pico de su curva, y la B --que no tiene pico-- tomando la escala del
+      otro oído; reflejos en la tabla espejada del editor; acompañantes con
+      su versión de la historia y sus rasgos de entrevista; la tabla de
+      umbrales reemplazada por el detalle de enmascaramiento (`CaseMasking`,
+      fórmulas copiadas de `response.py`/`DebugMkg.py`); curvas de ABR
+      (serie del click por intensidad) y de VEMP (tres subtipos por oído),
+      reconstruidas de los parámetros del caso en `CaseWaveforms`; y OEA con
+      las cuatro pruebas --TEOAE, DP-grama, SFOAE y SOAE-- cada una en sus
+      bandas y con su área normal (`CaseOae`).
 - [x] Las escalas duplicadas entre PHP y JS ya no pueden separarse en
       silencio (2026-09-10): `tests/test_charts_vs_js.php` lee
       `public/js/case/*.js` y compara contra `CaseCharts` la tabla de
@@ -649,3 +665,25 @@ Pendiente de esta misma revisión (no tocado todavía):
       `downHand()` siempre; y sigue con el modelo viejo de rango + curva
       sombra, distinto del "mejor de las dos vías" que usa
       `CalculateLogo`. Son dos modelos para el mismo fenómeno.
+
+### Los trazos del PDF no son el generador
+
+`CaseWaveforms` (ABR y VEMP) y `CaseOae` reconstruyen la FORMA del examen a
+partir de los parámetros del caso: mismas latencias normativas, misma
+función latencia-intensidad (Hood, quiebre en 70 dB), mismas reglas del
+patrón retrococlear --incluido que solo se aplican si el oído es neural, que
+es lo que hace `if is_neural` en el generador-- y misma ley de atenuación de
+la OEA. Lo que NO tienen es ruido, promediación, artefactos ni FSP: eso vive
+en Python y sigue siendo la única fuente de verdad de la señal. El pie de
+cada gráfico lo dice.
+
+La copia de los normativos (`CLICK_BASE`, `CaseOae::TEOAE/DPOAE/SFOAE/SOAE`)
+existe porque `resources/abr/` y `resources/oae/` no se despliegan con el
+backend. Pendiente:
+- [ ] Un test que compare esas constantes contra
+      `resources/*/normative_data.json` del repo (como hace
+      `test_charts_vs_js.php` con el JavaScript). Hoy se copiaron a mano y
+      nada avisa si el JSON cambia.
+- [ ] La normativa por curso (`AppConfig`, `normative_data.abr`) no se
+      consulta: el PDF siempre dibuja con los valores por defecto. Si un
+      curso tiene su propia tabla, su ficha debería usarla.

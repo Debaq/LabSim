@@ -201,8 +201,6 @@ admin_header('Fichas Clínicas', $me);
                 <a href="case_create.php?edit=<?= urlencode($c['id']) ?>" class="action-btn secondary">Editar ficha</a>
                 <a href="case_sheet_pdf.php?id=<?= urlencode($c['id']) ?>" class="action-btn secondary" target="_blank" rel="noopener"
                    title="Ficha completa en PDF: perfil, audiograma, impedanciometría, acumetría, logoaudiometría, supraliminares, ABR, OEA y VEMP">PDF</a>
-                <a href="case_sheet_pdf.php?id=<?= urlencode($c['id']) ?>&amp;modo=alumno" class="action-btn secondary" target="_blank" rel="noopener"
-                   title="Misma ficha sin el perfil auditivo ni los parámetros del generador: los exámenes, sin la respuesta">PDF alumno</a>
                 <form method="post" class="inline" onsubmit="return confirm(<?= htmlspecialchars(json_encode("¿Eliminar el caso {$c['id']}" . ($nombreVivo || $nombreSnapshot ? ' (' . ($nombreVivo ?: $nombreSnapshot) . ')' : '') . "? También se eliminan todas sus citas/rondas ({$c['rondas_count']}) y las atenciones registradas. No se puede deshacer."), ENT_QUOTES) ?>);">
                 <?= csrf_field() ?>
                     <input type="hidden" name="form_action" value="delete_case">
