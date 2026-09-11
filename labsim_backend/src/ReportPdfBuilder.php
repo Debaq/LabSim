@@ -172,7 +172,7 @@ final class ReportPdfBuilder
      * Cuerpo del informe de otoscopia: qué marcó el alumno en cada
      * cuadrante de la membrana, más el CAE y sus observaciones, por oído.
      * Shape que manda el cliente (ver OtoscopiaInforme.InformeOtoscopia):
-     * {"od": {"cuadrantes": {"anterior_superior": "perforation", ...},
+     * {"od": {"cuadrantes": {"anterior_superior": ["perforation", ...], ...},
      *         "cae": ["cae_cerumen", ...], "observaciones": "texto"},
      *  "oi": {...}}
      * Las claves son las de OtoReport (proyecto aparte) a propósito -- acá
@@ -223,10 +223,25 @@ final class ReportPdfBuilder
                     if (!isset($marcas[$clave])) {
                         continue;
                     }
-                    $hallazgo = (string) $marcas[$clave];
-                    $etiqueta = $hallazgos[$hallazgo] ?? $hallazgo;
+                    // Un cuadrante trae VARIOS hallazgos (en una zona se ve
+                    // más de una cosa). Los informes de la primera versión
+                    // traían un solo string: se aceptan las dos formas, si
+                    // no un informe viejo se imprimiría vacío.
+                    $delCuadrante = is_array($marcas[$clave]) ? $marcas[$clave] : [$marcas[$clave]];
+                    $etiquetas = [];
+                    foreach ($delCuadrante as $hallazgo) {
+                        $hallazgo = (string) $hallazgo;
+                        if ($hallazgo === '') {
+                            continue;
+                        }
+                        $etiquetas[] = $hallazgos[$hallazgo] ?? $hallazgo;
+                    }
+                    if ($etiquetas === []) {
+                        continue;
+                    }
+                    $linea = "{$nombre}: " . implode(', ', $etiquetas);
                     $y = self::ensureSpace($pdf, $y, 14);
-                    $pdf->text(self::MARGIN + 12, $y, "{$nombre}: {$etiqueta}", 9);
+                    $pdf->text(self::MARGIN + 12, $y, $linea, 9);
                     $y += 14;
                 }
             }

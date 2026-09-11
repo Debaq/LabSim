@@ -963,3 +963,37 @@ el criterio seguro es callar. Se pasaron a `debug_print` los volcados de
       son mensajes de error, no volcados de datos, y siguen saliendo para
       todos. Si algún día imprimen datos del caso, tienen que pasar por
       `debug_print` también.
+
+## Otoscopia: varios hallazgos por cuadrante (2026-09-11)
+
+El informe guardaba un hallazgo por cuadrante (`cuadrantes[clave] = "x"`),
+así que el segundo click pisaba al primero. En una misma zona se encuentra
+más de una cosa --una perforación con timpanoesclerosis alrededor, una
+retracción con placa-- y eso se estaba perdiendo.
+
+Ahora cada cuadrante guarda una lista, y los hallazgos se dibujan según
+qué clase de marca son (`TIPO_HALLAZGO` en OtoscopiaInforme.py):
+
+- **De área** (retracción, efusión, timpanoesclerosis, colesteatoma,
+  inflamación, miringitis): rellenan el cuadrante. Con varios, los 90° se
+  reparten en franjas iguales -- con uno solo queda igual que antes. En la
+  pars flácida son bandas verticales: un pie dentro de ese óvalo no se
+  leería.
+- **Puntuales** (perforación, tubo): marcador encima del relleno, a 0.78r
+  para no caer sobre las siglas AS/AI/PS/PI, abiertos en abanico si hay
+  más de uno. El tubo va como anillo y la perforación como disco: con dos
+  discos del mismo tamaño y distinto color no se distinguen en el esquema
+  chico.
+
+La clasificación área/punto la decidió el código, no el docente: es cómo
+se dibuja, no una afirmación clínica. Si alguna tiene que cambiar de clase,
+es una línea en `HALLAZGOS`.
+
+Click suma al cuadrante; volver a marcar el mismo hallazgo lo saca; sin
+hallazgo elegido, el click vacía el cuadrante (está en el tooltip del
+esquema). Al pasar el mouse, el tooltip dice qué hay marcado ahí: con
+varios hallazgos encimados el dibujo solo no alcanza.
+
+`ReportPdfBuilder::otoscopiaBody` acepta lista o string suelto, para que
+los informes ya subidos con la primera versión sigan imprimiendo sus
+hallazgos en vez de salir en blanco.

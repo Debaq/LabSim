@@ -15,6 +15,8 @@ LabSim se puede leer/importar con las mismas herramientas.
 Lo marcado se sube como informe tipo 'OTOSCOPIA' (report_upload.php) para
 que el docente lo revise desde admin/chat_detail.php.
 """
+import math
+
 from PySide6.QtCore import QPoint, QRect, Qt, Signal
 from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import (
@@ -29,19 +31,37 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-# (clave, etiqueta, color) -- mismas claves que FindingType de OtoReport.
+# (clave, etiqueta, color, tipo) -- claves de FindingType de OtoReport.
+#
+# El tipo es cómo se dibuja la marca, y son dos cosas distintas:
+#   "area": el hallazgo ocupa zona (una retracción, una efusión, una placa)
+#           -- rellena el cuadrante.
+#   "punto": el hallazgo es una lesión puntual dentro del cuadrante (una
+#            perforación, un tubo) -- se dibuja como marcador encima.
+# En un mismo cuadrante conviven varios: una perforación anteroinferior con
+# timpanoesclerosis alrededor es un hallazgo corriente, y antes el segundo
+# click pisaba al primero.
+AREA = "area"
+PUNTO = "punto"
 HALLAZGOS = [
-    ("retraction", "Retracción", "#f59e0b"),
-    ("perforation", "Perforación", "#ef4444"),
-    ("effusion", "Efusión", "#3b82f6"),
-    ("tympanosclerosis", "Timpanoesclerosis", "#8b5cf6"),
-    ("cholesteatoma", "Colesteatoma", "#f97316"),
-    ("inflammation", "Inflamación", "#dc2626"),
-    ("tube", "Tubo", "#10b981"),
-    ("myringitis", "Miringitis", "#ec4899"),
+    ("retraction", "Retracción", "#f59e0b", AREA),
+    ("perforation", "Perforación", "#ef4444", PUNTO),
+    ("effusion", "Efusión", "#3b82f6", AREA),
+    ("tympanosclerosis", "Timpanoesclerosis", "#8b5cf6", AREA),
+    ("cholesteatoma", "Colesteatoma", "#f97316", AREA),
+    ("inflammation", "Inflamación", "#dc2626", AREA),
+    ("tube", "Tubo", "#10b981", PUNTO),
+    ("myringitis", "Miringitis", "#ec4899", AREA),
 ]
-COLOR_HALLAZGO = {clave: color for clave, _, color in HALLAZGOS}
-ETIQUETA_HALLAZGO = {clave: etiqueta for clave, etiqueta, _ in HALLAZGOS}
+COLOR_HALLAZGO = {clave: color for clave, _, color, _t in HALLAZGOS}
+ETIQUETA_HALLAZGO = {clave: etiqueta for clave, etiqueta, _c, _t in HALLAZGOS}
+TIPO_HALLAZGO = {clave: tipo for clave, _e, _c, tipo in HALLAZGOS}
+
+
+def es_de_area(clave):
+    """Los hallazgos desconocidos (informes de otra versión) se dibujan
+    como área: es el relleno, lo que peor se puede perder de vista."""
+    return TIPO_HALLAZGO.get(clave, AREA) == AREA
 
 # Claves de QuadrantName (OtoReport). El orden es el de dibujo/lectura.
 CUADRANTES = [
@@ -72,19 +92,25 @@ CAE_CHECKS = [
 
 
 class _DiagramaTimpanico(QWidget):
-    """Esquema clickeable de la membrana: 4 cuadrantes + pars flácida. Un
-    hallazgo por cuadrante (marcar otro lo reemplaza, marcar el mismo lo
-    borra) -- mismo comportamiento que TympanicDiagram de OtoReport."""
+    """Esquema clickeable de la membrana: 4 cuadrantes + pars flácida.
+
+    Cada cuadrante guarda VARIOS hallazgos, no uno: en una misma zona se
+    encuentra más de una cosa a la vez (perforación con timpanoesclerosis
+    alrededor, retracción con placa). Los de área se reparten el cuadrante
+    en franjas y los puntuales se dibujan como marcadores encima, así
+    ninguno tapa al otro. Marcar dos veces el mismo hallazgo lo saca.
+    """
 
     cuadrante_click = Signal(str)
 
     def __init__(self, lado, parent=None):
         super().__init__(parent)
         self._es_derecho = lado == "od"
-        self.marcas = {}  # cuadrante -> clave de hallazgo
+        self.marcas = {}  # cuadrante -> [claves de hallazgo, en orden de marcado]
         self.setMinimumSize(200, 200)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setMouseTracking(True)  # para el tooltip con lo marcado
 
     # -- geometría (todo derivado del lado menor: el esquema es cuadrado) --
     def _metricas(self):
@@ -121,6 +147,19 @@ class _DiagramaTimpanico(QWidget):
             self.cuadrante_click.emit(cuadrante)
         super().mousePressEvent(event)
 
+    def mouseMoveEvent(self, event):
+        """Tooltip con lo marcado en el cuadrante de abajo del mouse: con
+        varios hallazgos en la misma zona, el dibujo solo no siempre deja
+        claro cuáles son."""
+        cuadrante = self._cuadrante_en(event.position().toPoint())
+        if cuadrante is None:
+            self.setToolTip("")
+        else:
+            claves = self.marcas.get(cuadrante, [])
+            etiquetas = ", ".join(ETIQUETA_HALLAZGO.get(c, c) for c in claves) or "sin hallazgos"
+            self.setToolTip(f"{ETIQUETA_CUADRANTE.get(cuadrante, cuadrante)}: {etiquetas}")
+        super().mouseMoveEvent(event)
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -140,16 +179,22 @@ class _DiagramaTimpanico(QWidget):
         painter.setBrush(QColor("#fde68a"))
         painter.drawEllipse(rect_de(r))
 
-        # Relleno de los cuadrantes marcados (pie de 90° cada uno).
+        # Relleno de los cuadrantes marcados: los 90° del cuadrante se
+        # reparten en tantas franjas como hallazgos de área tenga. Con uno
+        # solo queda igual que antes (el pie entero).
         for cuadrante, angulo in self._angulos_cuadrantes().items():
-            clave = self.marcas.get(cuadrante)
-            if not clave:
+            de_area = [c for c in self.marcas.get(cuadrante, []) if es_de_area(c)]
+            if not de_area:
                 continue
-            color = QColor(COLOR_HALLAZGO.get(clave, "#888888"))
-            color.setAlpha(150)
-            painter.setBrush(color)
             painter.setPen(Qt.PenStyle.NoPen)
-            painter.drawPie(rect_de(r), angulo * 16, 90 * 16)
+            franja = 90.0 / len(de_area)
+            for i, clave in enumerate(de_area):
+                color = QColor(COLOR_HALLAZGO.get(clave, "#888888"))
+                color.setAlpha(150)
+                painter.setBrush(color)
+                painter.drawPie(
+                    rect_de(r), int((angulo + i * franja) * 16), int(franja * 16)
+                )
 
         # Divisiones
         painter.setPen(QPen(QColor("#92400e"), 1, Qt.PenStyle.DashLine))
@@ -157,15 +202,25 @@ class _DiagramaTimpanico(QWidget):
         painter.drawLine(int(centro.x() - r), centro.y(), int(centro.x() + r), centro.y())
         painter.drawLine(centro.x(), int(centro.y() - r), centro.x(), int(centro.y() + r))
 
-        # Pars flácida
+        # Pars flácida: mismo criterio, pero repartida en bandas
+        # verticales (es un óvalo chico, un pie ahí no se leería).
         pf = self._rect_pars_flaccida()
-        clave_pf = self.marcas.get("pars_flaccida")
-        if clave_pf:
-            color = QColor(COLOR_HALLAZGO.get(clave_pf, "#888888"))
-            color.setAlpha(150)
-            painter.setBrush(color)
-        else:
-            painter.setBrush(Qt.BrushStyle.NoBrush)
+        area_pf = [c for c in self.marcas.get("pars_flaccida", []) if es_de_area(c)]
+        if area_pf:
+            painter.save()
+            painter.setClipRect(pf)
+            painter.setPen(Qt.PenStyle.NoPen)
+            ancho = pf.width() / len(area_pf)
+            for i, clave in enumerate(area_pf):
+                color = QColor(COLOR_HALLAZGO.get(clave, "#888888"))
+                color.setAlpha(150)
+                painter.fillRect(
+                    QRect(int(pf.left() + i * ancho), pf.top(),
+                          int(ancho) + 1, pf.height()),
+                    color,
+                )
+            painter.restore()
+        painter.setBrush(Qt.BrushStyle.NoBrush)
         painter.setPen(QPen(QColor("#92400e"), 1))
         painter.drawEllipse(pf)
 
@@ -187,6 +242,39 @@ class _DiagramaTimpanico(QWidget):
         painter.setBrush(QColor(254, 240, 138, 130))
         painter.drawPolygon(cono)
 
+        # Hallazgos puntuales (perforación, tubo): marcadores encima del
+        # relleno, no un color de fondo -- una perforación es una lesión en
+        # un punto del cuadrante, no el cuadrante entero, y así se ve junto
+        # con el área que la rodea. Van al final para que ninguna
+        # referencia anatómica los tape.
+        for cuadrante, angulo in self._angulos_cuadrantes().items():
+            puntos = [c for c in self.marcas.get(cuadrante, []) if not es_de_area(c)]
+            if not puntos:
+                continue
+            centro_ang = angulo + 45.0
+            # 0.78r y no el centro del cuadrante: ahí van las siglas
+            # (AS/AI/PS/PI, a ~0.6r) y el marcador quedaba encima del texto.
+            radio = r * 0.78
+            for i, clave in enumerate(puntos):
+                # Se abren en abanico dentro del cuadrante: dos
+                # perforaciones marcadas seguidas no se superponen.
+                ang = math.radians(centro_ang + (i - (len(puntos) - 1) / 2) * 16.0)
+                self._dibujar_marcador(
+                    painter, clave,
+                    QPoint(int(centro.x() + radio * math.cos(ang)),
+                           int(centro.y() - radio * math.sin(ang))),
+                    lado,
+                )
+
+        puntos_pf = [c for c in self.marcas.get("pars_flaccida", []) if not es_de_area(c)]
+        for i, clave in enumerate(puntos_pf):
+            paso = pf.width() / (len(puntos_pf) + 1)
+            self._dibujar_marcador(
+                painter, clave,
+                QPoint(int(pf.left() + paso * (i + 1)), pf.center().y()),
+                lado,
+            )
+
         # Siglas
         painter.setPen(QColor("#78350f"))
         signo_ant = 1 if self._es_derecho else -1
@@ -201,6 +289,20 @@ class _DiagramaTimpanico(QWidget):
         ):
             painter.drawText(QRect(x - 15, y - 8, 30, 16), Qt.AlignmentFlag.AlignCenter, texto)
         painter.end()
+
+    def _dibujar_marcador(self, painter, clave, punto, lado):
+        """Marcador de un hallazgo puntual. El tubo va como anillo y el
+        resto (perforación) como disco: con dos marcadores del mismo tamaño
+        y solo el color distinto, en el esquema chico no se distinguen."""
+        color = QColor(COLOR_HALLAZGO.get(clave, "#888888"))
+        radio = max(3, int(lado * 0.028))
+        if clave == "tube":
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+            painter.setPen(QPen(color, max(2, int(lado * 0.012))))
+        else:
+            painter.setBrush(color)
+            painter.setPen(QPen(QColor("#ffffff"), 1.5))
+        painter.drawEllipse(punto, radio, radio)
 
     def _angulos_cuadrantes(self):
         """Ángulo inicial (grados, antihorario desde las 3 en punto, como
@@ -243,6 +345,11 @@ class _PanelOido(QWidget):
 
         columna = QVBoxLayout()
         columna.addWidget(QLabel("Hallazgo a marcar:"))
+        self.diagrama.setToolTip(
+            "Cada click suma el hallazgo elegido al cuadrante. Volver a "
+            "marcarlo lo saca; sin hallazgo elegido, el click vacía el "
+            "cuadrante."
+        )
         columna.addLayout(self._build_paleta())
         self.btn_limpiar = QPushButton("Limpiar marcas")
         self.btn_limpiar.clicked.connect(self.limpiar_marcas)
@@ -267,7 +374,7 @@ class _PanelOido(QWidget):
         # ninguno tildado.
         grid = QGridLayout()
         self.botones_hallazgo = {}
-        for i, (clave, etiqueta, color) in enumerate(HALLAZGOS):
+        for i, (clave, etiqueta, color, _tipo) in enumerate(HALLAZGOS):
             btn = QPushButton(etiqueta)
             btn.setCheckable(True)
             btn.setStyleSheet(
@@ -307,13 +414,19 @@ class _PanelOido(QWidget):
             btn.setChecked(otra == clave)
 
     def _marcar_cuadrante(self, cuadrante):
+        """Suma el hallazgo activo a ese cuadrante (no lo reemplaza: en una
+        zona se ve más de una cosa). Click con el mismo hallazgo ya marcado
+        lo saca; click sin hallazgo activo vacía el cuadrante entero."""
         marcas = self.diagrama.marcas
+        del_cuadrante = marcas.setdefault(cuadrante, [])
         if self._hallazgo_activo is None:
-            marcas.pop(cuadrante, None)
-        elif marcas.get(cuadrante) == self._hallazgo_activo:
-            marcas.pop(cuadrante)  # segundo click con el mismo hallazgo = borrar
+            del_cuadrante.clear()
+        elif self._hallazgo_activo in del_cuadrante:
+            del_cuadrante.remove(self._hallazgo_activo)
         else:
-            marcas[cuadrante] = self._hallazgo_activo
+            del_cuadrante.append(self._hallazgo_activo)
+        if not del_cuadrante:
+            marcas.pop(cuadrante)
         self.diagrama.update()
 
     def limpiar_marcas(self):
@@ -329,7 +442,9 @@ class _PanelOido(QWidget):
 
     def to_dict(self):
         return {
-            "cuadrantes": dict(self.diagrama.marcas),
+            # cuadrante -> lista de hallazgos (antes era un solo string;
+            # el PDF del backend lee las dos formas, ver ReportPdfBuilder).
+            "cuadrantes": {c: list(h) for c, h in self.diagrama.marcas.items()},
             "cae": sorted(clave for clave, chk in self.checks_cae.items() if chk.isChecked()),
             "observaciones": self.txt_observaciones.toPlainText().strip(),
         }
@@ -341,7 +456,7 @@ class _PanelOido(QWidget):
 
 class InformeOtoscopia(QWidget):
     """Pestaña "Informe" de la ventana de otoscopia: lo que el alumno dice
-    haber visto, por cuadrante y oído. No se compara con nada acá -- lo
+    haber visto, por cuadrante y oído (varios hallazgos por cuadrante). No se compara con nada acá -- lo
     evalúa el docente contra la foto del caso (admin/chat_detail.php)."""
 
     guardar_pedido = Signal()
