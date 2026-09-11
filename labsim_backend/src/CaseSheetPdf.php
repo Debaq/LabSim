@@ -955,37 +955,150 @@ final class CaseSheetPdf
             );
         }
 
-        // --- Desviaciones y captura, una línea por oído ---------------
-        foreach (['od' => 'OD', 'oi' => 'OI'] as $ladoForm => $lado) {
+        // --- Lo que el equipo va a mostrar a 80 dB --------------------
+        // Latencias, amplitudes e interpicos del click a nivel alto, que es
+        // como se leen los informes. Salen del mismo trazo de arriba, con
+        // las desviaciones del caso ya aplicadas.
+        $ondas80 = [];
+        foreach (['od', 'oi'] as $ladoForm) {
             $datos = $porLado[$ladoForm];
+            $ondas80[$ladoForm] = CaseWaveforms::ondasClick(
+                80.0,
+                (float) ($datos['umbrales']['click'] ?? 20),
+                $datos['tipo'],
+                $datos['neural'],
+                $datos['desv'],
+                $poblacion
+            );
+        }
+
+        $filas = [['A 80 dB nHL', 'OD lat', 'OD amp', 'OI lat', 'OI amp']];
+        foreach (['I', 'III', 'V'] as $onda) {
+            $filas[] = [
+                'Onda ' . $onda,
+                self::ms($ondas80['od'][$onda]),
+                self::uv($ondas80['od'][$onda]),
+                self::ms($ondas80['oi'][$onda]),
+                self::uv($ondas80['oi'][$onda]),
+            ];
+        }
+        foreach ([['I', 'III'], ['III', 'V'], ['I', 'V']] as [$desde, $hasta]) {
+            $filas[] = [
+                'Interpico ' . $desde . '-' . $hasta,
+                self::interpico($ondas80['od'], $desde, $hasta),
+                '',
+                self::interpico($ondas80['oi'], $desde, $hasta),
+                '',
+            ];
+        }
+        $yTablas2 = $this->y;
+        $fin80 = $this->tablaEn(self::MARGEN, $yTablas2, $anchoTabla, $filas, [0.36, 0.16, 0.16, 0.16, 0.16], true);
+
+        // --- Captura y FSP -------------------------------------------
+        // El FSP decide cuándo el equipo da la curva por buena: sin estos
+        // números el docente no puede anticipar si el alumno va a llegar al
+        // objetivo o se va a quedar promediando.
+        $cap = static fn (string $clave, $default): array => [
+            (string) ($porLado['od']['cfg'][$clave] ?? $default),
+            (string) ($porLado['oi']['cfg'][$clave] ?? $default),
+        ];
+        $fsp = static fn (string $clave, $default): array => [
+            (string) ((($porLado['od']['cfg']['fsp_puntos'] ?? [])[$clave]) ?? $default),
+            (string) ((($porLado['oi']['cfg']['fsp_puntos'] ?? [])[$clave]) ?? $default),
+        ];
+        $alcanza = static function (string $lado) use ($porLado): string {
+            $puntos = $porLado[$lado]['cfg']['fsp_puntos'] ?? [];
+            $objetivo = (float) ($puntos['objetivo'] ?? 3.0);
+            if ((float) ($puntos['800'] ?? 2.3) >= $objetivo) {
+                return 'Sí, a 800';
+            }
+            if ((float) ($puntos['2000'] ?? 2.8) >= $objetivo) {
+                return 'Sí, a 2000';
+            }
+            return 'No llega';
+        };
+
+        $filas = [['Captura y FSP', 'OD', 'OI']];
+        $filas[] = ['Reproducible', self::repro($porLado['od']['cfg']), self::repro($porLado['oi']['cfg'])];
+        $filas[] = array_merge(['Jitter si no repro. (ms)'], $cap('repro_var', 0.2));
+        $filas[] = array_merge(['Promediaciones'], $cap('average_objetivo', 2000));
+        $filas[] = array_merge(['Inquietud (0-1)'], $cap('inquietud', 0));
+        $filas[] = array_merge(['PAM (0-1)'], $cap('pam', 0));
+        $filas[] = array_merge(['FSP @ 800 prom.'], $fsp('800', 2.3));
+        $filas[] = array_merge(['FSP @ 2000 prom.'], $fsp('2000', 2.8));
+        $filas[] = array_merge(['FSP objetivo'], $fsp('objetivo', 3.0));
+        $filas[] = ['¿Alcanza el objetivo?', $alcanza('od'), $alcanza('oi')];
+
+        $finCap = $this->tablaEn(
+            self::MARGEN + $anchoTabla + 16,
+            $yTablas2,
+            $anchoTabla,
+            $filas,
+            [0.46, 0.27, 0.27],
+            true
+        );
+        $this->y = max($fin80, $finCap) + 6;
+
+        // Las desviaciones cargadas a mano, solo si hay alguna: en cero no
+        // dicen nada y los valores de arriba ya las llevan aplicadas.
+        foreach (['od' => 'OD', 'oi' => 'OI'] as $ladoForm => $lado) {
             $partes = [];
             foreach (['onda_I' => 'I', 'onda_III' => 'III', 'onda_V' => 'V'] as $clave => $onda) {
-                $partes[] = sprintf(
-                    '%s %+.2f ms / %+.2f µV',
-                    $onda,
-                    (float) ($datos['desv'][$clave]['lat'] ?? 0),
-                    (float) ($datos['desv'][$clave]['amp'] ?? 0)
-                );
+                $lat = (float) ($porLado[$ladoForm]['desv'][$clave]['lat'] ?? 0);
+                $amp = (float) ($porLado[$ladoForm]['desv'][$clave]['amp'] ?? 0);
+                if (abs($lat) < 0.001 && abs($amp) < 0.001) {
+                    continue;
+                }
+                $partes[] = sprintf('%s %+.2f ms / %+.2f µV', $onda, $lat, $amp);
             }
-            $falsaV = is_array($datos['cfg']['falsa_v'] ?? null) ? $datos['cfg']['falsa_v'] : [];
+            $falsaV = is_array($porLado[$ladoForm]['cfg']['falsa_v'] ?? null) ? $porLado[$ladoForm]['cfg']['falsa_v'] : [];
+            if (((float) ($falsaV['amp'] ?? 0)) > 0) {
+                $partes[] = sprintf('falsa onda V %s µV a %s ms', (string) $falsaV['amp'], (string) ($falsaV['lat'] ?? 5.6));
+            }
+            if ($partes === []) {
+                continue;
+            }
             $this->parrafo(
-                $lado . ' -- desviaciones: ' . implode('   ', $partes)
-                . sprintf(
-                    '   |   promediaciones %s · réplica %s µV · inquietud %s · PAM %s · FSP objetivo %s%s',
-                    (string) ($datos['cfg']['average_objetivo'] ?? 2000),
-                    (string) ($datos['cfg']['repro_var'] ?? 0.2),
-                    (string) ($datos['cfg']['inquietud'] ?? 0),
-                    (string) ($datos['cfg']['pam'] ?? 0),
-                    (string) (($datos['cfg']['fsp_puntos'] ?? [])['objetivo'] ?? 3.0),
-                    ((float) ($falsaV['amp'] ?? 0)) > 0
-                        ? sprintf(' · falsa onda V %s µV a %s ms', (string) $falsaV['amp'], (string) ($falsaV['lat'] ?? 5.6))
-                        : ''
-                ),
+                $lado . ' -- cargado a mano: ' . implode('   ', $partes),
                 6.5,
                 null,
                 $ladoForm === 'od' ? CaseCharts::COLOR_OD : CaseCharts::COLOR_OI
             );
         }
+    }
+
+    /** Latencia de una onda a ese nivel, o -- si no se ve. */
+    private static function ms(array $onda): string
+    {
+        return $onda['amp'] >= CaseWaveforms::AMP_VISIBLE ? number_format($onda['lat'], 2) : '--';
+    }
+
+    /** Amplitud de una onda, o -- si no se ve. */
+    private static function uv(array $onda): string
+    {
+        return $onda['amp'] >= CaseWaveforms::AMP_VISIBLE ? number_format($onda['amp'], 2) : '--';
+    }
+
+    /** Interpico entre dos ondas: hace falta que las DOS se vean. */
+    private static function interpico(array $ondas, string $desde, string $hasta): string
+    {
+        if ($ondas[$desde]['amp'] < CaseWaveforms::AMP_VISIBLE || $ondas[$hasta]['amp'] < CaseWaveforms::AMP_VISIBLE) {
+            return '--';
+        }
+        return number_format($ondas[$hasta]['lat'] - $ondas[$desde]['lat'], 2);
+    }
+
+    /**
+     * Si la curva es reproducible. Un caso guardado antes de que existiera
+     * la casilla no trae la clave y se toma como reproducible, igual que
+     * hace CaseBuilder al releer la ficha.
+     */
+    private static function repro(array $cfg): string
+    {
+        if (!array_key_exists('repro', $cfg)) {
+            return 'Sí';
+        }
+        return empty($cfg['repro']) ? 'No' : 'Sí';
     }
 
     /**
@@ -1158,7 +1271,32 @@ final class CaseSheetPdf
 
         $this->y += $alto + 28;
         CaseCharts::legend($this->pdf, self::MARGEN + 26, $this->y, 'área gris = respuesta normal, punteado = piso de ruido');
-        $this->y += 10;
+        $this->y += 14;
+
+        // Los números del perfil de emisión, banda por banda. La curva los
+        // dibuja pero no se pueden leer de ahí, y son los que el docente
+        // cargó. Van las dos: la caída que escribió a mano y la que termina
+        // aplicando el cliente, que le suma la ley de la patología y el
+        // umbral (CaseProfile::loadedOaeAttenuation).
+        $cabecera = ['Caída por banda (dB)'];
+        foreach (CaseBuilder::EOAS_FREQS as $hz) {
+            $cabecera[] = self::hz((int) $hz);
+        }
+        $filas = [$cabecera];
+        foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $tag) {
+            $cargadas = is_array($cfg[$lado]['desviaciones'] ?? null) ? $cfg[$lado]['desviaciones'] : [];
+            $total = CaseOae::atenuacionPorBanda($cfg[$lado]);
+            $filaCargada = [$tag . ' cargada'];
+            $filaTotal = [$tag . ' aplicada'];
+            foreach (CaseBuilder::EOAS_FREQS as $hz) {
+                $filaCargada[] = self::db((float) ($cargadas[(string) $hz] ?? $cargadas[$hz] ?? 0));
+                $filaTotal[] = self::db((float) ($total[$hz] ?? 0));
+            }
+            $filas[] = $filaCargada;
+            $filas[] = $filaTotal;
+        }
+        $cols = count($cabecera);
+        $this->tabla($filas, array_merge([0.2], array_fill(0, $cols - 1, 0.8 / ($cols - 1))), true);
     }
 
     /**

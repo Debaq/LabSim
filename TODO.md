@@ -706,3 +706,31 @@ poner ahí un promedio de banda ancha sería tapar el error con un número.
 - [ ] Tocar los dos lados a la vez: `STIM_WEIGHTS` y `STIM_NHL_CORRECTION`
       en CaseProfile.php, y `STIM_MAP` en src/abr/ABR_generator.py, que son
       la misma lista escrita dos veces.
+
+### La ficha de OEA no configura las transientes
+
+El formulario guarda UN perfil de emisión por oído (tipo, umbral, caída por
+banda, atenuación, ruido, sello, variabilidad) más el modo y los picos del
+SOAE. Con eso el cliente arma las cuatro pruebas, pero **el TEOAE no tiene
+ningún parámetro propio**, y son los que deciden si la prueba pasa o no:
+
+- reproducibilidad (%) y estabilidad (%) del registro -- los normativos
+  traen `min_reproducibility_pct` 70 y `min_stability_pct` 80, pero el caso
+  no puede moverlos;
+- nivel del click y número de barridos (`default_level_db_spl` 60,
+  `default_n_sweeps` 260), que es lo que decide dónde termina el piso de
+  ruido;
+- jitter del estímulo y su tolerancia (`stim_jitter_db`), que es el control
+  de que la sonda no se movió.
+
+Un caso no puede, hoy, pedir un TEOAE con reproducibilidad baja: el
+ejercicio de "la prueba no pasa porque el registro es malo, no porque el
+oído esté mal" no se puede armar. Mismo hueco, más chico, en SFOAE
+(supresor) y DP (niveles L1/L2).
+
+- [ ] Agregar esos campos a la ficha de EOA (por oído, como el resto) y
+      mandarlos en `cases.data['EOAS'][lado]`.
+- [ ] Que el cliente los lea en lugar de sus defaults
+      (`resources/oae/normative_data.json`), igual que ya hace con el
+      umbral y las desviaciones.
+- [ ] Mostrarlos en la ficha en PDF, al lado de los que ya están.
