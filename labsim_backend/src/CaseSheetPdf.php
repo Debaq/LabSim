@@ -596,12 +596,20 @@ final class CaseSheetPdf
         $volumen = is_array($data['volume'] ?? null) ? $data['volume'] : [];
         $etf = is_array($data['ETF'] ?? null) ? $data['ETF'] : ['Normal', 'Normal'];
 
+        // Los dos oídos en la misma escala: el equipo tiene un solo botón de
+        // altura, así que el alumno los va a ver así y comparar uno con otro
+        // de un vistazo sólo funciona si el eje es el mismo.
+        $escala = CaseCharts::escalaTimpanograma(
+            CaseCharts::valoresTimpanograma((string) ($data['Z_OD'] ?? 'A'))['estatica'],
+            CaseCharts::valoresTimpanograma((string) ($data['Z_OI'] ?? 'A'))['estatica']
+        );
+
         foreach ([
             ['od', 'OD', (string) ($data['Z_OD'] ?? 'A'), CaseCharts::COLOR_OD, self::MARGEN, (string) ($volumen[0] ?? 'N/D'), (string) ($etf[0] ?? 'Normal')],
             ['oi', 'OI', (string) ($data['Z_OI'] ?? 'A'), CaseCharts::COLOR_OI, self::MARGEN + $ancho + 20, (string) ($volumen[1] ?? 'N/D'), (string) ($etf[1] ?? 'Normal')],
         ] as [$lado, $rotulo, $tipo, $color, $x, $vol, $etfLado]) {
             $this->pdf->text($x, $this->y + self::ASCENDENTE * 8, $rotulo . ' - curva tipo ' . $tipo, 8, true, $color);
-            CaseCharts::tympanogram($this->pdf, $x, $this->y + 11, $ancho, $alto, $tipo, $color);
+            CaseCharts::tympanogram($this->pdf, $x, $this->y + 11, $ancho, $alto, $tipo, $color, $escala);
             $this->pdf->text(
                 $x,
                 $this->y + $alto + 20,
@@ -658,24 +666,43 @@ final class CaseSheetPdf
             ]
         );
 
-        // Al lado, los números de la curva. La ficha guarda solo el tipo
-        // Jerger, así que compliance, presión y ancho salen de la misma
-        // forma que se dibuja arriba (ver CaseCharts::valoresTimpanograma):
-        // no hay dos fuentes que puedan discrepar.
+        // Al lado, los números de la curva. El caso guarda SOLO la letra de
+        // Jerger: la compliance y la presión las sortea la app dentro de un
+        // rango por letra, con una semilla por paciente que el backend no
+        // puede reproducir. Por eso va el rango y no un número inventado
+        // --el que lea el alumno va a caer ahí dentro. La gradiente sí es
+        // predecible: se calcula igual que en el equipo, sobre la curva que
+        // se dibuja arriba (ver CaseCharts::gradienteTimpanograma).
         $tipoOd = (string) ($data['Z_OD'] ?? 'A');
         $tipoOi = (string) ($data['Z_OI'] ?? 'A');
         $vOd = CaseCharts::valoresTimpanograma($tipoOd);
         $vOi = CaseCharts::valoresTimpanograma($tipoOi);
-        $presion = static fn (array $v): string => $v['plana'] ? 'sin pico' : self::db($v['pico_dapa']) . ' daPa';
-        $ancho = static fn (array $v): string => $v['plana'] ? '--' : self::db($v['ancho_dapa']) . ' daPa';
+        $presion = static function (array $v): string {
+            if ($v['plana']) {
+                return 'sin pico';
+            }
+
+            return self::db($v['p_min']) . ' a ' . self::db($v['p_max']) . ' daPa';
+        };
+        $compliance = static function (array $v): string {
+            // Un B queda por debajo de la resolución del equipo: "0,00 a
+            // 0,00" se leería como un dato medido y no lo es.
+            if ($v['c_max'] < 0.01) {
+                return 'menor a 0.01 mL';
+            }
+
+            return number_format($v['c_min'], 2) . ' a ' . number_format($v['c_max'], 2) . ' mL';
+        };
+        $gradiente = static function (array $v): string {
+            return number_format($v['gradiente'], 2);
+        };
 
         $filasZ = [
             ['Timpanograma', 'OD', 'OI'],
             ['Tipo (Jerger)', $tipoOd, $tipoOi],
-            ['Compliance estática', number_format($vOd['estatica'], 2) . ' mL', number_format($vOi['estatica'], 2) . ' mL'],
-            ['Compliance máxima', number_format($vOd['maxima'], 2) . ' mL', number_format($vOi['maxima'], 2) . ' mL'],
+            ['Compliance estática', $compliance($vOd), $compliance($vOi)],
             ['Presión del pico', $presion($vOd), $presion($vOi)],
-            ['Ancho a media altura', $ancho($vOd), $ancho($vOi)],
+            ['Gradiente', $gradiente($vOd), $gradiente($vOi)],
             ['Volumen del CAE', (string) ($volumen[0] ?? 'N/D') . ' mL', (string) ($volumen[1] ?? 'N/D') . ' mL'],
             ['Función tubaria', (string) ($etf[0] ?? 'Normal'), (string) ($etf[1] ?? 'Normal')],
         ];
@@ -693,6 +720,14 @@ final class CaseSheetPdf
         $this->parrafo(
             'Umbrales en dB HL; (-) = sin respuesta en toda la escala. Morfología de la curva: OD '
             . (string) ($tipos['od'] ?? 'normal') . ', OI ' . (string) ($tipos['oi'] ?? 'normal') . '.',
+            7
+        );
+        $this->parrafo(
+            'El caso guarda sólo la letra de Jerger: la compliance y la presión las sortea el equipo '
+            . 'dentro del rango de arriba, distintas para cada paciente, y la curva dibujada usa el '
+            . 'centro. El recuadro amarillo es el que el equipo usa para la gradiente --alto del pico '
+            . 'por 100 daPa a su alrededor-- y la gradiente es cuánto de ese alto conserva la curva en '
+            . 'los bordes. Como el ancho de la curva es fijo, da 0,85 en cualquier curva con pico.',
             7
         );
     }

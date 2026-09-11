@@ -190,20 +190,30 @@ t_eq($promedio->invoke(null, array_fill(0, 9, 130), [2, 3, 4, 6]), null,
 
 // Timpanograma: la curva sale del TIPO, y cada tipo tiene que dar la forma
 // que lo define -- si esto se desalinea con tympanogram.js, el docente ve
-// una curva en el editor y otra en el PDF.
+// una curva en el editor y otra en el PDF; si se desalinea con Z_225, ve
+// una curva distinta a la que le sale al alumno en el equipo.
 foreach (CaseBuilder::Z_OPTIONS as $tipo) {
     $pts = CaseCharts::tympanogramPoints($tipo);
-    // Paso de 5 daPa: con 10 el muestreo recortaba la punta del ápice.
-    t_eq(count($pts), 121, "Timpanograma {$tipo}: cubre -400..200 daPa de 5 en 5");
+    t_true($pts[0][0] <= -400.0, "Timpanograma {$tipo}: el barrido arranca en el borde de la ventana");
+    t_true(end($pts)[0] >= 190.0, "Timpanograma {$tipo}: el barrido llega al otro borde");
+    $previa = -INF;
+    foreach ($pts as [$daPa, $ml]) {
+        t_true($daPa > $previa, "Timpanograma {$tipo}: el barrido va en presión creciente");
+        $previa = $daPa;
+    }
     if ($tipo === 'B') {
         // B no tiene pico: su hallazgo es no tenerlo, y se comprueba abajo.
         continue;
     }
+    $v = CaseCharts::valoresTimpanograma($tipo);
     $picos = array_column($pts, 1);
     $presiones = array_column($pts, 0);
     $presionPico = $presiones[array_search(max($picos), $picos, true)];
-    $esperada = in_array($tipo, ['C', 'Cs'], true) ? -150.0 : 0.0;
-    t_close($presionPico, $esperada, 10.0, "Timpanograma {$tipo}: el pico cae donde corresponde");
+    t_close($presionPico, (float) $v['pico_dapa'], 10.0, "Timpanograma {$tipo}: el pico cae donde corresponde");
+    t_true($v['pico_dapa'] >= $v['p_min'] && $v['pico_dapa'] <= $v['p_max'],
+        "Timpanograma {$tipo}: la presión dibujada cae dentro del rango que sortea la app");
+    t_true($v['estatica'] >= $v['c_min'] && $v['estatica'] <= $v['c_max'],
+        "Timpanograma {$tipo}: la compliance dibujada cae dentro del rango que sortea la app");
 }
 t_true(max(array_column(CaseCharts::tympanogramPoints('Ad'), 1))
      > max(array_column(CaseCharts::tympanogramPoints('A'), 1)),
@@ -214,24 +224,43 @@ t_true(max(array_column(CaseCharts::tympanogramPoints('As'), 1))
 $curvaB = array_column(CaseCharts::tympanogramPoints('B'), 1);
 t_true(max($curvaB) - min($curvaB) < 0.1, 'B es plana: no tiene pico que buscar');
 
-// El ápice va en punta, no redondeado: la pendiente justo al lado del pico
-// tiene que ser MUCHO mayor que la de una gaussiana, que ahí llega plana.
-$curvaA = CaseCharts::tympanogramPoints('A');
+// La forma es el coseno alzado de la app: llega y sale del ápice con
+// pendiente cero, y también empalma con la línea base sin quiebre. Lo que
+// cae de verdad es la mitad del flanco. Antes la ficha dibujaba un ápice en
+// punta, que no es lo que ve el alumno.
+$curvaA = CaseCharts::curvaTimpanograma(0.95, -40.0);
 $iPico = 0;
 foreach ($curvaA as $i => $pt) {
     if ($pt[1] > $curvaA[$iPico][1]) { $iPico = $i; }
 }
-$pendienteJuntoAlPico = abs($curvaA[$iPico][1] - $curvaA[$iPico + 1][1]);
-$pendienteLejos = abs($curvaA[$iPico + 12][1] - $curvaA[$iPico + 13][1]);
-t_true($pendienteJuntoAlPico > $pendienteLejos,
-    'La curva cae más rápido junto al ápice que lejos: el pico es una punta, no una loma');
+$caida = static fn (array $c, int $i): float => abs($c[$i][1] - $c[$i + 1][1]);
+$mitadFlanco = (int) round($iPico / 2);
+t_true($caida($curvaA, $iPico) < $caida($curvaA, $mitadFlanco),
+    'El ápice llega con pendiente cero: el coseno alzado no hace punta');
+t_true($caida($curvaA, 0) < $caida($curvaA, $mitadFlanco),
+    'Y el pie de la curva empalma con la línea base sin quiebre');
 
-// Y la escala del eje es fija: los dos oídos y todas las fichas se leen igual.
-t_eq(CaseCharts::ESCALA_TIMPANOGRAMA_ML, 2.0, 'El timpanograma se dibuja siempre de 0 a 2 mL');
-foreach (CaseBuilder::Z_OPTIONS as $tipoZ) {
-    t_true(max(array_column(CaseCharts::tympanogramPoints($tipoZ), 1)) <= CaseCharts::ESCALA_TIMPANOGRAMA_ML,
-        "Timpanograma {$tipoZ}: su pico cabe en la escala fija");
+// La gradiente se calcula como en el equipo (Z.move): altura a +-50 daPa
+// del pico sobre la altura del pico, entre 0 y 1. Con el semiancho fijo de
+// la app da 0.85 para cualquier curva con pico -- es un número que NO
+// discrimina tipos, y la ficha tiene que mostrar eso y no otra cosa.
+foreach (CaseBuilder::Z_OPTIONS as $tipo) {
+    $v = CaseCharts::valoresTimpanograma($tipo);
+    t_true($v['gradiente'] >= 0.0 && $v['gradiente'] <= 1.0,
+        "Timpanograma {$tipo}: la gradiente queda entre 0 y 1");
+    if (!$v['plana']) {
+        t_close($v['gradiente'], 0.85, 0.02,
+            "Timpanograma {$tipo}: la gradiente es la que calcula el equipo");
+    }
 }
+t_eq(CaseCharts::gradienteTimpanograma(0.0, 0.0), 0.0, 'Sin compliance no hay gradiente que calcular');
+
+// La escala sube cuando la curva no cabe, como el botón cc del equipo.
+t_eq(CaseCharts::escalaTimpanograma(0.95), 1.0, 'Una curva chica se lee en el tope de 1 mL');
+t_eq(CaseCharts::escalaTimpanograma(1.6), 2.0, 'Una A alta necesita el tope de 2 mL');
+t_eq(CaseCharts::escalaTimpanograma(CaseCharts::valoresTimpanograma('Ad')['estatica']), 5.0,
+    'Un Ad no cabe en 2 mL: la ficha sube la escala en vez de recortar la curva');
+t_eq(CaseCharts::escalaTimpanograma(99.0), 8.0, 'Por encima de todo, queda el tope más alto');
 
 // Logoaudiograma: con reclutamiento la curva CAE pasada la UMD (rollover),
 // y sin él se queda en meseta. Es el hallazgo que el gráfico tiene que

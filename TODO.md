@@ -788,3 +788,44 @@ Pendiente, del lado del cliente:
       checkbox por oído; la tonal necesita algo equivalente, por frecuencia
       --una casilla, o un valor reservado distinto del 130-- antes de que se
       pueda cargar un caso con frecuencias sin probar.
+
+
+### La gradiente del timpanograma no discrimina nada
+
+La ficha ya la muestra (2026-09-11), calculada igual que el equipo: altura de
+la curva a ±50 daPa del pico sobre la altura del pico, entre 0 y 1
+(`Z.move` en `src/impedanciometria/Z.py`, replicado en
+`CaseCharts::gradienteTimpanograma`).
+
+El problema es que da **0,85 en toda curva con pico**, sea A, As, Ad, C o Cs.
+`Z_225.curve_z` arma la curva con `pressure_max = 200` fijo, así que todas
+tienen el mismo ancho: a ±50 daPa del pico el coseno alzado siempre va en
+`0,5 + 0,5·cos(π/4) = 0,854`. Lo único que la mueve es el ruido de medición,
+y sólo en las curvas de compliance muy baja (As, Cs), donde el ruido pesa
+respecto del pico; un B da 0,00 porque su compliance redondea a cero.
+
+Además el sentido está invertido respecto de la gradiente clásica: acá 1 es
+una curva ancha y 0 una en punta.
+
+- [ ] Que el ancho de la curva salga de la letra y no sea fijo (un As/Cs
+      rígido es ancho, un Ad puntiagudo) para que la gradiente signifique
+      algo. Toca `Z_225.curve_z` y, en espejo, `CaseCharts::curvaTimpanograma`
+      y `public/js/case/tympanogram.js`.
+- [ ] Decidir si se informa la gradiente clásica (1 - esta) o se deja la del
+      equipo. Hoy la ficha muestra la del equipo, que es la que el alumno lee
+      en pantalla.
+
+### La compliance y la presión del timpanograma no se pueden anticipar
+
+El caso guarda sólo la letra de Jerger. La compliance y la presión concretas
+las sortea la app al abrir el equipo (`Z_225.create_auto`), con una semilla
+`(id del paciente, oído, sonda)` que es un `random.Random` de Python y no se
+puede reproducir desde PHP.
+
+Por eso la ficha informa el **rango** por letra y dibuja el centro, en vez de
+un número que no va a coincidir con el que vea el alumno.
+
+- [ ] Si se quiere el número exacto en la ficha, hay que sortearlo en el
+      backend al crear el caso y guardarlo en `cases.data`, y que la app lo
+      lea en vez de sortear. Es el mismo patrón que ya se usa para todo lo
+      demás del caso.
