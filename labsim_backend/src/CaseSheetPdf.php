@@ -46,11 +46,13 @@ final class CaseSheetPdf
     private const ASCENDENTE = 0.8;
 
     /**
-     * Amplitud (µV) desde la cual un pico del VEMP se rotula. Cerca del
-     * umbral la respuesta se apaga, y ponerle "p13" a una línea plana
-     * enseñaría a marcar lo que no está.
+     * Fracción de la respuesta a nivel alto desde la cual un pico del VEMP
+     * se rotula. Cerca del umbral la respuesta se apaga, y ponerle "p13" a
+     * una línea plana enseñaría a marcar lo que no está. Va como fracción y
+     * no en µV porque las amplitudes normativas cambian dos órdenes de
+     * magnitud entre el cervical (cientos) y el ocular (unidades).
      */
-    private const VEMP_MARCA_MIN_UV = 0.05;
+    private const VEMP_MARCA_MIN_FRACCION = 0.08;
 
     /**
      * El logo del backend, en JPEG. El original de la app es
@@ -1109,7 +1111,7 @@ final class CaseSheetPdf
             $filas[] = ['Interpico ' . $clave, self::rango($limites['interpeak'][$clave])];
         }
 
-        $filas[] = ['Razón V/I', number_format($limites['v_i_min'], 2) . ' o más'];
+        $filas[] = ['Razón V/I', 'mayor que ' . number_format($limites['v_i_min'], 2)];
         $filas[] = ['Dif. interaural V (IT5)', 'hasta ' . number_format($limites['interaural_v'], 2)];
 
         $yRef = $this->y;
@@ -1311,28 +1313,57 @@ final class CaseSheetPdf
         ];
         $pruebas = ['od' => CaseOae::pruebas($cfg['od']), 'oi' => CaseOae::pruebas($cfg['oi'])];
 
-        // Las tres pruebas con estímulo, cada una en SUS bandas y con su
-        // área normal sombreada. El caso guarda un solo perfil de emisión
-        // por oído, pero las pruebas no comparten ni frecuencias ni escala.
         $ancho = ($this->anchoContenido - 14) / 2;
         $alto = 118.0;
+
+        // TEOAE: un panel por oído, con barras de señal y ruido banda por
+        // banda. No es un DP-grama: en el transiente lo que se lee es la
+        // relación entre las dos barras, no la forma de una curva.
+        $this->espacio($alto + 34);
+        $yTe = $this->y;
+        foreach (['od' => CaseCharts::COLOR_OD, 'oi' => CaseCharts::COLOR_OI] as $lado => $colorLado) {
+            $x = self::MARGEN + ($lado === 'od' ? 0 : $ancho + 14);
+            $bandas = array_keys($pruebas[$lado]['teoae']['bandas']);
+            $senal = [];
+            $ruido = [];
+            $pasa = [];
+            foreach ($bandas as $hz) {
+                $banda = $pruebas[$lado]['teoae']['bandas'][$hz];
+                $senal[$hz] = $banda['respuesta'];
+                $ruido[$hz] = $pruebas[$lado]['teoae']['piso'];
+                $pasa[$hz] = $banda['pasa'];
+            }
+            $this->pdf->text(
+                $x,
+                $yTe + self::ASCENDENTE * 7,
+                'TEOAE ' . strtoupper($lado) . ' -- señal y ruido por banda',
+                7,
+                true,
+                $colorLado
+            );
+            CaseCharts::oaeBars($this->pdf, $x, $yTe + 9, $ancho, $alto, $bandas, $senal, $ruido, $pasa, $colorLado, [-25.0, 25.0]);
+            $pasan = count(array_filter($pasa));
+            $this->pdf->text(
+                $x,
+                $yTe + $alto + 18,
+                $pasan . '/' . count($bandas) . ' bandas sobre el ruido   ·   R = no llega al criterio',
+                6,
+                false,
+                self::GRIS_TEXTO
+            );
+        }
+        $this->y = $yTe + $alto + 26;
+
+        // DP-grama y SFOAE sí son curvas por banda, con su área normal.
         $paneles = [
-            ['teoae', 'TEOAE (clicks)', [-15.0, 25.0], 'dB SPL'],
             ['dpoae', 'DP-grama (productos de distorsión)', [-30.0, 25.0], 'dB SPL'],
             ['sfoae', 'SFOAE (frecuencia específica)', [-20.0, 15.0], 'dB'],
         ];
 
-        $x = self::MARGEN;
-        $fila = 0;
+        $this->espacio($alto + 34);
+        $yCurvas = $this->y;
         foreach ($paneles as $i => [$clave, $rotulo, $rangoY, $unidad]) {
-            if ($i > 0 && $i % 2 === 0) {
-                $this->y += $alto + 24;
-                $fila++;
-            }
-            $x = self::MARGEN + ($i % 2) * ($ancho + 14);
-            if ($i % 2 === 0) {
-                $this->espacio($alto + 30);
-            }
+            $x = self::MARGEN + $i * ($ancho + 14);
 
             $bandas = array_keys($pruebas['od'][$clave]['bandas']);
             $area = $pruebas['od'][$clave]['area'];
@@ -1345,11 +1376,11 @@ final class CaseSheetPdf
                 $porLado['oi'][$hz] = $pruebas['oi'][$clave]['bandas'][$hz]['respuesta'] ?? null;
             }
 
-            $this->pdf->text($x, $this->y + self::ASCENDENTE * 7, $rotulo, 7, true, self::GRIS_TITULO);
+            $this->pdf->text($x, $yCurvas + self::ASCENDENTE * 7, $rotulo, 7, true, self::GRIS_TITULO);
             CaseCharts::oaePanel(
                 $this->pdf,
                 $x,
-                $this->y + 9,
+                $yCurvas + 9,
                 $ancho,
                 $alto,
                 $bandas,
@@ -1360,8 +1391,6 @@ final class CaseSheetPdf
                 $unidad
             );
 
-            // Debajo, qué banda pasa y cuál no: es el PASS/REFER del equipo.
-            // Cada oído con su color, como todo el resto de la ficha.
             $xResumen = $x;
             foreach (['od' => CaseCharts::COLOR_OD, 'oi' => CaseCharts::COLOR_OI] as $lado => $colorLado) {
                 $pasan = 0;
@@ -1370,50 +1399,15 @@ final class CaseSheetPdf
                 }
                 $total = count($pruebas[$lado][$clave]['bandas']);
                 $texto = strtoupper($lado) . ': ' . $pasan . '/' . $total . ' sobre el ruido';
-                $this->pdf->text($xResumen, $this->y + $alto + 18, $texto, 6, false, $colorLado);
+                $this->pdf->text($xResumen, $yCurvas + $alto + 18, $texto, 6, false, $colorLado);
                 $xResumen += $this->pdf->textWidth($texto, 6) + 12;
             }
         }
+        $this->y = $yCurvas + $alto + 26;
 
-        // SOAE: el cuarto examen, que no lleva estímulo. Lo que hay que ver
-        // es si asoma algún pico sobre el piso, y el caso puede forzarlos.
-        $this->y += $alto + 24;
-        $this->espacio($alto + 34);
-        $x = self::MARGEN + ($ancho + 14);
-        $soae = ['od' => CaseOae::soae($cfg['od']), 'oi' => CaseOae::soae($cfg['oi'])];
-        $this->pdf->text($x, $this->y + self::ASCENDENTE * 7, 'SOAE (espontáneas, sin estímulo)', 7, true, self::GRIS_TITULO);
-        CaseCharts::soaeSpectrum(
-            $this->pdf,
-            $x,
-            $this->y + 9,
-            $ancho,
-            $alto,
-            ['od' => $soae['od']['picos'], 'oi' => $soae['oi']['picos']],
-            CaseOae::SOAE['espectro_hz'],
-            [-20.0, 20.0],
-            static function (float $hz): float {
-                // Piso en V: sube hacia los graves y, menos, hacia los agudos.
-                $oct = log($hz / 2000.0, 2);
-                return CaseOae::SOAE['piso_db']
-                    + ($oct < 0 ? abs($oct) * CaseOae::SOAE['piso_subida_grave_db_oct']
-                                : $oct * CaseOae::SOAE['piso_subida_agudo_db_oct']);
-            }
-        );
-        $xModo = $x;
-        foreach (['od' => CaseCharts::COLOR_OD, 'oi' => CaseCharts::COLOR_OI] as $lado => $colorLado) {
-            $modo = $soae[$lado]['modo'];
-            $picos = count($soae[$lado]['picos']);
-            $detalle = [];
-            foreach ($soae[$lado]['picos'] as $pico) {
-                $detalle[] = self::hz((int) $pico['hz']) . ' Hz ' . self::db((float) $pico['db']) . ' dB';
-            }
-            $texto = strtoupper($lado) . ': ' . $modo
-                . ($detalle !== [] ? ' (' . implode(', ', $detalle) . ')' : '');
-            $this->pdf->text($xModo, $this->y + $alto + 18, $texto, 6, false, $colorLado);
-            $xModo += $this->pdf->textWidth($texto, 6) + 12;
-        }
-
-        // Al lado del SOAE, los parámetros del oído.
+        // Los parámetros del oído, debajo de las curvas.
+        $this->espacio(12 * 7 + 10);
+        $yParams = $this->y;
         $filas = [['', 'OD', 'OI']];
         foreach ([
             ['Patología', 'type', 'normal'],
@@ -1429,11 +1423,47 @@ final class CaseSheetPdf
                 (string) ($cfg['oi'][$clave] ?? $default),
             ];
         }
-        $this->tablaEn(self::MARGEN, $this->y + 9, $ancho, $filas, [0.44, 0.28, 0.28], true);
+        $this->y = $this->tablaEn(self::MARGEN, $yParams, $ancho, $filas, [0.44, 0.28, 0.28], true) + 4;
+        CaseCharts::legend($this->pdf, self::MARGEN + 26, $this->y + 4, 'área gris = respuesta normal, punteado = piso de ruido');
+        $this->y += 16;
 
-        $this->y += $alto + 28;
-        CaseCharts::legend($this->pdf, self::MARGEN + 26, $this->y, 'área gris = respuesta normal, punteado = piso de ruido');
-        $this->y += 14;
+        // SOAE aparte y a lo ancho: no es una prueba más de la cuadrícula
+        // --no lleva estímulo ni bandas fijas-- y lo que hay que mirar es un
+        // espectro entero buscando si asoma algún pico sobre el ruido.
+        $altoSoae = 96.0;
+        $this->espacio($altoSoae + 34);
+        $ySoae = $this->y;
+        $soae = ['od' => CaseOae::soae($cfg['od']), 'oi' => CaseOae::soae($cfg['oi'])];
+        $this->pdf->text(self::MARGEN, $ySoae + self::ASCENDENTE * 7, 'SOAE (espontáneas, sin estímulo)', 7, true, self::GRIS_TITULO);
+        CaseCharts::soaeSpectrum(
+            $this->pdf,
+            self::MARGEN,
+            $ySoae + 9,
+            $this->anchoContenido,
+            $altoSoae,
+            ['od' => $soae['od']['picos'], 'oi' => $soae['oi']['picos']],
+            CaseOae::SOAE['espectro_hz'],
+            [-20.0, 20.0],
+            static function (float $hz): float {
+                // Piso en V: sube hacia los graves y, menos, hacia los agudos.
+                $oct = log($hz / 2000.0, 2);
+                return CaseOae::SOAE['piso_db']
+                    + ($oct < 0 ? abs($oct) * CaseOae::SOAE['piso_subida_grave_db_oct']
+                                : $oct * CaseOae::SOAE['piso_subida_agudo_db_oct']);
+            }
+        );
+        $xModo = self::MARGEN;
+        foreach (['od' => CaseCharts::COLOR_OD, 'oi' => CaseCharts::COLOR_OI] as $lado => $colorLado) {
+            $modo = $soae[$lado]['modo'];
+            $detalle = [];
+            foreach ($soae[$lado]['picos'] as $pico) {
+                $detalle[] = self::hz((int) $pico['hz']) . ' Hz ' . self::db((float) $pico['db']) . ' dB';
+            }
+            $texto = strtoupper($lado) . ': ' . $modo . ($detalle !== [] ? ' (' . implode(', ', $detalle) . ')' : '');
+            $this->pdf->text($xModo, $ySoae + $altoSoae + 18, $texto, 6, false, $colorLado);
+            $xModo += $this->pdf->textWidth($texto, 6) + 12;
+        }
+        $this->y = $ySoae + $altoSoae + 26;
 
         // Los números del perfil de emisión, banda por banda. La curva los
         // dibuja pero no se pueden leer de ahí, y son los que el docente
@@ -1472,6 +1502,12 @@ final class CaseSheetPdf
         $this->titulo('Potenciales vestibulares (VEMP)', 330.0);
 
         $vemp = is_array($data['VEMP'] ?? null) ? $data['VEMP'] : [];
+        // Los normativos del VEMP también son por población: un niño tiene
+        // la p13 casi un milisegundo antes que un adulto mayor.
+        $poblacion = CaseWaveforms::poblacion(
+            isset($data['edad']) ? (int) $data['edad'] : null,
+            (int) ($data['gender'] ?? 0)
+        );
         $anchoPanel = ($this->anchoContenido - 2 * 12) / 3;
         $altoPanel = 105.0;
 
@@ -1502,16 +1538,24 @@ final class CaseSheetPdf
                 $umbral = (float) ($sub['umbral'] ?? CaseBuilder::VEMP_DEFAULTS[$subtipo]['umbral']);
                 $desv = is_array($sub['desviaciones'] ?? null) ? $sub['desviaciones'] : [];
 
+                // El corte de rotulado sale de la respuesta a nivel alto de
+                // ESTE subtipo, no de un µV fijo: el cervical se mide en
+                // cientos de µV y el ocular en unidades.
+                $refPico = 0.0;
+                foreach (CaseWaveforms::picosVemp($subtipo, 100.0, $umbral, $desv, $poblacion) as $pico) {
+                    $refPico = max($refPico, abs((float) $pico['amp']));
+                }
+
                 $series = [];
                 foreach (CaseWaveforms::serieIntensidades($umbral, 100.0, 10.0) as $nivel) {
-                    $pts = CaseWaveforms::trazoVemp($subtipo, $nivel, $umbral, $desv);
+                    $pts = CaseWaveforms::trazoVemp($subtipo, $nivel, $umbral, $desv, 40.0, 200, $poblacion);
                     $marcas = [];
-                    foreach (CaseWaveforms::picosVemp($subtipo, $nivel, $umbral, $desv) as $nombre => $pico) {
+                    foreach (CaseWaveforms::picosVemp($subtipo, $nivel, $umbral, $desv, $poblacion) as $nombre => $pico) {
                         // El valor se lee del TRAZO y no de la gaussiana del
                         // pico: p13 y n23 están a 10 ms y se solapan, así que
                         // la marca tiene que caer sobre la línea dibujada.
                         $valor = self::valorEn($pts, $pico['lat']);
-                        if (abs($valor) < self::VEMP_MARCA_MIN_UV) {
+                        if (abs($valor) < $refPico * self::VEMP_MARCA_MIN_FRACCION) {
                             continue;
                         }
                         $marcas[] = ['t' => $pico['lat'], 'v' => $valor, 'texto' => $nombre];
@@ -1545,41 +1589,70 @@ final class CaseSheetPdf
             $this->y += $altoPanel + 20;
         }
 
-        // Umbral y desviaciones de los dos oídos, en columnas.
-        $filas = [['Subtipo', 'Umbral OD', 'Umbral OI', 'Picos OD (lat / amp)', 'Picos OI (lat / amp)']];
+        // Umbral, amplitud y asimetría: lo que se lee de un VEMP. Antes acá
+        // iban las DESVIACIONES, que en un caso sin retoques son todas
+        // "+0.0/+0.0" y no dicen nada.
+        $filas = [['Subtipo', 'Umbral OD', 'Umbral OI', 'p-p OD (µV)', 'p-p OI (µV)', 'Asimetría']];
+        $picos100 = [];
         foreach (CaseBuilder::VEMP_SUBTIPOS as $subtipo) {
-            $celda = [];
-            $umbral = [];
+            $pp = [];
             foreach (['od', 'oi'] as $ladoForm) {
                 $sub = is_array($porLado[$ladoForm]['subtipos'][$subtipo] ?? null)
                     ? $porLado[$ladoForm]['subtipos'][$subtipo]
                     : [];
-                $umbral[$ladoForm] = self::db((float) ($sub['umbral'] ?? CaseBuilder::VEMP_DEFAULTS[$subtipo]['umbral'])) . ' dB';
+                $umbral = (float) ($sub['umbral'] ?? CaseBuilder::VEMP_DEFAULTS[$subtipo]['umbral']);
                 $desv = is_array($sub['desviaciones'] ?? null) ? $sub['desviaciones'] : [];
-                $picos = [];
-                foreach (CaseBuilder::VEMP_PEAKS[$subtipo] as $pico) {
-                    $picos[] = sprintf(
-                        '%s %+.1f/%+.1f',
-                        $pico,
-                        (float) ($desv[$pico]['lat'] ?? 0),
-                        (float) ($desv[$pico]['amp'] ?? 0)
-                    );
-                }
-                $celda[$ladoForm] = implode('  ', $picos);
+                // A 100 dB, que es el nivel al que se informa la amplitud.
+                $picos100[$subtipo][$ladoForm] = CaseWaveforms::picosVemp($subtipo, 100.0, $umbral, $desv, $poblacion);
+                $picos100[$subtipo][$ladoForm . '_umbral'] = $umbral;
+                $pp[$ladoForm] = self::picoAPico($picos100[$subtipo][$ladoForm]);
             }
             $filas[] = [
                 CaseBuilder::VEMP_SUBTIPO_LABELS[$subtipo],
-                $umbral['od'],
-                $umbral['oi'],
-                $celda['od'],
-                $celda['oi'],
+                self::db($picos100[$subtipo]['od_umbral']) . ' dB',
+                self::db($picos100[$subtipo]['oi_umbral']) . ' dB',
+                number_format($pp['od'], 1),
+                number_format($pp['oi'], 1),
+                self::asimetria($pp['od'], $pp['oi']),
             ];
         }
-        $this->tabla($filas, [0.22, 0.13, 0.13, 0.26, 0.26], true);
-        $this->parrafo(
-            'Umbral en dB; las desviaciones van en ms de latencia y µV de amplitud sobre el valor normal de cada pico.',
-            7
-        );
+        $this->tabla($filas, [0.22, 0.14, 0.14, 0.17, 0.17, 0.16], true);
+
+        // Y los picos en detalle, a 100 dB: latencia y amplitud de cada uno.
+        $filas = [['A 100 dB', 'OD lat (ms)', 'OD amp (µV)', 'OI lat (ms)', 'OI amp (µV)']];
+        foreach (CaseBuilder::VEMP_SUBTIPOS as $subtipo) {
+            foreach (CaseBuilder::VEMP_PEAKS[$subtipo] as $pico) {
+                $filas[] = [
+                    $subtipo . ' ' . $pico,
+                    number_format($picos100[$subtipo]['od'][$pico]['lat'], 1),
+                    number_format($picos100[$subtipo]['od'][$pico]['amp'], 1),
+                    number_format($picos100[$subtipo]['oi'][$pico]['lat'], 1),
+                    number_format($picos100[$subtipo]['oi'][$pico]['amp'], 1),
+                ];
+            }
+        }
+        $this->tabla($filas, [0.24, 0.19, 0.19, 0.19, 0.19], true);
+    }
+
+    /** Amplitud pico a pico: la distancia entre el pico positivo y el negativo. */
+    private static function picoAPico(array $picos): float
+    {
+        $valores = array_map(static fn (array $p): float => (float) $p['amp'], $picos);
+        return $valores === [] ? 0.0 : max($valores) - min($valores);
+    }
+
+    /**
+     * Razón de asimetría interaural, en %: la diferencia entre los dos oídos
+     * sobre la suma. Es LA lectura del VEMP -- una amplitud sola no dice
+     * nada sin el otro lado.
+     */
+    private static function asimetria(float $ppOd, float $ppOi): string
+    {
+        $suma = $ppOd + $ppOi;
+        if ($suma <= 0.001) {
+            return '--';
+        }
+        return (string) (int) round(abs($ppOd - $ppOi) / $suma * 100) . ' %';
     }
 
     /**

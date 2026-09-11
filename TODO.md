@@ -734,3 +734,28 @@ oído esté mal" no se puede armar. Mismo hueco, más chico, en SFOAE
       (`resources/oae/normative_data.json`), igual que ya hace con el
       umbral y las desviaciones.
 - [ ] Mostrarlos en la ficha en PDF, al lado de los que ya están.
+
+### La razón V/I normal es mayor que 1
+
+Corregido el 2026-09-11: `NORM_VI_RATIO_MIN` estaba en 0.5, o sea daba por
+normal una onda V de la mitad de la I. En un oído normal la V es MAYOR que
+la I; por debajo de 1 la V está desproporcionadamente chica y ese es el
+hallazgo retrococlear. Cambiado a 1.0 en los dos lados a la vez
+(`src/abr/ABR_generator.py` y `CaseWaveforms::NORM_VI_RATIO_MIN`), porque si
+se separan la ficha marca como alterado lo que el módulo da por normal.
+
+Queda por revisar lo que cuelga de eso:
+
+- [ ] `v_i_factor` del caso tiene default **0.45** y su ayuda dice "1.0 = sin
+      caída" (ver ABR_NEURAL_DEFAULTS y views/case/_perfil.php). Con el
+      criterio nuevo, un factor de 0.45 no es "la razón V/I" sino un
+      multiplicador sobre la amplitud de la V; el nombre y la ayuda inducen
+      a leerlo como la razón, que ahora tiene otro piso. Decidir si se
+      renombra el parámetro o se recalibra su escala.
+- [ ] `amplitude_v_i_ratio` en resources/abr/normative_data.json dice
+      [2.5, 5.0] para la coclear: eso sí es una razón V/I de verdad y no la
+      usa nadie para juzgar. Ver si el límite normal debería salir de ahí,
+      por población y patología, en vez de una constante única.
+- [ ] Los presets neurales (`ABR_NEURAL_PRESETS`) tienen v_i_factor entre
+      0.30 y 1.0 pensados contra el piso viejo. Revisar si siguen dando el
+      contraste que buscan.

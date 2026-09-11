@@ -441,9 +441,11 @@ IMPEDANCE_REF_KOHM = 2.0
 NORM_SD_LIMIT = 2.0
 NORM_LAT_SD = {'I': 0.20, 'II': 0.25, 'III': 0.22, 'IV': 0.28, 'V': 0.25}
 NORM_INTERPEAK_SD = {'I-III': 0.22, 'III-V': 0.22, 'I-V': 0.25}
-# Razon V/I: por debajo de esto la onda V esta desproporcionadamente chica
-# respecto de la I, hallazgo retrococlear clasico.
-NORM_VI_RATIO_MIN = 0.5
+# Razon V/I: en un oido normal la onda V es MAYOR que la I, asi que la razon
+# pasa de 1. Por debajo de 1 la V esta desproporcionadamente chica respecto
+# de la I, que es el hallazgo retrococlear clasico. Estaba en 0.5, que daba
+# por normal una V de la mitad de la I (criterio de la docente, 2026-09-11).
+NORM_VI_RATIO_MIN = 1.0
 # Diferencia interaural de la onda V que se considera significativa (ms).
 NORM_INTERAURAL_MAX = 0.4
 

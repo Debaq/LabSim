@@ -752,6 +752,80 @@ final class CaseCharts
     }
 
     /**
+     * TEOAE: barras dobles de señal y ruido por banda, que es como lo
+     * imprime cualquier equipo de transientes.
+     *
+     * No es un DP-grama y no se dibuja como uno: en el transiente lo que se
+     * lee es la RELACIÓN entre las dos barras banda por banda, no la forma
+     * de una curva. Por eso va un panel por oído -- cuatro barras por banda
+     * no se comparan con la vista.
+     *
+     * @param array<int,int> $bandas
+     * @param array<int,float> $senal Hz => dB SPL de respuesta
+     * @param array<int,float> $ruido Hz => dB SPL de piso
+     * @param array<int,bool> $pasa Hz => si esa banda supera el criterio
+     */
+    public static function oaeBars(
+        MiniPdf $pdf,
+        float $x,
+        float $y,
+        float $w,
+        float $h,
+        array $bandas,
+        array $senal,
+        array $ruido,
+        array $pasa,
+        string $color,
+        array $rangoY
+    ): void {
+        if ($bandas === []) {
+            return;
+        }
+        [$px, $py, $pw, $ph] = self::plotBox($x, $y, $w, $h);
+        $minY = $rangoY[0];
+        $maxY = $rangoY[1];
+        $fy = static fn (float $db): float => $py + ($maxY - max($minY, min($maxY, $db))) / ($maxY - $minY) * $ph;
+
+        for ($db = $minY; $db <= $maxY; $db += 10) {
+            $lineY = $fy((float) $db);
+            $cero = abs($db) < 0.01;
+            $pdf->line($px, $lineY, $px + $pw, $lineY, $cero ? 0.6 : 0.3, $cero ? self::COLOR_GRID_FUERTE : self::COLOR_GRID);
+            $pdf->textRight($px - 3, $lineY + 2, (string) (int) $db, 5.0, false, self::COLOR_ROTULO);
+        }
+        $pdf->rect($px, $py, $pw, $ph, 0.7, self::COLOR_GRID_FUERTE);
+        $pdf->text($x, $y + $h - 1.5, 'dB SPL', 5.0, false, self::COLOR_ROTULO);
+
+        // Cada banda ocupa su celda y dentro van las dos barras pegadas:
+        // la señal a la izquierda, el ruido a la derecha.
+        $celda = $pw / count($bandas);
+        $anchoBarra = min(9.0, $celda * 0.33);
+        $base = $fy(0.0);
+
+        foreach (array_values($bandas) as $i => $hz) {
+            $centro = $px + $celda * ($i + 0.5);
+            $pdf->textCenter($centro, $py + $ph + self::EJE_INF - 3, self::freqLabel((int) $hz), 5.0, false, self::COLOR_ROTULO);
+
+            foreach ([
+                [$senal[$hz] ?? $minY, $centro - $anchoBarra * 0.55 - $anchoBarra / 2, $color],
+                [$ruido[$hz] ?? $minY, $centro + $anchoBarra * 0.55 - $anchoBarra / 2, '#9a9a9a'],
+            ] as [$valor, $xBarra, $colorBarra]) {
+                $yValor = $fy((float) $valor);
+                $alto = abs($yValor - $base);
+                if ($alto < 0.5) {
+                    $alto = 0.5;
+                }
+                $pdf->rectFilled($xBarra, min($yValor, $base), $anchoBarra, $alto, $colorBarra);
+            }
+
+            // La banda que no llega al criterio se marca: es el REFER del
+            // equipo, y sin eso hay que medir la diferencia con el ojo.
+            if (empty($pasa[$hz])) {
+                $pdf->textCenter($centro, $py + 7, 'R', 5.5, true, self::COLOR_ROTULO);
+            }
+        }
+    }
+
+    /**
      * Espectro del SOAE: el piso de ruido y los picos declarados. Sin
      * estímulo -- es un registro en silencio, así que lo único que hay que
      * mostrar es dónde asoma algo sobre el ruido.

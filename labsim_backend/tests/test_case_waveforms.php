@@ -145,6 +145,16 @@ t_true($limNeo['lat']['V'][1] > $lim['lat']['V'][1],
 
 // --- VEMP ---------------------------------------------------------------
 
+// Las amplitudes son las normativas por población, en µV: el cervical se
+// mide en cientos y el ocular en unidades.
+t_true(CaseWaveforms::VEMP_BASE['adult_female']['CVEMP']['p13'][1] > 100,
+    'El cVEMP normativo se mide en cientos de µV');
+t_true(CaseWaveforms::VEMP_BASE['adult_female']['OVEMP']['n10'][1] < 20,
+    'El oVEMP, en unidades: no se pueden leer en la misma escala');
+t_true(CaseWaveforms::VEMP_BASE['child']['CVEMP']['p13'][0]
+     < CaseWaveforms::VEMP_BASE['elderly']['CVEMP']['p13'][0],
+    'La p13 del niño aparece antes que la del adulto mayor');
+
 $vempAlto = CaseWaveforms::trazoVemp('CVEMP', 100, 60);
 $vempUmbral = CaseWaveforms::trazoVemp('CVEMP', 60, 60);
 $vempBajo = CaseWaveforms::trazoVemp('CVEMP', 50, 60);

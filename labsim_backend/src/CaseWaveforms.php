@@ -67,11 +67,13 @@ final class CaseWaveforms
     public const NORM_INTERAURAL_V_MS = 0.4;
 
     /**
-     * Razón V/I mínima normal: por debajo la onda V está desproporcionadamente
-     * chica respecto de la I, que es el hallazgo retrococlear clásico.
-     * NORM_VI_RATIO_MIN en ABR_generator.py.
+     * Razón V/I mínima normal: en un oído normal la onda V es MAYOR que la
+     * I, así que la razón pasa de 1. Por debajo, la V está
+     * desproporcionadamente chica respecto de la I, que es el hallazgo
+     * retrococlear clásico. Mismo valor que NORM_VI_RATIO_MIN en
+     * ABR_generator.py, que se corrigió junto con este.
      */
-    public const NORM_VI_RATIO_MIN = 0.5;
+    public const NORM_VI_RATIO_MIN = 1.0;
 
     /** Ancho (sigma, ms) de cada onda. WAVE_SIGMA en ABR_generator.py. */
     public const SIGMA = ['I' => 0.22, 'III' => 0.22, 'V' => 0.18];
@@ -311,19 +313,37 @@ final class CaseWaveforms
     // ---------------------------------------------------------------
 
     /**
-     * Latencia (ms) y signo de cada pico por subtipo. El cVEMP es
-     * p13-n23 (positivo primero), el oVEMP n10-p16 (negativo primero) y el
-     * mVEMP p13-n23 como el cervical. Mismos picos que
-     * CaseBuilder::VEMP_PEAKS.
+     * Latencia (ms) y amplitud (µV) de cada pico del VEMP por población, con
+     * tone burst de 500 Hz por vía aérea. Copia de
+     * populations[*].air_conduction.tone_burst.500Hz en
+     * resources/vemp/normative_data.json.
+     *
+     * El signo sale del nombre del pico: p13 y p16 son positivos, n10 y n23
+     * negativos. Por eso el cVEMP arranca hacia arriba y el oVEMP hacia
+     * abajo, que es lo que los distingue de un vistazo.
      */
-    public const VEMP_PICOS = [
-        'CVEMP' => ['p13' => [13.0, 1.0], 'n23' => [23.0, -1.0]],
-        'OVEMP' => ['n10' => [10.0, -1.0], 'p16' => [16.0, 1.0]],
-        'MVEMP' => ['p13' => [13.0, 1.0], 'n23' => [23.0, -1.0]],
+    public const VEMP_BASE = [
+        'adult_male' => [
+            'CVEMP' => ['p13' => [13.0, 120.0], 'n23' => [23.0, 170.0]],
+            'OVEMP' => ['n10' => [10.0, 8.0], 'p16' => [16.0, 11.0]],
+            'MVEMP' => ['p13' => [13.0, 40.0], 'n23' => [23.0, 55.0]],
+        ],
+        'adult_female' => [
+            'CVEMP' => ['p13' => [12.8, 135.0], 'n23' => [22.5, 185.0]],
+            'OVEMP' => ['n10' => [9.8, 8.5], 'p16' => [15.8, 11.5]],
+            'MVEMP' => ['p13' => [12.8, 45.0], 'n23' => [22.5, 60.0]],
+        ],
+        'child' => [
+            'CVEMP' => ['p13' => [11.5, 150.0], 'n23' => [21.0, 210.0]],
+            'OVEMP' => ['n10' => [8.8, 10.0], 'p16' => [14.5, 13.0]],
+            'MVEMP' => ['p13' => [11.5, 50.0], 'n23' => [21.0, 68.0]],
+        ],
+        'elderly' => [
+            'CVEMP' => ['p13' => [14.5, 85.0], 'n23' => [24.5, 120.0]],
+            'OVEMP' => ['n10' => [11.5, 5.5], 'p16' => [17.5, 8.0]],
+            'MVEMP' => ['p13' => [14.5, 28.0], 'n23' => [24.5, 38.0]],
+        ],
     ];
-
-    /** Amplitud pico-pico (µV) de referencia a nivel alto, por subtipo. */
-    public const VEMP_AMP_BASE = ['CVEMP' => 1.0, 'OVEMP' => 0.35, 'MVEMP' => 0.5];
 
     /** Ancho de cada pico (ms). */
     public const VEMP_SIGMA = 3.2;
@@ -344,9 +364,10 @@ final class CaseWaveforms
         float $umbral,
         array $desviaciones = [],
         float $hasta = 40.0,
-        int $muestras = 200
+        int $muestras = 200,
+        string $poblacion = 'adult_female'
     ): array {
-        $picos = self::picosVemp($subtipo, $intensidad, $umbral, $desviaciones);
+        $picos = self::picosVemp($subtipo, $intensidad, $umbral, $desviaciones, $poblacion);
 
         $pts = [];
         for ($n = 0; $n <= $muestras; $n++) {
@@ -369,19 +390,25 @@ final class CaseWaveforms
      * @param array<string,array{lat:float,amp:float}> $desviaciones
      * @return array<string,array{lat:float,amp:float}>
      */
-    public static function picosVemp(string $subtipo, float $intensidad, float $umbral, array $desviaciones = []): array
-    {
-        $definicion = self::VEMP_PICOS[$subtipo] ?? self::VEMP_PICOS['CVEMP'];
+    public static function picosVemp(
+        string $subtipo,
+        float $intensidad,
+        float $umbral,
+        array $desviaciones = [],
+        string $poblacion = 'adult_female'
+    ): array {
+        $base = self::VEMP_BASE[$poblacion] ?? self::VEMP_BASE['adult_female'];
+        $definicion = $base[$subtipo] ?? $base['CVEMP'];
         $sl = $intensidad - $umbral;
         // Por debajo del umbral no hay respuesta; encima crece y satura.
         $crecimiento = $sl < 0 ? 0.0 : 1 - exp(-$sl / 12);
-        $ampBase = (self::VEMP_AMP_BASE[$subtipo] ?? 1.0) * $crecimiento;
 
         $out = [];
-        foreach ($definicion as $nombre => [$lat0, $signo]) {
+        foreach ($definicion as $nombre => [$lat0, $amp0]) {
+            $signo = strncmp($nombre, 'n', 1) === 0 ? -1.0 : 1.0;
             $out[$nombre] = [
                 'lat' => $lat0 + (float) ($desviaciones[$nombre]['lat'] ?? 0),
-                'amp' => ($ampBase + (float) ($desviaciones[$nombre]['amp'] ?? 0)) * $signo,
+                'amp' => ($amp0 * $crecimiento + (float) ($desviaciones[$nombre]['amp'] ?? 0)) * $signo,
             ];
         }
         return $out;
