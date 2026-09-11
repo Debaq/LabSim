@@ -121,6 +121,12 @@ t_true(strpos($pdfDemo, 'sin decidir') !== false,
     'La portada avisa de las fichas que el caso no terminó de decidir');
 t_true(strpos($pdfDemo, '500 Hz') !== false && strpos($pdfDemo, 'Zumbido') !== false,
     'El acúfeno trae los datos con los que se cuadra la acufenometría, no solo la frase del paciente');
+// Lo que el audiograma dibuja no se repite en números: el LDL tiene su
+// propia línea en el gráfico y una tabla al lado obliga a leer dos veces lo
+// mismo y a dudar de cuál manda.
+t_true(strpos($pdfDemo, 'LDL (dB HL)') === false,
+    'El LDL no se repite en tabla: ya está dibujado en el audiograma');
+
 t_true(strpos($pdfDemo, 'Interpico I-V') !== false,
     'El ABR informa los interpicos a 80 dB');
 t_true(strpos($pdfDemo, 'FSP objetivo') !== false && strpos($pdfDemo, 'Alcanza el objetivo') !== false,

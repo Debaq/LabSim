@@ -355,7 +355,7 @@ final class CaseSheetPdf
 
     private function audiometria(array $data): void
     {
-        $this->titulo('Audiometría tonal', 176.0);
+        $this->titulo('Audiometría tonal', 195.0);
 
         $aerea = self::desarmar($data['Aerea'] ?? []);
         $osea = self::desarmar($data['Osea'] ?? []);
@@ -367,8 +367,8 @@ final class CaseSheetPdf
             $ldlMedido[$lado] = count(array_filter($ldl[$lado], static fn ($v) => (int) $v !== 130)) > 0;
         }
 
-        $alto = 148.0;
-        $this->espacio($alto + 20);
+        $alto = 168.0;
+        $this->espacio($alto + 22);
         CaseCharts::audiogram($this->pdf, self::MARGEN, $this->y, $this->anchoContenido * 0.62, $alto, $aerea, $osea, $ldl, $ldlMedido);
 
         // Al lado del gráfico, la leyenda de símbolos: un audiograma sin
@@ -698,7 +698,7 @@ final class CaseSheetPdf
 
     private function logoaudiometria(array $data): void
     {
-        $this->titulo('Logoaudiometría', 88.0);
+        $this->titulo('Logoaudiometría', 98.0);
 
         $umd = is_array($data['UMD'] ?? null) ? $data['UMD'] : [];
         $sdt = is_array($data['SDT'] ?? null) ? $data['SDT'] : [0, 0];
@@ -716,7 +716,7 @@ final class CaseSheetPdf
             ];
         }
 
-        $alto = 88.0;
+        $alto = 98.0;
         $this->espacio($alto + 24);
         CaseCharts::logogram($this->pdf, self::MARGEN, $this->y, $this->anchoContenido * 0.55, $alto, $porLado);
         CaseCharts::legend($this->pdf, self::MARGEN + 26, $this->y + $alto + 8, 'SRT = vertical punteada, UMD = triángulo');
@@ -751,35 +751,11 @@ final class CaseSheetPdf
         $filas[] = ['SISI', self::pct((float) ($sisi[0] ?? 0)), self::pct((float) ($sisi[1] ?? 0))];
         $filas[] = ['Reclutamiento', !empty($recruit[0]) ? 'Presente' : 'Ausente', !empty($recruit[1]) ? 'Presente' : 'Ausente'];
         $filas[] = ['Stenger', !empty($stenger[0]) ? 'Positivo' : 'Negativo', !empty($stenger[1]) ? 'Positivo' : 'Negativo'];
-        $this->tabla($filas, [0.36, 0.32, 0.32], true, 0.62);
+        $this->tabla($filas, [0.36, 0.32, 0.32], true);
 
-        // El LDL en números: es la expresión audiométrica del reclutamiento
-        // y en el audiograma solo se puede estimar a ojo. Solo el oído que
-        // lo tiene medido -- sin medir se guarda 130 en las nueve.
-        $ldl = self::desarmar($data['LDL'] ?? []);
-        $filasLdl = [];
-        foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $tag) {
-            if (count(array_filter($ldl[$lado], static fn ($v): bool => (int) $v !== 130)) === 0) {
-                continue;
-            }
-            $fila = [$tag];
-            foreach (CaseBuilder::FREQUENCIES as $i => $hz) {
-                $fila[] = in_array($hz, CaseCharts::FREQS_OSEA, true) ? self::db((float) $ldl[$lado][$i]) : '';
-            }
-            $filasLdl[] = $fila;
-        }
-        if ($filasLdl !== []) {
-            $cabecera = ['LDL (dB HL)'];
-            foreach (CaseBuilder::FREQUENCIES as $hz) {
-                $cabecera[] = in_array($hz, CaseCharts::FREQS_OSEA, true) ? self::hz($hz) : '';
-            }
-            $cols = count($cabecera);
-            $this->tabla(
-                array_merge([$cabecera], $filasLdl),
-                array_merge([0.2], array_fill(0, $cols - 1, 0.8 / ($cols - 1))),
-                true
-            );
-        }
+        // El LDL no va en números: ya está dibujado en el audiograma con su
+        // propia línea. Repetir en una tabla lo que el gráfico muestra
+        // obliga a leer dos veces lo mismo y a dudar de cuál manda.
 
         // Fowler: el patrón es por FRECUENCIA, no uno por oído -- compara los
         // dos y por eso solo existe donde la asimetría califica. Lo que se
