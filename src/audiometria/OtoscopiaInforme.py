@@ -63,6 +63,16 @@ def es_de_area(clave):
     como área: es el relleno, lo que peor se puede perder de vista."""
     return TIPO_HALLAZGO.get(clave, AREA) == AREA
 
+
+def glifo_hallazgo(clave):
+    """Símbolo con que se dibuja el hallazgo en el esquema, para poder
+    repetirlo en el botón: el botón de la paleta es la leyenda, y con solo
+    el color no se sabe si el hallazgo sale como relleno, como disco o como
+    anillo. Tiene que seguir a _DiagramaTimpanico._dibujar_marcador."""
+    if es_de_area(clave):
+        return "■"
+    return "○" if clave == "tube" else "●"
+
 # Claves de QuadrantName (OtoReport). El orden es el de dibujo/lectura.
 CUADRANTES = [
     ("anterior_superior", "AS"),
@@ -375,13 +385,17 @@ class _PanelOido(QWidget):
         grid = QGridLayout()
         self.botones_hallazgo = {}
         for i, (clave, etiqueta, color, _tipo) in enumerate(HALLAZGOS):
-            btn = QPushButton(etiqueta)
+            btn = QPushButton(f"{glifo_hallazgo(clave)} {etiqueta}")
             btn.setCheckable(True)
             btn.setStyleSheet(
                 # 3 px: con 1 px el color del hallazgo casi no se veía en
                 # el botón, que es la única leyenda de qué color es cada uno.
                 f"QPushButton {{ border: 3px solid {color}; border-radius: 4px; padding: 3px; }}"
                 f"QPushButton:checked {{ background-color: {color}; color: white; }}"
+            )
+            btn.setToolTip(
+                "Rellena el cuadrante" if es_de_area(clave)
+                else "Marca puntual dentro del cuadrante"
             )
             btn.clicked.connect(lambda checked, c=clave: self._set_hallazgo(c if checked else None))
             self.botones_hallazgo[clave] = btn

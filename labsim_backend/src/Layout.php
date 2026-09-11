@@ -35,7 +35,7 @@ final class Layout
         'AGENDA'     => [false, 'Agenda', 13, [true, true], [900, 400], 'pre'],
         'CHAT'       => [false, 'Hablar con el paciente', 14, [true, true], [480, 280], 'pre'],
         'AC'         => [false, 'Acumetría', 15, [true, true], [480, 420], 'pre'],
-        'OT'         => [false, 'Otoscopia', 16, [false, true], [940, 580], 'pre'],
+        'OT'         => [false, 'Otoscopia', 16, [false, true], [1000, 580], 'pre'],
         'INBOX'      => [false, 'Bandeja de entrada', 17, [true, true], [700, 480], 'pre'],
         'FICHA'      => [false, 'Ficha clínica', 18, [false, true], [480, 560], 'pre'],
         'EVOLUCION'  => [false, 'Evolución', 19, [false, true], [420, 340], 'pre'],

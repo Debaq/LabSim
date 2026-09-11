@@ -997,3 +997,10 @@ varios hallazgos encimados el dibujo solo no alcanza.
 `ReportPdfBuilder::otoscopiaBody` acepta lista o string suelto, para que
 los informes ya subidos con la primera versión sigan imprimiendo sus
 hallazgos en vez de salir en blanco.
+
+Los botones de la paleta son la leyenda del esquema, así que llevan el
+mismo símbolo con que se dibuja el hallazgo (■ relleno de área, ● disco,
+○ anillo) además del color, con el borde en 3 px para que el color se lea.
+`glifo_hallazgo()` tiene que seguir a `_dibujar_marcador()`: si una marca
+cambia de forma, cambian las dos. Los botones quedaron más anchos y la
+subventana pasó de 940 a 1000 px (`Layout::APPS['OT']`).
