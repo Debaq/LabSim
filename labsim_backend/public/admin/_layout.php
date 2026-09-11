@@ -205,6 +205,13 @@ function admin_footer(): void
     });
 })();
 </script>
+<?php if (!empty($_SESSION['admin_user_id'])): ?>
+<script src="../js/session_guard.js?v=<?= admin_asset_version(__DIR__ . '/../js/session_guard.js') ?>"
+        data-session-guard
+        data-segundos="<?= Auth::sessionSecondsLeft() ?>"
+        data-ping="../session_ping.php"
+        data-destino="login.php?expirada=1"></script>
+<?php endif; ?>
 <?php foreach (admin_extra_js() as $js): ?>
 <script src="../js/<?= htmlspecialchars($js) ?>?v=<?= admin_asset_version(__DIR__ . '/../js/' . $js) ?>"></script>
 <?php endforeach; ?>

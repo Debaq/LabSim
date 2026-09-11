@@ -222,9 +222,23 @@ final class Auth
     }
 
     /**
+     * Inactividad máxima de una sesión de portal. El corte lo hacía el
+     * php.ini del hosting (session.gc_maxlifetime, 1440 s = 24 min): poco
+     * para armar una ficha, y encima invisible -- la sesión moría callada y
+     * el docente seguía escribiendo en una página ya muerta hasta que el
+     * POST rebotaba. Acá se fija explícito y el navegador avisa antes de
+     * cortar (ver js/session_guard.js).
+     */
+    public const SESSION_IDLE_SECONDS = 4320; // 72 min = el triple del default de PHP
+
+    /**
      * session_start() con flags de cookie explícitos (HttpOnly siempre,
      * Secure si la request llegó por HTTPS, SameSite=Lax) -- sin esto queda
      * a criterio del php.ini del hosting, que puede no traerlos.
+     *
+     * Además fija la caducidad por inactividad acá y no en el php.ini: el
+     * hosting es compartido y su gc puede barrer la sesión antes, así que el
+     * control propio ($_SESSION['last_activity']) es el que manda.
      */
     public static function startSession(): void
     {
@@ -232,7 +246,11 @@ final class Auth
             return;
         }
         $https = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+        // El gc del hosting no puede barrerla antes de nuestro propio límite.
+        @ini_set('session.gc_maxlifetime', (string) self::SESSION_IDLE_SECONDS);
         session_set_cookie_params([
+            // Cookie de sesión (muere al cerrar el navegador): la caducidad
+            // por inactividad la lleva el servidor, no el navegador.
             'lifetime' => 0,
             'path' => '/',
             'secure' => $https,
@@ -240,6 +258,40 @@ final class Auth
             'samesite' => 'Lax',
         ]);
         session_start();
+        self::expireIfIdle();
+        $_SESSION['last_activity'] = time();
+    }
+
+    /** Vacía la sesión si pasó SESSION_IDLE_SECONDS sin un solo request. */
+    private static function expireIfIdle(): void
+    {
+        $ultima = $_SESSION['last_activity'] ?? null;
+        if ($ultima === null || time() - (int) $ultima <= self::SESSION_IDLE_SECONDS) {
+            return;
+        }
+        $_SESSION = [];
+        session_regenerate_id(true);
+    }
+
+    /**
+     * Segundos que le quedan a la sesión sin actividad. Cada request la
+     * renueva (startSession escribe last_activity), así que al pintar una
+     * página esto vale siempre el total -- es el número con el que el
+     * navegador arranca su cuenta regresiva.
+     */
+    public static function sessionSecondsLeft(): int
+    {
+        $ultima = $_SESSION['last_activity'] ?? null;
+        if ($ultima === null) {
+            return 0;
+        }
+        return max(0, self::SESSION_IDLE_SECONDS - (time() - (int) $ultima));
+    }
+
+    /** ¿Hay alguna sesión de portal viva (docente/admin o alumno)? */
+    public static function hasPortalSession(): bool
+    {
+        return !empty($_SESSION['admin_user_id']) || !empty($_SESSION['student_user_id']);
     }
 
     /**

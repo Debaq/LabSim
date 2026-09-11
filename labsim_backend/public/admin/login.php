@@ -36,8 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+$expirada = isset($_GET['expirada']) && $_GET['expirada'] === '1';
+
 admin_header('Ingresar');
 ?>
+<?php if ($expirada): ?>
+    <p class="error">Tu sesión se cerró por inactividad. Ingresa de nuevo para seguir.</p>
+<?php endif; ?>
 <?php if ($error !== null): ?>
     <p class="error"><?= htmlspecialchars($error) ?></p>
 <?php endif; ?>

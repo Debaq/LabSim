@@ -91,6 +91,14 @@ function student_footer(): void
     paint();
 })();
 </script>
+<?php if (!empty($_SESSION['student_user_id'])): ?>
+<?php // Sin destino: el alumno no tiene login propio (entra por Moodle), así
+      // que al vencer se recarga y la página muestra el aviso de volver. ?>
+<script src="../js/session_guard.js?v=<?= (string) (@filemtime(__DIR__ . '/../js/session_guard.js') ?: time()) ?>"
+        data-session-guard
+        data-segundos="<?= Auth::sessionSecondsLeft() ?>"
+        data-ping="../session_ping.php"></script>
+<?php endif; ?>
 </body>
 </html>
 <?php
