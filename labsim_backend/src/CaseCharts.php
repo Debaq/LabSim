@@ -33,6 +33,13 @@ final class CaseCharts
     private const COLOR_LIMITE_NORMAL = '#555555';
     private const COLOR_ROTULO = '#444444';
 
+    /**
+     * Aire a cada lado del eje X, como fracción del ancho útil: el primer y
+     * el último punto no se pegan al marco. Un símbolo de 125 Hz montado
+     * sobre la línea del recuadro se lee peor y queda feo.
+     */
+    private const AIRE_EJE = 0.05;
+
     /** Margen interno del recuadro para los rótulos de los ejes (pt). */
     private const EJE_IZQ = 24.0;
     private const EJE_SUP = 11.0;
@@ -130,7 +137,9 @@ final class CaseCharts
         $minLog = log(125, 2);
         $maxLog = log(8000, 2);
 
-        $fx = static fn (float $hz): float => $px + (log($hz, 2) - $minLog) / ($maxLog - $minLog) * $pw;
+        $aire = $pw * self::AIRE_EJE;
+        $util = $pw - 2 * $aire;
+        $fx = static fn (float $hz): float => $px + $aire + (log($hz, 2) - $minLog) / ($maxLog - $minLog) * $util;
         $fy = static fn (float $db): float => $py + (max(-10.0, min(120.0, $db)) + 10) / 130 * $ph;
 
         // Grilla: una vertical por frecuencia del audiómetro y una
@@ -294,7 +303,9 @@ final class CaseCharts
     {
         [$px, $py, $pw, $ph] = self::plotBox($x, $y, $w, $h);
         $tope = self::ESCALA_TIMPANOGRAMA_ML;
-        $fx = static fn (float $daPa): float => $px + (max(-400.0, min(200.0, $daPa)) + 400) / 600 * $pw;
+        $aire = $pw * self::AIRE_EJE;
+        $util = $pw - 2 * $aire;
+        $fx = static fn (float $daPa): float => $px + $aire + (max(-400.0, min(200.0, $daPa)) + 400) / 600 * $util;
         $fy = static fn (float $ml) => $py + $ph - max(0.0, min($tope, $ml)) / $tope * $ph;
 
         foreach ([-400, -300, -200, -100, 0, 100, 200] as $daPa) {
@@ -387,7 +398,9 @@ final class CaseCharts
     public static function logogram(MiniPdf $pdf, float $x, float $y, float $w, float $h, array $porLado): void
     {
         [$px, $py, $pw, $ph] = self::plotBox($x, $y, $w, $h);
-        $fx = static fn (float $db): float => $px + (max(-10.0, min(120.0, $db)) + 10) / 130 * $pw;
+        $aire = $pw * self::AIRE_EJE;
+        $util = $pw - 2 * $aire;
+        $fx = static fn (float $db): float => $px + $aire + (max(-10.0, min(120.0, $db)) + 10) / 130 * $util;
         $fy = static fn (float $pct): float => $py + (100 - max(0.0, min(100.0, $pct))) / 100 * $ph;
 
         for ($db = 0; $db <= 120; $db += 20) {
@@ -625,7 +638,9 @@ final class CaseCharts
         $minLog = log((float) $bandas[0], 2);
         $maxLog = log((float) $bandas[count($bandas) - 1], 2);
 
-        $fx = static fn (float $hz): float => $px + (log($hz, 2) - $minLog) / max(0.001, $maxLog - $minLog) * $pw;
+        $aire = $pw * self::AIRE_EJE;
+        $util = $pw - 2 * $aire;
+        $fx = static fn (float $hz): float => $px + $aire + (log($hz, 2) - $minLog) / max(0.001, $maxLog - $minLog) * $util;
         $fy = static fn (float $db): float => $py + max(0.0, min($max, $db)) / $max * $ph;
 
         foreach ($bandas as $hz) {
@@ -693,7 +708,9 @@ final class CaseCharts
         $minLog = log((float) $bandas[0], 2);
         $maxLog = log((float) $bandas[count($bandas) - 1], 2);
 
-        $fx = static fn (float $hz): float => $px + (log($hz, 2) - $minLog) / max(0.001, $maxLog - $minLog) * $pw;
+        $aire = $pw * self::AIRE_EJE;
+        $util = $pw - 2 * $aire;
+        $fx = static fn (float $hz): float => $px + $aire + (log($hz, 2) - $minLog) / max(0.001, $maxLog - $minLog) * $util;
         $fy = static fn (float $db): float => $py + ($maxY - max($minY, min($maxY, $db))) / ($maxY - $minY) * $ph;
 
         // Área normal primero: todo lo demás va encima.
@@ -864,7 +881,9 @@ final class CaseCharts
         [$px, $py, $pw, $ph] = self::plotBox($x, $y, $w, $h);
         $minLog = log((float) $rangoHz[0], 2);
         $maxLog = log((float) $rangoHz[1], 2);
-        $fx = static fn (float $hz): float => $px + (log(max(1.0, $hz), 2) - $minLog) / max(0.001, $maxLog - $minLog) * $pw;
+        $aire = $pw * self::AIRE_EJE;
+        $util = $pw - 2 * $aire;
+        $fx = static fn (float $hz): float => $px + $aire + (log(max(1.0, $hz), 2) - $minLog) / max(0.001, $maxLog - $minLog) * $util;
         $fy = static fn (float $db): float => $py + ($rangoY[1] - max($rangoY[0], min($rangoY[1], $db))) / ($rangoY[1] - $rangoY[0]) * $ph;
 
         // La franja donde los picos son posibles: sin ella, un registro sin
