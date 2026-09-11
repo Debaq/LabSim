@@ -121,9 +121,18 @@ class ResponseAudiometry():
                 elif self.history_command[0] == 'cambie_de_volumen':
                     self.response_sisi()
                 elif self.history_command[0] =='aerea_+_ruido':
-                    self.response_aerea_w_msk()
+                    if self.data['audio']['stimOn'].count(True) == 2:
+                        self.response_aerea_w_msk()
+                    else:
+                        # instruccion dada pero el ruido nunca se encendio: el
+                        # paciente no deja de responder, responde sin
+                        # enmascarar -> curva sombra
+                        self.response_aerea_wout_msk()
                 elif self.history_command[0] =='vibrador_+_ruido':
-                    self.response_osea_w_msk()
+                    if self.data['audio']['stimOn'].count(True) == 2:
+                        self.response_osea_w_msk()
+                    else:
+                        self.response_aerea_wout_msk()
                 elif self.history_command[0] == 'escuche_mi_voz':
 
                     self.response_sdt()
@@ -131,15 +140,8 @@ class ResponseAudiometry():
                 debug_print("no has dado comando alguno")
         else:
             pass
-        try:  
-            if not any(self.data["audio"]['stimOn']):
-                self.downHand()
-            elif  self.history_command[0] == 'aerea_+_ruido' and self.data['audio']['stimOn'].count(True) < 2:
-                self.downHand()
-            elif  self.history_command[0] == 'vibrador_+_ruido' and self.data['audio']['stimOn'].count(True) < 2:
-                self.downHand()
-        except IndexError:
-            debug_print("no has dado comando alguno")
+        if not any(self.data["audio"]['stimOn']):
+            self.downHand()
 
 
         
@@ -757,6 +759,11 @@ class ResponseAudiometry():
         if self.data['audio']['test'] == 'Umbrales':
             if self.data['audio']['stimOn'].count(True) == 1:
                 stim_on = self.data['audio']['stimOn'].index(True)
+                if self.data['audio']['stim'][stim_on] in RUIDOS_ENMASCARANTES:
+                    # lo unico encendido es el ruido: lo oye, pero no es el
+                    # pitito por el que se le pidio levantar la mano
+                    self.downHand()
+                    return
                 trans = self.data['audio']['trans'][stim_on]
                 via = 'aerea' if trans == 0 else 'osea'
                 output = self.data['audio']['output'][stim_on] #derecho o izquierdo
