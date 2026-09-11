@@ -89,7 +89,7 @@ foreach ([
 }
 
 // Y los datos del caso, no solo los rótulos.
-t_true(strpos($pdfDemo, 'CASO-TEST') !== false, 'El PDF identifica el caso');
+t_true(strpos($pdfDemo, '#CASO-TEST') !== false, 'El PDF identifica el caso con su numeral');
 
 // Marca y numeración: el pie va en TODAS las páginas, y el año es el de
 // emisión (no el de hoy: una ficha impresa el año que viene no se firma sola

@@ -111,7 +111,7 @@ final class CaseSheetPdf
         // El año del pie es el de emisión, no el de hoy: una ficha impresa
         // el año que viene no se firma sola con el año que viene.
         $anio = preg_match('/(\d{4})/', $fecha, $m) === 1 ? $m[1] : date('Y');
-        $doc = new self($caseId, 'Ficha ' . $caseId . ($nombre !== '' ? ' - ' . $nombre : ''), $anio);
+        $doc = new self($caseId, 'Ficha #' . $caseId . ($nombre !== '' ? ' - ' . $nombre : ''), $anio);
         $doc->portada($caseId, $data, $patient, $emisor, $fecha);
         $doc->resumenPorOido($data);
         // La historia antes que los exámenes, como se lee una ficha: quién
@@ -156,7 +156,7 @@ final class CaseSheetPdf
             $xTitulo += $lado + 9;
         }
         $this->pdf->text($xTitulo, $this->y + 4, 'Ficha del caso', 19, true, self::GRIS_TITULO);
-        $this->pdf->textRight(self::MARGEN + $this->anchoContenido, $this->y + 4, $caseId, 13, true, self::GRIS_SUAVE);
+        $this->pdf->textRight(self::MARGEN + $this->anchoContenido, $this->y + 4, '#' . $caseId, 13, true, self::GRIS_SUAVE);
         $this->y += 16;
         $this->pdf->line(self::MARGEN, $this->y, self::MARGEN + $this->anchoContenido, $this->y, 1.2, self::GRIS_TITULO);
         $this->y += 16;
