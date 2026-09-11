@@ -792,18 +792,23 @@ final class CaseSheetPdf
             6.5
         );
 
-        // --- Umbral por estímulo, en tabla ----------------------------
-        $filas = [['Estímulo · dB nHL', 'OD', 'OI']];
+        // --- Umbral por estímulo, contra el conductual ----------------
+        // La columna que importa es la comparación: el ABR se lee en dB nHL
+        // y el audiograma en dB HL, y el ejercicio es ver cuánto se separan.
+        $aereaAbr = self::desarmar($data['Aerea'] ?? []);
+        $filas = [['Estímulo', 'OD nHL', 'OD cond.', 'OI nHL', 'OI cond.']];
         foreach (array_keys($porLado['od']['umbrales']) as $estimulo) {
             $filas[] = [
                 self::estimuloLabel((string) $estimulo),
                 self::umbralAbr($porLado['od']['umbrales'][$estimulo] ?? null),
+                self::conductual((string) $estimulo, $aereaAbr['od']),
                 self::umbralAbr($porLado['oi']['umbrales'][$estimulo] ?? null),
+                self::conductual((string) $estimulo, $aereaAbr['oi']),
             ];
         }
         $anchoTabla = ($this->anchoContenido - 16) / 2;
         $yTablas = $this->y;
-        $finUmbrales = $this->tablaEn(self::MARGEN, $yTablas, $anchoTabla, $filas, [0.52, 0.24, 0.24], true);
+        $finUmbrales = $this->tablaEn(self::MARGEN, $yTablas, $anchoTabla, $filas, [0.34, 0.17, 0.16, 0.17, 0.16], true);
 
         // --- Patrón retrococlear, al lado -----------------------------
         $filas = [['Patrón retrococlear', 'OD', 'OI']];
@@ -862,6 +867,41 @@ final class CaseSheetPdf
                 6.5
             );
         }
+    }
+
+    /**
+     * Umbral conductual (dB HL) con el que se compara cada estímulo del ABR.
+     *
+     * Sale de CaseProfile::STIM_WEIGHTS, que es la misma tabla con la que el
+     * motor deriva el umbral electrofisiológico: el burst es frecuencial y
+     * pesa su propia frecuencia; el click pesa 2, 3 y 4 kHz, que es la zona
+     * coclear que lo domina.
+     *
+     * Los chirp quedan sin referencia a propósito. Hoy el catálogo tiene
+     * "CE-Chirp" y "LS-Chirp" como si fueran dos estímulos de banda ancha, y
+     * eso está mal: falta separar el NB-chirp, que es frecuencial, del
+     * CE-chirp de banda ancha. Poner un promedio ahí sería tapar el error
+     * con un número.
+     *
+     * @param array<int,float> $aereaLado umbrales aéreos del oído
+     */
+    private static function conductual(string $estimulo, array $aereaLado): string
+    {
+        if (strpos($estimulo, 'chirp') !== false) {
+            return '--';
+        }
+        $pesos = CaseProfile::STIM_WEIGHTS[$estimulo] ?? [];
+        $suma = 0.0;
+        $total = 0.0;
+        foreach ($pesos as $hz => $peso) {
+            $i = array_search((int) $hz, CaseBuilder::FREQUENCIES, true);
+            if ($i === false) {
+                continue;
+            }
+            $suma += (float) ($aereaLado[$i] ?? 0) * $peso;
+            $total += $peso;
+        }
+        return $total > 0 ? self::db($suma / $total) : '--';
     }
 
     /** Umbral del ABR, o "sin respuesta" cuando no hay. */

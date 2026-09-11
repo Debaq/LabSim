@@ -687,3 +687,22 @@ backend. Pendiente:
 - [ ] La normativa por curso (`AppConfig`, `normative_data.abr`) no se
       consulta: el PDF siempre dibuja con los valores por defecto. Si un
       curso tiene su propia tabla, su ficha debería usarla.
+
+### Los chirp del ABR están mal catalogados
+
+`CaseProfile::STIM_WEIGHTS` y el resto del módulo tratan "CE-Chirp" y
+"LS-Chirp" como dos estímulos de banda ancha, y eso no existe: el CE-chirp
+es de banda ancha y el **NB-chirp es frecuencial** (banda estrecha centrada
+en una frecuencia), que es otra cosa y se lee contra el umbral de ESA
+frecuencia. "LS" es el tipo de chirp (level-specific), no una familia
+aparte: hay CE-chirp LS y NB-chirp LS.
+
+Por eso la columna de umbral conductual de la ficha deja los chirp en `--`:
+poner ahí un promedio de banda ancha sería tapar el error con un número.
+
+- [ ] Decidir el catálogo real de estímulos (click, tone burst por
+      frecuencia, CE-chirp de banda ancha, NB-chirp por frecuencia) y con
+      qué umbral conductual se compara cada uno.
+- [ ] Tocar los dos lados a la vez: `STIM_WEIGHTS` y `STIM_NHL_CORRECTION`
+      en CaseProfile.php, y `STIM_MAP` en src/abr/ABR_generator.py, que son
+      la misma lista escrita dos veces.
