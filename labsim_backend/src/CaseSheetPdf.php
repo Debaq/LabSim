@@ -99,13 +99,25 @@ final class CaseSheetPdf
         // es el paciente y qué cuenta, y recién después qué mide cada
         // prueba.
         $doc->clinica($data);
+
+        $doc->paginaNueva();
         $doc->audiometria($data);
         $doc->acumetria($data);
-        $doc->impedanciometria($data);
-        $doc->logoaudiometria($data);
+        // Las supraliminares van pegadas al tonal: son el mismo audiómetro y
+        // se leen sobre los umbrales de arriba.
         $doc->supraliminares($data);
+        $doc->logoaudiometria($data);
+
+        $doc->paginaNueva();
+        $doc->impedanciometria($data);
+
+        $doc->paginaNueva();
         $doc->abr($data);
+
+        $doc->paginaNueva();
         $doc->eoas($data);
+
+        $doc->paginaNueva();
         $doc->vemp($data);
         return $doc->pdf->output();
     }
@@ -244,7 +256,7 @@ final class CaseSheetPdf
 
     private function audiometria(array $data): void
     {
-        $this->titulo('Audiometría tonal', 250.0);
+        $this->titulo('Audiometría tonal', 200.0);
 
         $aerea = self::desarmar($data['Aerea'] ?? []);
         $osea = self::desarmar($data['Osea'] ?? []);
@@ -256,8 +268,8 @@ final class CaseSheetPdf
             $ldlMedido[$lado] = count(array_filter($ldl[$lado], static fn ($v) => (int) $v !== 130)) > 0;
         }
 
-        $alto = 210.0;
-        $this->espacio($alto + 26);
+        $alto = 168.0;
+        $this->espacio($alto + 24);
         CaseCharts::audiogram($this->pdf, self::MARGEN, $this->y, $this->anchoContenido * 0.62, $alto, $aerea, $osea, $ldl, $ldlMedido);
 
         // Al lado del gráfico, la leyenda de símbolos: un audiograma sin
@@ -337,21 +349,21 @@ final class CaseSheetPdf
         $this->y = $finMax + 4;
 
         $this->parrafo(
-            'Rango de ruido útil con la meseta entre paréntesis; (-) = ese umbral no cruza. '
-            . 'Aérea: mín = UAE - AI - UONE + UANE, máx = UOE + AI. '
-            . 'Ósea: mín = UOE - UONE + UANE + efecto oclusivo, máx = UOE + AI. '
-            . 'Calculado con NBN (CE 0); con otro ruido el mínimo sube.',
-            7
+            'Rango con la meseta entre paréntesis; (-) = ese umbral no cruza. Aérea: mín = UAE - AI - UONE '
+            . '+ UANE, máx = UOE + AI. Ósea: mín = UOE - UONE + UANE + efecto oclusivo, máx = UOE + AI. '
+            . 'Calculado con NBN (CE 0).',
+            6.5
         );
     }
 
     /**
-     * Acumetría, escrita como se escribe a mano.
+     * Acumetría, escrita como se escribe a mano y en dos columnas.
      *
      * Rinne y Weber comparten el mismo eje --OD a la izquierda, la
      * frecuencia al medio, OI a la derecha-- y el mismo estilo de fila. Son
      * dos lecturas del mismo diapasón: ponerle tabla a una y otra cosa a la
-     * otra las hacía parecer exámenes distintos.
+     * otra las hacía parecer exámenes distintos, y apiladas gastaban el doble
+     * de alto para cuatro líneas.
      *
      * El Rinne se anota (+) cuando la aérea supera a la ósea y (-) cuando es
      * al revés; el falso negativo va escrito, porque no es un resultado de
@@ -360,70 +372,79 @@ final class CaseSheetPdf
      */
     private function acumetria(array $data): void
     {
-        $this->titulo('Acumetría (diapasones)', 120.0);
+        $this->titulo('Acumetría (diapasones)', 100.0);
 
-        $xCentro = self::MARGEN + 120.0;
         $gap = 30.0;
+        $xRinne = self::MARGEN + 100.0;
+        $xWeber = self::MARGEN + 300.0;
+        $this->espacio(16 + 12 + 14 * count(CaseBuilder::ACUMETRIA_FREQS));
+        $yBase = $this->y;
 
-        // Encabezado del eje, una sola vez: vale para las dos pruebas.
-        $this->espacio(18);
-        $base = $this->y + self::ASCENDENTE * 7;
-        $this->pdf->textRight($xCentro - $gap, $base, 'OD', 7, true, CaseCharts::COLOR_OD);
-        $this->pdf->textCenter($xCentro, $base, 'Frecuencia', 7, true, self::GRIS_SUAVE);
-        $this->pdf->text($xCentro + $gap, $base, 'OI', 7, true, CaseCharts::COLOR_OI);
-        $this->y += 12;
+        // --- Rinne, a la izquierda ------------------------------------
+        $y = $yBase;
+        $this->pdf->text(self::MARGEN, $y + self::ASCENDENTE * 8.5, 'Rinne', 8.5, true, self::GRIS_TITULO);
+        $y += 14;
+        $base = $y + self::ASCENDENTE * 7;
+        $this->pdf->textRight($xRinne - $gap, $base, 'OD', 7, true, CaseCharts::COLOR_OD);
+        $this->pdf->textCenter($xRinne, $base, 'Frecuencia', 7, true, self::GRIS_SUAVE);
+        $this->pdf->text($xRinne + $gap, $base, 'OI', 7, true, CaseCharts::COLOR_OI);
+        $y += 12;
 
-        $this->subtitulo('Rinne');
         foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $idx) {
-            $this->espacio(16);
-            $base = $this->y + self::ASCENDENTE * 8;
+            $base = $y + self::ASCENDENTE * 8;
             $this->pdf->textRight(
-                $xCentro - $gap,
+                $xRinne - $gap,
                 $base,
                 self::rinne((string) ($data['Rinne'][$hz]['od'] ?? 'positivo')),
                 8,
                 true,
                 CaseCharts::COLOR_OD
             );
-            $this->pdf->textCenter($xCentro, $base, self::hz((int) $hz) . ' Hz', 8, true, self::GRIS_TITULO);
+            $this->pdf->textCenter($xRinne, $base, self::hz((int) $hz) . ' Hz', 8, true, self::GRIS_TITULO);
             $this->pdf->text(
-                $xCentro + $gap,
+                $xRinne + $gap,
                 $base,
                 self::rinne((string) ($data['Rinne'][$hz]['oi'] ?? 'positivo')),
                 8,
                 true,
                 CaseCharts::COLOR_OI
             );
-            $this->y += 14;
+            $y += 14;
         }
+        $finRinne = $y;
 
-        $this->subtitulo('Weber');
+        // --- Weber, a la derecha, con las filas alineadas -------------
+        $y = $yBase;
+        $this->pdf->text($xWeber - 60, $y + self::ASCENDENTE * 8.5, 'Weber', 8.5, true, self::GRIS_TITULO);
+        $y += 26;
+
         foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $idx) {
             $lado = (string) ($data['Weber'][$hz] ?? 'centrado');
-            $this->espacio(16);
-            $base = $this->y + self::ASCENDENTE * 8;
-            $centro = $this->y + 4;
+            $base = $y + self::ASCENDENTE * 8;
+            $centro = $y + 4;
 
             // Las flechas ocupan las mismas columnas que los (+)/(-) del
             // Rinne. Se dibujan: el carácter -> no existe en WinAnsi, que es
             // la codificación del texto del PDF.
             if ($lado === 'od' || $lado === 'centrado') {
-                $this->flecha($xCentro - $gap, $centro, -16.0, $lado === 'od' ? CaseCharts::COLOR_OD : self::GRIS_SUAVE);
+                $this->flecha($xWeber - $gap, $centro, -16.0, $lado === 'od' ? CaseCharts::COLOR_OD : self::GRIS_SUAVE);
             }
             if ($lado === 'oi' || $lado === 'centrado') {
-                $this->flecha($xCentro + $gap, $centro, 16.0, $lado === 'oi' ? CaseCharts::COLOR_OI : self::GRIS_SUAVE);
+                $this->flecha($xWeber + $gap, $centro, 16.0, $lado === 'oi' ? CaseCharts::COLOR_OI : self::GRIS_SUAVE);
             }
-            $this->pdf->textCenter($xCentro, $base, self::hz((int) $hz) . ' Hz', 8, true, self::GRIS_TITULO);
+            $this->pdf->textCenter($xWeber, $base, self::hz((int) $hz) . ' Hz', 8, true, self::GRIS_TITULO);
             $this->pdf->text(
-                $xCentro + 100,
+                $xWeber + 58,
                 $base,
                 CaseBuilder::WEBER_LABELS[$lado] ?? $lado,
-                8,
+                7.5,
                 false,
                 self::GRIS_TEXTO
             );
-            $this->y += 14;
+            $y += 14;
         }
+
+        $this->y = max($finRinne, $y) + 4;
     }
 
     /**
@@ -560,7 +581,7 @@ final class CaseSheetPdf
 
     private function logoaudiometria(array $data): void
     {
-        $this->titulo('Logoaudiometría', 205.0);
+        $this->titulo('Logoaudiometría', 100.0);
 
         $umd = is_array($data['UMD'] ?? null) ? $data['UMD'] : [];
         $sdt = is_array($data['SDT'] ?? null) ? $data['SDT'] : [0, 0];
@@ -578,10 +599,10 @@ final class CaseSheetPdf
             ];
         }
 
-        $alto = 165.0;
-        $this->espacio($alto + 40);
+        $alto = 100.0;
+        $this->espacio($alto + 28);
         CaseCharts::logogram($this->pdf, self::MARGEN, $this->y, $this->anchoContenido * 0.55, $alto, $porLado);
-        CaseCharts::legend($this->pdf, self::MARGEN + 26, $this->y + $alto + 10, 'SRT = vertical punteada, UMD = triángulo');
+        CaseCharts::legend($this->pdf, self::MARGEN + 26, $this->y + $alto + 8, 'SRT = vertical punteada, UMD = triángulo');
 
         $x = self::MARGEN + $this->anchoContenido * 0.6;
         $ancho = $this->anchoContenido * 0.4;
@@ -591,9 +612,9 @@ final class CaseSheetPdf
         $filas[] = ['UMD (%)', self::pct($porLado['od']['umd_pct']), self::pct($porLado['oi']['umd_pct'])];
         $filas[] = ['UMD a (dB)', self::db($porLado['od']['umd_int']), self::db($porLado['oi']['umd_int'])];
         $filas[] = ['Rollover', $porLado['od']['recruit'] ? 'Sí' : 'No', $porLado['oi']['recruit'] ? 'Sí' : 'No'];
-        $yTabla = $this->tablaEn($x, $this->y + 10, $ancho, $filas, [0.4, 0.3, 0.3], true);
+        $yTabla = $this->tablaEn($x, $this->y + 8, $ancho, $filas, [0.4, 0.3, 0.3], true);
 
-        $this->y = max($this->y + $alto + 24, $yTabla + 6);
+        $this->y = max($this->y + $alto + 18, $yTabla + 4);
     }
 
     private function supraliminares(array $data): void
@@ -1346,6 +1367,23 @@ final class CaseSheetPdf
     // Layout
     // -----------------------------------------------------------------
 
+    /**
+     * Arranca una página nueva, salvo que ya estemos al principio de una.
+     *
+     * La ficha tiene una paginación FIJA --generales y anamnesis, tonal,
+     * impedanciometría, ABR, OEA, VEMP-- para que cada examen se pueda
+     * imprimir, repartir o archivar suelto sin partirlo al medio.
+     */
+    private function paginaNueva(): void
+    {
+        if ($this->y <= self::MARGEN + 1) {
+            return;
+        }
+        $this->pdf->addPage();
+        $this->y = self::MARGEN;
+        $this->pdf->text(self::MARGEN, $this->y - 12, $this->encabezadoCorrido, 7, false, self::GRIS_SUAVE);
+    }
+
     /** Corta la página si lo que viene no entra. */
     private function espacio(float $necesario): void
     {
@@ -1366,19 +1404,19 @@ final class CaseSheetPdf
     private function titulo(string $texto, float $reserva = 60.0): void
     {
         $this->espacio($reserva + 30);
-        $this->y += 8;
-        $this->pdf->rectFilled(self::MARGEN, $this->y, $this->anchoContenido, 15, self::FONDO_CABECERA);
-        $this->pdf->text(self::MARGEN + 5, $this->y + 11, $texto, 10.5, true, self::GRIS_TITULO);
-        $this->y += 21;
+        $this->y += 6;
+        $this->pdf->rectFilled(self::MARGEN, $this->y, $this->anchoContenido, 14, self::FONDO_CABECERA);
+        $this->pdf->text(self::MARGEN + 5, $this->y + 10.5, $texto, 10.5, true, self::GRIS_TITULO);
+        $this->y += 18;
     }
 
     private function subtitulo(string $texto): void
     {
         // Reserva el subtítulo Y su primer párrafo, por el mismo motivo.
         $this->espacio(44);
-        $this->y += 4;
+        $this->y += 3;
         $this->pdf->text(self::MARGEN, $this->y + self::ASCENDENTE * 8.5, $texto, 8.5, true, self::GRIS_TITULO);
-        $this->y += 13;
+        $this->y += 12;
     }
 
     private function parrafo(string $texto, float $size = 8, ?float $ancho = null): void

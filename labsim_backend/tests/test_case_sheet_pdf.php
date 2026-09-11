@@ -73,8 +73,10 @@ $pdfDemo = CaseSheetPdf::build('CASO-TEST', ficha_caso_demo(), ['nombre' => 'Ana
 
 t_true(strpos($pdfDemo, '%PDF-1.4') === 0, 'La ficha sale como un PDF');
 t_true(substr(trim($pdfDemo), -5) === '%%EOF', 'El PDF cierra con %%EOF');
-t_true(substr_count($pdfDemo, '/Type /Page ') >= 3,
-    'La ficha completa no cabe en dos páginas: el documento se pagina solo');
+// Paginación fija: un examen por página, para poder imprimir o archivar
+// cualquiera de ellos suelto sin partirlo al medio.
+t_eq(substr_count($pdfDemo, '/Type /Page '), 6,
+    'La ficha son seis páginas: generales+anamnesis, tonal, impedanciometría, ABR, OEA y VEMP');
 t_true(strlen($pdfDemo) > 20000, 'El PDF trae contenido, no una página en blanco');
 
 // Ninguna sección puede faltar: el texto va en WinAnsi sin comprimir, así
