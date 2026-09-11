@@ -860,11 +860,29 @@ Los tres rangos viven en tres copias (`FORMAS_JERGER` en
 compara las tres --antes sólo comparaba PHP contra JS, que era por donde se
 había colado el desfase.
 
-- [ ] La gradiente del equipo sigue dando **0,85 en cualquier curva con
-      pico**: `Z_225.curve_z` usa `pmax=200` fijo, así que toda curva mide
-      400 daPa de base (TW ≈ 200 daPa, contra 50-110 daPa de un adulto
-      normal) y la lectura a ±50 daPa no depende de la letra. Para que el
-      número informe algo hay que hacer el ancho función de la letra, como
-      ya lo hace la curva impresa (`ANCHOS_TIMPANOGRAMA`). Ojo que además
-      el sentido está invertido respecto de la gradiente clásica (acá 1 es
-      curva ancha).
+La gradiente fija se arregló el mismo día: el ancho de la curva pasó a ser
+función de la letra (`ANCHOS_JERGER`, en TW = ancho a media altura), en vez
+de los 200 daPa fijos que daban 0,85 en cualquier curva con pico. Queda
+A/As 80 daPa (la rigidez baja el pico, no lo angosta), Ad 60 (disyunción:
+pico alto y en punta), C 100 y Cs 160 (la redondeada de la retracción con
+efusión incipiente). El ancho es fijo por letra y no sorteado a propósito:
+la ficha anticipa la gradiente que el alumno va a leer, y eso sólo se puede
+prometer si no cambia entre barridos. Ahora el equipo informa 0,31 / 0,31 /
+0,07 / 0,50 / 0,78.
+
+El ancho viaja en el dataset (índice 6) porque al recargar una curva
+guardada `Z.preCharger` la reconstruye con `manual=True` y ahí ya no hay
+letra de dónde sacarlo.
+
+Y la curva impresa de la ficha dejó de tener su propio ancho: se deriva del
+mismo TW con `w = TW / (2 ln 2)` (`CaseCharts::anchoImpreso`). La forma
+sigue siendo distinta a propósito --ápice en punta contra coseno alzado--
+pero el ancho es un hallazgo y tiene que ser el mismo en la ficha y en la
+pantalla. Por eso siguen siendo dos gradientes y dos filas.
+
+- [ ] El sentido de la gradiente está invertido respecto de la clásica: acá
+      1 es una curva ancha y 0 una en punta, y la de Brooks es al revés
+      (`1 - esto`). No se tocó porque cambia lo que el alumno lee y la
+      convención la define el docente, pero dar vuelta la resta en
+      `Z_225._calc_gradient`, `Z.move` y `CaseCharts::gradienteDe` es todo
+      lo que hace falta.

@@ -202,6 +202,14 @@ class ZControl(QWidget, Ui_Z_control):
 
         else:
             val = self.store_data[side].get(0)
+            # El ancho de la curva es el que se guardó con ella: depende de la
+            # letra de Jerger y acá ya no hay letra de la que sacarlo. Una
+            # curva vieja, guardada antes de que el ancho viajara en el
+            # dataset, se redibuja con el ancho por defecto.
+            try:
+                pmax = float(val[6])
+            except (IndexError, ValueError, TypeError):
+                pmax = 200
             try:
                 c = float(val[2])
                 p = int(val[3])
@@ -210,7 +218,7 @@ class ZControl(QWidget, Ui_Z_control):
                 c = val[2]
                 p = val[3]
                 vol = val[5]
-            result = Z_225(manual=True, c=c, p=p, vol=vol, win_neg=win_neg, win_pos=win_pos).getDataSet()
+            result = Z_225(manual=True, c=c, p=p, vol=vol, pmax=pmax, win_neg=win_neg, win_pos=win_pos).getDataSet()
             self.store_data[side].set(0, result)
             self.new[side] = False
 

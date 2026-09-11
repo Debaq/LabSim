@@ -23,8 +23,13 @@ window.drawTympanogram = (function () {
         Cs: [0.1, 0.3, -250, -110],
         B: [0.0, 0.003, -100, 20]
     };
-    // Ancho de la curva impresa (daPa), espejo de CaseCharts::ANCHOS_TIMPANOGRAMA.
-    var WIDTHS = { A: 60, As: 50, Ad: 70, C: 70, Cs: 60, B: 400 };
+    // Ancho de la curva por letra (TW, ancho a media altura en daPa), espejo
+    // de CaseCharts::ANCHOS_APP_TIMPANOGRAMA y de ANCHOS_JERGER en la app.
+    var TW = { A: 80, As: 80, Ad: 60, C: 100, Cs: 160, B: 400 };
+    // La curva impresa cae como exp(-|d| / w) y ahí la media altura está en
+    // w * ln 2, así que w = TW / (2 ln 2) la deja tan ancha como la del
+    // equipo (CaseCharts::anchoImpreso).
+    function anchoImpreso(type) { return (TW[type] || TW.A) / (2 * Math.LN2); }
     var MAX_ML = 2;            // tope del eje, CaseCharts::ESCALA_TIMPANOGRAMA_ML
     var GRADIENT_DELTA = 50;   // la gradiente se lee a +-50 daPa del pico
     var GRADIENT_COLOR = '#b08900';
@@ -35,7 +40,7 @@ window.drawTympanogram = (function () {
         return {
             c: Math.round((s[0] + s[1]) / 2 * 100) / 100,
             p: Math.round((s[2] + s[3]) / 2),
-            width: WIDTHS[type] || WIDTHS.A
+            width: anchoImpreso(type)
         };
     }
 

@@ -141,11 +141,25 @@ final class CaseCharts
     ];
 
     /**
-     * Semiancho de la curva (daPa): el barrido sube desde la línea base en
-     * p-200 y vuelve a ella en p+200. Es `pressure_max` de Z_225 y es fijo,
-     * así que TODAS las curvas de la app tienen el mismo ancho.
+     * Ancho de la curva del EQUIPO por letra, en daPa: el barrido sube desde
+     * la línea base en `pico - ancho` y vuelve a ella en `pico + ancho`. Es
+     * `pressure_max` de Z_225 y, en un coseno alzado, coincide con el TW
+     * (ancho a media altura), porque la media altura cae justo a la mitad de
+     * cada tramo.
+     *
+     * Espejo de ANCHOS_JERGER en src/impedanciometria/z_generator.py. Era
+     * 200 daPa para todas las letras, y como la gradiente se lee a ±50 daPa
+     * del pico, el equipo informaba 0,85 en cualquier curva con pico. Un
+     * adulto normal tiene TW de 50 a 110 daPa.
      */
-    public const PRESION_MAX_TIMPANOGRAMA = 200.0;
+    public const ANCHOS_APP_TIMPANOGRAMA = [
+        'A'  => 80.0,
+        'As' => 80.0,
+        'Ad' => 60.0,
+        'C'  => 100.0,
+        'Cs' => 160.0,
+        'B'  => 400.0,
+    ];
 
     /** Puntos por tramo (subida y bajada), `num_pts` de Z_225. */
     public const PUNTOS_TIMPANOGRAMA = 20;
@@ -157,19 +171,22 @@ final class CaseCharts
     public const GRADIENTE_DELTA_DAPA = 50.0;
 
     /**
-     * Ancho de la curva impresa, en daPa (constante de caída de la
-     * exponencial). No sale de la app --ahí el ancho es fijo-- sino de cómo
-     * se imprime un timpanograma: el ápice va en punta y el ancho es parte
-     * del hallazgo, un As rígido abre más que un Ad.
+     * Constante de caída de la curva IMPRESA (la exponencial del ápice en
+     * punta), derivada del ancho de la letra: en `exp(-|d| / w)` la media
+     * altura cae en `w * ln 2`, así que `w = TW / (2 ln 2)` deja la curva
+     * impresa tan ancha como la que el alumno ve en el equipo.
+     *
+     * Se deriva y no se escribe a mano para que no haya dos anchos para la
+     * misma letra: la forma es distinta a propósito --punta contra coseno
+     * alzado, ver tympanogramPoints()-- pero el ancho es el hallazgo y tiene
+     * que ser el mismo en la ficha y en la pantalla.
      */
-    public const ANCHOS_TIMPANOGRAMA = [
-        'A'  => 60.0,
-        'As' => 50.0,
-        'Ad' => 70.0,
-        'C'  => 70.0,
-        'Cs' => 60.0,
-        'B'  => 400.0,
-    ];
+    public static function anchoImpreso(string $tipo): float
+    {
+        $tw = self::ANCHOS_APP_TIMPANOGRAMA[$tipo] ?? self::ANCHOS_APP_TIMPANOGRAMA['A'];
+
+        return $tw / (2 * M_LN2);
+    }
 
     /** Amarillo de la ventana de gradiente, el mismo que usa el equipo. */
     public const COLOR_GRADIENTE = '#b08900';
@@ -476,8 +493,8 @@ final class CaseCharts
      * gráfico de al lado.
      *
      * `estatica` es la compliance compensada (pico menos línea base), que es
-     * la que se informa; `ancho` es el ancho a media altura (TW), que en una
-     * caída exponencial vale 2 * w * ln 2.
+     * la que se informa; `ancho_dapa` es el ancho a media altura (TW) de la
+     * letra, el mismo en la curva impresa y en la del equipo.
      *
      * @return array{pico_dapa:float,maxima:float,estatica:float,ancho_dapa:float,plana:bool}
      */
@@ -497,11 +514,11 @@ final class CaseCharts
             'p_max' => $pMax,
             'pico_dapa' => $pico,
             'estatica' => $estatica,
-            'ancho_dapa' => self::ANCHOS_TIMPANOGRAMA[$tipo] ?? self::ANCHOS_TIMPANOGRAMA['A'],
+            'ancho_dapa' => self::ANCHOS_APP_TIMPANOGRAMA[$tipo] ?? self::ANCHOS_APP_TIMPANOGRAMA['A'],
             // Dos gradientes, porque son dos curvas: la impresa acá arriba y
             // la que genera el equipo. Ver gradienteTimpanograma().
             'gradiente' => self::gradienteDe(self::tympanogramPoints($tipo), $estatica, $pico),
-            'gradiente_equipo' => self::gradienteTimpanograma($estatica, $pico),
+            'gradiente_equipo' => self::gradienteTimpanograma($estatica, $pico, self::ANCHOS_APP_TIMPANOGRAMA[$tipo] ?? self::ANCHOS_APP_TIMPANOGRAMA['A']),
             // Sin pico no hay presión que informar: el tipo B es plano por
             // definición y su "pico" sería el primer punto del barrido.
             'plana' => $estatica <= 0.0,
@@ -514,13 +531,14 @@ final class CaseCharts
      * src/impedanciometria/Z.py). Ojo con el sentido: acá 1 es una curva
      * ancha y 0 una en punta, al revés de la gradiente clásica.
      *
-     * Esta versión la mide sobre la curva que genera la app --la de ancho
-     * fijo-- así que es el número que va a leer el alumno en la pantalla del
-     * equipo, no el que se lee en la curva impresa de la ficha.
+     * Esta versión la mide sobre la curva que genera la app, así que es el
+     * número que va a leer el alumno en la pantalla del equipo, no el que se
+     * lee en la curva impresa de la ficha: la forma es otra (coseno alzado
+     * contra ápice en punta) aunque el ancho sea el mismo.
      */
-    public static function gradienteTimpanograma(float $compliance, float $pico): float
+    public static function gradienteTimpanograma(float $compliance, float $pico, float $ancho): float
     {
-        return self::gradienteDe(self::curvaTimpanograma($compliance, $pico), $compliance, $pico);
+        return self::gradienteDe(self::curvaTimpanograma($compliance, $pico, $ancho), $compliance, $pico);
     }
 
     /** La misma cuenta, sobre los puntos que se le pasen. */
@@ -570,9 +588,9 @@ final class CaseCharts
      *
      * @return array<int,array{0:float,1:float}> pares [presión, compliance]
      */
-    public static function curvaTimpanograma(float $compliance, float $pico): array
+    public static function curvaTimpanograma(float $compliance, float $pico, float $ancho): array
     {
-        $pmax = self::PRESION_MAX_TIMPANOGRAMA;
+        $pmax = $ancho;
         $n = self::PUNTOS_TIMPANOGRAMA;
         $pts = [];
         for ($i = 0; $i < $n; $i++) {
@@ -598,7 +616,7 @@ final class CaseCharts
         [$cMin, $cMax, $pMin, $pMax] = $forma;
         $altura = round(($cMin + $cMax) / 2, 2);
         $pico = round(($pMin + $pMax) / 2);
-        $ancho = self::ANCHOS_TIMPANOGRAMA[$tipo] ?? self::ANCHOS_TIMPANOGRAMA['A'];
+        $ancho = self::anchoImpreso($tipo);
 
         // Exponencial de |distancia| y no una gaussiana ni el coseno alzado
         // de la app: el timpanograma impreso tiene el ápice EN PUNTA, y es

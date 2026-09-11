@@ -120,9 +120,16 @@ foreach (CaseCharts::FORMAS_TIMPANOGRAMA as $tipo => $forma) {
 $rangoPresion = js_numeros($tympJs, '/p = Math\.max\((-?\d+), Math\.min\((\d+), p\)\)/', 'el rango de presión');
 t_eq($rangoPresion, [-400.0, 200.0], 'El timpanograma va de -400 a 200 daPa en los dos lados');
 
-$anchosJs = js_numeros($tympJs, '/WIDTHS = \{([^}]*)\}/', 'los anchos de curva');
-t_eq($anchosJs, array_values(array_map('floatval', CaseCharts::ANCHOS_TIMPANOGRAMA)),
+$anchosJs = js_numeros($tympJs, '/TW = \{([^}]*)\}/', 'los anchos de curva');
+t_eq($anchosJs, array_values(array_map('floatval', CaseCharts::ANCHOS_APP_TIMPANOGRAMA)),
     'El editor y la ficha abren la curva lo mismo en cada tipo');
+t_true(preg_match('/\(TW\[type\] \|\| TW\.A\) \/ \(2 \* Math\.LN2\)/', $tympJs) === 1,
+    'El editor deriva el ancho impreso del TW con la misma cuenta que el PHP');
+foreach (array_keys(CaseCharts::ANCHOS_APP_TIMPANOGRAMA) as $tipo) {
+    t_close(CaseCharts::anchoImpreso($tipo),
+        CaseCharts::ANCHOS_APP_TIMPANOGRAMA[$tipo] / (2 * M_LN2), 0.001,
+        "Timpanograma {$tipo}: la curva impresa se abre tanto como la del equipo");
+}
 
 t_eq(js_numeros($tympJs, '/MAX_ML = (\d+(?:\.\d+)?)/', 'el tope del eje de mL'),
     [(float) CaseCharts::ESCALA_TIMPANOGRAMA_ML],
@@ -164,6 +171,19 @@ if (!is_string($genPy) || $genPy === '') {
         preg_match_all('/-?\d+(?:\.\d+)?/', $m[1], $nums);
         t_eq(array_map('floatval', $nums[0]), array_map('floatval', $forma),
             "Timpanograma {$tipo}: la ficha informa el rango que sortea la app");
+    }
+
+    // Y el ancho, que es lo que decide la gradiente que va a leer el alumno.
+    $bloqueAnchos = preg_match('/ANCHOS_JERGER = \{([^}]*)\}/', $genPy, $m) === 1 ? $m[1] : '';
+    t_true($bloqueAnchos !== '', 'La app define ANCHOS_JERGER');
+    foreach (CaseCharts::ANCHOS_APP_TIMPANOGRAMA as $tipo => $ancho) {
+        $patron = "/'" . preg_quote($tipo, '/') . "':\s*(\d+(?:\.\d+)?)/";
+        if (preg_match($patron, $bloqueAnchos, $m) !== 1) {
+            t_true(false, "ANCHOS_JERGER trae el tipo {$tipo}");
+            continue;
+        }
+        t_eq((float) $m[1], (float) $ancho,
+            "Timpanograma {$tipo}: la curva de la app se abre lo que dice la ficha");
     }
 }
 

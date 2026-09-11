@@ -260,25 +260,45 @@ t_true($pendienteJuntoAlPico > $pendienteLejos,
 t_eq(CaseCharts::ESCALA_TIMPANOGRAMA_ML, 2.0, 'El timpanograma se dibuja siempre de 0 a 2 mL');
 
 // Dos gradientes, y las dos con la cuenta del equipo (Z.move): altura a +-50
-// daPa del pico sobre la altura del pico, entre 0 y 1.
-//  - 'gradiente' sale de la curva IMPRESA, así que distingue los tipos.
-//  - 'gradiente_equipo' sale de la curva de la app, que tiene ancho fijo, y
-//    por eso da 0,85 en cualquier curva con pico. Es la que va a leer el
-//    alumno en pantalla y la ficha tiene que anticiparla tal cual.
+// daPa del pico sobre la altura del pico, entre 0 y 1. Ojo con el sentido:
+// 1 es una curva ANCHA y 0 una en punta, al revés de la gradiente clásica.
+//  - 'gradiente' sale de la curva IMPRESA (ápice en punta).
+//  - 'gradiente_equipo' sale de la curva de la app (coseno alzado). Es la
+//    que va a leer el alumno en pantalla y la ficha tiene que anticiparla.
+// Las dos tienen que DISTINGUIR las letras: mientras el ancho de la app fue
+// fijo, la del equipo daba 0,85 en cualquier curva con pico y no informaba
+// nada.
 foreach (CaseBuilder::Z_OPTIONS as $tipo) {
     $v = CaseCharts::valoresTimpanograma($tipo);
     foreach (['gradiente', 'gradiente_equipo'] as $clave) {
         t_true($v[$clave] >= 0.0 && $v[$clave] <= 1.0,
             "Timpanograma {$tipo}: la {$clave} queda entre 0 y 1");
     }
-    if (!$v['plana']) {
-        t_close($v['gradiente_equipo'], 0.85, 0.02,
-            "Timpanograma {$tipo}: la gradiente del equipo es la que calcula Z.move");
-    }
 }
-t_eq(CaseCharts::gradienteTimpanograma(0.0, 0.0), 0.0, 'Sin compliance no hay gradiente que calcular');
-t_true(CaseCharts::valoresTimpanograma('As')['gradiente'] < CaseCharts::valoresTimpanograma('Ad')['gradiente'],
-    'En la curva impresa la gradiente sí distingue: un Ad abre más que un As');
+$conPico = array_values(array_filter(CaseBuilder::Z_OPTIONS, static function (string $tipo): bool {
+    return !CaseCharts::valoresTimpanograma($tipo)['plana'];
+}));
+foreach (['gradiente', 'gradiente_equipo'] as $clave) {
+    $valores = [];
+    foreach ($conPico as $tipo) {
+        $valores[] = CaseCharts::valoresTimpanograma($tipo)[$clave];
+    }
+    t_true(count(array_unique($valores)) > 1,
+        "La {$clave} no es el mismo número en todas las letras");
+    // Cs es la redondeada --retracción con efusión incipiente-- y Ad la más
+    // en punta: es el orden que tiene que salir de la cuenta, sin listarlo.
+    t_true(CaseCharts::valoresTimpanograma('Cs')[$clave] > CaseCharts::valoresTimpanograma('A')[$clave],
+        "Timpanograma Cs: la {$clave} delata una curva más redondeada que la A");
+    t_true(CaseCharts::valoresTimpanograma('Ad')[$clave] < CaseCharts::valoresTimpanograma('A')[$clave],
+        "Timpanograma Ad: la {$clave} delata una curva más en punta que la A");
+}
+t_eq(CaseCharts::gradienteTimpanograma(0.0, 0.0, 80.0), 0.0, 'Sin compliance no hay gradiente que calcular');
+// Un TW de adulto normal (50 a 110 daPa) para las curvas con pico normal:
+// con los 200 daPa fijos de antes ninguna caía en ese rango.
+foreach (['A', 'As', 'Ad'] as $tipo) {
+    $tw = CaseCharts::ANCHOS_APP_TIMPANOGRAMA[$tipo];
+    t_true($tw >= 50.0 && $tw <= 110.0, "Timpanograma {$tipo}: el ancho es el de un adulto (TW 50-110 daPa)");
+}
 
 // Logoaudiograma: con reclutamiento la curva CAE pasada la UMD (rollover),
 // y sin él se queda en meseta. Es el hallazgo que el gráfico tiene que

@@ -47,6 +47,33 @@ def map_letter_for_probe(letter, probe_freq, seed_key=None):
 #    curva que el equipo pueda mostrar (el eje abre en 2 cc).
 #  - El pico de C/Cs llega hasta -250 daPa, no hasta -400: -400 es el borde
 #    mismo de la ventana de barrido y ahí no queda pico que leer.
+# Ancho de la curva, en daPa: es el TW (ancho a media altura) y también el
+# semiancho del coseno alzado, porque en esa forma la media altura cae justo
+# a pmax/2 de cada lado del pico.
+#
+# Antes era 200 daPa para TODAS las letras, y como la gradiente se lee a ±50
+# daPa del pico, el equipo informaba 0,85 en cualquier curva con pico: un
+# número que no decía nada. Un adulto normal tiene TW de 50 a 110 daPa.
+#
+# El ancho es fijo por letra y no sorteado a propósito: la ficha del caso
+# anticipa la gradiente que el alumno va a leer en pantalla, y eso sólo se
+# puede prometer si el ancho no cambia entre un barrido y otro.
+#  - A y As comparten ancho: la rigidez baja la altura del pico, no lo
+#    angosta (una otoesclerosis tiene TW normal).
+#  - Ad es la más en punta: la disyunción osicular da pico alto y angosto.
+#  - C abre un poco y Cs bastante: la curva redondeada de la retracción con
+#    efusión incipiente es el hallazgo clásico de gradiente baja.
+#  - B no tiene pico, así que su ancho no se lee; queda plana igual.
+ANCHOS_JERGER = {
+    'A': 80,
+    'As': 80,
+    'Ad': 60,
+    'C': 100,
+    'Cs': 160,
+    'B': 400,
+}
+
+
 FORMAS_JERGER = {
     'A':  (0.3, 1.6, -100, 20),
     'As': (0.1, 0.3, -100, 20),
@@ -105,6 +132,7 @@ class Z_225():
             c_min, c_max, p_min, p_max = FORMAS_JERGER.get(letter, FORMAS_JERGER['A'])
             c = rng.uniform(c_min, c_max)
             p = rng.randint(int(p_min), int(p_max))
+            self.input[5] = ANCHOS_JERGER.get(letter, ANCHOS_JERGER['A'])
 
         if letter != 'N' and self.seed_key is not None:
             # jitter mínimo encima del valor estable del paciente -- no
@@ -187,7 +215,10 @@ class Z_225():
         vol = str(self.volume)
         self.x = self.x.tolist()
         self.y = self.y.tolist()
-        dataset = [self.x[::-1], self.y[::-1], c, p, g, vol]
+        # El ancho viaja en el dataset porque al recargar la curva guardada
+        # (Z.preCharger con manual=True) ya no hay letra de la que sacarlo, y
+        # sin él la curva se redibujaría con el ancho por defecto.
+        dataset = [self.x[::-1], self.y[::-1], c, p, g, vol, self.pressure_max]
         return dataset
 
 
