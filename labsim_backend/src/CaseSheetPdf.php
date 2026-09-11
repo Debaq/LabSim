@@ -229,8 +229,7 @@ final class CaseSheetPdf
             }
         }
         $this->parrafo(
-            'Los promedios van al paso de 5 dB, que es el mínimo que mueve un audiómetro, y el grado se lee '
-            . 'sobre ese valor. Módulos derivados del perfil: '
+            'Módulos derivados del perfil: '
             . ($autos === [] ? 'ninguno (todo cargado a mano)' : implode(', ', $autos)) . '.',
             7.5
         );
