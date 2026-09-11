@@ -364,18 +364,43 @@ $esperado = [
     'otitis_media' => 'transmission', 'otoesclerosis' => 'transmission',
     'disyuncion_cadena' => 'transmission', 'fractura_cadena' => 'transmission',
     'fractura_longitudinal' => 'transmission', 'perforacion' => 'transmission', 'disfuncion_tubaria' => 'transmission',
-    'tapon_cerumen' => 'transmission',
+    'tapon_cerumen' => 'transmission', 'cuerpo_extrano_cae' => 'transmission',
+    'otitis_externa' => 'transmission', 'estenosis_atresia_cae' => 'transmission',
+    'timpanoesclerosis' => 'transmission', 'otitis_media_aguda' => 'transmission',
+    'colesteatoma' => 'transmission', 'fijacion_congenita_estribo' => 'transmission',
+    'barotrauma' => 'transmission', 'glomus_timpanico' => 'transmission',
     // Sensoriales: coclear puro.
     'presbiacusia' => 'coclear', 'muesca_4k' => 'coclear', 'coclear_plana' => 'coclear',
     'meniere' => 'coclear', 'subita' => 'coclear',
     'fractura_transversal' => 'coclear', 'ototoxica' => 'coclear',
-    // Neurales: la cóclea viva y el ABR desarmado.
-    'schwannoma' => 'neural', 'neuropatia' => 'neural',
+    'nihl_cronica' => 'coclear', 'trauma_acustico_agudo' => 'coclear',
+    'salicilatos' => 'coclear', 'laberintitis' => 'coclear',
+    'osificacion_coclear' => 'coclear', 'conmocion_laberintica' => 'coclear',
+    'hidrops_retardado' => 'coclear', 'autoinmune' => 'coclear',
+    'parotiditis' => 'coclear', 'metabolica' => 'coclear',
+    // Genéticas y congénitas: la forma cambia, el sitio de la lesión no.
+    'gjb2' => 'coclear', 'usher' => 'coclear', 'waardenburg' => 'coclear',
+    'alport' => 'coclear', 'jervell_lange_nielsen' => 'coclear', 'stickler' => 'coclear',
+    'cmv_congenito' => 'coclear', 'rubeola_congenita' => 'coclear',
+    // Neurales: la cóclea viva y el ABR desarmado. Varios de estos traen el
+    // audiograma casi normal y aun así NO clasifican normal: el patrón
+    // retrococlear activo manda sobre el promedio tonal.
+    'schwannoma' => 'neural', 'neuropatia' => 'neural', 'kernicterus' => 'neural',
+    'nf2' => 'neural', 'tumor_angulo' => 'neural', 'compresion_microvascular' => 'neural',
+    'esclerosis_multiple' => 'neural', 'infarto_pontino' => 'neural',
+    'glioma_tronco' => 'neural', 'siderosis' => 'neural', 'chiari_hic' => 'neural',
+    'leucodistrofia' => 'neural', 'neuropatia_hereditaria' => 'neural',
+    'tec_tronco' => 'neural', 'toxico_metabolico' => 'neural',
+    'hipotermia_farmacos' => 'neural', 'prematuro' => 'neural',
+    'bloqueo_proximal' => 'neural',
     // Los dos componentes a la vez: con cce en el medio pesa el retro, que es
     // lo que el generador de curvas tiene que dibujar.
     'sensorioneural' => 'neural',
     // Mixtas: el gap sigue mandando sobre el tipo que ve el generador.
     'mixta_otitis_cronica' => 'transmission', 'mixta_otoesclerosis' => 'transmission',
+    'colesteatoma_fistula' => 'transmission', 'oido_operado' => 'transmission',
+    'paget' => 'transmission', 'carcinoma_cae' => 'transmission',
+    'trauma_craneal_completo' => 'transmission', 'post_radioterapia' => 'transmission',
 ];
 t_eq(array_keys($esperado), array_keys(CaseProfile::SCENARIOS),
     'La tabla de clasificación esperada cubre todos los cuadros del catálogo');
@@ -800,8 +825,8 @@ t_eq(CaseProfile::SCENARIOS['normal']['grados'], [],
 
 // Techos que son decisiones clínicas, no accidentes de la forma: si alguien
 // sube el gap de la conductiva, este test avisa antes que el aula.
-foreach (['otitis_media', 'otoesclerosis', 'disyuncion_cadena', 'fractura_cadena',
-          'fractura_longitudinal', 'perforacion', 'disfuncion_tubaria', 'tapon_cerumen'] as $cond) {
+foreach (array_keys(array_filter(CaseProfile::SCENARIOS,
+         fn ($e) => $e['categoria'] === 'conductiva')) as $cond) {
     t_true(isset(CaseProfile::SCENARIOS[$cond]['max_db']),
            "Conductiva '{$cond}': declara techo (la vía ósea le pone límite al gap)");
     t_true(!in_array('severa', CaseProfile::SCENARIOS[$cond]['grados'], true)
@@ -921,6 +946,12 @@ foreach (CaseProfile::SCENARIOS as $escKey => $esc) {
         }
         t_true($tinCfg['permanente'] >= 0 && $tinCfg['permanente'] <= 1,
             "Cuadro {$escKey}: la probabilidad de permanente es una probabilidad");
+        // Pulsátil es opcional y solo lo declara el cuadro que lo explica
+        // (una masa vascular): sin la clave el generador lo deja apagado.
+        if (isset($tinCfg['pulsatil'])) {
+            t_true($tinCfg['pulsatil'] > 0 && $tinCfg['pulsatil'] <= 1,
+                "Cuadro {$escKey}: la probabilidad de pulsátil es una probabilidad");
+        }
     }
     if (isset($esc['conciencia'])) {
         $conc = $esc['conciencia'];
@@ -928,6 +959,13 @@ foreach (CaseProfile::SCENARIOS as $escKey => $esc) {
             "Cuadro {$escKey}: el rango de conciencia va de menor a mayor dentro de 0-100");
     }
 }
+
+// El acúfeno pulsátil no se sortea en cualquier cuadro: es el hallazgo de
+// una masa vascular, y repartirlo le sacaría el valor que tiene.
+$conPulsatil = array_keys(array_filter(CaseProfile::SCENARIOS,
+    fn ($e) => isset($e['tinnitus']['pulsatil'])));
+t_eq($conPulsatil, ['glomus_timpanico'],
+    'Solo el glomus declara acúfeno pulsátil');
 
 // Ningún cuadro puede prometer acúfeno siempre: dos casos del mismo cuadro
 // tienen que poder salir uno con y otro sin, o el alumno memoriza la

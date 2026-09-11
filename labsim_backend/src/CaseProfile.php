@@ -553,6 +553,171 @@ final class CaseProfile
             'conciencia' => [70, 95],
         ],
 
+        'cuerpo_extrano_cae' => [
+            'label' => 'Cuerpo extraño en CAE',
+            'categoria' => 'conductiva',
+            'sn_shape' => [125 => 3, 250 => 3, 500 => 5, 1000 => 5, 2000 => 5, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
+            'sn_scale' => [0.0, 1.0],
+            // Gap PLANO: un objeto que ocluye el conducto atenúa parejo, a
+            // diferencia de la efusión o la perforación, que pierden sobre
+            // todo los graves. El oído medio está sano y la curva es A: eso
+            // es lo que separa este cuadro de una otitis.
+            'gap_shape' => [125 => 28, 250 => 28, 500 => 28, 1000 => 28, 2000 => 28, 3000 => 28, 4000 => 28, 6000 => 30, 8000 => 30],
+            'gap_scale' => [0.3, 1.1],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve'], 'max_db' => 35, 'gap_max_db' => 35,
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            // Se instaló de golpe (o el paciente se lo metió): lo nota.
+            'conciencia' => [85, 100],
+        ],
+        'otitis_externa' => [
+            'label' => 'Otitis externa difusa',
+            'categoria' => 'conductiva',
+            'sn_shape' => [125 => 3, 250 => 3, 500 => 5, 1000 => 5, 2000 => 6, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
+            'sn_scale' => [0.0, 1.0],
+            // El edema del conducto estrecha la luz sin tocar el oído medio:
+            // gap chico y parejo con curva A. La otoscopia y el dolor a la
+            // tracción del pabellón no salen del cuadro, se cargan aparte.
+            'gap_shape' => [125 => 26, 250 => 26, 500 => 25, 1000 => 24, 2000 => 22, 3000 => 22, 4000 => 22, 6000 => 24, 8000 => 24],
+            'gap_scale' => [0.4, 1.1],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve'], 'max_db' => 35, 'gap_max_db' => 32,
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'conciencia' => [80, 100],
+        ],
+        'estenosis_atresia_cae' => [
+            'label' => 'Estenosis / atresia congénita de CAE',
+            'categoria' => 'conductiva',
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 8, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
+            'sn_scale' => [0.0, 1.2],
+            // Gap grande y PLANO de toda la vida, y SIN muesca de Carhart:
+            // el estribo se mueve, lo que falta es el conducto. Esa planitud
+            // sin muesca es lo que lo separa de la otoesclerosis, que llega
+            // al mismo gap por otro camino.
+            'gap_shape' => [125 => 50, 250 => 52, 500 => 54, 1000 => 54, 2000 => 52, 3000 => 50, 4000 => 50, 6000 => 50, 8000 => 50],
+            'gap_scale' => [0.6, 1.0],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            // El timpanograma de verdad es NO REGISTRABLE --no hay dónde
+            // sellar la sonda--, y eso no existe en Z_OPTIONS. 'B' es lo
+            // menos falso que se puede escribir hoy: plano, sin pico. Ver
+            // TODO.md, "Timpanograma no registrable".
+            'z' => ['B'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'], 'max_db' => 60, 'gap_max_db' => 60,
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            // Nació así: no tiene con qué comparar, y ese es el punto.
+            'conciencia' => [15, 45],
+        ],
+        'timpanoesclerosis' => [
+            'label' => 'Timpanoesclerosis / miringoesclerosis',
+            'categoria' => 'conductiva',
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 8, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
+            'sn_scale' => [0.0, 1.2],
+            // Rigidez, no masa: el gap crece hacia los AGUDOS, al revés que
+            // la efusión. Con la curva As, ese sentido de la pendiente es
+            // todo el hallazgo.
+            'gap_shape' => [125 => 18, 250 => 18, 500 => 20, 1000 => 22, 2000 => 25, 3000 => 26, 4000 => 26, 6000 => 26, 8000 => 26],
+            'gap_scale' => [0.4, 1.1],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['As'], 'etf' => 'Normal',
+            'grados' => ['leve'], 'max_db' => 35, 'gap_max_db' => 32,
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'conciencia' => [40, 75],
+        ],
+        'otitis_media_aguda' => [
+            'label' => 'Otitis media aguda',
+            'categoria' => 'conductiva',
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 8, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
+            'sn_scale' => [0.0, 1.2],
+            // Misma curva que la efusión: lo que separa la aguda de la
+            // 'otitis_media' con efusión es la HISTORIA (horas-días, dolor,
+            // fiebre), no el audiograma ni el timpanograma.
+            'gap_shape' => [125 => 42, 250 => 42, 500 => 40, 1000 => 34, 2000 => 30, 3000 => 28, 4000 => 26, 6000 => 26, 8000 => 26],
+            'gap_scale' => [0.5, 1.2],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['B'], 'etf' => 'Disfunción tubaria',
+            'grados' => ['leve'], 'max_db' => 42, 'gap_max_db' => 48,
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'tinnitus' => ['prob' => 0.3, 'ruido' => ['Zumbido'],
+                           'frecuencia' => [250, 500], 'permanente' => 0.2],
+            // Empezó anteanoche con dolor: el paciente sabe el día.
+            'conciencia' => [90, 100],
+        ],
+        'colesteatoma' => [
+            'label' => 'Colesteatoma (sin daño coclear)',
+            'categoria' => 'conductiva',
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 8, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
+            'sn_scale' => [0.0, 1.2],
+            // Erosión de la cadena: gap grande y bastante plano, más que el
+            // de una efusión. Mientras la ósea siga sana el cuadro es este;
+            // cuando el colesteatoma se lleva la cóclea, el cuadro que mide
+            // ese oído es 'mixta_otitis_cronica' o 'colesteatoma_fistula'.
+            'gap_shape' => [125 => 46, 250 => 46, 500 => 45, 1000 => 42, 2000 => 40, 3000 => 38, 4000 => 38, 6000 => 38, 8000 => 38],
+            'gap_scale' => [0.6, 1.1],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['B'], 'etf' => 'Disfunción tubaria',
+            'grados' => ['leve', 'moderada'], 'max_db' => 55, 'gap_max_db' => 55,
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'tinnitus' => ['prob' => 0.3, 'ruido' => ['Zumbido'],
+                           'frecuencia' => [250, 500], 'permanente' => 0.4],
+            // Progresivo y con otorrea de años: se consulta tarde.
+            'conciencia' => [55, 85],
+        ],
+        'fijacion_congenita_estribo' => [
+            'label' => 'Fijación congénita del estribo / malformación de cadena',
+            'categoria' => 'conductiva',
+            // Sin muesca de Carhart: la fijación es de nacimiento y no
+            // arrastra el artefacto mecánico de la otoesclerosis. Un gap
+            // plano y grande con ósea limpia en 2 kHz es la diferencia.
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 8, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
+            'sn_scale' => [0.0, 1.2],
+            'gap_shape' => [125 => 42, 250 => 44, 500 => 46, 1000 => 46, 2000 => 44, 3000 => 42, 4000 => 42, 6000 => 42, 8000 => 42],
+            'gap_scale' => [0.6, 1.0],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['A', 'As'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'], 'max_db' => 55, 'gap_max_db' => 52,
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'conciencia' => [20, 50],
+        ],
+        'barotrauma' => [
+            'label' => 'Barotrauma de oído medio',
+            'categoria' => 'conductiva',
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 8, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
+            'sn_scale' => [0.0, 1.2],
+            // Graves dominantes, como toda caja que no se ventila. La curva
+            // es C/Cs por la presión negativa, o B si hubo hemotímpano.
+            'gap_shape' => [125 => 40, 250 => 40, 500 => 36, 1000 => 30, 2000 => 26, 3000 => 24, 4000 => 22, 6000 => 22, 8000 => 22],
+            'gap_scale' => [0.5, 1.1],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['C', 'B'], 'etf' => 'Disfunción tubaria',
+            'grados' => ['leve'], 'max_db' => 40, 'gap_max_db' => 48,
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'tinnitus' => ['prob' => 0.3, 'ruido' => ['Zumbido'],
+                           'frecuencia' => [250, 500], 'permanente' => 0.2],
+            // Pasó en el descenso del avión o del buceo: fecha y hora.
+            'conciencia' => [90, 100],
+        ],
+        'glomus_timpanico' => [
+            'label' => 'Glomus timpánico (paraganglioma)',
+            'categoria' => 'conductiva',
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 8, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
+            'sn_scale' => [0.0, 1.2],
+            'gap_shape' => [125 => 34, 250 => 34, 500 => 32, 1000 => 30, 2000 => 28, 3000 => 26, 4000 => 26, 6000 => 26, 8000 => 26],
+            'gap_scale' => [0.5, 1.1],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['B', 'As'], 'etf' => 'Normal',
+            'grados' => ['leve'], 'max_db' => 40, 'gap_max_db' => 42,
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            // El único cuadro del catálogo que enciende `pulsatil`: el
+            // acúfeno va al compás del pulso porque la masa ES vascular. El
+            // gap por sí solo no distingue esto de una otitis; el pulso sí.
+            'tinnitus' => ['prob' => 0.9, 'ruido' => ['Zumbido'],
+                           'frecuencia' => [125, 250], 'permanente' => 0.85,
+                           'pulsatil' => 0.9],
+            'conciencia' => [80, 100],
+        ],
+
         // --- Sensoriales (cocleares puras) ------------------------------
         'presbiacusia' => [
             'label' => 'Presbiacusia (descendente en agudos)',
@@ -674,6 +839,270 @@ final class CaseProfile
             'conciencia' => [30, 60],
         ],
 
+        'nihl_cronica' => [
+            'label' => 'Hipoacusia por ruido crónica (NIHL)',
+            'categoria' => 'sensorial',
+            // La muesca de 'muesca_4k' ensanchada y bilateral: años de
+            // exposición comen 3-6 kHz y la recuperación en 8 kHz se
+            // achica. Es una FOTO: la progresión no es un eje del caso.
+            'sn_shape' => [125 => 0, 250 => 0, 500 => 5, 1000 => 8, 2000 => 20, 3000 => 38, 4000 => 48, 6000 => 45, 8000 => 30],
+            'sn_scale' => [0.7, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            // Mismo techo que la muesca: con 500 y 1000 conservados el
+            // promedio no pasa de leve sin aplanar la muesca.
+            'grados' => ['leve'],
+            'tinnitus' => ['prob' => 0.8, 'ruido' => ['Pitido', 'Siseo'],
+                           'frecuencia' => [3000, 4000, 6000], 'permanente' => 0.7],
+            // Se instaló en años y el paciente se adaptó: "yo escucho bien,
+            // es la gente que habla bajo".
+            'conciencia' => [20, 50],
+        ],
+        'trauma_acustico_agudo' => [
+            'label' => 'Trauma acústico agudo (explosión)',
+            'categoria' => 'sensorial',
+            // Una sola exposición: muesca más profunda y estrecha que la
+            // crónica, y de un solo lado (el oído que quedó expuesto). Si
+            // además rompió el tímpano, el cuadro de ese oído es mixto.
+            'sn_shape' => [125 => 0, 250 => 0, 500 => 5, 1000 => 10, 2000 => 25, 3000 => 50, 4000 => 62, 6000 => 50, 8000 => 35],
+            'sn_scale' => [0.7, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve'],
+            'tinnitus' => ['prob' => 0.85, 'ruido' => ['Pitido', 'Silbido'],
+                           'frecuencia' => [3000, 4000, 6000], 'permanente' => 0.7],
+            'conciencia' => [90, 100],
+        ],
+        'salicilatos' => [
+            'label' => 'Ototoxicidad por salicilatos / quinina',
+            'categoria' => 'sensorial',
+            // Plana y bilateral, al revés que los aminoglucósidos, que
+            // empiezan por la base coclear ('ototoxica'). El acúfeno es
+            // desproporcionado para lo poco que baja el audiograma, y ese
+            // desbalance es el hallazgo. La REVERSIBILIDAD no se modela: el
+            // caso es una foto (ver TODO.md, "Eje temporal").
+            'sn_shape' => [125 => 28, 250 => 28, 500 => 30, 1000 => 30, 2000 => 30, 3000 => 32, 4000 => 32, 6000 => 34, 8000 => 34],
+            'sn_scale' => [0.6, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'], 'max_db' => 55,
+            'tinnitus' => ['prob' => 0.9, 'ruido' => ['Pitido', 'Silbido'],
+                           'frecuencia' => [4000, 6000], 'permanente' => 0.4],
+            'conciencia' => [75, 95],
+        ],
+        'laberintitis' => [
+            'label' => 'Laberintitis (viral / bacteriana)',
+            'categoria' => 'sensorial',
+            'sn_shape' => [125 => 70, 250 => 72, 500 => 75, 1000 => 75, 2000 => 78, 3000 => 78, 4000 => 80, 6000 => 80, 8000 => 80],
+            'sn_scale' => [0.7, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['severa', 'profunda'],
+            // El laberinto entero está inflamado, no solo la cóclea: los dos
+            // VEMP se apagan. Acá SÍ es regla del cuadro (a diferencia de la
+            // súbita, donde el compromiso vestibular es variable).
+            'vemp' => ['type' => 'neural',
+                       'umbral' => ['CVEMP' => [90, 95], 'OVEMP' => [90, 95], 'MVEMP' => [90, 95]]],
+            'tinnitus' => ['prob' => 0.6, 'ruido' => ['Zumbido', 'Pitido'],
+                           'frecuencia' => [2000, 4000], 'permanente' => 0.6],
+            'conciencia' => [90, 100],
+        ],
+        'osificacion_coclear' => [
+            'label' => 'Osificación coclear post-meningitis',
+            'categoria' => 'sensorial',
+            // 'coclear_plana' en su extremo y bilateral: OEA ausentes, ABR
+            // sin respuesta. Lo que lo hace un cuadro aparte es la ventana
+            // quirúrgica, que no sale del audiograma.
+            'sn_shape' => [125 => 90, 250 => 92, 500 => 95, 1000 => 95, 2000 => 95, 3000 => 95, 4000 => 98, 6000 => 98, 8000 => 98],
+            'sn_scale' => [0.8, 1.2], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['profunda'],
+            // La meningitis no respeta la división: se lleva el laberinto
+            // completo, como la fractura transversal.
+            'vemp' => ['type' => 'neural',
+                       'umbral' => ['CVEMP' => [92, 95], 'OVEMP' => [92, 95], 'MVEMP' => [92, 95]]],
+            'tinnitus' => ['prob' => 0.3, 'ruido' => ['Zumbido'],
+                           'frecuencia' => [2000, 4000], 'permanente' => 0.6],
+            'conciencia' => [60, 90],
+        ],
+        'conmocion_laberintica' => [
+            'label' => 'Conmoción laberíntica (TEC sin fractura)',
+            'categoria' => 'sensorial',
+            // Tímpano normal y curva A: el golpe no pasó por el oído medio,
+            // sacudió el laberinto. Por eso NO está entre las conductivas
+            // aunque el antecedente sea el mismo que el de la fractura
+            // longitudinal.
+            'sn_shape' => [125 => 0, 250 => 5, 500 => 10, 1000 => 15, 2000 => 35, 3000 => 45, 4000 => 50, 6000 => 50, 8000 => 50],
+            'sn_scale' => [0.6, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'],
+            // Sin `vemp` a propósito, mismo criterio que la súbita: el
+            // compromiso vestibular del TEC es real pero variable caso a
+            // caso, y como regla enseñaría una asociación que no existe.
+            'tinnitus' => ['prob' => 0.5, 'ruido' => ['Pitido', 'Zumbido'],
+                           'frecuencia' => [2000, 4000], 'permanente' => 0.5],
+            'conciencia' => [90, 100],
+        ],
+        'hidrops_retardado' => [
+            'label' => 'Hidrops endolinfático retardado',
+            'categoria' => 'sensorial',
+            // La curva del Ménière en un oído que ya venía dañado años
+            // antes. Igual que el Ménière, el caso guarda una foto: la
+            // fluctuación semana a semana no es un eje del modelo.
+            'sn_shape' => [125 => 52, 250 => 52, 500 => 48, 1000 => 38, 2000 => 28, 3000 => 22, 4000 => 22, 6000 => 22, 8000 => 22],
+            'sn_scale' => [0.6, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [95, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'],
+            'vemp' => ['type' => 'sacular',
+                       'umbral' => ['CVEMP' => [80, 95], 'OVEMP' => [60, 72], 'MVEMP' => [80, 95]]],
+            'tinnitus' => ['prob' => 0.7, 'ruido' => ['Zumbido'],
+                           'frecuencia' => [125, 250, 500], 'permanente' => 0.5],
+            'conciencia' => [70, 95],
+        ],
+        'autoinmune' => [
+            'label' => 'Autoinmune del oído interno / otosífilis',
+            'categoria' => 'sensorial',
+            // Bilateral y rápidamente progresiva: semanas a meses, no años.
+            // La ASIMETRÍA marcada que la caracteriza hoy solo se puede
+            // pedir a mano (ver TODO.md, "Asimetría declarada por el cuadro").
+            'sn_shape' => [125 => 40, 250 => 42, 500 => 45, 1000 => 48, 2000 => 55, 3000 => 58, 4000 => 60, 6000 => 62, 8000 => 62],
+            'sn_scale' => [0.6, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada', 'severa'],
+            'tinnitus' => ['prob' => 0.5, 'ruido' => ['Zumbido', 'Siseo'],
+                           'frecuencia' => [1000, 2000, 4000], 'permanente' => 0.6],
+            // Bajó rápido y el paciente lo vio bajar.
+            'conciencia' => [80, 100],
+        ],
+        'parotiditis' => [
+            'label' => 'Parotiditis / sarampión (profunda unilateral)',
+            'categoria' => 'sensorial',
+            'sn_shape' => [125 => 88, 250 => 90, 500 => 92, 1000 => 92, 2000 => 92, 3000 => 92, 4000 => 95, 6000 => 95, 8000 => 95],
+            'sn_scale' => [0.8, 1.2], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['severa', 'profunda'],
+            'tinnitus' => ['prob' => 0.2, 'ruido' => ['Zumbido'],
+                           'frecuencia' => [2000, 4000], 'permanente' => 0.5],
+            // Pasó en la infancia y el otro oído tapó el hueco: se descubre
+            // años después, en un examen escolar o laboral.
+            'conciencia' => [15, 45],
+        ],
+        'metabolica' => [
+            'label' => 'Diabetes / insuficiencia renal (descendente bilateral)',
+            'categoria' => 'sensorial',
+            // La forma de la presbiacusia, adelantada: lo que la hace un
+            // hallazgo es que está PEOR que la mediana de su edad, y esa
+            // comparación la hace ageNorm() cuando se elige el paciente.
+            'sn_shape' => [125 => 0, 250 => 5, 500 => 10, 1000 => 15, 2000 => 30, 3000 => 42, 4000 => 50, 6000 => 55, 8000 => 58],
+            'sn_scale' => [0.8, 1.6], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'],
+            'tinnitus' => ['prob' => 0.45, 'ruido' => ['Siseo', 'Pitido'],
+                           'frecuencia' => [4000, 6000], 'permanente' => 0.5],
+            'conciencia' => [25, 55],
+        ],
+
+        // --- Genéticas y congénitas -------------------------------------
+        // Van como sensoriales (salvo el kernícterus, que es neural) y lo
+        // que las separa NO es el gen: es la forma, la lateralidad y la
+        // edad de instalación. El gen y el síndrome viven en la anamnesis.
+        'gjb2' => [
+            'label' => 'No sindrómica GJB2 (conexina 26)',
+            'categoria' => 'sensorial',
+            // Plana, bilateral, simétrica y ESTABLE desde el nacimiento:
+            // es el patrón de la sordera congénita más frecuente.
+            'sn_shape' => [125 => 60, 250 => 62, 500 => 65, 1000 => 65, 2000 => 68, 3000 => 68, 4000 => 70, 6000 => 70, 8000 => 70],
+            'sn_scale' => [0.6, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['moderada', 'severa', 'profunda'],
+            'conciencia' => [10, 40],
+        ],
+        'usher' => [
+            'label' => 'Usher (descendente + retinosis)',
+            'categoria' => 'sensorial',
+            // Curva de presbiacusia en alguien que no tiene edad para eso.
+            // La retinosis pigmentaria es anamnesis, no audiograma.
+            'sn_shape' => [125 => 5, 250 => 8, 500 => 15, 1000 => 25, 2000 => 45, 3000 => 55, 4000 => 60, 6000 => 65, 8000 => 65],
+            'sn_scale' => [0.7, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'],
+            'conciencia' => [30, 60],
+        ],
+        'waardenburg' => [
+            'label' => 'Waardenburg (profunda congénita)',
+            'categoria' => 'sensorial',
+            'sn_shape' => [125 => 85, 250 => 88, 500 => 90, 1000 => 90, 2000 => 90, 3000 => 92, 4000 => 92, 6000 => 92, 8000 => 92],
+            'sn_scale' => [0.8, 1.2], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['severa', 'profunda'],
+            'conciencia' => [10, 40],
+        ],
+        'alport' => [
+            'label' => 'Alport (descendente en agudos, adolescencia)',
+            'categoria' => 'sensorial',
+            // Misma pendiente de la ototóxica sin el antecedente del
+            // fármaco: eso lo resuelve la anamnesis, no el audiograma.
+            'sn_shape' => [125 => 0, 250 => 0, 500 => 5, 1000 => 10, 2000 => 25, 3000 => 45, 4000 => 55, 6000 => 62, 8000 => 65],
+            'sn_scale' => [0.6, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve'],
+            'tinnitus' => ['prob' => 0.4, 'ruido' => ['Pitido', 'Siseo'],
+                           'frecuencia' => [4000, 6000], 'permanente' => 0.5],
+            'conciencia' => [25, 55],
+        ],
+        'jervell_lange_nielsen' => [
+            'label' => 'Jervell-Lange-Nielsen (profunda + QT largo)',
+            'categoria' => 'sensorial',
+            'sn_shape' => [125 => 90, 250 => 92, 500 => 95, 1000 => 95, 2000 => 95, 3000 => 95, 4000 => 98, 6000 => 98, 8000 => 98],
+            'sn_scale' => [0.8, 1.2], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['profunda'],
+            'conciencia' => [10, 40],
+        ],
+        'stickler' => [
+            'label' => 'Stickler (descendente + artropatía y miopía)',
+            'categoria' => 'sensorial',
+            'sn_shape' => [125 => 10, 250 => 12, 500 => 18, 1000 => 25, 2000 => 38, 3000 => 45, 4000 => 50, 6000 => 52, 8000 => 52],
+            'sn_scale' => [0.6, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'],
+            'conciencia' => [25, 55],
+        ],
+        'cmv_congenito' => [
+            'label' => 'CMV congénito (asimétrica progresiva)',
+            'categoria' => 'sensorial',
+            // Puede nacer con screening normal y caerse después: el caso
+            // muestra UN momento de esa historia (ver TODO.md, "Eje temporal").
+            'sn_shape' => [125 => 30, 250 => 32, 500 => 38, 1000 => 42, 2000 => 50, 3000 => 55, 4000 => 58, 6000 => 60, 8000 => 60],
+            'sn_scale' => [0.5, 1.5], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada', 'severa'],
+            'conciencia' => [10, 40],
+        ],
+        'rubeola_congenita' => [
+            'label' => 'Rubéola / toxoplasmosis congénita',
+            'categoria' => 'sensorial',
+            'sn_shape' => [125 => 55, 250 => 58, 500 => 60, 1000 => 62, 2000 => 65, 3000 => 65, 4000 => 68, 6000 => 68, 8000 => 68],
+            'sn_scale' => [0.6, 1.5], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['moderada', 'severa', 'profunda'],
+            'conciencia' => [10, 40],
+        ],
+
         // --- Neurales (retrococleares puras) ----------------------------
         // cce_pct bajo: la cóclea está viva, la OEA se conserva con el
         // umbral elevado y lo que se desarma es el ABR. Ese contraste ES el
@@ -714,6 +1143,231 @@ final class CaseProfile
             // compromiso del VIII completo.
             'vemp' => ['type' => 'normal',
                        'umbral' => ['CVEMP' => [55, 70], 'OVEMP' => [60, 75], 'MVEMP' => [65, 80]]],
+        ],
+
+        'kernicterus' => [
+            'label' => 'Kernícterus (hiperbilirrubinemia neonatal)',
+            'categoria' => 'neural',
+            // NO es coclear, aunque el antecedente sea neonatal: las OEA se
+            // conservan y lo que se desarma es el ABR. Ese contraste es todo
+            // el cuadro, y es el mismo error que hay que evitar con la ANSD.
+            'sn_shape' => [125 => 40, 250 => 42, 500 => 45, 1000 => 45, 2000 => 48, 3000 => 48, 4000 => 50, 6000 => 50, 8000 => 50],
+            'sn_scale' => [0.6, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [0, 15], 'retro' => 'kernicterus', 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada', 'severa', 'profunda'],
+            // Vestibular conservado, igual que en la ANSD: la bilirrubina
+            // pega en los núcleos auditivos del tronco, no en el nervio
+            // vestibular.
+            'vemp' => ['type' => 'normal',
+                       'umbral' => ['CVEMP' => [55, 70], 'OVEMP' => [60, 75], 'MVEMP' => [65, 80]]],
+            'conciencia' => [10, 40],
+        ],
+        'nf2' => [
+            'label' => 'Neurofibromatosis tipo 2 (schwannomas bilaterales)',
+            'categoria' => 'neural',
+            // El patrón del schwannoma en LOS DOS oídos: sin un lado sano
+            // que sirva de referencia, el IT5 no ayuda y hay que leer los
+            // interpicos absolutos. Esa es la trampa del cuadro.
+            'sn_shape' => [125 => 10, 250 => 10, 500 => 15, 1000 => 20, 2000 => 30, 3000 => 40, 4000 => 45, 6000 => 50, 8000 => 55],
+            'sn_scale' => [0.5, 1.2], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [10, 35], 'retro' => 'nf2', 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'],
+            'vemp' => ['type' => 'neural',
+                       'umbral' => ['CVEMP' => [82, 95], 'OVEMP' => [80, 95], 'MVEMP' => [85, 95]]],
+            'tinnitus' => ['prob' => 0.6, 'ruido' => ['Pitido', 'Zumbido'],
+                           'frecuencia' => [2000, 4000], 'permanente' => 0.7],
+            'conciencia' => [60, 90],
+        ],
+        'tumor_angulo' => [
+            'label' => 'Meningioma / epidermoide del ángulo pontocerebeloso',
+            'categoria' => 'neural',
+            // Indistinguible del schwannoma en el ABR: la diferencia la hace
+            // la imagen. Está en el catálogo justamente para que el alumno
+            // no cierre el diagnóstico con el PEATC.
+            'sn_shape' => [125 => 10, 250 => 10, 500 => 15, 1000 => 20, 2000 => 30, 3000 => 40, 4000 => 45, 6000 => 50, 8000 => 55],
+            'sn_scale' => [0.5, 1.2], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [10, 35], 'retro' => 'angulo', 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'],
+            'vemp' => ['type' => 'neural',
+                       'umbral' => ['CVEMP' => [80, 95], 'OVEMP' => [80, 95], 'MVEMP' => [82, 95]]],
+            'tinnitus' => ['prob' => 0.55, 'ruido' => ['Pitido', 'Zumbido'],
+                           'frecuencia' => [2000, 4000], 'permanente' => 0.6],
+            'conciencia' => [60, 90],
+        ],
+        'compresion_microvascular' => [
+            'label' => 'Compresión microvascular del VIII par',
+            'categoria' => 'neural',
+            // Alteración leve y a veces solo visible con tasas altas: el
+            // audiograma casi no se mueve. cce por debajo de CCE_COCLEAR_PCT
+            // a propósito -- si sube más, el cuadro que lo mide es
+            // 'sensorioneural', que usa este mismo preset con los dos
+            // componentes.
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 8, 1000 => 12, 2000 => 20, 3000 => 28, 4000 => 32, 6000 => 35, 8000 => 38],
+            'sn_scale' => [0.5, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [25, 55], 'retro' => 'microvascular', 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve'],
+            'vemp' => ['type' => 'neural',
+                       'umbral' => ['CVEMP' => [65, 82], 'OVEMP' => [65, 82], 'MVEMP' => [70, 88]]],
+            'tinnitus' => ['prob' => 0.6, 'ruido' => ['Pitido', 'Zumbido'],
+                           'frecuencia' => [2000, 4000], 'permanente' => 0.5],
+            'conciencia' => [60, 90],
+        ],
+        'esclerosis_multiple' => [
+            'label' => 'Esclerosis múltiple / desmielinizante',
+            'categoria' => 'neural',
+            // Audiograma normal o casi, con I-III limpio y III-V largo: la
+            // lesión es intraaxial, después del núcleo coclear. Es el cuadro
+            // que enseña que un audiograma normal no descarta nada.
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 8, 1000 => 8, 2000 => 10, 3000 => 12, 4000 => 15, 6000 => 18, 8000 => 20],
+            'sn_scale' => [0.4, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [20, 55], 'retro' => 'esclerosis_multiple', 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve'],
+            'conciencia' => [60, 90],
+        ],
+        'infarto_pontino' => [
+            'label' => 'Infarto pontino / AICA',
+            'categoria' => 'neural',
+            'sn_shape' => [125 => 8, 250 => 8, 500 => 10, 1000 => 12, 2000 => 15, 3000 => 18, 4000 => 20, 6000 => 22, 8000 => 25],
+            'sn_scale' => [0.4, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [15, 45], 'retro' => 'infarto_pontino', 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve'],
+            'conciencia' => [90, 100],
+        ],
+        'glioma_tronco' => [
+            'label' => 'Glioma de tronco / tumor de fosa posterior',
+            'categoria' => 'neural',
+            'sn_shape' => [125 => 10, 250 => 12, 500 => 15, 1000 => 18, 2000 => 22, 3000 => 25, 4000 => 28, 6000 => 30, 8000 => 32],
+            'sn_scale' => [0.5, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [10, 40], 'retro' => 'glioma_tronco', 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'],
+            'conciencia' => [55, 85],
+        ],
+        'siderosis' => [
+            'label' => 'Siderosis superficial del SNC',
+            'categoria' => 'neural',
+            // Bilateral progresiva con ataxia: la hemosiderina se deposita
+            // sobre el VIII en su trayecto cisternal, así que además del
+            // ABR se cae el VEMP.
+            'sn_shape' => [125 => 20, 250 => 22, 500 => 28, 1000 => 32, 2000 => 42, 3000 => 48, 4000 => 52, 6000 => 55, 8000 => 58],
+            'sn_scale' => [0.5, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [10, 40], 'retro' => 'siderosis', 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'],
+            'vemp' => ['type' => 'neural',
+                       'umbral' => ['CVEMP' => [82, 95], 'OVEMP' => [82, 95], 'MVEMP' => [85, 95]]],
+            'tinnitus' => ['prob' => 0.5, 'ruido' => ['Zumbido', 'Siseo'],
+                           'frecuencia' => [2000, 4000], 'permanente' => 0.6],
+            'conciencia' => [40, 70],
+        ],
+        'chiari_hic' => [
+            'label' => 'Chiari / hipertensión intracraneal',
+            'categoria' => 'neural',
+            // Compresión difusa: todo corrido y los interpicos largos, sin
+            // un tramo que domine.
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 8, 1000 => 10, 2000 => 12, 3000 => 15, 4000 => 18, 6000 => 20, 8000 => 22],
+            'sn_scale' => [0.4, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [20, 55], 'retro' => 'chiari_hic', 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve'],
+            'conciencia' => [55, 85],
+        ],
+        'leucodistrofia' => [
+            'label' => 'Leucodistrofia (Krabbe, adrenoleucodistrofia)',
+            'categoria' => 'neural',
+            // Interpicos muy largos con audiograma conservado, en un niño:
+            // la disociación es el hallazgo y el tamiz neonatal no la ve.
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 8, 1000 => 8, 2000 => 10, 3000 => 12, 4000 => 15, 6000 => 15, 8000 => 18],
+            'sn_scale' => [0.4, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [0, 20], 'retro' => 'leucodistrofia', 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve'],
+            'conciencia' => [10, 40],
+        ],
+        'neuropatia_hereditaria' => [
+            'label' => 'Neuropatía hereditaria (CMT, Friedreich)',
+            'categoria' => 'neural',
+            'sn_shape' => [125 => 10, 250 => 12, 500 => 15, 1000 => 18, 2000 => 25, 3000 => 30, 4000 => 35, 6000 => 38, 8000 => 40],
+            'sn_scale' => [0.5, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [5, 35], 'retro' => 'hereditaria_central', 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'],
+            // Polineuropatía: el nervio vestibular es un nervio más.
+            'vemp' => ['type' => 'neural',
+                       'umbral' => ['CVEMP' => [78, 92], 'OVEMP' => [78, 92], 'MVEMP' => [80, 95]]],
+            'conciencia' => [30, 60],
+        ],
+        'tec_tronco' => [
+            'label' => 'TEC con lesión de tronco',
+            'categoria' => 'neural',
+            'sn_shape' => [125 => 15, 250 => 15, 500 => 20, 1000 => 22, 2000 => 28, 3000 => 32, 4000 => 35, 6000 => 38, 8000 => 40],
+            'sn_scale' => [0.5, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [10, 45], 'retro' => 'tec_tronco', 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'],
+            'tinnitus' => ['prob' => 0.5, 'ruido' => ['Zumbido', 'Pitido'],
+                           'frecuencia' => [2000, 4000], 'permanente' => 0.5],
+            'conciencia' => [90, 100],
+        ],
+        'toxico_metabolico' => [
+            'label' => 'Tóxico-metabólico (hepática, hipotiroidismo)',
+            'categoria' => 'neural',
+            // Todo lento y, a diferencia del resto de esta lista,
+            // reversible al corregir la causa. La reversibilidad no se
+            // modela: el caso es una foto.
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 8, 1000 => 10, 2000 => 12, 3000 => 15, 4000 => 18, 6000 => 20, 8000 => 20],
+            'sn_scale' => [0.4, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [20, 55], 'retro' => 'toxico_metabolico', 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve'],
+            'conciencia' => [40, 70],
+        ],
+        'hipotermia_farmacos' => [
+            'label' => 'Hipotermia / depresores del SNC',
+            'categoria' => 'neural',
+            // Audiograma NORMAL y ABR corrido entero, onda I incluida, con
+            // los interpicos intactos: es el único cuadro donde se mueve la
+            // onda I, y por eso no tiene grado de hipoacusia.
+            'sn_shape' => [125 => 3, 250 => 3, 500 => 3, 1000 => 3, 2000 => 5, 3000 => 5, 4000 => 5, 6000 => 8, 8000 => 8],
+            'sn_scale' => [0.0, 1.2], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [20, 55], 'retro' => 'hipotermia_farmacos', 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => [],
+            'conciencia' => [40, 70],
+        ],
+        'prematuro' => [
+            'label' => 'Retraso madurativo del prematuro',
+            'categoria' => 'neural',
+            // No es patología: es maduración. Sin hipoacusia y sin grado --
+            // lo que corre son las latencias por edad, y la normativa de
+            // neonato ya las corre por su cuenta.
+            'sn_shape' => [125 => 3, 250 => 3, 500 => 3, 1000 => 3, 2000 => 5, 3000 => 5, 4000 => 5, 6000 => 8, 8000 => 8],
+            'sn_scale' => [0.0, 1.2], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [20, 50], 'retro' => 'prematuro', 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => [],
+            'conciencia' => [10, 40],
+        ],
+        'bloqueo_proximal' => [
+            'label' => 'Bloqueo proximal del VIII (coma)',
+            'categoria' => 'neural',
+            // Onda I presente y nada después: la cóclea está viva y la vía
+            // se corta enseguida. El paciente no colabora con la
+            // audiometría --el cuadro se define por el ABR, no por el
+            // audiograma--, así que no lleva grado.
+            'sn_shape' => [125 => 3, 250 => 3, 500 => 3, 1000 => 3, 2000 => 5, 3000 => 5, 4000 => 5, 6000 => 8, 8000 => 8],
+            'sn_scale' => [0.0, 1.2], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [0, 20], 'retro' => 'bloqueo_proximal', 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => [],
+            // No hay entrevista posible: el rasgo queda en el piso.
+            'conciencia' => [0, 20],
         ],
 
         // --- Sensorioneurales (los dos componentes a la vez) ------------
@@ -776,6 +1430,119 @@ final class CaseProfile
             'vemp' => ['type' => 'normal', 'umbral_gap' => true],
             'tinnitus' => ['prob' => 0.55, 'ruido' => ['Zumbido', 'Campanilleo'],
                            'frecuencia' => [250, 500, 1000], 'permanente' => 0.5],
+        ],
+        'colesteatoma_fistula' => [
+            'label' => 'Colesteatoma con fístula laberíntica',
+            'categoria' => 'mixta',
+            // El gap del colesteatoma más la caída coclear de la fístula: el
+            // mismo oído tiene los dos componentes, y separarlos es el
+            // ejercicio. El vértigo con presión (signo de la fístula) vive
+            // en la anamnesis.
+            'sn_shape' => [125 => 30, 250 => 32, 500 => 35, 1000 => 38, 2000 => 42, 3000 => 45, 4000 => 48, 6000 => 50, 8000 => 50],
+            'sn_scale' => [0.6, 1.3],
+            'gap_shape' => [125 => 46, 250 => 46, 500 => 45, 1000 => 42, 2000 => 40, 3000 => 38, 4000 => 38, 6000 => 38, 8000 => 38],
+            'gap_scale' => [0.5, 1.0],
+            'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['B'], 'etf' => 'Disfunción tubaria',
+            'grados' => ['leve', 'moderada', 'severa'], 'max_db' => 90, 'gap_max_db' => 55,
+            // Hay lesión laberíntica, pero el VEMP AÉREO no llega a
+            // mostrarla: lo apaga antes el oído medio. Por eso va atado al
+            // gap y no a un rango -- las dos formas son excluyentes.
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'tinnitus' => ['prob' => 0.5, 'ruido' => ['Zumbido', 'Siseo'],
+                           'frecuencia' => [500, 1000, 2000], 'permanente' => 0.5],
+            'conciencia' => [70, 95],
+        ],
+        'oido_operado' => [
+            'label' => 'Oído operado (timpanoplastia / mastoidectomía)',
+            'categoria' => 'mixta',
+            // Gap residual chico y ósea algo caída: el resultado habitual de
+            // una cirugía que funcionó. La curva depende de qué quedó --Ad
+            // si el injerto es laxo, B si hay cavidad--.
+            'sn_shape' => [125 => 15, 250 => 15, 500 => 18, 1000 => 20, 2000 => 25, 3000 => 28, 4000 => 30, 6000 => 32, 8000 => 32],
+            'sn_scale' => [0.5, 1.3],
+            'gap_shape' => [125 => 26, 250 => 26, 500 => 24, 1000 => 22, 2000 => 20, 3000 => 18, 4000 => 18, 6000 => 18, 8000 => 18],
+            'gap_scale' => [0.4, 1.1],
+            'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['Ad', 'B'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'], 'max_db' => 55, 'gap_max_db' => 35,
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'tinnitus' => ['prob' => 0.4, 'ruido' => ['Zumbido'],
+                           'frecuencia' => [500, 1000], 'permanente' => 0.4],
+            'conciencia' => [60, 90],
+        ],
+        'paget' => [
+            'label' => 'Enfermedad de Paget / otoespongiosis',
+            'categoria' => 'mixta',
+            // Mixta bilateral y progresiva: el hueso remodelado fija la
+            // cadena y compromete la cápsula ótica a la vez.
+            'sn_shape' => [125 => 25, 250 => 28, 500 => 32, 1000 => 35, 2000 => 40, 3000 => 45, 4000 => 48, 6000 => 50, 8000 => 52],
+            'sn_scale' => [0.6, 1.3],
+            'gap_shape' => [125 => 28, 250 => 28, 500 => 26, 1000 => 24, 2000 => 22, 3000 => 20, 4000 => 20, 6000 => 20, 8000 => 20],
+            'gap_scale' => [0.5, 1.1],
+            'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['As'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada', 'severa'], 'max_db' => 90, 'gap_max_db' => 45,
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'tinnitus' => ['prob' => 0.5, 'ruido' => ['Zumbido', 'Campanilleo'],
+                           'frecuencia' => [250, 500, 1000], 'permanente' => 0.5],
+            'conciencia' => [30, 60],
+        ],
+        'carcinoma_cae' => [
+            'label' => 'Carcinoma de CAE / tumor temporal',
+            'categoria' => 'mixta',
+            // Gap grande por la masa que ocupa el conducto MÁS compromiso
+            // coclear por invasión: unilateral y progresivo. La parálisis
+            // facial, que es el dato que apura la derivación, no sale del
+            // audiograma.
+            'sn_shape' => [125 => 35, 250 => 38, 500 => 42, 1000 => 45, 2000 => 50, 3000 => 55, 4000 => 58, 6000 => 60, 8000 => 60],
+            'sn_scale' => [0.6, 1.3],
+            'gap_shape' => [125 => 48, 250 => 48, 500 => 46, 1000 => 44, 2000 => 42, 3000 => 40, 4000 => 40, 6000 => 40, 8000 => 40],
+            'gap_scale' => [0.5, 1.0],
+            'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['B'], 'etf' => 'Normal',
+            'grados' => ['moderada', 'severa', 'profunda'], 'max_db' => 105, 'gap_max_db' => 56,
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'tinnitus' => ['prob' => 0.4, 'ruido' => ['Zumbido'],
+                           'frecuencia' => [500, 1000], 'permanente' => 0.5],
+            'conciencia' => [80, 100],
+        ],
+        'trauma_craneal_completo' => [
+            'label' => 'Trauma craneal con fractura y conmoción',
+            'categoria' => 'mixta',
+            // Los dos cuadros del TEC en el MISMO oído: el gap de la
+            // fractura longitudinal (hemotímpano, cadena luxada) sobre la
+            // caída en agudos de la conmoción laberíntica. Pedir cada uno
+            // por separado en oídos distintos es otro caso, no este.
+            'sn_shape' => [125 => 10, 250 => 15, 500 => 20, 1000 => 25, 2000 => 40, 3000 => 48, 4000 => 52, 6000 => 52, 8000 => 52],
+            'sn_scale' => [0.6, 1.3],
+            'gap_shape' => [125 => 45, 250 => 45, 500 => 42, 1000 => 38, 2000 => 35, 3000 => 32, 4000 => 30, 6000 => 30, 8000 => 30],
+            'gap_scale' => [0.5, 1.1],
+            'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['B'], 'etf' => 'Normal',
+            'grados' => ['leve', 'moderada'], 'max_db' => 75, 'gap_max_db' => 50,
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'tinnitus' => ['prob' => 0.5, 'ruido' => ['Zumbido', 'Pitido'],
+                           'frecuencia' => [2000, 4000], 'permanente' => 0.6],
+            'conciencia' => [90, 100],
+        ],
+        'post_radioterapia' => [
+            'label' => 'Post-radioterapia de cabeza y cuello',
+            'categoria' => 'mixta',
+            // Dos mecanismos con tiempos distintos: la otitis por disfunción
+            // tubaria aparece durante el tratamiento y la caída coclear en
+            // agudos se instala después, y sigue.
+            'sn_shape' => [125 => 10, 250 => 12, 500 => 18, 1000 => 22, 2000 => 35, 3000 => 45, 4000 => 52, 6000 => 55, 8000 => 58],
+            'sn_scale' => [0.6, 1.4],
+            'gap_shape' => [125 => 32, 250 => 32, 500 => 30, 1000 => 26, 2000 => 22, 3000 => 20, 4000 => 20, 6000 => 20, 8000 => 20],
+            'gap_scale' => [0.4, 1.1],
+            'cce_pct' => [85, 100], 'retro' => null, 'lateralidad' => 'unilateral',
+            'z' => ['B'], 'etf' => 'Disfunción tubaria',
+            'grados' => ['leve', 'moderada'], 'max_db' => 75, 'gap_max_db' => 45,
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            'tinnitus' => ['prob' => 0.45, 'ruido' => ['Siseo', 'Zumbido'],
+                           'frecuencia' => [2000, 4000], 'permanente' => 0.5],
+            'conciencia' => [55, 85],
         ],
     ];
 

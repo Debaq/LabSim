@@ -477,9 +477,11 @@
             set('ruido', alAzar(cfg.ruido));
             set('frecuencia', alAzar(cfg.frecuencia));
             marcar('permanente', Math.random() < cfg.permanente);
-            // Pulsátil no se genera: es vascular, y ninguno de estos cuadros
-            // lo explica. Se marca a mano cuando el caso lo pide.
-            marcar('pulsatil', false);
+            // Pulsátil solo lo enciende el cuadro que lo explica: es un
+            // acúfeno vascular, y sortearlo en cualquiera le enseñaría al
+            // alumno que el pulso no significa nada. Sin la clave queda
+            // apagado, y se marca a mano cuando el caso lo pide.
+            marcar('pulsatil', Math.random() < (cfg.pulsatil || 0));
         }
         // El 'change' es lo que abre o cierra el bloque de campos y los
         // habilita para el POST (ver case/tinnitus.js).
