@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QPushButton,
+    QSizePolicy,
     QTabWidget,
     QVBoxLayout,
     QWidget,
@@ -53,18 +54,27 @@ class _OtoscopioVisor(QWidget):
     un QLabel con la foto entera visible, el alumno solo ve de a un
     fragmento circular por vez, como al mirar por el instrumento real."""
 
-    RADIO_PEDIATRICO = 42  # px del círculo "visible" alrededor del cursor
-    RADIO_ADULTO = RADIO_PEDIATRICO * 2  # cono adulto: el doble de diámetro
+    # Fracción del lado menor del visor que abarca el círculo "visible"
+    # alrededor del cursor -- no un radio en px: con el visor estirado a
+    # toda la ventana, 42 px fijos (lo que medía sobre el visor de 220 px
+    # de antes) dejaban ver una porción cada vez más chica de la foto
+    # cuanto más grande la ventana. 0.19 mantiene esa misma proporción.
+    CONO_PEDIATRICO = 0.19
+    CONO_ADULTO = CONO_PEDIATRICO * 2  # el doble de diámetro
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._radio = self.RADIO_PEDIATRICO
+        self._cono = self.CONO_PEDIATRICO
         self._pixmap = None
         self._texto = SIN_IMAGEN_TEXTO
         self._scaled = None
         self._scaled_size = None
         self._mouse_pos = None
-        self.setMinimumSize(220, 220)
+        self.setMinimumSize(260, 260)
+        # Expanding: el visor tiene que repartirse todo el alto/ancho libre
+        # de la pestaña -- con el tamaño Preferred de un QWidget pelado las
+        # fotos quedaban chicas aunque sobrara ventana.
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setMouseTracking(True)
 
     def setPixmap(self, pixmap):
@@ -73,11 +83,11 @@ class _OtoscopioVisor(QWidget):
         self._scaled = None
         self.update()
 
-    def setRadio(self, radio):
+    def setCono(self, fraccion):
         """Cambia el diámetro del campo visible (tamaño del cono)."""
-        if radio == self._radio:
+        if fraccion == self._cono:
             return
-        self._radio = radio
+        self._cono = fraccion
         self.update()
 
     def setText(self, texto):
@@ -136,7 +146,7 @@ class _OtoscopioVisor(QWidget):
         # mouse no está encima, queda completamente tapado).
         mascara = QRegion(rect)
         if self._mouse_pos is not None:
-            r = self._radio
+            r = int(min(rect.width(), rect.height()) * self._cono)
             circulo = QRect(self._mouse_pos.x() - r, self._mouse_pos.y() - r, r * 2, r * 2)
             mascara -= QRegion(circulo, QRegion.RegionType.Ellipse)
         painter.setClipRegion(mascara)
@@ -175,7 +185,7 @@ class Otoscopia(QWidget):
         self.lbl_oi = self._build_slot()
         fila_visores.addLayout(self._build_columna("Oído derecho (OD)", self.lbl_od))
         fila_visores.addLayout(self._build_columna("Oído izquierdo (OI)", self.lbl_oi))
-        layout.addLayout(fila_visores)
+        layout.addLayout(fila_visores, 1)
         layout.addLayout(self._build_conos())
         return tab
 
@@ -187,13 +197,13 @@ class Otoscopia(QWidget):
         self.grupo_conos.setExclusive(True)
         self.btn_cono_pediatrico = QPushButton("Cono pediátrico")
         self.btn_cono_adulto = QPushButton("Cono adulto")
-        for btn, radio in (
-            (self.btn_cono_pediatrico, _OtoscopioVisor.RADIO_PEDIATRICO),
-            (self.btn_cono_adulto, _OtoscopioVisor.RADIO_ADULTO),
+        for btn, fraccion in (
+            (self.btn_cono_pediatrico, _OtoscopioVisor.CONO_PEDIATRICO),
+            (self.btn_cono_adulto, _OtoscopioVisor.CONO_ADULTO),
         ):
             btn.setCheckable(True)
             self.grupo_conos.addButton(btn)
-            btn.clicked.connect(lambda _checked=False, r=radio: self._set_cono(r))
+            btn.clicked.connect(lambda _checked=False, f=fraccion: self._set_cono(f))
         self.btn_cono_pediatrico.setChecked(True)
         fila.addStretch(1)
         fila.addWidget(self.btn_cono_pediatrico)
@@ -201,16 +211,16 @@ class Otoscopia(QWidget):
         fila.addStretch(1)
         return fila
 
-    def _set_cono(self, radio):
-        self.lbl_od.setRadio(radio)
-        self.lbl_oi.setRadio(radio)
+    def _set_cono(self, fraccion):
+        self.lbl_od.setCono(fraccion)
+        self.lbl_oi.setCono(fraccion)
 
     def _build_columna(self, titulo, label):
         col = QVBoxLayout()
         titulo_lbl = QLabel(f"<b>{titulo}</b>")
         titulo_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         col.addWidget(titulo_lbl)
-        col.addWidget(label)
+        col.addWidget(label, 1)
         return col
 
     def _build_slot(self):

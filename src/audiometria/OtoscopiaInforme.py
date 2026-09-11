@@ -82,7 +82,7 @@ class _DiagramaTimpanico(QWidget):
         super().__init__(parent)
         self._es_derecho = lado == "od"
         self.marcas = {}  # cuadrante -> clave de hallazgo
-        self.setMinimumSize(220, 220)
+        self.setMinimumSize(200, 200)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
@@ -233,24 +233,31 @@ class _PanelOido(QWidget):
         lbl_titulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         raiz.addWidget(lbl_titulo)
 
+        # Esquema y paleta lado a lado (como en OtoReport): apilados, el
+        # panel medía casi 700 px de alto y no entraba en la subventana
+        # del MDI junto con la pestaña del otoscopio.
+        fila = QHBoxLayout()
         self.diagrama = _DiagramaTimpanico(lado)
         self.diagrama.cuadrante_click.connect(self._marcar_cuadrante)
-        raiz.addWidget(self.diagrama)
+        fila.addWidget(self.diagrama, 1)
 
-        raiz.addWidget(QLabel("Hallazgo a marcar en el cuadrante:"))
-        raiz.addLayout(self._build_paleta())
-
+        columna = QVBoxLayout()
+        columna.addWidget(QLabel("Hallazgo a marcar:"))
+        columna.addLayout(self._build_paleta())
         self.btn_limpiar = QPushButton("Limpiar marcas")
         self.btn_limpiar.clicked.connect(self.limpiar_marcas)
-        raiz.addWidget(self.btn_limpiar)
+        columna.addWidget(self.btn_limpiar)
+        columna.addStretch(1)
+        fila.addLayout(columna)
+        raiz.addLayout(fila, 1)
 
         raiz.addWidget(QLabel("<b>Conducto auditivo externo</b>"))
         raiz.addLayout(self._build_cae())
 
         raiz.addWidget(QLabel("Observaciones:"))
         self.txt_observaciones = QTextEdit()
-        self.txt_observaciones.setPlaceholderText("Lo que no entra en el esquema")
-        self.txt_observaciones.setMaximumHeight(70)
+        self.txt_observaciones.setPlaceholderText("Observaciones")
+        self.txt_observaciones.setMaximumHeight(64)
         raiz.addWidget(self.txt_observaciones)
 
     def _build_paleta(self):
@@ -279,7 +286,7 @@ class _PanelOido(QWidget):
             chk = QCheckBox(etiqueta)
             chk.stateChanged.connect(lambda _estado, c=clave: self._cae_cambiado(c))
             self.checks_cae[clave] = chk
-            grid.addWidget(chk, i // 2, i % 2)
+            grid.addWidget(chk, i // 3, i % 3)
         return grid
 
     def _cae_cambiado(self, clave):

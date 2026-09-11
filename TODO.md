@@ -918,6 +918,19 @@ Decisiones que se tomaron sin preguntar:
   **Hasta que eso no se corra en el hosting, subir un informe de otoscopia
   falla con CHECK constraint.**
 
+La subventana del MDI pasó de 520x340 a 940x580 y dejó de tener máximo
+(`Layout::APPS['OT']`, `fix = [false, true]`): con dos pestañas y el
+esquema por oído no entraba nada. El informe se acomodó para que quepa ahí
+--esquema y paleta lado a lado, CAE en tres columnas-- y queda en 908x517
+de mínimo. Como el layout viene del backend, esto solo cambia cuando se
+despliega `Layout.php` y el cliente refresca su cache.
+
+Los visores crecen con la ventana (Expanding), así que el círculo del cono
+dejó de medirse en px y pasó a ser fracción del lado menor del visor
+(0,19 pediátrico / 0,38 adulto): los 42 px de antes, sobre un visor de
+220 px, eran ese 19%, pero con la ventana grande habrían dejado ver una
+porción cada vez menor de la foto.
+
 - [ ] Falta probarlo contra el backend real: el guardado se probó sin
       sesión (dice "no hay sesión iniciada con el servidor") y el PDF con
       el builder directo, no con una atención de verdad.
