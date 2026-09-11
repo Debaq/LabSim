@@ -68,6 +68,25 @@ final class CaseProfile
     public const CORE_FREQS = [500, 1000, 2000, 4000];
 
     /**
+     * Valor con el que el caso marca que en esa frecuencia NO HUBO
+     * RESPUESTA: el paciente no oyó ni al máximo del audiómetro.
+     *
+     * No es un umbral de 130 dB HL -- ningún audiómetro llega ahí. Tomarlo
+     * como número hacía dos daños: inflaba los promedios (una frecuencia
+     * sin respuesta empujaba el promedio 60 dB) e inventaba gaps, porque
+     * restarle la ósea a un 130 da una diferencia que nadie midió.
+     *
+     * Para todo lo que se deriva de la pérdida --OEA, ABR, reflejos,
+     * clasificación-- se toma como el TOPE del audiómetro: ese oído es al
+     * menos así de malo, y eso sí es un dato. Lo que no se puede es fingir
+     * que el umbral vale 130.
+     */
+    public const SIN_RESPUESTA_DB = 130.0;
+
+    /** Máximo que entrega el audiómetro (dB HL). */
+    public const MAX_AUDIOMETRO_DB = 120.0;
+
+    /**
      * Pesos por estímulo del ABR: qué zona coclear representa cada uno.
      * Las claves son EXACTAMENTE las de STIM_MAP en src/abr/ABR_generator.py
      * (click / ls_chirp / ce_chirp / tone_burst_<freq>), así el cliente
@@ -1651,13 +1670,33 @@ final class CaseProfile
     public static function decompose(array $airPairs, array $bonePairs, int $side, float $ccePct): array
     {
         $ccePct = self::clamp($ccePct, 0.0, 100.0);
-        $out = ['air' => [], 'bone' => [], 'gap' => [], 'sn' => [], 'cce' => [], 'retro_sn' => []];
+        $out = [
+            'air' => [], 'bone' => [], 'gap' => [], 'sn' => [], 'cce' => [], 'retro_sn' => [],
+            // Frecuencias donde no hubo respuesta, por vía. Quien derive algo
+            // de esa frecuencia tiene que saber que el número es un piso y no
+            // una medición (ver SIN_RESPUESTA_DB).
+            'sin_respuesta' => ['air' => [], 'bone' => []],
+        ];
 
         foreach (CaseBuilder::FREQUENCIES as $i => $hz) {
             $air = (float) ($airPairs[$i][$side] ?? 0);
             // Sin ósea cargada, el oído se lee sensorioneural puro (gap 0),
             // que es lo conservador: inventar un gap cambiaría el examen.
             $bone = (float) ($bonePairs[$i][$side] ?? $air);
+
+            // Sin respuesta: el umbral no es 130, es "al menos el tope del
+            // audiómetro". Se recorta ahí y se deja anotado.
+            if ($air >= self::SIN_RESPUESTA_DB) {
+                $out['sin_respuesta']['air'][] = $hz;
+                $air = self::MAX_AUDIOMETRO_DB;
+            }
+            if ($bone >= self::SIN_RESPUESTA_DB) {
+                $out['sin_respuesta']['bone'][] = $hz;
+                // Sin respuesta por vía ósea el gap no se puede medir: se
+                // lee sensorioneural puro, que es lo conservador.
+                $bone = $air;
+            }
+
             // Una ósea PEOR que la aérea no existe: es ruido de carga del
             // formulario (o un caso viejo con la ósea sin tocar). El gap se
             // trunca en 0 y la ósea se toma como el aéreo.
@@ -1695,8 +1734,19 @@ final class CaseProfile
     public static function abrThresholds(array $decomp, string $pathway = 'air_conduction'): array
     {
         $curva = $pathway === 'bone_conduction' ? $decomp['bone'] : $decomp['air'];
+        $sinRespuesta = ($decomp['sin_respuesta'] ?? [])[$pathway === 'bone_conduction' ? 'bone' : 'air'] ?? [];
         $out = [];
         foreach (self::STIM_WEIGHTS as $stim => $pesos) {
+            // Si NINGUNA de las frecuencias que pesan ese estímulo respondió
+            // en el tonal, el ABR tampoco va a responder: es "sin respuesta"
+            // y no un umbral saturado en el tope, que se leería como un
+            // hallazgo medido.
+            $conRespuesta = array_diff(array_keys($pesos), $sinRespuesta);
+            if ($conRespuesta === []) {
+                $out[$stim] = null;
+                continue;
+            }
+
             $suma = 0.0;
             $peso = 0.0;
             foreach ($pesos as $hz => $w) {
@@ -2291,7 +2341,11 @@ final class CaseProfile
                 // del retro): derivar el umbral y dejar el tipo a mano deja
                 // curvas que no se corresponden con ningún oído.
                 'type' => self::derivedType($decomp[$lado], $ccePct, $retro),
-                'umbral' => $porEstimulo['click'],
+                // El caso guarda UN número y el cliente lo lee como tal: sin
+                // respuesta se escribe el tope, que es como el propio módulo
+                // expresa "no hubo respuesta en toda la escala". El detalle
+                // --con su null-- viaja en umbral_por_estimulo.
+                'umbral' => $porEstimulo['click'] ?? self::ABR_MAX_DB,
                 'umbral_por_estimulo' => $porEstimulo,
                 'umbral_por_estimulo_oseo' => self::abrThresholds($decomp[$lado], 'bone_conduction'),
             ];

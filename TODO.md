@@ -759,3 +759,27 @@ Queda por revisar lo que cuelga de eso:
 - [ ] Los presets neurales (`ABR_NEURAL_PRESETS`) tienen v_i_factor entre
       0.30 y 1.0 pensados contra el piso viejo. Revisar si siguen dando el
       contraste que buscan.
+
+### "Sin respuesta" (130) ya no es un umbral de 130 dB
+
+Arreglado el 2026-09-11 en el backend. El audiómetro llega a 120: un 130
+significa que el paciente no oyó ni al máximo, y tomarlo como número inflaba
+los promedios 60 dB e inventaba gaps (restarle la ósea a un 130 da una
+diferencia que nadie midió).
+
+Qué hace ahora `CaseProfile::decompose`: recorta esos umbrales al tope del
+audiómetro --ese oído es al menos así de malo, y eso sí es un dato-- y deja
+la lista de frecuencias afectadas en `sin_respuesta`, para que quien derive
+algo de ahí sepa que el número es un piso. El ABR de un estímulo cuyas
+frecuencias no respondieron devuelve `null`, que la ficha y la vista previa
+muestran como "sin respuesta"; lo que se guarda en `cases.data` sigue siendo
+un entero (el tope), porque el cliente lee un número.
+
+Pendiente, del lado del cliente:
+- [ ] `src/audiometria/` y `src/abr/` siguen leyendo `Aerea`/`Osea` crudos.
+      Si el alumno mide un caso con 130 cargado, el motor de la app va a
+      tratarlo como 130 dB HL igual que hacía el backend.
+- [ ] El formulario no distingue "no se midió" de "no hubo respuesta": los
+      dos se guardan 130. En el LDL el 130 es "no se buscó" (lo pone el
+      checkbox) y en la tonal es "no respondió". Habría que separarlos, o
+      al menos decidir explícitamente que son lo mismo.

@@ -83,16 +83,23 @@
         el.value = valor;
     }
 
+    // Umbral del ABR: null es "sin respuesta" -- ninguna de las frecuencias
+    // que pesan ese estímulo respondió en el tonal. Escribir "null dB nHL"
+    // o un 120 sería mostrar un hallazgo que no se midió.
+    function nhl(valor) {
+        return (valor === null || valor === undefined) ? 'sin respuesta' : valor + ' dB nHL';
+    }
+
     function pintarTablaAbr(abr) {
         if (!preview || !tbody) return;
         tbody.innerHTML = '';
         ORDEN.forEach(function (stim) {
             var tr = document.createElement('tr');
             var celdas = [ETIQUETAS[stim],
-                abr.OD.umbral_por_estimulo[stim] + ' dB nHL',
-                abr.OD.umbral_por_estimulo_oseo[stim] + ' dB nHL',
-                abr.OI.umbral_por_estimulo[stim] + ' dB nHL',
-                abr.OI.umbral_por_estimulo_oseo[stim] + ' dB nHL'];
+                nhl(abr.OD.umbral_por_estimulo[stim]),
+                nhl(abr.OD.umbral_por_estimulo_oseo[stim]),
+                nhl(abr.OI.umbral_por_estimulo[stim]),
+                nhl(abr.OI.umbral_por_estimulo_oseo[stim])];
             celdas.forEach(function (texto, i) {
                 var td = document.createElement(i === 0 ? 'th' : 'td');
                 td.textContent = texto;

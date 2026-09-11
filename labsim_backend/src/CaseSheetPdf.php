@@ -1289,16 +1289,25 @@ final class CaseSheetPdf
             if ($i === false) {
                 continue;
             }
-            $suma += (float) ($aereaLado[$i] ?? 0) * $peso;
+            $umbral = (float) ($aereaLado[$i] ?? 0);
+            // Una frecuencia sin respuesta no entra al promedio: el 130 no
+            // es un umbral y metido en la cuenta inventa la referencia
+            // contra la que se lee el ABR.
+            if ($umbral >= CaseProfile::SIN_RESPUESTA_DB) {
+                continue;
+            }
+            $suma += $umbral * $peso;
             $total += $peso;
         }
-        return $total > 0 ? self::db($suma / $total) : '--';
+        return $total > 0 ? self::db($suma / $total) : 'sin resp.';
     }
 
-    /** Umbral del ABR, o "sin respuesta" cuando no hay. */
+    /** Umbral del ABR, o el aviso de que no hubo respuesta. */
     private static function umbralAbr($db): string
     {
-        return $db === null ? 'sin respuesta' : self::db((float) $db);
+        // Abreviado: la columna es angosta y "sin respuesta" se montaba
+        // sobre la de al lado.
+        return $db === null ? 'sin resp.' : self::db((float) $db);
     }
 
     /**
@@ -2175,6 +2184,11 @@ final class CaseSheetPdf
      */
     private static function celdaMkg(array $via): string
     {
+        // Sin umbral no hay nada que enmascarar ni rango que calcular: es
+        // distinto de "no cruza", y se dice distinto.
+        if (!empty($via['sin_umbral'])) {
+            return 'sin respuesta';
+        }
         // "/" y no "(-)": en los reflejos el guión entre paréntesis es un
         // RESULTADO --ausente-- y acá significa que no hay nada que hacer.
         if (!$via['cruza']) {

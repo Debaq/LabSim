@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/CaseBuilder.php';
+require_once __DIR__ . '/CaseProfile.php';
 
 /**
  * Enmascaramiento tonal: cuándo hace falta y con cuánto ruido.
@@ -49,6 +50,18 @@ final class CaseMasking
     public const OCLUSIVO_GAP_MAX = 5;
 
     /**
+     * Sin respuesta en esa frecuencia no hay umbral que enmascarar: la
+     * fórmula se calcula igual --el oído es al menos así de malo, ver
+     * CaseProfile::SIN_RESPUESTA_DB-- pero el resultado se marca, porque
+     * un rango calculado sobre un umbral que nadie midió no es un rango
+     * que el alumno pueda usar.
+     */
+    public static function sinRespuesta(float $umbral): bool
+    {
+        return $umbral >= CaseProfile::SIN_RESPUESTA_DB;
+    }
+
+    /**
      * Todo el cuadro de enmascaramiento de un oído, frecuencia por
      * frecuencia y vía por vía.
      *
@@ -82,6 +95,19 @@ final class CaseMasking
         $uone = (float) ($oseaNo[$i] ?? 0);
         $ai = (float) (self::AI_AEREA[$i] ?? 0);
 
+        // El umbral del oído que se está estudiando es el que decide si hay
+        // algo que enmascarar. Sin respuesta, no lo hay.
+        $sinUmbral = self::sinRespuesta($via === 'aerea' ? $uae : $uoe);
+
+        // Los umbrales sin respuesta entran a la fórmula recortados al tope
+        // del audiómetro: el oído es al menos así de malo. Lo que no se
+        // puede es usar el 130 como si fuera un nivel.
+        $tope = CaseProfile::MAX_AUDIOMETRO_DB;
+        $uae = min($uae, $tope);
+        $uoe = min($uoe, $tope);
+        $uane = min($uane, $tope);
+        $uone = min($uone, $tope);
+
         if ($via === 'aerea') {
             $estim = $uae;
             $aiEstimulo = $ai;
@@ -101,7 +127,8 @@ final class CaseMasking
         $nivelCruce = $estim - $aiEstimulo;
 
         return [
-            'cruza' => $nivelCruce >= $uone,
+            'sin_umbral' => $sinUmbral,
+            'cruza' => !$sinUmbral && $nivelCruce >= $uone,
             'min' => $min,
             'max' => $max,
             // El mínimo efectivo por encima del máximo tolerable: no existe

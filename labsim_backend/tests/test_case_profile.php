@@ -435,6 +435,62 @@ t_true(CaseProfile::recruitment(100.0, $dDesc)['recruit'],
     'Mismo criterio para el reclutamiento: se busca donde está el daño');
 
 // ---------------------------------------------------------------------
+// Sin respuesta (130): no es un umbral de 130 dB.
+//
+// El audiómetro llega a 120: un 130 significa que el paciente no oyó ni al
+// máximo. Tomarlo como número inflaba los promedios 60 dB e inventaba gaps,
+// porque restarle la ósea a un 130 da una diferencia que nadie midió.
+// ---------------------------------------------------------------------
+
+t_eq(CaseProfile::SIN_RESPUESTA_DB, 130.0, 'El valor de "sin respuesta" es el 130 que guarda el caso');
+t_true(CaseProfile::MAX_AUDIOMETRO_DB < CaseProfile::SIN_RESPUESTA_DB,
+    'Y está por encima de lo que el audiómetro puede entregar');
+
+$sinResp = audiograma([125 => 30, 250 => 35, 500 => 40, 1000 => 50, 2000 => 70, 3000 => 90,
+                       4000 => 130, 6000 => 130, 8000 => 130]);
+$dSinResp = CaseProfile::decompose($sinResp, $sinResp, 0, 100.0);
+
+t_eq($dSinResp['sin_respuesta']['air'], [4000, 6000, 8000],
+    'decompose() deja anotadas las frecuencias sin respuesta');
+t_eq($dSinResp['air'][4000], CaseProfile::MAX_AUDIOMETRO_DB,
+    'El umbral se recorta al tope del audiómetro: ese oído es al menos así de malo');
+t_eq($dSinResp['gap'][4000], 0.0,
+    'Y no se inventa un gap restándole la ósea a un umbral que no existe');
+
+// El promedio no se va a las nubes por una frecuencia sin respuesta.
+t_true(CaseProfile::coreAverage($dSinResp['sn']) <= 75.0,
+    'El promedio usa el tope del audiómetro, no el 130');
+
+// El ABR de una frecuencia que no respondió en el tonal tampoco responde:
+// es null y no un umbral saturado en el tope, que se leería como medido.
+$thSinResp = CaseProfile::abrThresholds($dSinResp);
+t_eq($thSinResp['tone_burst_4000Hz'], null,
+    'Sin respuesta en 4 kHz, el burst de 4 kHz no tiene umbral que informar');
+t_true($thSinResp['tone_burst_500Hz'] !== null,
+    'Y las frecuencias que sí respondieron conservan el suyo');
+t_true($thSinResp['click'] !== null,
+    'El click se sostiene mientras alguna de sus frecuencias responda');
+
+// Un oído sin respuesta en NINGUNA frecuencia: tampoco hay click.
+$mudo = audiograma([125 => 130]);
+$dMudo = CaseProfile::decompose($mudo, $mudo, 0, 100.0);
+t_eq(CaseProfile::abrThresholds($dMudo)['click'], null,
+    'Sin respuesta en todo el audiograma, el click tampoco tiene umbral');
+
+// Lo que se GUARDA sí lleva número: el cliente lee un entero, y el tope es
+// como el propio módulo expresa "no hubo respuesta en toda la escala".
+$proyectadoMudo = CaseProfile::project(
+    $mudo,
+    $mudo,
+    ['OD' => ['cce_pct' => 100.0, 'retro' => []], 'OI' => ['cce_pct' => 100.0, 'retro' => []]],
+    ['OD' => 'A', 'OI' => 'A']
+);
+t_eq($proyectadoMudo['abr']['OD']['umbral'], CaseProfile::ABR_MAX_DB,
+    'El umbral guardado del ABR es el tope, no null: el cliente lee un número');
+t_eq($proyectadoMudo['abr']['OD']['umbral_por_estimulo']['click'], null,
+    'Pero el detalle por estímulo conserva el null para poder decir "sin respuesta"');
+
+// ---------------------------------------------------------------------
 // project(): la misma pasada que corre al guardar y en la vista previa.
 // ---------------------------------------------------------------------
 
