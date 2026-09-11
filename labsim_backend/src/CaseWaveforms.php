@@ -275,24 +275,44 @@ final class CaseWaveforms
         float $hasta = 40.0,
         int $muestras = 200
     ): array {
-        $picos = self::VEMP_PICOS[$subtipo] ?? self::VEMP_PICOS['CVEMP'];
-        $sl = $intensidad - $umbral;
-        // Por debajo del umbral no hay respuesta; encima crece y satura.
-        $crecimiento = $sl < 0 ? 0.0 : 1 - exp(-$sl / 12);
-        $ampBase = (self::VEMP_AMP_BASE[$subtipo] ?? 1.0) * $crecimiento;
+        $picos = self::picosVemp($subtipo, $intensidad, $umbral, $desviaciones);
 
         $pts = [];
         for ($n = 0; $n <= $muestras; $n++) {
             $t = $hasta * $n / $muestras;
             $v = 0.0;
-            foreach ($picos as $nombre => [$lat0, $signo]) {
-                $lat = $lat0 + (float) ($desviaciones[$nombre]['lat'] ?? 0);
-                $amp = ($ampBase + (float) ($desviaciones[$nombre]['amp'] ?? 0)) * $signo;
-                $d = $t - $lat;
-                $v += $amp * exp(-($d * $d) / (2 * self::VEMP_SIGMA * self::VEMP_SIGMA));
+            foreach ($picos as $pico) {
+                $d = $t - $pico['lat'];
+                $v += $pico['amp'] * exp(-($d * $d) / (2 * self::VEMP_SIGMA * self::VEMP_SIGMA));
             }
             $pts[] = [$t, $v];
         }
         return $pts;
+    }
+
+    /**
+     * Latencia y amplitud (con signo) de cada pico del VEMP a una
+     * intensidad. Separado del trazo para poder rotular los picos sobre la
+     * curva: el nombre del pico es la mitad de lo que se lee en un VEMP.
+     *
+     * @param array<string,array{lat:float,amp:float}> $desviaciones
+     * @return array<string,array{lat:float,amp:float}>
+     */
+    public static function picosVemp(string $subtipo, float $intensidad, float $umbral, array $desviaciones = []): array
+    {
+        $definicion = self::VEMP_PICOS[$subtipo] ?? self::VEMP_PICOS['CVEMP'];
+        $sl = $intensidad - $umbral;
+        // Por debajo del umbral no hay respuesta; encima crece y satura.
+        $crecimiento = $sl < 0 ? 0.0 : 1 - exp(-$sl / 12);
+        $ampBase = (self::VEMP_AMP_BASE[$subtipo] ?? 1.0) * $crecimiento;
+
+        $out = [];
+        foreach ($definicion as $nombre => [$lat0, $signo]) {
+            $out[$nombre] = [
+                'lat' => $lat0 + (float) ($desviaciones[$nombre]['lat'] ?? 0),
+                'amp' => ($ampBase + (float) ($desviaciones[$nombre]['amp'] ?? 0)) * $signo,
+            ];
+        }
+        return $out;
     }
 }

@@ -44,6 +44,13 @@ final class CaseSheetPdf
      */
     private const ASCENDENTE = 0.8;
 
+    /**
+     * Amplitud (µV) desde la cual un pico del VEMP se rotula. Cerca del
+     * umbral la respuesta se apaga, y ponerle "p13" a una línea plana
+     * enseñaría a marcar lo que no está.
+     */
+    private const VEMP_MARCA_MIN_UV = 0.05;
+
     private const GRIS_TITULO = '#222222';
     private const GRIS_TEXTO = '#333333';
     private const GRIS_SUAVE = '#666666';
@@ -1034,9 +1041,22 @@ final class CaseSheetPdf
 
                 $series = [];
                 foreach (CaseWaveforms::serieIntensidades($umbral, 100.0, 10.0) as $nivel) {
+                    $pts = CaseWaveforms::trazoVemp($subtipo, $nivel, $umbral, $desv);
+                    $marcas = [];
+                    foreach (CaseWaveforms::picosVemp($subtipo, $nivel, $umbral, $desv) as $nombre => $pico) {
+                        // El valor se lee del TRAZO y no de la gaussiana del
+                        // pico: p13 y n23 están a 10 ms y se solapan, así que
+                        // la marca tiene que caer sobre la línea dibujada.
+                        $valor = self::valorEn($pts, $pico['lat']);
+                        if (abs($valor) < self::VEMP_MARCA_MIN_UV) {
+                            continue;
+                        }
+                        $marcas[] = ['t' => $pico['lat'], 'v' => $valor, 'texto' => $nombre];
+                    }
                     $series[] = [
                         'rotulo' => self::db($nivel),
-                        'pts' => CaseWaveforms::trazoVemp($subtipo, $nivel, $umbral, $desv),
+                        'pts' => $pts,
+                        'marcas' => $marcas,
                     ];
                 }
                 $this->pdf->text(
@@ -1516,6 +1536,25 @@ final class CaseSheetPdf
             return 'DILEMA (' . self::db($via['meseta']) . ')';
         }
         return self::db($via['min']) . ' - ' . self::db($via['max']) . ' (' . self::db($via['meseta']) . ')';
+    }
+
+    /**
+     * Valor del trazo en la muestra más cercana a $t.
+     *
+     * @param array<int,array{0:float,1:float}> $pts
+     */
+    private static function valorEn(array $pts, float $t): float
+    {
+        $mejor = 0.0;
+        $distancia = INF;
+        foreach ($pts as [$x, $y]) {
+            $d = abs($x - $t);
+            if ($d < $distancia) {
+                $distancia = $d;
+                $mejor = (float) $y;
+            }
+        }
+        return $mejor;
     }
 
     /** Umbral del reflejo, o (-) cuando no hay respuesta en toda la escala. */
