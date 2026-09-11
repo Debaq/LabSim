@@ -115,6 +115,34 @@ t_eq(CaseWaveforms::poblacion(null, 0), 'adult_female', 'Sin edad cae en el defa
 t_true(CaseWaveforms::CLICK_BASE['neonate']['V'][0] > CaseWaveforms::CLICK_BASE['adult_female']['V'][0],
     'La onda V del neonato aparece más tarde que la del adulto');
 
+// --- Rangos de normalidad (espejo de normative_limits) ------------------
+
+$lim = CaseWaveforms::limitesNormativos('adult_female', 80.0);
+foreach (['I', 'III', 'V'] as $onda) {
+    [$lo, $hi] = $lim['lat'][$onda];
+    $centro = CaseWaveforms::CLICK_BASE['adult_female'][$onda][0];
+    t_close(($lo + $hi) / 2, $centro, 0.001, "Onda {$onda}: el rango normal está centrado en la latencia poblacional");
+    t_close($hi - $lo, 2 * CaseWaveforms::NORM_SD_LIMITE * CaseWaveforms::NORM_SD_LAT[$onda], 0.001,
+        "Onda {$onda}: el rango normal es la media +- 2 DE");
+}
+t_close(($lim['interpeak']['I-V'][0] + $lim['interpeak']['I-V'][1]) / 2,
+    CaseWaveforms::CLICK_INTERPICOS['adult_female']['I-V'], 0.001,
+    'El interpico I-V se centra en el valor normativo de la población');
+
+// A menos intensidad la latencia normal es MÁS tardía: leer un ABR de 40 dB
+// con la banda de 80 marcaría como alterado un oído sano.
+$lim40 = CaseWaveforms::limitesNormativos('adult_female', 40.0);
+t_true($lim40['lat']['V'][1] > $lim['lat']['V'][1],
+    'El techo de la onda V se corre con la intensidad, como la curva');
+t_close($lim40['interpeak']['I-V'][1], $lim['interpeak']['I-V'][1], 0.001,
+    'Los interpicos NO dependen de la intensidad');
+
+// El neonato tiene su propia banda: con la de adulto, todo neonato sano
+// queda fuera de norma.
+$limNeo = CaseWaveforms::limitesNormativos('neonate', 80.0);
+t_true($limNeo['lat']['V'][1] > $lim['lat']['V'][1],
+    'La banda del neonato va más tarde que la del adulto');
+
 // --- VEMP ---------------------------------------------------------------
 
 $vempAlto = CaseWaveforms::trazoVemp('CVEMP', 100, 60);

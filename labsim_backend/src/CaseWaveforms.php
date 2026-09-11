@@ -39,6 +39,33 @@ final class CaseWaveforms
         'elderly'      => ['I' => [1.75, 0.27], 'III' => [4.00, 0.32], 'V' => [5.90, 0.45]],
     ];
 
+    /**
+     * Interpicos normativos del click por población (ms). Copia de
+     * populations[*].air_conduction.click.interpeak en
+     * resources/abr/normative_data.json.
+     */
+    public const CLICK_INTERPICOS = [
+        'adult_male' => ['I-III' => 2.2, 'III-V' => 1.85, 'I-V' => 4.05],
+        'adult_female' => ['I-III' => 2.2, 'III-V' => 1.8, 'I-V' => 4.0],
+        'child' => ['I-III' => 2.2, 'III-V' => 1.82, 'I-V' => 4.02],
+        'neonate' => ['I-III' => 2.6, 'III-V' => 2.1, 'I-V' => 4.7],
+        'elderly' => ['I-III' => 2.25, 'III-V' => 1.9, 'I-V' => 4.15],
+    ];
+
+    /**
+     * Rango de normalidad: media +- NORM_SD_LIMIT desviaciones. Mismos
+     * números que NORM_LAT_SD / NORM_INTERPEAK_SD / NORM_SD_LIMIT en
+     * ABR_generator.py, que es con los que el módulo juzga la tabla del
+     * alumno -- si acá dijeran otra cosa, la ficha marcaría como alterado
+     * lo que el equipo da por normal.
+     */
+    public const NORM_SD_LIMITE = 2.0;
+    public const NORM_SD_LAT = ['I' => 0.20, 'III' => 0.22, 'V' => 0.25];
+    public const NORM_SD_INTERPICO = ['I-III' => 0.22, 'III-V' => 0.22, 'I-V' => 0.25];
+
+    /** Diferencia interaural de la onda V que se considera significativa (ms). */
+    public const NORM_INTERAURAL_V_MS = 0.4;
+
     /** Ancho (sigma, ms) de cada onda. WAVE_SIGMA en ABR_generator.py. */
     public const SIGMA = ['I' => 0.22, 'III' => 0.22, 'V' => 0.18];
 
@@ -78,6 +105,38 @@ final class CaseWaveforms
 
     /** Amplitud (µV) por debajo de la cual la onda no se ve. */
     public const AMP_VISIBLE = 0.02;
+
+    /**
+     * Rangos de normalidad de latencias e interpicos a una intensidad.
+     *
+     * Espejo de ABRGenerator::normative_limits: la latencia absoluta se
+     * corre con la MISMA función latencia-intensidad que dibuja la curva
+     * (una V de 6.4 ms a 40 dB no es tardía; a 80 sí), y los interpicos no
+     * dependen de la intensidad.
+     *
+     * @return array{lat:array<string,array{0:float,1:float}>,interpeak:array<string,array{0:float,1:float}>,interaural_v:float}
+     */
+    public static function limitesNormativos(string $poblacion = 'adult_female', float $intensidad = 80.0): array
+    {
+        $base = self::CLICK_BASE[$poblacion] ?? self::CLICK_BASE['adult_female'];
+        $interpicos = self::CLICK_INTERPICOS[$poblacion] ?? self::CLICK_INTERPICOS['adult_female'];
+        $corrimiento = self::corrimientoLatencia($intensidad);
+
+        $lat = [];
+        foreach (self::NORM_SD_LAT as $onda => $sd) {
+            $centro = $base[$onda][0] + $corrimiento * self::LAT_SHIFT_FACTOR[$onda];
+            $margen = $sd * self::NORM_SD_LIMITE;
+            $lat[$onda] = [$centro - $margen, $centro + $margen];
+        }
+
+        $ip = [];
+        foreach (self::NORM_SD_INTERPICO as $clave => $sd) {
+            $margen = $sd * self::NORM_SD_LIMITE;
+            $ip[$clave] = [$interpicos[$clave] - $margen, $interpicos[$clave] + $margen];
+        }
+
+        return ['lat' => $lat, 'interpeak' => $ip, 'interaural_v' => self::NORM_INTERAURAL_V_MS];
+    }
 
     /**
      * Corrimiento (ms) de la función latencia-intensidad respecto de 80 dB.

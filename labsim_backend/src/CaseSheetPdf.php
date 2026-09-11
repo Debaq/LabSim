@@ -1001,22 +1001,27 @@ final class CaseSheetPdf
             );
         }
 
+        $limites = CaseWaveforms::limitesNormativos($poblacion, 80.0);
+
         $filas = [['A 80 dB nHL', 'OD lat', 'OD amp', 'OI lat', 'OI amp']];
         foreach (['I', 'III', 'V'] as $onda) {
+            $techo = $limites['lat'][$onda][1];
             $filas[] = [
                 'Onda ' . $onda,
-                self::ms($ondas80['od'][$onda]),
+                self::marcada(self::ms($ondas80['od'][$onda]), $ondas80['od'][$onda]['lat'], $techo, $ondas80['od'][$onda]),
                 self::uv($ondas80['od'][$onda]),
-                self::ms($ondas80['oi'][$onda]),
+                self::marcada(self::ms($ondas80['oi'][$onda]), $ondas80['oi'][$onda]['lat'], $techo, $ondas80['oi'][$onda]),
                 self::uv($ondas80['oi'][$onda]),
             ];
         }
         foreach ([['I', 'III'], ['III', 'V'], ['I', 'V']] as [$desde, $hasta]) {
+            $clave = $desde . '-' . $hasta;
+            $techo = $limites['interpeak'][$clave][1];
             $filas[] = [
-                'Interpico ' . $desde . '-' . $hasta,
-                self::interpico($ondas80['od'], $desde, $hasta),
+                'Interpico ' . $clave,
+                self::interpicoMarcado($ondas80['od'], $desde, $hasta, $techo),
                 '',
-                self::interpico($ondas80['oi'], $desde, $hasta),
+                self::interpicoMarcado($ondas80['oi'], $desde, $hasta, $techo),
                 '',
             ];
         }
@@ -1067,6 +1072,37 @@ final class CaseSheetPdf
             true
         );
         $this->y = max($fin80, $finCap) + 6;
+
+        // --- La referencia con la que se leen esos números -------------
+        // Media ± 2 DE de la población que le toca al paciente por edad y
+        // sexo, con la latencia corrida por la misma función L-I que dibuja
+        // la curva. Son los mismos límites con los que el módulo juzga la
+        // tabla del alumno.
+        $filas = [['Referencia · ' . self::poblacionLabel($poblacion) . ' · 80 dB', 'Normal (ms)']];
+        foreach (['I', 'III', 'V'] as $onda) {
+            $filas[] = ['Onda ' . $onda, self::rango($limites['lat'][$onda])];
+        }
+        foreach (['I-III', 'III-V', 'I-V'] as $clave) {
+            $filas[] = ['Interpico ' . $clave, self::rango($limites['interpeak'][$clave])];
+        }
+
+        // Diferencia interaural de la onda V (IT5): no es de un oído, es de
+        // la comparación, así que va con la referencia y no en la tabla de
+        // valores.
+        $vOd = $ondas80['od']['V'];
+        $vOi = $ondas80['oi']['V'];
+        $hayIT5 = $vOd['amp'] >= CaseWaveforms::AMP_VISIBLE && $vOi['amp'] >= CaseWaveforms::AMP_VISIBLE;
+        $it5 = $hayIT5 ? abs($vOd['lat'] - $vOi['lat']) : null;
+        $filas[] = [
+            'Dif. interaural V (IT5)',
+            'hasta ' . number_format($limites['interaural_v'], 2)
+            . '   |   medida: ' . ($it5 === null ? '--' : number_format($it5, 2) . ($it5 > $limites['interaural_v'] ? ' *' : '')),
+        ];
+
+        $yRef = $this->y;
+        $finRef = $this->tablaEn(self::MARGEN, $yRef, $anchoTabla, $filas, [0.46, 0.54], true);
+        $this->y = $finRef + 4;
+        $this->parrafo('* por sobre la referencia.', 6.5);
 
         // Las desviaciones cargadas a mano, solo si hay alguna: en cero no
         // dicen nada y los valores de arriba ya las llevan aplicadas.
@@ -1122,6 +1158,43 @@ final class CaseSheetPdf
             $datos[] = 'pulsátil';
         }
         return $frase . '  [' . implode(' · ', array_filter($datos)) . ']';
+    }
+
+    /** Agrega el asterisco si el valor se pasa del techo normativo. */
+    private static function marcada(string $texto, float $valor, float $techo, array $onda): string
+    {
+        if ($texto === '--' || $onda['amp'] < CaseWaveforms::AMP_VISIBLE) {
+            return $texto;
+        }
+        return $valor > $techo ? $texto . ' *' : $texto;
+    }
+
+    /** Interpico con su asterisco. */
+    private static function interpicoMarcado(array $ondas, string $desde, string $hasta, float $techo): string
+    {
+        $texto = self::interpico($ondas, $desde, $hasta);
+        if ($texto === '--') {
+            return $texto;
+        }
+        return ($ondas[$hasta]['lat'] - $ondas[$desde]['lat']) > $techo ? $texto . ' *' : $texto;
+    }
+
+    /** @param array{0:float,1:float} $rango */
+    private static function rango(array $rango): string
+    {
+        return number_format($rango[0], 2) . ' - ' . number_format($rango[1], 2);
+    }
+
+    /** Nombre legible de la población normativa. */
+    private static function poblacionLabel(string $poblacion): string
+    {
+        return [
+            'adult_male' => 'adulto',
+            'adult_female' => 'adulta',
+            'child' => 'niño',
+            'neonate' => 'neonato',
+            'elderly' => 'adulto mayor',
+        ][$poblacion] ?? $poblacion;
     }
 
     /** Latencia de una onda a ese nivel, o -- si no se ve. */
