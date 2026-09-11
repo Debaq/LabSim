@@ -49,10 +49,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             Users::setDisplayName((int) $me['id'], $displayName);
             if ($username !== $me['username']) {
-                Users::setUsername((int) $me['id'], $username);
-                AdminAudit::log($me, 'perfil_username', ['antes' => $me['username'], 'ahora' => $username]);
+                try {
+                    Users::setUsername((int) $me['id'], $username);
+                } catch (PDOException $e) {
+                    // Entre el chequeo de arriba y este UPDATE alguien pudo
+                    // tomar el mismo usuario (o un launch LTI escribirlo). La
+                    // UNIQUE es la que corta de verdad; acá solo se traduce a
+                    // un mensaje en vez de volcar el SQLSTATE en pantalla.
+                    $error = 'Ese usuario lo tomó otra cuenta recién. Elige otro.';
+                }
+                if ($error === null) {
+                    AdminAudit::log($me, 'perfil_username', ['antes' => $me['username'], 'ahora' => $username]);
+                }
             }
-            $success = 'Perfil actualizado.';
+            if ($error === null) {
+                $success = 'Perfil actualizado.';
+            }
             $me = Auth::requireAdminSession(); // relee la fila con los datos nuevos
         }
     } elseif ($action === 'password') {

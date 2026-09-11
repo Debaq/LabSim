@@ -151,7 +151,10 @@ final class Auth
      */
     public static function loginAdmin(string $username, string $password): ?array
     {
-        $stmt = Db::get()->prepare('SELECT * FROM users WHERE username = ? AND active = 1');
+        // COLLATE NOCASE: el usuario se tipea a mano en la app, y "NBaier"
+        // tiene que entrar igual que "nbaier". El índice único
+        // idx_users_username_nocase garantiza que eso no sea ambiguo.
+        $stmt = Db::get()->prepare('SELECT * FROM users WHERE username = ? COLLATE NOCASE AND active = 1');
         $stmt->execute([$username]);
         $row = $stmt->fetch();
         if (!$row || !$row['password_hash'] || !password_verify($password, $row['password_hash'])) {
@@ -300,7 +303,7 @@ final class Auth
      */
     public static function verifyAdminPassword(string $username, string $password): ?array
     {
-        $stmt = Db::get()->prepare("SELECT * FROM users WHERE username = ? AND role = 'admin' AND active = 1");
+        $stmt = Db::get()->prepare("SELECT * FROM users WHERE username = ? COLLATE NOCASE AND role = 'admin' AND active = 1");
         $stmt->execute([$username]);
         $row = $stmt->fetch();
         if (!$row || !$row['password_hash'] || !password_verify($password, $row['password_hash'])) {

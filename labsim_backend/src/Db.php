@@ -444,6 +444,38 @@ final class Db
         self::addColumnIfMissing(self::get(), 'users', 'username_locked', 'INTEGER NOT NULL DEFAULT 0');
     }
 
+    /**
+     * Índice único de users.username insensible a mayúsculas. Si la base ya
+     * trae duplicados que solo difieren en el caso, el CREATE INDEX falla:
+     * se detectan antes para poder decir cuáles son, porque arreglarlos es
+     * una decisión (a cuál de las dos cuentas renombrar) y no algo que esta
+     * migración pueda tomar sola.
+     */
+    public static function migrateUsernameNoCaseIfNeeded(): void
+    {
+        $pdo = self::get();
+        // Instalación nueva: users todavía no existe (la crea schema.sql, con
+        // el índice incluido). Va antes del exec de schema.sql a propósito:
+        // ahí el CREATE INDEX fallaría con un error crudo de SQLite en una
+        // base que ya trae duplicados, en vez del aviso de abajo.
+        $tablas = $pdo->query("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'users'")->fetchAll();
+        if (!$tablas) {
+            return;
+        }
+        $duplicados = $pdo->query(
+            'SELECT group_concat(username, " / ") AS nombres FROM users
+             GROUP BY lower(username) HAVING COUNT(*) > 1'
+        )->fetchAll();
+        if ($duplicados) {
+            throw new RuntimeException(
+                'Hay usuarios que solo se diferencian por mayúsculas y no pueden convivir: '
+                . implode(' | ', array_column($duplicados, 'nombres'))
+                . '. Renombra uno de cada par en Usuarios y vuelve a aplicar el schema.'
+            );
+        }
+        $pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username_nocase ON users (username COLLATE NOCASE)');
+    }
+
     public static function migrateDemoStudentIfNeeded(): void
     {
         $pdo = self::get();

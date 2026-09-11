@@ -73,6 +73,13 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (lti_platform_id, lti_sub)
 );
+-- La UNIQUE de la columna distingue mayúsculas, así que dejaba convivir a
+-- "Nico" y "nico" como cuentas distintas (por los caminos que no pasan por
+-- Users::usernameTaken: alta desde Usuarios y upsert de LTI). Como el login
+-- compara el username tal cual, esas dos cuentas son una trampa: quien tipea
+-- el caso distinto no entra aunque "su" usuario exista. Este índice las
+-- prohíbe, y de paso es el que usan las búsquedas con COLLATE NOCASE.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username_nocase ON users (username COLLATE NOCASE);
 
 -- Códigos de emparejamiento temporales: puente entre el login LTI (navegador)
 -- y la app de escritorio, que no puede recibir el redirect del LMS.

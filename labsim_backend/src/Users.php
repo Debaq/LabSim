@@ -18,7 +18,7 @@ final class Users
         $hash = password_hash($password, PASSWORD_DEFAULT);
         $pdo = Db::get();
 
-        $stmt = $pdo->prepare('SELECT id FROM users WHERE username = ?');
+        $stmt = $pdo->prepare('SELECT id FROM users WHERE username = ? COLLATE NOCASE');
         $stmt->execute([$username]);
         $existing = $stmt->fetch();
 
@@ -75,7 +75,7 @@ final class Users
     /** ¿Ese usuario ya lo tiene otra cuenta? Sin distinguir mayúsculas (se escribe a mano en la app). */
     public static function usernameTaken(string $username, int $exceptUserId): bool
     {
-        $stmt = Db::get()->prepare('SELECT 1 FROM users WHERE lower(username) = lower(?) AND id != ?');
+        $stmt = Db::get()->prepare('SELECT 1 FROM users WHERE username = ? COLLATE NOCASE AND id != ?');
         $stmt->execute([$username, $exceptUserId]);
         return (bool) $stmt->fetch();
     }

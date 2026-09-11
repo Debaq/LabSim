@@ -219,7 +219,7 @@ final class Courses
     /** Agrega un usuario existente (buscado por username) como docente o alumno del curso. */
     public static function addMemberByUsername(int $courseId, string $username, string $kind): ?string
     {
-        $stmt = Db::get()->prepare("SELECT id, role FROM users WHERE username = ?");
+        $stmt = Db::get()->prepare("SELECT id, role FROM users WHERE username = ? COLLATE NOCASE");
         $stmt->execute([$username]);
         $user = $stmt->fetch();
         if (!$user) {
@@ -288,7 +288,7 @@ final class Courses
             return ['status' => 'error', 'username' => $username, 'message' => 'Falta el username.'];
         }
 
-        $stmt = Db::get()->prepare('SELECT id FROM users WHERE username = ?');
+        $stmt = Db::get()->prepare('SELECT id FROM users WHERE username = ? COLLATE NOCASE');
         $stmt->execute([$username]);
         $user = $stmt->fetch();
 
@@ -339,7 +339,7 @@ final class Courses
 
         $username = 'demo_curso_' . $courseId;
         $pdo = Db::get();
-        $stmt = $pdo->prepare('SELECT id FROM users WHERE username = ?');
+        $stmt = $pdo->prepare('SELECT id FROM users WHERE username = ? COLLATE NOCASE');
         $stmt->execute([$username]);
         $existing = $stmt->fetchColumn();
         if ($existing !== false) {

@@ -51,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'config por curso' => static fn() => Db::migrateAppConfigCourseIdIfNeeded(),
                 'alumno demo' => static fn() => Db::migrateDemoStudentIfNeeded(),
                 'login propio del docente' => static fn() => Db::migrateProfileLoginIfNeeded(),
+                'usuarios sin distinguir mayúsculas' => static fn() => Db::migrateUsernameNoCaseIfNeeded(),
                 'otoscopía en informes' => static fn() => Db::migrateReportsOtoscopiaIfNeeded(),
                 // El schema en sí: crea las tablas que falten. Va en el medio
                 // porque los pasos de abajo agregan columnas a tablas que

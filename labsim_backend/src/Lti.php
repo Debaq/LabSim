@@ -254,7 +254,7 @@ final class Lti
         // del tool, default en muchas instalaciones), preferir el nombre
         // real por sobre el fallback opaco "{platform_id}:{sub}". Se
         // mantiene único agregando el sub entre paréntesis.
-        $username = $email ?: "{$name} ({$platform['id']}:{$sub})";
+        $username = $email ?: self::usernameOpaco($platform, $sub, $name);
 
         $stmt = $pdo->prepare('SELECT id, username_locked FROM users WHERE lti_platform_id = ? AND lti_sub = ?');
         $stmt->execute([$platform['id'], $sub]);
@@ -263,7 +263,14 @@ final class Lti
             // username_locked: la persona eligió su usuario de login en
             // admin/perfil.php para entrar a la app con contraseña. Moodle
             // sigue mandando el nombre a mostrar, pero el usuario es suyo.
-            if ((int) ($row['username_locked'] ?? 0) === 1) {
+            //
+            // Y aunque no esté lockeado, el username que manda Moodle puede
+            // ser el que OTRA cuenta ya tiene (un docente que se quedó con
+            // ese email en su perfil): escribirlo rompería la UNIQUE y con
+            // ella el launch entero. Vale más un username viejo que un
+            // alumno que no puede entrar a clase.
+            $lockeado = (int) ($row['username_locked'] ?? 0) === 1;
+            if ($lockeado || self::usernameDeOtro($pdo, $username, (int) $row['id'])) {
                 $pdo->prepare('UPDATE users SET display_name = ? WHERE id = ?')
                     ->execute([$name, $row['id']]);
             } else {
@@ -273,12 +280,31 @@ final class Lti
             return (int) $row['id'];
         }
 
+        // Cuenta nueva: si el email ya lo tiene otra cuenta, se cae al
+        // username opaco, que lleva platform:sub y por eso es único.
+        if (self::usernameDeOtro($pdo, $username, 0)) {
+            $username = self::usernameOpaco($platform, $sub, $name);
+        }
         $stmt = $pdo->prepare(
             "INSERT INTO users (role, username, display_name, lti_platform_id, lti_sub, permission)
              VALUES ('student', ?, ?, ?, ?, 444)"
         );
         $stmt->execute([$username, $name, $platform['id'], $sub]);
         return (int) $pdo->lastInsertId();
+    }
+
+    /** Username de último recurso: único por construcción (plataforma + sub de Moodle). */
+    private static function usernameOpaco(array $platform, string $sub, string $name): string
+    {
+        return "{$name} ({$platform['id']}:{$sub})";
+    }
+
+    /** ¿Ese username ya es de otra cuenta? Sin distinguir mayúsculas, igual que el índice único. */
+    private static function usernameDeOtro(PDO $pdo, string $username, int $exceptUserId): bool
+    {
+        $stmt = $pdo->prepare('SELECT 1 FROM users WHERE username = ? COLLATE NOCASE AND id != ?');
+        $stmt->execute([$username, $exceptUserId]);
+        return (bool) $stmt->fetch();
     }
 
     /** ID del curso LabSim vinculado a este contexto de Moodle (ver linkContextToCourse), o null si no está vinculado. */
