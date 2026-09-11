@@ -37,6 +37,12 @@ declare(strict_types=1);
  * y sus imágenes son un gráfico por prueba y oído: suffixes
  * '<prueba>_od' / '<prueba>_oi'.
  */
+// No hay autoloader: la dependencia se declara donde se usa. Sin estos dos
+// require, build() fatalaba con "Class MiniPdf not found" apenas se pedía un
+// informe sin PDF ya subido.
+require_once __DIR__ . '/HelveticaWidths.php';
+require_once __DIR__ . '/MiniPdf.php';
+
 final class ReportPdfBuilder
 {
     private const MARGIN = 50.0;
@@ -246,13 +252,21 @@ final class ReportPdfBuilder
     /** Líneas de resumen numérico de una prueba EOA en un oído. */
     private static function eoaLines(string $clave, array $r): array
     {
-        return match ($clave) {
-            'teoae' => self::teoaeLines($r),
-            'dpoae' => self::dpoaeLines($r),
-            'soae' => self::soaeLines($r),
-            'sfoae' => self::sfoaeLines($r),
-            default => [],
-        };
+        // switch y no match(): el hosting corre PHP 7.4 y match es de 8.0
+        // (ver tests/test_php_baseline.php). Con match, este archivo ni
+        // siquiera parseaba allá, así que report_pdf.php devolvía un 500.
+        switch ($clave) {
+            case 'teoae':
+                return self::teoaeLines($r);
+            case 'dpoae':
+                return self::dpoaeLines($r);
+            case 'soae':
+                return self::soaeLines($r);
+            case 'sfoae':
+                return self::sfoaeLines($r);
+            default:
+                return [];
+        }
     }
 
     private static function teoaeLines(array $r): array
@@ -416,13 +430,15 @@ final class ReportPdfBuilder
 
     private static function tipoLabel(string $tipo): string
     {
-        return match ($tipo) {
+        // Mapa y no match(): el hosting corre PHP 7.4 (ver el otro caso en
+        // eoaLines y tests/test_php_baseline.php).
+        $etiquetas = [
             'ABR' => 'PEATC (ABR)',
             'EOA' => 'Emisiones Otoacústicas',
             'VEMP' => 'Potenciales Evocados Vestibulares Miogénicos',
             'ELECTROCOCLEO' => 'Electrococleografía',
-            default => $tipo,
-        };
+        ];
+        return $etiquetas[$tipo] ?? $tipo;
     }
 
     /**

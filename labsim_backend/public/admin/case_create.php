@@ -445,6 +445,17 @@ admin_add_js('case/auto-cambios.js');
 admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico', $me);
 ?>
 
+<?php if ($isEdit): ?>
+<p class="row row--between">
+    <span class="muted">Ficha guardada: se puede imprimir tal como está guardada (los cambios sin guardar no salen en el PDF).</span>
+    <span>
+        <a class="btn" href="case_sheet_pdf.php?id=<?= urlencode($editId) ?>" target="_blank" rel="noopener">Ficha completa en PDF</a>
+        <a class="btn" href="case_sheet_pdf.php?id=<?= urlencode($editId) ?>&amp;modo=alumno" target="_blank" rel="noopener"
+           title="Sin el perfil auditivo ni los parámetros del generador">Versión para el alumno</a>
+    </span>
+</p>
+<?php endif; ?>
+
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 <?php if (!empty($faltantes)): ?>
 <div class="card pendientes-card">

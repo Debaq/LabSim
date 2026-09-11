@@ -4,10 +4,16 @@ declare(strict_types=1);
 
 /**
  * Generador de PDF mínimo, propio (sin Composer, sin librería de terceros
- * vendorizada) -- alcanza para lo que necesita ReportPdfBuilder: texto con
- * Helvetica/Helvetica-Bold (fuentes core, sin embeber), líneas/rectángulos,
- * e imágenes JPEG (incrustadas tal cual via DCTDecode, sin pasar por GD --
- * este hosting puede no tenerlo, ver ReportFile.php).
+ * vendorizada): texto con Helvetica/Helvetica-Bold (fuentes core, sin
+ * embeber), líneas/rectángulos/polilíneas/polígonos/círculos con color y
+ * trazo punteado, e imágenes JPEG (incrustadas tal cual via DCTDecode, sin
+ * pasar por GD -- este hosting puede no tenerlo, ver ReportFile.php).
+ *
+ * El color y el punteado entran por parámetro en cada primitiva, no como
+ * estado del objeto: cada dibujo se emite dentro de su propio q/Q, así una
+ * curva roja no puede teñir a la que venga después. Es lo que hace posible
+ * dibujar el audiograma de los dos oídos sin arrastrar estado (ver
+ * CaseCharts).
  *
  * No soporta: PNG (por eso ReportFile solo acepta JPEG), compresión de
  * streams (FlateDecode) ni fuentes embebidas/Unicode completo -- el texto
@@ -82,18 +88,23 @@ final class MiniPdf
     }
 
     /** Dibuja una línea YA en WinAnsi (un byte por char) -- no reconvierte. Uso interno de text()/textBlock(). */
-    private function drawWinAnsiLine(float $x, float $y, string $winAnsiText, float $size, bool $bold): void
+    private function drawWinAnsiLine(float $x, float $y, string $winAnsiText, float $size, bool $bold, ?string $color = null): void
     {
         $font = $bold ? '/FB' : '/F1';
         $encoded = self::esc($winAnsiText);
         $pdfY = $this->pageH - $y;
-        $this->currentStream .= sprintf("BT %s %.2F Tf %.2F %.2F Td (%s) Tj ET\n", $font, $size, $x, $pdfY, $encoded);
+        $ops = sprintf("BT %s %.2F Tf %.2F %.2F Td (%s) Tj ET\n", $font, $size, $x, $pdfY, $encoded);
+        if ($color === null) {
+            $this->currentStream .= $ops;
+            return;
+        }
+        $this->wrapped($ops, null, $color);
     }
 
     /** $text en UTF-8 (como llega de la app/BD) -- se convierte a WinAnsi acá. */
-    public function text(float $x, float $y, string $text, float $size = 10, bool $bold = false): void
+    public function text(float $x, float $y, string $text, float $size = 10, bool $bold = false, ?string $color = null): void
     {
-        $this->drawWinAnsiLine($x, $y, self::toWinAnsi($text), $size, $bold);
+        $this->drawWinAnsiLine($x, $y, self::toWinAnsi($text), $size, $bold, $color);
     }
 
     /**
@@ -127,27 +138,167 @@ final class MiniPdf
     }
 
     /** Dibuja texto envuelto empezando en (x,y), devuelve la Y siguiente (después de la última línea). */
-    public function textBlock(float $x, float $y, string $text, float $maxWidth, float $size = 10, bool $bold = false, float $lineHeight = 0): float
+    public function textBlock(float $x, float $y, string $text, float $maxWidth, float $size = 10, bool $bold = false, float $lineHeight = 0, ?string $color = null): float
     {
         $lineHeight = $lineHeight > 0 ? $lineHeight : $size * 1.35;
         foreach ($this->wrapText($text, $size, $maxWidth, $bold) as $line) {
-            $this->drawWinAnsiLine($x, $y, $line, $size, $bold);
+            $this->drawWinAnsiLine($x, $y, $line, $size, $bold, $color);
             $y += $lineHeight;
         }
         return $y;
     }
 
-    public function line(float $x1, float $y1, float $x2, float $y2, float $width = 0.5): void
+    public function line(float $x1, float $y1, float $x2, float $y2, float $width = 0.5, ?string $color = null, ?array $dash = null): void
     {
         $py1 = $this->pageH - $y1;
         $py2 = $this->pageH - $y2;
-        $this->currentStream .= sprintf("%.2F w %.2F %.2F m %.2F %.2F l S\n", $width, $x1, $py1, $x2, $py2);
+        $this->wrapped(
+            sprintf("%.2F w%s %.2F %.2F m %.2F %.2F l S\n", $width, self::dashOp($dash), $x1, $py1, $x2, $py2),
+            $color,
+            null
+        );
     }
 
-    public function rect(float $x, float $y, float $w, float $h, float $lineWidth = 0.5): void
+    public function rect(float $x, float $y, float $w, float $h, float $lineWidth = 0.5, ?string $color = null): void
     {
         $py = $this->pageH - $y - $h;
-        $this->currentStream .= sprintf("%.2F w %.2F %.2F %.2F %.2F re S\n", $lineWidth, $x, $py, $w, $h);
+        $this->wrapped(sprintf("%.2F w %.2F %.2F %.2F %.2F re S\n", $lineWidth, $x, $py, $w, $h), $color, null);
+    }
+
+    /** Rectángulo relleno sin borde -- fondos de tabla y barras. */
+    public function rectFilled(float $x, float $y, float $w, float $h, string $color): void
+    {
+        $py = $this->pageH - $y - $h;
+        $this->wrapped(sprintf("%.2F %.2F %.2F %.2F re f\n", $x, $py, $w, $h), null, $color);
+    }
+
+    /**
+     * Polilínea abierta por puntos [[x,y], ...] en coordenadas de la API
+     * (Y hacia abajo). Es el trazo de las curvas: audiograma, timpanograma,
+     * logograma, desviación de la OEA.
+     *
+     * @param array<int,array{0:float,1:float}> $pts
+     * @param array<int,float>|null $dash patrón [on, off] en pt, o null
+     */
+    public function polyline(array $pts, float $width = 1.0, ?string $color = null, ?array $dash = null): void
+    {
+        $pts = array_values(array_filter($pts, static fn ($p) => is_array($p) && count($p) >= 2));
+        if (count($pts) < 2) {
+            return;
+        }
+        $ops = sprintf("%.2F w%s\n", $width, self::dashOp($dash));
+        foreach ($pts as $i => $pt) {
+            $ops .= sprintf("%.2F %.2F %s\n", $pt[0], $this->pageH - $pt[1], $i === 0 ? 'm' : 'l');
+        }
+        $this->wrapped($ops . "S\n", $color, null);
+    }
+
+    /**
+     * Polígono cerrado. Con $fillColor se rellena; con $strokeColor se
+     * dibuja el borde; los dos juntos hacen las dos cosas.
+     *
+     * @param array<int,array{0:float,1:float}> $pts
+     */
+    public function polygon(array $pts, ?string $strokeColor = null, ?string $fillColor = null, float $width = 1.0): void
+    {
+        $pts = array_values(array_filter($pts, static fn ($p) => is_array($p) && count($p) >= 2));
+        if (count($pts) < 3) {
+            return;
+        }
+        $ops = sprintf("%.2F w\n", $width);
+        foreach ($pts as $i => $pt) {
+            $ops .= sprintf("%.2F %.2F %s\n", $pt[0], $this->pageH - $pt[1], $i === 0 ? 'm' : 'l');
+        }
+        $ops .= 'h ' . self::paintOp($strokeColor, $fillColor) . "\n";
+        $this->wrapped($ops, $strokeColor, $fillColor);
+    }
+
+    /**
+     * Círculo por cuatro bezier (el PDF no tiene primitiva de arco). La
+     * constante 0.5523 es la razón conocida que hace que una bezier cúbica
+     * aproxime un cuarto de circunferencia.
+     */
+    public function circle(float $cx, float $cy, float $r, ?string $strokeColor = null, ?string $fillColor = null, float $width = 1.0): void
+    {
+        $k = $r * 0.5523;
+        $py = $this->pageH - $cy;
+        $ops = sprintf("%.2F w\n", $width);
+        $ops .= sprintf("%.2F %.2F m\n", $cx + $r, $py);
+        $ops .= sprintf("%.2F %.2F %.2F %.2F %.2F %.2F c\n", $cx + $r, $py + $k, $cx + $k, $py + $r, $cx, $py + $r);
+        $ops .= sprintf("%.2F %.2F %.2F %.2F %.2F %.2F c\n", $cx - $k, $py + $r, $cx - $r, $py + $k, $cx - $r, $py);
+        $ops .= sprintf("%.2F %.2F %.2F %.2F %.2F %.2F c\n", $cx - $r, $py - $k, $cx - $k, $py - $r, $cx, $py - $r);
+        $ops .= sprintf("%.2F %.2F %.2F %.2F %.2F %.2F c\n", $cx + $k, $py - $r, $cx + $r, $py - $k, $cx + $r, $py);
+        $ops .= self::paintOp($strokeColor, $fillColor) . "\n";
+        $this->wrapped($ops, $strokeColor, $fillColor);
+    }
+
+    /** Ancho real de un texto en pt (Helvetica), para centrar o alinear a la derecha. */
+    public function textWidth(string $text, float $size, bool $bold = false): float
+    {
+        return HelveticaWidths::width(self::toWinAnsi($text), $size, $bold);
+    }
+
+    /** Texto centrado en $xCenter. */
+    public function textCenter(float $xCenter, float $y, string $text, float $size = 10, bool $bold = false, ?string $color = null): void
+    {
+        $this->text($xCenter - $this->textWidth($text, $size, $bold) / 2, $y, $text, $size, $bold, $color);
+    }
+
+    /** Texto terminado en $xRight (números de tabla, que se leen alineados). */
+    public function textRight(float $xRight, float $y, string $text, float $size = 10, bool $bold = false, ?string $color = null): void
+    {
+        $this->text($xRight - $this->textWidth($text, $size, $bold), $y, $text, $size, $bold, $color);
+    }
+
+    /** '#rrggbb' -> "r g b" en 0..1, que es como el PDF pide el color. */
+    private static function rgb(string $hex): string
+    {
+        $hex = ltrim(trim($hex), '#');
+        if (strlen($hex) !== 6 || !ctype_xdigit($hex)) {
+            return '0 0 0';
+        }
+        return sprintf(
+            '%.3F %.3F %.3F',
+            hexdec(substr($hex, 0, 2)) / 255,
+            hexdec(substr($hex, 2, 2)) / 255,
+            hexdec(substr($hex, 4, 2)) / 255
+        );
+    }
+
+    /** Operador de pintado según qué colores se pidieron (borde, relleno o los dos). */
+    private static function paintOp(?string $stroke, ?string $fill): string
+    {
+        if ($fill !== null && $stroke !== null) {
+            return 'B';
+        }
+        return $fill !== null ? 'f' : 'S';
+    }
+
+    private static function dashOp(?array $dash): string
+    {
+        if ($dash === null || $dash === []) {
+            return '';
+        }
+        return sprintf(' [%.2F %.2F] 0 d', (float) $dash[0], (float) ($dash[1] ?? $dash[0]));
+    }
+
+    /**
+     * Emite $ops dentro de q/Q con los colores pedidos. Todo dibujo pasa por
+     * acá: sin el q/Q, el color y el punteado quedarían activos para lo que
+     * se dibuje después, que es la clase de bug que aparece recién al mirar
+     * el PDF impreso.
+     */
+    private function wrapped(string $ops, ?string $strokeColor, ?string $fillColor): void
+    {
+        $this->currentStream .= "q\n";
+        if ($strokeColor !== null) {
+            $this->currentStream .= self::rgb($strokeColor) . " RG\n";
+        }
+        if ($fillColor !== null) {
+            $this->currentStream .= self::rgb($fillColor) . " rg\n";
+        }
+        $this->currentStream .= $ops;
+        $this->currentStream .= "Q\n";
     }
 
     /**
@@ -168,11 +319,32 @@ final class MiniPdf
         $channels = $info['channels'] ?? 3;
         $colorSpace = $channels === 1 ? 'DeviceGray' : ($channels === 4 ? 'DeviceCMYK' : 'DeviceRGB');
 
-        $key = $path . '#' . filemtime($path);
+        $this->embedJpeg($data, $info[0], $info[1], $colorSpace, $path . '#' . filemtime($path), $x, $y, $w, $h);
+    }
+
+    /**
+     * Incrusta un JPEG que ya está en memoria, sin pasar por disco.
+     *
+     * Existe para las fotos del caso: se guardan en webp (otoscopia) o png
+     * (avatar del paciente) y hay que convertirlas con GD para el PDF (ver
+     * PdfImage). Escribir el JPEG convertido a un archivo temporal solo para
+     * que image() lo vuelva a leer sería trabajo de más y basura en disco.
+     *
+     * @param string $jpegBytes contenido de un JPEG válido
+     * @param string $clave identidad de la imagen: dos incrustaciones con la
+     *                      misma clave comparten un solo objeto en el PDF
+     */
+    public function imageJpeg(string $jpegBytes, int $wPx, int $hPx, string $clave, float $x, float $y, float $w, float $h, bool $gris = false): void
+    {
+        $this->embedJpeg($jpegBytes, $wPx, $hPx, $gris ? 'DeviceGray' : 'DeviceRGB', $clave, $x, $y, $w, $h);
+    }
+
+    private function embedJpeg(string $data, int $wPx, int $hPx, string $colorSpace, string $key, float $x, float $y, float $w, float $h): void
+    {
         if (!isset($this->images[$key])) {
             $this->images[$key] = [
-                'width' => $info[0],
-                'height' => $info[1],
+                'width' => $wPx,
+                'height' => $hPx,
                 'colorSpace' => $colorSpace,
                 'bits' => 8,
                 'data' => $data,
