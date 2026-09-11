@@ -131,8 +131,13 @@ t_true(strpos($pdfDemo, 'Interpico I-V') !== false,
     'El ABR informa los interpicos a 80 dB');
 t_true(strpos($pdfDemo, 'FSP objetivo') !== false && strpos($pdfDemo, 'Alcanza el objetivo') !== false,
     'El ABR dice qué FSP logra y si llega al objetivo');
-t_true(strpos($pdfDemo, 'aplicada') !== false,
-    'La OEA informa la caída por banda que termina aplicando el cliente');
+// La hoja de OEA trae los números, no solo las curvas: emisión, ruido y la
+// relación entre los dos, que es lo que decide el PASS/REFER.
+t_true(strpos($pdfDemo, 'OD emis.') !== false && strpos($pdfDemo, 'OD S/R') !== false,
+    'La OEA informa emisión, ruido y relación señal/ruido por banda');
+foreach (['TEOAE 1k', 'DP 8k', 'SFOAE 500'] as $banda) {
+    t_true(strpos($pdfDemo, $banda) !== false, "La tabla de OEA incluye la banda '{$banda}'");
+}
 // Los paréntesis delimitan las cadenas en un content stream, así que MiniPdf
 // los escapa: en los bytes del PDF "(-)" aparece como "\(-\)".
 t_true(strpos($pdfDemo, '\\(-\\)') !== false, 'Un reflejo fuera de escala se imprime (-), no 130 dB');

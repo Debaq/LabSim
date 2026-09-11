@@ -752,18 +752,20 @@ final class CaseCharts
     }
 
     /**
-     * TEOAE: barras dobles de señal y ruido por banda, que es como lo
-     * imprime cualquier equipo de transientes.
+     * TEOAE: una barra por oído y banda, con el ruido SUPERPUESTO en gris
+     * dentro de la misma barra, que es como lo dibuja un equipo de
+     * transientes. Lo que asoma por encima del gris es la relación
+     * señal/ruido: se lee como altura, sin restar dos barras con el ojo.
      *
-     * No es un DP-grama y no se dibuja como uno: en el transiente lo que se
-     * lee es la RELACIÓN entre las dos barras banda por banda, no la forma
-     * de una curva. Por eso va un panel por oído -- cuatro barras por banda
-     * no se comparan con la vista.
+     * Sobre cada barra va su marca --un tick si esa banda pasa el criterio,
+     * una R si no-- EN EL COLOR DEL OÍDO. No es decoración: cuando el ruido
+     * tapa a la emisión la barra se ve toda gris, y sin esa marca no habría
+     * forma de saber de qué oído es.
      *
      * @param array<int,int> $bandas
-     * @param array<int,float> $senal Hz => dB SPL de respuesta
-     * @param array<int,float> $ruido Hz => dB SPL de piso
-     * @param array<int,bool> $pasa Hz => si esa banda supera el criterio
+     * @param array<string,array<int,float>> $senal lado => Hz => dB SPL
+     * @param array<string,array<int,float>> $ruido lado => Hz => dB SPL
+     * @param array<string,array<int,bool>> $pasa lado => Hz => supera el criterio
      */
     public static function oaeBars(
         MiniPdf $pdf,
@@ -775,7 +777,6 @@ final class CaseCharts
         array $senal,
         array $ruido,
         array $pasa,
-        string $color,
         array $rangoY
     ): void {
         if ($bandas === []) {
@@ -786,24 +787,19 @@ final class CaseCharts
         $maxY = $rangoY[1];
         $fy = static fn (float $db): float => $py + ($maxY - max($minY, min($maxY, $db))) / ($maxY - $minY) * $ph;
 
-        for ($db = $minY; $db <= $maxY; $db += 10) {
+        for ($db = $minY; $db <= $maxY; $db += 5) {
             $lineY = $fy((float) $db);
             $cero = abs($db) < 0.01;
             $pdf->line($px, $lineY, $px + $pw, $lineY, $cero ? 0.6 : 0.3, $cero ? self::COLOR_GRID_FUERTE : self::COLOR_GRID);
-            $pdf->textRight($px - 3, $lineY + 2, (string) (int) $db, 5.0, false, self::COLOR_ROTULO);
+            if ((int) $db % 10 === 0) {
+                $pdf->textRight($px - 3, $lineY + 2, (string) (int) $db, 5.0, false, self::COLOR_ROTULO);
+            }
         }
         $pdf->rect($px, $py, $pw, $ph, 0.7, self::COLOR_GRID_FUERTE);
         $pdf->text($x, $y + $h - 1.5, 'dB SPL', 5.0, false, self::COLOR_ROTULO);
 
-        // Cada banda ocupa su celda y dentro van las dos barras pegadas:
-        // la señal a la izquierda, el ruido a la derecha.
-        //
-        // Las barras crecen desde el PISO del eje y no desde el 0, que es
-        // como las dibuja un equipo de transientes: la barra es la magnitud.
-        // Así una banda sin respuesta se queda sin barra en vez de mostrar
-        // un tocón bajo el cero que se lee como "algo hay".
         $celda = $pw / count($bandas);
-        $anchoBarra = min(9.0, $celda * 0.33);
+        $anchoBarra = min(10.0, $celda * 0.3);
         $base = $fy($minY);
 
         foreach (array_values($bandas) as $i => $hz) {
@@ -811,25 +807,39 @@ final class CaseCharts
             $pdf->textCenter($centro, $py + $ph + self::EJE_INF - 3, self::freqLabel((int) $hz), 5.0, false, self::COLOR_ROTULO);
 
             foreach ([
-                [$senal[$hz] ?? $minY, $centro - $anchoBarra * 0.55 - $anchoBarra / 2, $color],
-                [$ruido[$hz] ?? $minY, $centro + $anchoBarra * 0.55 - $anchoBarra / 2, '#9a9a9a'],
-            ] as [$valor, $xBarra, $colorBarra]) {
-                $yValor = $fy((float) $valor);
-                $alto = $base - $yValor;
-                if ($alto <= 0.4) {
-                    // Por debajo del piso del eje no hay barra que dibujar:
-                    // esa banda no tiene respuesta, y el conteo lo dice.
-                    continue;
-                }
-                $pdf->rectFilled($xBarra, $yValor, $anchoBarra, $alto, $colorBarra);
-            }
+                ['od', self::COLOR_OD, $centro - $anchoBarra * 0.6 - $anchoBarra / 2],
+                ['oi', self::COLOR_OI, $centro + $anchoBarra * 0.6 - $anchoBarra / 2],
+            ] as [$lado, $color, $xBarra]) {
+                $valorSenal = (float) ($senal[$lado][$hz] ?? $minY);
+                $valorRuido = (float) ($ruido[$lado][$hz] ?? $minY);
 
-            // La banda que no llega al criterio se marca: es el REFER del
-            // equipo, y sin eso hay que medir la diferencia con el ojo.
-            if (empty($pasa[$hz])) {
-                $pdf->textCenter($centro, $py + 7, 'R', 5.5, true, self::COLOR_ROTULO);
+                // La emisión primero y el ruido encima: si el ruido la tapa,
+                // la barra se ve gris entera, que es exactamente lo que pasó.
+                foreach ([[$valorSenal, $color], [$valorRuido, '#9a9a9a']] as [$valor, $colorBarra]) {
+                    $yValor = $fy($valor);
+                    $alto = $base - $yValor;
+                    if ($alto > 0.4) {
+                        $pdf->rectFilled($xBarra, $yValor, $anchoBarra, $alto, $colorBarra);
+                    }
+                }
+
+                $marca = max($fy($valorSenal), $fy($valorRuido)) === $fy($valorSenal)
+                    ? $fy($valorRuido)
+                    : $fy($valorSenal);
+                $yMarca = min($fy($valorSenal), $fy($valorRuido)) - 4;
+                if (!empty($pasa[$lado][$hz])) {
+                    self::tick($pdf, $xBarra + $anchoBarra / 2, $yMarca, $color);
+                } else {
+                    $pdf->textCenter($xBarra + $anchoBarra / 2, $yMarca + 2, 'R', 5.5, true, $color);
+                }
             }
         }
+    }
+
+    /** Tick de "pasa", dibujado: el carácter no existe en WinAnsi. */
+    private static function tick(MiniPdf $pdf, float $x, float $y, string $color): void
+    {
+        $pdf->polyline([[$x - 2.4, $y - 0.6], [$x - 0.8, $y + 1.4], [$x + 2.6, $y - 2.8]], 1.1, $color);
     }
 
     /**
@@ -848,13 +858,26 @@ final class CaseCharts
         array $porLado,
         array $rangoHz,
         array $rangoY,
-        callable $piso
+        callable $piso,
+        ?array $zonaPicos = null
     ): void {
         [$px, $py, $pw, $ph] = self::plotBox($x, $y, $w, $h);
         $minLog = log((float) $rangoHz[0], 2);
         $maxLog = log((float) $rangoHz[1], 2);
         $fx = static fn (float $hz): float => $px + (log(max(1.0, $hz), 2) - $minLog) / max(0.001, $maxLog - $minLog) * $pw;
         $fy = static fn (float $db): float => $py + ($rangoY[1] - max($rangoY[0], min($rangoY[1], $db))) / ($rangoY[1] - $rangoY[0]) * $ph;
+
+        // La franja donde los picos son posibles: sin ella, un registro sin
+        // picos es un rectángulo vacío que no dice ni dónde se los busca.
+        if ($zonaPicos !== null) {
+            $pdf->rectFilled(
+                $fx((float) $zonaPicos[0]),
+                $py,
+                $fx((float) $zonaPicos[1]) - $fx((float) $zonaPicos[0]),
+                $ph,
+                '#eef2f6'
+            );
+        }
 
         foreach ([500, 1000, 2000, 4000, 7000] as $hz) {
             if ($hz < $rangoHz[0] || $hz > $rangoHz[1]) {

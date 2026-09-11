@@ -1302,9 +1302,13 @@ final class CaseSheetPdf
         return $db === null ? 'sin respuesta' : self::db((float) $db);
     }
 
+    /**
+     * Las cuatro pruebas de OEA: los cuatro gráficos en cuadrícula y, abajo,
+     * los números que el alumno va a leer del equipo.
+     */
     private function eoas(array $data): void
     {
-        $this->titulo('Emisiones otoacústicas (OEA)', 230.0);
+        $this->titulo('Emisiones otoacústicas (OEA)', 260.0);
 
         $eoas = is_array($data['EOAS'] ?? null) ? $data['EOAS'] : [];
         $cfg = [
@@ -1314,114 +1318,114 @@ final class CaseSheetPdf
         $pruebas = ['od' => CaseOae::pruebas($cfg['od']), 'oi' => CaseOae::pruebas($cfg['oi'])];
 
         $ancho = ($this->anchoContenido - 14) / 2;
-        $alto = 118.0;
+        $alto = 104.0;
+        $xDer = self::MARGEN + $ancho + 14;
 
-        // TEOAE: un panel por oído, con barras de señal y ruido banda por
-        // banda. No es un DP-grama: en el transiente lo que se lee es la
-        // relación entre las dos barras, no la forma de una curva.
-        $this->espacio($alto + 34);
-        $yTe = $this->y;
-        foreach (['od' => CaseCharts::COLOR_OD, 'oi' => CaseCharts::COLOR_OI] as $lado => $colorLado) {
-            $x = self::MARGEN + ($lado === 'od' ? 0 : $ancho + 14);
-            $bandas = array_keys($pruebas[$lado]['teoae']['bandas']);
-            $senal = [];
-            $ruido = [];
-            $pasa = [];
-            foreach ($bandas as $hz) {
+        // --- Fila 1: TEOAE y DP-grama --------------------------------
+        $this->espacio(2 * ($alto + 26) + 10);
+        $yFila1 = $this->y;
+
+        // El TEOAE trae los dos oídos en un solo panel: una barra por oído y
+        // banda con el ruido superpuesto en gris adentro. Lo que asoma por
+        // encima del gris es la relación señal/ruido.
+        $bandasTe = array_keys($pruebas['od']['teoae']['bandas']);
+        $senalTe = [];
+        $ruidoTe = [];
+        $pasaTe = [];
+        foreach (['od', 'oi'] as $lado) {
+            foreach ($bandasTe as $hz) {
                 $banda = $pruebas[$lado]['teoae']['bandas'][$hz];
-                $senal[$hz] = $banda['respuesta'];
-                $ruido[$hz] = $pruebas[$lado]['teoae']['piso'];
-                $pasa[$hz] = $banda['pasa'];
+                $senalTe[$lado][$hz] = $banda['respuesta'];
+                $ruidoTe[$lado][$hz] = $pruebas[$lado]['teoae']['piso'];
+                $pasaTe[$lado][$hz] = $banda['pasa'];
             }
-            $this->pdf->text(
-                $x,
-                $yTe + self::ASCENDENTE * 7,
-                'TEOAE ' . strtoupper($lado) . ' -- señal y ruido por banda',
-                7,
-                true,
-                $colorLado
-            );
-            // -5 a 20 dB SPL: ahí cae todo lo que se lee en un transiente --
-            // el piso promediado (~2), la respuesta normal (8-12 según el
-            // JSON normativo) y el criterio de 6 dB sobre el ruido--, con
-            // aire arriba para el oído que responde de más. Con el eje
-            // bajando a -25 la zona útil quedaba aplastada arriba.
-            CaseCharts::oaeBars($this->pdf, $x, $yTe + 9, $ancho, $alto, $bandas, $senal, $ruido, $pasa, $colorLado, [-5.0, 20.0]);
-            // Qué es cada barra. Sin esto el panel obliga a adivinar cuál de
-            // las dos es la emisión, que es lo único que se está midiendo.
-            $xPie = $x;
-            foreach ([[$colorLado, 'emisión'], ['#9a9a9a', 'ruido']] as [$colorMuestra, $queEs]) {
-                $this->pdf->rectFilled($xPie, $yTe + $alto + 14, 5, 5, $colorMuestra);
-                $this->pdf->text($xPie + 7, $yTe + $alto + 18, $queEs, 6, false, self::GRIS_TEXTO);
-                $xPie += 7 + $this->pdf->textWidth($queEs, 6) + 10;
-            }
-            $pasan = count(array_filter($pasa));
-            $this->pdf->text(
-                $xPie,
-                $yTe + $alto + 18,
-                '·   ' . $pasan . '/' . count($bandas) . ' bandas sobre el ruido   ·   R = no llega al criterio',
-                6,
-                false,
-                self::GRIS_TEXTO
-            );
         }
-        $this->y = $yTe + $alto + 26;
+        $this->pdf->text(self::MARGEN, $yFila1 + self::ASCENDENTE * 7, 'TEOAE (transientes)', 7, true, self::GRIS_TITULO);
+        // -5 a 20 dB SPL: ahí cae todo lo que se lee en un transiente -- el
+        // piso promediado (~2), la respuesta normal (8-12 según el JSON
+        // normativo) y el criterio de 6 dB sobre el ruido.
+        CaseCharts::oaeBars($this->pdf, self::MARGEN, $yFila1 + 9, $ancho, $alto, $bandasTe, $senalTe, $ruidoTe, $pasaTe, [-5.0, 20.0]);
 
-        // DP-grama y SFOAE sí son curvas por banda, con su área normal.
-        $paneles = [
-            ['dpoae', 'DP-grama (productos de distorsión)', [-30.0, 25.0], 'dB SPL'],
-            ['sfoae', 'SFOAE (frecuencia específica)', [-20.0, 15.0], 'dB'],
-        ];
+        $xPie = self::MARGEN;
+        $this->pdf->rectFilled($xPie, $yFila1 + $alto + 14, 5, 5, '#9a9a9a');
+        $this->pdf->text($xPie + 7, $yFila1 + $alto + 18, 'ruido', 6, false, self::GRIS_TEXTO);
+        $xPie += 7 + $this->pdf->textWidth('ruido', 6) + 9;
+        foreach (['od' => CaseCharts::COLOR_OD, 'oi' => CaseCharts::COLOR_OI] as $lado => $colorLado) {
+            $texto = strtoupper($lado) . ': ' . count(array_filter($pasaTe[$lado])) . '/' . count($bandasTe);
+            $this->pdf->rectFilled($xPie, $yFila1 + $alto + 14, 5, 5, $colorLado);
+            $this->pdf->text($xPie + 7, $yFila1 + $alto + 18, $texto, 6, false, $colorLado);
+            $xPie += 7 + $this->pdf->textWidth($texto, 6) + 9;
+        }
+        $this->pdf->text($xPie, $yFila1 + $alto + 18, 'tick = pasa · R = no llega', 6, false, self::GRIS_TEXTO);
 
-        $this->espacio($alto + 34);
-        $yCurvas = $this->y;
-        foreach ($paneles as $i => [$clave, $rotulo, $rangoY, $unidad]) {
-            $x = self::MARGEN + $i * ($ancho + 14);
+        $this->panelCurva($pruebas, 'dpoae', 'DP-grama (productos de distorsión)', $xDer, $yFila1, $ancho, $alto, [-30.0, 25.0], 'dB SPL');
 
-            $bandas = array_keys($pruebas['od'][$clave]['bandas']);
-            $area = $pruebas['od'][$clave]['area'];
-            $piso = [];
-            $porLado = ['od' => [], 'oi' => []];
-            foreach ($bandas as $hz) {
-                $bandaOd = $pruebas['od'][$clave]['bandas'][$hz];
-                $piso[$hz] = $bandaOd['piso'] ?? $pruebas['od'][$clave]['piso'];
-                $porLado['od'][$hz] = $bandaOd['respuesta'];
-                $porLado['oi'][$hz] = $pruebas['oi'][$clave]['bandas'][$hz]['respuesta'] ?? null;
+        // --- Fila 2: SFOAE y SOAE ------------------------------------
+        $yFila2 = $yFila1 + $alto + 26;
+        $this->panelCurva($pruebas, 'sfoae', 'SFOAE (frecuencia específica)', self::MARGEN, $yFila2, $ancho, $alto, [-20.0, 15.0], 'dB');
+
+        $soae = ['od' => CaseOae::soae($cfg['od']), 'oi' => CaseOae::soae($cfg['oi'])];
+        $this->pdf->text($xDer, $yFila2 + self::ASCENDENTE * 7, 'SOAE (espontáneas, sin estímulo)', 7, true, self::GRIS_TITULO);
+        CaseCharts::soaeSpectrum(
+            $this->pdf,
+            $xDer,
+            $yFila2 + 9,
+            $ancho,
+            $alto,
+            ['od' => $soae['od']['picos'], 'oi' => $soae['oi']['picos']],
+            CaseOae::SOAE['espectro_hz'],
+            [-20.0, 20.0],
+            static function (float $hz): float {
+                // Piso en V: sube hacia los graves y, menos, hacia los agudos.
+                $oct = log($hz / 2000.0, 2);
+                return CaseOae::SOAE['piso_db']
+                    + ($oct < 0 ? abs($oct) * CaseOae::SOAE['piso_subida_grave_db_oct']
+                                : $oct * CaseOae::SOAE['piso_subida_agudo_db_oct']);
+            },
+            CaseOae::SOAE['picos_hz']
+        );
+        $xModo = $xDer;
+        foreach (['od' => CaseCharts::COLOR_OD, 'oi' => CaseCharts::COLOR_OI] as $lado => $colorLado) {
+            $detalle = [];
+            foreach ($soae[$lado]['picos'] as $pico) {
+                $detalle[] = self::hz((int) $pico['hz']) . ' Hz ' . self::db((float) $pico['db']) . ' dB';
             }
+            $texto = strtoupper($lado) . ': ' . $soae[$lado]['modo']
+                . ($detalle !== [] ? ' (' . implode(', ', $detalle) . ')' : '');
+            $this->pdf->text($xModo, $yFila2 + $alto + 18, $texto, 6, false, $colorLado);
+            $xModo += $this->pdf->textWidth($texto, 6) + 10;
+        }
+        $this->pdf->text($xDer, $yFila2 + $alto + 26, 'franja gris = donde se buscan los picos', 6, false, self::GRIS_SUAVE);
 
-            $this->pdf->text($x, $yCurvas + self::ASCENDENTE * 7, $rotulo, 7, true, self::GRIS_TITULO);
-            CaseCharts::oaePanel(
-                $this->pdf,
-                $x,
-                $yCurvas + 9,
-                $ancho,
-                $alto,
-                $bandas,
-                $area,
-                $piso,
-                $porLado,
-                $rangoY,
-                $unidad
-            );
+        $this->y = $yFila2 + $alto + 32;
 
-            $xResumen = $x;
-            foreach (['od' => CaseCharts::COLOR_OD, 'oi' => CaseCharts::COLOR_OI] as $lado => $colorLado) {
-                $pasan = 0;
-                foreach ($pruebas[$lado][$clave]['bandas'] as $banda) {
-                    $pasan += $banda['pasa'] ? 1 : 0;
+        // --- Los números -----------------------------------------------
+        // Los gráficos muestran la forma; acá está lo que el alumno va a
+        // leer del equipo: la emisión, el piso de ruido y la relación entre
+        // los dos, que es lo que decide el PASS/REFER.
+        $filas = [['Prueba · banda', 'OD emis.', 'OD ruido', 'OD S/R', 'OI emis.', 'OI ruido', 'OI S/R']];
+        foreach (['teoae' => 'TEOAE', 'dpoae' => 'DP', 'sfoae' => 'SFOAE'] as $clave => $rotuloPrueba) {
+            foreach (array_keys($pruebas['od'][$clave]['bandas']) as $hz) {
+                $fila = [$rotuloPrueba . ' ' . self::hz((int) $hz)];
+                foreach (['od', 'oi'] as $lado) {
+                    $banda = $pruebas[$lado][$clave]['bandas'][$hz];
+                    $emision = (float) $banda['respuesta'];
+                    $piso = (float) ($banda['piso'] ?? $pruebas[$lado][$clave]['piso']);
+                    $fila[] = number_format($emision, 1);
+                    $fila[] = number_format($piso, 1);
+                    // El S/R lleva el REFER pegado: son el mismo dato leído
+                    // dos veces y separarlos obliga a comparar a mano.
+                    $fila[] = number_format($emision - $piso, 1) . ($banda['pasa'] ? '' : ' R');
                 }
-                $total = count($pruebas[$lado][$clave]['bandas']);
-                $texto = strtoupper($lado) . ': ' . $pasan . '/' . $total . ' sobre el ruido';
-                $this->pdf->text($xResumen, $yCurvas + $alto + 18, $texto, 6, false, $colorLado);
-                $xResumen += $this->pdf->textWidth($texto, 6) + 12;
+                $filas[] = $fila;
             }
         }
-        $this->y = $yCurvas + $alto + 26;
+        $this->tabla($filas, [0.22, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13], true);
+        $this->parrafo('En dB SPL (SFOAE en dB). S/R = emisión menos ruido; R = no llega al criterio de esa prueba.', 6.5);
 
-        // Los parámetros del oído, debajo de las curvas.
-        $this->espacio(12 * 7 + 10);
+        // --- El perfil que armó esos números ---------------------------
         $yParams = $this->y;
-        $filas = [['', 'OD', 'OI']];
+        $filas = [['Perfil del oído', 'OD', 'OI']];
         foreach ([
             ['Patología', 'type', 'normal'],
             ['Umbral (dB HL)', 'umbral', 20],
@@ -1436,72 +1440,59 @@ final class CaseSheetPdf
                 (string) ($cfg['oi'][$clave] ?? $default),
             ];
         }
-        $this->y = $this->tablaEn(self::MARGEN, $yParams, $ancho, $filas, [0.44, 0.28, 0.28], true) + 4;
-        CaseCharts::legend($this->pdf, self::MARGEN + 26, $this->y + 4, 'área gris = respuesta normal, punteado = piso de ruido');
-        $this->y += 16;
+        $finParams = $this->tablaEn(self::MARGEN, $yParams, $ancho, $filas, [0.44, 0.28, 0.28], true);
 
-        // SOAE aparte y a lo ancho: no es una prueba más de la cuadrícula
-        // --no lleva estímulo ni bandas fijas-- y lo que hay que mirar es un
-        // espectro entero buscando si asoma algún pico sobre el ruido.
-        $altoSoae = 96.0;
-        $this->espacio($altoSoae + 34);
-        $ySoae = $this->y;
-        $soae = ['od' => CaseOae::soae($cfg['od']), 'oi' => CaseOae::soae($cfg['oi'])];
-        $this->pdf->text(self::MARGEN, $ySoae + self::ASCENDENTE * 7, 'SOAE (espontáneas, sin estímulo)', 7, true, self::GRIS_TITULO);
-        CaseCharts::soaeSpectrum(
-            $this->pdf,
-            self::MARGEN,
-            $ySoae + 9,
-            $this->anchoContenido,
-            $altoSoae,
-            ['od' => $soae['od']['picos'], 'oi' => $soae['oi']['picos']],
-            CaseOae::SOAE['espectro_hz'],
-            [-20.0, 20.0],
-            static function (float $hz): float {
-                // Piso en V: sube hacia los graves y, menos, hacia los agudos.
-                $oct = log($hz / 2000.0, 2);
-                return CaseOae::SOAE['piso_db']
-                    + ($oct < 0 ? abs($oct) * CaseOae::SOAE['piso_subida_grave_db_oct']
-                                : $oct * CaseOae::SOAE['piso_subida_agudo_db_oct']);
-            }
-        );
-        $xModo = self::MARGEN;
-        foreach (['od' => CaseCharts::COLOR_OD, 'oi' => CaseCharts::COLOR_OI] as $lado => $colorLado) {
-            $modo = $soae[$lado]['modo'];
-            $detalle = [];
-            foreach ($soae[$lado]['picos'] as $pico) {
-                $detalle[] = self::hz((int) $pico['hz']) . ' Hz ' . self::db((float) $pico['db']) . ' dB';
-            }
-            $texto = strtoupper($lado) . ': ' . $modo . ($detalle !== [] ? ' (' . implode(', ', $detalle) . ')' : '');
-            $this->pdf->text($xModo, $ySoae + $altoSoae + 18, $texto, 6, false, $colorLado);
-            $xModo += $this->pdf->textWidth($texto, 6) + 12;
-        }
-        $this->y = $ySoae + $altoSoae + 26;
-
-        // Los números del perfil de emisión, banda por banda. La curva los
-        // dibuja pero no se pueden leer de ahí, y son los que el docente
-        // cargó. Van las dos: la caída que escribió a mano y la que termina
-        // aplicando el cliente, que le suma la ley de la patología y el
-        // umbral (CaseProfile::loadedOaeAttenuation).
-        $cabecera = ['Caída por banda (dB)'];
+        // La caída por banda: no es "del DP" -- el caso guarda UN perfil por
+        // oído en las bandas de EOAS_FREQS y el cliente lo aplica a las
+        // cuatro pruebas, cada una interpolando a las suyas.
+        $cabecera = ['Caída del perfil (dB)'];
         foreach (CaseBuilder::EOAS_FREQS as $hz) {
             $cabecera[] = self::hz((int) $hz);
         }
         $filas = [$cabecera];
         foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $tag) {
             $cargadas = is_array($cfg[$lado]['desviaciones'] ?? null) ? $cfg[$lado]['desviaciones'] : [];
-            $total = CaseOae::atenuacionPorBanda($cfg[$lado]);
-            $filaCargada = [$tag . ' cargada'];
-            $filaTotal = [$tag . ' aplicada'];
+            $fila = [$tag . ' cargada'];
             foreach (CaseBuilder::EOAS_FREQS as $hz) {
-                $filaCargada[] = self::db((float) ($cargadas[(string) $hz] ?? $cargadas[$hz] ?? 0));
-                $filaTotal[] = self::db((float) ($total[$hz] ?? 0));
+                $fila[] = self::db((float) ($cargadas[(string) $hz] ?? $cargadas[$hz] ?? 0));
             }
-            $filas[] = $filaCargada;
-            $filas[] = $filaTotal;
+            $filas[] = $fila;
         }
         $cols = count($cabecera);
+        $this->y = $finParams + 6;
         $this->tabla($filas, array_merge([0.2], array_fill(0, $cols - 1, 0.8 / ($cols - 1))), true);
+    }
+
+    /**
+     * Un panel de curva por banda con su área normal y el conteo por oído.
+     * Lo comparten el DP-grama y el SFOAE, que se leen igual.
+     */
+    private function panelCurva(array $pruebas, string $clave, string $rotulo, float $x, float $y, float $ancho, float $alto, array $rangoY, string $unidad): void
+    {
+        $bandas = array_keys($pruebas['od'][$clave]['bandas']);
+        $area = $pruebas['od'][$clave]['area'];
+        $piso = [];
+        $porLado = ['od' => [], 'oi' => []];
+        foreach ($bandas as $hz) {
+            $bandaOd = $pruebas['od'][$clave]['bandas'][$hz];
+            $piso[$hz] = $bandaOd['piso'] ?? $pruebas['od'][$clave]['piso'];
+            $porLado['od'][$hz] = $bandaOd['respuesta'];
+            $porLado['oi'][$hz] = $pruebas['oi'][$clave]['bandas'][$hz]['respuesta'] ?? null;
+        }
+
+        $this->pdf->text($x, $y + self::ASCENDENTE * 7, $rotulo, 7, true, self::GRIS_TITULO);
+        CaseCharts::oaePanel($this->pdf, $x, $y + 9, $ancho, $alto, $bandas, $area, $piso, $porLado, $rangoY, $unidad);
+
+        $xResumen = $x;
+        foreach (['od' => CaseCharts::COLOR_OD, 'oi' => CaseCharts::COLOR_OI] as $lado => $colorLado) {
+            $pasan = 0;
+            foreach ($pruebas[$lado][$clave]['bandas'] as $banda) {
+                $pasan += $banda['pasa'] ? 1 : 0;
+            }
+            $texto = strtoupper($lado) . ': ' . $pasan . '/' . count($bandas) . ' sobre el ruido';
+            $this->pdf->text($xResumen, $y + $alto + 18, $texto, 6, false, $colorLado);
+            $xResumen += $this->pdf->textWidth($texto, 6) + 10;
+        }
     }
 
     /**

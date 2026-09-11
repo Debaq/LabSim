@@ -67,6 +67,9 @@ final class CaseOae
         'piso_subida_agudo_db_oct' => 2.0,
         'min_snr_db' => 3.0,
         'prevalencia_pct' => 45,
+        // Dónde pueden aparecer picos espontáneos: fuera de esa banda no se
+        // buscan (peak_freq_min_hz / peak_freq_max_hz en el JSON).
+        'picos_hz' => [700, 4500],
     ];
 
     /**
