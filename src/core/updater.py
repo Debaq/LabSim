@@ -43,6 +43,7 @@ entradas que ese archivo no tiene (síntoma: KeyError al abrir una
 ventana nueva que
 ese json viejo no conoce).
 """
+import hashlib
 import json
 import os
 import re
@@ -72,6 +73,11 @@ REQUEST_TIMEOUT = 5
 # quien no actualiza hace mucho, donde el full probablemente sea mas chico
 # que la suma de todos los deltas intermedios igual.
 MAX_CHAIN_HOPS = 8
+MANIFEST_ASSET_NAME = "manifest.json"
+# Marca "esta instalacion ya se verifico contra su release". Vive con la data
+# del usuario (local_cache/) porque no es parte del build y no debe viajar en
+# ningun paquete: si viajara, una instalacion rota heredaria el visto bueno.
+VERIFY_MARKER = "resources/local_cache/.install_verified"
 
 
 def _parse_version(version: str) -> tuple:
@@ -112,6 +118,92 @@ def _asset_url(release: dict, name: str):
         (a.get("browser_download_url") for a in release.get("assets", []) if a.get("name") == name),
         None,
     )
+
+
+
+def _dist_dir() -> Path:
+    return Path(sys.executable).resolve().parent
+
+
+def _build_id_of(release: dict) -> str:
+    return release["tag_name"][len(TAG_PREFIX):]
+
+
+def _sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _install_matches_release(release: dict, dist_dir: Path):
+    """True/False si el ejecutable local coincide con el de `release`.
+    None si no se puede comprobar (release sin manifest, sin red, sin
+    permisos): ante la duda no se molesta al usuario."""
+    url = _asset_url(release, MANIFEST_ASSET_NAME)
+    if url is None:
+        return None
+    try:
+        with urlopen(Request(url), timeout=REQUEST_TIMEOUT * 3) as resp:
+            manifest = json.load(resp)
+    except (URLError, OSError, ValueError, TimeoutError):
+        return None
+    expected = (manifest.get("files") or {}).get("LabSim")
+    exe = dist_dir / "LabSim"
+    if not expected or not exe.is_file():
+        return None
+    try:
+        return _sha256(exe) == expected
+    except OSError:
+        return None
+
+
+def _check_install_integrity(candidates: list, local_release: dict):
+    """El caso de un swap que copio a medias: BUILD_VERSION quedo en la
+    version nueva pero el ejecutable es el viejo (ver _UPDATER_SCRIPT --
+    hasta 2026-09-10 la version se escribia aunque los cp fallaran). Ahi el
+    cliente corre codigo viejo Y el updater lo da por al dia, asi que no
+    vuelve a ofrecer nada: queda clavado para siempre.
+
+    Se comprueba una sola vez por build_id (marca en local_cache) y solo
+    cuando no hay nada mas nuevo que ofrecer. Si el ejecutable no coincide
+    con el de su release, se devuelve una reinstalacion completa."""
+    dist_dir = _dist_dir()
+    local_id = _build_id_of(local_release)
+    marker = dist_dir / VERIFY_MARKER
+    try:
+        if marker.read_text(encoding="utf-8").strip() == local_id:
+            return None
+    except OSError:
+        pass
+
+    ok = _install_matches_release(local_release, dist_dir)
+    if ok is None:
+        return None
+    if ok:
+        try:
+            marker.parent.mkdir(parents=True, exist_ok=True)
+            marker.write_text(local_id, encoding="utf-8")
+        except OSError:
+            pass
+        return None
+
+    asset = SETUP_ASSET_NAME if IS_WINDOWS else FULL_ASSET_NAME
+    mode = "setup" if IS_WINDOWS else "full"
+    for r in reversed(candidates):
+        url = _asset_url(r, asset)
+        if url is None:
+            continue
+        return {
+            "tag": r["tag_name"],
+            "build_id": _build_id_of(r),
+            "mode": mode,
+            "url": url,
+            "repair": True,
+            "notes": _extract_notes(r),
+        }
+    return None
 
 
 def check_for_update(current_version: str):
@@ -156,9 +248,6 @@ def check_for_update(current_version: str):
     local_id = local_build_id(current_version).lstrip("v")
     local_v, local_suffix = _split_build_id(local_id)
 
-    def build_id_of(release):
-        return release["tag_name"][len(TAG_PREFIX):]
-
     # Lo que corre localmente es, casi siempre, una release publicada: la
     # ubicamos por build_id en la lista ya ordenada por fecha. Todo lo que
     # viene DESPUES en esa lista es lo nuevo. Comparar por versión no
@@ -167,7 +256,7 @@ def check_for_update(current_version: str):
     # por nuevas también a las releases anteriores -- y como las más viejas
     # no tienen paquete update, la cadena se rompía siempre y caía al full.
     local_index = next(
-        (i for i, r in enumerate(candidates) if build_id_of(r) == local_id), None
+        (i for i, r in enumerate(candidates) if _build_id_of(r) == local_id), None
     )
 
     if local_index is not None:
@@ -178,14 +267,18 @@ def check_for_update(current_version: str):
         # release borrada): no sabemos en qué punto de la cadena estamos,
         # así que los diffs no son aplicables -- solo full.
         chain_ok = False
-        newer = [r for r in candidates if _split_build_id(build_id_of(r))[0] > local_v]
+        newer = [r for r in candidates if _split_build_id(_build_id_of(r))[0] > local_v]
         if not newer:
-            last_v, last_suffix = _split_build_id(build_id_of(candidates[-1]))
+            last_v, last_suffix = _split_build_id(_build_id_of(candidates[-1]))
             if last_v == local_v and last_suffix is not None and last_suffix != local_suffix:
                 newer = [candidates[-1]]
 
     if not newer:
-        return None
+        # Nada nuevo que ofrecer: es el momento de comprobar que lo que
+        # dice BUILD_VERSION sea de verdad lo que esta instalado.
+        if local_index is None:
+            return None
+        return _check_install_integrity(candidates, candidates[local_index])
 
     latest = newer[-1]
     latest_tag = latest["tag_name"]

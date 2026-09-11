@@ -832,43 +832,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         super().closeEvent(event)
 
 
-def _check_and_apply_update():
-    """Busca una versión nueva en GitHub Releases y, si el usuario acepta,
-    la descarga y aplica (reemplaza el build actual y reinicia -- no vuelve
-    si tiene éxito). Solo se llama en build congelada (PyInstaller); en modo
-    dev correr desde código fuente ya es la versión más nueva."""
-    from core.updater import apply_update_and_restart, check_for_update
-    update = check_for_update(__VERSION__)
-    if update is None:
-        return
-    tag = update["tag"]
-    notes = update.get("notes") or ""
-    if update["mode"] == "chain":
-        n = len(update["hops"])
-        detalle = f"Se aplicará en {n} paso{'s' if n != 1 else ''} (paquetes livianos, solo lo que cambió)."
-    elif update["mode"] == "setup":
-        detalle = "Se descargará el instalador y se ejecutará sin preguntar nada más."
-    else:
-        detalle = "Se descargará el paquete completo."
-    # Prompt estilizado: logo + stylesheet del tema + release notes del
-    # GitHub release bajo "Show Details" (colapsable). Antes era un
-    # QMessageBox.question plano sin contexto.
-    prompt = QMessageBox()
-    prompt.setIcon(QMessageBox.Question)
-    prompt.setWindowTitle("Actualización disponible")
-    prompt.setText(
-        f"Hay una nueva versión disponible ({tag}).\n{detalle}\n"
-        "¿Actualizar ahora? La aplicación se cerrará y volverá a abrir sola."
-    )
-    if notes:
-        prompt.setDetailedText(notes)
-    prompt.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-    prompt.setDefaultButton(QMessageBox.Yes)
-    style_dialog(prompt)
-    resp = prompt.exec()
-    if resp != QMessageBox.Yes:
-        return
-
+def _download_and_apply(update):
+    """Baja y aplica `update` (actualización o reparación) con barra de
+    progreso. No vuelve si el swap sale bien: la app se reinicia sola."""
+    from core.updater import apply_update_and_restart
     progress = QProgressDialog("Preparando actualización...", None, 0, 0)
     progress.setWindowTitle("Actualizando LabSim")
     progress.setWindowModality(Qt.WindowModal)
@@ -922,6 +889,68 @@ def _check_and_apply_update():
         # estructura inesperada (no lanzó, no hizo el swap) -- el
         # dialog quedaría abierto para siempre si no se cierra acá.
         progress.close()
+
+
+def _check_and_apply_update():
+    """Busca una versión nueva en GitHub Releases y, si el usuario acepta,
+    la descarga y aplica (reemplaza el build actual y reinicia -- no vuelve
+    si tiene éxito). Solo se llama en build congelada (PyInstaller); en modo
+    dev correr desde código fuente ya es la versión más nueva."""
+    from core.updater import check_for_update
+    update = check_for_update(__VERSION__)
+    if update is None:
+        return
+    tag = update["tag"]
+    notes = update.get("notes") or ""
+    if update.get("repair"):
+        # El ejecutable instalado no coincide con el de la release que dice
+        # tener: un swap que copió a medias (ver core/updater.py
+        # _check_install_integrity). No es "hay algo nuevo", es "lo que
+        # tenés no es lo que dice ser".
+        prompt = QMessageBox()
+        prompt.setIcon(QMessageBox.Warning)
+        prompt.setWindowTitle("Instalación incompleta")
+        prompt.setText(
+            f"La instalación figura como {DISPLAY_VERSION} pero el programa "
+            "instalado no es ese: una actualización anterior se copió a "
+            "medias, así que estás corriendo una versión vieja.\n"
+            "Se descargará el paquete completo y se reinstalará.\n"
+            "¿Reparar ahora? La aplicación se cerrará y volverá a abrir sola."
+        )
+        prompt.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        prompt.setDefaultButton(QMessageBox.Yes)
+        style_dialog(prompt)
+        if prompt.exec() != QMessageBox.Yes:
+            return
+        _download_and_apply(update)
+        return
+    if update["mode"] == "chain":
+        n = len(update["hops"])
+        detalle = f"Se aplicará en {n} paso{'s' if n != 1 else ''} (paquetes livianos, solo lo que cambió)."
+    elif update["mode"] == "setup":
+        detalle = "Se descargará el instalador y se ejecutará sin preguntar nada más."
+    else:
+        detalle = "Se descargará el paquete completo."
+    # Prompt estilizado: logo + stylesheet del tema + release notes del
+    # GitHub release bajo "Show Details" (colapsable). Antes era un
+    # QMessageBox.question plano sin contexto.
+    prompt = QMessageBox()
+    prompt.setIcon(QMessageBox.Question)
+    prompt.setWindowTitle("Actualización disponible")
+    prompt.setText(
+        f"Hay una nueva versión disponible ({tag}).\n{detalle}\n"
+        "¿Actualizar ahora? La aplicación se cerrará y volverá a abrir sola."
+    )
+    if notes:
+        prompt.setDetailedText(notes)
+    prompt.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+    prompt.setDefaultButton(QMessageBox.Yes)
+    style_dialog(prompt)
+    resp = prompt.exec()
+    if resp != QMessageBox.Yes:
+        return
+
+    _download_and_apply(update)
 
 
 if __name__ == '__main__':

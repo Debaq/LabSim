@@ -572,13 +572,26 @@ Pendiente:
       (tests/test_case_sheet_pdf.php) y la revisión visual del PDF que sale
       de ahí. El endpoint, los permisos por curso y los dos botones están
       sin ejecutar una sola vez.
-- [ ] Otoscopia: las fotos de `OtoscopiaPhoto` no se incrustan todavía.
-      `MiniPdf::image()` ya sabe poner JPEG, así que es enganchar la ruta.
-- [ ] La foto del paciente (`PatientPhoto`) en la portada, con el mismo
-      mecanismo.
-- [ ] Una versión "para el alumno" del mismo PDF, sin el perfil ni los
-      parámetros del generador (hoy el PDF muestra TODO: es la hoja de
-      respuestas del docente, no material para repartir antes del examen).
+- [x] Fotos incrustadas (2026-09-10): la del paciente en la portada y las de
+      otoscopia debajo del texto de cada fase. Se guardan en webp y png, y el
+      PDF solo lleva JPEG: convierte `src/PdfImage.php` con GD, en memoria y
+      sin cachear (una foto se reemplaza desde el editor, y un JPEG guardado
+      al lado quedaría mostrando la vieja). Sin GD, o con una foto ilegible,
+      se omite esa foto en vez de tumbar la ficha.
+- [x] Versión para el alumno (2026-09-10): `?modo=alumno`, con botón propio
+      en las dos pantallas. Saca el perfil auditivo (dónde está la lesión, el
+      %CCE), la patología declarada de ABR/OEA/VEMP, el umbral cargado, el
+      patrón retrococlear, las desviaciones por onda, las condiciones de
+      captura y los mandos de la OEA. Queda lo que el alumno podría medir.
+      **Cuándo repartirlo lo decide el docente**: el parámetro solo recorta.
+- [x] Las escalas duplicadas entre PHP y JS ya no pueden separarse en
+      silencio (2026-09-10): `tests/test_charts_vs_js.php` lee
+      `public/js/case/*.js` y compara contra `CaseCharts` la tabla de
+      atenuación interaural, el gap que enmascara la ósea, los rangos de los
+      tres gráficos, las seis campanas del timpanograma y la fórmula del
+      rollover. Unificarlos de verdad --que el editor lea las constantes
+      desde PHP-- implicaba reescribir el dibujo del editor, que funciona;
+      no vale el riesgo. Falla el test si alguien mueve un solo lado.
 
 ## El update mentía la versión (arreglado 2026-09-10)
 
@@ -609,7 +622,22 @@ la versión queda en la vieja y el próximo arranque vuelve a ofrecer el
 update.
 
 Para diagnosticar un cliente dudoso: `sha256sum LabSim` contra el hash de
-`LabSim` en el `manifest.json` de la release que dice tener.
+`LabSim` en el `manifest.json` de la release que dice tener. Así se cazó
+este caso: `BUILD_VERSION` decía `0.9.8-rde8b2be` y el ejecutable tenía el
+sha de `rca161de`.
+
+Y como el updater compara contra `BUILD_VERSION`, esa instalación **ya no
+volvía a ver ninguna actualización**: quedaba clavada para siempre. Por eso
+`check_for_update` ahora, cuando no hay nada más nuevo que ofrecer, compara
+el sha256 del ejecutable contra el `manifest.json` de su propia release y
+ofrece reinstalar el paquete completo si no coincide
+(`_check_install_integrity`). Se hace una sola vez por build_id --marca en
+`resources/local_cache/.install_verified`-- y si no se puede comprobar (sin
+red, release sin manifest) no se molesta al usuario. Cubierto por
+`tests/test_updater_integrity.py`.
+
+Para destrabar a mano una instalación ya mentida, sin reinstalar: escribir
+en `BUILD_VERSION` la versión real (la que diga el sha) y volver a abrir.
 
 Pendiente de esta misma revisión (no tocado todavía):
 - [ ] `Audiometer._mkg_on` exige `"Invertido"` en el canal del ruido. Si el
