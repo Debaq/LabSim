@@ -416,3 +416,208 @@ Pendiente:
 - [ ] Preguntarle a la docente qué discriminación espera de una curva
       sombra en un caso de anacusia unilateral: es la forma más directa de
       calibrar esto sin inventar.
+
+## Catálogo de cuadros: lo que el motor todavía no puede armar
+
+El backlog de `patologias_proximas.md` se volcó a `CaseProfile::SCENARIOS`
+el 2026-09-10: el catálogo pasó de 21 a 70 cuadros (9 conductivas, 18
+sensoriales --con las genéticas y congénitas--, 16 neurales que estrenan los
+presets de ABR que ya existían, y 6 mixtas). Todo eso se valida en
+`tests/test_case_profile.php` y **no se probó en el navegador**.
+
+Lo que quedó afuera no es olvido: son cuadros que el motor no puede
+escribir sin mentir. Ordenado por cuántos cuadros desbloquea:
+
+- [ ] **Reflejo presente con gap** (`gap_con_reflejo` declarado por el
+      cuadro). Hoy `reflexThreshold()` apaga el reflejo con cualquier gap
+      >= `REFLEX_PROBE_GAP_DB` (10 dB), sin excepción. Sin esto no se
+      pueden escribir la **dehiscencia del canal semicircular superior** ni
+      el **acueducto vestibular dilatado**: el reflejo presente CON gap es
+      justo lo que los separa de una otoesclerosis. Va de la mano del
+      siguiente punto.
+- [ ] **Ósea supranormal** (umbrales negativos, -5/-10 dB en graves). El
+      generador recorta a 0 (`aCinco()` hace `Math.max(0, …)`). Misma
+      familia que el anterior: la tercera ventana necesita los dos, más
+      decidir si el VEMP de ese cuadro sale del rango por subtipo o del gap
+      (hoy son excluyentes por test). Con eso entran también **Pendred** y
+      **Mondini**.
+- [ ] **Eje temporal / fluctuación.** Un caso es UNA foto. Sin esto, el
+      Ménière y el `hidrops_retardado` no fluctúan, el `cmv_congenito` y la
+      `nihl_cronica` no progresan, los `salicilatos` y el
+      `toxico_metabolico` no revierten, y la **tuba abierta (patulous)** no
+      se puede escribir en absoluto: su hallazgo es la fluctuación
+      respiratoria del timpanograma, no el audiograma (que es casi normal).
+      Es el cambio más grande de esta lista.
+- [ ] **Asimetría declarada por el cuadro.** Hoy la asimetría solo se
+      sortea cuando los dos oídos traen el mismo cuadro y el mismo grado.
+      El `autoinmune` y el `cmv_congenito` son bilaterales asimétricos por
+      definición y hay que armarlos a mano.
+- [ ] **Otoscopia ligada al cuadro.** `otitis_media_aguda` (tímpano
+      abombado), `colesteatoma`, `perforacion`, `glomus_timpanico` (masa
+      retrotimpánica) y `estenosis_atresia_cae` tienen hallazgo otoscópico
+      obligado, y hoy se carga aparte del cuadro.
+- [ ] **Timpanograma "no registrable".** `Z_OPTIONS` no lo tiene. La
+      atresia de CAE se escribe hoy con `B`, que es lo menos falso
+      disponible pero sigue siendo falso: no hay dónde sellar la sonda.
+- [ ] **Eje no orgánico** (respuestas inconsistentes, SRT que no cuadra con
+      el PTA, Stenger positivo). No hay nada de esto en el perfil y es un
+      ejercicio entero.
+- [ ] **Procesamiento auditivo central**: audiograma normal con pruebas
+      dicóticas alteradas. No hay módulo donde vivan esas pruebas.
+- [ ] **Hiperacusia / misofonía**: el LDL es un campo del formulario, no un
+      eje del perfil.
+
+## Edad del paciente: qué examen existe a esa edad (pediátrico)
+
+Hoy la edad solo alimenta `CaseProfile::ageNorm()` (el piso ISO 7029). Le
+falta la otra mitad: **qué método es posible a esa edad**. Sin eso, el motor
+puede devolver un audiograma tonal limpio de un lactante de cuatro meses, y
+eso le enseña al alumno que se puede. Es el mismo criterio del fallback
+sintético: sin datos válidos, no se genera nada.
+
+| Edad | Conductual válida | Objetiva | Impedancia |
+|---|---|---|---|
+| 0-6 m | ninguna (observación, sin umbral) | ABR/ASSR, OEA | sonda 1000 Hz |
+| 6 m - 2.5 a | VRA (refuerzo visual) | ABR/ASSR, OEA | 226 Hz ya sirve |
+| 2.5 - 5 a | juego condicionado | ídem | ídem |
+| 5 a+ | tonal convencional | ídem | ídem |
+
+Cae solo de la misma tabla: la logoaudiometría necesita lenguaje (listas por
+edad, no la del adulto), el SDT antes que el SRT y el SRT antes que la UMD,
+y la sonda de 226 Hz en un lactante da una curva que no significa lo que el
+alumno cree que significa.
+
+### Tres capas, y cuál manda
+
+1. **Ficha (docente): coherencia, no permiso.** Al guardar, el mismo tipo de
+   chequeo que ya hace `CaseBuilder::normalCoherenceError()`: si la edad del
+   paciente no admite tonal y el caso trae audiograma tonal cargado, se
+   reclama como pendiente (vía `CaseCompleteness`). El docente puede armar
+   un lactante; lo que no puede es armarlo con datos que ese paciente no
+   puede dar.
+2. **Equipo (alumno): la capa que importa.** El módulo tonal **se abre
+   igual**. Lo que cambia es el paciente: un lactante no da respuestas
+   replicables --falsos positivos sueltos, nada a 90 dB, respuestas que no
+   se repiten en el descenso-- y el módulo **se niega a cerrar un umbral**.
+   El alumno concluye solo que el método no aplica. Mismo mecanismo que el
+   enmascaramiento obligatorio en logoaudiometría: lo aprende porque le
+   falla, no porque un cartel se lo prohibió. Reusa lo que ya existe:
+   `paciente_confiabilidad` y `conciencia` al piso por edad, y el
+   acompañante (rama `feat/sala-acompanantes`) contestando por el niño en la
+   entrevista, que además es la pista.
+3. **Informe / stats (docente).** El intento queda registrado ("intentó
+   tonal convencional en paciente de 7 meses, 14 min"). No es castigo
+   automático: es lo que el docente necesita para corregir. Va con las
+   stats que ya viven embebidas en `launch.php`.
+
+**Decisión:** manda la capa 2; la 1 evita el caso incoherente y la 3 hace
+visible el error. El bloqueo duro (que el módulo ni abra) queda como opción
+**por curso**, apagada por default: si el tonal no se abre nunca, el alumno
+nunca elige mal y nunca aprende a elegir -- y aprende, peor, que el software
+decide por él.
+
+### Antes de tocar nada hay que decidir
+
+- [ ] **¿VRA y juego condicionado se implementan, o el caso pediátrico se
+      resuelve solo por vía objetiva?** Sin VRA el alumno queda sin salida
+      conductual y el ejercicio pediátrico se reduce a "hacé un ABR": mucho
+      más barato y bastante más pobre.
+- [ ] **¿La edad la fija el docente o la sortea el generador?** Es el punto
+      urgente: los cuadros congénitos que entraron al catálogo el 2026-09-10
+      (`gjb2`, `waardenburg`, `jervell_lange_nielsen`, `rubeola_congenita`,
+      `kernicterus`, `prematuro`) caen naturalmente en lactantes, así que
+      esto deja de ser hipotético apenas se use el catálogo nuevo.
+- [ ] **Sonda de 1000 Hz:** ¿entra como opción del impedanciómetro o el
+      lactante queda fuera de impedancia? Sin ella la timpanometría del bebé
+      miente igual que el tonal.
+
+## Ficha del caso en PDF (2026-09-10)
+
+`case_sheet_pdf.php?id=<caso>` arma la hoja de respuestas completa del caso
+--perfil, audiograma, acumetría, impedanciometría con timpanogramas,
+reflejos, logoaudiometría, supraliminares, deterioro tonal, ABR, OEA y
+VEMP-- con los mismos gráficos del editor. Entra por el botón "PDF" de
+Fichas Clínicas y por "Ficha completa en PDF" al editar un caso.
+
+Decisiones:
+- **Se arma en cada pedido, no se cachea** (a diferencia de los informes de
+  alumno, que sí se guardan en `ReportFile`): el caso se edita, y un PDF en
+  disco quedaría mintiendo desde la primera edición.
+- **Los gráficos se dibujan en PHP** (`CaseCharts`), no se exportan del
+  navegador: el backend no tiene headless Chrome ni GD garantizado. La
+  contra es que las escalas y los símbolos están escritos dos veces --acá y
+  en `public/js/case/*.js`--, y cada función dice de cuál JS es espejo.
+- **El ABR, la OEA y el VEMP se imprimen como lo que el caso DECLARA**
+  (umbral por estímulo, desviación por banda, umbral por subtipo), no como
+  una curva simulada: el generador de curvas vive en Python, en el cliente,
+  y duplicarlo en PHP sería una segunda fuente de verdad.
+
+### El hosting corre PHP 7.4
+
+Salió a la luz con este PDF: `str_starts_with()` es de PHP 8.0 y allá es un
+"Call to undefined function". Al buscar el resto apareció que
+`ReportPdfBuilder` usaba `match` (también 8.0) en dos lugares, así que ese
+archivo **ni siquiera parseaba** en el hosting: `report_pdf.php` devolvía 500
+y el PDF de los informes del alumno nunca se generó ahí. Los dos `match`
+ahora son `switch`/mapa.
+
+`tests/test_php_baseline.php` escanea `src/` y `public/` y falla si vuelve a
+entrar sintaxis de PHP 8. Es una red, no una garantía; la comprobación
+completa es parsear con un 7.4 de verdad, y el comando está en el docblock
+de ese test (la suite entera corre en `php:7.4-cli`).
+
+Pendiente:
+- [ ] **Probarlo en el navegador con un caso real.** Acá no hay pdo_sqlite:
+      lo único ejecutado es `CaseSheetPdf::build()` sobre un caso sintético
+      (tests/test_case_sheet_pdf.php) y la revisión visual del PDF que sale
+      de ahí. El endpoint, los permisos por curso y los dos botones están
+      sin ejecutar una sola vez.
+- [ ] Otoscopia: las fotos de `OtoscopiaPhoto` no se incrustan todavía.
+      `MiniPdf::image()` ya sabe poner JPEG, así que es enganchar la ruta.
+- [ ] La foto del paciente (`PatientPhoto`) en la portada, con el mismo
+      mecanismo.
+- [ ] Una versión "para el alumno" del mismo PDF, sin el perfil ni los
+      parámetros del generador (hoy el PDF muestra TODO: es la hoja de
+      respuestas del docente, no material para repartir antes del examen).
+
+## El update mentía la versión (arreglado 2026-09-10)
+
+Una docente reportó que la logoaudiometría seguía mal **después de
+actualizar**: oído sano a 40 dB no entendía, y sólo entendía con 20 dB de
+ruido en el oído malo. Esa conducta es el motor viejo de `CalculateLogo`
+(rango `[mkg_min, mkg_max]` + curva sombra, hasta `ca161de`). En el motor
+nuevo es **imposible**: `get()` devuelve `max(propio, cruce)` y el ruido
+sólo aparece restando en los dos términos, así que enmascarar nunca puede
+subir el puntaje.
+
+El binario publicado estaba bien (verificado abriendo el PYZ del `LabSim`
+de `rde8b2be`: el módulo `audiometria.logoaudiometry` trae el texto nuevo y
+ya no trae `curva sombra`). El problema era el swap:
+
+- `_UPDATER_SCRIPT` corre desacoplado con stdout/stderr a `/dev/null` y,
+  después del `set +e`, ignoraba el resultado de cada `cp`.
+- Al final escribía `BUILD_VERSION` **siempre**, hubiera copiado o no.
+
+O sea: si la copia del ejecutable fallaba (permisos de una instalación con
+sudo, disco lleno, lo que sea), el cliente quedaba con **código viejo y
+etiqueta nueva**. Y como el updater compara contra `BUILD_VERSION`, el
+update no se reintentaba nunca más: quedaba clavado ahí para siempre.
+
+Ahora el script loguea a `resources/local_cache/update.log`, marca cada
+copia fallida y sólo escribe `BUILD_VERSION` si no falló ninguna. Si falló,
+la versión queda en la vieja y el próximo arranque vuelve a ofrecer el
+update.
+
+Para diagnosticar un cliente dudoso: `sha256sum LabSim` contra el hash de
+`LabSim` en el `manifest.json` de la release que dice tener.
+
+Pendiente de esta misma revisión (no tocado todavía):
+- [ ] `Audiometer._mkg_on` exige `"Invertido"` en el canal del ruido. Si el
+      alumno lo deja en Normal, el ruido **suena** pero llega
+      `with_mkg=False`/`int_mkg=None` al motor y no enmascara nada: lo que
+      se oye y lo que se simula no coinciden.
+- [ ] `response.py:response_sdt_w_mkg` (mano levantada del SDT) exige
+      literal `Speech Noise` (índice 5) → con cualquier otro ruido hace
+      `downHand()` siempre; y sigue con el modelo viejo de rango + curva
+      sombra, distinto del "mejor de las dos vías" que usa
+      `CalculateLogo`. Son dos modelos para el mismo fenómeno.

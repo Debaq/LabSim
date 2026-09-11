@@ -270,6 +270,26 @@ FINAL_VERSION="$4"
 
 shopt -s nullglob dotglob
 
+# Todo lo que sigue va a un log: este script corre desacoplado y con
+# stdout/stderr a /dev/null (ver apply_update_and_restart), asi que una
+# copia que falla era invisible -- y la version quedaba mintiendo.
+LOG_DIR="$DIST_DIR/resources/local_cache"
+mkdir -p "$LOG_DIR" 2>/dev/null || true
+LOG="$LOG_DIR/update.log"
+if ! touch "$LOG" 2>/dev/null; then
+    LOG="${TMPDIR:-/tmp}/labsim-update.log"
+fi
+exec >>"$LOG" 2>&1
+echo "=== $(date -Is) update -> $FINAL_VERSION (dist: $DIST_DIR)"
+FAILED=0
+
+copy_or_flag() {
+    if ! cp -a "$1" "$2"; then
+        echo "labsim-update: FALLO copiando $1 -> $2"
+        FAILED=1
+    fi
+}
+
 waited=0
 while kill -0 "$PID" 2>/dev/null; do
     sleep 0.3
@@ -291,9 +311,9 @@ set +e
 apply_full() {
     local new_dist="$1"
     rm -rf "$DIST_DIR/_internal"
-    cp -a "$new_dist/_internal" "$DIST_DIR/_internal"
-    cp -a "$new_dist/LabSim" "$DIST_DIR/LabSim"
-    cp -a "$new_dist/run.sh" "$DIST_DIR/run.sh"
+    copy_or_flag "$new_dist/_internal" "$DIST_DIR/_internal"
+    copy_or_flag "$new_dist/LabSim" "$DIST_DIR/LabSim"
+    copy_or_flag "$new_dist/run.sh" "$DIST_DIR/run.sh"
     chmod +x "$DIST_DIR/LabSim" "$DIST_DIR/run.sh"
 
     if [ -d "$new_dist/resources" ]; then
@@ -335,11 +355,11 @@ apply_full() {
                     case "$jname" in
                         session.json) continue ;;
                     esac
-                    cp -a "$jf" "$DIST_DIR/resources/json/$jname" || echo "labsim-update: fallo copiando json/$jname" >&2
+                    copy_or_flag "$jf" "$DIST_DIR/resources/json/$jname"
                 done
             else
                 rm -rf "$DIST_DIR/resources/$name"
-                cp -a "$item" "$DIST_DIR/resources/$name" || echo "labsim-update: fallo copiando resources/$name" >&2
+                copy_or_flag "$item" "$DIST_DIR/resources/$name"
             fi
         done
     fi
@@ -359,7 +379,7 @@ apply_update() {
             __removed__.txt) continue ;;
         esac
         mkdir -p "$DIST_DIR/$(dirname "$rel")"
-        cp -a "$relfile" "$DIST_DIR/$rel" || echo "labsim-update: fallo copiando $rel" >&2
+        copy_or_flag "$relfile" "$DIST_DIR/$rel"
     done < <(find "$upd_dir" -type f -print0)
 
     chmod +x "$DIST_DIR/LabSim" 2>/dev/null
@@ -383,7 +403,19 @@ while IFS=$'\\t' read -r kind path; do
     esac
 done < "$STEPS_FILE"
 
-echo "$FINAL_VERSION" > "$DIST_DIR/BUILD_VERSION"
+# BUILD_VERSION es lo que la app muestra como version y lo que el updater
+# compara contra las releases. Escribirla sin que la copia haya funcionado
+# deja al cliente con codigo viejo y etiqueta nueva: el update no se
+# reintenta nunca y el bug "ya actualizado" se vuelve indiagnosticable.
+if [ "$FAILED" -eq 0 ]; then
+    if echo "$FINAL_VERSION" > "$DIST_DIR/BUILD_VERSION"; then
+        echo "labsim-update: OK -> $FINAL_VERSION"
+    else
+        echo "labsim-update: se aplico todo pero no pude escribir BUILD_VERSION"
+    fi
+else
+    echo "labsim-update: update INCOMPLETO -- BUILD_VERSION queda en $(cat "$DIST_DIR/BUILD_VERSION" 2>/dev/null); se reintenta en el proximo arranque"
+fi
 
 rm -rf "$(dirname "$STEPS_FILE")"
 
