@@ -726,8 +726,13 @@ final class CaseSheetPdf
         $filas = [['', 'OD', 'OI']];
         $filas[] = ['SDT (dB)', self::db($porLado['od']['sdt']), self::db($porLado['oi']['sdt'])];
         $filas[] = ['SRT (dB)', self::db($porLado['od']['srt']), self::db($porLado['oi']['srt'])];
-        $filas[] = ['UMD (%)', self::pct($porLado['od']['umd_pct']), self::pct($porLado['oi']['umd_pct'])];
-        $filas[] = ['UMD a (dB)', self::db($porLado['od']['umd_int']), self::db($porLado['oi']['umd_int'])];
+        // La UMD se anota como una sola cosa: "96 % a 70 dB". Partida en dos
+        // filas se leía como si fueran dos resultados distintos.
+        $filas[] = [
+            'UMD',
+            self::pct($porLado['od']['umd_pct']) . ' a ' . self::db($porLado['od']['umd_int']) . ' dB',
+            self::pct($porLado['oi']['umd_pct']) . ' a ' . self::db($porLado['oi']['umd_int']) . ' dB',
+        ];
         $filas[] = ['Rollover', $porLado['od']['recruit'] ? 'Sí' : 'No', $porLado['oi']['recruit'] ? 'Sí' : 'No'];
         $yTabla = $this->tablaEn($x, $this->y + 8, $ancho, $filas, [0.4, 0.3, 0.3], true);
 
