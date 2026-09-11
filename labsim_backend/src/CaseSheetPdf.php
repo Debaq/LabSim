@@ -1347,11 +1347,19 @@ final class CaseSheetPdf
             // aire arriba para el oído que responde de más. Con el eje
             // bajando a -25 la zona útil quedaba aplastada arriba.
             CaseCharts::oaeBars($this->pdf, $x, $yTe + 9, $ancho, $alto, $bandas, $senal, $ruido, $pasa, $colorLado, [-5.0, 20.0]);
+            // Qué es cada barra. Sin esto el panel obliga a adivinar cuál de
+            // las dos es la emisión, que es lo único que se está midiendo.
+            $xPie = $x;
+            foreach ([[$colorLado, 'emisión'], ['#9a9a9a', 'ruido']] as [$colorMuestra, $queEs]) {
+                $this->pdf->rectFilled($xPie, $yTe + $alto + 14, 5, 5, $colorMuestra);
+                $this->pdf->text($xPie + 7, $yTe + $alto + 18, $queEs, 6, false, self::GRIS_TEXTO);
+                $xPie += 7 + $this->pdf->textWidth($queEs, 6) + 10;
+            }
             $pasan = count(array_filter($pasa));
             $this->pdf->text(
-                $x,
+                $xPie,
                 $yTe + $alto + 18,
-                $pasan . '/' . count($bandas) . ' bandas sobre el ruido   ·   R = no llega al criterio',
+                '·   ' . $pasan . '/' . count($bandas) . ' bandas sobre el ruido   ·   R = no llega al criterio',
                 6,
                 false,
                 self::GRIS_TEXTO
