@@ -1341,7 +1341,12 @@ final class CaseSheetPdf
                 true,
                 $colorLado
             );
-            CaseCharts::oaeBars($this->pdf, $x, $yTe + 9, $ancho, $alto, $bandas, $senal, $ruido, $pasa, $colorLado, [-25.0, 25.0]);
+            // -5 a 20 dB SPL: ahí cae todo lo que se lee en un transiente --
+            // el piso promediado (~2), la respuesta normal (8-12 según el
+            // JSON normativo) y el criterio de 6 dB sobre el ruido--, con
+            // aire arriba para el oído que responde de más. Con el eje
+            // bajando a -25 la zona útil quedaba aplastada arriba.
+            CaseCharts::oaeBars($this->pdf, $x, $yTe + 9, $ancho, $alto, $bandas, $senal, $ruido, $pasa, $colorLado, [-5.0, 20.0]);
             $pasan = count(array_filter($pasa));
             $this->pdf->text(
                 $x,

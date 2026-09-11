@@ -797,9 +797,14 @@ final class CaseCharts
 
         // Cada banda ocupa su celda y dentro van las dos barras pegadas:
         // la señal a la izquierda, el ruido a la derecha.
+        //
+        // Las barras crecen desde el PISO del eje y no desde el 0, que es
+        // como las dibuja un equipo de transientes: la barra es la magnitud.
+        // Así una banda sin respuesta se queda sin barra en vez de mostrar
+        // un tocón bajo el cero que se lee como "algo hay".
         $celda = $pw / count($bandas);
         $anchoBarra = min(9.0, $celda * 0.33);
-        $base = $fy(0.0);
+        $base = $fy($minY);
 
         foreach (array_values($bandas) as $i => $hz) {
             $centro = $px + $celda * ($i + 0.5);
@@ -810,11 +815,13 @@ final class CaseCharts
                 [$ruido[$hz] ?? $minY, $centro + $anchoBarra * 0.55 - $anchoBarra / 2, '#9a9a9a'],
             ] as [$valor, $xBarra, $colorBarra]) {
                 $yValor = $fy((float) $valor);
-                $alto = abs($yValor - $base);
-                if ($alto < 0.5) {
-                    $alto = 0.5;
+                $alto = $base - $yValor;
+                if ($alto <= 0.4) {
+                    // Por debajo del piso del eje no hay barra que dibujar:
+                    // esa banda no tiene respuesta, y el conteo lo dice.
+                    continue;
                 }
-                $pdf->rectFilled($xBarra, min($yValor, $base), $anchoBarra, $alto, $colorBarra);
+                $pdf->rectFilled($xBarra, $yValor, $anchoBarra, $alto, $colorBarra);
             }
 
             // La banda que no llega al criterio se marca: es el REFER del
