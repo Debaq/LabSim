@@ -781,5 +781,10 @@ Pendiente, del lado del cliente:
       tratarlo como 130 dB HL igual que hacía el backend.
 - [ ] El formulario no distingue "no se midió" de "no hubo respuesta": los
       dos se guardan 130. En el LDL el 130 es "no se buscó" (lo pone el
-      checkbox) y en la tonal es "no respondió". Habría que separarlos, o
-      al menos decidir explícitamente que son lo mismo.
+      checkbox) y en la tonal es "no respondió". **No son lo mismo**: sin
+      respuesta se anota con su símbolo y una flecha hacia abajo (ya se
+      dibuja así en la ficha y en la vista previa, 2026-09-11), y no medido
+      no se anota. Hoy sólo el LDL tiene cómo decir "no medido", con el
+      checkbox por oído; la tonal necesita algo equivalente, por frecuencia
+      --una casilla, o un valor reservado distinto del 130-- antes de que se
+      pueda cargar un caso con frecuencias sin probar.
