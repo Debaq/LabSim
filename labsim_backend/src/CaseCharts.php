@@ -123,13 +123,20 @@ final class CaseCharts
      * que aquí no se puede reproducir. Por eso la ficha informa el rango y
      * dibuja el centro: el número exacto que va a leer el alumno cae dentro,
      * pero no se puede prometer cuál.
+     *
+     * Los rangos son de adulto y tienen que separar las letras: As y Cs son
+     * las rígidas (compliance bajo 0,3 mL) y no pueden solaparse con A y C,
+     * que llevan la compliance normal; el pico de C/Cs se queda en -250 daPa
+     * porque -400 es el borde de la ventana de barrido y ahí no hay pico que
+     * leer; Ad topa en 3,0 mL y no en 4,0 --igual queda sobre la escala de 2
+     * mL y por eso la ficha lo rotula.
      */
     public const FORMAS_TIMPANOGRAMA = [
         'A'  => [0.3, 1.6, -100.0, 20.0],
-        'As' => [0.01, 0.3, -100.0, 20.0],
-        'Ad' => [1.8, 4.0, -100.0, 20.0],
-        'C'  => [0.3, 1.6, -400.0, -100.0],
-        'Cs' => [0.01, 1.3, -400.0, -100.0],
+        'As' => [0.1, 0.3, -100.0, 20.0],
+        'Ad' => [1.8, 3.0, -100.0, 20.0],
+        'C'  => [0.3, 1.6, -250.0, -110.0],
+        'Cs' => [0.1, 0.3, -250.0, -110.0],
         'B'  => [0.0, 0.003, -100.0, 20.0],
     ];
 

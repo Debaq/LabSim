@@ -32,6 +32,31 @@ def map_letter_for_probe(letter, probe_freq, seed_key=None):
     return 'A' if draw < prob else 'B'
 
 
+# Rango que se sortea para cada letra de Jerger:
+# [compliance mín (mL), compliance máx, presión mín del pico (daPa), máx].
+#
+# Espejo de CaseCharts::FORMAS_TIMPANOGRAMA (labsim_backend/src/CaseCharts.php)
+# y de SHAPES en public/js/case/tympanogram.js: la ficha informa el rango y
+# dibuja su centro, así que un rango que no es clínico acá sale impreso mal
+# allá. Valores de adulto:
+#  - A/C comparten la compliance normal (0,3-1,6 mL); lo que los separa es
+#    dónde cae el pico.
+#  - As y Cs son las rígidas: compliance BAJO (<0,3 mL). Cs no puede sortear
+#    hasta 1,3, porque ahí es una C normal con otro nombre.
+#  - Ad va sobre 1,8 mL. El tope es 3,0 y no 4,0: más arriba deja de ser una
+#    curva que el equipo pueda mostrar (el eje abre en 2 cc).
+#  - El pico de C/Cs llega hasta -250 daPa, no hasta -400: -400 es el borde
+#    mismo de la ventana de barrido y ahí no queda pico que leer.
+FORMAS_JERGER = {
+    'A':  (0.3, 1.6, -100, 20),
+    'As': (0.1, 0.3, -100, 20),
+    'Ad': (1.8, 3.0, -100, 20),
+    'C':  (0.3, 1.6, -250, -110),
+    'Cs': (0.1, 0.3, -250, -110),
+    'B':  (0.0, 0.003, -100, 20),
+}
+
+
 class Z_225():
     def __init__(self, manual=False, letter="A", c=1, p=0, g=1, pmax=200, num_pts=20, vol=1.8, unseal=False, win_neg=-400, win_pos=200, seed_key=None):
 
@@ -72,28 +97,14 @@ class Z_225():
         # paciente siempre caiga en el mismo punto de la curva; random
         # global sólo se usa cuando no hay paciente (caso legacy/demo).
         rng = random.Random(str(self.seed_key)) if self.seed_key is not None else random
-        if letter == 'A':
-            c = rng.uniform(0.3, 1.6)
-            p = rng.randint(-100, 20)
-        elif letter == 'As':
-            c = rng.uniform(0.01, 0.3)
-            p = rng.randint(-100, 20)
-        elif letter == 'Ad':
-            c = rng.uniform(1.8, 4.0)
-            p = rng.randint(-100, 20)
-        elif letter == 'C':
-            c = rng.uniform(0.3, 1.6)
-            p = rng.randint(-400, -100)
-        elif letter == 'Cs':
-            c = rng.uniform(0.01, 1.3)
-            p = rng.randint(-400, -100)
-        elif letter == 'B':
-            c = rng.uniform(0.0, 0.003)
-            p = rng.randint(-100, 20)
-        elif letter == 'N':
+        if letter == 'N':
             c = 0
             p = 0
             self.input[7] = True
+        else:
+            c_min, c_max, p_min, p_max = FORMAS_JERGER.get(letter, FORMAS_JERGER['A'])
+            c = rng.uniform(c_min, c_max)
+            p = rng.randint(int(p_min), int(p_max))
 
         if letter != 'N' and self.seed_key is not None:
             # jitter mínimo encima del valor estable del paciente -- no

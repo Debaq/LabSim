@@ -838,3 +838,33 @@ un número que no va a coincidir con el que vea el alumno.
       backend al crear el caso y guardarlo en `cases.data`, y que la app lo
       lea en vez de sortear. Es el mismo patrón que ya se usa para todo lo
       demás del caso.
+
+### Rangos de compliance y presión por letra (2026-09-11)
+
+Los rangos que sortea la app venían mal y la ficha los imprimía tal cual:
+
+- `Cs` sorteaba 0,01 a 1,3 mL, o sea una C normal con nombre de rígida: la
+  ficha informaba "Cs, 0,01 a 1,30 mL" y dibujaba 0,66 mL, indistinguible de
+  una C. Ahora `As` y `Cs` van 0,10 a 0,30 mL (rígidas de verdad) y no se
+  solapan con `A`/`C`, que llevan la compliance normal 0,3 a 1,6 mL.
+- El pico de `C`/`Cs` llegaba a -400 daPa, que es el borde mismo de la
+  ventana de barrido: no quedaba pico que leer ni en la app ni en la ficha.
+  Ahora va de -250 a -110 daPa.
+- `Ad` llegaba a 4,0 mL. Topa en 3,0: igual queda sobre la escala de 2 mL y
+  por eso la ficha lo rotula "pico sobre 2 mL, fuera de escala" --aviso que
+  el PDF ya tenía y que ahora también muestra el editor.
+
+Los tres rangos viven en tres copias (`FORMAS_JERGER` en
+`src/impedanciometria/z_generator.py`, `CaseCharts::FORMAS_TIMPANOGRAMA`,
+`SHAPES` en `public/js/case/tympanogram.js`) y `test_charts_vs_js.php` ahora
+compara las tres --antes sólo comparaba PHP contra JS, que era por donde se
+había colado el desfase.
+
+- [ ] La gradiente del equipo sigue dando **0,85 en cualquier curva con
+      pico**: `Z_225.curve_z` usa `pmax=200` fijo, así que toda curva mide
+      400 daPa de base (TW ≈ 200 daPa, contra 50-110 daPa de un adulto
+      normal) y la lectura a ±50 daPa no depende de la letra. Para que el
+      número informe algo hay que hacer el ancho función de la letra, como
+      ya lo hace la curva impresa (`ANCHOS_TIMPANOGRAMA`). Ojo que además
+      el sentido está invertido respecto de la gradiente clásica (acá 1 es
+      curva ancha).

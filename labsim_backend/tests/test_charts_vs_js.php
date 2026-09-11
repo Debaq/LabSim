@@ -124,9 +124,13 @@ $anchosJs = js_numeros($tympJs, '/WIDTHS = \{([^}]*)\}/', 'los anchos de curva')
 t_eq($anchosJs, array_values(array_map('floatval', CaseCharts::ANCHOS_TIMPANOGRAMA)),
     'El editor y la ficha abren la curva lo mismo en cada tipo');
 
-$rangoCompliance = js_numeros($tympJs, '/c = Math\.max\((\d+), Math\.min\((\d+(?:\.\d+)?), c\)\)/', 'el rango de compliance');
-t_eq($rangoCompliance, [0.0, (float) CaseCharts::ESCALA_TIMPANOGRAMA_ML],
+t_eq(js_numeros($tympJs, '/MAX_ML = (\d+(?:\.\d+)?)/', 'el tope del eje de mL'),
+    [(float) CaseCharts::ESCALA_TIMPANOGRAMA_ML],
     'El timpanograma usa la misma escala fija de mL en el editor y en el PDF');
+t_true(preg_match('/c = Math\.max\(0, Math\.min\(MAX_ML, c\)\)/', $tympJs) === 1,
+    'El editor recorta la curva contra ese mismo tope, no contra un 2 escrito a mano');
+t_true(strpos($tympJs, 'pico sobre 2 mL, fuera de escala') !== false,
+    'El editor avisa cuando el pico se sale de la escala, igual que el PDF');
 
 t_eq(js_numeros($tympJs, '/GRADIENT_DELTA = (\d+)/', 'el delta de la gradiente'),
     [(float) CaseCharts::GRADIENTE_DELTA_DAPA],
@@ -136,6 +140,32 @@ t_eq(js_numeros($tympJs, '/GRADIENT_DELTA = (\d+)/', 'el delta de la gradiente')
 // curva del editor deja de ser la del PDF.
 t_true(preg_match('/Math\.exp\(-Math\.abs\(p - v\.p\) \/ v\.width\)/', $tympJs) === 1,
     'El editor dibuja el timpanograma con el ápice en punta (exponencial de |distancia|)');
+
+// --- Curva del timpanograma (z_generator.py, la app) --------------------
+//
+// La ficha no inventa la compliance ni la presión: informa el RANGO que la
+// app sortea para esa letra. Si el rango de la app se mueve y el de acá no,
+// la ficha imprime números que el alumno nunca va a ver en el equipo, que es
+// justo lo que pasó con Cs (sorteaba hasta 1,3 mL, o sea una C normal).
+//
+// El repo de la app no viaja al hosting, así que el archivo puede no estar:
+// ahí no hay nada que comparar y el test lo dice en vez de fallar.
+$rutaGen = dirname(dirname(__DIR__)) . '/src/impedanciometria/z_generator.py';
+$genPy = @file_get_contents($rutaGen);
+if (!is_string($genPy) || $genPy === '') {
+    echo "  (sin src/impedanciometria/z_generator.py: no se compara con la app)\n";
+} else {
+    foreach (CaseCharts::FORMAS_TIMPANOGRAMA as $tipo => $forma) {
+        $patron = "/'" . preg_quote($tipo, '/') . "':\s*\(([^)]*)\)/";
+        if (preg_match($patron, $genPy, $m) !== 1) {
+            t_true(false, "FORMAS_JERGER trae el tipo {$tipo}");
+            continue;
+        }
+        preg_match_all('/-?\d+(?:\.\d+)?/', $m[1], $nums);
+        t_eq(array_map('floatval', $nums[0]), array_map('floatval', $forma),
+            "Timpanograma {$tipo}: la ficha informa el rango que sortea la app");
+    }
+}
 
 // --- Rollover del logoaudiograma (logogram.js) --------------------------
 

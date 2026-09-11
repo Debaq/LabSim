@@ -221,6 +221,26 @@ t_true(max(array_column(CaseCharts::tympanogramPoints('Ad'), 1))
 t_true(max(array_column(CaseCharts::tympanogramPoints('As'), 1))
      < max(array_column(CaseCharts::tympanogramPoints('A'), 1)),
     'As es más chata que A (rigidez)');
+// Las letras tienen que separarse por los NÚMEROS que informa la ficha, no
+// sólo por el dibujo: As y Cs son las rígidas (compliance bajo lo normal) y
+// no pueden sortear en el mismo rango que A y C, o la ficha imprime una
+// compliance normal debajo del rótulo "rígida".
+foreach (['As' => 'A', 'Cs' => 'C'] as $rigida => $normal) {
+    $vR = CaseCharts::valoresTimpanograma($rigida);
+    $vN = CaseCharts::valoresTimpanograma($normal);
+    t_true($vR['c_max'] <= 0.3,
+        "Timpanograma {$rigida}: la compliance informada es la de un oído rígido (<= 0,3 mL)");
+    t_true($vR['c_max'] <= $vN['c_min'],
+        "Timpanograma {$rigida}: su compliance no se solapa con la de {$normal}");
+}
+// Y el pico de las C tiene que quedar DENTRO de la ventana de barrido: en
+// -400 daPa cae sobre el borde y no hay pico que leer.
+foreach (['C', 'Cs'] as $tipo) {
+    $v = CaseCharts::valoresTimpanograma($tipo);
+    t_true($v['p_max'] < -100.0, "Timpanograma {$tipo}: el pico queda en presión negativa franca");
+    t_true($v['p_min'] > -400.0, "Timpanograma {$tipo}: el pico no se va al borde de la ventana");
+}
+
 $curvaB = array_column(CaseCharts::tympanogramPoints('B'), 1);
 t_true(max($curvaB) - min($curvaB) < 0.1, 'B es plana: no tiene pico que buscar');
 

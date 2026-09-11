@@ -12,19 +12,20 @@
 window.drawTympanogram = (function () {
     var NS = 'http://www.w3.org/2000/svg';
     function xPos(p) { p = Math.max(-400, Math.min(200, p)); return 32 + (p - (-400)) / 600 * 280; }
-    function yPos(c) { c = Math.max(0, Math.min(2, c)); return 276 - c / 2 * 266; }
+    function yPos(c) { c = Math.max(0, Math.min(MAX_ML, c)); return 276 - c / MAX_ML * 266; }
 
     // [compliance mín, compliance máx, presión mín, presión máx] por letra.
     var SHAPES = {
         A: [0.3, 1.6, -100, 20],
-        As: [0.01, 0.3, -100, 20],
-        Ad: [1.8, 4.0, -100, 20],
-        C: [0.3, 1.6, -400, -100],
-        Cs: [0.01, 1.3, -400, -100],
+        As: [0.1, 0.3, -100, 20],
+        Ad: [1.8, 3.0, -100, 20],
+        C: [0.3, 1.6, -250, -110],
+        Cs: [0.1, 0.3, -250, -110],
         B: [0.0, 0.003, -100, 20]
     };
     // Ancho de la curva impresa (daPa), espejo de CaseCharts::ANCHOS_TIMPANOGRAMA.
     var WIDTHS = { A: 60, As: 50, Ad: 70, C: 70, Cs: 60, B: 400 };
+    var MAX_ML = 2;            // tope del eje, CaseCharts::ESCALA_TIMPANOGRAMA_ML
     var GRADIENT_DELTA = 50;   // la gradiente se lee a +-50 daPa del pico
     var GRADIENT_COLOR = '#b08900';
     var GRADIENT_FILL = '#fbf3d0';
@@ -58,6 +59,7 @@ window.drawTympanogram = (function () {
         if (!group) return;
         while (group.firstChild) group.removeChild(group.firstChild);
 
+        var fueraDeEscala = 0;
         [['z_od', window.sideColor('od')], ['z_oi', window.sideColor('oi')]].forEach(function (pair) {
             var node = document.getElementById(pair[0]);
             var type = node ? node.value : 'A';
@@ -85,6 +87,21 @@ window.drawTympanogram = (function () {
                 points: curvePoints(type).map(function (pt) { return xPos(pt[0]) + ',' + yPos(pt[1]); }).join(' '),
                 fill: 'none', stroke: pair[1], 'stroke-width': '1.5'
             }));
+
+            // El eje topa en 2 mL --la escala con la que abre el equipo-- así
+            // que un Ad se dibuja con la punta cortada. Se avisa, igual que en
+            // el PDF (CaseSheetPdf: "pico sobre 2 mL"), en vez de cambiarle la
+            // escala al gráfico y perder la comparación entre fichas.
+            if (v.c > MAX_ML) {
+                var texto = el('text', {
+                    x: 308, y: 22 + fueraDeEscala * 11, 'text-anchor': 'end',
+                    'font-size': '8', fill: pair[1]
+                });
+                texto.textContent = pair[0] === 'z_od' ? 'OD: pico sobre 2 mL, fuera de escala'
+                                                       : 'OI: pico sobre 2 mL, fuera de escala';
+                group.appendChild(texto);
+                fueraDeEscala++;
+            }
         });
     };
 })();
