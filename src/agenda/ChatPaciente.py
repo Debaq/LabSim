@@ -54,19 +54,22 @@ class _AvatarFetchThread(QThread):
     """Trae el avatar circular de una persona de la sala (si tiene foto
     subida) fuera del hilo de UI -- ver foto_paciente() en helpers.py. Emite
     None si no tiene foto o no hay conexión, no es una falla (fallback a
-    iniciales)."""
+    iniciales).
+
+    `foto_key` es la clave con la que el backend guarda esa foto y no el id
+    de persona: el paciente conserva la clave histórica del caso (persona
+    vacía) aunque en la sala sea `p1` -- ver PatientPhoto::key y
+    _foto_key() más abajo."""
     listo = Signal(str, object)
 
-    def __init__(self, case_id, persona_id, parent=None):
+    def __init__(self, case_id, persona_id, foto_key, parent=None):
         super().__init__(parent)
         self._case_id = case_id
         self._persona_id = persona_id
+        self._foto_key = foto_key
 
     def run(self):
-        # El paciente conserva la clave histórica del caso (persona vacía);
-        # cada acompañante cuelga de su id -- ver PatientPhoto::key.
-        persona = "" if self._persona_id == "__paciente__" else self._persona_id
-        self.listo.emit(self._persona_id, foto_paciente(self._case_id, persona))
+        self.listo.emit(self._persona_id, foto_paciente(self._case_id, self._foto_key))
 
 
 class ChatPacienteWidget(QWidget):
@@ -111,6 +114,7 @@ class ChatPacienteWidget(QWidget):
         # pregunta lo decide el modelo, no el cliente.
         self._sala = []
         self._avatares = set()  # personas que ya tienen imagen cargada en el documento
+        self._fotos = {}  # clave de foto -> pixmap ya traído (el paciente aparece como __paciente__ y como p1)
 
         layout = QVBoxLayout(self)
 
@@ -174,6 +178,7 @@ class ChatPacienteWidget(QWidget):
         self._intentos = 0
         self._sala = []
         self._avatares = set()  # transcript.clear() más abajo borra también los avatares
+        self._fotos = {}
         self.transcript.clear()  # ¡también borra los recursos (avatares) del documento, no solo el texto!
         self._ocultar_estado()
         self._actualizar_encabezado()
@@ -237,6 +242,14 @@ class ChatPacienteWidget(QWidget):
         if persona_id in self._avatares:
             return
         self._avatares.add(persona_id)
+        # El paciente se pinta dos veces: primero como __paciente__ (respaldo
+        # mientras no llega la sala) y después como p1. Es la misma foto y la
+        # misma clave, así que la segunda vez no se vuelve a pedir ni pasa
+        # por las iniciales.
+        foto = self._fotos.get(self._foto_key(persona_id))
+        if foto is not None:
+            self._set_avatar(persona_id, foto)
+            return
         self._set_avatar(persona_id, avatar_iniciales(etiqueta, self.AVATAR_SIZE))
         self._pedir_avatar(persona_id)
 
@@ -244,12 +257,30 @@ class ChatPacienteWidget(QWidget):
         self.transcript.document().addResource(
             QTextDocument.ImageResource, QUrl(self._avatar_url(persona_id)), pixmap.toImage()
         )
+        # Reemplazar el recurso no repinta solo: si la foto llegó después de
+        # la burbuja, sin esto la cara se sigue viendo con iniciales hasta
+        # que el alumno scrollea.
+        self.transcript.viewport().update()
+
+    def _foto_key(self, persona_id):
+        """Con qué clave pedirle al backend la foto de esa persona.
+
+        El paciente es `p1` en la sala pero su foto se sigue subiendo y
+        guardando con la clave histórica del caso (persona vacía, ver
+        _paciente.php y PatientPhoto::key), así que pedirla como `p1` daba
+        404 y el paciente quedaba con iniciales aunque tuviera foto."""
+        if persona_id == self._PACIENTE_ID:
+            return ""
+        persona = self._persona(persona_id)
+        if persona is not None and persona.get("es_paciente"):
+            return ""
+        return persona_id
 
     def _pedir_avatar(self, persona_id):
         """Foto real de esa persona si tiene una subida (ver
         PatientPhoto.php) -- mientras tanto (o si no hay), queda el círculo
         con iniciales."""
-        hilo = _AvatarFetchThread(self._case_id, persona_id, parent=self)
+        hilo = _AvatarFetchThread(self._case_id, persona_id, self._foto_key(persona_id), parent=self)
         hilo.listo.connect(lambda pid, data, cid=self._case_id: self._on_avatar_listo(cid, pid, data))
         # Se guardan todos: son varios en paralelo (uno por persona) y si se
         # pierde la referencia, Qt puede destruir el QThread a mitad de la
@@ -263,6 +294,7 @@ class ChatPacienteWidget(QWidget):
             return  # sin foto, o el alumno ya cambió de paciente mientras se pedía
         pixmap = avatar_circular_desde_bytes(data, self.AVATAR_SIZE)
         if pixmap is not None:
+            self._fotos[self._foto_key(persona_id)] = pixmap
             self._set_avatar(persona_id, pixmap)
 
     # -----------------------------------------------------------------
