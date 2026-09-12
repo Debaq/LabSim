@@ -144,8 +144,8 @@ admin_header('Fichas Clínicas', $me);
     <div class="patients-toolbar">
         <input type="text" id="patients-search" placeholder="Buscar por nombre, rut o ID..." autocomplete="off" oninput="filterPatientsTable()">
         <select id="patients-filter-estado" onchange="filterPatientsTable()">
-            <option value="">Todos los estados</option>
-            <option value="agendada">Agendada</option>
+            <option value="">Todas, en agenda o no</option>
+            <option value="agendada">En agenda</option>
             <option value="sin_agendar">Sin agendar</option>
         </select>
         <span class="toolbar-count" id="patients-toolbar-count"></span>
@@ -156,7 +156,7 @@ admin_header('Fichas Clínicas', $me);
             <th>ID</th>
             <th>Nombre</th>
             <th>Comentario</th>
-            <th>Estado</th>
+            <th title="Si el caso está puesto en alguna agenda. La fecha/hora vive en Agendas -- acá no, un mismo caso puede estar agendado varias veces">En agenda</th>
             <th title="Total de alumnos que han atendido este caso, sumando todas las rondas (citas/reagendos)">Atenciones</th>
             <th title="Cantidad de veces que este caso fue agendado -- cada reagendamiento suma una ronda nueva">Rondas</th>
             <th title="Quién armó la ficha y cuándo. En blanco = caso anterior al registro de autoría">Creada por</th>
@@ -206,12 +206,14 @@ admin_header('Fichas Clínicas', $me);
                       title="<?= htmlspecialchars(implode("\n", $faltantesRow)) ?>">incompleto</span>
                 <br>
                 <?php endif; ?>
-                <?php if (!$c['appointment_id']): ?>
-                <span class="text-warn">sin agendar</span>
-                <?php elseif ($c['fecha'] === '' || $c['hora'] === ''): ?>
+                <?php /* Solo si está o no en agenda: la fecha/hora de la cita
+                          no va acá -- un caso puede estar agendado varias veces
+                          (rondas) y mostrar una sola fecha hacía parecer que esa
+                          era LA fecha del caso. Eso se ve en Agendas. */ ?>
+                <?php if ($estadoRow === 'sin_agendar'): ?>
                 <span class="text-warn">sin agendar</span>
                 <?php else: ?>
-                agendada (<?= htmlspecialchars($c['fecha']) ?> <?= htmlspecialchars($c['hora']) ?>)
+                sí
                 <?php endif; ?>
             </td>
             <td style="font-size:0.8rem;">
