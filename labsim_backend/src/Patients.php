@@ -71,7 +71,7 @@ final class Patients
      * o la ficha del paciente en Agenda.py queda con el valor viejo/vacío
      * cuando se la abre desde una cita distinta a la que se editó.
      */
-    public static function updateHistoriaClinica(PDO $pdo, int $patientId, string $historiaClinica): void
+    public static function updateHistoriaClinica(PDO $pdo, int $patientId, string $historiaClinica, ?int $updatedBy = null): void
     {
         $pdo->prepare(
             'UPDATE patients SET historia_clinica = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
@@ -85,6 +85,15 @@ final class Patients
                 $data = [];
             }
             $data['historia_clinica'] = $historiaClinica;
+            // $updatedBy: quien está editando queda como último editor de
+            // TODOS los casos que este cascade toca, no solo del que abrió --
+            // si no, los otros casos del mismo paciente quedaban con fecha de
+            // edición nueva y el editor anterior (ver admin/patients.php).
+            if ($updatedBy !== null) {
+                $pdo->prepare('UPDATE cases SET data = ?, updated_at = CURRENT_TIMESTAMP, updated_by = ? WHERE id = ?')
+                    ->execute([json_encode($data, JSON_UNESCAPED_UNICODE), $updatedBy, $case['id']]);
+                continue;
+            }
             $pdo->prepare('UPDATE cases SET data = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
                 ->execute([json_encode($data, JSON_UNESCAPED_UNICODE), $case['id']]);
         }

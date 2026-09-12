@@ -183,7 +183,16 @@ CREATE TABLE IF NOT EXISTS cases (
     id TEXT PRIMARY KEY,
     data TEXT NOT NULL,               -- JSON: Anamnesis, audiometría, etc. (definición del caso)
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    patient_id INTEGER REFERENCES patients(id)
+    patient_id INTEGER REFERENCES patients(id),
+    -- Autoría de la ficha, para la tabla de patients.php: quién armó el caso
+    -- y quién lo tocó por última vez. Solo el id (los usuarios nunca se
+    -- borran, se desactivan con active=0), el nombre se resuelve con JOIN a
+    -- users para que un cambio de display_name se refleje en fichas viejas.
+    -- NULL = fila anterior a estas columnas que el backfill no pudo resolver
+    -- desde admin_audit_log (ver Db::migrateCaseAuthorshipIfNeeded).
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by INTEGER REFERENCES users(id),
+    updated_by INTEGER REFERENCES users(id)
 );
 CREATE INDEX IF NOT EXISTS idx_cases_patient_id ON cases(patient_id);
 

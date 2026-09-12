@@ -7,6 +7,7 @@ require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/CaseCompleteness.php';
 require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
+require_once __DIR__ . '/../../src/LlmUsage.php';
 
 /**
  * Base de datos de fichas clínicas (pacientes/casos) -- separado de agenda.php,
@@ -55,6 +56,25 @@ function patients_url(array $overrides = []): string
     return 'patients.php' . ($params ? '?' . http_build_query($params) : '');
 }
 
+/**
+ * Timestamp de la base (UTC, CURRENT_TIMESTAMP de SQLite) en hora de Chile y
+ * formato local. Sin esto, "creado ayer a las 22:00" se leía como hoy.
+ */
+function patients_fecha_local(?string $utc): string
+{
+    $utc = trim((string) $utc);
+    if ($utc === '') {
+        return '';
+    }
+    try {
+        $dt = new DateTime($utc, new DateTimeZone('UTC'));
+    } catch (Throwable $e) {
+        return $utc;
+    }
+    $dt->setTimezone(new DateTimeZone(LlmUsage::ZONA_INFORME));
+    return $dt->format('d-m-Y H:i');
+}
+
 // Docente: solo ve casos sin agendar (biblioteca compartida) + citas de
 // su(s) curso(s) + citas legado sin curso (course_id NULL) -- nunca citas
 // de un curso ajeno. Admin completo sin filtro. Esta lista NO se acota por
@@ -74,10 +94,17 @@ if (!$isFullAdmin) {
 
 $courseScopeSql = " WHERE a.id IS NULL OR ({$permissionSql})";
 $stmt = $pdo->prepare(
-    "SELECT c.id, c.data, c.updated_at,
+    "SELECT c.id, c.data, c.updated_at, c.created_at,
             a.id AS appointment_id, a.fecha, a.hora, a.rut, a.nombre, a.apellido, a.fecha_nac,
             a.procedimiento, a.nota_admin,
             p.comentario_docente,
+            -- Autoría de la ficha (cases.created_by/updated_by): el nombre se
+            -- resuelve en vivo con JOIN, no se copia en la fila, para que un
+            -- cambio de display_name se vea también en las fichas viejas.
+            -- NULL = caso anterior a esas columnas que el backfill no pudo
+            -- atribuir (ver Db::migrateCaseAuthorshipIfNeeded).
+            uc.display_name AS creador_nombre, uc.username AS creador_username,
+            ue.display_name AS editor_nombre, ue.username AS editor_username,
             -- Suma TODAS las rondas del caso (no solo la última cita) --
             -- si solo se contara att.appointment_id = a.id (última cita),
             -- cada reagendamiento hacía parecer que las atenciones de
@@ -91,6 +118,8 @@ $stmt = $pdo->prepare(
          SELECT id FROM appointments WHERE case_id = c.id ORDER BY id DESC LIMIT 1
      )
      LEFT JOIN patients p ON p.id = c.patient_id
+     LEFT JOIN users uc ON uc.id = c.created_by
+     LEFT JOIN users ue ON ue.id = c.updated_by
      {$courseScopeSql}
      ORDER BY CASE WHEN a.fecha IS NULL OR a.fecha = '' THEN 1 ELSE 0 END, a.fecha, a.hora, c.updated_at DESC"
 );
@@ -130,6 +159,8 @@ admin_header('Fichas Clínicas', $me);
             <th>Estado</th>
             <th title="Total de alumnos que han atendido este caso, sumando todas las rondas (citas/reagendos)">Atenciones</th>
             <th title="Cantidad de veces que este caso fue agendado -- cada reagendamiento suma una ronda nueva">Rondas</th>
+            <th title="Quién armó la ficha y cuándo. En blanco = caso anterior al registro de autoría">Creada por</th>
+            <th title="Quién guardó la ficha por última vez y cuándo">Última edición</th>
             <th>Acciones</th>
         </tr>
         <?php foreach ($cases as $c): ?>
@@ -148,8 +179,11 @@ admin_header('Fichas Clínicas', $me);
         // "incompleto" entra al blob de búsqueda: con el buscador que ya
         // existe alcanza para juntar todos los casos que hay que completar,
         // sin agregar otro filtro a la barra.
+        $creadorRow = trim((string) ($c['creador_nombre'] ?? ''));
+        $editorRow = trim((string) ($c['editor_nombre'] ?? ''));
         $searchBlob = mb_strtolower($c['id'] . ' ' . ($nombreVivo ?: $nombreSnapshot) . ' ' . ($c['rut'] ?? '')
-            . ' ' . $comentarioDocente . ($faltantesRow !== [] ? ' incompleto' : ''));
+            . ' ' . $comentarioDocente . ' ' . $creadorRow . ' ' . $editorRow
+            . ($faltantesRow !== [] ? ' incompleto' : ''));
         ?>
         <tr data-estado="<?= $estadoRow ?>" data-search="<?= htmlspecialchars($searchBlob) ?>">
             <td><?= htmlspecialchars($c['id']) ?></td>
@@ -194,6 +228,22 @@ admin_header('Fichas Clínicas', $me);
                 <?= (int) $c['rondas_count'] ?: '—' ?>
                 <?php endif; ?>
             </td>
+            <td style="font-size:0.8rem;">
+                <?php if ($creadorRow !== ''): ?>
+                <span title="<?= htmlspecialchars((string) $c['creador_username']) ?>"><?= htmlspecialchars($creadorRow) ?></span><br>
+                <?php else: ?>
+                <span style="color:var(--color-faint);">— autor desconocido —</span><br>
+                <?php endif; ?>
+                <span class="muted nowrap"><?= htmlspecialchars(patients_fecha_local($c['created_at'])) ?: '—' ?></span>
+            </td>
+            <td style="font-size:0.8rem;">
+                <?php if ($editorRow !== ''): ?>
+                <span title="<?= htmlspecialchars((string) $c['editor_username']) ?>"><?= htmlspecialchars($editorRow) ?></span><br>
+                <?php else: ?>
+                <span style="color:var(--color-faint);">— sin registro —</span><br>
+                <?php endif; ?>
+                <span class="muted nowrap"><?= htmlspecialchars(patients_fecha_local($c['updated_at'])) ?: '—' ?></span>
+            </td>
             <td class="nowrap">
                 <a href="agenda.php?schedule=<?= urlencode($c['id']) ?>" class="action-btn primary">
                     <?= $c['appointment_id'] ? 'Reagendar' : 'Agendar' ?>
@@ -215,7 +265,7 @@ admin_header('Fichas Clínicas', $me);
         </tr>
         <?php endforeach; ?>
         <?php if (!$cases): ?>
-        <tr><td colspan="7" class="muted">Ningún caso guardado todavía.</td></tr>
+        <tr><td colspan="9" class="muted">Ningún caso guardado todavía.</td></tr>
         <?php endif; ?>
     </table>
     </div>

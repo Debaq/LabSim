@@ -302,7 +302,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $editPatientId = Patients::upsertByRut($pdo, $editRut, $editNombre, $editApellido, $editFechaNacVal);
                 }
                 $editHistoriaClinica = trim((string) ($v['historia_clinica'] ?? ''));
-                Patients::updateHistoriaClinica($pdo, $editPatientId, $editHistoriaClinica);
+                Patients::updateHistoriaClinica($pdo, $editPatientId, $editHistoriaClinica, (int) $me['id']);
                 Patients::updateComentarioDocente($pdo, $editPatientId, trim((string) ($v['comentario_docente'] ?? '')));
                 // También va en cases.data (no solo en patients) para que llegue
                 // al cliente de escritorio via sync.php -- ese endpoint sincroniza
@@ -324,9 +324,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'fecha_nac' => $editFechaNacVal,
                 ]);
 
+                // updated_by: quién dejó la ficha como está ahora -- lo muestra
+                // la tabla de patients.php junto a quién la creó.
                 $pdo->prepare(
-                    'UPDATE cases SET data = ?, patient_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
-                )->execute([json_encode($data, JSON_UNESCAPED_UNICODE), $editPatientId, $id]);
+                    'UPDATE cases SET data = ?, patient_id = ?, updated_at = CURRENT_TIMESTAMP, updated_by = ? WHERE id = ?'
+                )->execute([json_encode($data, JSON_UNESCAPED_UNICODE), $editPatientId, (int) $me['id'], $id]);
                 AdminAudit::log($me, 'case_update', ['case_id' => $id]);
                 AdminAudit::log($me, 'patient_update', ['case_id' => $id, 'patient_id' => $editPatientId]);
 
@@ -356,15 +358,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $newPatientId = Patients::upsertByRut($pdo, $snapshotRut, $snapshotNombre, $snapshotApellido, $snapshotFechaNac);
             $newHistoriaClinica = trim((string) ($v['historia_clinica'] ?? ''));
-            Patients::updateHistoriaClinica($pdo, $newPatientId, $newHistoriaClinica);
+            Patients::updateHistoriaClinica($pdo, $newPatientId, $newHistoriaClinica, (int) $me['id']);
             Patients::updateComentarioDocente($pdo, $newPatientId, trim((string) ($v['comentario_docente'] ?? '')));
             // Ídem rama de edición más arriba: también en cases.data para sync.php.
             $data['historia_clinica'] = $newHistoriaClinica;
 
+            // created_by/created_at solo en el INSERT: si el id ya existía
+            // (mismo caso guardado dos veces) se respeta quién lo creó y
+            // cuándo, y el ON CONFLICT solo mueve la última edición.
             $pdo->prepare(
-                "INSERT INTO cases (id, data, updated_at, patient_id) VALUES (?, ?, CURRENT_TIMESTAMP, ?)
-                 ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = CURRENT_TIMESTAMP, patient_id = excluded.patient_id"
-            )->execute([$id, json_encode($data, JSON_UNESCAPED_UNICODE), $newPatientId]);
+                "INSERT INTO cases (id, data, updated_at, patient_id, created_at, created_by, updated_by)
+                     VALUES (?, ?, CURRENT_TIMESTAMP, ?, CURRENT_TIMESTAMP, ?, ?)
+                 ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = CURRENT_TIMESTAMP,
+                     patient_id = excluded.patient_id, updated_by = excluded.updated_by"
+            )->execute([$id, json_encode($data, JSON_UNESCAPED_UNICODE), $newPatientId, (int) $me['id'], (int) $me['id']]);
             AdminAudit::log($me, 'case_create', ['case_id' => $id, 'nombre' => $snapshotNombre, 'apellido' => $snapshotApellido]);
 
             // Reclama las fotos (paciente/otoscopia) subidas antes de guardar,

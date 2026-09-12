@@ -346,6 +346,84 @@ final class Db
         self::addColumnIfMissing(self::get(), 'patients', 'comentario_docente', "TEXT NOT NULL DEFAULT ''");
     }
 
+    /**
+     * Agrega la autoría de la ficha a cases (created_at/created_by/updated_by)
+     * -- instalaciones de antes de que existieran. El created_at se agrega con
+     * DEFAULT '' y no CURRENT_TIMESTAMP: SQLite rechaza un default no constante
+     * en ALTER TABLE ADD COLUMN ("Cannot add a column with non-constant
+     * default"), así que el valor de las filas viejas lo pone el backfill de
+     * abajo. Todo INSERT de cases escribe created_at explícito, así que el
+     * default nunca se usa en una fila nueva.
+     *
+     * Backfill: created_at = updated_at (lo más cercano a la fecha de creación
+     * que hay), y el autor sale de admin_audit_log, que ya venía registrando
+     * case_create/case_update con el case_id en details -- primer case_create
+     * para created_by, último case_create/case_update para updated_by. Las
+     * filas que no aparecen en el log (creadas desde la app por
+     * api/case_upsert.php, que no audita) quedan con autor NULL: patients.php
+     * las muestra como "—", no se inventa un autor.
+     */
+    public static function migrateCaseAuthorshipIfNeeded(): void
+    {
+        $pdo = self::get();
+        $cols = array_column($pdo->query('PRAGMA table_info(cases)')->fetchAll(), 'name');
+        $yaEstaba = in_array('created_by', $cols, true);
+        self::addColumnIfMissing($pdo, 'cases', 'created_at', "TEXT NOT NULL DEFAULT ''");
+        self::addColumnIfMissing($pdo, 'cases', 'created_by', 'INTEGER REFERENCES users(id)');
+        self::addColumnIfMissing($pdo, 'cases', 'updated_by', 'INTEGER REFERENCES users(id)');
+        $pdo->exec("UPDATE cases SET created_at = updated_at WHERE created_at = ''");
+        if ($yaEstaba) {
+            // Segunda corrida: no re-adivinar autores desde el log, ya
+            // están escritos (y pisar lo real con lo adivinado sería peor).
+            return;
+        }
+        self::backfillCaseAuthorshipFromAuditLog($pdo);
+    }
+
+    /** Autores de cases.created_by/updated_by deducidos de admin_audit_log. */
+    private static function backfillCaseAuthorshipFromAuditLog(PDO $pdo): void
+    {
+        $rows = $pdo->query(
+            "SELECT admin_user_id, action, details FROM admin_audit_log
+             WHERE action IN ('case_create', 'case_update') AND admin_user_id IS NOT NULL
+             ORDER BY id ASC"
+        )->fetchAll();
+
+        $creadores = [];   // case_id => user_id del primer case_create
+        $editores = [];    // case_id => user_id del último evento
+        foreach ($rows as $row) {
+            $details = json_decode((string) $row['details'], true);
+            $caseId = is_array($details) ? trim((string) ($details['case_id'] ?? '')) : '';
+            if ($caseId === '') {
+                continue;
+            }
+            $userId = (int) $row['admin_user_id'];
+            if ($row['action'] === 'case_create' && !isset($creadores[$caseId])) {
+                $creadores[$caseId] = $userId;
+            }
+            $editores[$caseId] = $userId;
+        }
+        if (!$creadores && !$editores) {
+            return;
+        }
+
+        $pdo->beginTransaction();
+        try {
+            $stmtCreado = $pdo->prepare('UPDATE cases SET created_by = ? WHERE id = ? AND created_by IS NULL');
+            foreach ($creadores as $caseId => $userId) {
+                $stmtCreado->execute([$userId, $caseId]);
+            }
+            $stmtEditado = $pdo->prepare('UPDATE cases SET updated_by = ? WHERE id = ? AND updated_by IS NULL');
+            foreach ($editores as $caseId => $userId) {
+                $stmtEditado->execute([$userId, $caseId]);
+            }
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+    }
+
     public static function migrateCoursesIfNeeded(): void
     {
         $pdo = self::get();

@@ -67,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'historia clínica del paciente' => static fn() => Db::migratePatientHistoriaClinicaIfNeeded(),
                 'comentario docente del paciente' => static fn() => Db::migratePatientComentarioDocenteIfNeeded(),
                 'cursos en citas' => static fn() => Db::migrateCoursesIfNeeded(),
+                'autoría de las fichas' => static fn() => Db::migrateCaseAuthorshipIfNeeded(),
                 // Después de cursos: patients ya existe (la creó schema.sql),
                 // recién ahí se puede backfillear patient_id.
                 'backfill de pacientes' => static fn() => Db::migratePatientsIfNeeded(),

@@ -45,6 +45,9 @@ final class Cases
             'cita_eliminada_en' => date('Y-m-d H:i:s'),
         ];
 
+        // No toca updated_by: borrar una cita no es editar la ficha -- el
+        // snapshot lo escribe el sistema, no un docente (ver
+        // admin/patients.php, columna "Última edición").
         $pdo->prepare('UPDATE cases SET data = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
             ->execute([json_encode($data, JSON_UNESCAPED_UNICODE), $appointment['case_id']]);
     }
