@@ -273,9 +273,13 @@ function agenda_url(array $overrides = []): string
 // el filtro dice qué recorte de eso quiere ver ahora mismo.
 $availableCourseIds = array_map(static fn(array $c): int => (int) $c['id'], $availableCourses);
 
-$filterCourseId = isset($_GET['filter_course']) && $_GET['filter_course'] !== '' ? (int) $_GET['filter_course'] : null;
+// El curso ya no se elige acá: lo fija el selector del header (?curso=N,
+// ver admin_course_context()) y lo comparten agenda, fichas, dashboard y
+// bandeja. Antes cada página tenía su propio <select> y había que repetir
+// la elección en cada una.
+$filterCourseId = admin_course_context($me);
 if ($filterCourseId !== null && !in_array($filterCourseId, $availableCourseIds, true)) {
-    $filterCourseId = null; // curso ajeno/inexistente -- se ignora en silencio, es solo navegación
+    $filterCourseId = null; // curso archivado o ajeno -- se ignora, es solo navegación
 }
 
 $filterGroupId = null;
@@ -772,15 +776,9 @@ admin_header('Agendas', $me);
     <form method="get" style="display:flex; gap:1rem; align-items:flex-end; flex-wrap:wrap;">
         <input type="hidden" name="month" value="<?= htmlspecialchars($month) ?>">
         <?php if ($scheduleCaseId !== null): ?><input type="hidden" name="schedule" value="<?= htmlspecialchars($scheduleCaseId) ?>"><?php endif; ?>
-        <label style="margin:0;">Curso
-            <select name="filter_course" onchange="this.form.submit()">
-                <option value="">-- todos<?= $isFullAdmin ? '' : ' (mis cursos)' ?> --</option>
-                <?php foreach ($availableCourses as $ac): ?>
-                <option value="<?= $ac['id'] ?>" <?= $filterCourseId === (int) $ac['id'] ? 'selected' : '' ?>><?= htmlspecialchars($ac['name']) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </label>
-        <?php if ($filterCourseId !== null): ?>
+        <?php if ($filterCourseId === null): ?>
+        <p class="help" style="margin:0;">Mostrando <?= $isFullAdmin ? 'todos los cursos' : 'todos mis cursos' ?>. Para filtrar por grupo o alumno, elegí un curso arriba, en el selector del header.</p>
+        <?php else: ?>
         <label style="margin:0;">Grupo
             <select name="filter_group" onchange="document.querySelector('[name=filter_student]').value='';this.form.submit()">
                 <option value="">-- todos --</option>
@@ -805,7 +803,9 @@ admin_header('Agendas', $me);
         Acotado a <strong><?= htmlspecialchars($courseNameById[$filterCourseId] ?? '') ?></strong>
         <?php if ($filterGroupId !== null): ?>· grupo <strong><?= htmlspecialchars($groupNameById[$filterGroupId] ?? '') ?></strong> (incluye también citas legado "todo el curso" de este curso, si las hubiera)<?php endif; ?>
         <?php if ($filterStudentId !== null): ?>· alumno <strong><?= htmlspecialchars($userNameById[$filterStudentId] ?? '') ?></strong> (incluye citas de su grupo, todo el curso o cola global que también le apliquen)<?php endif; ?>
-        &nbsp;·&nbsp; <a href="<?= agenda_url(['filter_course' => null, 'filter_group' => null, 'filter_student' => null]) ?>">Quitar filtro</a>
+        <?php if ($filterGroupId !== null || $filterStudentId !== null): ?>
+        &nbsp;·&nbsp; <a href="<?= agenda_url(['filter_group' => null, 'filter_student' => null]) ?>">Ver el curso completo</a>
+        <?php endif; ?>
     </p>
     <?php endif; ?>
 </div>

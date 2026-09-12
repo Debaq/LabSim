@@ -17,6 +17,20 @@ $pdo = Db::get();
 $isFullAdmin = (int) $me['permission'] === Auth::PERMISSION_ADMIN;
 $allowedStudentIds = $isFullAdmin ? null : Courses::rosterUserIds(Courses::teacherCourseIds((int) $me['id']));
 
+// Foco de curso del header (ver admin_course_context()): acota el dashboard
+// al roster de ESE curso. Un docente de dos cursos veía las dos cohortes
+// mezcladas en los mismos promedios y no había dónde separarlas.
+$contextCourseId = admin_course_context($me);
+$contextCourseName = null;
+if ($contextCourseId !== null) {
+    $curso = Courses::find($contextCourseId);
+    $contextCourseName = $curso ? (string) $curso['name'] : null;
+    $delCurso = Courses::rosterUserIds([$contextCourseId]);
+    $allowedStudentIds = $allowedStudentIds === null
+        ? $delCurso
+        : array_values(array_intersect($allowedStudentIds, $delCurso));
+}
+
 if ($allowedStudentIds === null) {
     $rows = $pdo->query('SELECT id, user_id, client_ts, action, payload FROM action_logs ORDER BY id')->fetchAll();
 } elseif ($allowedStudentIds) {
@@ -407,6 +421,11 @@ foreach ($logs as $l) {
 
 admin_add_css('dashboard.css');
 admin_header('Dashboard de actividad', $me);
+if ($contextCourseName !== null) {
+    echo '<p class="help help--xs" style="margin-top:-0.6rem;">Acotado a <strong>'
+        . htmlspecialchars($contextCourseName)
+        . '</strong> -- se cambia en el selector de curso del header.</p>';
+}
 ?>
 <div class="dash-grid" style="margin-bottom: 1.2rem;">
 <div class="card">

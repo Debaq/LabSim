@@ -1163,12 +1163,41 @@ docente con un solo curso, el selector no aparece.
       pegar lista. Además "repartir en N grupos"
       (`splitUngroupedIntoGroups()`) y renombrar grupo en línea. El JS salió
       a `public/js/course/board.js`.
-- [ ] **F1**: partir la vista en pestañas + `CourseAdmin.php`.
-- [ ] **F3**: pestaña Resumen.
-- [ ] **F4**: contexto de curso en el header.
+- [x] **F1** (2026-09-12): `courses.php` pasó de 937 a ~195 líneas de
+      controlador; la vista vive en `views/course/_{tabs,resumen,personas,
+      modulos,agenda,vinculos,pruebas,lista,params}.php` y todo lo que
+      escribe, en `src/CourseAdmin.php`. Cada pestaña carga solo sus datos
+      (el tablero de personas es lo caro y no se arma para mirar la agenda).
+      Dos decisiones al pasar: (a) la URL sigue siendo
+      `courses.php?id=N&tab=...` y no `course.php`, para no romper los links
+      que ya existen; (b) después de un POST se vuelve a la pestaña de donde
+      salió el formulario, deducida de la acción
+      (`CourseAdmin::TAB_BY_ACTION`), en vez de meter un `<input hidden
+      name="tab">` en los diecisiete formularios. `tests/test_course_admin.php`
+      cuida las dos costuras: acción sin pestaña y pestaña sin partial.
+- [x] **F3** (2026-09-12): pestaña Resumen con `src/CourseOverview.php` --
+      checklist de "curso listo" (docente, alumnos, módulos, citas por
+      delante, y grupos/Moodle como opcionales), próximos 7 días de agenda y
+      alumnos que todavía no atendieron a nadie. La ventana de fechas se
+      resuelve en PHP porque `appointments.fecha` es texto `dd-MM-yy`; hay
+      test, incluido el cruce de año.
+- [x] **F4** (2026-09-12): curso en foco en el header
+      (`admin_course_context()` en `_layout.php`, guardado en sesión,
+      `?curso=N` / `?curso=todos`). Lo leen agenda (borró su `<select>` de
+      curso; quedan los de grupo y alumno), bandeja de entrada (borró el
+      suyo) y dashboard (antes mezclaba las dos cohortes de un docente con
+      dos cursos en el mismo promedio). Entrar a la página de un curso lo
+      pone en foco. **Fichas clínicas queda afuera a propósito**: una ficha
+      no pertenece a un curso, se comparte, y esconderla por estar parado en
+      un curso haría creer que hay que volver a armarla.
 - [ ] **F5**: ciclo de vida -- `code`/`term`/fechas en `courses`, clonar curso
       para el semestre siguiente, purga de datos por semestre, export CSV del
-      roster.
+      roster. **A conversar antes de tocar nada** (2026-09-12): cómo se llama
+      un periodo acá, si "clonar" arrastra casos/agenda o solo la
+      configuración, y qué pasa con los datos del semestre viejo.
 
-Se arranca por F0 y F2 (lo que estorba hoy); F1 después, porque partir en
-pestañas encima del código duplicado sería mover basura de lugar.
+Se arrancó por F0 y F2 (lo que estorbaba); F1 después, porque partir en
+pestañas encima del código duplicado hubiera sido mover basura de lugar.
+Nada de esto se probó todavía en el navegador (acá no hay `pdo_sqlite`): los
+partials sí se renderizaron en seco con datos de mentira y `E_ALL` como
+excepción, que es lo que cazó una clave `origin` faltante en las tarjetas.

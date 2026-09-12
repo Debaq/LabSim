@@ -175,6 +175,34 @@ th {
 .scrollbox--short { max-height: 14rem; }
 .scrollbox--tall { max-height: 32rem; }
 
+/* Pestañas. Dos usos: botones con JS (ficha del caso, un solo documento con
+ * paneles) y enlaces sin JS (página del curso, cada pestaña es su propia
+ * carga). Por eso .tab-btn sirve para <button> y para <a>. */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2) var(--space-5);
+  border-bottom: 2px solid var(--color-border);
+  margin-bottom: var(--space-6);
+}
+.tab-btn {
+  display: inline-block;
+  padding: 0.6rem 1.1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+.tab-btn:hover { color: var(--color-primary); }
+.tab-btn.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+.tab-btn .tab-count { font-weight: 400; color: var(--color-muted); }
+
 /* Pane: caja con borde fino y padding chico (logs, bloques de código) */
 .pane {
   border: 1px solid var(--color-border);

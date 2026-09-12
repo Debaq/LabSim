@@ -32,6 +32,100 @@ function admin_asset_version(string $path): string
     return (string) (@filemtime($path) ?: time());
 }
 
+/**
+ * Curso "en foco" de la sesión admin (F4 del rediseño de cursos, ver
+ * TODO.md). El trabajo docente es todo por curso, y cada página resolvía eso
+ * con su propio <select>: agenda tenía el suyo, la bandeja otro, el
+ * dashboard ninguno. El foco se elige una vez en el header y lo leen todas.
+ *
+ * ?curso=N lo cambia, ?curso=todos lo saca. Solo es un recorte de vista: los
+ * permisos siguen resolviéndose aparte, con Courses::canAdminister().
+ * Devuelve null = sin recorte (el admin ve todo; el docente, todo lo suyo).
+ */
+function admin_course_context(?array $me): ?int
+{
+    if (!$me) {
+        return null;
+    }
+    if (!array_key_exists('__admin_course_ctx', $GLOBALS)) {
+        $ctx = null;
+        if (isset($_GET['curso'])) {
+            $raw = trim((string) $_GET['curso']);
+            if ($raw === '' || $raw === 'todos') {
+                unset($_SESSION['admin_course_ctx']);
+            } elseif (ctype_digit($raw) && Courses::canAdminister((int) $raw, $me)) {
+                $_SESSION['admin_course_ctx'] = (int) $raw;
+            }
+        }
+        if (isset($_SESSION['admin_course_ctx'])) {
+            $ctx = (int) $_SESSION['admin_course_ctx'];
+        }
+        // El docente de un solo curso está siempre en ese curso: no tiene
+        // entre qué elegir y el selector ni se le muestra.
+        if ($ctx === null && (int) $me['permission'] !== Auth::PERMISSION_ADMIN) {
+            $mis = Courses::teacherCourseIds((int) $me['id']);
+            if (count($mis) === 1) {
+                $ctx = (int) $mis[0];
+            }
+        }
+        // Un curso que dejó de ser suyo (o que se borró) no puede quedar
+        // filtrando en silencio.
+        if ($ctx !== null && !Courses::canAdminister($ctx, $me)) {
+            unset($_SESSION['admin_course_ctx']);
+            $ctx = null;
+        }
+        $GLOBALS['__admin_course_ctx'] = $ctx;
+    }
+    return $GLOBALS['__admin_course_ctx'];
+}
+
+/** Pone el foco en $courseId (entrar a la página de un curso es elegirlo). */
+function admin_set_course_context(int $courseId): void
+{
+    $_SESSION['admin_course_ctx'] = $courseId;
+    $GLOBALS['__admin_course_ctx'] = $courseId;
+}
+
+/** Cursos entre los que este usuario puede elegir foco. */
+function admin_context_courses(?array $me): array
+{
+    if (!$me) {
+        return [];
+    }
+    if ((int) $me['permission'] === Auth::PERMISSION_ADMIN) {
+        return Db::get()->query('SELECT id, name, active FROM courses ORDER BY active DESC, name')->fetchAll();
+    }
+    $ids = Courses::teacherCourseIds((int) $me['id']);
+    if (!$ids) {
+        return [];
+    }
+    $stmt = Db::get()->prepare(
+        'SELECT id, name, active FROM courses WHERE id IN (' . implode(',', array_fill(0, count($ids), '?')) . ')
+         ORDER BY active DESC, name'
+    );
+    $stmt->execute($ids);
+    return $stmt->fetchAll();
+}
+
+/**
+ * Los GET actuales como <input hidden>, para que cambiar de curso no borre
+ * el mes que se estaba mirando en la agenda ni la página de la bandeja. En
+ * courses.php se omite `id`: ahí cambiar de curso es ir al otro curso, no
+ * quedarse en la ficha del anterior.
+ */
+function admin_context_hidden_fields(): string
+{
+    $enCursos = basename($_SERVER['PHP_SELF'] ?? '') === 'courses.php';
+    $out = '';
+    foreach ($_GET as $k => $v) {
+        if ($k === 'curso' || !is_scalar($v) || ($enCursos && $k === 'id')) {
+            continue;
+        }
+        $out .= '<input type="hidden" name="' . htmlspecialchars((string) $k) . '" value="' . htmlspecialchars((string) $v) . '">';
+    }
+    return $out;
+}
+
 function admin_header(string $title, ?array $currentUser = null): void
 {
     header('Content-Type: text/html; charset=utf-8');
@@ -124,6 +218,24 @@ function admin_header(string $title, ?array $currentUser = null): void
         </nav>
     </div>
     <div class="row row--center">
+        <?php
+        // Selector de curso: solo cuando hay entre qué elegir (un docente con
+        // un curso ya está siempre en el suyo, ver admin_course_context()).
+        $ctxCourses = admin_context_courses($currentUser);
+        $ctxActual = admin_course_context($currentUser);
+        ?>
+        <?php if (count($ctxCourses) > 1): ?>
+        <form method="get" class="course-context">
+            <?= admin_context_hidden_fields() ?>
+            <select name="curso" onchange="this.form.submit()" aria-label="Curso en foco" title="Acota agenda, fichas, dashboard y bandeja a un curso">
+                <option value="todos"<?= $ctxActual === null ? ' selected' : '' ?>>Todos los cursos</option>
+                <?php foreach ($ctxCourses as $cc): ?>
+                <option value="<?= (int) $cc['id'] ?>"<?= $ctxActual === (int) $cc['id'] ? ' selected' : '' ?>><?= htmlspecialchars($cc['name']) ?><?= $cc['active'] ? '' : ' (archivado)' ?></option>
+                <?php endforeach; ?>
+            </select>
+            <noscript><button type="submit" class="btn btn--sm">Ir</button></noscript>
+        </form>
+        <?php endif; ?>
         <?php if ($currentUser): ?>
             <a href="perfil.php" title="Mi perfil: usuario y contraseña para la app"<?= $currentPage === 'perfil.php' ? ' aria-current="page"' : '' ?>><?= htmlspecialchars($currentUser['display_name']) ?></a>
             <a href="logout.php">Salir</a>

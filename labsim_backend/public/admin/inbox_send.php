@@ -111,9 +111,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$selectedCourseId = (int) ($_POST['course_id'] ?? $_GET['course_id'] ?? 0);
+// El curso lo fija el selector del header (ver admin_course_context()), que
+// es el mismo foco que usan agenda, fichas y dashboard: acá había un
+// <select> propio que obligaba a volver a elegir lo ya elegido. El POST
+// manda igual su course_id (el aviso se envía al curso que estaba a la
+// vista), y sin foco se cae al primer curso disponible.
+$contextCourseId = admin_course_context($me);
+$selectedCourseId = (int) ($_POST['course_id'] ?? $contextCourseId ?? 0);
 if ($selectedCourseId <= 0 && $courses) {
     $selectedCourseId = (int) reset($courses)['id'];
+}
+$cursoElegidoANombre = null;
+foreach ($courses as $c) {
+    if ((int) $c['id'] === $selectedCourseId) {
+        $cursoElegidoANombre = (string) $c['name'];
+    }
 }
 if ($selectedCourseId > 0) {
     Courses::assertAdministers($selectedCourseId, $me);
@@ -242,15 +254,14 @@ admin_header('Bandeja de entrada', $me);
     <?php if (!$courses): ?>
     <p class="help">No tienes cursos todavía -- créalos o pide que te agreguen en <a href="courses.php">Cursos</a>.</p>
     <?php else: ?>
-    <form method="get" style="margin-bottom:0.5rem;">
-        <label>Curso
-            <select name="course_id" onchange="this.form.submit()">
-                <?php foreach ($courses as $c): ?>
-                <option value="<?= (int) $c['id'] ?>" <?= (int) $c['id'] === $selectedCourseId ? 'selected' : '' ?>><?= htmlspecialchars($c['name']) ?></option>
-                <?php endforeach; ?>
-            </select>
-        </label>
-    </form>
+    <p class="help" style="margin-bottom:0.5rem;">
+        <?php if ($cursoElegidoANombre !== null): ?>
+        Curso: <strong><?= htmlspecialchars($cursoElegidoANombre) ?></strong><?= $contextCourseId === null && count($courses) > 1 ? ' (el primero de la lista)' : '' ?>.
+        <?php if (count($courses) > 1): ?>Se cambia en el selector de curso del header.<?php endif; ?>
+        <?php else: ?>
+        No tienes ningún curso al que mandar avisos.
+        <?php endif; ?>
+    </p>
 
     <form method="post">
     <?= csrf_field() ?>

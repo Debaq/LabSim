@@ -232,6 +232,31 @@ final class Courses
     }
 
     /**
+     * Contadores del curso en una sola query, para la barra de pestañas
+     * (alumnos sin contar el demo, docentes, grupos y módulos habilitados).
+     * Pedir las listas enteras solo para contarlas en cada pestaña era
+     * cuatro consultas y cuatro rosters traídos a memoria por página.
+     */
+    public static function counts(int $courseId): array
+    {
+        $stmt = Db::get()->prepare(
+            'SELECT (SELECT COUNT(*) FROM course_students cs JOIN users u ON u.id = cs.user_id
+                      WHERE cs.course_id = ? AND u.is_demo = 0) AS alumnos,
+                    (SELECT COUNT(*) FROM course_teachers WHERE course_id = ?) AS docentes,
+                    (SELECT COUNT(*) FROM student_groups WHERE course_id = ?) AS grupos,
+                    (SELECT COUNT(*) FROM course_modules WHERE course_id = ?) AS modulos'
+        );
+        $stmt->execute([$courseId, $courseId, $courseId, $courseId]);
+        $row = $stmt->fetch() ?: [];
+        return [
+            'alumnos' => (int) ($row['alumnos'] ?? 0),
+            'docentes' => (int) ($row['docentes'] ?? 0),
+            'grupos' => (int) ($row['grupos'] ?? 0),
+            'modulos' => (int) ($row['modulos'] ?? 0),
+        ];
+    }
+
+    /**
      * Avance de cada alumno matriculado, para los badges de su tarjeta en el
      * tablero: cuántas citas del curso le tocan (asignadas a él o al grupo
      * donde está), cuántas cerró como 'atendido' y cuándo tocó una atención

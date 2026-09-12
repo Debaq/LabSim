@@ -47,29 +47,9 @@ input:disabled, select:disabled { background: var(--color-row-alt); color: var(-
 .abr-preview svg, .eoa-preview svg, .vemp-preview svg { width: 100%; height: auto; display: block; }
 .vemp-preview { margin-top: 0.4rem; }
 
-/* Tabs de la ficha (Audiometría, Otoscopia, Reflejos, etc.).
- * Sin JS, todas las pestañas visibles apiladas -- degrada con gracia. */
-.tabs {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-2) var(--space-5);
-  border-bottom: 2px solid var(--color-border);
-  margin-bottom: var(--space-6);
-}
-.tab-btn {
-  padding: 0.6rem 1.1rem;
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--color-muted);
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-}
-.tab-btn:hover { color: var(--color-primary); }
-.tab-btn.active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+/* Tabs de la ficha: .tabs/.tab-btn viven en base.css (la página del curso
+ * también las usa y case.css solo se carga en la ficha). Acá queda lo que sí
+ * es de la ficha: el puntito de error, los paneles y los grupos. */
 .tab-btn .tab-error-dot {
   display: inline-block;
   width: 0.4rem;

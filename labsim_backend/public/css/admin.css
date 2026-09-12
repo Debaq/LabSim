@@ -161,6 +161,18 @@ button.danger { background: var(--color-danger); }
  * blanco (contraste WCAG AA consistente en ambos modos). El body y las
  * cards sí cambian. */
 
+/* Selector de curso del header: acota agenda/fichas/dashboard/bandeja a un
+ * curso. Va en la barra oscura, así que el <select> se achica para no
+ * competir con la nav. */
+.course-context { margin: 0; }
+.course-context select {
+  width: auto;
+  max-width: 12rem;
+  padding: 0.25rem 0.4rem;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
 /* Tablero de personas (courses.php): el roster del curso ES este tablero.
  * Columnas = grupos, tarjetas = alumnos (uno pertenece a un solo grupo, y
  * soltarlo en otra columna lo mueve). A la derecha, el panel de candidatos:

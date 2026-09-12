@@ -79,7 +79,10 @@ function patients_fecha_local(?string $utc): string
 // su(s) curso(s) + citas legado sin curso (course_id NULL) -- nunca citas
 // de un curso ajeno. Admin completo sin filtro. Esta lista NO se acota por
 // curso/grupo/alumno -- es la biblioteca completa del sistema (para eso está
-// el filtro de agenda.php).
+// el filtro de agenda.php). Tampoco la acota el foco de curso del header
+// (admin_course_context(), que sí aplican agenda, dashboard y bandeja): una
+// ficha no pertenece a un curso, se comparte entre todos, y esconderla por
+// estar parado en un curso haría creer que hay que volver a armarla.
 $permissionSql = '1=1';
 $permissionParams = [];
 if (!$isFullAdmin) {

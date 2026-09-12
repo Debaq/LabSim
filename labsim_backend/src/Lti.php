@@ -319,6 +319,34 @@ final class Lti
         return $courseId !== false ? (int) $courseId : null;
     }
 
+    /**
+     * Contextos de Moodle vinculados a $courseId, con el nombre humano que
+     * haya informado el último launch (user_lti_contexts.context_label; el
+     * vínculo en sí no lo guarda) y cuántos alumnos entraron desde ahí.
+     * Para la pestaña Vínculos del curso: sin esto, un contexto vinculado
+     * solo se veía como un id opaco en la base.
+     */
+    public static function contextsForCourse(int $courseId): array
+    {
+        $stmt = Db::get()->prepare(
+            "SELECT clc.id, clc.context_id, clc.created_at, clc.lti_platform_id,
+                    p.issuer, p.consumer_key, p.version,
+                    (SELECT ulc.context_label FROM user_lti_contexts ulc
+                      WHERE ulc.lti_platform_id = clc.lti_platform_id
+                        AND ulc.context_id = clc.context_id AND ulc.context_label <> ''
+                      ORDER BY ulc.last_seen_at DESC LIMIT 1) AS label,
+                    (SELECT COUNT(*) FROM user_lti_contexts ulc2
+                      WHERE ulc2.lti_platform_id = clc.lti_platform_id
+                        AND ulc2.context_id = clc.context_id) AS vistos
+             FROM course_lti_contexts clc
+             LEFT JOIN lti_platforms p ON p.id = clc.lti_platform_id
+             WHERE clc.course_id = ?
+             ORDER BY clc.id"
+        );
+        $stmt->execute([$courseId]);
+        return $stmt->fetchAll();
+    }
+
     /** Vincula (o revincula) un contexto de Moodle a un curso LabSim -- ver comentario de course_lti_contexts en schema.sql. */
     public static function linkContextToCourse(int $platformId, string $contextId, int $courseId): void
     {
