@@ -159,7 +159,46 @@ final class ReportPdfBuilder
             $pdf->text(self::MARGIN, $y, trim((string) ($asim['subtipo'] ?? '')) . '  '
                 . self::num($asim['ratio']) . '%  (OD ' . self::num($asim['od'] ?? null)
                 . ' µV / OI ' . self::num($asim['oi'] ?? null) . ' µV pico-pico)', 9);
-            $y += 24;
+            $y += 14;
+            // Con qué se calculó: la razón sale de las amplitudes corregidas
+            // por EMG, no de las crudas de la línea de arriba.
+            if (isset($asim['od_corregida']) && isset($asim['oi_corregida'])) {
+                $pdf->text(self::MARGIN, $y, 'Corregidas por EMG: OD '
+                    . self::num($asim['od_corregida']) . ' / OI '
+                    . self::num($asim['oi_corregida'])
+                    . ' (la razón se calcula con éstas)', 8);
+                $y += 12;
+            }
+            $y += 12;
+        }
+
+        // Umbral: lo que el alumno informó, y hasta dónde llegó la serie que
+        // midió. Son dos cosas distintas y por eso se imprimen las dos.
+        $umbrales = is_array($data['umbral_informado'] ?? null) ? $data['umbral_informado'] : [];
+        $lineasUmbral = [];
+        foreach (['OD', 'OI'] as $lado) {
+            $informado = $umbrales[$lado] ?? null;
+            $medido = $asim['umbral_' . strtolower($lado)] ?? null;
+            if ($informado === null && $medido === null) {
+                continue;
+            }
+            $texto = $lado . ': ';
+            $texto .= $informado === null ? 'sin umbral informado'
+                : ('umbral informado ' . self::num($informado) . ' dB');
+            if ($medido !== null) {
+                $texto .= '  ·  respuesta marcada hasta ' . self::num($medido) . ' dB';
+            }
+            $lineasUmbral[] = $texto;
+        }
+        if ($lineasUmbral !== []) {
+            $y = self::ensureSpace($pdf, $y, 20 + 14 * count($lineasUmbral));
+            $pdf->text(self::MARGIN, $y, 'Umbral', 12, true);
+            $y += 18;
+            foreach ($lineasUmbral as $linea) {
+                $pdf->text(self::MARGIN, $y, $linea, 9);
+                $y += 14;
+            }
+            $y += 10;
         }
 
         $y = self::technicalSection($pdf, $data, $y, $contentW);
@@ -695,9 +734,22 @@ final class ReportPdfBuilder
         if (isset($curva['p2p']) && is_numeric($curva['p2p'])) {
             $partes[] = 'p-p ' . self::num($curva['p2p']) . ' µV';
         }
+        // La amplitud CORREGIDA (pico-pico / EMG rectificado) es la única
+        // comparable entre registros: la cruda depende de cuánto contrajo el
+        // paciente en ese registro (ver src/vemp/session.py).
+        if (isset($curva['p2p_corregida']) && is_numeric($curva['p2p_corregida'])) {
+            $partes[] = 'p-p corr. ' . self::num($curva['p2p_corregida']);
+        }
+        if (!empty($curva['transductor'])) {
+            $partes[] = (string) $curva['transductor'];
+        }
         $tec = is_array($curva['tecnica'] ?? null) ? $curva['tecnica'] : [];
         if (isset($tec['barridos_aceptados'])) {
-            $partes[] = $tec['barridos_aceptados'] . ' barridos aceptados';
+            $linea = $tec['barridos_aceptados'] . ' barridos aceptados';
+            if (!empty($tec['barridos_rechazados'])) {
+                $linea .= ' (' . $tec['barridos_rechazados'] . ' rechazados)';
+            }
+            $partes[] = $linea;
         }
         if (isset($tec['impedancia_max_kohm'])) {
             $partes[] = 'imp. máx ' . self::num($tec['impedancia_max_kohm']) . ' kOhm';

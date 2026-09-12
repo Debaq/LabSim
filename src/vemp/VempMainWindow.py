@@ -1,56 +1,63 @@
 """
-VempMainWindow - Orquestador MDI del módulo VEMP.
+VempMainWindow — el equipo de VEMP dentro de LabSim.
 
-Mismo ciclo que AbrMainWindow: sin cronómetro propio, reacciona a la
-atención abierta en LabSim vía la_super(data_current, appointment_id), y el
-alumno promedia con el botón del panel de control. Cada paciente trae su
-definición en cases.data['VEMP']['OD'/'OI'] (ver CaseForm::parseVemp).
+Orquesta las piezas: el panel de control y el medidor de EMG a la izquierda,
+las trazas de los dos oídos en el centro, y las lecturas del examen (tabla,
+comparación entre oídos, análisis, informe) alrededor.
 
-Lo que cambió respecto de la primera versión, y por qué:
+Cómo corre el examen:
 
-- El examen ES MONOAURAL. Antes cada captura generaba las dos curvas (OD y
-  OI) a la vez con la misma intensidad; eso no es un VEMP. Ahora se
-  registra el oído del panel de control, uno por vez.
-- La curva CRECE MIENTRAS SE PROMEDIA. Antes el timer contaba ticks sin
-  dibujar nada y al terminar aparecía la curva final: la promediación no se
-  veía y daba lo mismo pedir 60 barridos que 600.
-- Se PUEDEN MARCAR LOS PICOS. Antes la tabla emitía una señal que no hacía
-  nada (`_on_request_value` era un `pass`), así que no había manera de
-  medir, ni de llenar la lat-int, ni de informar amplitudes.
-- El caso se lee con el SHAPE NUEVO (cases.data['VEMP'][lado]['subtipos']
-  [subtipo]), con compatibilidad hacia los casos viejos -- ver
-  VEMP_generator_v1.case_for_subtipo.
-- El SUBTIPO NO SE PRESELECCIONA desde el caso. Elegir qué VEMP corresponde
-  es la decisión clínica del examen y la toma el alumno; el caso trae los
-  tres armados justamente para que pueda elegir mal.
+1. El alumno elige subtipo, oído, maniobra, estímulo y registro, y da
+   Registrar. Ahí se crea UNA curva con esas condiciones congeladas.
+2. Cada tick se generan barridos nuevos: el equipo acepta los que entran en
+   banda y tira los otros, y la curva dibujada es el promedio acumulado de
+   los aceptados (ver engine.MotorVemp.lote). Por eso pedir 600 barridos
+   dura de verdad más que pedir 100 y un paciente que no contrae no limpia
+   nunca.
+3. Con los dos picos marcados, la curva entra en las cuentas: pico-pico,
+   corregida por EMG, asimetría, umbral y sintonía (ver session.Sesion).
+
+Sin caso no se registra nada. Si el paciente en atención no tiene VEMP
+cargado, el módulo lo dice y no deja registrar: no hay respuesta sintética
+"normal" de relleno.
 """
 
 import os
 
-from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import (QHBoxLayout, QLabel, QMainWindow, QTabWidget,
-                               QVBoxLayout, QWidget)
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtWidgets import (QHBoxLayout, QMainWindow, QProgressBar,
+                               QSplitter, QTabWidget, QVBoxLayout, QWidget)
 
 from backend.client import BackendClient
 from core.base import context
 from core.helpers import Preferences
-from vemp.VempControl import VempControl, SUBTIPO_LABELS
-from vemp.VempEmg import VempEmg
-from vemp.VempGraph import VempGraph
-from vemp.VempLatIntGraph import VempLatIntGraph
-from vemp.VempReport import VempReport
-from vemp.VempTable import VempTable
-from vemp.VEMP_generator_v1 import (SUBTIPO_PEAKS, SUBTIPOS, VEMP_Curve,
-                                    VEMPGeneratorV1, case_for_subtipo,
-                                    emg_de_maniobra, select_population)
+from vemp import engine, patient, protocol, theme
+from vemp.norms import normativa
+from vemp.session import Sesion
+from vemp.widgets.analysis import PanelAnalisis
+from vemp.widgets.controls import PanelControl
+from vemp.widgets.emg import MedidorEmg
+from vemp.widgets.kit import Pastilla, Tarjeta, etiqueta
+from vemp.widgets.measures import PanelAsimetria, TablaMedidas
+from vemp.widgets.report import PanelInforme
+from vemp.widgets.traces import PanelTrazas
 
-# Un tick de promediación (ms). Mismo valor que el ABR: es el ritmo al que
-# la curva se ve crecer.
-TIEMPO_ENTR_PROM = 300
-# Refresco del monitor de EMG: corre siempre que haya paciente, promediando
-# o no -- ahí se ve si el paciente está contrayendo antes de gastar
-# barridos en descubrirlo.
-TIEMPO_EMG = 300
+# Ritmo del reloj de promediación (ms). No es tiempo del paciente: el
+# tiempo del paciente lo marca la tasa de estímulo y se muestra aparte.
+TICK_MS = 220
+# Cuántos ticks dura una promediación completa. Se escala con los barridos
+# pedidos --acotado-- para que 600 barridos se sientan mucho más largos que
+# 100 sin que 1000 vuelvan el examen ineludible.
+TICKS_MIN, TICKS_MAX = 14, 70
+# Refresco del medidor de EMG: corre siempre que haya paciente, se esté
+# promediando o no. Ahí se ve si el paciente está contrayendo ANTES de
+# gastar barridos en descubrirlo.
+TICK_EMG_MS = 300
+# Ticks seguidos sin un solo barrido aceptado antes de cortar el registro.
+TICKS_SIN_AVANCE = 8
+# Cuánto más rápido se recupera el músculo descansando de lo que se cansa
+# contrayendo.
+RECUPERACION = 2.0
 
 
 class VempMainWindow(QMainWindow):
@@ -58,528 +65,590 @@ class VempMainWindow(QMainWindow):
         super().__init__(parent)
         self.data_login = data_login or {}
         self.setWindowTitle('VEMP')
+
         self.data_current = None
         self.appointment_id = None
-        # None = sin datos reales para ese oído (sin atención, o paciente sin
-        # VEMP configurado). Sin datos no se genera nada, ni un ejemplo
-        # sintético: graph() corta antes.
-        self.vemp_od = None
-        self.vemp_oi = None
-        self.subtipo = 'CVEMP'
+        self.caso = None
+        self.motor = None
+        self.sesion = Sesion()
 
-        # Estado de captura
-        self.state_capture = 'stopped'
-        self.current_setting = {}
-        self.current_capture_curve = ''
-        self.curves_R = []
-        self.curves_L = []
-        self.count_averages = 0
-        self.total_averages = 20
-        self.done = False
-        self.memory = {}
-        self.last_metadata = {}
-        # Última lectura de los cursores por oído (la usa la tabla al pedir
-        # un valor).
-        self.current_measuring = [None, None]
+        self.estado = 'detenido'        # detenido | registrando | pausado
+        self.registro_actual = None
+        self.barridos_por_tick = 10
+        self.ticks_sin_aceptar = 0
+        self.segundos_sostenido = 0.0
+        self.maniobra_previa = None
 
-        # La normativa se lee una vez: baseline_actual() la consulta cada
-        # vez que cambia el subtipo o la pestaña.
-        self._generador = None
+        self.timer_captura = QTimer(self)
+        self.timer_captura.timeout.connect(self._tick)
+        self.timer_emg = QTimer(self)
+        self.timer_emg.timeout.connect(self._tick_emg)
 
-        self.capture_timer = QTimer(self)
-        self.capture_timer.timeout.connect(self.capture)
-        self.emg_timer = QTimer(self)
-        self.emg_timer.timeout.connect(self.refresh_emg)
-
-        self._build_ui()
-        self._connect()
-        self.control.setEnabled(False)
-        self.apply_subtipo(self.control.get_subtipo())
+        self._construir()
+        self._conectar()
+        self._sin_caso()
 
     # =====================================================================
     # UI
     # =====================================================================
 
-    def _build_ui(self):
+    def _construir(self):
         central = QWidget()
+        theme.aplicar_estilo(central)
         self.setCentralWidget(central)
-        root = QHBoxLayout(central)
 
-        # --- Izquierda: control del equipo + monitor de EMG ---------------
-        self.control = VempControl()
-        self.emg = VempEmg()
-        izquierda = QVBoxLayout()
-        izquierda.addWidget(self.control)
-        izquierda.addWidget(self.emg)
-        izquierda.addStretch(1)
-        panel_izq = QWidget()
-        panel_izq.setLayout(izquierda)
-        panel_izq.setFixedWidth(320)
-        root.addWidget(panel_izq)
+        raiz = QVBoxLayout(central)
+        raiz.setContentsMargins(12, 10, 12, 12)
+        raiz.setSpacing(10)
+        raiz.addWidget(self._encabezado())
 
-        # --- Centro: pestañas + línea de estado ---------------------------
+        cuerpo = QHBoxLayout()
+        cuerpo.setSpacing(12)
+        raiz.addLayout(cuerpo, 1)
+
+        izquierda = QWidget()
+        izq_layout = QVBoxLayout(izquierda)
+        izq_layout.setContentsMargins(0, 0, 0, 0)
+        izq_layout.setSpacing(10)
+        self.control = PanelControl()
+        izq_layout.addWidget(self.control)
+        caja_emg = Tarjeta('Paciente')
+        self.medidor = MedidorEmg()
+        caja_emg.agregar(self.medidor)
+        self.lbl_maniobra = etiqueta('', rol='hint')
+        self.lbl_maniobra.setWordWrap(True)
+        caja_emg.agregar(self.lbl_maniobra)
+        izq_layout.addWidget(caja_emg)
+        izq_layout.addStretch(1)
+        izquierda.setFixedWidth(310)
+        cuerpo.addWidget(izquierda)
+
         self.tabs = QTabWidget()
-
-        self.graph_r = VempGraph(side=0, subtipo=self.subtipo)
-        self.graph_l = VempGraph(side=1, subtipo=self.subtipo)
-        graficos = QHBoxLayout()
-        graficos.addWidget(self.graph_r)
-        graficos.addWidget(self.graph_l)
-        tab_graficos = QWidget()
-        tab_graficos.setLayout(graficos)
-        self.tabs.addTab(tab_graficos, 'Curvas')
-
-        self.lat_int = VempLatIntGraph(peak_labels=SUBTIPO_PEAKS[self.subtipo])
-        self.tabs.addTab(self.lat_int, 'Lat-Int / Amplitud')
-
-        self.report = VempReport()
+        self.tabs.addTab(self._pestana_registro(), 'Registro')
+        self.analisis = PanelAnalisis()
+        self.tabs.addTab(self._envolver(self.analisis), 'Análisis')
+        self.informe = PanelInforme()
         if self.data_login.get('name'):
-            self.report.set_le_eva(self.data_login['name'])
-        self.tabs.addTab(self.report, 'Informe')
+            self.informe.set_evaluador(self.data_login['name'])
+        self.tabs.addTab(self._envolver(self.informe), 'Informe')
+        cuerpo.addWidget(self.tabs, 1)
 
-        self.lbl_info = QLabel('')
-        centro = QVBoxLayout()
-        centro.addWidget(self.tabs, 1)
-        centro.addWidget(self.lbl_info)
-        panel_centro = QWidget()
-        panel_centro.setLayout(centro)
-        root.addWidget(panel_centro, 1)
+    @staticmethod
+    def _envolver(widget):
+        """Las pestañas traen su propio margen: el panel no toca el borde."""
+        contenedor = QWidget()
+        layout = QVBoxLayout(contenedor)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.addWidget(widget)
+        return contenedor
 
-        # --- Derecha: tablas por oído -------------------------------------
-        self.table_r = VempTable(side=0, peak_labels=SUBTIPO_PEAKS[self.subtipo])
-        self.table_l = VempTable(side=1, peak_labels=SUBTIPO_PEAKS[self.subtipo])
-        derecha = QVBoxLayout()
-        derecha.addWidget(self.table_r)
-        derecha.addWidget(self.table_l)
-        derecha.addStretch(1)
-        panel_der = QWidget()
-        panel_der.setLayout(derecha)
-        panel_der.setFixedWidth(280)
-        root.addWidget(panel_der)
+    def _encabezado(self):
+        caja = Tarjeta()
+        caja.cuerpo.setContentsMargins(14, 10, 14, 10)
+        caja.cuerpo.setSpacing(6)
 
-    def _connect(self):
-        self.control.capture.connect(self.capture_state)
-        self.control.sig_subtipo.connect(self.apply_subtipo)
-        self.control.sig_maniobra.connect(lambda *_: self.refresh_emg())
-        self.tabs.currentChanged.connect(self.tab_change)
+        fila = QHBoxLayout()
+        fila.setSpacing(8)
+        self.lbl_paciente = etiqueta('Sin atención abierta', rol='titulo')
+        fila.addWidget(self.lbl_paciente)
+        self.pill_subtipo = Pastilla('cVEMP', 'acento')
+        fila.addWidget(self.pill_subtipo)
+        self.pill_lado = Pastilla('OD', 'od')
+        fila.addWidget(self.pill_lado)
+        self.pill_condicion = Pastilla('', 'neutro')
+        fila.addWidget(self.pill_condicion)
+        fila.addStretch(1)
+        self.pill_estado = Pastilla('detenido', 'neutro')
+        fila.addWidget(self.pill_estado)
+        caja.agregar_layout(fila)
 
-        for grafico in (self.graph_r, self.graph_l):
-            grafico.sig_data_info.connect(self.measure_data)
-            grafico.sig_change_value_mark.connect(self.update_memory_from_graph_mark)
-            grafico.sig_curve_selected.connect(self.curve_selected)
-            grafico.sig_del_curve.connect(self.update_delete_curve)
-        self.table_r.sig_measure_value.connect(self.measure_action)
-        self.table_l.sig_measure_value.connect(self.measure_action)
+        self.barra = QProgressBar()
+        self.barra.setTextVisible(False)
+        self.barra.setFixedHeight(6)
+        self.barra.setRange(0, 100)
+        self.barra.setValue(0)
+        self.barra.setStyleSheet(
+            f'QProgressBar {{ background: {theme.TARJETA_ALT}; border: none;'
+            f' border-radius: 3px; }}'
+            f'QProgressBar::chunk {{ background: {theme.ACENTO};'
+            f' border-radius: 3px; }}')
+        caja.agregar(self.barra)
+
+        self.lbl_estado = etiqueta('', rol='hint')
+        self.lbl_estado.setWordWrap(True)
+        caja.agregar(self.lbl_estado)
+        return caja
+
+    def _pestana_registro(self):
+        contenedor = QWidget()
+        layout = QVBoxLayout(contenedor)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(10)
+
+        trazas = QHBoxLayout()
+        trazas.setSpacing(10)
+        self.trazas = {}
+        for lado in protocol.LADOS:
+            caja = Tarjeta()
+            caja.cuerpo.setContentsMargins(10, 8, 10, 10)
+            panel = PanelTrazas(lado)
+            caja.agregar(panel, 1)
+            self.trazas[lado] = panel
+            trazas.addWidget(caja, 1)
+
+        abajo = QSplitter(Qt.Orientation.Horizontal)
+        caja_tabla = Tarjeta('Medidas')
+        self.tabla = TablaMedidas()
+        caja_tabla.agregar(self.tabla, 1)
+        abajo.addWidget(caja_tabla)
+        self.asimetria = PanelAsimetria()
+        abajo.addWidget(self.asimetria)
+        abajo.setStretchFactor(0, 3)
+        abajo.setStretchFactor(1, 2)
+        abajo.setMinimumHeight(190)
+
+        arriba = QWidget()
+        arriba.setLayout(trazas)
+        vertical = QSplitter(Qt.Orientation.Vertical)
+        vertical.addWidget(arriba)
+        vertical.addWidget(abajo)
+        vertical.setStretchFactor(0, 3)
+        vertical.setStretchFactor(1, 1)
+        layout.addWidget(vertical)
+        return contenedor
+
+    def _conectar(self):
+        self.control.sig_registrar.connect(self.iniciar)
+        self.control.sig_pausar.connect(self.pausar)
+        self.control.sig_detener.connect(self.detener)
+        self.control.sig_subtipo.connect(self._cambiar_subtipo)
+        self.control.sig_lado.connect(self._cambiar_lado)
+        self.control.sig_maniobra.connect(self._cambiar_maniobra)
+        self.control.sig_condicion.connect(self._refrescar_encabezado)
+
+        for panel in self.trazas.values():
+            panel.sig_marca.connect(self._marcar)
+            panel.sig_desmarca.connect(self._desmarcar)
+            panel.sig_seleccion.connect(self._seleccionar)
+            panel.sig_borrar.connect(self._borrar_curva)
+        self.tabla.sig_seleccion.connect(self._seleccionar_desde_tabla)
+        self.analisis.sig_condicion.connect(self._refrescar_analisis)
+        self.tabs.currentChanged.connect(self._cambiar_pestana)
 
     # =====================================================================
-    # la_super / reset (API que llama main.py)
+    # Ciclo de vida (API que llama main.py)
     # =====================================================================
 
     def la_super(self, data, appointment_id=None):
-        """Recibe el caso del paciente en atención (o None al cerrarla)."""
+        """Entra (o sale) el paciente en atención."""
+        self.detener()
         self.data_current = data
         self.appointment_id = appointment_id
-        self.control.setEnabled(data is not None)
-        vemp_data = (data or {}).get('VEMP') or {}
-        self.vemp_od = vemp_data.get('OD')
-        self.vemp_oi = vemp_data.get('OI')
-        self.reset()
-        self.apply_subtipo(self.control.get_subtipo())
-        if data is None:
-            self.emg_timer.stop()
-            self.emg.clear_trace()
-        else:
-            self.emg_timer.start(TIEMPO_EMG)
+        self.caso = patient.desde_caso(data) if data else None
+        self.motor = engine.MotorVemp(self.caso) if self.caso else None
+        self.sesion.limpiar()
+        self._limpiar_vistas()
 
-    def reset(self):
-        self.curves_R = []
-        self.curves_L = []
-        self.memory = {}
-        self.count_averages = 0
-        self.current_capture_curve = ''
-        self.last_metadata = {}
-        self.current_measuring = [None, None]
-        self.graph_r.limpiar_todo()
-        self.graph_l.limpiar_todo()
-        self.table_r.clear_all()
-        self.table_l.clear_all()
-        self.lat_int.clear_graph()
-        self.lbl_info.setText('')
-        self.report.set_asimetria(self.subtipo)
-
-    # =====================================================================
-    # Subtipo
-    # =====================================================================
-
-    def apply_subtipo(self, subtipo):
-        """Cambiar de VEMP cambia picos, escala, banda normativa y maniobras.
-
-        Las curvas ya tomadas del otro subtipo no se borran: se ocultan y
-        vuelven al cambiar el combo de nuevo (ver VempGraph.set_subtipo).
-        """
-        if subtipo not in SUBTIPOS:
+        if self.caso is None:
+            self._sin_caso(con_paciente=data is not None)
             return
-        self.subtipo = subtipo
-        picos = SUBTIPO_PEAKS[subtipo]
-        self.graph_r.set_subtipo(subtipo)
-        self.graph_l.set_subtipo(subtipo)
-        self.table_r.set_peak_labels(picos)
-        self.table_l.set_peak_labels(picos)
-        self.lat_int.set_subtipo(subtipo, self.baseline_actual(subtipo))
-        self.emg.set_subtipo(subtipo)
-        self.refresh_emg()
-        self.refresh_asimetria()
-        for tabla, grafico in ((self.table_r, self.graph_r),
-                               (self.table_l, self.graph_l)):
-            activa = grafico.get_active()
-            if activa:
-                self.curve_selected(activa)
-            else:
-                tabla.clear_all()
 
-    def baseline_actual(self, subtipo):
-        """Normativa de ESTE paciente para el subtipo: la misma que usa el
-        generador, para que la banda de la lat-int y las curvas cuenten la
-        misma historia."""
-        if self._generador is None:
-            try:
-                self._generador = VEMPGeneratorV1()
-            except Exception as exc:
-                print(f'VEMP: no se pudo leer la normativa ({exc})')
-                return {}
-        generador = self._generador
-        poblacion = select_population((self.data_current or {}).get('edad'),
-                                      (self.data_current or {}).get('gender'))
-        freq = self.control.cb_freq.currentText()
-        return generador.get_baseline_values(poblacion, subtipo, freq=freq)
+        self.control.setEnabled(True)
+        self.timer_emg.start(TICK_EMG_MS)
+        self.medidor.set_activo(True)
+        descripcion = f'Paciente · {self.caso.descripcion}'
+        self.lbl_paciente.setText(descripcion)
+        self.informe.set_paciente(descripcion)
+        self._cambiar_subtipo(self.control.subtipo())
+        self._cambiar_maniobra(self.control.maniobra())
+        self._mensaje('')
+
+    def _sin_caso(self, con_paciente=False):
+        self.control.setEnabled(False)
+        self.timer_emg.stop()
+        self.medidor.set_activo(False)
+        self.lbl_paciente.setText('Sin atención abierta')
+        self.informe.set_paciente('')
+        self.pill_estado.set('detenido', 'neutro')
+        if con_paciente:
+            self._mensaje('Este paciente no tiene VEMP cargado en el caso: '
+                          'el equipo no registra. Cargalo en la ficha VEMP del '
+                          'editor de casos.', 'alerta')
+        else:
+            self._mensaje('Abrí una atención para registrar.')
+
+    def _limpiar_vistas(self):
+        for panel in self.trazas.values():
+            panel.limpiar()
+        self.tabla.poblar([])
+        self.asimetria.set_resumen(self.control.subtipo(), None, None, None)
+        self.informe.limpiar()
+        self.barra.setValue(0)
 
     # =====================================================================
     # Captura
     # =====================================================================
 
-    def capture_state(self, state):
-        if state == 'record':
-            self.state_capture = state
-            self.current_setting = self.control.get_data()
-            self.total_averages = self.fake_averages(self.current_setting['average'])
-            self.capture_timer.start(TIEMPO_ENTR_PROM)
-        elif state == 'stopped':
-            self.state_capture = state
-            self.capture_timer.stop()
-            self.count_averages = 0
-        else:
-            self.state_capture = state
-            self.capture_timer.stop()
+    def iniciar(self):
+        if self.caso is None or self.motor is None:
+            return
+        ajustes = self.control.ajustes()
+        oido = self.caso.oido(ajustes.lado)
+        if oido is None:
+            self._mensaje(f'{ajustes.lado}: este oído no tiene VEMP cargado '
+                          'en el caso.', 'alerta')
+            return
 
-    def fake_averages(self, averages):
-        """Cuántos ticks dura la promediación pedida.
+        if self.estado == 'pausado' and self.registro_actual is not None:
+            self.estado = 'registrando'
+            self.control.set_registrando(True)
+            self.timer_captura.start(TICK_MS)
+            self._refrescar_encabezado()
+            return
 
-        Superlineal a propósito (igual que el ABR): pedir 600 barridos tiene
-        que sentirse mucho más largo que pedir 100, no un poco.
-        """
+        x = self.motor.eje(ajustes.subtipo)
+        self.registro_actual = self.sesion.nuevo(ajustes, x)
+        self.barridos_por_tick = self._barridos_por_tick(ajustes.promedios)
+        self.ticks_sin_aceptar = 0
+        self.estado = 'registrando'
+        self.control.set_registrando(True)
+        self.trazas[ajustes.lado].agregar(self.registro_actual)
+        self.analisis.sincronizar(ajustes.transductor, ajustes.freq)
+        self.timer_captura.start(TICK_MS)
+        self._refrescar_encabezado()
+
+    @staticmethod
+    def _barridos_por_tick(promedios):
+        ticks = min(max(promedios / 12.0, TICKS_MIN), TICKS_MAX)
+        return max(int(round(promedios / ticks)), 1)
+
+    def pausar(self):
+        if self.estado != 'registrando':
+            return
+        self.estado = 'pausado'
+        self.timer_captura.stop()
+        self.control.set_registrando(False, pausado=True)
+        self._refrescar_encabezado()
+
+    def detener(self):
+        self.timer_captura.stop()
+        if self.registro_actual is not None:
+            self.registro_actual.terminado = True
+        self.registro_actual = None
+        self.estado = 'detenido'
+        self.control.set_registrando(False)
+        self._refrescar_encabezado()
+
+    def _tick(self):
+        registro = self.registro_actual
+        if registro is None:
+            self.detener()
+            return
+
+        ajustes = registro.ajustes
+        # La maniobra se relee en cada tick aunque el resto del registro esté
+        # congelado: el paciente se afloja EN PLENA promediación y ver la
+        # respuesta caerse con él es parte de lo que hay que aprender.
+        ajustes.maniobra = self.control.maniobra()
+        emg = self.motor.emg_instantaneo(ajustes.subtipo, ajustes.maniobra,
+                                         self.segundos_sostenido)
+        self.medidor.push(emg)
+
+        faltan = max(ajustes.promedios - registro.aceptados, 0)
+        pedidos = min(self.barridos_por_tick, faltan) if faltan else 0
+        if pedidos <= 0:
+            self._terminar_registro(registro)
+            return
+
+        lote = self.motor.lote(ajustes, emg, pedidos)
+        registro.acumular(lote)
+        # Tiempo del paciente: los barridos presentados, a la tasa elegida.
+        # Se cuentan los presentados y no los aceptados: el estímulo sonó y
+        # el paciente estuvo contrayendo igual.
+        self.segundos_sostenido += engine.duracion_segundos(pedidos, ajustes.tasa)
+
+        # Registro que no avanza: el equipo está tirando todo lo que entra.
+        # Se corta en vez de dejarlo girando para siempre.
+        self.ticks_sin_aceptar = 0 if lote.aceptados else self.ticks_sin_aceptar + 1
+        if self.ticks_sin_aceptar >= TICKS_SIN_AVANCE:
+            self._abortar_registro(registro)
+            return
+
+        self.trazas[registro.lado].refrescar(registro.nombre)
+        self._refrescar_tabla()
+        self._refrescar_encabezado()
+
+        if registro.aceptados >= ajustes.promedios:
+            self._terminar_registro(registro)
+
+    def _abortar_registro(self, registro):
+        estado = protocol.estado_emg(registro.subtipo, self.medidor.nivel)
+        self.detener()
+        self.trazas[registro.lado].seleccionar(registro.nombre)
+        self._refrescar_tabla()
+        musculo, _via = protocol.MUSCULO[registro.subtipo]
+        self._mensaje(
+            f'Registro detenido: el equipo rechazó todos los barridos '
+            f'(contracción {estado}). El {musculo} tiene que estar en la banda '
+            f'del medidor para que un barrido entre al promedio.', 'alerta')
+
+    def _terminar_registro(self, registro):
+        registro.terminado = True
+        self.registro_actual = None
+        self.estado = 'detenido'
+        self.timer_captura.stop()
+        self.control.set_registrando(False)
+        self.trazas[registro.lado].seleccionar(registro.nombre)
+        self._refrescar_tabla()
+        self._refrescar_encabezado()
+        if registro.aceptados == 0:
+            self._mensaje('Ningún barrido entró al promedio: el equipo los '
+                          'rechazó todos. Mirá el EMG.', 'alerta')
+
+    # =====================================================================
+    # EMG
+    # =====================================================================
+
+    def _tick_emg(self):
+        if self.caso is None or self.motor is None:
+            return
+        subtipo = self.control.subtipo()
+        maniobra = self.control.maniobra()
+        if self.estado != 'registrando':
+            # Entre registro y registro el paciente descansa, y el músculo
+            # se recupera más rápido de lo que se cansó. Sin esto, un examen
+            # largo terminaba midiendo un paciente cada vez más flojo aunque
+            # el alumno le diera tiempo entre curva y curva.
+            self.segundos_sostenido = max(
+                0.0, self.segundos_sostenido - (TICK_EMG_MS / 1000.0) * RECUPERACION)
+            emg = self.motor.emg_instantaneo(subtipo, maniobra,
+                                             self.segundos_sostenido)
+            self.medidor.push(emg)
+
+    def _cambiar_maniobra(self, maniobra):
+        """Cambiar de maniobra descansa el músculo: el reloj de fatiga
+        arranca de nuevo."""
+        if maniobra != self.maniobra_previa:
+            self.segundos_sostenido = 0.0
+            self.maniobra_previa = maniobra
+        subtipo = self.control.subtipo()
+        musculo, _via = protocol.MUSCULO[subtipo]
+        self.lbl_maniobra.setText(f'{maniobra} · {musculo}')
+        if self.motor is not None:
+            self.medidor.push(self.motor.emg_instantaneo(subtipo, maniobra,
+                                                         self.segundos_sostenido))
+
+    # =====================================================================
+    # Subtipo / lado / selección
+    # =====================================================================
+
+    def _cambiar_subtipo(self, subtipo):
+        base = self._baseline(subtipo)
+        for panel in self.trazas.values():
+            panel.set_subtipo(subtipo)
+            panel.set_normativa(base)
+        self.medidor.set_subtipo(subtipo)
+        self.tabla.set_subtipo(subtipo)
+        self.analisis.set_subtipo(subtipo, base)
+        self._cambiar_maniobra(self.control.maniobra())
+        self._refrescar_tabla()
+        self._refrescar_encabezado()
+
+    def _baseline(self, subtipo):
+        if self.caso is None:
+            return {}
         try:
-            averages = int(averages)
-        except (TypeError, ValueError):
-            averages = 200
-        return max(5, min(int(round(averages ** 1.1 / 25)), 90))
+            return normativa().baseline(self.caso.poblacion, subtipo,
+                                        self.control.cb_freq.currentText())
+        except Exception as exc:                       # normativa incompleta
+            print(f'VEMP: sin normativa para {subtipo} ({exc})')
+            return {}
 
-    def capture(self):
-        if self.state_capture != 'record':
+    def _cambiar_lado(self, lado):
+        self._refrescar_encabezado()
+
+    def _seleccionar(self, nombre):
+        self._refrescar_tabla(activa=nombre)
+
+    def _seleccionar_desde_tabla(self, nombre):
+        registro = self.sesion.get(nombre)
+        if registro is None:
             return
-        # La maniobra se relee en cada tick aunque el resto del setting quede
-        # congelado al iniciar: el paciente se relaja EN PLENA promediación y
-        # ver la respuesta caerse ahí es parte de lo que hay que aprender.
-        self.current_setting['maniobra'] = self.control.get_maniobra()
-        self.graph(self.current_setting['side'])
+        panel = self.trazas[registro.lado]
+        if panel.activa != nombre:
+            panel.seleccionar(nombre)
 
-    def caso_del_lado(self, side):
-        oido = self.vemp_od if side == 'OD' else self.vemp_oi
-        return case_for_subtipo(oido, self.subtipo)
+    # =====================================================================
+    # Marcas
+    # =====================================================================
 
-    def new_curve(self, side):
-        letra_lado = 'R' if side == 'OD' else 'L'
-        lista = self.curves_R if letra_lado == 'R' else self.curves_L
-        # El nombre lleva el subtipo: un cVEMP y un oVEMP del mismo oído son
-        # curvas distintas y conviven en la misma memoria/informe.
-        prefijo = f'{self.subtipo[0]}{letra_lado}'
-        # El número sale del máximo y no de la cuenta: borrar una curva del
-        # medio no puede devolver un nombre que otra ya está usando.
-        usados = [int(c[len(prefijo):]) for c in lista
-                  if c.startswith(prefijo) and c[len(prefijo):].isdigit()]
-        curva = f'{prefijo}{max(usados, default=0) + 1}'
-        lista.append(curva)
-        self.current_capture_curve = curva
-        return curva
+    def _marcar(self, nombre, pico, lat, amp):
+        registro = self.sesion.get(nombre)
+        if registro is None:
+            return
+        registro.marcar(pico, lat, amp)
+        self.trazas[registro.lado].dibujar_marca(nombre, pico, lat, amp)
+        self._refrescar_tabla(activa=nombre)
+        self._refrescar_analisis()
 
-    def graph(self, side):
-        case = self.caso_del_lado(side)
-        if case is None:
-            # Paciente sin VEMP configurado en este oído. Sin datos reales no
-            # se genera nada.
-            self.control.stop_capture()
-            self.lbl_info.setText(
-                f'{side}: este paciente no tiene VEMP configurado en ese oído.')
+    def _desmarcar(self, nombre, pico):
+        registro = self.sesion.get(nombre)
+        if registro is None:
+            return
+        registro.desmarcar(pico)
+        self.trazas[registro.lado]._quitar_marca_items(nombre, pico)
+        self._refrescar_tabla(activa=nombre)
+        self._refrescar_analisis()
+
+    def _borrar_curva(self, nombre):
+        registro = self.sesion.get(nombre)
+        if registro is None:
+            return
+        if self.registro_actual is registro:
+            self.detener()
+        self.sesion.borrar(nombre)
+        self.trazas[registro.lado].borrar(nombre)
+        self._refrescar_tabla()
+        self._refrescar_analisis()
+
+    # =====================================================================
+    # Refrescos
+    # =====================================================================
+
+    def _refrescar_tabla(self, activa=None):
+        registros = list(self.sesion.registros.values())
+        if activa is None:
+            for panel in self.trazas.values():
+                if panel.activa:
+                    activa = panel.activa
+        self.tabla.poblar(registros, activa)
+        subtipo = self.control.subtipo()
+        ajustes = self.control.ajustes()
+        od, oi, ratio = self.sesion.asimetria(subtipo, ajustes.transductor,
+                                              ajustes.freq)
+        self.asimetria.set_resumen(subtipo, od, oi, ratio)
+
+    def _refrescar_analisis(self, sincronizar=False):
+        ajustes = self.control.ajustes()
+        if sincronizar:
+            # Una curva nueva mueve la condición que se está revisando; una
+            # vez ahí, el alumno la cambia a mano sin tocar el equipo.
+            self.analisis.sincronizar(ajustes.transductor, ajustes.freq)
+        self.analisis.set_subtipo(ajustes.subtipo, self._baseline(ajustes.subtipo))
+        self.analisis.actualizar(self.sesion)
+        transductor, freq = self.analisis.condicion()
+        self.informe.actualizar(self.sesion, ajustes.subtipo, transductor, freq)
+
+    def _cambiar_pestana(self, indice):
+        if indice in (1, 2):
+            self._refrescar_analisis()
+
+    def _refrescar_encabezado(self):
+        ajustes = self.control.ajustes()
+        self.pill_subtipo.set(protocol.SUBTIPO_CORTO[ajustes.subtipo], 'acento')
+        self.pill_lado.set(ajustes.lado, 'od' if ajustes.lado == 'OD' else 'oi')
+        unidad = 'SPL' if ajustes.transductor == protocol.AEREO else 'FL'
+        via = 'aéreo' if ajustes.transductor == protocol.AEREO else 'óseo'
+        self.pill_condicion.set(f'{ajustes.intensidad} dB {unidad} · '
+                                f'{ajustes.freq} · {via}')
+
+        estados = {'detenido': ('detenido', 'neutro'),
+                   'registrando': ('registrando', 'od'),
+                   'pausado': ('en pausa', 'acento')}
+        texto, tipo = estados[self.estado]
+        self.pill_estado.set(texto, tipo)
+
+        registro = self.registro_actual
+        if registro is None:
+            self.barra.setValue(0)
+            if self.caso is not None and self.estado == 'detenido':
+                self._mensaje(self._mensaje_listo(ajustes))
             return
 
-        self.done = False
-        if self.count_averages == 0:
-            self.new_curve(side)
-            self.count_averages = 1
-        elif self.count_averages < self.total_averages:
-            self.count_averages += 1
-        else:
-            self.done = True
-            self.count_averages = 0
-            self.control.stop_capture()
+        pedidos = max(registro.ajustes.promedios, 1)
+        self.barra.setValue(int(100 * min(registro.aceptados / pedidos, 1.0)))
+        segundos = engine.duracion_segundos(registro.aceptados,
+                                            registro.ajustes.tasa)
+        partes = [f'{registro.nombre}',
+                  f'{registro.aceptados}/{pedidos} barridos',
+                  f'{registro.rechazados} rechazados',
+                  f'{int(segundos // 60)}:{int(segundos % 60):02d} de registro',
+                  f'EMG {registro.emg_medio:.0f} µV']
+        estado_emg = protocol.estado_emg(registro.subtipo, self.medidor.nivel)
+        nivel = 'alerta' if estado_emg != 'ok' else None
+        if estado_emg != 'ok':
+            partes.append(f'contracción {estado_emg}: el equipo está rechazando barridos')
+        self._mensaje('   ·   '.join(partes), nivel)
 
-        intensidad = self.current_setting['int']
-        x, y, _dx, _dy, _repro, metadata = VEMP_Curve(
-            intensidad,
-            {**self.current_setting, 'subtipo': self.subtipo},
-            case,
-            repro_prev=0,
-            prom=[(self.count_averages / max(self.total_averages, 1)),
-                  self.current_setting['average']],
-            done=self.done,
-            patient=self.data_current,
-        )
-        self.last_metadata = metadata
+    def _mensaje_listo(self, ajustes):
+        """Qué va a pasar si aprieta Registrar ahora."""
+        segundos = engine.duracion_segundos(ajustes.promedios, ajustes.tasa)
+        return (f'Listo para registrar {protocol.SUBTIPO_CORTO[ajustes.subtipo]} '
+                f'{ajustes.lado}: {ajustes.promedios} barridos a {ajustes.tasa:.1f}/s '
+                f'({int(segundos // 60)}:{int(segundos % 60):02d}) · '
+                f'{protocol.descripcion_montaje(ajustes.subtipo, ajustes.lado)}')
 
-        grafico = self.graph_r if side == 'OD' else self.graph_l
-        grafico.create_line(self.current_capture_curve, x, y, intensidad,
-                            subtipo=self.subtipo, done=self.done)
-        self.memory_curves(side)
-        self.update_capture_info(metadata)
-
-    def memory_curves(self, side):
-        """Crea/actualiza la ficha de la curva en la memoria del examen."""
-        curva = self.current_capture_curve
-        if curva not in self.memory:
-            self.memory[curva] = {
-                **self.current_setting,
-                'side': side,
-                'subtipo': self.subtipo,
-                'waves': list(SUBTIPO_PEAKS[self.subtipo]),
-                'LatAmp': {p: [None, None] for p in SUBTIPO_PEAKS[self.subtipo]},
-                'p2p': None,
-            }
-        # Cómo se registró: la maniobra y el EMG son las condiciones sin las
-        # que el resultado no se puede evaluar (ver AbrMainWindow.
-        # recording_conditions -- mismo criterio).
-        self.memory[curva].update({
-            'maniobra': self.current_setting.get('maniobra'),
-            'emg_uv': round(float(self.last_metadata.get('emg_uv') or 0), 1),
-            'emg_ok': bool(self.last_metadata.get('emg_ok')),
-            'barridos': int(self.last_metadata.get('current_avg') or 0),
-            'done': self.done,
-        })
-
-    def update_capture_info(self, metadata):
-        """Estado de la captura, como lo muestra el equipo real.
-
-        Los barridos que van, el EMG con el que se están registrando y el
-        aviso cuando ese EMG no alcanza: sin eso, una curva plana por
-        paciente relajado y una por respuesta ausente se ven igual.
-        """
-        setting = self.current_setting
-        presentados = int(metadata.get('current_avg') or 0)
-        pedidos = int(setting.get('average') or 0)
-        rate = float(setting.get('rate') or 5.0)
-        segundos = int(presentados / rate) if rate else 0
-        partes = [
-            self.current_capture_curve,
-            f"{setting.get('int')} dB SPL {setting.get('side')}",
-            f"{self.subtipo} {setting.get('freq', '500Hz')}",
-            f"{presentados}/{pedidos} barridos",
-            f"{segundos // 60:02d}:{segundos % 60:02d}",
-            f"EMG {metadata.get('emg_uv', 0):.0f} µV",
-        ]
-        if not metadata.get('emg_ok'):
-            partes.append('⛔ EMG FUERA DE RANGO -- revisá la maniobra')
-        self.lbl_info.setText('  ·  '.join(str(p) for p in partes))
-
-    # =====================================================================
-    # Monitor de EMG
-    # =====================================================================
-
-    def refresh_emg(self):
-        if self.data_current is None:
-            return
-        nivel = emg_de_maniobra(self.subtipo, self.control.get_maniobra())
-        self.emg.push(nivel)
-
-    # =====================================================================
-    # Medición (cursores + tabla + marcas)
-    # =====================================================================
-
-    def measure_data(self, data):
-        """Lectura de los cursores del gráfico, guardada por oído."""
-        info = data.get('data') or {}
-        side = int(info.get('side', 0))
-        self.current_measuring[side] = info
-
-    def measure_action(self, pedido):
-        """Clic en una celda de la tabla: marca el pico donde está el cursor A.
-
-        Las dos columnas hacen lo mismo a propósito: la marca ES un punto de
-        la curva, así que latencia y amplitud salen juntas. Pedirlas por
-        separado (como en el ABR, donde la amplitud es A-A') dejaba marcar
-        una latencia sin amplitud y una amplitud sin latencia.
-        """
-        side = int(pedido.get('side', 0))
-        pico = pedido.get('pico')
-        medida = self.current_measuring[side]
-        if not medida:
-            self.lbl_info.setText(
-                'Poné el cursor A sobre el pico en la curva antes de marcarlo.')
-            return
-        grafico = self.graph_r if side == 0 else self.graph_l
-        if grafico.get_active() is None:
-            return
-        grafico.create_marks(pico)
-
-    def update_memory_from_graph_mark(self, data):
-        """Marca creada o borrada en el gráfico -> memoria + tabla + p2p."""
-        for curva, marcas in data.items():
-            ficha = self.memory.get(curva)
-            if ficha is None:
-                continue
-            for pico, coords in marcas.items():
-                if pico not in ficha['LatAmp']:
-                    continue
-                if coords is None:
-                    ficha['LatAmp'][pico] = [None, None]
-                else:
-                    ficha['LatAmp'][pico] = [float(coords[0]), float(coords[1])]
-            side = ficha.get('side', 'OD')
-            tabla = self.table_r if side == 'OD' else self.table_l
-            ficha['p2p'] = self.peak_to_peak(ficha)
-            if (self.graph_r if side == 'OD' else self.graph_l).get_active() == curva:
-                tabla.set_latamp(ficha['LatAmp'])
-            self.refresh_asimetria()
-
-    def peak_to_peak(self, ficha):
-        """Amplitud pico-pico de la curva: resta CON SIGNO entre sus dos
-        picos (P13 arriba, N23 abajo). Sale de los picos que registró ESA
-        curva y no de los del subtipo activo, que puede ser otro."""
-        latamp = ficha.get('LatAmp') or {}
-        amps = []
-        for pico in ficha.get('waves') or []:
-            vals = latamp.get(pico)
-            if not vals or vals[1] is None:
-                return None
-            amps.append(float(vals[1]))
-        if len(amps) < 2:
-            return None
-        return abs(amps[0] - amps[1])
-
-    def curve_selected(self, curva):
-        ficha = self.memory.get(curva)
-        if ficha is None:
-            return
-        tabla = self.table_r if ficha.get('side') == 'OD' else self.table_l
-        tabla.set_titulo(curva, ficha.get('int'), ficha.get('subtipo'))
-        tabla.set_latamp(ficha.get('LatAmp'))
-
-    def update_delete_curve(self, curva):
-        ficha = self.memory.pop(curva, None)
-        if ficha is None:
-            return
-        if curva in self.curves_R:
-            self.curves_R.remove(curva)
-        if curva in self.curves_L:
-            self.curves_L.remove(curva)
-        tabla = self.table_r if ficha.get('side') == 'OD' else self.table_l
-        tabla.clear_all()
-        self.refresh_asimetria()
-
-    # =====================================================================
-    # Asimetría
-    # =====================================================================
-
-    def asimetria(self):
-        """Razón de asimetría del subtipo activo, con las mayores amplitudes
-        pico-pico marcadas en cada oído. Devuelve (od, oi, ratio_%)."""
-        mejor = {'OD': None, 'OI': None}
-        for ficha in self.memory.values():
-            if ficha.get('subtipo') != self.subtipo:
-                continue
-            p2p = ficha.get('p2p')
-            lado = ficha.get('side')
-            if p2p is None or lado not in mejor:
-                continue
-            if mejor[lado] is None or p2p > mejor[lado]:
-                mejor[lado] = p2p
-        od, oi = mejor['OD'], mejor['OI']
-        if od is None or oi is None or (od + oi) == 0:
-            return od, oi, None
-        return od, oi, abs(od - oi) / (od + oi) * 100
-
-    def refresh_asimetria(self):
-        od, oi, ratio = self.asimetria()
-        self.report.set_asimetria(SUBTIPO_LABELS.get(self.subtipo, self.subtipo),
-                                  od, oi, ratio)
-
-    # =====================================================================
-    # Pestañas
-    # =====================================================================
-
-    def tab_change(self, index):
-        if index == 1:
-            self.lat_int.set_subtipo(self.subtipo, self.baseline_actual(self.subtipo))
-            self.lat_int.plot_data(self.memory, self.subtipo)
-        elif index == 2:
-            self.refresh_asimetria()
+    def _mensaje(self, texto, estado=None):
+        self.lbl_estado.setText(texto)
+        self.lbl_estado.setProperty('estado', estado or '')
+        theme.repintar(self.lbl_estado)
 
     # =====================================================================
     # Informe
     # =====================================================================
 
     def submit_report(self):
-        """Sube el informe al cerrar la atención. Best-effort, igual que el
-        ABR: sin conexión no debe romper el cierre de la atención."""
-        if not self.data_login or not self.memory:
+        """Sube el informe al cerrar la atención.
+
+        Best-effort, igual que el ABR: sin conexión no puede romper el
+        cierre de la atención.
+        """
+        if not self.data_login or not self.sesion.registros:
             return
         try:
             appointment_id = int(self.appointment_id)
         except (TypeError, ValueError):
             return
 
-        temp_dir = context.get_resource('local_cache/vemp/temp')
-        os.makedirs(temp_dir, exist_ok=True)
-        images = {}
-        for sufijo, widget in [('0', self.graph_r), ('1', self.graph_l),
-                               ('lat_int', self.lat_int)]:
-            path = os.path.join(temp_dir, f'upload_{sufijo}.jpg')
+        ajustes = self.control.ajustes()
+        temp = context.get_resource('local_cache/vemp/temp')
+        os.makedirs(temp, exist_ok=True)
+        imagenes = {}
+        exportables = [('0', self.trazas['OD']), ('1', self.trazas['OI']),
+                       ('lat_int', self.analisis)]
+        for sufijo, widget in exportables:
+            path = os.path.join(temp, f'upload_{sufijo}.jpg')
             try:
-                widget.export_jpg(path)
+                widget.exportar(path)
             except Exception as exc:
-                print(f'VEMP: no se pudo exportar {sufijo} para el informe: {exc}')
+                print(f'VEMP: no se pudo exportar {sufijo}: {exc}')
                 continue
-            images[sufijo] = path
+            imagenes[sufijo] = path
 
-        od, oi, ratio = self.asimetria()
+        resumen = self.sesion.resumen(ajustes.subtipo, ajustes.transductor,
+                                      ajustes.freq)
         data = {
-            'curvas': self.memory,
-            'subtipo': self.subtipo,
-            'asimetria': {'subtipo': self.subtipo, 'od': od, 'oi': oi,
-                          'ratio': None if ratio is None else round(ratio, 1)},
-            'hallazgos': self.report.text_edit_1.toPlainText(),
-            'conclusion': self.report.text_edit_2.toPlainText(),
-            'waves': list(SUBTIPO_PEAKS[self.subtipo]),
+            'curvas': self.sesion.curvas_dict(),
+            'subtipo': ajustes.subtipo,
+            'waves': list(protocol.PEAKS[ajustes.subtipo]),
+            'asimetria': resumen,
+            'umbral_informado': self.informe.umbrales(),
+            'hallazgos': self.informe.hallazgos(),
+            'conclusion': self.informe.conclusion(),
         }
-        client = BackendClient(
+
+        cliente = BackendClient(
             Preferences().get('BACKEND_URL'),
             context.get_resource('json/session.json'),
         )
-        if not client.is_logged_in():
+        if not cliente.is_logged_in():
             return
         try:
-            client.upload_report(appointment_id, 'VEMP', data, images)
+            cliente.upload_report(appointment_id, 'VEMP', data, imagenes)
         except Exception as exc:
             print(f'VEMP: no se pudo subir el informe: {exc}')
 
-    def closeEvent(self, event):
-        self.capture_timer.stop()
-        self.emg_timer.stop()
-        event.accept()
+    def closeEvent(self, evento):
+        self.timer_captura.stop()
+        self.timer_emg.stop()
+        evento.accept()

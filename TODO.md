@@ -1,40 +1,64 @@
 # TODO
 
-## VEMP en el cliente: probar en la app (pendiente)
+## VEMP v2: probar en la app real (pendiente)
 
-El pase por `src/vemp/` está hecho: el módulo lee el shape nuevo
-(`cases.data['VEMP'][lado]['subtipos'][subtipo]`, con compatibilidad hacia
-los casos viejos), dibuja la morfología bifásica, ya no extrapola la
-amplitud por encima de 80 dB y el examen se puede completar (un oído por
-vez, promediación en vivo, picos marcables, tabla y lat-int poblados,
-razón de asimetría en el informe).
+`src/vemp/` se rehizo entero (2026-09-12). Lo anterior se borró: no quedó
+nada de `VEMP_generator_v1.py` ni de los `Vemp*.py` viejos. Lo que hay
+ahora, y por qué:
 
-Lo que se agregó y no estaba: **la maniobra del paciente**. La amplitud del
-VEMP escala con el EMG tónico del músculo registrador (ECM en el cVEMP,
-mirada superior en el oVEMP, mordida en el mVEMP): con el paciente relajado
-no hay respuesta. El combo arranca SIEMPRE en la posición sin contracción
---no es un default correcto precargado-- y el monitor de EMG muestra el
-nivel y la banda válida. Ver `VEMP_generator_v1.MANIOBRAS` y `VempEmg.py`.
+- **Se promedian barridos de verdad** (`engine.MotorVemp.lote`). Antes había
+  una curva objetivo y un factor de crecimiento que la iba revelando: la
+  promediación era una animación. Ahora cada tick genera barridos, el equipo
+  acepta o rechaza cada uno y la curva es el promedio acumulado de los
+  aceptados; el ruido baja con la raíz de N porque se promedia, no porque se
+  lo multiplique por un número.
+- **La amplitud que compara es la CORREGIDA** (pico-pico / EMG rectificado,
+  `session.Registro.p2p_corregida`). La cruda depende de cuánto contrajo el
+  paciente, así que la asimetría de Jongkees se calcula con la corregida.
+- **Con el músculo fuera de banda no entra ningún barrido**: el registro no
+  avanza y se corta solo a los 8 ticks (`TICKS_SIN_AVANCE`). Antes avanzaba
+  igual, sucio.
+- **Vía ósea**: el módulo lee el gap 500/1000 Hz del audiograma del MISMO
+  caso (`patient._gap_audiograma`, sobre `Aerea_mkg`/`Osea_mkg`), así que una
+  conductiva apaga el VEMP aéreo y el vibrador lo recupera. La ventaja del
+  vibrador (`protocol.OSEO_VENTAJA_DB = 15`) es un valor declarado, no
+  normativo.
+- **Sintonía frecuencial**: 500/750/1000 Hz, y un umbral muy bajo
+  (`patient.UMBRAL_SINTONIA_INVERTIDA = 55`) invierte la sintonía y sube la
+  amplitud por encima de la normativa.
+- **Fatiga y recuperación del músculo**: sostener la contracción baja el EMG
+  (`MANIOBRAS[...][2]`) y descansar entre curvas lo recupera al doble de esa
+  velocidad (`RECUPERACION`).
+- **Se marca haciendo clic en la curva** con el pico elegido en la barra, y
+  la marca se pega al extremo de la polaridad correcta
+  (`Registro.pico_cercano`). Los cursores A/A' y las celdas clicables de la
+  tabla no existen más.
+- El contrato con el backend NO se tocó: mismo `cases.data['VEMP']`, mismo
+  `upload_report(appointment_id, 'VEMP', ...)`. `ReportPdfBuilder` ahora
+  además imprime la p-p corregida por curva y el bloque de umbral.
+
+Decisiones tomadas acá (no hay de dónde sacarlas):
+- Escala del óseo en dB FL, 20-75, propia y separada de la aérea (dB SPL,
+  50-125): el caso guarda un solo umbral, que es el aéreo.
+- Tolerancia de la banda de picos del gráfico: `traces.ANCHO_BANDA_MS = 2`,
+  declarada, porque el JSON normativo no trae desviación estándar por pico.
+- El mVEMP queda con la normativa que ya tenía (experimental, la misma tabla
+  del JSON): no se inventaron valores nuevos.
 
 Pendiente:
-- [ ] **Correr el módulo con un caso creado desde el editor nuevo.** Nada
-      de esto se probó en la app: acá no hay PySide6/pyqtgraph/scipy, así
-      que lo único ejecutado es el generador (tests/test_vemp_generator.py,
-      con filtros pasa-todo). Toda la UI --captura, cursores, marcas,
-      apilado, escalas, export a JPEG-- está sin ejecutar una sola vez.
-- [ ] Confirmar el PDF con un informe real: `ReportPdfBuilder` ya imprime
-      maniobra/EMG/pico-pico por curva y el bloque de asimetría, pero eso
-      se leyó en el código, no se generó un PDF.
-- [ ] Rangos normativos en la tabla (como `normative_limits` en el ABR):
-      hoy la tabla muestra lo medido sin referencia. El JSON normativo no
-      trae desviación estándar por pico, así que primero hay que decidir de
-      dónde sale la tolerancia (la banda de la lat-int usa un valor
-      declarado, `TOLERANCIA_LAT_MS = 1.5`, y lo dice).
-- [ ] Umbral del VEMP como dato del informe: hoy el alumno lo deduce de la
-      serie pero no hay dónde anotarlo.
-- [ ] `impedance` está fija en 3.0 kOhm (no hay diálogo de parámetros
-      avanzados como en el ABR). Si se agrega, entra por
-      `control_setting['impedance']`, que el generador ya lee.
+- [ ] **Correr el módulo en la app de verdad, con un caso del editor.** Lo
+      ejecutado hasta acá es offscreen (venv con PySide6/pyqtgraph/scipy):
+      los 16 tests de `tests/test_vemp.py`, el ciclo de vida completo
+      (atender, registrar, pausar, borrar, cerrar) y las tres pestañas
+      renderizadas a PNG. Falta verlo dentro del MDI de LabSim.
+- [ ] Confirmar el PDF con un informe real subido desde la app.
+- [ ] Umbral y sintonía en la ficha del docente: hoy el caso guarda UN
+      umbral por subtipo y la frecuencia lo corre con una regla declarada
+      (`patient._CORRIMIENTO_FREQ`). Si se quiere que el docente arme un
+      hidrops con la sintonía corrida a mano, hay que agregarle campos a
+      `_vemp.php` y a `CaseForm::parseVemp`.
+- [ ] Impedancia de electrodos: no hay control (el motor no la usa). Si se
+      agrega, entra como un campo más de `Ajustes`.
 
 ## Otoscopia: derivación + aprobación docente + fase por alumno
 
