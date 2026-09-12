@@ -128,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        if ($error === null && $courseId !== null && !$isFullAdmin && (!$myCourseIds || !in_array($courseId, $myCourseIds, true))) {
+        if ($error === null && $courseId !== null && !Courses::canAdminister($courseId, $me)) {
             $error = 'No tienes acceso a ese curso.';
         }
         if ($error === null && $courseId === null && ($assignedStudentId !== null || $assignedGroupId !== null)) {

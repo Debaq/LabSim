@@ -33,6 +33,20 @@ final class AppConfig
     }
 
     /**
+     * SOLO el override propio de $courseId (null si el curso no tiene fila
+     * para esa key, aunque exista la global). getEffective() no sirve para
+     * esta pregunta: devuelve la global cuando no hay override, y la UI
+     * necesita distinguir "este curso lo cambió" de "está heredando".
+     */
+    public static function courseOverride(string $key, int $courseId): ?array
+    {
+        $stmt = Db::get()->prepare('SELECT v FROM app_config WHERE k = ? AND course_id = ?');
+        $stmt->execute([$key, $courseId]);
+        $row = $stmt->fetch();
+        return $row ? json_decode($row['v'], true) : null;
+    }
+
+    /**
      * Keys cuyo valor efectivo (global u override del curso resuelto) pudo
      * cambiar desde $since -- usado por sync.php para no reenviar config que
      * el cliente ya tiene. No distingue si cambió el lado global o el del

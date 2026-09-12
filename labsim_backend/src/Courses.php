@@ -99,6 +99,42 @@ final class Courses
     }
 
     /**
+     * true si $me (la fila de users que devuelve Auth::requireAdminSession())
+     * puede administrar $courseId: el admin completo cualquiera, el docente
+     * solo los suyos. Única copia de la regla -- antes estaba repetida en
+     * courses.php, inbox_send.php, group_move.php y agenda.php, cada una con
+     * su propia forma de fallar.
+     */
+    public static function canAdminister(int $courseId, array $me): bool
+    {
+        if ((int) $me['permission'] === Auth::PERMISSION_ADMIN) {
+            return true;
+        }
+        return $courseId > 0 && self::isTeacherOf((int) $me['id'], $courseId);
+    }
+
+    /** Corta la request con 403 si $me no puede administrar $courseId (páginas HTML;
+     * los endpoints que responden JSON usan canAdminister() y arman su propio cuerpo). */
+    public static function assertAdministers(int $courseId, array $me): void
+    {
+        if (!self::canAdminister($courseId, $me)) {
+            http_response_code(403);
+            exit('No tienes acceso a este curso.');
+        }
+    }
+
+    /** true si $groupId es un grupo de $courseId -- el group_id llega del
+     * navegador (POST del tablero), así que no alcanza con tener acceso al
+     * curso: hay que confirmar que el grupo sea de ESE curso antes de
+     * renombrarlo o borrarlo. */
+    public static function groupBelongsTo(int $groupId, int $courseId): bool
+    {
+        $stmt = Db::get()->prepare('SELECT 1 FROM student_groups WHERE id = ? AND course_id = ?');
+        $stmt->execute([$groupId, $courseId]);
+        return (bool) $stmt->fetchColumn();
+    }
+
+    /**
      * El único curso donde $userId está matriculado, o null si está en
      * cero o en varios (ambiguo -- sesión multi-curso, sin resolver por
      * ahora). Fallback de Auth::issueTokenFor() para
@@ -164,6 +200,76 @@ final class Courses
     public static function listActive(): array
     {
         return Db::get()->query('SELECT * FROM courses WHERE active = 1 ORDER BY name')->fetchAll();
+    }
+
+    /**
+     * Cursos con la cuenta de docentes y de alumnos reales (sin el demo)
+     * resuelta en la misma consulta. La lista de courses.php llamaba a
+     * teachers() y students() dentro del foreach: dos queries por fila y el
+     * roster entero traído a memoria para contarlo.
+     * $courseIds null = todos (admin completo); array = solo esos (docente).
+     */
+    public static function listWithCounts(?array $courseIds): array
+    {
+        $sql = 'SELECT c.*,
+                       (SELECT COUNT(*) FROM course_teachers ct WHERE ct.course_id = c.id) AS n_teachers,
+                       (SELECT COUNT(*) FROM course_students cs
+                          JOIN users u ON u.id = cs.user_id
+                         WHERE cs.course_id = c.id AND u.is_demo = 0) AS n_students
+                FROM courses c';
+        $args = [];
+        if ($courseIds !== null) {
+            if (!$courseIds) {
+                return [];
+            }
+            $args = array_map('intval', $courseIds);
+            $sql .= ' WHERE c.id IN (' . implode(',', array_fill(0, count($args), '?')) . ')';
+        }
+        $sql .= ' ORDER BY c.active DESC, c.name';
+        $stmt = Db::get()->prepare($sql);
+        $stmt->execute($args);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Avance de cada alumno matriculado, para los badges de su tarjeta en el
+     * tablero: cuántas citas del curso le tocan (asignadas a él o al grupo
+     * donde está), cuántas cerró como 'atendido' y cuándo tocó una atención
+     * por última vez. Todo el roster en una query -- pintar esto por alumno
+     * serían tres consultas por tarjeta.
+     * [user_id => ['asignadas' => int, 'atendidas' => int, 'ultima' => ?string]]
+     */
+    public static function rosterProgress(int $courseId): array
+    {
+        $stmt = Db::get()->prepare(
+            "SELECT u.id AS user_id,
+                    (SELECT COUNT(*) FROM appointments a
+                      WHERE a.course_id = ?
+                        AND (a.assigned_student_id = u.id
+                             OR (a.assigned_group_id IS NOT NULL
+                                 AND a.assigned_group_id IN (
+                                     SELECT gm.group_id FROM group_members gm
+                                       JOIN student_groups g ON g.id = gm.group_id
+                                      WHERE gm.user_id = u.id AND g.course_id = ?)))) AS asignadas,
+                    (SELECT COUNT(*) FROM attendances att
+                       JOIN appointments a2 ON a2.id = att.appointment_id
+                      WHERE att.student_id = u.id AND att.estado = 'atendido' AND a2.course_id = ?) AS atendidas,
+                    (SELECT MAX(att2.updated_at) FROM attendances att2
+                       JOIN appointments a3 ON a3.id = att2.appointment_id
+                      WHERE att2.student_id = u.id AND a3.course_id = ?) AS ultima
+             FROM course_students cs JOIN users u ON u.id = cs.user_id
+             WHERE cs.course_id = ?"
+        );
+        $stmt->execute([$courseId, $courseId, $courseId, $courseId, $courseId]);
+        $out = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $out[(int) $row['user_id']] = [
+                'asignadas' => (int) $row['asignadas'],
+                'atendidas' => (int) $row['atendidas'],
+                'ultima' => $row['ultima'] !== null ? (string) $row['ultima'] : null,
+            ];
+        }
+        return $out;
     }
 
     public static function find(int $courseId): ?array
@@ -257,6 +363,29 @@ final class Courses
         );
         $stmt->execute([$courseId]);
         return $stmt->fetchAll();
+    }
+
+    /**
+     * Matricula a UN alumno ya existente validando la cuenta. Al arrastrar
+     * un candidato al tablero el user_id lo manda el navegador, no un
+     * <select> armado en el servidor: acá se confirma que sea una cuenta de
+     * alumno activa (y no el demo del curso, que se matricula solo) antes de
+     * meterlo al roster. Devuelve el error o null.
+     */
+    public static function enrollStudent(int $courseId, int $userId): ?string
+    {
+        $stmt = Db::get()->prepare('SELECT role, active, is_demo FROM users WHERE id = ?');
+        $stmt->execute([$userId]);
+        $user = $stmt->fetch();
+        if (!$user) {
+            return 'El alumno no existe.';
+        }
+        if ((string) $user['role'] !== 'student' || (int) $user['active'] !== 1 || (int) $user['is_demo'] === 1) {
+            return 'Esa cuenta no se puede matricular como alumno.';
+        }
+        Db::get()->prepare('INSERT OR IGNORE INTO course_students (course_id, user_id) VALUES (?, ?)')
+            ->execute([$courseId, $userId]);
+        return null;
     }
 
     /** Matricula varios alumnos ya existentes de una vez (por id). Devuelve cuántos quedaron matriculados. */
@@ -520,6 +649,47 @@ final class Courses
     {
         Db::get()->prepare('INSERT INTO student_groups (course_id, name) VALUES (?, ?)')->execute([$courseId, $name]);
         return (int) Db::get()->lastInsertId();
+    }
+
+    /**
+     * Crea $n grupos ("$prefix 1" .. "$prefix N") y reparte entre ellos a los
+     * alumnos que hoy están sin grupo, alfabéticamente y de a uno por columna
+     * (round-robin, así quedan parejos). No toca a los que ya tienen grupo ni
+     * al alumno demo. Empezar el semestre no puede ser crear ocho grupos a
+     * mano y arrastrar cuarenta tarjetas. Devuelve cuántos repartió.
+     */
+    public static function splitUngroupedIntoGroups(int $courseId, int $n, string $prefix): int
+    {
+        $prefix = trim($prefix) !== '' ? trim($prefix) : 'Grupo';
+        $grouped = self::studentGroupMap($courseId);
+        $sinGrupo = [];
+        foreach (self::students($courseId) as $s) {
+            if ((int) $s['is_demo'] === 1 || isset($grouped[(int) $s['id']])) {
+                continue;
+            }
+            $sinGrupo[] = (int) $s['id'];
+        }
+        if (!$sinGrupo || $n < 1) {
+            return 0;
+        }
+
+        $groupIds = [];
+        for ($i = 1; $i <= $n; $i++) {
+            $groupIds[] = self::createGroup($courseId, $prefix . ' ' . $i);
+        }
+        $pdo = Db::get();
+        $stmt = $pdo->prepare('INSERT OR IGNORE INTO group_members (group_id, user_id) VALUES (?, ?)');
+        $pdo->beginTransaction();
+        try {
+            foreach ($sinGrupo as $i => $userId) {
+                $stmt->execute([$groupIds[$i % $n], $userId]);
+            }
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+        return count($sinGrupo);
     }
 
     public static function renameGroup(int $groupId, string $name): void

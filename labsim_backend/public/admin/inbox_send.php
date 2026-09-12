@@ -33,17 +33,6 @@ $courses = $isFullAdmin
 $error = null;
 $success = null;
 
-function require_course_access_inbox(int $courseId, bool $isFullAdmin, ?array $myCourseIds): void
-{
-    if ($isFullAdmin) {
-        return;
-    }
-    if ($myCourseIds === null || !in_array($courseId, $myCourseIds, true)) {
-        http_response_code(403);
-        exit('No tienes acceso a este curso.');
-    }
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'marcar_leido') {
     Auth::requireCsrf();
     $id = (int) ($_POST['id'] ?? 0);
@@ -61,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'marca
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Auth::requireCsrf();
     $courseId = (int) ($_POST['course_id'] ?? 0);
-    require_course_access_inbox($courseId, $isFullAdmin, $myCourseIds);
+    Courses::assertAdministers($courseId, $me);
 
     $asunto = trim((string) ($_POST['asunto'] ?? ''));
     $cuerpo = trim((string) ($_POST['cuerpo'] ?? ''));
@@ -127,7 +116,7 @@ if ($selectedCourseId <= 0 && $courses) {
     $selectedCourseId = (int) reset($courses)['id'];
 }
 if ($selectedCourseId > 0) {
-    require_course_access_inbox($selectedCourseId, $isFullAdmin, $myCourseIds);
+    Courses::assertAdministers($selectedCourseId, $me);
 }
 $roster = $selectedCourseId > 0 ? Courses::students($selectedCourseId) : [];
 $grupos = $selectedCourseId > 0 ? Courses::groupsForCourse($selectedCourseId) : [];
