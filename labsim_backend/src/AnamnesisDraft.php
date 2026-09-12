@@ -110,13 +110,18 @@ final class AnamnesisDraft
      *
      * @return array<string,mixed>
      */
-    public static function opciones(int $presupuesto, string $modelo): array
+    public static function opciones(int $presupuesto, string $modelo, int $usuarioId = 0): array
     {
         return [
             'model' => $modelo,
             'max_tokens' => $presupuesto,
             'timeout' => self::TIMEOUT_S,
             'campo_tokens' => 'Máximo de tokens del borrador de anamnesis',
+            // Para la contabilidad (ver LlmUsage): esta tarea es la más
+            // cara por llamada de todas, así que mezclarla con el chat del
+            // alumno en un único total no dejaría ver de dónde sale el gasto.
+            'tarea' => 'anamnesis',
+            'user_id' => $usuarioId,
         ];
     }
 
@@ -275,14 +280,14 @@ TXT;
      *               medicamentos:string, cirugias:string, otros:string,
      *               comportamiento:string, disposicion:int}
      */
-    public static function generate(array $data): array
+    public static function generate(array $data, int $usuarioId = 0): array
     {
         $prompt = self::describeCase($data);
         $presupuesto = self::maxTokens();
         $modelo = self::model();
         self::$usoAcumulado = [];
         try {
-            $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], $prompt, self::opciones($presupuesto, $modelo));
+            $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], $prompt, self::opciones($presupuesto, $modelo, $usuarioId));
             self::acumularUso();
         } catch (LlmBudgetException $e) {
             // El intento que falló igual se factura -- en un modelo de
@@ -298,7 +303,7 @@ TXT;
             if ($reintento <= $presupuesto) {
                 throw $e;
             }
-            $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], $prompt, self::opciones($reintento, $modelo));
+            $raw = LlmChat::reply(self::SYSTEM_PROMPT, [], $prompt, self::opciones($reintento, $modelo, $usuarioId));
             self::acumularUso();
         }
         $draft = self::parse($raw);

@@ -62,7 +62,14 @@ final class OirsEvaluator
         $systemPrompt = LlmConfig::buildOirsPrompt($disposition);
 
         try {
-            $raw = LlmChat::reply($systemPrompt, [], $transcript);
+            // course_id no se pasa: la cita lo tiene, pero el evaluador
+            // corre al cerrar la atención y no hace falta una consulta más
+            // solo para la estadística -- la fila queda imputada al alumno,
+            // que ya dice de qué curso salió.
+            $raw = LlmChat::reply($systemPrompt, [], $transcript, [
+                'tarea' => 'oirs',
+                'user_id' => $studentId,
+            ]);
         } catch (Throwable $e) {
             error_log('[OirsEvaluator] LLM call failed: ' . $e->getMessage());
             return;
@@ -113,7 +120,8 @@ final class OirsEvaluator
             throw new RuntimeException('No hay conversación que evaluar todavía -- escribe al menos un mensaje.');
         }
 
-        $raw = LlmChat::reply(LlmConfig::buildOirsPrompt($disposition), [], self::transcriptFromLog($log));
+        $raw = LlmChat::reply(LlmConfig::buildOirsPrompt($disposition), [], self::transcriptFromLog($log),
+            ['tarea' => 'prueba']);
         $verdict = self::parseVerdict($raw);
         if ($verdict === null) {
             throw new RuntimeException('El LLM no devolvió un JSON válido: ' . $raw);

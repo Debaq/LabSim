@@ -4,6 +4,7 @@
 // la cargaba cada llamador a mano, así que un endpoint nuevo moría con
 // "Class 'LlmConfig' not found" recién al apretar el botón.
 require_once __DIR__ . '/LlmConfig.php';
+require_once __DIR__ . '/LlmUsage.php';
 
 /**
  * El modelo se quedó sin presupuesto ANTES de escribir la respuesta.
@@ -39,7 +40,7 @@ final class LlmChat
      */
     private static array $lastUsage = [];
 
-    /** Consumo de la última llamada: prompt, completion, razonamiento y total. */
+    /** Consumo de la última llamada: prompt (con su corte de cache), completion, razonamiento y total. */
     public static function lastUsage(): array
     {
         return self::$lastUsage;
@@ -61,6 +62,12 @@ final class LlmChat
             'max_tokens' => isset($opciones['max_tokens']) ? (int) $opciones['max_tokens'] : null,
             'timeout' => isset($opciones['timeout']) ? (int) $opciones['timeout'] : null,
             'campo_tokens' => (string) ($opciones['campo_tokens'] ?? 'Máximo de tokens por respuesta'),
+            // Solo para la contabilidad (ver LlmUsage): a quién se le
+            // imputa esta llamada. Vacío/0 = no se sabe, y la fila queda
+            // igual bajo "sin clasificar" -- el total nunca se pierde.
+            'tarea' => (string) ($opciones['tarea'] ?? ''),
+            'course_id' => (int) ($opciones['course_id'] ?? 0),
+            'user_id' => (int) ($opciones['user_id'] ?? 0),
         ];
     }
 
@@ -157,20 +164,42 @@ final class LlmChat
         }
 
         // `usage` es opcional en el protocolo: si el proveedor no lo manda,
-        // queda vacío y quien lo muestra decide qué decir.
+        // queda vacío y quien lo muestra decide qué decir. El corte de
+        // cache (hit/miss) lo normaliza LlmUsage porque es lo que decide la
+        // factura, no el total: un token que pegó en cache cuesta unas 50
+        // veces menos que uno que no.
         $usage = is_array($decoded['usage'] ?? null) ? $decoded['usage'] : [];
-        self::$lastUsage = [
-            'prompt' => (int) ($usage['prompt_tokens'] ?? 0),
-            'completion' => (int) ($usage['completion_tokens'] ?? 0),
-            // DeepSeek lo reporta anidado; otros proveedores lo omiten.
-            'razonamiento' => (int) ($usage['completion_tokens_details']['reasoning_tokens'] ?? 0),
-            'total' => (int) ($usage['total_tokens'] ?? 0),
-        ];
+        self::$lastUsage = LlmUsage::normalizar($usage);
 
-        return self::extractContent(
-            is_array($decoded) ? $decoded : [], (string) $response,
-            $modelo, (int) ($maxTokens ?? $cfg['max_tokens']), $campoTokens
-        );
+        // La llamada se anota ANTES de saber si el texto sirve, porque el
+        // proveedor cobra igual: el caso más caro de todos es justo el del
+        // modelo de razonamiento que gastó miles de tokens pensando y
+        // devolvió `content` vacío. Por eso extractContent va adentro de un
+        // try -- si lanza, la fila ya quedó escrita con ok = 0.
+        $contenido = null;
+        $falla = null;
+        try {
+            $contenido = self::extractContent(
+                is_array($decoded) ? $decoded : [], (string) $response,
+                $modelo, (int) ($maxTokens ?? $cfg['max_tokens']), $campoTokens
+            );
+        } catch (Throwable $e) {
+            $falla = $e;
+        }
+
+        LlmUsage::registrar(self::$lastUsage, [
+            'tarea' => $cfgTarea['tarea'],
+            'model' => $modelo,
+            'provider' => (string) $cfg['provider'],
+            'course_id' => $cfgTarea['course_id'],
+            'user_id' => $cfgTarea['user_id'],
+            'ok' => $falla === null,
+        ]);
+
+        if ($falla !== null) {
+            throw $falla;
+        }
+        return $contenido;
     }
 
     /**

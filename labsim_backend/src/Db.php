@@ -270,6 +270,64 @@ final class Db
     }
 
     /**
+     * La tabla de consumo (ver LlmUsage.php) y las tarifas en llm_config --
+     * instalaciones anteriores a que se llevara la cuenta de lo que gasta
+     * la API.
+     *
+     * A diferencia del resto de migrateLlm*, esta CREA la tabla en vez de
+     * esperar a schema.sql: la llama LlmUsage::registrar() en el camino del
+     * chat, que corre mucho antes de que alguien pase por "Aplicar schema",
+     * y sin la tabla no se anotaría nada durante todo ese tiempo. El CREATE
+     * es idéntico al de schema.sql (IF NOT EXISTS en los dos lados, así que
+     * corran en el orden que corran no se pisan).
+     */
+    public static function migrateLlmUsageIfNeeded(): void
+    {
+        $pdo = self::get();
+        $pdo->exec(
+            "CREATE TABLE IF NOT EXISTS llm_usage (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tarea TEXT NOT NULL DEFAULT '',
+                model TEXT NOT NULL DEFAULT '',
+                provider TEXT NOT NULL DEFAULT '',
+                course_id INTEGER,
+                user_id INTEGER,
+                cache_hit INTEGER NOT NULL DEFAULT 0,
+                cache_miss INTEGER NOT NULL DEFAULT 0,
+                completion INTEGER NOT NULL DEFAULT 0,
+                razonamiento INTEGER NOT NULL DEFAULT 0,
+                total INTEGER NOT NULL DEFAULT 0,
+                ventana TEXT NOT NULL DEFAULT 'peak',
+                ok INTEGER NOT NULL DEFAULT 1,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )"
+        );
+        $pdo->exec('CREATE INDEX IF NOT EXISTS idx_llm_usage_created ON llm_usage(created_at)');
+        $pdo->exec('CREATE INDEX IF NOT EXISTS idx_llm_usage_course ON llm_usage(course_id, created_at)');
+        self::migrateLlmPricesIfNeeded();
+    }
+
+    /**
+     * Solo las tarifas: es lo único que necesita LlmConfig::save(), que
+     * puede correr antes de que nadie haya aplicado el schema (mismo caso
+     * que migrateLlmSalaPromptIfNeeded).
+     */
+    public static function migrateLlmPricesIfNeeded(): void
+    {
+        $pdo = self::get();
+        // llm_config puede no existir todavía (instalación recién creada, o
+        // schema.sql sin aplicar): PRAGMA table_info sobre una tabla que no
+        // está no avisa, y el ALTER de abajo moriría con "no such table".
+        // Se sale en silencio -- schema.sql la crea ya con las columnas.
+        if (!$pdo->query("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'llm_config'")->fetch()) {
+            return;
+        }
+        self::addColumnIfMissing($pdo, 'llm_config', 'price_cache_hit', 'REAL NOT NULL DEFAULT 0');
+        self::addColumnIfMissing($pdo, 'llm_config', 'price_cache_miss', 'REAL NOT NULL DEFAULT 0');
+        self::addColumnIfMissing($pdo, 'llm_config', 'price_output', 'REAL NOT NULL DEFAULT 0');
+    }
+
+    /**
      * Agrega historia_clinica a patients -- instalaciones de antes de que
      * esa columna existiera. CREATE TABLE IF NOT EXISTS de schema.sql no
      * toca columnas de una tabla que ya existe, por eso el ALTER TABLE acá.

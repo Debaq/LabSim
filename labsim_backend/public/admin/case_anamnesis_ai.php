@@ -94,7 +94,7 @@ if ($data['edad'] <= 0) {
 }
 
 try {
-    $borrador = AnamnesisDraft::generate($data);
+    $borrador = AnamnesisDraft::generate($data, (int) $me['id']);
 } catch (Throwable $e) {
     http_response_code(502);
     echo json_encode(['ok' => false, 'error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);

@@ -266,6 +266,9 @@ PROMPT;
                 'system_prompt_template' => '',
                 'oirs_prompt_template' => '',
                 'sala_prompt_template' => '',
+                'price_cache_hit' => 0.0,
+                'price_cache_miss' => 0.0,
+                'price_output' => 0.0,
                 'active' => 0,
                 'updated_at' => null,
             ];
@@ -291,6 +294,14 @@ PROMPT;
         // Db::migrateLlmSalaPromptIfNeeded), y admin/llm.php corre con
         // strict_types, así que un null acá sería un TypeError, no un aviso.
         $row['sala_prompt_template'] = (string) ($row['sala_prompt_template'] ?? '');
+        // Tarifas en USD por millón de tokens (ver Db::migrateLlmPricesIfNeeded).
+        // 0 = sin cargar: el panel muestra tokens igual, solo que sin
+        // traducirlos a plata. Nunca se inventa un precio por defecto --
+        // un número inventado en una columna que dice "USD" es peor que un
+        // guion, porque nadie lo revisa.
+        foreach (['price_cache_hit', 'price_cache_miss', 'price_output'] as $campoPrecio) {
+            $row[$campoPrecio] = (float) ($row[$campoPrecio] ?? 0);
+        }
         return $row;
     }
 
@@ -468,11 +479,12 @@ PROMPT;
         // column". Es idempotente y esto lo corre un admin, no un alumno.
         Db::migrateLlmAnamnesisTokensIfNeeded();
         Db::migrateLlmSalaPromptIfNeeded();
+        Db::migrateLlmPricesIfNeeded();
 
         $pdo = Db::get();
         $pdo->prepare(
-            "INSERT INTO llm_config (id, provider, api_key, api_base_url, model, temperature, max_tokens, anamnesis_max_tokens, anamnesis_model, system_prompt_template, oirs_prompt_template, sala_prompt_template, active, updated_at)
-             VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            "INSERT INTO llm_config (id, provider, api_key, api_base_url, model, temperature, max_tokens, anamnesis_max_tokens, anamnesis_model, system_prompt_template, oirs_prompt_template, sala_prompt_template, price_cache_hit, price_cache_miss, price_output, active, updated_at)
+             VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
              ON CONFLICT(id) DO UPDATE SET
                 provider = excluded.provider,
                 api_key = excluded.api_key,
@@ -485,6 +497,9 @@ PROMPT;
                 system_prompt_template = excluded.system_prompt_template,
                 oirs_prompt_template = excluded.oirs_prompt_template,
                 sala_prompt_template = excluded.sala_prompt_template,
+                price_cache_hit = excluded.price_cache_hit,
+                price_cache_miss = excluded.price_cache_miss,
+                price_output = excluded.price_output,
                 active = excluded.active,
                 updated_at = CURRENT_TIMESTAMP"
         )->execute([
@@ -499,6 +514,9 @@ PROMPT;
             trim((string) ($data['system_prompt_template'] ?? '')),
             trim((string) ($data['oirs_prompt_template'] ?? '')),
             trim((string) ($data['sala_prompt_template'] ?? '')),
+            max(0.0, (float) ($data['price_cache_hit'] ?? 0)),
+            max(0.0, (float) ($data['price_cache_miss'] ?? 0)),
+            max(0.0, (float) ($data['price_output'] ?? 0)),
             !empty($data['active']) ? 1 : 0,
         ]);
     }

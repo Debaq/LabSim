@@ -65,7 +65,7 @@ foreach ((array) ($body['history'] ?? []) as $h) {
 }
 
 try {
-    $reply = LlmChat::reply($systemPrompt, $history, $message);
+    $reply = LlmChat::reply($systemPrompt, $history, $message, ['tarea' => 'prueba']);
     Response::json(['reply' => $reply]);
 } catch (Throwable $e) {
     Response::error($e->getMessage(), 502);

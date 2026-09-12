@@ -1004,3 +1004,62 @@ mismo símbolo con que se dibuja el hallazgo (■ relleno de área, ● disco,
 `glifo_hallazgo()` tiene que seguir a `_dibujar_marcador()`: si una marca
 cambia de forma, cambian las dos. Los botones quedaron más anchos y la
 subventana pasó de 940 a 1000 px (`Layout::APPS['OT']`).
+
+## Consumo de la API del LLM (2026-09-12)
+
+DeepSeek **no expone ningún endpoint de consumo**: su API solo devuelve el
+saldo que queda (`GET /user/balance`), y el desglose por día o por modelo
+vive únicamente en su panel web. Por eso la cuenta la lleva LabSim, llamada
+por llamada, con el bloque `usage` de cada respuesta -- tabla `llm_usage` y
+`src/LlmUsage.php`, panel en Admin -> IA Paciente.
+
+Lo que se anota por llamada: tarea (`chat_paciente`, `sala`, `anamnesis`,
+`oirs`, `prueba`), modelo, proveedor, curso, alumno, el corte de prompt
+entre cache hit y miss, respuesta, razonamiento, total, la franja horaria y
+si el texto salió usable.
+
+Sobre el **horario diferido**: DeepSeek cobra precio pleno solo de lunes a
+viernes, 01:00-04:00 y 06:00-10:00 UTC; el resto vale la mitad. En Chile
+esa franja cae de madrugada, así que todo el horario de clases ya paga la
+tarifa rebajada sin que haya que hacer nada. Se registra igual la ventana de
+cada llamada porque el precio depende de CUÁNDO se hizo, y calcularlo
+después con la franja en que uno mira el panel daría cualquier cosa.
+
+Decisiones que quedaron tomadas, por si alguna hay que revisar:
+
+- **Se guardan tokens, no plata.** El costo se calcula al mostrar con las
+  tarifas de `llm_config` (tres: cache hit, cache miss y respuesta, en USD
+  por millón, a precio pleno). Corregir una tarifa mal escrita arregla el
+  histórico entero. Sin tarifas cargadas el panel cuenta tokens y no inventa
+  ningún precio por defecto.
+- **El prompt va separado en cache hit / miss.** Es lo que decide la
+  factura: un token que pegó en cache cuesta unas 50 veces menos. Si el
+  proveedor no reporta el corte, todo entra como miss -- de más, nunca de
+  menos.
+- **Una sola tarifa para todos los modelos.** Si conviven dos modelos con
+  precios distintos (el general y el de anamnesis), el costo es una
+  aproximación; el panel lo dice en la tabla por modelo.
+- **Los días se cortan a medianoche hora de Chile**, no en UTC: con el corte
+  en UTC "hoy" arrancaba a las 21:00 del día anterior. El desfase de una
+  hora del horario de verano mueve una llamada de borde entre dos días, no
+  el total, y no se persigue.
+- **Retención de 365 días** (`LlmUsage::RETENCION_DIAS`), purgada al abrir el
+  panel y no en cada INSERT: la limpieza no tiene urgencia y el camino del
+  chat del alumno no debería cargar con un DELETE que no le sirve.
+- **La llamada se anota aunque el texto no sirva** (`ok = 0`). El caso más
+  caro de todos es el modelo de razonamiento que gastó miles de tokens
+  pensando y devolvió `content` vacío: verlo subir es la señal de que hay que
+  tocar el máximo de tokens.
+- **`registrar()` nunca lanza.** Quedarse sin la estadística es molesto;
+  cortarle la conversación a un alumno por no poder escribir una fila de
+  contabilidad sería peor.
+- Sin FK a `courses`/`users` en `llm_usage`: es contabilidad, y no tiene que
+  bloquear el borrado de un curso o un alumno.
+
+Pendiente:
+- [ ] **Cargar las tarifas reales** en Admin -> IA Paciente (hoy quedan en 0,
+  así que el panel muestra tokens y no costo).
+- [ ] **Probarlo en el backend real**: nada de esto corrió contra la base
+  viva -- acá no hay `pdo_sqlite` (solo `php -l`, balance de tags y el SQL
+  validado aparte con `sqlite3`). Antes de mirar el panel hay que aplicar el
+  schema en Admin -> Base de datos.

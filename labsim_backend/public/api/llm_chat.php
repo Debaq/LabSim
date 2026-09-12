@@ -138,8 +138,31 @@ foreach ((array) ($body['history'] ?? []) as $h) {
     ];
 }
 
+// Curso al que se le imputa el consumo (ver LlmUsage). Solo con cita real:
+// el "Atender (prueba)" del admin no manda appointment_id, y esa llamada no
+// pertenece a ningún curso. La columna es de una migración posterior, así
+// que un backend sin aplicar todavía el schema queda sin curso, no roto.
+$courseId = 0;
+if ($appointmentId > 0) {
+    try {
+        $cStmt = Db::get()->prepare('SELECT course_id FROM appointments WHERE id = ?');
+        $cStmt->execute([$appointmentId]);
+        $cRow = $cStmt->fetch();
+        $courseId = $cRow ? (int) ($cRow['course_id'] ?? 0) : 0;
+    } catch (Throwable $e) {
+        $courseId = 0;
+    }
+}
+
 try {
-    $raw = LlmChat::reply($systemPrompt, $history, $message);
+    $raw = LlmChat::reply($systemPrompt, $history, $message, [
+        // Se separan porque cuestan distinto: el prompt de la sala describe
+        // a cada persona presente y pide JSON, así que arranca bastante más
+        // caro que el del paciente solo.
+        'tarea' => $acompanado ? 'sala' : 'chat_paciente',
+        'course_id' => $courseId,
+        'user_id' => (int) $user['id'],
+    ]);
 } catch (Throwable $e) {
     Response::error($e->getMessage(), 502);
 }

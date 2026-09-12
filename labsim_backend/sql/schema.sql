@@ -338,9 +338,64 @@ CREATE TABLE IF NOT EXISTS llm_config (
     -- contesta. Un paciente que viene solo no lo usa: sigue con
     -- system_prompt_template.
     sala_prompt_template TEXT NOT NULL DEFAULT '',
+    -- Tarifas del proveedor en USD por millón de tokens, para poder
+    -- traducir a plata lo que se anota en llm_usage. Van acá y no
+    -- hardcodeadas porque cambian seguido, y separadas en tres porque un
+    -- token de prompt que pegó en la cache cuesta unas 50 veces menos que
+    -- uno que no -- con un solo precio de entrada el número no se parece a
+    -- la factura. Son las tarifas de PRECIO PLENO: en la franja rebajada
+    -- se les aplica LlmUsage::OFFPEAK_FACTOR al calcular.
+    price_cache_hit REAL NOT NULL DEFAULT 0,
+    price_cache_miss REAL NOT NULL DEFAULT 0,
+    price_output REAL NOT NULL DEFAULT 0,
     active INTEGER NOT NULL DEFAULT 0,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Consumo de la API del LLM, una fila por llamada (ver LlmUsage.php).
+--
+-- Existe porque DeepSeek no expone ningún endpoint de consumo: su API solo
+-- dice cuánto saldo queda, y el desglose por día o por modelo vive
+-- únicamente en su panel web. Sin esta tabla no hay forma de saber qué
+-- parte del gasto se va en el chat con el paciente y qué parte en los
+-- borradores de anamnesis.
+--
+-- Se guardan tokens y no plata: el precio cambia, así que el costo se
+-- calcula al mostrar con las tarifas de llm_config -- corregir una tarifa
+-- mal escrita arregla el histórico entero.
+CREATE TABLE IF NOT EXISTS llm_usage (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    -- chat_paciente | sala | anamnesis | oirs | prueba (ver LlmUsage::TAREAS)
+    tarea TEXT NOT NULL DEFAULT '',
+    model TEXT NOT NULL DEFAULT '',
+    provider TEXT NOT NULL DEFAULT '',
+    -- Sin REFERENCES a propósito: es contabilidad, no datos del curso. Con
+    -- la FK puesta, borrar un curso o un alumno quedaría bloqueado por
+    -- filas de estadística, que es exactamente al revés de lo que importa.
+    course_id INTEGER,
+    user_id INTEGER,
+    -- Desglose del prompt: lo que pegó en cache y lo que no. Si el
+    -- proveedor no reporta el corte, todo entra como miss (de más, nunca de
+    -- menos). completion YA incluye razonamiento; ese se guarda aparte solo
+    -- para poder mostrar cuánto del gasto se fue en pensar.
+    cache_hit INTEGER NOT NULL DEFAULT 0,
+    cache_miss INTEGER NOT NULL DEFAULT 0,
+    completion INTEGER NOT NULL DEFAULT 0,
+    razonamiento INTEGER NOT NULL DEFAULT 0,
+    total INTEGER NOT NULL DEFAULT 0,
+    -- peak | offpeak. Se estampa al momento de la llamada porque el precio
+    -- depende de CUÁNDO se hizo: calcularlo después, con la franja en que
+    -- uno mira el panel, daría cualquier cosa.
+    ventana TEXT NOT NULL DEFAULT 'peak',
+    -- 0 = el proveedor cobró pero no devolvió texto usable (típico del
+    -- modelo de razonamiento que se queda sin presupuesto pensando). Se
+    -- anota igual: es gasto real, y verlo subir es la señal de que hay que
+    -- tocar el máximo de tokens.
+    ok INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_llm_usage_created ON llm_usage(created_at);
+CREATE INDEX IF NOT EXISTS idx_llm_usage_course ON llm_usage(course_id, created_at);
 
 -- Historial de los chats "hablar con el paciente" (LlmChat) -- cada turno
 -- (mensaje del alumno + respuesta del LLM) queda como dos filas, para poder
