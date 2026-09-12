@@ -123,6 +123,49 @@ final class Courses
         }
     }
 
+    /**
+     * Fragmento WHERE + params que limitan una consulta a LOS ALUMNOS DE
+     * ESTE DOCENTE: los matriculados (course_students) en los cursos que
+     * administra, nunca los de un curso ajeno. Lo usa la bandeja de entrada
+     * (admin/inbox_send.php) para listar de corrido lo que han recibido sus
+     * alumnos; vive acá, y no en la página, para poder probar la regla sin
+     * base de datos (ver tests/test_inbox_scope.php).
+     *
+     * Va como subconsulta y no como IN de ids sueltos por dos razones: un
+     * curso grande pasaría el tope de variables de SQLite, y filtrar por
+     * course_students deja fuera de una a los docentes, que comparten tabla
+     * de mensajes (inbox_messages.student_id acepta cualquier user_id).
+     *
+     * $alcance: 'todos' (todos sus cursos) o cualquier otra cosa = solo
+     * $courseId. $myCourseIds: null solo para el admin completo, que ve
+     * todos los cursos; para un docente es la lista de teacherCourseIds()
+     * y el curso pedido se intersecta contra ella, así que un course_id o
+     * un alumno_id editados en la URL no le abren nada.
+     *
+     * Devuelve ['0', []] -- WHERE falso, cero filas -- si no queda ningún
+     * curso en pie (docente sin cursos, o curso ajeno).
+     */
+    public static function studentScopeSql(string $alcance, int $courseId, ?array $myCourseIds, string $columna = 'm.student_id'): array
+    {
+        $esAdminCompleto = $myCourseIds === null;
+        if ($alcance === 'todos' && $esAdminCompleto) {
+            return ["{$columna} IN (SELECT user_id FROM course_students)", []];
+        }
+        if ($alcance === 'todos') {
+            $courseIds = array_values($myCourseIds);
+        } else {
+            $courseIds = $courseId > 0 ? [$courseId] : [];
+            if (!$esAdminCompleto) {
+                $courseIds = array_values(array_intersect($courseIds, $myCourseIds));
+            }
+        }
+        if (!$courseIds) {
+            return ['0', []];
+        }
+        $ph = implode(',', array_fill(0, count($courseIds), '?'));
+        return ["{$columna} IN (SELECT user_id FROM course_students WHERE course_id IN ({$ph}))", $courseIds];
+    }
+
     /** true si $groupId es un grupo de $courseId -- el group_id llega del
      * navegador (POST del tablero), así que no alcanza con tener acceso al
      * curso: hay que confirmar que el grupo sea de ESE curso antes de

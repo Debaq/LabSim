@@ -1201,3 +1201,24 @@ pestañas encima del código duplicado hubiera sido mover basura de lugar.
 Nada de esto se probó todavía en el navegador (acá no hay `pdo_sqlite`): los
 partials sí se renderizaron en seco con datos de mentira y `E_ALL` como
 excepción, que es lo que cazó una clave `origin` faltante en las tarjetas.
+
+## Bandeja de entrada: lo que reciben los alumnos (2026-09-12)
+
+`admin/inbox_send.php` lista de corrido todo lo que llegó a la bandeja de
+los alumnos del docente (avisos de OIRS + mensajes de cualquier docente del
+curso), con filtros por alumno, tipo, leído y texto. El ámbito es
+`Courses::studentScopeSql()` -- única copia de "sus alumnos", con test
+(`tests/test_inbox_scope.php`): un docente nunca ve el buzón de un alumno de
+otro curso, ni editando `course_id` o `alumno_id` en la URL.
+
+Decisión de tamaño (no había una respuesta obvia): abre en **resumen de 5**
+mensajes y, apenas se filtra, muestra **todas las coincidencias** con tope
+duro de 500 por página. El tope existe porque un filtro ancho en un curso
+grande mandaría miles de filas de una; pasado el tope el listado sigue
+completo, paginado.
+
+- [ ] Probar en el navegador (acá no hay `pdo_sqlite`): las consultas sí se
+      corrieron contra `sql/schema.sql` en sqlite con datos de mentira.
+- [ ] A conversar: "Todos mis cursos" usa `teacherCourseIds()`, que incluye
+      cursos inactivos -- o sea también alumnos de cursos archivados. Queda
+      así a propósito (es historial), pero depende de F5.

@@ -42,7 +42,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'marca
         ->execute([$id, (int) $me['id']]);
     $backTo = (int) ($_POST['course_id'] ?? 0);
     $backPagina = max(1, (int) ($_POST['pagina'] ?? 1));
-    $qs = array_filter(['course_id' => $backTo ?: null, 'pagina' => $backPagina > 1 ? $backPagina : null]);
+    // El form no lleva action, así que postea a la URL con su query string:
+    // los filtros del listado "Recibidos por los alumnos" siguen en $_GET y
+    // se devuelven al redirect para no perder la vista que estaba puesta.
+    $filtrosVista = array_intersect_key(
+        $_GET,
+        array_flip(['alcance', 'alumno_id', 'tipo', 'estado', 'q', 'ver', 'pag_alumnos'])
+    );
+    $qs = array_filter(array_merge(
+        ['course_id' => $backTo ?: null, 'pagina' => $backPagina > 1 ? $backPagina : null],
+        $filtrosVista
+    ));
     header('Location: inbox_send.php' . ($qs ? '?' . http_build_query($qs) : ''));
     exit;
 }
@@ -147,6 +157,15 @@ $teachers = $selectedCourseId > 0
 // límite, porque un mensaje sin leer viejo no debe desaparecer del badge
 // solo por quedar fuera de la página actual.
 const INBOX_POR_PAGINA = 50;
+// El listado de lo que recibieron los alumnos abre como resumen: los
+// últimos RESUMEN mensajes, que es lo que uno mira al entrar. En cuanto se
+// busca (alumno, tipo, estado o texto) pasa a mostrar TODAS las
+// coincidencias -- el sentido de buscar es no perderse ninguna. MAX es el
+// tope duro de esa segunda modalidad: sin él, un filtro ancho en un curso
+// grande manda miles de filas al navegador de una sola vez. Pasado el tope
+// el listado sigue completo, pero paginado.
+const INBOX_ALUMNOS_RESUMEN = 5;
+const INBOX_ALUMNOS_MAX = 500;
 $pagina = max(1, (int) ($_GET['pagina'] ?? 1));
 $offset = ($pagina - 1) * INBOX_POR_PAGINA;
 
@@ -178,6 +197,132 @@ $stmtEnviados = $pdo->prepare(
 );
 $stmtEnviados->execute([(int) $me['id']]);
 $misEnvios = $stmtEnviados->fetchAll();
+
+// Lo que han recibido LOS ALUMNOS -- la misma bandeja que ve cada uno en la
+// app, pero de corrido: avisos automáticos de OirsEvaluator y mensajes que
+// mandó cualquier docente, sin tener que entrar ficha por ficha a
+// student.php. Scoping de siempre: el admin completo puede mirar todos los
+// cursos, el docente solo los que administra.
+$alcance = ($_GET['alcance'] ?? '') === 'todos' ? 'todos' : 'curso';
+$filtroAlumno = (int) ($_GET['alumno_id'] ?? 0);
+$filtroTipo = (string) ($_GET['tipo'] ?? '');
+if (!in_array($filtroTipo, ['reclamo', 'merito', 'mensaje'], true)) {
+    $filtroTipo = '';
+}
+$filtroEstado = (string) ($_GET['estado'] ?? '');
+if (!in_array($filtroEstado, ['leidos', 'no_leidos'], true)) {
+    $filtroEstado = '';
+}
+$filtroTexto = trim((string) ($_GET['q'] ?? ''));
+// Cambiar de curso no es "buscar": ensancha el listado, pero sigue siendo
+// la vista de entrada, así que no saca del resumen. El "Ver todos" sí.
+$hayBusqueda = $filtroAlumno > 0 || $filtroTipo !== '' || $filtroEstado !== '' || $filtroTexto !== '';
+$verTodos = ($_GET['ver'] ?? '') === 'todos' || $hayBusqueda;
+$porPaginaAlumnos = $verTodos ? INBOX_ALUMNOS_MAX : INBOX_ALUMNOS_RESUMEN;
+
+// Solo los alumnos de ESTE docente -- los matriculados en los cursos que
+// administra. La regla y el porqué de la subconsulta están en
+// Courses::studentScopeSql(); acá no se rehace, para que no haya dos
+// versiones de "sus alumnos" que se puedan ir separando.
+list($scopeSql, $scopeParams) = Courses::studentScopeSql(
+    $alcance,
+    $selectedCourseId,
+    $isFullAdmin ? null : $myCourseIds
+);
+
+$whereAlumnos = [$scopeSql];
+$paramsAlumnos = $scopeParams;
+if ($filtroAlumno > 0) {
+    $whereAlumnos[] = 'm.student_id = ?';
+    $paramsAlumnos[] = $filtroAlumno;
+}
+if ($filtroTipo !== '') {
+    $whereAlumnos[] = 'm.tipo = ?';
+    $paramsAlumnos[] = $filtroTipo;
+}
+if ($filtroEstado !== '') {
+    $whereAlumnos[] = 'm.leido = ' . ($filtroEstado === 'leidos' ? '1' : '0');
+}
+if ($filtroTexto !== '') {
+    $whereAlumnos[] = '(m.asunto LIKE ? OR m.cuerpo LIKE ? OR u.display_name LIKE ?)';
+    $like = '%' . $filtroTexto . '%';
+    $paramsAlumnos[] = $like;
+    $paramsAlumnos[] = $like;
+    $paramsAlumnos[] = $like;
+}
+$whereAlumnosSql = implode(' AND ', $whereAlumnos);
+
+// Acá sí conviene el COUNT(*) aparte (y no el LIMIT+1 de la bandeja
+// propia): con filtros puestos, saber cuántos mensajes hay en total es
+// parte de la respuesta, no solo si queda otra página.
+$stmt = $pdo->prepare(
+    "SELECT COUNT(*) FROM inbox_messages m JOIN users u ON u.id = m.student_id WHERE {$whereAlumnosSql}"
+);
+$stmt->execute($paramsAlumnos);
+$totalAlumnos = (int) $stmt->fetchColumn();
+
+$paginaAlumnos = max(1, (int) ($_GET['pag_alumnos'] ?? 1));
+// En modo resumen no hay paginado: son los 5 más recientes y un link para
+// abrir el listado completo -- paginar de a 5 sería peor que abrirlo.
+$totalPaginasAlumnos = $verTodos ? max(1, (int) ceil($totalAlumnos / $porPaginaAlumnos)) : 1;
+$paginaAlumnos = min($paginaAlumnos, $totalPaginasAlumnos);
+$stmt = $pdo->prepare(
+    "SELECT m.id, m.student_id, m.tipo, m.remitente, m.asunto, m.cuerpo, m.leido, m.created_at,
+            u.display_name, u.username,
+            a.fecha, a.hora, a.procedimiento
+     FROM inbox_messages m
+     JOIN users u ON u.id = m.student_id
+     LEFT JOIN appointments a ON a.id = m.appointment_id
+     WHERE {$whereAlumnosSql}
+     ORDER BY m.created_at DESC, m.id DESC
+     LIMIT " . $porPaginaAlumnos . ' OFFSET ?'
+);
+$stmt->execute(array_merge($paramsAlumnos, [($paginaAlumnos - 1) * $porPaginaAlumnos]));
+$mensajesAlumnos = $stmt->fetchAll();
+
+// Alumnos que pueblan el <select> del filtro -- los del mismo alcance que
+// el listado, para no ofrecer nombres que después no devuelven nada.
+if ($alcance === 'todos') {
+    if ($isFullAdmin) {
+        $alumnosFiltro = $pdo->query(
+            'SELECT DISTINCT u.id, u.display_name, u.username FROM course_students cs
+             JOIN users u ON u.id = cs.user_id ORDER BY u.display_name'
+        )->fetchAll();
+    } elseif ($myCourseIds) {
+        $ph = implode(',', array_fill(0, count($myCourseIds), '?'));
+        $stmt = $pdo->prepare(
+            "SELECT DISTINCT u.id, u.display_name, u.username FROM course_students cs
+             JOIN users u ON u.id = cs.user_id WHERE cs.course_id IN ({$ph}) ORDER BY u.display_name"
+        );
+        $stmt->execute($myCourseIds);
+        $alumnosFiltro = $stmt->fetchAll();
+    } else {
+        $alumnosFiltro = [];
+    }
+} else {
+    $alumnosFiltro = $roster;
+}
+
+$hayFiltrosAlumnos = $alcance === 'todos' || $filtroAlumno > 0 || $filtroTipo !== ''
+    || $filtroEstado !== '' || $filtroTexto !== '';
+
+// Base de los links de paginado: conserva filtros + la página de la bandeja
+// propia, que es otra numeración distinta (parámetro 'pagina').
+$qsAlumnos = array_filter([
+    'course_id' => $selectedCourseId > 0 ? $selectedCourseId : null,
+    'pagina' => $pagina > 1 ? $pagina : null,
+    'alcance' => $alcance === 'todos' ? 'todos' : null,
+    'alumno_id' => $filtroAlumno > 0 ? $filtroAlumno : null,
+    'tipo' => $filtroTipo ?: null,
+    'estado' => $filtroEstado ?: null,
+    'q' => $filtroTexto !== '' ? $filtroTexto : null,
+    'ver' => $verTodos && !$hayBusqueda ? 'todos' : null,
+]);
+$linkAlumnos = function (int $n) use ($qsAlumnos): string {
+    return '?' . http_build_query(array_merge($qsAlumnos, ['pag_alumnos' => $n])) . '#alumnos';
+};
+
+$tipoLabels = ['reclamo' => 'Reclamo', 'merito' => 'Mérito', 'mensaje' => 'Mensaje docente'];
 
 admin_header('Bandeja de entrada', $me);
 ?>
@@ -217,6 +362,125 @@ admin_header('Bandeja de entrada', $me);
         <?php if ($hayPaginaSiguiente): ?>
         <a href="?pagina=<?= $pagina + 1 ?><?= $selectedCourseId > 0 ? '&course_id=' . $selectedCourseId : '' ?>">Más antiguos »</a>
         <?php endif; ?>
+    </div>
+    <?php endif; ?>
+</div>
+
+<div class="card" id="alumnos">
+    <strong>Recibidos por los alumnos (<?= $totalAlumnos ?>)</strong>
+    <p class="legend">
+        Todo lo que ha llegado a la bandeja de los alumnos: los avisos automáticos sobre el trato a
+        pacientes (ver <a href="llm.php">Admin &rarr; IA Paciente</a>) y los mensajes que mandó cualquier
+        docente del curso, no solo tú. Es la misma bandeja que ve el alumno en la app; la ficha de uno
+        solo está en <em>Alumnos</em>. Abre con los <?= INBOX_ALUMNOS_RESUMEN ?> más recientes; al filtrar
+        salen todas las coincidencias.
+    </p>
+
+    <form method="get" style="display:flex; flex-wrap:wrap; align-items:center; gap:0.6rem; margin:0.7rem 0;">
+        <?php if ($selectedCourseId > 0): ?>
+        <input type="hidden" name="course_id" value="<?= $selectedCourseId ?>">
+        <?php endif; ?>
+        <?php if ($pagina > 1): ?>
+        <input type="hidden" name="pagina" value="<?= $pagina ?>">
+        <?php endif; ?>
+        <?php if ($verTodos && !$hayBusqueda): ?>
+        <input type="hidden" name="ver" value="todos">
+        <?php endif; ?>
+        <select name="alcance" class="input--auto">
+            <option value="curso"<?= $alcance === 'curso' ? ' selected' : '' ?>>
+                <?= $cursoElegidoANombre !== null ? htmlspecialchars($cursoElegidoANombre) : 'Curso en foco' ?>
+            </option>
+            <option value="todos"<?= $alcance === 'todos' ? ' selected' : '' ?>>
+                <?= $isFullAdmin ? 'Todos los cursos' : 'Todos mis cursos' ?>
+            </option>
+        </select>
+        <select name="alumno_id" class="input--auto">
+            <option value="">Todos los alumnos</option>
+            <?php foreach ($alumnosFiltro as $a): ?>
+            <option value="<?= (int) $a['id'] ?>"<?= $filtroAlumno === (int) $a['id'] ? ' selected' : '' ?>>
+                <?= htmlspecialchars($a['display_name']) ?>
+            </option>
+            <?php endforeach; ?>
+        </select>
+        <select name="tipo" class="input--auto">
+            <option value="">Todos los tipos</option>
+            <?php foreach ($tipoLabels as $codigo => $etiqueta): ?>
+            <option value="<?= $codigo ?>"<?= $filtroTipo === $codigo ? ' selected' : '' ?>><?= $etiqueta ?></option>
+            <?php endforeach; ?>
+        </select>
+        <select name="estado" class="input--auto">
+            <option value="">Leídos y sin leer</option>
+            <option value="no_leidos"<?= $filtroEstado === 'no_leidos' ? ' selected' : '' ?>>Sin leer</option>
+            <option value="leidos"<?= $filtroEstado === 'leidos' ? ' selected' : '' ?>>Leídos</option>
+        </select>
+        <input type="text" name="q" value="<?= htmlspecialchars($filtroTexto) ?>" placeholder="Buscar en asunto, cuerpo o alumno"
+               class="input--auto" style="flex:1 1 220px; margin-top:0;" autocomplete="off">
+        <button type="submit">Filtrar</button>
+        <?php if ($hayFiltrosAlumnos): ?>
+        <a href="inbox_send.php<?= $selectedCourseId > 0 ? '?course_id=' . $selectedCourseId : '' ?>#alumnos">Limpiar</a>
+        <?php endif; ?>
+    </form>
+
+    <?php if ($mensajesAlumnos): ?>
+    <p class="help" style="margin:0 0 0.4rem;">
+        <?php if (!$verTodos && $totalAlumnos > count($mensajesAlumnos)): ?>
+        Los <?= count($mensajesAlumnos) ?> más recientes de <?= $totalAlumnos ?>.
+        <a href="<?= htmlspecialchars('?' . http_build_query(array_merge($qsAlumnos, ['ver' => 'todos']))) ?>#alumnos">Ver todos</a>
+        <?php elseif ($hayBusqueda): ?>
+        <?= $totalAlumnos ?> coincidencia<?= $totalAlumnos === 1 ? '' : 's' ?><?= $totalAlumnos > INBOX_ALUMNOS_MAX
+            ? ' -- se muestran de a ' . INBOX_ALUMNOS_MAX . ', afina el filtro si buscas algo puntual' : '' ?>.
+        <?php else: ?>
+        <?= $totalAlumnos ?> mensaje<?= $totalAlumnos === 1 ? '' : 's' ?><?= $totalAlumnos > INBOX_ALUMNOS_MAX
+            ? ' -- se muestran de a ' . INBOX_ALUMNOS_MAX : '' ?>.
+        <?php endif; ?>
+    </p>
+    <?php endif; ?>
+
+    <div class="table-wrap">
+    <table>
+        <tr>
+            <th>Alumno</th><th>Tipo</th><th>Remitente</th><th>Asunto y mensaje</th>
+            <th>Cita</th><th>Estado</th><th>Fecha</th>
+        </tr>
+        <?php foreach ($mensajesAlumnos as $m): ?>
+        <tr>
+            <td class="nowrap">
+                <a href="student.php?id=<?= (int) $m['student_id'] ?>"><?= htmlspecialchars($m['display_name']) ?></a>
+            </td>
+            <td<?= $m['tipo'] === 'reclamo' ? ' class="badge-warn"' : '' ?>>
+                <?= htmlspecialchars($tipoLabels[$m['tipo']] ?? $m['tipo']) ?>
+            </td>
+            <td><?= htmlspecialchars($m['remitente'] ?: 'Sistema') ?></td>
+            <td>
+                <details>
+                    <summary style="cursor:pointer;"><?= htmlspecialchars($m['asunto']) ?></summary>
+                    <p style="white-space:pre-wrap; margin:0.4rem 0 0;" class="help"><?= htmlspecialchars($m['cuerpo']) ?></p>
+                </details>
+            </td>
+            <td class="help help--xs">
+                <?= $m['fecha'] ? htmlspecialchars($m['fecha'] . ' ' . ($m['hora'] ?: '')) . '<br>' . htmlspecialchars((string) $m['procedimiento']) : '—' ?>
+            </td>
+            <td class="nowrap"><?= $m['leido'] ? 'Leído' : '● Sin leer' ?></td>
+            <td class="mono nowrap" style="font-size:0.8rem;"><?= htmlspecialchars($m['created_at']) ?></td>
+        </tr>
+        <?php endforeach; ?>
+        <?php if (!$mensajesAlumnos): ?>
+        <tr><td colspan="7" class="muted">
+            <?= $hayFiltrosAlumnos ? 'Ningún mensaje coincide con el filtro.' : 'Tus alumnos no han recibido mensajes todavía.' ?>
+        </td></tr>
+        <?php endif; ?>
+    </table>
+    </div>
+
+    <?php if ($totalPaginasAlumnos > 1): ?>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
+        <?php if ($paginaAlumnos > 1): ?>
+        <a href="<?= htmlspecialchars($linkAlumnos($paginaAlumnos - 1)) ?>">« Más recientes</a>
+        <?php else: ?><span></span><?php endif; ?>
+        <span class="help">Página <?= $paginaAlumnos ?> de <?= $totalPaginasAlumnos ?></span>
+        <?php if ($paginaAlumnos < $totalPaginasAlumnos): ?>
+        <a href="<?= htmlspecialchars($linkAlumnos($paginaAlumnos + 1)) ?>">Más antiguos »</a>
+        <?php else: ?><span></span><?php endif; ?>
     </div>
     <?php endif; ?>
 </div>
