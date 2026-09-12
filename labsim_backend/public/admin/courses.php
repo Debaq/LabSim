@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Courses.php';
+require_once __DIR__ . '/../../src/CourseParams.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/_layout.php';
 
@@ -12,7 +13,15 @@ require_once __DIR__ . '/_layout.php';
  * todos al mismo fondo común (ver comentario en sql/schema.sql sobre
  * `courses`). El admin completo ve/crea cualquier curso; un docente entra
  * directo al detalle del/los suyo(s) -- nunca ve la lista global ni cursos
- * ajenos (mismo criterio de scoping que agenda.php/dashboard.php/student.php).
+ * ajenos (mismo criterio de scoping que agenda.php/dashboard.php/student.php,
+ * hoy centralizado en Courses::canAdminister()).
+ *
+ * Las personas del curso se administran en UN solo lugar: el tablero de
+ * grupos. Antes había además una tabla de alumnos arriba que listaba a los
+ * mismos matriculados con otras columnas -- el mismo roster dos veces en la
+ * misma página. Los candidatos a matricular viven en el panel de la derecha
+ * y se matriculan arrastrándolos a una columna (o marcándolos, para tandas
+ * grandes).
  */
 
 $me = Auth::requireAdminSession();
@@ -23,18 +32,6 @@ $myCourseIds = $isFullAdmin ? null : Courses::teacherCourseIds((int) $me['id']);
 $error = null;
 $success = null;
 $bulkResults = [];
-
-/** Corta la request si $courseId no es un curso que $me pueda administrar. */
-function require_course_access(int $courseId, bool $isFullAdmin, ?array $myCourseIds): void
-{
-    if ($isFullAdmin) {
-        return;
-    }
-    if ($myCourseIds === null || !in_array($courseId, $myCourseIds, true)) {
-        http_response_code(403);
-        exit('No tienes acceso a este curso.');
-    }
-}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Auth::requireCsrf();
@@ -56,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
     } elseif ($courseId > 0) {
-        require_course_access($courseId, $isFullAdmin, $myCourseIds);
+        Courses::assertAdministers($courseId, $me);
 
         if ($action === 'rename_course' && $isFullAdmin) {
             $name = trim((string) ($_POST['name'] ?? ''));
@@ -77,77 +74,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Courses::setEnabledModules($courseId, $codes);
             $success = 'Módulos actualizados.';
             AdminAudit::log($me, 'course_set_modules', ['course_id' => $courseId, 'modules' => Courses::enabledModules($courseId)]);
-        } elseif ($action === 'set_abr_normative') {
-            // El click SIEMPRE sale del perfil del paciente (caso, via
-            // 'desviaciones' en case_create.php) -- acá NUNCA se edita click.
-            // Lo que se configura por curso es cuánto se desvía cada
-            // estímulo (chirp/ls-chirp/burst) respecto a ESE click, como
-            // ratio (lat_ratio/amp_ratio) por onda I/III/V -- ver
-            // ABR_generator.py::get_baseline_values. Reemplaza el
-            // override completo cada guardado (no hace merge con el
-            // anterior), así un campo que se deja vacío a propósito vuelve
-            // a heredar el default de la app.
-            $override = [];
-            foreach ((array) ($_POST['abr_ratio'] ?? []) as $stimKey => $waves) {
-                foreach ((array) $waves as $wave => $fields) {
-                    $waveOverride = [];
-                    foreach (['lat_ratio', 'amp_ratio'] as $field) {
-                        $val = trim((string) ($fields[$field] ?? ''));
-                        if ($val !== '' && is_numeric($val)) {
-                            $waveOverride[$field] = (float) $val;
-                        }
-                    }
-                    if ($waveOverride) {
-                        $override[(string) $stimKey][(string) $wave] = $waveOverride;
-                    }
-                }
-            }
-            if ($override) {
-                AppConfig::set('normative_data.abr', $override, $courseId);
-                $success = 'Configuración de desviación ABR actualizada.';
+        } elseif ($action === 'set_params' || $action === 'reset_params') {
+            // Un solo par de acciones para TODOS los parámetros configurables
+            // por curso (normativa ABR, normativa VEMP y lo que se sume): la
+            // forma de cada key vive en CourseParams, no en un handler
+            // escrito a mano por examen.
+            $paramKey = (string) ($_POST['param_key'] ?? '');
+            $def = CourseParams::find($paramKey);
+            if ($def === null) {
+                $error = 'Parámetro desconocido.';
+            } elseif ($action === 'reset_params') {
+                AppConfig::clearCourseOverride($paramKey, $courseId);
+                $success = htmlspecialchars_decode($def['title']) . ': restablecido al default de la app.';
+                AdminAudit::log($me, 'course_reset_params', ['course_id' => $courseId, 'param_key' => $paramKey]);
             } else {
-                AppConfig::clearCourseOverride('normative_data.abr', $courseId);
-                $success = 'Sin valores marcados -- el curso vuelve a usar el default de la app.';
-            }
-            AdminAudit::log($me, 'course_set_abr_normative', ['course_id' => $courseId, 'override' => $override]);
-        } elseif ($action === 'reset_abr_normative') {
-            AppConfig::clearCourseOverride('normative_data.abr', $courseId);
-            $success = 'Configuración normativa ABR restablecida al default de la app.';
-            AdminAudit::log($me, 'course_reset_abr_normative', ['course_id' => $courseId]);
-        } elseif ($action === 'set_vemp_normative') {
-            // VEMP usa baselines ABSOLUTOS por pico (a diferencia de ABR
-            // donde el click lo define el paciente y el resto son ratios).
-            // Esto es porque VEMP depende del equipo/estímulo y no del
-            // paciente -- la patología del paciente se aplica aparte vía
-            // 'desviaciones' en case_create.php (mismo concepto que ABR).
-            // Shape: {subtipo: {pico: {lat: float, amp: float}}}
-            $override = [];
-            foreach ((array) ($_POST['vemp_baseline'] ?? []) as $subtipo => $picos) {
-                foreach ((array) $picos as $pico => $fields) {
-                    $picoOverride = [];
-                    foreach (['lat', 'amp'] as $field) {
-                        $val = trim((string) ($fields[$field] ?? ''));
-                        if ($val !== '' && is_numeric($val)) {
-                            $picoOverride[$field] = (float) $val;
-                        }
-                    }
-                    if ($picoOverride) {
-                        $override[(string) $subtipo][(string) $pico] = $picoOverride;
-                    }
+                $override = CourseParams::parse($paramKey, (array) ($_POST['params'] ?? []));
+                if ($override) {
+                    AppConfig::set($paramKey, $override, $courseId);
+                    $success = 'Configuración guardada -- el curso sobreescribe ' . count($override, COUNT_RECURSIVE) . ' valor(es).';
+                } else {
+                    // parse() omite lo que quedó igual al default: si no
+                    // sobra nada, el curso no tiene por qué tener override.
+                    AppConfig::clearCourseOverride($paramKey, $courseId);
+                    $success = 'Todo quedó igual al default de la app -- el curso vuelve a heredarlo.';
                 }
+                AdminAudit::log($me, 'course_set_params', ['course_id' => $courseId, 'param_key' => $paramKey, 'override' => $override]);
             }
-            if ($override) {
-                AppConfig::set('normative_data.vemp', $override, $courseId);
-                $success = 'Configuración normativa VEMP actualizada.';
-            } else {
-                AppConfig::clearCourseOverride('normative_data.vemp', $courseId);
-                $success = 'Sin valores marcados -- el curso vuelve a usar el default de la app.';
-            }
-            AdminAudit::log($me, 'course_set_vemp_normative', ['course_id' => $courseId, 'override' => $override]);
-        } elseif ($action === 'reset_vemp_normative') {
-            AppConfig::clearCourseOverride('normative_data.vemp', $courseId);
-            $success = 'Configuración normativa VEMP restablecida al default de la app.';
-            AdminAudit::log($me, 'course_reset_vemp_normative', ['course_id' => $courseId]);
         } elseif ($action === 'generate_demo_code') {
             $result = Courses::generateDemoAccessCode($courseId);
             $seconds = Auth::secondsUntil($result['expires_at']);
@@ -205,11 +157,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $success = 'Grupo creado.';
                 AdminAudit::log($me, 'group_create', ['course_id' => $courseId, 'name' => $name]);
             }
-        } elseif ($action === 'delete_group') {
+        } elseif ($action === 'rename_group' || $action === 'delete_group') {
+            // El group_id viene del navegador: tener acceso al curso no
+            // alcanza, hay que confirmar que el grupo sea de ESTE curso.
             $groupId = (int) ($_POST['group_id'] ?? 0);
-            Courses::deleteGroup($groupId);
-            $success = 'Grupo eliminado.';
-            AdminAudit::log($me, 'group_delete', ['course_id' => $courseId, 'group_id' => $groupId]);
+            if (!Courses::groupBelongsTo($groupId, $courseId)) {
+                $error = 'Ese grupo no pertenece a este curso.';
+            } elseif ($action === 'delete_group') {
+                Courses::deleteGroup($groupId);
+                $success = 'Grupo eliminado.';
+                AdminAudit::log($me, 'group_delete', ['course_id' => $courseId, 'group_id' => $groupId]);
+            } else {
+                $name = trim((string) ($_POST['name'] ?? ''));
+                if ($name === '') {
+                    $error = 'Falta el nombre del grupo.';
+                } else {
+                    Courses::renameGroup($groupId, $name);
+                    $success = 'Grupo renombrado.';
+                    AdminAudit::log($me, 'group_rename', ['course_id' => $courseId, 'group_id' => $groupId, 'name' => $name]);
+                }
+            }
+        } elseif ($action === 'split_groups') {
+            $n = (int) ($_POST['n_groups'] ?? 0);
+            $prefix = trim((string) ($_POST['group_prefix'] ?? 'Grupo'));
+            if ($n < 2 || $n > 40) {
+                $error = 'Elige entre 2 y 40 grupos.';
+            } else {
+                $repartidos = Courses::splitUngroupedIntoGroups($courseId, $n, $prefix);
+                $success = $repartidos > 0
+                    ? "{$repartidos} alumno(s) repartido(s) en {$n} grupo(s) nuevo(s)."
+                    : 'No había alumnos sin grupo -- no se creó nada.';
+                AdminAudit::log($me, 'course_split_groups', ['course_id' => $courseId, 'n' => $n, 'repartidos' => $repartidos]);
+            }
         } elseif ($action === 'bulk_enroll_selected') {
             $userIds = array_map('intval', (array) ($_POST['user_ids'] ?? []));
             $n = Courses::enrollExistingUsers($courseId, $userIds);
@@ -244,7 +223,7 @@ if ($detailId === null && !$isFullAdmin && $myCourseIds && count($myCourseIds) =
 }
 
 if ($detailId !== null) {
-    require_course_access($detailId, $isFullAdmin, $myCourseIds);
+    Courses::assertAdministers($detailId, $me);
     $course = Courses::find($detailId);
     if (!$course) {
         admin_header('Curso', $me);
@@ -253,22 +232,95 @@ if ($detailId !== null) {
         exit;
     }
 
-    $studentOptions = $pdo->query(
-        "SELECT username, display_name FROM users WHERE role = 'student' AND active = 1 ORDER BY display_name"
-    )->fetchAll();
+    $courseId = (int) $course['id'];
+    $courseMembers = Courses::students($courseId);
+    $students = array_values(array_filter($courseMembers, static fn($s) => !$s['is_demo']));
+    $demoStudent = null;
+    foreach ($courseMembers as $s) {
+        if ($s['is_demo']) {
+            $demoStudent = $s;
+            break;
+        }
+    }
+    $enrollable = Courses::enrollableStudents($courseId);
+    $groups = Courses::groupsForCourse($courseId);
+    $groupMap = Courses::studentGroupMap($courseId);
+    $progress = Courses::rosterProgress($courseId);
+
+    // Un alumno pertenece a un solo grupo por curso (ver
+    // Courses::moveStudentToGroup): aplanamos el map a "en qué columna va".
+    $groupedIds = [];
+    foreach ($groupMap as $uid => $gs) {
+        if ($gs) {
+            $groupedIds[(int) $uid] = (int) $gs[0]['id'];
+        }
+    }
+    $sinGrupo = array_values(array_filter($students, static fn($s) => !isset($groupedIds[(int) $s['id']])));
+
+    // Chips "todos los que vinieron del curso Moodle X" para el panel de
+    // candidatos (ver user_lti_contexts).
+    $origins = [];
+    foreach ($enrollable as $u) {
+        $o = trim((string) ($u['origin'] ?? ''));
+        if ($o !== '') {
+            $origins[$o] = ($origins[$o] ?? 0) + 1;
+        }
+    }
+    ksort($origins);
+
+    $enabledModules = Courses::enabledModules($courseId);
     $teacherOptions = $isFullAdmin
-        ? $pdo->query(
-            "SELECT username, display_name FROM users WHERE role = 'admin' AND active = 1 ORDER BY display_name"
-        )->fetchAll()
+        ? $pdo->query("SELECT username, display_name FROM users WHERE role = 'admin' AND active = 1 ORDER BY display_name")->fetchAll()
         : [];
 
+    /** Tarjeta de alumno del tablero: la misma para un matriculado y para un
+     * candidato del panel -- lo que cambia es data-enroll y qué controles
+     * quedan visibles, así arrastrar un candidato a una columna lo convierte
+     * en miembro sin tener que rearmar la tarjeta desde JS. */
+    $renderCard = static function (array $s, bool $isCandidate) use ($courseId, $progress): void {
+        $uid = (int) $s['id'];
+        $p = $progress[$uid] ?? ['asignadas' => 0, 'atendidas' => 0, 'ultima' => null];
+        $search = mb_strtolower($s['username'] . ' ' . $s['display_name'] . ' ' . (string) ($s['origin'] ?? ''));
+        ?>
+        <div class="group_card" draggable="true"
+             data-user-id="<?= $uid ?>"
+             data-enroll="<?= $isCandidate ? '1' : '0' ?>"
+             data-origin="<?= htmlspecialchars((string) ($s['origin'] ?? '')) ?>"
+             data-search="<?= htmlspecialchars($search) ?>">
+            <div class="group_card__head">
+                <label class="group_card__pick card-enroll-only" <?= $isCandidate ? '' : 'hidden' ?>>
+                    <input type="checkbox" form="enroll_form" name="user_ids[]" value="<?= $uid ?>" class="candidate_check">
+                </label>
+                <a href="student.php?id=<?= $uid ?>" class="group_card__name"><?= htmlspecialchars($s['display_name']) ?></a>
+                <form method="post" class="inline card-member-only" <?= $isCandidate ? 'hidden' : '' ?>
+                      onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Quitar a ' . $s['username'] . ' del curso? También lo saca de su grupo.'), ENT_QUOTES) ?>);">
+                <?= csrf_field() ?>
+                    <input type="hidden" name="form_action" value="remove_student">
+                    <input type="hidden" name="course_id" value="<?= $courseId ?>">
+                    <input type="hidden" name="user_id" value="<?= $uid ?>">
+                    <button type="submit" class="btn btn--danger btn--xs" title="Quitar del curso">&times;</button>
+                </form>
+            </div>
+            <div class="group_card__meta help help--xs">
+                <?= htmlspecialchars($s['username']) ?>
+                <span class="card-member-only" <?= $isCandidate ? 'hidden' : '' ?>>
+                    &nbsp;·&nbsp; <?= $p['asignadas'] ?> cita<?= $p['asignadas'] === 1 ? '' : 's' ?>
+                    &nbsp;·&nbsp; <?= $p['atendidas'] ?> cerrada<?= $p['atendidas'] === 1 ? '' : 's' ?>
+                    <?php if ($p['ultima'] !== null): ?>
+                    &nbsp;·&nbsp; últ. <?= htmlspecialchars(substr((string) $p['ultima'], 0, 10)) ?>
+                    <?php endif; ?>
+                </span>
+                <span class="card-enroll-only" <?= $isCandidate ? '' : 'hidden' ?>>
+                    <?= $s['origin'] ? '&nbsp;·&nbsp; ' . htmlspecialchars((string) $s['origin']) : '' ?>
+                </span>
+            </div>
+        </div>
+        <?php
+    };
+
+    admin_add_js('course/board.js');
     admin_header('Curso: ' . $course['name'], $me);
     ?>
-    <datalist id="students_datalist">
-        <?php foreach ($studentOptions as $u): ?>
-        <option value="<?= htmlspecialchars($u['username']) ?>"><?= htmlspecialchars($u['display_name']) ?></option>
-        <?php endforeach; ?>
-    </datalist>
     <?php if ($isFullAdmin): ?>
     <datalist id="teachers_datalist">
         <?php foreach ($teacherOptions as $u): ?>
@@ -286,13 +338,14 @@ if ($detailId !== null) {
     <div class="card">
         <strong><?= htmlspecialchars($course['name']) ?></strong>
         &nbsp;·&nbsp; <?= $course['active'] ? 'activo' : 'archivado' ?>
+        &nbsp;·&nbsp; <span class="help help--xs"><?= count($students) ?> alumno(s), <?= count($groups) ?> grupo(s)</span>
         <?php if ($isFullAdmin): ?>
         <details style="margin-top:0.6rem;">
             <summary>Editar</summary>
             <form method="post" style="margin-top:0.4rem;">
             <?= csrf_field() ?>
                 <input type="hidden" name="form_action" value="rename_course">
-                <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+                <input type="hidden" name="course_id" value="<?= $courseId ?>">
                 <label>Nombre
                     <input type="text" name="name" value="<?= htmlspecialchars($course['name']) ?>" required>
                 </label>
@@ -303,189 +356,174 @@ if ($detailId !== null) {
             <form method="post" class="inline" style="margin-top:0.6rem;">
             <?= csrf_field() ?>
                 <input type="hidden" name="form_action" value="toggle_active">
-                <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+                <input type="hidden" name="course_id" value="<?= $courseId ?>">
                 <button type="submit" class="btn btn--secondary"><?= $course['active'] ? 'Archivar curso' : 'Activar curso' ?></button>
             </form>
         </details>
         <?php endif; ?>
     </div>
 
-    <?php
-        $courseMembers = Courses::students((int) $course['id']);
-        $students = array_values(array_filter($courseMembers, static fn($s) => !$s['is_demo']));
-        $demoStudent = null;
-        foreach ($courseMembers as $s) {
-            if ($s['is_demo']) {
-                $demoStudent = $s;
-                break;
-            }
-        }
-        $enrollable = Courses::enrollableStudents((int) $course['id']);
-        $groups = Courses::groupsForCourse((int) $course['id']);
-        $groupMap = Courses::studentGroupMap((int) $course['id']);
-        $origins = [];
-        foreach ($enrollable as $u) {
-            $o = trim((string) ($u['origin'] ?? ''));
-            if ($o !== '') {
-                $origins[$o] = ($origins[$o] ?? 0) + 1;
-            }
-        }
-        ksort($origins);
-    ?>
-
     <div class="card">
-        <strong>Alumnos</strong>
-        <p class="help help--mt">
-            Un solo listado: matriculados y candidatos (alumnos activos que todavía no están en este curso). Busca y marca los que quieras matricular. El grupo de cada uno se asigna abajo, en "Grupos" (arrastrar y soltar).
-        </p>
-        <input type="text" id="roster_search" placeholder="Buscar por nombre o usuario..." class="input" style="margin:0.6rem 0;" oninput="rosterFilter()">
-        <?php if ($origins): ?>
-        <div style="margin-bottom:0.5rem;">
-            <span class="help help--xs">Filtrar candidatos por curso de Moodle:</span>
-            <?php foreach ($origins as $label => $count): ?>
-            <button type="button" class="btn btn--secondary btn--xs" style="margin:0 0.3rem 0.3rem 0;" onclick="rosterSelectOrigin(<?= htmlspecialchars(json_encode($label), ENT_QUOTES) ?>)">Todos de "<?= htmlspecialchars($label) ?>" (<?= $count ?>)</button>
-            <?php endforeach; ?>
+        <div class="row row--between" style="margin:0; align-items:center;">
+            <strong>Alumnos y grupos</strong>
+            <span class="help help--xs"><?= count($students) ?> matriculado(s) &middot; <?= count($sinGrupo) ?> sin grupo &middot; <?= count($enrollable) ?> candidato(s)</span>
         </div>
-        <?php endif; ?>
+        <p class="help help--mt">
+            Cada tarjeta es un alumno; arrastrarla a otra columna lo mueve de grupo (pertenece a uno solo a la vez). Los candidatos del panel de la derecha --alumnos activos que todavía no están en este curso-- se matriculan al soltarlos en una columna, o marcándolos y usando el botón, para tandas grandes.
+        </p>
 
-        <form method="post" id="roster_form">
-        <?= csrf_field() ?>
-            <input type="hidden" name="form_action" value="bulk_enroll_selected">
-            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-            <div class="scrollbox scrollbox--tall pane">
-            <div class="table-wrap">
-            <table id="roster_table" style="margin:0;">
-                <tr>
-                    <th><input type="checkbox" id="roster_select_all" onclick="rosterToggleAll(this)" title="Seleccionar todos los candidatos visibles"></th>
-                    <th>Usuario</th><th>Nombre</th><th>Origen</th><th>Grupos</th><th></th>
-                </tr>
-                <?php foreach ($students as $s): ?>
-                <tr class="roster_row" data-origin="" data-search="<?= htmlspecialchars(mb_strtolower($s['username'] . ' ' . $s['display_name'])) ?>">
-                    <td></td>
-                    <td><?= htmlspecialchars($s['username']) ?></td>
-                    <td><a href="student.php?id=<?= $s['id'] ?>"><?= htmlspecialchars($s['display_name']) ?></a></td>
-                    <td class="help help--xs">—</td>
-                    <td>
-                        <?php $g0 = $groupMap[$s['id']][0] ?? null; ?>
-                        <?php if ($g0): ?>
-                        <span class="tag tag--muted"><?= htmlspecialchars($g0['name']) ?></span>
-                        <?php else: ?>
-                        <span class="help help--xs">sin grupo</span>
-                        <?php endif; ?>
-                    </td>
-                    <td>
-                        <form method="post" class="inline" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Quitar a ' . $s['username'] . ' del curso? También lo saca de cualquier grupo del curso.'), ENT_QUOTES) ?>);">
-                        <?= csrf_field() ?>
-                            <input type="hidden" name="form_action" value="remove_student">
-                            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                            <input type="hidden" name="user_id" value="<?= $s['id'] ?>">
-                            <button type="submit" class="btn btn--danger btn--xs">Quitar</button>
-                        </form>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-                <?php foreach ($enrollable as $u): ?>
-                <tr class="roster_row" data-origin="<?= htmlspecialchars((string) ($u['origin'] ?? '')) ?>" data-search="<?= htmlspecialchars(mb_strtolower($u['username'] . ' ' . $u['display_name'] . ' ' . ($u['origin'] ?? ''))) ?>">
-                    <td><input type="checkbox" name="user_ids[]" value="<?= $u['id'] ?>" class="roster_check" onchange="rosterUpdateCount()"></td>
-                    <td><?= htmlspecialchars($u['username']) ?></td>
-                    <td><?= htmlspecialchars($u['display_name']) ?></td>
-                    <td class="help help--xs"><?= htmlspecialchars($u['origin'] ?: '—') ?></td>
-                    <td class="help help--xs">sin matricular</td>
-                    <td></td>
-                </tr>
-                <?php endforeach; ?>
-                <?php if (!$students && !$enrollable): ?>
-                <tr><td colspan="6" class="muted">Sin alumnos matriculados ni candidatos disponibles.</td></tr>
-                <?php endif; ?>
-            </table>
-            </div>
-            </div>
-            <button type="submit" class="btn btn--secondary" style="margin-top:0.5rem;">Matricular seleccionados (<span id="roster_count">0</span>)</button>
-        </form>
-        <script>
-        (function () {
-            function rows() { return document.querySelectorAll('#roster_table .roster_row'); }
-            window.rosterFilter = function () {
-                var q = document.getElementById('roster_search').value.toLowerCase();
-                rows().forEach(function (row) {
-                    row.style.display = row.dataset.search.indexOf(q) === -1 ? 'none' : '';
-                });
-            };
-            window.rosterSelectOrigin = function (label) {
-                rows().forEach(function (row) {
-                    if (row.dataset.origin === label) {
-                        row.style.display = '';
-                        var cb = row.querySelector('.roster_check');
-                        if (cb) cb.checked = true;
-                    }
-                });
-                rosterUpdateCount();
-            };
-            window.rosterToggleAll = function (cb) {
-                rows().forEach(function (row) {
-                    if (row.style.display !== 'none') {
-                        var rowCb = row.querySelector('.roster_check');
-                        if (rowCb) rowCb.checked = cb.checked;
-                    }
-                });
-                rosterUpdateCount();
-            };
-            window.rosterUpdateCount = function () {
-                document.getElementById('roster_count').textContent =
-                    document.querySelectorAll('#roster_table .roster_check:checked').length;
-            };
-        })();
-        </script>
-
-        <details class="section-sep section-sep--lg">
-            <summary>Agregar alumno nuevo o sin Moodle (manual)</summary>
-            <form method="post" class="row" style="margin-top:0.6rem; flex-wrap:wrap;">
+        <div class="row" style="margin-top:0.6rem; flex-wrap:wrap; gap:0.6rem;">
+            <input type="text" id="people_search" class="input grow" placeholder="Buscar por nombre, usuario u origen...">
+            <form method="post" class="row" style="margin:0; gap:0.4rem;">
             <?= csrf_field() ?>
-                <input type="hidden" name="form_action" value="add_student">
-                <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                <label style="flex:1; margin:0; min-width:220px;">Agregar alumno (nombre o username)
-                    <input type="text" name="username" list="students_datalist" required>
-                </label>
-                <label style="flex:1; margin:0; min-width:220px;">Nombre completo (solo si es alumno nuevo)
-                    <input type="text" name="display_name" placeholder="Se usa si el username no existe todavía">
-                </label>
-                <button type="submit" class="btn btn--secondary btn--sm">Agregar</button>
+                <input type="hidden" name="form_action" value="create_group">
+                <input type="hidden" name="course_id" value="<?= $courseId ?>">
+                <input type="text" name="name" class="input input--auto" placeholder="Nuevo grupo" required>
+                <button type="submit" class="btn btn--secondary btn--sm">Crear grupo</button>
             </form>
-            <p class="help help--mt-md">Si el username no existe todavía, se crea una cuenta nueva automáticamente con contraseña temporal (se muestra al agregar).</p>
+            <?php if ($sinGrupo): ?>
+            <form method="post" class="row" style="margin:0; gap:0.4rem;"
+                  onsubmit="return confirm('Crea los grupos nuevos y reparte entre ellos a los alumnos que hoy están sin grupo. ¿Seguir?');">
+            <?= csrf_field() ?>
+                <input type="hidden" name="form_action" value="split_groups">
+                <input type="hidden" name="course_id" value="<?= $courseId ?>">
+                <input type="number" name="n_groups" class="input input--narrow" min="2" max="40" value="4" required title="Cuántos grupos crear">
+                <input type="text" name="group_prefix" class="input input--auto" value="Grupo" title="Prefijo del nombre">
+                <button type="submit" class="btn btn--secondary btn--sm">Repartir <?= count($sinGrupo) ?> sin grupo</button>
+            </form>
+            <?php endif; ?>
+        </div>
 
-            <details class="section-sep section-sep--lg">
-                <summary>Agregar varios alumnos a la vez (por texto)</summary>
-                <form method="post" style="margin-top:0.6rem;">
-                <?= csrf_field() ?>
-                    <input type="hidden" name="form_action" value="bulk_add_students">
-                    <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                    <label>Uno por línea: <code>username</code>, o <code>username, nombre completo</code>, o <code>username, nombre completo, password</code>
-                        <textarea name="bulk_students" rows="6" class="textarea" placeholder="jperez&#10;mgonzalez, María González&#10;asilva, Ana Silva, MiClave123"></textarea>
-                    </label>
-                    <p class="help">Los que ya existen se matriculan tal cual. Los que no existen se crean con esa contraseña, o con una generada automáticamente si no se indica.</p>
-                    <button type="submit" class="btn btn--secondary">Procesar lista</button>
-                </form>
-                <?php if ($bulkResults): ?>
-                <div class="table-wrap">
-                <table style="margin-top:0.8rem;">
-                    <tr><th>Username</th><th>Resultado</th><th>Contraseña</th></tr>
-                    <?php foreach ($bulkResults as $r): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($r['username']) ?></td>
-                        <td style="color:<?= $r['status'] === 'error' ? 'var(--color-danger)' : 'var(--color-text)' ?>;"><?= htmlspecialchars($r['message']) ?></td>
-                        <td><?= !empty($r['password']) ? '<code>' . htmlspecialchars($r['password']) . '</code>' : '' ?></td>
-                    </tr>
+        <p id="board_error" class="error" hidden style="margin-top:0.6rem;"></p>
+
+        <div class="course-people">
+            <div id="course_board"
+                 data-course-id="<?= $courseId ?>"
+                 data-csrf="<?= htmlspecialchars(Auth::csrfToken()) ?>"
+                 data-endpoint="group_move.php">
+                <div class="pane group_column" data-group-id="">
+                    <div class="row row--between" style="margin:0; align-items:center;">
+                        <strong>Sin grupo (<span class="group_count"><?= count($sinGrupo) ?></span>)</strong>
+                    </div>
+                    <div class="group_dropzone">
+                        <?php foreach ($sinGrupo as $s) {
+                            $renderCard($s, false);
+                        } ?>
+                    </div>
+                </div>
+                <?php foreach ($groups as $g): ?>
+                <div class="pane group_column" data-group-id="<?= (int) $g['id'] ?>">
+                    <div class="row row--between" style="margin:0; align-items:center;">
+                        <strong class="group_title"><?= htmlspecialchars($g['name']) ?> (<span class="group_count"><?= (int) $g['member_count'] ?></span>)</strong>
+                        <form method="post" class="inline group_rename" hidden>
+                        <?= csrf_field() ?>
+                            <input type="hidden" name="form_action" value="rename_group">
+                            <input type="hidden" name="course_id" value="<?= $courseId ?>">
+                            <input type="hidden" name="group_id" value="<?= (int) $g['id'] ?>">
+                            <input type="text" name="name" class="input input--auto" value="<?= htmlspecialchars($g['name']) ?>" required>
+                        </form>
+                        <span class="row" style="margin:0; gap:0.2rem;">
+                            <button type="button" class="btn btn--ghost btn--xs" title="Renombrar grupo" data-rename-toggle>&#9998;</button>
+                            <form method="post" class="inline" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Eliminar el grupo ' . $g['name'] . '? Sus miembros quedan sin grupo.'), ENT_QUOTES) ?>);">
+                            <?= csrf_field() ?>
+                                <input type="hidden" name="form_action" value="delete_group">
+                                <input type="hidden" name="course_id" value="<?= $courseId ?>">
+                                <input type="hidden" name="group_id" value="<?= (int) $g['id'] ?>">
+                                <button type="submit" class="btn btn--danger btn--xs" title="Eliminar grupo">&times;</button>
+                            </form>
+                        </span>
+                    </div>
+                    <div class="group_dropzone">
+                        <?php foreach ($students as $s): ?>
+                        <?php if (($groupedIds[(int) $s['id']] ?? null) !== (int) $g['id']) continue; ?>
+                        <?php $renderCard($s, false); ?>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+
+            <div class="pane course-candidates">
+                <strong>Matricular (<span id="candidate_total"><?= count($enrollable) ?></span>)</strong>
+                <p class="help help--xs" style="margin-top:0.3rem;">Arrastra a una columna, o marca y matricula en bloque.</p>
+                <?php if ($origins): ?>
+                <div style="margin:0.4rem 0;">
+                    <?php foreach ($origins as $label => $count): ?>
+                    <button type="button" class="btn btn--secondary btn--xs" style="margin:0 0.3rem 0.3rem 0;"
+                            data-origin-select="<?= htmlspecialchars($label) ?>">Todos de "<?= htmlspecialchars($label) ?>" (<?= $count ?>)</button>
                     <?php endforeach; ?>
-                </table>
                 </div>
                 <?php endif; ?>
-            </details>
-        </details>
+                <!-- El form queda vacío y las tarjetas afuera: cada tarjeta trae
+                     su propio form (quitar del curso) y un form dentro de otro es
+                     HTML inválido. Los checkbox se asocian por atributo form=. -->
+                <form method="post" id="enroll_form">
+                <?= csrf_field() ?>
+                    <input type="hidden" name="form_action" value="bulk_enroll_selected">
+                    <input type="hidden" name="course_id" value="<?= $courseId ?>">
+                </form>
+                <div class="scrollbox" id="candidate_list">
+                    <?php foreach ($enrollable as $u) {
+                        $renderCard($u, true);
+                    } ?>
+                    <?php if (!$enrollable): ?>
+                    <p class="help help--xs">No quedan alumnos activos fuera de este curso.</p>
+                    <?php endif; ?>
+                </div>
+                <button type="submit" form="enroll_form" class="btn btn--secondary btn--sm" style="margin-top:0.5rem;">Matricular marcados (<span id="candidate_count">0</span>)</button>
+
+                <details class="section-sep">
+                    <summary>Alumno nuevo o sin Moodle</summary>
+                    <form method="post" style="margin-top:0.5rem;">
+                    <?= csrf_field() ?>
+                        <input type="hidden" name="form_action" value="add_student">
+                        <input type="hidden" name="course_id" value="<?= $courseId ?>">
+                        <label>Usuario
+                            <input type="text" name="username" required>
+                        </label>
+                        <label>Nombre completo (si es nuevo)
+                            <input type="text" name="display_name" placeholder="Se usa si el usuario no existe todavía">
+                        </label>
+                        <button type="submit" class="btn btn--secondary btn--sm">Agregar</button>
+                    </form>
+                    <p class="help help--xs">Si el usuario no existe, se crea la cuenta con una contraseña temporal que se muestra al agregar.</p>
+                </details>
+
+                <details class="section-sep">
+                    <summary>Pegar una lista</summary>
+                    <form method="post" style="margin-top:0.5rem;">
+                    <?= csrf_field() ?>
+                        <input type="hidden" name="form_action" value="bulk_add_students">
+                        <input type="hidden" name="course_id" value="<?= $courseId ?>">
+                        <label>Uno por línea: <code>usuario</code>, <code>usuario, nombre</code> o <code>usuario, nombre, clave</code>
+                            <textarea name="bulk_students" rows="6" class="textarea" placeholder="jperez&#10;mgonzalez, María González&#10;asilva, Ana Silva, MiClave123"></textarea>
+                        </label>
+                        <p class="help help--xs">Los que ya existen se matriculan; los que no, se crean con esa clave o con una generada.</p>
+                        <button type="submit" class="btn btn--secondary btn--sm">Procesar lista</button>
+                    </form>
+                </details>
+            </div>
+        </div>
+
+        <?php if ($bulkResults): ?>
+        <div class="table-wrap">
+        <table style="margin-top:0.8rem;">
+            <tr><th>Usuario</th><th>Resultado</th><th>Contraseña</th></tr>
+            <?php foreach ($bulkResults as $r): ?>
+            <tr>
+                <td><?= htmlspecialchars($r['username']) ?></td>
+                <td style="color:<?= $r['status'] === 'error' ? 'var(--color-danger)' : 'var(--color-text)' ?>;"><?= htmlspecialchars($r['message']) ?></td>
+                <td><?= !empty($r['password']) ? '<code>' . htmlspecialchars($r['password']) . '</code>' : '' ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </table>
+        </div>
+        <?php endif; ?>
     </div>
 
     <?php if ($isFullAdmin): ?>
     <div class="card">
-        <strong>Docentes (<?= count($teachers = Courses::teachers((int) $course['id'])) ?>)</strong>
+        <strong>Docentes (<?= count($teachers = Courses::teachers($courseId)) ?>)</strong>
         <div class="table-wrap">
         <table>
             <tr><th>Usuario</th><th>Nombre</th><th></th></tr>
@@ -497,7 +535,7 @@ if ($detailId !== null) {
                     <form method="post" class="inline">
                     <?= csrf_field() ?>
                         <input type="hidden" name="form_action" value="remove_teacher">
-                        <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+                        <input type="hidden" name="course_id" value="<?= $courseId ?>">
                         <input type="hidden" name="user_id" value="<?= $t['id'] ?>">
                         <button type="submit" class="btn btn--danger btn--xs">Quitar</button>
                     </form>
@@ -512,7 +550,7 @@ if ($detailId !== null) {
         <form method="post" class="row" style="margin-top:0.6rem;">
         <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="add_teacher">
-            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+            <input type="hidden" name="course_id" value="<?= $courseId ?>">
             <label style="flex:1; margin:0;">Agregar docente (nombre o username)
                 <input type="text" name="username" list="teachers_datalist" required>
             </label>
@@ -522,142 +560,14 @@ if ($detailId !== null) {
     <?php endif; ?>
 
     <div class="card">
-        <strong>Grupos</strong>
-        <p class="muted">Para citar a un subgrupo (p. ej. 5 alumnos a la misma hora) sin asignarlos uno por uno en la agenda. Un alumno pertenece a un solo grupo a la vez -- arrastralo a otra columna para moverlo, o a "Sin grupo" para sacarlo.</p>
-
-        <?php
-            $groupedIds = [];
-            foreach ($groupMap as $uid => $gs) {
-                if ($gs) {
-                    $groupedIds[$uid] = (int) $gs[0]['id'];
-                }
-            }
-            $unassigned = array_values(array_filter($students, fn($s) => !isset($groupedIds[$s['id']])));
-        ?>
-        <div id="group_board" style="display:flex; gap:0.8rem; overflow-x:auto; padding-bottom:0.4rem; margin-top:0.6rem;">
-            <div class="pane group_column" data-group-id="" style="min-width:200px; flex:1 1 200px;">
-                <strong>Sin grupo (<span class="group_count"><?= count($unassigned) ?></span>)</strong>
-                <div class="group_dropzone" style="min-height:3rem; margin-top:0.5rem;">
-                    <?php foreach ($unassigned as $s): ?>
-                    <div class="group_card" draggable="true" data-user-id="<?= $s['id'] ?>"><?= htmlspecialchars($s['display_name']) ?></div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-            <?php foreach ($groups as $g): ?>
-            <div class="pane group_column" data-group-id="<?= $g['id'] ?>" style="min-width:200px; flex:1 1 200px;">
-                <div class="row row--between" style="margin:0; align-items:center;">
-                    <strong><?= htmlspecialchars($g['name']) ?> (<span class="group_count"><?= (int) $g['member_count'] ?></span>)</strong>
-                    <form method="post" class="inline" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Eliminar el grupo ' . $g['name'] . '? Sus miembros quedan sin grupo.'), ENT_QUOTES) ?>);">
-                    <?= csrf_field() ?>
-                        <input type="hidden" name="form_action" value="delete_group">
-                        <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-                        <input type="hidden" name="group_id" value="<?= $g['id'] ?>">
-                        <button type="submit" class="btn btn--danger btn--xs" title="Eliminar grupo">&times;</button>
-                    </form>
-                </div>
-                <div class="group_dropzone" style="min-height:3rem; margin-top:0.5rem;">
-                    <?php foreach ($students as $s): ?>
-                    <?php if (($groupedIds[$s['id']] ?? null) !== (int) $g['id']) continue; ?>
-                    <div class="group_card" draggable="true" data-user-id="<?= $s['id'] ?>"><?= htmlspecialchars($s['display_name']) ?></div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-            <?php endforeach; ?>
-            <?php if (!$groups): ?>
-            <p class="muted">Sin grupos creados todavía -- creá uno abajo.</p>
-            <?php endif; ?>
-        </div>
-        <p id="group_board_error" class="error" hidden style="margin-top:0.6rem;"></p>
-
-        <form method="post" class="row" style="margin-top:0.8rem;">
-        <?= csrf_field() ?>
-            <input type="hidden" name="form_action" value="create_group">
-            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-            <label style="flex:1; margin:0;">Nuevo grupo (nombre)
-                <input type="text" name="name" required>
-            </label>
-            <button type="submit" class="btn btn--secondary btn--sm">Crear grupo</button>
-        </form>
-
-        <script>
-        (function () {
-            var board = document.getElementById('group_board');
-            if (!board) return;
-            var csrfToken = <?= json_encode(Auth::csrfToken()) ?>;
-            var courseId = <?= (int) $course['id'] ?>;
-            var errorBox = document.getElementById('group_board_error');
-            var dragged = null;
-
-            function updateCounts() {
-                board.querySelectorAll('.group_column').forEach(function (col) {
-                    var count = col.querySelectorAll('.group_card').length;
-                    var label = col.querySelector('.group_count');
-                    if (label) label.textContent = count;
-                });
-            }
-
-            board.querySelectorAll('.group_card').forEach(function (card) {
-                card.addEventListener('dragstart', function () { dragged = card; });
-            });
-
-            board.querySelectorAll('.group_dropzone').forEach(function (zone) {
-                zone.addEventListener('dragover', function (e) {
-                    e.preventDefault();
-                    zone.classList.add('group_dropzone--over');
-                });
-                zone.addEventListener('dragleave', function () {
-                    zone.classList.remove('group_dropzone--over');
-                });
-                zone.addEventListener('drop', function (e) {
-                    e.preventDefault();
-                    zone.classList.remove('group_dropzone--over');
-                    if (!dragged) return;
-
-                    var fromZone = dragged.parentElement;
-                    if (fromZone === zone) return;
-
-                    var userId = dragged.dataset.userId;
-                    var groupId = zone.closest('.group_column').dataset.groupId;
-
-                    zone.appendChild(dragged);
-                    updateCounts();
-                    errorBox.hidden = true;
-
-                    var body = new URLSearchParams();
-                    body.set('csrf_token', csrfToken);
-                    body.set('course_id', courseId);
-                    body.set('user_id', userId);
-                    body.set('group_id', groupId);
-
-                    fetch('group_move.php', { method: 'POST', body: body })
-                        .then(function (r) { return r.json(); })
-                        .then(function (data) {
-                            if (!data.ok) {
-                                throw new Error(data.error || 'No se pudo mover al alumno.');
-                            }
-                        })
-                        .catch(function (err) {
-                            fromZone.appendChild(dragged);
-                            updateCounts();
-                            errorBox.textContent = err.message;
-                            errorBox.hidden = false;
-                        });
-                });
-            });
-        })();
-        </script>
-    </div>
-
-    <div class="card">
         <strong>Módulos habilitados</strong>
         <p class="help help--mt">
             Qué ve un alumno de este curso en la app de escritorio. Sin marcar nada, el curso queda sin módulos habilitados.
         </p>
-        <?php $enabledModules = Courses::enabledModules((int) $course['id']); ?>
         <form method="post">
         <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="set_modules">
-            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+            <input type="hidden" name="course_id" value="<?= $courseId ?>">
             <?php foreach (Courses::modulesGroupedByBox() as $boxLabel => $boxModules): ?>
             <div class="section-sep">
                 <strong><?= htmlspecialchars($boxLabel) ?></strong>
@@ -675,152 +585,14 @@ if ($detailId !== null) {
         </form>
     </div>
 
-    <?php if (in_array('ABR', $enabledModules, true)): ?>
-    <div class="card">
-        <strong>Desviación de estímulos ABR (potenciales evocados)</strong>
-        <p class="help help--mt">
-            El click de cada paciente lo define el caso (case_create.php, campo "desviaciones") -- acá NO se edita click. Esto configura cuánto se desvían chirp/ls-chirp/burst respecto al click de ESE paciente, como factor multiplicador (ratio) por onda -- ej. amp_ratio 1.4 en onda V de "Chirp" = la V del chirp sale 40% más grande que la V (ya ajustada) del click de ese caso. Los campos muestran el valor por defecto de la app; tocalos para sobreescribir, dejalos como están para no cambiar nada.
-        </p>
-        <?php
-            // Ver ABR_generator.py::get_baseline_values -- valores por
-            // defecto (adult_female, vía aérea) de resources/abr/normative_data.json.
-            // Mantener sincronizado a mano si ese JSON cambia (repos separados).
-            $abrStimDefaults = [
-                'ce_chirp'         => ['label' => 'Chirp',       'I' => ['lat_ratio' => 0.8951, 'amp_ratio' => 2.1429], 'III' => ['lat_ratio' => 0.9783, 'amp_ratio' => 1.4054], 'V' => ['lat_ratio' => 0.9872, 'amp_ratio' => 1.2167]],
-                'ls_chirp'         => ['label' => 'Ls-chirp',    'I' => ['lat_ratio' => 0.9074, 'amp_ratio' => 1.8095], 'III' => ['lat_ratio' => 0.9918, 'amp_ratio' => 1.1892], 'V' => ['lat_ratio' => 0.9963, 'amp_ratio' => 1.0333]],
-                'tone_burst_500Hz'  => ['label' => 'Burst 500Hz', 'I' => ['lat_ratio' => 1.4506, 'amp_ratio' => 1.0476], 'III' => ['lat_ratio' => 1.4538, 'amp_ratio' => 0.7297], 'V' => ['lat_ratio' => 1.4625, 'amp_ratio' => 0.6333]],
-                'tone_burst_1000Hz' => ['label' => 'Burst 1kHz',  'I' => ['lat_ratio' => 1.2037, 'amp_ratio' => 1.2857], 'III' => ['lat_ratio' => 1.2636, 'amp_ratio' => 0.8649], 'V' => ['lat_ratio' => 1.2431, 'amp_ratio' => 0.7167]],
-                'tone_burst_2000Hz' => ['label' => 'Burst 2kHz',  'I' => ['lat_ratio' => 1.0494, 'amp_ratio' => 1.4286], 'III' => ['lat_ratio' => 1.1005, 'amp_ratio' => 0.9459], 'V' => ['lat_ratio' => 1.0969, 'amp_ratio' => 0.7833]],
-                'tone_burst_4000Hz' => ['label' => 'Burst 4kHz',  'I' => ['lat_ratio' => 0.9568, 'amp_ratio' => 1.5238], 'III' => ['lat_ratio' => 1.0326, 'amp_ratio' => 1.0000], 'V' => ['lat_ratio' => 1.0329, 'amp_ratio' => 0.8333]],
-            ];
-            $abrOverride = AppConfig::getEffective('normative_data.abr', (int) $course['id']) ?? [];
-        ?>
-        <form method="post">
-        <?= csrf_field() ?>
-            <input type="hidden" name="form_action" value="set_abr_normative">
-            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-            <?php foreach ($abrStimDefaults as $stimKey => $stimDefaults): ?>
-            <details style="margin-top:0.5rem;">
-                <summary><strong><?= htmlspecialchars($stimDefaults['label']) ?></strong></summary>
-                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:0.6rem 1rem; margin-top:0.4rem;">
-                    <?php foreach (['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V'] as $wave => $waveLabel): ?>
-                    <?php
-                        $defaults = $stimDefaults[$wave];
-                        $current = $abrOverride[$stimKey][$wave] ?? [];
-                    ?>
-                    <div>
-                        <strong style="font-weight:600;"><?= $waveLabel ?></strong>
-                        <label style="font-weight:normal; display:block; margin-top:0.2rem;">
-                            Ratio latencia
-                            <input type="number" step="0.0001" name="abr_ratio[<?= $stimKey ?>][<?= $wave ?>][lat_ratio]"
-                                   value="<?= htmlspecialchars((string) ($current['lat_ratio'] ?? $defaults['lat_ratio'])) ?>">
-                        </label>
-                        <label style="font-weight:normal; display:block; margin-top:0.2rem;">
-                            Ratio amplitud
-                            <input type="number" step="0.0001" name="abr_ratio[<?= $stimKey ?>][<?= $wave ?>][amp_ratio]"
-                                   value="<?= htmlspecialchars((string) ($current['amp_ratio'] ?? $defaults['amp_ratio'])) ?>">
-                        </label>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </details>
-            <?php endforeach; ?>
-            <div class="form-actions-sticky">
-                <button type="submit" class="btn btn--secondary">Guardar configuración</button>
-            </div>
-        </form>
-        <?php if ($abrOverride): ?>
-        <form method="post" style="margin-top:0.5rem;"
-              onsubmit="return confirm('¿Restablecer al valor por defecto de la app? Se pierde la configuración actual del curso.');">
-        <?= csrf_field() ?>
-            <input type="hidden" name="form_action" value="reset_abr_normative">
-            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-            <button type="submit" class="btn btn--danger btn--sm">Volver a default</button>
-        </form>
-        <?php else: ?>
-        <p class="help help--mt">Sin configuración propia -- usando el valor por defecto de la app.</p>
-        <?php endif; ?>
-    </div>
-    <?php endif; ?>
-
-    <?php if (in_array('VEMP', $enabledModules, true)): ?>
-    <div class="card">
-        <strong>Normativa VEMP (potenciales evocados vestibulares miogénicos)</strong>
-        <p class="help help--mt">
-            VEMP ajusta el baseline por pico/subtipo (a diferencia de ABR, donde el click lo define el paciente y el resto son ratios -- acá el baseline es del equipo). Acá se sobreescriben los absolutos de latencia/amplitud por pico, por subtipo (CVEMP cervical sobre SCM, OVEMP ocular sobre oblicuo inferior, MVEMP masetero). El paciente en sí desvía aparte vía "desviaciones" en case_create.php. Los campos muestran el default de la app; tocarlos sobreescribe, dejarlos como están hereda el default.
-        </p>
-        <?php
-            // Defaults sincronizados a mano con
-            // resources/vemp/normative_data.json (adult_female / 500Hz).
-            $vempDefaults = [
-                'CVEMP' => [
-                    'label' => 'CVEMP (cervical / SCM)',
-                    'picos' => [
-                        'p13' => ['lat' => 12.8, 'amp' => 135.0],
-                        'n23' => ['lat' => 22.5, 'amp' => 185.0],
-                    ],
-                ],
-                'OVEMP' => [
-                    'label' => 'OVEMP (ocular / oblicuo inferior)',
-                    'picos' => [
-                        'n10' => ['lat' => 9.8, 'amp' => 8.5],
-                        'p16' => ['lat' => 15.8, 'amp' => 11.5],
-                    ],
-                ],
-                'MVEMP' => [
-                    'label' => 'MVEMP (masetero -- experimental)',
-                    'picos' => [
-                        'p13' => ['lat' => 12.8, 'amp' => 45.0],
-                        'n23' => ['lat' => 22.5, 'amp' => 60.0],
-                    ],
-                ],
-            ];
-            $vempOverride = AppConfig::getEffective('normative_data.vemp', (int) $course['id']) ?? [];
-        ?>
-        <form method="post">
-        <?= csrf_field() ?>
-            <input type="hidden" name="form_action" value="set_vemp_normative">
-            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-            <?php foreach ($vempDefaults as $subtipo => $subDefaults): ?>
-            <details style="margin-top:0.5rem;">
-                <summary><strong><?= htmlspecialchars($subDefaults['label']) ?></strong></summary>
-                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:0.6rem 1rem; margin-top:0.4rem;">
-                    <?php foreach ($subDefaults['picos'] as $pico => $defaults): ?>
-                    <?php $current = $vempOverride[$subtipo][$pico] ?? []; ?>
-                    <div>
-                        <strong style="font-weight:600;"><?= strtoupper($pico) ?></strong>
-                        <label style="font-weight:normal; display:block; margin-top:0.2rem;">
-                            Latencia (ms)
-                            <input type="number" step="0.01" name="vemp_baseline[<?= $subtipo ?>][<?= $pico ?>][lat]"
-                                   value="<?= htmlspecialchars((string) ($current['lat'] ?? $defaults['lat'])) ?>">
-                        </label>
-                        <label style="font-weight:normal; display:block; margin-top:0.2rem;">
-                            Amplitud (µV)
-                            <input type="number" step="0.01" name="vemp_baseline[<?= $subtipo ?>][<?= $pico ?>][amp]"
-                                   value="<?= htmlspecialchars((string) ($current['amp'] ?? $defaults['amp'])) ?>">
-                        </label>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </details>
-            <?php endforeach; ?>
-            <div class="form-actions-sticky">
-                <button type="submit" class="btn btn--secondary">Guardar configuración</button>
-            </div>
-        </form>
-        <?php if ($vempOverride): ?>
-        <form method="post" style="margin-top:0.5rem;"
-              onsubmit="return confirm('¿Restablecer al valor por defecto de la app? Se pierde la configuración actual del curso.');">
-        <?= csrf_field() ?>
-            <input type="hidden" name="form_action" value="reset_vemp_normative">
-            <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-            <button type="submit" class="btn btn--danger btn--sm">Volver a default</button>
-        </form>
-        <?php else: ?>
-        <p class="help help--mt">Sin configuración propia -- usando el valor por defecto de la app.</p>
-        <?php endif; ?>
-    </div>
-    <?php endif; ?>
+    <?php
+    // Un editor por parámetro configurable del curso, generado desde el
+    // registro (CourseParams) -- solo los de módulos habilitados.
+    foreach (CourseParams::forModules($enabledModules) as $paramKey => $def) {
+        $override = AppConfig::courseOverride($paramKey, $courseId);
+        include __DIR__ . '/../../views/course/_params.php';
+    }
+    ?>
 
     <div class="card">
         <details>
@@ -832,14 +604,14 @@ if ($detailId !== null) {
             <form method="post">
             <?= csrf_field() ?>
                 <input type="hidden" name="form_action" value="generate_demo_code">
-                <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+                <input type="hidden" name="course_id" value="<?= $courseId ?>">
                 <button type="submit" class="btn btn--secondary">Generar código de acceso</button>
             </form>
             <?php if ($demoStudent !== null): ?>
             <form method="post" onsubmit="return confirm('¿Borrar todas las citas/atenciones/chats de prueba del demo? La cuenta queda igual.');">
             <?= csrf_field() ?>
                 <input type="hidden" name="form_action" value="clean_demo">
-                <input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+                <input type="hidden" name="course_id" value="<?= $courseId ?>">
                 <button type="submit" class="btn btn--danger">Limpiar datos de prueba</button>
             </form>
             <?php endif; ?>
@@ -853,21 +625,13 @@ if ($detailId !== null) {
 
 // Sin id: admin completo ve la lista global; docente sin cursos ve un aviso
 // (con 1 curso ya se redirigió arriba, con 2+ se lista solo lo suyo).
-if (!$isFullAdmin) {
-    admin_header('Cursos', $me);
-    if (!$myCourseIds) {
-        echo '<p class="muted">Todavía no estás asignado como docente de ningún curso.</p>';
-        admin_footer();
-        exit;
-    }
-    $placeholders = implode(',', array_fill(0, count($myCourseIds), '?'));
-    $stmt = $pdo->prepare("SELECT * FROM courses WHERE id IN ({$placeholders}) ORDER BY name");
-    $stmt->execute($myCourseIds);
-    $courses = $stmt->fetchAll();
-} else {
-    admin_header('Cursos', $me);
-    $courses = $pdo->query('SELECT * FROM courses ORDER BY active DESC, name')->fetchAll();
+admin_header('Cursos', $me);
+if (!$isFullAdmin && !$myCourseIds) {
+    echo '<p class="muted">Todavía no estás asignado como docente de ningún curso.</p>';
+    admin_footer();
+    exit;
 }
+$courses = Courses::listWithCounts($isFullAdmin ? null : $myCourseIds);
 ?>
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 <?php if ($success !== null): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
@@ -923,8 +687,8 @@ if (!$isFullAdmin) {
         <tr>
             <td><a href="courses.php?id=<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></a></td>
             <td><?= $c['active'] ? 'activo' : 'archivado' ?></td>
-            <td><?= count(Courses::teachers((int) $c['id'])) ?></td>
-            <td><?= count(array_filter(Courses::students((int) $c['id']), static fn($s) => !$s['is_demo'])) ?></td>
+            <td><?= (int) $c['n_teachers'] ?></td>
+            <td><?= (int) $c['n_students'] ?></td>
         </tr>
         <?php endforeach; ?>
         <?php if (!$courses): ?>

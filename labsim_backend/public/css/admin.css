@@ -161,6 +161,36 @@ button.danger { background: var(--color-danger); }
  * blanco (contraste WCAG AA consistente en ambos modos). El body y las
  * cards sí cambian. */
 
+/* Tablero de personas (courses.php): el roster del curso ES este tablero.
+ * Columnas = grupos, tarjetas = alumnos (uno pertenece a un solo grupo, y
+ * soltarlo en otra columna lo mueve). A la derecha, el panel de candidatos:
+ * arrastrar desde ahí matricula. En pantalla angosta el panel baja abajo. */
+.course-people {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 17rem;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+  align-items: start;
+}
+#course_board {
+  display: flex;
+  gap: 0.8rem;
+  overflow-x: auto;
+  padding-bottom: 0.4rem;
+}
+.group_column { min-width: 13rem; flex: 1 1 13rem; }
+.group_dropzone { min-height: 3rem; margin-top: 0.5rem; }
+.course-candidates { max-height: 40rem; overflow-y: auto; }
+.course-candidates .scrollbox { max-height: 22rem; }
+.group_card__head { display: flex; align-items: center; gap: 0.3rem; }
+.group_card__name { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.group_card__pick { margin: 0; }
+.group_card__meta { margin-top: 0.15rem; }
+
+@media (max-width: 60rem) {
+  .course-people { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* Tablero de grupos (courses.php): columnas con alumnos arrastrables.
  * Un alumno pertenece a un solo grupo -- soltarlo en otra columna lo mueve. */
 .group_card {

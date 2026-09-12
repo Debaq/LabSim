@@ -281,9 +281,10 @@ Pendiente:
       lugar del cliente (un `audiometria/params.py`) y que ese lugar
       consulte `app_config_store` con el literal actual como default. Sin
       eso, cablear la config obliga a tocar cada archivo.
-- [ ] UI de edición en `courses.php`, igual que se hizo con la normativa del
-      ABR. Ojo: son parámetros que cambian cómo responde el paciente, no
-      sólo cómo se informa -- conviene mostrar en el editor qué implica cada
+- [ ] UI de edición: ya no se escribe a mano -- es una entrada más en el
+      registro `src/CourseParams.php` (grupos, filas, campos con min/max y
+      defaults) y la card se pinta sola. Ojo: son parámetros que cambian cómo
+      responde el paciente, no sólo cómo se informa -- conviene mostrar en el editor qué implica cada
       uno (mecánica, no clínica) y no dejar que se guarde algo imposible
       (AI negativa, CE enorme).
 - [ ] Decidir qué pasa con los casos ya armados cuando un curso cambia un
@@ -1063,3 +1064,111 @@ Pendiente:
   viva -- acá no hay `pdo_sqlite` (solo `php -l`, balance de tags y el SQL
   validado aparte con `sqlite3`). Antes de mirar el panel hay que aplicar el
   schema en Admin -> Base de datos.
+
+## Rediseño de la gestión de cursos en el backend (2026-09-12)
+
+`admin/courses.php` llegó a 937 líneas en una sola vista de scroll: identidad,
+tabla de alumnos, docentes, tablero de grupos, módulos, normativa ABR,
+normativa VEMP y área de pruebas, todo apilado. Es insuficiente (no muestra
+ningún **estado** del curso) y repetitivo:
+
+| Repetición | Dónde |
+|---|---|
+| El roster dos veces | tabla "Alumnos" y tablero "Grupos" listan los mismos alumnos en la misma página |
+| Normativa copy-paste | el bloque ABR y el VEMP son ~210 líneas gemelas (POST + render); la audiometría por curso (sección "Parámetros de audiometría configurables por curso") sería el tercero |
+| Control de acceso | `require_course_access` clonada en `courses.php`, `inbox_send.php`, `group_move.php` y `agenda.php` |
+| Selector curso -> grupo -> alumno | reimplementado en `agenda.php` y en `inbox_send.php` |
+| N+1 en la lista de cursos | `Courses::teachers()` + `Courses::students()` por cada fila del `foreach` |
+
+Decisión de diseño: **el tablero de grupos es el roster**. La tabla de alumnos
+se elimina; lo único que aportaba y hay que conservar es el username, el
+origen de Moodle, "quitar del curso" y la matrícula de candidatos.
+
+### El tablero como única vista de personas
+
+- Columnas: "Sin grupo" + un grupo cada una. La tarjeta del alumno lleva
+  nombre, username en chico, badges de avance (citas pendientes / atendidas /
+  última actividad) y menú (ver ficha en `student.php`, quitar del curso).
+- Panel lateral "Matricular", colapsado: buscador, candidatos
+  (`Courses::enrollableStudents()`) con los chips de origen Moodle que ya
+  existen, alta manual y alta por texto. **Arrastrar un candidato al tablero
+  matricula y asigna grupo en un solo gesto** (mismo `group_move.php` con
+  `enroll=1`).
+- Selección múltiple en el tablero: mover a grupo, quitar, generar códigos,
+  exportar CSV.
+- "Repartir en N grupos": crea los grupos y distribuye a los que están sin
+  grupo. Hoy hay que crearlos de a uno y arrastrar cuarenta veces.
+- Renombrar grupo en línea (`Courses::renameGroup()` ya existe y no está
+  cableado a ninguna UI).
+
+### El curso como hub con pestañas
+
+`course.php?id=N&tab=...`, cada pestaña un partial en `views/course/_*.php` y
+el POST centralizado en `src/CourseAdmin.php` (mismo patrón que el refactor de
+`case_create.php`):
+
+1. **Resumen** (nuevo): checklist de "curso listo" (módulos elegidos, al menos
+   un docente, alumnos matriculados, grupos, citas futuras, LTI vinculado),
+   próximos 7 días de agenda y alumnos sin actividad. Cada ítem enlaza a su
+   pestaña.
+2. **Personas**: el tablero de arriba, más docentes.
+3. **Módulos y parámetros**: el checklist actual más las normativas unificadas.
+4. **Agenda del curso**: `agenda.php` filtrada.
+5. **Pruebas**: demo y limpieza de datos de prueba (ya existe).
+6. **Vínculos**: contexto LTI (hoy vive en la vista de lista, donde no se
+   encuentra).
+
+### Un registro para las normativas por curso
+
+`src/CourseParams.php` con la definición declarativa de cada key:
+
+```php
+'normative_data.abr' => [
+    'module' => 'ABR', 'label' => ..., 'help' => ...,
+    'shape' => [grupo => [campo => ['type' => 'number', 'step' => 0.0001, 'min' => 0]]],
+    'defaults' => [...],
+]
+```
+
+Un solo renderer (`views/course/_params.php`) y un solo handler genérico
+(parseo, validación de rango, reemplazo completo del override, "volver a
+default") sirven a ABR, VEMP y a la audiometría cuando llegue: agregar un
+módulo pasa a ser una entrada en el registro, no otro card. Los defaults hoy
+están copiados a mano del `normative_data.json` del cliente -- va un test que
+falle si divergen (mismo criterio que `test_php_baseline.php`).
+
+### Contexto de curso en el header
+
+Selector "Curso: X" en `_layout.php` guardado en sesión; agenda, fichas,
+dashboard y bandeja leen ese contexto y borran su propio `<select>`. Para un
+docente con un solo curso, el selector no aparece.
+
+### Fases
+
+- [x] **F0** (2026-09-12): `Courses::canAdminister()` / `assertAdministers()`
+      única (courses.php, inbox_send.php, group_move.php, agenda.php),
+      `Courses::listWithCounts()` contra el N+1 de la lista, registro
+      `src/CourseParams.php` + `views/course/_params.php` (los editores de
+      ABR y VEMP salen del registro; `tests/test_course_params.php` compara
+      los defaults contra los JSON del cliente y cubre `parse()`). De yapa:
+      `rename_group`/`delete_group` ahora verifican que el grupo sea del
+      curso (`groupBelongsTo()`), que era un agujero -- el `group_id` venía
+      del POST sin comprobar.
+- [x] **F2** (2026-09-12): el tablero es el roster. Se eliminó la tabla de
+      alumnos; las tarjetas llevan usuario, citas asignadas, cerradas y
+      última atención (`Courses::rosterProgress()`), link a la ficha y
+      quitar del curso. Panel de candidatos al costado: arrastrar matricula
+      (`group_move.php` con `enroll=1` -> `Courses::enrollStudent()`),
+      marcar + botón para tandas, chips por curso de Moodle, alta manual y
+      pegar lista. Además "repartir en N grupos"
+      (`splitUngroupedIntoGroups()`) y renombrar grupo en línea. El JS salió
+      a `public/js/course/board.js`.
+- [ ] **F1**: partir la vista en pestañas + `CourseAdmin.php`.
+- [ ] **F3**: pestaña Resumen.
+- [ ] **F4**: contexto de curso en el header.
+- [ ] **F5**: ciclo de vida -- `code`/`term`/fechas en `courses`, clonar curso
+      para el semestre siguiente, purga de datos por semestre, export CSV del
+      roster.
+
+Se arranca por F0 y F2 (lo que estorba hoy); F1 después, porque partir en
+pestañas encima del código duplicado sería mover basura de lugar.

@@ -11,13 +11,16 @@ require_once __DIR__ . '/../../src/AdminAudit.php';
  * arrastrar-y-soltar de courses.php -- fetch(), no <form>, por eso
  * devuelve JSON en vez de redirigir. Ver Courses::moveStudentToGroup()
  * para la regla de "un alumno, un solo grupo por curso".
+ *
+ * Con enroll=1 el alumno todavía no está en el curso: la tarjeta salió del
+ * panel de candidatos, así que primero se matricula (validando la cuenta en
+ * Courses::enrollStudent()) y recién después se ubica en la columna. Es el
+ * mismo gesto para el docente: arrastrar al grupo donde va.
  */
 
 header('Content-Type: application/json; charset=utf-8');
 
 $me = Auth::requireAdminSession();
-$isFullAdmin = (int) $me['permission'] === Auth::PERMISSION_ADMIN;
-$myCourseIds = $isFullAdmin ? null : Courses::teacherCourseIds((int) $me['id']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -44,10 +47,20 @@ if ($courseId <= 0 || $userId <= 0) {
     exit;
 }
 
-if (!$isFullAdmin && (!$myCourseIds || !in_array($courseId, $myCourseIds, true))) {
+if (!Courses::canAdminister($courseId, $me)) {
     http_response_code(403);
     echo json_encode(['ok' => false, 'error' => 'No tienes acceso a este curso.']);
     exit;
+}
+
+if ((string) ($_POST['enroll'] ?? '') === '1') {
+    $err = Courses::enrollStudent($courseId, $userId);
+    if ($err) {
+        http_response_code(422);
+        echo json_encode(['ok' => false, 'error' => $err]);
+        exit;
+    }
+    AdminAudit::log($me, 'course_enroll_drag', ['course_id' => $courseId, 'user_id' => $userId]);
 }
 
 $err = Courses::moveStudentToGroup($courseId, $userId, $groupId);
