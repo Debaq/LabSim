@@ -2008,5 +2008,12 @@ paso, hacia abajo -- mismo margen gobierna las dos direcciones).
   Un solo valor controla el desplazamiento horizontal (hacia el centro,
   desde cada esquina) y el vertical (hacia abajo, desde el techo del
   gráfico) -- duplicarlo mueve la letra en ambos sentidos a la vez.
-- Verificado con `pdftoppm` (antes/después) y suite completa sin
-  regresión (3740 asserts).
+- **Corrección:** con 20.0 la letra de OD ("As") seguía sobre la línea
+  del eje izquierdo -- `CaseCharts::plotBox()` corre el marco del
+  gráfico `EJE_IZQ = 24.0`pt adentro de `$x`, así que un margen menor a
+  eso todavía cae encima del borde. Subido a 35.0pt (deja ~11pt de aire
+  antes del marco); OI no tenía este problema (su borde derecho queda
+  mucho más cerca de `$x + $ancho` que lo que el margen le resta) pero
+  se corre el mismo tanto por usar la misma variable para los dos lados.
+- Verificado con `pdftoppm` (antes/después, recorte de cerca del borde
+  izquierdo) y suite completa sin regresión (3740 asserts).

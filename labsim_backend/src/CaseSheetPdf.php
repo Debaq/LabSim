@@ -659,7 +659,7 @@ final class CaseSheetPdf
             // sobre el gráfico mismo, como en un equipo real -- OD arriba a
             // la izquierda, OI arriba a la derecha, con margen (no pegada a
             // la esquina para no comerse la curva ni el eje).
-            $margenLetra = 20.0;
+            $margenLetra = 35.0;
             $tamanoLetra = 15.0;
             $yLetra = $yGrafico + $margenLetra + $tamanoLetra * self::ASCENDENTE;
             if ($lado === 'od') {
