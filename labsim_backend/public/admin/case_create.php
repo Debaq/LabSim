@@ -456,7 +456,11 @@ admin_header($isEdit ? 'Editar caso clínico ' . $editId : 'Crear caso clínico'
 <?php if ($isEdit): ?>
 <p class="row row--between">
     <span class="muted">Ficha guardada: se puede imprimir tal como está guardada (los cambios sin guardar no salen en el PDF).</span>
-    <a class="btn" href="case_sheet_pdf.php?id=<?= urlencode($editId) ?>" target="_blank" rel="noopener">Ficha completa en PDF</a>
+    <span>
+        <a class="btn" href="case_sheet_pdf.php?id=<?= urlencode($editId) ?>" target="_blank" rel="noopener">Ficha completa en PDF</a>
+        <a class="btn" href="case_sheet_pdf.php?id=<?= urlencode($editId) ?>&amp;modo=estudio" target="_blank" rel="noopener"
+           title="Los mismos exámenes, sin el perfil auditivo ni los parámetros del generador">Ficha de estudio en PDF</a>
+    </span>
 </p>
 <?php endif; ?>
 

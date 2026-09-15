@@ -147,4 +147,67 @@ final class CaseMasking
         $gap = (float) ($aereaNo[$i] ?? 0) - (float) ($oseaNo[$i] ?? 0);
         return $gap > self::OCLUSIVO_GAP_MAX ? 0.0 : $valor;
     }
+
+    // -----------------------------------------------------------------
+    // Enmascaramiento del HABLA (SDT, SRT, UMD)
+    // -----------------------------------------------------------------
+    //
+    // Mismas fórmulas que CalculateLogo en src/audiometria/logoaudiometry.py
+    // (_logo_vias, _masking_range, _bone_sdt), no una versión "para el
+    // informe": ver el docblock de arriba, vale lo mismo acá.
+    //
+    // La atenuación interaural es una sola (AI_HABLA), no por frecuencia
+    // como en tonal, porque el habla ocupa todo el espectro. Y el "umbral
+    // óseo" de referencia no es el que se mide directo: es el promedio de
+    // Fletcher (mejores 2 de 500/1k/2k Hz) que usa el motor para esto
+    // mismo -- boneSdt() de acá abajo.
+
+    /** Atenuación interaural del habla (dB). CalculateLogo.logo_attenuation. */
+    public const AI_HABLA = 45.0;
+
+    /**
+     * Umbral óseo de referencia para el enmascaramiento del habla: el
+     * promedio de Fletcher (mejores 2 de 500/1000/2000 Hz), al piso de
+     * 5 dB -- floor, no redondeo, igual que `_bone_sdt()`. Es DISTINTO del
+     * BIAP y de cualquier promedio de catálogo: corresponde uno a uno a
+     * esa función del motor.
+     *
+     * @param array<int,float> $osea 9 umbrales óseos (índice de CaseBuilder::FREQUENCIES)
+     */
+    public static function boneSdt(array $osea): float
+    {
+        $valores = [(float) ($osea[2] ?? 0), (float) ($osea[3] ?? 0), (float) ($osea[4] ?? 0)];
+        sort($valores);
+        $mejores2 = array_slice($valores, 0, 2);
+        return floor((array_sum($mejores2) / count($mejores2)) / 5) * 5;
+    }
+
+    /**
+     * Enmascaramiento del habla a una intensidad dada -- el SDT, el SRT o
+     * CADA nivel de UMD se prueban a su propia intensidad, así que esto se
+     * llama una vez por cada uno. CE queda en 0: es el coeficiente del
+     * Speech Noise, el ruido correcto para esta vía (ver
+     * masking_params.py::CE_LOGO) -- con otro ruido el mínimo sube, pero
+     * eso lo decide el alumno en la cabina, no la ficha.
+     *
+     * @param float $boneEstudiado umbral óseo de referencia (boneSdt) del oído que se prueba
+     * @param float $boneNoEstudiado umbral óseo de referencia del oído contrario
+     * @param float $sdtNoEstudiado SDT del oído contrario
+     * @return array{cruza:bool,min:float,max:float}
+     */
+    public static function logo(float $intensidad, float $boneEstudiado, float $boneNoEstudiado, float $sdtNoEstudiado): array
+    {
+        $at = self::AI_HABLA;
+        // El habla cruza por vía ósea al contralateral: solo hay algo que
+        // enmascarar si esa cruzada supera el umbral óseo del otro oído.
+        $cruza = ($intensidad - $at) >= $boneNoEstudiado;
+
+        $min = $intensidad - $at - $boneNoEstudiado + $sdtNoEstudiado;
+        $max = $at + $boneEstudiado;
+        if ($min > $max) {
+            [$min, $max] = [$max, $min];
+        }
+
+        return ['cruza' => $cruza, 'min' => $min, 'max' => $max];
+    }
 }

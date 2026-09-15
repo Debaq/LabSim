@@ -28,6 +28,12 @@ window.drawAudiogram = (function () {
     // [marca, espacio] en unidades del SVG -- espejo de CaseCharts::TRAZO_*.
     var BONE_DASH = '1,2';
     var LDL_DASH = '3,2';
+    // Cuánto se corre el símbolo óseo (no la línea) de la intersección
+    // frecuencia/intensidad: OD a la izquierda, OI a la derecha. Centrado,
+    // un umbral óseo igual al aéreo -lo más común- queda tapado por el
+    // círculo/cruz de la vía aérea en el mismo punto. Espejo de
+    // CaseCharts::DESPLAZAMIENTO_OSEA.
+    var BONE_OFFSET = 4;
     // Vía ósea y LDL se miden de 250 a 4000 Hz: ni 125 ni 6000/8000 se
     // prueban por vía ósea (el vibrador no entrega nivel útil ahí y la
     // vibración táctil se confunde con audición). Espejo de
@@ -205,10 +211,12 @@ window.drawAudiogram = (function () {
             if (!boneMeasured(m)) { continue; }
             var x2 = xPos(FREQS[m]);
             var yBOd = yPos(plotDb(oseaOd[m])), yBOi = yPos(plotDb(oseaOi[m]));
-            group.appendChild(makeBracket(x2, yBOd, window.sideColor('od'), 'left', boneMasked(aereaOd[m], oseaOd[m])));
-            if (noResponse(oseaOd[m])) { group.appendChild(makeNoResponseArrow(x2, yBOd, window.sideColor('od'), -1)); }
-            group.appendChild(makeBracket(x2, yBOi, window.sideColor('oi'), 'right', boneMasked(aereaOi[m], oseaOi[m])));
-            if (noResponse(oseaOi[m])) { group.appendChild(makeNoResponseArrow(x2, yBOi, window.sideColor('oi'), 1)); }
+            // El símbolo (no la línea) se corre de la intersección: ver
+            // BONE_OFFSET arriba.
+            group.appendChild(makeBracket(x2 - BONE_OFFSET, yBOd, window.sideColor('od'), 'left', boneMasked(aereaOd[m], oseaOd[m])));
+            if (noResponse(oseaOd[m])) { group.appendChild(makeNoResponseArrow(x2 - BONE_OFFSET, yBOd, window.sideColor('od'), -1)); }
+            group.appendChild(makeBracket(x2 + BONE_OFFSET, yBOi, window.sideColor('oi'), 'right', boneMasked(aereaOi[m], oseaOi[m])));
+            if (noResponse(oseaOi[m])) { group.appendChild(makeNoResponseArrow(x2 + BONE_OFFSET, yBOi, window.sideColor('oi'), 1)); }
         }
 
         // LDL: solo si "LDL medido" está activo para ese oído -- si no, el

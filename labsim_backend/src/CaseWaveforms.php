@@ -116,6 +116,53 @@ final class CaseWaveforms
     public const AMP_VISIBLE = 0.02;
 
     /**
+     * SN10: el valle lento que sigue a la V (de acá sale la amplitud de V
+     * medida pico-a-valle) y VII: el bump tardío chico que a veces ni
+     * aparece. Las dos son geometría derivada de V, no ondas con su propio
+     * crecimiento por SL -- por eso no están en AMP_GROWTH. Espejo de
+     * SN10_SIGMA_MS/SN10_AMP_RATIO y del bloque VII en build_target_curve().
+     */
+    public const SN10_SIGMA_MS = 0.55;
+    public const SN10_AMP_RATIO = 0.45;
+    public const SN10_LAT_OFFSET = 0.9;
+    public const VII_SIGMA = 0.40;
+    public const VII_AMP_RATIO = 0.18;
+    public const VII_LAT_OFFSET = 2.5;
+
+    /**
+     * Efecto de la tasa de estimulación (clics/s), anclado en RATE_REF (la
+     * tasa a la que se miden los valores normativos: ahí no cambia nada).
+     * Por encima la latencia crece lineal y la amplitud cae exponencial;
+     * la I es la más sensible y la V la que mejor aguanta. Espejo de
+     * RATE_REF/RATE_LAT_SLOPE/RATE_AMP_DECAY.
+     */
+    public const RATE_REF = 21.1;
+    public const RATE_LAT_SLOPE = ['I' => 0.0025, 'III' => 0.0045, 'V' => 0.0060];
+    public const RATE_AMP_DECAY = ['I' => 0.0060, 'III' => 0.0045, 'V' => 0.0035];
+
+    /**
+     * Un oído neural aguanta peor las tasas altas (fatiga de conducción):
+     * multiplica el corrimiento de latencia y la caída de amplitud de
+     * arriba. Espejo de NEURAL_RATE_FACTORS -- misma clave que
+     * neural.sensibilidad_tasa.
+     */
+    public const RATE_NEURAL_FACTORES = [
+        'normal' => [1.0, 1.0],
+        'moderada' => [1.25, 1.6],
+        'severa' => [1.5, 2.2],
+    ];
+
+    /**
+     * Tasa "de estrés": la que en la clínica se sube a propósito para
+     * desenmascarar fatiga de conducción (el hallazgo neural que a tasa
+     * normal puede no verse). No se usa para dibujar nada en la ficha --
+     * `ondasClick()` es sensible a la tasa (ver `$tasa` más abajo), pero
+     * la pila del PDF solo se arma a RATE_REF. Queda acá como valor de
+     * referencia para ejercitar esa sensibilidad en los tests.
+     */
+    public const TASA_ESTRES = 90.0;
+
+    /**
      * Rangos de normalidad de latencias e interpicos a una intensidad.
      *
      * Espejo de ABRGenerator::normative_limits: la latencia absoluta se
@@ -191,8 +238,15 @@ final class CaseWaveforms
     /**
      * Latencia y amplitud de cada onda del click a una intensidad dada.
      *
+     * Incluye, además de I/III/V, SN10 y VII -- geometría derivada de la V
+     * final (después de tasa, tipo y patrón neural), así que siempre van
+     * pegadas a ella. `trazo()` las suma igual que a cualquier otra: no son
+     * ondas que haya que tratar aparte.
+     *
      * @param array<string,mixed> $neural patrón retrococlear ya normalizado
      * @param array<string,array{lat:float,amp:float}> $desviaciones del caso
+     * @param float $tasa clics/s del estímulo. RATE_REF (21.1) es donde
+     *        están medidos los valores normativos -- ahí no cambia nada.
      * @return array<string,array{lat:float,amp:float,sigma:float}>
      */
     public static function ondasClick(
@@ -201,7 +255,8 @@ final class CaseWaveforms
         string $tipo,
         array $neural,
         array $desviaciones = [],
-        string $poblacion = 'adult_female'
+        string $poblacion = 'adult_female',
+        float $tasa = self::RATE_REF
     ): array {
         $base = self::CLICK_BASE[$poblacion] ?? self::CLICK_BASE['adult_female'];
         $sl = $intensidad - $umbral;
@@ -226,6 +281,18 @@ final class CaseWaveforms
         $bloqueo = $esNeural ? (string) ($neural['bloqueo'] ?? 'ninguno') : 'ninguno';
         $desincronia = $esNeural ? (string) ($neural['desincronia'] ?? 'ninguna') : 'ninguna';
         $caidaVI = $esNeural ? 1.0 - (float) ($neural['v_i_factor'] ?? 0.45) : 0.0;
+
+        // Tasa alta = fatiga de conducción: en un oído neural pega mucho
+        // más fuerte (RATE_NEURAL_FACTORES), en cualquier otro pega el
+        // corrimiento base nomás.
+        $dTasa = $tasa - self::RATE_REF;
+        $tasaLatGain = 1.0;
+        $tasaAmpGain = 1.0;
+        if ($esNeural && abs($dTasa) > 0.001) {
+            $sensibilidadTasa = (string) ($neural['sensibilidad_tasa'] ?? 'severa');
+            [$tasaLatGain, $tasaAmpGain] = self::RATE_NEURAL_FACTORES[$sensibilidadTasa]
+                ?? self::RATE_NEURAL_FACTORES['severa'];
+        }
 
         $out = [];
         foreach (['I', 'III', 'V'] as $onda) {
@@ -263,9 +330,96 @@ final class CaseWaveforms
             // A poco nivel de sensación la onda además se ensancha sola.
             $sigma *= 1 + max(0.0, 40 - $sl) / 120;
 
+            if (abs($dTasa) > 0.001) {
+                $lat += self::RATE_LAT_SLOPE[$onda] * $dTasa * $tasaLatGain;
+                $decaimiento = exp(-self::RATE_AMP_DECAY[$onda] * $tasaAmpGain * $dTasa);
+                // Techo bajo (tasas lentas no suben mucho la amplitud) y
+                // piso: ni a tasas muy altas la respuesta desaparece del
+                // todo en un oído normal.
+                $amp *= max(0.15, min(1.20, $decaimiento));
+            }
+
             $out[$onda] = ['lat' => $lat, 'amp' => max(0.0, $amp), 'sigma' => $sigma];
         }
+
+        // SN10 y VII: geometría derivada de la V YA final (con tasa, tipo y
+        // patrón neural aplicados) -- por eso van después del loop y no dentro.
+        $v = $out['V'];
+        $out['SN10'] = [
+            'lat' => $v['lat'] + self::SN10_LAT_OFFSET + $v['sigma'] * 2,
+            'amp' => -$v['amp'] * self::SN10_AMP_RATIO,
+            'sigma' => self::SN10_SIGMA_MS * ($v['sigma'] / self::SIGMA['V']),
+        ];
+        $out['VII'] = [
+            'lat' => $v['lat'] + self::VII_LAT_OFFSET,
+            'amp' => $v['amp'] * self::VII_AMP_RATIO,
+            'sigma' => self::VII_SIGMA,
+        ];
+
         return $out;
+    }
+
+    /**
+     * Amplitud (µV) del ruido residual de fondo (EEG+EMG ya promediados):
+     * lo que le queda a un registro bien hecho después de promediar.
+     * Espejo aproximado de NOISE_FLOOR_UV -- el generador real llega ahí
+     * simulando barrido por barrido; acá alcanza con una textura del
+     * mismo orden, no la simulación de la promediación entera (el PDF
+     * muestra el resultado final, no el proceso).
+     */
+    public const RUIDO_AMPLITUD_UV = 0.05;
+
+    /**
+     * Ruido de fondo determinístico (misma semilla = mismo ruido, para que
+     * el PDF sea reproducible al re-generarse) pero que se vea orgánico: no
+     * es blanco puro -- es una suma de pocas sinusoides con más peso en las
+     * graves, aproximando el EEG (pink) + EMG del generador real sin FFT.
+     * Ruido blanco puro en 240 muestras se ve como estática, no como un
+     * registro.
+     *
+     * @return array<int,float> $muestras+1 valores, mismo largo que trazo()
+     */
+    private static function ruidoDeFondo(int $semilla, int $muestras): array
+    {
+        // LCG de 32 bits (Numerical Recipes): 2^32 * 1664525 no se pasa de
+        // los 64 bits con signo de un int de PHP -- un finalizador tipo
+        // Murmur (XOR + multiplicar por una constante de 32 bits) SÍ se
+        // pasa, el producto cae en punto flotante y el & que sigue tira
+        // "not representable as an int". Determinístico igual, sin
+        // depender de mt_srand (que es un estado GLOBAL de PHP y pisaría
+        // cualquier otro random() del proceso).
+        $estado = $semilla % 4294967296;
+        if ($estado < 0) {
+            $estado += 4294967296;
+        }
+        $siguiente = static function () use (&$estado): float {
+            $estado = ($estado * 1664525 + 1013904223) % 4294967296;
+            return $estado / 4294967296;
+        };
+
+        $componentes = [
+            ['ciclos' => 0.6, 'peso' => 1.00],
+            ['ciclos' => 1.3, 'peso' => 0.80],
+            ['ciclos' => 2.4, 'peso' => 0.55],
+            ['ciclos' => 4.5, 'peso' => 0.35],
+            ['ciclos' => 8.0, 'peso' => 0.20],
+        ];
+        $fases = [];
+        $pesoTotal = 0.0;
+        foreach ($componentes as $c) {
+            $fases[] = $siguiente() * 2 * M_PI;
+            $pesoTotal += $c['peso'];
+        }
+
+        $ruido = [];
+        for ($n = 0; $n <= $muestras; $n++) {
+            $v = 0.0;
+            foreach ($componentes as $i => $c) {
+                $v += $c['peso'] * sin(2 * M_PI * $c['ciclos'] * $n / $muestras + $fases[$i]);
+            }
+            $ruido[] = $v / $pesoTotal;
+        }
+        return $ruido;
     }
 
     /**
@@ -273,11 +427,25 @@ final class CaseWaveforms
      * de 0 a $hasta ms. Es la misma construcción del generador ("ondas =
      * suma de gaussianas centradas en cada latencia, no Bézier").
      *
+     * Con `$ruidoSemilla` se le suma una textura de fondo determinística
+     * (RUIDO_AMPLITUD_UV): sin ruido, dos pasadas al mismo nivel salían
+     * pixel a pixel iguales, que no es como se ve un registro real -- y una
+     * curva "sin respuesta" perfectamente plana tampoco. Semillas
+     * distintas para las dos réplicas del mismo nivel (ver
+     * CaseSheetPdf::nivelesAbr()): son dos pasadas, no la misma dibujada
+     * dos veces.
+     *
      * @param array<string,array{lat:float,amp:float,sigma:float}> $ondas
      * @return array<int,array{0:float,1:float}> pares [ms, µV]
      */
-    public static function trazo(array $ondas, float $hasta = 12.0, int $muestras = 240): array
-    {
+    public static function trazo(
+        array $ondas,
+        float $hasta = 12.0,
+        int $muestras = 240,
+        ?int $ruidoSemilla = null
+    ): array {
+        $ruido = $ruidoSemilla === null ? null : self::ruidoDeFondo($ruidoSemilla, $muestras);
+
         $pts = [];
         for ($n = 0; $n <= $muestras; $n++) {
             $t = $hasta * $n / $muestras;
@@ -285,6 +453,9 @@ final class CaseWaveforms
             foreach ($ondas as $onda) {
                 $d = $t - $onda['lat'];
                 $v += $onda['amp'] * exp(-($d * $d) / (2 * $onda['sigma'] * $onda['sigma']));
+            }
+            if ($ruido !== null) {
+                $v += $ruido[$n] * self::RUIDO_AMPLITUD_UV;
             }
             $pts[] = [$t, $v];
         }

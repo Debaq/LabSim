@@ -65,6 +65,15 @@ final class CaseCharts
     public const TRAZO_LDL = [3.0, 2.0];
 
     /**
+     * Cuánto se corre el símbolo óseo (no la línea) de la intersección
+     * frecuencia/intensidad, en pt: OD hacia la izquierda, OI hacia la
+     * derecha. Centrado, un umbral óseo igual al aéreo (lo más común) queda
+     * tapado por el círculo/cruz de la vía aérea en el mismo punto. Mismo
+     * valor que BONE_OFFSET en public/js/case/audiogram.js.
+     */
+    public const DESPLAZAMIENTO_OSEA = 4.0;
+
+    /**
      * Frecuencias en las que SÍ se mide vía ósea y LDL: 250 a 4000 Hz.
      *
      * Ni 125 ni 6000/8000 se prueban por vía ósea --el vibrador no entrega
@@ -218,7 +227,8 @@ final class CaseCharts
         array $aerea,
         array $osea,
         array $ldl,
-        array $ldlMedido
+        array $ldlMedido,
+        bool $estudio = false
     ): void {
         // Margen inferior mayor que el resto: los símbolos de "no responde"
         // se dibujan en 120 dB y la flecha les cuelga por debajo.
@@ -270,9 +280,23 @@ final class CaseCharts
         // Vía ósea: unida con línea punteada, por oído, y SOLO en las
         // frecuencias donde se mide (ver FREQS_OSEA). Se dibuja antes que
         // los símbolos para que el corchete quede encima de la línea.
+        //
+        // En la ficha de estudio, además, solo donde el aéreo de ESE oído
+        // está fuera de lo normal: en un examen real no se prueba vía ósea
+        // en una frecuencia con audición normal (no hay nada que
+        // diferenciar), así que mostrarla ahí sería un dato que el examen
+        // nunca habría generado. En la ficha del docente se sigue mostrando
+        // completa -- es el perfil que cargó el generador.
+        // El LDL se sigue midiendo igual en las dos versiones (no es vía
+        // ósea, no aplica la regla de arriba): $freqsOsea sin filtrar por
+        // aéreo es lo que usa esa sección más abajo.
         $freqsOsea = array_filter($freqs, static fn ($hz): bool => in_array($hz, self::FREQS_OSEA, true));
+        $freqsOseaPorLado = [
+            'od' => self::freqsOseaVisibles($freqs, $aerea['od'] ?? [], $estudio),
+            'oi' => self::freqsOseaVisibles($freqs, $aerea['oi'] ?? [], $estudio),
+        ];
         foreach (['od' => self::COLOR_OD, 'oi' => self::COLOR_OI] as $lado => $color) {
-            foreach (self::tramosConUmbral($osea[$lado] ?? [], $freqsOsea, $fx, $fy) as $tramo) {
+            foreach (self::tramosConUmbral($osea[$lado] ?? [], $freqsOseaPorLado[$lado], $fx, $fy) as $tramo) {
                 $pdf->polyline($tramo, 0.9, $color, self::TRAZO_OSEA);
             }
         }
@@ -310,18 +334,32 @@ final class CaseCharts
             }
 
             // Ósea enmascarada si hay gap >= 10 dB en el mismo oído (la
-            // atenuación interaural ósea es ~0). Solo donde se mide.
-            if (in_array($hz, self::FREQS_OSEA, true)) {
+            // atenuación interaural ósea es ~0). Solo donde se mide -- y,
+            // en la ficha de estudio, solo del lado que de verdad la
+            // tendría (ver freqsOseaPorLado más arriba): un oído puede
+            // tener el aéreo normal y el otro no en la misma frecuencia.
+            $mostrarOseaOd = in_array($hz, $freqsOseaPorLado['od'], true);
+            $mostrarOseaOi = in_array($hz, $freqsOseaPorLado['oi'], true);
+            if ($mostrarOseaOd || $mostrarOseaOi) {
                 $yOOd = $oOd >= self::SIN_UMBRAL_DB ? $fy((float) self::NIVEL_MAXIMO_DB) : $fy($oOd);
                 $yOOi = $oOi >= self::SIN_UMBRAL_DB ? $fy((float) self::NIVEL_MAXIMO_DB) : $fy($oOi);
+                // El símbolo (no la línea) se corre de la intersección:
+                // centrado, un umbral óseo igual al aéreo -lo más común-
+                // queda tapado por el círculo/cruz de la vía aérea.
+                $cxOOd = $cx - self::DESPLAZAMIENTO_OSEA;
+                $cxOOi = $cx + self::DESPLAZAMIENTO_OSEA;
 
-                self::corchete($pdf, $cx, $yOOd, self::COLOR_OD, 'izq', ($aOd - $oOd) >= self::GAP_ENMASCARA_OSEA);
-                if ($oOd >= self::SIN_UMBRAL_DB) {
-                    self::flechaAbajo($pdf, $cx, $yOOd, self::COLOR_OD, -1);
+                if ($mostrarOseaOd) {
+                    self::corchete($pdf, $cxOOd, $yOOd, self::COLOR_OD, 'izq', ($aOd - $oOd) >= self::GAP_ENMASCARA_OSEA);
+                    if ($oOd >= self::SIN_UMBRAL_DB) {
+                        self::flechaAbajo($pdf, $cxOOd, $yOOd, self::COLOR_OD, -1);
+                    }
                 }
-                self::corchete($pdf, $cx, $yOOi, self::COLOR_OI, 'der', ($aOi - $oOi) >= self::GAP_ENMASCARA_OSEA);
-                if ($oOi >= self::SIN_UMBRAL_DB) {
-                    self::flechaAbajo($pdf, $cx, $yOOi, self::COLOR_OI, 1);
+                if ($mostrarOseaOi) {
+                    self::corchete($pdf, $cxOOi, $yOOi, self::COLOR_OI, 'der', ($aOi - $oOi) >= self::GAP_ENMASCARA_OSEA);
+                    if ($oOi >= self::SIN_UMBRAL_DB) {
+                        self::flechaAbajo($pdf, $cxOOi, $yOOi, self::COLOR_OI, 1);
+                    }
                 }
             }
         }
@@ -353,6 +391,14 @@ final class CaseCharts
                     self::flechaAbajo($pdf, $fx((float) $hz), $yPt, $color, $lado === 'od' ? -1 : 1);
                 }
             }
+        }
+
+        // Rótulo fijo sobre el propio gráfico: 125 Hz no tiene ni vía ósea
+        // ni LDL (ver FREQS_OSEA), así que esa celda queda libre y sirve
+        // para identificar la línea de guiones sin depender solo de la
+        // leyenda lateral -- con margen del cruce de líneas, no pegado.
+        if (!empty($ldlMedido['od']) || !empty($ldlMedido['oi'])) {
+            $pdf->text($fx(125.0) + 4, $fy(80.0) - 4, 'LDL:', 6.5, true, self::COLOR_ROTULO);
         }
     }
 
@@ -683,6 +729,14 @@ final class CaseCharts
             $umdX = $fx((float) $cfg['umd_int']);
             $umdY = $fy((float) $cfg['umd_pct']);
             $pdf->polygon([[$umdX, $umdY - 3.2], [$umdX - 3.2, $umdY + 2.6], [$umdX + 3.2, $umdY + 2.6]], null, $color);
+
+            // Los otros niveles de UMD que trae la tabla (los escalones de
+            // 5 en 5 hasta el máximo, y el de rollover si corresponde):
+            // cada uno es un punto que se probó de verdad, así que va
+            // marcado en la curva y no solo en la tabla.
+            foreach ($cfg['puntos'] ?? [] as [$db, $pct]) {
+                $pdf->circle($fx((float) $db), $fy((float) $pct), 1.6, $color, null, 1.0);
+            }
         }
     }
 
@@ -788,6 +842,51 @@ final class CaseCharts
         return $pts;
     }
 
+    /**
+     * El % de discriminación a un dB dado, sobre la MISMA curva que dibuja
+     * `logogram()` -- la cúbica suave de `curvaSuave()`, no una recta entre
+     * los puntos. Cualquier punto que se marque con esto (o un número de
+     * tabla que se calcule con esto) cae justo encima de la curva impresa;
+     * calcularlo con una recta lo dejaba visiblemente afuera.
+     *
+     * `curvaSuave()` no depende de en qué unidades vengan los puntos --acá
+     * se le pasan directo en (dB, %), sin pasar por px/py de ningún
+     * gráfico-- así que sirve tanto para ubicar algo en la página como para
+     * leer un número solo.
+     */
+    public static function pctLogoEnDb(array $cfg, float $db): float
+    {
+        $pts = self::logogramPoints($cfg);
+        $db = max($pts[0][0], min($pts[count($pts) - 1][0], $db));
+        foreach (self::curvaSuave($pts) as [$x0, $y0, $c1x, $c1y, $c2x, $c2y, $x1, $y1]) {
+            if ($db < $x0 - 1e-9 || $db > $x1 + 1e-9) {
+                continue;
+            }
+            // Bisección sobre t: la x de una cúbica no se invierte a mano,
+            // pero es monótona creciente en cada tramo (mismo supuesto que
+            // ya hace curvaSuave para no pasarse de 100 % ni bajar de 0).
+            $bez = static fn (float $p0, float $p1, float $p2, float $p3, float $t): float => (1 - $t) ** 3 * $p0
+                + 3 * (1 - $t) ** 2 * $t * $p1
+                + 3 * (1 - $t) * $t ** 2 * $p2
+                + $t ** 3 * $p3;
+            $lo = 0.0;
+            $hi = 1.0;
+            for ($n = 0; $n < 40; $n++) {
+                $mid = ($lo + $hi) / 2;
+                if ($bez($x0, $c1x, $c2x, $x1, $mid) < $db) {
+                    $lo = $mid;
+                } else {
+                    $hi = $mid;
+                }
+            }
+            return $bez($y0, $c1y, $c2y, $y1, ($lo + $hi) / 2);
+        }
+        // No debería llegar acá ($db ya quedó dentro del rango de los
+        // puntos), pero un extremo es la salida segura si algún redondeo lo
+        // deja justo afuera del último tramo.
+        return $pts[count($pts) - 1][1];
+    }
+
     // -----------------------------------------------------------------
     // Trazos apilados (ABR / VEMP)
     // -----------------------------------------------------------------
@@ -813,7 +912,8 @@ final class CaseCharts
         array $series,
         string $color,
         float $hasta = 12.0,
-        string $unidadX = 'ms'
+        string $unidadX = 'ms',
+        int $replicasPorNivel = 1
     ): void {
         $series = array_values(array_filter($series, static fn ($s) => !empty($s['pts'])));
         if ($series === []) {
@@ -842,11 +942,25 @@ final class CaseCharts
         }
         $pico = max(0.05, $pico);
 
-        $separacion = $ph / count($series);
-        $ganancia = $separacion * 0.40 / $pico;
+        // Sin réplicas, cada trazo se reparte el alto en partes iguales,
+        // como siempre. Con réplicas (el ABR repite cada nivel dos veces),
+        // el hueco grande tiene que separar NIVELES, no repeticiones del
+        // mismo: se arma un slot por nivel y adentro las réplicas van
+        // pegadas -- cerca, pero sin pisarse la una a la otra.
+        $replicasPorNivel = max(1, $replicasPorNivel);
+        $grupos = (int) ceil(count($series) / $replicasPorNivel);
+        $separacionGrupo = $ph / max(1, $grupos);
+        $gapReplica = $replicasPorNivel > 1 ? $separacionGrupo * 0.3 : 0.0;
+        $anchoTrazo = $replicasPorNivel > 1 ? $gapReplica : $separacionGrupo;
+        $ganancia = $anchoTrazo * 0.42 / $pico;
 
         foreach ($series as $i => $serie) {
-            $base = $py + $separacion * ($i + 0.5);
+            $grupo = intdiv($i, $replicasPorNivel);
+            $posEnGrupo = $i % $replicasPorNivel;
+            $centroGrupo = $py + $separacionGrupo * ($grupo + 0.5);
+            $base = $replicasPorNivel > 1
+                ? $centroGrupo - $gapReplica * ($replicasPorNivel - 1) / 2 + $gapReplica * $posEnGrupo
+                : $centroGrupo;
             // Línea de base: sin ella un trazo plano (sin respuesta) no se
             // distingue de un trazo que no se dibujó.
             $pdf->line($px, $base, $px + $pw, $base, 0.3, self::COLOR_GRID);
@@ -856,7 +970,12 @@ final class CaseCharts
                 $pts[] = [$fx((float) $t), $base - (float) $v * $ganancia];
             }
             $pdf->polyline($pts, 0.9, $color);
-            $pdf->textRight($px - 3, $base + 2, (string) $serie['rotulo'], 5.5, false, self::COLOR_ROTULO);
+            // Con réplicas, el rótulo va una sola vez por par -- dos
+            // números iguales pegados uno al otro leerían como un error de
+            // impresión, no como una repetición a propósito.
+            if ($posEnGrupo === 0) {
+                $pdf->textRight($px - 3, $base + 2, (string) $serie['rotulo'], 5.5, false, self::COLOR_ROTULO);
+            }
 
             foreach ($serie['marcas'] ?? [] as $marca) {
                 $mx = $fx((float) $marca['t']);
@@ -1196,6 +1315,30 @@ final class CaseCharts
     // -----------------------------------------------------------------
     // Interno
     // -----------------------------------------------------------------
+
+    /**
+     * Las frecuencias donde va la vía ósea de UN oído (línea y símbolo).
+     * Siempre las de FREQS_OSEA -- ahí es donde se mide -- pero en la ficha
+     * de estudio, además, solo donde el aéreo de ESE oído está fuera de lo
+     * normal: en un examen real no se prueba vía ósea en una frecuencia
+     * con audición normal (no hay nada que diferenciar), así que mostrarla
+     * ahí sería un dato que el examen nunca habría generado. En la ficha
+     * del docente se sigue mostrando completa -- es el perfil que cargó el
+     * generador.
+     *
+     * @param array<int,int> $freqs CaseBuilder::FREQUENCIES, con sus índices originales
+     * @param array<int,float> $aereaLado umbrales aéreos de ESE oído, por índice de frecuencia
+     * @return array<int,int> subconjunto de $freqs, con los mismos índices originales
+     */
+    public static function freqsOseaVisibles(array $freqs, array $aereaLado, bool $estudio): array
+    {
+        return array_filter($freqs, static function ($i) use ($freqs, $estudio, $aereaLado): bool {
+            if (!in_array($freqs[$i], self::FREQS_OSEA, true)) {
+                return false;
+            }
+            return !$estudio || (float) ($aereaLado[$i] ?? 0) > self::LIMITE_NORMALIDAD_DB;
+        }, ARRAY_FILTER_USE_KEY);
+    }
 
     /**
      * Parte una serie en los tramos que SÍ tienen umbral. Los huecos no se

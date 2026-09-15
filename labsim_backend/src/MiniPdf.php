@@ -139,15 +139,63 @@ final class MiniPdf
         return $lines;
     }
 
-    /** Dibuja texto envuelto empezando en (x,y), devuelve la Y siguiente (después de la última línea). */
-    public function textBlock(float $x, float $y, string $text, float $maxWidth, float $size = 10, bool $bold = false, float $lineHeight = 0, ?string $color = null): float
+    /**
+     * Dibuja texto envuelto empezando en (x,y), devuelve la Y siguiente
+     * (después de la última línea).
+     *
+     * `$justificado` estira el espacio ENTRE palabras (operador `Tw` del
+     * PDF) para que cada línea, salvo la última del bloque, llegue exacto
+     * a `$maxWidth` -- como un texto de verdad impreso, no en bandera. La
+     * última línea queda alineada a la izquierda, sin estirar (una línea
+     * corta justificada se ve peor, con las palabras separadas por kilómetros).
+     * Una línea de una sola palabra tampoco se estira: no hay espacio que
+     * mover.
+     */
+    public function textBlock(float $x, float $y, string $text, float $maxWidth, float $size = 10, bool $bold = false, float $lineHeight = 0, ?string $color = null, bool $justificado = false): float
     {
         $lineHeight = $lineHeight > 0 ? $lineHeight : $size * 1.35;
-        foreach ($this->wrapText($text, $size, $maxWidth, $bold) as $line) {
-            $this->drawWinAnsiLine($x, $y, $line, $size, $bold, $color);
+        $lineas = $this->wrapText($text, $size, $maxWidth, $bold);
+        $ultima = count($lineas) - 1;
+        foreach ($lineas as $i => $line) {
+            if ($justificado && $i !== $ultima) {
+                $this->drawJustifiedLine($x, $y, $line, $size, $bold, $maxWidth, $color);
+            } else {
+                $this->drawWinAnsiLine($x, $y, $line, $size, $bold, $color);
+            }
             $y += $lineHeight;
         }
         return $y;
+    }
+
+    /**
+     * Una línea YA en WinAnsi, estirada con `Tw` (espaciado entre
+     * palabras) para llegar justo a `$maxWidth`. El `Tw` es estado de
+     * texto que persiste en el content stream más allá de este BT/ET --
+     * por eso se resetea a 0 ANTES de cerrar, para no correr el espaciado
+     * de todo el texto que se dibuje después.
+     */
+    private function drawJustifiedLine(float $x, float $y, string $winAnsiLine, float $size, bool $bold, float $maxWidth, ?string $color = null): void
+    {
+        $espacios = substr_count($winAnsiLine, ' ');
+        if ($espacios < 1) {
+            $this->drawWinAnsiLine($x, $y, $winAnsiLine, $size, $bold, $color);
+            return;
+        }
+        $anchoNatural = HelveticaWidths::width($winAnsiLine, $size, $bold);
+        $extra = max(0.0, ($maxWidth - $anchoNatural) / $espacios);
+
+        $font = $bold ? '/FB' : '/F1';
+        $encoded = self::esc($winAnsiLine);
+        $pdfY = $this->pageH - $y;
+        $ops = sprintf(
+            "BT %s %.2F Tf %.2F Tw %.2F %.2F Td (%s) Tj 0 Tw ET\n",
+            $font, $size, $extra, $x, $pdfY, $encoded
+        );
+        if ($color === null) {
+            $this->currentStream .= $ops;
+            return;
+        }
+        $this->wrapped($ops, null, $color);
     }
 
     public function line(float $x1, float $y1, float $x2, float $y2, float $width = 0.5, ?string $color = null, ?array $dash = null): void

@@ -294,10 +294,11 @@ function admin_footer(): void
     paint();
 })();
 
-// Nav dropdowns (<details class="nav-group">): <details> nativo no se cierra
-// solo al clickear afuera ni cuando abrís otro -- lo agregamos acá.
+// Nav dropdowns (<details class="nav-group">) y menús de fila
+// (<details class="row-menu">, ej. patients.php): <details> nativo no se
+// cierra solo al clickear afuera ni cuando abrís otro -- lo agregamos acá.
 (function () {
-    var groups = document.querySelectorAll('details.nav-group');
+    var groups = document.querySelectorAll('details.nav-group, details.row-menu');
     if (!groups.length) return;
 
     groups.forEach(function (g) {

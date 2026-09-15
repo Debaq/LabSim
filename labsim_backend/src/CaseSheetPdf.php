@@ -27,6 +27,15 @@ require_once __DIR__ . '/CaseCompleteness.php';
  * supraliminares, ABR, OEA y VEMP-- para revisar, archivar o repartir en
  * clase.
  *
+ * Con `$estudio = true` (build()) arma en cambio la "ficha de estudio": el
+ * mismo documento, mismos exámenes y mismos gráficos, pero sin el perfil
+ * auditivo (dónde está la lesión, de qué tipo, si hay retrococlear -- la
+ * SOLUCIÓN del caso) ni los parámetros internos del generador (patología
+ * cargada, atenuación/ruido/sello del equipo, captura y FSP del ABR,
+ * desviaciones cargadas a mano, disposición del paciente, si la anamnesis
+ * la escribió una IA). Es para repartir al alumno como si fuera la ficha de
+ * un paciente real: con los hallazgos de cada examen, no con la respuesta.
+ *
  * Es función pura sobre arrays: entra `cases.data` y sale el PDF en bytes.
  * No toca PDO ni $_GET, así se puede testear sin base de datos (ver
  * tests/test_case_sheet_pdf.php).
@@ -144,10 +153,20 @@ final class CaseSheetPdf
     /**
      * @param array<string,mixed> $data cases.data
      * @param array{nombre?:string,rut?:string,fecha_nac?:string} $patient
+     * @param bool $estudio true arma la "ficha de estudio": los mismos
+     *        exámenes, pero sin el perfil auditivo (la solución del caso) ni
+     *        los parámetros internos del generador -- ver el docblock de la
+     *        clase.
      * @return string bytes del PDF
      */
-    public static function build(string $caseId, array $data, array $patient = [], string $emisor = '', string $fecha = ''): string
-    {
+    public static function build(
+        string $caseId,
+        array $data,
+        array $patient = [],
+        string $emisor = '',
+        string $fecha = '',
+        bool $estudio = false
+    ): string {
         $nombre = trim((string) ($patient['nombre'] ?? ''));
         $fecha = $fecha !== '' ? $fecha : date('d-m-Y');
         // El año del pie es el de la impresión, no el del caso: la marca
@@ -156,32 +175,36 @@ final class CaseSheetPdf
         // Lo que el visor muestra en la pestaña. Sin esto queda el nombre
         // del script que sirve el PDF (case_sheet_pdf.pdf).
         $doc->pdf->setTitle(self::identificador($caseId, $patient));
-        $doc->portada($caseId, $data, $patient, $emisor, $fecha);
-        $doc->resumenPorOido($data);
+        $doc->portada($caseId, $data, $patient, $emisor, $fecha, $estudio);
+        // El perfil auditivo es la solución del caso (dónde está la lesión,
+        // de qué tipo, si hay retrococlear): en la ficha de estudio no va.
+        if (!$estudio) {
+            $doc->resumenPorOido($data);
+        }
         // La historia antes que los exámenes, como se lee una ficha: quién
         // es el paciente y qué cuenta, y recién después qué mide cada
         // prueba.
-        $doc->clinica($data);
+        $doc->clinica($data, $estudio);
 
         $doc->paginaNueva();
-        $doc->audiometria($data);
-        $doc->acumetria($data);
+        $doc->audiometria($data, $estudio);
+        $doc->acumetria($data, $estudio);
         // Las supraliminares van pegadas al tonal: son el mismo audiómetro y
         // se leen sobre los umbrales de arriba.
-        $doc->supraliminares($data);
-        $doc->logoaudiometria($data);
+        $doc->supraliminares($data, $estudio);
+        $doc->logoaudiometria($data, $estudio);
 
         $doc->paginaNueva();
-        $doc->impedanciometria($data);
+        $doc->impedanciometria($data, $estudio);
 
         $doc->paginaNueva();
-        $doc->abr($data);
+        $doc->abr($data, $estudio);
 
         $doc->paginaNueva();
-        $doc->eoas($data);
+        $doc->eoas($data, $estudio);
 
         $doc->paginaNueva();
-        $doc->vemp($data);
+        $doc->vemp($data, $estudio);
         return $doc->pdf->output();
     }
 
@@ -189,7 +212,7 @@ final class CaseSheetPdf
     // Secciones
     // -----------------------------------------------------------------
 
-    private function portada(string $caseId, array $data, array $patient, string $emisor, string $fecha): void
+    private function portada(string $caseId, array $data, array $patient, string $emisor, string $fecha, bool $estudio = false): void
     {
         $xTitulo = self::MARGEN;
         $logo = PdfImage::jpegBytes(self::LOGO);
@@ -200,7 +223,7 @@ final class CaseSheetPdf
             $this->pdf->imageJpeg($logo['data'], $logo['w'], $logo['h'], 'logo', self::MARGEN, $this->y - 14, $lado, $lado);
             $xTitulo += $lado + 9;
         }
-        $this->pdf->text($xTitulo, $this->y + 4, 'Ficha del caso', 19, true, self::GRIS_TITULO);
+        $this->pdf->text($xTitulo, $this->y + 4, $estudio ? 'Ficha de estudio' : 'Ficha del caso', 19, true, self::GRIS_TITULO);
         $this->pdf->textRight(self::MARGEN + $this->anchoContenido, $this->y + 4, '#' . $caseId, 13, true, self::GRIS_SUAVE);
         $this->y += 20;
         $this->pdf->line(self::MARGEN, $this->y, self::MARGEN + $this->anchoContenido, $this->y, 1.2, self::GRIS_TITULO);
@@ -244,8 +267,9 @@ final class CaseSheetPdf
 
         // Lo que el caso todavía no decidió. El docente que apoya en vivo
         // tiene que saber si va a encontrarse con un examen a medio armar
-        // antes de que se lo encuentre el alumno.
-        $pendientes = CaseCompleteness::pendingTexts($data);
+        // antes de que se lo encuentre el alumno -- pero es un aviso PARA el
+        // docente, no algo que vaya en la ficha que recibe el alumno.
+        $pendientes = $estudio ? [] : CaseCompleteness::pendingTexts($data);
         if ($pendientes !== []) {
             $this->pdf->text(
                 self::MARGEN,
@@ -354,7 +378,7 @@ final class CaseSheetPdf
         );
     }
 
-    private function audiometria(array $data): void
+    private function audiometria(array $data, bool $estudio = false): void
     {
         $this->titulo('Audiometría tonal', 195.0);
 
@@ -370,31 +394,39 @@ final class CaseSheetPdf
 
         $alto = 168.0;
         $this->espacio($alto + 22);
-        CaseCharts::audiogram($this->pdf, self::MARGEN, $this->y, $this->anchoContenido * 0.62, $alto, $aerea, $osea, $ldl, $ldlMedido);
+        CaseCharts::audiogram($this->pdf, self::MARGEN, $this->y, $this->anchoContenido * 0.62, $alto, $aerea, $osea, $ldl, $ldlMedido, $estudio);
 
         // Al lado del gráfico, la leyenda de símbolos: un audiograma sin
         // leyenda obliga a recordar la convención de memoria.
         $xLeyenda = self::MARGEN + $this->anchoContenido * 0.66;
         $anchoLeyenda = $this->anchoContenido * 0.34;
         $yLeyenda = CaseCharts::symbolLegend($this->pdf, $xLeyenda, $this->y + 16, $anchoLeyenda);
-        $this->pdf->textBlock(
-            $xLeyenda,
-            $yLeyenda + 6,
-            'El enmascaramiento lo infiere el motor, no se carga a mano.',
-            $anchoLeyenda - 4,
-            6.5,
-            false,
-            8,
-            self::GRIS_SUAVE
-        );
+        // "El enmascaramiento lo infiere el motor..." es cómo opera el
+        // software, no algo que vaya en la ficha del alumno.
+        if (!$estudio) {
+            $this->pdf->textBlock(
+                $xLeyenda,
+                $yLeyenda + 6,
+                'El enmascaramiento lo infiere el motor, no se carga a mano.',
+                $anchoLeyenda - 4,
+                6.5,
+                false,
+                8,
+                self::GRIS_SUAVE
+            );
+        }
         $this->y += $alto + 10;
 
         // Debajo del audiograma va el enmascaramiento y no una tabla de
         // umbrales: los umbrales ya están en el gráfico, y lo que no se ve
         // ahí --de qué oído es cada punto, y con cuánto ruido se demuestra--
         // es justo lo que hay que decidir en la cabina. Las cuentas son las
-        // de la app (ver CaseMasking).
-        $this->enmascaramiento($aerea, $osea);
+        // de la app (ver CaseMasking) -- y son justo eso, la cuenta hecha:
+        // en la ficha de estudio el alumno decide el enmascaramiento en la
+        // cabina, no lo lee de una tabla.
+        if (!$estudio) {
+            $this->enmascaramiento($aerea, $osea);
+        }
     }
 
     /**
@@ -470,7 +502,7 @@ final class CaseSheetPdf
      * ese oído. El Weber no es un resultado por oído sino uno solo: una
      * flecha hacia el lado al que lateraliza, y dos flechas cuando no.
      */
-    private function acumetria(array $data): void
+    private function acumetria(array $data, bool $estudio = false): void
     {
         $this->titulo('Acumetría (diapasones)', 100.0);
 
@@ -527,20 +559,25 @@ final class CaseSheetPdf
             // Rinne. Se dibujan: el carácter -> no existe en WinAnsi, que es
             // la codificación del texto del PDF.
             if ($lado === 'od' || $lado === 'centrado') {
-                $this->flecha($xWeber - $gap, $centro, -16.0, $lado === 'od' ? CaseCharts::COLOR_OD : self::GRIS_SUAVE);
+                $this->flecha($xWeber - $gap, $centro, -16.0, CaseCharts::COLOR_OD);
             }
             if ($lado === 'oi' || $lado === 'centrado') {
-                $this->flecha($xWeber + $gap, $centro, 16.0, $lado === 'oi' ? CaseCharts::COLOR_OI : self::GRIS_SUAVE);
+                $this->flecha($xWeber + $gap, $centro, 16.0, CaseCharts::COLOR_OI);
             }
             $this->pdf->textCenter($xWeber, $base, self::hz((int) $hz) . ' Hz', 8, true, self::GRIS_TITULO);
-            $this->pdf->text(
-                $xWeber + 58,
-                $base,
-                CaseBuilder::WEBER_LABELS[$lado] ?? $lado,
-                7.5,
-                false,
-                self::GRIS_TEXTO
-            );
+            // "Lateraliza a OD/OI" es el veredicto: la flecha ya dice para
+            // dónde lateraliza, y decirlo también en texto sería resolverle
+            // la lectura al alumno.
+            if (!$estudio) {
+                $this->pdf->text(
+                    $xWeber + 58,
+                    $base,
+                    CaseBuilder::WEBER_LABELS[$lado] ?? $lado,
+                    7.5,
+                    false,
+                    self::GRIS_TEXTO
+                );
+            }
             $y += 14;
         }
 
@@ -586,7 +623,7 @@ final class CaseSheetPdf
         );
     }
 
-    private function impedanciometria(array $data): void
+    private function impedanciometria(array $data, bool $estudio = false): void
     {
         $this->titulo('Impedanciometría', 210.0);
 
@@ -600,7 +637,7 @@ final class CaseSheetPdf
             ['od', 'OD', (string) ($data['Z_OD'] ?? 'A'), CaseCharts::COLOR_OD, self::MARGEN, (string) ($volumen[0] ?? 'N/D'), (string) ($etf[0] ?? 'Normal')],
             ['oi', 'OI', (string) ($data['Z_OI'] ?? 'A'), CaseCharts::COLOR_OI, self::MARGEN + $ancho + 20, (string) ($volumen[1] ?? 'N/D'), (string) ($etf[1] ?? 'Normal')],
         ] as [$lado, $rotulo, $tipo, $color, $x, $vol, $etfLado]) {
-            $this->pdf->text($x, $this->y + self::ASCENDENTE * 8, $rotulo . ' - curva tipo ' . $tipo, 8, true, $color);
+            $this->pdf->text($x, $this->y + self::ASCENDENTE * 8, $rotulo, 8, true, $color);
             // El eje llega a 2 mL, que es lo que trae el equipo: un pico más
             // alto se sale por arriba ahí y acá igual, así que se avisa en
             // vez de cambiarle la escala a esta ficha sola.
@@ -615,7 +652,21 @@ final class CaseSheetPdf
                     self::GRIS_TEXTO
                 );
             }
-            CaseCharts::tympanogram($this->pdf, $x, $this->y + 11, $ancho, $alto, $tipo, $color);
+            $yGrafico = $this->y + 11;
+            CaseCharts::tympanogram($this->pdf, $x, $yGrafico, $ancho, $alto, $tipo, $color);
+            // La letra de Jerger SÍ va: es lo que cualquiera lee directo de
+            // la curva, no una respuesta que el caso esconda. Se imprime
+            // sobre el gráfico mismo, como en un equipo real -- OD arriba a
+            // la izquierda, OI arriba a la derecha, con margen (no pegada a
+            // la esquina para no comerse la curva ni el eje).
+            $margenLetra = 20.0;
+            $tamanoLetra = 15.0;
+            $yLetra = $yGrafico + $margenLetra + $tamanoLetra * self::ASCENDENTE;
+            if ($lado === 'od') {
+                $this->pdf->text($x + $margenLetra, $yLetra, $tipo, $tamanoLetra, true, $color);
+            } else {
+                $this->pdf->textRight($x + $ancho - $margenLetra, $yLetra, $tipo, $tamanoLetra, true, $color);
+            }
             $this->pdf->text(
                 $x,
                 $this->y + $alto + 20,
@@ -683,21 +734,31 @@ final class CaseSheetPdf
         $tipoOi = (string) ($data['Z_OI'] ?? 'A');
         $vOd = CaseCharts::valoresTimpanograma($tipoOd);
         $vOi = CaseCharts::valoresTimpanograma($tipoOi);
-        $presion = static function (array $v): string {
+        // El caso guarda solo la letra: la app sortea compliance y presión
+        // dentro del rango de la letra, así que el rango completo es la
+        // ficha de respuestas. La ficha de estudio se queda con un único
+        // valor -- el centro del rango, que es el mismo que usa la curva de
+        // arriba (CaseCharts::valoresTimpanograma) -- como leería el alumno
+        // el número en la pantalla de un equipo real.
+        $presion = static function (array $v) use ($estudio): string {
             if ($v['plana']) {
                 return 'sin pico';
             }
 
-            return self::db($v['p_min']) . ' a ' . self::db($v['p_max']) . ' daPa';
+            return $estudio
+                ? self::db($v['pico_dapa']) . ' daPa'
+                : self::db($v['p_min']) . ' a ' . self::db($v['p_max']) . ' daPa';
         };
-        $compliance = static function (array $v): string {
+        $compliance = static function (array $v) use ($estudio): string {
             // Un B queda por debajo de la resolución del equipo: "0,00 a
             // 0,00" se leería como un dato medido y no lo es.
             if ($v['c_max'] < 0.01) {
                 return 'menor a 0.01 mL';
             }
 
-            return number_format($v['c_min'], 2) . ' a ' . number_format($v['c_max'], 2) . ' mL';
+            return $estudio
+                ? number_format($v['estatica'], 2) . ' mL'
+                : number_format($v['c_min'], 2) . ' a ' . number_format($v['c_max'], 2) . ' mL';
         };
         $gradiente = static function (array $v): string {
             return number_format($v['gradiente'], 2);
@@ -708,14 +769,27 @@ final class CaseSheetPdf
 
         $filasZ = [
             ['Timpanograma', 'OD', 'OI'],
+            // La letra de Jerger no es una respuesta escondida: se lee
+            // directo de la curva (y ahora también va impresa sobre el
+            // gráfico), así que la tabla la trae en las dos versiones.
             ['Tipo (Jerger)', $tipoOd, $tipoOi],
-            ['Compliance estática', $compliance($vOd), $compliance($vOi)],
-            ['Presión del pico', $presion($vOd), $presion($vOi)],
-            ['Gradiente', $gradiente($vOd), $gradiente($vOi)],
-            ['Gradiente en el equipo', $gradienteEquipo($vOd), $gradienteEquipo($vOi)],
-            ['Volumen del CAE', (string) ($volumen[0] ?? 'N/D') . ' mL', (string) ($volumen[1] ?? 'N/D') . ' mL'],
-            ['Función tubaria', (string) ($etf[0] ?? 'Normal'), (string) ($etf[1] ?? 'Normal')],
         ];
+        $filasZ[] = ['Compliance estática', $compliance($vOd), $compliance($vOi)];
+        $filasZ[] = ['Presión del pico', $presion($vOd), $presion($vOi)];
+        $filasZ[] = ['Gradiente', $gradiente($vOd), $gradiente($vOi)];
+        // "Gradiente en el equipo" es el mismo dato recalculado con el ancho
+        // fijo que usa la app internamente: sirve para comparar contra la
+        // tabla del alumno, no para la ficha que el alumno recibe.
+        if (!$estudio) {
+            $filasZ[] = ['Gradiente en el equipo', $gradienteEquipo($vOd), $gradienteEquipo($vOi)];
+        }
+        $filasZ[] = ['Volumen del CAE', (string) ($volumen[0] ?? 'N/D') . ' mL', (string) ($volumen[1] ?? 'N/D') . ' mL'];
+        // "Función tubaria" es un veredicto cargado a mano (Normal/Disfunción
+        // tubaria), no algo que se lea de una curva: en la ficha de estudio
+        // no va.
+        if (!$estudio) {
+            $filasZ[] = ['Función tubaria', (string) ($etf[0] ?? 'Normal'), (string) ($etf[1] ?? 'Normal')];
+        }
         $finZ = $this->tablaEn(
             self::MARGEN + $anchoReflejos + 14,
             $yTablasZ,
@@ -727,23 +801,35 @@ final class CaseSheetPdf
         $this->y = max($finReflejos, $finZ) + 4;
 
         $tipos = $reflex['tipo'] ?? [];
-        $this->parrafo(
-            'Umbrales en dB HL; (-) = sin respuesta en toda la escala. Morfología de la curva: OD '
-            . (string) ($tipos['od'] ?? 'normal') . ', OI ' . (string) ($tipos['oi'] ?? 'normal') . '.',
-            7
-        );
-        $this->parrafo(
-            'El caso guarda sólo la letra de Jerger: la compliance y la presión las sortea el equipo '
-            . 'dentro del rango de arriba, distintas para cada paciente, y la curva de acá usa el centro. '
-            . 'El recuadro amarillo es de donde sale la gradiente --alto del pico por 100 daPa a su '
-            . 'alrededor--, que es cuánto de ese alto conserva la curva en los bordes. La segunda fila '
-            . 'es la que va a leer el alumno: el equipo dibuja todas las curvas con el mismo ancho, así '
-            . 'que ahí da 0,85 en cualquier curva con pico y no distingue una letra de otra.',
-            7
-        );
+        // La morfología (normal/invertido) es un hallazgo de la curva de
+        // reflejos -- parte de la respuesta, como la letra de Jerger -- así
+        // que en la ficha de estudio no va, y con ella se cae el aviso de
+        // "(-) = sin respuesta" (era la misma frase).
+        if ($estudio) {
+            $this->parrafo('Umbrales en dB SPL; (-) = sin respuesta en toda la escala.', 7);
+        } else {
+            $this->parrafo(
+                'Umbrales en dB SPL; (-) = sin respuesta en toda la escala. Morfología de la curva: OD '
+                . (string) ($tipos['od'] ?? 'normal') . ', OI ' . (string) ($tipos['oi'] ?? 'normal') . '.',
+                7
+            );
+            // Esto explica cómo arma la curva el generador (compliance y
+            // presión sorteadas, gradiente del equipo con ancho fijo): es
+            // mecánica del software, no algo que vaya en la ficha del
+            // alumno.
+            $this->parrafo(
+                'El caso guarda sólo la letra de Jerger: la compliance y la presión las sortea el equipo '
+                . 'dentro del rango de arriba, distintas para cada paciente, y la curva de acá usa el centro. '
+                . 'El recuadro amarillo es de donde sale la gradiente --alto del pico por 100 daPa a su '
+                . 'alrededor--, que es cuánto de ese alto conserva la curva en los bordes. La segunda fila '
+                . 'es la que va a leer el alumno: el equipo dibuja todas las curvas con el mismo ancho, así '
+                . 'que ahí da 0,85 en cualquier curva con pico y no distingue una letra de otra.',
+                7
+            );
+        }
     }
 
-    private function logoaudiometria(array $data): void
+    private function logoaudiometria(array $data, bool $estudio = false): void
     {
         $this->titulo('Logoaudiometría', 98.0);
 
@@ -751,6 +837,11 @@ final class CaseSheetPdf
         $sdt = is_array($data['SDT'] ?? null) ? $data['SDT'] : [0, 0];
         $srt = is_array($data['SRT'] ?? null) ? $data['SRT'] : [0, 0];
         $recruit = is_array($data['recruit'] ?? null) ? $data['recruit'] : [false, false];
+        // El enmascaramiento de SDT/SRT/UMD se calcula contra la vía ósea
+        // del oído contrario (ver CaseMasking::logo()): hace falta la
+        // audiometría, no solo lo que guarda esta sección.
+        $osea = self::desarmar($data['Osea'] ?? []);
+        $bone = ['od' => CaseMasking::boneSdt($osea['od']), 'oi' => CaseMasking::boneSdt($osea['oi'])];
 
         $porLado = [];
         foreach (['od' => 0, 'oi' => 1] as $lado => $i) {
@@ -763,6 +854,30 @@ final class CaseSheetPdf
             ];
         }
 
+        // Los niveles de UMD son POR OÍDO: cada uno sube de 5 en 5 dB hasta
+        // SU máximo (y un escalón más arriba solo si tiene rollover, para
+        // mostrar la caída) -- no tiene sentido seguir subiendo la
+        // intensidad en el oído que ya llegó a su techo. La tabla junta las
+        // dos listas en filas compartidas (para leerlas una al lado de la
+        // otra), pero un nivel que no es de la ventana propia de un oído
+        // queda en "--": ese oído no se probó ahí, no se inventa un número
+        // leyendo la curva más allá de donde el examen llegó.
+        $propios = [
+            'od' => self::nivelesUmdEar($porLado['od']['umd_int'], $porLado['od']['recruit']),
+            'oi' => self::nivelesUmdEar($porLado['oi']['umd_int'], $porLado['oi']['recruit']),
+        ];
+        foreach (['od', 'oi'] as $lado) {
+            // Los mismos puntos, para marcarlos en el gráfico de arriba: el
+            // del propio UMD no (ya lo marca el triángulo).
+            $porLado[$lado]['puntos'] = [];
+            foreach ($propios[$lado] as $nivel) {
+                if (abs($nivel - $porLado[$lado]['umd_int']) < 0.01) {
+                    continue;
+                }
+                $porLado[$lado]['puntos'][] = [$nivel, self::pctEnNivelUmd($nivel, $porLado[$lado])];
+            }
+        }
+
         $alto = 98.0;
         $this->espacio($alto + 24);
         CaseCharts::logogram($this->pdf, self::MARGEN, $this->y, $this->anchoContenido * 0.55, $alto, $porLado);
@@ -770,23 +885,110 @@ final class CaseSheetPdf
 
         $x = self::MARGEN + $this->anchoContenido * 0.6;
         $ancho = $this->anchoContenido * 0.4;
-        $filas = [['', 'OD', 'OI']];
-        $filas[] = ['SDT (dB)', self::db($porLado['od']['sdt']), self::db($porLado['oi']['sdt'])];
-        $filas[] = ['SRT (dB)', self::db($porLado['od']['srt']), self::db($porLado['oi']['srt'])];
-        // La UMD se anota como una sola cosa: "96 % a 70 dB". Partida en dos
-        // filas se leía como si fueran dos resultados distintos.
-        $filas[] = [
-            'UMD',
-            self::pct($porLado['od']['umd_pct']) . ' a ' . self::db($porLado['od']['umd_int']) . ' dB',
-            self::pct($porLado['oi']['umd_pct']) . ' a ' . self::db($porLado['oi']['umd_int']) . ' dB',
-        ];
-        $filas[] = ['Rollover', $porLado['od']['recruit'] ? 'Sí' : 'No', $porLado['oi']['recruit'] ? 'Sí' : 'No'];
-        $yTabla = $this->tablaEn($x, $this->y + 8, $ancho, $filas, [0.4, 0.3, 0.3], true);
+        $filas = [];
+
+        // SDT, SRT y cada nivel de UMD llevan su propio mkg (mismas
+        // fórmulas que CaseMasking::logo(), a la intensidad de cada uno):
+        // solo el dB cuando no hace falta enmascarar, "dB/mkg" cuando sí.
+        // El mkg es UN valor -- el mínimo efectivo, el que de verdad se usa
+        // (de más solo tapa y arriesga cruzar de vuelta) -- no el rango
+        // entero como en la tabla tonal, que ahí sí importa mostrar entero
+        // porque el alumno tiene que encontrar el propio.
+        //
+        // Colores: el dB propio y el % van del color del oído de la fila
+        // (rojo OD, azul OI); el mkg va del color del oído CONTRARIO,
+        // porque el ruido que enmascara se pone en el auricular del otro
+        // oído -- es SU número, no el del oído que se está leyendo.
+        //
+        // Las filas de UMD no comparten un dB de fila: cada oído prueba SU
+        // propia ventana (ver nivelesUmdEar()), así que forzarlas a un
+        // mismo nivel de fila dejaba celdas en "--" que no aportaban nada.
+        // Cada celda ya dice a qué dB corresponde, así que alcanza con
+        // numerarlas UMD1/UMD2/UMD3 en vez de por dB.
+        $colorDe = static fn (string $lado): string => $lado === 'od' ? CaseCharts::COLOR_OD : CaseCharts::COLOR_OI;
+        $celdaHabla = static function (?float $nivel, string $lado, string $otro, ?float $pct) use ($porLado, $bone, $colorDe): array {
+            if ($nivel === null) {
+                return [];
+            }
+            $propio = $colorDe($lado);
+            $contrario = $colorDe($otro);
+            $mkg = CaseMasking::logo($nivel, $bone[$lado], $bone[$otro], $porLado[$otro]['sdt']);
+            $segmentos = [[self::db($nivel) . ' dB', $propio]];
+            if ($mkg['cruza']) {
+                $segmentos[] = ['/', self::GRIS_TEXTO];
+                $segmentos[] = [self::db($mkg['min']) . ' dB', $contrario];
+            }
+            if ($pct !== null) {
+                $segmentos[] = [' ' . self::pct($pct), $propio];
+            }
+            return $segmentos;
+        };
+        $filaHabla = static function (string $rotulo, ?float $nivelOd, ?float $nivelOi, bool $conPct) use (&$filas, $celdaHabla, $porLado): void {
+            $filas[] = [
+                'label' => $rotulo,
+                'od' => $celdaHabla($nivelOd, 'od', 'oi', $conPct ? self::pctEnNivelUmd($nivelOd ?? 0.0, $porLado['od']) : null),
+                'oi' => $celdaHabla($nivelOi, 'oi', 'od', $conPct ? self::pctEnNivelUmd($nivelOi ?? 0.0, $porLado['oi']) : null),
+            ];
+        };
+        $filaHabla('SDT', $porLado['od']['sdt'], $porLado['oi']['sdt'], false);
+        $filaHabla('SRT', $porLado['od']['srt'], $porLado['oi']['srt'], false);
+        $filasUmd = max(count($propios['od']), count($propios['oi']));
+        for ($i = 0; $i < $filasUmd; $i++) {
+            $filaHabla('UMD' . ($i + 1), $propios['od'][$i] ?? null, $propios['oi'][$i] ?? null, true);
+        }
+        // El rollover es la respuesta, no un dato de lectura: ya se ve en
+        // los niveles de UMD de arriba (el % que baja pasado el máximo), así
+        // que decirlo aparte sería resolverle el hallazgo al alumno.
+        if (!$estudio) {
+            $filas[] = [
+                'label' => 'Rollover',
+                'od' => [[$porLado['od']['recruit'] ? 'Sí' : 'No', $colorDe('od')]],
+                'oi' => [[$porLado['oi']['recruit'] ? 'Sí' : 'No', $colorDe('oi')]],
+            ];
+        }
+        $yTabla = self::tablaHablaColoreada($this->pdf, $x, $this->y + 8, $ancho, $filas);
 
         $this->y = max($this->y + $alto + 18, $yTabla + 4);
     }
 
-    private function supraliminares(array $data): void
+    /**
+     * La tabla de SDT/SRT/UMD, con celdas de más de un color (el propio dB
+     * y el mkg del oído contrario no pueden ir del mismo color) -- por eso
+     * no usa tablaEn(), que pinta cada celda entera de un solo color.
+     *
+     * @param array<int,array{label:string,od:array<int,array{0:string,1:string}>,oi:array<int,array{0:string,1:string}>}> $filas
+     */
+    private static function tablaHablaColoreada(MiniPdf $pdf, float $x, float $y, float $ancho, array $filas): float
+    {
+        $anchoEtq = $ancho * 0.22;
+        $anchoCol = $ancho * 0.39;
+        $altoFila = 12.0;
+
+        $encabezado = [
+            'label' => '',
+            'od' => [['OD', CaseCharts::COLOR_OD]],
+            'oi' => [['OI', CaseCharts::COLOR_OI]],
+        ];
+        foreach (array_merge([$encabezado], $filas) as $i => $fila) {
+            $esCabecera = $i === 0;
+            if ($esCabecera) {
+                $pdf->rectFilled($x, $y, $ancho, $altoFila, self::FONDO_TABLA);
+            }
+            $pdf->text($x + 3, $y + $altoFila - 3.5, $fila['label'], 7.2, true, self::GRIS_TITULO);
+            foreach (['od' => $x + $anchoEtq, 'oi' => $x + $anchoEtq + $anchoCol] as $lado => $xCol) {
+                $cx = $xCol + 3;
+                foreach ($fila[$lado] as [$texto, $color]) {
+                    $pdf->text($cx, $y + $altoFila - 3.5, $texto, 7.2, $esCabecera, $color);
+                    $cx += $pdf->textWidth($texto, 7.2, $esCabecera);
+                }
+            }
+            $pdf->line($x, $y + $altoFila, $x + $ancho, $y + $altoFila, 0.3, '#bbbbbb');
+            $y += $altoFila;
+        }
+        return $y;
+    }
+
+    private function supraliminares(array $data, bool $estudio = false): void
     {
         $this->titulo('Pruebas supraliminares');
 
@@ -840,7 +1042,10 @@ final class CaseSheetPdf
                 'Niveles en dB HL del oído en estudio. "No ocurre" = el quiebre queda fuera de la escala del audiómetro.',
                 7
             );
-        } else {
+        } elseif (!$estudio) {
+            // El criterio de cuándo califica una frecuencia (diferencia
+            // interaural, oído bueno normal, sin gap) es la mecánica del
+            // test, no algo que le sirva al alumno para leerlo.
             $this->parrafo(
                 'Fowler: sin frecuencias que califiquen. Hace falta una diferencia interaural de 20 a 40 dB '
                 . 'en una misma frecuencia, con el oído bueno en rango normal y sin gap.',
@@ -872,7 +1077,11 @@ final class CaseSheetPdf
             foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $tag) {
                 $fila = [$tag];
                 foreach ($vals[$lado] as $v) {
-                    $fila[] = self::db((float) $v);
+                    // 0 no es un hallazgo real de esta prueba -- es el nivel
+                    // al que se estimuló, y nunca se administra en 0. Una
+                    // celda en 0 es "no se hizo" (clave ausente o campo del
+                    // formulario nunca tocado), no "sin deterioro".
+                    $fila[] = (float) $v <= 0.0 ? '/' : self::db((float) $v);
                 }
                 $filas[] = $fila;
             }
@@ -899,7 +1108,7 @@ final class CaseSheetPdf
      * En tabla se comparan los dos oídos de un vistazo, que es la lectura
      * que importa.
      */
-    private function abr(array $data): void
+    private function abr(array $data, bool $estudio = false): void
     {
         // La sección entera arranca en página nueva si no entra: partir la
         // serie del click de la tabla de umbrales obliga a ir y volver.
@@ -931,8 +1140,23 @@ final class CaseSheetPdf
         }
 
         // --- Las dos series del click, lado a lado --------------------
+        // Cada nivel entra dos veces (el equipo repite la intensidad para
+        // confirmar que la V es reproducible, no un artefacto de una sola
+        // pasada) y se agrega un escalón bajo el umbral que se queda sin V
+        // -- así se decide que el umbral de arriba es el umbral, y no un
+        // nivel más de la serie. Ver self::nivelesAbr().
+        $nivelesPorLado = [
+            'od' => self::nivelesAbr((float) ($porLado['od']['umbrales']['click'] ?? 20)),
+            'oi' => self::nivelesAbr((float) ($porLado['oi']['umbrales']['click'] ?? 20)),
+        ];
         $ancho = ($this->anchoContenido - 16) / 2;
-        $alto = 168.0;
+        // La pila crece con la cantidad de trazos: al doble de niveles de
+        // antes le corresponde el doble de alto, si no las curvas se pisan.
+        // El alto depende de GRUPOS (un nivel = sus dos réplicas pegadas),
+        // no de la cantidad total de trazos: las réplicas casi no ocupan
+        // espacio extra entre sí.
+        $gruposMax = (int) ceil(max(count($nivelesPorLado['od']), count($nivelesPorLado['oi'])) / 2);
+        $alto = max(168.0, $gruposMax * 34.0);
         $this->espacio($alto + 40);
         $yPilas = $this->y;
 
@@ -942,17 +1166,22 @@ final class CaseSheetPdf
             $datos = $porLado[$ladoForm];
             $umbralClick = (float) ($datos['umbrales']['click'] ?? 20);
 
+            // La patología cargada y el umbral del generador son la
+            // respuesta del caso: en la ficha de estudio el trazo se lee
+            // solo, como en el equipo real.
             $this->pdf->text(
                 $x,
                 $yPilas + self::ASCENDENTE * 8,
-                $lado . '  ·  ' . $datos['tipo'] . '  ·  umbral cargado ' . self::db((float) ($datos['cfg']['umbral'] ?? 20)),
+                $estudio
+                    ? $lado
+                    : $lado . '  ·  ' . $datos['tipo'] . '  ·  umbral cargado ' . self::db((float) ($datos['cfg']['umbral'] ?? 20)),
                 8,
                 true,
                 $color
             );
 
             $series = [];
-            foreach (CaseWaveforms::serieIntensidades($umbralClick) as $nivel) {
+            foreach ($nivelesPorLado[$ladoForm] as $i => $nivel) {
                 $ondas = CaseWaveforms::ondasClick(
                     $nivel,
                     $umbralClick,
@@ -969,21 +1198,29 @@ final class CaseSheetPdf
                         $marcas[] = ['t' => $ondas[$onda]['lat'], 'v' => $ondas[$onda]['amp'], 'texto' => $onda];
                     }
                 }
+                // Semilla por réplica (el índice ya distingue las dos
+                // pasadas del mismo nivel): con ruido, dos pasadas se
+                // parecen pero no salen pixel a pixel iguales.
+                $semilla = crc32($this->caseId . '|' . $ladoForm . '|' . $i);
                 $series[] = [
                     'rotulo' => self::db($nivel),
-                    'pts' => CaseWaveforms::trazo($ondas),
+                    'pts' => CaseWaveforms::trazo($ondas, 12.0, 240, $semilla),
                     'marcas' => $marcas,
                 ];
             }
-            CaseCharts::waveformStack($this->pdf, $x, $yPilas + 10, $ancho, $alto, $series, $color);
+            CaseCharts::waveformStack($this->pdf, $x, $yPilas + 10, $ancho, $alto, $series, $color, 12.0, 'ms', 2);
         }
         $this->y = $yPilas + $alto + 18;
-        $this->parrafo(
-            'Click por vía aérea, de 80 dB nHL al umbral de cada oído. Trazo reconstruido de los parámetros '
-            . 'del caso: sin ruido, sin promediación y sin artefactos, así que muestra la forma del examen, '
-            . 'no la pantalla del equipo.',
-            6.5
-        );
+        // Explica que el trazo es una reconstrucción sin ruido/artefactos --
+        // mecánica del software, no algo que vaya en la ficha del alumno.
+        if (!$estudio) {
+            $this->parrafo(
+                'Click por vía aérea, de 80 dB nHL al umbral de cada oído. Trazo reconstruido de los parámetros '
+                . 'del caso: sin ruido, sin promediación y sin artefactos, así que muestra la forma del examen, '
+                . 'no la pantalla del equipo.',
+                6.5
+            );
+        }
 
         // --- Umbral por estímulo, contra el conductual ----------------
         // La columna que importa es la comparación: el ABR se lee en dB nHL
@@ -999,36 +1236,42 @@ final class CaseSheetPdf
                 self::conductual((string) $estimulo, $aereaAbr['oi']),
             ];
         }
-        $anchoTabla = ($this->anchoContenido - 16) / 2;
+        $anchoTabla = $estudio ? $this->anchoContenido : ($this->anchoContenido - 16) / 2;
         $yTablas = $this->y;
         $finUmbrales = $this->tablaEn(self::MARGEN, $yTablas, $anchoTabla, $filas, [0.34, 0.17, 0.16, 0.17, 0.16], true);
 
-        // --- Patrón retrococlear, al lado -----------------------------
-        $filas = [['Patrón retrococlear', 'OD', 'OI']];
-        foreach (self::NEURAL_LABELS as $clave => $etiqueta) {
-            $filas[] = [
-                $etiqueta,
-                (string) ($porLado['od']['neural'][$clave] ?? ''),
-                (string) ($porLado['oi']['neural'][$clave] ?? ''),
-            ];
-        }
-        $finNeural = $this->tablaEn(
-            self::MARGEN + $anchoTabla + 16,
-            $yTablas,
-            $anchoTabla,
-            $filas,
-            [0.5, 0.25, 0.25],
-            true
-        );
-        $this->y = max($finUmbrales, $finNeural) + 6;
-
-        // El patrón solo entra en juego si el oído es neural: con los
-        // defaults cargados en un oído normal, esos números no dibujan nada.
-        if ($porLado['od']['tipo'] !== 'neural' && $porLado['oi']['tipo'] !== 'neural') {
-            $this->parrafo(
-                'El patrón retrococlear queda cargado pero no se aplica: ninguno de los dos oídos es neural.',
-                6.5
+        // El patrón retrococlear (self::NEURAL_LABELS) son los mandos con
+        // los que el generador arma la onda -- la respuesta del caso, no
+        // algo que el alumno mida -- así que en la ficha de estudio no va.
+        if ($estudio) {
+            $this->y = $finUmbrales + 6;
+        } else {
+            $filas = [['Patrón retrococlear', 'OD', 'OI']];
+            foreach (self::NEURAL_LABELS as $clave => $etiqueta) {
+                $filas[] = [
+                    $etiqueta,
+                    (string) ($porLado['od']['neural'][$clave] ?? ''),
+                    (string) ($porLado['oi']['neural'][$clave] ?? ''),
+                ];
+            }
+            $finNeural = $this->tablaEn(
+                self::MARGEN + $anchoTabla + 16,
+                $yTablas,
+                $anchoTabla,
+                $filas,
+                [0.5, 0.25, 0.25],
+                true
             );
+            $this->y = max($finUmbrales, $finNeural) + 6;
+
+            // El patrón solo entra en juego si el oído es neural: con los
+            // defaults cargados en un oído normal, esos números no dibujan nada.
+            if ($porLado['od']['tipo'] !== 'neural' && $porLado['oi']['tipo'] !== 'neural') {
+                $this->parrafo(
+                    'El patrón retrococlear queda cargado pero no se aplica: ninguno de los dos oídos es neural.',
+                    6.5
+                );
+            }
         }
 
         // --- Lo que el equipo va a mostrar a 80 dB --------------------
@@ -1101,47 +1344,52 @@ final class CaseSheetPdf
         // --- Captura y FSP -------------------------------------------
         // El FSP decide cuándo el equipo da la curva por buena: sin estos
         // números el docente no puede anticipar si el alumno va a llegar al
-        // objetivo o se va a quedar promediando.
-        $cap = static fn (string $clave, $default): array => [
-            (string) ($porLado['od']['cfg'][$clave] ?? $default),
-            (string) ($porLado['oi']['cfg'][$clave] ?? $default),
-        ];
-        $fsp = static fn (string $clave, $default): array => [
-            (string) ((($porLado['od']['cfg']['fsp_puntos'] ?? [])[$clave]) ?? $default),
-            (string) ((($porLado['oi']['cfg']['fsp_puntos'] ?? [])[$clave]) ?? $default),
-        ];
-        $alcanza = static function (string $lado) use ($porLado): string {
-            $puntos = $porLado[$lado]['cfg']['fsp_puntos'] ?? [];
-            $objetivo = (float) ($puntos['objetivo'] ?? 3.0);
-            if ((float) ($puntos['800'] ?? 2.3) >= $objetivo) {
-                return 'Sí, a 800';
-            }
-            if ((float) ($puntos['2000'] ?? 2.8) >= $objetivo) {
-                return 'Sí, a 2000';
-            }
-            return 'No llega';
-        };
+        // objetivo o se va a quedar promediando. Son mandos del generador,
+        // así que no van en la ficha de estudio.
+        if ($estudio) {
+            $this->y = $fin80 + 6;
+        } else {
+            $cap = static fn (string $clave, $default): array => [
+                (string) ($porLado['od']['cfg'][$clave] ?? $default),
+                (string) ($porLado['oi']['cfg'][$clave] ?? $default),
+            ];
+            $fsp = static fn (string $clave, $default): array => [
+                (string) ((($porLado['od']['cfg']['fsp_puntos'] ?? [])[$clave]) ?? $default),
+                (string) ((($porLado['oi']['cfg']['fsp_puntos'] ?? [])[$clave]) ?? $default),
+            ];
+            $alcanza = static function (string $lado) use ($porLado): string {
+                $puntos = $porLado[$lado]['cfg']['fsp_puntos'] ?? [];
+                $objetivo = (float) ($puntos['objetivo'] ?? 3.0);
+                if ((float) ($puntos['800'] ?? 2.3) >= $objetivo) {
+                    return 'Sí, a 800';
+                }
+                if ((float) ($puntos['2000'] ?? 2.8) >= $objetivo) {
+                    return 'Sí, a 2000';
+                }
+                return 'No llega';
+            };
 
-        $filas = [['Captura y FSP', 'OD', 'OI']];
-        $filas[] = ['Reproducible', self::repro($porLado['od']['cfg']), self::repro($porLado['oi']['cfg'])];
-        $filas[] = array_merge(['Jitter si no repro. (ms)'], $cap('repro_var', 0.2));
-        $filas[] = array_merge(['Promediaciones'], $cap('average_objetivo', 2000));
-        $filas[] = array_merge(['Inquietud (0-1)'], $cap('inquietud', 0));
-        $filas[] = array_merge(['PAM (0-1)'], $cap('pam', 0));
-        $filas[] = array_merge(['FSP @ 800 prom.'], $fsp('800', 2.3));
-        $filas[] = array_merge(['FSP @ 2000 prom.'], $fsp('2000', 2.8));
-        $filas[] = array_merge(['FSP objetivo'], $fsp('objetivo', 3.0));
-        $filas[] = ['¿Alcanza el objetivo?', $alcanza('od'), $alcanza('oi')];
+            $filas = [['Captura y FSP', 'OD', 'OI']];
+            $filas[] = ['Reproducible', self::repro($porLado['od']['cfg']), self::repro($porLado['oi']['cfg'])];
+            $filas[] = array_merge(['Jitter si no repro. (ms)'], $cap('repro_var', 0.2));
+            $filas[] = array_merge(['Promediaciones'], $cap('average_objetivo', 2000));
+            $filas[] = array_merge(['Inquietud (0-1)'], $cap('inquietud', 0));
+            $filas[] = array_merge(['PAM (0-1)'], $cap('pam', 0));
+            $filas[] = array_merge(['FSP @ 800 prom.'], $fsp('800', 2.3));
+            $filas[] = array_merge(['FSP @ 2000 prom.'], $fsp('2000', 2.8));
+            $filas[] = array_merge(['FSP objetivo'], $fsp('objetivo', 3.0));
+            $filas[] = ['¿Alcanza el objetivo?', $alcanza('od'), $alcanza('oi')];
 
-        $finCap = $this->tablaEn(
-            self::MARGEN + $anchoTabla + 16,
-            $yTablas2,
-            $anchoTabla,
-            $filas,
-            [0.46, 0.27, 0.27],
-            true
-        );
-        $this->y = max($fin80, $finCap) + 6;
+            $finCap = $this->tablaEn(
+                self::MARGEN + $anchoTabla + 16,
+                $yTablas2,
+                $anchoTabla,
+                $filas,
+                [0.46, 0.27, 0.27],
+                true
+            );
+            $this->y = max($fin80, $finCap) + 6;
+        }
 
         // --- La referencia con la que se leen esos números -------------
         // Media ± 2 DE de la población que le toca al paciente por edad y
@@ -1165,7 +1413,12 @@ final class CaseSheetPdf
         $this->parrafo('* fuera de la referencia (la razón V/I, por debajo).', 6.5);
 
         // Las desviaciones cargadas a mano, solo si hay alguna: en cero no
-        // dicen nada y los valores de arriba ya las llevan aplicadas.
+        // dicen nada y los valores de arriba ya las llevan aplicadas. Es el
+        // retoque manual del generador, no algo que vaya en la ficha de
+        // estudio.
+        if ($estudio) {
+            return;
+        }
         foreach (['od' => 'OD', 'oi' => 'OI'] as $ladoForm => $lado) {
             $partes = [];
             foreach (['onda_I' => 'I', 'onda_III' => 'III', 'onda_V' => 'V'] as $clave => $onda) {
@@ -1193,10 +1446,57 @@ final class CaseSheetPdf
     }
 
     /**
+     * Los niveles de la pila de trazos del click, para la ficha (NO para el
+     * generador -- `CaseWaveforms::serieIntensidades()` sigue siendo la
+     * única fuente para eso, y el VEMP la usa tal cual). Acá se le agregan
+     * dos cosas que hacen falta para leer la búsqueda de umbral como se
+     * hace de verdad:
+     *
+     * - Un escalón bajo el umbral que se queda sin onda V: sin él, la
+     *   ficha no muestra por qué el umbral de arriba es el umbral y no un
+     *   nivel más de la serie -- un umbral se define porque un paso más
+     *   abajo la V desaparece, no porque sí. No se agrega si no hubo
+     *   umbral real (sin respuesta en todo el barrido).
+     * - Cada nivel repetido dos veces: el equipo replica la intensidad
+     *   para confirmar que la V es reproducible, no un artefacto de una
+     *   sola pasada.
+     *
+     * @return array<int,float>
+     */
+    private static function nivelesAbr(float $umbralClick, float $maximo = 80.0): array
+    {
+        $niveles = CaseWaveforms::serieIntensidades($umbralClick, $maximo);
+        if ($umbralClick < $maximo) {
+            // De a 10 cerca del umbral, nunca de a 5 (nunca se hace un x5
+            // en la evaluación real). "Umbral - 10" no alcanza: el umbral
+            // del ABR se guarda redondeado a 5 dB (CaseProfile::ABR_STEP_DB),
+            // así que la mitad de los casos el umbral YA es un x5 (45, 35,
+            // ...) y restarle 10 se queda en la misma familia (45 -> 35,
+            // sigue siendo x5). Lo que hace falta es el escalón de 10 en
+            // 10 de la GRILLA (.... 40, 30, 20 ....), no un corrimiento
+            // relativo al umbral: el próximo múltiplo de 10 por debajo,
+            // que puede quedar a 10 dB (umbral x0) o a solo 5 (umbral x5)
+            // -- en cualquiera de los dos casos sigue estando bajo el
+            // umbral de visibilidad de la V (sl_min de la V es -4).
+            $niveles[] = max(-10.0, floor(($umbralClick - 1) / 10) * 10);
+        }
+        $duplicados = [];
+        foreach ($niveles as $nivel) {
+            $duplicados[] = $nivel;
+            $duplicados[] = $nivel;
+        }
+        return $duplicados;
+    }
+
+    /**
      * Acúfeno: la frase que escucha el paciente, y detrás los datos con los
      * que el alumno va a tener que cuadrar su acufenometría.
+     *
+     * Pública: EstudioRedactor::fuente() la reusa tal cual para que el
+     * relato de la ficha de estudio cite el mismo acúfeno que ve el
+     * docente, sin reimplementar la frase aparte.
      */
-    private static function acufeno(array $tinnitus): string
+    public static function acufeno(array $tinnitus): string
     {
         $frase = CaseBuilder::describeTinnitus($tinnitus);
         if (!CaseBuilder::tinnitusPresente($tinnitus)) {
@@ -1360,7 +1660,7 @@ final class CaseSheetPdf
      * Las cuatro pruebas de OEA: los cuatro gráficos en cuadrícula y, abajo,
      * los números que el alumno va a leer del equipo.
      */
-    private function eoas(array $data): void
+    private function eoas(array $data, bool $estudio = false): void
     {
         $this->titulo('Emisiones otoacústicas (OEA)', 260.0);
 
@@ -1478,6 +1778,12 @@ final class CaseSheetPdf
         $this->parrafo('En dB SPL (SFOAE en dB). S/R = emisión menos ruido; R = no llega al criterio de esa prueba.', 6.5);
 
         // --- El perfil que armó esos números ---------------------------
+        // Patología, umbral y mandos del generador (atenuación, ruido,
+        // sello, variabilidad) son la respuesta del caso: no van en la
+        // ficha de estudio, que se queda con lo que el equipo mostraría.
+        if ($estudio) {
+            return;
+        }
         $yParams = $this->y;
         $filas = [['Perfil del oído', 'OD', 'OI']];
         foreach ([
@@ -1555,7 +1861,7 @@ final class CaseSheetPdf
      * umbral de 90 dB es normal o está desarmado, y la comparación entre
      * oídos --que es toda la lectura del VEMP-- se hace en columnas.
      */
-    private function vemp(array $data): void
+    private function vemp(array $data, bool $estudio = false): void
     {
         $this->titulo('Potenciales vestibulares (VEMP)', 330.0);
 
@@ -1577,10 +1883,12 @@ final class CaseSheetPdf
             $porLado[$ladoForm] = ['cfg' => $cfg, 'subtipos' => $subtipos];
 
             $this->espacio($altoPanel + 34);
+            // La patología cargada es la respuesta del caso: en la ficha de
+            // estudio el trazo se lee solo.
             $this->pdf->text(
                 self::MARGEN,
                 $this->y + self::ASCENDENTE * 8,
-                $lado . '  ·  patología: ' . (string) ($cfg['type'] ?? 'normal'),
+                $estudio ? $lado : $lado . '  ·  patología: ' . (string) ($cfg['type'] ?? 'normal'),
                 8,
                 true,
                 $color
@@ -1733,65 +2041,105 @@ final class CaseSheetPdf
      * párrafos sueltos: leyendo la columna izquierda se ve QUÉ se está
      * diciendo sin tener que deducirlo del texto.
      */
-    private function clinica(array $data): void
+    private function clinica(array $data, bool $estudio = false): void
     {
         $this->titulo('Anamnesis y hallazgos clínicos', 140.0);
 
-        $anamnesis = (array) ($data['Anamnesis'] ?? []);
-        $antecedentes = (array) ($anamnesis['antecedentes'] ?? []);
-        $marcados = [];
-        foreach (CaseBuilder::HIST_CHECKBOXES as $clave) {
-            if (!empty($antecedentes[$clave])) {
-                $marcados[] = CaseBuilder::HIST_LABELS[$clave] ?? $clave;
+        // En la ficha de estudio, si ya hay una redacción guardada
+        // (EstudioRedactor -- se genera una vez con IA a partir de estos
+        // mismos hechos y se cachea en el caso, ver ensureFresh()), va
+        // como prosa corrida de ficha clínica real, no como campos
+        // etiquetados. Sin redacción guardada (todavía no se generó, o el
+        // LLM no está configurado) cae al detalle mecánico de siempre --
+        // la ficha nunca depende de que el LLM haya respondido.
+        //
+        // La clave 'clinica' es EstudioRedactor::SECCION_CLINICA a mano:
+        // esta clase no requiere EstudioRedactor.php (esa sí requiere
+        // ésta, para reusar self::acufeno() -- un require en el otro
+        // sentido sería circular).
+        $redaccion = $estudio
+            ? trim((string) ($data['EstudioRedaccion']['clinica']['texto'] ?? ''))
+            : '';
+        if ($redaccion !== '') {
+            $this->subtitulo('Historia clínica');
+            foreach (explode("\n\n", $redaccion) as $parrafo) {
+                $parrafo = trim($parrafo);
+                if ($parrafo !== '') {
+                    // Justificado: es prosa corrida de varias líneas, y a
+                    // bandera (alineado solo a la izquierda) se ve como un
+                    // borrador. La última línea de cada párrafo queda sin
+                    // estirar (ver MiniPdf::textBlock).
+                    $this->parrafo($parrafo, 8.5, null, null, true);
+                }
             }
+        } else {
+            $anamnesis = (array) ($data['Anamnesis'] ?? []);
+            $antecedentes = (array) ($anamnesis['antecedentes'] ?? []);
+            $marcados = [];
+            foreach (CaseBuilder::HIST_CHECKBOXES as $clave) {
+                if (!empty($antecedentes[$clave])) {
+                    $marcados[] = CaseBuilder::HIST_LABELS[$clave] ?? $clave;
+                }
+            }
+
+            $this->subtitulo('Historia');
+            $this->campos([
+                ['Antecedentes', $marcados === [] ? 'Ninguno marcado' : implode(', ', $marcados)],
+                ['Medicamentos', (string) ($anamnesis['medicamentos'] ?? '')],
+                ['Cirugías', (string) ($anamnesis['cirugias'] ?? '')],
+                ['Otros', (string) ($anamnesis['otros'] ?? '')],
+                ['Acúfeno', self::acufeno((array) ($data['Tinnitus'] ?? []))],
+            ]);
+
+            // Si el texto lo escribió la IA, el docente tiene que saberlo antes
+            // de apoyarse en él -- pero es información de autoría del caso, no
+            // algo que vaya en la ficha que recibe el alumno.
+            $ia = is_array($anamnesis['ia'] ?? null) ? $anamnesis['ia'] : [];
+            if (!$estudio && !empty($ia['generado'])) {
+                $verificado = !empty($ia['verificado'])
+                    ? 'verificado' . (($ia['verificado_por'] ?? '') !== '' ? ' por ' . $ia['verificado_por'] : '')
+                        . (($ia['verificado_en'] ?? '') !== '' ? ' el ' . $ia['verificado_en'] : '')
+                    : 'SIN verificar';
+                $this->campos([[
+                    'Borrador IA',
+                    'La anamnesis la escribió la IA'
+                    . (($ia['generado_en'] ?? '') !== '' ? ' el ' . $ia['generado_en'] : '') . '; ' . $verificado . '.',
+                ]]);
+            }
+
+            $this->subtitulo('En la consulta');
+            $campos = [['Comportamiento', (string) ($data['PatientBehavior'] ?? '')]];
+            // "Disposición" es el mando 0-100 con el que el generador simula al
+            // paciente, no algo que se observe en una consulta real.
+            if (!$estudio) {
+                $campos[] = ['Disposición', (string) ($data['PatientDisposition'] ?? 0) . ' / 100'];
+            }
+            $this->campos($campos);
+
+            // Quién cuenta esa historia: en un caso pediátrico el dato no sale
+            // del paciente, y de quién sale es parte del ejercicio.
+            $this->sala($data, $estudio);
         }
-
-        $this->subtitulo('Historia');
-        $this->campos([
-            ['Antecedentes', $marcados === [] ? 'Ninguno marcado' : implode(', ', $marcados)],
-            ['Medicamentos', (string) ($anamnesis['medicamentos'] ?? '')],
-            ['Cirugías', (string) ($anamnesis['cirugias'] ?? '')],
-            ['Otros', (string) ($anamnesis['otros'] ?? '')],
-            ['Acúfeno', self::acufeno((array) ($data['Tinnitus'] ?? []))],
-        ]);
-
-        // Si el texto lo escribió la IA, el docente tiene que saberlo antes
-        // de apoyarse en él -- y si alguien lo leyó y lo dio por bueno.
-        $ia = is_array($anamnesis['ia'] ?? null) ? $anamnesis['ia'] : [];
-        if (!empty($ia['generado'])) {
-            $verificado = !empty($ia['verificado'])
-                ? 'verificado' . (($ia['verificado_por'] ?? '') !== '' ? ' por ' . $ia['verificado_por'] : '')
-                    . (($ia['verificado_en'] ?? '') !== '' ? ' el ' . $ia['verificado_en'] : '')
-                : 'SIN verificar';
-            $this->campos([[
-                'Borrador IA',
-                'La anamnesis la escribió la IA'
-                . (($ia['generado_en'] ?? '') !== '' ? ' el ' . $ia['generado_en'] : '') . '; ' . $verificado . '.',
-            ]]);
-        }
-
-        $this->subtitulo('En la consulta');
-        $this->campos([
-            ['Comportamiento', (string) ($data['PatientBehavior'] ?? '')],
-            ['Disposición', (string) ($data['PatientDisposition'] ?? 0) . ' / 100'],
-        ]);
-
-        // Quién cuenta esa historia: en un caso pediátrico el dato no sale
-        // del paciente, y de quién sale es parte del ejercicio.
-        $this->sala($data);
 
         // Otoscopia por fases: cada fase describe qué cambió desde la
-        // anterior, así que se imprimen en orden y numeradas.
+        // anterior, así que se imprimen en orden -- pero SIN el número de
+        // fase, que es la lógica interna con la que se programó el caso
+        // (progresión de hallazgos), no algo clínico que el alumno lea.
         $fases = (array) (($data['Otoscopia'] ?? [])['fases'] ?? []);
-        $this->subtitulo('Otoscopia');
+        // Es un examen propio (como la audiometría o la impedanciometría),
+        // no una subsección de la anamnesis -- va con el mismo título con
+        // franja de fondo que usa el resto de los exámenes, no el subtítulo
+        // simple de "Historia"/"En la consulta". Reserva por defecto: las
+        // fotos ya reservan su propio espacio en fotosOtoscopia().
+        $this->titulo('Otoscopia');
         if ($fases === []) {
             $this->parrafo('Sin otoscopia cargada.', 8);
         } else {
             foreach (array_values($fases) as $i => $fase) {
                 $texto = trim((string) (is_array($fase) ? ($fase['texto'] ?? '') : ''));
-                $this->campos([
-                    ['Fase ' . ($i + 1), $texto !== '' ? $texto : ''],
-                ]);
+                if ($texto !== '') {
+                    $this->parrafo($texto, 8);
+                }
                 $this->fotosOtoscopia($i);
             }
         }
@@ -1810,7 +2158,7 @@ final class CaseSheetPdf
      * antes de que existieran los acompañantes igual trae su sala de una
      * persona, y ahí esta sección no dice nada y se omite.
      */
-    private function sala(array $data): void
+    private function sala(array $data, bool $estudio = false): void
     {
         $sala = Sala::desde($data);
         if (!Sala::tieneAcompanantes($sala)) {
@@ -1819,23 +2167,39 @@ final class CaseSheetPdf
 
         $this->subtitulo('Quiénes vienen a la consulta');
 
-        $filas = [['Quién', 'Edad', 'Informa', 'Conciencia', 'Confiab.', 'Interrumpe']];
-        foreach ($sala['personas'] as $persona) {
-            $filas[] = [
-                Sala::etiqueta($persona) . ($persona['es_paciente'] ? ' - paciente' : ''),
-                $persona['edad'] > 0 ? $persona['edad'] . ' años' : '-',
-                $persona['informante'] ? 'principal' : '-',
-                (string) $persona['conciencia'],
-                (string) $persona['confiabilidad'],
-                Sala::nivelInterrupcion((int) $persona['interrumpe']),
-            ];
+        // Conciencia, confiabilidad e "interrumpe" son mandos con los que el
+        // generador simula a cada acompañante, no algo que un examen real
+        // entregue: en la ficha de estudio el alumno los infiere de la
+        // consulta, no los lee de una tabla.
+        if ($estudio) {
+            $filas = [['Quién', 'Edad', 'Informa']];
+            foreach ($sala['personas'] as $persona) {
+                $filas[] = [
+                    Sala::etiqueta($persona) . ($persona['es_paciente'] ? ' - paciente' : ''),
+                    $persona['edad'] > 0 ? $persona['edad'] . ' años' : '-',
+                    $persona['informante'] ? 'principal' : '-',
+                ];
+            }
+            $this->tabla($filas, [0.5, 0.2, 0.3], true);
+        } else {
+            $filas = [['Quién', 'Edad', 'Informa', 'Conciencia', 'Confiab.', 'Interrumpe']];
+            foreach ($sala['personas'] as $persona) {
+                $filas[] = [
+                    Sala::etiqueta($persona) . ($persona['es_paciente'] ? ' - paciente' : ''),
+                    $persona['edad'] > 0 ? $persona['edad'] . ' años' : '-',
+                    $persona['informante'] ? 'principal' : '-',
+                    (string) $persona['conciencia'],
+                    (string) $persona['confiabilidad'],
+                    Sala::nivelInterrupcion((int) $persona['interrumpe']),
+                ];
+            }
+            $this->tabla($filas, [0.34, 0.1, 0.13, 0.14, 0.13, 0.16], true);
+            $this->parrafo(
+                'Conciencia y confiabilidad van de 0 a 100: cuánto nota esa persona el problema y cuánto se le '
+                . 'puede creer lo que cuenta. "Interrumpe" es cuánto se mete cuando la pregunta era para el paciente.',
+                7
+            );
         }
-        $this->tabla($filas, [0.34, 0.1, 0.13, 0.14, 0.13, 0.16], true);
-        $this->parrafo(
-            'Conciencia y confiabilidad van de 0 a 100: cuánto nota esa persona el problema y cuánto se le '
-            . 'puede creer lo que cuenta. "Interrumpe" es cuánto se mete cuando la pregunta era para el paciente.',
-            7
-        );
         // La edad que manda es la del paciente DE LA SALA: en un caso
         // pediátrico la ficha puede traer la edad del adulto que consulta.
         $paciente = Sala::paciente($sala);
@@ -1877,7 +2241,8 @@ final class CaseSheetPdf
     }
 
     /**
-     * Las dos fotos de otoscopia de una fase, lado a lado.
+     * Las dos fotos de otoscopia de una fase, centradas en la hoja, una al
+     * lado de la otra.
      *
      * Se guardan cuadradas de 640x640 (OtoscopiaPhoto), casi siempre en
      * webp: PdfImage las convierte. Si falta una --o el servidor no tiene
@@ -1897,14 +2262,18 @@ final class CaseSheetPdf
             return;
         }
 
-        $ancho = 108.0;
+        // El doble del tamaño original (108pt) -- se veían chicas al lado
+        // de tanto espacio libre en la hoja.
+        $ancho = 216.0;
+        $gap = 14.0;
+        $anchoTotal = $ancho * count($fotos) + $gap * (count($fotos) - 1);
         $this->espacio($ancho + 24);
-        $x = self::MARGEN;
+        $x = self::MARGEN + max(0.0, ($this->anchoContenido - $anchoTotal) / 2);
         $altoMax = 0.0;
         foreach ($fotos as [$lado, $rotulo, $img]) {
             $alto = PdfImage::altoProporcional($img, $ancho);
             $color = $lado === 'od' ? CaseCharts::COLOR_OD : CaseCharts::COLOR_OI;
-            $this->pdf->text($x, $this->y + self::ASCENDENTE * 7, $rotulo, 7, true, $color);
+            $this->pdf->textCenter($x + $ancho / 2, $this->y + self::ASCENDENTE * 7, $rotulo, 7, true, $color);
             $this->pdf->imageJpeg(
                 $img['data'],
                 $img['w'],
@@ -1917,7 +2286,7 @@ final class CaseSheetPdf
             );
             $this->pdf->rect($x, $this->y + 9, $ancho, $alto, 0.5, self::GRIS_SUAVE);
             $altoMax = max($altoMax, $alto);
-            $x += $ancho + 14;
+            $x += $ancho + $gap;
         }
         $this->y += $altoMax + 16;
     }
@@ -1999,7 +2368,7 @@ final class CaseSheetPdf
         $this->y += 12;
     }
 
-    private function parrafo(string $texto, float $size = 8, ?float $ancho = null, ?string $color = null): void
+    private function parrafo(string $texto, float $size = 8, ?float $ancho = null, ?string $color = null, bool $justificado = false): void
     {
         $this->espacio(($size * 1.35) * 2);
         $base = $this->y + self::ASCENDENTE * $size;
@@ -2011,7 +2380,8 @@ final class CaseSheetPdf
             $size,
             false,
             0,
-            $color ?? self::GRIS_TEXTO
+            $color ?? self::GRIS_TEXTO,
+            $justificado
         );
         $this->y = $fin - self::ASCENDENTE * $size + 2;
     }
@@ -2246,6 +2616,7 @@ final class CaseSheetPdf
         return self::db($via['min']) . ' - ' . self::db($via['max']) . ' (' . self::db($via['meseta']) . ')';
     }
 
+
     /**
      * Valor del trazo en la muestra más cercana a $t.
      *
@@ -2313,6 +2684,66 @@ final class CaseSheetPdf
     private static function pct(float $v): string
     {
         return (string) (int) round($v) . ' %';
+    }
+
+    /**
+     * Niveles de UMD a informar en la tabla: hasta 3, de 5 en 5 dB,
+     * terminando en el nivel donde el oído llega a su máximo. Si el máximo
+     * ya sale a 45 dB (el piso de la prueba) no hace falta seguir subiendo,
+     * así que queda un solo nivel; si sale más arriba, se listan los
+     * escalones previos -- pero nunca por debajo de 45.
+     *
+     * @return array<int,float>
+     */
+    private static function nivelesUmd(float $umdInt): array
+    {
+        $umdInt = max(45.0, round($umdInt / 5) * 5);
+        $niveles = [];
+        for ($i = 2; $i >= 0; $i--) {
+            $nivel = $umdInt - $i * 5;
+            if ($nivel >= 45.0) {
+                $niveles[] = $nivel;
+            }
+        }
+        return $niveles;
+    }
+
+    /**
+     * Los niveles de UMD de UN oído (no de los dos juntos): la ventana de
+     * hasta 3 escalones de nivelesUmd(), y si el oído tiene rollover, un
+     * escalón más ARRIBA del máximo -- ahí es donde se ve la caída, así que
+     * en ese caso sí hace falta seguir subiendo. Sin rollover no hay motivo
+     * clínico para seguir, así que la ventana no pasa del máximo.
+     *
+     * @return array<int,float>
+     */
+    private static function nivelesUmdEar(float $umdInt, bool $recruit): array
+    {
+        $niveles = self::nivelesUmd($umdInt);
+        if ($recruit) {
+            $niveles[] = max(45.0, round($umdInt / 5) * 5) + 5.0;
+        }
+        return $niveles;
+    }
+
+    /**
+     * El % de discriminación a un nivel dado, con la MISMA curva por tramos
+     * que dibuja el logoaudiograma (ver CaseCharts::logogramPoints): plano
+     * en 0 hasta el SDT, subida recta hasta el UMD y de ahí en más plano
+     * (o cayendo, con rollover). Así un nivel que le pertenece al otro oído
+     * -- porque la tabla trae la unión de los dos-- no inventa un número
+     * que contradiga al gráfico.
+     *
+     * @param array{sdt:float,umd_int:float,umd_pct:float,recruit:bool} $lado
+     */
+    private static function pctEnNivelUmd(float $db, array $lado): float
+    {
+        // CaseCharts::pctLogoEnDb() lee el mismo punto sobre la MISMA
+        // cúbica que dibuja el logoaudiograma (CaseCharts::logogram()): una
+        // recta entre SDT y UMD daba un número cercano pero no igual al de
+        // la curva redondeada, y el punto marcado en el gráfico quedaba
+        // visiblemente afuera de la línea.
+        return CaseCharts::pctLogoEnDb($lado, $db);
     }
 
     private static function hz(int $hz): string

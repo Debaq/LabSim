@@ -603,10 +603,466 @@ Pendiente:
       sin cachear (una foto se reemplaza desde el editor, y un JPEG guardado
       al lado quedaría mostrando la vieja). Sin GD, o con una foto ilegible,
       se omite esa foto en vez de tumbar la ficha.
-- Versión "para el alumno" del PDF: **descartada** (2026-09-10). Se llegó a
-      implementar (`?modo=alumno`, recortando perfil y mandos del generador)
-      y el docente la sacó: no hay caso de uso. La ficha es del docente y se
-      imprime entera. No reintroducir sin que la pida.
+- [x] **Ficha de estudio (2026-09-14):** vuelve la versión recortada, pedida
+      de nuevo pero con otro enfoque -- no es "la ficha con menos secciones",
+      es una ficha clínica real para repartir al alumno. `build(...,
+      estudio: true)` (`?modo=estudio` en el endpoint, botón "PDF estudio" en
+      Fichas Clínicas y "Ficha de estudio en PDF" en el editor) mantiene
+      TODOS los exámenes con sus gráficos y números medidos, y saca solo lo
+      que es la solución del caso o un mando del generador: el resumen de
+      "Perfil auditivo" entero, la tabla de patrón retrococlear y la de
+      "Captura y FSP" del ABR, "Perfil del oído" y "Caída del perfil" de la
+      OEA, la patología cargada en el título de cada trazo (ABR y VEMP), las
+      desviaciones cargadas a mano, la disposición del paciente (0-100), el
+      aviso de "Borrador IA" y el de fichas sin decidir (ambos son para el
+      docente). Sigue siendo un PDF solo para el docente -- el gate es el
+      mismo `Auth::requireAdminSession()` de siempre -- es él quien decide
+      cuándo y a quién repartírsela. La versión anterior (2026-09-10) se
+      había sacado del todo por no tener caso de uso; esta vez el pedido fue
+      explícito, así que si se vuelve a tocar este criterio, que quede
+      anotado acá por qué.
+      En impedanciometría (mismo día) el recorte por título no alcanzaba:
+      compliance estática y presión del pico se guardan como RANGO (la app
+      sortea el valor real ahí dentro, distinto por paciente) y ese rango sí
+      es la respuesta del caso. La ficha de estudio no los saca: los reduce
+      a un único valor -- el centro del rango, el mismo que ya usa la curva
+      para dibujarse (`CaseCharts::valoresTimpanograma()['estatica'|'pico_dapa']`)
+      -- como leería el alumno la pantalla de un equipo real. También se
+      saca la gradiente recalculada "del equipo" (duplicado interno) y la
+      morfología de los reflejos (sí es un hallazgo/respuesta).
+      **La letra de Jerger NO se saca** (a diferencia de un primer intento
+      el mismo día): se lee directo de la curva, así que no es una
+      respuesta escondida. Va en las dos versiones, en la tabla y --desde
+      este cambio-- también impresa sobre el propio gráfico del
+      timpanograma, como en un equipo real: OD arriba a la izquierda en
+      rojo, OI arriba a la derecha en azul, con margen (no pegada a la
+      esquina, para no comerse la curva ni el eje).
+      Ver el bloque final de `tests/test_case_sheet_pdf.php` --ojo ahí con
+      dos trampas de encoding: una palabra con tilde nunca matchea contra el
+      PDF (MiniPdf reescribe a WinAnsi/cp1252, bytes distintos del literal
+      UTF-8 del test) y un paréntesis literal sale escapado en el content
+      stream (`\(Jerger\)`), así que los needles van sin tildes y sin
+      paréntesis.
+      En audiometría se sumaron dos ajustes más, mismo criterio:
+      - **Rótulo "LDL:" sobre el propio audiograma** (`CaseCharts::audiogram()`),
+        no solo en la leyenda lateral: 125 Hz no mide ni vía ósea ni LDL (ver
+        `FREQS_OSEA`), así que esa celda de la grilla queda libre y ahí va el
+        texto, con margen del cruce de líneas. Es un rótulo, no una
+        respuesta, así que va en **las dos versiones** del PDF (y es un
+        cambio del audiograma en sí, no solo de la ficha de estudio).
+      - **La tabla de enmascaramiento SÍ se saca** de la ficha de estudio (y
+        con ella el aviso "El enmascaramiento lo infiere el motor, no se
+        carga a mano" de al lado de la leyenda): a diferencia de la letra de
+        Jerger, acá la tabla ES la cuenta hecha --el rango mín-máx de ruido
+        útil por frecuencia-- que el alumno tiene que decidir solo en la
+        cabina. Los umbrales del audiograma (círculo/cruz/corchetes) se
+        quedan igual, es solo la tabla de abajo la que no va.
+
+## UMD por niveles, no un solo punto (2026-09-14)
+
+En logoaudiometría, la fila "UMD" del PDF (`CaseSheetPdf::logoaudiometria()`)
+era un solo dato: "96 % a 70 dB". Cambia a como se prueba de verdad: el UMD
+sube de 5 en 5 dB hasta el máximo, y esos escalones intermedios son parte
+del examen, no un detalle de procedimiento a esconder.
+
+Regla (confirmada con el usuario): hasta 3 niveles de 5 dB terminando en el
+nivel del máximo, sin bajar de 45 dB (piso de la prueba). Si el máximo ya
+sale a 45 dB no hace falta seguir probando y queda un solo nivel. Ejemplos:
+máximo a 50 → 45,50; a 55 → 45,50,55; a 60 → 50,55,60 (la ventana se corre,
+ya no lleva el 45). Implementado en `CaseSheetPdf::nivelesUmd()`.
+
+Esto **solo pasa en este informe** (aclaración explícita del usuario): no
+hay cambio en cómo el caso guarda el UMD (`data.UMD` sigue siendo un solo
+`{int, percentage}` por oído, ver `case_create.php`) ni en el motor. Los
+niveles intermedios se DERIVAN en el momento de armar el PDF, con la misma
+curva por tramos que ya dibuja el logoaudiograma
+(`CaseCharts::logogramPoints()`: plano en 0 hasta el SDT, recta hasta el
+UMD, plano --o con rollover, cayendo-- de ahí en más). Nueva función
+`CaseSheetPdf::pctEnNivelUmd()` replica esa misma curva para poder leer el
+% en cualquier dB, no solo en el punto guardado.
+
+Cada oído puede llegar a su máximo en un nivel distinto (ej. OD a 70,
+OI a 65): la tabla trae la UNIÓN de los niveles de los dos oídos, así que
+un nivel puede quedar "de más" para uno de los dos oídos -- para ese oído,
+el % en ese nivel se lee de la misma curva (plano o con rollover más allá
+de su propio UMD), nunca inventado ni "--". Ver los asserts nuevos al final
+de `tests/test_case_sheet_pdf.php` para los números exactos con y sin
+rollover.
+
+Y en la ficha de estudio, la fila **"Rollover: Sí/No" se saca** (mismo día):
+es el veredicto, no un dato de lectura. Con la ventana de niveles de arriba
+ya puesta, el rollover se ve solo --el % de OI baja de 80 a 75 pasado su
+propio UMD-- así que decirlo aparte sería resolverle el hallazgo al
+alumno. La caída sigue estando en los números (eso no se toca, es el
+examen); lo único que se corta es la etiqueta "Rollover".
+
+Mismo día, tres veredictos más que se cortan de la ficha de estudio por el
+mismo motivo (dicen la respuesta en vez de dejar que se lea del símbolo o
+del trazo):
+- **Weber, "Lateraliza a OD/OI"**: la flecha ya apunta para el lado que
+  lateraliza -- decirlo también en texto sería sobrante. La flecha se
+  queda igual en las dos versiones, se corta solo el texto de al lado
+  (`CaseBuilder::WEBER_LABELS`).
+- **Impedanciometría, fila "Función tubaria"**: es un veredicto cargado a
+  mano (Normal/Disfunción tubaria), no algo que se lea de una curva del
+  timpanograma -- no tiene ningún trazo propio en la ficha del que
+  deducirse, así que se corta entera.
+- **ABR, el párrafo "Trazo reconstruido de los parámetros del caso: sin
+  ruido, sin promediación y sin artefactos..."**: mecánica del software
+  (avisa que la curva es sintética y no una pantalla de equipo real), no
+  algo que le sirva al alumno para leer el trazo.
+
+## ABR: cada nivel repetido y escalón bajo el umbral sin V (2026-09-14)
+
+La pila de trazos del click (`CaseSheetPdf::abr()`) mostraba un trazo por
+nivel, terminando justo en el umbral. Pedido del usuario: los niveles van
+DUPLICADOS (el equipo repite cada intensidad para confirmar que la V es
+reproducible, no un artefacto de una sola pasada) y siempre tiene que haber
+un nivel bajo el umbral que se quede SIN onda V -- así se decide que el
+umbral de arriba es el umbral, y no un nivel más de la serie.
+
+Implementado en `CaseSheetPdf::nivelesAbr()` (nueva, privada, solo para
+esta pila de la ficha): toma `CaseWaveforms::serieIntensidades()` tal cual
+(sin tocar esa función -- la comparte VEMP, que NO lleva este cambio) y le
+agrega un escalón de 5 dB bajo el umbral (piso -10 dB) cuando hubo umbral
+real (si fue "sin respuesta en todo el barrido" no hay umbral que
+confirmar, así que no se agrega), y después duplica cada nivel de la
+lista. El escalón sin V no es un truco de UI: con el modelo de amplitud de
+`CaseWaveforms::ondasClick()` (`sl_min` de la onda V = -4), 5 dB bajo el
+umbral el crecimiento da 0 exacto, así que el trazo sale plano de verdad,
+no solo etiquetado como tal.
+
+Como ahora hay hasta el doble de trazos (más el escalón extra), el alto de
+la pila (antes fijo en 168pt) pasa a ser `max(168, cantidad_de_niveles *
+26)`, calculado ANTES de dibujar (para que OD y OI, que pueden tener
+umbrales distintos y por lo tanto distinta cantidad de niveles, compartan
+la misma altura de caja). Verificado renderizando el PDF a PNG con
+`pdftoppm` (no alcanza con leer el texto crudo para esto, hay que ver el
+dibujo) -- sin superposición, el escalón bajo el umbral sale plano sin I/III/V
+marcadas, en las dos versiones de la ficha (docente y estudio: esto no es
+un veredicto que esconder, es cómo se ve un ABR real).
+
+Tests: bloque nuevo en `tests/test_case_sheet_pdf.php` que prueba
+`nivelesAbr()` por reflexión (duplicado, escalón, piso de -10 dB, caso sin
+umbral real) y confirma con `CaseWaveforms::ondasClick()` que la amplitud
+de la V cae bajo `AMP_VISIBLE` en el escalón de confirmación.
+
+**Corrección el mismo día:** las dos réplicas de un mismo nivel salían con
+la MISMA separación que entre niveles distintos -- parecían dos trazos más
+de la serie, no un par. `CaseCharts::waveformStack()` ahora recibe un
+`$replicasPorNivel` opcional (default 1, sin cambios para VEMP que no lo
+pasa): agrupa de a N trazos con un hueco chico DENTRO del par (cerca, sin
+pisarse) y el hueco grande de siempre ENTRE niveles distintos; el rótulo
+del nivel se imprime una sola vez por par (dos números iguales pegados
+leerían como un error de impresión). `abr()` llama con
+`$replicasPorNivel = 2` y el alto de la pila pasa a calcularse por GRUPOS
+(`ceil(niveles/2) * 34`), no por cantidad total de trazos. Verificado de
+nuevo con `pdftoppm` -- ver captura del resultado en la sesión, pares
+visiblemente juntos y niveles bien separados.
+
+**Corrección 2026-09-15: el escalón de confirmación es de 10 dB, no de
+5.** El usuario dio la regla real: la evaluación baja de 20 en 20 y, cerca
+del umbral, de 10 en 10 -- nunca un paso de 5 ("nunca se hace un x5").
+Con umbral a 30 dB la serie tiene que ser 80,60,40,30,20 -- el "20" es el
+escalón de confirmación, a 10 dB del umbral, no a 5.
+
+**Segunda vuelta, más importante:** el usuario preguntó "¿el nivel puede
+llegar a 0, funcionará en algún caso?" -- al revisarlo aparece algo peor
+que el 0 (que sí funciona bien: umbral 0 da -10,0,20,40,60,80, limpio).
+El umbral del ABR se guarda redondeado a 5 dB (`CaseProfile::ABR_STEP_DB
+= 5`), así que la MITAD de los casos el umbral YA es un "x5" (45, 35,
+25...) -- de hecho el umbral de OD en `ficha_caso_demo()`, el fixture que
+usan casi todos los tests, es 45. Con `$umbralClick - 10.0`, un umbral x5
+se queda en la misma familia (45 → 35, sigue siendo x5) -- exactamente lo
+que el usuario dijo que nunca pasa, y el primer arreglo no lo evitaba.
+
+Fix real: `max(-10.0, floor(($umbralClick - 1) / 10) * 10)` -- el
+PRÓXIMO MÚLTIPLO DE 10 de la grilla por debajo del umbral, no un
+corrimiento relativo a él. Con umbral x0 eso da el mismo resultado que
+"umbral - 10" (30 -> 20). Con umbral x5 da "umbral - 5" (45 -> 40): más
+cerca de lo que uno esperaría, pero sigue siendo un múltiplo de 10 limpio
+y sigue bien por debajo del `sl_min` de la onda V (-4), así que la
+garantía de "esta curva no tiene V" no se pierde por el gap más chico.
+`CaseWaveforms::serieIntensidades()` (la parte de 20 en 20 desde el
+máximo) no se tocó en ninguna de las dos vueltas.
+
+Tests: el ejemplo exacto del usuario (umbral 30 -> 80,60,40,30,20) y el
+caso x5 real (umbral 45 -> 80,60,45,40, no 80,60,45,35) quedaron los dos
+fijados -- el segundo es el que hubiera fallado con el primer arreglo.
+
+## Impedanciometría: reflejos en dB SPL, no dB HL (2026-09-14)
+
+El pie de la tabla de reflejos acústicos decía "Umbrales en dB HL"; los
+reflejos se informan en dB SPL. Corregido el texto en las dos versiones
+(`CaseSheetPdf::impedanciometria()`) -- no es un cambio de valores, los
+números no se tocan, era la unidad mal puesta.
+
+## Fowler: el criterio de calificación no va en la ficha de estudio (2026-09-14)
+
+Cuando ninguna frecuencia califica para Fowler, el PDF explicaba la regla
+completa ("Hace falta una diferencia interaural de 20 a 40 dB en una misma
+frecuencia, con el oído bueno en rango normal y sin gap"). Es la mecánica
+del test, no un dato de lectura -- se corta en la ficha de estudio
+(`CaseSheetPdf::supraliminares()`, ahora con `$estudio`). Cuando SÍ
+califica alguna frecuencia, la tabla con los niveles medidos se queda
+igual en las dos versiones (eso es examen real, no la regla de detrás).
+
+## UMD: la ventana es POR OÍDO, no la unión de los dos (2026-09-14)
+
+Corrección sobre [[UMD por niveles, no un solo punto]] (más arriba, mismo
+día): la primera versión armaba la tabla con la UNIÓN de los niveles de
+los dos oídos y, para el oído "de más" en un nivel ajeno, calculaba el %
+extrapolando su propia curva -- lo que hacía que un oído que ya llegó a su
+máximo (sin rollover, sin motivo clínico para seguir) apareciera con la
+intensidad "subiendo" en niveles que en realidad no se le probaron. El
+usuario lo marcó como absurdo: las restricciones y la dinámica del UMD son
+por oído.
+
+Fix: `CaseSheetPdf::nivelesUmdEar(umdInt, recruit)` (nueva) es la ventana
+de UN oído -- `nivelesUmd()` de siempre (≤3 escalones hasta el máximo) y,
+SOLO si ese oído tiene rollover, un escalón más ARRIBA del máximo (ahí es
+donde se ve la caída, así que ahí sí hay motivo para seguir subiendo). La
+tabla sigue mostrando la unión de niveles como filas compartidas (para
+leer los dos oídos uno al lado del otro), pero la celda de un oído en un
+nivel que no es de SU PROPIA ventana queda en "--", no en un número
+extrapolado.
+
+Y el pedido que venía con la corrección: **cada punto de la tabla tiene
+que verse en el gráfico**, no solo la curva continua. `CaseCharts::logogram()`
+ahora dibuja un círculo chico en cada punto de `cfg['puntos']` (la lista la
+arma `logoaudiometria()` con los mismos niveles y el mismo
+`pctEnNivelUmd()` de la tabla, salvo el punto que coincide con el propio
+UMD -- ese ya lo marca el triángulo). Verificado con `pdftoppm`: los
+círculos caen sobre la curva en los niveles de la tabla, y en el oído con
+rollover se ve el punto de la caída más allá del pico.
+
+Tests: bloque de `tests/test_case_sheet_pdf.php` reescrito -- ya no se
+espera el % extrapolado (ej. "51 %" para OD a 55 dB, que ahora es de OI),
+se agregó el caso de "45 dB con rollover sigue a 50" además del de "45 dB
+sin rollover se queda solo", y `nivelesUmdEar()` se prueba directo por
+reflexión.
+
+**Corrección importante el mismo día:** la curva del logoaudiograma es
+CÚBICA (Fritsch-Carlson), no una recta entre SDT y UMD -- así que
+calcular el % con una recta (lo que hacía la primera versión) daba un
+número cercano pero el punto marcado en el gráfico quedaba visiblemente
+AFUERA de la curva impresa. Nueva `CaseCharts::pctLogoEnDb(cfg, db)`: lee
+el punto sobre los mismos segmentos bezier que dibuja `curvaSuave()`
+(bisección sobre el parámetro t, la x de una cúbica no se invierte a
+mano). `CaseSheetPdf::pctEnNivelUmd()` ahora es un `use` de esa función.
+Cambia los números de la tabla (ver test actualizado: 74/90/96 % para OD
+en vez del viejo 66/81/96, y 64/76/80/79 % para OI en vez de 57/69/80/75)
+-- son los correctos, los viejos eran la aproximación lineal.
+
+**Y la tabla ganó enmascaramiento (mismo día, pedido del usuario):** SDT,
+SRT y cada UMD se prueban con su propio mkg si hace falta, mismas fórmulas
+que el motor (`src/audiometria/logoaudiometry.py::CalculateLogo`, no una
+versión inventada para el PDF) -- portadas a PHP en un rincón nuevo de
+`CaseMasking.php`:
+- `CaseMasking::AI_HABLA` = 45 dB (atenuación interaural del habla, fija,
+  no por frecuencia como en tonal).
+- `CaseMasking::boneSdt($osea)` = Fletcher (mejores 2 de 500/1k/2k Hz) al
+  PISO de 5 dB (floor, no redondeo) -- replica uno a uno
+  `CalculateLogo._bone_sdt()`, no es el BIAP ni ningún promedio de
+  catálogo.
+- `CaseMasking::logo($intensidad, $boneEstudiado, $boneNoEstudiado, $sdtNoEstudiado)`
+  = `{cruza, min, max}`, mismas fórmulas que `_logo_vias()`/`_masking_range()`
+  (CE en 0, el del Speech Noise, el ruido correcto para esta vía).
+
+El mkg que se IMPRIME es un solo valor -- el mínimo efectivo (`min`), el
+que de verdad se usaría (de más solo tapa y arriesga sobre-enmascarar) --
+no el rango entero como en la tabla tonal (ahí sí importa mostrar el
+rango completo porque el alumno tiene que encontrarlo). Formato de celda:
+`"{dB propio} dB[/{mkg mínimo} dB] {%}"`, con la barra y el mkg solo
+cuando `cruza` es cierto.
+
+**Colores por tramo, no por celda:** el dB propio y el % van del color
+del oído de la fila (rojo OD, azul OI); el mkg va del color del oído
+CONTRARIO, porque el ruido que enmascara se pone en el auricular del otro
+oído. `tablaEn()` pinta cada celda entera de un solo color, así que esta
+tabla NO la usa: `CaseSheetPdf::tablaHablaColoreada()` (nueva, privada) la
+dibuja a mano, con varios `$pdf->text()` seguidos por segmento (mismo
+patrón que ya usan otras líneas sueltas del archivo, ej. "OD · tipo ·
+umbral cargado" del ABR) y `$pdf->textWidth()` para no pisarlos.
+**Ojo con esto al testear:** cada tramo de color es un `Tj` separado en el
+content stream, así que un string armado como "65 dB/30 dB 90 %" NO
+aparece contiguo en los bytes crudos del PDF -- un `strpos()` sobre eso
+falla aunque el PDF esté bien. La cuenta se prueba con
+`CaseMasking::logo()`/`boneSdt()` directo, y el layout se verificó
+renderizando a PNG con `pdftoppm` (ver captura en la sesión).
+
+**Iteración de layout, dos vueltas:** un intento en el medio armó la tabla
+con 7 columnas (dB/mkg/% separados por oído) para darle más ancho, pero
+eso empujó la sección a una página de más (la ficha pasó de 6 a 7 páginas,
+rompiendo la paginación fija por examen) y además no era lo pedido -- el
+usuario quería UNA columna combinada por oído con formato "dB/mkg %", no
+columnas separadas. Se volvió a 3 columnas (rótulo, OD, OI) en la misma
+posición de siempre (al lado del gráfico, ancho 40%), y el Rollover volvió
+a ser la última fila de la MISMA tabla (no una tabla aparte): así entra
+todo en las 6 páginas de siempre. Moraleja: cuando el layout se pone
+difícil, el camino no es agrandar la tabla -- es achicar el contenido de
+la celda.
+
+## Audiograma: el símbolo óseo se corre de la intersección (2026-09-14)
+
+Con umbral óseo igual al aéreo (lo más común, sin gap) el corchete óseo
+quedaba dibujado EXACTAMENTE encima del círculo/cruz de la vía aérea, en
+el mismo punto -- se tapaban. Pedido del usuario: correr el símbolo (no la
+línea que lo une entre frecuencias) lo suficiente para que las dos marcas
+se vean, OD hacia la izquierda y OI hacia la derecha.
+
+`CaseCharts::DESPLAZAMIENTO_OSEA = 4.0` (pt): se resta a la X del corchete
+de OD y se suma a la de OI (y a su flecha de "sin respuesta", que tiene
+que moverse con el símbolo). La línea punteada que une los umbrales óseos
+entre frecuencias NO se toca -- sigue pasando por la frecuencia real, es
+el símbolo suelto el que se corre.
+
+Espejado en `public/js/case/audiogram.js` (`BONE_OFFSET = 4`, mismo
+criterio) para no romper la paridad PDF/editor que ya cuida
+`tests/test_charts_vs_js.php` -- ese test no compara coordenadas exactas
+(solo que ciertos patrones existan en el código), así que no hizo falta
+tocarlo, pero la paridad visual real solo se sostiene si las dos copias
+llevan el mismo desplazamiento. Verificado renderizando el PDF a PNG con
+`pdftoppm`: antes las marcas se superponían al pixel, ahora quedan
+separadas y las dos se leen.
+
+## Audiograma: la vía ósea normal se esconde en la ficha de estudio (2026-09-14)
+
+Pedido del usuario: en un examen real no se prueba vía ósea en una
+frecuencia donde el aéreo de ESE oído ya está en rango normal (<=20 dB,
+`CaseCharts::LIMITE_NORMALIDAD_DB`) -- no hay nada que diferenciar (no
+puede haber gap si no hay pérdida), así que un audiólogo de verdad ni se
+molesta en tomarla. Mostrarla en la ficha de estudio sería un dato que el
+examen real nunca habría generado.
+
+Nueva `CaseCharts::freqsOseaVisibles(freqs, aereaLado, estudio)` (pública,
+para poder testearla directo): en la ficha docente devuelve `FREQS_OSEA`
+completo (250-4000 Hz) sin importar el aéreo -- es el perfil que cargó el
+generador, se sigue mostrando entero. En la ficha de estudio, recorta a
+las frecuencias donde el aéreo de ESE oído (ojo: por oído, no compartido)
+es > 20 dB. El límite es inclusive: exactamente 20 dB ya se esconde.
+
+Se llama por separado para OD y OI (`audiogram()` ahora recibe `$estudio`
+y arma `$freqsOseaPorLado['od']`/`['oi']` cada uno con su propio aéreo) --
+un oído puede tener el aéreo normal en una frecuencia donde el otro no, y
+la línea/símbolo de UNO no tiene por qué desaparecer solo porque el OTRO
+se esconde ahí. El LDL usa su propia lista sin filtrar (`$freqsOsea`, sin
+sufijo `PorLado`): no es vía ósea, la regla no le aplica.
+
+Ojo con lo que SÍ se sigue mostrando igual en las dos versiones: la línea
+punteada solo se corta en las frecuencias que desaparecen (no se estira
+por encima saltándolas), y el símbolo desplazado (`DESPLAZAMIENTO_OSEA`,
+ver más arriba) sigue su misma regla de posición cuando corresponde
+dibujarlo.
+
+Verificado renderizando a PNG con `pdftoppm`: en el caso de prueba (OI con
+aéreo normal a 250 y 500 Hz), la ficha docente muestra la ósea completa de
+OI y la de estudio la corta justo ahí, sin tocar la de OD (que no tiene
+ninguna frecuencia normal en ese caso). No se puede probar por texto crudo
+(es dibujo vectorial, no hay marca de texto) -- el test nuevo llama
+`CaseCharts::freqsOseaVisibles()` directo.
+
+## ABR del PDF: VI/VII/SN10, efecto de tasa y ruido de fondo (2026-09-14/15)
+
+Pedido tras un análisis de brecha (fork, sin editar nada) comparando
+`CaseWaveforms.php` (el mirror del PDF) contra el generador real
+(`src/abr/ABR_generator.py`): "agregá VI/VII/SN10, el efecto de tasa y el
+ruido, en serio quiero verlas realistas -- pero SOLO el PDF, no el
+editor". Portado a PHP tal cual está en el generador real, no una versión
+inventada -- mismas constantes, mismas fórmulas.
+
+**SN10 y VII** (`ondasClick()`, después del loop de I/III/V): geometría
+DERIVADA de la V ya final (con tasa, tipo y patrón neural aplicados), no
+ondas con su propio crecimiento por SL:
+- SN10 (el valle que sigue a la V, contra el que se mide su amplitud
+  pico-a-valle): `lat = lat_V + 0.9 + sigma_V*2`, `amp = -amp_V * 0.45`,
+  `sigma = 0.55 * (sigma_V / SIGMA['V'])` (el factor de ancho de V, ya que
+  el PHP no guarda un `width` aparte -- va todo adentro de `sigma`).
+- VII (bump tardío chico): `lat = lat_V + 2.5`, `amp = amp_V * 0.18`,
+  `sigma = 0.40` fijo (NO escala con el ancho de V, así sale en el
+  generador real).
+- `trazo()` ya sumaba genérico sobre lo que tuviera `$ondas` -- agregarlas
+  ahí alcanzó, sin tocar esa función. Los `foreach (['I','III','V'])` que
+  marcan picos en el trazo (CaseSheetPdf::abr()) siguen sin tocar SN10/VII,
+  a propósito: no se marcan con texto, son parte de la forma, no un pico
+  que el alumno tenga que encontrar.
+
+**Efecto de tasa** (`ondasClick()` gana `float $tasa = RATE_REF`):
+`RATE_REF=21.1` (donde están medidos los valores normativos, ahí no
+cambia nada), `RATE_LAT_SLOPE`/`RATE_AMP_DECAY` por onda (I la más
+sensible, V la que mejor aguanta), y `RATE_NEURAL_FACTORES` que multiplica
+el corrimiento/caída si el oído es neural (clave = `neural.sensibilidad_tasa`,
+ya existía en el PHP). Verificado con números: a 90/s un oído normal
+corre la V +0.41 ms y cae a 79 % (el generador real dice "~25-30 % y
+~0.4-0.6 ms", justo en rango); un oído neural "severa" a la misma tasa
+corre más y cae más.
+
+**Corrección: sin fila extra en el PDF.** Un primer intento le agregó a
+`CaseSheetPdf::abr()` un par MÁS a 80 dB con `TASA_ESTRES = 90.0` al final
+de cada oído (rotulado "80·alta") para MOSTRAR el efecto. El usuario lo
+frenó: el pedido era que la GENERACIÓN de la onda fuera sensible a la
+tasa (que `ondasClick()` supiera calcularla si se le pide), no que
+apareciera una curva nueva en la ficha -- y aparte "80·alta" no es
+notación clínica reconocible ("soy experto en electro[fisiología] y no
+tengo idea qué es", con razón). Se sacó la fila; `ondasClick()` sigue
+siendo sensible a `$tasa` (con `RATE_REF` de default, o sea sin efecto si
+no se pide otra cosa) y `CaseSheetPdf::abr()` vuelve a llamarla sin ese
+argumento, como antes. `TASA_ESTRES` queda como valor de referencia SOLO
+para los tests que ejercitan la sensibilidad del modelo, no para dibujar
+nada.
+
+**Ruido de fondo** (`CaseWaveforms::trazo()` gana `?int $ruidoSemilla`):
+antes dos pasadas al mismo nivel salían pixel a pixel iguales, y una curva
+"sin respuesta" salía perfectamente plana -- ninguna de las dos cosas pasa
+en un registro real. `ruidoDeFondo()` es una textura determinística por
+semilla (no una simulación de la promediación entera del generador real,
+que tiene EEG pink+EMG, impedancia, rechazo de artefacto -- eso es
+fidelidad al EQUIPO, no al examen, y el PDF a propósito no busca eso).
+
+**Historia de ida y vuelta sobre cuánto ruido (mismo día):** con 5
+sinusoides graves (0.6-8 ciclos en 12 ms) normalizadas por la SUMA de sus
+pesos y `RUIDO_AMPLITUD_UV = 0.05`, el usuario lo vio "casi plana, eso no
+pasa en el de PC" (con el generador real abierto al lado). Se probó una
+versión más fuerte -- más componentes en frecuencias altas (2-36 ciclos) +
+jitter de muestra a muestra, normalizado por RMS en vez de por la suma
+(sumar sinusoides de fase independiente rara vez suma en fase, así que
+dividir por la suma llana dejaba el resultado muy por debajo de lo
+nominal) y `RUIDO_AMPLITUD_UV = 0.10` -- y esa versión el usuario la vio
+"horrible", pidió deshacerla.
+
+**Decisión final: volver a la primera versión** (5 sinusoides graves,
+normalización por suma, `RUIDO_AMPLITUD_UV = 0.05`) -- es la que quedó.
+No es que esa versión estuviera "mal" técnicamente; el juicio de cuánto
+ruido se ve bien en una ficha impresa es del usuario, no algo que una
+fórmula "correcta" (RMS vs. suma) resuelva sola. Si se vuelve a tocar esto,
+confirmar con él antes de subir la amplitud de nuevo -- no asumir que
+"más realista técnicamente" es "se ve mejor".
+
+`CaseSheetPdf::abr()` arma la semilla con `crc32($caseId . '|' . $lado .
+'|' . $i)`, `$i` el ÍNDICE dentro de la lista ya duplicada -- las dos
+réplicas de un mismo nivel quedan con índices distintos, así que su ruido
+sale distinto (se parecen, no son la misma pasada dibujada dos veces) y el
+PDF sigue siendo reproducible (mismo caso -> mismo PDF byte a byte, ver
+test nuevo).
+
+**Ojo con el PRNG:** el primer intento usó un finalizador tipo Murmur3
+(XOR + multiplicar por una constante de 32 bits) y PHP tiraba warnings
+"not representable as an int" -- el producto de dos enteros de 32 bits se
+pasa de los 64 con signo de un int de PHP en la mitad de los casos, cae en
+punto flotante, y el `&` que sigue explota. Cambiado a un LCG de 32 bits
+(Numerical Recipes, `estado = (estado*1664525 + 1013904223) % 2^32`): el
+producto más grande que hace (2^32 * 1664525 ≈ 7*10^15) no se acerca ni de
+lejos al límite de un int de 64 bits.
+
+Tests: bloque nuevo en `tests/test_case_sheet_pdf.php` -- SN10/VII
+(signo, proporción, orden de latencias), efecto de tasa (cero en RATE_REF,
+neural degrada más que normal a la misma tasa), ruido (misma semilla =
+mismo trazo, semillas distintas = trazos distintos, la diferencia es chica
+frente a la señal) y reproducibilidad end-to-end (mismo caso, mismo PDF
+byte a byte). Verificado además renderizando a PNG con `pdftoppm`: se ve
+el valle+bump después de la V, las dos réplicas de un mismo nivel ya no
+son idénticas a simple vista, y sigue en 6 páginas.
+
 - [x] Revisión del docente sobre el PDF, 2026-09-10 (todo aplicado en el PDF
       **y** en la vista previa del editor donde correspondía):
       ósea unida con línea punteada y LDL con guiones más largos (dos
@@ -1246,3 +1702,311 @@ completo, paginado.
 - [ ] A conversar: "Todos mis cursos" usa `teacherCourseIds()`, que incluye
       cursos inactivos -- o sea también alumnos de cursos archivados. Queda
       así a propósito (es historial), pero depende de F5.
+
+## Fichas Clínicas: orden de botones y Eliminar como ícono (2026-09-15)
+
+Feedback del usuario sobre `patients.php` (biblioteca de fichas): no se
+entendía la diferencia entre "Reagendar" y "+ Otra cita", el orden de los
+botones no era lógico (Editar debería ir primero) y "Eliminar" -- un botón
+de texto del mismo tamaño que los demás, pegado al lado -- era fácil de
+apretar de refilón (borra el caso completo con citas/rondas/atenciones,
+sin deshacer).
+
+- **Orden nuevo:** Editar ficha → Agendar/Reagendar → + Otra cita → PDF →
+  PDF estudio → Eliminar (al final, separado).
+- **Diferencia aclarada con `title`:** "Reagendar" cambia la fecha/hora de
+  la cita que YA tiene (la reemplaza); "+ Otra cita" agrega una cita nueva
+  SIN tocar la existente (para una segunda ronda). No cambió el
+  comportamiento, solo el texto del tooltip.
+- **Eliminar pasa a ícono** (`.action-btn-icon` en `patients.css`, nuevo):
+  un tacho chico, gris, con más margen a la izquierda que separa del resto
+  de la fila, mudo hasta el hover/foco (ahí se pone rojo). Es el primer
+  botón-ícono del panel admin -- no había ningún precedente en el resto de
+  `public/admin/*.php` (todos los "Eliminar" de ahí son botones de texto
+  `.danger`) -- así que si se homogeniza el resto más adelante, el patrón
+  ya está acá para copiar.
+
+**Corrección posterior (mismo día):** el usuario volvió sobre esto -- ni
+con el tooltip aclarado tenía sentido tener DOS botones para crear citas
+en la misma fila. Se colapsaron "Reagendar"/"Agendar" y "+ Otra cita" en
+un solo botón **Agendar**, que siempre apunta a
+`agenda.php?schedule=<id>` (sin `force_round`). La decisión de
+reemplazar la cita existente vs. agregar una ronda nueva se mueve
+adentro del modal de `agenda.php`, que YA la tenía resuelta: cuando el
+caso tiene cita, el modal se abre en modo "editar esta cita" y ofrece
+un link "agendar una cita nueva →" (línea ~679, con `force_round=1`) sin
+tocar la existente. No hizo falta tocar `agenda.php` -- el fork ya
+vivía ahí, solo sobraba la entrada duplicada desde `patients.php`.
+
+## Ficha de estudio: anamnesis redactada con IA como ficha clínica real (2026-09-15)
+
+Pedido del usuario: la página 1 de la ficha de estudio ("Quiénes vienen a
+la consulta" y el resto de la anamnesis) se leía como campos de
+formulario, no como una ficha clínica real. Se acordó explícitamente NO
+mandar esto a través de un LLM en cada pedido -- se genera **una sola
+vez** con IA y se **cachea en el caso**; las fichas siguientes reusan lo
+guardado.
+
+**Precedente que se reusó, no se reinventó:** `AnamnesisDraft.php` ya
+hace algo parecido (convertir hallazgos del caso en prosa clínica vía
+`LlmChat::reply()`), pero para OTRO fin -- inventa antecedentes plausibles
+para que el docente arme el caso. Lo nuevo (`EstudioRedactor.php`) no
+inventa nada: toma los hechos que el docente YA decidió y los redacta
+como prosa. Reusa el modelo/presupuesto/reintento de `AnamnesisDraft`
+(`maxTokens()`, `model()`, `retryBudget()`) en vez de agregar un campo de
+configuración aparte -- es la misma categoría de tarea (varios párrafos,
+capaz con un modelo de razonamiento de por medio).
+
+**Tres decisiones tomadas con el usuario antes de programar** (por
+`AskUserQuestion`, no asumidas):
+1. **Sin verificación docente** (a diferencia de `Anamnesis.ia`, que
+   bloquea agendar hasta que se verifica): el docente es el único que
+   puede pedir esta ficha igual, así que si algo sale raro lo nota él
+   mismo. Un paso de verificación de más no aporta acá.
+2. **Invalidación automática por hash**, no un botón "Regenerar": se
+   hashean los HECHOS de origen (`EstudioRedactor::fuente()`), no la
+   redacción; si el docente edita el caso y algo del hash cambia, la
+   ficha de estudio se regenera sola la próxima vez que se pida, sin que
+   nadie tenga que acordarse.
+3. **Diseñado extensible**: la clave en `cases.data` es
+   `EstudioRedaccion.<sección>` (hoy solo `'clinica'`, la constante
+   `EstudioRedactor::SECCION_CLINICA`) para poder sumar otras secciones de
+   la ficha de estudio a este mismo mecanismo más adelante sin rehacer el
+   cacheo.
+
+**Cómo queda armado:**
+- `EstudioRedactor::fuente($data)`: arma los hechos que puede ver el
+  modelo -- el MISMO recorte "seguro para el alumno" que ya usa
+  `CaseSheetPdf::clinica()`/`sala()` en la ficha de estudio (antecedentes
+  marcados, medicamentos/cirugías/otros, acúfeno vía
+  `CaseSheetPdf::acufeno()` -que pasó a `public`-, comportamiento general,
+  y cada acompañante con su versión/comportamiento -- nunca umbral, tipo
+  de patología, disposición, ni conciencia/confiabilidad/interrumpe). Por
+  construcción el modelo nunca VE un dato interno: no hace falta
+  pedírselo por prompt, ese dato no llega al mensaje.
+- `EstudioRedactor::hash($fuente)`: sha256 de esos mismos hechos.
+- `EstudioRedactor::generate()`: arma el mensaje (los hechos en JSON) y
+  llama a `LlmChat::reply()` con el `SYSTEM_PROMPT` (pide un relato de
+  ficha clínica real, en 2-4 párrafos, SIN agregar ni un hecho que no
+  esté en lo que se le dio, sin mencionar umbrales/dB/diagnóstico -- esto
+  último es cinturón y tirantes, ya es imposible por construcción de
+  `fuente()`). Responde JSON `{"texto": "párrafo1\n\npárrafo2"}`, mismo
+  pelado de ``` que `AnamnesisDraft::parse()`.
+- `EstudioRedactor::ensureFresh($caseId, $data, $usuarioId)`: el único
+  punto de entrada del endpoint. Compara el hash guardado contra el
+  actual; si coinciden y hay texto, no hace nada (deja `$data` como
+  está). Si no, intenta generar y persistir (`Cases::actualizarDatos()`,
+  nuevo método -- mismo criterio que `Cases::snapshotBeforeAppointmentDelete()`:
+  NO toca `updated_by`, porque quien escribe es el sistema, no un
+  docente editando la ficha). **Si el LLM falla por lo que sea (sin
+  api_key, sin red, proveedor caído), atrapa el `Throwable` y devuelve
+  `$data` sin tocar** -- ni rompe la ficha ni borra un texto viejo que ya
+  hubiera. Verificado con test: con hash desactualizado y sin LLM
+  configurado, el texto viejo sigue ahí.
+- `CaseSheetPdf::clinica()`: si `$estudio` y hay
+  `data.EstudioRedaccion.clinica.texto`, lo imprime como prosa corrida
+  (`explode("\n\n", ...)` + un `parrafo()` por cada uno, bajo el
+  subtítulo "Historia clínica") y OMITE el detalle mecánico (campos de
+  Historia, aviso de Borrador IA, "En la consulta", `sala()` entera). Sin
+  texto guardado, cae al detalle mecánico de siempre -- la ficha NUNCA
+  depende de que el LLM haya contestado. La ficha DOCENTE nunca usa la
+  redacción, tenga o no el caso una guardada: sigue con el detalle
+  completo de siempre (verificado con test).
+- Otoscopia (fotos + texto por fase) **no se tocó**: son fotos reales con
+  su propio texto por fase, ya se lee como hallazgo de examen, no como
+  formulario -- no era lo que el usuario señaló como el problema.
+
+**Sin ciclo de `require`:** `EstudioRedactor.php` sí requiere
+`CaseSheetPdf.php` (para reusar `acufeno()`), pero `CaseSheetPdf.php` NO
+requiere `EstudioRedactor.php` de vuelta -- la clave `'clinica'` va
+escrita a mano en `clinica()` con un comentario que dice que tiene que
+coincidir con `EstudioRedactor::SECCION_CLINICA`, en vez de referenciar
+la constante (que sí crearía el ciclo).
+
+**Pendiente:** probar en el navegador con un caso real y una API key de
+verdad configurada (acá no hay red ni `pdo_sqlite`; todo lo de arriba se
+probó con `EstudioRedactor::fuente()/hash()/parse()` y con
+`CaseSheetPdf::build()` inyectando una redacción ya guardada a mano, no
+con una llamada real al LLM).
+
+## Ficha de estudio: párrafos de la anamnesis redactada, justificados (2026-09-15)
+
+La prosa de `EstudioRedactor` (arriba) salía con `textBlock()` alineada
+solo a la izquierda, con el borde derecho irregular -- se veía mal al
+lado de una ficha con tablas de bordes rectos.
+
+- `MiniPdf::textBlock()` suma un parámetro `bool $justificado = false`.
+  Con `true`, cada línea salvo la última del bloque se dibuja con
+  `drawJustifiedLine()` (nuevo, privado): usa el operador `Tw`
+  (espaciado entre palabras) del content stream de PDF para estirar la
+  línea hasta `$maxWidth` exacto, y lo resetea a 0 antes del `ET` --si
+  no, el espaciado le queda pegado a texto no relacionado que se dibuje
+  después en el mismo bloque. Una línea sin espacios (no hay dónde
+  meter `Tw`) cae al dibujo plano de siempre.
+- `CaseSheetPdf::parrafo()` suma el mismo parámetro y lo pasa directo.
+- Solo se usa en `clinica()`, en el loop que imprime los párrafos de
+  `EstudioRedaccion.clinica.texto`: `$this->parrafo($p, 8.5, null, null,
+  true)`. Ningún otro `parrafo()` del documento cambió --la ficha
+  docente (sin redacción IA) sigue con el detalle mecánico de siempre,
+  sin justificar.
+- Verificado con `pdftoppm` (borde derecho parejo, última línea de cada
+  párrafo suelta) y con la suite completa (3740 asserts, sin
+  regresión).
+
+## Deterioro tonal: "/" en vez de "0" (2026-09-15)
+
+Primer intento: tratar solo la clave AUSENTE (`Carhart`/`Stat`/`Rosemberg`
+no existe en el JSON, caso de antes de esta prueba) como "no
+administrado", asumiendo que 0 en una celda presente era un hallazgo real
+("sostiene el tono de inmediato"). **El usuario corrigió la premisa
+clínica completa:** el valor que se guarda es el nivel al que se
+estimuló, y ESE nunca es 0 -- si fuera 0 no se habría hecho la prueba. La
+ayuda del formulario que decía "0 = sin deterioro" estaba mal.
+
+- `CaseSheetPdf::supraliminares()`: la regla es por CELDA, no por clave --
+  cualquier valor `<= 0` (sea porque la clave no existe, sea porque el
+  campo del formulario nunca se tocó) imprime "/" en vez del número,
+  mismo símbolo que ya usan las tablas de enmascaramiento para "no
+  aplica". Esto incluye a propósito los casos AUTO-DERIVADOS del perfil
+  auditivo: `CaseProfile::toneDecay()` sigue devolviendo 0 para oídos
+  normales (no se tocó, es el motor el que mira las fórmulas, no la
+  ficha), así que un caso derivado con oído sano va a mostrar "/" donde
+  antes mostraba "0" -- tradeoff explícito, aceptado por el usuario vía
+  AskUserQuestion en vez de agregar un flag "administrado" aparte.
+- Verificado con `pdftoppm` sobre el fixture de test (que ya trae ceros
+  reales mezclados con valores reales) y con la suite completa (3740
+  asserts, sin regresión).
+
+## Weber: revisado, ya estaba correcto (2026-09-15)
+
+El usuario preguntó por el color/lado de las flechas de Weber. Se
+verificó con render (`pdftoppm`): flecha izquierda roja = lateraliza a
+OD, flecha derecha azul = lateraliza a OI -- ya coincidía con la
+convención pedida, sin necesidad de cambios en `CaseSheetPdf::acumetria()`.
+
+## Weber: flechas grises en "sin lateralización" (2026-09-15)
+
+En el caso "centrado" (sin lateralización) `acumetria()` dibujaba las DOS
+flechas en gris (`GRIS_SUAVE`), reservando el color OD/OI solo para
+cuando lateraliza. El usuario lo notó: cada flecha debe ir siempre del
+color de su lado, lateralice o no -- el color identifica el LADO de la
+flecha (posición fija: izquierda=OD, derecha=OI), no si ese lado "ganó".
+
+- `CaseSheetPdf::acumetria()`: la flecha izquierda siempre
+  `CaseCharts::COLOR_OD`, la derecha siempre `CaseCharts::COLOR_OI`,
+  se dibuje o no dependía ya de si lateraliza o está centrado (sin
+  tocar esa condición). Verificado con `pdftoppm` y con la suite
+  completa (3740 asserts, sin regresión).
+
+## EstudioRedactor: sin juicios de valor sobre acompañantes (2026-09-15)
+
+El redactor con IA (ver sección de arriba) sacaba prosa como "la madre...
+se muestra conversadora, se va por las ramas y hay que traerla de
+vuelta" -- un juicio de valor sobre un TERCERO (el acompañante), no un
+hallazgo del paciente que es el sujeto de la ficha. El campo
+`comportamiento` de un acompañante existe en `Sala` para que el LLM DE
+LA SALA sepa cómo actuar ese personaje en el chat -- no es contenido
+para la ficha clínica.
+
+- `EstudioRedactor::fuente()`: el campo `comportamiento_en_consulta`
+  ahora SOLO se arma para la persona con `es_paciente = true`. Un
+  acompañante nunca lo recibe -- por construcción, no por instrucción al
+  modelo (mismo principio que ya usa el resto de esta clase: el dato
+  simplemente no llega al mensaje).
+- `SYSTEM_PROMPT`: además, explícito por si el dato volviera a filtrarse
+  algún día -- de un acompañante entra SOLO su versión de la historia del
+  paciente, nunca un comentario sobre su propia actitud/personalidad en
+  la consulta.
+- El comportamiento del PACIENTE (si lo hay) sigue entrando, porque es el
+  sujeto del procedimiento y sí es clínicamente relevante.
+- Cambia el hash de `fuente()`: casos con redacción ya cacheada se
+  regeneran solos la próxima vez que se pida la ficha (el mecanismo de
+  invalidación ya estaba pensado para esto).
+- Verificado llamando `EstudioRedactor::fuente()` con un acompañante con
+  `comportamiento` cargado y confirmando que no aparece en el JSON que
+  ve el modelo; suite completa sin regresión (3740 asserts).
+
+## Botón manual para regenerar la anamnesis de la ficha de estudio (2026-09-15)
+
+`EstudioRedactor::ensureFresh()` solo regenera si cambian los HECHOS de
+origen (hash). No se entera si lo que cambió fue el PROMPT (como la regla
+de no opinar sobre acompañantes, arriba) ni sirve si el docente quiere
+simplemente probar de nuevo con los mismos hechos porque la redacción
+salió mediocre. Pedido explícito del usuario: un botón manual.
+
+- `EstudioRedactor::regenerate($caseId, $data, $usuarioId)`: fuerza una
+  redacción nueva IGNORANDO el hash guardado. A diferencia de
+  `ensureFresh()`, NO atrapa el error del LLM -- quien aprieta el botón
+  necesita saber si falló, no quedarse con la redacción vieja en
+  silencio.
+- `patients.php`: nueva acción POST `regen_estudio` (case_id), con
+  try/catch que arma `$error`/`$success` como el resto de la página.
+- UI: menú de "tres puntitos" nuevo por fila (`<details class="row-menu">`,
+  sin JS propio -- reusa el mismo cierre-al-clickear-afuera que ya tenían
+  los `nav-group` del header, ahora `_layout.php` cierra
+  `nav-group, row-menu` genérico) con un único ítem por ahora: "Redactar
+  de nuevo anamnesis (IA)". Se eligió menú y no otro botón visible más
+  porque la fila ya tiene cinco acciones -- deja espacio para sumar otras
+  acciones secundarias después sin volver a amontonar la fila.
+- Estilos nuevos en `patients.css` (`.row-menu`, `.row-menu-btn`,
+  `.row-menu-dropdown`, `.row-menu-item`), sin CSS nuevo compartido: es
+  específico de esta tabla, igual que `.action-btn-icon`.
+- Verificado con `php -l` en los tres archivos tocados, suite completa
+  (3740 asserts) y una llamada directa a `EstudioRedactor::regenerate()`
+  confirmando que propaga la excepción del LLM en vez de un fatal error
+  (acá no hay red para probar el camino feliz).
+
+## Otoscopia: sin "Fase N", fotos al doble de tamaño y centradas (2026-09-15)
+
+`CaseSheetPdf::clinica()` imprimía cada fase de otoscopia como una fila
+de tabla "Fase N | <hallazgo>" seguida de las dos fotos (108pt de ancho
+cada una) pegadas al margen izquierdo. El usuario lo corrigió: "Fase N"
+es la lógica interna con la que se PROGRAMÓ el caso (progresión de
+hallazgos en el generador), no algo clínico -- y las fotos quedaban
+chicas para todo el espacio libre de la hoja.
+
+- El texto del hallazgo (si lo hay) se imprime como párrafo simple, sin
+  el rótulo "Fase N".
+- `fotosOtoscopia()`: ancho de cada foto pasa de 108pt a 216pt (el
+  doble), y el bloque OD/OI se centra en `anchoContenido` en vez de
+  arrancar en el margen izquierdo -- `$x = MARGEN + (anchoContenido -
+  anchoTotal) / 2`, con `anchoTotal` calculado sobre la cantidad de
+  fotos que realmente existan (1 o 2), así que si falta una queda esa
+  sola centrada, no descuadrada a la izquierda.
+- Verificado con `pdftoppm` generando dos fotos JPEG de prueba en
+  `data/otoscopia_photos/` (borradas después, no se suben al repo) --
+  salen centradas, simétricas respecto al margen, y el texto sin "Fase
+  N". Suite completa sin regresión (3740 asserts).
+
+## Otoscopia: mismo título con franja que el resto (2026-09-15)
+
+`Otoscopia` usaba `subtitulo()` (texto simple, sin franja) como si fuera
+una subsección de la anamnesis ("Historia", "En la consulta"). El
+usuario lo notó: no es una subsección de la entrevista, es un examen
+propio (como la audiometría o la impedanciometría) y debe llevar el
+mismo título con franja de fondo (`titulo()`) que todos los demás.
+
+- `CaseSheetPdf::clinica()`: `$this->titulo('Otoscopia')` en vez de
+  `subtitulo()`. Reserva por defecto (60pt), sin pasarle una reserva más
+  grande pensando en las fotos -- `fotosOtoscopia()` ya reserva su propio
+  espacio antes de dibujar, duplicarlo ahí metía a la ficha de prueba en
+  una séptima página de más (falló `test_case_sheet_pdf.php` hasta
+  sacarlo: la ficha tiene que seguir siendo generales+anamnesis, tonal,
+  impedanciometría, ABR, OEA, VEMP -- 6 páginas fijas).
+- Verificado con `pdftoppm` (franja igual a "Perfil auditivo"/"Anamnesis
+  y hallazgos clínicos") y suite completa sin regresión (3740 asserts,
+  6 páginas).
+
+## Impedanciometría: letra de Jerger más separada de la esquina (2026-09-15)
+
+La letra de Jerger sobre el timpanograma (OD arriba-izquierda, OI
+arriba-derecha) quedaba pegada al eje "2.0 mL" y muy cerca del borde del
+gráfico. El usuario pidió duplicar el corrimiento hacia el centro (y de
+paso, hacia abajo -- mismo margen gobierna las dos direcciones).
+
+- `CaseSheetPdf::impedanciometria()`: `$margenLetra` de 10.0 a 20.0pt.
+  Un solo valor controla el desplazamiento horizontal (hacia el centro,
+  desde cada esquina) y el vertical (hacia abajo, desde el techo del
+  gráfico) -- duplicarlo mueve la letra en ambos sentidos a la vez.
+- Verificado con `pdftoppm` (antes/después) y suite completa sin
+  regresión (3740 asserts).

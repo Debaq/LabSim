@@ -51,4 +51,20 @@ final class Cases
         $pdo->prepare('UPDATE cases SET data = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
             ->execute([json_encode($data, JSON_UNESCAPED_UNICODE), $appointment['case_id']]);
     }
+
+    /**
+     * Persiste `data` completo de un caso. Mismo criterio que
+     * snapshotBeforeAppointmentDelete: no toca `updated_by` porque quien
+     * escribe es el sistema (ej. EstudioRedactor cacheando una redacción),
+     * no un docente editando la ficha a mano -- "Última edición" en
+     * patients.php no tiene que mentir sobre quién tocó qué.
+     *
+     * @param array<string,mixed> $data
+     */
+    public static function actualizarDatos(string $caseId, array $data): void
+    {
+        Db::get()
+            ->prepare('UPDATE cases SET data = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+            ->execute([json_encode($data, JSON_UNESCAPED_UNICODE), $caseId]);
+    }
 }

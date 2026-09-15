@@ -4,15 +4,22 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/CaseSheetPdf.php';
+require_once __DIR__ . '/../../src/EstudioRedactor.php';
 
 /**
- * PDF de la ficha completa de un caso (?id=), para el docente.
+ * PDF de la ficha de un caso (?id=), para el docente.
  *
  * No es el informe del alumno (public/admin/report_pdf.php): esto es la hoja
  * de respuestas del caso -- perfil, audiograma, impedanciometría, acumetría,
  * logoaudiometría, supraliminares, ABR, OEA y VEMP-- con los mismos gráficos
  * del editor. Se arma en cada pedido y no se cachea en disco: el caso se
  * edita, y un PDF guardado quedaría mintiendo desde la primera edición.
+ *
+ * Con ?modo=estudio arma en cambio la "ficha de estudio": los mismos
+ * exámenes, pero sin el perfil auditivo ni los parámetros del generador (ver
+ * el docblock de CaseSheetPdf). Sigue siendo un PDF SOLO para el docente --
+ * es él quien decide cuándo y a quién repartírselo, igual que hoy hace con
+ * la ficha completa.
  *
  * Visibilidad: la misma de patients.php -- un docente no puede bajar la
  * ficha de un caso agendado en un curso ajeno.
@@ -21,6 +28,7 @@ require_once __DIR__ . '/../../src/CaseSheetPdf.php';
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
 
+$estudio = ($_GET['modo'] ?? '') === 'estudio';
 $caseId = trim((string) ($_GET['id'] ?? ''));
 if ($caseId === '') {
     http_response_code(400);
@@ -58,6 +66,16 @@ if (!is_array($data)) {
     exit('La ficha de este caso no se puede leer.');
 }
 
+// Ficha de estudio: la anamnesis se redacta como ficha clínica real con
+// IA la primera vez que se pide, y queda cacheada en el caso (ver
+// EstudioRedactor) -- las fichas siguientes reusan lo guardado, sin
+// llamar al LLM de nuevo. Si el LLM falla por lo que sea, ensureFresh()
+// no rompe nada: devuelve $data tal cual y CaseSheetPdf cae al detalle
+// mecánico de siempre.
+if ($estudio) {
+    $data = EstudioRedactor::ensureFresh((string) $caso['id'], $data, (int) $me['id']);
+}
+
 // Sin cita viva, el nombre sale del snapshot que guarda Cases:: al borrarla
 // -- si no, la ficha de un caso desagendado saldría sin paciente.
 $snapshot = is_array($data['paciente_snapshot'] ?? null) ? $data['paciente_snapshot'] : [];
@@ -74,7 +92,8 @@ try {
         $data,
         $patient,
         (string) ($me['display_name'] ?? ''),
-        date('d-m-Y')
+        date('d-m-Y'),
+        $estudio
     );
 } catch (Throwable $e) {
     http_response_code(500);
@@ -82,7 +101,7 @@ try {
 }
 
 // Mismo nombre que el título del documento: caso, paciente y RUT.
-$nombreArchivo = 'ficha_' . CaseSheetPdf::identificador((string) $caso['id'], $patient) . '.pdf';
+$nombreArchivo = ($estudio ? 'ficha_estudio_' : 'ficha_') . CaseSheetPdf::identificador((string) $caso['id'], $patient) . '.pdf';
 header('Content-Type: application/pdf');
 header('Content-Disposition: inline; filename="' . $nombreArchivo . '"');
 header('Content-Length: ' . strlen($pdfBytes));

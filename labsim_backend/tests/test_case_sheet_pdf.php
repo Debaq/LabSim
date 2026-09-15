@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../src/CaseSheetPdf.php';
+require_once __DIR__ . '/../src/EstudioRedactor.php';
 
 /**
  * La ficha en PDF. No se puede "ver" un PDF desde un test, así que se
@@ -79,6 +80,15 @@ t_eq(substr_count($pdfDemo, '/Type /Page '), 6,
     'La ficha son seis páginas: generales+anamnesis, tonal, impedanciometría, ABR, OEA y VEMP');
 t_true(strlen($pdfDemo) > 20000, 'El PDF trae contenido, no una página en blanco');
 
+// La ficha no tiene ninguna fuente de azar de verdad: regenerar el mismo
+// caso tiene que dar el mismo PDF byte a byte, si no cada apertura se vería
+// distinta.
+t_eq(
+    CaseSheetPdf::build('CASO-TEST', ficha_caso_demo(), ['nombre' => 'Ana', 'apellido' => 'Pérez', 'rut' => '11.111.111-1'], 'Docente', '10-09-2026'),
+    $pdfDemo,
+    'El mismo caso genera el mismo PDF byte a byte'
+);
+
 // Ninguna sección puede faltar: el texto va en WinAnsi sin comprimir, así
 // que los títulos se pueden buscar en los bytes del stream.
 foreach ([
@@ -113,7 +123,11 @@ t_eq(CaseSheetPdf::identificador('7'), '7', 'Sin paciente queda solo el número 
 t_eq(CaseSheetPdf::identificador('12', ['nombre' => 'Juan', 'apellido' => 'Muñoz', 'rut' => '9.876.543-K']),
     '12_J_Munoz_9876543-K',
     'Sin tildes ni eñes: el nombre tiene que sobrevivir a cualquier sistema de archivos');
-t_true(strpos($pdfDemo, 'curva tipo As') !== false, 'El timpanograma dice el tipo del oído');
+// La letra de Jerger no es una respuesta: se lee directo de la curva, así
+// que va impresa sobre el gráfico (además de en la tabla) -- por eso "As"
+// tiene que aparecer más de una vez.
+t_true(substr_count($pdfDemo, 'As') >= 2, 'La letra de Jerger va sobre el timpanograma y en la tabla');
+t_true(strpos($pdfDemo, 'Jerger') !== false, 'La tabla trae la fila con la letra de Jerger');
 
 // La hoja es el único apoyo del docente mientras el alumno atiende: tiene
 // que traer lo que el caso decidió Y lo que dejó sin decidir.
@@ -126,6 +140,92 @@ t_true(strpos($pdfDemo, '500 Hz') !== false && strpos($pdfDemo, 'Zumbido') !== f
 // mismo y a dudar de cuál manda.
 t_true(strpos($pdfDemo, 'LDL (dB HL)') === false,
     'El LDL no se repite en tabla: ya está dibujado en el audiograma');
+
+// UMD: no es un solo punto, es la subida de 5 en 5 dB hasta el máximo de
+// CADA oído (ficha_caso_demo: OD 96% a 70dB desde SDT 38 sin rollover, OI
+// 80% a 65dB con rollover desde SDT 30 -- por eso OI sigue un escalón más
+// arriba, a 70). La tabla junta las dos ventanas en filas compartidas, pero
+// un nivel que no es de la ventana PROPIA de un oído queda en "--": nada de
+// seguir subiendo la intensidad en el oído que ya no tiene motivo clínico
+// para seguir (sin rollover, no hay nada más que ver arriba del máximo).
+// Las filas se numeran por POSICIÓN (UMD1/UMD2/...), no por dB: cada oído
+// prueba su propia ventana y forzarlas a una fila por dB compartido dejaba
+// celdas "--" que no aportaban nada (ver nivelesUmdEar() más abajo). OD
+// tiene 3 niveles propios y OI 4 (por el escalón de rollover), así que la
+// tabla llega hasta UMD4.
+foreach (['UMD1', 'UMD2', 'UMD3', 'UMD4'] as $fila) {
+    t_true(strpos($pdfDemo, $fila) !== false, "La tabla de UMD trae la fila '{$fila}'");
+}
+// OD (sin rollover) no se prueba a 55 dB -- ese nivel es de la ventana de
+// OI, no de la suya -- así que ningún % calculado para OD en ese nivel
+// tiene que aparecer en la ficha.
+t_true(strpos($pdfDemo, '51 %') === false,
+    'OD no se prueba a 55 dB (no es su ventana): no aparece el % que daría leer su curva ahí');
+// Los % salen de la MISMA cúbica que dibuja la curva (CaseCharts::pctLogoEnDb,
+// Fritsch-Carlson), no de una recta entre SDT y UMD -- por eso no son un
+// tercio/dos tercios parejos entre SDT y UMD.
+foreach (['74 %', '90 %', '96 %'] as $pctOd) {
+    t_true(strpos($pdfDemo, $pctOd) !== false, "UMD de OD: aparece {$pctOd} en su propia ventana (60/65/70 dB)");
+}
+// OI tiene rollover: sobre su propio UMD (65 dB) el % cae, no se mantiene,
+// y por eso su ventana sí sigue un escalón más arriba (70 dB) -- ahí es
+// donde se ve la caída (la Fritsch-Carlson anula la tangente en el pico,
+// así que la caída a solo 5 dB del máximo es suave, no un escalón brusco).
+foreach (['64 %', '76 %', '80 %', '79 %'] as $pctOi) {
+    t_true(strpos($pdfDemo, $pctOi) !== false, "UMD de OI (con rollover): aparece {$pctOi} en su propia ventana (55/60/65/70 dB)");
+}
+
+// El mkg de SDT/SRT/UMD (CaseMasking::logo()/boneSdt()): un solo valor --
+// el mínimo efectivo, no el rango entero como en la tabla tonal -- y solo
+// cuando hace falta enmascarar (a 60 dB, OD todavía no cruza).
+t_eq(CaseMasking::boneSdt([10, 10, 12, 15, 25, 18, 15, 15, 15]), 10.0,
+    'boneSdt: Fletcher (mejores 2 de 500/1k/2k) al piso de 5, óseo de OD');
+t_eq(CaseMasking::boneSdt([15, 15, 20, 25, 40, 50, 55, 60, 60]), 20.0,
+    'boneSdt: ídem para OI');
+$mkgOdA60 = CaseMasking::logo(60.0, 10.0, 20.0, 30.0);
+t_true(!$mkgOdA60['cruza'], 'A 60 dB, OD todavía no cruza (15 < 20 de umbral óseo del contrario)');
+$mkgOdA65 = CaseMasking::logo(65.0, 10.0, 20.0, 30.0);
+t_true($mkgOdA65['cruza'] && abs($mkgOdA65['min'] - 30.0) < 0.01, 'A 65 dB, OD cruza y el mkg mínimo efectivo es 30 dB');
+// El "65 dB/30 dB 90 %" del PDF (confirmado a ojo renderizando a PNG con
+// pdftoppm: color propio para el dB y el %, color del oído contrario para
+// el mkg) no se puede confirmar con strpos sobre el texto crudo -- cada
+// tramo de color es un Tj de MiniPdf separado, así que en los bytes del
+// PDF quedan partidos por los operadores de color/posición de en medio,
+// no como un string contiguo. La cuenta ya queda probada arriba.
+
+$umdSoloUnNivel = ficha_caso_demo();
+$umdSoloUnNivel['UMD'] = [['int' => 45, 'percentage' => 100], ['int' => 45, 'percentage' => 100]];
+// Sin rollover en ninguno de los dos oídos: si no, el oído con rollover
+// agrega su propio escalón de más arriba y el caso deja de aislar lo que
+// se quiere probar acá.
+$umdSoloUnNivel['recruit'] = [false, false];
+$pdfUmdUnNivel = CaseSheetPdf::build('UMD45', $umdSoloUnNivel);
+t_true(strpos($pdfUmdUnNivel, 'UMD1') !== false,
+    'Si el máximo sale ya a 45 dB, la tabla de UMD trae un solo nivel');
+t_true(strpos($pdfUmdUnNivel, 'UMD2') === false,
+    'Si el máximo sale ya a 45 dB y no hay rollover, no hace falta seguir subiendo de a 5');
+
+// Con rollover, la ventana de ESE oído sí sigue un escalón más arriba del
+// máximo -- aunque el otro oído no tenga motivo para seguir.
+$umdConRolloverA45 = ficha_caso_demo();
+$umdConRolloverA45['UMD'] = [['int' => 45, 'percentage' => 100], ['int' => 45, 'percentage' => 90]];
+$umdConRolloverA45['recruit'] = [false, true];
+$pdfUmdRolloverA45 = CaseSheetPdf::build('UMD45R', $umdConRolloverA45);
+t_true(strpos($pdfUmdRolloverA45, 'UMD2') !== false,
+    'Con rollover, la ventana de ese oído sigue un escalón más arriba del máximo aunque sea a 45 dB');
+
+// Lo mismo, directo sobre la función: nivelesUmdEar() es la ventana de UN
+// oído, no la unión de los dos -- eso lo arma logoaudiometria() aparte.
+$nivelesUmdEar = new ReflectionMethod('CaseSheetPdf', 'nivelesUmdEar');
+$nivelesUmdEar->setAccessible(true);
+t_eq($nivelesUmdEar->invoke(null, 70.0, false), [60.0, 65.0, 70.0],
+    'nivelesUmdEar sin rollover no pasa del máximo propio');
+t_eq($nivelesUmdEar->invoke(null, 65.0, true), [55.0, 60.0, 65.0, 70.0],
+    'nivelesUmdEar con rollover agrega un escalón sobre el máximo propio');
+t_eq($nivelesUmdEar->invoke(null, 45.0, false), [45.0],
+    'nivelesUmdEar sin rollover y máximo a 45 dB no agrega nada');
+t_eq($nivelesUmdEar->invoke(null, 45.0, true), [45.0, 50.0],
+    'nivelesUmdEar con rollover sigue un escalón más arriba aunque el máximo ya sea 45 dB');
 
 t_true(strpos($pdfDemo, 'Interpico I-V') !== false,
     'El ABR informa los interpicos a 80 dB');
@@ -141,6 +241,22 @@ foreach (['TEOAE 1k', 'DP 8k', 'SFOAE 500'] as $banda) {
 // Los paréntesis delimitan las cadenas en un content stream, así que MiniPdf
 // los escapa: en los bytes del PDF "(-)" aparece como "\(-\)".
 t_true(strpos($pdfDemo, '\\(-\\)') !== false, 'Un reflejo fuera de escala se imprime (-), no 130 dB');
+
+// Fowler sin frecuencias que califiquen: el criterio (diferencia interaural,
+// oído bueno normal, sin gap) es la mecánica del test -- va en la ficha
+// docente, no en la de estudio.
+$sinFowler = ficha_caso_demo();
+$sinFowler['Fowler'] = ['patterns' => [], 'diplacusia' => false];
+$pdfSinFowlerDocente = CaseSheetPdf::build('SINFOWLER', $sinFowler, [], '', '', false);
+$pdfSinFowlerEstudio = CaseSheetPdf::build('SINFOWLER', $sinFowler, [], '', '', true);
+t_true(strpos($pdfSinFowlerDocente, 'diferencia interaural') !== false,
+    'La ficha docente explica por qué Fowler no calificó ninguna frecuencia');
+t_true(strpos($pdfSinFowlerEstudio, 'diferencia interaural') === false,
+    'La ficha de estudio NO trae el criterio de calificación de Fowler');
+
+// Y las unidades de los reflejos acústicos son SPL, no HL.
+t_true(strpos($pdfDemo, 'Umbrales en dB SPL') !== false,
+    'Los umbrales de reflejos acústicos se informan en dB SPL');
 
 // Un caso vacío (recién creado, sin nada cargado) tiene que salir igual: el
 // PDF no puede ser lo que se rompa cuando alguien imprime una ficha a medias.
@@ -185,6 +301,207 @@ t_close($promedio->invoke(null, [0, 0, 20, 30, 40, 0, 130, 0, 0], [2, 3, 4, 6]),
     'Con 4k sin umbral, promedia las otras tres y no mete el 130');
 t_eq($promedio->invoke(null, array_fill(0, 9, 130), [2, 3, 4, 6]), null,
     'Sin ninguna frecuencia con umbral no hay promedio que informar');
+
+// --- ABR: cada nivel repetido, y un escalón bajo el umbral sin V --------
+//
+// La pila de trazos del click no es solo la serie hasta el umbral: cada
+// nivel se repite dos veces (el equipo confirma que la V es reproducible)
+// y se agrega un escalón más abajo que se queda sin V (así se decide que
+// el umbral de arriba es el umbral, y no un nivel más de la serie). Bajar
+// de 20 en 20 y, cerca del umbral, de 10 en 10 -- nunca de a 5 (nunca se
+// hace un "x5" en la evaluación real): el escalón de confirmación es uno
+// más de esos 10, no una fracción aparte.
+$nivelesAbr = new ReflectionMethod('CaseSheetPdf', 'nivelesAbr');
+$nivelesAbr->setAccessible(true);
+t_eq(
+    $nivelesAbr->invoke(null, 50.0, 80.0),
+    [80.0, 80.0, 60.0, 60.0, 50.0, 50.0, 40.0, 40.0],
+    'nivelesAbr duplica cada nivel de la serie y agrega el escalón de 10 dB bajo el umbral'
+);
+// Sin respuesta en todo el barrido no hay umbral real que confirmar, así
+// que no hay escalón de más -- solo el nivel máximo, duplicado.
+t_eq($nivelesAbr->invoke(null, 90.0, 80.0), [80.0, 80.0],
+    'nivelesAbr sin umbral real (sin respuesta en el barrido) no agrega el escalón de confirmación');
+// El escalón de confirmación no baja del piso de -10 dB aunque el umbral
+// esté muy cerca de él.
+t_true(in_array(-10.0, $nivelesAbr->invoke(null, -8.0, 80.0), true),
+    'nivelesAbr no manda el escalón de confirmación bajo el piso de -10 dB');
+// El ejemplo real que dio el usuario: umbral a 30 dB -> 80,60,40,30,20.
+t_eq(
+    array_values(array_unique($nivelesAbr->invoke(null, 30.0, 80.0))),
+    [80.0, 60.0, 40.0, 30.0, 20.0],
+    'Umbral a 30 dB: la serie es 80,60,40,30,20 (20 en 20 y, cerca del umbral, 10 en 10)'
+);
+// El umbral del ABR se guarda redondeado a 5 dB (CaseProfile::ABR_STEP_DB):
+// la mitad de los casos el umbral YA es un "x5" (45, 35...), y ahí
+// "umbral - 10" se queda en la misma familia (45 -> 35, sigue siendo x5).
+// El escalón de confirmación tiene que ser el próximo múltiplo de 10 de
+// la GRILLA, no un corrimiento relativo al umbral.
+t_eq(
+    array_values(array_unique($nivelesAbr->invoke(null, 45.0, 80.0))),
+    [80.0, 60.0, 45.0, 40.0],
+    'Umbral a 45 dB (un "x5" real): el escalón de confirmación es 40, no 35'
+);
+
+// Y la razón de que ese escalón sirva: 5 dB bajo el umbral, la onda V cae
+// bajo el umbral de visibilidad (el mismo modelo que dibuja el trazo).
+$ondasBajoUmbral = CaseWaveforms::ondasClick(45.0, 50.0, 'coclear', []);
+t_true($ondasBajoUmbral['V']['amp'] < CaseWaveforms::AMP_VISIBLE,
+    'A 5 dB bajo el umbral cargado, la onda V ya no es visible');
+
+// --- ABR: SN10, VII, efecto de tasa y ruido de fondo -------------------
+//
+// SN10 (el valle que sigue a la V, contra el que se mide su amplitud
+// pico-a-valle) y VII (el bump tardío chico): geometría derivada de la V
+// final, no ondas con crecimiento propio. `ondasClick()` las agrega solas
+// y `trazo()` las suma igual que a cualquier otra -- no hay que tratarlas
+// aparte en el llamador.
+$ondasRef = CaseWaveforms::ondasClick(80.0, 45.0, 'transmission', [], [], 'adult_female');
+t_true($ondasRef['SN10']['amp'] < 0, 'El SN10 es un valle: amplitud negativa');
+t_close($ondasRef['SN10']['amp'], -$ondasRef['V']['amp'] * CaseWaveforms::SN10_AMP_RATIO, 0.001,
+    'El SN10 es proporcional a la amplitud de V (45 % en contra)');
+t_true($ondasRef['SN10']['lat'] > $ondasRef['V']['lat'], 'El SN10 va DESPUÉS de la V, no antes');
+t_true($ondasRef['VII']['lat'] > $ondasRef['SN10']['lat'], 'El VII va después del SN10 (más tardío todavía)');
+t_true($ondasRef['VII']['amp'] > 0, 'El VII es un bump: amplitud positiva');
+
+// Efecto de tasa: a RATE_REF (la tasa a la que están medidos los valores
+// normativos) no cambia nada; a una tasa alta la latencia crece y la
+// amplitud cae, MÁS en un oído neural con sensibilidad "severa" que en
+// uno normal a la misma tasa (fatiga de conducción).
+$ondasTasaRef = CaseWaveforms::ondasClick(80.0, 45.0, 'transmission', [], [], 'adult_female', CaseWaveforms::RATE_REF);
+t_eq($ondasTasaRef['V']['lat'], $ondasRef['V']['lat'], 'A RATE_REF el efecto de tasa es cero (es el ancla)');
+$ondasTasaAlta = CaseWaveforms::ondasClick(80.0, 45.0, 'transmission', [], [], 'adult_female', CaseWaveforms::TASA_ESTRES);
+t_true($ondasTasaAlta['V']['lat'] > $ondasRef['V']['lat'], 'A tasa alta la V se corre a mayor latencia');
+t_true($ondasTasaAlta['V']['amp'] < $ondasRef['V']['amp'], 'A tasa alta la V pierde amplitud');
+$corrimientoNormal = $ondasTasaAlta['V']['lat'] - $ondasRef['V']['lat'];
+$caidaNormal = $ondasTasaAlta['V']['amp'] / $ondasRef['V']['amp'];
+
+$ondasNeuralRef = CaseWaveforms::ondasClick(80.0, 45.0, 'neural', ['sensibilidad_tasa' => 'severa'], [], 'adult_female');
+$ondasNeuralAlta = CaseWaveforms::ondasClick(80.0, 45.0, 'neural', ['sensibilidad_tasa' => 'severa'], [], 'adult_female', CaseWaveforms::TASA_ESTRES);
+$corrimientoNeural = $ondasNeuralAlta['V']['lat'] - $ondasNeuralRef['V']['lat'];
+$caidaNeural = $ondasNeuralAlta['V']['amp'] / $ondasNeuralRef['V']['amp'];
+t_true($corrimientoNeural > $corrimientoNormal,
+    'La fatiga por tasa alta corre más la V en un oído neural "severa" que en uno normal');
+t_true($caidaNeural < $caidaNormal,
+    'Y le cae más la amplitud, por la misma razón');
+
+// El ruido de fondo es determinístico por semilla (mismo PDF, mismo
+// resultado si se regenera) pero distinto entre semillas (las dos
+// réplicas de un mismo nivel no salen pixel a pixel iguales).
+$trazoA = CaseWaveforms::trazo($ondasRef, 12.0, 240, 111);
+$trazoA2 = CaseWaveforms::trazo($ondasRef, 12.0, 240, 111);
+$trazoB = CaseWaveforms::trazo($ondasRef, 12.0, 240, 222);
+t_eq($trazoA, $trazoA2, 'Misma semilla, mismo ruido: el trazo con ruido es reproducible');
+t_true($trazoA[10][1] !== $trazoB[10][1], 'Semillas distintas dan ruido distinto (no son la misma pasada)');
+$trazoSinRuido = CaseWaveforms::trazo($ondasRef, 12.0, 240);
+t_true(abs($trazoA[10][1] - $trazoSinRuido[10][1]) > 0.0001,
+    'Con semilla, el trazo se aparta del limpio (hay ruido sumado)');
+t_true(abs($trazoA[10][1] - $trazoSinRuido[10][1]) < 0.5,
+    'Pero el ruido no tapa la señal: la diferencia es chica, del orden de RUIDO_AMPLITUD_UV');
+
+// --- EstudioRedactor: la anamnesis de la ficha de estudio como prosa ---
+//
+// fuente() solo puede ver lo mismo que ya es seguro para el alumno: nunca
+// un umbral, un tipo de patología, ni la disposición del generador. Se
+// prueba contra el mismo fixture de todo el archivo.
+$fuenteDemo = EstudioRedactor::fuente(ficha_caso_demo());
+foreach (['umbral', 'disposicion', 'tipo', 'conciencia', 'confiabilidad', 'interrumpe'] as $clavePeligrosa) {
+    t_true(
+        strpos(strtolower(json_encode($fuenteDemo)), $clavePeligrosa) === false,
+        "fuente() no incluye '{$clavePeligrosa}': nunca debe llegarle al LLM"
+    );
+}
+t_eq($fuenteDemo['antecedentes_marcados'], ['Hipoacusia familiar'],
+    'fuente() trae los antecedentes ya marcados, en texto, no las claves crudas');
+t_true(strpos($fuenteDemo['acufeno'], 'Zumbido') !== false,
+    'fuente() reusa CaseSheetPdf::acufeno(), no reimplementa la frase');
+
+// hash() es estable para los mismos datos y cambia si algo relevante
+// cambió -- así es como ensureFresh() sabe cuándo la redacción guardada
+// quedó vieja.
+t_eq(EstudioRedactor::hash($fuenteDemo), EstudioRedactor::hash($fuenteDemo),
+    'hash() es determinístico para los mismos datos');
+$fuenteEditada = $fuenteDemo;
+$fuenteEditada['medicamentos'] = 'Ibuprofeno';
+t_true(EstudioRedactor::hash($fuenteDemo) !== EstudioRedactor::hash($fuenteEditada),
+    'hash() cambia si el docente edita un hecho de la anamnesis');
+
+// parse(): mismo pelado de ``` que AnamnesisDraft, y el tope de caracteres.
+t_eq(EstudioRedactor::parse('{"texto": "Un párrafo."}'), 'Un párrafo.',
+    'parse() lee el texto de un JSON limpio');
+t_eq(EstudioRedactor::parse("```json\n{\"texto\": \"Un párrafo.\"}\n```"), 'Un párrafo.',
+    'parse() pela el ``` si el modelo lo agregó pese a la instrucción');
+t_eq(EstudioRedactor::parse('{"texto": ""}'), null, 'parse() de un texto vacío es null, no un string vacío');
+t_eq(EstudioRedactor::parse('no es json'), null, 'parse() de algo que no es JSON es null, no un error');
+t_eq(mb_strlen((string) EstudioRedactor::parse('{"texto": "' . str_repeat('a', 5000) . '"}')), EstudioRedactor::MAX_TEXTO,
+    'parse() recorta a MAX_TEXTO, un modelo suelto no puede llenar la ficha');
+
+// El render: con redacción guardada, la ficha de estudio la muestra como
+// prosa y ESCONDE el detalle mecánico (Historia/campos, Quiénes vienen a
+// la consulta); sin ella, cae al detalle mecánico de siempre. La ficha
+// docente nunca usa la redacción -- sigue con el detalle completo, tenga
+// o no una redacción guardada el caso.
+$dataConRedaccion = ficha_caso_demo();
+$dataConRedaccion['EstudioRedaccion']['clinica'] = [
+    'texto' => "Paciente adulta que consulta por síntomas auditivos.\n\nRefiere antecedente de hipoacusia familiar.",
+    'hash' => EstudioRedactor::hash($fuenteDemo),
+    'generado_en' => '2026-09-15 10:00:00',
+];
+$patientDemo = ['nombre' => 'Ana', 'apellido' => 'Pérez', 'rut' => '11.111.111-1'];
+$pdfConRedaccion = CaseSheetPdf::build('CASO-TEST', $dataConRedaccion, $patientDemo, 'Docente', '10-09-2026', true);
+t_true(strpos($pdfConRedaccion, 'Paciente adulta que consulta') !== false,
+    'Con redacción guardada, la ficha de estudio muestra la prosa');
+t_true(strpos($pdfConRedaccion, 'Historia cl') !== false,
+    'Con redacción guardada, el subtítulo pasa a "Historia clínica" (prosa, no campos)');
+t_true(strpos($pdfConRedaccion, 'Ninguno marcado') === false,
+    'Con redacción guardada, no aparece el detalle mecánico de antecedentes');
+
+$pdfSinRedaccion = CaseSheetPdf::build('CASO-TEST', ficha_caso_demo(), $patientDemo, 'Docente', '10-09-2026', true);
+t_true(strpos($pdfSinRedaccion, 'Paciente adulta que consulta') === false,
+    'Sin redacción guardada, no aparece un texto que nadie generó');
+t_true(strpos($pdfSinRedaccion, 'Zumbido') !== false,
+    'Sin redacción guardada, la ficha de estudio cae al detalle mecánico de siempre');
+
+$pdfDocenteConRedaccion = CaseSheetPdf::build('CASO-TEST', $dataConRedaccion, $patientDemo, 'Docente', '10-09-2026', false);
+t_true(strpos($pdfDocenteConRedaccion, 'Paciente adulta que consulta') === false,
+    'La ficha DOCENTE nunca usa la redacción de IA, aunque el caso ya tenga una guardada');
+
+// ensureFresh(): si el hash no coincide (el caso cambió) pero el LLM no
+// está configurado o falla, no rompe nada y se queda con el texto viejo
+// -- nunca deja la ficha sin nada por un problema de red.
+$dataDesactualizada = ficha_caso_demo();
+$dataDesactualizada['EstudioRedaccion']['clinica'] = [
+    'texto' => 'Texto viejo, de antes de la última edición del caso.',
+    'hash' => 'un-hash-que-ya-no-coincide',
+    'generado_en' => '2020-01-01 00:00:00',
+];
+$resultado = EstudioRedactor::ensureFresh('CASO-TEST', $dataDesactualizada, 1);
+t_eq($resultado['EstudioRedaccion']['clinica']['texto'], 'Texto viejo, de antes de la última edición del caso.',
+    'ensureFresh() no borra el texto viejo si no puede regenerar (sin LLM configurado en los tests)');
+
+// --- Audiograma: la vía ósea normal se esconde en la ficha de estudio ---
+//
+// En un examen real no se prueba vía ósea en una frecuencia con audición
+// normal (no hay nada que diferenciar). La ficha docente sigue mostrando
+// el perfil completo del generador; la de estudio no.
+$aereaOiConNormales = [10.0, 15.0, 20.0, 25.0, 40.0, 50.0, 55.0, 60.0, 60.0];
+$freqs = CaseBuilder::FREQUENCIES;
+t_eq(
+    array_values(CaseCharts::freqsOseaVisibles($freqs, $aereaOiConNormales, false)),
+    [250, 500, 1000, 2000, 3000, 4000],
+    'Ficha docente: la vía ósea se muestra completa (FREQS_OSEA), sea normal o no el aéreo'
+);
+t_eq(
+    array_values(CaseCharts::freqsOseaVisibles($freqs, $aereaOiConNormales, true)),
+    [1000, 2000, 3000, 4000],
+    'Ficha de estudio: se esconden 250 y 500 Hz, donde el aéreo (15 y 20) está en rango normal (<=20)'
+);
+// El límite es inclusive: exactamente 20 dB (el borde de lo normal) ya se
+// esconde, no hace falta que sea peor.
+t_true(
+    !in_array(500, CaseCharts::freqsOseaVisibles($freqs, $aereaOiConNormales, true), true),
+    'A exactamente 20 dB (el límite de lo normal) la vía ósea también se esconde'
+);
 
 // --- Las curvas que se sintetizan --------------------------------------
 
@@ -314,3 +631,115 @@ foreach ([$conRollover, $sinRollover] as $curva) {
         $previa = $db;
     }
 }
+
+// --- Ficha de estudio: mismos exámenes, sin la respuesta del caso ------
+//
+// build(..., estudio: true) es el mismo documento para el alumno: entran
+// los mismos gráficos y números que mide un examen real, pero no el perfil
+// auditivo ni los mandos con los que el generador arma el caso -- eso es
+// la solución, y es justo lo que el alumno tiene que deducir.
+$pdfEstudio = CaseSheetPdf::build(
+    'CASO-TEST',
+    ficha_caso_demo(),
+    ['nombre' => 'Ana', 'apellido' => 'Pérez', 'rut' => '11.111.111-1'],
+    'Docente',
+    '10-09-2026',
+    true
+);
+
+t_true(strpos($pdfEstudio, '%PDF-1.4') === 0, 'La ficha de estudio sale como un PDF');
+t_true(strpos($pdfEstudio, 'Ficha de estudio') !== false, 'La portada dice que es la ficha de estudio');
+
+// Lo que sigue siendo un examen real: se queda.
+foreach ([
+    'Audiometr', 'Acumetr', 'Impedanciometr', 'Logoaudiometr', 'supraliminares',
+    'ABR', 'OEA', 'VEMP', 'Otoscopia', 'Interpico I-V', 'OD emis.', 'OD S/R',
+] as $seccion) {
+    t_true(strpos($pdfEstudio, $seccion) !== false, "La ficha de estudio conserva '{$seccion}'");
+}
+
+// Lo que es la respuesta del caso o un mando del generador: no va. Los
+// needles evitan tildes -- MiniPdf reescribe el texto a WinAnsi/cp1252 y esos
+// bytes no coinciden con el literal UTF-8 de este archivo, así que una
+// palabra acentuada nunca matchea y la comprobación de ausencia sería un
+// falso positivo (ver 'Compliance est' más abajo, mismo motivo al revés).
+foreach ([
+    'Perfil auditivo' => 'el perfil auditivo (la solución del caso)',
+    'retrococlear' => 'la tabla ni el aviso de patrón retrococlear',
+    'Captura y FSP' => 'los mandos de captura y FSP del ABR',
+    'Perfil del o' => 'el perfil de configuración de la OEA',
+    'del perfil (dB)' => 'la caída del perfil de la OEA',
+    'Disposici' => 'la disposición del paciente (mando del generador)',
+    'sin decidir' => 'el aviso de fichas sin decidir (es para el docente)',
+    'Gradiente en el equipo' => 'la gradiente recalculada del equipo',
+    'Morfolog' => 'la morfología de los reflejos (es un hallazgo, no un dato de lectura)',
+    'sortea el equipo' => 'la explicación de cómo el generador sortea compliance y presión',
+    'Rollover' => 'el veredicto de rollover (ya se ve en los niveles de UMD que bajan)',
+    'Lateraliza' => 'el veredicto de lateralización del Weber (la flecha ya lo dice)',
+    'Funci' => 'la fila de función tubaria (veredicto cargado a mano)',
+    'reconstruido' => 'la explicación de que el trazo del ABR es una reconstrucción sin ruido',
+] as $ausente => $motivo) {
+    t_true(strpos($pdfEstudio, $ausente) === false, "La ficha de estudio NO trae {$motivo}");
+}
+
+// El Weber sigue con su flecha (símbolo) en las dos versiones -- lo que se
+// saca es solo el texto "Lateraliza a OD/OI" al lado.
+t_true(strpos($pdfDemo, 'Lateraliza a OD') !== false, 'La ficha docente sí dice a dónde lateraliza el Weber');
+t_true(strpos($pdfEstudio, 'Weber') !== false, 'La ficha de estudio sigue trayendo el bloque de Weber (solo sin el veredicto)');
+
+// El rollover de OI queda igual visible -- en los propios niveles de UMD,
+// que bajan pasado el máximo -- solo que sin el veredicto explícito.
+t_true(strpos($pdfDemo, 'Rollover') !== false, 'La ficha docente sí trae el veredicto de rollover');
+foreach (['64 %', '76 %', '80 %', '79 %'] as $pctOi) {
+    t_true(strpos($pdfEstudio, $pctOi) !== false,
+        "La ficha de estudio conserva {$pctOi} en la ventana de UMD de OI (ahí se ve la caída)");
+}
+
+// La letra de Jerger NO es una respuesta escondida -- se lee directo de la
+// curva del timpanograma y de hecho se imprime encima de ella -- así que la
+// ficha de estudio la trae igual que la del docente: en la tabla y sobre
+// el gráfico (OD arriba a la izquierda en rojo, OI arriba a la derecha en
+// azul, con margen).
+t_true(strpos($pdfEstudio, 'Jerger') !== false, 'La ficha de estudio trae la fila con la letra de Jerger');
+t_true(substr_count($pdfEstudio, 'As') >= 2,
+    'La letra de Jerger va sobre el timpanograma y en la tabla también en la ficha de estudio');
+
+// El rótulo "LDL:" del audiograma tampoco es una respuesta -- identifica la
+// línea de guiones sobre el gráfico mismo, en la celda de 125 Hz que no
+// tiene datos -- así que va en las dos versiones.
+t_true(strpos($pdfDemo, 'LDL:') !== false, 'El audiograma trae el rótulo LDL: sobre el gráfico');
+t_true(strpos($pdfEstudio, 'LDL:') !== false, 'La ficha de estudio también trae el rótulo LDL: sobre el gráfico');
+
+// El enmascaramiento SÍ es la cuenta hecha (rango mín-máx de ruido útil por
+// frecuencia): en la ficha de estudio el alumno lo decide en la cabina, no
+// lo lee de una tabla. Y el aviso de que "el motor lo infiere" es mecánica
+// del software, no algo que vaya en la ficha del alumno.
+t_true(strpos($pdfDemo, 'Enmascaramiento') !== false, 'La ficha docente trae la tabla de enmascaramiento');
+t_true(strpos($pdfDemo, 'infiere el motor') !== false,
+    'La ficha docente trae el aviso de que el enmascaramiento lo infiere el motor');
+t_true(strpos($pdfEstudio, 'Enmascaramiento') === false,
+    'La ficha de estudio NO trae la tabla de enmascaramiento (es la cuenta ya hecha)');
+t_true(strpos($pdfEstudio, 'infiere el motor') === false,
+    'La ficha de estudio NO trae el aviso de mecánica del enmascaramiento');
+
+// La compliance y la presión del timpanograma: en la ficha del docente son
+// un RANGO (la app sortea el valor real dentro de él); en la de estudio, un
+// único número -- el mismo centro que usa la curva -- como leería el
+// alumno la pantalla de un equipo real.
+t_true(strpos($pdfDemo, 'daPa') !== false, 'La ficha docente informa la presión del pico');
+// "estática" lleva tilde: MiniPdf reescribe el texto a WinAnsi y el byte no
+// coincide con el UTF-8 del literal PHP, así que se busca sin ella (mismo
+// truco que ya usan las demás secciones, ver 'Audiometr'/'Impedanciometr').
+t_true(strpos($pdfEstudio, 'Compliance est') !== false,
+    'La ficha de estudio sigue trayendo la fila de compliance estática');
+t_true(strpos($pdfEstudio, 'daPa') !== false, 'La ficha de estudio sigue trayendo la presión del pico');
+
+$vOdDemo = CaseCharts::valoresTimpanograma((string) ficha_caso_demo()['Z_OD']);
+t_true(
+    strpos($pdfEstudio, number_format($vOdDemo['estatica'], 2) . ' mL') !== false,
+    'La compliance de la ficha de estudio es el centro del rango (el mismo que dibuja la curva), no el rango'
+);
+t_true(
+    strpos($pdfEstudio, number_format($vOdDemo['c_min'], 2) . ' a ' . number_format($vOdDemo['c_max'], 2) . ' mL') === false,
+    'La ficha de estudio no trae el rango de compliance del generador'
+);

@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../src/CaseCompleteness.php';
 require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/../../src/LlmUsage.php';
+require_once __DIR__ . '/../../src/EstudioRedactor.php';
 
 /**
  * Base de datos de fichas clínicas (pacientes/casos) -- separado de agenda.php,
@@ -44,6 +45,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->commit();
             $success = 'Caso eliminado.';
             AdminAudit::log($me, 'case_delete', ['case_id' => $caseId, 'appointments_deleted' => count($appointmentIds)]);
+        }
+    } elseif ($action === 'regen_estudio') {
+        $caseId = trim((string) ($_POST['case_id'] ?? ''));
+        $stmt = $pdo->prepare('SELECT data FROM cases WHERE id = ?');
+        $stmt->execute([$caseId]);
+        $row = $stmt->fetch();
+        $data = $row ? json_decode((string) $row['data'], true) : null;
+        if (!is_array($data)) {
+            $error = 'Caso no encontrado o su ficha no se puede leer.';
+        } else {
+            try {
+                EstudioRedactor::regenerate($caseId, $data, (int) $me['id']);
+                $success = 'Redacción de la ficha de estudio regenerada.';
+                AdminAudit::log($me, 'estudio_redaccion_regenerar', ['case_id' => $caseId]);
+            } catch (Throwable $e) {
+                $error = 'No se pudo regenerar la redacción: ' . $e->getMessage();
+            }
         }
     }
 }
@@ -250,21 +268,33 @@ admin_header('Fichas Clínicas', $me);
                 <span class="muted nowrap"><?= htmlspecialchars(patients_fecha_local($c['updated_at'])) ?: '—' ?></span>
             </td>
             <td class="nowrap">
-                <a href="agenda.php?schedule=<?= urlencode($c['id']) ?>" class="action-btn primary">
-                    <?= $c['appointment_id'] ? 'Reagendar' : 'Agendar' ?>
-                </a>
-                <?php if ($c['appointment_id']): ?>
-                <a href="agenda.php?schedule=<?= urlencode($c['id']) ?>&amp;force_round=1" class="action-btn secondary"
-                   title="Cita nueva para este paciente, sin tocar la que ya tiene agendada">+ Otra cita</a>
-                <?php endif; ?>
                 <a href="case_create.php?edit=<?= urlencode($c['id']) ?>" class="action-btn secondary">Editar ficha</a>
+                <a href="agenda.php?schedule=<?= urlencode($c['id']) ?>" class="action-btn primary"
+                   title="<?= $c['appointment_id'] ? 'Edita la cita que ya tiene, o desde ahí agenda una cita nueva sin tocarla' : 'Le agenda una cita a este caso' ?>">
+                    Agendar
+                </a>
                 <a href="case_sheet_pdf.php?id=<?= urlencode($c['id']) ?>" class="action-btn secondary" target="_blank" rel="noopener"
                    title="Ficha completa en PDF: perfil, audiograma, impedanciometría, acumetría, logoaudiometría, supraliminares, ABR, OEA y VEMP">PDF</a>
+                <a href="case_sheet_pdf.php?id=<?= urlencode($c['id']) ?>&amp;modo=estudio" class="action-btn secondary" target="_blank" rel="noopener"
+                   title="Ficha de estudio en PDF: los mismos exámenes, sin el perfil auditivo ni los parámetros del generador -- para repartir al alumno">PDF estudio</a>
+                <details class="row-menu">
+                    <summary class="row-menu-btn" title="Más acciones" aria-label="Más acciones">&#8942;</summary>
+                    <div class="row-menu-dropdown">
+                        <form method="post" onsubmit="return confirm('¿Redactar de nuevo la anamnesis de la ficha de estudio con IA? Reemplaza el texto guardado.');">
+                        <?= csrf_field() ?>
+                            <input type="hidden" name="form_action" value="regen_estudio">
+                            <input type="hidden" name="case_id" value="<?= htmlspecialchars($c['id']) ?>">
+                            <button type="submit" class="row-menu-item">Redactar de nuevo anamnesis (IA)</button>
+                        </form>
+                    </div>
+                </details>
                 <form method="post" class="inline" onsubmit="return confirm(<?= htmlspecialchars(json_encode("¿Eliminar el caso {$c['id']}" . ($nombreVivo || $nombreSnapshot ? ' (' . ($nombreVivo ?: $nombreSnapshot) . ')' : '') . "? También se eliminan todas sus citas/rondas ({$c['rondas_count']}) y las atenciones registradas. No se puede deshacer."), ENT_QUOTES) ?>);">
                 <?= csrf_field() ?>
                     <input type="hidden" name="form_action" value="delete_case">
                     <input type="hidden" name="case_id" value="<?= htmlspecialchars($c['id']) ?>">
-                    <button type="submit" class="action-btn danger">Eliminar</button>
+                    <button type="submit" class="action-btn-icon" title="Eliminar caso" aria-label="Eliminar caso">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2zm-2 6h10l-1 12H8L7 9zm3 2v8h1v-8h-1zm4 0v8h1v-8h-1z"/></svg>
+                    </button>
                 </form>
             </td>
         </tr>
