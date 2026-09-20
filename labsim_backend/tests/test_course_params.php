@@ -40,10 +40,15 @@ if ($abr === null) {
     foreach ($def['defaults'] as $stim => $ondas) {
         // El override viaja con la clave plana 'tone_burst_500Hz' (así la
         // arma STIM_MAP y así la lee ABR_generator.get_baseline_values),
-        // pero en el JSON los bursts cuelgan de tone_burst -> '500Hz'.
-        $bloque = strpos((string) $stim, 'tone_burst_') === 0
-            ? ($fuente['tone_burst'][substr((string) $stim, strlen('tone_burst_'))] ?? [])
-            : ($fuente[$stim] ?? []);
+        // pero en el JSON los estímulos de banda (burst y NB CE-Chirp LS)
+        // cuelgan de su familia -> '500Hz'.
+        $bloque = $fuente[$stim] ?? [];
+        foreach (['tone_burst_', 'nb_ce_chirp_ls_'] as $familia) {
+            if (strpos((string) $stim, $familia) === 0) {
+                $banda = substr((string) $stim, strlen($familia));
+                $bloque = $fuente[rtrim($familia, '_')][$banda] ?? [];
+            }
+        }
         foreach ($ondas as $onda => $campos) {
             foreach ($campos as $campo => $valor) {
                 t_close(
@@ -57,7 +62,7 @@ if ($abr === null) {
     }
     // Al revés: un estímulo nuevo en el JSON del cliente tiene que aparecer
     // en el editor, o el curso no puede configurarlo.
-    foreach (['ce_chirp', 'ls_chirp', 'tone_burst_500Hz', 'tone_burst_1000Hz', 'tone_burst_2000Hz', 'tone_burst_4000Hz'] as $stim) {
+    foreach (['ce_chirp', 'ce_chirp_ls', 'nb_ce_chirp_ls_500Hz', 'tone_burst_500Hz', 'tone_burst_1000Hz', 'tone_burst_2000Hz', 'tone_burst_4000Hz'] as $stim) {
         t_true(isset($def['groups'][$stim]), "ABR: el editor cubre el estímulo {$stim}");
     }
 }

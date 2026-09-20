@@ -2,6 +2,7 @@ import random
 
 from PySide6.QtWidgets import QWidget
 from abr.UI.AbrConfig_ui import Ui_Abr_Config
+from abr.ABR_generator import LEGACY_STIM_LABELS
 from abr.protocols import PROTOCOLS, get_protocol
 from PySide6.QtCore import QCoreApplication, Signal
 
@@ -114,7 +115,11 @@ class AbrControl(QWidget, Ui_Abr_Config):
                 self.cb_test.setCurrentIndex(idx)
 
         if 'stim' in config:
-            idx = self.cb_stim.findText(config['stim'])
+            # Rotulo viejo ('Ls-chirp', 'Burst 1kHz') -> el de ahora: una
+            # configuracion guardada antes del cambio de nomenclatura no
+            # puede dejar el combo en el primer item sin avisar.
+            stim = LEGACY_STIM_LABELS.get(config['stim'], config['stim'])
+            idx = self.cb_stim.findText(stim)
             if idx >= 0:
                 self.cb_stim.setCurrentIndex(idx)
 

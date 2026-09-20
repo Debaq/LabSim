@@ -2017,3 +2017,47 @@ paso, hacia abajo -- mismo margen gobierna las dos direcciones).
   se corre el mismo tanto por usar la misma variable para los dos lados.
 - Verificado con `pdftoppm` (antes/después, recorte de cerca del borde
   izquierdo) y suite completa sin regresión (3740 asserts).
+
+## ABR: catálogo real de estímulos y vía ósea que sí cambia el trazo (2026-09-20)
+
+El combo de estímulos del ABR listaba "Chirp" y "Ls-chirp" como si fueran
+dos chirps de banda ancha y no existía el NB CE-Chirp LS, que es el
+estímulo frecuencia específico que se usa de rutina. Además, por vía ósea
+los chirps caían al bloque del click del normativo: el alumno cambiaba el
+estímulo y el potencial salía idéntico.
+
+- `STIM_MAP`: 11 estímulos (Click, CE-Chirp, CE-Chirp LS, NB CE-Chirp LS
+  500/1k/2k/4k, Burst 500/1k/2k/4k). `STIM_BY_BAND` agrupa los que llevan
+  banda (burst y NB chirp) y `stim_key()` arma `<estimulo>_<freq>` para
+  los dos. La vía sigue siendo del transductor (Parámetros Avanzados), no
+  un ítem del combo: el mismo estímulo por aire y por hueso es otra curva.
+- `resources/abr/normative_data.json`: `ls_chirp` -> `ce_chirp_ls` (mismos
+  números, solo nomenclatura) y bloque nuevo `nb_ce_chirp_ls` por banda,
+  derivado del burst de cada población (adelanto de la V de 0.90/0.55/
+  0.30/0.15 ms según banda, menos en las ondas tempranas, y +35%/+25% de
+  amplitud). Se generó con script, no a mano.
+- `get_baseline_values()`: la cascada de fallback ahora termina en la vía
+  AÉREA de la misma población. Los ratios son propiedad del estímulo, no
+  de la vía -- sin esto el chirp por vía ósea era el click.
+- Compatibilidad: `LEGACY_STIM_LABELS` (rótulos guardados) y
+  `LEGACY_STIM_KEYS` (`ls_chirp` en la tabla de umbrales del caso y en la
+  normativa por curso). Un caso viejo no puede quedar sin umbral por
+  estímulo en silencio: eso es exactamente el bug que se está arreglando.
+- Backend: `CaseProfile::STIM_WEIGHTS` / `STIM_NHL_CORRECTION` (NB chirp
+  ~5 dB menos de corrección nHL->eHL que el burst de esa banda),
+  `CourseParams` (editor de normativa por curso), `CaseSheetPdf`
+  (`estimuloLabel`, y `conductual()` ahora SÍ da referencia conductual
+  para el NB chirp, que es frecuencial; solo los de banda ancha van con
+  "--") y el preview del perfil.
+- La tabla de umbrales de la ficha pasó de 7 a 11 filas: se le agregó
+  `espacio()` antes de dibujarla (`tablaEn()` no corta páginas) y en la
+  versión del docente la primera columna va más ancha con cabecera corta.
+
+**Pendiente (no pedido, anotado acá):**
+- El vibrador óseo no tiene techo de salida. En el equipo real son ~45-50
+  dB nHL; hoy se puede pedir un ABR óseo de 80 dB y el generador responde.
+- La ficha PDF muestra solo los umbrales por vía aérea. El caso ya calcula
+  `umbral_por_estimulo_oseo`, así que la tabla ósea es solo maquetación.
+- Un override de normativa por curso guardado con la clave vieja
+  (`ls_chirp`) se sigue aplicando en el cliente por el alias, pero el
+  editor de `normativas.php` no lo muestra bajo "CE-Chirp LS".

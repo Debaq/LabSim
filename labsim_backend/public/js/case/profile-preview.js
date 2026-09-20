@@ -12,14 +12,23 @@
     var NEURAL_PARAMS = window.CASE_CONST.neuralParams;
     var DECAY_MODES = window.CASE_CONST.decayModes;
     var ETIQUETAS = {
-        'click': 'Click', 'ce_chirp': 'CE-chirp', 'ls_chirp': 'Ls-chirp',
+        'click': 'Click', 'ce_chirp': 'CE-Chirp', 'ce_chirp_ls': 'CE-Chirp LS',
+        // Clave vieja del CE-Chirp LS (casos guardados antes del cambio).
+        'ls_chirp': 'CE-Chirp LS',
+        'nb_ce_chirp_ls_500Hz': 'NB CE-Chirp LS 500 Hz',
+        'nb_ce_chirp_ls_1000Hz': 'NB CE-Chirp LS 1 kHz',
+        'nb_ce_chirp_ls_2000Hz': 'NB CE-Chirp LS 2 kHz',
+        'nb_ce_chirp_ls_4000Hz': 'NB CE-Chirp LS 4 kHz',
         'tone_burst_500Hz': 'Burst 500 Hz', 'tone_burst_1000Hz': 'Burst 1 kHz',
         'tone_burst_2000Hz': 'Burst 2 kHz', 'tone_burst_4000Hz': 'Burst 4 kHz'
     };
     // Graves a agudos y después los de banda ancha, que es como se lee un
     // protocolo frecuencia específica.
     var ORDEN = ['tone_burst_500Hz', 'tone_burst_1000Hz', 'tone_burst_2000Hz',
-                 'tone_burst_4000Hz', 'click', 'ce_chirp', 'ls_chirp'];
+                 'tone_burst_4000Hz', 'nb_ce_chirp_ls_500Hz',
+                 'nb_ce_chirp_ls_1000Hz', 'nb_ce_chirp_ls_2000Hz',
+                 'nb_ce_chirp_ls_4000Hz', 'click', 'ce_chirp', 'ce_chirp_ls',
+                 'ls_chirp'];
 
     var MODULOS = window.CASE_CONST.autoModules;
     var preview = document.getElementById('abr-threshold-preview');

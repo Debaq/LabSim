@@ -37,7 +37,9 @@ try:
     import numpy as np
     # core.base crea el QApplication al importarse: va antes de los widgets.
     from core.base import context  # noqa: F401
-    from abr.ABR_generator import DISCONNECTED, normative_limits
+    from abr.ABR_generator import (DISCONNECTED, LEGACY_STIM_LABELS, STIM_MAP,
+                                   normative_limits)
+    from abr.AbrControl import AbrControl
     from abr.AbrGraph import AbrGraph
     from abr.AbrMainWindow import AbrMainWindow
     HAS_UI = True
@@ -607,6 +609,24 @@ def test_report_carries_the_recording_conditions():
     # Y cada curva se lleva las suyas: el equipo se puede cambiar a mitad
     # del examen.
     assert w.memory['R1']['tecnica']['impedancia_max_kohm'] == 8.0
+
+
+def test_the_stimulus_combo_matches_the_generator():
+    """Cada item de cb_stim tiene que existir en STIM_MAP.
+
+    Un rotulo que no matchea cae en el default de STIM_MAP.get() --click--
+    y el alumno cambia el estimulo sin que el potencial cambie: el combo
+    miente en silencio.
+    """
+    if not HAS_UI:
+        return
+    control = AbrControl()
+    items = [control.cb_stim.itemText(i) for i in range(control.cb_stim.count())]
+    assert items == list(STIM_MAP.keys()), items
+    # Y los rotulos viejos tienen que poder restaurarse en el combo nuevo.
+    for viejo, nuevo in LEGACY_STIM_LABELS.items():
+        control.set_data({'stim': viejo})
+        assert control.cb_stim.currentText() == nuevo, (viejo, nuevo)
 
 
 if __name__ == "__main__":

@@ -89,8 +89,9 @@ final class CaseProfile
     /**
      * Pesos por estímulo del ABR: qué zona coclear representa cada uno.
      * Las claves son EXACTAMENTE las de STIM_MAP en src/abr/ABR_generator.py
-     * (click / ls_chirp / ce_chirp / tone_burst_<freq>), así el cliente
-     * indexa el resultado sin traducir nada.
+     * (click / ce_chirp / ce_chirp_ls / nb_ce_chirp_ls_<freq> /
+     * tone_burst_<freq>), así el cliente indexa el resultado sin traducir
+     * nada.
      *
      * El burst es frecuencia-específico por definición. El click no: su
      * respuesta la domina la base coclear (2-4 kHz), y por eso un click
@@ -104,9 +105,16 @@ final class CaseProfile
         'tone_burst_1000Hz' => [1000 => 1.0],
         'tone_burst_2000Hz' => [2000 => 1.0],
         'tone_burst_4000Hz' => [4000 => 1.0],
+        // NB CE-Chirp LS: banda estrecha, o sea frecuencia específico como
+        // el burst -- lo que cambia respecto al burst es la sincronía (sale
+        // antes y más grande), no qué zona coclear mira.
+        'nb_ce_chirp_ls_500Hz'  => [500 => 1.0],
+        'nb_ce_chirp_ls_1000Hz' => [1000 => 1.0],
+        'nb_ce_chirp_ls_2000Hz' => [2000 => 1.0],
+        'nb_ce_chirp_ls_4000Hz' => [4000 => 1.0],
         'click'             => [2000 => 0.35, 3000 => 0.30, 4000 => 0.35],
         'ce_chirp'          => [500 => 0.15, 1000 => 0.20, 2000 => 0.25, 4000 => 0.40],
-        'ls_chirp'          => [500 => 0.15, 1000 => 0.20, 2000 => 0.25, 4000 => 0.40],
+        'ce_chirp_ls'       => [500 => 0.15, 1000 => 0.20, 2000 => 0.25, 4000 => 0.40],
     ];
 
     /**
@@ -132,7 +140,15 @@ final class CaseProfile
         // El chirp sincroniza mejor toda la partición coclear: misma
         // respuesta con menos nivel, umbral algo más bajo que el click.
         'ce_chirp'          => 5.0,
-        'ls_chirp'          => 5.0,
+        'ce_chirp_ls'       => 5.0,
+        // El NB CE-Chirp LS mira la misma banda que el burst, pero como
+        // sincroniza el tramo coclear que le toca llega al umbral con
+        // menos nivel: la corrección nHL->eHL es ~5 dB menor que la del
+        // burst de esa frecuencia (en 4 kHz ya no queda margen).
+        'nb_ce_chirp_ls_500Hz'  => 15.0,
+        'nb_ce_chirp_ls_1000Hz' => 10.0,
+        'nb_ce_chirp_ls_2000Hz' => 5.0,
+        'nb_ce_chirp_ls_4000Hz' => 5.0,
     ];
 
     /** Paso del umbral ABR (los equipos van de 5 en 5 dB). */

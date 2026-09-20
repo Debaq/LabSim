@@ -1226,7 +1226,11 @@ final class CaseSheetPdf
         // La columna que importa es la comparación: el ABR se lee en dB nHL
         // y el audiograma en dB HL, y el ejercicio es ver cuánto se separan.
         $aereaAbr = self::desarmar($data['Aerea'] ?? []);
-        $filas = [['Estímulo', 'OD nHL', 'OD cond.', 'OI nHL', 'OI cond.']];
+        // En la ficha del docente la tabla va a media página: la cabecera
+        // larga ("OD cond.") no entra al lado de "NB CE-Chirp LS 500 Hz".
+        $filas = [$estudio
+            ? ['Estímulo', 'OD nHL', 'OD cond.', 'OI nHL', 'OI cond.']
+            : ['Estímulo', 'OD nHL', 'OD HL', 'OI nHL', 'OI HL']];
         foreach (array_keys($porLado['od']['umbrales']) as $estimulo) {
             $filas[] = [
                 self::estimuloLabel((string) $estimulo),
@@ -1237,8 +1241,16 @@ final class CaseSheetPdf
             ];
         }
         $anchoTabla = $estudio ? $this->anchoContenido : ($this->anchoContenido - 16) / 2;
+        // La tabla creció con los NB CE-Chirp LS (11 estímulos, no 7) y
+        // tablaEn() no corta páginas: si no entra entera, se va a la
+        // siguiente ANTES de dibujar, porque al lado se dibuja la del
+        // patrón retrococlear desde la misma Y.
+        $this->espacio(count($filas) * 12.0 + 12.0);
         $yTablas = $this->y;
-        $finUmbrales = $this->tablaEn(self::MARGEN, $yTablas, $anchoTabla, $filas, [0.34, 0.17, 0.16, 0.17, 0.16], true);
+        // Primera columna ancha: "NB CE-Chirp LS 500 Hz" no entra en 0.34
+        // del ancho de media página y se monta sobre la columna del umbral.
+        $finUmbrales = $this->tablaEn(self::MARGEN, $yTablas, $anchoTabla, $filas,
+            $estudio ? [0.34, 0.17, 0.16, 0.17, 0.16] : [0.44, 0.15, 0.13, 0.15, 0.13], true);
 
         // El patrón retrococlear (self::NEURAL_LABELS) son los mandos con
         // los que el generador arma la onda -- la respuesta del caso, no
@@ -1614,17 +1626,19 @@ final class CaseSheetPdf
      * pesa su propia frecuencia; el click pesa 2, 3 y 4 kHz, que es la zona
      * coclear que lo domina.
      *
-     * Los chirp quedan sin referencia a propósito. Hoy el catálogo tiene
-     * "CE-Chirp" y "LS-Chirp" como si fueran dos estímulos de banda ancha, y
-     * eso está mal: falta separar el NB-chirp, que es frecuencial, del
-     * CE-chirp de banda ancha. Poner un promedio ahí sería tapar el error
-     * con un número.
+     * Los chirp de BANDA ANCHA (CE-Chirp, CE-Chirp LS) quedan sin
+     * referencia a propósito: estimulan toda la partición coclear a la vez,
+     * así que no hay una frecuencia conductual con la cual compararlos y
+     * poner un promedio ahí sería tapar eso con un número. El NB CE-Chirp
+     * LS sí tiene referencia -- mira una banda sola, igual que el burst.
      *
      * @param array<int,float> $aereaLado umbrales aéreos del oído
      */
     private static function conductual(string $estimulo, array $aereaLado): string
     {
-        if (strpos($estimulo, 'chirp') !== false) {
+        $bandaAncha = ($estimulo === 'ce_chirp' || $estimulo === 'ce_chirp_ls'
+                       || $estimulo === 'ls_chirp');
+        if ($bandaAncha) {
             return '--';
         }
         $pesos = CaseProfile::STIM_WEIGHTS[$estimulo] ?? [];
@@ -2586,10 +2600,24 @@ final class CaseSheetPdf
     {
         // strpos() y no str_starts_with(): el hosting corre PHP 7.4 (ver
         // tests/test_php_baseline.php).
+        $bandas = ['500Hz' => '500 Hz', '1000Hz' => '1 kHz',
+                   '2000Hz' => '2 kHz', '4000Hz' => '4 kHz'];
         if (strpos($estimulo, 'tone_burst_') === 0) {
-            return 'Burst ' . str_replace(['tone_burst_', 'Hz'], ['', ''], $estimulo) . ' Hz';
+            $banda = substr($estimulo, strlen('tone_burst_'));
+            return 'Burst ' . ($bandas[$banda] ?? $banda);
         }
-        return ['click' => 'Click', 'ce_chirp' => 'CE-Chirp', 'ls_chirp' => 'LS-Chirp'][$estimulo] ?? $estimulo;
+        if (strpos($estimulo, 'nb_ce_chirp_ls_') === 0) {
+            $banda = substr($estimulo, strlen('nb_ce_chirp_ls_'));
+            return 'NB CE-Chirp LS ' . ($bandas[$banda] ?? $banda);
+        }
+        // 'ls_chirp' es la clave vieja del CE-Chirp LS: los casos guardados
+        // antes del cambio de nomenclatura la siguen trayendo.
+        return [
+            'click' => 'Click',
+            'ce_chirp' => 'CE-Chirp',
+            'ce_chirp_ls' => 'CE-Chirp LS',
+            'ls_chirp' => 'CE-Chirp LS',
+        ][$estimulo] ?? $estimulo;
     }
 
     /**

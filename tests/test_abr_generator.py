@@ -1013,7 +1013,7 @@ def test_fsp_criterion_is_reported():
 # ---------------------------------------------------------- estímulos (P2)
 
 def test_every_stimulus_works_in_every_population():
-    """Los 7 estímulos del combo dan ondas ordenadas en las 5 poblaciones."""
+    """Los 11 estímulos del combo dan ondas ordenadas en las 5 poblaciones."""
     g = _gen()
     for poblacion in ('adult_female', 'adult_male', 'child', 'neonate', 'elderly'):
         for etiqueta, (stim, freq) in STIM_MAP.items():
@@ -1033,9 +1033,62 @@ def test_stimulus_ratios_fall_back_to_the_adult_block():
     g = _gen()
     click = g.get_baseline_values('neonate', 'click', 'air_conduction')
     burst = g.get_baseline_values('neonate', 'tone_burst', 'air_conduction', freq='500Hz')
-    ls = g.get_baseline_values('neonate', 'ls_chirp', 'air_conduction')
+    ls = g.get_baseline_values('neonate', 'ce_chirp_ls', 'air_conduction')
     assert burst['V']['lat'] > click['V']['lat'] + 1.0   # 500 Hz llega mucho después
     assert ls['V']['lat'] < click['V']['lat']            # el chirp sincroniza
+
+
+def test_every_stimulus_changes_the_response_in_both_pathways():
+    """Ningun estimulo puede dar la curva del click, por aire NI por hueso.
+
+    La via osea del JSON solo describe click y burst: los chirps caian al
+    bloque del click y el combo dejaba de hacer efecto apenas se cambiaba
+    el transductor (el estimulo estaba, pero el potencial salia identico).
+    """
+    from abr.ABR_generator import STIM_MAP
+    g = _gen()
+    for via in ('air_conduction', 'bone_conduction'):
+        click = g.get_baseline_values('adult_female', 'click', via)
+        for etiqueta, (stim, freq) in STIM_MAP.items():
+            if stim == 'click':
+                continue
+            base = g.get_baseline_values('adult_female', stim, via, freq=freq)
+            distinto = any(abs(base[w]['lat'] - click[w]['lat']) > 0.02
+                           or abs(base[w]['amp'] - click[w]['amp']) > 0.01
+                           for w in ('I', 'III', 'V'))
+            assert distinto, (via, etiqueta)
+
+
+def test_narrow_band_chirp_sits_between_the_burst_and_the_wide_chirp():
+    """El NB CE-Chirp LS es frecuencia especifico pero sincroniza mejor.
+
+    Onda V antes que el burst de la misma banda (compensa el retardo de la
+    onda viajera) y despues del chirp de banda ancha, con mas amplitud que
+    el burst.
+    """
+    g = _gen()
+    ancho = g.get_baseline_values('adult_female', 'ce_chirp_ls', 'air_conduction')
+    for freq in ('500Hz', '1000Hz', '2000Hz', '4000Hz'):
+        nb = g.get_baseline_values('adult_female', 'nb_ce_chirp_ls',
+                                   'air_conduction', freq=freq)
+        burst = g.get_baseline_values('adult_female', 'tone_burst',
+                                      'air_conduction', freq=freq)
+        assert ancho['V']['lat'] <= nb['V']['lat'] < burst['V']['lat'], freq
+        assert burst['V']['amp'] < nb['V']['amp'] <= ancho['V']['amp'] * 1.05, freq
+
+
+def test_old_case_keys_still_find_their_threshold():
+    """Un caso guardado con 'ls_chirp' sigue leyendo su umbral.
+
+    Sin el alias, la tabla del caso no matcheaba la clave nueva y el umbral
+    caia al escalar del oido: el estimulo dejaba de hacer efecto en
+    silencio, que es exactamente el sintoma que motivo el cambio.
+    """
+    g = _gen()
+    caso = {'umbral': 80, 'umbral_por_estimulo': dict(DESCENDENTE)}
+    caso['umbral_por_estimulo']['ls_chirp'] = caso['umbral_por_estimulo'].pop('ce_chirp_ls')
+    assert g.case_threshold(caso, _stim('ce_chirp_ls'), 'air_conduction',
+                            'normal') == 50
 
 
 def test_tone_burst_interpolates_the_waves_it_does_not_describe():
@@ -1829,7 +1882,9 @@ def test_normative_limits_follow_intensity():
 DESCENDENTE = {
     'tone_burst_500Hz': 30, 'tone_burst_1000Hz': 30,
     'tone_burst_2000Hz': 50, 'tone_burst_4000Hz': 75,
-    'click': 65, 'ce_chirp': 50, 'ls_chirp': 50,
+    'nb_ce_chirp_ls_500Hz': 25, 'nb_ce_chirp_ls_1000Hz': 25,
+    'nb_ce_chirp_ls_2000Hz': 45, 'nb_ce_chirp_ls_4000Hz': 70,
+    'click': 65, 'ce_chirp': 50, 'ce_chirp_ls': 50,
 }
 
 

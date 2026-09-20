@@ -24,9 +24,16 @@ from dataclasses import dataclass
 
 
 # Estímulos tal como los rotula cb_stim (ver ABR_generator.STIM_MAP).
+#
+# WIDE_CHIRPS son los de banda ancha (toda la cóclea a la vez: umbral
+# global) y NB_CHIRPS los de banda estrecha, que son frecuencia-específicos
+# como el burst pero sincronizan mejor.
 CLICK = 'Click'
-CHIRPS = ('Ls-chirp', 'Chirp')
-BURSTS = ('Burst 500Hz', 'Burst 1kHz', 'Burst 2kHz', 'Burst 4kHz')
+WIDE_CHIRPS = ('CE-Chirp', 'CE-Chirp LS')
+NB_CHIRPS = ('NB CE-Chirp LS 500 Hz', 'NB CE-Chirp LS 1 kHz',
+             'NB CE-Chirp LS 2 kHz', 'NB CE-Chirp LS 4 kHz')
+CHIRPS = WIDE_CHIRPS + NB_CHIRPS
+BURSTS = ('Burst 500 Hz', 'Burst 1 kHz', 'Burst 2 kHz', 'Burst 4 kHz')
 
 
 @dataclass(frozen=True)
@@ -68,7 +75,7 @@ PROTOCOLS = {
     'ASSR': Protocol(
         name='ASSR', window_ms=100, filter_high=30, filter_low=300,
         rate=80.0, averages=1000, montage='vertex_mastoid',
-        stimuli=BURSTS,
+        stimuli=BURSTS + NB_CHIRPS,
         note='Se analiza en frecuencia (fase/amplitud del modulador), no en el tiempo.'),
     'MLR': Protocol(
         name='MLR', window_ms=100, filter_high=10, filter_low=300,

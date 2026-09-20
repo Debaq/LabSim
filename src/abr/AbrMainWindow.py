@@ -352,7 +352,13 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                            'aver', 'side'):
                 getattr(self.detail, f'lbl_info_{nombre}').setText('')
             return
-        self.detail.lbl_info_estim.setText(str(setting.get('stim', '')))
+        # El estimulo solo no dice como se registro: el mismo chirp por via
+        # osea es otra curva (otro normativo, otro umbral). Se rotula al
+        # lado del estimulo porque en el .ui no hay campo para la via.
+        estim = str(setting.get('stim', ''))
+        if setting.get('transducer') == 'bone_vibrator':
+            estim = f"{estim} (óseo)"
+        self.detail.lbl_info_estim.setText(estim)
         self.detail.lbl_info_pol.setText(str(setting.get('pol', '')))
         self.detail.lbl_info_int.setText(f"{setting.get('int', '')} dBnHL")
         self.detail.lbl_info_mkg.setText(f"{setting.get('mkg', '')} dB")
@@ -525,6 +531,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         if state == 'record':
             self.state_capture = state
             self.current_setting = self.control.get_data()
+            # La via la define el transductor (Parametros Avanzados), no el
+            # combo de estimulos: viaja pegada al setting de la captura
+            # para que el detalle diga con que se registro esa curva.
+            self.current_setting['transducer'] = self.technical.get('transducer')
             self.total_averages = self.fake_averages(self.current_setting["average"])
             # El FSP arranca de cero en cada captura y contra las
             # promediaciones que se pidieron, con el criterio de deteccion

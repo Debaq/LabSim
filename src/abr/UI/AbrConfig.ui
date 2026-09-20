@@ -314,32 +314,52 @@
      </item>
      <item>
       <property name="text">
-       <string>Ls-chirp</string>
+       <string>CE-Chirp</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Chirp</string>
+       <string>CE-Chirp LS</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Burst 500Hz</string>
+       <string>NB CE-Chirp LS 500 Hz</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Burst 1kHz</string>
+       <string>NB CE-Chirp LS 1 kHz</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Burst 2kHz</string>
+       <string>NB CE-Chirp LS 2 kHz</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Burst 4kHz</string>
+       <string>NB CE-Chirp LS 4 kHz</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Burst 500 Hz</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Burst 1 kHz</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Burst 2 kHz</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Burst 4 kHz</string>
       </property>
      </item>
     </widget>

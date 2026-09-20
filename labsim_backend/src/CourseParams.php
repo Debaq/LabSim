@@ -43,12 +43,16 @@ final class CourseParams
                 'module' => 'ABR',
                 'title' => 'Desviación de estímulos ABR (potenciales evocados)',
                 'help' => 'El click de cada paciente lo define el caso (case_create.php, campo "desviaciones") -- acá NO se edita click. '
-                    . 'Esto configura cuánto se desvían chirp/ls-chirp/burst respecto al click de ESE paciente, como factor multiplicador (ratio) por onda: '
+                    . 'Esto configura cuánto se desvían los chirps y el burst respecto al click de ESE paciente, como factor multiplicador (ratio) por onda: '
                     . 'ej. ratio de amplitud 1.4 en la onda V del chirp = la V del chirp sale 40% más grande que la V (ya ajustada) del click de ese caso. '
                     . 'Los campos muestran el valor por defecto de la app; el curso guarda solo los que quedes distintos del default.',
                 'groups' => [
-                    'ce_chirp' => ['label' => 'Chirp', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
-                    'ls_chirp' => ['label' => 'Ls-chirp', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
+                    'ce_chirp' => ['label' => 'CE-Chirp', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
+                    'ce_chirp_ls' => ['label' => 'CE-Chirp LS', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
+                    'nb_ce_chirp_ls_500Hz' => ['label' => 'NB CE-Chirp LS 500 Hz', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
+                    'nb_ce_chirp_ls_1000Hz' => ['label' => 'NB CE-Chirp LS 1 kHz', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
+                    'nb_ce_chirp_ls_2000Hz' => ['label' => 'NB CE-Chirp LS 2 kHz', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
+                    'nb_ce_chirp_ls_4000Hz' => ['label' => 'NB CE-Chirp LS 4 kHz', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
                     'tone_burst_500Hz' => ['label' => 'Burst 500 Hz', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
                     'tone_burst_1000Hz' => ['label' => 'Burst 1 kHz', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
                     'tone_burst_2000Hz' => ['label' => 'Burst 2 kHz', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
@@ -68,10 +72,30 @@ final class CourseParams
                         'III' => ['lat_ratio' => 0.9783, 'amp_ratio' => 1.4054],
                         'V' => ['lat_ratio' => 0.9872, 'amp_ratio' => 1.2167],
                     ],
-                    'ls_chirp' => [
+                    'ce_chirp_ls' => [
                         'I' => ['lat_ratio' => 0.9074, 'amp_ratio' => 1.8095],
                         'III' => ['lat_ratio' => 0.9918, 'amp_ratio' => 1.1892],
                         'V' => ['lat_ratio' => 0.9963, 'amp_ratio' => 1.0333],
+                    ],
+                    'nb_ce_chirp_ls_500Hz' => [
+                        'I' => ['lat_ratio' => 1.1173, 'amp_ratio' => 1.4143],
+                        'III' => ['lat_ratio' => 1.2581, 'amp_ratio' => 0.9851],
+                        'V' => ['lat_ratio' => 1.298, 'amp_ratio' => 0.855],
+                    ],
+                    'nb_ce_chirp_ls_1000Hz' => [
+                        'I' => ['lat_ratio' => 1.0, 'amp_ratio' => 1.7357],
+                        'III' => ['lat_ratio' => 1.144, 'amp_ratio' => 1.1676],
+                        'V' => ['lat_ratio' => 1.1426, 'amp_ratio' => 0.9675],
+                    ],
+                    'nb_ce_chirp_ls_2000Hz' => [
+                        'I' => ['lat_ratio' => 0.9383, 'amp_ratio' => 1.7858],
+                        'III' => ['lat_ratio' => 1.0353, 'amp_ratio' => 1.1824],
+                        'V' => ['lat_ratio' => 1.0421, 'amp_ratio' => 0.9791],
+                    ],
+                    'nb_ce_chirp_ls_4000Hz' => [
+                        'I' => ['lat_ratio' => 0.9012, 'amp_ratio' => 1.9047],
+                        'III' => ['lat_ratio' => 1.0, 'amp_ratio' => 1.25],
+                        'V' => ['lat_ratio' => 1.0055, 'amp_ratio' => 1.0416],
                     ],
                     'tone_burst_500Hz' => [
                         'I' => ['lat_ratio' => 1.4506, 'amp_ratio' => 1.0476],

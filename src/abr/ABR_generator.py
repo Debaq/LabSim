@@ -507,7 +507,8 @@ class ABRGenerator:
         bundleado) -> 1.0 (misma forma que click).
 
         ratio_override: dict {stim_key: {onda: {'lat_ratio':.., 'amp_ratio':..}}}
-        -- stim_key = 'ce_chirp'/'ls_chirp'/'tone_burst_<freq>' (ver STIM_MAP).
+        -- stim_key = 'ce_chirp'/'ce_chirp_ls'/'nb_ce_chirp_ls_<freq>'/
+        'tone_burst_<freq>' (ver STIM_MAP).
         Gana sobre el default bundleado, onda por onda.
         """
         pop = self.norms['populations'][population]
@@ -516,29 +517,39 @@ class ABRGenerator:
         if stimulus == 'click':
             return click
 
-        if stimulus == 'tone_burst':
-            stim_key = f"tone_burst_{freq or '1000Hz'}"
-            default_ratio_block = (via.get('tone_burst') or {}).get(freq or '1000Hz')
-        else:
-            stim_key = stimulus
-            default_ratio_block = via.get(stimulus)
+        stim_key = self.stim_key(stimulus, freq)
 
-        # El JSON no describe todos los estimulos en todas las poblaciones
-        # (neonato solo trae click y ce_chirp, por ejemplo). Sin esto, pedir
-        # un burst de 500 Hz en un neonato devolvia los valores del click en
-        # silencio, o sea el estimulo no hacia NADA. Los ratios son una
-        # propiedad del estimulo mucho mas que de la poblacion, asi que se
-        # caen a los del adulto en vez de inventarse un 1.0.
-        if not default_ratio_block:
-            fallback = (self.norms['populations']['adult_female'].get(pathway)
-                        or self.norms['populations']['adult_female']['air_conduction'])
-            if stimulus == 'tone_burst':
-                default_ratio_block = (fallback.get('tone_burst') or {}).get(freq or '1000Hz')
-            else:
-                default_ratio_block = fallback.get(stimulus)
+        def ratios_de(bloque):
+            if not bloque:
+                return None
+            if stimulus in STIM_BY_BAND:
+                return (bloque.get(stimulus) or {}).get(freq or '1000Hz')
+            return bloque.get(stimulus)
+
+        default_ratio_block = ratios_de(via)
+
+        # El JSON no describe todos los estimulos en todas las vias ni en
+        # todas las poblaciones (el neonato solo trae click y ce_chirp; la
+        # via osea no trae los chirps de banda ancha). Sin esto, pedir un
+        # burst de 500 Hz en un neonato --o un chirp por via osea-- devolvia
+        # los valores del click en silencio, o sea el estimulo no hacia
+        # NADA. Los ratios son una propiedad del estimulo mucho mas que de
+        # la poblacion o de la via, asi que se caen en cascada: misma
+        # poblacion por aire -> adulto por esta via -> adulto por aire.
+        pop_af = self.norms['populations']['adult_female']
+        for bloque in (pop.get('air_conduction'),
+                       pop_af.get(pathway),
+                       pop_af['air_conduction']):
+            if default_ratio_block:
+                break
+            default_ratio_block = ratios_de(bloque)
 
         default_ratio_block = self._complete_ratio_block(default_ratio_block, click)
         override_block = (ratio_override or {}).get(stim_key)
+        if override_block is None:
+            # Normativa por curso guardada con la nomenclatura vieja.
+            viejo = {v: k for k, v in LEGACY_STIM_KEYS.items()}.get(stim_key)
+            override_block = (ratio_override or {}).get(viejo) if viejo else None
 
         baseline = {}
         for wave, click_vals in click.items():
@@ -1406,10 +1417,11 @@ class ABRGenerator:
         """Clave del estimulo tal como la indexan el normativo y el caso.
 
         Misma forma que arma get_baseline_values: 'click', 'ce_chirp',
-        'ls_chirp' o 'tone_burst_<freq>'.
+        'ce_chirp_ls' o '<estimulo de banda>_<freq>' (tone_burst y
+        nb_ce_chirp_ls).
         """
-        if stim == 'tone_burst':
-            return f"tone_burst_{freq or '1000Hz'}"
+        if stim in STIM_BY_BAND:
+            return f"{stim}_{freq or '1000Hz'}"
         return stim
 
     def case_threshold(self, case_config, stimulus_config, pathway, pathology):
@@ -1433,8 +1445,13 @@ class ABRGenerator:
             clave = ('umbral_por_estimulo_oseo' if pathway == 'bone_conduction'
                      else 'umbral_por_estimulo')
             tabla = case_config.get(clave) or {}
-            valor = tabla.get(self.stim_key(stimulus_config['stim'],
-                                            stimulus_config.get('freq')))
+            key = self.stim_key(stimulus_config['stim'],
+                                stimulus_config.get('freq'))
+            valor = tabla.get(key)
+            if valor is None:
+                # Casos guardados con la nomenclatura vieja (ls_chirp).
+                viejo = {v: k for k, v in LEGACY_STIM_KEYS.items()}.get(key)
+                valor = tabla.get(viejo) if viejo else None
             if valor is not None:
                 return float(valor)
             if 'umbral' in case_config:
@@ -2209,14 +2226,51 @@ def _get_generator():
 
 
 # Texto del combo cb_stim (AbrConfig_ui.py) -> (clave en normative_data.json, freq)
+#
+# Los estimulos son los del equipo real: click, CE-Chirp de banda ancha
+# (el original, no level-specific), CE-Chirp LS (nivel-especifico, el que
+# se usa de rutina hoy), NB CE-Chirp LS por banda y tone burst por
+# frecuencia. Los dos primeros y los dos ultimos NO son lo mismo: el chirp
+# de banda ancha explora toda la coclea a la vez --sirve para umbral
+# global, no para evaluacion frecuencia especifica-- y el NB/burst miran
+# una banda sola. La via (aerea/osea) no es un estimulo: la define el
+# transductor en Parametros Avanzados (ver AbrAdvanceSettings).
 STIM_MAP = {
-    'Click':       ('click', None),
-    'Ls-chirp':    ('ls_chirp', None),
-    'Chirp':       ('ce_chirp', None),
-    'Burst 500Hz': ('tone_burst', '500Hz'),
-    'Burst 1kHz':  ('tone_burst', '1000Hz'),
-    'Burst 2kHz':  ('tone_burst', '2000Hz'),
-    'Burst 4kHz':  ('tone_burst', '4000Hz'),
+    'Click':                 ('click', None),
+    'CE-Chirp':              ('ce_chirp', None),
+    'CE-Chirp LS':           ('ce_chirp_ls', None),
+    'NB CE-Chirp LS 500 Hz': ('nb_ce_chirp_ls', '500Hz'),
+    'NB CE-Chirp LS 1 kHz':  ('nb_ce_chirp_ls', '1000Hz'),
+    'NB CE-Chirp LS 2 kHz':  ('nb_ce_chirp_ls', '2000Hz'),
+    'NB CE-Chirp LS 4 kHz':  ('nb_ce_chirp_ls', '4000Hz'),
+    'Burst 500 Hz':          ('tone_burst', '500Hz'),
+    'Burst 1 kHz':           ('tone_burst', '1000Hz'),
+    'Burst 2 kHz':           ('tone_burst', '2000Hz'),
+    'Burst 4 kHz':           ('tone_burst', '4000Hz'),
+}
+
+
+# Estimulos que llevan frecuencia: la clave del normativo y la del caso se
+# arman con la banda pegada (ver ABRGenerator.stim_key).
+STIM_BY_BAND = ('tone_burst', 'nb_ce_chirp_ls')
+
+
+# Rotulos y claves viejas -> las de ahora. Los casos y las configuraciones
+# guardadas antes del cambio de nomenclatura traen 'Ls-chirp'/'ls_chirp' y
+# 'Burst 1kHz': sin esto el combo se iba al primer item y la tabla de
+# umbrales por estimulo del caso no matcheaba ninguna clave (o sea, el
+# estimulo dejaba de hacer efecto, en silencio).
+LEGACY_STIM_LABELS = {
+    'Chirp':       'CE-Chirp',
+    'Ls-chirp':    'CE-Chirp LS',
+    'Burst 500Hz': 'Burst 500 Hz',
+    'Burst 1kHz':  'Burst 1 kHz',
+    'Burst 2kHz':  'Burst 2 kHz',
+    'Burst 4kHz':  'Burst 4 kHz',
+}
+
+LEGACY_STIM_KEYS = {
+    'ls_chirp': 'ce_chirp_ls',
 }
 
 

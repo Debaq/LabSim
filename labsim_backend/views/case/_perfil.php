@@ -48,8 +48,8 @@
 </div>
 <div class="card">
     <strong>Umbral por estímulo, derivado del audiograma</strong>
-    <p class="help">Con esto encendido, el umbral del ABR deja de ser un número por oído y pasa a calcularse por estímulo desde la audiometría del caso: el burst de 500 Hz responde según el umbral en 500, el de 4 kHz según el de 4 kHz, el click según la base coclear (2-4 kHz) y el chirp con más peso en los graves. Es lo que permite pedir una evaluación frecuencia específica en una hipoacusia descendente. La vía ósea usa los umbrales óseos, así que el gap conductivo del ABR sale del audiograma solo.</p>
-    <p class="help">Los números de la tabla están en dB nHL, no en dB HL: incluyen la corrección conductual-electrofisiológica (+20 dB en 500 Hz, +15 en 1 k, +10 en 2 k, +5 en 4 k, +10 el click, +5 el chirp). Por eso un oído de 0 dB HL igual muestra 20 dB nHL con burst de 500: la tabla no está mal, está en otra unidad.</p>
+    <p class="help">Con esto encendido, el umbral del ABR deja de ser un número por oído y pasa a calcularse por estímulo desde la audiometría del caso: el burst de 500 Hz responde según el umbral en 500, el de 4 kHz según el de 4 kHz, el click según la base coclear (2-4 kHz), el NB CE-Chirp LS según su propia banda y los chirps de banda ancha con más peso en los graves que el click. Es lo que permite pedir una evaluación frecuencia específica en una hipoacusia descendente. La vía ósea usa los umbrales óseos, así que el gap conductivo del ABR sale del audiograma solo.</p>
+    <p class="help">Los números de la tabla están en dB nHL, no en dB HL: incluyen la corrección conductual-electrofisiológica (burst: +20 dB en 500 Hz, +15 en 1 k, +10 en 2 k, +5 en 4 k; NB CE-Chirp LS: +15, +10, +5 y +5; click +10; chirp de banda ancha +5). Por eso un oído de 0 dB HL igual muestra 20 dB nHL con burst de 500: la tabla no está mal, está en otra unidad.</p>
     <div id="abr-threshold-preview" hidden>
         <table class="reflex-pattern-table" style="margin-top:0.6rem;">
             <thead>
