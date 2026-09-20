@@ -130,11 +130,11 @@
           "500Hz": {
             "I": {
               "lat_ratio": 1.1879,
-              "amp_ratio": 0.9
+              "amp_ratio": 0.3329
             },
             "III": {
               "lat_ratio": 1.2416,
-              "amp_ratio": 0.9643
+              "amp_ratio": 0.6065
             },
             "V": {
               "lat_ratio": 1.2807,
@@ -149,11 +149,11 @@
           "1000Hz": {
             "I": {
               "lat_ratio": 1.0727,
-              "amp_ratio": 1.125
+              "amp_ratio": 0.5197
             },
             "III": {
               "lat_ratio": 1.1325,
-              "amp_ratio": 1.1571
+              "amp_ratio": 0.7427
             },
             "V": {
               "lat_ratio": 1.1316,
@@ -168,11 +168,11 @@
           "2000Hz": {
             "I": {
               "lat_ratio": 1.0121,
-              "amp_ratio": 1.1666
+              "amp_ratio": 0.7041
             },
             "III": {
               "lat_ratio": 1.0286,
-              "amp_ratio": 1.1786
+              "amp_ratio": 0.8526
             },
             "V": {
               "lat_ratio": 1.0351,
@@ -187,11 +187,11 @@
           "4000Hz": {
             "I": {
               "lat_ratio": 0.9758,
-              "amp_ratio": 1.25
+              "amp_ratio": 0.8677
             },
             "III": {
               "lat_ratio": 0.9948,
-              "amp_ratio": 1.25
+              "amp_ratio": 0.9375
             },
             "V": {
               "lat_ratio": 1.0,
@@ -208,11 +208,11 @@
           "500Hz": {
             "I": {
               "lat_ratio": 1.5152,
-              "amp_ratio": 0.6667
+              "amp_ratio": 0.1108
             },
             "III": {
               "lat_ratio": 1.4286,
-              "amp_ratio": 0.7143
+              "amp_ratio": 0.3679
             },
             "V": {
               "lat_ratio": 1.4386,
@@ -227,11 +227,11 @@
           "1000Hz": {
             "I": {
               "lat_ratio": 1.2727,
-              "amp_ratio": 0.8333
+              "amp_ratio": 0.2701
             },
             "III": {
               "lat_ratio": 1.2468,
-              "amp_ratio": 0.8571
+              "amp_ratio": 0.5516
             },
             "V": {
               "lat_ratio": 1.2281,
@@ -246,11 +246,11 @@
           "2000Hz": {
             "I": {
               "lat_ratio": 1.1212,
-              "amp_ratio": 0.9333
+              "amp_ratio": 0.4957
             },
             "III": {
               "lat_ratio": 1.0909,
-              "amp_ratio": 0.9429
+              "amp_ratio": 0.7269
             },
             "V": {
               "lat_ratio": 1.0877,
@@ -265,11 +265,11 @@
           "4000Hz": {
             "I": {
               "lat_ratio": 1.0303,
-              "amp_ratio": 1.0
+              "amp_ratio": 0.7529
             },
             "III": {
               "lat_ratio": 1.026,
-              "amp_ratio": 1.0
+              "amp_ratio": 0.879
             },
             "V": {
               "lat_ratio": 1.0263,
@@ -327,11 +327,11 @@
           "500Hz": {
             "I": {
               "lat_ratio": 1.1676,
-              "amp_ratio": 0.972
+              "amp_ratio": 0.3329
             },
             "III": {
               "lat_ratio": 1.2296,
-              "amp_ratio": 0.99
+              "amp_ratio": 0.6065
             },
             "V": {
               "lat_ratio": 1.2712,
@@ -341,11 +341,11 @@
           "1000Hz": {
             "I": {
               "lat_ratio": 1.0648,
-              "amp_ratio": 1.188
+              "amp_ratio": 0.5197
             },
             "III": {
               "lat_ratio": 1.126,
-              "amp_ratio": 1.215
+              "amp_ratio": 0.7427
             },
             "V": {
               "lat_ratio": 1.1271,
@@ -355,11 +355,11 @@
           "2000Hz": {
             "I": {
               "lat_ratio": 1.0108,
-              "amp_ratio": 1.25
+              "amp_ratio": 0.7041
             },
             "III": {
               "lat_ratio": 1.0271,
-              "amp_ratio": 1.25
+              "amp_ratio": 0.8526
             },
             "V": {
               "lat_ratio": 1.0339,
@@ -369,11 +369,11 @@
           "4000Hz": {
             "I": {
               "lat_ratio": 0.9784,
-              "amp_ratio": 1.35
+              "amp_ratio": 0.8677
             },
             "III": {
               "lat_ratio": 0.9951,
-              "amp_ratio": 1.3334
+              "amp_ratio": 0.9375
             },
             "V": {
               "lat_ratio": 1.0,
@@ -385,11 +385,11 @@
           "500Hz": {
             "I": {
               "lat_ratio": 1.4595,
-              "amp_ratio": 0.72
+              "amp_ratio": 0.1108
             },
             "III": {
               "lat_ratio": 1.4074,
-              "amp_ratio": 0.7333
+              "amp_ratio": 0.3679
             },
             "V": {
               "lat_ratio": 1.4237,
@@ -399,11 +399,11 @@
           "1000Hz": {
             "I": {
               "lat_ratio": 1.2432,
-              "amp_ratio": 0.88
+              "amp_ratio": 0.2701
             },
             "III": {
               "lat_ratio": 1.2346,
-              "amp_ratio": 0.9
+              "amp_ratio": 0.5516
             },
             "V": {
               "lat_ratio": 1.2203,
@@ -413,11 +413,11 @@
           "2000Hz": {
             "I": {
               "lat_ratio": 1.1081,
-              "amp_ratio": 1.0
+              "amp_ratio": 0.4957
             },
             "III": {
               "lat_ratio": 1.0864,
-              "amp_ratio": 1.0
+              "amp_ratio": 0.7269
             },
             "V": {
               "lat_ratio": 1.0847,
@@ -427,11 +427,11 @@
           "4000Hz": {
             "I": {
               "lat_ratio": 1.027,
-              "amp_ratio": 1.08
+              "amp_ratio": 0.7529
             },
             "III": {
               "lat_ratio": 1.0247,
-              "amp_ratio": 1.0667
+              "amp_ratio": 0.879
             },
             "V": {
               "lat_ratio": 1.0254,
@@ -574,11 +574,11 @@
           "500Hz": {
             "I": {
               "lat_ratio": 1.1173,
-              "amp_ratio": 1.4143
+              "amp_ratio": 0.3329
             },
             "III": {
               "lat_ratio": 1.2581,
-              "amp_ratio": 0.9851
+              "amp_ratio": 0.6065
             },
             "V": {
               "lat_ratio": 1.298,
@@ -593,11 +593,11 @@
           "1000Hz": {
             "I": {
               "lat_ratio": 1.0,
-              "amp_ratio": 1.7357
+              "amp_ratio": 0.5197
             },
             "III": {
               "lat_ratio": 1.144,
-              "amp_ratio": 1.1676
+              "amp_ratio": 0.7427
             },
             "V": {
               "lat_ratio": 1.1426,
@@ -612,11 +612,11 @@
           "2000Hz": {
             "I": {
               "lat_ratio": 0.9383,
-              "amp_ratio": 1.7858
+              "amp_ratio": 0.7041
             },
             "III": {
               "lat_ratio": 1.0353,
-              "amp_ratio": 1.1824
+              "amp_ratio": 0.8526
             },
             "V": {
               "lat_ratio": 1.0421,
@@ -631,11 +631,11 @@
           "4000Hz": {
             "I": {
               "lat_ratio": 0.9012,
-              "amp_ratio": 1.9047
+              "amp_ratio": 0.8677
             },
             "III": {
               "lat_ratio": 1.0,
-              "amp_ratio": 1.25
+              "amp_ratio": 0.9375
             },
             "V": {
               "lat_ratio": 1.0055,
@@ -652,11 +652,11 @@
           "500Hz": {
             "I": {
               "lat_ratio": 1.4506,
-              "amp_ratio": 1.0476
+              "amp_ratio": 0.1108
             },
             "III": {
               "lat_ratio": 1.4538,
-              "amp_ratio": 0.7297
+              "amp_ratio": 0.3679
             },
             "V": {
               "lat_ratio": 1.4625,
@@ -671,11 +671,11 @@
           "1000Hz": {
             "I": {
               "lat_ratio": 1.2037,
-              "amp_ratio": 1.2857
+              "amp_ratio": 0.2701
             },
             "III": {
               "lat_ratio": 1.2636,
-              "amp_ratio": 0.8649
+              "amp_ratio": 0.5516
             },
             "V": {
               "lat_ratio": 1.2431,
@@ -690,11 +690,11 @@
           "2000Hz": {
             "I": {
               "lat_ratio": 1.0494,
-              "amp_ratio": 1.4286
+              "amp_ratio": 0.4957
             },
             "III": {
               "lat_ratio": 1.1005,
-              "amp_ratio": 0.9459
+              "amp_ratio": 0.7269
             },
             "V": {
               "lat_ratio": 1.0969,
@@ -709,11 +709,11 @@
           "4000Hz": {
             "I": {
               "lat_ratio": 0.9568,
-              "amp_ratio": 1.5238
+              "amp_ratio": 0.7529
             },
             "III": {
               "lat_ratio": 1.0326,
-              "amp_ratio": 1.0
+              "amp_ratio": 0.879
             },
             "V": {
               "lat_ratio": 1.0329,
@@ -771,11 +771,11 @@
           "500Hz": {
             "I": {
               "lat_ratio": 1.1824,
-              "amp_ratio": 0.9999
+              "amp_ratio": 0.3329
             },
             "III": {
               "lat_ratio": 1.2385,
-              "amp_ratio": 1.0125
+              "amp_ratio": 0.6065
             },
             "V": {
               "lat_ratio": 1.2807,
@@ -785,11 +785,11 @@
           "1000Hz": {
             "I": {
               "lat_ratio": 1.0706,
-              "amp_ratio": 1.2
+              "amp_ratio": 0.5197
             },
             "III": {
               "lat_ratio": 1.1308,
-              "amp_ratio": 1.2234
+              "amp_ratio": 0.7427
             },
             "V": {
               "lat_ratio": 1.1316,
@@ -799,11 +799,11 @@
           "2000Hz": {
             "I": {
               "lat_ratio": 1.0117,
-              "amp_ratio": 1.25
+              "amp_ratio": 0.7041
             },
             "III": {
               "lat_ratio": 1.0282,
-              "amp_ratio": 1.25
+              "amp_ratio": 0.8526
             },
             "V": {
               "lat_ratio": 1.0351,
@@ -813,11 +813,11 @@
           "4000Hz": {
             "I": {
               "lat_ratio": 0.9765,
-              "amp_ratio": 1.3426
+              "amp_ratio": 0.8677
             },
             "III": {
               "lat_ratio": 0.9948,
-              "amp_ratio": 1.3281
+              "amp_ratio": 0.9375
             },
             "V": {
               "lat_ratio": 1.0,
@@ -829,11 +829,11 @@
           "500Hz": {
             "I": {
               "lat_ratio": 1.5,
-              "amp_ratio": 0.7407
+              "amp_ratio": 0.1108
             },
             "III": {
               "lat_ratio": 1.4231,
-              "amp_ratio": 0.75
+              "amp_ratio": 0.3679
             },
             "V": {
               "lat_ratio": 1.4386,
@@ -843,11 +843,11 @@
           "1000Hz": {
             "I": {
               "lat_ratio": 1.2647,
-              "amp_ratio": 0.8889
+              "amp_ratio": 0.2701
             },
             "III": {
               "lat_ratio": 1.2436,
-              "amp_ratio": 0.9062
+              "amp_ratio": 0.5516
             },
             "V": {
               "lat_ratio": 1.2281,
@@ -857,11 +857,11 @@
           "2000Hz": {
             "I": {
               "lat_ratio": 1.1176,
-              "amp_ratio": 1.0
+              "amp_ratio": 0.4957
             },
             "III": {
               "lat_ratio": 1.0897,
-              "amp_ratio": 1.0
+              "amp_ratio": 0.7269
             },
             "V": {
               "lat_ratio": 1.0877,
@@ -871,11 +871,11 @@
           "4000Hz": {
             "I": {
               "lat_ratio": 1.0294,
-              "amp_ratio": 1.0741
+              "amp_ratio": 0.7529
             },
             "III": {
               "lat_ratio": 1.0256,
-              "amp_ratio": 1.0625
+              "amp_ratio": 0.879
             },
             "V": {
               "lat_ratio": 1.0263,

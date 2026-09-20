@@ -142,6 +142,54 @@ LAT_SHIFT_FACTOR = {'I': 1.15, 'II': 1.12, 'III': 1.05, 'IV': 1.02, 'V': 1.0}
 # distorsiona y el estimulo deja de ser el que dice la pantalla.
 BONE_MAX_OUTPUT_DB = 50.0
 
+# ---------------------------------------------------------------------
+# Morfologia por estimulo
+# ---------------------------------------------------------------------
+# Un estimulo no solo corre la latencia y cambia la amplitud: cambia la
+# FORMA. La onda del burst de 500 Hz es ancha y roma, la del chirp es
+# angosta y limpia, y eso es lo que el alumno ve antes que cualquier
+# numero.
+#
+# El motor es uno solo: cuanto se DESPARRAMAN en el tiempo los aportes de
+# la particion coclear que el estimulo excita. Ese desparramo sale del
+# retardo de la onda viajera, que llega tarde al apex y temprano a la base
+# (tau(f) proporcional a f^-0.55). Un burst no lo compensa; un chirp
+# presenta los graves antes y lo cancela: por eso el chirp sincroniza.
+#
+# STIM_DISPERSION es ese desparramo normalizado al del burst de 500 Hz
+# (el peor). La compensacion del chirp lo reduce: banda estrecha ~0.5,
+# banda ancha ~1.0.
+#
+# Anclaje: F23 (Pinto y Matas, 40 sujetos) reporta que con tone burst a 80
+# dB HL "solo se identifico la onda V; las ondas I y III estuvieron
+# ausentes en todas las frecuencias". Por eso la onda I del burst grave
+# practicamente no existe acá. Se deja gradiente por frecuencia --a 4 kHz
+# la I se sigue viendo-- porque su serie es en dB HL, que a 500 Hz es
+# bastante menos nivel de sensacion que a 4 kHz. F24 no reporta anchos,
+# asi que el afinamiento del chirp es derivado, no publicado.
+STIM_DISPERSION = {'500Hz': 1.0, '1000Hz': 0.595, '2000Hz': 0.319, '4000Hz': 0.129}
+STIM_COMPENSATION = {'tone_burst': 0.0, 'nb_ce_chirp_ls': 0.5,
+                     'ce_chirp_ls': 1.0, 'ce_chirp': 1.0, 'click': 0.0}
+# Cuanto ensancha cada onda por unidad de dispersion residual. La I es la
+# mas corta y la que mas sufre; la V, generada por mas poblaciones a la
+# vez, es la que mejor aguanta (por eso es la ultima que se pierde).
+STIM_WIDTH_SENSITIVITY = {'I': 1.2, 'II': 1.0, 'III': 0.9, 'IV': 0.7, 'V': 0.6}
+# Los chirp de banda ancha suman en fase lo que el click suma desparramado:
+# la onda sale algo mas angosta. Derivado, no publicado.
+WIDE_CHIRP_SHARPENING = {'I': 0.92, 'II': 0.95, 'III': 0.96, 'IV': 0.96, 'V': 0.96}
+
+
+def stimulus_width(stim, freq=None):
+    """Factor de ancho por onda para ese estimulo (1.0 = como el click)."""
+    if stim in ('ce_chirp', 'ce_chirp_ls'):
+        return dict(WIDE_CHIRP_SHARPENING)
+    dispersion = STIM_DISPERSION.get(freq or '', 0.0)
+    if not dispersion:
+        return {}
+    residual = dispersion * (1.0 - STIM_COMPENSATION.get(stim, 0.0))
+    return {w: 1.0 + k * residual for w, k in STIM_WIDTH_SENSITIVITY.items()}
+
+
 # Polaridad: caida de amplitud por onda al pasar de rarefaccion (el
 # baseline) a condensacion. F27, mismo click en las dos polaridades sobre
 # 100 oidos.
@@ -701,7 +749,8 @@ class ABRGenerator:
 
     def calculate_wave_parameters(self, baseline, intensity, threshold,
                                    pathology, desviaciones=None, repro_shift=0.0,
-                                   click_baseline=None, neural=None):
+                                   click_baseline=None, neural=None,
+                                   stim_width=None):
         modified = {}
         # Patologia conductiva = el estimulo llega atenuado a una coclea
         # sana, asi que la respuesta es la de un nivel MENOR: toda la
@@ -827,6 +876,12 @@ class ABRGenerator:
                 # es lo que se ve antes de que desaparezcan del todo.
                 width_factor *= NEURAL_DESYNC_WIDTH.get(
                     neural_params['desincronia'], 1.0)
+            # Ancho propio del estimulo (ver stimulus_width): el burst de
+            # 500 Hz desparrama los aportes de la coclea y el chirp los
+            # alinea. Es lo que hace que dos estimulos con la misma
+            # latencia y amplitud no se vean iguales.
+            if stim_width:
+                width_factor *= stim_width.get(wave, 1.0)
 
             modified[wave] = {
                 'lat': calc_lat,
@@ -1604,6 +1659,8 @@ class ABRGenerator:
             desviaciones=contra.get('desviaciones'),
             click_baseline=click_baseline,
             neural=contra.get('neural'),
+            stim_width=stimulus_width(stimulus_config['stim'],
+                                      stimulus_config.get('freq')),
         )
         for wave, v in values.items():
             factor = SHADOW_AMP_FACTOR
@@ -1982,6 +2039,8 @@ class ABRGenerator:
             baseline, stimulus_config['int'], threshold, pathology, desviaciones,
             repro_shift=repro_shift, click_baseline=click_baseline,
             neural=neural,
+            stim_width=stimulus_width(stimulus_config['stim'],
+                                      stimulus_config.get('freq')),
         )
 
         # 7. Polaridad + rate

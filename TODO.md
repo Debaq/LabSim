@@ -2130,3 +2130,40 @@ duplicada en dos repos.
   valores siguen derivados. No usable sin el click de esa misma serie.
 - Sexo y edad: nuestro salto ♂/♀ en la onda V (0.14) y el de adulto mayor
   quedaron dentro de lo publicado al reanclar; no hizo falta tocarlos.
+
+## ABR: la forma de la onda cambia con el estímulo (2026-09-20)
+
+Faltaba lo que el alumno ve antes que cualquier número: el burst de 500 Hz
+tiene que dar ondas **anchas y romas** y el chirp, angostas. Hasta ahora el
+estímulo solo movía latencia y amplitud, así que dos estímulos muy distintos
+se dibujaban con la misma forma.
+
+**Un solo motor**: cuánto se desparraman en el tiempo los aportes de la
+partición coclear que el estímulo excita. Eso sale del retardo de la onda
+viajera (tarde en el ápex, temprano en la base); el burst no lo compensa y
+el chirp sí -- por eso el chirp "sincroniza". `STIM_DISPERSION` normaliza ese
+desparramo al del burst de 500 Hz y `STIM_COMPENSATION` le resta lo que
+compensa cada chirp (banda estrecha 0.5, banda ancha 1.0).
+
+De ahí salen las dos consecuencias, con la misma cuenta:
+
+- **Ancho** (`stimulus_width`, aplicado en `calculate_wave_parameters` junto
+  al ensanchamiento por nivel y por desincronía). FWHM medido en el trazo:
+  onda V 0.41 ms con click, 0.52 con NB chirp de 500 y 0.63 con burst de
+  500; los chirp de banda ancha quedan apenas por debajo del click.
+- **Amplitud de las ondas tempranas**. La tabla tenía el burst con la onda I
+  **más grande** que la del click (ratios 1.05 a 1.52), al revés de F23
+  (Pinto y Matas, n=40): *"con tone burst a 80 dB HL solo se identificó la
+  onda V; las ondas I y III estuvieron ausentes en todas las frecuencias"*.
+  Ahora la I del burst de 500 queda en 0.049 µV (0.11× la del click) y 2.2
+  veces más ancha -- o sea, no se identifica. Se conserva gradiente por
+  banda (a 4 kHz la I se sigue viendo) porque esa serie está en dB HL, que
+  a 500 Hz es bastante menos nivel de sensación que a 4 kHz.
+
+El NB CE-Chirp LS es el que muestra el argumento completo: misma banda que
+el burst, pero la onda I vuelve a 0.146 µV (3× la del burst) y el trazo se
+angosta de 1.15 a 0.84 ms. Eso es lo que el alumno tiene que poder ver.
+
+F24 no reporta anchos, así que el afinamiento del chirp de banda ancha
+(0.92 en la onda I, 0.96 en el resto) es derivado, no publicado, y está
+marcado como tal.

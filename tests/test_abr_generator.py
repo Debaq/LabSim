@@ -62,7 +62,7 @@ from abr.ABR_generator import (  # noqa: E402
     ABRGenerator, IMPEDANCE_BALANCE_LIMIT_KOHM, IMPEDANCE_LIMIT_KOHM,
     INTERAURAL_ATTENUATION, NEURAL_BLOQUEO_OPTIONS, NEURAL_PARAM_DEFAULTS,
     RATE_REF, STIM_MAP, BONE_MAX_OUTPUT_DB, agitation_factor,
-    default_settings, select_population)
+    default_settings, select_population, stimulus_width)
 from abr.protocols import PROTOCOLS, get_protocol  # noqa: E402
 
 NORMS = os.path.join(os.path.dirname(__file__), '..', 'resources', 'abr', 'normative_data.json')
@@ -267,6 +267,86 @@ def test_rate_reference_is_neutral():
     for wave in sin_tasa:
         assert abs(sin_tasa[wave]['lat'] - con_tasa[wave]['lat']) < 1e-9
         assert abs(sin_tasa[wave]['amp'] - con_tasa[wave]['amp']) < 1e-9
+
+
+# ------------------------------------------------------ morfologia
+
+def _fwhm(g, stim, freq, onda='V'):
+    """Ancho a media altura de esa onda en el trazo sintetizado (ms)."""
+    b = g.get_baseline_values('adult_female', stim, 'air_conduction', freq=freq)
+    v, _ = g.calculate_wave_parameters(b, 80, 10, 'normal',
+                                       stim_width=stimulus_width(stim, freq))
+    t = np.linspace(0, 14, 3000)
+    y = g.build_target_curve(t, v)
+    centro = v[onda]['lat']
+    m = (t > centro - 2) & (t < centro + 2)
+    ts, ys = t[m], y[m]
+    i = int(np.argmax(ys))
+    mitad = ys[i] / 2
+    izq = ts[:i][ys[:i] <= mitad]
+    der = ts[i:][ys[i:] <= mitad]
+    assert len(izq) and len(der), (stim, freq, onda)
+    return der[0] - izq[-1]
+
+
+def test_stimulus_changes_the_shape_not_only_the_numbers():
+    """El burst da ondas anchas y romas; el chirp, angostas.
+
+    Es lo primero que se ve en pantalla, antes que cualquier numero: dos
+    estimulos con la misma latencia y amplitud no pueden dibujarse igual.
+    El motor es cuanto se desparraman en el tiempo los aportes de la
+    coclea que el estimulo excita (ver STIM_DISPERSION).
+    """
+    g = _gen()
+    click = _fwhm(g, 'click', None)
+    burst = _fwhm(g, 'tone_burst', '500Hz')
+    nb = _fwhm(g, 'nb_ce_chirp_ls', '500Hz')
+    ancho = _fwhm(g, 'ce_chirp_ls', None)
+    assert ancho <= click < nb < burst, (ancho, click, nb, burst)
+    # El efecto se apaga hacia los agudos: a 4 kHz hay poco que desparramar.
+    assert _fwhm(g, 'tone_burst', '4000Hz') < burst
+    assert abs(_fwhm(g, 'tone_burst', '4000Hz') - click) < 0.15
+
+
+def test_tone_burst_loses_the_early_waves():
+    """F23: con burst a 80 dB HL solo se identifica la onda V.
+
+    "las ondas I y III estuvieron ausentes en todas las frecuencias"
+    (Pinto y Matas, 40 sujetos). La tabla anterior tenia el burst con la
+    onda I MAS grande que la del click, que es exactamente al reves.
+    """
+    g = _gen()
+    click = g.get_baseline_values('adult_female', 'click', 'air_conduction')
+    grave = g.get_baseline_values('adult_female', 'tone_burst',
+                                  'air_conduction', freq='500Hz')
+    assert grave['I']['amp'] < 0.15 * click['I']['amp']
+    assert grave['III']['amp'] < 0.45 * click['III']['amp']
+    # La V sobrevive: es la que se usa para buscar umbral por frecuencia.
+    assert grave['V']['amp'] > 0.55 * click['V']['amp']
+    # Gradiente por banda: a 4 kHz la onda I se sigue viendo.
+    anterior = 0.0
+    for freq in ('500Hz', '1000Hz', '2000Hz', '4000Hz'):
+        b = g.get_baseline_values('adult_female', 'tone_burst',
+                                  'air_conduction', freq=freq)
+        assert b['I']['amp'] > anterior, freq
+        anterior = b['I']['amp']
+
+
+def test_narrow_band_chirp_recovers_what_the_burst_loses():
+    """Misma banda que el burst, pero sincronizada.
+
+    Ese es todo el argumento del NB CE-Chirp LS: mira la misma zona coclear
+    y ademas junta las descargas, asi que la onda I vuelve a verse y la
+    respuesta sale mas angosta.
+    """
+    g = _gen()
+    burst = g.get_baseline_values('adult_female', 'tone_burst',
+                                  'air_conduction', freq='500Hz')
+    nb = g.get_baseline_values('adult_female', 'nb_ce_chirp_ls',
+                               'air_conduction', freq='500Hz')
+    assert nb['I']['amp'] > 2 * burst['I']['amp']
+    assert nb['V']['amp'] > burst['V']['amp']
+    assert _fwhm(g, 'nb_ce_chirp_ls', '500Hz') < _fwhm(g, 'tone_burst', '500Hz')
 
 
 # ------------------------------------------------- anclaje bibliografico
