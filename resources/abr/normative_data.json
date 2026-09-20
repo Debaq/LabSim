@@ -1,5 +1,79 @@
 {
   "comments": "Normative ABR data for different populations, stimuli and pathways. All latencies in ms, amplitudes in µV at 80dBnHL baseline",
+  "fuentes": {
+    "F01": {
+      "cita": "Sanfins MD, Santillo MEA, Martins MFP, Silva DLdS, Gos E, Skarzynski PH, Hall JW III. The Influence of Sex, Ear, and Age on Auditory Brainstem Response. Diagnostics. 2026;16(7):971.",
+      "n": "244 sujetos (134 H / 110 M), 3-79 anios",
+      "protocolo": "Click 0.1 ms rarefaccion, 80 dB nHL, 19.3/s, ER-3A, Fz-mastoides ipsi, filtro 0.1-3 kHz, 2x2000 barridos",
+      "enlace": "https://doi.org/10.3390/diagnostics16070971"
+    },
+    "F04": {
+      "cita": "Chalak S, Kale A, Deshpande VK, Biswas DA. Establishment of Normative Data for Monaural Recordings of Auditory Brainstem Response. J Clin Diagn Res. 2013.",
+      "n": "40 ninios, edad media 7.62 +/- 2.39 anios",
+      "protocolo": "Click monoaural con enmascaramiento contralateral, 70 dB nHL, 11.1/s, filtro 100/250-5000 Hz, 2000 barridos",
+      "enlace": "https://doi.org/10.7860/JCDR/2013/6768.3730"
+    },
+    "F07": {
+      "cita": "Auditory Brainstem Response: reference-values for age (neonatos por edad gestacional).",
+      "n": "40 neonatos por grupo de edad gestacional",
+      "protocolo": "Click; grupos de 35-36 y 37-38 semanas",
+      "enlace": "https://www.researchgate.net/publication/263015732"
+    },
+    "F09": {
+      "cita": "Jerger J, Hall J. Effects of age and sex on auditory brainstem response. Arch Otolaryngol. 1980;106(7):387-391.",
+      "n": "319 sujetos (182 H / 137 M), 98 normoyentes",
+      "protocolo": "Click; latencia y amplitud de onda V por edad y sexo",
+      "enlace": "https://doi.org/10.1001/archotol.1980.00790310011003"
+    },
+    "F10": {
+      "cita": "Stockard JE, Stockard JJ, Westmoreland BF, Corfits JL. Brainstem auditory-evoked responses: normal variation as a function of stimulus and subject characteristics. Arch Neurol. 1979.",
+      "n": "64 adultos + 77 neonatos de termino",
+      "protocolo": "Click rarefaccion vs condensacion, 30-70 dB SL/HL, 10 y 80 clicks/s",
+      "enlace": "https://pubmed.ncbi.nlm.nih.gov/508145/"
+    },
+    "F13": {
+      "cita": "Jiang ZD et al. The effect of click rate on latency and interpeak interval of the brain-stem auditory evoked potentials in children from birth to 6 years. Electroencephalogr Clin Neurophysiol. 1991.",
+      "n": "80 ninios (0-6 anios) + 21 adultos",
+      "protocolo": "Click a 10, 30, 50, 70 y 90/s; 70, 40 y 20 dB HL/SL",
+      "enlace": "https://www.sciencedirect.com/science/article/abs/pii/016855979190044X"
+    },
+    "F18": {
+      "cita": "Normalization of Bone Conduction Auditory Brainstem Evoked Responses in Normal Hearing Individuals. J Int Adv Otol.",
+      "n": "100 sujetos (50 H / 50 M), 10-60 anios, 200 oidos",
+      "protocolo": "ABR por via osea a 50, 30 y 10 dB nHL (el vibrador no entrega mas), 5 grupos etarios",
+      "enlace": "https://advancedotology.org//en/normalization-of-bone-conduction-auditory-brainstem-evoked-responses-in-normal-hearing-individuals-131309"
+    },
+    "F21": {
+      "cita": "Aguilar-Madrid G et al. Latencias de los potenciales evocados auditivos de tronco cerebral en trabajadores. 2015. PMID 26960049.",
+      "n": "196 sujetos (107 H / 89 M), 16-65 anios",
+      "protocolo": "Nicolet Viking Quest, 2000 clicks de rarefaccion, 33/s, ventana 10 ms, camara sonoamortiguada",
+      "enlace": "https://www.redalyc.org/pdf/4577/457745149012.pdf"
+    },
+    "F24": {
+      "cita": "Cargnelutti M, Coser PL, Biaggio EP. LS CE-Chirp vs. Click in the neuroaudiological diagnosis by ABR. Braz J Otorhinolaryngol. 2017;83(3):313-317.",
+      "n": "30 sujetos / 60 oidos normoyentes",
+      "protocolo": "85 dB nHL, polaridad alternante, 17.1/s, filtro 100-3000 Hz; click y chirp en los MISMOS sujetos",
+      "enlace": "https://doi.org/10.1016/j.bjorl.2016.04.018"
+    },
+    "F25": {
+      "cita": "Rosa LAC et al. Auditory Brainstem Response: reference-values for age. CoDAS. 2014.",
+      "n": "80 lactantes por edad posconcepcional",
+      "protocolo": "Click; grupos de 35-36, 37-38, 39-40 semanas y 6 meses",
+      "enlace": "https://doi.org/10.1590/2317-1782/2014469in"
+    },
+    "F26": {
+      "cita": "Hood LJ. Clinical Applications of the Auditory Brainstem Response. Singular Publishing Group. Tabla 2-3.",
+      "n": "Mujeres normoyentes 20-30 anios; n de 2 a 20 segun celda",
+      "protocolo": "Click, serie completa de 90 a 20 dB nHL, ondas I a VI e interpicos",
+      "enlace": "Transcripcion aportada por el usuario; verificar contra el libro impreso"
+    },
+    "F27": {
+      "cita": "Da Silva Nunes C, Gentile Matas C. Audiometria de tronco encefalico utilizando diferentes polaridades de presentacion del estimulo acustico. Rev Chil Fonoaudiol. 2005;6(2).",
+      "n": "50 adultos (25 H / 25 M), 18-40 anios, 100 oidos",
+      "protocolo": "Bio-Logic Traveler Express, click 0.1 ms, 11.1/s, 80 dB HL, 2000 estimulos con replica",
+      "enlace": "Revista Chilena de Fonoaudiologia, vol. 6, num. 2, 2005"
+    }
+  },
   "populations": {
     "adult_male": {
       "age_range": [
@@ -11,119 +85,119 @@
       "air_conduction": {
         "click": {
           "MC": {
-            "lat": 0.5,
-            "amp": 0.15
+            "lat": 0.445,
+            "amp": 0.12
           },
           "I": {
-            "lat": 1.65,
-            "amp": 0.3
+            "lat": 1.47,
+            "amp": 0.32
           },
           "II": {
-            "lat": 2.8,
-            "amp": 0.2
+            "lat": 2.662,
+            "amp": 0.16
           },
           "III": {
-            "lat": 3.85,
-            "amp": 0.35
+            "lat": 3.75,
+            "amp": 0.37
           },
           "IV": {
-            "lat": 4.95,
-            "amp": 0.25
+            "lat": 4.898,
+            "amp": 0.2
           },
           "V": {
-            "lat": 5.7,
-            "amp": 0.5
+            "lat": 5.68,
+            "amp": 0.4
           },
           "VI": {
-            "lat": 7.3,
-            "amp": 0.35
+            "lat": 7.349,
+            "amp": 0.28
           },
           "VII": {
-            "lat": 8.5,
-            "amp": 0.3
+            "lat": 8.601,
+            "amp": 0.24
           },
           "interpeak": {
-            "I-III": 2.2,
-            "III-V": 1.85,
-            "I-V": 4.05
+            "I-III": 2.28,
+            "III-V": 1.93,
+            "I-V": 4.21
           }
         },
         "ce_chirp": {
           "MC": {
-            "lat_ratio": 0.96,
-            "amp_ratio": 1.2
+            "lat_ratio": 0.98,
+            "amp_ratio": 1.3725
           },
           "I": {
-            "lat_ratio": 0.9697,
-            "amp_ratio": 1.4
+            "lat_ratio": 0.9879,
+            "amp_ratio": 1.4233
           },
           "II": {
-            "lat_ratio": 0.9821,
-            "amp_ratio": 1.4
+            "lat_ratio": 0.9928,
+            "amp_ratio": 1.4233
           },
           "III": {
-            "lat_ratio": 0.974,
-            "amp_ratio": 1.4
+            "lat_ratio": 0.987,
+            "amp_ratio": 1.4233
           },
           "IV": {
-            "lat_ratio": 0.9798,
-            "amp_ratio": 1.4
+            "lat_ratio": 0.9823,
+            "amp_ratio": 1.4233
           },
           "V": {
-            "lat_ratio": 0.9825,
-            "amp_ratio": 1.4
+            "lat_ratio": 0.9761,
+            "amp_ratio": 1.4233
           },
           "VI": {
-            "lat_ratio": 0.9863,
-            "amp_ratio": 1.2857
+            "lat_ratio": 0.9779,
+            "amp_ratio": 1.3724
           },
           "VII": {
-            "lat_ratio": 0.9882,
-            "amp_ratio": 1.2667
+            "lat_ratio": 0.9789,
+            "amp_ratio": 1.3636
           },
           "interpeak": {
-            "I-III": 2.15,
-            "III-V": 1.85,
-            "I-V": 4.0
+            "I-III": 2.25,
+            "III-V": 1.84,
+            "I-V": 4.09
           }
         },
         "ce_chirp_ls": {
           "MC": {
-            "lat_ratio": 0.98,
-            "amp_ratio": 1.0667
+            "lat_ratio": 1.0,
+            "amp_ratio": 1.22
           },
           "I": {
-            "lat_ratio": 0.9818,
-            "amp_ratio": 1.2
+            "lat_ratio": 1.0,
+            "amp_ratio": 1.22
           },
           "II": {
-            "lat_ratio": 0.9893,
-            "amp_ratio": 1.2
+            "lat_ratio": 1.0,
+            "amp_ratio": 1.22
           },
           "III": {
-            "lat_ratio": 0.987,
-            "amp_ratio": 1.2
+            "lat_ratio": 1.0,
+            "amp_ratio": 1.22
           },
           "IV": {
-            "lat_ratio": 0.9899,
-            "amp_ratio": 1.2
+            "lat_ratio": 0.9924,
+            "amp_ratio": 1.22
           },
           "V": {
-            "lat_ratio": 0.9912,
-            "amp_ratio": 1.2
+            "lat_ratio": 0.9848,
+            "amp_ratio": 1.22
           },
           "VI": {
-            "lat_ratio": 0.9932,
-            "amp_ratio": 1.1429
+            "lat_ratio": 0.9848,
+            "amp_ratio": 1.22
           },
           "VII": {
-            "lat_ratio": 0.9941,
-            "amp_ratio": 1.1333
+            "lat_ratio": 0.9848,
+            "amp_ratio": 1.22
           },
           "interpeak": {
-            "I-III": 2.18,
-            "III-V": 1.85,
-            "I-V": 4.03
+            "I-III": 2.28,
+            "III-V": 1.84,
+            "I-V": 4.12
           }
         },
         "nb_ce_chirp_ls": {
@@ -281,42 +355,46 @@
               "I-V": 4.15
             }
           }
+        },
+        "fuente": {
+          "lat": "F01",
+          "amp": "F27"
         }
       },
       "bone_conduction": {
         "click": {
           "I": {
-            "lat": 1.85,
-            "amp": 0.25
+            "lat": 1.67,
+            "amp": 0.278
           },
           "II": {
-            "lat": 3.0,
-            "amp": 0.18
+            "lat": 2.862,
+            "amp": 0.139
           },
           "III": {
-            "lat": 4.05,
-            "amp": 0.3
+            "lat": 3.95,
+            "amp": 0.322
           },
           "IV": {
-            "lat": 5.15,
-            "amp": 0.22
+            "lat": 5.098,
+            "amp": 0.17
           },
           "V": {
-            "lat": 5.9,
-            "amp": 0.45
+            "lat": 5.88,
+            "amp": 0.348
           },
           "VI": {
-            "lat": 7.5,
-            "amp": 0.3
+            "lat": 7.549,
+            "amp": 0.232
           },
           "VII": {
-            "lat": 8.7,
-            "amp": 0.25
+            "lat": 8.801,
+            "amp": 0.193
           },
           "interpeak": {
-            "I-III": 2.2,
-            "III-V": 1.85,
-            "I-V": 4.05
+            "I-III": 2.28,
+            "III-V": 1.93,
+            "I-V": 4.21
           }
         },
         "nb_ce_chirp_ls": {
@@ -434,6 +512,10 @@
               "amp_ratio": 1.0
             }
           }
+        },
+        "fuente": {
+          "lat": "derivado",
+          "amp": "derivado"
         }
       }
     },
@@ -447,119 +529,119 @@
       "air_conduction": {
         "click": {
           "MC": {
-            "lat": 0.48,
-            "amp": 0.16
+            "lat": 0.433,
+            "amp": 0.144
           },
           "I": {
-            "lat": 1.62,
-            "amp": 0.21
+            "lat": 1.46,
+            "amp": 0.44
           },
           "II": {
-            "lat": 2.68,
-            "amp": 0.11
+            "lat": 2.587,
+            "amp": 0.099
           },
           "III": {
-            "lat": 3.68,
-            "amp": 0.37
+            "lat": 3.65,
+            "amp": 0.47
           },
           "IV": {
-            "lat": 4.68,
-            "amp": 0.27
+            "lat": 4.706,
+            "amp": 0.243
           },
           "V": {
-            "lat": 5.47,
-            "amp": 0.6
+            "lat": 5.54,
+            "amp": 0.54
           },
           "VI": {
-            "lat": 7.29,
-            "amp": 0.37
+            "lat": 7.462,
+            "amp": 0.333
           },
           "VII": {
-            "lat": 8.3,
-            "amp": 0.32
+            "lat": 8.528,
+            "amp": 0.288
           },
           "interpeak": {
-            "I-III": 2.2,
-            "III-V": 1.8,
-            "I-V": 4.0
+            "I-III": 2.19,
+            "III-V": 1.89,
+            "I-V": 4.08
           }
         },
         "ce_chirp": {
           "MC": {
-            "lat_ratio": 0.9583,
-            "amp_ratio": 1.1875
+            "lat_ratio": 0.9791,
+            "amp_ratio": 1.3635
           },
           "I": {
-            "lat_ratio": 0.8951,
-            "amp_ratio": 2.1429
+            "lat_ratio": 0.9877,
+            "amp_ratio": 1.4448
           },
           "II": {
-            "lat_ratio": 0.9701,
-            "amp_ratio": 2.7273
+            "lat_ratio": 0.9925,
+            "amp_ratio": 1.4077
           },
           "III": {
-            "lat_ratio": 0.9783,
-            "amp_ratio": 1.4054
+            "lat_ratio": 0.9865,
+            "amp_ratio": 1.4418
           },
           "IV": {
-            "lat_ratio": 1.0043,
-            "amp_ratio": 1.3704
+            "lat_ratio": 0.9817,
+            "amp_ratio": 1.4106
           },
           "V": {
-            "lat_ratio": 0.9872,
-            "amp_ratio": 1.2167
+            "lat_ratio": 0.9757,
+            "amp_ratio": 1.4365
           },
           "VI": {
-            "lat_ratio": 0.9602,
-            "amp_ratio": 1.2703
+            "lat_ratio": 0.9779,
+            "amp_ratio": 1.3653
           },
           "VII": {
-            "lat_ratio": 0.988,
-            "amp_ratio": 1.25
+            "lat_ratio": 0.9788,
+            "amp_ratio": 1.3556
           },
           "interpeak": {
-            "I-III": 2.15,
+            "I-III": 2.16,
             "III-V": 1.8,
-            "I-V": 3.95
+            "I-V": 3.96
           }
         },
         "ce_chirp_ls": {
           "MC": {
-            "lat_ratio": 0.9792,
-            "amp_ratio": 1.0625
+            "lat_ratio": 1.0,
+            "amp_ratio": 1.22
           },
           "I": {
-            "lat_ratio": 0.9074,
-            "amp_ratio": 1.8095
+            "lat_ratio": 1.0,
+            "amp_ratio": 1.22
           },
           "II": {
-            "lat_ratio": 0.9776,
-            "amp_ratio": 2.3636
+            "lat_ratio": 1.0,
+            "amp_ratio": 1.22
           },
           "III": {
-            "lat_ratio": 0.9918,
-            "amp_ratio": 1.1892
+            "lat_ratio": 1.0,
+            "amp_ratio": 1.22
           },
           "IV": {
-            "lat_ratio": 1.015,
-            "amp_ratio": 1.1852
+            "lat_ratio": 0.9924,
+            "amp_ratio": 1.22
           },
           "V": {
-            "lat_ratio": 0.9963,
-            "amp_ratio": 1.0333
+            "lat_ratio": 0.9848,
+            "amp_ratio": 1.22
           },
           "VI": {
-            "lat_ratio": 0.9671,
-            "amp_ratio": 1.1351
+            "lat_ratio": 0.9848,
+            "amp_ratio": 1.22
           },
           "VII": {
-            "lat_ratio": 0.994,
-            "amp_ratio": 1.125
+            "lat_ratio": 0.9848,
+            "amp_ratio": 1.22
           },
           "interpeak": {
-            "I-III": 2.18,
-            "III-V": 1.8,
-            "I-V": 3.98
+            "I-III": 2.19,
+            "III-V": 1.81,
+            "I-V": 4.0
           }
         },
         "nb_ce_chirp_ls": {
@@ -717,42 +799,46 @@
               "I-V": 4.1
             }
           }
+        },
+        "fuente": {
+          "lat": "F01",
+          "amp": "F27"
         }
       },
       "bone_conduction": {
         "click": {
           "I": {
-            "lat": 1.7,
-            "amp": 0.27
+            "lat": 1.54,
+            "amp": 0.395
           },
           "II": {
-            "lat": 2.85,
-            "amp": 0.2
+            "lat": 2.758,
+            "amp": 0.206
           },
           "III": {
-            "lat": 3.9,
-            "amp": 0.32
+            "lat": 3.87,
+            "amp": 0.422
           },
           "IV": {
-            "lat": 5.0,
-            "amp": 0.24
+            "lat": 5.031,
+            "amp": 0.248
           },
           "V": {
-            "lat": 5.7,
-            "amp": 0.47
+            "lat": 5.77,
+            "amp": 0.485
           },
           "VI": {
-            "lat": 7.3,
-            "amp": 0.32
+            "lat": 7.459,
+            "amp": 0.33
           },
           "VII": {
-            "lat": 8.5,
-            "amp": 0.27
+            "lat": 8.726,
+            "amp": 0.279
           },
           "interpeak": {
-            "I-III": 2.2,
-            "III-V": 1.8,
-            "I-V": 4.0
+            "I-III": 2.33,
+            "III-V": 1.9,
+            "I-V": 4.23
           }
         },
         "nb_ce_chirp_ls": {
@@ -870,6 +956,10 @@
               "amp_ratio": 1.0
             }
           }
+        },
+        "fuente": {
+          "lat": "derivado",
+          "amp": "derivado"
         }
       }
     },
@@ -883,92 +973,72 @@
       "air_conduction": {
         "click": {
           "MC": {
-            "lat": 0.49,
-            "amp": 0.14
+            "lat": 0.459,
+            "amp": 0.12
           },
           "I": {
-            "lat": 1.58,
-            "amp": 0.28
+            "lat": 1.48,
+            "amp": 0.239
           },
           "II": {
-            "lat": 2.73,
-            "amp": 0.19
+            "lat": 2.536,
+            "amp": 0.162
           },
           "III": {
-            "lat": 3.78,
-            "amp": 0.33
+            "lat": 3.5,
+            "amp": 0.282
           },
           "IV": {
-            "lat": 4.88,
-            "amp": 0.23
+            "lat": 4.709,
+            "amp": 0.196
           },
           "V": {
-            "lat": 5.6,
-            "amp": 0.48
+            "lat": 5.5,
+            "amp": 0.41
           },
           "VI": {
-            "lat": 7.2,
-            "amp": 0.33
+            "lat": 7.258,
+            "amp": 0.282
           },
           "VII": {
-            "lat": 8.4,
-            "amp": 0.28
+            "lat": 8.577,
+            "amp": 0.239
           },
           "interpeak": {
-            "I-III": 2.2,
-            "III-V": 1.82,
+            "I-III": 2.02,
+            "III-V": 2.0,
             "I-V": 4.02
           }
         },
-        "ce_chirp": {
-          "MC": {
-            "lat_ratio": 0.9592,
-            "amp_ratio": 1.2143
-          },
-          "I": {
-            "lat_ratio": 0.9684,
-            "amp_ratio": 1.3929
-          },
-          "II": {
-            "lat_ratio": 0.9817,
-            "amp_ratio": 1.3684
-          },
-          "III": {
-            "lat_ratio": 0.9735,
-            "amp_ratio": 1.3939
-          },
-          "IV": {
-            "lat_ratio": 0.9795,
-            "amp_ratio": 1.3913
-          },
-          "V": {
-            "lat_ratio": 0.9821,
-            "amp_ratio": 1.3958
-          },
-          "VI": {
-            "lat_ratio": 0.9861,
-            "amp_ratio": 1.2727
-          },
-          "VII": {
-            "lat_ratio": 0.9881,
-            "amp_ratio": 1.2857
-          }
+        "ce_chirp": {},
+        "fuente": {
+          "lat": "F04",
+          "amp": "derivado"
         }
       },
       "bone_conduction": {
         "click": {
           "I": {
-            "lat": 1.78,
-            "amp": 0.24
+            "lat": 1.68,
+            "amp": 0.217
           },
           "III": {
-            "lat": 3.98,
-            "amp": 0.28
+            "lat": 3.7,
+            "amp": 0.256
           },
           "V": {
-            "lat": 5.8,
-            "amp": 0.43
+            "lat": 5.7,
+            "amp": 0.372
+          },
+          "interpeak": {
+            "I-III": 2.02,
+            "III-V": 2.0,
+            "I-V": 4.02
           }
+        },
+        "fuente": {
+          "lat": "derivado",
+          "amp": "derivado"
         }
       }
     },
@@ -982,52 +1052,43 @@
       "air_conduction": {
         "click": {
           "I": {
-            "lat": 2.1,
-            "amp": 0.2
+            "lat": 1.79,
+            "amp": 0.171
           },
           "II": {
-            "lat": 3.3,
-            "amp": 0.14
+            "lat": 3.068,
+            "amp": 0.12
           },
           "III": {
-            "lat": 4.7,
-            "amp": 0.24
+            "lat": 4.56,
+            "amp": 0.205
           },
           "IV": {
-            "lat": 5.8,
-            "amp": 0.18
+            "lat": 5.838,
+            "amp": 0.154
           },
           "V": {
-            "lat": 6.8,
-            "amp": 0.35
+            "lat": 7.0,
+            "amp": 0.299
           },
           "VI": {
-            "lat": 8.5,
-            "amp": 0.24
+            "lat": 8.975,
+            "amp": 0.205
           },
           "VII": {
-            "lat": 9.8,
-            "amp": 0.2
+            "lat": 10.486,
+            "amp": 0.171
           },
           "interpeak": {
-            "I-III": 2.6,
-            "III-V": 2.1,
-            "I-V": 4.7
+            "I-III": 2.77,
+            "III-V": 2.44,
+            "I-V": 5.21
           }
         },
-        "ce_chirp": {
-          "I": {
-            "lat_ratio": 0.9762,
-            "amp_ratio": 1.4
-          },
-          "III": {
-            "lat_ratio": 0.9787,
-            "amp_ratio": 1.375
-          },
-          "V": {
-            "lat_ratio": 0.9853,
-            "amp_ratio": 1.4
-          }
+        "ce_chirp": {},
+        "fuente": {
+          "lat": "F25",
+          "amp": "derivado"
         }
       }
     },
@@ -1046,42 +1107,46 @@
       "air_conduction": {
         "click": {
           "MC": {
-            "lat": 0.52,
-            "amp": 0.14
+            "lat": 0.547,
+            "amp": 0.132
           },
           "I": {
-            "lat": 1.75,
-            "amp": 0.27
+            "lat": 1.84,
+            "amp": 0.342
           },
           "II": {
-            "lat": 2.95,
-            "amp": 0.18
+            "lat": 2.944,
+            "amp": 0.169
           },
           "III": {
-            "lat": 4.0,
-            "amp": 0.32
+            "lat": 3.91,
+            "amp": 0.378
           },
           "IV": {
-            "lat": 5.1,
-            "amp": 0.22
+            "lat": 5.027,
+            "amp": 0.207
           },
           "V": {
-            "lat": 5.9,
-            "amp": 0.45
+            "lat": 5.84,
+            "amp": 0.423
           },
           "VI": {
-            "lat": 7.5,
-            "amp": 0.31
+            "lat": 7.465,
+            "amp": 0.291
           },
           "VII": {
-            "lat": 8.7,
-            "amp": 0.26
+            "lat": 8.684,
+            "amp": 0.244
           },
           "interpeak": {
-            "I-III": 2.25,
-            "III-V": 1.9,
-            "I-V": 4.15
+            "I-III": 2.07,
+            "III-V": 1.93,
+            "I-V": 4.0
           }
+        },
+        "fuente": {
+          "lat": "F21",
+          "amp": "F09"
         }
       }
     }

@@ -61,7 +61,8 @@ except ImportError:
 from abr.ABR_generator import (  # noqa: E402
     ABRGenerator, IMPEDANCE_BALANCE_LIMIT_KOHM, IMPEDANCE_LIMIT_KOHM,
     INTERAURAL_ATTENUATION, NEURAL_BLOQUEO_OPTIONS, NEURAL_PARAM_DEFAULTS,
-    RATE_REF, STIM_MAP, agitation_factor, default_settings, select_population)
+    RATE_REF, STIM_MAP, BONE_MAX_OUTPUT_DB, agitation_factor,
+    default_settings, select_population)
 from abr.protocols import PROTOCOLS, get_protocol  # noqa: E402
 
 NORMS = os.path.join(os.path.dirname(__file__), '..', 'resources', 'abr', 'normative_data.json')
@@ -143,8 +144,12 @@ def test_impaired_ear_is_not_full_amplitude_at_80db():
     perdida = _params(80, threshold=60, pathology='cochlear')
     assert perdida['V']['amp'] < 0.92 * sano['V']['amp']
     assert perdida['V']['amp'] > 0.20 * sano['V']['amp']
-    # Onda I: en pérdida coclear con umbral 60 a 80 dB no debe estar.
-    assert perdida['I']['amp'] < 0.05
+    # Onda I: en pérdida coclear con umbral 60 a 80 dB tiene que quedar
+    # reducida a una fracción de la sana. Se compara CONTRA LA SANA y no
+    # contra un número fijo: las amplitudes normativas ahora salen de F27
+    # (onda I de 0.44 µV, no 0.21), así que un umbral absoluto acá medía la
+    # escala del baseline y no lo que el test quiere ver.
+    assert perdida['I']['amp'] < 0.25 * sano['I']['amp']
 
 
 def test_no_response_below_threshold():
@@ -178,13 +183,20 @@ def test_wave_I_decays_without_a_cliff():
 
 # -------------------------------------------------------------- interpicos
 
-def test_interpeak_widening_is_physiological():
-    """I-V ensancha 0.1-0.45 ms entre 80 y 20 dB (antes: 1.26 ms)."""
+def test_interpeak_shortens_slightly_toward_threshold():
+    """El I-V se ACORTA un poco al bajar la intensidad, no se ensancha.
+
+    F26 (Hood, tabla 2-3): I-V pasa de 3.85 ms a 80 dB a 3.60 a 40, porque
+    la onda I se corre más que la V (1.43 contra 1.18 ms). F06 lo da
+    prácticamente constante en neonatos (5.02 a 40 dB contra 5.03 a 80).
+    Ninguna de las dos lo ensancha, que es lo que hacía el modelo cuando
+    la onda I usaba un factor de 0.85 sobre el corrimiento de la V.
+    """
     def i_v(intensity):
         v = _params(intensity)
         return v['V']['lat'] - v['I']['lat']
     delta = i_v(20) - i_v(80)
-    assert 0.10 <= delta <= 0.45, delta
+    assert -0.50 <= delta <= -0.05, delta
 
 
 def test_interpeak_at_80db_matches_norms():
@@ -215,12 +227,18 @@ def test_rate_effect_is_continuous():
 
 
 def test_rate_effect_magnitude_is_clinical():
-    """De 11 a 91/s: onda V ~+0.4-0.6 ms y -20-35% de amplitud."""
+    """De 11 a 91/s la onda V se prolonga 12-15% y pierde 20-35% de amplitud.
+
+    F13 (Jiang, 80 niños + 21 adultos, click de 10 a 90/s): onda I 4-10%,
+    III 9-13% y V 12-15%. Antes el modelo movía la V la mitad de eso.
+    """
+    g = _gen()
+    base = g.get_baseline_values()['V']['lat']
     lento = _params(80, rate=11.1)
     rapido = _params(80, rate=91.1)
     d_lat = rapido['V']['lat'] - lento['V']['lat']
     ratio = rapido['V']['amp'] / lento['V']['amp']
-    assert 0.30 <= d_lat <= 0.70, d_lat
+    assert 0.12 <= d_lat / base <= 0.15, d_lat / base
     assert 0.65 <= ratio <= 0.85, ratio
     # La onda I aguanta peor la tasa que la V.
     assert rapido['I']['amp'] / lento['I']['amp'] < ratio
@@ -251,17 +269,135 @@ def test_rate_reference_is_neutral():
         assert abs(sin_tasa[wave]['amp'] - con_tasa[wave]['amp']) < 1e-9
 
 
+# ------------------------------------------------- anclaje bibliografico
+
+def test_click_matches_the_published_reference():
+    """El click de adulto es el de F01 (latencias) y F27 (amplitudes).
+
+    F01: Sanfins et al. 2026, n=244, click 0.1 ms de rarefaccion, 80 dB
+    nHL, ER-3A. F27: Da Silva Nunes y Gentile Matas 2005, n=100 oidos, el
+    mismo click en rarefaccion y condensacion.
+    """
+    g = _gen()
+    publicado = {
+        'adult_female': {'lat': {'I': 1.46, 'III': 3.65, 'V': 5.54},
+                         'amp': {'I': 0.44, 'III': 0.47, 'V': 0.54}},
+        'adult_male':   {'lat': {'I': 1.47, 'III': 3.75, 'V': 5.68},
+                         'amp': {'I': 0.32, 'III': 0.37, 'V': 0.40}},
+    }
+    for pob, esperado in publicado.items():
+        b = g.get_baseline_values(pob, 'click', 'air_conduction')
+        for w, lat in esperado['lat'].items():
+            assert abs(b[w]['lat'] - lat) < 0.011, (pob, w, b[w]['lat'])
+        for w, amp in esperado['amp'].items():
+            assert abs(b[w]['amp'] - amp) < 0.011, (pob, w, b[w]['amp'])
+
+
+def test_wave_hierarchy_holds_in_every_population():
+    """I < III < V en latencia Y en amplitud, en las dos vias.
+
+    Al reanclar las amplitudes, la via osea quedo un rato con la onda I mas
+    grande que la V --se escalaba onda por onda contra una tabla vieja que
+    ya era incoherente-- y eso hace que TODO registro oseo dispare el
+    criterio V/I.
+    """
+    g = _gen()
+    for pob in ('adult_male', 'adult_female', 'child', 'neonate', 'elderly'):
+        for via in ('air_conduction', 'bone_conduction'):
+            if via not in g.norms['populations'][pob]:
+                continue
+            b = g.get_baseline_values(pob, 'click', via)
+            lats = [b[w]['lat'] for w in ('I', 'III', 'V')]
+            amps = [b[w]['amp'] for w in ('I', 'III', 'V')]
+            assert lats == sorted(lats), (pob, via, lats)
+            assert amps == sorted(amps), (pob, via, amps)
+            # Razon V/I dentro de lo publicado (F01: 1.66 +/- 0.89).
+            assert 1.0 < b['V']['amp'] / b['I']['amp'] < 2.55, (pob, via)
+
+
+def test_neonate_has_a_mature_wave_i_and_a_long_interpeak():
+    """El neonato madura del centro, no de la periferia.
+
+    F25 (Rosa, n=80 por edad posconcepcional): a termino la onda I ya esta
+    en 1.79 ms --casi la del adulto-- mientras el I-V sigue en ~5.2 contra
+    4.08. Estaba al reves: onda I en 2.10 (+30%) e interpico 4.70 (+15%),
+    y con eso todos los estimulos derivados heredaban un retardo coclear
+    que el neonato no tiene.
+    """
+    g = _gen()
+    neo = g.get_baseline_values('neonate', 'click', 'air_conduction')
+    adulto = g.get_baseline_values('adult_female', 'click', 'air_conduction')
+    assert abs(neo['I']['lat'] - 1.79) < 0.011
+    assert neo['I']['lat'] - adulto['I']['lat'] < 0.40          # periferia casi madura
+    assert (neo['V']['lat'] - neo['I']['lat']) > 5.0            # centro inmaduro
+    assert (neo['V']['lat'] - neo['I']['lat']) > (adulto['V']['lat'] - adulto['I']['lat']) + 1.0
+
+
+def test_ls_chirp_gains_amplitude_and_barely_moves_latency():
+    """F24: mismos sujetos, click contra LS CE-Chirp a 85 dB nHL.
+
+    Publicado: I y III no se mueven, la V adelanta 0.08 ms y la amplitud de
+    la V sube 22% (0.50 -> 0.61 uV).
+    """
+    g = _gen()
+    click = g.get_baseline_values('adult_female', 'click', 'air_conduction')
+    ls = g.get_baseline_values('adult_female', 'ce_chirp_ls', 'air_conduction')
+    assert abs(ls['I']['lat'] - click['I']['lat']) < 0.01
+    assert abs(ls['III']['lat'] - click['III']['lat']) < 0.01
+    assert abs((click['V']['lat'] - ls['V']['lat']) - 0.08) < 0.02
+    assert abs(ls['V']['amp'] / click['V']['amp'] - 1.22) < 0.02
+
+
+def test_condensation_loses_amplitude_where_f27_says():
+    """F27 midio el mismo click en las dos polaridades, 100 oidos.
+
+    La caida al pasar a condensacion es de la onda I (~0.82) y la III
+    (~0.85); la V no tiene efecto consistente. El baseline esta medido en
+    rarefaccion, asi que esa polaridad no corrige nada.
+    """
+    g = _gen()
+    base = g.get_baseline_values()
+    rar, cm_rar = g.apply_polarity_effects(
+        g.calculate_wave_parameters(base, 80, 10, 'normal')[0], 'Rarefacción')
+    con, cm_con = g.apply_polarity_effects(
+        g.calculate_wave_parameters(base, 80, 10, 'normal')[0], 'Condensación')
+    assert abs(con['I']['amp'] / rar['I']['amp'] - 0.82) < 0.02
+    assert abs(con['III']['amp'] / rar['III']['amp'] - 0.85) < 0.02
+    assert abs(con['V']['amp'] / rar['V']['amp'] - 1.0) < 0.02
+    assert cm_rar < 0 < cm_con        # la microfonica sigue a la polaridad
+
+
+def test_bone_vibrator_tops_out_at_its_maximum_output():
+    """El vibrador no pasa de BONE_MAX_OUTPUT_DB: pedirle mas entrega eso.
+
+    F18 construye su normativa a 50, 30 y 10 dB nHL justamente porque el
+    transductor no da mas. No es un tope del modelo: es el del equipo.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    _, _, pedido_80 = _curva(intensity=80, technical={'transducer': 'bone_vibrator'})
+    _, _, pedido_50 = _curva(intensity=50, technical={'transducer': 'bone_vibrator'})
+    _, _, aereo_80 = _curva(intensity=80, technical={'transducer': 'insert_earphone'})
+    assert pedido_80['output_db'] == BONE_MAX_OUTPUT_DB
+    assert pedido_50['output_db'] == 50
+    assert aereo_80['output_db'] == 80
+    # Y el registro es el de 50, no el de 80: la respuesta deja de crecer.
+    assert pedido_80['threshold'] == pedido_50['threshold']
+
+
 # ------------------------------------------------------------------ golden
 
 def test_golden_wave_parameters():
     """Snapshot del oído normal (umbral 20) para detectar drift del modelo."""
+    # Regenerado al reanclar el normativo en la bibliografia (F01/F27
+    # para el adulto, F26 para la funcion latencia-intensidad): los
+    # numeros cambian a proposito, el test sigue siendo el detector de
+    # drift del modelo.
     golden = {
-        80: {'I': (1.62, 0.200), 'II': (2.68, 0.103), 'III': (3.68, 0.358),
-             'IV': (4.68, 0.257), 'V': (5.47, 0.576)},
-        60: {'I': (1.98, 0.165), 'II': (3.06, 0.080), 'III': (4.07, 0.328),
-             'IV': (5.08, 0.229), 'V': (5.89, 0.534)},
-        40: {'I': (2.49, 0.039), 'II': (3.60, 0.015), 'III': (4.62, 0.227),
-             'IV': (5.66, 0.140), 'V': (6.49, 0.420)},
+        80: {'I': (1.46, 0.420), 'II': (2.59, 0.092), 'III': (3.65, 0.455), 'IV': (4.71, 0.232), 'V': (5.54, 0.518)},
+        60: {'I': (1.92, 0.346), 'II': (3.04, 0.072), 'III': (4.07, 0.417), 'IV': (5.11, 0.206), 'V': (5.94, 0.480)},
+        40: {'I': (2.82, 0.083), 'II': (3.91, 0.013), 'III': (4.89, 0.288), 'IV': (5.91, 0.126), 'V': (6.72, 0.378)},
     }
     for intensity, esperado in golden.items():
         v = _params(intensity)
@@ -993,9 +1129,14 @@ def test_residual_noise_target_sets_the_floor():
     if not HAS_SCIPY:
         print("  (salteado: sin scipy)")
         return
-    t, y_40, _ = _curva(technical={'residual_noise_nv': 40})
-    t, y_120, _ = _curva(technical={'residual_noise_nv': 120})
-    razon = y_120[t > 9].std() / y_40[t > 9].std()
+    # El ruido se mide como lo mide el equipo --la diferencia de los dos
+    # subpromedios, donde la senial se cancela-- y no con la cola del
+    # trazo: ahi todavia hay SN10, onda VI y onda VII, asi que la razon
+    # terminaba dependiendo de cuanta senial cae despues de los 9 ms (y se
+    # movio al reanclar el normativo, sin que el ruido cambiara nada).
+    _, _, meta_40 = _curva(technical={'residual_noise_nv': 40})
+    _, _, meta_120 = _curva(technical={'residual_noise_nv': 120})
+    razon = meta_120['residual_noise_nv'] / meta_40['residual_noise_nv']
     assert 2.0 < razon < 4.0, razon
 
 

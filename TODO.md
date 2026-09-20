@@ -2061,3 +2061,64 @@ estímulo y el potencial salía idéntico.
 - Un override de normativa por curso guardado con la clave vieja
   (`ls_chirp`) se sigue aplicando en el cliente por el alias, pero el
   editor de `normativas.php` no lo muestra bajo "CE-Chirp LS".
+
+## ABR: normativa anclada en bibliografía, con cita (2026-09-20)
+
+El usuario aportó `docs/normativa/ABR_valores_referencia_latencias_interpico.xlsx`
+(483 filas, 27 fuentes). Reglas que fijó: bibliografía más fuerte primero,
+cita en todo pero solo donde la ve el DOCENTE, lo que no está publicado se
+calcula, y el vibrador óseo llega a 50 dB y eso no es un bug.
+
+**Qué se reancló (cada valor con su fuente, en el JSON y en normativas.php):**
+
+| | antes | ahora | fuente |
+|---|---|---|---|
+| Click adulto ♀ I/III/V | 1.62/3.68/5.47 | 1.46/3.65/5.54 | F01 Sanfins 2026, n=244 |
+| Click adulto ♂ | 1.65/3.85/5.70 | 1.47/3.75/5.68 | F01 |
+| Amplitudes adulto (♀) | 0.21/0.37/0.60 | 0.44/0.47/0.54 | F27 Da Silva, n=100 oídos |
+| Razón V/I generada | 2.85 | 1.23 | publicada: 1.66 ± 0.89 (F01) |
+| Click niño | 1.58/3.78/5.60 | 1.48/3.50/5.50 | F04 Chalak (70 dB, llevado a 80) |
+| Click neonato | 2.10/4.70/6.80 | 1.79/4.56/7.00 | F25 Rosa + F07 |
+| Click adulto mayor | 1.75/4.00/5.90 | 1.84/3.91/5.84 | F21 Aguilar, n=196 |
+| CE-Chirp LS | +3% amplitud | +22%, V −0.08 ms | F24 Cargnelutti, n=60 oídos |
+| `LAT_SHIFT_FACTOR` onda I | 0.85 | 1.15 | F26 Hood (serie 80→40) |
+| Función L-I bajo 70 dB | 0.3 ms/10 dB | 0.28 (70-50) y 0.50 (<50) | F26 vs F22 Delgado |
+| Tasa, onda V 10→90/s | +7.6% | +13.6% | F13 Jiang (publicado 12-15%) |
+| Polaridad | ×1.1 a todas las ondas | I ×0.82 y III ×0.85 en condensación | F27 (mismo click, dos polaridades) |
+| Vibrador óseo | sin techo | 50 dB nHL (`BONE_MAX_OUTPUT_DB`) | F18, que normaliza a 50/30/10 |
+
+**El hallazgo de fondo (neonato):** lo teníamos al revés. El neonato real
+tiene la periferia casi madura (onda I 1.79, contra 1.46 del adulto) y el
+centro claramente inmaduro (I-V 5.21 contra 4.08). Nosotros le habíamos
+puesto +30% en la onda I y +15% en el interpico. Con la regla de derivación
+que entró antes (parte periférica escala con la onda I, parte central con
+el I-V), ese error se propagaba a TODOS los estímulos del neonato.
+
+**Lo que se calcula porque nadie lo publica:** ondas II, IV, VI y VII,
+microfónica, amplitudes de niño y neonato, toda la vía ósea, el CE-Chirp de
+banda ancha (no LS) y los cuatro NB CE-Chirp LS. Regla: conservar la forma
+(posición relativa entre las ondas ancladas para la latencia, fracción de la
+onda V para la amplitud) y fijar el nivel con lo que sí está publicado.
+
+**Dos trampas que dejó el reanclaje, ya arregladas:** escalar la amplitud
+onda por onda contra la tabla vieja dejaba la onda I más grande que la V en
+vía ósea (dispara el criterio V/I en todo registro óseo), e interpolar la
+amplitud de II y IV por posición las dejaba casi tan grandes como sus
+vecinas. Las dos tienen test.
+
+**Dónde se ven las citas:** `admin/normativas.php` (bloque "Fuentes", con n,
+protocolo y enlace por fuente, y qué ancla cada población) y la ficha PDF
+del docente, bajo la tabla de referencia. En la ficha de estudio y en el
+panel del alumno NO aparece ninguna cita: el alumno lee un examen.
+
+**Pendiente:**
+- Sembrar el catálogo de autores de `normativas.php` con las fuentes fuertes
+  como sets editables (hoy están las citas, pero los sets los crea el
+  docente a mano).
+- El tramo de 1 a 3 años cae en `child`, que ya tiene valores de adulto;
+  F11/F19 dicen que la equivalencia se alcanza entre los 9 meses y los 3
+  años.
+- Burst de 1-4 kHz: única fuente F23 en dB HL y sin click propio; nuestros
+  valores siguen derivados. No usable sin el click de esa misma serie.
+- Sexo y edad: nuestro salto ♂/♀ en la onda V (0.14) y el de adulto mayor
+  quedaron dentro de lo publicado al reanclar; no hizo falta tocarlos.

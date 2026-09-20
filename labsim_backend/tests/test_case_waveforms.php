@@ -26,7 +26,11 @@ $neutro = [
 
 t_close(CaseWaveforms::corrimientoLatencia(80), 0.0, 0.001, 'A 80 dB la función L-I no corre nada: es la referencia');
 t_close(CaseWaveforms::corrimientoLatencia(70), 0.12, 0.001, 'De 80 a 70 dB la V se corre 0.12 ms (tramo plano)');
-t_close(CaseWaveforms::corrimientoLatencia(50), 0.72, 0.001, 'Bajo 70 dB la pendiente es 0.3 ms/10 dB (Hood)');
+t_close(CaseWaveforms::corrimientoLatencia(50), 0.68, 0.001, 'Entre 70 y 50 dB la pendiente es 0.28 ms/10 dB (F26 Hood)');
+// Tercer tramo: abajo de 50 la función se empina (F26: 6.19 -> 7.52 de 50 a
+// 20 dB). Con una sola pendiente de 0.3 la onda V quedaba 0.45 ms rápida a
+// 30 dB, justo donde el alumno busca el umbral.
+t_close(CaseWaveforms::corrimientoLatencia(30), 1.68, 0.001, 'Bajo 50 dB la pendiente es 0.50 ms/10 dB (F26, contrastado con F22)');
 t_true(CaseWaveforms::corrimientoLatencia(30) > CaseWaveforms::corrimientoLatencia(60),
     'Cuanto más cerca del umbral, más tarde aparece la onda');
 

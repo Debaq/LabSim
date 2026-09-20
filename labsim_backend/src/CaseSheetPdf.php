@@ -72,6 +72,19 @@ final class CaseSheetPdf
     private const FONDO_CABECERA = '#dde3ea';
 
     /** Etiquetas cortas del patrón retrococlear (ver views/case/_perfil.php). */
+    /**
+     * De dónde sale la referencia de cada población. Va en la ficha del
+     * DOCENTE, nunca en la de estudio: el alumno lee el examen, no la
+     * bibliografía. Las citas completas viven en admin/normativas.php.
+     */
+    private const FUENTE_REFERENCIA = [
+        'adult_male' => 'Referencia: latencias de Sanfins et al. 2026 (n=244, click 0.1 ms rarefacción, 80 dB nHL, ER-3A) y amplitudes de Da Silva Nunes y Gentile Matas 2005 (n=100 oídos).',
+        'adult_female' => 'Referencia: latencias de Sanfins et al. 2026 (n=244, click 0.1 ms rarefacción, 80 dB nHL, ER-3A) y amplitudes de Da Silva Nunes y Gentile Matas 2005 (n=100 oídos).',
+        'child' => 'Referencia: Chalak et al. 2013 (n=40 niños, media 7.6 años), medida a 70 dB nHL y llevada a 80 con la función latencia-intensidad.',
+        'neonate' => 'Referencia: Rosa et al. 2014 (n=80 lactantes, 39-40 semanas); la onda V a término se interpola con los grupos vecinos.',
+        'elderly' => 'Referencia: Aguilar-Madrid et al. 2015 (n=196), grupo de 45 años o más; la amplitud aplica la caída del 10% de Jerger y Hall 1980.',
+    ];
+
     private const NEURAL_LABELS = [
         'i_iii_ms' => 'Prolongación I-III (ms)',
         'iii_v_ms' => 'Prolongación III-V (ms)',
@@ -1423,6 +1436,12 @@ final class CaseSheetPdf
         $finRef = $this->tablaEn(self::MARGEN, $yRef, $anchoTabla, $filas, [0.46, 0.54], true);
         $this->y = $finRef + 4;
         $this->parrafo('* fuera de la referencia (la razón V/I, por debajo).', 6.5);
+        // La cita va SOLO en la ficha del docente: el alumno lee un examen,
+        // no una tabla normativa con bibliografía al pie. Las fuentes
+        // completas están en Configuración > Normativas.
+        if (!$estudio) {
+            $this->parrafo(self::FUENTE_REFERENCIA[$poblacion] ?? '', 6.5);
+        }
 
         // Las desviaciones cargadas a mano, solo si hay alguna: en cero no
         // dicen nada y los valores de arriba ya las llevan aplicadas. Es el

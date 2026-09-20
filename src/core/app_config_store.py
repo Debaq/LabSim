@@ -6,7 +6,7 @@ no el default global) -- este modulo solo guarda lo que llega y lo sirve, sin
 resolver nada de nuevo.
 
 Pensado para tablas normativas de examenes editables por el docente sin
-recompilar la app: "normative_data.abr" primero, "normative_data.p300"/
+recompilar la app: "normative_data.vemp" hoy, "normative_data.p300"/
 "normative_data.ecochg" despues siguen la misma key generica
 "normative_data.<examen>". Si no hay fila (ni override ni default) para una
 key, get() devuelve el default y quien llama sigue usando su propio bundle

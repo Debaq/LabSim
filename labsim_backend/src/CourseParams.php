@@ -7,10 +7,17 @@
  * valores por defecto; con eso alcanza tanto para pintar el editor
  * (views/course/_params.php) como para leer el POST (parse()).
  *
- * Existe para cortar la copia: el editor del ABR y el del VEMP eran ~210
- * líneas gemelas en courses.php (handler + render), y los parámetros de
- * audiometría por curso (ver TODO.md) iban a ser la tercera copia. Sumar un
+ * Existe para cortar la copia: los editores por examen eran ~210 líneas
+ * gemelas en courses.php (handler + render), y los parámetros de
+ * audiometría por curso (ver TODO.md) iban a ser otra copia. Sumar un
  * examen configurable ahora es agregar una entrada acá.
+ *
+ * NO va acá lo que el modelo puede derivar solo. El ABR tuvo su editor
+ * (60 campos: ratio de latencia y amplitud por onda y por estímulo) y se
+ * sacó: eran parámetros internos del generador, no decisiones docentes,
+ * nadie podía tocar uno sin romper la coherencia con los otros 59, y hoy
+ * el cliente los deriva del click de cada población (ver
+ * ABRGenerator._rescale_ratio_block).
  *
  * Cada definición:
  *   module    código de Courses::MODULES -- el editor solo se muestra si el
@@ -32,99 +39,17 @@ final class CourseParams
      * repo del cliente y cómo se lee cada valor. Solo documental acá.
      */
     public const SOURCES = [
-        'normative_data.abr' => 'resources/abr/normative_data.json (adult_female, vía aérea)',
         'normative_data.vemp' => 'resources/vemp/normative_data.json (adult_female, 500Hz)',
     ];
 
     public static function all(): array
     {
         return [
-            'normative_data.abr' => [
-                'module' => 'ABR',
-                'title' => 'Desviación de estímulos ABR (potenciales evocados)',
-                'help' => 'El click de cada paciente lo define el caso (case_create.php, campo "desviaciones") -- acá NO se edita click. '
-                    . 'Esto configura cuánto se desvían los chirps y el burst respecto al click de ESE paciente, como factor multiplicador (ratio) por onda: '
-                    . 'ej. ratio de amplitud 1.4 en la onda V del chirp = la V del chirp sale 40% más grande que la V (ya ajustada) del click de ese caso. '
-                    . 'Los campos muestran el valor por defecto de la app; el curso guarda solo los que quedes distintos del default.',
-                'groups' => [
-                    'ce_chirp' => ['label' => 'CE-Chirp', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
-                    'ce_chirp_ls' => ['label' => 'CE-Chirp LS', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
-                    'nb_ce_chirp_ls_500Hz' => ['label' => 'NB CE-Chirp LS 500 Hz', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
-                    'nb_ce_chirp_ls_1000Hz' => ['label' => 'NB CE-Chirp LS 1 kHz', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
-                    'nb_ce_chirp_ls_2000Hz' => ['label' => 'NB CE-Chirp LS 2 kHz', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
-                    'nb_ce_chirp_ls_4000Hz' => ['label' => 'NB CE-Chirp LS 4 kHz', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
-                    'tone_burst_500Hz' => ['label' => 'Burst 500 Hz', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
-                    'tone_burst_1000Hz' => ['label' => 'Burst 1 kHz', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
-                    'tone_burst_2000Hz' => ['label' => 'Burst 2 kHz', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
-                    'tone_burst_4000Hz' => ['label' => 'Burst 4 kHz', 'rows' => ['I' => 'Onda I', 'III' => 'Onda III', 'V' => 'Onda V']],
-                ],
-                'fields' => [
-                    // Ratio, no valor absoluto: 0 o negativo no significa nada
-                    // (la onda desaparecería o se invertiría), y arriba de 5x
-                    // el trazado deja de ser un ABR.
-                    'lat_ratio' => ['label' => 'Ratio latencia', 'step' => 0.0001, 'min' => 0.1, 'max' => 5.0],
-                    'amp_ratio' => ['label' => 'Ratio amplitud', 'step' => 0.0001, 'min' => 0.1, 'max' => 5.0],
-                ],
-                // Ver ABR_generator.py::get_baseline_values.
-                'defaults' => [
-                    'ce_chirp' => [
-                        'I' => ['lat_ratio' => 0.8951, 'amp_ratio' => 2.1429],
-                        'III' => ['lat_ratio' => 0.9783, 'amp_ratio' => 1.4054],
-                        'V' => ['lat_ratio' => 0.9872, 'amp_ratio' => 1.2167],
-                    ],
-                    'ce_chirp_ls' => [
-                        'I' => ['lat_ratio' => 0.9074, 'amp_ratio' => 1.8095],
-                        'III' => ['lat_ratio' => 0.9918, 'amp_ratio' => 1.1892],
-                        'V' => ['lat_ratio' => 0.9963, 'amp_ratio' => 1.0333],
-                    ],
-                    'nb_ce_chirp_ls_500Hz' => [
-                        'I' => ['lat_ratio' => 1.1173, 'amp_ratio' => 1.4143],
-                        'III' => ['lat_ratio' => 1.2581, 'amp_ratio' => 0.9851],
-                        'V' => ['lat_ratio' => 1.298, 'amp_ratio' => 0.855],
-                    ],
-                    'nb_ce_chirp_ls_1000Hz' => [
-                        'I' => ['lat_ratio' => 1.0, 'amp_ratio' => 1.7357],
-                        'III' => ['lat_ratio' => 1.144, 'amp_ratio' => 1.1676],
-                        'V' => ['lat_ratio' => 1.1426, 'amp_ratio' => 0.9675],
-                    ],
-                    'nb_ce_chirp_ls_2000Hz' => [
-                        'I' => ['lat_ratio' => 0.9383, 'amp_ratio' => 1.7858],
-                        'III' => ['lat_ratio' => 1.0353, 'amp_ratio' => 1.1824],
-                        'V' => ['lat_ratio' => 1.0421, 'amp_ratio' => 0.9791],
-                    ],
-                    'nb_ce_chirp_ls_4000Hz' => [
-                        'I' => ['lat_ratio' => 0.9012, 'amp_ratio' => 1.9047],
-                        'III' => ['lat_ratio' => 1.0, 'amp_ratio' => 1.25],
-                        'V' => ['lat_ratio' => 1.0055, 'amp_ratio' => 1.0416],
-                    ],
-                    'tone_burst_500Hz' => [
-                        'I' => ['lat_ratio' => 1.4506, 'amp_ratio' => 1.0476],
-                        'III' => ['lat_ratio' => 1.4538, 'amp_ratio' => 0.7297],
-                        'V' => ['lat_ratio' => 1.4625, 'amp_ratio' => 0.6333],
-                    ],
-                    'tone_burst_1000Hz' => [
-                        'I' => ['lat_ratio' => 1.2037, 'amp_ratio' => 1.2857],
-                        'III' => ['lat_ratio' => 1.2636, 'amp_ratio' => 0.8649],
-                        'V' => ['lat_ratio' => 1.2431, 'amp_ratio' => 0.7167],
-                    ],
-                    'tone_burst_2000Hz' => [
-                        'I' => ['lat_ratio' => 1.0494, 'amp_ratio' => 1.4286],
-                        'III' => ['lat_ratio' => 1.1005, 'amp_ratio' => 0.9459],
-                        'V' => ['lat_ratio' => 1.0969, 'amp_ratio' => 0.7833],
-                    ],
-                    'tone_burst_4000Hz' => [
-                        'I' => ['lat_ratio' => 0.9568, 'amp_ratio' => 1.5238],
-                        'III' => ['lat_ratio' => 1.0326, 'amp_ratio' => 1.0000],
-                        'V' => ['lat_ratio' => 1.0329, 'amp_ratio' => 0.8333],
-                    ],
-                ],
-            ],
-
             'normative_data.vemp' => [
                 'module' => 'VEMP',
                 'title' => 'Normativa VEMP (potenciales evocados vestibulares miogénicos)',
-                'help' => 'VEMP ajusta el baseline por pico y subtipo con valores ABSOLUTOS, a diferencia del ABR (donde el click lo pone el paciente y el resto son ratios): '
-                    . 'acá el baseline es del equipo, no del paciente. El paciente desvía aparte, vía "desviaciones" en case_create.php. '
+                'help' => 'VEMP ajusta el baseline por pico y subtipo con valores ABSOLUTOS: acá el baseline es del equipo, no del paciente. '
+                    . 'El paciente desvía aparte, vía "desviaciones" en case_create.php. '
                     . 'Los campos muestran el default de la app; el curso guarda solo los que queden distintos.',
                 'groups' => [
                     'CVEMP' => ['label' => 'CVEMP (cervical / SCM)', 'rows' => ['p13' => 'P13', 'n23' => 'N23']],

@@ -56,7 +56,6 @@ import random
 import numpy as np
 import scipy.signal as signal
 from core.base import context
-from core import app_config_store
 from abr.protocols import get_protocol
 from core.rng import case_fingerprint, stable_seed
 
@@ -117,11 +116,18 @@ COCHLEAR_LI_SLOPE = 0.15
 DEV_LI_GAIN = 0.35
 DEV_LI_MAX = 1.5
 
-# La funcion latencia-intensidad no corre todas las ondas lo mismo: el
-# interpico I-V se ensancha SOLO un poco al bajar la intensidad (0.2-0.4 ms
-# entre 80 y 20 dB). Factor sobre el shift de la onda V. Antes la onda I
-# usaba 0.2 y el resto 1.0 -> I-V pasaba de 3.85 a 5.11 ms, imposible.
-LAT_SHIFT_FACTOR = {'I': 0.85, 'II': 0.90, 'III': 0.92, 'IV': 0.96, 'V': 1.0}
+# La funcion latencia-intensidad no corre todas las ondas lo mismo. Factor
+# sobre el shift de la onda V.
+#
+# F26 (Hood, tabla 2-3, serie completa 80->40 dB): la onda I se corre 1.43
+# ms y la V 1.18 -> la I se mueve ~1.2 veces mas, y el I-V se ACORTA al
+# bajar (3.85 -> 3.60). F22 (Delgado, 90->50) da I y V casi iguales
+# (razon 0.97). Se toma 1.15, entre las dos series y mas cerca de la que
+# tiene la serie completa.
+#
+# Antes estaba en 0.85 para la I: el interpico se ALARGABA al bajar la
+# intensidad, que es lo contrario de lo que reportan las dos fuentes.
+LAT_SHIFT_FACTOR = {'I': 1.15, 'II': 1.12, 'III': 1.05, 'IV': 1.02, 'V': 1.0}
 
 # Tasa de estimulacion. Los valores normativos se miden a ~21.1/s (tasa
 # clinica tipica) -- ese es el ancla: ahi el modelo no toca nada. Por
@@ -130,9 +136,26 @@ LAT_SHIFT_FACTOR = {'I': 0.85, 'II': 0.90, 'III': 0.92, 'IV': 0.96, 'V': 1.0}
 # habia tramos 15/50/60/70 con saltos (la onda II pasaba de 0.110 a 0.006
 # uV entre 55 y 60/s) y rangos irreales (onda V variaba 6.4x en amplitud y
 # 1.1 ms en latencia entre 11 y 90/s; lo real es ~25-30% y ~0.4-0.6 ms).
+# Salida maxima del vibrador oseo, en dB nHL. No es una limitacion del
+# modelo: es la del transductor. F18 (200 oidos) construye su normativa a
+# 50, 30 y 10 dB nHL porque el vibrador no entrega mas -- por encima de ahi
+# distorsiona y el estimulo deja de ser el que dice la pantalla.
+BONE_MAX_OUTPUT_DB = 50.0
+
+# Polaridad: caida de amplitud por onda al pasar de rarefaccion (el
+# baseline) a condensacion. F27, mismo click en las dos polaridades sobre
+# 100 oidos.
+POLARITY_AMP_CONDENSATION = {'I': 0.82, 'II': 0.84, 'III': 0.85,
+                             'IV': 0.92, 'V': 1.0}
+
 RATE_REF = 21.1
-RATE_LAT_SLOPE = {'I': 0.0025, 'II': 0.0035, 'III': 0.0045,
-                  'IV': 0.0055, 'V': 0.0060}
+# F13 (Jiang, 80 ninios + 21 adultos, click de 10 a 90/s): de 10 a 90/s la
+# onda I se prolonga 4-10%, la III 9-13% y la V 12-15%, y los interpicos se
+# prolongan con ella. Las pendientes salen de ahi (ms por estimulo/s sobre
+# el baseline adulto): I 0.12 ms = 8%, III 0.40 ms = 11%, V 0.75 ms = 14%.
+# Antes la V se movia la mitad de lo publicado (7.6%).
+RATE_LAT_SLOPE = {'I': 0.0015, 'II': 0.0028, 'III': 0.0050,
+                  'IV': 0.0072, 'V': 0.0094}
 RATE_AMP_DECAY = {'I': 0.0060, 'II': 0.0070, 'III': 0.0045,
                   'IV': 0.0060, 'V': 0.0035}
 # Patologia neural = mala resistencia a tasas altas ("rate_effect": "severe"
@@ -493,23 +516,17 @@ class ABRGenerator:
 
     def get_baseline_values(self, population='adult_female',
                             stimulus='click', pathway='air_conduction',
-                            freq=None, ratio_override=None):
+                            freq=None):
         """
         Click SIEMPRE sale del baseline poblacional tal cual -- el perfil
         real del paciente lo ajusta aparte via 'desviaciones' del caso (ver
         calculate_wave_parameters), nunca se pisa desde acá. Cualquier otro
         estimulo guarda solo un ratio respecto a click (lat_ratio/amp_ratio,
         nunca su propio absoluto ni un delta): cuanto se desvia chirp/burst
-        del click de ESE paciente. Ese ratio SI es configurable por curso
-        (ratio_override, ver core.app_config_store / AppConfig.php en el
-        backend) -- es comportamiento del estimulo/equipo que el docente
-        calibra, no un dato del paciente. Sin ratio (ni override ni default
-        bundleado) -> 1.0 (misma forma que click).
+        del click de ESE paciente. Sin ratio -> 1.0 (misma forma que click).
 
-        ratio_override: dict {stim_key: {onda: {'lat_ratio':.., 'amp_ratio':..}}}
-        -- stim_key = 'ce_chirp'/'ce_chirp_ls'/'nb_ce_chirp_ls_<freq>'/
-        'tone_burst_<freq>' (ver STIM_MAP).
-        Gana sobre el default bundleado, onda por onda.
+        Lo que el JSON no describe se DERIVA del bloque que si existe, no
+        se copia (ver _rescale_ratio_block).
         """
         pop = self.norms['populations'][population]
         via = pop.get(pathway) or pop['air_conduction']
@@ -530,26 +547,24 @@ class ABRGenerator:
 
         # El JSON no describe todos los estimulos en todas las vias ni en
         # todas las poblaciones (el neonato solo trae click y ce_chirp; la
-        # via osea no trae los chirps de banda ancha). Sin esto, pedir un
-        # burst de 500 Hz en un neonato --o un chirp por via osea-- devolvia
-        # los valores del click en silencio, o sea el estimulo no hacia
-        # NADA. Los ratios son una propiedad del estimulo mucho mas que de
-        # la poblacion o de la via, asi que se caen en cascada: misma
-        # poblacion por aire -> adulto por esta via -> adulto por aire.
+        # via osea no trae los chirps de banda ancha). Lo que falta NO se
+        # copia del adulto: se DERIVA, reexpresando el corrimiento del
+        # estimulo sobre el click de esta poblacion y esta via (ver
+        # _rescale_ratio_block). Copiarlo tal cual era el bug: el ratio
+        # del adulto aplicado a un neonato le estira el retardo del burst
+        # con su inmadurez central, que no es de donde sale ese retardo.
         pop_af = self.norms['populations']['adult_female']
-        for bloque in (pop.get('air_conduction'),
-                       pop_af.get(pathway),
-                       pop_af['air_conduction']):
-            if default_ratio_block:
-                break
-            default_ratio_block = ratios_de(bloque)
+        if not default_ratio_block:
+            for bloque in (pop.get('air_conduction'),
+                           pop_af.get(pathway),
+                           pop_af['air_conduction']):
+                prestado = ratios_de(bloque)
+                if prestado:
+                    default_ratio_block = self._rescale_ratio_block(
+                        prestado, bloque['click'], click)
+                    break
 
         default_ratio_block = self._complete_ratio_block(default_ratio_block, click)
-        override_block = (ratio_override or {}).get(stim_key)
-        if override_block is None:
-            # Normativa por curso guardada con la nomenclatura vieja.
-            viejo = {v: k for k, v in LEGACY_STIM_KEYS.items()}.get(stim_key)
-            override_block = (ratio_override or {}).get(viejo) if viejo else None
 
         baseline = {}
         for wave, click_vals in click.items():
@@ -558,13 +573,84 @@ class ABRGenerator:
             ratio = {'lat_ratio': 1.0, 'amp_ratio': 1.0}
             if default_ratio_block and wave in default_ratio_block:
                 ratio.update(default_ratio_block[wave])
-            if override_block and wave in override_block:
-                ratio.update(override_block[wave])
             baseline[wave] = {
                 'lat': click_vals['lat'] * ratio['lat_ratio'],
                 'amp': click_vals['amp'] * ratio['amp_ratio'],
             }
         return baseline
+
+    @staticmethod
+    def _rescale_ratio_block(block, ref_click, click):
+        """Reexpresa los ratios de otra poblacion/via sobre ESTE click.
+
+        Lo que el estimulo le hace a la respuesta se sabe del adulto: el
+        burst de 500 Hz llega ~0.7 ms mas tarde que el click en la onda I y
+        ~2.5 ms en la V, el chirp adelanta y agranda. Lo que falta para las
+        otras poblaciones no es ese dato, es COMO se traslada. La regla:
+
+        - Parte periferica: el corrimiento que ya se ve en la onda I
+          (recorrido coclear y oido medio). Escala con la onda I de esta
+          poblacion/via, que es justo lo que mide esa parte.
+        - Parte central: lo que el estimulo ADEMAS alarga de la I a la V.
+          Escala con el interpico I-V de esta poblacion.
+
+        Copiar el ratio tal cual --que es lo que se hacia-- asume que todo
+        escala con la latencia absoluta del click. En un neonato eso estira
+        el retardo del burst con su inmadurez central, cuando ese retardo es
+        coclear; y en la via osea le pasa lo mismo con el corrimiento del
+        oido medio.
+
+        La amplitud no se toca: es propiedad del estimulo (cuanta coclea
+        sincroniza), no de la maduracion.
+        """
+        if not block:
+            return block
+        for clave in ('I', 'V'):
+            if clave not in ref_click or clave not in click:
+                return block
+        ref_I, ref_V = ref_click['I']['lat'], ref_click['V']['lat']
+        lat_I, lat_V = click['I']['lat'], click['V']['lat']
+        if not ref_I or ref_V == ref_I:
+            return block
+
+        m_perif = lat_I / ref_I
+        m_central = (lat_V - lat_I) / (ref_V - ref_I)
+
+        def corrimiento(wave):
+            r = block.get(wave)
+            if not isinstance(r, dict) or wave not in ref_click:
+                return None
+            return ref_click[wave]['lat'] * (float(r.get('lat_ratio', 1.0)) - 1.0)
+
+        shift_I = corrimiento('I') or 0.0
+        fuera = {}
+        for wave, r in block.items():
+            if not isinstance(r, dict) or 'lat_ratio' not in r:
+                continue
+            base = click.get(wave)
+            if base is None:
+                continue
+            shift = corrimiento(wave)
+            if shift is None:
+                continue
+            # La microfonica es prearterial: pura periferia, sin parte central.
+            central = 0.0 if wave == 'MC' else shift - shift_I
+            nuevo = m_perif * shift_I + m_central * central
+            fuera[wave] = dict(r)
+            fuera[wave]['lat_ratio'] = (base['lat'] + nuevo) / base['lat']
+
+        salida = {k: v for k, v in block.items() if k not in fuera}
+        salida.update(fuera)
+        # El interpico declarado quedaria mintiendo contra las latencias
+        # nuevas: se recalcula de ellas.
+        if 'interpeak' in block and {'I', 'III', 'V'} <= set(fuera):
+            lat = {w: click[w]['lat'] * fuera[w]['lat_ratio'] for w in ('I', 'III', 'V')}
+            salida['interpeak'] = {
+                'I-III': round(lat['III'] - lat['I'], 2),
+                'III-V': round(lat['V'] - lat['III'], 2),
+                'I-V': round(lat['V'] - lat['I'], 2),
+            }
+        return salida
 
     @staticmethod
     def _complete_ratio_block(block, click):
@@ -752,19 +838,38 @@ class ABRGenerator:
 
     def apply_polarity_effects(self, values, polarity, pathology='normal',
                                neural=None):
+        # El baseline normativo esta medido EN RAREFACCION (F01 y F27 usan
+        # click de rarefaccion), asi que esa polaridad no corrige nada: es
+        # el punto de partida. Las otras dos se expresan contra ella.
+        #
+        # F27 (50 adultos, 100 oidos, el MISMO click en las dos
+        # polaridades) da la caida de amplitud al pasar a condensacion:
+        # onda I ~0.82, onda III ~0.85, onda V sin efecto consistente
+        # (1.10 en mujeres, 0.87 en hombres). F10 (Stockard) agrega que en
+        # latencia el efecto es de la onda I --rarefaccion la adelanta-- y
+        # que en III y V no hay diferencia consistente.
+        #
+        # Antes esto multiplicaba TODAS las amplitudes por 1.1 en
+        # rarefaccion y la V por 1.15 en condensacion, que es al reves de
+        # lo que mide F27.
         CM_value = None
         if polarity == 'Rarefacción':
-            for w in values:
-                values[w]['amp'] *= 1.1
-            if 'I' in values:
-                values['I']['lat'] -= 0.1
             CM_value = -0.15
         elif polarity == 'Condensación':
-            if 'V' in values:
-                values['V']['amp'] *= 1.15
+            for w, factor in POLARITY_AMP_CONDENSATION.items():
+                if w in values:
+                    values[w]['amp'] *= factor
             if 'I' in values:
                 values['I']['lat'] += 0.1
             CM_value = 0.15
+        elif polarity in ('Alternada', 'Alternante'):
+            # Promedio de las dos: es lo que el equipo suma barrido a
+            # barrido. Sin microfonica, que es el punto de alternar.
+            for w, factor in POLARITY_AMP_CONDENSATION.items():
+                if w in values:
+                    values[w]['amp'] *= (1.0 + factor) / 2.0
+            if 'I' in values:
+                values['I']['lat'] += 0.05
         # Con polaridad alternada el CM se cancela (CM_value queda None):
         # es justamente por eso que una desincronia auditiva se busca con
         # rarefaccion y condensacion por separado.
@@ -1459,7 +1564,7 @@ class ABRGenerator:
         return self.norms['pathology_modifiers'][pathology]['threshold_range'][0]
 
     def shadow_values(self, population, pathway, stimulus_config, masking, ia,
-                      case_config, click_baseline=None, ratio_override=None):
+                      case_config, click_baseline=None):
         """Respuesta de la coclea del oido NO evaluado, o None si no cruza.
 
         Al otro oido le llega el estimulo atenuado por el craneo
@@ -1492,7 +1597,7 @@ class ABRGenerator:
 
         baseline = self.get_baseline_values(
             population, stimulus_config['stim'], pathway,
-            freq=stimulus_config.get('freq'), ratio_override=ratio_override,
+            freq=stimulus_config.get('freq'),
         )
         values, _ = self.calculate_wave_parameters(
             baseline, level, threshold, contra.get('type', 'normal'),
@@ -1738,13 +1843,16 @@ class ABRGenerator:
     def latency_intensity_shift(intensity):
         """Corrimiento de la funcion latencia-intensidad (ms) respecto de 80 dB.
 
-        Pendiente (onda V, click): ~0.12 ms/10 dB cerca del techo (por
-        encima de 70 dB, casi plana) y ~0.3 ms/10 dB de ahi para abajo --
-        Hood, "Clinical Applications of the ABR", reporta ~0.3 ms/10 dB
-        entre 70 y 50 dB. Quiebre en 70 (antes estaba en 60, dejaba el
-        tramo 70-60 con la pendiente plana que no corresponde). El tramo
-        alto estaba en 0.08: de 80 a 100 dB la V se movia 0.16 ms, menos
-        que el error de lectura del alumno.
+        Tres tramos, de la serie completa de F26 (Hood, tabla 2-3, onda V
+        de 80 a 20 dB) contrastada con F22 (Delgado, 90 a 10 dB):
+
+            >= 70 dB   0.12 ms/10 dB   casi plana cerca del techo
+            70-50 dB   0.28 ms/10 dB   F26: 5.64 -> 6.19 entre 70 y 50
+            < 50 dB    0.50 ms/10 dB   F26: 6.19 -> 7.52 entre 50 y 20
+
+        El tercer tramo faltaba: con una sola pendiente de 0.3 abajo de 70
+        la V quedaba 0.45 ms rapida a 30 dB (6.79 contra 7.24 de F26 y 7.47
+        de F22), justo donde el alumno busca el umbral.
 
         Es la funcion del oido NORMAL. La perdida coclear la empina cerca
         del umbral (COCHLEAR_LI_SLOPE) y la conductiva la corre en paralelo
@@ -1757,7 +1865,10 @@ class ABRGenerator:
         """
         if intensity >= 70:
             return (80 - intensity) / 10 * 0.12
-        return (80 - 70) / 10 * 0.12 + (70 - intensity) / 10 * 0.3
+        alto = 0.12
+        if intensity >= 50:
+            return alto + (70 - intensity) / 10 * 0.28
+        return alto + 2 * 0.28 + (50 - intensity) / 10 * 0.50
 
     def latency_intensity_band(self, population='adult_female', wave='V',
                                intensities=None, stimulus='click',
@@ -1792,16 +1903,18 @@ class ABRGenerator:
                    else stimulus_config['pathway'])
         if transducer == 'bone_vibrator':
             pathway = 'bone_conduction'
-        # Ratio de desviacion por curso (ver core.app_config_store en el
-        # cliente / AppConfig.php en el backend) -- afecta solo como se
-        # desvian chirp/burst respecto al click, nunca el click en si
-        # (eso lo define el caso/paciente via 'desviaciones', mas abajo).
-        ratio_override = case_config.get('ratio_override') if case_config else None
+            # El vibrador no pasa de BONE_MAX_OUTPUT_DB: pedirle 80 dB
+            # entrega 50 y el registro es el de 50, no el de 80. Se recorta
+            # aca y no en el panel porque el equipo tampoco avisa: lo que
+            # delata el tope es que la respuesta deja de crecer.
+            if float(stimulus_config['int']) > BONE_MAX_OUTPUT_DB:
+                stimulus_config = dict(stimulus_config)
+                stimulus_config['int'] = BONE_MAX_OUTPUT_DB
         baseline = self.get_baseline_values(
             population, stimulus_config['stim'], pathway,
-            freq=stimulus_config.get('freq'), ratio_override=ratio_override,
+            freq=stimulus_config.get('freq'),
         )
-        # Baseline de click (misma poblacion/via, sin override) para escalar
+        # Baseline de click (misma poblacion/via) para escalar
         # desviaciones cuando el estimulo activo no es click (ver
         # calculate_wave_parameters).
         click_baseline = None
@@ -1928,7 +2041,7 @@ class ABRGenerator:
         # enmascara). Antes el spinbox de masking se leia y se tiraba.
         shadow = self.shadow_values(
             population, pathway, stimulus_config, masking, ia, case_config,
-            click_baseline=click_baseline, ratio_override=ratio_override,
+            click_baseline=click_baseline,
         )
         if shadow:
             contra_case = (case_config or {}).get('contra') or {}
@@ -2158,6 +2271,9 @@ class ABRGenerator:
             'window_ms': window_ms,
             'transducer': transducer,
             'pathway': pathway,
+            # Lo que el transductor entrego de verdad: con vibrador oseo
+            # puede ser menos que lo que pidio el panel (BONE_MAX_OUTPUT_DB).
+            'output_db': float(stimulus_config['int']),
             'accepted_sweeps': accepted,
             'rejected_sweeps': max(current_avg - accepted, 0.0),
             'artifact_acceptance': acceptance,
@@ -2377,13 +2493,6 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
     else:
         var_repro = 0
 
-    # Ratio de desviacion de chirp/burst por curso -- config del docente
-    # (ver AppConfig.php), sincronizada al cliente en core.app_config_store
-    # bajo key generica "normative_data.<examen>" (mismo mecanismo para
-    # P300/electrococleografia a futuro). Nunca toca click -- eso lo define
-    # el caso via 'desviaciones', abajo.
-    ratio_override = app_config_store.get('normative_data.abr')
-
     case_config = {
         'desviaciones': preferences.get('desviaciones', {}),
         # Falsa onda V: artefacto docente que solo delatan los subpromedios
@@ -2406,7 +2515,6 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
         # Jitter DENTRO de la captura: lo que hace que los subpromedios A/B
         # de un paciente no reproducible no lleguen a pegarse nunca.
         'repro_jitter': 0.0 if preferences.get('repro', True) else repro_var,
-        'ratio_override': ratio_override,
         # Patron retrococlear del caso (I-III, III-V, bloqueo, razon V/I,
         # microfonica, desincronia, tasa). Los casos guardados antes de que
         # existiera no lo traen y caen en NEURAL_PARAM_DEFAULTS, que es como

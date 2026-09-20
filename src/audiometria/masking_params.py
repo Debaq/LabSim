@@ -7,7 +7,7 @@ reves cerraria el ciclo.
 
 Es tambien el lugar donde deberian aterrizar estos valores cuando se hagan
 configurables por curso desde la plataforma (app_config / AppConfig.php, el
-mismo camino que 'normative_data.abr'), en vez de estar repartidos por los
+mismo camino que 'normative_data.vemp'), en vez de estar repartidos por los
 modulos que los consumen. Ver TODO.md.
 """
 

@@ -30,42 +30,14 @@ function cp_json(string $path): ?array
 
 $defs = CourseParams::all();
 
-// --- ABR: ratios por estímulo/onda (adult_female, vía aérea) --------------
-$abr = cp_json($raizCliente . '/resources/abr/normative_data.json');
-if ($abr === null) {
-    t_true(true, 'ABR: sin resources/abr/normative_data.json a mano -- comparación omitida');
-} else {
-    $fuente = $abr['populations']['adult_female']['air_conduction'] ?? [];
-    $def = $defs['normative_data.abr'];
-    foreach ($def['defaults'] as $stim => $ondas) {
-        // El override viaja con la clave plana 'tone_burst_500Hz' (así la
-        // arma STIM_MAP y así la lee ABR_generator.get_baseline_values),
-        // pero en el JSON los estímulos de banda (burst y NB CE-Chirp LS)
-        // cuelgan de su familia -> '500Hz'.
-        $bloque = $fuente[$stim] ?? [];
-        foreach (['tone_burst_', 'nb_ce_chirp_ls_'] as $familia) {
-            if (strpos((string) $stim, $familia) === 0) {
-                $banda = substr((string) $stim, strlen($familia));
-                $bloque = $fuente[rtrim($familia, '_')][$banda] ?? [];
-            }
-        }
-        foreach ($ondas as $onda => $campos) {
-            foreach ($campos as $campo => $valor) {
-                t_close(
-                    (float) ($bloque[$onda][$campo] ?? -1),
-                    (float) $valor,
-                    1e-6,
-                    "ABR {$stim}/{$onda}/{$campo}: CourseParams vs normative_data.json"
-                );
-            }
-        }
-    }
-    // Al revés: un estímulo nuevo en el JSON del cliente tiene que aparecer
-    // en el editor, o el curso no puede configurarlo.
-    foreach (['ce_chirp', 'ce_chirp_ls', 'nb_ce_chirp_ls_500Hz', 'tone_burst_500Hz', 'tone_burst_1000Hz', 'tone_burst_2000Hz', 'tone_burst_4000Hz'] as $stim) {
-        t_true(isset($def['groups'][$stim]), "ABR: el editor cubre el estímulo {$stim}");
-    }
-}
+// --- ABR: ya no tiene editor por curso -----------------------------------
+// Eran 60 campos (ratio de latencia y amplitud por onda y por estímulo) que
+// no son decisiones docentes sino parámetros internos del generador, sin
+// forma de tocar uno sin romper la coherencia con los otros 59. El cliente
+// los deriva del click de cada población. Si alguien lo vuelve a agregar,
+// que sea a propósito y no por inercia.
+t_eq(CourseParams::find('normative_data.abr'), null, 'ABR: no hay editor de ratios por curso');
+t_eq(array_keys(CourseParams::forModules(['ABR'])), [], 'ABR: un curso con ABR no ve editores de normativa');
 
 // --- VEMP: baselines absolutos por subtipo/pico (adult_female, 500Hz) -----
 $vemp = cp_json($raizCliente . '/resources/vemp/normative_data.json');
@@ -88,9 +60,9 @@ if ($vemp === null) {
 }
 
 // --- parse(): lo que queda igual al default NO se guarda -------------------
-$abrDef = $defs['normative_data.abr'];
+$vempDef = $defs['normative_data.vemp'];
 $igualQueElDefault = [];
-foreach ($abrDef['defaults'] as $stim => $ondas) {
+foreach ($vempDef['defaults'] as $stim => $ondas) {
     foreach ($ondas as $onda => $campos) {
         foreach ($campos as $campo => $valor) {
             $igualQueElDefault[$stim][$onda][$campo] = (string) $valor;
@@ -98,32 +70,32 @@ foreach ($abrDef['defaults'] as $stim => $ondas) {
     }
 }
 t_eq(
-    CourseParams::parse('normative_data.abr', $igualQueElDefault),
+    CourseParams::parse('normative_data.vemp', $igualQueElDefault),
     [],
     'parse(): guardar el formulario sin tocar nada no crea override'
 );
 
 $tocado = $igualQueElDefault;
-$tocado['ce_chirp']['V']['amp_ratio'] = '1.9';
+$tocado['CVEMP']['p13']['amp'] = '150';
 t_eq(
-    CourseParams::parse('normative_data.abr', $tocado),
-    ['ce_chirp' => ['V' => ['amp_ratio' => 1.9]]],
+    CourseParams::parse('normative_data.vemp', $tocado),
+    ['CVEMP' => ['p13' => ['amp' => 150.0]]],
     'parse(): solo viaja el valor que el docente cambió'
 );
 
-// Fuera de rango: se recorta al tope, no se guarda un ABR imposible.
+// Fuera de rango: se recorta al tope, no se guarda un trazado imposible.
 $fueraDeRango = $igualQueElDefault;
-$fueraDeRango['ce_chirp']['V']['lat_ratio'] = '99';
-$fueraDeRango['ce_chirp']['V']['amp_ratio'] = '-3';
+$fueraDeRango['CVEMP']['p13']['lat'] = '999';
+$fueraDeRango['CVEMP']['p13']['amp'] = '-3';
 t_eq(
-    CourseParams::parse('normative_data.abr', $fueraDeRango),
-    ['ce_chirp' => ['V' => ['lat_ratio' => 5.0, 'amp_ratio' => 0.1]]],
+    CourseParams::parse('normative_data.vemp', $fueraDeRango),
+    ['CVEMP' => ['p13' => ['lat' => 60.0, 'amp' => 0.1]]],
     'parse(): recorta a [min, max] en vez de aceptar cualquier número'
 );
 
 // Basura y claves inventadas: se ignoran (el recorrido sale de la definición).
 t_eq(
-    CourseParams::parse('normative_data.abr', ['ce_chirp' => ['V' => ['amp_ratio' => 'abc']], 'inventado' => ['X' => ['y' => '1']]]),
+    CourseParams::parse('normative_data.vemp', ['CVEMP' => ['p13' => ['amp' => 'abc']], 'inventado' => ['X' => ['y' => '1']]]),
     [],
     'parse(): descarta lo no numérico y las claves que no están en el registro'
 );
@@ -131,19 +103,19 @@ t_eq(CourseParams::parse('key.que.no.existe', ['a' => ['b' => ['c' => '1']]]), [
 t_eq(CourseParams::find('key.que.no.existe'), null, 'find(): key desconocida es null');
 
 // --- forModules(): el editor solo aparece con el módulo habilitado ---------
-t_eq(array_keys(CourseParams::forModules(['ABR'])), ['normative_data.abr'], 'forModules(): curso con ABR ve solo el editor de ABR');
+t_eq(array_keys(CourseParams::forModules(['VEMP'])), ['normative_data.vemp'], 'forModules(): curso con VEMP ve el editor de VEMP');
 t_eq(array_keys(CourseParams::forModules([])), [], 'forModules(): curso sin módulos no ve editores');
 t_eq(
     count(CourseParams::forModules(['ABR', 'VEMP', 'A'])),
-    2,
+    1,
     'forModules(): un módulo sin parámetros registrados no agrega editores'
 );
 
 // --- displayValue(): muestra el override del curso, si no el default -------
-$override = ['ce_chirp' => ['V' => ['amp_ratio' => 1.9]]];
-t_eq(CourseParams::displayValue($abrDef, $override, 'ce_chirp', 'V', 'amp_ratio'), '1.9', 'displayValue(): gana el valor del curso');
-t_eq(CourseParams::displayValue($abrDef, $override, 'ce_chirp', 'V', 'lat_ratio'), '0.9872', 'displayValue(): sin override, el default de la app');
-t_eq(CourseParams::displayValue($abrDef, null, 'ce_chirp', 'I', 'lat_ratio'), '0.8951', 'displayValue(): curso sin override ninguno');
+$override = ['CVEMP' => ['p13' => ['amp' => 150.0]]];
+t_eq(CourseParams::displayValue($vempDef, $override, 'CVEMP', 'p13', 'amp'), '150', 'displayValue(): gana el valor del curso');
+t_eq(CourseParams::displayValue($vempDef, $override, 'CVEMP', 'p13', 'lat'), '12.8', 'displayValue(): sin override, el default de la app');
+t_eq(CourseParams::displayValue($vempDef, null, 'CVEMP', 'n23', 'lat'), '22.5', 'displayValue(): curso sin override ninguno');
 
 // Cada módulo referenciado tiene que existir en Courses::MODULES, o el
 // editor nunca se mostraría (forModules compara contra los códigos de ahí).

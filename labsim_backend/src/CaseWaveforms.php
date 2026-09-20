@@ -32,11 +32,11 @@ final class CaseWaveforms
      * resources/abr/normative_data.json.
      */
     public const CLICK_BASE = [
-        'adult_male'   => ['I' => [1.65, 0.30], 'III' => [3.85, 0.35], 'V' => [5.70, 0.50]],
-        'adult_female' => ['I' => [1.62, 0.21], 'III' => [3.68, 0.37], 'V' => [5.47, 0.60]],
-        'child'        => ['I' => [1.58, 0.28], 'III' => [3.78, 0.33], 'V' => [5.60, 0.48]],
-        'neonate'      => ['I' => [2.10, 0.20], 'III' => [4.70, 0.24], 'V' => [6.80, 0.35]],
-        'elderly'      => ['I' => [1.75, 0.27], 'III' => [4.00, 0.32], 'V' => [5.90, 0.45]],
+        'adult_male'     => ['I' => [1.47, 0.320], 'III' => [3.75, 0.370], 'V' => [5.68, 0.400]],
+        'adult_female'   => ['I' => [1.46, 0.440], 'III' => [3.65, 0.470], 'V' => [5.54, 0.540]],
+        'child'          => ['I' => [1.48, 0.239], 'III' => [3.50, 0.282], 'V' => [5.50, 0.410]],
+        'neonate'        => ['I' => [1.79, 0.171], 'III' => [4.56, 0.205], 'V' => [7.00, 0.299]],
+        'elderly'        => ['I' => [1.84, 0.342], 'III' => [3.91, 0.378], 'V' => [5.84, 0.423]],
     ];
 
     /**
@@ -45,11 +45,11 @@ final class CaseWaveforms
      * resources/abr/normative_data.json.
      */
     public const CLICK_INTERPICOS = [
-        'adult_male' => ['I-III' => 2.2, 'III-V' => 1.85, 'I-V' => 4.05],
-        'adult_female' => ['I-III' => 2.2, 'III-V' => 1.8, 'I-V' => 4.0],
-        'child' => ['I-III' => 2.2, 'III-V' => 1.82, 'I-V' => 4.02],
-        'neonate' => ['I-III' => 2.6, 'III-V' => 2.1, 'I-V' => 4.7],
-        'elderly' => ['I-III' => 2.25, 'III-V' => 1.9, 'I-V' => 4.15],
+        'adult_male' => ['I-III' => 2.28, 'III-V' => 1.93, 'I-V' => 4.21],
+        'adult_female' => ['I-III' => 2.19, 'III-V' => 1.89, 'I-V' => 4.08],
+        'child' => ['I-III' => 2.02, 'III-V' => 2.00, 'I-V' => 4.02],
+        'neonate' => ['I-III' => 2.77, 'III-V' => 2.44, 'I-V' => 5.21],
+        'elderly' => ['I-III' => 2.07, 'III-V' => 1.93, 'I-V' => 4.00],
     ];
 
     /**
@@ -94,7 +94,7 @@ final class CaseWaveforms
     public const TAU_FACTOR_COCLEAR = 0.65;
 
     /** Cuánto del corrimiento L-I le toca a cada onda. LAT_SHIFT_FACTOR. */
-    public const LAT_SHIFT_FACTOR = ['I' => 0.85, 'III' => 0.92, 'V' => 1.0];
+    public const LAT_SHIFT_FACTOR = ['I' => 1.15, 'III' => 1.05, 'V' => 1.0];
 
     /** Reparto de las prolongaciones. NEURAL_LAT_SHARE / NEURAL_LAT_SHARE_IIIV. */
     public const SHARE_I_III = ['I' => 0.0, 'III' => 1.0, 'V' => 1.0];
@@ -201,15 +201,19 @@ final class CaseWaveforms
 
     /**
      * Corrimiento (ms) de la función latencia-intensidad respecto de 80 dB.
-     * Espejo exacto de ABRGenerator.latency_intensity_shift: ~0.12 ms/10 dB
-     * por encima de 70 dB y ~0.3 ms/10 dB de ahí para abajo (Hood).
+     * Espejo exacto de ABRGenerator.latency_intensity_shift: 0.12 ms/10 dB
+     * por encima de 70 dB, 0.28 entre 70 y 50, y 0.50 de 50 para abajo
+     * (Hood F26, contrastado con Delgado F22).
      */
     public static function corrimientoLatencia(float $intensidad): float
     {
         if ($intensidad >= 70) {
             return (80 - $intensidad) / 10 * 0.12;
         }
-        return (80 - 70) / 10 * 0.12 + (70 - $intensidad) / 10 * 0.3;
+        if ($intensidad >= 50) {
+            return 0.12 + (70 - $intensidad) / 10 * 0.28;
+        }
+        return 0.12 + 2 * 0.28 + (50 - $intensidad) / 10 * 0.50;
     }
 
     /**
