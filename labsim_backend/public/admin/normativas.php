@@ -17,93 +17,7 @@ require_once __DIR__ . '/_layout.php';
  * _rescale_ratio_block). Hubo un editor por curso para eso y se sacó.
  */
 
-/**
- * Bibliografía de la que sale cada valor de fábrica. Se muestra ACÁ y no
- * en la app: el alumno lee un examen, no una tabla normativa con citas.
- */
-const ABR_FUENTES = [
-    'F01' => [
-        'cita' => "Sanfins MD, Santillo MEA, Martins MFP, Silva DLdS, Gos E, Skarzynski PH, Hall JW III. The Influence of Sex, Ear, and Age on Auditory Brainstem Response. Diagnostics. 2026;16(7):971.",
-        'n' => "244 sujetos (134 H / 110 M), 3-79 anios",
-        'protocolo' => "Click 0.1 ms rarefaccion, 80 dB nHL, 19.3/s, ER-3A, Fz-mastoides ipsi, filtro 0.1-3 kHz, 2x2000 barridos",
-        'enlace' => "https://doi.org/10.3390/diagnostics16070971",
-    ],
-    'F04' => [
-        'cita' => "Chalak S, Kale A, Deshpande VK, Biswas DA. Establishment of Normative Data for Monaural Recordings of Auditory Brainstem Response. J Clin Diagn Res. 2013.",
-        'n' => "40 ninios, edad media 7.62 +/- 2.39 anios",
-        'protocolo' => "Click monoaural con enmascaramiento contralateral, 70 dB nHL, 11.1/s, filtro 100/250-5000 Hz, 2000 barridos",
-        'enlace' => "https://doi.org/10.7860/JCDR/2013/6768.3730",
-    ],
-    'F07' => [
-        'cita' => "Auditory Brainstem Response: reference-values for age (neonatos por edad gestacional).",
-        'n' => "40 neonatos por grupo de edad gestacional",
-        'protocolo' => "Click; grupos de 35-36 y 37-38 semanas",
-        'enlace' => "https://www.researchgate.net/publication/263015732",
-    ],
-    'F09' => [
-        'cita' => "Jerger J, Hall J. Effects of age and sex on auditory brainstem response. Arch Otolaryngol. 1980;106(7):387-391.",
-        'n' => "319 sujetos (182 H / 137 M), 98 normoyentes",
-        'protocolo' => "Click; latencia y amplitud de onda V por edad y sexo",
-        'enlace' => "https://doi.org/10.1001/archotol.1980.00790310011003",
-    ],
-    'F10' => [
-        'cita' => "Stockard JE, Stockard JJ, Westmoreland BF, Corfits JL. Brainstem auditory-evoked responses: normal variation as a function of stimulus and subject characteristics. Arch Neurol. 1979.",
-        'n' => "64 adultos + 77 neonatos de termino",
-        'protocolo' => "Click rarefaccion vs condensacion, 30-70 dB SL/HL, 10 y 80 clicks/s",
-        'enlace' => "https://pubmed.ncbi.nlm.nih.gov/508145/",
-    ],
-    'F13' => [
-        'cita' => "Jiang ZD et al. The effect of click rate on latency and interpeak interval of the brain-stem auditory evoked potentials in children from birth to 6 years. Electroencephalogr Clin Neurophysiol. 1991.",
-        'n' => "80 ninios (0-6 anios) + 21 adultos",
-        'protocolo' => "Click a 10, 30, 50, 70 y 90/s; 70, 40 y 20 dB HL/SL",
-        'enlace' => "https://www.sciencedirect.com/science/article/abs/pii/016855979190044X",
-    ],
-    'F18' => [
-        'cita' => "Normalization of Bone Conduction Auditory Brainstem Evoked Responses in Normal Hearing Individuals. J Int Adv Otol.",
-        'n' => "100 sujetos (50 H / 50 M), 10-60 anios, 200 oidos",
-        'protocolo' => "ABR por via osea a 50, 30 y 10 dB nHL (el vibrador no entrega mas), 5 grupos etarios",
-        'enlace' => "https://advancedotology.org//en/normalization-of-bone-conduction-auditory-brainstem-evoked-responses-in-normal-hearing-individuals-131309",
-    ],
-    'F21' => [
-        'cita' => "Aguilar-Madrid G et al. Latencias de los potenciales evocados auditivos de tronco cerebral en trabajadores. 2015. PMID 26960049.",
-        'n' => "196 sujetos (107 H / 89 M), 16-65 anios",
-        'protocolo' => "Nicolet Viking Quest, 2000 clicks de rarefaccion, 33/s, ventana 10 ms, camara sonoamortiguada",
-        'enlace' => "https://www.redalyc.org/pdf/4577/457745149012.pdf",
-    ],
-    'F24' => [
-        'cita' => "Cargnelutti M, Coser PL, Biaggio EP. LS CE-Chirp vs. Click in the neuroaudiological diagnosis by ABR. Braz J Otorhinolaryngol. 2017;83(3):313-317.",
-        'n' => "30 sujetos / 60 oidos normoyentes",
-        'protocolo' => "85 dB nHL, polaridad alternante, 17.1/s, filtro 100-3000 Hz; click y chirp en los MISMOS sujetos",
-        'enlace' => "https://doi.org/10.1016/j.bjorl.2016.04.018",
-    ],
-    'F25' => [
-        'cita' => "Rosa LAC et al. Auditory Brainstem Response: reference-values for age. CoDAS. 2014.",
-        'n' => "80 lactantes por edad posconcepcional",
-        'protocolo' => "Click; grupos de 35-36, 37-38, 39-40 semanas y 6 meses",
-        'enlace' => "https://doi.org/10.1590/2317-1782/2014469in",
-    ],
-    'F26' => [
-        'cita' => "Hood LJ. Clinical Applications of the Auditory Brainstem Response. Singular Publishing Group. Tabla 2-3.",
-        'n' => "Mujeres normoyentes 20-30 anios; n de 2 a 20 segun celda",
-        'protocolo' => "Click, serie completa de 90 a 20 dB nHL, ondas I a VI e interpicos",
-        'enlace' => "Transcripcion aportada por el usuario; verificar contra el libro impreso",
-    ],
-    'F27' => [
-        'cita' => "Da Silva Nunes C, Gentile Matas C. Audiometria de tronco encefalico utilizando diferentes polaridades de presentacion del estimulo acustico. Rev Chil Fonoaudiol. 2005;6(2).",
-        'n' => "50 adultos (25 H / 25 M), 18-40 anios, 100 oidos",
-        'protocolo' => "Bio-Logic Traveler Express, click 0.1 ms, 11.1/s, 80 dB HL, 2000 estimulos con replica",
-        'enlace' => "Revista Chilena de Fonoaudiologia, vol. 6, num. 2, 2005",
-    ],
-];
-
-/** Qué ancla cada fuente en la tabla de fábrica. */
-const ABR_FUENTE_DE = [
-    'adult_male' => ['lat' => 'F01', 'amp' => 'F27'],
-    'adult_female' => ['lat' => 'F01', 'amp' => 'F27'],
-    'child' => ['lat' => 'F04', 'amp' => 'calculada'],
-    'neonate' => ['lat' => 'F25', 'amp' => 'calculada'],
-    'elderly' => ['lat' => 'F21', 'amp' => 'F09'],
-];
+require_once __DIR__ . '/../../src/AbrReferences.php';
 
 const ABR_AUTHORS_KEY = 'abr_reference_authors';
 const ABR_WAVES = ['I', 'III', 'V'];
@@ -235,8 +149,8 @@ admin_header('Normativas', $me);
             <div>
                 <strong style="font-weight:600;"><?= htmlspecialchars($popLabel) ?></strong>
                 <div style="font-size:0.78em; opacity:0.7;">
-                    lat <?= htmlspecialchars(ABR_FUENTE_DE[$pop]['lat']) ?> ·
-                    amp <?= htmlspecialchars(ABR_FUENTE_DE[$pop]['amp']) ?>
+                    lat <?= htmlspecialchars(AbrReferences::ANCLAJE[$pop]['lat']) ?> ·
+                    amp <?= htmlspecialchars(AbrReferences::ANCLAJE[$pop]['amp']) ?>
                 </div>
                 <?php foreach (ABR_WAVES as $wave): ?>
                 <div style="font-size:0.85em; opacity:0.85;">
@@ -254,7 +168,8 @@ admin_header('Normativas', $me);
     <details>
         <summary><strong>Fuentes</strong> -- de dónde sale cada número</summary>
         <p class="help help--mt">Estas citas son para usted. No se muestran en la app ni en la ficha del alumno.</p>
-        <?php foreach (ABR_FUENTES as $fid => $f): ?>
+        <p class="help"><a href="normativa_planilla.php">Descargar la planilla completa</a> (483 filas, 27 fuentes: latencias, interpicos, amplitudes y factores modificadores, con protocolo y enlace de cada serie).</p>
+        <?php foreach (AbrReferences::FUENTES as $fid => $f): ?>
         <div style="margin-top:0.6rem; font-size:0.85em;">
             <strong><?= htmlspecialchars($fid) ?></strong> ·
             <?= htmlspecialchars($f['cita']) ?>
@@ -268,6 +183,33 @@ admin_header('Normativas', $me);
         <?php endforeach; ?>
     </details>
 </div>
+
+<?php foreach (AbrReferences::SETS as $setId => $set): ?>
+<div class="card">
+    <details>
+        <summary><strong><?= htmlspecialchars($set['label']) ?></strong> -- publicado, no editable</summary>
+        <p class="help help--mt"><?= htmlspecialchars($set['nota']) ?></p>
+        <p class="help"><?= htmlspecialchars(AbrReferences::FUENTES[$set['fuente']]['cita']) ?></p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:0.8rem; margin-top:0.4rem;">
+            <?php foreach ($set['populations'] as $pop => $ondas): ?>
+            <div>
+                <strong style="font-weight:600;"><?= htmlspecialchars(ABR_POPULATION_LABELS[$pop] ?? $pop) ?></strong>
+                <?php foreach (ABR_WAVES as $wave): ?>
+                <?php if (isset($ondas[$wave])): ?>
+                <div style="font-size:0.85em; opacity:0.85;">
+                    Onda <?= $wave ?>:
+                    <?= isset($ondas[$wave]['lat']) ? htmlspecialchars((string) $ondas[$wave]['lat']) . ' ms' : '' ?>
+                    <?= isset($ondas[$wave]['amp']) ? ' / ' . htmlspecialchars((string) $ondas[$wave]['amp']) . ' µV' : '' ?>
+                </div>
+                <?php endif; ?>
+                <?php endforeach; ?>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <p class="help help--mt">Lo que esta serie no publica --las poblaciones y ondas que no aparecen acá-- lo completa el set de fábrica, campo por campo. Para cambiar alguno de estos números, cree un set propio más abajo.</p>
+    </details>
+</div>
+<?php endforeach; ?>
 
 <?php foreach ($authors as $authorId => $author): ?>
 <div class="card">

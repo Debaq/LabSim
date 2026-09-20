@@ -2064,7 +2064,7 @@ estímulo y el potencial salía idéntico.
 
 ## ABR: normativa anclada en bibliografía, con cita (2026-09-20)
 
-El usuario aportó `docs/normativa/ABR_valores_referencia_latencias_interpico.xlsx`
+El usuario aportó `labsim_backend/resources/normativa/ABR_valores_referencia_latencias_interpico.xlsx`
 (483 filas, 27 fuentes). Reglas que fijó: bibliografía más fuerte primero,
 cita en todo pero solo donde la ve el DOCENTE, lo que no está publicado se
 calcula, y el vibrador óseo llega a 50 dB y eso no es un bug.
@@ -2111,10 +2111,18 @@ protocolo y enlace por fuente, y qué ancla cada población) y la ficha PDF
 del docente, bajo la tabla de referencia. En la ficha de estudio y en el
 panel del alumno NO aparece ninguna cita: el alumno lee un examen.
 
+**Todo lo que el docente necesita está en el BACKEND, que es lo único que
+él ve** -- el repo del cliente no lo abre nunca. Por eso la planilla vive en
+`labsim_backend/resources/normativa/` (se descarga desde normativas.php, con
+sesión de admin), las citas completas en `src/AbrReferences.php`, y los sets
+publicados --Sanfins 2026, Aguilar-Madrid 2015, Hood, pediátrico (Chalak +
+Rosa)-- aparecen en el selector de autor del caso junto con los suyos. Un
+set publicado cubre solo lo que esa serie publica: el resto lo completa el
+default campo por campo, y un set propio con el mismo id lo pisa. El JSON
+del cliente conserva solo el ID de fuente por bloque, para no tener la cita
+duplicada en dos repos.
+
 **Pendiente:**
-- Sembrar el catálogo de autores de `normativas.php` con las fuentes fuertes
-  como sets editables (hoy están las citas, pero los sets los crea el
-  docente a mano).
 - El tramo de 1 a 3 años cae en `child`, que ya tiene valores de adulto;
   F11/F19 dicen que la equivalencia se alcanza entre los 9 meses y los 3
   años.

@@ -393,7 +393,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // una dependencia invisible -- se declara acá, antes de las dos. Va después
 // del POST y no antes: un guardado exitoso redirige sin dibujar el formulario,
 // y esta consulta no haría falta.
-$abrAuthorCatalog = AppConfig::getEffective('abr_reference_authors', null) ?? [];
+// Sets de autor: primero los publicados que trae la app (AbrReferences) y
+// después los que armó el docente en normativas.php. Un set incompleto no
+// obliga a nada: lo que no define cae en el default, onda por onda.
+require_once dirname(dirname(__DIR__)) . '/src/AbrReferences.php';
+$abrAuthorCatalog = AbrReferences::catalog(
+    AppConfig::getEffective('abr_reference_authors', null) ?? []
+);
 // Lo que el editor le reclama al caso, agrupado por ficha: lo muestra el
 // Resumen en la fila que corresponde. En un POST son los que acaba de
 // calcular CaseForm; al abrir un caso a editar, los del caso guardado --

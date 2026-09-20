@@ -14,7 +14,7 @@
 <div class="tab-panel" data-tab="abr">
 <div class="card">
     <strong>Autor de referencia</strong>
-    <p class="help">Set normativo con el que se calculan las ondas, uno solo para todo el paciente. Cada autor reporta baselines de latencia y amplitud levemente distintos según la población -- se configuran en <a href="normativas.php">Configuración &rsaquo; Normativas</a>. No queda guardado en el caso, solo se usa para calcular; los números finales sí quedan en cada campo.</p>
+    <p class="help">Set normativo con el que se calculan las ondas, uno solo para todo el paciente. Cada autor reporta baselines de latencia y amplitud levemente distintos según la población. La lista trae los sets publicados (con su cita y su protocolo en <a href="normativas.php">Configuración &rsaquo; Normativas</a>) y los que haya armado usted; un set que no cubre una población o una onda la completa con el default, campo por campo. No queda guardado en el caso, solo se usa para calcular; los números finales sí quedan en cada campo.</p>
     <label style="max-width:22em;">Autor
         <select id="abr-author-select">
             <option value="__default__">LabSim (default)</option>
