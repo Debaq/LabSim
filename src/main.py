@@ -654,7 +654,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             # Antes de deshidratar: los módulos "de examen" suben su informe
             # mientras todavía tienen appointment_id/data_login --
             # _hydrate_modules() de abajo se los saca.
-            for attr in ("subw_abr", "subw_vemp", "subw_eoas", "subw_ot"):
+            for attr in ("subw_abr", "subw_aabr", "subw_vemp", "subw_eoas",
+                         "subw_ot"):
                 try:
                     getattr(self, attr).obj.submit_report()
                 except AttributeError:

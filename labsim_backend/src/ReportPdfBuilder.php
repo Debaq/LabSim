@@ -80,6 +80,13 @@ final class ReportPdfBuilder
             return $pdf->output();
         }
 
+        if ($tipo === 'AABR') {
+            $y = self::aabrBody($pdf, $data, $y, $contentW);
+            $y = self::technicalSection($pdf, $data, $y, $contentW);
+            self::textSections($pdf, $data, $y, $contentW);
+            return $pdf->output();
+        }
+
         if ($tipo === 'EOA') {
             $y = self::eoaBody($pdf, $reportId, $data, $y, $contentW);
             $y = self::technicalSection($pdf, $data, $y, $contentW);
@@ -577,12 +584,53 @@ final class ReportPdfBuilder
         return $y;
     }
 
+    /**
+     * Cuerpo del informe de tamizaje: qué dio cada oído y con qué.
+     *
+     * No lleva curvas ni imágenes -- un tamizaje no informa morfología,
+     * informa PASA o REFIERE--, así que lo que hay que dejar por escrito es
+     * el resultado, el nivel al que se tamizó y cuántos barridos costó: con
+     * eso se puede discutir el procedimiento, que es lo que se evalúa.
+     */
+    private static function aabrBody(MiniPdf $pdf, array $data, float $y, float $contentW): float
+    {
+        $pdf->text(self::MARGIN, $y, 'Resultado del tamizaje', 13, true);
+        $y += 18;
+
+        $resultados = is_array($data['resultados'] ?? null) ? $data['resultados'] : [];
+        $cols = [70.0, 90.0, 120.0, 90.0];
+        $encabezados = ['Oído', 'Resultado', 'Estímulo y nivel', 'Barridos'];
+        $x = self::MARGIN;
+        foreach ($encabezados as $i => $texto) {
+            $pdf->text($x, $y, $texto, 10, true);
+            $x += $cols[$i];
+        }
+        $y += 15;
+        foreach (['OD', 'OI'] as $lado) {
+            $r = is_array($resultados[$lado] ?? null) ? $resultados[$lado] : [];
+            $veredicto = (string) ($r['veredicto'] ?? 'no realizado');
+            $nivel = isset($r['nivel'])
+                ? sprintf('%s a %d dB nHL', (string) ($r['estimulo'] ?? 'CE-Chirp'), (int) $r['nivel'])
+                : '—';
+            $barridos = isset($r['barridos']) ? (string) (int) $r['barridos'] : '—';
+            $celdas = [$lado, $veredicto, $nivel, $barridos];
+            $x = self::MARGIN;
+            foreach ($celdas as $i => $texto) {
+                $pdf->text($x, $y, $texto, 10, $i === 0);
+                $x += $cols[$i];
+            }
+            $y += 15;
+        }
+        return $y + 10;
+    }
+
     private static function tipoLabel(string $tipo): string
     {
         // Mapa y no match(): el hosting corre PHP 7.4 (ver el otro caso en
         // eoaLines y tests/test_php_baseline.php).
         $etiquetas = [
             'ABR' => 'PEATC (ABR)',
+            'AABR' => 'Tamizaje auditivo automatizado (AABR)',
             'EOA' => 'Emisiones Otoacústicas',
             'VEMP' => 'Potenciales Evocados Vestibulares Miogénicos',
             'ELECTROCOCLEO' => 'Electrococleografía',

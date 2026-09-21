@@ -21,8 +21,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 
 try:
-    from abr.AabrMainWindow import (BARRIDOS_MAX, CRITERIO_FSP, NIVEL_DB,
-                                    AabrMainWindow)
+    from abr.AabrMainWindow import (BARRIDOS_MAX, CRITERIO_FSP, IMPEDANCIA_KOHM,
+                                    NIVEL_DB, AabrMainWindow)
     HAS_UI = True
 except Exception as exc:  # pragma: no cover - sin PySide6/scipy
     print(f"  (salteado: {exc})")
@@ -49,25 +49,21 @@ def _ventana(od, oi=None, horas=30):
     return w
 
 
-def _preparar(w, sello=0.9):
-    """Los dos pasos previos, como en el equipo real: sonda e impedancias.
+def _tamizar(w, sello=0.9, tope=3000):
+    """La secuencia entera sin QTimer, disparando cada fase a mano.
 
-    Sin QTimer: el chequeo de sonda se deja converger a mano (el widget de
-    probe fit tiene su propio timer, que en un test no corre) y después se
-    miden las impedancias.
+    En la app la mueve el equipo solo: un botón, y sonda -> impedancias ->
+    registro -> resultado. Acá los timers no corren, así que el test los
+    reemplaza en el mismo orden.
     """
-    w.verificar_sonda()
-    w.probe.fit_quality = sello
-    w._sonda_lista()
-    w.medir_impedancias()
-    return w
-
-
-def _tamizar(w, tope=400, preparar=True):
-    """Corre la prueba entera sin QTimer, tick a tick."""
-    if preparar:
-        _preparar(w)
     w.start()
+    if not w.corriendo:
+        return w.resultado[w.lado_activo]
+    w.probe.fit_quality = sello
+    w._sonda_lista()                 # cierra la sonda y encadena impedancias
+    if not w.corriendo:
+        return w.resultado[w.lado_activo]
+    w._fase_registro()               # lo que dispara el timer del paso 2
     for _ in range(tope):
         if not w.corriendo:
             break
@@ -158,83 +154,88 @@ def test_without_a_case_nothing_is_screened():
     assert w.resultado['OD'] is None
     # Con atención abierta pero sin ABR en ese oído, tampoco.
     w.la_super({'nombre': 'X', 'edad': 30, 'gender': 0, 'ABR': {}}, 1)
-    _preparar(w)
     w.start()
     assert not w.corriendo
     assert w.resultado['OD'] is None
 
 
-def test_the_order_of_the_steps_is_the_order_of_the_equipment():
-    """Sonda, impedancias, estímulo, resultado. No se saltea.
+def test_one_button_runs_the_whole_thing_in_order():
+    """Un botón: sonda, impedancias, registro, resultado.
 
-    Es como se toma de verdad --la sonda se comparte con el equipo de EOA,
-    así que se chequea primero-- y es la mitad de lo que el alumno tiene
-    que aprender del tamizaje.
+    No hay navegación ni pasos que apretar. El indicador de fase va
+    avanzando solo y termina en el resultado.
     """
     if not HAS_UI:
         return
     w = _ventana(_oido(10))
     assert w.paso == 0
-    # Sin sonda no se pasa a impedancias, y sin impedancias no se registra.
-    w._ir_a(1)
-    assert w.paso == 0
-    w._ir_a(2)
-    assert w.paso == 0
     w.start()
-    assert not w.corriendo
-
-    w.verificar_sonda()
+    assert w.corriendo
+    assert w.paso == 0                 # chequeando la sonda
     w.probe.fit_quality = 0.9
     w._sonda_lista()
-    assert w.sonda_ok
-    w._ir_a(1)
-    assert w.paso == 1
-    # Todavía no: las impedancias no se midieron.
-    w._ir_a(2)
-    assert w.paso == 1
-    w.medir_impedancias()
-    assert w.impedancias_ok
-    w._ir_a(2)
+    assert w.paso == 1                 # impedancias, y encadena solo
+    w._fase_registro()
     assert w.paso == 2
-    # Y al terminar el registro se va solo al resultado.
-    _tamizar(w, preparar=False)
+    for _ in range(3000):
+        if not w.corriendo:
+            break
+        w._tick()
     assert w.paso == 3
+    assert w.resultado['OD']['veredicto'] == 'PASA'
 
 
-def test_a_loose_probe_stops_the_screening():
-    """Sello flojo: el equipo no deja seguir. Es el error más común."""
+def test_a_loose_probe_stops_the_sequence():
+    """Sello flojo: el equipo se detiene ahí y dice por qué."""
     if not HAS_UI:
         return
     w = _ventana(_oido(10))
-    w.verificar_sonda()
+    w.start()
     w.probe.fit_quality = 0.2
     w._sonda_lista()
+    assert not w.corriendo
     assert not w.sonda_ok
-    assert not w.btn_sonda_ok.isEnabled()
-    w._ir_a(1)
     assert w.paso == 0
+    assert 'sonda' in w.lbl_resumen.text().lower()
+    assert w.resultado['OD'] is None
 
 
-def test_bad_impedances_stop_the_screening():
-    """Con un electrodo fuera de norma el equipo no lanza el estímulo."""
+def test_impedances_are_shown_and_never_stop_anything():
+    """En tamizaje el límite es ancho: se muestran y listo.
+
+    No se modelan ni frenan la prueba -- el ejercicio del AABR no es el
+    montaje, y un chequeo que nunca falla no tiene nada que enseñar.
+    """
     if not HAS_UI:
         return
     w = _ventana(_oido(10))
-    w.verificar_sonda()
-    w.probe.fit_quality = 0.9
-    w._sonda_lista()
-    w.imp_spins['vertex'].setValue(12.0)
-    w.medir_impedancias()
-    assert not w.impedancias_ok
-    assert not w.btn_imp_ok.isEnabled()
-    w._ir_a(2)
-    assert w.paso == 1
-    w.start()
-    assert not w.corriendo
-    # Acomodado el electrodo, sigue.
-    w.imp_spins['vertex'].setValue(2.0)
-    w.medir_impedancias()
-    assert w.impedancias_ok
+    assert f"{IMPEDANCIA_KOHM:.0f}" in w.lbl_impedancias.text()
+    assert 'OK' in w.lbl_impedancias.text()
+    assert _tamizar(w)['veredicto'] == 'PASA'
+
+
+def test_the_screening_takes_the_time_it_takes():
+    """900 barridos son unos 30 segundos, no uno.
+
+    El tiempo sale de la tasa: subirla acorta la prueba, que es la razón
+    por la que los equipos de tamizaje estimulan tan rápido.
+    """
+    if not HAS_UI:
+        return
+    w = _ventana(_oido(10))
+    w.barridos = 900.0
+    assert 25 <= w._segundos() <= 35, w._segundos()
+    # Con la tasa al doble, la mitad del tiempo.
+    lento, rapido = 45.0, 90.0
+    w.sb_tasa.setValue(lento)
+    t_lento = w._segundos()
+    w.sb_tasa.setValue(rapido)
+    assert abs(w._segundos() * 2 - t_lento) < 1.0
+
+    # Y el resultado lo informa: cuánto costó, no solo qué dio.
+    r = _tamizar(_ventana(_oido(10)))
+    assert r['segundos'] > 0
+    assert f"{r['segundos']} s" in w.lbl_resumen.text() or r['segundos'] > 0
 
 
 def test_the_trace_is_drawn_while_averaging():
@@ -242,8 +243,10 @@ def test_the_trace_is_drawn_while_averaging():
     if not HAS_UI:
         return
     w = _ventana(_oido(10))
-    _preparar(w)
     w.start()
+    w.probe.fit_quality = 0.9
+    w._sonda_lista()
+    w._fase_registro()
     w._tick()
     x, y = w.curva.getData()
     assert x is not None and len(x) > 100
@@ -255,18 +258,17 @@ def test_changing_ear_goes_back_to_the_probe():
     if not HAS_UI:
         return
     w = _ventana(_oido(10), _oido(10))
-    _preparar(w)
-    assert w.sonda_ok and w.impedancias_ok
+    _tamizar(w)
+    assert w.sonda_ok
     w.cb_lado.setCurrentText('OI')
     assert not w.sonda_ok
-    assert not w.impedancias_ok
     assert w.paso == 0
 
 
 def test_closing_the_attention_stops_the_run():
     if not HAS_UI:
         return
-    w = _preparar(_ventana(_oido(10)))
+    w = _ventana(_oido(10))
     w.start()
     assert w.corriendo
     w.la_super(None, None)
@@ -289,11 +291,81 @@ def test_the_protocol_button_puts_the_equipment_back():
     assert w.chk_auto.isChecked()
 
 
-def test_screening_does_not_upload_a_report():
-    """El tamizaje no produce informe: produce PASA o REFIERE."""
+def test_the_report_travels_with_the_result():
+    """El informe se precarga con lo que dio y queda editable.
+
+    Y lo que se guarda es lo INFORMADO, no lo medido: informar distinto de
+    lo que salió también es un error, y tiene que poder cometerse.
+    """
     if not HAS_UI:
         return
-    assert _ventana(_oido(10)).submit_report() is None
+    w = _ventana(_oido(10), _oido(85, 'coclear'))
+    _tamizar(w)
+    assert w.cb_informe['OD'].currentText() == 'PASA'
+    data = w.report_data()
+    assert data['resultados']['OD']['veredicto'] == 'PASA'
+    assert data['resultados']['OI']['veredicto'] == 'No realizado'
+    # Las condiciones salen del registro: es el procedimiento lo que se evalúa.
+    assert data['resultados']['OD']['nivel'] == NIVEL_DB
+    assert data['resultados']['OD']['barridos'] > 0
+    assert data['resultados']['OD']['segundos'] > 0
+    assert data['tecnica']['criterio_fsp'] == CRITERIO_FSP
+    assert data['tecnica']['sello_sonda_ok'] is True
+    # Y el texto del alumno.
+    w.txt_observaciones.setPlainText("Bebé dormido, sin artefacto")
+    w.txt_conducta.setPlainText("Rescreening en 15 días")
+    data = w.report_data()
+    assert 'dormido' in data['hallazgos']
+    assert 'Rescreening' in data['conclusion']
+    # Informar otra cosa: se guarda lo informado.
+    w.cb_informe['OD'].setCurrentText('REFIERE')
+    assert w.report_data()['resultados']['OD']['veredicto'] == 'REFIERE'
+
+
+def test_nothing_is_uploaded_without_a_screening():
+    """Sin tamizar y sin escribir nada no se sube un informe vacío."""
+    if not HAS_UI:
+        return
+    w = _ventana(_oido(10))
+    data = w.report_data()
+    assert all(r['veredicto'] == 'No realizado' for r in data['resultados'].values())
+    assert data['hallazgos'] == '' and data['conclusion'] == ''
+
+
+def test_the_report_is_uploaded_as_its_own_type():
+    """Va al backend como tipo 'AABR', que es el que report_upload.php
+    acepta y el que el PDF del informe sabe dibujar. El backend resuelve la
+    atención con appointment_id + el alumno del token, así que el informe
+    queda colgado de SU atención."""
+    if not HAS_UI:
+        return
+    w = _ventana(_oido(10))
+    _tamizar(w)
+    subido = {}
+
+    class _ClienteFalso:
+        def __init__(self, *a, **k):
+            pass
+
+        def is_logged_in(self):
+            return True
+
+        def upload_report(self, appointment_id, tipo, data, images):
+            subido.update({'appointment_id': appointment_id, 'tipo': tipo,
+                           'data': data, 'images': images})
+            return {}
+
+    import abr.AabrMainWindow as modulo
+    original = modulo.BackendClient
+    modulo.BackendClient = _ClienteFalso
+    try:
+        w.submit_report()
+    finally:
+        modulo.BackendClient = original
+    assert subido['tipo'] == 'AABR'
+    assert subido['appointment_id'] == 7       # el de _ventana
+    assert subido['images'] == {}              # un tamizaje no informa curvas
+    assert subido['data']['resultados']['OD']['veredicto'] == 'PASA'
 
 
 if __name__ == "__main__":

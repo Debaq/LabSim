@@ -2,19 +2,21 @@
 
 Es OTRO equipo, no un modo del ABR: comparte el generador, el criterio de
 detección y el ruido del paciente, pero no deja marcar ondas ni buscar
-umbrales. Se pone un nivel fijo y el equipo contesta PASA o REFIERE cuando
-el estadístico cruza el criterio o cuando se acaban los barridos.
+umbrales. Se pone un nivel fijo y el equipo contesta PASA o REFIERE.
 
-Lo que lo define es el ORDEN, que es el del equipo real y no se puede
-saltear:
+Hay UN botón y una sola pantalla. La secuencia la corre el equipo solo, en
+el orden en que se toma de verdad, y se detiene donde falla:
 
-    1. Chequeo de sonda -- la comparte con el equipo de EOA, así que es la
-       misma pantalla de probe fit (ver oae/widgets/probe_check.py).
-    2. Chequeo de impedancias -- con los electrodos fuera de norma el
-       equipo no deja lanzar, y ahí se acomodan.
-    3. Estímulo: promedia mostrando la curva, que sí se ve (los equipos de
-       tamizaje la muestran mientras registran).
-    4. Resultado: PASA o REFIERE.
+    1. Sonda -- la comparte con el equipo de EOA, así que es la misma
+       pantalla de probe fit (ver oae/widgets/probe_check.py). Sello flojo:
+       se detiene ahí.
+    2. Impedancias -- se muestran y listo. En tamizaje el límite es mucho
+       más ancho que en el ABR diagnóstico (20 kΩ), así que no frenan nada
+       y no se modelan: el ejercicio del AABR no es el montaje.
+    3. Estímulo -- promedia mostrando la curva, que sí se ve (los equipos
+       de tamizaje la muestran mientras registran), y al ritmo real: unos
+       30 segundos cada 900 barridos.
+    4. Resultado -- PASA o REFIERE, y el informe.
 
 El panel de configuración queda a la vista y editable a propósito. El
 equipo real se configura una vez y nadie vuelve a mirarlo; acá el docente
@@ -28,16 +30,18 @@ core/ui_helpers.py.
 import numpy as np
 import pyqtgraph as pg
 
-from abr.ABR_generator import (ABR_Curve, ABRGenerator, IMPEDANCE_BALANCE_LIMIT_KOHM,
-                               IMPEDANCE_LIMIT_KOHM)
-from abr.AbrAdvanceSettings import ELECTRODES, TRANSDUCERS, default_settings
+from abr.ABR_generator import ABR_Curve
+from abr.AbrAdvanceSettings import TRANSDUCERS, default_settings
+from backend.client import BackendClient
+from core.base import context
+from core.helpers import Preferences
 from oae.generators.base import oae_probe_fit
 from oae.widgets.probe_check import ProbeCheckWidget
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QDoubleSpinBox, QFormLayout,
                                QGridLayout, QGroupBox, QHBoxLayout, QLabel,
-                               QMainWindow, QProgressBar, QPushButton,
-                               QSpinBox, QStackedWidget, QVBoxLayout, QWidget)
+                               QMainWindow, QPlainTextEdit, QProgressBar,
+                               QPushButton, QSpinBox, QVBoxLayout, QWidget)
 
 # Protocolo de tamizaje de rutina. Son los defaults del equipo, no una
 # recomendación: el docente los mueve en pantalla.
@@ -50,16 +54,24 @@ FILTRO_ALTO = 100.0      # pasa-alto (Hz)
 FILTRO_BAJO = 3000.0     # pasa-bajo (Hz)
 ESTIMULOS = ('CE-Chirp', 'Click')
 
-# Sello mínimo para dar la sonda por puesta. Por debajo de esto el equipo
-# no deja avanzar: entra menos estímulo del que dice el dial.
-SELLO_MINIMO = 0.60
-# Cuánto dura el chequeo de sonda antes de poder seguir (ms).
-SONDA_MS = 2500
+# Impedancia que muestra el equipo. En tamizaje el límite es mucho más
+# ancho que en el ABR diagnóstico --hasta 20 kΩ se acepta-- así que acá no
+# frena nada ni se modela.
+IMPEDANCIA_KOHM = 20.0
 
-# Cada tick promedia un bloque: la prueba entera dura unos segundos, que es
-# lo que hace que se pueda mostrar en clase sin esperar el registro real.
+# Sello mínimo para dar la sonda por puesta. Por debajo de esto el equipo
+# se detiene: entra menos estímulo del que dice el dial.
+SELLO_MINIMO = 0.60
+SONDA_MS = 2500          # cuánto dura el chequeo de sonda
+PASO_MS = 900            # pausa del chequeo de impedancias, para que se vea
+
+# Ritmo del registro. 900 barridos toman unos 30 segundos: entre el rechazo
+# de artefacto y las pausas del propio equipo entra cerca de un tercio de
+# lo que la tasa promete, así que el tiempo sale de la tasa y no de un
+# número fijo. Subir la tasa acorta la prueba, que es la razón por la que
+# los equipos de tamizaje estimulan tan rápido.
 TICK_MS = 250
-BLOQUES = 20
+EFICIENCIA_BARRIDOS = 0.35
 
 LADOS = ('OD', 'OI')
 PASOS = ("1 · Sonda", "2 · Impedancias", "3 · Registro", "4 · Resultado")
@@ -77,11 +89,10 @@ class AabrMainWindow(QMainWindow):
         self.eoas = {'OD': None, 'OI': None}
         self.resultado = {'OD': None, 'OI': None}
         self.lado_activo = 'OD'
-        self.barridos = 0
+        self.barridos = 0.0
         self.corriendo = False
         self.paso = 0
         self.sonda_ok = False
-        self.impedancias_ok = False
         self.technical = default_settings('ABR')
 
         self.timer = QTimer(self)
@@ -89,6 +100,9 @@ class AabrMainWindow(QMainWindow):
         self.timer_sonda = QTimer(self)
         self.timer_sonda.setSingleShot(True)
         self.timer_sonda.timeout.connect(self._sonda_lista)
+        self.timer_paso = QTimer(self)
+        self.timer_paso.setSingleShot(True)
+        self.timer_paso.timeout.connect(self._fase_registro)
 
         self._build()
         self._set_enabled(False)
@@ -105,13 +119,20 @@ class AabrMainWindow(QMainWindow):
         self.lbl_paciente.setStyleSheet("color:#666;")
         derecha.addWidget(self.lbl_paciente)
         derecha.addLayout(self._barra_pasos())
+        derecha.addWidget(self._pantalla(), 1)
+        derecha.addWidget(self._informe())
 
-        self.stack = QStackedWidget()
-        self.stack.addWidget(self._paso_sonda())
-        self.stack.addWidget(self._paso_impedancias())
-        self.stack.addWidget(self._paso_registro())
-        self.stack.addWidget(self._paso_resultado())
-        derecha.addWidget(self.stack, 1)
+        # UN botón: la secuencia la corre el equipo. Detener es para
+        # abortarla a mitad de camino.
+        fila = QHBoxLayout()
+        self.btn_start = QPushButton("Iniciar")
+        self.btn_start.clicked.connect(self.start)
+        self.btn_stop = QPushButton("Detener")
+        self.btn_stop.setEnabled(False)
+        self.btn_stop.clicked.connect(self.abortar)
+        fila.addWidget(self.btn_start)
+        fila.addWidget(self.btn_stop)
+        derecha.addLayout(fila)
 
         self.lbl_resumen = QLabel("")
         self.lbl_resumen.setWordWrap(True)
@@ -203,86 +224,25 @@ class AabrMainWindow(QMainWindow):
         self.chk_auto.setChecked(True)
         form.addRow(self.chk_auto)
 
-        # Lo que hace es devolver los controles de arriba a como vienen de
-        # fábrica: es el "restaurar predeterminados" del equipo, no otro
-        # protocolo que haya que elegir.
+        # Devuelve los controles de arriba a como vienen de fábrica.
         self.btn_protocolo = QPushButton("Restaurar valores de fábrica")
         self.btn_protocolo.clicked.connect(self.restore_protocol)
         form.addRow(self.btn_protocolo)
         return caja
 
-    # ------------------------------------------------------------- paso 1
-    def _paso_sonda(self):
+    def _pantalla(self):
+        """Todo en una sola pantalla: sonda a un lado, curva al otro."""
         caja = QWidget()
         vbox = QVBoxLayout(caja)
-        # La misma pantalla del equipo de EOA: los dos comparten la sonda,
-        # y el sello sale del mismo campo del caso (EOAS['sello_pct']).
+
+        fila = QHBoxLayout()
         self.probe = ProbeCheckWidget()
-        vbox.addWidget(self.probe)
-        self.lbl_sonda = QLabel("Poné la sonda y verificá el ajuste.")
-        self.lbl_sonda.setWordWrap(True)
-        vbox.addWidget(self.lbl_sonda)
+        self.probe.setFixedWidth(280)
+        fila.addWidget(self.probe)
 
-        fila = QHBoxLayout()
-        self.btn_sonda = QPushButton("Verificar sonda")
-        self.btn_sonda.clicked.connect(self.verificar_sonda)
-        self.btn_sonda_ok = QPushButton("Siguiente →")
-        self.btn_sonda_ok.setEnabled(False)
-        self.btn_sonda_ok.clicked.connect(lambda: self._ir_a(1))
-        fila.addWidget(self.btn_sonda)
-        fila.addWidget(self.btn_sonda_ok)
-        vbox.addLayout(fila)
-        return caja
-
-    # ------------------------------------------------------------- paso 2
-    def _paso_impedancias(self):
-        caja = QWidget()
-        vbox = QVBoxLayout(caja)
-        grupo = QGroupBox("Impedancia de los electrodos")
-        grid = QGridLayout(grupo)
-        self.imp_spins = {}
-        self.imp_labels = {}
-        impedancias = self.technical.get('impedance') or {}
-        for row, (key, label, _default) in enumerate(ELECTRODES):
-            spin = QDoubleSpinBox()
-            spin.setRange(0.5, 20.0)
-            spin.setSingleStep(0.5)
-            spin.setDecimals(1)
-            spin.setSuffix(" kΩ")
-            spin.setValue(float(impedancias.get(key, 2.0)))
-            spin.valueChanged.connect(self.medir_impedancias)
-            estado = QLabel("—")
-            grid.addWidget(QLabel(label), row, 0)
-            grid.addWidget(spin, row, 1)
-            grid.addWidget(estado, row, 2)
-            self.imp_spins[key] = spin
-            self.imp_labels[key] = estado
-        vbox.addWidget(grupo)
-
-        self.lbl_impedancias = QLabel("")
-        self.lbl_impedancias.setWordWrap(True)
-        vbox.addWidget(self.lbl_impedancias)
-
-        fila = QHBoxLayout()
-        self.btn_imp_medir = QPushButton("Medir impedancias")
-        self.btn_imp_medir.clicked.connect(self.medir_impedancias)
-        self.btn_imp_ok = QPushButton("Siguiente →")
-        self.btn_imp_ok.setEnabled(False)
-        self.btn_imp_ok.clicked.connect(lambda: self._ir_a(2))
-        fila.addWidget(QPushButton("← Sonda", clicked=lambda: self._ir_a(0)))
-        fila.addWidget(self.btn_imp_medir)
-        fila.addWidget(self.btn_imp_ok)
-        vbox.addLayout(fila)
-        vbox.addStretch(1)
-        return caja
-
-    # ------------------------------------------------------------- paso 3
-    def _paso_registro(self):
-        caja = QWidget()
-        vbox = QVBoxLayout(caja)
         # La curva SÍ se ve: los equipos de tamizaje la muestran mientras
         # promedian. Lo que no hay es marcado de ondas ni escala de
-        # intensidades: es una sola curva, al nivel del tamizaje.
+        # intensidades: una sola curva, al nivel del tamizaje.
         self.plot = pg.PlotWidget()
         self.plot.setBackground((255, 255, 255))
         self.plot.setLabel("bottom", "Tiempo", units="ms")
@@ -291,7 +251,18 @@ class AabrMainWindow(QMainWindow):
         self.plot.hideButtons()
         self.plot.showGrid(x=True, y=True, alpha=0.25)
         self.curva = self.plot.plot(pen=pg.mkPen((41, 128, 185), width=2))
-        vbox.addWidget(self.plot, 1)
+        fila.addWidget(self.plot, 1)
+        vbox.addLayout(fila, 1)
+
+        self.lbl_sonda = QLabel("Sonda: sin chequear")
+        self.lbl_impedancias = QLabel(
+            f"Impedancias: OK (≤ {IMPEDANCIA_KOHM:.0f} kΩ)")
+        for lbl in (self.lbl_sonda, self.lbl_impedancias):
+            lbl.setStyleSheet("color:#666;")
+        estado = QHBoxLayout()
+        estado.addWidget(self.lbl_sonda)
+        estado.addWidget(self.lbl_impedancias)
+        vbox.addLayout(estado)
 
         self.barra = QProgressBar()
         self.barra.setRange(0, BARRIDOS_MAX)
@@ -302,10 +273,12 @@ class AabrMainWindow(QMainWindow):
         self.lbl_fsp = QLabel("—")
         self.lbl_ruido = QLabel("—")
         self.lbl_aceptados = QLabel("—")
+        self.lbl_tiempo = QLabel("—")
         for col, (titulo, widget) in enumerate((
                 ("FSP", self.lbl_fsp),
                 ("Ruido residual", self.lbl_ruido),
-                ("Barridos aceptados", self.lbl_aceptados))):
+                ("Barridos aceptados", self.lbl_aceptados),
+                ("Tiempo", self.lbl_tiempo))):
             titulo_lbl = QLabel(titulo)
             titulo_lbl.setStyleSheet("color:#666;")
             grid.addWidget(titulo_lbl, 0, col)
@@ -313,134 +286,128 @@ class AabrMainWindow(QMainWindow):
             grid.addWidget(widget, 1, col)
         vbox.addLayout(grid)
 
-        fila = QHBoxLayout()
-        self.btn_start = QPushButton("Iniciar")
-        self.btn_start.clicked.connect(self.start)
-        self.btn_stop = QPushButton("Detener")
-        self.btn_stop.setEnabled(False)
-        self.btn_stop.clicked.connect(self.stop)
-        fila.addWidget(QPushButton("← Impedancias", clicked=lambda: self._ir_a(1)))
-        fila.addWidget(self.btn_start)
-        fila.addWidget(self.btn_stop)
-        vbox.addLayout(fila)
-        return caja
-
-    # ------------------------------------------------------------- paso 4
-    def _paso_resultado(self):
-        caja = QWidget()
-        vbox = QVBoxLayout(caja)
         self.lbl_veredicto = QLabel("—")
         self.lbl_veredicto.setAlignment(Qt.AlignCenter)
-        self.lbl_veredicto.setMinimumHeight(110)
+        self.lbl_veredicto.setMinimumHeight(70)
         self._pintar_veredicto(None)
         vbox.addWidget(self.lbl_veredicto)
+        return caja
 
-        self.lbl_detalle = QLabel("")
-        self.lbl_detalle.setWordWrap(True)
-        self.lbl_detalle.setAlignment(Qt.AlignCenter)
-        vbox.addWidget(self.lbl_detalle)
+    def _informe(self):
+        """Un tamizaje no informa morfología, informa PASA o REFIERE. Pero
+        algo hay que dejar escrito: sin esto el alumno tamizaba y no quedaba
+        nada --ni el resultado, ni con qué nivel, ni qué decidió-- cuando se
+        cerraba la atención."""
+        caja = QGroupBox("Informe")
+        grid = QGridLayout(caja)
+        self.cb_informe = {}
+        for col, lado in enumerate(LADOS):
+            combo = QComboBox()
+            combo.addItems(["No realizado", "PASA", "REFIERE"])
+            grid.addWidget(QLabel(f"Resultado {lado}"), 0, col * 2)
+            grid.addWidget(combo, 0, col * 2 + 1)
+            self.cb_informe[lado] = combo
+        self.lbl_condiciones = QLabel("")
+        self.lbl_condiciones.setWordWrap(True)
+        self.lbl_condiciones.setStyleSheet("color:#666;")
+        grid.addWidget(self.lbl_condiciones, 1, 0, 1, 4)
 
-        fila = QHBoxLayout()
-        fila.addWidget(QPushButton("Repetir este oído", clicked=lambda: self._ir_a(2)))
-        fila.addWidget(QPushButton("Otro oído (desde la sonda)",
-                                   clicked=self._otro_oido))
-        vbox.addLayout(fila)
-        vbox.addStretch(1)
+        self.txt_observaciones = QPlainTextEdit()
+        self.txt_observaciones.setPlaceholderText("Observaciones del registro")
+        self.txt_observaciones.setFixedHeight(54)
+        self.txt_conducta = QPlainTextEdit()
+        self.txt_conducta.setPlaceholderText("Conducta")
+        self.txt_conducta.setFixedHeight(54)
+        grid.addWidget(self.txt_observaciones, 2, 0, 1, 2)
+        grid.addWidget(self.txt_conducta, 2, 2, 1, 2)
         return caja
 
     # -------------------------------------------------------------- pasos
     def _ir_a(self, paso):
-        """Cambia de paso. Hacia adelante solo si el anterior está hecho."""
-        if paso >= 1 and not self.sonda_ok:
-            paso = 0
-        if paso >= 2 and not self.impedancias_ok:
-            paso = 1
+        """Pinta el indicador de fase. No es navegación: la secuencia la
+        mueve el equipo, no el alumno."""
         self.paso = paso
-        self.stack.setCurrentIndex(paso)
         for i, lbl in enumerate(self.lbl_pasos):
             activo = i == paso
-            hecho = ((i == 0 and self.sonda_ok) or (i == 1 and self.impedancias_ok)
-                     or (i == 3 and self.resultado.get(self.lado_activo)))
-            color = "#1b5e20" if hecho else ("#000" if activo else "#999")
+            color = "#1b5e20" if i < paso else ("#000" if activo else "#999")
             peso = "bold" if activo else "normal"
             lbl.setStyleSheet(f"color:{color}; font-weight:{peso};")
-        if paso != 0:
-            self.probe.stop()
-        if paso != 2:
-            self.stop()
 
-    def _otro_oido(self):
-        self.cb_lado.setCurrentText('OI' if self.lado_activo == 'OD' else 'OD')
-
-    # -------------------------------------------------------------- paso 1
-    def verificar_sonda(self):
-        """Chequeo de sonda, el mismo del equipo de EOA."""
-        caso = self.eoas.get(self.lado_activo)
-        if self.data_current is None:
-            return
-        self.sonda_ok = False
-        self.btn_sonda_ok.setEnabled(False)
-        self.lbl_sonda.setText("Acomodando la sonda…")
-        self.probe.start(60.0, oae_probe_fit(caso))
-        self.timer_sonda.start(SONDA_MS)
-
-    def _sonda_lista(self):
-        sello = float(getattr(self.probe, 'fit_quality', 0.0))
-        self.sonda_ok = sello >= SELLO_MINIMO
-        self.btn_sonda_ok.setEnabled(self.sonda_ok)
-        if self.sonda_ok:
-            self.lbl_sonda.setText(f"Sello {sello * 100:.0f} %: la sonda está puesta.")
-        else:
-            self.lbl_sonda.setText(
-                f"Sello {sello * 100:.0f} %: el equipo no deja seguir. "
-                "Volvé a poner la sonda.")
-        self._ir_a(self.paso)
-
-    # -------------------------------------------------------------- paso 2
-    def medir_impedancias(self):
-        """Pantalla de impedancias: con los electrodos fuera de norma el
-        equipo no deja lanzar el estímulo."""
-        impedancias = {k: float(spin.value()) for k, spin in self.imp_spins.items()}
-        self.technical['impedance'] = impedancias
-        peor, desbalance, ok = ABRGenerator.impedance_report(self.technical)
-        for key, spin in self.imp_spins.items():
-            valor = float(spin.value())
-            bien = valor <= IMPEDANCE_LIMIT_KOHM
-            self.imp_labels[key].setText("OK" if bien else "ALTA")
-            self.imp_labels[key].setStyleSheet(
-                f"color:{'#1b5e20' if bien else '#b71c1c'}; font-weight:bold;")
-        self.impedancias_ok = bool(ok)
-        self.btn_imp_ok.setEnabled(self.impedancias_ok)
-        self.lbl_impedancias.setText(
-            f"Peor electrodo {peor:.1f} kΩ (límite {IMPEDANCE_LIMIT_KOHM:.0f}) · "
-            f"desbalance {desbalance:.1f} kΩ (límite {IMPEDANCE_BALANCE_LIMIT_KOHM:.0f})")
-        self._ir_a(self.paso)
-
-    # -------------------------------------------------------------- paso 3
+    # ------------------------------------------------------ la secuencia
     def start(self):
-        if self.corriendo or self.abr.get(self.lado_activo) is None:
-            if self.abr.get(self.lado_activo) is None:
-                self.lbl_resumen.setText(
-                    f"Este paciente no tiene ABR configurado en {self.lado_activo}.")
+        """El único botón: corre la prueba entera, en orden."""
+        if self.corriendo or self.data_current is None:
             return
-        if not (self.sonda_ok and self.impedancias_ok):
-            self._ir_a(0 if not self.sonda_ok else 1)
+        if self.abr.get(self.lado_activo) is None:
+            self.lbl_resumen.setText(
+                f"Este paciente no tiene ABR configurado en {self.lado_activo}.")
             return
-        self.barridos = 0
+        self.corriendo = True
+        self.sonda_ok = False
         self.resultado[self.lado_activo] = None
+        self.barridos = 0.0
         self.barra.setRange(0, int(self.sb_barridos.value()))
         self.barra.setValue(0)
-        self.corriendo = True
+        self.curva.clear()
+        self.lbl_tiempo.setText("0 s")
         self.btn_start.setEnabled(False)
         self.btn_stop.setEnabled(True)
-        self.timer.start(TICK_MS)
+        self._pintar_veredicto(None)
+        self.lbl_resumen.setText("")
+        self._fase_sonda()
 
-    def stop(self):
+    def abortar(self):
+        """Detener a mano, sin veredicto: la prueba no se tomó."""
+        self._detener("Detenido por el operador: la prueba no se completó.")
+
+    def _detener(self, motivo=""):
+        """Corta la secuencia donde esté y dice por qué."""
         self.timer.stop()
+        self.timer_sonda.stop()
+        self.timer_paso.stop()
+        self.probe.stop()
         self.corriendo = False
         if hasattr(self, 'btn_start'):
             self.btn_start.setEnabled(self.data_current is not None)
             self.btn_stop.setEnabled(False)
+        if motivo:
+            self.lbl_resumen.setText(motivo)
+
+    # La ventana principal llama stop() al cerrar la atención.
+    def stop(self):
+        self._detener()
+
+    # ---- 1. sonda
+    def _fase_sonda(self):
+        self._ir_a(0)
+        self.lbl_sonda.setText("Sonda: chequeando…")
+        self.probe.start(60.0, oae_probe_fit(self.eoas.get(self.lado_activo)))
+        self.timer_sonda.start(SONDA_MS)
+
+    def _sonda_lista(self):
+        sello = float(getattr(self.probe, 'fit_quality', 0.0))
+        self.probe.stop()
+        self.sonda_ok = sello >= SELLO_MINIMO
+        if not self.sonda_ok:
+            self.lbl_sonda.setText(f"Sonda: sello {sello * 100:.0f} %")
+            self._detener("Detenido en el chequeo de sonda: sello insuficiente.")
+            return
+        self.lbl_sonda.setText(f"Sonda: OK ({sello * 100:.0f} %)")
+        self._fase_impedancias()
+
+    # ---- 2. impedancias
+    def _fase_impedancias(self):
+        """Se muestran y listo: en tamizaje el límite es ancho y no frenan."""
+        self._ir_a(1)
+        self.lbl_impedancias.setText(
+            f"Impedancias: OK (≤ {IMPEDANCIA_KOHM:.0f} kΩ)")
+        # Una pausa corta para que el chequeo se vea, como en el equipo.
+        self.timer_paso.start(PASO_MS)
+
+    # ---- 3. registro
+    def _fase_registro(self):
+        self._ir_a(2)
+        self.timer.start(TICK_MS)
 
     def _control_setting(self):
         return {
@@ -461,12 +428,20 @@ class AabrMainWindow(QMainWindow):
         tech['transducer'] = self._transducer_keys[self.cb_transducer.currentIndex()]
         tech['artifact_reject_uv'] = float(self.sb_rechazo.value())
         tech['fsp_criterion'] = float(self.sb_criterio.value())
-        tech['impedance'] = {k: float(s.value()) for k, s in self.imp_spins.items()}
         return tech
+
+    def _barridos_por_tick(self):
+        """Cuántos barridos entran en un tick, al ritmo real del equipo."""
+        return float(self.sb_tasa.value()) * EFICIENCIA_BARRIDOS * (TICK_MS / 1000.0)
+
+    def _segundos(self):
+        """Cuánto lleva este registro en el equipo real."""
+        tasa = float(self.sb_tasa.value()) * EFICIENCIA_BARRIDOS
+        return self.barridos / tasa if tasa else 0.0
 
     def _tick(self):
         total = int(self.sb_barridos.value())
-        self.barridos = min(total, self.barridos + max(1, total // BLOQUES))
+        self.barridos = min(float(total), self.barridos + self._barridos_por_tick())
         caso = self.abr.get(self.lado_activo)
         contra = self.abr.get('OI' if self.lado_activo == 'OD' else 'OD')
         x, y, _, _, _, meta = ABR_Curve(
@@ -487,6 +462,7 @@ class AabrMainWindow(QMainWindow):
         self.lbl_fsp.setText(f"{fsp:.2f}")
         self.lbl_ruido.setText(f"{meta.get('residual_noise_nv', 0):.0f} nV")
         self.lbl_aceptados.setText(f"{int(meta.get('accepted_sweeps') or 0)}")
+        self.lbl_tiempo.setText(f"{self._segundos():.0f} s")
 
         if fsp >= criterio and self.chk_auto.isChecked():
             self._cerrar('PASA', fsp)
@@ -494,21 +470,27 @@ class AabrMainWindow(QMainWindow):
             self._cerrar('PASA' if fsp >= criterio else 'REFIERE', fsp)
 
     def _cerrar(self, veredicto, fsp):
-        self.stop()
+        self._detener()
+        self._ir_a(3)
         self.resultado[self.lado_activo] = {
             'veredicto': veredicto,
-            'barridos': self.barridos,
+            'barridos': int(round(self.barridos)),
+            'segundos': int(round(self._segundos())),
             'fsp': fsp,
             'nivel': int(self.sb_nivel.value()),
             'estimulo': self.cb_stim.currentText(),
         }
+        # El informe se precarga con lo que dio, y queda EDITABLE: informar
+        # distinto de lo que salió también es un error, y corregirlo es
+        # parte del ejercicio.
+        combo = self.cb_informe.get(self.lado_activo)
+        if combo is not None:
+            idx = combo.findText(veredicto)
+            if idx >= 0:
+                combo.setCurrentIndex(idx)
         self._pintar_veredicto(veredicto)
-        self.lbl_detalle.setText(
-            f"{self.lado_activo} · {self.cb_stim.currentText()} a "
-            f"{int(self.sb_nivel.value())} dB nHL · {int(self.barridos)} barridos "
-            f"· FSP {fsp:.2f}")
+        self._pintar_condiciones()
         self._pintar_resumen()
-        self._ir_a(3)
 
     # -------------------------------------------------------------- estado
     def restore_protocol(self):
@@ -526,7 +508,7 @@ class AabrMainWindow(QMainWindow):
             self._transducer_keys.index('insert_earphone'))
 
     def _set_enabled(self, on):
-        for w in (self.btn_start, self.cb_lado, self.btn_sonda):
+        for w in (self.btn_start, self.cb_lado):
             w.setEnabled(on)
 
     def la_super(self, data, appointment_id=None):
@@ -535,8 +517,7 @@ class AabrMainWindow(QMainWindow):
         Mismo patrón que AbrMainWindow: sin datos reales no se tamiza, ni
         siquiera con atención abierta pero sin ABR configurado en ese lado.
         """
-        self.stop()
-        self.probe.stop()
+        self._detener()
         self.appointment_id = appointment_id
         self.data_current = data
         abr_data = (data or {}).get('ABR') or {}
@@ -544,6 +525,10 @@ class AabrMainWindow(QMainWindow):
         self.abr = {'OD': abr_data.get('OD'), 'OI': abr_data.get('OI')}
         self.eoas = {'OD': eoas_data.get('OD'), 'OI': eoas_data.get('OI')}
         self.resultado = {'OD': None, 'OI': None}
+        for combo in self.cb_informe.values():
+            combo.setCurrentIndex(0)
+        self.txt_observaciones.setPlainText("")
+        self.txt_conducta.setPlainText("")
         self._set_enabled(data is not None)
         if data is None:
             self.lbl_paciente.setText("Sin atención abierta")
@@ -554,30 +539,27 @@ class AabrMainWindow(QMainWindow):
             self.lbl_paciente.setText(
                 f"{data.get('nombre', 'Paciente')} · {detalle}")
         self._reset_lectura()
+        self._ir_a(0)
 
     def _cambiar_lado(self, lado):
-        self.stop()
+        self._detener()
         self.lado_activo = lado
-        # Oído nuevo, sonda nueva: se vuelve al primer paso, como en el
-        # equipo real -- la oliva se saca y se pone del otro lado.
+        # Oído nuevo, sonda nueva: la oliva se saca y se pone del otro lado.
         self.sonda_ok = False
-        self.impedancias_ok = False
         self._reset_lectura()
         self._ir_a(0)
 
     def _reset_lectura(self):
-        self.barridos = 0
+        self.barridos = 0.0
         self.barra.setRange(0, int(self.sb_barridos.value()))
         self.barra.setValue(0)
         self.curva.clear()
-        self.lbl_fsp.setText("—")
-        self.lbl_ruido.setText("—")
-        self.lbl_aceptados.setText("—")
-        self.lbl_sonda.setText("Poné la sonda y verificá el ajuste.")
-        self.btn_sonda_ok.setEnabled(False)
-        self.btn_imp_ok.setEnabled(self.impedancias_ok)
+        for lbl in (self.lbl_fsp, self.lbl_ruido, self.lbl_aceptados,
+                    self.lbl_tiempo):
+            lbl.setText("—")
+        self.lbl_sonda.setText("Sonda: sin chequear")
         self._pintar_veredicto(self.resultado.get(self.lado_activo))
-        self.lbl_detalle.setText("")
+        self._pintar_condiciones()
         self._pintar_resumen()
 
     def _pintar_veredicto(self, veredicto):
@@ -589,27 +571,96 @@ class AabrMainWindow(QMainWindow):
         color, fondo = colores.get(veredicto, colores[None])
         self.lbl_veredicto.setText(veredicto or "—")
         self.lbl_veredicto.setStyleSheet(
-            f"font-size:34px; font-weight:bold; color:{color};"
+            f"font-size:30px; font-weight:bold; color:{color};"
             f"background:{fondo}; border-radius:8px;")
 
     def _pintar_resumen(self):
         partes = []
         for lado in LADOS:
             r = self.resultado.get(lado)
-            partes.append(f"{lado}: {r['veredicto']} ({int(r['barridos'])} barridos)"
-                          if r else f"{lado}: sin tamizar")
+            partes.append(
+                f"{lado}: {r['veredicto']} ({r['barridos']} barridos, {r['segundos']} s)"
+                if r else f"{lado}: sin tamizar")
         self.lbl_resumen.setText(" · ".join(partes))
 
-    def submit_report(self):
-        """El tamizaje no sube informe.
+    def _pintar_condiciones(self):
+        """Las condiciones se escriben solas: son del equipo, no del alumno."""
+        partes = []
+        for lado in LADOS:
+            r = self.resultado.get(lado)
+            if r:
+                partes.append(f"{lado}: {r['estimulo']} a {r['nivel']} dB nHL, "
+                              f"{r['barridos']} barridos en {r['segundos']} s, "
+                              f"FSP {r['fsp']:.2f}")
+        partes.append(f"impedancias ≤ {IMPEDANCIA_KOHM:.0f} kΩ")
+        self.lbl_condiciones.setText(" · ".join(partes))
 
-        Existe para que la ventana principal pueda llamarlo igual que a los
-        otros módulos de examen sin preguntar: un AABR no produce curvas
-        marcadas ni conclusión, produce PASA o REFIERE.
+    # ------------------------------------------------------------- informe
+    def report_data(self):
+        """Lo que se guarda del tamizaje.
+
+        `resultados` sale de los combos, no de lo que midió el equipo: si el
+        alumno informa otra cosa, se guarda lo que informó. Las condiciones
+        sí salen del registro, porque es el procedimiento lo que se evalúa.
         """
-        return
+        resultados = {}
+        for lado in LADOS:
+            combo = self.cb_informe.get(lado)
+            informado = combo.currentText() if combo is not None else 'No realizado'
+            medido = self.resultado.get(lado) or {}
+            resultados[lado] = {
+                'veredicto': informado,
+                'nivel': medido.get('nivel'),
+                'estimulo': medido.get('estimulo'),
+                'barridos': medido.get('barridos'),
+                'segundos': medido.get('segundos'),
+                'fsp': medido.get('fsp'),
+            }
+        tech = self._technical()
+        return {
+            'resultados': resultados,
+            'tecnica': {
+                'transductor': tech.get('transducer'),
+                'criterio_fsp': tech.get('fsp_criterion'),
+                'rechazo_uv': tech.get('artifact_reject_uv'),
+                'tasa': float(self.sb_tasa.value()),
+                'banda_hz': [float(self.sb_pasa_alto.value()),
+                             float(self.sb_pasa_bajo.value())],
+                'barridos_maximos': int(self.sb_barridos.value()),
+                'impedancia_kohm': IMPEDANCIA_KOHM,
+                'sello_sonda_ok': bool(self.sonda_ok),
+            },
+            'hallazgos': self.txt_observaciones.toPlainText(),
+            'conclusion': self.txt_conducta.toPlainText(),
+        }
+
+    def submit_report(self):
+        """Sube el informe del tamizaje al cerrar la atención.
+
+        Mismo camino que los otros módulos de examen (ver
+        AbrMainWindow.submit_report): best-effort, sin imágenes --un
+        tamizaje no informa curvas-- y con tipo 'AABR'.
+        """
+        if not self.data_login:
+            return
+        try:
+            appointment_id = int(self.appointment_id)
+        except (TypeError, ValueError):
+            return
+        data = self.report_data()
+        vacio = all(r['veredicto'] == 'No realizado'
+                    for r in data['resultados'].values())
+        if vacio and not data['hallazgos'].strip() and not data['conclusion'].strip():
+            return
+        client = BackendClient(Preferences().get("BACKEND_URL"),
+                               context.get_resource('json/session.json'))
+        if not client.is_logged_in():
+            return
+        try:
+            client.upload_report(appointment_id, 'AABR', data, {})
+        except Exception as exc:
+            print(f"AABR: no se pudo subir el informe: {exc}")
 
     def closeEvent(self, event):
-        self.stop()
-        self.probe.stop()
+        self._detener()
         event.accept()

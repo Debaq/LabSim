@@ -2941,20 +2941,41 @@ generador, criterio y ruido del paciente, y no deja marcar ondas ni buscar
 umbrales. Nivel fijo, y el equipo contesta PASA o REFIERE cuando el FSP cruza
 el criterio o cuando se acaban los barridos.
 
-Lo que lo define es **el orden de la toma**, que es el del equipo real y no se
-puede saltear:
+**Un botón y una sola pantalla.** La secuencia la corre el equipo solo, en el
+orden en que se toma de verdad, y se detiene donde falla:
 
 1. **Sonda** — la comparte con el equipo de EOA, así que es la misma pantalla
    de probe fit (`oae/widgets/probe_check.py`) y el mismo sello del caso
-   (`EOAS['sello_pct']`). Con el sello bajo 60 % el equipo no deja seguir.
-2. **Impedancias** — los cuatro electrodos con su valor, editables ahí mismo.
-   Fuera de norma no lanza el estímulo, que es lo que pasa de verdad.
+   (`EOAS['sello_pct']`). Con el sello bajo 60 % se detiene ahí.
+2. **Impedancias** — se muestran y listo, siempre OK a 20 kΩ. En tamizaje el
+   límite es mucho más ancho que en el ABR diagnóstico, así que no frenan nada
+   y no se modelan: el ejercicio del AABR no es el montaje.
 3. **Registro** — promedia **mostrando la curva**: los equipos de tamizaje la
    muestran mientras registran. Lo que no hay es marcado de ondas ni escala de
    intensidades: una sola curva, al nivel del tamizaje.
-4. **Resultado** — PASA o REFIERE, con el detalle de cómo se llegó.
+4. **Resultado** — PASA o REFIERE, y el informe.
+
+Al **ritmo real**: 900 barridos son unos 30 segundos, no uno. El tiempo sale de
+la tasa (`EFICIENCIA_BARRIDOS`, ~1 de cada 3 barridos entra al promedio entre
+el rechazo y las pausas del equipo), así que subir la tasa acorta la prueba
+—que es la razón por la que los equipos de tamizaje estimulan tan rápido—.
 
 Cambiar de oído vuelve al paso 1: la oliva se saca y se pone del otro lado.
+
+### El informe
+
+Un tamizaje no informa morfología, informa PASA o REFIERE; pero algo hay que
+dejar escrito. El bloque de informe trae el resultado por oído precargado con
+lo que dio y **editable** (informar distinto de lo que salió también es un
+error y tiene que poder cometerse), las condiciones escritas solas (estímulo,
+nivel, barridos, segundos, FSP, impedancias) y dos campos de texto:
+observaciones y conducta.
+
+Sube al cerrar la atención con tipo `AABR` --nuevo en `REPORT_TIPOS` y en
+`ReportPdfBuilder`, que le dibuja su propio cuerpo sin curvas-- por el mismo
+camino que los demás módulos de examen: `report_upload.php` resuelve la
+atención con `appointment_id` + el alumno del token, así que el informe queda
+colgado de SU atención. Sin tamizar y sin texto no se sube nada.
 
 El panel de configuración queda a la vista y editable (nivel, estímulo,
 transductor, tasa, barridos máximos, criterio, rechazo de artefacto, banda de
