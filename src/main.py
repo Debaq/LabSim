@@ -5,6 +5,7 @@ import requests
 from PySide6.QtCore import Qt, QSize, QTimer, Signal, Slot
 from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox, QProgressDialog
 
+from abr.AabrMainWindow import AabrMainWindow
 from abr.AbrMainWindow import AbrMainWindow
 from oae.OaeMainWindow import OaeMainWindow
 from vemp.VempMainWindow import VempMainWindow
@@ -508,7 +509,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         login_subw = self.subw.get("LOGIN") if self.subw else None
         self.subw = {"LOGIN": login_subw} if login_subw else None
 
-        for attr in ("subw_a", "subw_w", "subw_z", "subw_ac", "subw_ot", "subw_abr", "subw_eoas", "subw_vemp"):
+        for attr in ("subw_a", "subw_w", "subw_z", "subw_ac", "subw_ot", "subw_abr",
+                     "subw_aabr", "subw_eoas", "subw_vemp"):
             if hasattr(self, attr):
                 delattr(self, attr)
 
@@ -666,7 +668,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Carga self.data_current en los módulos ya construidos, o los
         deshidrata (data_current=None) para que dejen de loguear acciones
         bajo el caso/paciente ya cerrado."""
-        for attr in ("subw_a", "subw_z", "subw_w", "subw_ac", "subw_ot", "subw_abr", "subw_eoas", "subw_vemp"):
+        for attr in ("subw_a", "subw_z", "subw_w", "subw_ac", "subw_ot", "subw_abr",
+                     "subw_aabr", "subw_eoas", "subw_vemp"):
             try:
                 getattr(self, attr).obj.la_super(self.data_current, self.data_current_key)
             except AttributeError:
@@ -680,6 +683,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw_w = FrameSubMdi(ListWords.ListWords(self.data_current))
         self.subw_z = FrameSubMdi(Z.ZControl())
         self.subw_abr = FrameSubMdi(AbrMainWindow(data_login=self.data_login))
+        self.subw_aabr = FrameSubMdi(AabrMainWindow(data_login=self.data_login))
         self.subw_eoas = FrameSubMdi(OaeMainWindow(data_login=self.data_login))
         self.subw_vemp = FrameSubMdi(VempMainWindow(data_login=self.data_login))
 
@@ -688,6 +692,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "AC": self.subw_ac,
             "OT": self.subw_ot,
             "ABR": self.subw_abr,
+            "AABR": self.subw_aabr,
             "VEMP": self.subw_vemp,
             "EOAS": self.subw_eoas,
             "AGENDA": FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self)),

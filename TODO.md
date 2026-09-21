@@ -2926,3 +2926,43 @@ después) y `asfixia_perinatal` (neural: el otro camino a la neuropatía en la
 UCIN, junto con la bilirrubina). Con eso el turno del recién nacido tiene
 material en las tres categorías que hay que poder distinguir ahí --5
 conductivas, 15 sensoriales, 5 neurales-- que es el ejercicio.
+
+## Equipo de AABR (2026-09-21)
+
+El backend razonaba en AABR --las tasas de pase de `NewbornScreening`, el
+`resultadoOido()` de la ficha docente-- pero en la app no existía: el único
+protocolo implementado era el ABR diagnóstico. El alumno podía emularlo
+estimulando a 35 dB nHL y leyendo el rótulo del FSP, que es el mismo
+estadístico, pero sin nada que le impidiera diagnosticar con un equipo de
+tamizaje.
+
+`src/abr/AabrMainWindow.py` es **otro equipo**, no un modo del ABR: comparte
+generador, criterio y ruido del paciente, y no deja marcar ondas ni buscar
+umbrales. Nivel fijo, Iniciar, y el equipo contesta PASA o REFIERE cuando el
+FSP cruza el criterio o cuando se acaban los barridos. **No dibuja la curva**
+a propósito: se ve lo que ve quien tamiza --barridos, ruido residual y el
+número del FSP--, y esa restricción es el contenido.
+
+El panel de configuración queda a la vista y editable (nivel, estímulo,
+transductor, tasa, barridos máximos, criterio, rechazo de artefacto, banda de
+registro), que era el pedido: poder mover los parámetros delante del curso y
+ver qué le pasa al resultado. "Volver al protocolo de tamizaje" devuelve el
+equipo a 35 dB nHL / CE-Chirp / 6000 barridos / FSP 3,1.
+
+### Cómo se habilita
+
+`AABR` entra en `Layout::APPS` y en el Box de Electrofisiología, al lado de
+ABR, pero **no** tiene switch propio en `Courses::MODULES`: se habilita con
+ABR vía `MODULE_ALIAS` en `core/ui_helpers.py`. Ofrecer el tamizaje sin el
+diagnóstico no tiene sentido, y así el docente prende una cosa y le aparecen
+los dos botones. Es el primer alias de módulo; si aparece otro caso igual,
+el patrón ya está.
+
+### Lo que los tests fijan
+
+Oído sano pasa y pasa rápido; hipoacusia real refiere; **neuropatía refiere
+aunque la cóclea esté viva** (el patrón que justifica tamizar con AABR y no
+solo con EOA); cortar el promedio antes de tiempo refiere a un sano --el
+error de procedimiento que el ejercicio tiene que dejar cometer--; y el mismo
+oído de umbral 45 refiere a 35 dB nHL y pasa a 60, así que subir el nivel
+para "conseguir un PASA" se ve como lo que es.

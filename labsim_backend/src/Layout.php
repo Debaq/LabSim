@@ -25,6 +25,11 @@ final class Layout
         'W'          => [false, 'Lista de Palabras', 2, [true, true], [170, 500], 'pre'],
         'Z'          => [false, 'Impedanciómetro', 3, [true, true], [740, 560], 'pre'],
         'ABR'        => [false, 'Potencial evocado auditivo de tronco cerebral', 4, [false, true], 'max', 'pre'],
+        // Tamizaje automatizado: mismo equipo por dentro, otra prueba. No
+        // tiene módulo propio en Courses::MODULES a propósito -- se habilita
+        // con ABR (ver SubWindow::_module_visible en el cliente), porque
+        // ofrecer el tamizaje sin el diagnóstico no tiene sentido.
+        'AABR'       => [false, 'Tamizaje auditivo automatizado (AABR)', 21, [false, true], [980, 620], 'pre'],
         'VEMP'       => [false, 'Potenciales evocados vestibulares miogénicos', 5, [false, true], 'max', 'pre'],
         'EOAS'       => [false, 'Emisor Otoacústico', 6, [false, true], 'max', 'pre'],
         'EOAC'       => [false, 'Emisor Otoacústico Clínico', 7, [false, true], [1000, 600], 'development'],
@@ -58,7 +63,7 @@ final class Layout
     public const BOXS = [
         'sala_espera' => [true,  ['AGENDA'],                                          'Sala de Espera'],
         'Box_1'       => [true,  ['OT', 'AC', 'A', 'Z'],                              'Box Audiología'],
-        'Box_2'       => [true,  ['ABR', 'VEMP', 'EOAS'],                             'Box Electrofisiología'],
+        'Box_2'       => [true,  ['ABR', 'AABR', 'VEMP', 'EOAS'],                     'Box Electrofisiología'],
         'Box_3'       => [false, ['VNG', 'VHIT', 'POS'],                              'Box Otoneurología'],
     ];
 

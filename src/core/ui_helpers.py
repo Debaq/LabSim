@@ -249,9 +249,15 @@ class MoveWindow():
 # esté acá (ej. "LOGIN") queda siempre visible: la restricción por curso
 # solo aplica a lo que el docente puede tocar en el panel admin.
 GATED_MODULE_CODES = {
-    "A", "W", "Z", "ABR", "VEMP", "EOAS", "CVOICE", "AGENDA", "CHAT", "AC", "OT",
-    "INBOX", "FICHA", "EVOLUCION", "MIS_PACIENTES",
+    "A", "W", "Z", "ABR", "AABR", "VEMP", "EOAS", "CVOICE", "AGENDA", "CHAT",
+    "AC", "OT", "INBOX", "FICHA", "EVOLUCION", "MIS_PACIENTES",
 }
+
+# Modulos que NO tienen switch propio en el panel del docente: se habilitan
+# con otro. El tamizaje automatizado va con el ABR -- es el mismo equipo por
+# dentro y ofrecer el tamizaje sin el diagnostico no tiene sentido. Asi el
+# docente prende "ABR" y le aparecen los dos botones.
+MODULE_ALIAS = {"AABR": "ABR"}
 
 
 class SubWindow():
@@ -271,6 +277,7 @@ class SubWindow():
         (admin completo, ver Auth::userProfile en el backend) tampoco hay
         restricción.
         """
+        code = MODULE_ALIAS.get(code, code)
         if code not in GATED_MODULE_CODES:
             return True
         data_login = getattr(self, "data_login", None)
