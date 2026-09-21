@@ -51,6 +51,9 @@ final class Sala
      * tanto, a quién tiene que terminar preguntándole el alumno. Va como
      * texto al prompt de la sala.
      */
+    /** Edad bajo la cual el paciente no cuenta su historia: la cuentan por él. */
+    public const EDAD_SIN_RELATO = 3;
+
     public const CAP_NULO = 'nulo';             // 0-2: no habla; solo conducta observable
     public const CAP_MINIMO = 'minimo';         // 3-5: nombre, "me duele acá", sí/no
     public const CAP_PARCIAL = 'parcial';       // 6-13: síntomas y colegio, no fechas ni fármacos
@@ -96,7 +99,7 @@ final class Sala
     /** Capacidad de relato que le corresponde a una edad en años. */
     public static function capacidad(int $edad): string
     {
-        if ($edad <= 2) {
+        if ($edad < self::EDAD_SIN_RELATO) {
             return self::CAP_NULO;
         }
         if ($edad <= 5) {
@@ -109,6 +112,23 @@ final class Sala
             return self::CAP_CASI_TOTAL;
         }
         return self::CAP_TOTAL;
+    }
+
+    /**
+     * Cómo se comporta en la conversación ESTE acompañante, con este
+     * paciente al lado.
+     *
+     * Con una guagua no hay número que valga: el paciente no produce
+     * frases, así que el acompañante contesta todo aunque el docente le
+     * haya puesto "espera su turno". Decirle al modelo que espere el turno
+     * de alguien que no habla deja la entrevista en silencio.
+     */
+    public static function nivelInterrupcionCon(int $valor, int $edadPaciente): string
+    {
+        if (self::capacidad($edadPaciente) === self::CAP_NULO) {
+            return 'mucho';
+        }
+        return self::nivelInterrupcion($valor);
     }
 
     /** Tramo de INTERRUMPE_DESC que le corresponde a un 0-100. */

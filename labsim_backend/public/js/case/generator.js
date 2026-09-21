@@ -45,6 +45,9 @@
     // adulto es envejecimiento, ruido y otitis viejas: cosas que este
     // paciente todavía no tuvo.
     var EDAD_AUDICION_PERFECTA = window.CASE_CONST.edadAudicionPerfecta || 18;
+    // Bajo esta edad el paciente no cuenta su historia: la cuenta quien lo
+    // trajo (ver Sala::capacidad, CAP_NULO).
+    var EDAD_SIN_RELATO = window.CASE_CONST.edadSinRelato || 3;
     // Techo de la audiometría. Si una frecuencia del promedio satura, subir
     // más la escala ya no sube el promedio: el grado pedido no se alcanza y
     // el cuadro se aplana.
@@ -145,7 +148,12 @@
         // Cuánto se mete y cuánto le creemos varían en cada generación: dos
         // casos del mismo cuadro tienen que dar entrevistas distintas, si no
         // el alumno memoriza la dinámica en vez de leerla.
-        set('sala_interrumpe[]', String(Math.round(entre(25, 85))));
+        //
+        // Salvo con una guagua: ahí no hay dinámica que sortear. El paciente
+        // no produce frases, así que la madre contesta todo -- no es que
+        // "interrumpa mucho", es que es la única que habla.
+        var habla = edad >= EDAD_SIN_RELATO;
+        set('sala_interrumpe[]', habla ? String(Math.round(entre(25, 85))) : '100');
         set('sala_confiabilidad[]', String(Math.round(entre(60, 95))));
         // Comportamiento y sensibilidad van al prompt del LLM. Vacíos, la
         // madre contesta como una voz neutra y las tres o cuatro madres que
@@ -581,6 +589,10 @@
         if (rangos.length) {
             rango = rangos.reduce(function (a, b) { return a[0] <= b[0] ? a : b; });
         }
+        // Una guagua no tiene conciencia de su problema, tenga el cuadro que
+        // tenga: no es que lo minimice, es que no hay relato. Va en 0 por
+        // EDAD y no por cuadro.
+        if (edadEnAnios() < EDAD_SIN_RELATO) { rango = [0, 0]; }
         var conc = document.querySelector('#case-form [name="paciente_conciencia"]');
         if (conc) { conc.value = Math.round(entre(rango[0], rango[1])); }
         var conf = document.querySelector('#case-form [name="paciente_confiabilidad"]');
@@ -803,6 +815,19 @@
             peso.value = String(Math.round(entre(2700, 3900) / 10) * 10);
             peso.dispatchEvent(new Event('change', { bubbles: true }));
         }
+        // Cuánto líquido le tocó a CADA oído, sorteado acá y no al guardar:
+        // la vista previa proyecta con lo que hay en el formulario, así que
+        // si el percentil no está escrito, proyecta con el default (0,5) y
+        // ese valor termina guardado. Con 0,5 a las catorce horas la EOA
+        // pasa siempre, y el turno del tamizaje deja de tener sorpresa.
+        ['OD', 'OI'].forEach(function (lado) {
+            var el = document.querySelector(
+                '#case-form [name="nacimiento[percentil][' + lado + ']"]');
+            if (el) {
+                el.value = Math.random().toFixed(4);
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
     }
 
     boton.addEventListener('click', function () {

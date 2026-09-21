@@ -423,6 +423,14 @@ PROMPT;
     public static function fichasDeSala(array $sala): string
     {
         $lineas = [];
+        // Edad del paciente: decide si el acompañante tiene con quién
+        // turnarse (ver Sala::nivelInterrupcionCon).
+        $edadPaciente = 30;
+        foreach ($sala['personas'] as $p) {
+            if (!empty($p['es_paciente'])) {
+                $edadPaciente = (int) $p['edad'];
+            }
+        }
         foreach ($sala['personas'] as $p) {
             $quien = Sala::etiqueta($p) . ', ' . $p['edad'] . ' años';
             $quien .= $p['genero'] === 1 ? ', mujer' : ', hombre';
@@ -436,9 +444,15 @@ PROMPT;
             if (!$p['es_paciente']) {
                 $ficha[] = '  Sabe lo que el paciente no puede saber o no recuerda: fechas, remedios, operaciones, '
                     . 'cómo fue el embarazo y el parto, y qué le nota en la casa.';
-                $ficha[] = '  En la conversación: ' . Sala::INTERRUMPE_DESC[Sala::nivelInterrupcion((int) $p['interrumpe'])];
+                $ficha[] = '  En la conversación: '
+                    . Sala::INTERRUMPE_DESC[Sala::nivelInterrupcionCon((int) $p['interrumpe'], $edadPaciente)];
             }
-            if ($p['es_paciente'] && $p['conciencia'] < Sala::CONCIENCIA_BAJA) {
+            // Negar el problema es una CONDUCTA DE RELATO: hace falta poder
+            // hablar. Sin este guard, un lactante con conciencia 0 --que es
+            // lo que le corresponde-- entraba al prompt diciendo que escucha
+            // bien y echándole la culpa a la tele.
+            if ($p['es_paciente'] && $p['conciencia'] < Sala::CONCIENCIA_BAJA
+                && Sala::capacidad((int) $p['edad']) !== Sala::CAP_NULO) {
                 $ficha[] = '  No cree tener un problema: dice que escucha bien y le echa la culpa a otra cosa '
                     . '(que hablan bajo, que la tele está mala). No cede fácil aunque lo contradigan.';
             }

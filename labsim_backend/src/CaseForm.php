@@ -607,8 +607,14 @@ final class CaseForm
      * líquido, y los dos oídos del mismo bebé tampoco --por eso en el turno
      * uno refiere y el otro no--. Si ya venía en el caso se respeta, así
      * volver a guardar no le cambia el resultado al ejercicio.
+     *
+     * Es pública porque la vista previa (admin/case_project.php) tiene que
+     * proyectar con las MISMAS circunstancias que se van a guardar: sin
+     * esto proyectaba con el percentil por defecto (0,5) y, como lo posteado
+     * le gana a la proyección, un recién nacido de 14 horas salía siempre
+     * con las EOA presentes --0,5 cae justo del lado que pasa--.
      */
-    private static function parseNacimiento(array $v): array
+    public static function parseNacimiento(array $v): array
     {
         $semanas = self::val($v, ['nacimiento', 'semanas'], '');
         $semanas = is_numeric($semanas) ? (int) $semanas : null;

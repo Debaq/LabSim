@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/CaseProfile.php';
+require_once __DIR__ . '/../../src/CaseForm.php';
 
 /**
  * Proyección del perfil auditivo para la vista previa en vivo del creador
@@ -95,7 +96,14 @@ if ($edadAnios === 0 && $valorEdad !== '' && is_numeric($valorEdad)) {
 }
 $edadMeses = $horasVida !== null ? $horasVida / 720.0 : $edadAnios * 12.0;
 
-$proyeccion = CaseProfile::project($airPairs, $bonePairs, $perfil, $tymp, $horasVida, $edadMeses);
+// Circunstancias del parto: las MISMAS que se van a guardar (parto,
+// semanas, peso, y sobre todo el percentil de líquido de cada oído). Sin
+// esto la vista previa proyectaba con el percentil por defecto, y como lo
+// posteado le gana a la proyección al guardar, ese default quedaba escrito:
+// un recién nacido de 14 horas salía siempre con las EOA presentes.
+$nacimiento = $horasVida !== null ? CaseForm::parseNacimiento($_POST) : [];
+$proyeccion = CaseProfile::project($airPairs, $bonePairs, $perfil, $tymp,
+                                   $horasVida, $edadMeses, $nacimiento);
 
 // La descomposición es un detalle interno (nueve frecuencias por seis
 // curvas por oído): no la necesita el navegador y solo engorda la respuesta.

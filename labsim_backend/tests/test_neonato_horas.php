@@ -321,3 +321,35 @@ t_eq(NewbornScreening::resultadoOido(0.0, NewbornScreening::ABR_SCREEN_DB + 5)['
 $liquido = NewbornScreening::resultadoOido(20.0, 30.0, 40.0, false);
 t_eq($liquido['teoae'], 'refiere', 'Con líquido la TEOAE refiere');
 t_eq($liquido['aabr'], 'pasa', 'Y el AABR aguanta: hace falta mucha más conductiva');
+
+// --- El percentil tiene que viajar, o no hay sorteo -----------------------
+
+// Bug real: un recién nacido de 14 horas salía SIEMPRE con las EOA
+// presentes. La vista previa proyectaba sin las circunstancias del parto,
+// así que usaba el percentil por defecto (0,5) -- y a esa edad 0,5 cae
+// justo del lado que pasa. Como lo posteado le gana a la proyección al
+// guardar, ese default quedaba escrito en el caso.
+$pasa14 = NewbornScreening::resultado(NewbornScreening::transientDb(14.0, [], 0.5));
+t_eq($pasa14['teoae'], 'pasa', 'A las 14 h el percentil 0,5 pasa: por eso no se notaba');
+$refiere14 = NewbornScreening::resultado(NewbornScreening::transientDb(14.0, [], 0.8));
+t_eq($refiere14['teoae'], 'refiere', 'Y con más líquido refiere: el sorteo es el que decide');
+
+// La proyección respeta el percentil que le llega, oído por oído.
+$curva = neo_audiograma();
+$dispar = CaseProfile::project($curva, $curva,
+    ['OD' => ['cce_pct' => 100, 'retro' => []], 'OI' => ['cce_pct' => 100, 'retro' => []]],
+    ['OD' => 'A', 'OI' => 'A'], 14.0, 14 / 720.0,
+    ['percentil' => ['OD' => 0.05, 'OI' => 0.95]]);
+t_true(($dispar['eoas']['OD']['atten_db'] ?? 0) < ($dispar['eoas']['OI']['atten_db'] ?? 0),
+    'Cada oído proyecta con SU percentil');
+
+// Y parseNacimiento es pública justamente para que la vista previa use lo
+// mismo que el guardado: si vuelve a ser privada, esto falla.
+$refl = new ReflectionMethod('CaseForm', 'parseNacimiento');
+t_true($refl->isPublic(), 'parseNacimiento es pública: la vista previa la necesita');
+$proyector = (string) @file_get_contents(dirname(__DIR__) . '/public/admin/case_project.php');
+t_true(strpos($proyector, 'CaseForm::parseNacimiento($_POST)') !== false,
+    'La vista previa proyecta con las circunstancias del parto');
+$genJs2 = (string) @file_get_contents(dirname(__DIR__) . '/public/js/case/generator.js');
+t_true(strpos($genJs2, "nacimiento[percentil][") !== false,
+    'Y el generador sortea el percentil de cada oído al armar el caso');

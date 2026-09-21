@@ -3084,3 +3084,36 @@ de 226 Hz** (el default, y lo que traen los casos viejos), **positivo** y
 Es el mismo criterio que la SOAE: el caso que NECESITA un resultado concreto
 --el lactante con el oído medio ocupado que a 226 Hz se ve normal y solo la
 sonda de 1000 Hz delata-- no puede quedar librado a que la moneda acompañe.
+
+## Recién nacidos: tres cosas que se notaron probando (2026-09-21)
+
+### Las EOA salían presentes siempre
+
+Un recién nacido de 14 horas con los dos oídos normales daba las EOA
+presentes en todos los casos. La vista previa (`admin/case_project.php`)
+proyectaba **sin las circunstancias del parto**, así que usaba el percentil
+de líquido por defecto (0,5) -- y a esa edad 0,5 cae justo del lado que pasa.
+Como al guardar **lo posteado le gana a la proyección**, ese default quedaba
+escrito en el caso y el sorteo de `parseNacimiento` no se veía nunca.
+
+Ahora la vista previa proyecta con `CaseForm::parseNacimiento($_POST)` --la
+misma función que el guardado, ahora pública-- y el generador **sortea el
+percentil de cada oído** al armar el caso y lo escribe en el formulario. Con
+eso los dos caminos usan el mismo número y el turno del tamizaje vuelve a
+tener sorpresa: a las 14 horas la TEOAE refiere en el 45 % de los recién
+nacidos sanos, que es lo que dice la tabla.
+
+### La madre habla y el bebé no
+
+Bajo los 3 años (`Sala::EDAD_SIN_RELATO`, que ya era el corte de `CAP_NULO`)
+el paciente no produce frases. Dos incoherencias:
+
+- El acompañante podía quedar con "espera su turno: habla solo cuando le
+  hablan a ella" mientras el paciente no puede hablar. `nivelInterrupcionCon()`
+  lo fuerza a "contesta por el paciente" cuando el paciente es una guagua, y
+  el generador escribe la tendencia a responder en 100.
+- **Bug del prompt**: con conciencia bajo 40 --que es lo que le corresponde a
+  un lactante-- el prompt le hacía decir al bebé que escucha bien y que la
+  culpa es de la tele. Negar el problema es una conducta de RELATO: ahora esa
+  línea solo entra si el paciente puede hablar. El generador además pone la
+  conciencia en 0 por edad, no por cuadro.
