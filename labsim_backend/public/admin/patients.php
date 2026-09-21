@@ -156,8 +156,10 @@ admin_header('Fichas Clínicas', $me);
 <div class="card">
     <div class="row row--between">
         <strong>Pacientes registrados (<?= count($cases) ?>)</strong>
-        <a class="btn" href="case_create.php">+ Crear caso nuevo</a>
-        <a class="btn secondary" href="case_import.php" title="Pegar una lista de casos en JSON: para armar la tanda de una práctica de una sola vez.">Importar JSON</a>
+        <span class="row row--center row--gap-sm">
+            <a class="btn" href="case_create.php">+ Crear caso nuevo</a>
+            <a class="btn secondary" href="case_import.php" title="Pegar una lista de casos en JSON: para armar la tanda de una práctica de una sola vez.">Importar JSON</a>
+        </span>
     </div>
     <p class="muted">
         Biblioteca completa de fichas del sistema (agendadas o no). Para agendar, reagendar o eliminar citas,
