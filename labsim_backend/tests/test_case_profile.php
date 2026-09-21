@@ -63,7 +63,21 @@ t_close($d['sn'][1000], 5.0, 0.01, 'Conductiva: componente sensorioneural mínim
 $thAir = CaseProfile::abrThresholds($d, 'air_conduction');
 $thBone = CaseProfile::abrThresholds($d, 'bone_conduction');
 t_eq($thAir['click'], 55, 'Conductiva: click aéreo elevado por el gap');
-t_eq($thBone['click'], 15, 'Conductiva: click óseo casi normal -- el gap se ve solo comparando las dos vías');
+// La ósea lleva su propia referencia de 0 dB nHL (ver boneNhlOffset): en un
+// adulto son ~15 dB más que la aérea, y por eso este 30 es "óseo normal" y
+// no un componente sensorioneural. Comparar los dos números de frente es
+// justamente el error que hay que saber no cometer.
+t_eq($thBone['click'], 30, 'Conductiva: click óseo normal para su propia referencia');
+t_true(
+    $thAir['click'] - $thBone['click'] >= 20,
+    'Conductiva: el gap se ve igual comparando las dos vías, cada una contra su norma'
+);
+// Sin edad cargada se asume adulto; en un lactante el mismo oído daría la
+// ósea mucho más baja, porque su cráneo compensa la referencia.
+t_true(
+    CaseProfile::abrThresholds($d, 'bone_conduction', 3.0)['click'] < $thBone['click'],
+    'El mismo oído en un lactante da umbral óseo más bajo: es la referencia, no la audición'
+);
 t_eq(CaseProfile::derivedType($d, 100.0), 'transmission', 'Gap de 40 dB se clasifica como transmisión');
 
 // Ósea peor que la aérea (ruido de carga del formulario) no inventa gap.

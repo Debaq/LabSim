@@ -149,47 +149,65 @@ t_true(
     'Cada oído tiene su propio percentil: uno puede referir y el otro no'
 );
 
-// --- Calibración ósea del lactante ---------------------------------------
+// --- Referencia de la vía ósea ---------------------------------------------
 
-// El cráneo sin suturar transmite mejor, sobre todo en graves, y el vibrador
-// está calibrado sobre cráneo adulto: el mismo oído da un umbral óseo más
-// bajo en el dial. Lo que importa clínicamente es que eso INFLA el gap
-// aéreo-óseo aparente, y es un error de lectura clásico en screening.
+// El 0 dB nHL óseo no está referenciado como el aéreo: la fuerza que lo
+// define se mide sobre cráneo adulto. Cobb y Stuart 2016 miden, con click y
+// audición normal: adultos 3,75 dB nHL por aire contra 18,75 por hueso;
+// lactantes 3,75 y 1,25. O sea, el que muestra gap aparente es el ADULTO.
 
-t_close(CaseProfile::infantBoneFactor(null), 0.0, 0.01, 'Sin edad no se inventa un lactante');
-t_close(CaseProfile::infantBoneFactor(3), 1.0, 0.01, 'Bajo 6 meses la calibración aplica entera');
-t_close(CaseProfile::infantBoneFactor(24), 0.0, 0.01, 'A los 2 años ya no queda: las suturas se cerraron');
+t_close(CaseProfile::boneNhlOffset(360), 15.0, 0.01, 'Adulto: la ósea lee ~15 dB más alto que la aérea');
+t_close(CaseProfile::boneNhlOffset(1), -2.5, 0.01, 'Lactante: la ósea lee igual o algo mejor que la aérea');
 t_true(
-    CaseProfile::infantBoneFactor(12) > 0 && CaseProfile::infantBoneFactor(12) < 1,
-    'Entre los 6 y los 24 meses se va de a poco'
+    CaseProfile::boneNhlOffset(12) > CaseProfile::boneNhlOffset(3)
+    && CaseProfile::boneNhlOffset(12) < CaseProfile::boneNhlOffset(360),
+    'Entre los 6 y los 24 meses la referencia se va corriendo a la de adulto'
 );
+t_close(CaseProfile::boneNhlOffset(null), 15.0, 0.01, 'Sin edad se asume adulto, no lactante');
 
-$lactante = neo_proyeccion(null, [], 3.0);
 $adulto = neo_proyeccion(null, [], 360.0);
-$dosAnios = neo_proyeccion(null, [], 24.0);
+$bebe = neo_proyeccion(null, [], 3.0);
 
-$graveLact = $lactante['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_500Hz'];
-$graveAdulto = $adulto['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_500Hz'];
+$aAdulto = $adulto['abr']['OD']['umbral_por_estimulo']['click'];
+$oAdulto = $adulto['abr']['OD']['umbral_por_estimulo_oseo']['click'];
+$aBebe = $bebe['abr']['OD']['umbral_por_estimulo']['click'];
+$oBebe = $bebe['abr']['OD']['umbral_por_estimulo_oseo']['click'];
 
-t_true($graveLact < $graveAdulto, 'En 500 Hz el lactante lee un umbral óseo más bajo que el adulto');
-t_eq(
-    $lactante['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_4000Hz'],
-    $adulto['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_4000Hz'],
-    'En 4 kHz no hay diferencia: el efecto es de graves'
-);
-t_eq(
-    $dosAnios['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_500Hz'],
-    $graveAdulto,
-    'A los 2 años el umbral óseo ya es el de adulto'
-);
-t_eq(
-    $lactante['abr']['OD']['umbral_por_estimulo']['tone_burst_500Hz'],
-    $adulto['abr']['OD']['umbral_por_estimulo']['tone_burst_500Hz'],
-    'La vía aérea no cambia con la calibración ósea'
-);
+t_true($oAdulto - $aAdulto >= 10, 'El adulto normal muestra gap aéreo-óseo aparente, que no es conductivo');
+t_true(abs($oBebe - $aBebe) <= 5, 'El lactante normal no lo muestra: sus dos vías dan casi lo mismo');
+t_true($oBebe < $oAdulto, 'Y su umbral óseo es más bajo que el del adulto con la misma audición');
 
-// Y el efecto que hay que saber leer: gap aparente en un oído normal.
-$gapLact = $lactante['abr']['OD']['umbral_por_estimulo']['tone_burst_500Hz'] - $graveLact;
-$gapAdulto = $adulto['abr']['OD']['umbral_por_estimulo']['tone_burst_500Hz'] - $graveAdulto;
-t_eq($gapAdulto, 0, 'En el adulto normal no hay gap');
-t_true($gapLact >= 10, 'En el lactante normal aparece un gap de calibración, que no es conductivo');
+// --- El vibrador no llega: la ventana útil es angosta ---------------------
+
+// Con la referencia corregida, un normoyente adulto ya gasta la mitad del
+// margen. Una sensorial leve deja la vía ósea fuera de alcance, y eso NO es
+// un error del examen: es por qué el ABR óseo sirve para pérdidas leves y
+// moderadas y deja de servir enseguida.
+function neo_umbral_oseo(float $hlAire, float $hlOseo, float $meses)
+{
+    $aire = [];
+    $oseo = [];
+    foreach (CaseBuilder::FREQUENCIES as $f) {
+        $aire[] = [$hlAire, $hlAire];
+        $oseo[] = [$hlOseo, $hlOseo];
+    }
+    $p = CaseProfile::project(
+        $aire, $oseo,
+        ['OD' => ['cce_pct' => 0, 'retro' => []], 'OI' => ['cce_pct' => 0, 'retro' => []]],
+        ['OD' => 'A', 'OI' => 'A'], null, $meses
+    );
+    return $p['abr']['OD']['umbral_por_estimulo_oseo']['click'];
+}
+
+t_true(neo_umbral_oseo(0, 0, 360) <= CaseProfile::BONE_MAX_OUTPUT_DB,
+    'El adulto normal todavía entra en el rango del vibrador');
+t_true(neo_umbral_oseo(30, 30, 360) !== null,
+    'Con sensorial de 30 dB HL la ósea todavía entra, justo en el tope');
+t_eq(neo_umbral_oseo(35, 35, 360), null,
+    'Con 35 dB HL el vibrador ya no llega: sin respuesta por vía ósea');
+// La conductiva es para lo que sirve: la ósea se queda abajo aunque la
+// aérea se vaya lejos.
+t_true(neo_umbral_oseo(60, 10, 360) !== null,
+    'Una conductiva de 50 dB deja ver la ósea perfectamente');
+t_true(neo_umbral_oseo(40, 0, 360) !== null,
+    'Una conductiva de 40 dB sí deja ver la ósea: es justo para lo que sirve');

@@ -2719,21 +2719,29 @@ final class CaseSheetPdf
             . 'y por eso un "refiere" temprano es motivo de rescreening y no un hallazgo.';
     }
 
-    /** Aviso de la calibración ósea del lactante, vacío si no aplica. */
+    /** Cómo leer la vía ósea de este paciente. Solo ficha del docente. */
     private static function infantBoneNote(array $data): string
     {
         $meses = ($data['edad_horas'] ?? null) !== null && $data['edad_horas'] !== ''
             ? ((float) $data['edad_horas']) / 720.0
             : (isset($data['edad']) ? (float) $data['edad'] * 12.0 : null);
-        $factor = CaseProfile::infantBoneFactor($meses);
-        if ($factor <= 0.0) {
+        if ($meses === null) {
             return '';
         }
-        return 'Vía ósea de lactante: el cráneo con las suturas abiertas transmite mejor que el del adulto, '
-            . 'sobre todo en graves, y los valores de referencia del vibrador están definidos sobre cráneo adulto. '
-            . 'El umbral óseo se lee hasta 15 dB más bajo en 500 Hz (menos a medida que sube la frecuencia, nada en 4 kHz), '
-            . 'así que el gap aéreo-óseo APARENTE queda inflado: no confundirlo con un componente de transmisión. '
-            . 'El efecto se va solo a medida que las suturas se cierran, cerca de los dos años.';
+        $offset = CaseProfile::boneNhlOffset($meses);
+        $comun = 'La vía ósea tiene su propia referencia de 0 dB nHL --la fuerza del vibrador se define sobre '
+            . 'cráneo adulto-- así que sus umbrales NO se comparan de frente con los aéreos: cada vía contra su '
+            . 'propia norma. Y el vibrador no pasa de ' . (int) CaseProfile::BONE_MAX_OUTPUT_DB . ' dB nHL, '
+            . 'así que la ventana útil es angosta: pasada una pérdida sensorineural leve, por vía ósea no se '
+            . 'encuentra nada y eso no es un error del examen.';
+        if ($offset >= CaseProfile::BONE_NHL_OFFSET_ADULT_DB - 0.01) {
+            return 'Vía ósea (adulto): un oído normal ya da unos ' . (int) $offset . ' dB nHL más por hueso que '
+                . 'por aire. Ese gap aéreo-óseo aparente NO es de transmisión. ' . $comun;
+        }
+        return 'Vía ósea de lactante: el cráneo con las suturas abiertas transmite mucho mejor y compensa entera '
+            . 'la referencia, así que este paciente da umbrales óseos casi iguales a los aéreos -- al revés del '
+            . 'adulto, que muestra unos 15 dB de diferencia sin tener patología. El efecto se va solo a medida que '
+            . 'las suturas se cierran, cerca de los dos años. ' . $comun;
     }
 
     /**

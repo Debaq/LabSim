@@ -152,39 +152,48 @@ final class CaseProfile
     ];
 
     /**
-     * Calibración de la vía ósea del lactante, en dB por frecuencia.
+     * Referencia de la vía ósea: cuánto más alto lee su umbral que el aéreo,
+     * en dB, para un ADULTO.
      *
-     * Los valores de referencia del vibrador (la fuerza que equivale a 0 dB)
-     * están definidos sobre un cráneo ADULTO, en la mastoides. El cráneo del
-     * lactante tiene las suturas abiertas y los huesos sin fusionar, y eso lo
-     * hace MÁS eficiente transmitiendo sonido por vía ósea, sobre todo en
-     * graves: el mismo nivel de dial le llega más fuerte a la cóclea. Con
-     * calibración de adulto, el umbral óseo de un bebé se lee más bajo que el
-     * de un adulto con exactamente la misma audición.
+     * El 0 dB nHL de la vía ósea no está referenciado igual que el de la
+     * aérea: la fuerza que define el cero se mide sobre cráneo adulto, y con
+     * esa referencia un adulto normoyente da umbrales óseos MUCHO más altos
+     * que los aéreos. Cobb y Stuart 2016 lo miden con click: 3,75 dB nHL por
+     * aire contra 18,75 por hueso en adultos normales.
      *
-     * Ojo con la consecuencia clínica, que es el motivo de modelarlo: como el
-     * gap aéreo-óseo se calcula restando, usar norma de adulto en un lactante
-     * INFLA el componente conductivo aparente. Es un error clásico de lectura
-     * en screening.
+     * Los mismos autores miden lactantes: 3,75 por aire y 1,25 por hueso.
+     * O sea, en el bebé las dos vías dan casi lo mismo -- el cráneo sin
+     * suturar es mucho más eficiente y compensa entera la referencia. Por eso
+     * el offset no es una constante sino una función de la edad, que pasa de
+     * +15 en el adulto a -2,5 en el lactante.
      *
-     * Efecto decreciente con la frecuencia (en 4 kHz prácticamente no hay) y
-     * que se va con la edad a medida que las suturas se cierran:
-     * completo bajo los 6 meses, nada pasados los 24.
+     * Consecuencia que hay que leer bien, y es al revés de lo que parece: el
+     * que muestra un gap aéreo-óseo APARENTE en dB nHL es el ADULTO, no el
+     * bebé. No es conductivo: es que cada vía tiene su propia referencia y
+     * hay que compararlas contra sus propias normas.
      */
-    public const INFANT_BONE_CALIBRATION_DB = [
-        500 => 15.0,
-        1000 => 10.0,
-        2000 => 5.0,
-        3000 => 2.0,
-        4000 => 0.0,
-        6000 => 0.0,
-        8000 => 0.0,
-    ];
+    /**
+     * Salida máxima del vibrador, en dB nHL. Espejo de BONE_MAX_OUTPUT_DB en
+     * src/abr/ABR_generator.py.
+     *
+     * La revisión la ubica entre 45 y 55 según equipo y colocación; se toma
+     * el tope. Con la referencia ósea corregida la ventana útil igual queda
+     * MUY angosta: un adulto normoyente ya da 25 dB nHL por hueso, así que
+     * quedan 30 dB de margen. Una sensorial de 35 dB HL pone el umbral óseo
+     * fuera del alcance del vibrador: por vía ósea no se encuentra nada. Eso no es una limitación del simulador, es la razón
+     * por la que el ABR óseo sirve para separar transmisión de sensorineural
+     * en pérdidas leves y moderadas, y deja de servir enseguida.
+     */
+    public const BONE_MAX_OUTPUT_DB = 55.0;
+
+    public const BONE_NHL_OFFSET_ADULT_DB = 15.0;
+    public const BONE_NHL_OFFSET_INFANT_DB = -2.5;
     public const INFANT_BONE_FULL_MONTHS = 6.0;
     public const INFANT_BONE_NONE_MONTHS = 24.0;
 
     /**
-     * Cuánto de la calibración de lactante aplica a esa edad (0 a 1).
+     * Cuánto de "cráneo de lactante" le queda a esa edad (0 a 1). Entero
+     * bajo los 6 meses, nada pasados los 24: es el cierre de las suturas.
      * `null` = edad desconocida -> 0, no se inventa un lactante.
      */
     public static function infantBoneFactor($edadMeses): float
@@ -201,6 +210,14 @@ final class CaseProfile
         }
         return (self::INFANT_BONE_NONE_MONTHS - $m)
             / (self::INFANT_BONE_NONE_MONTHS - self::INFANT_BONE_FULL_MONTHS);
+    }
+
+    /** Offset de la referencia ósea a esa edad, en dB. */
+    public static function boneNhlOffset($edadMeses): float
+    {
+        $f = self::infantBoneFactor($edadMeses);
+        return self::BONE_NHL_OFFSET_ADULT_DB
+            + $f * (self::BONE_NHL_OFFSET_INFANT_DB - self::BONE_NHL_OFFSET_ADULT_DB);
     }
 
     /**
@@ -1836,12 +1853,11 @@ final class CaseProfile
      */
     public static function abrThresholds(array $decomp, string $pathway = 'air_conduction', $edadMeses = null): array
     {
-        // Vía ósea en lactante: el cráneo sin suturar transmite mejor, así
-        // que el mismo oído da un umbral más bajo en el dial (ver
-        // INFANT_BONE_CALIBRATION_DB). Solo la ósea: la aérea entra por el
-        // conducto y no le importa el cráneo.
-        $calibracion = $pathway === 'bone_conduction'
-            ? self::infantBoneFactor($edadMeses)
+        // La vía ósea tiene su propia referencia de 0 dB nHL, y cuánto se
+        // separa de la aérea depende de la edad (ver boneNhlOffset): +15 dB
+        // en el adulto, casi nada en el lactante.
+        $offsetOseo = $pathway === 'bone_conduction'
+            ? self::boneNhlOffset($edadMeses)
             : 0.0;
         $curva = $pathway === 'bone_conduction' ? $decomp['bone'] : $decomp['air'];
         $sinRespuesta = ($decomp['sin_respuesta'] ?? [])[$pathway === 'bone_conduction' ? 'bone' : 'air'] ?? [];
@@ -1869,19 +1885,13 @@ final class CaseProfile
             }
             $hl = $peso > 0 ? $suma / $peso : 0.0;
             $nhl = $hl + self::STIM_NHL_CORRECTION[$stim];
-            if ($calibracion > 0.0) {
-                // La corrección pesa las mismas frecuencias que el estímulo:
-                // un burst de 500 se lleva los 15 dB enteros y uno de 4 kHz
-                // casi nada, que es como se comporta el cráneo.
-                $ajuste = 0.0;
-                $pesoAjuste = 0.0;
-                foreach ($pesos as $hz => $w) {
-                    $ajuste += (self::INFANT_BONE_CALIBRATION_DB[(int) $hz] ?? 0.0) * $w;
-                    $pesoAjuste += $w;
-                }
-                if ($pesoAjuste > 0) {
-                    $nhl -= ($ajuste / $pesoAjuste) * $calibracion;
-                }
+            $nhl += $offsetOseo;
+            if ($pathway === 'bone_conduction' && $nhl > self::BONE_MAX_OUTPUT_DB) {
+                // El vibrador no llega: no hay umbral que informar, hay
+                // "sin respuesta". Un número acá sería un umbral que nadie
+                // pudo medir.
+                $out[$stim] = null;
+                continue;
             }
             $out[$stim] = (int) self::clamp(
                 round($nhl / self::ABR_STEP_DB) * self::ABR_STEP_DB,

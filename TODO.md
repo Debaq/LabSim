@@ -2514,3 +2514,45 @@ error que el ejercicio ahora deja cometer.
    15 dB de gap aéreo-óseo en dB nHL**, que es real pero exige que el alumno
    sepa que cada vía tiene su propia referencia. Es un cambio de fondo en
    cómo se lee el examen y afecta todos los casos existentes.
+
+## Vía ósea: referencia propia de 0 dB nHL y tope de 55 (2026-09-21)
+
+Aplicado lo que quedaba pendiente del aporte bibliográfico. Cobb y Stuart
+2016 miden con click y audición normal: **adultos 3,75 dB nHL por aire
+contra 18,75 por hueso; lactantes 3,75 y 1,25**. O sea, el 0 dB nHL óseo no
+está referenciado como el aéreo --la fuerza que lo define se mide sobre
+cráneo adulto-- y el que muestra un gap aparente es el ADULTO, no el bebé.
+Eso da vuelta la nota que yo había escrito el día anterior.
+
+`boneNhlOffset()` pasa de +15 dB en el adulto a −2,5 en el lactante, con el
+cierre de las suturas en el medio (entero bajo 6 meses, nada pasados los 24).
+Reemplaza la tabla por frecuencia que yo había inventado: la fuente es de
+click, así que se modela lo que la fuente mide y no una dependencia de
+frecuencia sin respaldo.
+
+Click, con el tope del vibrador en **55 dB nHL** (la revisión lo ubica entre
+45 y 55; se toma el tope, decisión del docente):
+
+| caso (dB HL aire/hueso) | aéreo | óseo | aire − óseo |
+|---|---|---|---|
+| adulto normal 0/0 | 10 nHL | 25 nHL | −15 dB |
+| recién nacido 0/0 | 10 nHL | 10 nHL | 0 dB |
+| conductiva 40/0 | 50 nHL | 25 nHL | +25 dB |
+| conductiva 60/10 | 70 nHL | 35 nHL | +35 dB |
+| sensorial 30/30 | 40 nHL | 55 nHL | −15 dB |
+| **sensorial 35/35** | 45 nHL | **sin respuesta** | -- |
+| mixta 60/30 | 70 nHL | 55 nHL | +15 dB |
+
+**La ventana útil es angosta y esa es la enseñanza**: un adulto normoyente ya
+gasta 25 de los 55 dB, así que con una sensorial de 35 dB HL el umbral óseo
+se va del alcance del vibrador. Por vía ósea no se encuentra nada, y no es
+un error del examen: el ABR óseo sirve para separar transmisión de
+sensorineural en pérdidas leves y moderadas, y deja de servir enseguida.
+
+**Bug previo que destapó esto.** El backend escribe `null` para decir "sin
+respuesta" (ninguna frecuencia respondió, o el umbral se fue del vibrador),
+pero el cliente lo leía como "sin dato" y caía al umbral escalar del oído:
+dibujaba una respuesta que en el caso no existe. Ahora `case_threshold`
+distingue la clave ausente (cae al escalar, como siempre) de la clave
+presente en null (`NO_RESPONSE_DB`, no responde nunca). Afectaba también a
+la vía aérea, no solo a la ósea.

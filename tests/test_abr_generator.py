@@ -63,7 +63,8 @@ from abr.ABR_generator import (  # noqa: E402
     INTERAURAL_ATTENUATION, NEURAL_BLOQUEO_OPTIONS, NEURAL_PARAM_DEFAULTS,
     RATE_REF, STIM_MAP, BONE_MAX_OUTPUT_DB, agitation_factor,
     default_settings, select_population, stimulus_width,
-    bone_latency_correction, INFANT_BONE_LAT_MS, INFANT_POPULATIONS)
+    bone_latency_correction, INFANT_BONE_LAT_MS, INFANT_POPULATIONS,
+    NO_RESPONSE_DB)
 from abr.protocols import PROTOCOLS, get_protocol  # noqa: E402
 
 NORMS = os.path.join(os.path.dirname(__file__), '..', 'resources', 'abr', 'normative_data.json')
@@ -2266,6 +2267,28 @@ DESCENDENTE = {
 
 def _stim(stim, freq=None):
     return {'stim': stim, 'freq': freq, 'int': 60, 'pathway': 'air_conduction'}
+
+
+def test_no_response_in_the_case_means_no_response_on_screen():
+    """Si el caso dice "sin respuesta", el equipo no puede dibujar una.
+
+    El backend escribe null cuando ninguna frecuencia respondio en el tonal,
+    y tambien en la via osea cuando el umbral se va por encima de lo que
+    entrega el vibrador (ver CaseProfile::abrThresholds). El cliente trataba
+    ese null como "sin dato" y caia al umbral escalar del oido: dibujaba una
+    respuesta que en el caso no existe.
+    """
+    g = _gen()
+    caso = {'umbral': 40, 'umbral_por_estimulo_oseo': {'click': None},
+            'umbral_por_estimulo': {'click': 40}}
+    sin = g.case_threshold(caso, _stim('click'), 'bone_conduction', 'normal')
+    con = g.case_threshold(caso, _stim('click'), 'air_conduction', 'normal')
+    assert sin >= NO_RESPONSE_DB, sin
+    assert con == 40
+    # Y con la clave ausente (caso viejo) sigue cayendo al escalar, que es
+    # como se comportaba.
+    viejo = {'umbral': 40, 'umbral_por_estimulo_oseo': {}}
+    assert g.case_threshold(viejo, _stim('click'), 'bone_conduction', 'normal') == 40
 
 
 def test_threshold_falls_back_to_the_scalar_without_a_table():

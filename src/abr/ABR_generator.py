@@ -188,11 +188,15 @@ def bone_latency_correction(intensity):
     return 0.0
 
 
+# Umbral que se usa cuando el caso dice "sin respuesta": mas alto que
+# cualquier salida del equipo, asi nada responde nunca.
+NO_RESPONSE_DB = 999.0
+
 # Salida maxima del vibrador oseo, en dB nHL. No es una limitacion del
 # modelo: es la del transductor. F18 (200 oidos) construye su normativa a
 # 50, 30 y 10 dB nHL porque el vibrador no entrega mas -- por encima de ahi
 # distorsiona y el estimulo deja de ser el que dice la pantalla.
-BONE_MAX_OUTPUT_DB = 50.0
+BONE_MAX_OUTPUT_DB = 55.0
 
 # ---------------------------------------------------------------------
 # Morfologia por estimulo
@@ -1676,12 +1680,23 @@ class ABRGenerator:
             tabla = case_config.get(clave) or {}
             key = self.stim_key(stimulus_config['stim'],
                                 stimulus_config.get('freq'))
-            valor = tabla.get(key)
-            if valor is None:
+            if key not in tabla:
                 # Casos guardados con la nomenclatura vieja (ls_chirp).
                 viejo = {v: k for k, v in LEGACY_STIM_KEYS.items()}.get(key)
-                valor = tabla.get(viejo) if viejo else None
-            if valor is not None:
+                if viejo in tabla:
+                    key = viejo
+            if key in tabla:
+                valor = tabla[key]
+                if valor is None:
+                    # La clave ESTA y vale null: el backend dice "sin
+                    # respuesta", no "sin dato" (ver CaseProfile::
+                    # abrThresholds). Pasa cuando ninguna frecuencia
+                    # respondio en el tonal, y en la via osea cuando el
+                    # umbral se va por encima de lo que entrega el
+                    # vibrador. Antes esto caia al umbral escalar del oido
+                    # y el equipo dibujaba una respuesta que en el caso no
+                    # existe.
+                    return NO_RESPONSE_DB
                 return float(valor)
             if 'umbral' in case_config:
                 return float(case_config['umbral'])
