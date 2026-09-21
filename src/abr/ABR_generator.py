@@ -362,10 +362,35 @@ NEURAL_CM_SIGMA_GAIN = 3.5
 # Insertos aislan mucho mas que los supraaurales, que es justamente el
 # argumento clinico para usarlos.
 INTERAURAL_ATTENUATION = {
-    'insert_earphone': 65.0,
-    'TDH39_headphone': 45.0,
-    'bone_vibrator': 0.0,     # el vibrador oseo estimula las dos cocleas
+    'insert_earphone': 65.0,   # publicado 60-70
+    'TDH39_headphone': 45.0,   # publicado 40-50: cruza 20 dB antes
+    'bone_vibrator': 5.0,      # publicado 0-10 en ADULTO: practicamente nula
 }
+
+# La via osea del LACTANTE si tiene atenuacion interaural apreciable: 10-25
+# dB, y baja con la edad. La cabeza es chica y el craneo sin suturar no
+# conduce de un lado al otro como el del adulto, que es un bloque rigido.
+#
+# Importa para la curva sombra: en un adulto, estimular por hueso responde
+# siempre la mejor coclea y hay que enmascarar SIEMPRE. En un neonato, con
+# 20 dB de atenuacion, una asimetria moderada se puede ver sin enmascarar --
+# y por eso el screening oseo neonatal es viable.
+INFANT_BONE_IA_DB = 22.0
+
+
+def interaural_attenuation(transducer, population='adult_female'):
+    """Cuanto se atenua el estimulo al cruzar el craneo, en dB."""
+    base = INTERAURAL_ATTENUATION.get(transducer, 65.0)
+    if transducer != 'bone_vibrator':
+        return base
+    peso = INFANT_POPULATIONS.get(population, 0.0)
+    return base + peso * (INFANT_BONE_IA_DB - base)
+
+
+# Salida maxima por via aerea, en dB nHL. Ni el fono de insercion ni el
+# supraaural pasan de 90-100: pedirle 120 a un equipo real no entrega 120,
+# entrega distorsion. Mismo criterio que BONE_MAX_OUTPUT_DB.
+AIR_MAX_OUTPUT_DB = 100.0
 # La respuesta del oido NO evaluado se registra desde un montaje pensado
 # para el otro lado: llega mas chica y sobre todo sin onda I reconocible.
 SHADOW_AMP_FACTOR = 0.7
@@ -451,9 +476,13 @@ SAMPLES_PER_MS = 500 / 12
 # normativos estan medidos CON insertos: al pasar a supraaural todo el
 # complejo aparece 0.9 ms antes. Es el ajuste que en clinica se hace de
 # cabeza al comparar informes de equipos distintos.
+# Retardo acustico del transductor, en ms, respecto del fono de insercion
+# (que es la referencia del normativo). El de insercion tiene 0.9-1.0 ms de
+# tubo; el supraaural apenas 0.1 (el timpano queda a unos 3 cm del
+# diafragma), asi que su respuesta entera aparece ~0.8 ms ANTES.
 TRANSDUCER_LATENCY_MS = {
     'insert_earphone': 0.0,
-    'TDH39_headphone': -0.9,
+    'TDH39_headphone': -0.8,
     'bone_vibrator': 0.0,   # via osea: tiene su propio bloque normativo
 }
 
@@ -1314,26 +1343,46 @@ class ABRGenerator:
             0.25, 1.0))
 
     def add_transducer_artifact(self, t, transducer='insert_earphone',
-                                intensity=80.0):
-        """Artefacto electrico del estimulo, en los primeros ms.
+                                intensity=80.0, polarity=None):
+        """Artefacto electromagnetico del estimulo, en los primeros ms.
 
-        No es acustico: es la corriente que va al transductor acoplandose
-        al electrodo, asi que CRECE CON LA INTENSIDAD (mas nivel, mas
-        corriente) y depende de cuan cerca del electrodo este la bobina.
-        Por eso el insert casi no lo tiene -- la bobina queda a 33 cm de
-        tubo del oido -- y el supraaural, apoyado sobre el mastoides, lo
-        tiene entero. A intensidades altas se mete justo donde va la onda
-        I, que es el error que produce: se lee I donde solo hay estimulo.
+        No es acustico: el transductor es una bobina con un iman, y la
+        corriente del click induce un voltaje en los electrodos y sus
+        cables. Por eso CRECE CON LA INTENSIDAD (mas nivel, mas corriente)
+        y depende de cuan cerca del electrodo quede la bobina.
 
-        La escala es 10^((int-80)/25): la amplitud tabulada es la de 80 dB,
-        a 40 dB no queda nada y a 100 dB es cinco veces mas grande.
+        El supraaural es el caso feo: apoyado sobre la oreja, a pocos
+        centimetros del electrodo de mastoides, y ADEMAS casi no tiene
+        retardo acustico (0.1 ms contra los 0.9-1.0 del tubo de insercion),
+        asi que el artefacto y la onda I quedan pegados en el tiempo. A
+        nivel alto tapa la onda I o la deforma, y se lee una I temprana y
+        grande que es puro estimulo. El de insercion aleja la bobina 33 cm
+        de tubo y practicamente lo elimina; el vibrador, apoyado en el
+        mastoides, lo tiene entero.
+
+        Polaridad: el artefacto SE INVIERTE con el estimulo, asi que en
+        alternada se cancela al promediar mientras la respuesta neural en
+        buena parte no. Es la razon principal de alternar, mas alla de la
+        microfonica -- y el motivo de que una onda I "que solo aparece en
+        rarefaccion" haya que mirarla con desconfianza.
+
+        La escala es 10^((int-ref)/25) y el ref es de CADA transductor, no
+        80 para todos: 80 dB es un nivel de rutina para un fono pero esta
+        por encima de lo que el vibrador puede entregar. Con el ref unico,
+        el vibrador --que fisicamente es el peor, va apoyado sobre el hueso
+        a centimetros del electrodo-- terminaba con el artefacto mas chico
+        de los tres, porque nunca llega a 80. Su nivel de trabajo alto es
+        50-55, y ahi el artefacto tiene que ser grande: es la razon de que
+        por via osea las ondas tempranas se pierdan tan seguido.
         """
+        if polarity in ('Alternada', 'Alternante'):
+            return np.zeros_like(t)
         cfg = {
-            'insert_earphone': {'dur': 0.8, 'amp': 0.05},
-            'TDH39_headphone': {'dur': 1.2, 'amp': 0.12},
-            'bone_vibrator':   {'dur': 1.5, 'amp': 0.20},
-        }.get(transducer, {'dur': 0.8, 'amp': 0.05})
-        escala = 10 ** ((float(intensity) - 80.0) / 25.0)
+            'insert_earphone': {'dur': 0.8, 'amp': 0.05, 'ref': 80.0},
+            'TDH39_headphone': {'dur': 1.0, 'amp': 0.12, 'ref': 80.0},
+            'bone_vibrator':   {'dur': 1.5, 'amp': 0.30, 'ref': 50.0},
+        }.get(transducer, {'dur': 0.8, 'amp': 0.05, 'ref': 80.0})
+        escala = 10 ** ((float(intensity) - cfg['ref']) / 25.0)
         art = np.zeros_like(t)
         mask = t < cfg['dur']
         art[mask] = cfg['amp'] * escala * np.exp(-t[mask] * 5)
@@ -2061,6 +2110,10 @@ class ABRGenerator:
             if float(stimulus_config['int']) > BONE_MAX_OUTPUT_DB:
                 stimulus_config = dict(stimulus_config)
                 stimulus_config['int'] = BONE_MAX_OUTPUT_DB
+        elif float(stimulus_config['int']) > AIR_MAX_OUTPUT_DB:
+            # Los fonos tampoco son infinitos: 90-100 dB nHL es el tope.
+            stimulus_config = dict(stimulus_config)
+            stimulus_config['int'] = AIR_MAX_OUTPUT_DB
         baseline = self.get_baseline_values(
             population, stimulus_config['stim'], pathway,
             freq=stimulus_config.get('freq'),
@@ -2083,7 +2136,7 @@ class ABRGenerator:
         masking = float((case_config or {}).get('masking') or 0.0)
         # Atenuacion interaural del ESTIMULO: cuanto le llega al otro oido
         # de lo que se esta midiendo (ver shadow_values).
-        ia = INTERAURAL_ATTENUATION.get(transducer, 65.0)
+        ia = interaural_attenuation(transducer, population)
         # La del RUIDO es otra: el enmascaramiento se entrega por via aerea
         # al oido contrario, con un fono, aunque el estimulo vaya por hueso.
         # Con el vibrador (ia = 0) usar la del estimulo hacia que CUALQUIER
@@ -2092,10 +2145,10 @@ class ABRGenerator:
         # mismo -- el de copa deja cruzar el ruido 20 dB antes que el de
         # insercion, que es el motivo clinico de preferir insercion cuando
         # hay que enmascarar fuerte.
-        ia_masking = INTERAURAL_ATTENUATION.get(
+        ia_masking = interaural_attenuation(
             technical_config.get('masking_transducer')
             or (transducer if transducer != 'bone_vibrator' else 'insert_earphone'),
-            65.0)
+            population)
         if masking > 0:
             threshold = max(threshold, masking - ia_masking)
 
@@ -2250,7 +2303,7 @@ class ABRGenerator:
                  and transducer == 'insert_earphone')
         y_drift = self.add_baseline_drift(t, rng)
         y_artifact = self.add_transducer_artifact(
-            t, transducer, stimulus_config['int'])
+            t, transducer, stimulus_config['int'], stimulus_config.get('pol'))
 
         # 11. Curva limpia (sin ruido). La senial NO se escala por cuanto
         # se lleva promediado: en un equipo real esta completa desde el

@@ -2611,3 +2611,61 @@ Hay que empinar `WAVE_AMP_GROWTH` cerca del umbral (que a SL 0 quede en
 ~10-15% y no en 31%). Afecta TODOS los exámenes y todos los casos, no solo
 la vía ósea, así que no se toca sin decidirlo: es de los cambios que
 cambian la dificultad del ejercicio.
+
+## Transductores: IA por población, topes de salida y artefacto EM (2026-09-21)
+
+Tercer y cuarto aporte del docente. Contraste fila por fila:
+
+| | nuestro | publicado | |
+|---|---|---|---|
+| IA inserción ER-3A | 65 dB | 60-70 | OK |
+| IA supraaural TDH-39 | 45 dB | 40-50 | OK |
+| IA vibrador, adulto | 0 dB | 0-10 | al borde → **5** |
+| IA vibrador, **lactante** | 0 dB | **10-25, baja con la edad** | **no estaba** |
+| Retardo supraaural vs inserción | −0.9 ms | 0.1 vs 0.9-1.0 → −0.8 | corregido |
+| Tope aéreo | **el panel permitía 120** | 90-100 | **no estaba** |
+| Tope óseo | 55 | 45-55 | OK |
+
+**La IA ósea del lactante importa de verdad.** La cabeza es chica y el cráneo
+sin suturar no conduce de lado a lado como el bloque rígido del adulto:
+`interaural_attenuation()` da 5 dB en adulto, 13.5 a 1-3 años y 22 en
+neonato. Es parte de por qué el screening óseo neonatal es viable sin
+enmascarar en asimetrías moderadas.
+
+**Topes de salida**: `AIR_MAX_OUTPUT_DB = 100`. El panel dejaba pedir 120 y
+el generador lo tomaba como bueno; ningún fono entrega eso.
+
+**Artefacto electromagnético.** El transductor es una bobina con un imán y la
+corriente del click induce voltaje en los electrodos. Dos cosas nuevas:
+
+1. **Se cancela con polaridad alternada** (se invierte con el estímulo, la
+   respuesta neural en buena parte no). Ahora es la razón principal de
+   alternar, más allá de la microfónica -- y explica por qué una onda I "que
+   solo aparece en rarefacción" hay que mirarla con desconfianza. Antes el
+   artefacto se sumaba igual en las tres polaridades.
+2. **El vibrador es el peor de los tres y quedaba como el mejor.** La escala
+   del artefacto se refería a 80 dB para todos, pero 80 está por encima de lo
+   que el vibrador puede entregar: a su tope de 55 daba 0.02 µV, el más chico
+   de los tres, cuando físicamente va apoyado SOBRE el hueso a centímetros
+   del electrodo. Ahora cada transductor tiene su nivel de referencia (fonos
+   80, vibrador 50) y en su nivel alto de trabajo queda:
+
+   | transductor | nivel | artefacto | dura |
+   |---|---|---|---|
+   | inserción | 95 dB | 0.199 µV | 0.8 ms |
+   | supraaural | 95 dB | 0.478 µV | 1.0 ms |
+   | **vibrador** | **55 dB** | **0.475 µV** | **1.2 ms** |
+
+   Sumado a que por vía ósea las ondas tempranas ya vienen reducidas
+   (`BONE_WAVE_AMP`), eso es por qué se pierden tan seguido.
+
+Y el supraaural es el caso feo por partida doble: artefacto grande Y casi sin
+retardo acústico, así que el artefacto y la onda I quedan pegados en el
+tiempo. A nivel alto la tapa o la deforma, y se lee una I temprana y grande
+que es puro estímulo.
+
+**Efecto colateral en un test previo:** `test_a_high_high_pass_eats_the_amplitude`
+medía con polaridad alternada y su margen estaba calibrado con el artefacto
+sumando. El artefacto es de baja frecuencia, así que el pasa-alto también se
+lo comía y exageraba la diferencia. Se recalibró contra 500 y 750 Hz, donde
+el efecto es inequívoco.

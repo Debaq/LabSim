@@ -64,7 +64,8 @@ from abr.ABR_generator import (  # noqa: E402
     RATE_REF, STIM_MAP, BONE_MAX_OUTPUT_DB, agitation_factor,
     default_settings, select_population, stimulus_width,
     bone_latency_correction, INFANT_BONE_LAT_MS, INFANT_POPULATIONS,
-    NO_RESPONSE_DB)
+    NO_RESPONSE_DB, AIR_MAX_OUTPUT_DB, interaural_attenuation,
+    TRANSDUCER_LATENCY_MS)
 from abr.protocols import PROTOCOLS, get_protocol  # noqa: E402
 
 NORMS = os.path.join(os.path.dirname(__file__), '..', 'resources', 'abr', 'normative_data.json')
@@ -1729,11 +1730,19 @@ def test_a_high_high_pass_eats_the_amplitude_not_the_latency():
         return t[zona][np.argmax(y[zona])], y[zona].max() - y[zona].min()
     lat_ok, pv_ok = pico_valle(100)
     lat_mal, pv_mal = pico_valle(300)
-    assert pv_mal < pv_ok * 0.85, (pv_ok, pv_mal)
+    # 300 Hz se lleva ~15% de la amplitud. El limite estaba en 0.85 justo, y
+    # quedo al borde cuando el artefacto del transductor dejo de sumar en
+    # polaridad alternada (que es la del caso de prueba): ese artefacto es
+    # de baja frecuencia, asi que el pasa-alto tambien se lo comia y
+    # exageraba la diferencia. Se mide contra 500 y 750, donde el efecto es
+    # inequivoco, y se deja 300 como "ya se nota".
+    assert pv_mal < pv_ok * 0.90, (pv_ok, pv_mal)
     assert abs(lat_mal - lat_ok) < 0.2, (lat_ok, lat_mal)
+    _, pv_500 = pico_valle(500)
+    assert pv_500 < pv_ok * 0.75, (pv_ok, pv_500)
     # Y con el pasa-alto en 750 no queda casi nada que medir.
     _, pv_peor = pico_valle(750)
-    assert pv_peor < pv_mal
+    assert pv_peor < pv_500
 
 
 # --------------------------------------- agitacion del paciente (tramos)
@@ -2267,6 +2276,97 @@ DESCENDENTE = {
 
 def _stim(stim, freq=None):
     return {'stim': stim, 'freq': freq, 'int': 60, 'pathway': 'air_conduction'}
+
+
+def test_alternating_polarity_cancels_the_stimulus_artifact():
+    """El artefacto se invierte con el estimulo: alternando se cancela.
+
+    El transductor es una bobina con un iman y la corriente del click
+    induce voltaje en los electrodos. Al invertir la polaridad se invierte
+    el artefacto, asi que al promediar alternada desaparece mientras la
+    respuesta neural en buena parte no. Es la razon principal de alternar,
+    mas alla de la microfonica -- y por que una onda I "que solo aparece en
+    rarefaccion" hay que mirarla con desconfianza.
+    """
+    g = _gen()
+    t = np.linspace(0, 12, 1000)
+    for transductor in ('insert_earphone', 'TDH39_headphone', 'bone_vibrator'):
+        fija = g.add_transducer_artifact(t, transductor, 95, 'Rarefacción')
+        alterna = g.add_transducer_artifact(t, transductor, 95, 'Alternada')
+        assert fija.max() > 0.1, transductor
+        assert alterna.max() == 0.0, transductor
+
+    # El supraaural es el caso feo: bobina apoyada a centimetros del
+    # electrodo. El de insercion la aleja 33 cm de tubo.
+    supra = g.add_transducer_artifact(t, 'TDH39_headphone', 95, 'Rarefacción')
+    insercion = g.add_transducer_artifact(t, 'insert_earphone', 95, 'Rarefacción')
+    assert supra.max() > 2 * insercion.max()
+    # Y dura hasta ~1 ms, que es justo donde cae la onda I del supraaural
+    # (su respuesta entera aparece 0.8 ms antes, porque no tiene tubo).
+    assert 0.8 <= t[supra > 0.001].max() <= 1.2
+    assert TRANSDUCER_LATENCY_MS['TDH39_headphone'] == -0.8
+
+    # Crece con la intensidad: a nivel bajo no molesta, a nivel alto tapa.
+    bajo = g.add_transducer_artifact(t, 'TDH39_headphone', 60, 'Rarefacción')
+    assert bajo.max() < 0.1 * supra.max()
+
+    # El vibrador es el peor de los tres: va apoyado sobre el hueso, a
+    # centimetros del electrodo. Se compara a SU nivel alto de trabajo (55,
+    # su tope) contra el de los fonos (95): con la escala anclada en 80 para
+    # todos, el vibrador quedaba con el artefacto mas CHICO de los tres
+    # porque nunca llega a 80, que es justo al reves de lo que pasa.
+    vibrador = g.add_transducer_artifact(t, 'bone_vibrator', 55, 'Rarefacción')
+    assert vibrador.max() > 2 * insercion.max()
+    assert vibrador.max() > 0.9 * supra.max()
+    # Y dura mas: es el que mas se mete donde van las ondas tempranas, que
+    # por via osea ya vienen reducidas (ver BONE_WAVE_AMP).
+    assert t[vibrador > 0.001].max() > t[supra > 0.001].max()
+
+
+def test_interaural_attenuation_matches_the_published_ranges():
+    """Cada transductor cruza el craneo distinto, y el bebe no es un adulto.
+
+    Publicado: insercion ER-3A 60-70 dB, supraaural TDH-39/49 40-50, vibrador
+    oseo en adulto 0-10, y en neonato y lactante pequenio 10-25 bajando con la
+    edad -- la cabeza es chica y el craneo sin suturar no conduce de lado a
+    lado como el bloque rigido del adulto.
+
+    El vibrador del adulto estaba en 0 (borde del rango) y el del bebe
+    tambien, que es directamente otro numero.
+    """
+    assert 60 <= interaural_attenuation('insert_earphone') <= 70
+    assert 40 <= interaural_attenuation('TDH39_headphone') <= 50
+    assert 0 <= interaural_attenuation('bone_vibrator') <= 10
+    # El fono no cambia con la edad: la atenuacion es del recorrido por el
+    # craneo del sonido que entra por el conducto, no del craneo mismo.
+    assert (interaural_attenuation('insert_earphone', 'neonate')
+            == interaural_attenuation('insert_earphone'))
+    # El vibrador si.
+    for pob in ('neonate', 'toddler'):
+        assert 10 <= interaural_attenuation('bone_vibrator', pob) <= 25, pob
+    assert (interaural_attenuation('bone_vibrator', 'neonate')
+            > interaural_attenuation('bone_vibrator', 'toddler')
+            > interaural_attenuation('bone_vibrator', 'adult_female'))
+
+
+def test_neither_transducer_delivers_more_than_it_can():
+    """Los topes de salida son del equipo, no del modelo.
+
+    Publicado: fonos 90-100 dB nHL, vibrador 45-55. Pedirle 120 a un fono no
+    entrega 120, entrega distorsion; el panel dejaba pedirlo y el generador
+    lo tomaba como bueno.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    _, _, aereo = _curva(intensity=120, technical={'transducer': 'insert_earphone'})
+    _, _, oseo = _curva(intensity=120, technical={'transducer': 'bone_vibrator'})
+    assert aereo['output_db'] == AIR_MAX_OUTPUT_DB
+    assert oseo['output_db'] == BONE_MAX_OUTPUT_DB
+    assert AIR_MAX_OUTPUT_DB > BONE_MAX_OUTPUT_DB
+    # Y por debajo del tope entrega lo que se le pide.
+    _, _, normal = _curva(intensity=80, technical={'transducer': 'insert_earphone'})
+    assert normal['output_db'] == 80
 
 
 def test_masking_crosses_over_by_the_phone_not_by_the_stimulus():
