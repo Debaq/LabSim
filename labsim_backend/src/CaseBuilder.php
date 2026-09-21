@@ -1013,6 +1013,10 @@ final class CaseBuilder
             'Weber' => $form['weber'],
             'sector' => 'Camara_sono',
             'edad' => $age,
+            // Horas de vida, solo en el primer año (ver CaseForm). Es lo que
+            // separa un recién nacido de turno de un lactante de ocho meses:
+            // los dos son 'edad' = 0 y no se parecen en nada.
+            'edad_horas' => $form['edad_horas'] ?? null,
             'volume' => [self::earVolume($age, $gender), self::earVolume($age, $gender), 'N/D'],
             'UMD' => $form['umd'],
             'SDT' => $form['sdt'],
@@ -1248,6 +1252,23 @@ final class CaseBuilder
                 // Mismo shape que los otros checkboxes del form (presente =
                 // marcado): un módulo en manual no aparece en $_POST.
                 $v['perfil']['auto'][$moduloAuto] = '1';
+            }
+        }
+
+        $horas = $data['edad_horas'] ?? null;
+        if ($horas !== null && $horas !== '') {
+            $horas = (int) $horas;
+            // Se muestra en la unidad más legible: horas el primer par de
+            // días, después días, y meses pasado el mes y medio.
+            if ($horas >= 1080) {
+                $v['edad_valor'] = (string) (int) round($horas / 720);
+                $v['edad_unidad'] = 'meses';
+            } elseif ($horas >= 48) {
+                $v['edad_valor'] = (string) (int) round($horas / 24);
+                $v['edad_unidad'] = 'dias';
+            } else {
+                $v['edad_valor'] = (string) $horas;
+                $v['edad_unidad'] = 'horas';
             }
         }
 

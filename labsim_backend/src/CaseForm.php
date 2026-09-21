@@ -98,6 +98,13 @@ final class CaseForm
         // Editable siempre acá, en creación y en edición -- la agenda no
         // incide en esto para nada, solo guarda la fecha de la cita.
         $age = max(0, (int) ($v['age'] ?? 0));
+        // Horas de vida: solo tiene sentido en el primer año, y es lo que
+        // decide si el caso es un recién nacido de turno de maternidad (con
+        // su transitorio, ver CaseProfile::neonatalTransientDb) o un
+        // lactante de ocho meses. La edad en años enteros no alcanza:
+        // "0 años" mete en la misma bolsa un bebé de seis horas y uno de
+        // once meses, que en pantalla no se parecen en nada.
+        $horasVida = self::horasDeVida($v, $age);
         $nombre1 = trim((string) ($v['nombre1'] ?? ''));
         $apellido1 = trim((string) ($v['apellido1'] ?? ''));
 
@@ -327,7 +334,7 @@ final class CaseForm
         // CaseProfile::project). La misma función alimenta la vista previa
         // en vivo del formulario, vía admin/case_project.php: una sola
         // implementación de cada ley.
-        $proyeccion = CaseProfile::project($airPairs, $bonePairs, $perfil, ['OD' => $zOd, 'OI' => $zOi]);
+        $proyeccion = CaseProfile::project($airPairs, $bonePairs, $perfil, ['OD' => $zOd, 'OI' => $zOi], $horasVida);
         $decomp = $proyeccion['decomp'];
 
         // La derivación es una SUGERENCIA, no una fuente que pise al
@@ -453,6 +460,7 @@ final class CaseForm
             $data = CaseBuilder::buildCaseData([
                 'gender' => $gender,
                 'age' => $age,
+                'edad_horas' => $horasVida,
                 'id' => $id,
                 'aerea' => $airPairs,
                 'osea' => self::zip($osea['od'], $osea['oi']),
@@ -564,6 +572,30 @@ final class CaseForm
         $f->nombre1 = $nombre1;
         $f->apellido1 = $apellido1;
         return $f;
+    }
+
+    /**
+     * Horas de vida del paciente, o null si no viene al caso.
+     *
+     * El formulario lo pide con unidad (horas, días o meses) porque un
+     * neonatólogo no dice "0.002 años". Se normaliza a horas, que es la
+     * unidad en la que el transitorio de las primeras horas tiene sentido.
+     * Sobre el año se descarta: ahí manda la edad en años.
+     */
+    private static function horasDeVida(array $v, int $age): ?int
+    {
+        if ($age > 0) {
+            return null;
+        }
+        $n = self::val($v, ['edad_valor'], '');
+        if ($n === '' || $n === null || !is_numeric($n)) {
+            return null;
+        }
+        $unidad = (string) self::val($v, ['edad_unidad'], 'horas');
+        $factor = ['horas' => 1, 'dias' => 24, 'meses' => 720];
+        $horas = (int) round((float) $n * ($factor[$unidad] ?? 1));
+        // Un año o más en horas ya no es un recién nacido: lo cubre 'age'.
+        return max(0, min($horas, 8760));
     }
 
     /**

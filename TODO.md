@@ -2234,3 +2234,47 @@ toca.
 Las franjas viven en tres lugares que tienen que decir lo mismo:
 `ABR_generator.select_population`, `CaseWaveforms::poblacion` y
 `public/js/case/abr.js`. Hay test en los dos primeros.
+
+## Recién nacido: horas de vida y su transitorio (2026-09-21)
+
+La edad se guardaba en años enteros, así que un bebé de seis horas y uno de
+once meses eran los dos "0 años". No había forma de armar el caso más común
+del screening neonatal, ni en el generador automático ni en la ficha.
+
+**El campo.** `edad_valor` + `edad_unidad` (horas / días / meses) en la ficha
+del paciente, solo cuando la edad va en 0. Se normaliza a `edad_horas` en
+`cases.data` y vuelve a la unidad más legible al reabrir el caso (horas el
+primer par de días, después días, meses pasado el mes y medio). La ficha PDF
+imprime "6 horas de vida" en vez de "0 años".
+
+**El hallazgo, que es el punto.** Antes de las 24 horas el conducto tiene
+vérnix y restos de líquido amniótico y el oído medio todavía tiene
+mesénquima: es una pérdida de transmisión REAL pero transitoria, que se
+resuelve sola en dos o tres días. Por eso el screening con EOA antes de las
+24 horas refiere mucho más que a las 48. `CaseProfile::neonatalTransientDb()`
+lo modela como atenuación que decae exponencial (28 dB a las 0 h, τ = 24 h,
+nada pasada la semana), y `project()` la reparte según lo que cada examen
+atraviesa:
+
+| horas | ABR aéreo | ABR óseo | atenuación EOA | lectura |
+|---|---|---|---|---|
+| 0 | 35 nHL | 20 nHL | 61.6 dB | EOA ausente |
+| 6 | 35 nHL | 20 nHL | 48.0 dB | EOA ausente |
+| 24 | 25 nHL | 20 nHL | 22.7 dB | EOA reducida |
+| 48 | 20 nHL | 20 nHL | 8.3 dB | EOA presente |
+| 168 | 20 nHL | 20 nHL | 0 dB | normal |
+
+La EOA va al doble (cruza conducto y oído medio de ida Y de vuelta, mismo
+criterio que la conductiva en `oae_attenuation_db`) y el ABR aéreo a 0.6. La
+**vía ósea no se toca**: el vibrador saltea conducto y oído medio, y ese
+contraste --aérea elevada, ósea normal-- es lo que dice que es transitorio y
+no hipoacusia. El `type` del oído sigue siendo `normal`: si se derivara como
+conductivo, el alumno leería una patología donde no la hay.
+
+El cliente no necesitó cambios: la EOA ya lee `atten_db` del caso y el ABR
+su `umbral_por_estimulo`, los dos proyectados por el backend.
+
+**Pendiente de lo mismo:** la plasticidad craneal del neonato también hace
+que el timpanograma de 226 Hz no sirva (hay que usar 1000 Hz) y que la vía
+ósea neonatal tenga su propia calibración. Nada de eso está modelado: hoy el
+timpanograma del recién nacido se dibuja como el de un adulto.

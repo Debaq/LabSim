@@ -21,6 +21,16 @@
         <label>Edad
             <input type="number" name="age" id="patient-age" min="0" max="110" value="<?= htmlspecialchars((string) ($v['age'] ?? '')) ?>">
         </label>
+        <label>Edad exacta <span class="help" style="font-weight:normal;">(solo si va en 0)</span>
+            <span style="display:flex; gap:0.3rem;">
+                <input type="number" name="edad_valor" id="patient-edad-valor" min="0" max="8760" step="1" style="width:5em;" value="<?= htmlspecialchars((string) ($v['edad_valor'] ?? '')) ?>">
+                <select name="edad_unidad" id="patient-edad-unidad">
+                    <?php foreach (['horas' => 'horas', 'dias' => 'días', 'meses' => 'meses'] as $u => $uLabel): ?>
+                    <option value="<?= $u ?>"<?= ($v['edad_unidad'] ?? 'horas') === $u ? ' selected' : '' ?>><?= $uLabel ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </span>
+        </label>
         <label>Fecha de nacimiento
             <input type="text" name="fecha_nac" id="patient-fecha-nac" value="<?= htmlspecialchars((string) ($v['fecha_nac'] ?? '')) ?>" readonly title="Se calcula sola a partir de la edad (día y mes al azar)." placeholder="AAAA-MM-DD">
         </label>

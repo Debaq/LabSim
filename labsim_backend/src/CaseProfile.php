@@ -151,6 +151,54 @@ final class CaseProfile
         'nb_ce_chirp_ls_4000Hz' => 5.0,
     ];
 
+    /**
+     * Transitorio de las primeras horas de vida, en dB.
+     *
+     * Un recién nacido de menos de 24 horas tiene el conducto con vérnix y
+     * restos de líquido amniótico, y mesénquima en el oído medio: el
+     * resultado es una pérdida de transmisión REAL pero transitoria, que se
+     * resuelve sola en dos o tres días. Es la razón por la que el screening
+     * con EOA antes de las 24 horas refiere mucho más que a las 48, y es
+     * contenido de la asignatura: el alumno tiene que poder ver una EOA
+     * ausente en un oído que oye perfecto.
+     *
+     * Se modela como una atenuación que decae exponencial con las horas de
+     * vida (`NEONATAL_TAU_H`), y NO como una patología: el caso sigue
+     * siendo un oído normal.
+     *
+     * Los tres exámenes no la sufren igual:
+     * - EOA: la peor parte. El sonido atraviesa el conducto y el oído medio
+     *   de ida Y de vuelta, así que la atenuación va al doble (mismo
+     *   criterio que la conductiva en oae_attenuation_db).
+     * - ABR aéreo: la sufre una sola vez, y el fono de inserción empuja el
+     *   estímulo más allá de parte del vérnix.
+     * - ABR óseo: NO la sufre. El vibrador saltea conducto y oído medio, y
+     *   ese contraste --aérea elevada, ósea normal-- es justo lo que dice
+     *   que es transitorio y no una hipoacusia.
+     */
+    public const NEONATAL_DEBRIS_DB = 28.0;
+    public const NEONATAL_TAU_H = 24.0;
+    public const NEONATAL_OAE_FACTOR = 2.2;
+    public const NEONATAL_ABR_FACTOR = 0.6;
+    /** Pasada una semana ya no queda nada que modelar. */
+    public const NEONATAL_MAX_H = 168.0;
+
+    /**
+     * Atenuación por el transitorio, en dB, a las `$horas` de vida.
+     * `null` (o sin dato) = no es un recién nacido: 0.
+     */
+    public static function neonatalTransientDb($horas): float
+    {
+        if ($horas === null || $horas === '') {
+            return 0.0;
+        }
+        $h = max(0.0, (float) $horas);
+        if ($h >= self::NEONATAL_MAX_H) {
+            return 0.0;
+        }
+        return self::NEONATAL_DEBRIS_DB * exp(-$h / self::NEONATAL_TAU_H);
+    }
+
     /** Paso del umbral ABR (los equipos van de 5 en 5 dB). */
     public const ABR_STEP_DB = 5;
     public const ABR_MAX_DB = 120;
@@ -2330,8 +2378,11 @@ final class CaseProfile
      * @param array $perfil     normalize()
      * @param array<string,string> $tympPorLado ['OD' => 'A', 'OI' => 'B']
      */
-    public static function project(array $airPairs, array $bonePairs, array $perfil, array $tympPorLado): array
+    public static function project(array $airPairs, array $bonePairs, array $perfil, array $tympPorLado, $horasDeVida = null): array
     {
+        // Transitorio de las primeras horas (ver neonatalTransientDb): no es
+        // patología del caso, es la edad del paciente.
+        $transitorio = self::neonatalTransientDb($horasDeVida);
         $decomp = [];
         foreach (['OD' => 0, 'OI' => 1] as $lado => $sideIdx) {
             $decomp[$lado] = self::decompose(
@@ -2351,6 +2402,21 @@ final class CaseProfile
             $otro = $lado === 'OD' ? 'OI' : 'OD';
 
             $porEstimulo = self::abrThresholds($decomp[$lado], 'air_conduction');
+            if ($transitorio > 0.0) {
+                // Solo la vía aérea: el vibrador saltea conducto y oído
+                // medio, y ese contraste es el hallazgo.
+                $sumaAbr = $transitorio * self::NEONATAL_ABR_FACTOR;
+                foreach ($porEstimulo as $stim => $db) {
+                    if ($db === null) {
+                        continue;
+                    }
+                    $porEstimulo[$stim] = (int) self::clamp(
+                        round(($db + $sumaAbr) / self::ABR_STEP_DB) * self::ABR_STEP_DB,
+                        0.0,
+                        (float) self::ABR_MAX_DB
+                    );
+                }
+            }
             $abr[$lado] = [
                 // El tipo decide la física de la curva (corrimiento paralelo
                 // de la conductiva, pendiente L-I de la coclear, interpicos
@@ -2376,6 +2442,12 @@ final class CaseProfile
                 'umbral' => 0,
                 'desviaciones' => self::oaeDeviations($decomp[$lado]),
             ];
+            if ($transitorio > 0.0) {
+                // atten_db es la atenuación pareja que el cliente suma tal
+                // cual (ver oae_attenuation_db): acá entra al doble porque
+                // el sonido cruza el conducto de ida y de vuelta.
+                $eoas[$lado]['atten_db'] = round($transitorio * self::NEONATAL_OAE_FACTOR, 1);
+            }
 
             $tymp = (string) ($tympPorLado[$lado] ?? 'A');
             $ipsi = [];

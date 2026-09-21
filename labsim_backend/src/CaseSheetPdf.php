@@ -270,6 +270,12 @@ final class CaseSheetPdf
 
         $nombre = trim(((string) ($patient['nombre'] ?? '')) . ' ' . ((string) ($patient['apellido'] ?? '')));
         $edad = isset($data['edad']) ? (string) $data['edad'] . ' años' : 'N/D';
+        // Un recién nacido no se describe en años: "0 años" mete en la misma
+        // bolsa un bebé de seis horas y uno de once meses, y el examen no se
+        // parece en nada (ver CaseProfile::neonatalTransientDb).
+        if (($data['edad_horas'] ?? null) !== null && (int) ($data['edad'] ?? 0) === 0) {
+            $edad = self::edadExacta((int) $data['edad_horas']);
+        }
         $sexo = ((int) ($data['gender'] ?? 0)) === 1 ? 'Femenino' : 'Masculino';
 
         $this->filasKv([
@@ -2636,6 +2642,20 @@ final class CaseSheetPdf
             'coclear' => 'Coclear',
             'neural' => 'Retrococlear',
         ][$tipo] ?? $tipo;
+    }
+
+    /** "18 horas de vida", "3 días de vida", "8 meses". */
+    private static function edadExacta(int $horas): string
+    {
+        if ($horas < 48) {
+            return $horas . ($horas === 1 ? ' hora' : ' horas') . ' de vida';
+        }
+        if ($horas < 1080) {
+            $dias = (int) round($horas / 24);
+            return $dias . ($dias === 1 ? ' día' : ' días') . ' de vida';
+        }
+        $meses = (int) round($horas / 720);
+        return $meses . ($meses === 1 ? ' mes' : ' meses');
     }
 
     private static function estimuloLabel(string $estimulo): string
