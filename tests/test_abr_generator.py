@@ -65,7 +65,7 @@ from abr.ABR_generator import (  # noqa: E402
     default_settings, select_population, stimulus_width,
     bone_latency_correction, INFANT_BONE_LAT_MS, INFANT_POPULATIONS,
     NO_RESPONSE_DB, AIR_MAX_OUTPUT_DB, interaural_attenuation,
-    TRANSDUCER_LATENCY_MS)
+    TRANSDUCER_LATENCY_MS, NOISE_REF_SWEEPS)
 from abr.protocols import PROTOCOLS, get_protocol  # noqa: E402
 
 NORMS = os.path.join(os.path.dirname(__file__), '..', 'resources', 'abr', 'normative_data.json')
@@ -1370,9 +1370,27 @@ def test_artifact_rejection_cuts_both_ways():
     # hay SN10 y onda VII, y la comparacion terminaba dependiendo de
     # cuanta senial quedaba en esos ultimos milisegundos.
     _, _, meta_habitual = _curva()
-    _, _, meta_sin = _curva(technical={'artifact_reject_uv': 0.0})
+    # Rechazo estrecho en un paciente QUIETO: se descartan barridos buenos,
+    # el promedio junta menos y el residual sube. Rechazar tiene un precio.
     assert meta['residual_noise_nv'] > meta_habitual['residual_noise_nv']
-    assert meta_sin['residual_noise_nv'] > meta_habitual['residual_noise_nv']
+
+    # Apagar el rechazo en un paciente quieto ya ensucia algo: entran las
+    # excursiones normales del EEG que el rechazo recortaba
+    # (NO_REJECT_NOISE_FACTOR), aunque no se descarte ningun barrido.
+    _, _, quieto_sin = _curva(technical={'artifact_reject_uv': 0.0})
+    assert quieto_sin['accepted_sweeps'] == meta_habitual['accepted_sweeps']
+    assert (quieto_sin['residual_noise_nv']
+            > 1.2 * meta_habitual['residual_noise_nv'])
+
+    inquieto = {'inquietud': 0.8}
+    _, _, con_rechazo = _curva(caso_extra=inquieto)
+    _, _, sin_rechazo = _curva(technical={'artifact_reject_uv': 0.0},
+                               caso_extra=inquieto)
+    # Con el paciente moviendose, el rechazo es la diferencia entre un
+    # trazo legible y uno inservible: descarta la mitad de los barridos y
+    # aun asi el residual queda menos de la mitad.
+    assert sin_rechazo['accepted_sweeps'] > con_rechazo['accepted_sweeps']
+    assert sin_rechazo['residual_noise_nv'] > 2 * con_rechazo['residual_noise_nv']
 
 
 def test_residual_noise_target_sets_the_floor():
@@ -1662,8 +1680,15 @@ def test_false_wave_raises_residual_noise_but_not_fsp():
         return
     _, _, con = _curva_falsa(lat=5.6, umbral=90)
     _, _, sin = _curva_falsa(amp=0, umbral=90)
-    assert con['residual_noise_nv'] > sin['residual_noise_nv'] * 1.5
+    # El margen era 1.5 cuando el trazo salia tres veces mas limpio de lo
+    # que el equipo declaraba: con el ruido ya calibrado, la misma falsa
+    # onda pesa proporcionalmente menos sobre el residual. Sigue siendo la
+    # pista numerica, pero no tapa el registro.
+    assert con['residual_noise_nv'] > sin['residual_noise_nv'] * 1.3
     assert abs(con['fsp'] - sin['fsp']) < 1e-9
+    # Y crece con el tamanio de la falsa onda, que es lo que la hace pista.
+    _, _, grande = _curva_falsa(amp=0.4, lat=5.6, umbral=90)
+    assert grande['residual_noise_nv'] > con['residual_noise_nv']
 
 
 def test_false_wave_only_in_its_intensity_range():
@@ -2388,6 +2413,52 @@ def test_neither_transducer_delivers_more_than_it_can():
     # Y por debajo del tope entrega lo que se le pide.
     _, _, normal = _curva(intensity=80, technical={'transducer': 'insert_earphone'})
     assert normal['output_db'] == 80
+
+
+def test_averaging_more_lowers_the_noise_like_one_over_root_n():
+    """El residual baja con los barridos ABSOLUTOS, no con la fraccion.
+
+    El bloque de ruido era `objetivo / NOISE_BLOCKS`, asi que al llegar al
+    objetivo siempre habia los mismos bloques: pedir 4000 barridos daba
+    exactamente el mismo ruido final que pedir 1000. Promediar mas no
+    servia de nada, que es justo la maniobra con la que se confirma una
+    respuesta cerca del umbral.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    # Se promedian varias semillas: una sola realizacion del ruido tiene
+    # ~15% de dispersion y el test daria falsos rojos.
+    semillas = ['caso-1', 'caso-2', 'caso-3', 'caso-4', 'caso-5', 'caso-6']
+    ruido = {}
+    for n in (1000, 2000, 4000):
+        medidas = [_curva(current=n, target=n, seed_key=sk)[2]['residual_noise_nv']
+                   for sk in semillas]
+        ruido[n] = sum(medidas) / len(medidas)
+    # 1/sqrt(N): duplicar los barridos baja el ruido ~30%.
+    assert 1.25 < ruido[1000] / ruido[2000] < 1.6, ruido
+    assert 1.25 < ruido[2000] / ruido[4000] < 1.6, ruido
+    # Y cuadruplicar lo baja a la mitad.
+    assert 1.8 < ruido[1000] / ruido[4000] < 2.3, ruido
+
+
+def test_the_residual_noise_matches_what_the_equipment_declares():
+    """A los barridos de referencia, el residual es el que declara el equipo.
+
+    El ruido se genera con RMS 1 y DESPUES pasa por la banda de registro,
+    que se queda con una fraccion: sin compensar eso, el trazo salia 3.7
+    veces mas limpio de lo que el equipo decia (11 nV cuando declaraba 40).
+    Un trazo demasiado limpio hace trivial encontrar el umbral.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    for objetivo in (40, 80):
+        _, _, meta = _curva(current=int(NOISE_REF_SWEEPS),
+                            target=int(NOISE_REF_SWEEPS),
+                            technical={'residual_noise_nv': objetivo})
+        assert 0.75 * objetivo < meta['residual_noise_nv'] < 1.3 * objetivo, \
+            (objetivo, meta['residual_noise_nv'])
 
 
 def test_the_response_at_threshold_is_at_the_noise_level():

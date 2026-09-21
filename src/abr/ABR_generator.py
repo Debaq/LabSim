@@ -430,9 +430,26 @@ SHADOW_WAVE_I_FACTOR = 0.3
 # nuevo en cada tick como antes.
 NOISE_FLOOR_UV = 0.055
 NOISE_BLOCKS = 200
-# Techo de seguridad del ruido al arrancar la promediacion: mas que esto se
-# sale de la escala del grafico y deja de leerse como ruido.
-NOISE_MAX_UV = 1.2
+# Barridos a los que esta referido ese ruido residual. El residual cae como
+# 1/sqrt(N) desde ahi: a 2000 barridos es 1/sqrt(2) del de 1000, a 4000 la
+# mitad. Es lo que hace que promediar mas sirva -- y lo que obliga a
+# promediar mas para confirmar una respuesta cerca del umbral.
+NOISE_REF_SWEEPS = 1000.0
+# El ruido se genera con RMS 1 y DESPUES pasa por la banda de registro, que
+# se queda con una fraccion (el EEG es 1/f y el EMG es de alta: la mayor
+# parte de su energia cae fuera de 100-3000 Hz). El equipo mide el residual
+# sobre el trazo YA filtrado, asi que la escala tiene que definirse ahi: sin
+# esta compensacion el trazo salia 3.7 veces mas limpio de lo que el propio
+# equipo declaraba (11 nV cuando decia 40).
+NOISE_BAND_CALIBRATION = 3.7
+# Techo de seguridad del ruido al arrancar la promediacion, EN EL TRAZO YA
+# FILTRADO (que es lo que se ve): mas que esto se sale de la escala del
+# grafico y deja de leerse como ruido. Estaba en 1.2 y se expresaba en
+# unidades del ruido sin filtrar, asi que al calibrar la escala contra el
+# trazo filtrado quedo mordiendo en el caso normal: cualquier objetivo de
+# ruido de 40 nV para arriba daba exactamente el mismo trazo, y el ajuste
+# del equipo dejaba de hacer efecto.
+NOISE_MAX_UV = 2.5
 
 # Falsa onda V: pico de ruido con forma de onda que el docente pone a
 # proposito para que el alumno tenga que decidir con los subpromedios A/B y
@@ -1627,10 +1644,15 @@ class ABRGenerator:
     @staticmethod
     def noise_blocks_done(current_avg, target_avg):
         """Bloques de ruido ya acumulados para `current_avg` barridos."""
-        target = max(float(target_avg), 1.0)
-        block = max(target / NOISE_BLOCKS, 10.0)
+        # El bloque es un numero ABSOLUTO de barridos, no una fraccion del
+        # objetivo. Antes era target/NOISE_BLOCKS, asi que al llegar al
+        # objetivo siempre habia NOISE_BLOCKS bloques y el ruido final era
+        # el mismo pidiendo 1000 barridos que pidiendo 4000: promediar mas
+        # no servia de nada, que es justo la maniobra con la que se confirma
+        # una respuesta cerca del umbral.
+        block = max(NOISE_REF_SWEEPS / NOISE_BLOCKS, 1.0)
         m = int(np.ceil(max(float(current_avg), 1.0) / block))
-        return max(min(m, NOISE_BLOCKS * 4), 1)
+        return max(min(m, NOISE_BLOCKS * 16), 1)
 
     @staticmethod
     def band_noise_factor(filter_high, filter_low):
@@ -1660,14 +1682,14 @@ class ABRGenerator:
         para que al llegar al objetivo (m = NOISE_BLOCKS) el piso quede
         en el ruido residual que declara el equipo, con paciente tipico.
         """
-        amp = (noise_floor_uv * np.sqrt(NOISE_BLOCKS) * quality * imp_factor
-               * max(float(band_factor), 1e-6))
+        amp = (noise_floor_uv * NOISE_BAND_CALIBRATION * np.sqrt(NOISE_BLOCKS)
+               * quality * imp_factor * max(float(band_factor), 1e-6))
         # El techo existe para que el arranque de la promediacion no se
         # salga de la escala del grafico; NO para tapar unos electrodos
         # malos, asi que sube con ellos. Sin esto, de 6 kOhm para arriba
         # todo daba el mismo trazo y la regla de los 5 kOhm no se podia
         # mostrar.
-        techo = NOISE_MAX_UV * max(imp_factor, 1.0)
+        techo = NOISE_MAX_UV * NOISE_BAND_CALIBRATION * max(imp_factor, 1.0)
         return min(amp, techo)
 
     # =====================================================================

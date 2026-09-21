@@ -2730,3 +2730,54 @@ trazo sale ~3 veces más limpio de lo que el propio equipo declara. Eso hace
 el umbral más fácil de lo que debería incluso con la amplitud ya corregida.
 No se tocó: la calibración del ruido tiene sus propios tests y toca FSP,
 rechazo de artefacto y monitor de EEG.
+
+## Ruido residual: calibrado y dependiente de los barridos (2026-09-21)
+
+Dos defectos, y el segundo era peor que el primero.
+
+**1. El trazo salía 3.7 veces más limpio de lo que el propio equipo
+declaraba** (11 nV medidos con el objetivo en 40). El ruido se genera con
+RMS 1 y DESPUÉS pasa por la banda de registro, que se queda con una
+fracción -- el EEG es 1/f y el EMG es de alta, así que la mayor parte de su
+energía cae fuera de 100-3000 Hz. El equipo mide el residual sobre el trazo
+ya filtrado, así que la escala tiene que definirse ahí
+(`NOISE_BAND_CALIBRATION`).
+
+**2. El ruido dependía de la FRACCIÓN del objetivo, no de los barridos.**
+El bloque era `objetivo / NOISE_BLOCKS`, así que al llegar al objetivo
+siempre había los mismos bloques: pedir 4000 barridos daba exactamente el
+mismo ruido final que pedir 1000. **Promediar más no servía de nada**, que
+es justo la maniobra con la que se confirma una respuesta cerca del umbral.
+Ahora el bloque es absoluto y el residual cae como 1/√N desde
+`NOISE_REF_SWEEPS`.
+
+Las dos cosas juntas cambian el ejercicio. Oído con umbral real de 30 dB,
+SNR de la onda V:
+
+| dB | SL | 1000 | 2000 | 4000 | 8000 |
+|---|---|---|---|---|---|
+| 45 | +15 | 5.4 | 8.9 | 13.0 | 18.9 |
+| 40 | +10 | 4.1 | 6.6 | 11.2 | 13.3 |
+| **35** | **+5** | **2.2** | **2.9** | **4.5** | **8.1** |
+| 30 | 0 | 2.0 | 2.1 | 1.8 | 2.4 |
+
+Con el criterio habitual (SNR ≳ 3), el alumno que promedia 1000 barridos
+informa umbral 45; el que promedia 4000 llega a 35. El umbral real (30)
+nunca se ve claro, que es la definición de umbral. Es exactamente lo que
+pasa en la clínica y antes no pasaba.
+
+**Tres tests se cayeron y los tres estaban midiendo el defecto:**
+
+- El techo de seguridad del ruido (`NOISE_MAX_UV`) estaba expresado en
+  unidades del ruido sin filtrar y quedó mordiendo en el caso normal: con
+  la escala nueva, cualquier objetivo de 40 nV para arriba daba el mismo
+  trazo y el ajuste del equipo dejaba de hacer efecto. Ahora está en
+  unidades del trazo que se ve.
+- El de rechazo de artefacto comparaba con el paciente QUIETO, donde
+  apagar el rechazo casi no cambia nada. Ahora compara donde importa: con
+  inquietud 0.8, el rechazo descarta 760 barridos y aun así deja el
+  residual en menos de la mitad.
+- El de la falsa onda V tenía margen de 1.5 calibrado contra el trazo
+  demasiado limpio. Con el ruido real, la misma falsa onda pesa
+  proporcionalmente menos: sigue siendo la pista, pero no tapa el
+  registro.
