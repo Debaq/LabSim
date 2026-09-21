@@ -267,3 +267,13 @@ t_close(CaseMasking::efectoOclusivo(4, $aereaOi, $oseaOi), 0.0, 0.001,
     'En 2 kHz no hay efecto oclusivo');
 t_close(CaseMasking::efectoOclusivo(2, $aereaOd, $oseaOd), 0.0, 0.001,
     'Un oído con gap ya se comporta como ocluido: no gana nada');
+
+// Las horas de vida mandan sobre los años enteros: un bebé de ocho meses y
+// un recién nacido son los dos "0 años" y no comparten normativa. 'neonate'
+// es el bloque del recién nacido de término; pasados los tres meses la vía
+// ya arrancó a madurar y lo que corresponde es 'toddler'.
+t_eq(CaseWaveforms::poblacion(0, 0, 10), 'neonate', 'Diez horas de vida: neonato');
+t_eq(CaseWaveforms::poblacion(0, 0, 24 * 30), 'neonate', 'Al mes todavía neonato');
+t_eq(CaseWaveforms::poblacion(0, 0, 24 * 240), 'toddler', 'A los ocho meses ya no: la vía maduró');
+t_eq(CaseWaveforms::poblacion(0, 0, null), 'neonate', 'Sin horas cargadas, 0 años se asume recién nacido');
+t_eq(CaseWaveforms::poblacion(30, 0, ''), 'adult_male', 'Horas vacías no rompen al adulto');

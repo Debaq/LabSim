@@ -32,6 +32,17 @@ declare(strict_types=1);
  *      rate. PMCID PMC10645159.
  *   9. Lupoli et al. y Xiao et al., citados en (1).
  *  10. Nebraska DHHS, EHDI. Newborn Hearing Screening Protocol (JCIH 2019).
+ *  11. JCIH 2019 Position Statement: indicadores de riesgo -- peso < 1500 g,
+ *      UCIN > 5 días, hiperbilirrubinemia con exanguinotransfusión,
+ *      ototóxicos e infecciones congénitas (CMV, herpes, rubéola, sífilis,
+ *      toxoplasmosis, zika). El peso y las semanas mueven el tamizaje acá;
+ *      las TORCH NO, y eso es a propósito (ver abajo).
+ *
+ * Las infecciones congénitas no se descuentan del tamizaje porque no son
+ * un transitorio del conducto: son riesgo de hipoacusia DE VERDAD, muchas
+ * veces progresiva o de aparición tardía. Un CMV congénito que PASA el
+ * tamizaje y a los seis meses ya no pasa es el caso que hay que poder
+ * armar, y taparlo con un "refiere" al nacer lo arruinaría.
  *
  * El detalle importante de la tabla: a las pocas horas la TEOAE refiere en
  * más de la mitad de los recién nacidos SANOS, mientras el AABR pasa en el
@@ -73,6 +84,16 @@ final class NewbornScreening
     public const MOD_HORAS = [
         'cesarea' => ['teoae' => -12.0, 'aabr' => -4.0],
         'pretermino_tardio' => ['teoae' => -13.0, 'aabr' => -6.0],
+        // Prematuro de menos de 34 semanas: conducto mucho más estrecho y
+        // colapsable, más mesénquima sin reabsorber y una vía auditiva que
+        // todavía está madurando -- por eso acá el AABR también se resiente,
+        // cosa que con el pretérmino tardío casi no pasa. Es la razón de que
+        // la UCIN refiera varias veces más que la sala cuna.
+        'pretermino' => ['teoae' => -20.0, 'aabr' => -12.0],
+        // Muy bajo peso al nacer (< 1500 g). Se suma al de las semanas
+        // cuando van juntos, que es lo habitual: un prematuro extremo de
+        // 900 g refiere muchísimo más que uno de 36 semanas y 2400 g.
+        'muy_bajo_peso' => ['teoae' => -10.0, 'aabr' => -8.0],
         'peg' => ['teoae' => 8.0, 'aabr' => 0.0],
     ];
 
@@ -192,4 +213,44 @@ final class NewbornScreening
             'aabr' => $transitorioDb <= self::ABR_FAIL_DB ? 'pasa' : 'refiere',
         ];
     }
+
+    /** Nivel al que tamiza un AABR, en dB nHL. */
+    public const ABR_SCREEN_DB = 35.0;
+
+    /**
+     * Qué va a informar el equipo en ESTE oído, transitorio Y patología.
+     *
+     * `resultado()` mira solo el transitorio de las primeras horas, que es
+     * lo que la tabla publicada describe. Pero un oído con una hipoacusia de
+     * verdad refiere igual, y decir "AABR pasa" en un GJB2 de 80 dB es
+     * exactamente el error que el docente no tiene que leer en su ficha.
+     *
+     * @param float      $transitorioDb conductiva transitoria, dB HL
+     * @param float|null $umbralAbrNhl  umbral ABR aéreo del caso, dB nHL
+     *                                  (null = sin respuesta)
+     * @param float      $attenOaeDb    atenuación total de la EOA, dB
+     * @param bool       $cocleaDanada  si la cóclea del caso está dañada
+     */
+    public static function resultadoOido(
+        float $transitorioDb,
+        ?float $umbralAbrNhl,
+        float $attenOaeDb = 0.0,
+        bool $cocleaDanada = false
+    ): array {
+        $base = self::resultado($transitorioDb);
+        // El AABR tamiza a un nivel fijo: si el umbral del oído está por
+        // encima, no hay respuesta y refiere.
+        if ($umbralAbrNhl === null || $umbralAbrNhl > self::ABR_SCREEN_DB) {
+            $base['aabr'] = 'refiere';
+        }
+        // La EOA se cae con la cóclea dañada y con cualquier atenuación de
+        // ida y vuelta que la deje bajo criterio.
+        if ($cocleaDanada || $attenOaeDb > self::OAE_FAIL_DB * self::OAE_ROUND_TRIP) {
+            $base['teoae'] = 'refiere';
+        }
+        return $base;
+    }
+
+    /** La EOA cruza el oído medio dos veces: ida y vuelta (ver CaseOae). */
+    public const OAE_ROUND_TRIP = 2.0;
 }

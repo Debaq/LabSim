@@ -29,6 +29,19 @@
         // Espejo de CaseWaveforms::poblacion y de
         // ABR_generator.select_population: si esto se desincroniza, el caso
         // se arma con una población y la app lo dibuja con otra.
+        // Horas de vida: cuando están, mandan (espejo de
+        // CaseWaveforms::poblacion y select_population). Un bebé de ocho
+        // meses y un recién nacido son los dos "0 años" y no comparten
+        // normativa.
+        var val = document.getElementById('patient-edad-valor');
+        var uni = document.getElementById('patient-edad-unidad');
+        var n = val ? parseFloat(val.value) : NaN;
+        if (age < 1 && !isNaN(n)) {
+            var horas = n * ({ horas: 1, dias: 24, meses: 720 }[uni ? uni.value : 'horas'] || 1);
+            var meses = horas / 720;
+            if (meses < 3) { return 'neonate'; }
+            if (meses < 36) { return 'toddler'; }
+        }
         if (age < 1) { return 'neonate'; }
         if (age < 3) { return 'toddler'; }
         if (age < 18) { return 'child'; }

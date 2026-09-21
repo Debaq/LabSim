@@ -211,3 +211,113 @@ t_true(neo_umbral_oseo(60, 10, 360) !== null,
     'Una conductiva de 50 dB deja ver la ósea perfectamente');
 t_true(neo_umbral_oseo(40, 0, 360) !== null,
     'Una conductiva de 40 dB sí deja ver la ósea: es justo para lo que sirve');
+
+// --- Prematuro, peso y TORCH ---------------------------------------------
+
+// El pretérmino tardío (34-36) ya estaba; el prematuro de verdad (< 34) pega
+// mucho más fuerte y, a diferencia del tardío, TAMBIÉN se lleva el AABR: es
+// la razón de que la UCIN refiera varias veces más que la sala cuna.
+$base = NewbornScreening::passProbability('teoae', 30.0);
+$tardio = NewbornScreening::passProbability('teoae', 30.0, ['pretermino_tardio' => true]);
+$prema = NewbornScreening::passProbability('teoae', 30.0, ['pretermino' => true]);
+t_true($prema < $tardio && $tardio < $base, 'A menos semanas, menos pasa la TEOAE');
+$aabrTardio = NewbornScreening::passProbability('aabr', 30.0, ['pretermino_tardio' => true]);
+$aabrPrema = NewbornScreening::passProbability('aabr', 30.0, ['pretermino' => true]);
+t_true($aabrPrema < $aabrTardio, 'Y el prematuro de verdad también se lleva el AABR');
+
+// Muy bajo peso: indicador de riesgo del JCIH y más "refiere". Se SUMA a las
+// semanas, que es lo que pasa de verdad (un prematuro extremo pesa poco).
+t_true(
+    NewbornScreening::passProbability('teoae', 30.0, ['muy_bajo_peso' => true]) < $base,
+    'Muy bajo peso: la TEOAE pasa menos'
+);
+// Se acumulan, y se mide donde se puede ver: la tabla es por franjas, así
+// que a las 30 h el prematuro ya está en la primera (0.40) y restarle más
+// horas no lo baja más. A las 60 h hay recorrido.
+t_true(
+    NewbornScreening::passProbability('teoae', 60.0, ['pretermino' => true, 'muy_bajo_peso' => true])
+    < NewbornScreening::passProbability('teoae', 60.0, ['pretermino' => true]),
+    'Prematuro Y muy bajo peso se acumulan'
+);
+t_true(
+    NewbornScreening::passProbability('aabr', 30.0, ['pretermino' => true, 'muy_bajo_peso' => true])
+    < NewbornScreening::passProbability('aabr', 30.0, ['pretermino' => true]),
+    'También en el AABR'
+);
+
+// Las TORCH NO tocan el tamizaje: no son líquido en el conducto, son riesgo
+// de hipoacusia de verdad. El CMV que PASA el tamizaje y se cae después es
+// el caso que hay que poder armar.
+t_close(
+    NewbornScreening::passProbability('teoae', 30.0, ['torch' => 'cmv', 'torch_sintomatica' => true]),
+    $base, 0.0001, 'Una TORCH no cambia la probabilidad de pasar el tamizaje'
+);
+
+// --- Qué cuadros se le ofrecen a un recién nacido -------------------------
+
+// El filtro es del generador, no del modelo: un caso ya armado con una edad
+// rara sigue funcionando. Lo que se evita es ofrecerle presbiacusia a un
+// bebé de diez horas.
+$rn = CaseProfile::scenariosParaEdad(0.001);
+$adulto = CaseProfile::scenariosParaEdad(70.0);
+foreach (['presbiacusia', 'nihl_cronica', 'otoesclerosis', 'meniere', 'schwannoma'] as $adulto1) {
+    t_true(!in_array($adulto1, $rn, true), "A un recién nacido no se le ofrece '$adulto1'");
+    t_true(in_array($adulto1, $adulto, true), "Y al adulto sí");
+}
+foreach (['efusion_neonatal', 'prematuro'] as $soloBebe) {
+    t_true(in_array($soloBebe, $rn, true), "Al recién nacido sí se le ofrece '$soloBebe'");
+    t_true(!in_array($soloBebe, $adulto, true), "Y al adulto de 70 no");
+}
+
+// Las TRES categorías tienen material para el turno del recién nacido: sin
+// eso no se puede armar la práctica que las compara, que es el ejercicio.
+foreach (['conductiva', 'sensorial', 'neural'] as $cat) {
+    $lista = CaseProfile::scenariosParaEdad(0.001, $cat);
+    t_true(count($lista) >= 3, "Hay al menos tres cuadros '$cat' para un recién nacido");
+    $neonatales = array_filter($lista, function ($k) {
+        return in_array($k, CaseProfile::SCENARIO_NEONATAL, true);
+    });
+    t_true(count($neonatales) >= 1, "Y al menos uno es del turno del recién nacido ($cat)");
+    // Los del turno van PRIMERO: si no, quedan perdidos entre setenta.
+    t_true(in_array($lista[0], CaseProfile::SCENARIO_NEONATAL, true),
+        "El primero de la lista '$cat' es uno del recién nacido");
+}
+
+// Todo lo que figura en las tablas auxiliares existe en el catálogo.
+foreach (CaseProfile::SCENARIO_NEONATAL as $k) {
+    t_true(isset(CaseProfile::SCENARIOS[$k]), "SCENARIO_NEONATAL: '$k' existe en el catálogo");
+}
+foreach (array_keys(CaseProfile::SCENARIO_EDAD) as $k) {
+    t_true(isset(CaseProfile::SCENARIOS[$k]), "SCENARIO_EDAD: '$k' existe en el catálogo");
+}
+
+// --- El tamizaje del oído, no solo el del transitorio ---------------------
+
+// resultado() mira solo el líquido de las primeras horas, que es lo que
+// describe la tabla publicada. El oído completo puede referir por otra cosa,
+// y la ficha del docente tiene que decirlo: leer "AABR pasa" en un GJB2 de
+// 80 dB sería al revés de lo que el caso enseña.
+$sano = NewbornScreening::resultadoOido(1.0, 15.0, 2.0, false);
+t_eq($sano['teoae'], 'pasa', 'Oído sano sin líquido: pasa la TEOAE');
+t_eq($sano['aabr'], 'pasa', 'Y el AABR');
+
+$gjb2 = NewbornScreening::resultadoOido(1.0, 80.0, 2.0, true);
+t_eq($gjb2['aabr'], 'refiere', 'Sensorial profunda: el AABR refiere sin una gota de líquido');
+t_eq($gjb2['teoae'], 'refiere', 'Y la TEOAE también: la cóclea está dañada');
+
+// El patrón que define la neuropatía, y la razón de tamizar con AABR en UCI.
+$ansd = NewbornScreening::resultadoOido(1.0, null, 2.0, false);
+t_eq($ansd['teoae'], 'pasa', 'Neuropatía: la TEOAE PASA, la cóclea está viva');
+t_eq($ansd['aabr'], 'refiere', 'Y el AABR refiere: es todo el cuadro');
+
+// Justo en el nivel de tamizaje todavía pasa; un escalón más arriba, no.
+t_eq(NewbornScreening::resultadoOido(0.0, NewbornScreening::ABR_SCREEN_DB)['aabr'],
+    'pasa', 'En el nivel de tamizaje el AABR todavía pasa');
+t_eq(NewbornScreening::resultadoOido(0.0, NewbornScreening::ABR_SCREEN_DB + 5)['aabr'],
+    'refiere', 'Cinco dB más arriba, refiere');
+
+// Y el transitorio sigue funcionando solo: una conductiva de líquido tumba
+// la EOA mucho antes que el AABR.
+$liquido = NewbornScreening::resultadoOido(20.0, 30.0, 40.0, false);
+t_eq($liquido['teoae'], 'refiere', 'Con líquido la TEOAE refiere');
+t_eq($liquido['aabr'], 'pasa', 'Y el AABR aguanta: hace falta mucha más conductiva');

@@ -735,7 +735,7 @@ NORM_VI_RATIO_MIN = 1.0
 NORM_INTERAURAL_MAX = 0.4
 
 
-def select_population(age=None, gender=None):
+def select_population(age=None, gender=None, horas=None):
     """Poblacion normativa segun el paciente (claves de normative_data.json).
 
     gender: 0 = hombre, 1 = mujer (mismo criterio que cases.data['gender']
@@ -757,6 +757,21 @@ def select_population(age=None, gender=None):
     una mujer. No separa en pediatria a proposito -- la diferencia por sexo
     aparece con la pubertad, no antes.
     """
+    # Horas de vida: cuando estan, mandan. Sin esto un bebe de ocho meses
+    # tomaba las latencias del recien nacido, porque los dos son "0 anios" y
+    # el corte iba por ahi. El bloque 'neonate' es el del recien nacido de
+    # termino; pasados los tres meses la via ya arranco a madurar y lo que
+    # corresponde es 'toddler', que es justamente el tramo de la maduracion.
+    if horas not in (None, ''):
+        try:
+            meses = float(horas) / 720.0
+        except (TypeError, ValueError):
+            meses = None
+        if meses is not None:
+            if meses < 3:
+                return 'neonate'
+            if meses < 36:
+                return 'toddler'
     if age is None:
         return 'adult_female'
     try:
@@ -3175,7 +3190,8 @@ def ABR_Curve(actual_intencity, control_setting, preferences, repro_prev, prom,
     }
 
     population = select_population((patient or {}).get('edad'),
-                                   (patient or {}).get('gender'))
+                                   (patient or {}).get('gender'),
+                                   (patient or {}).get('edad_horas'))
 
     t, y, metadata = generator.generate_curve(
         population=population,
@@ -3252,7 +3268,8 @@ def raw_eeg(technical=None, quality=1.0, seed=0, tick=0, duration_ms=300.0,
 def normative_limits(patient=None, intensity=80, stim='Click'):
     """Rangos de normalidad para el paciente en atencion, a esa intensidad."""
     population = select_population((patient or {}).get('edad'),
-                                   (patient or {}).get('gender'))
+                                   (patient or {}).get('gender'),
+                                   (patient or {}).get('edad_horas'))
     stim_key, freq = STIM_MAP.get(stim, ('click', None))
     return _get_generator().normative_limits(population, intensity,
                                              stim_key, freq=freq)
@@ -3261,7 +3278,8 @@ def normative_limits(patient=None, intensity=80, stim='Click'):
 def latency_intensity_band(patient=None, wave='V', stim='Click'):
     """Banda normativa (x, lo, hi) del grafico latencia-intensidad."""
     population = select_population((patient or {}).get('edad'),
-                                   (patient or {}).get('gender'))
+                                   (patient or {}).get('gender'),
+                                   (patient or {}).get('edad_horas'))
     stim_key, freq = STIM_MAP.get(stim, ('click', None))
     return _get_generator().latency_intensity_band(population, wave,
                                                    stimulus=stim_key, freq=freq)

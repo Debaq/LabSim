@@ -439,6 +439,7 @@ admin_add_js('case/patient-photo.js');
 admin_add_js('case/sala.js');
 admin_add_js('case/otoscopia.js');
 admin_add_js('case/sex-mirror.js');
+admin_add_js('case/newborn.js');
 admin_add_js('case/tabs.js');
 admin_add_js('case/tinnitus.js');
 admin_add_js('case/audiogram.js');
@@ -641,6 +642,12 @@ window.CASE_CONST = <?= json_encode([
     'vempNormative' => CaseBuilder::vempNormative(),
     'vempBaselineOverride' => $vempBaselineOverride,
     'escenarios' => CaseProfile::SCENARIOS,
+    // Qué se le puede ofrecer a esta edad y qué va primero en el turno del
+    // recién nacido (ver CaseProfile::scenariosParaEdad).
+    'scenarioEdad' => CaseProfile::SCENARIO_EDAD,
+    'scenarioNeonatal' => CaseProfile::SCENARIO_NEONATAL,
+    'torchOptions' => CaseBuilder::TORCH_OPTIONS,
+    'pesoMuyBajoG' => CaseBuilder::PESO_MUY_BAJO_G,
     'categorias' => CaseProfile::CATEGORIAS,
     'grades' => CaseProfile::GRADES,
     'gradeFreqs' => CaseProfile::GRADE_FREQS,

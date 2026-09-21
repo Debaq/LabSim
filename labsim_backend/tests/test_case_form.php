@@ -70,8 +70,15 @@ $cfRevisado = ['revisado' => array_fill_keys(array_keys(CaseReview::revisables()
 
 // --- Validaciones que bloquean el guardado ---------------------------------
 
-t_eq(CaseForm::fromPost(['age' => '0'], $cfPdo, $cfMe, null, false)->error,
-    'Falta la edad.', 'Sin edad no se guarda');
+t_true(strpos((string) CaseForm::fromPost(['age' => '0'], $cfPdo, $cfMe, null, false)->error,
+    'Falta la edad') === 0, 'Sin edad no se guarda');
+// Pero 0 CON edad exacta es un recién nacido, no un campo vacío: es el caso
+// de maternidad, y el formulario lo rechazaba justo cuando la edad era el
+// dato del ejercicio.
+t_eq(CaseForm::fromPost(['age' => '0', 'edad_valor' => '10', 'edad_unidad' => 'horas',
+    'nombre1' => 'Ana', 'apellido1' => 'Paz', 'acumetria_auto' => '1',
+    'perfil_confirmar' => '1'], $cfPdo, $cfMe, null, false)->error,
+    null, 'Un recién nacido de 10 horas sí se guarda');
 t_eq(CaseForm::fromPost(['age' => '30'], $cfPdo, $cfMe, null, false)->error,
     'Falta el nombre del paciente: generalo con "Generar caso" (Armado rápido) o escribilo a mano en la pestaña Paciente.',
     'Al crear, sin nombre no se guarda');
@@ -275,3 +282,34 @@ t_true($cfVempIncoherente !== null && strpos($cfVempIncoherente, 'mVEMP') !== fa
     'VEMP: la incoherencia nombra el subtipo donde está el problema');
 t_eq($cfRun(['vemp' => ['od' => ['type' => 'normal', 'MVEMP' => ['lat_p13' => '0']]]])->error, null,
     'VEMP: patología normal con las ondas en 0 guarda sin chistar');
+
+// --- Recién nacido: parto, prematurez, peso y TORCH ------------------------
+
+// Los derivados que mueven el tamizaje salen de los números cargados, no son
+// campos aparte: un prematuro de 30 semanas con 1200 g acumula los dos.
+$cfBebe = $cfRun(['age' => '0', 'edad_valor' => '10', 'edad_unidad' => 'horas',
+    'nacimiento' => ['semanas' => '30', 'peso_g' => '1200', 'torch' => 'cmv',
+                     'torch_sintomatica' => '1', 'parto' => 'cesarea',
+                     'uci_dias' => '12', 'ototoxicos' => '1']]);
+$cfNac = $cfBebe->data['nacimiento'] ?? [];
+t_true(!empty($cfNac['pretermino']), '30 semanas es prematuro');
+t_true(empty($cfNac['pretermino_tardio']), 'Y no pretérmino tardío: son tramos distintos');
+t_true(!empty($cfNac['muy_bajo_peso']), '1200 g es muy bajo peso');
+t_true(!empty($cfNac['cesarea']), 'La cesárea sigue saliendo del tipo de parto');
+t_eq($cfNac['peso_g'], 1200, 'El peso se guarda en gramos');
+t_eq($cfNac['torch'], 'cmv', 'La infección congénita se guarda');
+t_true(!empty($cfNac['torch_sintomatica']), 'Y si fue sintomática al nacer');
+t_eq($cfNac['uci_dias'], 12, 'Los días de UCI neonatal se guardan');
+t_true(!empty($cfNac['ototoxicos']), 'Y los ototóxicos');
+
+$cfTermino = $cfRun(['age' => '0', 'edad_valor' => '10', 'edad_unidad' => 'horas',
+    'nacimiento' => ['semanas' => '39', 'peso_g' => '3300']]);
+$cfNacT = $cfTermino->data['nacimiento'] ?? [];
+t_true(empty($cfNacT['pretermino']), '39 semanas no es prematuro');
+t_true(empty($cfNacT['muy_bajo_peso']), '3300 g no es muy bajo peso');
+t_eq($cfNacT['torch'], null, 'Sin infección declarada queda en null');
+
+// Una TORCH inventada no entra: el select tiene su catálogo.
+$cfTorchMalo = $cfRun(['age' => '0', 'edad_valor' => '10',
+    'nacimiento' => ['torch' => 'loquesea']]);
+t_eq($cfTorchMalo->data['nacimiento']['torch'], null, 'Una TORCH fuera del catálogo se descarta');

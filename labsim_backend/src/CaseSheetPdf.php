@@ -1158,7 +1158,8 @@ final class CaseSheetPdf
         $perfil = CaseProfile::normalize($data);
         $poblacion = CaseWaveforms::poblacion(
             isset($data['edad']) ? (int) $data['edad'] : null,
-            (int) ($data['gender'] ?? 0)
+            (int) ($data['gender'] ?? 0),
+            $data['edad_horas'] ?? null
         );
 
         $porLado = [];
@@ -1965,7 +1966,8 @@ final class CaseSheetPdf
         // la p13 casi un milisegundo antes que un adulto mayor.
         $poblacion = CaseWaveforms::poblacion(
             isset($data['edad']) ? (int) $data['edad'] : null,
-            (int) ($data['gender'] ?? 0)
+            (int) ($data['gender'] ?? 0),
+            $data['edad_horas'] ?? null
         );
         $anchoPanel = ($this->anchoContenido - 2 * 12) / 3;
         $altoPanel = 105.0;
@@ -2689,10 +2691,27 @@ final class CaseSheetPdf
         }
         require_once __DIR__ . '/NewbornScreening.php';
         $nac = is_array($data['nacimiento'] ?? null) ? $data['nacimiento'] : [];
+        $abrData = is_array($data['ABR'] ?? null) ? $data['ABR'] : [];
+        $eoasData = is_array($data['EOAS'] ?? null) ? $data['EOAS'] : [];
         $partes = [];
         foreach (['OD', 'OI'] as $lado) {
             $db = CaseProfile::neonatalTransientDb($horas, $nac, $lado);
-            $r = NewbornScreening::resultado($db);
+            // El resultado es el del OÍDO, no solo el del transitorio: un
+            // GJB2 de 80 dB refiere el AABR aunque no tenga una gota de
+            // líquido, y leer "AABR pasa" en esa ficha sería al revés de lo
+            // que el caso enseña.
+            $ladoForm = $lado === 'OD' ? 'od' : 'oi';
+            $ear = is_array($abrData[$ladoForm] ?? null) ? $abrData[$ladoForm]
+                : (is_array($abrData[$lado] ?? null) ? $abrData[$lado] : []);
+            $umbral = $ear['umbral_por_estimulo']['click'] ?? ($ear['umbral'] ?? null);
+            $eoaEar = is_array($eoasData[$ladoForm] ?? null) ? $eoasData[$ladoForm]
+                : (is_array($eoasData[$lado] ?? null) ? $eoasData[$lado] : []);
+            $r = NewbornScreening::resultadoOido(
+                $db,
+                $umbral === null || $umbral === '' ? null : (float) $umbral,
+                (float) ($eoaEar['atten_db'] ?? 0),
+                in_array($eoaEar['type'] ?? '', ['coclear', 'transmission'], true)
+            );
             $partes[] = sprintf('%s: TEOAE %s · AABR %s (%.1f dB de conductiva transitoria)',
                 $lado, $r['teoae'], $r['aabr'], $db);
         }
@@ -2700,8 +2719,13 @@ final class CaseSheetPdf
         if (!empty($nac['cesarea'])) {
             $ctx[] = 'cesárea (se comporta como 12 h más joven para la EOA)';
         }
-        if (!empty($nac['pretermino_tardio'])) {
-            $ctx[] = 'pretérmino tardío';
+        if (!empty($nac['pretermino'])) {
+            $ctx[] = 'prematuro de ' . (int) $nac['semanas'] . ' semanas (refiere mucho más, y el AABR también)';
+        } elseif (!empty($nac['pretermino_tardio'])) {
+            $ctx[] = 'pretérmino tardío de ' . (int) $nac['semanas'] . ' semanas';
+        }
+        if (!empty($nac['muy_bajo_peso'])) {
+            $ctx[] = 'muy bajo peso (' . (int) $nac['peso_g'] . ' g)';
         }
         if (!empty($nac['peg'])) {
             $ctx[] = 'pequeño para la edad gestacional (pasa algo mejor)';
@@ -2712,8 +2736,34 @@ final class CaseSheetPdf
         if (!empty($nac['liquido_persistente'])) {
             $ctx[] = 'líquido o vérnix persistente';
         }
+        // Indicadores de riesgo del JCIH 2019. NO mueven el tamizaje --no son
+        // líquido en el conducto-- y por eso van en una frase aparte: lo que
+        // obligan es a seguimiento, porque varias TORCH dan hipoacusia
+        // progresiva o de aparición tardía y "pasó el tamizaje" no cierra
+        // el problema.
+        $riesgo = [];
+        if (!empty($nac['torch'])) {
+            require_once __DIR__ . '/CaseBuilder.php';
+            $riesgo[] = (CaseBuilder::TORCH_OPTIONS[$nac['torch']] ?? $nac['torch'])
+                . (!empty($nac['torch_sintomatica']) ? ', sintomática al nacer' : ', asintomática');
+        }
+        if (($nac['uci_dias'] ?? null) !== null && (int) $nac['uci_dias'] > 5) {
+            $riesgo[] = (int) $nac['uci_dias'] . ' días en UCI neonatal';
+        }
+        if (!empty($nac['ototoxicos'])) {
+            $riesgo[] = 'ototóxicos';
+        }
+        if (!empty($nac['exanguinotransfusion'])) {
+            $riesgo[] = 'hiperbilirrubinemia con exanguinotransfusión';
+        }
+        if (!empty($nac['muy_bajo_peso'])) {
+            $riesgo[] = 'peso < ' . CaseBuilder::PESO_MUY_BAJO_G . ' g';
+        }
+
         return 'Screening neonatal esperado — ' . implode(' | ', $partes)
             . ($ctx !== [] ? '. Circunstancias: ' . implode(', ', $ctx) : '')
+            . ($riesgo !== [] ? '. Indicadores de riesgo (JCIH 2019): ' . implode(', ', $riesgo)
+                . ' — obligan a seguimiento aunque el tamizaje pase' : '')
             . '. Las tasas salen de la bibliografía de screening por franja horaria: a las pocas horas la '
             . 'EOA refiere en más de la mitad de los recién nacidos SANOS mientras el AABR pasa en el 85%, '
             . 'y por eso un "refiere" temprano es motivo de rescreening y no un hallazgo.';

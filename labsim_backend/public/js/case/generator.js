@@ -10,6 +10,8 @@
 // El catálogo se serializa desde CaseProfile::SCENARIOS, no se re-tipea acá.
 (function () {
     var ESCENARIOS = window.CASE_CONST.escenarios;
+    var SCENARIO_EDAD = window.CASE_CONST.scenarioEdad || {};
+    var SCENARIO_NEONATAL = window.CASE_CONST.scenarioNeonatal || [];
     var CATEGORIAS = window.CASE_CONST.categorias;
     var NEURAL_DEFAULTS = window.CASE_CONST.neuralDefaults;
     var GRADES = window.CASE_CONST.grades;
@@ -159,6 +161,25 @@
         var n = el ? parseInt(el.value, 10) : NaN;
         return isNaN(n) ? 30 : Math.max(0, n);
     }
+    /**
+     * Edad en años con decimales: la exacta manda cuando está cargada.
+     *
+     * `edadActual()` sigue devolviendo años enteros porque es lo que usan
+     * la norma ISO 7029 y la madre de la sala. Acá hace falta el detalle:
+     * un recién nacido de 8 horas y uno de 8 meses son los dos "0 años" y
+     * no se les ofrecen los mismos cuadros.
+     */
+    function edadEnAnios() {
+        var anios = edadActual();
+        if (anios > 0) { return anios; }
+        var val = document.getElementById('patient-edad-valor');
+        var uni = document.getElementById('patient-edad-unidad');
+        var n = val ? parseFloat(val.value) : NaN;
+        if (isNaN(n)) { return 0; }
+        var horas = n * ({ horas: 1, dias: 24, meses: 720 }[uni ? uni.value : 'horas'] || 1);
+        return horas / 8760.0;
+    }
+
     function generoActual() {
         var chk = document.querySelector('#case-form input[name="gender"]:checked');
         return chk && chk.value === '1' ? 1 : 0;
@@ -288,16 +309,52 @@
         sel.title = lista.length === 0 ? 'Este cuadro no tiene grado de hipoacusia' : '';
     }
 
-    /** Cuadros de la categoría elegida. */
+    /**
+     * ¿Este cuadro existe a esta edad? Espejo de
+     * CaseProfile::scenariosParaEdad -- si se toca una, tocar la otra.
+     *
+     * Sin esto, la lista le ofrecía presbiacusia, NIHL crónica y
+     * otoesclerosis a un recién nacido con la misma prominencia que el
+     * kernícterus, y los cuadros del turno del RN estaban perdidos entre
+     * setenta.
+     */
+    function vaEnEstaEdad(clave, edad) {
+        var r = SCENARIO_EDAD[clave];
+        if (!r) { return true; }
+        if (r[0] !== null && r[0] !== undefined && edad < r[0]) { return false; }
+        if (r[1] !== null && r[1] !== undefined && edad > r[1]) { return false; }
+        return true;
+    }
+
+    function esNeonatal(clave) {
+        return SCENARIO_NEONATAL.indexOf(clave) !== -1;
+    }
+
+    /** Cuadros de la categoría elegida que existen a la edad cargada. */
     function sincronizarCuadros(lado) {
         var sel = selectores[lado];
         var cat = categorias[lado] ? categorias[lado].value : '__random__';
+        var edad = edadEnAnios();
         var previo = sel.value;
-        var html = '';
         var hay = [];
         Object.keys(ESCENARIOS).forEach(function (clave) {
             if (cat !== '__random__' && ESCENARIOS[clave].categoria !== cat) { return; }
+            if (!vaEnEstaEdad(clave, edad)) { return; }
             hay.push(clave);
+        });
+        // Menor de un año: primero los del turno del recién nacido.
+        if (edad < 1) {
+            hay.sort(function (a, b) {
+                return (esNeonatal(a) ? 0 : 1) - (esNeonatal(b) ? 0 : 1);
+            });
+        }
+        var html = '';
+        var separado = false;
+        hay.forEach(function (clave) {
+            if (edad < 1 && !separado && !esNeonatal(clave) && html !== '') {
+                html += '<option disabled>── menos habituales a esta edad ──</option>';
+                separado = true;
+            }
             html += '<option value="' + clave + '">' + ESCENARIOS[clave].label + '</option>';
         });
         if (hay.length > 1) { html += '<option value="__random__">Cualquiera (al azar)</option>'; }
@@ -696,10 +753,46 @@
     });
 
     // --- El botón ----------------------------------------------------------
+    /**
+     * Recién nacido sin edad exacta: se sortea el turno.
+     *
+     * Con la edad en 0 y el campo vacío, el caso quedaba como "lactante de
+     * 0 meses" --sin horas de vida, o sea sin transitorio de las primeras
+     * horas y sin tamizaje--, que es justo el turno que se quería armar. Lo
+     * que ya esté cargado NO se pisa: si el docente puso 6 horas y una
+     * cesárea, manda él.
+     */
+    function completarRecienNacido() {
+        if (edadActual() !== 0) { return; }
+        var valor = document.getElementById('patient-edad-valor');
+        if (!valor || valor.value !== '') { return; }
+        var unidad = document.getElementById('patient-edad-unidad');
+        // Entre 6 y 36 horas: la ventana del tamizaje antes del alta, que
+        // es donde la EOA y el AABR dicen cosas distintas.
+        valor.value = String(Math.round(entre(6, 36)));
+        if (unidad) {
+            unidad.value = 'horas';
+            unidad.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        valor.dispatchEvent(new Event('input', { bubbles: true }));
+        valor.dispatchEvent(new Event('change', { bubbles: true }));
+        var semanas = document.querySelector('#case-form [name="nacimiento[semanas]"]');
+        if (semanas && semanas.value === '') {
+            semanas.value = String(Math.round(entre(37, 41)));
+            semanas.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        var peso = document.querySelector('#case-form [name="nacimiento[peso_g]"]');
+        if (peso && peso.value === '') {
+            peso.value = String(Math.round(entre(2700, 3900) / 10) * 10);
+            peso.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    }
+
     boton.addEventListener('click', function () {
         var claveOd = escenarioDe('od');
         var claveOi = escenarioDe('oi');
         if (!claveOd || !claveOi) { return; }
+        completarRecienNacido();
         var escOd = ESCENARIOS[claveOd], escOi = ESCENARIOS[claveOi];
         var gradoOd = grados.od ? grados.od.value : 'random';
         var gradoOi = grados.oi ? grados.oi.value : 'random';

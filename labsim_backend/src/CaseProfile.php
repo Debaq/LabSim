@@ -410,6 +410,121 @@ final class CaseProfile
     ];
 
     /**
+     * Edad a la que cada cuadro puede aparecer, en años: [mínima, máxima].
+     * null = sin límite de ese lado. Lo que no figura acá va a cualquier
+     * edad, que es la mayoría.
+     *
+     * Vive en una tabla aparte y no dentro de cada cuadro a propósito: son
+     * setenta y pico de bloques y lo único que se quiere mirar junto es
+     * justamente esto -- qué se le puede ofrecer a un recién nacido y qué
+     * no. El filtro es del GENERADOR, no del modelo: un caso ya armado con
+     * una edad rara sigue funcionando.
+     */
+    public const SCENARIO_EDAD = [
+        // Adquiridos del adulto
+        'presbiacusia' => [50, null],
+        'nihl_cronica' => [18, null],
+        'trauma_acustico_agudo' => [5, null],
+        'otoesclerosis' => [15, null],
+        'meniere' => [15, null],
+        'hidrops_retardado' => [20, null],
+        'subita' => [5, null],
+        'autoinmune' => [15, null],
+        'metabolica' => [10, null],
+        'salicilatos' => [10, null],
+        'glomus_timpanico' => [30, null],
+        'sensorioneural' => [5, null],
+        // Retrococleares del adulto
+        'schwannoma' => [20, null],
+        'nf2' => [12, null],
+        'tumor_angulo' => [20, null],
+        'compresion_microvascular' => [30, null],
+        'esclerosis_multiple' => [18, null],
+        'infarto_pontino' => [40, null],
+        'siderosis' => [30, null],
+        'neuropatia_hereditaria' => [5, null],
+        'toxico_metabolico' => [10, null],
+        'leucodistrofia' => [0.5, null],
+        // Necesitan un oído que ya vivió algo
+        'colesteatoma' => [3, null],
+        'timpanoesclerosis' => [3, null],
+        'disyuncion_cadena' => [3, null],
+        'fractura_cadena' => [3, null],
+        'fractura_longitudinal' => [1, null],
+        'fractura_transversal' => [1, null],
+        'conmocion_laberintica' => [2, null],
+        'tec_tronco' => [1, null],
+        'barotrauma' => [3, null],
+        'mixta_otitis_cronica' => [3, null],
+        'perforacion' => [1, null],
+        'cuerpo_extrano_cae' => [1, null],
+        'otitis_externa' => [1, null],
+        'tapon_cerumen' => [0.5, null],
+        'disfuncion_tubaria' => [1, null],
+        'parotiditis' => [1, null],
+        'bloqueo_proximal' => [1, null],
+        'glioma_tronco' => [1, null],
+        'hipotermia_farmacos' => [1, null],
+        // Propios del recién nacido: dejan de tener sentido después
+        'efusion_neonatal' => [0, 1],
+        'prematuro' => [0, 2],
+    ];
+
+    /**
+     * Cuadros del turno del recién nacido. El generador los ofrece PRIMERO
+     * cuando el paciente tiene menos de un año: son los que se ven en el
+     * rescreening y en el diagnóstico temprano, repartidos en las tres
+     * categorías que hay que poder distinguir ahí --transmisión, sensorial
+     * y neural-- porque distinguirlas es todo el ejercicio.
+     */
+    public const SCENARIO_NEONATAL = [
+        'normal',
+        // Transmisión
+        'efusion_neonatal', 'estenosis_atresia_cae', 'fijacion_congenita_estribo',
+        // Sensoriales
+        'gjb2', 'pendred', 'cmv_congenito', 'rubeola_congenita',
+        'usher', 'waardenburg', 'jervell_lange_nielsen', 'ototoxica',
+        'osificacion_coclear',
+        // Neurales
+        'neuropatia', 'kernicterus', 'asfixia_perinatal', 'prematuro',
+    ];
+
+    /**
+     * Los cuadros que se le pueden ofrecer a un paciente de esa edad, en el
+     * orden en que conviene mostrarlos.
+     *
+     * @return array<int,string> claves de SCENARIOS
+     */
+    public static function scenariosParaEdad(?float $edadAnios, ?string $categoria = null): array
+    {
+        $out = [];
+        foreach (self::SCENARIOS as $clave => $esc) {
+            if ($categoria !== null && $esc['categoria'] !== $categoria) {
+                continue;
+            }
+            if ($edadAnios !== null && isset(self::SCENARIO_EDAD[$clave])) {
+                [$min, $max] = self::SCENARIO_EDAD[$clave];
+                if ($min !== null && $edadAnios < $min) {
+                    continue;
+                }
+                if ($max !== null && $edadAnios > $max) {
+                    continue;
+                }
+            }
+            $out[] = $clave;
+        }
+        // Menor de un año: primero los del turno del recién nacido.
+        if ($edadAnios !== null && $edadAnios < 1) {
+            usort($out, function ($a, $b) {
+                $pa = in_array($a, self::SCENARIO_NEONATAL, true) ? 0 : 1;
+                $pb = in_array($b, self::SCENARIO_NEONATAL, true) ? 0 : 1;
+                return $pa <=> $pb;
+            });
+        }
+        return $out;
+    }
+
+    /**
      * Cuadros clínicos para generar un caso coherente de una sola vez.
      *
      * `sn_shape`/`gap_shape` son formas relativas en dB por frecuencia; la
@@ -520,6 +635,29 @@ final class CaseProfile
             'tinnitus' => ['prob' => 0.3, 'ruido' => ['Zumbido'],
                            'frecuencia' => [250, 500], 'permanente' => 0.3],
             'conciencia' => [70, 95],
+        ],
+        'efusion_neonatal' => [
+            'label' => 'Efusión / mesénquima del oído medio del recién nacido',
+            'categoria' => 'conductiva',
+            // NO es el transitorio de las primeras horas --ese lo pone la
+            // edad y no es patología (ver NewbornScreening)--: es el oído
+            // medio que no terminó de airearse y sigue ocupado a las
+            // semanas. Es la causa más común de "refiere" repetido en el
+            // rescreening, y la que hay que descartar antes de hablar de
+            // hipoacusia: la ósea está intacta.
+            'sn_shape' => [125 => 3, 250 => 3, 500 => 3, 1000 => 3, 2000 => 5, 3000 => 5, 4000 => 5, 6000 => 8, 8000 => 8],
+            'sn_scale' => [0.0, 1.2],
+            'gap_shape' => [125 => 35, 250 => 35, 500 => 32, 1000 => 28, 2000 => 25, 3000 => 22, 4000 => 22, 6000 => 22, 8000 => 22],
+            'gap_scale' => [0.5, 1.2],
+            'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            // Con sonda de 226 Hz esto se ve 'A' igual (ver z_generator:
+            // map_letter_for_probe): la sonda del lactante es la de 1000 Hz,
+            // y ese error es parte del ejercicio.
+            'z' => ['B'], 'etf' => 'Disfunción tubaria',
+            'grados' => ['leve'], 'max_db' => 40, 'gap_max_db' => 45,
+            'vemp' => ['type' => 'normal', 'umbral_gap' => true],
+            // Recién nacido: no hay queja ni conciencia del problema.
+            'conciencia' => [0, 15],
         ],
         'otoesclerosis' => [
             'label' => 'Otoesclerosis',
@@ -1219,6 +1357,23 @@ final class CaseProfile
             'grados' => ['leve', 'moderada'],
             'conciencia' => [25, 55],
         ],
+        'pendred' => [
+            'label' => 'Pendred / acueducto vestibular dilatado',
+            'categoria' => 'sensorial',
+            // Puede PASAR el tamizaje y caerse después, a saltos y con
+            // fluctuación --clásicamente tras un golpe en la cabeza--. Es el
+            // contraejemplo del "pasó el screening, listo".
+            'sn_shape' => [125 => 55, 250 => 58, 500 => 60, 1000 => 62, 2000 => 68, 3000 => 72, 4000 => 75, 6000 => 78, 8000 => 78],
+            'sn_scale' => [0.4, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['moderada', 'severa', 'profunda'],
+            // El acueducto dilatado también deja el saco endolinfático
+            // anómalo: el VEMP puede salir con umbral bajo (tercera ventana).
+            'vemp' => ['type' => 'normal',
+                       'umbral' => ['CVEMP' => [60, 75], 'OVEMP' => [65, 80], 'MVEMP' => [70, 85]]],
+            'conciencia' => [10, 40],
+        ],
         'cmv_congenito' => [
             'label' => 'CMV congénito (asimétrica progresiva)',
             'categoria' => 'sensorial',
@@ -1284,6 +1439,23 @@ final class CaseProfile
                        'umbral' => ['CVEMP' => [55, 70], 'OVEMP' => [60, 75], 'MVEMP' => [65, 80]]],
         ],
 
+        'asfixia_perinatal' => [
+            'label' => 'Asfixia perinatal / encefalopatía hipóxico-isquémica',
+            'categoria' => 'neural',
+            // El otro gran camino a la neuropatía en la UCIN, junto con la
+            // bilirrubina: cóclea viva (OEA y microfónica presentes) y el
+            // tronco desarmado. Suele venir con prematurez, ventilación y
+            // ototóxicos encima, así que el caso completo se arma con los
+            // antecedentes de la ficha del paciente.
+            'sn_shape' => [125 => 35, 250 => 38, 500 => 42, 1000 => 45, 2000 => 48, 3000 => 50, 4000 => 52, 6000 => 55, 8000 => 55],
+            'sn_scale' => [0.5, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [0, 15], 'retro' => 'ansd', 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['moderada', 'severa', 'profunda'],
+            'vemp' => ['type' => 'normal',
+                       'umbral' => ['CVEMP' => [55, 70], 'OVEMP' => [60, 75], 'MVEMP' => [65, 80]]],
+            'conciencia' => [0, 15],
+        ],
         'kernicterus' => [
             'label' => 'Kernícterus (hiperbilirrubinemia neonatal)',
             'categoria' => 'neural',

@@ -64,6 +64,27 @@ final class CaseBuilder
     // formulario y quedan editables; el preset elegido NO se persiste.
     // Las claves y los defaults tienen que coincidir con
     // NEURAL_PARAM_DEFAULTS en src/abr/ABR_generator.py.
+    /**
+     * Infecciones congénitas (TORCH) que el JCIH 2019 lista como indicador
+     * de riesgo. NO mueven el tamizaje --no son líquido en el conducto--
+     * pero sí obligan a seguimiento: varias dan hipoacusia progresiva o de
+     * aparición tardía, y el caso "pasó el tamizaje y a los seis meses no"
+     * es el que hay que poder armar.
+     */
+    public const TORCH_OPTIONS = [
+        '' => 'Ninguna',
+        'cmv' => 'Citomegalovirus (CMV)',
+        'toxoplasmosis' => 'Toxoplasmosis',
+        'rubeola' => 'Rubéola',
+        'sifilis' => 'Sífilis',
+        'herpes' => 'Herpes simple',
+        'zika' => 'Zika',
+        'vih' => 'VIH',
+    ];
+
+    /** Muy bajo peso al nacer, en gramos (JCIH 2019). */
+    public const PESO_MUY_BAJO_G = 1500;
+
     public const ABR_NEURAL_DEFAULTS = [
         'i_iii_ms' => 0.2,          // prolongación selectiva I-III
         'iii_v_ms' => 0.2,          // prolongación selectiva III-V
@@ -1295,6 +1316,12 @@ final class CaseBuilder
             $v['nacimiento'] = [
                 'parto' => (string) ($nacimiento['parto'] ?? 'vaginal'),
                 'semanas' => $nacimiento['semanas'] ?? '',
+                'peso_g' => $nacimiento['peso_g'] ?? '',
+                'torch' => (string) ($nacimiento['torch'] ?? ''),
+                'torch_sintomatica' => !empty($nacimiento['torch_sintomatica']) ? '1' : '',
+                'uci_dias' => $nacimiento['uci_dias'] ?? '',
+                'ototoxicos' => !empty($nacimiento['ototoxicos']) ? '1' : '',
+                'exanguinotransfusion' => !empty($nacimiento['exanguinotransfusion']) ? '1' : '',
                 'peg' => !empty($nacimiento['peg']) ? '1' : '',
                 'vernix_limpiado' => !empty($nacimiento['vernix_limpiado']) ? '1' : '',
                 'liquido_persistente' => !empty($nacimiento['liquido_persistente']) ? '1' : '',

@@ -2774,6 +2774,24 @@ def test_stim_key_matches_the_normative_keys():
         assert clave in DESCENDENTE, (etiqueta, clave)
 
 
+def test_hours_of_life_beat_whole_years_for_the_population():
+    """Un bebé de ocho meses no es un recién nacido.
+
+    Los dos son "0 años" -- la edad en años enteros los mete en la misma
+    bolsa -- y no comparten normativa: 'neonate' es el bloque del recién
+    nacido de término y a los tres meses la vía ya arrancó a madurar, que es
+    para lo que está 'toddler'. Espejo de CaseWaveforms::poblacion.
+    """
+    assert select_population(0, 1) == 'neonate'          # sin horas, se asume
+    assert select_population(0, 1, horas=10) == 'neonate'
+    assert select_population(0, 1, horas=24 * 30) == 'neonate'
+    assert select_population(0, 1, horas=24 * 240) == 'toddler'
+    assert select_population(2, 1, horas=None) == 'toddler'
+    assert select_population(30, 0, horas='') == 'adult_male'
+    # Basura en el campo no rompe: cae en el camino de siempre.
+    assert select_population(30, 0, horas='chanta') == 'adult_male'
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_") and callable(fn):

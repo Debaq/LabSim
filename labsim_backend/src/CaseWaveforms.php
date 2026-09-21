@@ -226,8 +226,22 @@ final class CaseWaveforms
      * 'child' y un adolescente también, porque a esa edad las latencias ya
      * son de adulto.
      */
-    public static function poblacion(?int $edad, int $genero): string
+    public static function poblacion(?int $edad, int $genero, $horas = null): string
     {
+        // Horas de vida: cuando están, mandan. Sin esto un bebé de ocho
+        // meses tomaba las latencias del recién nacido, porque los dos son
+        // "0 años". 'neonate' es el bloque del recién nacido de término;
+        // pasados los tres meses la vía ya arrancó a madurar y lo que
+        // corresponde es 'toddler', que es el tramo de la maduración.
+        if ($horas !== null && $horas !== '' && is_numeric($horas)) {
+            $meses = (float) $horas / 720.0;
+            if ($meses < 3) {
+                return 'neonate';
+            }
+            if ($meses < 36) {
+                return 'toddler';
+            }
+        }
         if ($edad === null) {
             return 'adult_female';
         }

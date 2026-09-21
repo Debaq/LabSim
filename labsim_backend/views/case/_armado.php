@@ -34,6 +34,49 @@
             <input type="number" id="armado-age" min="0" max="110" value="<?= htmlspecialchars((string) ($v['age'] ?? '')) ?>">
         </label>
     </div>
+
+    <div id="armado-rn" hidden>
+        <p class="help help--mt-md"><strong>Recién nacido.</strong> Con la edad en 0 hace falta la edad exacta: un bebé de 8 horas y uno de 8 meses son los dos "0 años" y no se parecen en nada. Las horas de vida deciden cuánto refiere el tamizaje --a las 6 horas la TEOAE refiere en más de la mitad de los recién nacidos SANOS mientras el AABR pasa en el 85 %-- y el parto, las semanas y el peso lo mueven de ahí. Todo esto se escribe en la ficha <a href="#" class="tab-link" data-goto-tab="paciente">Paciente</a>, donde se edita igual.</p>
+        <div class="three-col">
+            <label>Edad exacta
+                <span style="display:flex; gap:0.3rem;">
+                    <input type="number" id="armado-edad-valor" min="0" max="8760" step="1" style="width:5em;" placeholder="10">
+                    <select id="armado-edad-unidad">
+                        <option value="horas">horas</option>
+                        <option value="dias">días</option>
+                        <option value="meses">meses</option>
+                    </select>
+                </span>
+            </label>
+            <label>Parto
+                <select id="armado-parto">
+                    <option value="vaginal">Vaginal</option>
+                    <option value="cesarea">Cesárea</option>
+                </select>
+            </label>
+            <label>Semanas / peso (g)
+                <span style="display:flex; gap:0.3rem;">
+                    <input type="number" id="armado-semanas" min="24" max="42" step="1" style="width:4.5em;" placeholder="40">
+                    <input type="number" id="armado-peso" min="400" max="6000" step="10" style="width:6em;" placeholder="3200">
+                </span>
+            </label>
+        </div>
+        <div class="two-col">
+            <label>Infección congénita (TORCH)
+                <select id="armado-torch">
+                    <?php foreach (CaseBuilder::TORCH_OPTIONS as $tKey => $tLabel): ?>
+                    <option value="<?= $tKey ?>"><?= htmlspecialchars($tLabel) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+            <label>Días en UCI neonatal
+                <input type="number" id="armado-uci" min="0" max="180" step="1" placeholder="0">
+            </label>
+        </div>
+        <label class="inline-check"><input type="checkbox" id="armado-ototoxicos"> Aminoglucósidos u otros ototóxicos</label>
+        <label class="inline-check"><input type="checkbox" id="armado-exanguino"> Hiperbilirrubinemia con exanguinotransfusión</label>
+        <p class="help">Los indicadores de riesgo <strong>no</strong> inventan una hipoacusia ni mueven el tamizaje: el cuadro se elige abajo. Lo que hacen es que el caso tenga sentido clínico --un kernícterus sin exanguinotransfusión, o una ANSD sin UCI, se leen raro-- y obligan a seguimiento aunque el tamizaje pase.</p>
+    </div>
 </div>
 
 <div class="card">

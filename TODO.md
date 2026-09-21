@@ -2872,3 +2872,57 @@ Sirve para armar casos: con N* = 800 al nivel de referencia, el que se
 detiene a los 400 barridos informa ~6 dB de más. Y explica por qué no hay
 que empinar la curva de crecimiento para acortar esa diferencia: rompe F1,
 que es la condición fuerte.
+
+## Casos de recién nacido: se podían proyectar pero no armar (2026-09-21)
+
+El motor neonatal estaba entero --transitorio por horas, tamizaje por franja,
+referencia ósea del lactante, sonda de 1000 Hz-- pero el camino para ARMAR el
+caso no llegaba hasta ahí. Lo que faltaba:
+
+1. **`age = 0` bloqueaba el guardado** con "Falta la edad". O sea que ningún
+   caso de maternidad se podía guardar, justo cuando la edad es el dato del
+   ejercicio. Ahora 0 es válido si viene la edad exacta.
+2. **El armado rápido no sabía de recién nacidos**: pedía años enteros y no
+   escribía las horas de vida, así que el caso salía como "lactante de 0
+   meses" sin transitorio ni tamizaje. Ahora tiene su bloque, y el botón
+   sortea el turno (6-36 h, 37-41 semanas, 2700-3900 g) cuando la edad va en
+   0 y el campo está vacío. Lo ya cargado no se pisa.
+3. **El catálogo no filtraba por edad**: le ofrecía presbiacusia, NIHL y
+   otoesclerosis a un bebé de diez horas, con los cuadros del turno perdidos
+   entre setenta. `CaseProfile::SCENARIO_EDAD` (rangos) y `SCENARIO_NEONATAL`
+   (los del turno, que van primero) más `scenariosParaEdad()`, espejados en
+   `generator.js`.
+4. **La población normativa iba por años enteros**: un bebé de ocho meses
+   tomaba las latencias del recién nacido. Ahora las horas de vida mandan:
+   menos de 3 meses `neonate`, hasta los 3 años `toddler`. Espejado en
+   `select_population`, `CaseWaveforms::poblacion` y `abr.js`.
+5. **La ficha del docente mentía sobre el tamizaje**: `resultado()` mira solo
+   el transitorio, así que un GJB2 de 80 dB salía como "AABR pasa".
+   `resultadoOido()` cruza transitorio, umbral ABR y estado de la EOA, y da
+   el patrón que importa: neuropatía = TEOAE pasa + AABR refiere.
+
+### Campos nuevos del nacimiento
+
+`peso_g`, `torch` (+ `torch_sintomatica`), `uci_dias`, `ototoxicos` y
+`exanguinotransfusion`, además de las semanas que ya estaban. De los números
+salen los derivados, que no son campos aparte: `pretermino` (< 34 semanas,
+distinto del tardío 34-36) y `muy_bajo_peso` (< 1500 g, JCIH 2019).
+
+Los dos primeros mueven el tamizaje --prematuro −20 h TEOAE / −12 h AABR,
+muy bajo peso −10 / −8, y se acumulan, que es la razón de que la UCIN refiera
+varias veces más que la sala cuna--. **Las TORCH NO lo mueven**, y es a
+propósito: no son líquido en el conducto, son riesgo de hipoacusia de verdad,
+muchas veces progresiva o de aparición tardía. Un CMV que pasa el tamizaje y
+a los seis meses ya no pasa es el caso que hay que poder armar, y taparlo con
+un "refiere" al nacer lo arruinaría. Los indicadores de riesgo van a la ficha
+del docente como antecedente y obligan a seguimiento; no inventan hipoacusia.
+
+### Cuadros nuevos
+
+`efusion_neonatal` (transmisión: el oído medio que no terminó de airearse, la
+causa más común de "refiere" repetido en el rescreening), `pendred` /
+acueducto vestibular dilatado (sensorial que puede PASAR el tamizaje y caerse
+después) y `asfixia_perinatal` (neural: el otro camino a la neuropatía en la
+UCIN, junto con la bilirrubina). Con eso el turno del recién nacido tiene
+material en las tres categorías que hay que poder distinguir ahí --5
+conductivas, 15 sensoriales, 5 neurales-- que es el ejercicio.

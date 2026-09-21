@@ -375,7 +375,8 @@ foreach (CaseProfile::SCENARIOS as $clave => $esc) {
 $esperado = [
     'normal' => 'normal',
     // Conductivas: la cóclea sana, el gap manda.
-    'otitis_media' => 'transmission', 'otoesclerosis' => 'transmission',
+    'otitis_media' => 'transmission', 'efusion_neonatal' => 'transmission',
+    'otoesclerosis' => 'transmission',
     'disyuncion_cadena' => 'transmission', 'fractura_cadena' => 'transmission',
     'fractura_longitudinal' => 'transmission', 'perforacion' => 'transmission', 'disfuncion_tubaria' => 'transmission',
     'tapon_cerumen' => 'transmission', 'cuerpo_extrano_cae' => 'transmission',
@@ -395,11 +396,13 @@ $esperado = [
     // Genéticas y congénitas: la forma cambia, el sitio de la lesión no.
     'gjb2' => 'coclear', 'usher' => 'coclear', 'waardenburg' => 'coclear',
     'alport' => 'coclear', 'jervell_lange_nielsen' => 'coclear', 'stickler' => 'coclear',
+    'pendred' => 'coclear',
     'cmv_congenito' => 'coclear', 'rubeola_congenita' => 'coclear',
     // Neurales: la cóclea viva y el ABR desarmado. Varios de estos traen el
     // audiograma casi normal y aun así NO clasifican normal: el patrón
     // retrococlear activo manda sobre el promedio tonal.
-    'schwannoma' => 'neural', 'neuropatia' => 'neural', 'kernicterus' => 'neural',
+    'schwannoma' => 'neural', 'neuropatia' => 'neural',
+    'asfixia_perinatal' => 'neural', 'kernicterus' => 'neural',
     'nf2' => 'neural', 'tumor_angulo' => 'neural', 'compresion_microvascular' => 'neural',
     'esclerosis_multiple' => 'neural', 'infarto_pontino' => 'neural',
     'glioma_tronco' => 'neural', 'siderosis' => 'neural', 'chiari_hic' => 'neural',

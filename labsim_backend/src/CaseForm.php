@@ -297,7 +297,7 @@ final class CaseForm
         // hecho con Hood y otro con Sanfins son indistinguibles después de
         // guardar, y la diferencia entre sets es del orden de la desviación
         // que el docente quiso cargar a mano.
-        $abrAutor = self::abrAutor($v, $age, $gender);
+        $abrAutor = self::abrAutor($v, $age, $gender, $horasVida);
 
         // EOA: patología por oído, mismo shape simplificado (type + umbral)
         // que ABR usa para su curva -- ver oae_attenuation_db en
@@ -373,8 +373,12 @@ final class CaseForm
         $vempOd = self::parseVemp($v, 'od');
         $vempOi = self::parseVemp($v, 'oi');
 
-        if ($age <= 0) {
-            $error = 'Falta la edad.';
+        // Edad 0 es válida SI viene la edad exacta: es un recién nacido o un
+        // lactante, no un campo sin llenar. Sin esa excepción no se podía
+        // guardar ningún caso de maternidad -- el formulario los rechazaba
+        // con "Falta la edad" justo cuando la edad era el dato.
+        if ($age <= 0 && $horasVida === null) {
+            $error = 'Falta la edad: si es un recién nacido o un lactante, dejá 0 y cargá la edad exacta (horas, días o meses) en la ficha Paciente.';
         } elseif (!$isUpdate && ($nombre1 === '' || $apellido1 === '')) {
             $error = 'Falta el nombre del paciente: generalo con "Generar caso" (Armado rápido) o escribilo a mano en la pestaña Paciente.';
         } elseif ($isUpdate && (trim((string) ($v['nombre'] ?? '')) === '' || trim((string) ($v['apellido'] ?? '')) === '')) {
@@ -596,17 +600,31 @@ final class CaseForm
     {
         $semanas = self::val($v, ['nacimiento', 'semanas'], '');
         $semanas = is_numeric($semanas) ? (int) $semanas : null;
+        $peso = self::val($v, ['nacimiento', 'peso_g'], '');
+        $peso = is_numeric($peso) ? (int) $peso : null;
+        $torch = (string) self::val($v, ['nacimiento', 'torch'], '');
         $out = [
             'parto' => self::val($v, ['nacimiento', 'parto'], 'vaginal') === 'cesarea'
                 ? 'cesarea' : 'vaginal',
             'semanas' => $semanas,
+            'peso_g' => $peso,
+            'torch' => isset(CaseBuilder::TORCH_OPTIONS[$torch]) && $torch !== '' ? $torch : null,
+            'torch_sintomatica' => (bool) self::val($v, ['nacimiento', 'torch_sintomatica'], false),
+            'uci_dias' => ($d = self::val($v, ['nacimiento', 'uci_dias'], '')) !== '' && is_numeric($d)
+                ? max(0, (int) $d) : null,
+            'ototoxicos' => (bool) self::val($v, ['nacimiento', 'ototoxicos'], false),
+            'exanguinotransfusion' => (bool) self::val($v, ['nacimiento', 'exanguinotransfusion'], false),
             'peg' => (bool) self::val($v, ['nacimiento', 'peg'], false),
             'vernix_limpiado' => (bool) self::val($v, ['nacimiento', 'vernix_limpiado'], false),
             'liquido_persistente' => (bool) self::val($v, ['nacimiento', 'liquido_persistente'], false),
         ];
-        // El prematuro tardío no es un campo aparte: sale de las semanas.
+        // Los que mueven el tamizaje no son campos aparte: salen de las
+        // semanas y del peso. Un prematuro de 30 semanas con 900 g acumula
+        // los dos, que es lo que pasa de verdad.
         $out['cesarea'] = $out['parto'] === 'cesarea';
         $out['pretermino_tardio'] = $semanas !== null && $semanas >= 34 && $semanas <= 36;
+        $out['pretermino'] = $semanas !== null && $semanas < 34;
+        $out['muy_bajo_peso'] = $peso !== null && $peso < CaseBuilder::PESO_MUY_BAJO_G;
         $out['percentil'] = [];
         foreach (['OD', 'OI'] as $lado) {
             $guardado = self::val($v, ['nacimiento', 'percentil', $lado], '');
@@ -649,7 +667,7 @@ final class CaseForm
      * se editan, y un caso de hace seis meses tiene que poder decir con qué
      * números se armó aunque ese set ya no sea el mismo.
      */
-    private static function abrAutor(array $v, int $edad, int $genero): array
+    private static function abrAutor(array $v, int $edad, int $genero, $horas = null): array
     {
         require_once __DIR__ . '/AbrReferences.php';
         require_once __DIR__ . '/CaseWaveforms.php';
@@ -672,7 +690,7 @@ final class CaseForm
             $id = '__default__';
             $label = 'LabSim (default)';
         }
-        $pop = CaseWaveforms::poblacion($edad, $genero);
+        $pop = CaseWaveforms::poblacion($edad, $genero, $horas);
         return [
             'set' => $id,
             'label' => $label,
