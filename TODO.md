@@ -2452,3 +2452,65 @@ como está y agregar UN campo al caso del recién nacido, "horas de vida al
 momento de la cita", resolviéndolo contra la hora de la cita y no contra el
 reloj. Cubre el caso de uso real (preparar el turno) sin abrir la lata de que
 el resto del padrón envejezca.
+
+## Vía ósea del ABR: ley por nivel, lactante invertido y solo onda V (2026-09-21)
+
+Segundo aporte bibliográfico del docente (12 referencias: Beattie 1998, Cobb
+y Stuart 2016 I y II, Yang 1987, Stuart 1993, Türkman 2018, Seo 2018).
+Contraste contra lo que teníamos:
+
+**Lo que ya estaba bien.** La onda V del click óseo del adulto cae dentro del
+rango publicado en los tres niveles medidos (45, 30 y 15 dB nHL), con menos
+de 0.1 ms de diferencia. Y el tope de salida del vibrador que pusimos ayer
+(50 dB) coincide con el "45 a 55 dB nHL" de la revisión. Los interpicos por
+edad también caen en rango: neonato 5.21 contra 4.9-5.3 publicado, 1-3 años
+4.28 contra 4.2-4.5, adulto 4.08 contra 3.9-4.2.
+
+**Lo que estaba mal: el signo del lactante.** El modelo le sumaba a TODAS las
+poblaciones el mismo +0.2 ms por vía ósea. La bibliografía dice lo contrario
+para el bebé: su onda V por vía ósea es **más corta** que por vía aérea, y
+más corta que la del adulto. El cráneo sin suturar transmite mejor y el
+vibrador saltea un oído medio que todavía tiene mesénquima, así que **por vía
+ósea el bebé se parece mucho más a un adulto que por vía aérea**. Con el
+offset de adulto, el neonato quedaba 0.5-0.6 ms tarde en los tres niveles --
+justo en el examen que define su conducta clínica.
+
+**Lo que faltaba: la corrección no es fija, depende del nivel.** Beattie
+1998 (B-71): +0.3 ms a 40 dB, +0.4 a 30, +0.5 a 20, +0.8 a 10, y a 55 dB no
+hace falta corregir. Es la misma idea que la función latencia-intensidad pero
+de la VÍA: el vibrador rinde menos cerca del umbral. Ahora está como
+`BONE_LAT_CORRECTION` e interpola entre esos puntos.
+
+Al lactante no se le aplica esa corrección: su función latencia-intensidad
+por vía ósea es más plana (0.45 contra 0.52 ms/10 dB en la tabla publicada).
+Se pondera por cuánto cráneo sin suturar le queda (`INFANT_POPULATIONS`:
+neonato 1.0, 1-3 años 0.5). Resultado: 6 de las 9 celdas de la tabla caen
+dentro del rango y las otras tres se pasan por 0.03, 0.05 y 0.15 ms.
+
+**Lo que faltaba: por vía ósea solo la onda V es confiable.** La I y la III
+rara vez se identifican --menos energía, espectro más pobre en agudos (que es
+la zona que genera la I) y el artefacto del transductor tapando los primeros
+milisegundos--. `BONE_WAVE_AMP` las reduce y `BONE_WAVE_WIDTH` las ensancha.
+En el trazo, click de 50 dB en adulta normal: por aire la onda I sale en
+0.168 µV y por hueso en 0.018, bajo el piso de lectura, mientras la V
+sobrevive (0.350 contra 0.368). Buscar interpicos en un registro óseo es un
+error que el ejercicio ahora deja cometer.
+
+**Dos cosas que NO toqué, porque son decisión del docente:**
+
+1. **El chirp por vía ósea.** La fuente nueva da la onda V del CE-Chirp entre
+   1.0 y 1.5 ms más corta que la del click, y ella misma aclara "depende de
+   cómo el equipo referencia el tiempo cero". Eso contradice de frente a F24
+   (Cargnelutti, click y chirp en los MISMOS sujetos), que no encuentra
+   diferencia significativa de latencia. No son datos incompatibles: son dos
+   convenciones de tiempo cero. Aplicar los 1.0-1.5 ms rompería el anclaje de
+   F24 que ya está en el modelo. Hay que elegir qué equipo simulamos.
+2. **La referencia de umbral de la vía ósea.** El dato de Cobb y Stuart es
+   fuerte: adultos con audición normal dan 3.75 dB nHL por aire y **18.75 por
+   hueso**, mientras los lactantes dan 3.75 y 1.25. O sea, en el adulto el
+   0 dB nHL óseo está referenciado mucho más "duro" que el aéreo. Nuestro
+   modelo hoy los deja comparables (mismo umbral por las dos vías en un oído
+   normal). Adoptarlo tal cual significa que **todo adulto normal mostraría
+   15 dB de gap aéreo-óseo en dB nHL**, que es real pero exige que el alumno
+   sepa que cada vía tiene su propia referencia. Es un cambio de fondo en
+   cómo se lee el examen y afecta todos los casos existentes.

@@ -62,7 +62,8 @@ from abr.ABR_generator import (  # noqa: E402
     ABRGenerator, IMPEDANCE_BALANCE_LIMIT_KOHM, IMPEDANCE_LIMIT_KOHM,
     INTERAURAL_ATTENUATION, NEURAL_BLOQUEO_OPTIONS, NEURAL_PARAM_DEFAULTS,
     RATE_REF, STIM_MAP, BONE_MAX_OUTPUT_DB, agitation_factor,
-    default_settings, select_population, stimulus_width)
+    default_settings, select_population, stimulus_width,
+    bone_latency_correction, INFANT_BONE_LAT_MS, INFANT_POPULATIONS)
 from abr.protocols import PROTOCOLS, get_protocol  # noqa: E402
 
 NORMS = os.path.join(os.path.dirname(__file__), '..', 'resources', 'abr', 'normative_data.json')
@@ -347,6 +348,97 @@ def test_narrow_band_chirp_recovers_what_the_burst_loses():
     assert nb['I']['amp'] > 2 * burst['I']['amp']
     assert nb['V']['amp'] > burst['V']['amp']
     assert _fwhm(g, 'nb_ce_chirp_ls', '500Hz') < _fwhm(g, 'tone_burst', '500Hz')
+
+
+# ------------------------------------------------------- via osea
+
+def test_bone_latency_correction_grows_toward_threshold():
+    """La osea no es un offset fijo: se atrasa mas cerca del umbral.
+
+    Beattie 1998 (B-71): +0.3 ms a 40 dB, +0.4 a 30, +0.5 a 20, +0.8 a 10, y
+    a 55 dB no hace falta corregir. Antes el modelo sumaba ~0.2 ms parejo a
+    toda intensidad.
+    """
+    assert bone_latency_correction(60) == 0.0
+    assert bone_latency_correction(55) == 0.0
+    for nivel, esperado in ((40, 0.3), (30, 0.4), (20, 0.5), (10, 0.8)):
+        assert abs(bone_latency_correction(nivel) - esperado) < 0.001, nivel
+    # Monotona: nunca se adelanta al bajar.
+    niveles = list(range(10, 60, 5))
+    valores = [bone_latency_correction(n) for n in niveles]
+    assert valores == sorted(valores, reverse=True), valores
+
+
+def test_infant_bone_is_faster_than_air_unlike_the_adult():
+    """En el lactante la osea sale ANTES que la aerea. En el adulto, despues.
+
+    El craneo sin suturar transmite mejor y el vibrador saltea un oido medio
+    que todavia tiene mesenquima, asi que por via osea el bebe se parece
+    mucho mas a un adulto que por via aerea (Cobb y Stuart 2016; Yang et al.
+    1987; Stuart et al. 1993). El modelo le sumaba a todos el mismo +0.2 ms:
+    el signo estaba al reves justo donde el ABR oseo es el examen.
+    """
+    assert INFANT_BONE_LAT_MS < 0
+    assert INFANT_POPULATIONS['neonate'] == 1.0
+    # Con las suturas a medio cerrar, la mitad de cada comportamiento.
+    assert 0 < INFANT_POPULATIONS['toddler'] < 1
+
+
+def test_bone_wave_v_matches_the_published_table():
+    """Onda V del click oseo contra los valores publicados por edad y nivel.
+
+    Tabla aproximada de la revision de via osea (Cobb y Stuart 2016 para
+    neonatos; Turkman et al. 2018 para adultos), en ms:
+
+        dB      neonato      1-3 anios     adulto
+        45     7.2-7.6      6.6-7.0      6.8-7.2
+        30     7.8-8.3      7.2-7.6      7.5-7.9
+        15     8.5-9.0      7.9-8.3      8.3-8.8
+
+    Se acepta 0.2 ms de margen sobre el rango: la fuente misma los da como
+    aproximados y la resolucion de lectura del ejercicio es mayor que eso.
+    """
+    g = _gen()
+    publicado = {
+        45: {'neonate': (7.2, 7.6), 'toddler': (6.6, 7.0), 'adult_female': (6.8, 7.2)},
+        30: {'neonate': (7.8, 8.3), 'toddler': (7.2, 7.6), 'adult_female': (7.5, 7.9)},
+        15: {'neonate': (8.5, 9.0), 'toddler': (7.9, 8.3), 'adult_female': (8.3, 8.8)},
+    }
+    for nivel, filas in publicado.items():
+        for pob, (lo, hi) in filas.items():
+            base = g.get_baseline_values(pob, 'click', 'bone_conduction')
+            valores, _ = g.calculate_wave_parameters(base, nivel, 0, 'normal')
+            peso = INFANT_POPULATIONS.get(pob, 0.0)
+            corr = (peso * INFANT_BONE_LAT_MS
+                    + (1.0 - peso) * bone_latency_correction(nivel))
+            lat = valores['V']['lat'] + corr
+            assert lo - 0.2 <= lat <= hi + 0.2, (nivel, pob, round(lat, 2), lo, hi)
+
+
+def test_only_wave_v_survives_by_bone():
+    """Por via osea solo la onda V es confiable.
+
+    La I y la III rara vez se identifican: el vibrador entrega menos energia
+    y con espectro mas pobre en agudos --la zona que genera la onda I-- y el
+    artefacto del transductor tapa los primeros milisegundos. Buscar
+    interpicos en un registro oseo es un error que el ejercicio tiene que
+    dejar cometer, asi que la onda tiene que DIBUJARSE chiquita, no faltar.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    aereo = _curva(intensity=50, technical={'transducer': 'insert_earphone'})
+    oseo = _curva(intensity=50, technical={'transducer': 'bone_vibrator'})
+
+    def pico(res, desde, hasta):
+        t, y, _ = res
+        m = (t >= desde) & (t <= hasta)
+        return float(np.max(y[m]))
+
+    # La onda V aguanta por las dos vias.
+    assert pico(oseo, 5.0, 8.0) > 0.5 * pico(aereo, 5.0, 8.0)
+    # La onda I no: por hueso queda bajo el piso de lectura.
+    assert pico(oseo, 1.2, 3.2) < 0.25 * pico(aereo, 1.2, 3.2)
 
 
 # ------------------------------------------------- anclaje bibliografico

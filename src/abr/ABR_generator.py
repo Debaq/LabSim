@@ -136,6 +136,58 @@ LAT_SHIFT_FACTOR = {'I': 1.15, 'II': 1.12, 'III': 1.05, 'IV': 1.02, 'V': 1.0}
 # habia tramos 15/50/60/70 con saltos (la onda II pasaba de 0.110 a 0.006
 # uV entre 55 y 60/s) y rangos irreales (onda V variaba 6.4x en amplitud y
 # 1.1 ms en latencia entre 11 y 90/s; lo real es ~25-30% y ~0.4-0.6 ms).
+# Correccion de latencia de la via osea, en ms, por nivel. NO es un offset
+# fijo: a nivel alto la osea y la aerea dan lo mismo y la diferencia crece
+# hacia el umbral.
+#
+# Beattie 1998 (Scand Audiol 27:120-6, B-71): +0.3 ms a 40 dB, +0.4 a 30,
+# +0.5 a 20 y +0.8 a 10 dB nHL; a 55 dB no hace falta corregir. Es la misma
+# idea que la funcion latencia-intensidad, pero de la VIA: el vibrador
+# entrega menos energia util cerca del umbral.
+BONE_LAT_CORRECTION = {55.0: 0.0, 40.0: 0.3, 30.0: 0.4, 20.0: 0.5, 10.0: 0.8}
+
+# Lactante: la osea le sale MAS RAPIDA que la aerea, al reves que en el
+# adulto. El craneo sin suturar transmite mejor y el vibrador saltea un oido
+# medio que todavia tiene mesenquima, asi que por via osea el bebe se parece
+# mucho mas a un adulto que por via aerea (Cobb y Stuart 2016; Yang,
+# Rupert y Moushegian 1987; Stuart et al. 1993).
+#
+# El valor sale de cerrar contra la tabla de latencias publicada: con el
+# offset de adulto el neonato quedaba 0.5-0.6 ms tarde en los tres niveles
+# medidos (45, 30 y 15 dB nHL).
+# Y no se le suma ademas la correccion por nivel: esa describe un vibrador
+# que rinde menos cerca del umbral sobre un craneo adulto. En el lactante la
+# funcion latencia-intensidad por via osea es mas PLANA que la del adulto
+# (0.45 contra 0.52 ms/10 dB en la tabla publicada), asi que el offset
+# constante es lo que cierra en los tres niveles medidos.
+INFANT_BONE_LAT_MS = -0.60
+
+
+# Por via osea, en la practica solo la onda V es confiable: la I y la III
+# rara vez se identifican. El vibrador entrega menos energia y con un
+# espectro mas pobre en agudos, que es justo la zona que genera la onda I, y
+# ademas el artefacto del transductor tapa los primeros milisegundos. Factor
+# de amplitud y de ancho por onda (Seo et al. 2018, revision; Turkman et al.
+# 2018, que publica interpicos solo cuando la I se ve).
+BONE_WAVE_AMP = {'I': 0.25, 'II': 0.35, 'III': 0.60, 'IV': 0.80, 'V': 1.0}
+BONE_WAVE_WIDTH = {'I': 1.5, 'II': 1.4, 'III': 1.2, 'IV': 1.1, 'V': 1.05}
+
+
+def bone_latency_correction(intensity):
+    """Cuanto se atrasa la via osea respecto de la aerea a ese nivel (ms)."""
+    niveles = sorted(BONE_LAT_CORRECTION)
+    if intensity >= niveles[-1]:
+        return 0.0
+    if intensity <= niveles[0]:
+        return BONE_LAT_CORRECTION[niveles[0]]
+    for a, b in zip(niveles, niveles[1:]):
+        if a <= intensity <= b:
+            f = (intensity - a) / (b - a)
+            return (BONE_LAT_CORRECTION[a]
+                    + f * (BONE_LAT_CORRECTION[b] - BONE_LAT_CORRECTION[a]))
+    return 0.0
+
+
 # Salida maxima del vibrador oseo, en dB nHL. No es una limitacion del
 # modelo: es la del transductor. F18 (200 oidos) construye su normativa a
 # 50, 30 y 10 dB nHL porque el vibrador no entrega mas -- por encima de ahi
@@ -2060,6 +2112,23 @@ class ABRGenerator:
                                       stimulus_config.get('freq')),
         )
 
+        # Via osea: la diferencia con la aerea no es un offset fijo, crece
+        # hacia el umbral (ver BONE_LAT_CORRECTION). En el LACTANTE el signo
+        # se invierte: el craneo sin suturar y el oido medio salteado le dan
+        # una osea mas rapida que la aerea, asi que por esta via el bebe se
+        # parece mucho mas a un adulto que por aire.
+        if pathway == 'bone_conduction':
+            w = INFANT_POPULATIONS.get(population, 0.0)
+            corr = (w * INFANT_BONE_LAT_MS
+                    + (1.0 - w) * bone_latency_correction(float(stimulus_config['int'])))
+            for wave, v in values.items():
+                v['lat'] += corr
+                # Y solo la onda V es confiable por esta via (ver
+                # BONE_WAVE_AMP): buscar interpicos en un registro oseo es
+                # el error que el ejercicio tiene que dejar ver.
+                v['amp'] *= BONE_WAVE_AMP.get(wave, 1.0)
+                v['width'] = v.get('width', 1.0) * BONE_WAVE_WIDTH.get(wave, 1.0)
+
         # 7. Polaridad + rate
         values, CM_value = self.apply_polarity_effects(
             values, stimulus_config['pol'], pathology, neural)
@@ -2470,6 +2539,13 @@ LEGACY_STIM_KEYS = {
 LEGACY_POPULATIONS = {
     'elderly': 'elderly_female',
 }
+
+# Poblaciones con el craneo todavia sin suturar: la via osea se comporta
+# distinto (ver INFANT_BONE_LAT_MS).
+# Cuanto le queda de craneo sin suturar a cada poblacion, entre 0 y 1: es
+# lo que pondera la osea de lactante contra la de adulto. El de 1 a 3 anios
+# tiene las suturas a medio cerrar, asi que le toca la mitad de cada una.
+INFANT_POPULATIONS = {'neonate': 1.0, 'toddler': 0.5}
 
 
 # Tipo de patologia del caso (como lo guarda CaseBuilder.abrBuild) ->
