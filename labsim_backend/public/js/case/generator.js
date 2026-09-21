@@ -40,6 +40,11 @@
         'insistente, repite lo que le preocupa hasta que le contestan'
     ];
     var JITTER_DB = 4;   // ruido por frecuencia: ningún audiograma real es liso
+    // Hasta esta edad, el oído sano va en CERO y sin variabilidad (ver
+    // CaseProfile::EDAD_AUDICION_PERFECTA). La dispersión de 0 a 15 dB del
+    // adulto es envejecimiento, ruido y otitis viejas: cosas que este
+    // paciente todavía no tuvo.
+    var EDAD_AUDICION_PERFECTA = window.CASE_CONST.edadAudicionPerfecta || 18;
     // Techo de la audiometría. Si una frecuencia del promedio satura, subir
     // más la escala ya no sube el promedio: el grado pedido no se alcanza y
     // el cuadro se aplana.
@@ -413,10 +418,21 @@
         };
     }
 
+    /** Oído sano de un chico: cero clavado, sin jitter ni norma por edad. */
+    function esCeroClavado(esc) {
+        return esc.categoria === 'normal' && edadEnAnios() < EDAD_AUDICION_PERFECTA;
+    }
+
     function generarLado(esc, lado, escalas, asimetria, norma) {
+        // Oído sano por debajo de EDAD_AUDICION_PERFECTA: 0 dB HL en todas
+        // las frecuencias y listo. No es un atajo -- a esta edad un oído
+        // normal oye en cero, y dibujarle 5 o 10 dB "por variabilidad" le
+        // enseña al alumno un normal que no existe.
+        var cero = esCeroClavado(esc);
         // La curva final = umbral mediano por edad + forma del cuadro. Un
         // señor de 70 con una otitis tiene la otitis Y su presbiacusia.
         var sn = FREQS.map(function (hz) {
+            if (cero) { return 0; }
             return (norma[hz] || 0) + (esc.sn_shape[hz] || 0) * escalas.sn
                  + entre(-JITTER_DB, JITTER_DB) + asimetria;
         });
@@ -425,6 +441,7 @@
         // norma por edad alta todavía podían empujar el gap un poco más
         // arriba de lo que ese oído medio puede atenuar.
         var gap = FREQS.map(function (hz) {
+            if (cero) { return 0; }
             if (!esc.gap_shape || !Object.keys(esc.gap_shape).length) { return 0; }
             var v = (esc.gap_shape[hz] || 0) * escalas.gap + entre(-JITTER_DB, JITTER_DB);
             return Math.min(v, techoGap(esc));

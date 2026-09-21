@@ -400,6 +400,22 @@ final class CaseProfile
      * los dos componentes, que es donde el alumno tiene que separarlos --la
      * OEA dice cuánto hay de coclear y el ABR cuánto de retro--.
      */
+    /**
+     * Hasta qué edad un oído sano se dibuja en CERO, sin variabilidad.
+     *
+     * No es una simplificación: a esta edad un oído normal oye en 0 dB HL en
+     * todas las frecuencias y no hay otra forma. La dispersión de 0 a 15 dB
+     * que trae la audiometría del adulto es envejecimiento temprano,
+     * exposición a ruido y otitis viejas -- cosas que este paciente todavía
+     * no tuvo. Dibujarle 5 o 10 dB "por variabilidad" le enseña al alumno un
+     * normal que no existe a esta edad.
+     *
+     * El corte va en 18 y no en 15 porque es donde arranca la norma ISO 7029
+     * (ver ageNorm): antes de esa edad la norma no dice nada, justamente
+     * porque no hay nada que decir.
+     */
+    public const EDAD_AUDICION_PERFECTA = 18;
+
     public const CATEGORIAS = [
         'normal'         => 'Normal',
         'conductiva'     => 'Conductiva',

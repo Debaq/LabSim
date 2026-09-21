@@ -645,6 +645,7 @@ window.CASE_CONST = <?= json_encode([
     // Qué se le puede ofrecer a esta edad y qué va primero en el turno del
     // recién nacido (ver CaseProfile::scenariosParaEdad).
     'scenarioEdad' => CaseProfile::SCENARIO_EDAD,
+    'edadAudicionPerfecta' => CaseProfile::EDAD_AUDICION_PERFECTA,
     'scenarioNeonatal' => CaseProfile::SCENARIO_NEONATAL,
     'torchOptions' => CaseBuilder::TORCH_OPTIONS,
     'pesoMuyBajoG' => CaseBuilder::PESO_MUY_BAJO_G,

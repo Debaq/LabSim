@@ -1053,3 +1053,28 @@ foreach (CaseProfile::SCENARIOS as $escKey => $esc) {
 t_true(CaseProfile::SCENARIOS['presbiacusia']['conciencia'][1]
      < CaseProfile::SCENARIOS['subita']['conciencia'][0],
     'La presbiacusia deja menos conciencia del problema que la súbita');
+
+// --- Oído sano de un chico: cero clavado ----------------------------------
+
+// A esta edad un oído normal oye en 0 dB HL en todas las frecuencias y no
+// hay otra forma. La dispersión de 0 a 15 dB que trae la audiometría del
+// adulto es envejecimiento temprano, ruido y otitis viejas: cosas que este
+// paciente todavía no tuvo. El corte va donde arranca ISO 7029.
+t_eq(CaseProfile::EDAD_AUDICION_PERFECTA, 18,
+    'El cero clavado llega hasta donde arranca la norma por edad');
+$normaChico = CaseProfile::ageNorm(CaseProfile::EDAD_AUDICION_PERFECTA - 1, 0);
+t_close(array_sum(array_map('floatval', $normaChico)), 0.0, 0.001,
+    'Bajo esa edad la norma por edad no suma nada en ninguna frecuencia');
+
+// El generador vive en JS y esto no lo puede correr, pero sí puede exigir
+// que use la MISMA constante y no una copia suya (mismo criterio que
+// test_charts_vs_js): el día que alguien cambie la edad en un solo lado,
+// falla acá y no en el aula.
+$genJs = (string) @file_get_contents(dirname(__DIR__) . '/public/js/case/generator.js');
+t_true(strpos($genJs, 'edadAudicionPerfecta') !== false,
+    'El generador JS lee la edad desde CASE_CONST');
+t_true(strpos($genJs, 'esCeroClavado') !== false,
+    'Y tiene la regla del cero clavado');
+$crear = (string) @file_get_contents(dirname(__DIR__) . '/public/admin/case_create.php');
+t_true(strpos($crear, "'edadAudicionPerfecta' => CaseProfile::EDAD_AUDICION_PERFECTA") !== false,
+    'case_create la expone en CASE_CONST');

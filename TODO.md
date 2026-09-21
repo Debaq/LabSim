@@ -3052,3 +3052,20 @@ desde 0, y no lo son --falta el 12, y los pos_z llegan hasta 21 con 21 apps--.
 El último módulo del layout quedaba siempre justo afuera del Storage; hasta
 ahora el máximo coincidía con `len(APPS) - 1` de casualidad. Ahora manda el
 pos_z más alto, no cuántas apps hay.
+
+## Oído sano de un chico: cero clavado (2026-09-21)
+
+Generar "Normal para la edad" en un paciente joven daba umbrales de 0 a 10 dB
+repartidos por frecuencia: la forma del cuadro (3-5 dB) más el jitter de ±4.
+Eso es un normal de adulto. **A esa edad un oído normal oye en 0 dB HL en
+todas las frecuencias y no hay otra forma**: la dispersión que trae la
+audiometría del adulto es envejecimiento temprano, ruido y otitis viejas,
+cosas que ese paciente todavía no tuvo. Dibujárselas le enseña al alumno un
+normal que no existe.
+
+`CaseProfile::EDAD_AUDICION_PERFECTA = 18`, expuesta en `CASE_CONST` y leída
+por `generator.js` (`esCeroClavado`): bajo esa edad, el cuadro normal se
+escribe en 0, sin jitter, sin norma por edad y sin gap. El corte va en 18 y no
+en 15 porque es donde arranca ISO 7029 -- antes de esa edad la norma no dice
+nada, justamente porque no hay nada que decir. Los demás cuadros no cambian:
+un chico con otitis tiene su otitis sobre un oído de cero.
