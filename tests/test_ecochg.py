@@ -360,6 +360,61 @@ def test_the_fsp_uses_the_ecochg_window():
     assert meta['fsp_a_rms'] > 0
 
 
+def test_the_trace_settles_while_it_averages():
+    """La promediación tiene que verse, no solo correr.
+
+    El electrodo timpánico multiplica la respuesta por 8 y si el ruido no
+    lo acompaña el complejo sale entero en el primer bloque de barridos:
+    el contador avanza y en pantalla no pasa nada. El ruido del electrodo
+    (ELECTRODE_NOISE_GAIN) es lo que deja que el trazo se asiente.
+    """
+    if not HAS_SCIPY:
+        return
+    residuales = []
+    for avance in (0.05, 0.2, 1.0):
+        tec = default_settings('ECochG')
+        control = {'test': 'ECochG', 'stim': 'Click', 'pol': 'Alternada',
+                   'int': 90, 'mkg': 0, 'rate': 11.1, 'filter_down': '3000',
+                   'filter_passhigh': '10', 'average': 1500, 'side': 'OD',
+                   'atten': False, 'clamp': False}
+        caso = {'umbral': 20, 'type': 'normal', 'average_objetivo': 1500,
+                'ecochg': {'sp_ap': 0.25}}
+        _, _, _, _, _, meta = ABR_Curve(
+            90, control, caso, 0, [avance, 1500], done=False,
+            patient={'edad': 35, 'gender': 1}, capture_id='R1', technical=tec)
+        residuales.append(meta['residual_noise_nv'])
+    assert residuales[0] > residuales[1] > residuales[2], residuales
+    # Y al principio hay ruido de verdad: no es un trazo limpio al que le
+    # baja un decimal.
+    assert residuales[0] > 2 * residuales[-1], residuales
+
+
+def test_getting_closer_to_the_cochlea_buys_signal_to_noise():
+    """Meterse hasta la membrana mejora la relación señal/ruido.
+
+    No solo la amplitud: si el ruido creciera igual que la señal, cambiar
+    de electrodo sería puro cambio de escala y la decisión técnica del
+    examen no existiría. Tampoco es gratis -- el electrodo de oído toma el
+    músculo de ahí mismo y tiene más impedancia.
+    """
+    if not HAS_SCIPY:
+        return
+    anterior = None
+    for montaje in ('extratympanic', 'tympanic', 'transtympanic'):
+        gain = E.ELECTRODE_GAIN[montaje]
+        ruido = E.ELECTRODE_NOISE_GAIN[montaje]
+        assert ruido > 1.0, montaje
+        snr = gain / ruido
+        assert anterior is None or snr > anterior, montaje
+        anterior = snr
+    # Y se ve en el registro: el mismo oído da FSP creciente.
+    fsps = []
+    for montaje in ('extratympanic', 'tympanic', 'transtympanic'):
+        _, _, _, _, _, meta = _curva(montage=montaje)
+        fsps.append(meta['fsp'])
+    assert fsps[0] < fsps[1] < fsps[2], fsps
+
+
 def test_the_ecochg_has_no_shadow_curve_and_no_contra_channel():
     """Un electrodo timpánico está pegado a ESTA cóclea.
 

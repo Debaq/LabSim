@@ -3282,6 +3282,29 @@ se adapta el PA que uno sano) y `rar_cond_ms` (separación entre polaridades).
   comparación entre dos curvas, igual que la razón de asimetría del VEMP. El PDF
   no interpreta nada -- qué razón es patológica lo dice quien informa.
 
+### El electrodo también toma ruido (2026-09-21)
+
+`ecochg.ELECTRODE_NOISE_GAIN`. El montaje multiplicaba la respuesta por 8 y
+dejaba el ruido del paciente igual, así que el complejo salía entero en el
+primer bloque de barridos: la promediación corría --el contador avanzaba, el
+FSP subía-- pero en pantalla no pasaba nada. Ahora el electrodo de oído toma
+más ruido que uno de superficie (1.4 / 1.8 / 2.2 según cuán adentro esté: el
+músculo de la zona, la impedancia y un paciente incómodo que se mueve).
+
+La ventaja de acercarse a la cóclea sigue mandando --1.8x de relación
+señal/ruido con el de conducto, 4.4x con el timpánico, 11x con el
+transtimpánico-- pero no es gratis, y eso le da sentido a elegir electrodo.
+De paso la razón medida hereda la dispersión que corresponde: ±0.10 desde el
+conducto, ±0.03 desde la membrana, ±0.01 desde el promontorio, contra un
+límite de 0.40. Es el argumento clínico de la posición, y ahora se ve.
+
+El ABR no cambia: los montajes de superficie quedan en 1.0 (el EEG es el
+mismo en Cz o en Fz) y ahí la elección de montaje ya se pagaba bien, con menos
+señal y el mismo ruido.
+
+Cubierto por `test_the_trace_settles_while_it_averages` y
+`test_getting_closer_to_the_cochlea_buys_signal_to_noise`.
+
 ### Lo que falta
 
 - Nada de esto se probó en la app real ni en el navegador todavía: el hosting

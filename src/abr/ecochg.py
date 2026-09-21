@@ -147,6 +147,28 @@ ELECTRODE_GAIN = {
 # --entre 6 y 15 veces la onda I de un registro de superficie-- y esa es
 # justamente la razon clinica de meterse hasta la membrana.
 
+# Cuánto MÁS ruido del propio paciente entra por ese electrodo, contra el
+# Cz-mastoides del ABR. NO es lo mismo que la ganancia: la ganancia es el
+# camino de la cóclea al electrodo, y el ruido no viene de la cóclea.
+#
+# Sin esto el electrodo timpánico multiplicaba la respuesta por 8 y dejaba
+# el ruido igual, así que el complejo salía entero en el primer bloque de
+# barridos: se podía ver la promediación corriendo, pero no había nada que
+# mirar. Un electrodo metido en el conducto o apoyado en la membrana toma
+# el músculo de ahí mismo, tiene bastante más impedancia que uno de
+# superficie y va sobre un paciente incómodo, que se mueve más.
+#
+# La ventaja de acercarse a la cóclea sigue estando y es la que manda --la
+# señal crece mucho más rápido que el ruido: 1.8x de relación señal/ruido
+# con el de conducto, 4.4x con el timpánico y 11x con el transtimpánico
+# contra un registro de superficie-- pero no es gratis.
+ELECTRODE_NOISE_GAIN = {
+    'extratympanic': 1.4,
+    'tympanic': 1.8,
+    'transtympanic': 2.2,
+}
+
+
 # Límite superior normal de la razón de AMPLITUDES PS/PA, por electrodo.
 # Cambia con el electrodo y no por capricho: cuanto más lejos de la cóclea,
 # más se atenúa el PA (que es de campo cercano y muy sincronizado) frente

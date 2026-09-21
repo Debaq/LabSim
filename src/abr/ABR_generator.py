@@ -2906,6 +2906,12 @@ class ABRGenerator:
         else:
             noise_floor = float(technical_config.get('residual_noise_nv') or
                                 NOISE_FLOOR_UV * 1000) / 1000.0
+        # Cuanto ruido del paciente toma ESTE electrodo. Los montajes de
+        # superficie no cambian entre si (el EEG es el mismo en Cz o en
+        # Fz); los del ECochG si, porque estan metidos en el oido -- ver
+        # ecochg.ELECTRODE_NOISE_GAIN.
+        noise_floor *= ecochg.ELECTRODE_NOISE_GAIN.get(
+            technical_config.get('montage'), 1.0)
         imp_factor = self.impedance_noise_factor(imp_max)
         if not technical_config.get('artifact_reject_uv'):
             imp_factor *= NO_REJECT_NOISE_FACTOR
