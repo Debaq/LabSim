@@ -2938,16 +2938,29 @@ tamizaje.
 
 `src/abr/AabrMainWindow.py` es **otro equipo**, no un modo del ABR: comparte
 generador, criterio y ruido del paciente, y no deja marcar ondas ni buscar
-umbrales. Nivel fijo, Iniciar, y el equipo contesta PASA o REFIERE cuando el
-FSP cruza el criterio o cuando se acaban los barridos. **No dibuja la curva**
-a propósito: se ve lo que ve quien tamiza --barridos, ruido residual y el
-número del FSP--, y esa restricción es el contenido.
+umbrales. Nivel fijo, y el equipo contesta PASA o REFIERE cuando el FSP cruza
+el criterio o cuando se acaban los barridos.
+
+Lo que lo define es **el orden de la toma**, que es el del equipo real y no se
+puede saltear:
+
+1. **Sonda** — la comparte con el equipo de EOA, así que es la misma pantalla
+   de probe fit (`oae/widgets/probe_check.py`) y el mismo sello del caso
+   (`EOAS['sello_pct']`). Con el sello bajo 60 % el equipo no deja seguir.
+2. **Impedancias** — los cuatro electrodos con su valor, editables ahí mismo.
+   Fuera de norma no lanza el estímulo, que es lo que pasa de verdad.
+3. **Registro** — promedia **mostrando la curva**: los equipos de tamizaje la
+   muestran mientras registran. Lo que no hay es marcado de ondas ni escala de
+   intensidades: una sola curva, al nivel del tamizaje.
+4. **Resultado** — PASA o REFIERE, con el detalle de cómo se llegó.
+
+Cambiar de oído vuelve al paso 1: la oliva se saca y se pone del otro lado.
 
 El panel de configuración queda a la vista y editable (nivel, estímulo,
 transductor, tasa, barridos máximos, criterio, rechazo de artefacto, banda de
 registro), que era el pedido: poder mover los parámetros delante del curso y
-ver qué le pasa al resultado. "Volver al protocolo de tamizaje" devuelve el
-equipo a 35 dB nHL / CE-Chirp / 6000 barridos / FSP 3,1.
+ver qué le pasa al resultado. "Restaurar valores de fábrica" los devuelve a
+35 dB nHL / CE-Chirp / 6000 barridos / FSP 3,1.
 
 ### Cómo se habilita
 

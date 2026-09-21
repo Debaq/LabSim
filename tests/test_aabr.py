@@ -49,8 +49,24 @@ def _ventana(od, oi=None, horas=30):
     return w
 
 
-def _tamizar(w, tope=400):
+def _preparar(w, sello=0.9):
+    """Los dos pasos previos, como en el equipo real: sonda e impedancias.
+
+    Sin QTimer: el chequeo de sonda se deja converger a mano (el widget de
+    probe fit tiene su propio timer, que en un test no corre) y después se
+    miden las impedancias.
+    """
+    w.verificar_sonda()
+    w.probe.fit_quality = sello
+    w._sonda_lista()
+    w.medir_impedancias()
+    return w
+
+
+def _tamizar(w, tope=400, preparar=True):
     """Corre la prueba entera sin QTimer, tick a tick."""
+    if preparar:
+        _preparar(w)
     w.start()
     for _ in range(tope):
         if not w.corriendo:
@@ -142,15 +158,115 @@ def test_without_a_case_nothing_is_screened():
     assert w.resultado['OD'] is None
     # Con atención abierta pero sin ABR en ese oído, tampoco.
     w.la_super({'nombre': 'X', 'edad': 30, 'gender': 0, 'ABR': {}}, 1)
+    _preparar(w)
     w.start()
     assert not w.corriendo
     assert w.resultado['OD'] is None
 
 
-def test_closing_the_attention_stops_the_run():
+def test_the_order_of_the_steps_is_the_order_of_the_equipment():
+    """Sonda, impedancias, estímulo, resultado. No se saltea.
+
+    Es como se toma de verdad --la sonda se comparte con el equipo de EOA,
+    así que se chequea primero-- y es la mitad de lo que el alumno tiene
+    que aprender del tamizaje.
+    """
     if not HAS_UI:
         return
     w = _ventana(_oido(10))
+    assert w.paso == 0
+    # Sin sonda no se pasa a impedancias, y sin impedancias no se registra.
+    w._ir_a(1)
+    assert w.paso == 0
+    w._ir_a(2)
+    assert w.paso == 0
+    w.start()
+    assert not w.corriendo
+
+    w.verificar_sonda()
+    w.probe.fit_quality = 0.9
+    w._sonda_lista()
+    assert w.sonda_ok
+    w._ir_a(1)
+    assert w.paso == 1
+    # Todavía no: las impedancias no se midieron.
+    w._ir_a(2)
+    assert w.paso == 1
+    w.medir_impedancias()
+    assert w.impedancias_ok
+    w._ir_a(2)
+    assert w.paso == 2
+    # Y al terminar el registro se va solo al resultado.
+    _tamizar(w, preparar=False)
+    assert w.paso == 3
+
+
+def test_a_loose_probe_stops_the_screening():
+    """Sello flojo: el equipo no deja seguir. Es el error más común."""
+    if not HAS_UI:
+        return
+    w = _ventana(_oido(10))
+    w.verificar_sonda()
+    w.probe.fit_quality = 0.2
+    w._sonda_lista()
+    assert not w.sonda_ok
+    assert not w.btn_sonda_ok.isEnabled()
+    w._ir_a(1)
+    assert w.paso == 0
+
+
+def test_bad_impedances_stop_the_screening():
+    """Con un electrodo fuera de norma el equipo no lanza el estímulo."""
+    if not HAS_UI:
+        return
+    w = _ventana(_oido(10))
+    w.verificar_sonda()
+    w.probe.fit_quality = 0.9
+    w._sonda_lista()
+    w.imp_spins['vertex'].setValue(12.0)
+    w.medir_impedancias()
+    assert not w.impedancias_ok
+    assert not w.btn_imp_ok.isEnabled()
+    w._ir_a(2)
+    assert w.paso == 1
+    w.start()
+    assert not w.corriendo
+    # Acomodado el electrodo, sigue.
+    w.imp_spins['vertex'].setValue(2.0)
+    w.medir_impedancias()
+    assert w.impedancias_ok
+
+
+def test_the_trace_is_drawn_while_averaging():
+    """La curva SÍ se ve: los equipos de tamizaje la muestran."""
+    if not HAS_UI:
+        return
+    w = _ventana(_oido(10))
+    _preparar(w)
+    w.start()
+    w._tick()
+    x, y = w.curva.getData()
+    assert x is not None and len(x) > 100
+    assert float(max(abs(v) for v in y)) > 0
+
+
+def test_changing_ear_goes_back_to_the_probe():
+    """Oído nuevo, sonda nueva: la oliva se saca y se pone del otro lado."""
+    if not HAS_UI:
+        return
+    w = _ventana(_oido(10), _oido(10))
+    _preparar(w)
+    assert w.sonda_ok and w.impedancias_ok
+    w.cb_lado.setCurrentText('OI')
+    assert not w.sonda_ok
+    assert not w.impedancias_ok
+    assert w.paso == 0
+
+
+def test_closing_the_attention_stops_the_run():
+    if not HAS_UI:
+        return
+    w = _preparar(_ventana(_oido(10)))
     w.start()
     assert w.corriendo
     w.la_super(None, None)
