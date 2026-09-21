@@ -3117,3 +3117,16 @@ el paciente no produce frases. Dos incoherencias:
   culpa es de la tele. Negar el problema es una conducta de RELATO: ahora esa
   línea solo entra si el paciente puede hablar. El generador además pone la
   conciencia en 0 por edad, no por cuadro.
+
+## El informe de la TEOAE reventaba al cerrar la captura (2026-09-21)
+
+`KeyError: 0` en `_store_report`, justo al terminar de medir el oído --con el
+paciente en atención y la medición ya hecha--. `snr_per_band` y
+`pass_per_band` vienen indexados **por frecuencia** (`{1000: 8.2, 2000: ...}`),
+que es como los arma el generador recorriendo `normative['bands_hz']`, y el
+informe los leía por posición.
+
+No saltó antes porque el dibujo de las barras sí los trata como diccionario:
+la pantalla se veía bien y el error aparecía solo al guardar. Ahora se leen
+por frecuencia, tolerando la clave como texto (un caso guardado o un JSON la
+pueden traer así), con tests que fijan que cada banda conserve SU número.

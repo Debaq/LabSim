@@ -395,8 +395,23 @@ class TeoaePanel(QWidget):
         if ear is None or frame is None or self._last_result is None:
             return
         bands = self._last_result.get("bands_hz") or self.generator.normative["bands_hz"]
-        snr = frame.get("snr_per_band", [])
-        passed = frame.get("pass_per_band", [])
+        # snr_per_band y pass_per_band vienen indexados POR FRECUENCIA
+        # ({1000: 8.2, 2000: ...}), no por posición: el generador los arma
+        # recorriendo normative['bands_hz'] (ver teoae.py). Indexarlos como
+        # lista reventaba con KeyError: 0 al cerrar la captura, o sea justo
+        # al terminar de medir el oído.
+        snr = frame.get("snr_per_band") or {}
+        passed = frame.get("pass_per_band") or {}
+
+        def por_banda(mapa, hz):
+            if isinstance(mapa, dict):
+                # La clave es el mismo float que la banda, pero un caso
+                # guardado o un JSON pueden traerla como texto.
+                if hz in mapa:
+                    return mapa[hz]
+                return mapa.get(str(hz), mapa.get(int(hz)))
+            i = list(bands).index(hz)
+            return mapa[i] if i < len(mapa) else None
         self._report[ear] = {
             "nivel_click_db_spl": self._last_level,
             "n_promedios": self._last_n,
@@ -404,10 +419,12 @@ class TeoaePanel(QWidget):
             "bandas": [
                 {
                     "hz": float(hz),
-                    "snr_db": round(float(snr[i]), 1) if i < len(snr) else None,
-                    "pass": bool(passed[i]) if i < len(passed) else None,
+                    "snr_db": (lambda v: round(float(v), 1) if v is not None else None)(
+                        por_banda(snr, hz)),
+                    "pass": (lambda v: bool(v) if v is not None else None)(
+                        por_banda(passed, hz)),
                 }
-                for i, hz in enumerate(bands)
+                for hz in bands
             ],
             "n_pass": int(frame.get("n_pass", 0)),
             "n_bandas": int(self._last_result.get("n_bands", len(bands))),
