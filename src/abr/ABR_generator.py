@@ -1724,12 +1724,36 @@ class ABRGenerator:
         # frunce) y los hay de descartar el barrido entero.
         return 1.0 + (AGITATION_GAIN - 1.0) * float(rng.uniform(0.35, 1.0))
 
-    def sweep_noise(self, n, blocks, rng):
+    def sweep_noise(self, n, blocks, rng, band_factor=1.0):
         """`blocks` realizaciones independientes de ruido de barrido (n muestras).
 
-        Devuelve una matriz (blocks, n) de RMS 1. Pink (EEG de fondo, 1/f)
-        70% + EMG (musculo, HF) 30%, igual que antes, pero generadas de una
-        sola vez para poder promediarlas.
+        Devuelve una matriz (blocks, n) de RMS `band_factor`. Pink (EEG de
+        fondo, 1/f) 70% + EMG (musculo, HF) 30%, generadas de una sola vez
+        para poder promediarlas.
+
+        `band_factor` es cuanto ruido de mas deja entrar la banda elegida
+        (ver band_noise_factor), y NO entra como un multiplicador parejo:
+        lo que se suma al abrir el pasa-alto es ruido LENTO, porque es
+        justamente lo que el pasa-alto estaba sacando. La diferencia
+        importa mucho:
+
+        - Dentro de una epoca de 10-12 ms no entra ni un ciclo de 10 Hz,
+          asi que ese ruido no se ve como un trazo peludo sino como una
+          linea de base que se va para arriba o para abajo en cada
+          barrido. En el promedio eso queda como una ondulacion lenta, que
+          es exactamente lo que se ve en un ABR registrado con el
+          pasa-alto en 3.3 Hz.
+        - Y una medida de amplitud PICO A PICO, o de base a pico, se come
+          casi todo ese error: los dos puntos estan a menos de un
+          milisegundo uno del otro y la ondulacion los mueve a los dos
+          juntos.
+
+        Como multiplicador parejo el modelo cobraba 3.16x de ruido de alta
+        frecuencia por usar la banda de 10 Hz, que es la banda OBLIGATORIA
+        del ECochG: la razon PS/PA quedaba con un 40% de dispersion y no
+        se podia separar un oido normal de uno con hidrops. El RMS total
+        es el mismo de antes, asi que el ruido residual que declara el
+        equipo y el FSP no cambian.
         """
         white = rng.standard_normal((blocks, n))
         fft = np.fft.rfft(white, axis=1)
@@ -1750,7 +1774,30 @@ class ABRGenerator:
             except Exception:
                 pass
 
-        return 0.70 * pink + 0.30 * emg
+        base = 0.70 * pink + 0.30 * emg
+        exceso = float(band_factor) ** 2 - 1.0
+        if exceso <= 0 or n < 8:
+            return base
+        # Componente lenta. Lo que deja entrar un pasa-alto de 10 Hz que
+        # un pasa-alto de 100 no dejaba son periodos de 10 a 100 ms: en
+        # una ventana de 10-12 ms eso es, como mucho, UN ciclo, y en el
+        # extremo lento ni siquiera eso -- es un escalon o una rampa. Se
+        # arma con esas cuatro formas y nada mas rapido, que es el punto:
+        # un escalon por barrido mueve la linea de base entera y una
+        # medida de base a pico no se entera.
+        x = np.linspace(-1.0, 1.0, n)
+        formas = np.stack([np.ones(n), x, np.sin(np.pi * x), np.cos(np.pi * x)])
+        pesos = rng.standard_normal((blocks, formas.shape[0]))
+        lento = pesos @ formas
+        std = np.std(lento, axis=1, keepdims=True)
+        # El escalon puro tiene desviacion cero: se normaliza por la
+        # amplitud para que no se vaya al infinito, y sigue siendo el
+        # termino que mas mueve la linea de base.
+        norma = np.where(std > 1e-9, std,
+                         np.max(np.abs(lento), axis=1, keepdims=True))
+        lento = np.divide(lento, norma, out=np.zeros_like(lento),
+                          where=norma > 1e-9)
+        return base + np.sqrt(exceso) * lento
 
     def averaged_noise(self, t, current_avg, target_avg, quality, rng,
                        imp_factor=1.0, noise_floor_uv=NOISE_FLOOR_UV,
@@ -1792,8 +1839,9 @@ class ABRGenerator:
         """
         n = len(t)
         m = self.noise_blocks_done(current_avg, target_avg)
-        escala = self.noise_scale(quality, imp_factor, noise_floor_uv,
-                                  band_factor)
+        # El ancho de banda NO entra aca: entra en la forma del ruido de
+        # cada barrido (ver sweep_noise), no como un multiplicador parejo.
+        escala = self.noise_scale(quality, imp_factor, noise_floor_uv)
 
         # Semilla de los bloques: UN solo tiro del rng del caso, sin
         # importar cuantos bloques se pidan. Asi el bloque i es siempre el
@@ -1812,7 +1860,8 @@ class ABRGenerator:
         usados = 0
         while hechos < m:
             bloques = self.sweep_noise(
-                n, NOISE_TANDA, np.random.default_rng([semilla, hechos // NOISE_TANDA]))
+                n, NOISE_TANDA, np.random.default_rng([semilla, hechos // NOISE_TANDA]),
+                band_factor=band_factor)
             usar = min(NOISE_TANDA, m - hechos)
             bloques = bloques[:usar]
             idx = np.arange(hechos, hechos + usar)
@@ -2852,22 +2901,26 @@ class ABRGenerator:
             v_ref, _ = ondas_a(nivel_ref)
             v_ref = self.apply_rate_effects(v_ref, stimulus_config['rate'],
                                             pathology, neural)
-            if es_ecochg:
-                y_ref, _ = self.build_ecochg_curve(
-                    t, v_ref, stimulus_config['pol'], pathology, neural,
-                    case_ec, technical_config.get('montage', 'vertex_mastoid'),
-                    stimulus_config['stim'], stimulus_config.get('freq'),
-                    nivel_ref - threshold, montage_gain, baseline.get('MC'),
-                    float((baseline.get('MC') or {}).get('lat', 0.0)) + lat_offset,
-                    float(stimulus_config['rate']))
-            else:
-                y_ref, _ = self.build_polarity_curve(
-                    t, v_ref, stimulus_config['pol'], pathology, neural,
-                    cm_sigma_gain)
+            # La referencia se arma SIEMPRE con la morfologia del tronco y
+            # se mide en la ventana del tronco, corra la prueba que corra.
+            # Lo que se despeja aca es cuanto ruido trae EL PACIENTE, y eso
+            # no cambia porque se cambie de examen: el caso declara "a tal
+            # nivel hicieron falta tantos barridos" una sola vez.
+            #
+            # Armandola con la curva del ECochG el numero salia absurdo: al
+            # nivel de referencia (el umbral) el potencial de sumacion vale
+            # cero, asi que la referencia era ~0, sigma caia al piso
+            # (MIN_PATIENT_SIGMA_UV) y el mismo paciente resultaba cuatro
+            # veces mas silencioso en ECochG que en ABR. Con la respuesta
+            # siete veces mas grande, el complejo salia entero en el primer
+            # bloque de barridos y promediar no cambiaba nada en pantalla.
+            y_ref, _ = self.build_polarity_curve(
+                t, v_ref, stimulus_config['pol'], pathology, neural,
+                cm_sigma_gain)
             y_ref = self.apply_filters(
                 y_ref, float(stimulus_config['filter_down']),
                 float(stimulus_config['filter_passhigh']), fs)
-            desde, hasta = self.fsp_window(population, test)
+            desde, hasta = self.fsp_window(population)
             vent = (t >= desde) & (t <= hasta)
             a_ref = float(np.sqrt(np.mean(y_ref[vent] ** 2))) if vent.any() else 0.0
             sigma_paciente = self.sigma_from_criterion(
@@ -2906,12 +2959,6 @@ class ABRGenerator:
         else:
             noise_floor = float(technical_config.get('residual_noise_nv') or
                                 NOISE_FLOOR_UV * 1000) / 1000.0
-        # Cuanto ruido del paciente toma ESTE electrodo. Los montajes de
-        # superficie no cambian entre si (el EEG es el mismo en Cz o en
-        # Fz); los del ECochG si, porque estan metidos en el oido -- ver
-        # ecochg.ELECTRODE_NOISE_GAIN.
-        noise_floor *= ecochg.ELECTRODE_NOISE_GAIN.get(
-            technical_config.get('montage'), 1.0)
         imp_factor = self.impedance_noise_factor(imp_max)
         if not technical_config.get('artifact_reject_uv'):
             imp_factor *= NO_REJECT_NOISE_FACTOR
@@ -3164,7 +3211,7 @@ def default_settings(test='ABR'):
         'montage': protocol.montage,
         'electrodes': {'vertex': 'Cz', 'right': 'A2', 'left': 'A1', 'ground': 'Fpz'},
         'impedance': {'vertex': 2.0, 'right': 2.0, 'left': 2.0, 'ground': 2.0},
-        'artifact_reject_uv': 25.0,
+        'artifact_reject_uv': protocol.reject_uv,
         'residual_noise_nv': 40.0,
         'fsp_criterion': 3.1,
         # --- Todavia SIN EFECTO en el trazo -----------------------------

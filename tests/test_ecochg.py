@@ -51,7 +51,7 @@ CAPTURAS = ('R1', 'R2', 'R3', 'R4', 'R5')
 
 def _curva(sp_ap=0.25, montage='tympanic', pol='Alternada', inty=90,
            rate=11.1, umbral=20, capture='R1', stim='Click', extra=None,
-           technical=None):
+           technical=None, avance=1.0):
     """Una captura de ECochG completa, como la pide AbrMainWindow."""
     tec = default_settings('ECochG')
     tec['montage'] = montage
@@ -63,7 +63,7 @@ def _curva(sp_ap=0.25, montage='tympanic', pol='Alternada', inty=90,
     caso = {'umbral': umbral, 'type': 'normal', 'average_objetivo': 1500}
     if sp_ap is not None:
         caso['ecochg'] = dict({'sp_ap': sp_ap}, **(extra or {}))
-    return ABR_Curve(inty, control, caso, 0, [1.0, 1500], done=True,
+    return ABR_Curve(inty, control, caso, 0, [avance, 1500], done=avance >= 1.0,
                      patient={'edad': 35, 'gender': 1}, capture_id=capture,
                      technical=tec)
 
@@ -399,10 +399,11 @@ def test_the_fsp_uses_the_ecochg_window():
 def test_the_trace_settles_while_it_averages():
     """La promediación tiene que verse, no solo correr.
 
-    El electrodo timpánico multiplica la respuesta por 8 y si el ruido no
-    lo acompaña el complejo sale entero en el primer bloque de barridos:
-    el contador avanza y en pantalla no pasa nada. El ruido del electrodo
-    (ELECTRODE_NOISE_GAIN) es lo que deja que el trazo se asiente.
+    El ruido que trae el paciente es el MISMO corra la prueba que corra: si
+    se lo despeja con la curva del ECochG al nivel de referencia --donde el
+    potencial de sumación vale cero-- sale ~0, y el complejo aparece entero
+    en el primer bloque de barridos. El contador avanza y en pantalla no
+    pasa nada.
     """
     if not HAS_SCIPY:
         return
@@ -428,27 +429,65 @@ def test_the_trace_settles_while_it_averages():
 def test_getting_closer_to_the_cochlea_buys_signal_to_noise():
     """Meterse hasta la membrana mejora la relación señal/ruido.
 
-    No solo la amplitud: si el ruido creciera igual que la señal, cambiar
-    de electrodo sería puro cambio de escala y la decisión técnica del
-    examen no existiría. Tampoco es gratis -- el electrodo de oído toma el
-    músculo de ahí mismo y tiene más impedancia.
+    El ruido es del paciente y del amplificador, no de la cóclea: el mismo
+    registro con un electrodo más cerca trae más respuesta sobre el mismo
+    piso de ruido. Esa es la razón de meterse hasta la membrana, y se tiene
+    que poder leer en el FSP y en cuánto salta la razón medida entre dos
+    capturas iguales.
     """
     if not HAS_SCIPY:
         return
-    anterior = None
+    fsps, ruidos, saltos = [], [], []
     for montaje in ('extratympanic', 'tympanic', 'transtympanic'):
-        gain = E.ELECTRODE_GAIN[montaje]
-        ruido = E.ELECTRODE_NOISE_GAIN[montaje]
-        assert ruido > 1.0, montaje
-        snr = gain / ruido
-        assert anterior is None or snr > anterior, montaje
-        anterior = snr
-    # Y se ve en el registro: el mismo oído da FSP creciente.
-    fsps = []
-    for montaje in ('extratympanic', 'tympanic', 'transtympanic'):
-        _, _, _, _, _, meta = _curva(montage=montaje)
-        fsps.append(meta['fsp'])
+        medidas = []
+        for cap in CAPTURAS:
+            _, _, _, _, _, meta = _curva(montage=montaje, capture=cap)
+            if cap == CAPTURAS[0]:
+                fsps.append(meta['fsp'])
+                ruidos.append(meta['residual_noise_nv'])
+            medida, _ = _medida(montage=montaje, capture=cap)
+            if medida.get('sp_ap') is not None:
+                medidas.append(medida['sp_ap'])
+        saltos.append(statistics.pstdev(medidas))
     assert fsps[0] < fsps[1] < fsps[2], fsps
+    # El piso de ruido es el mismo: lo que cambia es cuánta respuesta llega.
+    assert max(ruidos) / min(ruidos) < 1.1, ruidos
+    # Y la medida se vuelve más reproducible al acercarse.
+    assert saltos[0] > saltos[1] > saltos[2], saltos
+
+
+def test_the_band_does_not_charge_high_frequency_noise_for_low_cuts():
+    """Lo que deja entrar un pasa-alto bajo es ruido LENTO.
+
+    En una ventana de diez milisegundos no entra ni un ciclo de 10 Hz: ese
+    ruido se ve como una línea de base que se va para arriba o para abajo
+    en cada barrido, no como un trazo peludo. Importa porque la banda de
+    10 Hz es la OBLIGATORIA del ECochG --no es un error del alumno-- y
+    cobrándola como ruido parejo la razón PS/PA quedaba con 40% de
+    dispersión y no se podía separar un oído normal de uno con hidrops.
+
+    Una medida de base a pico se come casi todo ese error, porque las dos
+    marcas están a menos de un milisegundo y la ondulación las mueve
+    juntas. Eso es lo que este test mide.
+    """
+    if not HAS_SCIPY:
+        return
+    from abr.ABR_generator import ABRGenerator
+    gen = ABRGenerator()
+    rng = np.random.default_rng(11)
+    n = 416
+    ancho = gen.sweep_noise(n, 200, rng, band_factor=3.16)
+    # El RMS total es el que declara la banda: el ruido residual que
+    # muestra el equipo no cambia.
+    assert abs(float(np.mean(np.std(ancho, axis=1))) - 3.16) < 0.4
+    # Pero la diferencia entre dos puntos cercanos --que es como se mide
+    # una amplitud-- crece mucho menos que el RMS.
+    angosto = gen.sweep_noise(n, 200, rng, band_factor=1.0)
+    salto = 25                       # ~0.6 ms en una ventana de 10 ms
+    def cercanos(m):
+        return float(np.mean(np.std(m[:, salto:] - m[:, :-salto], axis=1)))
+    assert cercanos(ancho) < 2.0 * cercanos(angosto), \
+        (cercanos(ancho), cercanos(angosto))
 
 
 def test_the_ecochg_has_no_shadow_curve_and_no_contra_channel():

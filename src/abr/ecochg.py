@@ -147,28 +147,6 @@ ELECTRODE_GAIN = {
 # --entre 6 y 15 veces la onda I de un registro de superficie-- y esa es
 # justamente la razon clinica de meterse hasta la membrana.
 
-# Cuánto MÁS ruido del propio paciente entra por ese electrodo, contra el
-# Cz-mastoides del ABR. NO es lo mismo que la ganancia: la ganancia es el
-# camino de la cóclea al electrodo, y el ruido no viene de la cóclea.
-#
-# Sin esto el electrodo timpánico multiplicaba la respuesta por 8 y dejaba
-# el ruido igual, así que el complejo salía entero en el primer bloque de
-# barridos: se podía ver la promediación corriendo, pero no había nada que
-# mirar. Un electrodo metido en el conducto o apoyado en la membrana toma
-# el músculo de ahí mismo, tiene bastante más impedancia que uno de
-# superficie y va sobre un paciente incómodo, que se mueve más.
-#
-# La ventaja de acercarse a la cóclea sigue estando y es la que manda --la
-# señal crece mucho más rápido que el ruido: 1.8x de relación señal/ruido
-# con el de conducto, 4.4x con el timpánico y 11x con el transtimpánico
-# contra un registro de superficie-- pero no es gratis.
-ELECTRODE_NOISE_GAIN = {
-    'extratympanic': 1.4,
-    'tympanic': 1.8,
-    'transtympanic': 2.2,
-}
-
-
 # Límite superior normal de la razón de AMPLITUDES PS/PA, por electrodo.
 # Cambia con el electrodo y no por capricho: cuanto más lejos de la cóclea,
 # más se atenúa el PA (que es de campo cercano y muy sincronizado) frente
@@ -596,9 +574,23 @@ def auto_marks(t, y):
     return marcas
 
 
-def _sample_at(t, y, x):
-    """Valor del trazo en x (el más cercano, como cualquier cursor)."""
-    return float(y[int(np.argmin(np.abs(t - x)))])
+# Ancho (ms) con el que se lee el trazo para medir una amplitud. Un cursor
+# sobre una pantalla lee la CURVA, no una muestra suelta: con el ruido
+# residual de un registro normal, dos marcas puestas en el mismo lugar daban
+# amplitudes que se diferenciaban en un 30%, y la razón PS/PA saltaba sola
+# entre capturas idénticas.
+READ_MS = 0.15
+
+
+def _sample_at(t, y, x, ms=READ_MS):
+    """Valor del trazo en x, leído como lo lee un cursor."""
+    i = int(np.argmin(np.abs(t - x)))
+    if len(t) < 3 or ms <= 0:
+        return float(y[i])
+    paso = float(t[1] - t[0])
+    n = max(int(round(ms / paso)) // 2, 0)
+    desde, hasta = max(i - n, 0), min(i + n + 1, len(y))
+    return float(np.mean(y[desde:hasta]))
 
 
 def complex_onset(t, y, base, x_ps):

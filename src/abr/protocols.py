@@ -14,6 +14,12 @@ pero su protocolo ya está descrito: cuando llegue el generador, el equipo
 se configura solo.
 
 Las ventanas y filtros son los valores clínicos de rutina:
+El rechazo de artefacto también es del protocolo y no un número fijo del
+equipo: una banda más ancha deja entrar excursiones de base más grandes, así
+que la misma ventana de rechazo que sirve para un ABR (100-3000 Hz) descarta
+dos tercios de los barridos de un ECochG (10-3000). Eso no es un paciente
+inquieto -- es la banda --, y se paga promediando el triple para nada.
+
 - ECochG mira los primeros milisegundos (MC/PS/PA), ventana corta. Son 10
   y no 5 ms porque la razón de ÁREAS se integra hasta que el complejo
   vuelve a la línea de base, y en un hidrops marcado la meseta del
@@ -50,6 +56,7 @@ class Protocol:
     rate: float                 # tasa de estimulación (estímulos/s)
     averages: int               # promediaciones de rutina
     montage: str                # clave de technical_factors.electrode_montage
+    reject_uv: float = 25.0     # ventana de rechazo de artefacto de rutina
     stimuli: tuple = ()         # estímulos con sentido clínico para esta prueba
     implemented: bool = False
     note: str = ''
@@ -68,7 +75,7 @@ PROTOCOLS = {
         note='Tronco cerebral. Burst para umbrales por frecuencia, chirp para sincronizar.'),
     'ECochG': Protocol(
         name='ECochG', window_ms=10, filter_high=10, filter_low=3000,
-        rate=11.1, averages=1500, montage='tympanic',
+        rate=11.1, averages=1500, montage='tympanic', reject_uv=40.0,
         stimuli=(CLICK,) + BURSTS, implemented=True,
         note='Microfónica coclear, potencial de sumación y PA. Necesita electrodo timpánico.'),
     'Stacked ABR': Protocol(

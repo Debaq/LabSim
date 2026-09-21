@@ -3282,28 +3282,65 @@ se adapta el PA que uno sano) y `rar_cond_ms` (separación entre polaridades).
   comparación entre dos curvas, igual que la razón de asimetría del VEMP. El PDF
   no interpreta nada -- qué razón es patológica lo dice quien informa.
 
-### El electrodo también toma ruido (2026-09-21)
+### "No veo que promedie": tres bugs del ruido (2026-09-21)
 
-`ecochg.ELECTRODE_NOISE_GAIN`. El montaje multiplicaba la respuesta por 8 y
-dejaba el ruido del paciente igual, así que el complejo salía entero en el
-primer bloque de barridos: la promediación corría --el contador avanzaba, el
-FSP subía-- pero en pantalla no pasaba nada. Ahora el electrodo de oído toma
-más ruido que uno de superficie (1.4 / 1.8 / 2.2 según cuán adentro esté: el
-músculo de la zona, la impedancia y un paciente incómodo que se mueve).
+El docente probó y dijo que la curva se ve igual desde el primer barrido. Era
+cierto, y detrás había tres cosas distintas. Un primer parche
+(`ELECTRODE_NOISE_GAIN`: hacer que el electrodo de oído tomara más ruido) se
+escribió y después se sacó -- tapaba el síntoma de la primera.
 
-La ventaja de acercarse a la cóclea sigue mandando --1.8x de relación
-señal/ruido con el de conducto, 4.4x con el timpánico, 11x con el
-transtimpánico-- pero no es gratis, y eso le da sentido a elegir electrodo.
-De paso la razón medida hereda la dispersión que corresponde: ±0.10 desde el
-conducto, ±0.03 desde la membrana, ±0.01 desde el promontorio, contra un
-límite de 0.40. Es el argumento clínico de la posición, y ahora se ve.
+**1. El ruido del paciente dependía de qué prueba se corría.** `sigma` se
+despeja de la referencia que declara el caso ("a tal nivel hicieron falta
+tantos barridos"), y la curva de esa referencia se armaba con la morfología de
+la prueba activa. Al nivel de referencia --que es el umbral-- el potencial de
+sumación vale cero, así que la referencia del ECochG daba ~0, `sigma` caía al
+piso (`MIN_PATIENT_SIGMA_UV`) y **el mismo paciente resultaba cuatro veces más
+silencioso en ECochG que en ABR** (0.50 µV contra 2.22). Con la respuesta ocho
+veces más grande, el complejo salía entero en el primer bloque. Ahora la
+referencia se arma SIEMPRE con la morfología del tronco y se mide en la
+ventana del tronco: el ruido es del paciente, no del examen.
 
-El ABR no cambia: los montajes de superficie quedan en 1.0 (el EEG es el
-mismo en Cz o en Fz) y ahí la elección de montaje ya se pagaba bien, con menos
-señal y el mismo ruido.
+**2. El rechazo de artefacto era el del ABR para todas las pruebas.** ±25 µV
+con la banda del ECochG (10-3000 Hz, que deja entrar excursiones de base
+mucho más grandes) descartaba dos tercios de los barridos. Eso no es un
+paciente inquieto: es la banda, y se paga promediando el triple para nada.
+Ahora cada protocolo trae el suyo (`Protocol.reject_uv`): 25 µV el ABR, 40 el
+ECochG.
 
-Cubierto por `test_the_trace_settles_while_it_averages` y
-`test_getting_closer_to_the_cochlea_buys_signal_to_noise`.
+**3. El ancho de banda se cobraba como ruido parejo.** `band_noise_factor` dice
+que con el pasa-alto en 10 Hz entra 3.16 veces más ruido que en 100, y ese
+factor multiplicaba el ruido ENTERO. Pero en una ventana de diez milisegundos
+no entra ni un ciclo de 10 Hz: lo que un pasa-alto bajo deja pasar son
+períodos de 10 a 100 ms, o sea un escalón o una rampa por barrido, no pasto.
+Se ve como una línea de base que se va para arriba o para abajo en cada
+barrido --y en el promedio, como la ondulación lenta que tiene cualquier ABR
+registrado en 3.3 Hz-- y una medida de base a pico se la come casi entera,
+porque las dos marcas están a menos de un milisegundo y la ondulación las
+mueve juntas.
+
+Ahora el exceso entra con esa forma (`sweep_noise(band_factor=...)`: escalón,
+rampa y un ciclo de seno/coseno, nada más rápido) y el RMS total sigue siendo
+el mismo, así que el ruido residual que declara el equipo y el FSP no cambian.
+Importa porque **la banda de 10 Hz es la obligatoria del ECochG**, no un error
+del alumno: cobrándola como ruido de alta frecuencia, la razón PS/PA quedaba
+con 40% de dispersión y no se podía separar un oído normal de uno con hidrops.
+
+Resultado, a 2000 barridos con electrodo timpánico (12 capturas por fila):
+
+| declarada | razón medida | razón de áreas |
+|---|---|---|
+| 0.25 | 0.232 ± 0.108 | 1.31 ± 0.52 |
+| 0.40 | 0.380 ± 0.066 | 2.08 ± 0.80 |
+| 0.55 | 0.546 ± 0.076 | 3.92 ± 1.80 |
+
+Esa dispersión (±0.07-0.11) es la que reporta la bibliografía para el
+test-retest de la razón de amplitudes, y es la razón de ser de la razón de
+áreas. El ABR no cambia: con el pasa-alto en 100 Hz el residual sigue en 56 nV
+y abrirlo lo sigue arruinando (77 nV en 33, 501 en 10, 928 en 3.3).
+
+Cubierto por `test_the_trace_settles_while_it_averages`,
+`test_getting_closer_to_the_cochlea_buys_signal_to_noise` y
+`test_the_band_does_not_charge_high_frequency_noise_for_low_cuts`.
 
 ### Marcado automático (2026-09-21)
 
