@@ -171,17 +171,27 @@ def test_recruitment_makes_cochlear_grow_faster():
 # ----------------------------------------------------------- onda I / cliff
 
 def test_wave_I_decays_without_a_cliff():
-    """La onda I se apaga gradual: nada de 0.21 -> 0.011 uV en un paso.
+    """La onda I se apaga gradual, sin escalones.
 
     El modelo viejo tenía disappear_offset = 70 para I y II, así que a 70 dB
     exactos la onda I ya era invisible en un oído normal.
+
+    Se mide con paso de 2 dB y no de 10: la onda TIENE que llegar a cero a
+    un nivel finito --si no, encontrar el umbral es imposible-- y cerca de
+    ese punto cualquier curva que valga cero cae rápido en términos
+    relativos. Lo que no puede haber es un salto entre dos niveles
+    contiguos del equipo. Antes esto pasaba sólo porque la amplitud tenía
+    un piso del 19%, que es justo lo que se sacó para que el umbral cueste
+    encontrarlo (ver AMP_KNEE_FRACTION).
     """
-    amps = [_params(i)['I']['amp'] for i in (80, 70, 60, 50, 40)]
+    amps = [_params(i)['I']['amp'] for i in range(80, 38, -2)]
     for prev, cur in zip(amps, amps[1:]):
         assert cur < prev, amps
-        assert cur > 0.15 * prev, amps          # sin escalones
-    assert amps[2] > 0.5 * amps[0], amps        # visible a 60 dB
-    assert amps[1] > 0.7 * amps[0], amps        # clara a 70 dB
+        assert cur > 0.20 * prev, amps          # sin escalones
+    # Y sigue estando clara a nivel alto, que es donde se mide.
+    assert _params(60)['I']['amp'] > 0.7 * _params(80)['I']['amp']
+    # Por debajo de su sl_min ya no está: es la primera que se pierde.
+    assert _params(35)['I']['amp'] < 0.01
 
 
 # -------------------------------------------------------------- interpicos
@@ -564,14 +574,15 @@ def test_bone_vibrator_tops_out_at_its_maximum_output():
 
 def test_golden_wave_parameters():
     """Snapshot del oído normal (umbral 20) para detectar drift del modelo."""
-    # Regenerado al reanclar el normativo en la bibliografia (F01/F27
-    # para el adulto, F26 para la funcion latencia-intensidad): los
-    # numeros cambian a proposito, el test sigue siendo el detector de
+    # Regenerado dos veces a proposito: al reanclar el normativo en la
+    # bibliografia (F01/F27 para el adulto, F26 para la funcion
+    # latencia-intensidad) y al sacarle el piso a la amplitud cerca del
+    # umbral (ver AMP_KNEE_FRACTION). El test sigue siendo el detector de
     # drift del modelo.
     golden = {
-        80: {'I': (1.46, 0.420), 'II': (2.59, 0.092), 'III': (3.65, 0.455), 'IV': (4.71, 0.232), 'V': (5.54, 0.518)},
-        60: {'I': (1.92, 0.346), 'II': (3.04, 0.072), 'III': (4.07, 0.417), 'IV': (5.11, 0.206), 'V': (5.94, 0.480)},
-        40: {'I': (2.82, 0.083), 'II': (3.91, 0.013), 'III': (4.89, 0.288), 'IV': (5.91, 0.126), 'V': (6.72, 0.378)},
+        80: {'I': (1.46, 0.429), 'II': (2.59, 0.096), 'III': (3.65, 0.463), 'IV': (4.71, 0.238), 'V': (5.54, 0.535)},
+        60: {'I': (1.92, 0.353), 'II': (3.04, 0.074), 'III': (4.07, 0.425), 'IV': (5.11, 0.212), 'V': (5.94, 0.507)},
+        40: {'I': (2.82, 0.015), 'II': (3.91, 0.001), 'III': (4.89, 0.291), 'IV': (5.91, 0.126), 'V': (6.72, 0.401)},
     }
     for intensity, esperado in golden.items():
         v = _params(intensity)
@@ -584,7 +595,8 @@ def test_golden_wave_parameters():
 
 def _curva(intensity=80, threshold=20, pathology='normal', population='adult_female',
            current=2000, target=2000, masking=0, contra=None, capture='R1',
-           seed_key='caso-1', fsp=(2.3, 2.8), technical=None, filter_high=100):
+           seed_key='caso-1', fsp=(2.3, 2.8), technical=None, filter_high=100,
+           caso_extra=None):
     """Corre generate_curve con un caso completo (necesita scipy)."""
     g = _gen()
     stim = {'stim': 'click', 'freq': None, 'pol': 'Alternada', 'int': intensity,
@@ -596,6 +608,7 @@ def _curva(intensity=80, threshold=20, pathology='normal', population='adult_fem
             'umbral': threshold, 'average_objetivo': target, 'repro_shift': 0.0,
             'masking': masking, 'contra': contra,
             'seed_key': seed_key, 'capture_id': capture}
+    case.update(caso_extra or {})
     return g.generate_curve(population, pathology, stim, tech, case)
 
 
@@ -2290,11 +2303,19 @@ def test_alternating_polarity_cancels_the_stimulus_artifact():
     """
     g = _gen()
     t = np.linspace(0, 12, 1000)
-    for transductor in ('insert_earphone', 'TDH39_headphone', 'bone_vibrator'):
+    for transductor in ('insert_earphone', 'TDH39_headphone'):
         fija = g.add_transducer_artifact(t, transductor, 95, 'Rarefacción')
         alterna = g.add_transducer_artifact(t, transductor, 95, 'Alternada')
         assert fija.max() > 0.1, transductor
         assert alterna.max() == 0.0, transductor
+
+    # Por via osea la cancelacion NO es completa: el artefacto no sale
+    # identico en las dos polaridades (la bobina empuja contra el hueso, que
+    # no responde igual en los dos sentidos) y queda un residuo. Darlo por
+    # cancelado del todo dejaba la osea mas limpia de lo que es.
+    fija = g.add_transducer_artifact(t, 'bone_vibrator', 55, 'Rarefacción')
+    alterna = g.add_transducer_artifact(t, 'bone_vibrator', 55, 'Alternada')
+    assert 0.0 < alterna.max() < 0.25 * fija.max()
 
     # El supraaural es el caso feo: bobina apoyada a centimetros del
     # electrodo. El de insercion la aleja 33 cm de tubo.
@@ -2367,6 +2388,67 @@ def test_neither_transducer_delivers_more_than_it_can():
     # Y por debajo del tope entrega lo que se le pide.
     _, _, normal = _curva(intensity=80, technical={'transducer': 'insert_earphone'})
     assert normal['output_db'] == 80
+
+
+def test_the_response_at_threshold_is_at_the_noise_level():
+    """En el umbral la onda V tiene que quedar a la altura del ruido.
+
+    Antes salia en el 31% de su amplitud maxima estimulando JUSTO en el
+    umbral: con 2000 barridos se leia clara y encontrar el umbral era
+    trivial. Ahora queda en ~3%, y detectarla depende de promediar mas y de
+    repetir el registro -- que es la maniobra clinica.
+
+    Forma: A(SL) = A_ref * (1 - e^(-SL/tau)) / (1 - e^(-SL_ref/tau)).
+    """
+    g = _gen()
+    base = g.get_baseline_values()
+
+    def amp(sl):
+        v, _ = g.calculate_wave_parameters(base, 10 + sl, 10, 'normal')
+        return v['V']['amp']
+
+    ref = amp(70)
+    assert amp(0) < 0.06 * ref, amp(0) / ref          # en el umbral, nada
+    assert 0.40 <= amp(10) / ref <= 0.60, amp(10) / ref   # a 10 dB SL, mitad
+    assert amp(40) > 0.85 * ref
+    # Monotona y sin saltos entre niveles contiguos del equipo.
+    valores = [amp(sl) for sl in range(70, -1, -5)]
+    for prev, cur in zip(valores, valores[1:]):
+        assert cur < prev
+    # Y la jerarquia se mantiene a nivel alto: la V no puede ser menor que
+    # la I (fue el efecto de anclar la normalizacion en el SL equivocado).
+    v, _ = g.calculate_wave_parameters(base, 80, 10, 'normal')
+    assert v['V']['amp'] > v['I']['amp'] > v['II']['amp']
+
+
+def test_overmasking_is_judged_against_the_bone_threshold():
+    """El ruido cruzado llega a la coclea POR HUESO.
+
+    Asi que se compara contra el umbral oseo del oido medido, no contra el
+    aereo. Comparandolo con el aereo se subestima el sobreenmascaramiento
+    justo en las conductivas, que es donde mas importa: un oido con 45 dB de
+    gap tiene la coclea sana y el ruido cruzado la enmascara mucho antes de
+    lo que sugiere su umbral aereo.
+    """
+    g = _gen()
+    # Conductiva: aereo 70, oseo 25 (coclea sana).
+    caso = {'umbral': 70,
+            'umbral_por_estimulo': {'click': 70},
+            'umbral_por_estimulo_oseo': {'click': 25}}
+    tecnico = {'transducer': 'insert_earphone'}
+
+    def umbral_efectivo(masking):
+        _, _, meta = _curva(intensity=80, threshold=70, masking=masking,
+                            technical=tecnico, caso_extra=caso)
+        return meta['threshold']
+
+    # 95 dB de ruido cruzan 30 dB (IA 65), que ya supera el umbral OSEO de
+    # 25: sobreenmascara aunque el umbral aereo sea 70.
+    assert umbral_efectivo(95) > 70
+    # 80 dB cruzan 15, por debajo del oseo: todavia no.
+    assert umbral_efectivo(80) == 70
+    # Y cuanto mas ruido, peor.
+    assert umbral_efectivo(110) > umbral_efectivo(95)
 
 
 def test_masking_crosses_over_by_the_phone_not_by_the_stimulus():

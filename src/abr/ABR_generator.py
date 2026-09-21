@@ -88,8 +88,21 @@ WAVE_AMP_GROWTH = {
     'II':  {'sl_min': 22, 'tau': 14},
     'III': {'sl_min': 5,  'tau': 16},
     'IV':  {'sl_min': 8,  'tau': 17},
-    'V':   {'sl_min': -4, 'tau': 20},   # sigue presente en el umbral mismo
+    'V':   {'sl_min': 0,  'tau': 15},   # la ultima, pero en el umbral es nada
 }
+
+# Nivel de sensacion al que la amplitud del normativo esta medida, y codo
+# del arranque. Con el codo en 0.3*tau la onda V salia en el 31% de su
+# amplitud a SL 0: encontrar el umbral era trivial. Ahora queda en ~3%.
+#
+# El ancla va en 70 y no en 40 porque el normativo esta medido a 80 dB nHL
+# en oidos normales (umbral ~10), o sea SL ~70. Anclarlo en 40 hacia que
+# cada onda creciera distinto por encima de ese punto --la I, que arranca
+# mas tarde y satura mas rapido, se iba 21% por encima de su valor
+# normativo-- y a nivel alto la onda I terminaba mas grande que la V, que
+# es imposible y ademas rompe el criterio V/I.
+AMP_SL_REF = 70.0
+AMP_KNEE_FRACTION = 0.05
 
 # Reclutamiento: en perdida coclear la amplitud crece mas rapido con el SL,
 # por eso a nivel alto la onda V puede verse casi normal pese al umbral
@@ -171,6 +184,16 @@ INFANT_BONE_LAT_MS = -0.60
 # 2018, que publica interpicos solo cuando la I se ve).
 BONE_WAVE_AMP = {'I': 0.25, 'II': 0.35, 'III': 0.60, 'IV': 0.80, 'V': 1.0}
 BONE_WAVE_WIDTH = {'I': 1.5, 'II': 1.4, 'III': 1.2, 'IV': 1.1, 'V': 1.05}
+
+
+# Cuanto del artefacto sobrevive al promediar en polaridad alternada. En
+# los fonos la cancelacion es practicamente completa; el vibrador no es
+# simetrico entre polaridades y deja un residuo del orden del 15%.
+ARTIFACT_ALT_RESIDUAL = {
+    'insert_earphone': 0.0,
+    'TDH39_headphone': 0.0,
+    'bone_vibrator': 0.15,
+}
 
 
 def bone_latency_correction(intensity):
@@ -261,6 +284,9 @@ def stimulus_width(stim, freq=None):
 # 100 oidos.
 POLARITY_AMP_CONDENSATION = {'I': 0.82, 'II': 0.84, 'III': 0.85,
                              'IV': 0.92, 'V': 1.0}
+# Alternar promedia dos respuestas con latencias apenas distintas: la onda
+# sale un poco mas ancha y con el pico algo mas bajo.
+POLARITY_ALT_WIDTH = 1.05
 
 RATE_REF = 21.1
 # F13 (Jiang, 80 ninios + 21 adultos, click de 10 a 90/s): de 10 a 90/s la
@@ -952,9 +978,22 @@ class ABRGenerator:
             # Codo suave (softplus) en vez de max(x, 0): la onda se apaga
             # de forma gradual al acercarse a su sl_min en vez de cortarse
             # seco. logaddexp para que no reviente con exponentes grandes.
-            knee = 0.3 * tau
+            #
+            # El codo era de 0.3*tau y dejaba un PISO: la onda V salia en el
+            # 31% de su amplitud estimulando justo en el umbral, o sea clara
+            # y facil de encontrar. En el umbral la respuesta tiene que
+            # quedar a la altura del ruido residual -- es lo que obliga a
+            # promediar mas y a repetir el registro para confirmarla, que es
+            # la maniobra clinica. Con 0.05*tau el codo sigue siendo suave
+            # pero no regala amplitud.
+            knee = AMP_KNEE_FRACTION * tau
             sl_eff = knee * np.logaddexp(0.0, (sl - growth['sl_min']) / knee)
-            amp_factor = 1.0 - np.exp(-sl_eff / tau)
+            # Normalizado a AMP_SL_REF: la amplitud del normativo es la que
+            # se mide a ~40 dB SL, no un techo asintotico que no se alcanza
+            # nunca (antes a 40 dB SL se llegaba al 89% y el normativo
+            # quedaba sistematicamente sub-representado).
+            ref = 1.0 - np.exp(-max(AMP_SL_REF - growth['sl_min'], 1.0) / tau)
+            amp_factor = (1.0 - np.exp(-sl_eff / tau)) / ref
 
             calc_amp = baseline[wave]['amp'] * amp_factor
             if is_neural:
@@ -1037,6 +1076,11 @@ class ABRGenerator:
                     values[w]['amp'] *= (1.0 + factor) / 2.0
             if 'I' in values:
                 values['I']['lat'] += 0.05
+            # Y como la latencia no es identica en las dos polaridades, el
+            # promedio ensancha un poco las ondas y les baja el pico. Es
+            # menor, pero es el precio de alternar.
+            for v in values.values():
+                v['width'] = v.get('width', 1.0) * POLARITY_ALT_WIDTH
         # Con polaridad alternada el CM se cancela (CM_value queda None):
         # es justamente por eso que una desincronia auditiva se busca con
         # rarefaccion y condensacion por separado.
@@ -1375,14 +1419,24 @@ class ABRGenerator:
         50-55, y ahi el artefacto tiene que ser grande: es la razon de que
         por via osea las ondas tempranas se pierdan tan seguido.
         """
-        if polarity in ('Alternada', 'Alternante'):
-            return np.zeros_like(t)
+        cancela = polarity in ('Alternada', 'Alternante')
         cfg = {
             'insert_earphone': {'dur': 0.8, 'amp': 0.05, 'ref': 80.0},
             'TDH39_headphone': {'dur': 1.0, 'amp': 0.12, 'ref': 80.0},
             'bone_vibrator':   {'dur': 1.5, 'amp': 0.30, 'ref': 50.0},
         }.get(transducer, {'dur': 0.8, 'amp': 0.05, 'ref': 80.0})
+        if cancela:
+            # La cancelacion no es perfecta: el artefacto no sale identico
+            # en las dos polaridades, y por via osea menos todavia (la
+            # bobina empuja contra el hueso, que no responde igual en los
+            # dos sentidos). Queda un residuo. Darlo por cancelado del todo
+            # dejaba la via osea mas limpia de lo que es.
+            residuo = ARTIFACT_ALT_RESIDUAL.get(transducer, 0.0)
+            if residuo <= 0.0:
+                return np.zeros_like(t)
         escala = 10 ** ((float(intensity) - cfg['ref']) / 25.0)
+        if cancela:
+            escala *= residuo
         art = np.zeros_like(t)
         mask = t < cfg['dur']
         art[mask] = cfg['amp'] * escala * np.exp(-t[mask] * 5)
@@ -2150,7 +2204,22 @@ class ABRGenerator:
             or (transducer if transducer != 'bone_vibrator' else 'insert_earphone'),
             population)
         if masking > 0:
-            threshold = max(threshold, masking - ia_masking)
+            # El ruido que cruza el craneo llega a la coclea POR VIA OSEA,
+            # asi que hay que compararlo contra el umbral OSEO de este
+            # oido, no contra el aereo. Comparandolo con el aereo se
+            # subestima el sobreenmascaramiento justo en las conductivas,
+            # que es donde mas importa: un oido con 40 dB de gap tiene la
+            # coclea sana y el ruido cruzado la enmascara mucho antes de lo
+            # que sugiere su umbral aereo.
+            cruzado = masking - ia_masking
+            oseo = self.case_threshold(case_config, stimulus_config,
+                                       'bone_conduction', pathology)
+            if cruzado > oseo:
+                # Lo que el estimulo tiene que superar ahora es el ruido en
+                # la coclea, mas lo que le cuesta llegar hasta ahi por la
+                # via que se esta usando (el gap, si lo hay).
+                gap = max(threshold - oseo, 0.0)
+                threshold = max(threshold, cruzado + gap)
 
         # 3. Desviaciones (el caso trae un solo set, plano por onda -- no
         # esta anidado por estimulo, ver CaseBuilder.abrBuild en case_create.php).

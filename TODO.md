@@ -2669,3 +2669,64 @@ medía con polaridad alternada y su margen estaba calibrado con el artefacto
 sumando. El artefacto es de baja frecuencia, así que el pasa-alto también se
 lo comía y exageraba la diferencia. Se recalibró contra 500 y 750 Hz, donde
 el efecto es inequívoco.
+
+## Umbral, polaridad y sobreenmascaramiento: los cuatro puntos (2026-09-21)
+
+**1. La respuesta en el umbral era demasiado clara.** Salía en el 31% de su
+amplitud máxima estimulando JUSTO en el umbral, así que encontrar el umbral
+era trivial. Ahora la ley es
+`A(SL) = A_ref · (1 − e^(−SL/tau)) / (1 − e^(−SL_ref/tau))`, con el codo
+suave reducido de 0.3·tau a 0.05·tau: queda en ~3% a SL 0 y 49% a SL 10.
+
+Medido en una búsqueda de umbral real (oído de 30 dB, 2000 barridos):
+
+| dB | SL | onda V | ruido | SNR | lectura |
+|---|---|---|---|---|---|
+| 40 | +10 | 0.184 | 0.012 | 15 | clara |
+| 35 | +5 | 0.117 | 0.015 | 7.7 | clara |
+| **30** | **0** | **0.023** | 0.011 | **2.0** | **dudosa** |
+
+**Trampa que apareció**: anclar la normalización en SL 40 (como decía la
+propuesta) invertía la razón V/I a nivel alto. Nuestras amplitudes
+normativas están medidas a 80 dB nHL en oídos normales, o sea SL ~70, no 40.
+Con el ancla en 40 cada onda crecía distinto por encima de ese punto --la
+onda I, que arranca más tarde y satura más rápido, se iba 21% por encima de
+su valor normativo-- y terminaba siendo más grande que la V. `AMP_SL_REF = 70`.
+
+**2a. La cancelación del artefacto al alternar no es completa por vía ósea.**
+El vibrador no es simétrico entre polaridades (empuja contra el hueso, que
+no responde igual en los dos sentidos): queda un residuo del 15%
+(`ARTIFACT_ALT_RESIDUAL`). En los fonos sí cancela.
+
+**2b. Alternar ensancha las ondas** un 5%: promedia dos respuestas con
+latencias apenas distintas.
+
+**2c. La maniobra del tubo YA estaba** y es la que distingue artefacto de
+respuesta: con el tubo pinzado el artefacto persiste y la onda V desaparece
+(0.477 → 0.047 µV). Es el `ch_clamp` del panel, que se relee en cada tick de
+la promediación.
+
+**3. El sobreenmascaramiento se juzgaba contra el umbral equivocado.** El
+ruido que cruza el cráneo llega a la cóclea **por vía ósea**, así que se
+compara contra el umbral ÓSEO del oído medido. Con el aéreo se subestimaba
+justo en las conductivas, que es donde el enmascaramiento importa. Conductiva
+con aéreo 70 y óseo 25, estímulo aéreo de 80, ruido con inserción:
+
+| masking | cruza | antes | ahora |
+|---|---|---|---|
+| 80 dB | 15 dB | ok | ok |
+| 95 dB | 30 dB | ok (30 < 70) | **sobreenmascara** (30 > 25) |
+
+**4. Efecto de oclusión: postergado**, con el aval del docente. Se concentra
+bajo 1 kHz y el click y el chirp de banda ancha generan la respuesta desde
+regiones más agudas; con inserción profunda además es chico. Solo va a pesar
+cuando se agregue tone burst de 500 Hz por vía ósea con supraaural en el
+oído contrario.
+
+**Pendiente que quedó a la vista:** nuestro ruido residual es ~11 nV a 2000
+barridos cuando el equipo tiene configurado un objetivo de 40 nV, y la
+propuesta del docente usa 0.05 µV / √(barridos/1000) = 35 nV. O sea, el
+trazo sale ~3 veces más limpio de lo que el propio equipo declara. Eso hace
+el umbral más fácil de lo que debería incluso con la amplitud ya corregida.
+No se tocó: la calibración del ruido tiene sus propios tests y toca FSP,
+rechazo de artefacto y monitor de EEG.
