@@ -729,6 +729,24 @@ final class CaseForm
     }
 
     /** Un oído del ABR desde el POST (ver ABR_TYPE_OPTIONS). */
+    /**
+     * Número del formulario acotado a un rango.
+     *
+     * Un campo fuera de rango no se rechaza con un error: se recorta. Son
+     * parámetros de modelado --no datos clínicos del paciente-- y frenar
+     * el guardado de un caso entero porque una razón quedó en 1.5 le
+     * cuesta al docente más de lo que evita.
+     */
+    private static function clampNum(array $v, array $path, float $default,
+                                     float $min, float $max): float
+    {
+        $valor = self::val($v, $path, null);
+        if ($valor === null || $valor === '') {
+            return $default;
+        }
+        return round(max($min, min($max, (float) $valor)), 3);
+    }
+
     private static function parseAbr(array $v, string $lado): array
     {
             return [
@@ -769,6 +787,28 @@ final class CaseForm
                     'int_max' => (float) self::val($v, ['abr', $lado, 'falsa_v_int_max'], 120),
                     'mitad' => in_array(self::val($v, ['abr', $lado, 'falsa_v_mitad'], 'auto'), ['auto', 'a', 'b'], true)
                         ? (string) self::val($v, ['abr', $lado, 'falsa_v_mitad'], 'auto') : 'auto',
+                ],
+                // Electrococleografía de este oído (ver CaseBuilder::
+                // ECOCHG_DEFAULTS). Va adentro del bloque ABR porque es la
+                // misma prueba en el mismo equipo, y se guarda siempre: el
+                // cliente lo necesita para poder registrar ECochG, y un
+                // oído sin él no registra nada.
+                'ecochg' => [
+                    'sp_ap' => self::clampNum($v, ['abr', $lado, 'ecochg', 'sp_ap'],
+                        CaseBuilder::ECOCHG_DEFAULTS['sp_ap'], 0.0, CaseBuilder::ECOCHG_SP_AP_MAX),
+                    'tasa' => self::clampNum($v, ['abr', $lado, 'ecochg', 'tasa'],
+                        CaseBuilder::ECOCHG_DEFAULTS['tasa'], 1.0, CaseBuilder::ECOCHG_TASA_MAX),
+                    'rar_cond_ms' => self::clampNum($v, ['abr', $lado, 'ecochg', 'rar_cond_ms'],
+                        CaseBuilder::ECOCHG_DEFAULTS['rar_cond_ms'], 0.0, CaseBuilder::ECOCHG_RAR_COND_MAX_MS),
+                    // La microfónica NO tiene campo propio: es la misma
+                    // del patrón retrococlear (el ABR y el ECochG registran
+                    // LA MISMA microfónica, con distinto electrodo). Dos
+                    // campos para el mismo potencial terminan
+                    // contradiciéndose y el caso deja de cerrar.
+                    'mc' => in_array(self::val($v, ['abr', $lado, 'neural', 'microfonica'], 'normal'),
+                        CaseBuilder::ECOCHG_MC_OPTIONS, true)
+                        ? (string) self::val($v, ['abr', $lado, 'neural', 'microfonica'], 'normal')
+                        : 'normal',
                 ],
                 'umbral' => (int) self::val($v, ['abr', $lado, 'umbral'], 20),
                 'average_objetivo' => (int) self::val($v, ['abr', $lado, 'average_objetivo'], 2000),

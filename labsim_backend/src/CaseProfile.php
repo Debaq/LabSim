@@ -1071,6 +1071,14 @@ final class CaseProfile
             // utrículo por el nervio superior, se conserva mejor.
             'vemp' => ['type' => 'sacular',
                        'umbral' => ['CVEMP' => [80, 95], 'OVEMP' => [60, 72], 'MVEMP' => [80, 95]]],
+            // Electrococleografía: el examen del hidrops. La razón PS/PA
+            // sube (límite timpánico 0.40), el PA se adapta más al subir
+            // la tasa y la separación entre polaridades se agranda. El
+            // rango arranca sobre el límite pero pasa por el borde: un
+            // Ménière con la razón en 0.42 es tan real como uno en 0.65, y
+            // es el que obliga a mirar la razón de áreas.
+            'ecochg' => ['sp_ap' => [0.42, 0.68], 'tasa' => [1.6, 2.8],
+                         'rar_cond_ms' => [0.25, 0.55]],
             'tinnitus' => ['prob' => 0.85, 'ruido' => ['Zumbido'],
                            'frecuencia' => [125, 250, 500], 'permanente' => 0.5],
             'conciencia' => [80, 100],
@@ -1251,6 +1259,9 @@ final class CaseProfile
             'grados' => ['leve', 'moderada'],
             'vemp' => ['type' => 'sacular',
                        'umbral' => ['CVEMP' => [80, 95], 'OVEMP' => [60, 72], 'MVEMP' => [80, 95]]],
+            // Mismo hidrops, misma electrococleografía (ver 'meniere').
+            'ecochg' => ['sp_ap' => [0.45, 0.72], 'tasa' => [1.6, 3.0],
+                         'rar_cond_ms' => [0.25, 0.6]],
             'tinnitus' => ['prob' => 0.7, 'ruido' => ['Zumbido'],
                            'frecuencia' => [125, 250, 500], 'permanente' => 0.5],
             'conciencia' => [70, 95],

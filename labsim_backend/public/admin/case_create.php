@@ -644,6 +644,9 @@ window.CASE_CONST = <?= json_encode([
     'vempSubtipos' => CaseBuilder::VEMP_SUBTIPOS,
     'vempPeaks' => CaseBuilder::VEMP_PEAKS,
     'vempDefaults' => CaseBuilder::VEMP_DEFAULTS,
+    // Electrococleografía: el armado rápido escribe estos campos desde el
+    // cuadro (ver generarEcochg en case/generator.js).
+    'ecochgDefaults' => CaseBuilder::ECOCHG_DEFAULTS,
     // Mismo JSON que carga VEMPGeneratorV1 en la app (fuera de public/: no
     // se puede pedir por HTTP, viaja serializado acá, igual que el banco de
     // nombres) -- lo usa la vista previa de la ficha VEMP.

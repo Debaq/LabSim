@@ -94,6 +94,13 @@ final class ReportPdfBuilder
             return $pdf->output();
         }
 
+        if ($tipo === 'ELECTROCOCLEO') {
+            $y = self::ecochgBody($pdf, $reportId, $data, $y, $contentW);
+            $y = self::technicalSection($pdf, $data, $y, $contentW);
+            self::textSections($pdf, $data, $y, $contentW);
+            return $pdf->output();
+        }
+
         // Imágenes: OD y OI lado a lado, Lat-Int abajo (todas opcionales).
         $imgW = ($contentW - 20) / 2;
         $imgH = $imgW * 0.6;
@@ -622,6 +629,94 @@ final class ReportPdfBuilder
             $y += 15;
         }
         return $y + 10;
+    }
+
+    /**
+     * Cuerpo del informe de electrococleografía.
+     *
+     * No reusa el del ABR porque no comparten NADA de lo que se informa:
+     * ahí van latencias de cinco ondas e interpicos, y acá van dos razones
+     * entre tres potenciales. Tampoco lleva el gráfico latencia-intensidad
+     * (el ECochG no se registra en serie descendente: se hace a nivel alto,
+     * que es donde el potencial de sumación es medible).
+     *
+     * Las medidas las manda el cliente ya calculadas desde las marcas del
+     * alumno (ver ecochg.measure_complex): acá no se vuelve a medir nada.
+     * Tampoco se interpreta -- qué razón es patológica lo dice quien
+     * informa, no el PDF.
+     */
+    private static function ecochgBody(MiniPdf $pdf, int $reportId, array $data,
+                                       float $y, float $contentW): float
+    {
+        $imgW = ($contentW - 20) / 2;
+        $imgH = $imgW * 0.6;
+        $dibujo = false;
+        foreach ([['0', 'OD', self::MARGIN], ['1', 'OI', self::MARGIN + $imgW + 20]] as $lado) {
+            $path = ReportFile::imagePath($reportId, $lado[0]);
+            if (!is_file($path)) {
+                continue;
+            }
+            $pdf->text($lado[2], $y, $lado[1], 9, true);
+            $pdf->image($path, $lado[2], $y + 4, $imgW, $imgH);
+            $dibujo = true;
+        }
+        if ($dibujo) {
+            $y += $imgH + 24;
+        }
+
+        $curvas = is_array($data['curvas'] ?? null) ? $data['curvas'] : [];
+        if (count($curvas) === 0) {
+            return $y;
+        }
+        $y = self::ensureSpace($pdf, $y, 40);
+        $pdf->text(self::MARGIN, $y, 'Medidas', 12, true);
+        $y += 18;
+        foreach ($curvas as $nombre => $curva) {
+            if (!is_array($curva)) {
+                continue;
+            }
+            $m = is_array($curva['ECochG'] ?? null) ? $curva['ECochG'] : [];
+            $y = self::ensureSpace($pdf, $y, 40);
+            $partes = [
+                'PS ' . self::num($m['sp_amp'] ?? null) . ' µV',
+                'PA ' . self::num($m['ap_amp'] ?? null) . ' µV',
+                'PS/PA ' . self::num($m['sp_ap'] ?? null),
+                'áreas ' . self::num($m['area_ratio'] ?? null),
+            ];
+            $pdf->text(self::MARGIN, $y,
+                (string) $nombre . '  ' . implode('   ', $partes), 9);
+            $y += 14;
+            $detalle = [
+                'lat PA ' . self::num($m['ap_lat'] ?? null) . ' ms',
+                'ancho PA ' . self::num($m['ancho_pa'] ?? null) . ' ms',
+                'complejo ' . self::num($m['ancho'] ?? null) . ' ms',
+            ];
+            $pdf->text(self::MARGIN + 12, $y, implode('   ', $detalle), 8);
+            $y += 12;
+            $setup = self::formatCurveSetup($curva);
+            if ($setup !== '') {
+                $pdf->text(self::MARGIN + 12, $y, $setup, 8);
+                $y += 12;
+            }
+        }
+        $y += 10;
+
+        // Corrimiento por tasa: es una comparación entre dos curvas, así
+        // que no puede ir en la línea de ninguna. Lo manda el cliente ya
+        // resuelto (ver ecochg.rate_shift).
+        $tasa = is_array($data['tasa'] ?? null) ? $data['tasa'] : [];
+        if (isset($tasa['d_lat'])) {
+            $y = self::ensureSpace($pdf, $y, 34);
+            $pdf->text(self::MARGIN, $y, 'Corrimiento por tasa', 12, true);
+            $y += 18;
+            $pdf->text(self::MARGIN, $y,
+                self::num($tasa['rate_lenta'] ?? null) . '/s → '
+                . self::num($tasa['rate_rapida'] ?? null) . '/s:  latencia del PA '
+                . self::num($tasa['d_lat']) . ' ms   amplitud '
+                . self::num($tasa['d_amp_pct'] ?? null) . '%', 9);
+            $y += 26;
+        }
+        return $y;
     }
 
     private static function tipoLabel(string $tipo): string

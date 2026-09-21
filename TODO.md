@@ -3248,14 +3248,43 @@ es corto y el resultado es el de antes: `tests/test_abr_generator.py` pasa igual
 Cubierto por `tests/test_ecochg_panel.py` (la costura completa: combo → equipo →
 captura → marcas → tabla) y `tests/test_ecochg.py` (el modelo).
 
+### El caso y el informe (2026-09-21, misma tanda)
+
+El bloque `ecochg` viaja **dentro** del bloque ABR de cada oído
+(`cases.data['ABR']['OD']['ecochg']`) y no en una clave propia: es la misma
+prueba en el mismo equipo, una opción del combo de potenciales, y el cliente ya
+lee ese diccionario como `preferences`. Tres campos: `sp_ap` (la razón medida
+con electrodo TIMPÁNICO, que es la posición de referencia), `tasa` (cuánto más
+se adapta el PA que uno sano) y `rar_cond_ms` (separación entre polaridades).
+
+- **La microfónica no tiene campo propio**: se copia del patrón retrococlear
+  (`neural.microfonica`). El ABR y el ECochG registran LA MISMA microfónica con
+  distinto electrodo, y dos campos para el mismo potencial terminan
+  contradiciéndose.
+- **El eje `ecochg` del cuadro está solo en `meniere` e `hidrops_retardado`**,
+  y el rango arranca sobre el límite pero pasa por el borde (0.42-0.68): un
+  Ménière con la razón en 0.42 es tan real como uno en 0.65, y es el que obliga
+  a mirar la razón de áreas. Un test verifica que ningún otro cuadro lo declare
+  y que los rangos quepan en los topes del formulario.
+- **Un oído sano tampoco sortea siempre el mismo número** (0.15-0.32): un valor
+  calcado delata cuál es "el" valor normal.
+- **Un campo fuera de rango se recorta, no rechaza el guardado**
+  (`CaseForm::clampNum`): son parámetros de modelado, no datos clínicos, y
+  frenar un caso entero por una razón en 1.5 cuesta más de lo que evita.
+- **Cambiar de prueba en el combo borra las curvas, y pregunta antes.** El ABR y
+  el ECochG no se apilan en el mismo gráfico (ventanas distintas, y el ECochG
+  tiene el PA hacia abajo) y el informe se sube con UN tipo. Se descartó
+  permitir sesiones mezcladas: el informe habría quedado mal rotulado o habría
+  que subir dos, con las mismas imágenes en los dos.
+- **El informe sube como `ELECTROCOCLEO`** y `ReportPdfBuilder::ecochgBody` lo
+  imprime con sus medidas, sin el gráfico latencia-intensidad: el ECochG no se
+  registra en serie descendente. El corrimiento por tasa va aparte porque es una
+  comparación entre dos curvas, igual que la razón de asimetría del VEMP. El PDF
+  no interpreta nada -- qué razón es patológica lo dice quien informa.
+
 ### Lo que falta
 
-- **Bloque `ecochg` del caso en el backend**: `CaseProfile` (razón por cuadro:
-  el Ménière y el hidrops retardado son los que la suben), `CaseBuilder` y la
-  ficha de `case_create.php`. Hoy el bloque se lee de `preferences['ecochg']`
-  pero nadie lo escribe, así que la prueba queda sin registro en todos los
-  casos -- que es el comportamiento correcto, no un bug.
-- **Informe**: el tipo `ELECTROCOCLEO` ya existe en el backend (tabla `reports`,
-  `report_upload.php`, `ReportPdfBuilder`), falta el bloque del PDF y el envío
-  desde el cliente.
-- Nada de esto se probó en la app real todavía.
+- Nada de esto se probó en la app real ni en el navegador todavía: el hosting
+  local no tiene `pdo_sqlite`, así que las vistas PHP se validaron con `php -l`,
+  balance de `<div>` y `node --check`.
+- La **ficha de estudio** (PDF del docente) no muestra ECochG todavía.

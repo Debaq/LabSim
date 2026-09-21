@@ -22,6 +22,7 @@
     var AUTO_MODULES = window.CASE_CONST.autoModules;
     var VEMP_SUBTIPOS = window.CASE_CONST.vempSubtipos || [];
     var VEMP_DEFAULTS = window.CASE_CONST.vempDefaults || {};
+    var ECOCHG_DEFAULTS = window.CASE_CONST.ecochgDefaults || {};
     var GRADE_FREQS_VEMP = window.CASE_CONST.gradeFreqs;
     // Banco compartido con la app de escritorio (resources/names.json, fuera
     // de public/: no se puede pedir por HTTP, viaja serializado acá).
@@ -502,6 +503,37 @@
         }
 
         generarVemp(esc, lado, gap);
+        generarEcochg(esc, lado);
+    }
+
+    /**
+     * Electrococleografía del oído, desde el eje `ecochg` del cuadro.
+     *
+     * Se escribe SIEMPRE, traiga el cuadro esa clave o no: sin la rama de
+     * limpieza, pedir "OI normal" después de un Ménière dejaba el oído
+     * recién declarado sano con la razón PS/PA del hidrops anterior --
+     * mismo problema que ya tenían el VEMP y el patrón retrococlear.
+     *
+     * La microfónica no se toca acá: sale del patrón retrococlear (es el
+     * mismo potencial con otro electrodo, ver CaseForm::parseAbr).
+     */
+    function generarEcochg(esc, lado) {
+        var cfg = esc.ecochg || null;
+        Object.keys(ECOCHG_DEFAULTS).forEach(function (param) {
+            if (param === 'mc') { return; }
+            var campo = document.querySelector(
+                '#case-form [name="abr[' + lado + '][ecochg][' + param + ']"]');
+            if (!campo) { return; }
+            var rango = cfg && cfg[param];
+            var valor = rango ? entre(rango[0], rango[1]) : ECOCHG_DEFAULTS[param];
+            if (!rango && param === 'sp_ap') {
+                // Un oído sano tampoco da el mismo número dos veces: la
+                // razón normal tiene su dispersión, y un valor calcado
+                // delata cuál es "el" valor normal.
+                valor = entre(0.15, 0.32);
+            }
+            campo.value = Math.round(valor * 100) / 100;
+        });
     }
 
     /**

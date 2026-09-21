@@ -107,6 +107,19 @@
             </select>
         </label>
     </div>
+    <p class="help">Electrococleografía de este oído. Es otra prueba del mismo equipo (combo <em>Test</em> del panel del alumno), no otro módulo: se registra con los mismos electrodos y el mismo promediador, pero con electrodo de oído y ventana corta. Estos tres campos son lo único que el ECochG agrega al oído; la microfónica sale del patrón retrococlear del <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>, porque es el mismo potencial registrado con otro electrodo.</p>
+    <p class="help">La razón PS/PA se declara <strong>medida con electrodo timpánico</strong>, que es la posición de referencia; el cliente la reescala para el electrodo de conducto y el transtimpánico junto con su límite, así que el oído no cambia de veredicto al cambiar de electrodo. El límite timpánico es 0,40.</p>
+    <div class="three-col">
+        <label>Razón PS/PA (timpánico)
+            <input type="number" step="0.01" min="0" max="<?= CaseBuilder::ECOCHG_SP_AP_MAX ?>" name="abr[<?= $lado ?>][ecochg][sp_ap]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['ecochg']['sp_ap'] ?? CaseBuilder::ECOCHG_DEFAULTS['sp_ap'])) ?>" title="Lo que mide el alumno con las marcas bien puestas es este número. Por encima del límite del electrodo la celda le sale en rojo.">
+        </label>
+        <label>Adaptación del PA por tasa (×)
+            <input type="number" step="0.1" min="1" max="<?= CaseBuilder::ECOCHG_TASA_MAX ?>" name="abr[<?= $lado ?>][ecochg][tasa]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['ecochg']['tasa'] ?? CaseBuilder::ECOCHG_DEFAULTS['tasa'])) ?>" title="1 = se adapta como un oído sano. Por encima, el PA se atrasa y se achica más al subir la tasa; el alumno lo ve comparando dos curvas del mismo oído a distinta tasa.">
+        </label>
+        <label>Separación rarefacción-condensación (ms)
+            <input type="number" step="0.05" min="0" max="<?= CaseBuilder::ECOCHG_RAR_COND_MAX_MS ?>" name="abr[<?= $lado ?>][ecochg][rar_cond_ms]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['ecochg']['rar_cond_ms'] ?? CaseBuilder::ECOCHG_DEFAULTS['rar_cond_ms'])) ?>" title="Cuánto más tarde llega el PA en condensación que en rarefacción. 0,1 ms es lo de un oído sano (es el efecto de polaridad de la onda I).">
+        </label>
+    </div>
     <p class="help">Cuánto ruido trae este paciente. No se declara el FSP --que es el RESULTADO y depende del nivel y de cuánto se promedie-- sino las condiciones en que se midió: a tal nivel, hicieron falta tantos barridos para que el equipo declarara respuesta. De ahí sale el ruido del paciente, y ese ruido vale para todos los demás niveles.</p>
     <div class="three-col">
         <label>Nivel de referencia (dB nHL)

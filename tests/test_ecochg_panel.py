@@ -221,6 +221,61 @@ def test_the_rate_shift_needs_two_curves_of_the_same_ear():
     assert _valor(w.table_ec_r, 'd_amp_pct') < 0
 
 
+def test_switching_test_with_curves_asks_first():
+    """Cambiar de prueba empieza un registro nuevo, y avisa.
+
+    El ABR y el ECochG no se apilan en el mismo gráfico --ventanas
+    distintas, y el ECochG tiene el PA hacia abajo-- y el informe se sube
+    con UN tipo. Pero el combo está a un clic, así que no puede borrar sin
+    preguntar.
+    """
+    if not HAS_UI:
+        return
+    w = _ventana()
+    curva = _capturar(w)
+    assert curva in w.memory
+
+    preguntas = []
+    w.confirm_test_change = lambda test: (preguntas.append(test), False)[1]
+    w.control.cb_test.setCurrentText('ABR')
+    assert preguntas == ['ABR']
+    assert w.control.cb_test.currentText() == 'ECochG'
+    assert curva in w.memory            # no se borró nada
+
+    w.confirm_test_change = lambda test: True
+    w.control.cb_test.setCurrentText('ABR')
+    assert w.control.cb_test.currentText() == 'ABR'
+    assert w.memory == {}
+
+
+def test_the_report_goes_up_as_an_ecochg():
+    """La tabla `reports` ya distingue ELECTROCOCLEO de ABR."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    subidos = []
+
+    class _Cliente:
+        def __init__(self, *a, **k):
+            pass
+
+        def is_logged_in(self):
+            return True
+
+        def upload_report(self, appointment_id, tipo, data, images):
+            subidos.append(tipo)
+
+    import abr.AbrMainWindow as modulo
+    original = modulo.BackendClient
+    modulo.BackendClient = _Cliente
+    try:
+        _capturar(w)
+        w.submit_report()
+    finally:
+        modulo.BackendClient = original
+    assert subidos == ['ELECTROCOCLEO']
+
+
 def test_a_case_without_ecochg_records_nothing():
     """Sin dato del backend no se inventa un oído normal."""
     if not HAS_UI:

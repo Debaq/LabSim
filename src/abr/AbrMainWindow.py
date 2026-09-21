@@ -36,7 +36,8 @@ from core.base import context
 from core.helpers import Preferences
 from core.rng import stable_seed
 from PySide6.QtCore import QCoreApplication, QTimer
-from PySide6.QtWidgets import QMainWindow, QSizePolicy, QSpacerItem
+from PySide6.QtWidgets import (QMainWindow, QMessageBox, QSizePolicy,
+                               QSpacerItem)
 
 tr = QCoreApplication.translate
 
@@ -165,7 +166,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # edita el alumno en Parametros Avanzados. Antes el dialogo se abria
         # y se descartaba: el generador quedaba fijo en fono de insercion,
         # impedancia 3 kOhm y ventana de 12 ms.
-        self.technical = default_settings(self.control.cb_test.currentText())
+        self.test_actual = self.control.cb_test.currentText()
+        self.technical = default_settings(self.test_actual)
         self.control.cb_test.currentTextChanged.connect(self.test_changed)
         # Los rangos normativos de la tabla dependen de la intensidad y del
         # estimulo con que se registro, asi que siguen al panel de control.
@@ -414,6 +416,12 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
         temp_dir = context.get_resource("local_cache/abr/temp")
         exporters = {'0': self.graph_r, '1': self.graph_l, 'lat_int': self.graph_lat_int}
+        if self.es_ecochg():
+            # El ECochG no se registra en serie descendente: se hace a
+            # nivel alto, que es donde el potencial de sumacion es
+            # medible. El grafico latencia-intensidad queda vacio y en el
+            # informe seria un cuadro en blanco con un titulo.
+            exporters.pop('lat_int')
         images = {}
         for suffix, exporter in exporters.items():
             path = os.path.join(temp_dir, f'upload_{suffix}.jpg')
@@ -434,12 +442,26 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             'hallazgos': self.report.text_edit_1.toPlainText(),
             'conclusion': self.report.text_edit_2.toPlainText(),
         }
+        if self.es_ecochg():
+            # El corrimiento por tasa es una comparacion entre dos curvas,
+            # asi que no vive en ninguna: va aparte, ya resuelto, igual que
+            # la razon de asimetria del VEMP.
+            for lado, clave in ((0, 'OD'), (1, 'OI')):
+                shift = self.ecochg_rate_shift(lado)
+                if shift:
+                    data.setdefault('tasa', dict(shift, oido=clave))
 
         client = BackendClient(Preferences().get("BACKEND_URL"), context.get_resource('json/session.json'))
         if not client.is_logged_in():
             return
         try:
-            client.upload_report(appointment_id, 'ABR', data, images)
+            # El tipo es el de la prueba con la que se registro: la tabla
+            # `reports` ya distingue ELECTROCOCLEO de ABR, y el informe de
+            # un ECochG no dice nada de ondas I-V. Cambiar de prueba borra
+            # las curvas (ver test_changed), asi que no hay sesiones
+            # mezcladas que puedan quedar mal rotuladas.
+            tipo = 'ELECTROCOCLEO' if self.es_ecochg() else 'ABR'
+            client.upload_report(appointment_id, tipo, data, images)
         except Exception as exc:
             print(f"ABR: no se pudo subir el informe: {exc}")
 
@@ -883,12 +905,35 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         proposito: son los controles que el alumno tiene que aprender a
         configurar (ver AbrControl.randomize_initial_values).
         """
+        # Cambiar de prueba empieza un registro nuevo: el ABR y el ECochG
+        # no se pueden apilar en el mismo grafico (ventanas distintas, y el
+        # ECochG tiene el PA hacia abajo porque el electrodo activo es el
+        # del oido), y el informe se sube con UN tipo. Se pregunta porque
+        # es destructivo y el combo esta a un clic de distancia.
+        if self.memory and not self.confirm_test_change(test):
+            self.control.cb_test.blockSignals(True)
+            self.control.cb_test.setCurrentText(self.test_actual)
+            self.control.cb_test.blockSignals(False)
+            return
+        self.test_actual = test
         self.technical = default_settings(test)
         self.control.apply_protocol(test)
         self.apply_test_widgets(test)
         self.apply_window()
         self.apply_norms()
+        self.reset()
         self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
+
+    def confirm_test_change(self, test):
+        """Avisa que cambiar de prueba borra lo registrado."""
+        respuesta = QMessageBox.question(
+            self, tr("AbrMainWindow", "Cambiar de prueba"),
+            tr("AbrMainWindow",
+               "Cambiar a {0} borra las curvas registradas y el informe "
+               "escrito.\n\n¿Continuar?").format(test),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No)
+        return respuesta == QMessageBox.StandardButton.Yes
 
     def apply_window(self):
         """Los gráficos siguen la ventana de registro del equipo."""

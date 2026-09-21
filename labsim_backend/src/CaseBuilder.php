@@ -131,6 +131,36 @@ final class CaseBuilder
     // Rangos aceptados de los parámetros numéricos (ms / factor).
     public const ABR_NEURAL_MAX_MS = 4.0;
 
+    /**
+     * Electrococleografía de ese oído (ver src/abr/ecochg.py en el cliente).
+     *
+     * Viaja DENTRO del bloque ABR del oído porque es la misma prueba en el
+     * mismo equipo: el ECochG es una opción del combo de potenciales, no un
+     * módulo aparte. Sin este sub-bloque el cliente no registra nada --
+     * `ecochg.case_params` devuelve null y el equipo se queda sin señal.
+     *
+     * `sp_ap` es la razón medida con electrodo TIMPÁNICO, que es la posición
+     * de referencia; el cliente la reescala para las otras dos junto con su
+     * límite, así que un oído no cambia de diagnóstico al cambiar de
+     * electrodo.
+     */
+    public const ECOCHG_DEFAULTS = [
+        'sp_ap' => 0.25,        // razón PS/PA (límite timpánico: 0.40)
+        'tasa' => 1.0,          // cuánto MÁS se adapta el PA que uno sano
+        'rar_cond_ms' => 0.1,   // separación rarefacción-condensación
+        'mc' => 'normal',
+    ];
+    // La microfónica del ECochG es la MISMA del patrón retrococlear (ver
+    // ABR_NEURAL_MICROFONICA_OPTIONS): un solo potencial, dos electrodos.
+    // Por eso no tiene campo propio en la ficha -- se copia de ahí.
+    public const ECOCHG_MC_OPTIONS = self::ABR_NEURAL_MICROFONICA_OPTIONS;
+    // Topes de los campos numéricos. El de `sp_ap` es el punto en que el PS
+    // pasa a ser más profundo que la propia espiga del PA y el complejo deja
+    // de tener forma de ECochG.
+    public const ECOCHG_SP_AP_MAX = 0.90;
+    public const ECOCHG_TASA_MAX = 4.0;
+    public const ECOCHG_RAR_COND_MAX_MS = 1.0;
+
     // Entidades clínicas como punto de partida. Varias comparten patrón a
     // propósito -- el PEATC no las distingue entre sí, las separa la
     // imagen o la clínica --, y eso es justamente lo que el alumno tiene
@@ -1444,6 +1474,19 @@ final class CaseBuilder
             // Patrón retrococlear: un caso guardado antes de que existiera
             // no trae la clave y cae en los defaults, que son el cuadro que
             // dibujaba el generador cuando "neural" era uno solo.
+            // Electrococleografia: un caso guardado antes de que existiera
+            // no trae la clave y cae en los defaults. Ojo: en el CASO la
+            // ausencia de la clave significa "este oido no registra
+            // ECochG" (ver ecochg.case_params), pero en el FORMULARIO hay
+            // que mostrar algo, y lo que se muestra es un oido sano --
+            // guardar el caso desde el editor lo escribe.
+            $ec = is_array($ladoAbr['ecochg'] ?? null) ? $ladoAbr['ecochg'] : [];
+            foreach (self::ECOCHG_DEFAULTS as $clave => $default) {
+                if ($clave === 'mc') {
+                    continue;   // sale del patrón retrococlear, no del form
+                }
+                $v['abr'][$ladoForm]['ecochg'][$clave] = (string) ($ec[$clave] ?? $default);
+            }
             $neural = is_array($ladoAbr['neural'] ?? null) ? $ladoAbr['neural'] : [];
             foreach (self::ABR_NEURAL_DEFAULTS as $clave => $default) {
                 $v['abr'][$ladoForm]['neural'][$clave] = (string) ($neural[$clave] ?? $default);
