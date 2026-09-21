@@ -313,3 +313,17 @@ t_eq($cfNacT['torch'], null, 'Sin infección declarada queda en null');
 $cfTorchMalo = $cfRun(['age' => '0', 'edad_valor' => '10',
     'nacimiento' => ['torch' => 'loquesea']]);
 t_eq($cfTorchMalo->data['nacimiento']['torch'], null, 'Una TORCH fuera del catálogo se descarta');
+
+// --- Timpanograma de alta frecuencia (sonda de 1000 Hz) -------------------
+
+// La letra de Jerger es la de 226 Hz. En el lactante esa sonda dibuja el
+// pico de la pared del conducto y tapa un oído medio ocupado, así que el
+// equipo trae también la de 1000 Hz, que no da letra sino positivo o
+// negativo. 'auto' lo deriva de la letra, que es lo que el simulador hizo
+// siempre; declararlo es para el caso que NECESITA un resultado concreto.
+$cfZ = $cfRun(['z1000_od' => 'negativo', 'z1000_oi' => 'positivo']);
+t_eq($cfZ->data['Z1000_OD'], 'negativo', 'La sonda de 1000 Hz se guarda por oído');
+t_eq($cfZ->data['Z1000_OI'], 'positivo', 'Y cada oído tiene el suyo');
+t_eq($cfRun()->data['Z1000_OD'], 'auto', 'Sin declarar queda en auto');
+t_eq($cfRun(['z1000_od' => 'cualquiera'])->data['Z1000_OD'], 'auto',
+    'Un valor fuera del catálogo cae en auto');

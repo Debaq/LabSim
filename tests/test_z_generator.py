@@ -22,7 +22,7 @@ if SRC not in sys.path:
     sys.path.insert(0, SRC)
 
 from impedanciometria.z_generator import (edad_meses_del_caso, is_infant_ear,
-                                          map_letter_for_probe)
+                                          map_letter_for_probe, z1000_del_caso)
 from impedanciometria.z_generator import (ANCHOS_JERGER, FORMAS_JERGER,
                                           Z_225)
 
@@ -146,6 +146,47 @@ def test_sin_edad_no_se_inventa_un_lactante():
     assert not is_infant_ear(None)
     assert edad_meses_del_caso({}) is None
     assert map_letter_for_probe('B', '226', seed_key=1, edad_meses=None) == 'B'
+
+
+def test_el_docente_puede_fijar_la_sonda_de_1000():
+    """El caso que NECESITA un resultado concreto no puede quedar en el sorteo.
+
+    Un lactante con el oído medio ocupado que a 226 Hz se ve normal y solo
+    la sonda de 1000 Hz delata es un caso que se arma a propósito. 'auto'
+    --el default, y lo que traen los casos viejos-- sigue derivándolo de la
+    letra de Jerger.
+    """
+    # Forzado: manda lo declarado, sea cual sea la letra.
+    for letra in ('A', 'As', 'Ad', 'C', 'Cs', 'B', 'N'):
+        assert map_letter_for_probe(letra, '1000', seed_key=('x', letra),
+                                    forzado='positivo') == 'A'
+        assert map_letter_for_probe(letra, '1000', seed_key=('x', letra),
+                                    forzado='negativo') == 'B'
+
+    # Auto: la letra manda, como siempre. Una A casi siempre da positivo y
+    # una B casi siempre negativo, sobre muchas semillas.
+    positivos_a = sum(map_letter_for_probe('A', '1000', seed_key=('a', i)) == 'A'
+                      for i in range(200))
+    positivos_b = sum(map_letter_for_probe('B', '1000', seed_key=('b', i)) == 'A'
+                      for i in range(200))
+    assert positivos_a > 170, positivos_a
+    assert positivos_b < 30, positivos_b
+
+    # Y la sonda de 226 Hz no se entera de este campo: su hallazgo es otro.
+    assert map_letter_for_probe('B', '226', edad_meses=2, forzado='negativo') == 'A'
+
+
+def test_el_campo_del_caso_se_lee_con_su_default():
+    """Caso viejo o campo sin cargar: 'auto', que es como se comportaba."""
+    assert z1000_del_caso(None, 'OD') == 'auto'
+    assert z1000_del_caso({}, 'OD') == 'auto'
+    assert z1000_del_caso({'Z1000_OD': 'positivo'}, 'OD') == 'positivo'
+    assert z1000_del_caso({'Z1000_OD': 'negativo'}, 'OD') == 'negativo'
+    assert z1000_del_caso({'Z1000_OD': 'cualquiera'}, 'OD') == 'auto'
+    # Cada oído el suyo.
+    data = {'Z1000_OD': 'positivo', 'Z1000_OI': 'negativo'}
+    assert z1000_del_caso(data, 'OD') == 'positivo'
+    assert z1000_del_caso(data, 'OI') == 'negativo'
 
 
 if __name__ == "__main__":

@@ -190,6 +190,16 @@ final class CaseForm
 
         $zOd = (string) ($v['z_od'] ?? 'A');
         $zOi = (string) ($v['z_oi'] ?? 'A');
+        // Sonda de 1000 Hz (lactante): 'auto' = derivarlo de la letra, que
+        // es lo que el simulador hacía siempre.
+        $z1000Od = (string) ($v['z1000_od'] ?? 'auto');
+        $z1000Oi = (string) ($v['z1000_oi'] ?? 'auto');
+        if (!in_array($z1000Od, CaseBuilder::Z1000_OPTIONS, true)) {
+            $z1000Od = 'auto';
+        }
+        if (!in_array($z1000Oi, CaseBuilder::Z1000_OPTIONS, true)) {
+            $z1000Oi = 'auto';
+        }
         $etfOd = (string) ($v['etf_od'] ?? 'Normal');
         $etfOi = (string) ($v['etf_oi'] ?? 'Normal');
 
@@ -480,6 +490,8 @@ final class CaseForm
                 'ldl' => self::zip($ldl['od'], $ldl['oi']),
                 'z_od' => $zOd,
                 'z_oi' => $zOi,
+                'z1000_od' => $z1000Od,
+                'z1000_oi' => $z1000Oi,
                 'rinne' => $rinne,
                 'weber' => $weber,
                 'umd' => $umd,

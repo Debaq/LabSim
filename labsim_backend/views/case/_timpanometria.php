@@ -91,6 +91,7 @@
 <div class="audiometria-fields">
 <div class="card">
     <strong>Timpanometría (Z)</strong>
+    <p class="help">La letra de Jerger es la de la sonda de <strong>226 Hz</strong>. En el lactante esa sonda dibuja el pico de la pared del conducto y tapa un oído medio ocupado, por eso el equipo trae también la de <strong>1000 Hz</strong>, que no da letra sino positivo o negativo. Derivado la saca de la curva de 226 Hz; ponerla a mano es para el caso que NECESITA un resultado concreto y no puede quedar librado al sorteo.</p>
     <div class="two-col">
         <label>Z OD
             <select id="z_od" name="z_od">
@@ -103,6 +104,20 @@
             <select id="z_oi" name="z_oi">
                 <?php foreach (CaseBuilder::Z_OPTIONS as $opt): ?>
                 <option value="<?= $opt ?>" <?= ($v['z_oi'] ?? 'A') === $opt ? 'selected' : '' ?>><?= $opt ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label>Sonda 1000 Hz OD
+            <select name="z1000_od">
+                <?php foreach (CaseBuilder::Z1000_LABELS as $opt => $lbl): ?>
+                <option value="<?= $opt ?>" <?= ($v['z1000_od'] ?? 'auto') === $opt ? 'selected' : '' ?>><?= htmlspecialchars($lbl) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label>Sonda 1000 Hz OI
+            <select name="z1000_oi">
+                <?php foreach (CaseBuilder::Z1000_LABELS as $opt => $lbl): ?>
+                <option value="<?= $opt ?>" <?= ($v['z1000_oi'] ?? 'auto') === $opt ? 'selected' : '' ?>><?= htmlspecialchars($lbl) ?></option>
                 <?php endforeach; ?>
             </select>
         </label>

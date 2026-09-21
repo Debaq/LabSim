@@ -3069,3 +3069,18 @@ escribe en 0, sin jitter, sin norma por edad y sin gap. El corte va en 18 y no
 en 15 porque es donde arranca ISO 7029 -- antes de esa edad la norma no dice
 nada, justamente porque no hay nada que decir. Los demás cuadros no cambian:
 un chico con otitis tiene su otitis sobre un oído de cero.
+
+## Timpanograma de alta frecuencia en la ficha (2026-09-21)
+
+El cliente ya modelaba la sonda de 1000 Hz --protocolo binario, positivo o
+negativo, sin letra de Jerger-- pero la ficha no la mencionaba: el resultado
+salía sorteado de la letra de 226 Hz con un gradiente de probabilidad, y el
+docente no podía ni verlo ni fijarlo.
+
+`Z1000_OD` / `Z1000_OI` en el caso, con tres valores: **derivado de la curva
+de 226 Hz** (el default, y lo que traen los casos viejos), **positivo** y
+**negativo**. El cliente lo respeta en `map_letter_for_probe(..., forzado=)`.
+
+Es el mismo criterio que la SOAE: el caso que NECESITA un resultado concreto
+--el lactante con el oído medio ocupado que a 226 Hz se ve normal y solo la
+sonda de 1000 Hz delata-- no puede quedar librado a que la moneda acompañe.

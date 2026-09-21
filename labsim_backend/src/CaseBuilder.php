@@ -47,6 +47,25 @@ final class CaseBuilder
     public const OTOSCOPIA_MAX_FASES = 20;
 
     public const Z_OPTIONS = ['A', 'As', 'Ad', 'C', 'Cs', 'B'];
+
+    /**
+     * Timpanograma de ALTA FRECUENCIA (sonda de 1000 Hz), el del lactante.
+     *
+     * No lleva letra de Jerger: el protocolo es binario, hay pico o no hay
+     * (positivo / negativo). 'auto' lo deriva de la letra de 226 Hz ya
+     * cargada --A/Ad casi siempre positivo, As borderline, B/C sin pico casi
+     * siempre negativo--, que es lo que el simulador hacía siempre. Las
+     * otras dos opciones son para cuando el caso NECESITA un resultado
+     * concreto: un lactante con el oído medio ocupado que a 226 Hz se ve
+     * normal y solo la sonda de 1000 Hz delata, no puede quedar librado al
+     * sorteo.
+     */
+    public const Z1000_OPTIONS = ['auto', 'positivo', 'negativo'];
+    public const Z1000_LABELS = [
+        'auto' => 'Derivado de la curva de 226 Hz',
+        'positivo' => 'Positivo (con pico)',
+        'negativo' => 'Negativo (sin pico)',
+    ];
     public const ETF_OPTIONS = ['Normal', 'Disfunción tubaria', 'Permeable', 'No permeable'];
 
     // Patología ABR por oído -- ver AbrMainWindow.py::test_test() (llama a
@@ -1045,6 +1064,10 @@ final class CaseBuilder
             'Osea_mkg' => $form['osea'],
             'Z_OD' => $form['z_od'],
             'Z_OI' => $form['z_oi'],
+            // Sonda de 1000 Hz, la del lactante (ver Z1000_OPTIONS). El
+            // cliente la lee en z_generator.map_letter_for_probe.
+            'Z1000_OD' => $form['z1000_od'] ?? 'auto',
+            'Z1000_OI' => $form['z1000_oi'] ?? 'auto',
             'Rinne' => $form['rinne'],
             'Weber' => $form['weber'],
             'sector' => 'Camara_sono',
@@ -1144,6 +1167,8 @@ final class CaseBuilder
 
         $v['z_od'] = $data['Z_OD'] ?? 'A';
         $v['z_oi'] = $data['Z_OI'] ?? 'A';
+        $v['z1000_od'] = $data['Z1000_OD'] ?? 'auto';
+        $v['z1000_oi'] = $data['Z1000_OI'] ?? 'auto';
 
         // Igual que sdt_auto/srt_auto: se muestra el valor guardado tal cual
         // (acumetria_auto queda sin marcar) -- si quedara tildado el checkbox

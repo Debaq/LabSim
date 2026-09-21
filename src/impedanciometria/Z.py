@@ -20,7 +20,8 @@ from impedanciometria.ZDscreen import ZDscreen
 from impedanciometria.ZETFscreen import ZETFscreen
 from impedanciometria.h_z import changeSide, changeSideText, sideText, printer, date_time
 from impedanciometria.z_generator import (Z_225, Reflex_curve, edad_meses_del_caso,
-                                          is_infant_ear, map_letter_for_probe)
+                                          is_infant_ear, map_letter_for_probe,
+                                          z1000_del_caso)
 from impedanciometria.z_audio import ProbeTone, ReflexTone
 from core.helpers import Storage, debug_print
 
@@ -198,7 +199,8 @@ class ZControl(QWidget, Ui_Z_control):
                 # conducto y tapa un oido medio lleno.
                 zGerger = map_letter_for_probe(
                     zGerger, self.probe_freq, seed_key=seed_key,
-                    edad_meses=edad_meses_del_caso(self.data))
+                    edad_meses=edad_meses_del_caso(self.data),
+                    forzado=z1000_del_caso(self.data, self.Z.get_side()))
                 vol = self.data['volume'][side]
             else:
                 seed_key = None

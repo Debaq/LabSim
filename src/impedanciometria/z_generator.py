@@ -63,12 +63,28 @@ def is_infant_ear(edad_meses):
         return False
 
 
-def map_letter_for_probe(letter, probe_freq, seed_key=None, edad_meses=None):
+def z1000_del_caso(data, side):
+    """Que declaro el docente para la sonda de 1000 Hz en ese oido.
+
+    'auto' (o un caso viejo, que no trae el campo) = derivarlo de la letra
+    de 226 Hz, que es lo que el simulador hizo siempre. Ver
+    CaseBuilder::Z1000_OPTIONS en el backend.
+    """
+    if not data:
+        return 'auto'
+    valor = data.get(f'Z1000_{side}')
+    return valor if valor in ('positivo', 'negativo') else 'auto'
+
+
+def map_letter_for_probe(letter, probe_freq, seed_key=None, edad_meses=None,
+                         forzado='auto'):
     """Que dibuja el equipo segun la sonda, la letra del caso y la edad.
 
     Sonda 1000 Hz (protocolo Interacoustics): clasificacion binaria
-    positivo/negativo segun presencia de peak, no letra Jerger. No hay campo
-    de caso nuevo -- se deriva de la misma letra Z_OD/Z_OI ya cargada, con
+    positivo/negativo segun presencia de peak, no letra Jerger. `forzado` es
+    lo que el docente declaro en la ficha (Z1000_OD/Z1000_OI): con 'auto'
+    --el default y lo que traen los casos viejos-- se deriva de la misma
+    letra Z_OD/Z_OI ya cargada, con
     gradiente de probabilidad de "positivo" segun cuan rigido/movil es el
     oido en esa letra (A/Ad/C con peak franco -> casi siempre positivo;
     As borderline -> mayoria negativo pero no siempre; B/N sin peak -> casi
@@ -93,6 +109,14 @@ def map_letter_for_probe(letter, probe_freq, seed_key=None, edad_meses=None):
         if is_infant_ear(edad_meses) and letter in ('B', 'N'):
             return 'A'
         return letter
+    # Lo que el docente haya declarado manda sobre el sorteo: el lactante
+    # con el oido medio ocupado que a 226 Hz se ve normal y solo la sonda de
+    # 1000 Hz delata es un caso que se arma a proposito, no uno que salga si
+    # la moneda acompana (ver Z1000_OPTIONS en el backend).
+    if forzado == 'positivo':
+        return 'A'
+    if forzado == 'negativo':
+        return 'B'
     prob = PROBE_1000_POSITIVE_PROB.get(letter, 0.5)
     draw = random.Random(str(seed_key)).random() if seed_key is not None else random.random()
     return 'A' if draw < prob else 'B'
