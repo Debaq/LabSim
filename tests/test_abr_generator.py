@@ -382,7 +382,7 @@ def test_wave_hierarchy_holds_in_every_population():
     criterio V/I.
     """
     g = _gen()
-    for pob in ('adult_male', 'adult_female', 'child', 'neonate', 'elderly'):
+    for pob in g.norms['populations']:
         for via in ('air_conduction', 'bone_conduction'):
             if via not in g.norms['populations'][pob]:
                 continue
@@ -812,15 +812,78 @@ def test_neural_param_keys_match_the_backend():
 
 
 def test_population_follows_age_and_sex():
+    """Las franjas cubren toda la vida y ninguna cae en otra por descuido."""
     assert select_population(None) == 'adult_female'
     assert select_population(0) == 'neonate'
     assert select_population(0.2) == 'neonate'
-    assert select_population(1) == 'child'
+    # 1 a 3 anios: la via todavia madura, no es 'child' (que ya es casi
+    # adulto) ni 'neonate'.
+    assert select_population(1) == 'toddler'
+    assert select_population(2.5) == 'toddler'
+    assert select_population(3) == 'child'
     assert select_population(9) == 'child'
+    assert select_population(17) == 'child'
     assert select_population(30, 0) == 'adult_male'
     assert select_population(30, 1) == 'adult_female'
-    assert select_population(70, 0) == 'elderly'
+    # El sexo tambien separa al adulto mayor: antes un hombre de 70 se
+    # dibujaba con la curva de una mujer.
+    assert select_population(70, 0) == 'elderly_male'
+    assert select_population(70, 1) == 'elderly_female'
     assert select_population("no es una edad") == 'adult_female'
+    # Toda poblacion que el ruteo devuelve tiene que existir en el JSON.
+    g = _gen()
+    for edad in (0, 0.5, 1, 2, 3, 10, 17, 18, 30, 59, 60, 85, 100):
+        for sexo in ('0', '1'):
+            pop = select_population(edad, sexo)
+            assert pop in g.norms['populations'], (edad, sexo, pop)
+
+
+def test_legacy_population_key_still_resolves():
+    """Un caso guardado con 'elderly' sigue andando.
+
+    Era una sola poblacion hasta que se separo por sexo.
+    """
+    g = _gen()
+    viejo = g.get_baseline_values('elderly', 'click', 'air_conduction')
+    nuevo = g.get_baseline_values('elderly_female', 'click', 'air_conduction')
+    assert viejo == nuevo
+
+
+def test_every_population_has_its_own_bone_pathway():
+    """El vibrador tiene que cambiar el trazo en TODAS las poblaciones.
+
+    El neonato y el adulto mayor no traian bloque oseo, asi que caian a su
+    propia via aerea: el transductor dejaba de hacer efecto justo en el
+    paciente donde el ABR oseo es el examen (el recien nacido que no paso el
+    screening).
+    """
+    g = _gen()
+    for pob in g.norms['populations']:
+        aereo = g.get_baseline_values(pob, 'click', 'air_conduction')
+        oseo = g.get_baseline_values(pob, 'click', 'bone_conduction')
+        assert oseo['V']['lat'] > aereo['V']['lat'], pob
+        assert oseo['V']['amp'] < aereo['V']['amp'], pob
+
+
+def test_toddler_sits_between_the_neonate_and_the_child():
+    """1-3 anios: la maduracion a medio camino, con la onda V ultima.
+
+    F11 (Gorga, n=535, 3 meses a 3 anios) y F19 ponen la equivalencia adulta
+    entre los 9 meses y los 3 anios. Control: el I-V queda entre los 4.81 ms
+    que F25 mide a los 6 meses y los 4.02 del ninio de 7 anios.
+    """
+    g = _gen()
+    neo = g.get_baseline_values('neonate', 'click', 'air_conduction')
+    tod = g.get_baseline_values('toddler', 'click', 'air_conduction')
+    nino = g.get_baseline_values('child', 'click', 'air_conduction')
+    for onda in ('I', 'III', 'V'):
+        assert nino[onda]['lat'] < tod[onda]['lat'] < neo[onda]['lat'], onda
+    i_v = tod['V']['lat'] - tod['I']['lat']
+    assert 4.02 < i_v < 4.81, i_v
+    # La onda V madura ultima: le queda mas camino que a la I.
+    resta = lambda b: (b['V']['lat'] - nino['V']['lat']) / (neo['V']['lat'] - nino['V']['lat'])
+    resta_i = (tod['I']['lat'] - nino['I']['lat']) / (neo['I']['lat'] - nino['I']['lat'])
+    assert resta(tod) > resta_i
 
 
 def test_neonate_has_a_longer_wave_V_than_an_adult():
@@ -1236,7 +1299,7 @@ def test_fsp_criterion_is_reported():
 def test_every_stimulus_works_in_every_population():
     """Los 11 estímulos del combo dan ondas ordenadas en las 5 poblaciones."""
     g = _gen()
-    for poblacion in ('adult_female', 'adult_male', 'child', 'neonate', 'elderly'):
+    for poblacion in _gen().norms['populations']:
         for etiqueta, (stim, freq) in STIM_MAP.items():
             base = g.get_baseline_values(poblacion, stim, 'air_conduction', freq=freq)
             lats = [base[w]['lat'] for w in ('I', 'II', 'III', 'IV', 'V')]

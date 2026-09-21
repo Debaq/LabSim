@@ -24,9 +24,11 @@ const ABR_WAVES = ['I', 'III', 'V'];
 const ABR_POPULATION_LABELS = [
     'adult_male' => 'Adulto (hombre, 18-50)',
     'adult_female' => 'Adulto (mujer, 18-50)',
-    'child' => 'Niño (2-12)',
-    'neonate' => 'Neonato (0-3 meses)',
-    'elderly' => 'Adulto mayor (60-85)',
+    'child' => 'Niño (3-17)',
+    'toddler' => 'Primera infancia (1-3)',
+    'neonate' => 'Neonato (bajo 1 año)',
+    'elderly_male' => 'Adulto mayor (hombre, 60+)',
+    'elderly_female' => 'Adulto mayor (mujer, 60+)',
 ];
 
 // El set de fábrica sale de CaseWaveforms::CLICK_BASE, que es la copia que

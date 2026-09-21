@@ -530,9 +530,18 @@ def select_population(age=None, gender=None):
 
     Las franjas del JSON dejan huecos (neonate 0-0.25, child 2-12,
     adult 18-50, elderly 60-85); acá se cubren completas porque un paciente
-    de 1, 15 o 55 anios existe igual. Un lactante se aproxima con 'child'
-    (la via auditiva ya madura cerca de los 18 meses) y 13-17 tambien,
-    porque a esa edad las latencias ya son practicamente de adulto.
+    de 1, 15 o 55 anios existe igual.
+
+    El tramo de 1 a 3 anios tiene bloque propio ('toddler'): la via esta
+    madurando --equivalencia adulta entre los 9 meses y los 3 anios, con la
+    onda V ultima-- y meterlo en 'child', que ya es casi adulto, le borraba
+    justo eso. De 3 a 17 va 'child': a esa edad las latencias ya son
+    practicamente de adulto.
+
+    El sexo separa de los 18 en adelante, adulto mayor incluido. Antes el
+    adulto mayor era uno solo: un hombre de 70 se dibujaba con la curva de
+    una mujer. No separa en pediatria a proposito -- la diferencia por sexo
+    aparece con la pubertad, no antes.
     """
     if age is None:
         return 'adult_female'
@@ -542,11 +551,14 @@ def select_population(age=None, gender=None):
         return 'adult_female'
     if age < 1:
         return 'neonate'
+    if age < 3:
+        return 'toddler'
     if age < 18:
         return 'child'
+    hombre = str(gender) == '0'
     if age >= 60:
-        return 'elderly'
-    return 'adult_male' if str(gender) == '0' else 'adult_female'
+        return 'elderly_male' if hombre else 'elderly_female'
+    return 'adult_male' if hombre else 'adult_female'
 
 
 class ABRGenerator:
@@ -576,7 +588,12 @@ class ABRGenerator:
         Lo que el JSON no describe se DERIVA del bloque que si existe, no
         se copia (ver _rescale_ratio_block).
         """
-        pop = self.norms['populations'][population]
+        pop = self.norms['populations'].get(population)
+        if pop is None:
+            # 'elderly' era una sola poblacion antes de separarla por sexo;
+            # un caso guardado con esa clave sigue resolviendo.
+            pop = self.norms['populations'][LEGACY_POPULATIONS.get(population,
+                                                                   'adult_female')]
         via = pop.get(pathway) or pop['air_conduction']
         click = via['click']
         if stimulus == 'click':
@@ -2446,6 +2463,12 @@ LEGACY_STIM_LABELS = {
 
 LEGACY_STIM_KEYS = {
     'ls_chirp': 'ce_chirp_ls',
+}
+
+# Poblaciones que dejaron de existir tal cual. 'elderly' era una sola hasta
+# que se separo por sexo; los casos guardados con esa clave siguen andando.
+LEGACY_POPULATIONS = {
+    'elderly': 'elderly_female',
 }
 
 

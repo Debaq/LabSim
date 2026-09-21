@@ -34,7 +34,10 @@ foreach (AbrReferences::ANCLAJE as $pop => $anclas) {
 
 // --- Sets publicados ------------------------------------------------------
 
-$poblaciones = ['adult_male', 'adult_female', 'child', 'neonate', 'elderly'];
+// Las poblaciones válidas son las del normativo, no una lista aparte: si
+// se agrega una (1-3 años, adulto mayor por sexo) y un set la nombra mal,
+// el baseline se resuelve al default sin que nadie se entere.
+$poblaciones = array_keys(AbrReferences::defaults());
 foreach (AbrReferences::SETS as $id => $set) {
     t_true(isset(AbrReferences::FUENTES[$set['fuente']]), "Set {$id}: su fuente está citada");
     t_true(($set['nota'] ?? '') !== '', "Set {$id}: dice qué publica y qué no");

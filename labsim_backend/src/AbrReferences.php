@@ -112,8 +112,10 @@ final class AbrReferences
         'adult_male'   => ['lat' => 'F01', 'amp' => 'F27'],
         'adult_female' => ['lat' => 'F01', 'amp' => 'F27'],
         'child'        => ['lat' => 'F04', 'amp' => 'calculada'],
+        'toddler'        => ['lat' => 'calculada', 'amp' => 'calculada'],
         'neonate'      => ['lat' => 'F25', 'amp' => 'calculada'],
-        'elderly'      => ['lat' => 'F21', 'amp' => 'F09'],
+        'elderly_male'   => ['lat' => 'F21', 'amp' => 'F09'],
+        'elderly_female' => ['lat' => 'F21', 'amp' => 'F09'],
     ];
 
     /**
@@ -145,7 +147,8 @@ final class AbrReferences
             'populations' => [
                 'adult_male'   => ['I' => ['lat' => 1.74], 'III' => ['lat' => 3.91], 'V' => ['lat' => 5.86]],
                 'adult_female' => ['I' => ['lat' => 1.70], 'III' => ['lat' => 3.81], 'V' => ['lat' => 5.70]],
-                'elderly'      => ['I' => ['lat' => 1.83], 'III' => ['lat' => 3.91], 'V' => ['lat' => 5.84]],
+                'elderly_male'   => ['I' => ['lat' => 1.83], 'III' => ['lat' => 3.98], 'V' => ['lat' => 5.85]],
+                'elderly_female' => ['I' => ['lat' => 1.84], 'III' => ['lat' => 3.84], 'V' => ['lat' => 5.84]],
             ],
         ],
         'hood' => [

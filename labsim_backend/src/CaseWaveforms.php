@@ -32,11 +32,13 @@ final class CaseWaveforms
      * resources/abr/normative_data.json.
      */
     public const CLICK_BASE = [
-        'adult_male'     => ['I' => [1.47, 0.320], 'III' => [3.75, 0.370], 'V' => [5.68, 0.400]],
-        'adult_female'   => ['I' => [1.46, 0.440], 'III' => [3.65, 0.470], 'V' => [5.54, 0.540]],
-        'child'          => ['I' => [1.48, 0.239], 'III' => [3.50, 0.282], 'V' => [5.50, 0.410]],
-        'neonate'        => ['I' => [1.79, 0.171], 'III' => [4.56, 0.205], 'V' => [7.00, 0.299]],
-        'elderly'        => ['I' => [1.84, 0.342], 'III' => [3.91, 0.378], 'V' => [5.84, 0.423]],
+        'adult_male'       => ['I' => [1.47, 0.320], 'III' => [3.75, 0.370], 'V' => [5.68, 0.400]],
+        'adult_female'     => ['I' => [1.46, 0.440], 'III' => [3.65, 0.470], 'V' => [5.54, 0.540]],
+        'child'            => ['I' => [1.48, 0.239], 'III' => [3.50, 0.282], 'V' => [5.50, 0.410]],
+        'toddler'          => ['I' => [1.52, 0.231], 'III' => [3.67, 0.270], 'V' => [5.80, 0.388]],
+        'neonate'          => ['I' => [1.79, 0.171], 'III' => [4.56, 0.205], 'V' => [7.00, 0.299]],
+        'elderly_male'     => ['I' => [1.83, 0.288], 'III' => [3.98, 0.333], 'V' => [5.85, 0.360]],
+        'elderly_female'   => ['I' => [1.84, 0.396], 'III' => [3.84, 0.423], 'V' => [5.84, 0.486]],
     ];
 
     /**
@@ -45,11 +47,13 @@ final class CaseWaveforms
      * resources/abr/normative_data.json.
      */
     public const CLICK_INTERPICOS = [
-        'adult_male' => ['I-III' => 2.28, 'III-V' => 1.93, 'I-V' => 4.21],
-        'adult_female' => ['I-III' => 2.19, 'III-V' => 1.89, 'I-V' => 4.08],
-        'child' => ['I-III' => 2.02, 'III-V' => 2.00, 'I-V' => 4.02],
-        'neonate' => ['I-III' => 2.77, 'III-V' => 2.44, 'I-V' => 5.21],
-        'elderly' => ['I-III' => 2.07, 'III-V' => 1.93, 'I-V' => 4.00],
+        'adult_male'       => ['I-III' => 2.28, 'III-V' => 1.93, 'I-V' => 4.21],
+        'adult_female'     => ['I-III' => 2.19, 'III-V' => 1.89, 'I-V' => 4.08],
+        'child'            => ['I-III' => 2.02, 'III-V' => 2.00, 'I-V' => 4.02],
+        'toddler'          => ['I-III' => 2.15, 'III-V' => 2.13, 'I-V' => 4.28],
+        'neonate'          => ['I-III' => 2.77, 'III-V' => 2.44, 'I-V' => 5.21],
+        'elderly_male'     => ['I-III' => 2.15, 'III-V' => 1.87, 'I-V' => 4.02],
+        'elderly_female'   => ['I-III' => 2.00, 'III-V' => 2.00, 'I-V' => 4.00],
     ];
 
     /**
@@ -227,14 +231,20 @@ final class CaseWaveforms
         if ($edad === null) {
             return 'adult_female';
         }
+        // Espejo de ABR_generator.select_population. El tramo de 1 a 3 años
+        // tiene bloque propio (la vía todavía madura) y el sexo separa de
+        // los 18 en adelante, adulto mayor incluido.
         if ($edad < 1) {
             return 'neonate';
+        }
+        if ($edad < 3) {
+            return 'toddler';
         }
         if ($edad < 18) {
             return 'child';
         }
         if ($edad >= 60) {
-            return 'elderly';
+            return $genero === 0 ? 'elderly_male' : 'elderly_female';
         }
         return $genero === 0 ? 'adult_male' : 'adult_female';
     }
@@ -505,6 +515,23 @@ final class CaseWaveforms
      * negativos. Por eso el cVEMP arranca hacia arriba y el oVEMP hacia
      * abajo, que es lo que los distingue de un vistazo.
      */
+    /**
+     * El ABR separa más poblaciones que el VEMP: tiene bloque de 1 a 3 años
+     * y parte el adulto mayor por sexo. La tabla del VEMP no, así que acá se
+     * traduce en vez de caer al fallback de adulto -- un chico de 2 años y
+     * un hombre de 70 se dibujaban con la p13 de una mujer adulta.
+     */
+    private const VEMP_POP_ALIAS = [
+        'toddler' => 'child',
+        'elderly_male' => 'elderly',
+        'elderly_female' => 'elderly',
+    ];
+
+    private static function poblacionVemp(string $poblacion): string
+    {
+        return self::VEMP_POP_ALIAS[$poblacion] ?? $poblacion;
+    }
+
     public const VEMP_BASE = [
         'adult_male' => [
             'CVEMP' => ['p13' => [13.0, 120.0], 'n23' => [23.0, 170.0]],
@@ -545,7 +572,7 @@ final class CaseWaveforms
      */
     public static function hayRespuestaVemp(string $subtipo, array $picos, string $poblacion = 'adult_female'): bool
     {
-        $base = self::VEMP_BASE[$poblacion] ?? self::VEMP_BASE['adult_female'];
+        $base = self::VEMP_BASE[self::poblacionVemp($poblacion)] ?? self::VEMP_BASE['adult_female'];
         $definicion = $base[$subtipo] ?? $base['CVEMP'];
         $plena = 0.0;
         foreach ($definicion as [, $amp]) {
@@ -610,7 +637,7 @@ final class CaseWaveforms
         array $desviaciones = [],
         string $poblacion = 'adult_female'
     ): array {
-        $base = self::VEMP_BASE[$poblacion] ?? self::VEMP_BASE['adult_female'];
+        $base = self::VEMP_BASE[self::poblacionVemp($poblacion)] ?? self::VEMP_BASE['adult_female'];
         $definicion = $base[$subtipo] ?? $base['CVEMP'];
         $sl = $intensidad - $umbral;
         // Por debajo del umbral no hay respuesta; encima crece y satura.

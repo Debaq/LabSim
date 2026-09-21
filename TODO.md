@@ -2193,3 +2193,44 @@ una tabla que la app ya no usa. Había cuatro copias de los mismos números
 --el JSON del cliente, `CaseWaveforms::CLICK_BASE`, `normativas.php` y el
 JS--; quedan dos: la del cliente y la del backend, y las otras dos salen de
 `AbrReferences::defaults()`, que las deriva de `CLICK_BASE`.
+
+## ABR: rellenar los huecos de población y vía (2026-09-21)
+
+Quedaban tres combinaciones sin cubrir, y una de ellas era la peor posible.
+
+**1. Vía ósea en neonato y en adulto mayor: no existía.** Ninguno de los dos
+tenía bloque óseo, así que caían a su propia vía aérea y devolvían la curva
+**idéntica**: el vibrador dejaba de hacer efecto justo en el paciente donde
+el ABR óseo *es* el examen -- el recién nacido que no pasó el screening y
+hay que separarle transmisión de sensorineural. Ahora se deriva del aéreo de
+su población con el mismo corrimiento que ya tenían adulto y niño (+0.20 ms
+parejo, amplitud al 0.89).
+
+**2. Sexo, solo entre 18 y 59.** Un hombre de 70 se dibujaba con la curva de
+una mujer. `elderly` se parte en `elderly_male` / `elderly_female` con los
+valores que F21 publica por sexo en su grupo de 45 o más (y con el III de
+hombre-izquierdo corregido por la errata). En pediatría **no** se separa, y
+eso no es un hueco: la diferencia por sexo aparece con la pubertad. La clave
+vieja `elderly` sigue resolviendo (`LEGACY_POPULATIONS`) para los casos ya
+guardados.
+
+**3. De 1 a 3 años caía en `child`,** que ya tiene valores casi de adulto.
+Población nueva `toddler`, interpolada entre el neonato de término y el niño
+con una fracción por onda (0.88 la I, 0.84 la III, 0.80 la V: la onda V
+madura última, F11 n=535 y F19). Control independiente: el I-V queda en 4.28
+ms, entre los 4.81 que F25 mide a los 6 meses y los 4.02 del niño de 7 años.
+
+Resultado: **7 poblaciones × 2 vías × 11 estímulos = 154 combinaciones, y
+ninguna devuelve la curva del click**. Antes eran 5 poblaciones con dos de
+ellas sin vía ósea.
+
+**Trampa que apareció:** `CaseWaveforms::poblacion()` la comparte el VEMP,
+cuya tabla no tiene ni `toddler` ni el adulto mayor por sexo -- caía al
+fallback de mujer adulta en silencio. Se agregó `VEMP_POP_ALIAS`
+(toddler -> child, elderly_* -> elderly) para que traduzca en vez de
+perderse. El VEMP del cliente tiene su propia `Normativa.poblacion` y no se
+toca.
+
+Las franjas viven en tres lugares que tienen que decir lo mismo:
+`ABR_generator.select_population`, `CaseWaveforms::poblacion` y
+`public/js/case/abr.js`. Hay test en los dos primeros.

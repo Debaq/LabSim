@@ -26,9 +26,13 @@
         if (isNaN(age)) { age = 30; }
         var genderChecked = document.querySelector('input[name="gender"]:checked');
         var isFemale = !!genderChecked && genderChecked.value === '1';
-        if (age <= 0.25) { return 'neonate'; }
-        if (age <= 12) { return 'child'; }
-        if (age >= 60) { return 'elderly'; }
+        // Espejo de CaseWaveforms::poblacion y de
+        // ABR_generator.select_population: si esto se desincroniza, el caso
+        // se arma con una población y la app lo dibuja con otra.
+        if (age < 1) { return 'neonate'; }
+        if (age < 3) { return 'toddler'; }
+        if (age < 18) { return 'child'; }
+        if (age >= 60) { return isFemale ? 'elderly_female' : 'elderly_male'; }
         return isFemale ? 'adult_female' : 'adult_male';
     }
 

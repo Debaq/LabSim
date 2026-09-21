@@ -120,7 +120,16 @@ t_eq(CaseWaveforms::poblacion(7, 0), 'child', 'Un niño de 7 usa la de niño');
 t_eq(CaseWaveforms::poblacion(15, 1), 'child', 'A los 15 las latencias ya son casi de adulto, pero usa child');
 t_eq(CaseWaveforms::poblacion(30, 0), 'adult_male', 'Adulto hombre');
 t_eq(CaseWaveforms::poblacion(30, 1), 'adult_female', 'Adulta mujer');
-t_eq(CaseWaveforms::poblacion(70, 1), 'elderly', 'Sobre 60 usa la normativa de adulto mayor');
+t_eq(CaseWaveforms::poblacion(70, 1), 'elderly_female', 'Sobre 60 usa la normativa de adulto mayor, por sexo');
+t_eq(CaseWaveforms::poblacion(70, 0), 'elderly_male', 'Un hombre de 70 no se dibuja con la curva de una mujer');
+// De 1 a 3 años la vía todavía madura: bloque propio, no 'child' --que ya
+// es casi adulto-- ni 'neonate'.
+t_eq(CaseWaveforms::poblacion(2, 0), 'toddler', 'De 1 a 3 años hay normativa propia');
+t_true(
+    CaseWaveforms::CLICK_BASE['neonate']['V'][0] > CaseWaveforms::CLICK_BASE['toddler']['V'][0]
+    && CaseWaveforms::CLICK_BASE['toddler']['V'][0] > CaseWaveforms::CLICK_BASE['child']['V'][0],
+    'La onda V del tramo 1-3 queda entre la del neonato y la del niño'
+);
 t_eq(CaseWaveforms::poblacion(null, 0), 'adult_female', 'Sin edad cae en el default histórico');
 
 // El neonato tiene TODO más tarde que el adulto: es el error clásico de
