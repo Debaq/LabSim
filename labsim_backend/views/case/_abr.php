@@ -107,16 +107,20 @@
             </select>
         </label>
     </div>
-    <p class="help">FSP (Fsp progresivo, referencia de la curva)</p>
+    <p class="help">Cuánto ruido trae este paciente. No se declara el FSP --que es el RESULTADO y depende del nivel y de cuánto se promedie-- sino las condiciones en que se midió: a tal nivel, hicieron falta tantos barridos para que el equipo declarara respuesta. De ahí sale el ruido del paciente, y ese ruido vale para todos los demás niveles.</p>
     <div class="three-col">
-        <label>FSP @ 800 prom.
-            <input type="number" step="0.01" name="abr[<?= $lado ?>][fsp_800]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['fsp_800'] ?? '2.3')) ?>">
+        <label>Nivel de referencia (dB nHL)
+            <input type="number" step="5" min="0" max="100" placeholder="el umbral" name="abr[<?= $lado ?>][nivel_referencia]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['nivel_referencia'] ?? '')) ?>" title="Vacío = el propio umbral de este oído, que es lo habitual: así el umbral declarado es el nivel donde el equipo declara respuesta en la mitad de los registros.">
         </label>
-        <label>FSP @ 2000 prom.
-            <input type="number" step="0.01" name="abr[<?= $lado ?>][fsp_2000]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['fsp_2000'] ?? '2.8')) ?>">
+        <label>Barridos para el criterio
+            <input type="number" step="100" min="100" max="8000" name="abr[<?= $lado ?>][barridos_criterio]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['barridos_criterio'] ?? '2000')) ?>" title="Barridos que hicieron falta para llegar a FSP 3,1 a ese nivel. Más barridos = paciente más ruidoso. Con la referencia vacía, 2000 deja el umbral del caso en el 50% de detección.">
         </label>
-        <label>FSP objetivo
-            <input type="number" step="0.01" name="abr[<?= $lado ?>][fsp_obj]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['fsp_obj'] ?? '3.0')) ?>">
+        <label>Respuesta a ese nivel
+            <select name="abr[<?= $lado ?>][respuesta_en_referencia]">
+                <?php foreach (['presente' => 'Presente', 'ausente' => 'Ausente'] as $rKey => $rLabel): ?>
+                <option value="<?= $rKey ?>" <?= (($v['abr'][$lado]['respuesta_en_referencia'] ?? 'presente') === $rKey) ? 'selected' : '' ?>><?= $rLabel ?></option>
+                <?php endforeach; ?>
+            </select>
         </label>
     </div>
 </div>

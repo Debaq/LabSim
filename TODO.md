@@ -2781,3 +2781,73 @@ pasa en la clínica y antes no pasaba.
   demasiado limpio. Con el ruido real, la misma falsa onda pesa
   proporcionalmente menos: sigue siendo la pista, pero no tapa el
   registro.
+
+## ABR: el FSP sale del trazo y el umbral del caso es el que se mide (2026-09-21)
+
+Tres cambios encadenados que cierran el hueco que dejó la batería de
+verificación (`verificacion_abr_eoa.md`, tests D6 y H1).
+
+### 1. El FSP se calcula, no se declara
+
+`fsp_puntos` del caso era el número que el equipo mostraba, degradado por
+ruido y electrodos. Daba lo mismo con respuesta clara que sin respuesta, y
+por eso D6 no salía solo. Ahora:
+
+- `expected_fsp()` es la razón entre la señal que hay en la ventana de
+  análisis (filtrada, como la ve el equipo) y el ruido residual medido
+  sobre A−B: `1 + (A_rms / residual)²`.
+- `observed_fsp()` sortea alrededor de ese valor con una F no central
+  (df1 = 5, df2 = 250, la de Elberling & Don), así que dos registros
+  iguales no dan el mismo número. Criterio 3.1.
+- Que el FSP suba con el nivel, suba con los barridos y caiga con
+  impedancias altas, paciente inquieto o banda mal elegida no se programa:
+  sale de que todo eso ya está en el residual.
+
+### 2. El ruido del paciente se declara por las CONDICIONES
+
+`nivel_referencia` + `barridos_criterio` (N*) + `respuesta_en_referencia`
+reemplazan al FSP declarado: "a tal nivel hicieron falta tantos barridos
+para llegar al criterio". De ahí sale σ = A_rms·√(N*/2.1) y ese ruido vale
+para todos los niveles. Los casos viejos se convierten al vuelo con
+N* = 2.1·2000/(FSP@2000 − 1), que no depende del caso porque la amplitud
+se cancela.
+
+**El default del nivel de referencia es VACÍO = el propio umbral**, con
+N* = 2000. Es lo que hace que las dos definiciones de umbral coincidan: el
+umbral que declara el docente es el nivel donde el equipo dice "presente"
+en la mitad de los registros con 2000 barridos. Correrse de 2000 es correr
+el umbral que va a encontrar el alumno, y es la perilla para un paciente
+más ruidoso o más quieto.
+
+`residual_noise_nv` de Parámetros Avanzados dejó de escalar el ruido: es el
+criterio con el que el alumno decide cuándo parar, no una propiedad del
+paciente. Sigue siendo el respaldo del caso que declara AUSENTE la
+respuesta en la referencia, donde no hay amplitud de la que despejar σ.
+
+### 3. Umbral fisiológico ≠ umbral clínico
+
+`PHYSIOLOGICAL_OFFSET_DB = 9.0`: la onda V se apaga 9 dB por DEBAJO del
+umbral que informa el equipo, así que en el umbral clínico vale la mitad de
+su amplitud. Sin esto, o la respuesta en el umbral era invisible (P de
+detección 0.05, que era D6) o había que regalar amplitud.
+
+El desfase solo corre el origen del nivel de sensación, así que **todo lo
+que se mide lejos del umbral queda igual**: los `sl_min` de cada onda, el
+ancla del normativo (`AMP_SL_REF`) y la referencia de la función L-I
+coclear se corrieron los mismos 9 dB. El golden del modelo lo confirma:
+solo se movió la onda V, y más cuanto más cerca del umbral (0.401 → 0.464
+a 40 dB; 0.535 → 0.537 a 80).
+
+El reclutamiento bajó de 0.65 a 0.8 de τ: contando el SL desde el umbral
+fisiológico, un oído con umbral 60 estimulado a 80 dB llegaba al 95% de la
+amplitud del oído sano, o sea se veía sano.
+
+### 4. El zumbido de red se lleva puesto el FSP
+
+Hallazgo al correr la regresión: sin tierra el equipo dibujaba el zumbido
+pero el residual y el FSP no se enteraban, porque la interferencia se
+generaba IGUAL para las dos mitades y se cancelaba exacto en A−B. Ahora se
+reparte en cuadratura entre lo que sobrevive al promediado (`MAINS_COHERENT`
+0.8, lo que se ve dibujado) y lo que entra con la fase de cada barrido
+(`MAINS_INCOHERENT` 0.6, lo que no se cancela). Sin tierra: residual de 59
+a 742 nV y FSP de 7.9 a 1.0.

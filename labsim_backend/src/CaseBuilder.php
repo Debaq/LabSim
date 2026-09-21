@@ -994,6 +994,21 @@ final class CaseBuilder
      * -- el cliente (Audiometer.py/Z.py/ListWords.py) espera exactamente
      * estas claves. $form ya viene validado desde case_create.php.
      */
+    /**
+     * Migración del FSP declarado a "barridos para el criterio".
+     *
+     * De FSP = 1 + A²N/σ² se despeja σ² = A²N/(FSP-1), y de ahí
+     * N* = (3,1-1)·σ²/A² = 2,1·N/(FSP-1). La amplitud se cancela: la
+     * conversión sale solo del FSP que el caso tenía declarado a 2000
+     * promediaciones. Espejo de criterion_sweeps_from_fsp() en
+     * src/abr/ABR_generator.py.
+     */
+    public static function fspToCriterionSweeps(float $fsp2000, float $barridos = 2000.0): int
+    {
+        $fsp = max($fsp2000, 1.01);
+        return (int) round((3.1 - 1.0) * $barridos / ($fsp - 1.0));
+    }
+
     public static function buildCaseData(array $form): array
     {
         $gender = (int) $form['gender'];
@@ -1333,6 +1348,18 @@ final class CaseBuilder
                 'fsp_800' => (string) ($fsp['800'] ?? 2.3),
                 'fsp_2000' => (string) ($fsp['2000'] ?? 2.8),
                 'fsp_obj' => (string) ($fsp['objetivo'] ?? 3.0),
+                // Ruido del paciente. Un caso viejo trae el FSP declarado y
+                // no estos campos: se convierte al vuelo con la misma
+                // fórmula que usa el cliente (criterion_sweeps_from_fsp),
+                // N* = (3,1 - 1) * 2000 / (FSP@2000 - 1). La amplitud se
+                // cancela, así que la conversión no depende del caso.
+                // Vacio = el propio umbral (es el default y lo habitual),
+                // asi que null y "no esta la clave" son lo mismo.
+                'nivel_referencia' => isset($ladoAbr['nivel_referencia'])
+                    ? (string) $ladoAbr['nivel_referencia'] : '',
+                'barridos_criterio' => (string) ($ladoAbr['barridos_criterio']
+                    ?? self::fspToCriterionSweeps((float) ($fsp['2000'] ?? 2.8))),
+                'respuesta_en_referencia' => (string) ($ladoAbr['respuesta_en_referencia'] ?? 'presente'),
             ];
             if (!empty($ladoAbr['repro']) || !isset($ladoAbr['repro'])) {
                 // Default repro=true (caso nuevo sin ABR configurado aún, o

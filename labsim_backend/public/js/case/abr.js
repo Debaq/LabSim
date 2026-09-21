@@ -72,7 +72,14 @@
         var v = {
             umbral: 20, repro: true, repro_var: 0, average_objetivo: 1500,
             lat_I: 0, lat_III: 0, lat_V: 0, amp_I: 0, amp_III: 0, amp_V: 0,
-            fsp_800: 2.3, fsp_2000: 2.8, fsp_obj: 3.0
+            fsp_800: 2.3, fsp_2000: 2.8, fsp_obj: 3.0,
+            // Ruido del paciente: a qué nivel se midió y cuántos barridos
+            // hicieron falta. Más barridos = paciente más ruidoso. La
+            // referencia vacía es el propio umbral, y 2000 barridos ahí
+            // dejan el umbral declarado en el 50% de detección; moverse de
+            // 2000 es correr el umbral que va a encontrar el alumno.
+            nivel_referencia: '', barridos_criterio: 2000,
+            respuesta_en_referencia: 'presente'
         };
         if (type === 'coclear') {
             // Sensorial: umbral elevado (recruitment), onda I reducida,
@@ -85,6 +92,7 @@
             v.amp_V = ampOffset.V + b.V.amp * rand(-0.05, 0.15);
             v.average_objetivo = Math.round(rand(1500, 2500));
             v.fsp_800 = 2.3 * rand(0.8, 1.0); v.fsp_2000 = 2.8 * rand(0.8, 1.0); v.fsp_obj = 3.0 * rand(0.8, 1.0);
+            v.barridos_criterio = Math.round(rand(1700, 2400) / 100) * 100;
         } else if (type === 'transmission') {
             // Conductivo: desplazamiento uniforme de latencia y reducción
             // uniforme de amplitud en I/III/V -- interpicos quedan normales.
@@ -95,6 +103,7 @@
             v.amp_I = ampOffset.I + b.I.amp * ampFactor; v.amp_III = ampOffset.III + b.III.amp * ampFactor; v.amp_V = ampOffset.V + b.V.amp * ampFactor;
             v.average_objetivo = Math.round(rand(1500, 2200));
             v.fsp_800 = 2.3 * rand(0.85, 1.0); v.fsp_2000 = 2.8 * rand(0.85, 1.0); v.fsp_obj = 3.0 * rand(0.85, 1.0);
+            v.barridos_criterio = Math.round(rand(1600, 2300) / 100) * 100;
         } else if (type === 'neural') {
             // Retrococlear: las latencias y amplitudes NO se sortean acá.
             // El patrón (I-III, III-V, razón V/I, bloqueo...) es su propio
@@ -113,6 +122,9 @@
             v.repro_var = v.repro ? 0 : rand(0.15, 0.4);
             v.average_objetivo = Math.round(rand(2500, 4000));
             v.fsp_800 = rand(1.2, 1.8); v.fsp_2000 = rand(1.6, 2.2); v.fsp_obj = rand(2.0, 2.6);
+            // Retrococlear: la respuesta es pobre, el criterio cuesta mucho
+            // mas llegar aunque el paciente este quieto.
+            v.barridos_criterio = Math.round(rand(2100, 2900) / 100) * 100;
         } else {
             // Normal: sin hallazgos, solo ruido de test-retest.
             v.umbral = Math.round(rand(0, 20));
@@ -122,6 +134,7 @@
             v.amp_V = ampOffset.V + b.V.amp * rand(-0.08, 0.08);
             v.average_objetivo = Math.round(rand(1200, 1800));
             v.fsp_800 = 2.3 + rand(-0.1, 0.1); v.fsp_2000 = 2.8 + rand(-0.1, 0.1); v.fsp_obj = 3.0 + rand(-0.1, 0.1);
+            v.barridos_criterio = Math.round(rand(1700, 2200) / 100) * 100;
         }
         return v;
     }

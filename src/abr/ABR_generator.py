@@ -57,6 +57,10 @@ import numpy as np
 import scipy.signal as signal
 from core.base import context
 from abr.protocols import get_protocol
+try:
+    from scipy.stats import ncf
+except ImportError:        # el sorteo del FSP necesita scipy.stats
+    ncf = None
 from core.rng import case_fingerprint, stable_seed
 
 
@@ -83,13 +87,30 @@ WAVE_SIGMA = {
 #   tau    = que tan rapido satura.
 # Calibrado para que a ~60 dB SL (oido normal estimulado a 80 dB, que es
 # como estan medidos los valores del JSON normativo) el factor sea ~0.95.
+#
+# OJO con el cero: sl_min se cuenta desde el umbral FISIOLOGICO, que esta
+# PHYSIOLOGICAL_OFFSET_DB por debajo del clinico (ver mas abajo). Los
+# niveles de emergencia publicados estan en SL clinico, asi que aca van
+# sumados el desfase: la I emerge a 20 dB sobre el umbral clinico = 29
+# sobre el fisiologico. La unica que cambia de verdad es la V, que por
+# definicion se apaga en el umbral fisiologico y por eso queda en 0: en el
+# umbral clinico ya vale la mitad, que es lo que hace que el equipo la
+# detecte ahi en la mitad de los registros.
 WAVE_AMP_GROWTH = {
-    'I':   {'sl_min': 20, 'tau': 13},   # la primera en perderse (~40 dB SL)
-    'II':  {'sl_min': 22, 'tau': 14},
-    'III': {'sl_min': 5,  'tau': 16},
-    'IV':  {'sl_min': 8,  'tau': 17},
-    'V':   {'sl_min': 0,  'tau': 15},   # la ultima, pero en el umbral es nada
+    'I':   {'sl_min': 29, 'tau': 13},   # la primera en perderse (~40 dB SL)
+    'II':  {'sl_min': 31, 'tau': 14},
+    'III': {'sl_min': 14, 'tau': 16},
+    'IV':  {'sl_min': 17, 'tau': 17},
+    'V':   {'sl_min': 0,  'tau': 15},   # la ultima: se apaga en el umbral
 }
+
+# Cuanto por debajo del umbral clinico esta el umbral fisiologico, en dB.
+# Calibrado sobre el propio modelo: es el nivel de sensacion al que la
+# deteccion por FSP >= 3.1 con 2000 barridos ocurre en la mitad de los
+# registros, con un paciente de ruido tipico (N* = 1500 a 40 dB nHL). Con un
+# paciente mas ruidoso hace falta mas nivel, que es justo lo que pasa en la
+# clinica.
+PHYSIOLOGICAL_OFFSET_DB = 9.0
 
 # Nivel de sensacion al que la amplitud del normativo esta medida, y codo
 # del arranque. Con el codo en 0.3*tau la onda V salia en el 31% de su
@@ -100,14 +121,20 @@ WAVE_AMP_GROWTH = {
 # cada onda creciera distinto por encima de ese punto --la I, que arranca
 # mas tarde y satura mas rapido, se iba 21% por encima de su valor
 # normativo-- y a nivel alto la onda I terminaba mas grande que la V, que
-# es imposible y ademas rompe el criterio V/I.
-AMP_SL_REF = 70.0
+# es imposible y ademas rompe el criterio V/I. Ese 70 es SL clinico, asi
+# que aca tambien se le suma el desfase: corriendo el ancla y los sl_min
+# juntos, todo lo que pasa lejos del umbral queda exactamente como estaba.
+AMP_SL_REF = 70.0 + PHYSIOLOGICAL_OFFSET_DB
 AMP_KNEE_FRACTION = 0.05
 
 # Reclutamiento: en perdida coclear la amplitud crece mas rapido con el SL,
 # por eso a nivel alto la onda V puede verse casi normal pese al umbral
 # elevado (recruitment: true en normative_data.json). Multiplica tau.
-PATHOLOGY_TAU_FACTOR = {'cochlear': 0.65}
+# 0.65 era demasiado: contando el SL desde el umbral fisiologico, un oido
+# con umbral 60 estimulado a 80 dB llegaba al 95% de la amplitud del oido
+# sano, o sea se veia sano. El reclutamiento acelera el crecimiento, no lo
+# borra: a igual dB nHL el oido con perdida sigue dando menos.
+PATHOLOGY_TAU_FACTOR = {'cochlear': 0.8}
 
 # Funcion latencia-intensidad de la perdida COCLEAR. No es la normal (que
 # es lo que hacia antes: la patologia coclear no tocaba la latencia, solo
@@ -118,7 +145,9 @@ PATHOLOGY_TAU_FACTOR = {'cochlear': 0.65}
 # EMPINADA en vez de corrida. Sin esto, subir de 80 a 100 dB en un caso
 # coclear movia la V 0.16 ms y la funcion salia igual a la de un oido sano.
 # Pendiente extra (ms) por cada 10 dB de SL por debajo de la referencia.
-COCHLEAR_LI_SL_REF = 40.0
+# La referencia son 40 dB sobre el umbral CLINICO, asi que contada desde el
+# fisiologico lleva sumado el desfase (igual que AMP_SL_REF y los sl_min).
+COCHLEAR_LI_SL_REF = 40.0 + PHYSIOLOGICAL_OFFSET_DB
 COCHLEAR_LI_SLOPE = 0.15
 
 # Las desviaciones del caso se definen pensando en click a NIVEL ALTO
@@ -435,6 +464,45 @@ NOISE_BLOCKS = 200
 # mitad. Es lo que hace que promediar mas sirva -- y lo que obliga a
 # promediar mas para confirmar una respuesta cerca del umbral.
 NOISE_REF_SWEEPS = 1000.0
+
+# Ventana de analisis del FSP (ms), por poblacion: la respuesta del neonato
+# esta corrida a la derecha y hay que mirarla donde esta.
+FSP_WINDOW_MS = {
+    'adulto': (4.0, 10.0),
+    'neonate': (5.0, 12.0),
+    'toddler': (4.6, 11.3),
+    'child': (4.3, 10.7),
+}
+# Grados de libertad del estadistico F con el que se sortea el FSP
+# observado (Elberling y Don): 5 puntos de la ventana contra 250 barridos.
+FSP_DF1 = 5
+FSP_DF2 = 250
+# Criterio de respuesta presente. Es el que trae el equipo por defecto y el
+# que se usa para despejar el ruido del paciente desde N* (ver
+# sigma_from_criterion).
+FSP_CRITERION = 3.1
+NOISE_MODEL_GAIN = 1.13
+
+# Ruido de UN barrido por debajo del cual no baja ningun paciente: es el
+# EEG de fondo, no una propiedad del equipo. Con 2000 barridos deja el
+# residual en ~11 nV, mas limpio que cualquier registro real.
+MIN_PATIENT_SIGMA_UV = 0.5
+
+# Como el caso declara cuan ruidoso es el paciente: a que nivel se midio,
+# cuantos barridos hicieron falta para que el equipo declarara respuesta, y
+# si a ese nivel habia respuesta. De ahi sale sigma (ver
+# sigma_from_criterion). Los valores por defecto son los de un paciente
+# tipico dormido.
+CASE_REFERENCE_DEFAULT = {
+    # None = el UMBRAL de ese oido para ese estimulo. Es el default a
+    # proposito: con la referencia en el umbral y N* = 2000, el umbral que
+    # declara el caso ES el nivel donde el equipo declara respuesta en la
+    # mitad de los registros con 2000 barridos. Las dos definiciones de
+    # umbral --la del caso y la que mide el alumno-- pasan a ser la misma.
+    'nivel_referencia': None,
+    'barridos_criterio': 2000.0,
+    'respuesta_en_referencia': 'presente',
+}
 # El ruido se genera con RMS 1 y DESPUES pasa por la banda de registro, que
 # se queda con una fraccion (el EEG es 1/f y el EMG es de alta: la mayor
 # parte de su energia cae fuera de 100-3000 Hz). El equipo mide el residual
@@ -484,6 +552,14 @@ AGITATION_MAX_DUTY = 0.5
 # Por encima de este factor el barrido cruza el umbral de rechazo y el
 # equipo lo descarta entero, en vez de promediarlo sucio.
 AGITATION_REJECT_FACTOR = 2.0
+
+# Reparto del zumbido de red entre lo que sobrevive al promediado (queda
+# dibujado en el trazo) y lo que entra con fase distinta en cada barrido
+# (no se cancela en A-B y por eso se lleva puesto el FSP). En cuadratura:
+# 0.8^2 + 0.6^2 = 1, o sea que la potencia total del zumbido es la misma
+# que antes de separarlo.
+MAINS_COHERENT = 0.8
+MAINS_INCOHERENT = 0.6
 
 # Reflejo post-auricular (PAM): contraccion del musculo auricular
 # posterior ante un sonido fuerte. Es miogenico, no neural, pero se
@@ -925,7 +1001,18 @@ class ABRGenerator:
         # esta estimulando. Es lo que manda en amplitud y en ancho de la
         # onda; la intensidad absoluta sola no dice nada (80 dB en un oido
         # con umbral 60 son 20 dB SL, no una respuesta maxima).
-        sl = intensity - threshold
+        #
+        # Y se mide desde el umbral FISIOLOGICO, que esta PHYSIOLOGICAL_
+        # OFFSET_DB por debajo del que declara el caso. El del caso es el
+        # umbral CLINICO --el que el equipo informa, el que sale de la
+        # bibliografia via STIM_NHL_CORRECTION y el que el alumno tiene que
+        # encontrar-- y un umbral clinico no es el nivel donde la respuesta
+        # empieza a existir: es el nivel donde se la puede DETECTAR. Por
+        # debajo la respuesta existe, pero queda bajo el ruido.
+        #
+        # Sin este desfase las dos definiciones no coincidian: el caso
+        # decia "umbral 30" y el alumno, midiendo bien, informaba 35 o 40.
+        sl = intensity - (threshold - PHYSIOLOGICAL_OFFSET_DB)
 
         # Coclear: la funcion L-I se empina cerca del umbral (ver
         # COCHLEAR_LI_SLOPE) y converge a la normal a SL alto.
@@ -1032,13 +1119,15 @@ class ABRGenerator:
 
             # Ensanchamiento cerca del umbral, tambien por SL (antes iba
             # contra la intensidad absoluta: un oido con perdida no
-            # ensanchaba nunca).
-            if sl >= 50:
+            # ensanchaba nunca). Los quiebres estan en SL clinico, asi que
+            # se les suma el desfase como a todo lo demas.
+            sl_clin = sl - PHYSIOLOGICAL_OFFSET_DB
+            if sl_clin >= 50:
                 width_factor = 1.0
-            elif sl >= 30:
-                width_factor = 1.0 + (50 - sl) * 0.03
+            elif sl_clin >= 30:
+                width_factor = 1.0 + (50 - sl_clin) * 0.03
             else:
-                width_factor = min(1.6 + (30 - sl) * 0.05, 2.6)
+                width_factor = min(1.6 + (30 - sl_clin) * 0.05, 2.6)
             if is_neural:
                 # Morfologia pobre/desincronizada: ondas anchas y romas, que
                 # es lo que se ve antes de que desaparezcan del todo.
@@ -1751,6 +1840,108 @@ class ABRGenerator:
     # FSP / TRANSICION
     # =====================================================================
 
+    @staticmethod
+    def sigma_from_criterion(a_rms, barridos_criterio):
+        """Ruido de UN barrido que hace que el FSP llegue a 3.1 con N*.
+
+        Es la forma en que el caso declara cuan ruidoso es el paciente, y es
+        una cantidad que el docente puede medir: "a este nivel, este
+        paciente necesita N* barridos para que el equipo declare respuesta".
+        Despejado de FSP = 1 + A^2 N / sigma^2 con FSP = FSP_CRITERION:
+
+            sigma = A_rms * sqrt(N* / (FSP_CRITERION - 1))
+
+        Antes el caso declaraba el FSP directo (`fsp_puntos`), que es el
+        RESULTADO y no una propiedad del paciente: el mismo numero valia a
+        cualquier nivel y con cualquier cantidad de barridos.
+        """
+        if a_rms <= 0 or barridos_criterio <= 0:
+            return None
+        # NOISE_MODEL_GAIN: el ruido que el equipo INFORMA (estimado de la
+        # diferencia de los dos subpromedios, sobre una ventana finita) sale
+        # ~13% por encima del sigma/sqrt(N) ideal. Medido sobre el propio
+        # modelo a 400, 800, 1600 y 3200 barridos. Sin esta correccion, un
+        # caso que declara N* barridos para llegar al criterio necesitaba
+        # ~25% mas, y la promesa del campo no se cumplia.
+        sigma = float(a_rms * np.sqrt(barridos_criterio / (FSP_CRITERION - 1.0))
+                     / NOISE_MODEL_GAIN)
+        # Piso: ningun paciente esta MAS quieto que su propio EEG. Sin
+        # esto, un caso sin respuesta a su nivel de referencia --una
+        # neuropatia con bloqueo, por ejemplo-- despejaba un sigma casi
+        # cero, el residual se iba al piso y el FSP declaraba respuesta
+        # presente justo donde no hay ninguna.
+        return max(sigma, MIN_PATIENT_SIGMA_UV)
+
+    @staticmethod
+    def criterion_sweeps_from_fsp(fsp_2000, barridos=2000.0):
+        """Migracion: N* equivalente a un FSP declarado a `barridos`.
+
+        De FSP = 1 + A^2 N / sigma^2 se despeja sigma^2 = A^2 N /(FSP - 1), y
+        de ahi N* = (FSP_CRITERION - 1) * sigma^2 / A^2 = (FSP_CRITERION - 1)
+        * N / (FSP - 1). La amplitud se cancela: la conversion no depende del
+        caso, solo del FSP que tenia declarado.
+        """
+        fsp = max(float(fsp_2000), 1.01)
+        return float((FSP_CRITERION - 1.0) * barridos / (fsp - 1.0))
+
+    @staticmethod
+    def fsp_window(population):
+        """Ventana de analisis del FSP (ms), por poblacion.
+
+        El neonato tiene la respuesta entera corrida a la derecha (su onda V
+        esta cerca de 7 ms contra 5.5 del adulto), asi que la ventana que se
+        analiza tambien se corre: medir al bebe con la ventana del adulto
+        deja la onda V pegada al borde y baja el FSP por recorte, no por
+        falta de respuesta.
+        """
+        return FSP_WINDOW_MS.get(population, FSP_WINDOW_MS['adulto'])
+
+    def expected_fsp(self, t, senial, residual_uv, population):
+        """FSP esperado del registro: VAR(S) / (VAR(SP)/N).
+
+        Elberling y Don 1984. En la forma que se puede calcular sin simular
+        barrido por barrido:
+
+            FSP = 1 + A_rms^2 * N / sigma^2 = 1 + (A_rms / R)^2
+
+        porque el ruido del PROMEDIO es R = sigma / sqrt(N). O sea: el FSP
+        es la razon entre lo que hay de senial y lo que quedo de ruido, y
+        sale solo de esas dos cosas. Crece con el nivel (mas senial), crece
+        con los barridos (menos ruido) y cae con impedancias altas o un
+        paciente inquieto (mas ruido). Nada de eso hay que programarlo
+        aparte: sale de la formula.
+
+        Antes el FSP lo declaraba el caso (`fsp_puntos`) y se degradaba a
+        mano; daba el mismo numero con respuesta clara que sin respuesta.
+        """
+        desde, hasta = self.fsp_window(population)
+        vent = (t >= desde) & (t <= hasta)
+        if not vent.any() or residual_uv <= 0:
+            return 1.0
+        a_rms = float(np.sqrt(np.mean(senial[vent] ** 2)))
+        return 1.0 + (a_rms / residual_uv) ** 2
+
+    @staticmethod
+    def observed_fsp(esperado, rng):
+        """FSP que muestra el equipo: un sorteo, no el valor teorico.
+
+        El FSP es un estadistico F calculado sobre una muestra, asi que dos
+        registros del mismo paciente en las mismas condiciones NO dan el
+        mismo numero -- y esa es justamente la razon por la que se repite el
+        registro para confirmar. Se sortea de una F no central con
+        df1 = FSP_DF1 y df2 = FSP_DF2, con el parametro de no centralidad
+        elegido para que la MEDIA de la distribucion sea el FSP esperado.
+        """
+        if ncf is None:          # sin scipy.stats: sin sorteo, valor teorico
+            return float(max(esperado, 1.0))
+        media = max(float(esperado), 1.0)
+        # media de una F no central = (df1 + nc)/df1 * df2/(df2 - 2)
+        nc = max(FSP_DF1 * (media * (FSP_DF2 - 2) / FSP_DF2 - 1.0), 0.0)
+        valor = float(ncf.rvs(FSP_DF1, FSP_DF2, nc,
+                              random_state=np.random.default_rng(
+                                  int(rng.integers(1 << 32)))))
+        return max(valor, 1.0)
+
     def calculate_fsp(self, prom_actual, fsp_800, fsp_2000):
         if prom_actual <= 0:
             return 0.5
@@ -2266,12 +2457,25 @@ class ABRGenerator:
         # Se escalan por estimulo en calculate_wave_parameters via click_baseline.
         desviaciones = case_config.get('desviaciones') if case_config else None
 
-        # 4. FSP del caso
-        if case_config and 'fsp_puntos' in case_config:
-            fsp_800 = case_config['fsp_puntos']['800']
-            fsp_2000 = case_config['fsp_puntos']['2000']
-        else:
-            fsp_800, fsp_2000 = 2.3, 2.8
+        # 4. Cuan ruidoso es ESTE paciente. El caso ya no declara el FSP
+        # --que es el resultado-- sino las condiciones en que se midio:
+        # a `nivel_referencia`, hicieron falta `barridos_criterio` para que
+        # el equipo declarara respuesta. De ahi se despeja el ruido de un
+        # barrido (ver sigma_from_criterion) y ese ruido vale para TODOS
+        # los niveles, que es lo que un paciente tiene.
+        #
+        # Los casos guardados con `fsp_puntos` se convierten al vuelo (ver
+        # criterion_sweeps_from_fsp): la conversion no depende del caso,
+        # solo del FSP que tenia declarado.
+        referencia = dict(CASE_REFERENCE_DEFAULT)
+        if case_config:
+            for clave in referencia:
+                if case_config.get(clave) is not None:
+                    referencia[clave] = case_config[clave]
+            if 'barridos_criterio' not in (case_config or {}) \
+                    and case_config.get('fsp_puntos'):
+                referencia['barridos_criterio'] = self.criterion_sweeps_from_fsp(
+                    case_config['fsp_puntos'].get('2000', 2.8))
 
         # 5. FSP actual
         current_avg = stimulus_config['current_avg']
@@ -2305,30 +2509,40 @@ class ABRGenerator:
         # microfonica, desincronia, tasa) -- ver NEURAL_PARAM_DEFAULTS.
         repro_shift = case_config.get('repro_shift', 0.0) if case_config else 0.0
         neural = (case_config or {}).get('neural')
-        values, waves_visible = self.calculate_wave_parameters(
-            baseline, stimulus_config['int'], threshold, pathology, desviaciones,
-            repro_shift=repro_shift, click_baseline=click_baseline,
-            neural=neural,
-            stim_width=stimulus_width(stimulus_config['stim'],
-                                      stimulus_config.get('freq')),
-        )
+        def ondas_a(nivel):
+            """Ondas tal como quedan a ESE nivel, con todo aplicado.
 
-        # Via osea: la diferencia con la aerea no es un offset fijo, crece
-        # hacia el umbral (ver BONE_LAT_CORRECTION). En el LACTANTE el signo
-        # se invierte: el craneo sin suturar y el oido medio salteado le dan
-        # una osea mas rapida que la aerea, asi que por esta via el bebe se
-        # parece mucho mas a un adulto que por aire.
-        if pathway == 'bone_conduction':
-            w = INFANT_POPULATIONS.get(population, 0.0)
-            corr = (w * INFANT_BONE_LAT_MS
-                    + (1.0 - w) * bone_latency_correction(float(stimulus_config['int'])))
-            for wave, v in values.items():
-                v['lat'] += corr
-                # Y solo la onda V es confiable por esta via (ver
-                # BONE_WAVE_AMP): buscar interpicos en un registro oseo es
-                # el error que el ejercicio tiene que dejar ver.
-                v['amp'] *= BONE_WAVE_AMP.get(wave, 1.0)
-                v['width'] = v.get('width', 1.0) * BONE_WAVE_WIDTH.get(wave, 1.0)
+            Se usa dos veces: para el nivel que se esta registrando y para
+            el nivel de referencia del caso, del que sale el ruido del
+            paciente (ver sigma_from_criterion).
+            """
+            v, visibles = self.calculate_wave_parameters(
+                baseline, nivel, threshold, pathology, desviaciones,
+                repro_shift=repro_shift, click_baseline=click_baseline,
+                neural=neural,
+                stim_width=stimulus_width(stimulus_config['stim'],
+                                          stimulus_config.get('freq')),
+            )
+            # Via osea: la diferencia con la aerea no es un offset fijo,
+            # crece hacia el umbral (ver BONE_LAT_CORRECTION). En el
+            # LACTANTE el signo se invierte: el craneo sin suturar y el
+            # oido medio salteado le dan una osea mas rapida que la aerea,
+            # asi que por esta via el bebe se parece mucho mas a un adulto
+            # que por aire.
+            if pathway == 'bone_conduction':
+                w = INFANT_POPULATIONS.get(population, 0.0)
+                corr = (w * INFANT_BONE_LAT_MS
+                        + (1.0 - w) * bone_latency_correction(float(nivel)))
+                for wave, onda in v.items():
+                    onda['lat'] += corr
+                    # Y solo la onda V es confiable por esta via (ver
+                    # BONE_WAVE_AMP): buscar interpicos en un registro oseo
+                    # es el error que el ejercicio tiene que dejar ver.
+                    onda['amp'] *= BONE_WAVE_AMP.get(wave, 1.0)
+                    onda['width'] = onda.get('width', 1.0) * BONE_WAVE_WIDTH.get(wave, 1.0)
+            return v, visibles
+
+        values, waves_visible = ondas_a(stimulus_config['int'])
 
         # 7. Polaridad + rate. La polaridad ya no se aplica sobre el vector
         # de ondas: se aplica al ARMAR la curva (ver build_polarity_curve),
@@ -2453,10 +2667,33 @@ class ABRGenerator:
         if case_config and case_config.get('average_objetivo'):
             growth_target = case_config['average_objetivo']
         growth = self.calculate_growth(current_avg, growth_target)
-        # Calidad de registro del paciente: un caso con FSP objetivo bajo
-        # es un paciente ruidoso (se mueve, tensa el cuello) y su curva
-        # tarda mas en limpiarse.
-        quality = float(np.clip(2.8 / max(fsp_2000, 0.5), 0.5, 2.5))
+        # Cuanto ruido trae el paciente. Sale de las condiciones en que se
+        # midio (nivel de referencia y barridos que hicieron falta), no de
+        # un FSP declarado: el FSP es el resultado, no la causa.
+        #
+        # sigma es el ruido de UN barrido; el modelo de ruido trabaja con
+        # el residual al llegar a NOISE_REF_SWEEPS, que es sigma/sqrt(N).
+        quality = 1.0
+        sigma_paciente = None
+        if str(referencia.get('respuesta_en_referencia', 'presente')) != 'ausente':
+            nivel_ref = referencia.get('nivel_referencia')
+            nivel_ref = threshold if nivel_ref in (None, '') else float(nivel_ref)
+            v_ref, _ = ondas_a(nivel_ref)
+            v_ref = self.apply_rate_effects(v_ref, stimulus_config['rate'],
+                                            pathology, neural)
+            y_ref, _ = self.build_polarity_curve(
+                t, v_ref, stimulus_config['pol'], pathology, neural,
+                cm_sigma_gain)
+            y_ref = self.apply_filters(
+                y_ref, float(stimulus_config['filter_down']),
+                float(stimulus_config['filter_passhigh']), fs)
+            desde, hasta = self.fsp_window(population)
+            vent = (t >= desde) & (t <= hasta)
+            a_ref = float(np.sqrt(np.mean(y_ref[vent] ** 2))) if vent.any() else 0.0
+            sigma_paciente = self.sigma_from_criterion(
+                a_ref, float(referencia['barridos_criterio']))
+            referencia['a_rms'] = a_ref
+
 
         # Estado de los electrodos y rechazo de artefacto: es la parte que
         # el alumno controla desde Parametros Avanzados.
@@ -2473,8 +2710,16 @@ class ABRGenerator:
         acceptance = self.artifact_acceptance(
             technical_config.get('artifact_reject_uv'), quality,
             self.reject_impedance_factor(imp_max) * band_factor)
-        noise_floor = float(technical_config.get('residual_noise_nv') or
-                            NOISE_FLOOR_UV * 1000) / 1000.0
+        # El ruido del trazo es el del PACIENTE (sigma, del caso). El
+        # `residual_noise_nv` del equipo es el criterio con el que el
+        # alumno decide cuando parar, no una propiedad del paciente: antes
+        # se usaba como escala del ruido y eso mezclaba las dos cosas.
+        # Queda de respaldo para los casos que no declaran referencia.
+        if sigma_paciente:
+            noise_floor = sigma_paciente / float(np.sqrt(NOISE_REF_SWEEPS))
+        else:
+            noise_floor = float(technical_config.get('residual_noise_nv') or
+                                NOISE_FLOOR_UV * 1000) / 1000.0
         imp_factor = self.impedance_noise_factor(imp_max)
         if not technical_config.get('artifact_reject_uv'):
             imp_factor *= NO_REJECT_NOISE_FACTOR
@@ -2529,8 +2774,27 @@ class ABRGenerator:
         # hace que el equipo cuente 2000 presentados con 1500 promediados,
         # y el criterio de deteccion tiene que ir con los 1500 -- si no,
         # descartar barridos saldria gratis.
-        fsp_actual = self.calculate_fsp(accepted, fsp_800, fsp_2000)
-        red = self.mains_interference(t, sin_tierra, desbalance, rng)
+        # El zumbido no es todo igual en las dos mitades. Una parte queda
+        # enganchada al estimulo (la que el promediado NO borra: es la que
+        # se ve dibujada en el trazo aunque se promedien miles de barridos)
+        # y otra entra con la fase que le toca a cada barrido, porque 50 Hz
+        # y una tasa de 21.1/s son incoherentes. Esa segunda parte sobrevive
+        # distinta en A y en B, o sea que NO se cancela en A-B: es la que
+        # hace que el residual se dispare y el FSP se caiga.
+        #
+        # Con una sola realizacion para las dos mitades el zumbido se
+        # cancelaba exacto en A-B: el equipo lo dibujaba, pero el residual y
+        # el FSP no se enteraban y sin tierra se seguia declarando respuesta
+        # presente sobre un trazo inservible.
+        red_coh = MAINS_COHERENT * self.mains_interference(
+            t, sin_tierra, desbalance, rng)
+        inc_a = MAINS_INCOHERENT * self.mains_interference(
+            t, sin_tierra, desbalance, rng)
+        inc_b = MAINS_INCOHERENT * self.mains_interference(
+            t, sin_tierra, desbalance, rng)
+        red_a = red_coh + inc_a
+        red_b = red_coh + inc_b
+        red = red_coh + (inc_a + inc_b) / 2.0
         y_noisy = y_clean + ruido + red
 
         # 13. Canal contralateral: el mismo estimulo, el mismo paciente,
@@ -2544,7 +2808,7 @@ class ABRGenerator:
             # Mismo canal, mismo ruido, sin respuesta: el contra tiene que
             # apagarse con la maniobra igual que el ipsi.
             y_contra = self.apply_filters(
-                y_clean + ruido_b + red,
+                y_clean + ruido_b + red_b,
                 float(stimulus_config['filter_down']),
                 float(stimulus_config['filter_passhigh']), fs)
         elif contra_key and hay_registro:
@@ -2557,7 +2821,7 @@ class ABRGenerator:
                 y_contra_clean = y_contra_clean + self.build_target_curve(
                     t, shadow_values, shadow_cm)
             y_contra = self.apply_filters(
-                y_contra_clean + ruido_b + red,
+                y_contra_clean + ruido_b + red_b,
                 float(stimulus_config['filter_down']),
                 float(stimulus_config['filter_passhigh']),
                 fs,
@@ -2575,10 +2839,10 @@ class ABRGenerator:
         # que se decide si una onda es respuesta o es ruido, sin tener que
         # repetir la captura entera.
         sub_a = self.apply_filters(
-            y_clean_a + ruido_a + red, float(stimulus_config['filter_down']),
+            y_clean_a + ruido_a + red_a, float(stimulus_config['filter_down']),
             float(stimulus_config['filter_passhigh']), fs)
         sub_b = self.apply_filters(
-            y_clean_b + ruido_b + red, float(stimulus_config['filter_down']),
+            y_clean_b + ruido_b + red_b, float(stimulus_config['filter_down']),
             float(stimulus_config['filter_passhigh']), fs)
         repro_index = self.replicability(sub_a, sub_b)
 
@@ -2588,24 +2852,37 @@ class ABRGenerator:
         # sale de ahi sin tener que separar senial de ruido a mano.
         residual_nv = float(np.std(sub_a - sub_b) / 2.0 * 1000.0)
 
-        # El FSP del caso esta medido con el equipo bien puesto. Con los
-        # electrodos malos el ruido sube y el FSP CAE solo (es una razon de
-        # varianzas): si no, se podia registrar con 15 kOhm y el equipo
-        # igual declaraba "respuesta presente".
-        escala_ref = self.noise_scale(
-            quality, self.impedance_noise_factor(IMPEDANCE_REF_KOHM), noise_floor)
-        ruido_ref = escala_ref / max(np.sqrt(self.noise_blocks_done(
-            accepted, growth_target)), 1.0)
-        degradacion = max(np.sqrt((float(np.std(ruido)) ** 2
-                                   + float(np.std(red)) ** 2)) / max(ruido_ref, 1e-9), 1.0)
-        # Piso en 1.0: el FSP es una razon de varianzas (senial+ruido
-        # sobre ruido), no puede dar menos que 1 -- por debajo de eso
-        # simplemente no hay nada que detectar.
-        fsp_actual = max(1.0, 1.0 + (fsp_actual - 1.0) / degradacion ** 2)
+        # FSP: sale del trazo, no del caso. Es la razon entre la senial que
+        # hay en la ventana de analisis y el ruido que quedo despues de
+        # promediar (ver expected_fsp). Que suba con el nivel, que suba con
+        # los barridos y que caiga con impedancias altas o un paciente
+        # inquieto no se programa: es consecuencia de esa razon, porque
+        # todas esas cosas ya estan en el ruido residual.
+        #
+        # La senial es la RESPUESTA (con la sombra, si la hay), no el trazo
+        # entero: el drift y el artefacto del transductor no son respuesta y
+        # meterlos daba un FSP que subia con el artefacto. Se mide filtrada,
+        # que es como la ve el equipo: con la banda mal elegida el FSP tiene
+        # que caer igual que cae la onda. Es la MISMA cantidad con la que se
+        # despejo el ruido del paciente (ver sigma_from_criterion), asi que
+        # el caso que declara N* barridos para llegar al criterio, llega.
+        senial_filtrada = self.apply_filters(
+            y_target, float(stimulus_config['filter_down']),
+            float(stimulus_config['filter_passhigh']), fs)
+        desde_v, hasta_v = self.fsp_window(population)
+        vent_v = (t >= desde_v) & (t <= hasta_v)
+        a_rms_registro = (float(np.sqrt(np.mean(senial_filtrada[vent_v] ** 2)))
+                          if vent_v.any() else 0.0)
+        fsp_esperado = self.expected_fsp(t, senial_filtrada,
+                                         residual_nv / 1000.0, population)
+        # Y lo que el equipo muestra es un sorteo alrededor de ese valor:
+        # dos registros iguales no dan el mismo numero, que es la razon de
+        # repetir para confirmar.
+        fsp_actual = self.observed_fsp(fsp_esperado, rng)
         if clamp:
-            # Sin estimulo no hay nada que detectar: el FSP es una razon de
-            # varianzas y no puede quedar declarando respuesta presente.
-            fsp_actual = 1.0
+            # Sin estimulo no hay senial: la formula ya da 1, pero se deja
+            # explicito porque es el punto de la maniobra.
+            fsp_esperado = fsp_actual = 1.0
 
         return t, y_final, {
             'population': population,
@@ -2614,6 +2891,12 @@ class ABRGenerator:
             'current_avg': current_avg,
             'target_avg': target_avg,
             'fsp': fsp_actual,
+            'fsp_esperado': fsp_esperado,
+            # Las dos cantidades de las que sale el FSP, para poder
+            # auditarlo: la senial en la ventana y el ruido del paciente.
+            'fsp_a_rms': a_rms_registro,
+            'fsp_sigma': sigma_paciente,
+            'fsp_a_referencia': referencia.get('a_rms'),
             'growth': growth,
             'threshold': threshold,
             'masking': masking,

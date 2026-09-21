@@ -256,10 +256,13 @@ def test_fsp_does_not_cross_an_unreachable_criterion():
     """Con un criterio que el caso no alcanza no hay marca de cruce."""
     if not HAS_UI:
         return
+    # El FSP ya no se declara en el caso: sale del trazo, asi que hay que
+    # estimular donde no haya respuesta que alcance el criterio. 10 dB bajo
+    # el umbral del caso es justamente eso.
     w = _ventana()
-    w.technical['fsp_criterion'] = 4.0        # el caso llega a 2.8
-    _capturar(w)
-    assert w.fmp.crossed_at is None
+    w.technical['fsp_criterion'] = 4.0
+    _capturar(w, intensidad=10)
+    assert w.fmp.crossed_at is None, w.last_metadata['fsp']
 
 
 def test_fsp_reads_out_the_state():
@@ -284,9 +287,11 @@ def test_fsp_reads_out_the_state():
 def test_fsp_state_says_when_there_is_no_response():
     if not HAS_UI:
         return
+    # Igual que el anterior: sin respuesta de verdad, estimulando bajo el
+    # umbral, y no con un criterio que el caso "no declaraba".
     w = _ventana()
-    w.technical['fsp_criterion'] = 4.0        # el caso llega a 2.8
-    _capturar(w)
+    w.technical['fsp_criterion'] = 4.0
+    _capturar(w, intensidad=10)
     assert 'sin respuesta' in w.fmp.lbl_state.toPlainText()
 
 

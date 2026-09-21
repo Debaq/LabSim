@@ -730,6 +730,23 @@ final class CaseForm
                     'onda_III' => ['lat' => (float) self::val($v, ['abr', $lado, 'lat_III'], 0), 'amp' => (float) self::val($v, ['abr', $lado, 'amp_III'], 0)],
                     'onda_V' => ['lat' => (float) self::val($v, ['abr', $lado, 'lat_V'], 0), 'amp' => (float) self::val($v, ['abr', $lado, 'amp_V'], 0)],
                 ],
+                // Cuán ruidoso es el paciente, declarado por las CONDICIONES
+                // en que se midió y no por el FSP, que es el resultado: a
+                // `nivel_referencia` hicieron falta `barridos_criterio` para
+                // llegar al criterio. De ahí el cliente despeja el ruido de un
+                // barrido (ver sigma_from_criterion en ABR_generator.py) y ese
+                // ruido vale para todos los niveles.
+                //
+                // Vacío = el propio umbral de ese oído. Con la referencia en
+                // el umbral y 2000 barridos, el umbral que declara el caso es
+                // exactamente el nivel donde el equipo dice "presente" en la
+                // mitad de los registros: el umbral del caso y el que marca el
+                // alumno pasan a ser la misma definición.
+                'nivel_referencia' => self::val($v, ['abr', $lado, 'nivel_referencia'], '') === ''
+                    ? null : (float) self::val($v, ['abr', $lado, 'nivel_referencia'], 0.0),
+                'barridos_criterio' => max(100.0, (float) self::val($v, ['abr', $lado, 'barridos_criterio'], 2000.0)),
+                'respuesta_en_referencia' => self::val($v, ['abr', $lado, 'respuesta_en_referencia'], 'presente') === 'ausente'
+                    ? 'ausente' : 'presente',
                 'fsp_puntos' => [
                     '800' => (float) self::val($v, ['abr', $lado, 'fsp_800'], 2.3),
                     '2000' => (float) self::val($v, ['abr', $lado, 'fsp_2000'], 2.8),

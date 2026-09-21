@@ -65,7 +65,7 @@ from abr.ABR_generator import (  # noqa: E402
     default_settings, select_population, stimulus_width,
     bone_latency_correction, INFANT_BONE_LAT_MS, INFANT_POPULATIONS,
     NO_RESPONSE_DB, AIR_MAX_OUTPUT_DB, interaural_attenuation,
-    TRANSDUCER_LATENCY_MS, NOISE_REF_SWEEPS)
+    TRANSDUCER_LATENCY_MS, NOISE_REF_SWEEPS, PHYSIOLOGICAL_OFFSET_DB)
 from abr.protocols import PROTOCOLS, get_protocol  # noqa: E402
 
 NORMS = os.path.join(os.path.dirname(__file__), '..', 'resources', 'abr', 'normative_data.json')
@@ -439,8 +439,14 @@ def test_only_wave_v_survives_by_bone():
     if not HAS_SCIPY:
         print("  (salteado: sin scipy)")
         return
-    aereo = _curva(intensity=50, technical={'transducer': 'insert_earphone'})
-    oseo = _curva(intensity=50, technical={'transducer': 'bone_vibrator'})
+    # 55 dB nHL sobre un oido de umbral 0: el tope del vibrador, y el
+    # unico nivel donde la comparacion dice algo. Mas abajo la onda I
+    # tampoco existe POR AIRE --emerge recien a ~20 dB sobre el umbral
+    # clinico-- y el test terminaba comparando ruido contra ruido.
+    aereo = _curva(intensity=55, threshold=0,
+                   technical={'transducer': 'insert_earphone'})
+    oseo = _curva(intensity=55, threshold=0,
+                  technical={'transducer': 'bone_vibrator'})
 
     def pico(res, desde, hasta):
         t, y, _ = res
@@ -574,15 +580,19 @@ def test_bone_vibrator_tops_out_at_its_maximum_output():
 
 def test_golden_wave_parameters():
     """Snapshot del oído normal (umbral 20) para detectar drift del modelo."""
-    # Regenerado dos veces a proposito: al reanclar el normativo en la
+    # Regenerado tres veces a proposito: al reanclar el normativo en la
     # bibliografia (F01/F27 para el adulto, F26 para la funcion
-    # latencia-intensidad) y al sacarle el piso a la amplitud cerca del
-    # umbral (ver AMP_KNEE_FRACTION). El test sigue siendo el detector de
-    # drift del modelo.
+    # latencia-intensidad), al sacarle el piso a la amplitud cerca del
+    # umbral (ver AMP_KNEE_FRACTION) y al separar el umbral fisiologico del
+    # clinico (PHYSIOLOGICAL_OFFSET_DB). Esta ultima vez SOLO se movio la
+    # onda V, y mas cuanto mas cerca del umbral (0.401 -> 0.464 a 40 dB,
+    # 0.535 -> 0.537 a 80): es exactamente lo que el desfase tenia que
+    # hacer, porque los sl_min y el ancla del normativo se corrieron
+    # juntos. Si alguna vez se mueve otra onda, es drift de verdad.
     golden = {
-        80: {'I': (1.46, 0.429), 'II': (2.59, 0.096), 'III': (3.65, 0.463), 'IV': (4.71, 0.238), 'V': (5.54, 0.535)},
-        60: {'I': (1.92, 0.353), 'II': (3.04, 0.074), 'III': (4.07, 0.425), 'IV': (5.11, 0.212), 'V': (5.94, 0.507)},
-        40: {'I': (2.82, 0.015), 'II': (3.91, 0.001), 'III': (4.89, 0.291), 'IV': (5.91, 0.126), 'V': (6.72, 0.401)},
+        80: {'I': (1.46, 0.429), 'II': (2.59, 0.096), 'III': (3.65, 0.463), 'IV': (4.71, 0.238), 'V': (5.54, 0.537)},
+        60: {'I': (1.92, 0.353), 'II': (3.04, 0.074), 'III': (4.07, 0.425), 'IV': (5.11, 0.212), 'V': (5.94, 0.522)},
+        40: {'I': (2.82, 0.015), 'II': (3.91, 0.001), 'III': (4.89, 0.291), 'IV': (5.91, 0.126), 'V': (6.72, 0.464)},
     }
     for intensity, esperado in golden.items():
         v = _params(intensity)
@@ -1238,13 +1248,25 @@ def test_disconnected_active_electrode_leaves_no_response():
     # Y sobre todo: no hay onda. Con respuesta real el pico cae siempre en
     # la misma latencia; acá cada captura lo pone en otro lado, que es como
     # se reconoce que lo que se está viendo es ruido.
+    # Se pide MAYORIA y no unanimidad: a 80 dB la III mide el 86% de la V,
+    # asi que en una captura ruidosa el maximo del trazo puede caer en la
+    # III sin que eso sea "no hay respuesta". Lo que distingue ruido de
+    # respuesta es que la respuesta repite, no que no falle nunca.
     def picos(**kw):
-        return [_curva(capture=f"R{i}", **kw)[0][np.argmax(_curva(capture=f"R{i}", **kw)[1])]
-                for i in range(1, 4)]
+        salida = []
+        for i in range(1, 6):
+            t_i, y_i, _ = _curva(capture=f"R{i}", **kw)
+            salida.append(t_i[np.argmax(y_i)])
+        return salida
+
+    def repiten(picos_, span=0.2):
+        return max(sum(1 for q in picos_ if abs(q - p) <= span) for p in picos_)
+
     sin_electrodo = picos(technical={'electrodes': electrodos})
     con_electrodo = picos()
     assert max(sin_electrodo) - min(sin_electrodo) > 0.5, sin_electrodo
-    assert max(con_electrodo) - min(con_electrodo) < 0.2, con_electrodo
+    assert repiten(sin_electrodo) <= 2, sin_electrodo
+    assert repiten(con_electrodo) >= 4, con_electrodo
 
 
 def test_missing_ground_brings_mains_hum():
@@ -1321,10 +1343,18 @@ def test_impedance_balance_limit_of_2k_is_visible():
     # Dentro de norma no hay zumbido (el residual es invisible).
     assert meta0['mains'] is False and meta_limite['mains'] is False
     assert r_limite < 2.0 * r0
-    # Pasando el límite salta.
+    # Pasando el límite salta. El trazo casi duplica su ruido de fondo
+    # (era "3 veces" cuando el piso del trazo lo ponía el equipo y no el
+    # paciente; ahora el paciente trae su propio ruido y el zumbido se
+    # suma a ESO), y sobre todo se lo lleva puesto el FSP: el zumbido
+    # entra con fase distinta en cada barrido, no se cancela en A-B y el
+    # equipo pasa de declarar respuesta a no poder declarar nada.
     assert meta_pasado['mains'] is True
     assert meta_pasado['impedance_ok'] is False
-    assert r_pasado > 3 * r_limite, (r_limite, r_pasado)
+    assert r_pasado > 1.8 * r_limite, (r_limite, r_pasado)
+    assert meta_pasado['residual_noise_nv'] > 2.5 * meta0['residual_noise_nv']
+    assert meta_pasado['fsp'] < meta0['fsp'] / 3.0, (meta0['fsp'],
+                                                     meta_pasado['fsp'])
     # Y sigue creciendo con la diferencia.
     assert con_dif(4.0)[0] > r_pasado
 
@@ -1394,17 +1424,36 @@ def test_artifact_rejection_cuts_both_ways():
 
 
 def test_residual_noise_target_sets_the_floor():
+    """El ruido es del PACIENTE, no del numerito que puso el alumno.
+
+    `residual_noise_nv` de Parametros Avanzados es el criterio con el que
+    el equipo decide cuando parar de promediar, no una propiedad del
+    paciente. Antes escalaba el ruido del trazo, o sea que bajando el
+    objetivo el alumno se conseguia un paciente mas quieto. Ahora el ruido
+    sale de las condiciones declaradas en el caso (nivel de referencia y
+    barridos que hicieron falta) y el objetivo no lo toca; lo que si hace
+    es cambiar cuando se llega, que es lo que el alumno tiene que aprender
+    a manejar.
+
+    El respaldo por el objetivo del equipo sigue existiendo para el caso
+    que declara AUSENTE la respuesta en la referencia: ahi no hay amplitud
+    de la que despejar sigma.
+    """
     if not HAS_SCIPY:
         print("  (salteado: sin scipy)")
         return
-    # El ruido se mide como lo mide el equipo --la diferencia de los dos
-    # subpromedios, donde la senial se cancela-- y no con la cola del
-    # trazo: ahi todavia hay SN10, onda VI y onda VII, asi que la razon
-    # terminaba dependiendo de cuanta senial cae despues de los 9 ms (y se
-    # movio al reanclar el normativo, sin que el ruido cambiara nada).
     _, _, meta_40 = _curva(technical={'residual_noise_nv': 40})
     _, _, meta_120 = _curva(technical={'residual_noise_nv': 120})
-    razon = meta_120['residual_noise_nv'] / meta_40['residual_noise_nv']
+    assert abs(meta_120['residual_noise_nv']
+               - meta_40['residual_noise_nv']) < 1.0, (
+        meta_40['residual_noise_nv'], meta_120['residual_noise_nv'])
+
+    ausente = {'respuesta_en_referencia': 'ausente'}
+    _, _, sin_ref_40 = _curva(technical={'residual_noise_nv': 40},
+                              caso_extra=ausente)
+    _, _, sin_ref_120 = _curva(technical={'residual_noise_nv': 120},
+                               caso_extra=ausente)
+    razon = sin_ref_120['residual_noise_nv'] / sin_ref_40['residual_noise_nv']
     assert 2.0 < razon < 4.0, razon
 
 
@@ -1412,11 +1461,15 @@ def test_fsp_criterion_is_reported():
     if not HAS_SCIPY:
         print("  (salteado: sin scipy)")
         return
-    _, _, meta = _curva(technical={'fsp_criterion': 4.0}, fsp=(2.3, 2.8))
+    # El FSP ya no se declara: se calcula sobre el trazo, asi que el nivel
+    # es el que manda. 10 dB bajo el umbral no hay con que llegar a 4.0; a
+    # 80 dB se pasa cualquier criterio razonable.
+    _, _, meta = _curva(intensity=10, threshold=20,
+                        technical={'fsp_criterion': 4.0})
     assert meta['fsp_criterion'] == 4.0
-    assert meta['fsp_pass'] is False            # el caso llega a 2.8, no a 4.0
+    assert meta['fsp_pass'] is False, meta['fsp']
     _, _, meta = _curva(technical={'fsp_criterion': 2.0})
-    assert meta['fsp_pass'] is True
+    assert meta['fsp_pass'] is True, meta['fsp']
 
 
 # ---------------------------------------------------------- estímulos (P2)
@@ -1544,9 +1597,15 @@ def test_replicability_rises_with_averaging():
     if not HAS_SCIPY:
         print("  (salteado: sin scipy)")
         return
+    # Las cotas son bajas a proposito: el indice se calcula sobre el trazo
+    # entero, donde la mayor parte del tiempo no hay mas que ruido. Con el
+    # ruido real del paciente (unos 50 nV a 2000 barridos) el indice llega
+    # a ~0.76, no a 1. Lo que el test mira es que SUBA y que los extremos
+    # esten claramente separados, no el valor absoluto.
     indices = [_curva(current=n)[2]['repro_index'] for n in (100, 500, 2000)]
     assert indices == sorted(indices), indices
-    assert indices[0] < 0.85 < indices[-1], indices
+    assert indices[0] < 0.30, indices
+    assert indices[-1] > 0.70, indices
 
 
 def test_non_reproducible_patient_never_locks_ab():
@@ -1571,8 +1630,10 @@ def test_non_reproducible_patient_never_locks_ab():
                 'seed_key': 'caso-1', 'capture_id': 'R1'}
         return g.generate_curve('adult_female', 'normal', stim,
                                 default_settings('ABR'), case)[2]['repro_index']
-    assert indice(0.0) > 0.9
-    assert indice(0.4) < 0.5
+    # 0.70 y no 0.9: ver la nota de test_replicability_rises_with_averaging
+    # -- el indice va sobre el trazo entero y el paciente trae ruido real.
+    assert indice(0.0) > 0.70, indice(0.0)
+    assert indice(0.4) < 0.50, indice(0.4)
 
 
 # ------------------------------------------------ falsa onda V (artefacto)
@@ -1681,10 +1742,12 @@ def test_false_wave_raises_residual_noise_but_not_fsp():
     _, _, con = _curva_falsa(lat=5.6, umbral=90)
     _, _, sin = _curva_falsa(amp=0, umbral=90)
     # El margen era 1.5 cuando el trazo salia tres veces mas limpio de lo
-    # que el equipo declaraba: con el ruido ya calibrado, la misma falsa
-    # onda pesa proporcionalmente menos sobre el residual. Sigue siendo la
-    # pista numerica, pero no tapa el registro.
-    assert con['residual_noise_nv'] > sin['residual_noise_nv'] * 1.3
+    # que el equipo declaraba, y 1.3 cuando el ruido se escalaba con el
+    # objetivo del equipo. Ahora el ruido es el del paciente declarado en
+    # el caso --mas alto-- asi que la misma falsa onda pesa todavia menos
+    # sobre el residual: 1.15 medido. Sigue siendo la pista numerica, pero
+    # no tapa el registro, que es justamente lo que hace el ejercicio.
+    assert con['residual_noise_nv'] > sin['residual_noise_nv'] * 1.1
     assert abs(con['fsp'] - sin['fsp']) < 1e-9
     # Y crece con el tamanio de la falsa onda, que es lo que la hace pista.
     _, _, grande = _curva_falsa(amp=0.4, lat=5.6, umbral=90)
@@ -1826,7 +1889,17 @@ def test_moving_patient_loses_sweeps_to_the_reject():
     _, _, movido = _curva_agit(inquietud=0.6)
     assert movido['accepted_sweeps'] < quieto['accepted_sweeps'] * 0.9
     assert movido['current_avg'] == quieto['current_avg']    # presentados
-    assert movido['fsp'] < quieto['fsp']
+
+    # El FSP se promedia sobre 12 pacientes: ahora sale del trazo, y una
+    # sola realizacion de ruido se mueve +-15%, asi que comparar dos
+    # capturas sueltas da vuelta el signo cada tantas semillas. Lo que el
+    # modelo garantiza es la MEDIA, que es lo que se ve en el turno.
+    def medio(inquietud):
+        valores = [_curva_agit(inquietud=inquietud, capture_id=f'R{i}',
+                               seed_key=f'c{i}')[2]['fsp'] for i in range(12)]
+        return sum(valores) / len(valores)
+
+    assert medio(0.6) < medio(0.0)
 
 
 def test_without_reject_the_movement_enters_the_average():
@@ -2009,14 +2082,21 @@ def test_clamping_the_tube_kills_the_response_but_not_the_artifact():
     # Sin estimulo el equipo no puede declarar respuesta presente.
     assert meta['fsp'] == 1.0
     # Pero el artefacto de estimulo sigue ahi (mismo equipo, misma corriente).
-    _, sup_abierto, _ = _curva_tec(intensity=100, transducer='TDH39_headphone')
-    _, sup_pinzado, _ = _curva_tec(intensity=100, transducer='TDH39_headphone',
-                                   clamp=True)
+    _, sup_abierto, meta_ab = _curva_tec(intensity=100,
+                                         transducer='TDH39_headphone')
+    _, sup_pinzado, meta_pin = _curva_tec(intensity=100,
+                                          transducer='TDH39_headphone',
+                                          clamp=True)
     # Filtrado queda bifasico (el pasa-alto le saca el DC), asi que se
-    # mide en valor absoluto: lo que importa es que siga estando.
+    # mide en valor absoluto: lo que importa es que siga estando, y se
+    # compara contra el PISO DE RUIDO del propio registro y no contra un
+    # numero fijo -- el artefacto ronda 0.3 uV y cualquier cambio del
+    # ruido del paciente hacia rozar la cota.
     inicio = t < 1.5
-    assert np.abs(sup_pinzado[inicio]).max() > 0.3, np.abs(sup_pinzado[inicio]).max()
-    assert np.abs(sup_abierto[inicio]).max() > 0.3
+    for traza, meta_t in ((sup_pinzado, meta_pin), (sup_abierto, meta_ab)):
+        piso = meta_t['residual_noise_nv'] / 1000.0
+        assert np.abs(traza[inicio]).max() > 4 * piso, (
+            np.abs(traza[inicio]).max(), piso)
 
 
 def test_clamping_does_nothing_without_a_tube():
@@ -2450,6 +2530,12 @@ def test_the_residual_noise_matches_what_the_equipment_declares():
     que se queda con una fraccion: sin compensar eso, el trazo salia 3.7
     veces mas limpio de lo que el equipo decia (11 nV cuando declaraba 40).
     Un trazo demasiado limpio hace trivial encontrar el umbral.
+
+    Se mide sobre el caso que declara AUSENTE la respuesta en la
+    referencia, que es el unico que sigue escalando el ruido con el
+    objetivo del equipo: cuando el caso declara sus condiciones de
+    registro, el ruido es el del paciente (ver
+    test_residual_noise_target_sets_the_floor).
     """
     if not HAS_SCIPY:
         print("  (salteado: sin scipy)")
@@ -2457,18 +2543,24 @@ def test_the_residual_noise_matches_what_the_equipment_declares():
     for objetivo in (40, 80):
         _, _, meta = _curva(current=int(NOISE_REF_SWEEPS),
                             target=int(NOISE_REF_SWEEPS),
+                            caso_extra={'respuesta_en_referencia': 'ausente'},
                             technical={'residual_noise_nv': objetivo})
         assert 0.75 * objetivo < meta['residual_noise_nv'] < 1.3 * objetivo, \
             (objetivo, meta['residual_noise_nv'])
 
 
 def test_the_response_at_threshold_is_at_the_noise_level():
-    """En el umbral la onda V tiene que quedar a la altura del ruido.
+    """En el umbral FISIOLOGICO la onda V queda a la altura del ruido.
 
     Antes salia en el 31% de su amplitud maxima estimulando JUSTO en el
     umbral: con 2000 barridos se leia clara y encontrar el umbral era
     trivial. Ahora queda en ~3%, y detectarla depende de promediar mas y de
     repetir el registro -- que es la maniobra clinica.
+
+    El SL se cuenta desde el umbral FISIOLOGICO, que esta
+    PHYSIOLOGICAL_OFFSET_DB por debajo del que declara el caso: en el
+    umbral CLINICO la onda vale ~la mitad, y es lo que hace que el equipo
+    la detecte ahi en la mitad de los registros y no siempre ni nunca.
 
     Forma: A(SL) = A_ref * (1 - e^(-SL/tau)) / (1 - e^(-SL_ref/tau)).
     """
@@ -2476,13 +2568,18 @@ def test_the_response_at_threshold_is_at_the_noise_level():
     base = g.get_baseline_values()
 
     def amp(sl):
-        v, _ = g.calculate_wave_parameters(base, 10 + sl, 10, 'normal')
+        """sl contado desde el umbral fisiologico."""
+        v, _ = g.calculate_wave_parameters(
+            base, 10 - PHYSIOLOGICAL_OFFSET_DB + sl, 10, 'normal')
         return v['V']['amp']
 
     ref = amp(70)
     assert amp(0) < 0.06 * ref, amp(0) / ref          # en el umbral, nada
     assert 0.40 <= amp(10) / ref <= 0.60, amp(10) / ref   # a 10 dB SL, mitad
     assert amp(40) > 0.85 * ref
+    # Y en el umbral CLINICO, la mitad: ni invisible ni obvia.
+    clinico = g.calculate_wave_parameters(base, 10, 10, 'normal')[0]['V']['amp']
+    assert 0.35 <= clinico / ref <= 0.65, clinico / ref
     # Monotona y sin saltos entre niveles contiguos del equipo.
     valores = [amp(sl) for sl in range(70, -1, -5)]
     for prev, cur in zip(valores, valores[1:]):
