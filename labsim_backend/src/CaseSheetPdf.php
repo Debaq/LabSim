@@ -218,6 +218,12 @@ final class CaseSheetPdf
         $doc->paginaNueva();
         $doc->eoas($data, $estudio);
 
+        // El tamizaje va DESPUÉS de las OEA y no antes: es la otra mitad
+        // del mismo turno --se tamiza con las dos pruebas-- y se lee con
+        // los dos resultados a la vista.
+        $doc->paginaNueva();
+        $doc->aabr($data, $estudio);
+
         $doc->paginaNueva();
         $doc->vemp($data, $estudio);
         return $doc->pdf->output();
@@ -1957,6 +1963,127 @@ final class CaseSheetPdf
      * umbral de 90 dB es normal o está desarmado, y la comparación entre
      * oídos --que es toda la lectura del VEMP-- se hace en columnas.
      */
+    /**
+     * Tamizaje auditivo automatizado (AABR): qué tiene que contestar el
+     * equipo en este paciente.
+     *
+     * No es una prueba más del informe: es lo que el alumno va a ver en el
+     * módulo AABR, que solo dice PASA o REFIERE. Acá se escribe el
+     * resultado esperado y, sobre todo, POR QUÉ -- el transitorio de las
+     * primeras horas, el umbral del oído o la desincronía son tres motivos
+     * distintos de "refiere" y se manejan distinto.
+     */
+    private function aabr(array $data, bool $estudio = false): void
+    {
+        require_once __DIR__ . '/NewbornScreening.php';
+        $this->titulo('Tamizaje automatizado (AABR + TEOAE)', 200.0);
+
+        $this->parrafo(
+            'Condiciones del tamizaje: ' . self::AABR_ESTIMULO . ' a '
+            . (int) NewbornScreening::ABR_SCREEN_DB . ' dB nHL por fono de '
+            . 'inserción, criterio FSP ' . number_format(self::AABR_CRITERIO, 1, ',', '')
+            . ', tope de ' . self::AABR_BARRIDOS . ' barridos. El equipo no '
+            . 'busca umbral ni marca ondas: a ese nivel hay respuesta o no la hay.',
+            7.5
+        );
+
+        $filas = [['Oído', 'TEOAE', 'AABR', 'Umbral ABR del caso', 'Por qué']];
+        foreach (['OD', 'OI'] as $lado) {
+            $r = self::tamizajeDeOido($data, $lado);
+            $filas[] = [
+                $lado,
+                strtoupper($r['teoae']),
+                strtoupper($r['aabr']),
+                $r['umbral'] === null ? 'sin respuesta' : ((int) $r['umbral']) . ' dB nHL',
+                $r['motivo'],
+            ];
+        }
+        $this->tabla($filas, [0.09, 0.13, 0.13, 0.2, 0.45], true);
+
+        // El transitorio solo existe en el recién nacido, y es la diferencia
+        // entre "rescreening en 15 días" y "derivar": el mismo REFIERE.
+        $horas = $data['edad_horas'] ?? null;
+        if ($horas !== null && $horas !== '') {
+            $nota = self::notaScreening($data);
+            if ($nota !== '') {
+                $this->parrafo($nota, 6.8);
+            }
+        } elseif (!$estudio) {
+            // El aviso de la edad exacta solo tiene sentido si el paciente
+            // PODRÍA ser un recién nacido: en uno de 44 años es ruido.
+            $esBebe = (int) ($data['edad'] ?? 99) === 0;
+            $this->parrafo(
+                'Sin horas de vida cargadas no hay transitorio de las primeras '
+                . 'horas: el resultado sale solo del umbral del oído.'
+                . ($esBebe
+                    ? ' Si este paciente es un recién nacido, cargar la edad exacta '
+                      . 'en la ficha Paciente cambia lo que contesta el tamizaje.'
+                    : ''),
+                6.8
+            );
+        }
+    }
+
+    /** Estímulo y parámetros del equipo de tamizaje (ver AabrMainWindow). */
+    public const AABR_ESTIMULO = 'CE-Chirp';
+    public const AABR_CRITERIO = 3.1;
+    public const AABR_BARRIDOS = 6000;
+
+    /**
+     * Qué contesta el tamizaje en ese oído, y con qué motivo.
+     *
+     * El motivo importa tanto como el resultado: un REFIERE por líquido de
+     * las primeras horas se rescreenea, uno por umbral se deriva y uno con
+     * TEOAE presente es una desincronía. Son tres caminos distintos.
+     *
+     * @return array{teoae:string,aabr:string,umbral:?float,motivo:string}
+     */
+    private static function tamizajeDeOido(array $data, string $lado): array
+    {
+        require_once __DIR__ . '/NewbornScreening.php';
+        $horas = $data['edad_horas'] ?? null;
+        $nac = is_array($data['nacimiento'] ?? null) ? $data['nacimiento'] : [];
+        $transitorio = ($horas === null || $horas === '')
+            ? 0.0 : CaseProfile::neonatalTransientDb($horas, $nac, $lado);
+
+        $abrData = is_array($data['ABR'] ?? null) ? $data['ABR'] : [];
+        $ladoForm = $lado === 'OD' ? 'od' : 'oi';
+        $ear = is_array($abrData[$lado] ?? null) ? $abrData[$lado]
+            : (is_array($abrData[$ladoForm] ?? null) ? $abrData[$ladoForm] : []);
+        // El equipo tamiza con chirp; si el caso no trae ese estímulo, cae
+        // en el click, que es el que siempre está.
+        $porEstimulo = is_array($ear['umbral_por_estimulo'] ?? null)
+            ? $ear['umbral_por_estimulo'] : [];
+        $umbral = $porEstimulo['ce_chirp'] ?? ($porEstimulo['click'] ?? ($ear['umbral'] ?? null));
+        $umbral = ($umbral === null || $umbral === '') ? null : (float) $umbral;
+
+        $eoasData = is_array($data['EOAS'] ?? null) ? $data['EOAS'] : [];
+        $eoaEar = is_array($eoasData[$lado] ?? null) ? $eoasData[$lado]
+            : (is_array($eoasData[$ladoForm] ?? null) ? $eoasData[$ladoForm] : []);
+        $coclea = in_array($eoaEar['type'] ?? '', ['coclear', 'transmission'], true);
+
+        $r = NewbornScreening::resultadoOido(
+            $transitorio, $umbral, (float) ($eoaEar['atten_db'] ?? 0), $coclea
+        );
+
+        $motivo = 'respuesta presente en las dos pruebas';
+        if ($r['aabr'] === 'refiere' || $r['teoae'] === 'refiere') {
+            if ($r['aabr'] === 'refiere' && $r['teoae'] === 'pasa') {
+                $motivo = 'TEOAE presente con AABR ausente: desincronía, no cóclea';
+            } elseif ($transitorio > NewbornScreening::ABR_FAIL_DB) {
+                $motivo = sprintf('transitorio de las primeras horas (%.1f dB)', $transitorio);
+            } elseif ($umbral === null || $umbral > NewbornScreening::ABR_SCREEN_DB) {
+                $motivo = 'el umbral del oído está sobre el nivel de tamizaje';
+            } elseif ($transitorio > NewbornScreening::OAE_FAIL_DB) {
+                $motivo = sprintf('solo la TEOAE: transitorio de %.1f dB, el AABR aguanta', $transitorio);
+            } else {
+                $motivo = 'la cóclea del caso no devuelve emisiones';
+            }
+        }
+        return ['teoae' => $r['teoae'], 'aabr' => $r['aabr'],
+                'umbral' => $umbral, 'motivo' => $motivo];
+    }
+
     private function vemp(array $data, bool $estudio = false): void
     {
         $this->titulo('Potenciales vestibulares (VEMP)', 330.0);

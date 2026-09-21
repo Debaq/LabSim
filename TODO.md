@@ -2966,3 +2966,21 @@ solo con EOA); cortar el promedio antes de tiempo refiere a un sano --el
 error de procedimiento que el ejercicio tiene que dejar cometer--; y el mismo
 oído de umbral 45 refiere a 35 dB nHL y pasa a 60, así que subir el nivel
 para "conseguir un PASA" se ve como lo que es.
+
+### La hoja de tamizaje en el PDF
+
+`CaseSheetPdf::aabr()`, **después de las OEA** y antes del VEMP: es la otra
+mitad del mismo turno --se tamiza con las dos pruebas-- y se lee con los dos
+resultados a la vista.
+
+No repite el informe: dice qué tiene que contestar el equipo en este paciente
+y **por qué**, que es lo que separa un rescreening de una derivación. La
+columna "Por qué" distingue los tres caminos: transitorio de las primeras
+horas, umbral por encima del nivel de tamizaje, o TEOAE presente con AABR
+ausente (desincronía). En el recién nacido, debajo va el tamizaje esperado
+por franja horaria con las circunstancias del parto y los indicadores de
+riesgo del JCIH.
+
+La hoja sale en todos los casos, también en un adulto: el AABR es un equipo
+que el alumno puede usar con cualquier paciente y el docente necesita saber
+qué debería dar. Lo que cambia es la nota de abajo.

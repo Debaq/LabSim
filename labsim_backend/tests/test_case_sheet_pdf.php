@@ -76,8 +76,8 @@ t_true(strpos($pdfDemo, '%PDF-1.4') === 0, 'La ficha sale como un PDF');
 t_true(substr(trim($pdfDemo), -5) === '%%EOF', 'El PDF cierra con %%EOF');
 // Paginación fija: un examen por página, para poder imprimir o archivar
 // cualquiera de ellos suelto sin partirlo al medio.
-t_eq(substr_count($pdfDemo, '/Type /Page '), 6,
-    'La ficha son seis páginas: generales+anamnesis, tonal, impedanciometría, ABR, OEA y VEMP');
+t_eq(substr_count($pdfDemo, '/Type /Page '), 7,
+    'La ficha son siete páginas: generales+anamnesis, tonal, impedanciometría, ABR, OEA, tamizaje y VEMP');
 t_true(strlen($pdfDemo) > 20000, 'El PDF trae contenido, no una página en blanco');
 
 // La ficha no tiene ninguna fuente de azar de verdad: regenerar el mismo
@@ -93,7 +93,8 @@ t_eq(
 // que los títulos se pueden buscar en los bytes del stream.
 foreach ([
     'Ficha del caso', 'Perfil auditivo', 'Audiometr', 'Acumetr', 'Impedanciometr',
-    'Logoaudiometr', 'supraliminares', 'ABR', 'OEA', 'VEMP', 'Otoscopia',
+    'Logoaudiometr', 'supraliminares', 'ABR', 'OEA', 'Tamizaje automatizado',
+    'VEMP', 'Otoscopia',
 ] as $seccion) {
     t_true(strpos($pdfDemo, $seccion) !== false, "La ficha incluye la sección '{$seccion}'");
 }
@@ -103,8 +104,8 @@ t_true(strpos($pdfDemo, '#CASO-TEST') !== false, 'El PDF identifica el caso con 
 
 // Marca y numeración: el pie va en TODAS las páginas, con el año en que se
 // imprime el PDF (la marca dice cuándo se generó este papel).
-t_eq(substr_count($pdfDemo, 'Desarrollado con LabSim'), 6,
-    'La marca del pie está en las seis páginas');
+t_eq(substr_count($pdfDemo, 'Desarrollado con LabSim'), 7,
+    'La marca del pie está en las siete páginas');
 t_true(strpos($pdfDemo, 'LabSim ' . date('Y') . ' para la simulaci') !== false,
     'El pie lleva el año en que se imprime');
 
@@ -743,3 +744,37 @@ t_true(
     strpos($pdfEstudio, number_format($vOdDemo['c_min'], 2) . ' a ' . number_format($vOdDemo['c_max'], 2) . ' mL') === false,
     'La ficha de estudio no trae el rango de compliance del generador'
 );
+
+// --- La hoja de tamizaje (AABR + TEOAE) -----------------------------------
+
+// Va después de las OEA: es la otra mitad del mismo turno y se lee con los
+// dos resultados a la vista. Y no es una prueba más del informe -- dice qué
+// tiene que contestar el equipo en este paciente y POR QUÉ, que es lo que
+// separa un rescreening de una derivación.
+t_true(strpos($pdfDemo, 'Tamizaje automatizado') !== false,
+    'La ficha trae la hoja de tamizaje');
+t_true(strpos($pdfDemo, 'CE-Chirp') !== false,
+    'Y dice con qué estímulo y a qué nivel tamiza el equipo');
+
+// El caso demo es una mixta de 45 dB en OD: por encima del nivel de
+// tamizaje, así que el equipo refiere. Si esto se cayera, la hoja estaría
+// informando lo contrario de lo que el alumno va a ver en el módulo AABR.
+t_true(strpos($pdfDemo, 'REFIERE') !== false,
+    'Un oído con umbral sobre el nivel de tamizaje sale como REFIERE');
+
+// Recién nacido: el transitorio de las primeras horas entra en la hoja, y
+// con él la diferencia entre "rescreening" y "derivar".
+$fichaBebe = ficha_caso_demo();
+$fichaBebe['edad'] = 0;
+$fichaBebe['edad_horas'] = 8;
+$fichaBebe['nacimiento'] = ['percentil' => ['OD' => 0.9, 'OI' => 0.9],
+    'semanas' => 30, 'peso_g' => 1150, 'pretermino' => true,
+    'muy_bajo_peso' => true, 'torch' => 'cmv'];
+$pdfBebe = CaseSheetPdf::build('CASO-RN', $fichaBebe,
+    ['nombre' => 'Bebé', 'apellido' => 'Prueba', 'rut' => '1-9'], 'Docente', '21-09-2026');
+t_true(strpos($pdfBebe, 'Screening neonatal esperado') !== false,
+    'En un recién nacido la hoja trae el tamizaje esperado por franja horaria');
+t_true(strpos($pdfBebe, 'prematuro de 30 semanas') !== false,
+    'Y las circunstancias que lo mueven');
+t_true(strpos($pdfBebe, 'Citomegalovirus') !== false,
+    'Y los indicadores de riesgo, que no lo mueven pero obligan a seguimiento');
