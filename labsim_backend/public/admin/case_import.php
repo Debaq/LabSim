@@ -81,6 +81,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Alta: el mismo bloque que case_create.php para un caso nuevo.
         $data = $form->data;
+
+        // Umbral del ABR: si el JSON no lo trae, se toma el que proyectó el
+        // perfil en vez del default del formulario (20). Son dB nHL, no los
+        // dB HL del audiograma, y confundirlos es el error fácil de este
+        // importador: un oído con 35 dB HL de conductiva tiene el ABR en 55
+        // nHL, no en 35. Con el campo vacío, el caso queda coherente solo.
+        foreach (['od' => 'OD', 'oi' => 'OI'] as $ladoForm => $lado) {
+            if (isset($post['abr'][$ladoForm]['umbral'])
+                && $post['abr'][$ladoForm]['umbral'] !== '') {
+                continue;
+            }
+            $proyectado = $data['ABR'][$lado]['umbral_por_estimulo']['click'] ?? null;
+            if ($proyectado !== null) {
+                $data['ABR'][$lado]['umbral'] = (int) $proyectado;
+            }
+        }
         $nombre = trim($form->nombre1 . ' ' . trim((string) ($post['nombre2'] ?? '')));
         $apellido = trim($form->apellido1 . ' ' . trim((string) ($post['apellido2'] ?? '')));
         $rut = trim((string) ($post['rut'] ?? '')) !== ''
@@ -125,6 +141,7 @@ admin_header('Importar casos', $me);
 <div class="card">
     <strong>Importar casos desde JSON</strong>
     <p class="help">Una lista de casos. Cada uno lleva los mismos campos del formulario de creación, así que se guardan por el mismo camino: validan, proyectan y quedan igual que si los hubieras hecho a mano. Lo mínimo es <code>age</code>, <code>nombre1</code> y <code>apellido1</code>; el resto cae en los defaults.</p>
+    <p class="help"><strong>Ojo con las unidades:</strong> el audiograma va en <strong>dB HL</strong> y el umbral del ABR en <strong>dB nHL</strong>, que no son lo mismo -- un oído con 35 dB HL de conductiva tiene el ABR en 55 nHL. Lo más seguro es <strong>no mandar</strong> <code>abr[od][umbral]</code>: si viene vacío, se toma el que proyecta el perfil desde el audiograma.</p>
     <p class="help"><strong>Ojo con el tipo:</strong> lo posteado le gana a la proyección, así que el tipo de cada oído se declara --<code>abr[od][type]</code> y <code>eoas[od][type]</code>, con <code>normal</code>, <code>transmission</code>, <code>coclear</code> o <code>neural</code>--. Si no viene, el caso queda "normal" aunque el audiograma diga otra cosa. Los módulos en automático van en <code>perfil[auto][abr]</code>, <code>[eoas]</code>, <code>[reflex]</code>, <code>[recruit]</code> y <code>[logo]</code>; el patrón retrococlear, en <code>abr[od][neural]</code>.</p>
     <p class="help">Para un recién nacido: <code>age</code> en 0 y <code>edad_valor</code>/<code>edad_unidad</code> con la edad exacta. El audiograma va como <code>"aerea": {"od": {"0": 10, "1": 10, ...}, "oi": {...}}</code> y lo mismo <code>osea</code>, con una entrada por frecuencia en este orden: <?= implode(', ', CaseBuilder::FREQUENCIES) ?> Hz. El perfil por oído va en <code>perfil[od][cce_pct]</code> y <code>perfil[od][retro][...]</code>.</p>
 
