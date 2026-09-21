@@ -68,7 +68,7 @@ def test_window_range_comes_from_the_protocol():
     assert p300.sb_window.value() == 800
     assert p300.sb_window.minimum() < 800 < p300.sb_window.maximum()
     ecochg = AbrAdvanceSettings(test='ECochG')
-    assert ecochg.sb_window.value() == 5
+    assert ecochg.sb_window.value() == 10
     assert ecochg.get_data()['montage'] == 'tympanic'
 
 

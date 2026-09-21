@@ -3130,3 +3130,109 @@ No saltó antes porque el dibujo de las barras sí los trata como diccionario:
 la pantalla se veía bien y el error aparecía solo al guardar. Ahora se leen
 por frecuencia, tolerando la clave como texto (un caso guardado o un JSON la
 pueden traer así), con tests que fijan que cada banda conserve SU número.
+
+## Electrococleografía: el motor (2026-09-21)
+
+`src/abr/ecochg.py` es el modelo del examen y `ABRGenerator.build_ecochg_curve`
+el enganche. El ECochG cuelga de la ventana del ABR --mismo equipo, mismos
+electrodos, mismo promediador, mismo ruido, mismo FSP-- y se separa solo en la
+curva objetivo y en la ventana de análisis. La UI de medición y el bloque del
+caso en el backend todavía NO están: ver "lo que falta" al final.
+
+### Decisiones tomadas con el docente
+
+- **El PA va hacia abajo.** El electrodo activo es el del oído (timpánico o de
+  conducto), no el vértex, así que la negatividad coclear queda hacia abajo en
+  pantalla. Es la convención opuesta a la del ABR de la misma ventana y es
+  correcta: el montaje está invertido.
+- **Se marca haciendo clic en la curva**, como en VEMP v2, con cuatro marcas:
+  BL (línea de base), PS, PA y FIN (retorno a la base).
+- **Las cuatro medidas**: razón de amplitudes PS/PA, razón de áreas, latencia y
+  ancho del PA, y corrimiento por tasa.
+
+### Decisiones de modelado (no había de dónde sacarlas)
+
+1. **La altura del PS se despeja sobre la curva armada** (`calibrate_sp`), no
+   con una fórmula cerrada. El hombro del PS cae sobre la rama ascendente del
+   PA, así que en ese punto el trazo ya trae la cola de la gaussiana del PA; y
+   con polaridad alternada el trazo es además el promedio de dos curvas con el
+   PA en distinta latencia y amplitud. Con la fórmula cerrada un caso declarado
+   en 0.55 se medía 0.43: el docente no podía poner un oído en el borde del
+   límite y saber de qué lado iba a caer. Ahora lo medido es lo declarado
+   (`test_the_measured_ratio_is_the_one_the_case_declares`, tolerancia 0.05).
+   Se descartó calibrar a mano los coeficientes de la morfología: cualquier
+   cambio posterior de anchos los habría vuelto a desalinear en silencio.
+2. **La meseta se calibra SIEMPRE sobre la curva alternada**, sea cual sea la
+   polaridad del equipo. Es la única sin microfónica encima, y la microfónica
+   --que en una desincronía es más grande que el propio PS-- no tiene por qué
+   cambiar cuánto PS produce esa cóclea. Así el PS es el mismo en las tres
+   polaridades y lo único que cambia entre ellas es la MC, que es el punto del
+   examen.
+3. **La latencia de la MC sale de la normativa** (clave `MC` del bundle) más el
+   retardo del transductor, y NO se deriva de la del PA. Derivándola del PA, la
+   polaridad le corría 0.1 ms y la MC de rarefacción no cancelaba con la de
+   condensación al alternar -- justo lo que el examen usa para separarla del PS
+   y del PA. Era un bug real, no una simplificación.
+4. **Las dos áreas se separan con una línea horizontal a la altura del PS**, no
+   con un corte en el tiempo: área PS = lo que aporta la meseta, que corre por
+   debajo de todo el complejo; área PA = lo que la espiga agrega por encima de
+   esa meseta. Es la separación que reproduce los valores publicados (normal
+   ~1.0, límite 1.94 con electrodo timpánico). Cortando por tiempo en el hombro
+   la razón daba ~0.3 y no había contra qué compararla.
+5. **El sumación se prolonga además de crecer** (`SP_TAIL_PER_RATIO`), desde la
+   razón de un oído sano y no desde el límite. Sin eso, la razón de áreas y la
+   de amplitudes decían exactamente lo mismo y la segunda no agregaba nada; con
+   eso, el área cruza su límite un poco antes que la amplitud, que es el
+   comportamiento clínico descrito.
+6. **El límite de áreas se escala por electrodo** igual que el de amplitudes
+   (1.94 timpánico → 2.43 de conducto → 1.46 transtimpánico). Un mismo oído no
+   puede cambiar de diagnóstico al cambiar de electrodo
+   (`test_the_electrode_moves_the_ratio_and_its_limit_together`).
+7. **Ventana de 10 ms, no 5.** La razón de áreas se integra hasta que el
+   complejo vuelve a la línea de base, y en un hidrops marcado la meseta se
+   prolonga bastante más allá del PA: con 5 ms el examen no se podía terminar
+   justo en el caso que interesa. Se descartó dejar 5 ms y que el alumno abriera
+   la ventana: el equipo no avisa por qué no hay número, y el ejercicio pasaba a
+   ser sobre la ventana en vez de sobre el hidrops.
+8. **Ganancia del electrodo recalibrada**: 2.5 / 8.0 / 25.0 (conducto,
+   timpánico, transtimpánico) contra el Cz-mastoides. El valor viejo de
+   `tympanic` era 2.5 y con eso el ECochG salía con PEOR relación señal/ruido
+   que un ABR, porque su banda (10-3000 Hz contra 100-3000) deja entrar unas 3
+   veces más ruido. Un electrodo timpánico da PA de 1 a 5 µV, que es la razón
+   clínica de meterse hasta la membrana.
+9. **El PS necesita nivel** (`SP_SL_MIN` / `SP_SL_FULL`): el PA existe hasta el
+   umbral pero el PS solo se hace medible con la cóclea bien empujada. Medir la
+   razón a nivel bajo la da chica aunque el oído tenga hidrops, y el equipo no
+   avisa: es el error que el ejercicio tiene que dejar cometer.
+10. **Sin curva sombra ni canal contralateral.** Un electrodo timpánico está
+    pegado a ESA cóclea; lo que capta del otro lado queda muy por debajo de su
+    propia respuesta. El ECochG no es la prueba con la que se enseña
+    enmascaramiento.
+
+### Arreglo colateral: el pasa-alto sobre la época
+
+`ABRGenerator.apply_filters` filtraba la época recortada con el padding corto de
+`sosfiltfilt` (unas decenas de muestras), o sea le daba al filtro un tramo mucho
+más corto que su propia respuesta al impulso (1/f = 100 ms para un corte de
+10 Hz). Con eso el potencial de sumación --un desplazamiento DC de 2 ms dentro
+de una ventana de 10-- desaparecía entero y el examen no se podía hacer. Ahora
+la época se extiende con su propio borde (que es la línea de base, igual que en
+el registro continuo del equipo) hasta cubrir tres constantes de tiempo del
+corte, y después se recorta. Con cortes altos (100 Hz, ABR de 12 ms) el relleno
+es corto y el resultado es el de antes: `tests/test_abr_generator.py` pasa igual.
+
+### Lo que falta
+
+- **UI de medición**: el gráfico invertido, la barra de marcas BL/PS/PA/FIN con
+  clic sobre la curva, y la tabla del ECochG (las cuatro medidas contra su
+  normativa). Hoy la prueba se registra pero se mide con la tabla de ondas I-V
+  del ABR, que no sirve.
+- **Bloque `ecochg` del caso en el backend**: `CaseProfile` (razón por cuadro:
+  el Ménière y el hidrops retardado son los que la suben), `CaseBuilder` y la
+  ficha de `case_create.php`. Hoy el bloque se lee de `preferences['ecochg']`
+  pero nadie lo escribe, así que la prueba queda sin registro en todos los
+  casos -- que es el comportamiento correcto, no un bug.
+- **Informe**: el tipo `ELECTROCOCLEO` ya existe en el backend (tabla `reports`,
+  `report_upload.php`, `ReportPdfBuilder`), falta el bloque del PDF y el envío
+  desde el cliente.
+- Nada de esto se probó en la app real todavía.

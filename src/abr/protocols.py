@@ -14,7 +14,11 @@ pero su protocolo ya está descrito: cuando llegue el generador, el equipo
 se configura solo.
 
 Las ventanas y filtros son los valores clínicos de rutina:
-- ECochG mira los primeros milisegundos (MP/PA), ventana corta.
+- ECochG mira los primeros milisegundos (MC/PS/PA), ventana corta. Son 10
+  y no 5 ms porque la razón de ÁREAS se integra hasta que el complejo
+  vuelve a la línea de base, y en un hidrops marcado la meseta del
+  sumación se prolonga bastante más allá del PA: con 5 ms el examen no se
+  puede terminar justo en el caso que interesa.
 - ABR/Stacked ABR: tronco, 10-15 ms.
 - MLR: respuesta de vía tálamo-cortical, decenas de ms.
 - CAEP/MMN/P300: corteza, cientos de ms y filtros muy bajos.
@@ -63,9 +67,9 @@ PROTOCOLS = {
         stimuli=(CLICK,) + CHIRPS + BURSTS, implemented=True,
         note='Tronco cerebral. Burst para umbrales por frecuencia, chirp para sincronizar.'),
     'ECochG': Protocol(
-        name='ECochG', window_ms=5, filter_high=10, filter_low=3000,
+        name='ECochG', window_ms=10, filter_high=10, filter_low=3000,
         rate=11.1, averages=1500, montage='tympanic',
-        stimuli=(CLICK,) + BURSTS,
+        stimuli=(CLICK,) + BURSTS, implemented=True,
         note='Microfónica coclear, potencial de sumación y PA. Necesita electrodo timpánico.'),
     'Stacked ABR': Protocol(
         name='Stacked ABR', window_ms=15, filter_high=100, filter_low=3000,

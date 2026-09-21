@@ -1164,8 +1164,9 @@ def test_protocol_table_covers_every_test_in_the_combo():
     esperados = {'ABR', 'ASSR', 'MLR', 'P300', 'MMN', 'ECochG', 'CAEP',
                  'Stacked ABR'}
     assert esperados == set(PROTOCOLS)
-    # Solo ABR tiene generador; el resto queda descrito pero deshabilitado.
-    assert {n for n, p in PROTOCOLS.items() if p.implemented} == {'ABR'}
+    # Con generador detras: ABR y ECochG. El resto queda descrito pero
+    # deshabilitado hasta que aparezca el suyo.
+    assert {n for n, p in PROTOCOLS.items() if p.implemented} == {'ABR', 'ECochG'}
     for nombre, p in PROTOCOLS.items():
         assert p.window_ms > 0, nombre
         assert p.filter_high < p.filter_low, nombre     # pasa-alto < pasa-bajo
@@ -1179,7 +1180,9 @@ def test_defaults_follow_the_protocol():
     assert abr['window_ms'] == get_protocol('ABR').window_ms
     assert abr['montage'] == 'vertex_mastoid'
     ecochg = default_settings('ECochG')
-    assert ecochg['window_ms'] == 5           # ventana corta: MC, PS y PA
+    # Ventana corta (MC, PS y PA), pero no tanto como para que el complejo
+    # de un hidrops no llegue a volver a la base (ver abr/protocols.py).
+    assert ecochg['window_ms'] == 10
     assert ecochg['montage'] == 'tympanic'
     assert default_settings('P300')['window_ms'] == 800
     # Una prueba desconocida no puede reventar: cae en el protocolo de ABR.
