@@ -21,6 +21,8 @@ SRC = os.path.join(os.path.dirname(__file__), '..', 'src')
 if SRC not in sys.path:
     sys.path.insert(0, SRC)
 
+from impedanciometria.z_generator import (edad_meses_del_caso, is_infant_ear,
+                                          map_letter_for_probe)
 from impedanciometria.z_generator import (ANCHOS_JERGER, FORMAS_JERGER,
                                           Z_225)
 
@@ -93,6 +95,57 @@ def test_la_curva_sin_sello_no_inventa_numeros():
     """N = sonda sin sellar: no hay compliance ni presión que informar."""
     d = Z_225(letter='N').getDataSet()
     assert d[2] == d[3] == d[4] == 'N/D'
+
+
+# ------------------------------------------- sonda y edad (lactante)
+
+def test_la_sonda_de_226_miente_en_un_lactante():
+    """El hallazgo: a 226 Hz el lactante dibuja pico aunque este lleno.
+
+    Bajo los 6 meses la pared del conducto todavia es cartilaginosa y su
+    movimiento DOMINA la admitancia: el equipo muestra el pico de la pared,
+    no el del oido medio. Por eso el estandar a esa edad es sonda de 1000
+    Hz, y por eso el simulador tiene que DEJAR cometer el error -- si a 226
+    Hz saliera plana, el alumno nunca se entera de que eligio mal la sonda.
+    """
+    bebe = {'edad': 0, 'edad_horas': 6}
+    adulto = {'edad': 30}
+    # Oido medio lleno (B): a 226 Hz el bebe lo muestra como normal.
+    assert map_letter_for_probe('B', '226', seed_key=1,
+                                edad_meses=edad_meses_del_caso(bebe)) == 'A'
+    # El mismo oido, con la sonda que corresponde, se lee como lo que es.
+    assert map_letter_for_probe('B', '1000', seed_key=1,
+                                edad_meses=edad_meses_del_caso(bebe)) == 'B'
+    # Y en un adulto la de 226 no miente.
+    assert map_letter_for_probe('B', '226', seed_key=1,
+                                edad_meses=edad_meses_del_caso(adulto)) == 'B'
+
+
+def test_la_sonda_de_226_vuelve_a_servir_pasados_los_seis_meses():
+    """El conducto se osifica: a los 8 meses la de 226 ya no tapa nada."""
+    bebe_grande = {'edad': 0, 'edad_horas': 5760}       # 8 meses
+    assert not is_infant_ear(edad_meses_del_caso(bebe_grande))
+    assert map_letter_for_probe('B', '226', seed_key=1,
+                                edad_meses=edad_meses_del_caso(bebe_grande)) == 'B'
+
+
+def test_lo_que_la_pared_blanda_tapa_es_la_ausencia_de_pico():
+    """Una rigida sigue leyendose rigida.
+
+    La pared del conducto agrega movimiento, asi que puede inventar un pico
+    donde no hay; no puede hacer que una compliance baja se vea alta sin
+    pico. As y Cs se siguen informando como tales.
+    """
+    bebe = 0.2
+    for letra in ('As', 'Cs', 'C', 'A', 'Ad'):
+        assert map_letter_for_probe(letra, '226', seed_key=1, edad_meses=bebe) == letra
+
+
+def test_sin_edad_no_se_inventa_un_lactante():
+    """Un caso sin edad cargada se comporta como siempre."""
+    assert not is_infant_ear(None)
+    assert edad_meses_del_caso({}) is None
+    assert map_letter_for_probe('B', '226', seed_key=1, edad_meses=None) == 'B'
 
 
 if __name__ == "__main__":

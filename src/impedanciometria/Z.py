@@ -19,7 +19,8 @@ from impedanciometria.ZRscreen import ZRscreen
 from impedanciometria.ZDscreen import ZDscreen
 from impedanciometria.ZETFscreen import ZETFscreen
 from impedanciometria.h_z import changeSide, changeSideText, sideText, printer, date_time
-from impedanciometria.z_generator import Z_225, Reflex_curve, map_letter_for_probe
+from impedanciometria.z_generator import (Z_225, Reflex_curve, edad_meses_del_caso,
+                                          is_infant_ear, map_letter_for_probe)
 from impedanciometria.z_audio import ProbeTone, ReflexTone
 from core.helpers import Storage, debug_print
 
@@ -192,7 +193,12 @@ class ZControl(QWidget, Ui_Z_control):
             if self.data is not None:
                 seed_key = (self.data.get('id'), self.Z.get_side(), self.probe_freq)
                 zGerger = self.data[f"Z_{self.Z.get_side()}"]
-                zGerger = map_letter_for_probe(zGerger, self.probe_freq, seed_key=seed_key)
+                # La edad decide si la sonda elegida sirve: bajo los 6
+                # meses la de 226 Hz dibuja el pico de la pared del
+                # conducto y tapa un oido medio lleno.
+                zGerger = map_letter_for_probe(
+                    zGerger, self.probe_freq, seed_key=seed_key,
+                    edad_meses=edad_meses_del_caso(self.data))
                 vol = self.data['volume'][side]
             else:
                 seed_key = None

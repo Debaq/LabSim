@@ -14,18 +14,84 @@ PROBE_1000_POSITIVE_PROB = {
 }
 
 
-def map_letter_for_probe(letter, probe_freq, seed_key=None):
-    """Sonda 1000 Hz (protocolo Interacoustics): clasificación binaria
-    positivo/negativo según presencia de peak, no letra Jerger. No hay campo
+# Edad hasta la cual la sonda de 226 Hz no sirve. Bajo los 6 meses la pared
+# del conducto todavia es cartilaginosa y blanda, y su movimiento DOMINA la
+# admitancia medida: el equipo dibuja un pico que es de la pared, no del
+# oido medio. Por eso el estandar en lactantes es sonda de 1000 Hz.
+INFANT_PROBE_MONTHS = 6.0
+
+
+def edad_meses_del_caso(data):
+    """Edad del paciente en meses, o None si el caso no la dice.
+
+    'edad_horas' es lo fino (ver CaseForm::horasDeVida en el backend) y
+    manda cuando esta. Sin eso queda 'edad' en anios enteros: si es 0, el
+    paciente tiene menos de un anio y no hay forma de saber si son tres
+    dias o once meses -- se asume lactante, que es el caso que hay que
+    poder armar y el error que hay que poder cometer. Con la edad exacta
+    cargada, un bebe de ocho meses se comporta como corresponde.
+    """
+    if not data:
+        return None
+    horas = data.get('edad_horas')
+    if horas not in (None, ''):
+        try:
+            return float(horas) / 720.0
+        except (TypeError, ValueError):
+            pass
+    edad = data.get('edad')
+    if edad in (None, ''):
+        return None
+    try:
+        return float(edad) * 12.0
+    except (TypeError, ValueError):
+        return None
+
+
+def is_infant_ear(edad_meses):
+    """True si a este oido la sonda de 226 Hz no le sirve.
+
+    edad_meses None = no se sabe -> se asume que NO es lactante. Un caso
+    viejo, sin edad exacta cargada, tiene que seguir comportandose como
+    siempre; el hallazgo se arma a proposito, no por un dato faltante.
+    """
+    if edad_meses is None:
+        return False
+    try:
+        return float(edad_meses) < INFANT_PROBE_MONTHS
+    except (TypeError, ValueError):
+        return False
+
+
+def map_letter_for_probe(letter, probe_freq, seed_key=None, edad_meses=None):
+    """Que dibuja el equipo segun la sonda, la letra del caso y la edad.
+
+    Sonda 1000 Hz (protocolo Interacoustics): clasificacion binaria
+    positivo/negativo segun presencia de peak, no letra Jerger. No hay campo
     de caso nuevo -- se deriva de la misma letra Z_OD/Z_OI ya cargada, con
-    gradiente de probabilidad de "positivo" según cuán rígido/móvil es el
-    oído en esa letra (A/Ad/C con peak franco -> casi siempre positivo;
-    As borderline -> mayoría negativo pero no siempre; B/N sin peak -> casi
+    gradiente de probabilidad de "positivo" segun cuan rigido/movil es el
+    oido en esa letra (A/Ad/C con peak franco -> casi siempre positivo;
+    As borderline -> mayoria negativo pero no siempre; B/N sin peak -> casi
     siempre negativo). Se reusa la forma de curva A/B como proxy visual.
 
-    seed_key (paciente, oído, sonda) fija el resultado -- mismo paciente
-    siempre da el mismo positivo/negativo, no una moneda distinta por click."""
+    Sonda 226 Hz en un lactante: el equipo dibuja una curva CON PICO aunque
+    el oido medio este lleno. No es un bug del simulador, es el hallazgo --
+    a esa edad la pared del conducto es blanda y su movimiento tapa al del
+    oido medio, asi que un timpanograma "normal" a 226 Hz no descarta nada.
+    El alumno tiene que darse cuenta de que la sonda esta mal elegida, y la
+    unica forma de que pueda darse cuenta es que el equipo se lo deje hacer.
+    La curva que sale es A (pico normal) y no la letra real del caso.
+
+    seed_key (paciente, oido, sonda) fija el resultado -- mismo paciente
+    siempre da el mismo positivo/negativo, no una moneda distinta por click.
+    """
     if probe_freq != '1000':
+        # 226 Hz en lactante: pico de la pared del conducto, no del oido
+        # medio. Las rigidas siguen leyendose rigidas (As/Cs): lo que la
+        # pared blanda enmascara es la AUSENCIA de pico, no una compliance
+        # baja de por si.
+        if is_infant_ear(edad_meses) and letter in ('B', 'N'):
+            return 'A'
         return letter
     prob = PROBE_1000_POSITIVE_PROB.get(letter, 0.5)
     draw = random.Random(str(seed_key)).random() if seed_key is not None else random.random()

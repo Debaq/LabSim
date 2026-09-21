@@ -699,6 +699,25 @@ final class CaseSheetPdf
         }
         $this->y += $alto + 30;
 
+        // Lactante: la sonda de 226 Hz no sirve y el equipo NO lo avisa.
+        // Va solo en la ficha del docente: es cómo se va a comportar el
+        // ejercicio, no un dato del paciente. Sin esto, el caso parece mal
+        // armado cuando el alumno informa un timpanograma normal en un oído
+        // que el docente cargó lleno.
+        if (!$estudio && self::esLactante($data)) {
+            $letras = [(string) ($data['Z_OD'] ?? 'A'), (string) ($data['Z_OI'] ?? 'A')];
+            $tapadas = array_intersect($letras, ['B', 'N']) !== [];
+            $this->parrafo(
+                'Paciente bajo 6 meses: con sonda de 226 Hz la pared del conducto domina la medición y el '
+                . 'equipo dibuja un pico que no es del oído medio. La sonda válida a esta edad es la de 1000 Hz.'
+                . ($tapadas
+                    ? ' En este caso hay un oído sin pico cargado, así que a 226 Hz se va a ver NORMAL: ese es el '
+                      . 'error que el ejercicio deja cometer.'
+                    : ''),
+                6.5
+            );
+        }
+
         // Reflejos: la misma tabla espejada del editor (ipsi al centro,
         // contra afuera). Se lee por FILAS de frecuencia y el patrón --qué
         // se cae y de qué lado-- se ve de un vistazo; con una tabla por oído
@@ -2642,6 +2661,20 @@ final class CaseSheetPdf
             'coclear' => 'Coclear',
             'neural' => 'Retrococlear',
         ][$tipo] ?? $tipo;
+    }
+
+    /**
+     * Bajo 6 meses: el conducto todavía es cartilaginoso y la sonda de
+     * 226 Hz no sirve. Espejo de is_infant_ear() en
+     * src/impedanciometria/z_generator.py.
+     */
+    private static function esLactante(array $data): bool
+    {
+        $horas = $data['edad_horas'] ?? null;
+        if ($horas !== null && $horas !== '') {
+            return ((float) $horas) / 720.0 < 6.0;
+        }
+        return isset($data['edad']) && (int) $data['edad'] === 0;
     }
 
     /** "18 horas de vida", "3 días de vida", "8 meses". */

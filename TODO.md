@@ -2278,3 +2278,38 @@ su `umbral_por_estimulo`, los dos proyectados por el backend.
 que el timpanograma de 226 Hz no sirva (hay que usar 1000 Hz) y que la vía
 ósea neonatal tenga su propia calibración. Nada de eso está modelado: hoy el
 timpanograma del recién nacido se dibuja como el de un adulto.
+
+## Timpanometría del lactante: la sonda de 226 Hz no sirve (2026-09-21)
+
+Segunda mitad del escenario neonatal. Bajo los 6 meses la pared del conducto
+todavía es cartilaginosa y blanda, y su movimiento **domina** la admitancia
+medida: con sonda de 226 Hz el equipo dibuja un pico que es de la pared, no
+del oído medio. Un timpanograma "normal" a esa edad no descarta nada, y por
+eso el estándar es sonda de **1000 Hz**.
+
+El módulo ya tenía las dos sondas y `map_letter_for_probe()` ya convertía la
+letra de Jerger en positivo/negativo para la de 1000. Lo que faltaba era el
+error: a 226 Hz el lactante daba la letra real del caso, así que elegir mal
+la sonda no tenía consecuencia y el hallazgo no existía.
+
+Ahora, con sonda de 226 Hz y paciente bajo 6 meses, un oído cargado **B o N
+se dibuja como A**. Las rígidas (As, Cs) se siguen leyendo como tales: lo que
+la pared blanda agrega es movimiento, así que puede inventar un pico donde no
+hay, pero no puede hacer que una compliance baja se vea alta.
+
+El simulador tiene que **dejar cometer** el error: si a 226 Hz saliera plana,
+el alumno nunca se entera de que eligió mal la sonda.
+
+La edad sale de `edad_horas` cuando está (ver la sección anterior) y, si no,
+de `edad` en años: con 0 se asume lactante, porque es el caso que hay que
+poder armar. Con la edad exacta cargada, un bebé de 8 meses se comporta como
+corresponde.
+
+La ficha del DOCENTE lo avisa --si no, el caso parece mal armado cuando el
+alumno informa timpanograma normal en un oído que el docente cargó lleno-- y
+dice explícitamente cuál es el error que el ejercicio deja cometer. La ficha
+de estudio no lo dice.
+
+**Queda pendiente del mismo tema:** la calibración de la vía ósea del
+lactante (suturas abiertas, menor atenuación interaural) sigue siendo la del
+adulto.
