@@ -2313,3 +2313,37 @@ de estudio no lo dice.
 **Queda pendiente del mismo tema:** la calibración de la vía ósea del
 lactante (suturas abiertas, menor atenuación interaural) sigue siendo la del
 adulto.
+
+## Vía ósea del lactante: calibración propia (2026-09-21)
+
+Cierra el escenario neonatal. Los valores de referencia del vibrador --la
+fuerza que equivale a 0 dB-- están definidos sobre **cráneo adulto**, en la
+mastoides. El cráneo del lactante tiene las suturas abiertas y los huesos sin
+fusionar, y eso lo hace más eficiente transmitiendo por vía ósea, sobre todo
+en graves: el mismo nivel de dial le llega más fuerte a la cóclea.
+
+`CaseProfile::INFANT_BONE_CALIBRATION_DB` = 15 dB en 500 Hz, 10 en 1 k, 5 en
+2 k, 2 en 3 k y nada en 4 k. Se aplica pesando las mismas frecuencias que el
+estímulo (un burst de 500 se lleva los 15 enteros, el click casi nada porque
+lo domina la base coclear) y **solo a la vía ósea**: la aérea entra por el
+conducto y no le importa el cráneo. Se desvanece con el cierre de las
+suturas: completa bajo los 6 meses, nada pasados los 24, lineal en el medio.
+
+Umbral óseo de un oído normal (10 dB HL parejo):
+
+| edad | 500 Hz | 1 kHz | 2 kHz | 4 kHz |
+|---|---|---|---|---|
+| adulto | 30 | 25 | 20 | 15 |
+| lactante 3 meses | 15 | 15 | 15 | 15 |
+| 12 meses | 20 | 20 | 15 | 15 |
+| 24 meses | 30 | 25 | 20 | 15 |
+
+**La consecuencia es el punto:** como el gap se calcula restando, el lactante
+normal muestra un **gap aéreo-óseo aparente de 15 dB en 500 Hz** que no es
+conductivo, es de calibración. Es un error de lectura clásico en screening y
+ahora el simulador lo reproduce. La ficha del docente lo avisa explícito; la
+de estudio no, porque ahí es justamente lo que el alumno tiene que resolver.
+
+Con esto el recién nacido queda coherente en los cuatro exámenes: EOA ausente
+por el transitorio, ABR aéreo algo elevado, ABR óseo con su propia
+calibración, y timpanograma que engaña con la sonda equivocada.

@@ -95,3 +95,59 @@ t_true(
     CaseProfile::NEONATAL_OAE_FACTOR > CaseProfile::NEONATAL_ABR_FACTOR * 2,
     'La EOA cruza el conducto de ida y vuelta: le pega mucho más que al ABR'
 );
+
+// --- Calibración ósea del lactante ---------------------------------------
+
+// El cráneo sin suturar transmite mejor, sobre todo en graves, y el vibrador
+// está calibrado sobre cráneo adulto: el mismo oído da un umbral óseo más
+// bajo en el dial. Lo que importa clínicamente es que eso INFLA el gap
+// aéreo-óseo aparente, y es un error de lectura clásico en screening.
+
+t_close(CaseProfile::infantBoneFactor(null), 0.0, 0.01, 'Sin edad no se inventa un lactante');
+t_close(CaseProfile::infantBoneFactor(3), 1.0, 0.01, 'Bajo 6 meses la calibración aplica entera');
+t_close(CaseProfile::infantBoneFactor(24), 0.0, 0.01, 'A los 2 años ya no queda: las suturas se cerraron');
+t_true(
+    CaseProfile::infantBoneFactor(12) > 0 && CaseProfile::infantBoneFactor(12) < 1,
+    'Entre los 6 y los 24 meses se va de a poco'
+);
+
+function neo_proyeccion_meses(float $meses): array
+{
+    $curva = neo_audiograma();
+    return CaseProfile::project(
+        $curva, $curva,
+        ['OD' => ['cce_pct' => 0, 'retro' => []], 'OI' => ['cce_pct' => 0, 'retro' => []]],
+        ['OD' => 'A', 'OI' => 'A'],
+        null, $meses
+    );
+}
+
+$lactante = neo_proyeccion_meses(3.0);
+$adulto = neo_proyeccion_meses(360.0);
+$dosAnios = neo_proyeccion_meses(24.0);
+
+$graveLact = $lactante['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_500Hz'];
+$graveAdulto = $adulto['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_500Hz'];
+$agudoLact = $lactante['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_4000Hz'];
+$agudoAdulto = $adulto['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_4000Hz'];
+
+t_true($graveLact < $graveAdulto, 'En 500 Hz el lactante lee un umbral óseo más bajo que el adulto');
+t_eq($agudoLact, $agudoAdulto, 'En 4 kHz no hay diferencia: el efecto es de graves');
+t_eq(
+    $dosAnios['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_500Hz'],
+    $graveAdulto,
+    'A los 2 años el umbral óseo ya es el de adulto'
+);
+
+// La vía AÉREA no se toca: entra por el conducto y no le importa el cráneo.
+t_eq(
+    $lactante['abr']['OD']['umbral_por_estimulo']['tone_burst_500Hz'],
+    $adulto['abr']['OD']['umbral_por_estimulo']['tone_burst_500Hz'],
+    'La vía aérea no cambia con la calibración ósea'
+);
+
+// Y el efecto que hay que saber leer: gap aparente en un oído normal.
+$gapLact = $lactante['abr']['OD']['umbral_por_estimulo']['tone_burst_500Hz'] - $graveLact;
+$gapAdulto = $adulto['abr']['OD']['umbral_por_estimulo']['tone_burst_500Hz'] - $graveAdulto;
+t_eq($gapAdulto, 0, 'En el adulto normal no hay gap');
+t_true($gapLact >= 10, 'En el lactante normal aparece un gap de calibración, que no es conductivo');

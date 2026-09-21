@@ -1470,6 +1470,13 @@ final class CaseSheetPdf
             $this->parrafo(self::FUENTE_REFERENCIA[$poblacion] ?? '', 6.5);
             // Con qué set se construyó el caso. Va solo acá: es trazabilidad
             // de cómo se armó el ejercicio, no un dato del paciente.
+            // Calibración ósea del lactante: el cráneo sin suturar transmite
+            // mejor, así que el umbral óseo se lee más bajo y el gap
+            // aéreo-óseo APARENTE queda inflado. Sin este aviso, un
+            // lactante normal parece tener una conductiva de 15 dB.
+            if (self::infantBoneNote($data) !== '') {
+                $this->parrafo(self::infantBoneNote($data), 6.5);
+            }
             $autor = is_array($abr['autor'] ?? null) ? $abr['autor'] : [];
             if (($autor['label'] ?? '') !== '') {
                 $base = is_array($autor['baseline'] ?? null) ? $autor['baseline'] : [];
@@ -2661,6 +2668,23 @@ final class CaseSheetPdf
             'coclear' => 'Coclear',
             'neural' => 'Retrococlear',
         ][$tipo] ?? $tipo;
+    }
+
+    /** Aviso de la calibración ósea del lactante, vacío si no aplica. */
+    private static function infantBoneNote(array $data): string
+    {
+        $meses = ($data['edad_horas'] ?? null) !== null && $data['edad_horas'] !== ''
+            ? ((float) $data['edad_horas']) / 720.0
+            : (isset($data['edad']) ? (float) $data['edad'] * 12.0 : null);
+        $factor = CaseProfile::infantBoneFactor($meses);
+        if ($factor <= 0.0) {
+            return '';
+        }
+        return 'Vía ósea de lactante: el cráneo con las suturas abiertas transmite mejor que el del adulto, '
+            . 'sobre todo en graves, y los valores de referencia del vibrador están definidos sobre cráneo adulto. '
+            . 'El umbral óseo se lee hasta 15 dB más bajo en 500 Hz (menos a medida que sube la frecuencia, nada en 4 kHz), '
+            . 'así que el gap aéreo-óseo APARENTE queda inflado: no confundirlo con un componente de transmisión. '
+            . 'El efecto se va solo a medida que las suturas se cierran, cerca de los dos años.';
     }
 
     /**

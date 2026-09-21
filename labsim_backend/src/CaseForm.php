@@ -105,6 +105,10 @@ final class CaseForm
         // "0 años" mete en la misma bolsa un bebé de seis horas y uno de
         // once meses, que en pantalla no se parecen en nada.
         $horasVida = self::horasDeVida($v, $age);
+        // Edad en meses: la calibración ósea del lactante se va con el cierre
+        // de las suturas, que lleva un par de años -- no cabe en "horas de
+        // vida" ni en años enteros.
+        $edadMeses = $horasVida !== null ? $horasVida / 720.0 : $age * 12.0;
         $nombre1 = trim((string) ($v['nombre1'] ?? ''));
         $apellido1 = trim((string) ($v['apellido1'] ?? ''));
 
@@ -334,7 +338,7 @@ final class CaseForm
         // CaseProfile::project). La misma función alimenta la vista previa
         // en vivo del formulario, vía admin/case_project.php: una sola
         // implementación de cada ley.
-        $proyeccion = CaseProfile::project($airPairs, $bonePairs, $perfil, ['OD' => $zOd, 'OI' => $zOi], $horasVida);
+        $proyeccion = CaseProfile::project($airPairs, $bonePairs, $perfil, ['OD' => $zOd, 'OI' => $zOi], $horasVida, $edadMeses);
         $decomp = $proyeccion['decomp'];
 
         // La derivación es una SUGERENCIA, no una fuente que pise al

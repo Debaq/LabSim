@@ -184,6 +184,58 @@ final class CaseProfile
     public const NEONATAL_MAX_H = 168.0;
 
     /**
+     * Calibración de la vía ósea del lactante, en dB por frecuencia.
+     *
+     * Los valores de referencia del vibrador (la fuerza que equivale a 0 dB)
+     * están definidos sobre un cráneo ADULTO, en la mastoides. El cráneo del
+     * lactante tiene las suturas abiertas y los huesos sin fusionar, y eso lo
+     * hace MÁS eficiente transmitiendo sonido por vía ósea, sobre todo en
+     * graves: el mismo nivel de dial le llega más fuerte a la cóclea. Con
+     * calibración de adulto, el umbral óseo de un bebé se lee más bajo que el
+     * de un adulto con exactamente la misma audición.
+     *
+     * Ojo con la consecuencia clínica, que es el motivo de modelarlo: como el
+     * gap aéreo-óseo se calcula restando, usar norma de adulto en un lactante
+     * INFLA el componente conductivo aparente. Es un error clásico de lectura
+     * en screening.
+     *
+     * Efecto decreciente con la frecuencia (en 4 kHz prácticamente no hay) y
+     * que se va con la edad a medida que las suturas se cierran:
+     * completo bajo los 6 meses, nada pasados los 24.
+     */
+    public const INFANT_BONE_CALIBRATION_DB = [
+        500 => 15.0,
+        1000 => 10.0,
+        2000 => 5.0,
+        3000 => 2.0,
+        4000 => 0.0,
+        6000 => 0.0,
+        8000 => 0.0,
+    ];
+    public const INFANT_BONE_FULL_MONTHS = 6.0;
+    public const INFANT_BONE_NONE_MONTHS = 24.0;
+
+    /**
+     * Cuánto de la calibración de lactante aplica a esa edad (0 a 1).
+     * `null` = edad desconocida -> 0, no se inventa un lactante.
+     */
+    public static function infantBoneFactor($edadMeses): float
+    {
+        if ($edadMeses === null || $edadMeses === '') {
+            return 0.0;
+        }
+        $m = max(0.0, (float) $edadMeses);
+        if ($m <= self::INFANT_BONE_FULL_MONTHS) {
+            return 1.0;
+        }
+        if ($m >= self::INFANT_BONE_NONE_MONTHS) {
+            return 0.0;
+        }
+        return (self::INFANT_BONE_NONE_MONTHS - $m)
+            / (self::INFANT_BONE_NONE_MONTHS - self::INFANT_BONE_FULL_MONTHS);
+    }
+
+    /**
      * Atenuación por el transitorio, en dB, a las `$horas` de vida.
      * `null` (o sin dato) = no es un recién nacido: 0.
      */
@@ -1795,8 +1847,15 @@ final class CaseProfile
      * @param string $pathway 'air_conduction' | 'bone_conduction'
      * @return array<string,int> clave de STIM_MAP -> dB nHL
      */
-    public static function abrThresholds(array $decomp, string $pathway = 'air_conduction'): array
+    public static function abrThresholds(array $decomp, string $pathway = 'air_conduction', $edadMeses = null): array
     {
+        // Vía ósea en lactante: el cráneo sin suturar transmite mejor, así
+        // que el mismo oído da un umbral más bajo en el dial (ver
+        // INFANT_BONE_CALIBRATION_DB). Solo la ósea: la aérea entra por el
+        // conducto y no le importa el cráneo.
+        $calibracion = $pathway === 'bone_conduction'
+            ? self::infantBoneFactor($edadMeses)
+            : 0.0;
         $curva = $pathway === 'bone_conduction' ? $decomp['bone'] : $decomp['air'];
         $sinRespuesta = ($decomp['sin_respuesta'] ?? [])[$pathway === 'bone_conduction' ? 'bone' : 'air'] ?? [];
         $out = [];
@@ -1823,6 +1882,20 @@ final class CaseProfile
             }
             $hl = $peso > 0 ? $suma / $peso : 0.0;
             $nhl = $hl + self::STIM_NHL_CORRECTION[$stim];
+            if ($calibracion > 0.0) {
+                // La corrección pesa las mismas frecuencias que el estímulo:
+                // un burst de 500 se lleva los 15 dB enteros y uno de 4 kHz
+                // casi nada, que es como se comporta el cráneo.
+                $ajuste = 0.0;
+                $pesoAjuste = 0.0;
+                foreach ($pesos as $hz => $w) {
+                    $ajuste += (self::INFANT_BONE_CALIBRATION_DB[(int) $hz] ?? 0.0) * $w;
+                    $pesoAjuste += $w;
+                }
+                if ($pesoAjuste > 0) {
+                    $nhl -= ($ajuste / $pesoAjuste) * $calibracion;
+                }
+            }
             $out[$stim] = (int) self::clamp(
                 round($nhl / self::ABR_STEP_DB) * self::ABR_STEP_DB,
                 0.0,
@@ -2378,7 +2451,7 @@ final class CaseProfile
      * @param array $perfil     normalize()
      * @param array<string,string> $tympPorLado ['OD' => 'A', 'OI' => 'B']
      */
-    public static function project(array $airPairs, array $bonePairs, array $perfil, array $tympPorLado, $horasDeVida = null): array
+    public static function project(array $airPairs, array $bonePairs, array $perfil, array $tympPorLado, $horasDeVida = null, $edadMeses = null): array
     {
         // Transitorio de las primeras horas (ver neonatalTransientDb): no es
         // patología del caso, es la edad del paciente.
@@ -2429,7 +2502,7 @@ final class CaseProfile
                 // --con su null-- viaja en umbral_por_estimulo.
                 'umbral' => $porEstimulo['click'] ?? self::ABR_MAX_DB,
                 'umbral_por_estimulo' => $porEstimulo,
-                'umbral_por_estimulo_oseo' => self::abrThresholds($decomp[$lado], 'bone_conduction'),
+                'umbral_por_estimulo_oseo' => self::abrThresholds($decomp[$lado], 'bone_conduction', $edadMeses),
             ];
 
             // El `umbral` de la OEA va en 0 a propósito: el cliente suma su

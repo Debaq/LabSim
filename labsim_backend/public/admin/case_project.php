@@ -82,7 +82,20 @@ $tymp = [
     'OI' => in_array($payload['z']['oi'] ?? 'A', CaseBuilder::Z_OPTIONS, true) ? (string) $payload['z']['oi'] : 'A',
 ];
 
-$proyeccion = CaseProfile::project($airPairs, $bonePairs, $perfil, $tymp);
+// Edad: decide el transitorio de las primeras horas y la calibración ósea
+// del lactante (ver CaseProfile). La vista previa tiene que mostrar lo
+// mismo que se va a guardar.
+$edadAnios = max(0, (int) ($_POST['age'] ?? 0));
+$horasVida = null;
+$valorEdad = $_POST['edad_valor'] ?? '';
+if ($edadAnios === 0 && $valorEdad !== '' && is_numeric($valorEdad)) {
+    $factor = ['horas' => 1, 'dias' => 24, 'meses' => 720];
+    $unidad = (string) ($_POST['edad_unidad'] ?? 'horas');
+    $horasVida = max(0, min((int) round((float) $valorEdad * ($factor[$unidad] ?? 1)), 8760));
+}
+$edadMeses = $horasVida !== null ? $horasVida / 720.0 : $edadAnios * 12.0;
+
+$proyeccion = CaseProfile::project($airPairs, $bonePairs, $perfil, $tymp, $horasVida, $edadMeses);
 
 // La descomposición es un detalle interno (nueve frecuencias por seis
 // curvas por oído): no la necesita el navegador y solo engorda la respuesta.
