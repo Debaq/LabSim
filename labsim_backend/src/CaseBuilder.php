@@ -985,7 +985,28 @@ final class CaseBuilder
     {
         $birthYear = (int) date('Y') - $age;
         $randomDay = random_int(0, 364);
-        return date('d-m-Y', mktime(0, 0, 0, 1, 1 + $randomDay, $birthYear));
+        $fecha = mktime(0, 0, 0, 1, 1 + $randomDay, $birthYear);
+        // Nadie nace en el futuro. Con edad 0 el año de nacimiento es el
+        // actual, así que sortear un día cualquiera daba fechas por venir
+        // --y en la ficha de un recién nacido eso salta a la vista--.
+        $hoy = mktime(0, 0, 0, (int) date('n'), (int) date('j'), (int) date('Y'));
+        if ($fecha > $hoy) {
+            $fecha = $hoy - random_int(0, 30) * 86400;
+        }
+        return date('d-m-Y', $fecha);
+    }
+
+    /**
+     * Fecha de nacimiento de un recién nacido, desde sus horas de vida.
+     *
+     * No se sortea: si el caso dice "10 horas de vida", nació hoy. Es el
+     * dato que el alumno cruza con la hora del tamizaje, así que una fecha
+     * al azar dentro del año lo deja sin nada que calcular -- y con la
+     * edad en 0 llegaba a ponerlo naciendo en noviembre.
+     */
+    public static function fechaNacFromHoras(int $horas): string
+    {
+        return date('d-m-Y', time() - $horas * 3600);
     }
 
     /** Mejor 2 de [500,1000,2000 Hz] (índices 2,3,4), promedio, floor a múltiplo de 5. Igual que create_a.py::_fletcher_avg. */

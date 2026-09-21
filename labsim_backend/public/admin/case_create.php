@@ -347,7 +347,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $postedRut = trim((string) ($v['rut'] ?? ''));
             $postedFechaNacIso = trim((string) ($v['fecha_nac'] ?? ''));
             $snapshotRut = $postedRut !== '' ? $postedRut : (string) CaseBuilder::rutFromAge($age);
-            $snapshotFechaNac = $postedFechaNacIso !== '' ? date('d-m-Y', strtotime($postedFechaNacIso)) : CaseBuilder::randomFechaNacForAge($age);
+            // Recién nacido: la fecha sale de las horas de vida (ver
+            // CaseBuilder::fechaNacFromHoras); con edad 0 y un sorteo dentro
+            // del año, el paciente podía quedar naciendo el mes que viene.
+            $horasSnapshot = $data['edad_horas'] ?? null;
+            $snapshotFechaNac = $postedFechaNacIso !== ''
+                ? date('d-m-Y', strtotime($postedFechaNacIso))
+                : ($horasSnapshot !== null && $horasSnapshot !== ''
+                    ? CaseBuilder::fechaNacFromHoras((int) $horasSnapshot)
+                    : CaseBuilder::randomFechaNacForAge($age));
             $data['paciente_snapshot'] = [
                 'nombre' => $snapshotNombre,
                 'apellido' => $snapshotApellido,

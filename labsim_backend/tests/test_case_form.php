@@ -342,3 +342,21 @@ t_true(isset($cfProyRn->proyeccion['eoas']['OD']['atten_db']),
     'En un recién nacido, con la atenuación del transitorio');
 t_true((float) $cfProyRn->proyeccion['eoas']['OD']['atten_db'] > 0,
     'Y con líquido de verdad esa atenuación no es cero');
+
+// --- Nadie nace en el futuro ----------------------------------------------
+
+// Con edad 0 el año de nacimiento es el actual, así que sortear un día
+// cualquiera del año daba fechas por venir: en la ficha de un recién nacido
+// eso salta a la vista (y pasó en una clase).
+for ($i = 0; $i < 40; $i++) {
+    $f = CaseBuilder::randomFechaNacForAge(0);
+    t_true(strtotime($f) <= strtotime(date('d-m-Y')), "Fecha de RN no futura: $f");
+}
+t_true(strtotime(CaseBuilder::randomFechaNacForAge(30)) < strtotime('-25 years'),
+    'Y la del adulto sigue cayendo donde corresponde');
+
+// Un recién nacido no se sortea: su fecha sale de las horas de vida.
+t_eq(CaseBuilder::fechaNacFromHoras(10), date('d-m-Y'),
+    'Diez horas de vida: nació hoy');
+t_eq(CaseBuilder::fechaNacFromHoras(30), date('d-m-Y', time() - 30 * 3600),
+    'Treinta horas: ayer o antes de ayer, según la hora');

@@ -24,6 +24,7 @@ require_once __DIR__ . '/../../src/CaseForm.php';
 require_once __DIR__ . '/../../src/CaseReview.php';
 require_once __DIR__ . '/../../src/CaseBuilder.php';
 require_once __DIR__ . '/../../src/Patients.php';
+require_once __DIR__ . '/../../src/Sala.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/_layout.php';
 
@@ -66,6 +67,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Las once fichas, dadas por revisadas: el importador no es el lugar
         // para el checklist, que existe para el que arma el caso a mano.
         $post['revisado'] = array_fill_keys(array_keys(CaseReview::revisables()), '1');
+
+        // Un paciente que no habla no llega solo a la consulta. Si el JSON
+        // no trae acompañante, se le pone la madre: sin esto el caso se
+        // guardaba igual --Sala::problemas lo avisa pero no bloquea-- y en
+        // la entrevista el informante terminaba siendo la guagua.
+        $edadCaso = (int) ($post['age'] ?? 0);
+        if (Sala::capacidad($edadCaso) === Sala::CAP_NULO
+            && empty($post['sala_rol'])) {
+            $post['sala_id'] = ['a1'];
+            $post['sala_rol'] = ['madre'];
+            $post['sala_nombre'] = [trim('Madre de ' . (string) ($post['nombre1'] ?? ''))];
+            $post['sala_genero'] = ['1'];
+            $post['sala_edad'] = [(string) random_int(22, 38)];
+            // Con una guagua al lado, la madre contesta todo: no es que
+            // interrumpa, es la única que habla (ver
+            // Sala::nivelInterrupcionCon).
+            $post['sala_interrumpe'] = ['100'];
+            $post['sala_confiabilidad'] = [(string) random_int(70, 95)];
+            $post['sala_disposicion'] = ['0'];
+            $post['sala_informante'] = 'a1';
+            // Y el paciente no tiene conciencia de nada: no hay relato.
+            $post['paciente_conciencia'] = '0';
+        }
 
         try {
             $form = CaseForm::fromPost($post, $pdo, $me, null, false);
@@ -120,9 +144,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ? trim((string) $post['rut'])
             : (string) CaseBuilder::rutFromAge($form->age);
         $fechaNacIso = trim((string) ($post['fecha_nac'] ?? ''));
+        // Recién nacido: la fecha sale de las horas de vida, no de un
+        // sorteo dentro del año. Si el caso dice "10 horas", nació hoy.
+        $horasVida = $data['edad_horas'] ?? null;
         $fechaNac = $fechaNacIso !== ''
             ? date('d-m-Y', strtotime($fechaNacIso))
-            : CaseBuilder::randomFechaNacForAge($form->age);
+            : ($horasVida !== null && $horasVida !== ''
+                ? CaseBuilder::fechaNacFromHoras((int) $horasVida)
+                : CaseBuilder::randomFechaNacForAge($form->age));
 
         $data['paciente_snapshot'] = [
             'nombre' => $nombre,

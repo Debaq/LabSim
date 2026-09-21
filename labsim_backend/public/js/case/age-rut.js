@@ -21,13 +21,33 @@
 
     function recompute() {
         var age = parseInt(ageInput.value, 10);
-        if (!age || age < 0 || age === lastAge) { return; }
+        if (isNaN(age) || age < 0 || age === lastAge) { return; }
         lastAge = age;
 
-        var currentYear = new Date().getFullYear();
+        var hoy = new Date();
+        var currentYear = hoy.getFullYear();
         var birthYear = currentYear - age;
         var randomDayOffset = Math.floor(Math.random() * 365);
         var birthDate = new Date(birthYear, 0, 1 + randomDayOffset);
+        // Nadie nace en el futuro: con edad 0 el año es el actual y el
+        // sorteo caía después de hoy una de cada tres veces.
+        if (birthDate > hoy) {
+            birthDate = new Date(hoy.getTime() - Math.floor(Math.random() * 31) * 86400000);
+            randomDayOffset = Math.floor(
+                (birthDate - new Date(birthDate.getFullYear(), 0, 1)) / 86400000);
+        }
+        // Y si es un recién nacido con edad exacta cargada, la fecha sale
+        // de sus horas de vida: nació hoy o ayer, no en febrero.
+        var valorEdad = document.getElementById('patient-edad-valor');
+        var unidadEdad = document.getElementById('patient-edad-unidad');
+        var nExacta = valorEdad ? parseFloat(valorEdad.value) : NaN;
+        if (age === 0 && !isNaN(nExacta)) {
+            var factor = { horas: 1, dias: 24, meses: 720 };
+            var horas = nExacta * (factor[unidadEdad ? unidadEdad.value : 'horas'] || 1);
+            birthDate = new Date(hoy.getTime() - horas * 3600000);
+            randomDayOffset = Math.floor(
+                (birthDate - new Date(birthDate.getFullYear(), 0, 1)) / 86400000);
+        }
         fechaInput.value = birthDate.getFullYear() + '-' + pad2(birthDate.getMonth() + 1) + '-' + pad2(birthDate.getDate());
 
         var birthDateFloat = birthYear + (randomDayOffset / 365);
@@ -37,4 +57,14 @@
 
     ageInput.addEventListener('input', recompute);
     ageInput.addEventListener('change', recompute);
+    // La edad exacta también mueve la fecha: es la que manda en un recién
+    // nacido.
+    ['patient-edad-valor', 'patient-edad-unidad'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) {
+            ['input', 'change'].forEach(function (ev) {
+                el.addEventListener(ev, function () { lastAge = null; recompute(); });
+            });
+        }
+    });
 })();
