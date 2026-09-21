@@ -190,9 +190,9 @@ BONE_WAVE_WIDTH = {'I': 1.5, 'II': 1.4, 'III': 1.2, 'IV': 1.1, 'V': 1.05}
 # los fonos la cancelacion es practicamente completa; el vibrador no es
 # simetrico entre polaridades y deja un residuo del orden del 15%.
 ARTIFACT_ALT_RESIDUAL = {
-    'insert_earphone': 0.0,
-    'TDH39_headphone': 0.0,
-    'bone_vibrator': 0.15,
+    'insert_earphone': 0.035,   # la bobina esta lejos: casi simetrico
+    'TDH39_headphone': 0.075,
+    'bone_vibrator': 0.15,      # empuja contra el hueso: el menos simetrico
 }
 
 
@@ -284,9 +284,9 @@ def stimulus_width(stim, freq=None):
 # 100 oidos.
 POLARITY_AMP_CONDENSATION = {'I': 0.82, 'II': 0.84, 'III': 0.85,
                              'IV': 0.92, 'V': 1.0}
-# Alternar promedia dos respuestas con latencias apenas distintas: la onda
-# sale un poco mas ancha y con el pico algo mas bajo.
-POLARITY_ALT_WIDTH = 1.05
+# Las dos polaridades que se promedian al alternar. No se lista
+# 'Alternada' a proposito: es el promedio de estas dos.
+POLARITY_PAIR = ('Rarefacción', 'Condensación')
 
 RATE_REF = 21.1
 # F13 (Jiang, 80 ninios + 21 adultos, click de 10 a 90/s): de 10 a 90/s la
@@ -1086,18 +1086,12 @@ class ABRGenerator:
                 values['I']['lat'] += 0.1
             CM_value = 0.15
         elif polarity in ('Alternada', 'Alternante'):
-            # Promedio de las dos: es lo que el equipo suma barrido a
-            # barrido. Sin microfonica, que es el punto de alternar.
-            for w, factor in POLARITY_AMP_CONDENSATION.items():
-                if w in values:
-                    values[w]['amp'] *= (1.0 + factor) / 2.0
-            if 'I' in values:
-                values['I']['lat'] += 0.05
-            # Y como la latencia no es identica en las dos polaridades, el
-            # promedio ensancha un poco las ondas y les baja el pico. Es
-            # menor, pero es el precio de alternar.
-            for v in values.values():
-                v['width'] = v.get('width', 1.0) * POLARITY_ALT_WIDTH
+            # La alternada no se calcula: se PROMEDIAN las dos polaridades,
+            # que es lo que el equipo hace barrido a barrido (ver
+            # build_polarity_curve). Aca solo se marca, y la microfonica
+            # queda en None porque se cancela -- ese es el punto de
+            # alternar.
+            return values, None
         # Con polaridad alternada el CM se cancela (CM_value queda None):
         # es justamente por eso que una desincronia auditiva se busca con
         # rarefaccion y condensacion por separado.
@@ -1135,6 +1129,30 @@ class ABRGenerator:
     # =====================================================================
     # MODELO MORFOLOGICO (NUEVO): SUMA DE GAUSSIANAS
     # =====================================================================
+
+    def build_polarity_curve(self, t, values, polarity, pathology, neural,
+                             cm_sigma_gain):
+        """Curva objetivo para esa polaridad.
+
+        Alternada NO es un caso aparte con sus propios factores: es el
+        PROMEDIO de la curva en rarefaccion y la curva en condensacion, que
+        es lo que el equipo suma barrido a barrido. De ahi salen solos el
+        ensanchamiento y la caida del pico --las dos polaridades no tienen
+        la misma latencia (ver POLARITY_AMP_CONDENSATION y el +0.1 ms de la
+        onda I)-- sin fijar ningun factor a mano. Y la microfonica se
+        cancela sola, porque entra con signo opuesto en cada una.
+        """
+        if polarity not in ('Alternada', 'Alternante'):
+            v, cm = self.apply_polarity_effects(
+                {w: dict(d) for w, d in values.items()}, polarity, pathology, neural)
+            return self.build_target_curve(t, v, cm, cm_sigma_gain), cm
+
+        curvas = []
+        for pol in POLARITY_PAIR:
+            v, cm = self.apply_polarity_effects(
+                {w: dict(d) for w, d in values.items()}, pol, pathology, neural)
+            curvas.append(self.build_target_curve(t, v, cm, cm_sigma_gain))
+        return (curvas[0] + curvas[1]) / 2.0, None
 
     @staticmethod
     def _gaussian(t, center, amp, sigma):
@@ -1866,7 +1884,7 @@ class ABRGenerator:
             self.case_threshold(contra, stimulus_config, pathway,
                                 contra.get('type', 'normal')),
             float(masking))
-        if level <= threshold:
+        if level < threshold:
             return None
 
         baseline = self.get_baseline_values(
@@ -2312,11 +2330,15 @@ class ABRGenerator:
                 v['amp'] *= BONE_WAVE_AMP.get(wave, 1.0)
                 v['width'] = v.get('width', 1.0) * BONE_WAVE_WIDTH.get(wave, 1.0)
 
-        # 7. Polaridad + rate
-        values, CM_value = self.apply_polarity_effects(
-            values, stimulus_config['pol'], pathology, neural)
+        # 7. Polaridad + rate. La polaridad ya no se aplica sobre el vector
+        # de ondas: se aplica al ARMAR la curva (ver build_polarity_curve),
+        # porque la alternada es el promedio de las otras dos y eso no se
+        # puede expresar como un factor por onda.
         values = self.apply_rate_effects(values, stimulus_config['rate'],
                                          pathology, neural)
+        _, CM_value = self.apply_polarity_effects(
+            {w: dict(d) for w, d in values.items()},
+            stimulus_config['pol'], pathology, neural)
         # El microfonico de una desincronia dura lo que dura el estimulo, no
         # es el pulso corto pre-onda I del oido sano.
         cm_sigma_gain = (
@@ -2354,11 +2376,11 @@ class ABRGenerator:
         jitter = float((case_config or {}).get('repro_jitter') or 0.0)
         values_a = self._shift_latencies(values, jitter / 2)
         values_b = self._shift_latencies(values, -jitter / 2)
-        y_target_a = self.build_target_curve(t, values_a, CM_value,
-                                             cm_sigma_gain)
-        y_target_b = (y_target_a if not jitter
-                      else self.build_target_curve(t, values_b, CM_value,
-                                                   cm_sigma_gain))
+        pol = stimulus_config['pol']
+        y_target_a, _ = self.build_polarity_curve(t, values_a, pol, pathology,
+                                                  neural, cm_sigma_gain)
+        y_target_b = y_target_a if not jitter else self.build_polarity_curve(
+            t, values_b, pol, pathology, neural, cm_sigma_gain)[0]
         y_target = (y_target_a + y_target_b) / 2
 
         # 9b. Curva sombra: si el estimulo cruza el craneo por encima de la

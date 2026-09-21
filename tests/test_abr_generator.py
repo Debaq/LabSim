@@ -2328,19 +2328,20 @@ def test_alternating_polarity_cancels_the_stimulus_artifact():
     """
     g = _gen()
     t = np.linspace(0, 12, 1000)
-    for transductor in ('insert_earphone', 'TDH39_headphone'):
-        fija = g.add_transducer_artifact(t, transductor, 95, 'Rarefacción')
-        alterna = g.add_transducer_artifact(t, transductor, 95, 'Alternada')
+    # La cancelacion nunca es total: el artefacto no sale identico en las
+    # dos polaridades. Cuanto menos simetrico es el transductor, mas
+    # residuo queda -- el vibrador, que empuja contra el hueso, es el peor;
+    # el de insercion, con la bobina lejos, el que mejor cancela.
+    residuo = {}
+    for transductor, nivel in (('insert_earphone', 95), ('TDH39_headphone', 95),
+                               ('bone_vibrator', 55)):
+        fija = g.add_transducer_artifact(t, transductor, nivel, 'Rarefacción')
+        alterna = g.add_transducer_artifact(t, transductor, nivel, 'Alternada')
         assert fija.max() > 0.1, transductor
-        assert alterna.max() == 0.0, transductor
-
-    # Por via osea la cancelacion NO es completa: el artefacto no sale
-    # identico en las dos polaridades (la bobina empuja contra el hueso, que
-    # no responde igual en los dos sentidos) y queda un residuo. Darlo por
-    # cancelado del todo dejaba la osea mas limpia de lo que es.
-    fija = g.add_transducer_artifact(t, 'bone_vibrator', 55, 'Rarefacción')
-    alterna = g.add_transducer_artifact(t, 'bone_vibrator', 55, 'Alternada')
-    assert 0.0 < alterna.max() < 0.25 * fija.max()
+        residuo[transductor] = alterna.max() / fija.max()
+        assert 0.0 < residuo[transductor] < 0.25, transductor
+    assert (residuo['bone_vibrator'] > residuo['TDH39_headphone']
+            > residuo['insert_earphone'])
 
     # El supraaural es el caso feo: bobina apoyada a centimetros del
     # electrodo. El de insercion la aleja 33 cm de tubo.
