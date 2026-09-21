@@ -184,14 +184,13 @@ def test_the_pending_parameters_are_there_and_marked():
     for envolvente in ('2-0-2', '1-0-1', '5-0-5'):
         assert d.cb_burst_env.findData(envolvente) >= 0, envolvente
 
-    # Marcados: el tooltip dice que no afectan al trazo. Sin esto, el alumno
-    # configura el notch de 50 Hz, sigue viendo el zumbido y aprende algo
-    # falso.
-    for widget in (d.cb_burst_env, d.cb_notch, d.cb_gain, d.cb_smoothing):
-        assert 'no afecta' in widget.toolTip(), widget.toolTip()
-    # Y los que SÍ funcionan no llevan esa marca.
-    for widget in (d.cb_transducer, d.cb_reject, d.cb_fsp):
-        assert 'no afecta' not in widget.toolTip()
+    # Y NO se distinguen en pantalla de los que sí funcionan: es un equipo
+    # simulado, y un equipo no le avisa al operador cuáles de sus perillas
+    # están implementadas. Marcarlos rompería la simulación.
+    for widget in (d.cb_burst_env, d.cb_notch, d.cb_gain, d.cb_smoothing,
+                   d.cb_transducer, d.cb_reject, d.cb_fsp):
+        assert widget.toolTip() == '', widget.toolTip()
+        assert widget.isEnabled()
 
 
 def test_the_pending_parameters_survive_a_round_trip():

@@ -2994,11 +2994,10 @@ lee**: se dibujan, se guardan y viajan en el `technical_config` con la clave
 con la que se van a leer.
 
 Los que quedan pendientes están listados en `ABR_generator.UNCONNECTED_SETTINGS`,
-y van en gris con tooltip. Esa marca no es estética: si el alumno configura el
-notch de 50 Hz, sigue viendo el zumbido y nadie le dice que ese control no
-hace nada, aprende algo falso. Es la excepción a "el diálogo no le avisa nada"
---lo que no se avisa son los errores clínicos, no las limitaciones del
-simulador--.
+que es documentación interna: **en pantalla no se distinguen** de los que sí
+funcionan. Llegaron a estar en gris con un tooltip que decía que no afectaban
+al trazo, y se sacó: es un equipo simulado y un equipo no le avisa al operador
+cuáles de sus perillas están implementadas. Marcarlos rompe la simulación.
 
 | pestaña | pendientes |
 |---|---|

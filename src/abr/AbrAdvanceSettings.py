@@ -30,13 +30,6 @@ from abr.protocols import get_protocol
 
 tr = QCoreApplication.translate
 
-# Marca de los parámetros que el equipo muestra pero el modelo todavía no
-# usa. No es un detalle de estilo: sin la marca, el alumno configura el
-# notch de 50 Hz, sigue viendo el zumbido y aprende algo falso.
-PENDIENTE_COLOR = "#8a8a8a"
-PENDIENTE_TOOLTIP = ("Todavía no afecta al trazo: el equipo lo guarda, pero "
-                     "el modelo no lo usa.")
-
 
 # Rótulo visible -> clave que entiende el generador.
 TRANSDUCERS = {
@@ -90,9 +83,10 @@ ELECTRODES = (
 #
 # Estaban faltando y los alumnos los buscaban --el 2-1-2 del tone burst es
 # el ejemplo que se repite--. Se dibujan y viajan en el technical_config,
-# pero el generador no los lee (ver UNCONNECTED_SETTINGS en el generador).
-# Van marcados en gris y con tooltip: que el alumno crea que configuró el
-# notch de 50 Hz y siga viendo el zumbido sería enseñarle algo falso.
+# pero el generador todavía no los lee (ver UNCONNECTED_SETTINGS en el
+# generador). En pantalla NO se distinguen de los demás: es un equipo
+# simulado, y un equipo no le avisa al operador cuáles de sus perillas
+# están implementadas.
 # ---------------------------------------------------------------------
 
 # Duración del click. 100 µs es el de rutina; los otros existen y cambian
@@ -209,13 +203,6 @@ class AbrAdvanceSettings(QDialog):
         tabs.addTab(self._tab_promediacion(settings), "Promediación")
         layout.addWidget(tabs)
 
-        aviso = QLabel(
-            "Los parámetros en gris todavía no afectan al trazo: el equipo "
-            "los guarda y los muestra, pero el modelo no los usa.")
-        aviso.setWordWrap(True)
-        aviso.setStyleSheet(f"color:{PENDIENTE_COLOR}; font-size:10px;")
-        layout.addWidget(aviso)
-
         botones = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok
                                    | QDialogButtonBox.StandardButton.Cancel
                                    | QDialogButtonBox.StandardButton.RestoreDefaults)
@@ -227,13 +214,15 @@ class AbrAdvanceSettings(QDialog):
 
     @staticmethod
     def _fila(grid, row, texto, widget, pendiente=False):
-        """Una fila etiqueta/control. `pendiente` = dibujada pero sin efecto."""
-        label = QLabel(texto)
-        if pendiente:
-            label.setStyleSheet(f"color:{PENDIENTE_COLOR};")
-            label.setToolTip(PENDIENTE_TOOLTIP)
-            widget.setToolTip(PENDIENTE_TOOLTIP)
-        grid.addWidget(label, row, 0)
+        """Una fila etiqueta/control.
+
+        `pendiente` marca los que el modelo todavía no lee (ver
+        UNCONNECTED_SETTINGS en el generador), pero NO se nota en pantalla:
+        es un equipo simulado y un equipo no avisa cuáles de sus perillas
+        están implementadas. El alumno ve el mismo panel que en el equipo
+        real; qué mueve el trazo y qué no es parte de lo que descubre.
+        """
+        grid.addWidget(QLabel(texto), row, 0)
         grid.addWidget(widget, row, 1)
 
     def _tab_estimulo(self, settings):
