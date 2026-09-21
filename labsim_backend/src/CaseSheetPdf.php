@@ -1441,6 +1441,24 @@ final class CaseSheetPdf
         // completas están en Configuración > Normativas.
         if (!$estudio) {
             $this->parrafo(self::FUENTE_REFERENCIA[$poblacion] ?? '', 6.5);
+            // Con qué set se construyó el caso. Va solo acá: es trazabilidad
+            // de cómo se armó el ejercicio, no un dato del paciente.
+            $autor = is_array($abr['autor'] ?? null) ? $abr['autor'] : [];
+            if (($autor['label'] ?? '') !== '') {
+                $base = is_array($autor['baseline'] ?? null) ? $autor['baseline'] : [];
+                $partes = [];
+                foreach (['I', 'III', 'V'] as $onda) {
+                    if (isset($base[$onda]['lat'])) {
+                        $partes[] = sprintf('%s %.2f ms / %.2f µV', $onda,
+                            (float) $base[$onda]['lat'], (float) ($base[$onda]['amp'] ?? 0));
+                    }
+                }
+                $this->parrafo(
+                    'Caso construido con: ' . (string) $autor['label']
+                    . ($partes !== [] ? ' — baseline usado: ' . implode(' · ', $partes) : ''),
+                    6.5
+                );
+            }
         }
 
         // Las desviaciones cargadas a mano, solo si hay alguna: en cero no

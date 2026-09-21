@@ -11,13 +11,11 @@
 // Es una sugerencia al azar dentro de un rango clínicamente razonable, no un
 // valor fijo -- el docente la edita después.
 (function () {
-    var ABR_DEFAULT_POPULATIONS = {
-        adult_male:   { I: { lat: 1.65, amp: 0.30 }, III: { lat: 3.85, amp: 0.35 }, V: { lat: 5.70, amp: 0.50 } },
-        adult_female: { I: { lat: 1.62, amp: 0.21 }, III: { lat: 3.68, amp: 0.37 }, V: { lat: 5.47, amp: 0.60 } },
-        child:        { I: { lat: 1.58, amp: 0.28 }, III: { lat: 3.78, amp: 0.33 }, V: { lat: 5.60, amp: 0.48 } },
-        neonate:      { I: { lat: 2.10, amp: 0.20 }, III: { lat: 4.70, amp: 0.24 }, V: { lat: 6.80, amp: 0.35 } },
-        elderly:      { I: { lat: 1.75, amp: 0.27 }, III: { lat: 4.00, amp: 0.32 }, V: { lat: 5.90, amp: 0.45 } }
-    };
+    // El default de la app lo manda el backend (AbrReferences::defaults,
+    // que lo saca de CaseWaveforms::CLICK_BASE). Acá había una copia a mano
+    // que se quedó vieja cuando el normativo se reancló en bibliografía: el
+    // caso se armaba contra una tabla que la app ya no usaba.
+    var ABR_DEFAULT_POPULATIONS = window.CASE_CONST.abrDefaultPopulations;
     var ABR_AUTHOR_CATALOG = window.CASE_CONST.abrAuthorCatalog;
 
     function rand(min, max) { return min + Math.random() * (max - min); }

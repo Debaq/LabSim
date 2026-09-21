@@ -167,6 +167,62 @@ final class AbrReferences
         ],
     ];
 
+    /**
+     * El default de la app en forma onda => ['lat'=>, 'amp'=>].
+     *
+     * La tabla vive en CaseWaveforms::CLICK_BASE (copia del normativo del
+     * cliente) y acá solo se le cambia la forma. Antes había tres copias
+     * más --normativas.php, case_create y public/js/case/abr.js-- y la del
+     * JS se quedó vieja al reanclar el normativo: los casos se armaban
+     * contra una tabla que la app ya no usaba.
+     */
+    public static function defaults(): array
+    {
+        require_once __DIR__ . '/CaseWaveforms.php';
+        $out = [];
+        foreach (CaseWaveforms::CLICK_BASE as $pop => $ondas) {
+            foreach ($ondas as $onda => $par) {
+                $out[$pop][$onda] = ['lat' => (float) $par[0], 'amp' => (float) $par[1]];
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * El baseline que realmente se usó: el del set, completado con el
+     * default de la app donde esa serie no publica nada. Es la misma
+     * resolución que hace public/js/case/abr.js al armar el caso, campo
+     * por campo, y sirve para dejar registrado con qué se construyó.
+     *
+     * @return array<string,array<string,float>> onda => ['lat'=>, 'amp'=>]
+     */
+    public static function resolve(string $setId, string $pop): array
+    {
+        require_once __DIR__ . '/CaseWaveforms.php';
+        $base = CaseWaveforms::CLICK_BASE[$pop] ?? CaseWaveforms::CLICK_BASE['adult_female'];
+        $set = self::SETS[$setId]['populations'][$pop] ?? [];
+        $out = [];
+        foreach (['I', 'III', 'V'] as $onda) {
+            $out[$onda] = [
+                'lat' => isset($set[$onda]['lat']) ? (float) $set[$onda]['lat'] : (float) $base[$onda][0],
+                'amp' => isset($set[$onda]['amp']) ? (float) $set[$onda]['amp'] : (float) $base[$onda][1],
+            ];
+        }
+        return $out;
+    }
+
+    /** Etiqueta del set, o null si no está registrado. */
+    public static function label(string $setId, array $propios = []): ?string
+    {
+        if (isset(self::SETS[$setId]['label'])) {
+            return (string) self::SETS[$setId]['label'];
+        }
+        if (isset($propios[$setId]['label'])) {
+            return (string) $propios[$setId]['label'];
+        }
+        return null;
+    }
+
     /** Ruta absoluta de la planilla, o null si no está desplegada. */
     public static function planilla(): ?string
     {

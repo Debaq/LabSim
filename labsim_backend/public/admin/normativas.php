@@ -29,23 +29,12 @@ const ABR_POPULATION_LABELS = [
     'elderly' => 'Adulto mayor (60-85)',
 ];
 
-// Mismos números que el pseudo-autor "LabSim (default)" hardcodeado en
-// case_create.php y que ABR_generator.py trae de fábrica en
-// resources/abr/normative_data.json (población "click", vía aérea).
-// Mantener sincronizado a mano si ese JSON cambia -- es el punto de
-// referencia (offset 0) contra el que se calculan los demás autores.
-//
-// De dónde sale cada fila (ver ABR_FUENTES abajo): latencias de adulto de
-// F01, amplitudes de adulto de F27, niño de F04, neonato de F25/F07 y
-// adulto mayor de F21. Lo que ninguna serie publica --ondas II, IV, VI,
-// VII, microfónica y las amplitudes pediátricas-- se calcula de esas.
-const ABR_DEFAULT_POPULATIONS = [
-    'adult_male'   => ['I' => ['lat' => 1.47, 'amp' => 0.320], 'III' => ['lat' => 3.75, 'amp' => 0.370], 'V' => ['lat' => 5.68, 'amp' => 0.400]],
-    'adult_female' => ['I' => ['lat' => 1.46, 'amp' => 0.440], 'III' => ['lat' => 3.65, 'amp' => 0.470], 'V' => ['lat' => 5.54, 'amp' => 0.540]],
-    'child'        => ['I' => ['lat' => 1.48, 'amp' => 0.239], 'III' => ['lat' => 3.50, 'amp' => 0.282], 'V' => ['lat' => 5.50, 'amp' => 0.410]],
-    'neonate'      => ['I' => ['lat' => 1.79, 'amp' => 0.171], 'III' => ['lat' => 4.56, 'amp' => 0.205], 'V' => ['lat' => 7.00, 'amp' => 0.299]],
-    'elderly'      => ['I' => ['lat' => 1.84, 'amp' => 0.342], 'III' => ['lat' => 3.91, 'amp' => 0.378], 'V' => ['lat' => 5.84, 'amp' => 0.423]],
-];
+// El set de fábrica sale de CaseWaveforms::CLICK_BASE, que es la copia que
+// el backend ya mantiene del normativo del cliente: una sola tabla y no
+// dos que se desincronizan. De dónde viene cada fila lo dice
+// AbrReferences::ANCLAJE.
+require_once __DIR__ . '/../../src/CaseWaveforms.php';
+$abrDefaults = AbrReferences::defaults();
 
 function slugify_author(string $label): string
 {
@@ -154,7 +143,7 @@ admin_header('Normativas', $me);
                 </div>
                 <?php foreach (ABR_WAVES as $wave): ?>
                 <div style="font-size:0.85em; opacity:0.85;">
-                    Onda <?= $wave ?>: lat <?= ABR_DEFAULT_POPULATIONS[$pop][$wave]['lat'] ?> ms / amp <?= ABR_DEFAULT_POPULATIONS[$pop][$wave]['amp'] ?> µV
+                    Onda <?= $wave ?>: lat <?= $abrDefaults[$pop][$wave]['lat'] ?> ms / amp <?= $abrDefaults[$pop][$wave]['amp'] ?> µV
                 </div>
                 <?php endforeach; ?>
             </div>
@@ -227,7 +216,7 @@ admin_header('Normativas', $me);
                 <div>
                     <strong style="font-weight:600;"><?= htmlspecialchars($popLabel) ?></strong>
                     <?php foreach (ABR_WAVES as $wave): ?>
-                    <?php $cur = $author['populations'][$pop][$wave] ?? ABR_DEFAULT_POPULATIONS[$pop][$wave]; ?>
+                    <?php $cur = $author['populations'][$pop][$wave] ?? $abrDefaults[$pop][$wave]; ?>
                     <div style="margin-top:0.3rem;">
                         <span style="font-weight:normal; font-size:0.85em;">Onda <?= $wave ?></span>
                         <label style="font-weight:normal; display:inline-block; margin-right:0.4rem;">
@@ -271,7 +260,7 @@ admin_header('Normativas', $me);
                 <div>
                     <strong style="font-weight:600;"><?= htmlspecialchars($popLabel) ?></strong>
                     <?php foreach (ABR_WAVES as $wave): ?>
-                    <?php $cur = ABR_DEFAULT_POPULATIONS[$pop][$wave]; ?>
+                    <?php $cur = $abrDefaults[$pop][$wave]; ?>
                     <div style="margin-top:0.3rem;">
                         <span style="font-weight:normal; font-size:0.85em;">Onda <?= $wave ?></span>
                         <label style="font-weight:normal; display:inline-block; margin-right:0.4rem;">

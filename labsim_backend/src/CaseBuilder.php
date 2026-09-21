@@ -1252,6 +1252,9 @@ final class CaseBuilder
         }
 
         $abr = $data['ABR'] ?? [];
+        // Set normativo con el que se construyó, para que el select vuelva
+        // a marcarlo al reabrir el caso.
+        $v['abr']['autor'] = (string) (($abr['autor']['set'] ?? null) ?: '__default__');
         foreach (['OD' => 'od', 'OI' => 'oi'] as $ladoData => $ladoForm) {
             $ladoAbr = is_array($abr[$ladoData] ?? null) ? $abr[$ladoData] : [];
             $desv = is_array($ladoAbr['desviaciones'] ?? null) ? $ladoAbr['desviaciones'] : [];

@@ -624,6 +624,9 @@ window.CASE_CONST = <?= json_encode([
     'neuralDefaults' => CaseBuilder::ABR_NEURAL_DEFAULTS,
     'abrNeuralPresets' => CaseBuilder::ABR_NEURAL_PRESETS,
     'abrAuthorCatalog' => $abrAuthorCatalog,
+    // El default de la app, que el JS usaba con su propia copia
+    // hardcodeada -- y se quedó vieja al reanclar el normativo.
+    'abrDefaultPopulations' => AbrReferences::defaults(),
     'eoasFreqs' => CaseBuilder::EOAS_FREQS,
     'eoasShapes' => CaseBuilder::EOAS_AUTOFILL_SHAPES,
     'eoasGrades' => CaseBuilder::EOAS_AUTOFILL_GRADES,

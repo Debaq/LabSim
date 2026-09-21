@@ -276,6 +276,13 @@ final class CaseForm
         // AbrMainWindow.la_super/DEFAULT_ABR_CASE en el cliente).
         $abrOd = self::parseAbr($v, 'od');
         $abrOi = self::parseAbr($v, 'oi');
+        // Con qué set normativo se armó este caso. No cambia nada de lo que
+        // se simula --las ondas ya están escritas en cada campo, con el
+        // offset del autor adentro-- pero deja el rastro: sin esto, un caso
+        // hecho con Hood y otro con Sanfins son indistinguibles después de
+        // guardar, y la diferencia entre sets es del orden de la desviación
+        // que el docente quiso cargar a mano.
+        $abrAutor = self::abrAutor($v, $age, $gender);
 
         // EOA: patología por oído, mismo shape simplificado (type + umbral)
         // que ABR usa para su curva -- ver oae_attenuation_db en
@@ -512,7 +519,7 @@ final class CaseForm
                 ]),
                 'otoscopia' => ['fases' => $otoscopiaFases],
                 'perfil' => $perfil,
-                'abr' => ['OD' => $abrOd, 'OI' => $abrOi],
+                'abr' => ['OD' => $abrOd, 'OI' => $abrOi, 'autor' => $abrAutor],
                 'eoas' => ['OD' => $eoasOd, 'OI' => $eoasOi],
                 'vemp' => ['OD' => $vempOd, 'OI' => $vempOi],
                 // La pasada final del docente por el Resumen: qué fichas
@@ -557,6 +564,46 @@ final class CaseForm
         $f->nombre1 = $nombre1;
         $f->apellido1 = $apellido1;
         return $f;
+    }
+
+    /**
+     * Con qué set normativo se construyó el caso, y qué valores tenía ese
+     * set para la población que le toca al paciente.
+     *
+     * Se guarda el baseline RESUELTO y no solo el id: los sets del docente
+     * se editan, y un caso de hace seis meses tiene que poder decir con qué
+     * números se armó aunque ese set ya no sea el mismo.
+     */
+    private static function abrAutor(array $v, int $edad, int $genero): array
+    {
+        require_once __DIR__ . '/AbrReferences.php';
+        require_once __DIR__ . '/CaseWaveforms.php';
+        $id = trim((string) self::val($v, ['abr', 'autor'], '__default__'));
+        // Los sets del docente viven en app_config, que es base de datos:
+        // CaseForm se usa también desde los tests, sin PDO. Si no está a
+        // mano se resuelve contra los publicados y el set propio queda
+        // registrado por su id igual -- el rastro no se pierde.
+        $propios = [];
+        if (class_exists('AppConfig')) {
+            try {
+                $guardados = AppConfig::getEffective('abr_reference_authors', null);
+                $propios = is_array($guardados) ? $guardados : [];
+            } catch (Throwable $e) {
+                $propios = [];
+            }
+        }
+        $label = AbrReferences::label($id, $propios) ?? ($id !== '__default__' ? $id : null);
+        if ($id === '__default__' || $label === null) {
+            $id = '__default__';
+            $label = 'LabSim (default)';
+        }
+        $pop = CaseWaveforms::poblacion($edad, $genero);
+        return [
+            'set' => $id,
+            'label' => $label,
+            'poblacion' => $pop,
+            'baseline' => AbrReferences::resolve($id, $pop),
+        ];
     }
 
     /** Un oído del ABR desde el POST (ver ABR_TYPE_OPTIONS). */

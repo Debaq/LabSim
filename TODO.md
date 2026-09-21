@@ -2167,3 +2167,29 @@ angosta de 1.15 a 0.84 ms. Eso es lo que el alumno tiene que poder ver.
 F24 no reporta anchos, así que el afinamiento del chirp de banda ancha
 (0.92 en la onda I, 0.96 en el resto) es derivado, no publicado, y está
 marcado como tal.
+
+## ABR: el caso registra con qué se construyó (2026-09-20)
+
+Idea del usuario, y corrige algo que yo había planteado mal: no es que al
+alumno se lo evalúe contra otro autor --nadie corrige sus marcas, la banda
+normativa es ayuda de lectura-- sino que **el caso no dejaba rastro de con
+qué set se armó**. Las desviaciones ya viajan con el offset autor-vs-default
+adentro (ver `public/js/case/abr.js`, `buildValues`), así que después de
+guardar un caso hecho con Hood y otro hecho con Sanfins son
+indistinguibles, y la diferencia entre sets es del orden de la desviación
+que el docente carga a mano.
+
+Ahora `cases.data['ABR']['autor']` guarda `set`, `label`, `poblacion` y el
+**baseline resuelto** -- no solo el id: los sets del docente se editan, y un
+caso de hace seis meses tiene que poder decir con qué números se armó aunque
+ese set ya no sea el mismo. El select del editor postea (antes no tenía
+`name`) y vuelve a su valor al reabrir el caso. La ficha del docente lo
+imprime bajo la tabla de referencia; la de estudio no.
+
+**Bug que apareció haciendo esto:** `public/js/case/abr.js` tenía su PROPIA
+copia de la tabla normativa por defecto, y se quedó vieja al reanclar (onda
+I en 0.21 µV, neonato en 2.10 ms). O sea: los casos nuevos se armaban contra
+una tabla que la app ya no usa. Había cuatro copias de los mismos números
+--el JSON del cliente, `CaseWaveforms::CLICK_BASE`, `normativas.php` y el
+JS--; quedan dos: la del cliente y la del backend, y las otras dos salen de
+`AbrReferences::defaults()`, que las deriva de `CLICK_BASE`.
