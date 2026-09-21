@@ -4,8 +4,9 @@ Batería de medición sobre el modelo. Última corrida: 2026-09-21 contra
 `main`, con el entorno del proyecto (`micromamba activate labsim`) para el
 cliente y `php` para el backend.
 
-**Tercera pasada.** Las dos primeras dejaron dos FUERA (D6 y el hallazgo H1:
-el FSP no dependía del nivel de estímulo). Los dos se corrigieron de raíz:
+**Tercera pasada, sin FUERA.** Las dos primeras dejaron dos (D6 y el
+hallazgo H1: el FSP no dependía del nivel de estímulo). Los dos se
+corrigieron de raíz:
 
 1. **El FSP se calcula sobre el trazo**, no se declara en el caso
    (`expected_fsp` + sorteo con F no central, criterio 3,1).
@@ -15,6 +16,12 @@ el FSP no dependía del nivel de estímulo). Los dos se corrigieron de raíz:
 3. **El umbral fisiológico está 9 dB por debajo del clínico**
    (`PHYSIOLOGICAL_OFFSET_DB`), así que en el umbral que declara el caso la
    onda V vale la mitad y el equipo la detecta en la mitad de los registros.
+
+El único que había quedado fuera en esta pasada, F3, estaba mal planteado
+en la batería y no en el modelo: el rango de 5-10 dB es el de UNA reducción
+a la mitad de los barridos, y el test comparaba 500 contra 2000, que son
+dos. Partido en F3a (1000 vs 2000) y F3b (500 vs 2000), el modelo cae
+dentro de los dos.
 
 Detalle del diseño en `TODO.md`. Cada test usa semilla fija. Los bloques A,
 B, C, E y F miden el generador del cliente (`src/abr/ABR_generator.py`); los
@@ -37,7 +44,8 @@ bloques D y G, la proyección del backend
 | 3 | desfase umbral fisiológico | P ≈ 0,5 en el umbral del caso | 9,0 dB → P = 0,51 (150 reps, 2000 barridos) | OK |
 | 3 | D6 sensorial 30/30, vibrador, 55 dB nHL | P ≈ 0,5 (0,40–0,60) | 0,50 (100 reps) | OK |
 | 3 | F1 amplitud onda V por SL fisiológico | 0 % · 50 % · — · 100 % | SL 0 3,7 % · 10 52,3 % · 20 79,1 % · 40 100 % (umbral clínico 48,5 %) | OK |
-| 3 | F3 umbral hallado, 500 vs 2000 barridos | 500 queda 5-10 dB más alto | 24,7 vs 12,2 dB (media) · 25 vs 10 (mediana) | **FUERA** |
+| 3 | F3a umbral hallado, 1000 vs 2000 barridos | 5-7 dB más alto | 17,7 vs 12,2 dB → **5,5 dB** | OK |
+| 3 | F3b umbral hallado, 500 vs 2000 barridos | 10-14 dB más alto | 24,7 vs 12,2 dB → **12,5 dB** | OK |
 | 4 | A1 atenuación interaural | 65 / 45 / 5 / 22 / 13,5 | 65,0 / 45,0 / 5,0 / 22,0 / 13,5 | OK |
 | 4 | A2 latencia onda V, inserción vs supraaural | 0,8 ms ± 0,1 | 0,800 ms | OK |
 | 4 | A3 interpicos, inserción vs supraaural | 0 ms ± 0,05 | 0,000 / 0,000 / 0,000 | OK |
@@ -70,27 +78,35 @@ bloques D y G, la proyección del backend
 | 4 | G5 neuropatía, AABR 35 dB nHL | refiere | P(pasa) = 0,00 (control normal 1,00) | OK |
 | 4 | G6 sensorial 40 dB, AABR 35 dB nHL | refiere | P(pasa) = 0,00 | OK |
 
-**43 OK · 1 FUERA**
+**44 OK · 0 FUERA**
 
-## Test FUERA
+## Dos cosas que conviene tener a mano
 
-### F3 — umbral hallado con 500 contra 2000 barridos
+### El desfase del umbral fisiológico es de 9 dB
 
-Esperado 5-10 dB de diferencia. Medido **12,5 dB de media** (24,7 con 500
-barridos contra 12,2 con 2000; medianas 25 y 10, sobre 60 repeticiones con
-paso de 5 dB).
+Más de los 3-5 dB que se estimaban a ojo, pero no es un número elegido: se
+calibró contra el criterio FSP ≥ 3,1, que era la idea. Lo que deja es lo que
+se quería:
 
-No es un parámetro suelto: sale de dos cosas ancladas por separado.
-Promediar 4 veces menos deja el doble de ruido, así que para volver a cruzar
-el criterio hace falta el doble de amplitud; y la curva de crecimiento
-—anclada en F1, que exige 50 % de amplitud a 10 dB sobre el umbral
-fisiológico— necesita unos 12 dB para duplicar la onda cerca del umbral.
-Bajar la diferencia a 10 dB obliga a empinar el crecimiento, y eso rompe F1.
+- en el umbral clínico del caso la onda V mide el **48 %** de su amplitud a
+  SL 40, y el FSP ronda 3,1 con 2000 barridos;
+- o sea que ahí el equipo declara respuesta en la mitad de los registros;
+- el alumno que promedia poco o no repite **sobreestima el umbral**, igual
+  que en la clínica.
 
-Dicho de otro modo: el modelo dice que **cada vez que se parten los barridos
-a la mitad se pagan unos 6 dB de umbral**, y la referencia clínica de "5-10
-dB" está pensada para una reducción a la mitad, no a la cuarta parte. Queda
-anotado, no corregido.
+### Barridos y umbral: media son 6 dB
+
+Cada vez que se parten los barridos a la mitad, el umbral hallado sube unos
+6 dB (medido: 500 → 24,7 · 1000 → 17,7 · 2000 → 12,2 · 4000 → 9,5 dB sobre
+un umbral declarado de 10). Es la consecuencia directa de la curva de
+crecimiento que exige F1 (50 % de amplitud a 10 dB sobre el umbral
+fisiológico) combinada con el 1/√N del promediado, y por eso empinar la
+curva para "arreglar" F3 rompería F1.
+
+**Para armar casos:** con N* = 800 al nivel de referencia, el alumno que se
+detiene a los 400 barridos va a informar un umbral ~6 dB más alto que el
+declarado. Sirve como pregunta: por qué su umbral quedó más alto que el
+esperado.
 
 ## Cómo reproducirla
 

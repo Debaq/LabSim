@@ -2851,3 +2851,17 @@ reparte en cuadratura entre lo que sobrevive al promediado (`MAINS_COHERENT`
 0.8, lo que se ve dibujado) y lo que entra con la fase de cada barrido
 (`MAINS_INCOHERENT` 0.6, lo que no se cancela). Sin tierra: residual de 59
 a 742 nV y FSP de 7.9 a 1.0.
+
+### Barridos y umbral: 6 dB por cada mitad
+
+Consecuencia medible del punto 3 y de la curva de crecimiento anclada en F1
+(50 % de amplitud a 10 dB sobre el umbral fisiológico) combinada con el
+1/√N del promediado: **cada vez que se parten los barridos a la mitad, el
+umbral que encuentra el alumno sube unos 6 dB**. Medido sobre un umbral
+declarado de 10 dB nHL: 500 barridos → 24,7 · 1000 → 17,7 · 2000 → 12,2 ·
+4000 → 9,5.
+
+Sirve para armar casos: con N* = 800 al nivel de referencia, el que se
+detiene a los 400 barridos informa ~6 dB de más. Y explica por qué no hay
+que empinar la curva de crecimiento para acortar esa diferencia: rompe F1,
+que es la condición fuerte.
