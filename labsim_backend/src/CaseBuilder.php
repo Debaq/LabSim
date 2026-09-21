@@ -1017,6 +1017,9 @@ final class CaseBuilder
             // separa un recién nacido de turno de un lactante de ocho meses:
             // los dos son 'edad' = 0 y no se parecen en nada.
             'edad_horas' => $form['edad_horas'] ?? null,
+            // Circunstancias del parto y el percentil sorteado de cada oído
+            // (ver NewbornScreening). Solo en recién nacidos.
+            'nacimiento' => $form['nacimiento'] ?? [],
             'volume' => [self::earVolume($age, $gender), self::earVolume($age, $gender), 'N/D'],
             'UMD' => $form['umd'],
             'SDT' => $form['sdt'],
@@ -1270,6 +1273,20 @@ final class CaseBuilder
                 $v['edad_valor'] = (string) $horas;
                 $v['edad_unidad'] = 'horas';
             }
+        }
+
+        $nacimiento = is_array($data['nacimiento'] ?? null) ? $data['nacimiento'] : [];
+        if ($nacimiento !== []) {
+            $v['nacimiento'] = [
+                'parto' => (string) ($nacimiento['parto'] ?? 'vaginal'),
+                'semanas' => $nacimiento['semanas'] ?? '',
+                'peg' => !empty($nacimiento['peg']) ? '1' : '',
+                'vernix_limpiado' => !empty($nacimiento['vernix_limpiado']) ? '1' : '',
+                'liquido_persistente' => !empty($nacimiento['liquido_persistente']) ? '1' : '',
+                // El percentil vuelve tal cual: si se resorteara al reabrir,
+                // el mismo caso cambiaría de resultado entre dos clases.
+                'percentil' => $nacimiento['percentil'] ?? [],
+            ];
         }
 
         $abr = $data['ABR'] ?? [];

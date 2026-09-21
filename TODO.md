@@ -2347,3 +2347,58 @@ de estudio no, porque ahí es justamente lo que el alumno tiene que resolver.
 Con esto el recién nacido queda coherente en los cuatro exámenes: EOA ausente
 por el transitorio, ABR aéreo algo elevado, ABR óseo con su propia
 calibración, y timpanograma que engaña con la sonda equivocada.
+
+## Screening neonatal: calibrado contra tasas de pase publicadas (2026-09-21)
+
+El usuario aportó las tasas de pase por franja horaria (TEOAE y AABR), los
+modificadores y las 10 referencias. Eso cambia el modelo de raíz: **la
+bibliografía no publica decibeles, publica porcentajes de pase**, así que
+ahora la tabla manda y los dB son su consecuencia. La curva exponencial que
+yo había estimado el día anterior queda reemplazada.
+
+`NewbornScreening` (backend, con las 10 citas en el docblock):
+
+| franja | TEOAE pasa | AABR pasa |
+|---|---|---|
+| 0-12 h | 0,40 | 0,85 |
+| 12-24 h | 0,55 | 0,92 |
+| 24-36 h | 0,75 | 0,95 |
+| 36-48 h | 0,85 | 0,96 |
+| 48-72 h | 0,93 | 0,97 |
+| >72 h | 0,95 | 0,97 |
+
+**Cómo se invierte.** Los dos umbrales en dB no se inventaron, se midieron
+contra nuestros propios generadores: la TEOAE de este simulador cae bajo
+criterio pasando los ~7,5 dB de atenuación total (o sea 3,75 dB de
+conductiva, porque el sonido cruza de ida y vuelta), y el AABR de screening
+a 35 dB nHL deja de pasar con ~25 dB de conductiva. Con esos dos puntos, la
+función cuantil por tramos lineales reproduce **exactamente** las dos
+columnas de la tabla en todas las franjas (verificado con 2000 percentiles
+por franja, ±0,01).
+
+**Cada oído tiene su percentil**, sorteado una vez y guardado en el caso: dos
+recién nacidos de la misma edad no tienen la misma cantidad de líquido, y los
+dos oídos del mismo bebé tampoco. Por eso uno puede referir y el otro no, que
+es lo que se ve en el turno. Al reabrir el caso el percentil vuelve tal cual:
+el mismo ejercicio no puede cambiar de resultado entre dos clases.
+
+**Modificadores** (bloque "Recién nacido: circunstancias del parto" en la
+ficha del paciente): cesárea (−12 h para la EOA, −4 h para el AABR: sin
+trabajo de parto no se exprime el líquido), pretérmino tardío --derivado de
+las semanas de EG, no es un campo aparte-- (−13 h / −6 h), pequeño para edad
+gestacional (+8 h, pasa mejor), vérnix limpiado antes de medir (corta a la
+mitad lo que refiere la EOA) y líquido persistente (deja de ser cuestión de
+horas: 0,20 / 0,80).
+
+**Tope de un mes**: pasado eso ya no es screening neonatal. El 5% que sigue
+refiriendo a las 72 h es sonda, ruido y oído medio de verdad, no el
+transitorio del parto; sin el tope, un bebé de ocho meses heredaba la tasa
+del recién nacido.
+
+La ficha del docente anticipa el resultado por oído con su porqué; la de
+estudio no.
+
+Lo que la tabla de "condición real" describe ya salía solo del modelo: la
+hipoacusia sensorial ≥35-40 dB borra la EOA por el audiograma, y la
+neuropatía deja la EOA normal con el ABR alterado (es el contraste que
+`type = neural` ya hacía).

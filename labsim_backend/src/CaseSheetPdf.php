@@ -1470,6 +1470,13 @@ final class CaseSheetPdf
             $this->parrafo(self::FUENTE_REFERENCIA[$poblacion] ?? '', 6.5);
             // Con qué set se construyó el caso. Va solo acá: es trazabilidad
             // de cómo se armó el ejercicio, no un dato del paciente.
+            // Qué va a informar el screening y por qué. Es el ejercicio
+            // entero: un recién nacido sano puede referir la EOA y pasar el
+            // AABR, y eso no es un error del caso.
+            $scr = self::notaScreening($data);
+            if ($scr !== '') {
+                $this->parrafo($scr, 6.5);
+            }
             // Calibración ósea del lactante: el cráneo sin suturar transmite
             // mejor, así que el umbral óseo se lee más bajo y el gap
             // aéreo-óseo APARENTE queda inflado. Sin este aviso, un
@@ -2668,6 +2675,48 @@ final class CaseSheetPdf
             'coclear' => 'Coclear',
             'neural' => 'Retrococlear',
         ][$tipo] ?? $tipo;
+    }
+
+    /**
+     * Lo que va a informar el screening neonatal en cada oído, con el porqué.
+     * Solo ficha del docente.
+     */
+    private static function notaScreening(array $data): string
+    {
+        $horas = $data['edad_horas'] ?? null;
+        if ($horas === null || $horas === '') {
+            return '';
+        }
+        require_once __DIR__ . '/NewbornScreening.php';
+        $nac = is_array($data['nacimiento'] ?? null) ? $data['nacimiento'] : [];
+        $partes = [];
+        foreach (['OD', 'OI'] as $lado) {
+            $db = CaseProfile::neonatalTransientDb($horas, $nac, $lado);
+            $r = NewbornScreening::resultado($db);
+            $partes[] = sprintf('%s: TEOAE %s · AABR %s (%.1f dB de conductiva transitoria)',
+                $lado, $r['teoae'], $r['aabr'], $db);
+        }
+        $ctx = [];
+        if (!empty($nac['cesarea'])) {
+            $ctx[] = 'cesárea (se comporta como 12 h más joven para la EOA)';
+        }
+        if (!empty($nac['pretermino_tardio'])) {
+            $ctx[] = 'pretérmino tardío';
+        }
+        if (!empty($nac['peg'])) {
+            $ctx[] = 'pequeño para la edad gestacional (pasa algo mejor)';
+        }
+        if (!empty($nac['vernix_limpiado'])) {
+            $ctx[] = 'vérnix limpiado antes de medir';
+        }
+        if (!empty($nac['liquido_persistente'])) {
+            $ctx[] = 'líquido o vérnix persistente';
+        }
+        return 'Screening neonatal esperado — ' . implode(' | ', $partes)
+            . ($ctx !== [] ? '. Circunstancias: ' . implode(', ', $ctx) : '')
+            . '. Las tasas salen de la bibliografía de screening por franja horaria: a las pocas horas la '
+            . 'EOA refiere en más de la mitad de los recién nacidos SANOS mientras el AABR pasa en el 85%, '
+            . 'y por eso un "refiere" temprano es motivo de rescreening y no un hallazgo.';
     }
 
     /** Aviso de la calibración ósea del lactante, vacío si no aplica. */

@@ -38,6 +38,29 @@
             <input type="text" name="rut" id="patient-rut" value="<?= htmlspecialchars((string) ($v['rut'] ?? '')) ?>">
         </label>
     </div>
+
+    <?php $nac = $v['nacimiento'] ?? []; ?>
+    <details<?= ($v['edad_valor'] ?? '') !== '' ? ' open' : '' ?>>
+        <summary><strong>Recién nacido: circunstancias del parto</strong></summary>
+        <p class="help help--mt">Solo aplica si la edad va en 0 y se cargó la edad exacta. Mueven cuánto refiere el screening en las primeras horas: el líquido del oído medio se exprime en el canal del parto, así que una cesárea sin trabajo de parto se comporta como un bebé 12 horas más joven para la EOA. No cambian la audición del paciente.</p>
+        <div class="three-col">
+            <label>Parto
+                <select name="nacimiento[parto]">
+                    <option value="vaginal"<?= (($nac['parto'] ?? 'vaginal') === 'vaginal') ? ' selected' : '' ?>>Vaginal</option>
+                    <option value="cesarea"<?= (($nac['parto'] ?? '') === 'cesarea') ? ' selected' : '' ?>>Cesárea</option>
+                </select>
+            </label>
+            <label>Edad gestacional (semanas)
+                <input type="number" name="nacimiento[semanas]" min="24" max="42" step="1" value="<?= htmlspecialchars((string) ($nac['semanas'] ?? '')) ?>" placeholder="40">
+            </label>
+        </div>
+        <label class="inline-check"><input type="checkbox" name="nacimiento[peg]" value="1" <?= !empty($nac['peg']) ? 'checked' : '' ?>> Pequeño para la edad gestacional</label>
+        <label class="inline-check"><input type="checkbox" name="nacimiento[vernix_limpiado]" value="1" <?= !empty($nac['vernix_limpiado']) ? 'checked' : '' ?>> Se limpió el vérnix del conducto antes de medir</label>
+        <label class="inline-check"><input type="checkbox" name="nacimiento[liquido_persistente]" value="1" <?= !empty($nac['liquido_persistente']) ? 'checked' : '' ?>> Líquido o vérnix persistente (no se resolvió con las horas)</label>
+        <?php foreach (['OD', 'OI'] as $ladoNac): ?>
+        <input type="hidden" name="nacimiento[percentil][<?= $ladoNac ?>]" value="<?= htmlspecialchars((string) ($nac['percentil'][$ladoNac] ?? '')) ?>">
+        <?php endforeach; ?>
+    </details>
     <?php if (!$isEdit): ?>
     <div class="two-col">
         <label>Nombre

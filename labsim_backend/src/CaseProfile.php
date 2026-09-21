@@ -152,38 +152,6 @@ final class CaseProfile
     ];
 
     /**
-     * Transitorio de las primeras horas de vida, en dB.
-     *
-     * Un recién nacido de menos de 24 horas tiene el conducto con vérnix y
-     * restos de líquido amniótico, y mesénquima en el oído medio: el
-     * resultado es una pérdida de transmisión REAL pero transitoria, que se
-     * resuelve sola en dos o tres días. Es la razón por la que el screening
-     * con EOA antes de las 24 horas refiere mucho más que a las 48, y es
-     * contenido de la asignatura: el alumno tiene que poder ver una EOA
-     * ausente en un oído que oye perfecto.
-     *
-     * Se modela como una atenuación que decae exponencial con las horas de
-     * vida (`NEONATAL_TAU_H`), y NO como una patología: el caso sigue
-     * siendo un oído normal.
-     *
-     * Los tres exámenes no la sufren igual:
-     * - EOA: la peor parte. El sonido atraviesa el conducto y el oído medio
-     *   de ida Y de vuelta, así que la atenuación va al doble (mismo
-     *   criterio que la conductiva en oae_attenuation_db).
-     * - ABR aéreo: la sufre una sola vez, y el fono de inserción empuja el
-     *   estímulo más allá de parte del vérnix.
-     * - ABR óseo: NO la sufre. El vibrador saltea conducto y oído medio, y
-     *   ese contraste --aérea elevada, ósea normal-- es justo lo que dice
-     *   que es transitorio y no una hipoacusia.
-     */
-    public const NEONATAL_DEBRIS_DB = 28.0;
-    public const NEONATAL_TAU_H = 24.0;
-    public const NEONATAL_OAE_FACTOR = 2.2;
-    public const NEONATAL_ABR_FACTOR = 0.6;
-    /** Pasada una semana ya no queda nada que modelar. */
-    public const NEONATAL_MAX_H = 168.0;
-
-    /**
      * Calibración de la vía ósea del lactante, en dB por frecuencia.
      *
      * Los valores de referencia del vibrador (la fuerza que equivale a 0 dB)
@@ -236,19 +204,38 @@ final class CaseProfile
     }
 
     /**
-     * Atenuación por el transitorio, en dB, a las `$horas` de vida.
-     * `null` (o sin dato) = no es un recién nacido: 0.
+     * Transitorio de las primeras horas de vida.
+     *
+     * Cuánta conductiva le toca a este bebé sale de NewbornScreening, que
+     * invierte las tasas de pase publicadas por franja horaria: la
+     * bibliografía no da decibeles, da porcentajes de pase, así que los dB
+     * son consecuencia de la tabla y no al revés.
+     *
+     * Los tres exámenes no la sufren igual:
+     * - EOA: la peor parte. El sonido atraviesa conducto y oído medio de ida
+     *   Y de vuelta, así que va al doble (mismo criterio que la conductiva
+     *   en oae_attenuation_db). Por eso refiere tanto en las primeras horas.
+     * - ABR aéreo: la sufre una sola vez.
+     * - ABR óseo: NO la sufre. El vibrador saltea conducto y oído medio, y
+     *   ese contraste --aérea elevada, ósea normal-- es lo que dice que es
+     *   transitorio y no una hipoacusia.
      */
-    public static function neonatalTransientDb($horas): float
+    public const NEONATAL_OAE_FACTOR = 2.0;
+    public const NEONATAL_ABR_FACTOR = 0.6;
+
+    /**
+     * Conductiva transitoria de ese oído, en dB HL. `$nacimiento` trae las
+     * circunstancias (parto, edad gestacional, vérnix) y el percentil
+     * sorteado del oído -- ver NewbornScreening.
+     */
+    public static function neonatalTransientDb($horas, array $nacimiento = [], string $lado = 'OD'): float
     {
         if ($horas === null || $horas === '') {
             return 0.0;
         }
-        $h = max(0.0, (float) $horas);
-        if ($h >= self::NEONATAL_MAX_H) {
-            return 0.0;
-        }
-        return self::NEONATAL_DEBRIS_DB * exp(-$h / self::NEONATAL_TAU_H);
+        require_once __DIR__ . '/NewbornScreening.php';
+        $u = $nacimiento['percentil'][$lado] ?? 0.5;
+        return NewbornScreening::transientDb((float) $horas, $nacimiento, (float) $u);
     }
 
     /** Paso del umbral ABR (los equipos van de 5 en 5 dB). */
@@ -2451,11 +2438,8 @@ final class CaseProfile
      * @param array $perfil     normalize()
      * @param array<string,string> $tympPorLado ['OD' => 'A', 'OI' => 'B']
      */
-    public static function project(array $airPairs, array $bonePairs, array $perfil, array $tympPorLado, $horasDeVida = null, $edadMeses = null): array
+    public static function project(array $airPairs, array $bonePairs, array $perfil, array $tympPorLado, $horasDeVida = null, $edadMeses = null, array $nacimiento = []): array
     {
-        // Transitorio de las primeras horas (ver neonatalTransientDb): no es
-        // patología del caso, es la edad del paciente.
-        $transitorio = self::neonatalTransientDb($horasDeVida);
         $decomp = [];
         foreach (['OD' => 0, 'OI' => 1] as $lado => $sideIdx) {
             $decomp[$lado] = self::decompose(
@@ -2473,6 +2457,12 @@ final class CaseProfile
             $ccePct = (float) ($perfil[$lado]['cce_pct'] ?? self::DEFAULT_CCE_PCT);
             $retro = self::normalizeRetro($perfil[$lado]['retro'] ?? []);
             $otro = $lado === 'OD' ? 'OI' : 'OD';
+
+            // Transitorio de las primeras horas: no es patología del caso,
+            // es la edad del paciente. Por oído, porque la cantidad de
+            // líquido no es la misma en los dos (y por eso uno refiere y el
+            // otro no, que es lo que se ve en el turno).
+            $transitorio = self::neonatalTransientDb($horasDeVida, $nacimiento, $lado);
 
             $porEstimulo = self::abrThresholds($decomp[$lado], 'air_conduction');
             if ($transitorio > 0.0) {

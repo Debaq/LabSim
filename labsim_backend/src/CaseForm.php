@@ -109,6 +109,10 @@ final class CaseForm
         // de las suturas, que lleva un par de años -- no cabe en "horas de
         // vida" ni en años enteros.
         $edadMeses = $horasVida !== null ? $horasVida / 720.0 : $age * 12.0;
+        // Circunstancias del parto: deciden cuánto refiere el screening (ver
+        // NewbornScreening). Solo se guardan si el paciente es un recién
+        // nacido; en un adulto no significan nada.
+        $nacimiento = $horasVida !== null ? self::parseNacimiento($v) : [];
         $nombre1 = trim((string) ($v['nombre1'] ?? ''));
         $apellido1 = trim((string) ($v['apellido1'] ?? ''));
 
@@ -338,7 +342,7 @@ final class CaseForm
         // CaseProfile::project). La misma función alimenta la vista previa
         // en vivo del formulario, vía admin/case_project.php: una sola
         // implementación de cada ley.
-        $proyeccion = CaseProfile::project($airPairs, $bonePairs, $perfil, ['OD' => $zOd, 'OI' => $zOi], $horasVida, $edadMeses);
+        $proyeccion = CaseProfile::project($airPairs, $bonePairs, $perfil, ['OD' => $zOd, 'OI' => $zOi], $horasVida, $edadMeses, $nacimiento);
         $decomp = $proyeccion['decomp'];
 
         // La derivación es una SUGERENCIA, no una fuente que pise al
@@ -465,6 +469,7 @@ final class CaseForm
                 'gender' => $gender,
                 'age' => $age,
                 'edad_horas' => $horasVida,
+                'nacimiento' => $nacimiento,
                 'id' => $id,
                 'aerea' => $airPairs,
                 'osea' => self::zip($osea['od'], $osea['oi']),
@@ -576,6 +581,40 @@ final class CaseForm
         $f->nombre1 = $nombre1;
         $f->apellido1 = $apellido1;
         return $f;
+    }
+
+    /**
+     * Circunstancias del parto que mueven el screening neonatal.
+     *
+     * El percentil de cada oído se sortea UNA vez y queda guardado: dos
+     * recién nacidos de la misma edad no tienen la misma cantidad de
+     * líquido, y los dos oídos del mismo bebé tampoco --por eso en el turno
+     * uno refiere y el otro no--. Si ya venía en el caso se respeta, así
+     * volver a guardar no le cambia el resultado al ejercicio.
+     */
+    private static function parseNacimiento(array $v): array
+    {
+        $semanas = self::val($v, ['nacimiento', 'semanas'], '');
+        $semanas = is_numeric($semanas) ? (int) $semanas : null;
+        $out = [
+            'parto' => self::val($v, ['nacimiento', 'parto'], 'vaginal') === 'cesarea'
+                ? 'cesarea' : 'vaginal',
+            'semanas' => $semanas,
+            'peg' => (bool) self::val($v, ['nacimiento', 'peg'], false),
+            'vernix_limpiado' => (bool) self::val($v, ['nacimiento', 'vernix_limpiado'], false),
+            'liquido_persistente' => (bool) self::val($v, ['nacimiento', 'liquido_persistente'], false),
+        ];
+        // El prematuro tardío no es un campo aparte: sale de las semanas.
+        $out['cesarea'] = $out['parto'] === 'cesarea';
+        $out['pretermino_tardio'] = $semanas !== null && $semanas >= 34 && $semanas <= 36;
+        $out['percentil'] = [];
+        foreach (['OD', 'OI'] as $lado) {
+            $guardado = self::val($v, ['nacimiento', 'percentil', $lado], '');
+            $out['percentil'][$lado] = is_numeric($guardado)
+                ? min(1.0, max(0.0, (float) $guardado))
+                : round(mt_rand() / mt_getrandmax(), 4);
+        }
+        return $out;
     }
 
     /**

@@ -3,17 +3,22 @@
 declare(strict_types=1);
 
 /**
- * El recién nacido de turno: horas de vida y su transitorio.
+ * El recién nacido de turno: horas de vida, screening y transitorio.
  *
  * Es el escenario que la edad en años enteros no podía representar. Un bebé
  * de seis horas y uno de once meses son los dos "0 años" y no se parecen en
  * nada: el primero tiene vérnix en el conducto y mesénquima en el oído
- * medio, así que la EOA sale AUSENTE en un oído que oye perfecto, mientras
- * el ABR --y sobre todo el ABR óseo-- dice que no hay hipoacusia.
+ * medio, así que la EOA refiere en más de la mitad de los recién nacidos
+ * SANOS mientras el AABR pasa en el 85%.
+ *
+ * Las tasas salen de la bibliografía (ver NewbornScreening) y los decibeles
+ * salen de las tasas, no al revés. Por eso el test que más importa es el que
+ * comprueba que el modelo REPRODUCE la tabla publicada.
  */
 
 require_once dirname(__DIR__) . '/src/CaseProfile.php';
 require_once dirname(__DIR__) . '/src/CaseBuilder.php';
+require_once dirname(__DIR__) . '/src/NewbornScreening.php';
 
 /** Oído normal: 10 dB HL parejos por aire y por hueso. */
 function neo_audiograma(): array
@@ -25,43 +30,95 @@ function neo_audiograma(): array
     return $curva;
 }
 
-function neo_proyeccion($horas): array
+function neo_proyeccion($horas, array $nacimiento = [], $meses = null): array
 {
     $curva = neo_audiograma();
     return CaseProfile::project(
         $curva, $curva,
         ['OD' => ['cce_pct' => 0, 'retro' => []], 'OI' => ['cce_pct' => 0, 'retro' => []]],
         ['OD' => 'A', 'OI' => 'A'],
-        $horas
+        $horas, $meses, $nacimiento
     );
 }
 
-// --- La ley del transitorio ----------------------------------------------
+// --- Lo central: se reproduce la tabla publicada -------------------------
 
-t_close(CaseProfile::neonatalTransientDb(null), 0.0, 0.01, 'Sin horas de vida no hay transitorio');
-t_close(CaseProfile::neonatalTransientDb(''), 0.0, 0.01, 'Campo vacío tampoco');
-t_true(CaseProfile::neonatalTransientDb(0) > 25.0, 'Recién nacido: el transitorio arranca fuerte');
+// Se barre el percentil de punta a punta y se cuenta qué proporción pasa.
+// Si alguien toca los umbrales en dB, esto lo caza.
+foreach ([[6, 0.40, 0.85], [18, 0.55, 0.92], [30, 0.75, 0.95],
+          [42, 0.85, 0.96], [60, 0.93, 0.97], [96, 0.95, 0.97]] as [$h, $objTeoae, $objAabr]) {
+    $pasaTeoae = 0;
+    $pasaAabr = 0;
+    $n = 2000;
+    for ($i = 0; $i < $n; $i++) {
+        $db = NewbornScreening::transientDb((float) $h, [], ($i + 0.5) / $n);
+        $r = NewbornScreening::resultado($db);
+        $pasaTeoae += $r['teoae'] === 'pasa' ? 1 : 0;
+        $pasaAabr += $r['aabr'] === 'pasa' ? 1 : 0;
+    }
+    t_close($pasaTeoae / $n, $objTeoae, 0.01, "A las {$h} h la TEOAE pasa en la proporción publicada");
+    t_close($pasaAabr / $n, $objAabr, 0.01, "A las {$h} h el AABR pasa en la proporción publicada");
+}
+
+// El AABR siempre aguanta más que la TEOAE: es la misma conductiva y el
+// AABR necesita mucha más para caerse.
+for ($i = 1; $i < 20; $i++) {
+    $db = NewbornScreening::transientDb(6.0, [], $i / 20);
+    $r = NewbornScreening::resultado($db);
+    t_true(
+        !($r['aabr'] === 'refiere' && $r['teoae'] === 'pasa'),
+        'Ningún bebé refiere el AABR y pasa la TEOAE por el transitorio'
+    );
+}
+
+// --- Modificadores --------------------------------------------------------
+
+// Cesárea: sin trabajo de parto no se exprime el líquido, así que a la misma
+// edad pasa menos.
 t_true(
-    CaseProfile::neonatalTransientDb(0) > CaseProfile::neonatalTransientDb(24),
-    'A las 24 horas ya bajó'
+    NewbornScreening::passProbability('teoae', 30.0, ['cesarea' => true])
+    < NewbornScreening::passProbability('teoae', 30.0),
+    'Cesárea: a la misma edad la TEOAE pasa menos'
 );
-t_true(CaseProfile::neonatalTransientDb(48) < 5.0, 'A las 48 horas casi no queda');
-t_close(CaseProfile::neonatalTransientDb(168), 0.0, 0.01, 'A la semana no queda nada');
-t_close(CaseProfile::neonatalTransientDb(500), 0.0, 0.01, 'Y no reaparece después');
+// Y le pega mucho menos al AABR que a la EOA (-4 h contra -12 h).
+$caidaTeoae = NewbornScreening::passProbability('teoae', 30.0)
+    - NewbornScreening::passProbability('teoae', 30.0, ['cesarea' => true]);
+$caidaAabr = NewbornScreening::passProbability('aabr', 30.0)
+    - NewbornScreening::passProbability('aabr', 30.0, ['cesarea' => true]);
+t_true($caidaTeoae > $caidaAabr, 'La cesárea le pega más a la EOA que al AABR');
 
-// --- El hallazgo: EOA ausente con audición normal -------------------------
+t_true(
+    NewbornScreening::passProbability('teoae', 30.0, ['peg' => true])
+    > NewbornScreening::passProbability('teoae', 30.0),
+    'Pequeño para la edad gestacional: pasa algo mejor'
+);
 
-$recien = neo_proyeccion(6);
-$dosDias = neo_proyeccion(48);
+// Limpiar el vérnix no cambia la edad: corta a la mitad lo que refiere.
+$sinLimpiar = 1.0 - NewbornScreening::passProbability('teoae', 6.0);
+$limpiado = 1.0 - NewbornScreening::passProbability('teoae', 6.0, ['vernix_limpiado' => true]);
+t_close($limpiado, $sinLimpiar * 0.5, 0.001, 'Limpiar el vérnix corta a la mitad lo que refiere la TEOAE');
+
+// Líquido persistente: deja de ser cuestión de horas.
+t_close(NewbornScreening::passProbability('teoae', 96.0, ['liquido_persistente' => true]),
+    0.20, 0.001, 'Con líquido persistente la TEOAE pasa en 20% aunque hayan pasado días');
+t_close(NewbornScreening::passProbability('aabr', 96.0, ['liquido_persistente' => true]),
+    0.80, 0.001, 'Y el AABR en 80%');
+
+// Pasado el primer mes esto ya no es screening neonatal.
+t_close(NewbornScreening::transientDb(2000.0, [], 0.99), 0.0, 0.001,
+    'A los tres meses no queda transitorio del parto');
+
+// --- Lo que ve el alumno en los tres exámenes ----------------------------
+
+// Un bebé con MUCHO transitorio (percentil alto) a las 6 horas.
+$cargado = ['percentil' => ['OD' => 0.99, 'OI' => 0.99]];
+$recien = neo_proyeccion(6.0, $cargado);
+$dosDias = neo_proyeccion(48.0, $cargado);
 $sinDato = neo_proyeccion(null);
 
 t_true(
-    ($recien['eoas']['OD']['atten_db'] ?? 0) > 40.0,
-    'A las 6 horas la EOA queda por debajo del piso: sale ausente'
-);
-t_true(
-    ($dosDias['eoas']['OD']['atten_db'] ?? 0) < 12.0,
-    'A las 48 horas la EOA vuelve'
+    ($recien['eoas']['OD']['atten_db'] ?? 0) > 10.0,
+    'Con el transitorio cargado la EOA queda bajo criterio: refiere'
 );
 t_eq($sinDato['eoas']['OD']['atten_db'] ?? null, null, 'Sin horas de vida no se toca la EOA');
 
@@ -71,29 +128,25 @@ t_eq($sinDato['eoas']['OD']['atten_db'] ?? null, null, 'Sin horas de vida no se 
 t_eq($recien['eoas']['OD']['type'], 'normal', 'El oído sigue siendo normal, el transitorio no es patología');
 t_eq($recien['abr']['OD']['type'], 'normal', 'Y el ABR tampoco se vuelve conductivo');
 
-// --- Aérea sí, ósea no ----------------------------------------------------
-
+// Aérea sí, ósea no: el vibrador saltea conducto y oído medio.
 $aereo = $recien['abr']['OD']['umbral_por_estimulo']['click'];
 $oseo = $recien['abr']['OD']['umbral_por_estimulo_oseo']['click'];
-$aereoSano = $sinDato['abr']['OD']['umbral_por_estimulo']['click'];
-$oseoSano = $sinDato['abr']['OD']['umbral_por_estimulo_oseo']['click'];
+t_true($aereo > $sinDato['abr']['OD']['umbral_por_estimulo']['click'],
+    'El ABR aéreo del recién nacido cargado sale elevado');
+t_eq($oseo, $sinDato['abr']['OD']['umbral_por_estimulo_oseo']['click'],
+    'El ABR óseo NO: el vibrador saltea conducto y oído medio');
 
-t_true($aereo > $aereoSano, 'El ABR aéreo del recién nacido sale algo elevado');
-t_eq($oseo, $oseoSano, 'El ABR óseo NO: el vibrador saltea conducto y oído medio');
-t_true($aereo - $oseo > 5, 'Queda un gap aéreo-óseo, que es lo que dice que es transitorio');
-
-// A las 48 horas el gap se cerró solo.
-t_eq(
-    $dosDias['abr']['OD']['umbral_por_estimulo']['click'],
-    $dosDias['abr']['OD']['umbral_por_estimulo_oseo']['click'],
-    'A las 48 horas el gap ya no está'
+// A las 48 horas el mismo bebé ya está limpio.
+t_true(
+    ($dosDias['eoas']['OD']['atten_db'] ?? 0) < ($recien['eoas']['OD']['atten_db'] ?? 0),
+    'A las 48 horas queda mucho menos transitorio que a las 6'
 );
 
-// --- La EOA sufre más que el ABR ------------------------------------------
-
+// Los dos oídos pueden dar distinto: es lo que se ve en el turno.
+$dispar = neo_proyeccion(6.0, ['percentil' => ['OD' => 0.05, 'OI' => 0.99]]);
 t_true(
-    CaseProfile::NEONATAL_OAE_FACTOR > CaseProfile::NEONATAL_ABR_FACTOR * 2,
-    'La EOA cruza el conducto de ida y vuelta: le pega mucho más que al ABR'
+    ($dispar['eoas']['OD']['atten_db'] ?? 0) < ($dispar['eoas']['OI']['atten_db'] ?? 0),
+    'Cada oído tiene su propio percentil: uno puede referir y el otro no'
 );
 
 // --- Calibración ósea del lactante ---------------------------------------
@@ -111,35 +164,24 @@ t_true(
     'Entre los 6 y los 24 meses se va de a poco'
 );
 
-function neo_proyeccion_meses(float $meses): array
-{
-    $curva = neo_audiograma();
-    return CaseProfile::project(
-        $curva, $curva,
-        ['OD' => ['cce_pct' => 0, 'retro' => []], 'OI' => ['cce_pct' => 0, 'retro' => []]],
-        ['OD' => 'A', 'OI' => 'A'],
-        null, $meses
-    );
-}
-
-$lactante = neo_proyeccion_meses(3.0);
-$adulto = neo_proyeccion_meses(360.0);
-$dosAnios = neo_proyeccion_meses(24.0);
+$lactante = neo_proyeccion(null, [], 3.0);
+$adulto = neo_proyeccion(null, [], 360.0);
+$dosAnios = neo_proyeccion(null, [], 24.0);
 
 $graveLact = $lactante['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_500Hz'];
 $graveAdulto = $adulto['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_500Hz'];
-$agudoLact = $lactante['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_4000Hz'];
-$agudoAdulto = $adulto['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_4000Hz'];
 
 t_true($graveLact < $graveAdulto, 'En 500 Hz el lactante lee un umbral óseo más bajo que el adulto');
-t_eq($agudoLact, $agudoAdulto, 'En 4 kHz no hay diferencia: el efecto es de graves');
+t_eq(
+    $lactante['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_4000Hz'],
+    $adulto['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_4000Hz'],
+    'En 4 kHz no hay diferencia: el efecto es de graves'
+);
 t_eq(
     $dosAnios['abr']['OD']['umbral_por_estimulo_oseo']['tone_burst_500Hz'],
     $graveAdulto,
     'A los 2 años el umbral óseo ya es el de adulto'
 );
-
-// La vía AÉREA no se toca: entra por el conducto y no le importa el cráneo.
 t_eq(
     $lactante['abr']['OD']['umbral_por_estimulo']['tone_burst_500Hz'],
     $adulto['abr']['OD']['umbral_por_estimulo']['tone_burst_500Hz'],
