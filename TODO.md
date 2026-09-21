@@ -2402,3 +2402,53 @@ Lo que la tabla de "condición real" describe ya salía solo del modelo: la
 hipoacusia sensorial ≥35-40 dB borra la EOA por el audiograma, y la
 neuropatía deja la EOA normal con el ABR alterado (es el contraste que
 `type = neural` ya hacía).
+
+## A decidir: ¿los pacientes están congelados o envejecen? (2026-09-21)
+
+Sale de querer "hacer nacer a un paciente X horas antes del turno del
+alumno". Hoy el sistema no puede: no es una función que falte, es que nunca
+se decidió qué es la edad de un paciente. **Hay que elegir una de las dos, no
+las dos.**
+
+**Cómo está hoy (congelado, aunque no esté escrito en ningún lado):**
+- `edad` es un número estático en `cases.data`, puesto a mano por el docente.
+- `fecha_nac` se DERIVA de la edad, con día y mes al azar (ver
+  `views/case/_paciente.php`): es decoración para la ficha, no la fuente de
+  verdad. Si el docente pone 30 años, la fecha se inventa para que cierre.
+- Nadie recalcula nada con el paso del tiempo. Un caso de hace seis meses
+  sigue teniendo 30 años.
+- `edad_horas` (recién nacido) sigue el mismo criterio: son 6 horas para
+  siempre, las abra el alumno hoy o el mes que viene.
+
+O sea: lo que se implementó estos días es **coherente con el modelo
+congelado**. Lo que no puede expresar es "nace X horas antes de la cita".
+
+**Qué costaría el modelo que envejece.** No es solo cambiar un campo:
+
+1. La fuente de verdad pasa a ser la fecha (y hora) de nacimiento, y `edad`
+   se calcula. Eso invierte la relación actual y toca la ficha del paciente,
+   la agenda y los PDF.
+2. **El caso es un snapshot.** `api/sync.php` manda `cases.data` tal cual y
+   solo re-manda lo que cambió (`updated_at > since`), así que una propiedad
+   que depende del tiempo no puede vivir horneada adentro: al día siguiente
+   está vieja y el sync no la refresca porque el caso no se editó.
+3. Entonces el transitorio neonatal habría que resolverlo **en el momento del
+   examen**, no al guardar: o el backend lo recalcula al entregar el caso, o
+   el cliente lo hace al abrirlo. Lo segundo es lo único que sobrevive a la
+   caché del sync, y obliga a portar `NewbornScreening` a Python (mismo
+   patrón que `CaseWaveforms` espeja al generador, con test cruzado).
+4. Hay que decidir **contra qué instante** se mide: la hora de la cita (que
+   es lo que el docente quiere fijar) o el reloj real del alumno. Con la
+   cita, "nace 6 h antes del turno" es exacto y el alumno que llega tarde ve
+   un bebé de 6 h igual. Con el reloj real, el que llega dos horas tarde ve
+   un bebé de 8 h -- más realista y más difícil de preparar.
+5. Y lo incómodo: si los pacientes envejecen de verdad, un caso de "3 meses"
+   guardado en marzo es un bebé de 9 meses en septiembre, y su audiograma
+   pediátrico y su timpanograma dejan de corresponder. O los casos caducan,
+   o envejece solo el recién nacido, o se congela todo salvo la edad exacta.
+
+**Sugerencia para cuando se retome:** el híbrido más barato es congelar todo
+como está y agregar UN campo al caso del recién nacido, "horas de vida al
+momento de la cita", resolviéndolo contra la hora de la cita y no contra el
+reloj. Cubre el caso de uso real (preparar el turno) sin abrir la lata de que
+el resto del padrón envejezca.
