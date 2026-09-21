@@ -62,6 +62,13 @@
             <tbody id="abr-threshold-rows"></tbody>
         </table>
         <p class="help">El campo "Umbral (dB)" de cada oído se escribe desde esta tabla (con el valor del click, que es lo que mostraría un ABR de rutina). Se puede corregir a mano: es una sugerencia, no un candado.</p>
+        <table class="reflex-pattern-table" style="margin-top:0.6rem;">
+            <thead>
+                <tr><th>Tamizaje (AABR + TEOAE)</th><th>OD</th><th>OI</th></tr>
+            </thead>
+            <tbody id="aabr-preview-rows"></tbody>
+        </table>
+        <p class="help">Lo que va a contestar el equipo de tamizaje con este caso. El alumno no ve un umbral sino PASA o REFIERE, así que esto es lo que él va a leer. En un recién nacido incluye el transitorio de las primeras horas, que cambia con la edad exacta y con el parto.</p>
     </div>
 </div>
 <div class="two-col">

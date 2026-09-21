@@ -118,6 +118,39 @@
         });
     }
 
+    /**
+     * Qué contesta el equipo de tamizaje. Va debajo de la tabla de
+     * umbrales porque es su otra cara: el alumno que tamiza no ve un
+     * número, ve PASA o REFIERE.
+     */
+    function pintarAabr(aabr) {
+        var cuerpo = document.getElementById('aabr-preview-rows');
+        if (!cuerpo) { return; }
+        cuerpo.innerHTML = '';
+        if (!aabr) { return; }
+        var filas = [
+            ['TEOAE', function (r) { return r.teoae.toUpperCase(); }],
+            ['AABR a ' + (aabr.OD.nivel || 35) + ' dB nHL',
+                function (r) { return r.aabr.toUpperCase(); }],
+            ['Conductiva transitoria',
+                function (r) { return r.transitorio_db.toFixed(1) + ' dB'; }]
+        ];
+        filas.forEach(function (fila) {
+            var tr = document.createElement('tr');
+            var th = document.createElement('th');
+            th.textContent = fila[0];
+            tr.appendChild(th);
+            ['OD', 'OI'].forEach(function (lado) {
+                var td = document.createElement('td');
+                td.textContent = fila[1](aabr[lado]);
+                if (td.textContent === 'REFIERE') { td.style.color = '#b71c1c'; }
+                if (td.textContent === 'PASA') { td.style.color = '#1b5e20'; }
+                tr.appendChild(td);
+            });
+            cuerpo.appendChild(tr);
+        });
+    }
+
     function hidratar(p) {
         if (preview) { preview.hidden = !autoOn('abr'); }
         tabsTocadas = {};
@@ -125,6 +158,7 @@
         if (autoOn('abr')) {
             moduloActual = 'abr';
             pintarTablaAbr(p.abr);
+            pintarAabr(p.aabr);
             ['od', 'oi'].forEach(function (lado) {
                 var lo = lado.toUpperCase();
                 setVal('abr[' + lado + '][type]', p.abr[lo].type);

@@ -327,3 +327,11 @@ t_eq($cfZ->data['Z1000_OI'], 'positivo', 'Y cada oído tiene el suyo');
 t_eq($cfRun()->data['Z1000_OD'], 'auto', 'Sin declarar queda en auto');
 t_eq($cfRun(['z1000_od' => 'cualquiera'])->data['Z1000_OD'], 'auto',
     'Un valor fuera del catálogo cae en auto');
+
+// La proyección queda accesible: el importador por JSON la necesita para
+// las claves que el formulario no manda (en la página las escribe
+// profile-preview.js antes de enviar, así que el POST ES la proyección).
+$cfProy = $cfRun();
+t_true(isset($cfProy->proyeccion['abr']['OD']), 'CaseForm expone lo que proyectó el perfil');
+t_true(isset($cfProy->proyeccion['eoas']['OD']['atten_db']),
+    'Incluida la atenuación de la OEA, que es la que el JSON no puede mandar');

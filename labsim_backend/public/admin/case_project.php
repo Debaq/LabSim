@@ -105,6 +105,28 @@ $nacimiento = $horasVida !== null ? CaseForm::parseNacimiento($_POST) : [];
 $proyeccion = CaseProfile::project($airPairs, $bonePairs, $perfil, $tymp,
                                    $horasVida, $edadMeses, $nacimiento);
 
+// Qué va a contestar el equipo de tamizaje con este caso, oído por oído.
+// Es la otra cara del umbral del ABR: el alumno no ve un número sino PASA o
+// REFIERE, y el docente tiene que poder anticiparlo sin ir a abrir el
+// módulo AABR con el paciente en atención.
+require_once __DIR__ . '/../../src/NewbornScreening.php';
+$proyeccion['aabr'] = [];
+foreach (['OD', 'OI'] as $ladoScr) {
+    $transitorio = $horasVida === null
+        ? 0.0 : CaseProfile::neonatalTransientDb($horasVida, $nacimiento, $ladoScr);
+    $earAbr = $proyeccion['abr'][$ladoScr] ?? [];
+    $earEoa = $proyeccion['eoas'][$ladoScr] ?? [];
+    $umbralScr = $earAbr['umbral_por_estimulo']['ce_chirp']
+        ?? ($earAbr['umbral_por_estimulo']['click'] ?? null);
+    $proyeccion['aabr'][$ladoScr] = NewbornScreening::resultadoOido(
+        $transitorio,
+        $umbralScr === null ? null : (float) $umbralScr,
+        (float) ($earEoa['atten_db'] ?? 0),
+        in_array($earEoa['type'] ?? '', ['coclear', 'transmission'], true)
+    ) + ['transitorio_db' => round($transitorio, 1),
+         'nivel' => NewbornScreening::ABR_SCREEN_DB];
+}
+
 // La descomposición es un detalle interno (nueve frecuencias por seis
 // curvas por oído): no la necesita el navegador y solo engorda la respuesta.
 unset($proyeccion['decomp']);

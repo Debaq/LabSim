@@ -32,6 +32,16 @@ final class CaseForm
     public array $sinRevisar = [];
     /** cases.data listo para persistir; [] si no se llegó a armar. */
     public array $data = [];
+    /**
+     * Lo que proyectó el perfil, antes de que lo posteado le gane.
+     *
+     * En el formulario no hace falta --profile-preview.js ya escribió esos
+     * campos en la página, así que el POST ES la proyección-- pero al
+     * importar por JSON no hay navegador que los escriba: sin esto, un caso
+     * importado se queda con los defaults del formulario donde el JSON no
+     * dijo nada, y lo que proyectó el audiograma se pierde.
+     */
+    public array $proyeccion = [];
     /** Id del caso: el que se editaba, o el que se reservó recién. '' si no se llegó. */
     public string $caseId = '';
     public bool $isUpdate = false;
@@ -353,6 +363,7 @@ final class CaseForm
         // en vivo del formulario, vía admin/case_project.php: una sola
         // implementación de cada ley.
         $proyeccion = CaseProfile::project($airPairs, $bonePairs, $perfil, ['OD' => $zOd, 'OI' => $zOi], $horasVida, $edadMeses, $nacimiento);
+        $f->proyeccion = $proyeccion;
         $decomp = $proyeccion['decomp'];
 
         // La derivación es una SUGERENCIA, no una fuente que pise al
