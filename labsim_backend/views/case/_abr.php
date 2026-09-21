@@ -42,8 +42,8 @@
                 <?php endforeach; ?>
             </select>
         </label>
-        <label>Umbral (dB)
-            <input type="number" name="abr[<?= $lado ?>][umbral]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['umbral'] ?? '20')) ?>">
+        <label>Umbral (dB) <span class="muted help--xs">referido a 2000 barridos</span>
+            <input type="number" name="abr[<?= $lado ?>][umbral]" value="<?= htmlspecialchars((string) ($v['abr'][$lado]['umbral'] ?? '20')) ?>" title="El nivel donde el equipo declara respuesta en la mitad de los registros CON 2000 BARRIDOS. Quien promedie más puede encontrar respuesta algo por debajo, y está bien: es lo que pasa con un paciente tranquilo y mucho promediado.">
         </label>
         <label class="inline-check" style="align-self:end;">
             <input type="checkbox" name="abr[<?= $lado ?>][repro]" <?= ($v['abr'][$lado]['repro'] ?? '1') === '1' ? 'checked' : '' ?>>

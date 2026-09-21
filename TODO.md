@@ -2861,6 +2861,13 @@ umbral que encuentra el alumno sube unos 6 dB**. Medido sobre un umbral
 declarado de 10 dB nHL: 500 barridos → 24,7 · 1000 → 17,7 · 2000 → 12,2 ·
 4000 → 9,5.
 
+El piso de esa serie no es el umbral declarado sino el **fisiológico** (1 dB
+nHL en el ejemplo), así que promediando mucho se encuentra respuesta POR
+DEBAJO del declarado y el escalón se va achicando (7,0 · 5,5 · 2,7 dB):
+cerca del umbral fisiológico la amplitud tiende a cero y agregar barridos
+rinde cada vez menos. Por eso el umbral del caso está **referido a 2000
+barridos**, y el campo de la ficha lo dice.
+
 Sirve para armar casos: con N* = 800 al nivel de referencia, el que se
 detiene a los 400 barridos informa ~6 dB de más. Y explica por qué no hay
 que empinar la curva de crecimiento para acortar esa diferencia: rompe F1,

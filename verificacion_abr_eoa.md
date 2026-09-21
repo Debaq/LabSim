@@ -94,14 +94,34 @@ se quería:
 - el alumno que promedia poco o no repite **sobreestima el umbral**, igual
   que en la clínica.
 
+### El umbral del caso está referido a 2000 barridos
+
+Es parte de la definición, no un detalle: el umbral que declara el docente
+es el nivel donde el equipo dice "presente" en la mitad de los registros
+**con 2000 barridos**. Quien promedie más puede encontrar respuesta algo por
+DEBAJO del umbral declarado, y eso es correcto: es lo que pasa en la clínica
+cuando se promedia mucho en un paciente tranquilo. En la ficha, el campo
+lleva la nota "referido a 2000 barridos".
+
 ### Barridos y umbral: media son 6 dB
 
 Cada vez que se parten los barridos a la mitad, el umbral hallado sube unos
-6 dB (medido: 500 → 24,7 · 1000 → 17,7 · 2000 → 12,2 · 4000 → 9,5 dB sobre
-un umbral declarado de 10). Es la consecuencia directa de la curva de
+6 dB. Medido sobre un umbral declarado de 10 dB nHL: 500 → 24,7 · 1000 →
+17,7 · 2000 → 12,2 · 4000 → 9,5. Es la consecuencia directa de la curva de
 crecimiento que exige F1 (50 % de amplitud a 10 dB sobre el umbral
 fisiológico) combinada con el 1/√N del promediado, y por eso empinar la
 curva para "arreglar" F3 rompería F1.
+
+Dos lecturas de esa serie que conviene no confundir:
+
+- **Los 9,5 dB a 4000 barridos no son un error de redondeo**: el piso no es
+  el umbral declarado (10) sino el **fisiológico**, que con el desfase de 9
+  dB queda en 1 dB nHL. Promediando más se encuentra respuesta por debajo
+  del declarado, hasta que la amplitud se acerca a cero y el escalón se
+  achica (7,0 · 5,5 · 2,7 dB): cerca del umbral fisiológico, agregar
+  barridos rinde cada vez menos.
+- **Los 2,2 dB entre 12,2 hallado y 10 declarado** salen del paso de 5 dB de
+  la búsqueda y están dentro de la tolerancia.
 
 **Para armar casos:** con N* = 800 al nivel de referencia, el alumno que se
 detiene a los 400 barridos va a informar un umbral ~6 dB más alto que el
