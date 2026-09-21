@@ -2556,3 +2556,58 @@ dibujaba una respuesta que en el caso no existe. Ahora `case_threshold`
 distingue la clave ausente (cae al escalar, como siempre) de la clave
 presente en null (`NO_RESPONSE_DB`, no responde nunca). Afectaba también a
 la vía aérea, no solo a la ósea.
+
+## Enmascaramiento: la IA del ruido es la del fono, no la del estímulo (2026-09-21)
+
+Bug que encontró el docente. El enmascaramiento se le entrega al oído
+contrario **con un fono**, aunque el estímulo vaya por hueso. El modelo
+usaba la atenuación interaural del ESTÍMULO para decidir cuánto ruido cruza
+de vuelta al oído que se está midiendo, así que con vibrador (IA = 0)
+cualquier nivel de masking sobreenmascaraba: 70 dB de ruido le subían el
+umbral a 70 al oído en estudio.
+
+Y entre fonos tampoco da igual. Conductiva en OD (óseo 30 nHL), estímulo de
+55 por vibrador, ruido al OI:
+
+| masking | inserción (IA 65) | copa TDH-39 (IA 45) |
+|---|---|---|
+| 70 dB | umbral 30, ok | umbral 30, ok |
+| 80 dB | umbral 30, ok | **umbral 35, sobreenmascarado** |
+| 90 dB | umbral 30, ok | **umbral 45, sobreenmascarado** |
+
+Eso es el motivo clínico de preferir inserción cuando hay que enmascarar
+fuerte, y ahora el simulador lo muestra. `masking_transducer` en la config
+técnica; si no se declara, se usa el fono del estímulo, y con vibrador la
+inserción (que es lo que se usa).
+
+**Pendiente del mismo tema: el efecto de oclusión.** Tapar el oído contrario
+con un fono de copa mejora su umbral óseo en graves 15-20 dB (con inserción
+profunda, mucho menos). O sea, el fono que entrega el ruido cambia también
+cuánto ruido hace falta. No está modelado, y para modelarlo bien habría que
+decidir si el panel declara con qué fono se enmascara o se asume.
+
+## A revisar: la respuesta justo en el umbral es demasiado clara (2026-09-21)
+
+Salió comprobando el tope del vibrador. La amplitud de la onda V contra el
+nivel de sensación, en oído normal:
+
+| SL | amplitud | % de la de SL 40 |
+|---|---|---|
+| +40 dB | 0.480 µV | 100% |
+| +20 | 0.378 | 79% |
+| +10 | 0.279 | 58% |
+| +5 | 0.216 | 45% |
+| **0** | **0.150** | **31%** |
+| −5 | 0.091 | 19% |
+| −10 | 0.048 | 10% |
+
+Estimulando JUSTO en el umbral del oído, la onda V sale en 0.113 µV con SNR
+de 7.8 en un registro de 2000 barridos: se lee clara. Clínicamente, en el
+umbral la respuesta es mínima y ambigua por definición -- es lo que obliga a
+promediar más y a repetir para confirmar. Con esta curva, buscar umbral es
+demasiado fácil y la maniobra pierde sentido.
+
+Hay que empinar `WAVE_AMP_GROWTH` cerca del umbral (que a SL 0 quede en
+~10-15% y no en 31%). Afecta TODOS los exámenes y todos los casos, no solo
+la vía ósea, así que no se toca sin decidirlo: es de los cambios que
+cambian la dificultad del ejercicio.

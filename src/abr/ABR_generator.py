@@ -198,6 +198,16 @@ NO_RESPONSE_DB = 999.0
 # distorsiona y el estimulo deja de ser el que dice la pantalla.
 BONE_MAX_OUTPUT_DB = 55.0
 
+
+# Se probo modelar compresion del vibrador en sus ultimos dB (la bobina se
+# satura y la piel del mastoides deja de seguir el movimiento) y se
+# descarto: el umbral del caso YA esta en unidades de dial, asi que
+# descontar ahi otra vez convierte "respuesta fragil en el tope" en
+# "respuesta ausente", que no es lo que se quiere mostrar. La fragilidad
+# sale sola del nivel de sensacion: estimular justo en el umbral deja una
+# onda minima (ver WAVE_AMP_GROWTH), y decidir si esta o no es la destreza
+# que el alumno tiene que ejercitar.
+
 # ---------------------------------------------------------------------
 # Morfologia por estimulo
 # ---------------------------------------------------------------------
@@ -2045,7 +2055,7 @@ class ABRGenerator:
         if transducer == 'bone_vibrator':
             pathway = 'bone_conduction'
             # El vibrador no pasa de BONE_MAX_OUTPUT_DB: pedirle 80 dB
-            # entrega 50 y el registro es el de 50, no el de 80. Se recorta
+            # entrega 55 y el registro es el de 55, no el de 80. Se recorta
             # aca y no en el panel porque el equipo tampoco avisa: lo que
             # delata el tope es que la respuesta deja de crecer.
             if float(stimulus_config['int']) > BONE_MAX_OUTPUT_DB:
@@ -2071,9 +2081,23 @@ class ABRGenerator:
         threshold = self.case_threshold(case_config, stimulus_config, pathway, pathology)
 
         masking = float((case_config or {}).get('masking') or 0.0)
+        # Atenuacion interaural del ESTIMULO: cuanto le llega al otro oido
+        # de lo que se esta midiendo (ver shadow_values).
         ia = INTERAURAL_ATTENUATION.get(transducer, 65.0)
+        # La del RUIDO es otra: el enmascaramiento se entrega por via aerea
+        # al oido contrario, con un fono, aunque el estimulo vaya por hueso.
+        # Con el vibrador (ia = 0) usar la del estimulo hacia que CUALQUIER
+        # nivel de masking enmascarara tambien el oido que se esta midiendo:
+        # 70 dB de ruido subian su umbral a 70. Y entre fonos tampoco es lo
+        # mismo -- el de copa deja cruzar el ruido 20 dB antes que el de
+        # insercion, que es el motivo clinico de preferir insercion cuando
+        # hay que enmascarar fuerte.
+        ia_masking = INTERAURAL_ATTENUATION.get(
+            technical_config.get('masking_transducer')
+            or (transducer if transducer != 'bone_vibrator' else 'insert_earphone'),
+            65.0)
         if masking > 0:
-            threshold = max(threshold, masking - ia)
+            threshold = max(threshold, masking - ia_masking)
 
         # 3. Desviaciones (el caso trae un solo set, plano por onda -- no
         # esta anidado por estimulo, ver CaseBuilder.abrBuild en case_create.php).

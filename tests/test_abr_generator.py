@@ -2269,6 +2269,39 @@ def _stim(stim, freq=None):
     return {'stim': stim, 'freq': freq, 'int': 60, 'pathway': 'air_conduction'}
 
 
+def test_masking_crosses_over_by_the_phone_not_by_the_stimulus():
+    """La IA del RUIDO es la del fono que lo entrega, no la del estimulo.
+
+    El enmascaramiento se le pone al oido contrario con un fono, aunque el
+    estimulo vaya por hueso. Usando la IA del estimulo, con vibrador (IA=0)
+    CUALQUIER nivel de ruido enmascaraba tambien el oido que se esta
+    midiendo: 70 dB le subian el umbral a 70.
+
+    Y entre fonos tampoco da igual: el de copa deja cruzar el ruido 20 dB
+    antes que el de insercion, que es el motivo clinico de preferir
+    insercion cuando hay que enmascarar fuerte.
+    """
+    if not HAS_SCIPY:
+        print("  (salteado: sin scipy)")
+        return
+    caso = {'umbral': 30, 'umbral_por_estimulo_oseo': {'click': 30},
+            'umbral_por_estimulo': {'click': 60}}
+
+    def umbral(masking, fono):
+        _, _, meta = _curva(
+            intensity=55, threshold=30, masking=masking,
+            technical={'transducer': 'bone_vibrator', 'masking_transducer': fono})
+        return meta['threshold']
+
+    # Con vibrador y ruido por insercion, 70 dB no sobreenmascaran.
+    assert umbral(70, 'insert_earphone') == 30
+    # El de copa deja cruzar antes: a 80 ya le subio el umbral al oido medido.
+    assert umbral(80, 'TDH39_headphone') > 30
+    assert umbral(80, 'insert_earphone') == 30
+    # Y cuanto mas ruido, peor, con los dos.
+    assert umbral(95, 'TDH39_headphone') > umbral(80, 'TDH39_headphone')
+
+
 def test_no_response_in_the_case_means_no_response_on_screen():
     """Si el caso dice "sin respuesta", el equipo no puede dibujar una.
 
