@@ -125,6 +125,20 @@ def test_choosing_ecochg_swaps_the_equipment_and_the_table():
     assert w.graph_r.mark_labels == ('I', 'II', 'III', 'IV', 'V')
 
 
+def test_the_three_ecochg_electrodes_are_selectable():
+    """El modelo distingue tres posiciones: el diálogo tiene que ofrecerlas.
+
+    Cada una tiene su propio límite de razón PS/PA, y comparar el mismo oído
+    medido desde el conducto y desde la membrana es medio ejercicio. Con una
+    sola posición en el combo eso no se podía hacer.
+    """
+    if not HAS_UI:
+        return
+    from abr.AbrAdvanceSettings import MONTAGES
+    for clave in ecochg.ELECTRODE_GAIN:
+        assert clave in MONTAGES.values(), clave
+
+
 def test_only_one_mark_is_armed_in_the_whole_window():
     """Con dos armadas, un clic en el otro oído pondría la que no se mira."""
     if not HAS_UI:

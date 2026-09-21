@@ -38,11 +38,19 @@ TRANSDUCERS = {
     "Vibrador óseo": 'bone_vibrator',
 }
 
+# Los tres primeros son montajes de superficie (el ABR y los corticales); los
+# tres últimos son los del ECochG, y no son "otra posición de electrodo" sino
+# otra distancia a la cóclea: cuanto más cerca, más grande la respuesta y más
+# bajo el límite de la razón PS/PA (ver abr/ecochg.py). Elegir ECochG deja el
+# equipo en el timpánico, que es el de rutina; las otras dos posiciones se
+# eligen acá.
 MONTAGES = {
     "Cz - mastoides": 'vertex_mastoid',
     "Fz - mastoides": 'forehead_mastoid',
     "Cz - lóbulo": 'vertex_earlobe',
+    "Conducto / TipTrode (ECochG)": 'extratympanic',
     "Timpánico (ECochG)": 'tympanic',
+    "Transtimpánico / promontorio (ECochG)": 'transtympanic',
 }
 
 # Posiciones de electrodo. La ultima sale del generador para que
