@@ -241,6 +241,42 @@ def test_the_summating_potential_needs_level():
 
 # -------------------------------------------------------------- medidas
 
+def test_the_automatic_marking_reads_the_trace_and_nothing_else():
+    """El marcado automático es el del equipo, no la respuesta del caso.
+
+    Encuentra el PA como el PRIMER mínimo hondo del rango fisiológico (no
+    el más hondo: con un sumación grande el N2 llega a medir casi lo
+    mismo), la base en el tramo previo y el retorno en el cruce. El hombro
+    del PS va por convención, a SP_SHOULDER_MS del PA -- ver TODO.md.
+    """
+    if not HAS_SCIPY:
+        return
+    for montaje in ('tympanic', 'transtympanic'):
+        for declarado in (0.25, 0.40, 0.55):
+            razones = []
+            for cap in CAPTURAS:
+                t, y, _, _, _, meta = _curva(sp_ap=declarado, montage=montaje,
+                                             capture=cap)
+                auto = E.auto_marks(t, y)
+                assert set(auto) == set(E.MARKS), (montaje, declarado, auto)
+                assert abs(auto['PA'] - meta['ecochg_ap_lat']) < 0.15
+                medida = E.measure_complex(
+                    t, y, {k: (v, 0.0) for k, v in auto.items()})
+                razones.append(medida['sp_ap'])
+            esperado = E.sp_ap_for_electrode(declarado, montaje)
+            assert abs(statistics.mean(razones) - esperado) < 0.06, \
+                (montaje, declarado, statistics.mean(razones), esperado)
+
+
+def test_the_automatic_marking_does_not_invent_a_complex():
+    """Sin deflexión donde debería estar el PA, no marca nada."""
+    t = np.linspace(0, 10, 400)
+    assert E.auto_marks(t, np.zeros_like(t)) == {}
+    # Una curva que solo sube tampoco tiene PA: el PA es una deflexión
+    # NEGATIVA respecto de la base (el electrodo activo es el del oído).
+    assert E.auto_marks(t, t * 0.1) == {}
+
+
 def test_the_measurement_says_which_marks_are_missing():
     """Sin las marcas no hay medida, y se dice cuál falta."""
     t = np.linspace(0, 10, 400)

@@ -466,6 +466,136 @@ MARK_LABELS = {
 }
 
 
+# ---------------------------------------------------------------------
+# MARCADO AUTOMÁTICO
+# ---------------------------------------------------------------------
+
+# Dónde puede estar el PA de un click, en ms. Es un rango fisiológico (la
+# onda I con fono de inserción no cae fuera de ahí), no el dato del caso:
+# el detector trabaja sobre el TRAZO y no sabe qué declaró el docente. Por
+# eso se equivoca cuando el trazo está mal registrado, que es justamente lo
+# que el alumno tiene que poder ver.
+AP_SEARCH_MS = (0.8, 3.5)
+# Tramo del que sale la línea de base: antes de que llegue nada.
+BASELINE_MS = (0.0, 0.35)
+# Qué tan cerca de la base tiene que volver el trazo para darlo por vuelto,
+# como fracción de la profundidad del PA. Un cruce estricto no sirve: basta
+# un poco de deriva lenta para que el trazo se quede del lado de abajo toda
+# la ventana y el retorno no exista, justo en los registros donde importa.
+RETURN_FRACTION = 0.10
+# Qué tan hondo tiene que ser un mínimo local para aceptarlo como el PA,
+# contra el más hondo de la ventana. Por debajo de esto es una ondulación
+# del ruido y se sigue buscando.
+AP_MIN_DEPTH = 0.80
+
+# Suavizado (en ms) con el que se buscan las pendientes. Sin esto el ruido
+# del registro manda en la derivada y el hombro cae en cualquier lado.
+SMOOTH_MS = 0.12
+
+
+def _smooth(t, y, ms=SMOOTH_MS):
+    """Media móvil de `ms` milisegundos."""
+    if len(t) < 3:
+        return y
+    paso = float(t[1] - t[0])
+    n = max(int(round(ms / paso)), 1)
+    if n < 2:
+        return y
+    nucleo = np.ones(n) / n
+    return np.convolve(y, nucleo, mode='same')
+
+
+def auto_marks(t, y):
+    """Marcado automático del complejo, como lo hace el equipo.
+
+    Devuelve {marca: latencia} con las cuatro marcas, o {} si no encuentra
+    un complejo donde debería haberlo.
+
+    Trabaja SOBRE EL TRAZO y nada más: no mira el caso, ni la razón que el
+    docente declaró, ni la latencia que el modelo usó para dibujar. Esa es
+    la diferencia entre un marcado automático y la respuesta regalada --
+    con la banda mal puesta, el nivel bajo o el promedio a medias, esto
+    marca mal, igual que el equipo real, y darse cuenta es parte del
+    examen.
+
+    Cómo encuentra cada punto:
+      BL   el trazo antes de que llegue nada (BASELINE_MS).
+      PA   el PRIMER mínimo del rango fisiológico (AP_SEARCH_MS) que sea
+           bastante hondo -- no el más hondo: con un sumación grande el N2
+           llega a medir casi lo mismo.
+      PS   a SP_SHOULDER_MS del PA, por convención de protocolo: con click
+           el hombro no tiene firma geométrica confiable.
+      FIN  el primer punto después del PA en que el trazo vuelve a
+           pegarse a la base.
+    """
+    if len(t) < 8:
+        return {}
+    t = np.asarray(t, dtype=float)
+    y = np.asarray(y, dtype=float)
+    suave = _smooth(t, y)
+
+    base_sel = (t >= BASELINE_MS[0]) & (t <= BASELINE_MS[1])
+    if not base_sel.any():
+        return {}
+    base = float(np.mean(suave[base_sel]))
+    # La marca de base va en el punto del tramo que mejor representa ese
+    # nivel, no en un instante fijo: si el alumno la arrastra después, se
+    # mueve sobre el trazo igual que las demás.
+    x_bl = float(t[base_sel][int(np.argmin(np.abs(suave[base_sel] - base)))])
+
+    pa_sel = np.where((t >= AP_SEARCH_MS[0]) & (t <= AP_SEARCH_MS[1]))[0]
+    if not len(pa_sel):
+        return {}
+    # El PA es el PRIMER pico negativo del complejo, no el más profundo.
+    # Con un sumación grande el N2 corre montado sobre la meseta y llega a
+    # medir casi lo mismo que el PA: tomando el mínimo absoluto, la marca
+    # se iba al N2 justo en los oídos con más hidrops, que son los que
+    # importan.
+    i_pa = int(pa_sel[int(np.argmin(suave[pa_sel]))])
+    mas_hondo = base - float(suave[i_pa])
+    if mas_hondo > 0:
+        for k in range(1, len(pa_sel) - 1):
+            i = int(pa_sel[k])
+            if suave[i] > suave[i - 1] or suave[i] > suave[i + 1]:
+                continue                      # no es un mínimo local
+            if (base - float(suave[i])) >= AP_MIN_DEPTH * mas_hondo:
+                i_pa = i
+                break
+    if suave[i_pa] >= base:
+        # No hay ninguna deflexión negativa donde debería estar el PA: no
+        # hay complejo que marcar. No se inventa uno.
+        return {}
+    x_pa = float(t[i_pa])
+
+    marcas = {'BL': x_bl, 'PA': x_pa}
+
+    # Hombro del PS: por CONVENCIÓN, a SP_SHOULDER_MS del pico del PA, y no
+    # buscándolo en la forma del trazo.
+    #
+    # No es pereza: con un click el complejo entero dura alrededor de un
+    # milisegundo y los dos potenciales se superponen, así que el hombro no
+    # tiene firma geométrica confiable (ver TODO.md -- se probaron tres
+    # detectores y ninguno aguantó el ruido). Es una limitación real de la
+    # técnica con click, no del simulador, y por eso los protocolos fijan
+    # el punto en vez de buscarlo.
+    #
+    # Fijar el INSTANTE no regala el resultado: la amplitud sale del trazo,
+    # así que con la banda mal puesta o el nivel bajo el PS no está ahí y la
+    # razón sale mal igual. Lo que el marcado automático no puede hacer es
+    # salvar un registro malo.
+    x_ps = x_pa - SP_SHOULDER_MS
+    if x_ps > float(t[0]):
+        marcas['PS'] = x_ps
+
+    # Retorno a la base: el primer punto después del PA en que el trazo
+    # vuelve a pegarse a ella (ver RETURN_FRACTION).
+    umbral_vuelta = base - RETURN_FRACTION * (base - float(suave[i_pa]))
+    vueltas = np.where(suave[i_pa:] >= umbral_vuelta)[0]
+    if len(vueltas):
+        marcas['FIN'] = float(t[i_pa + int(vueltas[0])])
+    return marcas
+
+
 def _sample_at(t, y, x):
     """Valor del trazo en x (el más cercano, como cualquier cursor)."""
     return float(y[int(np.argmin(np.abs(t - x)))])

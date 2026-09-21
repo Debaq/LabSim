@@ -118,6 +118,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.table_l.sig_measure_value.connect(self.measure_action)
         self.table_ec_r.sig_arm_mark.connect(self.arm_ecochg_mark)
         self.table_ec_l.sig_arm_mark.connect(self.arm_ecochg_mark)
+        self.table_ec_r.sig_auto_mark.connect(self.auto_ecochg_mark)
+        self.table_ec_l.sig_auto_mark.connect(self.auto_ecochg_mark)
         self.graph_r.sig_data_info.connect(self.measure_data)
         self.graph_l.sig_data_info.connect(self.measure_data)
         self.graph_r.sig_change_value_mark.connect(self.table_r.change_value_lat)
@@ -843,6 +845,30 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             tablas[otro].disarm()
             graficos[otro].arm_mark(None)
         graficos[propio].arm_mark(mark)
+
+    def auto_ecochg_mark(self, side):
+        """Marcado automatico del equipo sobre la curva seleccionada.
+
+        Lo hace el mismo detector que usaria un equipo real: mira el TRAZO
+        y nada mas, no el caso ni lo que el modelo dibujo (ver
+        ecochg.auto_marks). Con la banda mal puesta, el nivel bajo o el
+        promedio a medias marca mal, y corregirlo a mano es parte del
+        examen: las marcas quedan como cualquier otra.
+        """
+        grafico = self.graph_r if side == 0 else self.graph_l
+        curva = grafico.get_active()
+        if not curva or curva not in grafico.data:
+            return
+        x, y = grafico.data[curva]['ipsi_xy']
+        marcas = ecochg.auto_marks(np.asarray(x), np.asarray(y))
+        if not marcas:
+            # No hay complejo donde deberia haberlo: no se inventa uno.
+            return
+        for marca in ecochg.MARKS:
+            if marca not in marcas:
+                continue
+            grafico.current_lat = marcas[marca]
+            grafico.create_marks(marca)
 
     def ecochg_mark_changed(self, data):
         """Una marca del ECochG se puso, se movio o se borro."""

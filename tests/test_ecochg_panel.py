@@ -235,6 +235,52 @@ def test_the_rate_shift_needs_two_curves_of_the_same_ear():
     assert _valor(w.table_ec_r, 'd_amp_pct') < 0
 
 
+def test_the_auto_mark_button_fills_the_table():
+    """El equipo marca solo, y de ahí salen las medidas.
+
+    Es lo que hace cualquier equipo real: pone las cuatro marcas y el
+    clínico corrige. No es la respuesta -- detecta sobre el trazo.
+    """
+    if not HAS_UI:
+        return
+    w = _ventana(_caso(sp_ap=0.25))
+    curva = _capturar(w)
+    assert w.table_ec_r.medidas == {}
+    w.table_ec_r.btn_auto.click()
+    medidas = w.table_ec_r.medidas
+    assert medidas.get('faltan') == []
+    assert abs(medidas['sp_ap'] - 0.25) < 0.08
+    # Las marcas quedan puestas como cualquier otra: se pueden corregir.
+    assert set(w.graph_r.marks[curva]) == set(ecochg.MARKS)
+
+
+def test_the_auto_mark_is_not_the_answer():
+    """Marcando bien sobre un registro mal hecho, la medida sale mal.
+
+    El potencial de sumación es un desplazamiento DC y el pasa-alto se lo
+    come: con la constante de tiempo de un corte en 200 Hz (0.8 ms) sobre
+    una meseta de un par de milisegundos, la razón se subestima bastante.
+    El marcado automático no lo sabe -- pone las marcas igual. Si en vez de
+    medir el trazo devolviera lo que el caso declara, el examen no
+    existiría.
+    """
+    if not HAS_UI:
+        return
+    medidas = {}
+    for pasa_alto in ('10', '200'):
+        w = _ventana(_caso(sp_ap=0.55))
+        idx = w.control.cb_filter_up.findText(pasa_alto)
+        assert idx >= 0
+        w.control.cb_filter_up.setCurrentIndex(idx)
+        _capturar(w)
+        w.table_ec_r.btn_auto.click()
+        medidas[pasa_alto] = w.table_ec_r.medidas.get('sp_ap')
+    assert abs(medidas['10'] - 0.55) < 0.08, medidas
+    # Con la banda del ABR la misma cóclea se informa bastante más baja, y
+    # el equipo no avisa.
+    assert medidas['200'] < medidas['10'] - 0.10, medidas
+
+
 def test_switching_test_with_curves_asks_first():
     """Cambiar de prueba empieza un registro nuevo, y avisa.
 

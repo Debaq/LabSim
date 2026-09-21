@@ -61,6 +61,8 @@ class EcochgTable(QWidget):
     # Marca que el alumno dejó armada (o None al desarmarla): el gráfico la
     # pone donde haga clic.
     sig_arm_mark = Signal(int, object)
+    # Marcado automático del equipo sobre la curva seleccionada.
+    sig_auto_mark = Signal(int)
 
     OUT_COLOR = QColor(255, 120, 120, 170)
 
@@ -96,6 +98,17 @@ class EcochgTable(QWidget):
             self.botones.addButton(btn)
             btn.clicked.connect(lambda _=False, m=marca: self._armar(m))
             cabecera.addWidget(btn)
+        # Marcado automático, como el de cualquier equipo: pone las cuatro
+        # marcas sobre el trazo y se pueden corregir a mano después. No es
+        # la respuesta: detecta sobre la curva registrada, así que con la
+        # banda mal puesta o el promedio a medias marca mal.
+        self.btn_auto = QToolButton(self)
+        self.btn_auto.setText("Auto")
+        self.btn_auto.setToolTip("Marcado automático del equipo sobre la "
+                                 "curva seleccionada")
+        self.btn_auto.clicked.connect(
+            lambda: self.sig_auto_mark.emit(self.side))
+        cabecera.addWidget(self.btn_auto)
         layout.addLayout(cabecera)
 
         self.tabla = QTableWidget(len(FILAS), 1, self)

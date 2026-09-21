@@ -3305,6 +3305,56 @@ señal y el mismo ruido.
 Cubierto por `test_the_trace_settles_while_it_averages` y
 `test_getting_closer_to_the_cochlea_buys_signal_to_noise`.
 
+### Marcado automático (2026-09-21)
+
+Botón `Auto` en la barra de marcas: pone las cuatro y de ahí salen las medidas,
+como cualquier equipo real (el clínico corrige después). Detecta **sobre el
+trazo** y nada más -- no mira el caso, ni la razón declarada, ni la latencia
+que el modelo usó para dibujar. Con la banda mal puesta o el nivel bajo marca
+igual y la medida sale mal, que es lo que tiene que pasar.
+
+Cómo encuentra cada punto y por qué:
+
+- **PA: el PRIMER mínimo hondo del rango fisiológico (0.8-3.5 ms), no el más
+  hondo.** Con un sumación grande el N2 corre montado sobre la meseta y llega a
+  medir el 91% de lo que mide el PA, así que el mínimo absoluto se iba al N2
+  justo en los oídos con más hidrops, que son los que importan. Se acepta el
+  primer mínimo local que llegue al 80% del más hondo.
+- **FIN: el primer punto en que el trazo vuelve a pegarse a la base** (dentro
+  del 10% de la profundidad del PA), no un cruce estricto: basta un poco de
+  deriva lenta para que el trazo se quede del lado de abajo toda la ventana y
+  el retorno no exista, justo en los registros donde importa.
+- **PS: por convención, a `SP_SHOULDER_MS` del PA.** Se probaron tres
+  detectores geométricos y ninguno aguantó: (1) caminar hacia atrás desde el
+  pico hasta que la bajada afloje -- pone la marca encima del propio PA, porque
+  acercándose a un mínimo la pendiente vuelve a cero sola; (2) el primer cambio
+  de signo de la curvatura después de la caída más pronunciada -- no encuentra
+  nada en los oídos normales y se dispara en los demás; (3) el punto menos
+  empinado entre la caída y el pico -- queda pegado al PA (razón 0.75-0.92).
+  El motivo de fondo: con un click el complejo entero dura alrededor de un
+  milisegundo y los dos potenciales se superponen, así que el hombro no tiene
+  firma geométrica confiable. Es una limitación real de la técnica con click
+  --por eso los protocolos fijan el punto en vez de buscarlo-- y no del
+  simulador. Fijar el INSTANTE no regala el resultado: la amplitud sale del
+  trazo igual.
+
+Qué tan bien anda, contra la razón que declara el caso (6 capturas por celda):
+conducto ±0.13 (y a veces no encuentra el complejo), timpánico ±0.04,
+transtimpánico ±0.02. Es el mismo orden que la dispersión del marcado manual:
+el marcado automático no arregla un registro malo.
+
+De paso quedó medido el efecto de la banda sobre la razón, con el marcado
+automático como regla fija (declarada 0.55): pasa-alto en 10 Hz da 0.558, en
+33 Hz da 0.580, en 100 Hz da 0.497 y en 200 Hz da 0.380. No es que el
+sumación "desaparezca" con la banda del ABR --eso pasaba con el bug del padding
+de la época, ya arreglado-- sino que se subestima, tanto más cuanto más alto el
+corte. La constante de tiempo de un corte en 200 Hz es 0.8 ms y la meseta dura
+un par de milisegundos.
+
+Queda por decidir si el botón lo ve el alumno o solo el docente. Hoy lo ven los
+dos: los equipos reales marcan solos y reconocer una marca mal puesta es parte
+del examen. Sacarlo para el alumno es esconder el botón en `EcochgTable._build`.
+
 ### Lo que falta
 
 - Nada de esto se probó en la app real ni en el navegador todavía: el hosting
