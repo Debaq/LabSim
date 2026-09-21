@@ -12,6 +12,8 @@ definición ABR en cases.data['ABR']['OD'/'OI'] (ver CaseBuilder.php).
 """
 import os
 
+import numpy as np
+
 from abr.ABR_generator import (ABR_Curve, ABRGenerator, agitation_factor,
                                case_quality, latency_intensity_band,
                                normative_limits, raw_eeg)
@@ -24,6 +26,8 @@ from abr.AbrGraph import AbrGraph
 from abr.AbrLatIntGraph import GraphLatInt
 from abr.AbrReport import AbrReport
 from abr.AbrTable import AbrTable
+from abr.EcochgTable import EcochgTable
+from abr import ecochg
 from abr.EEG import EEG
 from abr.FSP import FSP
 from abr.UI.AbrMain_ui import Ui_MainWindow
@@ -95,6 +99,14 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.layout_dock_test_contents.addWidget(self.detail)
         self.layout_dock_values_contents.addWidget(self.table_r)
         self.layout_dock_values_contents.addWidget(self.table_l)
+        # Las tablas del ECochG viven al lado de las del ABR y se muestran
+        # segun la prueba activa (ver apply_test_widgets): son dos examenes
+        # que no comparten NI UNA medida --ondas I-V contra razon PS/PA--
+        # asi que no hay una tabla que sirva para los dos.
+        self.table_ec_r = EcochgTable(0)
+        self.table_ec_l = EcochgTable(1)
+        self.layout_dock_values_contents.addWidget(self.table_ec_r)
+        self.layout_dock_values_contents.addWidget(self.table_ec_l)
         self.layout_dock_values_contents.addSpacerItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         ########Conexiones de slots
@@ -103,6 +115,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # atención, ver la_super) -- el menú queda sin acción conectada.
         self.table_r.sig_measure_value.connect(self.measure_action)
         self.table_l.sig_measure_value.connect(self.measure_action)
+        self.table_ec_r.sig_arm_mark.connect(self.arm_ecochg_mark)
+        self.table_ec_l.sig_arm_mark.connect(self.arm_ecochg_mark)
         self.graph_r.sig_data_info.connect(self.measure_data)
         self.graph_l.sig_data_info.connect(self.measure_data)
         self.graph_r.sig_change_value_mark.connect(self.table_r.change_value_lat)
@@ -172,6 +186,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.last_metadata = {}
         self.blink = False
         self.lbl_scale.setText(f"{int(round(self.graph_r.get_scale()))}µV")
+        self.apply_test_widgets(self.control.cb_test.currentText())
         self.apply_window()
         self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
         self.dock_test.setFixedHeight(ALTO_DOCK_DETALLE)
@@ -259,8 +274,16 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         etiqueta = f"Onda V ±2 DE ({edad} años)" if edad is not None else "Onda V ±2 DE"
         self.graph_lat_int.set_band(x, lo, hi, etiqueta)
         intensidad = self.control.sb_intencity.value()
+        limites = normative_limits(self.data_current, intensidad, stim)
         for tabla in (self.table_r, self.table_l):
-            tabla.set_norms(normative_limits(self.data_current, intensidad, stim))
+            tabla.set_norms(limites)
+        # ECochG: el limite de cada razon depende del ELECTRODO (ver
+        # ecochg.SP_AP_LIMIT), y la latencia del PA es la de la onda I --
+        # es la misma descarga, registrada desde el otro extremo.
+        norma_ec = ecochg.normative(self.technical.get('montage'),
+                                    (limites.get('lat') or {}).get('I'))
+        for tabla in (self.table_ec_r, self.table_ec_l):
+            tabla.set_norms(norma_ec)
 
     def refresh_eeg(self):
         """Un trozo nuevo de EEG crudo en el monitor de los dos canales."""
@@ -438,6 +461,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # Limpiar tablas
         self.table_r.clear_all()
         self.table_l.clear_all()
+        self.table_ec_r.clear_all()
+        self.table_ec_l.clear_all()
         self.detail_all.clear_all()
 
         # Limpiar panel de detalle y estado de captura
@@ -452,6 +477,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             table_letter = 'r' if curve[0] == 'R' else 'l'
             table = f'table_{table_letter}'
             getattr(self, table).clear_all()
+            getattr(self, f'table_ec_{table_letter}').clear_all()
             self.detail_all.delete_row_by_header(curve)
             del self.memory[curve]
             self.fsp_tracks.pop(curve, None)
@@ -473,6 +499,12 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             table = f'table_{table_letter}'
             data = self.memory[curve]
         except KeyError:
+            return
+        if self.es_ecochg():
+            # La tabla del ECochG muestra las medidas de la curva que se
+            # esta mirando: son de la curva, no del oido.
+            self.refresh_ecochg(curve)
+            self.update_detail_info(data)
             return
         # Los rangos normativos dependen de la intensidad de ESA curva: una
         # onda V de 6.4 ms a 40 dB es normal y a 80 dB no.
@@ -692,6 +724,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         getattr(self,label).setText(f'{data}')
 
     def update_memory_from_graph_mark(self, data):
+        if self.es_ecochg():
+            # Las marcas del ECochG no son ondas: no entran en LatAmp ni en
+            # la tabla de todas las curvas, que esta armada sobre I-V.
+            self.ecochg_mark_changed(data)
+            return
         """
         Actualiza la memoria cuando se marca una onda directamente en el gráfico
 
@@ -741,6 +778,103 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # acaba de tocar, sin esperar a promediar.
             self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
 
+    # ------------------------------------------------------------------
+    # ECochG: la medicion es otra (ver abr/ecochg.py y EcochgTable)
+    # ------------------------------------------------------------------
+
+    def es_ecochg(self):
+        return self.control.cb_test.currentText() == 'ECochG'
+
+    def apply_test_widgets(self, test):
+        """Muestra la tabla de la prueba activa y ajusta el marcado.
+
+        En el ABR se marcan cinco ondas con los cursores y las celdas de la
+        tabla; en el ECochG se marcan cuatro puntos haciendo clic sobre la
+        curva. No es una preferencia de interfaz: son dos examenes que no
+        comparten ninguna medida.
+        """
+        ecochg_on = test == 'ECochG'
+        for tabla in (self.table_r, self.table_l):
+            tabla.setVisible(not ecochg_on)
+        for tabla in (self.table_ec_r, self.table_ec_l):
+            tabla.setVisible(ecochg_on)
+            tabla.disarm()
+        for grafico in (self.graph_r, self.graph_l):
+            if ecochg_on:
+                # El PA se pega al pico; la base y el hombro del PS caen
+                # donde el alumno decida, que es la parte que se evalua.
+                grafico.set_marks_mode(ecochg.MARKS, snap=('PA',), notify=True)
+            else:
+                grafico.set_marks_mode(('I', 'II', 'III', 'IV', 'V'))
+
+    def arm_ecochg_mark(self, side, mark):
+        """Deja armada una marca en el grafico de ese oido.
+
+        Solo una a la vez en toda la ventana: con dos armadas, un clic en
+        el grafico del otro oido pondria la marca del que no se estaba
+        mirando.
+        """
+        propio, otro = (0, 1) if side == 0 else (1, 0)
+        graficos = (self.graph_r, self.graph_l)
+        tablas = (self.table_ec_r, self.table_ec_l)
+        if mark is not None:
+            tablas[otro].disarm()
+            graficos[otro].arm_mark(None)
+        graficos[propio].arm_mark(mark)
+
+    def ecochg_mark_changed(self, data):
+        """Una marca del ECochG se puso, se movio o se borro."""
+        for curve, marcas in data.items():
+            if curve not in self.memory:
+                continue
+            guardadas = self.memory[curve].setdefault('marcas', {})
+            for marca, coords in marcas.items():
+                if coords is None:
+                    guardadas.pop(marca, None)
+                else:
+                    guardadas[marca] = list(coords)
+            self.refresh_ecochg(curve)
+
+    def refresh_ecochg(self, curve):
+        """Recalcula las medidas de esa curva y las muestra."""
+        if not curve or curve not in self.memory:
+            return
+        side = 0 if curve[0] == 'R' else 1
+        grafico = self.graph_r if side == 0 else self.graph_l
+        tabla = self.table_ec_r if side == 0 else self.table_ec_l
+        datos = grafico.data.get(curve)
+        if datos is None:
+            return
+        x, y = datos['ipsi_xy']
+        medidas = ecochg.measure_complex(
+            np.asarray(x), np.asarray(y),
+            (self.memory[curve].get('marcas') or {}))
+        self.memory[curve]['ECochG'] = medidas
+        tabla.set_medidas(medidas)
+        tabla.set_rate_shift(self.ecochg_rate_shift(side))
+        # La marca ya esta puesta: se suelta para que el proximo clic no
+        # la vuelva a mover sin querer.
+        tabla.disarm()
+        grafico.arm_mark(None)
+
+    def ecochg_rate_shift(self, side):
+        """Corrimiento del PA entre la curva mas lenta y la mas rapida.
+
+        Se arma con TODAS las curvas medidas de ese oido, no con la
+        seleccionada: es una comparacion entre dos registros y el alumno
+        tiene que haberlos capturado.
+        """
+        letra = 'R' if side == 0 else 'L'
+        curvas = []
+        for nombre, datos in self.memory.items():
+            if not nombre.startswith(letra):
+                continue
+            medidas = datos.get('ECochG') or {}
+            curvas.append({'rate': datos.get('rate'),
+                           'ap_lat': medidas.get('ap_lat'),
+                           'ap_amp': medidas.get('ap_amp')})
+        return ecochg.rate_shift(curvas)
+
     def test_changed(self, test):
         """Cambio de prueba en el combo: cada potencial trae su protocolo.
 
@@ -751,7 +885,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """
         self.technical = default_settings(test)
         self.control.apply_protocol(test)
+        self.apply_test_widgets(test)
         self.apply_window()
+        self.apply_norms()
         self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
 
     def apply_window(self):

@@ -3221,12 +3221,35 @@ el registro continuo del equipo) hasta cubrir tres constantes de tiempo del
 corte, y después se recorta. Con cortes altos (100 Hz, ABR de 12 ms) el relleno
 es corto y el resultado es el de antes: `tests/test_abr_generator.py` pasa igual.
 
+### La medición (2026-09-21, misma tanda)
+
+`src/abr/EcochgTable.py` es la tabla y el marcado vive en `AbrGraph`. Decisiones:
+
+- **Las dos tablas conviven y se muestran según la prueba** (`apply_test_widgets`)
+  en vez de una tabla que se reconfigura: el ABR y el ECochG no comparten ni una
+  medida --ondas I-V e interpicos contra razones PS/PA-- y una tabla que sirviera
+  para los dos iba a ser una con la mitad de las filas vacías siempre.
+- **Solo el PA se pega al trazo.** La línea de base y el hombro del PS caen donde
+  el alumno haga clic: ahí es donde decide, y de esa decisión sale la razón que
+  informa. Pegarlos habría convertido el examen en apretar cuatro botones.
+- **La marca recién puesta avisa solo en el ECochG** (`AbrGraph.notify_create`).
+  En el ABR la marca la pone `measure_action` DESPUÉS de escribir la tabla con
+  los valores de los cursores (latencia A, amplitud pico-pico A-B); avisar ahí
+  habría pisado esos valores con la coordenada cruda del trazo.
+- **El menú contextual "Eliminar marcas" se arma con las marcas de la prueba**
+  y no con las cinco ondas fijas: un ECochG no tiene onda III.
+- **El inicio del complejo no se marca**: es el último punto antes del PS en que
+  el trazo seguía pegado a la base (dentro del 10% de la altura del PS). Pedir
+  una quinta marca para un punto que el trazo ya define era ruido.
+- **El corrimiento por tasa se arma con todas las curvas medidas del oído**, no
+  con la seleccionada, y la fila dice entre qué dos tasas comparó: 0.3 ms entre
+  11 y 21/s y entre 11 y 91/s no significan lo mismo.
+
+Cubierto por `tests/test_ecochg_panel.py` (la costura completa: combo → equipo →
+captura → marcas → tabla) y `tests/test_ecochg.py` (el modelo).
+
 ### Lo que falta
 
-- **UI de medición**: el gráfico invertido, la barra de marcas BL/PS/PA/FIN con
-  clic sobre la curva, y la tabla del ECochG (las cuatro medidas contra su
-  normativa). Hoy la prueba se registra pero se mide con la tabla de ondas I-V
-  del ABR, que no sirve.
 - **Bloque `ecochg` del caso en el backend**: `CaseProfile` (razón por cuadro:
   el Ménière y el hidrops retardado son los que la suben), `CaseBuilder` y la
   ficha de `case_create.php`. Hoy el bloque se lee de `preferences['ecochg']`

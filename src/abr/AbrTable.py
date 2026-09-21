@@ -222,6 +222,10 @@ class AbrTable(QWidget, Ui_TableData):
         for i in data:
             for t in data[i]:
                 coord = self.curve_coord(f"{t}_L")
+                if coord is None:
+                    # Marca de otra prueba (el ECochG marca BL/PS/PA/FIN,
+                    # que no son ondas): esta tabla no tiene donde ponerla.
+                    continue
                 if data[i][t] is None:
                     self.tw_latamp.setItem(coord[0], 0, QTableWidgetItem(""))
                     self.tw_latamp.setItem(coord[0], 1, QTableWidgetItem(""))

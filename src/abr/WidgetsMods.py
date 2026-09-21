@@ -89,12 +89,11 @@ class GraphicsLayoutWidgetMod(GraphicsLayoutWidget):
         smooth = contextMenu.addMenu(QCoreApplication.translate("GraphicsLayoutWidgetMod", "Suavizar"))
         view = contextMenu.addMenu(QCoreApplication.translate("GraphicsLayoutWidgetMod", "Mostrar"))
         
-        # Añade submenús a 'delete_mark'
-        mark_i = delete_mark.addAction(QCoreApplication.translate("GraphicsLayoutWidgetMod", "Curva I"))
-        mark_ii = delete_mark.addAction(QCoreApplication.translate("GraphicsLayoutWidgetMod", "Curva II"))
-        mark_iii = delete_mark.addAction(QCoreApplication.translate("GraphicsLayoutWidgetMod", "Curva III"))
-        mark_iv = delete_mark.addAction(QCoreApplication.translate("GraphicsLayoutWidgetMod", "Curva IV"))
-        mark_v = delete_mark.addAction(QCoreApplication.translate("GraphicsLayoutWidgetMod", "Curva V"))
+        # Submenús de 'delete_mark': las marcas de la prueba activa, no las
+        # cinco ondas fijas. Un ECochG no tiene onda III -- tiene PS y PA.
+        for etiqueta in getattr(self, 'mark_labels', ('I', 'II', 'III', 'IV', 'V')):
+            accion = delete_mark.addAction(etiqueta)
+            accion.triggered.connect(partial(self.delete_mark, etiqueta))
         mark_all = delete_mark.addAction(QCoreApplication.translate("GraphicsLayoutWidgetMod", "Eliminar todas"))
 
         x2 = smooth.addAction(QCoreApplication.translate("GraphicsLayoutWidgetMod", "x2"))
@@ -105,11 +104,6 @@ class GraphicsLayoutWidgetMod(GraphicsLayoutWidget):
         contra = view.addAction(QCoreApplication.translate("GraphicsLayoutWidgetMod", "contra"))
        
 
-        mark_i.triggered.connect(partial(self.delete_mark, 'Curva I'))
-        mark_ii.triggered.connect(partial(self.delete_mark, 'Curva II'))
-        mark_iii.triggered.connect(partial(self.delete_mark, 'Curva III'))
-        mark_iv.triggered.connect(partial(self.delete_mark, 'Curva IV'))
-        mark_v.triggered.connect(partial(self.delete_mark, 'Curva V'))
         mark_all.triggered.connect(self.delete_all_marks)
 
         x2.triggered.connect(partial(self.smooth, '0.5'))

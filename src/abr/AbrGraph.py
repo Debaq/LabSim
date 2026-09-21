@@ -32,6 +32,25 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.window_ms = 12.0
         self.act_curve = None
         self.marks = {}
+        # Marca armada desde la barra del ECochG: mientras haya una, un
+        # clic sobre el grafico la pone. En el ABR no hay ninguna armada
+        # nunca y el clic sigue siendo el de siempre (seleccionar curva).
+        self.mark_mode = None
+        # Como se llaman las marcas de la prueba activa: cambia el menu
+        # contextual de "Eliminar marcas". Las del ABR son las ondas; las
+        # del ECochG son los cuatro puntos que definen las dos razones.
+        self.mark_labels = ('I', 'II', 'III', 'IV', 'V')
+        # Marcas que se pegan al extremo del trazo en vez de caer donde
+        # cayo el clic. El PA es un pico y marcarlo es decir donde esta, no
+        # acertarle al punto; el hombro del PS y la linea de base NO se
+        # pegan a nada, que es justamente la parte que el alumno decide.
+        self.snap_marks = ()
+        # Si una marca recien puesta avisa. En el ABR NO: ahi la marca la
+        # pone measure_action DESPUES de escribir la tabla con los valores
+        # de los cursores (latencia A, amplitud pico-pico A-B), y avisar
+        # aca pisaria esos valores con la coordenada cruda del trazo. En el
+        # ECochG la marca ES el dato, asi que tiene que avisar.
+        self.notify_create = False
         self.data = {}
         self.curve_int = {}
         self.current_lat = 0
@@ -56,6 +75,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.gap_ratio = 0.35
         self.configure_pyqtgraph()
         self.setup_ui_elements()
+        self.pw.scene().sigMouseClicked.connect(self.click_mark)
         self.colors_side()
         self.inifine_ab()
 
@@ -382,6 +402,50 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             # Actualizar la latencia actual
             self.current_lat = lat_a
 
+    def set_marks_mode(self, labels, snap=(), notify=False):
+        """Que marcas tiene esta prueba, cuales se pegan y si avisan."""
+        self.mark_labels = tuple(labels)
+        self.snap_marks = tuple(snap)
+        self.notify_create = bool(notify)
+        self.mark_mode = None
+
+    def arm_mark(self, mark):
+        """Deja armada la marca que el proximo clic va a poner."""
+        self.mark_mode = mark
+
+    def snap_to_peak(self, x):
+        """Minimo del trazo cerca de x.
+
+        En el ECochG el PA es una deflexion NEGATIVA (el electrodo activo
+        es el del oido, no el vertex), asi que el pico es un minimo.
+        """
+        datos = self.data.get(self.act_curve)
+        if not datos:
+            return x
+        xs, ys = datos['ipsi_xy']
+        cerca = np.where(np.abs(xs - x) <= self.SNAP_MS)[0]
+        if not len(cerca):
+            return x
+        return float(xs[cerca[int(np.argmin(ys[cerca]))]])
+
+    def click_mark(self, ev):
+        """Clic sobre la curva con una marca armada: la pone ahi."""
+        if self.mark_mode is None or self.act_curve is None:
+            return
+        if ev.button() != Qt.MouseButton.LeftButton:
+            return
+        if self.act_curve not in self.data:
+            return
+        x = float(self.pw.vb.mapSceneToView(ev.scenePos()).x())
+        if self.mark_mode in self.snap_marks:
+            x = self.snap_to_peak(x)
+        self.current_lat = x
+        self.create_marks(self.mark_mode)
+        ev.accept()
+
+    # Cuanto se puede correr una marca que se pega al trazo, en ms.
+    SNAP_MS = 0.4
+
     def create_marks(self, lbl_mark):
         name_curve = self.act_curve
         lbl = lbl_mark
@@ -399,6 +463,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             text.setFont(font)
             text.setPos(x, y+0.1)
             self.pw.addItem(text)
+            if self.notify_create:
+                self.update_value_mark(lbl)
         else:
             self.update_marks(x,y, name)
 
@@ -442,8 +508,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             name_mark = f'{name_curve}_{mark}'
             self.update_marks(x,y,name_mark)
         
-    def delete_mark(self, sender):
-        _,mark = sender.split(' ')
+    def delete_mark(self, mark):
         name_mark = f'{self.act_curve}_{mark}'
         for item in self.pw.items[:]:  
             if isinstance(item, TextItemMod) and item.tipo == 'mark' and item.name == name_mark:
