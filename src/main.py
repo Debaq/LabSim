@@ -269,7 +269,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.debug_mkg_dialog = None
         self.subw = None
         self.sectors_lbl = SECTORS
-        self.modules = Storage(len(APPS))
+        # El Storage se indexa por pos_z, que NO es un índice denso: el
+        # layout tiene huecos (hoy falta el 12) y los pos_z pueden pasarse
+        # de la cantidad de apps. Dimensionarlo con len(APPS) dejaba el
+        # último módulo justo afuera -- abrirlo reventaba con IndexError en
+        # Storage.is_full. Manda el pos_z más alto, no cuántas apps hay.
+        self.modules = Storage(max((app[2] for app in APPS.values()), default=0) + 1)
         self.var_list_word = Storage(2)
         self.log_uploader = None
         self.sync_thread = None

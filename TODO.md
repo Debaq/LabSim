@@ -3008,3 +3008,13 @@ cuáles de sus perillas están implementadas. Marcarlos rompe la simulación.
 **Conectar uno** es leerlo en el generador, darle su test, y sacarlo de
 `UNCONNECTED_SETTINGS`: el test del diálogo exige que todo lo que siga en esa
 lista esté dibujado y marcado, así que la lista se achica sola.
+
+### El Storage de módulos se indexaba con len(APPS)
+
+Abrir el AABR reventaba con `IndexError: list index out of range` en
+`Storage.is_full`. La causa no era el módulo nuevo: `self.modules =
+Storage(len(APPS))` asume que los `pos_z` del layout son un índice denso
+desde 0, y no lo son --falta el 12, y los pos_z llegan hasta 21 con 21 apps--.
+El último módulo del layout quedaba siempre justo afuera del Storage; hasta
+ahora el máximo coincidía con `len(APPS) - 1` de casualidad. Ahora manda el
+pos_z más alto, no cuántas apps hay.
