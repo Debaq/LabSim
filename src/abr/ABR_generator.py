@@ -2979,7 +2979,42 @@ def default_settings(test='ABR'):
         'artifact_reject_uv': 25.0,
         'residual_noise_nv': 40.0,
         'fsp_criterion': 3.1,
+        # --- Todavia SIN EFECTO en el trazo -----------------------------
+        # Estan en el equipo real y el alumno los busca, asi que el dialogo
+        # los muestra y el technical_config los transporta. El generador no
+        # los lee ADREDE: conectarlos es leerlos aca, uno por uno, con su
+        # modelo y su test. Ver UNCONNECTED_SETTINGS.
+        'click_us': 100.0,
+        'burst_envelope': '2-1-2',
+        'burst_window': 'blackman',
+        'level_unit': 'nHL',
+        'rate_jitter_pct': 0.0,
+        'presentation': 'monaural',
+        'masking_noise': 'white',
+        'masking_offset_db': 0.0,
+        'channels': 1,
+        'gain': 100000.0,
+        'notch_hz': 0.0,
+        'filter_slope': 12.0,
+        'sample_rate_hz': 30000.0,
+        'weighted_averaging': False,
+        'auto_stop': 'ambos',
+        'fsp_window_ms': None,
+        'smoothing': 0.0,
     }
+
+
+# Lo que el dialogo de Parametros Avanzados muestra pero el generador
+# todavia no lee. Se lista explicito para que los tests puedan exigir que
+# el resto SI se use, y para que la lista se achique sola a medida que se
+# vayan conectando: sacar una clave de aca es el ultimo paso de
+# conectarla.
+UNCONNECTED_SETTINGS = (
+    'click_us', 'burst_envelope', 'burst_window', 'level_unit',
+    'rate_jitter_pct', 'presentation', 'masking_noise', 'masking_offset_db',
+    'channels', 'gain', 'notch_hz', 'filter_slope', 'sample_rate_hz',
+    'weighted_averaging', 'auto_stop', 'fsp_window_ms', 'smoothing',
+)
 
 
 def _get_generator():

@@ -26,15 +26,23 @@ try:
     from abr.AbrAdvanceSettings import (ARTIFACT_REJECT, AbrAdvanceSettings,
                                         MONTAGES, TRANSDUCERS,
                                         default_settings)
-    from abr.ABR_generator import DISCONNECTED
+    from abr.ABR_generator import DISCONNECTED, UNCONNECTED_SETTINGS
     HAS_QT = True
 except ImportError as exc:          # sin PySide6 instalado
     print(f"  (tests de UI salteados: {exc})")
     HAS_QT = False
 
 
+# Las que el generador YA usa.
 CLAVES = {'transducer', 'montage', 'window_ms', 'electrodes', 'impedance',
           'artifact_reject_uv', 'residual_noise_nv', 'fsp_criterion'}
+
+# Y las que el diálogo muestra pero el modelo todavía no lee. Están porque
+# el equipo real las tiene y el alumno las busca --el 2-1-2 del tone burst
+# es el ejemplo que se repite--; viajan en el technical_config con la clave
+# con la que se van a leer, así que conectar una es leerla en el generador
+# y sacarla de esta lista.
+PENDIENTES = set(UNCONNECTED_SETTINGS)
 
 
 def test_get_data_returns_a_technical_config():
@@ -42,7 +50,7 @@ def test_get_data_returns_a_technical_config():
     if not HAS_QT:
         return
     data = AbrAdvanceSettings(test='ABR').get_data()
-    assert set(data) == CLAVES
+    assert set(data) == CLAVES | PENDIENTES
     assert set(data['electrodes']) == {'vertex', 'right', 'left', 'ground'}
     assert set(data['impedance']) == set(data['electrodes'])
     # Y coincide con el default del protocolo, que es lo que usa ABR_Curve
@@ -151,6 +159,56 @@ def test_labels_map_to_the_keys_the_generator_uses():
                                          'bone_vibrator'}
     assert 'vertex_mastoid' in MONTAGES.values()
     assert 0.0 in ARTIFACT_REJECT.values()      # "Desactivado"
+
+
+def test_the_pending_parameters_are_there_and_marked():
+    """Los parámetros que el equipo real tiene y el modelo todavía no usa.
+
+    Faltaban y los alumnos los buscaban. Se dibujan, se guardan y viajan en
+    el technical_config, pero el generador no los lee: el test fija las dos
+    mitades del trato -- que estén, y que el diálogo no finja que hacen
+    algo. Cuando uno se conecte, sale de UNCONNECTED_SETTINGS y este test
+    deja de pedirlo.
+    """
+    if not HAS_QT:
+        return
+    d = AbrAdvanceSettings(test='ABR')
+    data = d.get_data()
+    for clave in UNCONNECTED_SETTINGS:
+        assert clave in data, clave
+
+    # El 2-1-2 es el que se pide por nombre: tiene que poder elegirse.
+    assert d.cb_burst_env.findData('2-1-2') >= 0
+    assert data['burst_envelope'] == '2-1-2'
+    # Y el resto de las envolventes de rutina, que es de lo que se compara.
+    for envolvente in ('2-0-2', '1-0-1', '5-0-5'):
+        assert d.cb_burst_env.findData(envolvente) >= 0, envolvente
+
+    # Marcados: el tooltip dice que no afectan al trazo. Sin esto, el alumno
+    # configura el notch de 50 Hz, sigue viendo el zumbido y aprende algo
+    # falso.
+    for widget in (d.cb_burst_env, d.cb_notch, d.cb_gain, d.cb_smoothing):
+        assert 'no afecta' in widget.toolTip(), widget.toolTip()
+    # Y los que SÍ funcionan no llevan esa marca.
+    for widget in (d.cb_transducer, d.cb_reject, d.cb_fsp):
+        assert 'no afecta' not in widget.toolTip()
+
+
+def test_the_pending_parameters_survive_a_round_trip():
+    """Se guardan aunque no hagan nada: si no, al reabrir el diálogo el
+    alumno perdería lo que configuró y parecería un bug del equipo."""
+    if not HAS_QT:
+        return
+    custom = dict(
+        default_settings('ABR'),
+        burst_envelope='5-0-5', burst_window='hanning', click_us=200.0,
+        level_unit='peSPL', rate_jitter_pct=10.0, presentation='binaural',
+        masking_noise='narrow', masking_offset_db=-10.0, channels=2,
+        gain=50000.0, notch_hz=50.0, filter_slope=24.0,
+        sample_rate_hz=48000.0, weighted_averaging=True, auto_stop='fsp',
+        fsp_window_ms=8.0, smoothing=5.0,
+    )
+    assert AbrAdvanceSettings(custom, test='ABR').get_data() == custom
 
 
 if __name__ == "__main__":

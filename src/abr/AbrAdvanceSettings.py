@@ -22,13 +22,20 @@ tiene que reconocer en el trazo y corregirlo, que es el ejercicio.
 from PySide6.QtCore import QCoreApplication
 from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox,
                                QDoubleSpinBox, QGridLayout, QGroupBox, QLabel,
-                               QVBoxLayout)
+                               QTabWidget, QVBoxLayout, QWidget)
 
 from abr.ABR_generator import DISCONNECTED
 from abr.ABR_generator import default_settings as _generator_defaults
 from abr.protocols import get_protocol
 
 tr = QCoreApplication.translate
+
+# Marca de los parámetros que el equipo muestra pero el modelo todavía no
+# usa. No es un detalle de estilo: sin la marca, el alumno configura el
+# notch de 50 Hz, sigue viendo el zumbido y aprende algo falso.
+PENDIENTE_COLOR = "#8a8a8a"
+PENDIENTE_TOOLTIP = ("Todavía no afecta al trazo: el equipo lo guarda, pero "
+                     "el modelo no lo usa.")
 
 
 # Rótulo visible -> clave que entiende el generador.
@@ -78,6 +85,90 @@ ELECTRODES = (
     ('ground', "Tierra", "Fpz"),
 )
 
+# ---------------------------------------------------------------------
+# Parámetros que el equipo real tiene y el modelo todavía NO usa.
+#
+# Estaban faltando y los alumnos los buscaban --el 2-1-2 del tone burst es
+# el ejemplo que se repite--. Se dibujan y viajan en el technical_config,
+# pero el generador no los lee (ver UNCONNECTED_SETTINGS en el generador).
+# Van marcados en gris y con tooltip: que el alumno crea que configuró el
+# notch de 50 Hz y siga viendo el zumbido sería enseñarle algo falso.
+# ---------------------------------------------------------------------
+
+# Duración del click. 100 µs es el de rutina; los otros existen y cambian
+# el espectro (más corto = más agudo, más largo = más grave).
+CLICK_US = {"50 µs": 50.0, "100 µs": 100.0, "200 µs": 200.0, "500 µs": 500.0}
+
+# Envolvente del tone burst en CICLOS de la frecuencia del tono:
+# subida - meseta - bajada. El 2-1-2 es el de rutina para umbrales por
+# frecuencia; sin meseta (2-0-2) el estímulo es más corto y sincroniza
+# mejor, con meseta larga es más específico en frecuencia y peor
+# sincronizado.
+BURST_ENVELOPES = {
+    "2-1-2 ciclos": '2-1-2',
+    "2-0-2 ciclos": '2-0-2',
+    "1-0-1 ciclos": '1-0-1',
+    "2-2-2 ciclos": '2-2-2',
+    "5-0-5 ciclos": '5-0-5',
+    "1 ms - 1 ms - 1 ms": 'ms-1-1-1',
+}
+
+# Forma de la rampa de subida y bajada.
+BURST_WINDOWS = {
+    "Blackman": 'blackman',
+    "Hanning": 'hanning',
+    "Gaussiana": 'gauss',
+    "Lineal (trapezoidal)": 'linear',
+}
+
+# Unidad en la que el equipo muestra el nivel.
+LEVEL_UNITS = {"dB nHL": 'nHL', "dB peSPL": 'peSPL', "dB HL": 'HL',
+               "dB SL": 'SL'}
+
+# Aleatorización del intervalo entre estímulos: rompe la periodicidad para
+# que el artefacto del transductor no se sume en fase con la respuesta.
+RATE_JITTER = {"Sin jitter": 0.0, "± 5 %": 5.0, "± 10 %": 10.0, "± 20 %": 20.0}
+
+PRESENTATION = {
+    "Monoaural": 'monaural',
+    "Binaural": 'binaural',
+    "Alternando oídos": 'alternating',
+}
+
+MASKING_NOISE = {
+    "Ruido blanco": 'white',
+    "Banda estrecha": 'narrow',
+    "Ruido de habla": 'speech',
+}
+
+CHANNELS = {"1 canal (ipsi)": 1, "2 canales (ipsi + contra)": 2}
+
+GAINS = {"×10.000": 10000.0, "×50.000": 50000.0, "×100.000": 100000.0,
+         "×150.000": 150000.0}
+
+# Filtro de red. En Chile la red es de 50 Hz; el de 60 está porque los
+# equipos lo traen y porque el mismo caso se puede correr en otro país.
+NOTCH = {"Desactivado": 0.0, "50 Hz": 50.0, "60 Hz": 60.0}
+
+FILTER_SLOPES = {"6 dB/oct": 6.0, "12 dB/oct": 12.0, "24 dB/oct": 24.0,
+                 "48 dB/oct": 48.0}
+
+SAMPLE_RATES = {"20 kHz": 20000.0, "30 kHz": 30000.0, "44,1 kHz": 44100.0,
+                "48 kHz": 48000.0}
+
+WEIGHTED_AVERAGING = {"Promedio simple": False, "Promedio ponderado por ruido": True}
+
+# Qué hace el equipo cuando se cumple el criterio.
+AUTO_STOP = {
+    "Al cruzar el FSP o llegar al ruido objetivo": 'ambos',
+    "Solo al cruzar el FSP": 'fsp',
+    "Solo al llegar al ruido objetivo": 'ruido',
+    "No parar solo": 'no',
+}
+
+SMOOTHING = {"Sin suavizado": 0.0, "3 puntos": 3.0, "5 puntos": 5.0,
+             "7 puntos": 7.0}
+
 
 def default_settings(test: str = 'ABR') -> dict:
     """technical_config de rutina para el protocolo pedido.
@@ -112,9 +203,71 @@ class AbrAdvanceSettings(QDialog):
     # ------------------------------------------------------------------ UI
     def _build(self, settings):
         layout = QVBoxLayout(self)
+        tabs = QTabWidget()
+        tabs.addTab(self._tab_estimulo(settings), "Estímulo")
+        tabs.addTab(self._tab_registro(settings), "Registro")
+        tabs.addTab(self._tab_promediacion(settings), "Promediación")
+        layout.addWidget(tabs)
 
-        registro = QGroupBox("Registro")
-        grid = QGridLayout(registro)
+        aviso = QLabel(
+            "Los parámetros en gris todavía no afectan al trazo: el equipo "
+            "los guarda y los muestra, pero el modelo no los usa.")
+        aviso.setWordWrap(True)
+        aviso.setStyleSheet(f"color:{PENDIENTE_COLOR}; font-size:10px;")
+        layout.addWidget(aviso)
+
+        botones = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok
+                                   | QDialogButtonBox.StandardButton.Cancel
+                                   | QDialogButtonBox.StandardButton.RestoreDefaults)
+        botones.accepted.connect(self.accept)
+        botones.rejected.connect(self.reject)
+        botones.button(QDialogButtonBox.StandardButton.RestoreDefaults).clicked.connect(
+            self.restore_defaults)
+        layout.addWidget(botones)
+
+    @staticmethod
+    def _fila(grid, row, texto, widget, pendiente=False):
+        """Una fila etiqueta/control. `pendiente` = dibujada pero sin efecto."""
+        label = QLabel(texto)
+        if pendiente:
+            label.setStyleSheet(f"color:{PENDIENTE_COLOR};")
+            label.setToolTip(PENDIENTE_TOOLTIP)
+            widget.setToolTip(PENDIENTE_TOOLTIP)
+        grid.addWidget(label, row, 0)
+        grid.addWidget(widget, row, 1)
+
+    def _tab_estimulo(self, settings):
+        caja = QGroupBox()
+        grid = QGridLayout(caja)
+        self.cb_click_us = _combo(CLICK_US, settings.get('click_us'))
+        self.cb_burst_env = _combo(BURST_ENVELOPES, settings.get('burst_envelope'))
+        self.cb_burst_win = _combo(BURST_WINDOWS, settings.get('burst_window'))
+        self.cb_level_unit = _combo(LEVEL_UNITS, settings.get('level_unit'))
+        self.cb_jitter = _combo(RATE_JITTER, settings.get('rate_jitter_pct'))
+        self.cb_presentation = _combo(PRESENTATION, settings.get('presentation'))
+        self.cb_masking_noise = _combo(MASKING_NOISE, settings.get('masking_noise'))
+        self.sb_masking_offset = QDoubleSpinBox()
+        self.sb_masking_offset.setRange(-40.0, 40.0)
+        self.sb_masking_offset.setDecimals(0)
+        self.sb_masking_offset.setSuffix(" dB")
+        self.sb_masking_offset.setValue(float(settings.get('masking_offset_db') or 0.0))
+        filas = (
+            ("Duración del click", self.cb_click_us),
+            ("Envolvente del tone burst", self.cb_burst_env),
+            ("Ventana del tone burst", self.cb_burst_win),
+            ("Unidad de nivel", self.cb_level_unit),
+            ("Jitter de la tasa", self.cb_jitter),
+            ("Presentación", self.cb_presentation),
+            ("Ruido de enmascaramiento", self.cb_masking_noise),
+            ("Offset del enmascaramiento", self.sb_masking_offset),
+        )
+        for row, (texto, widget) in enumerate(filas):
+            self._fila(grid, row, texto, widget, pendiente=True)
+        return caja
+
+    def _tab_registro(self, settings):
+        caja = QGroupBox()
+        grid = QGridLayout(caja)
         self.cb_transducer = _combo(TRANSDUCERS, settings.get('transducer'))
         self.cb_montage = _combo(MONTAGES, settings.get('montage'))
         self.sb_window = QDoubleSpinBox()
@@ -123,16 +276,25 @@ class AbrAdvanceSettings(QDialog):
         self.sb_window.setDecimals(1)
         self.sb_window.setSuffix(" ms")
         self.sb_window.setValue(float(settings.get('window_ms', self.protocol.window_ms)))
-        grid.addWidget(QLabel("Transductor"), 0, 0)
-        grid.addWidget(self.cb_transducer, 0, 1)
-        grid.addWidget(QLabel("Montaje"), 1, 0)
-        grid.addWidget(self.cb_montage, 1, 1)
-        grid.addWidget(QLabel("Ventana"), 2, 0)
-        grid.addWidget(self.sb_window, 2, 1)
-        layout.addWidget(registro)
+        self._fila(grid, 0, "Transductor", self.cb_transducer)
+        self._fila(grid, 1, "Montaje", self.cb_montage)
+        self._fila(grid, 2, "Ventana", self.sb_window)
+
+        self.cb_channels = _combo(CHANNELS, settings.get('channels'))
+        self.cb_gain = _combo(GAINS, settings.get('gain'))
+        self.cb_notch = _combo(NOTCH, settings.get('notch_hz'))
+        self.cb_slope = _combo(FILTER_SLOPES, settings.get('filter_slope'))
+        self.cb_sample_rate = _combo(SAMPLE_RATES, settings.get('sample_rate_hz'))
+        for row, (texto, widget) in enumerate((
+                ("Canales", self.cb_channels),
+                ("Ganancia del amplificador", self.cb_gain),
+                ("Filtro de red (notch)", self.cb_notch),
+                ("Pendiente del filtro", self.cb_slope),
+                ("Frecuencia de muestreo", self.cb_sample_rate)), start=3):
+            self._fila(grid, row, texto, widget, pendiente=True)
 
         electrodos = QGroupBox("Electrodos (posición e impedancia)")
-        grid = QGridLayout(electrodos)
+        egrid = QGridLayout(electrodos)
         self.electrode_widgets = {}
         posiciones = settings.get('electrodes') or {}
         impedancias = settings.get('impedance')
@@ -150,33 +312,44 @@ class AbrAdvanceSettings(QDialog):
             spin.setDecimals(1)
             spin.setSuffix(" kΩ")
             spin.setValue(float(impedancias.get(key, 2.0)))
-            grid.addWidget(QLabel(label), row, 0)
-            grid.addWidget(combo, row, 1)
-            grid.addWidget(spin, row, 2)
+            egrid.addWidget(QLabel(label), row, 0)
+            egrid.addWidget(combo, row, 1)
+            egrid.addWidget(spin, row, 2)
             self.electrode_widgets[key] = (combo, spin)
-        layout.addWidget(electrodos)
 
-        promedio = QGroupBox("Promediación")
-        grid = QGridLayout(promedio)
+        envoltorio = QWidget()
+        vbox = QVBoxLayout(envoltorio)
+        vbox.addWidget(caja)
+        vbox.addWidget(electrodos)
+        vbox.addStretch(1)
+        return envoltorio
+
+    def _tab_promediacion(self, settings):
+        caja = QGroupBox()
+        grid = QGridLayout(caja)
         self.cb_reject = _combo(ARTIFACT_REJECT, settings.get('artifact_reject_uv'))
         self.cb_noise = _combo(RESIDUAL_NOISE, settings.get('residual_noise_nv'))
         self.cb_fsp = _combo(FSP_CRITERIA, settings.get('fsp_criterion'))
-        grid.addWidget(QLabel("Rechazo de artefacto"), 0, 0)
-        grid.addWidget(self.cb_reject, 0, 1)
-        grid.addWidget(QLabel("Ruido residual objetivo"), 1, 0)
-        grid.addWidget(self.cb_noise, 1, 1)
-        grid.addWidget(QLabel("Criterio de detección"), 2, 0)
-        grid.addWidget(self.cb_fsp, 2, 1)
-        layout.addWidget(promedio)
+        self._fila(grid, 0, "Rechazo de artefacto", self.cb_reject)
+        self._fila(grid, 1, "Ruido residual objetivo", self.cb_noise)
+        self._fila(grid, 2, "Criterio de detección", self.cb_fsp)
 
-        botones = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok
-                                   | QDialogButtonBox.StandardButton.Cancel
-                                   | QDialogButtonBox.StandardButton.RestoreDefaults)
-        botones.accepted.connect(self.accept)
-        botones.rejected.connect(self.reject)
-        botones.button(QDialogButtonBox.StandardButton.RestoreDefaults).clicked.connect(
-            self.restore_defaults)
-        layout.addWidget(botones)
+        self.cb_weighted = _combo(WEIGHTED_AVERAGING, settings.get('weighted_averaging'))
+        self.cb_auto_stop = _combo(AUTO_STOP, settings.get('auto_stop'))
+        self.sb_fsp_window = QDoubleSpinBox()
+        self.sb_fsp_window.setRange(0.0, 50.0)
+        self.sb_fsp_window.setDecimals(1)
+        self.sb_fsp_window.setSuffix(" ms")
+        self.sb_fsp_window.setSpecialValueText("Automática (por edad)")
+        self.sb_fsp_window.setValue(float(settings.get('fsp_window_ms') or 0.0))
+        self.cb_smoothing = _combo(SMOOTHING, settings.get('smoothing'))
+        for row, (texto, widget) in enumerate((
+                ("Tipo de promediación", self.cb_weighted),
+                ("Parada automática", self.cb_auto_stop),
+                ("Ventana de análisis del FSP", self.sb_fsp_window),
+                ("Suavizado del trazo", self.cb_smoothing)), start=3):
+            self._fila(grid, row, texto, widget, pendiente=True)
+        return caja
 
     # --------------------------------------------------------------- datos
     def restore_defaults(self):
@@ -199,6 +372,27 @@ class AbrAdvanceSettings(QDialog):
             'artifact_reject_uv': float(self.cb_reject.currentData()) or 0.0,
             'residual_noise_nv': float(self.cb_noise.currentData()),
             'fsp_criterion': float(self.cb_fsp.currentData()) or None,
+            # Sin efecto todavía, pero viajan en el technical_config con la
+            # clave con la que se van a leer: conectar uno es leerlo en el
+            # generador y sacarlo de UNCONNECTED_SETTINGS.
+            'click_us': float(self.cb_click_us.currentData()),
+            'burst_envelope': self.cb_burst_env.currentData(),
+            'burst_window': self.cb_burst_win.currentData(),
+            'level_unit': self.cb_level_unit.currentData(),
+            'rate_jitter_pct': float(self.cb_jitter.currentData()),
+            'presentation': self.cb_presentation.currentData(),
+            'masking_noise': self.cb_masking_noise.currentData(),
+            'masking_offset_db': float(self.sb_masking_offset.value()),
+            'channels': int(self.cb_channels.currentData()),
+            'gain': float(self.cb_gain.currentData()),
+            'notch_hz': float(self.cb_notch.currentData()),
+            'filter_slope': float(self.cb_slope.currentData()),
+            'sample_rate_hz': float(self.cb_sample_rate.currentData()),
+            'weighted_averaging': bool(self.cb_weighted.currentData()),
+            'auto_stop': self.cb_auto_stop.currentData(),
+            # 0 = automática (la ventana por edad que usa el generador).
+            'fsp_window_ms': float(self.sb_fsp_window.value()) or None,
+            'smoothing': float(self.cb_smoothing.currentData()),
         }
 
     def set_data(self, settings: dict) -> None:
@@ -206,13 +400,32 @@ class AbrAdvanceSettings(QDialog):
                            (self.cb_montage, 'montage'),
                            (self.cb_reject, 'artifact_reject_uv'),
                            (self.cb_noise, 'residual_noise_nv'),
-                           (self.cb_fsp, 'fsp_criterion')):
+                           (self.cb_fsp, 'fsp_criterion'),
+                           (self.cb_click_us, 'click_us'),
+                           (self.cb_burst_env, 'burst_envelope'),
+                           (self.cb_burst_win, 'burst_window'),
+                           (self.cb_level_unit, 'level_unit'),
+                           (self.cb_jitter, 'rate_jitter_pct'),
+                           (self.cb_presentation, 'presentation'),
+                           (self.cb_masking_noise, 'masking_noise'),
+                           (self.cb_channels, 'channels'),
+                           (self.cb_gain, 'gain'),
+                           (self.cb_notch, 'notch_hz'),
+                           (self.cb_slope, 'filter_slope'),
+                           (self.cb_sample_rate, 'sample_rate_hz'),
+                           (self.cb_weighted, 'weighted_averaging'),
+                           (self.cb_auto_stop, 'auto_stop'),
+                           (self.cb_smoothing, 'smoothing')):
             valor = settings.get(key)
             idx = combo.findData(valor if valor is not None else 0.0)
             if idx >= 0:
                 combo.setCurrentIndex(idx)
         if 'window_ms' in settings:
             self.sb_window.setValue(float(settings['window_ms']))
+        if 'masking_offset_db' in settings:
+            self.sb_masking_offset.setValue(float(settings['masking_offset_db'] or 0.0))
+        if 'fsp_window_ms' in settings:
+            self.sb_fsp_window.setValue(float(settings['fsp_window_ms'] or 0.0))
         posiciones = settings.get('electrodes') or {}
         impedancias = settings.get('impedance')
         if not isinstance(impedancias, dict):

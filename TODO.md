@@ -2984,3 +2984,28 @@ riesgo del JCIH.
 La hoja sale en todos los casos, también en un adulto: el AABR es un equipo
 que el alumno puede usar con cualquier paciente y el docente necesita saber
 qué debería dar. Lo que cambia es la nota de abajo.
+
+## Parámetros avanzados del ABR: lo que faltaba (2026-09-21)
+
+Los alumnos los buscaban y no estaban --el **2-1-2 del tone burst** es el
+ejemplo que se repite--. Ahora el diálogo los tiene todos, repartidos en tres
+pestañas (Estímulo, Registro, Promediación), pero **el modelo todavía no los
+lee**: se dibujan, se guardan y viajan en el `technical_config` con la clave
+con la que se van a leer.
+
+Los que quedan pendientes están listados en `ABR_generator.UNCONNECTED_SETTINGS`,
+y van en gris con tooltip. Esa marca no es estética: si el alumno configura el
+notch de 50 Hz, sigue viendo el zumbido y nadie le dice que ese control no
+hace nada, aprende algo falso. Es la excepción a "el diálogo no le avisa nada"
+--lo que no se avisa son los errores clínicos, no las limitaciones del
+simulador--.
+
+| pestaña | pendientes |
+|---|---|
+| Estímulo | duración del click, envolvente del burst (2-1-2, 2-0-2, 1-0-1, 2-2-2, 5-0-5, en ms), ventana (Blackman/Hanning/gaussiana/lineal), unidad de nivel, jitter de la tasa, presentación, ruido y offset de enmascaramiento |
+| Registro | canales, ganancia, notch de red, pendiente del filtro, frecuencia de muestreo |
+| Promediación | promedio ponderado, parada automática, ventana de análisis del FSP, suavizado |
+
+**Conectar uno** es leerlo en el generador, darle su test, y sacarlo de
+`UNCONNECTED_SETTINGS`: el test del diálogo exige que todo lo que siga en esa
+lista esté dibujado y marcado, así que la lista se achica sola.
