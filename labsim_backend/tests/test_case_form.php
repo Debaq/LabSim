@@ -333,5 +333,12 @@ t_eq($cfRun(['z1000_od' => 'cualquiera'])->data['Z1000_OD'], 'auto',
 // profile-preview.js antes de enviar, así que el POST ES la proyección).
 $cfProy = $cfRun();
 t_true(isset($cfProy->proyeccion['abr']['OD']), 'CaseForm expone lo que proyectó el perfil');
-t_true(isset($cfProy->proyeccion['eoas']['OD']['atten_db']),
-    'Incluida la atenuación de la OEA, que es la que el JSON no puede mandar');
+t_true(isset($cfProy->proyeccion['eoas']['OD']), 'Y la OEA proyectada');
+// La atenuación de la OEA aparece cuando hay transitorio que atenuar, o sea
+// en el recién nacido: es justo la que el JSON del importador no manda.
+$cfProyRn = $cfRun(['age' => '0', 'edad_valor' => '10', 'edad_unidad' => 'horas',
+    'nacimiento' => ['percentil' => ['OD' => '0.9', 'OI' => '0.9']]]);
+t_true(isset($cfProyRn->proyeccion['eoas']['OD']['atten_db']),
+    'En un recién nacido, con la atenuación del transitorio');
+t_true((float) $cfProyRn->proyeccion['eoas']['OD']['atten_db'] > 0,
+    'Y con líquido de verdad esa atenuación no es cero');
