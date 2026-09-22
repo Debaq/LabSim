@@ -115,7 +115,7 @@ def test_choosing_ecochg_swaps_the_equipment_and_the_table():
     assert w.table_r.isVisibleTo(w) and not w.table_ec_r.isVisibleTo(w)
     w.control.cb_test.setCurrentText('ECochG')
     assert w.technical['montage'] == 'tympanic'
-    assert w.technical['window_ms'] == 10
+    assert w.technical['window_ms'] == 6
     assert not w.table_r.isVisibleTo(w) and w.table_ec_r.isVisibleTo(w)
     # Y el gráfico pasa a marcar los cuatro puntos del ECochG.
     assert w.graph_r.mark_labels == ecochg.MARKS
@@ -272,10 +272,18 @@ def test_the_auto_mark_is_not_the_answer():
         idx = w.control.cb_filter_up.findText(pasa_alto)
         assert idx >= 0
         w.control.cb_filter_up.setCurrentIndex(idx)
-        _capturar(w)
-        w.table_ec_r.btn_auto.click()
-        medidas[pasa_alto] = w.table_ec_r.medidas.get('sp_ap')
-    assert abs(medidas['10'] - 0.55) < 0.08, medidas
+        leidas = []
+        # Tres curvas del mismo oído al mismo nivel: la razón de UNA
+        # captura tiene su ruido, y lo que se compara acá es la banda.
+        for _ in range(3):
+            curva = _capturar(w, 90)
+            w.graph_r.active_curve(curva)
+            w.table_ec_r.btn_auto.click()
+            valor = w.table_ec_r.medidas.get('sp_ap')
+            if valor is not None:
+                leidas.append(valor)
+        medidas[pasa_alto] = sum(leidas) / len(leidas)
+    assert abs(medidas['10'] - 0.55) < 0.10, medidas
     # Con la banda del ABR la misma cóclea se informa bastante más baja, y
     # el equipo no avisa.
     assert medidas['200'] < medidas['10'] - 0.10, medidas

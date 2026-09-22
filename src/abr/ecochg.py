@@ -77,7 +77,14 @@ N2_SIGMA_MS = 0.30
 # Cuánto dura el desplazamiento DC del PS después del pico del PA. Es lo
 # que hace que la razón de ÁREAS sea distinta de la de amplitudes: la
 # meseta corre por debajo de todo el complejo, no solo hasta el PA.
-SP_TAIL_MS = 1.35
+#
+# Con click es CORTO. Estuvo en 1.35 ms un rato, estirado para que la razón
+# de áreas diera el 1.94 publicado, y el precio fue que el trazo dejó de
+# parecerse a un ECochG: en vez de una espiga con un hombro quedaba un
+# bolsón ancho del que no se podía sacar ni dónde estaba el PA. La
+# morfología manda; el límite de áreas sale del modelo (ver
+# AREA_RATIO_LIMIT).
+SP_TAIL_MS = 0.60
 # Cuánto se PROLONGA la meseta por cada punto de razón por encima de la de
 # un oído sano. En el hidrops el sumación no solo sube: dura más, porque el
 # desplazamiento de la membrana tarda más en volver. Es la razón física de
@@ -89,10 +96,10 @@ SP_TAIL_MS = 1.35
 # no desde el límite: si empezara en el límite, las dos razones se cruzarían
 # en el mismo punto y la de áreas volvería a ser redundante justo donde
 # tiene que servir.
-SP_TAIL_PER_RATIO = 5.0
+SP_TAIL_PER_RATIO = 3.0
 SP_NORMAL_FRACTION = 0.5
 POST_POSITIVITY_RATIO = 0.10
-POST_POSITIVITY_MS = 2.1
+POST_POSITIVITY_MS = 1.6
 POST_POSITIVITY_SIGMA_MS = 0.55
 
 # Nivel de sensación (dB SL) entre el que el PS no se distingue y aquel en
@@ -146,6 +153,19 @@ ELECTRODE_GAIN = {
 # alcanzaba ni para empatar. Un electrodo timpanico da PA de 1 a 5 uV
 # --entre 6 y 15 veces la onda I de un registro de superficie-- y esa es
 # justamente la razon clinica de meterse hasta la membrana.
+
+# Alto de la ventana del gráfico, en µV, por cada unidad de ganancia del
+# electrodo. El ABR se dibuja en 6 µV con ondas de medio µV; un ECochG
+# timpánico tiene el PA en 3.5 µV y en esa misma escala se sale por abajo y
+# se pisa con la curva de al lado. La escala tiene que seguir al electrodo:
+# es lo primero que cambia de un registro al otro.
+DISPLAY_UV_PER_GAIN = 2.0
+
+
+def display_scale_uv(montage):
+    """Alto de ventana con el que se dibuja un ECochG de ese electrodo."""
+    return DISPLAY_UV_PER_GAIN * ELECTRODE_GAIN.get(montage, 1.0)
+
 
 # Límite superior normal de la razón de AMPLITUDES PS/PA, por electrodo.
 # Cambia con el electrodo y no por capricho: cuanto más lejos de la cóclea,
@@ -504,7 +524,8 @@ def auto_marks(t, y):
       PS   a SP_SHOULDER_MS del PA, por convención de protocolo: con click
            el hombro no tiene firma geométrica confiable.
       FIN  el primer punto después del PA en que el trazo vuelve a
-           pegarse a la base.
+           pegarse a la base, o donde termina de subir si nunca vuelve
+           (con el pasa-alto bajo del ECochG la base se inclina).
     """
     if len(t) < 8:
         return {}
@@ -569,8 +590,21 @@ def auto_marks(t, y):
     # vuelve a pegarse a ella (ver RETURN_FRACTION).
     umbral_vuelta = base - RETURN_FRACTION * (base - float(suave[i_pa]))
     vueltas = np.where(suave[i_pa:] >= umbral_vuelta)[0]
-    if len(vueltas):
-        marcas['FIN'] = float(t[i_pa + int(vueltas[0])])
+    fin = int(vueltas[0]) if len(vueltas) else None
+    # Si nunca vuelve --con el pasa-alto bajo del ECochG la línea de base
+    # se inclina y el trazo puede terminar la ventana del lado de abajo--
+    # se usa el final de la recuperación: el primer punto en que deja de
+    # subir. Es lo que marca cualquiera mirando el trazo, y sin esto el
+    # área quedaba sin medir en uno de cada tres registros del electrodo
+    # de conducto, que es donde más falta hace.
+    subiendo = np.diff(suave[i_pa:])
+    topes = np.where((subiendo[:-1] > 0) & (subiendo[1:] <= 0))[0]
+    minimo = int(round(0.3 / max(float(t[1] - t[0]), 1e-9)))
+    topes = topes[topes >= minimo]
+    if len(topes) and (fin is None or int(topes[0]) + 1 < fin):
+        fin = int(topes[0]) + 1
+    if fin is not None:
+        marcas['FIN'] = float(t[i_pa + fin])
     return marcas
 
 
@@ -714,7 +748,11 @@ def rate_shift(curvas):
 # sano, en ms, y caída de amplitud en %. Salen del mismo modelo de tasa que
 # el ABR (RATE_LAT_SLOPE / RATE_AMP_DECAY de la onda I): no son una tabla
 # aparte que pueda quedar desincronizada del motor.
-RATE_SHIFT_LIMIT_MS = 0.30
+# Limite del corrimiento de latencia del PA entre la tasa mas lenta y la
+# mas rapida. Sale del propio modelo de tasa (el de la onda I del ABR): un
+# oido sano corre 0.12 ms entre 11 y 91/s y uno que se adapta al doble y
+# medio corre 0.29. El limite va en el medio.
+RATE_SHIFT_LIMIT_MS = 0.20
 RATE_AMP_DROP_LIMIT_PCT = -65.0
 
 

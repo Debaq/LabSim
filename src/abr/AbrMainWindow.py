@@ -20,6 +20,7 @@ from abr.ABR_generator import (ABR_Curve, ABRGenerator, agitation_factor,
 from abr.AbrAdvanceSettings import (MONTAGES, TRANSDUCERS, AbrAdvanceSettings,
                                     default_settings)
 from abr.AbrControl import AbrControl
+from abr.ECochG_generator import ECochG_Curve
 from abr.AbrDetail import AbrDetail
 from abr.AbrDetailAllCurves import AbrDetailAllCurves
 from abr.AbrGraph import AbrGraph
@@ -41,7 +42,13 @@ from PySide6.QtWidgets import (QMainWindow, QMessageBox, QSizePolicy,
 
 tr = QCoreApplication.translate
 
-TIEMPO_ENTR_PROM = 300
+# Cada cuanto se redibuja la curva mientras promedia. Estaba en 300 ms, o
+# sea tres cuadros por segundo: la promediacion se veia a los saltos. Un
+# tick cuesta ~30 ms de calculo, asi que hay lugar de sobra para tres veces
+# mas cuadros; la DURACION de la captura no cambia, porque la cuenta de
+# ticks se multiplico por lo mismo (ver fake_averages).
+TIEMPO_ENTR_PROM = 100
+CUADROS_POR_TICK_VIEJO = 3
 # Refresco del monitor de EEG crudo. Es el trazo que corre SIEMPRE que hay
 # un paciente cargado, promediando o no: ahi se ve el 50 Hz y la tension
 # antes de gastar 2000 barridos en descubrirlos.
@@ -356,7 +363,12 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                   f"repro {metadata.get('repro_index', 0):.2f}"]
         if metadata.get('fsp_criterion') and metadata.get('fsp_pass'):
             partes.append("respuesta presente")
-        if not metadata.get('recording', True):
+        if metadata.get('ecochg_sin_datos'):
+            # No es un electrodo suelto: este caso no trae
+            # electrococleografia. Decir "electrodo desconectado" mandaba
+            # al alumno a revisar el montaje por algo que no es del equipo.
+            partes.append("SIN REGISTRO (el caso no trae ECochG)")
+        elif not metadata.get('recording', True):
             partes.append("SIN REGISTRO (electrodo desconectado)")
         if metadata.get('mains'):
             partes.append("50 Hz")
@@ -708,9 +720,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             if fake:
                 # b > 1: superlineal a propósito -- pedir más promediaciones
                 # (caso difícil / mucho ruido) debe sentirse notoriamente
-                # más largo, no solo un poco más. Ancla en 2000 = ~28 ticks
-                # (~8.4s), igual que la calibración vieja (b=0.522).
-                a = 0.0014339
+                # más largo, no solo un poco más. Ancla en 2000 = ~84 ticks
+                # de 100 ms (~8.4 s), la misma duración de siempre repartida
+                # en el triple de cuadros.
+                a = 0.0014339 * CUADROS_POR_TICK_VIEJO
                 b = 1.3
                 return a * (averages**b)
             self.total_averages = averages
@@ -961,11 +974,26 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             QMessageBox.StandardButton.No)
         return respuesta == QMessageBox.StandardButton.Yes
 
+    ESCALA_ABR_UV = 6.0
+
     def apply_window(self):
-        """Los gráficos siguen la ventana de registro del equipo."""
+        """Los graficos siguen la ventana y la escala del equipo.
+
+        La escala no es una preferencia de dibujo: un ECochG timpanico
+        tiene el PA en 3.5 uV y en la escala del ABR (6 uV de alto, para
+        ondas de medio uV) se sale por abajo y se pisa con la curva de al
+        lado. Sigue al ELECTRODO, que es lo que decide cuanta respuesta
+        llega.
+        """
         ventana = self.technical.get('window_ms', 12)
-        self.graph_r.set_windows(ventana)
-        self.graph_l.set_windows(ventana)
+        if self.es_ecochg():
+            escala = ecochg.display_scale_uv(self.technical.get('montage'))
+        else:
+            escala = self.ESCALA_ABR_UV
+        for grafico in (self.graph_r, self.graph_l):
+            grafico.set_windows(ventana)
+            grafico.set_scale(escala)
+        self.lbl_scale.setText(f"{int(round(self.graph_r.get_scale()))}µV")
 
 ################INTERCAMBIO
     def memory_curves(self, value=None, side=None):
@@ -1038,9 +1066,29 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             repro_prev = 0
 
 
+        # Cuanto se lleva promediado, como FRACCION de la captura. Era
+        # `count * total * 2.5`, que crece con la cantidad de ticks: el
+        # promedio llegaba al tope en el 40% de la captura y el resto de
+        # los ticks dibujaban exactamente el mismo trazo. O sea que la
+        # segunda mitad de cada promediacion era una animacion congelada,
+        # y al subir los cuadros por segundo eso empeoraba en vez de
+        # mejorar.
+        prom = [min(self.count_averages / max(self.total_averages, 1), 1.0),
+                self.current_setting['average']]
+        if self.es_ecochg():
+            # Otro examen, otro generador (ver abr/ECochG_generator.py). No
+            # devuelve canal contralateral ni jitter de reproducibilidad:
+            # el ECochG no los tiene.
+            x, y, metadata = ECochG_Curve(
+                self.current_setting["int"], self.current_setting, case, prom,
+                done=self.done, patient=self.data_current,
+                capture_id=self.current_capture_curve,
+                technical=self.technical)
+            return (x, y), None, 0, metadata
+
         x, y, dx, dy, repro, metadata = ABR_Curve(
             self.current_setting["int"], self.current_setting, case, repro_prev,
-            [(self.count_averages * self.total_averages) * 2.5, self.current_setting['average']],
+            prom,
             done=self.done,
             # data_current trae 'edad' y 'gender' del paciente (ver
             # CaseBuilder.buildCaseData): con eso el generador elige la

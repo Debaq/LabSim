@@ -3392,6 +3392,67 @@ Queda por decidir si el botón lo ve el alumno o solo el docente. Hoy lo ven los
 dos: los equipos reales marcan solos y reconocer una marca mal puesta es parte
 del examen. Sacarlo para el alumno es esconder el botón en `EcochgTable._build`.
 
+### Mirarlo de verdad, y separar el generador (2026-09-21)
+
+El docente probó otra vez: "no logro ver nada de electrococleo, no veo
+promediaciones ni animación fluida". Todo cierto. Hasta acá se había validado
+solo con tests headless, que confirman números y no miran el gráfico. Se
+exportó el trazo a JPEG y se lo miró: **era ilegible**. Cinco cosas.
+
+**1. El generador está separado** (`src/abr/ECochG_generator.py`), que es lo que
+pidió el docente. Era una rama adentro de `ABRGenerator.generate_curve` y ahora
+es su propio `generate_curve` con su propio flujo: sin curva sombra, sin canal
+contralateral, sin falsa onda V, sin reflejo post-auricular, con su ventana de
+FSP. Lo que sí se comparte es el EQUIPO --normativa, ondas, ruido, filtros,
+electrodos, rechazo-- importando las piezas de `ABRGenerator`, porque ahí es
+donde viven y duplicarlas era garantizar que se desincronizaran. `ABR_Curve`
+volvió a ser solo del ABR.
+
+**2. La escala del gráfico no seguía al electrodo.** El ABR se dibuja en 6 µV
+de alto porque sus ondas son de medio µV. Un ECochG timpánico tiene el PA en
+3.5 µV: se salía por abajo y se pisaba con la curva de al lado. Ahora la
+escala sale del electrodo (`ecochg.display_scale_uv`: 2 µV por unidad de
+ganancia, o sea 5 / 16 / 50 µV) y el apilado la sigue. Es lo primero que
+cambia entre un registro y el otro y estaba clavado.
+
+**3. La morfología estaba estirada para que diera un número.** `SP_TAIL_MS`
+estaba en 1.35 ms para que la razón de áreas llegara al 1.94 publicado, y el
+precio era que el trazo dejaba de parecerse a un ECochG: en vez de una espiga
+con un hombro quedaba un bolsón ancho del que no se sacaba ni dónde estaba el
+PA. Se bajó a 0.6 ms (que es lo que dura con click) y la ventana de 10 a 6 ms.
+La razón de áreas terminó dando 1.95 en el límite de amplitudes igual, porque
+el punto 5 mejoró la relación señal/ruido. Morfología primero.
+
+**4. La promediación llegaba al tope en el 40% de la captura.** `graph()` pasaba
+`count * total * 2.5` como avance, que crece con la cantidad de ticks: el
+promedio se completaba a un tercio de camino y el resto de los ticks
+redibujaban el mismo trazo. **Esto ya pasaba en el ABR.** Ahora pasa la
+FRACCIÓN (`count / total`) y la promediación avanza pareja de punta a punta:
+el ABR va de 24 a 2000 barridos aceptados con el residual cayendo de 554 a
+63 nV, en vez de congelarse a mitad de camino.
+
+**5. Tres cuadros por segundo.** `TIEMPO_ENTR_PROM` era 300 ms. Un tick cuesta
+~30 ms de cálculo, así que había lugar de sobra: ahora es 100 ms y la cuenta de
+ticks se multiplicó por tres (`CUADROS_POR_TICK_VIEJO`), así que la captura
+dura exactamente lo mismo repartida en el triple de cuadros.
+
+Cómo quedó, con el marcado automático sobre el trazo (8 capturas por celda):
+
+| electrodo | declarada 0.25 | 0.40 | 0.55 |
+|---|---|---|---|
+| conducto | 0.308 ± 0.044 | 0.471 ± 0.047 | 0.526 ± 0.176 |
+| timpánico | 0.232 ± 0.010 | 0.398 ± 0.015 | 0.532 ± 0.029 |
+| transtimpánico | 0.182 ± 0.006 | 0.288 ± 0.005 | 0.399 ± 0.006 |
+
+(las dos últimas columnas del conducto y del transtimpánico van contra sus
+propios límites, 0.50 y 0.30, no contra 0.40)
+
+Y el efecto de la banda, que es el ejercicio: con el pasa-alto en 10 Hz una
+razón declarada en 0.55 se mide 0.532; en 100 Hz, 0.380; en 200 Hz, 0.080.
+
+**Sigue sin probarse en la app corriendo de verdad.** Lo que se verificó acá es
+el trazo exportado a JPEG desde la ventana real, con sus marcas y su tabla.
+
 ### Lo que falta
 
 - Nada de esto se probó en la app real ni en el navegador todavía: el hosting

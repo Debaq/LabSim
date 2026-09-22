@@ -504,7 +504,11 @@ def test_clamping_the_tube_works_mid_capture():
     w = _ventana()
     w.control.sb_intencity.setValue(80)
     w.control.start_capture()
-    for _ in range(5):
+    # Hasta que el promedio este armado: la maniobra se compara contra una
+    # onda que se ve, no contra ruido. Son los dos tercios de la captura
+    # (ver TIEMPO_ENTR_PROM y fake_averages: la promediacion avanza
+    # parejo de punta a punta).
+    for _ in range(int(w.total_averages * 2 / 3)):
         w.capture()
     assert w.last_metadata['tube_clamped'] is False
     abierto = np.asarray(w.graph_r.data['R1']['ipsi_xy'][1])

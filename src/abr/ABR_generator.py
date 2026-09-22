@@ -474,12 +474,6 @@ FSP_WINDOW_MS = {
     'toddler': (4.6, 11.3),
     'child': (4.3, 10.7),
 }
-# El ECochG no se analiza donde el ABR: su respuesta entera termina antes
-# de que empiece la ventana de la onda V. Con la ventana del ABR el FSP
-# daba 1.0 siempre (no hay senial ahi), o sea que el equipo nunca declaraba
-# respuesta presente por mucho que se promediara. No depende de la
-# poblacion: el PA es la onda I, que es lo que menos se corre con la edad.
-ECOCHG_FSP_WINDOW_MS = (0.6, 3.5)
 # Grados de libertad del estadistico F con el que se sortea el FSP
 # observado (Elberling y Don): 5 puntos de la ventana contra 250 barridos.
 FSP_DF1 = 5
@@ -700,6 +694,9 @@ EEG_HP_REF_HZ = 100.0
 EEG_LP_REF_HZ = 3000.0
 EEG_HP_EXPONENT = 0.5
 EEG_LP_EXPONENT = 0.15
+# Que parte del ruido de mas que deja entrar un pasa-alto bajo es ONDULACION
+# LENTA (ver sweep_noise). El resto sigue siendo ruido de banda.
+BAND_SLOW_SHARE = 0.80
 # Artefactos de movimiento/EMG del monitor: pico respecto del umbral de
 # rechazo (los que el equipo descarta se tienen que VER cruzando la barra)
 # y duracion de la rafaga.
@@ -1321,90 +1318,6 @@ class ABRGenerator:
 
         return y
 
-    # ------------------------------------------------------------------
-    # ECochG: los tres potenciales del oido interno (ver abr/ecochg.py)
-    # ------------------------------------------------------------------
-
-    def _ecochg_una_polaridad(self, t, values, polarity, pathology, neural,
-                              case_ec, montage, stim, freq, sl, gain,
-                              mc_baseline, cm_lat, rate, sp_scale=1.0):
-        """Curva de ECochG de UNA polaridad, con sus parametros."""
-        v, _ = self.apply_polarity_effects(
-            {w: dict(d) for w, d in values.items()}, polarity, pathology,
-            neural)
-        # Adaptacion propia del oido: apply_rate_effects ya le puso al PA la
-        # del oido sano (es la misma onda I). El caso declara cuanto MAS se
-        # adapta este --en el hidrops la membrana desplazada se recupera
-        # peor-- y eso es lo que se agrega, sobre la misma pendiente y la
-        # misma referencia de tasa, para no tener dos modelos de tasa.
-        exceso_tasa = float(case_ec['tasa']) - 1.0
-        if exceso_tasa and 'I' in v:
-            d_rate = float(rate) - RATE_REF
-            v['I']['lat'] += RATE_LAT_SLOPE['I'] * d_rate * exceso_tasa
-            v['I']['amp'] *= float(np.clip(
-                np.exp(-RATE_AMP_DECAY['I'] * exceso_tasa * d_rate), 0.15, 1.2))
-        if polarity == 'Condensación' and 'I' in v:
-            # apply_polarity_effects ya le puso a la onda I los 0.1 ms que
-            # separan condensacion de rarefaccion en un oido sano. El caso
-            # puede declarar una separacion mayor --es lo que pasa con la
-            # membrana desplazada-- y lo que se agrega es la diferencia.
-            v['I']['lat'] += float(case_ec['rar_cond_ms']) - 0.1
-        params = ecochg.component_params(
-            v.get('I', {'lat': 1.5, 'amp': 0.0}), case_ec, montage,
-            stim=stim, freq=freq, mc_baseline=mc_baseline, sl=sl, gain=gain,
-            cm_lat=cm_lat)
-        return ecochg.build_curve(t, params, polarity, sp_scale), params
-
-    def build_ecochg_curve(self, t, values, polarity, pathology, neural,
-                           case_ec, montage, stim, freq, sl, gain,
-                           mc_baseline, cm_lat=None, rate=RATE_REF):
-        """Curva objetivo del ECochG, con la alternada como promedio real.
-
-        Mismo criterio que build_polarity_curve: la alternada no tiene
-        factores propios, es el promedio de las dos polaridades. Aca eso
-        importa mas que en el ABR, porque es lo que CANCELA la microfonica
-        -- y separar la microfonica del PS/PA es la mitad del examen.
-        """
-        args = (pathology, neural, case_ec, montage, stim, freq, sl, gain,
-                mc_baseline, cm_lat, rate)
-
-        def alternada(escala):
-            """Promedio de las dos polaridades, con esa meseta de PS."""
-            y_r, par = self._ecochg_una_polaridad(
-                t, values, 'Rarefacción', *args, sp_scale=escala)
-            y_c, _ = self._ecochg_una_polaridad(
-                t, values, 'Condensación', *args, sp_scale=escala)
-            return (y_r + y_c) / 2.0, par
-
-        # La altura de la meseta se despeja SIEMPRE sobre la curva
-        # alternada, tenga la que tenga el equipo: es la unica sin
-        # microfonica encima, y la microfonica --que puede ser mas grande
-        # que el propio PS-- no tiene por que cambiar cuanto PS produce
-        # esta coclea. Asi el PS es el mismo en las tres polaridades y lo
-        # unico que cambia entre ellas es la MC, que es el punto.
-        y_con, params = alternada(1.0)
-        if params['sp_ap'] <= 0 or params['ap_amp'] <= 0:
-            escala, x_pa, x_ps = 1.0, params['ap_lat'], params['sp_lat']
-        else:
-            y_sin, _ = alternada(0.0)
-            escala, x_pa, x_ps = ecochg.calibrate_sp(
-                t, y_sin, y_con, params['sp_ap'], params['ap_lat'])
-        if polarity in ('Alternada', 'Alternante'):
-            y_r, params = self._ecochg_una_polaridad(
-                t, values, 'Rarefacción', *args, sp_scale=escala)
-            y_c, _ = self._ecochg_una_polaridad(
-                t, values, 'Condensación', *args, sp_scale=escala)
-            y = (y_r + y_c) / 2.0
-        else:
-            y, params = self._ecochg_una_polaridad(
-                t, values, polarity, *args, sp_scale=escala)
-            # La latencia del PA es la de ESTA curva, no la de la alternada
-            # con la que se calibro: rarefaccion y condensacion no tienen el
-            # PA en el mismo lugar, y esa separacion es un hallazgo.
-            x_pa = ecochg.peak_time(t, y, params['ap_lat'])
-            x_ps = x_pa - ecochg.SP_SHOULDER_MS
-        return y, dict(params, ap_lat=x_pa, sp_lat=x_ps)
-
     def false_wave(self, t, case_config, accepted, target_avg, rng,
                    intensidad=None):
         """Pico espureo con forma de onda V, presente en una sola mitad.
@@ -1778,6 +1691,14 @@ class ABRGenerator:
         exceso = float(band_factor) ** 2 - 1.0
         if exceso <= 0 or n < 8:
             return base
+        # El exceso se reparte: casi todo va a la parte lenta (es lo que el
+        # pasa-alto estaba sacando) y una porcion sigue siendo ruido de
+        # banda. Dejarlo TODO en la parte lenta no sirve: dentro de una
+        # ventana corta la ondulacion tiene muy pocos grados de libertad,
+        # asi que el ruido residual que declara el equipo saltaba seis
+        # veces entre dos capturas iguales.
+        base = base * np.sqrt(1.0 + (1.0 - BAND_SLOW_SHARE) * exceso)
+        exceso = BAND_SLOW_SHARE * exceso
         # Componente lenta. Lo que deja entrar un pasa-alto de 10 Hz que
         # un pasa-alto de 100 no dejaba son periodos de 10 a 100 ms: en
         # una ventana de 10-12 ms eso es, como mucho, UN ciclo, y en el
@@ -2066,8 +1987,8 @@ class ABRGenerator:
         return float((FSP_CRITERION - 1.0) * barridos / (fsp - 1.0))
 
     @staticmethod
-    def fsp_window(population, test='ABR'):
-        """Ventana de analisis del FSP (ms), por poblacion y prueba.
+    def fsp_window(population):
+        """Ventana de analisis del FSP (ms), por poblacion.
 
         El neonato tiene la respuesta entera corrida a la derecha (su onda V
         esta cerca de 7 ms contra 5.5 del adulto), asi que la ventana que se
@@ -2075,11 +1996,9 @@ class ABRGenerator:
         deja la onda V pegada al borde y baja el FSP por recorte, no por
         falta de respuesta.
         """
-        if test == 'ECochG':
-            return ECOCHG_FSP_WINDOW_MS
         return FSP_WINDOW_MS.get(population, FSP_WINDOW_MS['adulto'])
 
-    def expected_fsp(self, t, senial, residual_uv, population, test='ABR'):
+    def expected_fsp(self, t, senial, residual_uv, population):
         """FSP esperado del registro: VAR(S) / (VAR(SP)/N).
 
         Elberling y Don 1984. En la forma que se puede calcular sin simular
@@ -2097,7 +2016,7 @@ class ABRGenerator:
         Antes el FSP lo declaraba el caso (`fsp_puntos`) y se degradaba a
         mano; daba el mismo numero con respuesta clara que sin respuesta.
         """
-        desde, hasta = self.fsp_window(population, test)
+        desde, hasta = self.fsp_window(population)
         vent = (t >= desde) & (t <= hasta)
         if not vent.any() or residual_uv <= 0:
             return 1.0
@@ -2563,14 +2482,6 @@ class ABRGenerator:
 
     def generate_curve(self, population, pathology, stimulus_config,
                         technical_config, case_config=None):
-        # 0. Que prueba es. El ECochG comparte TODO el equipo con el ABR
-        # (electrodos, rechazo, promediador, ruido) y se separa solo en lo
-        # que de verdad cambia: la curva objetivo y la ventana de analisis.
-        # Lo demas de este metodo no se entera de cual de las dos es.
-        test = stimulus_config.get('test', 'ABR')
-        case_ec = ecochg.case_params((case_config or {}).get('ecochg'))
-        es_ecochg = test == 'ECochG' and case_ec is not None
-
         # 1. Baseline normativo. El vibrador oseo no es "otro transductor
         # de aire": estimula la coclea directo y tiene su propio bloque
         # normativo (bone_conduction), asi que la via la manda el equipo.
@@ -2782,33 +2693,10 @@ class ABRGenerator:
         values_a = self._shift_latencies(values, jitter / 2)
         values_b = self._shift_latencies(values, -jitter / 2)
         pol = stimulus_config['pol']
-        if es_ecochg:
-            # El PS necesita nivel para ser medible (ver ecochg.SP_SL_MIN):
-            # el nivel de sensacion es lo que separa un ECochG clinico a 90
-            # dB de una serie descendente que no sirve para medir la razon.
-            sl_ec = float(stimulus_config['int']) - threshold
-            # Latencia de la microfonica: la normativa la trae medida
-            # (clave 'MC' del bundle) y se le aplica el mismo retardo de
-            # transductor que a las ondas. NO se deriva de la latencia del
-            # PA a proposito -- ver ecochg.component_params.
-            cm_lat = float((baseline.get('MC') or {}).get('lat', 0.0)) or None
-            if cm_lat is not None:
-                cm_lat += lat_offset
-            ec_args = (pathology, neural, case_ec,
-                       technical_config.get('montage', 'vertex_mastoid'),
-                       stimulus_config['stim'], stimulus_config.get('freq'),
-                       sl_ec, montage_gain, baseline.get('MC'), cm_lat,
-                       float(stimulus_config['rate']))
-            y_target_a, ec_params = self.build_ecochg_curve(
-                t, values_a, pol, *ec_args)
-            y_target_b = y_target_a if not jitter else self.build_ecochg_curve(
-                t, values_b, pol, *ec_args)[0]
-        else:
-            ec_params = None
-            y_target_a, _ = self.build_polarity_curve(
-                t, values_a, pol, pathology, neural, cm_sigma_gain)
-            y_target_b = y_target_a if not jitter else self.build_polarity_curve(
-                t, values_b, pol, pathology, neural, cm_sigma_gain)[0]
+        y_target_a, _ = self.build_polarity_curve(
+            t, values_a, pol, pathology, neural, cm_sigma_gain)
+        y_target_b = y_target_a if not jitter else self.build_polarity_curve(
+            t, values_b, pol, pathology, neural, cm_sigma_gain)[0]
         y_target = (y_target_a + y_target_b) / 2
 
         # 9b. Curva sombra: si el estimulo cruza el craneo por encima de la
@@ -2817,13 +2705,7 @@ class ABRGenerator:
         # suficiente en ese oido desaparece, que es exactamente el ejercicio
         # (estimular fuerte un oido muerto y ver "respuesta" hasta que se
         # enmascara). Antes el spinbox de masking se leia y se tiraba.
-        # La curva sombra es de campo lejano: la coclea del otro oido
-        # responde y el electrodo del vertex la registra igual. Un electrodo
-        # timpanico NO: esta pegado a ESTA coclea y lo que capta del otro
-        # lado queda muy por debajo de su propia respuesta. Por eso el
-        # ECochG no tiene sombra, y por eso tampoco es la prueba con la que
-        # se ensena enmascaramiento.
-        shadow = None if es_ecochg else self.shadow_values(
+        shadow = self.shadow_values(
             population, pathway, stimulus_config, masking, ia, case_config,
             click_baseline=click_baseline,
         )
@@ -2932,12 +2814,6 @@ class ABRGenerator:
         # el alumno controla desde Parametros Avanzados.
         hay_registro, sin_tierra, imp_max, desbalance = self.electrode_state(
             technical_config)
-        # ECochG sobre un caso que no trae ECochG: no hay registro. NO se
-        # dibuja un ABR de 5 ms en su lugar ni se supone un oido normal --
-        # sin dato del backend el equipo no produce nada (misma regla que
-        # el resto de los modulos).
-        if test == 'ECochG' and case_ec is None:
-            hay_registro = False
         # Banda de registro: la MISMA cuenta que ensucia el monitor. Sin
         # esto, dejar el pasa-alto en 3.3 Hz (como arranca el equipo) se
         # veia en el EEG y no costaba nada en la curva -- o sea el alumno
@@ -3040,8 +2916,8 @@ class ABRGenerator:
         # leido entre el vertex y el mastoides del oido NO estimulado.
         # Comparte el ruido del promediado (es el mismo amplificador y el
         # mismo momento) pero la respuesta llega proyectada distinto.
-        contra_key = None if es_ecochg else self.contra_channel(
-            technical_config, stimulus_config.get('side', 'OD'))
+        contra_key = self.contra_channel(technical_config,
+                                         stimulus_config.get('side', 'OD'))
         y_contra = None
         if contra_key and hay_registro and clamp:
             # Mismo canal, mismo ruido, sin respuesta: el contra tiene que
@@ -3108,13 +2984,12 @@ class ABRGenerator:
         senial_filtrada = self.apply_filters(
             y_target, float(stimulus_config['filter_down']),
             float(stimulus_config['filter_passhigh']), fs)
-        desde_v, hasta_v = self.fsp_window(population, test)
+        desde_v, hasta_v = self.fsp_window(population)
         vent_v = (t >= desde_v) & (t <= hasta_v)
         a_rms_registro = (float(np.sqrt(np.mean(senial_filtrada[vent_v] ** 2)))
                           if vent_v.any() else 0.0)
         fsp_esperado = self.expected_fsp(t, senial_filtrada,
-                                         residual_nv / 1000.0, population,
-                                         test)
+                                         residual_nv / 1000.0, population)
         # Y lo que el equipo muestra es un sorteo alrededor de ese valor:
         # dos registros iguales no dan el mismo numero, que es la razon de
         # repetir para confirmar.
@@ -3127,16 +3002,7 @@ class ABRGenerator:
         return t, y_final, {
             'population': population,
             'pathology': pathology,
-            'test': test,
-            # Que el caso trae con que construir un ECochG. Sin esto la
-            # prueba no se registra: no se inventa un oido normal para que
-            # el equipo tenga algo que dibujar.
-            'ecochg': es_ecochg,
-            'ecochg_sin_datos': test == 'ECochG' and case_ec is None,
-            # Latencia del PA que el modelo puso en el trazo. Va para que
-            # el informe y los tests puedan auditar la marca del alumno --
-            # la razon PS/PA NO va, que es el resultado que tiene que medir.
-            'ecochg_ap_lat': (ec_params or {}).get('ap_lat') if es_ecochg else None,
+            'test': stimulus_config.get('test', 'ABR'),
             'waves_visible': waves_visible,
             'current_avg': current_avg,
             'target_avg': target_avg,

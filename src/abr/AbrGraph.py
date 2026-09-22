@@ -535,6 +535,29 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
 
     ###############HELPERS
+    def set_scale(self, uv: float) -> None:
+        """Alto de la ventana en uV. Lo fija la prueba, no el widget.
+
+        El ABR se dibuja en 6 uV porque sus ondas son de medio uV; un
+        ECochG timpanico tiene el PA en 3.5 uV y con esa escala se sale
+        por abajo y se pisa con la curva de al lado. El apilado sigue a la
+        escala (gap_ratio), asi que las curvas se separan con ella.
+        """
+        uv = float(uv)
+        if uv <= 0 or abs(uv - self.scale_uv) < 1e-9:
+            return
+        proporcion = uv / self.scale_uv
+        self.scale_uv = uv
+        # Las curvas ya dibujadas se reacomodan: su altura de apilado esta
+        # expresada en uV, no en ranuras, y si no se escala el gap las de
+        # abajo se van fuera de la ventana.
+        for nombre, datos in self.data.items():
+            datos['gap'] = datos.get('gap', 0.0) * proporcion
+            self.redraw(nombre)
+            self.move_label(nombre)
+            self.move_marks(nombre)
+        self.apply_view()
+
     def set_windows(self, ms: float) -> None:
         """Ajusta el eje a la ventana de registro configurada en el equipo.
 
