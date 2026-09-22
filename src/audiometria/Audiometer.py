@@ -8,6 +8,8 @@
 #   NOTA: si no hablas español, no es mi culpa, aprende         #
 #################################################################
 
+import traceback
+
 import numpy as np
 #from audiometria.response_A import Response
 from audiometria.audio_player import Player
@@ -260,7 +262,21 @@ class Audiometer(QWidget, Ui_Audiometer):
         # (MODO_MANTENER), asi que siempre se comportaba como click rapido.
         # Con eventFilter se captura el press/release real de la tecla.
         self._stim_keys = {Qt.Key_V: 0, Qt.Key_B: 1}
-        QApplication.instance().installEventFilter(self)
+        # Guardia de reentrada: el filtro vive en QApplication, asi que si
+        # algo de adentro (emitir pressed, mover el dial) despacha otro
+        # evento, este mismo metodo se vuelve a llamar ANIDADO. Sin la
+        # guardia esa anidacion se apila hasta reventar el limite de
+        # recursion, y PySide lo reporta como la cadena interminable de
+        # "Error calling Python override of QWidget::eventFilter()".
+        self._filter_busy = False
+        self._filter_error_logged = False
+        self._filter_installed = False
+        # El filtro se instala y se saca con showEvent/hideEvent: con el
+        # audiometro cerrado no tiene nada que capturar, y cada evento de
+        # la aplicacion (los miles que despacha pyqtgraph en el ABR) deja
+        # de pagar un frame de Python.
+        if self.isVisible():
+            self.install_key_filter(True)
 
         # Conectar todos los labels que comienzan con "lbl" al slot
         for attribute_name in dir(self):
@@ -269,6 +285,25 @@ class Audiometer(QWidget, Ui_Audiometer):
                 if isinstance(attribute, QLabel):
                     attribute.textChanged.connect(self.on_label_text_changed)
 
+
+    def install_key_filter(self, activo: bool) -> None:
+        """Pone o saca el filtro global de teclas del audiometro."""
+        app = QApplication.instance()
+        if app is None or activo == self._filter_installed:
+            return
+        if activo:
+            app.installEventFilter(self)
+        else:
+            app.removeEventFilter(self)
+        self._filter_installed = activo
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.install_key_filter(True)
+
+    def hideEvent(self, event):
+        super().hideEvent(event)
+        self.install_key_filter(False)
 
     def eventFilter(self, obj, event):
         # El filtro esta instalado en QApplication: recibe TODOS los eventos
@@ -282,33 +317,52 @@ class Audiometer(QWidget, Ui_Audiometer):
         event_type = event.type()
         if event_type not in (QEvent.KeyPress, QEvent.KeyRelease):
             return False
+        if self._filter_busy:
+            # Ya hay una tecla en proceso: lo que llegue mientras tanto es
+            # un evento anidado y se deja seguir de largo.
+            return False
 
-        # isVisible() (no isActiveWindow()): el audiometro debe capturar
-        # sus teclas mientras este abierto, sin importar que otra
-        # subventana MDI tenga el foco interno (ver comentario en __init__).
-        if self.isVisible():
-            focus = QApplication.focusWidget()
-            if isinstance(focus, (QLineEdit, QTextEdit, QPlainTextEdit)):
-                return False
+        self._filter_busy = True
+        try:
+            # isVisible() (no isActiveWindow()): el audiometro debe capturar
+            # sus teclas mientras este abierto, sin importar que otra
+            # subventana MDI tenga el foco interno (ver comentario en
+            # __init__).
+            if self.isVisible():
+                focus = QApplication.focusWidget()
+                if isinstance(focus, (QLineEdit, QTextEdit, QPlainTextEdit)):
+                    return False
 
-            key = event.key()
-            if event_type == QEvent.KeyPress:
-                if key in self._dial_keys:
-                    ch, up = self._dial_keys[key]
-                    self.MoveDial(ch, up)
-                    return True
-                if key in self._switch_keys:
-                    self._switch_keys[key]()
-                    return True
-
-            ch = self._stim_keys.get(key)
-            if ch is not None and not event.isAutoRepeat():
+                key = event.key()
                 if event_type == QEvent.KeyPress:
-                    self.btn_stims[ch].pressed.emit()
-                else:
-                    self.btn_stims[ch].released.emit()
-                return True
-        return False
+                    if key in self._dial_keys:
+                        ch, up = self._dial_keys[key]
+                        self.MoveDial(ch, up)
+                        return True
+                    if key in self._switch_keys:
+                        self._switch_keys[key]()
+                        return True
+
+                ch = self._stim_keys.get(key)
+                if ch is not None and not event.isAutoRepeat():
+                    if event_type == QEvent.KeyPress:
+                        self.btn_stims[ch].pressed.emit()
+                    else:
+                        self.btn_stims[ch].released.emit()
+                    return True
+            return False
+        except Exception:
+            # Una excepcion que se escapa de un override llamado desde C++
+            # no se ve: PySide la envuelve en "Error calling Python
+            # override..." y, si el evento venia anidado, la envuelve una
+            # vez por nivel hasta dejar un mensaje ilegible. Se imprime la
+            # causa real UNA vez y la tecla se deja pasar.
+            if not self._filter_error_logged:
+                self._filter_error_logged = True
+                traceback.print_exc()
+            return False
+        finally:
+            self._filter_busy = False
 
     def on_label_text_changed(self, sender):
         self.response.set_config(sender)

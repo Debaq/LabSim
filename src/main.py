@@ -1,6 +1,8 @@
 from pathlib import Path
+import faulthandler
 import os
 import sys
+import traceback
 import requests
 from PySide6.QtCore import Qt, QSize, QTimer, Signal, Slot
 from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox, QProgressDialog
@@ -88,6 +90,24 @@ LOCAL_LOG_QUEUE = get_log_queue()
 # alumno (audio_stim_button, z_dial_change, etc.) se suben aparte, con
 # nombre propio, vía log_queue.push() explícito en Audiometer.py y Z.py.
 sys.stdout = Logger(LOG_FILE)
+# stderr al mismo archivo. Los errores de PySide ("Error calling Python
+# override of QWidget::eventFilter(): ...") y los traceback de cualquier
+# excepcion NO pasan por stdout: sin esto, lo unico que quedaba del
+# problema era lo que el alumno alcanzara a copiar de la consola, y la
+# causa real es justo la ultima linea, la que la consola recorta.
+sys.stderr = Logger(LOG_FILE, stream=sys.__stderr__)
+# Un cuelgue duro (stack overflow de la cadena de layout de pyqtgraph, por
+# ejemplo) no deja traceback de Python: faulthandler escribe el stack en
+# el mismo log antes de que el proceso se vaya.
+faulthandler.enable(file=open(LOG_FILE, 'a', buffering=1))
+
+
+def _log_excepcion(tipo, valor, tb):
+    """Toda excepcion no atrapada al log, no solo a una consola que se cierra."""
+    traceback.print_exception(tipo, valor, tb)
+
+
+sys.excepthook = _log_excepcion
 
 
 class ComandVoiceA(QWidget, commandVoiceA):
