@@ -3459,3 +3459,33 @@ el trazo exportado a JPEG desde la ventana real, con sus marcas y su tabla.
   local no tiene `pdo_sqlite`, así que las vistas PHP se validaron con `php -l`,
   balance de `<div>` y `node --check`.
 - La **ficha de estudio** (PDF del docente) no muestra ECochG todavía.
+
+## El test del timpanograma fallaba una de cada cuatro corridas (2026-09-21)
+
+`tests/test_z_generator.py` era intermitente y venía de antes: en el árbol
+anterior a todo el ECochG falla 8 de 25 veces, y en el de ahora 4 de 25. Es la
+misma tasa -- la diferencia es el sorteo.
+
+Importa porque una suite con un test que falla solo deja de servir para lo
+único que sirve. En esta misma sesión mandó a buscar un bug inexistente en el
+módulo de impedanciometría, que ni siquiera importa nada de `abr`.
+
+Eran dos tolerancias puestas justo en el borde de la aleatoriedad que el
+propio generador declara:
+
+- **Compliance** (`test_el_mismo_paciente_lee_siempre_lo_mismo`): el jitter por
+  barrido multiplica cada lectura por un uniforme en [0.97, 1.03], así que dos
+  lecturas pueden diferir 6%, y la tolerancia era 5%. Además la compliance se
+  informa redondeada a dos decimales, y en las curvas rígidas (As, Cs:
+  compliance ~0.1) ese paso de 0.01 pesa más que el jitter, cosa que una
+  tolerancia puramente relativa no cubre nunca. Ahora es `7% + 0.02`.
+- **Gradiente** (`test_el_ancho_viaja_en_el_dataset`): se mide sobre la curva ya
+  dibujada, que lleva ruido encima, así que reconstruirla no da el mismo número.
+  En las rígidas el pico es chico y el ruido el mismo, así que son las menos
+  reproducibles: sobre 300 reconstrucciones el percentil 95 da 0.08 y el peor
+  caso 0.13. La tolerancia era 0.05; ahora es 0.15.
+
+No se tocó el generador: la aleatoriedad es deliberada (el mismo paciente
+tiembla un poco entre lecturas, que es lo que hace un equipo real). Lo que
+estaba mal era lo que el test esperaba de ella. Medido: 0 fallas en 100
+corridas.

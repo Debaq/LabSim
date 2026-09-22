@@ -77,9 +77,17 @@ def test_el_ancho_viaja_en_el_dataset():
         d = _curva(letra)
         assert float(d[6]) == float(ancho), f"{letra}: {d[6]}"
         # Y reconstruirla a mano con ese ancho da la misma gradiente.
+        #
+        # La tolerancia es 0.15 y no 0.05: la gradiente se mide sobre la
+        # curva YA dibujada, que lleva ruido encima (`np.random.normal` en
+        # curve_z), asi que dos curvas del mismo paciente no dan el mismo
+        # numero exacto. En las rigidas (As, Cs) el pico es chico y el ruido
+        # es el mismo, asi que ahi la gradiente es la menos reproducible:
+        # sobre 300 reconstrucciones el percentil 95 da 0.08 y el peor caso
+        # 0.13. Con 0.05 el test fallaba una de cada quince corridas.
         rehecha = Z_225(manual=True, c=float(d[2]), p=int(float(d[3])),
                         vol=float(d[5]), pmax=float(d[6])).getDataSet()
-        assert abs(float(rehecha[4]) - float(d[4])) <= 0.05, f"{letra}: {rehecha[4]} vs {d[4]}"
+        assert abs(float(rehecha[4]) - float(d[4])) <= 0.15, f"{letra}: {rehecha[4]} vs {d[4]}"
 
 
 def test_el_mismo_paciente_lee_siempre_lo_mismo():
@@ -87,7 +95,24 @@ def test_el_mismo_paciente_lee_siempre_lo_mismo():
     for letra in FORMAS_JERGER:
         primera, segunda = _curva(letra), _curva(letra)
         # El jitter por barrido mueve el valor, pero no lo resortea entero.
-        assert abs(float(primera[2]) - float(segunda[2])) <= 0.05 * max(float(primera[2]), 0.01)
+        #
+        # La tolerancia tiene dos partes, y las dos hacen falta:
+        #
+        # - El jitter DOBLE: cada lectura sale multiplicada por un uniforme
+        #   en [0.97, 1.03] (ver z_generator, `c * random.uniform(...)`), asi
+        #   que dos lecturas seguidas pueden diferir hasta un 6%.
+        # - El redondeo: la compliance se informa con dos decimales
+        #   (`round(self.input[1], 2)`), o sea en pasos de 0.01, y dos
+        #   redondeos pueden separarse 0.02. En las curvas rigidas (As, Cs:
+        #   compliance ~0.1) eso pesa MAS que el jitter, y una tolerancia
+        #   puramente relativa no lo cubre nunca.
+        #
+        # Con el 5% relativo que habia, el test fallaba una de cada cuatro
+        # corridas: lo suficiente para que la suite dejara de servir para
+        # detectar regresiones y para mandar a cualquiera a buscar un bug
+        # que no existe.
+        assert abs(float(primera[2]) - float(segunda[2])) <= \
+            0.07 * max(float(primera[2]), 0.01) + 0.02
         assert abs(float(primera[3]) - float(segunda[3])) <= 4
 
 
