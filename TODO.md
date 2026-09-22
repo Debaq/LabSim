@@ -3495,8 +3495,10 @@ corridas.
 Mismo patrón que el del timpanograma, en el backend: `test_case_form.php`
 exigía que un bebé de diez horas de vida hubiera nacido HOY. Qué día sea
 depende de la hora a la que se corra la suite -- diez horas antes de las nueve
-de la mañana es ayer --, y PHP acá corre en UTC, así que fallaba todos los días
-entre medianoche y las diez. Casi la mitad del tiempo.
+de la mañana es ayer --, así que fallaba durante las primeras diez horas de
+cada día. A qué hora de pared corresponde eso depende de la zona que tenga
+configurada el PHP donde corra: en este entorno de desarrollo es UTC, en el
+hosting no se sabe (el repo no fija ninguna, sale del php.ini del servidor).
 
 También venía de antes: se comprobó corriendo la suite en el árbol anterior a
 todo el ECochG (4189 asserts, mismo fallo).
@@ -3508,3 +3510,17 @@ Verificado a las 0, 3, 9, 10, 11, 18 y 23 horas.
 **Los dos tests intermitentes juntos hacían que la suite completa no pudiera
 usarse como semáforo**, que es exactamente para lo que hace falta cuando se
 toca el motor compartido.
+
+### Pendiente de confirmar con el docente: la zona del hosting
+
+`CaseBuilder::fechaNacFromHoras` calcula con `date()`, o sea con la zona por
+defecto del PHP que corra. El resto de la app NO asume esa zona: guarda en UTC
+y convierte explícitamente a `LlmUsage::ZONA_INFORME` ('America/Santiago')
+donde muestra fechas (ver `patients.php`, y el comentario de ZONA_INFORME:
+"CURRENT_TIMESTAMP de SQLite es UTC").
+
+Si el php.ini del hosting no está en Santiago, la fecha de nacimiento de un
+recién nacido se calcula en una zona y las horas de la atención se muestran en
+otra: un bebé cargado con 2 horas de vida puede quedar con fecha de ayer para
+el alumno. No se toca sin saber qué zona tiene el servidor -- eso lo sabe él,
+no se puede averiguar desde acá.
