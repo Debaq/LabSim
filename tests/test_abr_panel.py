@@ -730,3 +730,85 @@ def test_fsp_follows_the_curve_being_recorded():
     w.capture()
     assert len(w.fmp.curve_fsp.getData()[1]) == 9
     w.control.stop_capture()
+
+
+# ------------------------------------------------- etiquetas de las curvas
+
+def _etiqueta(graph, curva):
+    """El texto de la etiqueta de esa curva, sin el HTML."""
+    import re
+    from abr.WidgetsMods import TextItemMod
+    for item in graph.pw.items:
+        if isinstance(item, TextItemMod) and item.tipo == 'label' \
+                and item.curve_parent == curva:
+            html = item.textItem.toHtml()
+            texto = re.sub(r'<[^>]+>', ' ', html)
+            return ' '.join(texto.split())
+    raise AssertionError(f'sin etiqueta para {curva}')
+
+
+def test_routine_stack_labels_only_intensity():
+    """Todas iguales: la etiqueta dice la intensidad y nada mas."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    _capturar(w, intensidad=80)
+    _capturar(w, intensidad=60)
+    for curva, dB in (('R1', '80'), ('R2', '60')):
+        texto = _etiqueta(w.graph_r, curva)
+        assert texto == f'{dB} dBnHl', texto
+
+
+def test_a_different_polarity_labels_every_curve():
+    """Una condensacion entre alternadas: se rotulan las dos, para comparar."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    _capturar(w, intensidad=80)
+    w.control.cb_pol.setCurrentIndex(w.control.cb_pol.findText('Condensación'))
+    _capturar(w, intensidad=80)
+    assert 'alt.' in _etiqueta(w.graph_r, 'R1')
+    assert 'cond.' in _etiqueta(w.graph_r, 'R2')
+
+
+def test_a_different_stimulus_and_rate_show_up():
+    """Estimulo y tasa distintos: los dos entran en las dos etiquetas."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    w.control.sb_rate.setValue(21.1)
+    _capturar(w, intensidad=80)
+    idx = w.control.cb_stim.findText('NB CE-Chirp LS 500 Hz')
+    w.control.cb_stim.model().item(idx).setEnabled(True)
+    w.control.cb_stim.setCurrentIndex(idx)
+    w.control.sb_rate.setValue(41.1)
+    _capturar(w, intensidad=80)
+    primera, segunda = _etiqueta(w.graph_r, 'R1'), _etiqueta(w.graph_r, 'R2')
+    assert 'click' in primera and '21.1/s' in primera, primera
+    assert 'chirp 500' in segunda and '41.1/s' in segunda, segunda
+
+
+def test_bone_curve_is_the_only_one_marked():
+    """La via osea se rotula sola: la aerea es el registro por defecto."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    _capturar(w, intensidad=80)
+    w.technical['transducer'] = 'bone_vibrator'
+    _capturar(w, intensidad=40)
+    assert 'ósea' not in _etiqueta(w.graph_r, 'R1')
+    assert 'ósea' in _etiqueta(w.graph_r, 'R2')
+
+
+def test_deleting_the_odd_curve_restores_plain_labels():
+    """Si se borra la unica distinta, el resto vuelve a la intensidad sola."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    _capturar(w, intensidad=80)
+    w.control.cb_pol.setCurrentIndex(w.control.cb_pol.findText('Rarefacción'))
+    _capturar(w, intensidad=80)
+    assert 'alt.' in _etiqueta(w.graph_r, 'R1')
+    w.graph_r.act_curve = 'R2'
+    w.graph_r.delete_curve()
+    assert _etiqueta(w.graph_r, 'R1') == '80 dBnHl'

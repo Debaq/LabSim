@@ -682,7 +682,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             "repro": repro, "intencity": intencity, "done": self.done}}
         side_letter = 'r' if side == 'OD' else 'l'
         graph = f'graph_{side_letter}'
-        getattr(self, graph).create_line(data_line, intencity)
+        # El setting viaja con la curva: la etiqueta decide sola si hay
+        # algun parametro que la distinga del resto de la pila.
+        getattr(self, graph).create_line(data_line, intencity,
+                                         self.current_setting)
         self.push_fsp(self.current_capture_curve, metadata)
         self.update_capture_info(metadata)
         self.update_detail_info(self.current_setting)

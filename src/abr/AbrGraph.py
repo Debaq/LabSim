@@ -11,6 +11,32 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
 
 
+# Como se abrevia cada parametro cuando hay que ponerlo en la etiqueta de
+# una curva. Solo entran los que distinguen una curva de las otras del
+# mismo grafico (ver curve_tokens): si toda la pila es click alternado a
+# la misma tasa, la etiqueta dice solo la intensidad, que es lo que se lee
+# en un ABR de rutina.
+STIM_SHORT = {
+    "Click": "click",
+    "CE-Chirp": "chirp",
+    "CE-Chirp LS": "chirp LS",
+    "NB CE-Chirp LS 500 Hz": "chirp 500",
+    "NB CE-Chirp LS 1 kHz": "chirp 1k",
+    "NB CE-Chirp LS 2 kHz": "chirp 2k",
+    "NB CE-Chirp LS 4 kHz": "chirp 4k",
+    "Burst 500 Hz": "burst 500",
+    "Burst 1 kHz": "burst 1k",
+    "Burst 2 kHz": "burst 2k",
+    "Burst 4 kHz": "burst 4k",
+}
+
+POL_SHORT = {
+    "Alternada": "alt.",
+    "Condensación": "cond.",
+    "Rarefacción": "rar.",
+}
+
+
 class AbrGraph(GraphicsLayoutWidgetMod):
     sig_data_info = Signal(dict)
     sig_del_curve = Signal(str)
@@ -53,6 +79,11 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.notify_create = False
         self.data = {}
         self.curve_int = {}
+        # Con que quedo registrada cada curva (estimulo, polaridad, tasa y
+        # si fue por via osea). No es para el detalle -- eso ya lo lleva la
+        # ventana -- sino para la etiqueta: decide que parametro merece
+        # escribirse al lado de la intensidad.
+        self.curve_cfg = {}
         self.current_lat = 0
         # Trazos por curva: promedio, canal contralateral y los dos
         # subpromedios A/B. Antes habia un solo PlotDataItem por curva y se
@@ -188,7 +219,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         piso = min((v.get('gap', 0.0) for v in self.data.values()), default=0.0)
         self.pw.setYRange(piso - self.scale_uv / 2, self.scale_uv / 2, padding=0)
 
-    def create_line(self, data, intencity):
+    def create_line(self, data, intencity, setting=None):
         for name, values in data.items():
             if name in self.data: #si la curva ya existe solo se actualiza el grafico correspondiente
                 self.update_data(name, values)
@@ -200,9 +231,13 @@ class AbrGraph(GraphicsLayoutWidgetMod):
                 self.data[name] = values
                 self.marks[name] = {}
                 self.curve_int[name] = intencity
+                self.curve_cfg[name] = self.read_config(setting)
                 self.traces[name] = self.create_traces(name, values)
-                label = self.create_label(name, intencity, values['gap'])
+                label = self.create_label(name, values['gap'])
                 self.pw.addItem(label)
+                # La curva nueva puede estrenar un parametro distinto: ahi
+                # las que ya estaban tambien tienen que decir el suyo.
+                self.refresh_labels()
                 self.apply_view()
 
     def create_traces(self, name, values):
@@ -274,14 +309,71 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.redraw(curve)
         self.move_marks(curve)
 
-    def label_html(self,text:str, fill:str) -> str :
+    def read_config(self, setting) -> dict:
+        """Lo que de la captura puede terminar en la etiqueta.
+
+        La via sale del transductor y no del combo de estimulos (el mismo
+        click se presenta por insercion o por vibrador), asi que se guarda
+        ya resuelta.
+        """
+        setting = setting or {}
+        return {'stim': setting.get('stim'), 'pol': setting.get('pol'),
+                'rate': setting.get('rate'),
+                'bone': setting.get('transducer') == 'bone_vibrator'}
+
+    def mixed_param(self, clave: str) -> bool:
+        """Si ese parametro NO es el mismo en todas las curvas del grafico."""
+        valores = {cfg.get(clave) for cfg in self.curve_cfg.values()
+                   if cfg and cfg.get(clave) is not None}
+        return len(valores) > 1
+
+    def curve_tokens(self, key) -> list:
+        """Parametros que hay que escribir al lado de la intensidad.
+
+        Un ABR de rutina es toda la pila con el mismo estimulo, la misma
+        polaridad y la misma tasa: repetirlo curva por curva es ruido. Solo
+        se escribe el parametro que cambia dentro del grafico, y ahi se
+        escribe en TODAS (si una es condensacion y el resto alternada, la
+        comparacion se lee sola: 'cond.' contra 'alt.').
+
+        La via osea es la excepcion: se rotula solo la curva osea. La aerea
+        es el registro por defecto y no se anuncia.
+        """
+        cfg = self.curve_cfg.get(key) or {}
+        tokens = []
+        if self.mixed_param('stim'):
+            tokens.append(STIM_SHORT.get(cfg.get('stim'), cfg.get('stim')))
+        if self.mixed_param('pol'):
+            tokens.append(POL_SHORT.get(cfg.get('pol'), cfg.get('pol')))
+        if self.mixed_param('rate'):
+            tasa = cfg.get('rate')
+            tokens.append(f'{float(tasa):g}/s' if tasa is not None else None)
+        if cfg.get('bone'):
+            tokens.append('ósea')
+        return [t for t in tokens if t]
+
+    def label_html(self, key, fill: str) -> str:
+        intensidad = self.curve_int.get(key, '')
+        tokens = self.curve_tokens(key)
+        extra = ''
+        if tokens:
+            extra = (f"<br><span style='color: #000; font-size: 6pt;'>"
+                     f"{' · '.join(tokens)}</span>")
         return f"""
                 <div style='text-align: center; background-color: {fill};'>
                 <span style='color: #000; font-size: 7pt;'>
-                {text} dBnHl
-                </span>
+                {intensidad} dBnHl
+                </span>{extra}
                 </div>
                 """
+
+    def refresh_labels(self) -> None:
+        """Reescribe todas las etiquetas: lo que se muestra es relativo."""
+        for item in self.pw.items:
+            if isinstance(item, TextItemMod) and item.tipo == 'label':
+                fill = (self.active_fill_color if item.name == self.act_curve
+                        else self.inactive_fill_color)
+                item.setHtml(self.label_html(item.name, fill))
     def smooth(self, ev):
         curve = self.act_curve
         d = self.data[curve]
@@ -299,9 +391,9 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.move_marks(curve)
 
 
-    def create_label(self,key, text, h):
+    def create_label(self, key, h):
         fill = self.active_fill_color
-        lbl = self.label_html(text, fill)
+        lbl = self.label_html(key, fill)
         text = TextItemMod(name=key, tipo='label', curve_parent= key, html=lbl, border="w")
         text.sigDragged.connect(self.drag_curve)
         text.sigPositionChangeStarted.connect(self.active_curve)
@@ -323,6 +415,10 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             self.data.pop(self.act_curve, None)
             self.marks.pop(self.act_curve, None)
             self.curve_int.pop(self.act_curve, None)
+            self.curve_cfg.pop(self.act_curve, None)
+            # Si la que se fue era la unica distinta, las demas vuelven a
+            # mostrar solo la intensidad.
+            self.refresh_labels()
             self.sig_del_curve.emit(self.act_curve)
             self.act_curve = None
             self.apply_view()
@@ -339,20 +435,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             for clave, item in trazos.items():
                 item.setPen(self.pen_for(clave, activa))
         #se selecciona el label de la curva
-        for item in self.pw.items:
-            if isinstance(item, TextItemMod): 
-                if item.name == self.act_curve:
-                    fill = self.active_fill_color
-                    lbl_name = self.curve_int[self.act_curve]
-                    lbl = self.label_html(lbl_name, fill)
-                    item.setHtml(lbl)
-                else:
-                    if item.tipo == 'label':
-                        fill = self.inactive_fill_color
-                        lbl_name = self.curve_int[item.name]
-
-                        lbl = self.label_html(lbl_name, fill)
-                        item.setHtml(lbl)
+        self.refresh_labels()
         self.sig_curve_selected.emit(self.act_curve)
         #se actualizan los datos de las marcas
         #print(self.marks[self.act_curve])
@@ -644,6 +727,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.data = {}
         self.marks = {}
         self.curve_int = {}
+        self.curve_cfg = {}
         self.traces = {}
         self.act_curve = None
         self.apply_view()
