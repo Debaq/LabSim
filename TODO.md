@@ -3489,3 +3489,22 @@ No se tocó el generador: la aleatoriedad es deliberada (el mismo paciente
 tiembla un poco entre lecturas, que es lo que hace un equipo real). Lo que
 estaba mal era lo que el test esperaba de ella. Medido: 0 fallas en 100
 corridas.
+
+## Y el del recién nacido fallaba media jornada (2026-09-21)
+
+Mismo patrón que el del timpanograma, en el backend: `test_case_form.php`
+exigía que un bebé de diez horas de vida hubiera nacido HOY. Qué día sea
+depende de la hora a la que se corra la suite -- diez horas antes de las nueve
+de la mañana es ayer --, y PHP acá corre en UTC, así que fallaba todos los días
+entre medianoche y las diez. Casi la mitad del tiempo.
+
+También venía de antes: se comprobó corriendo la suite en el árbol anterior a
+todo el ECochG (4189 asserts, mismo fallo).
+
+Ahora se exige lo que importa: que la fecha salga de las horas de vida y no de
+un sorteo, que sea hoy o ayer según la hora, y que nunca caiga adelante.
+Verificado a las 0, 3, 9, 10, 11, 18 y 23 horas.
+
+**Los dos tests intermitentes juntos hacían que la suite completa no pudiera
+usarse como semáforo**, que es exactamente para lo que hace falta cuando se
+toca el motor compartido.

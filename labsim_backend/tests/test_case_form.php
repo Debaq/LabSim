@@ -356,7 +356,18 @@ t_true(strtotime(CaseBuilder::randomFechaNacForAge(30)) < strtotime('-25 years')
     'Y la del adulto sigue cayendo donde corresponde');
 
 // Un recién nacido no se sortea: su fecha sale de las horas de vida.
-t_eq(CaseBuilder::fechaNacFromHoras(10), date('d-m-Y'),
-    'Diez horas de vida: nació hoy');
+//
+// QUE DÍA sea depende de la hora a la que se corra el test: diez horas antes
+// de las nueve de la mañana es ayer. Se exigía 'hoy' a secas y eso hacía que
+// la suite fallara todos los días entre medianoche y las diez (PHP acá corre
+// en UTC), o sea casi la mitad del tiempo. Lo que importa es que la fecha
+// salga de las horas de vida y no de un sorteo, y que nunca caiga adelante.
+$nacio = CaseBuilder::fechaNacFromHoras(10);
+t_eq($nacio, date('d-m-Y', strtotime('-10 hours')),
+    'Diez horas de vida: la fecha sale de las horas, no de un sorteo');
+t_true(in_array($nacio, [date('d-m-Y'), date('d-m-Y', strtotime('-1 day'))], true),
+    'Diez horas de vida: hoy o ayer, según la hora');
+t_true(strtotime($nacio) <= strtotime(date('d-m-Y')),
+    'Diez horas de vida: nunca en el futuro');
 t_eq(CaseBuilder::fechaNacFromHoras(30), date('d-m-Y', time() - 30 * 3600),
     'Treinta horas: ayer o antes de ayer, según la hora');
