@@ -6,11 +6,17 @@ la app no se cuelga esperando -- se propaga requests.RequestException y
 quien llame decide (reintentar, avisar "sin conexión", etc.).
 """
 import json
+import time
+from datetime import datetime
 from pathlib import Path
 
 import requests
 
 DEFAULT_TIMEOUT = 10
+# Cuanto se le tolera al reloj de la maquina antes de avisar, en segundos.
+# Dos minutos es latencia y deriva normal; mas que eso ya mueve una cita de
+# hora y hace llegar tarde a alguien convencido de que llega a tiempo.
+CLOCK_SKEW_TOLERANCE_S = 120
 
 
 class BackendClient:
@@ -132,6 +138,46 @@ class BackendClient:
         if self.user and self.user.get("role") == "admin":
             return self.get_admin_dump()
         return self.get_sync("1970-01-01 00:00:00")
+
+    def get_clock(self) -> dict:
+        """Reloj del servidor, para comparar con el de esta máquina.
+
+        Ver api/clock.php y src/Clock.php en el backend. El backend calcula
+        y muestra todo en la zona de la institución, declarada en su código
+        y no en el php.ini del hosting, así que este dato NO se usa para
+        reinterpretar fechas: las horas de una cita son las del curso y no
+        las del computador que las lee.
+
+        Sirve para lo otro: darse cuenta de que el reloj de esta máquina
+        está corrido. Un alumno con la hora mal puesta llega tarde
+        convencido de que llega a tiempo.
+        """
+        return self._get("/api/clock.php")
+
+    def clock_skew(self) -> dict | None:
+        """Cuánto se aparta el reloj de esta máquina del del servidor.
+
+        Devuelve {'segundos', 'zona_local', 'zona_servidor', 'en_hora'}, o
+        None si no se pudo preguntar (sin conexión, sin sesión). El
+        desfase se calcula contra el epoch UTC del servidor, que es lo
+        único que no depende de zonas horarias.
+        """
+        try:
+            reloj = self.get_clock()
+        except Exception:
+            return None
+        epoch = reloj.get("epoch")
+        if not epoch:
+            return None
+        desfase = time.time() - float(epoch)
+        return {
+            "segundos": round(desfase),
+            "zona_local": str(datetime.now().astimezone().tzinfo or ""),
+            "zona_servidor": reloj.get("zona"),
+            # Dos minutos es latencia y deriva normal de reloj, no un
+            # problema: el aviso tiene que salir cuando de verdad importa.
+            "en_hora": abs(desfase) <= CLOCK_SKEW_TOLERANCE_S,
+        }
 
     def upsert_case(self, case_id: str, data: dict) -> dict:
         return self._post("/api/case_upsert.php", {"id": case_id, "data": data})

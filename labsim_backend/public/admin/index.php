@@ -59,8 +59,92 @@ $modules = [
 ];
 $modulesMissingRequired = array_filter($modules, static fn($m) => $m['required'] && !$m['ok']);
 
+$reloj = Clock::info($GLOBALS['ZONA_PHP_INI'] ?? null);
+try {
+    $reloj['base_ahora'] = (string) $pdo->query('SELECT CURRENT_TIMESTAMP')->fetchColumn();
+    $relojDesfase = strtotime($reloj['base_ahora'] . ' UTC') - $reloj['epoch'];
+    $reloj['base_en_utc'] = abs($relojDesfase) < 120;
+} catch (Throwable $e) {
+    $reloj['base_ahora'] = null;
+    $reloj['base_en_utc'] = null;
+}
+
 admin_header('Estado del backend', $me);
 ?>
+<div class="card">
+    <p><strong>Reloj</strong></p>
+    <p class="help">Las fechas se guardan en UTC y se calculan y muestran en la zona de la
+    aplicación, que está declarada en el código (<code>Clock::ZONA</code>) y no depende del
+    php.ini del servidor. Acá se puede confirmar eso, y ver en qué zona está el hosting.
+    Si el reloj de este computador no coincide, se avisa abajo: las horas de las citas son
+    las del curso, no las del que mira, así que no se reinterpretan -- pero un computador
+    con la hora corrida hace llegar tarde a su dueño.</p>
+    <div class="table-wrap">
+    <table>
+        <tr>
+            <td>Zona de la aplicación</td>
+            <td><strong><?= htmlspecialchars($reloj['zona']) ?></strong>
+                <span class="muted">UTC<?= sprintf('%+d:%02d', intdiv($reloj['zona_offset_min'], 60), abs($reloj['zona_offset_min']) % 60) ?><?= $reloj['horario_verano'] ? ', horario de verano' : '' ?></span></td>
+        </tr>
+        <tr>
+            <td>Hora del servidor</td>
+            <td><strong><?= htmlspecialchars($reloj['local']) ?></strong>
+                <span class="muted">(<?= htmlspecialchars($reloj['utc']) ?> UTC)</span></td>
+        </tr>
+        <tr>
+            <td>Zona que trae el servidor (php.ini)</td>
+            <td>
+                <strong><?= htmlspecialchars($reloj['php_ini']) ?></strong>
+                <?php if ($reloj['php_ini_coincide']): ?>
+                <span style="color:var(--color-success-text);">✓ igual a la de la aplicación</span>
+                <?php else: ?>
+                <span class="muted">distinta de la de la aplicación, y no importa: la fija
+                <code>bootstrap.php</code> en cada request</span>
+                <?php endif; ?>
+            </td>
+        </tr>
+        <tr>
+            <td>La base guarda en</td>
+            <td>
+                <?php if ($reloj['base_en_utc'] === true): ?>
+                <strong>UTC</strong> <span style="color:var(--color-success-text);">✓</span>
+                <?php elseif ($reloj['base_en_utc'] === false): ?>
+                <strong style="color:var(--color-danger);">NO está en UTC</strong>
+                <span class="muted">dice <?= htmlspecialchars((string) $reloj['base_ahora']) ?>;
+                todas las conversiones de fecha quedan corridas</span>
+                <?php else: ?>
+                <span class="muted">—</span>
+                <?php endif; ?>
+            </td>
+        </tr>
+        <tr>
+            <td>Reloj de este computador</td>
+            <td id="reloj-cliente" data-epoch="<?= (int) $reloj['epoch'] ?>"><span class="muted">comprobando…</span></td>
+        </tr>
+    </table>
+    </div>
+</div>
+<script>
+// Comparación contra el reloj del que mira. No ajusta nada: informa.
+(function () {
+    var celda = document.getElementById('reloj-cliente');
+    if (!celda) { return; }
+    var servidor = parseInt(celda.getAttribute('data-epoch'), 10) * 1000;
+    var zona = '—';
+    try { zona = Intl.DateTimeFormat().resolvedOptions().timeZone || '—'; } catch (e) {}
+    var desfase = Math.round((Date.now() - servidor) / 1000);
+    var texto = '<strong>' + zona + '</strong>';
+    if (Math.abs(desfase) <= 120) {
+        texto += ' <span style="color:var(--color-success-text);">\u2713 en hora</span>';
+    } else {
+        var minutos = Math.round(Math.abs(desfase) / 60);
+        texto += ' <strong style="color:var(--color-danger);">' + minutos + ' min ' +
+                 (desfase > 0 ? 'adelantado' : 'atrasado') + '</strong>' +
+                 ' <span class="muted">respecto del servidor</span>';
+    }
+    celda.innerHTML = texto;
+})();
+</script>
 <div class="card">
     <p><strong>Base de datos:</strong> conectada (SQLite, WAL) &nbsp;·&nbsp; <strong>PHP:</strong> <?= htmlspecialchars(PHP_VERSION) ?></p>
     <div class="table-wrap">

@@ -3,6 +3,7 @@
 // Sin autoloader, igual que el resto de src/: la dependencia se declara
 // donde se usa (ver la cabecera de LlmChat.php).
 require_once __DIR__ . '/Db.php';
+require_once __DIR__ . '/Clock.php';
 
 /**
  * Registro de consumo de la API del LLM.
@@ -57,8 +58,11 @@ final class LlmUsage
      * y "hoy" arranca la noche anterior, que al mirar el panel no se
      * entiende. El desfase de una hora del horario de verano no se
      * persigue: mueve una llamada de borde entre dos días, no el total.
+     *
+     * Es la zona de la aplicación (ver Clock): se deja el alias para no
+     * renombrar los usos, pero la declaración vive en un solo lugar.
      */
-    public const ZONA_INFORME = 'America/Santiago';
+    public const ZONA_INFORME = Clock::ZONA;
 
     /** Tareas conocidas, en el orden en que se muestran. La clave es lo que se guarda. */
     public const TAREAS = [

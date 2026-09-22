@@ -3511,16 +3511,48 @@ Verificado a las 0, 3, 9, 10, 11, 18 y 23 horas.
 usarse como semáforo**, que es exactamente para lo que hace falta cuando se
 toca el motor compartido.
 
-### Pendiente de confirmar con el docente: la zona del hosting
+### El reloj: una sola zona, declarada, y un reloj para verla (2026-09-21)
 
-`CaseBuilder::fechaNacFromHoras` calcula con `date()`, o sea con la zona por
-defecto del PHP que corra. El resto de la app NO asume esa zona: guarda en UTC
-y convierte explícitamente a `LlmUsage::ZONA_INFORME` ('America/Santiago')
-donde muestra fechas (ver `patients.php`, y el comentario de ZONA_INFORME:
-"CURRENT_TIMESTAMP de SQLite es UTC").
+`src/Clock.php`, `api/clock.php` y el bloque de reloj en admin/index.php
+(Estado). Había tres relojes que no se hablaban:
 
-Si el php.ini del hosting no está en Santiago, la fecha de nacimiento de un
-recién nacido se calcula en una zona y las horas de la atención se muestran en
-otra: un bebé cargado con 2 horas de vida puede quedar con fecha de ayer para
-el alumno. No se toca sin saber qué zona tiene el servidor -- eso lo sabe él,
-no se puede averiguar desde acá.
+1. **SQLite**: `CURRENT_TIMESTAMP` es UTC, siempre.
+2. **PHP**: `date()` usa la zona del php.ini del hosting, que el repo no fijaba
+   -- así que el mismo código daba fechas distintas en el servidor y en
+   desarrollo, y no se podía saber cuál desde afuera.
+3. **La pantalla**: algunas fechas se convertían a mano a America/Santiago
+   (`patients.php`) y otras no (`CaseBuilder::fechaNacFromHoras`, con `date()`).
+
+El síntoma era el test del recién nacido: un bebé de pocas horas podía quedar
+con fecha de ayer según la hora y la zona del servidor.
+
+**Lo que se hizo**: `bootstrap.php` fija la zona de la aplicación en cada
+request, así que el php.ini deja de importar. Se guarda en UTC, se calcula y se
+muestra en `Clock::ZONA`. Probado con cuatro hostings imaginarios muy separados
+(Madrid, Tokio, UTC, Kiritimati): el mismo código da el mismo resultado en
+todos (`test_clock.php`).
+
+**Lo que NO se hizo, y es la parte importante de la decisión.** El docente
+propuso que la app leyera la zona del PC y se hiciera un "match" con el
+servidor. Para los DATOS eso es un error: las horas de una cita son del CURSO,
+no del que las mira. Con render por zona del cliente, dos alumnos de la misma
+clase con los relojes distintos verían horarios distintos para la misma cita, y
+el que tuviera la zona mal configurada llegaría tarde convencido de que llegaba
+a tiempo -- el error se volvería invisible en vez de evidente.
+
+La zona del cliente sí se lee, pero solo para AVISAR que no coincide:
+- `admin/index.php` muestra la zona de la app, la hora del servidor, la que
+  trae el php.ini, si la base está realmente en UTC, y compara contra el reloj
+  del navegador.
+- `BackendClient.clock_skew()` hace lo mismo desde la app de escritorio,
+  comparando contra el epoch UTC del servidor (lo único que no depende de
+  zonas). Tolerancia de 2 minutos: menos que eso es latencia y deriva normal,
+  más que eso mueve una cita de hora.
+
+Queda por decidir DÓNDE avisa la app de escritorio: hoy `clock_skew()` existe y
+está testeada pero no la llama nadie. El lugar natural es el arranque de sesión
+o el mismo cartel que ya informa "sin conexión".
+
+**Lo que sigue sin saberse, y no hace falta**: en qué zona está el php.ini del
+hosting. Antes era necesario y no se podía averiguar; ahora el reloj de Estado
+lo muestra y, sobre todo, ya no cambia el comportamiento.
