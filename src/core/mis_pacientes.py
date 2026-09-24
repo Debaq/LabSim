@@ -11,6 +11,9 @@ alumno ha atendido; al seleccionar uno, muestra en pestañas:
     que el docente haya dejado turno a turno (ver chat_comments).
   - Ficha clínica: misma ficha que agenda.Agenda muestra al atender (motor
     compartido, ver core.ficha), acá en modo solo-lectura histórico.
+  - Exámenes: los informes de esa atención. El ABR se abre en el módulo para
+    mirarlo (solo lectura: una atención cerrada no se actualiza más); el PDF
+    de cualquier examen se ve en el portal web, no acá.
 
 Vive como subventana única del MDI (ver main.py: self.subw["MIS_PACIENTES"]),
 igual que Agenda o la Bandeja de entrada."""
@@ -22,13 +25,27 @@ import shiboken6
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QSplitter, QPushButton,
                                 QTableWidget, QTableWidgetItem, QHeaderView,
-                                QAbstractItemView, QTextEdit, QTabWidget)
+                                QAbstractItemView, QTextEdit, QTabWidget, QLabel)
 
-from core.helpers import mis_atenciones, mi_conversacion, CasesOffline, Shedule
+from core.helpers import mis_atenciones, mi_conversacion, mis_informes, CasesOffline, Shedule
 from core.ficha import render_ficha_html
 
 BTN_OBJECT_NAME = "btn_mis_pacientes"
 COLUMNAS = ("Fecha", "Paciente", "Procedimiento")
+
+NOMBRE_EXAMEN = {
+    "ABR": "PEATC (ABR)",
+    "ELECTROCOCLEO": "Electrococleografía",
+    "AABR": "Tamizaje automatizado (AABR)",
+    "EOA": "Emisiones otoacústicas",
+    "VEMP": "VEMP",
+    "OTOSCOPIA": "Otoscopia",
+}
+# Los que se pueden abrir en el módulo para mirarlos: guardan las curvas
+# con su trazo y el ABR las vuelve a dibujar.
+SE_ABREN_EN_EL_ABR = ("ABR", "ELECTROCOCLEO")
+AVISO_PDF = ("El informe en PDF de cada examen lo ves en la web: "
+             "<i>Pacientes que has atendido → la atención → Tus informes</i>.")
 
 
 def _render_docente_comments(comments, sobre):
@@ -93,12 +110,81 @@ class MisPacientesWidget(QWidget):
         self.texto_ficha.setReadOnly(True)
         self.tabs.addTab(self.texto_ficha, "Ficha clínica")
 
+        self.tabs.addTab(self._build_examenes(), "Exámenes")
+
         splitter.addWidget(self.tabs)
         splitter.setSizes([260, 560])
 
         self._mostrar_vacio()
 
+    def _build_examenes(self):
+        pagina = QWidget(self)
+        caja = QVBoxLayout(pagina)
+        self.tabla_examenes = QTableWidget(0, 2, pagina)
+        self.tabla_examenes.setHorizontalHeaderLabels(("Examen", "Guardado"))
+        self.tabla_examenes.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tabla_examenes.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tabla_examenes.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.tabla_examenes.verticalHeader().setVisible(False)
+        self.tabla_examenes.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.tabla_examenes.itemSelectionChanged.connect(self._on_examen)
+        self.tabla_examenes.itemDoubleClicked.connect(lambda _item: self._ver_en_abr())
+        caja.addWidget(self.tabla_examenes)
+
+        self.btn_ver_abr = QPushButton("Ver en el ABR", pagina)
+        self.btn_ver_abr.setToolTip("Abre las curvas en el módulo ABR, solo para mirarlas")
+        self.btn_ver_abr.setEnabled(False)
+        self.btn_ver_abr.clicked.connect(self._ver_en_abr)
+        caja.addWidget(self.btn_ver_abr)
+
+        self.lbl_examenes = QLabel(AVISO_PDF, pagina)
+        self.lbl_examenes.setWordWrap(True)
+        self.lbl_examenes.setStyleSheet("color:#666;")
+        caja.addWidget(self.lbl_examenes)
+        self._examenes = []
+        self._atencion = None
+        return pagina
+
+    def _mostrar_examenes(self, it):
+        appointment_id = it.get("appointment_id")
+        self._atencion = it
+        self._examenes = mis_informes(appointment_id) if appointment_id else []
+        self.tabla_examenes.setRowCount(len(self._examenes))
+        for fila, informe in enumerate(self._examenes):
+            tipo = informe.get("tipo", "")
+            self.tabla_examenes.setItem(fila, 0, QTableWidgetItem(NOMBRE_EXAMEN.get(tipo, tipo)))
+            self.tabla_examenes.setItem(fila, 1, QTableWidgetItem(informe.get("updated_at") or "—"))
+        self.btn_ver_abr.setEnabled(False)
+        self.lbl_examenes.setText(
+            AVISO_PDF if self._examenes else
+            "Esta atención no tiene exámenes guardados.")
+
+    def _examen_elegido(self):
+        filas = self.tabla_examenes.selectionModel().selectedRows()
+        if not filas or filas[0].row() >= len(self._examenes):
+            return None
+        return self._examenes[filas[0].row()]
+
+    def _on_examen(self):
+        informe = self._examen_elegido()
+        self.btn_ver_abr.setEnabled(
+            informe is not None and informe.get("tipo") in SE_ABREN_EN_EL_ABR)
+
+    def _ver_en_abr(self):
+        informe = self._examen_elegido()
+        if informe is None or informe.get("tipo") not in SE_ABREN_EN_EL_ABR:
+            return
+        it = self._atencion or {}
+        paciente = f"{it.get('nombre', '')} {it.get('apellido', '')}".strip() or "el paciente"
+        aviso = f"{paciente} · atención del {it.get('fecha') or '—'}: solo lectura"
+        if self._main_window is not None and hasattr(self._main_window, "abrir_abr_consulta"):
+            self._main_window.abrir_abr_consulta(informe.get("data") or {}, aviso)
+
     def _mostrar_vacio(self):
+        if hasattr(self, "tabla_examenes"):
+            self.tabla_examenes.setRowCount(0)
+            self._examenes = []
+            self.btn_ver_abr.setEnabled(False)
         self.texto_resumen.setHtml("<p style='color:#888;'>Selecciona un paciente de la lista.</p>")
         self.texto_conversacion.setHtml("<p style='color:#888;'>Selecciona un paciente de la lista.</p>")
         self.texto_ficha.setHtml("<p style='color:#888;'>Selecciona un paciente de la lista.</p>")
@@ -140,6 +226,7 @@ class MisPacientesWidget(QWidget):
         self._mostrar_resumen(it)
         self._mostrar_conversacion(it)
         self._mostrar_ficha(it)
+        self._mostrar_examenes(it)
 
     def _mostrar_resumen(self, it):
         stats = it.get("stats") or {}

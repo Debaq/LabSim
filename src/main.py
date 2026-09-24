@@ -29,7 +29,7 @@ from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Sto
                           es_docente,
                           marcar_entry_atendiendo, marcar_entry_atendido,
                           reset_backend_session)
-from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon, style_dialog, is_full_window
+from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon, style_dialog, is_full_window, raise_window
 from audiometria.UI.Ui_command_voice_A import Ui_Form as commandVoiceA
 from core.UI.Ui_Main import Ui_MainWindow
 from core.Logger import Logger
@@ -931,6 +931,26 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if (self.paciente_actual or {}).get("appointment_id") is None:
             return
         self._subir_informes()
+
+    def abrir_abr_consulta(self, data, aviso):
+        """"Mis pacientes" -> Ver en el ABR: abre el ABR de una atención ya
+        cerrada, solo para mirarlo (ver AbrMainWindow.open_past)."""
+        if not self._module_visible("ABR") or getattr(self, "subw_abr", None) is None:
+            QMessageBox.information(self, "Ver en el ABR",
+                                    "El módulo ABR no está habilitado en tu curso.")
+            return
+        if self.data_current_key is not None or not self.subw_abr.obj.open_past(data, aviso):
+            QMessageBox.information(
+                self, "Ver en el ABR",
+                "Tienes una atención en curso. Ciérrala para mirar exámenes anteriores.")
+            return
+        # activate_auto alterna: con el ABR ya a la vista lo escondería.
+        pos_z = self.apps["ABR"][2]
+        sub = self.modules.get(pos_z) if self.modules.is_full(pos_z) else None
+        if sub is not None and not sub.isHidden():
+            raise_window(sub)
+        else:
+            self.activate_auto("ABR")
 
     def abrir_ficha_con(self, html, on_chat=None):
         """Abre (o trae al frente) la subventana MDI de ficha clínica,

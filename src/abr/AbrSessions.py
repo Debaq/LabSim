@@ -70,18 +70,3 @@ def session_label(report: dict) -> str:
     hora = (report.get('hora') or '')[:5]
     prueba = 'ECochG' if report.get('tipo') == 'ELECTROCOCLEO' else 'ABR'
     return ' '.join(p for p in (fecha, hora, '·', prueba) if p)
-
-
-def editable_part(data: dict) -> dict:
-    """Lo que el alumno puede cambiar en una sesion cerrada.
-
-    Mismos campos que ReportRevision.php: si esto no cambio, no hay nada
-    que guardar ni que preguntar al salir.
-    """
-    curvas = {}
-    for nombre, curva in (data.get('curvas') or {}).items():
-        curvas[nombre] = {k: curva.get(k) for k in
-                          ('LatAmp', 'marcas', 'marcas_graf')}
-    return {'curvas': curvas,
-            'hallazgos': data.get('hallazgos', ''),
-            'conclusion': data.get('conclusion', '')}

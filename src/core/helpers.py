@@ -166,6 +166,15 @@ def mi_conversacion(appointment_id: int) -> list:
         return []
 
 
+def mis_informes(appointment_id: int) -> list:
+    """Informes de examen propios de una atención (ver my_report.php), el
+    más nuevo primero. Lista vacía si falla la red."""
+    try:
+        return _get_backend_client().get_my_report(appointment_id)
+    except requests.RequestException:
+        return []
+
+
 def foto_paciente(case_id, persona=""):
     """Avatar circular del paciente (bytes PNG) o None si no tiene foto
     subida o no hay conexión al backend -- a diferencia de chat_con_paciente,

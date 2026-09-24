@@ -144,39 +144,48 @@ def test_going_back_restores_the_current_session():
     assert w.curves_R == ['R1', 'R2']
 
 
-def test_saving_a_revision_goes_to_that_attendance():
+def test_a_previous_session_is_read_only():
+    """Una atención cerrada no se actualiza más: ni marcas, ni borrar
+    marcas, ni texto del informe, y nada se sube."""
     if not HAS_UI:
         return
     _preparar()
-    w, _ = _con_anterior()
+    w, anterior = _con_anterior()
     w.select_session(0)
+    antes = dict(w.graph_r.marks.get('R1', {}))
     w.graph_r.act_curve = 'R1'
     w.graph_r.current_lat = 5.7
     w.graph_r.create_marks('V')
-    w.report.text_edit_2.setPlainText('Terminada')
-    assert w.revision_dirty()
-    assert w.save_session()
-    cita, tipo, data = ClienteFalso.subidas[-1]
-    assert (cita, tipo) == (7, 'ABR')
-    assert data['conclusion'] == 'Terminada'
-    assert 'V' in data['curvas']['R1']['marcas_graf']
-    assert not w.revision_dirty()
+    w.graph_r.delete_all_marks()
+    assert w.graph_r.marks.get('R1', {}) == antes
+    w.measure_action({'0': {'V_L': None}})     # marcar desde la tabla
+    assert w.memory['R1'] == {k: v for k, v in anterior['data']['curvas']['R1'].items()
+                              if k not in ('traza', 'marcas_graf')}
+    assert w.report.text_edit_2.isReadOnly()
+    assert not hasattr(w, 'btn_save_session')
+    w.select_session(None)
+    assert not w.report.text_edit_2.isReadOnly()
+    assert not w.graph_r.read_only
+    assert ClienteFalso.subidas == []
 
 
-def test_leaving_a_changed_revision_asks_first():
+def test_a_past_attention_opens_to_look_only():
+    """Desde "Mis pacientes": sin atención en curso, el ABR de una
+    atención cerrada se abre para mirar."""
     if not HAS_UI:
         return
     _preparar()
-    w, _ = _con_anterior()
-    w.select_session(0)
-    w.report.text_edit_2.setPlainText('a medio escribir')
-    w.ask_save_revision = lambda allow_cancel=True: 'cancel'
-    w.cb_session.setCurrentIndex(0)
-    assert w.session_idx == 0 and w.cb_session.currentIndex() == 1
-    w.ask_save_revision = lambda allow_cancel=True: 'discard'
-    w.cb_session.setCurrentIndex(0)
-    assert w.session_idx is None
-    assert ClienteFalso.subidas == []
+    guardado = _sesion_guardada()['data']
+    w = panel._ventana()
+    assert not w.open_past(guardado, 'x')      # con atención abierta, no
+    w.la_super(None)
+    assert w.open_past(guardado, 'Atención del 10/09: solo lectura')
+    assert w.curves_R == ['R1', 'R2']
+    assert w.view_only and w.graph_r.read_only
+    assert not w.control.isEnabled()
+    assert w.report_job() is None
+    w.la_super(panel._caso(), 42)              # llega una atención nueva
+    assert not w.view_only and w.graph_r.data == {}
 
 
 def test_closing_the_attendance_uploads_the_current_session():

@@ -19,8 +19,13 @@
   `emg_suma`); un informe VEMP de antes de esto no trae trazo y sus curvas
   no se pueden redibujar. EOA recupera los resultados por prueba y oído,
   no los gráficos (las capturas ya están en el servidor).
-- [ ] Subir al servidor: `api/my_report.php` (nuevo) y `api/my_patient_reports.php`
-  (hoy da 404 en producción).
+- [ ] Subir al servidor: `api/my_report.php` (nuevo), `api/my_patient_reports.php`
+  (hoy da 404 en producción) y `api/report_upload.php` (sin revisión).
+- **Atención cerrada = congelada** (pedido 2026-09-24): ningún informe se
+  vuelve a subir después de 'atendido' (report_upload.php 409 para todos;
+  se borró ReportRevision). Las sesiones anteriores del ABR y "Mis
+  pacientes → Exámenes → Ver en el ABR" son solo lectura. El PDF se ve
+  solo en la web (portal del alumno / perfil del alumno para el docente).
 
 ## VEMP v2: probar en la app real (pendiente)
 

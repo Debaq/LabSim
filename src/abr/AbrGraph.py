@@ -110,6 +110,9 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # En una sesion anterior las curvas son lo que se registro ese dia:
         # se marcan, no se borran (ver AbrMainWindow.select_session).
         self.curves_locked = False
+        # Sesion de una atencion ya cerrada: solo se mira. Ni marcas nuevas
+        # ni borrar las que tiene (ver AbrMainWindow.set_view_mode).
+        self.read_only = False
         # Separacion entre curvas como fraccion de la escala. 0.35 deja el
         # ruido del arranque (hasta ~1.2 uV RMS) sin invadir la curva de
         # arriba a escala normal.
@@ -440,7 +443,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         return text
 
     def delete_curve(self):
-        if self.curves_locked:
+        if self.curves_locked or self.read_only:
             return
         delete = False
         for item in self.traces.pop(self.act_curve, {}).values():
@@ -554,7 +557,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
     def click_mark(self, ev):
         """Clic sobre la curva con una marca armada: la pone ahi."""
-        if self.mark_mode is None or self.act_curve is None:
+        if self.read_only or self.mark_mode is None or self.act_curve is None:
             return
         if ev.button() != Qt.MouseButton.LeftButton:
             return
@@ -574,7 +577,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         """Pone (o corre) la marca `lbl_mark` de la curva activa en
         current_lat y avisa el valor nuevo."""
         name_curve = self.act_curve
-        if name_curve not in self.data:
+        if self.read_only or name_curve not in self.data:
             return
         xs, ys = self.data[name_curve]['ipsi_xy']
         id_x = self.find_idx(xs, self.current_lat)
@@ -630,7 +633,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
     def delete_mark(self, mark):
         curve = self.act_curve
-        if mark not in self.marks.get(curve, {}):
+        if self.read_only or mark not in self.marks.get(curve, {}):
             return
         item = self.mark_item(curve, mark)
         if item is not None:

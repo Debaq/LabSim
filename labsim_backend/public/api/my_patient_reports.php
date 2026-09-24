@@ -6,8 +6,8 @@ require_once __DIR__ . '/../bootstrap.php';
 
 /**
  * Sesiones de ABR/electrococleo del alumno logueado con el MISMO paciente
- * de una cita, para que el módulo ABR las liste y deje abrirlas (verlas o
- * terminar marcas y conclusiones, ver ReportRevision).
+ * de una cita, para que el módulo ABR las liste y deje abrirlas. Solo para
+ * mirarlas: una atención cerrada no se actualiza más (ver report_upload.php).
  *
  * GET appointment_id=<la cita en atención>. El paciente es el caso de esa
  * cita (appointments.case_id): sin caso no hay con qué agrupar y la lista

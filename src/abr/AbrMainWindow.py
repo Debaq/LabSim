@@ -26,7 +26,7 @@ from abr.AbrDetailAllCurves import AbrDetailAllCurves
 from abr.AbrGraph import AbrGraph
 from abr.AbrLatIntGraph import GraphLatInt
 from abr.AbrReport import AbrReport
-from abr.AbrSessions import (curve_order, editable_part, pack_trace,
+from abr.AbrSessions import (curve_order, pack_trace,
                              session_label, unpack_trace)
 from abr.AbrTable import AbrTable
 from abr.EcochgTable import EcochgTable
@@ -435,7 +435,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # Se esta mirando una sesion anterior: lo que se sube es la de
             # esta atencion, asi que primero se vuelve a ella (y se ofrece
             # guardar lo que se haya cambiado en la otra).
-            self.select_session(None, allow_cancel=False)
+            self.select_session(None)
         job = self.report_job()
         if job is None:
             return
@@ -600,24 +600,20 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """Combo de sesiones en la barra de arriba, junto al estado.
 
         Al mismo paciente se le puede hacer mas de un ABR (uno por
-        atencion). Desde aca se abre uno anterior para verlo o terminarlo:
-        marcas y conclusiones, nunca curvas nuevas.
+        atencion). Desde aca se abre uno anterior para mirarlo: una atencion
+        cerrada no se actualiza mas, ni marcas ni conclusiones.
         """
         # Sin sesiones anteriores no hay nada que elegir: la barra aparece
         # recien cuando fetch_sessions encuentra alguna.
         self.sessions = []
         self.session_idx = None
         self.live_snapshot = None
-        self.revision_baseline = None
+        self.view_only = False
         self.lbl_session = QLabel(tr("AbrMainWindow", "Sesión:"))
         self.cb_session = QComboBox()
         self.cb_session.setMinimumWidth(180)
         self.cb_session.currentIndexChanged.connect(self.on_session_combo)
-        self.btn_save_session = QPushButton(tr("AbrMainWindow", "Guardar cambios"))
-        self.btn_save_session.setStatusTip(tr(
-            "AbrMainWindow", "Guardar marcas y conclusiones de esta sesión"))
-        self.btn_save_session.clicked.connect(self.save_session)
-        for widget in (self.lbl_session, self.cb_session, self.btn_save_session):
+        for widget in (self.lbl_session, self.cb_session):
             self.horizontalLayout.addWidget(widget)
         self.fill_sessions([])
 
@@ -633,7 +629,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         hay = bool(self.sessions)
         self.lbl_session.setVisible(hay)
         self.cb_session.setVisible(hay)
-        self.btn_save_session.setVisible(False)
 
     def fetch_sessions(self):
         """Pide al backend los ABR anteriores de este alumno con este paciente."""
@@ -691,14 +686,13 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                                    self.live_snapshot.get('equipo'))
         self.session_idx = None
         self.live_snapshot = None
-        self.revision_baseline = None
-        self.set_revision_mode(False)
+        self.set_view_mode(False)
         self.fill_sessions([])
 
     def on_session_combo(self, index):
         self.select_session(index - 1 if index > 0 else None)
 
-    def select_session(self, idx, allow_cancel=True):
+    def select_session(self, idx):
         """Abre una sesion anterior (idx) o vuelve a la actual (None).
 
         La actual no se pierde al ir a mirar otra: se guarda entera (curvas,
@@ -708,88 +702,49 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             return
         if self.state_capture != 'stopped':
             self.control.stop_capture()
-        if self.session_idx is not None:
-            if not self.leave_revision(allow_cancel):
-                self.cb_session.blockSignals(True)
-                self.cb_session.setCurrentIndex(self.session_idx + 1)
-                self.cb_session.blockSignals(False)
-                return
-        else:
+        if self.session_idx is None:
             self.live_snapshot = self.session_payload()
 
         if idx is None:
             self.draw_session(self.live_snapshot)
             self.live_snapshot = None
-            self.revision_baseline = None
         else:
             self.draw_session(self.sessions[idx]['data'])
-            self.revision_baseline = editable_part(self.session_payload())
         self.session_idx = idx
         self.cb_session.blockSignals(True)
         self.cb_session.setCurrentIndex(0 if idx is None else idx + 1)
         self.cb_session.blockSignals(False)
-        self.set_revision_mode(idx is not None)
+        self.set_view_mode(idx is not None, tr(
+            "AbrMainWindow", "Sesión anterior: solo lectura"))
 
-    def set_revision_mode(self, on):
-        """En una sesion anterior no se registra ni se borran curvas."""
+    def set_view_mode(self, on, aviso=None):
+        """Solo mirar: una atencion cerrada no se actualiza mas.
+
+        Ni se registra, ni se marca, ni se borra, ni se escribe en el
+        informe. Hasta 2026-09-24 se podian terminar marcas y conclusiones
+        de una sesion cerrada; se saco a pedido del docente.
+        """
+        self.view_only = on
         self.control.setEnabled(not on and self.data_current is not None)
         for grafico in (self.graph_r, self.graph_l):
             grafico.curves_locked = on
-        self.btn_save_session.setVisible(on)
-        if on:
-            self.lbl_info.setText(tr(
-                "AbrMainWindow",
-                "Sesión anterior: solo se editan marcas y conclusiones"))
+            grafico.read_only = on
+            if on:
+                grafico.arm_mark(None)
+        for texto in (self.report.text_edit_1, self.report.text_edit_2):
+            texto.setReadOnly(on)
+        if on and aviso:
+            self.lbl_info.setText(aviso)
 
-    def revision_dirty(self):
-        return (self.revision_baseline is not None
-                and editable_part(self.session_payload()) != self.revision_baseline)
-
-    def leave_revision(self, allow_cancel=True):
-        """Salir de una sesion anterior: si cambio algo, guardar o no."""
-        if not self.revision_dirty():
-            return True
-        respuesta = self.ask_save_revision(allow_cancel)
-        if respuesta == 'save':
-            return self.save_session()
-        return respuesta == 'discard'
-
-    def ask_save_revision(self, allow_cancel=True):
-        botones = QMessageBox.StandardButton.Save | QMessageBox.StandardButton.Discard
-        if allow_cancel:
-            botones |= QMessageBox.StandardButton.Cancel
-        respuesta = QMessageBox.question(
-            self, tr("AbrMainWindow", "Sesión anterior"),
-            tr("AbrMainWindow",
-               "Cambiaste marcas o conclusiones de esta sesión.\n\n"
-               "¿Guardar los cambios?"),
-            botones, QMessageBox.StandardButton.Save)
-        return {QMessageBox.StandardButton.Save: 'save',
-                QMessageBox.StandardButton.Discard: 'discard'}.get(respuesta, 'cancel')
-
-    def save_session(self):
-        """Sube marcas y conclusiones de la sesion anterior abierta.
-
-        El backend toma solo eso (ver ReportRevision.php): los trazos y el
-        setting de esa sesion quedan como se registraron.
-        """
-        if self.session_idx is None:
+    def open_past(self, data, aviso):
+        """Abre, para mirar, el ABR de una atencion ya cerrada (desde "Mis
+        pacientes"). Solo sin una atencion en curso: lo que esta en pantalla
+        seria de otro paciente y se perderia de vista."""
+        if self.data_current is not None:
             return False
-        report = self.sessions[self.session_idx]
-        data = self.session_payload()
-        try:
-            client = BackendClient(Preferences().get("BACKEND_URL"),
-                                   context.get_resource('json/session.json'))
-            client.upload_report(int(report['appointment_id']), report['tipo'],
-                                 data, self.export_images())
-        except Exception as exc:
-            QMessageBox.warning(
-                self, tr("AbrMainWindow", "Sesión anterior"),
-                tr("AbrMainWindow", "No se pudieron guardar los cambios:\n{0}").format(exc))
-            return False
-        report['data'] = data
-        self.revision_baseline = editable_part(data)
-        self.lbl_info.setText(tr("AbrMainWindow", "Cambios guardados"))
+        self.clear_sessions()
+        self.draw_session(data)
+        self.set_view_mode(True, aviso)
         return True
 
     def reset(self):
@@ -1073,6 +1028,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             return 1
 
     def measure_action(self, data):
+        if self.view_only:
+            return
         side =  list(data.keys())[0]
         side_letter = 'r' if side == '0' else 'l'
         request = list(data[side].keys())[0]
@@ -1193,6 +1150,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         el grafico del otro oido pondria la marca del que no se estaba
         mirando.
         """
+        if self.view_only:
+            return
         propio, otro = (0, 1) if side == 0 else (1, 0)
         graficos = (self.graph_r, self.graph_l)
         tablas = (self.table_ec_r, self.table_ec_l)
