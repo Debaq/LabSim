@@ -107,6 +107,9 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # -> 6.25) y ya no se volvia nunca a la escala de la prueba.
         self.scale_base = self.scale_uv
         self.scale_step = 0
+        # En una sesion anterior las curvas son lo que se registro ese dia:
+        # se marcan, no se borran (ver AbrMainWindow.select_session).
+        self.curves_locked = False
         # Separacion entre curvas como fraccion de la escala. 0.35 deja el
         # ruido del arranque (hasta ~1.2 uV RMS) sin invadir la curva de
         # arriba a escala normal.
@@ -265,6 +268,16 @@ class AbrGraph(GraphicsLayoutWidgetMod):
                 # las que ya estaban tambien tienen que decir el suyo.
                 self.refresh_labels()
                 self.apply_view()
+
+    def load_curve(self, name, values, intencity, setting, gap, marks=None):
+        """Redibuja una curva guardada donde estaba, con sus marcas."""
+        self.create_line({name: values}, intencity, setting)
+        self.data[name]['gap'] = float(gap)
+        self.redraw(name)
+        self.move_label(name)
+        for etiqueta, xy in (marks or {}).items():
+            self.recreate_mark(name, etiqueta, list(xy))
+        self.apply_view()
 
     def create_traces(self, name, values):
         """Los cuatro trazos de una curva: A/B, contra y promedio.
@@ -427,6 +440,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         return text
 
     def delete_curve(self):
+        if self.curves_locked:
+            return
         delete = False
         for item in self.traces.pop(self.act_curve, {}).values():
             self.pw.removeItem(item)

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/ReportFile.php';
+require_once __DIR__ . '/../../src/ReportRevision.php';
 
 /**
  * Sube (o rehace) el informe de un módulo "de examen" (ABR/EOA/VEMP/
@@ -27,7 +28,9 @@ require_once __DIR__ . '/../../src/ReportFile.php';
  *
  * Mientras attendances.estado siga 'atendiendo' esto es un upsert libre
  * (el alumno puede rehacer el informe cuantas veces quiera). Una vez
- * 'atendido' queda fijo -- rechaza con 409 en vez de sobreescribir.
+ * 'atendido' queda fijo -- rechaza con 409 en vez de sobreescribir --,
+ * salvo ABR/electrococleo: ahí se aceptan marcas y conclusiones sobre las
+ * curvas ya guardadas, nunca curvas nuevas (ver ReportRevision).
  */
 
 const REPORT_TIPOS = ['ABR', 'AABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'OTOSCOPIA'];
@@ -71,10 +74,21 @@ if (!$attendance) {
     // trata esto como "reintentar más tarde", no como error fatal.
     Response::error('Todavía no hay una atención registrada para esa cita.', 404);
 }
-if ($attendance['estado'] === 'atendido') {
-    Response::error('La atención ya está cerrada, el informe quedó fijo.', 409);
-}
 $attendanceId = (int) $attendance['id'];
+if ($attendance['estado'] === 'atendido') {
+    if (!ReportRevision::admite($tipo)) {
+        Response::error('La atención ya está cerrada, el informe quedó fijo.', 409);
+    }
+    $stmt = $pdo->prepare('SELECT data FROM reports WHERE attendance_id = ? AND tipo = ?');
+    $stmt->execute([$attendanceId, $tipo]);
+    $guardado = json_decode((string) $stmt->fetchColumn(), true);
+    if (!is_array($guardado)) {
+        // Sin informe previo no hay curvas que revisar: registrar es de
+        // la atención abierta.
+        Response::error('La atención ya está cerrada y no tiene informe que revisar.', 409);
+    }
+    $data = ReportRevision::fusionar($guardado, $data, date('c'));
+}
 
 // Validar imágenes subidas ANTES de tocar la base -- todo o nada.
 $imageFiles = [];

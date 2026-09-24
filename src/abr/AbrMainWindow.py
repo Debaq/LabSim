@@ -26,6 +26,8 @@ from abr.AbrDetailAllCurves import AbrDetailAllCurves
 from abr.AbrGraph import AbrGraph
 from abr.AbrLatIntGraph import GraphLatInt
 from abr.AbrReport import AbrReport
+from abr.AbrSessions import (curve_order, editable_part, pack_trace,
+                             session_label, unpack_trace)
 from abr.AbrTable import AbrTable
 from abr.EcochgTable import EcochgTable
 from abr import ecochg
@@ -37,8 +39,8 @@ from core.base import context
 from core.helpers import Preferences
 from core.rng import stable_seed
 from PySide6.QtCore import QCoreApplication, QTimer
-from PySide6.QtWidgets import (QMainWindow, QMessageBox, QSizePolicy,
-                               QSpacerItem)
+from PySide6.QtWidgets import (QComboBox, QLabel, QMainWindow, QMessageBox,
+                               QPushButton, QSizePolicy, QSpacerItem)
 
 tr = QCoreApplication.translate
 
@@ -170,6 +172,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.fsp_shown = None
         self.donde = False
         self.count_averages = 0
+        self.setup_sessions_bar()
         # Equipo (transductor, ventana, montaje, electrodos, rechazo de
         # artefacto...). Arranca en el montaje de rutina del protocolo y lo
         # edita el alumno en Parametros Avanzados. Antes el dialogo se abria
@@ -212,6 +215,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         de generar nada si el lado activo no tiene datos."""
         self.appointment_id = appointment_id
         self.data_current = data
+        self.clear_sessions()
         self.control.setEnabled(data is not None)
         abr_data = (data or {}).get('ABR') or {}
         self.abr_od = abr_data.get('OD')
@@ -231,6 +235,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
             self.eeg_timer.start(TIEMPO_EEG)
+            # Despues de pintar: es una consulta al backend y la atencion
+            # no tiene por que esperarla.
+            QTimer.singleShot(0, self.fetch_sessions)
 
     def recording_conditions(self):
         """Como se esta registrando: equipo + lo que el equipo midio.
@@ -421,6 +428,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         en pantalla, puede reintentar (ej. reabriendo la atención) o el
         docente puede pedir que se revise a mano.
         """
+        if self.session_idx is not None:
+            # Se esta mirando una sesion anterior: lo que se sube es la de
+            # esta atencion, asi que primero se vuelve a ella (y se ofrece
+            # guardar lo que se haya cambiado en la otra).
+            self.select_session(None, allow_cancel=False)
         if not self.data_login or not self.memory:
             return
         try:
@@ -428,6 +440,26 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         except (TypeError, ValueError):
             return
 
+        images = self.export_images()
+        data = self.session_payload()
+        client = BackendClient(Preferences().get("BACKEND_URL"), context.get_resource('json/session.json'))
+        if not client.is_logged_in():
+            return
+        try:
+            # El tipo es el de la prueba con la que se registro: la tabla
+            # `reports` ya distingue ELECTROCOCLEO de ABR, y el informe de
+            # un ECochG no dice nada de ondas I-V. Cambiar de prueba borra
+            # las curvas (ver test_changed), asi que no hay sesiones
+            # mezcladas que puedan quedar mal rotuladas.
+            client.upload_report(appointment_id, self.report_tipo(), data, images)
+        except Exception as exc:
+            print(f"ABR: no se pudo subir el informe: {exc}")
+
+    def report_tipo(self):
+        return 'ELECTROCOCLEO' if self.es_ecochg() else 'ABR'
+
+    def export_images(self):
+        """JPEG de los graficos para el informe, tal como estan en pantalla."""
         temp_dir = context.get_resource("local_cache/abr/temp")
         exporters = {'0': self.graph_r, '1': self.graph_l, 'lat_int': self.graph_lat_int}
         if self.es_ecochg():
@@ -445,9 +477,32 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 print(f"ABR: no se pudo exportar {suffix} para el informe: {exc}")
                 continue
             images[suffix] = path
+        return images
 
+    def session_payload(self):
+        """La sesion en pantalla, tal como se manda al backend.
+
+        Cada curva lleva su trazo y sus marcas en el grafico (ver
+        AbrSessions): con eso se vuelve a abrir tal cual, para mirarla o
+        terminar de marcarla en otra atencion.
+        """
+        curvas = {}
+        for nombre, entrada in self.memory.items():
+            curva = dict(entrada)
+            grafico = self.graph_r if nombre.startswith('R') else self.graph_l
+            valores = grafico.data.get(nombre)
+            if valores is not None:
+                curva['traza'] = pack_trace(valores)
+                curva['marcas_graf'] = {
+                    etiqueta: [float(v) for v in xy]
+                    for etiqueta, xy in grafico.marks.get(nombre, {}).items()}
+            curvas[nombre] = curva
         data = {
-            'curvas': self.memory,
+            'prueba': self.test_actual,
+            # El equipo tal cual (ventana, montaje...): con esto la sesion
+            # se vuelve a dibujar con la misma ventana y escala.
+            'equipo': dict(self.technical),
+            'curvas': curvas,
             # Condiciones de registro: sin esto el informe dice QUE se
             # obtuvo pero no COMO, y el procedimiento no se puede evaluar.
             # Cada curva ademas lleva las suyas (memory[curva]['tecnica']),
@@ -464,20 +519,229 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 shift = self.ecochg_rate_shift(lado)
                 if shift:
                     data.setdefault('tasa', dict(shift, oido=clave))
+        return data
 
-        client = BackendClient(Preferences().get("BACKEND_URL"), context.get_resource('json/session.json'))
-        if not client.is_logged_in():
+    def draw_session(self, data):
+        """Dibuja una sesion que vino del backend (o la actual, al volver a ella)."""
+        self.reset()
+        curvas = data.get('curvas') or {}
+        prueba = data.get('prueba')
+        if not prueba:
+            primera = next(iter(curvas.values()), {})
+            prueba = primera.get('test') or 'ABR'
+        self.set_test_silently(prueba, data.get('equipo'))
+        for nombre in sorted(curvas, key=curve_order):
+            entrada = curvas[nombre]
+            self.memory[nombre] = {k: v for k, v in entrada.items()
+                                   if k not in ('traza', 'marcas_graf')}
+            self.fsp_tracks[nombre] = entrada.get('fsp_track') or {}
+            traza = entrada.get('traza')
+            if not traza:
+                # Informe de antes de guardar trazos: quedan los numeros.
+                continue
+            letra = nombre[:1]
+            grafico = self.graph_r if letra == 'R' else self.graph_l
+            grafico.load_curve(nombre, unpack_trace(traza, entrada.get('int')),
+                               entrada.get('int'), entrada,
+                               traza.get('gap', 0.0), entrada.get('marcas_graf'))
+            getattr(self, f'curves_{letra}').append(nombre)
+        if self.es_ecochg():
+            for nombre in self.memory:
+                self.refresh_ecochg(nombre)
+        self.detail_all.process_and_fill_data(self.memory)
+        self.report.text_edit_1.setPlainText(data.get('hallazgos', ''))
+        self.report.text_edit_2.setPlainText(data.get('conclusion', ''))
+        for lista in (self.curves_R, self.curves_L):
+            if lista:
+                self.selected_(lista[-1])
+
+    def set_test_silently(self, test, equipo=None):
+        """Pone la prueba de una sesion sin pasar por test_changed.
+
+        test_changed borra las curvas y pregunta: aca se esta abriendo una
+        sesion, no cambiando de prueba.
+        """
+        self.control.cb_test.blockSignals(True)
+        self.control.cb_test.setCurrentText(test)
+        self.control.cb_test.blockSignals(False)
+        self.test_actual = test
+        self.technical = dict(equipo) if equipo else default_settings(test)
+        self.apply_test_widgets(test)
+        self.apply_window()
+        self.apply_norms()
+
+    # ------------------------------------------------------------------
+    # Sesiones anteriores del mismo paciente
+    # ------------------------------------------------------------------
+
+    def setup_sessions_bar(self):
+        """Combo de sesiones en la barra de arriba, junto al estado.
+
+        Al mismo paciente se le puede hacer mas de un ABR (uno por
+        atencion). Desde aca se abre uno anterior para verlo o terminarlo:
+        marcas y conclusiones, nunca curvas nuevas.
+        """
+        # Sin sesiones anteriores no hay nada que elegir: la barra aparece
+        # recien cuando fetch_sessions encuentra alguna.
+        self.sessions = []
+        self.session_idx = None
+        self.live_snapshot = None
+        self.revision_baseline = None
+        self.lbl_session = QLabel(tr("AbrMainWindow", "Sesión:"))
+        self.cb_session = QComboBox()
+        self.cb_session.setMinimumWidth(180)
+        self.cb_session.currentIndexChanged.connect(self.on_session_combo)
+        self.btn_save_session = QPushButton(tr("AbrMainWindow", "Guardar cambios"))
+        self.btn_save_session.setStatusTip(tr(
+            "AbrMainWindow", "Guardar marcas y conclusiones de esta sesión"))
+        self.btn_save_session.clicked.connect(self.save_session)
+        for widget in (self.lbl_session, self.cb_session, self.btn_save_session):
+            self.horizontalLayout.addWidget(widget)
+        self.fill_sessions([])
+
+    def fill_sessions(self, reports):
+        self.sessions = [r for r in reports if isinstance(r.get('data'), dict)]
+        self.cb_session.blockSignals(True)
+        self.cb_session.clear()
+        self.cb_session.addItem(tr("AbrMainWindow", "Actual"))
+        for report in self.sessions:
+            self.cb_session.addItem(session_label(report))
+        self.cb_session.setCurrentIndex(0)
+        self.cb_session.blockSignals(False)
+        hay = bool(self.sessions)
+        self.lbl_session.setVisible(hay)
+        self.cb_session.setVisible(hay)
+        self.btn_save_session.setVisible(False)
+
+    def fetch_sessions(self):
+        """Pide al backend los ABR anteriores de este alumno con este paciente."""
+        if self.data_current is None:
             return
         try:
-            # El tipo es el de la prueba con la que se registro: la tabla
-            # `reports` ya distingue ELECTROCOCLEO de ABR, y el informe de
-            # un ECochG no dice nada de ondas I-V. Cambiar de prueba borra
-            # las curvas (ver test_changed), asi que no hay sesiones
-            # mezcladas que puedan quedar mal rotuladas.
-            tipo = 'ELECTROCOCLEO' if self.es_ecochg() else 'ABR'
-            client.upload_report(appointment_id, tipo, data, images)
+            appointment_id = int(self.appointment_id)
+        except (TypeError, ValueError):
+            return
+        try:
+            client = BackendClient(Preferences().get("BACKEND_URL"),
+                                   context.get_resource('json/session.json'))
+            if not client.is_logged_in():
+                return
+            reports = client.get_patient_reports(appointment_id)
         except Exception as exc:
-            print(f"ABR: no se pudo subir el informe: {exc}")
+            # Sin conexion se atiende igual: solo no se ven las anteriores.
+            print(f"ABR: no se pudieron traer las sesiones anteriores: {exc}")
+            return
+        if self.session_idx is None:
+            self.fill_sessions(reports)
+
+    def clear_sessions(self):
+        """Cambio de paciente: la lista era del anterior."""
+        if self.session_idx is not None and self.live_snapshot is not None:
+            # La prueba en pantalla era la de la sesion anterior.
+            self.set_test_silently(self.live_snapshot.get('prueba') or 'ABR',
+                                   self.live_snapshot.get('equipo'))
+        self.session_idx = None
+        self.live_snapshot = None
+        self.revision_baseline = None
+        self.set_revision_mode(False)
+        self.fill_sessions([])
+
+    def on_session_combo(self, index):
+        self.select_session(index - 1 if index > 0 else None)
+
+    def select_session(self, idx, allow_cancel=True):
+        """Abre una sesion anterior (idx) o vuelve a la actual (None).
+
+        La actual no se pierde al ir a mirar otra: se guarda entera (curvas,
+        marcas, informe escrito, prueba y equipo) y se restituye al volver.
+        """
+        if idx == self.session_idx:
+            return
+        if self.state_capture != 'stopped':
+            self.control.stop_capture()
+        if self.session_idx is not None:
+            if not self.leave_revision(allow_cancel):
+                self.cb_session.blockSignals(True)
+                self.cb_session.setCurrentIndex(self.session_idx + 1)
+                self.cb_session.blockSignals(False)
+                return
+        else:
+            self.live_snapshot = self.session_payload()
+
+        if idx is None:
+            self.draw_session(self.live_snapshot)
+            self.live_snapshot = None
+            self.revision_baseline = None
+        else:
+            self.draw_session(self.sessions[idx]['data'])
+            self.revision_baseline = editable_part(self.session_payload())
+        self.session_idx = idx
+        self.cb_session.blockSignals(True)
+        self.cb_session.setCurrentIndex(0 if idx is None else idx + 1)
+        self.cb_session.blockSignals(False)
+        self.set_revision_mode(idx is not None)
+
+    def set_revision_mode(self, on):
+        """En una sesion anterior no se registra ni se borran curvas."""
+        self.control.setEnabled(not on and self.data_current is not None)
+        for grafico in (self.graph_r, self.graph_l):
+            grafico.curves_locked = on
+        self.btn_save_session.setVisible(on)
+        if on:
+            self.lbl_info.setText(tr(
+                "AbrMainWindow",
+                "Sesión anterior: solo se editan marcas y conclusiones"))
+
+    def revision_dirty(self):
+        return (self.revision_baseline is not None
+                and editable_part(self.session_payload()) != self.revision_baseline)
+
+    def leave_revision(self, allow_cancel=True):
+        """Salir de una sesion anterior: si cambio algo, guardar o no."""
+        if not self.revision_dirty():
+            return True
+        respuesta = self.ask_save_revision(allow_cancel)
+        if respuesta == 'save':
+            return self.save_session()
+        return respuesta == 'discard'
+
+    def ask_save_revision(self, allow_cancel=True):
+        botones = QMessageBox.StandardButton.Save | QMessageBox.StandardButton.Discard
+        if allow_cancel:
+            botones |= QMessageBox.StandardButton.Cancel
+        respuesta = QMessageBox.question(
+            self, tr("AbrMainWindow", "Sesión anterior"),
+            tr("AbrMainWindow",
+               "Cambiaste marcas o conclusiones de esta sesión.\n\n"
+               "¿Guardar los cambios?"),
+            botones, QMessageBox.StandardButton.Save)
+        return {QMessageBox.StandardButton.Save: 'save',
+                QMessageBox.StandardButton.Discard: 'discard'}.get(respuesta, 'cancel')
+
+    def save_session(self):
+        """Sube marcas y conclusiones de la sesion anterior abierta.
+
+        El backend toma solo eso (ver ReportRevision.php): los trazos y el
+        setting de esa sesion quedan como se registraron.
+        """
+        if self.session_idx is None:
+            return False
+        report = self.sessions[self.session_idx]
+        data = self.session_payload()
+        try:
+            client = BackendClient(Preferences().get("BACKEND_URL"),
+                                   context.get_resource('json/session.json'))
+            client.upload_report(int(report['appointment_id']), report['tipo'],
+                                 data, self.export_images())
+        except Exception as exc:
+            QMessageBox.warning(
+                self, tr("AbrMainWindow", "Sesión anterior"),
+                tr("AbrMainWindow", "No se pudieron guardar los cambios:\n{0}").format(exc))
+            return False
+        report['data'] = data
+        self.revision_baseline = editable_part(data)
+        self.lbl_info.setText(tr("AbrMainWindow", "Cambios guardados"))
+        return True
 
     def reset(self):
         """Limpia completamente los gráficos y la memoria de curvas"""
@@ -601,6 +865,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
 
     def capture_state(self, state:str) -> None:
+        if state == 'record' and self.session_idx is not None:
+            # Sesion anterior abierta: se mira y se marca, no se registra.
+            self.control.stop_capture()
+            return
         if state == 'record':
             self.state_capture = state
             self.current_setting = self.control.get_data()

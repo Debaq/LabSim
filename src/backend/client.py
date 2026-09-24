@@ -276,6 +276,13 @@ class BackendClient:
         my_chat_history.php)."""
         return self._get("/api/my_chat_history.php", {"appointment_id": appointment_id})
 
+    def get_patient_reports(self, appointment_id: int) -> list[dict]:
+        """Sesiones de ABR/electrococleo propias con el mismo paciente de
+        esa cita, sin la cita misma, con `data` completo (curvas y trazos)
+        -- ver my_patient_reports.php."""
+        return self._get("/api/my_patient_reports.php",
+                         {"appointment_id": appointment_id}).get("reports", [])
+
     def upload_report(
         self, appointment_id: int, tipo: str, data: dict, images: dict[str, str], timeout: int = 30,
     ) -> dict:
