@@ -381,8 +381,61 @@ def test_stacking_follows_the_scale():
     w.btn_scale_plus.click()
     factor = w.graph_r.get_scale() / escala_antes
     assert abs(w.graph_r.data['R2']['gap'] - antes * factor) < 1e-9
-    assert w.lbl_scale.text() == f"{int(round(w.graph_r.get_scale()))}µV"
+    assert w.lbl_scale.text() == f"{round(w.graph_r.get_scale(), 1):g}µV"
 
+
+def test_scale_hits_its_limits_and_comes_back():
+    """Apretar de más en el tope no hace nada, y se vuelve a la escala base.
+
+    Antes el tope recortaba (192 -> 200) y desde ahí la escalera quedaba
+    corrida para siempre: 100, 50, 25, 12.5, 6.25... nunca más 6 µV.
+    """
+    if not HAS_UI:
+        return
+    w = _ventana()
+    for db in (80, 60):
+        _capturar(w, intensidad=db)
+    gap = w.graph_r.data['R2']['gap']
+    for _ in range(12):
+        w.btn_scale_plus.click()
+    assert w.graph_r.get_scale() == 192
+    for _ in range(12):
+        w.btn_scale_minus.click()
+    assert w.graph_r.get_scale() == 1.5
+    assert w.lbl_scale.text() == '1.5µV'
+    for _ in range(2):
+        w.btn_scale_plus.click()
+    assert w.graph_r.get_scale() == 6
+    assert w.graph_l.get_scale() == 6
+    assert abs(w.graph_r.data['R2']['gap'] - gap) < 1e-9
+
+
+def test_mouse_wheel_does_not_zoom_behind_the_scale():
+    """La rueda no cambia la vista: el zoom es solo de los botones."""
+    if not HAS_UI:
+        return
+    from PySide6.QtCore import QPointF
+
+    class Rueda:                       # lo que lee ViewBox.wheelEvent
+        def __init__(self):
+            self.ignorado = False
+        def delta(self):
+            return 480
+        def pos(self):
+            return QPointF(10, 10)
+        def accept(self):
+            pass
+        def ignore(self):
+            self.ignorado = True
+
+    w = _ventana()
+    _capturar(w, intensidad=80)
+    vb = w.graph_r.pw.getViewBox()
+    antes = vb.viewRange()[1]
+    ev = Rueda()
+    vb.wheelEvent(ev)
+    assert ev.ignorado
+    assert vb.viewRange()[1] == antes
 
 def test_every_curve_draws_its_four_traces():
     """Promedio, contralateral y los dos subpromedios A/B."""

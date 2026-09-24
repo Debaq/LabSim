@@ -100,6 +100,13 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # todas las curvas nacian en la MISMA altura (se pisaban hasta que
         # el alumno las arrastraba a mano) y el gap no seguia a la escala.
         self.scale_uv = 6.0
+        # Los botones +/- recorren una escalera de dobles/mitades de la
+        # escala base de la prueba (la que fija set_scale). Antes se
+        # multiplicaba o dividia la escala actual y se recortaba en 1 y
+        # 200 uV: el recorte rompia la escalera (192 -> 200 -> 100 -> ...
+        # -> 6.25) y ya no se volvia nunca a la escala de la prueba.
+        self.scale_base = self.scale_uv
+        self.scale_step = 0
         # Separacion entre curvas como fraccion de la escala. 0.35 deja el
         # ruido del arranque (hasta ~1.2 uV RMS) sin invadir la curva de
         # arriba a escala normal.
@@ -132,6 +139,20 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         ay.setStyle(showValues=False)
         view_box = self.pw.getViewBox()
         view_box.setMouseMode(pg.ViewBox.PanMode)
+        # La rueda y el arrastre con boton derecho hacian zoom por su
+        # cuenta, sin pasar por la escala: el rotulo seguia diciendo lo
+        # mismo y el siguiente +/- reencuadraba de golpe (las curvas
+        # "saltaban" en vez de agrandarse). El zoom es solo de los botones;
+        # el arrastre con boton izquierdo sigue desplazando en vertical.
+        view_box.wheelEvent = lambda ev, axis=None: ev.ignore()
+        arrastre = view_box.mouseDragEvent
+
+        def solo_desplazar(ev, axis=None):
+            if ev.button() == Qt.MouseButton.RightButton:
+                ev.ignore()
+                return
+            arrastre(ev, axis)
+        view_box.mouseDragEvent = solo_desplazar
 
     def pen_for(self, clave, activa=True):
         """Pen de un trazo segun su tipo y si la curva esta seleccionada.
@@ -216,8 +237,13 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
     def apply_view(self):
         """Rango vertical: una ventana de escala completa mas el apilado."""
-        piso = min((v.get('gap', 0.0) for v in self.data.values()), default=0.0)
-        self.pw.setYRange(piso - self.scale_uv / 2, self.scale_uv / 2, padding=0)
+        gaps = [v.get('gap', 0.0) for v in self.data.values()]
+        piso = min(gaps, default=0.0)
+        # Tambien hacia arriba: una curva arrastrada por encima de la
+        # primera quedaba fuera de la ventana al cambiar de escala.
+        techo = max(max(gaps, default=0.0), 0.0)
+        self.pw.setYRange(piso - self.scale_uv / 2, techo + self.scale_uv / 2,
+                          padding=0)
 
     def create_line(self, data, intencity, setting=None):
         for name, values in data.items():
@@ -627,13 +653,24 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         escala (gap_ratio), asi que las curvas se separan con ella.
         """
         uv = float(uv)
-        if uv <= 0 or abs(uv - self.scale_uv) < 1e-9:
+        if uv <= 0:
+            return
+        self.scale_base = uv
+        self.scale_step = 0
+        self.apply_scale(uv)
+
+    def apply_scale(self, uv: float) -> None:
+        """Lleva la ventana a `uv` y reescala el apilado en la misma proporcion.
+
+        El gap de cada curva se reescala tambien (incluidas las que el
+        alumno movio a mano): esta expresado en uV, no en ranuras, y si no
+        acompaña a la escala las curvas se juntan al abrirla y se van de
+        pantalla al cerrarla.
+        """
+        if abs(uv - self.scale_uv) < 1e-9:
             return
         proporcion = uv / self.scale_uv
         self.scale_uv = uv
-        # Las curvas ya dibujadas se reacomodan: su altura de apilado esta
-        # expresada en uV, no en ranuras, y si no se escala el gap las de
-        # abajo se van fuera de la ventana.
         for nombre, datos in self.data.items():
             datos['gap'] = datos.get('gap', 0.0) * proporcion
             self.redraw(nombre)
@@ -654,30 +691,22 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             if item is not None and item.getXPos() > self.window_ms:
                 item.setPos((self.window_ms, 0))
 
-    def scale(self, direction):
-        """Cambia la escala vertical, y con ella el apilado.
+    # Hasta cuantas mitades (-) y dobles (+) de la escala base se llega.
+    # Con los 6 uV del ABR: de 1.5 a 192 uV.
+    SCALE_STEPS = (-2, 5)
 
-        El gap de cada curva se reescala en la misma proporcion (incluidas
-        las que el alumno movio a mano): antes la escala cambiaba el rango
-        y dejaba las curvas separadas por los mismos 1.8 uV, asi que al
-        abrir la escala se juntaban todas y al cerrarla se iban de pantalla.
+    def scale(self, direction):
+        """Un paso de la escalera de escalas: el doble o la mitad.
+
+        En el tope no hace nada, ni un recorte: asi cada paso es siempre
+        x2 o /2 y volver sobre los pasos devuelve exactamente la escala de
+        la prueba.
         """
-        actual = self.scale_uv
-        if direction == 'plus':
-            nueva = min(actual * 2, 200)
-        elif direction == 'minus':
-            nueva = max(actual / 2, 1)
-        else:
-            nueva = actual
-        if nueva != actual:
-            factor = nueva / actual
-            self.scale_uv = nueva
-            for curve, valores in self.data.items():
-                valores['gap'] = valores.get('gap', 0.0) * factor
-                self.redraw(curve)
-                self.move_label(curve)
-                self.move_marks(curve)
-            self.apply_view()
+        paso = self.scale_step + {'plus': 1, 'minus': -1}.get(direction, 0)
+        lo, hi = self.SCALE_STEPS
+        if lo <= paso <= hi and paso != self.scale_step:
+            self.scale_step = paso
+            self.apply_scale(self.scale_base * 2 ** paso)
         return self.get_scale()
 
     def move_label(self, curve):

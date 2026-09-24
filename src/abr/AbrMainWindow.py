@@ -196,7 +196,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # todo esto y se tiraba (ABR_Curve devolvia solo las curvas).
         self.last_metadata = {}
         self.blink = False
-        self.lbl_scale.setText(f"{int(round(self.graph_r.get_scale()))}µV")
+        self.show_scale()
         self.apply_test_widgets(self.control.cb_test.currentText())
         self.apply_window()
         self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
@@ -554,11 +554,14 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
     def scale_graph(self):
         _,_,direction = self.sender().objectName().split('_')
-        value = self.graph_r.scale(direction)
+        self.graph_r.scale(direction)
         self.graph_l.scale(direction)
-        value = int(round(value,0))
-        value = f"{value}µV"
-        self.lbl_scale.setText(value)
+        self.show_scale()
+
+    def show_scale(self):
+        # Sin redondear a entero: la escala baja a 1.5 uV y el rotulo
+        # decia "2µV".
+        self.lbl_scale.setText(f"{round(self.graph_r.get_scale(), 1):g}µV")
 
     def toggle_sub(self, visible):
         """Subpromedios A/B a la vista en los dos oidos a la vez."""
@@ -1015,7 +1018,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         for grafico in (self.graph_r, self.graph_l):
             grafico.set_windows(ventana)
             grafico.set_scale(escala)
-        self.lbl_scale.setText(f"{int(round(self.graph_r.get_scale()))}µV")
+        self.show_scale()
 
 ################INTERCAMBIO
     def memory_curves(self, value=None, side=None):
