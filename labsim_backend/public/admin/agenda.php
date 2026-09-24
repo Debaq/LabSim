@@ -184,9 +184,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($error === null && $willInsert && $courseId === null) {
             $error = 'Falta el curso (obligatorio para citas nuevas).';
         }
-        if ($error === null && $willInsert && $courseId !== null && $assignedStudentId === null && $assignedGroupId === null) {
+        // "Todo el curso" se acepta solo en un curso sin grupos: ahí el curso
+        // entero ES el único grupo, y exigir uno dejaba la cita sin agendar.
+        if ($error === null && $willInsert && $courseId !== null && $assignedStudentId === null && $assignedGroupId === null
+            && Courses::groupsForCourse($courseId) !== []) {
             $error = 'Falta asignar la cita a un grupo o a un alumno específico (obligatorio para citas nuevas; '
-                . '"todo el curso" ya no es una opción de asignación para citas nuevas).';
+                . '"todo el curso" solo se ofrece en cursos sin grupos).';
         }
 
         if ($error === null) {
@@ -500,13 +503,22 @@ $isNewFlow = isset($_GET['new']) && $scheduleCaseId === null;
 $prefillFechaIso = isset($_GET['fecha']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $_GET['fecha']) ? (string) $_GET['fecha'] : null;
 $caseOptions = [];
 if ($isNewFlow) {
+    // La columna archived_at puede no existir todavía en una instalación que
+    // no pasó por "Aplicar schema" -- sin esto el selector reventaría con
+    // "no such column" en vez de abrir.
+    Db::migrateCaseLibraryIfNeeded();
     $stmt = $pdo->query(
+        // Las archivadas no entran al selector: archivar es justamente
+        // sacar de circulación una ficha vieja sin borrarla, y si siguiera
+        // apareciendo acá no habría sacado nada de nada. Las citas que ya
+        // tenía se siguen atendiendo (ver CaseLibrary).
         "SELECT c.id, c.data, a.nombre, a.apellido, a.fecha, p.comentario_docente
          FROM cases c
          LEFT JOIN appointments a ON a.id = (
              SELECT id FROM appointments WHERE case_id = c.id ORDER BY id DESC LIMIT 1
          )
          LEFT JOIN patients p ON p.id = c.patient_id
+         WHERE c.archived_at IS NULL
          ORDER BY c.updated_at DESC"
     );
     foreach ($stmt->fetchAll() as $co) {
@@ -649,9 +661,7 @@ admin_header('Agendas', $me);
         </label>
         <label>Asignar a<?= $requiresCourse ? ' *' : '' ?>
             <select name="assign_mode" id="sched-assign-mode" onchange="onAssignModeChange()">
-                <option value="course" <?= $curAssignMode === 'course' ? 'selected' : '' ?> <?= $requiresCourse ? 'disabled' : '' ?>>
-                    Todo el curso<?= $requiresCourse ? ' (solo lectura, valor histórico -- no disponible para citas nuevas)' : '' ?>
-                </option>
+                <option value="course" id="sched-assign-course" <?= $curAssignMode === 'course' ? 'selected' : '' ?>>Todo el curso</option>
                 <option value="group" <?= $curAssignMode === 'group' ? 'selected' : '' ?>>Grupo</option>
                 <option value="student" <?= $curAssignMode === 'student' ? 'selected' : '' ?>>Alumno</option>
             </select>
@@ -694,11 +704,31 @@ admin_header('Agendas', $me);
 <script>
     var COURSE_GROUPS = <?= json_encode($groupsByCourse) ?>;
     var COURSE_STUDENTS = <?= json_encode($studentsByCourse) ?>;
+    var REQUIRES_COURSE = <?= $requiresCourse ? 'true' : 'false' ?>;
 
     function onCourseChange() {
         var courseId = document.getElementById('sched-course').value;
-        fillSelect('sched-group', COURSE_GROUPS[courseId] || []);
+        var groups = COURSE_GROUPS[courseId] || [];
+        fillSelect('sched-group', groups);
         fillSelect('sched-student', COURSE_STUDENTS[courseId] || []);
+        syncCourseOption(courseId, groups.length > 0);
+    }
+
+    // En una cita nueva "Todo el curso" existe solo si el curso no tiene
+    // grupos (el servidor aplica la misma regla). Sin grupos, "Grupo" no
+    // tiene nada que elegir, así que se pasa solo a "Todo el curso".
+    function syncCourseOption(courseId, hasGroups) {
+        if (!REQUIRES_COURSE) { return; }
+        var mode = document.getElementById('sched-assign-mode');
+        var opt = document.getElementById('sched-assign-course');
+        var allowed = courseId !== '' && !hasGroups;
+        opt.disabled = !allowed;
+        opt.textContent = allowed || courseId === ''
+            ? 'Todo el curso'
+            : 'Todo el curso (no disponible: el curso tiene grupos)';
+        if (!allowed && mode.value === 'course') { mode.value = 'group'; }
+        if (allowed && mode.value === 'group') { mode.value = 'course'; }
+        onAssignModeChange();
     }
 
     function fillSelect(id, items) {

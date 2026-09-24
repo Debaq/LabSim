@@ -16,7 +16,8 @@ declare(strict_types=1);
  *   - assigned_student_id -> ese alumno
  *   - assigned_group_id   -> los miembros de ese grupo
  *   - solo course_id      -> todos los matriculados del curso (citas legado
- *                            "todo el curso"; ya no se pueden crear nuevas)
+ *                            "todo el curso"; en citas nuevas, solo si el
+ *                            curso no tiene grupos)
  *   - sin course_id       -> cola global legado. No se le puede calcular una
  *                            audiencia, así que solo choca con otras citas sin
  *                            curso: no tiene sentido que una fila vieja sin
