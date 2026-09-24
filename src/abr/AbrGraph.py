@@ -800,6 +800,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         export = pg.exporters.ImageExporter(self.pw)
 
         temp_dir = context.get_resource("local_cache/abr/temp")
+        os.makedirs(temp_dir, exist_ok=True)
         output_file = os.path.join(temp_dir, f'{self.side}.png')
         export.export(output_file)
 

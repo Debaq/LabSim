@@ -166,6 +166,26 @@ class OaeMainWindow(QMainWindow):
                     images[suffix] = path
         return images
 
+    def report_job(self):
+        """El informe tal como se sube (ver core/report_autosave.py), o None
+        si todavía no hay ninguna captura."""
+        if not self.data_login:
+            return None
+        try:
+            appointment_id = int(self.appointment_id)
+        except (TypeError, ValueError):
+            return None
+        pruebas = self._panels_summary()
+        if not pruebas:
+            return None
+        data = {
+            "pruebas": pruebas,
+            "hallazgos": self.report.text_edit_1.toPlainText(),
+            "conclusion": self.report.text_edit_2.toPlainText(),
+        }
+        return {"appointment_id": appointment_id, "tipo": "EOA", "data": data,
+                "images": self._export_images}
+
     def _on_save_report(self):
         """Botón 'Guardar informe': mismo camino que el cierre de atención,
         pero avisando en pantalla qué pasó (el alumno tiene que saber si su

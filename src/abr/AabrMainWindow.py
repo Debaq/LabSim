@@ -35,6 +35,7 @@ from abr.AbrAdvanceSettings import TRANSDUCERS, default_settings
 from backend.client import BackendClient
 from core.base import context
 from core.helpers import Preferences
+from core.report_autosave import subir_ahora
 from oae.generators.base import oae_probe_fit
 from oae.widgets.probe_check import ProbeCheckWidget
 from PySide6.QtCore import Qt, QTimer
@@ -641,25 +642,30 @@ class AabrMainWindow(QMainWindow):
         AbrMainWindow.submit_report): best-effort, sin imágenes --un
         tamizaje no informa curvas-- y con tipo 'AABR'.
         """
-        if not self.data_login:
+        job = self.report_job()
+        if job is None:
             return
+        client = BackendClient(Preferences().get("BACKEND_URL"),
+                               context.get_resource('json/session.json'))
+        ok, error = subir_ahora(job, client)
+        if not ok:
+            print(f"AABR: no se pudo subir el informe: {error}")
+
+    def report_job(self):
+        """El informe tal como se sube (ver core/report_autosave.py), o None."""
+        if not self.data_login:
+            return None
         try:
             appointment_id = int(self.appointment_id)
         except (TypeError, ValueError):
-            return
+            return None
         data = self.report_data()
         vacio = all(r['veredicto'] == 'No realizado'
                     for r in data['resultados'].values())
         if vacio and not data['hallazgos'].strip() and not data['conclusion'].strip():
-            return
-        client = BackendClient(Preferences().get("BACKEND_URL"),
-                               context.get_resource('json/session.json'))
-        if not client.is_logged_in():
-            return
-        try:
-            client.upload_report(appointment_id, 'AABR', data, {})
-        except Exception as exc:
-            print(f"AABR: no se pudo subir el informe: {exc}")
+            return None
+        return {"appointment_id": appointment_id, "tipo": 'AABR', "data": data,
+                "images": None}
 
     def closeEvent(self, event):
         self._detener()

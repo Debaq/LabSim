@@ -34,6 +34,7 @@ class ClienteFalso:
     """Lo que el módulo usa de BackendClient, sin red."""
     subidas = []
     informes = []
+    actuales = []   # lo ya guardado de la cita en curso (my_report.php)
 
     def __init__(self, *args, **kwargs):
         pass
@@ -44,6 +45,9 @@ class ClienteFalso:
     def get_patient_reports(self, appointment_id):
         return self.informes
 
+    def get_my_report(self, appointment_id, tipos=None):
+        return self.actuales
+
     def upload_report(self, appointment_id, tipo, data, images):
         # Lo que viaja de verdad: JSON. Si algo no se serializa, revienta acá.
         ClienteFalso.subidas.append((appointment_id, tipo, json.loads(json.dumps(data))))
@@ -53,6 +57,7 @@ class ClienteFalso:
 def _preparar():
     ClienteFalso.subidas = []
     ClienteFalso.informes = []
+    ClienteFalso.actuales = []
     modulo.BackendClient = ClienteFalso
 
 
@@ -231,6 +236,76 @@ def test_an_ecochg_session_comes_back_with_its_marks_and_table():
     assert w2.control.cb_test.currentText() == 'ABR'
     assert not w2.es_ecochg()
     assert w2.graph_r.data == {}
+
+
+def test_resuming_brings_back_what_was_saved():
+    """Se cerró la app con la atención abierta: el informe se había guardado
+    solo (core/report_autosave.py) y al retomar vuelve tal como estaba."""
+    if not HAS_UI:
+        return
+    _preparar()
+    guardado = _sesion_guardada()
+    guardado['data']['curvas']['R1']['marcas_graf'] = {'V': [5.6, 0.3]}
+    ClienteFalso.actuales = [{'tipo': 'ABR', 'data': guardado['data']}]
+    w = panel._ventana()
+    w.fetch_sessions()
+    assert w.curves_R == ['R1', 'R2']
+    assert set(w.memory) == {'R1', 'R2'}
+    assert 'V' in w.graph_r.marks['R1']
+    assert w.report.text_edit_2.toPlainText() == 'Conclusión de la primera'
+    assert w.session_idx is None            # es la sesión en curso, no una anterior
+    w.data_login = {'name': 'Alumno', 'user': 'al', 'permission': 'user'}
+    job = w.report_job()
+    assert job['appointment_id'] == 42 and set(job['data']['curvas']) == {'R1', 'R2'}
+
+
+def test_resuming_does_not_overwrite_new_work():
+    if not HAS_UI:
+        return
+    _preparar()
+    ClienteFalso.actuales = [{'tipo': 'ABR', 'data': _sesion_guardada()['data']}]
+    w = panel._ventana()
+    panel._capturar(w, intensidad=70)
+    w.fetch_sessions()
+    assert list(w.memory) == ['R1']
+    assert w.memory['R1']['int'] == 70
+
+
+def test_nothing_is_autosaved_while_looking_at_another_session():
+    if not HAS_UI:
+        return
+    _preparar()
+    w, _ = _con_anterior()
+    w.data_login = {'name': 'Alumno', 'user': 'al', 'permission': 'user'}
+    panel._capturar(w, intensidad=70)
+    assert w.report_job() is not None
+    w.select_session(0)
+    assert w.report_job() is None
+
+
+def test_the_report_goes_up_even_without_the_temp_folder():
+    """En la app instalada no existe local_cache/abr/temp (local_cache no va
+    en el build). El JPEG no se escribía, sin error, y la subida reventaba al
+    abrir un archivo inexistente: el ABR no llegaba nunca al backend."""
+    if not HAS_UI:
+        return
+    import tempfile
+    _preparar()
+    w = panel._ventana()
+    w.data_login = {'name': 'Alumno', 'user': 'al', 'permission': 'user'}
+    panel._capturar(w, intensidad=80)
+    base = os.path.join(tempfile.mkdtemp(), 'no', 'existe')
+    original = modulo.context.get_resource
+    modulo.context.get_resource = lambda ruta: (os.path.join(base, ruta) if ruta.startswith('local_cache')
+                                                else original(ruta))
+    try:
+        imagenes = w.export_images()
+        w.submit_report()
+    finally:
+        modulo.context.get_resource = original
+    assert set(imagenes) == {'0', '1', 'lat_int'}
+    assert all(os.path.isfile(r) for r in imagenes.values())
+    assert ClienteFalso.subidas and ClienteFalso.subidas[-1][1] == 'ABR'
 
 
 if __name__ == "__main__":

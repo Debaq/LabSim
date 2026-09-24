@@ -275,11 +275,23 @@ class Otoscopia(QWidget):
         _cerrar_atencion_real ANTES de deshidratar (mismo patrón que
         AbrMainWindow.submit_report). Best-effort: sin conexión falla en
         silencio, el cierre de la atención no se rompe por esto."""
-        if self.appointment_id is None or not self.informe.tiene_algo():
+        if self.report_job() is None:
             return
         ok, detalle = self._subir_informe()
         if not ok:
             print(f"Otoscopia: no se pudo subir el informe: {detalle}")
+
+    def report_job(self):
+        """El informe tal como se sube (ver core/report_autosave.py), o None.
+        Sin imágenes: la foto del caso ya la tiene el backend."""
+        if self.appointment_id is None or not self.informe.tiene_algo():
+            return None
+        try:
+            appointment_id = int(self.appointment_id)
+        except (TypeError, ValueError):
+            return None
+        return {"appointment_id": appointment_id, "tipo": "OTOSCOPIA",
+                "data": self.informe.to_dict(), "images": None}
 
     def _subir_informe(self):
         """(ok, detalle). Sube el informe tipo 'OTOSCOPIA' -- sin imágenes:

@@ -1,5 +1,24 @@
 # TODO
 
+## Informes de examen: guardado automático (2026-09-24, sin probar en la app real)
+
+- **Causa de los ABR que no llegaban**: en la app instalada no existe
+  `resources/local_cache/abr/temp` (`local_cache` está en `.gitignore`, el
+  build del CI no la trae). El JPEG no se escribía, sin error, y la subida
+  reventaba al abrir el archivo: el informe entero se perdía. Ahora se crea
+  la carpeta y una imagen que falte no tira abajo el informe.
+- `src/core/report_autosave.py`: cada 30 s sube lo que cambió de ABR, AABR,
+  EOA, VEMP y Otoscopia; también al esconder el módulo y al cerrar la app o
+  la sesión con la atención abierta. Contrato: `report_job()` en cada módulo.
+- Atender a otro paciente con una atención real abierta ahora avisa y no
+  deja: antes vaciaba los módulos sin subir nada.
+- Retomar la atención recupera el ABR/ECochG guardado (`api/my_report.php`).
+- [ ] Recuperar al retomar también EOA, VEMP, AABR y Otoscopia. Hoy se
+  guardan, pero al retomar arrancan vacíos, y si el alumno registra algo
+  nuevo el informe guardado se reemplaza por el nuevo (más corto).
+- [ ] Subir al servidor: `api/my_report.php` (nuevo) y `api/my_patient_reports.php`
+  (hoy da 404 en producción).
+
 ## VEMP v2: probar en la app real (pendiente)
 
 `src/vemp/` se rehizo entero (2026-09-12). Lo anterior se borró: no quedó

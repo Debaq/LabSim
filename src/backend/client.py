@@ -283,6 +283,14 @@ class BackendClient:
         return self._get("/api/my_patient_reports.php",
                          {"appointment_id": appointment_id}).get("reports", [])
 
+    def get_my_report(self, appointment_id: int, tipos: list[str] | None = None) -> list[dict]:
+        """Informes propios ya guardados en ESA cita (el más nuevo primero),
+        para recuperarlos al retomar la atención -- ver my_report.php."""
+        params = {"appointment_id": appointment_id}
+        if tipos:
+            params["tipos"] = ",".join(tipos)
+        return self._get("/api/my_report.php", params).get("reports", [])
+
     def upload_report(
         self, appointment_id: int, tipo: str, data: dict, images: dict[str, str], timeout: int = 30,
     ) -> dict:

@@ -37,6 +37,7 @@ from abr.UI.AbrMain_ui import Ui_MainWindow
 from backend.client import BackendClient
 from core.base import context
 from core.helpers import Preferences
+from core.report_autosave import subir_ahora
 from core.rng import stable_seed
 from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import (QComboBox, QLabel, QMainWindow, QMessageBox,
@@ -435,27 +436,36 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # esta atencion, asi que primero se vuelve a ella (y se ofrece
             # guardar lo que se haya cambiado en la otra).
             self.select_session(None, allow_cancel=False)
-        if not self.data_login or not self.memory:
+        job = self.report_job()
+        if job is None:
             return
+        client = BackendClient(Preferences().get("BACKEND_URL"), context.get_resource('json/session.json'))
+        ok, error = subir_ahora(job, client)
+        if not ok:
+            print(f"ABR: no se pudo subir el informe: {error}")
+
+    def report_job(self):
+        """El informe tal como se sube (ver core/report_autosave.py), o None
+        si no hay nada que subir.
+
+        Mirando una sesion anterior no se sube nada: lo que esta en
+        pantalla es otra atencion, y la actual se sube al volver a ella.
+        """
+        if self.session_idx is not None:
+            return None
+        if not self.data_login or not self.memory:
+            return None
         try:
             appointment_id = int(self.appointment_id)
         except (TypeError, ValueError):
-            return
-
-        images = self.export_images()
-        data = self.session_payload()
-        client = BackendClient(Preferences().get("BACKEND_URL"), context.get_resource('json/session.json'))
-        if not client.is_logged_in():
-            return
-        try:
-            # El tipo es el de la prueba con la que se registro: la tabla
-            # `reports` ya distingue ELECTROCOCLEO de ABR, y el informe de
-            # un ECochG no dice nada de ondas I-V. Cambiar de prueba borra
-            # las curvas (ver test_changed), asi que no hay sesiones
-            # mezcladas que puedan quedar mal rotuladas.
-            client.upload_report(appointment_id, self.report_tipo(), data, images)
-        except Exception as exc:
-            print(f"ABR: no se pudo subir el informe: {exc}")
+            return None
+        # El tipo es el de la prueba con la que se registro: la tabla
+        # `reports` ya distingue ELECTROCOCLEO de ABR, y el informe de un
+        # ECochG no dice nada de ondas I-V. Cambiar de prueba borra las
+        # curvas (ver test_changed), asi que no hay sesiones mezcladas que
+        # puedan quedar mal rotuladas.
+        return {"appointment_id": appointment_id, "tipo": self.report_tipo(),
+                "data": self.session_payload(), "images": self.export_images}
 
     def report_tipo(self):
         return 'ELECTROCOCLEO' if self.es_ecochg() else 'ABR'
@@ -463,6 +473,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
     def export_images(self):
         """JPEG de los graficos para el informe, tal como estan en pantalla."""
         temp_dir = context.get_resource("local_cache/abr/temp")
+        # En la app instalada la carpeta no existe (local_cache no va en el
+        # build): sin esto el JPEG no se escribia, sin error, y la subida
+        # reventaba al abrir un archivo inexistente. El informe del ABR no
+        # llegaba nunca al backend.
+        os.makedirs(temp_dir, exist_ok=True)
         exporters = {'0': self.graph_r, '1': self.graph_l, 'lat_int': self.graph_lat_int}
         if self.es_ecochg():
             # El ECochG no se registra en serie descendente: se hace a
@@ -477,6 +492,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 exporter.export_jpg(path)
             except Exception as exc:
                 print(f"ABR: no se pudo exportar {suffix} para el informe: {exc}")
+                continue
+            if not os.path.isfile(path):
+                # QImage.save falla en silencio: sin la imagen se sube igual
+                # el resto del informe.
+                print(f"ABR: no se pudo exportar {suffix} para el informe")
                 continue
             images[suffix] = path
         return images
@@ -623,6 +643,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             appointment_id = int(self.appointment_id)
         except (TypeError, ValueError):
             return
+        client = None
         try:
             client = BackendClient(Preferences().get("BACKEND_URL"),
                                    context.get_resource('json/session.json'))
@@ -632,9 +653,35 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         except Exception as exc:
             # Sin conexion se atiende igual: solo no se ven las anteriores.
             print(f"ABR: no se pudieron traer las sesiones anteriores: {exc}")
-            return
-        if self.session_idx is None:
+            reports = None
+        if reports is not None and self.session_idx is None:
             self.fill_sessions(reports)
+        if client is not None:
+            self.restore_current(client, appointment_id)
+
+    def restore_current(self, client, appointment_id):
+        """Retomar la atencion: vuelve lo que ya se habia guardado de ella.
+
+        El informe se guarda solo mientras se atiende (ver
+        core/report_autosave.py). Si la app se cerro con la atencion
+        abierta, las curvas estan en el servidor y no en memoria: se
+        redibujan como estaban. Solo si el alumno todavia no registro nada
+        en esta vuelta -- lo que esta en pantalla no se pisa.
+        """
+        if self.memory or self.session_idx is not None:
+            return
+        try:
+            guardados = client.get_my_report(appointment_id, ['ABR', 'ELECTROCOCLEO'])
+        except Exception as exc:
+            print(f"ABR: no se pudo recuperar lo guardado de esta atencion: {exc}")
+            return
+        if self.memory or self.session_idx is not None:
+            return  # empezo a registrar mientras se pedia
+        for informe in guardados:
+            data = informe.get('data')
+            if isinstance(data, dict) and data.get('curvas'):
+                self.draw_session(data)
+                return
 
     def clear_sessions(self):
         """Cambio de paciente: la lista era del anterior."""

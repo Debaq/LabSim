@@ -31,6 +31,7 @@ from PySide6.QtWidgets import (QHBoxLayout, QMainWindow, QProgressBar,
 from backend.client import BackendClient
 from core.base import context
 from core.helpers import Preferences
+from core.report_autosave import subir_ahora
 from vemp import engine, patient, protocol, theme
 from vemp.norms import normativa
 from vemp.session import Sesion
@@ -603,14 +604,41 @@ class VempMainWindow(QMainWindow):
         Best-effort, igual que el ABR: sin conexión no puede romper el
         cierre de la atención.
         """
-        if not self.data_login or not self.sesion.registros:
+        job = self.report_job()
+        if job is None:
             return
+        cliente = BackendClient(
+            Preferences().get('BACKEND_URL'),
+            context.get_resource('json/session.json'),
+        )
+        ok, error = subir_ahora(job, cliente)
+        if not ok:
+            print(f'VEMP: no se pudo subir el informe: {error}')
+
+    def report_job(self):
+        """El informe tal como se sube (ver core/report_autosave.py), o None."""
+        if not self.data_login or not self.sesion.registros:
+            return None
         try:
             appointment_id = int(self.appointment_id)
         except (TypeError, ValueError):
-            return
-
+            return None
         ajustes = self.control.ajustes()
+        resumen = self.sesion.resumen(ajustes.subtipo, ajustes.transductor,
+                                      ajustes.freq)
+        data = {
+            'curvas': self.sesion.curvas_dict(),
+            'subtipo': ajustes.subtipo,
+            'waves': list(protocol.PEAKS[ajustes.subtipo]),
+            'asimetria': resumen,
+            'umbral_informado': self.informe.umbrales(),
+            'hallazgos': self.informe.hallazgos(),
+            'conclusion': self.informe.conclusion(),
+        }
+        return {"appointment_id": appointment_id, "tipo": 'VEMP', "data": data,
+                "images": self._exportar_imagenes}
+
+    def _exportar_imagenes(self):
         temp = context.get_resource('local_cache/vemp/temp')
         os.makedirs(temp, exist_ok=True)
         imagenes = {}
@@ -624,29 +652,7 @@ class VempMainWindow(QMainWindow):
                 print(f'VEMP: no se pudo exportar {sufijo}: {exc}')
                 continue
             imagenes[sufijo] = path
-
-        resumen = self.sesion.resumen(ajustes.subtipo, ajustes.transductor,
-                                      ajustes.freq)
-        data = {
-            'curvas': self.sesion.curvas_dict(),
-            'subtipo': ajustes.subtipo,
-            'waves': list(protocol.PEAKS[ajustes.subtipo]),
-            'asimetria': resumen,
-            'umbral_informado': self.informe.umbrales(),
-            'hallazgos': self.informe.hallazgos(),
-            'conclusion': self.informe.conclusion(),
-        }
-
-        cliente = BackendClient(
-            Preferences().get('BACKEND_URL'),
-            context.get_resource('json/session.json'),
-        )
-        if not cliente.is_logged_in():
-            return
-        try:
-            cliente.upload_report(appointment_id, 'VEMP', data, imagenes)
-        except Exception as exc:
-            print(f'VEMP: no se pudo subir el informe: {exc}')
+        return imagenes
 
     def closeEvent(self, evento):
         self.timer_captura.stop()

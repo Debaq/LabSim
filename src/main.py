@@ -22,6 +22,7 @@ from core.h_win import FrameSubMdi, MdiArea
 from core import inbox
 from core import mis_pacientes
 from core import app_config_store
+from core.report_autosave import ReportAutosave
 from core.module_placeholder import ModulePlaceholder
 from core.updater import local_build_id
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
@@ -298,6 +299,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.var_list_word = Storage(2)
         self.log_uploader = None
         self.sync_thread = None
+        self.report_autosave = ReportAutosave(self._modulos_examen, self)
         self._layout_retry = None
         self.cronometro_segundos = 0
         self.cronometro_timer = QTimer(self)
@@ -461,6 +463,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
     def logout(self):
         """Cierra la sesión actual"""
+        self._guardar_informes_al_salir()
         LOCAL_LOG_QUEUE.push("session_logout", {
             "user": self.data_login.get("user") if self.data_login else None,
         })
@@ -577,6 +580,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         attendances/agenda -- no deja rastro en la base de datos."""
         if not es_docente(self.data_login["permission"]):
             return  # solo admin/profe usan el ciclo de prueba
+        self.report_autosave.detener()
         self.data_current_key = None
         self.data_current = None
         self.paciente_actual = None
@@ -589,6 +593,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         difieren solo en si se marca "atendiendo" en la agenda/backend y en
         el appointment_id que queda asociado al chat (ver docstrings de cada
         una)."""
+        if self._otra_atencion_abierta(key):
+            return
+
         shedule = Shedule()
         agenda = shedule.data.setdefault("agenda_1", {})
         entry = agenda.get(key)
@@ -615,6 +622,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self._hydrate_modules()
         if self.data_current:
             self.changeStateBtnAreas(self.frameAction, self.data_current["box"])
+        self.report_autosave.iniciar()
 
         rut = entry.rut
         nombre = f"{entry.nombre} {entry.apellido}".strip()
@@ -673,15 +681,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             # informe queda fijo). Con el orden al revés no se guardaba
             # ninguno. Además tiene que ser antes de _hydrate_modules(),
             # que les saca appointment_id/data_login.
-            for attr in ("subw_abr", "subw_aabr", "subw_vemp", "subw_eoas",
-                         "subw_ot"):
-                subw = getattr(self, attr, None)
-                if subw is None:
-                    continue  # módulo nunca abierto: no hay informe
-                try:
-                    subw.obj.submit_report()
-                except Exception as exc:
-                    print(f"{attr}: no se pudo subir el informe: {exc}")
+            self._subir_informes()
 
         marcar_entry_atendido(entry, self.data_login["user"], nota)
         shedule.set(shedule.data)
@@ -742,6 +742,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
         self._hydrate_modules()
         self.connect_signals()
+        # Al esconder un módulo de examen se sube lo que tenga (ver
+        # core/report_autosave.py).
+        for attr in self._ATTRS_EXAMEN:
+            frame = getattr(self, attr)
+            frame.visibility_changed.connect(
+                lambda visible, m=frame.obj: None if visible else self.report_autosave.guardar(m))
 
     def activate_listWords(self):
         if self.subw_a.obj.lbl_prueba.text() == "Logoaudiometría":
@@ -857,6 +863,55 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw["CHAT"].obj.set_paciente(case_id, nombre, edad, procedimiento, appointment_id)
         self.activate_auto("CHAT")
 
+    # -----------------------------------------------------------------
+    # Informes de examen (ver core/report_autosave.py)
+    # -----------------------------------------------------------------
+
+    _ATTRS_EXAMEN = ("subw_abr", "subw_aabr", "subw_vemp", "subw_eoas", "subw_ot")
+
+    def _modulos_examen(self):
+        return [getattr(self, a).obj for a in self._ATTRS_EXAMEN
+                if getattr(self, a, None) is not None]
+
+    def _subir_informes(self):
+        """Subida final y sincrónica de todos los informes. Primero espera
+        las subidas automáticas en curso: si una vieja terminara después,
+        pisaría esta."""
+        self.report_autosave.detener()
+        for modulo in self._modulos_examen():
+            try:
+                modulo.submit_report()
+            except Exception as exc:
+                print(f"{type(modulo).__name__}: no se pudo subir el informe: {exc}")
+
+    def _otra_atencion_abierta(self, key):
+        """Atender a otro paciente con una atención real abierta vaciaba los
+        módulos de examen sin subir nada: las curvas del anterior se
+        perdían. Ahora se pide cerrar primero."""
+        actual = self.data_current_key
+        if actual is None or actual == key:
+            return False
+        if (self.paciente_actual or {}).get("appointment_id") is None:
+            return False  # "prueba" del docente: no hay nada que perder
+        nombre = (self.paciente_actual or {}).get("nombre") or "otro paciente"
+        dlg = QMessageBox(QMessageBox.Icon.Warning, "Atención abierta",
+                          f"Tienes a {nombre} en atención. Ciérrala primero "
+                          "(Cerrar/Evolucionar en la agenda) para que sus exámenes "
+                          "queden guardados.",
+                          QMessageBox.StandardButton.Ok, self)
+        style_dialog(dlg)
+        dlg.exec()
+        return True
+
+    def _guardar_informes_al_salir(self):
+        """Cerrar la app o la sesión con la atención abierta: los informes
+        se suben igual (la atención sigue 'atendiendo' y se puede retomar)."""
+        if self.data_current_key is None:
+            return
+        if (self.paciente_actual or {}).get("appointment_id") is None:
+            return
+        self._subir_informes()
+
     def abrir_ficha_con(self, html, on_chat=None):
         """Abre (o trae al frente) la subventana MDI de ficha clínica,
         reapuntada al paciente indicado."""
@@ -879,6 +934,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.abrir_chat_con(p["case_id"], p["nombre"], p["edad"], p["procedimiento"], p.get("appointment_id"))
 
     def closeEvent(self, event):
+        self._guardar_informes_al_salir()
         if self.log_uploader is not None:
             # Igual que en logout(): sin esto, acciones recién logueadas quedan
             # en la cola local hasta el próximo login si se cierra con la X.
