@@ -571,87 +571,86 @@ class AbrGraph(GraphicsLayoutWidgetMod):
     SNAP_MS = 0.4
 
     def create_marks(self, lbl_mark):
+        """Pone (o corre) la marca `lbl_mark` de la curva activa en
+        current_lat y avisa el valor nuevo."""
         name_curve = self.act_curve
-        lbl = lbl_mark
-        id_X = self.find_idx(self.data[name_curve]['ipsi_xy'][0], self.current_lat)
-        x = self.data[name_curve]['ipsi_xy'][0][id_X]
-        y = self.data[name_curve]['ipsi_xy'][1][id_X]
-        name = f'{name_curve}_{lbl}'
-        if lbl not in self.marks[name_curve]:
-            self.marks[name_curve][lbl] = [x,y]
-            y = y + self.data[name_curve]['gap']
-            curve_mark = f"<span style='color: #000; font-size: 7pt;'><h3>&darr;<sup>{lbl}</sup></h3></span>"
-            text = TextItemMod(name = name, tipo='mark', curve_parent=name_curve, html = curve_mark,  anchor=(0.34,0.6), color=(0,0,0,255))
-            font = QFont()
-            font.setPixelSize(13)
-            text.setFont(font)
-            text.setPos(x, y+0.1)
-            self.pw.addItem(text)
-            if self.notify_create:
-                self.update_value_mark(lbl)
-        else:
-            self.update_marks(x,y, name)
+        if name_curve not in self.data:
+            return
+        xs, ys = self.data[name_curve]['ipsi_xy']
+        id_x = self.find_idx(xs, self.current_lat)
+        marcas = self.marks.setdefault(name_curve, {})
+        nueva = lbl_mark not in marcas
+        marcas[lbl_mark] = [xs[id_x], ys[id_x]]
+        self.place_mark(name_curve, lbl_mark)
+        if not nueva or self.notify_create:
+            self.update_value_mark(lbl_mark, curve=name_curve)
 
     def recreate_mark(self, curve_name, lbl_mark, mark_data):
-        """Recrea una marca guardada en el gráfico"""
-        x, y = mark_data
+        """Recrea una marca guardada en el gráfico (sin avisar: el valor ya
+        está en la memoria de la sesión)."""
+        self.marks.setdefault(curve_name, {})[lbl_mark] = list(mark_data)
+        self.place_mark(curve_name, lbl_mark)
+
+    def mark_item(self, curve_name, lbl_mark):
         name = f'{curve_name}_{lbl_mark}'
+        for item in self.pw.items:
+            if isinstance(item, TextItemMod) and item.tipo == 'mark' and item.name == name:
+                return item
+        return None
 
-        # Verificar que la curva y la marca existen en los datos
-        if curve_name not in self.marks:
-            self.marks[curve_name] = {}
+    def place_mark(self, curve_name, lbl_mark):
+        """Dibuja la marca donde dice self.marks, sobre la altura actual de
+        su curva. Si el dibujo no existe se crea: antes solo se corria el
+        que habia, y una marca que se habia quedado sin dibujo (ver
+        delete_all_marks) no volvia a aparecer nunca, aunque la latencia
+        siguiera en la tabla."""
+        x, y = self.marks[curve_name][lbl_mark]
+        y = y + self.data[curve_name].get('gap', 0.0) + 0.1
+        item = self.mark_item(curve_name, lbl_mark)
+        if item is None:
+            html = f"<span style='color: #000; font-size: 7pt;'><h3>&darr;<sup>{lbl_mark}</sup></h3></span>"
+            item = TextItemMod(name=f'{curve_name}_{lbl_mark}', tipo='mark', curve_parent=curve_name,
+                               html=html, anchor=(0.34, 0.6), color=(0, 0, 0, 255))
+            font = QFont()
+            font.setPixelSize(13)
+            item.setFont(font)
+            self.pw.addItem(item)
+        item.setPos(x, y)
 
-        self.marks[curve_name][lbl_mark] = [x, y]
-
-        # Ajustar y con el gap de la curva
-        y_adjusted = y + self.data[curve_name].get('gap', 1.8)
-
-        # Crear el texto visual de la marca
-        curve_mark = f"<span style='color: #000; font-size: 7pt;'><h3>&darr;<sup>{lbl_mark}</sup></h3></span>"
-        text = TextItemMod(name=name, tipo='mark', curve_parent=curve_name, html=curve_mark, anchor=(0.34,0.6), color=(0,0,0,255))
-        font = QFont()
-        font.setPixelSize(13)
-        text.setFont(font)
-        text.setPos(x, y_adjusted+0.1)
-        self.pw.addItem(text)
-
-    def update_marks(self,x , y, name):
-        name_curve,mark = name.split('_')
-        self.marks[name_curve][mark][0] = x
-        self.marks[name_curve][mark][1] = y
-        y = y + self.data[name_curve]['gap']
-        for item in self.pw.items:                
-            if isinstance(item, TextItemMod): 
-                if item.name == name and item.tipo == 'mark':
-                    item.setPos(x,y)
-                    self.update_value_mark(mark) 
-      
     def move_marks(self, name_curve):
-        for mark in self.marks[name_curve]:
-            x, y = self.marks[name_curve][mark]
-            name_mark = f'{name_curve}_{mark}'
-            self.update_marks(x,y,name_mark)
-        
+        """Acompaña la curva cuando cambia su altura (escala, arrastre).
+
+        Solo reubica: la latencia y la amplitud no cambian, asi que no se
+        avisa nada. Antes avisaba con la curva ACTIVA en vez de la dueña de
+        la marca y, si la activa no tenia esa onda, reventaba con KeyError a
+        mitad del cambio de escala: las demas curvas quedaban sin reescalar
+        (se iban de la ventana) y el otro oido ni se enteraba."""
+        for mark in self.marks.get(name_curve, {}):
+            self.place_mark(name_curve, mark)
+
     def delete_mark(self, mark):
-        name_mark = f'{self.act_curve}_{mark}'
-        for item in self.pw.items[:]:  
-            if isinstance(item, TextItemMod) and item.tipo == 'mark' and item.name == name_mark:
-                self.pw.removeItem(item)
-                self.update_value_mark(mark, True)
+        curve = self.act_curve
+        if mark not in self.marks.get(curve, {}):
+            return
+        item = self.mark_item(curve, mark)
+        if item is not None:
+            self.pw.removeItem(item)
+        self.update_value_mark(mark, True, curve=curve)
 
     def delete_all_marks(self):
-        for item in self.pw.items[:]:  
-            if isinstance(item, TextItemMod) and item.tipo == 'mark':
-                self.pw.removeItem(item)
-                _,mark = item.name.split('_')
-                self.update_value_mark(mark, True)
+        """"Eliminar todas" del menú: todas las de la curva activa, igual
+        que las opciones de al lado. Antes sacaba el dibujo de las marcas de
+        TODAS las curvas pero solo borraba el registro de la activa: las
+        otras seguían con su latencia en la tabla y sin flecha, para siempre."""
+        for mark in list(self.marks.get(self.act_curve, {})):
+            self.delete_mark(mark)
 
-    def update_value_mark(self, mark, delete = False):
-        curve = self.act_curve
+    def update_value_mark(self, mark, delete=False, curve=None):
+        curve = self.act_curve if curve is None else curve
         if not delete:
             x = self.marks[curve][mark]
         else:
-            del self.marks[curve][mark]
+            self.marks.get(curve, {}).pop(mark, None)
             x = None
         result = {curve:{mark:x}}
         self.sig_change_value_mark.emit(result)

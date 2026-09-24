@@ -432,6 +432,78 @@ def test_grid_follows_the_scale():
     assert g.grid.opts['tickSpacing'][1] == [1.0]
 
 
+def _marcar(g, curva, onda, ms):
+    g.active_curve(curva)
+    g.current_lat = ms
+    g.create_marks(onda)
+
+
+def _flechas(g):
+    from abr.WidgetsMods import TextItemMod
+    return sorted(i.name for i in g.pw.items
+                  if isinstance(i, TextItemMod) and i.tipo == 'mark')
+
+
+def test_scale_with_marks_on_another_curve():
+    """Marca en una curva que no es la activa + cambio de escala.
+
+    Mover las marcas avisaba con la curva ACTIVA: si esa no tenía la onda,
+    KeyError a mitad de la escala. Las curvas de abajo quedaban sin
+    reescalar (fuera de la ventana: "desaparecían"), el oído izquierdo no
+    cambiaba y el rótulo tampoco.
+    """
+    if not HAS_UI:
+        return
+    w = _ventana()
+    for db in (80, 60):
+        _capturar(w, intensidad=db)
+    g = w.graph_r
+    _marcar(g, 'R1', 'V', 5.6)
+    _marcar(g, 'R2', 'I', 1.6)          # R2 activa, sin onda V
+    gap = g.data['R2']['gap']
+    w.btn_scale_plus.click()
+    assert g.get_scale() == 3 and w.graph_l.get_scale() == 3
+    assert w.lbl_scale.text() == '3µV'
+    assert abs(g.data['R2']['gap'] - gap / 2) < 1e-9
+    item = g.mark_item('R1', 'V')
+    assert abs(item.pos().y() - (g.marks['R1']['V'][1] + g.data['R1']['gap'] + 0.1)) < 1e-9
+
+
+def test_delete_all_marks_only_touches_the_active_curve():
+    """"Eliminar todas" sacaba el dibujo de las marcas de todas las curvas
+    y el registro solo de la activa: las otras quedaban con la latencia en
+    la tabla y sin flecha, y al volver a marcar no aparecían nunca más."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    for db in (80, 60):
+        _capturar(w, intensidad=db)
+    g = w.graph_r
+    _marcar(g, 'R1', 'V', 5.6)
+    _marcar(g, 'R2', 'I', 1.6)
+    _marcar(g, 'R2', 'V', 5.8)
+    g.delete_all_marks()                # R2 activa
+    assert _flechas(g) == ['R1_V']
+    assert g.marks['R2'] == {} and 'V' in g.marks['R1']
+    _marcar(g, 'R2', 'V', 5.8)
+    assert _flechas(g) == ['R1_V', 'R2_V']
+
+
+def test_a_mark_without_its_arrow_comes_back():
+    """Si por lo que sea una marca queda registrada sin dibujo, volver a
+    marcarla la dibuja de nuevo (antes solo corría una flecha que ya no
+    existía)."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    _capturar(w, intensidad=80)
+    g = w.graph_r
+    _marcar(g, 'R1', 'V', 5.6)
+    g.pw.removeItem(g.mark_item('R1', 'V'))
+    _marcar(g, 'R1', 'V', 5.7)
+    assert _flechas(g) == ['R1_V']
+
+
 def test_mouse_wheel_does_not_zoom_behind_the_scale():
     """La rueda no cambia la vista: el zoom es solo de los botones."""
     if not HAS_UI:
