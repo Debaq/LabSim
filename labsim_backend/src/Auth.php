@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/UserPrefs.php';
+
 final class Auth
 {
     // Distinción de nivel dentro de role='admin' (el CHECK de users.role
@@ -542,6 +544,13 @@ final class Auth
         // para decidir la vista de agenda admin vs alumno.
         $user['permission'] = (int) $user['permission'];
         $user['modules'] = self::resolveModules($userId, $user, $courseId);
+        // Las preferencias viajan en el login: la app las aplica al entrar,
+        // en cualquier equipo (ver UserPrefs.php).
+        try {
+            $user['prefs'] = UserPrefs::leer($userId);
+        } catch (Throwable $e) {
+            $user['prefs'] = UserPrefs::vacias();
+        }
         return $user;
     }
 

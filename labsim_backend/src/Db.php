@@ -251,6 +251,16 @@ final class Db
      * llamada que migrateLlmOirsPromptIfNeeded: después del exec de
      * schema.sql.
      */
+    /**
+     * users.prefs: preferencias personales de la app (atajos, mouse para
+     * zurdos), ver UserPrefs.php. La lee el login, que corre antes de que
+     * nadie pase por "Aplicar schema".
+     */
+    public static function migrateUserPrefsIfNeeded(): void
+    {
+        self::addColumnIfMissing(self::get(), 'users', 'prefs', "TEXT NOT NULL DEFAULT '{}'");
+    }
+
     public static function migrateSalaIfNeeded(): void
     {
         $pdo = self::get();

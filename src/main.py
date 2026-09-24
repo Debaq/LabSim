@@ -23,6 +23,9 @@ from core import inbox
 from core import mis_pacientes
 from core import app_config_store
 from core.report_autosave import ReportAutosave
+from core.kiosko import es_kiosko
+from core.preferencias import preferencias
+from core import mouse_zurdo, configuracion
 from core.module_placeholder import ModulePlaceholder
 from core.updater import local_build_id
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
@@ -134,6 +137,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.cmb_case.setVisible(False)
         self.cmb_case.setEnabled(False)
         self.create_variables()
+        # Mouse para zurdos: sigue a la preferencia del alumno logueado, solo
+        # en modo laboratorio (ver core/mouse_zurdo.py).
+        mouse_zurdo.conectar()
         self.set_mdi_area()
         self.create_sub_windows()
         layout = (self.horizontalLayout_5, self.layoutTest)
@@ -328,6 +334,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.lbl_name.setText(f"{user}")
             self.btn_login.setText("Cerrar Sesión")
             self.data_login = data
+            # Atajos y mouse del alumno: vienen con el login, así lo siguen
+            # a cualquier equipo (ver core/preferencias.py).
+            preferencias().cargar(data.get("prefs") or {})
             self._apply_admin_overrides_if_any()
             LOCAL_LOG_QUEUE.push("session_login", {
                 "user": data.get("user"),
@@ -496,6 +505,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.data_current = None
         self.data_current_key = None
         self.paciente_actual = None
+        preferencias().limpiar()
 
     def _start_cronometro(self):
         """Arranca (o reinicia si ya venía corriendo) el cronómetro de
@@ -802,6 +812,11 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.btn_cerrar_ventanas.setObjectName("btn_cerrar_ventanas")
         self.btn_cerrar_ventanas.clicked.connect(self.cerrar_ventanas)
         self.layoutAction.addWidget(self.btn_cerrar_ventanas)
+        # Atajos de teclado y mouse para zurdos, guardados en el perfil.
+        self.btn_configuracion = QPushButton("Configuración")
+        self.btn_configuracion.setObjectName("btn_configuracion")
+        self.btn_configuracion.clicked.connect(lambda: configuracion.abrir(self))
+        self.layoutAction.addWidget(self.btn_configuracion)
         if es_docente((self.data_login or {}).get("permission")):
             # Panel de depuración: umbrales *_mkg cargados y rangos de
             # enmascaramiento en vivo. Solo admin/docente -- al alumno le
@@ -986,13 +1001,14 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
 
 def _auto_update_forzado():
-    """Kiosko: LABSIM_AUTO_UPDATE=1 actualiza sin preguntar.
+    """Kiosko: se actualiza sin preguntar.
 
     En los computadores del laboratorio el cuadro de "¿Actualizar ahora?" lo
     contesta el alumno, que puede decir "No" siempre, y las máquinas quedan
-    en versiones viejas. Con la variable puesta (la define quien administra
-    el equipo, no la app) se aplica directo."""
-    return os.environ.get("LABSIM_AUTO_UPDATE", "").strip() == "1"
+    en versiones viejas. Con LABSIM_KIOSKO=1 (ver core/kiosko.py) se aplica
+    directo; LABSIM_AUTO_UPDATE=1 hace lo mismo sin el resto del modo
+    laboratorio."""
+    return es_kiosko() or os.environ.get("LABSIM_AUTO_UPDATE", "").strip() == "1"
 
 
 def _download_and_apply(update, silencioso=False):

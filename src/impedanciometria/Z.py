@@ -24,7 +24,8 @@ from impedanciometria.z_generator import (Z_225, Reflex_curve, edad_meses_del_ca
                                           z1000_del_caso)
 from impedanciometria.z_audio import ProbeTone, ReflexTone
 from core.helpers import Storage, debug_print
-from core import keyboard_monitor
+from core import atajos, keyboard_monitor
+from core.preferencias import preferencias
 
 
 class ZControl(QWidget, Ui_Z_control):
@@ -99,9 +100,9 @@ class ZControl(QWidget, Ui_Z_control):
         self.btn_down.setEnabled(False)
         self.btn_down.clicked.connect(lambda: self.updown_change(-10))
 
-        # SHORTCUTS -- S/W se invierten según haya controlador o no (ver
-        # core/keyboard_monitor.teclas_dial): con el controlador S sube,
-        # con el teclado del computador W sube.
+        # SHORTCUTS -- las teclas las arma _aplicar_atajos (ver
+        # core/atajos.py): con el controlador S sube, con el teclado del
+        # computador W sube (o lo que el alumno haya configurado).
         self.shortcut_dial_down = QShortcut(QKeySequence(Qt.Key_W), self)
         self.shortcut_dial_down.setAutoRepeat(False)
         self.shortcut_dial_down.activated.connect(
@@ -112,13 +113,14 @@ class ZControl(QWidget, Ui_Z_control):
         self.shortcut_dial_up.activated.connect(
             lambda: self.dial.triggerAction(QAbstractSlider.SliderSingleStepAdd))
 
-        self.kb_monitor = keyboard_monitor.monitor()
-        self.kb_monitor.connection_changed.connect(self._aplicar_teclas_dial)
-        self._aplicar_teclas_dial(self.kb_monitor.is_connected())
-
         self.shortcut_stimulus = QShortcut(QKeySequence(Qt.Key_V), self)
         self.shortcut_stimulus.setAutoRepeat(False)
         self.shortcut_stimulus.activated.connect(self.btn_stimulus.click)
+
+        self.kb_monitor = keyboard_monitor.monitor()
+        self.kb_monitor.connection_changed.connect(self._aplicar_atajos)
+        preferencias().cambiaron.connect(self._aplicar_atajos)
+        self._aplicar_atajos()
 
         self.btn_3.setEnabled(True)
         self.btn_3.clicked.connect(self.direction_change)
@@ -166,10 +168,11 @@ class ZControl(QWidget, Ui_Z_control):
         self.new = [True, True]
 
 
-    def _aplicar_teclas_dial(self, conectado):
-        subir, bajar = keyboard_monitor.teclas_dial(conectado)
-        self.shortcut_dial_up.setKey(QKeySequence(subir))
-        self.shortcut_dial_down.setKey(QKeySequence(bajar))
+    def _aplicar_atajos(self, *_):
+        teclas = atajos.teclas(self.kb_monitor.is_connected(), preferencias().atajos())
+        self.shortcut_dial_up.setKey(QKeySequence(teclas["z_subir"]))
+        self.shortcut_dial_down.setKey(QKeySequence(teclas["z_bajar"]))
+        self.shortcut_stimulus.setKey(QKeySequence(teclas["z_estimulo"]))
 
     def _log(self, action, **payload):
         """Encola una interacción del alumno en el impedanciómetro (ver

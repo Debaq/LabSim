@@ -78,6 +78,9 @@ CREATE TABLE IF NOT EXISTS users (
     -- promedios/listados de alumnos reales -- mismo criterio que ya existía
     -- para excluir role='admin' de esas vistas.
     is_demo INTEGER NOT NULL DEFAULT 0,
+    -- Preferencias de la app de escritorio (atajos, mouse para zurdos):
+    -- JSON, ver src/UserPrefs.php. Viajan con la cuenta, no con el equipo.
+    prefs TEXT NOT NULL DEFAULT '{}',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (lti_platform_id, lti_sub)

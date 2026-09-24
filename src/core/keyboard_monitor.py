@@ -6,10 +6,8 @@ fábrica de ST (0483:5740). Con varias unidades en uso no se filtra por
 número de serie: cualquier dispositivo con ese VID:PID cuenta como "el
 keyboard LabSim" conectado.
 
-Para qué se usa: el mismo dial se maneja distinto con el controlador y con
-el teclado del computador (ver teclas_dial). El encoder del controlador
-manda 's' al girar a la derecha (subir) y 'w' a la izquierda (bajar); en
-un teclado lo intuitivo es lo contrario, W arriba y S abajo, como WASD.
+Para qué se usa: con el controlador conectado mandan las teclas de su
+firmware; sin él, las del teclado del computador (ver core/atajos.py).
 
 - Linux: pyudev, con aviso inmediato al enchufar/desenchufar.
 - Windows: el registro dice qué instancias de ese VID:PID se enchufaron
@@ -33,14 +31,6 @@ if _ES_LINUX:
 LABSIM_KEYBOARD_VID = "0483"
 LABSIM_KEYBOARD_PID = "5740"
 POLL_MS = 2000
-
-
-def teclas_dial(conectado):
-    """(subir, bajar) del dial del canal 1 del audiómetro y del dial de la
-    impedanciometría, según haya controlador o no."""
-    if conectado:
-        return Qt.Key_S, Qt.Key_W     # encoder: derecha = 's' = subir
-    return Qt.Key_W, Qt.Key_S         # teclado: W arriba, S abajo
 
 
 def _presente_en_windows():

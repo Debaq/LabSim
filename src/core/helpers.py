@@ -166,6 +166,12 @@ def mi_conversacion(appointment_id: int) -> list:
         return []
 
 
+def guardar_preferencias(prefs: dict) -> dict:
+    """Guarda las preferencias del usuario logueado en su cuenta. Lanza si
+    falla (el diálogo de Configuración muestra el motivo)."""
+    return _get_backend_client().save_prefs(prefs)
+
+
 def mis_informes(appointment_id: int) -> list:
     """Informes de examen propios de una atención (ver my_report.php), el
     más nuevo primero. Lista vacía si falla la red."""
@@ -394,8 +400,6 @@ class Preferences:
         style = context.get_resource(f'styles/{style}.qss')
         with open(style,"r",encoding="utf8") as f_h:
             wid.setStyleSheet(f_h.read())
-
-# keyboard_shortcuts : [up_dial_izq,down_dial_izq,up_dial_der,down_dial_der],
 
 # frecuency_dict:
 #             {"Nombre de la prueba":[[Aerea],[Osea],[campo libre]]}

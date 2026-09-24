@@ -238,6 +238,11 @@ class BackendClient:
             body["appointment_id"] = appointment_id
         return self._post("/api/llm_chat.php", body, timeout=35)
 
+    def save_prefs(self, prefs: dict) -> dict:
+        """Guarda las preferencias personales (atajos, mouse para zurdos) en
+        la cuenta -- ver my_prefs.php. Devuelve las que quedaron guardadas."""
+        return self._post("/api/my_prefs.php", {"prefs": prefs}).get("prefs", {})
+
     def get_inbox(self) -> dict:
         """Bandeja de entrada del usuario logueado (ver inbox.php): avisos
         automáticos sobre el trato a pacientes + mensajes que un docente

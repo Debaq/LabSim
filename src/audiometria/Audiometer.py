@@ -19,18 +19,17 @@ from audiometria.h_audio import (calibrate, create_frecuency, create_intency,
                          create_sound, create_word, data_basic)
 from core.helpers import Preferences
 from PySide6.QtCore import QEvent, QObject, Qt, QTimer, Signal, Slot
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QKeySequence
 from PySide6.QtWidgets import (QApplication, QLabel, QLineEdit, QPlainTextEdit,
                                QTextEdit, QWidget)
-from core import keyboard_monitor
+from core import atajos, keyboard_monitor
+from core.preferencias import preferencias
 from backend.log_queue import get_log_queue
 from audiometria.response import ResponseAudiometry as Response
 from audiometria.UI.Ui_Audiometer import Ui_Audiometer
 
 #context
 class_pref = Preferences()
-keyboard_shortcuts = class_pref.get("keyboard_shortcuts")
-keyboard_shortcuts_switch = class_pref.get("keyboard_shortcuts_switch")
 intency_dict = class_pref.get("intency_dict")
 frecuency_dict = class_pref.get("frecuency_dict")
 output_list = class_pref.get("output_list")
@@ -86,18 +85,12 @@ class Audiometer(QWidget, Ui_Audiometer):
         # la otra ventana. Se resuelven junto a V/B en el eventFilter
         # global para que el audiometro siempre tenga prioridad mientras
         # este abierto, sin depender de cual subventana MDI esta activa.
-        # El canal 1 (S/W) se invierte según haya controlador o no: ver
-        # _aplicar_teclas_dial. El canal 2 (I/K) es igual en los dos.
+        # Qué tecla hace qué lo arma _aplicar_atajos (ver core/atajos.py):
+        # depende de si está el controlador LabSim y de lo que el alumno
+        # configuró en su perfil.
         self._dial_keys = {}
-        self._aplicar_teclas_dial(False)
-        self._switch_keys = {
-            Qt.Key(ord(keyboard_shortcuts_switch[0].upper())): lambda: self.cycle_output(0),
-            Qt.Key(ord(keyboard_shortcuts_switch[1].upper())): lambda: self.cycle_stim(0),
-            Qt.Key(ord(keyboard_shortcuts_switch[2].upper())): lambda: self.cycle_trans(0),
-            Qt.Key(ord(keyboard_shortcuts_switch[3].upper())): lambda: self.cycle_output(1),
-            Qt.Key(ord(keyboard_shortcuts_switch[4].upper())): lambda: self.cycle_stim(1),
-            Qt.Key(ord(keyboard_shortcuts_switch[5].upper())): lambda: self.cycle_trans(1),
-        }
+        self._switch_keys = {}
+        self._stim_keys = {}
 
         ### Steps and extend
         self.btn_step_1.clicked.connect(lambda: self.step(1))
@@ -248,19 +241,19 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.trans_idx = [0,0]
 
         # Detección del keyboard LabSim por USB (ver keyboard_monitor.py):
-        # con él, S sube y W baja (el encoder manda 's' al girar a la
-        # derecha); con el teclado del computador es al revés, W arriba y
-        # S abajo, como WASD. Cambia solo al enchufarlo o sacarlo.
+        # con él mandan las teclas del firmware; sin él, las del teclado
+        # del computador (las del alumno, o las por defecto). Se rearman al
+        # enchufarlo o sacarlo y cuando el alumno cambia sus atajos.
         self.kb_monitor = keyboard_monitor.monitor()
-        self.kb_monitor.connection_changed.connect(self._aplicar_teclas_dial)
-        self._aplicar_teclas_dial(self.kb_monitor.is_connected())
+        self.kb_monitor.connection_changed.connect(self._aplicar_atajos)
+        preferencias().cambiaron.connect(self._aplicar_atajos)
+        self._aplicar_atajos()
 
         # Shortcuts V/B del btn estimulo: no se usa QPushButton.setShortcut
         # porque eso dispara animateClick() (press+release fijo ~100ms) sin
         # importar cuanto se mantenga la tecla apretada en el firmware
         # (MODO_MANTENER), asi que siempre se comportaba como click rapido.
         # Con eventFilter se captura el press/release real de la tecla.
-        self._stim_keys = {Qt.Key_V: 0, Qt.Key_B: 1}
         # Guardia de reentrada: el filtro vive en QApplication, asi que si
         # algo de adentro (emitir pressed, mover el dial) despacha otro
         # evento, este mismo metodo se vuelve a llamar ANIDADO. Sin la
@@ -304,14 +297,27 @@ class Audiometer(QWidget, Ui_Audiometer):
         super().hideEvent(event)
         self.install_key_filter(False)
 
-    def _aplicar_teclas_dial(self, conectado):
-        subir, bajar = keyboard_monitor.teclas_dial(conectado)
+    def _aplicar_atajos(self, *_):
+        teclas = atajos.teclas(self.kb_monitor.is_connected(), preferencias().atajos())
+        k = lambda accion: atajos.qt_key(teclas[accion])  # noqa: E731
         self._dial_keys = {
-            subir: (0, True),
-            bajar: (0, False),
-            Qt.Key(ord(keyboard_shortcuts[2].upper())): (1, True),
-            Qt.Key(ord(keyboard_shortcuts[3].upper())): (1, False),
+            k("a_ch1_subir"): (0, True),
+            k("a_ch1_bajar"): (0, False),
+            k("a_ch2_subir"): (1, True),
+            k("a_ch2_bajar"): (1, False),
         }
+        self._switch_keys = {
+            k("a_salida_ch1"): lambda: self.cycle_output(0),
+            k("a_tipo_estimulo_ch1"): lambda: self.cycle_stim(0),
+            k("a_transductor_ch1"): lambda: self.cycle_trans(0),
+            k("a_salida_ch2"): lambda: self.cycle_output(1),
+            k("a_tipo_estimulo_ch2"): lambda: self.cycle_stim(1),
+            k("a_transductor_ch2"): lambda: self.cycle_trans(1),
+        }
+        self._stim_keys = {k("a_estimulo_ch1"): 0, k("a_estimulo_ch2"): 1}
+        # Frecuencia: atajo propio del botón (no pasa por el filtro).
+        self.btn_freq_minus.setShortcut(QKeySequence(teclas["a_freq_menos"]))
+        self.btn_freq_plus.setShortcut(QKeySequence(teclas["a_freq_mas"]))
 
     def eventFilter(self, obj, event):
         # El filtro esta instalado en QApplication: recibe TODOS los eventos

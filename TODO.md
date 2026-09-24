@@ -1,5 +1,25 @@
 # TODO
 
+## Modo laboratorio (kiosko) y preferencias del alumno (2026-09-24, sin probar en Windows real)
+
+- `LABSIM_KIOSKO=1` (variable de entorno del equipo, se lee solo en
+  `src/core/kiosko.py`). En Windows, como admin: `setx LABSIM_KIOSKO 1 /M`.
+  Hace dos cosas: actualiza sin preguntar y aplica el "mouse para zurdos"
+  del alumno dentro de LabSim. `LABSIM_AUTO_UPDATE=1` sigue funcionando
+  solo para la actualización.
+- Preferencias en la cuenta (`users.prefs`, `UserPrefs.php`,
+  `api/my_prefs.php`), llegan con el login: atajos de teclado propios y
+  mouse para zurdos. Botón "Configuración" en la barra de acciones.
+- Atajos (`src/core/atajos.py`): con el controlador LabSim conectado
+  mandan las teclas del firmware (no se pueden cambiar); sin él, las del
+  alumno sobre las por defecto (W sube / S baja). Mantener los ids iguales
+  a `UserPrefs::ACCIONES`.
+- Decisión: los atajos personales se aplican en cualquier equipo; el mouse
+  para zurdos solo en kiosko, porque en un equipo propio el alumno lo tiene
+  en el sistema y LabSim lo volvería a invertir.
+- [ ] Probar en Windows real: detección del controlador (registro +
+  cfgmgr32) y mouse para zurdos sobre ABR/VEMP (menú contextual de pyqtgraph).
+
 ## Informes de examen: guardado automático (2026-09-24, sin probar en la app real)
 
 - **Causa de los ABR que no llegaban**: en la app instalada no existe

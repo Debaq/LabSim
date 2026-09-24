@@ -44,5 +44,8 @@ class LoginConnect():
             # en el backend) -- "or []" acá convertiría ese None en [] y
             # bloquearía al admin, por eso se preserva tal cual.
             'modules': user.get("modules"),
+            # Atajos propios y mouse para zurdos: viajan con la cuenta (ver
+            # core/preferencias.py).
+            'prefs': user.get("prefs") or {},
             'cases': {},
         }
