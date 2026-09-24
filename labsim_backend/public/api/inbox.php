@@ -32,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Response::json(['ok' => true]);
 }
 
+Oirs::normalizarGuardados($pdo);
 $stmt = $pdo->prepare(
     "SELECT m.id, m.appointment_id, m.tipo, m.remitente, m.asunto, m.cuerpo, m.leido, m.created_at,
             a.fecha, a.hora, a.procedimiento

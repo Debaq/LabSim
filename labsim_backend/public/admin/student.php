@@ -70,6 +70,7 @@ foreach ($attendances as $a) {
     }
 }
 
+Oirs::normalizarGuardados($pdo);
 $stmt = $pdo->prepare(
     "SELECT m.id, m.tipo, m.remitente, m.asunto, m.cuerpo, m.created_at,
             a.id AS appointment_id, a.fecha, a.hora, a.procedimiento

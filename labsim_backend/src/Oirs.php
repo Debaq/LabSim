@@ -36,6 +36,24 @@ final class Oirs
         . 'se sintió tratado. Es parte del ejercicio para practicar el trato, no es un reclamo real ni '
         . 'queda en ningún registro fuera de LabSim.';
 
+    /**
+     * Deja con remitente y asunto suaves los avisos ya guardados. Los de
+     * antes de este cambio decían "OIRS: Aviso de reclamo por atención
+     * recibida..." y así se veían en las vistas del docente y en cualquier
+     * lugar que leyera la tabla directo. Idempotente y barato: solo toca
+     * las filas que todavía no están normalizadas, así que se puede llamar
+     * en cada vista que lista mensajes.
+     */
+    public static function normalizarGuardados(PDO $pdo): void
+    {
+        foreach (self::ASUNTOS as $tipo => $asunto) {
+            $pdo->prepare(
+                'UPDATE inbox_messages SET asunto = ?, remitente = ?
+                 WHERE tipo = ? AND (asunto <> ? OR remitente <> ?)'
+            )->execute([$asunto, self::REMITENTE, $tipo, $asunto, self::REMITENTE]);
+        }
+    }
+
     public static function label(string $tipo): string
     {
         return self::LABELS[$tipo] ?? $tipo;

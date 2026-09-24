@@ -182,6 +182,9 @@ $misMensajes = $stmtRecibidos->fetchAll();
 $hayPaginaSiguiente = count($misMensajes) > INBOX_POR_PAGINA;
 $misMensajes = array_slice($misMensajes, 0, INBOX_POR_PAGINA);
 
+// Avisos OIRS viejos con "reclamo" en el asunto: se dejan suaves (ver Oirs.php).
+Oirs::normalizarGuardados($pdo);
+
 // Lo que YO he mandado (esta página, avisos manuales) -- cada envío a N
 // destinatarios queda como N filas (mismo asunto/cuerpo/created_at, distinto
 // student_id), así que se agrupan por lote para mostrar un solo renglón por

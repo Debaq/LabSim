@@ -108,6 +108,7 @@ $reportLabels = ReportFile::LABELS;
 // un docente le mandó sobre esta cita. Se muestran como en la bandeja de la
 // app, con nombre suave y el aviso de que son parte del ejercicio (ver
 // Oirs.php).
+Oirs::normalizarGuardados($pdo);
 $stmt = $pdo->prepare(
     'SELECT id, tipo, remitente, asunto, cuerpo, created_at FROM inbox_messages
      WHERE appointment_id = ? AND student_id = ? ORDER BY created_at, id'
