@@ -184,13 +184,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($error === null && $willInsert && $courseId === null) {
             $error = 'Falta el curso (obligatorio para citas nuevas).';
         }
-        // "Todo el curso" se acepta solo en un curso sin grupos: ahí el curso
-        // entero ES el único grupo, y exigir uno dejaba la cita sin agendar.
-        if ($error === null && $willInsert && $courseId !== null && $assignedStudentId === null && $assignedGroupId === null
-            && Courses::groupsForCourse($courseId) !== []) {
-            $error = 'Falta asignar la cita a un grupo o a un alumno específico (obligatorio para citas nuevas; '
-                . '"todo el curso" solo se ofrece en cursos sin grupos).';
-        }
 
         if ($error === null) {
             // Identidad ya resuelta más arriba (fija si el caso ya tenía
@@ -649,7 +642,7 @@ admin_header('Agendas', $me);
             $curGroupId = $filterGroupId ?? 0;
             $curStudentId = $filterStudentId ?? 0;
         }
-        $curAssignMode = $curStudentId ? 'student' : ($curGroupId ? 'group' : ($requiresCourse ? 'group' : 'course'));
+        $curAssignMode = $curStudentId ? 'student' : ($curGroupId ? 'group' : 'course');
         ?>
         <label>Curso<?= $requiresCourse ? ' *' : ' (solo aplica a citas/rondas nuevas)' ?>
             <select name="course_id" id="sched-course" <?= $requiresCourse ? 'required' : '' ?> onchange="onCourseChange()">
@@ -661,7 +654,7 @@ admin_header('Agendas', $me);
         </label>
         <label>Asignar a<?= $requiresCourse ? ' *' : '' ?>
             <select name="assign_mode" id="sched-assign-mode" onchange="onAssignModeChange()">
-                <option value="course" id="sched-assign-course" <?= $curAssignMode === 'course' ? 'selected' : '' ?>>Todo el curso</option>
+                <option value="course" <?= $curAssignMode === 'course' ? 'selected' : '' ?>>Todo el curso</option>
                 <option value="group" <?= $curAssignMode === 'group' ? 'selected' : '' ?>>Grupo</option>
                 <option value="student" <?= $curAssignMode === 'student' ? 'selected' : '' ?>>Alumno</option>
             </select>
@@ -704,7 +697,6 @@ admin_header('Agendas', $me);
 <script>
     var COURSE_GROUPS = <?= json_encode($groupsByCourse) ?>;
     var COURSE_STUDENTS = <?= json_encode($studentsByCourse) ?>;
-    var REQUIRES_COURSE = <?= $requiresCourse ? 'true' : 'false' ?>;
 
     function onCourseChange() {
         var courseId = document.getElementById('sched-course').value;
@@ -714,20 +706,10 @@ admin_header('Agendas', $me);
         syncCourseOption(courseId, groups.length > 0);
     }
 
-    // En una cita nueva "Todo el curso" existe solo si el curso no tiene
-    // grupos (el servidor aplica la misma regla). Sin grupos, "Grupo" no
-    // tiene nada que elegir, así que se pasa solo a "Todo el curso".
+    // Sin grupos, "Grupo" no tiene nada que elegir: se pasa a "Todo el curso".
     function syncCourseOption(courseId, hasGroups) {
-        if (!REQUIRES_COURSE) { return; }
         var mode = document.getElementById('sched-assign-mode');
-        var opt = document.getElementById('sched-assign-course');
-        var allowed = courseId !== '' && !hasGroups;
-        opt.disabled = !allowed;
-        opt.textContent = allowed || courseId === ''
-            ? 'Todo el curso'
-            : 'Todo el curso (no disponible: el curso tiene grupos)';
-        if (!allowed && mode.value === 'course') { mode.value = 'group'; }
-        if (allowed && mode.value === 'group') { mode.value = 'course'; }
+        if (courseId !== '' && !hasGroups && mode.value === 'group') { mode.value = 'course'; }
         onAssignModeChange();
     }
 
@@ -831,7 +813,7 @@ admin_header('Agendas', $me);
     <?php if ($filterCourseId !== null): ?>
     <p style="font-size:0.8rem; color:var(--color-muted); margin-top:0.5rem;">
         Acotado a <strong><?= htmlspecialchars($courseNameById[$filterCourseId] ?? '') ?></strong>
-        <?php if ($filterGroupId !== null): ?>· grupo <strong><?= htmlspecialchars($groupNameById[$filterGroupId] ?? '') ?></strong> (incluye también citas legado "todo el curso" de este curso, si las hubiera)<?php endif; ?>
+        <?php if ($filterGroupId !== null): ?>· grupo <strong><?= htmlspecialchars($groupNameById[$filterGroupId] ?? '') ?></strong> (incluye también las citas de "todo el curso")<?php endif; ?>
         <?php if ($filterStudentId !== null): ?>· alumno <strong><?= htmlspecialchars($userNameById[$filterStudentId] ?? '') ?></strong> (incluye citas de su grupo, todo el curso o cola global que también le apliquen)<?php endif; ?>
         <?php if ($filterGroupId !== null || $filterStudentId !== null): ?>
         &nbsp;·&nbsp; <a href="<?= agenda_url(['filter_group' => null, 'filter_student' => null]) ?>">Ver el curso completo</a>
