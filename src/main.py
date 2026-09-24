@@ -28,7 +28,7 @@ from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Sto
                           es_docente,
                           marcar_entry_atendiendo, marcar_entry_atendido,
                           reset_backend_session)
-from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon, style_dialog
+from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon, style_dialog, is_full_window
 from audiometria.UI.Ui_command_voice_A import Ui_Form as commandVoiceA
 from core.UI.Ui_Main import Ui_MainWindow
 from core.Logger import Logger
@@ -732,8 +732,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             "AGENDA": FrameSubMdi(Agenda.Agenda(self.data_login["permission"], self)),
             "CVOICE": FrameSubMdi(ComandVoiceA()),
             "CHAT": FrameSubMdi(ChatPacienteWidget(self.data_login.get("name"))),
-            "FICHA": FrameSubMdi(Agenda.FichaClinicaWidget()),
-            "EVOLUCION": FrameSubMdi(Agenda.EvolucionWidget()),
+            "FICHA": FrameSubMdi(Agenda.FichaClinicaWidget(), expand=True),
+            "EVOLUCION": FrameSubMdi(Agenda.EvolucionWidget(), expand=True),
             "INBOX": FrameSubMdi(inbox.InboxWidget(self)),
             "MIS_PACIENTES": FrameSubMdi(mis_pacientes.MisPacientesWidget(self)),
             "W": self.subw_w,
@@ -788,6 +788,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.btn_list_words.setObjectName("btn_W")
             self.btn_list_words.clicked.connect(self.activate_listWords)
             self.layoutAction.addWidget(self.btn_list_words)
+        # Rescate: una subventana tapada o corrida se cierra desde acá sin
+        # tener que encontrarle la ✕.
+        self.btn_cerrar_ventanas = QPushButton("Cerrar ventanas")
+        self.btn_cerrar_ventanas.setObjectName("btn_cerrar_ventanas")
+        self.btn_cerrar_ventanas.clicked.connect(self.cerrar_ventanas)
+        self.layoutAction.addWidget(self.btn_cerrar_ventanas)
         if es_docente((self.data_login or {}).get("permission")):
             # Panel de depuración: umbrales *_mkg cargados y rangos de
             # enmascaramiento en vivo. Solo admin/docente -- al alumno le
@@ -797,6 +803,18 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.btn_debug_mkg.clicked.connect(self.abrir_debug_mkg)
             self.layoutAction.addWidget(self.btn_debug_mkg)
         self._update_action_buttons()
+
+    def cerrar_ventanas(self):
+        """Oculta todas las subventanas normales, igual que su ✕ (el
+        contenido se conserva). Los módulos a pantalla completa (ABR, VEMP,
+        EOAS) quedan: ocupan todo el MDI, no se pueden perder, y cerrarlos a
+        mitad de un examen sería un accidente."""
+        login_pos_z = self.apps["LOGIN"][2]
+        login = self.modules.get(login_pos_z)
+        for sub in self.mdi_area.subWindowList():
+            if sub is login or sub.isHidden() or is_full_window(sub):
+                continue
+            sub.hide()
 
     def abrir_debug_mkg(self):
         """Abre (o trae al frente) el panel de depuración de

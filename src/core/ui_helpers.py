@@ -159,8 +159,13 @@ def show_hide(obj:any, pos:int):
         pos(int): indice de la subventana
     """
     if obj.get(pos).isHidden():
-        obj.get(pos).show()
-        raise_window(obj.get(pos))
+        sub = obj.get(pos)
+        sub.show()
+        mdi = sub.mdiArea()
+        if mdi is not None and not is_full_window(sub):
+            # Pudo quedar afuera si el MDI se achicó mientras estaba oculta.
+            mdi.keep_inside(sub)
+        raise_window(sub)
     else:
         obj.get(pos).hide()
 
@@ -300,8 +305,11 @@ class SubWindow():
         """
         if not self._module_visible(app):
             return
-        width = size().width()
-        height = size().height()
+        # Centro del área MDI, no de la ventana principal: esa incluye
+        # barras y toolbar, y el centro quedaba corrido hacia abajo.
+        viewport = self.mdi_area.viewport().size()
+        width = viewport.width()
+        height = viewport.height()
         _, name, pos_z, fix, size, _ = self.app[app]
         if size == "max":
             pos = [0, 0]
@@ -379,6 +387,7 @@ class SubWindow():
                 sub.setMinimumSize(size[0], size[1])
                 sub.resize(size[0], size[1])
             sub.show()
+            self.mdi_area.keep_inside(sub)
             raise_window(sub)
             list_wi = self.mdi_area.subWindowList()
             self.modules.set(pos_z, list_wi[-1])

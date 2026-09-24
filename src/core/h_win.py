@@ -53,10 +53,15 @@ class FrameSubMdi(QWidget, UI_frameSubMdi):
     # mostrar los botones que solo aplican con cierto modulo abierto.
     visibility_changed = Signal(bool)
 
-    def __init__(self, ui_ui):
+    def __init__(self, ui_ui, expand=False):
         #super(FrameSubMdi, self).__init__()
         super().__init__()
         self.setupUi(self)
+        if expand:
+            # El spacer de abajo del .ui es Expanding y se reparte el alto
+            # sobrante con el contenido: con stretch 1 el contenido se lo
+            # lleva entero (texto que ocupa toda la subventana).
+            self.verticalLayout_2.setStretchFactor(self.layout_content, 1)
         # QWidget plano no pinta border/background de QSS sin esto (a
         # diferencia de QFrame, que lo hace solo) -- necesario para el
         # borde delgado que marca el límite de cada subventana MDI.
@@ -139,5 +144,29 @@ class MdiArea(QMdiArea):
     def _refit_full(self):
         from core.ui_helpers import fit_full_window, is_full_window
         for sub in self.subWindowList():
-            if is_full_window(sub) and not sub.isHidden():
+            if sub.isHidden():
+                continue
+            if is_full_window(sub):
                 fit_full_window(sub)
+            else:
+                self.keep_inside(sub)
+
+    def keep_inside(self, sub):
+        """Deja la subventana entera dentro del viewport: si es más grande
+        la achica (el contenido se recorta, pero la barra con la ✕ queda a
+        la vista) y si quedó corrida la vuelve a meter. Sin esto, en
+        pantallas chicas o al achicar la ventana principal había módulos
+        que quedaban con la barra afuera y no se podían cerrar ni mover."""
+        viewport = self.viewport().size()
+        vw, vh = viewport.width(), viewport.height()
+        if vw <= 0 or vh <= 0:
+            return
+        w, h = sub.width(), sub.height()
+        if w > vw or h > vh:
+            w, h = min(w, vw), min(h, vh)
+            sub.setMinimumSize(min(sub.minimumWidth(), w), min(sub.minimumHeight(), h))
+            sub.resize(w, h)
+        x = min(max(sub.x(), 0), vw - sub.width())
+        y = min(max(sub.y(), 0), vh - sub.height())
+        if (x, y) != (sub.x(), sub.y()):
+            sub.move(x, y)
