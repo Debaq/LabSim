@@ -70,6 +70,14 @@ class AbrTable(QWidget, Ui_TableData):
         item.setToolTip(f'Fuera de rango: {texto}')
 
     @staticmethod
+    def fmt(valor) -> str:
+        # Un decimal en pantalla; self.data guarda el valor sin redondear
+        # para los interpicos y la normativa.
+        if not isinstance(valor, (int, float)):
+            return ''
+        return f'{valor:.1f}'
+
+    @staticmethod
     def in_range(valor, rango) -> bool:
         lo, hi = rango
         if lo is not None and valor < lo:
@@ -154,8 +162,7 @@ class AbrTable(QWidget, Ui_TableData):
         coords = self.curve_coord(command)
         value = data[str(self.side)][command]
         self.data[coords[0]][coords[1]] = value
-        value = round(value,2)
-        item = QTableWidgetItem(str(value))
+        item = QTableWidgetItem(self.fmt(value))
         self.tw_latamp.setItem(coords[0], coords[1], item)
         #print(f"command {command} ,  row {coords[0]}, column {coords[1]}")
         self.calcule_others()
@@ -202,8 +209,7 @@ class AbrTable(QWidget, Ui_TableData):
         value_i = self.data[0][1]
         value_v = self.data[4][1]
         relation = value_v/value_i
-        relation = round(relation,2)
-        item = QTableWidgetItem(str(relation))
+        item = QTableWidgetItem(self.fmt(relation))
         self.tw_inter.setItem(3,0, item)
         
     def erase_cell(self, cell) ->None:
@@ -214,8 +220,7 @@ class AbrTable(QWidget, Ui_TableData):
         value_a = self.data[pos_a][0]
         value_b = self.data[pos_b][0]
         interpeak = abs(value_a - value_b)
-        interpeak = round(interpeak, 3)
-        item = QTableWidgetItem(str(interpeak))
+        item = QTableWidgetItem(self.fmt(interpeak))
         self.tw_inter.setItem(cell,0, item)
 
     def change_value_lat(self, data:dict):
@@ -249,8 +254,8 @@ class AbrTable(QWidget, Ui_TableData):
             # Obtener los valores de latencia y amplitud
             lat, amp = latamp_dict['LatAmp'][wave]
             # Crear los QTableWidgetItems, manejar valores None
-            lat_item = QTableWidgetItem('' if lat is None else str(lat))
-            amp_item = QTableWidgetItem('' if amp is None else str(amp))
+            lat_item = QTableWidgetItem(self.fmt(lat))
+            amp_item = QTableWidgetItem(self.fmt(amp))
 
             # Asignar los valores a la celda correspondiente en la fila y columna adecuada
             self.tw_latamp.setItem(row_index, 0, lat_item)  # Columna para latencia

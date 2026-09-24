@@ -2,6 +2,7 @@ from PySide6.QtCore import QCoreApplication, Signal, Qt
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QWidget, QTableWidgetItem
 from abr.UI.AbrDetailAllCurves_ui import Ui_DetailAllCurves
+from abr.AbrTable import AbrTable
 
 tr = QCoreApplication.translate
 
@@ -76,25 +77,22 @@ class AbrDetailAllCurves(QWidget, Ui_DetailAllCurves):
     @staticmethod
     def format_lat_amp(lat_amp):
         # Formatear la latencia y amplitud
-        return f"{round(lat_amp[0],2) if lat_amp[0] is not None else ''}" \
-               f"({'{:.2f}'.format(lat_amp[1]) if lat_amp[1] is not None else ''})"
+        return f"{AbrTable.fmt(lat_amp[0])}({AbrTable.fmt(lat_amp[1])})"
 
     @staticmethod
     def calculate_ratio(lat_amp_dict):
         # Calcular la relación V/I
         try:
-            return round(lat_amp_dict['V'][1] / lat_amp_dict['I'][1],2)
+            return AbrTable.fmt(lat_amp_dict['V'][1] / lat_amp_dict['I'][1])
         except (TypeError, ZeroDivisionError):
-            return None
+            return ''
 
     @staticmethod
     def cal_interpeak(val_a:int, val_b:int) ->None:
         try:
-            interpeak = abs(val_a[0] - val_b[0])
-            interpeak = round(interpeak, 3)
-            return interpeak
+            return AbrTable.fmt(abs(val_a[0] - val_b[0]))
         except (TypeError, ZeroDivisionError):
-            return None
+            return ''
 
     def find_row_by_header(self, header_name):
         # Buscar la fila por el encabezado vertical
