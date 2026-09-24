@@ -493,6 +493,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.memory = {}
         self.fsp_tracks = {}
         self.fsp_shown = None
+        # Una captura a medias no sobrevive al cambio de paciente.
+        self.count_averages = 0
 
         # Limpiar tablas
         self.table_r.clear_all()
@@ -615,8 +617,25 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         elif state == 'stopped':
             self.state_capture = state
             self.capture_timer.stop()
+            if self.count_averages:
+                self.close_cut_capture()
         else:
             self.state_capture = state
+
+    def close_cut_capture(self) -> None:
+        """Detener a mitad de camino cierra la curva con lo que lleva.
+
+        Sin esto el contador quedaba donde se corto y el proximo Iniciar
+        seguia promediando sobre la MISMA curva (con el setting nuevo),
+        en vez de abrir otra. La curva cortada queda como terminada: su
+        trazo es el de los barridos que alcanzo a promediar y la tecnica
+        en memoria ya dice cuantos fueron (ver recording_conditions).
+        """
+        self.count_averages = 0
+        curve = self.current_capture_curve
+        graph = self.graph_r if curve.startswith('R') else self.graph_l
+        if curve in graph.data:
+            graph.data[curve]['done'] = True
 
     def capture(self) -> None:
         if self.state_capture == 'record':

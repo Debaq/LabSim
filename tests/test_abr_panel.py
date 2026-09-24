@@ -523,6 +523,35 @@ def test_clamping_the_tube_works_mid_capture():
     w.control.stop_capture()
 
 
+def test_stopping_mid_capture_keeps_the_curve_and_opens_a_new_one():
+    """Detener a mitad deja la curva con lo promediado; Iniciar abre otra.
+
+    Antes el contador quedaba donde se corto y el siguiente Iniciar seguia
+    sobre la misma curva, con el setting nuevo encima.
+    """
+    if not HAS_UI:
+        return
+    w = _ventana()
+    w.control.sb_intencity.setValue(80)
+    w.control.start_capture()
+    for _ in range(int(w.total_averages / 3)):
+        w.capture()
+    cortada = np.asarray(w.graph_r.data['R1']['ipsi_xy'][1]).copy()
+    barridos = w.memory['R1']['tecnica']['barridos_presentados']
+    w.control.stop_capture()
+
+    assert w.count_averages == 0
+    assert w.graph_r.data['R1']['done'] is True
+    assert 0 < barridos < 2000
+
+    _capturar(w, intensidad=60)
+    assert w.curves_R == ['R1', 'R2']
+    assert w.graph_r.curve_int['R2'] == 60
+    assert np.array_equal(np.asarray(w.graph_r.data['R1']['ipsi_xy'][1]), cortada)
+    assert w.memory['R1']['tecnica']['barridos_presentados'] == barridos
+    assert w.memory['R1']['int'] == 80
+
+
 # ------------------------------------------------------- tabla con normativa
 
 def test_table_flags_a_late_wave_v():
