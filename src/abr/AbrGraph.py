@@ -686,6 +686,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             return
         proporcion = uv / self.scale_uv
         self.scale_uv = uv
+        self.apply_grid()
         for nombre, datos in self.data.items():
             datos['gap'] = datos.get('gap', 0.0) * proporcion
             self.redraw(nombre)
@@ -706,18 +707,31 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             if item is not None and item.getXPos() > self.window_ms:
                 item.setPos((self.window_ms, 0))
 
-    # Hasta cuantas mitades (-) y dobles (+) de la escala base se llega.
-    # Con los 6 uV del ABR: de 1.5 a 192 uV.
-    SCALE_STEPS = (-2, 5)
+    # Divisiones de la grilla por ventana de escala: 6 da la grilla de
+    # 1 uV del ABR a 6 uV.
+    GRID_DIVISIONS = 6
+
+    def apply_grid(self):
+        """La grilla sigue a la escala. Fija en 1 uV, a 48 uV eran ~70
+        lineas y a 192 uV mas de 300: una mancha gris que tapaba las
+        curvas, que ademas a esa escala ya eran casi planas."""
+        self.grid.setTickSpacing(x=[1.0], y=[self.scale_uv / self.GRID_DIVISIONS])
+
+    # Hasta cuantas mitades y dobles (en uV) de la escala base se llega.
+    # Con los 6 uV del ABR: de 0.75 a 48 uV.
+    SCALE_STEPS = (-3, 3)
 
     def scale(self, direction):
         """Un paso de la escalera de escalas: el doble o la mitad.
+
+        '+' agranda las curvas (la mitad de uV en la ventana) y '-' las
+        achica. Al reves, '+' las aplastaba hasta que parecian desaparecer.
 
         En el tope no hace nada, ni un recorte: asi cada paso es siempre
         x2 o /2 y volver sobre los pasos devuelve exactamente la escala de
         la prueba.
         """
-        paso = self.scale_step + {'plus': 1, 'minus': -1}.get(direction, 0)
+        paso = self.scale_step + {'plus': -1, 'minus': 1}.get(direction, 0)
         lo, hi = self.SCALE_STEPS
         if lo <= paso <= hi and paso != self.scale_step:
             self.scale_step = paso

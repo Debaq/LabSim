@@ -145,6 +145,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.detail_all.sig_selected_curve.connect(self.selected_)
         self.btn_scale_minus.clicked.connect(self.scale_graph)
         self.btn_scale_plus.clicked.connect(self.scale_graph)
+        self.btn_scale_plus.setToolTip("Agrandar las curvas (menos µV en la ventana)")
+        self.btn_scale_minus.setToolTip("Achicar las curvas (más µV en la ventana)")
         self.btn_toggle_sub.toggled.connect(self.toggle_sub)
         self.btn_toggle_contra.toggled.connect(self.toggle_contra)
         self.btn_next_case.hide()  # sin ciclo de casos propio, no aplica
@@ -823,9 +825,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.show_scale()
 
     def show_scale(self):
-        # Sin redondear a entero: la escala baja a 1.5 uV y el rotulo
-        # decia "2µV".
-        self.lbl_scale.setText(f"{round(self.graph_r.get_scale(), 1):g}µV")
+        # Sin redondear a entero: la escala baja a 0.75 uV y el rotulo
+        # decia "1µV".
+        self.lbl_scale.setText(f"{round(self.graph_r.get_scale(), 2):g}µV")
 
     def toggle_sub(self, visible):
         """Subpromedios A/B a la vista en los dos oidos a la vez."""

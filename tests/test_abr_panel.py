@@ -381,7 +381,7 @@ def test_stacking_follows_the_scale():
     w.btn_scale_plus.click()
     factor = w.graph_r.get_scale() / escala_antes
     assert abs(w.graph_r.data['R2']['gap'] - antes * factor) < 1e-9
-    assert w.lbl_scale.text() == f"{round(w.graph_r.get_scale(), 1):g}µV"
+    assert w.lbl_scale.text() == f"{round(w.graph_r.get_scale(), 2):g}µV"
 
 
 def test_scale_hits_its_limits_and_comes_back():
@@ -389,6 +389,9 @@ def test_scale_hits_its_limits_and_comes_back():
 
     Antes el tope recortaba (192 -> 200) y desde ahí la escalera quedaba
     corrida para siempre: 100, 50, 25, 12.5, 6.25... nunca más 6 µV.
+
+    '+' agranda las curvas: baja los µV de la ventana. Al revés, '+' las
+    aplastaba hasta 192 µV y parecía que desaparecían.
     """
     if not HAS_UI:
         return
@@ -396,18 +399,37 @@ def test_scale_hits_its_limits_and_comes_back():
     for db in (80, 60):
         _capturar(w, intensidad=db)
     gap = w.graph_r.data['R2']['gap']
+    w.btn_scale_plus.click()
+    assert w.graph_r.get_scale() == 3
     for _ in range(12):
         w.btn_scale_plus.click()
-    assert w.graph_r.get_scale() == 192
+    assert w.graph_r.get_scale() == 0.75
+    assert w.lbl_scale.text() == '0.75µV'
     for _ in range(12):
         w.btn_scale_minus.click()
-    assert w.graph_r.get_scale() == 1.5
-    assert w.lbl_scale.text() == '1.5µV'
-    for _ in range(2):
+    assert w.graph_r.get_scale() == 48
+    for _ in range(3):
         w.btn_scale_plus.click()
     assert w.graph_r.get_scale() == 6
     assert w.graph_l.get_scale() == 6
     assert abs(w.graph_r.data['R2']['gap'] - gap) < 1e-9
+
+
+def test_grid_follows_the_scale():
+    """La grilla tiene siempre las mismas divisiones por ventana: fija en
+    1 µV, a escalas grandes eran cientos de líneas que tapaban las curvas."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    _capturar(w, intensidad=80)
+    g = w.graph_r
+    for _ in range(3):
+        w.btn_scale_minus.click()
+    assert g.get_scale() == 48
+    assert g.grid.opts['tickSpacing'][1] == [48 / g.GRID_DIVISIONS]
+    for _ in range(3):
+        w.btn_scale_plus.click()
+    assert g.grid.opts['tickSpacing'][1] == [1.0]
 
 
 def test_mouse_wheel_does_not_zoom_behind_the_scale():
