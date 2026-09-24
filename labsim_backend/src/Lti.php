@@ -34,6 +34,10 @@ final class Lti
 
     public static function listPlatforms(): array
     {
+        // Para que la pantalla de admin muestre (y pueda guardar) el curso
+        // por defecto sin depender de que alguien haya corrido "Aplicar
+        // schema" antes -- ver lti_platforms.default_course_id.
+        Db::migrateLtiDefaultCourseIfNeeded();
         return Db::get()->query('SELECT * FROM lti_platforms ORDER BY id DESC')->fetchAll();
     }
 
@@ -307,6 +311,58 @@ final class Lti
         return (bool) $stmt->fetch();
     }
 
+    /**
+     * Curso LabSim de ESTE launch: el del contexto de Moodle si está
+     * vinculado y, si no, el curso por defecto de la clave con la que se
+     * entró (lti_platforms.default_course_id).
+     *
+     * Las dos reglas conviven a propósito y en este orden: el vínculo por
+     * contexto es más específico --una clave del sitio entero puede servir a
+     * varios cursos de Moodle, y cada uno mapear a un curso distinto-- y el
+     * de la clave es el que hace que la matrícula sea INMEDIATA: el docente
+     * crea una clave para su curso, la pega en Moodle y el primer alumno que
+     * entra ya queda matriculado, sin que nadie vincule nada después del
+     * primer launch.
+     *
+     * Todo lo que necesita "el curso de esta sesión" pasa por acá (la
+     * matrícula automática, los módulos habilitados, la config por curso, la
+     * sincronización), así que la regla es una sola y no hay dos verdades.
+     */
+    public static function courseForLaunch(int $platformId, ?string $contextId): ?int
+    {
+        $courseId = self::findCourseForContext($platformId, $contextId);
+        return $courseId !== null ? $courseId : self::defaultCourseFor($platformId);
+    }
+
+    /** Curso al que matricula una clave LTI por sí sola, o null si no tiene uno asignado. */
+    public static function defaultCourseFor(int $platformId): ?int
+    {
+        Db::migrateLtiDefaultCourseIfNeeded();
+        $stmt = Db::get()->prepare('SELECT default_course_id FROM lti_platforms WHERE id = ?');
+        $stmt->execute([$platformId]);
+        $courseId = $stmt->fetchColumn();
+        return ($courseId === false || $courseId === null) ? null : (int) $courseId;
+    }
+
+    /** Asigna (o quita, con null) el curso al que matricula una clave LTI. */
+    public static function setDefaultCourse(int $platformId, ?int $courseId): void
+    {
+        Db::migrateLtiDefaultCourseIfNeeded();
+        Db::get()->prepare('UPDATE lti_platforms SET default_course_id = ? WHERE id = ?')
+            ->execute([$courseId, $platformId]);
+    }
+
+    /** Claves LTI que matriculan a este curso por sí solas -- para la pestaña Vínculos. */
+    public static function platformsForCourse(int $courseId): array
+    {
+        Db::migrateLtiDefaultCourseIfNeeded();
+        $stmt = Db::get()->prepare(
+            'SELECT id, version, issuer, consumer_key FROM lti_platforms WHERE default_course_id = ? ORDER BY id'
+        );
+        $stmt->execute([$courseId]);
+        return $stmt->fetchAll();
+    }
+
     /** ID del curso LabSim vinculado a este contexto de Moodle (ver linkContextToCourse), o null si no está vinculado. */
     public static function findCourseForContext(int $platformId, ?string $contextId): ?int
     {
@@ -357,15 +413,16 @@ final class Lti
     }
 
     /**
-     * Si $contextId está vinculado a un curso (ver linkContextToCourse),
-     * deja asignado a $userId en ese curso segun su rol: alumno a
-     * course_students (asi cientos de alumnos que entran por el mismo curso
-     * de Moodle no requieren que el docente los agregue uno por uno ni sepa
-     * sus nombres) y docente a course_teachers.
+     * Si el launch resuelve a un curso (ver courseForLaunch: contexto
+     * vinculado, o curso por defecto de la clave), deja asignado a $userId
+     * en ese curso segun su rol: alumno a course_students (asi cientos de
+     * alumnos que entran por el mismo curso de Moodle no requieren que el
+     * docente los agregue uno por uno ni sepa sus nombres) y docente a
+     * course_teachers.
      */
     public static function autoEnrollIfMapped(int $platformId, ?string $contextId, int $userId): void
     {
-        $courseId = self::findCourseForContext($platformId, $contextId);
+        $courseId = self::courseForLaunch($platformId, $contextId);
         if ($courseId === null) {
             return;
         }

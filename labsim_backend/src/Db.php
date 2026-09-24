@@ -489,6 +489,28 @@ final class Db
     }
 
     /**
+     * Curso al que matricula una clave LTI por sí sola (ver el comentario de
+     * lti_platforms.default_course_id en schema.sql).
+     *
+     * La llaman Lti::defaultCourseFor/setDefaultCourse, que corren en el
+     * camino del launch: sin esto, una instalación que todavía no pasó por
+     * "Aplicar schema" reventaría con "no such column: default_course_id" en
+     * cada entrada desde Moodle. Es idempotente y barata (un PRAGMA).
+     */
+    public static function migrateLtiDefaultCourseIfNeeded(): void
+    {
+        // Una vez por request: esto cuelga del camino del launch y de cada
+        // emisión de token, y el PRAGMA de addColumnIfMissing no hace falta
+        // repetirlo dentro de la misma corrida.
+        static $hecho = false;
+        if ($hecho) {
+            return;
+        }
+        $hecho = true;
+        self::addColumnIfMissing(self::get(), 'lti_platforms', 'default_course_id', 'INTEGER REFERENCES courses(id)');
+    }
+
+    /**
      * Reconstruye app_config para soportar override por curso (ver comentario
      * de esa tabla en sql/schema.sql). La PK vieja era (k) solo: un simple
      * ALTER TABLE ADD COLUMN course_id no alcanza porque esa PK seguiría

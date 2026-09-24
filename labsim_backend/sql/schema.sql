@@ -21,6 +21,15 @@ CREATE TABLE IF NOT EXISTS lti_platforms (
     jwks_url TEXT NOT NULL DEFAULT '',
     consumer_key TEXT NOT NULL DEFAULT '',
     shared_secret TEXT NOT NULL DEFAULT '',
+    -- Curso de LabSim al que matricula ESTA clave por sí sola: cualquiera
+    -- que entre por un launch con estas credenciales queda matriculado ahí
+    -- en el acto, sin que nadie vincule el curso de Moodle después del
+    -- primer launch (ver Lti::courseForLaunch). Es la vía de una clave por
+    -- curso: el docente la crea, la pega en Moodle y el roster se llena
+    -- solo. NULL = la clave no matricula por sí sola y todo depende del
+    -- vínculo por contexto (course_lti_contexts), que sigue mandando cuando
+    -- existe porque es más específico.
+    default_course_id INTEGER REFERENCES courses(id),
     active INTEGER NOT NULL DEFAULT 1
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_lti_platforms_13
@@ -195,7 +204,6 @@ CREATE TABLE IF NOT EXISTS cases (
     updated_by INTEGER REFERENCES users(id)
 );
 CREATE INDEX IF NOT EXISTS idx_cases_patient_id ON cases(patient_id);
-
 -- Citas de la agenda (antes cada fila de schedule.json["agenda_1"]).
 -- Compartidas: cualquier alumno puede atenderlas (ver attendances abajo).
 CREATE TABLE IF NOT EXISTS appointments (

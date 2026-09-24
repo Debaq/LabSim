@@ -5,9 +5,30 @@
  * vínculo es lo que hace que los alumnos se matriculen solos, así que
  * conviene poder confirmar que está puesto.
  *
- * Espera: $courseId, $vinculos.
+ * Espera: $courseId, $vinculos, $clavesLti, $isFullAdmin.
  */
 ?>
+<div class="card">
+    <strong>Claves LTI que matriculan en este curso (<?= count($clavesLti) ?>)</strong>
+    <p class="help help--mt">
+        Una clave asignada a este curso matricula <strong>en el acto</strong>: cualquiera que entre desde Moodle con esa clave queda en el roster en su primer launch, sin vincular nada ni esperar a que un docente entre primero. Se crean y se asignan en <?php if ($isFullAdmin): ?><a href="lti.php">Conexión LTI</a><?php else: ?><strong>Conexión LTI</strong> (lo hace el administrador)<?php endif; ?>, y lo habitual es una clave por curso.
+    </p>
+    <?php if (!$clavesLti): ?>
+    <p class="muted">Ninguna clave apunta a este curso: los alumnos entran por el vínculo del curso de Moodle (abajo) o se matriculan a mano en la pestaña Personas.</p>
+    <?php else: ?>
+    <div class="table-wrap">
+    <table style="margin-top:0.5rem;">
+        <tr><th>Clave</th><th>Versión</th></tr>
+        <?php foreach ($clavesLti as $k): ?>
+        <tr>
+            <td class="help help--xs"><code><?= htmlspecialchars((string) ($k['issuer'] !== '' ? $k['issuer'] : $k['consumer_key'])) ?></code></td>
+            <td>LTI <?= htmlspecialchars((string) $k['version']) ?></td>
+        </tr>
+        <?php endforeach; ?>
+    </table>
+    </div>
+    <?php endif; ?>
+</div>
 <div class="card">
     <strong>Cursos de Moodle vinculados (<?= count($vinculos) ?>)</strong>
     <p class="help help--mt">

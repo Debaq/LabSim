@@ -8,7 +8,7 @@ require_once __DIR__ . '/../bootstrap.php';
 // (después de esto, el admin usa sync.php como todos).
 
 [, $platformId, $contextId] = Auth::requireAdminWithSession();
-$courseId = $platformId !== null ? Lti::findCourseForContext($platformId, $contextId) : null;
+$courseId = $platformId !== null ? Lti::courseForLaunch($platformId, $contextId) : null;
 $pdo = Db::get();
 
 $students = $pdo->query(

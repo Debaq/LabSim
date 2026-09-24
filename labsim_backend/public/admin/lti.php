@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
+require_once __DIR__ . '/../../src/Courses.php';
 
 $me = Auth::requireFullAdminSession();
 
@@ -17,13 +18,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'] !== '' ? (int) $_POST['id'] : null;
     $ltiVersion = $_POST['lti_version'] ?? '1.3';
 
-    if ($ltiVersion === '1.1') {
+    // Curso al que matricula la clave por sí sola: se guarda igual para las
+    // dos versiones de LTI y también solo, sin tocar las credenciales (ese
+    // es el caso de la tabla de abajo, donde cambiar el curso no puede
+    // implicar regenerar el shared secret).
+    if (($_POST['form_action'] ?? '') === 'set_default_course') {
+        $courseId = (int) ($_POST['default_course_id'] ?? 0);
+        if ($id === null) {
+            $error = 'Falta la clave LTI.';
+        } else {
+            Lti::setDefaultCourse($id, $courseId > 0 ? $courseId : null);
+            $success = $courseId > 0
+                ? 'Listo: quien entre con esa clave queda matriculado en ese curso.'
+                : 'Esa clave ya no matricula sola.';
+            AdminAudit::log($me, 'lti_set_default_course', ['id' => $id, 'course_id' => $courseId ?: null]);
+        }
+    } elseif ($ltiVersion === '1.1') {
         // El backend genera las credenciales (como hace Moodle al registrar
         // un tool) en vez de que el admin las invente a mano -- menos typos,
         // más entropía. El shared_secret solo se muestra esta vez.
         $consumerKey = bin2hex(random_bytes(16));
         $sharedSecret = bin2hex(random_bytes(24));
-        Lti::upsertPlatform11($id, $consumerKey, $sharedSecret);
+        $nuevoId = Lti::upsertPlatform11($id, $consumerKey, $sharedSecret);
+        // Una clave por curso, en un solo paso: si se eligió curso al
+        // crearla, queda matriculando desde el primer launch. Al regenerar
+        // credenciales el campo no viene, y el curso ya asignado no se toca.
+        if (isset($_POST['default_course_id'])) {
+            $courseId = (int) $_POST['default_course_id'];
+            Lti::setDefaultCourse($nuevoId, $courseId > 0 ? $courseId : null);
+        }
         $success = $id !== null ? 'Credenciales LTI 1.1 regeneradas.' : 'Herramienta LTI 1.1 creada.';
         $generated11 = ['consumer_key' => $consumerKey, 'shared_secret' => $sharedSecret];
         AdminAudit::log($me, $id !== null ? 'lti11_regenerate' : 'lti11_create', ['id' => $id]);
@@ -38,7 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($issuer === '' || $clientId === '' || $deploymentId === '' || $authLoginUrl === '' || $jwksUrl === '') {
             $error = 'Completa issuer, client_id, deployment_id, auth_login_url y jwks_url (todos vienen de la pantalla "External tool" de Moodle).';
         } else {
-            Lti::upsertPlatform13($id, $issuer, $clientId, $deploymentId, $authLoginUrl, $authTokenUrl ?: $authLoginUrl, $jwksUrl);
+            $nuevoId = Lti::upsertPlatform13($id, $issuer, $clientId, $deploymentId, $authLoginUrl, $authTokenUrl ?: $authLoginUrl, $jwksUrl);
+            if (isset($_POST['default_course_id'])) {
+                $courseId = (int) $_POST['default_course_id'];
+                Lti::setDefaultCourse($nuevoId, $courseId > 0 ? $courseId : null);
+            }
             $success = 'Plataforma LTI 1.3 guardada.';
             AdminAudit::log($me, 'lti13_upsert', ['id' => $id, 'issuer' => $issuer]);
         }
@@ -51,6 +78,23 @@ $loginUrl = "{$scheme}://{$_SERVER['HTTP_HOST']}{$baseDir}/lti/login.php";
 $launchUrl = "{$scheme}://{$_SERVER['HTTP_HOST']}{$baseDir}/lti/launch.php";
 
 $platforms = Lti::listPlatforms();
+$cursos = Courses::listActive();
+$cursoNombre = [];
+foreach ($cursos as $c) {
+    $cursoNombre[(int) $c['id']] = (string) $c['name'];
+}
+
+/** El <select> de curso de una clave, igual en el alta y en la tabla. */
+$selectCurso = static function (?int $seleccionado) use ($cursos): string {
+    $html = '<select name="default_course_id">';
+    $html .= '<option value="0">-- ninguno: no matricula sola --</option>';
+    foreach ($cursos as $c) {
+        $html .= '<option value="' . (int) $c['id'] . '"'
+            . ($seleccionado === (int) $c['id'] ? ' selected' : '') . '>'
+            . htmlspecialchars((string) $c['name']) . '</option>';
+    }
+    return $html . '</select>';
+};
 
 admin_header('Conexión LTI (Moodle)', $me);
 ?>
@@ -78,6 +122,17 @@ admin_header('Conexión LTI (Moodle)', $me);
     <?= csrf_field() ?>
         <input type="hidden" name="id" value="">
         <input type="hidden" name="lti_version" value="1.1">
+        <label>Matricular en este curso a quien entre con esta clave
+            <?= $selectCurso(null) ?>
+        </label>
+        <p class="muted">
+            Con un curso elegido acá, la clave <strong>matricula sola</strong>: el alumno entra
+            desde Moodle y queda en el roster de ese curso en el primer launch, sin que nadie lo
+            agregue a mano ni vincule nada después. Lo normal es entonces una clave por curso.
+            Si el mismo Moodle tiene varios cursos y querés separarlos con una sola clave, dejalo
+            en "ninguno" y vinculá cada curso de Moodle desde
+            <a href="courses.php">Cursos → Vínculos</a>.
+        </p>
         <button type="submit">Crear nueva herramienta LTI 1.1</button>
     </form>
 </div>
@@ -118,6 +173,10 @@ admin_header('Conexión LTI (Moodle)', $me);
         <label>JWKS URL (Moodle: "Public keyset URL")
             <input type="text" name="jwks_url" required>
         </label>
+        <label>Matricular en este curso a quien entre con esta clave
+            <?= $selectCurso(null) ?>
+        </label>
+        <p class="muted">Mismo criterio que en 1.1: con un curso elegido, la matrícula es inmediata en el primer launch.</p>
         <div class="form-actions-sticky">
             <button type="submit">Guardar</button>
         </div>
@@ -128,13 +187,24 @@ admin_header('Conexión LTI (Moodle)', $me);
     <strong>Plataformas registradas</strong>
     <div class="table-wrap">
     <table>
-        <tr><th>Versión</th><th>Issuer / Consumer key</th><th>Client ID</th><th>Deployment ID</th><th>Activa</th><th></th></tr>
+        <tr><th>Versión</th><th>Issuer / Consumer key</th><th>Client ID</th><th>Deployment ID</th><th>Matricula en</th><th>Activa</th><th></th></tr>
         <?php foreach ($platforms as $p): ?>
+        <?php $defaultCourse = isset($p['default_course_id']) && $p['default_course_id'] !== null
+            ? (int) $p['default_course_id'] : null; ?>
         <tr>
             <td><?= htmlspecialchars($p['version']) ?></td>
             <td><?= htmlspecialchars($p['version'] === '1.1' ? $p['consumer_key'] : $p['issuer']) ?></td>
             <td><?= htmlspecialchars($p['client_id']) ?></td>
             <td><?= htmlspecialchars($p['deployment_id']) ?></td>
+            <td>
+                <form method="post">
+                <?= csrf_field() ?>
+                    <input type="hidden" name="id" value="<?= (int) $p['id'] ?>">
+                    <input type="hidden" name="form_action" value="set_default_course">
+                    <?= $selectCurso($defaultCourse) ?>
+                    <button type="submit">Guardar</button>
+                </form>
+            </td>
             <td><?= $p['active'] ? 'sí' : 'no' ?></td>
             <td>
                 <?php if ($p['version'] === '1.1'): ?>
@@ -149,7 +219,7 @@ admin_header('Conexión LTI (Moodle)', $me);
         </tr>
         <?php endforeach; ?>
         <?php if (!$platforms): ?>
-        <tr><td colspan="6" class="muted">Ninguna registrada todavía.</td></tr>
+        <tr><td colspan="7" class="muted">Ninguna registrada todavía.</td></tr>
         <?php endif; ?>
     </table>
     </div>

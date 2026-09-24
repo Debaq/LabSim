@@ -147,6 +147,10 @@ if ($detailId !== null) {
 
         case 'vinculos':
             $vinculos = Lti::contextsForCourse($courseId);
+            // Claves que matriculan a este curso por sí solas: la otra
+            // mitad de la misma pregunta ("¿de dónde entran los alumnos de
+            // este curso?"), y la única que hace la matrícula inmediata.
+            $clavesLti = Lti::platformsForCourse($courseId);
             break;
 
         case 'pruebas':

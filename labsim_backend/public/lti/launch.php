@@ -106,12 +106,14 @@ $isPortalUser = $userRow && $userRow['role'] === 'admin' && (int) $userRow['acti
 // sirve para levantar la sesión de portal ahí mismo (varios navegadores la
 // descartan). El botón manda a admin/sso.php, que canjea este token de un
 // solo uso en una pestaña nueva (primer partido) y ahí sí levanta la sesión.
-// Si este curso de Moodle todavía no está vinculado a un curso de LabSim,
-// se manda al docente/admin directo a courses.php con el contexto en la URL
-// para que lo vincule ahí (una vez) -- ver comentario de course_lti_contexts
-// en schema.sql y el bloque "link_lti_context" en admin/courses.php.
+// Si este launch todavía no resuelve a ningún curso de LabSim --ni por el
+// contexto de Moodle ni por el curso por defecto de la clave-- se manda al
+// docente/admin directo a courses.php con el contexto en la URL para que lo
+// vincule ahí (una vez) -- ver comentario de course_lti_contexts en
+// schema.sql y el bloque "link_lti_context" en admin/courses.php. Una clave
+// creada para un curso no pasa por acá: ya matricula sola.
 $needsLtiLink = $isPortalUser && $platformId !== null && $contextId !== null
-    && Lti::findCourseForContext($platformId, $contextId) === null;
+    && Lti::courseForLaunch($platformId, $contextId) === null;
 $portalUrl = $isPortalUser
     ? '../admin/sso.php?token=' . urlencode(Auth::issuePortalSsoToken($userId))
         . ($needsLtiLink ? '&link_platform=' . $platformId . '&link_context=' . urlencode($contextId) : '')

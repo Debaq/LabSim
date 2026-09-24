@@ -20,7 +20,7 @@ require_once __DIR__ . '/../bootstrap.php';
  */
 
 [$user, $platformId, $contextId] = Auth::requireUserWithSession();
-$courseId = $platformId !== null ? Lti::findCourseForContext($platformId, $contextId) : null;
+$courseId = $platformId !== null ? Lti::courseForLaunch($platformId, $contextId) : null;
 $since = $_GET['since'] ?? '1970-01-01 00:00:00';
 $pdo = Db::get();
 

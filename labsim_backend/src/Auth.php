@@ -439,8 +439,8 @@ final class Auth
         $pdo->exec(
             "DELETE FROM tokens WHERE last_seen_at < datetime('now', '-" . self::TOKEN_INACTIVE_DAYS . " days')"
         );
-        $courseId = ($ltiPlatformId !== null && $contextId !== null)
-            ? Lti::findCourseForContext($ltiPlatformId, $contextId)
+        $courseId = $ltiPlatformId !== null
+            ? Lti::courseForLaunch($ltiPlatformId, $contextId)
             : null;
         // Sin contexto LTI (login local, código del estudiante demo): si la
         // cuenta está matriculada en un único curso, se asume ese -- sin
