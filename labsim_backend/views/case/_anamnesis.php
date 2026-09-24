@@ -60,7 +60,7 @@
             <?php endforeach; ?>
         </select>
     </label>
-    <p class="help">Qué tan fácil se ofende o se pone contento este paciente -- define el umbral del aviso OIRS (reclamo/mérito) que puede dejar al cerrar la atención.</p>
+    <p class="help">Qué tan fácil se ofende o se pone contento este paciente -- define el umbral del aviso OIRS (sugerencia de mejora/felicitación) que puede dejar al cerrar la atención.</p>
 </div>
 
 <div class="card" id="chat-test-card">

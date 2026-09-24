@@ -6,6 +6,7 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/_layout.php';
+require_once __DIR__ . '/../../src/Oirs.php';
 
 /**
  * Mensajes que el docente/admin manda a mano a la bandeja de entrada
@@ -322,7 +323,7 @@ $linkAlumnos = function (int $n) use ($qsAlumnos): string {
     return '?' . http_build_query(array_merge($qsAlumnos, ['pag_alumnos' => $n])) . '#alumnos';
 };
 
-$tipoLabels = ['reclamo' => 'Reclamo', 'merito' => 'Mérito', 'mensaje' => 'Mensaje docente'];
+$tipoLabels = Oirs::LABELS;
 
 admin_header('Bandeja de entrada', $me);
 ?>

@@ -234,17 +234,10 @@ esta forma exacta:
 {"veredicto": "reclamo" | "merito" | "neutro", "asunto": "...", "cuerpo": "..."}
 
 Si veredicto es "neutro", asunto y cuerpo pueden ir vacíos ("").
-Si es "reclamo" o "merito": redacta "asunto" como el asunto de un correo
-formal de la Oficina de Informaciones, Reclamos y Sugerencias -- varía la
-redacción entre distintos casos (no repitas siempre la misma frase), pero
-mantén un tono institucional, por ejemplo variantes de "OIRS: Aviso de
-reclamo por atención recibida" o "OIRS: Aviso de reconocimiento por atención
-recibida". Redacta "cuerpo" en tono formal-institucional, en 2 a 4 oraciones,
-resumiendo desde la oficina el motivo reportado por el paciente (qué pasó y
-por qué), sin inventar hechos que no estén en la transcripción, y sin firmar
-como si fuera el paciente directamente -- suena a un aviso oficial de la
-oficina que resume su queja o felicitación, no a una carta personal del
-paciente.
+Si es "reclamo" o "merito": "asunto" puede ir vacío (lo pone el sistema).
+Redacta "cuerpo" en 2 a 4 oraciones, contando qué percibió el paciente y
+por qué (qué pasó en la conversación), sin inventar hechos que no estén en
+la transcripción.
 PROMPT;
 
     public static function get(): array
@@ -334,11 +327,28 @@ PROMPT;
     }
 
     /** System prompt final del evaluador OIRS para un nivel de disposición dado. */
+    /**
+     * Tono del texto que lee el alumno. Va APARTE de la plantilla, que el
+     * admin puede reescribir: sin esto una plantilla propia volvería a
+     * sonar a queja formal. Hubo una alumna que se puso a llorar con un
+     * "aviso de reclamo" (ver Oirs.php).
+     */
+    public const OIRS_TONO = <<<'TXT'
+
+Tono del "cuerpo" (obligatorio): quien lo lee es un/a estudiante que está
+aprendiendo, y el paciente es simulado. Escríbelo como retroalimentación
+formativa y amable: di concretamente qué percibió el paciente y qué podría
+hacer distinto la próxima vez (o qué hizo bien, si es felicitación). No uses
+las palabras "reclamo", "queja", "denuncia" ni "sanción", no amenaces con
+consecuencias y no uses un tono de acusación. Habla del trato, nunca de la
+persona.
+TXT;
+
     public static function buildOirsPrompt(int $disposition): string
     {
         return self::fillPlaceholders(self::effectiveOirsPrompt(), [
             '{{disposicion}}' => self::dispositionLabel($disposition),
-        ]);
+        ]) . "\n" . self::OIRS_TONO;
     }
 
     /** Texto de {{disposicion}} para un nivel -2..2 (fuera de rango = 0, "normal"). */

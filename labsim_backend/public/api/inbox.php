@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../../src/Oirs.php';
 
 /**
  * Bandeja de entrada del alumno logueado: mensajes de dos orígenes (ver
@@ -40,4 +41,5 @@ $stmt = $pdo->prepare(
      ORDER BY m.created_at DESC"
 );
 $stmt->execute([$user['id']]);
-Response::json(['items' => $stmt->fetchAll()]);
+// Remitente/asunto suaves y el aviso de que es simulado (ver Oirs.php).
+Response::json(['items' => array_map([Oirs::class, 'paraAlumno'], $stmt->fetchAll())]);

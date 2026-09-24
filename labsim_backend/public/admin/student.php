@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
+require_once __DIR__ . '/../../src/Oirs.php';
 require_once __DIR__ . '/../../src/Metrics.php';
 require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/ReportFile.php';
@@ -248,7 +249,7 @@ admin_header('Alumno: ' . $student['display_name'], $me);
 </div>
 
 <?php
-$tipoLabels = ['reclamo' => 'Reclamo', 'merito' => 'Mérito', 'mensaje' => 'Mensaje docente'];
+$tipoLabels = Oirs::LABELS;
 ?>
 <div class="card">
     <strong>Bandeja de entrada (<?= count($inboxMessages) ?>)</strong>

@@ -12,6 +12,8 @@ mensajes que un docente mandó a mano desde Admin -> Bandeja de entrada.
 Vive como subventana del MDI (ver main.py: self.subw["INBOX"]), igual que
 Agenda o el chat con el paciente, en vez de un diálogo emergente."""
 
+import html as html_lib
+
 import shiboken6
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QPushButton, QWidget, QVBoxLayout, QTextEdit,
@@ -85,7 +87,7 @@ class InboxWidget(QWidget):
             return
         row = filas[0].row()
         it = self.tabla.item(row, 0).data(Qt.UserRole)
-        self.cuerpo.setPlainText(f"Asunto: {it.get('asunto', '')}\n\n{it.get('cuerpo', '')}")
+        self.cuerpo.setHtml(cuerpo_html(it))
         if not it.get("leido"):
             inbox_marcar_leido(int(it["id"]))
             it["leido"] = 1
@@ -93,6 +95,22 @@ class InboxWidget(QWidget):
             self.tabla.selectRow(row)
             if self._main_window is not None:
                 actualizar_badge(self._main_window)
+
+
+def cuerpo_html(it):
+    """El mensaje abierto. Los de la OIRS simulada traen `aviso` (ver
+    Oirs.php en el backend): va arriba, antes del texto, para que nadie lea
+    una sugerencia del paciente virtual como una queja real."""
+    partes = []
+    if it.get("aviso"):
+        partes.append(
+            '<p style="background:#eef4ff; border:1px solid #c9d8f5; border-radius:6px; '
+            f'padding:6px 10px; color:#34507a;">{html_lib.escape(it["aviso"])}</p>')
+    if it.get("tipo_label"):
+        partes.append(f'<p style="color:#666; margin:0;">{html_lib.escape(it["tipo_label"])}</p>')
+    partes.append(f'<p><b>{html_lib.escape(it.get("asunto", ""))}</b></p>')
+    partes.append(f'<p>{html_lib.escape(it.get("cuerpo", "")).replace(chr(10), "<br>")}</p>')
+    return "".join(partes)
 
 
 def crear_boton(main_window, layout):

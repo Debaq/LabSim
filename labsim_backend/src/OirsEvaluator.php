@@ -1,9 +1,9 @@
 <?php
 
+require_once __DIR__ . '/Oirs.php';
+
 final class OirsEvaluator
 {
-    /** Remitente que ve el alumno en la bandeja para este tipo de mensaje (ver inbox_messages.remitente). */
-    private const REMITENTE = 'Oficina de Informaciones, Reclamos y Sugerencias (OIRS)';
 
     /**
      * Al cerrar una atención (attendance_action.php, action 'atendido'),
@@ -79,7 +79,7 @@ final class OirsEvaluator
         if ($verdict === null || $verdict['veredicto'] === 'neutro') {
             return;
         }
-        if ($verdict['asunto'] === '' || $verdict['cuerpo'] === '') {
+        if ($verdict['cuerpo'] === '') {
             return; // salida del LLM incompleta -- mejor no dejar un aviso vacío
         }
 
@@ -92,8 +92,10 @@ final class OirsEvaluator
             $studentId,
             $patientId,
             $verdict['veredicto'],
-            self::REMITENTE,
-            $verdict['asunto'],
+            Oirs::REMITENTE,
+            // Asunto fijo y suave (ver Oirs.php): el del modelo decía
+            // "aviso de reclamo" y se leía como una queja real.
+            Oirs::ASUNTOS[$verdict['veredicto']],
             $verdict['cuerpo'],
         ]);
     }
@@ -125,6 +127,9 @@ final class OirsEvaluator
         $verdict = self::parseVerdict($raw);
         if ($verdict === null) {
             throw new RuntimeException('El LLM no devolvió un JSON válido: ' . $raw);
+        }
+        if (Oirs::esDeLaOirs($verdict['veredicto'])) {
+            $verdict['asunto'] = Oirs::ASUNTOS[$verdict['veredicto']];
         }
         return $verdict;
     }

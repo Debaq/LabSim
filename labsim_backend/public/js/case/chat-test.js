@@ -133,8 +133,8 @@
     var oirsResult = document.getElementById('oirs-test-result');
     if (oirsBtn && oirsResult) {
         var VEREDICTO_LABELS = {
-            reclamo: { text: 'Reclamo', color: '#a33', bg: '#fbeaea' },
-            merito: { text: 'Mérito', color: '#2e7d32', bg: '#eaf6ea' },
+            reclamo: { text: 'Sugerencia de mejora', color: '#a33', bg: '#fbeaea' },
+            merito: { text: 'Felicitación', color: '#2e7d32', bg: '#eaf6ea' },
             neutro: { text: 'Neutro (sin aviso)', color: '#666', bg: '#f0f0f0' },
         };
 
@@ -175,7 +175,7 @@
                     mail.style.cssText = 'margin-top:0.5rem; padding:0.7rem; border:1px solid #e5e5e5; border-radius:6px; background:#fafafa; font-size:0.88rem;';
                     var from = document.createElement('div');
                     from.style.color = '#888';
-                    from.textContent = 'De: Oficina de Informaciones, Reclamos y Sugerencias (OIRS)';
+                    from.textContent = 'De: OIRS (simulada)';
                     var subject = document.createElement('div');
                     subject.style.cssText = 'font-weight:600; margin-top:0.2rem;';
                     subject.textContent = 'Asunto: ' + v.asunto;

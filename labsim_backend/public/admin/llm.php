@@ -536,7 +536,7 @@ admin_header('IA Paciente (LLM)', $me);
     <strong>Prompt del evaluador OIRS</strong>
     <p class="muted">
         Al cerrar una atención (botón "Atender" -> nota final), esta plantilla decide -- releyendo el chat
-        completo del alumno con el paciente -- si corresponde un reclamo, un mérito, o nada, y redacta el
+        completo del alumno con el paciente -- si corresponde una sugerencia de mejora, una felicitación, o nada, y redacta el
         aviso que le llega al alumno en su Bandeja OIRS (ver Admin -> ficha del alumno para revisarlos ahí
         también). Solo juzga el TRATO recibido, no el conocimiento clínico. Único placeholder disponible:
         <code>{{disposicion}}</code> (<?= htmlspecialchars(\LlmConfig::PLACEHOLDERS['{{disposicion}}']) ?>).

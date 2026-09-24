@@ -6,6 +6,8 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/Metrics.php';
 require_once __DIR__ . '/../../src/HistoriaClinica.php';
+require_once __DIR__ . '/../../src/Oirs.php';
+require_once __DIR__ . '/../../src/ReportFile.php';
 
 /**
  * Detalle de una atención propia ya cerrada: stats de comportamiento, ficha
@@ -100,12 +102,21 @@ $stmt = $pdo->prepare(
 $stmt->execute([(int) $attendance['id']]);
 $reports = $stmt->fetchAll();
 
-$reportLabels = [
-    'ABR' => 'PEATC (ABR)',
-    'EOA' => 'Emisiones otoacústicas',
-    'VEMP' => 'VEMP',
-    'ELECTROCOCLEO' => 'Electrococleografía',
-];
+$reportLabels = ReportFile::LABELS;
+
+// Mensajes que recibió por esta atención: los de la OIRS simulada y los que
+// un docente le mandó sobre esta cita. Se muestran como en la bandeja de la
+// app, con nombre suave y el aviso de que son parte del ejercicio (ver
+// Oirs.php).
+$stmt = $pdo->prepare(
+    'SELECT id, tipo, remitente, asunto, cuerpo, created_at FROM inbox_messages
+     WHERE appointment_id = ? AND student_id = ? ORDER BY created_at, id'
+);
+$stmt->execute([$appointmentId, $me['id']]);
+$mensajes = array_map([Oirs::class, 'paraAlumno'], $stmt->fetchAll());
+$hayOirs = (bool) array_filter($mensajes, function (array $m): bool {
+    return Oirs::esDeLaOirs((string) $m['tipo']);
+});
 
 $attendanceComments = ['evolucion' => [], 'procedimiento' => []];
 $stmt = $pdo->prepare(
@@ -189,6 +200,28 @@ student_header($paciente, $me);
         </tr>
         <?php endforeach; ?>
     </table>
+    <?php endif; ?>
+</div>
+
+<div class="card">
+    <h2>Mensajes recibidos</h2>
+    <?php if (!$mensajes): ?>
+    <p class="empty">No recibiste mensajes por esta atención.</p>
+    <?php else: ?>
+    <?php if ($hayOirs): ?>
+    <p class="legend"><?= htmlspecialchars(Oirs::AVISO_ALUMNO) ?></p>
+    <?php endif; ?>
+    <?php foreach ($mensajes as $m): ?>
+    <div class="bubble-row">
+        <div class="bubble-system">
+            <span class="bubble-system-header">
+                <?= htmlspecialchars($m['tipo_label']) ?> · <?= htmlspecialchars($m['remitente']) ?> · <?= htmlspecialchars($m['created_at']) ?>
+            </span>
+            <b><?= htmlspecialchars($m['asunto']) ?></b><br>
+            <?= nl2br(htmlspecialchars($m['cuerpo'])) ?>
+        </div>
+    </div>
+    <?php endforeach; ?>
     <?php endif; ?>
 </div>
 
