@@ -22,7 +22,7 @@ from PySide6.QtCore import QEvent, QObject, Qt, QTimer, Signal, Slot
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (QApplication, QLabel, QLineEdit, QPlainTextEdit,
                                QTextEdit, QWidget)
-from core.keyboard_monitor import KeyboardMonitor
+from core import keyboard_monitor
 from backend.log_queue import get_log_queue
 from audiometria.response import ResponseAudiometry as Response
 from audiometria.UI.Ui_Audiometer import Ui_Audiometer
@@ -86,12 +86,10 @@ class Audiometer(QWidget, Ui_Audiometer):
         # la otra ventana. Se resuelven junto a V/B en el eventFilter
         # global para que el audiometro siempre tenga prioridad mientras
         # este abierto, sin depender de cual subventana MDI esta activa.
-        self._dial_keys = {
-            Qt.Key(ord(keyboard_shortcuts[0].upper())): (0, True),
-            Qt.Key(ord(keyboard_shortcuts[1].upper())): (0, False),
-            Qt.Key(ord(keyboard_shortcuts[2].upper())): (1, True),
-            Qt.Key(ord(keyboard_shortcuts[3].upper())): (1, False),
-        }
+        # El canal 1 (S/W) se invierte según haya controlador o no: ver
+        # _aplicar_teclas_dial. El canal 2 (I/K) es igual en los dos.
+        self._dial_keys = {}
+        self._aplicar_teclas_dial(False)
         self._switch_keys = {
             Qt.Key(ord(keyboard_shortcuts_switch[0].upper())): lambda: self.cycle_output(0),
             Qt.Key(ord(keyboard_shortcuts_switch[1].upper())): lambda: self.cycle_stim(0),
@@ -249,12 +247,13 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.activate_response = [0, 0]
         self.trans_idx = [0,0]
 
-        # Detección del keyboard LabSim por USB (ver keyboard_monitor.py).
-        # No toca la interfaz: solo deja disponible self.kb_monitor por si
-        # se necesita en el futuro (ej. .is_connected(), señal
-        # connection_changed).
-        self.kb_monitor = KeyboardMonitor(self)
-        self.kb_monitor.start()
+        # Detección del keyboard LabSim por USB (ver keyboard_monitor.py):
+        # con él, S sube y W baja (el encoder manda 's' al girar a la
+        # derecha); con el teclado del computador es al revés, W arriba y
+        # S abajo, como WASD. Cambia solo al enchufarlo o sacarlo.
+        self.kb_monitor = keyboard_monitor.monitor()
+        self.kb_monitor.connection_changed.connect(self._aplicar_teclas_dial)
+        self._aplicar_teclas_dial(self.kb_monitor.is_connected())
 
         # Shortcuts V/B del btn estimulo: no se usa QPushButton.setShortcut
         # porque eso dispara animateClick() (press+release fijo ~100ms) sin
@@ -304,6 +303,15 @@ class Audiometer(QWidget, Ui_Audiometer):
     def hideEvent(self, event):
         super().hideEvent(event)
         self.install_key_filter(False)
+
+    def _aplicar_teclas_dial(self, conectado):
+        subir, bajar = keyboard_monitor.teclas_dial(conectado)
+        self._dial_keys = {
+            subir: (0, True),
+            bajar: (0, False),
+            Qt.Key(ord(keyboard_shortcuts[2].upper())): (1, True),
+            Qt.Key(ord(keyboard_shortcuts[3].upper())): (1, False),
+        }
 
     def eventFilter(self, obj, event):
         # El filtro esta instalado en QApplication: recibe TODOS los eventos
