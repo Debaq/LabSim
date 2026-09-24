@@ -666,20 +666,28 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if entry is None:
             return
 
+        if self.data_current_key == key:
+            # Los informes de los módulos "de examen" suben ANTES de marcar
+            # 'atendido': shedule.set() empuja ese estado al backend en el
+            # acto, y desde ahí report_upload.php rechaza con 409 (el
+            # informe queda fijo). Con el orden al revés no se guardaba
+            # ninguno. Además tiene que ser antes de _hydrate_modules(),
+            # que les saca appointment_id/data_login.
+            for attr in ("subw_abr", "subw_aabr", "subw_vemp", "subw_eoas",
+                         "subw_ot"):
+                subw = getattr(self, attr, None)
+                if subw is None:
+                    continue  # módulo nunca abierto: no hay informe
+                try:
+                    subw.obj.submit_report()
+                except Exception as exc:
+                    print(f"{attr}: no se pudo subir el informe: {exc}")
+
         marcar_entry_atendido(entry, self.data_login["user"], nota)
         shedule.set(shedule.data)
         self._stop_cronometro()
 
         if self.data_current_key == key:
-            # Antes de deshidratar: los módulos "de examen" suben su informe
-            # mientras todavía tienen appointment_id/data_login --
-            # _hydrate_modules() de abajo se los saca.
-            for attr in ("subw_abr", "subw_aabr", "subw_vemp", "subw_eoas",
-                         "subw_ot"):
-                try:
-                    getattr(self, attr).obj.submit_report()
-                except AttributeError:
-                    pass
             self.data_current_key = None
             self.data_current = None
             self.paciente_actual = None
