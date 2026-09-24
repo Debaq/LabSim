@@ -985,9 +985,22 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         super().closeEvent(event)
 
 
-def _download_and_apply(update):
+def _auto_update_forzado():
+    """Kiosko: LABSIM_AUTO_UPDATE=1 actualiza sin preguntar.
+
+    En los computadores del laboratorio el cuadro de "¿Actualizar ahora?" lo
+    contesta el alumno, que puede decir "No" siempre, y las máquinas quedan
+    en versiones viejas. Con la variable puesta (la define quien administra
+    el equipo, no la app) se aplica directo."""
+    return os.environ.get("LABSIM_AUTO_UPDATE", "").strip() == "1"
+
+
+def _download_and_apply(update, silencioso=False):
     """Baja y aplica `update` (actualización o reparación) con barra de
-    progreso. No vuelve si el swap sale bien: la app se reinicia sola."""
+    progreso. No vuelve si el swap sale bien: la app se reinicia sola.
+
+    silencioso: si falla, se sigue con la versión actual sin cartel -- en
+    un kiosko nadie lo cierra y la app quedaría trabada detrás."""
     from core.updater import apply_update_and_restart
     progress = QProgressDialog("Preparando actualización...", None, 0, 0)
     progress.setWindowTitle("Actualizando LabSim")
@@ -1028,6 +1041,9 @@ def _download_and_apply(update):
         # Falla de red o archivo corrupto a mitad de la descarga/extracción:
         # no dejamos morir la app acá, se sigue con la versión actual instalada.
         progress.close()
+        if silencioso:
+            print(f"Actualización automática fallida, sigue la versión actual: {exc}")
+            return
         warning = QMessageBox()
         warning.setIcon(QMessageBox.Warning)
         warning.setWindowTitle("Actualización fallida")
@@ -1055,6 +1071,9 @@ def _check_and_apply_update():
         return
     tag = update["tag"]
     notes = update.get("notes") or ""
+    if _auto_update_forzado():
+        _download_and_apply(update, silencioso=True)
+        return
     if update.get("repair"):
         # El ejecutable instalado no coincide con el de la release que dice
         # tener: un swap que copió a medias (ver core/updater.py
