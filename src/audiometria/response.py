@@ -776,7 +776,7 @@ class ResponseAudiometry():
                 value = self._resolve_masked_threshold(via, frecuency, output, o_n, 0)
                 verify = True if int_ >= value else False
 
-                #print(f"la intencidad de estimulación es {int}, el umbral es {value} superaste el umbral {verify}")
+                #print(f"la intensidad de estimulación es {int}, el umbral es {value} superaste el umbral {verify}")
                 if verify:
                     self.upHand()
                 else:
