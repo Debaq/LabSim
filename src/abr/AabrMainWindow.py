@@ -559,7 +559,9 @@ class AabrMainWindow(QMainWindow):
                     self.lbl_tiempo):
             lbl.setText("—")
         self.lbl_sonda.setText("Sonda: sin chequear")
-        self._pintar_veredicto(self.resultado.get(self.lado_activo))
+        # El veredicto, no el dict del resultado: con el dict revienta
+        # (unhashable) al volver a un oido ya tamizado.
+        self._pintar_veredicto((self.resultado.get(self.lado_activo) or {}).get('veredicto'))
         self._pintar_condiciones()
         self._pintar_resumen()
 
@@ -634,6 +636,43 @@ class AabrMainWindow(QMainWindow):
             'hallazgos': self.txt_observaciones.toPlainText(),
             'conclusion': self.txt_conducta.toPlainText(),
         }
+
+    def restore_report(self, data):
+        """Retomar la atención: vuelve el tamizaje ya guardado (ver
+        core/report_autosave.py), si todavía no se tamizó nada."""
+        if self.data_current is None or any(self.resultado.values()):
+            return False
+        recuperado = False
+        for lado, r in (data.get('resultados') or {}).items():
+            if lado not in self.resultado or not r:
+                continue
+            combo = self.cb_informe.get(lado)
+            if combo is not None:
+                idx = combo.findText(r.get('veredicto') or '')
+                if idx >= 0:
+                    combo.setCurrentIndex(idx)
+            # Solo se reconstruye lo medido si hubo registro (barridos):
+            # 'veredicto' es lo que el alumno informó en el combo.
+            if r.get('barridos') is not None and r.get('fsp') is not None:
+                self.resultado[lado] = {
+                    'veredicto': r.get('veredicto'),
+                    'barridos': r.get('barridos'),
+                    'segundos': r.get('segundos'),
+                    'fsp': r.get('fsp'),
+                    'nivel': r.get('nivel'),
+                    'estimulo': r.get('estimulo'),
+                }
+                recuperado = True
+        if data.get('hallazgos'):
+            self.txt_observaciones.setPlainText(data['hallazgos'])
+            recuperado = True
+        if data.get('conclusion'):
+            self.txt_conducta.setPlainText(data['conclusion'])
+            recuperado = True
+        self._pintar_veredicto((self.resultado.get(self.lado_activo) or {}).get('veredicto'))
+        self._pintar_condiciones()
+        self._pintar_resumen()
+        return recuperado
 
     def submit_report(self):
         """Sube el informe del tamizaje al cerrar la atención.

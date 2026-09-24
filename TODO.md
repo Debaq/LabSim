@@ -13,9 +13,12 @@
 - Atender a otro paciente con una atención real abierta ahora avisa y no
   deja: antes vaciaba los módulos sin subir nada.
 - Retomar la atención recupera el ABR/ECochG guardado (`api/my_report.php`).
-- [ ] Recuperar al retomar también EOA, VEMP, AABR y Otoscopia. Hoy se
-  guardan, pero al retomar arrancan vacíos, y si el alumno registra algo
-  nuevo el informe guardado se reemplaza por el nuevo (más corto).
+- [x] Recuperar al retomar también EOA, VEMP, AABR y Otoscopia
+  (`restore_report` en cada módulo, lo reparte `ReportAutosave.recuperar`).
+  VEMP ahora guarda el trazo de cada curva (`traza`, `ajustes`,
+  `emg_suma`); un informe VEMP de antes de esto no trae trazo y sus curvas
+  no se pueden redibujar. EOA recupera los resultados por prueba y oído,
+  no los gráficos (las capturas ya están en el servidor).
 - [ ] Subir al servidor: `api/my_report.php` (nuevo) y `api/my_patient_reports.php`
   (hoy da 404 en producción).
 

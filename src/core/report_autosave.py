@@ -26,7 +26,7 @@ import os
 import shutil
 import tempfile
 
-from PySide6.QtCore import QObject, QThread, QTimer, Signal
+from PySide6.QtCore import QObject, QThread, QTimer, Signal, Slot
 
 from core.base import context
 from core.helpers import Preferences
@@ -78,6 +78,52 @@ class _Subida(QThread):
         else:
             self.resultado = (True, "")
         self.terminada.emit(self, *self.resultado)
+
+
+class _Recuperacion(QThread):
+    """Trae lo ya guardado de una cita (my_report.php) fuera del hilo de UI."""
+    lista = Signal(object, object)   # appointment_id, [informes]
+
+    def __init__(self, appointment_id, tipos, parent=None):
+        super().__init__(parent)
+        self.appointment_id = appointment_id
+        self.tipos = tipos
+
+    def run(self):
+        try:
+            client = _client()
+            informes = client.get_my_report(self.appointment_id, self.tipos) \
+                if client.is_logged_in() else []
+        except Exception as exc:  # noqa: BLE001 -- sin red se atiende igual
+            print(f"autosave: no se pudo recuperar lo guardado: {exc}")
+            informes = []
+        self.lista.emit(self.appointment_id, informes)
+
+
+class _Reparto(QObject):
+    """Le da a cada módulo lo recuperado (ver ReportAutosave.recuperar)."""
+
+    def __init__(self, destinos, sigue_vigente, parent=None):
+        super().__init__(parent)
+        self.destinos = destinos
+        self.sigue_vigente = sigue_vigente
+
+    @Slot(object, object)
+    def repartir(self, cita, informes):
+        if not self.sigue_vigente(cita):
+            return
+        vistos = set()
+        for informe in informes:   # el más nuevo primero
+            tipo = informe.get("tipo")
+            modulo = self.destinos.get(tipo)
+            data = informe.get("data")
+            if modulo is None or tipo in vistos or not isinstance(data, dict):
+                continue
+            vistos.add(tipo)
+            try:
+                modulo.restore_report(data)
+            except Exception as exc:  # noqa: BLE001 -- uno no frena a los demás
+                print(f"autosave: no se pudo recuperar {tipo}: {exc}")
 
 
 class ReportAutosave(QObject):
@@ -138,6 +184,23 @@ class ReportAutosave(QObject):
             self._hilos[clave] = hilo
             hilo.terminada.connect(self._terminada)
             hilo.start()
+
+    def recuperar(self, appointment_id, destinos, sigue_vigente):
+        """Retomar la atención: pide lo ya guardado de esa cita y se lo da a
+        cada módulo (`destinos`: {tipo: módulo con restore_report}).
+
+        `sigue_vigente(appointment_id)`: si el alumno ya cerró o cambió de
+        atención cuando llega la respuesta, no se toca nada.
+        """
+        reparto = _Reparto(destinos, sigue_vigente, self)
+        hilo = _Recuperacion(appointment_id, list(destinos), self)
+        # A un método de un QObject del hilo principal: el aviso llega
+        # encolado allá, no en el hilo de la consulta.
+        hilo.lista.connect(reparto.repartir)
+        hilo.finished.connect(hilo.deleteLater)
+        hilo.finished.connect(reparto.deleteLater)
+        hilo.start()
+        return hilo
 
     def olvidar(self, appointment_id, tipo):
         """La subida final ya se hizo a mano: que el próximo tick no crea

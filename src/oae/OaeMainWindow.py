@@ -166,6 +166,29 @@ class OaeMainWindow(QMainWindow):
                     images[suffix] = path
         return images
 
+    def restore_report(self, data):
+        """Retomar la atención: vuelven los resultados ya guardados de cada
+        prueba y oído (ver core/report_autosave.py).
+
+        Se recuperan los números, no los gráficos: las capturas ya están en
+        el servidor y no se vuelven a subir. Lo que importa es que una
+        captura nueva no reemplace el informe entero por uno con solo esa
+        prueba. Un oído que se vuelva a medir pisa al recuperado.
+        """
+        pruebas = data.get('pruebas') or {}
+        recuperado = False
+        for clave, attr, _label in PRUEBAS:
+            panel = getattr(self, attr)
+            for oido, resumen in (pruebas.get(clave) or {}).items():
+                if oido not in panel._report:
+                    panel._report[oido] = resumen
+                    recuperado = True
+        if not self.report.text_edit_1.toPlainText().strip():
+            self.report.text_edit_1.setPlainText(data.get('hallazgos') or '')
+        if not self.report.text_edit_2.toPlainText().strip():
+            self.report.text_edit_2.setPlainText(data.get('conclusion') or '')
+        return recuperado
+
     def report_job(self):
         """El informe tal como se sube (ver core/report_autosave.py), o None
         si todavía no hay ninguna captura."""

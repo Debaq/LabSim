@@ -469,6 +469,20 @@ class _PanelOido(QWidget):
         d = self.to_dict()
         return bool(d["cuadrantes"] or d["cae"] or d["observaciones"])
 
+    def from_dict(self, d):
+        """Lo contrario de to_dict (acepta el formato viejo de un hallazgo
+        por cuadrante)."""
+        self.limpiar()
+        for cuadrante, hallazgos in (d.get("cuadrantes") or {}).items():
+            lista = [hallazgos] if isinstance(hallazgos, str) else list(hallazgos or [])
+            if lista:
+                self.diagrama.marcas[cuadrante] = lista
+        for clave in d.get("cae") or []:
+            if clave in self.checks_cae:
+                self.checks_cae[clave].setChecked(True)
+        self.txt_observaciones.setPlainText(d.get("observaciones") or "")
+        self.diagrama.update()
+
 
 class InformeOtoscopia(QWidget):
     """Pestaña "Informe" de la ventana de otoscopia: lo que el alumno dice
@@ -506,6 +520,10 @@ class InformeOtoscopia(QWidget):
 
     def tiene_algo(self):
         return self.panel_od.tiene_algo() or self.panel_oi.tiene_algo()
+
+    def from_dict(self, d):
+        self.panel_od.from_dict(d.get("od") or {})
+        self.panel_oi.from_dict(d.get("oi") or {})
 
     def set_estado(self, texto):
         self.lbl_estado.setText(texto)

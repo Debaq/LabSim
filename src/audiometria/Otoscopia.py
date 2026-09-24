@@ -293,6 +293,14 @@ class Otoscopia(QWidget):
         return {"appointment_id": appointment_id, "tipo": "OTOSCOPIA",
                 "data": self.informe.to_dict(), "images": None}
 
+    def restore_report(self, data):
+        """Retomar la atención: vuelve el informe ya guardado (ver
+        core/report_autosave.py), si todavía no se marcó nada."""
+        if self.appointment_id is None or self.informe.tiene_algo():
+            return False
+        self.informe.from_dict(data or {})
+        return self.informe.tiene_algo()
+
     def _subir_informe(self):
         """(ok, detalle). Sube el informe tipo 'OTOSCOPIA' -- sin imágenes:
         lo que el alumno informa son las marcas por cuadrante, la foto del

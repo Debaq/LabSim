@@ -183,7 +183,37 @@ class Registro:
                 'barridos_rechazados': self.rechazados,
                 'barridos_pedidos': ajustes.promedios,
             },
+            # Con esto la curva se vuelve a armar tal cual al retomar la
+            # atención (ver desde_dict): antes solo viajaban las medidas y
+            # el trazo se perdía con la app.
+            'traza': {'x': [round(float(v), 4) for v in self.x],
+                      'y': [round(float(v), 5) for v in self.y]},
+            'ajustes': dict(ajustes.__dict__),
+            'emg_suma': round(self.emg_suma, 4),
+            'terminado': self.terminado,
         }
+
+    @classmethod
+    def desde_dict(cls, nombre, d):
+        """La curva guardada por a_dict(), o None si no trae el trazo
+        (informes de antes de que se guardara)."""
+        from vemp.engine import Ajustes
+        traza = d.get('traza') or {}
+        if not traza.get('x'):
+            return None
+        campos = {k: v for k, v in (d.get('ajustes') or {}).items()
+                  if k in Ajustes.__dataclass_fields__}
+        registro = cls(nombre, Ajustes(**campos), traza['x'])
+        registro.y = np.asarray(traza['y'], dtype=float)
+        tecnica = d.get('tecnica') or {}
+        registro.aceptados = int(tecnica.get('barridos_aceptados') or 0)
+        registro.rechazados = int(tecnica.get('barridos_rechazados') or 0)
+        registro.emg_suma = float(d.get('emg_suma') or 0.0)
+        registro.terminado = bool(d.get('terminado', True))
+        for pico, valores in (d.get('LatAmp') or {}).items():
+            if valores and valores[0] is not None and valores[1] is not None:
+                registro.marcar(pico, valores[0], valores[1])
+        return registro
 
 
 class Sesion:

@@ -34,7 +34,7 @@ from core.helpers import Preferences
 from core.report_autosave import subir_ahora
 from vemp import engine, patient, protocol, theme
 from vemp.norms import normativa
-from vemp.session import Sesion
+from vemp.session import Registro, Sesion
 from vemp.widgets.analysis import PanelAnalisis
 from vemp.widgets.controls import PanelControl
 from vemp.widgets.emg import MedidorEmg
@@ -637,6 +637,33 @@ class VempMainWindow(QMainWindow):
         }
         return {"appointment_id": appointment_id, "tipo": 'VEMP', "data": data,
                 "images": self._exportar_imagenes}
+
+    def restore_report(self, data):
+        """Retomar la atención: vuelven las curvas y el informe que ya se
+        habían guardado (ver core/report_autosave.py). Solo si todavía no
+        se registró nada en esta vuelta."""
+        if self.caso is None or self.sesion.registros:
+            return False
+        for nombre, curva in (data.get('curvas') or {}).items():
+            registro = Registro.desde_dict(nombre, curva)
+            if registro is None:
+                continue
+            self.sesion.registros[nombre] = registro
+            panel = self.trazas.get(registro.lado)
+            if panel is None:
+                continue
+            panel.agregar(registro)
+            for pico, (lat, amp) in registro.marcas.items():
+                panel.dibujar_marca(nombre, pico, lat, amp)
+        for lado, db in (data.get('umbral_informado') or {}).items():
+            spin = self.informe.spins_umbral.get(lado)
+            if spin is not None and db:
+                spin.setValue(int(db))
+        self.informe.txt_hallazgos.setPlainText(data.get('hallazgos') or '')
+        self.informe.txt_conclusion.setPlainText(data.get('conclusion') or '')
+        self._refrescar_tabla()
+        self._refrescar_analisis()
+        return bool(self.sesion.registros)
 
     def _exportar_imagenes(self):
         temp = context.get_resource('local_cache/vemp/temp')

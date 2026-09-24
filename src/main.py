@@ -623,6 +623,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if self.data_current:
             self.changeStateBtnAreas(self.frameAction, self.data_current["box"])
         self.report_autosave.iniciar()
+        if not es_prueba:
+            self._recuperar_informes(key)
 
         rut = entry.rut
         nombre = f"{entry.nombre} {entry.apellido}".strip()
@@ -883,6 +885,24 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 modulo.submit_report()
             except Exception as exc:
                 print(f"{type(modulo).__name__}: no se pudo subir el informe: {exc}")
+
+    # El ABR recupera lo suyo solo (AbrMainWindow.restore_current), junto
+    # con la lista de sesiones anteriores.
+    _TIPO_POR_MODULO = {"subw_aabr": "AABR", "subw_vemp": "VEMP",
+                        "subw_eoas": "EOA", "subw_ot": "OTOSCOPIA"}
+
+    def _recuperar_informes(self, key):
+        """Retomar una atención: vuelve lo que ya se había guardado solo."""
+        try:
+            appointment_id = int(key)
+        except (TypeError, ValueError):
+            return
+        destinos = {tipo: getattr(self, attr).obj
+                    for attr, tipo in self._TIPO_POR_MODULO.items()
+                    if getattr(self, attr, None) is not None}
+        self.report_autosave.recuperar(
+            appointment_id, destinos,
+            lambda cita: str(self.data_current_key) == str(cita))
 
     def _otra_atencion_abierta(self, key):
         """Atender a otro paciente con una atención real abierta vaciaba los
