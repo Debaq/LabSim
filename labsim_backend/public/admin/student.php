@@ -6,6 +6,7 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/Metrics.php';
 require_once __DIR__ . '/../../src/Courses.php';
+require_once __DIR__ . '/../../src/ReportFile.php';
 
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
@@ -44,6 +45,22 @@ $stmt = $pdo->prepare(
 );
 $stmt->execute([$studentId]);
 $attendances = $stmt->fetchAll();
+
+// Informes de examen (ABR, EOA, VEMP...) por cita, para abrirlos desde acá
+// mismo. Antes había que entrar a "Ver atención" y bajar hasta el final.
+$stmt = $pdo->prepare(
+    'SELECT r.id, r.tipo, att.appointment_id
+     FROM reports r
+     JOIN attendances att ON att.id = r.attendance_id
+     WHERE att.student_id = ?
+     ORDER BY r.tipo'
+);
+$stmt->execute([$studentId]);
+$reportsByAppt = [];
+foreach ($stmt->fetchAll() as $r) {
+    $reportsByAppt[(int) $r['appointment_id']][] = $r;
+}
+$totalReports = array_sum(array_map('count', $reportsByAppt));
 
 $estadoCounts = ['atendiendo' => 0, 'atendido' => 0, 'no_show' => 0];
 foreach ($attendances as $a) {
@@ -185,11 +202,11 @@ admin_header('Alumno: ' . $student['display_name'], $me);
 </div>
 
 <div class="card">
-    <strong>Atenciones (<?= count($attendances) ?>)</strong>
+    <strong>Atenciones (<?= count($attendances) ?>) · Exámenes con informe (<?= (int) $totalReports ?>)</strong>
     <p class="legend">Comportamiento aislado por cada atención (cita/paciente) -- así un caso no ensucia las métricas de otro cuando el alumno revisó más de uno.</p>
     <div class="table-wrap">
     <table>
-        <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Bloques</th><th>Duración</th><th>Delta prom.</th><th>Pausas largas</th><th>Hora real</th><th>Nota</th><th>Actualizado</th><th>Detalle</th></tr>
+        <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Bloques</th><th>Duración</th><th>Delta prom.</th><th>Pausas largas</th><th>Hora real</th><th>Nota</th><th>Exámenes</th><th>Actualizado</th><th>Detalle</th></tr>
         <?php foreach ($attendances as $a):
             $aStats = $statsByAppt[(int) $a['appointment_id']] ?? null;
             // Duración real (Atender -> Atendido) siempre que esté cerrada;
@@ -212,12 +229,19 @@ admin_header('Alumno: ' . $student['display_name'], $me);
             <td<?= ($aStats['long_pauses'] ?? 0) > 0 ? ' class="badge-warn"' : '' ?>><?= $aStats['long_pauses'] ?? '—' ?></td>
             <td><?= htmlspecialchars($a['hora_real'] ?: '—') ?></td>
             <td class="help"><?= htmlspecialchars($a['nota'] ?: '—') ?></td>
+            <td>
+                <?php foreach ($reportsByAppt[(int) $a['appointment_id']] ?? [] as $r): ?>
+                <a href="report_pdf.php?id=<?= (int) $r['id'] ?>" target="_blank"
+                   title="<?= htmlspecialchars(ReportFile::LABELS[$r['tipo']] ?? $r['tipo']) ?> (PDF)"><?= htmlspecialchars(ReportFile::SHORT_LABELS[$r['tipo']] ?? $r['tipo']) ?></a><br>
+                <?php endforeach; ?>
+                <?php if (empty($reportsByAppt[(int) $a['appointment_id']])): ?><span class="muted">—</span><?php endif; ?>
+            </td>
             <td><?= htmlspecialchars($a['updated_at']) ?></td>
             <td><a href="chat_detail.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>">Ver atención</a></td>
         </tr>
         <?php endforeach; ?>
         <?php if (!$attendances): ?>
-        <tr><td colspan="12" class="muted">Sin atenciones registradas todavía.</td></tr>
+        <tr><td colspan="13" class="muted">Sin atenciones registradas todavía.</td></tr>
         <?php endif; ?>
     </table>
     </div>

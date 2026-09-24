@@ -16,6 +16,26 @@ declare(strict_types=1);
  */
 final class ReportFile
 {
+    /** Nombre de cada tipo de informe (reports.tipo) para mostrarle al docente. */
+    public const LABELS = [
+        'ABR' => 'PEATC (ABR)',
+        'AABR' => 'Tamizaje automatizado (AABR)',
+        'EOA' => 'Emisiones otoacústicas',
+        'VEMP' => 'VEMP',
+        'ELECTROCOCLEO' => 'Electrococleografía',
+        'OTOSCOPIA' => 'Otoscopia (informe por cuadrantes)',
+    ];
+
+    /** Rótulo corto, para una celda de tabla. */
+    public const SHORT_LABELS = [
+        'ABR' => 'ABR',
+        'AABR' => 'AABR',
+        'EOA' => 'EOA',
+        'VEMP' => 'VEMP',
+        'ELECTROCOCLEO' => 'ECochG',
+        'OTOSCOPIA' => 'Otoscopia',
+    ];
+
     public static function dir(): string
     {
         $dir = __DIR__ . '/../data/reports';

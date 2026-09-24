@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/Courses.php';
+require_once __DIR__ . '/../../src/ReportFile.php';
 
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
@@ -94,13 +95,7 @@ if ($attendance) {
     $stmt->execute([$attendance['id']]);
     $reports = $stmt->fetchAll();
 }
-$reportLabels = [
-    'ABR' => 'PEATC (ABR)',
-    'EOA' => 'Emisiones otoacústicas',
-    'VEMP' => 'VEMP',
-    'ELECTROCOCLEO' => 'Electrococleografía',
-    'OTOSCOPIA' => 'Otoscopia (informe por cuadrantes)',
-];
+$reportLabels = ReportFile::LABELS;
 
 $stmt = $pdo->prepare(
     'SELECT id, role, content, speaker_label, created_at FROM llm_chat_logs
