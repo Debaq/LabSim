@@ -4,7 +4,7 @@ import os
 import sys
 import traceback
 import requests
-from PySide6.QtCore import Qt, QSize, QTimer, Signal, Slot
+from PySide6.QtCore import QEvent, Qt, QSize, QTimer, Signal, Slot
 from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox, QProgressDialog
 
 from abr.AabrMainWindow import AabrMainWindow
@@ -149,7 +149,11 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.setWindowTitle(f"LabSim {DISPLAY_VERSION}")
         self.lbl_title.setText(f"LabSim {DISPLAY_VERSION}")
         self.configure_btn()
-        MoveWindow(self).set_movewindow()
+        if not es_kiosko():
+            # En el laboratorio la ventana no se mueve ni se restaura: va
+            # a pantalla completa (ver _aplicar_kiosko).
+            MoveWindow(self).set_movewindow()
+        self._aplicar_kiosko()
         self._setup_layout_status()
 
     def _setup_layout_status(self):
@@ -270,6 +274,35 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.btn_max.clicked.connect(self._toggle_max_min)
         self.btn_login.clicked.connect(self.toggle_login)
 
+    # -----------------------------------------------------------------
+    # Modo laboratorio (ver core/kiosko.py)
+    # -----------------------------------------------------------------
+
+    def _salida_permitida(self):
+        """En el laboratorio solo sale un docente logueado: el alumno no
+        puede cerrar la app. Fuera del laboratorio, siempre."""
+        if not es_kiosko():
+            return True
+        return bool(self.data_login) and es_docente(self.data_login.get("permission"))
+
+    def _aplicar_kiosko(self):
+        """Pantalla completa y sin botones de ventana. El de cerrar vuelve
+        a aparecer con un docente logueado, que es la salida del personal
+        (si no, solo quedaría el administrador de tareas)."""
+        if not es_kiosko():
+            return
+        self.btn_min.setVisible(False)
+        self.btn_max.setVisible(False)
+        self.btn_salir.setVisible(self._salida_permitida())
+
+    def changeEvent(self, event):
+        super().changeEvent(event)
+        # Algo la sacó de pantalla completa (Win+Abajo, doble clic, el
+        # sistema): vuelve sola.
+        if (es_kiosko() and event.type() == QEvent.Type.WindowStateChange
+                and self.isVisible() and not self.isFullScreen()):
+            QTimer.singleShot(0, self.showFullScreen)
+
     def _update_max_icon(self):
         """Cambia el icono de btn_max entre maximizar/restaurar según el
         estado actual de la ventana"""
@@ -337,6 +370,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             # Atajos y mouse del alumno: vienen con el login, así lo siguen
             # a cualquier equipo (ver core/preferencias.py).
             preferencias().cargar(data.get("prefs") or {})
+            self._aplicar_kiosko()
             self._apply_admin_overrides_if_any()
             LOCAL_LOG_QUEUE.push("session_login", {
                 "user": data.get("user"),
@@ -506,6 +540,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.data_current_key = None
         self.paciente_actual = None
         preferencias().limpiar()
+        self._aplicar_kiosko()
 
     def _start_cronometro(self):
         """Arranca (o reinicia si ya venía corriendo) el cronómetro de
@@ -989,6 +1024,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.abrir_chat_con(p["case_id"], p["nombre"], p["edad"], p["procedimiento"], p.get("appointment_id"))
 
     def closeEvent(self, event):
+        if not self._salida_permitida():
+            # Laboratorio: ni la X (que no está) ni Alt+F4 cierran la app.
+            event.ignore()
+            return
         self._guardar_informes_al_salir()
         if self.log_uploader is not None:
             # Igual que en logout(): sin esto, acciones recién logueadas quedan
@@ -1147,6 +1186,9 @@ if __name__ == '__main__':
 
     window = MainWindow()
     Preferences.get_style(window)
-    window.show()
+    if es_kiosko():
+        window.showFullScreen()
+    else:
+        window.show()
     exit_code = context.app.exec()
     sys.exit(exit_code)

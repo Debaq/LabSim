@@ -4,8 +4,10 @@
 
 - `LABSIM_KIOSKO=1` (variable de entorno del equipo, se lee solo en
   `src/core/kiosko.py`). En Windows, como admin: `setx LABSIM_KIOSKO 1 /M`.
-  Hace dos cosas: actualiza sin preguntar y aplica el "mouse para zurdos"
-  del alumno dentro de LabSim. `LABSIM_AUTO_UPDATE=1` sigue funcionando
+  Hace tres cosas: actualiza sin preguntar, aplica el "mouse para zurdos"
+  del alumno dentro de LabSim, y deja la ventana a pantalla completa sin
+  botones de ventana ni forma de cerrarla (Alt+F4 tampoco); solo un
+  docente logueado ve el botón de cerrar. `LABSIM_AUTO_UPDATE=1` sigue funcionando
   solo para la actualización.
 - Preferencias en la cuenta (`users.prefs`, `UserPrefs.php`,
   `api/my_prefs.php`), llegan con el login: atajos de teclado propios y
