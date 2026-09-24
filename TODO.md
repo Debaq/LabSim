@@ -3556,3 +3556,50 @@ o el mismo cartel que ya informa "sin conexión".
 **Lo que sigue sin saberse, y no hace falta**: en qué zona está el php.ini del
 hosting. Antes era necesario y no se podía averiguar; ahora el reloj de Estado
 lo muestra y, sobre todo, ya no cambia el comportamiento.
+
+## Biblioteca de fichas: carpetas y archivado (sin probar en el navegador)
+
+`admin/patients.php` pasó de "una lista con todo" a una biblioteca que se
+puede mantener: carpetas, archivado y acciones en tanda (`src/CaseLibrary.php`,
+`cases.folder_id` / `cases.archived_at`, tabla `case_folders`). Lo decidido, y
+por qué, para no rediscutirlo:
+
+- **Una carpeta por ficha, no etiquetas.** Una ficha vive en un lugar, como un
+  archivo, y así "mover" se entiende sin explicar. Si alguna vez hace falta que
+  una ficha esté en dos lados a la vez, eso son etiquetas y es otra tabla, no
+  este campo.
+- **Carpetas planas, sin árbol.** Con doscientas fichas lo que ordena es
+  separar por semestre o por práctica; un árbol obliga a navegar en vez de
+  filtrar y esconde justo lo que se busca.
+- **Borrar una carpeta no borra fichas**: quedan sueltas (`folder_id = NULL`).
+  Que "eliminar carpeta" se llevara doscientos casos armados sería la peor
+  sorpresa posible de esa pantalla.
+- **Archivar es reversible y no toca nada más**: la ficha sale de la lista y
+  del selector de "agendar caso nuevo" (`agenda.php`), pero sus citas,
+  atenciones e historial quedan intactos, y una ficha archivada con citas
+  vivas se sigue atendiendo. Es el lugar donde van a parar los casos de
+  semestres pasados sin tener que decidir si se borran.
+- **Archivadas es una VISTA aparte, no un filtro más de la barra**: lo
+  archivado no se mezcla con lo vivo ni por accidente.
+- **El borrado en tanda informa el impacto antes y después**: el confirm dice
+  cuántas fichas, y el mensaje de vuelta cuántas citas y atenciones de alumnos
+  se llevó puestas (`CaseLibrary::impactoDeBorrado`). Todo en una transacción:
+  una tanda interrumpida no puede dejar casos sin citas y citas sin atenciones.
+- **Densidad**: el comentario del docente tenía columna propia de 22rem y un
+  párrafo por fila -- tres casos llenaban la pantalla. Ahora va recortado a
+  una línea bajo el nombre, con el texto completo en el tooltip, y las nueve
+  columnas quedaron en seis (Ficha, Estado, Uso, Autoría, Acciones).
+
+**El orden de la migración importa**: `migrateCaseLibraryIfNeeded` va ANTES
+del paso `schema.sql` en `admin/database.php`, porque ese archivo trae un
+`CREATE INDEX ... ON cases(folder_id)` que en una base ya existente muere con
+"no such column: folder_id" (pasó en el hosting). Y la migración se salta sola
+si `cases` todavía no existe: en una instalación nueva la crea schema.sql, ya
+con las dos columnas.
+
+**Qué se probó y qué no**: acá no hay `pdo_sqlite`, así que las dos secuencias
+(base existente con el schema viejo, y base vacía) se replicaron en SQLite con
+Python, junto con las consultas nuevas -- carpetas, impacto del borrado, lista
+filtrada, selector de agenda sin archivadas, borrado en tanda y borrar carpeta
+sin perder fichas. Falta verlo en el navegador: la barra de acciones en tanda,
+el menú de carpetas y la densidad de la tabla.

@@ -25,7 +25,10 @@ function admin_count(PDO $pdo, string $sql): string
 $counts = [
     'Alumnos' => admin_count($pdo, "SELECT COUNT(*) FROM users WHERE role='student'"),
     'Admins' => admin_count($pdo, "SELECT COUNT(*) FROM users WHERE role='admin'"),
-    'Casos clínicos' => admin_count($pdo, 'SELECT COUNT(*) FROM cases'),
+    // Sin las archivadas, para que este número y el de la biblioteca de
+    // fichas (admin/patients.php) digan lo mismo. admin_count() devuelve '—'
+    // si la columna todavía no existe, así que no hace falta migrar acá.
+    'Casos clínicos' => admin_count($pdo, 'SELECT COUNT(*) FROM cases WHERE archived_at IS NULL'),
     'Citas de agenda' => admin_count($pdo, 'SELECT COUNT(*) FROM appointments'),
     'Atenciones registradas' => admin_count($pdo, 'SELECT COUNT(*) FROM attendances'),
     'Plataformas LTI registradas' => admin_count($pdo, 'SELECT COUNT(*) FROM lti_platforms'),

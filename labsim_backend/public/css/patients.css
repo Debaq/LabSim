@@ -123,3 +123,108 @@ details.row-menu[open] .row-menu-dropdown { display: flex; }
   cursor: pointer;
 }
 .row-menu-item:hover { background: var(--color-row-alt); }
+/* ------------------------------------------------------------------ *
+ * Biblioteca de fichas: carpetas, selección en tanda y tabla densa.
+ * ------------------------------------------------------------------ */
+
+/* Carpetas como pastillas: filtro y ubicación a la vez. Planas, sin árbol
+ * -- con doscientas fichas lo que ordena es separar por semestre/práctica,
+ * no navegar niveles. */
+.folder-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0.9rem 0 0.2rem;
+}
+.folder-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  text-decoration: none;
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+.folder-pill:hover { background: var(--color-row-alt); }
+.folder-pill.is-active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+.folder-pill-count { font-size: 0.7rem; opacity: 0.7; }
+/* Archivadas queda a la derecha y separada: es otra vista, no una carpeta
+ * más -- lo archivado no se mezcla con lo vivo ni de refilón. */
+.folder-pill--archive { margin-left: auto; }
+.folder-admin { margin: 0; }
+.row-menu-dropdown--wide { min-width: 300px; }
+.folder-form {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+  padding: var(--space-2) 0.9rem;
+}
+.folder-form input[type="text"] { flex: 1 1 auto; margin: 0; min-width: 0; }
+.folder-form button { margin: 0; padding: 0.15rem 0.5rem; font-size: 0.8rem; }
+.link-danger { color: var(--color-danger); }
+
+/* Barra de acciones en tanda: aparece recién con algo tildado, y queda
+ * pegada arriba al hacer scroll para no tener que volver al encabezado
+ * después de seleccionar treinta fichas. */
+.bulk-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  margin: 0 0 var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-warn-bg);
+  color: var(--color-warn-text);
+}
+.bulk-bar .btn { margin: 0; }
+.bulk-move { display: inline-flex; gap: 0.3rem; align-items: center; }
+.bulk-move select { width: auto; margin: 0; }
+
+/* Tabla densa: una fila = una ficha, sin celdas que crezcan con el texto.
+ * El ancho se lo lleva la columna Ficha; el resto es de tamaño fijo. */
+.table-dense th, .table-dense td {
+  padding: 0.3rem 0.5rem;
+  vertical-align: middle;
+  font-size: 0.85rem;
+}
+.table-dense .col-check { width: 1.8rem; }
+.table-dense .col-check input { width: auto; margin: 0; }
+.table-dense .col-estado { width: 16rem; }
+.table-dense .col-uso { width: 5rem; text-align: center; }
+.table-dense .col-autoria { width: 11rem; font-size: 0.78rem; }
+.table-dense .col-acciones { width: 1%; }
+.table-dense .col-estado .tag { margin: 0 0.15rem 0.1rem 0; }
+
+.ficha-id {
+  display: inline-block;
+  min-width: 2.5rem;
+  color: var(--color-muted);
+  font-size: 0.78rem;
+}
+.ficha-nombre { font-weight: 600; text-decoration: none; }
+.ficha-nombre--vacio { color: var(--color-danger); font-weight: 400; }
+/* El comentario del docente: una línea, recortada, con el texto completo en
+ * el tooltip. Tenía columna propia de 22rem y un párrafo por fila -- tres
+ * casos llenaban la pantalla y la tabla dejaba de servir para buscar. */
+.ficha-comentario {
+  display: block;
+  max-width: 46rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}

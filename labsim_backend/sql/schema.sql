@@ -201,9 +201,35 @@ CREATE TABLE IF NOT EXISTS cases (
     -- desde admin_audit_log (ver Db::migrateCaseAuthorshipIfNeeded).
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by INTEGER REFERENCES users(id),
-    updated_by INTEGER REFERENCES users(id)
+    updated_by INTEGER REFERENCES users(id),
+    -- Carpeta de la biblioteca de fichas (admin/patients.php). NULL = suelta,
+    -- "Sin carpeta". Es UNA carpeta por ficha a propósito: una ficha vive en
+    -- un lugar, como un archivo, y así "mover" es una operación que se
+    -- entiende sin explicar. Si alguna vez hace falta que una ficha esté en
+    -- dos lados, eso son etiquetas y es otra tabla, no este campo.
+    folder_id INTEGER REFERENCES case_folders(id),
+    -- Archivada: fuera de la vista por defecto y fuera del selector de
+    -- "agendar caso nuevo", pero NO borrada -- sus citas, atenciones e
+    -- historial siguen intactos, y una ficha archivada que todavía tiene
+    -- citas vivas se sigue atendiendo. Es el lugar donde van a parar los
+    -- casos de semestres pasados sin tener que decidir si se borran.
+    archived_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_cases_patient_id ON cases(patient_id);
+CREATE INDEX IF NOT EXISTS idx_cases_folder_id ON cases(folder_id);
+
+-- Carpetas de la biblioteca de fichas clínicas (admin/patients.php). Son
+-- planas a propósito: sin carpetas dentro de carpetas, que en una biblioteca
+-- de doscientos casos no ordena nada y obliga a navegar en vez de filtrar.
+-- Borrar una carpeta NO borra sus fichas: quedan sueltas (folder_id = NULL).
+CREATE TABLE IF NOT EXISTS case_folders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by INTEGER REFERENCES users(id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_case_folders_name ON case_folders (name COLLATE NOCASE);
+
 -- Citas de la agenda (antes cada fila de schedule.json["agenda_1"]).
 -- Compartidas: cualquier alumno puede atenderlas (ver attendances abajo).
 CREATE TABLE IF NOT EXISTS appointments (

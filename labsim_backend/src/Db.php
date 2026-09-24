@@ -489,6 +489,48 @@ final class Db
     }
 
     /**
+     * Carpetas y archivado de la biblioteca de fichas (ver case_folders y
+     * cases.folder_id/archived_at en schema.sql).
+     *
+     * Crea la tabla además de las columnas, y no espera a schema.sql, por lo
+     * mismo que migrateLlmUsageIfNeeded: la llama CaseLibrary en el camino de
+     * admin/patients.php, que es la página que se abre todos los días,
+     * mientras que "Aplicar schema" puede pasar semanas sin correr.
+     */
+    public static function migrateCaseLibraryIfNeeded(): void
+    {
+        static $hecho = false;
+        if ($hecho) {
+            return;
+        }
+        $pdo = self::get();
+        $pdo->exec(
+            'CREATE TABLE IF NOT EXISTS case_folders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                created_by INTEGER REFERENCES users(id)
+            )'
+        );
+        $pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_case_folders_name ON case_folders (name COLLATE NOCASE)');
+        // Instalación nueva: `cases` todavía no existe porque esto corre
+        // ANTES de schema.sql (que trae el índice sobre cases(folder_id) y
+        // necesita la columna puesta). Ahí no hay nada que migrar --
+        // schema.sql crea la tabla ya con las dos columnas-- y el ALTER
+        // moriría con "no such table". Tampoco se marca como hecho: si en el
+        // mismo request alguien vuelve a llamar después de schema.sql, la
+        // tabla ya está y corresponde revisarla.
+        $existe = $pdo->query("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'cases'")->fetchColumn();
+        if ($existe === false) {
+            return;
+        }
+        $hecho = true;
+        self::addColumnIfMissing($pdo, 'cases', 'folder_id', 'INTEGER REFERENCES case_folders(id)');
+        self::addColumnIfMissing($pdo, 'cases', 'archived_at', 'TEXT');
+        $pdo->exec('CREATE INDEX IF NOT EXISTS idx_cases_folder_id ON cases(folder_id)');
+    }
+
+    /**
      * Curso al que matricula una clave LTI por sí sola (ver el comentario de
      * lti_platforms.default_course_id en schema.sql).
      *

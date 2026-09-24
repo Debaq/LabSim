@@ -53,6 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'login propio del docente' => static fn() => Db::migrateProfileLoginIfNeeded(),
                 'usuarios sin distinguir mayúsculas' => static fn() => Db::migrateUsernameNoCaseIfNeeded(),
                 'otoscopía en informes' => static fn() => Db::migrateReportsOtoscopiaIfNeeded(),
+                // Antes de schema.sql, y no después: ese archivo trae un
+                // `CREATE INDEX ... ON cases(folder_id)` que en una base ya
+                // existente falla con "no such column: folder_id" si la
+                // columna no se agregó primero (mismo motivo que
+                // migrateAppConfigCourseIdIfNeeded).
+                'carpetas y archivado de fichas' => static fn() => Db::migrateCaseLibraryIfNeeded(),
                 // El schema en sí: crea las tablas que falten. Va en el medio
                 // porque los pasos de abajo agregan columnas a tablas que
                 // recién acá existen (CREATE TABLE IF NOT EXISTS no toca una
