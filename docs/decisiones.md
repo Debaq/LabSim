@@ -5,6 +5,25 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## SISI: el paciente responde a las subidas de intensidad (2026-09-24)
+
+Reporte de prueba en clase: el paciente decía "sí" una sola vez y después
+nada. El motor (`response_sisi`) solo miraba el toc-toc: sorteaba el % SISI
+al prender el tono y las subidas de intensidad no llegaban a la prueba.
+
+Ahora, con la instrucción `cambie_de_volumen` y el tono portador sonando,
+cada subida de intensidad del canal del tono es un incremento:
+- 5 dB o más (familiarización): lo nota siempre, SISI positivo o negativo.
+- 1 dB (la prueba): lo nota con el % SISI del caso.
+- 3 dB (el otro paso del equipo): interpolado entre el % y 100.
+- Bajar (volver al portador): no se responde.
+- Portador bajo el umbral aéreo de ese oído: no oye ningún incremento.
+- Prender el tono no cuenta como incremento.
+
+El paciente no sabe si está en familiarización o en prueba (así se le
+instruye en la clínica), por eso no hay modo: decide el tamaño del salto.
+Tests en `tests/test_sisi.py`. Sin probar en la app real.
+
 ## Build más liviano y arranque más rápido (explorado 2026-09-24, sin hacer)
 
 Medido sobre el build Linux (`dist/LabSim`, 431 MB) y con `-X importtime`.

@@ -119,7 +119,9 @@ class ResponseAudiometry():
                 elif self.history_command[0] =='dos_pitos':
                     self.fowler()
                 elif self.history_command[0] == 'cambie_de_volumen':
-                    self.response_sisi()
+                    # prender el tono portador no es un incremento: el
+                    # paciente responde recien cuando se sube la intensidad
+                    pass
                 elif self.history_command[0] =='aerea_+_ruido':
                     if self.data['audio']['stimOn'].count(True) == 2:
                         self.response_aerea_w_msk()
@@ -156,7 +158,11 @@ class ResponseAudiometry():
 
         if 'int' in name:
             value = str_.split(' ')
+            old_int = self.data['audio']['int'][channel]
             self.data['audio']['int'][channel] = int(value[0])
+            if (self.history_command
+                    and self.history_command[0] == 'cambie_de_volumen'):
+                self.response_sisi(channel, int(value[0]) - old_int)
         elif 'trans' in name:
             value = trans_list.index(str_)
             self.data['audio']['trans'][channel] = value
@@ -557,17 +563,31 @@ class ResponseAudiometry():
         else:
             self.downHand()
 
-    def response_sisi(self):
-        """SISI: cada pulsación del comando simula un incremento de 1dB;
-        la probabilidad de detectarlo es el score % guardado en el caso."""
-        if self.data['audio']['test'] == 'Umbrales':
-            if self.data['audio']['stimOn'].count(True) == 1:
-                stim_on = self.data['audio']['stimOn'].index(True)
-                output = self.data['audio']['output'][stim_on]
-                pct = self.dbdata.get('SISI', [0, 0])[output]
-                if random.randint(1, 100) <= pct:
-                    self.other_response.create_voice_('si')
-
+    def response_sisi(self, channel, delta):
+        """SISI: con el tono portador sonando, cada subida de intensidad es
+        un incremento y el paciente dice "si" si lo nota. Se decide por el
+        tamano del salto, sin importar si el alumno esta familiarizando o
+        midiendo -- el paciente no sabe en que etapa esta:
+        - 5 dB o mas (familiarizacion): lo nota siempre.
+        - 1 dB (la prueba): lo nota con el % SISI del caso.
+        - entre medio (paso de 3 dB): interpolado entre ambos.
+        Bajar la intensidad (volver al portador) no se responde, y un tono
+        bajo el umbral no deja oir ningun incremento."""
+        if delta <= 0 or self.data['audio']['test'] != 'Umbrales':
+            return
+        if self._tone_channel() != channel:
+            return
+        output = self.data['audio']['output'][channel]
+        freq = self.data['audio']['freq']
+        if self.data['audio']['int'][channel] - delta < self.aerea[output][freq]:
+            return
+        if delta >= self.STEP_DB:
+            pct = 100
+        else:
+            base = self.dbdata.get('SISI', [0, 0])[output]
+            pct = base + (100 - base) * (delta - 1) / (self.STEP_DB - 1)
+        if random.random() * 100 < pct:
+            self.other_response.create_voice_('si')
 
     def _masking_calc(self, via, frecuency, o_e, o_n, ce=0):
         """
