@@ -55,6 +55,7 @@ import tempfile
 from pathlib import Path
 from urllib.error import URLError
 from urllib.request import Request, urlopen
+from xml.etree import ElementTree
 
 REPO = "Debaq/LabSim"
 TAG_PREFIX = "pyinstaller-v"
@@ -66,7 +67,10 @@ UPDATE_ASSET_NAME = "LabSim-linux-x86_64-update.tar.gz"
 # a la mas nueva le falta (build de Windows caida, o SKIP_WINDOWS=1).
 SETUP_ASSET_NAME = "LabSim-windows-x86_64-setup.exe"
 IS_WINDOWS = sys.platform.startswith("win")
-RELEASES_API = f"https://api.github.com/repos/{REPO}/releases"
+# per_page=100: la API devuelve 30 por defecto y las releases viejas se
+# mantienen a proposito (son la cadena de updates). Pasadas las 30, una
+# maquina atrasada no encontraba la suya en la lista y bajaba el full.
+RELEASES_API = f"https://api.github.com/repos/{REPO}/releases?per_page=100"
 REQUEST_TIMEOUT = 5
 # Mas saltos que esto y sale mas a cuenta bajar el full directo -- cada hop
 # es una descarga + extraccion aparte, y encima "muchos hops" suele pasar
@@ -78,6 +82,18 @@ MANIFEST_ASSET_NAME = "manifest.json"
 # del usuario (local_cache/) porque no es parte del build y no debe viajar en
 # ningun paquete: si viajara, una instalacion rota heredaria el visto bueno.
 VERIFY_MARKER = "resources/local_cache/.install_verified"
+# Feed Atom de releases: es una pagina web, no la API, asi que no tiene el
+# limite de 60 consultas por hora POR IP de la API sin autenticar (el
+# laboratorio entero sale por la misma IP, y el kiosko pregunta al abrir y
+# cada media hora). Trae solo las 10 mas nuevas y sin assets: sirve para
+# saber si hay algo nuevo; la API se consulta solo cuando lo hay.
+RELEASES_FEED = f"https://github.com/{REPO}/releases.atom"
+
+
+class UpdateCheckError(Exception):
+    """No se pudo saber si hay version nueva (red, GitHub, respuesta rara).
+    Solo la levanta check_for_update(estricto=True): el kiosko no abre sin
+    saberlo."""
 
 
 def _parse_version(version: str) -> tuple:
@@ -110,7 +126,41 @@ def local_build_id(fallback_version: str) -> str:
 def _fetch_releases() -> list:
     req = Request(RELEASES_API, headers={"Accept": "application/vnd.github+json"})
     with urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
-        return json.load(resp)
+        releases = json.load(resp)
+    if not isinstance(releases, list):
+        # con el limite agotado GitHub contesta un dict con "message"
+        raise ValueError("GitHub no devolvio una lista de releases")
+    return releases
+
+
+def _ultimo_build_feed():
+    """build_id de la release 'pyinstaller-v*' mas nueva segun el feed Atom,
+    o None si el feed no trae ninguna (las 10 ultimas son del rewrite Tauri).
+    Levanta si no se pudo leer."""
+    with urlopen(Request(RELEASES_FEED), timeout=REQUEST_TIMEOUT) as resp:
+        raiz = ElementTree.fromstring(resp.read())
+    ns = "{http://www.w3.org/2005/Atom}"
+    for entry in raiz.iter(ns + "entry"):
+        tag = (entry.findtext(ns + "id") or "").rsplit("/", 1)[-1]
+        if tag.startswith(TAG_PREFIX):
+            return tag[len(TAG_PREFIX):]
+    return None
+
+
+def _al_dia_segun_feed(local_id: str) -> bool:
+    """Atajo sin la API: la release mas nueva es la local y la instalacion ya
+    se verifico contra ella (si no, hay que ir a la API a verificarla)."""
+    try:
+        ultimo = _ultimo_build_feed()
+    except (URLError, OSError, ValueError, TimeoutError, ElementTree.ParseError):
+        return False
+    if ultimo is None or ultimo != local_id:
+        return False
+    try:
+        marca = (_dist_dir() / VERIFY_MARKER).read_text(encoding="utf-8").strip()
+    except OSError:
+        return False
+    return marca == local_id
 
 
 def _asset_url(release: dict, name: str):
@@ -206,7 +256,7 @@ def _check_install_integrity(candidates: list, local_release: dict):
     return None
 
 
-def check_for_update(current_version: str):
+def check_for_update(current_version: str, estricto: bool = False):
     """Busca releases 'pyinstaller-v*' más nuevas que el build local.
 
     'Más nueva' = publicada después que la release que corresponde al
@@ -229,10 +279,20 @@ def check_for_update(current_version: str):
       ser la última: el .exe lo compila un runner aparte y puede faltar.
 
     Devuelve None si no hay nada nuevo, o si falla la red (nunca revienta:
-    no queremos bloquear el arranque por un lab sin internet)."""
+    no queremos bloquear el arranque por un lab sin internet). Con
+    estricto=True la falla de red levanta UpdateCheckError en vez de pasar
+    por "no hay nada": el kiosko no abre sin saber si esta al dia.
+
+    Primero se mira el feed Atom (sin limite de consultas): si dice que la
+    local es la ultima, no se toca la API. Si el feed falla o hay algo
+    nuevo, se sigue por la API como siempre."""
+    if _al_dia_segun_feed(local_build_id(current_version).lstrip("v")):
+        return None
     try:
         releases = _fetch_releases()
-    except (URLError, OSError, ValueError, TimeoutError):
+    except (URLError, OSError, ValueError, TimeoutError) as exc:
+        if estricto:
+            raise UpdateCheckError(str(exc)) from exc
         return None
 
     candidates = [r for r in releases if r.get("tag_name", "").startswith(TAG_PREFIX)]

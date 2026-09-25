@@ -10,8 +10,10 @@ Qué cambia en un kiosko:
   (core/mouse_zurdo.py). En un computador personal no: ahí el alumno lo
   configura en el sistema, y si LabSim lo invirtiera otra vez quedaría al
   derecho.
-- Las actualizaciones se aplican sin preguntar (main._auto_update_forzado):
-  el alumno podía decir "No" siempre y las máquinas quedaban viejas.
+- La actualización es obligatoria (core/actualizacion_kiosko.py): no abre
+  sin estar al día, y lo que sale con la app abierta se instala apenas no
+  haya sesión iniciada. Antes el alumno podía decir "No" y, si fallaba, se
+  abría la versión vieja sin avisar.
 - Al apagar el equipo (SIGTERM) la app cierra en orden y guarda lo abierto
   (atender_apagado), aunque el alumno no pueda cerrarla.
 """

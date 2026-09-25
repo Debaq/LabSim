@@ -70,8 +70,10 @@ def buscar(releases, exe_bytes, manifest_exe_sha, local="0.9.8", windows=False,
             return _FakeResp(json.dumps({"files": {"LabSim": manifest_exe_sha}}).encode())
 
         original = (updater._fetch_releases, updater.IS_WINDOWS,
-                    updater.local_build_id, updater._dist_dir, updater.urlopen)
+                    updater.local_build_id, updater._dist_dir, updater.urlopen,
+                    updater._ultimo_build_feed)
         updater._fetch_releases = lambda: releases
+        updater._ultimo_build_feed = lambda: None     # sin atajo: va a la API
         updater.IS_WINDOWS = windows
         updater.local_build_id = lambda _v: local
         updater._dist_dir = lambda: dist
@@ -80,7 +82,7 @@ def buscar(releases, exe_bytes, manifest_exe_sha, local="0.9.8", windows=False,
             r = updater.check_for_update("v0.9.8")
         finally:
             (updater._fetch_releases, updater.IS_WINDOWS, updater.local_build_id,
-             updater._dist_dir, updater.urlopen) = original
+             updater._dist_dir, updater.urlopen, updater._ultimo_build_feed) = original
         marca = dist / updater.VERIFY_MARKER
         return r, (marca.read_text(encoding="utf-8") if marca.is_file() else None)
 

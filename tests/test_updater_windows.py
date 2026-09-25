@@ -36,14 +36,17 @@ UPDATE = updater.UPDATE_ASSET_NAME
 def buscar(releases, local="0.9.8", windows=True):
     """check_for_update() contra una lista de releases de mentira, como si
     corriera en Windows (o en Linux con windows=False)."""
-    original = (updater._fetch_releases, updater.IS_WINDOWS, updater.local_build_id)
+    original = (updater._fetch_releases, updater.IS_WINDOWS, updater.local_build_id,
+                updater._ultimo_build_feed)
     updater._fetch_releases = lambda: releases
+    updater._ultimo_build_feed = lambda: None     # sin atajo: va a la API
     updater.IS_WINDOWS = windows
     updater.local_build_id = lambda _v: local
     try:
         return updater.check_for_update("v0.9.8")
     finally:
-        updater._fetch_releases, updater.IS_WINDOWS, updater.local_build_id = original
+        (updater._fetch_releases, updater.IS_WINDOWS, updater.local_build_id,
+         updater._ultimo_build_feed) = original
 
 
 def test_toma_el_instalador_de_la_mas_nueva():

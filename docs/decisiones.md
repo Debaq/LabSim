@@ -146,12 +146,54 @@ un reintento en background) y, en el build congelado, `__main__` consulta
 GitHub Releases por actualizaciones antes de crear la ventana (~0,5-0,8 s,
 timeout 5 s). Con red lenta son varios segundos de nada en pantalla.
 
+## Actualización obligatoria en el kiosko (2026-09-25)
+
+En el laboratorio una versión vieja es una versión rota: la actualización
+es lo que funciona. Antes el kiosko actualizaba sin preguntar, pero si la
+consulta a GitHub o la instalación fallaban abría la versión vieja sin
+avisar, y solo miraba al arrancar. Ahora (`core/actualizacion_kiosko.py`,
+solo con `LABSIM_KIOSKO=1` y build congelado):
+- **Al abrir no se muestra LabSim hasta confirmar que está al día.** Si
+  hay versión nueva se instala; si no se puede consultar o la instalación
+  falla, queda la pantalla "Actualizando LabSim" reintentando (10, 20, 40,
+  60 y después cada 120 s). Decisión del usuario: sin internet la app
+  tampoco sirve (el login necesita el backend), así que bloquear no quita
+  nada.
+- **Con la app abierta se mira cada 30 min.** Sin sesión iniciada se
+  actualiza en el momento; con un alumno atendiendo, al cerrar sesión
+  (nunca a mitad de una atención; la sesión igual vence por inactividad).
+  Si la red se corta con la app abierta se sigue trabajando.
+- `LABSIM_AUTO_UPDATE=1` fuera del kiosko queda como antes: sin preguntar,
+  y si falla abre la versión actual.
+
+**Límite de GitHub.** La API sin autenticar deja 60 consultas por hora por
+IP y todo el laboratorio sale por la misma. Con consultas al abrir y cada
+media hora, unas 30 máquinas lo agotan, y con el bloqueo estricto el
+laboratorio quedaría parado. Un ETag no sirve: el 304 no descuenta solo en
+consultas autenticadas (medido: 51 -> 50). Por eso "¿estoy al día?" se
+pregunta al feed Atom (`releases.atom`, página web, sin ese límite; trae
+las 10 más nuevas, sin assets): si la última es la local y la instalación
+ya está verificada (`.install_verified`), no se toca la API. La API se
+consulta solo cuando hay versión nueva (una vez por máquina y release) o
+si el feed falla. `check_for_update(estricto=True)` levanta
+`UpdateCheckError` en vez de confundir "no pude consultar" (incluido el
+límite agotado, que GitHub contesta con 403) con "no hay nada nuevo".
+Además la API se pide con `per_page=100`: por defecto trae 30 y las
+releases viejas se guardan a propósito (cadena de updates).
+
+Probado con el build en kiosko y offscreen: al día pasa a la ventana sin
+gastar consultas de la API; con la red cortada queda en la pantalla de
+actualización. No probado: una actualización real de punta a punta con
+esta versión (la primera release que la lleve se instala con el código
+viejo).
+
 ## Modo laboratorio (kiosko) y preferencias del alumno (2026-09-24)
 
 - `LABSIM_KIOSKO=1` (variable de entorno del equipo, se lee solo en
   `src/core/kiosko.py`). Solo Linux: el laboratorio corre una distro
   propia; en Windows/macOS la variable no hace nada.
-  Hace tres cosas: actualiza sin preguntar, aplica el "mouse para zurdos"
+  Hace tres cosas: actualiza obligatoriamente (ver "Actualización
+  obligatoria en el kiosko"), aplica el "mouse para zurdos"
   del alumno dentro de LabSim, y deja la ventana a pantalla completa sin
   botones de ventana ni forma de cerrarla (Alt+F4 tampoco); solo un
   docente logueado ve el botón de cerrar. `LABSIM_AUTO_UPDATE=1` sigue funcionando

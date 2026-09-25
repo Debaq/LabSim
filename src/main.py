@@ -150,6 +150,35 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             MoveWindow(self).set_movewindow()
         self._aplicar_kiosko()
         self._setup_layout_status()
+        # Kiosko: cada media hora se mira si salió una versión nueva (ver
+        # core/actualizacion_kiosko.py y _on_update_disponible).
+        self._chequeo_update = None
+        if es_kiosko() and getattr(sys, 'frozen', False):
+            from core.actualizacion_kiosko import ChequeoPeriodico
+            self._chequeo_update = ChequeoPeriodico(__VERSION__, parent=self)
+            self._chequeo_update.hay_update.connect(self._on_update_disponible)
+
+    def _on_update_disponible(self):
+        """Kiosko: hay versión nueva. Sin sesión iniciada se aplica ya; con
+        un alumno atendiendo, al cerrar sesión (ver logout)."""
+        if self.data_login:
+            self._update_pendiente = True
+        else:
+            self._actualizar_ahora()
+
+    def _actualizar_ahora(self):
+        """Tapa la ventana y actualiza. No vuelve si se instala (la app se
+        reinicia); si falla, reintenta hasta lograrlo. Vuelve solo si ya no
+        hay nada nuevo o si el equipo se está apagando."""
+        if self._actualizando or self._apagando:
+            return
+        from core.actualizacion_kiosko import actualizar_o_bloquear
+        self._actualizando = True
+        self._update_pendiente = False
+        try:
+            actualizar_o_bloquear(__VERSION__, abortar=lambda: self._apagando)
+        finally:
+            self._actualizando = False
 
     def _setup_layout_status(self):
         """Avisa (o no) según de dónde salió el layout, y deja un reintento
@@ -331,6 +360,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.data_login = None
         # El equipo se está apagando (ver cerrar_por_apagado).
         self._apagando = False
+        # Kiosko: versión nueva esperando a que se cierre la sesión, y
+        # actualización en curso (ver _on_update_disponible).
+        self._update_pendiente = False
+        self._actualizando = False
         self.data_current = None
         self.data_current_key = None
         self.paciente_actual = None
@@ -549,6 +582,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.paciente_actual = None
         preferencias().limpiar()
         self._aplicar_kiosko()
+        if self._update_pendiente:
+            # Kiosko: salió una versión nueva durante la atención.
+            QTimer.singleShot(0, self._actualizar_ahora)
 
     def _start_cronometro(self):
         """Arranca (o reinicia si ya venía corriendo) el cronómetro de
@@ -1055,14 +1091,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
 
 def _auto_update_forzado():
-    """Kiosko: se actualiza sin preguntar.
-
-    En los computadores del laboratorio el cuadro de "¿Actualizar ahora?" lo
-    contesta el alumno, que puede decir "No" siempre, y las máquinas quedan
-    en versiones viejas. Con LABSIM_KIOSKO=1 (ver core/kiosko.py) se aplica
-    directo; LABSIM_AUTO_UPDATE=1 hace lo mismo sin el resto del modo
-    laboratorio."""
-    return es_kiosko() or os.environ.get("LABSIM_AUTO_UPDATE", "").strip() == "1"
+    """LABSIM_AUTO_UPDATE=1: se actualiza sin preguntar, y si falla se abre
+    la versión actual. El kiosko no pasa por acá: ahí la actualización es
+    obligatoria (core/actualizacion_kiosko.py)."""
+    return os.environ.get("LABSIM_AUTO_UPDATE", "").strip() == "1"
 
 
 def _download_and_apply(update, silencioso=False):
@@ -1217,7 +1249,12 @@ def _check_and_apply_update():
 
 if __name__ == '__main__':
     if getattr(sys, 'frozen', False):
-        _check_and_apply_update()
+        if es_kiosko():
+            # No se abre con una versión vieja: espera a estar al día.
+            from core.actualizacion_kiosko import actualizar_o_bloquear
+            actualizar_o_bloquear(__VERSION__)
+        else:
+            _check_and_apply_update()
 
     window = MainWindow()
     Preferences.get_style(window)
