@@ -143,6 +143,13 @@ if [ -z "$CURRENT_VERSION" ]; then
 fi
 
 read -rp "Versión actual: v${CURRENT_VERSION}. Nueva versión (Enter para mantener): " NEW_VERSION
+# La "v" la pone el script: escribir "v0.9.9" dejaba 'vv0.9.9' en main.py y
+# el instalador de Windows fallaba (VersionInfoVersion solo acepta números).
+NEW_VERSION="${NEW_VERSION#[vV]}"
+if [ -n "$NEW_VERSION" ] && ! [[ "$NEW_VERSION" =~ ^[0-9]+(\.[0-9]+){1,3}$ ]]; then
+    echo "Versión inválida: '${NEW_VERSION}' (formato 0.9.9)" >&2
+    exit 1
+fi
 
 if [ -n "$NEW_VERSION" ] && [ "$NEW_VERSION" != "$CURRENT_VERSION" ]; then
     sed -i "s/__VERSION__ = 'v${CURRENT_VERSION}'/__VERSION__ = 'v${NEW_VERSION}'/" src/main.py
