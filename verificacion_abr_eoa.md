@@ -23,7 +23,7 @@ a la mitad de los barridos, y el test comparaba 500 contra 2000, que son
 dos. Partido en F3a (1000 vs 2000) y F3b (500 vs 2000), el modelo cae
 dentro de los dos.
 
-Detalle del diseño en `TODO.md`. Cada test usa semilla fija. Los bloques A,
+Detalle del diseño en `docs/decisiones.md`. Cada test usa semilla fija. Los bloques A,
 B, C, E y F miden el generador del cliente (`src/abr/ABR_generator.py`); los
 bloques D y G, la proyección del backend
 (`labsim_backend/src/CaseProfile.php`, `NewbornScreening.php`).

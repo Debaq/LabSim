@@ -34,7 +34,7 @@ function admin_asset_version(string $path): string
 
 /**
  * Curso "en foco" de la sesión admin (F4 del rediseño de cursos, ver
- * TODO.md). El trabajo docente es todo por curso, y cada página resolvía eso
+ * docs/decisiones.md). El trabajo docente es todo por curso, y cada página resolvía eso
  * con su propio <select>: agenda tenía el suyo, la bandeja otro, el
  * dashboard ninguno. El foco se elige una vez en el header y lo leen todas.
  *

@@ -18,7 +18,7 @@ propio módulo en vez de ser una fila más de `build_target_curve`:
 - El resultado no es una latencia contra una tabla: es una RAZÓN entre el
   PS y el PA, que es lo que se eleva en el hidrops endolinfático.
 
-Convención de trazo (decidida con el docente, ver TODO.md): PA hacia
+Convención de trazo (decidida con el docente, ver docs/decisiones.md): PA hacia
 ABAJO. El electrodo activo es el del oído (timpánico o de conducto), no el
 vértex, así que la negatividad coclear queda hacia abajo en la pantalla --
 que es como lo imprimen los equipos en modo ECochG. Es la convención
@@ -573,7 +573,7 @@ def auto_marks(t, y):
     #
     # No es pereza: con un click el complejo entero dura alrededor de un
     # milisegundo y los dos potenciales se superponen, así que el hombro no
-    # tiene firma geométrica confiable (ver TODO.md -- se probaron tres
+    # tiene firma geométrica confiable (ver docs/decisiones.md -- se probaron tres
     # detectores y ninguno aguantó el ruido). Es una limitación real de la
     # técnica con click, no del simulador, y por eso los protocolos fijan
     # el punto en vez de buscarlo.
@@ -679,7 +679,7 @@ def measure_complex(t, y, marks):
         meseta.
     Es la separación que reproduce los valores publicados de la razón de
     áreas (normal ~1.2, límite 1.94): cortando por tiempo en el hombro del
-    PS la razón daría ~0.3 y no habría contra qué compararla. Ver TODO.md.
+    PS la razón daría ~0.3 y no habría contra qué compararla. Ver docs/decisiones.md.
     """
     faltan = [m for m in ('BL', 'PS', 'PA') if m not in marks]
     if faltan:

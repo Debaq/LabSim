@@ -8,7 +8,7 @@ reves cerraria el ciclo.
 Es tambien el lugar donde deberian aterrizar estos valores cuando se hagan
 configurables por curso desde la plataforma (app_config / AppConfig.php, el
 mismo camino que 'normative_data.vemp'), en vez de estar repartidos por los
-modulos que los consumen. Ver TODO.md.
+modulos que los consumen. Ver docs/decisiones.md.
 """
 
 # Indices de stim_list (resources/json/config_audiometer.json):
@@ -58,7 +58,7 @@ CE_LOGO = {
 }
 
 # OJO: las cifras son de arranque y falta confirmarlas con la docente (ver
-# TODO.md). Lo que no es opinable es el orden: NBN < PN < WN/SN en tonal, y
+# docs/decisiones.md). Lo que no es opinable es el orden: NBN < PN < WN/SN en tonal, y
 # SN < PN/WN < NBN en logoaudiometria.
 
 
