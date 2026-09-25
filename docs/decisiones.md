@@ -24,7 +24,29 @@ El paciente no sabe si está en familiarización o en prueba (así se le
 instruye en la clínica), por eso no hay modo: decide el tamaño del salto.
 Tests en `tests/test_sisi.py`. Sin probar en la app real.
 
-## Build más liviano y arranque más rápido (explorado 2026-09-24, sin hacer)
+## Build más liviano y arranque más rápido (explorado 2026-09-24; tamaño hecho 2026-09-25)
+
+**Hecho (2026-09-25): 431 -> 394 MB en Linux**, con `prune_qt()` en
+`LabSim.spec`. Salen el tema GTK con toda su cadena (GTK3, cairo, pango,
+harfbuzz, libxml2, atk, epoxy...), Qt6Pdf, el teclado virtual, eglfs/linuxfb/
+vnc/minimal/offscreen/vkkhrdisplay, los imageformats sobrantes y las 124
+traducciones (la app no instala ningún QTranslator). La exploración de abajo
+se equivocó en dos cosas:
+- QtQuick/Qml **no** se puede sacar: lo importa `libffmpegmediaplugin`, el
+  audio del audiómetro.
+- La segunda ICU (v78, ~40 MB) tampoco: la usa `_sqlite3`.
+
+Se mantiene el plugin wayland (la distro del kiosko puede no tener
+XWayland) y, en Windows, `opengl32sw.dll` (OpenGL por software para equipos
+sin driver de video).
+
+`prune_qt` solo poda lo que colgaba de un plugin sacado y que ya nadie
+importa, así que no toca libs que Qt abre con dlopen (FFmpeg, OpenSSL). Al
+final verifica que nada de lo que queda importe algo sacado y, si pasa,
+corta el build: así se descubrió lo de sqlite. Los symlinks que COLLECT deja
+colgando en `_internal/` se borran después. Verificado: `ldd` sin
+dependencias rotas y arranque en xcb y en wayland. En Windows los patrones
+son los mismos (`qpdf.dll`, `Qt6Pdf.dll`...) pero no se midió.
 
 Medido sobre el build Linux (`dist/LabSim`, 431 MB) y con `-X importtime`.
 

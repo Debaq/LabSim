@@ -104,11 +104,6 @@ Pedagógicas o de la docente; bloquean lo que cuelga de ellas.
 ## Funcionalidades
 
 ### Build y arranque
-- [ ] 22. Achicar el build (~90 MB, solo `LabSim.spec`): tema GTK, QtQuick/Qml,
-      Qt6Pdf, plataformas no-xcb, traducciones, imageformats sobrantes. No
-      sacar QtMultimedia/FFmpeg, QtNetwork, QtOpenGL/QtSvg/QtTest. En
-      Windows revisar además `opengl32sw.dll`. Probar que arranque y suene.
-      § Build más liviano y arranque más rápido
 - [ ] 23. Arranque ~2 s más rápido: importar `scipy.signal` dentro de las
       funciones (`abr/ABR_generator.py`, `vemp/engine.py`, `abr/smooth.py`) y
       precargarlo en un hilo después del login. § Build más liviano
