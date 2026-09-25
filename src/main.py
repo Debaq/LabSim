@@ -155,7 +155,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self._chequeo_update = None
         if es_kiosko() and getattr(sys, 'frozen', False):
             from core.actualizacion_kiosko import ChequeoPeriodico
-            self._chequeo_update = ChequeoPeriodico(__VERSION__, parent=self)
+            self._chequeo_update = ChequeoPeriodico(__VERSION__, BACKEND_URL, parent=self)
             self._chequeo_update.hay_update.connect(self._on_update_disponible)
 
     def _on_update_disponible(self):
@@ -176,7 +176,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self._actualizando = True
         self._update_pendiente = False
         try:
-            actualizar_o_bloquear(__VERSION__, abortar=lambda: self._apagando)
+            actualizar_o_bloquear(__VERSION__, BACKEND_URL,
+                                  abortar=lambda: self._apagando)
         finally:
             self._actualizando = False
 
@@ -1188,7 +1189,7 @@ def _check_and_apply_update():
     si tiene éxito). Solo se llama en build congelada (PyInstaller); en modo
     dev correr desde código fuente ya es la versión más nueva."""
     from core.updater import check_for_update
-    update = check_for_update(__VERSION__)
+    update = check_for_update(__VERSION__, backend_url=BACKEND_URL)
     if update is None:
         return
     tag = update["tag"]
@@ -1252,7 +1253,7 @@ if __name__ == '__main__':
         if es_kiosko():
             # No se abre con una versión vieja: espera a estar al día.
             from core.actualizacion_kiosko import actualizar_o_bloquear
-            actualizar_o_bloquear(__VERSION__)
+            actualizar_o_bloquear(__VERSION__, BACKEND_URL)
         else:
             _check_and_apply_update()
 

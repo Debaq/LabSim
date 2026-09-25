@@ -107,7 +107,7 @@ def _en_hilo(fn, *args, **kwargs):
     return resultado.get("ok")
 
 
-def actualizar_o_bloquear(version, abortar=lambda: False):
+def actualizar_o_bloquear(version, backend_url=None, abortar=lambda: False):
     """No vuelve hasta que LabSim está al día.
 
     Si hay versión nueva la instala y reinicia (apply_update_and_restart no
@@ -123,7 +123,8 @@ def actualizar_o_bloquear(version, abortar=lambda: False):
         while not abortar():
             pantalla.estado("Buscando actualizaciones...")
             try:
-                update = _en_hilo(check_for_update, version, estricto=True)
+                update = _en_hilo(check_for_update, version, estricto=True,
+                                  backend_url=backend_url)
             except UpdateCheckError as exc:
                 motivo = ("No se pudo consultar si hay una versión nueva "
                           f"({exc}). Revisa la conexión a internet.")
@@ -160,9 +161,10 @@ class ChequeoPeriodico(QObject):
 
     hay_update = Signal()
 
-    def __init__(self, version, parent=None):
+    def __init__(self, version, backend_url=None, parent=None):
         super().__init__(parent)
         self._version = version
+        self._backend_url = backend_url
         self._timer = QTimer(self)
         self._timer.setInterval(CHEQUEO_MIN * 60 * 1000)
         self._timer.timeout.connect(self._chequear)
@@ -173,7 +175,7 @@ class ChequeoPeriodico(QObject):
 
     def _consultar(self):
         try:
-            update = check_for_update(self._version)
+            update = check_for_update(self._version, backend_url=self._backend_url)
         except Exception:
             return
         if update is not None:

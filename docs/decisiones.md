@@ -170,8 +170,20 @@ solo con `LABSIM_KIOSKO=1` y build congelado):
 IP y todo el laboratorio sale por la misma. Con consultas al abrir y cada
 media hora, unas 30 máquinas lo agotan, y con el bloqueo estricto el
 laboratorio quedaría parado. Un ETag no sirve: el 304 no descuenta solo en
-consultas autenticadas (medido: 51 -> 50). Por eso "¿estoy al día?" se
-pregunta al feed Atom (`releases.atom`, página web, sin ese límite; trae
+consultas autenticadas (medido: 51 -> 50).
+
+La lista la guarda el **backend** (`AppReleases.php`, `api/app_releases.php`,
+anónimo como `layout.php`): consulta a GitHub una vez cada 10 min por todos
+los clientes (una IP, ~6 por hora; con el cache vencido un `flock` hace que
+consulte uno solo), filtra las `pyinstaller-v*` y deja los campos que usa
+el updater. Si GitHub no responde sirve la guardada mientras tenga menos
+de 1 h; más vieja contesta 503, porque el cliente la tomaría por buena. Se
+guarda solo la información, no los paquetes: las descargas de GitHub no
+tienen ese límite, y 100+ MB por versión no caben en el hosting. Encaja con
+la regla de arriba: el backend es lo único que la app necesita sí o sí.
+
+Si el backend no responde (o todavía no tiene el endpoint desplegado), el
+cliente cae a GitHub directo: "¿estoy al día?" se pregunta al feed Atom (`releases.atom`, página web, sin ese límite; trae
 las 10 más nuevas, sin assets): si la última es la local y la instalación
 ya está verificada (`.install_verified`), no se toca la API. La API se
 consulta solo cuando hay versión nueva (una vez por máquina y release) o

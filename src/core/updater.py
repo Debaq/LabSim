@@ -133,6 +133,19 @@ def _fetch_releases() -> list:
     return releases
 
 
+def _fetch_releases_backend(backend_url: str) -> list:
+    """La lista que guarda el backend (api/app_releases.php), con la misma
+    forma que la de la API. Levanta si no responde o si no tiene una lista
+    reciente (503)."""
+    url = backend_url.rstrip("/") + "/api/app_releases.php"
+    with urlopen(Request(url), timeout=REQUEST_TIMEOUT) as resp:
+        data = json.load(resp)
+    releases = data.get("releases") if isinstance(data, dict) else None
+    if not isinstance(releases, list):
+        raise ValueError("el backend no devolvio una lista de releases")
+    return releases
+
+
 def _ultimo_build_feed():
     """build_id de la release 'pyinstaller-v*' mas nueva segun el feed Atom,
     o None si el feed no trae ninguna (las 10 ultimas son del rewrite Tauri).
@@ -256,7 +269,8 @@ def _check_install_integrity(candidates: list, local_release: dict):
     return None
 
 
-def check_for_update(current_version: str, estricto: bool = False):
+def check_for_update(current_version: str, estricto: bool = False,
+                     backend_url: str | None = None):
     """Busca releases 'pyinstaller-v*' más nuevas que el build local.
 
     'Más nueva' = publicada después que la release que corresponde al
@@ -283,17 +297,25 @@ def check_for_update(current_version: str, estricto: bool = False):
     estricto=True la falla de red levanta UpdateCheckError en vez de pasar
     por "no hay nada": el kiosko no abre sin saber si esta al dia.
 
-    Primero se mira el feed Atom (sin limite de consultas): si dice que la
-    local es la ultima, no se toca la API. Si el feed falla o hay algo
-    nuevo, se sigue por la API como siempre."""
-    if _al_dia_segun_feed(local_build_id(current_version).lstrip("v")):
-        return None
-    try:
-        releases = _fetch_releases()
-    except (URLError, OSError, ValueError, TimeoutError) as exc:
-        if estricto:
-            raise UpdateCheckError(str(exc)) from exc
-        return None
+    De donde sale la lista, en orden: el backend (backend_url; consulta a
+    GitHub una vez cada 10 min por todos los clientes, ver AppReleases.php),
+    y si no responde, GitHub directo: primero el feed Atom (sin limite de
+    consultas) por si dice que la local es la ultima, y si no, la API."""
+    releases = None
+    if backend_url:
+        try:
+            releases = _fetch_releases_backend(backend_url)
+        except (URLError, OSError, ValueError, TimeoutError):
+            releases = None
+    if releases is None:
+        if _al_dia_segun_feed(local_build_id(current_version).lstrip("v")):
+            return None
+        try:
+            releases = _fetch_releases()
+        except (URLError, OSError, ValueError, TimeoutError) as exc:
+            if estricto:
+                raise UpdateCheckError(str(exc)) from exc
+            return None
 
     candidates = [r for r in releases if r.get("tag_name", "").startswith(TAG_PREFIX)]
     if not candidates:

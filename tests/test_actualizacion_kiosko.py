@@ -13,7 +13,8 @@ vieja sin avisar. Ahora:
 3. check_for_update(estricto=True) distingue "no hay nada" de "no se pudo
    consultar"; sin estricto sigue devolviendo None (fuera del kiosko no se
    bloquea a nadie).
-4. "¿Estoy al día?" se pregunta al feed Atom (página web, sin el límite de
+4. La lista sale del backend (consulta a GitHub una vez cada 10 min por
+   todo el laboratorio); si no responde, "¿estoy al día?" se pregunta al feed Atom (página web, sin el límite de
    60 consultas por hora de la API, que el laboratorio comparte por IP); la
    API solo cuando hay algo nuevo o falta verificar la instalación.
 """
@@ -34,11 +35,17 @@ from core import updater  # noqa: E402
 ak.ESPERAS_S = (0,)          # sin esperas reales entre reintentos
 
 
-def _chequear(feed, marca=None, api=None, estricto=False):
-    """check_for_update con feed y API de mentira. `feed` es el build_id que
-    trae el feed (o una excepción); `api` la lista de releases (o una
-    excepción). Devuelve (resultado, si se consultó la API)."""
+def _chequear(feed, marca=None, api=None, estricto=False, backend=None):
+    """check_for_update con backend, feed y API de mentira. `feed` es el
+    build_id que trae el feed (o una excepción); `api` y `backend` la lista
+    de releases (o una excepción; backend None = sin backend configurado).
+    Devuelve (resultado, si se consultó la API)."""
     usada = []
+
+    def backend_falso(_url):
+        if isinstance(backend, Exception):
+            raise backend
+        return backend
 
     def feed_falso():
         if isinstance(feed, Exception):
@@ -52,7 +59,8 @@ def _chequear(feed, marca=None, api=None, estricto=False):
         return api or []
 
     original = (updater._ultimo_build_feed, updater._fetch_releases,
-                updater.local_build_id, updater._dist_dir)
+                updater.local_build_id, updater._dist_dir,
+                updater._fetch_releases_backend)
     with tempfile.TemporaryDirectory() as tmp:
         if marca is not None:
             m = Path(tmp) / updater.VERIFY_MARKER
@@ -62,11 +70,15 @@ def _chequear(feed, marca=None, api=None, estricto=False):
         updater._fetch_releases = api_falsa
         updater.local_build_id = lambda _v: "0.9.8-raaa"
         updater._dist_dir = lambda: Path(tmp)
+        updater._fetch_releases_backend = backend_falso
+        url = "https://backend" if backend is not None else None
         try:
-            return updater.check_for_update("v0.9.8", estricto=estricto), bool(usada)
+            return (updater.check_for_update("v0.9.8", estricto=estricto, backend_url=url),
+                    bool(usada))
         finally:
             (updater._ultimo_build_feed, updater._fetch_releases,
-             updater.local_build_id, updater._dist_dir) = original
+             updater.local_build_id, updater._dist_dir,
+             updater._fetch_releases_backend) = original
 
 
 def test_al_dia_segun_el_feed_no_gasta_la_api():
@@ -83,6 +95,23 @@ def test_version_nueva_en_el_feed_va_a_la_api():
 
 def test_feed_caido_cae_a_la_api():
     assert _chequear(URLError("sin red"), marca="0.9.8-raaa")[1]
+
+
+def _release(build_id, fecha):
+    return {"tag_name": "pyinstaller-v" + build_id, "created_at": fecha, "body": "",
+            "assets": [{"name": updater.FULL_ASSET_NAME,
+                        "browser_download_url": "https://github.com/x/full.tar.gz"}]}
+
+
+def test_con_backend_no_se_toca_github():
+    lista = [_release("0.9.8-raaa", "2026-09-24"), _release("0.9.8-rbbb", "2026-09-25")]
+    # feed y API explotarían si se usaran
+    r, api = _chequear(RuntimeError("no"), api=RuntimeError("no"), backend=lista)
+    assert r["build_id"] == "0.9.8-rbbb" and not api
+
+
+def test_backend_caido_cae_a_github():
+    assert _chequear("0.9.8-rbbb", marca="0.9.8-raaa", backend=URLError("caído"))[1]
 
 
 def test_limite_de_github_no_se_confunde_con_al_dia():
@@ -104,7 +133,7 @@ def _simular(respuestas_check, fallas_apply=0, abortar=lambda: False):
     class Reinicio(BaseException):   # como os._exit: nada la atrapa
         pass
 
-    def check(_version, estricto=False):
+    def check(_version, estricto=False, backend_url=None):
         assert estricto
         llamadas["check"] += 1
         r = cola.pop(0)
