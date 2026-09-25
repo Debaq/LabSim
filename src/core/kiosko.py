@@ -16,6 +16,7 @@ Qué cambia en un kiosko:
 
 import os
 import signal
+import sys
 import threading
 
 from PySide6.QtCore import QTimer
@@ -34,14 +35,15 @@ def es_kiosko():
 def atender_apagado(cerrar):
     """SIGTERM (apagar.sh, systemd al apagar) llama a `cerrar` en el hilo
     de Qt en vez de matar la app al instante, que perdía el informe en
-    curso. Solo en el laboratorio.
+    curso. Solo en el laboratorio, que es Linux: en Windows no hay kiosko
+    ni SIGTERM al apagar.
 
     Devuelve el temporizador "despertador" (o None): hay que guardarlo, si
     se recolecta deja de andar. Python atiende las señales solo cuando corre
     código Python, y con la app quieta el que corre es el bucle de Qt (C++):
     sin este tic la señal esperaría hasta el próximo clic.
     """
-    if not es_kiosko():
+    if sys.platform == "win32" or not es_kiosko():
         return None
     recibida = []
 

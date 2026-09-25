@@ -56,9 +56,9 @@ después del login. Otros: pyqtgraph 0,57 s, numpy 0,33 s, requests 0,2 s.
 - Apagado del equipo (Linux: `apagar.sh`, systemd): SIGTERM ya no mata la
   app al instante. `kiosko.atender_apagado` la cierra como con la X (sube
   informes y logs, para hilos) aunque no haya docente; una guardia sale a
-  los 12 s pase lo que pase (apagar.sh espera 15). Solo en kiosko. Probado
-  con `kill -TERM` sin sesión: sale en ~0,5 s. Falta probarlo con un
-  alumno atendiendo. En Windows el apagado no manda SIGTERM: ahí no aplica.
+  los 12 s pase lo que pase (apagar.sh espera 15). Solo en kiosko y nunca
+  en Windows (ahí no hay kiosko). Probado con `kill -TERM` sin sesión: sale
+  en ~0,5 s. Falta probarlo con un alumno atendiendo.
 - [ ] Probar en Windows real: detección del controlador (registro +
   cfgmgr32) y mouse para zurdos sobre ABR/VEMP (menú contextual de pyqtgraph).
 

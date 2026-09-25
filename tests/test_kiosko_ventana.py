@@ -90,6 +90,16 @@ def test_sigterm_llega_al_cierre_una_sola_vez():
         kiosko.PLAZO_APAGADO_S = plazo
 
 
+def test_en_windows_no_se_atiende_sigterm():
+    from core import kiosko
+    plataforma = sys.platform
+    sys.platform = "win32"
+    try:
+        assert kiosko.atender_apagado(lambda: None) is None
+    finally:
+        sys.platform = plataforma
+
+
 def test_fuera_del_laboratorio_todo_normal():
     os.environ["LABSIM_KIOSKO"] = "0"
     try:
