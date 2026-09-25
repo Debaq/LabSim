@@ -34,10 +34,16 @@ class ConfiguracionDialog(QDialog):
         self.lbl_error.setStyleSheet("color:#b3261e;")
         raiz.addWidget(self.lbl_error)
 
-        self.botones = QDialogButtonBox(QDialogButtonBox.StandardButton.Save
-                                        | QDialogButtonBox.StandardButton.Cancel, self)
-        self.botones.button(QDialogButtonBox.StandardButton.Save).setText("Guardar")
-        self.botones.button(QDialogButtonBox.StandardButton.Cancel).setText("Cancelar")
+        # Botones creados acá y no pedidos con botones.button(Save): PySide
+        # busca el wrapper por dirección de memoria y, si quedó uno viejo de
+        # un objeto ya borrado en esa dirección (un QWidgetItem de algún
+        # layout), devuelve ese en vez del botón -- "'QWidgetItem' object
+        # has no attribute 'setText'". Con la referencia propia no hay
+        # búsqueda.
+        self.botones = QDialogButtonBox(self)
+        self.btn_guardar = QPushButton("Guardar")
+        self.botones.addButton(self.btn_guardar, QDialogButtonBox.ButtonRole.AcceptRole)
+        self.botones.addButton(QPushButton("Cancelar"), QDialogButtonBox.ButtonRole.RejectRole)
         self.botones.accepted.connect(self._guardar)
         self.botones.rejected.connect(self.reject)
         raiz.addWidget(self.botones)
@@ -129,7 +135,7 @@ class ConfiguracionDialog(QDialog):
     def _validar(self, *_):
         errores = atajos.conflictos(self._mapa())
         self.lbl_error.setText("\n".join(errores))
-        self.botones.button(QDialogButtonBox.StandardButton.Save).setEnabled(not errores)
+        self.btn_guardar.setEnabled(not errores)
         return not errores
 
     def _guardar(self):

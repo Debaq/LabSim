@@ -22,7 +22,7 @@ tiene que reconocer en el trazo y corregirlo, que es el ejercicio.
 from PySide6.QtCore import QCoreApplication
 from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox,
                                QDoubleSpinBox, QGridLayout, QGroupBox, QLabel,
-                               QTabWidget, QVBoxLayout, QWidget)
+                               QPushButton, QTabWidget, QVBoxLayout, QWidget)
 
 from abr.ABR_generator import DISCONNECTED
 from abr.ABR_generator import default_settings as _generator_defaults
@@ -212,12 +212,15 @@ class AbrAdvanceSettings(QDialog):
         layout.addWidget(tabs)
 
         botones = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok
-                                   | QDialogButtonBox.StandardButton.Cancel
-                                   | QDialogButtonBox.StandardButton.RestoreDefaults)
+                                   | QDialogButtonBox.StandardButton.Cancel)
         botones.accepted.connect(self.accept)
         botones.rejected.connect(self.reject)
-        botones.button(QDialogButtonBox.StandardButton.RestoreDefaults).clicked.connect(
-            self.restore_defaults)
+        # Creado acá y no pedido con botones.button(RestoreDefaults): PySide
+        # puede devolver un wrapper viejo de otro objeto que ocupaba esa
+        # dirección (ver core/configuracion.py).
+        restaurar = QPushButton("Restore Defaults")
+        restaurar.clicked.connect(self.restore_defaults)
+        botones.addButton(restaurar, QDialogButtonBox.ButtonRole.ResetRole)
         layout.addWidget(botones)
 
     @staticmethod
