@@ -20,7 +20,7 @@ Lo que se verifica acá es lo que antes no existía o no llegaba a pantalla:
    marcar latencias, interpicos ni V/I fuera de rango.
 6. Informe: las condiciones de registro suben junto con las curvas.
 
-Necesita PySide6 + pyqtgraph + scipy. Sin entorno gráfico se corre igual
+Necesita PySide6 + pyqtgraph. Sin entorno gráfico se corre igual
 con QT_QPA_PLATFORM=offscreen, que se fija acá abajo.
 """
 
@@ -43,7 +43,7 @@ try:
     from abr.AbrGraph import AbrGraph
     from abr.AbrMainWindow import AbrMainWindow
     HAS_UI = True
-except ImportError as exc:          # sin PySide6/pyqtgraph/scipy
+except ImportError as exc:          # sin PySide6/pyqtgraph
     print(f"  (tests de panel salteados: {exc})")
     HAS_UI = False
 

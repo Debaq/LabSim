@@ -9,7 +9,10 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    # scipy ya no es dependencia (core/dsp.py), pero si esta instalado en el
+    # entorno pyqtgraph lo arrastra: solo lo usa en affineSlice con
+    # interpolacion de orden > 1, que la app no llama. Son ~70 MB.
+    excludes=['scipy'],
     noarchive=False,
     optimize=0,
 )

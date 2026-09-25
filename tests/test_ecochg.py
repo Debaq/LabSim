@@ -18,9 +18,6 @@ cambia: qué se registra y cómo se mide. Estos tests cubren esa separación:
 6. El PS necesita nivel: medir la razón a nivel bajo la da chica.
 7. La ventana de análisis del FSP es la suya (el ECochG termina antes de
    que empiece la del ABR).
-
-Necesita scipy (filtros del pipeline). Sin scipy se saltan los tests que
-generan curvas completas.
 """
 
 import os
@@ -33,18 +30,11 @@ SRC = os.path.join(os.path.dirname(__file__), '..', 'src')
 if SRC not in sys.path:
     sys.path.insert(0, SRC)
 
-try:
-    import scipy.signal  # noqa: F401
-    HAS_SCIPY = True
-except ImportError:
-    HAS_SCIPY = False
-
 from abr import ecochg as E
 from abr.protocols import get_protocol
 
-if HAS_SCIPY:
-    from abr.ABR_generator import default_settings
-    from abr.ECochG_generator import ECochG_Curve
+from abr.ABR_generator import default_settings
+from abr.ECochG_generator import ECochG_Curve
 
 
 CAPTURAS = ('R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8')
@@ -146,8 +136,6 @@ def test_the_electrode_moves_the_ratio_and_its_limit_together():
 
 def test_no_ecochg_data_means_no_recording():
     """Elegir ECochG sobre un caso que no lo trae no dibuja un ABR de 10 ms."""
-    if not HAS_SCIPY:
-        return
     t, y, _, _, _, meta = _curva(sp_ap=None)
     assert meta['ecochg_sin_datos'] is True
     assert meta['recording'] is False
@@ -166,8 +154,6 @@ def test_the_measured_ratio_is_the_one_the_case_declares():
     test-retest de esta razón): lo que se exige acá es que no haya SESGO,
     no que el ruido no exista.
     """
-    if not HAS_SCIPY:
-        return
     for declarado in (0.20, 0.30, 0.40, 0.55):
         medido = _promedio('sp_ap', sp_ap=declarado)
         assert abs(medido - declarado) < 0.07, (declarado, medido)
@@ -175,8 +161,6 @@ def test_the_measured_ratio_is_the_one_the_case_declares():
 
 def test_the_ratio_is_read_against_the_limit_of_its_own_electrode():
     """Cada posición de electrodo mide su propio número."""
-    if not HAS_SCIPY:
-        return
     for montaje in ('extratympanic', 'tympanic', 'transtympanic'):
         sano = _promedio('sp_ap', sp_ap=0.20, montage=montaje)
         hidrops = _promedio('sp_ap', sp_ap=0.55, montage=montaje)
@@ -186,8 +170,6 @@ def test_the_ratio_is_read_against_the_limit_of_its_own_electrode():
 
 def test_the_closer_electrode_gets_a_bigger_response():
     """Meterse hasta la membrana no es capricho: el PA crece."""
-    if not HAS_SCIPY:
-        return
     amps = [_promedio('ap_amp', montage=m)
             for m in ('extratympanic', 'tympanic', 'transtympanic')]
     assert amps[0] < amps[1] < amps[2]
@@ -204,8 +186,6 @@ def test_alternating_polarity_cancels_the_cochlear_microphonic():
     barrido a barrido. Por eso una desincronía auditiva se busca con las
     dos polaridades por separado.
     """
-    if not HAS_SCIPY:
-        return
     t, y_alt, _, _, _, meta = _curva(pol='Alternada', extra={'mc': 'amplificada'})
     _, y_rar, _, _, _, _ = _curva(pol='Rarefacción', extra={'mc': 'amplificada'})
     _, y_con, _, _, _, _ = _curva(pol='Condensación', extra={'mc': 'amplificada'})
@@ -225,8 +205,6 @@ def test_an_amplified_microphonic_does_not_change_the_sp_ap_ratio():
     alternada, desincronía en la resta de polaridades-- y una no puede
     contaminar a la otra.
     """
-    if not HAS_SCIPY:
-        return
     normal = _promedio('sp_ap', sp_ap=0.30)
     amplificada = _promedio('sp_ap', sp_ap=0.30, extra={'mc': 'amplificada'})
     assert abs(normal - amplificada) < 0.05
@@ -242,8 +220,6 @@ def test_the_summating_potential_needs_level():
     assert E.sp_level_factor(80) == 1.0
     assert E.sp_level_factor(20) == 0.0
     assert 0 < E.sp_level_factor(50) < 1
-    if not HAS_SCIPY:
-        return
     alto = _promedio('sp_ap', sp_ap=0.55, inty=90, umbral=20)
     bajo = _promedio('sp_ap', sp_ap=0.55, inty=50, umbral=20)
     assert bajo < alto / 2
@@ -259,8 +235,6 @@ def test_the_automatic_marking_reads_the_trace_and_nothing_else():
     mismo), la base en el tramo previo y el retorno en el cruce. El hombro
     del PS va por convención, a SP_SHOULDER_MS del PA -- ver TODO.md.
     """
-    if not HAS_SCIPY:
-        return
     for montaje in ('tympanic', 'transtympanic'):
         for declarado in (0.25, 0.40, 0.55):
             razones = []
@@ -306,8 +280,6 @@ def test_the_area_ratio_moves_more_than_the_amplitude_one():
     Si solo cambiara de altura, las dos razones dirían exactamente lo mismo
     y la de áreas no agregaría nada.
     """
-    if not HAS_SCIPY:
-        return
     amp_sano = _promedio('sp_ap', sp_ap=0.25)
     amp_mal = _promedio('sp_ap', sp_ap=0.50)
     area_sano = _promedio('area_ratio', sp_ap=0.25)
@@ -319,8 +291,6 @@ def test_the_area_ratio_moves_more_than_the_amplitude_one():
 
 def test_the_action_potential_widens_in_hydrops():
     """El PA no solo queda chico contra el PS: se desincroniza."""
-    if not HAS_SCIPY:
-        return
     sano = _promedio('ancho_pa', sp_ap=0.25)
     mal = _promedio('ancho_pa', sp_ap=0.60)
     assert mal > sano
@@ -339,8 +309,6 @@ def test_the_rate_shift_needs_two_captures():
 
 def test_raising_the_rate_delays_and_shrinks_the_action_potential():
     """El PA se adapta: es el mismo modelo de tasa que la onda I del ABR."""
-    if not HAS_SCIPY:
-        return
     lento, _ = _medida(rate=11.1, sp_ap=0.25)
     rapido, _ = _medida(rate=91.0, sp_ap=0.25)
     fuera = E.rate_shift([
@@ -358,8 +326,6 @@ def test_the_case_can_declare_a_worse_adaptation():
     usa la onda I del ABR, con `tasa` diciendo cuánto MÁS se adapta este
     oído que uno sano.
     """
-    if not HAS_SCIPY:
-        return
     def corrimiento(tasa):
         lento, _ = _medida(rate=11.1, sp_ap=0.25, extra={'tasa': tasa})
         rapido, _ = _medida(rate=91.0, sp_ap=0.25, extra={'tasa': tasa})
@@ -381,8 +347,6 @@ def test_the_case_can_widen_the_rarefaction_condensation_gap():
     efecto de polaridad de la onda I); con la membrana desplazada la
     separación crece, y se mide comparando las dos curvas.
     """
-    if not HAS_SCIPY:
-        return
     def separacion(ms):
         _, _, _, _, _, rar = _curva(pol='Rarefacción', extra={'rar_cond_ms': ms})
         _, _, _, _, _, con = _curva(pol='Condensación', extra={'rar_cond_ms': ms})
@@ -399,8 +363,6 @@ def test_the_fsp_uses_the_ecochg_window():
     analizándolo ahí, el equipo nunca declaraba respuesta presente por
     mucho que se promediara.
     """
-    if not HAS_SCIPY:
-        return
     _, _, _, _, _, meta = _curva()
     assert meta['fsp'] > 3.0
     assert meta['fsp_a_rms'] > 0
@@ -415,8 +377,6 @@ def test_the_trace_settles_while_it_averages():
     en el primer bloque de barridos. El contador avanza y en pantalla no
     pasa nada.
     """
-    if not HAS_SCIPY:
-        return
     residuales = []
     for avance in (0.05, 0.2, 1.0):
         tec = default_settings('ECochG')
@@ -445,8 +405,6 @@ def test_getting_closer_to_the_cochlea_buys_signal_to_noise():
     que poder leer en el FSP y en cuánto salta la razón medida entre dos
     capturas iguales.
     """
-    if not HAS_SCIPY:
-        return
     fsps, ruidos, saltos = [], [], []
     for montaje in ('extratympanic', 'tympanic', 'transtympanic'):
         medidas, propios, ruido = [], [], []
@@ -484,8 +442,6 @@ def test_the_band_does_not_charge_high_frequency_noise_for_low_cuts():
     marcas están a menos de un milisegundo y la ondulación las mueve
     juntas. Eso es lo que este test mide.
     """
-    if not HAS_SCIPY:
-        return
     from abr.ABR_generator import ABRGenerator
     gen = ABRGenerator()
     rng = np.random.default_rng(11)
@@ -511,8 +467,6 @@ def test_the_ecochg_has_no_shadow_curve_and_no_contra_channel():
     oído queda muy por debajo de su propia respuesta. Por eso el ECochG no
     es la prueba con la que se enseña enmascaramiento.
     """
-    if not HAS_SCIPY:
-        return
     _, _, dx, dy, _, meta = _curva()
     assert dy is None and dx is None
     assert meta['contra'] is None

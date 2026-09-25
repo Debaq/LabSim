@@ -103,11 +103,6 @@ Pedagógicas o de la docente; bloquean lo que cuelga de ellas.
 
 ## Funcionalidades
 
-### Build y arranque
-- [ ] 23. Arranque ~2 s más rápido: importar `scipy.signal` dentro de las
-      funciones (`abr/ABR_generator.py`, `vemp/engine.py`, `abr/smooth.py`) y
-      precargarlo en un hilo después del login. § Build más liviano
-
 ### Otoscopia: derivación + aprobación docente + fase por alumno
 Hoy todo alumno ve la fase 1 (`FASE_FIJA = 0` en `Otoscopia.py`).
 § Otoscopia: derivación + aprobación docente + fase por alumno

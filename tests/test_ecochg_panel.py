@@ -31,7 +31,7 @@ try:
     from abr import ecochg
     from abr.AbrMainWindow import AbrMainWindow
     HAS_UI = True
-except ImportError as exc:          # sin PySide6/pyqtgraph/scipy
+except ImportError as exc:          # sin PySide6/pyqtgraph
     print(f"  (tests de panel salteados: {exc})")
     HAS_UI = False
 

@@ -24,7 +24,7 @@ El paciente no sabe si está en familiarización o en prueba (así se le
 instruye en la clínica), por eso no hay modo: decide el tamaño del salto.
 Tests en `tests/test_sisi.py`. Sin probar en la app real.
 
-## Build más liviano y arranque más rápido (explorado 2026-09-24; tamaño hecho 2026-09-25)
+## Build más liviano y arranque más rápido (explorado 2026-09-24; Qt y scipy hechos 2026-09-25)
 
 **Hecho (2026-09-25): 431 -> 394 MB en Linux**, con `prune_qt()` en
 `LabSim.spec`. Salen el tema GTK con toda su cadena (GTK3, cairo, pango,
@@ -71,14 +71,35 @@ Windows: mismo criterio pero sin GTK; revisar Qt6Quick/Qml/Pdf,
 traducciones y `opengl32sw.dll` (~20 MB). No medido: el build sale del
 runner (bajar el artefacto para ver).
 
-**Arranque (`import main` = 3,7 s, de eso `scipy.signal` = 2,1 s):**
-Solo se usan `butter`, `sosfiltfilt`, `filtfilt` (ABR/VEMP),
-`gaussian_filter1d` (abr/smooth.py) y `scipy.stats.ncf` (sorteo FSP), pero
-`import scipy.signal` carga stats/interpolate/optimize/ndimage. Entra al
-arrancar por main -> AabrMainWindow -> ABR_generator. Importarlo dentro de
-las funciones (abr/ABR_generator.py, vemp/engine.py, abr/smooth.py) ahorra
-~2 s; el costo pasa a la primera captura, y se puede precargar en un hilo
-después del login. Otros: pyqtgraph 0,57 s, numpy 0,33 s, requests 0,2 s.
+**Hecho (2026-09-25): scipy fuera de la app (build Linux 394 -> 319 MB,
+`import main` 3,7 -> 0,95 s).** Solo se usaban `butter`, `sosfiltfilt`, `filtfilt`
+(ABR/VEMP), `gaussian_filter1d` (abr/smooth.py) y `scipy.stats.ncf` (sorteo
+FSP), pero el paquete entero pesaba 41 MB + 30 MB de `scipy.libs` y
+`import scipy.signal` tardaba 2,1 s al arrancar (cargaba stats/interpolate/
+optimize/ndimage). Se descartó importarlo dentro de las funciones: ahorraba
+el arranque pero no el tamaño.
+
+Reemplazo en `src/core/dsp.py`, numpy puro:
+- Butterworth con el mismo diseño que scipy (prototipo + bilineal con
+  prewarp), en secciones como SOS; `filtfilt` con el mismo relleno impar y
+  las mismas condiciones iniciales de régimen. Cada sección no se recorre
+  muestra a muestra: su respuesta al impulso sale cerrada de los polos y se
+  convoluciona por FFT (recortar la respuesta al largo de la señal es exacto
+  para esas muestras). Todo escrito en factores `(p - c)`, `(1 - p)` sin
+  restas de números parecidos, porque con cortes chicos los polos quedan a
+  1e-4 de z=1. Resultado: igual que `sosfiltfilt` hasta ~1e-12 en los
+  rangos que usa la app, y ~2x más rápido (núcleo cacheado por filtro y
+  largo). VEMP usaba la forma (b, a) de scipy, que era la imprecisa (1e-5
+  relativo); ahora sale como SOS.
+- `gaussian_filter1d`: mismo núcleo y borde 'reflect' (= 'symmetric').
+- FSP: `ncf.rvs` de scipy es literalmente `rng.noncentral_f`; se llama
+  directo con el mismo generador, así que da el mismo número.
+Comparado con HEAD: curvas ABR, FSP y VEMP iguales hasta 2e-12.
+`tests/test_dsp.py` compara contra scipy cuando está instalado.
+
+`LabSim.spec` excluye scipy: si quedó instalado en el entorno, pyqtgraph lo
+arrastraría (solo lo usa en `affineSlice` con orden > 1, que no se llama).
+Otros tiempos de import: pyqtgraph 0,28 s, numpy 0,22 s.
 
 ## Modo laboratorio (kiosko) y preferencias del alumno (2026-09-24)
 

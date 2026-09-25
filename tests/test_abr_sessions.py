@@ -4,7 +4,7 @@ ABR, y el alumno abre uno anterior para verlo o terminarlo (marcas y
 conclusiones, nunca curvas nuevas). Todo vive en el backend: acá se lo
 reemplaza por un cliente falso que guarda lo que se le sube.
 
-Necesita PySide6 + pyqtgraph + scipy (ver test_abr_panel.py).
+Necesita PySide6 + pyqtgraph (ver test_abr_panel.py).
 """
 
 import json

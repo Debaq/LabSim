@@ -26,16 +26,11 @@ pero no la leía nadie:
     rechazo de artefacto, ruido residual objetivo.
 12. Protocolos por potencial evocado (abr/protocols.py) y todos los
     estímulos del combo funcionando en todas las poblaciones.
-
-Sin scipy en el sandbox: se stubea para poder importar el módulo y correr
-todo lo que es matemática de parámetros. Los tests del pipeline y de la
-respuesta de los filtros necesitan scipy real y se saltan si no está.
 """
 
 import os
 import re
 import sys
-import types
 
 import numpy as np
 
@@ -43,20 +38,6 @@ import numpy as np
 SRC = os.path.join(os.path.dirname(__file__), '..', 'src')
 if SRC not in sys.path:
     sys.path.insert(0, SRC)
-
-try:
-    import scipy.signal  # noqa: F401
-    HAS_SCIPY = True
-except ImportError:
-    HAS_SCIPY = False
-    fake_signal = types.ModuleType('scipy.signal')
-    fake_signal.butter = lambda *a, **k: ([1.0], [1.0])
-    fake_signal.filtfilt = lambda *a, **k: None
-    fake_signal.sosfiltfilt = lambda *a, **k: None
-    scipy = types.ModuleType('scipy')
-    scipy.signal = fake_signal
-    sys.modules['scipy'] = scipy
-    sys.modules['scipy.signal'] = fake_signal
 
 from abr.ABR_generator import (  # noqa: E402
     ABRGenerator, IMPEDANCE_BALANCE_LIMIT_KOHM, IMPEDANCE_LIMIT_KOHM,
@@ -102,9 +83,6 @@ def test_filter_cutoff_lands_on_the_labeled_frequency():
     Con el fs viejo (20000) el corte real quedaba 2.08x más arriba y este
     tono pasaba casi entero.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     g = _gen()
     for cutoff in (1500.0, 3000.0):
         for freq, lo, hi in ((cutoff / 3, 0.90, 1.05),
@@ -117,9 +95,6 @@ def test_filter_cutoff_lands_on_the_labeled_frequency():
 
 def test_high_pass_removes_slow_drift():
     """El pasa-alto tiene que matar la deriva lenta y dejar pasar la banda ABR."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     g = _gen()
     slow = np.sin(2 * np.pi * 30.0 * T_AXIS / 1000.0)
     band = np.sin(2 * np.pi * 900.0 * T_AXIS / 1000.0)
@@ -436,9 +411,6 @@ def test_only_wave_v_survives_by_bone():
     interpicos en un registro oseo es un error que el ejercicio tiene que
     dejar cometer, asi que la onda tiene que DIBUJARSE chiquita, no faltar.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     # 55 dB nHL sobre un oido de umbral 0: el tope del vibrador, y el
     # unico nivel donde la comparacion dice algo. Mas abajo la onda I
     # tampoco existe POR AIRE --emerge recien a ~20 dB sobre el umbral
@@ -563,9 +535,6 @@ def test_bone_vibrator_tops_out_at_its_maximum_output():
     F18 construye su normativa a 50, 30 y 10 dB nHL justamente porque el
     transductor no da mas. No es un tope del modelo: es el del equipo.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     _, _, pedido_80 = _curva(intensity=80, technical={'transducer': 'bone_vibrator'})
     _, _, pedido_50 = _curva(intensity=50, technical={'transducer': 'bone_vibrator'})
     _, _, aereo_80 = _curva(intensity=80, technical={'transducer': 'insert_earphone'})
@@ -607,7 +576,7 @@ def _curva(intensity=80, threshold=20, pathology='normal', population='adult_fem
            current=2000, target=2000, masking=0, contra=None, capture='R1',
            seed_key='caso-1', fsp=(2.3, 2.8), technical=None, filter_high=100,
            caso_extra=None):
-    """Corre generate_curve con un caso completo (necesita scipy)."""
+    """Corre generate_curve con un caso completo."""
     g = _gen()
     stim = {'stim': 'click', 'freq': None, 'pol': 'Alternada', 'int': intensity,
             'rate': 21.1, 'filter_down': 3000, 'filter_passhigh': filter_high,
@@ -625,9 +594,6 @@ def _curva(intensity=80, threshold=20, pathology='normal', population='adult_fem
 # ------------------------------------------------------ pipeline (P0)
 
 def test_pipeline_produces_a_wave_V_where_it_should():
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     g = _gen()
     stim = {'stim': 'click', 'freq': None, 'pol': 'Rarefacción', 'int': 80,
             'rate': 21.1, 'filter_down': 3000, 'filter_passhigh': 100,
@@ -647,9 +613,6 @@ def test_pipeline_produces_a_wave_V_where_it_should():
 
 
 def test_pipeline_low_intensity_is_smaller_and_later():
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     g = _gen()
 
     def corrida(intensity):
@@ -1051,9 +1014,6 @@ def test_no_shadow_below_interaural_attenuation():
 
 
 def test_shadow_shows_up_in_the_curve():
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     contra = {'umbral': 15, 'type': 'normal'}
     # Oído evaluado sin respuesta (umbral 95), otro oído sano.
     _, _, meta_sin = _curva(intensity=90, threshold=95, pathology='cochlear',
@@ -1066,9 +1026,6 @@ def test_shadow_shows_up_in_the_curve():
 
 def test_overmasking_degrades_the_test_ear():
     """Demasiado masking cruza de vuelta y enmascara el oído evaluado."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     contra = {'umbral': 20, 'type': 'normal'}
     _, y_sin, meta_sin = _curva(intensity=60, threshold=20, contra=contra, masking=0)
     _, y_over, meta_over = _curva(intensity=60, threshold=20, contra=contra, masking=100)
@@ -1086,9 +1043,6 @@ def test_signal_does_not_grow_with_averaging():
     onda V medía la mitad: en un equipo real está completa desde el primer
     barrido y lo que baja es el ruido.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     t_med, y_med, _ = _curva(current=600, target=2000)
     t_fin, y_fin, _ = _curva(current=2000, target=2000)
     pico_med = y_med[(t_med > 4.5) & (t_med < 6.5)].max()
@@ -1098,9 +1052,6 @@ def test_signal_does_not_grow_with_averaging():
 
 def test_residual_noise_falls_as_one_over_sqrt_n():
     """El ruido residual cae ~1/sqrt(N) y termina en el orden de 40 nV."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     g = _gen()
     def residual(n):
         ruido = g.averaged_noise(T_AXIS, n, 2000, 1.0, np.random.default_rng(11))
@@ -1114,9 +1065,6 @@ def test_residual_noise_falls_as_one_over_sqrt_n():
 
 def test_trace_settles_instead_of_flickering():
     """Dos ticks seguidos comparten el ruido ya acumulado."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     _, y1, _ = _curva(current=1000)
     _, y2, _ = _curva(current=1175)             # el tick siguiente
     _, y3, _ = _curva(current=1000, capture='R2')
@@ -1126,9 +1074,6 @@ def test_trace_settles_instead_of_flickering():
 
 def test_stopping_early_leaves_a_noisier_curve():
     """Parar antes del average que el caso necesita deja más ruido."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     # La señal es la misma en las tres (mismo caso, misma semilla), así que
     # la distancia contra una corrida muy promediada es ruido y nada más.
     _, y_corto, _ = _curva(current=1000, target=4000)
@@ -1145,9 +1090,6 @@ def test_capture_is_reproducible_across_runs():
     hash() de Python no sirve para esto (saltea por proceso); el ruido va
     sembrado con core.rng.stable_seed.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     _, a, _ = _curva()
     _, b, _ = _curva()
     assert np.array_equal(a, b)
@@ -1190,9 +1132,6 @@ def test_defaults_follow_the_protocol():
 
 
 def test_window_sets_the_time_axis_without_moving_fs():
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     for ventana in (6.0, 12.0, 20.0):
         t, y, meta = _curva(technical={'window_ms': ventana})
         assert abs(t[-1] - ventana) < 1e-9
@@ -1203,9 +1142,6 @@ def test_window_sets_the_time_axis_without_moving_fs():
 
 def test_supraaural_makes_everything_earlier():
     """Sin el tubo del inserto, el complejo aparece ~0.9 ms antes."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     t_ins, y_ins, _ = _curva()
     t_tdh, y_tdh, meta = _curva(technical={'transducer': 'TDH39_headphone'})
     adelanto = t_ins[np.argmax(y_ins)] - t_tdh[np.argmax(y_tdh)]
@@ -1215,9 +1151,6 @@ def test_supraaural_makes_everything_earlier():
 
 def test_bone_vibrator_switches_to_bone_conduction():
     """El vibrador óseo no es otro fono: tiene su propio bloque normativo."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     _, _, meta = _curva(technical={'transducer': 'bone_vibrator'})
     assert meta['pathway'] == 'bone_conduction'
 
@@ -1229,8 +1162,6 @@ def test_montage_scales_amplitude():
     assert abs(factor - 0.7) < 1e-9
     assert g.montage_factor('vertex_mastoid') == 1.0
     assert g.montage_factor('tympanic') > 1.0        # ECochG: mucho más grande
-    if not HAS_SCIPY:
-        return
     _, y_cz, _ = _curva()
     _, y_fz, _ = _curva(technical={'montage': 'forehead_mastoid'})
     assert y_fz.max() < y_cz.max()
@@ -1238,9 +1169,6 @@ def test_montage_scales_amplitude():
 
 def test_disconnected_active_electrode_leaves_no_response():
     """Sin activo no hay diferencia de potencial: solo ruido, por más que promedie."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     electrodos = {'vertex': 'No Conectado', 'right': 'A2', 'left': 'A1',
                   'ground': 'Fpz'}
     t, y, meta = _curva(technical={'electrodes': electrodos})
@@ -1274,9 +1202,6 @@ def test_disconnected_active_electrode_leaves_no_response():
 
 def test_missing_ground_brings_mains_hum():
     """Sin tierra entra la red: el zumbido se ve pese al pasa-alto de 100 Hz."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     electrodos = {'vertex': 'Cz', 'right': 'A2', 'left': 'A1',
                   'ground': 'No Conectado'}
     t, y_sin, meta = _curva(technical={'electrodes': electrodos})
@@ -1309,8 +1234,6 @@ def test_impedance_limit_of_5k_is_visible():
     # np.interp saturaba: 8, 12 y 20 kOhm daban el mismo trazo).
     assert g.impedance_noise_factor(8) > 2.5 * g.impedance_noise_factor(5)
     assert g.impedance_noise_factor(12) > 2 * g.impedance_noise_factor(8)
-    if not HAS_SCIPY:
-        return
     todos = lambda k: {e: k for e in ('vertex', 'right', 'left', 'ground')}
     r5, meta5 = _ruido(todos(5.0))
     r8, meta8 = _ruido(todos(8.0))
@@ -1332,9 +1255,6 @@ def test_impedance_balance_limit_of_2k_is_visible():
     del amplificador, así que se manifiesta distinto que la impedancia
     alta: no es más ruido de fondo, es 50 Hz.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     def con_dif(dif):
         return _ruido({'vertex': 2.0 + dif, 'right': 2.0, 'left': 2.0,
                        'ground': 2.0})
@@ -1391,8 +1311,6 @@ def test_artifact_rejection_cuts_both_ways():
     # Con un paciente inquieto el mismo umbral descarta más.
     assert g.artifact_acceptance(25, 2.0) < g.artifact_acceptance(25, 1.0)
     assert g.artifact_acceptance(0, 1.0) == 1.0           # desactivado
-    if not HAS_SCIPY:
-        return
     t, y_habitual, _ = _curva()
     t, y_estrecho, meta = _curva(technical={'artifact_reject_uv': 10.0})
     t, y_sin, _ = _curva(technical={'artifact_reject_uv': 0.0})
@@ -1442,9 +1360,6 @@ def test_residual_noise_target_sets_the_floor():
     que declara AUSENTE la respuesta en la referencia: ahi no hay amplitud
     de la que despejar sigma.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     _, _, meta_40 = _curva(technical={'residual_noise_nv': 40})
     _, _, meta_120 = _curva(technical={'residual_noise_nv': 120})
     assert abs(meta_120['residual_noise_nv']
@@ -1461,9 +1376,6 @@ def test_residual_noise_target_sets_the_floor():
 
 
 def test_fsp_criterion_is_reported():
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     # El FSP ya no se declara: se calcula sobre el trazo, asi que el nivel
     # es el que manda. 10 dB bajo el umbral no hay con que llegar a 4.0; a
     # 80 dB se pasa cualquier criterio razonable.
@@ -1574,9 +1486,6 @@ def test_subaverages_average_to_the_full_curve():
     lo que se le muestra al alumno como replicabilidad no es el registro
     que esta mirando.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     t, y, meta = _curva(current=1000)
     medio = (meta['sub_a'] + meta['sub_b']) / 2
     assert np.allclose(y, medio, atol=1e-9), float(np.abs(y - medio).max())
@@ -1584,9 +1493,6 @@ def test_subaverages_average_to_the_full_curve():
 
 def test_subaverages_are_noisier_than_the_full_average():
     """Cada subpromedio lleva la mitad de los barridos: ~sqrt(2) mas ruido."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     # Curva sin respuesta (estimulo bajo el umbral): asi el trazo entero
     # es ruido y nada mas. Medirlo en la cola del registro ya no sirve:
     # ahi tambien viven el SN10 y la onda VII.
@@ -1597,9 +1503,6 @@ def test_subaverages_are_noisier_than_the_full_average():
 
 def test_replicability_rises_with_averaging():
     """A y B se van pegando a medida que la respuesta emerge del ruido."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     # Las cotas son bajas a proposito: el indice se calcula sobre el trazo
     # entero, donde la mayor parte del tiempo no hay mas que ruido. Con el
     # ruido real del paciente (unos 50 nV a 2000 barridos) el indice llega
@@ -1618,9 +1521,6 @@ def test_non_reproducible_patient_never_locks_ab():
     subpromedios de un paciente no reproducible convergian igual que los de
     uno normal, y "no reproducible" no se veia en vivo por ningun lado.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     g = _gen()
     def indice(jitter):
         stim = {'stim': 'click', 'freq': None, 'pol': 'Alternada', 'int': 80,
@@ -1671,9 +1571,6 @@ def test_false_wave_lives_in_one_half_only():
     Es la unica pista que tiene el alumno: en el promedio se ve una onda
     plausible, y solo comparando A con B se descubre que no replica.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     t, y, meta = _curva_falsa(mitad='a')
     _, y0, base = _curva_falsa(amp=0)
     i = int(np.argmin(np.abs(t - 8.5)))
@@ -1692,9 +1589,6 @@ def test_false_wave_lives_in_one_half_only():
 
 def test_false_wave_looks_like_a_real_wave_v():
     """Tiene el ancho de una onda V: no se descarta por la forma."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     t, y, meta = _curva_falsa(amp=0.4)
     _, y0, _ = _curva_falsa(amp=0)
     solo = y - y0
@@ -1713,9 +1607,6 @@ def test_false_wave_fades_with_averaging_but_not_as_fast_as_noise():
     Pero promedia peor que el ruido de fondo (es de baja frecuencia), asi
     que sigue ahi el tiempo suficiente para que el ejercicio exista.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     def altura(n):
         t, y, meta = _curva_falsa(current=n)
         _, _, base = _curva_falsa(amp=0, current=n)
@@ -1739,9 +1630,6 @@ def test_false_wave_raises_residual_noise_but_not_fsp():
     dos mitades. Por eso el ejercicio es mirar A y B en la latencia de la
     onda, no leer un numero.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     _, _, con = _curva_falsa(lat=5.6, umbral=90)
     _, _, sin = _curva_falsa(amp=0, umbral=90)
     # El margen era 1.5 cuando el trazo salia tres veces mas limpio de lo
@@ -1764,9 +1652,6 @@ def test_false_wave_only_in_its_intensity_range():
     donde la falsa onda no esta, la V verdadera migra en latencia con la
     intensidad -- y la falsa, en las suyas, no se mueve nunca.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     def altura(intensity):
         t, y, meta = _curva_falsa(intensity=intensity, rango=(20, 40))
         _, _, base = _curva_falsa(amp=0, intensity=intensity)
@@ -1825,9 +1710,6 @@ def test_a_high_high_pass_eats_the_amplitude_not_the_latency():
     Es el error de medir con la banda equivocada y comparar igual contra
     la normativa: la onda sigue donde estaba, pero es la mitad de alta.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     def pico_valle(hp):
         t, y, _ = _curva(filter_high=hp)
         zona = (t > 4) & (t < 9)
@@ -1869,9 +1751,6 @@ def _curva_agit(inquietud=0.6, current=2000, reject=25.0, **kw):
 
 def test_a_still_patient_is_unchanged():
     """inquietud 0 = lo de siempre: los casos viejos no se mueven."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     _, con, meta_con = _curva_agit(inquietud=0)
     _, sin, meta_sin = _curva_agit(inquietud=None)
     assert np.array_equal(con, sin)
@@ -1885,9 +1764,6 @@ def test_moving_patient_loses_sweeps_to_the_reject():
     El equipo sigue contando los presentados -- el contador sube igual --
     pero el promedio avanza con menos, y el FSP va con los que entraron.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     _, _, quieto = _curva_agit(inquietud=0)
     _, _, movido = _curva_agit(inquietud=0.6)
     assert movido['accepted_sweeps'] < quieto['accepted_sweeps'] * 0.9
@@ -1911,9 +1787,6 @@ def test_without_reject_the_movement_enters_the_average():
     Es la diferencia que hay que poder mostrar -- apagar el rechazo no
     "acelera" la prueba, la arruina.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     _, _, con_rechazo = _curva_agit(inquietud=0.6, reject=25.0)
     _, _, sin_rechazo = _curva_agit(inquietud=0.6, reject=None)
     assert sin_rechazo['accepted_sweeps'] > con_rechazo['accepted_sweeps']
@@ -1973,9 +1846,6 @@ def _curva_pam(pam=0.8, intensity=90, window=20.0, filter_high=100,
 
 def test_pam_is_late_big_and_needs_a_loud_click():
     """13 ms, en uV, y solo con sonido fuerte: es un reflejo, tiene umbral."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     t, y, _ = _curva_pam(intensity=90)
     tardio = t > 10
     pico = t[tardio][np.argmax(y[tardio])]
@@ -1995,9 +1865,6 @@ def test_pam_replicates_in_both_subaverages():
     Se promedia como cualquier respuesta, asi que aparece igual en las dos
     mitades. Lo delatan la latencia y el tamanio, no la replicabilidad.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     t, y, meta = _curva_pam()
     i = int(np.argmin(np.abs(t - 13.0)))
     assert meta['sub_a'][i] > 0.8 and meta['sub_b'][i] > 0.8
@@ -2006,9 +1873,6 @@ def test_pam_replicates_in_both_subaverages():
 
 def test_pam_does_not_move_the_fsp():
     """El equipo no lo mide como respuesta -- lo mide el alumno con el cursor."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     _, _, con = _curva_pam(pam=0.8)
     _, _, sin = _curva_pam(pam=0)
     assert abs(con['fsp'] - sin['fsp']) < 1e-9
@@ -2016,9 +1880,6 @@ def test_pam_does_not_move_the_fsp():
 
 def test_pam_shrinks_with_a_higher_high_pass():
     """Es lento: subir el pasa-alto se lo come, y eso es una maniobra."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     t, abierto, _ = _curva_pam(filter_high=30)
     _, cerrado, _ = _curva_pam(filter_high=300)
     tardio = t > 10
@@ -2027,9 +1888,6 @@ def test_pam_shrinks_with_a_higher_high_pass():
 
 def test_pam_barely_fits_the_routine_window():
     """En 12 ms apenas asoma: se ve entero cuando se abre la ventana."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     t12, corta, _ = _curva_pam(window=12.0)
     t20, larga, _ = _curva_pam(window=20.0)
     assert corta.max() < larga[t20 > 10].max()
@@ -2037,9 +1895,6 @@ def test_pam_barely_fits_the_routine_window():
 
 def test_clamping_the_tube_removes_the_pam():
     """Sin sonido no hay reflejo: la maniobra tambien lo apaga."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     t, abierto, _ = _curva_pam()
     _, pinzado, _ = _curva_pam(clamp=True)
     tardio = t > 10
@@ -2073,9 +1928,6 @@ def test_clamping_the_tube_kills_the_response_but_not_the_artifact():
 
     Es la prueba de que lo que se ve en los primeros ms no es onda I.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     t, abierto, _ = _curva_tec()
     _, pinzado, meta = _curva_tec(clamp=True)
     # La onda V se cae.
@@ -2104,9 +1956,6 @@ def test_clamping_the_tube_kills_the_response_but_not_the_artifact():
 
 def test_clamping_does_nothing_without_a_tube():
     """Supraaural y vibrador no tienen tubo que pinzar."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     for transductor in ('TDH39_headphone', 'bone_vibrator'):
         _, abierto, _ = _curva_tec(transducer=transductor)
         _, pinzado, meta = _curva_tec(transducer=transductor, clamp=True)
@@ -2120,9 +1969,6 @@ def test_clamping_removes_the_microphonic_too():
     Es la unica forma real de separarlas -- las dos siguen al estimulo y
     las dos estan en los primeros ms.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     neural = {'microfonica': 'amplificada', 'bloqueo': 'total'}
     t, abierto, _ = _curva_tec(pathology='neural', neural=neural,
                                pol='Rarefacción')
@@ -2137,9 +1983,6 @@ def test_the_false_wave_survives_the_clamp():
 
     Es la segunda maniobra que la delata, ademas de A/B.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     g = _gen()
     def altura(clamp):
         """Cuanto aporta la falsa onda en 8.5 ms, con y sin ella."""
@@ -2167,9 +2010,6 @@ def test_the_false_wave_survives_the_clamp():
 
 def test_false_wave_is_off_by_default():
     """Sin configurarla no existe: los casos viejos no cambian."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     _, y0, _ = _curva_falsa(amp=0)
     _, y1, _ = _curva_falsa(amp=0.0, lat=8.5)
     assert np.array_equal(y0, y1)
@@ -2198,9 +2038,6 @@ def test_contra_channel_loses_wave_I_and_delays_wave_V():
     Antes ABR_Curve devolvia una copia exacta del ipsi (dy = y.copy()) y la
     UI ni la dibujaba.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     t, y, meta = _curva(current=2000)
     contra = meta['contra']
     assert contra is not None
@@ -2215,9 +2052,6 @@ def test_contra_channel_loses_wave_I_and_delays_wave_V():
 
 def test_no_contra_channel_without_the_electrode():
     """Sin el electrodo del otro mastoides no hay canal contralateral."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     from abr.ABR_generator import DISCONNECTED
     electrodos = {'vertex': 'Cz', 'right': 'A2', 'left': DISCONNECTED,
                   'ground': 'Fpz'}
@@ -2237,9 +2071,6 @@ def test_rejected_sweeps_are_reported():
     Se calculaban y no salian de ahi: ABR_Curve devolvia solo las curvas,
     asi que la UI no tenia como mostrar por que el promedio no avanzaba.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     _, _, meta = _curva(current=2000, technical={'artifact_reject_uv': 10.0})
     assert meta['accepted_sweeps'] < 2000
     assert abs(meta['accepted_sweeps'] + meta['rejected_sweeps'] - 2000) < 1e-6
@@ -2252,9 +2083,6 @@ def test_bad_impedance_drops_the_fsp():
     podia registrar con 15 kOhm y el equipo declaraba igual "respuesta
     presente".
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     _, _, bueno = _curva(current=2000)
     malas = {'vertex': 15.0, 'right': 15.0, 'left': 15.0, 'ground': 15.0}
     _, _, malo = _curva(current=2000, technical={'impedance': malas})
@@ -2271,9 +2099,6 @@ def test_raw_eeg_is_physiological():
     que tiene sentido comparar el umbral) es el canal ya filtrado, que con
     los electrodos bien puestos queda en ~2 uV.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     g = _gen()
     datos = g.raw_eeg(default_settings('ABR'), quality=1.0, seed=7, tick=1)
     assert 1.0 < datos['rms_R'] < 4.0, datos['rms_R']
@@ -2288,9 +2113,6 @@ def test_raw_eeg_and_the_average_reject_together():
     Era la incoherencia del modulo: el monitor golpeando la barra de
     rechazo mientras el promediador aceptaba el 100% de los barridos.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     g = _gen()
     tech = default_settings('ABR')
     limpio = g.raw_eeg(tech, quality=1.0, seed=7, tick=1)
@@ -2308,9 +2130,6 @@ def test_raw_eeg_and_the_average_reject_together():
 
 def test_raw_eeg_shows_mains_without_ground():
     """Sin tierra el trazo crudo queda montado sobre el zumbido de red."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     from abr.ABR_generator import DISCONNECTED
     g = _gen()
     tech = default_settings('ABR')
@@ -2328,9 +2147,6 @@ def test_raw_eeg_shows_mains_without_ground():
 
 def test_raw_eeg_is_flat_without_electrode():
     """Electrodo desconectado = canal sin registro, no un EEG limpio."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     from abr.ABR_generator import DISCONNECTED
     g = _gen()
     tech = default_settings('ABR')
@@ -2341,9 +2157,6 @@ def test_raw_eeg_is_flat_without_electrode():
 
 def test_raw_eeg_runs_instead_of_repeating():
     """Cada tick trae EEG nuevo: es un monitor, no una foto."""
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     g = _gen()
     uno = g.raw_eeg(default_settings('ABR'), seed=7, tick=1)['R']
     dos = g.raw_eeg(default_settings('ABR'), seed=7, tick=2)['R']
@@ -2486,9 +2299,6 @@ def test_neither_transducer_delivers_more_than_it_can():
     entrega 120, entrega distorsion; el panel dejaba pedirlo y el generador
     lo tomaba como bueno.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     _, _, aereo = _curva(intensity=120, technical={'transducer': 'insert_earphone'})
     _, _, oseo = _curva(intensity=120, technical={'transducer': 'bone_vibrator'})
     assert aereo['output_db'] == AIR_MAX_OUTPUT_DB
@@ -2508,9 +2318,6 @@ def test_averaging_more_lowers_the_noise_like_one_over_root_n():
     servia de nada, que es justo la maniobra con la que se confirma una
     respuesta cerca del umbral.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     # Se promedian varias semillas: una sola realizacion del ruido tiene
     # ~15% de dispersion y el test daria falsos rojos.
     semillas = ['caso-1', 'caso-2', 'caso-3', 'caso-4', 'caso-5', 'caso-6']
@@ -2540,9 +2347,6 @@ def test_the_residual_noise_matches_what_the_equipment_declares():
     registro, el ruido es el del paciente (ver
     test_residual_noise_target_sets_the_floor).
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     for objetivo in (40, 80):
         _, _, meta = _curva(current=int(NOISE_REF_SWEEPS),
                             target=int(NOISE_REF_SWEEPS),
@@ -2635,9 +2439,6 @@ def test_masking_crosses_over_by_the_phone_not_by_the_stimulus():
     antes que el de insercion, que es el motivo clinico de preferir
     insercion cuando hay que enmascarar fuerte.
     """
-    if not HAS_SCIPY:
-        print("  (salteado: sin scipy)")
-        return
     caso = {'umbral': 30, 'umbral_por_estimulo_oseo': {'click': 30},
             'umbral_por_estimulo': {'click': 60}}
 

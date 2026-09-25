@@ -31,7 +31,7 @@ jobs:
 
       # Misma version que el build local de Linux (build.sh / env micromamba
       # 'labsim'), para no debuggear diferencias de runtime entre plataformas.
-      # PySide6 entra por wheel abi3 (cp310-abi3) y numpy/scipy tienen cp314
+      # PySide6 entra por wheel abi3 (cp310-abi3) y numpy tiene cp314
       # win_amd64.
       - name: Setup Python
         uses: actions/setup-python@v5

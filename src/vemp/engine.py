@@ -25,8 +25,8 @@ import math
 from dataclasses import dataclass, field
 
 import numpy as np
-import scipy.signal as signal
 
+from core import dsp
 from vemp import patient, protocol
 from vemp.norms import normativa as _normativa
 
@@ -376,12 +376,10 @@ class MotorVemp:
         try:
             alto = float(ajustes.filtro_alto)
             if 0 < alto < nyq:
-                b, a = signal.butter(2, alto / nyq, 'high')
-                salida = signal.filtfilt(b, a, salida)
+                salida = dsp.filtfilt(dsp.butter(2, alto / nyq, 'high'), salida)
             bajo = float(ajustes.filtro_bajo)
             if 0 < bajo < nyq:
-                b, a = signal.butter(4, bajo / nyq, 'low')
-                salida = signal.filtfilt(b, a, salida)
+                salida = dsp.filtfilt(dsp.butter(4, bajo / nyq, 'low'), salida)
         except ValueError:
             return salida
         return salida * self._ventana_bordes(len(salida))

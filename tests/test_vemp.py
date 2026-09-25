@@ -15,14 +15,12 @@ VEMP: lo que tiene que seguir siendo cierto y no se ve mirando una curva.
 6. La morfología es BIFÁSICA (p arriba, n abajo) y el caso viejo (un solo
    subtipo en la raíz del oído) sigue abriendo.
 
-Sin scipy en el sandbox se stubbea con filtros pasa-todo: lo que se prueba
-es el modelo, no el filtrado. core.base crea un QApplication al importarse,
-así que QT_QPA_PLATFORM=offscreen.
+core.base crea un QApplication al importarse, así que
+QT_QPA_PLATFORM=offscreen.
 """
 
 import os
 import sys
-import types
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 REPO = os.path.join(os.path.dirname(__file__), "..")
@@ -30,26 +28,6 @@ SRC = os.path.join(REPO, "src")
 if SRC not in sys.path:
     sys.path.insert(0, SRC)
 os.chdir(REPO)
-
-
-def stub_scipy():
-    """scipy.signal con filtros pasa-todo, solo si no está el real."""
-    try:
-        import scipy.signal  # noqa: F401
-        return
-    except ImportError:
-        pass
-    import numpy as np
-    fake = types.ModuleType("scipy.signal")
-    fake.butter = lambda *a, **k: (np.array([1.0]), np.array([1.0]))
-    fake.filtfilt = lambda b, a, x, **k: np.asarray(x)
-    scipy = types.ModuleType("scipy")
-    scipy.signal = fake
-    sys.modules.setdefault("scipy", scipy)
-    sys.modules["scipy.signal"] = fake
-
-
-stub_scipy()
 
 import numpy as np  # noqa: E402
 

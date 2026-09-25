@@ -24,7 +24,7 @@ try:
     from abr.AabrMainWindow import (BARRIDOS_MAX, CRITERIO_FSP, IMPEDANCIA_KOHM,
                                     NIVEL_DB, AabrMainWindow)
     HAS_UI = True
-except Exception as exc:  # pragma: no cover - sin PySide6/scipy
+except Exception as exc:  # pragma: no cover - sin PySide6
     print(f"  (salteado: {exc})")
     HAS_UI = False
 

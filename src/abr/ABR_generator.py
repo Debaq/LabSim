@@ -54,14 +54,10 @@ junto con abr/bezier_prop.py):
 import json
 import random
 import numpy as np
-import scipy.signal as signal
+from core import dsp
 from core.base import context
 from abr import ecochg
 from abr.protocols import get_protocol
-try:
-    from scipy.stats import ncf
-except ImportError:        # el sorteo del FSP necesita scipy.stats
-    ncf = None
 from core.rng import case_fingerprint, stable_seed
 
 
@@ -1680,8 +1676,7 @@ class ABRGenerator:
         emg = rng.standard_normal((blocks, n))
         if n > 12:
             try:
-                sos = signal.butter(4, 0.4, 'high', output='sos')
-                emg = signal.sosfiltfilt(sos, emg, axis=1)
+                emg = dsp.filtfilt(dsp.butter(4, 0.4, 'high'), emg, axis=1)
                 std = np.std(emg, axis=1, keepdims=True)
                 emg = np.divide(emg, std, out=np.zeros_like(emg), where=std > 0)
             except Exception:
@@ -1902,19 +1897,18 @@ class ABRGenerator:
         if 0 < filter_low < nyq:
             low_n = min(filter_low / nyq, 0.99)
             order = 4 if filter_low >= 3000 else (5 if filter_low >= 2000 else 6)
-            sos = signal.butter(order, low_n, 'low', output='sos')
-            out = signal.sosfiltfilt(sos, out)
+            out = dsp.filtfilt(dsp.butter(order, low_n, 'low'), out)
 
         if filter_high > 0:
             high_n = min(max(filter_high / nyq, 1e-5), 0.99)
             order = 6 if filter_high >= 150 else (5 if filter_high >= 50 else 4)
-            sos = signal.butter(order, high_n, 'high', output='sos')
+            filt = dsp.butter(order, high_n, 'high')
             # La epoca NO es la senial: es una ventana sobre un registro
             # continuo que antes y despues del estimulo esta en la linea de
             # base. El pasa-alto en el equipo real trabaja sobre ese
             # registro continuo, no sobre los 5 o 12 ms recortados.
             #
-            # Filtrar la epoca sola con el padding corto de sosfiltfilt
+            # Filtrar la epoca sola con el padding corto de filtfilt
             # (unas decenas de muestras) le da al filtro un tramo mucho mas
             # corto que su propia respuesta al impulso (1/f = 100 ms para un
             # corte de 10 Hz) y el resultado es que se lleva puesto lo que
@@ -1931,10 +1925,10 @@ class ABRGenerator:
             if relleno > 0:
                 largo = len(out)
                 ext = np.pad(out, relleno, mode='edge')
-                ext = signal.sosfiltfilt(sos, ext)
+                ext = dsp.filtfilt(filt, ext)
                 out = ext[relleno:relleno + largo]
             else:
-                out = signal.sosfiltfilt(sos, out)
+                out = dsp.filtfilt(filt, out)
 
         return out
 
@@ -2034,14 +2028,12 @@ class ABRGenerator:
         df1 = FSP_DF1 y df2 = FSP_DF2, con el parametro de no centralidad
         elegido para que la MEDIA de la distribucion sea el FSP esperado.
         """
-        if ncf is None:          # sin scipy.stats: sin sorteo, valor teorico
-            return float(max(esperado, 1.0))
         media = max(float(esperado), 1.0)
         # media de una F no central = (df1 + nc)/df1 * df2/(df2 - 2)
         nc = max(FSP_DF1 * (media * (FSP_DF2 - 2) / FSP_DF2 - 1.0), 0.0)
-        valor = float(ncf.rvs(FSP_DF1, FSP_DF2, nc,
-                              random_state=np.random.default_rng(
-                                  int(rng.integers(1 << 32)))))
+        # mismo sorteo que daba scipy.stats.ncf.rvs, que llama a esto
+        sorteo = np.random.default_rng(int(rng.integers(1 << 32)))
+        valor = float(sorteo.noncentral_f(FSP_DF1, FSP_DF2, nc))
         return max(valor, 1.0)
 
     def calculate_fsp(self, prom_actual, fsp_800, fsp_2000):
