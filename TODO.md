@@ -1,5 +1,39 @@
 # TODO
 
+## Build más liviano y arranque más rápido (explorado 2026-09-24, sin hacer)
+
+Medido sobre el build Linux (`dist/LabSim`, 431 MB) y con `-X importtime`.
+
+**Tamaño (~90 MB recortables, solo en `LabSim.spec`, sin tocar código):**
+PyInstaller mete todos los plugins de Qt y cada uno arrastra sus libs.
+- Tema GTK (`plugins/platformthemes/libqgtk3.so`) -> GTK3, cairo, pango,
+  harfbuzz, libxml2, glycin y una segunda ICU (v78, además de la 73 de
+  PySide6): ~60 MB. No se usa: la app fuerza Fusion claro.
+- QtQuick/Qml/QmlModels/VirtualKeyboard (~17 MB): los arrastra
+  `platforminputcontexts/libqtvirtualkeyboardplugin.so`. Todo es Widgets.
+- Qt6Pdf (~4,5 MB): lo arrastra `imageformats/libqpdf.so`.
+- Plataformas wayland/eglfs/vnc/linuxfb + egldeviceintegrations (~3 MB):
+  en Linux basta xcb.
+- `translations/` (124 .qm, ~7 MB): a lo sumo las de español.
+- imageformats tiff/webp/icns/tga/wbmp (~1,5 MB): bastan jpeg/svg/ico.
+
+NO sacar: QtMultimedia + FFmpeg (audio del audiómetro), QtNetwork (lo pide
+audio_player), QtOpenGL/QtSvg/QtTest (pyqtgraph los importa al cargar).
+Probar después que la app instalada arranque y que suene el audio.
+
+Windows: mismo criterio pero sin GTK; revisar Qt6Quick/Qml/Pdf,
+traducciones y `opengl32sw.dll` (~20 MB). No medido: el build sale del
+runner (bajar el artefacto para ver).
+
+**Arranque (`import main` = 3,7 s, de eso `scipy.signal` = 2,1 s):**
+Solo se usan `butter`, `sosfiltfilt`, `filtfilt` (ABR/VEMP),
+`gaussian_filter1d` (abr/smooth.py) y `scipy.stats.ncf` (sorteo FSP), pero
+`import scipy.signal` carga stats/interpolate/optimize/ndimage. Entra al
+arrancar por main -> AabrMainWindow -> ABR_generator. Importarlo dentro de
+las funciones (abr/ABR_generator.py, vemp/engine.py, abr/smooth.py) ahorra
+~2 s; el costo pasa a la primera captura, y se puede precargar en un hilo
+después del login. Otros: pyqtgraph 0,57 s, numpy 0,33 s, requests 0,2 s.
+
 ## Modo laboratorio (kiosko) y preferencias del alumno (2026-09-24, sin probar en Windows real)
 
 - `LABSIM_KIOSKO=1` (variable de entorno del equipo, se lee solo en
