@@ -7,16 +7,11 @@ import requests
 from PySide6.QtCore import QEvent, Qt, QSize, QTimer, Signal, Slot
 from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox, QProgressDialog
 
-from abr.AabrMainWindow import AabrMainWindow
-from abr.AbrMainWindow import AbrMainWindow
-from oae.OaeMainWindow import OaeMainWindow
-from vemp.VempMainWindow import VempMainWindow
 from agenda import Agenda
 from agenda.ChatPaciente import ChatPacienteWidget
-from audiometria import Acumetria, Audiometer, ListWords, Otoscopia
+from audiometria import Acumetria, Otoscopia
 from audiometria.DebugMkg import DebugMkgDialog
 from auth import login as Ui_login
-from impedanciometria import Z
 from core.base import context
 from core.h_win import FrameSubMdi, MdiArea
 from core import inbox
@@ -771,6 +766,13 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
     def load_sub_windows(self):
         """Carga las subventanas"""
+        from abr.AabrMainWindow import AabrMainWindow
+        from abr.AbrMainWindow import AbrMainWindow
+        from audiometria import Audiometer, ListWords
+        from impedanciometria import Z
+        from oae.OaeMainWindow import OaeMainWindow
+        from vemp.VempMainWindow import VempMainWindow
+
         self.subw_a = FrameSubMdi(Audiometer.Audiometer(self.data_current))
         self.subw_ac = FrameSubMdi(Acumetria.Acumetria(self.data_current))
         self.subw_ot = FrameSubMdi(Otoscopia.Otoscopia(self.data_current))
@@ -1128,6 +1130,26 @@ def _download_and_apply(update, silencioso=False):
         progress.close()
 
 
+def _precargar_modulos():
+    """Importa los módulos de examen mientras se muestra el login.
+
+    Son los que traen numpy y pyqtgraph (~0,45 s): se importan recién en
+    load_sub_windows, después del login, para que la ventana aparezca antes.
+    Se precargan acá, con la ventana ya a la vista y el alumno escribiendo
+    usuario y clave, así el login no paga el import. Si algo falla, se
+    ignora: load_sub_windows lo vuelve a importar y ahí sí se ve el error."""
+    try:
+        import abr.AabrMainWindow  # noqa: F401
+        import abr.AbrMainWindow  # noqa: F401
+        import audiometria.Audiometer  # noqa: F401
+        import audiometria.ListWords  # noqa: F401
+        import impedanciometria.Z  # noqa: F401
+        import oae.OaeMainWindow  # noqa: F401
+        import vemp.VempMainWindow  # noqa: F401
+    except Exception:
+        traceback.print_exc()
+
+
 def _check_and_apply_update():
     """Busca una versión nueva en GitHub Releases y, si el usuario acepta,
     la descarga y aplica (reemplaza el build actual y reinicia -- no vuelve
@@ -1204,5 +1226,6 @@ if __name__ == '__main__':
     else:
         window.show()
     despertador = atender_apagado(window.cerrar_por_apagado)
+    QTimer.singleShot(0, _precargar_modulos)
     exit_code = context.app.exec()
     sys.exit(exit_code)

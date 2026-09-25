@@ -24,7 +24,7 @@ El paciente no sabe si está en familiarización o en prueba (así se le
 instruye en la clínica), por eso no hay modo: decide el tamaño del salto.
 Tests en `tests/test_sisi.py`. Sin probar en la app real.
 
-## Build más liviano y arranque más rápido (explorado 2026-09-24; Qt y scipy hechos 2026-09-25)
+## Build más liviano y arranque más rápido (explorado 2026-09-24; hecho 2026-09-25)
 
 **Hecho (2026-09-25): 431 -> 394 MB en Linux**, con `prune_qt()` en
 `LabSim.spec`. Salen el tema GTK con toda su cadena (GTK3, cairo, pango,
@@ -34,7 +34,8 @@ traducciones (la app no instala ningún QTranslator). La exploración de abajo
 se equivocó en dos cosas:
 - QtQuick/Qml **no** se puede sacar: lo importa `libffmpegmediaplugin`, el
   audio del audiómetro.
-- La segunda ICU (v78, ~40 MB) tampoco: la usa `_sqlite3`.
+- La segunda ICU (v78, ~38 MB) se creyó que la usaba `_sqlite3` y se dejó.
+  No era así (ver abajo, "Tercera pasada").
 
 Se mantiene el plugin wayland (la distro del kiosko puede no tener
 XWayland) y, en Windows, `opengl32sw.dll` (OpenGL por software para equipos
@@ -43,7 +44,7 @@ sin driver de video).
 `prune_qt` solo poda lo que colgaba de un plugin sacado y que ya nadie
 importa, así que no toca libs que Qt abre con dlopen (FFmpeg, OpenSSL). Al
 final verifica que nada de lo que queda importe algo sacado y, si pasa,
-corta el build: así se descubrió lo de sqlite. Los symlinks que COLLECT deja
+corta el build. Los symlinks que COLLECT deja
 colgando en `_internal/` se borran después. Verificado: `ldd` sin
 dependencias rotas y arranque en xcb y en wayland. En Windows los patrones
 son los mismos (`qpdf.dll`, `Qt6Pdf.dll`...) pero no se midió.
@@ -72,7 +73,10 @@ traducciones y `opengl32sw.dll` (~20 MB). No medido: el build sale del
 runner (bajar el artefacto para ver).
 
 **Hecho (2026-09-25): scipy fuera de la app (build Linux 394 -> 319 MB,
-`import main` 3,7 -> 0,95 s).** Solo se usaban `butter`, `sosfiltfilt`, `filtfilt`
+`import main` 2,07 -> 1,20 s).** (El commit dijo "3,7 -> 0,95 s": el 0,95
+estaba mal medido, corriendo desde `src/` el import se cortaba en
+`DebugMkg`, que busca `resources/` relativo al cwd. Medir desde la raíz con
+`PYTHONPATH=src`. El 3,7 s de la exploración era con caché fría.) Solo se usaban `butter`, `sosfiltfilt`, `filtfilt`
 (ABR/VEMP), `gaussian_filter1d` (abr/smooth.py) y `scipy.stats.ncf` (sorteo
 FSP), pero el paquete entero pesaba 41 MB + 30 MB de `scipy.libs` y
 `import scipy.signal` tardaba 2,1 s al arrancar (cargaba stats/interpolate/
@@ -99,7 +103,48 @@ Comparado con HEAD: curvas ABR, FSP y VEMP iguales hasta 2e-12.
 
 `LabSim.spec` excluye scipy: si quedó instalado en el entorno, pyqtgraph lo
 arrastraría (solo lo usa en `affineSlice` con orden > 1, que no se llama).
-Otros tiempos de import: pyqtgraph 0,28 s, numpy 0,22 s.
+
+**Tercera pasada (2026-09-25): 319 -> 240 MB, `import main` 1,20 -> 0,89 s.**
+Todo en `LabSim.spec` salvo lo último:
+- **ICU 78 fuera (~38 MB).** Nadie la carga. La pide la `libsqlite3` del
+  env conda, pero PyInstaller empaqueta la de `/usr/lib`, que no usa ICU
+  (`_sqlite3` tiene RPATH `$ORIGIN/../..` y resuelve a esa). El chequeo de
+  `prune_qt` la daba por necesaria porque `get_imports()` en Linux es
+  `ldd`: transitivo y resuelto contra el env de build, no contra el dist.
+  Ahora el chequeo lee solo el NEEDED directo de cada lib empaquetada
+  (`objdump -p`), que es lo que de verdad se carga. Si algún día entra la
+  libsqlite3 de conda, el chequeo corta el build.
+- **`strip --strip-debug` (~40 MB)** en `libpython3*.so` (venía con info de
+  debug: 29 de sus 34 MB) y `lib-dynload/*.so`. Solo esos: el `strip=True`
+  de PyInstaller pasa por todo y puede romper las libs de `numpy.libs`
+  (retocadas con patchelf).
+- **setuptools fuera (~160 ms de arranque).** urllib3 prueba
+  `from backports import zstd` (opcional; en 3.14 usa `compression.zstd`) y
+  el hook de PyInstaller para `backports` lo resuelve en el `_vendor` de
+  setuptools. Entraba setuptools entero más un runtime hook que lo importa
+  en cada arranque. En `excludes` no sirve (el alias del hook choca con
+  "already imported as ExcludedModule"): se filtra de `a.pure`, `a.datas`
+  y `a.scripts` después del análisis.
+- **Módulos de examen en diferido** (`src/main.py`). ABR, AABR, OAE, VEMP,
+  Z, audiómetro y logoaudiometría traen numpy y pyqtgraph (~0,4 s) y solo
+  se usan en `load_sub_windows`, después del login. Se importan ahí, y
+  `_precargar_modulos()` los carga con un `QTimer.singleShot(0)` apenas se
+  muestra la ventana, mientras el alumno escribe usuario y clave: el login
+  no aparece más tarde ni el post-login se hace más lento.
+Verificado: sin libs faltantes (`ldd` con el LD_LIBRARY_PATH del bundle),
+el binario arranca y se queda en el login (con el plugin offscreen puesto a
+mano solo para la prueba), y los 7 módulos siguen en el PYZ.
+
+Quedan (no se tocan): OpenBLAS de numpy (27 MB, numpy viene enlazado a
+eso), FFmpeg y QtQuick/Qml (audio), QtOpenGL (pyqtgraph lo importa al
+cargar), requests (~0,1 s, lo usa el login).
+
+**Red antes de mostrar la ventana (sin decidir).** Lo que más tarda ahora
+en el arranque no son imports: `main` hace a nivel de módulo el pedido del
+layout al backend (`fetch_layout`, ~0,5 s, timeout 5 s; con caché ya hay
+un reintento en background) y, en el build congelado, `__main__` consulta
+GitHub Releases por actualizaciones antes de crear la ventana (~0,5-0,8 s,
+timeout 5 s). Con red lenta son varios segundos de nada en pantalla.
 
 ## Modo laboratorio (kiosko) y preferencias del alumno (2026-09-24)
 
