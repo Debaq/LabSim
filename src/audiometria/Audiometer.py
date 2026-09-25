@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (QApplication, QLabel, QLineEdit, QPlainTextEdit,
 from core import atajos, keyboard_monitor
 from core.preferencias import preferencias
 from backend.log_queue import get_log_queue
+from audiometria.response import ESTIMULO_ENCENDIDO
 from audiometria.response import ResponseAudiometry as Response
 from audiometria.UI.Ui_Audiometer import Ui_Audiometer
 
@@ -685,7 +686,7 @@ class Audiometer(QWidget, Ui_Audiometer):
             self.signal_speech.emit(self.datasignal_speech)
             self.lbl_warnings[ch].setStyleSheet(
                 "background-color: rgb(170, 170, 255);  color : rgb(170, 170, 255);")
-            self.lbl_warnings[ch].setText("toc-toc")
+            self.lbl_warnings[ch].setText(ESTIMULO_ENCENDIDO)
             self.datasignal_speech[4] = self.lbl_revers[contra].text() == "Invertido" and self.lbl_stim[contra].text() == "Speech Noise"
             self.datasignal_speech[6] = self._mkg_intensity(ch)
 
@@ -703,7 +704,7 @@ class Audiometer(QWidget, Ui_Audiometer):
             self.vu_meters[ch].setValue(50)
             self.lbl_warnings[ch].setStyleSheet(
             "background-color: rgb(170, 170, 255);  color : rgb(170, 170, 255);")
-            self.lbl_warnings[ch].setText("toc-toc")
+            self.lbl_warnings[ch].setText(ESTIMULO_ENCENDIDO)
             self.players.play(ch, self.state_supra[0], True)
             self.channel_on[ch] = True
             self.post_channel_on()
@@ -723,7 +724,7 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.vu_meters[ch].setValue(50)
         self.lbl_warnings[ch].setStyleSheet(
             "background-color: rgb(170, 170, 255);  color : rgb(170, 170, 255);")
-        self.lbl_warnings[ch].setText("toc-toc")
+        self.lbl_warnings[ch].setText(ESTIMULO_ENCENDIDO)
         self.channel_on[ch] = True
         self.post_channel_on()
 

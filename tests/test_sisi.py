@@ -1,6 +1,6 @@
 """
 SISI: el paciente respondia una sola vez (al prender el tono) y despues nada,
-porque el motor solo miraba el toc-toc y no las subidas de intensidad.
+porque el motor solo miraba el encendido del tono y no las subidas de intensidad.
 
 Ahora cada subida con el portador sonando es un incremento:
 - 5 dB (familiarizacion) se nota siempre, SISI positivo o negativo.
@@ -18,7 +18,8 @@ from unittest import mock
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from audiometria.response import ResponseAudiometry  # noqa: E402
+from audiometria.response import (  # noqa: E402
+    ESTIMULO_ENCENDIDO, ResponseAudiometry)
 
 
 class FakeLabel:
@@ -66,7 +67,7 @@ class SisiTest(unittest.TestCase):
             "freq": 3, "test": "Umbrales", "stim": [0, 3],
             "output": [oido, 1 - oido], "int": [nivel, 0],
         })
-        self.r.set_config(FakeSender("lbl_stimOn_ch0", "toc-toc"))
+        self.r.set_config(FakeSender("lbl_stimOn_ch0", ESTIMULO_ENCENDIDO))
 
     def nivel(self, db):
         self.r.set_config(FakeSender("lbl_int_ch0", f"{db} dB HL"))

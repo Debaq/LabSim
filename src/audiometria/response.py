@@ -22,6 +22,10 @@ trans_list = class_pref.get("trans_list")
 reverse_list = class_pref.get("reverse_list")
 tone_list = class_pref.get("tone_list")
 pulsatile_time = class_pref.get("pulsatile_time")
+# Texto que el audiometro pone en lbl_stimOn_chX mientras el canal suena (la
+# letra va del color del fondo: no se ve, solo marca el estado). Es la unica
+# forma en que este motor se entera de que se prendio o apago un estimulo.
+ESTIMULO_ENCENDIDO = "estimulo_encendido"
 alternate_time = class_pref.get("alternate_time")
 
 '''_summary_
@@ -173,7 +177,7 @@ class ResponseAudiometry():
             value = stim_list.index(str_)
             self.data['audio']['stim'][channel] = value
         elif 'stimOn' in name:
-            value = True if str_ == 'toc-toc' else False
+            value = str_ == ESTIMULO_ENCENDIDO
             self.data['audio']['stimOn'][channel] = value
             self.response_()
         elif 'freq' in name:

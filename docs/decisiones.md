@@ -8,7 +8,7 @@ principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 ## SISI: el paciente responde a las subidas de intensidad (2026-09-24)
 
 Reporte de prueba en clase: el paciente decía "sí" una sola vez y después
-nada. El motor (`response_sisi`) solo miraba el toc-toc: sorteaba el % SISI
+nada. El motor (`response_sisi`) solo miraba el encendido del tono: sorteaba el % SISI
 al prender el tono y las subidas de intensidad no llegaban a la prueba.
 
 Ahora, con la instrucción `cambie_de_volumen` y el tono portador sonando,
