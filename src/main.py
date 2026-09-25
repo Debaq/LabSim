@@ -382,6 +382,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.sync_thread = None
         self.report_autosave = ReportAutosave(self._modulos_examen, self)
         self._layout_retry = None
+        self._layout_sin_override = None
         self.cronometro_segundos = 0
         self.cronometro_timer = QTimer(self)
         self.cronometro_timer.setInterval(1000)
@@ -437,6 +438,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                     f"\nDetalle: {exc}",
                 )
                 self.data_login = None
+                self._limpiar_barras()
+                self._restaurar_layout()
                 self.lbl_name.setText("")
                 self.btn_login.setText("Ingresar")
                 login_subw = self.subw.get("LOGIN") if self.subw else None
@@ -485,6 +488,14 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             return
         if self.data_login.get("permission") != 777:
             return
+        # Se guarda lo que vino del layout para devolverlo al cerrar sesión
+        # (ver _restaurar_layout): si no, el alumno que entra después del
+        # admin hereda sus boxes y módulos habilitados.
+        if self._layout_sin_override is None:
+            self._layout_sin_override = (
+                {k: box[0] for k, box in self.boxs.items()},
+                {k: app[5] for k, app in self.apps.items() if len(app) > 5},
+            )
         for box in self.boxs.values():
             box[0] = True
         for app in self.apps.values():
@@ -492,6 +503,28 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             # para que chargeBtnsArea no haga btn.setDisabled(True).
             if len(app) > 5:
                 app[5] = "pre"
+
+    def _restaurar_layout(self):
+        """Deshace _apply_admin_overrides_if_any (in-place, por lo mismo)."""
+        if self._layout_sin_override is None:
+            return
+        boxs, apps = self._layout_sin_override
+        for k, activo in boxs.items():
+            self.boxs[k][0] = activo
+        for k, state in apps.items():
+            self.apps[k][5] = state
+        self._layout_sin_override = None
+
+    def _limpiar_barras(self):
+        """Saca los botones de secciones, de equipos y de acciones: sin
+        sesión la barra queda vacía como al abrir la app (btns_seccion y
+        btns_actions los vuelven a armar en el próximo login)."""
+        for layout in (*self.layouts, self.layoutAction):
+            self._clear_layout(layout)
+        for attr in ("btn_chat_paciente", "btn_cmd_voice", "btn_list_words",
+                     "btn_cerrar_ventanas", "btn_configuracion",
+                     "btn_debug_mkg", "btn_bandeja_oirs"):
+            setattr(self, attr, None)
 
     def _logged_in_client(self):
         """Cliente del backend con la sesión que dejó el login, o None si ese
@@ -561,6 +594,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self._stop_sync_thread()
         self._reset_cronometro()
         self._close_sub_windows()
+        self._limpiar_barras()
+        self._restaurar_layout()
         login_subw = self.subw.get("LOGIN") if self.subw else None
         if login_subw is not None:
             # El login se logueó via toggle_login (btn "Cerrar Sesión"), no
