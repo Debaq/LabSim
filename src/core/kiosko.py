@@ -1,7 +1,9 @@
 """Modo laboratorio (kiosko): computadores compartidos del laboratorio.
 
 Se activa con la variable de entorno LABSIM_KIOSKO=1, que define quien
-administra el equipo (no la app). Es el único lugar donde se lee.
+administra el equipo (no la app). Es el único lugar donde se lee. Solo en
+Linux: el laboratorio corre una distro propia; en Windows o macOS la
+variable no hace nada.
 
 Qué cambia en un kiosko:
 - El "mouse para zurdos" del perfil del alumno se aplica dentro de LabSim
@@ -29,21 +31,21 @@ PLAZO_APAGADO_S = 12
 
 
 def es_kiosko():
-    return os.environ.get("LABSIM_KIOSKO", "").strip() == "1"
+    return (sys.platform.startswith("linux")
+            and os.environ.get("LABSIM_KIOSKO", "").strip() == "1")
 
 
 def atender_apagado(cerrar):
     """SIGTERM (apagar.sh, systemd al apagar) llama a `cerrar` en el hilo
     de Qt en vez de matar la app al instante, que perdía el informe en
-    curso. Solo en el laboratorio, que es Linux: en Windows no hay kiosko
-    ni SIGTERM al apagar.
+    curso. Solo en el laboratorio.
 
     Devuelve el temporizador "despertador" (o None): hay que guardarlo, si
     se recolecta deja de andar. Python atiende las señales solo cuando corre
     código Python, y con la app quieta el que corre es el bucle de Qt (C++):
     sin este tic la señal esperaría hasta el próximo clic.
     """
-    if sys.platform == "win32" or not es_kiosko():
+    if not es_kiosko():
         return None
     recibida = []
 

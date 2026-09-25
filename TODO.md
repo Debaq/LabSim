@@ -34,10 +34,11 @@ las funciones (abr/ABR_generator.py, vemp/engine.py, abr/smooth.py) ahorra
 ~2 s; el costo pasa a la primera captura, y se puede precargar en un hilo
 después del login. Otros: pyqtgraph 0,57 s, numpy 0,33 s, requests 0,2 s.
 
-## Modo laboratorio (kiosko) y preferencias del alumno (2026-09-24, sin probar en Windows real)
+## Modo laboratorio (kiosko) y preferencias del alumno (2026-09-24)
 
 - `LABSIM_KIOSKO=1` (variable de entorno del equipo, se lee solo en
-  `src/core/kiosko.py`). En Windows, como admin: `setx LABSIM_KIOSKO 1 /M`.
+  `src/core/kiosko.py`). Solo Linux: el laboratorio corre una distro
+  propia; en Windows/macOS la variable no hace nada.
   Hace tres cosas: actualiza sin preguntar, aplica el "mouse para zurdos"
   del alumno dentro de LabSim, y deja la ventana a pantalla completa sin
   botones de ventana ni forma de cerrarla (Alt+F4 tampoco); solo un
@@ -56,11 +57,13 @@ después del login. Otros: pyqtgraph 0,57 s, numpy 0,33 s, requests 0,2 s.
 - Apagado del equipo (Linux: `apagar.sh`, systemd): SIGTERM ya no mata la
   app al instante. `kiosko.atender_apagado` la cierra como con la X (sube
   informes y logs, para hilos) aunque no haya docente; una guardia sale a
-  los 12 s pase lo que pase (apagar.sh espera 15). Solo en kiosko y nunca
-  en Windows (ahí no hay kiosko). Probado con `kill -TERM` sin sesión: sale
-  en ~0,5 s. Falta probarlo con un alumno atendiendo.
-- [ ] Probar en Windows real: detección del controlador (registro +
-  cfgmgr32) y mouse para zurdos sobre ABR/VEMP (menú contextual de pyqtgraph).
+  los 12 s pase lo que pase (apagar.sh espera 15). Solo en kiosko.
+  Probado con `kill -TERM` sin sesión: sale en ~0,5 s. Falta probarlo con
+  un alumno atendiendo.
+- [ ] Probar en Windows real la detección del controlador (registro +
+  cfgmgr32).
+- [ ] Probar en el kiosko (Linux) el mouse para zurdos sobre ABR/VEMP (menú
+  contextual de pyqtgraph).
 
 ## Informes de examen: guardado automático (2026-09-24, sin probar en la app real)
 
