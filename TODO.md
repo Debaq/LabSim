@@ -53,6 +53,12 @@ después del login. Otros: pyqtgraph 0,57 s, numpy 0,33 s, requests 0,2 s.
 - Decisión: los atajos personales se aplican en cualquier equipo; el mouse
   para zurdos solo en kiosko, porque en un equipo propio el alumno lo tiene
   en el sistema y LabSim lo volvería a invertir.
+- Apagado del equipo (Linux: `apagar.sh`, systemd): SIGTERM ya no mata la
+  app al instante. `kiosko.atender_apagado` la cierra como con la X (sube
+  informes y logs, para hilos) aunque no haya docente; una guardia sale a
+  los 12 s pase lo que pase (apagar.sh espera 15). Solo en kiosko. Probado
+  con `kill -TERM` sin sesión: sale en ~0,5 s. Falta probarlo con un
+  alumno atendiendo. En Windows el apagado no manda SIGTERM: ahí no aplica.
 - [ ] Probar en Windows real: detección del controlador (registro +
   cfgmgr32) y mouse para zurdos sobre ABR/VEMP (menú contextual de pyqtgraph).
 

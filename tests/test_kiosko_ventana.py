@@ -60,6 +60,36 @@ def test_si_la_sacan_de_pantalla_completa_vuelve():
     assert w.isFullScreen()
 
 
+def test_al_apagar_el_equipo_cierra_aunque_sea_alumno():
+    w = _ventana()
+    w.data_login = {"user": "al", "permission": 444}
+    w._aplicar_kiosko()
+    w.cerrar_por_apagado()
+    assert not w.isVisible()
+
+
+def test_sigterm_llega_al_cierre_una_sola_vez():
+    import signal
+    import time
+    from core import kiosko
+    plazo = kiosko.PLAZO_APAGADO_S
+    kiosko.PLAZO_APAGADO_S = 3600  # que la guardia no mate al test
+    llamadas = []
+    try:
+        despertador = kiosko.atender_apagado(lambda: llamadas.append(1))
+        assert despertador is not None
+        os.kill(os.getpid(), signal.SIGTERM)
+        os.kill(os.getpid(), signal.SIGTERM)
+        fin = time.monotonic() + 2
+        while not llamadas and time.monotonic() < fin:
+            APP.processEvents()
+        APP.processEvents()
+        assert llamadas == [1]
+    finally:
+        signal.signal(signal.SIGTERM, signal.SIG_DFL)
+        kiosko.PLAZO_APAGADO_S = plazo
+
+
 def test_fuera_del_laboratorio_todo_normal():
     os.environ["LABSIM_KIOSKO"] = "0"
     try:

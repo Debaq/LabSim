@@ -23,7 +23,7 @@ from core import inbox
 from core import mis_pacientes
 from core import app_config_store
 from core.report_autosave import ReportAutosave
-from core.kiosko import es_kiosko
+from core.kiosko import es_kiosko, atender_apagado
 from core.preferencias import preferencias
 from core import mouse_zurdo, configuracion
 from core.module_placeholder import ModulePlaceholder
@@ -280,8 +280,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
     def _salida_permitida(self):
         """En el laboratorio solo sale un docente logueado: el alumno no
-        puede cerrar la app. Fuera del laboratorio, siempre."""
-        if not es_kiosko():
+        puede cerrar la app. Fuera del laboratorio, siempre. Si el equipo
+        se apaga, también: el sistema no espera a un docente."""
+        if not es_kiosko() or self._apagando:
             return True
         return bool(self.data_login) and es_docente(self.data_login.get("permission"))
 
@@ -294,6 +295,16 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.btn_min.setVisible(False)
         self.btn_max.setVisible(False)
         self.btn_salir.setVisible(self._salida_permitida())
+
+    def cerrar_por_apagado(self):
+        """El equipo se apaga (SIGTERM, ver core/kiosko.atender_apagado):
+        cierra como con la X -- sube informes y logs, para los hilos --
+        aunque no haya un docente logueado."""
+        if self._apagando:
+            return
+        self._apagando = True
+        self.close()
+        context.app.quit()
 
     def changeEvent(self, event):
         super().changeEvent(event)
@@ -323,6 +334,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def create_variables(self):
         """Crea las variables necesarias para el funcionamiento del programa"""
         self.data_login = None
+        # El equipo se está apagando (ver cerrar_por_apagado).
+        self._apagando = False
         self.data_current = None
         self.data_current_key = None
         self.paciente_actual = None
@@ -1190,5 +1203,6 @@ if __name__ == '__main__':
         window.showFullScreen()
     else:
         window.show()
+    despertador = atender_apagado(window.cerrar_por_apagado)
     exit_code = context.app.exec()
     sys.exit(exit_code)
