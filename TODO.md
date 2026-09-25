@@ -43,49 +43,6 @@ Revisado contra el código el 2026-09-24.
       atención se pierde (el autosave de 30 s lo mitiga, pero solo sube).
       § Otoscopia: cono del espéculo e informe por cuadrantes
 
-## Desplegar en el hosting
-
-- [ ] Subir `api/my_report.php` (nuevo), `api/my_patient_reports.php` (hoy
-      404 en producción) y `api/report_upload.php`. § Informes de examen:
-      guardado automático
-- [ ] Confirmar que se corrió "Aplicar schema" en Admin → Base de datos:
-      trae `llm_usage`, la migración de `reports` para `OTOSCOPIA` (sin ella
-      subir un informe de otoscopia falla con CHECK constraint) y
-      `case_folders`/`cases.folder_id`.
-- [ ] Cargar las tarifas reales del LLM en Admin → IA Paciente (hoy en 0: el
-      panel cuenta tokens, no costo). § Consumo de la API del LLM
-
-## Probar en la app real
-
-- [ ] Kiosko: apagado por SIGTERM con un alumno atendiendo (sin sesión ya
-      probado); mouse para zurdos sobre ABR/VEMP (menú de pyqtgraph).
-      § Modo laboratorio (kiosko)
-- [ ] Windows: detección del controlador (registro + cfgmgr32). § Modo
-      laboratorio (kiosko)
-- [ ] Guardado automático de informes y recuperación al retomar la atención
-      en los cinco módulos. § Informes de examen: guardado automático
-- [ ] VEMP v2 dentro del MDI con un caso del editor, y su PDF con un informe
-      subido desde la app. § VEMP v2: probar en la app real
-- [ ] ECochG (motor, medición, marcado automático, caso e informe). § Electrococleografía: el motor
-- [ ] Otoscopia contra el backend real: guardado con una atención de verdad y
-      el PDF. § Otoscopia: cono del espéculo e informe por cuadrantes
-
-## Probar en el navegador
-
-Local no hay `pdo_sqlite`: todo esto se validó con `php -l`, tests y SQLite
-aparte, nunca renderizado de verdad.
-
-- [ ] Ficha del caso en PDF (`case_sheet_pdf.php`) con un caso real: endpoint,
-      permisos por curso y los dos botones. § Ficha del caso en PDF
-- [ ] Anamnesis de la ficha de estudio redactada por IA, con API key real, y
-      el botón "Redactar de nuevo". § Ficha de estudio: anamnesis redactada con IA
-- [ ] Gestión de cursos F0-F4 (pestañas, tablero-roster, resumen, curso en
-      foco). § Rediseño de la gestión de cursos en el backend
-- [ ] Bandeja de entrada (`inbox_send.php`). § Bandeja de entrada
-- [ ] Panel de consumo del LLM. § Consumo de la API del LLM
-- [ ] Biblioteca de fichas: acciones en tanda, menú de carpetas, densidad de
-      la tabla. § Biblioteca de fichas: carpetas y archivado
-
 ## Decisiones pendientes
 
 Pedagógicas o de la docente; bloquean lo que cuelga de ellas.
