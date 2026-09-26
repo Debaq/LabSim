@@ -11,8 +11,10 @@ declare(strict_types=1);
  * kiosko no abre sin confirmar que está al día (core/actualizacion_kiosko.py
  * del cliente), así que agotar el límite era dejar el laboratorio parado.
  *
- * El backend consulta a GitHub una vez cada TTL segundos (una sola IP, ~6
- * por hora) y entrega la misma lista a todos. Solo la información: los
+ * El backend consulta a GitHub una vez cada TTL segundos (12 h) y entrega la
+ * misma lista a todos. Además se consulta al momento con el botón de
+ * admin/versiones.php y al aplicar el schema (admin/database.php): una
+ * versión recién publicada no espera las 12 h si alguien la pide. Solo la información: los
  * paquetes se siguen bajando de GitHub, que para las descargas no tiene ese
  * límite, y guardarlos acá sería llenar el hosting con 100+ MB por versión.
  *
@@ -25,24 +27,34 @@ final class AppReleases
 {
     private const URL = 'https://api.github.com/repos/Debaq/LabSim/releases?per_page=100';
     private const PREFIJO = 'pyinstaller-v';
-    public const TTL = 600;
-    public const MAX_VIEJA = 3600;
+    public const TTL = 43200;
+    public const MAX_VIEJA = 86400;
     private const TIMEOUT = 6;
+
+    /** Archivos que publica scripts/release_pyinstaller.sh en cada versión. */
+    public const ARCHIVOS = [
+        'Windows' => 'LabSim-windows-x86_64-setup.exe',
+        'Linux' => 'LabSim-linux-x86_64.tar.gz',
+        'Actualización Linux' => 'LabSim-linux-x86_64-update.tar.gz',
+        'Manifiesto' => 'manifest.json',
+    ];
 
     /**
      * ['consultado' => epoch, 'releases' => [...]] o null si no hay una
-     * lista confiable.
+     * lista confiable. $forzar consulta a GitHub aunque la guardada esté
+     * vigente; si GitHub no responde, se comporta igual que sin forzar.
      *
      * @return array{consultado: int, releases: array<int, array<string, mixed>>}|null
      */
-    public static function lista(?callable $fetch = null, ?string $cachePath = null, ?int $ahora = null): ?array
+    public static function lista(?callable $fetch = null, ?string $cachePath = null, ?int $ahora = null,
+                                 bool $forzar = false): ?array
     {
         $fetch = $fetch ?? [self::class, 'fetch'];
-        $cachePath = $cachePath ?? __DIR__ . '/../data/app_releases.json';
+        $cachePath = $cachePath ?? self::cachePath();
         $ahora = $ahora ?? time();
 
         $cache = self::leerCache($cachePath);
-        if ($cache !== null && $ahora - $cache['consultado'] < self::TTL) {
+        if (!$forzar && $cache !== null && $ahora - $cache['consultado'] < self::TTL) {
             return $cache;
         }
 
@@ -55,7 +67,7 @@ final class AppReleases
         }
         try {
             $cache = self::leerCache($cachePath);
-            if ($cache !== null && $ahora - $cache['consultado'] < self::TTL) {
+            if (!$forzar && $cache !== null && $ahora - $cache['consultado'] < self::TTL) {
                 return $cache;
             }
             $releases = $fetch();
@@ -75,6 +87,37 @@ final class AppReleases
             return $cache;
         }
         return null;
+    }
+
+    /**
+     * La lista guardada tal cual, sin consultar a GitHub ni descartarla por
+     * vieja: para mostrarla en el admin.
+     *
+     * @return array{consultado: int, releases: array<int, array<string, mixed>>}|null
+     */
+    public static function guardada(?string $cachePath = null): ?array
+    {
+        return self::leerCache($cachePath ?? self::cachePath());
+    }
+
+    /**
+     * Qué archivos de ARCHIVOS tiene una versión (etiqueta => bool).
+     *
+     * @return array<string, bool>
+     */
+    public static function archivos(array $release): array
+    {
+        $nombres = array_column((array) ($release['assets'] ?? []), 'name');
+        $salida = [];
+        foreach (self::ARCHIVOS as $etiqueta => $nombre) {
+            $salida[$etiqueta] = in_array($nombre, $nombres, true);
+        }
+        return $salida;
+    }
+
+    private static function cachePath(): string
+    {
+        return __DIR__ . '/../data/app_releases.json';
     }
 
     /**

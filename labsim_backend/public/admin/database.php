@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Backups.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
+require_once __DIR__ . '/../../src/AppReleases.php';
 require_once __DIR__ . '/_layout.php';
 
 /**
@@ -98,6 +99,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $success .= " Se movieron {$movedTeachers} matrícula(s) de docentes del roster de alumnos a docentes del curso.";
             }
             AdminAudit::log($me, 'apply_schema');
+            // Aplicar el schema es lo que se hace tras cada despliegue: de
+            // paso se trae la lista de versiones de la app sin esperar las
+            // 12 h (ver AppReleases). Si GitHub no responde no es un error
+            // del schema.
+            AppReleases::lista(null, null, null, true);
         } elseif ($action === 'create') {
             $created = Backups::create();
             $success = "Backup creado: {$created}.";

@@ -51,8 +51,25 @@ t_eq($l['consultado'], $t0 + AppReleases::TTL, 'GitHub caído: se sirve la guard
 t_eq(AppReleases::lista($caido, $cache, $t0 + AppReleases::TTL + AppReleases::MAX_VIEJA), null,
      'Una lista demasiado vieja no se sirve: el cliente la tomaría por buena');
 
+$llamadas = 0;
+$l = AppReleases::lista($github, $cache, $t0 + 10);
+AppReleases::lista($github, $cache, $t0 + 20, true);
+t_eq($llamadas, 1, 'Forzar consulta a GitHub aunque la guardada esté vigente');
+t_eq(AppReleases::guardada($cache)['consultado'], $t0 + 20, 'La consulta forzada queda guardada');
+
+$l = AppReleases::lista($caido, $cache, $t0 + 30, true);
+t_eq($l['consultado'], $t0 + 20, 'Forzar con GitHub caído: sigue la guardada');
+
+t_eq(AppReleases::archivos($l['releases'][0]),
+     ['Windows' => false, 'Linux' => false, 'Actualización Linux' => false, 'Manifiesto' => true],
+     'Archivos presentes por versión');
+
+t_eq(AppReleases::guardada($cache)['consultado'], $t0 + 20,
+     'guardada() no descarta la lista por vieja ni consulta');
+
 @unlink($cache);
 t_eq(AppReleases::lista($caido, $cache, $t0), null, 'Sin GitHub ni guardada: null');
+t_eq(AppReleases::guardada($cache), null, 'Sin lista guardada: null');
 
 @unlink($cache . '.lock');
 @rmdir($dir);

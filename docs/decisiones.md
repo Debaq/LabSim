@@ -173,11 +173,17 @@ laboratorio quedaría parado. Un ETag no sirve: el 304 no descuenta solo en
 consultas autenticadas (medido: 51 -> 50).
 
 La lista la guarda el **backend** (`AppReleases.php`, `api/app_releases.php`,
-anónimo como `layout.php`): consulta a GitHub una vez cada 10 min por todos
-los clientes (una IP, ~6 por hora; con el cache vencido un `flock` hace que
-consulte uno solo), filtra las `pyinstaller-v*` y deja los campos que usa
-el updater. Si GitHub no responde sirve la guardada mientras tenga menos
-de 1 h; más vieja contesta 503, porque el cliente la tomaría por buena. Se
+anónimo como `layout.php`): consulta a GitHub una vez cada 12 h por todos
+los clientes (con el cache vencido un `flock` hace que consulte uno solo),
+filtra las `pyinstaller-v*` y deja los campos que usa el updater. Cada
+10 min era de más: las versiones salen pocas veces y las publica el mismo
+admin, así que además se consulta al momento con "Consultar ahora" en
+`admin/versiones.php` y al aplicar el schema (lo que se hace tras cada
+despliegue). Una versión nueva no llega a los equipos hasta la próxima
+consulta. Si GitHub no responde sirve la guardada mientras tenga menos
+de 24 h; más vieja contesta 503, porque el cliente la tomaría por buena.
+`admin/versiones.php` muestra la lista guardada y qué archivos tiene cada
+versión: sin instalador de Windows = falló el build de Windows. Se
 guarda solo la información, no los paquetes: las descargas de GitHub no
 tienen ese límite, y 100+ MB por versión no caben en el hosting. Encaja con
 la regla de arriba: el backend es lo único que la app necesita sí o sí.
