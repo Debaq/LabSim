@@ -183,7 +183,17 @@ despliegue). Una versión nueva no llega a los equipos hasta la próxima
 consulta. Si GitHub no responde sirve la guardada mientras tenga menos
 de 24 h; más vieja contesta 503, porque el cliente la tomaría por buena.
 `admin/versiones.php` muestra la lista guardada y qué archivos tiene cada
-versión: sin instalador de Windows = falló el build de Windows. Se
+versión: sin instalador de Windows = falló el build de Windows.
+
+Abajo muestra los **equipos**: la app manda un bloque `equipo` con el login
+(`core/equipo.py`: id, nombre, SO, versión, si es build o código) y el
+backend guarda el último ingreso de cada uno (`Equipos.php`, tabla
+`app_equipos`, se crea sola). Va en el login y no en `app_releases.php`
+porque ese es anónimo: cualquiera podría llenar la tabla. La clave es un
+hash del machine-id / MachineGuid y no el hostname, porque las máquinas del
+laboratorio salen de la misma imagen. El estado se calcula contra la lista
+guardada: al día, N versiones atrás, o "no publicada" si la versión no está
+en la lista (build de prueba o lista sin actualizar). Se
 guarda solo la información, no los paquetes: las descargas de GitHub no
 tienen ese límite, y 100+ MB por versión no caben en el hosting. Encaja con
 la regla de arriba: el backend es lo único que la app necesita sí o sí.

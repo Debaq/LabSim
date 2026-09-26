@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../../src/Equipos.php';
 
 $body = json_decode(file_get_contents('php://input'), true) ?? [];
 $username = trim((string) ($body['username'] ?? ''));
@@ -24,5 +25,8 @@ Auth::recordLoginAttempt($username, $ip, $result !== null);
 if ($result === null) {
     Response::error('Usuario o contraseña incorrectos', 401);
 }
+
+// Versión de la app en cada equipo (ver admin/versiones.php).
+Equipos::registrar($body['equipo'] ?? null, (int) $result['user']['id']);
 
 Response::json($result);

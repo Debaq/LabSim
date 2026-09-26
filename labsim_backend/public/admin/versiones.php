@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/AppReleases.php';
+require_once __DIR__ . '/../../src/Equipos.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/_layout.php';
 
@@ -11,6 +12,8 @@ require_once __DIR__ . '/_layout.php';
  * Versiones de la app de escritorio publicadas en GitHub, desde la lista que
  * guarda el backend (ver AppReleases). Mirar la página no consulta a GitHub;
  * el botón sí, y deja la lista nueva para los equipos del laboratorio.
+ * Abajo, la versión con la que se entró por última vez desde cada equipo
+ * (ver Equipos).
  */
 
 $me = Auth::requireFullAdminSession();
@@ -34,7 +37,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $guardada = AppReleases::guardada();
 $releases = $guardada['releases'] ?? [];
-$prefijo = 'pyinstaller-v';
+$prefijo = AppReleases::PREFIJO;
+$equipos = Equipos::listar();
+$claseEstado = [
+    'al_dia' => 'tag--success',
+    'atrasado' => 'tag--warn',
+    'no_publicada' => 'tag--warn',
+    'desarrollo' => 'tag--muted',
+    'sin_lista' => 'tag--muted',
+];
 
 admin_header('Versiones de la app', $me);
 ?>
@@ -63,6 +74,39 @@ admin_header('Versiones de la app', $me);
 </div>
 
 <div class="card">
+    <h2>Equipos</h2>
+    <p class="muted">
+        Cada equipo aparece al iniciar sesión en la app, con la versión que tenía en ese momento.
+        Los que no entran hace 180 días dejan de aparecer. "No publicada" es una versión que no está
+        en la lista de GitHub (un build de prueba, o la lista está sin actualizar).
+    </p>
+    <div class="table-wrap">
+    <table>
+        <tr><th>Equipo</th><th>Sistema</th><th>Versión</th><th>Estado</th><th>Último ingreso</th><th>Usuario</th></tr>
+        <?php foreach ($equipos as $e): ?>
+        <?php $estado = Equipos::estado((string) $e['version'], (bool) (int) $e['empaquetada'], $releases); ?>
+        <tr>
+            <td><?= htmlspecialchars((string) $e['nombre']) ?></td>
+            <td><?= htmlspecialchars((string) $e['so']) ?></td>
+            <td class="mono"><?= htmlspecialchars((string) $e['version']) ?></td>
+            <td><span class="tag <?= $claseEstado[$estado['clave']] ?>"><?= htmlspecialchars($estado['texto']) ?></span></td>
+            <td><?= htmlspecialchars(Clock::fromUtc((string) $e['last_seen_at'])->format('Y-m-d H:i')) ?></td>
+            <td>
+                <?php if ($e['username'] !== null): ?>
+                    <?= htmlspecialchars((string) $e['display_name']) ?> <span class="muted">(<?= htmlspecialchars((string) $e['username']) ?>)</span>
+                <?php endif; ?>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+        <?php if (!$equipos): ?>
+        <tr><td colspan="6" class="muted">Ningún equipo registrado todavía.</td></tr>
+        <?php endif; ?>
+    </table>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Versiones publicadas</h2>
     <p class="muted">
         Si a una versión le falta el instalador de Windows, falló el build de Windows (GitHub Actions)
         y los equipos Windows no la reciben.

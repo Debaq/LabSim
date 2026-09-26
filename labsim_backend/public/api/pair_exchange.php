@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
+require_once __DIR__ . '/../../src/Equipos.php';
 
 $body = json_decode(file_get_contents('php://input'), true) ?? [];
 $code = trim((string) ($body['code'] ?? ''));
@@ -23,5 +24,8 @@ Auth::recordPairExchangeAttempt($ip, $result !== null);
 if ($result === null) {
     Response::error('Código inválido, ya usado o expirado', 404);
 }
+
+// Versión de la app en cada equipo (ver admin/versiones.php).
+Equipos::registrar($body['equipo'] ?? null, (int) $result['user']['id']);
 
 Response::json($result);

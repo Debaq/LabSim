@@ -291,6 +291,26 @@ final class Db
      * es idéntico al de schema.sql (IF NOT EXISTS en los dos lados, así que
      * corran en el orden que corran no se pisan).
      */
+    /**
+     * Tabla de equipos de admin/versiones.php. Se crea sola (como
+     * llm_usage): la escribe el login de la app, que corre antes de que
+     * alguien pase por "Aplicar schema". Mismo SQL que schema.sql.
+     */
+    public static function migrateAppEquiposIfNeeded(): void
+    {
+        self::get()->exec(
+            "CREATE TABLE IF NOT EXISTS app_equipos (
+                id TEXT PRIMARY KEY,
+                nombre TEXT NOT NULL DEFAULT '',
+                so TEXT NOT NULL DEFAULT '',
+                version TEXT NOT NULL DEFAULT '',
+                empaquetada INTEGER NOT NULL DEFAULT 1,
+                user_id INTEGER,
+                last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )"
+        );
+    }
+
     public static function migrateLlmUsageIfNeeded(): void
     {
         $pdo = self::get();

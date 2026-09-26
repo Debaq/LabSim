@@ -17,6 +17,7 @@ from core.h_win import FrameSubMdi, MdiArea
 from core import inbox
 from core import mis_pacientes
 from core import app_config_store
+from core import equipo
 from core.report_autosave import ReportAutosave
 from core.kiosko import es_kiosko, atender_apagado
 from core.preferencias import preferencias
@@ -46,6 +47,8 @@ __VERSION__ = 'v0.9.9'
 # Build real (con sufijo -r<commit> si aplica) para mostrar en el título --
 # __VERSION__ solo no alcanza porque no sube en cada build de prueba.
 DISPLAY_VERSION = f"v{local_build_id(__VERSION__.lstrip('v'))}"
+# Viaja con el login: el backend muestra qué versión hay en cada equipo.
+equipo.version = DISPLAY_VERSION.lstrip('v')
 Preferences = Preferences()
 STYLES = Preferences.get("styles")
 LANGUAJE = Preferences.get("lang")

@@ -675,3 +675,18 @@ CREATE INDEX IF NOT EXISTS idx_pair_exchange_attempts_ip ON pair_exchange_attemp
 -- Correr manualmente después de deploy si la tabla course_modules tenía
 -- asignaciones previas para módulos que ya no existen.
 DELETE FROM course_modules WHERE module_code = 'CVC';
+
+-- Equipos donde se usa la app y su versión (ver Equipos.php y
+-- admin/versiones.php). Se llena al iniciar sesión en la app.
+CREATE TABLE IF NOT EXISTS app_equipos (
+    -- hash del machine-id / MachineGuid (ver core/equipo.py del cliente)
+    id TEXT PRIMARY KEY,
+    nombre TEXT NOT NULL DEFAULT '',
+    so TEXT NOT NULL DEFAULT '',
+    version TEXT NOT NULL DEFAULT '',
+    -- 0 = corriendo desde el código (desarrollo), no un build publicado
+    empaquetada INTEGER NOT NULL DEFAULT 1,
+    -- último usuario que entró; sin REFERENCES, como llm_usage
+    user_id INTEGER,
+    last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

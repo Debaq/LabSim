@@ -71,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'tokens de anamnesis' => static fn() => Db::migrateLlmAnamnesisTokensIfNeeded(),
                 'sala del caso' => static fn() => Db::migrateSalaIfNeeded(),
                 'consumo de la API del LLM' => static fn() => Db::migrateLlmUsageIfNeeded(),
+                'equipos del laboratorio' => static fn() => Db::migrateAppEquiposIfNeeded(),
                 'historia clínica del paciente' => static fn() => Db::migratePatientHistoriaClinicaIfNeeded(),
                 'comentario docente del paciente' => static fn() => Db::migratePatientComentarioDocenteIfNeeded(),
                 'cursos en citas' => static fn() => Db::migrateCoursesIfNeeded(),

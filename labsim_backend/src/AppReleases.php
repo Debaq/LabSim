@@ -26,7 +26,7 @@ declare(strict_types=1);
 final class AppReleases
 {
     private const URL = 'https://api.github.com/repos/Debaq/LabSim/releases?per_page=100';
-    private const PREFIJO = 'pyinstaller-v';
+    public const PREFIJO = 'pyinstaller-v';
     public const TTL = 43200;
     public const MAX_VIEJA = 86400;
     private const TIMEOUT = 6;

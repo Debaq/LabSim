@@ -12,6 +12,8 @@ from pathlib import Path
 
 import requests
 
+from core import equipo
+
 DEFAULT_TIMEOUT = 10
 # Cuanto se le tolera al reloj de la maquina antes de avisar, en segundos.
 # Dos minutos es latencia y deriva normal; mas que eso ya mueve una cita de
@@ -109,14 +111,16 @@ class BackendClient:
 
     def pair_exchange(self, code: str) -> dict:
         """Cambia el código mostrado tras el login LTI por un token de sesión."""
-        result = self._post("/api/pair_exchange.php", {"code": code})
+        result = self._post("/api/pair_exchange.php", {"code": code, "equipo": equipo.identidad()})
         self.token = result["token"]
         self.user = result["user"]
         self._save_session()
         return result
 
     def login_admin(self, username: str, password: str) -> dict:
-        result = self._post("/api/admin_login.php", {"username": username, "password": password})
+        result = self._post("/api/admin_login.php", {
+            "username": username, "password": password, "equipo": equipo.identidad(),
+        })
         self.token = result["token"]
         self.user = result["user"]
         self._save_session()
