@@ -140,15 +140,66 @@ def test_the_three_ecochg_electrodes_are_selectable():
 
 
 def test_only_one_mark_is_armed_in_the_whole_window():
-    """Con dos armadas, un clic en el otro oído pondría la que no se mira."""
+    """Una sola marca armada a la vez, y la pone el gráfico que recibe el
+    clic: el botón dice QUÉ marca, el clic dice DÓNDE."""
     if not HAS_UI:
         return
     w = _ventana()
     w.arm_ecochg_mark(0, 'PA')
-    assert w.graph_r.mark_mode == 'PA'
+    assert w.graph_r.mark_mode == w.graph_l.mark_mode == 'PA'
     w.arm_ecochg_mark(1, 'PS')
-    assert w.graph_l.mark_mode == 'PS'
-    assert w.graph_r.mark_mode is None
+    assert w.graph_r.mark_mode == w.graph_l.mark_mode == 'PS'
+
+
+def test_a_mark_armed_in_one_table_goes_to_the_clicked_ear():
+    """En clase se apretaba el botón de una tabla y se hacía clic en el
+    gráfico del otro oído: no pasaba nada y no avisaba."""
+    if not HAS_UI:
+        return
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+    w = _ventana_visible()
+    curva = _capturar(w, lado='OI')
+    g = w.graph_l
+    w.arm_ecochg_mark(0, 'BL')          # botón de la tabla de OD
+    QTest.mouseClick(g.viewport(), Qt.MouseButton.LeftButton,
+                     Qt.KeyboardModifier.NoModifier, _pixel(g, 0.2, curva))
+    assert 'BL' in g.marks.get(curva, {}), g.marks
+    # Y después de marcar, nada queda armado.
+    assert w.graph_r.mark_mode is None and g.mark_mode is None
+
+
+def test_selecting_the_curve_does_not_disarm_the_mark():
+    """Apretar el botón y después seleccionar la curva (clic en su
+    etiqueta) dejaba la marca desarmada y el clic siguiente no marcaba."""
+    if not HAS_UI:
+        return
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+    w = _ventana_visible()
+    curva = _capturar(w)
+    g = w.graph_r
+    w.arm_ecochg_mark(0, 'PS')
+    g.active_curve(curva)
+    assert g.mark_mode == 'PS'
+    QTest.mouseClick(g.viewport(), Qt.MouseButton.LeftButton,
+                     Qt.KeyboardModifier.NoModifier, _pixel(g, 0.8, curva))
+    assert 'PS' in g.marks.get(curva, {}), g.marks
+
+
+def test_a_mark_that_cannot_be_placed_says_why():
+    """Sin curva en ese oído, el clic avisa en la barra en vez de callar."""
+    if not HAS_UI:
+        return
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+    w = _ventana_visible()
+    _capturar(w)                         # solo OD
+    w.arm_ecochg_mark(0, 'BL')
+    g = w.graph_l
+    QTest.mouseClick(g.viewport(), Qt.MouseButton.LeftButton,
+                     Qt.KeyboardModifier.NoModifier, _pixel(g, 0.2))
+    assert 'curva seleccionada' in w.lbl_info.text(), w.lbl_info.text()
 
 
 def test_the_action_potential_mark_snaps_to_the_peak():

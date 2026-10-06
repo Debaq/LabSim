@@ -3847,6 +3847,15 @@ referencia. Lo que se decidió:
      marcas, volvían al arranque: el A no se dejaba mover. Ahora un límite
      sin dato deja el cursor donde está.
   El botón Auto también respeta el modo solo lectura.
+  Y dos más, que siguieron después del primer arreglo ("aprieto PA y BL y no
+  marca nada"):
+  3. La marca se armaba solo en el gráfico del oído de la tabla: un clic en
+     el otro gráfico no hacía nada. Ahora se arma en los dos y la pone el
+     gráfico que recibe el clic (el botón dice QUÉ, el clic dice DÓNDE).
+  4. Seleccionar la curva después de apretar el botón la desarmaba (el
+     recálculo soltaba la marca). Ahora solo se suelta al poner una marca.
+  Si igual no se puede poner, la barra de estado dice por qué (solo lectura,
+  o no hay curva seleccionada en ese oído).
 - **Achurado de las dos áreas** (`ecochg.area_shading`, `AbrGraph.set_area_shading`):
   PS en azul, PA en naranja, con diagonales cruzadas. Sale de las mismas
   cuentas que la tabla (`_area_zones`), así que lo achurado es el número.

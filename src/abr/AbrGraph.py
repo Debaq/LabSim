@@ -42,6 +42,9 @@ class AbrGraph(GraphicsLayoutWidgetMod):
     sig_del_curve = Signal(str)
     sig_change_value_mark = Signal(dict)
     sig_curve_selected = Signal(str)
+    # Una marca armada que no se pudo poner, con el motivo: sin esto el
+    # clic no hacia nada y no habia forma de saber por que.
+    sig_mark_failed = Signal(str)
 
     # Verde para el subpromedio A y cafe para el B, iguales en los dos
     # oidos: no son senial del canal, son la replicabilidad.
@@ -660,9 +663,15 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
     def place_armed_mark(self, x):
         """Pone la marca armada en x (clic o clic con el mouse movido)."""
-        if self.read_only or self.mark_mode is None or self.act_curve is None:
+        if self.mark_mode is None:
             return False
-        if self.act_curve not in self.data:
+        if self.read_only:
+            self.sig_mark_failed.emit("Sesión de solo lectura: no se puede marcar")
+            return False
+        if self.act_curve is None or self.act_curve not in self.data:
+            self.sig_mark_failed.emit(
+                "No hay curva seleccionada en este oído: haga clic en la "
+                "etiqueta de la curva y vuelva a marcar")
             return False
         x = float(x)
         if self.mark_mode in self.snap_marks:

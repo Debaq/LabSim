@@ -142,6 +142,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.graph_r.sig_change_value_mark.connect(self.update_memory_from_graph_mark)
         self.graph_l.sig_change_value_mark.connect(self.update_memory_from_graph_mark)
         self.graph_r.sig_curve_selected.connect(self.curve_selected)
+        self.graph_r.sig_mark_failed.connect(self.lbl_info.setText)
+        self.graph_l.sig_mark_failed.connect(self.lbl_info.setText)
         self.graph_l.sig_curve_selected.connect(self.curve_selected)
         self.graph_r.sig_del_curve.connect(self.update_delete_curve)
         self.graph_l.sig_del_curve.connect(self.update_delete_curve)
@@ -1180,14 +1182,19 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         mirando.
         """
         if self.view_only:
+            (self.table_ec_r if side == 0 else self.table_ec_l).disarm()
+            self.lbl_info.setText(tr("AbrMainWindow",
+                                     "Sesión de solo lectura: no se puede marcar"))
             return
-        propio, otro = (0, 1) if side == 0 else (1, 0)
-        graficos = (self.graph_r, self.graph_l)
-        tablas = (self.table_ec_r, self.table_ec_l)
+        # La marca queda armada en LOS DOS graficos y la pone el que reciba
+        # el clic: el boton dice QUE marca, el clic dice DONDE. Antes solo
+        # se armaba en el oido de la tabla y un clic en el otro grafico no
+        # hacia nada, sin aviso.
+        otro = 1 if side == 0 else 0
         if mark is not None:
-            tablas[otro].disarm()
-            graficos[otro].arm_mark(None)
-        graficos[propio].arm_mark(mark)
+            (self.table_ec_r, self.table_ec_l)[otro].disarm()
+        for grafico in (self.graph_r, self.graph_l):
+            grafico.arm_mark(mark)
 
     def auto_ecochg_mark(self, side):
         """Marcado automatico del equipo sobre la curva seleccionada.
@@ -1231,6 +1238,15 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 else:
                     guardadas[marca] = list(coords)
             self.refresh_ecochg(curve)
+            # La marca ya esta puesta: se suelta para que el proximo clic no
+            # la vuelva a mover sin querer. Solo aca, cuando se marco: antes
+            # se soltaba en cada recalculo, y seleccionar la curva despues
+            # de apretar el boton dejaba la marca desarmada.
+            if any(m in ecochg.MARKS for m in marcas):
+                for tabla in (self.table_ec_r, self.table_ec_l):
+                    tabla.disarm()
+                for grafico in (self.graph_r, self.graph_l):
+                    grafico.arm_mark(None)
 
     def refresh_ecochg(self, curve):
         """Recalcula las medidas de esa curva y las muestra."""
@@ -1260,10 +1276,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         tabla.set_medidas(medidas)
         tabla.set_rate_shift(self.ecochg_rate_shift(side))
         tabla.set_polarity_shift(self.ecochg_polarity_shift(side))
-        # La marca ya esta puesta: se suelta para que el proximo clic no
-        # la vuelva a mover sin querer.
-        tabla.disarm()
-        grafico.arm_mark(None)
 
     def ecochg_rate_shift(self, side):
         """Corrimiento del PA entre la curva mas lenta y la mas rapida.
