@@ -71,9 +71,14 @@ AP_WIDTH_PER_RATIO = 2.5
 # acerca a la base por debajo sin cruzarla nunca, y el RETORNO A LA BASE
 # --que es el límite derecho de las dos integrales del área-- no existiría
 # como punto marcable. En un registro real ese cruce está siempre.
-N2_RATIO = 0.22
+#
+# El N2 tiene que verse como un valle propio, ~1 ms después del N1. Estuvo
+# en 0.22 del PA con 0.30 ms de ancho y la positividad de abajo (ancha y
+# centrada encima) se lo comía: quedaba un hombro de 0.04 uV sobre la cola
+# del PS y el docente no lo encontraba en el trazo.
+N2_RATIO = 0.30
 N2_MS = 1.05
-N2_SIGMA_MS = 0.30
+N2_SIGMA_MS = 0.22
 # Cuánto dura el desplazamiento DC del PS después del pico del PA. Es lo
 # que hace que la razón de ÁREAS sea distinta de la de amplitudes: la
 # meseta corre por debajo de todo el complejo, no solo hasta el PA.
@@ -99,8 +104,9 @@ SP_TAIL_MS = 0.60
 SP_TAIL_PER_RATIO = 3.0
 SP_NORMAL_FRACTION = 0.5
 POST_POSITIVITY_RATIO = 0.10
-POST_POSITIVITY_MS = 1.6
-POST_POSITIVITY_SIGMA_MS = 0.55
+# Después del N2 y angosta: centrada sobre él lo tapaba (ver N2_RATIO).
+POST_POSITIVITY_MS = 1.9
+POST_POSITIVITY_SIGMA_MS = 0.35
 
 # Nivel de sensación (dB SL) entre el que el PS no se distingue y aquel en
 # que ya está entero. El PA existe hasta el umbral --es lo que define el
@@ -713,9 +719,7 @@ def auto_marks(t, y, ps_at=None):
     topes = np.where((subiendo[:-1] > 0) & (subiendo[1:] <= 0))[0]
     minimo = int(round(0.3 / max(float(t[1] - t[0]), 1e-9)))
     topes = topes[topes >= minimo]
-    if ps_at is not None and fin is not None:
-        topes = topes[:0]
-    if len(topes) and (fin is None or int(topes[0]) + 1 < fin):
+    if len(topes) and fin is None:
         fin = int(topes[0]) + 1
     if fin is not None:
         marcas['FIN'] = float(t[desde + fin])
@@ -826,9 +830,23 @@ def measure_complex(t, y, marks):
     if vent.sum() < 2 or amp_ps <= 0 or amp_pa <= 0:
         return out
     desvio = np.clip(base - y[vent], 0.0, None)
-    area_total = float(np.trapezoid(desvio, t[vent]))
-    area_ps = float(np.trapezoid(np.clip(desvio, None, amp_ps), t[vent]))
-    area_pa = area_total - area_ps
+    tv = t[vent]
+    area_ps = float(np.trapezoid(np.clip(desvio, None, amp_ps), tv))
+    # Área PA: solo el lóbulo del N1 por encima de la meseta, o sea el
+    # tramo continuo alrededor del pico del PA en que el trazo pasa la
+    # altura del PS. El N2 también puede pasarla y no es la espiga del
+    # acción: contándolo, un N2 visible bajaba la razón de áreas de 2.0 a
+    # 1.5 en el mismo oído (ver docs/decisiones.md).
+    exceso = np.clip(desvio - amp_ps, 0.0, None)
+    i_pa = int(np.argmin(np.abs(tv - x_pa)))
+    desde, hasta = i_pa, i_pa
+    while desde > 0 and exceso[desde - 1] > 0:
+        desde -= 1
+    while hasta < len(exceso) - 1 and exceso[hasta + 1] > 0:
+        hasta += 1
+    area_pa = (float(np.trapezoid(exceso[desde:hasta + 1],
+                                  tv[desde:hasta + 1]))
+               if hasta > desde else 0.0)
     out['area_ps'] = area_ps
     out['area_pa'] = area_pa
     out['area_ratio'] = (area_ps / area_pa) if area_pa > 0 else None

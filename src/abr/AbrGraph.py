@@ -117,6 +117,18 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # ruido del arranque (hasta ~1.2 uV RMS) sin invadir la curva de
         # arriba a escala normal.
         self.gap_ratio = 0.35
+        # Eje Y invertido (boton de la barra). Hay quien lee el ABR con el
+        # vertex positivo hacia abajo y el ECochG con el PA hacia arriba:
+        # es convencion del equipo, no del examen.
+        self.y_inverted = False
+        # Linea de base del ECochG por curva: de la marca BL a la FIN (o al
+        # borde de la ventana mientras no haya FIN). Sin ella la marca BL
+        # era una flechita pegada al eje y parecia que no se habia puesto.
+        self.base_lines = {}
+        # Los cursores A/A' son del ABR (latencia y amplitud pico a pico).
+        # En el ECochG no miden nada y el A, parado en 0 ms, tapaba justo
+        # el tramo donde se marca la linea de base.
+        self.cursors_visible = True
         self.configure_pyqtgraph()
         self.setup_ui_elements()
         self.pw.scene().sigMouseClicked.connect(self.click_mark)
@@ -456,6 +468,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
                 delete = True
 
         if delete:
+            self.remove_base_line(self.act_curve)
             self.data.pop(self.act_curve, None)
             self.marks.pop(self.act_curve, None)
             self.curve_int.pop(self.act_curve, None)
@@ -535,6 +548,9 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.snap_marks = tuple(snap)
         self.notify_create = bool(notify)
         self.mark_mode = None
+        self.cursors_visible = 'BL' not in self.mark_labels
+        for item in (self.inf_a, self.inf_b):
+            item.setVisible(self.cursors_visible)
 
     def arm_mark(self, mark):
         """Deja armada la marca que el proximo clic va a poner."""
@@ -608,7 +624,10 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         delete_all_marks) no volvia a aparecer nunca, aunque la latencia
         siguiera en la tabla."""
         x, y = self.marks[curve_name][lbl_mark]
-        y = y + self.data[curve_name].get('gap', 0.0) + 0.1
+        # La flecha va POR ENCIMA del trazo en pantalla: con el eje
+        # invertido, "encima" es restar.
+        y = y + self.data[curve_name].get('gap', 0.0) + (
+            -0.1 if self.y_inverted else 0.1)
         item = self.mark_item(curve_name, lbl_mark)
         if item is None:
             html = f"<span style='color: #000; font-size: 7pt;'><h3>&darr;<sup>{lbl_mark}</sup></h3></span>"
@@ -619,6 +638,35 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             item.setFont(font)
             self.pw.addItem(item)
         item.setPos(x, y)
+        if lbl_mark in ('BL', 'FIN'):
+            self.refresh_base_line(curve_name)
+
+    def refresh_base_line(self, curve_name):
+        """Linea horizontal de la base del ECochG: de BL a FIN.
+
+        Va a la altura que marco BL (que es la base de las medidas, ver
+        ecochg.measure_complex), sobre la altura actual de la curva. Sin
+        FIN llega hasta el borde de la ventana.
+        """
+        marcas = self.marks.get(curve_name, {})
+        if 'BL' not in marcas or curve_name not in self.data:
+            self.remove_base_line(curve_name)
+            return
+        x0, y0 = marcas['BL']
+        x1 = marcas['FIN'][0] if 'FIN' in marcas else self.window_ms
+        y = float(y0) + self.data[curve_name].get('gap', 0.0)
+        linea = self.base_lines.get(curve_name)
+        if linea is None:
+            linea = pg.PlotDataItem(pen=pg.mkPen((0, 0, 0, 200), width=1,
+                                                 style=Qt.PenStyle.DashLine))
+            self.pw.addItem(linea)
+            self.base_lines[curve_name] = linea
+        linea.setData([float(x0), float(x1)], [y, y])
+
+    def remove_base_line(self, curve_name):
+        linea = self.base_lines.pop(curve_name, None)
+        if linea is not None:
+            self.pw.removeItem(linea)
 
     def move_marks(self, name_curve):
         """Acompaña la curva cuando cambia su altura (escala, arrastre).
@@ -630,6 +678,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         (se iban de la ventana) y el otro oido ni se enteraba."""
         for mark in self.marks.get(name_curve, {}):
             self.place_mark(name_curve, mark)
+        self.refresh_base_line(name_curve)
 
     def delete_mark(self, mark):
         curve = self.act_curve
@@ -639,6 +688,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         if item is not None:
             self.pw.removeItem(item)
         self.update_value_mark(mark, True, curve=curve)
+        if mark in ('BL', 'FIN'):
+            self.refresh_base_line(curve)
 
     def delete_all_marks(self):
         """"Eliminar todas" del menú: todas las de la curva activa, igual
@@ -705,6 +756,9 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.window_ms = float(ms)
         self.pw.setXRange(0, self.window_ms + self.window_ms * 0.08,
                           padding=0)
+        # Una base sin FIN llega al borde: si el borde se movio, ella tambien.
+        for nombre in list(self.base_lines):
+            self.refresh_base_line(nombre)
         for item in (getattr(self, 'inf_a', None), getattr(self, 'inf_b', None)):
             if item is not None and item.getXPos() > self.window_ms:
                 item.setPos((self.window_ms, 0))
@@ -739,6 +793,18 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             self.scale_step = paso
             self.apply_scale(self.scale_base * 2 ** paso)
         return self.get_scale()
+
+    def set_y_inverted(self, inverted: bool) -> None:
+        """Da vuelta el eje Y. Solo el dibujo: las amplitudes y las marcas
+        guardadas no cambian de signo."""
+        self.y_inverted = bool(inverted)
+        self.pw.invertY(self.y_inverted)
+        # La grilla escribe sus numeros con la transformacion de la vista:
+        # invertida, salen espejados. Se apagan; la escala sigue en el
+        # rotulo de la barra.
+        self.grid.setTextPen(None if self.y_inverted else self.color_pen)
+        for nombre in self.data:
+            self.move_marks(nombre)
 
     def move_label(self, curve):
         """Deja la etiqueta de intensidad a la altura de su curva."""
@@ -783,6 +849,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             if isinstance(item, TextItemMod):
                 self.pw.removeItem(item)
 
+        # Las lineas de base son PlotDataItem y ya salieron arriba.
+        self.base_lines = {}
         # Limpiar diccionarios internos
         self.data = {}
         self.marks = {}
@@ -813,7 +881,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         export = pg.exporters.ImageExporter(self.pw)
         export.export(path)
 
-        self.inf_a.show()
-        self.inf_b.show()
+        self.inf_a.setVisible(self.cursors_visible)
+        self.inf_b.setVisible(self.cursors_visible)
 
 

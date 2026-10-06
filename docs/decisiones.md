@@ -3793,6 +3793,22 @@ referencia. Lo que se decidió:
   meseta), y al volver al click, 10 ms. El alumno no la recibe: sigue con el
   protocolo y tasa/promediaciones al azar. Se agregó 5 Hz al combo del
   pasa-alto.
+- **El N2 se ve** (`N2_RATIO` 0.22→0.30, σ 0.30→0.22, positividad final
+  corrida a +1.9 ms y angosta). Antes era un hombro de 0.04 µV que la
+  positividad tapaba; ahora un valle de ~0.5 µV en un oído sano. Con 0.40 se
+  veía más, pero la razón de áreas cruzaba 1.94 recién en ~0.46 (después que
+  la de amplitudes); con 0.30 la calibración queda como estaba (tímpano: sano
+  1.10, 0.40 → 2.02).
+- **FIN automático = retorno real a la base**; "donde deja de subir" queda
+  solo de respaldo cuando nunca vuelve. Con el N2 visible, el primer tope era
+  el P1 y el área se cortaba antes de la cola del PS.
+- **Área PA = solo el lóbulo del N1** por encima de la meseta (el tramo
+  continuo alrededor del pico). Un N2 que pase la altura del PS no es la
+  espiga del acción.
+- **Línea de base dibujada** de BL a FIN (hasta el borde sin FIN), **cursores
+  A/A' ocultos en el ECochG** (el A en 0 ms tapaba la zona de BL) y **botón ↕
+  para invertir el eje Y** en los dos oídos; con el eje invertido se apagan los
+  números de la grilla porque salen espejados.
 
 ## El test del timpanograma fallaba una de cada cuatro corridas (2026-09-21)
 

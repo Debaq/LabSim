@@ -298,6 +298,43 @@ def test_the_student_does_not_get_the_standard_setup():
     assert w.technical['burst_envelope'] == '2-1-2'
 
 
+def test_the_baseline_is_drawn_from_bl_to_fin():
+    """BL deja una línea de base a la vista; con FIN termina ahí."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    curva = _capturar(w)
+    g = w.graph_r
+    # En el ECochG los cursores A/A' del ABR no están: el A, en 0 ms,
+    # tapaba el tramo donde se marca la base.
+    assert not g.inf_a.isVisible() and not g.inf_b.isVisible()
+    g.current_lat = 0.15
+    g.create_marks('BL')
+    xs, ys = g.base_lines[curva].getData()
+    assert abs(xs[0] - 0.15) < 0.05 and abs(xs[1] - g.window_ms) < 1e-9
+    assert ys[0] == ys[1]
+    puestas = _marcar(w, curva)
+    xs, _ = g.base_lines[curva].getData()
+    assert abs(xs[1] - puestas['FIN']) < 0.05, (xs, puestas)
+    g.delete_mark('BL')
+    assert curva not in g.base_lines
+    # De vuelta al ABR, los cursores vuelven.
+    w.apply_test_widgets('ABR')
+    assert g.inf_a.isVisible()
+
+
+def test_the_y_axis_can_be_inverted():
+    """El botón da vuelta el eje de los dos oídos."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    w.btn_invert_y.setChecked(True)
+    assert w.graph_r.pw.getViewBox().yInverted()
+    assert w.graph_l.pw.getViewBox().yInverted()
+    w.btn_invert_y.setChecked(False)
+    assert not w.graph_r.pw.getViewBox().yInverted()
+
+
 def test_the_auto_mark_button_fills_the_table():
     """El equipo marca solo, y de ahí salen las medidas.
 

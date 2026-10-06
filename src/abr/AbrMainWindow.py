@@ -154,6 +154,15 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.btn_scale_minus.setToolTip("Achicar las curvas (más µV en la ventana)")
         self.btn_toggle_sub.toggled.connect(self.toggle_sub)
         self.btn_toggle_contra.toggled.connect(self.toggle_contra)
+        # Invertir el eje Y: va en la misma barra, debajo de los otros.
+        self.btn_invert_y = QPushButton("↕", self.verticalFrame)
+        self.btn_invert_y.setObjectName("btn_invert_y")
+        self.btn_invert_y.setCheckable(True)
+        self.btn_invert_y.setToolTip("Invertir el eje Y")
+        self.verticalLayout.insertWidget(
+            self.verticalLayout.indexOf(self.btn_toggle_contra) + 1,
+            self.btn_invert_y)
+        self.btn_invert_y.toggled.connect(self.invert_y)
         self.btn_next_case.hide()  # sin ciclo de casos propio, no aplica
 
         ######Variables de Estado
@@ -850,6 +859,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """Subpromedios A/B a la vista en los dos oidos a la vez."""
         self.graph_r.set_sub_visible(visible)
         self.graph_l.set_sub_visible(visible)
+
+    def invert_y(self, inverted):
+        """Eje Y invertido en los dos oidos a la vez."""
+        self.graph_r.set_y_inverted(inverted)
+        self.graph_l.set_y_inverted(inverted)
 
     def toggle_contra(self, visible):
         self.graph_r.set_contra_visible(visible)
