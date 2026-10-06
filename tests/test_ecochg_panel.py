@@ -349,6 +349,19 @@ def test_the_cursors_are_the_area_limits():
     assert abs(w.memory[curva]['marcas']['FIN'][0] - nuevo_fin) < 0.05
 
 
+def test_dragging_the_label_of_a_deleted_curve_does_not_crash():
+    """Arrastrar la etiqueta de una curva que ya no está no revienta."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    curva = _capturar(w)
+    g = w.graph_r
+    g.active_curve(curva)
+    g.delete_curve()
+    g.drag_curve({'pos': (10.0, -1.0), 'name': curva})
+    assert curva not in g.data
+
+
 def test_the_y_axis_can_be_inverted():
     """El botón da vuelta el eje de los dos oídos."""
     if not HAS_UI:

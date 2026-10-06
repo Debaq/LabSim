@@ -370,6 +370,16 @@ class AbrGraph(GraphicsLayoutWidgetMod):
     def drag_curve(self, value):
         gap_y = value['pos'][1]
         curve = value['name']
+        if curve not in self.data:
+            # Etiqueta de una curva que ya no esta (se borro o se limpio el
+            # grafico con el arrastre en curso): Qt le sigue mandando el
+            # arrastre y cada movimiento era un KeyError en la consola. Se
+            # quita la etiqueta huerfana y no se hace nada mas.
+            for item in self.pw.items[:]:
+                if (isinstance(item, TextItemMod) and item.tipo == 'label'
+                        and item.name == curve):
+                    self.pw.removeItem(item)
+            return
         self.data[curve]['gap'] = gap_y
         self.redraw(curve)
         self.move_marks(curve)
