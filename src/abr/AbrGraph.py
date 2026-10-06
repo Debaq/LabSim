@@ -129,10 +129,12 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # [items])}. Las zonas vienen de ecochg.area_shading, o sea de las
         # mismas cuentas que el numero de la tabla.
         self.area_fills = {}
-        # Los cursores A/A' son del ABR (latencia y amplitud pico a pico).
-        # En el ECochG no miden nada y el A, parado en 0 ms, tapaba justo
-        # el tramo donde se marca la linea de base.
-        self.cursors_visible = True
+        # En el ABR los cursores A/A' miden latencia y amplitud pico a pico.
+        # En el ECochG son los limites del area (ver area_cursor_moved): A
+        # el inicio y A' el retorno a la base, guardados como las marcas
+        # INI y FIN de la curva.
+        self.area_cursors = False
+        self._placing_cursors = False
         self.configure_pyqtgraph()
         self.setup_ui_elements()
         self.pw.scene().sigMouseClicked.connect(self.click_mark)
@@ -237,6 +239,11 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         #Posición en X de las lineas infinitas
         self.inf_a.sigPositionChanged.connect(self.get_amplitude)
         self.inf_b.sigPositionChanged.connect(self.get_amplitude)
+        # En el ECochG, mover un cursor mueve un limite del area.
+        self.inf_a.sigPositionChanged.connect(
+            lambda: self.area_cursor_moved('INI'))
+        self.inf_b.sigPositionChanged.connect(
+            lambda: self.area_cursor_moved('FIN'))
         #Se agregan lineas infinitas a la grafica
         self.pw.addItem(self.inf_a)
         self.pw.addItem(self.inf_b)
@@ -502,7 +509,42 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         #se actualizan los datos de las marcas
         #print(self.marks[self.act_curve])
 
+    # Marcas que no se dibujan con flecha: son los cursores A/A' del ECochG.
+    AREA_MARKS = ('INI', 'FIN')
+    # Donde arrancan los cursores del ECochG mientras no hay medida: el A
+    # fuera del tramo pre-estimulo, que es donde se marca BL.
+    AREA_CURSOR_START_MS = 0.5
+
+    def place_area_cursors(self, x_ini, x_fin):
+        """Lleva A/A' a los limites del area de la curva activa, sin que
+        eso cuente como que el alumno los movio."""
+        self._placing_cursors = True
+        try:
+            self.inf_a.setPos((self.AREA_CURSOR_START_MS if x_ini is None
+                               else float(x_ini), 0))
+            self.inf_b.setPos((self.window_ms if x_fin is None
+                               else float(x_fin), 0))
+        finally:
+            self._placing_cursors = False
+
+    def area_cursor_moved(self, mark):
+        """El alumno arrastro A o A': ese limite del area es ahora suyo."""
+        if (not self.area_cursors or self._placing_cursors or self.read_only
+                or self.act_curve not in self.data):
+            return
+        linea = self.inf_a if mark == 'INI' else self.inf_b
+        x = max(0.0, min(self.window_ms, float(linea.getXPos())))
+        xs, ys = self.data[self.act_curve]['ipsi_xy']
+        i = self.find_idx(xs, x)
+        self.marks.setdefault(self.act_curve, {})[mark] = [xs[i], ys[i]]
+        self.refresh_base_line(self.act_curve)
+        self.update_value_mark(mark, curve=self.act_curve)
+
     def get_amplitude(self):
+        if self.area_cursors:
+            # En el ECochG los cursores no miden amplitud pico a pico: son
+            # los limites del area (ver area_cursor_moved).
+            return
         # Obtener posiciones actuales de las líneas
         lat_a = self.inf_a.getXPos()
         lat_b = self.inf_b.getXPos()
@@ -553,9 +595,10 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.snap_marks = tuple(snap)
         self.notify_create = bool(notify)
         self.mark_mode = None
-        self.cursors_visible = 'BL' not in self.mark_labels
-        for item in (self.inf_a, self.inf_b):
-            item.setVisible(self.cursors_visible)
+        self.area_cursors = 'BL' in self.mark_labels
+        if self.area_cursors:
+            # Fuera del tramo donde se marca BL, hasta que haya medida.
+            self.place_area_cursors(None, None)
 
     def arm_mark(self, mark):
         """Deja armada la marca que el proximo clic va a poner."""
@@ -628,6 +671,10 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         que habia, y una marca que se habia quedado sin dibujo (ver
         delete_all_marks) no volvia a aparecer nunca, aunque la latencia
         siguiera en la tabla."""
+        if lbl_mark in self.AREA_MARKS:
+            # Sin flecha: la posicion la muestra el cursor. Solo la base.
+            self.refresh_base_line(curve_name)
+            return
         x, y = self.marks[curve_name][lbl_mark]
         # La flecha va POR ENCIMA del trazo en pantalla: con el eje
         # invertido, "encima" es restar.
@@ -798,9 +845,14 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # Una base sin FIN llega al borde: si el borde se movio, ella tambien.
         for nombre in list(self.base_lines):
             self.refresh_base_line(nombre)
-        for item in (getattr(self, 'inf_a', None), getattr(self, 'inf_b', None)):
-            if item is not None and item.getXPos() > self.window_ms:
-                item.setPos((self.window_ms, 0))
+        self._placing_cursors = True
+        try:
+            for item in (getattr(self, 'inf_a', None),
+                         getattr(self, 'inf_b', None)):
+                if item is not None and item.getXPos() > self.window_ms:
+                    item.setPos((self.window_ms, 0))
+        finally:
+            self._placing_cursors = False
 
     # Divisiones de la grilla por ventana de escala: 6 da la grilla de
     # 1 uV del ABR a 6 uV.
@@ -922,7 +974,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         export = pg.exporters.ImageExporter(self.pw)
         export.export(path)
 
-        self.inf_a.setVisible(self.cursors_visible)
-        self.inf_b.setVisible(self.cursors_visible)
+        self.inf_a.show()
+        self.inf_b.show()
 
 

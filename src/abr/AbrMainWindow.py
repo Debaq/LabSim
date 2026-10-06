@@ -1210,7 +1210,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         if not marcas:
             # No hay complejo donde deberia haberlo: no se inventa uno.
             return
-        for marca in ecochg.MARKS:
+        for marca in ecochg.MARKS + ecochg.AREA_MARKS:
             if marca not in marcas:
                 continue
             grafico.current_lat = marcas[marca]
@@ -1244,9 +1244,14 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             np.asarray(x), np.asarray(y),
             (self.memory[curve].get('marcas') or {}))
         self.memory[curve]['ECochG'] = medidas
+        marcas = self.memory[curve].get('marcas') or {}
         grafico.set_area_shading(curve, ecochg.area_shading(
-            np.asarray(x), np.asarray(y),
-            (self.memory[curve].get('marcas') or {})))
+            np.asarray(x), np.asarray(y), marcas))
+        if curve == grafico.get_active():
+            # A y A' muestran los limites que se usaron: el inicio que el
+            # alumno puso o, si no lo movio, el que se despega de la base.
+            grafico.place_area_cursors(medidas.get('inicio'),
+                                       (marcas.get('FIN') or [None])[0])
         tabla.set_medidas(medidas)
         tabla.set_rate_shift(self.ecochg_rate_shift(side))
         tabla.set_polarity_shift(self.ecochg_polarity_shift(side))

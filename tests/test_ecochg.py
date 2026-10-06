@@ -242,7 +242,7 @@ def test_the_automatic_marking_reads_the_trace_and_nothing_else():
                 t, y, _, _, _, meta = _curva(sp_ap=declarado, montage=montaje,
                                              capture=cap)
                 auto = E.auto_marks(t, y)
-                assert set(auto) == set(E.MARKS), (montaje, declarado, auto)
+                assert set(auto) == set(E.MARKS) | set(E.AREA_MARKS), (montaje, declarado, auto)
                 assert abs(auto['PA'] - meta['ecochg_ap_lat']) < 0.15
                 medida = E.measure_complex(
                     t, y, {k: (v, 0.0) for k, v in auto.items()})
@@ -278,15 +278,19 @@ def test_the_area_ratio_moves_more_than_the_amplitude_one():
     """El sumación del hidrops sube Y se prolonga.
 
     Si solo cambiara de altura, las dos razones dirían exactamente lo mismo
-    y la de áreas no agregaría nada.
+    y la de áreas no agregaría nada. Con el método publicado la de áreas
+    parte de 1 (el complejo entero contra el PA), así que se compara cuánto
+    pasa cada una SU límite: el área lo pasa por más.
     """
-    amp_sano = _promedio('sp_ap', sp_ap=0.25)
+    limites = E.normative('tympanic')
+    lim_amp, lim_area = limites['sp_ap'][1], limites['area_ratio'][1]
     amp_mal = _promedio('sp_ap', sp_ap=0.50)
     area_sano = _promedio('area_ratio', sp_ap=0.25)
     area_mal = _promedio('area_ratio', sp_ap=0.50)
-    assert area_mal / area_sano > amp_mal / amp_sano
-    limites = E.normative('tympanic')
-    assert area_sano < limites['area_ratio'][1] < area_mal
+    assert area_mal / lim_area > amp_mal / lim_amp, (area_mal, amp_mal)
+    assert area_sano < lim_area < area_mal
+    # Y el oído sano cae donde los controles publicados (1.34 ± 0.30).
+    assert 1.04 < area_sano < 1.64, area_sano
 
 
 def test_the_action_potential_widens_in_hydrops():
@@ -578,13 +582,11 @@ def test_with_a_burst_the_click_limits_are_not_painted():
 
 
 def test_the_limits_per_electrode():
-    """Promontorio 0.35, tímpano 0.40, conducto 0.50; áreas 1.94 en el
-    tímpano y escaladas en los otros dos."""
+    """Promontorio 0.35, tímpano 0.40, conducto 0.50; áreas 1.94 en los
+    tres (con el método publicado el electrodo mueve las dos áreas juntas)."""
     assert E.SP_AP_LIMIT == {'transtympanic': 0.35, 'tympanic': 0.40,
                              'extratympanic': 0.50}
-    assert E.AREA_RATIO_LIMIT['tympanic'] == 1.94
-    assert abs(E.AREA_RATIO_LIMIT['transtympanic'] - 1.6975) < 1e-9
-    assert abs(E.AREA_RATIO_LIMIT['extratympanic'] - 2.425) < 1e-9
+    assert set(E.AREA_RATIO_LIMIT.values()) == {1.94}
     assert E.RAR_COND_LIMIT_MS == 0.38
 
 

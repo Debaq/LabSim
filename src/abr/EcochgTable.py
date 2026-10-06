@@ -4,16 +4,17 @@ La tabla del ABR (AbrTable) no sirve para esto: ahí se miden cinco ondas
 con sus latencias, sus interpicos y la razón V/I. Acá se miden tres
 potenciales y lo que se informa son RAZONES entre dos de ellos.
 
-El alumno arma la medida poniendo cuatro marcas sobre el trazo (barra de
-arriba, clic sobre la curva):
+El alumno arma la medida poniendo tres marcas sobre el trazo (barra de
+arriba, clic sobre la curva) y llevando los dos cursores del gráfico:
 
     BL   línea de base, en el tramo previo a la respuesta
-    PS   hombro del potencial de sumación
+    PS   hombro del potencial de sumación (inicio del N1)
     PA   pico del potencial de acción
-    FIN  donde el complejo vuelve a la línea de base
+    A    inicio del área (si no se mueve, donde el trazo se despega)
+    A'   donde el complejo vuelve a la línea de base
 
 Con BL, PS y PA ya hay razón de amplitudes; el área y el ancho del complejo
-necesitan además el retorno. Lo que falta se dice en la celda, porque un
+necesitan además el retorno (A'). Lo que falta se dice en la celda, porque un
 número que no aparece sin explicación se lee como "este examen no lo
 tiene".
 
@@ -207,8 +208,7 @@ class EcochgTable(QWidget):
                 if clave in ENTRE_CURVAS:
                     item.setToolTip(ENTRE_CURVAS[clave])
                 elif falta and (falta in faltan or not self.medidas):
-                    item.setToolTip(f"Falta la marca {falta} "
-                                    f"({ecochg.MARK_LABELS[falta]})")
+                    item.setToolTip(f"Falta: {ecochg.MARK_LABELS[falta]}")
                 elif faltan:
                     item.setToolTip("Faltan marcas: " + ", ".join(sorted(faltan)))
             else:

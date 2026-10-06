@@ -101,7 +101,12 @@ SP_TAIL_MS = 0.60
 # no desde el límite: si empezara en el límite, las dos razones se cruzarían
 # en el mismo punto y la de áreas volvería a ser redundante justo donde
 # tiene que servir.
-SP_TAIL_PER_RATIO = 3.0
+#
+# 12 y no 3: con el método publicado de la razón de áreas (ver
+# measure_complex) es la prolongación lo que la hace crecer. Con 3 un
+# hidrops declarado en 0.55 medía 1.64 y no cruzaba nunca 1.94; con 12 el
+# timpánico cruza en ~0.38, justo antes que la de amplitudes (0.40).
+SP_TAIL_PER_RATIO = 12.0
 SP_NORMAL_FRACTION = 0.5
 POST_POSITIVITY_RATIO = 0.10
 # Después del N2 y angosta: centrada sobre él lo tapaba (ver N2_RATIO).
@@ -188,19 +193,22 @@ SP_AP_LIMIT = {
     'tympanic': 0.40,        # sobre el tímpano
     'transtympanic': 0.35,   # promontorio
 }
-# Límite de la razón de ÁREAS (ver measure_complex para la definición
-# exacta de las dos áreas). Es más sensible que la de amplitudes porque
-# recoge las dos cosas que le pasan al sumación en el hidrops --que sube y
-# que se prolonga-- y no solo su altura en un punto.
+# Límite de la razón de ÁREAS (Devaiah, Ferraro y col. 2003: electrodo
+# timpánico, click alternado a 90 dB; controles 1.34 ± 0.30, límite 1.94).
+# Ver measure_complex para la definición de las dos áreas. Es más sensible
+# que la de amplitudes porque recoge las dos cosas que le pasan al
+# sumación en el hidrops --que sube y que se prolonga-- y no solo su altura
+# en un punto.
 #
-# 1.94 es el límite publicado para electrodo timpánico; las otras dos
-# posiciones se escalan igual que el límite de amplitudes, por la misma
-# razón (un mismo oído no puede cambiar de diagnóstico al cambiar de
-# electrodo).
+# El mismo límite para los tres electrodos. Antes se escalaba como el de
+# amplitudes, pero con el método publicado las dos áreas se miden contra
+# la misma base y el electrodo las cambia a las dos en la misma proporción:
+# en el modelo un oído sano da ~1.35-1.40 desde el promontorio, el tímpano o
+# el conducto.
 AREA_RATIO_LIMIT = {
     'tympanic': 1.94,
-    'extratympanic': 1.94 * SP_AP_LIMIT['extratympanic'] / SP_AP_LIMIT['tympanic'],
-    'transtympanic': 1.94 * SP_AP_LIMIT['transtympanic'] / SP_AP_LIMIT['tympanic'],
+    'extratympanic': 1.94,
+    'transtympanic': 1.94,
 }
 
 # Montajes que son ECochG. El resto (Cz-mastoides y compañía) registran un
@@ -560,12 +568,16 @@ def calibrate_sp(t, y_sin, y_con, razon, lat_hint=None):
 
 # Marcas que el alumno pone sobre el trazo. No son ondas: son los cuatro
 # puntos que definen las dos razones.
-MARKS = ('BL', 'PS', 'PA', 'FIN')
+MARKS = ('BL', 'PS', 'PA')
+# Los límites del área no son marcas con flecha: son los cursores A (INI) y
+# A' (FIN) del gráfico, que se arrastran. Se guardan con las demás marcas.
+AREA_MARKS = ('INI', 'FIN')
 MARK_LABELS = {
     'BL': 'Línea de base',
     'PS': 'Potencial de sumación',
     'PA': 'Potencial de acción',
-    'FIN': 'Retorno a la base',
+    'INI': 'Inicio del área (cursor A)',
+    'FIN': "Retorno a la base (cursor A')",
 }
 
 
@@ -586,6 +598,10 @@ BASELINE_MS = (0.0, 0.35)
 # un poco de deriva lenta para que el trazo se quede del lado de abajo toda
 # la ventana y el retorno no exista, justo en los registros donde importa.
 RETURN_FRACTION = 0.10
+# Suavizado con el que se busca el retorno, y desde cuánto después del PA
+# se aceptan topes como final de la recuperación (después del N2).
+RETURN_SMOOTH_MS = 0.4
+RETURN_SEARCH_MS = 1.5
 # Qué tan hondo tiene que ser un mínimo local para aceptarlo como el PA,
 # contra el más hondo de la ventana. Por debajo de esto es una ondulación
 # del ruido y se sigue buscando.
@@ -703,26 +719,33 @@ def auto_marks(t, y, ps_at=None):
     desde = i_pa
     if ps_at is not None:
         desde = max(i_pa, int(np.argmin(np.abs(t - float(ps_at)))))
+    # El retorno se busca sobre un trazo más suavizado (RETURN_SMOOTH_MS):
+    # la cola del PS vuelve a la base despacio y, con el ruido lento del
+    # registro encima, un cruce estricto del umbral caía 2 a 5 ms tarde en
+    # uno de cada cuatro registros.
+    lento = _smooth(t, y, RETURN_SMOOTH_MS)
     umbral_vuelta = base - RETURN_FRACTION * (base - float(suave[desde]))
-    vueltas = np.where(suave[desde:] >= umbral_vuelta)[0]
+    vueltas = np.where(lento[desde:] >= umbral_vuelta)[0]
     fin = int(vueltas[0]) if len(vueltas) else None
-    # Si nunca vuelve --con el pasa-alto bajo del ECochG la línea de base
-    # se inclina y el trazo puede terminar la ventana del lado de abajo--
-    # se usa el final de la recuperación: el primer punto en que deja de
-    # subir. Es lo que marca cualquiera mirando el trazo, y sin esto el
-    # área quedaba sin medir en uno de cada tres registros del electrodo
-    # de conducto, que es donde más falta hace.
+    # Y si antes de cruzar deja de subir --con el pasa-alto bajo la base se
+    # inclina y el trazo puede quedarse del lado de abajo--, el retorno es
+    # ese final de la recuperación: lo que marca cualquiera mirando el
+    # trazo. Se busca recién después del N2 (RETURN_SEARCH_MS): antes, el
+    # primer tope es el P1 y el área se cortaría en plena cola del PS.
     #
     # Con burst solo si nunca vuelve: sobre la meseta el ruido hace topes
     # en cualquier lado y el primero caería en plena meseta.
-    subiendo = np.diff(suave[desde:])
+    subiendo = np.diff(lento[desde:])
     topes = np.where((subiendo[:-1] > 0) & (subiendo[1:] <= 0))[0]
-    minimo = int(round(0.3 / max(float(t[1] - t[0]), 1e-9)))
+    minimo = int(round(RETURN_SEARCH_MS / max(float(t[1] - t[0]), 1e-9)))
     topes = topes[topes >= minimo]
     if len(topes) and fin is None:
         fin = int(topes[0]) + 1
     if fin is not None:
         marcas['FIN'] = float(t[desde + fin])
+    # Inicio del área (cursor A): donde el trazo se despega de la base.
+    if 'PS' in marcas:
+        marcas['INI'] = complex_onset(t, suave, base, marcas['PS'])
     return marcas
 
 
@@ -778,9 +801,14 @@ def ap_half_width(t, y, x_pa, base, amp_ps, amp_pa):
     idx = int(np.argmin(np.abs(t - x_pa)))
     izq = np.where(y[:idx + 1] >= nivel)[0]
     der = np.where(y[idx:] >= nivel)[0]
-    if not len(izq) or not len(der):
+    if not len(izq):
         return None
-    return float(t[idx + der[0]] - t[izq[-1]])
+    # A la derecha, como mucho hasta el P1: con la meseta honda del
+    # hidrops el trazo no vuelve a subir de la media altura hasta el final
+    # de la cola, y el "ancho del PA" salía de 3 ms y medio.
+    x_der = float(t[idx + der[0]]) if len(der) else float(t[-1])
+    x_der = min(x_der, first_p1(t, y, x_pa, float(t[-1])))
+    return x_der - float(t[izq[-1]])
 
 
 def measure_complex(t, y, marks):
@@ -789,15 +817,11 @@ def measure_complex(t, y, marks):
     Convención: el trazo tiene el PA hacia abajo, así que una amplitud
     positiva es una deflexión negativa (hacia abajo) respecto de la base.
 
-    Las dos áreas se separan con una línea HORIZONTAL a la altura del PS,
-    no con un corte en el tiempo:
-      - área PS = lo que aporta la meseta del sumación, que corre por
-        DEBAJO de todo el complejo de punta a punta;
-      - área PA = lo que la espiga del acción agrega POR ENCIMA de esa
-        meseta.
-    Es la separación que reproduce los valores publicados de la razón de
-    áreas (normal ~1.2, límite 1.94): cortando por tiempo en el hombro del
-    PS la razón daría ~0.3 y no habría contra qué compararla. Ver docs/decisiones.md.
+    Las amplitudes salen de BL, PS y PA. Las áreas, del método publicado
+    (ver _area_zones): el área PS es el complejo entero entre los cursores
+    A (inicio; si no se movió, donde el trazo se despega de la base) y A'
+    (retorno a la base), y el área PA va del hombro del PS al P1. Ver
+    docs/decisiones.md.
     """
     faltan = [m for m in ('BL', 'PS', 'PA') if m not in marks]
     if faltan:
@@ -823,68 +847,78 @@ def measure_complex(t, y, marks):
     out['ancho_pa'] = ap_half_width(t, y, x_pa, base, amp_ps, amp_pa)
 
     x_fin = float(marks['FIN'][0])
-    x_ini = complex_onset(t, y, base, x_ps)
+    x_ini = (float(marks['INI'][0]) if 'INI' in marks
+             else complex_onset(t, y, base, x_ps))
     out['inicio'] = x_ini
     out['ancho'] = x_fin - x_ini
-    zonas = _area_zones(t, y, base, amp_ps, amp_pa, x_ini, x_fin, x_pa)
-    if zonas is None:
+    zonas = _area_zones(t, y, base, x_ini, x_fin, x_ps, x_pa)
+    if zonas is None or amp_ps <= 0 or amp_pa <= 0:
         return out
-    tv, desvio, (desde, hasta) = zonas
-    area_ps = float(np.trapezoid(np.clip(desvio, None, amp_ps), tv))
-    exceso = np.clip(desvio - amp_ps, 0.0, None)
-    area_pa = (float(np.trapezoid(exceso[desde:hasta + 1],
-                                  tv[desde:hasta + 1]))
-               if hasta > desde else 0.0)
+    (tv, dv), (ta, da) = zonas
+    area_ps = float(np.trapezoid(dv, tv))
+    area_pa = float(np.trapezoid(da, ta)) if len(ta) > 1 else 0.0
     out['area_ps'] = area_ps
     out['area_pa'] = area_pa
     out['area_ratio'] = (area_ps / area_pa) if area_pa > 0 else None
     return out
 
 
-# Cuánto después del pico del PA se empieza a buscar el P1 (el repunte que
-# cierra el lóbulo del N1). Antes de eso, una ondulación del ruido en la
-# rama de subida cortaría el lóbulo a la mitad.
+# Cuánto después del pico del PA se empieza a buscar el P1 (el primer
+# repunte positivo, que cierra el área del PA). Antes de eso, una
+# ondulación del ruido en la rama de subida la cortaría a la mitad.
 P1_MIN_MS = 0.3
 
 
-def _area_zones(t, y, base, amp_ps, amp_pa, x_ini, x_fin, x_pa):
-    """Tramo integrado y lóbulo del N1: (tv, desvío, (desde, hasta)).
+def first_p1(t, y, x_pa, x_fin):
+    """Primer pico positivo después del N1: donde termina el área del PA.
 
-    Área PA: solo el lóbulo del N1 por encima de la meseta, o sea el tramo
-    continuo alrededor del pico del PA en que el trazo pasa la altura del
-    PS. El N2 también puede pasarla y no es la espiga del acción.
+    Si no hay ninguno antes del retorno a la base (el trazo sube derecho),
+    el área del PA termina en el retorno.
     """
+    suave = _smooth(t, y)
+    paso = max(float(t[1] - t[0]), 1e-9)
+    i0 = int(np.argmin(np.abs(t - x_pa))) + max(int(round(P1_MIN_MS / paso)), 1)
+    i_fin = int(np.argmin(np.abs(t - x_fin)))
+    for i in range(max(i0, 1), min(i_fin, len(t) - 1)):
+        if suave[i] >= suave[i - 1] and suave[i] > suave[i + 1]:
+            return float(t[i])
+    return float(x_fin)
+
+
+def _area_zones(t, y, base, x_ini, x_fin, x_ps, x_pa):
+    """Tramos y desvíos de las dos áreas: ((t, d) del PS, (t, d) del PA).
+
+    Método publicado (Devaiah, Ferraro y col. 2003), las dos contra la
+    línea de base:
+      - área PS: el complejo ENTERO, desde el inicio de la respuesta
+        (cursor A) hasta que el trazo vuelve a la base después del N1
+        (cursor A'). Por eso la meseta del hidrops, que sigue después del
+        N1, entra entera: el área PS puede ir mucho más allá que la del PA.
+      - área PA: desde el inicio del N1 (el hombro, marca PS) hasta el
+        primer pico positivo después del N1 (P1).
+    El desvío se recorta en cero: lo que pasa por encima de la base no
+    resta.
+    """
+    t = np.asarray(t, dtype=float)
+    y = np.asarray(y, dtype=float)
     vent = (t >= x_ini) & (t <= x_fin)
-    if vent.sum() < 2 or amp_ps <= 0 or amp_pa <= 0:
+    if vent.sum() < 2:
         return None
-    desvio = np.clip(base - y[vent], 0.0, None)
-    tv = t[vent]
-    exceso = np.clip(desvio - amp_ps, 0.0, None)
-    i_pa = int(np.argmin(np.abs(tv - x_pa)))
-    desde, hasta = i_pa, i_pa
-    while desde > 0 and exceso[desde - 1] > 0:
-        desde -= 1
-    while hasta < len(exceso) - 1 and exceso[hasta + 1] > 0:
-        hasta += 1
-    # Y termina en el P1, el repunte entre N1 y N2: con la meseta alta del
-    # hidrops el trazo no vuelve a subir de la altura del PS entre los dos
-    # y, sin este corte, el N2 entraba entero en el área del PA.
-    suave = _smooth(tv, desvio)
-    salto = max(int(round(P1_MIN_MS / max(float(tv[1] - tv[0]), 1e-9))), 1)
-    for i in range(i_pa + salto, hasta):
-        if suave[i] <= suave[i - 1] and suave[i] < suave[i + 1]:
-            hasta = i
-            break
-    return tv, desvio, (desde, hasta)
+    desvio = np.clip(base - y, 0.0, None)
+    x_p1 = first_p1(t, y, x_pa, x_fin)
+    pa = (t >= x_ps) & (t <= x_p1)
+    return (t[vent], desvio[vent]), (t[pa], desvio[pa])
 
 
 def area_shading(t, y, marks):
     """Lo que se integra, para achurarlo en el gráfico.
 
-    Devuelve {'ps': (x, y_arriba, y_abajo), 'pa': (x, y_arriba, y_abajo)}
-    en coordenadas del trazo (PA hacia abajo), o None si todavía no hay
-    áreas. Sale de las MISMAS cuentas que measure_complex: lo achurado es
-    exactamente lo que da el número de la tabla.
+    Devuelve {'ps': (x, y_base, y_trazo), 'pa': (x, y_base, y_trazo)} en
+    coordenadas del trazo (PA hacia abajo), o None si todavía no hay áreas.
+    Sale de las MISMAS cuentas que measure_complex: lo achurado es
+    exactamente lo que da el número de la tabla. Las dos se superponen
+    (el área PA está dentro de la del PS), así que el cruce de los dos
+    achurados es el PA.
     """
     t = np.asarray(t, dtype=float)
     y = np.asarray(y, dtype=float)
@@ -892,18 +926,12 @@ def area_shading(t, y, marks):
     if medida.get('area_ratio') is None:
         return None
     base = medida['base']
-    amp_ps, amp_pa = medida['sp_amp'], medida['ap_amp']
-    zonas = _area_zones(t, y, base, amp_ps, amp_pa, medida['inicio'],
-                        float(marks['FIN'][0]), medida['ap_lat'])
-    tv, desvio, (desde, hasta) = zonas
-    nivel_ps = base - amp_ps
-    piso_ps = base - np.clip(desvio, None, amp_ps)
-    x_pa = tv[desde:hasta + 1]
-    piso_pa = base - desvio[desde:hasta + 1]
-    return {
-        'ps': (tv, np.full_like(tv, base), piso_ps),
-        'pa': (x_pa, np.full_like(x_pa, nivel_ps), piso_pa),
-    }
+    zonas = _area_zones(t, y, base, medida['inicio'], float(marks['FIN'][0]),
+                        medida['sp_lat'], medida['ap_lat'])
+    salida = {}
+    for clave, (x, d) in zip(('ps', 'pa'), zonas):
+        salida[clave] = (x, np.full_like(x, base), base - d)
+    return salida
 
 
 def rate_shift(curvas):

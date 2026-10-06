@@ -20,12 +20,11 @@ que la misma ventana de rechazo que sirve para un ABR (100-3000 Hz) descarta
 dos tercios de los barridos de un ECochG (10-3000). Eso no es un paciente
 inquieto -- es la banda --, y se paga promediando el triple para nada.
 
-- ECochG mira los primeros milisegundos (MC/PS/PA), ventana corta. Son 6 y
-  no 5 porque la razón de ÁREAS se integra hasta que el complejo vuelve a
-  la línea de base, y en un hidrops marcado la meseta del sumación se
-  prolonga más allá del PA; y no más de 6 porque el complejo entero dura
-  un par de milisegundos y en una ventana larga queda apretado contra el
-  borde izquierdo, imposible de leer. Con burst, en cambio, el sumación dura
+- ECochG mira los primeros milisegundos (MC/PS/PA), ventana de 10 ms (el
+  estándar del docente). La razón de ÁREAS se integra hasta que el complejo
+  vuelve a la línea de base, y en un hidrops marcado la meseta del sumación
+  se prolonga 3-4 ms más allá del PA: con 6 ms, el Ménière más marcado
+  volvía a la base en el borde de la ventana. Con burst, en cambio, el sumación dura
   lo que dura el estímulo (un 1-10-1 ms son 12 ms): la ventana se abre a
   mano en Parámetros avanzados, como en el equipo, y por eso su tope llega
   a 25 ms.
@@ -80,7 +79,7 @@ PROTOCOLS = {
         stimuli=(CLICK,) + CHIRPS + BURSTS, implemented=True,
         note='Tronco cerebral. Burst para umbrales por frecuencia, chirp para sincronizar.'),
     'ECochG': Protocol(
-        name='ECochG', window_ms=6, filter_high=10, filter_low=3000,
+        name='ECochG', window_ms=10, filter_high=10, filter_low=3000,
         rate=11.1, averages=1500, montage='tympanic', reject_uv=40.0,
         stimuli=(CLICK,) + BURSTS, implemented=True, window_max=25.0,
         note='Microfónica coclear, potencial de sumación y PA. Necesita electrodo timpánico.'),

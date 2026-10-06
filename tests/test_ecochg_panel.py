@@ -115,7 +115,7 @@ def test_choosing_ecochg_swaps_the_equipment_and_the_table():
     assert w.table_r.isVisibleTo(w) and not w.table_ec_r.isVisibleTo(w)
     w.control.cb_test.setCurrentText('ECochG')
     assert w.technical['montage'] == 'tympanic'
-    assert w.technical['window_ms'] == 6
+    assert w.technical['window_ms'] == 10
     assert not w.table_r.isVisibleTo(w) and w.table_ec_r.isVisibleTo(w)
     # Y el gráfico pasa a marcar los cuatro puntos del ECochG.
     assert w.graph_r.mark_labels == ecochg.MARKS
@@ -293,7 +293,7 @@ def test_the_student_does_not_get_the_standard_setup():
         return
     w = _ventana_con_permiso(1)
     assert w.control.get_data()['filter_passhigh'] != '5'
-    assert w.technical['window_ms'] == 6
+    assert w.technical['window_ms'] == 10
     w.control.cb_stim.setCurrentText('Burst 1 kHz')
     assert w.technical['burst_envelope'] == '2-1-2'
 
@@ -305,9 +305,9 @@ def test_the_baseline_is_drawn_from_bl_to_fin():
     w = _ventana()
     curva = _capturar(w)
     g = w.graph_r
-    # En el ECochG los cursores A/A' del ABR no están: el A, en 0 ms,
-    # tapaba el tramo donde se marca la base.
-    assert not g.inf_a.isVisible() and not g.inf_b.isVisible()
+    # En el ECochG los cursores A/A' son los límites del área y arrancan
+    # fuera del tramo donde se marca la base.
+    assert g.inf_a.getXPos() >= g.AREA_CURSOR_START_MS
     g.current_lat = 0.15
     g.create_marks('BL')
     xs, ys = g.base_lines[curva].getData()
@@ -318,9 +318,35 @@ def test_the_baseline_is_drawn_from_bl_to_fin():
     assert abs(xs[1] - puestas['FIN']) < 0.05, (xs, puestas)
     g.delete_mark('BL')
     assert curva not in g.base_lines
-    # De vuelta al ABR, los cursores vuelven.
+
+
+def test_the_cursors_are_the_area_limits():
+    """A es el inicio del área y A' el retorno: moverlos cambia el área y
+    el achurado, y quedan guardados como marcas de la curva."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    curva = _capturar(w)
+    w.auto_ecochg_mark(0)
+    g = w.graph_r
+    medidas = w.memory[curva]['ECochG']
+    assert medidas.get('area_ratio') is not None
+    marcas = w.memory[curva]['marcas']
+    # El marcado automático deja los cursores en los límites que usó.
+    assert abs(g.inf_a.getXPos() - medidas['inicio']) < 0.05
+    assert abs(g.inf_b.getXPos() - marcas['FIN'][0]) < 0.05
+    area = medidas['area_ps']
+    nuevo_fin = float(marcas['FIN'][0]) - 0.8
+    # Traer A' antes del retorno deja afuera parte del complejo.
+    g.inf_b.setPos((nuevo_fin, 0))
+    nueva = w.memory[curva]['ECochG']
+    assert nueva['area_ps'] < area, (nueva['area_ps'], area)
+    assert abs(w.memory[curva]['marcas']['FIN'][0] - nuevo_fin) < 0.05
+    assert curva in g.area_fills
+    # Y moverlo en el ABR no toca nada del ECochG.
     w.apply_test_widgets('ABR')
-    assert g.inf_a.isVisible()
+    g.inf_b.setPos((5.0, 0))
+    assert abs(w.memory[curva]['marcas']['FIN'][0] - nuevo_fin) < 0.05
 
 
 def test_the_y_axis_can_be_inverted():
@@ -351,7 +377,7 @@ def test_the_auto_mark_button_fills_the_table():
     assert medidas.get('faltan') == []
     assert abs(medidas['sp_ap'] - 0.25) < 0.08
     # Las marcas quedan puestas como cualquier otra: se pueden corregir.
-    assert set(w.graph_r.marks[curva]) == set(ecochg.MARKS)
+    assert set(w.graph_r.marks[curva]) == set(ecochg.MARKS + ecochg.AREA_MARKS)
 
 
 def test_the_auto_mark_is_not_the_answer():

@@ -3809,14 +3809,37 @@ referencia. Lo que se decidió:
   A/A' ocultos en el ECochG** (el A en 0 ms tapaba la zona de BL) y **botón ↕
   para invertir el eje Y** en los dos oídos; con el eje invertido se apagan los
   números de la grilla porque salen espejados.
+- **Razón de áreas = método publicado** (Devaiah, Dawson, Ferraro y Ator 2003,
+  electrodo timpánico, click alternado a 90 dB; controles 1.34 ± 0.30, límite
+  1.94). Área PS = el complejo ENTERO contra la línea de base, desde el inicio
+  de la respuesta hasta el retorno a la base después del N1; área PA = desde
+  el inicio del N1 (marca PS) hasta el primer pico positivo después del N1
+  (P1). Reemplaza la separación con una línea horizontal a la altura del PS
+  (decisión 4 del motor), que no era la publicada: el docente lo detectó
+  porque el área del PS tiene que poder ir más allá de la del PA. Con esto:
+  tímpano sano 1.41 ± 0.14, 0.40 → 2.15, 0.55 → 2.76 (en el hidrops varía más
+  entre capturas, porque la cola vuelve despacio a la base).
+- **`SP_TAIL_PER_RATIO` 3 → 12**: con el método publicado es la prolongación
+  del PS la que hace crecer la razón; con 3 un 0.55 medía 1.64.
+- **Límite de áreas 1.94 en los tres electrodos**: con el método publicado el
+  electrodo mueve las dos áreas juntas (sano ~1.35-1.45 en los tres).
+- **Cursores A (inicio) y A' (retorno)** son los límites del área en el ECochG
+  (marcas `INI` y `FIN` de la curva). FIN dejó de ser marca con flecha. Si A no
+  se movió, el inicio es donde el trazo se despega de la base. El marcado
+  automático pone los dos.
+- **El ruido del paciente se despeja en la ventana del ABR** (12 ms) y no en la
+  del ECochG. Era un bug: con 6 ms la ventana de análisis del ABR quedaba
+  cortada y el paciente traía la quinta parte del ruido que con 10 ms (σ 0.5
+  contra 2.47). Las mediciones "estables" en 6 ms eran artificiales.
+- **Ventana del ECochG 10 ms** (el estándar del docente): con la cola larga del
+  hidrops, 6 ms no alcanzaba.
+- **Retorno automático** buscado sobre un trazo más suavizado (0.4 ms), y el
+  ancho del PA a media altura limitado al P1 (con la meseta honda daba 3.5 ms).
 - **Achurado de las dos áreas** (`ecochg.area_shading`, `AbrGraph.set_area_shading`):
   PS en azul, PA en naranja, con diagonales cruzadas. Sale de las mismas
   cuentas que la tabla (`_area_zones`), así que lo achurado es el número.
-- **El lóbulo del PA termina en el P1** (primer repunte después de 0.3 ms del
-  pico). En el hidrops la meseta deja el trazo bajo la altura del PS entre N1 y
-  N2 y el N2 entraba entero en el área del PA. Con el corte, la calibración
-  queda: tímpano sano 1.17, cruza 1.94 en ~0.37 (antes que la de amplitudes,
-  como está diseñado); promontorio y conducto igual respecto de sus límites.
+- **El área del PA termina en el P1** (primer repunte después de 0.3 ms del
+  pico), como en el método publicado: el N2 no entra.
 
 ## El test del timpanograma fallaba una de cada cuatro corridas (2026-09-21)
 

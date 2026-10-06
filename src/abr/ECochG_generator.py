@@ -34,12 +34,17 @@ from abr.ABR_generator import (AIR_MAX_OUTPUT_DB, BONE_MAX_OUTPUT_DB,
                                STIM_MAP, TRANSDUCER_LATENCY_MS, ABRGenerator,
                                _get_generator, default_settings,
                                select_population, stimulus_width)
+from abr.protocols import get_protocol
 from core.rng import case_fingerprint, stable_seed
 
 
 # Ventana de analisis del FSP. No depende de la poblacion: el PA es la onda
 # I, que es lo que menos se corre con la edad.
 FSP_WINDOW_MS = (0.6, 3.5)
+
+# Ventana con la que se despeja el ruido del paciente: la del ABR de rutina
+# (ver reference_sigma y el comentario en generate_curve).
+ABR_REFERENCE_WINDOW_MS = get_protocol('ABR').window_ms
 
 
 class ECochGGenerator:
@@ -321,10 +326,18 @@ class ECochGGenerator:
         if case_ec is None:
             hay_registro = False
 
+        # La referencia se arma en la ventana del ABR y no en la del
+        # ECochG: con 6 ms la ventana de analisis del ABR quedaba cortada,
+        # la respuesta de referencia salia chica y el mismo paciente traia
+        # la quinta parte del ruido que con 10 ms. El ruido es del paciente
+        # y no puede depender de la ventana que eligio el alumno.
+        t_ref = np.linspace(0, ABR_REFERENCE_WINDOW_MS,
+                            int(round(ABR_REFERENCE_WINDOW_MS * SAMPLES_PER_MS)))
+        fs_ref = (len(t_ref) - 1) / (t_ref[-1] / 1000.0)
         sigma, referencia = self.reference_sigma(
-            t, fs, population, pathology, neural, baseline, click_baseline,
-            threshold, stimulus_config, case_config, desviaciones,
-            repro_shift)
+            t_ref, fs_ref, population, pathology, neural, baseline,
+            click_baseline, threshold, stimulus_config, case_config,
+            desviaciones, repro_shift)
         noise_floor = (sigma / float(np.sqrt(NOISE_REF_SWEEPS)) if sigma else
                        float(technical_config.get('residual_noise_nv')
                              or NOISE_FLOOR_UV * 1000) / 1000.0)
