@@ -8,7 +8,7 @@ from abr.WidgetsMods import (GraphicsLayoutWidgetMod, InfiniteLineMod,
                              TextItemMod)
 from core.base import context
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QBrush, QColor, QFont
 
 
 # Como se abrevia cada parametro cuando hay que ponerlo en la etiqueta de
@@ -125,6 +125,10 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # borde de la ventana mientras no haya FIN). Sin ella la marca BL
         # era una flechita pegada al eje y parecia que no se habia puesto.
         self.base_lines = {}
+        # Achurado de las dos areas del ECochG por curva: {curva: (zonas,
+        # [items])}. Las zonas vienen de ecochg.area_shading, o sea de las
+        # mismas cuentas que el numero de la tabla.
+        self.area_fills = {}
         # Los cursores A/A' son del ABR (latencia y amplitud pico a pico).
         # En el ECochG no miden nada y el A, parado en 0 ms, tapaba justo
         # el tramo donde se marca la linea de base.
@@ -469,6 +473,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
         if delete:
             self.remove_base_line(self.act_curve)
+            self.set_area_shading(self.act_curve, None)
             self.data.pop(self.act_curve, None)
             self.marks.pop(self.act_curve, None)
             self.curve_int.pop(self.act_curve, None)
@@ -663,6 +668,38 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             self.base_lines[curve_name] = linea
         linea.setData([float(x0), float(x1)], [y, y])
 
+    # Achurado de cada area: PS en azul, lobulo del N1 en naranja, con
+    # diagonales cruzadas para que se distingan tambien en blanco y negro.
+    AREA_STYLE = {
+        'ps': ((0, 90, 200, 170), Qt.BrushStyle.BDiagPattern),
+        'pa': ((230, 120, 0, 200), Qt.BrushStyle.FDiagPattern),
+    }
+
+    def set_area_shading(self, curve_name, zonas):
+        """Achura (o borra, con None) las areas integradas de la curva."""
+        _, viejos = self.area_fills.pop(curve_name, (None, []))
+        for item in viejos:
+            self.pw.removeItem(item)
+        if not zonas or curve_name not in self.data:
+            return
+        gap = self.data[curve_name].get('gap', 0.0)
+        items = []
+        for clave, (x, arriba, abajo) in zonas.items():
+            if len(x) < 2:
+                continue
+            color, patron = self.AREA_STYLE[clave]
+            c1 = pg.PlotCurveItem(x, arriba + gap, pen=None)
+            c2 = pg.PlotCurveItem(x, abajo + gap, pen=None)
+            relleno = pg.FillBetweenItem(c1, c2,
+                                         brush=QBrush(QColor(*color), patron))
+            relleno.setZValue(-5)
+            self.pw.addItem(relleno)
+            items += [relleno]
+            # Las curvas guia no se dibujan, pero tienen que vivir mientras
+            # viva el relleno.
+            relleno._guias = (c1, c2)
+        self.area_fills[curve_name] = (zonas, items)
+
     def remove_base_line(self, curve_name):
         linea = self.base_lines.pop(curve_name, None)
         if linea is not None:
@@ -679,6 +716,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         for mark in self.marks.get(name_curve, {}):
             self.place_mark(name_curve, mark)
         self.refresh_base_line(name_curve)
+        if name_curve in self.area_fills:
+            self.set_area_shading(name_curve, self.area_fills[name_curve][0])
 
     def delete_mark(self, mark):
         curve = self.act_curve
@@ -851,6 +890,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
         # Las lineas de base son PlotDataItem y ya salieron arriba.
         self.base_lines = {}
+        for nombre in list(self.area_fills):
+            self.set_area_shading(nombre, None)
         # Limpiar diccionarios internos
         self.data = {}
         self.marks = {}

@@ -3809,6 +3809,14 @@ referencia. Lo que se decidió:
   A/A' ocultos en el ECochG** (el A en 0 ms tapaba la zona de BL) y **botón ↕
   para invertir el eje Y** en los dos oídos; con el eje invertido se apagan los
   números de la grilla porque salen espejados.
+- **Achurado de las dos áreas** (`ecochg.area_shading`, `AbrGraph.set_area_shading`):
+  PS en azul, PA en naranja, con diagonales cruzadas. Sale de las mismas
+  cuentas que la tabla (`_area_zones`), así que lo achurado es el número.
+- **El lóbulo del PA termina en el P1** (primer repunte después de 0.3 ms del
+  pico). En el hidrops la meseta deja el trazo bajo la altura del PS entre N1 y
+  N2 y el N2 entraba entero en el área del PA. Con el corte, la calibración
+  queda: tímpano sano 1.17, cruza 1.94 en ~0.37 (antes que la de amplitudes,
+  como está diseñado); promontorio y conducto igual respecto de sus límites.
 
 ## El test del timpanograma fallaba una de cada cuatro corridas (2026-09-21)
 

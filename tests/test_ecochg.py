@@ -473,6 +473,23 @@ def test_the_ecochg_has_no_shadow_curve_and_no_contra_channel():
     assert meta['shadow'] is False
 
 
+def test_the_shading_is_exactly_what_is_integrated():
+    """Lo achurado en el gráfico da el mismo número que la tabla, y el
+    lóbulo del PA termina en el P1 aunque haya hidrops (el N2 no entra)."""
+    for sp_ap in (0.25, 0.55):
+        t, y, _, _, _, _ = _curva(sp_ap=sp_ap)
+        marcas = {k: (v, float(np.interp(v, t, y)))
+                  for k, v in E.auto_marks(t, y).items()}
+        medida = E.measure_complex(t, y, marks=marcas)
+        zonas = E.area_shading(t, y, marcas)
+        for clave, area in (('ps', 'area_ps'), ('pa', 'area_pa')):
+            x, arriba, abajo = zonas[clave]
+            achurado = float(np.trapezoid(arriba - abajo, x))
+            assert abs(achurado - medida[area]) < 1e-6 * max(1.0, medida[area])
+        x_pa = zonas['pa'][0]
+        assert x_pa[-1] < medida['ap_lat'] + E.N2_MS - 0.2, (sp_ap, x_pa[-1])
+
+
 # ------------------------------------------------------------- tone burst
 
 BURST_LARGO = {'window_ms': 20, 'burst_envelope': 'ms-1-10-1'}

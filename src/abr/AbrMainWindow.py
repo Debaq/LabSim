@@ -1244,6 +1244,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             np.asarray(x), np.asarray(y),
             (self.memory[curve].get('marcas') or {}))
         self.memory[curve]['ECochG'] = medidas
+        grafico.set_area_shading(curve, ecochg.area_shading(
+            np.asarray(x), np.asarray(y),
+            (self.memory[curve].get('marcas') or {})))
         tabla.set_medidas(medidas)
         tabla.set_rate_shift(self.ecochg_rate_shift(side))
         tabla.set_polarity_shift(self.ecochg_polarity_shift(side))

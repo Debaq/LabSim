@@ -826,24 +826,12 @@ def measure_complex(t, y, marks):
     x_ini = complex_onset(t, y, base, x_ps)
     out['inicio'] = x_ini
     out['ancho'] = x_fin - x_ini
-    vent = (t >= x_ini) & (t <= x_fin)
-    if vent.sum() < 2 or amp_ps <= 0 or amp_pa <= 0:
+    zonas = _area_zones(t, y, base, amp_ps, amp_pa, x_ini, x_fin, x_pa)
+    if zonas is None:
         return out
-    desvio = np.clip(base - y[vent], 0.0, None)
-    tv = t[vent]
+    tv, desvio, (desde, hasta) = zonas
     area_ps = float(np.trapezoid(np.clip(desvio, None, amp_ps), tv))
-    # Área PA: solo el lóbulo del N1 por encima de la meseta, o sea el
-    # tramo continuo alrededor del pico del PA en que el trazo pasa la
-    # altura del PS. El N2 también puede pasarla y no es la espiga del
-    # acción: contándolo, un N2 visible bajaba la razón de áreas de 2.0 a
-    # 1.5 en el mismo oído (ver docs/decisiones.md).
     exceso = np.clip(desvio - amp_ps, 0.0, None)
-    i_pa = int(np.argmin(np.abs(tv - x_pa)))
-    desde, hasta = i_pa, i_pa
-    while desde > 0 and exceso[desde - 1] > 0:
-        desde -= 1
-    while hasta < len(exceso) - 1 and exceso[hasta + 1] > 0:
-        hasta += 1
     area_pa = (float(np.trapezoid(exceso[desde:hasta + 1],
                                   tv[desde:hasta + 1]))
                if hasta > desde else 0.0)
@@ -851,6 +839,71 @@ def measure_complex(t, y, marks):
     out['area_pa'] = area_pa
     out['area_ratio'] = (area_ps / area_pa) if area_pa > 0 else None
     return out
+
+
+# Cuánto después del pico del PA se empieza a buscar el P1 (el repunte que
+# cierra el lóbulo del N1). Antes de eso, una ondulación del ruido en la
+# rama de subida cortaría el lóbulo a la mitad.
+P1_MIN_MS = 0.3
+
+
+def _area_zones(t, y, base, amp_ps, amp_pa, x_ini, x_fin, x_pa):
+    """Tramo integrado y lóbulo del N1: (tv, desvío, (desde, hasta)).
+
+    Área PA: solo el lóbulo del N1 por encima de la meseta, o sea el tramo
+    continuo alrededor del pico del PA en que el trazo pasa la altura del
+    PS. El N2 también puede pasarla y no es la espiga del acción.
+    """
+    vent = (t >= x_ini) & (t <= x_fin)
+    if vent.sum() < 2 or amp_ps <= 0 or amp_pa <= 0:
+        return None
+    desvio = np.clip(base - y[vent], 0.0, None)
+    tv = t[vent]
+    exceso = np.clip(desvio - amp_ps, 0.0, None)
+    i_pa = int(np.argmin(np.abs(tv - x_pa)))
+    desde, hasta = i_pa, i_pa
+    while desde > 0 and exceso[desde - 1] > 0:
+        desde -= 1
+    while hasta < len(exceso) - 1 and exceso[hasta + 1] > 0:
+        hasta += 1
+    # Y termina en el P1, el repunte entre N1 y N2: con la meseta alta del
+    # hidrops el trazo no vuelve a subir de la altura del PS entre los dos
+    # y, sin este corte, el N2 entraba entero en el área del PA.
+    suave = _smooth(tv, desvio)
+    salto = max(int(round(P1_MIN_MS / max(float(tv[1] - tv[0]), 1e-9))), 1)
+    for i in range(i_pa + salto, hasta):
+        if suave[i] <= suave[i - 1] and suave[i] < suave[i + 1]:
+            hasta = i
+            break
+    return tv, desvio, (desde, hasta)
+
+
+def area_shading(t, y, marks):
+    """Lo que se integra, para achurarlo en el gráfico.
+
+    Devuelve {'ps': (x, y_arriba, y_abajo), 'pa': (x, y_arriba, y_abajo)}
+    en coordenadas del trazo (PA hacia abajo), o None si todavía no hay
+    áreas. Sale de las MISMAS cuentas que measure_complex: lo achurado es
+    exactamente lo que da el número de la tabla.
+    """
+    t = np.asarray(t, dtype=float)
+    y = np.asarray(y, dtype=float)
+    medida = measure_complex(t, y, marks)
+    if medida.get('area_ratio') is None:
+        return None
+    base = medida['base']
+    amp_ps, amp_pa = medida['sp_amp'], medida['ap_amp']
+    zonas = _area_zones(t, y, base, amp_ps, amp_pa, medida['inicio'],
+                        float(marks['FIN'][0]), medida['ap_lat'])
+    tv, desvio, (desde, hasta) = zonas
+    nivel_ps = base - amp_ps
+    piso_ps = base - np.clip(desvio, None, amp_ps)
+    x_pa = tv[desde:hasta + 1]
+    piso_pa = base - desvio[desde:hasta + 1]
+    return {
+        'ps': (tv, np.full_like(tv, base), piso_ps),
+        'pa': (x_pa, np.full_like(x_pa, nivel_ps), piso_pa),
+    }
 
 
 def rate_shift(curvas):
