@@ -155,11 +155,15 @@ CM_ONSET_BEFORE_AP_MS = 1.0
 # ECochG. Cuanto más cerca de la cóclea, más grande todo -- y también más
 # invasivo. El de conducto (TipTrode) apenas gana sobre el ABR y obliga a
 # promediar mucho más; el transtimpánico atraviesa el tímpano hasta el
-# promontorio y da milivoltios de PA, pero lo pone un médico.
+# promontorio y da decenas de µV de PA, pero lo pone un médico.
+#
+# El promontorio estaba en 25 (PA ~10 µV), el extremo bajo de lo que se
+# registra ahí: un PA transtimpánico normal a nivel alto anda entre 10 y
+# varias decenas de µV. Con 50 queda en ~20 µV, la mitad del rango.
 ELECTRODE_GAIN = {
     'extratympanic': 2.5,    # TipTrode en el conducto: PA ~1 uV
     'tympanic': 8.0,         # electrodo sobre la membrana: PA ~3.5 uV
-    'transtympanic': 25.0,   # aguja en el promontorio: PA ~10 uV
+    'transtympanic': 50.0,   # aguja en el promontorio: PA ~20 uV
 }
 # El valor que tenia 'tympanic' en el generador antes de que existiera esta
 # tabla era 2.5 sobre el Cz-mastoides, y con eso el ECochG salia con PEOR
