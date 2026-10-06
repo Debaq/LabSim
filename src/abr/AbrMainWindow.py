@@ -1198,6 +1198,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         promedio a medias marca mal, y corregirlo a mano es parte del
         examen: las marcas quedan como cualquier otra.
         """
+        if self.view_only:
+            # Igual que las marcas a mano: una sesion cerrada solo se mira.
+            return
         grafico = self.graph_r if side == 0 else self.graph_l
         curva = grafico.get_active()
         if not curva or curva not in grafico.data:
@@ -1250,7 +1253,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         if curve == grafico.get_active():
             # A y A' muestran los limites que se usaron: el inicio que el
             # alumno puso o, si no lo movio, el que se despega de la base.
-            grafico.place_area_cursors(medidas.get('inicio'),
+            # Sin dato, el cursor queda donde esta (ver place_area_cursors).
+            inicio = (marcas.get('INI') or [medidas.get('inicio')])[0]
+            grafico.place_area_cursors(inicio,
                                        (marcas.get('FIN') or [None])[0])
         tabla.set_medidas(medidas)
         tabla.set_rate_shift(self.ecochg_rate_shift(side))

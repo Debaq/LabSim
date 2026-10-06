@@ -349,6 +349,84 @@ def test_the_cursors_are_the_area_limits():
     assert abs(w.memory[curva]['marcas']['FIN'][0] - nuevo_fin) < 0.05
 
 
+def _pixel(g, lat, curva=None):
+    from PySide6.QtCore import QPointF
+    y = 0.0
+    if curva is not None:
+        xs, ys = g.data[curva]['ipsi_xy']
+        y = float(np.interp(lat, xs, ys)) + g.data[curva].get('gap', 0.0)
+    return g.mapFromScene(g.pw.vb.mapViewToScene(QPointF(lat, y)))
+
+
+def _arrastre(g, desde, hasta, pasos=8):
+    """Apretar, mover y soltar con el mouse, como en clase."""
+    from PySide6.QtCore import QPoint, Qt
+    from PySide6.QtTest import QTest
+    from PySide6.QtWidgets import QApplication
+    QTest.mousePress(g.viewport(), Qt.MouseButton.LeftButton,
+                     Qt.KeyboardModifier.NoModifier, desde)
+    for k in range(1, pasos + 1):
+        QTest.mouseMove(g.viewport(), QPoint(
+            int(desde.x() + (hasta.x() - desde.x()) * k / pasos),
+            int(desde.y() + (hasta.y() - desde.y()) * k / pasos)))
+        QApplication.processEvents()
+    QTest.mouseRelease(g.viewport(), Qt.MouseButton.LeftButton,
+                       Qt.KeyboardModifier.NoModifier, hasta)
+    QApplication.processEvents()
+
+
+def _ventana_visible():
+    from PySide6.QtWidgets import QApplication
+    w = _ventana()
+    w.resize(1400, 900)
+    w.show()
+    QApplication.processEvents()
+    return w
+
+
+def test_cursor_a_can_be_dragged_before_any_mark():
+    """En clase el A no se dejaba mover: cada recálculo lo devolvía a su
+    lugar de arranque mientras faltara alguna marca."""
+    if not HAS_UI:
+        return
+    w = _ventana_visible()
+    _capturar(w)
+    g = w.graph_r
+    x0 = g.inf_a.getXPos()
+    _arrastre(g, _pixel(g, x0), _pixel(g, 2.0))
+    assert abs(g.inf_a.getXPos() - 2.0) < 0.3, g.inf_a.getXPos()
+    _arrastre(g, _pixel(g, g.inf_b.getXPos(), None), _pixel(g, 4.0))
+    assert abs(g.inf_b.getXPos() - 4.0) < 0.3, g.inf_b.getXPos()
+
+
+def test_a_mark_is_placed_even_if_the_mouse_moves_a_little():
+    """Apretar y soltar con el mouse algo movido pone la marca armada en
+    vez de desplazar el gráfico."""
+    if not HAS_UI:
+        return
+    from PySide6.QtCore import QPoint
+    w = _ventana_visible()
+    curva = _capturar(w)
+    g = w.graph_r
+    for marca, lat in (('BL', 0.2), ('PS', 0.8), ('PA', 1.35)):
+        w.arm_ecochg_mark(0, marca)
+        p = _pixel(g, lat, curva)
+        _arrastre(g, p, QPoint(p.x() + 9, p.y() + 7), pasos=3)
+        assert marca in g.marks.get(curva, {}), (marca, g.marks.get(curva))
+    assert w.memory[curva]['ECochG'].get('sp_ap') is not None
+
+
+def test_the_auto_mark_respects_read_only_sessions():
+    """Una sesión cerrada solo se mira: tampoco con el botón Auto."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    curva = _capturar(w)
+    w.set_view_mode(True)
+    w.auto_ecochg_mark(0)
+    assert not w.graph_r.marks.get(curva)
+
+
 def test_dragging_the_label_of_a_deleted_curve_does_not_crash():
     """Arrastrar la etiqueta de una curva que ya no está no revienta."""
     if not HAS_UI:

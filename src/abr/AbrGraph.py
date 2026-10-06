@@ -175,6 +175,18 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             if ev.button() == Qt.MouseButton.RightButton:
                 ev.ignore()
                 return
+            if (self.mark_mode is not None
+                    and ev.button() == Qt.MouseButton.LeftButton):
+                # Con una marca armada, apretar y soltar con el mouse un
+                # poco movido (un touchpad lo hace casi siempre) es poner la
+                # marca, no desplazar el grafico. Antes Qt lo tomaba como
+                # arrastre, la marca no se ponia nunca y solo andaba el
+                # marcado automatico.
+                ev.accept()
+                if ev.isFinish():
+                    self.place_armed_mark(
+                        view_box.mapSceneToView(ev.scenePos()).x())
+                return
             arrastre(ev, axis)
         view_box.mouseDragEvent = solo_desplazar
 
@@ -525,15 +537,25 @@ class AbrGraph(GraphicsLayoutWidgetMod):
     # fuera del tramo pre-estimulo, que es donde se marca BL.
     AREA_CURSOR_START_MS = 0.5
 
-    def place_area_cursors(self, x_ini, x_fin):
+    def place_area_cursors(self, x_ini, x_fin, reset=False):
         """Lleva A/A' a los limites del area de la curva activa, sin que
-        eso cuente como que el alumno los movio."""
+        eso cuente como que el alumno los movio.
+
+        Un limite en None deja el cursor donde esta: antes lo devolvia a
+        su lugar de arranque y, como el recalculo corre en cada movimiento,
+        el A no se dejaba arrastrar mientras faltara alguna marca. Solo
+        `reset` (cambio de prueba o de curva) los lleva al arranque.
+        """
         self._placing_cursors = True
         try:
-            self.inf_a.setPos((self.AREA_CURSOR_START_MS if x_ini is None
-                               else float(x_ini), 0))
-            self.inf_b.setPos((self.window_ms if x_fin is None
-                               else float(x_fin), 0))
+            if x_ini is not None:
+                self.inf_a.setPos((float(x_ini), 0))
+            elif reset:
+                self.inf_a.setPos((self.AREA_CURSOR_START_MS, 0))
+            if x_fin is not None:
+                self.inf_b.setPos((float(x_fin), 0))
+            elif reset:
+                self.inf_b.setPos((self.window_ms, 0))
         finally:
             self._placing_cursors = False
 
@@ -608,7 +630,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.area_cursors = 'BL' in self.mark_labels
         if self.area_cursors:
             # Fuera del tramo donde se marca BL, hasta que haya medida.
-            self.place_area_cursors(None, None)
+            self.place_area_cursors(None, None, reset=True)
 
     def arm_mark(self, mark):
         """Deja armada la marca que el proximo clic va a poner."""
@@ -631,18 +653,23 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
     def click_mark(self, ev):
         """Clic sobre la curva con una marca armada: la pone ahi."""
-        if self.read_only or self.mark_mode is None or self.act_curve is None:
-            return
         if ev.button() != Qt.MouseButton.LeftButton:
             return
+        if self.place_armed_mark(self.pw.vb.mapSceneToView(ev.scenePos()).x()):
+            ev.accept()
+
+    def place_armed_mark(self, x):
+        """Pone la marca armada en x (clic o clic con el mouse movido)."""
+        if self.read_only or self.mark_mode is None or self.act_curve is None:
+            return False
         if self.act_curve not in self.data:
-            return
-        x = float(self.pw.vb.mapSceneToView(ev.scenePos()).x())
+            return False
+        x = float(x)
         if self.mark_mode in self.snap_marks:
             x = self.snap_to_peak(x)
         self.current_lat = x
         self.create_marks(self.mark_mode)
-        ev.accept()
+        return True
 
     # Cuanto se puede correr una marca que se pega al trazo, en ms.
     SNAP_MS = 0.4

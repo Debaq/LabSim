@@ -3835,6 +3835,18 @@ referencia. Lo que se decidió:
   hidrops, 6 ms no alcanzaba.
 - **Retorno automático** buscado sobre un trazo más suavizado (0.4 ms), y el
   ancho del PA a media altura limitado al P1 (con la meseta honda daba 3.5 ms).
+- **En clase no se podía marcar a mano (2026-10-06), solo con Auto.** Dos
+  causas, las dos con test que reproduce el mouse real
+  (`test_a_mark_is_placed_even_if_the_mouse_moves_a_little`,
+  `test_cursor_a_can_be_dragged_before_any_mark`):
+  1. Apretar y soltar con el mouse algo movido (casi siempre con touchpad) era
+     para Qt un arrastre del gráfico y no un clic: la marca armada no se
+     ponía nunca. Ahora, con una marca armada, ese arrastre la pone donde se
+     suelta.
+  2. Los cursores A/A' se recolocaban en cada recálculo y, sin todas las
+     marcas, volvían al arranque: el A no se dejaba mover. Ahora un límite
+     sin dato deja el cursor donde está.
+  El botón Auto también respeta el modo solo lectura.
 - **Achurado de las dos áreas** (`ecochg.area_shading`, `AbrGraph.set_area_shading`):
   PS en azul, PA en naranja, con diagonales cruzadas. Sale de las mismas
   cuentas que la tabla (`_area_zones`), así que lo achurado es el número.
