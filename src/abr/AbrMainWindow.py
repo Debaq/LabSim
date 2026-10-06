@@ -30,13 +30,14 @@ from abr.AbrSessions import (curve_order, pack_trace,
                              session_label, unpack_trace)
 from abr.AbrTable import AbrTable
 from abr.EcochgTable import EcochgTable
+from abr.protocols import standard_setup
 from abr import ecochg
 from abr.EEG import EEG
 from abr.FSP import FSP
 from abr.UI.AbrMain_ui import Ui_MainWindow
 from backend.client import BackendClient
 from core.base import context
-from core.helpers import Preferences
+from core.helpers import Preferences, es_docente
 from core.report_autosave import subir_ahora
 from core.rng import stable_seed
 from PySide6.QtCore import QCoreApplication, QTimer
@@ -69,6 +70,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # data_login: dict de la sesión de LabSim (user/name/permission), lo
         # entrega la ventana principal al montar esta subventana MDI.
         self.data_login = data_login
+        # El docente encuentra el equipo en la configuracion estandar de la
+        # prueba (ver protocols.STANDARD_SETUP); el alumno no.
+        self.docente = es_docente((data_login or {}).get('permission'))
         self.setWindowTitle("ABR")
         self.data_current = None
         self.appointment_id = None
@@ -188,6 +192,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # estimulo con que se registro, asi que siguen al panel de control.
         self.control.sb_intencity.valueChanged.connect(self.apply_norms)
         self.control.cb_stim.currentTextChanged.connect(self.apply_norms)
+        self.control.cb_stim.currentTextChanged.connect(self.stim_changed)
         self.control.apply_protocol(self.control.cb_test.currentText())
 
         # Monitor de EEG crudo: corre siempre que haya paciente, no solo
@@ -1290,10 +1295,47 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.technical = default_settings(test)
         self.control.apply_protocol(test)
         self.apply_test_widgets(test)
+        self.apply_standard_setup(test)
         self.apply_window()
         self.apply_norms()
         self.reset()
         self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
+
+    def apply_standard_setup(self, test):
+        """Deja el equipo en la configuracion estandar, SOLO al docente.
+
+        Es para tomar la prueba de punta a punta sin configurarla a mano. El
+        alumno arranca con tasa y promediaciones al azar y el resto en el
+        protocolo: configurar el equipo es parte de lo que se evalua.
+        """
+        if not self.docente or getattr(self, 'view_only', False):
+            return
+        setup = standard_setup(test)
+        if setup is None:
+            return
+        control, technical = setup
+        self.technical.update(technical)
+        # set_data mueve cb_stim, que dispara stim_changed: el ajuste del
+        # estimulo (envolvente y ventana del burst) sale de ahi.
+        self.control.set_data(control)
+
+    def stim_changed(self, stim):
+        """Con el docente en ECochG, el estimulo trae su envolvente y ventana.
+
+        El burst necesita 1-10-1 ms y una ventana que contenga la meseta; al
+        volver al click, la ventana del click. Los filtros, la tasa y el
+        resto no se tocan: pueden haberse movido a proposito.
+        """
+        if not self.docente or getattr(self, 'view_only', False):
+            return
+        setup = standard_setup(self.control.cb_test.currentText(), stim)
+        if setup is None:
+            return
+        _, technical = setup
+        for clave in ('burst_envelope', 'window_ms'):
+            if clave in technical:
+                self.technical[clave] = technical[clave]
+        self.apply_window()
 
     def confirm_test_change(self, test):
         """Avisa que cambiar de prueba borra lo registrado."""

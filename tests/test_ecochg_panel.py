@@ -258,6 +258,46 @@ def test_the_polarity_shift_needs_a_rarefaction_and_a_condensation():
     assert polaridad and polaridad[0]['oido'] == 'OD', polaridad
 
 
+def _ventana_con_permiso(permiso):
+    w = AbrMainWindow({'name': 'X', 'user': 'x', 'permission': permiso})
+    w.la_super(_caso(), 42)
+    w.control.cb_test.setCurrentText('ECochG')
+    return w
+
+
+def test_the_teacher_gets_the_standard_ecochg_setup():
+    """El docente encuentra el ECochG listo para tomar."""
+    if not HAS_UI:
+        return
+    w = _ventana_con_permiso(777)
+    c = w.control.get_data()
+    assert c['stim'] == 'Click' and c['pol'] == 'Alternada', c
+    assert c['int'] == 90 and c['average'] == 1500, c
+    assert abs(c['rate'] - 11.1) < 1e-6, c
+    assert (c['filter_passhigh'], c['filter_down']) == ('5', '3000'), c
+    assert w.technical['window_ms'] == 10.0
+    assert w.technical['montage'] == 'tympanic'
+    assert w.technical['gain'] == 100000.0
+    # Con burst: envolvente 1-10-1 ms y una ventana que contenga la meseta.
+    w.control.cb_stim.setCurrentText('Burst 1 kHz')
+    assert w.technical['burst_envelope'] == 'ms-1-10-1'
+    assert w.technical['window_ms'] == 20.0
+    # Y de vuelta al click, la ventana del click.
+    w.control.cb_stim.setCurrentText('Click')
+    assert w.technical['window_ms'] == 10.0
+
+
+def test_the_student_does_not_get_the_standard_setup():
+    """El alumno arranca con el protocolo y lo demás al azar."""
+    if not HAS_UI:
+        return
+    w = _ventana_con_permiso(1)
+    assert w.control.get_data()['filter_passhigh'] != '5'
+    assert w.technical['window_ms'] == 6
+    w.control.cb_stim.setCurrentText('Burst 1 kHz')
+    assert w.technical['burst_envelope'] == '2-1-2'
+
+
 def test_the_auto_mark_button_fills_the_table():
     """El equipo marca solo, y de ahí salen las medidas.
 

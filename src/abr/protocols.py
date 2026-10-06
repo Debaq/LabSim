@@ -119,6 +119,38 @@ PROTOCOLS = {
 DEFAULT_TEST = 'ABR'
 
 
+# Configuración estándar con la que el DOCENTE encuentra el equipo al elegir
+# la prueba (la definió el docente). Es para tomar el examen de prueba sin
+# configurar todo a mano: el alumno NO la recibe, porque configurar el
+# equipo es lo que tiene que aprender (ver AbrControl.randomize_initial_values).
+# 'control' son los mandos del panel; 'technical' lo de Parámetros avanzados.
+STANDARD_SETUP = {
+    'ECochG': {
+        'control': {'stim': CLICK, 'pol': 'Alternada', 'int': 90,
+                    'rate': 11.1, 'filter_passhigh': '5',
+                    'filter_down': '3000', 'average': 1500},
+        'technical': {'montage': 'tympanic', 'window_ms': 10.0,
+                      'gain': 100000.0},
+    },
+}
+
+# Con burst el estándar cambia la envolvente y la ventana: el sumación dura
+# lo que dura el estímulo (1-10-1 ms = 12 ms) y en 10 ms no entra entero.
+STANDARD_BURST_TECHNICAL = {'burst_envelope': 'ms-1-10-1', 'window_ms': 20.0}
+
+
+def standard_setup(test: str, stim: str = CLICK):
+    """(control, technical) estándar de la prueba con ese estímulo, o None."""
+    base = STANDARD_SETUP.get(test)
+    if base is None:
+        return None
+    control = dict(base['control'])
+    technical = dict(base['technical'])
+    if stim in BURSTS:
+        technical.update(STANDARD_BURST_TECHNICAL)
+    return control, technical
+
+
 def get_protocol(test: str) -> Protocol:
     """Protocolo de la prueba, o el de ABR si el nombre no está en la tabla."""
     return PROTOCOLS.get(test, PROTOCOLS[DEFAULT_TEST])

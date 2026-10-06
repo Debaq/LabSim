@@ -3786,6 +3786,13 @@ referencia. Lo que se decidió:
   de hidrops) y la medida saltaba de a 0.25 ms. Con 0.6 la medida sigue a la
   declarada a ±0.02 (`test_the_measured_polarity_shift_follows_the_case`).
   Clínicamente la MC del click es un ringing breve antes del N1.
+- **Configuración estándar solo para el docente** (`protocols.STANDARD_SETUP`,
+  definida por el docente): al elegir ECochG queda click, alternada, 90 dB,
+  11.1/s, 5-3000 Hz, 1500 barridos, timpánico, ventana 10 ms, ganancia 100000.
+  Con burst pasa a envolvente 1-10-1 ms y ventana de 20 ms (en 10 no entra la
+  meseta), y al volver al click, 10 ms. El alumno no la recibe: sigue con el
+  protocolo y tasa/promediaciones al azar. Se agregó 5 Hz al combo del
+  pasa-alto.
 
 ## El test del timpanograma fallaba una de cada cuatro corridas (2026-09-21)
 
