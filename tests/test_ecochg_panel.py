@@ -235,6 +235,29 @@ def test_the_rate_shift_needs_two_curves_of_the_same_ear():
     assert _valor(w.table_ec_r, 'd_amp_pct') < 0
 
 
+def test_the_polarity_shift_needs_a_rarefaction_and_a_condensation():
+    """Una curva de cada polaridad al mismo nivel, y la fila se llena; el
+    informe la lleva aparte, por oído."""
+    if not HAS_UI:
+        return
+    caso = _caso()
+    for oido in caso['ABR'].values():
+        oido['ecochg']['rar_cond_ms'] = 0.5
+    w = _ventana(caso)
+    for pol in ('Rarefacción', 'Condensación'):
+        w.control.cb_pol.setCurrentIndex(w.control.cb_pol.findText(pol))
+        curva = _capturar(w, 90)
+        _marcar(w, curva)
+        if pol == 'Rarefacción':
+            assert _valor(w.table_ec_r, 'd_rc') is None
+    d_rc = _valor(w.table_ec_r, 'd_rc')
+    assert d_rc is not None and abs(d_rc - 0.5) < 0.12, d_rc
+    fila = [f[1] for f in __import__('abr.EcochgTable', fromlist=['FILAS']).FILAS].index('d_rc')
+    assert w.table_ec_r.tabla.item(fila, 0).toolTip().startswith('Fuera')
+    polaridad = w.session_payload().get('polaridad')
+    assert polaridad and polaridad[0]['oido'] == 'OD', polaridad
+
+
 def test_the_auto_mark_button_fills_the_table():
     """El equipo marca solo, y de ahí salen las medidas.
 

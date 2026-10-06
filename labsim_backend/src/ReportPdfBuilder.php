@@ -716,6 +716,36 @@ final class ReportPdfBuilder
                 . self::num($tasa['d_amp_pct'] ?? null) . '%', 9);
             $y += 26;
         }
+
+        // Separación del PA entre rarefacción y condensación: también es
+        // una comparación entre dos curvas, una por oído (ver
+        // ecochg.polarity_shift).
+        $polaridad = is_array($data['polaridad'] ?? null) ? $data['polaridad'] : [];
+        $filas = [];
+        foreach ($polaridad as $p) {
+            if (is_array($p) && isset($p['d_rc'])) {
+                $filas[] = $p;
+            }
+        }
+        if (count($filas) > 0) {
+            $y = self::ensureSpace($pdf, $y, 20 + 14 * count($filas));
+            $pdf->text(self::MARGIN, $y, 'Rarefacción / condensación', 12, true);
+            $y += 18;
+            // Dos decimales: el criterio es de centésimas (0,38 ms) y num()
+            // redondea a uno.
+            $ms = function ($v) {
+                return is_numeric($v) ? number_format((float) $v, 2, ',', '') : 'N/D';
+            };
+            foreach ($filas as $p) {
+                $pdf->text(self::MARGIN, $y,
+                    (string) ($p['oido'] ?? '') . '  ' . self::num($p['int'] ?? null) . ' dB:  PA rar '
+                    . $ms($p['lat_rar'] ?? null) . ' ms   cond '
+                    . $ms($p['lat_cond'] ?? null) . ' ms   diferencia '
+                    . $ms($p['d_rc']) . ' ms', 9);
+                $y += 14;
+            }
+            $y += 12;
+        }
         return $y;
     }
 

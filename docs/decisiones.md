@@ -3459,7 +3459,8 @@ caso en el backend todavía NO están: ver "lo que falta" al final.
    eso, el área cruza su límite un poco antes que la amplitud, que es el
    comportamiento clínico descrito.
 6. **El límite de áreas se escala por electrodo** igual que el de amplitudes
-   (1.94 timpánico → 2.43 de conducto → 1.46 transtimpánico). Un mismo oído no
+   (1.94 timpánico → 2.43 de conducto → 1.70 transtimpánico, desde el
+   2026-10-06; antes 1.46 con el límite viejo de 0.30). Un mismo oído no
    puede cambiar de diagnóstico al cambiar de electrodo
    (`test_the_electrode_moves_the_ratio_and_its_limit_together`).
 7. **Ventana de 10 ms, no 5.** La razón de áreas se integra hasta que el
@@ -3733,6 +3734,58 @@ el trazo exportado a JPEG desde la ventana real, con sus marcas y su tabla.
   local no tiene `pdo_sqlite`, así que las vistas PHP se validaron con `php -l`,
   balance de `<div>` y `node --check`.
 - La **ficha de estudio** (PDF del docente) no muestra ECochG todavía.
+
+## ECochG con tone burst, límites por electrodo y rarefacción/condensación (2026-10-06)
+
+Pedido del docente: medir un hidrops con burst 1-10-1 ms y con sus valores de
+referencia. Lo que se decidió:
+
+- **Límites de la razón PS/PA por electrodo**: promontorio (transtimpánico)
+  0.35, tímpano 0.40, conducto (TipTrode) 0.50. El transtimpánico estaba en
+  0.30. El docente llama "extratimpánico" al electrodo sobre el tímpano; en el
+  código `extratympanic` sigue siendo el de conducto (el rótulo del combo dice
+  "Conducto / TipTrode"). La razón de áreas sigue en 1.94 en el tímpano y se
+  escala por electrodo igual que antes (2.43 conducto, 1.70 promontorio).
+- **La envolvente del burst del equipo ya hace efecto** (`burst_envelope`, se
+  sacó de `UNCONNECTED_SETTINGS`) y se agregó "1 ms - 10 ms - 1 ms"
+  (`ms-1-10-1`). La lee SOLO el ECochG; el ABR sigue sin mirarla. El default
+  sigue en 2-1-2 ciclos: elegir la envolvente es parte del ejercicio.
+- **Con burst el PS es una meseta que dura lo que dura el estímulo**
+  (`ecochg.burst_timing` / `_trapezoid`), arranca con la llegada del sonido a
+  la cóclea (la latencia de la MC) y el PA queda como espiga del comienzo,
+  montada encima con su amplitud entera. La MC también sigue la envolvente
+  entera. Con 2-1-2 a 1 kHz la meseta dura 5 ms; con 1-10-1 ms, 12.
+- **La altura de la meseta con burst se refiere al PA del CLICK** al mismo
+  nivel (`sp_ref_amp`), por la razón del caso. El PA del burst de 1 kHz es la
+  cuarta parte del del click (sincroniza mal) y escalando con él el sumación
+  quedaba invisible justo con el estímulo que se usa para mirarlo. Con burst
+  NO se calibra la meseta (`calibrate_sp`): se lee en la mitad, donde no llega
+  la espiga del PA, así que la altura nominal ya es la medida.
+- **Con burst la tabla no pinta las dos razones**: los límites publicados son
+  de click, y con burst un oído sano da razones muy por encima (PA chico, PS
+  sostenido). Se miden y se muestran igual.
+- **La ventana del ECochG llega a 25 ms** (`Protocol.window_max`). El default
+  sigue en 6 ms, que es la del click: con burst largo hay que abrirla a mano en
+  Parámetros avanzados, como en el equipo. Con 6 ms la meseta se corta.
+- **El pasa-alto de 10 Hz se come la meseta** de un burst de 12 ms (constante
+  de tiempo de 16 ms). No se corrigió: es el filtro real y con 3.3 Hz se
+  sostiene. Es otro error que el ejercicio tiene que dejar cometer.
+- **Marcado automático con burst**: el PS va a la mitad de la meseta del
+  estímulo que mandó el equipo (`burst_ps_ms`: retardo del transductor +
+  subida + meseta/2) y el retorno se busca después de esa mitad. Lo sabe el
+  equipo, no el caso.
+- **Diferencia de latencia del PA rarefacción-condensación** (`d_rc`, límite
+  0.38 ms): fila nueva de la tabla, armada con una curva de cada polaridad del
+  mismo estímulo y nivel (`ecochg.polarity_shift`; si hay varios pares, el de
+  nivel más alto). Va en valor absoluto. Sube al informe como `polaridad`, una
+  entrada por oído, y el PDF la imprime con dos decimales (`num()` redondea a
+  uno y 0.38 salía 0.4).
+- **La MC del click dura 0.6 ms y no 1.0.** Con 1.0 seguía sonando cuando
+  llegaba el PA y, en una sola polaridad, le corría el pico ±0.15 ms en
+  sentidos opuestos: una separación declarada de 0.30 se medía 0.48 (pintada
+  de hidrops) y la medida saltaba de a 0.25 ms. Con 0.6 la medida sigue a la
+  declarada a ±0.02 (`test_the_measured_polarity_shift_follows_the_case`).
+  Clínicamente la MC del click es un ringing breve antes del N1.
 
 ## El test del timpanograma fallaba una de cada cuatro corridas (2026-09-21)
 

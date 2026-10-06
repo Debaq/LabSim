@@ -118,10 +118,14 @@ SP_SL_FULL = 70.0
 # que dura el burst, que es la razón clínica de usar burst de 1 kHz para
 # mirar el PS.
 CM_CLICK_HZ = 2500.0
-CM_CLICK_MS = 1.0
-# Ciclos del tone burst (envolvente 2-1-2): cuánto dura la MC en ms sale de
-# la frecuencia del burst.
-BURST_CYCLES = 5.0
+# Con click es un ringing breve que se apaga antes del N1. Estuvo en 1.0 ms
+# y seguía sonando bajo el PA: en una sola polaridad le corría el pico
+# ±0.15 ms (para lados opuestos en rarefacción y condensación) y la
+# separación rar/cond medida dejaba de ser la que declara el caso.
+CM_CLICK_MS = 0.6
+# Envolvente del tone burst cuando el equipo no trae una (la de rutina del
+# ABR, ver AbrAdvanceSettings.BURST_ENVELOPES).
+DEFAULT_BURST_ENVELOPE = '2-1-2'
 # La MC arranca con la llegada del estímulo a la cóclea, antes que todo lo
 # demás: es el único componente que no espera la sinapsis. Su latencia la
 # fija la ACÚSTICA (el tubo del fono y el viaje hasta la base de la
@@ -174,9 +178,9 @@ def display_scale_uv(montage):
 # conducto. Comparar contra el límite equivocado es el error que el
 # ejercicio tiene que dejar cometer.
 SP_AP_LIMIT = {
-    'extratympanic': 0.50,
-    'tympanic': 0.40,
-    'transtympanic': 0.30,
+    'extratympanic': 0.50,   # conducto (TipTrode)
+    'tympanic': 0.40,        # sobre el tímpano
+    'transtympanic': 0.35,   # promontorio
 }
 # Límite de la razón de ÁREAS (ver measure_complex para la definición
 # exacta de las dos áreas). Es más sensible que la de amplitudes porque
@@ -266,6 +270,62 @@ def sp_ap_for_electrode(sp_ap_tympanic, montage):
 
 
 # ---------------------------------------------------------------------
+# TONE BURST
+# ---------------------------------------------------------------------
+
+def freq_hz(freq):
+    """'1000Hz' -> 1000.0 (la clave de banda de STIM_MAP)."""
+    texto = str(freq or '').replace('Hz', '').replace('k', '000')
+    try:
+        return float(texto) or 1000.0
+    except ValueError:
+        return 1000.0
+
+
+def burst_timing(envelope, hz):
+    """Subida, meseta y bajada del burst, en ms.
+
+    `envelope` es la clave del equipo (AbrAdvanceSettings.BURST_ENVELOPES):
+    '2-1-2' va en CICLOS de la frecuencia del tono y 'ms-1-10-1' en
+    milisegundos. Con ciclos la duración depende de la frecuencia (un 2-1-2
+    dura 5 ms a 1 kHz y 1.25 ms a 4 kHz); con milisegundos no, que es por
+    lo que el ECochG con burst se programa en ms.
+    """
+    codigo = str(envelope or DEFAULT_BURST_ENVELOPE)
+    en_ms = codigo.startswith('ms-')
+    partes = codigo[3:] if en_ms else codigo
+    try:
+        rise, plateau, fall = (float(p) for p in partes.split('-'))
+    except ValueError:
+        return burst_timing(DEFAULT_BURST_ENVELOPE, hz)
+    if not en_ms:
+        ciclo = 1000.0 / float(hz)
+        rise, plateau, fall = rise * ciclo, plateau * ciclo, fall * ciclo
+    return rise, plateau, fall
+
+
+def burst_plateau_center(timing, onset=0.0):
+    """Mitad de la meseta del estímulo: donde se lee el PS con burst."""
+    rise, plateau, _ = timing
+    return float(onset) + rise + plateau / 2.0
+
+
+def _trapezoid(t, onset, timing):
+    """Envolvente del burst (0 a 1) que arranca en `onset`."""
+    rise, plateau, fall = timing
+    dt = np.asarray(t, dtype=float) - float(onset)
+    env = np.zeros_like(dt)
+    if rise > 0:
+        env = np.where((dt >= 0) & (dt < rise), dt / rise, env)
+    meseta = (dt >= rise) & (dt <= rise + plateau)
+    env = np.where(meseta, 1.0, env)
+    if fall > 0:
+        bajada = (dt > rise + plateau) & (dt < rise + plateau + fall)
+        env = np.where(bajada, 1.0 - (dt - rise - plateau) / fall, env)
+    return env
+
+
+# ---------------------------------------------------------------------
 # CURVA
 # ---------------------------------------------------------------------
 
@@ -286,7 +346,8 @@ def sp_level_factor(sl):
 
 
 def component_params(wave_i, case, montage, stim='click', freq=None,
-                     mc_baseline=None, sl=None, gain=1.0, cm_lat=None):
+                     mc_baseline=None, sl=None, gain=1.0, cm_lat=None,
+                     envelope=None, sp_ref_amp=None):
     """Los tres potenciales, a partir de la onda I ya calculada.
 
     `wave_i` es values['I'] del ABR: latencia y amplitud con la intensidad,
@@ -305,6 +366,16 @@ def component_params(wave_i, case, montage, stim='click', freq=None,
     curva en rarefacción y la de condensación quedaban desalineadas y NO
     se cancelaban al alternar -- que es justo lo que el examen usa para
     separarla del PS y del PA.
+
+    Con tone burst (`envelope` es la del equipo) el PS deja de ser el
+    hombro de un click: es un desplazamiento DC que dura lo que dura el
+    estímulo, con su misma subida y bajada, y el PA queda como una espiga
+    solo al comienzo. La altura de esa meseta es `sp_ref_amp` (el PA del
+    CLICK a ese nivel) por la razón del caso, y no el PA del propio burst:
+    el burst sincroniza mal y su PA es chico (a 1 kHz la cuarta parte que
+    el del click), pero el sumación es un desplazamiento de la membrana y
+    no depende de la sincronía. Escalarlo con el PA del burst lo dejaba
+    invisible justo en el estímulo que se usa para mirarlo.
     """
     amp_pa = float(wave_i['amp'])
     lat_pa = float(wave_i['lat'])
@@ -316,10 +387,11 @@ def component_params(wave_i, case, montage, stim='click', freq=None,
                                                   SP_AP_LIMIT['tympanic'])
     cola_ps = SP_TAIL_MS * (1.0 + SP_TAIL_PER_RATIO * max(razon - normal, 0.0))
 
+    timing = None
     if stim == 'tone_burst' and freq:
-        hz = float(str(freq).replace('Hz', '').replace('k', '000') or 1000)
-        cm_hz = hz
-        cm_ms = BURST_CYCLES * 1000.0 / hz
+        cm_hz = freq_hz(freq)
+        timing = burst_timing(envelope, cm_hz)
+        cm_ms = sum(timing)
     else:
         cm_hz = CM_CLICK_HZ
         cm_ms = CM_CLICK_MS
@@ -336,8 +408,10 @@ def component_params(wave_i, case, montage, stim='click', freq=None,
     # deja la razón MEDIDA igual a la declarada se despeja sobre la curva
     # ya armada, en calibrate_sp.
     sp_amp = amp_pa * razon
+    cm_onset = (lat_pa - CM_ONSET_BEFORE_AP_MS if cm_lat is None
+                else float(cm_lat))
 
-    return {
+    out = {
         'ap_lat': lat_pa,
         'ap_amp': amp_pa,
         'ap_sigma': ancho,
@@ -348,10 +422,20 @@ def component_params(wave_i, case, montage, stim='click', freq=None,
         'cm_amp': cm_base * float(gain) * MC_GAIN.get(case['mc'], 1.0),
         'cm_hz': cm_hz,
         'cm_ms': cm_ms,
-        'cm_onset': (lat_pa - CM_ONSET_BEFORE_AP_MS if cm_lat is None
-                     else float(cm_lat)),
+        'cm_onset': cm_onset,
         'sp_ap': razon,
+        'burst': None,
     }
+    if timing is not None:
+        # El PS arranca con el sonido en la cóclea (la misma llegada que la
+        # MC) y sigue la envolvente del estímulo; se lee en la mitad de la
+        # meseta, lejos de la espiga del PA y de la bajada.
+        out['burst'] = timing
+        out['sp_onset'] = cm_onset
+        out['sp_lat'] = burst_plateau_center(timing, cm_onset)
+        if sp_ref_amp:
+            out['sp_amp'] = float(sp_ref_amp) * razon
+    return out
 
 
 def build_curve(t, params, polarity, sp_scale=1.0):
@@ -365,22 +449,33 @@ def build_curve(t, params, polarity, sp_scale=1.0):
     y = np.zeros_like(t)
     amp_pa = params['ap_amp']
     sp_amp = params['sp_amp'] * float(sp_scale)
+    timing = params.get('burst')
 
-    # PS: meseta que sube con una sigmoide y se sostiene POR DEBAJO de todo
-    # el complejo. No decae con el PA: el desplazamiento DC dura lo que dura
-    # el estímulo, y eso es lo que hace que la razón de ÁREAS mida algo
-    # distinto de la de amplitudes.
-    meseta = _sigmoid(t, params['sp_onset'] + SP_RISE_MS, SP_RISE_MS)
-    meseta = meseta * (1.0 - _sigmoid(t, params['ap_lat'] + params['sp_tail'],
-                                      SP_RISE_MS * 2))
-    y -= sp_amp * meseta
+    if timing is not None:
+        # Con burst el PS es la envolvente del estímulo: sube con la
+        # rampa, se sostiene toda la meseta y baja con la bajada. El PA es
+        # la descarga del COMIENZO y va montado encima de la meseta con su
+        # amplitud entera: acá no hay razón de hombro que respetar.
+        y -= sp_amp * _trapezoid(t, params['sp_onset'], timing)
+        y -= _gaussian(t, params['ap_lat'], amp_pa, params['ap_sigma'])
+    else:
+        # PS: meseta que sube con una sigmoide y se sostiene POR DEBAJO de
+        # todo el complejo. No decae con el PA: el desplazamiento DC dura
+        # lo que dura el estímulo, y eso es lo que hace que la razón de
+        # ÁREAS mida algo distinto de la de amplitudes.
+        meseta = _sigmoid(t, params['sp_onset'] + SP_RISE_MS, SP_RISE_MS)
+        meseta = meseta * (1.0 - _sigmoid(
+            t, params['ap_lat'] + params['sp_tail'], SP_RISE_MS * 2))
+        y -= sp_amp * meseta
 
-    # PA (N1). La espiga se dibuja con lo que le FALTA para llegar a la
-    # amplitud del PA: el PA se mide desde la línea de base, o sea que la
-    # meseta del PS ya es parte de su profundidad. Si la gaussiana valiera
-    # la amplitud entera, el trazo daría una razón PS/PA más baja que la
-    # que declara el caso (el denominador se agrandaría solo).
-    y -= _gaussian(t, params['ap_lat'], amp_pa - sp_amp, params['ap_sigma'])
+        # PA (N1). La espiga se dibuja con lo que le FALTA para llegar a la
+        # amplitud del PA: el PA se mide desde la línea de base, o sea que
+        # la meseta del PS ya es parte de su profundidad. Si la gaussiana
+        # valiera la amplitud entera, el trazo daría una razón PS/PA más
+        # baja que la que declara el caso (el denominador se agrandaría
+        # solo).
+        y -= _gaussian(t, params['ap_lat'], amp_pa - sp_amp,
+                       params['ap_sigma'])
     y -= _gaussian(t, params['ap_lat'] + N2_MS, amp_pa * N2_RATIO, N2_SIGMA_MS)
     y += _gaussian(t, params['ap_lat'] + POST_POSITIVITY_MS,
                    amp_pa * POST_POSITIVITY_RATIO, POST_POSITIVITY_SIGMA_MS)
@@ -395,9 +490,13 @@ def build_curve(t, params, polarity, sp_scale=1.0):
         signo = -1.0
     if signo and params['cm_amp'] > 0:
         dt = t - params['cm_onset']
-        env = np.exp(-0.5 * ((dt - params['cm_ms'] / 2) /
-                             (params['cm_ms'] / 3)) ** 2)
-        env[dt < 0] = 0.0
+        if timing is not None:
+            # Con burst la MC reproduce el estímulo entero, rampa incluida.
+            env = _trapezoid(t, params['cm_onset'], timing)
+        else:
+            env = np.exp(-0.5 * ((dt - params['cm_ms'] / 2) /
+                                 (params['cm_ms'] / 3)) ** 2)
+            env[dt < 0] = 0.0
         y += signo * params['cm_amp'] * env * np.sin(
             2 * np.pi * params['cm_hz'] * dt / 1000.0)
     return y
@@ -503,8 +602,12 @@ def _smooth(t, y, ms=SMOOTH_MS):
     return np.convolve(y, nucleo, mode='same')
 
 
-def auto_marks(t, y):
+def auto_marks(t, y, ps_at=None):
     """Marcado automático del complejo, como lo hace el equipo.
+
+    `ps_at` es la mitad de la meseta del estímulo cuando es un burst (ver
+    burst_plateau_center): el equipo sabe qué estímulo mandó y cuándo, y
+    con burst el PS se lee ahí y no en el hombro. Con click va en None.
 
     Devuelve {marca: latencia} con las cuatro marcas, o {} si no encuentra
     un complejo donde debería haberlo.
@@ -582,14 +685,20 @@ def auto_marks(t, y):
     # así que con la banda mal puesta o el nivel bajo el PS no está ahí y la
     # razón sale mal igual. Lo que el marcado automático no puede hacer es
     # salvar un registro malo.
-    x_ps = x_pa - SP_SHOULDER_MS
-    if x_ps > float(t[0]):
+    x_ps = x_pa - SP_SHOULDER_MS if ps_at is None else float(ps_at)
+    if float(t[0]) < x_ps < float(t[-1]):
         marcas['PS'] = x_ps
 
     # Retorno a la base: el primer punto después del PA en que el trazo
-    # vuelve a pegarse a ella (ver RETURN_FRACTION).
-    umbral_vuelta = base - RETURN_FRACTION * (base - float(suave[i_pa]))
-    vueltas = np.where(suave[i_pa:] >= umbral_vuelta)[0]
+    # vuelve a pegarse a ella (ver RETURN_FRACTION). Con burst se busca
+    # después de la meseta: antes de eso el trazo está sostenido abajo a
+    # propósito, y cualquier ondulación del ruido sobre ella parecería el
+    # final de la recuperación.
+    desde = i_pa
+    if ps_at is not None:
+        desde = max(i_pa, int(np.argmin(np.abs(t - float(ps_at)))))
+    umbral_vuelta = base - RETURN_FRACTION * (base - float(suave[desde]))
+    vueltas = np.where(suave[desde:] >= umbral_vuelta)[0]
     fin = int(vueltas[0]) if len(vueltas) else None
     # Si nunca vuelve --con el pasa-alto bajo del ECochG la línea de base
     # se inclina y el trazo puede terminar la ventana del lado de abajo--
@@ -597,14 +706,19 @@ def auto_marks(t, y):
     # subir. Es lo que marca cualquiera mirando el trazo, y sin esto el
     # área quedaba sin medir en uno de cada tres registros del electrodo
     # de conducto, que es donde más falta hace.
-    subiendo = np.diff(suave[i_pa:])
+    #
+    # Con burst solo si nunca vuelve: sobre la meseta el ruido hace topes
+    # en cualquier lado y el primero caería en plena meseta.
+    subiendo = np.diff(suave[desde:])
     topes = np.where((subiendo[:-1] > 0) & (subiendo[1:] <= 0))[0]
     minimo = int(round(0.3 / max(float(t[1] - t[0]), 1e-9)))
     topes = topes[topes >= minimo]
+    if ps_at is not None and fin is not None:
+        topes = topes[:0]
     if len(topes) and (fin is None or int(topes[0]) + 1 < fin):
         fin = int(topes[0]) + 1
     if fin is not None:
-        marcas['FIN'] = float(t[i_pa + fin])
+        marcas['FIN'] = float(t[desde + fin])
     return marcas
 
 
@@ -755,14 +869,62 @@ def rate_shift(curvas):
 RATE_SHIFT_LIMIT_MS = 0.20
 RATE_AMP_DROP_LIMIT_PCT = -65.0
 
+# Diferencia de latencia del PA entre rarefacción y condensación por encima
+# de la cual se considera alargada (criterio de hidrops, con click).
+RAR_COND_LIMIT_MS = 0.38
+POLARITY_PAIR = ('Rarefacción', 'Condensación')
 
-def normative(montage, ap_lat_range=None):
-    """Límites contra los que se pinta la tabla del ECochG."""
-    return {
-        'sp_ap': (None, SP_AP_LIMIT.get(montage, SP_AP_LIMIT['tympanic'])),
-        'area_ratio': (None, AREA_RATIO_LIMIT.get(
-            montage, AREA_RATIO_LIMIT['tympanic'])),
+
+def polarity_shift(curvas):
+    """Diferencia de latencia del PA entre rarefacción y condensación.
+
+    `curvas` es una lista de dicts {'pol':, 'stim':, 'int':, 'ap_lat':} en
+    el orden en que se registraron. Igual que el corrimiento por tasa, es
+    una comparación entre dos registros: solo se arma con una curva de
+    cada polaridad del MISMO estímulo y nivel (a distinto nivel el PA se
+    corre solo por la intensidad, y eso no es la separación que se busca).
+    Si hay más de un par se toma el de nivel más alto, que es donde se
+    hace el examen; dentro de cada polaridad, la última registrada.
+
+    La diferencia va en valor absoluto: el criterio es cuánto se separan,
+    no cuál llega primero.
+    """
+    pares = {}
+    for c in curvas:
+        if c.get('pol') not in POLARITY_PAIR or c.get('ap_lat') is None:
+            continue
+        try:
+            nivel = float(c.get('int'))
+        except (TypeError, ValueError):
+            continue
+        clave = (str(c.get('stim') or ''), nivel)
+        pares.setdefault(clave, {})[c['pol']] = float(c['ap_lat'])
+    completos = [(k, v) for k, v in pares.items() if len(v) == 2]
+    if not completos:
+        return None
+    (stim, nivel), lat = max(completos, key=lambda kv: kv[0][1])
+    rar, cond = lat['Rarefacción'], lat['Condensación']
+    return {'stim': stim, 'int': nivel, 'lat_rar': rar, 'lat_cond': cond,
+            'd_rc': abs(cond - rar)}
+
+
+def normative(montage, ap_lat_range=None, burst=False):
+    """Límites contra los que se pinta la tabla del ECochG.
+
+    Con burst las dos razones se miden igual pero no se pintan: sus
+    límites publicados son de click, y con burst el PA es chico y el PS
+    sostenido, así que el mismo oído sano las da muy por encima. Pintarlas
+    de rojo sería decirle al alumno que un oído normal tiene hidrops.
+    """
+    normas = {
         'ap_lat': ap_lat_range,
         'ancho_pa': (None, 0.65),
         'd_lat': (None, RATE_SHIFT_LIMIT_MS),
+        'd_rc': (None, RAR_COND_LIMIT_MS),
     }
+    if not burst:
+        normas['sp_ap'] = (None, SP_AP_LIMIT.get(montage,
+                                                 SP_AP_LIMIT['tympanic']))
+        normas['area_ratio'] = (None, AREA_RATIO_LIMIT.get(
+            montage, AREA_RATIO_LIMIT['tympanic']))
+    return normas

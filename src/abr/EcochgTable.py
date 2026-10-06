@@ -19,7 +19,9 @@ tiene".
 
 El corrimiento por tasa no es una medida de una curva sola: sale de
 comparar la curva más lenta con la más rápida que el alumno haya
-registrado en ese oído (ver ecochg.rate_shift).
+registrado en ese oído (ver ecochg.rate_shift). La separación del PA entre
+rarefacción y condensación tampoco: sale de una curva de cada polaridad al
+mismo nivel (ver ecochg.polarity_shift).
 """
 # pylint: disable=no-name-in-module
 from PySide6.QtCore import QCoreApplication, Qt, Signal
@@ -45,7 +47,16 @@ FILAS = (
     ("Duración complejo", 'ancho', "ms", 2),
     ("Δ latencia por tasa", 'd_lat', "ms", 2),
     ("Δ amplitud por tasa", 'd_amp_pct', "%", 0),
+    ("Δ PA rar/cond", 'd_rc', "ms", 2),
 )
+
+# Filas que comparan dos curvas del oído y no salen de las marcas de una.
+ENTRE_CURVAS = {
+    'd_lat': "Necesita dos curvas de este oído a distinta tasa",
+    'd_amp_pct': "Necesita dos curvas de este oído a distinta tasa",
+    'd_rc': ("Necesita una curva en rarefacción y otra en condensación, "
+             "mismo estímulo y nivel, con el PA marcado"),
+}
 
 # Qué marca hace falta para que cada medida exista. Lo que no está acá sale
 # con las tres primeras.
@@ -170,6 +181,15 @@ class EcochgTable(QWidget):
             self.medidas['tasas'] = (shift['rate_lenta'], shift['rate_rapida'])
         self._pintar()
 
+    def set_polarity_shift(self, shift) -> None:
+        """Separación rarefacción-condensación (ecochg.polarity_shift)."""
+        self.medidas.pop('d_rc', None)
+        self.medidas.pop('nivel_rc', None)
+        if shift:
+            self.medidas['d_rc'] = shift['d_rc']
+            self.medidas['nivel_rc'] = shift['int']
+        self._pintar()
+
     def clear_all(self) -> None:
         self.medidas = {}
         self._pintar()
@@ -184,9 +204,8 @@ class EcochgTable(QWidget):
             if valor is None:
                 item.setText("")
                 falta = REQUIERE.get(clave)
-                if clave in ('d_lat', 'd_amp_pct'):
-                    item.setToolTip("Necesita dos curvas de este oído a "
-                                    "distinta tasa")
+                if clave in ENTRE_CURVAS:
+                    item.setToolTip(ENTRE_CURVAS[clave])
                 elif falta and (falta in faltan or not self.medidas):
                     item.setToolTip(f"Falta la marca {falta} "
                                     f"({ecochg.MARK_LABELS[falta]})")
@@ -206,6 +225,13 @@ class EcochgTable(QWidget):
         rotulo = FILAS[fila][0]
         if tasas:
             rotulo += f" ({tasas[0]:.0f}→{tasas[1]:.0f}/s)"
+        self.tabla.setVerticalHeaderItem(fila, QTableWidgetItem(rotulo))
+        # Y la de polaridad, a qué nivel se comparó.
+        nivel = self.medidas.get('nivel_rc')
+        fila = [f[1] for f in FILAS].index('d_rc')
+        rotulo = FILAS[fila][0]
+        if nivel is not None:
+            rotulo += f" ({nivel:.0f} dB)"
         self.tabla.setVerticalHeaderItem(fila, QTableWidgetItem(rotulo))
 
     def _flag(self, item, clave, valor) -> None:

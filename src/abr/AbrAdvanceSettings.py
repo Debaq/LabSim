@@ -105,7 +105,9 @@ CLICK_US = {"50 µs": 50.0, "100 µs": 100.0, "200 µs": 200.0, "500 µs": 500.0
 # subida - meseta - bajada. El 2-1-2 es el de rutina para umbrales por
 # frecuencia; sin meseta (2-0-2) el estímulo es más corto y sincroniza
 # mejor, con meseta larga es más específico en frecuencia y peor
-# sincronizado.
+# sincronizado. Las 'ms-' van en milisegundos: el 1-10-1 ms es el del
+# ECochG con burst, que necesita una meseta larga para que el sumación se
+# lea sostenido (ver abr/ecochg.burst_timing). Hoy la lee solo el ECochG.
 BURST_ENVELOPES = {
     "2-1-2 ciclos": '2-1-2',
     "2-0-2 ciclos": '2-0-2',
@@ -113,6 +115,7 @@ BURST_ENVELOPES = {
     "2-2-2 ciclos": '2-2-2',
     "5-0-5 ciclos": '5-0-5',
     "1 ms - 1 ms - 1 ms": 'ms-1-1-1',
+    "1 ms - 10 ms - 1 ms": 'ms-1-10-1',
 }
 
 # Forma de la rampa de subida y bajada.

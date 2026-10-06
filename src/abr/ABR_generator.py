@@ -3072,13 +3072,15 @@ def default_settings(test='ABR'):
         'artifact_reject_uv': protocol.reject_uv,
         'residual_noise_nv': 40.0,
         'fsp_criterion': 3.1,
+        # Envolvente del tone burst: la lee el ECochG (meseta del PS y
+        # duracion de la MC). El ABR todavia no la mira.
+        'burst_envelope': '2-1-2',
         # --- Todavia SIN EFECTO en el trazo -----------------------------
         # Estan en el equipo real y el alumno los busca, asi que el dialogo
         # los muestra y el technical_config los transporta. El generador no
         # los lee ADREDE: conectarlos es leerlos aca, uno por uno, con su
         # modelo y su test. Ver UNCONNECTED_SETTINGS.
         'click_us': 100.0,
-        'burst_envelope': '2-1-2',
         'burst_window': 'blackman',
         'level_unit': 'nHL',
         'rate_jitter_pct': 0.0,
@@ -3103,7 +3105,7 @@ def default_settings(test='ABR'):
 # vayan conectando: sacar una clave de aca es el ultimo paso de
 # conectarla.
 UNCONNECTED_SETTINGS = (
-    'click_us', 'burst_envelope', 'burst_window', 'level_unit',
+    'click_us', 'burst_window', 'level_unit',
     'rate_jitter_pct', 'presentation', 'masking_noise', 'masking_offset_db',
     'channels', 'gain', 'notch_hz', 'filter_slope', 'sample_rate_hz',
     'weighted_averaging', 'auto_stop', 'fsp_window_ms', 'smoothing',

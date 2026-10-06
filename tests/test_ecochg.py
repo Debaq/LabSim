@@ -42,14 +42,14 @@ CAPTURAS = ('R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8')
 
 def _curva(sp_ap=0.25, montage='tympanic', pol='Alternada', inty=90,
            rate=11.1, umbral=20, capture='R1', stim='Click', extra=None,
-           technical=None, avance=1.0):
+           technical=None, avance=1.0, hp='10'):
     """Una captura de ECochG completa, como la pide AbrMainWindow."""
     tec = default_settings('ECochG')
     tec['montage'] = montage
     tec.update(technical or {})
     control = {'test': 'ECochG', 'stim': stim, 'pol': pol, 'int': inty,
                'mkg': 0, 'rate': rate, 'filter_down': '3000',
-               'filter_passhigh': '10', 'average': 1500, 'side': 'OD',
+               'filter_passhigh': hp, 'average': 1500, 'side': 'OD',
                'atten': False, 'clamp': False}
     caso = {'umbral': umbral, 'type': 'normal', 'average_objetivo': 1500}
     if sp_ap is not None:
@@ -471,6 +471,140 @@ def test_the_ecochg_has_no_shadow_curve_and_no_contra_channel():
     assert dy is None and dx is None
     assert meta['contra'] is None
     assert meta['shadow'] is False
+
+
+# ------------------------------------------------------------- tone burst
+
+BURST_LARGO = {'window_ms': 20, 'burst_envelope': 'ms-1-10-1'}
+
+
+def test_the_burst_envelope_is_read_in_cycles_or_in_ms():
+    """'2-1-2' va en ciclos del tono; 'ms-1-10-1' en milisegundos."""
+    assert E.burst_timing('2-1-2', 1000) == (2.0, 1.0, 2.0)
+    assert E.burst_timing('2-1-2', 4000) == (0.5, 0.25, 0.5)
+    assert E.burst_timing('ms-1-10-1', 1000) == (1.0, 10.0, 1.0)
+    assert E.burst_timing('ms-1-10-1', 4000) == (1.0, 10.0, 1.0)
+    # Una clave rota no tira la captura: cae en la de rutina.
+    assert E.burst_timing('basura', 1000) == E.burst_timing(None, 1000)
+
+
+def test_with_a_long_burst_the_sp_lasts_as_long_as_the_stimulus():
+    """Con 1-10-1 ms el sumación es una meseta de ~12 ms, no un hombro.
+
+    Se mira en alternada (sin MC) y con el pasa-alto bajo, que es como se
+    registra: con 10 Hz la meseta se cae sola en 10 ms.
+    """
+    t = None
+    mitad, despues = [], []
+    for cap in CAPTURAS:
+        t, y, _, _, _, _ = _curva(sp_ap=0.55, stim='Burst 1 kHz', hp='3.3',
+                                  technical=BURST_LARGO, capture=cap)
+        base = float(np.mean(y[t < 0.3]))
+        mitad.append(base - float(np.mean(y[(t > 5) & (t < 9)])))
+        despues.append(base - float(np.mean(y[(t > 16) & (t < 19)])))
+    assert statistics.mean(mitad) > 1.0, mitad
+    assert statistics.mean(mitad) > 3 * abs(statistics.mean(despues)), \
+        (mitad, despues)
+
+
+def test_with_a_burst_the_hydrops_deepens_the_plateau():
+    """Mismo burst, mismo nivel: el hidrops deja la meseta más honda."""
+    def meseta(sp_ap):
+        valores = []
+        for cap in CAPTURAS:
+            t, y, _, _, _, _ = _curva(sp_ap=sp_ap, stim='Burst 1 kHz',
+                                      hp='3.3', technical=BURST_LARGO,
+                                      capture=cap)
+            base = float(np.mean(y[t < 0.3]))
+            valores.append(base - float(np.mean(y[(t > 5) & (t < 9)])))
+        return statistics.mean(valores)
+    sano, hidrops = meseta(0.25), meseta(0.55)
+    assert hidrops > 1.6 * sano, (sano, hidrops)
+
+
+def test_with_a_short_burst_the_plateau_ends_early():
+    """El 2-1-2 de rutina a 1 kHz dura 5 ms: a los 8 ms ya no hay meseta."""
+    corto = {'window_ms': 20, 'burst_envelope': '2-1-2'}
+    valores = []
+    for cap in CAPTURAS:
+        t, y, _, _, _, _ = _curva(sp_ap=0.55, stim='Burst 1 kHz', hp='3.3',
+                                  technical=corto, capture=cap)
+        base = float(np.mean(y[t < 0.3]))
+        valores.append(base - float(np.mean(y[(t > 8) & (t < 11)])))
+    assert statistics.mean(valores) < 0.5, valores
+
+
+def test_automatic_marking_with_a_burst_reads_the_sp_mid_plateau():
+    """El equipo sabe qué burst mandó: el PS va a la mitad de la meseta y
+    el retorno, después de que el estímulo terminó."""
+    from abr.ECochG_generator import burst_ps_ms
+    ps_at = burst_ps_ms('Burst 1 kHz', BURST_LARGO)
+    assert 5.5 <= ps_at <= 7.5, ps_at
+    assert burst_ps_ms('Click', BURST_LARGO) is None
+    t, y, _, _, _, _ = _curva(sp_ap=0.55, stim='Burst 1 kHz', hp='3.3',
+                              technical=BURST_LARGO)
+    auto = E.auto_marks(t, y, ps_at=ps_at)
+    assert auto['PS'] == ps_at
+    assert auto['PA'] < 4.0, auto
+    assert auto.get('FIN', 0) > 11.0, auto
+
+
+def test_with_a_burst_the_click_limits_are_not_painted():
+    """Las razones con burst se miden pero no se comparan contra los
+    límites del click: un oído sano saldría pintado de hidrops."""
+    click = E.normative('tympanic')
+    burst = E.normative('tympanic', burst=True)
+    assert click['sp_ap'] == (None, 0.40)
+    assert click['area_ratio'] == (None, 1.94)
+    assert 'sp_ap' not in burst and 'area_ratio' not in burst
+    assert burst['d_rc'] == click['d_rc'] == (None, E.RAR_COND_LIMIT_MS)
+
+
+def test_the_limits_per_electrode():
+    """Promontorio 0.35, tímpano 0.40, conducto 0.50; áreas 1.94 en el
+    tímpano y escaladas en los otros dos."""
+    assert E.SP_AP_LIMIT == {'transtympanic': 0.35, 'tympanic': 0.40,
+                             'extratympanic': 0.50}
+    assert E.AREA_RATIO_LIMIT['tympanic'] == 1.94
+    assert abs(E.AREA_RATIO_LIMIT['transtympanic'] - 1.6975) < 1e-9
+    assert abs(E.AREA_RATIO_LIMIT['extratympanic'] - 2.425) < 1e-9
+    assert E.RAR_COND_LIMIT_MS == 0.38
+
+
+# ------------------------------------------------- rarefacción/condensación
+
+def test_the_polarity_shift_needs_a_pair_at_the_same_level():
+    """Una de cada polaridad, mismo estímulo y nivel."""
+    assert E.polarity_shift([]) is None
+    solo = [{'pol': 'Rarefacción', 'stim': 'Click', 'int': 90, 'ap_lat': 1.4}]
+    assert E.polarity_shift(solo) is None
+    distinto_nivel = solo + [{'pol': 'Condensación', 'stim': 'Click',
+                              'int': 70, 'ap_lat': 1.9}]
+    assert E.polarity_shift(distinto_nivel) is None
+    par = distinto_nivel + [{'pol': 'Condensación', 'stim': 'Click',
+                             'int': 90, 'ap_lat': 1.85}]
+    shift = E.polarity_shift(par)
+    assert shift['int'] == 90.0
+    assert abs(shift['d_rc'] - 0.45) < 1e-9
+    # Sin el PA marcado no hay comparación.
+    sin_marca = solo + [{'pol': 'Condensación', 'stim': 'Click', 'int': 90,
+                         'ap_lat': None}]
+    assert E.polarity_shift(sin_marca) is None
+
+
+def test_the_measured_polarity_shift_follows_the_case():
+    """Lo que el caso declara en rar_cond_ms es lo que separa los PA."""
+    for declarado in (0.1, 0.5):
+        difs = []
+        for cap in CAPTURAS:
+            lat = {}
+            for pol in ('Rarefacción', 'Condensación'):
+                t, y, _, _, _, _ = _curva(
+                    sp_ap=0.25, pol=pol, capture=cap,
+                    extra={'rar_cond_ms': declarado})
+                lat[pol] = E.auto_marks(t, y)['PA']
+            difs.append(lat['Condensación'] - lat['Rarefacción'])
+        assert abs(statistics.mean(difs) - declarado) < 0.1, (declarado, difs)
 
 
 if __name__ == "__main__":

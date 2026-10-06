@@ -20,7 +20,7 @@ from abr.ABR_generator import (ABR_Curve, ABRGenerator, agitation_factor,
 from abr.AbrAdvanceSettings import (MONTAGES, TRANSDUCERS, AbrAdvanceSettings,
                                     default_settings)
 from abr.AbrControl import AbrControl
-from abr.ECochG_generator import ECochG_Curve
+from abr.ECochG_generator import ECochG_Curve, burst_ps_ms
 from abr.AbrDetail import AbrDetail
 from abr.AbrDetailAllCurves import AbrDetailAllCurves
 from abr.AbrGraph import AbrGraph
@@ -267,6 +267,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             'rechazo_artefacto_uv': tec.get('artifact_reject_uv'),
             'ruido_residual_objetivo_nv': tec.get('residual_noise_nv'),
             'criterio_fsp': tec.get('fsp_criterion'),
+            'envolvente_burst': tec.get('burst_envelope'),
         }
         if meta:
             datos.update({
@@ -302,7 +303,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # ecochg.SP_AP_LIMIT), y la latencia del PA es la de la onda I --
         # es la misma descarga, registrada desde el otro extremo.
         norma_ec = ecochg.normative(self.technical.get('montage'),
-                                    (limites.get('lat') or {}).get('I'))
+                                    (limites.get('lat') or {}).get('I'),
+                                    burst=stim.startswith('Burst'))
         for tabla in (self.table_ec_r, self.table_ec_l):
             tabla.set_norms(norma_ec)
 
@@ -541,6 +543,14 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 shift = self.ecochg_rate_shift(lado)
                 if shift:
                     data.setdefault('tasa', dict(shift, oido=clave))
+            # La separacion rarefaccion-condensacion, lo mismo: sale de un
+            # par de curvas. Esta va por oido, porque se compara de a uno.
+            polaridad = [dict(shift, oido=clave)
+                         for lado, clave in ((0, 'OD'), (1, 'OI'))
+                         for shift in [self.ecochg_polarity_shift(lado)]
+                         if shift]
+            if polaridad:
+                data['polaridad'] = polaridad
         return data
 
     def draw_session(self, data):
@@ -1174,7 +1184,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         if not curva or curva not in grafico.data:
             return
         x, y = grafico.data[curva]['ipsi_xy']
-        marcas = ecochg.auto_marks(np.asarray(x), np.asarray(y))
+        # Con burst el equipo lee el PS en la mitad de SU estimulo.
+        stim = (self.memory.get(curva) or {}).get('stim', '')
+        marcas = ecochg.auto_marks(np.asarray(x), np.asarray(y),
+                                   ps_at=burst_ps_ms(stim, self.technical))
         if not marcas:
             # No hay complejo donde deberia haberlo: no se inventa uno.
             return
@@ -1214,6 +1227,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.memory[curve]['ECochG'] = medidas
         tabla.set_medidas(medidas)
         tabla.set_rate_shift(self.ecochg_rate_shift(side))
+        tabla.set_polarity_shift(self.ecochg_polarity_shift(side))
         # La marca ya esta puesta: se suelta para que el proximo clic no
         # la vuelva a mover sin querer.
         tabla.disarm()
@@ -1236,6 +1250,23 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                            'ap_lat': medidas.get('ap_lat'),
                            'ap_amp': medidas.get('ap_amp')})
         return ecochg.rate_shift(curvas)
+
+    def ecochg_polarity_shift(self, side):
+        """Separacion del PA entre rarefaccion y condensacion en ese oido.
+
+        Igual que el corrimiento por tasa: sale de dos curvas medidas (una
+        de cada polaridad, mismo estimulo y nivel), no de la seleccionada.
+        """
+        letra = 'R' if side == 0 else 'L'
+        curvas = []
+        for nombre in sorted(self.memory, key=curve_order):
+            if not nombre.startswith(letra):
+                continue
+            datos = self.memory[nombre]
+            curvas.append({'pol': datos.get('pol'), 'stim': datos.get('stim'),
+                           'int': datos.get('int'),
+                           'ap_lat': (datos.get('ECochG') or {}).get('ap_lat')})
+        return ecochg.polarity_shift(curvas)
 
     def test_changed(self, test):
         """Cambio de prueba en el combo: cada potencial trae su protocolo.

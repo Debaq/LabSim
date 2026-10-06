@@ -82,7 +82,8 @@ class ECochGGenerator:
         params = ecochg.component_params(
             onda or {'lat': 1.5, 'amp': 0.0}, ctx['case'], ctx['montage'],
             stim=ctx['stim'], freq=ctx['freq'], mc_baseline=ctx['mc'],
-            sl=ctx['sl'], gain=ctx['gain'], cm_lat=ctx['cm_lat'])
+            sl=ctx['sl'], gain=ctx['gain'], cm_lat=ctx['cm_lat'],
+            envelope=ctx.get('envelope'), sp_ref_amp=ctx.get('sp_ref_amp'))
         return ecochg.build_curve(t, params, polarity, sp_scale), params
 
     def target_curve(self, t, values, polarity, ctx):
@@ -107,7 +108,14 @@ class ECochGGenerator:
             return (y_r + y_c) / 2.0, par
 
         y_con, params = alternada(1.0)
-        if params['sp_ap'] <= 0 or params['ap_amp'] <= 0:
+        if params['burst'] is not None:
+            # Con burst la meseta se lee en la mitad del estimulo, donde no
+            # llega la espiga del PA: la altura nominal ES la medida y no
+            # hay nada que despejar.
+            escala = 1.0
+            x_pa = ecochg.peak_time(t, y_con, params['ap_lat'])
+            x_ps = params['sp_lat']
+        elif params['sp_ap'] <= 0 or params['ap_amp'] <= 0:
             escala, x_pa, x_ps = 1.0, params['ap_lat'], params['sp_lat']
         else:
             y_sin, _ = alternada(0.0)
@@ -127,7 +135,8 @@ class ECochGGenerator:
             # no tienen el PA en el mismo lugar, y esa separacion es un
             # hallazgo.
             x_pa = ecochg.peak_time(t, y, params['ap_lat'])
-            x_ps = x_pa - ecochg.SP_SHOULDER_MS
+            x_ps = (params['sp_lat'] if params['burst'] is not None
+                    else x_pa - ecochg.SP_SHOULDER_MS)
         return y, dict(params, ap_lat=x_pa, sp_lat=x_ps)
 
     # ------------------------------------------------------------------
@@ -248,6 +257,22 @@ class ECochGGenerator:
         cm_lat = float((baseline.get('MC') or {}).get('lat', 0.0)) or None
         if cm_lat is not None:
             cm_lat += lat_offset
+
+        # Con burst, la altura del PS se refiere al PA del CLICK a ese
+        # mismo nivel (ver ecochg.component_params): el sumacion no depende
+        # de la sincronia y el PA del burst si.
+        sp_ref_amp = None
+        if click_baseline is not None and stimulus_config['stim'] == 'tone_burst':
+            click_cfg = dict(stimulus_config, stim='click', freq=None)
+            v_click, _ = abr.calculate_wave_parameters(
+                click_baseline, stimulus_config['int'],
+                abr.case_threshold(case_config, click_cfg, pathway, pathology),
+                pathology, desviaciones, repro_shift=repro_shift,
+                neural=neural)
+            v_click = abr.apply_rate_effects(
+                v_click, stimulus_config['rate'], pathology, neural)
+            if v_click.get('I'):
+                sp_ref_amp = float(v_click['I']['amp']) * gain
         ctx = {
             'pathology': pathology, 'neural': neural, 'case': case_ec,
             'montage': montage, 'stim': stimulus_config['stim'],
@@ -258,6 +283,8 @@ class ECochGGenerator:
             'sl': float(stimulus_config['int']) - threshold,
             'gain': gain, 'mc': baseline.get('MC'), 'cm_lat': cm_lat,
             'rate': float(stimulus_config['rate']),
+            'envelope': technical_config.get('burst_envelope'),
+            'sp_ref_amp': sp_ref_amp,
         }
 
         jitter = float((case_config or {}).get('repro_jitter') or 0.0)
@@ -404,6 +431,24 @@ class ECochGGenerator:
             'fsp_criterion': criterio,
             'fsp_pass': (fsp >= criterio) if criterio else None,
         }
+
+
+def burst_ps_ms(stim_label, technical):
+    """Donde marca el PS el equipo con burst (mitad de la meseta), o None.
+
+    Lo sabe el EQUIPO, no el caso: es cuando mando el estimulo (el retardo
+    de su transductor) y con que envolvente. Con click devuelve None y el
+    PS va al hombro.
+    """
+    stim, freq = STIM_MAP.get(stim_label, ('click', None))
+    if stim != 'tone_burst':
+        return None
+    technical = technical or {}
+    timing = ecochg.burst_timing(technical.get('burst_envelope'),
+                                 ecochg.freq_hz(freq))
+    retardo = TRANSDUCER_LATENCY_MS.get(
+        technical.get('transducer', 'insert_earphone'), 0.0)
+    return ecochg.burst_plateau_center(timing, retardo)
 
 
 _generator = None

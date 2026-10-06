@@ -25,7 +25,10 @@ inquieto -- es la banda --, y se paga promediando el triple para nada.
   la línea de base, y en un hidrops marcado la meseta del sumación se
   prolonga más allá del PA; y no más de 6 porque el complejo entero dura
   un par de milisegundos y en una ventana larga queda apretado contra el
-  borde izquierdo, imposible de leer.
+  borde izquierdo, imposible de leer. Con burst, en cambio, el sumación dura
+  lo que dura el estímulo (un 1-10-1 ms son 12 ms): la ventana se abre a
+  mano en Parámetros avanzados, como en el equipo, y por eso su tope llega
+  a 25 ms.
 - ABR/Stacked ABR: tronco, 10-15 ms.
 - MLR: respuesta de vía tálamo-cortical, decenas de ms.
 - CAEP/MMN/P300: corteza, cientos de ms y filtros muy bajos.
@@ -61,11 +64,13 @@ class Protocol:
     stimuli: tuple = ()         # estímulos con sentido clínico para esta prueba
     implemented: bool = False
     note: str = ''
+    window_max: float = 0.0     # tope del spinbox si no es el doble de la ventana
 
     @property
     def window_range(self) -> tuple:
         """Rango razonable de ventana para el spinbox (ms)."""
-        return (max(self.window_ms / 2, 2.0), self.window_ms * 2)
+        return (max(self.window_ms / 2, 2.0),
+                self.window_max or self.window_ms * 2)
 
 
 PROTOCOLS = {
@@ -77,7 +82,7 @@ PROTOCOLS = {
     'ECochG': Protocol(
         name='ECochG', window_ms=6, filter_high=10, filter_low=3000,
         rate=11.1, averages=1500, montage='tympanic', reject_uv=40.0,
-        stimuli=(CLICK,) + BURSTS, implemented=True,
+        stimuli=(CLICK,) + BURSTS, implemented=True, window_max=25.0,
         note='Microfónica coclear, potencial de sumación y PA. Necesita electrodo timpánico.'),
     'Stacked ABR': Protocol(
         name='Stacked ABR', window_ms=15, filter_high=100, filter_low=3000,

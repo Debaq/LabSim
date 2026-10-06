@@ -35,7 +35,8 @@ except ImportError as exc:          # sin PySide6 instalado
 
 # Las que el generador YA usa.
 CLAVES = {'transducer', 'montage', 'window_ms', 'electrodes', 'impedance',
-          'artifact_reject_uv', 'residual_noise_nv', 'fsp_criterion'}
+          'artifact_reject_uv', 'residual_noise_nv', 'fsp_criterion',
+          'burst_envelope'}
 
 # Y las que el diálogo muestra pero el modelo todavía no lee. Están porque
 # el equipo real las tiene y el alumno las busca --el 2-1-2 del tone burst
@@ -181,7 +182,7 @@ def test_the_pending_parameters_are_there_and_marked():
     assert d.cb_burst_env.findData('2-1-2') >= 0
     assert data['burst_envelope'] == '2-1-2'
     # Y el resto de las envolventes de rutina, que es de lo que se compara.
-    for envolvente in ('2-0-2', '1-0-1', '5-0-5'):
+    for envolvente in ('2-0-2', '1-0-1', '5-0-5', 'ms-1-10-1'):
         assert d.cb_burst_env.findData(envolvente) >= 0, envolvente
 
     # Y NO se distinguen en pantalla de los que sí funcionan: es un equipo
