@@ -9,6 +9,9 @@
  *         $courseId (int), $override (?array, AppConfig::courseOverride()).
  */
 $hasOverride = !empty($override);
+// 'stack': una fila debajo de otra a todo el ancho (las textareas de
+// frases no caben en la grilla de 170px de los números).
+$gridColumns = ($def['layout'] ?? '') === 'stack' ? '1fr' : 'repeat(auto-fill, minmax(170px, 1fr))';
 ?>
 <div class="card">
     <div class="row row--between" style="margin:0; align-items:center;">
@@ -35,11 +38,18 @@ $hasOverride = !empty($override);
                 <strong><?= htmlspecialchars($group['label']) ?></strong>
                 <?php if ($groupTouched): ?><span class="tag tag--warn">modificado</span><?php endif; ?>
             </summary>
-            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); gap:0.6rem 1rem; margin-top:0.4rem;">
+            <div style="display:grid; grid-template-columns:<?= $gridColumns ?>; gap:0.6rem 1rem; margin-top:0.4rem;">
                 <?php foreach ($group['rows'] as $rowKey => $rowLabel): ?>
                 <div>
                     <strong style="font-weight:600;"><?= htmlspecialchars($rowLabel) ?></strong>
                     <?php foreach ($def['fields'] as $fieldKey => $field): ?>
+                    <?php if (CourseParams::isLines($field)): ?>
+                    <label class="normal" style="display:block; margin-top:0.4rem;">
+                        <?= htmlspecialchars($field['label']) ?>
+                        <textarea class="textarea" rows="8" style="font-family:inherit;"
+                                  name="params[<?= htmlspecialchars($groupKey) ?>][<?= htmlspecialchars($rowKey) ?>][<?= htmlspecialchars($fieldKey) ?>]"><?= htmlspecialchars(CourseParams::displayValue($def, $override, (string) $groupKey, (string) $rowKey, (string) $fieldKey)) ?></textarea>
+                    </label>
+                    <?php continue; endif; ?>
                     <label class="normal" style="display:block; margin-top:0.2rem;">
                         <?= htmlspecialchars($field['label']) ?>
                         <input type="number"

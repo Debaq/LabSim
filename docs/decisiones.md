@@ -4178,6 +4178,18 @@ asomara la cabeza para decir que el paciente siguiente ya llegó
   apilan.
 - **Sin sonido**: con audífonos puestos un "ding" en medio de un umbral
   contamina la audiometría.
-- Los textos son fijos en el cliente; si el docente quiere escribirlos él,
-  el registro de `CourseParams` solo admite números y habría que sumarle
-  campos de texto.
+- **Frases variadas y editables** (misma fecha, pedido del docente): el
+  resto de la app conversa con IA, y una secretaria que dice siempre lo
+  mismo se nota enseguida. Cada aviso trae 12 frases con paciente siguiente
+  y 12 sin, y sortea una cada vez, sin repetir la que dijo la vez anterior
+  en ese mismo aviso (dentro de la sesión de la app). No se generan con IA
+  en el momento: cada aviso sería una llamada de red en el hilo de la UI y
+  el docente no podría escribirlas él.
+- Se editan en la misma tarjeta del curso, una frase por línea.
+  `CourseParams` sumó el campo `'type' => 'lines'` (textarea → lista de
+  strings, tope de 60 frases de 300 caracteres) y `'layout' => 'stack'`.
+  Marcas: `{nombre}` y `{hora}` de la cita siguiente, `{minutos}` del aviso.
+  Se reemplazan a mano y no con `str.format`, así que una llave suelta del
+  docente no rompe nada. Una frase que pide un dato que no hay (un
+  `{nombre}` sin paciente siguiente) se salta. Si se borran todas las
+  líneas, vuelven las de la app.

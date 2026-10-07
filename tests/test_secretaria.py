@@ -8,6 +8,7 @@ solo.
 """
 
 import os
+import random
 import sys
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -62,22 +63,61 @@ def test_hora_con_segundos_se_muestra_hh_mm():
     assert sec.siguiente_paciente(agenda, "1", "alumno")["hora"] == "10:30"
 
 
+def _minutos(override=None):
+    return [a["min"] for a in sec.config_avisos(override)]
+
+
 def test_textos_nombran_al_siguiente_o_hablan_del_tiempo():
+    avisos = sec.config_avisos()
     siguiente = {"nombre": "Luis Soto", "hora": "09:45"}
-    assert "Luis Soto" in sec.texto_aviso(0, 20, siguiente)
-    assert "09:45" in sec.texto_aviso(0, 20, siguiente)
-    assert "Luis Soto" in sec.texto_aviso(2, 40, siguiente)
-    sin = sec.texto_aviso(1, 30.0, None)
-    assert "30 minutos" in sin
-    # más avisos que textos: repite el último, no revienta
-    assert sec.texto_aviso(7, 90, None) == sec.texto_aviso(2, 90, None)
+    for aviso in avisos:
+        for _ in range(30):
+            texto = sec.texto_aviso(aviso, aviso["min"], siguiente)
+            assert "Luis Soto" in texto and "{" not in texto, texto
+            sin = sec.texto_aviso(aviso, 30.0, None)
+            assert "Luis Soto" not in sin and "{" not in sin, sin
+
+
+def test_variacion_grande_y_sin_repetir_seguido():
+    avisos = sec.config_avisos()
+    for aviso in avisos:
+        assert len(aviso["con_paciente"]) >= 10 and len(aviso["sin_paciente"]) >= 10
+    rng = random.Random(1)
+    siguiente = {"nombre": "Luis Soto", "hora": "09:45"}
+    anterior, vistas = None, set()
+    for _ in range(60):
+        texto = sec.texto_aviso(avisos[0], 20, siguiente, rng=rng, evitar=anterior)
+        assert texto != anterior
+        vistas.add(texto)
+        anterior = texto
+    assert len(vistas) >= 8
 
 
 def test_minutos_default_y_override_del_curso():
-    assert sec.minutos_avisos() == [20.0, 30.0, 40.0]
+    assert _minutos() == [20.0, 30.0, 40.0]
     override = {"avisos": {"aviso_2": {"min": 25.0}, "aviso_3": {"min": 0}}}
-    assert sec.minutos_avisos(override) == [20.0, 25.0, 0.0]
-    assert sec.minutos_avisos({"avisos": {"aviso_1": {"min": "basura"}}})[0] == 20.0
+    assert _minutos(override) == [20.0, 25.0, 0.0]
+    assert _minutos({"avisos": {"aviso_1": {"min": "basura"}}})[0] == 20.0
+
+
+def test_textos_del_curso_reemplazan_al_default():
+    override = {"avisos": {"aviso_1": {"con_paciente": ["Llegó {nombre} ({hora}) {sin_cerrar"]}}}
+    avisos = sec.config_avisos(override)
+    assert avisos[0]["con_paciente"] == ["Llegó {nombre} ({hora}) {sin_cerrar"]
+    assert avisos[0]["sin_paciente"] == sec.config_avisos()[0]["sin_paciente"]
+    # llave suelta del docente: no revienta, se deja tal cual
+    assert sec.texto_aviso(avisos[0], 20, {"nombre": "Rosa", "hora": "10:30"}) == "Llegó Rosa (10:30) {sin_cerrar"
+    # lista vacía o con basura: queda el default, el aviso no sale mudo
+    vacio = sec.config_avisos({"avisos": {"aviso_1": {"con_paciente": ["  ", 3]}}})
+    assert vacio[0]["con_paciente"] == sec.config_avisos()[0]["con_paciente"]
+
+
+def test_plantilla_sin_dato_disponible_se_descarta():
+    aviso = {"min": 20, "con_paciente": [], "sin_paciente": ["{nombre} espera", "Van {minutos} min"]}
+    for _ in range(20):
+        assert sec.texto_aviso(aviso, 20, None) == "Van 20 min"
+    solo_nombre = {"min": 20, "con_paciente": [], "sin_paciente": ["{nombre} espera"]}
+    assert sec.texto_aviso(solo_nombre, 20, None) == "Ya van 20 minutos de atención."
 
 
 class _Parche:

@@ -27,7 +27,12 @@
  *             el docente es el experto en lo clínico).
  *   groups    [clave => ['label' => ..., 'rows' => [clave => etiqueta]]]
  *   fields    [clave => ['label' => ..., 'step' => ..., 'min' => ..., 'max' => ...]]
- *   defaults  [grupo][fila][campo] => float, el valor que trae la app.
+ *             o, para texto, ['label' => ..., 'type' => 'lines', 'max_lines' => ...,
+ *             'max_len' => ...]: un textarea con una entrada por línea que se
+ *             guarda como lista de strings.
+ *   layout    opcional, 'stack': una fila debajo de otra a todo el ancho (lo
+ *             que lleva textareas no cabe en la grilla de números).
+ *   defaults  [grupo][fila][campo] => float (o lista de strings), el valor que trae la app.
  *
  * Los defaults son copia a mano de los JSON del cliente (repos separados);
  * tests/test_course_params.php falla si se desincronizan.
@@ -85,19 +90,115 @@ final class CourseParams
                 'module' => 'AGENDA',
                 'title' => 'Avisos de la secretaria durante la atención',
                 'help' => 'Minutos desde que el alumno presiona "Atender" hasta cada aviso de Karime, que aparece unos segundos abajo a la derecha y se va solo. '
-                    . 'Si el alumno tiene otra cita pendiente ese mismo día, el aviso la nombra; si no, habla del tiempo que lleva la atención. '
-                    . 'En 0 ese aviso no aparece. Si el alumno retoma la atención (reabrir la app), los minutos vuelven a contar desde cero.',
+                    . 'En 0 ese aviso no aparece. Si el alumno retoma la atención (reabrir la app), los minutos vuelven a contar desde cero. '
+                    . 'Cada aviso sortea una de sus frases (una por línea) y no repite la que dijo la vez anterior. '
+                    . '"Con paciente siguiente" se usa si el alumno tiene otra cita sin atender ese mismo día y puede llevar {nombre} y {hora} de esa cita; '
+                    . '"Sin paciente siguiente" se usa si no la tiene. Ambas pueden llevar {minutos} (los del aviso). '
+                    . 'Una frase que pide un dato que no hay se salta. Si se borran todas las líneas, vuelven las de la app.',
+                'layout' => 'stack',
                 'groups' => [
                     'avisos' => ['label' => 'Avisos', 'rows' => ['aviso_1' => 'Primer aviso', 'aviso_2' => 'Segundo aviso', 'aviso_3' => 'Tercer aviso']],
                 ],
                 'fields' => [
                     'min' => ['label' => 'Minutos', 'step' => 1, 'min' => 0, 'max' => 240],
+                    'con_paciente' => ['label' => 'Frases con paciente siguiente (una por línea)', 'type' => 'lines', 'max_lines' => 60, 'max_len' => 300],
+                    'sin_paciente' => ['label' => 'Frases sin paciente siguiente (una por línea)', 'type' => 'lines', 'max_lines' => 60, 'max_len' => 300],
                 ],
                 'defaults' => [
                     'avisos' => [
-                        'aviso_1' => ['min' => 20],
-                        'aviso_2' => ['min' => 30],
-                        'aviso_3' => ['min' => 40],
+                        'aviso_1' => [
+                            'min' => 20,
+                            'con_paciente' => [
+                                'Te aviso que {nombre} ya llegó, tenía hora a las {hora}. Está en la sala de espera.',
+                                'Llegó {nombre} para su hora de las {hora}. Ya le tomé los datos, queda esperando afuera.',
+                                'Permiso, solo para avisarte que {nombre} ya está en la sala de espera. Su hora es a las {hora}.',
+                                '{nombre} acaba de llegar, con hora para las {hora}. Avísame cuando puedas recibirle.',
+                                'Hola, disculpa la interrupción: ya llegó {nombre}, hora de las {hora}.',
+                                'Te cuento que {nombre} ya está aquí para su hora de las {hora}. Le pedí que esperara un ratito.',
+                                'Ya está {nombre} en recepción, tiene hora a las {hora}. Tú me dices.',
+                                'Aviso rápido: {nombre} ya llegó. Su atención es a las {hora}.',
+                                '{nombre} ya está en la sala de espera. Venía para las {hora}, no te apures pero tenlo en cuenta.',
+                                'Perdona que entre así. Llegó {nombre}, su hora era a las {hora}.',
+                                'Ya llegó tu paciente de las {hora}, {nombre}. Está en la sala.',
+                                'Te dejo el aviso: {nombre}, hora de las {hora}, ya está esperando.',
+                            ],
+                            'sin_paciente' => [
+                                'Ya van {minutos} minutos de atención. Recuerda que el box se ocupa en el bloque siguiente.',
+                                'Te aviso que llevas {minutos} minutos. El box está reservado para después.',
+                                'Permiso, solo para que tengas el tiempo: van {minutos} minutos.',
+                                'Llevas {minutos} minutos con tu paciente. Todo bien, solo para que lo tengas presente.',
+                                'Disculpa la interrupción, ¿cómo vas? Ya van {minutos} minutos.',
+                                'Te cuento que el box lo necesitan después de ti. Llevas {minutos} minutos.',
+                                'Aviso de recepción: {minutos} minutos de atención hasta ahora.',
+                                'Hola, paso a recordarte el tiempo: van {minutos} minutos.',
+                                'Ya van {minutos} minutos. Avísame si necesitas algo de recepción.',
+                                'Solo un recordatorio: llevas {minutos} minutos y el box tiene otra reserva más tarde.',
+                                'Van {minutos} minutos. Cuando termines, avísame para dejar el box listo.',
+                                'Te dejo el dato: {minutos} minutos de atención. Sigue nomás.',
+                            ],
+                        ],
+                        'aviso_2' => [
+                            'min' => 30,
+                            'con_paciente' => [
+                                '{nombre} sigue esperando en la sala. ¿Te falta mucho?',
+                                'Disculpa, {nombre} me preguntó si falta mucho. ¿Qué le digo?',
+                                'Oye, {nombre} ya lleva un rato en la sala. ¿Cómo vas?',
+                                '{nombre} sigue afuera esperando su hora de las {hora}. ¿Te queda poquito?',
+                                'Te vuelvo a molestar: {nombre} sigue en la sala de espera.',
+                                '¿Vas a demorar mucho más? {nombre} está esperando desde hace rato.',
+                                '{nombre} se acercó al mesón a preguntar por su hora. Le dije que ya casi.',
+                                'Solo para que sepas: la hora de {nombre} era a las {hora} y sigue esperando.',
+                                '¿Cuánto te falta más o menos? Es para avisarle a {nombre}.',
+                                '{nombre} ya miró el reloj un par de veces... ¿cómo vamos?',
+                                'La sala se está llenando y {nombre} sigue esperando. ¿Te falta mucho?',
+                                'Le ofrecí un vaso de agua a {nombre} mientras espera. ¿Cuánto te queda?',
+                            ],
+                            'sin_paciente' => [
+                                'Van {minutos} minutos. Voy a necesitar el box pronto.',
+                                '¿Te falta mucho? Llevas {minutos} minutos y viene otro equipo a usar el box.',
+                                'Ya son {minutos} minutos. ¿Cómo vas?',
+                                'Oye, el siguiente bloque empieza pronto y llevas {minutos} minutos.',
+                                'Te vuelvo a molestar: {minutos} minutos. ¿Te queda poco?',
+                                'Me están preguntando por el box. Llevas {minutos} minutos, ¿cuánto te falta?',
+                                'Van {minutos} minutos. Ojo con el tiempo.',
+                                'Disculpa, ¿vas a demorar mucho más? Ya son {minutos} minutos.',
+                                'Tu atención ya va en {minutos} minutos. Ve pensando en el cierre.',
+                                '{minutos} minutos ya. Hay gente esperando el box.',
+                                'Ya llevas {minutos} minutos. ¿Necesitas más tiempo o vas terminando?',
+                                'Paso de nuevo: van {minutos} minutos y la agenda del box viene apretada.',
+                            ],
+                        ],
+                        'aviso_3' => [
+                            'min' => 40,
+                            'con_paciente' => [
+                                '{nombre} ya lleva rato esperando y está preguntando por su hora. ¿Le digo que pase?',
+                                'Oye, a {nombre} se le está acabando la paciencia. Necesito que vayas cerrando.',
+                                '{nombre} me dijo que tiene que irse pronto. ¿Puedes ir terminando?',
+                                'Ya vamos bien atrasados con {nombre}, su hora era a las {hora}. Por favor ve cerrando.',
+                                '{nombre} pidió hablar con alguien por la demora. ¿Te falta mucho de verdad?',
+                                'Te pido que vayas terminando: {nombre} lleva mucho esperando y se está atrasando toda la agenda.',
+                                'Disculpa la insistencia, pero {nombre} está pensando en reagendar. ¿Le digo que espere un poco más o ya terminas?',
+                                'Esto ya se está alargando mucho. {nombre} espera desde las {hora}.',
+                                'Último aviso, de verdad: {nombre} sigue afuera y la agenda viene atrasada.',
+                                'Si no terminas pronto voy a tener que reagendar a {nombre}. ¿Qué hago?',
+                                '{nombre} ya me preguntó tres veces. Por favor ve cerrando la atención.',
+                                'Ya no sé qué decirle a {nombre}. ¿Vas a alcanzar a atenderle o le doy otra hora?',
+                            ],
+                            'sin_paciente' => [
+                                'Ya van {minutos} minutos. Por favor ve cerrando la atención.',
+                                'Necesito el box ya, llevas {minutos} minutos. Ve terminando por favor.',
+                                'Esto se alargó mucho: {minutos} minutos. Cierra la atención cuando puedas, pero pronto.',
+                                'Último aviso: {minutos} minutos. El siguiente bloque ya está esperando.',
+                                'Van {minutos} minutos y me están reclamando el box. ¿Terminas?',
+                                'Disculpa la insistencia, pero ya son {minutos} minutos. Hay que ir cerrando.',
+                                'Ya pasamos de largo el tiempo: {minutos} minutos. Por favor termina.',
+                                '{minutos} minutos. Ya no puedo atrasar más al grupo que viene.',
+                                'Te pido que vayas terminando, llevas {minutos} minutos.',
+                                'Ya son {minutos} minutos de atención. Hay que liberar el box.',
+                                'Van {minutos} minutos. Me pidieron avisarte que cierres ahora.',
+                                'Ya es mucho rato, {minutos} minutos. Por favor ve despidiendo al paciente.',
+                            ],
+                        ],
                     ],
                 ],
             ],
@@ -141,6 +242,17 @@ final class CourseParams
         foreach ($def['groups'] as $groupKey => $group) {
             foreach ($group['rows'] as $rowKey => $_rowLabel) {
                 foreach ($def['fields'] as $fieldKey => $field) {
+                    if (self::isLines($field)) {
+                        $lines = self::parseLines($field, $raw[$groupKey][$rowKey][$fieldKey] ?? '');
+                        $default = isset($def['defaults'][$groupKey][$rowKey][$fieldKey])
+                            ? array_values((array) $def['defaults'][$groupKey][$rowKey][$fieldKey])
+                            : [];
+                        // Vacío = vuelve el default (el aviso no queda mudo).
+                        if ($lines && $lines !== $default) {
+                            $override[$groupKey][$rowKey][$fieldKey] = $lines;
+                        }
+                        continue;
+                    }
                     $posted = isset($raw[$groupKey][$rowKey][$fieldKey]) ? trim((string) $raw[$groupKey][$rowKey][$fieldKey]) : '';
                     if ($posted === '' || !is_numeric($posted)) {
                         continue;
@@ -173,10 +285,41 @@ final class CourseParams
     public static function displayValue(array $def, ?array $override, string $groupKey, string $rowKey, string $fieldKey): string
     {
         if (isset($override[$groupKey][$rowKey][$fieldKey])) {
-            return (string) $override[$groupKey][$rowKey][$fieldKey];
+            $value = $override[$groupKey][$rowKey][$fieldKey];
+        } elseif (isset($def['defaults'][$groupKey][$rowKey][$fieldKey])) {
+            $value = $def['defaults'][$groupKey][$rowKey][$fieldKey];
+        } else {
+            return '';
         }
-        return isset($def['defaults'][$groupKey][$rowKey][$fieldKey])
-            ? (string) $def['defaults'][$groupKey][$rowKey][$fieldKey]
-            : '';
+        return is_array($value) ? implode("\n", $value) : (string) $value;
+    }
+
+    /** Campo de texto libre con una entrada por línea (frases), no un número. */
+    public static function isLines(array $field): bool
+    {
+        return ($field['type'] ?? 'number') === 'lines';
+    }
+
+    /**
+     * Textarea -> lista de frases: una por línea, sin vacías, recortadas a
+     * max_len caracteres y a max_lines líneas (un pegado gigante no infla
+     * la config que viaja a cada cliente en el sync).
+     */
+    private static function parseLines(array $field, $raw): array
+    {
+        $maxLines = (int) ($field['max_lines'] ?? 60);
+        $maxLen = (int) ($field['max_len'] ?? 300);
+        $lines = [];
+        foreach (preg_split('/\r\n|\r|\n/', is_string($raw) ? $raw : '') as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+            $lines[] = mb_substr($line, 0, $maxLen, 'UTF-8');
+            if (count($lines) >= $maxLines) {
+                break;
+            }
+        }
+        return $lines;
     }
 }

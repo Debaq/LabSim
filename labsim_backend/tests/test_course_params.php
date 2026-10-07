@@ -76,8 +76,57 @@ if ($secretaria === null) {
             1e-9,
             "Secretaria {$aviso}/min: CourseParams vs secretaria_avisos.json"
         );
+        foreach (['con_paciente', 'sin_paciente'] as $tipo) {
+            t_eq(
+                $campos[$tipo],
+                $secretaria['avisos'][$aviso][$tipo] ?? null,
+                "Secretaria {$aviso}/{$tipo}: frases de CourseParams vs secretaria_avisos.json"
+            );
+        }
     }
 }
+
+// --- Campos de texto (frases de la secretaria) ------------------------------
+$secDef = $defs['secretaria.avisos'];
+$formSinTocar = [];
+foreach ($secDef['defaults']['avisos'] as $aviso => $campos) {
+    $formSinTocar['avisos'][$aviso] = [
+        'min' => (string) $campos['min'],
+        'con_paciente' => implode("\r\n", $campos['con_paciente']),
+        'sin_paciente' => implode("\r\n", $campos['sin_paciente']),
+    ];
+}
+t_eq(CourseParams::parse('secretaria.avisos', $formSinTocar), [], 'parse() texto: guardar sin tocar no crea override (aunque el navegador mande \\r\\n)');
+
+$conFrases = $formSinTocar;
+$conFrases['avisos']['aviso_2']['con_paciente'] = "  Llegó {nombre}  \n\n\nPasa {nombre}, son las {hora}\n";
+$conFrases['avisos']['aviso_3']['min'] = '0';
+t_eq(
+    CourseParams::parse('secretaria.avisos', $conFrases),
+    ['avisos' => [
+        'aviso_2' => ['con_paciente' => ['Llegó {nombre}', 'Pasa {nombre}, son las {hora}']],
+        'aviso_3' => ['min' => 0.0],
+    ]],
+    'parse() texto: una frase por línea, sin vacías ni espacios de borde; min 0 apaga'
+);
+
+$borrado = $formSinTocar;
+$borrado['avisos']['aviso_1']['sin_paciente'] = "   \n  ";
+t_eq(CourseParams::parse('secretaria.avisos', $borrado), [], 'parse() texto: borrar todas las líneas vuelve al default');
+
+$largo = $formSinTocar;
+$largo['avisos']['aviso_1']['con_paciente'] = str_repeat('á', 500) . "\n" . implode("\n", array_fill(0, 100, 'x'));
+$recortado = CourseParams::parse('secretaria.avisos', $largo)['avisos']['aviso_1']['con_paciente'];
+t_eq(count($recortado), 60, 'parse() texto: tope de líneas');
+t_eq(mb_strlen($recortado[0], 'UTF-8'), 300, 'parse() texto: tope de largo por frase, sin cortar un carácter multibyte');
+
+t_eq(
+    CourseParams::displayValue($secDef, ['avisos' => ['aviso_1' => ['con_paciente' => ['a', 'b']]]], 'avisos', 'aviso_1', 'con_paciente'),
+    "a\nb",
+    'displayValue() texto: una frase por línea en el textarea'
+);
+t_eq(CourseParams::displayValue($secDef, null, 'avisos', 'aviso_1', 'min'), '20', 'displayValue(): minutos default');
+t_eq(array_keys(CourseParams::forModules(['AGENDA'])), ['secretaria.avisos'], 'forModules(): curso con Agenda ve los avisos de la secretaria');
 
 // --- parse(): lo que queda igual al default NO se guarda -------------------
 $vempDef = $defs['normative_data.vemp'];

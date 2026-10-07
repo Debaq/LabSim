@@ -11,12 +11,16 @@ para avisar que el paciente siguiente ya llegó, y que apura al alumno.
 Si el alumno tiene otra cita pendiente ese mismo día, Karime la nombra (es
 un paciente real de su agenda). Si no, el aviso habla del tiempo que lleva
 la atención: no se inventa un paciente que el alumno después no encuentra.
+Cada aviso sortea entre muchas variantes (editables por curso, una por
+línea en admin): el resto de la app conversa con IA y una secretaria que
+dice siempre la misma frase se nota enseguida.
 
 Sin sonido a propósito: la app tiene audiometría con audífonos puestos y un
 "ding" en medio de un umbral contamina la prueba.
 """
 
 import json
+import random
 
 from PySide6.QtCore import QEasingCurve, QEvent, QObject, QPropertyAnimation, Qt, QTimer
 from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout,
@@ -32,6 +36,12 @@ DURACION_MS = 9000
 FADE_MS = 350
 MARGEN = 16
 SEPARACION = 8
+TIPOS = ("con_paciente", "sin_paciente")
+# Último recurso si todas las variantes de un aviso piden datos que no hay.
+_DEFAULT_SEGURO = {
+    "con_paciente": ["{nombre} ya llegó y está en la sala de espera."],
+    "sin_paciente": ["Ya van {minutos} minutos de atención."],
+}
 
 
 def _defaults():
@@ -39,20 +49,29 @@ def _defaults():
         return json.load(archivo)["avisos"]
 
 
-def minutos_avisos(override=None):
-    """Minutos de cada aviso, en orden: el default de la app con lo que el
-    curso sobreescribió encima (override = {"avisos": {"aviso_N": {"min": x}}},
-    como lo guarda CourseParams::parse). 0 apaga ese aviso."""
+def config_avisos(override=None):
+    """Los avisos en orden, cada uno {"min", "con_paciente", "sin_paciente"}:
+    el default de la app con lo que el curso sobreescribió encima (override
+    = {"avisos": {"aviso_N": {campo: valor}}}, como lo guarda
+    CourseParams::parse). min 0 apaga ese aviso. Una lista de textos vacía o
+    rota no deja al aviso mudo: queda la del default."""
     avisos = _defaults()
     propios = (override or {}).get("avisos") or {}
-    minutos = []
+    config = []
     for clave in sorted(avisos):
-        valor = (propios.get(clave) or {}).get("min", avisos[clave]["min"])
+        default, curso = avisos[clave], propios.get(clave) or {}
         try:
-            minutos.append(max(0.0, float(valor)))
+            minutos = max(0.0, float(curso.get("min", default["min"])))
         except (TypeError, ValueError):
-            minutos.append(float(avisos[clave]["min"]))
-    return minutos
+            minutos = float(default["min"])
+        aviso = {"min": minutos}
+        for tipo in TIPOS:
+            textos = curso.get(tipo)
+            if isinstance(textos, list):
+                textos = [t.strip() for t in textos if isinstance(t, str) and t.strip()]
+            aviso[tipo] = textos or default[tipo]
+        config.append(aviso)
+    return config
 
 
 def siguiente_paciente(agenda, key_actual, username):
@@ -74,24 +93,34 @@ def siguiente_paciente(agenda, key_actual, username):
     return {"nombre": nombre, "hora": cita.hora[:5]}
 
 
-def texto_aviso(indice, minutos, siguiente):
-    """Lo que dice Karime en el aviso número `indice` (0, 1, 2...), cada uno
-    más apurado que el anterior."""
-    minutos = int(round(minutos))
+def _rellenar(plantilla, valores):
+    """Reemplaza {nombre}/{hora}/{minutos} a mano y no con str.format: el
+    texto lo escribe el docente y una llave suelta no puede romper el
+    aviso. None si la plantilla pide un dato que no hay (un {nombre} sin
+    paciente siguiente)."""
+    for clave in ("nombre", "hora", "minutos"):
+        marca = "{" + clave + "}"
+        if marca in plantilla:
+            if valores.get(clave) is None:
+                return None
+            plantilla = plantilla.replace(marca, str(valores[clave]))
+    return plantilla
+
+
+def texto_aviso(aviso, minutos, siguiente, rng=random, evitar=None):
+    """Lo que dice Karime: una variante al azar de las del aviso (ver
+    config_avisos), con o sin paciente siguiente. `evitar` es la frase que
+    dijo la vez anterior en este mismo aviso, para no repetirla seguido."""
+    tipo = "con_paciente" if siguiente else "sin_paciente"
+    valores = {"minutos": int(round(minutos))}
     if siguiente:
-        nombre, hora = siguiente["nombre"], siguiente["hora"]
-        textos = (
-            f"Te aviso que {nombre} ya llegó, tenía hora a las {hora}. Está en la sala de espera.",
-            f"{nombre} sigue esperando en la sala. ¿Te falta mucho?",
-            f"{nombre} ya lleva rato esperando y está preguntando por su hora. ¿Le digo que pase?",
-        )
-    else:
-        textos = (
-            f"Ya van {minutos} minutos de atención. Recuerda que el box se ocupa en el bloque siguiente.",
-            f"Van {minutos} minutos. Voy a necesitar el box pronto.",
-            f"Ya van {minutos} minutos. Por favor ve cerrando la atención.",
-        )
-    return textos[min(indice, len(textos) - 1)]
+        valores.update(nombre=siguiente["nombre"], hora=siguiente["hora"])
+    textos = [t for t in (_rellenar(p, valores) for p in aviso[tipo]) if t]
+    if not textos:
+        # El docente dejó solo plantillas con datos que acá no hay.
+        textos = [t for t in (_rellenar(p, valores) for p in _DEFAULT_SEGURO[tipo]) if t]
+    candidatos = [t for t in textos if t != evitar] or textos
+    return rng.choice(candidatos)
 
 
 class AvisoSecretaria(QFrame):
@@ -192,20 +221,28 @@ class Secretaria(QObject):
         self._area = area
         self._timers = []
         self._avisos = []
+        # Última frase de cada aviso en esta sesión de la app: con varias
+        # atenciones seguidas, Karime no abre dos veces igual.
+        self._ultimos = {}
         area.installEventFilter(self)
 
     def iniciar(self, siguiente):
         """siguiente: {"nombre", "hora"} de siguiente_paciente(), o None."""
         self.detener()
-        for indice, minutos in enumerate(minutos_avisos(app_config_store.get(CONFIG_KEY))):
-            if minutos <= 0:
+        for indice, aviso in enumerate(config_avisos(app_config_store.get(CONFIG_KEY))):
+            if aviso["min"] <= 0:
                 continue
             timer = QTimer(self)
             timer.setSingleShot(True)
             timer.timeout.connect(
-                lambda i=indice, m=minutos: self.avisar(texto_aviso(i, m, siguiente)))
-            timer.start(int(minutos * 60_000))
+                lambda i=indice, a=aviso: self._decir(i, a, siguiente))
+            timer.start(int(aviso["min"] * 60_000))
             self._timers.append(timer)
+
+    def _decir(self, indice, aviso, siguiente):
+        texto = texto_aviso(aviso, aviso["min"], siguiente, evitar=self._ultimos.get(indice))
+        self._ultimos[indice] = texto
+        self.avisar(texto)
 
     def detener(self):
         for timer in self._timers:
