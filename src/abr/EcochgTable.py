@@ -47,6 +47,8 @@ FILAS = (
     ("Δ latencia por tasa", 'd_lat', "ms", 2),
     ("Δ amplitud por tasa", 'd_amp_pct', "%", 0),
     ("Δ PA rar/cond", 'd_rc', "ms", 2),
+    ("Latencia MC", 'mc_lat', "ms", 2),
+    ("Amplitud MC (p-p)", 'mc_amp', "µV", 2),
 )
 
 # Filas que comparan dos curvas del oído y no salen de las marcas de una.
@@ -57,11 +59,17 @@ ENTRE_CURVAS = {
              "mismo estímulo y nivel, con el PA marcado"),
 }
 
+# Color de las marcas que se dibujan como punto (ver AbrGraph.DOT_MARKS).
+MARK_COLORS = {'BL': (110, 110, 110), 'INI': (0, 150, 70),
+               'FIN': (210, 40, 40)}
+
 # Qué marca hace falta para que cada medida exista. Lo que no está acá sale
 # con las tres primeras.
 REQUIERE = {
     'area_ratio': 'FIN',
     'ancho': 'FIN',
+    'mc_lat': 'MC',
+    'mc_amp': 'MC',
 }
 
 
@@ -102,6 +110,10 @@ class EcochgTable(QWidget):
                            "está la bandera A")
             btn.clicked.connect(
                 lambda _=False, m=marca: self.sig_mark.emit(self.side, m))
+            color = MARK_COLORS.get(marca)
+            if color:
+                # El mismo color que el punto que deja en el gráfico.
+                btn.setStyleSheet(f"color: rgb{color}; font-weight: bold;")
             self.botones.append(btn)
             cabecera.addWidget(btn)
         # Marcado automático, como el de cualquier equipo: pone las cuatro

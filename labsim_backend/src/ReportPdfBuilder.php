@@ -691,6 +691,12 @@ final class ReportPdfBuilder
                 'ancho PA ' . self::num($m['ancho_pa'] ?? null) . ' ms',
                 'complejo ' . self::num($m['ancho'] ?? null) . ' ms',
             ];
+            // La microfónica solo si se marcó: se mide en rarefacción o
+            // condensación (en alternada se cancela).
+            if (isset($m['mc_amp'])) {
+                $detalle[] = 'MC ' . self::num($m['mc_amp']) . ' µV p-p a '
+                    . self::num($m['mc_lat'] ?? null) . ' ms';
+            }
             $pdf->text(self::MARGIN + 12, $y, implode('   ', $detalle), 8);
             $y += 12;
             $setup = self::formatCurveSetup($curva);

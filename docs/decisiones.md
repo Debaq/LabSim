@@ -3868,6 +3868,36 @@ referencia. Lo que se decidió:
   se veía en ninguna parte de la pantalla.
 - **Arrastrar la bandera mueve la línea adonde está el mouse.**
   `InfiniteLineLabelMod` la corría una fracción del movimiento (/60).
+- **Forma y ruido del ECochG rehechos (2026-10-07)**, a pedido del docente ("en
+  un normal el PA no se ve claramente, la curva no tiene la forma deseada"):
+  - **El electrodo de oído capta menos EEG** (`ecochg.EEG_PICKUP`: timpánico
+    0.35, promontorio 0.30, conducto 0.55 del Cz-mastoides). El ruido de fondo
+    es EEG cortical y el activo del ECochG está lejos de la corteza; sin esto,
+    con el pasa-alto en 5 Hz la base ondulaba ±1-2 µV alrededor de un PA de 3.
+  - **Complejo sano clásico**: hombro del PS corto que sube rápido
+    (`SP_RISE_MS` 0.06, empieza 0.45 ms antes del hombro, hombro 0.50 ms antes
+    del N1), N1 angosto (σ 0.18), **P1** positivo a +0.5 ms (`P1_RATIO` 0.30)
+    para que el trazo vuelva a cruzar la base antes del N2, y cola del PS de
+    0.30 ms. Antes el complejo arrancaba 0.8 ms antes del N1 con una bajada
+    lenta (un "cuenco") y no volvía a la base.
+  - Con el PS a medio subir en el hombro, la calibración lo inflaba al doble y
+    en el hidrops el N2 quedaba más hondo que el N1 (con 0.68, −16 µV). Por
+    eso la subida rápida.
+  - **Hidrops**: `SP_TAIL_PER_RATIO` 25 sobre la cola de 0.30 ms; vuelve a la
+    base ~4-5 ms (antes 6). Calibración timpánico: sano ~1.1-1.2, cruza 1.94
+    cerca de 0.40, 0.55 → ~2.9.
+  - **El pasa-alto alto ya no hunde la RAZÓN PS/PA** (antes 0.55 → 0.08 con
+    200 Hz): eso salía del bolsón largo del PS. Ahora el filtro se come los µV
+    del PS (−⅓ con 200 Hz) pero también la parte de meseta del PA. El test lo
+    pide en µV.
+  - Límite del ancho del N1 a media altura: 0.65 → 0.50 ms (N1 más angosto).
+- **BL, Ini y Fin son puntos de color** (gris, verde, rojo; el botón lleva el
+  mismo color) y no flechas: marcan un nivel o un límite, no un pico.
+- **Áreas con color de fondo**: PS celeste translúcido, PA naranja encima. Con
+  dos achurados cruzados no se distinguía cuál era cuál.
+- **Marca MC** (botón, en la bandera A): latencia y amplitud pico a pico de un
+  ciclo alrededor de la marca (±0.2 ms). Se lee en rarefacción o condensación;
+  en alternada se cancela. Sale en la tabla y en el PDF.
 - **Achurado de las dos áreas** (`ecochg.area_shading`, `AbrGraph.set_area_shading`):
   PS en azul, PA en naranja, con diagonales cruzadas. Sale de las mismas
   cuentas que la tabla (`_area_zones`), así que lo achurado es el número.

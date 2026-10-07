@@ -39,18 +39,18 @@ import numpy as np
 # un pico: es una meseta que arranca antes y se mantiene POR DEBAJO del PA
 # (de ahí que el PA se lea como una espiga montada sobre ella). El hombro
 # es el punto que el alumno marca.
-SP_SHOULDER_MS = 0.55
+SP_SHOULDER_MS = 0.50
 # Cuánto antes del hombro empieza a despegarse de la base. El complejo
 # entero arranca entonces SP_SHOULDER_MS + SP_ONSET_MS antes del PA: con el
 # PA del click a 90 dB en ~1.4 ms, eso deja el despegue en ~0.6 ms y un
 # tramo de base plana delante donde poner la marca BL. Más largo y el PS
 # empezaría antes de que el sonido llegue a la cóclea.
-SP_ONSET_MS = 0.25
+SP_ONSET_MS = 0.45
 # Pendiente del flanco de subida del PS (ms de la sigmoide). Un flanco
 # instantáneo no deja hombro visible y la marca no tendría dónde caer; uno
 # muy lento hace que el hombro caiga en plena subida y el trazo mida menos
 # razón PS/PA de la que el caso declara.
-SP_RISE_MS = 0.12
+SP_RISE_MS = 0.06
 # Fracción de la amplitud del PS con la que se da por empezado el complejo
 # (ver complex_onset). El despegue de la base es asintótico: sin un
 # criterio el "inicio" se iría hasta el borde de la ventana.
@@ -58,7 +58,7 @@ ONSET_FRACTION = 0.10
 
 # Ancho del PA. Es la onda I vista desde el oído: más angosta que
 # cualquier onda del tronco porque no acumuló dispersión de vía.
-AP_SIGMA_MS = 0.22
+AP_SIGMA_MS = 0.18
 # Cuánto se ensancha el PA por cada punto de razón PS/PA sobre el límite.
 # En el hidrops el PA no solo queda chico contra el PS: se ensancha,
 # porque la membrana desplazada desincroniza la descarga. Es la segunda
@@ -79,6 +79,12 @@ AP_WIDTH_PER_RATIO = 2.5
 N2_RATIO = 0.30
 N2_MS = 1.05
 N2_SIGMA_MS = 0.22
+# P1: la positividad entre N1 y N2. Es la que hace que en un oído sano el
+# trazo vuelva a cruzar la base después del N1, que es el punto donde
+# termina el área en el método publicado.
+P1_RATIO = 0.30
+P1_MS = 0.50
+P1_SIGMA_MS = 0.15
 # Cuánto dura el desplazamiento DC del PS después del pico del PA. Es lo
 # que hace que la razón de ÁREAS sea distinta de la de amplitudes: la
 # meseta corre por debajo de todo el complejo, no solo hasta el PA.
@@ -89,7 +95,7 @@ N2_SIGMA_MS = 0.22
 # bolsón ancho del que no se podía sacar ni dónde estaba el PA. La
 # morfología manda; el límite de áreas sale del modelo (ver
 # AREA_RATIO_LIMIT).
-SP_TAIL_MS = 0.60
+SP_TAIL_MS = 0.30
 # Cuánto se PROLONGA la meseta por cada punto de razón por encima de la de
 # un oído sano. En el hidrops el sumación no solo sube: dura más, porque el
 # desplazamiento de la membrana tarda más en volver. Es la razón física de
@@ -106,7 +112,7 @@ SP_TAIL_MS = 0.60
 # measure_complex) es la prolongación lo que la hace crecer. Con 3 un
 # hidrops declarado en 0.55 medía 1.64 y no cruzaba nunca 1.94; con 12 el
 # timpánico cruza en ~0.38, justo antes que la de amplitudes (0.40).
-SP_TAIL_PER_RATIO = 12.0
+SP_TAIL_PER_RATIO = 25.0
 SP_NORMAL_FRACTION = 0.5
 POST_POSITIVITY_RATIO = 0.10
 # Después del N2 y angosta: centrada sobre él lo tapaba (ver N2_RATIO).
@@ -172,6 +178,20 @@ ELECTRODE_GAIN = {
 # alcanzaba ni para empatar. Un electrodo timpanico da PA de 1 a 5 uV
 # --entre 6 y 15 veces la onda I de un registro de superficie-- y esa es
 # justamente la razon clinica de meterse hasta la membrana.
+
+# Cuánto EEG del paciente capta cada electrodo de oído, contra el
+# Cz-mastoides del ABR (= 1.0). El ruido de fondo de un potencial evocado es
+# sobre todo EEG cortical, y el activo del ABR está en el vértex, encima de
+# la corteza; el del ECochG está en el oído, y la diferencia entre él y la
+# referencia lleva mucho menos EEG. Sin esto el ECochG cargaba el EEG entero
+# del ABR y, con el pasa-alto de 5 Hz, la línea de base ondulaba ±1-2 µV
+# alrededor de un PA de 3 µV: no se encontraba el PA en un oído sano.
+# El de conducto queda más cerca del cuero cabelludo y capta más.
+EEG_PICKUP = {
+    'extratympanic': 0.55,
+    'tympanic': 0.35,
+    'transtympanic': 0.30,
+}
 
 # Alto de la ventana del gráfico, en µV, por cada unidad de ganancia del
 # electrodo. El ABR se dibuja en 6 µV con ondas de medio µV; un ECochG
@@ -494,6 +514,7 @@ def build_curve(t, params, polarity, sp_scale=1.0):
         # solo).
         y -= _gaussian(t, params['ap_lat'], amp_pa - sp_amp,
                        params['ap_sigma'])
+    y += _gaussian(t, params['ap_lat'] + P1_MS, amp_pa * P1_RATIO, P1_SIGMA_MS)
     y -= _gaussian(t, params['ap_lat'] + N2_MS, amp_pa * N2_RATIO, N2_SIGMA_MS)
     y += _gaussian(t, params['ap_lat'] + POST_POSITIVITY_MS,
                    amp_pa * POST_POSITIVITY_RATIO, POST_POSITIVITY_SIGMA_MS)
@@ -575,17 +596,27 @@ def calibrate_sp(t, y_sin, y_con, razon, lat_hint=None):
 # Se ponen como en el ABR: la bandera A en el punto y el botón de la marca.
 # INI y FIN son los límites del área (inicio de la respuesta y retorno a la
 # base); sin INI, el inicio es donde el trazo se despega de la base.
-MARKS = ('BL', 'INI', 'PS', 'PA', 'FIN')
+MARKS = ('BL', 'INI', 'PS', 'PA', 'FIN', 'MC')
 MARK_LABELS = {
     'BL': 'Línea de base',
     'INI': 'Inicio del área',
     'PS': 'Potencial de sumación',
     'PA': 'Potencial de acción',
     'FIN': 'Retorno a la base (fin del área)',
+    'MC': 'Microfónica coclear (un pico)',
 }
 # Rótulo corto de cada botón.
 MARK_BUTTONS = {'BL': 'BL', 'INI': 'Ini', 'PS': 'PS', 'PA': 'PA',
-                'FIN': 'Fin'}
+                'FIN': 'Fin', 'MC': 'MC'}
+# Las que pone el marcado automático: todas menos la MC, que se busca a mano
+# en rarefacción o condensación (en alternada, que es como se registra el
+# complejo, se cancela).
+AUTO_MARKS = ('BL', 'INI', 'PS', 'PA', 'FIN')
+# Medio ciclo de la MC alrededor de la marca, en ms, para leer su amplitud
+# pico a pico: con click la MC va a ~2.5 kHz (0.4 ms el ciclo), así que
+# ±0.2 ms toma un ciclo entero. Se mide en una curva en rarefacción y otra
+# en condensación: la MC se invierte entre las dos y en alternada se cancela.
+MC_HALF_WINDOW_MS = 0.2
 
 
 # ---------------------------------------------------------------------
@@ -830,9 +861,18 @@ def measure_complex(t, y, marks):
     (retorno a la base), y el área PA va del hombro del PS al P1. Ver
     docs/decisiones.md.
     """
+    # La MC no depende del resto: se lee sola, en la curva que sea.
+    mc = {}
+    if 'MC' in marks:
+        x_mc = float(marks['MC'][0])
+        cerca = (t >= x_mc - MC_HALF_WINDOW_MS) & (t <= x_mc + MC_HALF_WINDOW_MS)
+        if cerca.any():
+            mc = {'mc_lat': x_mc,
+                  'mc_amp': float(np.max(y[cerca]) - np.min(y[cerca]))}
+
     faltan = [m for m in ('BL', 'PS', 'PA') if m not in marks]
     if faltan:
-        return {'faltan': faltan}
+        return dict(mc, faltan=faltan)
 
     base = float(marks['BL'][1])
     x_ps, x_pa = float(marks['PS'][0]), float(marks['PA'][0])
@@ -840,6 +880,7 @@ def measure_complex(t, y, marks):
     amp_pa = base - _sample_at(t, y, x_pa)
 
     out = {
+        **mc,
         'base': base,
         'sp_lat': x_ps, 'sp_amp': amp_ps,
         'ap_lat': x_pa, 'ap_amp': amp_pa,
@@ -1024,7 +1065,9 @@ def normative(montage, ap_lat_range=None, burst=False):
     """
     normas = {
         'ap_lat': ap_lat_range,
-        'ancho_pa': (None, 0.65),
+        # El N1 de un oído sano mide ~0.45 ms a media altura; el hidrops lo
+        # ensancha (AP_WIDTH_PER_RATIO).
+        'ancho_pa': (None, 0.50),
         'd_lat': (None, RATE_SHIFT_LIMIT_MS),
         'd_rc': (None, RAR_COND_LIMIT_MS),
     }

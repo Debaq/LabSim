@@ -242,7 +242,7 @@ def test_the_automatic_marking_reads_the_trace_and_nothing_else():
                 t, y, _, _, _, meta = _curva(sp_ap=declarado, montage=montaje,
                                              capture=cap)
                 auto = E.auto_marks(t, y)
-                assert set(auto) == set(E.MARKS), (montaje, declarado, auto)
+                assert set(auto) == set(E.AUTO_MARKS), (montaje, declarado, auto)
                 assert abs(auto['PA'] - meta['ecochg_ap_lat']) < 0.15
                 medida = E.measure_complex(
                     t, y, {k: (v, 0.0) for k, v in auto.items()})
@@ -492,6 +492,24 @@ def test_the_shading_is_exactly_what_is_integrated():
             assert abs(achurado - medida[area]) < 1e-6 * max(1.0, medida[area])
         x_pa = zonas['pa'][0]
         assert x_pa[-1] < medida['ap_lat'] + E.N2_MS - 0.2, (sp_ap, x_pa[-1])
+
+
+def test_the_cochlear_microphonic_is_measured_where_it_is_marked():
+    """La MC se marca sola (no necesita BL, PS ni PA) y se invierte entre
+    rarefacción y condensación."""
+    t, y_r, _, _, _, _ = _curva(pol='Rarefacción', extra={'mc': 'amplificada'})
+    _, y_c, _, _, _, _ = _curva(pol='Condensación', extra={'mc': 'amplificada'})
+    _, y_a, _, _, _, _ = _curva(pol='Alternada', extra={'mc': 'amplificada'})
+    x = 0.9                               # dentro del ringing de la MC
+    medida_r = E.measure_complex(t, y_r, {'MC': (x, 0.0)})
+    assert medida_r['mc_lat'] == x
+    assert medida_r['mc_amp'] > 0
+    medida_a = E.measure_complex(t, y_a, {'MC': (x, 0.0)})
+    # En alternada se cancela: queda mucho menos.
+    assert medida_a['mc_amp'] < 0.6 * medida_r['mc_amp'], (medida_a, medida_r)
+    # Y se invierte: la diferencia entre polaridades es casi el doble de una.
+    cerca = (t > x - 0.2) & (t < x + 0.2)
+    assert np.corrcoef(y_r[cerca], y_c[cerca])[0, 1] < 0
 
 
 # ------------------------------------------------------------- tone burst

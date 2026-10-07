@@ -1210,7 +1210,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         if not marcas:
             # No hay complejo donde deberia haberlo: no se inventa uno.
             return
-        for marca in ecochg.MARKS:
+        for marca in ecochg.AUTO_MARKS:
             if marca not in marcas:
                 continue
             grafico.current_lat = marcas[marca]

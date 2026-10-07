@@ -172,6 +172,27 @@ def test_the_buttons_mark_where_the_flag_is():
     assert w.memory[curva]['ECochG'].get('sp_ap') is not None
 
 
+def test_bl_ini_and_fin_are_colored_dots_not_arrows():
+    """BL, Ini y Fin marcan un nivel o un límite, no un pico: van como
+    punto de color (el del botón) y no tapan el trazo con una flecha."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    curva = _capturar(w)
+    g = w.graph_r
+    w.auto_ecochg_mark(0)
+    for marca in ('BL', 'INI', 'FIN'):
+        assert (curva, marca) in g.dot_items, marca
+        assert g.mark_item(curva, marca) is None, marca
+    for marca in ('PS', 'PA'):
+        assert g.mark_item(curva, marca) is not None, marca
+    g.active_curve(curva)
+    g.delete_mark('FIN')
+    assert (curva, 'FIN') not in g.dot_items
+    w.reset()
+    assert not g.dot_items
+
+
 def test_the_flags_show_their_latency():
     """En ninguna parte de la pantalla se veía en qué latencia estaban las
     banderas (ABR y ECochG)."""
@@ -508,15 +529,15 @@ def test_the_auto_mark_button_fills_the_table():
     assert medidas.get('faltan') == []
     assert abs(medidas['sp_ap'] - 0.25) < 0.08
     # Las marcas quedan puestas como cualquier otra: se pueden corregir.
-    assert set(w.graph_r.marks[curva]) == set(ecochg.MARKS)
+    assert set(w.graph_r.marks[curva]) == set(ecochg.AUTO_MARKS)
 
 
 def test_the_auto_mark_is_not_the_answer():
     """Marcando bien sobre un registro mal hecho, la medida sale mal.
 
     El potencial de sumación es un desplazamiento DC y el pasa-alto se lo
-    come: con la constante de tiempo de un corte en 200 Hz (0.8 ms) sobre
-    una meseta de un par de milisegundos, la razón se subestima bastante.
+    come: con la constante de tiempo de un corte en 200 Hz (0.8 ms) el PS
+    pierde un tercio de sus µV.
     El marcado automático no lo sabe -- pone las marcas igual. Si en vez de
     medir el trazo devolviera lo que el caso declara, el examen no
     existiría.
@@ -532,18 +553,23 @@ def test_the_auto_mark_is_not_the_answer():
         leidas = []
         # Tres curvas del mismo oído al mismo nivel: la razón de UNA
         # captura tiene su ruido, y lo que se compara acá es la banda.
+        razones = []
         for _ in range(3):
             curva = _capturar(w, 90)
             w.graph_r.active_curve(curva)
             w.table_ec_r.btn_auto.click()
-            valor = w.table_ec_r.medidas.get('sp_ap')
+            valor = w.table_ec_r.medidas.get('sp_amp')
             if valor is not None:
                 leidas.append(valor)
+                razones.append(w.table_ec_r.medidas.get('sp_ap'))
         medidas[pasa_alto] = sum(leidas) / len(leidas)
-    assert abs(medidas['10'] - 0.55) < 0.10, medidas
-    # Con la banda del ABR la misma cóclea se informa bastante más baja, y
-    # el equipo no avisa.
-    assert medidas['200'] < medidas['10'] - 0.10, medidas
+        if pasa_alto == '10':
+            assert abs(sum(razones) / len(razones) - 0.55) < 0.10, razones
+    # Con la banda del ABR el pasa-alto se come el PS (es un desplazamiento
+    # DC): la misma cóclea informa bastante menos µV de sumación, y el
+    # equipo no avisa. La RAZÓN se mueve poco, porque la meseta también es
+    # parte de la profundidad del PA (ver docs/decisiones.md).
+    assert medidas['200'] < 0.8 * medidas['10'], medidas
 
 
 def test_switching_test_with_curves_asks_first():

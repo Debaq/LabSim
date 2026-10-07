@@ -125,6 +125,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # [items])}. Las zonas vienen de ecochg.area_shading, o sea de las
         # mismas cuentas que el numero de la tabla.
         self.area_fills = {}
+        # Puntos de las marcas BL/INI/FIN: {(curva, marca): ScatterPlotItem}.
+        self.dot_items = {}
         self.configure_pyqtgraph()
         self.setup_ui_elements()
         self.colors_side()
@@ -475,6 +477,9 @@ class AbrGraph(GraphicsLayoutWidgetMod):
                 delete = True
 
         if delete:
+            for curva, marca in [k for k in self.dot_items
+                                 if k[0] == self.act_curve]:
+                self.remove_dot(curva, marca)
             self.remove_base_line(self.act_curve)
             self.set_area_shading(self.act_curve, None)
             self.data.pop(self.act_curve, None)
@@ -627,6 +632,12 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         delete_all_marks) no volvia a aparecer nunca, aunque la latencia
         siguiera en la tabla."""
         x, y = self.marks[curve_name][lbl_mark]
+        if lbl_mark in self.DOT_MARKS:
+            self.place_dot(curve_name, lbl_mark, x,
+                           y + self.data[curve_name].get('gap', 0.0))
+            if lbl_mark in ('BL', 'FIN'):
+                self.refresh_base_line(curve_name)
+            return
         # La flecha va POR ENCIMA del trazo en pantalla: con el eje
         # invertido, "encima" es restar.
         y = y + self.data[curve_name].get('gap', 0.0) + (
@@ -643,6 +654,33 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         item.setPos(x, y)
         if lbl_mark in ('BL', 'FIN'):
             self.refresh_base_line(curve_name)
+
+    # Marcas que son un punto de color sobre el trazo y no una flecha: no
+    # senialan un pico sino un nivel (BL) o un limite del area (INI, FIN).
+    # Con flecha tapaban el trazo justo donde se mira el despegue. El color
+    # es el mismo del boton de la tabla.
+    DOT_MARKS = {
+        'BL': (110, 110, 110),
+        'INI': (0, 150, 70),
+        'FIN': (210, 40, 40),
+    }
+
+    def place_dot(self, curve_name, lbl_mark, x, y):
+        clave = (curve_name, lbl_mark)
+        punto = self.dot_items.get(clave)
+        if punto is None:
+            punto = pg.ScatterPlotItem(
+                size=9, pen=pg.mkPen('w', width=1),
+                brush=pg.mkBrush(*self.DOT_MARKS[lbl_mark]))
+            punto.setZValue(10)
+            self.pw.addItem(punto)
+            self.dot_items[clave] = punto
+        punto.setData([float(x)], [float(y)])
+
+    def remove_dot(self, curve_name, lbl_mark):
+        punto = self.dot_items.pop((curve_name, lbl_mark), None)
+        if punto is not None:
+            self.pw.removeItem(punto)
 
     def refresh_base_line(self, curve_name):
         """Linea horizontal de la base del ECochG: de BL a FIN.
@@ -666,11 +704,13 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             self.base_lines[curve_name] = linea
         linea.setData([float(x0), float(x1)], [y, y])
 
-    # Achurado de cada area: PS en azul, lobulo del N1 en naranja, con
-    # diagonales cruzadas para que se distingan tambien en blanco y negro.
+    # Relleno de cada area, color de fondo y no achurado (con dos achurados
+    # cruzados no se distinguia cual era cual): el PS celeste claro y el PA
+    # naranja mas firme encima, porque el area del PA esta DENTRO de la del
+    # PS (metodo publicado: el PS es el complejo entero).
     AREA_STYLE = {
-        'ps': ((0, 90, 200, 170), Qt.BrushStyle.BDiagPattern),
-        'pa': ((230, 120, 0, 200), Qt.BrushStyle.FDiagPattern),
+        'ps': ((60, 150, 230, 70), Qt.BrushStyle.SolidPattern),
+        'pa': ((245, 140, 20, 150), Qt.BrushStyle.SolidPattern),
     }
 
     def set_area_shading(self, curve_name, zonas):
@@ -690,7 +730,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             c2 = pg.PlotCurveItem(x, abajo + gap, pen=None)
             relleno = pg.FillBetweenItem(c1, c2,
                                          brush=QBrush(QColor(*color), patron))
-            relleno.setZValue(-5)
+            relleno.setZValue(-5 if clave == 'ps' else -4)
             self.pw.addItem(relleno)
             items += [relleno]
             # Las curvas guia no se dibujan, pero tienen que vivir mientras
@@ -724,6 +764,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         item = self.mark_item(curve, mark)
         if item is not None:
             self.pw.removeItem(item)
+        self.remove_dot(curve, mark)
         self.update_value_mark(mark, True, curve=curve)
         if mark in ('BL', 'FIN'):
             self.refresh_base_line(curve)
@@ -889,6 +930,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
         # Las lineas de base son PlotDataItem y ya salieron arriba.
         self.base_lines = {}
+        for clave in list(self.dot_items):
+            self.remove_dot(*clave)
         for nombre in list(self.area_fills):
             self.set_area_shading(nombre, None)
         # Limpiar diccionarios internos

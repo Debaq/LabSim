@@ -338,6 +338,10 @@ class ECochGGenerator:
             t_ref, fs_ref, population, pathology, neural, baseline,
             click_baseline, threshold, stimulus_config, case_config,
             desviaciones, repro_shift)
+        if sigma:
+            # El ruido es el EEG del paciente, pero el electrodo de oido capta
+            # solo una parte (ver ecochg.EEG_PICKUP).
+            sigma *= ecochg.EEG_PICKUP.get(montage, 1.0)
         noise_floor = (sigma / float(np.sqrt(NOISE_REF_SWEEPS)) if sigma else
                        float(technical_config.get('residual_noise_nv')
                              or NOISE_FLOOR_UV * 1000) / 1000.0)

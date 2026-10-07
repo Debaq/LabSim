@@ -1122,9 +1122,9 @@ def test_defaults_follow_the_protocol():
     assert abr['window_ms'] == get_protocol('ABR').window_ms
     assert abr['montage'] == 'vertex_mastoid'
     ecochg = default_settings('ECochG')
-    # Ventana corta (MC, PS y PA): la suficiente para que el complejo de un
-    # hidrops vuelva a la base, y no mas -- ver abr/protocols.py.
-    assert ecochg['window_ms'] == 6
+    # 10 ms, el estandar del docente: el complejo de un hidrops marcado
+    # vuelve a la base cerca de los 5 ms -- ver abr/protocols.py.
+    assert ecochg['window_ms'] == 10
     assert ecochg['montage'] == 'tympanic'
     assert default_settings('P300')['window_ms'] == 800
     # Una prueba desconocida no puede reventar: cae en el protocolo de ABR.
