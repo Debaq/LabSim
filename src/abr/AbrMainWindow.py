@@ -130,8 +130,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # atención, ver la_super) -- el menú queda sin acción conectada.
         self.table_r.sig_measure_value.connect(self.measure_action)
         self.table_l.sig_measure_value.connect(self.measure_action)
-        self.table_ec_r.sig_arm_mark.connect(self.arm_ecochg_mark)
-        self.table_ec_l.sig_arm_mark.connect(self.arm_ecochg_mark)
+        self.table_ec_r.sig_mark.connect(self.mark_ecochg)
+        self.table_ec_l.sig_mark.connect(self.mark_ecochg)
         self.table_ec_r.sig_auto_mark.connect(self.auto_ecochg_mark)
         self.table_ec_l.sig_auto_mark.connect(self.auto_ecochg_mark)
         self.graph_r.sig_data_info.connect(self.measure_data)
@@ -142,8 +142,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.graph_r.sig_change_value_mark.connect(self.update_memory_from_graph_mark)
         self.graph_l.sig_change_value_mark.connect(self.update_memory_from_graph_mark)
         self.graph_r.sig_curve_selected.connect(self.curve_selected)
-        self.graph_r.sig_mark_failed.connect(self.lbl_info.setText)
-        self.graph_l.sig_mark_failed.connect(self.lbl_info.setText)
         self.graph_l.sig_curve_selected.connect(self.curve_selected)
         self.graph_r.sig_del_curve.connect(self.update_delete_curve)
         self.graph_l.sig_del_curve.connect(self.update_delete_curve)
@@ -755,8 +753,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         for grafico in (self.graph_r, self.graph_l):
             grafico.curves_locked = on
             grafico.read_only = on
-            if on:
-                grafico.arm_mark(None)
         for texto in (self.report.text_edit_1, self.report.text_edit_2):
             texto.setReadOnly(on)
         if on and aviso:
@@ -1165,7 +1161,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             tabla.setVisible(not ecochg_on)
         for tabla in (self.table_ec_r, self.table_ec_l):
             tabla.setVisible(ecochg_on)
-            tabla.disarm()
         for grafico in (self.graph_r, self.graph_l):
             if ecochg_on:
                 # El PA se pega al pico; la base y el hombro del PS caen
@@ -1174,27 +1169,22 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             else:
                 grafico.set_marks_mode(('I', 'II', 'III', 'IV', 'V'))
 
-    def arm_ecochg_mark(self, side, mark):
-        """Deja armada una marca en el grafico de ese oido.
+    def mark_ecochg(self, side, mark):
+        """Pone la marca en la bandera A del grafico de ese oido.
 
-        Solo una a la vez en toda la ventana: con dos armadas, un clic en
-        el grafico del otro oido pondria la marca del que no se estaba
-        mirando.
+        Es como se marca en el ABR: la bandera en el punto y el boton. Antes
+        el boton solo "armaba" la marca y habia que hacer ademas un clic
+        sobre la curva; en clase se movia la bandera, se apretaba el boton
+        y no pasaba nada. Si no se puede, la barra de estado dice por que.
         """
         if self.view_only:
-            (self.table_ec_r if side == 0 else self.table_ec_l).disarm()
             self.lbl_info.setText(tr("AbrMainWindow",
                                      "Sesión de solo lectura: no se puede marcar"))
             return
-        # La marca queda armada en LOS DOS graficos y la pone el que reciba
-        # el clic: el boton dice QUE marca, el clic dice DONDE. Antes solo
-        # se armaba en el oido de la tabla y un clic en el otro grafico no
-        # hacia nada, sin aviso.
-        otro = 1 if side == 0 else 0
-        if mark is not None:
-            (self.table_ec_r, self.table_ec_l)[otro].disarm()
-        for grafico in (self.graph_r, self.graph_l):
-            grafico.arm_mark(mark)
+        grafico = self.graph_r if side == 0 else self.graph_l
+        motivo = grafico.mark_at_cursor(mark)
+        if motivo:
+            self.lbl_info.setText(tr("AbrMainWindow", motivo))
 
     def auto_ecochg_mark(self, side):
         """Marcado automatico del equipo sobre la curva seleccionada.
@@ -1220,7 +1210,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         if not marcas:
             # No hay complejo donde deberia haberlo: no se inventa uno.
             return
-        for marca in ecochg.MARKS + ecochg.AREA_MARKS:
+        for marca in ecochg.MARKS:
             if marca not in marcas:
                 continue
             grafico.current_lat = marcas[marca]
@@ -1238,15 +1228,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 else:
                     guardadas[marca] = list(coords)
             self.refresh_ecochg(curve)
-            # La marca ya esta puesta: se suelta para que el proximo clic no
-            # la vuelva a mover sin querer. Solo aca, cuando se marco: antes
-            # se soltaba en cada recalculo, y seleccionar la curva despues
-            # de apretar el boton dejaba la marca desarmada.
-            if any(m in ecochg.MARKS for m in marcas):
-                for tabla in (self.table_ec_r, self.table_ec_l):
-                    tabla.disarm()
-                for grafico in (self.graph_r, self.graph_l):
-                    grafico.arm_mark(None)
 
     def refresh_ecochg(self, curve):
         """Recalcula las medidas de esa curva y las muestra."""
@@ -1266,13 +1247,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         marcas = self.memory[curve].get('marcas') or {}
         grafico.set_area_shading(curve, ecochg.area_shading(
             np.asarray(x), np.asarray(y), marcas))
-        if curve == grafico.get_active():
-            # A y A' muestran los limites que se usaron: el inicio que el
-            # alumno puso o, si no lo movio, el que se despega de la base.
-            # Sin dato, el cursor queda donde esta (ver place_area_cursors).
-            inicio = (marcas.get('INI') or [medidas.get('inicio')])[0]
-            grafico.place_area_cursors(inicio,
-                                       (marcas.get('FIN') or [None])[0])
         tabla.set_medidas(medidas)
         tabla.set_rate_shift(self.ecochg_rate_shift(side))
         tabla.set_polarity_shift(self.ecochg_polarity_shift(side))

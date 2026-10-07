@@ -242,7 +242,7 @@ def test_the_automatic_marking_reads_the_trace_and_nothing_else():
                 t, y, _, _, _, meta = _curva(sp_ap=declarado, montage=montaje,
                                              capture=cap)
                 auto = E.auto_marks(t, y)
-                assert set(auto) == set(E.MARKS) | set(E.AREA_MARKS), (montaje, declarado, auto)
+                assert set(auto) == set(E.MARKS), (montaje, declarado, auto)
                 assert abs(auto['PA'] - meta['ecochg_ap_lat']) < 0.15
                 medida = E.measure_complex(
                     t, y, {k: (v, 0.0) for k, v in auto.items()})

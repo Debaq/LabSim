@@ -139,39 +139,19 @@ def test_the_three_ecochg_electrodes_are_selectable():
         assert clave in MONTAGES.values(), clave
 
 
-def test_only_one_mark_is_armed_in_the_whole_window():
-    """Una sola marca armada a la vez, y la pone el gráfico que recibe el
-    clic: el botón dice QUÉ marca, el clic dice DÓNDE."""
-    if not HAS_UI:
-        return
-    w = _ventana()
-    w.arm_ecochg_mark(0, 'PA')
-    assert w.graph_r.mark_mode == w.graph_l.mark_mode == 'PA'
-    w.arm_ecochg_mark(1, 'PS')
-    assert w.graph_r.mark_mode == w.graph_l.mark_mode == 'PS'
+def _boton(w, side, marca):
+    tabla = w.table_ec_r if side == 0 else w.table_ec_l
+    from abr import ecochg as _e
+    for btn in tabla.botones:
+        if btn.text() == _e.MARK_BUTTONS[marca]:
+            return btn
+    raise AssertionError(marca)
 
 
-def test_a_mark_armed_in_one_table_goes_to_the_clicked_ear():
-    """En clase se apretaba el botón de una tabla y se hacía clic en el
-    gráfico del otro oído: no pasaba nada y no avisaba."""
-    if not HAS_UI:
-        return
-    from PySide6.QtCore import Qt
-    from PySide6.QtTest import QTest
-    w = _ventana_visible()
-    curva = _capturar(w, lado='OI')
-    g = w.graph_l
-    w.arm_ecochg_mark(0, 'BL')          # botón de la tabla de OD
-    QTest.mouseClick(g.viewport(), Qt.MouseButton.LeftButton,
-                     Qt.KeyboardModifier.NoModifier, _pixel(g, 0.2, curva))
-    assert 'BL' in g.marks.get(curva, {}), g.marks
-    # Y después de marcar, nada queda armado.
-    assert w.graph_r.mark_mode is None and g.mark_mode is None
-
-
-def test_selecting_the_curve_does_not_disarm_the_mark():
-    """Apretar el botón y después seleccionar la curva (clic en su
-    etiqueta) dejaba la marca desarmada y el clic siguiente no marcaba."""
+def test_the_buttons_mark_where_the_flag_is():
+    """Como en el ABR: la bandera A en el punto y el botón. En clase se
+    movía la bandera, se apretaba PA y no pasaba nada (el botón solo
+    "armaba" la marca y había que hacer además un clic en la curva)."""
     if not HAS_UI:
         return
     from PySide6.QtCore import Qt
@@ -179,27 +159,43 @@ def test_selecting_the_curve_does_not_disarm_the_mark():
     w = _ventana_visible()
     curva = _capturar(w)
     g = w.graph_r
-    w.arm_ecochg_mark(0, 'PS')
-    g.active_curve(curva)
-    assert g.mark_mode == 'PS'
-    QTest.mouseClick(g.viewport(), Qt.MouseButton.LeftButton,
-                     Qt.KeyboardModifier.NoModifier, _pixel(g, 0.8, curva))
-    assert 'PS' in g.marks.get(curva, {}), g.marks
+    ap_lat = w.last_metadata['ecochg_ap_lat']
+    for marca, lat in (('BL', 0.2), ('PS', ap_lat - 0.55),
+                       ('PA', ap_lat + 0.15)):
+        _arrastre(g, _pixel(g, g.inf_a.getXPos()), _pixel(g, lat))
+        QTest.mouseClick(_boton(w, 0, marca), Qt.MouseButton.LeftButton)
+        assert marca in g.marks.get(curva, {}), (marca, g.marks.get(curva))
+        if marca != 'PA':
+            assert abs(g.marks[curva][marca][0] - g.inf_a.getXPos()) < 0.05
+    # El PA se pega al pico aunque la bandera haya quedado corrida.
+    assert abs(g.marks[curva]['PA'][0] - ap_lat) < 0.1
+    assert w.memory[curva]['ECochG'].get('sp_ap') is not None
+
+
+def test_the_flags_show_their_latency():
+    """En ninguna parte de la pantalla se veía en qué latencia estaban las
+    banderas (ABR y ECochG)."""
+    if not HAS_UI:
+        return
+    w = _ventana()
+    g = w.graph_r
+    g.inf_a.setPos((1.35, 0))
+    g.inf_b.setPos((5.5, 0))
+    assert '1.35 ms' in g.inf_a.label.textItem.toPlainText()
+    assert '5.50 ms' in g.inf_b.label.textItem.toPlainText()
 
 
 def test_a_mark_that_cannot_be_placed_says_why():
-    """Sin curva en ese oído, el clic avisa en la barra en vez de callar."""
+    """Sin curva en ese oído, el botón avisa en la barra en vez de callar."""
     if not HAS_UI:
         return
-    from PySide6.QtCore import Qt
-    from PySide6.QtTest import QTest
-    w = _ventana_visible()
+    w = _ventana()
     _capturar(w)                         # solo OD
-    w.arm_ecochg_mark(0, 'BL')
-    g = w.graph_l
-    QTest.mouseClick(g.viewport(), Qt.MouseButton.LeftButton,
-                     Qt.KeyboardModifier.NoModifier, _pixel(g, 0.2))
+    w.mark_ecochg(1, 'BL')
     assert 'curva seleccionada' in w.lbl_info.text(), w.lbl_info.text()
+    w.set_view_mode(True)
+    w.mark_ecochg(0, 'BL')
+    assert 'solo lectura' in w.lbl_info.text(), w.lbl_info.text()
 
 
 def test_the_action_potential_mark_snaps_to_the_peak():
@@ -373,9 +369,6 @@ def test_the_baseline_is_drawn_from_bl_to_fin():
     w = _ventana()
     curva = _capturar(w)
     g = w.graph_r
-    # En el ECochG los cursores A/A' son los límites del área y arrancan
-    # fuera del tramo donde se marca la base.
-    assert g.inf_a.getXPos() >= g.AREA_CURSOR_START_MS
     g.current_lat = 0.15
     g.create_marks('BL')
     xs, ys = g.base_lines[curva].getData()
@@ -386,35 +379,6 @@ def test_the_baseline_is_drawn_from_bl_to_fin():
     assert abs(xs[1] - puestas['FIN']) < 0.05, (xs, puestas)
     g.delete_mark('BL')
     assert curva not in g.base_lines
-
-
-def test_the_cursors_are_the_area_limits():
-    """A es el inicio del área y A' el retorno: moverlos cambia el área y
-    el achurado, y quedan guardados como marcas de la curva."""
-    if not HAS_UI:
-        return
-    w = _ventana()
-    curva = _capturar(w)
-    w.auto_ecochg_mark(0)
-    g = w.graph_r
-    medidas = w.memory[curva]['ECochG']
-    assert medidas.get('area_ratio') is not None
-    marcas = w.memory[curva]['marcas']
-    # El marcado automático deja los cursores en los límites que usó.
-    assert abs(g.inf_a.getXPos() - medidas['inicio']) < 0.05
-    assert abs(g.inf_b.getXPos() - marcas['FIN'][0]) < 0.05
-    area = medidas['area_ps']
-    nuevo_fin = float(marcas['FIN'][0]) - 0.8
-    # Traer A' antes del retorno deja afuera parte del complejo.
-    g.inf_b.setPos((nuevo_fin, 0))
-    nueva = w.memory[curva]['ECochG']
-    assert nueva['area_ps'] < area, (nueva['area_ps'], area)
-    assert abs(w.memory[curva]['marcas']['FIN'][0] - nuevo_fin) < 0.05
-    assert curva in g.area_fills
-    # Y moverlo en el ABR no toca nada del ECochG.
-    w.apply_test_widgets('ABR')
-    g.inf_b.setPos((5.0, 0))
-    assert abs(w.memory[curva]['marcas']['FIN'][0] - nuevo_fin) < 0.05
 
 
 def _pixel(g, lat, curva=None):
@@ -453,35 +417,43 @@ def _ventana_visible():
 
 
 def test_cursor_a_can_be_dragged_before_any_mark():
-    """En clase el A no se dejaba mover: cada recálculo lo devolvía a su
-    lugar de arranque mientras faltara alguna marca."""
+    """Las banderas se arrastran con el mouse aunque no haya marcas."""
     if not HAS_UI:
         return
     w = _ventana_visible()
     _capturar(w)
     g = w.graph_r
+    g.inf_a.setPos((1.0, 0))              # fuera del borde del eje
     x0 = g.inf_a.getXPos()
     _arrastre(g, _pixel(g, x0), _pixel(g, 2.0))
     assert abs(g.inf_a.getXPos() - 2.0) < 0.3, g.inf_a.getXPos()
-    _arrastre(g, _pixel(g, g.inf_b.getXPos(), None), _pixel(g, 4.0))
+    # A' se agarra por arriba: a la altura de la curva, en el borde derecho,
+    # está su etiqueta de intensidad.
+    from PySide6.QtCore import QPointF
+    arriba = g.scale_uv * 0.2
+    _arrastre(g, g.mapFromScene(g.pw.vb.mapViewToScene(
+                  QPointF(g.inf_b.getXPos(), arriba))),
+              g.mapFromScene(g.pw.vb.mapViewToScene(QPointF(4.0, arriba))))
     assert abs(g.inf_b.getXPos() - 4.0) < 0.3, g.inf_b.getXPos()
-
-
-def test_a_mark_is_placed_even_if_the_mouse_moves_a_little():
-    """Apretar y soltar con el mouse algo movido pone la marca armada en
-    vez de desplazar el gráfico."""
-    if not HAS_UI:
-        return
-    from PySide6.QtCore import QPoint
-    w = _ventana_visible()
-    curva = _capturar(w)
-    g = w.graph_r
-    for marca, lat in (('BL', 0.2), ('PS', 0.8), ('PA', 1.35)):
-        w.arm_ecochg_mark(0, marca)
-        p = _pixel(g, lat, curva)
-        _arrastre(g, p, QPoint(p.x() + 9, p.y() + 7), pasos=3)
-        assert marca in g.marks.get(curva, {}), (marca, g.marks.get(curva))
-    assert w.memory[curva]['ECochG'].get('sp_ap') is not None
+    # Y arrastrando la bandera (el rótulo de arriba) la línea sigue al
+    # mouse, no una fracción de su movimiento.
+    class _Arrastre:
+        def __init__(self, x, fin=False):
+            self._p = g.pw.vb.mapViewToScene(QPointF(x, 0))
+            self._fin = fin
+        def button(self):
+            return __import__('PySide6.QtCore', fromlist=['Qt']).Qt.MouseButton.LeftButton
+        def accept(self):
+            pass
+        def ignore(self):
+            pass
+        def scenePos(self):
+            return self._p
+        def isFinish(self):
+            return self._fin
+    for x in (2.5, 3.0):
+        g.inf_a.label.mouseDragEvent(_Arrastre(x, fin=(x == 3.0)))
+    assert abs(g.inf_a.getXPos() - 3.0) < 0.05, g.inf_a.getXPos()
 
 
 def test_the_auto_mark_respects_read_only_sessions():
@@ -536,7 +508,7 @@ def test_the_auto_mark_button_fills_the_table():
     assert medidas.get('faltan') == []
     assert abs(medidas['sp_ap'] - 0.25) < 0.08
     # Las marcas quedan puestas como cualquier otra: se pueden corregir.
-    assert set(w.graph_r.marks[curva]) == set(ecochg.MARKS + ecochg.AREA_MARKS)
+    assert set(w.graph_r.marks[curva]) == set(ecochg.MARKS)
 
 
 def test_the_auto_mark_is_not_the_answer():

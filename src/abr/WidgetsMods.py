@@ -67,12 +67,23 @@ class InfiniteLineLabelMod(InfLineLabel):
         self.pos_line = self.line.getPos()
 
     def mouseDragEvent(self, ev):
-        super().mouseDragEvent(ev)
-        pos = ev.pos()
-        pos = self.mapToItem(self, pos)
-        prev_pos = self.line.getXPos()
-        new_pos = prev_pos + pos.x()/60
-        self.line.setPos([new_pos,0])
+        """Arrastrar la bandera lleva la linea adonde esta el mouse.
+
+        Antes la corria una fraccion del movimiento (desplazamiento / 60):
+        la linea quedaba rezagada y no habia forma de dejarla donde se
+        queria.
+        """
+        if ev.button() != Qt.MouseButton.LeftButton:
+            ev.ignore()
+            return
+        ev.accept()
+        vista = self.line.getViewBox()
+        if vista is None:
+            return
+        x = vista.mapSceneToView(ev.scenePos()).x()
+        self.line.setPos([x, 0])
+        if ev.isFinish():
+            self.line.sigPositionChangeFinished.emit(self.line)
 
 
 class GraphicsLayoutWidgetMod(GraphicsLayoutWidget):

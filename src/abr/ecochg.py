@@ -572,17 +572,20 @@ def calibrate_sp(t, y_sin, y_con, razon, lat_hint=None):
 
 # Marcas que el alumno pone sobre el trazo. No son ondas: son los cuatro
 # puntos que definen las dos razones.
-MARKS = ('BL', 'PS', 'PA')
-# Los límites del área no son marcas con flecha: son los cursores A (INI) y
-# A' (FIN) del gráfico, que se arrastran. Se guardan con las demás marcas.
-AREA_MARKS = ('INI', 'FIN')
+# Se ponen como en el ABR: la bandera A en el punto y el botón de la marca.
+# INI y FIN son los límites del área (inicio de la respuesta y retorno a la
+# base); sin INI, el inicio es donde el trazo se despega de la base.
+MARKS = ('BL', 'INI', 'PS', 'PA', 'FIN')
 MARK_LABELS = {
     'BL': 'Línea de base',
+    'INI': 'Inicio del área',
     'PS': 'Potencial de sumación',
     'PA': 'Potencial de acción',
-    'INI': 'Inicio del área (cursor A)',
-    'FIN': "Retorno a la base (cursor A')",
+    'FIN': 'Retorno a la base (fin del área)',
 }
+# Rótulo corto de cada botón.
+MARK_BUTTONS = {'BL': 'BL', 'INI': 'Ini', 'PS': 'PS', 'PA': 'PA',
+                'FIN': 'Fin'}
 
 
 # ---------------------------------------------------------------------

@@ -42,9 +42,6 @@ class AbrGraph(GraphicsLayoutWidgetMod):
     sig_del_curve = Signal(str)
     sig_change_value_mark = Signal(dict)
     sig_curve_selected = Signal(str)
-    # Una marca armada que no se pudo poner, con el motivo: sin esto el
-    # clic no hacia nada y no habia forma de saber por que.
-    sig_mark_failed = Signal(str)
 
     # Verde para el subpromedio A y cafe para el B, iguales en los dos
     # oidos: no son senial del canal, son la replicabilidad.
@@ -61,10 +58,6 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.window_ms = 12.0
         self.act_curve = None
         self.marks = {}
-        # Marca armada desde la barra del ECochG: mientras haya una, un
-        # clic sobre el grafico la pone. En el ABR no hay ninguna armada
-        # nunca y el clic sigue siendo el de siempre (seleccionar curva).
-        self.mark_mode = None
         # Como se llaman las marcas de la prueba activa: cambia el menu
         # contextual de "Eliminar marcas". Las del ABR son las ondas; las
         # del ECochG son los cuatro puntos que definen las dos razones.
@@ -132,15 +125,8 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # [items])}. Las zonas vienen de ecochg.area_shading, o sea de las
         # mismas cuentas que el numero de la tabla.
         self.area_fills = {}
-        # En el ABR los cursores A/A' miden latencia y amplitud pico a pico.
-        # En el ECochG son los limites del area (ver area_cursor_moved): A
-        # el inicio y A' el retorno a la base, guardados como las marcas
-        # INI y FIN de la curva.
-        self.area_cursors = False
-        self._placing_cursors = False
         self.configure_pyqtgraph()
         self.setup_ui_elements()
-        self.pw.scene().sigMouseClicked.connect(self.click_mark)
         self.colors_side()
         self.inifine_ab()
 
@@ -177,18 +163,6 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         def solo_desplazar(ev, axis=None):
             if ev.button() == Qt.MouseButton.RightButton:
                 ev.ignore()
-                return
-            if (self.mark_mode is not None
-                    and ev.button() == Qt.MouseButton.LeftButton):
-                # Con una marca armada, apretar y soltar con el mouse un
-                # poco movido (un touchpad lo hace casi siempre) es poner la
-                # marca, no desplazar el grafico. Antes Qt lo tomaba como
-                # arrastre, la marca no se ponia nunca y solo andaba el
-                # marcado automatico.
-                ev.accept()
-                if ev.isFinish():
-                    self.place_armed_mark(
-                        view_box.mapSceneToView(ev.scenePos()).x())
                 return
             arrastre(ev, axis)
         view_box.mouseDragEvent = solo_desplazar
@@ -248,17 +222,14 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         opst = {'position':0.9, 'color': (255,255,255), 'fill': (0,0,0,255), 'movable': True}
         name_a = f"A{self.side}"
         name_b = f"B{self.side}"
-        #Lineas infinitas
-        self.inf_a = InfiniteLineMod(lbl='A', pos=pos_A, movable=True, angle=90, pen=pen1, labelOpts=opst, name=name_a)
-        self.inf_b = InfiniteLineMod(lbl="A'", pos=pos_B, movable=True, angle=90, pen=pen1, labelOpts=opst, name=name_b)
+        # Lineas infinitas. La bandera dice su latencia ({value} lo
+        # rellena pyqtgraph al moverla): antes decia solo "A" y no habia en
+        # ninguna parte de la pantalla en que latencia estaba.
+        self.inf_a = InfiniteLineMod(lbl='A {value:.2f} ms', pos=pos_A, movable=True, angle=90, pen=pen1, labelOpts=opst, name=name_a)
+        self.inf_b = InfiniteLineMod(lbl="A' {value:.2f} ms", pos=pos_B, movable=True, angle=90, pen=pen1, labelOpts=opst, name=name_b)
         #Posición en X de las lineas infinitas
         self.inf_a.sigPositionChanged.connect(self.get_amplitude)
         self.inf_b.sigPositionChanged.connect(self.get_amplitude)
-        # En el ECochG, mover un cursor mueve un limite del area.
-        self.inf_a.sigPositionChanged.connect(
-            lambda: self.area_cursor_moved('INI'))
-        self.inf_b.sigPositionChanged.connect(
-            lambda: self.area_cursor_moved('FIN'))
         #Se agregan lineas infinitas a la grafica
         self.pw.addItem(self.inf_a)
         self.pw.addItem(self.inf_b)
@@ -534,52 +505,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         #se actualizan los datos de las marcas
         #print(self.marks[self.act_curve])
 
-    # Marcas que no se dibujan con flecha: son los cursores A/A' del ECochG.
-    AREA_MARKS = ('INI', 'FIN')
-    # Donde arrancan los cursores del ECochG mientras no hay medida: el A
-    # fuera del tramo pre-estimulo, que es donde se marca BL.
-    AREA_CURSOR_START_MS = 0.5
-
-    def place_area_cursors(self, x_ini, x_fin, reset=False):
-        """Lleva A/A' a los limites del area de la curva activa, sin que
-        eso cuente como que el alumno los movio.
-
-        Un limite en None deja el cursor donde esta: antes lo devolvia a
-        su lugar de arranque y, como el recalculo corre en cada movimiento,
-        el A no se dejaba arrastrar mientras faltara alguna marca. Solo
-        `reset` (cambio de prueba o de curva) los lleva al arranque.
-        """
-        self._placing_cursors = True
-        try:
-            if x_ini is not None:
-                self.inf_a.setPos((float(x_ini), 0))
-            elif reset:
-                self.inf_a.setPos((self.AREA_CURSOR_START_MS, 0))
-            if x_fin is not None:
-                self.inf_b.setPos((float(x_fin), 0))
-            elif reset:
-                self.inf_b.setPos((self.window_ms, 0))
-        finally:
-            self._placing_cursors = False
-
-    def area_cursor_moved(self, mark):
-        """El alumno arrastro A o A': ese limite del area es ahora suyo."""
-        if (not self.area_cursors or self._placing_cursors or self.read_only
-                or self.act_curve not in self.data):
-            return
-        linea = self.inf_a if mark == 'INI' else self.inf_b
-        x = max(0.0, min(self.window_ms, float(linea.getXPos())))
-        xs, ys = self.data[self.act_curve]['ipsi_xy']
-        i = self.find_idx(xs, x)
-        self.marks.setdefault(self.act_curve, {})[mark] = [xs[i], ys[i]]
-        self.refresh_base_line(self.act_curve)
-        self.update_value_mark(mark, curve=self.act_curve)
-
     def get_amplitude(self):
-        if self.area_cursors:
-            # En el ECochG los cursores no miden amplitud pico a pico: son
-            # los limites del area (ver area_cursor_moved).
-            return
         # Obtener posiciones actuales de las líneas
         lat_a = self.inf_a.getXPos()
         lat_b = self.inf_b.getXPos()
@@ -629,15 +555,6 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.mark_labels = tuple(labels)
         self.snap_marks = tuple(snap)
         self.notify_create = bool(notify)
-        self.mark_mode = None
-        self.area_cursors = 'BL' in self.mark_labels
-        if self.area_cursors:
-            # Fuera del tramo donde se marca BL, hasta que haya medida.
-            self.place_area_cursors(None, None, reset=True)
-
-    def arm_mark(self, mark):
-        """Deja armada la marca que el proximo clic va a poner."""
-        self.mark_mode = mark
 
     def snap_to_peak(self, x):
         """Minimo del trazo cerca de x.
@@ -654,31 +571,23 @@ class AbrGraph(GraphicsLayoutWidgetMod):
             return x
         return float(xs[cerca[int(np.argmin(ys[cerca]))]])
 
-    def click_mark(self, ev):
-        """Clic sobre la curva con una marca armada: la pone ahi."""
-        if ev.button() != Qt.MouseButton.LeftButton:
-            return
-        if self.place_armed_mark(self.pw.vb.mapSceneToView(ev.scenePos()).x()):
-            ev.accept()
+    def mark_at_cursor(self, mark):
+        """Pone `mark` en la curva activa, en la latencia de la bandera A.
 
-    def place_armed_mark(self, x):
-        """Pone la marca armada en x (clic o clic con el mouse movido)."""
-        if self.mark_mode is None:
-            return False
+        Es como se marca en el ABR: se lleva la bandera a la onda y se
+        aprieta el boton. Devuelve None si la puso, o el motivo si no.
+        """
         if self.read_only:
-            self.sig_mark_failed.emit("Sesión de solo lectura: no se puede marcar")
-            return False
+            return "Sesión de solo lectura: no se puede marcar"
         if self.act_curve is None or self.act_curve not in self.data:
-            self.sig_mark_failed.emit(
-                "No hay curva seleccionada en este oído: haga clic en la "
-                "etiqueta de la curva y vuelva a marcar")
-            return False
-        x = float(x)
-        if self.mark_mode in self.snap_marks:
+            return ("No hay curva seleccionada en este oído: haga clic en "
+                    "la etiqueta de la curva y vuelva a marcar")
+        x = float(self.inf_a.getXPos())
+        if mark in self.snap_marks:
             x = self.snap_to_peak(x)
         self.current_lat = x
-        self.create_marks(self.mark_mode)
-        return True
+        self.create_marks(mark)
+        return None
 
     # Cuanto se puede correr una marca que se pega al trazo, en ms.
     SNAP_MS = 0.4
@@ -717,10 +626,6 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         que habia, y una marca que se habia quedado sin dibujo (ver
         delete_all_marks) no volvia a aparecer nunca, aunque la latencia
         siguiera en la tabla."""
-        if lbl_mark in self.AREA_MARKS:
-            # Sin flecha: la posicion la muestra el cursor. Solo la base.
-            self.refresh_base_line(curve_name)
-            return
         x, y = self.marks[curve_name][lbl_mark]
         # La flecha va POR ENCIMA del trazo en pantalla: con el eje
         # invertido, "encima" es restar.
@@ -891,14 +796,10 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # Una base sin FIN llega al borde: si el borde se movio, ella tambien.
         for nombre in list(self.base_lines):
             self.refresh_base_line(nombre)
-        self._placing_cursors = True
-        try:
-            for item in (getattr(self, 'inf_a', None),
-                         getattr(self, 'inf_b', None)):
-                if item is not None and item.getXPos() > self.window_ms:
-                    item.setPos((self.window_ms, 0))
-        finally:
-            self._placing_cursors = False
+        for item in (getattr(self, 'inf_a', None),
+                     getattr(self, 'inf_b', None)):
+            if item is not None and item.getXPos() > self.window_ms:
+                item.setPos((self.window_ms, 0))
 
     # Divisiones de la grilla por ventana de escala: 6 da la grilla de
     # 1 uV del ABR a 6 uV.

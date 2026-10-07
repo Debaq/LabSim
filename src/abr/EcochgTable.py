@@ -4,19 +4,17 @@ La tabla del ABR (AbrTable) no sirve para esto: ahí se miden cinco ondas
 con sus latencias, sus interpicos y la razón V/I. Acá se miden tres
 potenciales y lo que se informa son RAZONES entre dos de ellos.
 
-El alumno arma la medida poniendo tres marcas sobre el trazo (barra de
-arriba, clic sobre la curva) y llevando los dos cursores del gráfico:
+El alumno arma la medida como en el ABR: lleva la bandera A del gráfico al
+punto y aprieta el botón de la marca (barra de arriba):
 
     BL   línea de base, en el tramo previo a la respuesta
+    Ini  inicio del área (si no se marca, donde el trazo se despega)
     PS   hombro del potencial de sumación (inicio del N1)
-    PA   pico del potencial de acción
-    A    inicio del área (si no se mueve, donde el trazo se despega)
-    A'   donde el complejo vuelve a la línea de base
+    PA   pico del potencial de acción (se pega al pico más cercano)
+    Fin  donde el complejo vuelve a la línea de base (fin del área)
 
 Con BL, PS y PA ya hay razón de amplitudes; el área y el ancho del complejo
-necesitan además el retorno (A'). Lo que falta se dice en la celda, porque un
-número que no aparece sin explicación se lee como "este examen no lo
-tiene".
+necesitan además el retorno (Fin).
 
 El corrimiento por tasa no es una medida de una curva sola: sale de
 comparar la curva más lenta con la más rápida que el alumno haya
@@ -27,7 +25,7 @@ mismo nivel (ver ecochg.polarity_shift).
 # pylint: disable=no-name-in-module
 from PySide6.QtCore import QCoreApplication, Qt, Signal
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import (QButtonGroup, QHBoxLayout, QHeaderView, QLabel,
+from PySide6.QtWidgets import (QHBoxLayout, QHeaderView, QLabel,
                                QTableWidget, QTableWidgetItem, QToolButton,
                                QVBoxLayout, QWidget)
 
@@ -70,9 +68,8 @@ REQUIERE = {
 class EcochgTable(QWidget):
     """Medidas del ECochG de un oído, con la barra de marcas."""
 
-    # Marca que el alumno dejó armada (o None al desarmarla): el gráfico la
-    # pone donde haga clic.
-    sig_arm_mark = Signal(int, object)
+    # Marca pedida con su botón: se pone en la bandera A del gráfico.
+    sig_mark = Signal(int, str)
     # Marcado automático del equipo sobre la curva seleccionada.
     sig_auto_mark = Signal(int)
 
@@ -97,18 +94,15 @@ class EcochgTable(QWidget):
         self.label = QLabel(self.side_text)
         cabecera.addWidget(self.label)
         cabecera.addStretch(1)
-        # No exclusivo: el mismo botón arma y desarma la marca, y volver a
-        # apretarlo tiene que soltarla (con un grupo exclusivo, Qt no deja
-        # destildar el que ya está tildado).
-        self.botones = QButtonGroup(self)
-        self.botones.setExclusive(False)
+        self.botones = []
         for marca in ecochg.MARKS:
             btn = QToolButton(self)
-            btn.setText(marca)
-            btn.setCheckable(True)
-            btn.setToolTip(ecochg.MARK_LABELS[marca])
-            self.botones.addButton(btn)
-            btn.clicked.connect(lambda _=False, m=marca: self._armar(m))
+            btn.setText(ecochg.MARK_BUTTONS[marca])
+            btn.setToolTip(f"{ecochg.MARK_LABELS[marca]}: se pone donde "
+                           "está la bandera A")
+            btn.clicked.connect(
+                lambda _=False, m=marca: self.sig_mark.emit(self.side, m))
+            self.botones.append(btn)
             cabecera.addWidget(btn)
         # Marcado automático, como el de cualquier equipo: pone las cuatro
         # marcas sobre el trazo y se pueden corregir a mano después. No es
@@ -137,29 +131,6 @@ class EcochgTable(QWidget):
             f"QTableWidget::item{{ background-color:{color}; }}")
         layout.addWidget(self.tabla)
         self.clear_all()
-
-    def _armar(self, marca) -> None:
-        """Arma o desarma una marca (el mismo botón hace las dos cosas)."""
-        pulsado = None
-        for btn in self.botones.buttons():
-            if btn.text() == marca:
-                pulsado = btn
-            else:
-                btn.setChecked(False)
-        activa = marca if (pulsado is not None and pulsado.isChecked()) else None
-        self.sig_arm_mark.emit(self.side, activa)
-
-    def armed(self):
-        """Marca armada en este momento, o None."""
-        for btn in self.botones.buttons():
-            if btn.isChecked():
-                return btn.text()
-        return None
-
-    def disarm(self) -> None:
-        """Suelta la marca armada (después de ponerla o de cambiar de curva)."""
-        for btn in self.botones.buttons():
-            btn.setChecked(False)
 
     # ------------------------------------------------------------ valores
 

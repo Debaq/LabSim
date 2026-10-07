@@ -3856,6 +3856,18 @@ referencia. Lo que se decidió:
      recálculo soltaba la marca). Ahora solo se suelta al poner una marca.
   Si igual no se puede poner, la barra de estado dice por qué (solo lectura,
   o no hay curva seleccionada en ese oído).
+- **Marcado del ECochG como el del ABR (2026-10-07).** Lo anterior seguía sin
+  servir en clase: el docente movía la bandera A, apretaba PA y no pasaba
+  nada, porque el botón solo "armaba" la marca y había que hacer además un
+  clic sobre la curva. Ahora el botón pone la marca en la latencia de la
+  bandera A (PA se pega al pico más cercano). Los límites del área dejaron de
+  ser los cursores y son dos marcas más, **Ini** y **Fin**, con su botón; las
+  banderas quedan libres para marcar, igual que en el ABR. Se sacó todo lo de
+  "armar" (clic y arrastre sobre el gráfico).
+- **Cada bandera dice su latencia** ("A 1.35 ms"), en el ABR y el ECochG: no
+  se veía en ninguna parte de la pantalla.
+- **Arrastrar la bandera mueve la línea adonde está el mouse.**
+  `InfiniteLineLabelMod` la corría una fracción del movimiento (/60).
 - **Achurado de las dos áreas** (`ecochg.area_shading`, `AbrGraph.set_area_shading`):
   PS en azul, PA en naranja, con diagonales cruzadas. Sale de las mismas
   cuentas que la tabla (`_area_zones`), así que lo achurado es el número.
