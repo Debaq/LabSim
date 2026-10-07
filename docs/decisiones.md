@@ -4047,3 +4047,31 @@ Python, junto con las consultas nuevas -- carpetas, impacto del borrado, lista
 filtrada, selector de agenda sin archivadas, borrado en tanda y borrar carpeta
 sin perder fichas. Falta verlo en el navegador: la barra de acciones en tanda,
 el menú de carpetas y la densidad de la tabla.
+
+## Parámetros avanzados conectados (2026-10-07)
+
+Estaban en el diálogo sin hacer nada (`UNCONNECTED_SETTINGS`). El docente pidió
+conectarlos todos; van por grupos, cada uno con su test en
+`tests/test_abr_parametros_avanzados.py`.
+
+### Filtros y red
+
+- **Notch 50/60 Hz.** El zumbido dura todo el registro y la época (10-12 ms) es
+  más corta que un ciclo de 50 Hz, así que el notch no se aplica filtrando la
+  época recortada: `mains_interference` saca la componente que cae en su
+  frecuencia (uno de 60 con red de 50 no saca nada; uno de 50 deja los
+  armónicos de 150/250 Hz, que son los que sobreviven al pasa-alto del ABR).
+  Sobre la respuesta sí se filtra (`ABRGenerator.notch`, fase cero, Q 25). Al
+  ruido de EEG no: filtrar cada época recortada le dejaba una oscilación de
+  red en los bordes. Como es angosto, solo deforma lo que vive cerca de la red
+  (latencia media, Na-Pa); al ABR y al ECochG casi no les hace nada. Se
+  probó primero la idea de que deformaba el PS del ECochG y no es así.
+- **Pendiente** (6-48 dB/oct): orden del Butterworth = pendiente / 6. Por
+  defecto 24 (orden 4), casi lo que el modelo usaba fijo (4-6 según el corte).
+  Fase cero: no corre latencias. Pendiente fuerte = más ringing; suave = más
+  energía fuera de la banda (curva "peluda"). Con ruido blanco una pendiente
+  suave da MENOS desvío total, porque también atenúa dentro de la banda.
+- **Jitter de la tasa**: la parte del zumbido enganchada al estímulo
+  (`MAINS_COHERENT`) se multiplica por exp(-jitter/5%): con 10% queda un
+  octavo y el resto se promedia como ruido.
+

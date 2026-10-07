@@ -28,7 +28,8 @@ import numpy as np
 
 from abr import ecochg
 from abr.ABR_generator import (AIR_MAX_OUTPUT_DB, BONE_MAX_OUTPUT_DB,
-                               CASE_REFERENCE_DEFAULT, NOISE_FLOOR_UV,
+                               CASE_REFERENCE_DEFAULT, DEFAULT_FILTER_SLOPE,
+                               NOISE_FLOOR_UV,
                                NOISE_REF_SWEEPS, PATHOLOGY_MAP, RATE_AMP_DECAY,
                                RATE_LAT_SLOPE, RATE_REF, SAMPLES_PER_MS,
                                STIM_MAP, TRANSDUCER_LATENCY_MS, ABRGenerator,
@@ -189,9 +190,13 @@ class ECochGGenerator:
                                             pathology, neural)
         y_ref, _ = self.abr.build_polarity_curve(
             t, v_ref, stimulus_config['pol'], pathology, neural, 1.0)
+        notch = float(stimulus_config.get('notch_hz') or 0.0)
+        if notch:
+            y_ref = self.abr.notch(y_ref, fs, notch)
         y_ref = self.abr.apply_filters(
             y_ref, float(stimulus_config['filter_down']),
-            float(stimulus_config['filter_passhigh']), fs)
+            float(stimulus_config['filter_passhigh']), fs,
+            slope_db=stimulus_config.get('filter_slope'))
         desde, hasta = self.abr.fsp_window(population)
         vent = (t >= desde) & (t <= hasta)
         a_ref = float(np.sqrt(np.mean(y_ref[vent] ** 2))) if vent.any() else 0.0
@@ -308,6 +313,13 @@ class ECochGGenerator:
         # Drift y artefacto del transductor: son del equipo, valen igual.
         clamp = (bool(technical_config.get('tube_clamped'))
                  and transducer == 'insert_earphone')
+        # Notch sobre la respuesta, no sobre el ruido (ver el comentario en
+        # ABRGenerator.generate_curve y ABRGenerator.notch).
+        notch = float(technical_config.get('notch_hz') or 0.0)
+        if notch:
+            y_target = abr.notch(y_target, fs, notch)
+            y_target_a = abr.notch(y_target_a, fs, notch)
+            y_target_b = abr.notch(y_target_b, fs, notch)
         y_drift = abr.add_baseline_drift(t, rng)
         y_artifact = abr.add_transducer_artifact(
             t, transducer, stimulus_config['int'], stimulus_config.get('pol'))
@@ -336,8 +348,11 @@ class ECochGGenerator:
         fs_ref = (len(t_ref) - 1) / (t_ref[-1] / 1000.0)
         sigma, referencia = self.reference_sigma(
             t_ref, fs_ref, population, pathology, neural, baseline,
-            click_baseline, threshold, stimulus_config, case_config,
-            desviaciones, repro_shift)
+            click_baseline, threshold,
+            dict(stimulus_config,
+                 notch_hz=technical_config.get('notch_hz'),
+                 filter_slope=technical_config.get('filter_slope')),
+            case_config, desviaciones, repro_shift)
         if sigma:
             # El ruido es el EEG del paciente, pero el electrodo de oido capta
             # solo una parte (ver ecochg.EEG_PICKUP).
@@ -375,21 +390,28 @@ class ECochGGenerator:
         bloque_actual = abr.noise_blocks_done(accepted, growth_target)
         accepted = accepted * entraron
 
-        red_coh = 0.8 * abr.mains_interference(t, sin_tierra, desbalance, rng)
-        inc_a = 0.6 * abr.mains_interference(t, sin_tierra, desbalance, rng)
-        inc_b = 0.6 * abr.mains_interference(t, sin_tierra, desbalance, rng)
+        pendiente = technical_config.get('filter_slope') or DEFAULT_FILTER_SLOPE
+        jitter_tasa = float(technical_config.get('rate_jitter_pct') or 0.0)
+        red_coh = (0.8 * abr.jitter_coherence(jitter_tasa)
+                   * abr.mains_interference(t, sin_tierra, desbalance, rng,
+                                            notch))
+        inc_a = 0.6 * abr.mains_interference(t, sin_tierra, desbalance, rng,
+                                             notch)
+        inc_b = 0.6 * abr.mains_interference(t, sin_tierra, desbalance, rng,
+                                             notch)
         red = red_coh + (inc_a + inc_b) / 2.0
 
         hp = float(stimulus_config['filter_passhigh'])
         lp = float(stimulus_config['filter_down'])
-        y_final = abr.apply_filters(y_clean + ruido + red, lp, hp, fs)
+        y_final = abr.apply_filters(y_clean + ruido + red, lp, hp, fs,
+                                    slope_db=pendiente)
         sub_a = abr.apply_filters(y_clean_a + ruido_a + red_coh + inc_a,
-                                  lp, hp, fs)
+                                  lp, hp, fs, slope_db=pendiente)
         sub_b = abr.apply_filters(y_clean_b + ruido_b + red_coh + inc_b,
-                                  lp, hp, fs)
+                                  lp, hp, fs, slope_db=pendiente)
         residual_nv = float(np.std(sub_a - sub_b) / 2.0 * 1000.0)
 
-        senial = abr.apply_filters(y_target, lp, hp, fs)
+        senial = abr.apply_filters(y_target, lp, hp, fs, slope_db=pendiente)
         desde, hasta = FSP_WINDOW_MS
         vent = (t >= desde) & (t <= hasta)
         a_rms = float(np.sqrt(np.mean(senial[vent] ** 2))) if vent.any() else 0.0

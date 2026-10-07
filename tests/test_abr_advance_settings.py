@@ -36,7 +36,7 @@ except ImportError as exc:          # sin PySide6 instalado
 # Las que el generador YA usa.
 CLAVES = {'transducer', 'montage', 'window_ms', 'electrodes', 'impedance',
           'artifact_reject_uv', 'residual_noise_nv', 'fsp_criterion',
-          'burst_envelope'}
+          'burst_envelope', 'notch_hz', 'filter_slope', 'rate_jitter_pct'}
 
 # Y las que el diálogo muestra pero el modelo todavía no lee. Están porque
 # el equipo real las tiene y el alumno las busca --el 2-1-2 del tone burst

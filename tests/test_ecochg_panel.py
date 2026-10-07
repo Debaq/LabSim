@@ -448,10 +448,11 @@ def test_cursor_a_can_be_dragged_before_any_mark():
     x0 = g.inf_a.getXPos()
     _arrastre(g, _pixel(g, x0), _pixel(g, 2.0))
     assert abs(g.inf_a.getXPos() - 2.0) < 0.3, g.inf_a.getXPos()
-    # A' se agarra por arriba: a la altura de la curva, en el borde derecho,
-    # está su etiqueta de intensidad.
+    # A' se agarra por la parte de abajo de la línea: a la altura de la
+    # curva, en el borde derecho, está su etiqueta de intensidad, y arriba
+    # su bandera.
     from PySide6.QtCore import QPointF
-    arriba = g.scale_uv * 0.2
+    arriba = -g.scale_uv * 0.3
     _arrastre(g, g.mapFromScene(g.pw.vb.mapViewToScene(
                   QPointF(g.inf_b.getXPos(), arriba))),
               g.mapFromScene(g.pw.vb.mapViewToScene(QPointF(4.0, arriba))))

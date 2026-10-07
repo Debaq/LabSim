@@ -557,6 +557,20 @@ AGITATION_REJECT_FACTOR = 2.0
 # que antes de separarlo.
 MAINS_COHERENT = 0.8
 MAINS_INCOHERENT = 0.6
+# Jitter de la tasa (Parametros avanzados): aleatorizar el intervalo entre
+# estimulos rompe la fase fija entre el estimulo y la red, asi que la parte
+# del zumbido que quedaba "enganchada" (MAINS_COHERENT) pasa a promediarse
+# como ruido. Factor que le queda a la parte coherente por cada % de jitter:
+# con 5% queda un tercio, con 10% un octavo, con 20% casi nada.
+MAINS_JITTER_DECAY_PCT = 5.0
+# Notch: Q del filtro de red. Un notch de equipo es angosto (~2 Hz a 50 Hz):
+# saca la fundamental y deja pasar los armonicos, que son los que sobreviven
+# al pasa-alto del ABR.
+NOTCH_Q = 25.0
+# Pendiente de los filtros cuando el equipo no trae una (dB/oct por pasada;
+# orden = pendiente / 6). 24 dB/oct = orden 4, casi lo que usaba el modelo
+# antes de que la pendiente fuera configurable.
+DEFAULT_FILTER_SLOPE = 24.0
 
 # Reflejo post-auricular (PAM): contraccion del musculo auricular
 # posterior ante un sonido fuerte. Es miogenico, no neural, pero se
@@ -1465,7 +1479,7 @@ class ABRGenerator:
         desbalance = max(valores) - min(valores)
         return hay_registro, sin_tierra, max(valores), desbalance
 
-    def mains_interference(self, t, sin_tierra, desbalance, rng):
+    def mains_interference(self, t, sin_tierra, desbalance, rng, notch_hz=0.0):
         """Zumbido de red por desbalance de electrodos o falta de tierra.
 
         Con los armonicos, no solo la fundamental: a 50 Hz el pasa-alto de
@@ -1486,9 +1500,22 @@ class ABRGenerator:
         zumbido = np.zeros_like(t)
         for armonico, peso in ((1, 1.0), (3, 0.5), (5, 0.3)):
             fase = rng.uniform(0, 2 * np.pi)
+            # El notch saca la componente que cae en su frecuencia. Se aplica
+            # aca y no filtrando la epoca: el zumbido dura todo el registro y
+            # el equipo filtra el registro continuo, pero la epoca (10-12 ms)
+            # es mas corta que un ciclo de 50 Hz y filtrarla recortada no lo
+            # sacaria. Un notch de 60 Hz con red de 50 no saca nada, y uno
+            # de 50 deja los armonicos: los dos son lo que pasa en el equipo.
+            if notch_hz and abs(MAINS_HZ * armonico - float(notch_hz)) < 1.0:
+                continue
             zumbido += peso * np.sin(
                 2 * np.pi * MAINS_HZ * armonico * t / 1000.0 + fase)
         return amp * zumbido
+
+    @staticmethod
+    def jitter_coherence(jitter_pct):
+        """Cuanto zumbido queda enganchado al estimulo con ese jitter."""
+        return float(np.exp(-float(jitter_pct or 0.0) / MAINS_JITTER_DECAY_PCT))
 
     def reject_impedance_factor(self, impedance):
         """Cuanto mas seguido cruza el umbral de rechazo por impedancia.
@@ -1875,7 +1902,8 @@ class ABRGenerator:
     # FILTROS (limpios: solo butterworth, sin hacks)
     # =====================================================================
 
-    def apply_filters(self, y, filter_low, filter_high, fs):
+    def apply_filters(self, y, filter_low, filter_high, fs, notch_hz=0.0,
+                      slope_db=None):
         """Butterworth pasa-bajo + pasa-alto, en secciones de segundo orden.
 
         fs LLEGA CALCULADA del eje temporal real (ver generate_curve): 500
@@ -1890,18 +1918,27 @@ class ABRGenerator:
 
         Los efectos morfologicos (ensanchamiento, drift) son parte del
         modelo de ruido, no del filtro.
+
+        `slope_db` es la pendiente del equipo (Parametros avanzados), en
+        dB/oct por pasada: orden = pendiente / 6. Como el filtrado es de fase
+        cero no corre latencias, pero una pendiente fuerte hace "ringing"
+        (oscilaciones antes y despues de cada onda) y una suave deja pasar
+        ruido de fuera de la banda. `notch_hz` es el filtro de red (ver
+        notch()).
         """
         nyq = fs / 2
         out = y.copy()
+        orden = (max(1, int(round(float(slope_db) / 6.0)))
+                 if slope_db else None)
 
         if 0 < filter_low < nyq:
             low_n = min(filter_low / nyq, 0.99)
-            order = 4 if filter_low >= 3000 else (5 if filter_low >= 2000 else 6)
+            order = orden or (4 if filter_low >= 3000 else (5 if filter_low >= 2000 else 6))
             out = dsp.filtfilt(dsp.butter(order, low_n, 'low'), out)
 
         if filter_high > 0:
             high_n = min(max(filter_high / nyq, 1e-5), 0.99)
-            order = 6 if filter_high >= 150 else (5 if filter_high >= 50 else 4)
+            order = orden or (6 if filter_high >= 150 else (5 if filter_high >= 50 else 4))
             filt = dsp.butter(order, high_n, 'high')
             # La epoca NO es la senial: es una ventana sobre un registro
             # continuo que antes y despues del estimulo esta en la linea de
@@ -1930,7 +1967,33 @@ class ABRGenerator:
             else:
                 out = dsp.filtfilt(filt, out)
 
+        if notch_hz:
+            out = self.notch(out, fs, float(notch_hz))
         return out
+
+    @staticmethod
+    def notch(y, fs, f0, q=NOTCH_Q):
+        """Filtro de red de fase cero sobre la epoca.
+
+        Se aplica en frecuencia sobre la epoca prolongada con su propio borde
+        (la linea de base), igual que el pasa-alto: lo que se filtra aca es
+        la RESPUESTA y el ruido, que fuera de la epoca son base. El zumbido
+        mismo lo saca mains_interference. Como es angosto, solo deforma lo
+        que tiene energia cerca de la red: al ABR y al ECochG (cortos) y a
+        los corticales (lentos) casi no les hace nada; a la respuesta de
+        latencia media (Na-Pa, 20-50 Hz) le come amplitud y le deja una
+        ondulacion, que es el costo clasico de usarlo.
+        """
+        if f0 <= 0 or f0 >= fs / 2:
+            return y
+        relleno = int(min(3.0 * q / (np.pi * f0) * fs, 20 * len(y)))
+        ext = np.pad(np.asarray(y, dtype=float), relleno, mode='edge')
+        n = 1 << (len(ext) - 1).bit_length()
+        f = np.fft.rfftfreq(n, 1.0 / fs)
+        d = f * f - f0 * f0
+        gan = np.abs(d) / np.sqrt(d * d + (f * f0 / q) ** 2 + 1e-30)
+        out = np.fft.irfft(np.fft.rfft(ext, n) * gan, n)[:len(ext)]
+        return out[relleno:relleno + len(y)]
 
     # =====================================================================
     # FSP / TRANSICION
@@ -2281,6 +2344,8 @@ class ABRGenerator:
 
         sin_tierra = not conectado('ground')
         reject = float(technical_config.get('artifact_reject_uv') or 0.0)
+        notch = float(technical_config.get('notch_hz') or 0.0)
+        pendiente = technical_config.get('filter_slope') or DEFAULT_FILTER_SLOPE
         # Banda de registro del equipo. El pasa-bajo se limita a lo que el
         # muestreo del monitor puede mostrar (Nyquist), pero el ANCHO de
         # banda sigue contando en la amplitud: es el efecto que el alumno
@@ -2320,15 +2385,17 @@ class ABRGenerator:
             # EEG de fondo llevado a la banda del equipo y recien ahi
             # escalado: la amplitud es la de la banda, no la de banda ancha.
             crudo = self.sweep_noise(n_pad, 1, rng)[0]
-            crudo = self.apply_filters(crudo, lp_display, hp, fs)[margen:margen + n]
+            crudo = self.apply_filters(crudo, lp_display, hp, fs,
+                                       slope_db=pendiente)[margen:margen + n]
             trazo = crudo / (float(np.std(crudo)) or 1.0) * amp
             # Zumbido de red, a la amplitud del canal sin promediar (ver
             # MAINS_MONITOR_GAIN): a 100 Hz de pasa-alto sobreviven los
             # armonicos, la fundamental de 50 no -- bajar el pasa-alto la
             # deja entrar entera, que es justo lo que hay que mostrar.
             red = MAINS_MONITOR_GAIN * self.mains_interference(
-                t_pad, sin_tierra, desbalance, rng)
-            red = self.apply_filters(red, lp_display, hp, fs)[margen:margen + n]
+                t_pad, sin_tierra, desbalance, rng, notch)
+            red = self.apply_filters(red, lp_display, hp, fs,
+                                     slope_db=pendiente)[margen:margen + n]
             trazo = trazo + red
             # Artefactos de movimiento/EMG: tantos tiros como barridos entren
             # en el trozo, con LA MISMA fraccion que el promediador descarta
@@ -2478,6 +2545,10 @@ class ABRGenerator:
         # de aire": estimula la coclea directo y tiene su propio bloque
         # normativo (bone_conduction), asi que la via la manda el equipo.
         transducer = technical_config.get('transducer', 'insert_earphone')
+        # Filtros y red del equipo (Parametros avanzados).
+        notch = float(technical_config.get('notch_hz') or 0.0)
+        pendiente = technical_config.get('filter_slope') or DEFAULT_FILTER_SLOPE
+        jitter_tasa = float(technical_config.get('rate_jitter_pct') or 0.0)
         pathway = ('air_conduction' if 'pathway' not in stimulus_config
                    else stimulus_config['pathway'])
         if transducer == 'bone_vibrator':
@@ -2734,6 +2805,16 @@ class ABRGenerator:
         # Que A/B NO lo delate es el punto (ver postauricular_reflex).
         y_pam = self.postauricular_reflex(
             t, (case_config or {}).get('pam'), stimulus_config['int'])
+        if notch:
+            # El notch se aplica a lo que esta enganchado al estimulo (la
+            # respuesta y lo que la acompania), no al ruido: el equipo filtra
+            # el EEG continuo y ahi le saca casi nada, pero filtrar cada
+            # epoca recortada le dejaba una oscilacion de red en los bordes.
+            # La red misma la saca mains_interference.
+            y_target = self.notch(y_target, fs, notch)
+            y_target_a = self.notch(y_target_a, fs, notch)
+            y_target_b = self.notch(y_target_b, fs, notch)
+            y_pam = self.notch(y_pam, fs, notch)
         y_clean = y_target + y_drift + y_artifact + y_pam
         y_clean_a = y_target_a + y_drift + y_artifact + y_pam
         y_clean_b = y_target_b + y_drift + y_artifact + y_pam
@@ -2793,7 +2874,7 @@ class ABRGenerator:
                 cm_sigma_gain)
             y_ref = self.apply_filters(
                 y_ref, float(stimulus_config['filter_down']),
-                float(stimulus_config['filter_passhigh']), fs)
+                float(stimulus_config['filter_passhigh']), fs, slope_db=pendiente)
             desde, hasta = self.fsp_window(population)
             vent = (t >= desde) & (t <= hasta)
             a_ref = float(np.sqrt(np.mean(y_ref[vent] ** 2))) if vent.any() else 0.0
@@ -2893,12 +2974,13 @@ class ABRGenerator:
         # cancelaba exacto en A-B: el equipo lo dibujaba, pero el residual y
         # el FSP no se enteraban y sin tierra se seguia declarando respuesta
         # presente sobre un trazo inservible.
-        red_coh = MAINS_COHERENT * self.mains_interference(
-            t, sin_tierra, desbalance, rng)
+        red_coh = (MAINS_COHERENT * self.jitter_coherence(jitter_tasa)
+                   * self.mains_interference(
+                       t, sin_tierra, desbalance, rng, notch))
         inc_a = MAINS_INCOHERENT * self.mains_interference(
-            t, sin_tierra, desbalance, rng)
+            t, sin_tierra, desbalance, rng, notch)
         inc_b = MAINS_INCOHERENT * self.mains_interference(
-            t, sin_tierra, desbalance, rng)
+            t, sin_tierra, desbalance, rng, notch)
         red_a = red_coh + inc_a
         red_b = red_coh + inc_b
         red = red_coh + (inc_a + inc_b) / 2.0
@@ -2917,7 +2999,7 @@ class ABRGenerator:
             y_contra = self.apply_filters(
                 y_clean + ruido_b + red_b,
                 float(stimulus_config['filter_down']),
-                float(stimulus_config['filter_passhigh']), fs)
+                float(stimulus_config['filter_passhigh']), fs, slope_db=pendiente)
         elif contra_key and hay_registro:
             y_contra_clean = (self.build_target_curve(
                 t, self.contra_values(values), CM_value)
@@ -2927,30 +3009,30 @@ class ABRGenerator:
                 # contralateral queda MAS cerca del electrodo, no menos.
                 y_contra_clean = y_contra_clean + self.build_target_curve(
                     t, shadow_values, shadow_cm)
+            if notch:
+                y_contra_clean = self.notch(y_contra_clean, fs, notch)
             y_contra = self.apply_filters(
                 y_contra_clean + ruido_b + red_b,
                 float(stimulus_config['filter_down']),
                 float(stimulus_config['filter_passhigh']),
-                fs,
-            )
+                fs, slope_db=pendiente)
 
         # 14. Filtros al final (como equipos reales)
         y_final = self.apply_filters(
             y_noisy,
             float(stimulus_config['filter_down']),
             float(stimulus_config['filter_passhigh']),
-            fs,
-        )
+            fs, slope_db=pendiente)
         # Subpromedios A/B: mismos filtros, misma senial, distinta mitad de
         # los barridos. Es la replicabilidad EN VIVO -- el criterio con el
         # que se decide si una onda es respuesta o es ruido, sin tener que
         # repetir la captura entera.
         sub_a = self.apply_filters(
             y_clean_a + ruido_a + red_a, float(stimulus_config['filter_down']),
-            float(stimulus_config['filter_passhigh']), fs)
+            float(stimulus_config['filter_passhigh']), fs, slope_db=pendiente)
         sub_b = self.apply_filters(
             y_clean_b + ruido_b + red_b, float(stimulus_config['filter_down']),
-            float(stimulus_config['filter_passhigh']), fs)
+            float(stimulus_config['filter_passhigh']), fs, slope_db=pendiente)
         repro_index = self.replicability(sub_a, sub_b)
 
         # Ruido residual REAL de este registro (nV RMS), que es lo que el
@@ -2975,7 +3057,7 @@ class ABRGenerator:
         # el caso que declara N* barridos para llegar al criterio, llega.
         senial_filtrada = self.apply_filters(
             y_target, float(stimulus_config['filter_down']),
-            float(stimulus_config['filter_passhigh']), fs)
+            float(stimulus_config['filter_passhigh']), fs, slope_db=pendiente)
         desde_v, hasta_v = self.fsp_window(population)
         vent_v = (t >= desde_v) & (t <= hasta_v)
         a_rms_registro = (float(np.sqrt(np.mean(senial_filtrada[vent_v] ** 2)))
@@ -3075,6 +3157,10 @@ def default_settings(test='ABR'):
         # Envolvente del tone burst: la lee el ECochG (meseta del PS y
         # duracion de la MC). El ABR todavia no la mira.
         'burst_envelope': '2-1-2',
+        # Filtros y red (ver apply_filters, notch y jitter_coherence).
+        'notch_hz': 0.0,
+        'filter_slope': DEFAULT_FILTER_SLOPE,
+        'rate_jitter_pct': 0.0,
         # --- Todavia SIN EFECTO en el trazo -----------------------------
         # Estan en el equipo real y el alumno los busca, asi que el dialogo
         # los muestra y el technical_config los transporta. El generador no
@@ -3083,14 +3169,11 @@ def default_settings(test='ABR'):
         'click_us': 100.0,
         'burst_window': 'blackman',
         'level_unit': 'nHL',
-        'rate_jitter_pct': 0.0,
         'presentation': 'monaural',
         'masking_noise': 'white',
         'masking_offset_db': 0.0,
         'channels': 1,
         'gain': 100000.0,
-        'notch_hz': 0.0,
-        'filter_slope': 12.0,
         'sample_rate_hz': 30000.0,
         'weighted_averaging': False,
         'auto_stop': 'ambos',
@@ -3106,8 +3189,8 @@ def default_settings(test='ABR'):
 # conectarla.
 UNCONNECTED_SETTINGS = (
     'click_us', 'burst_window', 'level_unit',
-    'rate_jitter_pct', 'presentation', 'masking_noise', 'masking_offset_db',
-    'channels', 'gain', 'notch_hz', 'filter_slope', 'sample_rate_hz',
+    'presentation', 'masking_noise', 'masking_offset_db',
+    'channels', 'gain', 'sample_rate_hz',
     'weighted_averaging', 'auto_stop', 'fsp_window_ms', 'smoothing',
 )
 

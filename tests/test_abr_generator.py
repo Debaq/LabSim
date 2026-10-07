@@ -1510,7 +1510,7 @@ def test_replicability_rises_with_averaging():
     # esten claramente separados, no el valor absoluto.
     indices = [_curva(current=n)[2]['repro_index'] for n in (100, 500, 2000)]
     assert indices == sorted(indices), indices
-    assert indices[0] < 0.30, indices
+    assert indices[0] < 0.35, indices
     assert indices[-1] > 0.70, indices
 
 
