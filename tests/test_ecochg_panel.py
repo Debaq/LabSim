@@ -338,6 +338,23 @@ def test_the_teacher_gets_the_standard_ecochg_setup():
     assert w.technical['window_ms'] == 10.0
 
 
+def test_a_window_set_by_hand_survives_a_stimulus_change():
+    """Si el docente cambió la ventana a mano, cambiar de estímulo no se
+    la devuelve a la del preset (ni la envolvente)."""
+    if not HAS_UI:
+        return
+    w = _ventana_con_permiso(777)
+    w.technical['window_ms'] = 15.0             # Parámetros avanzados
+    w.control.cb_stim.setCurrentText('Burst 1 kHz')
+    assert w.technical['window_ms'] == 15.0
+    assert w.technical['burst_envelope'] == 'ms-1-10-1'
+    w.technical['burst_envelope'] = '2-1-2'
+    w.control.cb_stim.setCurrentText('Burst 2 kHz')
+    assert w.technical['burst_envelope'] == '2-1-2'
+    w.control.cb_stim.setCurrentText('Click')
+    assert w.technical['window_ms'] == 15.0
+
+
 def test_the_student_does_not_get_the_standard_setup():
     """El alumno arranca con el protocolo y lo demás al azar."""
     if not HAS_UI:

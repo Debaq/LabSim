@@ -1354,6 +1354,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             return
         control, technical = setup
         self.technical.update(technical)
+        # Lo que el preset puso, para saber despues si el docente lo cambio
+        # a mano (ver stim_changed).
+        self.preset_tec = dict(technical)
         # set_data mueve cb_stim, que dispara stim_changed: el ajuste del
         # estimulo (envolvente y ventana del burst) sale de ahi.
         self.control.set_data(control)
@@ -1364,16 +1367,29 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         El burst necesita 1-10-1 ms y una ventana que contenga la meseta; al
         volver al click, la ventana del click. Los filtros, la tasa y el
         resto no se tocan: pueden haberse movido a proposito.
+
+        Y tampoco la ventana ni la envolvente si el docente ya las cambio
+        en Parametros avanzados: el preset solo pisa lo que el mismo puso.
+        Antes, cambiar de estimulo devolvia la ventana a la del preset.
         """
         if not self.docente or getattr(self, 'view_only', False):
             return
-        setup = standard_setup(self.control.cb_test.currentText(), stim)
+        test = self.control.cb_test.currentText()
+        setup = standard_setup(test, stim)
         if setup is None:
             return
         _, technical = setup
+        puesto = getattr(self, 'preset_tec', {})
+        defecto = default_settings(test)
         for clave in ('burst_envelope', 'window_ms'):
-            if clave in technical:
-                self.technical[clave] = technical[clave]
+            if clave not in technical:
+                continue
+            esperado = puesto.get(clave, defecto.get(clave))
+            if self.technical.get(clave) != esperado:
+                continue                      # lo cambio a mano: se respeta
+            self.technical[clave] = technical[clave]
+            puesto[clave] = technical[clave]
+        self.preset_tec = puesto
         self.apply_window()
 
     def confirm_test_change(self, test):
