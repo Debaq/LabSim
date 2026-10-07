@@ -40,6 +40,7 @@ final class CourseParams
      */
     public const SOURCES = [
         'normative_data.vemp' => 'resources/vemp/normative_data.json (adult_female, 500Hz)',
+        'secretaria.avisos' => 'resources/json/secretaria_avisos.json',
     ];
 
     public static function all(): array
@@ -75,6 +76,28 @@ final class CourseParams
                     'MVEMP' => [
                         'p13' => ['lat' => 12.8, 'amp' => 45.0],
                         'n23' => ['lat' => 22.5, 'amp' => 60.0],
+                    ],
+                ],
+            ],
+            // Karime, la secretaria (ver core/secretaria.py en el cliente):
+            // avisos emergentes durante la atención para apurar al alumno.
+            'secretaria.avisos' => [
+                'module' => 'AGENDA',
+                'title' => 'Avisos de la secretaria durante la atención',
+                'help' => 'Minutos desde que el alumno presiona "Atender" hasta cada aviso de Karime, que aparece unos segundos abajo a la derecha y se va solo. '
+                    . 'Si el alumno tiene otra cita pendiente ese mismo día, el aviso la nombra; si no, habla del tiempo que lleva la atención. '
+                    . 'En 0 ese aviso no aparece. Si el alumno retoma la atención (reabrir la app), los minutos vuelven a contar desde cero.',
+                'groups' => [
+                    'avisos' => ['label' => 'Avisos', 'rows' => ['aviso_1' => 'Primer aviso', 'aviso_2' => 'Segundo aviso', 'aviso_3' => 'Tercer aviso']],
+                ],
+                'fields' => [
+                    'min' => ['label' => 'Minutos', 'step' => 1, 'min' => 0, 'max' => 240],
+                ],
+                'defaults' => [
+                    'avisos' => [
+                        'aviso_1' => ['min' => 20],
+                        'aviso_2' => ['min' => 30],
+                        'aviso_3' => ['min' => 40],
                     ],
                 ],
             ],

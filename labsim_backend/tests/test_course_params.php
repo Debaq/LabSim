@@ -59,6 +59,26 @@ if ($vemp === null) {
     }
 }
 
+// --- Secretaria: minutos de cada aviso --------------------------------------
+$secretaria = cp_json($raizCliente . '/resources/json/secretaria_avisos.json');
+if ($secretaria === null) {
+    t_true(true, 'Secretaria: sin resources/json/secretaria_avisos.json a mano -- comparación omitida');
+} else {
+    t_eq(
+        array_keys($defs['secretaria.avisos']['defaults']['avisos']),
+        array_keys($secretaria['avisos']),
+        'Secretaria: mismos avisos en CourseParams y secretaria_avisos.json'
+    );
+    foreach ($defs['secretaria.avisos']['defaults']['avisos'] as $aviso => $campos) {
+        t_close(
+            (float) ($secretaria['avisos'][$aviso]['min'] ?? -1),
+            (float) $campos['min'],
+            1e-9,
+            "Secretaria {$aviso}/min: CourseParams vs secretaria_avisos.json"
+        );
+    }
+}
+
 // --- parse(): lo que queda igual al default NO se guarda -------------------
 $vempDef = $defs['normative_data.vemp'];
 $igualQueElDefault = [];

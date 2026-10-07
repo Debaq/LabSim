@@ -4146,3 +4146,38 @@ conectarlos todos; van por grupos, cada uno con su test en
 
 Con esto `UNCONNECTED_SETTINGS` quedó vacío: todo lo del diálogo hace algo.
 
+
+## Karime, la secretaria: avisos que apuran la atención (2026-10-07)
+
+Avisos emergentes dentro del MDI durante la atención, como si la secretaria
+asomara la cabeza para decir que el paciente siguiente ya llegó
+(`src/core/secretaria.py`).
+
+- **Cuándo**: hasta tres avisos, a los minutos configurados desde que se
+  presiona "Atender" (default 20/30/40). Corren junto al cronómetro: se
+  programan en `_atender_caso` y se cancelan en `_stop_cronometro` /
+  `_reset_cronometro`, o sea al cerrar la atención, al cerrarla de prueba y
+  en el logout. Retomar la atención reinicia la cuenta, igual que el
+  cronómetro. Sin sorteo de minutos: el docente fija el apuro.
+- **Por curso**: key `secretaria.avisos` en `CourseParams` (módulo AGENDA),
+  con el editor genérico de admin → Cursos. 0 apaga ese aviso. El default
+  vive en `resources/json/secretaria_avisos.json` y el test de
+  `test_course_params.php` lo compara con la copia del backend.
+- **Qué dice**: si el alumno tiene otra cita pendiente el mismo día, Karime
+  la nombra con su hora (la más temprana sin atender: un paciente que se
+  saltó también está esperando). Si no hay, habla del tiempo que lleva la
+  atención y del box. Nunca nombra un paciente que no está en la agenda. El
+  siguiente se calcula una vez al atender con la agenda que ya se bajó:
+  `Shedule()` es un pull completo al backend y no se puede repetir en el
+  hilo de la UI cuando salta cada aviso; mientras dura la atención no se
+  puede abrir otra, así que no cambia.
+- **Cómo se ve**: tarjeta abajo a la derecha, hija del `QMdiArea` y no del
+  viewport, para quedar encima de cualquier subventana aunque el alumno
+  active otra. Aparece y se va con fundido, dura 9 s, se cierra con la ✕ y
+  no roba el foco (el alumno puede estar tecleando). Si se juntan varios, se
+  apilan.
+- **Sin sonido**: con audífonos puestos un "ding" en medio de un umbral
+  contamina la audiometría.
+- Los textos son fijos en el cliente; si el docente quiere escribirlos él,
+  el registro de `CourseParams` solo admite números y habría que sumarle
+  campos de texto.

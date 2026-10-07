@@ -19,6 +19,7 @@ from core import mis_pacientes
 from core import app_config_store
 from core import equipo
 from core.report_autosave import ReportAutosave
+from core.secretaria import Secretaria, siguiente_paciente
 from core.kiosko import es_kiosko, atender_apagado
 from core.preferencias import preferencias
 from core import mouse_zurdo, configuracion
@@ -358,6 +359,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Crea el objeto mdi_area"""
         self.mdi_area = MdiArea()
         self.horizontalLayout.addWidget(self.mdi_area)
+        # Karime: avisos de la secretaria durante la atención (ver
+        # core/secretaria.py), se programan junto con el cronómetro.
+        self.secretaria = Secretaria(self.mdi_area)
 
     def create_variables(self):
         """Crea las variables necesarias para el funcionamiento del programa"""
@@ -637,10 +641,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         """Detiene el cronómetro (al evolucionar) dejando el tiempo final
         visible hasta el próximo "atender" o el logout"""
         self.cronometro_timer.stop()
+        self.secretaria.detener()
 
     def _reset_cronometro(self):
         """Limpia el cronómetro (logout)"""
         self.cronometro_timer.stop()
+        self.secretaria.detener()
         self.cronometro_segundos = 0
         self.lbl_cronometro.setText("")
 
@@ -781,6 +787,11 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.statusbar.showMessage(f"Estás atendiendo a: RUT {rut} — Fecha de nacimiento {entry.fecha_nac}")
 
         self._start_cronometro()
+        # Con la agenda que ya se bajó acá: Shedule() es un pull completo
+        # al backend y no se puede repetir en el hilo de la UI cuando salta
+        # cada aviso. Mientras dure esta atención no se puede abrir otra
+        # (ver _otra_atencion_abierta), así que el siguiente no cambia.
+        self.secretaria.iniciar(siguiente_paciente(agenda, key, self.data_login["user"]))
 
     def cerrar_atencion(self, key, nota):
         """Cierra la atención (estado 'atendido') guardando la nota de atención del estudiante"""
