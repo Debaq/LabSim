@@ -368,12 +368,15 @@ class ECochGGenerator:
 
         band_factor = abr.band_noise_factor(
             stimulus_config['filter_passhigh'], stimulus_config['filter_down'])
+        rechazo = abr.effective_reject_uv(technical_config)
         acceptance = abr.artifact_acceptance(
-            technical_config.get('artifact_reject_uv'), 1.0,
+            rechazo, 1.0,
             abr.reject_impedance_factor(imp_max) * band_factor)
         current_avg = stimulus_config['current_avg']
         target_avg = stimulus_config['average']
         accepted = current_avg * acceptance
+        if technical_config.get('presentation') == 'alternating':
+            accepted *= 0.5
         if not hay_registro:
             y_clean = np.zeros_like(t)
             y_clean_a = np.zeros_like(t)
@@ -391,7 +394,7 @@ class ECochGGenerator:
             t, accepted, growth_target, 1.0, rng,
             abr.impedance_noise_factor(imp_max), noise_floor, split=True,
             band_factor=band_factor, agitacion=agitacion,
-            reject_uv=technical_config.get('artifact_reject_uv'),
+            reject_uv=rechazo,
             weighted=bool(technical_config.get('weighted_averaging')))
         bloque_actual = abr.noise_blocks_done(accepted, growth_target)
         accepted = accepted * entraron
@@ -431,6 +434,13 @@ class ECochGGenerator:
         if clamp or not hay_registro:
             fsp_esperado = fsp = 1.0
 
+        grilla = abr.equipment_grid(t, technical_config.get('sample_rate_hz'))
+        if grilla is not None:
+            # Muestreo del equipo (ver ABRGenerator.generate_curve).
+            y_final = np.interp(grilla, t, y_final)
+            sub_a = np.interp(grilla, t, sub_a)
+            sub_b = np.interp(grilla, t, sub_b)
+            t = grilla
         puntos = technical_config.get('smoothing')
         if puntos:
             # Suavizado del equipo, despues del FSP (ver ABRGenerator).

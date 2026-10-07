@@ -8,6 +8,7 @@ tiene que mover y nada más.
 1. Filtros y red: notch, pendiente y jitter de la tasa.
 2. Estímulo: duración del click y ventana (rampa) del burst.
 3. Promediador: ponderado, ventana del FSP, suavizado y parada automática.
+4. Equipo: ganancia, muestreo, canales, presentación y enmascaramiento.
 """
 
 import os
@@ -289,6 +290,78 @@ def test_auto_stop_ends_the_capture_when_the_fsp_crosses():
     w2 = P._ventana(average=4000)
     P._capturar(w2, intensidad=80)
     assert 'Detenido' not in w2.lbl_info.text()
+
+
+
+# ------------------------------------------------------------------ equipo
+
+OTRO_OIDO_SANO = {'contra': {'umbral': 20, 'type': 'normal', 'desviaciones': {}}}
+
+
+def test_the_equipment_parameters_are_connected():
+    for clave in ('gain', 'sample_rate_hz', 'channels', 'presentation',
+                  'masking_noise', 'masking_offset_db'):
+        assert clave not in UNCONNECTED_SETTINGS, clave
+        assert clave in default_settings('ABR'), clave
+    # El contralateral se registraba desde siempre: dos canales.
+    assert default_settings('ABR')['channels'] == 2
+
+
+def test_high_gain_saturates_and_rejects_more():
+    g = _gen()
+    assert g.effective_reject_uv({'artifact_reject_uv': 40, 'gain': 100000}) == 40
+    assert abs(g.effective_reject_uv({'artifact_reject_uv': 40, 'gain': 150000})
+               - 33.33) < 0.01
+    # Con el rechazo apagado no se descarta nada por saturar.
+    assert not g.effective_reject_uv({'artifact_reject_uv': 0, 'gain': 150000})
+    # Con la banda abierta (pasa-alto bajo, como en el ECochG) el canal es
+    # grande y el umbral efectivo se nota en los barridos que entran.
+    baja = _curva(technical={'artifact_reject_uv': 40, 'gain': 50000},
+                  filter_high=10)[2]
+    alta = _curva(technical={'artifact_reject_uv': 40, 'gain': 150000},
+                  filter_high=10)[2]
+    assert alta['artifact_acceptance'] < baja['artifact_acceptance']
+
+
+def test_the_trace_comes_on_the_equipment_sampling_grid():
+    for sr in (20000.0, 30000.0, 48000.0):
+        t, y, meta = _curva(technical={'sample_rate_hz': sr})
+        paso = float(t[1] - t[0])
+        assert abs(paso - 1000.0 / sr) < 1e-6, (sr, paso)
+        assert len(y) == len(t) == len(meta['sub_a'])
+
+
+def test_one_channel_records_no_contralateral():
+    assert _curva(technical={'channels': 2})[2]['contra'] is not None
+    assert _curva(technical={'channels': 1})[2]['contra'] is None
+
+
+def test_binaural_brings_the_other_ear_in_and_alternating_halves_sweeps():
+    mono = _curva(caso_extra=OTRO_OIDO_SANO)[2]
+    bin_ = _curva(technical={'presentation': 'binaural'},
+                  caso_extra=OTRO_OIDO_SANO)[2]
+    assert not mono['shadow']
+    assert bin_['shadow']
+    alterna = _curva(technical={'presentation': 'alternating'})[2]
+    assert abs(alterna['accepted_sweeps'] - mono['accepted_sweeps'] / 2) < 1
+
+
+def test_masking_offset_is_relative_to_the_stimulus():
+    meta = _curva(technical={'masking_offset_db': -30.0}, intensity=80)[2]
+    assert meta['masking'] == 50.0
+    assert _curva(intensity=80)[2]['masking'] == 0.0
+
+
+def test_the_masking_noise_type_changes_how_much_it_masks():
+    """Por vía ósea (sin atenuación interaural) el otro oído responde; 60
+    dB de ruido blanco lo tapan y la banda estrecha, contra un click, no."""
+    tec = {'transducer': 'bone_vibrator'}
+    caso = dict(OTRO_OIDO_SANO, masking=60.0)
+    blanco = _curva(technical=tec, intensity=50, caso_extra=caso)[2]
+    angosto = _curva(technical=dict(tec, masking_noise='narrow'),
+                     intensity=50, caso_extra=caso)[2]
+    sin = _curva(technical=tec, intensity=50, caso_extra=OTRO_OIDO_SANO)[2]
+    assert sin['shadow'] and not blanco['shadow'] and angosto['shadow']
 
 
 if __name__ == "__main__":

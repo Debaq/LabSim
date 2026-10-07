@@ -1132,11 +1132,14 @@ def test_defaults_follow_the_protocol():
 
 
 def test_window_sets_the_time_axis_without_moving_fs():
+    """La ventana alarga el eje, pero el muestreo es el del equipo
+    (Parametros avanzados, 30 kHz por defecto), sea cual sea la ventana."""
+    muestreo = default_settings('ABR')['sample_rate_hz']
     for ventana in (6.0, 12.0, 20.0):
         t, y, meta = _curva(technical={'window_ms': ventana})
-        assert abs(t[-1] - ventana) < 1e-9
-        fs = (len(t) - 1) / (t[-1] / 1000.0)
-        assert abs(fs - FS) / FS < 0.01, (ventana, fs)
+        paso = float(t[1] - t[0])
+        assert abs(paso - 1000.0 / muestreo) < 1e-9, (ventana, paso)
+        assert ventana - paso <= t[-1] <= ventana + 1e-9
         assert meta['window_ms'] == ventana
 
 

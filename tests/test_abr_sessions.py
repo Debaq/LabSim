@@ -90,7 +90,9 @@ def test_the_payload_carries_the_traces_and_marks():
     w.graph_r.create_marks('V')
     data = w.session_payload()
     curva = data['curvas']['R1']
-    assert len(curva['traza']['t']) == len(curva['traza']['ipsi']) == 500
+    # Tantas muestras como la curva dibujada (las del muestreo del equipo).
+    dibujada = len(w.graph_r.data['R1']['ipsi_xy'][0])
+    assert len(curva['traza']['t']) == len(curva['traza']['ipsi']) == dibujada
     assert curva['traza']['contra'] is not None
     assert 'V' in curva['marcas_graf']
     assert data['prueba'] == 'ABR'

@@ -4105,3 +4105,26 @@ conectarlos todos; van por grupos, cada uno con su test en
   otro valor todas las capturas se habrían cortado solas al conectarlo.
   Actúa desde 250 barridos aceptados y avisa en la barra por qué paró.
 
+### Equipo y presentación
+
+- **Ganancia**: rango de entrada = 5·10⁶ / ganancia µV (50 µV con ×100.000).
+  Un barrido que satura se descarta igual que uno que cruza el rechazo, así
+  que el umbral efectivo es el menor de los dos (`effective_reject_uv`). Con
+  la ganancia de rutina no cambia nada (rechazo de 25 y 40 µV); con ×150.000
+  satura en 33 µV y el ECochG (rechazo 40) pierde barridos. Con el rechazo
+  apagado no descarta.
+- **Muestreo**: el trazo que se entrega está en la grilla del equipo (30 kHz
+  por defecto, antes salía a los 41.7 kHz internos del modelo). Las sesiones
+  guardadas pesan menos. El suavizado actúa sobre esas muestras.
+- **Canales**: por defecto 2 (el contralateral se registraba desde siempre;
+  el diálogo traía 1, que conectado lo habría sacado). Con 1, no hay contra.
+- **Presentación**: binaural = el otro oído recibe el estímulo entero (sin
+  atenuación interaural ni enmascaramiento posible) y su respuesta entra
+  como sombra; alternando oídos = cada oído se lleva la mitad de los
+  barridos. En el ECochG solo aplica alternando.
+- **Enmascaramiento**: el offset distinto de 0 pasa a modo relativo
+  (estímulo + offset, como programan los equipos); en 0 manda el valor del
+  panel. El tipo de ruido cambia cuánto enmascara contra el estímulo
+  (`MASKING_NOISE_EFFECT_DB`: banda estrecha −15 dB contra un click y +5
+  contra un burst; ruido de habla −10/−5). Sin fuente numérica.
+

@@ -578,6 +578,23 @@ DEFAULT_FILTER_SLOPE = 24.0
 # ondas llegan algo mas tarde, mas anchas y un poco mas chicas. SIN FUENTE
 # numerica: los tamanios son chicos a proposito (500 us = +0.19 ms, ancho
 # x1.23, amplitud x0.86) y se pueden afinar si aparece una referencia.
+# Ganancia del amplificador (Parametros avanzados): el rango de entrada antes
+# de saturar es AMP_RANGE_UV_GAIN / ganancia (50 uV con x100.000). Un barrido
+# que satura se descarta igual que uno que cruza el rechazo, asi que con
+# ganancia alta el umbral efectivo es el menor de los dos. Con el rechazo
+# apagado no se descarta nada (el saturado entra deformado, como antes).
+AMP_RANGE_UV_GAIN = 5.0e6
+# Cuanto enmascara cada tipo de ruido contra cada estimulo, en dB respecto
+# del ruido blanco (que es la referencia de la calibracion). La banda
+# estrecha alrededor de la frecuencia del burst es mas eficiente para el
+# burst y mucho menos para un click de banda ancha; el ruido de habla es
+# grave y enmascara poco un click. SIN FUENTE numerica: ordenes de magnitud.
+MASKING_NOISE_EFFECT_DB = {
+    'white': {'ancha': 0.0, 'angosta': 0.0},
+    'narrow': {'ancha': -15.0, 'angosta': 5.0},
+    'speech': {'ancha': -10.0, 'angosta': -5.0},
+}
+
 CLICK_REF_US = 100.0
 CLICK_LAT_PER_OCTAVE_MS = 0.08
 CLICK_WIDTH_PER_OCTAVE = 0.10
@@ -1564,6 +1581,34 @@ class ABRGenerator:
             onda['width'] = onda.get('width', 1.0) * ancho
             onda['amp'] *= amp
         return values
+
+    @staticmethod
+    def effective_reject_uv(technical_config):
+        """Umbral de rechazo efectivo: el del equipo o la saturacion."""
+        tec = technical_config or {}
+        rechazo = tec.get('artifact_reject_uv')
+        if not rechazo:
+            return rechazo
+        ganancia = float(tec.get('gain') or 100000.0)
+        return min(float(rechazo), AMP_RANGE_UV_GAIN / ganancia)
+
+    @staticmethod
+    def masking_effect_db(technical_config, stim):
+        """Cuanto enmascara el ruido elegido contra este estimulo."""
+        tipo = (technical_config or {}).get('masking_noise') or 'white'
+        banda = 'angosta' if stim in STIM_BY_BAND else 'ancha'
+        return MASKING_NOISE_EFFECT_DB.get(tipo, MASKING_NOISE_EFFECT_DB['white'])[banda]
+
+    @staticmethod
+    def equipment_grid(t, sample_rate_hz):
+        """Eje temporal con el muestreo del equipo, o None si no aplica."""
+        sr = float(sample_rate_hz or 0.0)
+        if sr <= 0 or len(t) < 2:
+            return None
+        paso = 1000.0 / sr
+        if abs(paso - float(t[1] - t[0])) <= 1e-3 * paso:
+            return None
+        return np.arange(0.0, float(t[-1]) + 1e-9, paso)
 
     @staticmethod
     def jitter_coherence(jitter_pct):
@@ -2681,6 +2726,16 @@ class ABRGenerator:
         threshold = self.case_threshold(case_config, stimulus_config, pathway, pathology)
 
         masking = float((case_config or {}).get('masking') or 0.0)
+        # Offset de Parametros avanzados: enmascaramiento RELATIVO al
+        # estimulo (estimulo + offset), que es como lo programan los equipos.
+        # En 0 manda el valor absoluto del panel.
+        offset = float(technical_config.get('masking_offset_db') or 0.0)
+        if offset:
+            masking = max(0.0, float(stimulus_config['int']) + offset)
+        # Lo que el ruido ENMASCARA depende de su tipo y del estimulo (ver
+        # MASKING_NOISE_EFFECT_DB); `masking` sigue siendo lo que se entrega.
+        mask_eff = (max(0.0, masking + self.masking_effect_db(
+            technical_config, stimulus_config['stim'])) if masking > 0 else 0.0)
         # Atenuacion interaural del ESTIMULO: cuanto le llega al otro oido
         # de lo que se esta midiendo (ver shadow_values).
         ia = interaural_attenuation(transducer, population)
@@ -2704,7 +2759,7 @@ class ABRGenerator:
             # que es donde mas importa: un oido con 40 dB de gap tiene la
             # coclea sana y el ruido cruzado la enmascara mucho antes de lo
             # que sugiere su umbral aereo.
-            cruzado = masking - ia_masking
+            cruzado = mask_eff - ia_masking
             oseo = self.case_threshold(case_config, stimulus_config,
                                        'bone_conduction', pathology)
             if cruzado > oseo:
@@ -2867,9 +2922,15 @@ class ABRGenerator:
         # suficiente en ese oido desaparece, que es exactamente el ejercicio
         # (estimular fuerte un oido muerto y ver "respuesta" hasta que se
         # enmascara). Antes el spinbox de masking se leia y se tiraba.
+        binaural = technical_config.get('presentation') == 'binaural'
+        # Binaural: el otro oido no recibe el estimulo atenuado por el
+        # craneo sino entero, y no se lo puede enmascarar (se lo esta
+        # estimulando): su respuesta entra al registro como una sombra sin
+        # atenuacion interaural.
         shadow = self.shadow_values(
-            population, pathway, stimulus_config, masking, ia, case_config,
-            click_baseline=click_baseline,
+            population, pathway, stimulus_config,
+            0.0 if binaural else mask_eff, 0.0 if binaural else ia,
+            case_config, click_baseline=click_baseline,
         )
         if shadow:
             shadow = self.stimulus_settings_effects(
@@ -2996,8 +3057,9 @@ class ABRGenerator:
             stimulus_config['filter_passhigh'], stimulus_config['filter_down'])
         # Lo que cruza el umbral de rechazo: paciente, electrodos fuera de
         # norma y ancho de banda, los tres terminos que agrandan el canal.
+        rechazo = self.effective_reject_uv(technical_config)
         acceptance = self.artifact_acceptance(
-            technical_config.get('artifact_reject_uv'), quality,
+            rechazo, quality,
             self.reject_impedance_factor(imp_max) * band_factor)
         # El ruido del trazo es el del PACIENTE (sigma, del caso). El
         # `residual_noise_nv` del equipo es el criterio con el que el
@@ -3016,6 +3078,9 @@ class ABRGenerator:
         # Barridos que realmente entraron al promedio: el equipo cuenta los
         # presentados, no los aceptados.
         accepted = current_avg * acceptance
+        if technical_config.get('presentation') == 'alternating':
+            # Alternando oidos, cada oido se lleva la mitad de los barridos.
+            accepted *= 0.5
 
         if not hay_registro:
             # Sin electrodo activo o sin ninguna referencia no hay nada que
@@ -3052,7 +3117,7 @@ class ABRGenerator:
         ruido, ruido_a, ruido_b, entraron = self.averaged_noise(
             t, accepted, growth_target, quality, rng, imp_factor, noise_floor,
             split=True, band_factor=band_factor, agitacion=agitacion,
-            reject_uv=technical_config.get('artifact_reject_uv'),
+            reject_uv=rechazo,
             weighted=bool(technical_config.get('weighted_averaging')),
         )
         # Los barridos descartados por moverse no promediaron: el equipo
@@ -3094,6 +3159,9 @@ class ABRGenerator:
         # mismo momento) pero la respuesta llega proyectada distinto.
         contra_key = self.contra_channel(technical_config,
                                          stimulus_config.get('side', 'OD'))
+        if int(technical_config.get('channels') or 2) < 2:
+            # Equipo de un canal: no se registra el contralateral.
+            contra_key = None
         y_contra = None
         if contra_key and hay_registro and clamp:
             # Mismo canal, mismo ruido, sin respuesta: el contra tiene que
@@ -3177,9 +3245,23 @@ class ABRGenerator:
             # explicito porque es el punto de la maniobra.
             fsp_esperado = fsp_actual = 1.0
 
+        # Muestreo del equipo: el trazo que se entrega es el de SU grilla
+        # (30 kHz = un punto cada 0.033 ms). Lo que esta por debajo de esa
+        # resolucion no se puede marcar. El filtro pasa-bajo ya esta, asi
+        # que no hay aliasing que simular.
+        grilla = self.equipment_grid(t, technical_config.get('sample_rate_hz'))
+        if grilla is not None:
+            y_final = np.interp(grilla, t, y_final)
+            sub_a = np.interp(grilla, t, sub_a)
+            sub_b = np.interp(grilla, t, sub_b)
+            if y_contra is not None:
+                y_contra = np.interp(grilla, t, y_contra)
+            t = grilla
+
         # Suavizado del equipo (Parametros avanzados): sobre lo que se
-        # muestra y se mide. El FSP y el residual ya salieron del trazo sin
-        # suavizar, como en el equipo (se calculan sobre los barridos).
+        # muestra y se mide, en las muestras del equipo. El FSP y el residual
+        # ya salieron del trazo sin suavizar, como en el equipo (se calculan
+        # sobre los barridos).
         puntos = technical_config.get('smoothing')
         if puntos:
             y_final = self.smooth_trace(y_final, puntos)
@@ -3271,6 +3353,15 @@ def default_settings(test='ABR'):
         # Envolvente del tone burst: la lee el ECochG (meseta del PS y
         # duracion de la MC). El ABR todavia no la mira.
         'burst_envelope': '2-1-2',
+        # Equipo y presentacion (ver effective_reject_uv, equipment_grid,
+        # masking_effect_db). Dos canales: el contralateral se registraba
+        # desde siempre.
+        'presentation': 'monaural',
+        'masking_noise': 'white',
+        'masking_offset_db': 0.0,
+        'channels': 2,
+        'gain': 100000.0,
+        'sample_rate_hz': 30000.0,
         # Promediador. auto_stop arranca en 'no': cuando parar es parte de
         # lo que el alumno aprende, el equipo no lo decide por el.
         'weighted_averaging': False,
@@ -3290,12 +3381,6 @@ def default_settings(test='ABR'):
         # los lee ADREDE: conectarlos es leerlos aca, uno por uno, con su
         # modelo y su test. Ver UNCONNECTED_SETTINGS.
         'level_unit': 'nHL',
-        'presentation': 'monaural',
-        'masking_noise': 'white',
-        'masking_offset_db': 0.0,
-        'channels': 1,
-        'gain': 100000.0,
-        'sample_rate_hz': 30000.0,
     }
 
 
@@ -3306,8 +3391,6 @@ def default_settings(test='ABR'):
 # conectarla.
 UNCONNECTED_SETTINGS = (
     'level_unit',
-    'presentation', 'masking_noise', 'masking_offset_db',
-    'channels', 'gain', 'sample_rate_hz',
 )
 
 
