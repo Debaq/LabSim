@@ -348,18 +348,28 @@ def burst_plateau_center(timing, onset=0.0):
     return float(onset) + rise + plateau / 2.0
 
 
-def _trapezoid(t, onset, timing):
-    """Envolvente del burst (0 a 1) que arranca en `onset`."""
+def _trapezoid(t, onset, timing, ramp='linear'):
+    """Envolvente del burst (0 a 1) que arranca en `onset`.
+
+    `ramp` es la ventana del equipo: 'linear' sube y baja en recta; las
+    demás (Blackman, Hanning, gaussiana) en curva de coseno, que es como se
+    ven en el osciloscopio.
+    """
     rise, plateau, fall = timing
     dt = np.asarray(t, dtype=float) - float(onset)
+
+    def forma(x):
+        x = np.clip(x, 0.0, 1.0)
+        return x if ramp == 'linear' else 0.5 - 0.5 * np.cos(np.pi * x)
+
     env = np.zeros_like(dt)
     if rise > 0:
-        env = np.where((dt >= 0) & (dt < rise), dt / rise, env)
+        env = np.where((dt >= 0) & (dt < rise), forma(dt / rise), env)
     meseta = (dt >= rise) & (dt <= rise + plateau)
     env = np.where(meseta, 1.0, env)
     if fall > 0:
         bajada = (dt > rise + plateau) & (dt < rise + plateau + fall)
-        env = np.where(bajada, 1.0 - (dt - rise - plateau) / fall, env)
+        env = np.where(bajada, 1.0 - forma((dt - rise - plateau) / fall), env)
     return env
 
 
@@ -385,7 +395,7 @@ def sp_level_factor(sl):
 
 def component_params(wave_i, case, montage, stim='click', freq=None,
                      mc_baseline=None, sl=None, gain=1.0, cm_lat=None,
-                     envelope=None, sp_ref_amp=None):
+                     envelope=None, sp_ref_amp=None, ramp=None):
     """Los tres potenciales, a partir de la onda I ya calculada.
 
     `wave_i` es values['I'] del ABR: latencia y amplitud con la intensidad,
@@ -469,6 +479,7 @@ def component_params(wave_i, case, montage, stim='click', freq=None,
         # MC) y sigue la envolvente del estímulo; se lee en la mitad de la
         # meseta, lejos de la espiga del PA y de la bajada.
         out['burst'] = timing
+        out['ramp'] = ramp or 'blackman'
         out['sp_onset'] = cm_onset
         out['sp_lat'] = burst_plateau_center(timing, cm_onset)
         if sp_ref_amp:
@@ -494,7 +505,8 @@ def build_curve(t, params, polarity, sp_scale=1.0):
         # rampa, se sostiene toda la meseta y baja con la bajada. El PA es
         # la descarga del COMIENZO y va montado encima de la meseta con su
         # amplitud entera: acá no hay razón de hombro que respetar.
-        y -= sp_amp * _trapezoid(t, params['sp_onset'], timing)
+        y -= sp_amp * _trapezoid(t, params['sp_onset'], timing,
+                                 params.get('ramp', 'linear'))
         y -= _gaussian(t, params['ap_lat'], amp_pa, params['ap_sigma'])
     else:
         # PS: meseta que sube con una sigmoide y se sostiene POR DEBAJO de
@@ -531,7 +543,8 @@ def build_curve(t, params, polarity, sp_scale=1.0):
         dt = t - params['cm_onset']
         if timing is not None:
             # Con burst la MC reproduce el estímulo entero, rampa incluida.
-            env = _trapezoid(t, params['cm_onset'], timing)
+            env = _trapezoid(t, params['cm_onset'], timing,
+                             params.get('ramp', 'linear'))
         else:
             env = np.exp(-0.5 * ((dt - params['cm_ms'] / 2) /
                                  (params['cm_ms'] / 3)) ** 2)

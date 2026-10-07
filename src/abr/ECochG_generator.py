@@ -89,7 +89,8 @@ class ECochGGenerator:
             onda or {'lat': 1.5, 'amp': 0.0}, ctx['case'], ctx['montage'],
             stim=ctx['stim'], freq=ctx['freq'], mc_baseline=ctx['mc'],
             sl=ctx['sl'], gain=ctx['gain'], cm_lat=ctx['cm_lat'],
-            envelope=ctx.get('envelope'), sp_ref_amp=ctx.get('sp_ref_amp'))
+            envelope=ctx.get('envelope'), sp_ref_amp=ctx.get('sp_ref_amp'),
+            ramp=ctx.get('ramp'))
         return ecochg.build_curve(t, params, polarity, sp_scale), params
 
     def target_curve(self, t, values, polarity, ctx):
@@ -257,6 +258,9 @@ class ECochGGenerator:
                                       stimulus_config.get('freq')))
         values = abr.apply_rate_effects(values, stimulus_config['rate'],
                                         pathology, neural)
+        # Duracion del click / rampa del burst del equipo: el PA es la onda I.
+        values = abr.stimulus_settings_effects(values, stimulus_config['stim'],
+                                               technical_config)
         lat_offset = TRANSDUCER_LATENCY_MS.get(transducer, 0.0)
         montage = technical_config.get('montage', 'vertex_mastoid')
         gain = abr.montage_factor(montage)
@@ -294,6 +298,7 @@ class ECochGGenerator:
             'gain': gain, 'mc': baseline.get('MC'), 'cm_lat': cm_lat,
             'rate': float(stimulus_config['rate']),
             'envelope': technical_config.get('burst_envelope'),
+            'ramp': technical_config.get('burst_window'),
             'sp_ref_amp': sp_ref_amp,
         }
 

@@ -6,6 +6,7 @@ Cada uno, al conectarse, trae acá el test que muestra que mueve lo que
 tiene que mover y nada más.
 
 1. Filtros y red: notch, pendiente y jitter de la tasa.
+2. Estímulo: duración del click y ventana (rampa) del burst.
 """
 
 import os
@@ -154,6 +155,68 @@ def test_rate_jitter_unlocks_the_mains_from_the_stimulus():
     con = _curva(technical=dict(SIN_TIERRA, tube_clamped=True,
                                 rate_jitter_pct=20.0), filter_high=10)[1]
     assert np.std(con) < np.std(sin), (np.std(con), np.std(sin))
+
+
+
+# ---------------------------------------------------------------- estímulo
+
+def test_the_stimulus_parameters_are_connected():
+    for clave in ('click_us', 'burst_window'):
+        assert clave not in UNCONNECTED_SETTINGS, clave
+        assert clave in default_settings('ABR'), clave
+
+
+def _ondas(stim, technical):
+    g = _gen()
+    base = {'I': {'lat': 1.5, 'amp': 0.4, 'width': 1.0},
+            'V': {'lat': 5.6, 'amp': 0.5, 'width': 1.0}}
+    return g.stimulus_settings_effects(
+        {w: dict(d) for w, d in base.items()}, stim, technical)
+
+
+def test_a_longer_click_comes_later_wider_and_smaller():
+    rutina = _ondas('click', {'click_us': 100.0})
+    largo = _ondas('click', {'click_us': 500.0})
+    corto = _ondas('click', {'click_us': 50.0})
+    assert rutina['V']['lat'] == 5.6 and rutina['V']['width'] == 1.0
+    assert largo['V']['lat'] > rutina['V']['lat'] + 0.1
+    assert largo['V']['width'] > 1.1 and largo['V']['amp'] < 0.5
+    # Más corto que el de rutina casi no cambia nada.
+    assert abs(corto['V']['lat'] - 5.6) < 0.05
+    # Y no toca el burst.
+    assert _ondas('tone_burst', {'click_us': 500.0})['V']['lat'] == 5.6
+
+
+def test_a_longer_click_shifts_the_recorded_wave_V():
+    """De punta a punta: con el click de 500 µs la onda V del trazo llega
+    más tarde que con el de 100."""
+    def pico_v(click_us):
+        t, y, _ = _curva(technical={'click_us': click_us})
+        ventana = (t > 4.5) & (t < 7.5)
+        return float(t[ventana][np.argmax(y[ventana])])
+    assert pico_v(500.0) > pico_v(100.0) + 0.08
+
+
+def test_the_burst_ramp_changes_synchrony_a_little():
+    """Rampa lineal: más salpicadura espectral, sincroniza algo mejor."""
+    blackman = _ondas('tone_burst', {'burst_window': 'blackman'})
+    lineal = _ondas('tone_burst', {'burst_window': 'linear'})
+    assert lineal['V']['width'] < blackman['V']['width']
+    assert lineal['V']['amp'] > blackman['V']['amp']
+    assert _ondas('click', {'burst_window': 'linear'})['V']['width'] == 1.0
+
+
+def test_the_burst_ramp_shapes_the_ecochg_envelope():
+    """En el ECochG con burst, la rampa del equipo es la del PS y la MC."""
+    from abr import ecochg as E
+    t = np.linspace(0, 5, 501)
+    timing = (1.0, 2.0, 1.0)
+    lineal = E._trapezoid(t, 0.5, timing, 'linear')
+    coseno = E._trapezoid(t, 0.5, timing, 'blackman')
+    cuarto = int(np.argmin(np.abs(t - 0.75)))      # un cuarto de la subida
+    assert abs(lineal[cuarto] - 0.25) < 0.02
+    assert coseno[cuarto] < lineal[cuarto]
+    assert lineal.max() == coseno.max() == 1.0
 
 
 if __name__ == "__main__":

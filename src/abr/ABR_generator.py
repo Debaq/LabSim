@@ -572,6 +572,27 @@ NOTCH_Q = 25.0
 # antes de que la pendiente fuera configurable.
 DEFAULT_FILTER_SLOPE = 24.0
 
+# Duracion del click (Parametros avanzados). El de rutina es de 100 us; uno
+# mas largo concentra la energia en frecuencias mas graves, que estimulan
+# una porcion mas apical (mas lenta) de la coclea y sincronizan peor: las
+# ondas llegan algo mas tarde, mas anchas y un poco mas chicas. SIN FUENTE
+# numerica: los tamanios son chicos a proposito (500 us = +0.19 ms, ancho
+# x1.23, amplitud x0.86) y se pueden afinar si aparece una referencia.
+CLICK_REF_US = 100.0
+CLICK_LAT_PER_OCTAVE_MS = 0.08
+CLICK_WIDTH_PER_OCTAVE = 0.10
+CLICK_AMP_PER_OCTAVE = 0.06
+# Ventana (forma de la rampa) del tone burst. La rampa lineal tiene mas
+# salpicadura espectral: estimula mas coclea, sincroniza un poco mejor y es
+# menos especifica en frecuencia. Blackman es la referencia. SIN FUENTE
+# numerica, mismos criterios que el click.
+BURST_WINDOW_EFFECT = {
+    'blackman': {'width': 1.00, 'amp': 1.00},
+    'hanning': {'width': 0.98, 'amp': 1.02},
+    'gauss': {'width': 1.01, 'amp': 0.99},
+    'linear': {'width': 0.93, 'amp': 1.06},
+}
+
 # Reflejo post-auricular (PAM): contraccion del musculo auricular
 # posterior ante un sonido fuerte. Es miogenico, no neural, pero se
 # PROMEDIA como cualquier respuesta -- aparece igual en los dos
@@ -1511,6 +1532,38 @@ class ABRGenerator:
             zumbido += peso * np.sin(
                 2 * np.pi * MAINS_HZ * armonico * t / 1000.0 + fase)
         return amp * zumbido
+
+    @staticmethod
+    def stimulus_settings_effects(values, stim, technical_config):
+        """Lo que el estimulo configurado en el equipo le hace a las ondas.
+
+        Duracion del click y forma de la rampa del burst (ver CLICK_* y
+        BURST_WINDOW_EFFECT). Se aplica a la respuesta del oido evaluado,
+        a la curva sombra y al PA del ECochG: es el mismo estimulo.
+        """
+        tec = technical_config or {}
+        lat = 0.0
+        ancho = amp = 1.0
+        if stim == 'click':
+            octavas = float(np.log2(max(float(tec.get('click_us') or CLICK_REF_US),
+                                        1.0) / CLICK_REF_US))
+            # Mas corto que el de rutina casi no cambia nada: el espectro ya
+            # cubre toda la coclea.
+            efectivo = octavas if octavas > 0 else 0.5 * octavas
+            lat = CLICK_LAT_PER_OCTAVE_MS * efectivo
+            ancho = 1.0 + CLICK_WIDTH_PER_OCTAVE * max(octavas, 0.0)
+            amp = 1.0 - CLICK_AMP_PER_OCTAVE * max(octavas, 0.0)
+        elif stim == 'tone_burst':
+            efecto = BURST_WINDOW_EFFECT.get(tec.get('burst_window'),
+                                             BURST_WINDOW_EFFECT['blackman'])
+            ancho, amp = efecto['width'], efecto['amp']
+        if lat == 0.0 and ancho == 1.0 and amp == 1.0:
+            return values
+        for onda in values.values():
+            onda['lat'] += lat
+            onda['width'] = onda.get('width', 1.0) * ancho
+            onda['amp'] *= amp
+        return values
 
     @staticmethod
     def jitter_coherence(jitter_pct):
@@ -2708,6 +2761,8 @@ class ABRGenerator:
             return v, visibles
 
         values, waves_visible = ondas_a(stimulus_config['int'])
+        values = self.stimulus_settings_effects(
+            values, stimulus_config['stim'], technical_config)
 
         # 7. Polaridad + rate. La polaridad ya no se aplica sobre el vector
         # de ondas: se aplica al ARMAR la curva (ver build_polarity_curve),
@@ -2773,6 +2828,8 @@ class ABRGenerator:
             click_baseline=click_baseline,
         )
         if shadow:
+            shadow = self.stimulus_settings_effects(
+                shadow, stimulus_config['stim'], technical_config)
             contra_case = (case_config or {}).get('contra') or {}
             shadow_values, shadow_cm = self.apply_polarity_effects(
                 shadow, stimulus_config['pol'],
@@ -3157,6 +3214,9 @@ def default_settings(test='ABR'):
         # Envolvente del tone burst: la lee el ECochG (meseta del PS y
         # duracion de la MC). El ABR todavia no la mira.
         'burst_envelope': '2-1-2',
+        # Estimulo (ver stimulus_settings_effects).
+        'click_us': 100.0,
+        'burst_window': 'blackman',
         # Filtros y red (ver apply_filters, notch y jitter_coherence).
         'notch_hz': 0.0,
         'filter_slope': DEFAULT_FILTER_SLOPE,
@@ -3166,8 +3226,6 @@ def default_settings(test='ABR'):
         # los muestra y el technical_config los transporta. El generador no
         # los lee ADREDE: conectarlos es leerlos aca, uno por uno, con su
         # modelo y su test. Ver UNCONNECTED_SETTINGS.
-        'click_us': 100.0,
-        'burst_window': 'blackman',
         'level_unit': 'nHL',
         'presentation': 'monaural',
         'masking_noise': 'white',
@@ -3188,7 +3246,7 @@ def default_settings(test='ABR'):
 # vayan conectando: sacar una clave de aca es el ultimo paso de
 # conectarla.
 UNCONNECTED_SETTINGS = (
-    'click_us', 'burst_window', 'level_unit',
+    'level_unit',
     'presentation', 'masking_noise', 'masking_offset_db',
     'channels', 'gain', 'sample_rate_hz',
     'weighted_averaging', 'auto_stop', 'fsp_window_ms', 'smoothing',

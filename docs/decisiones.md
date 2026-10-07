@@ -4075,3 +4075,17 @@ conectarlos todos; van por grupos, cada uno con su test en
   (`MAINS_COHERENT`) se multiplica por exp(-jitter/5%): con 10% queda un
   octavo y el resto se promedia como ruido.
 
+### Estímulo
+
+- **Duración del click** (`stimulus_settings_effects`): uno más largo
+  concentra la energía en graves (porción más apical y lenta de la cóclea):
+  por octava sobre 100 µs, +0.08 ms de latencia, ancho ×1.10 y amplitud
+  ×0.94 (500 µs = +0.19 ms). Más corto que el de rutina casi no cambia
+  nada. **Sin fuente numérica**: tamaños chicos a propósito, para afinar si
+  aparece una referencia.
+- **Ventana del burst**: la rampa lineal tiene más salpicadura espectral y
+  sincroniza un poco mejor (ancho ×0.93, amplitud ×1.06 contra Blackman);
+  en el ECochG con burst es además la forma de la rampa del PS y la MC
+  (lineal o coseno). Sin fuente numérica.
+- Se aplica a la respuesta, a la curva sombra y al PA del ECochG.
+
