@@ -4089,3 +4089,19 @@ conectarlos todos; van por grupos, cada uno con su test en
   (lineal o coseno). Sin fuente numérica.
 - Se aplica a la respuesta, a la curva sombra y al PA del ECochG.
 
+### Promediador
+
+- **Promediación ponderada**: cada bloque pesa 1/f² (f = su factor de
+  agitación). Con el paciente quieto da el promedio simple; inquieto y sin
+  rechazo, los barridos sucios pesan menos y el residual baja.
+- **Ventana del FSP**: el valor del diálogo es dónde TERMINA la ventana del
+  registro (en automático, la de la edad). La referencia del ruido del
+  paciente sigue con la automática: el paciente no cambia de ruido.
+- **Suavizado** (media móvil de N puntos): sobre el trazo que se muestra y
+  se mide, después del FSP y del residual (como en el equipo, que los
+  calcula sobre los barridos).
+- **Parada automática**: el valor por defecto pasó de "FSP o ruido" a **"No
+  parar solo"**: cuándo parar es parte de lo que el alumno aprende, y con el
+  otro valor todas las capturas se habrían cortado solas al conectarlo.
+  Actúa desde 250 barridos aceptados y avisa en la barra por qué paró.
+

@@ -391,7 +391,8 @@ class ECochGGenerator:
             t, accepted, growth_target, 1.0, rng,
             abr.impedance_noise_factor(imp_max), noise_floor, split=True,
             band_factor=band_factor, agitacion=agitacion,
-            reject_uv=technical_config.get('artifact_reject_uv'))
+            reject_uv=technical_config.get('artifact_reject_uv'),
+            weighted=bool(technical_config.get('weighted_averaging')))
         bloque_actual = abr.noise_blocks_done(accepted, growth_target)
         accepted = accepted * entraron
 
@@ -418,6 +419,10 @@ class ECochGGenerator:
 
         senial = abr.apply_filters(y_target, lp, hp, fs, slope_db=pendiente)
         desde, hasta = FSP_WINDOW_MS
+        if technical_config.get('fsp_window_ms'):
+            # Fin de la ventana puesto en el equipo (ver
+            # ABRGenerator.recording_fsp_window).
+            hasta = max(float(technical_config['fsp_window_ms']), desde + 0.5)
         vent = (t >= desde) & (t <= hasta)
         a_rms = float(np.sqrt(np.mean(senial[vent] ** 2))) if vent.any() else 0.0
         fsp_esperado = (1.0 + (a_rms / (residual_nv / 1000.0)) ** 2
@@ -425,6 +430,13 @@ class ECochGGenerator:
         fsp = abr.observed_fsp(fsp_esperado, rng)
         if clamp or not hay_registro:
             fsp_esperado = fsp = 1.0
+
+        puntos = technical_config.get('smoothing')
+        if puntos:
+            # Suavizado del equipo, despues del FSP (ver ABRGenerator).
+            y_final = abr.smooth_trace(y_final, puntos)
+            sub_a = abr.smooth_trace(sub_a, puntos)
+            sub_b = abr.smooth_trace(sub_b, puntos)
 
         criterio = technical_config.get('fsp_criterion')
         return t, y_final, {

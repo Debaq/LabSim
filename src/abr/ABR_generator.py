@@ -1798,7 +1798,7 @@ class ABRGenerator:
     def averaged_noise(self, t, current_avg, target_avg, quality, rng,
                        imp_factor=1.0, noise_floor_uv=NOISE_FLOOR_UV,
                        split=False, band_factor=1.0, agitacion=None,
-                       reject_uv=None):
+                       reject_uv=None, weighted=False):
         """Ruido RESIDUAL de un promediado de `current_avg` barridos.
 
         El equipo promedia: la senial esta completa desde el primer barrido
@@ -1832,6 +1832,12 @@ class ABRGenerator:
         subir. Sin rechazo entran igual y ensucian el promedio para
         siempre, que es exactamente la diferencia que hay que mostrar.
         Devuelve tambien, en split, cuantos bloques entraron de los m.
+
+        weighted: promediacion ponderada por ruido (Parametros avanzados).
+        Cada bloque pesa 1/f^2 (f = su factor de agitacion), que es lo que
+        hace un equipo con la varianza de cada tanda: los barridos sucios
+        cuentan menos en vez de entrar parejo. Sin agitacion todos pesan lo
+        mismo y da el promedio simple.
         """
         n = len(t)
         m = self.noise_blocks_done(current_avg, target_avg)
@@ -1852,6 +1858,7 @@ class ABRGenerator:
         suma_a = np.zeros(n)
         suma_b = np.zeros(n)
         n_a = n_b = 0
+        peso_total = peso_a = peso_b = 0.0
         hechos = 0
         usados = 0
         while hechos < m:
@@ -1861,6 +1868,7 @@ class ABRGenerator:
             usar = min(NOISE_TANDA, m - hechos)
             bloques = bloques[:usar]
             idx = np.arange(hechos, hechos + usar)
+            factores = np.ones(usar)
             if agitacion is not None:
                 factores = np.array([float(agitacion(i)) for i in idx])
                 if reject_uv:
@@ -1875,29 +1883,34 @@ class ABRGenerator:
             hechos += usar
             if not len(bloques):
                 continue
-            total += bloques.sum(axis=0)
+            pesos = (1.0 / np.maximum(factores, 1e-6) ** 2 if weighted
+                     else np.ones(len(bloques)))
+            ponderados = bloques * pesos[:, None]
+            total += ponderados.sum(axis=0)
+            peso_total += float(pesos.sum())
             usados += len(bloques)
-            pares = bloques[idx % 2 == 0]
-            impares = bloques[idx % 2 == 1]
-            if len(pares):
-                suma_a += pares.sum(axis=0)
-                n_a += len(pares)
-            if len(impares):
-                suma_b += impares.sum(axis=0)
-                n_b += len(impares)
+            es_par = idx % 2 == 0
+            if es_par.any():
+                suma_a += ponderados[es_par].sum(axis=0)
+                peso_a += float(pesos[es_par].sum())
+                n_a += int(es_par.sum())
+            if (~es_par).any():
+                suma_b += ponderados[~es_par].sum(axis=0)
+                peso_b += float(pesos[~es_par].sum())
+                n_b += int((~es_par).sum())
 
         # El denominador son los bloques que ENTRARON, no los que se
         # presentaron: promediar 2000 barridos de los que se descartaron
         # 600 deja el ruido de 1400, y ese es el punto.
-        residual = total / max(usados, 1) * escala
+        residual = total / max(peso_total, 1e-12) * escala if usados else total
         if not split:
             return residual
         # Subpromedios A/B: barridos pares e impares promediados en
         # paralelo. Misma senial en los dos (es el mismo paciente), la
         # mitad de barridos cada uno -> sqrt(2) mas ruido, que es lo que
         # hace que A y B se peguen recien cuando hay respuesta de verdad.
-        sub_a = suma_a / max(n_a, 1) * escala
-        sub_b = suma_b / max(n_b, 1) * escala if n_b else np.zeros(n)
+        sub_a = suma_a / max(peso_a, 1e-12) * escala if n_a else np.zeros(n)
+        sub_b = suma_b / max(peso_b, 1e-12) * escala if n_b else np.zeros(n)
         return residual, sub_a, sub_b, usados / max(m, 1)
 
     @staticmethod
@@ -2108,7 +2121,38 @@ class ABRGenerator:
         """
         return FSP_WINDOW_MS.get(population, FSP_WINDOW_MS['adulto'])
 
-    def expected_fsp(self, t, senial, residual_uv, population):
+    def recording_fsp_window(self, population, technical_config):
+        """Ventana de analisis del FSP del REGISTRO (Parametros avanzados).
+
+        En automatico es la de la edad (fsp_window). Si el equipo trae un
+        valor, es donde TERMINA la ventana: alargarla mete tramo sin
+        respuesta y el FSP baja; acortarla puede dejar afuera la onda V. La
+        referencia del ruido del paciente sigue usando la automatica: el
+        paciente no cambia de ruido porque se cambie la ventana.
+        """
+        desde, hasta = self.fsp_window(population)
+        fin = (technical_config or {}).get('fsp_window_ms')
+        if fin:
+            hasta = max(float(fin), desde + 1.0)
+        return desde, hasta
+
+    @staticmethod
+    def smooth_trace(y, puntos):
+        """Suavizado del trazo del equipo: media movil de `puntos` muestras.
+
+        Lo aplica el equipo al trazo que muestra y con el que se mide: baja
+        el ruido de alta frecuencia y, si es mucho, tambien redondea los
+        picos angostos (el PA del ECochG pierde amplitud).
+        """
+        n = int(puntos or 0)
+        if n < 2 or y is None:
+            return y
+        y = np.asarray(y, dtype=float)
+        izq = n // 2
+        ext = np.pad(y, (izq, n - 1 - izq), mode='edge')
+        return np.convolve(ext, np.ones(n) / n, mode='valid')
+
+    def expected_fsp(self, t, senial, residual_uv, population, ventana=None):
         """FSP esperado del registro: VAR(S) / (VAR(SP)/N).
 
         Elberling y Don 1984. En la forma que se puede calcular sin simular
@@ -2126,7 +2170,7 @@ class ABRGenerator:
         Antes el FSP lo declaraba el caso (`fsp_puntos`) y se degradaba a
         mano; daba el mismo numero con respuesta clara que sin respuesta.
         """
-        desde, hasta = self.fsp_window(population)
+        desde, hasta = ventana or self.fsp_window(population)
         vent = (t >= desde) & (t <= hasta)
         if not vent.any() or residual_uv <= 0:
             return 1.0
@@ -3009,6 +3053,7 @@ class ABRGenerator:
             t, accepted, growth_target, quality, rng, imp_factor, noise_floor,
             split=True, band_factor=band_factor, agitacion=agitacion,
             reject_uv=technical_config.get('artifact_reject_uv'),
+            weighted=bool(technical_config.get('weighted_averaging')),
         )
         # Los barridos descartados por moverse no promediaron: el equipo
         # sigue contando los presentados, pero el FSP y el ruido residual
@@ -3115,12 +3160,14 @@ class ABRGenerator:
         senial_filtrada = self.apply_filters(
             y_target, float(stimulus_config['filter_down']),
             float(stimulus_config['filter_passhigh']), fs, slope_db=pendiente)
-        desde_v, hasta_v = self.fsp_window(population)
+        desde_v, hasta_v = self.recording_fsp_window(population,
+                                                     technical_config)
         vent_v = (t >= desde_v) & (t <= hasta_v)
         a_rms_registro = (float(np.sqrt(np.mean(senial_filtrada[vent_v] ** 2)))
                           if vent_v.any() else 0.0)
         fsp_esperado = self.expected_fsp(t, senial_filtrada,
-                                         residual_nv / 1000.0, population)
+                                         residual_nv / 1000.0, population,
+                                         (desde_v, hasta_v))
         # Y lo que el equipo muestra es un sorteo alrededor de ese valor:
         # dos registros iguales no dan el mismo numero, que es la razon de
         # repetir para confirmar.
@@ -3129,6 +3176,16 @@ class ABRGenerator:
             # Sin estimulo no hay senial: la formula ya da 1, pero se deja
             # explicito porque es el punto de la maniobra.
             fsp_esperado = fsp_actual = 1.0
+
+        # Suavizado del equipo (Parametros avanzados): sobre lo que se
+        # muestra y se mide. El FSP y el residual ya salieron del trazo sin
+        # suavizar, como en el equipo (se calculan sobre los barridos).
+        puntos = technical_config.get('smoothing')
+        if puntos:
+            y_final = self.smooth_trace(y_final, puntos)
+            sub_a = self.smooth_trace(sub_a, puntos)
+            sub_b = self.smooth_trace(sub_b, puntos)
+            y_contra = self.smooth_trace(y_contra, puntos)
 
         return t, y_final, {
             'population': population,
@@ -3214,6 +3271,12 @@ def default_settings(test='ABR'):
         # Envolvente del tone burst: la lee el ECochG (meseta del PS y
         # duracion de la MC). El ABR todavia no la mira.
         'burst_envelope': '2-1-2',
+        # Promediador. auto_stop arranca en 'no': cuando parar es parte de
+        # lo que el alumno aprende, el equipo no lo decide por el.
+        'weighted_averaging': False,
+        'auto_stop': 'no',
+        'fsp_window_ms': None,
+        'smoothing': 0.0,
         # Estimulo (ver stimulus_settings_effects).
         'click_us': 100.0,
         'burst_window': 'blackman',
@@ -3233,10 +3296,6 @@ def default_settings(test='ABR'):
         'channels': 1,
         'gain': 100000.0,
         'sample_rate_hz': 30000.0,
-        'weighted_averaging': False,
-        'auto_stop': 'ambos',
-        'fsp_window_ms': None,
-        'smoothing': 0.0,
     }
 
 
@@ -3249,7 +3308,6 @@ UNCONNECTED_SETTINGS = (
     'level_unit',
     'presentation', 'masking_noise', 'masking_offset_db',
     'channels', 'gain', 'sample_rate_hz',
-    'weighted_averaging', 'auto_stop', 'fsp_window_ms', 'smoothing',
 )
 
 

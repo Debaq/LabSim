@@ -1030,6 +1030,33 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.push_fsp(self.current_capture_curve, metadata)
         self.update_capture_info(metadata)
         self.update_detail_info(self.current_setting)
+        motivo = self.auto_stop_reason(metadata)
+        if motivo and self.state_capture == 'record' and not self.done:
+            # Parada automatica del equipo (Parametros avanzados): la curva
+            # se cierra con lo que lleva, igual que al apretar Detener.
+            self.control.stop_capture()
+            self.lbl_info.setText(self.lbl_info.text() + "  ·  " + motivo)
+
+    # Barridos minimos antes de que la parada automatica pueda actuar: con
+    # pocos el FSP sale alto por azar y el ruido residual no es confiable.
+    AUTO_STOP_MIN_SWEEPS = 250
+
+    def auto_stop_reason(self, metadata):
+        """Por que el equipo para solo, o None si no corresponde."""
+        modo = (self.technical or {}).get('auto_stop') or 'no'
+        if modo == 'no':
+            return None
+        if float(metadata.get('accepted_sweeps') or 0) < self.AUTO_STOP_MIN_SWEEPS:
+            return None
+        fsp_ok = bool(metadata.get('fsp_pass'))
+        objetivo = float((self.technical or {}).get('residual_noise_nv') or 0)
+        ruido = float(metadata.get('residual_noise_nv') or 0)
+        ruido_ok = bool(objetivo) and 0 < ruido <= objetivo
+        if modo in ('fsp', 'ambos') and fsp_ok:
+            return tr("AbrMainWindow", "Detenido: FSP sobre el criterio")
+        if modo in ('ruido', 'ambos') and ruido_ok:
+            return tr("AbrMainWindow", "Detenido: ruido residual alcanzado")
+        return None
 
     def push_fsp(self, curve, metadata):
         """Un punto de FSP para ESA curva, y al grafico si es la que se mira.

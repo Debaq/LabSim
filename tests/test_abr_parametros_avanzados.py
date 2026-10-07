@@ -7,6 +7,7 @@ tiene que mover y nada más.
 
 1. Filtros y red: notch, pendiente y jitter de la tasa.
 2. Estímulo: duración del click y ventana (rampa) del burst.
+3. Promediador: ponderado, ventana del FSP, suavizado y parada automática.
 """
 
 import os
@@ -17,6 +18,9 @@ import numpy as np
 SRC = os.path.join(os.path.dirname(__file__), '..', 'src')
 if SRC not in sys.path:
     sys.path.insert(0, SRC)
+TESTS = os.path.dirname(os.path.abspath(__file__))
+if TESTS not in sys.path:
+    sys.path.insert(0, TESTS)
 
 from abr.ABR_generator import (MAINS_HZ, UNCONNECTED_SETTINGS,
                                _get_generator, default_settings)
@@ -217,6 +221,74 @@ def test_the_burst_ramp_shapes_the_ecochg_envelope():
     assert abs(lineal[cuarto] - 0.25) < 0.02
     assert coseno[cuarto] < lineal[cuarto]
     assert lineal.max() == coseno.max() == 1.0
+
+
+
+# ------------------------------------------------------------- promediador
+
+def test_the_averager_parameters_are_connected():
+    for clave in ('weighted_averaging', 'auto_stop', 'fsp_window_ms',
+                  'smoothing'):
+        assert clave not in UNCONNECTED_SETTINGS, clave
+        assert clave in default_settings('ABR'), clave
+    # Cuándo parar lo decide el alumno salvo que el equipo se configure.
+    assert default_settings('ABR')['auto_stop'] == 'no'
+
+
+def test_weighted_averaging_tames_a_restless_patient():
+    """Con el paciente inquieto y sin rechazo, los barridos sucios entran
+    al promedio; ponderados por ruido pesan menos y el residual baja."""
+    inquieto = {'inquietud': 0.9}
+    simple = _curva(technical={'artifact_reject_uv': 0},
+                    caso_extra=inquieto)[2]
+    ponderado = _curva(technical={'artifact_reject_uv': 0,
+                                  'weighted_averaging': True},
+                       caso_extra=inquieto)[2]
+    assert ponderado['residual_noise_nv'] < 0.9 * simple['residual_noise_nv'], (
+        ponderado['residual_noise_nv'], simple['residual_noise_nv'])
+    # Con un paciente quieto da lo mismo.
+    quieto_s = _curva()[1]
+    quieto_p = _curva(technical={'weighted_averaging': True})[1]
+    assert np.allclose(quieto_s, quieto_p)
+
+
+def test_the_fsp_window_end_is_configurable():
+    """Cortar la ventana antes de la onda V deja la respuesta afuera."""
+    auto = _curva()[2]
+    corta = _curva(technical={'fsp_window_ms': 3.0})[2]
+    assert corta['fsp_esperado'] < 0.5 * auto['fsp_esperado'], (
+        corta['fsp_esperado'], auto['fsp_esperado'])
+
+
+def test_smoothing_lowers_the_fast_noise():
+    """Sin respuesta (bajo el umbral), el suavizado baja el ruido rápido."""
+    t, crudo, _ = _curva(intensity=10)
+    _, suave, _ = _curva(intensity=10, technical={'smoothing': 7.0})
+    assert np.std(np.diff(suave)) < 0.9 * np.std(np.diff(crudo))
+    # Y lo hace sobre el mismo registro, no sobre otro.
+    assert np.corrcoef(crudo, suave)[0, 1] > 0.8
+
+
+def test_auto_stop_ends_the_capture_when_the_fsp_crosses():
+    """Con parada por FSP, una respuesta clara corta la captura antes de
+    llegar a los barridos pedidos, y la barra dice por qué."""
+    try:
+        from core.base import context  # noqa: F401  (QApplication)
+        import test_abr_panel as P
+    except ImportError:
+        return
+    if not getattr(P, 'HAS_UI', False):
+        return
+    w = P._ventana(average=4000)
+    w.technical['auto_stop'] = 'fsp'
+    P._capturar(w, intensidad=80)
+    assert 'Detenido' in w.lbl_info.text(), w.lbl_info.text()
+    track = w.fsp_tracks[w.current_capture_curve]
+    assert track['sweeps'][-1] < 4000, track['sweeps'][-1]
+    # Sin parada automática llega hasta el final.
+    w2 = P._ventana(average=4000)
+    P._capturar(w2, intensidad=80)
+    assert 'Detenido' not in w2.lbl_info.text()
 
 
 if __name__ == "__main__":
