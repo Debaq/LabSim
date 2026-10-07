@@ -89,8 +89,10 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # Los dos subpromedios y el contra se pueden ocultar desde la barra
         # del grafico: con cuatro trazos por curva y ocho curvas apiladas,
         # buscar la onda V en el promedio se hace ilegible.
-        self.show_sub = True
-        self.show_contra = True
+        # Arrancan ocultos (pedido del docente): el que los quiere mirar los
+        # prende con los botones AB y C de la barra.
+        self.show_sub = False
+        self.show_contra = False
         # Escala vertical del grafico, en uV de alto de ventana. Antes el
         # yRange estaba clavado en (-3, 3) y el apilado en 1.8 uV fijos:
         # todas las curvas nacian en la MISMA altura (se pisaban hasta que

@@ -506,11 +506,17 @@ def test_the_y_axis_can_be_inverted():
     if not HAS_UI:
         return
     w = _ventana()
+    # El botón dice dónde quedó el negativo.
+    assert w.btn_invert_y.text() == "−↓"
+    assert 'abajo' in w.btn_invert_y.toolTip()
     w.btn_invert_y.setChecked(True)
     assert w.graph_r.pw.getViewBox().yInverted()
     assert w.graph_l.pw.getViewBox().yInverted()
+    assert w.btn_invert_y.text() == "−↑"
+    assert 'arriba' in w.btn_invert_y.toolTip()
     w.btn_invert_y.setChecked(False)
     assert not w.graph_r.pw.getViewBox().yInverted()
+    assert w.btn_invert_y.text() == "−↓"
 
 
 def test_the_auto_mark_button_fills_the_table():

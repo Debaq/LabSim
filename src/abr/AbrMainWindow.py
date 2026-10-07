@@ -154,15 +154,19 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.btn_scale_minus.setToolTip("Achicar las curvas (más µV en la ventana)")
         self.btn_toggle_sub.toggled.connect(self.toggle_sub)
         self.btn_toggle_contra.toggled.connect(self.toggle_contra)
+        # Subpromedios A-B y contralateral arrancan apagados (en el .ui los
+        # botones vienen tildados).
+        self.btn_toggle_sub.setChecked(False)
+        self.btn_toggle_contra.setChecked(False)
         # Invertir el eje Y: va en la misma barra, debajo de los otros.
-        self.btn_invert_y = QPushButton("↕", self.verticalFrame)
+        self.btn_invert_y = QPushButton(self.verticalFrame)
         self.btn_invert_y.setObjectName("btn_invert_y")
         self.btn_invert_y.setCheckable(True)
-        self.btn_invert_y.setToolTip("Invertir el eje Y")
         self.verticalLayout.insertWidget(
             self.verticalLayout.indexOf(self.btn_toggle_contra) + 1,
             self.btn_invert_y)
         self.btn_invert_y.toggled.connect(self.invert_y)
+        self.show_negative_side(False)
         self.btn_next_case.hide()  # sin ciclo de casos propio, no aplica
 
         ######Variables de Estado
@@ -862,6 +866,22 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """Eje Y invertido en los dos oidos a la vez."""
         self.graph_r.set_y_inverted(inverted)
         self.graph_l.set_y_inverted(inverted)
+        self.show_negative_side(inverted)
+
+    def show_negative_side(self, inverted):
+        """El boton dice hacia donde quedo el lado NEGATIVO del eje.
+
+        Un "↕" no decia nada: el alumno lo apretaba y no sabia si la curva
+        estaba en la convencion que buscaba. Sin invertir, el negativo va
+        abajo (en el ECochG es donde va el PA).
+        """
+        flecha = "↑" if inverted else "↓"
+        self.btn_invert_y.setText(f"−{flecha}")
+        self.btn_invert_y.setToolTip(tr(
+            "AbrMainWindow",
+            "Negativo hacia {0}. Clic para invertir el eje Y").format(
+                tr("AbrMainWindow", "arriba") if inverted
+                else tr("AbrMainWindow", "abajo")))
 
     def toggle_contra(self, visible):
         self.graph_r.set_contra_visible(visible)

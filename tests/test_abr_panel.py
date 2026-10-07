@@ -584,8 +584,9 @@ def test_sub_and_contra_can_be_hidden():
         return
     w = _ventana()
     _capturar(w)
-    w.btn_toggle_sub.setChecked(False)
-    w.btn_toggle_contra.setChecked(False)
+    # Arrancan apagados: se prenden a pedido.
+    assert not w.btn_toggle_sub.isChecked()
+    assert not w.btn_toggle_contra.isChecked()
     for g in (w.graph_r, w.graph_l):
         for curva, trazos in g.traces.items():
             assert not trazos['sub_a'].isVisible(), curva
