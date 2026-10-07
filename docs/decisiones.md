@@ -4128,3 +4128,21 @@ conectarlos todos; van por grupos, cada uno con su test en
   (`MASKING_NOISE_EFFECT_DB`: banda estrecha −15 dB contra un click y +5
   contra un burst; ruido de habla −10/−5). Sin fuente numérica.
 
+### Unidad de nivel
+
+- Solo cambia cómo se muestra el nivel (etiquetas de las curvas, barra de
+  captura y detalle); el equipo sigue trabajando en nHL (`level_label`).
+- **peSPL** = nHL + RETSPL del transductor y el estímulo (`RETSPL_PE_DB`).
+  **Valores aproximados a ISO 389-6, para verificar contra la norma**: click
+  35.5 (inserto) / 30 (copa); bursts de 500 a 4000 Hz entre 21.5 y 32. Con
+  vibrador óseo no hay peSPL y se muestra nHL.
+- **HL** = el mismo número (el equipo está calibrado en HL para ese
+  estímulo).
+- **SL** = nivel − umbral aéreo del audiograma del caso en ese oído
+  (`sl_reference`): el de la frecuencia del burst, o el promedio de 2-3-4 kHz
+  para el click. Es dato clínico del paciente, no el umbral del ABR (que es
+  la respuesta). Sin audiograma, queda en nHL.
+- El rótulo pasó de "dBnHl" a "dB nHL".
+
+Con esto `UNCONNECTED_SETTINGS` quedó vacío: todo lo del diálogo hace algo.
+

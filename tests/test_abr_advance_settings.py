@@ -39,7 +39,7 @@ CLAVES = {'transducer', 'montage', 'window_ms', 'electrodes', 'impedance',
           'burst_envelope', 'notch_hz', 'filter_slope', 'rate_jitter_pct',
           'click_us', 'burst_window', 'weighted_averaging', 'auto_stop',
           'fsp_window_ms', 'smoothing', 'gain', 'sample_rate_hz', 'channels',
-          'presentation', 'masking_noise', 'masking_offset_db'}
+          'presentation', 'masking_noise', 'masking_offset_db', 'level_unit'}
 
 # Y las que el diálogo muestra pero el modelo todavía no lee. Están porque
 # el equipo real las tiene y el alumno las busca --el 2-1-2 del tone burst

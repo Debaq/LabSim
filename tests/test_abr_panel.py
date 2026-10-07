@@ -339,14 +339,14 @@ def test_detail_panel_describes_the_capture():
         return
     w = _ventana()
     _capturar(w, intensidad=70)
-    assert w.detail.lbl_info_int.text() == '70 dBnHL'
+    assert w.detail.lbl_info_int.text() == '70 dB nHL'
     assert w.detail.lbl_info_side.text() == 'OD'
     assert w.detail.lbl_info_estim.text() == w.control.cb_stim.currentText()
     assert w.detail.lbl_info_aver.text() == '2000'
     # Y al seleccionar otra curva, muestra la de ESA curva.
     _capturar(w, intensidad=40)
     w.curve_selected('R1')
-    assert w.detail.lbl_info_int.text() == '70 dBnHL'
+    assert w.detail.lbl_info_int.text() == '70 dB nHL'
 
 
 # ----------------------------------------------------- gráfico principal
@@ -933,7 +933,7 @@ def test_routine_stack_labels_only_intensity():
     _capturar(w, intensidad=60)
     for curva, dB in (('R1', '80'), ('R2', '60')):
         texto = _etiqueta(w.graph_r, curva)
-        assert texto == f'{dB} dBnHl', texto
+        assert texto == f'{dB} dB nHL', texto
 
 
 def test_a_different_polarity_labels_every_curve():
@@ -988,4 +988,4 @@ def test_deleting_the_odd_curve_restores_plain_labels():
     assert 'alt.' in _etiqueta(w.graph_r, 'R1')
     w.graph_r.act_curve = 'R2'
     w.graph_r.delete_curve()
-    assert _etiqueta(w.graph_r, 'R1') == '80 dBnHl'
+    assert _etiqueta(w.graph_r, 'R1') == '80 dB nHL'

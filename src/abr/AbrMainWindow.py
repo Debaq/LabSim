@@ -15,6 +15,7 @@ import os
 import numpy as np
 
 from abr.ABR_generator import (ABR_Curve, ABRGenerator, agitation_factor,
+                               level_label, sl_reference,
                                case_quality, latency_intensity_band,
                                normative_limits, raw_eeg)
 from abr.AbrAdvanceSettings import (MONTAGES, TRANSDUCERS, AbrAdvanceSettings,
@@ -167,6 +168,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.btn_invert_y)
         self.btn_invert_y.toggled.connect(self.invert_y)
         self.show_negative_side(False)
+        # Las etiquetas de las curvas dicen el nivel en la unidad del equipo.
+        for grafico, lado in ((self.graph_r, 'OD'), (self.graph_l, 'OI')):
+            grafico.level_text = (
+                lambda intensidad, cfg, lado=lado: self.level_text(
+                    intensidad, cfg.get('stim'), cfg.get('transducer'), lado))
         self.btn_next_case.hide()  # sin ciclo de casos propio, no aplica
 
         ######Variables de Estado
@@ -385,7 +391,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.lbl_time.setText(f"{segundos // 60:02d}:{segundos % 60:02d}")
 
         partes = [f"{self.current_capture_curve}",
-                  f"{self.current_setting.get('int')} dBnHL {self.current_setting.get('side')}",
+                  f"{self.level_text_for(self.current_setting)} "
+                  f"{self.current_setting.get('side')}",
                   f"{int(presentados)}/{int(self.current_setting.get('average') or 0)} barridos",
                   f"aceptados {int(aceptados)}",
                   f"FSP {metadata.get('fsp', 0):.1f}",
@@ -429,7 +436,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             estim = f"{estim} (óseo)"
         self.detail.lbl_info_estim.setText(estim)
         self.detail.lbl_info_pol.setText(str(setting.get('pol', '')))
-        self.detail.lbl_info_int.setText(f"{setting.get('int', '')} dBnHL")
+        self.detail.lbl_info_int.setText(self.level_text_for(setting))
         self.detail.lbl_info_mkg.setText(f"{setting.get('mkg', '')} dB")
         self.detail.lbl_info_rate.setText(f"{setting.get('rate', '')}/s")
         self.detail.lbl_info_filter.setText(
@@ -868,6 +875,20 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.graph_l.set_y_inverted(inverted)
         self.show_negative_side(inverted)
 
+    def level_text(self, intensidad, stim, transducer, side):
+        """Nivel en la unidad que eligio el equipo (Parametros avanzados)."""
+        unidad = (self.technical or {}).get('level_unit') or 'nHL'
+        ref = None
+        if unidad == 'SL':
+            ref = sl_reference((self.data_current or {}).get('Aerea'), side, stim)
+        return level_label(intensidad, unidad, stim, transducer, ref)
+
+    def level_text_for(self, setting):
+        setting = setting or {}
+        return self.level_text(setting.get('int', ''), setting.get('stim'),
+                               setting.get('transducer'),
+                               setting.get('side', 'OD'))
+
     def show_negative_side(self, inverted):
         """El boton dice hacia donde quedo el lado NEGATIVO del eje.
 
@@ -1183,6 +1204,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         if dialog.exec():
             self.technical = dialog.get_data()
             self.apply_window()
+            # La unidad del nivel puede haber cambiado: las etiquetas de las
+            # curvas ya tomadas se reescriben (es solo como se muestra).
+            for grafico in (self.graph_r, self.graph_l):
+                grafico.refresh_labels()
             # El monitor de EEG tiene que mostrar de inmediato las barras
             # de rechazo nuevas: es donde el alumno ve el efecto de lo que
             # acaba de tocar, sin esperar a promediar.

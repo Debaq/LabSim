@@ -9,6 +9,7 @@ tiene que mover y nada más.
 2. Estímulo: duración del click y ventana (rampa) del burst.
 3. Promediador: ponderado, ventana del FSP, suavizado y parada automática.
 4. Equipo: ganancia, muestreo, canales, presentación y enmascaramiento.
+5. Unidad de nivel.
 """
 
 import os
@@ -362,6 +363,56 @@ def test_the_masking_noise_type_changes_how_much_it_masks():
                      intensity=50, caso_extra=caso)[2]
     sin = _curva(technical=tec, intensity=50, caso_extra=OTRO_OIDO_SANO)[2]
     assert sin['shadow'] and not blanco['shadow'] and angosto['shadow']
+
+
+
+# --------------------------------------------------------- unidad de nivel
+
+def test_nothing_is_left_unconnected():
+    assert UNCONNECTED_SETTINGS == ()
+    assert 'level_unit' in default_settings('ABR')
+
+
+def test_the_level_is_shown_in_the_chosen_unit():
+    from abr.ABR_generator import level_label
+    assert level_label(80, 'nHL', 'Click', 'insert_earphone') == "80 dB nHL"
+    assert level_label(80, 'HL', 'Click', 'insert_earphone') == "80 dB HL"
+    pe = level_label(80, 'peSPL', 'Click', 'insert_earphone')
+    assert pe.endswith("dB peSPL") and float(pe.split()[0]) > 100
+    # Inserto y copa no tienen la misma calibración.
+    assert pe != level_label(80, 'peSPL', 'Click', 'TDH39_headphone')
+    # Por vía ósea no hay peSPL: queda en nHL.
+    assert level_label(50, 'peSPL', 'Click', 'bone_vibrator') == "50 dB nHL"
+    # SL sin audiograma no se puede calcular: queda en nHL.
+    assert level_label(80, 'SL', 'Click', 'insert_earphone') == "80 dB nHL"
+    assert level_label(80, 'SL', 'Click', 'insert_earphone', 30) == "50 dB SL"
+
+
+def test_sensation_level_uses_the_behavioural_audiogram():
+    """SL contra el umbral aéreo del caso en ese oído: el del burst en su
+    frecuencia, el del click en 2-3-4 kHz."""
+    from abr.ABR_generator import AUDIOGRAM_FREQS, sl_reference
+    aerea = [[f // 100, 0] for f in AUDIOGRAM_FREQS]     # OD = f/100 dB
+    assert sl_reference(aerea, 'OD', 'Burst 1 kHz') == 10
+    assert sl_reference(aerea, 'OD', 'Click') == (20 + 30 + 40) / 3
+    assert sl_reference(aerea, 'OI', 'Click') == 0
+    assert sl_reference(None, 'OD', 'Click') is None
+
+
+def test_the_curve_labels_follow_the_unit():
+    try:
+        from core.base import context  # noqa: F401  (QApplication)
+        import test_abr_panel as P
+    except ImportError:
+        return
+    if not getattr(P, 'HAS_UI', False):
+        return
+    w = P._ventana()
+    P._capturar(w, intensidad=80)
+    assert "80 dB nHL" in w.graph_r.label_html('R1', '#fff')
+    w.technical['level_unit'] = 'peSPL'
+    w.graph_r.refresh_labels()
+    assert "peSPL" in w.graph_r.label_html('R1', '#fff')
 
 
 if __name__ == "__main__":

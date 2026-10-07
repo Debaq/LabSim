@@ -3327,6 +3327,84 @@ class ABRGenerator:
 
 
 # ============================================================================
+# Unidad de nivel (Parametros avanzados)
+# ============================================================================
+
+# RETSPL pico equivalente (dB peSPL que corresponden a 0 dB nHL) por
+# transductor y estimulo. APROXIMADOS a ISO 389-6 (click de 100 us y tone
+# bursts breves): sirven para mostrar el nivel en peSPL, no para calibrar.
+# Hay que verificarlos contra la norma antes de usarlos en un informe. Los
+# chirps de banda ancha van con el click y los de banda estrecha con el
+# burst de su frecuencia. Con vibrador oseo no hay peSPL: se muestra nHL.
+RETSPL_PE_DB = {
+    'insert_earphone': {'click': 35.5, '500Hz': 22.5, '1000Hz': 21.5,
+                        '2000Hz': 28.0, '4000Hz': 32.0},
+    'TDH39_headphone': {'click': 30.0, '500Hz': 25.5, '1000Hz': 21.5,
+                        '2000Hz': 25.5, '4000Hz': 30.5},
+}
+# Frecuencias del audiograma del caso (cases.data['Aerea'], pares OD/OI):
+# las mismas que CaseBuilder::FREQUENCIES del backend.
+AUDIOGRAM_FREQS = (125, 250, 500, 1000, 2000, 3000, 4000, 6000, 8000)
+# Con que frecuencias del audiograma se compara un estimulo de banda ancha
+# para el nivel de sensacion: la region que el click estimula de verdad.
+SL_BROADBAND_FREQS = (2000, 3000, 4000)
+
+
+def sl_reference(aerea, side, stim_label):
+    """Umbral conductual contra el que se calcula el dB SL, o None.
+
+    Es el umbral aereo del audiograma del caso en ese oido: para un burst o
+    un chirp de banda estrecha, el de su frecuencia; para el click y los
+    chirps anchos, el promedio de 2, 3 y 4 kHz. Es dato clinico del
+    paciente (el audiograma ya se tomo), no el umbral del ABR.
+    """
+    if not isinstance(aerea, (list, tuple)) or not aerea:
+        return None
+    idx_lado = 0 if side in ('OD', 0, 'R') else 1
+    _, freq = STIM_MAP.get(stim_label, ('click', None))
+    if freq:
+        frecuencias = (int(str(freq).replace('Hz', '')),)
+    else:
+        frecuencias = SL_BROADBAND_FREQS
+    valores = []
+    for f in frecuencias:
+        if f not in AUDIOGRAM_FREQS:
+            continue
+        par = aerea[AUDIOGRAM_FREQS.index(f)] if AUDIOGRAM_FREQS.index(f) < len(aerea) else None
+        try:
+            valores.append(float(par[idx_lado]))
+        except (TypeError, ValueError, IndexError):
+            continue
+    return sum(valores) / len(valores) if valores else None
+
+
+def level_label(nhl, unit, stim_label, transducer, sl_ref=None):
+    """El nivel del estimulo como lo muestra el equipo, en la unidad elegida.
+
+    Solo cambia lo que se muestra: el equipo sigue trabajando en nHL. dB HL
+    es el mismo numero (el equipo esta calibrado en HL para ese estimulo);
+    peSPL suma el RETSPL del transductor; SL resta el umbral conductual
+    (sl_reference) y, sin audiograma, se queda en nHL.
+    """
+    try:
+        nivel = float(nhl)
+    except (TypeError, ValueError):
+        return f"{nhl} dB nHL"
+    unidad = unit or 'nHL'
+    if unidad == 'peSPL' and transducer in RETSPL_PE_DB:
+        clave, freq = STIM_MAP.get(stim_label, ('click', None))
+        tabla = RETSPL_PE_DB[transducer]
+        offset = tabla.get(freq) if freq else tabla['click']
+        if offset is not None:
+            return f"{nivel + offset:g} dB peSPL"
+    if unidad == 'HL':
+        return f"{nivel:g} dB HL"
+    if unidad == 'SL' and sl_ref is not None:
+        return f"{nivel - sl_ref:g} dB SL"
+    return f"{nivel:g} dB nHL"
+
+
+# ============================================================================
 # Interfaz publica: la usa AbrMainWindow
 # ============================================================================
 
@@ -3362,6 +3440,8 @@ def default_settings(test='ABR'):
         'channels': 2,
         'gain': 100000.0,
         'sample_rate_hz': 30000.0,
+        # Unidad en que se muestra el nivel (ver level_label).
+        'level_unit': 'nHL',
         # Promediador. auto_stop arranca en 'no': cuando parar es parte de
         # lo que el alumno aprende, el equipo no lo decide por el.
         'weighted_averaging': False,
@@ -3380,7 +3460,6 @@ def default_settings(test='ABR'):
         # los muestra y el technical_config los transporta. El generador no
         # los lee ADREDE: conectarlos es leerlos aca, uno por uno, con su
         # modelo y su test. Ver UNCONNECTED_SETTINGS.
-        'level_unit': 'nHL',
     }
 
 
@@ -3389,9 +3468,7 @@ def default_settings(test='ABR'):
 # el resto SI se use, y para que la lista se achique sola a medida que se
 # vayan conectando: sacar una clave de aca es el ultimo paso de
 # conectarla.
-UNCONNECTED_SETTINGS = (
-    'level_unit',
-)
+UNCONNECTED_SETTINGS = ()
 
 
 def _get_generator():

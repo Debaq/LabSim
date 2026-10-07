@@ -129,6 +129,9 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         self.area_fills = {}
         # Puntos de las marcas BL/INI/FIN: {(curva, marca): ScatterPlotItem}.
         self.dot_items = {}
+        # callable(intensidad, cfg) -> texto del nivel en la unidad del
+        # equipo (lo pone la ventana; ver AbrMainWindow.level_text).
+        self.level_text = None
         self.configure_pyqtgraph()
         self.setup_ui_elements()
         self.colors_side()
@@ -384,6 +387,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         setting = setting or {}
         return {'stim': setting.get('stim'), 'pol': setting.get('pol'),
                 'rate': setting.get('rate'),
+                'transducer': setting.get('transducer'),
                 'bone': setting.get('transducer') == 'bone_vibrator'}
 
     def mixed_param(self, clave: str) -> bool:
@@ -419,6 +423,12 @@ class AbrGraph(GraphicsLayoutWidgetMod):
 
     def label_html(self, key, fill: str) -> str:
         intensidad = self.curve_int.get(key, '')
+        # La unidad la decide el equipo (Parametros avanzados); sin quien la
+        # resuelva, nHL como siempre.
+        if self.level_text is not None:
+            nivel = self.level_text(intensidad, self.curve_cfg.get(key) or {})
+        else:
+            nivel = f"{intensidad} dB nHL"
         tokens = self.curve_tokens(key)
         extra = ''
         if tokens:
@@ -427,7 +437,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         return f"""
                 <div style='text-align: center; background-color: {fill};'>
                 <span style='color: #000; font-size: 7pt;'>
-                {intensidad} dBnHl
+                {nivel}
                 </span>{extra}
                 </div>
                 """
