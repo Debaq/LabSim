@@ -64,3 +64,15 @@ foreach (Bibliografia::PATOLOGIAS as $clave => $citas) {
         t_true(in_array($c['coincide'] ?? '', ['si', 'parcial', 'no'], true), "Cita {$clave}#{$i}: dice si coincide");
     }
 }
+
+// Revisión del 2026-10-08: todo cuadro tiene literatura y ninguna cita queda
+// "a medias". Si la literatura difiere, o se aplica al generador o la nota
+// dice por qué el generador difiere a propósito.
+foreach (CaseProfile::SCENARIOS as $clave => $_) {
+    t_true(!empty(Bibliografia::PATOLOGIAS[$clave]), "Cuadro {$clave}: tiene bibliografía");
+}
+foreach (Bibliografia::PATOLOGIAS as $clave => $citas) {
+    foreach ($citas as $i => $c) {
+        t_eq($c['coincide'], 'si', "Cita {$clave}#{$i}: revisada (ni parcial ni contradicha)");
+    }
+}

@@ -291,8 +291,8 @@ final class CaseBuilder
         ],
         'prematuro' => [
             'label' => 'Retraso madurativo del prematuro',
-            'nota' => 'No es patología: es maduración. Antes de usar esto, fijate que la edad del paciente ya elige la población normativa de neonato, que corre la onda V casi 1 ms.',
-            'params' => ['i_iii_ms' => 0.0, 'iii_v_ms' => 0.0, 'global_delay_ms' => 0.60,
+            'nota' => 'No es patología: es maduración. Antes de usar esto, fijate que la edad del paciente ya elige la población normativa de neonato, que corre la onda V casi 1 ms. Suma 0,10 ms al III-V: a edad de término el prematuro lo arrastra algo largo, más a menor edad gestacional (Stipdonk 2016).',
+            'params' => ['i_iii_ms' => 0.0, 'iii_v_ms' => 0.10, 'global_delay_ms' => 0.60,
                 'bloqueo' => 'ninguno', 'v_i_factor' => 0.80, 'microfonica' => 'normal',
                 'desincronia' => 'leve', 'sensibilidad_tasa' => 'moderada'],
         ],

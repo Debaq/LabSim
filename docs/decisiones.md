@@ -4344,3 +4344,39 @@ El cuadro 'normal' tiene la forma en cero, así que vale eso: 0 dB HL en todo
 para un joven y su presbiacusia esperable para un mayor, sin caso especial.
 Lo mismo pasa con las frecuencias sanas de un oído enfermo: una muesca de 4
 kHz ya no ensucia los graves. Se eliminó `EDAD_AUDICION_PERFECTA`.
+
+## Las 78 coincidencias parciales, revisadas (2026-10-08)
+
+Se revisaron las 78 citas que coincidían "en parte" con el generador y se
+buscó bibliografía para `infarto_pontino`, que no tenía. Ahora los 75 cuadros
+tienen bibliografía (170 citas, todas verificadas en PubMed) y ninguna queda
+como parcial: o se aplicó al generador (la nota empieza con "Aplicado") o el
+generador difiere a propósito (la nota empieza con "Decisión docente:", por
+el criterio de cuadro típico). `test_bibliografia` exige las dos cosas.
+
+Lo que cambió en el generador:
+
+- **Vía ósea sana en 0.** Casi todas las conductivas tenían 5-10 dB de forma
+  ósea en todas las frecuencias, y en un joven eso se leía como 5-10 dB. Una
+  conductiva pura no mueve la ósea: queda en 0 salvo donde hay literatura. Esas
+  excepciones son la muesca de Carhart en otoesclerosis y fijación congénita
+  (0,5-4 kHz, máximo 15 en 2 kHz, Perez 2009), la muesca de 2 kHz de la OME
+  (Ahmad 2002), la ósea ascendente de la OMA y la de graves de la disfunción
+  tubaria. Lo mismo vale para los graves de muesca 4k, ototóxica, trauma
+  acústico, conmoción, Stickler, compresión microvascular y TEC de tronco.
+- **Audiograma normal sin grado** en los neurales donde la literatura lo
+  describe normal: esclerosis múltiple, leucodistrofia, neuropatía
+  hereditaria e infarto pontino. También en los cuadros que ya eran normales
+  pero tenían 3-8 dB de forma: prematuro, bloqueo proximal e hipotermia.
+- **Formas:** disyunción (gap plano, mayor en graves), cuerpo extraño (gap
+  ascendente), fractura longitudinal y TEC completo (gap con valle en 2 kHz),
+  ANSD (más pérdida en graves), Usher pasa a ser el tipo 2 (caída desde 1 kHz,
+  moderada a severa) y CMV (llega a profunda).
+- **Otros ejes:** kernicterus con VEMP neural de umbral normal, NF2 con el
+  oVEMP casi ausente, parotiditis con VEMP caído, siderosis hasta severa con cce
+  20-55, salicilatos solo leve (asíntota de ~40 dB), Chiari unilateral,
+  conmoción bilateral, prematuro con +0,10 ms de III-V (Stipdonk 2016).
+
+Límite del modelo: el VEMP del generador sortea umbral y no latencias, así que
+el VEMP de latencia larga de la EM y de la CMT no queda representado. Esa
+latencia la carga el docente a mano.
