@@ -129,6 +129,7 @@ class VempMainWindow(QMainWindow):
         self.analisis = PanelAnalisis()
         self.tabs.addTab(self._envolver(self.analisis), 'Análisis')
         self.informe = PanelInforme()
+        self.estado_informe = self.informe.estado
         if self.data_login.get('name'):
             self.informe.set_evaluador(self.data_login['name'])
         self.tabs.addTab(self._envolver(self.informe), 'Informe')

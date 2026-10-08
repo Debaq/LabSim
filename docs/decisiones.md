@@ -3546,7 +3546,8 @@ se adapta el PA que uno sano) y `rar_cond_ms` (separación entre polaridades).
 - **Un campo fuera de rango se recorta, no rechaza el guardado**
   (`CaseForm::clampNum`): son parámetros de modelado, no datos clínicos, y
   frenar un caso entero por una razón en 1.5 cuesta más de lo que evita.
-- **Cambiar de prueba en el combo borra las curvas, y pregunta antes.** El ABR y
+- **Cambiar de prueba en el combo borra las curvas, y pregunta antes.**
+  *Revertido el 2026-10-08: ver "ABR y ECochG en la misma atención".* El ABR y
   el ECochG no se apilan en el mismo gráfico (ventanas distintas, y el ECochG
   tiene el PA hacia abajo) y el informe se sube con UN tipo. Se descartó
   permitir sesiones mezcladas: el informe habría quedado mal rotulado o habría
@@ -4251,3 +4252,37 @@ arma solo desde `ANCLAJE`, `SETS` y `LIMITES` para que no se desincronice.
 - Las del tamizaje neonatal salen del comentario de `NewbornScreening`, que
   ahora apunta a `Bibliografia::TAMIZAJE`.
 - Normativas ya no lista fuentes: enlaza a Bibliografía.
+
+## ABR y ECochG en la misma atención; informes sin botón "Guardar" (2026-10-08)
+
+A un paciente se le toma más de una prueba, y el alumno tiene que poder
+volver a corregir sus conclusiones en la misma atención. Cambiar de prueba en
+el combo del ABR preguntaba y **borraba** las curvas y el informe escrito
+(revierte la decisión "Cambiar de prueba en el combo borra las curvas" de la
+sección del ECochG).
+
+- Cada prueba es un registro aparte (`AbrMainWindow.otras_pruebas`): al
+  cambiar, la que se deja queda guardada entera (curvas, marcas, informe
+  escrito y equipo) y vuelve tal cual al elegirla de nuevo. Siguen sin
+  apilarse en el mismo gráfico.
+- Se suben las dos, cada una con su tipo (`ABR`, `ELECTROCOCLEO`): la tabla
+  `reports` ya tenía `UNIQUE(attendance_id, tipo)`, el backend no cambió. Las
+  imágenes de la que se deja se exportan al dejarla, porque después ya no está
+  en pantalla.
+- El autoguardado acepta varios informes por módulo (`report_jobs()`).
+- Retomar la atención trae las dos: la última guardada a pantalla, la otra
+  aparte. La que se recuperó y no se volvió a abrir no se resube (no hay
+  gráficos de donde sacar sus imágenes; las del servidor quedan).
+- `es_ecochg()` sigue a la prueba registrada (`test_actual`), no al combo: al
+  cambiar, el combo ya muestra la nueva mientras se guarda la anterior.
+
+EOA y Otoscopia tenían un botón "Guardar informe" que los demás módulos no
+tenían. Sobraba desde el autoguardado: sin apretarlo el informe se subía
+igual. Se sacó, y **todos** los módulos de examen (ABR, AABR, EOA, VEMP,
+Otoscopia) muestran bajo la conclusión el mismo aviso
+(`core/estado_informe.py`): "informe guardado a las HH:MM" o "no se pudo
+guardar (motivo). Se reintenta solo", una línea por tipo en el ABR. Lo
+actualiza el autoguardado después de cada subida.
+
+Tests en `tests/test_ecochg_panel.py` y `tests/test_report_autosave.py`. Sin
+probar en la app real.

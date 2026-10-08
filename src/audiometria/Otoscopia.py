@@ -171,7 +171,8 @@ class Otoscopia(QWidget):
         self.tabs = QTabWidget()
         self.tabs.addTab(self._build_tab_otoscopio(), "Otoscopio")
         self.informe = InformeOtoscopia()
-        self.informe.guardar_pedido.connect(self._guardar_informe)
+        # Lo actualiza el autoguardado (core/report_autosave.py).
+        self.estado_informe = self.informe.estado
         self.tabs.addTab(self.informe, "Informe")
         layout.addWidget(self.tabs)
 
@@ -260,15 +261,6 @@ class Otoscopia(QWidget):
                 lbl.setPixmap(pix)
             else:
                 lbl.setText(SIN_IMAGEN_TEXTO)
-
-    def _guardar_informe(self):
-        """Botón "Guardar informe": misma subida que al cerrar la atención,
-        pero acá el alumno ve qué pasó (el cierre es best-effort silencioso)."""
-        if self.appointment_id is None:
-            self.informe.set_estado("Sin una atención abierta no hay dónde guardar el informe.")
-            return
-        ok, detalle = self._subir_informe()
-        self.informe.set_estado("Informe guardado." if ok else f"No se pudo guardar: {detalle}")
 
     def submit_report(self):
         """Sube el informe al cerrar la atención -- lo llama main.py::

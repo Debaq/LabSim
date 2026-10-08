@@ -1,30 +1,27 @@
-"""Panel de informe EOA (hallazgos + conclusión + guardar).
+"""Panel de informe EOA (hallazgos + conclusión + aviso de guardado).
 
 Mismo patrón que AbrReport/VempReport: el alumno escribe la descripción y
 la conclusión, y el PDF lo arma el backend (report_pdf.php) con las
-capturas de los 4 tabs. La diferencia con ABR/VEMP es el botón "Guardar
-informe": acá el alumno guarda cuando quiere (y puede rehacerlo mientras la
-atención siga abierta), no solo al cerrar la atención.
+capturas de los 4 tabs. Se guarda solo mientras se atiende, como todos
+los módulos de examen (ver core/report_autosave.py): hasta 2026-10-08 había
+un botón "Guardar informe" propio de EOA.
 """
 from datetime import datetime
 
-from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QFormLayout,
     QGroupBox,
-    QHBoxLayout,
     QLabel,
-    QPushButton,
     QTextEdit,
     QVBoxLayout,
     QWidget,
 )
 
+from core.estado_informe import EstadoInforme
+
 
 class OaeReport(QWidget):
     """Tab 'Informe' del módulo EOA."""
-
-    save_requested = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -47,7 +44,7 @@ class OaeReport(QWidget):
         outer.addWidget(cab)
 
         # Resumen de lo capturado: el alumno tiene que ver QUÉ se va a
-        # adjuntar antes de guardar (si olvidó capturar un oído, acá se
+        # adjuntar (si olvidó capturar un oído, acá se
         # nota; en el PDF ya sería tarde).
         outer.addWidget(QLabel("Pruebas capturadas (se adjuntan al PDF):"))
         self.lbl_capturas = QLabel("--")
@@ -71,14 +68,8 @@ class OaeReport(QWidget):
         )
         outer.addWidget(self.text_edit_2, stretch=1)
 
-        botones = QHBoxLayout()
-        botones.addStretch(1)
-        self.lbl_status = QLabel("")
-        botones.addWidget(self.lbl_status)
-        self.btn_save = QPushButton("Guardar informe")
-        self.btn_save.clicked.connect(self.save_requested.emit)
-        botones.addWidget(self.btn_save)
-        outer.addLayout(botones)
+        self.estado = EstadoInforme()
+        outer.addWidget(self.estado)
 
     # ------------------------------------------------------------------
     def set_evaluador(self, text):
@@ -94,12 +85,7 @@ class OaeReport(QWidget):
         self.lbl_capturas.setText(", ".join(resumen) if resumen
                                   else "Todavía no hay capturas.")
 
-    def set_status(self, text, ok=True):
-        self.lbl_status.setText(text)
-        self.lbl_status.setStyleSheet(
-            "color: #27ae60;" if ok else "color: #c0392b;")
-
     def clear_texts(self):
         self.text_edit_1.clear()
         self.text_edit_2.clear()
-        self.set_status("")
+        self.estado.limpiar()

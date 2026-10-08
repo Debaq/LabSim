@@ -31,6 +31,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from core.estado_informe import EstadoInforme
+
 # (clave, etiqueta, color, tipo) -- claves de FindingType de OtoReport.
 #
 # El tipo es cómo se dibuja la marca, y son dos cosas distintas:
@@ -489,8 +491,6 @@ class InformeOtoscopia(QWidget):
     haber visto, por cuadrante y oído (varios hallazgos por cuadrante). No se compara con nada acá -- lo
     evalúa el docente contra la foto del caso (admin/chat_detail.php)."""
 
-    guardar_pedido = Signal()
-
     def __init__(self, parent=None):
         super().__init__(parent)
         raiz = QVBoxLayout(self)
@@ -502,18 +502,15 @@ class InformeOtoscopia(QWidget):
         oidos.addWidget(self.panel_oi)
         raiz.addLayout(oidos)
 
-        barra = QHBoxLayout()
-        self.lbl_estado = QLabel("")
-        self.btn_guardar = QPushButton("Guardar informe")
-        self.btn_guardar.clicked.connect(self.guardar_pedido.emit)
-        barra.addWidget(self.lbl_estado, 1)
-        barra.addWidget(self.btn_guardar)
-        raiz.addLayout(barra)
+        # Se guarda solo (core/report_autosave.py): sin botón, como en
+        # todos los módulos de examen; acá se ve si quedó guardado.
+        self.estado = EstadoInforme()
+        raiz.addWidget(self.estado)
 
     def limpiar(self):
         self.panel_od.limpiar()
         self.panel_oi.limpiar()
-        self.lbl_estado.setText("")
+        self.estado.limpiar()
 
     def to_dict(self):
         return {"od": self.panel_od.to_dict(), "oi": self.panel_oi.to_dict()}
@@ -524,6 +521,3 @@ class InformeOtoscopia(QWidget):
     def from_dict(self, d):
         self.panel_od.from_dict(d.get("od") or {})
         self.panel_oi.from_dict(d.get("oi") or {})
-
-    def set_estado(self, texto):
-        self.lbl_estado.setText(texto)

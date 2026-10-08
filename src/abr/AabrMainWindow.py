@@ -34,6 +34,7 @@ from abr.ABR_generator import ABR_Curve
 from abr.AbrAdvanceSettings import TRANSDUCERS, default_settings
 from backend.client import BackendClient
 from core.base import context
+from core.estado_informe import EstadoInforme
 from core.helpers import Preferences
 from core.report_autosave import subir_ahora
 from oae.generators.base import oae_probe_fit
@@ -321,6 +322,9 @@ class AabrMainWindow(QMainWindow):
         self.txt_conducta.setFixedHeight(54)
         grid.addWidget(self.txt_observaciones, 2, 0, 1, 2)
         grid.addWidget(self.txt_conducta, 2, 2, 1, 2)
+        # Se guarda solo (core/report_autosave.py); acá se ve si quedó.
+        self.estado_informe = EstadoInforme()
+        grid.addWidget(self.estado_informe, 3, 0, 1, 4)
         return caja
 
     # -------------------------------------------------------------- pasos

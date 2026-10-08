@@ -38,12 +38,13 @@ from abr.FSP import FSP
 from abr.UI.AbrMain_ui import Ui_MainWindow
 from backend.client import BackendClient
 from core.base import context
+from core.estado_informe import EstadoInforme
 from core.helpers import Preferences, es_docente
 from core.report_autosave import subir_ahora
 from core.rng import stable_seed
 from PySide6.QtCore import QCoreApplication, QTimer
-from PySide6.QtWidgets import (QComboBox, QLabel, QMainWindow, QMessageBox,
-                               QPushButton, QSizePolicy, QSpacerItem)
+from PySide6.QtWidgets import (QComboBox, QLabel, QMainWindow, QPushButton,
+                               QSizePolicy, QSpacerItem)
 
 tr = QCoreApplication.translate
 
@@ -108,6 +109,12 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.layout_abr.addWidget(self.graph_l)
         self.layout_lat_int.addWidget(self.graph_lat_int)
         self.layout_report.addWidget(self.report)
+        # Se guarda solo (core/report_autosave.py); bajo la conclusion se ve
+        # si quedo guardado, con una linea por prueba (ABR, ECochG).
+        self.estado_informe = EstadoInforme()
+        self.report.verticalLayout.insertWidget(
+            self.report.verticalLayout.indexOf(self.report.text_edit_2) + 1,
+            self.estado_informe)
         self.detail.layout_tab1_secction1.addWidget(self.eeg)
         self.detail.layout_tab1_secction2.addWidget(self.fmp)
         self.detail.layout_tab2.addWidget(self.detail_all)
@@ -206,6 +213,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         # impedancia 3 kOhm y ventana de 12 ms.
         self.test_actual = self.control.cb_test.currentText()
         self.technical = default_settings(self.test_actual)
+        # Las pruebas de esta atencion que no estan en pantalla, por nombre
+        # de prueba: {'data': payload, 'images': {sufijo: ruta},
+        # 'pendiente': hay que subirla} (ver test_changed).
+        self.otras_pruebas = {}
         self.control.cb_test.currentTextChanged.connect(self.test_changed)
         # Los rangos normativos de la tabla dependen de la intensidad y del
         # estimulo con que se registro, asi que siguen al panel de control.
@@ -243,6 +254,8 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.appointment_id = appointment_id
         self.data_current = data
         self.clear_sessions()
+        # Las pruebas que quedaron aparte eran del paciente anterior.
+        self.otras_pruebas = {}
         self.control.setEnabled(data is not None)
         abr_data = (data or {}).get('ABR') or {}
         self.abr_od = abr_data.get('OD')
@@ -463,13 +476,14 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             # esta atencion, asi que primero se vuelve a ella (y se ofrece
             # guardar lo que se haya cambiado en la otra).
             self.select_session(None)
-        job = self.report_job()
-        if job is None:
+        jobs = self.report_jobs()
+        if not jobs:
             return
         client = BackendClient(Preferences().get("BACKEND_URL"), context.get_resource('json/session.json'))
-        ok, error = subir_ahora(job, client)
-        if not ok:
-            print(f"ABR: no se pudo subir el informe: {error}")
+        for job in jobs:
+            ok, error = subir_ahora(job, client)
+            if not ok:
+                print(f"ABR: no se pudo subir el informe {job['tipo']}: {error}")
 
     def report_job(self):
         """El informe tal como se sube (ver core/report_autosave.py), o None
@@ -488,16 +502,40 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             return None
         # El tipo es el de la prueba con la que se registro: la tabla
         # `reports` ya distingue ELECTROCOCLEO de ABR, y el informe de un
-        # ECochG no dice nada de ondas I-V. Cambiar de prueba borra las
-        # curvas (ver test_changed), asi que no hay sesiones mezcladas que
+        # ECochG no dice nada de ondas I-V. Cada prueba es un registro
+        # aparte (ver test_changed), asi que no hay sesiones mezcladas que
         # puedan quedar mal rotuladas.
         return {"appointment_id": appointment_id, "tipo": self.report_tipo(),
                 "data": self.session_payload(), "images": self.export_images}
 
-    def report_tipo(self):
-        return 'ELECTROCOCLEO' if self.es_ecochg() else 'ABR'
+    def report_jobs(self):
+        """Todos los informes de la atencion: el de la prueba en pantalla
+        y los de las que quedaron aparte al cambiar de prueba, cada uno con
+        su tipo (ver core/report_autosave.py).
 
-    def export_images(self):
+        Las que se recuperaron del servidor y no se volvieron a abrir no
+        se suben: ya estan alla, con sus imagenes, y aca no hay graficos de
+        donde sacar otras.
+        """
+        jobs = [job for job in [self.report_job()] if job is not None]
+        if not self.data_login:
+            return jobs
+        try:
+            appointment_id = int(self.appointment_id)
+        except (TypeError, ValueError):
+            return jobs
+        for test, guardada in self.otras_pruebas.items():
+            if not guardada['pendiente'] or not guardada['data'].get('curvas'):
+                continue
+            jobs.append({"appointment_id": appointment_id,
+                         "tipo": self.report_tipo(test), "data": guardada['data'],
+                         "images": lambda g=guardada: dict(g['images'])})
+        return jobs
+
+    def report_tipo(self, test=None):
+        return 'ELECTROCOCLEO' if (test or self.test_actual) == 'ECochG' else 'ABR'
+
+    def export_images(self, prefijo='upload'):
         """JPEG de los graficos para el informe, tal como estan en pantalla."""
         temp_dir = context.get_resource("local_cache/abr/temp")
         # En la app instalada la carpeta no existe (local_cache no va en el
@@ -514,7 +552,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             exporters.pop('lat_int')
         images = {}
         for suffix, exporter in exporters.items():
-            path = os.path.join(temp_dir, f'upload_{suffix}.jpg')
+            path = os.path.join(temp_dir, f'{prefijo}_{suffix}.jpg')
             try:
                 exporter.export_jpg(path)
             except Exception as exc:
@@ -707,11 +745,26 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             return
         if self.memory or self.session_idx is not None:
             return  # empezo a registrar mientras se pedia
-        for informe in guardados:
+        # Puede haber un ABR y un ECochG de la misma atencion: el ultimo
+        # que se guardo vuelve a pantalla y el otro queda aparte, para
+        # elegirlo en el combo de prueba (ver test_changed).
+        pruebas = {}
+        for informe in guardados:   # el mas nuevo primero
             data = informe.get('data')
-            if isinstance(data, dict) and data.get('curvas'):
-                self.draw_session(data)
-                return
+            if not isinstance(data, dict) or not data.get('curvas'):
+                continue
+            test = data.get('prueba') or (
+                'ECochG' if informe.get('tipo') == 'ELECTROCOCLEO' else 'ABR')
+            pruebas.setdefault(test, data)
+        if not pruebas:
+            return
+        actual = next(iter(pruebas))
+        for test, data in pruebas.items():
+            if test != actual:
+                self.otras_pruebas[test] = {'data': data, 'images': {}, 'pendiente': False}
+        self.control.apply_protocol(actual)
+        self.draw_session(pruebas[actual])
+        self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
 
     def clear_sessions(self):
         """Cambio de paciente: la lista era del anterior."""
@@ -1218,7 +1271,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
     # ------------------------------------------------------------------
 
     def es_ecochg(self):
-        return self.control.cb_test.currentText() == 'ECochG'
+        # La prueba registrada, no la del combo: al cambiar de prueba el
+        # combo ya muestra la nueva mientras se guarda la que se deja (ver
+        # test_changed), y esa se tiene que guardar con su propio tipo.
+        return self.test_actual == 'ECochG'
 
     def apply_test_widgets(self, test):
         """Muestra la tabla de la prueba activa y ajusta el marcado.
@@ -1366,25 +1422,51 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         proposito: son los controles que el alumno tiene que aprender a
         configurar (ver AbrControl.randomize_initial_values).
         """
-        # Cambiar de prueba empieza un registro nuevo: el ABR y el ECochG
-        # no se pueden apilar en el mismo grafico (ventanas distintas, y el
+        # Cada prueba es un registro aparte: el ABR y el ECochG no se
+        # pueden apilar en el mismo grafico (ventanas distintas, y el
         # ECochG tiene el PA hacia abajo porque el electrodo activo es el
-        # del oido), y el informe se sube con UN tipo. Se pregunta porque
-        # es destructivo y el combo esta a un clic de distancia.
-        if self.memory and not self.confirm_test_change(test):
-            self.control.cb_test.blockSignals(True)
-            self.control.cb_test.setCurrentText(self.test_actual)
-            self.control.cb_test.blockSignals(False)
+        # del oido), y cada informe se sube con su tipo. Pero cambiar de
+        # prueba no borra nada: la que se deja queda guardada entera
+        # (curvas, marcas, informe escrito y equipo) y vuelve tal cual al
+        # elegirla otra vez. A un paciente se le toma mas de una prueba, y
+        # el alumno tiene que poder volver a corregir sus conclusiones en
+        # la misma atencion. Hasta 2026-10-08 se preguntaba y se borraba.
+        if test == self.test_actual:
             return
+        self.guardar_prueba_actual()
         self.test_actual = test
-        self.technical = default_settings(test)
         self.control.apply_protocol(test)
-        self.apply_test_widgets(test)
-        self.apply_standard_setup(test)
-        self.apply_window()
-        self.apply_norms()
-        self.reset()
+        guardada = self.otras_pruebas.pop(test, None)
+        if guardada is not None:
+            self.draw_session(guardada['data'])
+        else:
+            self.technical = default_settings(test)
+            self.apply_test_widgets(test)
+            self.apply_standard_setup(test)
+            self.apply_window()
+            self.apply_norms()
+            self.reset()
+            # reset() no toca el informe escrito: sin esto la conclusion
+            # del ECochG quedaba como la del ABR nuevo.
+            self.report.text_edit_1.clear()
+            self.report.text_edit_2.clear()
         self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
+
+    def guardar_prueba_actual(self):
+        """Deja aparte la prueba en pantalla antes de cambiar a otra.
+
+        Las imagenes se exportan ahora, mientras los graficos todavia la
+        muestran: despues ya no esta en pantalla y el informe se sigue
+        subiendo (ver report_jobs).
+        """
+        texto = (self.report.text_edit_1.toPlainText().strip()
+                 or self.report.text_edit_2.toPlainText().strip())
+        if not self.memory and not texto:
+            self.otras_pruebas.pop(self.test_actual, None)
+            return
+        imagenes = self.export_images(f'guardada_{self.report_tipo()}') if self.memory else {}
+        self.otras_pruebas[self.test_actual] = {
+            'data': self.session_payload(), 'images': imagenes, 'pendiente': True}
 
     def apply_standard_setup(self, test):
         """Deja el equipo en la configuracion estandar, SOLO al docente.
@@ -1437,17 +1519,6 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             puesto[clave] = technical[clave]
         self.preset_tec = puesto
         self.apply_window()
-
-    def confirm_test_change(self, test):
-        """Avisa que cambiar de prueba borra lo registrado."""
-        respuesta = QMessageBox.question(
-            self, tr("AbrMainWindow", "Cambiar de prueba"),
-            tr("AbrMainWindow",
-               "Cambiar a {0} borra las curvas registradas y el informe "
-               "escrito.\n\n¿Continuar?").format(test),
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.No)
-        return respuesta == QMessageBox.StandardButton.Yes
 
     ESCALA_ABR_UV = 6.0
 

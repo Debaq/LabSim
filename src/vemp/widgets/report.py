@@ -16,6 +16,7 @@ from datetime import datetime
 from PySide6.QtWidgets import (QHBoxLayout, QScrollArea, QSpinBox, QTextEdit,
                                QVBoxLayout, QWidget)
 
+from core.estado_informe import EstadoInforme
 from vemp import protocol
 from vemp.widgets.kit import Campos, Dato, Tarjeta, etiqueta, etiqueta_seccion
 
@@ -110,6 +111,9 @@ class PanelInforme(QWidget):
         self.txt_conclusion.setPlaceholderText('Interpretación del examen...')
         self.txt_conclusion.setMinimumHeight(90)
         caja.agregar(self.txt_conclusion)
+        # Se guarda solo (core/report_autosave.py); acá se ve si quedó.
+        self.estado = EstadoInforme()
+        caja.agregar(self.estado)
         return caja
 
     # ------------------------------------------------------------------

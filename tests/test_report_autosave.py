@@ -117,6 +117,51 @@ def test_iniciar_olvida_la_atencion_anterior():
     auto.detener()
 
 
+class ModuloDoble(Modulo):
+    """Un módulo que sube dos informes por atención (el ABR: ABR + ECochG)."""
+
+    def report_jobs(self):
+        return [self.report_job(),
+                {"appointment_id": 42, "tipo": "ELECTROCOCLEO",
+                 "data": {"curvas": {"R1": 90}}, "images": self.exportar}]
+
+
+def test_un_modulo_puede_subir_varios_informes():
+    subidas = _con_subidas()
+    m = ModuloDoble()
+    auto = ra.ReportAutosave(lambda: [m])
+    _tick(auto)
+    assert sorted(s[0] for s in subidas) == ["ABR", "ELECTROCOCLEO"]
+    _tick(auto)
+    assert len(subidas) == 2   # cada tipo con su huella: nada cambió
+    auto.detener()
+
+
+def test_el_modulo_muestra_si_quedo_guardado():
+    """Sin botón "Guardar": el alumno ve en el módulo si se subió o no."""
+    from core.estado_informe import EstadoInforme
+    _con_subidas()
+    m = ModuloDoble()
+    m.estado_informe = EstadoInforme()
+    auto = ra.ReportAutosave(lambda: [m])
+    auto.iniciar()
+    _tick(auto)
+    texto = m.estado_informe.text()
+    assert "ABR: informe guardado" in texto and "ECochG: informe guardado" in texto, texto
+
+    def falla(job, client=None):
+        raise RuntimeError("sin red")
+    ra.subir = falla
+    m.data["curvas"]["R2"] = 60
+    _tick(auto)
+    texto = m.estado_informe.text()
+    assert "ABR: no se pudo guardar" in texto and "sin red" in texto, texto
+    assert "ECochG: informe guardado" in texto, texto
+    auto.iniciar()   # atención nueva: lo de la anterior no dice nada
+    assert "guardado" not in m.estado_informe.text().replace("se guarda", "")
+    auto.detener()
+
+
 if __name__ == "__main__":
     fallas = 0
     for nombre, fn in sorted(globals().items()):

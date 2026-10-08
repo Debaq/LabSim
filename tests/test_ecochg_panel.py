@@ -579,31 +579,124 @@ def test_the_auto_mark_is_not_the_answer():
     assert medidas['200'] < 0.8 * medidas['10'], medidas
 
 
-def test_switching_test_with_curves_asks_first():
-    """Cambiar de prueba empieza un registro nuevo, y avisa.
+def test_switching_test_keeps_both_recordings():
+    """Cambiar de prueba no borra nada: cada una vuelve tal cual.
 
     El ABR y el ECochG no se apilan en el mismo gráfico --ventanas
-    distintas, y el ECochG tiene el PA hacia abajo-- y el informe se sube
-    con UN tipo. Pero el combo está a un clic, así que no puede borrar sin
-    preguntar.
+    distintas, y el ECochG tiene el PA hacia abajo--, pero a un paciente se
+    le toman los dos y el alumno vuelve a corregir sus conclusiones en la
+    misma atención. Hasta 2026-10-08 se preguntaba y se borraba.
     """
     if not HAS_UI:
         return
     w = _ventana()
     curva = _capturar(w)
-    assert curva in w.memory
+    w.report.text_edit_2.setPlainText('Conclusión del ECochG')
+    ventana_ecochg = w.technical['window_ms']
 
-    preguntas = []
-    w.confirm_test_change = lambda test: (preguntas.append(test), False)[1]
     w.control.cb_test.setCurrentText('ABR')
-    assert preguntas == ['ABR']
-    assert w.control.cb_test.currentText() == 'ECochG'
-    assert curva in w.memory            # no se borró nada
-
-    w.confirm_test_change = lambda test: True
-    w.control.cb_test.setCurrentText('ABR')
-    assert w.control.cb_test.currentText() == 'ABR'
     assert w.memory == {}
+    assert w.report.text_edit_2.toPlainText() == ''
+    assert 'ECochG' in w.otras_pruebas
+    w.report.text_edit_2.setPlainText('Conclusión del ABR')
+
+    w.control.cb_test.setCurrentText('ECochG')
+    assert curva in w.memory
+    assert w.report.text_edit_2.toPlainText() == 'Conclusión del ECochG'
+    assert w.technical['window_ms'] == ventana_ecochg
+    assert w.es_ecochg()
+    # El ABR quedó aparte con su conclusión (sin curvas no se sube).
+    assert w.otras_pruebas['ABR']['data']['conclusion'] == 'Conclusión del ABR'
+
+
+class _ClienteAnota:
+    """BackendClient sin red: anota lo que se sube."""
+    subidas = []
+    actuales = []
+
+    def __init__(self, *a, **k):
+        pass
+
+    def is_logged_in(self):
+        return True
+
+    def get_my_report(self, appointment_id, tipos=None):
+        return self.actuales
+
+    def upload_report(self, appointment_id, tipo, data, images):
+        import json
+        _ClienteAnota.subidas.append((tipo, json.loads(json.dumps(data)), dict(images)))
+
+
+def _con_cliente(fn):
+    import abr.AbrMainWindow as modulo
+    original = modulo.BackendClient
+    _ClienteAnota.subidas = []
+    modulo.BackendClient = _ClienteAnota
+    try:
+        return fn()
+    finally:
+        modulo.BackendClient = original
+
+
+def _alumno(w):
+    w.data_login = {'name': 'Alumno', 'user': 'al', 'permission': 'user'}
+    return w
+
+
+def test_both_tests_go_up_each_with_its_type():
+    """Un ABR y un ECochG de la misma atención: dos informes, y el que no
+    está en pantalla se sube con las imágenes de cuando se dejó."""
+    if not HAS_UI:
+        return
+    w = _alumno(_ventana())
+    _capturar(w)
+    w.report.text_edit_2.setPlainText('Hidrops OD')
+    w.control.cb_test.setCurrentText('ABR')
+    _capturar(w, intensidad=80)
+    w.report.text_edit_2.setPlainText('ABR normal')
+
+    _con_cliente(w.submit_report)
+    por_tipo = {tipo: (data, imgs) for tipo, data, imgs in _ClienteAnota.subidas}
+    assert set(por_tipo) == {'ABR', 'ELECTROCOCLEO'}
+    assert por_tipo['ELECTROCOCLEO'][0]['conclusion'] == 'Hidrops OD'
+    assert por_tipo['ELECTROCOCLEO'][0]['prueba'] == 'ECochG'
+    assert por_tipo['ABR'][0]['conclusion'] == 'ABR normal'
+    # El ECochG no informa latencia-intensidad, el ABR sí.
+    assert set(por_tipo['ELECTROCOCLEO'][1]) == {'0', '1'}
+    assert 'lat_int' in por_tipo['ABR'][1]
+    assert all(os.path.isfile(r) for r in por_tipo['ELECTROCOCLEO'][1].values())
+
+
+def test_resuming_brings_back_both_tests():
+    """Retomar la atención trae el ABR y el ECochG: el último guardado a
+    pantalla, el otro aparte. El que no se toca no se resube sin imágenes."""
+    if not HAS_UI:
+        return
+    import json
+    w = _alumno(_ventana())
+    _capturar(w)
+    w.report.text_edit_2.setPlainText('Hidrops OD')
+    ecochg_data = json.loads(json.dumps(w.session_payload()))
+    w.control.cb_test.setCurrentText('ABR')
+    _capturar(w, intensidad=80)
+    w.report.text_edit_2.setPlainText('ABR normal')
+    abr_data = json.loads(json.dumps(w.session_payload()))
+
+    w2 = _alumno(_ventana())
+    w2.control.cb_test.setCurrentText('ABR')
+    _ClienteAnota.actuales = [{'tipo': 'ELECTROCOCLEO', 'data': ecochg_data},
+                              {'tipo': 'ABR', 'data': abr_data}]
+    w2.restore_current(_ClienteAnota(), 42)
+    assert w2.test_actual == 'ECochG'
+    assert w2.control.cb_test.currentText() == 'ECochG'
+    assert w2.report.text_edit_2.toPlainText() == 'Hidrops OD'
+    assert [j['tipo'] for j in w2.report_jobs()] == ['ELECTROCOCLEO']
+
+    w2.control.cb_test.setCurrentText('ABR')
+    assert w2.report.text_edit_2.toPlainText() == 'ABR normal'
+    assert set(w2.memory) == set(abr_data['curvas'])
+    assert sorted(j['tipo'] for j in w2.report_jobs()) == ['ABR', 'ELECTROCOCLEO']
 
 
 def test_the_report_goes_up_as_an_ecochg():

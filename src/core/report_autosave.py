@@ -15,7 +15,9 @@ un upsert libre (ver report_upload.php).
 
 Contrato con los módulos: `report_job()` devuelve None (nada que subir) o
 un dict {appointment_id, tipo, data, images}, donde `images` es un callable
-que exporta los JPEG y devuelve {sufijo: ruta}. Las imágenes se exportan
+que exporta los JPEG y devuelve {sufijo: ruta}. Un módulo que sube más de un
+informe por atención (el ABR: un ABR y un ECochG) expone además
+`report_jobs()`, con la lista entera. Las imágenes se exportan
 solo si `data` cambió: exportar los gráficos cuesta y no hace falta cada 30
 segundos si el alumno no tocó nada.
 """
@@ -46,6 +48,14 @@ def huella(job) -> str:
     crudo = json.dumps([job["appointment_id"], job["tipo"], job["data"]],
                        sort_keys=True, ensure_ascii=False, default=str)
     return hashlib.blake2b(crudo.encode("utf-8"), digest_size=16).hexdigest()
+
+
+def trabajos(modulo) -> list:
+    """Los informes que un módulo tiene para subir (ver el contrato arriba)."""
+    if hasattr(modulo, "report_jobs"):
+        return list(modulo.report_jobs())
+    job = modulo.report_job()
+    return [] if job is None else [job]
 
 
 def subir(job, client=None) -> None:
@@ -146,6 +156,10 @@ class ReportAutosave(QObject):
     def iniciar(self):
         """Arranca con una atención nueva: se olvida lo subido antes."""
         self._huellas.clear()
+        for m in self._modulos():
+            estado = getattr(m, "estado_informe", None)
+            if estado is not None:
+                estado.limpiar()
         self._timer.start()
 
     def detener(self):
@@ -166,24 +180,27 @@ class ReportAutosave(QObject):
         """Sube en segundo plano lo que haya cambiado (uno o todos)."""
         for m in ([modulo] if modulo is not None else self._modulos()):
             try:
-                job = m.report_job()
+                jobs = trabajos(m)
             except Exception as exc:  # noqa: BLE001 -- un módulo no frena a los demás
                 print(f"autosave: {type(m).__name__}: {exc}")
                 continue
-            if job is None:
-                continue
-            clave = (job["appointment_id"], job["tipo"])
-            if clave in self._hilos:
-                continue  # sigue subiendo la anterior; el próximo tick va
-            h = huella(job)
-            if self._huellas.get(clave) == h:
-                continue
-            carpeta = tempfile.mkdtemp(prefix="labsim_informe_")
-            job["images_listas"] = self._copiar_imagenes(job, carpeta)
-            hilo = _Subida(job, clave, h, carpeta, self)
-            self._hilos[clave] = hilo
-            hilo.terminada.connect(self._terminada)
-            hilo.start()
+            for job in jobs:
+                self._subir_si_cambio(m, job)
+
+    def _subir_si_cambio(self, modulo, job):
+        clave = (job["appointment_id"], job["tipo"])
+        if clave in self._hilos:
+            return  # sigue subiendo la anterior; el próximo tick va
+        h = huella(job)
+        if self._huellas.get(clave) == h:
+            return
+        carpeta = tempfile.mkdtemp(prefix="labsim_informe_")
+        job["images_listas"] = self._copiar_imagenes(job, carpeta)
+        hilo = _Subida(job, clave, h, carpeta, self)
+        hilo.modulo = modulo
+        self._hilos[clave] = hilo
+        hilo.terminada.connect(self._terminada)
+        hilo.start()
 
     def recuperar(self, appointment_id, destinos, sigue_vigente):
         """Retomar la atención: pide lo ya guardado de esa cita y se lo da a
@@ -239,6 +256,10 @@ class ReportAutosave(QObject):
             self._huellas[hilo.clave] = hilo.huella
         else:
             print(f"autosave: no se pudo subir {hilo.clave[1]}: {err}")
+        # El alumno ve en el módulo si quedó guardado (no hay botón).
+        estado = getattr(getattr(hilo, "modulo", None), "estado_informe", None)
+        if estado is not None:
+            estado.guardado(hilo.clave[1], ok, err)
 
 
 def subir_ahora(job, client=None) -> tuple[bool, str]:
