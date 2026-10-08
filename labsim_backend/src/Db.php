@@ -37,6 +37,19 @@ final class Db
      * posterior en el mismo request abre una conexión nueva (ya contra el
      * archivo restaurado).
      */
+    /** Una conexión nueva, aparte de la compartida, con la misma configuración. */
+    private static function conexionAparte(): PDO
+    {
+        $pdo = new PDO('sqlite:' . self::config()['db']['path'], null, null, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_STRINGIFY_FETCHES => false,
+        ]);
+        $pdo->exec('PRAGMA foreign_keys = ON');
+        $pdo->exec('PRAGMA busy_timeout = 5000');
+        return $pdo;
+    }
+
     public static function closeForRestore(): void
     {
         self::$pdo = null;
@@ -636,8 +649,15 @@ final class Db
         if ($listo !== null) {
             return $listo;
         }
+        // Si falló hace poco no se reintenta en cada subida: cada intento
+        // toma la base para escribir y, con los kioskos guardando cada 30 s,
+        // eso bloqueaba a los demás. "Aplicar schema" la corre igual.
+        $marca = __DIR__ . '/../data/.migracion_informes_fallo';
+        $reciente = is_file($marca) && (time() - (int) @filemtime($marca)) < 3600;
         try {
-            self::migrateReportsTiposIfNeeded();
+            if (!$reciente) {
+                self::migrateReportsTiposIfNeeded();
+            }
             $pdo = self::get();
             $pdo->exec(
                 'CREATE TABLE IF NOT EXISTS report_versions (
@@ -652,12 +672,16 @@ final class Db
             $pdo->exec('CREATE INDEX IF NOT EXISTS idx_report_versions_report ON report_versions (report_id)');
         } catch (Throwable $e) {
             error_log('[Db::ensureReportVersioning] ' . $e->getMessage());
+            @file_put_contents($marca, date('c') . ' ' . $e->getMessage() . "\n");
         }
         try {
             $cols = array_column(self::get()->query('PRAGMA table_info(reports)')->fetchAll(), 'name');
             $listo = in_array('version', $cols, true);
         } catch (Throwable $e) {
             $listo = false;
+        }
+        if ($listo && is_file($marca)) {
+            @unlink($marca);
         }
         return $listo;
     }
@@ -674,10 +698,15 @@ final class Db
      */
     public static function migrateReportsTiposIfNeeded(): void
     {
-        $pdo = self::get();
+        // Conexión propia: SQLite no deja hacer DROP TABLE en una conexión
+        // con una consulta a medio leer ("database table is locked"), y la
+        // compartida siempre trae la del token (Auth::requireUser). Por eso
+        // la migración de otoscopía dejó reports_old en producción.
+        $pdo = self::conexionAparte();
         $stmt = $pdo->prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'reports'");
         $stmt->execute();
         $sql = (string) $stmt->fetchColumn();
+        $stmt->closeCursor();   // a medio leer, el DROP de abajo falla
         // Tabla todavía inexistente (instalación nueva): la crea schema.sql
         // ya con el CHECK nuevo, no hay nada que migrar.
         if ($sql === '') {
