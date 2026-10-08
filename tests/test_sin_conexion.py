@@ -380,6 +380,34 @@ def test_quedan_vivos_avisa_de_un_hilo_soltado_que_sigue():
     assert not hilos.quedan_vivos()
 
 
+
+def test_una_subida_fallida_no_borra_su_hilo_antes_de_que_termine():
+    """El hilo avisa (terminada) dentro de run() y recién después termina.
+    Borrarlo con ese aviso abortaba el proceso si run() todavía no había
+    devuelto (laboratorio, 2026-10-08)."""
+    from PySide6.QtCore import QCoreApplication, QEvent
+
+    class _Lenta(ra._Subida):
+        def run(self):
+            self.resultado = (False, "sin red")
+            self.terminada.emit(self, *self.resultado)
+            time.sleep(0.4)   # como un hilo que espera el GIL para salir
+
+    original = ra._Subida
+    ra._Subida = _Lenta
+    try:
+        auto = ra.ReportAutosave(lambda: [])
+        job = _job({"curvas": {"R1": 33}}, cita=80)
+        auto._subir_si_cambio(None, job, "u1")
+        hilo = auto._hilos[(80, "ABR")]
+        time.sleep(0.1)
+        APP.processEvents()                       # llega `terminada`
+        QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        assert shiboken6.isValid(hilo) and hilo.isRunning()
+        hilo.wait(2000)
+    finally:
+        ra._Subida = original
+
 if __name__ == "__main__":
     fallas = 0
     for nombre, fn in sorted(globals().items()):

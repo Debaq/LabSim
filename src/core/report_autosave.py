@@ -308,6 +308,13 @@ class ReportAutosave(QObject):
         hilo.modulo = modulo
         self._hilos[clave] = hilo
         hilo.terminada.connect(self._terminada)
+        # Se borra recién cuando terminó del todo. `terminada` se emite
+        # dentro de run(): borrarlo desde ahí (deleteLater en _terminada)
+        # podía destruirlo con run() todavía devolviendo -- el hilo espera
+        # el GIL mientras el principal procesa el borrado -- y Qt abortaba
+        # el proceso. Pasó en el laboratorio el 2026-10-08 con el servidor
+        # fallando cada 30 s.
+        hilo.finished.connect(hilo.deleteLater)
         hilo.start()
 
     def recuperar(self, appointment_id, destinos, sigue_vigente):
@@ -358,7 +365,6 @@ class ReportAutosave(QObject):
             return
         del self._hilos[hilo.clave]
         shutil.rmtree(hilo.carpeta, ignore_errors=True)
-        hilo.deleteLater()
         if ok:
             self._huellas[hilo.clave] = hilo.huella
         else:
