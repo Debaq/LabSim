@@ -4570,6 +4570,7 @@ pausados con la ventana oculta, OAE (Iniciar durante la captura, Limpiar con
 captura pendiente, Detener en la sonda guardaba la corrida anterior),
 `Preferences.get` devuelve None como decía su comentario.
 
-Queda fuera, a propósito: el `preCharger` del impedanciómetro sin paciente
-sigue dibujando una curva tipo A (choca con "sin datos reales no se genera",
-pero no es de estabilidad).
+Impedanciómetro sin paciente: antes dibujaba una curva plana con 1,8 ml
+inventados. Ahora no genera nada y la pantalla del timpanograma dice "SONDA
+ABIERTA / sin paciente", como el equipo real cuando la sonda no sella;
+Estímulo no barre ni suena (`ZZscreen.set_sonda_abierta`).

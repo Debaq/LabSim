@@ -39,6 +39,11 @@ class ZZscreen(QWidget, Ui_Z_zscreen):
         self.pw1.addItem(self.gradient_box)
 
         self.ploty = self.pw1.plot()
+        # Sin paciente no hay oído que sellar: el equipo real lo avisa en
+        # pantalla en vez de dibujar una curva (ver set_sonda_abierta).
+        self.txt_abierta = pg.TextItem("SONDA ABIERTA\nsin paciente", color='y', anchor=(0.5, 0.5))
+        self.txt_abierta.setVisible(False)
+        self.pw1.addItem(self.txt_abierta, ignoreBounds=True)
         self.graph.addWidget(self.pw1)
     
     def update_graph(self, x,y):
@@ -94,6 +99,15 @@ class ZZscreen(QWidget, Ui_Z_zscreen):
         array = np.asarray(array_in)
         idx = (np.abs(array - value)).argmin()
         return array_out[idx]
+
+    def set_sonda_abierta(self, abierta):
+        """Aviso de sonda abierta: no hay paciente atendiéndose."""
+        if abierta:
+            (x0, x1), (y0, y1) = self.pw1.viewRange()
+            self.txt_abierta.setPos((x0 + x1) / 2, (y0 + y1) / 2)
+            self.clearData()
+            self.clear_lbl()
+        self.txt_abierta.setVisible(abierta)
 
     def clear_lbl(self):
         self.lbl_p.setText("")

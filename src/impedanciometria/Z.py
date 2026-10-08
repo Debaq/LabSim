@@ -238,9 +238,11 @@ class ZControl(QWidget, Ui_Z_control):
                     edad_meses=edad_meses_del_caso(self.data),
                     forzado=z1000_del_caso(self.data, self.Z.get_side()))
             else:
-                seed_key = None
-                zGerger = "N"
-                vol = 1.8
+                # Sin paciente no hay oído: la sonda queda abierta y no se
+                # dibuja nada (ver refresh / ZZscreen.set_sonda_abierta). Antes
+                # salía una curva plana con 1.8 ml inventados.
+                self.update_reflex_volume()
+                return
             result = Z_225(letter=zGerger, vol=vol, win_neg=win_neg, win_pos=win_pos, seed_key=seed_key).getDataSet()
             self.store_data[side].set(0, result)
             self.new[side] = True
@@ -328,6 +330,7 @@ class ZControl(QWidget, Ui_Z_control):
                 self.Z.set_gradient_box(float(memory[3]), float(memory[2]))
             except (ValueError, TypeError):
                 self.Z.set_gradient_box(None, None)
+        self.Z.set_sonda_abierta(self.data is None)
 
     def timerAnimation(self):
         if self.time_ch0.isActive():
@@ -540,6 +543,10 @@ class ZControl(QWidget, Ui_Z_control):
             self.reflex_stimulus()
         else:
             self._log("z_stimulus_click", screen='tymp', side=self.Z.get_side(), leak=self.leak)
+            if self.data is None:
+                # Sonda abierta: no hay barrido que hacer.
+                self.Z.set_sonda_abierta(True)
+                return
             self.timerAnimation()
 
     def reflex_stimulus(self):
