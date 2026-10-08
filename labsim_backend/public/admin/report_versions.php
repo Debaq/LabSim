@@ -15,7 +15,12 @@ require_once __DIR__ . '/../../src/ReportVersions.php';
 
 $me = Auth::requireAdminSession();
 $isFullAdmin = (int) $me['permission'] === Auth::PERMISSION_ADMIN;
-Db::ensureReportVersioning();
+if (!Db::ensureReportVersioning()) {
+    admin_header('Versiones del informe', $me);
+    echo '<p class="error">La tabla de informes todavía no tiene versiones: aplica el schema en Sistema → Base de datos.</p>';
+    admin_footer();
+    exit;
+}
 
 $reportId = (int) ($_GET['report_id'] ?? 0);
 $informe = ReportVersions::informe($reportId);

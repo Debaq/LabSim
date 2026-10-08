@@ -64,7 +64,9 @@ if (!is_array($data)) {
 }
 
 $pdo = Db::get();
-Db::ensureReportVersioning();
+// Si la tabla no se pudo poner al día, se guarda como antes de las
+// versiones: un informe que no se guarda es peor que uno sin versión.
+$versionado = Db::ensureReportVersioning();
 
 $stmt = $pdo->prepare(
     'SELECT id, estado FROM attendances WHERE appointment_id = ? AND student_id = ?'
@@ -109,35 +111,48 @@ foreach (REPORT_IMAGE_SUFFIXES as $suffix) {
 $versionBase = isset($_POST['version_base']) ? (int) $_POST['version_base'] : null;
 $dataJson = json_encode($data, JSON_UNESCAPED_UNICODE);
 
-$pdo->beginTransaction();
-try {
-    $stmt = $pdo->prepare('SELECT id, data, version, updated_at FROM reports WHERE attendance_id = ? AND tipo = ?');
+if (!$versionado) {
+    $pdo->prepare(
+        'INSERT INTO reports (attendance_id, tipo, data, updated_at)
+         VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+         ON CONFLICT(attendance_id, tipo) DO UPDATE SET
+            data = excluded.data, updated_at = CURRENT_TIMESTAMP'
+    )->execute([$attendanceId, $tipo, $dataJson]);
+    $stmt = $pdo->prepare('SELECT id FROM reports WHERE attendance_id = ? AND tipo = ?');
     $stmt->execute([$attendanceId, $tipo]);
-    $previo = $stmt->fetch();
-    if ($previo) {
-        $reportId = (int) $previo['id'];
-        $version = (int) $previo['version'] + 1;
-        if ($versionBase !== null && $versionBase !== (int) $previo['version']
-                && $previo['data'] !== $dataJson) {
+    $reportId = (int) $stmt->fetchColumn();
+    $version = null;
+} else {
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare('SELECT id, data, version, updated_at FROM reports WHERE attendance_id = ? AND tipo = ?');
+        $stmt->execute([$attendanceId, $tipo]);
+        $previo = $stmt->fetch();
+        if ($previo) {
+            $reportId = (int) $previo['id'];
+            $version = (int) $previo['version'] + 1;
+            if ($versionBase !== null && $versionBase !== (int) $previo['version']
+                    && $previo['data'] !== $dataJson) {
+                $pdo->prepare(
+                    'INSERT INTO report_versions (report_id, version, data, guardado_at) VALUES (?, ?, ?, ?)'
+                )->execute([$reportId, (int) $previo['version'], $previo['data'], $previo['updated_at']]);
+            }
             $pdo->prepare(
-                'INSERT INTO report_versions (report_id, version, data, guardado_at) VALUES (?, ?, ?, ?)'
-            )->execute([$reportId, (int) $previo['version'], $previo['data'], $previo['updated_at']]);
+                'UPDATE reports SET data = ?, version = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+            )->execute([$dataJson, $version, $reportId]);
+        } else {
+            $version = 1;
+            $pdo->prepare(
+                'INSERT INTO reports (attendance_id, tipo, data, version, updated_at)
+                 VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP)'
+            )->execute([$attendanceId, $tipo, $dataJson]);
+            $reportId = (int) $pdo->lastInsertId();
         }
-        $pdo->prepare(
-            'UPDATE reports SET data = ?, version = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
-        )->execute([$dataJson, $version, $reportId]);
-    } else {
-        $version = 1;
-        $pdo->prepare(
-            'INSERT INTO reports (attendance_id, tipo, data, version, updated_at)
-             VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP)'
-        )->execute([$attendanceId, $tipo, $dataJson]);
-        $reportId = (int) $pdo->lastInsertId();
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
     }
-    $pdo->commit();
-} catch (Throwable $e) {
-    $pdo->rollBack();
-    throw $e;
 }
 
 // El PDF (si ya se había generado en una subida anterior) queda

@@ -623,22 +623,43 @@ final class Db
      * (version, AABR, report_versions), al vuelo: entre el despliegue y el
      * "Aplicar schema" del admin cada subida fallaba por la columna que
      * falta. Si ya está al día son dos consultas al catálogo.
+     *
+     * Nunca lanza: devuelve si la tabla quedó con `version`. Si la
+     * migración falla, quien llama sigue como antes de las versiones. La
+     * primera versión de esto lanzaba, y una tabla reports_old que había
+     * quedado de una migración vieja hizo fallar TODA subida y TODA
+     * recuperación de informes en producción (2026-10-08).
      */
-    public static function ensureReportVersioning(): void
+    public static function ensureReportVersioning(): bool
     {
-        self::migrateReportsTiposIfNeeded();
-        $pdo = self::get();
-        $pdo->exec(
-            'CREATE TABLE IF NOT EXISTS report_versions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                report_id INTEGER NOT NULL REFERENCES reports(id),
-                version INTEGER NOT NULL,
-                data TEXT NOT NULL,
-                guardado_at TEXT NOT NULL,
-                reemplazado_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-            )'
-        );
-        $pdo->exec('CREATE INDEX IF NOT EXISTS idx_report_versions_report ON report_versions (report_id)');
+        static $listo = null;
+        if ($listo !== null) {
+            return $listo;
+        }
+        try {
+            self::migrateReportsTiposIfNeeded();
+            $pdo = self::get();
+            $pdo->exec(
+                'CREATE TABLE IF NOT EXISTS report_versions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    report_id INTEGER NOT NULL REFERENCES reports(id),
+                    version INTEGER NOT NULL,
+                    data TEXT NOT NULL,
+                    guardado_at TEXT NOT NULL,
+                    reemplazado_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )'
+            );
+            $pdo->exec('CREATE INDEX IF NOT EXISTS idx_report_versions_report ON report_versions (report_id)');
+        } catch (Throwable $e) {
+            error_log('[Db::ensureReportVersioning] ' . $e->getMessage());
+        }
+        try {
+            $cols = array_column(self::get()->query('PRAGMA table_info(reports)')->fetchAll(), 'name');
+            $listo = in_array('version', $cols, true);
+        } catch (Throwable $e) {
+            $listo = false;
+        }
+        return $listo;
     }
 
     /**
@@ -667,9 +688,13 @@ final class Db
         if (strpos($sql, "'AABR'") !== false && $tieneVersion) {
             return;
         }
+        // Nombre propio para la copia: una migración vieja dejó una tabla
+        // reports_old en producción, y usar ese nombre fallaba siempre.
+        // Esa tabla no se toca (puede tener datos).
+        $vieja = 'reports_migracion_' . date('YmdHis') . '_' . bin2hex(random_bytes(3));
         $pdo->beginTransaction();
         try {
-            $pdo->exec('ALTER TABLE reports RENAME TO reports_old');
+            $pdo->exec("ALTER TABLE reports RENAME TO {$vieja}");
             $pdo->exec(
                 "CREATE TABLE reports (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -688,9 +713,9 @@ final class Db
             $version = $tieneVersion ? 'version' : '1';
             $pdo->exec(
                 "INSERT INTO reports (id, attendance_id, tipo, data, version, created_at, updated_at)
-                 SELECT id, attendance_id, tipo, data, {$version}, created_at, updated_at FROM reports_old"
+                 SELECT id, attendance_id, tipo, data, {$version}, created_at, updated_at FROM {$vieja}"
             );
-            $pdo->exec('DROP TABLE reports_old');
+            $pdo->exec("DROP TABLE {$vieja}");
             $pdo->exec('CREATE INDEX IF NOT EXISTS idx_reports_attendance ON reports (attendance_id)');
             $pdo->commit();
         } catch (Throwable $e) {

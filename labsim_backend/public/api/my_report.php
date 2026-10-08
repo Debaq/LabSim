@@ -26,9 +26,9 @@ if ($appointmentId <= 0) {
 
 $tipos = array_values(array_filter(array_map('trim', explode(',', (string) ($_GET['tipos'] ?? '')))));
 
-Db::ensureReportVersioning();
+$version = Db::ensureReportVersioning() ? 'r.version' : 'NULL AS version';
 
-$sql = 'SELECT r.id, r.tipo, r.data, r.version, r.updated_at, a.estado
+$sql = 'SELECT r.id, r.tipo, r.data, ' . $version . ', r.updated_at, a.estado
         FROM reports r
         JOIN attendances a ON a.id = r.attendance_id
         WHERE a.appointment_id = ? AND a.student_id = ?';
