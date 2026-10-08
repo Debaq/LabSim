@@ -4574,3 +4574,111 @@ Impedanciómetro sin paciente: antes dibujaba una curva plana con 1,8 ml
 inventados. Ahora no genera nada y la pantalla del timpanograma dice "SONDA
 ABIERTA / sin paciente", como el equipo real cuando la sonda no sella;
 Estímulo no barre ni suena (`ZZscreen.set_sonda_abierta`).
+
+## Audiometría: leer el examen del alumno desde el registro (2026-10-08)
+
+Pregunta: ¿se puede saber qué audiograma anotó el alumno en su hoja mirando
+lo que hizo en el audiómetro? Sí: en umbrales el paciente es determinista
+(`_resolve_masked_threshold`), así que lo que el alumno oyó se puede saber
+y, con eso, el umbral que su procedimiento justifica. No es lo que escribió
+(la hoja es de papel): un error al pasarlo a la hoja no se ve.
+
+Se hace **en el backend** y **mixto**:
+- **Exámenes nuevos (registro v2, hecho):** cada `audio_stim_button` trae la
+  foto del equipo (`Audiometer._estado`: los dos canales, prueba,
+  frecuencia, paso e instrucción vigente); la mano del paciente queda en
+  `audio_respuesta` cada vez que cambia; hora con milisegundos (la duración
+  de 1 a 2 s no se mide con segundos enteros); `audio_caso_cargado`,
+  `audio_prueba_change` y lo que antes cambiaba sin rastro (estímulo puesto
+  solo en el canal contrario, recorte al tope de intensidad, con
+  `auto: true`). Todo evento del audiómetro lleva `v: 2`.
+- **Exámenes pasados (sin `v`):** se reconstruye el estado repasando los
+  eventos y la mano se recalcula con una copia en PHP de la lógica de
+  `response.py`, con casos de referencia comunes a los dos lenguajes. Queda
+  marcado "reconstruido" y la duración del estímulo como no evaluable.
+
+Las instrucciones ya quedaban registradas (`audio_talkback_press`): el
+paciente solo obedece una instrucción al apretar el talkback, y sin
+instrucción no responde.
+
+**Indicador de efectividad de los umbrales aéreos.** Se compara contra la
+técnica T01 de la Bibliografía (`Bibliografia::TECNICAS`), escrita tal como
+la enseña el docente y pendiente de contrastar con la literatura y la
+normativa. Cada frecuencia tiene dos fases: familiarización (subir de 10 en
+10 dB hasta la primera respuesta) y técnica (bajar 10 dB, subir 5 dB,
+cerrar con 2 de 3 o 3 de 5). Un "subió 10 dB" está bien en la primera y es
+un error en la segunda.
+- **El otro oído va después, con la misma técnica completa**: familiarización
+  en 1 kHz desde 40 dB HL, el mismo orden y la repetición de 1 kHz.
+- **Orden de la audiometría (T00):** umbrales aéreos, logoaudiometría,
+  tinnitumetría, supraliminares, umbrales óseos. Cada prueba se reconoce en
+  el registro: la logo por el estímulo Habla o la prueba Logoaudiometría,
+  las supraliminares por su instrucción en el talkback, la ósea por el
+  transductor. La tinnitumetría no se simula todavía: el orden se evalúa
+  sin ella hasta que exista.
+- **Umbrales óseos (T02):** misma técnica, de 250 Hz a 4 kHz (el equipo
+  deja 125, la técnica no), partiendo por el oído **peor** del caso. En un
+  oído con el aéreo normal (20 dB HL o menos de 250 a 4000 Hz) la ósea no se
+  exige; si el alumno la toma igual, queda como **observación** y la técnica
+  se evalúa igual. Es el mismo corte que ya oculta la ósea normal en la
+  ficha de estudio.
+- **Oído mejor: lo define el caso**, no la anamnesis. Partir por el otro ya
+  es un error. Mejor = menor promedio aéreo de 500, 1000, 2000 y 4000 Hz;
+  con los promedios a 5 dB o menos, vale cualquiera de los dos (bajo un
+  paso del equipo el alumno no tiene cómo saberlo).
+- **Lo ven el docente y el alumno.** Ante el alumno se habla de "pasos de la
+  técnica", no de errores (mismo criterio que la OIRS).
+- Los parámetros de la técnica (nivel inicial, pasos, criterio, tolerancia
+  de la repetición de 1 kHz) van configurables por curso.
+
+### Cómo quedó (2026-10-08)
+
+`AudiometriaPaciente` (la mano, copia de `response.py`), `AudiometriaRegistro`
+(presentaciones de una atención), `AudiometriaTecnica` (reglas e
+indicadores) y `AudiometriaTecnicaVista`. Se ve en "Ver atención" del
+docente (`admin/chat_detail.php`, con los umbrales del paciente), en la
+columna "Técnica" de la ficha del alumno (`admin/student.php`), en la
+atención cerrada del alumno (`student/atencion.php`) y como una línea en su
+última atención en Moodle (`launch.php`). Parámetros por curso en
+`CourseParams` ('audiometria.tecnica', módulo Audiómetro).
+
+Criterios que no venían dados y se decidieron:
+- **Nivel = visita**: estímulos seguidos a la misma intensidad. El paso
+  siguiente lo decide la respuesta al último estímulo de la visita.
+- **2 de 3 o 3 de 5 son estímulos**, no ascensos completos: respuestas
+  sobre los estímulos dados a ese nivel llegando desde abajo (mayoría y al
+  menos 2), contando solo después de la familiarización. Tres estímulos
+  seguidos a un nivel cierran el umbral igual que tres ascensos.
+- Se sacó "dos estímulos por nivel": era una mala lectura de la técnica. Lo
+  que hay es el 2 de 3.
+- **Duración**: la regla se cumple con el 80 % de los estímulos entre 1 y
+  2 s. Se mide solo con milisegundos en las dos puntas.
+- **Frecuencia nueva**: no se evalúa el inicio de una frecuencia que se
+  repite (la repetición de 1 kHz no tiene nivel de inicio en la técnica).
+- **Exactitud**: un umbral "corresponde" a ±5 dB del paciente; "curva
+  sombra" si coincide con lo que da el oído sin ruido en el otro y eso
+  queda más de 5 dB mejor que el real. Sin respuesta al tope (130) y sin
+  ninguna mano, corresponde.
+- **El alumno no ve los umbrales del paciente**: ve si el suyo corresponde,
+  no cuál era. Ve "Para revisar" donde el docente ve "No cumple".
+- `audio_respuesta` y `audio_caso_cargado` no son acciones del alumno: se
+  sacan de las sesiones de `Metrics` (la mano sube a las décimas del
+  estímulo y contaba como "acción sin pausa").
+- El enmascaramiento todavía no es una regla: la ósea sin enmascarar sale
+  como "curva sombra" en la tabla, pero no descuenta como paso.
+
+**Literatura (2026-10-08).** Se contrastaron T00-T02 con ASHA 2005, BSA
+2018, ISO 8253-1 (1989 completa, 2010 parcial), ISP 2018 y 2012, PREXOR,
+NTP 285 y fuentes secundarias
+(`docs/investigacion/tecnica_audiometria_tonal/informe.md`). Lo que respaldan quedó como fuentes de cada técnica en la
+Bibliografía; lo que difiere o no se pudo leer, en
+`docs/observaciones_tecnicas.md`, para investigarlo. La vía ósea al final
+es decisión docente (todo lo de fonos primero, un solo cambio de
+transductor), aunque las fuentes la ponen después de la aérea.
+
+Los casos de referencia de la mano están en
+`labsim_backend/tests/fixtures/audiometria_paciente.json`, los corren
+`tests/test_audiometria_paciente.py` (contra `response.py`) y
+`labsim_backend/tests/test_audiometria_paciente.php` (contra la copia).
+Cambiar `response.py` sin cambiar la copia rompe el de Python.
+

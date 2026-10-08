@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../src/Metrics.php';
 require_once __DIR__ . '/../../src/HistoriaClinica.php';
 require_once __DIR__ . '/../../src/Oirs.php';
 require_once __DIR__ . '/../../src/ReportFile.php';
+require_once __DIR__ . '/../../src/AudiometriaTecnicaVista.php';
 
 /**
  * Detalle de una atención propia ya cerrada: stats de comportamiento, ficha
@@ -102,6 +103,10 @@ $stmt = $pdo->prepare(
 $stmt->execute([(int) $attendance['id']]);
 $reports = $stmt->fetchAll();
 
+// Pasos de la técnica de audiometría (ver AudiometriaTecnica): lo mismo que
+// ve el docente, sin los umbrales del paciente.
+$tecnica = AudiometriaTecnica::paraAtencion($appointmentId, (int) $me['id']);
+
 $reportLabels = ReportFile::LABELS;
 
 // Mensajes que recibió por esta atención: los de la OIRS simulada y los que
@@ -185,6 +190,13 @@ student_header($paciente, $me);
     <?php render_attendance_comments($attendanceComments['evolucion']); ?>
     <?php endif; ?>
 </div>
+
+<?php if ($tecnica !== null): ?>
+<div class="card">
+    <h2>Pasos de la técnica de audiometría</h2>
+    <?php AudiometriaTecnicaVista::render($tecnica, false); ?>
+</div>
+<?php endif; ?>
 
 <div class="card">
     <h2>Tus informes</h2>

@@ -6,6 +6,7 @@ require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/ReportFile.php';
+require_once __DIR__ . '/../../src/AudiometriaTecnicaVista.php';
 
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
@@ -179,6 +180,15 @@ if ($attendance) {
     render_section_comments('procedimiento', 'Procedimiento', (string) $appointment['procedimiento'], $attendanceComments['procedimiento']);
 }
 ?>
+
+<?php $tecnica = AudiometriaTecnica::paraAtencion($appointmentId, $studentId); ?>
+<?php if ($tecnica !== null): ?>
+<div class="card section-panel" id="tecnica">
+    <h3>Técnica de audiometría</h3>
+    <p class="help">Comparada con las técnicas T00-T02 de la <a href="bibliografia.php#tecnicas">Bibliografía</a>, con los valores del curso. El alumno ve lo mismo en su atención, sin los umbrales del paciente.</p>
+    <?php AudiometriaTecnicaVista::render($tecnica, true); ?>
+</div>
+<?php endif; ?>
 
 <?php if ($reports): ?>
 <div class="card section-panel">

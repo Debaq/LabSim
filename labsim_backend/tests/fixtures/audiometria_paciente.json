@@ -1,0 +1,924 @@
+{
+ "casos": {
+  "anacusia_od": {
+   "Aerea_mkg": [
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ]
+   ],
+   "Osea_mkg": [
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ],
+    [
+     90,
+     5
+    ]
+   ]
+  },
+  "conductiva_od": {
+   "Aerea_mkg": [
+    [
+     50,
+     10
+    ],
+    [
+     50,
+     10
+    ],
+    [
+     50,
+     10
+    ],
+    [
+     50,
+     10
+    ],
+    [
+     50,
+     10
+    ],
+    [
+     50,
+     10
+    ],
+    [
+     50,
+     10
+    ],
+    [
+     50,
+     10
+    ],
+    [
+     50,
+     10
+    ],
+    [
+     50,
+     10
+    ],
+    [
+     50,
+     10
+    ],
+    [
+     50,
+     10
+    ],
+    [
+     50,
+     10
+    ],
+    [
+     50,
+     10
+    ],
+    [
+     50,
+     10
+    ]
+   ],
+   "Osea_mkg": [
+    [
+     10,
+     10
+    ],
+    [
+     10,
+     10
+    ],
+    [
+     10,
+     10
+    ],
+    [
+     10,
+     10
+    ],
+    [
+     10,
+     10
+    ],
+    [
+     10,
+     10
+    ],
+    [
+     10,
+     10
+    ],
+    [
+     10,
+     10
+    ],
+    [
+     10,
+     10
+    ],
+    [
+     10,
+     10
+    ],
+    [
+     10,
+     10
+    ],
+    [
+     10,
+     10
+    ],
+    [
+     10,
+     10
+    ],
+    [
+     10,
+     10
+    ],
+    [
+     10,
+     10
+    ]
+   ]
+  },
+  "sn_oi": {
+   "Aerea_mkg": [
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ]
+   ],
+   "Osea_mkg": [
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ],
+    [
+     10,
+     30
+    ]
+   ]
+  }
+ },
+ "escenas": [
+  {
+   "nombre": "aerea sobre umbral",
+   "caso": "sn_oi",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "colocar_fonos",
+    "canales": [
+     {
+      "on": true,
+      "int": 30,
+      "output": 1,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": false,
+      "int": 20,
+      "output": 1,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": false,
+   "esperado": true
+  },
+  {
+   "nombre": "aerea bajo umbral",
+   "caso": "sn_oi",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "colocar_fonos",
+    "canales": [
+     {
+      "on": true,
+      "int": 25,
+      "output": 1,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": false,
+      "int": 20,
+      "output": 1,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": false,
+   "esperado": false
+  },
+  {
+   "nombre": "sombra sin enmascarar responde",
+   "caso": "anacusia_od",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "colocar_fonos",
+    "canales": [
+     {
+      "on": true,
+      "int": 50,
+      "output": 0,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": false,
+      "int": 20,
+      "output": 1,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": false,
+   "esperado": true
+  },
+  {
+   "nombre": "bajo la sombra",
+   "caso": "anacusia_od",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "colocar_fonos",
+    "canales": [
+     {
+      "on": true,
+      "int": 40,
+      "output": 0,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": false,
+      "int": 20,
+      "output": 1,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": false,
+   "esperado": false
+  },
+  {
+   "nombre": "osea sin enmascarar: sombra del otro oido",
+   "caso": "sn_oi",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "colocar_vibrador",
+    "canales": [
+     {
+      "on": true,
+      "int": 10,
+      "output": 1,
+      "trans": 1,
+      "stim": 0
+     },
+     {
+      "on": false,
+      "int": 20,
+      "output": 1,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": false,
+   "esperado": true
+  },
+  {
+   "nombre": "solo el ruido prendido",
+   "caso": "sn_oi",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "colocar_fonos",
+    "canales": [
+     {
+      "on": false,
+      "int": 30,
+      "output": 1,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": true,
+      "int": 60,
+      "output": 0,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": true,
+   "esperado": false
+  },
+  {
+   "nombre": "sin instruccion no cambia",
+   "caso": "sn_oi",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": null,
+    "canales": [
+     {
+      "on": true,
+      "int": 0,
+      "output": 1,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": false,
+      "int": 20,
+      "output": 1,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": true,
+   "esperado": true
+  },
+  {
+   "nombre": "dos canales con colocar_fonos no cambia",
+   "caso": "sn_oi",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "colocar_fonos",
+    "canales": [
+     {
+      "on": true,
+      "int": 60,
+      "output": 1,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": true,
+      "int": 40,
+      "output": 0,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": true,
+   "esperado": true
+  },
+  {
+   "nombre": "enmascarado en rango: real, no oye",
+   "caso": "anacusia_od",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "aerea_+_ruido",
+    "canales": [
+     {
+      "on": true,
+      "int": 80,
+      "output": 0,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": true,
+      "int": 60,
+      "output": 1,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": true,
+   "esperado": false
+  },
+  {
+   "nombre": "enmascarado en rango: real, oye",
+   "caso": "anacusia_od",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "aerea_+_ruido",
+    "canales": [
+     {
+      "on": true,
+      "int": 90,
+      "output": 0,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": true,
+      "int": 60,
+      "output": 1,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": false,
+   "esperado": true
+  },
+  {
+   "nombre": "submascarado: sombra",
+   "caso": "anacusia_od",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "aerea_+_ruido",
+    "canales": [
+     {
+      "on": true,
+      "int": 50,
+      "output": 0,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": true,
+      "int": 10,
+      "output": 1,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": false,
+   "esperado": true
+  },
+  {
+   "nombre": "ruido blanco suma CE: a 55 todavia submascara",
+   "caso": "anacusia_od",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "aerea_+_ruido",
+    "canales": [
+     {
+      "on": true,
+      "int": 50,
+      "output": 0,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": true,
+      "int": 55,
+      "output": 1,
+      "trans": 0,
+      "stim": 4
+     }
+    ]
+   },
+   "previa": false,
+   "esperado": true
+  },
+  {
+   "nombre": "NBN a 55 ya enmascara",
+   "caso": "anacusia_od",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "aerea_+_ruido",
+    "canales": [
+     {
+      "on": true,
+      "int": 50,
+      "output": 0,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": true,
+      "int": 55,
+      "output": 1,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": true,
+   "esperado": false
+  },
+  {
+   "nombre": "sobreenmascarado: no oye",
+   "caso": "conductiva_od",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "aerea_+_ruido",
+    "canales": [
+     {
+      "on": true,
+      "int": 100,
+      "output": 0,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": true,
+      "int": 90,
+      "output": 1,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": false,
+   "esperado": false
+  },
+  {
+   "nombre": "enmascarado sin ruido prendido: sombra",
+   "caso": "anacusia_od",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "aerea_+_ruido",
+    "canales": [
+     {
+      "on": true,
+      "int": 50,
+      "output": 0,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": false,
+      "int": 40,
+      "output": 1,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": false,
+   "esperado": true
+  },
+  {
+   "nombre": "osea enmascarada en rango",
+   "caso": "sn_oi",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "vibrador_+_ruido",
+    "canales": [
+     {
+      "on": true,
+      "int": 25,
+      "output": 1,
+      "trans": 1,
+      "stim": 0
+     },
+     {
+      "on": true,
+      "int": 40,
+      "output": 0,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": true,
+   "esperado": false
+  },
+  {
+   "nombre": "osea enmascarada oye",
+   "caso": "sn_oi",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "vibrador_+_ruido",
+    "canales": [
+     {
+      "on": true,
+      "int": 30,
+      "output": 1,
+      "trans": 1,
+      "stim": 0
+     },
+     {
+      "on": true,
+      "int": 40,
+      "output": 0,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": false,
+   "esperado": true
+  },
+  {
+   "nombre": "osea oclusion en graves",
+   "caso": "sn_oi",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 1,
+    "instruccion": "vibrador_+_ruido",
+    "canales": [
+     {
+      "on": true,
+      "int": 25,
+      "output": 1,
+      "trans": 1,
+      "stim": 0
+     },
+     {
+      "on": true,
+      "int": 35,
+      "output": 0,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": false,
+   "esperado": true
+  },
+  {
+   "nombre": "logo no es umbral",
+   "caso": "sn_oi",
+   "estado": {
+    "prueba": "Logoaudiometría",
+    "freq_idx": 3,
+    "instruccion": "colocar_fonos",
+    "canales": [
+     {
+      "on": true,
+      "int": 60,
+      "output": 1,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": false,
+      "int": 20,
+      "output": 1,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": false,
+   "esperado": false
+  },
+  {
+   "nombre": "nada prendido baja la mano",
+   "caso": "sn_oi",
+   "estado": {
+    "prueba": "Umbrales",
+    "freq_idx": 3,
+    "instruccion": "colocar_fonos",
+    "canales": [
+     {
+      "on": false,
+      "int": 60,
+      "output": 1,
+      "trans": 0,
+      "stim": 0
+     },
+     {
+      "on": false,
+      "int": 20,
+      "output": 1,
+      "trans": 0,
+      "stim": 3
+     }
+    ]
+   },
+   "previa": true,
+   "esperado": false
+  }
+ ]
+}

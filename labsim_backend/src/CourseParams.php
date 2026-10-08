@@ -202,6 +202,47 @@ final class CourseParams
                     ],
                 ],
             ],
+            // Técnica de umbrales (Bibliografia::TECNICAS T01/T02): con qué
+            // se compara lo que hizo el alumno en AudiometriaTecnica. Solo lo
+            // lee el backend; el audiómetro no cambia con estos números.
+            'audiometria.tecnica' => [
+                'module' => 'A',
+                'title' => 'Técnica de umbrales tonales (indicadores)',
+                'help' => 'Con estos valores se revisa, en la ficha de cada atención, la técnica con que el alumno tomó los umbrales: '
+                    . 'nivel de inicio en 1 kHz, saltos de la familiarización (hasta la primera respuesta), bajada tras responder y subida tras no responder, '
+                    . 'cuántos dB sobre el umbral anterior parte cada frecuencia nueva, diferencia de la repetición de 1 kHz que obliga a repetir todo, '
+                    . 'duración de cada estímulo, diferencia de promedios bajo la cual los dos oídos valen como "mejor" o "peor", '
+                    . 'y el umbral aéreo hasta el que un oído no necesita umbrales óseos. No cambian el audiómetro ni al paciente.',
+                'groups' => [
+                    'tecnica' => ['label' => 'Umbrales', 'rows' => ['aereos' => 'Vía aérea (T01)', 'oseos' => 'Vía ósea (T02)']],
+                ],
+                'fields' => [
+                    'nivel_inicial' => ['label' => 'Inicio en 1 kHz (dB HL)', 'step' => 5, 'min' => 0, 'max' => 120],
+                    'paso_familiarizacion' => ['label' => 'Familiarización (dB)', 'step' => 5, 'min' => 5, 'max' => 30],
+                    'paso_bajada' => ['label' => 'Baja tras responder (dB)', 'step' => 5, 'min' => 5, 'max' => 30],
+                    'paso_subida' => ['label' => 'Sube tras no responder (dB)', 'step' => 1, 'min' => 1, 'max' => 20],
+                    'sobre_anterior' => ['label' => 'Frecuencia nueva sobre el umbral anterior (dB)', 'step' => 5, 'min' => 0, 'max' => 40],
+                    'dif_repeticion' => ['label' => 'Repetición de 1 kHz: diferencia máxima (dB)', 'step' => 5, 'min' => 0, 'max' => 30],
+                    'dur_min' => ['label' => 'Estímulo mínimo (s)', 'step' => 0.1, 'min' => 0.1, 'max' => 10],
+                    'dur_max' => ['label' => 'Estímulo máximo (s)', 'step' => 0.1, 'min' => 0.1, 'max' => 10],
+                    'tol_oido' => ['label' => 'Oídos parejos hasta (dB de promedio)', 'step' => 1, 'min' => 0, 'max' => 30],
+                    'oido_sano' => ['label' => 'Sin óseos si el aéreo no pasa de (dB HL)', 'step' => 5, 'min' => 0, 'max' => 40],
+                ],
+                'defaults' => [
+                    'tecnica' => [
+                        'aereos' => [
+                            'nivel_inicial' => 40, 'paso_familiarizacion' => 10, 'paso_bajada' => 10, 'paso_subida' => 5,
+                            'sobre_anterior' => 10, 'dif_repeticion' => 10, 'dur_min' => 1, 'dur_max' => 2,
+                            'tol_oido' => 5, 'oido_sano' => 20,
+                        ],
+                        'oseos' => [
+                            'nivel_inicial' => 40, 'paso_familiarizacion' => 10, 'paso_bajada' => 10, 'paso_subida' => 5,
+                            'sobre_anterior' => 10, 'dif_repeticion' => 10, 'dur_min' => 1, 'dur_max' => 2,
+                            'tol_oido' => 5, 'oido_sano' => 20,
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 

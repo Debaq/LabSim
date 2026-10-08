@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Metrics.php';
+require_once __DIR__ . '/../../src/AudiometriaTecnica.php';
 
 /**
  * Un JSON crudo de error acá lo ve el alumno en el navegador (esta página
@@ -211,6 +212,7 @@ if ($isPortalUser) {
     }
     $lastAttentionSessions = [];
     $lastAttentionAppt = null;
+    $lastTecnica = null;
     if ($lastAttentionKey !== null) {
         foreach ($mySessions as $s) {
             if ($s['appointment_id'] === $lastAttentionKey['appointment_id'] && $s['case_id'] === $lastAttentionKey['case_id']) {
@@ -233,6 +235,13 @@ if ($isPortalUser) {
             $stmt = Db::get()->prepare('SELECT nombre, apellido, procedimiento FROM appointments WHERE id = ?');
             $stmt->execute([(int) $lastAttentionKey['appointment_id']]);
             $lastAttentionAppt = $stmt->fetch() ?: null;
+            // Pasos de la técnica de audiometría, solo con la atención ya
+            // cerrada (igual que student/atencion.php, donde está el detalle).
+            $stmt = Db::get()->prepare("SELECT 1 FROM attendances WHERE appointment_id = ? AND student_id = ? AND estado = 'atendido'");
+            $stmt->execute([(int) $lastAttentionKey['appointment_id'], $userId]);
+            if ($stmt->fetchColumn()) {
+                $lastTecnica = AudiometriaTecnica::paraAtencion((int) $lastAttentionKey['appointment_id'], (int) $userId, $myLogs);
+            }
         }
     }
 }
@@ -384,6 +393,12 @@ header('Content-Type: text/html; charset=utf-8');
                     &nbsp;·&nbsp; <span class="<?= $lastAttentionStats['long_pauses'] > 0 ? 'badge-warn' : '' ?>">pausas largas: <?= $lastAttentionStats['long_pauses'] ?></span>
                     &nbsp;·&nbsp; sin pausa (0s): <?= $lastAttentionStats['no_pause_actions'] ?>
                 </p>
+                <?php if ($lastTecnica !== null): ?>
+                <p class="stats-summary">
+                    Técnica de audiometría: <?= (int) $lastTecnica['puntaje']['cumple'] ?> de <?= (int) $lastTecnica['puntaje']['total'] ?> pasos
+                    · el detalle está en Mis pacientes
+                </p>
+                <?php endif; ?>
                 <p class="stats-caption">Cada barra es una acción; ancho = demora desde la anterior. Borde rojo arriba = pausa ≥30s.</p>
                 <?php foreach ($lastAttentionSessions as $s): ?>
                 <?php render_attention_timeline($s); ?>

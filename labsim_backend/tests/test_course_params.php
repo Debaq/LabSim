@@ -175,10 +175,11 @@ t_eq(CourseParams::find('key.que.no.existe'), null, 'find(): key desconocida es 
 t_eq(array_keys(CourseParams::forModules(['VEMP'])), ['normative_data.vemp'], 'forModules(): curso con VEMP ve el editor de VEMP');
 t_eq(array_keys(CourseParams::forModules([])), [], 'forModules(): curso sin módulos no ve editores');
 t_eq(
-    count(CourseParams::forModules(['ABR', 'VEMP', 'A'])),
+    count(CourseParams::forModules(['ABR', 'VEMP', 'Z'])),
     1,
     'forModules(): un módulo sin parámetros registrados no agrega editores'
 );
+t_eq(array_keys(CourseParams::forModules(['A'])), ['audiometria.tecnica'], 'forModules(): curso con audiómetro ve la técnica de umbrales');
 
 // --- displayValue(): muestra el override del curso, si no el default -------
 $override = ['CVEMP' => ['p13' => ['amp' => 150.0]]];

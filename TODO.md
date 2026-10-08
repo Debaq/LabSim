@@ -6,7 +6,7 @@ Al cerrar un ítem se borra de acá; si deja una decisión, va como sección nue
 en `docs/decisiones.md`.
 
 Cada ítem tiene un número fijo para nombrarlo. Al cerrar uno no se renumera
-el resto; un ítem nuevo toma el número siguiente al más alto (hoy 56).
+el resto; un ítem nuevo toma el número siguiente al más alto (hoy 64).
 
 Revisado contra el código el 2026-09-24.
 
@@ -174,6 +174,13 @@ gap significativo. § Parámetros de audiometría configurables por curso
 - [ ] 55. Compliance y presión exactas en la ficha: sortearlas en el backend al
       crear el caso y que la app las lea. § La compliance y la presión del
       timpanograma no se pueden anticipar
+
+### Audiometría: leer el examen desde el registro
+§ Audiometría: leer el examen del alumno desde el registro
+- [ ] 62. Enmascaramiento como regla de la técnica (cuándo enmascarar,
+      nivel inicial del ruido, meseta); hoy solo aparece como "curva sombra".
+- [ ] 63. Tinnitumetría en el audiómetro, para que entre al orden (T00).
+- [ ] 64. Logoaudiometría y supraliminares como técnicas propias (T03+).
 
 ### Menores
 - [ ] 56. Los `print()` de ABR, EOA y VEMP son de error; si algún día imprimen

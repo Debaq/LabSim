@@ -10,6 +10,14 @@ final class Metrics
      * técnico en vez de romper -- no hace falta tocar este archivo para
      * que la página siga funcionando, solo para que se vea prolijo.
      */
+    /**
+     * Eventos que registra el audiómetro y no son acciones del alumno: la
+     * mano del paciente y la carga del caso (ver AudiometriaRegistro). Fuera
+     * de las sesiones, o la mano, que sube a las décimas del estímulo,
+     * contaría como "acción sin pausa".
+     */
+    public const NO_SON_DEL_ALUMNO = ['audio_respuesta', 'audio_caso_cargado'];
+
     private const ACTION_LABELS = [
         // Audiómetro
         'audio_intensity_change' => 'Cambio de intensidad (dB)',
@@ -25,6 +33,9 @@ final class Metrics
         'audio_step_change' => 'Cambio de paso (dB/Hz)',
         'audio_talkback_press' => 'Uso de talkback (habla al paciente)',
         'audio_logo_reset' => 'Reinicio de logoaudiometría',
+        'audio_prueba_change' => 'Cambio de prueba (umbrales/logoaudiometría)',
+        'audio_respuesta' => 'Respuesta del paciente (mano)',
+        'audio_caso_cargado' => 'Paciente cargado en el audiómetro',
         // Impedanciómetro (Z)
         'z_dial_change' => 'Movimiento de dial',
         'z_direction_change' => 'Cambio de dirección de barrido',
@@ -99,6 +110,9 @@ final class Metrics
         $sessions = [];
         $current = null;
         foreach ($decodedLogs as $log) {
+            if (in_array($log['action'], self::NO_SON_DEL_ALUMNO, true)) {
+                continue;
+            }
             $ts = strtotime((string) $log['client_ts']) ?: 0;
             $sameBucket = $current
                 && $current['appointment_id'] === $log['appointment_id']
