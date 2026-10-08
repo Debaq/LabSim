@@ -395,7 +395,7 @@ header('Content-Type: text/html; charset=utf-8');
                 </p>
                 <?php if ($lastTecnica !== null): ?>
                 <p class="stats-summary">
-                    Técnica de audiometría: <?= (int) $lastTecnica['puntaje']['cumple'] ?> de <?= (int) $lastTecnica['puntaje']['total'] ?> pasos
+                    Técnica de audiometría: <b><?= $lastTecnica['puntaje']['pct'] ?? '—' ?> %</b> de logro (<?= (int) $lastTecnica['puntaje']['cumple'] ?> de <?= (int) $lastTecnica['puntaje']['total'] ?> pasos)
                     · el detalle está en Mis pacientes
                 </p>
                 <?php endif; ?>

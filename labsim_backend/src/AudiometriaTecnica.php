@@ -44,6 +44,19 @@ final class AudiometriaTecnica
         'oseos' => [1000, 2000, 3000, 4000, 500, 250],
     ];
 
+    /**
+     * Tope del audiómetro por vía y frecuencia: [rango normal, rango
+     * extendido] (intency_dict de resources/json/config_audiometer.json; el
+     * test lo compara con el JSON). Al tope la familiarización no puede
+     * subir 10, y llegar al tope sin respuesta es una frecuencia cerrada.
+     */
+    public const TOPES = [
+        'aereos' => [125 => [100, 120], 250 => [100, 120], 500 => [100, 120], 1000 => [100, 120], 2000 => [100, 120],
+            3000 => [100, 120], 4000 => [100, 120], 6000 => [100, 120], 8000 => [100, 120]],
+        'oseos' => [125 => [40, 50], 250 => [45, 60], 500 => [50, 60], 1000 => [100, 100], 2000 => [100, 100],
+            3000 => [100, 100], 4000 => [100, 100], 6000 => [100, 100], 8000 => [100, 100]],
+    ];
+
     /** Frecuencias del promedio que decide el oído mejor (índices de AudiometriaPaciente::FRECUENCIAS). */
     private const PROMEDIO_IDX = [2, 3, 4, 6];
     /** Rango de la vía ósea (250 a 4000 Hz), para decidir si un oído es sano. */
@@ -146,6 +159,12 @@ final class AudiometriaTecnica
             'aereos' => self::via('aereos', $registro, $paciente, $params['aereos']),
             'oseos' => self::via('oseos', $registro, $paciente, $params['oseos']),
         ];
+        foreach (['orden', 'aereos', 'oseos'] as $k) {
+            $out[$k]['puntaje'] = self::sumar([$out[$k]]);
+            foreach ($out[$k]['oidos'] ?? [] as $oido => $reglas) {
+                $out[$k]['puntaje_oidos'][$oido] = self::sumar([['reglas' => $reglas]]);
+            }
+        }
         $out['puntaje'] = self::sumar([$out['orden'], $out['aereos'], $out['oseos']]);
         return $out;
     }
@@ -220,6 +239,35 @@ final class AudiometriaTecnica
         $bloques = self::bloques($pres, $via, $p);
         $primero = $pres[0];
 
+        // Repeticiones, por oído: la de 1 kHz al final y la del oído completo
+        // cuando hace falta son de la técnica; las demás son advertencia.
+        $retests = [];
+        $sinNecesidad = [];
+        foreach (array_values(array_unique(array_column($bloques, 'oido'))) as $o) {
+            $indices = array_keys(array_filter($bloques, static function ($b) use ($o) { return $b['oido'] === $o; }));
+            $clas = self::repeticiones(array_values(array_intersect_key($bloques, array_flip($indices))), $via, $p);
+            $retests[$o] = $clas['retest'];
+            foreach ($indices as $local => $global) {
+                $bloques[$global]['innecesaria'] = in_array($local, $clas['innecesarias'], true);
+                $bloques[$global]['previo_verificado'] = $clas['previos'][$local] ?? null;
+                if ($bloques[$global]['innecesaria']) {
+                    $sinNecesidad[] = $bloques[$global];
+                }
+            }
+        }
+        if ($sinNecesidad) {
+            $segundos = 0.0;
+            $cuales = [];
+            foreach ($sinNecesidad as $b) {
+                $ultimo = end($b['pres']);
+                $segundos += max(0.0, (float) ($ultimo['t_off'] ?? $ultimo['t_on']) - (float) $b['pres'][0]['t_on']);
+                $cuales[] = self::OIDOS[$b['oido']] . ' ' . self::hz($b['freq'])
+                    . ($b['previo_verificado'] === null ? '' : ' (ya verificado en ' . $b['previo_verificado'] . ')');
+            }
+            $res['observaciones'][] = 'Repitió sin necesidad ' . self::lista($cuales) . '. Sin esas repeticiones habría ganado '
+                . self::tiempo($segundos) . '.';
+        }
+
         $instr = $via === 'aereos' ? AudiometriaRegistro::INSTR_AEREA : AudiometriaRegistro::INSTR_OSEA;
         $res['reglas'][] = [
             'texto' => 'Se da la instrucción al paciente antes del primer estímulo.',
@@ -237,11 +285,18 @@ final class AudiometriaTecnica
                 : 'Se partió por ' . self::OIDOS[$primero['oido']] . '; el oído ' . ($via === 'aereos' ? 'mejor' : 'peor') . ' es ' . self::OIDOS[$inicioEsperado] . '.',
         ];
 
+        // Volver al otro oído a repetir sin necesidad ya es advertencia: no
+        // cuenta además como cambio de oído.
         $cambios = 0;
-        for ($i = 1, $n = count($bloques); $i < $n; $i++) {
-            if ($bloques[$i]['oido'] !== $bloques[$i - 1]['oido']) {
+        $anterior = null;
+        foreach ($bloques as $b) {
+            if ($b['innecesaria']) {
+                continue;
+            }
+            if ($anterior !== null && $b['oido'] !== $anterior) {
                 $cambios++;
             }
+            $anterior = $b['oido'];
         }
         $res['reglas'][] = [
             'texto' => 'Se termina un oído antes de pasar al otro.',
@@ -296,7 +351,7 @@ final class AudiometriaTecnica
 
         foreach ($hechos as $o) {
             $propios = array_values(array_filter($bloques, static function ($b) use ($o) { return $b['oido'] === $o; }));
-            $res['oidos'][self::OIDOS[$o]] = self::oido($propios, $via, $p);
+            $res['oidos'][self::OIDOS[$o]] = self::oido($propios, $via, $p, $retests[$o]);
             $res['umbrales'][self::OIDOS[$o]] = self::umbrales($propios, $via, $o, $paciente);
         }
 
@@ -318,7 +373,7 @@ final class AudiometriaTecnica
     }
 
     /** Reglas de un oído: inicio, pasos, cierre, orden y repetición de 1 kHz. */
-    private static function oido(array $bloques, string $via, array $p): array
+    private static function oido(array $bloques, string $via, array $p, ?int $r): array
     {
         $reglas = [];
         $orden = self::ORDEN_FRECUENCIAS[$via];
@@ -351,7 +406,7 @@ final class AudiometriaTecnica
         $reglas[] = [
             'texto' => sprintf('Cada frecuencia nueva parte %d dB sobre el umbral de la anterior.', (int) $p['sobre_anterior']),
             'cumple' => $evaluadas === 0 ? null : $mal === [],
-            'detalle' => $mal === [] ? ($evaluadas === 0 ? 'Sin frecuencias con un umbral anterior cerrado.' : 'Así fue en las ' . $evaluadas . ' frecuencias.') : implode('; ', $mal) . '.',
+            'detalle' => $mal === [] ? ($evaluadas === 0 ? 'Ninguna frecuencia tenía el umbral anterior verificado.' : 'Así fue en las ' . $evaluadas . ' frecuencias.') : implode('; ', $mal) . '.',
         ];
 
         $desvios = [];
@@ -374,26 +429,20 @@ final class AudiometriaTecnica
             }
         }
         $reglas[] = [
-            'texto' => 'El umbral se cierra con 2 de 3 o 3 de 5 respuestas subiendo, antes de cambiar de frecuencia.',
+            'texto' => 'Se verifica el umbral con 2 de 3 o 3 de 5 respuestas subiendo antes de cambiar de frecuencia.',
             'cumple' => $abiertos === [],
-            'detalle' => $abiertos === [] ? 'Todas las frecuencias cerradas.' : 'Sin cerrar: ' . implode(', ', array_unique($abiertos)) . '.',
+            'detalle' => $abiertos === [] ? 'Se verificó en todas las frecuencias.' : 'Cambió de frecuencia sin verificar 2 de 3 ni 3 de 5 en: ' . implode(', ', array_unique($abiertos)) . '.',
         ];
 
-        $secuencia = array_column($bloques, 'freq');
-        $pase = array_merge($orden, [1000]);
+        // El orden mira la primera vez que tomó cada frecuencia: las
+        // repeticiones son su propia regla (1 kHz) o advertencia.
+        $secuencia = array_values(array_unique(array_column($bloques, 'freq')));
         $reglas[] = [
-            'texto' => 'Orden de frecuencias: ' . implode(', ', array_map([self::class, 'hz'], $orden)) . ' y se repite 1 kHz.',
-            'cumple' => array_slice($secuencia, 0, count($pase)) === $pase,
+            'texto' => 'Orden de frecuencias: ' . implode(', ', array_map([self::class, 'hz'], $orden)) . '.',
+            'cumple' => array_slice($secuencia, 0, count($orden)) === $orden,
             'detalle' => 'Se hizo: ' . implode(', ', array_map([self::class, 'hz'], $secuencia)) . '.',
         ];
 
-        $r = null;
-        for ($i = 1, $n = count($bloques); $i < $n; $i++) {
-            if ($bloques[$i]['freq'] === 1000) {
-                $r = $i;
-                break;
-            }
-        }
         if ($r === null) {
             $reglas[] = [
                 'texto' => sprintf('Se repite 1 kHz al final; si difiere más de %d dB de la primera vez, se repite todo el umbral.', (int) $p['dif_repeticion']),
@@ -405,7 +454,7 @@ final class AudiometriaTecnica
             $u2 = $bloques[$r]['umbral'];
             if ($u1 === null || $u2 === null) {
                 $cumple = null;
-                $detalle = 'Se repitió 1 kHz, pero sin un umbral cerrado para comparar.';
+                $detalle = 'Se repitió 1 kHz, pero en alguna de las dos veces no verificó 2 de 3 ni 3 de 5: no hay umbrales para comparar.';
             } else {
                 $dif = abs($u2 - $u1);
                 $resto = array_column(array_slice($bloques, $r + 1), 'freq');
@@ -427,42 +476,48 @@ final class AudiometriaTecnica
         return $reglas;
     }
 
-    /** Umbral obtenido por frecuencia contra el del paciente (el último cerrado de cada frecuencia). */
+    /**
+     * Umbral obtenido en cada frecuencia contra el del paciente, en el orden
+     * en que el alumno los tomó: la repetición de 1 kHz (o de cualquier
+     * frecuencia) es su propia fila, marcada 'repeticion'.
+     */
     private static function umbrales(array $bloques, string $via, int $oido, AudiometriaPaciente $paciente): array
     {
-        $por = [];
-        foreach ($bloques as $b) {
-            if (!isset($por[$b['freq']]) || $b['umbral'] !== null || $por[$b['freq']]['estimado'] === null) {
-                $por[$b['freq']] = ['estimado' => $b['umbral'], 'aprox' => $b['aprox'], 'con_ruido' => $b['con_ruido']];
-            }
-        }
+        $vistas = [];
         $filas = [];
-        foreach (self::ORDEN_FRECUENCIAS[$via] as $hz) {
-            if (!isset($por[$hz])) {
-                continue;
-            }
+        foreach ($bloques as $b) {
+            $hz = $b['freq'];
+            $repeticion = isset($vistas[$hz]);
+            $vistas[$hz] = true;
             $idx = array_search($hz, AudiometriaPaciente::FRECUENCIAS, true);
             $real = $idx === false ? null : $paciente->umbralReal($via === 'aereos' ? 'aerea' : 'osea', $idx, $oido);
             $sombra = $idx === false ? null : $paciente->umbralSinRuido($via === 'aereos' ? 'aerea' : 'osea', $idx, $oido);
-            $est = $por[$hz]['estimado'];
+            $est = $b['umbral'];
             if ($real === null) {
                 $estado = 'sin dato';
+            } elseif ($est === null && $b['sin_respuesta']) {
+                // corresponde si el paciente de verdad no oye hasta ahí
+                $aparente = $b['con_ruido'] ? $real : (int) $sombra;
+                $estado = $aparente > $b['maximo'] ? 'coincide' : 'difiere';
             } elseif ($est === null) {
-                $estado = $real >= 120 && $por[$hz]['aprox'] === null ? 'coincide' : 'sin cerrar';
+                $estado = 'sin verificar';
             } elseif (abs($est - $real) <= 5) {
                 $estado = 'coincide';
-            } elseif (!$por[$hz]['con_ruido'] && $sombra !== null && $sombra < $real - 5 && abs($est - $sombra) <= 5) {
+            } elseif (!$b['con_ruido'] && $sombra !== null && $sombra < $real - 5 && abs($est - $sombra) <= 5) {
                 $estado = 'sombra';
             } else {
                 $estado = 'difiere';
             }
             $filas[] = [
                 'freq' => $hz,
+                'repeticion' => $repeticion,
+                'innecesaria' => $b['innecesaria'] ?? false,
                 'estimado' => $est,
-                'aprox' => $por[$hz]['aprox'],
+                'aprox' => $b['aprox'],
                 'real' => $real,
                 'sombra' => $sombra,
-                'con_ruido' => $por[$hz]['con_ruido'],
+                'con_ruido' => $b['con_ruido'],
+                'sin_respuesta' => $b['sin_respuesta'],
                 'estado' => $estado,
             ];
         }
@@ -486,14 +541,15 @@ final class AudiometriaTecnica
             $bloques[$n - 1]['pres'][] = $x;
         }
         foreach ($bloques as &$b) {
-            $b = $b + self::analizar($b, $p);
+            $b = $b + self::analizar($b, $via, $p);
         }
         unset($b);
         return $bloques;
     }
 
-    private static function analizar(array $bloque, array $p): array
+    private static function analizar(array $bloque, string $via, array $p): array
     {
+        $topes = self::TOPES[$via][$bloque['freq']] ?? [];
         $visitas = [];
         foreach ($bloque['pres'] as $x) {
             $n = count($visitas);
@@ -541,7 +597,9 @@ final class AudiometriaTecnica
                 $esperado = $a['ultimo'] ? -(int) $p['paso_bajada'] : (int) $p['paso_subida'];
                 $fase = $a['ultimo'] ? 'tras responder' : 'tras no responder';
             }
-            if ($delta !== $esperado) {
+            // al tope del equipo no se puede subir el paso completo
+            $alTope = $esperado > 0 && $delta > 0 && $delta < $esperado && in_array($b['int'], $topes, true);
+            if ($delta !== $esperado && !$alTope) {
                 $desvios[] = sprintf('%s (%s): %s a %d dB pasó a %d dB (correspondía %+d).',
                     $etiqueta, date('H:i:s', (int) $b['t']), $fase, $a['int'], $b['int'], $esperado);
             }
@@ -582,17 +640,88 @@ final class AudiometriaTecnica
                 $aprox = $v['int'];
             }
         }
+        // Sin ninguna respuesta hasta el tope del equipo: la búsqueda está
+        // terminada, el oído no responde en esa frecuencia.
+        $maximo = max(array_column($visitas, 'int'));
+        $sinRespuesta = $primera === null && $topes !== [] && $maximo >= $topes[0];
         return [
             'inicio' => $visitas[0]['int'],
             'umbral' => $umbral,
             'aprox' => $aprox,
-            'cerrado' => $umbral !== null,
+            'sin_respuesta' => $sinRespuesta,
+            'maximo' => $maximo,
+            'cerrado' => $umbral !== null || $sinRespuesta,
             'desvios' => $desvios,
             'con_ruido' => $conRuido,
         ];
     }
 
+    /**
+     * Repeticiones de un oído. 'retest' es la repetición de 1 kHz que pide la
+     * técnica: el primer 1 kHz después de haber pasado por todas las demás
+     * frecuencias. Si difiere más de lo permitido, lo que sigue es repetir
+     * el oído completo y también es de la técnica. 'innecesarias' son los
+     * bloques de una frecuencia que ya estaba verificada en ese oído.
+     * 'previos': el umbral ya verificado de cada repetición innecesaria.
+     */
+    private static function repeticiones(array $bloques, string $via, array $p): array
+    {
+        $primeras = [];
+        foreach ($bloques as $i => $b) {
+            if (!isset($primeras[$b['freq']])) {
+                $primeras[$b['freq']] = $i;
+            }
+        }
+        $resto = array_diff_key($primeras, [1000 => true]);
+        $ultimaNueva = $resto ? max($resto) : 0;
+        $r = null;
+        foreach ($bloques as $i => $b) {
+            if ($i > $ultimaNueva && $i > 0 && $b['freq'] === 1000) {
+                $r = $i;
+                break;
+            }
+        }
+        $repetirTodo = false;
+        if ($r !== null && $bloques[0]['umbral'] !== null && $bloques[$r]['umbral'] !== null) {
+            $repetirTodo = abs($bloques[$r]['umbral'] - $bloques[0]['umbral']) > $p['dif_repeticion'];
+        }
+        $verificadas = [];
+        $innecesarias = [];
+        $previos = [];
+        foreach ($bloques as $i => $b) {
+            $necesaria = $i === $r || ($repetirTodo && $i > $r);
+            if (!$necesaria && isset($verificadas[$b['freq']])) {
+                $innecesarias[] = $i;
+                $previos[$i] = $verificadas[$b['freq']];
+            }
+            if ($b['cerrado']) {
+                $verificadas[$b['freq']] = $b['umbral'] !== null ? $b['umbral'] . ' dB' : 'sin respuesta';
+            }
+        }
+        return ['retest' => $r, 'innecesarias' => $innecesarias, 'previos' => $previos];
+    }
+
     // ---- utilidades ----------------------------------------------------------
+
+    /** "45 s", "1 min 20 s". */
+    public static function tiempo(float $segundos): string
+    {
+        $s = (int) round($segundos);
+        if ($s < 60) {
+            return $s . ' s';
+        }
+        return intdiv($s, 60) . ' min' . ($s % 60 ? ' ' . ($s % 60) . ' s' : '');
+    }
+
+    /** "a", "a y b", "a, b y c". */
+    private static function lista(array $items): string
+    {
+        if (count($items) <= 1) {
+            return implode('', $items);
+        }
+        $ultimo = array_pop($items);
+        return implode(', ', $items) . ' y ' . $ultimo;
+    }
 
     /** Promedio aéreo 500-1000-2000-4000 del caso (decide oído mejor y peor). */
     private static function promedio(AudiometriaPaciente $paciente, int $oido): float
@@ -615,7 +744,11 @@ final class AudiometriaTecnica
         return true;
     }
 
-    /** Suma de reglas evaluables y cumplidas de varias secciones. */
+    /**
+     * Suma de reglas evaluables y cumplidas de varias secciones, con el
+     * porcentaje de logro (null si no hubo nada evaluable). Cada regla pesa
+     * lo mismo.
+     */
     public static function sumar(array $secciones): array
     {
         $cumple = $total = 0;
@@ -636,7 +769,7 @@ final class AudiometriaTecnica
                 }
             }
         }
-        return ['cumple' => $cumple, 'total' => $total];
+        return ['cumple' => $cumple, 'total' => $total, 'pct' => $total > 0 ? (int) round(100 * $cumple / $total) : null];
     }
 
     public static function hz(int $hz): string

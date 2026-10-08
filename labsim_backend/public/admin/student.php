@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../src/Metrics.php';
 require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/ReportFile.php';
 require_once __DIR__ . '/../../src/ReportVersions.php';
-require_once __DIR__ . '/../../src/AudiometriaTecnica.php';
+require_once __DIR__ . '/../../src/AudiometriaTecnicaVista.php';
 
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
@@ -226,7 +226,7 @@ admin_header('Alumno: ' . $student['display_name'], $me);
     <p class="legend">Comportamiento aislado por cada atención (cita/paciente) -- así un caso no ensucia las métricas de otro cuando el alumno revisó más de uno.</p>
     <div class="table-wrap">
     <table>
-        <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Bloques</th><th>Duración</th><th>Delta prom.</th><th>Pausas largas</th><th>Hora real</th><th>Nota</th><th>Exámenes</th><th title="Pasos de la técnica de audiometría cumplidos">Técnica</th><th>Actualizado</th><th>Detalle</th></tr>
+        <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Bloques</th><th>Duración</th><th>Delta prom.</th><th>Pausas largas</th><th>Hora real</th><th>Nota</th><th>Exámenes</th><th title="Logro de la técnica de audiometría (pasos cumplidos sobre los evaluables)">Técnica</th><th>Actualizado</th><th>Detalle</th></tr>
         <?php foreach ($attendances as $a):
             $aStats = $statsByAppt[(int) $a['appointment_id']] ?? null;
             // Duración real (Atender -> Atendido) siempre que esté cerrada;
@@ -261,7 +261,8 @@ admin_header('Alumno: ' . $student['display_name'], $me);
                 <?php if (empty($reportsByAppt[(int) $a['appointment_id']])): ?><span class="muted">—</span><?php endif; ?>
             </td>
             <td><?php $tec = $tecnicaByAppt[(int) $a['appointment_id']] ?? null; ?>
-                <?php if ($tec): ?><a href="chat_detail.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>#tecnica"><?= (int) $tec['cumple'] ?>/<?= (int) $tec['total'] ?></a><?php else: ?><span class="muted">—</span><?php endif; ?></td>
+                <?php if ($tec): ?><a href="chat_detail.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>#tecnica"
+                   title="<?= (int) $tec['cumple'] ?> de <?= (int) $tec['total'] ?> pasos" style="color:<?= AudiometriaTecnicaVista::color($tec['pct']) ?>; font-weight:600;"><?= htmlspecialchars(AudiometriaTecnicaVista::pct($tec['pct'])) ?></a><?php else: ?><span class="muted">—</span><?php endif; ?></td>
             <td><?= htmlspecialchars($a['updated_at']) ?></td>
             <td><a href="chat_detail.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>">Ver atención</a></td>
         </tr>

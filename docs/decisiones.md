@@ -4651,6 +4651,32 @@ Criterios que no venían dados y se decidieron:
   seguidos a un nivel cierran el umbral igual que tres ascensos.
 - Se sacó "dos estímulos por nivel": era una mala lectura de la técnica. Lo
   que hay es el 2 de 3.
+- **Topes del equipo** (`AudiometriaTecnica::TOPES`, copia del
+  `intency_dict` del audiómetro, con test): subir menos de 10 en la
+  familiarización porque se llegó al tope no es un desvío (vía ósea 250 Hz
+  tope en 45 dB). Llegar al tope sin ninguna respuesta cuenta como frecuencia
+  terminada "sin respuesta", y corresponde si el paciente de verdad no oye hasta
+  ahí.
+- **"No verificó 2/3 ni 3/5"** (antes "sin cerrar"): el alumno cambió de
+  frecuencia sin llegar a 2 de 3 o 3 de 5 respuestas subiendo en un nivel.
+  Es un error de procedimiento y descuenta.
+- **La tabla de umbrales va en el orden en que el alumno los tomó**, con la
+  repetición de 1 kHz (o de cualquier frecuencia) como fila propia marcada
+  "(repetición)". La exactitud se cuenta sobre todas las filas.
+- **Repetir sin necesidad es advertencia, no error**: puede estar
+  verificando. Es repetir una frecuencia ya verificada en ese oído; no
+  cuentan la repetición de 1 kHz al final (el primer 1 kHz después de pasar
+  por todas las demás), el oído completo cuando 1 kHz difiere más de lo
+  permitido, ni volver a una frecuencia que no se había verificado. La
+  advertencia dice cuáles y cuánto tiempo habría ganado (del primer al
+  último estímulo de cada repetición). No descuenta en el orden de
+  frecuencias (se mira la primera vez de cada una) ni en "un oído a la vez".
+- **Orden de frecuencias y repetición de 1 kHz** son reglas separadas: no
+  repetir 1 kHz descuenta una vez.
+- **Porcentaje de logro**: pasos cumplidos sobre los evaluables, cada regla
+  pesa lo mismo. General, por sección y por oído; verde desde 85 %, ámbar
+  desde 60 %, rojo debajo. Las secciones van plegadas con su porcentaje en
+  el título. En la ficha del alumno y en Moodle se ve el porcentaje.
 - **Duración**: la regla se cumple con el 80 % de los estímulos entre 1 y
   2 s. Se mide solo con milisegundos en las dos puntas.
 - **Frecuencia nueva**: no se evalúa el inicio de una frecuencia que se

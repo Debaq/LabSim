@@ -31,11 +31,11 @@ final class AtExaminador
     private $caso;
     private $estado;
 
-    public function __construct(bool $v2)
+    public function __construct(bool $v2, ?array $caso = null)
     {
         $this->v2 = $v2;
         $this->t = strtotime('2026-10-08 10:00:00');
-        $this->caso = new AudiometriaPaciente(at_caso());
+        $this->caso = new AudiometriaPaciente($caso ?? at_caso());
         $this->estado = [
             'prueba' => 'Umbrales', 'freq' => '1000 Hz', 'step' => 5, 'instruccion' => null,
             'canales' => [
@@ -213,8 +213,10 @@ foreach (at_reglas($res['oseos']) as $texto => $cumple) {
     }
     t_eq($cumple, true, "Técnica perfecta (óseos): {$texto}");
 }
-t_eq(array_column($res['aereos']['umbrales']['OD'], 'estimado'), array_fill(0, 9, 10), 'Técnica: umbrales aéreos OD estimados');
-t_eq(array_column($res['aereos']['umbrales']['OI'], 'estimado'), array_fill(0, 9, 30), 'Técnica: umbrales aéreos OI estimados');
+t_eq(array_column($res['aereos']['umbrales']['OD'], 'estimado'), array_fill(0, 10, 10), 'Técnica: umbrales aéreos OD estimados (9 frecuencias y la repetición)');
+t_eq(array_column($res['aereos']['umbrales']['OI'], 'estimado'), array_fill(0, 10, 30), 'Técnica: umbrales aéreos OI estimados');
+t_eq(array_column($res['aereos']['umbrales']['OD'], 'freq'), array_merge($aereos, [1000]), 'Técnica: la tabla va en el orden en que tomó los umbrales');
+t_eq(array_column($res['aereos']['umbrales']['OD'], 'repeticion'), array_merge(array_fill(0, 9, false), [true]), 'Técnica: la repetición de 1 kHz es su propia fila');
 t_eq(array_unique(array_column($res['oseos']['umbrales']['OI'], 'estado')), ['sombra'], 'Técnica: ósea OI sin enmascarar = curva sombra');
 t_eq($res['oseos']['observaciones'], [], 'Técnica: ósea solo en el oído que la necesita, sin observaciones');
 t_eq($res['orden']['hechas'], ['Umbrales aéreos', 'Umbrales óseos'], 'Técnica: pruebas reconocidas');
@@ -229,8 +231,8 @@ $viejo->oidoCompleto(1, $aereos);
 $resViejo = AudiometriaTecnica::evaluar(AudiometriaRegistro::leer($viejo->logs, at_caso()), at_caso(), $params);
 t_eq($resViejo['reconstruido'], true, 'Técnica: registro viejo queda reconstruido');
 t_eq($resViejo['con_ms'], false, 'Técnica: registro viejo sin milisegundos');
-t_eq(array_column($resViejo['aereos']['umbrales']['OD'], 'estimado'), array_fill(0, 9, 10), 'Técnica: reconstruido da los mismos umbrales OD');
-t_eq(array_column($resViejo['aereos']['umbrales']['OI'], 'estimado'), array_fill(0, 9, 30), 'Técnica: reconstruido da los mismos umbrales OI');
+t_eq(array_column($resViejo['aereos']['umbrales']['OD'], 'estimado'), array_fill(0, 10, 10), 'Técnica: reconstruido da los mismos umbrales OD');
+t_eq(array_column($resViejo['aereos']['umbrales']['OI'], 'estimado'), array_fill(0, 10, 30), 'Técnica: reconstruido da los mismos umbrales OI');
 $duracion = null;
 foreach ($resViejo['aereos']['reglas'] as $r) {
     if (strpos($r['texto'], 'segundos') !== false) {
@@ -342,3 +344,149 @@ foreach ([40, 30, 20, 10, 0, 5, 10, 10, 10] as $db) {
 $r = AudiometriaTecnica::evaluar(AudiometriaRegistro::leer($tres->logs, at_caso()), at_caso(), $params);
 t_eq($r['aereos']['umbrales']['OD'][0]['estimado'], 10, 'Técnica: tres estímulos seguidos a 10 dB llegando desde abajo cierran el umbral');
 t_eq(at_falla(at_reglas($r['aereos']), 'OD · Familiarización'), false, 'Técnica: repetir estímulos en el mismo nivel no es un desvío de paso');
+
+
+// --- Familiarización: casos que tienen que pasar sin desvíos ---------------
+/** Caída simétrica (sin sombra): 60 dB en graves y 1 kHz, 80 dB en 2-3 kHz, sin respuesta desde 4 kHz. */
+function at_caida(): array
+{
+    $od = [60, 60, 60, 60, 80, 80, 130, 130, 130];
+    $filas = [];
+    foreach ($od as $i => $v) {
+        $filas[$i] = [$v, $v];
+    }
+    $filas = array_merge($filas, array_fill(0, 6, [130, 130]));
+    return ['Aerea_mkg' => $filas, 'Osea_mkg' => $filas, 'Aerea' => $filas, 'Osea' => $filas];
+}
+
+function at_secuencia(AtExaminador $ex, int $hz, array $niveles): void
+{
+    $ex->frecuencia($hz);
+    foreach ($niveles as $db) {
+        $ex->tono($db);
+    }
+}
+
+$caida = new AtExaminador(true, at_caida());
+$caida->instruccion('colocar_fonos');
+$caida->oido(0);
+// 1 kHz: familiarización 40, 50 (sin respuesta) -> 60 responde; técnica.
+at_secuencia($caida, 1000, [40, 50, 60, 50, 55, 60, 50, 55, 60]);
+// 2 kHz: parte en 70 (60 + 10), no responde -> familiarización 80; técnica.
+at_secuencia($caida, 2000, [70, 80, 70, 75, 80, 70, 75, 80]);
+// 3 kHz: parte en 90 (80 + 10), responde; técnica.
+at_secuencia($caida, 3000, [90, 80, 70, 75, 80, 70, 75, 80]);
+// 4 kHz: parte en 90, sube de 10 en 10 hasta el tope (100) sin respuesta.
+at_secuencia($caida, 4000, [90, 100]);
+$r = AudiometriaTecnica::evaluar(AudiometriaRegistro::leer($caida->logs, at_caida()), at_caida(), $params);
+$od = [];
+foreach ($r['aereos']['oidos']['OD'] as $x) {
+    $od[$x['texto']] = $x;
+}
+$pasos = null;
+$cierre = null;
+$inicio = null;
+foreach ($od as $texto => $x) {
+    if (strpos($texto, 'Familiarización') === 0) {
+        $pasos = $x;
+    } elseif (strpos($texto, 'Se verifica el umbral') === 0) {
+        $cierre = $x;
+    } elseif (strpos($texto, 'Cada frecuencia nueva') === 0) {
+        $inicio = $x;
+    }
+}
+t_eq($pasos['cumple'], true, 'Familiarización: +10 hasta responder y después -10/+5, sin desvíos (' . $pasos['detalle'] . ')');
+t_eq($inicio['cumple'], true, 'Familiarización: cada frecuencia parte 10 sobre la anterior aunque no responda (' . $inicio['detalle'] . ')');
+t_eq($cierre['cumple'], true, 'Familiarización: llegar al tope sin respuesta cierra la frecuencia (' . $cierre['detalle'] . ')');
+$u = array_column($r['aereos']['umbrales']['OD'], 'estado', 'freq');
+t_eq($u[4000] ?? null, 'coincide', 'Familiarización: sin respuesta al tope corresponde a un oído sin respuesta');
+t_eq(array_column($r['aereos']['umbrales']['OD'], 'estimado', 'freq'), [1000 => 60, 2000 => 80, 3000 => 80, 4000 => null], 'Familiarización: umbrales de la caída');
+
+// Familiarización subiendo de 5 en 5: desvío.
+$cinco = new AtExaminador(true, at_caida());
+$cinco->instruccion('colocar_fonos');
+$cinco->oido(0);
+at_secuencia($cinco, 1000, [40, 45, 50, 55, 60, 50, 55, 60, 50, 55, 60]);
+$r = AudiometriaTecnica::evaluar(AudiometriaRegistro::leer($cinco->logs, at_caida()), at_caida(), $params);
+t_true(at_falla(at_reglas($r['aereos']), 'OD · Familiarización'), 'Familiarización: subir de 5 antes de la primera respuesta es un desvío');
+
+// Vía ósea en 250 Hz: el equipo llega a 45 dB; desde 40 no se puede subir 10.
+$tope = new AtExaminador(true, at_caida());
+$tope->instruccion('colocar_vibrador');
+$tope->transductor('Oséa');
+$tope->oido(0);
+at_secuencia($tope, 250, [40, 45]);
+$r = AudiometriaTecnica::evaluar(AudiometriaRegistro::leer($tope->logs, at_caida()), at_caida(), $params);
+t_eq(at_falla(at_reglas($r['oseos']), 'OD · Familiarización'), false, 'Familiarización: subir al tope del equipo (45 dB en 250 Hz óseo) no es un desvío');
+t_eq(at_falla(at_reglas($r['oseos']), 'OD · Se verifica el umbral'), false, 'Familiarización: tope del equipo sin respuesta cierra la frecuencia');
+
+// Los topes son los del audiómetro (intency_dict del cliente).
+$cfg = dirname(__DIR__, 2) . '/resources/json/config_audiometer.json';
+if (is_file($cfg)) {
+    $dict = json_decode((string) file_get_contents($cfg), true)['intency_dict'];
+    foreach (['aereos' => 0, 'oseos' => 1] as $via => $trans) {
+        foreach (AudiometriaTecnica::TOPES[$via] as $hz => $tope) {
+            $fila = $dict[(string) $hz][$trans];
+            t_eq($tope, [$fila[0][1], $fila[1][0]], "Topes {$via} {$hz} Hz: iguales a config_audiometer.json");
+        }
+    }
+} else {
+    t_true(true, 'Topes: sin config_audiometer.json a mano -- comparación omitida');
+}
+
+// --- Porcentaje de logro ---------------------------------------------------
+$p = $res['puntaje'];
+t_eq($p['pct'], (int) round(100 * $p['cumple'] / $p['total']), 'Logro: el porcentaje sale de pasos cumplidos sobre evaluables');
+t_eq($res['aereos']['puntaje']['pct'], 100, 'Logro: examen aéreo al pie de la letra = 100 %');
+t_eq(array_keys($res['aereos']['puntaje_oidos']), ['OD', 'OI'], 'Logro: también por oído');
+t_eq(AudiometriaTecnica::sumar([['reglas' => []]])['pct'], null, 'Logro: sin pasos evaluables no hay porcentaje');
+ob_start();
+AudiometriaTecnicaVista::render($res, false);
+$html = (string) ob_get_clean();
+t_true(strpos($html, (string) $p['pct'] . ' %') !== false, 'Logro: la vista muestra el porcentaje general');
+t_eq(substr_count($html, '<details'), substr_count($html, '</details>'), 'Logro: secciones plegables balanceadas');
+
+// No repetir 1 kHz descuenta una vez: el orden de frecuencias igual se cumple.
+$sinRepetir = new AtExaminador(true);
+$sinRepetir->instruccion('colocar_fonos');
+$sinRepetir->oidoCompleto(0, $aereos, 40, false);
+$rr = at_reglas(AudiometriaTecnica::evaluar(AudiometriaRegistro::leer($sinRepetir->logs, at_caso()), at_caso(), $params)['aereos']);
+t_true(at_falla($rr, 'OD · Se repite 1 kHz'), 'Logro: sin repetir 1 kHz se marca');
+t_eq(at_falla($rr, 'OD · Orden de frecuencias'), false, 'Logro: y no descuenta además el orden');
+
+// --- Repetir sin necesidad: advertencia con el tiempo, no descuenta ---------
+$repite = new AtExaminador(true);
+$repite->instruccion('colocar_fonos');
+$repite->oido(0);
+$previo = null;
+foreach ([1000, 2000, 3000, 2000, 1000, 4000, 6000, 8000, 500, 250, 125, 1000] as $i => $hz) {
+    $repite->frecuencia($hz);
+    $u = $repite->umbral($previo === null ? 40 : $previo + 10);
+    $previo = $u;
+}
+$repite->oidoCompleto(1, $aereos);
+$repite->oido(0);
+$repite->frecuencia(4000);
+$repite->umbral(20);
+$r = AudiometriaTecnica::evaluar(AudiometriaRegistro::leer($repite->logs, at_caso()), at_caso(), $params);
+t_eq($r['aereos']['puntaje']['pct'], 100, 'Repetir sin necesidad: no descuenta (' . json_encode(array_keys(array_filter(at_reglas($r['aereos']), static function ($c) { return $c === false; })), JSON_UNESCAPED_UNICODE) . ')');
+$obs = implode(' ', $r['aereos']['observaciones']);
+t_true(strpos($obs, 'Repitió sin necesidad OD 2 kHz (ya verificado en 10 dB), OD 1 kHz (ya verificado en 10 dB) y OD 4 kHz') !== false, 'Repetir sin necesidad: dice cuáles (' . $obs . ')');
+t_true(preg_match('/habría ganado (\d+ min( \d+ s)?|\d+ s)\./', $obs) === 1, 'Repetir sin necesidad: dice cuánto tiempo habría ganado');
+$filas = $r['aereos']['umbrales']['OD'];
+t_eq(array_column(array_filter($filas, static function ($f) { return $f['innecesaria']; }), 'freq'), [2000, 1000, 4000], 'Repetir sin necesidad: marcadas en la tabla, en orden');
+t_eq(array_sum(array_column($filas, 'repeticion')), 4, 'Repetir sin necesidad: la repetición final de 1 kHz no es innecesaria');
+t_eq(AudiometriaTecnica::tiempo(80), '1 min 20 s', 'Tiempo: minutos y segundos');
+t_eq(AudiometriaTecnica::tiempo(45), '45 s', 'Tiempo: solo segundos');
+
+// Volver a una frecuencia que no había verificado no es repetir sin necesidad.
+$vuelve = new AtExaminador(true);
+$vuelve->instruccion('colocar_fonos');
+$vuelve->oido(0);
+at_secuencia($vuelve, 1000, [40, 30, 20, 10, 0, 5, 10, 0, 5, 10]);
+at_secuencia($vuelve, 2000, [20, 10, 0, 5]);   // se va sin verificar
+at_secuencia($vuelve, 3000, [20, 10, 0, 5, 10, 0, 5, 10]);
+at_secuencia($vuelve, 2000, [20, 10, 0, 5, 10, 0, 5, 10]);
+$r = AudiometriaTecnica::evaluar(AudiometriaRegistro::leer($vuelve->logs, at_caso()), at_caso(), $params);
+t_eq($r['aereos']['observaciones'], [], 'Volver a verificar: no es repetir sin necesidad');
+t_true(at_falla(at_reglas($r['aereos']), 'OD · Se verifica el umbral'), 'Volver a verificar: irse sin verificar igual se marca');
