@@ -278,6 +278,10 @@ class Audiometer(QWidget, Ui_Audiometer):
                 if isinstance(attribute, QLabel):
                     attribute.textChanged.connect(self.on_label_text_changed)
 
+        # el caso que llegó al construir (la_super corrió antes de setupUi)
+        if getattr(self, "id", None) is not None:
+            self._log("audio_caso_cargado", estado=self._estado())
+
 
     def install_key_filter(self, activo: bool) -> None:
         """Pone o saca el filtro global de teclas del audiometro."""
@@ -411,7 +415,38 @@ class Audiometer(QWidget, Ui_Audiometer):
             payload.setdefault("case_id", case_id)
         payload.setdefault("appointment_id", getattr(self, "appointment_id", None))
         payload.setdefault("con_paciente", case_id is not None)
+        # v2: cada estímulo trae la foto del equipo (ver _estado) y la mano
+        # del paciente queda registrada (audio_respuesta). Con eso el
+        # backend lee el examen tal cual; sin "v" lo tiene que reconstruir.
+        payload.setdefault("v", 2)
         self.log_queue.push(action, payload)
+
+    def _estado(self):
+        """Foto del equipo para el registro: los dos canales completos.
+
+        Antes cada estímulo traía solo su canal, y el ruido del otro había
+        que adivinarlo repasando todo lo anterior, con cambios que no
+        dejaban rastro. Con esto cada presentación se entiende sola.
+        """
+        canales = []
+        for c in (0, 1):
+            canales.append({
+                "on": self.lbl_warnings[c].text() == ESTIMULO_ENCENDIDO,
+                "invertido": not self.no_Rev(c),
+                "intensity": self.lbl_intencity[c].text(),
+                "stim": self.lbl_stim[c].text(),
+                "output": self.lbl_output[c].text(),
+                "trans": self.lbl_trans[c].text(),
+                "contin": self.lbl_contin[c].text(),
+            })
+        historia = self.response.history_command
+        return {
+            "prueba": self.lbl_prueba.text(),
+            "freq": self.lbl_freq.text(),
+            "step": self.step(),
+            "instruccion": historia[0] if historia else None,
+            "canales": canales,
+        }
 
     def disabled_widgets(self):
         # Disabled BETA
@@ -439,6 +474,10 @@ class Audiometer(QWidget, Ui_Audiometer):
         result1 = [thr['Aerea_mkg'], thr['Osea_mkg']]
         self.thr = [result, result1]
         self.response.set_case(data)
+        # al construir el audiómetro, la_super corre antes de setupUi: todavía
+        # no hay equipo que fotografiar
+        if hasattr(self, "lbl_warnings"):
+            self._log("audio_caso_cargado", estado=self._estado())
         
     
     @Slot()
@@ -554,6 +593,7 @@ class Audiometer(QWidget, Ui_Audiometer):
                 stim=self.lbl_stim[ch].text(),
                 output=self.lbl_output[ch].text(),
                 trans=self.lbl_trans[ch].text(),
+                estado=self._estado(),
             )
         no_logo = self.no_Logo(ch)
         no_alternate = self.lbl_contin[0].text() != tone_list[2]
@@ -776,6 +816,8 @@ class Audiometer(QWidget, Ui_Audiometer):
     def _extracted_from_threshold_2(self, arg0, arg1):
         self.lbl_freq.setFont(QFont('Noto Sans', 20))
         self.lbl_freq.setText(arg0)
+        if self.lbl_prueba.text() != test_list[arg1]:
+            self._log("audio_prueba_change", prueba=test_list[arg1])
         self.lbl_prueba.setText(test_list[arg1])
             #data = {'frecuency': 1000,
             #        'stim_type_ch0': stim_list[0], 'stim_type_ch1': stim_list[3]}
@@ -842,6 +884,7 @@ class Audiometer(QWidget, Ui_Audiometer):
             compare_stim = set(compare_stim)
             if verify_stim in compare_stim:
                 self.speech()
+                self._log("audio_stim_select", ch=contra, stim=stim_list[5], auto=True)
                 self.lbl_stim[contra].setText(stim_list[5])
             else:
                 self.speech()
@@ -851,6 +894,7 @@ class Audiometer(QWidget, Ui_Audiometer):
             compare_stim = set(compare_stim)
             if verify_stim in compare_stim:
                 self.threshold()
+                self._log("audio_stim_select", ch=contra, stim=stim_list[3], auto=True)
                 self.lbl_stim[contra].setText(stim_list[3])
             else:
                 self.threshold()
@@ -1032,9 +1076,15 @@ class Audiometer(QWidget, Ui_Audiometer):
         new_int = intency[len_intency-1]
         int_der = int(self.lbl_intencity[0].text().split(' dB HL')[0])
         int_izq = int(self.lbl_intencity[1].text().split(' dB HL')[0])
+        # el recorte al tope también se registra: sin esto la intensidad
+        # cambiaba sin que el registro lo supiera
         if int_der >= intency[-1]:
+            if int_der != new_int:
+                self._log("audio_intensity_change", ch=0, intensity=new_int, freq=f, auto=True)
             self.lbl_intencity[0].setText(f"{new_int} dB HL")
         if int_izq >= intency[-1]:
+            if int_izq != new_int:
+                self._log("audio_intensity_change", ch=1, intensity=new_int, freq=f, auto=True)
             self.lbl_intencity[1].setText(f"{new_int} dB HL")
 
     def step(self, step=0):

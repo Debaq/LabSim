@@ -81,6 +81,7 @@ class ResponseAudiometry():
 
         self.history_command= []
         self.obj_audio = obj_audio
+        self.mano = False
         self.frecuency =         [125,250, 500,1000,2000,3000,4000,6000,8000]
         self.attenuations = [35, 40,  40,  40, 40,  45,  45,  50, 50]
 
@@ -843,10 +844,21 @@ class ResponseAudiometry():
                 
         
     def upHand(self):
-        self.obj_audio.lbl_response.setStyleSheet('background-color: rgb(170, 170, 255);')
-    
+        self._mano(True)
+
     def downHand(self):
-        self.obj_audio.lbl_response.setStyleSheet('background-color: rgb(255, 255, 255);')
+        self._mano(False)
+
+    def _mano(self, arriba):
+        """Levanta o baja la mano del paciente y, si cambió, lo registra:
+        es lo que vio el alumno, y el backend no tiene que recalcularlo."""
+        color = '170, 170, 255' if arriba else '255, 255, 255'
+        self.obj_audio.lbl_response.setStyleSheet(f'background-color: rgb({color});')
+        if arriba != self.mano:
+            self.mano = arriba
+            log = getattr(self.obj_audio, "_log", None)
+            if log is not None:
+                log("audio_respuesta", mano=arriba)
 
 
     

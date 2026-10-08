@@ -68,7 +68,9 @@ class LocalLogQueue:
 
     def push(self, action: str, payload: dict | None = None) -> None:
         """Encola un evento. Escritura local, no bloquea por red."""
-        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # con milisegundos: la duración de un estímulo (1 a 2 s) no se mide
+        # con segundos enteros
+        ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         try:
             with self._connect() as conn:
                 conn.execute(
