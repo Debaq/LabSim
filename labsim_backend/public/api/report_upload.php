@@ -176,7 +176,11 @@ if (!$versionado) {
 // viene en este request (ver ReportFile::deletePdf()).
 ReportFile::deletePdf($reportId);
 foreach ($imageFiles as $suffix => $tmpPath) {
-    ReportFile::saveImage($reportId, $suffix, $tmpPath);
+    // (string): PHP convierte las claves '0' y '1' (OD/OI del ABR y del
+    // VEMP) en enteros, y con strict_types saveImage() las rechazaba con un
+    // TypeError -- después de guardar los datos, así que la app recibía un
+    // error y no dejaba cerrar la atención (laboratorio, 2026-10-08).
+    ReportFile::saveImage($reportId, (string) $suffix, $tmpPath);
 }
 
 Response::json(['ok' => true, 'report_id' => $reportId, 'version' => $version]);

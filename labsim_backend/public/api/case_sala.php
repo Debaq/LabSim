@@ -43,5 +43,5 @@ $sala = Sala::desde(
 
 Response::json([
     'sala' => Sala::paraCliente($sala),
-    'aforo' => $sala['aforo'],
+    'aforo' => $sala['aforo'] ?? null,
 ]);

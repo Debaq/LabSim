@@ -37,6 +37,32 @@ final class Db
      * posterior en el mismo request abre una conexión nueva (ya contra el
      * archivo restaurado).
      */
+    /**
+     * Corre $escribir y, si choca con otra escritura ("database is locked"),
+     * lo reintenta unas veces con espera creciente. Con los kioskos del
+     * laboratorio escribiendo a la vez, busy_timeout solo no alcanzaba
+     * (laboratorio, 2026-10-08). Lo que no sea un bloqueo se relanza igual.
+     *
+     * @return mixed lo que devuelva $escribir
+     */
+    public static function reintentar(callable $escribir, int $intentos = 4)
+    {
+        for ($intento = 1; ; $intento++) {
+            try {
+                return $escribir();
+            } catch (PDOException $e) {
+                $pdo = self::get();
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                if ($intento >= $intentos || stripos($e->getMessage(), 'locked') === false) {
+                    throw $e;
+                }
+                usleep(250000 * $intento);
+            }
+        }
+    }
+
     /** Una conexión nueva, aparte de la compartida, con la misma configuración. */
     private static function conexionAparte(): PDO
     {

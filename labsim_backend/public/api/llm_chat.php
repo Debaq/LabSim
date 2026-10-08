@@ -172,17 +172,30 @@ $respuestas = $acompanado
     : [['persona_id' => '', 'etiqueta' => '', 'texto' => $raw]];
 
 if ($appointmentId > 0) {
-    Db::migrateSalaIfNeeded();
-    $logStmt = Db::get()->prepare(
-        'INSERT INTO llm_chat_logs (appointment_id, student_id, case_id, role, content, speaker_id, speaker_label)
-         VALUES (?, ?, ?, ?, ?, ?, ?)'
-    );
-    $logStmt->execute([$appointmentId, $user['id'], $caseId, 'user', $message, '', '']);
-    foreach ($respuestas as $r) {
-        $logStmt->execute([
-            $appointmentId, $user['id'], $caseId, 'assistant', $r['texto'],
-            $r['persona_id'], $r['etiqueta'],
-        ]);
+    // La respuesta ya existe (se pagó el LLM): si la base está bloqueada
+    // se reintenta, y si aun así no se puede anotar, el alumno la recibe
+    // igual. Antes moría acá con "database is locked" y el alumno veía un
+    // error en vez de la respuesta (154 veces el 2026-10-08).
+    try {
+        Db::reintentar(static function () use ($appointmentId, $user, $caseId, $message, $respuestas): void {
+            Db::migrateSalaIfNeeded();
+            $pdo = Db::get();
+            $pdo->beginTransaction();
+            $logStmt = $pdo->prepare(
+                'INSERT INTO llm_chat_logs (appointment_id, student_id, case_id, role, content, speaker_id, speaker_label)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)'
+            );
+            $logStmt->execute([$appointmentId, $user['id'], $caseId, 'user', $message, '', '']);
+            foreach ($respuestas as $r) {
+                $logStmt->execute([
+                    $appointmentId, $user['id'], $caseId, 'assistant', $r['texto'],
+                    $r['persona_id'], $r['etiqueta'],
+                ]);
+            }
+            $pdo->commit();
+        });
+    } catch (PDOException $e) {
+        error_log('[llm_chat] no se pudo anotar la conversación: ' . $e->getMessage());
     }
 }
 
