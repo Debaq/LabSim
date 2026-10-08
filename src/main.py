@@ -19,6 +19,7 @@ from core import inbox
 from core import mis_pacientes
 from core import app_config_store
 from core import equipo
+from core import report_autosave
 from core.report_autosave import ReportAutosave, SubidaPendientes, subir_pendientes
 from core.secretaria import Secretaria, siguiente_paciente
 from core.kiosko import es_kiosko, atender_apagado
@@ -1251,6 +1252,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         pisaría esta. Devuelve los módulos que no pudieron subir (lo suyo
         quedó respaldado en el equipo, ver core/respaldo_informes.py)."""
         self.report_autosave.detener()
+        report_autosave.ultimos_errores.clear()
         fallidos = []
         for modulo in self._modulos_examen():
             try:
@@ -1260,6 +1262,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 ok = False
             if ok is False:
                 fallidos.append(type(modulo).__name__)
+        if fallidos and report_autosave.ultimos_errores:
+            # El motivo real (lo que respondió el servidor), no el módulo.
+            return [f"{tipo}: {err[:150]}" for tipo, err in report_autosave.ultimos_errores.items()]
         return fallidos
 
     # El ABR recupera lo suyo solo (AbrMainWindow.restore_current), junto

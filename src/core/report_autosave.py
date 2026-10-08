@@ -418,6 +418,11 @@ class SubidaPendientes(QThread):
             print(f"autosave: no se pudieron subir los pendientes: {exc}")
 
 
+# Motivo de la última subida sincrónica fallida de cada tipo: el cierre de
+# la atención lo muestra (sin esto el aviso solo decía el nombre del módulo).
+ultimos_errores = {}
+
+
 def subir_ahora(job, client=None) -> tuple[bool, str]:
     """Subida sincrónica de un job (cierre de atención, cierre de la app).
     Las imágenes se exportan acá mismo. `client`: el BackendClient del
@@ -441,5 +446,7 @@ def subir_ahora(job, client=None) -> tuple[bool, str]:
         respaldo_informes.guardar(usuario, job, huella(job), job["images_listas"])
         subir(job, cliente)
     except Exception as exc:  # noqa: BLE001
+        ultimos_errores[job.get("tipo")] = str(exc)
         return False, str(exc)
+    ultimos_errores.pop(job.get("tipo"), None)
     return True, ""

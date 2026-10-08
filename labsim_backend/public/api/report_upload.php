@@ -123,35 +123,49 @@ if (!$versionado) {
     $reportId = (int) $stmt->fetchColumn();
     $version = null;
 } else {
-    $pdo->beginTransaction();
-    try {
-        $stmt = $pdo->prepare('SELECT id, data, version, updated_at FROM reports WHERE attendance_id = ? AND tipo = ?');
-        $stmt->execute([$attendanceId, $tipo]);
-        $previo = $stmt->fetch();
-        if ($previo) {
-            $reportId = (int) $previo['id'];
-            $version = (int) $previo['version'] + 1;
-            if ($versionBase !== null && $versionBase !== (int) $previo['version']
-                    && $previo['data'] !== $dataJson) {
-                $pdo->prepare(
-                    'INSERT INTO report_versions (report_id, version, data, guardado_at) VALUES (?, ?, ?, ?)'
-                )->execute([$reportId, (int) $previo['version'], $previo['data'], $previo['updated_at']]);
+    // Con varios kioskos guardando a la vez, la transacción puede chocar
+    // con otra escritura ("database is locked"): se reintenta en vez de
+    // perder la subida.
+    for ($intento = 1; ; $intento++) {
+        try {
+            $pdo->beginTransaction();
+            try {
+                $stmt = $pdo->prepare('SELECT id, data, version, updated_at FROM reports WHERE attendance_id = ? AND tipo = ?');
+                $stmt->execute([$attendanceId, $tipo]);
+                $previo = $stmt->fetch();
+                $stmt->closeCursor();
+                if ($previo) {
+                    $reportId = (int) $previo['id'];
+                    $version = (int) $previo['version'] + 1;
+                    if ($versionBase !== null && $versionBase !== (int) $previo['version']
+                            && $previo['data'] !== $dataJson) {
+                        $pdo->prepare(
+                            'INSERT INTO report_versions (report_id, version, data, guardado_at) VALUES (?, ?, ?, ?)'
+                        )->execute([$reportId, (int) $previo['version'], $previo['data'], $previo['updated_at']]);
+                    }
+                    $pdo->prepare(
+                        'UPDATE reports SET data = ?, version = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+                    )->execute([$dataJson, $version, $reportId]);
+                } else {
+                    $version = 1;
+                    $pdo->prepare(
+                        'INSERT INTO reports (attendance_id, tipo, data, version, updated_at)
+                         VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP)'
+                    )->execute([$attendanceId, $tipo, $dataJson]);
+                    $reportId = (int) $pdo->lastInsertId();
+                }
+                $pdo->commit();
+            } catch (Throwable $e) {
+                $pdo->rollBack();
+                throw $e;
             }
-            $pdo->prepare(
-                'UPDATE reports SET data = ?, version = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
-            )->execute([$dataJson, $version, $reportId]);
-        } else {
-            $version = 1;
-            $pdo->prepare(
-                'INSERT INTO reports (attendance_id, tipo, data, version, updated_at)
-                 VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP)'
-            )->execute([$attendanceId, $tipo, $dataJson]);
-            $reportId = (int) $pdo->lastInsertId();
+            break;
+        } catch (PDOException $e) {
+            if ($intento >= 4 || stripos($e->getMessage(), 'locked') === false) {
+                throw $e;
+            }
+            usleep(250000 * $intento);
         }
-        $pdo->commit();
-    } catch (Throwable $e) {
-        $pdo->rollBack();
-        throw $e;
     }
 }
 

@@ -492,7 +492,20 @@ final class Auth
             Response::error('Token inválido o expirado', 401);
         }
 
-        $pdo->prepare('UPDATE tokens SET last_seen_at = CURRENT_TIMESTAMP WHERE token = ?')->execute([$token]);
+        // Solo sirve para podar tokens sin uso (días): basta con anotarlo
+        // una vez por minuto. Antes se escribía en CADA petición, y con los
+        // kioskos sincronizando, guardando y subiendo acciones a la vez, si
+        // esta escritura esperaba más que busy_timeout la petición entera
+        // moría ("database is locked") aunque fuera una subida de informe.
+        // Por lo mismo, que no se pueda anotar no es un error.
+        try {
+            $pdo->prepare(
+                "UPDATE tokens SET last_seen_at = CURRENT_TIMESTAMP
+                 WHERE token = ? AND last_seen_at < datetime('now', '-60 seconds')"
+            )->execute([$token]);
+        } catch (PDOException $e) {
+            error_log('[Auth] no se pudo anotar last_seen_at: ' . $e->getMessage());
+        }
 
         $sessionPlatformId = $row['session_lti_platform_id'] !== null ? (int) $row['session_lti_platform_id'] : null;
         $sessionContextId = $row['session_context_id'];
