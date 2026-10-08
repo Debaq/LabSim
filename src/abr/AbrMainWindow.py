@@ -40,7 +40,7 @@ from backend.client import BackendClient
 from core.base import context
 from core.estado_informe import EstadoInforme
 from core.helpers import Preferences, es_docente
-from core import respaldo_informes
+from core import hilos, respaldo_informes
 from core.report_autosave import recuperar, subir_ahora
 from core.rng import stable_seed
 from PySide6.QtCore import QCoreApplication, QThread, QTimer, Signal
@@ -761,7 +761,7 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             return
         hilo = _Retomar(appointment_id, self)
         hilo.listo.connect(self._on_retomar)
-        hilo.finished.connect(hilo.deleteLater)
+        hilos.borrar_al_terminar(hilo)
         self._retomar = hilo
         hilo.start()
 

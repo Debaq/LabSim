@@ -366,7 +366,7 @@ class Agenda(QWidget, Ui_Form):
         # Cada 15 s se creaba uno nuevo y ninguno se borraba.
         hilo, self._shedule_fetch_thread = self._shedule_fetch_thread, None
         if hilo is not None:
-            hilo.deleteLater()
+            hilos.borrar(hilo)   # no deleteLater pelado: ver hilos.borrar_al_terminar
         if getattr(self, "_refrescar_otra_vez", False):
             self.refresh_async()
 

@@ -408,6 +408,40 @@ def test_una_subida_fallida_no_borra_su_hilo_antes_de_que_termine():
     finally:
         ra._Subida = original
 
+
+def test_borrar_al_terminar_borra_recien_cuando_salio_y_no_aborta():
+    """Muchos hilos cortos que avisan a Python al terminar, como la agenda
+    cada 15 s o el autoguardado: con finished -> deleteLater el objeto de
+    Python del hilo se destruía mientras el hilo todavía lo tocaba y la
+    memoria quedaba corrupta (aborto en Shiboken::Object::destroy)."""
+    from PySide6.QtCore import QObject, Signal
+
+    class _Corto(QThread):
+        listo = Signal(object)
+
+        def run(self):
+            self.listo.emit({"dato": list(range(50))})
+
+    recibidos = []
+    dueno = QObject()
+    lanzados = []
+    for _ in range(200):
+        h = _Corto(dueno)
+        h.listo.connect(lambda d: recibidos.append(d))
+        h.finished.connect(lambda: None)
+        hilos.borrar_al_terminar(h)
+        h.start()
+        lanzados.append(h)
+        APP.processEvents()
+    limite = time.time() + 10
+    while time.time() < limite and any(shiboken6.isValid(h) for h in lanzados):
+        APP.processEvents()
+        from PySide6.QtCore import QCoreApplication, QEvent
+        QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
+        time.sleep(0.01)
+    assert len(recibidos) == 200
+    assert not any(shiboken6.isValid(h) for h in lanzados), "quedaron hilos sin borrar"
+
 if __name__ == "__main__":
     fallas = 0
     for nombre, fn in sorted(globals().items()):

@@ -14,6 +14,7 @@ from PySide6.QtWidgets import QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, 
 from PySide6.QtCore import QThread, Signal, QTimer, QUrl
 from PySide6.QtGui import QTextDocument
 from core.helpers import chat_con_paciente, foto_paciente, sala_del_caso
+from core import hilos
 from core.avatar import avatar_iniciales, avatar_circular_desde_bytes, color_por_nombre
 
 
@@ -196,7 +197,7 @@ class ChatPacienteWidget(QWidget):
     def _pedir_sala(self):
         self._sala_thread = _SalaFetchThread(self._case_id, self._nombre, self._edad, parent=self)
         self._sala_thread.listo.connect(lambda sala, cid=self._case_id: self._on_sala_lista(cid, sala))
-        self._sala_thread.finished.connect(self._sala_thread.deleteLater)
+        hilos.borrar_al_terminar(self._sala_thread)
         self._sala_thread.start()
 
     def _on_sala_lista(self, case_id_solicitado, sala):
@@ -288,7 +289,7 @@ class ChatPacienteWidget(QWidget):
         # llamada de red.
         self._avatar_threads.append(hilo)
         hilo.finished.connect(lambda h=hilo: self._avatar_threads.remove(h) if h in self._avatar_threads else None)
-        hilo.finished.connect(hilo.deleteLater)
+        hilos.borrar_al_terminar(hilo)
         hilo.start()
 
     def _on_avatar_listo(self, case_id_solicitado, persona_id, data):
@@ -393,7 +394,7 @@ class ChatPacienteWidget(QWidget):
         self._thread.respondido.connect(lambda r: self._on_respuesta(case_id_solicitado, mensaje, r))
         self._thread.fallo.connect(lambda e: self._on_fallo(case_id_solicitado, mensaje, e))
         self._thread.finished.connect(self._on_thread_finished)
-        self._thread.finished.connect(self._thread.deleteLater)
+        hilos.borrar_al_terminar(self._thread)
         self._thread.start()
 
     def _on_respuesta(self, case_id_solicitado, mensaje, resultado):

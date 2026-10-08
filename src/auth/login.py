@@ -1,6 +1,7 @@
 # pylint: disable=no-name-in-module
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import QMessageBox, QWidget
+from core import hilos
 
 from auth.func_login import LoginConnect
 from auth.login_busy_dialog import LoginBusyDialog
@@ -89,7 +90,7 @@ class MainLogin(QWidget, Ui_Login):
         # pesado del post-login (load_sub_windows) nunca corre en paralelo
         # con el thread del worker aún vivo.
         thread.finished.connect(self._on_login_finished)
-        thread.finished.connect(thread.deleteLater)
+        hilos.borrar_al_terminar(thread)
         self._login_thread = thread
         self._login_worker = worker  # evita GC antes de que termine
         thread.start()

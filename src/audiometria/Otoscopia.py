@@ -9,6 +9,7 @@
 from audiometria.OtoscopiaInforme import InformeOtoscopia
 from backend.client import BackendClient
 from core.base import context
+from core import hilos
 from core.helpers import Preferences, foto_otoscopia
 from core.report_autosave import subir_ahora
 from PySide6.QtCore import QRect, Qt, QThread, Signal
@@ -250,7 +251,7 @@ class Otoscopia(QWidget):
         self._fetch_thread.listo.connect(
             lambda od, oi, cid=self._case_id_pedido: self._on_fotos_listas(cid, od, oi)
         )
-        self._fetch_thread.finished.connect(self._fetch_thread.deleteLater)
+        hilos.borrar_al_terminar(self._fetch_thread)
         self._fetch_thread.start()
 
     def _on_fotos_listas(self, case_id_solicitado, od_bytes, oi_bytes):

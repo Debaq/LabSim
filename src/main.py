@@ -639,7 +639,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def _fin_subida_pendientes(self):
         hilo, self._subida_pendientes = self._subida_pendientes, None
         if hilo is not None:
-            hilo.deleteLater()
+            hilos.borrar(hilo)   # no deleteLater pelado: ver hilos.borrar_al_terminar
 
     def _on_backend_sync(self, _delta):
         # refresh_async: este callback corre en cada ciclo de polling (15s);

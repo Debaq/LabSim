@@ -308,13 +308,11 @@ class ReportAutosave(QObject):
         hilo.modulo = modulo
         self._hilos[clave] = hilo
         hilo.terminada.connect(self._terminada)
-        # Se borra recién cuando terminó del todo. `terminada` se emite
-        # dentro de run(): borrarlo desde ahí (deleteLater en _terminada)
-        # podía destruirlo con run() todavía devolviendo -- el hilo espera
-        # el GIL mientras el principal procesa el borrado -- y Qt abortaba
-        # el proceso. Pasó en el laboratorio el 2026-10-08 con el servidor
-        # fallando cada 30 s.
-        hilo.finished.connect(hilo.deleteLater)
+        # Se borra recién cuando terminó del todo (ver hilos.borrar_al_terminar).
+        # `terminada` se emite dentro de run(): borrarlo desde ahí
+        # (deleteLater en _terminada) lo destruía con run() todavía
+        # devolviendo y Qt abortaba (laboratorio, 2026-10-08).
+        hilos.borrar_al_terminar(hilo)
         hilo.start()
 
     def recuperar(self, appointment_id, destinos, sigue_vigente):
@@ -329,7 +327,7 @@ class ReportAutosave(QObject):
         # A un método de un QObject del hilo principal: el aviso llega
         # encolado allá, no en el hilo de la consulta.
         hilo.lista.connect(reparto.repartir)
-        hilo.finished.connect(hilo.deleteLater)
+        hilos.borrar_al_terminar(hilo)
         hilo.finished.connect(reparto.deleteLater)
         hilo.start()
         return hilo

@@ -14,7 +14,7 @@ llega a nadie (el dueño no existe) o le llega a quien siga vivo.
 """
 import time
 
-from PySide6.QtCore import QThread
+from PySide6.QtCore import QObject, QThread, Slot
 from PySide6.QtWidgets import QApplication
 
 _sueltos = set()
@@ -38,7 +38,7 @@ def soltar(hilo):
     hilo.requestInterruption()
     hilo.setParent(None)
     _sueltos.add(hilo)
-    hilo.finished.connect(lambda h=hilo: _terminado(h))
+    borrar_al_terminar(hilo)
     _esperar_al_salir()
 
 
@@ -53,9 +53,44 @@ def soltar_hijos(objeto):
         soltar(hilo)
 
 
-def _terminado(hilo):
-    _sueltos.discard(hilo)
-    hilo.deleteLater()
+class _Borrador(QObject):
+    """Vive en el hilo de la ventana: lo que llega por `finished` se
+    atiende acá, no en el hilo que está terminando."""
+
+    @Slot()
+    def terminado(self):
+        hilo = self.sender()
+        if isinstance(hilo, QThread):
+            borrar(hilo)
+
+
+_borrador = None
+
+
+def borrar_al_terminar(hilo):
+    """Borra `hilo` cuando terminó del todo. Reemplaza a
+    `finished.connect(hilo.deleteLater)`, que en PySide no es seguro: Qt
+    emite `finished` desde el hilo que termina y, mientras ese hilo
+    todavía toca su objeto de Python, el principal podía estar
+    destruyéndolo. La memoria quedaba corrupta y la app abortaba después,
+    en cualquier otro borrado (Shiboken::Object::destroy; laboratorio,
+    2026-10-08, tickets 1 y 2)."""
+    global _borrador
+    if _borrador is None:
+        _borrador = _Borrador()
+    hilo.finished.connect(_borrador.terminado)
+
+
+def borrar(hilo):
+    """Desde el hilo de la ventana: espera a que `hilo` haya salido del
+    todo (wait vuelve enseguida después de `finished`) y recién ahí lo
+    borra."""
+    try:
+        hilo.wait()
+        _sueltos.discard(hilo)
+        hilo.deleteLater()
+    except RuntimeError:   # el objeto de Qt ya no existe
+        _sueltos.discard(hilo)
 
 
 _conectado = False
