@@ -43,3 +43,5 @@ resources/json/session.json
 # **/ y no resources/: LOCAL_LOG_QUEUE en main.py arma la ruta relativa a
 # src/ (via BASE_DIR), no al cwd, así que cae en src/resources/local_cache/
 **/local_cache/
+src/log_file.txt.en_curso
+src/log_file.txt.cierre_pendiente

@@ -26,11 +26,12 @@ _ROTULOS = {"so_version": "Sistema operativo", "distribucion": "Distribución",
 class _Envio(QThread):
     listo = Signal(bool, str)   # ok, número de ticket o motivo
 
-    def __init__(self, descripcion, equipo_info, detalle):
+    def __init__(self, descripcion, equipo_info, detalle, cierre_inesperado=False):
         super().__init__()
         self.descripcion = descripcion
         self.equipo_info = equipo_info
         self.detalle = detalle
+        self.cierre_inesperado = cierre_inesperado
 
     def run(self):
         from backend.client import BackendClient
@@ -38,16 +39,113 @@ class _Envio(QThread):
             log_gz = gzip.compress(registro.cola())
             client = BackendClient(Preferences().get("BACKEND_URL"),
                                    context.get_resource("json/session.json"))
-            if not client.is_logged_in():
-                raise RuntimeError("no hay sesión iniciada con el servidor")
-            respuesta = client.send_ticket(self.descripcion, self.equipo_info,
-                                           self.detalle, log_gz or None)
+            if self.cierre_inesperado:
+                respuesta = self._enviar_cierre(client, log_gz or None)
+            else:
+                if not client.is_logged_in():
+                    raise RuntimeError("no hay sesión iniciada con el servidor")
+                respuesta = client.send_ticket(self.descripcion, self.equipo_info,
+                                               self.detalle, log_gz or None)
         except Exception as exc:  # noqa: BLE001 -- se le muestra al usuario
             print(f"soporte: no se pudo enviar el reporte: {exc}")
             self.listo.emit(False, str(exc))
             return
         print(f"soporte: reporte enviado, ticket #{respuesta.get('id')}")
         self.listo.emit(True, str(respuesta.get("id", "")))
+
+    def _enviar_cierre(self, client, log_gz):
+        """Con la sesión que quedó de antes de la caída, si sigue valiendo
+        (el ticket queda a nombre de ese usuario); si no, sin sesión."""
+        import requests
+        args = (self.descripcion, self.equipo_info, self.detalle, log_gz)
+        if client.is_logged_in():
+            try:
+                return client.send_ticket(*args, cierre_inesperado=True)
+            except requests.HTTPError as exc:
+                if getattr(exc.response, "status_code", None) != 401:
+                    raise
+        return client.send_ticket(*args, cierre_inesperado=True, anonimo=True)
+
+
+def ofrecer_envio_por_cierre(parent, hora_arranque):
+    """La vez anterior LabSim se cerró sin terminar bien (ver
+    registro.marcar_inicio): se ofrece mandar el registro, mostrando qué
+    sale del equipo. Mandarlo es tocar "Enviar"; no se insiste."""
+    info_equipo = equipo.identidad()
+    detalle = registro.detalle_sistema()
+    dlg = QDialog(parent)
+    dlg.setWindowTitle("LabSim se cerró de forma inesperada")
+    caja = QVBoxLayout(dlg)
+    texto = QLabel(
+        "La última vez que se usó LabSim en este equipo"
+        + (f" (abierto a las {hora_arranque[11:16]})" if len(hora_arranque) >= 16 else "")
+        + " se cerró de forma inesperada.\n\n¿Enviar el registro al equipo de LabSim? "
+        "Sirve para encontrar la causa. No se envía nada de lo que hiciste en los exámenes.",
+        dlg)
+    texto.setWordWrap(True)
+    caja.addWidget(texto)
+    descripcion = QPlainTextEdit(dlg)
+    descripcion.setPlaceholderText("¿Qué estabas haciendo? (opcional)")
+    descripcion.setMaximumHeight(70)
+    caja.addWidget(descripcion)
+    caja.addWidget(_caja_que_se_envia(dlg, info_equipo, detalle))
+    botones = QDialogButtonBox(dlg)
+    btn_enviar = botones.addButton("Enviar registro", QDialogButtonBox.ButtonRole.AcceptRole)
+    botones.addButton("No enviar", QDialogButtonBox.ButtonRole.RejectRole)
+    botones.accepted.connect(dlg.accept)
+    botones.rejected.connect(dlg.reject)
+    btn_enviar.setDefault(True)
+    caja.addWidget(botones)
+    style_dialog(dlg)
+    respuesta = dlg.exec()
+    registro.cierre_atendido()
+    if respuesta != QDialog.DialogCode.Accepted:
+        print("soporte: no se envió el registro del cierre inesperado")
+        return None
+    envio = _Envio(descripcion.toPlainText().strip(), info_equipo, detalle, cierre_inesperado=True)
+    envio.start()
+    # No hay ventana que espere la respuesta: el resultado queda en el registro.
+    hilos.soltar(envio)
+    return envio
+
+
+def _caja_que_se_envia(parent, info_equipo, detalle):
+    box = QGroupBox("Qué se envía", parent)
+    form = QFormLayout(box)
+    e = info_equipo or {}
+    form.addRow("Versión de LabSim:", QLabel(e.get("version") or equipo.version or "?", box))
+    form.addRow("Nombre del equipo:", QLabel(e.get("nombre", "?"), box))
+    for clave, valor in detalle.items():
+        if isinstance(valor, bool):
+            valor = "sí" if valor else "no"
+        etiqueta = QLabel(str(valor), box)
+        etiqueta.setWordWrap(True)
+        form.addRow(f"{_ROTULOS.get(clave, clave)}:", etiqueta)
+    kb = len(registro.cola()) // 1024
+    btn_ver = QPushButton(f"Ver el registro ({kb} KB)", box)
+    btn_ver.clicked.connect(lambda: _ver_registro(parent))
+    form.addRow("Registro de la app:", btn_ver)
+    form.addRow("", QLabel(f"Se guarda en: {registro.archivo()}", box))
+    return box
+
+
+def _ver_registro(parent):
+    dlg = QDialog(parent)
+    dlg.setWindowTitle("Registro de LabSim")
+    dlg.resize(760, 520)
+    caja = QVBoxLayout(dlg)
+    texto = QPlainTextEdit(dlg)
+    texto.setReadOnly(True)
+    texto.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
+    texto.setPlainText(registro.cola().decode("utf-8", errors="replace")
+                       or "(el registro está vacío)")
+    texto.moveCursor(texto.textCursor().MoveOperation.End)
+    caja.addWidget(texto)
+    botones = QDialogButtonBox(QDialogButtonBox.StandardButton.Close, dlg)
+    botones.rejected.connect(dlg.reject)
+    caja.addWidget(botones)
+    style_dialog(dlg)
+    dlg.exec()
 
 
 class PaginaSoporte(QWidget):
@@ -92,41 +190,10 @@ class PaginaSoporte(QWidget):
         self._actualizar_boton()
 
     def _caja_que_se_envia(self):
-        box = QGroupBox("Qué se envía", self)
-        form = QFormLayout(box)
-        e = self._equipo or {}
-        form.addRow("Versión de LabSim:", QLabel(e.get("version") or equipo.version or "?", box))
-        form.addRow("Nombre del equipo:", QLabel(e.get("nombre", "?"), box))
-        for clave, valor in self._detalle.items():
-            if isinstance(valor, bool):
-                valor = "sí" if valor else "no"
-            etiqueta = QLabel(str(valor), box)
-            etiqueta.setWordWrap(True)
-            form.addRow(f"{_ROTULOS.get(clave, clave)}:", etiqueta)
-        kb = len(registro.cola()) // 1024
-        btn_ver = QPushButton(f"Ver el registro ({kb} KB)", box)
-        btn_ver.clicked.connect(self._ver_registro)
-        form.addRow("Registro de la app:", btn_ver)
-        form.addRow("", QLabel(f"Se guarda en: {registro.archivo()}", box))
-        return box
+        return _caja_que_se_envia(self, self._equipo, self._detalle)
 
     def _ver_registro(self):
-        dlg = QDialog(self)
-        dlg.setWindowTitle("Registro de LabSim")
-        dlg.resize(760, 520)
-        caja = QVBoxLayout(dlg)
-        texto = QPlainTextEdit(dlg)
-        texto.setReadOnly(True)
-        texto.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
-        texto.setPlainText(registro.cola().decode("utf-8", errors="replace")
-                           or "(el registro está vacío)")
-        texto.moveCursor(texto.textCursor().MoveOperation.End)
-        caja.addWidget(texto)
-        botones = QDialogButtonBox(QDialogButtonBox.StandardButton.Close, dlg)
-        botones.rejected.connect(dlg.reject)
-        caja.addWidget(botones)
-        style_dialog(dlg)
-        dlg.exec()
+        _ver_registro(self)
 
     def _actualizar_boton(self, *_):
         enviando = self._envio is not None

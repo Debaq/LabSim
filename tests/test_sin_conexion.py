@@ -442,6 +442,54 @@ def test_borrar_al_terminar_borra_recien_cuando_salio_y_no_aborta():
     assert len(recibidos) == 200
     assert not any(shiboken6.isValid(h) for h in lanzados), "quedaron hilos sin borrar"
 
+
+def test_un_cierre_inesperado_se_ofrece_una_vez_aunque_se_actualice_en_el_medio():
+    from pathlib import Path
+    log = Path(tempfile.mkdtemp()) / "labsim.log"
+    assert registro.marcar_inicio(log) is None          # primera vez
+    registro.marcar_salida()
+    assert registro.marcar_inicio(log) is None          # la anterior salió bien
+    # ... y esta se cae: no hay marcar_salida
+    hora = registro.marcar_inicio(log)
+    assert hora is not None
+    registro.marcar_salida()                            # la actualización reinicia
+    assert registro.marcar_inicio(log) == hora          # el aviso sigue pendiente
+    registro.cierre_atendido()                          # se respondió
+    registro.marcar_salida()
+    assert registro.marcar_inicio(log) is None
+
+
+class _ClienteTicket:
+    def __init__(self, con_sesion, token_valido=True):
+        self._con_sesion = con_sesion
+        self._valido = token_valido
+        self.envios = []
+
+    def is_logged_in(self):
+        return self._con_sesion
+
+    def send_ticket(self, *args, cierre_inesperado=False, anonimo=False):
+        if not anonimo and not self._valido:
+            r = requests.Response()
+            r.status_code = 401
+            raise requests.HTTPError("token vencido", response=r)
+        self.envios.append((cierre_inesperado, anonimo))
+        return {"id": len(self.envios)}
+
+
+def test_el_reporte_de_una_caida_usa_la_sesion_que_quedo_o_va_sin_sesion():
+    from core import soporte
+    envio = soporte._Envio("", {}, {}, cierre_inesperado=True)
+    con = _ClienteTicket(True)
+    envio._enviar_cierre(con, None)
+    assert con.envios == [(True, False)]                 # a nombre del alumno
+    vencida = _ClienteTicket(True, token_valido=False)
+    envio._enviar_cierre(vencida, None)
+    assert vencida.envios == [(True, True)]              # token vencido: sin sesión
+    sin = _ClienteTicket(False)
+    envio._enviar_cierre(sin, None)
+    assert sin.envios == [(True, True)]
+
 if __name__ == "__main__":
     fallas = 0
     for nombre, fn in sorted(globals().items()):

@@ -614,6 +614,15 @@ def _download(url: str, dest: Path, on_chunk) -> None:
             on_chunk(downloaded, total)
 
 
+def _salida_limpia():
+    """Reiniciar para actualizar no es una caída (ver registro.marcar_inicio)."""
+    try:
+        from core import registro
+        registro.marcar_salida()
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def apply_update_and_restart(update_info: dict, on_progress=None) -> None:
     """Descarga el/los paquete(s) de update_info (ver check_for_update),
     los extrae, lanza el script que hace el swap una vez que este proceso
@@ -646,6 +655,7 @@ def apply_update_and_restart(update_info: dict, on_progress=None) -> None:
         flags = getattr(subprocess, "DETACHED_PROCESS", 0) | getattr(
             subprocess, "CREATE_NEW_PROCESS_GROUP", 0
         )
+        _salida_limpia()
         subprocess.Popen(
             [
                 str(setup_path),
@@ -702,6 +712,7 @@ def apply_update_and_restart(update_info: dict, on_progress=None) -> None:
     script_path.chmod(0o755)
 
     report("restart", 0, 0, len(steps), len(steps))
+    _salida_limpia()
     subprocess.Popen(
         [str(script_path), str(os.getpid()), str(dist_dir), str(steps_file), update_info["build_id"]],
         start_new_session=True,

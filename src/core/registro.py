@@ -115,3 +115,62 @@ def cola(max_bytes=MAX_ENVIO) -> bytes:
         partes.insert(0, trozo)
         restante -= len(trozo)
     return b"".join(partes)
+
+
+# -- Cierre inesperado ------------------------------------------------------------
+# Al arrancar se deja una marca al lado del registro y al salir bien se
+# borra. Si al arrancar la marca sigue ahí, la vez anterior LabSim se cayó
+# (o lo mataron) y se ofrece mandar el registro (ver core/soporte.py).
+# Sin esto el registro de una caída solo llegaba si alguien se acordaba de
+# ir a Configuración → Reportar un problema.
+
+_marca = None
+_pendiente = None
+
+
+def marcar_inicio(ruta_log: Path):
+    """Deja la marca de "corriendo". Devuelve la hora de arranque de una
+    vez anterior que no terminó bien y que todavía no se ofreció reportar,
+    o None.
+
+    Lo pendiente va en un archivo aparte que solo se borra al responder el
+    aviso (cierre_atendido): en el kiosko, al reabrir tras una caída, la
+    actualización obligatoria puede reiniciar antes de mostrar nada, y esa
+    salida limpia borraba la marca y con ella el aviso."""
+    global _marca, _pendiente
+    _marca = Path(str(ruta_log) + ".en_curso")
+    _pendiente = Path(str(ruta_log) + ".cierre_pendiente")
+    try:
+        if _marca.exists() and not _pendiente.exists():
+            hora = _marca.read_text("utf-8").strip() or "?"
+            _pendiente.write_text(hora, "utf-8")
+    except OSError:
+        pass
+    try:
+        _marca.write_text(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "utf-8")
+    except OSError:
+        pass
+    try:
+        return _pendiente.read_text("utf-8").strip() or "?" if _pendiente.exists() else None
+    except OSError:
+        return None
+
+
+def cierre_atendido() -> None:
+    """Ya se ofreció mandar el registro de la caída (se mandó o no)."""
+    if _pendiente is None:
+        return
+    try:
+        _pendiente.unlink(missing_ok=True)
+    except OSError:
+        pass
+
+
+def marcar_salida() -> None:
+    """Salida en orden (cerrar, actualizar, reiniciar): no es una caída."""
+    if _marca is None:
+        return
+    try:
+        _marca.unlink(missing_ok=True)
+    except OSError:
+        pass

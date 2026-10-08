@@ -49,6 +49,9 @@ $fecha = static function (string $utc): string {
     return Clock::fromUtc($utc)->format('Y-m-d H:i');
 };
 $quien = static function (array $t): string {
+    if ($t['user_id'] === null) {
+        return 'sin sesión (enviado al reabrir tras un cierre inesperado)';
+    }
     if ($t['username'] === null) {
         return 'usuario borrado';
     }

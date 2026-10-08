@@ -276,19 +276,25 @@ class BackendClient:
         return self._get_bytes("/api/otoscopia_photo.php", {"case_id": case_id, "side": side, "fase": fase})
 
     def send_ticket(self, descripcion: str, equipo_info: dict | None, detalle: dict,
-                    log_gz: bytes | None, timeout: int = 60) -> dict:
+                    log_gz: bytes | None, timeout: int = 60,
+                    cierre_inesperado: bool = False, anonimo: bool = False) -> dict:
         """Reporte de problema (Configuración → Reportar un problema, ver
         core/soporte.py y ticket.php). Solo se llama después de que el
-        usuario aceptó mandar esta información. Devuelve {id}."""
+        usuario aceptó mandar esta información. Devuelve {id}.
+
+        `cierre_inesperado` + `anonimo`: el que se ofrece al reabrir tras
+        una caída, sin sesión (el servidor lo acepta solo en ese caso)."""
         form = {
             "descripcion": descripcion,
             "equipo": json.dumps(equipo_info or {}, ensure_ascii=False),
             "detalle": json.dumps(detalle, ensure_ascii=False, default=str),
             "acepta": "1",
         }
+        if cierre_inesperado:
+            form["cierre_inesperado"] = "1"
         files = {"log": ("labsim.log.gz", log_gz, "application/gzip")} if log_gz else None
         resp = self._http.post(f"{self._base_url}/api/ticket.php", data=form, files=files,
-                               headers=self._headers(), timeout=timeout)
+                               headers={} if anonimo else self._headers(), timeout=timeout)
         self._raise_for_status_with_detail(resp)
         return resp.json()
 

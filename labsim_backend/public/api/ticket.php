@@ -15,8 +15,6 @@ require_once __DIR__ . '/../../src/Tickets.php';
  * Responde {id}: el número de ticket que se le muestra al usuario.
  */
 
-$user = Auth::requireUser();
-
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     Response::error('Método no permitido.', 405);
 }
@@ -25,8 +23,25 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 if ((string) ($_POST['acepta'] ?? '') !== '1') {
     Response::error('Falta aceptar el envío de la información del equipo.', 400);
 }
-if (Tickets::excedeLimite((int) $user['id'])) {
-    Response::error('Ya enviaste varios reportes en la última hora. Intenta más tarde.', 429);
+
+// Cierre inesperado (la app se cayó y al volver a abrir ofrece mandar el
+// registro, ver core/soporte.py): si no quedó una sesión con la que
+// identificarse se acepta igual, sin usuario -- el registro vale más que
+// saber quién era. Solo para eso, y con tope por equipo y global.
+$cierreInesperado = (string) ($_POST['cierre_inesperado'] ?? '') === '1';
+$equipoRaw = json_decode((string) ($_POST['equipo'] ?? ''), true);
+if ($cierreInesperado && trim((string) ($_SERVER['HTTP_AUTHORIZATION'] ?? '')) === '') {
+    $userId = null;
+    $equipoId = (string) ((Equipos::normalizar($equipoRaw) ?? [])['id'] ?? '');
+    if (Tickets::excedeLimiteAnonimo($equipoId)) {
+        Response::error('Este equipo ya envió varios reportes en la última hora.', 429);
+    }
+} else {
+    $user = Auth::requireUser();
+    $userId = (int) $user['id'];
+    if (Tickets::excedeLimite($userId)) {
+        Response::error('Ya enviaste varios reportes en la última hora. Intenta más tarde.', 429);
+    }
 }
 
 $logGz = null;
@@ -43,10 +58,14 @@ if (isset($_FILES['log']) && $_FILES['log']['error'] !== UPLOAD_ERR_NO_FILE) {
     }
 }
 
+$descripcion = (string) ($_POST['descripcion'] ?? '');
+if ($cierreInesperado) {
+    $descripcion = trim('[Cierre inesperado] ' . $descripcion);
+}
 $id = Tickets::crear(
-    (int) $user['id'],
-    (string) ($_POST['descripcion'] ?? ''),
-    json_decode((string) ($_POST['equipo'] ?? ''), true),
+    $userId,
+    $descripcion,
+    $equipoRaw,
     json_decode((string) ($_POST['detalle'] ?? ''), true),
     $logGz
 );

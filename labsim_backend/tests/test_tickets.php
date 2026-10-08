@@ -23,3 +23,10 @@ t_true(!Tickets::esGzip(''), 'Vacío no pasa');
 
 t_eq(Tickets::cola("a\nb\nc\nd\n", 2), "c\nd", 'Cola del registro');
 t_eq(Tickets::cola("a\r\nb", 5), "a\nb", 'Cola con CRLF de Windows');
+
+// Cierre inesperado sin sesión: se acepta con tope por equipo y global.
+t_true(Tickets::MAX_ANONIMOS_POR_EQUIPO_HORA > 0 && Tickets::MAX_ANONIMOS_POR_EQUIPO_HORA < Tickets::MAX_ANONIMOS_HORA,
+       'Tope de reportes anónimos por equipo menor que el global');
+$ticketPhp = (string) file_get_contents(__DIR__ . '/../public/api/ticket.php');
+t_true(strpos($ticketPhp, "cierre_inesperado") !== false && strpos($ticketPhp, 'excedeLimiteAnonimo') !== false,
+       'ticket.php solo deja pasar sin sesión los cierres inesperados, con tope');

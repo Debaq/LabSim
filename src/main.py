@@ -95,6 +95,11 @@ sys.stderr = Logger(LOG_FILE, stream=sys.__stderr__, max_bytes=registro.MAX_BYTE
 # el mismo log antes de que el proceso se vaya.
 faulthandler.enable(file=open(LOG_FILE, 'a', buffering=1))
 print(registro.encabezado())
+# Si la vez anterior no terminó bien, al abrir se ofrece mandar el registro
+# (ver core/soporte.ofrecer_envio_por_cierre).
+CIERRE_PREVIO = registro.marcar_inicio(LOG_FILE)
+if CIERRE_PREVIO:
+    print(f"la vez anterior (abierta {CIERRE_PREVIO}) no terminó bien")
 
 
 def _log_excepcion(tipo, valor, tb):
@@ -319,6 +324,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         reintento, así que el arranque nuevo levanta con el layout fresco
         aunque la red se caiga de nuevo en el medio."""
         self.close()
+        registro.marcar_salida()
         if getattr(sys, "frozen", False):
             os.execv(sys.executable, [sys.executable] + sys.argv[1:])
         else:
@@ -377,6 +383,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if self._apagando:
             return
         self._apagando = True
+        # Apagar el equipo no es una caída, aunque el plazo corte la salida.
+        registro.marcar_salida()
         self.close()
         context.app.quit()
 
@@ -1574,7 +1582,11 @@ if __name__ == '__main__':
         window.show()
     despertador = atender_apagado(window.cerrar_por_apagado)
     QTimer.singleShot(0, _precargar_modulos)
+    if CIERRE_PREVIO:
+        from core import soporte
+        QTimer.singleShot(1500, lambda: soporte.ofrecer_envio_por_cierre(window, CIERRE_PREVIO))
     exit_code = context.app.exec()
+    registro.marcar_salida()
     if hilos.quedan_vivos():
         # Un hilo que sigue en una petición de red se destruiría al
         # terminar el intérprete y Qt abortaría el proceso ("LabSim dejó de

@@ -112,13 +112,36 @@ final class Tickets
         return (int) $stmt->fetchColumn() >= self::MAX_POR_HORA;
     }
 
+    /** Reportes de cierre inesperado sin sesión (user_id NULL): por equipo y en total. */
+    public const MAX_ANONIMOS_POR_EQUIPO_HORA = 3;
+    public const MAX_ANONIMOS_HORA = 60;
+
+    public static function excedeLimiteAnonimo(string $equipoId): bool
+    {
+        self::migrar();
+        $pdo = Db::get();
+        $stmt = $pdo->prepare(
+            "SELECT COUNT(*) FROM app_tickets WHERE user_id IS NULL AND created_at > datetime('now', '-1 hour')"
+        );
+        $stmt->execute();
+        if ((int) $stmt->fetchColumn() >= self::MAX_ANONIMOS_HORA) {
+            return true;
+        }
+        $stmt = $pdo->prepare(
+            "SELECT COUNT(*) FROM app_tickets
+             WHERE user_id IS NULL AND equipo_id = ? AND created_at > datetime('now', '-1 hour')"
+        );
+        $stmt->execute([$equipoId]);
+        return (int) $stmt->fetchColumn() >= self::MAX_ANONIMOS_POR_EQUIPO_HORA;
+    }
+
     /**
      * Crea el ticket y guarda el registro. Devuelve el id.
      *
      * @param mixed $equipoRaw
      * @param mixed $detalleRaw
      */
-    public static function crear(int $userId, string $descripcion, $equipoRaw, $detalleRaw, ?string $logGz): int
+    public static function crear(?int $userId, string $descripcion, $equipoRaw, $detalleRaw, ?string $logGz): int
     {
         self::migrar();
         // El bloque del equipo es el mismo del login; si viene raro igual
