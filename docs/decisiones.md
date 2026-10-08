@@ -4208,15 +4208,23 @@ causas sumadas:
   con umbral 30 ya pierde un tercio).
 - **El rango del cuadro arrancaba pegado al límite** (0.42 contra 0.40). Pasa
   a 0.46-0.70 (Ménière) y 0.48-0.72 (retardado), siempre con electrodo de
-  tímpano. Equivale a promontorio 0.40-0.61, cerca de la media de Ménière
-  transtimpánica publicada (0.46), y el techo deja el conducto en 0.875, bajo
-  el tope de forma del complejo (0.90).
+  tímpano. Equivale a promontorio 0.40-0.61 y conducto 0.575-0.875: los tres
+  sobre su límite, y el techo bajo el tope de forma del complejo (0.90).
 
 No se tocó la separación rar/cond (0.25-0.55 contra límite 0.38): en la
 literatura agrega poco y muchos Ménière confirmados la tienen normal.
 
 Tampoco se tocan los límites por electrodo (0.35/0.40/0.50, decididos con el
-docente el 2026-10-06), aunque hay series transtimpánicas que usan 0.40.
+docente el 2026-10-06). Revisados contra la bibliografía: promontorio 0.35 es
+el corte transtimpánico de Wuyts 1997, tímpano 0.40 el extremo bajo del
+percentil 95 de Margolis 1995, conducto 0.50 el techo observado de Roland
+1993 (no un corte estadístico).
+
+Las citas, con n, protocolo y enlace, viven en `src/EcochgReferences.php` y
+se muestran solo al docente en `admin/normativas.php#ecochg` (mismo criterio
+que `AbrReferences`). Dos datos que circularon en la primera revisión NO se
+pudieron verificar y no se citan: una media transtimpánica de Ménière de
+0.46 atribuida a una serie coreana y una serie de 1976 oídos con corte 0.40.
 
 La ficha ahora dice qué electrodo es el de referencia y muestra, debajo del
 campo, la razón y el límite con tímpano, conducto y promontorio, en rojo la

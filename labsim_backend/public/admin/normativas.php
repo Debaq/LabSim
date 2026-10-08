@@ -18,6 +18,7 @@ require_once __DIR__ . '/_layout.php';
  */
 
 require_once __DIR__ . '/../../src/AbrReferences.php';
+require_once __DIR__ . '/../../src/EcochgReferences.php';
 
 const ABR_AUTHORS_KEY = 'abr_reference_authors';
 const ABR_WAVES = ['I', 'III', 'V'];
@@ -280,6 +281,29 @@ admin_header('Normativas', $me);
                 <button type="submit" class="btn btn--secondary">Crear set</button>
             </div>
         </form>
+    </details>
+</div>
+
+<div class="card" id="ecochg">
+    <details>
+        <summary><strong>Electrococleografía</strong> -- de dónde sale cada límite</summary>
+        <p class="help help--mt">Estas citas son para usted. No se muestran en la app ni en la ficha del alumno. Los límites son los que usa la app al pintar en rojo la tabla del alumno; no se editan acá.</p>
+        <?php foreach (EcochgReferences::LIMITES as $lim): ?>
+        <div style="margin-top:0.6rem; font-size:0.85em;">
+            <strong><?= htmlspecialchars($lim['label']) ?>:</strong> <?= htmlspecialchars($lim['valor']) ?>
+            · <?= $lim['fuentes'] ? htmlspecialchars(implode(', ', $lim['fuentes'])) : 'calculado' ?>
+            <div style="opacity:0.8;"><?= htmlspecialchars($lim['nota']) ?></div>
+        </div>
+        <?php endforeach; ?>
+        <p class="help help--mt"><strong>Fuentes</strong></p>
+        <?php foreach (EcochgReferences::FUENTES as $fid => $f): ?>
+        <div style="margin-top:0.6rem; font-size:0.85em;">
+            <strong><?= htmlspecialchars($fid) ?></strong> ·
+            <?= htmlspecialchars($f['cita']) ?>
+            <div style="opacity:0.8;"><?= htmlspecialchars($f['n']) ?> · <?= htmlspecialchars($f['protocolo']) ?></div>
+            <div><a href="<?= htmlspecialchars($f['enlace']) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($f['enlace']) ?></a></div>
+        </div>
+        <?php endforeach; ?>
     </details>
 </div>
 
