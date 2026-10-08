@@ -4328,3 +4328,19 @@ están en `BibliografiaPatologias`, con la nota "Aplicado"):
 El Ménière se queda con el ECochG siempre alterado aunque la literatura dé
 ~50% normal: el generador muestra el cuadro típico y la variabilidad se
 enseña aparte (decisión del docente).
+
+## Oído sano en cero a cualquier edad joven: el ruido va solo donde hay lesión (2026-10-08)
+
+Reemplaza "Oído sano de un chico: cero clavado" (2026-09-21). Ese arreglo
+cortaba en 18 años: un paciente normal de 20 o 30 seguía saliendo con 5, 10 y
+hasta 15 dB sueltos. Venían de tres lados: la forma del cuadro normal (3-5
+dB), el jitter de ±4 por frecuencia y la asimetría de 0-8 dB entre oídos.
+Como el redondeo a 5 no baja de 0, el ruido solo podía subir el umbral.
+
+Ahora el ruido y la asimetría van **solo a las frecuencias que el cuadro
+daña**, desde `CaseProfile::LESION_MIN_DB = 10` dB de daño (`conLesion()` en
+`generator.js`). El resto queda exactamente en la mediana ISO 7029 por edad.
+El cuadro 'normal' tiene la forma en cero, así que vale eso: 0 dB HL en todo
+para un joven y su presbiacusia esperable para un mayor, sin caso especial.
+Lo mismo pasa con las frecuencias sanas de un oído enfermo: una muesca de 4
+kHz ya no ensucia los graves. Se eliminó `EDAD_AUDICION_PERFECTA`.

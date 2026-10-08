@@ -1059,27 +1059,32 @@ t_true(CaseProfile::SCENARIOS['presbiacusia']['conciencia'][1]
      < CaseProfile::SCENARIOS['subita']['conciencia'][0],
     'La presbiacusia deja menos conciencia del problema que la súbita');
 
-// --- Oído sano de un chico: cero clavado ----------------------------------
+// --- Oído sano = mediana por edad, sin ruido ------------------------------
 
-// A esta edad un oído normal oye en 0 dB HL en todas las frecuencias y no
-// hay otra forma. La dispersión de 0 a 15 dB que trae la audiometría del
-// adulto es envejecimiento temprano, ruido y otitis viejas: cosas que este
-// paciente todavía no tuvo. El corte va donde arranca ISO 7029.
-t_eq(CaseProfile::EDAD_AUDICION_PERFECTA, 18,
-    'El cero clavado llega hasta donde arranca la norma por edad');
-$normaChico = CaseProfile::ageNorm(CaseProfile::EDAD_AUDICION_PERFECTA - 1, 0);
-t_close(array_sum(array_map('floatval', $normaChico)), 0.0, 0.001,
-    'Bajo esa edad la norma por edad no suma nada en ninguna frecuencia');
+// Un oído normal joven oye en 0 dB HL en todas las frecuencias y no hay otra
+// forma: la dispersión de 0 a 15 dB del adulto es envejecimiento, ruido y
+// otitis viejas, que ya trae la mediana ISO 7029. El cuadro 'normal' no le
+// suma nada a esa mediana.
+t_eq(array_sum(CaseProfile::SCENARIOS['normal']['sn_shape']), 0,
+    'El cuadro normal no suma nada a la mediana por edad');
+t_eq(CaseProfile::SCENARIOS['normal']['sn_scale'], [0.0, 0.0],
+    'Ni con escala: no hay variabilidad que sortear');
+t_close(array_sum(array_map('floatval', CaseProfile::ageNorm(17, 0))), 0.0, 0.001,
+    'Bajo los 18 la mediana por edad es 0 en todas las frecuencias');
 
+// El ruido por frecuencia va solo donde hay lesión: con el ruido en todas,
+// el redondeo a 5 (que no baja de 0) dejaba 5-15 dB sueltos en oídos sanos.
+t_eq(CaseProfile::LESION_MIN_DB, 10, 'Lesión desde 10 dB de daño');
 // El generador vive en JS y esto no lo puede correr, pero sí puede exigir
 // que use la MISMA constante y no una copia suya (mismo criterio que
-// test_charts_vs_js): el día que alguien cambie la edad en un solo lado,
-// falla acá y no en el aula.
+// test_charts_vs_js).
 $genJs = (string) @file_get_contents(dirname(__DIR__) . '/public/js/case/generator.js');
-t_true(strpos($genJs, 'edadAudicionPerfecta') !== false,
-    'El generador JS lee la edad desde CASE_CONST');
-t_true(strpos($genJs, 'esCeroClavado') !== false,
-    'Y tiene la regla del cero clavado');
+t_true(strpos($genJs, 'CASE_CONST.lesionMinDb') !== false,
+    'El generador JS lee el umbral de lesión desde CASE_CONST');
+t_true(preg_match('/function conLesion\(dano, extra\) \{\s*if \(dano < LESION_MIN_DB\) \{ return dano; \}/', $genJs) === 1,
+    'Y bajo ese umbral no suma ruido ni asimetría');
+t_true(strpos($genJs, 'entre(-JITTER_DB, JITTER_DB)') === strrpos($genJs, 'entre(-JITTER_DB, JITTER_DB)'),
+    'El ruido por frecuencia se suma en un solo lugar (conLesion)');
 $crear = (string) @file_get_contents(dirname(__DIR__) . '/public/admin/case_create.php');
-t_true(strpos($crear, "'edadAudicionPerfecta' => CaseProfile::EDAD_AUDICION_PERFECTA") !== false,
+t_true(strpos($crear, "'lesionMinDb' => CaseProfile::LESION_MIN_DB") !== false,
     'case_create la expone en CASE_CONST');

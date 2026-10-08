@@ -401,20 +401,21 @@ final class CaseProfile
      * OEA dice cuánto hay de coclear y el ABR cuánto de retro--.
      */
     /**
-     * Hasta qué edad un oído sano se dibuja en CERO, sin variabilidad.
+     * Desde cuántos dB de daño una frecuencia cuenta como lesionada.
      *
-     * No es una simplificación: a esta edad un oído normal oye en 0 dB HL en
-     * todas las frecuencias y no hay otra forma. La dispersión de 0 a 15 dB
-     * que trae la audiometría del adulto es envejecimiento temprano,
-     * exposición a ruido y otitis viejas -- cosas que este paciente todavía
-     * no tuvo. Dibujarle 5 o 10 dB "por variabilidad" le enseña al alumno un
-     * normal que no existe a esta edad.
+     * El generador le pone ruido por frecuencia (y la asimetría entre oídos)
+     * SOLO a las frecuencias donde el cuadro suma al menos esto. Las demás
+     * quedan exactamente en la mediana por edad de ageNorm(): 0 dB HL en
+     * todas las frecuencias hasta los 18 años, sin "variabilidad".
      *
-     * El corte va en 18 y no en 15 porque es donde arranca la norma ISO 7029
-     * (ver ageNorm): antes de esa edad la norma no dice nada, justamente
-     * porque no hay nada que decir.
+     * Antes el ruido iba a todas, y como el redondeo a 5 no baja de 0, un
+     * oído sano de un joven salía con 5, 10 y hasta 15 dB sueltos. Eso no
+     * existe: a esa edad un oído normal oye en 0, y la dispersión de 0 a 15
+     * dB del adulto es envejecimiento, ruido y otitis viejas, que la
+     * mediana ISO 7029 ya trae por edad. Lo mismo pasa con las frecuencias
+     * sanas de un oído enfermo: una muesca de 4 kHz no ensucia los graves.
      */
-    public const EDAD_AUDICION_PERFECTA = 18;
+    public const LESION_MIN_DB = 10;
 
     public const CATEGORIAS = [
         'normal'         => 'Normal',
@@ -576,8 +577,9 @@ final class CaseProfile
      *
      * El cuadro se elige POR OÍDO: un paciente puede tener el OD sano y una
      * conductiva en el OI, o una coclear de un lado y un schwannoma del
-     * otro. El oído sano se pide con 'normal', que no es un cero: es un oído
-     * normal con la variabilidad y la edad que le corresponden.
+     * otro. El oído sano se pide con 'normal', que es la mediana por edad
+     * de ageNorm() y nada más: 0 dB HL en un joven, su presbiacusia
+     * esperable en un mayor. Sin ruido (ver LESION_MIN_DB).
      *
      * `vemp` es el eje vestibular del cuadro, y NO todos lo tienen: los que
      * no traen la clave se generan con un VEMP normal. Lleva `type` (la
@@ -615,8 +617,10 @@ final class CaseProfile
         'normal' => [
             'label' => 'Normal para la edad',
             'categoria' => 'normal',
-            'sn_shape' => [125 => 3, 250 => 3, 500 => 3, 1000 => 3, 2000 => 3, 3000 => 3, 4000 => 3, 6000 => 5, 8000 => 5],
-            'sn_scale' => [0.0, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            // En cero: el oído sano es la mediana ISO 7029 por edad, que el
+            // generador suma aparte. Un joven sale en 0 dB en todo.
+            'sn_shape' => [125 => 0, 250 => 0, 500 => 0, 1000 => 0, 2000 => 0, 3000 => 0, 4000 => 0, 6000 => 0, 8000 => 0],
+            'sn_scale' => [0.0, 0.0], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal', 'grados' => [],
             'tinnitus' => ['prob' => 0.05, 'ruido' => ['Zumbido', 'Siseo'],

@@ -40,12 +40,13 @@
         'callada, deja hablar al paciente y solo corrige lo que sabe',
         'insistente, repite lo que le preocupa hasta que le contestan'
     ];
-    var JITTER_DB = 4;   // ruido por frecuencia: ningún audiograma real es liso
-    // Hasta esta edad, el oído sano va en CERO y sin variabilidad (ver
-    // CaseProfile::EDAD_AUDICION_PERFECTA). La dispersión de 0 a 15 dB del
-    // adulto es envejecimiento, ruido y otitis viejas: cosas que este
-    // paciente todavía no tuvo.
-    var EDAD_AUDICION_PERFECTA = window.CASE_CONST.edadAudicionPerfecta || 18;
+    // Ruido por frecuencia: ningún audiograma PATOLÓGICO es liso. Va solo
+    // donde el cuadro daña (LESION_MIN_DB): una frecuencia sana se queda en
+    // la mediana por edad, que en un joven es 0. Con el jitter en todas, el
+    // redondeo a 5 (que no baja de 0) convertía el ruido en 5 o 10 dB
+    // sobre oídos sanos -- una variabilidad que no existe.
+    var JITTER_DB = 4;
+    var LESION_MIN_DB = window.CASE_CONST.lesionMinDb || 10;
     // Bajo esta edad el paciente no cuenta su historia: la cuenta quien lo
     // trajo (ver Sala::capacidad, CAP_NULO).
     var EDAD_SIN_RELATO = window.CASE_CONST.edadSinRelato || 3;
@@ -427,32 +428,33 @@
         };
     }
 
-    /** Oído sano de un chico: cero clavado, sin jitter ni norma por edad. */
-    function esCeroClavado(esc) {
-        return esc.categoria === 'normal' && edadEnAnios() < EDAD_AUDICION_PERFECTA;
+    /**
+     * Lo que el cuadro le suma a la mediana por edad en esta frecuencia,
+     * con el ruido y la asimetría SOLO si ahí hay lesión (LESION_MIN_DB).
+     *
+     * Una frecuencia sana queda exactamente en la mediana ISO 7029: 0 dB HL
+     * en un joven, su presbiacusia esperable en un mayor. Es lo que hace
+     * que el cuadro 'normal' (forma en cero) salga en cero en un joven, sin
+     * caso especial, y que una muesca de 4 kHz no le ensucie los graves.
+     */
+    function conLesion(dano, extra) {
+        if (dano < LESION_MIN_DB) { return dano; }
+        return dano + entre(-JITTER_DB, JITTER_DB) + extra;
     }
 
     function generarLado(esc, lado, escalas, asimetria, norma) {
-        // Oído sano por debajo de EDAD_AUDICION_PERFECTA: 0 dB HL en todas
-        // las frecuencias y listo. No es un atajo -- a esta edad un oído
-        // normal oye en cero, y dibujarle 5 o 10 dB "por variabilidad" le
-        // enseña al alumno un normal que no existe.
-        var cero = esCeroClavado(esc);
         // La curva final = umbral mediano por edad + forma del cuadro. Un
         // señor de 70 con una otitis tiene la otitis Y su presbiacusia.
         var sn = FREQS.map(function (hz) {
-            if (cero) { return 0; }
-            return (norma[hz] || 0) + (esc.sn_shape[hz] || 0) * escalas.sn
-                 + entre(-JITTER_DB, JITTER_DB) + asimetria;
+            return (norma[hz] || 0) + conLesion((esc.sn_shape[hz] || 0) * escalas.sn, asimetria);
         });
         // El recorte es el que garantiza el techo: techoDe() ya mantiene el
         // grado dentro de lo posible, pero el jitter por frecuencia y una
         // norma por edad alta todavía podían empujar el gap un poco más
         // arriba de lo que ese oído medio puede atenuar.
         var gap = FREQS.map(function (hz) {
-            if (cero) { return 0; }
             if (!esc.gap_shape || !Object.keys(esc.gap_shape).length) { return 0; }
-            var v = (esc.gap_shape[hz] || 0) * escalas.gap + entre(-JITTER_DB, JITTER_DB);
+            var v = conLesion((esc.gap_shape[hz] || 0) * escalas.gap, 0);
             return Math.min(v, techoGap(esc));
         });
 
