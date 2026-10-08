@@ -213,6 +213,7 @@ function admin_header(string $title, ?array $currentUser = null): void
                 <summary class="nav-label">Configuración<span class="nav-caret">▾</span></summary>
                 <div class="nav-dropdown">
                     <a href="normativas.php"<?= $ariaCurrent('normativas.php') ?>>Normativas</a>
+                    <a href="bibliografia.php"<?= $ariaCurrent('bibliografia.php') ?>>Bibliografía</a>
                 </div>
             </details>
             <?php endif; ?>

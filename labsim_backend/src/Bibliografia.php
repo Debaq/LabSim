@@ -1,0 +1,314 @@
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/AbrReferences.php';
+require_once __DIR__ . '/EcochgReferences.php';
+
+/**
+ * Toda la bibliografía de LabSim en un solo lugar, ordenada por examen, y
+ * a qué número o comportamiento de la app corresponde cada cita.
+ *
+ * Se muestra en admin/bibliografia.php, solo al docente: el alumno lee un
+ * examen, no una tabla normativa (ver AbrReferences).
+ *
+ * Las fichas del ABR y del ECochG NO se copian acá: siguen viviendo en
+ * AbrReferences y EcochgReferences, que es donde las usa el resto del
+ * backend. Acá se agrega lo que les faltaba --a qué corresponde cada una--
+ * y las fuentes que estaban sueltas en comentarios del código (tamizaje
+ * neonatal, normas, las del generador del ABR que no están en la planilla).
+ *
+ * Regla para agregar una cita: va con su ficha (cita, n, protocolo,
+ * enlace) y con 'usa', la lista de lo que respalda en la app. Una cita que
+ * no se pudo confirmar va con 'verificada' => false y la nota dice qué
+ * falta; no se completa de memoria.
+ */
+final class Bibliografia
+{
+    /** Secciones en el orden en que se muestran. */
+    public const SECCIONES = [
+        'abr' => [
+            'titulo' => 'ABR (potenciales de tronco)',
+            'resumen' => 'Latencias y amplitudes normales por población, la función latencia-intensidad, el efecto de la tasa, la polaridad, el estímulo y la vía ósea. Las F son las 27 fuentes de la planilla de referencia; las A son las que usa el generador y no están en la planilla.',
+        ],
+        'ecochg' => [
+            'titulo' => 'Electrococleografía',
+            'resumen' => 'Límites de la razón PS/PA por electrodo, razón de áreas, separación entre polaridades y cuántos Ménière dan un ECochG normal.',
+        ],
+        'tamizaje' => [
+            'titulo' => 'Tamizaje auditivo neonatal',
+            'resumen' => 'Probabilidad de que un recién nacido pase TEOAE o AABR según las horas de vida, e indicadores de riesgo del paciente neonato.',
+        ],
+        'normas' => [
+            'titulo' => 'Normas y clasificaciones',
+            'resumen' => 'Normas y convenciones que usan el generador de casos, la ficha y el PDF: umbral esperable por edad, grado de hipoacusia, símbolos del audiograma.',
+        ],
+    ];
+
+    /**
+     * A qué corresponde cada fuente de la planilla ABR, más allá del set de
+     * fábrica y de los sets publicados (eso se arma solo, ver usosAbr).
+     * Sale de los comentarios del generador (src/abr/ABR_generator.py) y
+     * de la ficha PDF.
+     */
+    public const USO_ABR = [
+        'F01' => ['Polaridad de referencia: el normativo está medido en rarefacción, y las otras polaridades se expresan contra ella.'],
+        'F09' => ['Ficha PDF del docente: caída del 10% de amplitud en el adulto mayor.'],
+        'F10' => ['Polaridad: la rarefacción adelanta la onda I; en III y V no hay diferencia consistente.'],
+        'F11' => ['Primera infancia (1-3 años): la onda V es la última en madurar; la población se interpola entre neonato y niño.'],
+        'F13' => ['Tasa de estimulación: cuánto se alarga cada onda de 10 a 90/s (I 8%, III 11%, V 14%).'],
+        'F18' => [
+            'Vía ósea: el vibrador no entrega más de ~50 dB nHL (tope del equipo en la app).',
+            'Vía ósea: los interpicos solo se publican cuando la onda I se ve, que es la excepción.',
+        ],
+        'F22' => ['Función latencia-intensidad: contraste de la serie de Hood (90 a 10 dB); cuánto se corre cada onda al bajar el nivel.'],
+        'F23' => ['Tone burst: a 80 dB HL solo se identifica la onda V; la onda I del burst grave casi no existe.'],
+        'F24' => ['Chirp contra click en los mismos sujetos. No publica anchos de onda: el afinamiento del chirp es derivado.'],
+        'F26' => ['Función latencia-intensidad: forma de la curva (tramos sobre y bajo 50 dB) y desplazamiento de la onda I contra la V.'],
+        'F27' => ['Polaridad: caída de amplitud de las ondas I y III al pasar a condensación.'],
+    ];
+
+    /** Fuentes del generador del ABR que no están en la planilla. */
+    public const ABR_COMPLEMENTARIAS = [
+        'A01' => [
+            'cita' => 'Elberling C, Don M. Quality estimation of averaged auditory brainstem responses. Scand Audiol. 1984;13(3):187-197. doi:10.3109/01050398409043059.',
+            'n' => 'Método',
+            'protocolo' => 'Estimación de la relación señal/ruido del promedio (FSP) durante el registro.',
+            'enlace' => 'https://doi.org/10.3109/01050398409043059',
+            'usa' => [
+                'FSP: cómo se calcula el valor esperado y con qué estadístico F se sortea el observado.',
+                'Criterio de respuesta presente (FSP 3,1) y ruido del paciente que se despeja de los barridos del caso.',
+            ],
+        ],
+        'A02' => [
+            'cita' => 'Beattie RC. Normative wave V latency-intensity functions using the EARTONE 3A insert earphone and the Radioear B-71 bone vibrator. Scand Audiol. 1998;27(2):120-126.',
+            'n' => 'Adultos normoyentes',
+            'protocolo' => 'Vibrador óseo Radioear B-71.',
+            'enlace' => 'Sin enlace',
+            'verificada' => false,
+            'nota' => 'En el código figura como "Beattie 1998 (Scand Audiol 27:120-6, B-71)". No se encontró el artículo en línea: el título está sin confirmar.',
+            'usa' => ['Vía ósea: corrección de latencia por nivel (+0,3 ms a 40 dB, +0,4 a 30, +0,5 a 20, +0,8 a 10; nada desde 55).'],
+        ],
+        'A03' => [
+            'cita' => 'Cobb KM, Stuart A. Neonate auditory brainstem responses to CE-Chirp and CE-Chirp octave band stimuli I y II. Ear Hear. 2016;37(6).',
+            'n' => '168 neonatos sanos y 20 adultos jóvenes normoyentes',
+            'protocolo' => 'CE-Chirp por vía aérea y ósea, y CE-Chirp por octavas; comparación con click y tone burst.',
+            'enlace' => 'Sin enlace',
+            'verificada' => false,
+            'nota' => 'Autores, año y diseño confirmados; volumen y páginas a confirmar en el original.',
+            'usa' => [
+                'Umbral óseo contra aéreo según la edad: en el adulto la vía ósea lee ~15 dB más alto; en el lactante, casi igual (generador de perfil).',
+                'Vía ósea del lactante: le sale más rápida que la aérea, al revés que en el adulto.',
+            ],
+        ],
+        'A04' => [
+            'cita' => 'Yang EY, Rupert AL, Moushegian G. A developmental study of bone conduction auditory brain stem response in infants. Ear Hear. 1987;8:244-251.',
+            'n' => 'Lactantes',
+            'protocolo' => 'ABR por vía ósea en distintas edades.',
+            'enlace' => 'Sin enlace',
+            'usa' => ['Vía ósea del lactante: más rápida que la aérea (cráneo sin suturar, oído medio con mesénquima).'],
+        ],
+        'A05' => [
+            'cita' => 'Yang EY, Stuart A, Stenstrom R, Green WB. Test-retest variability of the auditory brainstem response to bone-conducted clicks in newborn infants. Audiology. 1993;32:89-94.',
+            'n' => 'Recién nacidos',
+            'protocolo' => 'Click por vía ósea, test-retest.',
+            'enlace' => 'Sin enlace',
+            'verificada' => false,
+            'nota' => 'En el código figura como "Stuart et al. 1993". Esta es la serie de 1993 de ese grupo que más se parece; confirmar que sea la que se quiso citar.',
+            'usa' => ['Vía ósea del lactante: más rápida que la aérea.'],
+        ],
+        'A06' => [
+            'cita' => 'Seo YJ et al. Update on bone-conduction auditory brainstem responses: a review. J Audiol Otol. 2018;22(2):53-58. PMID 29471611.',
+            'n' => 'Revisión',
+            'protocolo' => 'ABR por vía ósea en lactantes, niños y adultos.',
+            'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/29471611/',
+            'usa' => ['Vía ósea: las ondas I y III rara vez se identifican; en la app salen más chicas y más anchas que por vía aérea.'],
+        ],
+    ];
+
+    /** Tamizaje neonatal (NewbornScreening). Aportadas por el docente. */
+    public const TAMIZAJE = [
+        'N01' => [
+            'cita' => 'Seehiranwong W, Saengrat P. Timing of newborn hearing screening effects on passing rates. Am J Perinatol. 2025. PMID 40759178.',
+            'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/40759178/',
+            'usa' => ['Tasas de pase de TEOAE y AABR por franja horaria.'],
+        ],
+        'N02' => [
+            'cita' => 'Cheepcharoenrat C, Rerkasem A. Timing effect on TEOAE referral rates within and after 48 hours of birth. Int Arch Otorhinolaryngol. 2025. PMID 40735129.',
+            'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/40735129/',
+            'usa' => ['Tasas de "refiere" de TEOAE antes y después de las 48 horas.'],
+        ],
+        'N03' => [
+            'cita' => 'OAE in universal hearing screening: which day after birth should we examine the newborns? PMID 14564092.',
+            'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/14564092/',
+            'usa' => ['Tasas de pase de TEOAE por día de vida.'],
+        ],
+        'N04' => [
+            'cita' => 'Akinpelu OV et al. OAE in newborn hearing screening: systematic review of protocols. Int J Pediatr Otorhinolaryngol. 2014. PMID 24613088.',
+            'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/24613088/',
+            'usa' => ['Tasas de pase de TEOAE y momento del tamizaje.'],
+        ],
+        'N05' => [
+            'cita' => 'Stewart DL et al. Universal newborn hearing screening with AABR: multisite investigation. J Perinatol. 2000. PMID 11190693.',
+            'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/11190693/',
+            'usa' => ['Tasas de pase del AABR.'],
+        ],
+        'N06' => [
+            'cita' => 'Doyle KJ et al. Newborn hearing screening by OAE and AABR. Int J Pediatr Otorhinolaryngol. 1997;41(2):111-119.',
+            'enlace' => 'Sin enlace',
+            'usa' => ['Brecha entre TEOAE y AABR en las primeras horas.'],
+        ],
+        'N07' => [
+            'cita' => 'Van Dyk M, Swanepoel DW, Hall JW 3rd. Outcomes with OAE and AABR in the first 48 h. Int J Pediatr Otorhinolaryngol. 2015. PMID 25921078.',
+            'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/25921078/',
+            'usa' => ['TEOAE refiere en más de la mitad de los sanos a pocas horas; el AABR pasa en ~85%.'],
+        ],
+        'N08' => [
+            'cita' => 'Newborn hearing screening: early ear examination improves the pass rate. PMCID PMC10645159.',
+            'enlace' => 'https://pmc.ncbi.nlm.nih.gov/articles/PMC10645159/',
+            'usa' => ['Causa del "refiere" temprano: vérnix y líquido en el conducto, transitorio.'],
+        ],
+        'N09' => [
+            'cita' => 'Lupoli et al. y Xiao et al., citados en Seehiranwong y Saengrat 2025 (N01).',
+            'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/40759178/',
+            'usa' => ['Tasas de pase por franja horaria (series secundarias).'],
+        ],
+        'N10' => [
+            'cita' => 'Nebraska DHHS, EHDI. Newborn Hearing Screening Protocol (basado en JCIH 2019).',
+            'enlace' => 'Sin enlace',
+            'usa' => ['Protocolo: tamizar lo más tarde posible antes del alta; "refiere" temprano = rescreening.'],
+        ],
+        'N11' => [
+            'cita' => 'Joint Committee on Infant Hearing. Year 2019 Position Statement: Principles and Guidelines for Early Hearing Detection and Intervention Programs. J Early Hear Detect Interv. 2019;4(2):1-44.',
+            'enlace' => 'https://doi.org/10.15142/fptk-b748',
+            'usa' => [
+                'Indicadores de riesgo del paciente neonato: peso < 1500 g, UCIN > 5 días, hiperbilirrubinemia con exanguinotransfusión, ototóxicos, infecciones congénitas.',
+                'Peso y semanas mueven el tamizaje; las infecciones congénitas NO (son hipoacusia real, a veces tardía).',
+                'Ficha PDF: línea "Indicadores de riesgo (JCIH 2019)".',
+            ],
+        ],
+    ];
+
+    /** Normas y clasificaciones. */
+    public const NORMAS = [
+        'S01' => [
+            'cita' => 'ISO 7029:2017. Acoustics -- Statistical distribution of hearing thresholds related to age and gender.',
+            'enlace' => 'https://www.iso.org/standard/42916.html',
+            'usa' => [
+                'Generador de casos: umbral mediano esperable por edad y sexo, que se suma al cuadro (pestaña Armado).',
+                'Edad desde la que se aplica la desviación por edad (18 años).',
+            ],
+        ],
+        'S02' => [
+            'cita' => 'BIAP. Recomendación 02/1: Clasificación audiométrica de las deficiencias auditivas.',
+            'enlace' => 'https://www.biap.org',
+            'usa' => [
+                'Grado de hipoacusia por promedio de 500, 1000, 2000 y 4000 Hz en vía aérea (normal hasta 20 dB HL).',
+                'Generador: escala el cuadro para que el promedio caiga en el grado pedido.',
+                'Ficha PDF: promedios BIAP aéreo y óseo.',
+            ],
+        ],
+        'S03' => [
+            'cita' => 'American Speech-Language-Hearing Association. Guidelines for audiometric symbols. ASHA. 1990;32(Suppl 2):25-30.',
+            'enlace' => 'Sin enlace',
+            'usa' => ['Símbolos del audiograma en el editor del caso y en el PDF.'],
+        ],
+    ];
+
+    /**
+     * Fuentes de una sección, cada una con su ficha y 'usa' (lista de a
+     * qué corresponde). En el ABR, las de la planilla que no respaldan
+     * ningún número quedan aparte (ver sinUsoAbr).
+     */
+    public static function fuentes(string $seccion): array
+    {
+        switch ($seccion) {
+            case 'abr':
+                $usos = self::usosAbr();
+                $out = [];
+                foreach (self::fichasAbr() as $fid => $f) {
+                    if (!empty($usos[$fid])) {
+                        $out[$fid] = $f + ['usa' => $usos[$fid]];
+                    }
+                }
+                return $out + self::ABR_COMPLEMENTARIAS;
+            case 'ecochg':
+                $out = [];
+                foreach (EcochgReferences::FUENTES as $fid => $f) {
+                    $usa = [];
+                    foreach (EcochgReferences::LIMITES as $lim) {
+                        if (in_array($fid, $lim['fuentes'], true)) {
+                            $usa[] = $lim['label'] . ' (' . $lim['valor'] . ').';
+                        }
+                    }
+                    $out[$fid] = $f + ['usa' => $usa];
+                }
+                return $out;
+            case 'tamizaje':
+                return self::TAMIZAJE;
+            case 'normas':
+                return self::NORMAS;
+        }
+        return [];
+    }
+
+    /** Fuentes de la planilla ABR que no respaldan ningún número de la app. */
+    public static function sinUsoAbr(): array
+    {
+        $usos = self::usosAbr();
+        $out = [];
+        foreach (self::fichasAbr() as $fid => $f) {
+            if (empty($usos[$fid])) {
+                $out[$fid] = $f;
+            }
+        }
+        return $out;
+    }
+
+    private static function fichasAbr(): array
+    {
+        $fichas = AbrReferences::FUENTES;
+        ksort($fichas);
+        return $fichas;
+    }
+
+    /**
+     * A qué corresponde cada fuente de la planilla: el anclaje del set de
+     * fábrica y los sets publicados se leen de AbrReferences (así no se
+     * desincronizan), y se les suma USO_ABR.
+     */
+    private static function usosAbr(): array
+    {
+        $poblacion = [
+            'adult_male' => 'adulto hombre', 'adult_female' => 'adulto mujer',
+            'child' => 'niño (3-17)', 'toddler' => 'primera infancia (1-3)',
+            'neonate' => 'neonato', 'elderly_male' => 'adulto mayor hombre',
+            'elderly_female' => 'adulto mayor mujer',
+        ];
+        $medida = ['lat' => 'Latencias', 'amp' => 'Amplitudes'];
+
+        $anclas = [];
+        foreach (AbrReferences::ANCLAJE as $pop => $porMedida) {
+            foreach ($porMedida as $que => $fid) {
+                $anclas[$fid][$que][] = $poblacion[$pop] ?? $pop;
+            }
+        }
+        $usos = [];
+        foreach ($anclas as $fid => $porMedida) {
+            foreach ($porMedida as $que => $pops) {
+                $usos[$fid][] = $medida[$que] . ' normales del set de fábrica: '
+                    . implode(', ', array_unique($pops)) . '.';
+            }
+        }
+        foreach (AbrReferences::SETS as $set) {
+            $usos[$set['fuente']][] = 'Set publicado "' . $set['label'] . '" (selector de autor del caso).';
+        }
+        foreach (self::USO_ABR as $fid => $lista) {
+            foreach ($lista as $uso) {
+                $usos[$fid][] = $uso;
+            }
+        }
+        unset($usos['calculada']);
+        return $usos;
+    }
+}

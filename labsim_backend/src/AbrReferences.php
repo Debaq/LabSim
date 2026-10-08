@@ -26,7 +26,11 @@ final class AbrReferences
     /** Planilla de referencia, relativa a la raíz del backend. */
     public const PLANILLA = 'resources/normativa/ABR_valores_referencia_latencias_interpico.xlsx';
 
-    /** Ficha de cada fuente citada. */
+    /**
+     * Ficha de cada fuente de la planilla (las 27). Que una fuente esté acá
+     * no quiere decir que respalde un número de la app: a qué corresponde
+     * cada una lo dice Bibliografia (admin/bibliografia.php).
+     */
     public const FUENTES = [
         'F01' => [
             'cita' => 'Sanfins MD, Santillo MEA, Martins MFP, Silva DLdS, Gos E, Skarzynski PH, Hall JW III. The Influence of Sex, Ear, and Age on Auditory Brainstem Response. Diagnostics. 2026;16(7):971.',
@@ -99,6 +103,95 @@ final class AbrReferences
             'n' => '50 adultos (25 H / 25 M), 18-40 anios, 100 oidos',
             'protocolo' => 'Bio-Logic Traveler Express, click 0.1 ms, 11.1/s, 80 dB HL, 2000 estimulos con replica',
             'enlace' => 'Revista Chilena de Fonoaudiologia, vol. 6, num. 2, 2005',
+        ],        'F02' => [
+            'cita' => 'Sanfins MD, Colella-Santos MF, Ferrazoli N, Rezende A, Donadon C, Gos E, Skarzynski PH. Latency and Interpeak Interval Values of Auditory Brainstem Response in 73 Individuals with Normal Hearing. Med Sci Monit. 2022;28:e937847.',
+            'n' => '73 sujetos, >3 anos',
+            'protocolo' => 'Neuro-Audio (Neurosoft); click; 80 dB nHL. Estudio previo de la misma linea que F01',
+            'enlace' => 'https://doi.org/10.12659/MSM.937847',
+        ],
+        'F03' => [
+            'cita' => 'Standardization of Latency and Amplitude Values of Short, Middle and Long Latency Auditory Evoked Potentials in Adults. Int Arch Otorhinolaryngol (PMC10147452). 2023.',
+            'n' => 'Adultos normoyentes',
+            'protocolo' => 'Click; valores comparados con los del manual del equipo',
+            'enlace' => 'https://pmc.ncbi.nlm.nih.gov/articles/PMC10147452/',
+        ],
+        'F05' => [
+            'cita' => 'Camarillo et al. Establishing normative values for auditory brainstem response measurements among infants aged 3 to 6 months. SPMC J Health Care Serv.',
+            'n' => 'Lactantes 3-6 meses',
+            'protocolo' => 'Interacoustics Eclipse EP15; IP30 insert; 60-90 dB nHL; 45.1 clicks/s',
+            'enlace' => 'https://spmcjournal.com/V10N1Galley/Camarillo/Camarillo.php',
+        ],
+        'F06' => [
+            'cita' => 'Brain stem evoked response audiometry in neonates (registro IMSEAR/WHO).',
+            'n' => 'Neonatos',
+            'protocolo' => 'Click a 40 y 80 dB nHL; analisis de funcion latencia-intensidad',
+            'enlace' => 'https://imsear.searo.who.int/signposting/describedby/b35f4ef2-aac4-48ed-a62d-469d8abf1ff3',
+        ],
+        'F08' => [
+            'cita' => 'Auditory Brainstem Response (ABR) in Clinical Practice. University of Cape Town.',
+            'n' => 'Adultos y ninos >3 anos',
+            'protocolo' => 'Click; valores redondeados de referencia rapida; se recomienda media + 2 DE del propio laboratorio',
+            'enlace' => 'https://health.uct.ac.za/sites/default/files/content_migration/health_uct_ac_za/1016/files/Auditory%20Brainstem%20Response%20_ABR_%20in%20Clinical%20Practice.pdf',
+        ],
+        'F11' => [
+            'cita' => 'Gorga MP, Kaminski JR, Beauchaine KL, Jesteadt W, Neely ST. Auditory brainstem responses from children three months to three years of age: normal patterns of response II. J Speech Hear Res. 1989;32(2):281-288.',
+            'n' => '535 ninos de 3 meses a 3 anos',
+            'protocolo' => 'Click; funciones latencia-nivel por grupo etario; normas por media y DE',
+            'enlace' => 'https://doi.org/10.1044/jshr.3202.281',
+        ],
+        'F12' => [
+            'cita' => 'Gorga MP, Reiland JK, Beauchaine KA, Worthington DW, Jesteadt W. Auditory brainstem response from graduates of an intensive care nursery: normal patterns of response. J Speech Hear Res. 1987;30:311-318.',
+            'n' => 'Egresados de UCI neonatal',
+            'protocolo' => 'Click; base de las normas por edad incorporadas en varios equipos comerciales',
+            'enlace' => 'https://doi.org/10.1044/jshr.3003.311',
+        ],
+        'F14' => [
+            'cita' => 'Chiappa KH. Evoked Potentials in Clinical Medicine, 3.a ed. Lippincott-Raven; 1997. (y Chiappa K, Gladstone KJ, Young RR. Arch Neurol. 1979;36:81-87)',
+            'n' => '50 sujetos normales (serie de 1979)',
+            'protocolo' => 'Click; limites superiores de normalidad usados en neurologia clinica',
+            'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/760398/',
+        ],
+        'F15' => [
+            'cita' => 'Hall JW III. eHandbook of Auditory Evoked Responses. Kindle Direct Publishing; 2015. (y Handbook of Auditory Evoked Responses, Allyn & Bacon, 1992)',
+            'n' => 'No aplica (texto o guía)',
+            'protocolo' => 'Protocolos estandar de registro y tablas de factores no patologicos',
+            'enlace' => 'Sin enlace en la planilla',
+        ],
+        'F16' => [
+            'cita' => 'ACNS Guideline 9C: Guidelines on Short-Latency Auditory Evoked Potentials. American Clinical Neurophysiology Society; 2008.',
+            'n' => 'No aplica (texto o guía)',
+            'protocolo' => 'Recomendaciones de registro y uso de funciones latencia-intensidad con limites de tolerancia 95% y 99%',
+            'enlace' => 'https://www.acns.org/pdf/guidelines/Guideline-9C.pdf',
+        ],
+        'F17' => [
+            'cita' => 'Nakhla V et al. LS CE-Chirp vs. Click in the neuroaudiological diagnosis by ABR. Braz J Otorhinolaryngol (PMC9444743).',
+            'n' => '30 normoyentes',
+            'protocolo' => 'Click vs LS CE-Chirp; 85 dB nHL; polaridad alternante; 17.1/s; filtro 100-3000 Hz',
+            'enlace' => 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9444743/',
+        ],
+        'F19' => [
+            'cita' => 'Sharma M, Bist SS, Kumar S. Age-related maturation of wave V latency of auditory brainstem response in children. J Audiol Otol. 2016;20(2):97-104.',
+            'n' => '80 sujetos, 0-12 anos (8 grupos)',
+            'protocolo' => 'Click; seguimiento de la latencia de onda V por grupo etario',
+            'enlace' => 'https://doi.org/10.7874/jao.2016.20.2.97',
+        ],
+        'F20' => [
+            'cita' => 'Konrad-Martin D et al. Age-related changes in the auditory brainstem response. J Am Acad Audiol (PMC5549623).',
+            'n' => '131 veteranos, 26-71 anos',
+            'protocolo' => 'Click a 11, 51 y 71/s; ambas polaridades; ondas I, III, V e intervalo I-V',
+            'enlace' => 'https://pmc.ncbi.nlm.nih.gov/articles/PMC5549623/',
+        ],
+        'F22' => [
+            'cita' => 'Delgado Hernandez J, Zenker Castro F, Barajas del Prat JJ. Normalizacion de los Potenciales Evocados Auditivos del Tronco Cerebral I: resultados en una muestra de adultos normoyentes. Auditio. 2003;2(1).',
+            'n' => '20 sujetos (10 H / 10 M), 26-67 anos',
+            'protocolo' => 'Auriculares supraaurales Beyerdynamic DT48; click alternante de 100 us; 19/s; filtro 160 Hz-3.2 kHz; montaje Cz-Fz-M1-M2; 1600 promediaciones; ventana 12 ms; 90 dB nHL equivalen a 101 dB SPL; criterio media +/- 2.5 DE',
+            'enlace' => 'https://doi.org/10.51445/sja.auditio.vol2.2003.0020',
+        ],
+        'F23' => [
+            'cita' => 'Pinto FR, Matas CG. A comparison between hearing and tone burst electrophysiological thresholds. Braz J Otorhinolaryngol.',
+            'n' => '40 sujetos (18-40 anos)',
+            'protocolo' => 'Biologic Traveler Express; auriculares supraaurales TDH-39; tone burst a 500, 1000, 2000 y 4000 Hz; 80 dB HL (no nHL); 1500 barridos con dos replicas; electrodos vertex y mastoides. A 80 dB HL solo se identifico la onda V',
+            'enlace' => 'https://doi.org/10.1016/S1808-8694(15)30103-8',
         ],
     ];
 

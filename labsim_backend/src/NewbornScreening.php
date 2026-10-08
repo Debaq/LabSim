@@ -11,32 +11,10 @@ declare(strict_types=1);
  * bibliografía publica NO son decibeles: son tasas de pase por franja
  * horaria. Así que la tabla manda y los dB salen de ella, no al revés.
  *
- * Fuentes de las tasas (aportadas por el docente):
- *   1. Seehiranwong W, Saengrat P. Timing of newborn hearing screening
- *      effects on passing rates. Am J Perinatol. 2025. PMID 40759178.
- *   2. Cheepcharoenrat C, Rerkasem A. Timing effect on TEOAE referral rates
- *      within and after 48 hours of birth. Int Arch Otorhinolaryngol. 2025.
- *      PMID 40735129.
- *   3. OAE in universal hearing screening: which day after birth should we
- *      examine the newborns? PMID 14564092.
- *   4. Akinpelu OV et al. OAE in newborn hearing screening: systematic
- *      review of protocols. Int J Pediatr Otorhinolaryngol. 2014. PMID
- *      24613088.
- *   5. Stewart DL et al. Universal newborn hearing screening with AABR:
- *      multisite investigation. J Perinatol. 2000. PMID 11190693.
- *   6. Doyle KJ et al. Newborn hearing screening by OAE and AABR. Int J
- *      Pediatr Otorhinolaryngol. 1997;41(2):111-9.
- *   7. Van Dyk M, Swanepoel DW, Hall JW 3rd. Outcomes with OAE and AABR in
- *      the first 48 h. Int J Pediatr Otorhinolaryngol. 2015. PMID 25921078.
- *   8. Newborn hearing screening: early ear examination improves the pass
- *      rate. PMCID PMC10645159.
- *   9. Lupoli et al. y Xiao et al., citados en (1).
- *  10. Nebraska DHHS, EHDI. Newborn Hearing Screening Protocol (JCIH 2019).
- *  11. JCIH 2019 Position Statement: indicadores de riesgo -- peso < 1500 g,
- *      UCIN > 5 días, hiperbilirrubinemia con exanguinotransfusión,
- *      ototóxicos e infecciones congénitas (CMV, herpes, rubéola, sífilis,
- *      toxoplasmosis, zika). El peso y las semanas mueven el tamizaje acá;
- *      las TORCH NO, y eso es a propósito (ver abajo).
+ * Fuentes de las tasas (aportadas por el docente) y de los indicadores de
+ * riesgo (JCIH 2019): Bibliografia::TAMIZAJE, que es lo que el docente ve
+ * en admin/bibliografia.php#tamizaje. Peso y semanas mueven el tamizaje;
+ * las TORCH NO, y eso es a propósito (ver abajo).
  *
  * Las infecciones congénitas no se descuentan del tamizaje porque no son
  * un transitorio del conducto: son riesgo de hipoacusia DE VERDAD, muchas

@@ -4233,3 +4233,21 @@ que pasa.
 Lo que la literatura dice y el generador NO reproduce a propósito: un 30-40%
 de los Ménière definidos tienen el ECochG normal. El cuadro del generador da
 siempre el hidrops alterado; un Ménière con ECochG normal se arma a mano.
+
+## Bibliografía en un solo lugar (2026-10-08)
+
+`admin/bibliografia.php` (menú Configuración) junta todas las citas por
+examen —ABR, ECochG, tamizaje neonatal, normas— y cada una dice a qué
+corresponde. El registro es `src/Bibliografia.php`; las fichas del ABR y del
+ECochG siguen en `AbrReferences` y `EcochgReferences`, y su "corresponde a" se
+arma solo desde `ANCLAJE`, `SETS` y `LIMITES` para que no se desincronice.
+
+- Las 27 fuentes de la planilla están cargadas. Las 13 que no respaldan ningún
+  número quedan aparte, en "sin ningún número de la app detrás".
+- Las del generador del ABR que no están en la planilla (Elberling y Don,
+  Beattie, Cobb y Stuart, Yang, Seo) pasan a ser A01-A06. Las que no se
+  pudieron confirmar van marcadas "sin verificar" con lo que falta; no se
+  completan de memoria.
+- Las del tamizaje neonatal salen del comentario de `NewbornScreening`, que
+  ahora apunta a `Bibliografia::TAMIZAJE`.
+- Normativas ya no lista fuentes: enlaza a Bibliografía.

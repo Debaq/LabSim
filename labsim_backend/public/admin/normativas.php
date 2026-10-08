@@ -18,7 +18,6 @@ require_once __DIR__ . '/_layout.php';
  */
 
 require_once __DIR__ . '/../../src/AbrReferences.php';
-require_once __DIR__ . '/../../src/EcochgReferences.php';
 
 const ABR_AUTHORS_KEY = 'abr_reference_authors';
 const ABR_WAVES = ['I', 'III', 'V'];
@@ -157,23 +156,8 @@ admin_header('Normativas', $me);
 </div>
 
 <div class="card">
-    <details>
-        <summary><strong>Fuentes</strong> -- de dónde sale cada número</summary>
-        <p class="help help--mt">Estas citas son para usted. No se muestran en la app ni en la ficha del alumno.</p>
-        <p class="help"><a href="normativa_planilla.php">Descargar la planilla completa</a> (483 filas, 27 fuentes: latencias, interpicos, amplitudes y factores modificadores, con protocolo y enlace de cada serie).</p>
-        <?php foreach (AbrReferences::FUENTES as $fid => $f): ?>
-        <div style="margin-top:0.6rem; font-size:0.85em;">
-            <strong><?= htmlspecialchars($fid) ?></strong> ·
-            <?= htmlspecialchars($f['cita']) ?>
-            <div style="opacity:0.8;"><?= htmlspecialchars($f['n']) ?> · <?= htmlspecialchars($f['protocolo']) ?></div>
-            <?php if (strpos($f['enlace'], 'http') === 0): ?>
-            <div><a href="<?= htmlspecialchars($f['enlace']) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($f['enlace']) ?></a></div>
-            <?php else: ?>
-            <div style="opacity:0.8;"><?= htmlspecialchars($f['enlace']) ?></div>
-            <?php endif; ?>
-        </div>
-        <?php endforeach; ?>
-    </details>
+    <strong>Fuentes</strong>
+    <p class="help help--mt">La cita, el n, el protocolo y a qué corresponde cada fuente del ABR (y de los demás exámenes) están en <a href="bibliografia.php#abr">Configuración &rsaquo; Bibliografía</a>.</p>
 </div>
 
 <?php foreach (AbrReferences::SETS as $setId => $set): ?>
@@ -284,28 +268,6 @@ admin_header('Normativas', $me);
     </details>
 </div>
 
-<div class="card" id="ecochg">
-    <details>
-        <summary><strong>Electrococleografía</strong> -- de dónde sale cada límite</summary>
-        <p class="help help--mt">Estas citas son para usted. No se muestran en la app ni en la ficha del alumno. Los límites son los que usa la app al pintar en rojo la tabla del alumno; no se editan acá.</p>
-        <?php foreach (EcochgReferences::LIMITES as $lim): ?>
-        <div style="margin-top:0.6rem; font-size:0.85em;">
-            <strong><?= htmlspecialchars($lim['label']) ?>:</strong> <?= htmlspecialchars($lim['valor']) ?>
-            · <?= $lim['fuentes'] ? htmlspecialchars(implode(', ', $lim['fuentes'])) : 'calculado' ?>
-            <div style="opacity:0.8;"><?= htmlspecialchars($lim['nota']) ?></div>
-        </div>
-        <?php endforeach; ?>
-        <p class="help help--mt"><strong>Fuentes</strong></p>
-        <?php foreach (EcochgReferences::FUENTES as $fid => $f): ?>
-        <div style="margin-top:0.6rem; font-size:0.85em;">
-            <strong><?= htmlspecialchars($fid) ?></strong> ·
-            <?= htmlspecialchars($f['cita']) ?>
-            <div style="opacity:0.8;"><?= htmlspecialchars($f['n']) ?> · <?= htmlspecialchars($f['protocolo']) ?></div>
-            <div><a href="<?= htmlspecialchars($f['enlace']) ?>" target="_blank" rel="noopener"><?= htmlspecialchars($f['enlace']) ?></a></div>
-        </div>
-        <?php endforeach; ?>
-    </details>
-</div>
 
 <?php
 admin_footer();
