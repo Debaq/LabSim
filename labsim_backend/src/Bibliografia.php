@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/AbrReferences.php';
 require_once __DIR__ . '/EcochgReferences.php';
+require_once __DIR__ . '/CaseProfile.php';
 
 /**
  * Toda la bibliografía de LabSim en un solo lugar, ordenada por examen, y
@@ -214,6 +215,184 @@ final class Bibliografia
             'usa' => ['Símbolos del audiograma en el editor del caso y en el PDF.'],
         ],
     ];
+
+    /**
+     * Bibliografía de cada cuadro de CaseProfile::SCENARIOS, por clave.
+     * Cada cita: eje, cita, enlace, respalda (qué valor), coincide
+     * (si / parcial / no), nota y verificada. Un cuadro que no está acá es
+     * una decisión de diseño sin bibliografía todavía.
+     */
+    public const PATOLOGIAS = [];
+
+    /** Nombre de cada eje de un cuadro, en el orden en que se muestran. */
+    public const EJES = [
+        'sn_shape' => 'Forma de la vía ósea (dB por frecuencia)',
+        'sn_scale' => 'Escala de la forma ósea',
+        'gap_shape' => 'Forma del gap aéreo-óseo (dB por frecuencia)',
+        'gap_scale' => 'Escala del gap',
+        'gap_max_db' => 'Techo del gap (dB)',
+        'max_db' => 'Techo del promedio BIAP (dB HL)',
+        'grados' => 'Grados posibles',
+        'cce_pct' => 'Proporción coclear del daño (%)',
+        'retro' => 'Patrón retrococlear del ABR',
+        'z' => 'Timpanograma',
+        'etf' => 'Función tubaria',
+        'vemp' => 'VEMP',
+        'ecochg' => 'Electrococleografía',
+        'tinnitus' => 'Acúfeno',
+        'conciencia' => 'Conciencia del problema (entrevista)',
+        'lateralidad' => 'Sugerencia para el otro oído',
+    ];
+
+    /**
+     * Los cuadros del generador (CaseProfile::SCENARIOS) con el porqué de
+     * cada eje.
+     *
+     * El porqué NO se copia: se lee de los comentarios que tiene cada
+     * cuadro en CaseProfile.php, que es donde se escribe al tomar la
+     * decisión. Un comentario va con los ejes de la línea que lo sigue
+     * ('grados', 'max_db' y 'gap_max_db' suelen ir juntos porque se
+     * deciden juntos). Así lo que ve el docente es siempre lo que hace el
+     * generador, sin una segunda copia que se quede vieja.
+     *
+     * Devuelve ['categorias' => [cat => intro], 'cuadros' => [clave => [
+     *   'label', 'categoria', 'filas' => [['ejes' => [...], 'porque' => '']]]]].
+     */
+    public static function cuadros(): array
+    {
+        $lineas = file(__DIR__ . '/CaseProfile.php', FILE_IGNORE_NEW_LINES) ?: [];
+        $categorias = [];
+        $comentarios = [];
+        $introGrupo = [];
+        $actual = null;
+        $pendiente = [];
+        $dentro = false;
+        foreach ($lineas as $l) {
+            if (!$dentro) {
+                $dentro = strpos($l, 'public const SCENARIOS = [') !== false;
+                continue;
+            }
+            if (preg_match('/^    \];/', $l)) {
+                break;
+            }
+            if (preg_match('/^ {8}\/\/ ?(.*)$/', $l, $m)) {
+                if (strpos($m[1], '---') === 0) {
+                    $introGrupo = [];
+                } else {
+                    $introGrupo[] = trim($m[1]);
+                }
+                continue;
+            }
+            if (preg_match("/^ {8}'([a-z0-9_]+)' => \\[$/", $l, $m)) {
+                $actual = $m[1];
+                $comentarios[$actual] = [];
+                $pendiente = [];
+                if ($introGrupo) {
+                    $categoria = CaseProfile::SCENARIOS[$actual]['categoria'] ?? '';
+                    $categorias[$categoria] = trim(($categorias[$categoria] ?? '') . ' ' . implode(' ', $introGrupo));
+                    $introGrupo = [];
+                }
+                continue;
+            }
+            if ($actual === null) {
+                continue;
+            }
+            if (preg_match('/^ {12}\/\/ ?(.*)$/', $l, $m)) {
+                $pendiente[] = trim($m[1]);
+                continue;
+            }
+            if (preg_match("/^ {12}'/", $l) && preg_match_all("/(?:^ {12}|, )'([a-z_]+)' =>/", $l, $mm)) {
+                $comentarios[$actual][] = ['ejes' => $mm[1], 'porque' => implode(' ', $pendiente)];
+                $pendiente = [];
+            }
+        }
+
+        $cuadros = [];
+        foreach (CaseProfile::SCENARIOS as $clave => $sc) {
+            $filas = [];
+            $vistos = [];
+            foreach ($comentarios[$clave] ?? [] as $fila) {
+                $ejes = array_values(array_filter($fila['ejes'], static function ($e) use ($sc) {
+                    return isset(self::EJES[$e]) && array_key_exists($e, $sc);
+                }));
+                if ($ejes === [] && $fila['porque'] === '') {
+                    continue;
+                }
+                if ($ejes === []) {
+                    // Comentario sobre el label o la categoría: es el porqué
+                    // del cuadro entero, va con el primer eje que siga.
+                    $filas[] = ['ejes' => [], 'porque' => $fila['porque']];
+                    continue;
+                }
+                $filas[] = ['ejes' => $ejes, 'porque' => $fila['porque']];
+                $vistos = array_merge($vistos, $ejes);
+            }
+            // Los ejes sin comentario van juntos al final, en una sola fila:
+            // son los valores que no necesitaron explicación.
+            $sinPorque = [];
+            foreach ($filas as $i => $fila) {
+                if ($fila['porque'] === '') {
+                    $sinPorque = array_merge($sinPorque, $fila['ejes']);
+                    unset($filas[$i]);
+                }
+            }
+            foreach (array_keys(self::EJES) as $eje) {
+                if (array_key_exists($eje, $sc) && !in_array($eje, $vistos, true)) {
+                    $sinPorque[] = $eje;
+                }
+            }
+            $filas = array_values($filas);
+            if ($sinPorque) {
+                $orden = array_flip(array_keys(self::EJES));
+                usort($sinPorque, static function ($a, $b) use ($orden) {
+                    return $orden[$a] <=> $orden[$b];
+                });
+                $filas[] = ['ejes' => $sinPorque, 'porque' => ''];
+            }
+            $cuadros[$clave] = [
+                'label' => $sc['label'],
+                'categoria' => $sc['categoria'],
+                'filas' => $filas,
+            ];
+        }
+        return ['categorias' => $categorias, 'cuadros' => $cuadros];
+    }
+
+    /** Valor de un eje en texto corto: "125:5 250:5 ...", "0.5-1.2", etc. */
+    public static function valorEje($v, bool $opciones = false): string
+    {
+        if ($v === null) {
+            return '--';
+        }
+        if (is_bool($v)) {
+            return $v ? 'sí' : 'no';
+        }
+        if (!is_array($v)) {
+            return (string) $v;
+        }
+        if ($v === []) {
+            return 'ninguno';
+        }
+        $esLista = array_keys($v) === range(0, count($v) - 1);
+        if ($esLista) {
+            // Dos números son un rango [mín, máx], salvo que el que llama
+            // diga que es una lista de opciones (frecuencias del acúfeno).
+            $num = !$opciones && count($v) === 2 && is_numeric($v[0]) && is_numeric($v[1]);
+            if ($num) {
+                return $v[0] == $v[1] ? (string) $v[0] : $v[0] . '-' . $v[1];
+            }
+            return implode(', ', array_map([self::class, 'valorEje'], $v));
+        }
+        $partes = [];
+        foreach ($v as $k => $x) {
+            if (is_int($k) && $k >= 125) {
+                $partes[] = ($k >= 1000 ? ($k / 1000) . 'k' : $k) . ':' . self::valorEje($x);
+            } else {
+                $partes[] = $k . ' ' . self::valorEje($x, in_array($k, ['frecuencia', 'ruido', 'type'], true));
+            }
+        }
+        return implode(is_int(array_key_first($v)) ? ' ' : ' · ', $partes);
+    }
 
     /**
      * Fuentes de una sección, cada una con su ficha y 'usa' (lista de a

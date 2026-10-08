@@ -33,3 +33,34 @@ t_eq(count(AbrReferences::FUENTES), 27, 'Las 27 fuentes de la planilla están ca
 foreach (array_keys(Bibliografia::USO_ABR) as $fid) {
     t_true(isset(AbrReferences::FUENTES[$fid]), "Uso ABR {$fid}: la fuente existe");
 }
+
+// --- Patologías del generador ----------------------------------------------
+
+// El porqué se lee de los comentarios de CaseProfile.php: si el parser se
+// rompe (cambió la indentación, se movió la constante), el cuadro se
+// queda sin ejes o con ejes repetidos sin que nadie lo note.
+$catalogo = Bibliografia::cuadros();
+t_eq(count($catalogo['cuadros']), count(CaseProfile::SCENARIOS), 'Bibliografía: están todos los cuadros');
+$conPorque = 0;
+foreach (CaseProfile::SCENARIOS as $clave => $sc) {
+    $ejes = [];
+    foreach ($catalogo['cuadros'][$clave]['filas'] ?? [] as $fila) {
+        $ejes = array_merge($ejes, $fila['ejes']);
+        if ($fila['porque'] !== '') {
+            $conPorque++;
+        }
+    }
+    $esperados = array_values(array_intersect(array_keys(Bibliografia::EJES), array_keys($sc)));
+    sort($ejes);
+    sort($esperados);
+    t_eq($ejes, $esperados, "Cuadro {$clave}: cada eje aparece una sola vez");
+}
+t_true($conPorque > 100, 'Bibliografía: el parser encontró los comentarios de los cuadros');
+foreach (Bibliografia::PATOLOGIAS as $clave => $citas) {
+    t_true(isset(CaseProfile::SCENARIOS[$clave]), "Bibliografía de {$clave}: el cuadro existe");
+    foreach ($citas as $i => $c) {
+        t_true(isset(Bibliografia::EJES[$c['eje']]) || $c['eje'] === 'general', "Cita {$clave}#{$i}: eje válido");
+        t_true(!empty($c['cita']) && !empty($c['respalda']), "Cita {$clave}#{$i}: tiene cita y qué respalda");
+        t_true(in_array($c['coincide'] ?? '', ['si', 'parcial', 'no'], true), "Cita {$clave}#{$i}: dice si coincide");
+    }
+}

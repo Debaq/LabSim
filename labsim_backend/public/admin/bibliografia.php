@@ -63,6 +63,8 @@ admin_header('Bibliografía', $me);
         <li><a href="#<?= htmlspecialchars($sid) ?>"><?= htmlspecialchars($sec['titulo']) ?></a>
             (<?= count(Bibliografia::fuentes($sid)) ?> fuentes)</li>
         <?php endforeach; ?>
+        <li><a href="#patologias">Patologías del generador</a>
+            (<?= count(CaseProfile::SCENARIOS) ?> cuadros, <?= count(Bibliografia::PATOLOGIAS) ?> con bibliografía)</li>
     </ul>
 </div>
 
@@ -104,6 +106,69 @@ admin_header('Bibliografía', $me);
     </details>
 </div>
 <?php endforeach; ?>
+
+<?php
+$catalogo = Bibliografia::cuadros();
+$categoriaLabel = [
+    'normal' => 'Normal', 'conductiva' => 'Conductivas', 'sensorial' => 'Sensoriales',
+    'neural' => 'Neurales', 'sensorioneural' => 'Sensorioneurales', 'mixta' => 'Mixtas',
+];
+$porCategoria = [];
+foreach ($catalogo['cuadros'] as $clave => $c) {
+    $porCategoria[$c['categoria']][$clave] = $c;
+}
+?>
+<div class="card" id="patologias">
+    <details open>
+        <summary><strong>Patologías del generador</strong></summary>
+        <p class="help help--mt">Cada cuadro que ofrece el autocompletado del caso, con lo que fija en el oído y por qué. El porqué es el que quedó escrito en el código al tomar la decisión, así que es siempre lo que hace el generador hoy. Los valores son rangos: el generador sortea dentro de ellos y usted edita el resultado. Donde no hay bibliografía, el valor es una decisión de diseño.</p>
+        <?php foreach ($porCategoria as $cat => $lista): ?>
+        <details style="margin-top:0.8rem;">
+            <summary><strong><?= htmlspecialchars($categoriaLabel[$cat] ?? $cat) ?></strong> (<?= count($lista) ?>)</summary>
+            <?php if (!empty($catalogo['categorias'][$cat])): ?>
+            <p class="help help--mt"><?= htmlspecialchars($catalogo['categorias'][$cat]) ?></p>
+            <?php endif; ?>
+            <?php foreach ($lista as $clave => $c): ?>
+            <?php $citas = Bibliografia::PATOLOGIAS[$clave] ?? []; ?>
+            <details style="margin:0.6rem 0 0 0.8rem;" id="cuadro-<?= htmlspecialchars($clave) ?>">
+                <summary><?= htmlspecialchars($c['label']) ?>
+                    <span style="opacity:0.7; font-size:0.85em;">· <?= $citas ? count($citas) . ' citas' : 'sin bibliografía' ?></span></summary>
+                <table style="width:100%; font-size:0.85em; margin-top:0.4rem; border-collapse:collapse;">
+                    <?php foreach ($c['filas'] as $fila): ?>
+                    <tr style="border-top:1px solid var(--color-border, #ddd); vertical-align:top;">
+                        <td style="padding:0.3rem 0.5rem 0.3rem 0; width:38%;">
+                            <?php if ($fila['ejes'] === []): ?>
+                            <em>El cuadro</em>
+                            <?php endif; ?>
+                            <?php foreach ($fila['ejes'] as $eje): ?>
+                            <div><strong><?= htmlspecialchars(Bibliografia::EJES[$eje]) ?>:</strong>
+                                <?= htmlspecialchars(Bibliografia::valorEje(CaseProfile::SCENARIOS[$clave][$eje])) ?></div>
+                            <?php endforeach; ?>
+                        </td>
+                        <td style="padding:0.3rem 0; opacity:<?= $fila['porque'] !== '' ? '1' : '0.5' ?>;">
+                            <?= $fila['porque'] !== '' ? htmlspecialchars($fila['porque']) : 'Sin fundamento escrito: valores de diseño.' ?>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </table>
+                <?php if ($citas): ?>
+                <p class="help help--mt"><strong>Bibliografía del cuadro</strong></p>
+                <?php foreach ($citas as $i => $cita): ?>
+                <?php
+                $coincide = $cita['coincide'] ?? 'si';
+                $cita['usa'] = [Bibliografia::EJES[$cita['eje']] ?? 'General'] ;
+                $cita['usa'][0] .= ': ' . $cita['respalda']
+                    . ($coincide === 'no' ? ' (la literatura NO coincide con el generador)' : ($coincide === 'parcial' ? ' (coincide en parte)' : ''));
+                bib_ficha((string) ($i + 1), $cita);
+                ?>
+                <?php endforeach; ?>
+                <?php endif; ?>
+            </details>
+            <?php endforeach; ?>
+        </details>
+        <?php endforeach; ?>
+    </details>
+</div>
 
 <?php
 admin_footer();
