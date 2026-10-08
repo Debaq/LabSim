@@ -145,6 +145,9 @@ def _simular(respuestas_check, fallas_apply=0, abortar=lambda: False):
         llamadas["apply"] += 1
         if llamadas["apply"] <= fallas_apply:
             raise OSError("descarga cortada")
+        if on_progress is not None:
+            for etapa in ("download", "extract", "restart"):
+                on_progress(etapa, 0, 0, 1, 1)
         raise Reinicio()     # el real hace os._exit
 
     original = (ak.check_for_update, ak.apply_update_and_restart)
@@ -183,17 +186,45 @@ def test_apagado_corta_la_espera():
     assert _simular([sin_red] * 5, abortar=lambda: True) == (0, 0, False)
 
 
+def test_alguien_entra_mientras_se_baja_y_no_se_reinicia():
+    """Un alumno inició sesión con la descarga en curso: el reinicio cierra
+    sin guardar, así que se cancela aunque ya se haya bajado."""
+    consultas = []
+
+    def abortar():
+        consultas.append(1)
+        return len(consultas) >= 3   # 1: bucle, 2: tras consultar, 3: descarga
+
+    assert _simular([{"mode": "full"}], abortar=abortar) == (1, 1, False)
+
+
+def _ventana(main, data_login=None, login_en_curso=False):
+    ventana = SimpleNamespace(data_login=data_login, _update_pendiente=False,
+                              subw={"LOGIN": SimpleNamespace(obj=SimpleNamespace(
+                                  _login_thread=object() if login_en_curso else None))})
+    ventana._sesion_activa = lambda: main.MainWindow._sesion_activa(ventana)
+    return ventana
+
+
 def test_con_alumno_atendiendo_espera_al_cierre_de_sesion():
     import main
     aplicadas = []
-    ventana = SimpleNamespace(data_login={"user": "alumno"},
-                              _update_pendiente=False,
-                              _actualizar_ahora=lambda: aplicadas.append(1))
+    ventana = _ventana(main, data_login={"user": "alumno"})
+    ventana._actualizar_ahora = lambda: aplicadas.append(1)
     main.MainWindow._on_update_disponible(ventana)
     assert ventana._update_pendiente and not aplicadas
     ventana.data_login = None
     main.MainWindow._on_update_disponible(ventana)
     assert aplicadas == [1]
+
+
+def test_con_un_alumno_entrando_tambien_espera():
+    import main
+    aplicadas = []
+    ventana = _ventana(main, login_en_curso=True)
+    ventana._actualizar_ahora = lambda: aplicadas.append(1)
+    main.MainWindow._on_update_disponible(ventana)
+    assert ventana._update_pendiente and not aplicadas
 
 
 if __name__ == "__main__":

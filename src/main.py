@@ -174,26 +174,41 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
     def _on_update_disponible(self):
         """Kiosko: hay versión nueva. Sin sesión iniciada se aplica ya; con
-        un alumno atendiendo, al cerrar sesión (ver logout)."""
-        if self.data_login:
+        un alumno atendiendo (o entrando), al cerrar sesión (ver logout)."""
+        if self._sesion_activa():
             self._update_pendiente = True
         else:
             self._actualizar_ahora()
 
+    def _sesion_activa(self):
+        """Hay alguien adentro o entrando: el login corre en otro hilo y
+        mientras tanto data_login sigue vacío."""
+        if self.data_login:
+            return True
+        login = (self.subw or {}).get("LOGIN")
+        return login is not None and getattr(login.obj, "_login_thread", None) is not None
+
     def _actualizar_ahora(self):
         """Tapa la ventana y actualiza. No vuelve si se instala (la app se
-        reinicia); si falla, reintenta hasta lograrlo. Vuelve solo si ya no
-        hay nada nuevo o si el equipo se está apagando."""
+        reinicia); si falla, reintenta hasta lograrlo. Vuelve si ya no hay
+        nada nuevo, si el equipo se está apagando o si alguien inició sesión
+        en el medio: el reinicio cierra sin guardar, así que con una sesión
+        abierta se cancela hasta en el último paso y queda para el logout."""
         if self._actualizando or self._apagando:
+            return
+        if self._sesion_activa():
+            self._update_pendiente = True
             return
         from core.actualizacion_kiosko import actualizar_o_bloquear
         self._actualizando = True
         self._update_pendiente = False
         try:
             actualizar_o_bloquear(__VERSION__, BACKEND_URL,
-                                  abortar=lambda: self._apagando)
+                                  abortar=lambda: self._apagando or self._sesion_activa())
         finally:
             self._actualizando = False
+            if self._sesion_activa():
+                self._update_pendiente = True
 
     def _setup_layout_status(self):
         """Avisa (o no) según de dónde salió el layout, y deja un reintento

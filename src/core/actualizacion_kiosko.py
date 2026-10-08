@@ -107,13 +107,28 @@ def _en_hilo(fn, *args, **kwargs):
     return resultado.get("ok")
 
 
+class _Cancelada(Exception):
+    """abortar() se cumplió a mitad de la descarga o la instalación."""
+
+
 def actualizar_o_bloquear(version, backend_url=None, abortar=lambda: False):
     """No vuelve hasta que LabSim está al día.
 
     Si hay versión nueva la instala y reinicia (apply_update_and_restart no
     vuelve). Si no se puede consultar o la instalación falla, reintenta con
     la pantalla puesta. Vuelve solo cuando GitHub confirma que no hay nada
-    nuevo, o si `abortar()` da True (el equipo se está apagando)."""
+    nuevo, o si `abortar()` da True (el equipo se está apagando, o alguien
+    inició sesión mientras se buscaba o bajaba la versión nueva).
+
+    abortar() se mira también en cada etapa de la instalación, hasta el
+    último momento antes de reiniciar: el reinicio cierra el proceso sin
+    guardar nada, y con un alumno adentro se perdía su atención."""
+
+    def progreso(stage, current, total, hop, hops):
+        if abortar():
+            raise _Cancelada()
+        pantalla.progreso(stage, current, total, hop, hops)
+
     pantalla = PantallaActualizacion()
     pantalla.showFullScreen()
     pantalla.raise_()
@@ -134,13 +149,16 @@ def actualizar_o_bloquear(version, backend_url=None, abortar=lambda: False):
                 motivo = ("No se pudo consultar si hay una versión nueva "
                           f"({exc}). Revisa la conexión a internet.")
             else:
-                if update is None:
+                if update is None or abortar():
                     return
                 try:
                     # No vuelve si sale bien: el proceso termina y el script
                     # del swap abre la versión nueva.
-                    apply_update_and_restart(update, on_progress=pantalla.progreso)
+                    apply_update_and_restart(update, on_progress=progreso)
                     motivo = "El paquete de actualización vino con una estructura inesperada."
+                except _Cancelada:
+                    print("actualización: cancelada, hay una sesión abierta")
+                    return
                 except Exception as exc:
                     traceback.print_exc()
                     motivo = f"No se pudo instalar la actualización ({exc})."
