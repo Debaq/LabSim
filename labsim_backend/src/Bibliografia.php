@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/AbrReferences.php';
 require_once __DIR__ . '/EcochgReferences.php';
 require_once __DIR__ . '/CaseProfile.php';
+require_once __DIR__ . '/BibliografiaPatologias.php';
 
 /**
  * Toda la bibliografía de LabSim en un solo lugar, ordenada por examen, y
@@ -220,9 +221,10 @@ final class Bibliografia
      * Bibliografía de cada cuadro de CaseProfile::SCENARIOS, por clave.
      * Cada cita: eje, cita, enlace, respalda (qué valor), coincide
      * (si / parcial / no), nota y verificada. Un cuadro que no está acá es
-     * una decisión de diseño sin bibliografía todavía.
+     * una decisión de diseño sin bibliografía todavía. Las citas viven en
+     * BibliografiaPatologias (son muchas para este archivo).
      */
-    public const PATOLOGIAS = [];
+    public const PATOLOGIAS = BibliografiaPatologias::CITAS;
 
     /** Nombre de cada eje de un cuadro, en el orden en que se muestran. */
     public const EJES = [

@@ -4286,3 +4286,16 @@ actualiza el autoguardado después de cada subida.
 
 Tests en `tests/test_ecochg_panel.py` y `tests/test_report_autosave.py`. Sin
 probar en la app real.
+
+### Bibliografía de los cuadros del generador (2026-10-08)
+
+Los 73 cuadros de `CaseProfile::SCENARIOS` tienen bibliografía en
+`src/BibliografiaPatologias.php` (155 citas). Se buscó por grupo de cuadros,
+y cada cita se comprobó contra PubMed o Crossref: el título y el primer autor
+coinciden con el PMID o el DOI. El porqué de cada eje no se copió: la página
+lo lee de los comentarios del cuadro en `CaseProfile.php`.
+
+Cada cita dice si la literatura coincide con lo que arma el generador: 64 sí,
+78 en parte y 13 no. **Ninguna discrepancia se aplicó al generador**: son
+cambios a decidir con el docente, y la página los marca ("la literatura NO
+coincide").
