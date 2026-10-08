@@ -126,8 +126,15 @@ POST_POSITIVITY_SIGMA_MS = 0.35
 # hace a 80-90 dB nHL y no en una serie descendente, y por eso medir la
 # razón a nivel bajo la da CHICA aunque el oído tenga hidrops. Que ese
 # error se pueda cometer, y que el trazo no avise, es el ejercicio.
-SP_SL_MIN = 30.0
-SP_SL_FULL = 70.0
+#
+# Estaba en 30-70 dB SL y era demasiado exigente: un Ménière con el umbral
+# del click en 30 dB nHL, medido como corresponde a 90, quedaba en 60 SL y
+# perdía un cuarto del PS -- un hidrops declarado en 0.42 medía 0.32 y salía
+# NORMAL en el examen bien hecho. Con 20-50 el ECochG a 90 dB lee la razón
+# entera mientras el umbral no pase de 40 dB nHL, y el error de medir a
+# nivel bajo (70 dB con umbral 30 ya pierde un tercio) sigue estando.
+SP_SL_MIN = 20.0
+SP_SL_FULL = 50.0
 
 # Microfónica coclear. Con click la MC es una oscilación corta dominada por
 # la base de la cóclea (la región de 2-3 kHz es la que responde primero y

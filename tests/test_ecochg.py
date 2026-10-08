@@ -219,10 +219,22 @@ def test_the_summating_potential_needs_level():
     """
     assert E.sp_level_factor(80) == 1.0
     assert E.sp_level_factor(20) == 0.0
-    assert 0 < E.sp_level_factor(50) < 1
+    assert 0 < E.sp_level_factor(35) < 1
     alto = _promedio('sp_ap', sp_ap=0.55, inty=90, umbral=20)
     bajo = _promedio('sp_ap', sp_ap=0.55, inty=50, umbral=20)
     assert bajo < alto / 2
+
+
+def test_a_hydrops_measured_at_90_db_reads_abnormal():
+    """El examen bien hecho tiene que dar el hidrops.
+
+    Ménière con el umbral del click en 40 dB nHL, medido a 90: la razón
+    leída es la declarada y pasa el límite timpánico. Con el PS pidiendo
+    70 dB SL para estar entero, este oído salía normal.
+    """
+    assert E.sp_level_factor(90 - 40) == 1.0
+    razon = _promedio('sp_ap', sp_ap=0.46, inty=90, umbral=40)
+    assert razon > E.SP_AP_LIMIT['tympanic']
 
 
 # -------------------------------------------------------------- medidas

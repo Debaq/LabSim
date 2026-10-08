@@ -158,6 +158,15 @@ final class CaseBuilder
     // pasa a ser más profundo que la propia espiga del PA y el complejo deja
     // de tener forma de ECochG.
     public const ECOCHG_SP_AP_MAX = 0.90;
+    // Límite normal de la razón PS/PA por electrodo, espejo de
+    // ecochg.SP_AP_LIMIT del cliente. La ficha los usa para mostrarle al
+    // docente lo que el alumno va a leer con cada electrodo: el cliente
+    // pasa la razón timpánica a los otros dos por la proporción de límites.
+    public const ECOCHG_SP_AP_LIMITS = [
+        'tympanic' => 0.40,
+        'extratympanic' => 0.50,
+        'transtympanic' => 0.35,
+    ];
     public const ECOCHG_TASA_MAX = 4.0;
     public const ECOCHG_RAR_COND_MAX_MS = 1.0;
 

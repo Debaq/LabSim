@@ -718,6 +718,45 @@
         abrAgeEl.addEventListener('input', onAbrPopulationChange);
         abrAgeEl.addEventListener('change', onAbrPopulationChange);
     }
+    // Razón PS/PA con cada electrodo del combo Montaje. La ficha la pide
+    // con electrodo de tímpano y el cliente la pasa a los otros dos por la
+    // proporción de límites (ecochg.sp_ap_for_electrode): se muestra acá
+    // para que el docente no tenga que adivinar con cuál se configura.
+    var ECOCHG_ELECTRODOS = [
+        ['tympanic', 'Tímpano'],
+        ['extratympanic', 'Conducto (TipTrode)'],
+        ['transtympanic', 'Promontorio (transtimpánico)'],
+    ];
+    window.drawEcochgEquiv = function () {
+        document.querySelectorAll('.ecochg-equiv').forEach(function (out) {
+            var lado = out.getAttribute('data-lado');
+            var campo = document.querySelector(
+                '#case-form [name="abr[' + lado + '][ecochg][sp_ap]"]');
+            var limites = JSON.parse(out.getAttribute('data-limites') || '{}');
+            var razon = campo ? parseFloat(campo.value) : NaN;
+            out.textContent = '';
+            if (isNaN(razon) || !limites.tympanic) { return; }
+            ECOCHG_ELECTRODOS.forEach(function (par, i) {
+                var limite = limites[par[0]];
+                var valor = razon * limite / limites.tympanic;
+                var item = document.createElement('span');
+                item.textContent = (i ? ' · ' : '') + par[1] + ' ' +
+                    valor.toFixed(2).replace('.', ',') + ' (límite ' +
+                    limite.toFixed(2).replace('.', ',') + ')';
+                if (valor > limite) { item.className = 'badge-warn'; }
+                out.appendChild(item);
+            });
+        });
+    };
+    if (abrPreviewForm) {
+        abrPreviewForm.addEventListener('input', function (e) {
+            if (e.target.name && /\[ecochg\]\[sp_ap\]$/.test(e.target.name)) {
+                window.drawEcochgEquiv();
+            }
+        });
+    }
+
     ['od', 'oi'].forEach(syncAbsFromDelta);
     window.drawAbrPreview();
+    window.drawEcochgEquiv();
 })();

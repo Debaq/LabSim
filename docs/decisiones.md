@@ -4193,3 +4193,35 @@ asomara la cabeza para decir que el paciente siguiente ya llegó
   docente no rompe nada. Una frase que pide un dato que no hay (un
   `{nombre}` sin paciente siguiente) se salta. Si se borran todas las
   líneas, vuelven las de la app.
+
+## Electrococleografía: el hidrops salía normal (2026-10-08)
+
+El docente vio Ménière e hidrops retardado con la razón PS/PA baja. Dos
+causas sumadas:
+
+- **El PS pedía 70 dB SL para estar entero** (`SP_SL_MIN/FULL` en
+  `src/abr/ecochg.py`). Un Ménière con el umbral del click en 30 dB nHL,
+  medido a 90, quedaba en 60 SL y perdía un cuarto del PS: declarado en 0.42,
+  medía 0.32. Pasa a 20-50 dB SL. En la literatura la razón es estable entre
+  68 y 78 dB nHL en oídos sanos (Margolis: 0.29 y 0.22), así que exigir 70 SL
+  no tenía respaldo; el error de medir a nivel bajo sigue existiendo (70 dB
+  con umbral 30 ya pierde un tercio).
+- **El rango del cuadro arrancaba pegado al límite** (0.42 contra 0.40). Pasa
+  a 0.46-0.70 (Ménière) y 0.48-0.72 (retardado), siempre con electrodo de
+  tímpano. Equivale a promontorio 0.40-0.61, cerca de la media de Ménière
+  transtimpánica publicada (0.46), y el techo deja el conducto en 0.875, bajo
+  el tope de forma del complejo (0.90).
+
+No se tocó la separación rar/cond (0.25-0.55 contra límite 0.38): en la
+literatura agrega poco y muchos Ménière confirmados la tienen normal.
+
+Tampoco se tocan los límites por electrodo (0.35/0.40/0.50, decididos con el
+docente el 2026-10-06), aunque hay series transtimpánicas que usan 0.40.
+
+La ficha ahora dice qué electrodo es el de referencia y muestra, debajo del
+campo, la razón y el límite con tímpano, conducto y promontorio, en rojo la
+que pasa.
+
+Lo que la literatura dice y el generador NO reproduce a propósito: un 30-40%
+de los Ménière definidos tienen el ECochG normal. El cuadro del generador da
+siempre el hidrops alterado; un Ménière con ECochG normal se arma a mano.

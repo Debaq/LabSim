@@ -534,6 +534,7 @@
             }
             campo.value = Math.round(valor * 100) / 100;
         });
+        if (window.drawEcochgEquiv) { window.drawEcochgEquiv(); }
     }
 
     /**
