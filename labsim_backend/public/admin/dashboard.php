@@ -168,6 +168,18 @@ if ($appointmentId !== null) {
     foreach ($attStmt->fetchAll() as $a) {
         $attByStudent[(int) $a['student_id']] = $a['estado'];
     }
+    // Informes que ya tiene el servidor, por alumno: para ver que está todo
+    // antes de cerrarle la atención a mano (ver close_attendance).
+    $reportsByStudent = [];
+    $repStmt = $pdo->prepare(
+        'SELECT att.student_id, r.tipo, r.updated_at FROM reports r
+         JOIN attendances att ON att.id = r.attendance_id
+         WHERE att.appointment_id = ? ORDER BY r.tipo'
+    );
+    $repStmt->execute([$appointmentId]);
+    foreach ($repStmt->fetchAll() as $r) {
+        $reportsByStudent[(int) $r['student_id']][] = $r;
+    }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Auth::requireCsrf();
@@ -184,6 +196,28 @@ if ($appointmentId !== null) {
                 AdminAudit::log($me, 'attendance_reactivate', ['appointment_id' => $appointmentId, 'student_id' => $reactUserId]);
             }
             header('Location: dashboard.php?appointment_id=' . $appointmentId . '#student-' . $reactUserId);
+            exit;
+        }
+
+        if ($postAction === 'close_attendance') {
+            // Contraparte de "Reactivar": el alumno no puede cerrar desde la
+            // app (el servidor no recibe su informe, el equipo se cayó) y el
+            // docente ve que lo hecho ya está en el servidor. Queda
+            // 'atendido' como si lo hubiera cerrado él; la evolución que
+            // escribió vive en su equipo y no llega, así que la nota lo dice.
+            $closeUserId = (int) ($_POST['user_id'] ?? 0);
+            if ($closeUserId > 0) {
+                $pdo->prepare(
+                    "UPDATE attendances SET estado = 'atendido',
+                        nota = CASE WHEN nota IS NULL OR TRIM(nota) = ''
+                                    THEN 'Atención cerrada por el docente desde el panel.'
+                                    ELSE nota END,
+                        updated_at = CURRENT_TIMESTAMP
+                     WHERE appointment_id = ? AND student_id = ? AND estado = 'atendiendo'"
+                )->execute([$appointmentId, $closeUserId]);
+                AdminAudit::log($me, 'attendance_close', ['appointment_id' => $appointmentId, 'student_id' => $closeUserId]);
+            }
+            header('Location: dashboard.php?appointment_id=' . $appointmentId . '#student-' . $closeUserId);
             exit;
         }
 
@@ -247,6 +281,14 @@ if ($appointmentId !== null) {
     $byStudent = [];
     foreach ($apptLogs as $l) {
         $byStudent[(int) $l['user_id']][] = $l;
+    }
+    // También quien tiene la atención abierta o cerrada sin acciones
+    // registradas: ABR, ECochG, EOA y VEMP no registran acciones, y sin
+    // esto el alumno no aparecía (ni su "Cerrar atención").
+    foreach (array_keys($attByStudent) as $sid) {
+        if (!isset($byStudent[$sid])) {
+            $byStudent[$sid] = [];
+        }
     }
 
     // La referencia siempre va primera; ?compare= (elegido a mano) pasa por
@@ -318,6 +360,23 @@ if ($appointmentId !== null) {
             <input type="hidden" name="form_action" value="<?= $isReference ? 'unmark_reference' : 'mark_reference' ?>">
             <input type="hidden" name="user_id" value="<?= $uid ?>">
             <button type="submit" class="secondary" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;"><?= $isReference ? 'Quitar referencia' : 'Marcar como referencia' ?></button>
+        </form>
+        <?php endif; ?>
+        <?php if ($curEstado === 'atendiendo'): ?>
+        <?php
+        $susInformes = $reportsByStudent[$uid] ?? [];
+        $listaInformes = $susInformes
+            ? implode(', ', array_map(static function (array $r): string {
+                return $r['tipo'] . ' (' . Clock::fromUtc((string) $r['updated_at'])->format('H:i') . ')';
+            }, $susInformes))
+            : 'ninguno';
+        ?>
+        &nbsp;·&nbsp; informes en el servidor: <strong><?= htmlspecialchars($listaInformes) ?></strong>
+        <form method="post" class="inline" style="margin-left:0.6rem;" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Cerrar la atención de ' . ($student['display_name'] ?? ('Alumno #' . $uid)) . '? Queda "atendido" con los informes que tiene el servidor: ' . $listaInformes . '. Lo que no haya llegado desde su equipo ya no se va a poder subir. La evolución que escribió en la app no llega.'), ENT_QUOTES) ?>);">
+        <?= csrf_field() ?>
+            <input type="hidden" name="form_action" value="close_attendance">
+            <input type="hidden" name="user_id" value="<?= $uid ?>">
+            <button type="submit" class="secondary" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;">Cerrar atención</button>
         </form>
         <?php endif; ?>
         <?php if (in_array($curEstado, ['atendido', 'no_show'], true)): ?>
