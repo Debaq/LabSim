@@ -686,14 +686,27 @@
                 '#case-form [name="vemp[' + lado + '][' + subtipo + '][umbral]"]');
             if (campo) { campo.value = Math.round(Math.min(100, Math.max(30, umbral)) / 5) * 5; }
 
-            // Las ondas vuelven a 0: la patología y el umbral ya describen
-            // el cuadro, y dejar las desviaciones de la generación anterior
-            // sumaría el efecto dos veces.
+            // Las ondas vuelven a 0 salvo la latencia que declara el cuadro
+            // (`lat_ms`): la patología y el umbral ya describen el resto, y
+            // dejar las desviaciones de la generación anterior sumaría el
+            // efecto dos veces. El umbral solo no alcanza para las lesiones
+            // centrales (EM, CMT, kernicterus), cuyo VEMP está PRESENTE y
+            // tarde: sin esto había que cargar la latencia a mano y era fácil
+            // que se pasara.
+            //
+            // Un solo sorteo por subtipo para todos sus picos: la p13 y la
+            // n23 se corren juntas (la de un paciente lento lo es en las dos),
+            // en vez de que una salga al principio de su rango y la otra al
+            // final.
+            var lat = (cfg && cfg.lat_ms && cfg.lat_ms[subtipo]) || {};
+            var u = Math.random();
             ['p13', 'n23', 'n10', 'p16'].forEach(function (pico) {
                 ['lat', 'amp'].forEach(function (campoOnda) {
                     var el = document.querySelector('#case-form [name="vemp[' + lado + '][' +
                         subtipo + '][' + campoOnda + '_' + pico + ']"]');
-                    if (el) { el.value = '0'; }
+                    if (!el) { return; }
+                    var r = campoOnda === 'lat' ? lat[pico] : null;
+                    el.value = r ? String(Math.round((r[0] + (r[1] - r[0]) * u) * 10) / 10) : '0';
                 });
             });
         });
@@ -733,6 +746,60 @@
         } else {
             el.value = 'OD: ' + frase(claveOd, gradoOd) + '. OI: ' + frase(claveOi, gradoOi) + '.';
         }
+    }
+
+    /**
+     * Cuadros que el oído contrario TIENE que tener para que este cuadro
+     * exista (`contralateral` en SCENARIOS), filtrados por la edad. Vacío
+     * si el cuadro no lo pide.
+     */
+    function cuadrosContralaterales(esc) {
+        var edad = edadEnAnios();
+        return (esc.contralateral || []).filter(function (c) {
+            return ESCENARIOS[c] && vaEnEstaEdad(c, edad);
+        });
+    }
+
+    /** Escribe un cuadro (y su grado, si lo admite) en los selectores de un oído. */
+    function ponerCuadro(lado, clave, grado) {
+        if (categorias[lado]) {
+            categorias[lado].value = ESCENARIOS[clave].categoria;
+            sincronizarCuadros(lado);
+        }
+        selectores[lado].value = clave;
+        sincronizarGrados(lado);
+        if (grados[lado] && (ESCENARIOS[clave].grados || []).indexOf(grado) !== -1) {
+            grados[lado].value = grado;
+        }
+    }
+
+    /**
+     * El oído contrario de un cuadro que lo necesita (hidrops retardado:
+     * el otro oído quedó sordo años antes).
+     *
+     * La sugerencia del selector ya lo propone, pero no alcanza: con
+     * "Cualquiera (al azar)" el cuadro sale recién al generar, y un docente
+     * que eligió el hidrops y después tocó el otro oído lo pierde sin
+     * notarlo. Si el otro oído quedó sano o al azar se pone el cuadro que
+     * corresponde -- un hidrops contralateral con el otro oído normal no
+     * existe --; si el docente eligió OTRA patología, se respeta y se avisa.
+     *
+     * Devuelve el aviso para el estado, o ''.
+     */
+    function resolverContralateral(lado, libre) {
+        var otro = lado === 'od' ? 'oi' : 'od';
+        var esc = ESCENARIOS[selectores[lado].value];
+        var contra = esc ? cuadrosContralaterales(esc) : [];
+        if (!contra.length || contra.indexOf(selectores[otro].value) !== -1) { return ''; }
+        if (!ESCENARIOS[selectores[otro].value]) { return ''; }
+        if (libre[otro] || selectores[otro].value === 'normal') {
+            ponerCuadro(otro, alAzar(contra), 'profunda');
+            return '';
+        }
+        return '. OJO: ' + esc.label + ' en ' + lado.toUpperCase() + ' necesita en ' +
+            otro.toUpperCase() + ' una sordera profunda antigua (' +
+            contra.map(function (c) { return ESCENARIOS[c].label; }).join(', ') +
+            '); quedó ' + ESCENARIOS[selectores[otro].value].label;
     }
 
     /** Cuadro elegido para un oído, resolviendo "Cualquiera (al azar)". */
@@ -778,7 +845,10 @@
             if (igualar && igualar.checked) { espejar(); return; }
             var esc = ESCENARIOS[selectores[lado].value];
             if (!esc || !categorias[otro]) { return; }
-            if (esc.lateralidad === 'unilateral') {
+            var contra = cuadrosContralaterales(esc);
+            if (contra.length) {
+                ponerCuadro(otro, alAzar(contra), 'profunda');
+            } else if (esc.lateralidad === 'unilateral') {
                 categorias[otro].value = 'normal';
                 sincronizarCuadros(otro);
             }
@@ -866,6 +936,16 @@
     }
 
     boton.addEventListener('click', function () {
+        // Qué oído dejó el docente librado al azar: ese se puede completar
+        // con el contralateral que pida el otro (ver resolverContralateral).
+        var libre = {};
+        ['od', 'oi'].forEach(function (l) {
+            libre[l] = selectores[l].value === '__random__' ||
+                (categorias[l] && categorias[l].value === '__random__');
+        });
+        escenarioDe('od');
+        escenarioDe('oi');
+        var avisoContra = resolverContralateral('od', libre) || resolverContralateral('oi', libre);
         var claveOd = escenarioDe('od');
         var claveOi = escenarioDe('oi');
         if (!claveOd || !claveOi) { return; }
@@ -968,6 +1048,7 @@
                 'OD ' + escOd.label + ', OI ' + escOi.label +
                 (tinnitus ? '. Con acúfeno (' + tinnitus + ')' : '. Sin acúfeno') +
                 (madre ? '. Es menor: viene con su madre (' + madre + '), revisá la pestaña Sala' : '') +
+                avisoContra +
                 '. Revisalo ficha por ficha en Resumen antes de guardar.';
         }
     });

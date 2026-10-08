@@ -1088,3 +1088,44 @@ t_true(strpos($genJs, 'entre(-JITTER_DB, JITTER_DB)') === strrpos($genJs, 'entre
 $crear = (string) @file_get_contents(dirname(__DIR__) . '/public/admin/case_create.php');
 t_true(strpos($crear, "'lesionMinDb' => CaseProfile::LESION_MIN_DB") !== false,
     'case_create la expone en CASE_CONST');
+
+// --- Latencias del VEMP por cuadro (vemp.lat_ms) ---------------------------
+
+// Las lesiones centrales tienen el VEMP PRESENTE y tarde. Sin esto el
+// generador solo sorteaba el umbral, y la latencia larga había que cargarla
+// a mano: fácil de olvidar.
+foreach (CaseProfile::SCENARIOS as $clave => $esc) {
+    foreach ($esc['vemp']['lat_ms'] ?? [] as $subtipo => $picos) {
+        t_true(isset(CaseBuilder::VEMP_PEAKS[$subtipo]), "{$clave}: lat_ms de un subtipo que existe ({$subtipo})");
+        foreach ($picos as $pico => $r) {
+            t_true(in_array($pico, CaseBuilder::VEMP_PEAKS[$subtipo] ?? [], true),
+                "{$clave}: {$pico} es un pico del {$subtipo}");
+            t_true(count($r) === 2 && $r[0] <= $r[1] && $r[0] > 0, "{$clave}: {$subtipo}.{$pico} es un rango que alarga");
+        }
+    }
+}
+foreach (['esclerosis_multiple', 'neuropatia_hereditaria', 'kernicterus'] as $clave) {
+    t_true(!empty(CaseProfile::SCENARIOS[$clave]['vemp']['lat_ms']['CVEMP']['p13']),
+        "{$clave}: el cVEMP sale con la p13 larga");
+}
+$genJs = (string) @file_get_contents(dirname(__DIR__) . '/public/js/case/generator.js');
+t_true(strpos($genJs, 'cfg.lat_ms') !== false, 'El generador JS escribe las latencias del cuadro');
+
+// --- Oído contralateral obligatorio ----------------------------------------
+
+// El hidrops retardado no existe sin la sordera profunda vieja del otro oído:
+// el generador la pone sola si el otro oído quedó sano o al azar.
+t_true(!empty(CaseProfile::SCENARIOS['hidrops_retardado']['contralateral']),
+    'El hidrops retardado declara su oído contrario');
+foreach (CaseProfile::SCENARIOS as $clave => $esc) {
+    foreach ($esc['contralateral'] ?? [] as $otro) {
+        t_true(isset(CaseProfile::SCENARIOS[$otro]), "{$clave}: el contralateral {$otro} existe");
+        t_true(in_array('profunda', CaseProfile::SCENARIOS[$otro]['grados'] ?? [], true),
+            "{$clave}: {$otro} puede ser profunda (es la sordera vieja)");
+        $minCuadro = CaseProfile::SCENARIO_EDAD[$clave][0] ?? 0;
+        $minOtro = CaseProfile::SCENARIO_EDAD[$otro][0] ?? 0;
+        t_true($minOtro <= $minCuadro, "{$clave}: {$otro} se ofrece a la edad del cuadro");
+    }
+}
+t_true(strpos($genJs, 'function resolverContralateral') !== false,
+    'El generador completa el oído contrario al generar');

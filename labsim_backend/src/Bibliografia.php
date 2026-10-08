@@ -244,6 +244,7 @@ final class Bibliografia
         'tinnitus' => 'Acúfeno',
         'conciencia' => 'Conciencia del problema (entrevista)',
         'lateralidad' => 'Sugerencia para el otro oído',
+        'contralateral' => 'Oído contrario que exige el cuadro',
     ];
 
     /**
@@ -390,7 +391,8 @@ final class Bibliografia
             if (is_int($k) && $k >= 125) {
                 $partes[] = ($k >= 1000 ? ($k / 1000) . 'k' : $k) . ':' . self::valorEje($x);
             } else {
-                $partes[] = $k . ' ' . self::valorEje($x, in_array($k, ['frecuencia', 'ruido', 'type'], true));
+                $nombre = $k === 'lat_ms' ? 'latencia +ms' : $k;
+                $partes[] = $nombre . ' ' . self::valorEje($x, in_array($k, ['frecuencia', 'ruido', 'type'], true));
             }
         }
         return implode(is_int(array_key_first($v)) ? ' ' : ' · ', $partes);

@@ -4438,3 +4438,30 @@ Al usuario no se le contesta: los tickets se ven en Sistema → "Tickets de la
 app" (`admin/tickets.php`, solo admin completo) con estado abierto/cerrado y
 una nota interna, para abrir issues después. El registro se guarda en
 `data/tickets/` (fuera de public/, como los informes).
+
+## VEMP tarde y oído contrario del hidrops: que no se le pasen al docente (2026-10-08)
+
+Dos cosas de la revisión que quedaban "a mano" y que un docente podía
+olvidar:
+
+- **Latencias del VEMP.** El generador solo sorteaba el umbral, y el VEMP de
+  una lesión central está PRESENTE y tarde, no ausente. Ahora el cuadro puede
+  declarar `vemp.lat_ms` (ms sobre la normativa, por subtipo y pico) y
+  `generarVemp()` los escribe en los campos de desviación, que el cliente ya
+  aplicaba. Lo hace con un solo sorteo por subtipo, para que la p13 y la n23
+  se corran juntas. Lo usan tres cuadros:
+  - Esclerosis múltiple: umbral normal, p13 +2 a +4,5 ms y oVEMP corrido
+    (Murofushi 2001, Gazioglu 2012). Pasa de VEMP normal a patológico por el
+    criterio de cuadro típico.
+  - CMT: p13 +7 a +11 ms y n23 +3,5 a +7 ms, que da los 23 y 29 ms de
+    Poretti 2013.
+  - Kernicterus: p13 +1,1 a +2,2 ms y n23 +1,6 a +3,2 ms (Ozkiraz 2012). La
+    magnitud es 1-2 DE de la normativa neonatal del mismo grupo (Erbek
+    2007).
+- **Hidrops retardado.** Sin el otro oído sordo, el cuadro no existe. Ahora
+  declara `contralateral` (parotiditis, laberintitis, fractura transversal):
+  - Al elegirlo, el editor pone uno de esos cuadros en el otro oído, en
+    profunda.
+  - Al generar, si el otro oído quedó sano o al azar, lo completa solo.
+  - Si el docente eligió otra patología en ese oído, se respeta y el estado
+    lo avisa con un "OJO".

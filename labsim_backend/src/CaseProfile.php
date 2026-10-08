@@ -588,6 +588,14 @@ final class CaseProfile
      * porque el oído medio no deja pasar el estímulo, así que el umbral
      * sube tanto como el gap en vez de un rango fijo.
      *
+     * `vemp.lat_ms` corre las latencias del VEMP, en ms sobre la normativa,
+     * por subtipo y pico (`[min, max]`). Es lo que distingue una lesión
+     * central --VEMP PRESENTE y tarde: esclerosis múltiple, CMT,
+     * kernicterus-- de una periférica, que lo apaga sin correrlo
+     * (Murofushi 2001). El generador sortea una sola posición dentro del
+     * rango para todos los picos del subtipo, para que la p13 y la n23 se
+     * corran juntas.
+     *
      * Que un cuadro no traiga `vemp` es una decisión, no un olvido. La
      * súbita y la ototóxica se dejan normales a propósito: el compromiso
      * vestibular en las dos es real pero variable caso a caso, y armarlo
@@ -599,6 +607,13 @@ final class CaseProfile
      * probabilidad y no un sí/no: dos casos del mismo cuadro tienen que
      * poder salir uno con acúfeno y otro sin. La LATERALIDAD no está acá --
      * sale de a cuántos oídos les tocó el cuadro al generar.
+     *
+     * `contralateral` es la lista de cuadros que el OTRO oído tiene que
+     * tener para que este exista (hoy solo el hidrops retardado, que es
+     * justamente un oído sano que se enferma años después de que el otro
+     * quedara sordo). El editor lo propone al elegir el cuadro, y al
+     * generar lo pone si el otro oído quedó sano o al azar; si el docente
+     * eligió otra patología, se respeta y se avisa en el estado.
      *
      * `conciencia` es el rango del rasgo homónimo del paciente en la
      * entrevista (ver Sala::RASGOS_DEFAULT), y solo aparece en los cuadros
@@ -1412,9 +1427,8 @@ final class CaseProfile
         'hidrops_retardado' => [
             'label' => 'Hidrops endolinfático retardado (contralateral)',
             'categoria' => 'sensorial',
-            // La curva del Ménière en un oído que ya venía dañado años
-            // antes. Igual que el Ménière, el caso guarda una foto: la
-            // fluctuación semana a semana no es un eje del modelo.
+            // Igual que el Ménière, el caso guarda una foto: la fluctuación
+            // semana a semana no es un eje del modelo.
             //
             // Forma contralateral: el oído que oía bien hace el hidrops años
             // después de que el otro quedara sordo (Schuknecht 1978). La curva
@@ -1422,10 +1436,12 @@ final class CaseProfile
             'sn_shape' => [125 => 52, 250 => 52, 500 => 48, 1000 => 38, 2000 => 28, 3000 => 22, 4000 => 22, 6000 => 22, 8000 => 22],
             'sn_scale' => [0.6, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [95, 100], 'retro' => null,
-            // 'bilateral' no repite el hidrops: evita que el editor proponga el
-            // otro oído normal. Ahí va la sordera profunda antigua
-            // ('parotiditis', 'laberintitis').
-            'lateralidad' => 'bilateral',
+            // El hidrops es de un solo oído; el otro es la sordera profunda
+            // antigua que lo explica (Schuknecht 1978: laberintitis viral,
+            // sobre todo parotiditis, y trauma). Sin ese oído el cuadro no
+            // existe, así que el generador lo pone solo (ver `contralateral`).
+            'lateralidad' => 'unilateral',
+            'contralateral' => ['parotiditis', 'laberintitis', 'fractura_transversal'],
             'z' => ['A'], 'etf' => 'Normal',
             'grados' => ['leve', 'moderada'],
             'vemp' => ['type' => 'sacular',
@@ -1716,7 +1732,16 @@ final class CaseProfile
             'cce_pct' => [0, 15], 'retro' => 'kernicterus', 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal',
             'grados' => ['leve', 'moderada', 'severa', 'profunda'],
-            'vemp' => ['type' => 'neural', 'umbral' => ['CVEMP' => [55, 70], 'OVEMP' => [60, 75], 'MVEMP' => [65, 80]]],
+            // VEMP presente en todos, con umbral normal y la p13 y la n23
+            // tarde: la bilirrubina toca los núcleos vestibulares o la vía
+            // vestibuloespinal (Ozkiraz 2012). El resumen no da la magnitud;
+            // se usa 1-2 DE de la normativa neonatal del mismo grupo (Erbek
+            // 2007: p13 13,7 ± 1,1 ms, n23 20,5 ± 1,6 ms). El oVEMP no se
+            // midió y queda normal.
+            'vemp' => ['type' => 'normal',
+                       'umbral' => ['CVEMP' => [55, 70], 'OVEMP' => [60, 75], 'MVEMP' => [65, 80]],
+                       'lat_ms' => ['CVEMP' => ['p13' => [1.1, 2.2], 'n23' => [1.6, 3.2]],
+                                    'MVEMP' => ['p13' => [1.1, 2.2], 'n23' => [1.6, 3.2]]]],
             'conciencia' => [10, 40],
         ],
             // VEMP presente con umbral normal pero latencias largas: la
@@ -1797,6 +1822,17 @@ final class CaseProfile
             'cce_pct' => [20, 55], 'retro' => 'esclerosis_multiple', 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal',
             'grados' => [],
+            // VEMP PRESENTE y tarde, con umbral normal: en la EM el VEMP se
+            // altera por latencia, no por umbral. Todos los EM de Murofushi
+            // 2001 con respuesta tenían la p13 larga, y Gazioglu 2012 encontró
+            // alargadas la p13 y las ondas del oVEMP. Ninguno publica la
+            // media en el resumen: 2-4,5 ms deja la onda fuera del límite
+            // normal (media + 2,5 DE, ~2 ms) sin volverla otro cuadro.
+            'vemp' => ['type' => 'normal',
+                       'umbral' => ['CVEMP' => [55, 70], 'OVEMP' => [60, 75], 'MVEMP' => [65, 80]],
+                       'lat_ms' => ['CVEMP' => ['p13' => [2.0, 4.5], 'n23' => [1.5, 4.0]],
+                                    'MVEMP' => ['p13' => [2.0, 4.5], 'n23' => [1.5, 4.0]],
+                                    'OVEMP' => ['n10' => [1.5, 3.5], 'p16' => [1.5, 3.5]]]],
             'conciencia' => [60, 90],
         ],
         'infarto_pontino' => [
@@ -1922,9 +1958,16 @@ final class CaseProfile
             'cce_pct' => [5, 35], 'retro' => 'hereditaria_central', 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal',
             'grados' => [],
-            // Polineuropatía: el nervio vestibular es un nervio más.
-            'vemp' => ['type' => 'neural',
-                       'umbral' => ['CVEMP' => [78, 92], 'OVEMP' => [78, 92], 'MVEMP' => [80, 95]]],
+            // Polineuropatía: el nervio vestibular es un nervio más, y lo que
+            // muestra es un cVEMP PRESENTE y muy tarde (Poretti 2013: alterado
+            // en el 75 %, p13 23,0 ± 2,7 ms y n23 29,0 ± 1,8 ms). Con la
+            // normativa en 13 y 23 ms eso es +7 a +11 en la p13 y +3,5 a +7
+            // en la n23; el intervalo se acorta, como en la serie. El oVEMP
+            // no se midió y queda normal.
+            'vemp' => ['type' => 'normal',
+                       'umbral' => ['CVEMP' => [55, 70], 'OVEMP' => [60, 75], 'MVEMP' => [65, 80]],
+                       'lat_ms' => ['CVEMP' => ['p13' => [7.0, 11.0], 'n23' => [3.5, 7.0]],
+                                    'MVEMP' => ['p13' => [7.0, 11.0], 'n23' => [3.5, 7.0]]]],
             'conciencia' => [30, 60],
         ],
         'tec_tronco' => [
