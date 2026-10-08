@@ -14,11 +14,11 @@ from PySide6.QtWidgets import (QTableWidgetItem, QAbstractItemView,
                                 QDateEdit, QPushButton, QMessageBox, QLineEdit,
                                 QVBoxLayout, QLabel, QTextEdit,
                                 QCheckBox)
-from PySide6.QtCore import QDate, QTime, QDateTime, Qt, QThread, Signal
+from PySide6.QtCore import QDate, QTime, QDateTime, Qt, QThread, QTimer, Signal
 from PySide6.QtGui import QBrush, QColor, QFont, QTextCharFormat
 from agenda.UI.Ui_agenda import Ui_Form
 from core import feriados as feriados_cl
-from core import hilos
+from core import hilos, respaldo_informes
 from core.helpers import (Shedule, entry_estado_por, CasesOffline, debug_print,
                           es_docente,
                           marcar_entry_no_show,
@@ -100,11 +100,41 @@ class EvolucionWidget(QWidget):
         layout.addWidget(self.btn_guardar)
 
         self._on_guardar = None
+        # (usuario, appointment_id) del borrador en el equipo, o None
+        # (prueba del docente: no se guarda nada).
+        self._borrador = None
+        # Lo escrito va al disco poco después de cada cambio (ver
+        # respaldo_informes.guardar_borrador).
+        self._timer_borrador = QTimer(self)
+        self._timer_borrador.setSingleShot(True)
+        self._timer_borrador.setInterval(1500)
+        self._timer_borrador.timeout.connect(self.guardar_borrador)
+        self.texto.textChanged.connect(self._timer_borrador.start)
 
-    def set_contexto(self, nombre_paciente, on_guardar):
+    def set_contexto(self, nombre_paciente, on_guardar, borrador=None):
+        """`borrador`: (usuario, appointment_id) de una atención real. Lo
+        escrito antes para esa misma atención vuelve, aunque la ventana se
+        haya cerrado, se haya cerrado sesión o la app se haya caído."""
+        self.guardar_borrador()   # lo pendiente del contexto anterior
+        mismo = borrador is not None and borrador == self._borrador
         self.lbl_paciente.setText(f"Paciente: {nombre_paciente}")
-        self.texto.clear()
         self._on_guardar = on_guardar
+        self._borrador = borrador
+        if mismo and self.texto.toPlainText().strip():
+            return
+        texto = respaldo_informes.leer_borrador(*borrador) if borrador else ""
+        self.texto.blockSignals(True)
+        self.texto.setPlainText(texto)
+        self.texto.blockSignals(False)
+
+    def guardar_borrador(self):
+        self._timer_borrador.stop()
+        if self._borrador is not None:
+            respaldo_informes.guardar_borrador(*self._borrador, self.texto.toPlainText())
+
+    def hideEvent(self, event):
+        self.guardar_borrador()
+        super().hideEvent(event)
 
     def _on_guardar_clicked(self):
         nota = self.texto.toPlainText().strip()
@@ -112,11 +142,16 @@ class EvolucionWidget(QWidget):
             QMessageBox.warning(self, "Evolución", "Debes describir la evolución del paciente.")
             return
 
-        # False: no se pudo cerrar (sin conexión). La nota queda escrita
-        # para volver a intentarlo.
-        if self._on_guardar is not None and self._on_guardar(nota) is False:
+        self.guardar_borrador()
+        # Solo True es "cerrada": False (sin conexión) o None (no se pudo)
+        # dejan la nota escrita para volver a intentarlo.
+        if self._on_guardar is not None and self._on_guardar(nota) is not True:
             return
+        if self._borrador is not None:
+            respaldo_informes.borrar_borrador(*self._borrador)
+        self.texto.blockSignals(True)
         self.texto.clear()
+        self.texto.blockSignals(False)
 
         padre = self.parent()
         if padre is not None and hasattr(padre, "hide_window"):
@@ -311,15 +346,29 @@ class Agenda(QWidget, Ui_Form):
         dispara SIEMPRE una consulta nueva a Shedule() (get_full_state), y si
         se hacía en el hilo de UI, un backend caído congelaba la ventana
         completa (timeout SSL de hasta 10s, cada ciclo de sync)."""
-        if getattr(self, "_shedule_fetch_thread", None) is not None and self._shedule_fetch_thread.isRunning():
+        if getattr(self, "_shedule_fetch_thread", None) is not None:
+            # Hay una en curso, quizás de antes del cambio que hay que
+            # mostrar (atender/cerrar): se repite al terminar.
+            self._refrescar_otra_vez = True
             return
-        self._shedule_fetch_thread = _SheduleFetchThread(self)
-        self._shedule_fetch_thread.fetched.connect(self._on_refresh_async_done)
-        self._shedule_fetch_thread.start()
+        self._refrescar_otra_vez = False
+        hilo = _SheduleFetchThread(self)
+        hilo.fetched.connect(self._on_refresh_async_done)
+        hilo.finished.connect(self._on_refresh_async_finished)
+        self._shedule_fetch_thread = hilo
+        hilo.start()
 
     def _on_refresh_async_done(self, data):
         self.shedule = data
         self.populate_shedule()
+
+    def _on_refresh_async_finished(self):
+        # Cada 15 s se creaba uno nuevo y ninguno se borraba.
+        hilo, self._shedule_fetch_thread = self._shedule_fetch_thread, None
+        if hilo is not None:
+            hilo.deleteLater()
+        if getattr(self, "_refrescar_otra_vez", False):
+            self.refresh_async()
 
     def _current_username(self):
         data_login = getattr(self.main_window, "data_login", None) or {}
@@ -572,7 +621,7 @@ class Agenda(QWidget, Ui_Form):
         def _guardar(nota):
             return self.main_window.cerrar_atencion(key, nota)
 
-        self.main_window.abrir_evolucion(nombre or "el paciente", _guardar)
+        self.main_window.abrir_evolucion(nombre or "el paciente", _guardar, key)
 
     def _cerrar_atencion_prueba(self):
         """Admin/profe: misma subventana de evolución, pero sin marcar
@@ -587,6 +636,7 @@ class Agenda(QWidget, Ui_Form):
             self._prueba_atendiendo_key = None
             self.main_window.cerrar_atencion_prueba(nota)
             self._on_selection_changed()
+            return True
 
         self.main_window.abrir_evolucion(nombre or "el paciente", _guardar)
 
@@ -623,7 +673,7 @@ class Agenda(QWidget, Ui_Form):
         def _guardar(nota):
             return self.main_window.cerrar_atencion_base(key, nota)
 
-        self.main_window.abrir_evolucion(nombre or "el paciente", _guardar)
+        self.main_window.abrir_evolucion(nombre or "el paciente", _guardar, key)
 
     def _marcar_no_show(self):
         if self._selected_row_key is None:
@@ -638,8 +688,12 @@ class Agenda(QWidget, Ui_Form):
 
         row = self.shedule["agenda_1"][self._selected_row_key]
         marcar_entry_no_show(row, self._current_username())
-        Shedule().set(self.shedule)
-        self.refresh()
+        try:
+            Shedule().set(self.shedule)
+        except requests.RequestException as exc:
+            QMessageBox.warning(self, "Marcar inasistencia",
+                                f"No hay conexión con el servidor. Inténtalo de nuevo.\n\n{exc}")
+        self.refresh_async()
 
     def _ver_ficha_paciente(self):
         if self._selected_row_key is None:
@@ -653,7 +707,12 @@ class Agenda(QWidget, Ui_Form):
             )
             return
 
-        cases = CasesOffline().get_cases()
+        try:
+            cases = CasesOffline().get_cases()
+        except requests.RequestException as exc:
+            QMessageBox.warning(self, "Ver ficha",
+                                f"No hay conexión con el servidor. Inténtalo de nuevo.\n\n{exc}")
+            return
         caso = cases.get(case_id, {})
         debug_print(f"[agenda_ficha] case_id={case_id!r} (type={type(case_id).__name__}) "
               f"cases_keys_sample={list(cases.keys())[:10]!r} "

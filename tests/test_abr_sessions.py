@@ -51,10 +51,20 @@ class ClienteFalso:
     def get_my_report(self, appointment_id, tipos=None):
         return self.actuales
 
-    def upload_report(self, appointment_id, tipo, data, images):
+    def upload_report(self, appointment_id, tipo, data, images, **_kw):
         # Lo que viaja de verdad: JSON. Si algo no se serializa, revienta acá.
         ClienteFalso.subidas.append((appointment_id, tipo, json.loads(json.dumps(data))))
         return {'ok': True}
+
+
+def _traer(w):
+    """fetch_sessions corre en otro hilo: espera y entrega la respuesta."""
+    w.fetch_sessions()
+    hilo = getattr(w, '_retomar', None)
+    if hilo is not None:
+        hilo.wait(5000)
+    from core.base import context
+    context.app.processEvents()
 
 
 def _preparar():
@@ -217,7 +227,7 @@ def test_the_list_comes_from_the_backend():
     ClienteFalso.informes = [_sesion_guardada()]
     w = panel._ventana()
     assert not w.cb_session.isVisibleTo(w)
-    w.fetch_sessions()
+    _traer(w)
     assert w.cb_session.count() == 2
     assert w.cb_session.itemText(1) == '10/09/2026 10:30 · ABR'
     assert w.cb_session.isVisibleTo(w)
@@ -262,7 +272,7 @@ def test_resuming_brings_back_what_was_saved():
     guardado['data']['curvas']['R1']['marcas_graf'] = {'V': [5.6, 0.3]}
     ClienteFalso.actuales = [{'tipo': 'ABR', 'data': guardado['data']}]
     w = panel._ventana()
-    w.fetch_sessions()
+    _traer(w)
     assert w.curves_R == ['R1', 'R2']
     assert set(w.memory) == {'R1', 'R2'}
     assert 'V' in w.graph_r.marks['R1']
@@ -280,7 +290,7 @@ def test_resuming_does_not_overwrite_new_work():
     ClienteFalso.actuales = [{'tipo': 'ABR', 'data': _sesion_guardada()['data']}]
     w = panel._ventana()
     panel._capturar(w, intensidad=70)
-    w.fetch_sessions()
+    _traer(w)
     assert list(w.memory) == ['R1']
     assert w.memory['R1']['int'] == 70
 

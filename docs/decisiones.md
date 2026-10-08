@@ -4485,3 +4485,91 @@ muestra en dos lugares:
 Las notas del Ménière y de la EM ahora dan la cifra de la realidad: ECochG
 normal en cerca de la mitad de los Ménière, y VEMP normal en el 69-75 % de
 las EM. `test_bibliografia` exige que las dos aparezcan.
+
+## Auditoría de estabilidad: que no se cierre ni se pierda lo del alumno (2026-10-08)
+
+Auditoría de punta a punta (ciclo de vida, avance del alumno, módulos de
+examen). Lo que se cambió y por qué:
+
+**Cierres del proceso.** Al cerrar sesión solo se soltaban los hilos de las
+subventanas que se habían abierto alguna vez; las que nunca se mostraron no
+tienen padre y el GC las destruía con su hilo corriendo (la agenda se
+refresca cada 15 s aunque esté cerrada; la foto de otoscopia se pide al
+atender). `_soltar_hilos_de_ventanas()` suelta los de todas, al cerrar sesión
+y al cerrar la app. Al salir, `hilos.quedan_vivos()`: si algún hilo de red
+sigue, `os._exit` en vez de dejar que el intérprete lo destruya (abortaba:
+"LabSim dejó de funcionar"). La espera al salir es de 4 s en total, no por hilo.
+
+**Evolución escrita.** Vivía solo en la ventana y `set_contexto` la borraba
+al reabrir. Ahora es un borrador en el equipo (`respaldo_informes.
+guardar_borrador`, 1,5 s después de cada cambio, al esconder la ventana, al
+cerrar sesión y al apagar), por usuario y cita; vuelve al reabrir aunque la
+app se haya caído y se borra solo cuando el cierre de la atención salió
+bien. No se sube sola: viaja como la nota del cierre, como antes. Es lo único
+que deja el alumno de audiometría, logo e impedanciometría.
+
+**Cierre de la atención.** `attendance_action.php` evaluaba OIRS (LLM, hasta
+30 s) antes de responder y la app cortaba a los 10: creía que no se había
+cerrado y quedaba en un bucle de "sin conexión" con la atención ya cerrada.
+OIRS corre ahora después de responder (`register_shutdown_function` +
+`fastcgi_finish_request`/`litespeed_finish_request`), el cliente espera 40 s
+en ese POST, y si algo falla pregunta si quedó cerrada antes de decir que no.
+Si la cita desapareció de la agenda la evolución no se borra. El aviso dice el
+motivo real (sin conexión / sesión vencida / el servidor no aceptó + detalle).
+
+**Recuperar al retomar.** Si el servidor no respondía, el módulo arrancaba
+vacío y el autoguardado subía la atención en blanco encima de lo hecho. Ahora:
+- lo que trae el servidor queda también en el equipo (`anotar_del_servidor`),
+  y sin red vuelve lo último del equipo aunque ya estuviera subido;
+- cada informe lleva `version` en el servidor; la app manda `version_base` (la
+  versión sobre la que armó el informe) y si no coincide **el servidor aparta
+  la versión que pisa** en `report_versions` en vez de perderla. No se
+  rechaza la subida: el alumno sigue trabajando y nada se pierde. El docente
+  ve "(N ant.)" junto al informe en la ficha del alumno y puede restaurar una
+  (`admin/report_versions.php`; la actual pasa a la lista). Se guardan solo los
+  datos, las imágenes son las de la última subida.
+- `report_upload.php`/`my_report.php` ponen la tabla al día solos
+  (`Db::ensureReportVersioning`): entre el despliegue y "Aplicar schema" cada
+  subida fallaba por la columna nueva.
+
+**AABR no se guardaba nunca.** El CHECK de `reports.tipo` no incluía 'AABR'
+(se agregó a `REPORT_TIPOS` pero no a la tabla): cada informe de tamizaje daba
+500. La migración (`migrateReportsTiposIfNeeded`, reemplaza a la de
+otoscopía) reconstruye la tabla con AABR y `version`.
+
+**Pendientes de otro equipo.** Lo que no subía solo se mandaba al cerrar esa
+cita en ese equipo. Ahora se suben todos los pendientes del usuario al
+iniciar sesión y con cada sync (`SubidaPendientes`), salvo la cita abierta,
+que la sube el autoguardado. Al salir no se resube lo que ya subió con la
+misma huella (pisaba lo que el alumno siguió haciendo en otro equipo).
+
+**Respaldo en disco.** Datos cada 5 s (sin exportar gráficos; los gráficos
+siguen cada 30 s). Escritura con temporal propio + fsync del archivo y de la
+carpeta (antes un corte de luz podía dejar un archivo vacío) y con lock (la
+subida marcaba desde otro hilo y revertía lo nuevo). Un JSON roto se aparta
+como `.danado` en vez de ignorarse. Las imágenes que no vienen en un respaldo
+nuevo se conservan (la EOA retomada vuelve sin gráficos y borraba los de la
+vuelta anterior). Apagado del kiosko: todo al disco y nada a la red.
+
+**Otros.** `_hydrate_modules` aísla cada módulo (un dato raro del caso cortaba
+la carga de todos los siguientes, que quedaban sin caso ni autoguardado). El
+login se deshace entero ante cualquier error, no solo de red. Un layout nuevo
+con la sesión abierta reinicia al cerrar sesión, no en plena atención. El
+refresco de la agenda tras atender/cerrar va en segundo plano. Las acciones
+de `logs.db` llevan el usuario (en un equipo sin red las subía la sesión
+siguiente a su nombre) y la cola se aparta si está dañada. El registro rota
+también en caliente. Arranque: layout sin SECTORS o error inesperado del
+chequeo de actualización ya no impiden abrir.
+
+**Módulos de examen** (sin cierres del proceso, pero estados rotos):
+logoaudiometría con UMD fuera de grilla, impedanciometría (cambio de oído a
+mitad del barrido, paciente nuevo con el timpanograma del anterior, reflejos
+como lista o texto), umbral ABR/AABR 'NR' o texto, VEMP con números como
+texto, tono del audiómetro que seguía sonando escondido, EEG/EMG de fondo
+pausados con la ventana oculta, OAE (Iniciar durante la captura, Limpiar con
+captura pendiente, Detener en la sonda guardaba la corrida anterior),
+`Preferences.get` devuelve None como decía su comentario.
+
+Queda fuera, a propósito: el `preCharger` del impedanciómetro sin paciente
+sigue dibujando una curva tipo A (choca con "sin datos reales no se genera",
+pero no es de estabilidad).

@@ -353,7 +353,7 @@ def test_the_report_is_uploaded_as_its_own_type():
         def is_logged_in(self):
             return True
 
-        def upload_report(self, appointment_id, tipo, data, images):
+        def upload_report(self, appointment_id, tipo, data, images, **_kw):
             subido.update({'appointment_id': appointment_id, 'tipo': tipo,
                            'data': data, 'images': images})
             return {}

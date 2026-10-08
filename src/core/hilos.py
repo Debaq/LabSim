@@ -12,10 +12,15 @@ cierra".
 termine solo; recién ahí se borra. Lo que el hilo emita después ya no le
 llega a nadie (el dueño no existe) o le llega a quien siga vivo.
 """
+import time
+
 from PySide6.QtCore import QThread
 from PySide6.QtWidgets import QApplication
 
 _sueltos = set()
+
+# Lo que se espera al cerrar la app a que terminen los hilos de red.
+ESPERA_AL_SALIR_S = 4
 
 
 def soltar(hilo):
@@ -68,8 +73,26 @@ def _esperar_al_salir():
 
 
 def _al_salir():
+    # Plazo total, no por hilo: con la red colgada varios hilos esperando
+    # sumaban medio minuto con la ventana ya cerrada.
+    limite = time.monotonic() + ESPERA_AL_SALIR_S
     for hilo in list(_sueltos):
+        resto = int((limite - time.monotonic()) * 1000)
+        if resto <= 0:
+            break
         try:
-            hilo.wait(3000)
+            hilo.wait(resto)
         except RuntimeError:
             pass
+
+
+def quedan_vivos() -> bool:
+    """Si algún hilo soltado sigue corriendo (ver __main__ en main.py: no
+    se puede dejar que el intérprete lo destruya al terminar)."""
+    for hilo in list(_sueltos):
+        try:
+            if hilo.isRunning():
+                return True
+        except RuntimeError:
+            continue
+    return False

@@ -8,7 +8,9 @@ rápido, nunca toca la red -- y `LogUploaderThread` sube lo acumulado en
 lotes cada cierto tiempo, en un hilo aparte del hilo de la UI.
 """
 import json
+import os
 import sqlite3
+import threading
 from datetime import datetime
 from pathlib import Path
 
@@ -20,7 +22,28 @@ class LocalLogQueue:
     def __init__(self, db_path):
         self._db_path = Path(db_path)
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._init_db()
+        # Quién está logueado: cada evento lleva su dueño. En un equipo
+        # compartido sin red, lo que dejó un alumno lo subía la sesión del
+        # siguiente y quedaba a nombre de él (ver set_usuario).
+        self._usuario = None
+        try:
+            self._init_db()
+        except sqlite3.DatabaseError as exc:
+            # Un corte de luz puede dejar el archivo roto: sin esto la app
+            # no abría (se importa al arrancar). Se aparta y se empieza otro.
+            print(f"log_queue: {self._db_path.name} dañado ({exc}), se aparta")
+            for sufijo in ("", "-wal", "-shm"):
+                viejo = Path(str(self._db_path) + sufijo)
+                if viejo.exists():
+                    try:
+                        os.replace(viejo, Path(str(viejo) + ".danado"))
+                    except OSError:
+                        pass
+            self._init_db()
+
+    def set_usuario(self, usuario) -> None:
+        """Id del usuario logueado (None al cerrar sesión)."""
+        self._usuario = None if usuario is None else str(usuario)
 
     def _connect(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self._db_path, timeout=5)
@@ -39,22 +62,41 @@ class LocalLogQueue:
                 )
                 """
             )
+            columnas = [r[1] for r in conn.execute("PRAGMA table_info(pending_logs)")]
+            if "user_id" not in columnas:
+                conn.execute("ALTER TABLE pending_logs ADD COLUMN user_id TEXT")
 
     def push(self, action: str, payload: dict | None = None) -> None:
         """Encola un evento. Escritura local, no bloquea por red."""
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        with self._connect() as conn:
-            conn.execute(
-                "INSERT INTO pending_logs (ts, action, payload) VALUES (?, ?, ?)",
-                (ts, action, json.dumps(payload, ensure_ascii=False) if payload is not None else None),
-            )
+        try:
+            with self._connect() as conn:
+                conn.execute(
+                    "INSERT INTO pending_logs (ts, action, payload, user_id) VALUES (?, ?, ?, ?)",
+                    (ts, action,
+                     json.dumps(payload, ensure_ascii=False) if payload is not None else None,
+                     self._usuario),
+                )
+        except sqlite3.Error as exc:
+            # Se llama desde los slots de los módulos: un disco lleno no
+            # puede cortar lo que estaba haciendo el alumno.
+            print(f"log_queue: no se pudo encolar {action}: {exc}")
 
-    def pop_batch(self, limit: int = 200) -> list[dict]:
+    def pop_batch(self, limit: int = 200, usuario=None) -> list[dict]:
+        """Los más viejos de `usuario` (más los sin dueño, de antes de que
+        los eventos lo llevaran). None = de cualquiera."""
         with self._connect() as conn:
-            rows = conn.execute(
-                "SELECT id, ts, action, payload FROM pending_logs ORDER BY id LIMIT ?",
-                (limit,),
-            ).fetchall()
+            if usuario is None:
+                rows = conn.execute(
+                    "SELECT id, ts, action, payload FROM pending_logs ORDER BY id LIMIT ?",
+                    (limit,),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    "SELECT id, ts, action, payload FROM pending_logs "
+                    "WHERE user_id = ? OR user_id IS NULL ORDER BY id LIMIT ?",
+                    (str(usuario), limit),
+                ).fetchall()
         return [
             {"id": r[0], "ts": r[1], "action": r[2], "payload": json.loads(r[3]) if r[3] else None}
             for r in rows
@@ -100,6 +142,11 @@ class LogUploaderThread(QThread):
         self._client = client
         self._interval_s = interval_s
         self._batch_size = batch_size
+        # Solo lo de quien tiene el token (ver LocalLogQueue.set_usuario).
+        self._usuario = (getattr(client, "user", None) or {}).get("id")
+        # flush_now() (hilo de la ventana) y run() sacaban el mismo lote a
+        # la vez y lo subían dos veces, por la misma conexión.
+        self._lock = threading.Lock()
 
     def run(self) -> None:
         while not self.isInterruptionRequested():
@@ -113,16 +160,21 @@ class LogUploaderThread(QThread):
         self._flush_once()
 
     def _flush_once(self) -> None:
-        batch = self._queue.pop_batch(self._batch_size)
-        if not batch:
-            return
-        entries = [{"ts": e["ts"], "action": e["action"], "payload": e["payload"]} for e in batch]
-        try:
-            self._client.post_logs_batch(entries)
-        except requests.RequestException as exc:
-            self.upload_failed.emit(str(exc))
-            return
-        self._queue.delete_ids([e["id"] for e in batch])
+        with self._lock:
+            try:
+                batch = self._queue.pop_batch(self._batch_size, self._usuario)
+                if not batch:
+                    return
+                entries = [{"ts": e["ts"], "action": e["action"], "payload": e["payload"]}
+                           for e in batch]
+                try:
+                    self._client.post_logs_batch(entries)
+                except requests.RequestException as exc:
+                    self.upload_failed.emit(str(exc))
+                    return
+                self._queue.delete_ids([e["id"] for e in batch])
+            except sqlite3.Error as exc:
+                print(f"log_queue: no se pudo leer la cola: {exc}")
 
     def _wait_interruptible(self, seconds: float) -> None:
         elapsed = 0.0

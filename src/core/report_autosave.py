@@ -43,6 +43,9 @@ from core.helpers import Preferences
 
 
 INTERVALO_MS = 30_000
+# Respaldo en el disco de los datos (sin exportar gráficos), más seguido
+# que la subida: un corte de luz pierde a lo sumo esto.
+INTERVALO_DISCO_MS = 5_000
 
 
 def _client():
@@ -73,17 +76,23 @@ def subir(job, client=None) -> None:
     if not client.is_logged_in():
         raise RuntimeError("no hay sesión con el servidor")
     usuario = respaldo_informes.usuario_de(client)
+    # La versión del servidor sobre la que se armó: si allá hay otra (otro
+    # equipo, o un retomar que no alcanzó a traer lo guardado), el
+    # servidor aparta la que pisa en vez de perderla.
+    registro = respaldo_informes.leer(usuario, job["appointment_id"], job["tipo"]) or {}
     try:
-        client.upload_report(int(job["appointment_id"]), job["tipo"], job["data"],
-                             job.get("images_listas") or {})
+        respuesta = client.upload_report(int(job["appointment_id"]), job["tipo"], job["data"],
+                                         job.get("images_listas") or {},
+                                         version_base=registro.get("version") or 0)
     except requests.HTTPError as exc:
         if getattr(exc.response, "status_code", None) == 409:
             # Atención ya cerrada: el servidor no lo va a aceptar nunca.
             respaldo_informes.marcar(usuario, job["appointment_id"], job["tipo"],
                                      huella(job), "cerrada")
         raise
+    version = (respuesta or {}).get("version") if isinstance(respuesta, dict) else None
     respaldo_informes.marcar(usuario, job["appointment_id"], job["tipo"],
-                             huella(job), "subido")
+                             huella(job), "subido", version=version)
 
 
 class _Subida(QThread):
@@ -119,19 +128,29 @@ class _Recuperacion(QThread):
         self.tipos = tipos
 
     def run(self):
-        try:
-            client = _client()
-            informes = client.get_my_report(self.appointment_id, self.tipos) \
-                if client.is_logged_in() else []
-        except Exception as exc:  # noqa: BLE001 -- sin red se atiende igual
-            print(f"autosave: no se pudo recuperar lo guardado: {exc}")
-            informes = []
-            client = None
-        if client is None:
-            client = _client()
-        informes = respaldo_informes.mezclar(respaldo_informes.usuario_de(client),
-                                             self.appointment_id, informes, self.tipos)
-        self.lista.emit(self.appointment_id, informes)
+        self.lista.emit(self.appointment_id, recuperar(self.appointment_id, self.tipos))
+
+
+def recuperar(appointment_id, tipos, client=None) -> list:
+    """Lo guardado de una cita, el más nuevo primero: lo del servidor con lo
+    del equipo delante (ver respaldo_informes.mezclar). Corre en el hilo
+    que llama (red)."""
+    servidor_ok = False
+    informes = []
+    try:
+        client = client if client is not None else _client()
+        if client.is_logged_in():
+            informes = client.get_my_report(appointment_id, tipos)
+            servidor_ok = True
+    except Exception as exc:  # noqa: BLE001 -- sin red se atiende igual
+        print(f"autosave: no se pudo recuperar lo guardado: {exc}")
+    if client is None:
+        client = _client()
+    usuario = respaldo_informes.usuario_de(client)
+    for informe in informes:
+        respaldo_informes.anotar_del_servidor(usuario, appointment_id, informe)
+    return respaldo_informes.mezclar(usuario, appointment_id, informes, tipos,
+                                     servidor_ok=servidor_ok)
 
 
 class _Reparto(QObject):
@@ -174,28 +193,65 @@ class ReportAutosave(QObject):
         self._huellas = {}      # (appointment_id, tipo) -> huella subida
         self._respaldadas = {}  # (appointment_id, tipo) -> (huella, quedó en el disco)
         self._hilos = {}        # (appointment_id, tipo) -> _Subida en curso
+        self._en_disco = {}     # (appointment_id, tipo) -> huella de los datos en el disco
         self._timer = QTimer(self)
         self._timer.setInterval(INTERVALO_MS)
         self._timer.timeout.connect(self.guardar)
+        self._timer_disco = QTimer(self)
+        self._timer_disco.setInterval(INTERVALO_DISCO_MS)
+        self._timer_disco.timeout.connect(self.respaldar)
 
     def iniciar(self):
         """Arranca con una atención nueva: se olvida lo subido antes."""
         self._huellas.clear()
         self._respaldadas.clear()
+        self._en_disco.clear()
         for m in self._modulos():
             estado = getattr(m, "estado_informe", None)
             if estado is not None:
                 estado.limpiar()
         self._timer.start()
+        self._timer_disco.start()
 
     def detener(self):
         self._timer.stop()
+        self._timer_disco.stop()
         self.esperar()
 
     def reanudar(self):
         """Vuelve a correr sin olvidar nada (la subida final falló y la
         atención sigue abierta)."""
         self._timer.start()
+        self._timer_disco.start()
+
+    def respaldar(self, con_imagenes=False):
+        """Solo al disco, sin red: los datos de lo que cambió (y, con
+        `con_imagenes`, también los gráficos). Rápido y nunca lanza: corre
+        cada pocos segundos y antes de que el equipo se apague."""
+        usuario = None
+        for m in self._modulos():
+            try:
+                jobs = trabajos(m)
+                for job in jobs:
+                    if usuario is None:
+                        usuario = respaldo_informes.usuario_de(_client())
+                    clave = (job["appointment_id"], job["tipo"])
+                    h = huella(job)
+                    if con_imagenes:
+                        if self._respaldadas.get(clave, (None,))[0] == h:
+                            continue
+                        exportar = job.get("images")
+                        imagenes = exportar() if callable(exportar) else {}
+                        self._respaldadas[clave] = (
+                            h, respaldo_informes.guardar(usuario, job, h, imagenes or {}))
+                        self._en_disco[clave] = h
+                        continue
+                    if self._en_disco.get(clave) == h or self._respaldadas.get(clave, (None,))[0] == h:
+                        continue
+                    if respaldo_informes.guardar(usuario, job, h):
+                        self._en_disco[clave] = h
+            except Exception as exc:  # noqa: BLE001 -- un módulo no frena a los demás
+                print(f"autosave: no se pudo respaldar {type(m).__name__}: {exc}")
 
     def esperar(self):
         """Espera a que terminen las subidas en curso. Se llama antes de la
@@ -222,13 +278,12 @@ class ReportAutosave(QObject):
         for m in ([modulo] if modulo is not None else self._modulos()):
             try:
                 jobs = trabajos(m)
+                for job in jobs:
+                    if usuario is None:
+                        usuario = respaldo_informes.usuario_de(_client())
+                    self._subir_si_cambio(m, job, usuario)
             except Exception as exc:  # noqa: BLE001 -- un módulo no frena a los demás
                 print(f"autosave: {type(m).__name__}: {exc}")
-                continue
-            for job in jobs:
-                if usuario is None:
-                    usuario = respaldo_informes.usuario_de(_client())
-                self._subir_si_cambio(m, job, usuario)
 
     def _subir_si_cambio(self, modulo, job, usuario):
         clave = (job["appointment_id"], job["tipo"])
@@ -241,6 +296,7 @@ class ReportAutosave(QObject):
             imagenes = exportar() if callable(exportar) else {}
             self._respaldadas[clave] = (
                 h, respaldo_informes.guardar(usuario, job, h, imagenes or {}))
+            self._en_disco[clave] = h
         if clave in self._hilos:
             return  # sigue subiendo la anterior; el próximo tick va
         if self._huellas.get(clave) == h:
@@ -314,13 +370,19 @@ class ReportAutosave(QObject):
                             en_equipo=self._respaldadas.get(hilo.clave, (None, False))[1])
 
 
-def subir_pendientes(appointment_id, client=None) -> tuple[bool, str]:
-    """Sube lo que quedó en el equipo sin subir de esa cita (p. ej. la app
-    se cerró sin red y la atención se cierra sin haberla retomado). Antes de
-    cerrar una atención: si algo no sube, no se cierra."""
+def subir_pendientes(appointment_id=None, client=None, excluir=None) -> tuple[bool, str]:
+    """Sube lo que quedó en el equipo sin subir: de esa cita (antes de
+    cerrarla: si algo no sube, no se cierra) o, con None, de todas las del
+    usuario (al iniciar sesión y con cada sync: un alumno que trabajó sin
+    red en un equipo y siguió en otro). `excluir()`: la cita abierta ahora,
+    que la sube el autoguardado. Una atención ya cerrada responde 409 y
+    queda como 'cerrada', sin trabar a las demás."""
     client = client if client is not None else _client()
     usuario = respaldo_informes.usuario_de(client)
+    primer_error = ""
     for registro in respaldo_informes.pendientes(usuario, appointment_id):
+        if excluir is not None and str(excluir()) == str(registro.get("appointment_id")):
+            continue
         job = {"appointment_id": registro["appointment_id"], "tipo": registro["tipo"],
                "data": registro["data"],
                "images_listas": respaldo_informes.imagenes(
@@ -328,24 +390,49 @@ def subir_pendientes(appointment_id, client=None) -> tuple[bool, str]:
         try:
             subir(job, client)
         except Exception as exc:  # noqa: BLE001
-            return False, str(exc)
-    return True, ""
+            if appointment_id is not None:
+                return False, str(exc)
+            print(f"autosave: pendiente de la cita {registro.get('appointment_id')} "
+                  f"({registro.get('tipo')}) no subió: {exc}")
+            primer_error = primer_error or str(exc)
+    return not primer_error, primer_error
+
+
+class SubidaPendientes(QThread):
+    """subir_pendientes() de todas las citas, fuera del hilo de la ventana."""
+
+    def __init__(self, excluir, parent=None):
+        super().__init__(parent)
+        self.excluir = excluir
+
+    def run(self):
+        try:
+            subir_pendientes(None, excluir=self.excluir)
+        except Exception as exc:  # noqa: BLE001
+            print(f"autosave: no se pudieron subir los pendientes: {exc}")
 
 
 def subir_ahora(job, client=None) -> tuple[bool, str]:
     """Subida sincrónica de un job (cierre de atención, cierre de la app).
     Las imágenes se exportan acá mismo. `client`: el BackendClient del
-    módulo que llama (None = uno nuevo)."""
-    exportar = job.get("images")
-    job = dict(job)
-    # Una imagen que no se pudo exportar no tira abajo el informe entero.
-    job["images_listas"] = {k: v for k, v in (exportar() if callable(exportar) else {}).items()
-                            if os.path.isfile(v)}
+    módulo que llama (None = uno nuevo).
+
+    Si ese mismo contenido ya subió, no se repite: al cerrar sesión en un
+    equipo donde la atención quedó atrás, resubir pisaba lo que el alumno
+    siguió haciendo en otro."""
     try:
         cliente = client if client is not None else _client()
+        usuario = respaldo_informes.usuario_de(cliente)
+        previo = respaldo_informes.leer(usuario, job["appointment_id"], job["tipo"]) or {}
+        if previo.get("estado") == "subido" and previo.get("huella") == huella(job):
+            return True, ""
+        exportar = job.get("images")
+        job = dict(job)
+        # Una imagen que no se pudo exportar no tira abajo el informe entero.
+        job["images_listas"] = {k: v for k, v in (exportar() if callable(exportar) else {}).items()
+                                if os.path.isfile(v)}
         # Al disco antes que a la red: si la subida falla, al retomar vuelve.
-        respaldo_informes.guardar(respaldo_informes.usuario_de(cliente), job,
-                                  huella(job), job["images_listas"])
+        respaldo_informes.guardar(usuario, job, huella(job), job["images_listas"])
         subir(job, cliente)
     except Exception as exc:  # noqa: BLE001
         return False, str(exc)

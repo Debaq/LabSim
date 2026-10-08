@@ -626,7 +626,7 @@ class _ClienteAnota:
     def get_my_report(self, appointment_id, tipos=None):
         return self.actuales
 
-    def upload_report(self, appointment_id, tipo, data, images):
+    def upload_report(self, appointment_id, tipo, data, images, **_kw):
         import json
         _ClienteAnota.subidas.append((tipo, json.loads(json.dumps(data)), dict(images)))
 
@@ -716,7 +716,7 @@ def test_the_report_goes_up_as_an_ecochg():
         def is_logged_in(self):
             return True
 
-        def upload_report(self, appointment_id, tipo, data, images):
+        def upload_report(self, appointment_id, tipo, data, images, **_kw):
             subidos.append(tipo)
 
     import abr.AbrMainWindow as modulo

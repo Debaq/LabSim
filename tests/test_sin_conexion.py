@@ -108,7 +108,7 @@ class _Cliente:
     def is_logged_in(self):
         return True
 
-    def upload_report(self, cita, tipo, data, imagenes):
+    def upload_report(self, cita, tipo, data, imagenes, **_kw):
         if self.falla is not None:
             raise self.falla
         self.subidos.append((cita, tipo, data, sorted(imagenes)))
@@ -241,6 +241,143 @@ def test_el_reporte_lleva_el_registro_comprimido():
     finally:
         cliente_mod.BackendClient = original
         registro.cola = original_cola
+
+
+
+# -- auditoría 2026-10-08: lo que faltaba para no perder lo hecho -------------
+
+def test_sin_servidor_vuelve_lo_ya_subido_del_equipo():
+    """Retomar sin red: el módulo vuelve con lo último de este equipo, no
+    vacío (vacío, el autoguardado subía la atención en blanco encima)."""
+    job = _job({"curvas": {"R1": 65}}, cita=60)
+    rp.guardar("u1", job, ra.huella(job))
+    rp.marcar("u1", 60, "ABR", ra.huella(job), "subido")
+    assert rp.mezclar("u1", 60, [], ["ABR"]) == []
+    sin_red = rp.mezclar("u1", 60, [], ["ABR"], servidor_ok=False)
+    assert [r["data"] for r in sin_red] == [{"curvas": {"R1": 65}}]
+
+
+def test_lo_del_servidor_queda_en_el_equipo_sin_pisar_lo_pendiente():
+    rp.anotar_del_servidor("u1", 61, {"tipo": "VEMP", "data": {"x": 1}, "version": 4})
+    assert rp.leer("u1", 61, "VEMP")["version"] == 4
+    pend = _job({"x": 2}, tipo="VEMP", cita=61)
+    rp.guardar("u1", pend, ra.huella(pend))
+    assert rp.leer("u1", 61, "VEMP")["version"] == 4     # la base se conserva
+    rp.anotar_del_servidor("u1", 61, {"tipo": "VEMP", "data": {"x": 1}, "version": 5})
+    assert rp.leer("u1", 61, "VEMP")["data"] == {"x": 2}
+
+
+def test_un_respaldo_danado_se_aparta_en_vez_de_perderse():
+    job = _job({"x": 1}, cita=62)
+    rp.guardar("u1", job, ra.huella(job))
+    ruta = rp._ruta("u1", 62, "ABR")
+    ruta.write_text('{"roto": ', "utf-8")
+    assert rp.leer("u1", 62, "ABR") is None
+    assert ruta.with_name(ruta.name + ".danado").exists()
+
+
+class _ClienteVersion:
+    user = {"id": 11}
+
+    def __init__(self):
+        self.bases = []
+        self.version = 0
+
+    def is_logged_in(self):
+        return True
+
+    def upload_report(self, cita, tipo, data, imagenes, version_base=None, **_kw):
+        self.bases.append(version_base)
+        self.version += 1
+        return {"ok": True, "version": self.version}
+
+
+def test_cada_subida_lleva_la_version_sobre_la_que_se_armo():
+    cliente = _ClienteVersion()
+    uno = _job({"c": 1}, cita=63)
+    ok, _ = ra.subir_ahora(uno, cliente)
+    dos = _job({"c": 2}, cita=63)
+    ok2, _ = ra.subir_ahora(dos, cliente)
+    assert ok and ok2 and cliente.bases == [0, 1]
+    assert rp.leer("11", 63, "ABR")["version"] == 2
+
+
+def test_subir_ahora_no_repite_lo_que_ya_subio():
+    """Al cerrar sesión en un equipo donde la atención quedó atrás, resubir
+    pisaba lo que el alumno siguió haciendo en otro."""
+    cliente = _ClienteVersion()
+    job = _job({"c": 9}, cita=64)
+    ra.subir_ahora(job, cliente)
+    ra.subir_ahora(job, cliente)
+    assert cliente.bases == [0]
+
+
+def test_los_pendientes_de_otras_citas_suben_y_la_abierta_no():
+    for cita in (65, 66):
+        job = _job({"c": cita}, cita=cita)
+        rp.guardar("11", job, ra.huella(job))
+    cliente = _ClienteVersion()
+    ok, _ = ra.subir_pendientes(None, cliente, excluir=lambda: 66)
+    assert ok and len(cliente.bases) == 1
+    assert [r["appointment_id"] for r in rp.pendientes("11") if r["appointment_id"] in (65, 66)] == [66]
+
+
+def test_la_evolucion_escrita_sobrevive_a_cerrar_la_ventana():
+    from agenda.Agenda import EvolucionWidget
+    w = EvolucionWidget()
+    w.set_contexto("Paciente", lambda nota: True, ("u1", 70))
+    w.texto.setPlainText("Hipoacusia conductiva derecha")
+    w.guardar_borrador()
+    otra = EvolucionWidget()       # app reiniciada / sesión nueva
+    otra.set_contexto("Paciente", lambda nota: True, ("u1", 70))
+    assert otra.texto.toPlainText() == "Hipoacusia conductiva derecha"
+    # Reabrir la misma atención no la borra.
+    otra.set_contexto("Paciente", lambda nota: True, ("u1", 70))
+    assert otra.texto.toPlainText() == "Hipoacusia conductiva derecha"
+    # Si no se pudo cerrar, queda.
+    otra.set_contexto("Paciente", lambda nota: False, ("u1", 70))
+    otra._on_guardar_clicked()
+    assert rp.leer_borrador("u1", 70) == "Hipoacusia conductiva derecha"
+    # Cerrada de verdad: se borra.
+    otra.set_contexto("Paciente", lambda nota: True, ("u1", 70))
+    otra._on_guardar_clicked()
+    assert rp.leer_borrador("u1", 70) == "" and otra.texto.toPlainText() == ""
+    # Otra atención empieza en blanco.
+    otra.set_contexto("Otro", lambda nota: True, ("u1", 71))
+    assert otra.texto.toPlainText() == ""
+
+
+def test_las_acciones_quedan_a_nombre_de_quien_las_hizo():
+    from backend.log_queue import LocalLogQueue
+    cola = LocalLogQueue(os.path.join(tempfile.mkdtemp(), "logs.db"))
+    cola.set_usuario(1)
+    cola.push("audio_stim_button", {"x": 1})
+    cola.set_usuario(2)
+    cola.push("z_dial_change", {"x": 2})
+    assert [e["action"] for e in cola.pop_batch(10, 2)] == ["z_dial_change"]
+    assert [e["action"] for e in cola.pop_batch(10, 1)] == ["audio_stim_button"]
+
+
+def test_una_cola_de_acciones_danada_no_impide_abrir():
+    from backend.log_queue import LocalLogQueue
+    ruta = os.path.join(tempfile.mkdtemp(), "logs.db")
+    with open(ruta, "wb") as f:
+        f.write(b"esto no es sqlite" * 100)
+    cola = LocalLogQueue(ruta)
+    cola.push("x")
+    assert cola.pending_count() == 1
+    assert os.path.exists(ruta + ".danado")
+
+
+def test_quedan_vivos_avisa_de_un_hilo_soltado_que_sigue():
+    dueno = QWidget()
+    hilo = _Lento(dueno)
+    hilo.start()
+    hilos.soltar_hijos(dueno)
+    assert hilos.quedan_vivos()
+    hilo.wait(2000)
+    APP.processEvents()
+    assert not hilos.quedan_vivos()
 
 
 if __name__ == "__main__":

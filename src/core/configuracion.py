@@ -155,4 +155,7 @@ class ConfiguracionDialog(QDialog):
 
 
 def abrir(parent=None):
-    ConfiguracionDialog(parent).exec()
+    dialogo = ConfiguracionDialog(parent)
+    dialogo.exec()
+    # Con padre quedaba vivo uno por cada vez que se abría.
+    dialogo.deleteLater()

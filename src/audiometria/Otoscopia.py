@@ -250,6 +250,7 @@ class Otoscopia(QWidget):
         self._fetch_thread.listo.connect(
             lambda od, oi, cid=self._case_id_pedido: self._on_fotos_listas(cid, od, oi)
         )
+        self._fetch_thread.finished.connect(self._fetch_thread.deleteLater)
         self._fetch_thread.start()
 
     def _on_fotos_listas(self, case_id_solicitado, od_bytes, oi_bytes):

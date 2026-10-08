@@ -199,7 +199,11 @@ class BackendClient:
         body = {"id": appointment_id, "action": action}
         if nota is not None:
             body["nota"] = nota
-        return self._post("/api/attendance_action.php", body)
+        # Cerrar ('atendido') dispara la evaluación OIRS del lado del
+        # servidor; con 10 s el cliente cortaba antes de la respuesta y
+        # creía que no se había cerrado.
+        timeout = 40 if action == "atendido" else DEFAULT_TIMEOUT
+        return self._post("/api/attendance_action.php", body, timeout=timeout)
 
     def get_case_sala(self, case_id: str, nombre: str = "", edad: int = 0) -> dict:
         """Quiénes están en el box de un caso (ver case_sala.php). Se pide
@@ -319,6 +323,7 @@ class BackendClient:
 
     def upload_report(
         self, appointment_id: int, tipo: str, data: dict, images: dict[str, str], timeout: int = 30,
+        version_base: int | None = None,
     ) -> dict:
         """Sube (o rehace) el informe de un módulo "de examen" (ABR/EOA/VEMP/
         electrococleo) de una atención propia -- ver report_upload.php. El
@@ -330,7 +335,11 @@ class BackendClient:
 
         Se puede rehacer mientras la atención siga 'atendiendo'; una vez
         'atendido' el backend lo rechaza (409) -- responsabilidad de quien
-        llama decidir si eso es un error real o no (ver AbrMainWindow)."""
+        llama decidir si eso es un error real o no (ver AbrMainWindow).
+
+        `version_base`: la versión del servidor sobre la que se armó (0 =
+        ninguna conocida). Si allá hay otra, el servidor guarda aparte la
+        que se pisa (report_versions). Devuelve {ok, report_id, version}."""
         opened = []
         try:
             files = {}
@@ -343,6 +352,8 @@ class BackendClient:
                 "tipo": tipo,
                 "data": json.dumps(data, ensure_ascii=False),
             }
+            if version_base is not None:
+                form["version_base"] = str(int(version_base))
             resp = self._http.post(
                 f"{self._base_url}/api/report_upload.php",
                 data=form, files=files, headers=self._headers(), timeout=timeout,

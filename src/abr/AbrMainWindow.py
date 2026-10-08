@@ -41,9 +41,9 @@ from core.base import context
 from core.estado_informe import EstadoInforme
 from core.helpers import Preferences, es_docente
 from core import respaldo_informes
-from core.report_autosave import subir_ahora
+from core.report_autosave import recuperar, subir_ahora
 from core.rng import stable_seed
-from PySide6.QtCore import QCoreApplication, QTimer
+from PySide6.QtCore import QCoreApplication, QThread, QTimer, Signal
 from PySide6.QtWidgets import (QComboBox, QLabel, QMainWindow, QPushButton,
                                QSizePolicy, QSpacerItem)
 
@@ -65,6 +65,35 @@ TIEMPO_EEG = 300
 # verdad, a esa altura no se lee ninguno de los dos.
 ALTO_DOCK_DETALLE = 220
 
+
+
+class _Retomar(QThread):
+    """Sesiones anteriores + lo guardado de esta atencion, fuera del hilo
+    de la ventana (ver AbrMainWindow.fetch_sessions)."""
+    listo = Signal(object, object, object, object)   # cita, sesiones, guardados, usuario
+
+    def __init__(self, appointment_id, parent=None):
+        super().__init__(parent)
+        self.appointment_id = appointment_id
+
+    def run(self):
+        reports = None
+        try:
+            client = BackendClient(Preferences().get("BACKEND_URL"),
+                                   context.get_resource('json/session.json'))
+        except Exception as exc:  # noqa: BLE001
+            print(f"ABR: sin cliente del servidor: {exc}")
+            return
+        if not client.is_logged_in():
+            return
+        try:
+            reports = client.get_patient_reports(self.appointment_id)
+        except Exception as exc:  # noqa: BLE001
+            # Sin conexion se atiende igual: solo no se ven las anteriores.
+            print(f"ABR: no se pudieron traer las sesiones anteriores: {exc}")
+        guardados = recuperar(self.appointment_id, ['ABR', 'ELECTROCOCLEO'], client)
+        self.listo.emit(self.appointment_id, reports, guardados,
+                        respaldo_informes.usuario_de(client))
 
 class AbrMainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, data_login=None) -> None:
@@ -233,6 +262,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.quality = 1.0
         self.eeg_timer = QTimer(self)
         self.eeg_timer.timeout.connect(self.refresh_eeg)
+        # Timers parados por hideEvent, para reanudarlos en showEvent
+        self._eeg_pausado = False
+        self._captura_pausada = False
         # Ultima metadata que devolvio el generador: barridos aceptados,
         # rechazo, FSP, ruido residual, replicabilidad. Antes se calculaba
         # todo esto y se tiraba (ABR_Curve devolvia solo las curvas).
@@ -253,6 +285,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         en None en ambos casos (sin fallback sintético); graph() corta antes
         de generar nada si el lado activo no tiene datos."""
         self.appointment_id = appointment_id
+        # Una captura en curso es del paciente anterior: se corta antes de
+        # limpiar, si no el timer seguia promediando sobre el caso nuevo
+        if self.state_capture in ('record', 'pause'):
+            self.control.stop_capture()
+        self.capture_timer.stop()
         self.data_current = data
         self.clear_sessions()
         # Las pruebas que quedaron aparte eran del paciente anterior.
@@ -275,7 +312,10 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.eeg.clear_trace()
         else:
             self.eeg.set_reject(self.technical.get('artifact_reject_uv'))
-            self.eeg_timer.start(TIEMPO_EEG)
+            if self.isVisible():
+                self.eeg_timer.start(TIEMPO_EEG)
+            else:
+                self._eeg_pausado = True  # arranca al mostrarse (showEvent)
             # Despues de pintar: es una consulta al backend y la atencion
             # no tiene por que esperarla.
             QTimer.singleShot(0, self.fetch_sessions)
@@ -364,11 +404,13 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                             tick=self.eeg_tick, duration_ms=TIEMPO_EEG,
                             test=self.control.cb_test.currentText(),
                             setting=self.control.get_data())
+            self.eeg.push(datos)
         except Exception as exc:
-            print(f"ABR: no se pudo generar el EEG crudo: {exc}")
-            self.eeg_timer.stop()
-            return
-        self.eeg.push(datos)
+            # El monitor sigue: un trozo que falla no apaga el EEG del resto
+            # de la atencion (se avisa una vez por error distinto)
+            if str(exc) != getattr(self, '_ultimo_error_eeg', None):
+                print(f"ABR: no se pudo generar el EEG crudo: {exc}")
+                self._ultimo_error_eeg = str(exc)
 
     def agitation_now(self):
         """Cuanto se esta moviendo el paciente en este momento.
@@ -708,51 +750,47 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.cb_session.setVisible(hay)
 
     def fetch_sessions(self):
-        """Pide al backend los ABR anteriores de este alumno con este paciente."""
+        """Pide al backend los ABR anteriores de este alumno con este
+        paciente y lo ya guardado de esta atencion. En otro hilo: con la red
+        mala eran dos consultas de 10 s con la ventana congelada."""
         if self.data_current is None:
             return
         try:
             appointment_id = int(self.appointment_id)
         except (TypeError, ValueError):
             return
-        client = None
-        try:
-            client = BackendClient(Preferences().get("BACKEND_URL"),
-                                   context.get_resource('json/session.json'))
-            if not client.is_logged_in():
-                return
-            reports = client.get_patient_reports(appointment_id)
-        except Exception as exc:
-            # Sin conexion se atiende igual: solo no se ven las anteriores.
-            print(f"ABR: no se pudieron traer las sesiones anteriores: {exc}")
-            reports = None
+        hilo = _Retomar(appointment_id, self)
+        hilo.listo.connect(self._on_retomar)
+        hilo.finished.connect(hilo.deleteLater)
+        self._retomar = hilo
+        hilo.start()
+
+    def _on_retomar(self, appointment_id, reports, guardados, usuario):
+        if str(self.appointment_id) != str(appointment_id) or self.data_current is None:
+            return   # ya se cambio de paciente
         if reports is not None and self.session_idx is None:
             self.fill_sessions(reports)
-        if client is not None:
-            self.restore_current(client, appointment_id)
+        if guardados is not None:
+            self.apply_restored(guardados, usuario, appointment_id)
 
     def restore_current(self, client, appointment_id):
+        """Retomar la atencion, sincronico (ver fetch_sessions y
+        apply_restored)."""
+        tipos = ['ABR', 'ELECTROCOCLEO']
+        guardados = recuperar(appointment_id, tipos, client)
+        self.apply_restored(guardados, respaldo_informes.usuario_de(client), appointment_id)
+
+    def apply_restored(self, guardados, usuario, appointment_id):
         """Retomar la atencion: vuelve lo que ya se habia guardado de ella.
 
         El informe se guarda solo mientras se atiende (ver
         core/report_autosave.py). Si la app se cerro con la atencion
         abierta, las curvas estan en el servidor y no en memoria: se
-        redibujan como estaban. Solo si el alumno todavia no registro nada
-        en esta vuelta -- lo que esta en pantalla no se pisa.
+        redibujan como estaban. Lo que quedo en el equipo sin subir es mas
+        nuevo que lo del servidor, y sin red vuelve lo ultimo del equipo
+        (ver core/respaldo_informes.py). Solo si el alumno todavia no
+        registro nada en esta vuelta -- lo que esta en pantalla no se pisa.
         """
-        if self.memory or self.session_idx is not None:
-            return
-        tipos = ['ABR', 'ELECTROCOCLEO']
-        try:
-            guardados = client.get_my_report(appointment_id, tipos)
-        except Exception as exc:
-            # Sin red igual vuelve lo que quedo respaldado en el equipo.
-            print(f"ABR: no se pudo recuperar lo guardado de esta atencion: {exc}")
-            guardados = []
-        # Lo que quedo en el equipo sin subir es mas nuevo que lo del
-        # servidor (ver core/respaldo_informes.py).
-        usuario = respaldo_informes.usuario_de(client)
-        guardados = respaldo_informes.mezclar(usuario, appointment_id, guardados, tipos)
         if self.memory or self.session_idx is not None:
             return  # empezo a registrar mientras se pedia
         # Puede haber un ABR y un ECochG de la misma atencion: el ultimo
@@ -1201,10 +1239,17 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         request = list(data[side].keys())[0]
         mark,command = request.split('_')
         side = int(side)
+        # Clic en la tabla sin curva activa (o sin medir todavia): no hay
+        # valor que anotar ni curva en memoria donde guardarlo
+        medicion = self.current_measuring[side]
+        if not medicion or getattr(self, f'graph_{side_letter}').act_curve not in self.memory:
+            return
         if command == 'L':
-            value = self.current_measuring[side]['lat_A']
+            value = medicion.get('lat_A')
         elif command == 'A':
-            value = self.current_measuring[side]['amp_AB']
+            value = medicion.get('amp_AB')
+        else:
+            return
         self.memory_curves((mark,command,value), side_letter)
         data[str(side)][request] = value
         table = f'table_{side_letter}'
@@ -1667,5 +1712,24 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         return (x, y), contra, repro, metadata
 
     #########EVENTS
+    def hideEvent(self, event):
+        # Ventana escondida: el monitor de EEG y la captura no siguen
+        # corriendo de fondo. La captura queda donde iba (contador, curva,
+        # setting) y sigue al volver a mostrarse.
+        self._eeg_pausado = self._eeg_pausado or self.eeg_timer.isActive()
+        self._captura_pausada = self._captura_pausada or self.capture_timer.isActive()
+        self.eeg_timer.stop()
+        self.capture_timer.stop()
+        super().hideEvent(event)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        if self._eeg_pausado and self.data_current is not None:
+            self.eeg_timer.start(TIEMPO_EEG)
+        if self._captura_pausada and self.state_capture in ('record', 'pause'):
+            self.capture_timer.start(TIEMPO_ENTR_PROM)
+        self._eeg_pausado = False
+        self._captura_pausada = False
+
     def closeEvent(self, event):
         event.accept()

@@ -18,7 +18,7 @@ from core import inbox
 from core import mis_pacientes
 from core import app_config_store
 from core import equipo
-from core.report_autosave import ReportAutosave, subir_pendientes
+from core.report_autosave import ReportAutosave, SubidaPendientes, subir_pendientes
 from core.secretaria import Secretaria, siguiente_paciente
 from core.kiosko import es_kiosko, atender_apagado
 from core.preferencias import preferencias
@@ -26,7 +26,7 @@ from core import mouse_zurdo, configuracion, hilos, registro, respaldo_informes
 from core.module_placeholder import ModulePlaceholder
 from core.updater import local_build_id
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
-                          es_docente,
+                          es_docente, entry_estado_por,
                           marcar_entry_atendiendo, marcar_entry_atendido,
                           reset_backend_session)
 from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titlebar_icon, style_dialog, is_full_window, raise_window
@@ -66,21 +66,6 @@ LANGUAJE = Preferences.get("lang")
 _LAYOUT_FALLBACK_APPS = {
     "LOGIN": [True, "Ingreso", 0, [True, True], [410, 140], "pre"],
 }
-BACKEND_URL = Preferences.get("BACKEND_URL")
-_layout = fetch_layout(BACKEND_URL)
-if _layout:
-    APPS = _layout["APP"]
-    SECTORS = _layout["SECTORS"]
-    BOXS = _layout["BOXS"]
-    LAYOUT_AVAILABLE = True
-else:
-    APPS = _LAYOUT_FALLBACK_APPS
-    SECTORS = {}
-    BOXS = {}
-    LAYOUT_AVAILABLE = False
-# 'network' (backend respondió), 'cache' (copia local, modo offline) o
-# None (no hay layout de ninguna parte).
-LAYOUT_SOURCE = app_layout.last_source
 
 # Cola local de logs de acciones (ver lib/backend/log_queue.py). Es solo un
 # insert sqlite local, nunca toca la red -- se sube al backend en batches
@@ -95,13 +80,14 @@ LOCAL_LOG_QUEUE = get_log_queue()
 # se rota al arrancar; ver core/registro.py. Se manda desde Configuración.
 LOG_FILE = registro.archivo()
 registro.rotar(LOG_FILE)
-sys.stdout = Logger(LOG_FILE)
+sys.stdout = Logger(LOG_FILE, max_bytes=registro.MAX_BYTES, rotar=registro.rotar)
 # stderr al mismo archivo. Los errores de PySide ("Error calling Python
 # override of QWidget::eventFilter(): ...") y los traceback de cualquier
 # excepcion NO pasan por stdout: sin esto, lo unico que quedaba del
 # problema era lo que el alumno alcanzara a copiar de la consola, y la
 # causa real es justo la ultima linea, la que la consola recorta.
-sys.stderr = Logger(LOG_FILE, stream=sys.__stderr__)
+sys.stderr = Logger(LOG_FILE, stream=sys.__stderr__, max_bytes=registro.MAX_BYTES,
+                    rotar=registro.rotar)
 # Un cuelgue duro (stack overflow de la cadena de layout de pyqtgraph, por
 # ejemplo) no deja traceback de Python: faulthandler escribe el stack en
 # el mismo log antes de que el proceso se vaya.
@@ -115,6 +101,24 @@ def _log_excepcion(tipo, valor, tb):
 
 
 sys.excepthook = _log_excepcion
+
+# Después del registro y del excepthook: si algo falla acá queda en el log.
+BACKEND_URL = Preferences.get("BACKEND_URL")
+_layout = fetch_layout(BACKEND_URL)
+if _layout:
+    APPS = _layout["APP"]
+    # Una respuesta sin sectores no puede impedir que la app abra.
+    SECTORS = _layout.get("SECTORS") or {}
+    BOXS = _layout["BOXS"]
+    LAYOUT_AVAILABLE = True
+else:
+    APPS = _LAYOUT_FALLBACK_APPS
+    SECTORS = {}
+    BOXS = {}
+    LAYOUT_AVAILABLE = False
+# 'network' (backend respondió), 'cache' (copia local, modo offline) o
+# None (no hay layout de ninguna parte).
+LAYOUT_SOURCE = app_layout.last_source
 
 
 class ComandVoiceA(QWidget, commandVoiceA):
@@ -262,6 +266,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if igual:
             print("[layout] conexión restablecida, cache al día")
             return
+        if self.data_login:
+            # Con una sesión abierta no se reinicia: execv cortaba la
+            # atención sin subir nada. Se aplica al cerrar sesión.
+            print("[layout] cambió la configuración; se reinicia al cerrar sesión")
+            self._reinicio_pendiente = True
+            return
         ask = QMessageBox(self)
         ask.setIcon(QMessageBox.Information)
         ask.setWindowTitle("Conexión restablecida")
@@ -379,6 +389,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         # actualización en curso (ver _on_update_disponible).
         self._update_pendiente = False
         self._actualizando = False
+        # Llegó un layout distinto con la sesión abierta (ver
+        # _on_layout_recovered): se reinicia al cerrar sesión.
+        self._reinicio_pendiente = False
         self.data_current = None
         self.data_current_key = None
         self.paciente_actual = None
@@ -395,6 +408,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.log_uploader = None
         self.sync_thread = None
         self.report_autosave = ReportAutosave(self._modulos_examen, self)
+        self._subida_pendientes = None
         self._layout_retry = None
         self._layout_sin_override = None
         self.cronometro_segundos = 0
@@ -429,6 +443,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             preferencias().cargar(data.get("prefs") or {})
             self._aplicar_kiosko()
             self._apply_admin_overrides_if_any()
+            cliente = self._logged_in_client()
+            LOCAL_LOG_QUEUE.set_usuario((cliente.user or {}).get("id") if cliente else None)
             LOCAL_LOG_QUEUE.push("session_login", {
                 "user": data.get("user"),
                 "name": data.get("name"),
@@ -436,7 +452,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             })
             try:
                 self.refresh_data()
-            except requests.RequestException as exc:
+            except Exception as exc:  # noqa: BLE001
+                if not isinstance(exc, requests.RequestException):
+                    # Una respuesta con forma inesperada o un error local:
+                    # mismo rollback, la sesión no puede quedar a medias
+                    # (sin módulos, sin sync, sin subir acciones).
+                    traceback.print_exc()
                 # Servidor caído/inestable justo después del login (ver
                 # BackendClient: nunca se cuelga, propaga la excepción) --
                 # sin este catch, el traceback subía sin manejar y Qt
@@ -452,6 +473,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                     f"\nDetalle: {exc}",
                 )
                 self.data_login = None
+                self._close_sub_windows()
                 self._limpiar_barras()
                 self._restaurar_layout()
                 self.lbl_name.setText("")
@@ -464,6 +486,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self._warn_if_no_modules()
             self._start_log_uploader()
             self._start_sync_thread()
+            self._subir_pendientes_en_fondo()
 
     def _warn_if_no_modules(self):
         """Aviso explícito cuando el backend devuelve modules=[]: la sesión
@@ -573,6 +596,23 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.sync_thread.sync_ok.connect(self._on_backend_sync)
         self.sync_thread.start()
 
+    def _subir_pendientes_en_fondo(self):
+        """Informes que quedaron en este equipo sin subir, de cualquier
+        atención del usuario (ver report_autosave.subir_pendientes). Al
+        iniciar sesión y con cada sync, que es cuando hay red."""
+        hilo = getattr(self, "_subida_pendientes", None)
+        if hilo is not None:
+            return
+        hilo = SubidaPendientes(lambda: self.data_current_key, self)
+        hilo.finished.connect(self._fin_subida_pendientes)
+        self._subida_pendientes = hilo
+        hilo.start()
+
+    def _fin_subida_pendientes(self):
+        hilo, self._subida_pendientes = self._subida_pendientes, None
+        if hilo is not None:
+            hilo.deleteLater()
+
     def _on_backend_sync(self, _delta):
         # refresh_async: este callback corre en cada ciclo de polling (15s);
         # refresh() normal dispara una consulta de red nueva y BLOQUEANTE
@@ -586,6 +626,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if _delta.get("_inbox") is not None:
             inbox.actualizar_badge(self, _delta["_inbox"])
         app_config_store.update_from_sync(_delta.get("config"))
+        self._subir_pendientes_en_fondo()
 
     def _stop_sync_thread(self):
         if self.sync_thread is not None:
@@ -612,6 +653,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             # detiene abajo).
             self.log_uploader.flush_now()
         self._stop_log_uploader()
+        LOCAL_LOG_QUEUE.set_usuario(None)
         self._stop_sync_thread()
         self._reset_cronometro()
         self._close_sub_windows()
@@ -642,6 +684,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if self._update_pendiente:
             # Kiosko: salió una versión nueva durante la atención.
             QTimer.singleShot(0, self._actualizar_ahora)
+        elif self._reinicio_pendiente:
+            self._reinicio_pendiente = False
+            QTimer.singleShot(0, self._restart_app)
 
     def _start_cronometro(self):
         """Arranca (o reinicia si ya venía corriendo) el cronómetro de
@@ -686,6 +731,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 sub.deleteLater()
                 self.modules.set(pos_z, None)
 
+        # Las subventanas que nunca se abrieron no tienen padre: al soltarlas
+        # acá el GC las destruye junto con sus hilos (la agenda se refresca
+        # cada 15 s aunque esté cerrada, la otoscopia baja la foto al
+        # atender). Un hilo vivo destruido así abortaba el proceso.
+        self._soltar_hilos_de_ventanas(incluir_login=False)
+
         login_subw = self.subw.get("LOGIN") if self.subw else None
         self.subw = {"LOGIN": login_subw} if login_subw else None
 
@@ -693,6 +744,18 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                      "subw_aabr", "subw_eoas", "subw_vemp"):
             if hasattr(self, attr):
                 delattr(self, attr)
+
+    def _soltar_hilos_de_ventanas(self, incluir_login=True):
+        """Suelta (core/hilos.py) los hilos de todas las subventanas, estén
+        abiertas o no, antes de que se borren."""
+        frames = list((self.subw or {}).items())
+        frames += [(attr, getattr(self, attr, None)) for attr in
+                   ("subw_a", "subw_w", "subw_z", "subw_ac", "subw_ot", "subw_abr",
+                    "subw_aabr", "subw_eoas", "subw_vemp")]
+        for nombre, frame in frames:
+            if frame is None or (nombre == "LOGIN" and not incluir_login):
+                continue
+            hilos.soltar_hijos(frame)
 
     def atender_paciente(self, key):
         """
@@ -778,7 +841,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.data_current_key = key
 
         if not es_prueba and self.subw and "AGENDA" in self.subw:
-            self.subw["AGENDA"].obj.refresh()
+            # En segundo plano: con la red cortada justo acá, el refresh
+            # sincrónico lanzaba y la atención quedaba abierta en el
+            # servidor sin módulos cargados ni autoguardado.
+            self.subw["AGENDA"].obj.refresh_async()
 
         self._hydrate_modules()
         if self.data_current:
@@ -858,7 +924,18 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         agenda = shedule.data.setdefault("agenda_1", {})
         entry = agenda.get(key)
         if entry is None:
-            return
+            # La cita ya no está (la borró el docente): no hay qué cerrar, y
+            # la evolución escrita no se puede tirar como si se hubiera
+            # guardado.
+            self._aviso("No se pudo cerrar la atención",
+                        "Esta cita ya no está en la agenda (puede que el docente la "
+                        "haya borrado). Lo que escribiste quedó guardado en este equipo; "
+                        "avísale a tu docente.")
+            return False
+        if entry_estado_por(entry, self.data_login["user"]) == "atendido":
+            # Un intento anterior sí llegó al servidor aunque la respuesta
+            # no volvió a tiempo: ya está cerrada.
+            return self._cierre_ya_hecho(key)
 
         actual = self.data_current_key == key
         fallidos = []
@@ -886,36 +963,66 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         try:
             shedule.set(shedule.data)
         except requests.RequestException as exc:
+            if self._quedo_cerrada(key):
+                # El servidor la cerró y lo que se cortó fue la respuesta.
+                return self._cierre_ya_hecho(key, avisar=False)
             return self._cierre_sin_conexion(exc, reanudar=actual)
-        self._stop_cronometro()
+        return self._cierre_ya_hecho(key, avisar=False)
 
+    def _quedo_cerrada(self, key):
+        """Después de un error al cerrar: ¿el servidor la cerró igual?"""
+        try:
+            entry = Shedule().data.get("agenda_1", {}).get(key)
+        except requests.RequestException:
+            return False
+        return entry is not None and entry_estado_por(entry, self.data_login["user"]) == "atendido"
+
+    def _cierre_ya_hecho(self, key, avisar=True):
+        """La atención quedó cerrada en el servidor: se descarga de los
+        módulos (lo que tenían ya subió antes de cerrar)."""
+        self.report_autosave.detener()
+        self._stop_cronometro()
         if self.data_current_key == key:
             self.data_current_key = None
             self.data_current = None
             self.paciente_actual = None
             self._hydrate_modules()
-
         if self.subw and "AGENDA" in self.subw:
-            self.subw["AGENDA"].obj.refresh()
-
+            self.subw["AGENDA"].obj.refresh_async()
         self.statusbar.clearMessage()
+        if avisar:
+            self._aviso("Atención cerrada",
+                        "Esta atención ya había quedado cerrada en el servidor en un "
+                        "intento anterior (la respuesta no alcanzó a llegar).",
+                        QMessageBox.Icon.Information)
         return True
 
-    def _cierre_sin_conexion(self, detalle, reanudar=False):
-        """No se pudo cerrar la atención por la red. Sigue abierta y el
-        autoguardado vuelve a correr (se había detenido para la subida
-        final)."""
-        print(f"cerrar atención: sin conexión: {detalle}")
-        if reanudar:
-            self.report_autosave.reanudar()
-        dlg = QMessageBox(QMessageBox.Icon.Warning, "Sin conexión con el servidor",
-                          "No se pudo cerrar la atención porque no hay conexión con el "
-                          "servidor.\n\nTus exámenes quedaron guardados en este equipo y la "
-                          "atención sigue abierta. Cuando vuelva la conexión, guarda la "
-                          "evolución de nuevo (lo que escribiste no se borró).",
-                          QMessageBox.StandardButton.Ok, self)
+    def _aviso(self, titulo, texto, icono=QMessageBox.Icon.Warning):
+        dlg = QMessageBox(icono, titulo, texto, QMessageBox.StandardButton.Ok, self)
         style_dialog(dlg)
         dlg.exec()
+
+    def _cierre_sin_conexion(self, detalle, reanudar=False):
+        """No se pudo cerrar la atención. Sigue abierta y el autoguardado
+        vuelve a correr (se había detenido para la subida final)."""
+        print(f"cerrar atención: no se pudo: {detalle}")
+        if reanudar:
+            self.report_autosave.reanudar()
+        texto = str(detalle)
+        if "401" in texto or "Unauthorized" in texto or "sesión" in texto.lower():
+            motivo = ("Tu sesión con el servidor venció. Cierra sesión y vuelve a "
+                      "ingresar: lo hecho está guardado en este equipo y se sube solo.")
+        elif isinstance(detalle, (requests.ConnectionError, requests.Timeout)) \
+                or "Connection" in texto or "timed out" in texto.lower():
+            motivo = ("No hay conexión con el servidor. Cuando vuelva, guarda la "
+                      "evolución de nuevo.")
+        else:
+            motivo = ("El servidor no aceptó el cierre. Inténtalo de nuevo y, si se "
+                      "repite, avísale a tu docente o usa Configuración → Reportar un "
+                      f"problema.\n\nDetalle: {texto[:200]}")
+        self._aviso("No se pudo cerrar la atención",
+                    "Tus exámenes quedaron guardados en este equipo y la atención sigue "
+                    "abierta (lo que escribiste en la evolución no se borró).\n\n" + motivo)
         return False
 
     def _hydrate_modules(self):
@@ -924,10 +1031,16 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         bajo el caso/paciente ya cerrado."""
         for attr in ("subw_a", "subw_z", "subw_w", "subw_ac", "subw_ot", "subw_abr",
                      "subw_aabr", "subw_eoas", "subw_vemp"):
+            frame = getattr(self, attr, None)
+            if frame is None:
+                continue
             try:
-                getattr(self, attr).obj.la_super(self.data_current, self.data_current_key)
-            except AttributeError:
-                pass
+                frame.obj.la_super(self.data_current, self.data_current_key)
+            except Exception:  # noqa: BLE001
+                # Un dato raro del caso en un módulo no puede dejar sin caso
+                # (ni sin autoguardado) a los que vienen después.
+                print(f"{attr}: no se pudo cargar el caso:")
+                traceback.print_exc()
 
     def load_sub_windows(self):
         """Carga las subventanas"""
@@ -1162,6 +1275,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def _guardar_informes_al_salir(self):
         """Cerrar la app o la sesión con la atención abierta: los informes
         se suben igual (la atención sigue 'atendiendo' y se puede retomar)."""
+        evolucion = (self.subw or {}).get("EVOLUCION")
+        if evolucion is not None:
+            # Lo último que escribió, antes de que se borre la ventana.
+            evolucion.obj.guardar_borrador()
         if self.data_current_key is None:
             return
         if (self.paciente_actual or {}).get("appointment_id") is None:
@@ -1194,11 +1311,17 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.subw["FICHA"].obj.set_ficha(html, on_chat)
         self.activate_auto("FICHA")
 
-    def abrir_evolucion(self, nombre_paciente, on_guardar):
+    def abrir_evolucion(self, nombre_paciente, on_guardar, appointment_id=None):
         """Abre (o trae al frente) la subventana MDI de evolución, reapuntada
         al paciente/callback indicado (ver Agenda._cerrar_atencion y
-        Agenda._cerrar_atencion_prueba)."""
-        self.subw["EVOLUCION"].obj.set_contexto(nombre_paciente, on_guardar)
+        Agenda._cerrar_atencion_prueba). Con `appointment_id` (atención
+        real) lo escrito queda como borrador en el equipo."""
+        borrador = None
+        if appointment_id is not None:
+            usuario = respaldo_informes.usuario_de(self._logged_in_client())
+            if usuario:
+                borrador = (usuario, appointment_id)
+        self.subw["EVOLUCION"].obj.set_contexto(nombre_paciente, on_guardar, borrador)
         self.activate_auto("EVOLUCION")
 
     def abrir_chat_paciente(self):
@@ -1214,14 +1337,28 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             # Laboratorio: ni la X (que no está) ni Alt+F4 cierran la app.
             event.ignore()
             return
-        self._guardar_informes_al_salir()
-        if self.log_uploader is not None:
-            # Igual que en logout(): sin esto, acciones recién logueadas quedan
-            # en la cola local hasta el próximo login si se cierra con la X.
-            self.log_uploader.flush_now()
+        if self._apagando:
+            # El equipo se apaga y da pocos segundos (core/kiosko.py): todo
+            # al disco y nada a la red, que con la red colgada no
+            # alcanzaba. Lo pendiente sube en el próximo inicio de sesión.
+            evolucion = (self.subw or {}).get("EVOLUCION")
+            if evolucion is not None:
+                evolucion.obj.guardar_borrador()
+            self.report_autosave.respaldar(con_imagenes=True)
+        else:
+            self._guardar_informes_al_salir()
+            if self.log_uploader is not None:
+                # Igual que en logout(): sin esto, acciones recién logueadas
+                # quedan en la cola local hasta el próximo login si se
+                # cierra con la X.
+                self.log_uploader.flush_now()
         self._stop_log_uploader()
         self._stop_sync_thread()
         self._stop_layout_retry()
+        # Lo que siga esperando al servidor (chat, agenda, avatares) no
+        # puede destruirse con la ventana: Qt abortaría el proceso.
+        self._soltar_hilos_de_ventanas()
+        hilos.soltar_hijos(self)
         super().closeEvent(event)
 
 
@@ -1389,7 +1526,13 @@ if __name__ == '__main__':
             from core.actualizacion_kiosko import actualizar_o_bloquear
             actualizar_o_bloquear(__VERSION__, BACKEND_URL)
         else:
-            _check_and_apply_update()
+            try:
+                _check_and_apply_update()
+            except Exception:  # noqa: BLE001
+                # Una respuesta rara de GitHub o del backend no puede
+                # impedir que la app abra: se sigue con esta versión.
+                print("actualización: no se pudo comprobar, se sigue con esta versión")
+                traceback.print_exc()
 
     window = MainWindow()
     Preferences.get_style(window)
@@ -1400,4 +1543,13 @@ if __name__ == '__main__':
     despertador = atender_apagado(window.cerrar_por_apagado)
     QTimer.singleShot(0, _precargar_modulos)
     exit_code = context.app.exec()
+    if hilos.quedan_vivos():
+        # Un hilo que sigue en una petición de red se destruiría al
+        # terminar el intérprete y Qt abortaría el proceso ("LabSim dejó de
+        # funcionar" en Windows). Lo del alumno ya se subió o quedó en el
+        # equipo en closeEvent: se sale sin esperar.
+        print("salida: quedan hilos de red en curso, se sale sin esperarlos")
+        sys.stdout.flush()
+        sys.stderr.flush()
+        os._exit(exit_code)
     sys.exit(exit_code)

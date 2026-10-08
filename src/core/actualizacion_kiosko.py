@@ -125,7 +125,12 @@ def actualizar_o_bloquear(version, backend_url=None, abortar=lambda: False):
             try:
                 update = _en_hilo(check_for_update, version, estricto=True,
                                   backend_url=backend_url)
-            except UpdateCheckError as exc:
+            except Exception as exc:  # noqa: BLE001
+                # UpdateCheckError es lo esperable (sin red); cualquier otra
+                # cosa (una respuesta con forma inesperada) se reintenta
+                # igual en vez de impedir que el equipo arranque.
+                if not isinstance(exc, UpdateCheckError):
+                    print(f"actualización: error inesperado al consultar: {exc!r}")
                 motivo = ("No se pudo consultar si hay una versión nueva "
                           f"({exc}). Revisa la conexión a internet.")
             else:
