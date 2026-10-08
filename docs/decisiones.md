@@ -5,6 +5,49 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Práctica deliberada: pacientes para practicar cuando el alumno quiera (2026-10-08)
+
+Hasta ahora el alumno solo veía los pacientes que el docente le citaba para
+los prácticos. Ahora cada curso tiene una **lista de práctica** (pestaña
+"Práctica" del curso en el panel) y el alumno la abre en la app con el botón
+"Práctica libre" de la agenda, en el laboratorio o en su casa.
+
+Decidido con el docente:
+
+- **Intentos ilimitados y separados.** Cada vez que el alumno abre un
+  paciente de la lista es un intento nuevo, con su evolución, informes,
+  chat y % de técnica propios. Si dejó uno a medias (la app se cerró), el
+  botón dice "Retomar" y vuelve a ese mismo, no abre otro.
+- **Ficha de estudio al cerrar, por paciente.** Una casilla por paciente de
+  la lista: si está marcada, el alumno puede bajar la ficha de estudio del
+  caso (la misma de `case_sheet_pdf.php?modo=estudio`) desde su último
+  intento cerrado (agenda en modo práctica, Mis pacientes, portal web). Vale
+  lo que diga la casilla ahora, también para intentos viejos.
+- **Estadística aparte.** Los intentos no entran a la agenda, a los choques
+  de horario, a las rondas del caso en Fichas Clínicas, al tablero del curso
+  (salvo un contador "N prácticas"), al dashboard ni al resumen de
+  `launch.php`. En la ficha del alumno (`student.php`) van en su propia
+  tabla.
+
+Cómo está hecho: cada intento es **una cita propia** en `appointments`, con
+`practice_id` (la fila de `practice_cases`), asignada al alumno, con la fecha
+y hora en que la abrió. Así atención, informes, chat, técnica y OIRS
+funcionan sin un camino aparte. El costo es que toda vista de prácticos
+filtra `Practica::sinPractica()`; una consulta nueva sobre `appointments`
+tiene que decidir de qué lado está. La historia clínica tampoco se mezcla:
+en un práctico no aparecen las evoluciones de los intentos del mismo
+paciente, ni al revés (ficha de la app, `student/atencion.php`, sesiones
+anteriores del ABR).
+
+Descartado: reusar las citas "todo el curso" sin fecha. `attendances` es
+UNIQUE por (cita, alumno), así que una sola cita no admite intentos
+repetidos, y una cita sin fecha el alumno no la ve.
+
+La migración corre sola (`Practica::listo()`, nunca lanza; si falla, todo
+sigue como antes de la práctica) y también está en "Aplicar schema". Quitar
+un paciente de la lista lo desactiva, no lo borra: sus intentos siguen
+apuntando a esa fila.
+
 ## SISI: el paciente responde a las subidas de intensidad (2026-09-24)
 
 Reporte de prueba en clase: el paciente decía "sí" una sola vez y después

@@ -118,6 +118,9 @@ final class Db
         if (array_key_exists('patient_id', $row)) {
             $row['patient_id'] = $row['patient_id'] !== null ? (int) $row['patient_id'] : null;
         }
+        if (array_key_exists('practice_id', $row)) {
+            $row['practice_id'] = $row['practice_id'] !== null ? (int) $row['practice_id'] : null;
+        }
         return $row;
     }
 
@@ -837,6 +840,41 @@ final class Db
             );
         }
         $pdo->exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username_nocase ON users (username COLLATE NOCASE)');
+    }
+
+    /**
+     * Práctica deliberada (ver practice_cases y appointments.practice_id en
+     * schema.sql). Crea la tabla además de la columna, y no espera a
+     * schema.sql: la llama Practica::listo() desde sync.php y la agenda, que
+     * corren todo el día, mientras que "Aplicar schema" puede tardar. Debe
+     * correr ANTES de schema.sql en "Aplicar schema": ese archivo trae el
+     * índice sobre appointments(practice_id).
+     */
+    public static function migratePracticeIfNeeded(): void
+    {
+        $pdo = self::get();
+        $pdo->exec(
+            'CREATE TABLE IF NOT EXISTS practice_cases (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                course_id INTEGER NOT NULL REFERENCES courses(id),
+                case_id TEXT NOT NULL REFERENCES cases(id),
+                procedimiento TEXT NOT NULL DEFAULT \'\',
+                show_study_sheet INTEGER NOT NULL DEFAULT 0,
+                active INTEGER NOT NULL DEFAULT 1,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                created_by INTEGER REFERENCES users(id),
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE (course_id, case_id)
+            )'
+        );
+        // Instalación nueva: appointments todavía no existe (esto corre antes
+        // de schema.sql, que la crea ya con la columna).
+        $existe = $pdo->query("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'appointments'")->fetchColumn();
+        if ($existe === false) {
+            return;
+        }
+        self::addColumnIfMissing($pdo, 'appointments', 'practice_id', 'INTEGER REFERENCES practice_cases(id)');
+        $pdo->exec('CREATE INDEX IF NOT EXISTS idx_appointments_practice ON appointments (practice_id)');
     }
 
     public static function migrateDemoStudentIfNeeded(): void

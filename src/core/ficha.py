@@ -44,7 +44,7 @@ def resolver_fechas_historia_clinica(texto, fecha_cita_str):
     return HISTORIA_CLINICA_FECHA_RE.sub(_reemplazar, texto)
 
 
-def historial_atenciones(shedule, rut, username, is_admin):
+def historial_atenciones(shedule, rut, username, is_admin, practica=False):
     """
     Recopila, para todas las citas (filas de agenda) del mismo paciente (mismo rut),
     las atenciones cerradas por cada alumno, ordenadas cronológicamente.
@@ -53,10 +53,15 @@ def historial_atenciones(shedule, rut, username, is_admin):
     Alumno (is_admin=False): solo ve sus propias notas -- mismo criterio que
     admin/student.php le da al docente sobre cada alumno individual, pero acá
     aplicado a "cada alumno sobre sí mismo".
+
+    `practica`: la ficha es de un intento de práctica deliberada. Los
+    intentos y los prácticos no se mezclan: cada lado ve solo su historial.
     """
     historial = []
     for otra_row in shedule.get("agenda_1", {}).values():
         if otra_row.rut != rut:
+            continue
+        if (getattr(otra_row, "practice_id", None) is not None) != practica:
             continue
         atencion = otra_row.atencion
         fecha = otra_row.fecha
@@ -170,7 +175,8 @@ def render_ficha_html(row, caso, shedule, username, is_admin):
     # atenciones previas, que es como se lee una ficha de verdad.
     historia_clinica = caso.get("historia_clinica", "") if isinstance(caso, dict) else ""
     entradas = linea_tiempo(historia_clinica, row.fecha,
-                            historial_atenciones(shedule, rut, username, is_admin))
+                            historial_atenciones(shedule, rut, username, is_admin,
+                                                 getattr(row, "practice_id", None) is not None))
 
     partes.append("<h3>Historial del paciente</h3>")
     if entradas:

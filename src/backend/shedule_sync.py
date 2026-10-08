@@ -30,6 +30,10 @@ class AgendaEntry:
     # appointment_id, así que nunca se empuja al backend (ver
     # diff_and_push_shedule) ni admite atenciones reales.
     sin_cita: bool = False
+    # Intento de práctica deliberada (practice_cases.id en el backend): una
+    # cita que el alumno se abrió solo desde "Práctica libre". No se muestra
+    # en la agenda ni cuenta como paciente en espera; ver Agenda.py.
+    practice_id: int | None = None
 
 
 def backend_state_to_shedule(state: dict, own_user_id: int, own_username: str) -> dict:
@@ -51,6 +55,7 @@ def backend_state_to_shedule(state: dict, own_user_id: int, own_username: str) -
             procedimiento=appt.get("procedimiento") or "",
             case_id=appt.get("case_id") or "",
             nota_admin=appt.get("nota_admin") or "",
+            practice_id=appt.get("practice_id"),
         )
 
     for att in state.get("attendances", []):

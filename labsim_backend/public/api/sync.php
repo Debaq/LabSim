@@ -17,6 +17,10 @@ require_once __DIR__ . '/../bootstrap.php';
  * un alumno solo la ve si le corresponde (ver WHERE de abajo).
  * attendances es el progreso propio de cada uno: el admin ve el de todos
  * (lo necesita para el historial por paciente), el alumno solo el suyo.
+ *
+ * Los intentos de práctica deliberada (practice_id) le llegan solo al alumno
+ * que los hizo -- van asignados a él -- y la app los muestra aparte de la
+ * agenda (ver Practica).
  */
 
 [$user, $platformId, $contextId] = Auth::requireUserWithSession();
@@ -28,7 +32,8 @@ if ($user['role'] === 'admin') {
     // Docente/admin en el cliente de escritorio necesita ver todo, sin
     // filtro por curso (mismo criterio que ya usan dashboard.php/agenda.php
     // para el admin completo).
-    $stmt = $pdo->prepare('SELECT * FROM appointments WHERE updated_at > ?');
+    // Sin los intentos de práctica de los alumnos (ver Practica).
+    $stmt = $pdo->prepare('SELECT * FROM appointments WHERE updated_at > ? AND ' . Practica::sinPractica());
     $stmt->execute([$since]);
 } else {
     // PDO no permite mezclar placeholders posicionales y nombrados en la

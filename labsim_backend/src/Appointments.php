@@ -85,7 +85,7 @@ class Appointments
 
         $stmt = $pdo->prepare(
             'SELECT id, nombre, apellido, case_id, course_id, assigned_group_id, assigned_student_id
-             FROM appointments WHERE fecha = ? AND hora = ? AND id != ?'
+             FROM appointments WHERE fecha = ? AND hora = ? AND id != ? AND ' . Practica::sinPractica()
         );
         $stmt->execute([$fecha, $hora, $excluirId]);
         $candidatas = $stmt->fetchAll();

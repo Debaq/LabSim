@@ -58,6 +58,18 @@ def test_sin_cita_pendiente_no_se_inventa_paciente():
     assert sec.siguiente_paciente(_agenda(), "6", "alumno") is None
 
 
+def test_en_practica_libre_nadie_espera():
+    """Un intento de práctica deliberada (el alumno en su casa) no tiene
+    pacientes en la sala de espera, y un intento tampoco es un paciente
+    esperando durante un práctico."""
+    agenda = _agenda()
+    agenda["9"] = _cita("09:05", "Prac", "Tica", practice_id=3)
+    assert sec.siguiente_paciente(agenda, "9", "alumno") is None
+    agenda["9"].hora = "09:10"
+    agenda["3"].atencion["alumno"] = {"estado": "atendido"}
+    assert sec.siguiente_paciente(agenda, "1", "alumno")["nombre"] == "Rosa Muñoz"
+
+
 def test_hora_con_segundos_se_muestra_hh_mm():
     agenda = {"1": _cita("09:00"), "2": _cita("10:30:00", "Rosa", "Muñoz")}
     assert sec.siguiente_paciente(agenda, "1", "alumno")["hora"] == "10:30"

@@ -83,3 +83,23 @@ def test_las_filas_sin_cita_nunca_se_empujan_al_backend():
     del nuevo["agenda_1"]["case:c2"]
     diff_and_push_shedule(cliente, nuevo, shedule, "doc")
     assert cliente.llamadas == []
+
+
+def test_el_intento_de_practica_trae_su_practice_id():
+    estado = {
+        "students": [], "attendances": [], "cases": [],
+        "appointments": [
+            {"id": 5, "fecha": "08-10-26", "hora": "21:00", "case_id": "c1", "practice_id": 7},
+            {"id": 6, "fecha": "08-10-26", "hora": "10:00", "case_id": "c1"},
+        ],
+    }
+    agenda = backend_state_to_shedule(estado, 1, "alumno")["agenda_1"]
+    assert agenda["5"].practice_id == 7
+    assert agenda["6"].practice_id is None
+
+
+if __name__ == "__main__":
+    for nombre, fn in sorted(globals().items()):
+        if nombre.startswith("test_") and callable(fn):
+            fn()
+            print(f"ok   {nombre}")

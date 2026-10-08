@@ -60,6 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // columna no se agregó primero (mismo motivo que
                 // migrateAppConfigCourseIdIfNeeded).
                 'carpetas y archivado de fichas' => static fn() => Db::migrateCaseLibraryIfNeeded(),
+                // Antes de schema.sql por el índice sobre appointments(practice_id).
+                'práctica deliberada' => static fn() => Db::migratePracticeIfNeeded(),
                 // El schema en sí: crea las tablas que falten. Va en el medio
                 // porque los pasos de abajo agregan columnas a tablas que
                 // recién acá existen (CREATE TABLE IF NOT EXISTS no toca una

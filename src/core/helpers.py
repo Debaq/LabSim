@@ -156,6 +156,23 @@ def mis_atenciones() -> list:
         return []
 
 
+def lista_practica() -> list:
+    """Pacientes de práctica deliberada del alumno (ver api/practica.php).
+    Lanza requests.RequestException si falla la red: quien llama distingue
+    "sin conexión" de "no hay pacientes"."""
+    return _get_backend_client().get_practica()
+
+
+def iniciar_practica(practice_id: int) -> dict:
+    """Abre un intento de práctica y devuelve su cita. Lanza si falla."""
+    return _get_backend_client().iniciar_practica(practice_id)
+
+
+def ficha_estudio_pdf(appointment_id: int) -> bytes:
+    """PDF de la ficha de estudio de un intento cerrado. Lanza si falla."""
+    return _get_backend_client().get_ficha_estudio(appointment_id)
+
+
 def mi_conversacion(appointment_id: int) -> list:
     """Conversación con el paciente simulado de una atención propia, con
     los comentarios que el docente haya dejado por turno (ver

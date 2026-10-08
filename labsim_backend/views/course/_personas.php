@@ -15,7 +15,7 @@
  * en miembro sin tener que rearmar la tarjeta desde JS. */
 $renderCard = static function (array $s, bool $isCandidate) use ($courseId, $progress): void {
     $uid = (int) $s['id'];
-    $p = $progress[$uid] ?? ['asignadas' => 0, 'atendidas' => 0, 'ultima' => null];
+    $p = $progress[$uid] ?? ['asignadas' => 0, 'atendidas' => 0, 'ultima' => null, 'practicas' => 0];
     $search = mb_strtolower($s['username'] . ' ' . $s['display_name'] . ' ' . (string) ($s['origin'] ?? ''));
     ?>
     <div class="group_card" draggable="true"
@@ -42,6 +42,9 @@ $renderCard = static function (array $s, bool $isCandidate) use ($courseId, $pro
             <span class="card-member-only" <?= $isCandidate ? 'hidden' : '' ?>>
                 &nbsp;·&nbsp; <?= $p['asignadas'] ?> cita<?= $p['asignadas'] === 1 ? '' : 's' ?>
                 &nbsp;·&nbsp; <?= $p['atendidas'] ?> cerrada<?= $p['atendidas'] === 1 ? '' : 's' ?>
+                <?php if ($p['practicas'] > 0): ?>
+                &nbsp;·&nbsp; <?= $p['practicas'] ?> práctica<?= $p['practicas'] === 1 ? '' : 's' ?>
+                <?php endif; ?>
                 <?php if ($p['ultima'] !== null): ?>
                 &nbsp;·&nbsp; últ. <?= htmlspecialchars(substr((string) $p['ultima'], 0, 10)) ?>
                 <?php endif; ?>

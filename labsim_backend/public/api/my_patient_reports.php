@@ -26,12 +26,17 @@ if ($appointmentId <= 0) {
 
 $pdo = Db::get();
 
-$stmt = $pdo->prepare('SELECT case_id FROM appointments WHERE id = ?');
+$esPractica = Practica::listo();
+$stmt = $pdo->prepare('SELECT case_id, ' . ($esPractica ? 'practice_id' : 'NULL AS practice_id') . ' FROM appointments WHERE id = ?');
 $stmt->execute([$appointmentId]);
-$caseId = $stmt->fetchColumn();
-if ($caseId === false || $caseId === null || $caseId === '') {
+$filas = $stmt->fetchAll();
+$caseId = $filas ? $filas[0]['case_id'] : null;
+if ($caseId === null || $caseId === '') {
     Response::json(['reports' => []]);
 }
+// Intentos de práctica y prácticos no se mezclan: en un práctico no aparecen
+// las curvas que el alumno sacó practicando ese mismo caso, ni al revés.
+$mismoLado = $filas[0]['practice_id'] !== null ? Practica::soloPractica('ap') : Practica::sinPractica('ap');
 
 $stmt = $pdo->prepare(
     "SELECT r.id, r.tipo, r.data, r.updated_at,
@@ -40,7 +45,7 @@ $stmt = $pdo->prepare(
      FROM reports r
      JOIN attendances a ON a.id = r.attendance_id
      JOIN appointments ap ON ap.id = a.appointment_id
-     WHERE a.student_id = ? AND ap.case_id = ? AND ap.id <> ?
+     WHERE a.student_id = ? AND ap.case_id = ? AND ap.id <> ? AND {$mismoLado}
        AND r.tipo IN ('ABR', 'ELECTROCOCLEO')
      ORDER BY ap.fecha DESC, ap.hora DESC, r.id DESC"
 );

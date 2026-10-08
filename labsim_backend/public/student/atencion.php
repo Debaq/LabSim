@@ -30,8 +30,9 @@ $stmt->execute([$appointmentId, $me['id'], 'atendido']);
 $attendance = $stmt->fetch();
 
 $stmt = $pdo->prepare(
-    'SELECT id, fecha, hora, rut, nombre, apellido, fecha_nac, procedimiento, patient_id
-     FROM appointments WHERE id = ?'
+    'SELECT id, fecha, hora, rut, nombre, apellido, fecha_nac, procedimiento, patient_id, '
+    . (Practica::listo() ? 'practice_id' : 'NULL AS practice_id')
+    . ' FROM appointments WHERE id = ?'
 );
 $stmt->execute([$appointmentId]);
 $appointment = $stmt->fetch();
@@ -62,12 +63,15 @@ if ($appointment['patient_id']) {
     $historiaClinica = (string) ($stmt->fetchColumn() ?: '');
 }
 
+// Un intento de práctica no es parte de la historia clínica del paciente en
+// los prácticos, ni al revés: cada lado ve solo lo suyo.
 $historial = [];
 if ($appointment['patient_id']) {
     $stmt = $pdo->prepare(
         "SELECT att2.nota, att2.hora_real, a2.fecha
          FROM attendances att2 JOIN appointments a2 ON a2.id = att2.appointment_id
-         WHERE att2.student_id = ? AND att2.estado = 'atendido' AND a2.patient_id = ?"
+         WHERE att2.student_id = ? AND att2.estado = 'atendido' AND a2.patient_id = ?
+           AND " . ($appointment['practice_id'] !== null ? Practica::soloPractica('a2') : Practica::sinPractica('a2'))
     );
     $stmt->execute([$me['id'], (int) $appointment['patient_id']]);
     $historial = $stmt->fetchAll();
@@ -108,6 +112,9 @@ $reports = $stmt->fetchAll();
 $tecnica = AudiometriaTecnica::paraAtencion($appointmentId, (int) $me['id']);
 
 $reportLabels = ReportFile::LABELS;
+
+$esPractica = $appointment['practice_id'] !== null;
+$fichaEstudio = $esPractica && Practica::fichaDeEstudioPermitida($appointmentId, (int) $me['id']) !== null;
 
 // Mensajes que recibió por esta atención: los de la OIRS simulada y los que
 // un docente le mandó sobre esta cita. Se muestran como en la bandeja de la
@@ -156,7 +163,15 @@ $paciente = trim("{$appointment['nombre']} {$appointment['apellido']}") ?: 'Paci
 student_header($paciente, $me);
 ?>
 <a class="back" href="mis_pacientes.php">&larr; Mis pacientes</a>
-<h1><?= htmlspecialchars($paciente) ?></h1>
+<h1><?= htmlspecialchars($paciente) ?><?php if ($esPractica): ?> <span class="tag">Práctica</span><?php endif; ?></h1>
+
+<?php if ($fichaEstudio): ?>
+<div class="card">
+    <h2>Ficha de estudio</h2>
+    <p>Los resultados del caso, para comparar con lo que obtuviste en este intento.</p>
+    <p><a href="ficha_estudio.php?appointment_id=<?= (int) $appointmentId ?>" target="_blank">Ver ficha de estudio (PDF)</a></p>
+</div>
+<?php endif; ?>
 
 <div class="card">
     <h2>Datos de la atención</h2>

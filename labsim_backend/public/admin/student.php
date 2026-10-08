@@ -40,14 +40,21 @@ if (!$student) {
 
 $stmt = $pdo->prepare(
     "SELECT att.estado, att.nota, att.hora_real, att.updated_at,
-            a.id AS appointment_id, a.fecha, a.hora, a.nombre, a.apellido, a.procedimiento
+            a.id AS appointment_id, a.fecha, a.hora, a.nombre, a.apellido, a.procedimiento,
+            " . (Practica::listo() ? 'a.practice_id' : 'NULL') . " AS practice_id
      FROM attendances att
      JOIN appointments a ON a.id = att.appointment_id
      WHERE att.student_id = ?
      ORDER BY att.updated_at DESC"
 );
 $stmt->execute([$studentId]);
-$attendances = $stmt->fetchAll();
+$todasLasAtenciones = $stmt->fetchAll();
+// Los intentos de práctica deliberada van en su propia tabla y no entran
+// al resumen ni a la evolución semanal, que hablan de los prácticos (ver
+// Practica).
+$attendances = array_values(array_filter($todasLasAtenciones, static fn(array $a): bool => $a['practice_id'] === null));
+$practicas = array_values(array_filter($todasLasAtenciones, static fn(array $a): bool => $a['practice_id'] !== null));
+$citasPractica = array_flip(array_map('intval', array_column($practicas, 'appointment_id')));
 
 // Informes de examen (ABR, EOA, VEMP...) por cita, para abrirlos desde acá
 // mismo. Antes había que entrar a "Ver atención" y bajar hasta el final.
@@ -107,7 +114,13 @@ $recentLogs = $stmt->fetchAll();
 $stmt = $pdo->prepare('SELECT user_id, client_ts, action, payload FROM action_logs WHERE user_id = ? ORDER BY id');
 $stmt->execute([$studentId]);
 $allLogs = Metrics::decodeLogs($stmt->fetchAll());
-$sessions = Metrics::buildSessions($allLogs);
+$sessionsTodas = Metrics::buildSessions($allLogs);
+$logsPracticos = array_values(array_filter(
+    $allLogs,
+    static fn(array $l): bool => $l['appointment_id'] === null || $l['appointment_id'] === ''
+        || !isset($citasPractica[(int) $l['appointment_id']])
+));
+$sessions = Metrics::buildSessions($logsPracticos);
 $behaviorStats = Metrics::summarizeSessions($sessions);
 $weekly = Metrics::sessionsByWeek($sessions);
 $histogram = Metrics::deltaHistogram($sessions);
@@ -119,7 +132,7 @@ $histTotal = array_sum($histogram) ?: 1;
 // misma sesión de trabajo el alumno puede pasar por más de un paciente y el
 // análisis (para nota/feedback) es por caso, no por el total mezclado.
 $sessionsByAppt = [];
-foreach ($sessions as $s) {
+foreach ($sessionsTodas as $s) {
     $key = $s['appointment_id'] !== null ? (int) $s['appointment_id'] : 0;
     $sessionsByAppt[$key][] = $s;
 }
@@ -151,7 +164,7 @@ foreach ($attendances as $a) {
 // Técnica de la audiometría por atención (ver AudiometriaTecnica): pasos
 // cumplidos sobre los evaluables, con el detalle en "Ver atención".
 $tecnicaByAppt = [];
-foreach ($attendances as $a) {
+foreach ($todasLasAtenciones as $a) {
     $tec = AudiometriaTecnica::paraAtencion((int) $a['appointment_id'], $studentId, $allLogs);
     if ($tec !== null) {
         $tecnicaByAppt[(int) $a['appointment_id']] = $tec['puntaje'];
@@ -180,8 +193,9 @@ admin_header('Alumno: ' . $student['display_name'], $me);
         <tr><td>Atendidos (cerrados)</td><td><strong><?= $estadoCounts['atendido'] ?></strong></td></tr>
         <tr><td>No-show</td><td><strong><?= $estadoCounts['no_show'] ?></strong></td></tr>
         <tr><td>Acciones registradas (total)</td><td><strong><?= $totalActions ?></strong></td></tr>
+        <tr><td>Intentos de práctica cerrados</td><td><strong><?= count(array_filter($practicas, static fn(array $a): bool => $a['estado'] === 'atendido')) ?></strong></td></tr>
         <tr><td>Sesiones (login-logout)</td><td><strong><?= Metrics::countLoginSessions($allLogs) ?></strong></td></tr>
-        <tr><td>Atenciones (pacientes distintos)</td><td><strong><?= Metrics::countAttentions($allLogs) ?></strong></td></tr>
+        <tr><td>Atenciones (pacientes distintos)</td><td><strong><?= Metrics::countAttentions($logsPracticos) ?></strong></td></tr>
         <tr><td>Bloques de actividad</td><td><strong><?= $behaviorStats['n_sessions'] ?></strong></td></tr>
         <tr><td>Duración total</td><td><strong><?= htmlspecialchars(Metrics::formatDurationHms($totalDurationRealS)) ?></strong></td></tr>
         <tr><td>Delta promedio entre acciones</td><td><strong><?= isset($behaviorStats['avg_delta_s']) ? htmlspecialchars(Metrics::formatDurationHms((int) round($behaviorStats['avg_delta_s']))) : '—' ?></strong></td></tr>
@@ -221,13 +235,14 @@ admin_header('Alumno: ' . $student['display_name'], $me);
     </div>
 </div>
 
-<div class="card">
-    <strong>Atenciones (<?= count($attendances) ?>) · Exámenes con informe (<?= (int) $totalReports ?>)</strong>
-    <p class="legend">Comportamiento aislado por cada atención (cita/paciente) -- así un caso no ensucia las métricas de otro cuando el alumno revisó más de uno.</p>
+<?php
+/** Tabla de atenciones (prácticos o intentos de práctica), una fila por cita. */
+$tablaAtenciones = static function (array $filas, string $vacio) use ($statsByAppt, $studentId, $reportsByAppt, $versionesPorInforme, $tecnicaByAppt): void {
+    ?>
     <div class="table-wrap">
     <table>
         <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Bloques</th><th>Duración</th><th>Delta prom.</th><th>Pausas largas</th><th>Hora real</th><th>Nota</th><th>Exámenes</th><th title="Logro de la técnica de audiometría (pasos cumplidos sobre los evaluables)">Técnica</th><th>Actualizado</th><th>Detalle</th></tr>
-        <?php foreach ($attendances as $a):
+        <?php foreach ($filas as $a):
             $aStats = $statsByAppt[(int) $a['appointment_id']] ?? null;
             // Duración real (Atender -> Atendido) siempre que esté cerrada;
             // más confiable que el cálculo por action_logs, que arranca recién
@@ -267,12 +282,27 @@ admin_header('Alumno: ' . $student['display_name'], $me);
             <td><a href="chat_detail.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>">Ver atención</a></td>
         </tr>
         <?php endforeach; ?>
-        <?php if (!$attendances): ?>
-        <tr><td colspan="14" class="muted">Sin atenciones registradas todavía.</td></tr>
+        <?php if (!$filas): ?>
+        <tr><td colspan="14" class="muted"><?= htmlspecialchars($vacio) ?></td></tr>
         <?php endif; ?>
     </table>
     </div>
+    <?php
+};
+?>
+<div class="card">
+    <strong>Atenciones (<?= count($attendances) ?>) · Exámenes con informe (<?= (int) $totalReports ?>)</strong>
+    <p class="legend">Comportamiento aislado por cada atención (cita/paciente) -- así un caso no ensucia las métricas de otro cuando el alumno revisó más de uno.</p>
+    <?php $tablaAtenciones($attendances, 'Sin atenciones registradas todavía.'); ?>
 </div>
+
+<?php if ($practicas): ?>
+<div class="card">
+    <strong>Práctica deliberada (<?= count($practicas) ?> intento<?= count($practicas) === 1 ? '' : 's' ?>)</strong>
+    <p class="legend">Pacientes de la lista de práctica del curso, abiertos cuando el alumno quiso. Cada intento es una fila; no entran al resumen de arriba.</p>
+    <?php $tablaAtenciones($practicas, ''); ?>
+</div>
+<?php endif; ?>
 
 <?php
 $tipoLabels = Oirs::LABELS;

@@ -37,6 +37,9 @@ final class CourseAdmin
         'generate_demo_code' => 'pruebas',
         'clean_demo' => 'pruebas',
         'link_lti_context' => 'vinculos',
+        'practice_add' => 'practica',
+        'practice_remove' => 'practica',
+        'practice_set_sheet' => 'practica',
     ];
 
     public static function tabForAction(string $action): ?string
@@ -141,6 +144,44 @@ final class CourseAdmin
                     $res['success'] = 'Todo quedó igual al default de la app -- el curso vuelve a heredarlo.';
                 }
                 AdminAudit::log($me, 'course_set_params', ['course_id' => $courseId, 'param_key' => $paramKey, 'override' => $override]);
+                break;
+
+            case 'practice_add':
+                $caseId = trim((string) ($post['case_id'] ?? ''));
+                if ($caseId === '') {
+                    $res['error'] = 'Falta elegir la ficha.';
+                    break;
+                }
+                $err = Practica::agregar(
+                    $courseId,
+                    $caseId,
+                    (string) ($post['procedimiento'] ?? ''),
+                    ($post['show_study_sheet'] ?? '') === '1',
+                    (int) $me['id']
+                );
+                if ($err !== null) {
+                    $res['error'] = $err;
+                    break;
+                }
+                $res['success'] = 'Paciente agregado a la lista de práctica.';
+                AdminAudit::log($me, 'practice_add', ['course_id' => $courseId, 'case_id' => $caseId]);
+                break;
+
+            case 'practice_remove':
+                $practiceId = (int) ($post['practice_id'] ?? 0);
+                Practica::quitar($practiceId, $courseId);
+                $res['success'] = 'Paciente quitado de la lista de práctica (sus intentos se conservan).';
+                AdminAudit::log($me, 'practice_remove', ['course_id' => $courseId, 'practice_id' => $practiceId]);
+                break;
+
+            case 'practice_set_sheet':
+                $practiceId = (int) ($post['practice_id'] ?? 0);
+                $mostrar = ($post['show_study_sheet'] ?? '') === '1';
+                Practica::setMostrarFicha($practiceId, $courseId, $mostrar);
+                $res['success'] = $mostrar
+                    ? 'La ficha de estudio queda disponible al cerrar cada intento.'
+                    : 'La ficha de estudio ya no se muestra al cerrar.';
+                AdminAudit::log($me, 'practice_set_sheet', ['course_id' => $courseId, 'practice_id' => $practiceId, 'show' => $mostrar]);
                 break;
 
             case 'generate_demo_code':

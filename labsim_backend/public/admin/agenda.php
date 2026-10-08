@@ -323,7 +323,7 @@ if ($historyCaseId !== null) {
     $stmt = $pdo->prepare(
         "SELECT a.id, a.fecha, a.hora, a.procedimiento, a.nombre, a.apellido,
                 (SELECT COUNT(*) FROM attendances att WHERE att.appointment_id = a.id) AS atenciones_count
-         FROM appointments a WHERE a.case_id = ? ORDER BY a.id DESC"
+         FROM appointments a WHERE a.case_id = ? AND " . Practica::sinPractica('a') . " ORDER BY a.id DESC"
     );
     $stmt->execute([$historyCaseId]);
     $historyRows = $stmt->fetchAll();
@@ -341,7 +341,7 @@ if ($scheduleCaseId !== null) {
                 a.procedimiento, a.nota_admin, a.course_id, a.assigned_student_id, a.assigned_group_id
          FROM cases c
          LEFT JOIN appointments a ON a.id = (
-             SELECT id FROM appointments WHERE case_id = c.id ORDER BY id DESC LIMIT 1
+             SELECT id FROM appointments WHERE case_id = c.id AND " . Practica::sinPractica() . " ORDER BY id DESC LIMIT 1
          )
          WHERE c.id = ?"
     );
@@ -355,7 +355,7 @@ if ($scheduleCaseId !== null) {
 // de esa fila específica para editar/eliminar la correcta.
 $scheduleAppointmentId = isset($_GET['appointment']) ? (int) $_GET['appointment'] : null;
 if ($scheduleRow !== null && $scheduleAppointmentId !== null) {
-    $stmt = $pdo->prepare('SELECT * FROM appointments WHERE id = ? AND case_id = ?');
+    $stmt = $pdo->prepare('SELECT * FROM appointments WHERE id = ? AND case_id = ? AND ' . Practica::sinPractica());
     $stmt->execute([$scheduleAppointmentId, $scheduleRow['id']]);
     $specificAppt = $stmt->fetch();
     if ($specificAppt !== false) {
@@ -372,7 +372,7 @@ if ($scheduleRow !== null && !$scheduleRow['appointment_id']) {
 $scheduleForceRound = isset($_GET['force_round']) && $_GET['force_round'] === '1';
 $scheduleAppointmentsCount = 0;
 if ($scheduleRow !== null) {
-    $stmt = $pdo->prepare('SELECT COUNT(*) FROM appointments WHERE case_id = ?');
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM appointments WHERE case_id = ? AND ' . Practica::sinPractica());
     $stmt->execute([$scheduleRow['id']]);
     $scheduleAppointmentsCount = (int) $stmt->fetchColumn();
 }
@@ -454,7 +454,7 @@ function appt_in_filter_scope(
 $calStmt = $pdo->prepare(
     "SELECT a.id AS appointment_id, a.case_id, a.fecha, a.hora, a.nombre, a.apellido,
             a.course_id, a.assigned_student_id, a.assigned_group_id
-     FROM appointments a" . ($permissionSql !== '1=1' ? " WHERE ({$permissionSql})" : '')
+     FROM appointments a WHERE " . Practica::sinPractica('a') . ($permissionSql !== '1=1' ? " AND ({$permissionSql})" : '')
 );
 $calStmt->execute($permissionParams);
 $calendarAppointments = $calStmt->fetchAll();
@@ -508,7 +508,7 @@ if ($isNewFlow) {
         "SELECT c.id, c.data, a.nombre, a.apellido, a.fecha, p.comentario_docente
          FROM cases c
          LEFT JOIN appointments a ON a.id = (
-             SELECT id FROM appointments WHERE case_id = c.id ORDER BY id DESC LIMIT 1
+             SELECT id FROM appointments WHERE case_id = c.id AND " . Practica::sinPractica() . " ORDER BY id DESC LIMIT 1
          )
          LEFT JOIN patients p ON p.id = c.patient_id
          WHERE c.archived_at IS NULL

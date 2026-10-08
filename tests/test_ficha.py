@@ -152,6 +152,26 @@ def test_fecha_de_cita_invalida_deja_la_llave():
     assert resolver_fechas_historia_clinica("{{-5}} algo", "no-es-fecha") == "{{-5}} algo"
 
 
+def test_practica_y_practicos_no_se_mezclan_en_el_historial():
+    """La evolución de un intento de práctica no aparece en la ficha del
+    mismo paciente en un práctico, ni al revés."""
+    practico = FilaFalsa()
+    practico.atencion = {"alumno1": {"estado": "atendido", "nota": "NOTA-PRACTICO", "hora_real": "09:12:00"}}
+    intento = FilaFalsa()
+    intento.practice_id = 4
+    intento.fecha = "12-09-26"
+    intento.atencion = {"alumno1": {"estado": "atendido", "nota": "NOTA-PRACTICA", "hora_real": "20:00:00"}}
+    shedule = {"agenda_1": {1: practico, 2: intento}}
+
+    html_practico = render_ficha_html(FilaFalsa(), {}, shedule, "alumno1", False)
+    assert "NOTA-PRACTICO" in html_practico and "NOTA-PRACTICA" not in html_practico
+
+    otra = FilaFalsa()
+    otra.practice_id = 4
+    html_intento = render_ficha_html(otra, {}, shedule, "alumno1", False)
+    assert "NOTA-PRACTICA" in html_intento and "NOTA-PRACTICO" not in html_intento
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_") and callable(fn):

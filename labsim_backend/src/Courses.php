@@ -305,14 +305,21 @@ final class Courses
      * donde está), cuántas cerró como 'atendido' y cuándo tocó una atención
      * por última vez. Todo el roster en una query -- pintar esto por alumno
      * serían tres consultas por tarjeta.
-     * [user_id => ['asignadas' => int, 'atendidas' => int, 'ultima' => ?string]]
+     * [user_id => ['asignadas' => int, 'atendidas' => int, 'ultima' => ?string, 'practicas' => int]]
      */
     public static function rosterProgress(int $courseId): array
     {
+        // Los intentos de práctica deliberada se cuentan aparte
+        // ('practicas'): no son citas asignadas ni cuentan como actividad
+        // de prácticos (ver Practica).
+        $sinP = Practica::sinPractica('a');
+        $sinP2 = Practica::sinPractica('a2');
+        $sinP3 = Practica::sinPractica('a3');
+        $soloP = Practica::soloPractica('a4');
         $stmt = Db::get()->prepare(
             "SELECT u.id AS user_id,
                     (SELECT COUNT(*) FROM appointments a
-                      WHERE a.course_id = ?
+                      WHERE a.course_id = ? AND {$sinP}
                         AND (a.assigned_student_id = u.id
                              OR (a.assigned_group_id IS NOT NULL
                                  AND a.assigned_group_id IN (
@@ -321,20 +328,24 @@ final class Courses
                                       WHERE gm.user_id = u.id AND g.course_id = ?)))) AS asignadas,
                     (SELECT COUNT(*) FROM attendances att
                        JOIN appointments a2 ON a2.id = att.appointment_id
-                      WHERE att.student_id = u.id AND att.estado = 'atendido' AND a2.course_id = ?) AS atendidas,
+                      WHERE att.student_id = u.id AND att.estado = 'atendido' AND a2.course_id = ? AND {$sinP2}) AS atendidas,
                     (SELECT MAX(att2.updated_at) FROM attendances att2
                        JOIN appointments a3 ON a3.id = att2.appointment_id
-                      WHERE att2.student_id = u.id AND a3.course_id = ?) AS ultima
+                      WHERE att2.student_id = u.id AND a3.course_id = ? AND {$sinP3}) AS ultima,
+                    (SELECT COUNT(*) FROM attendances att4
+                       JOIN appointments a4 ON a4.id = att4.appointment_id
+                      WHERE att4.student_id = u.id AND att4.estado = 'atendido' AND a4.course_id = ? AND {$soloP}) AS practicas
              FROM course_students cs JOIN users u ON u.id = cs.user_id
              WHERE cs.course_id = ?"
         );
-        $stmt->execute([$courseId, $courseId, $courseId, $courseId, $courseId]);
+        $stmt->execute([$courseId, $courseId, $courseId, $courseId, $courseId, $courseId]);
         $out = [];
         foreach ($stmt->fetchAll() as $row) {
             $out[(int) $row['user_id']] = [
                 'asignadas' => (int) $row['asignadas'],
                 'atendidas' => (int) $row['atendidas'],
                 'ultima' => $row['ultima'] !== null ? (string) $row['ultima'] : null,
+                'practicas' => (int) $row['practicas'],
             ];
         }
         return $out;

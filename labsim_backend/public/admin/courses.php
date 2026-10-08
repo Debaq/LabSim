@@ -79,6 +79,7 @@ if ($detailId !== null) {
         'personas' => ['label' => 'Personas', 'count' => $counts['alumnos']],
         'modulos' => ['label' => 'Módulos', 'count' => $counts['modulos']],
         'agenda' => ['label' => 'Agenda'],
+        'practica' => ['label' => 'Práctica'],
         'vinculos' => ['label' => 'Vínculos'],
         'pruebas' => ['label' => 'Pruebas'],
     ];
@@ -143,6 +144,11 @@ if ($detailId !== null) {
             $ventanaDias = 30;
             $proximas = CourseOverview::proximasCitas($courseId, $ventanaDias);
             $conteoCitas = CourseOverview::conteoCitas($courseId);
+            break;
+
+        case 'practica':
+            $practicaItems = Practica::delCurso($courseId);
+            $practicaCasos = Practica::casosParaAgregar($courseId);
             break;
 
         case 'vinculos':

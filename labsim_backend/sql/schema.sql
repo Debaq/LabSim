@@ -263,12 +263,41 @@ CREATE TABLE IF NOT EXISTS appointments (
     course_id INTEGER REFERENCES courses(id),
     assigned_student_id INTEGER REFERENCES users(id),
     assigned_group_id INTEGER REFERENCES student_groups(id),
-    patient_id INTEGER REFERENCES patients(id)
+    patient_id INTEGER REFERENCES patients(id),
+    -- Intento de práctica deliberada (ver practice_cases): NULL = cita de
+    -- práctico, la de siempre. Cada vez que el alumno abre un paciente de la
+    -- lista de práctica se crea una cita propia, asignada a él, con este id;
+    -- así atención, informes, chat y técnica funcionan sin cambios. Toda
+    -- vista de la agenda o estadística de prácticos filtra
+    -- `practice_id IS NULL` (ver Practica::sinPractica).
+    practice_id INTEGER REFERENCES practice_cases(id)
 );
 CREATE INDEX IF NOT EXISTS idx_appointments_updated ON appointments (updated_at);
+CREATE INDEX IF NOT EXISTS idx_appointments_practice ON appointments (practice_id);
 CREATE INDEX IF NOT EXISTS idx_appointments_fecha ON appointments (fecha);
 CREATE INDEX IF NOT EXISTS idx_appointments_rut ON appointments (rut);
 CREATE INDEX IF NOT EXISTS idx_appointments_patient_id ON appointments (patient_id);
+
+-- Lista de práctica deliberada de un curso: pacientes que el alumno puede
+-- abrir cuando quiera (en su casa, por ejemplo), cuantas veces quiera. No
+-- tienen fecha ni hora: cada intento es una cita propia en appointments
+-- (practice_id). Quitar un paciente de la lista lo desactiva (active = 0) y
+-- no lo borra: los intentos ya hechos siguen apuntando acá.
+-- show_study_sheet: al cerrar un intento, el alumno puede bajar la ficha de
+-- estudio del caso para comparar con lo que obtuvo. Lo decide el docente
+-- por paciente, y vale lo que diga ahora (también para intentos viejos).
+CREATE TABLE IF NOT EXISTS practice_cases (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    course_id INTEGER NOT NULL REFERENCES courses(id),
+    case_id TEXT NOT NULL REFERENCES cases(id),
+    procedimiento TEXT NOT NULL DEFAULT '',
+    show_study_sheet INTEGER NOT NULL DEFAULT 0,
+    active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by INTEGER REFERENCES users(id),
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (course_id, case_id)
+);
 
 -- Progreso de CADA alumno sobre una cita (antes entry[8], el dict por
 -- username). Varios alumnos pueden tener fila propia para la misma cita.

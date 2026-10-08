@@ -31,7 +31,9 @@ foreach ($cases as &$c) {
 }
 unset($c);
 
-$appointments = Db::castAppointments($pdo->query('SELECT * FROM appointments')->fetchAll());
+// Sin los intentos de práctica de los alumnos (ver Practica): no son citas
+// de la agenda y el docente no los atiende.
+$appointments = Db::castAppointments($pdo->query('SELECT * FROM appointments WHERE ' . Practica::sinPractica())->fetchAll());
 $attendances = $pdo->query('SELECT * FROM attendances')->fetchAll();
 
 // Config efectiva (override del curso resuelto si existe, si no el default

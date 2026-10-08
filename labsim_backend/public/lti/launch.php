@@ -144,8 +144,18 @@ if ($isPortalUser) {
     $rows = Db::get()->query(
         "SELECT al.* FROM action_logs al JOIN users u ON u.id = al.user_id WHERE u.role = 'student' ORDER BY al.id"
     )->fetchAll();
+    // Los intentos de práctica deliberada no cuentan acá: el resumen habla
+    // de los prácticos (ver Practica).
+    $citasPractica = array_flip(array_map(
+        'intval',
+        array_column(Db::get()->query('SELECT id FROM appointments WHERE ' . Practica::soloPractica())->fetchAll(), 'id')
+    ));
     $logsByUser = [];
     foreach (Metrics::decodeLogs($rows) as $log) {
+        if ($log['appointment_id'] !== null && $log['appointment_id'] !== ''
+            && isset($citasPractica[(int) $log['appointment_id']])) {
+            continue;
+        }
         $logsByUser[(int) $log['user_id']][] = $log;
     }
 

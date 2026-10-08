@@ -306,6 +306,26 @@ class BackendClient:
         comportamiento por atención (ver my_attendances.php)."""
         return self._get("/api/my_attendances.php")
 
+    def get_practica(self) -> list[dict]:
+        """Pacientes de práctica deliberada de los cursos del alumno, con
+        sus intentos y el que tenga abierto (ver api/practica.php)."""
+        return self._get("/api/practica.php").get("items", [])
+
+    def iniciar_practica(self, practice_id: int) -> dict:
+        """Abre un intento: devuelve la cita (la que quedó abierta en ese
+        paciente, o una nueva)."""
+        return self._post("/api/practica.php", {"action": "iniciar", "id": practice_id})["appointment"]
+
+    def get_ficha_estudio(self, appointment_id: int) -> bytes | None:
+        """PDF de la ficha de estudio de un intento de práctica cerrado,
+        si el docente la dejó disponible (ver api/practica_ficha.php)."""
+        resp = self._http.get(
+            f"{self._base_url}/api/practica_ficha.php", params={"appointment_id": appointment_id},
+            headers=self._headers(), timeout=60,
+        )
+        self._raise_for_status_with_detail(resp)
+        return resp.content
+
     def get_my_chat_history(self, appointment_id: int) -> dict:
         """Conversación con el paciente simulado de una atención propia,
         más los comentarios que el docente haya dejado (ver

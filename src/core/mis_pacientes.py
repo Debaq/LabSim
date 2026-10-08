@@ -13,7 +13,9 @@ alumno ha atendido; al seleccionar uno, muestra en pestañas:
     compartido, ver core.ficha), acá en modo solo-lectura histórico.
   - Exámenes: los informes de esa atención. El ABR se abre en el módulo para
     mirarlo (solo lectura: una atención cerrada no se actualiza más); el PDF
-    de cualquier examen se ve en el portal web, no acá.
+    de cualquier examen se ve en el portal web, no acá. En un intento de
+    práctica deliberada, si el docente lo permite, también la ficha de
+    estudio del caso (ver core.practica).
 
 Vive como subventana única del MDI (ver main.py: self.subw["MIS_PACIENTES"]),
 igual que Agenda o la Bandeja de entrada."""
@@ -29,6 +31,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QSplitter, QPushButton,
 
 from core.helpers import mis_atenciones, mi_conversacion, mis_informes, CasesOffline, Shedule
 from core.ficha import render_ficha_html
+from core.practica import abrir_ficha_estudio
 
 BTN_OBJECT_NAME = "btn_mis_pacientes"
 COLUMNAS = ("Fecha", "Paciente", "Procedimiento")
@@ -137,6 +140,12 @@ class MisPacientesWidget(QWidget):
         self.btn_ver_abr.clicked.connect(self._ver_en_abr)
         caja.addWidget(self.btn_ver_abr)
 
+        self.btn_ficha_estudio = QPushButton("Ficha de estudio (PDF)", pagina)
+        self.btn_ficha_estudio.setToolTip("Los resultados del caso, para comparar con lo que obtuviste")
+        self.btn_ficha_estudio.setVisible(False)
+        self.btn_ficha_estudio.clicked.connect(self._ver_ficha_estudio)
+        caja.addWidget(self.btn_ficha_estudio)
+
         self.lbl_examenes = QLabel(AVISO_PDF, pagina)
         self.lbl_examenes.setWordWrap(True)
         self.lbl_examenes.setStyleSheet("color:#666;")
@@ -155,6 +164,7 @@ class MisPacientesWidget(QWidget):
             self.tabla_examenes.setItem(fila, 0, QTableWidgetItem(NOMBRE_EXAMEN.get(tipo, tipo)))
             self.tabla_examenes.setItem(fila, 1, QTableWidgetItem(informe.get("updated_at") or "—"))
         self.btn_ver_abr.setEnabled(False)
+        self.btn_ficha_estudio.setVisible(bool(it.get("ficha_estudio")))
         self.lbl_examenes.setText(
             AVISO_PDF if self._examenes else
             "Esta atención no tiene exámenes guardados.")
@@ -180,11 +190,17 @@ class MisPacientesWidget(QWidget):
         if self._main_window is not None and hasattr(self._main_window, "abrir_abr_consulta"):
             self._main_window.abrir_abr_consulta(informe.get("data") or {}, aviso)
 
+    def _ver_ficha_estudio(self):
+        it = self._atencion or {}
+        if it.get("ficha_estudio") and it.get("appointment_id"):
+            abrir_ficha_estudio(self, it["appointment_id"])
+
     def _mostrar_vacio(self):
         if hasattr(self, "tabla_examenes"):
             self.tabla_examenes.setRowCount(0)
             self._examenes = []
             self.btn_ver_abr.setEnabled(False)
+            self.btn_ficha_estudio.setVisible(False)
         self.texto_resumen.setHtml("<p style='color:#888;'>Selecciona un paciente de la lista.</p>")
         self.texto_conversacion.setHtml("<p style='color:#888;'>Selecciona un paciente de la lista.</p>")
         self.texto_ficha.setHtml("<p style='color:#888;'>Selecciona un paciente de la lista.</p>")
@@ -207,7 +223,9 @@ class MisPacientesWidget(QWidget):
             paciente = f"{it.get('nombre', '')} {it.get('apellido', '')}".strip() or "Paciente sin nombre"
             fecha_item = QTableWidgetItem(f"{it.get('fecha', '') or '—'} {it.get('hora', '')}".strip())
             paciente_item = QTableWidgetItem(paciente)
-            proc_item = QTableWidgetItem(it.get("procedimiento", ""))
+            proc = it.get("procedimiento", "")
+            # Intento de práctica deliberada: se rotula, no se esconde.
+            proc_item = QTableWidgetItem(f"{proc} · práctica" if it.get("practica") else proc)
             for item in (fecha_item, paciente_item, proc_item):
                 item.setData(Qt.UserRole, it)
             self.tabla.setItem(row, 0, fecha_item)
@@ -321,6 +339,7 @@ class MisPacientesWidget(QWidget):
                 fecha=it.get("fecha", ""), hora=it.get("hora", ""), rut="",
                 nombre=it.get("nombre", ""), apellido=it.get("apellido", ""),
                 fecha_nac="", procedimiento=it.get("procedimiento", ""), atencion={},
+                practice_id=1 if it.get("practica") else None,
             )
 
         caso = self._cases.get(case_id, {})

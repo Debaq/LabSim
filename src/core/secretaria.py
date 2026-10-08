@@ -81,9 +81,12 @@ def siguiente_paciente(agenda, key_actual, username):
     actual = agenda.get(key_actual)
     if actual is None or not actual.fecha:
         return None
+    if getattr(actual, "practice_id", None) is not None:
+        return None   # práctica libre: nadie espera en la sala
     pendientes = [
         e for k, e in agenda.items()
         if k != key_actual and not e.sin_cita and e.fecha == actual.fecha and e.hora
+        and getattr(e, "practice_id", None) is None
         and not e.atencion.get(username)
     ]
     if not pendientes:

@@ -18,14 +18,18 @@ $pdo = Db::get();
 
 $stmt = $pdo->prepare(
     "SELECT att.hora_real, att.updated_at,
-            a.id AS appointment_id, a.fecha, a.hora, a.nombre, a.apellido, a.procedimiento
+            a.id AS appointment_id, a.fecha, a.hora, a.nombre, a.apellido, a.procedimiento,
+            " . (Practica::listo() ? 'a.practice_id' : 'NULL') . " AS practice_id
      FROM attendances att
      JOIN appointments a ON a.id = att.appointment_id
      WHERE att.student_id = ? AND att.estado = 'atendido'
      ORDER BY att.updated_at DESC"
 );
 $stmt->execute([$me['id']]);
-$attendances = $stmt->fetchAll();
+$todas = $stmt->fetchAll();
+// Los intentos de práctica deliberada van en su propia tabla (ver Practica).
+$attendances = array_values(array_filter($todas, static fn (array $a): bool => $a['practice_id'] === null));
+$practicas = array_values(array_filter($todas, static fn (array $a): bool => $a['practice_id'] !== null));
 
 $stmt = $pdo->prepare('SELECT user_id, client_ts, action, payload FROM action_logs WHERE user_id = ? ORDER BY id');
 $stmt->execute([$me['id']]);
@@ -38,16 +42,14 @@ foreach ($sessions as $s) {
 }
 
 student_header('Mis pacientes', $me);
-?>
-<h1>Pacientes que has atendido (<?= count($attendances) ?>)</h1>
-<div class="card">
-    <?php if (!$attendances): ?>
-    <p class="empty">Todavía no has cerrado ninguna atención.</p>
-    <?php else: ?>
+
+/** Tabla de atenciones cerradas (prácticos o intentos de práctica). */
+$tabla = static function (array $filas) use ($sessionsByAppt): void {
+    ?>
     <div class="table-wrap">
     <table>
         <tr><th>Fecha</th><th>Paciente</th><th>Procedimiento</th><th>Duración</th><th>Bloques</th><th>Delta prom.</th><th>Pausas largas</th></tr>
-        <?php foreach ($attendances as $a):
+        <?php foreach ($filas as $a):
             $stats = Metrics::summarizeSessions($sessionsByAppt[(int) $a['appointment_id']] ?? []);
             // Duración real (Atender -> Atendido), mismo criterio que
             // admin/student.php -- más confiable que sumar action_logs.
@@ -65,9 +67,25 @@ student_header('Mis pacientes', $me);
         <?php endforeach; ?>
     </table>
     </div>
+    <?php
+};
+?>
+<h1>Pacientes que has atendido (<?= count($attendances) ?>)</h1>
+<div class="card">
+    <?php if (!$attendances): ?>
+    <p class="empty">Todavía no has cerrado ninguna atención.</p>
+    <?php else: ?>
+    <?php $tabla($attendances); ?>
     <p class="legend">Pincha una fila para ver el detalle: tu conversación con el paciente (con la retroalimentación
         de tu docente si dejó alguna) y la ficha clínica.</p>
     <?php endif; ?>
 </div>
+<?php if ($practicas): ?>
+<h1>Práctica (<?= count($practicas) ?> intento<?= count($practicas) === 1 ? '' : 's' ?>)</h1>
+<div class="card">
+    <?php $tabla($practicas); ?>
+    <p class="legend">Cada vez que abres un paciente de práctica queda como un intento aparte.</p>
+</div>
+<?php endif; ?>
 <?php
 student_footer();

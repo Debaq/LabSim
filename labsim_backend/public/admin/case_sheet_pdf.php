@@ -40,7 +40,7 @@ $stmt = $pdo->prepare(
             a.course_id, a.rut, a.nombre, a.apellido, a.fecha_nac
      FROM cases c
      LEFT JOIN appointments a ON a.id = (
-         SELECT id FROM appointments WHERE case_id = c.id ORDER BY id DESC LIMIT 1
+         SELECT id FROM appointments WHERE case_id = c.id AND ' . Practica::sinPractica() . ' ORDER BY id DESC LIMIT 1
      )
      WHERE c.id = ?'
 );

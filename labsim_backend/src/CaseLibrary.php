@@ -166,6 +166,10 @@ final class CaseLibrary
                     (SELECT id FROM appointments WHERE case_id IN ({$in}))"
             )->execute($params);
             $pdo->prepare("DELETE FROM appointments WHERE case_id IN ({$in})")->execute($params);
+            // Después de las citas: los intentos de práctica apuntan acá.
+            if (Practica::listo()) {
+                $pdo->prepare("DELETE FROM practice_cases WHERE case_id IN ({$in})")->execute($params);
+            }
             $pdo->prepare("DELETE FROM cases WHERE id IN ({$in})")->execute($params);
             if ($propia) {
                 $pdo->commit();

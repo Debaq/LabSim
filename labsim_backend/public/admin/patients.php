@@ -211,6 +211,10 @@ if ($folderFiltro === 'sin') {
 $whereSql = ' WHERE (a.id IS NULL OR (' . $permissionSql . ')) AND ' . implode(' AND ', $filtroSql);
 
 Db::migrateCaseLibraryIfNeeded();
+// Los intentos de práctica deliberada no son rondas del caso ni su última
+// cita (ver Practica).
+$sinPractica = Practica::sinPractica();
+$sinPracticaAp2 = Practica::sinPractica('ap2');
 $stmt = $pdo->prepare(
     "SELECT c.id, c.data, c.updated_at, c.created_at, c.folder_id, c.archived_at,
             a.id AS appointment_id, a.fecha, a.hora, a.rut, a.nombre, a.apellido, a.fecha_nac,
@@ -229,11 +233,11 @@ $stmt = $pdo->prepare(
             -- rondas previas se \"perdían\" (volvía a 0).
             (SELECT COUNT(*) FROM attendances att
                 JOIN appointments ap2 ON ap2.id = att.appointment_id
-                WHERE ap2.case_id = c.id) AS atenciones_count,
-            (SELECT COUNT(*) FROM appointments WHERE case_id = c.id) AS rondas_count
+                WHERE ap2.case_id = c.id AND {$sinPracticaAp2}) AS atenciones_count,
+            (SELECT COUNT(*) FROM appointments WHERE case_id = c.id AND {$sinPractica}) AS rondas_count
      FROM cases c
      LEFT JOIN appointments a ON a.id = (
-         SELECT id FROM appointments WHERE case_id = c.id ORDER BY id DESC LIMIT 1
+         SELECT id FROM appointments WHERE case_id = c.id AND {$sinPractica} ORDER BY id DESC LIMIT 1
      )
      LEFT JOIN patients p ON p.id = c.patient_id
      LEFT JOIN users uc ON uc.id = c.created_by

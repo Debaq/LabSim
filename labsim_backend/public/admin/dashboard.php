@@ -405,6 +405,21 @@ if ($appointmentId !== null) {
     exit;
 }
 
+// Vista general: los intentos de práctica deliberada se ven aparte (ficha
+// del alumno, pestaña Práctica del curso), no en estos promedios. El
+// detalle de una atención puntual (arriba) sí los muestra.
+$citasPractica = array_flip(array_map(
+    'intval',
+    array_column($pdo->query('SELECT id FROM appointments WHERE ' . Practica::soloPractica())->fetchAll(), 'id')
+));
+if ($citasPractica) {
+    $logs = array_values(array_filter(
+        $logs,
+        static fn(array $l): bool => $l['appointment_id'] === null || $l['appointment_id'] === ''
+            || !isset($citasPractica[(int) $l['appointment_id']])
+    ));
+}
+
 $byUserLogs = [];
 foreach ($logs as $l) {
     $byUserLogs[(int) $l['user_id']][] = $l;
@@ -426,6 +441,9 @@ if ($allowedStudentIds === null) {
 }
 $attByUser = [];
 foreach ($attRows as $a) {
+    if (isset($citasPractica[(int) $a['appointment_id']])) {
+        continue;
+    }
     $attByUser[(int) $a['student_id']][] = $a;
 }
 

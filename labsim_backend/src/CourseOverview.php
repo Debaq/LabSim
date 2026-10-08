@@ -50,7 +50,7 @@ final class CourseOverview
              FROM appointments a
              LEFT JOIN users u ON u.id = a.assigned_student_id
              LEFT JOIN student_groups g ON g.id = a.assigned_group_id
-             WHERE a.course_id = ?"
+             WHERE a.course_id = ? AND " . Practica::sinPractica('a')
         );
         $stmt->execute([$courseId]);
 
@@ -71,7 +71,7 @@ final class CourseOverview
     public static function conteoCitas(int $courseId, ?DateTimeImmutable $hoy = null): array
     {
         $hoy = $hoy ?: new DateTimeImmutable('today');
-        $stmt = Db::get()->prepare('SELECT fecha FROM appointments WHERE course_id = ?');
+        $stmt = Db::get()->prepare('SELECT fecha FROM appointments WHERE course_id = ? AND ' . Practica::sinPractica());
         $stmt->execute([$courseId]);
         $total = 0;
         $futuras = 0;
