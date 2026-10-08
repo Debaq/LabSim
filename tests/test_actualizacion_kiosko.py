@@ -227,6 +227,61 @@ def test_con_un_alumno_entrando_tambien_espera():
     assert ventana._update_pendiente and not aplicadas
 
 
+
+def _ventana_layout(main, sesion=False):
+    v = SimpleNamespace(_layout_retry=object(), _reinicio_pendiente=False, reinicios=[])
+    v._set_offline_title = lambda _offline: None
+    v._sesion_activa = lambda: sesion
+    v._restart_app = lambda: v.reinicios.append(1)
+    return v
+
+
+def _con_layout(main, arranque, fn):
+    original = (main._LAYOUT_ARRANQUE, main.LAYOUT_AVAILABLE)
+    main._LAYOUT_ARRANQUE, main.LAYOUT_AVAILABLE = arranque, True
+    try:
+        fn()
+    finally:
+        main._LAYOUT_ARRANQUE, main.LAYOUT_AVAILABLE = original
+
+
+LAYOUT = {"APP": {"A": [True, "Audio", 1, [True, True], [1, 1], "pre"]},
+          "BOXS": {"B1": [True, ["A"], "Box"]}, "SECTORS": {}}
+
+
+def test_vuelve_la_red_con_lo_mismo_no_reinicia():
+    """Un docente logueado cambia APPS en memoria: eso no es "cambió"."""
+    import copy
+    import main
+    v = _ventana_layout(main)
+    _con_layout(main, copy.deepcopy(LAYOUT),
+                lambda: main.MainWindow._on_layout_recovered(v, copy.deepcopy(LAYOUT)))
+    assert v.reinicios == [] and not v._reinicio_pendiente
+
+
+def test_cambio_con_alumno_adentro_espera_al_logout():
+    import copy
+    import main
+    nuevo = copy.deepcopy(LAYOUT)
+    nuevo["APP"]["A"][5] = "development"
+    v = _ventana_layout(main, sesion=True)
+    _con_layout(main, copy.deepcopy(LAYOUT), lambda: main.MainWindow._on_layout_recovered(v, nuevo))
+    assert v.reinicios == [] and v._reinicio_pendiente
+
+
+def test_cambio_en_kiosko_sin_sesion_reinicia_sin_preguntar():
+    import copy
+    import main
+    nuevo = copy.deepcopy(LAYOUT)
+    nuevo["APP"]["A"][5] = "development"
+    v = _ventana_layout(main)
+    os.environ["LABSIM_KIOSKO"] = "1"
+    try:
+        _con_layout(main, copy.deepcopy(LAYOUT), lambda: main.MainWindow._on_layout_recovered(v, nuevo))
+    finally:
+        os.environ.pop("LABSIM_KIOSKO", None)
+    assert v.reinicios == [1]
+
 if __name__ == "__main__":
     fallos = 0
     for nombre, fn in sorted(globals().items()):

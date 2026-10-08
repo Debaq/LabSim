@@ -1,4 +1,5 @@
 from pathlib import Path
+import copy
 import faulthandler
 import os
 import sys
@@ -119,6 +120,10 @@ else:
 # 'network' (backend respondió), 'cache' (copia local, modo offline) o
 # None (no hay layout de ninguna parte).
 LAYOUT_SOURCE = app_layout.last_source
+# Copia intacta para comparar cuando vuelve la red: APPS/BOXS se modifican
+# en memoria con un docente logueado (_apply_admin_overrides_if_any), y
+# comparar contra eso daba "la configuración cambió" sin haber cambiado.
+_LAYOUT_ARRANQUE = copy.deepcopy(_layout) if _layout else None
 
 
 class ComandVoiceA(QWidget, commandVoiceA):
@@ -272,20 +277,27 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         reiniciar -- la toolbar se arma una sola vez en __init__."""
         self._layout_retry = None
         self._set_offline_title(False)
+        arranque = _LAYOUT_ARRANQUE or {}
         igual = (
             LAYOUT_AVAILABLE
-            and data.get("APP") == APPS
-            and data.get("BOXS") == BOXS
-            and data.get("SECTORS") == SECTORS
+            and data.get("APP") == arranque.get("APP")
+            and data.get("BOXS") == arranque.get("BOXS")
+            and (data.get("SECTORS") or {}) == (arranque.get("SECTORS") or {})
         )
         if igual:
             print("[layout] conexión restablecida, cache al día")
             return
-        if self.data_login:
+        if self._sesion_activa():
             # Con una sesión abierta no se reinicia: execv cortaba la
             # atención sin subir nada. Se aplica al cerrar sesión.
             print("[layout] cambió la configuración; se reinicia al cerrar sesión")
             self._reinicio_pendiente = True
+            return
+        if es_kiosko():
+            # Sin nadie adentro no hay nada que perder, y no es una
+            # pregunta para el alumno que se sienta después.
+            print("[layout] cambió la configuración; se reinicia (kiosko sin sesión)")
+            self._restart_app()
             return
         ask = QMessageBox(self)
         ask.setIcon(QMessageBox.Information)
