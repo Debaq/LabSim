@@ -34,6 +34,23 @@ foreach (array_keys(Bibliografia::USO_ABR) as $fid) {
     t_true(isset(AbrReferences::FUENTES[$fid]), "Uso ABR {$fid}: la fuente existe");
 }
 
+// --- Técnicas de examen -----------------------------------------------------
+
+// La técnica es la referencia del indicador de efectividad: sin pasos no hay
+// nada contra qué comparar. Sus fuentes, cuando lleguen, siguen las mismas
+// reglas que las demás.
+foreach (Bibliografia::TECNICAS as $tid => $t) {
+    t_true(!empty($t['titulo']) && !empty($t['pasos']), "Técnica {$tid}: tiene título y pasos");
+    t_true(!empty($t['usa']), "Técnica {$tid}: dice a qué corresponde");
+    t_true(is_array($t['fuentes']), "Técnica {$tid}: fuentes es una lista (vacía si falta investigar)");
+    foreach ($t['fuentes'] as $fid => $f) {
+        t_true(!empty($f['cita']) && isset($f['enlace']), "Técnica {$tid}/{$fid}: tiene cita y enlace");
+        if (($f['verificada'] ?? true) === false) {
+            t_true(!empty($f['nota']), "Técnica {$tid}/{$fid}: sin verificar y dice qué falta");
+        }
+    }
+}
+
 // --- Patologías del generador ----------------------------------------------
 
 // El porqué se lee de los comentarios de CaseProfile.php: si el parser se

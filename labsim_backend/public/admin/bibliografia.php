@@ -86,6 +86,8 @@ admin_header('Bibliografía', $me);
         <li><a href="#<?= htmlspecialchars($sid) ?>"><?= htmlspecialchars($sec['titulo']) ?></a>
             (<?= count(Bibliografia::fuentes($sid)) ?> fuentes)</li>
         <?php endforeach; ?>
+        <li><a href="#tecnicas">Técnicas de examen</a>
+            (<?= count(Bibliografia::TECNICAS) ?>)</li>
         <li><a href="#decisiones">Para su teoría: lo que el generador muestra siempre alterado</a>
             (<?= count($decisiones) ?> cuadros)</li>
         <li><a href="#patologias">Patologías del generador</a>
@@ -131,6 +133,37 @@ admin_header('Bibliografía', $me);
     </details>
 </div>
 <?php endforeach; ?>
+
+<div class="card" id="tecnicas">
+    <details open>
+        <summary><strong>Técnicas de examen</strong></summary>
+        <p class="help help--mt">Cómo se toma cada examen, paso a paso, tal como usted lo enseña. Es la referencia contra la que se compara lo que hace el alumno en el equipo.</p>
+        <?php foreach (Bibliografia::TECNICAS as $tid => $t): ?>
+        <div style="margin-top:0.8rem; font-size:0.9em;">
+            <strong><?= htmlspecialchars($tid) ?> · <?= htmlspecialchars($t['titulo']) ?></strong>
+            <?php if (!$t['fuentes']): ?><span class="badge-warn">· sin bibliografía todavía</span><?php endif; ?>
+            <div style="opacity:0.8;"><?= htmlspecialchars($t['resumen']) ?></div>
+            <ol style="margin:0.3rem 0 0 1.2rem; padding:0;">
+                <?php foreach ($t['pasos'] as $paso): ?>
+                <li><?= htmlspecialchars($paso) ?></li>
+                <?php endforeach; ?>
+            </ol>
+            <?php if (!empty($t['nota'])): ?>
+            <div style="opacity:0.8; margin-top:0.2rem;"><em><?= htmlspecialchars($t['nota']) ?></em></div>
+            <?php endif; ?>
+            <div style="margin-top:0.2rem;">Corresponde a:</div>
+            <ul style="margin:0.1rem 0 0 1.2rem; padding:0;">
+                <?php foreach ($t['usa'] as $uso): ?>
+                <li><?= htmlspecialchars($uso) ?></li>
+                <?php endforeach; ?>
+            </ul>
+            <?php foreach ($t['fuentes'] as $fid => $f): ?>
+            <?php bib_ficha((string) $fid, $f); ?>
+            <?php endforeach; ?>
+        </div>
+        <?php endforeach; ?>
+    </details>
+</div>
 
 <?php
 $catalogo = Bibliografia::cuadros();

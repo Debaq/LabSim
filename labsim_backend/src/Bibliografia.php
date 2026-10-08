@@ -218,6 +218,38 @@ final class Bibliografia
     ];
 
     /**
+     * Técnicas de examen tal como las enseña el docente, paso a paso. Son
+     * la referencia contra la que se evalúa lo que hace el alumno (ver
+     * 'usa'), así que se escriben como reglas que se puedan medir en el
+     * registro de acciones.
+     *
+     * 'fuentes' queda vacío hasta contrastar la técnica con la literatura
+     * científica y la normativa: con la misma regla que las citas, no se
+     * completa de memoria.
+     */
+    public const TECNICAS = [
+        'T01' => [
+            'titulo' => 'Umbrales tonales por vía aérea',
+            'resumen' => 'Técnica determinista y ordenada: siempre los mismos pasos, en el mismo orden.',
+            'pasos' => [
+                'Se parte por el oído mejor.',
+                'Cada estímulo dura entre 1 y 2 segundos.',
+                'Familiarización en 1 kHz: se parte en 40 dB HL. Si no responde, se sube de 10 en 10 dB hasta la primera respuesta.',
+                'Desde la primera respuesta comienza la técnica: se dan dos estímulos en cada nivel y se baja de 10 en 10 dB mientras responda.',
+                'Cuando en un nivel no responde, se sube de 5 en 5 dB para precisar el umbral: el umbral es el nivel que responde 2 de 3 o 3 de 5 veces.',
+                'Orden de frecuencias: 1, 2, 3, 4, 6 y 8 kHz; luego 500, 250 y 125 Hz.',
+                'Cada frecuencia nueva parte 10 dB sobre el umbral de la frecuencia anterior. Si no responde, se sube de 10 en 10 dB hasta la primera respuesta (familiarización) y luego sigue la técnica.',
+                'Al terminar se repite 1 kHz para confirmar. Si da una diferencia mayor a 10 dB respecto de la primera vez, se repite todo el umbral.',
+            ],
+            'usa' => [
+                'Indicador de efectividad de la toma de umbrales aéreos (pendiente): se evalúa con el registro de acciones del audiómetro.',
+            ],
+            'fuentes' => [],
+            'nota' => 'Técnica tal como la enseña el docente. Falta contrastarla con la literatura científica y la normativa.',
+        ],
+    ];
+
+    /**
      * Bibliografía de cada cuadro de CaseProfile::SCENARIOS, por clave.
      * Cada cita: eje, cita, enlace, respalda (qué valor), coincide
      * (si / parcial / no), nota y verificada. Un cuadro que no está acá es
