@@ -369,9 +369,9 @@ class Preferences:
             self.data.update(data)
 
     def get(self, pref):
-        """recupera las prefernecias desde un archivo *.json"""
-        #print(self.data[pref])
-        return self.data[pref]
+        """recupera las prefernecias desde un archivo *.json (None si la
+        clave no está, ver el json faltante en __init__)"""
+        return self.data.get(pref)
 
     def set(self, pref, var):
         """modifica una configuración"""

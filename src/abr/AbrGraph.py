@@ -534,7 +534,7 @@ class AbrGraph(GraphicsLayoutWidgetMod):
         # Establecer las posiciones corregidas
         self.inf_a.setPos((lat_a, 0))
         self.inf_b.setPos((lat_b, 0))
-        if self.act_curve:
+        if self.act_curve in self.data:
             x = self.data[self.act_curve]['ipsi_xy'][0]
             y = self.data[self.act_curve]['ipsi_xy'][1]
 

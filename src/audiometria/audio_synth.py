@@ -269,12 +269,20 @@ def _write_wav(path, stereo):
     pcm = np.round(samples * 32767.0).astype("<i2")
 
     tmp_path = f"{path}.{os.getpid()}.tmp"
-    with wave.open(tmp_path, "wb") as handle:
-        handle.setnchannels(2)
-        handle.setsampwidth(2)
-        handle.setframerate(SAMPLE_RATE)
-        handle.writeframes(pcm.tobytes())
-    os.replace(tmp_path, path)
+    try:
+        with wave.open(tmp_path, "wb") as handle:
+            handle.setnchannels(2)
+            handle.setsampwidth(2)
+            handle.setframerate(SAMPLE_RATE)
+            handle.writeframes(pcm.tobytes())
+        os.replace(tmp_path, path)
+    except OSError:
+        # no dejar el .tmp a medias ocupando el poco disco que queda
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            pass
+        raise
 
 
 # --------------------------------------------------------------- generacion
@@ -360,5 +368,11 @@ def stimulus_file(stim, freq, ch, audio_dir):
 
     destination = _cache_dir(audio_dir) / f"{stim}_{freq_tag}_{ch}.wav"
     if not destination.exists():
-        _write_wav(str(destination), render(stim, freq_value, ch))
+        try:
+            _write_wav(str(destination), render(stim, freq_value, ch))
+        except OSError as exc:
+            # Disco lleno o sin permiso: se avisa y quien llama recurre al
+            # archivo estatico en vez de reventar el boton del estimulo
+            print(f"audio_synth: no se pudo escribir {destination}: {exc}")
+            return None
     return str(destination)

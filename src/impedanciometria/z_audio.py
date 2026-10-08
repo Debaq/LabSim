@@ -45,7 +45,8 @@ _MAX_VOLUME = 0.5
 
 def _source_for(stim, freq, ch):
     path = audio_synth.stimulus_file(stim, freq, ch, _AUDIO_DIR)
-    return QUrl.fromLocalFile(path)
+    # None = no se pudo generar (disco lleno): sin sonido, sin excepcion
+    return QUrl.fromLocalFile(path) if path else QUrl()
 
 
 class _FadingPlayer(QObject):

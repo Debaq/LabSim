@@ -241,6 +241,17 @@ def bone_latency_correction(intensity):
 # cualquier salida del equipo, asi nada responde nunca.
 NO_RESPONSE_DB = 999.0
 
+
+def umbral_db(valor):
+    """Umbral del caso como numero; 'NR', None o un texto que no se lee
+    cuentan como sin respuesta (NO_RESPONSE_DB). Un float() pelado
+    reventaba la captura entera por un dato mal cargado."""
+    try:
+        return float(valor)
+    except (TypeError, ValueError):
+        return NO_RESPONSE_DB
+
+
 # Salida maxima del vibrador oseo, en dB nHL. No es una limitacion del
 # modelo: es la del transductor. F18 (200 oidos) construye su normativa a
 # 50, 30 y 10 dB nHL porque el vibrador no entrega mas -- por encima de ahi
@@ -2340,9 +2351,9 @@ class ABRGenerator:
                     # y el equipo dibujaba una respuesta que en el caso no
                     # existe.
                     return NO_RESPONSE_DB
-                return float(valor)
+                return umbral_db(valor)
             if 'umbral' in case_config:
-                return float(case_config['umbral'])
+                return umbral_db(case_config['umbral'])
         return self.norms['pathology_modifiers'][pathology]['threshold_range'][0]
 
     def shadow_values(self, population, pathway, stimulus_config, masking, ia,
@@ -3732,7 +3743,12 @@ def case_quality(preferences):
     es donde el caso declara "este paciente es ruidoso".
     """
     puntos = (preferences or {}).get('fsp_puntos') or {}
-    fsp_2000 = float(puntos.get('2000', 2.8) or 2.8)
+    if not isinstance(puntos, dict):
+        puntos = {}  # PHP manda [] cuando no hay puntos
+    try:
+        fsp_2000 = float(puntos.get('2000', 2.8) or 2.8)
+    except (TypeError, ValueError):
+        fsp_2000 = 2.8
     return float(np.clip(2.8 / max(fsp_2000, 0.5), 0.5, 2.5))
 
 

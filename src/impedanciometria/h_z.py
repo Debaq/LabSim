@@ -10,6 +10,8 @@ def printer(self, widget):
     now = datetime.now()
     current_time = now.strftime("%d-%m-%y_%H_%M_%S")        
     file = str(QFileDialog.getExistingDirectory(self, "Seleccionar destino"))
+    if not file:
+        return  # dialogo cancelado: sin esto intentaba guardar en '/<fecha>.jpg'
     name = file + '/'+ current_time + '.jpg'
     screenshot.save(name, 'jpg')
 

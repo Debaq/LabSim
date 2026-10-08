@@ -449,17 +449,24 @@ class AabrMainWindow(QMainWindow):
         self.barridos = min(float(total), self.barridos + self._barridos_por_tick())
         caso = self.abr.get(self.lado_activo)
         contra = self.abr.get('OI' if self.lado_activo == 'OD' else 'OD')
-        x, y, _, _, _, meta = ABR_Curve(
-            int(self.sb_nivel.value()), self._control_setting(), caso, 0,
-            # prom = [fracción promediada, total]: por debajo de 1.0 el
-            # generador lo toma como fracción exacta (ver ABR_Curve).
-            [self.barridos / float(total), total],
-            done=False,
-            patient=self.data_current,
-            contra=contra,
-            capture_id=f"AABR-{self.lado_activo}",
-            technical=self._technical(),
-        )
+        try:
+            x, y, _, _, _, meta = ABR_Curve(
+                int(self.sb_nivel.value()), self._control_setting(), caso, 0,
+                # prom = [fracción promediada, total]: por debajo de 1.0 el
+                # generador lo toma como fracción exacta (ver ABR_Curve).
+                [self.barridos / float(total), total],
+                done=False,
+                patient=self.data_current,
+                contra=contra,
+                capture_id=f"AABR-{self.lado_activo}",
+                technical=self._technical(),
+            )
+        except Exception as exc:
+            # Un dato del caso que el generador no puede leer: se corta acá
+            # en vez de reventar cada 250 ms sin llegar nunca al veredicto.
+            print(f"AABR: no se pudo generar el registro: {exc!r}")
+            self._detener("Detenido: el caso no tiene datos de ABR válidos para este oído.")
+            return
         self.curva.setData(np.asarray(x), np.asarray(y))
         fsp = float(meta.get('fsp') or 1.0)
         criterio = float(self.sb_criterio.value())

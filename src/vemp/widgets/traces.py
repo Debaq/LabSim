@@ -430,6 +430,10 @@ class PanelTrazas(QWidget):
         registro = self.registros.get(nombre)
         if registro is None:
             return
+        # Clic fuera del trazo (antes de -5 ms o después del final): no hay
+        # pico ahí y la marca quedaba guardada con la latencia del clic
+        if registro.x.size and not (registro.x[0] <= x <= registro.x[-1]):
+            return
         lat, amp = registro.pico_cercano(x, self.pico_activo)
         self.sig_marca.emit(nombre, self.pico_activo, lat, amp)
 

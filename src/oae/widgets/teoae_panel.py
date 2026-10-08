@@ -307,9 +307,15 @@ class TeoaePanel(QWidget):
         ear = "OD" if self.btn_od.isChecked() else "OI"
         return ear, (self.case_od if ear == "OD" else self.case_oi)
 
+    def _capturando(self):
+        """Chequeo de sonda o promediado en curso."""
+        return self._pending is not None or self._anim_timer.isActive()
+
     def _update_case_gate(self):
         ear, case = self._current_case()
-        self.btn_start.setEnabled(case is not None)
+        # Cambiar de oído en plena captura no rehabilita Iniciar: una
+        # segunda captura encima de la primera pisaba sus frames
+        self.btn_start.setEnabled(case is not None and not self._capturando())
         if case is None:
             self.lbl_status.setText(f"Sin atención abierta o EOA no configurado para {ear}.")
 
@@ -470,7 +476,12 @@ class TeoaePanel(QWidget):
         ear, _case = self._current_case()
         self._report.pop(ear, None)
         self._shots.pop(ear, None)
+        # Una captura pendiente (chequeo de sonda) se anula: si no, el
+        # singleShot la terminaba igual y se guardaba en el paciente nuevo
+        self._pending = None
+        self.probe.stop()
         self._anim_timer.stop()
+        self.btn_stop.setEnabled(False)
         self._frames = []
         self._anim_idx = 0
         self.curve_response.clear()
@@ -487,6 +498,7 @@ class TeoaePanel(QWidget):
         self.lbl_response.setText("--")
         self._last_result = None
         self.lbl_status.setText("Listo")
+        self._update_case_gate()
 
     def _render_frame(self, frame: dict):
         """Pinta un promedio parcial (o final): ondas, espectro, SNR y métricas.

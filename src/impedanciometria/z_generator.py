@@ -189,6 +189,12 @@ class Z_225():
         self.num_pts = self.input[6]
         self.win_neg = self.input[8]
         self.win_pos = self.input[9]
+        # El volumen puede llegar como texto desde el backend ("1.2"): sin
+        # convertirlo round() falla y la curva sale plana, como desellada
+        try:
+            self.input[4] = float(self.input[4])
+        except (TypeError, ValueError):
+            pass
         try:
             self.compliance = round(self.input[1], 2)
             self.pressure = self.input[2]

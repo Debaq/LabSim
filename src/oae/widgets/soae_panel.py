@@ -268,7 +268,10 @@ class SoaePanel(QWidget):
     def _update_case_gate(self):
         ear, case = self._current_case()
         available = case is not None
-        self.btn_start.setEnabled(available and not self._anim_timer.isActive())
+        # Tampoco durante el chequeo de sonda (_pending): cambiar de oído
+        # ahí rehabilitaba Iniciar en medio de la captura
+        self.btn_start.setEnabled(available and self._pending is None
+                                  and not self._anim_timer.isActive())
         if not available:
             self.lbl_status.setText(f"Sin atención abierta o EOA no configurado para {ear}.")
 
@@ -408,8 +411,12 @@ class SoaePanel(QWidget):
         ear, _case = self._current_case()
         self._report.pop(ear, None)
         self._shots.pop(ear, None)
+        # Una captura pendiente (chequeo de sonda) se anula: si no, el
+        # singleShot la terminaba igual y se guardaba en el paciente nuevo
+        self._pending = None
         self._anim_timer.stop()
         self.probe.stop()
+        self.btn_stop.setEnabled(False)
         self._frames = []
         self._anim_idx = 0
         self._result = None

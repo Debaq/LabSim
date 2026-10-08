@@ -83,13 +83,18 @@ class CalculateLogo():
                 data[i_result] = 0
                 
     def cal_range_sdt_umd(self, data:dict, rangex:list, umd:int):
-        idx_umd = self.por_logo.index(umd)
+        # El % del caso puede no caer en la grilla de 4 en 4 (90%): se baja
+        # al escalon de abajo para no pasar del UMD real
+        umd_grilla = min(max(int(umd) // 4 * 4, 0), self.por_logo[-1])
+        idx_umd = self.por_logo.index(umd_grilla)
         cant_values = rangex[1]-rangex[0]
         values = []
         prev = 130
         multiplo = 5 if umd > 92 else 2
         for count, _ in enumerate(range(cant_values-1), start=1):
-            value = self.por_logo[idx_umd-count*multiplo]
+            # SDT lejos del UMD: el indice se iria bajo cero; se acota a 0%
+            # (que cae en el 'value <= 0' de abajo)
+            value = self.por_logo[max(idx_umd-count*multiplo, 0)]
             if value <= 0 or value > umd or value > prev:
                 value = 4
             prev = value

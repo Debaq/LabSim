@@ -293,10 +293,30 @@ class Audiometer(QWidget, Ui_Audiometer):
     def showEvent(self, event):
         super().showEvent(event)
         self.install_key_filter(True)
+        # Rearma los timers del modo de tono que quedo elegido (hideEvent
+        # los paro)
+        for ch in (0, 1):
+            self.c_puls_stat(ch)
+        self.c_alternate_stat(self.lbl_contin[0].text() == tone_list[2])
 
     def hideEvent(self, event):
         super().hideEvent(event)
         self.install_key_filter(False)
+        # Escondido no suena nada: sin esto un tono continuo, pulsatil o
+        # alternado seguia sonando con el audiometro cerrado. El canal
+        # invertido vuelve a normal para que el boton no quede al reves.
+        self.time_ch[0].stop()
+        self.time_ch[1].stop()
+        self.time_alternate.stop()
+        self.alternate_active["active"] = False
+        for ch in (0, 1):
+            if not self.no_Rev(ch):
+                self.reverse(ch)
+            self.puls_active[ch] = False
+        self.players.stop_all()
+        for ch in (0, 1):
+            if self.channel_on[ch]:
+                self.stop(ch)
 
     def _aplicar_atajos(self, *_):
         teclas = atajos.teclas(self.kb_monitor.is_connected(), preferencias().atajos())
@@ -966,14 +986,14 @@ class Audiometer(QWidget, Ui_Audiometer):
         label = self.lbl_freq.text().split(' : ')[0]
         total = int(label.split('/')[1])
         count = int(label.split('/')[0])
-        percentage = (100 * count) / total
+        percentage = (100 * count) / max(total, 1)
         return [total, count, percentage]
 
     def logo_numberQ(self, up):
         data = self.logo_display()
-        percentage = (100 * data[1]) / data[0]
+        percentage = (100 * data[1]) / max(data[0], 1)
         total = data[0]+1 if up else data[0]-1
-        total = max(total, 0)
+        total = max(total, 1)  # con 0 palabras el % divide por cero
         self.lbl_freq.setText(
             "{}/{} : {:.0f}%".format(data[1], total, percentage))
 
@@ -989,7 +1009,7 @@ class Audiometer(QWidget, Ui_Audiometer):
             data = self.logo_display()
             count = data[1]+1 if plus else data[1]-1
             count = max(count, 0)
-            percentage = (100 * count) / data[0]
+            percentage = (100 * count) / max(data[0], 1)
             self.lbl_freq.setText(
                 "{}/{} : {:.0f}%".format(count, data[0], percentage))
 

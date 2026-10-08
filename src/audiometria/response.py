@@ -279,12 +279,17 @@ class ResponseAudiometry():
         rango de mkg depende de la intensidad del estimulo (int_), no solo
         del oido/frecuencia, por eso no usa _masking_calc.
         """
-        sdt = self.dbdata['SDT'] #umbral guardado en el perfil del paciente
+        sdt = self.dbdata.get('SDT') #umbral guardado en el perfil del paciente
+        try:
+            uae = sdt[o_e]
+            uane = sdt[o_n]
+        except (TypeError, IndexError, KeyError):
+            # caso sin SDT cargado: no se inventa un umbral, el paciente
+            # no responde
+            return 130
         sdt_osea = self.calc_sdt(self.dbdata['Osea_mkg'])
 
         at = 45
-        uae = sdt[o_e]
-        uane = sdt[o_n]
         uoe = sdt_osea[o_e]
         uone = sdt_osea[o_n]
 

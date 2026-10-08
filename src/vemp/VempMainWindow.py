@@ -84,6 +84,9 @@ class VempMainWindow(QMainWindow):
         self.timer_captura.timeout.connect(self._tick)
         self.timer_emg = QTimer(self)
         self.timer_emg.timeout.connect(self._tick_emg)
+        # Timers parados por hideEvent, para reanudarlos en showEvent
+        self._emg_pausado = False
+        self._captura_pausada = False
 
         self._construir()
         self._conectar()
@@ -256,7 +259,10 @@ class VempMainWindow(QMainWindow):
             return
 
         self.control.setEnabled(True)
-        self.timer_emg.start(TICK_EMG_MS)
+        if self.isVisible():
+            self.timer_emg.start(TICK_EMG_MS)
+        else:
+            self._emg_pausado = True  # arranca al mostrarse (showEvent)
         self.medidor.set_activo(True)
         descripcion = f'Paciente · {self.caso.descripcion}'
         self.lbl_paciente.setText(descripcion)
@@ -342,6 +348,17 @@ class VempMainWindow(QMainWindow):
         self._refrescar_encabezado()
 
     def _tick(self):
+        try:
+            self._tick_registro()
+        except Exception as exc:
+            # Sin esto el timer seguía reventando y el equipo quedaba en
+            # 'registrando' para siempre
+            print(f'VEMP: falló el registro: {exc!r}')
+            self.detener()
+            self._mensaje('Registro detenido: el equipo no pudo seguir '
+                          'promediando con los datos de este caso.', 'alerta')
+
+    def _tick_registro(self):
         registro = self.registro_actual
         if registro is None:
             self.detener()
@@ -682,6 +699,24 @@ class VempMainWindow(QMainWindow):
                 continue
             imagenes[sufijo] = path
         return imagenes
+
+    def hideEvent(self, evento):
+        # Ventana escondida: ni el EMG de fondo ni la captura siguen
+        # corriendo. El registro queda donde iba y sigue al volver.
+        self._emg_pausado = self._emg_pausado or self.timer_emg.isActive()
+        self._captura_pausada = self._captura_pausada or self.timer_captura.isActive()
+        self.timer_emg.stop()
+        self.timer_captura.stop()
+        super().hideEvent(evento)
+
+    def showEvent(self, evento):
+        super().showEvent(evento)
+        if self._emg_pausado and self.caso is not None:
+            self.timer_emg.start(TICK_EMG_MS)
+        if self._captura_pausada and self.estado == 'registrando':
+            self.timer_captura.start(TICK_MS)
+        self._emg_pausado = False
+        self._captura_pausada = False
 
     def closeEvent(self, evento):
         self.timer_captura.stop()

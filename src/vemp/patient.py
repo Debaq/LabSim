@@ -44,6 +44,9 @@ DEFAULTS = {
     'MVEMP': {'umbral': 70, 'average_objetivo': 300},
 }
 REPRO_VAR_DEFAULT = 0.2
+# Umbral del caso que no se puede leer ('NR', null): ninguna intensidad del
+# equipo llega, así que no hay respuesta.
+UMBRAL_SIN_RESPUESTA = 999
 
 # Piso del umbral óseo: por debajo de esto el vibrador ya no tiene rango
 # útil y el examen no distingue nada.
@@ -181,10 +184,13 @@ def _leer_oido(lado, crudo, data):
         desviaciones = desviaciones if isinstance(desviaciones, dict) else {}
         subtipos[subtipo] = SubtipoCaso(
             subtipo=subtipo,
-            umbral=int(sub.get('umbral', default['umbral'])),
+            # Un umbral que no se lee ('NR', null) es sin respuesta, no el
+            # default normal; sin la clave queda el default de siempre
+            umbral=_numero(sub.get('umbral', default['umbral']), UMBRAL_SIN_RESPUESTA, int),
             repro=bool(sub.get('repro', True)),
-            repro_var=float(sub.get('repro_var', REPRO_VAR_DEFAULT)),
-            average_objetivo=int(sub.get('average_objetivo', default['average_objetivo'])),
+            repro_var=_numero(sub.get('repro_var', REPRO_VAR_DEFAULT), REPRO_VAR_DEFAULT),
+            average_objetivo=_numero(sub.get('average_objetivo', default['average_objetivo']),
+                                     default['average_objetivo'], int),
             # Solo los picos de ESTE subtipo: cVEMP y mVEMP comparten los
             # nombres (p13/n23) y cada uno trae los suyos.
             desviaciones={p: dict(desviaciones.get(p) or {})
@@ -192,6 +198,15 @@ def _leer_oido(lado, crudo, data):
         )
     return OidoCaso(lado=lado, tipo=str(crudo.get('type', 'normal') or 'normal'),
                     subtipos=subtipos, gap=_gap_audiograma(lado, data))
+
+
+def _numero(valor, defecto, tipo=float):
+    """`valor` como número, o `defecto` si no se puede leer. Un int()/float()
+    pelado que fallaba dejaba cargado el caso del paciente anterior."""
+    try:
+        return tipo(float(valor))
+    except (TypeError, ValueError, OverflowError):
+        return defecto
 
 
 def _gap_audiograma(lado, data):

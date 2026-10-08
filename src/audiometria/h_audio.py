@@ -104,15 +104,23 @@ def _panned_word_file(rel_path, side):
     src = Path(context.get_resource(rel_path))
     dst = src.parent / "_panned" / f"{src.stem}_{suffix}{src.suffix}"
     if not dst.exists():
-        dst.parent.mkdir(parents=True, exist_ok=True)
+        # En Windows sin esto cada palabra abria una consola de ffmpeg
+        flags = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
         try:
+            dst.parent.mkdir(parents=True, exist_ok=True)
             subprocess.run(
                 ["ffmpeg", "-y", "-loglevel", "error", "-i", str(src),
                  "-af", _PAN_FILTERS[suffix], str(dst)],
-                check=True,
+                check=True, timeout=15, creationflags=flags,
             )
-        except (subprocess.CalledProcessError, FileNotFoundError):
-            return str(src)  # ffmpeg no disponible: se reproduce sin pannear
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError):
+            # ffmpeg no disponible, colgado o recursos de solo lectura: se
+            # reproduce sin pannear (y sin dejar un archivo a medias)
+            try:
+                dst.unlink()
+            except OSError:
+                pass
+            return str(src)
     return str(dst)
 
 

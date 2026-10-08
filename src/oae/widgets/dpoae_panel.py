@@ -355,7 +355,10 @@ class DpoaePanel(QWidget):
     def _update_case_gate(self):
         ear, case = self._current_case()
         available = case is not None
-        self.btn_start.setEnabled(available and not self._anim_timer.isActive())
+        # Tampoco durante el chequeo de sonda (_pending): cambiar de oído
+        # ahí rehabilitaba Iniciar en medio de la captura
+        self.btn_start.setEnabled(available and self._pending is None
+                                  and not self._anim_timer.isActive())
         if not available:
             self.lbl_status.setText(f"Sin atención abierta o EOA no configurado para {ear}.")
 
@@ -435,12 +438,16 @@ class DpoaePanel(QWidget):
             self._commit_io_point(point)
 
     def _on_stop(self):
+        # Cortado en el chequeo de sonda (antes de promediar) esta corrida
+        # no midio nada: sin esto se volvia a guardar la corrida anterior,
+        # que seguia en memoria, como "parcial"
+        midiendo = self._anim_timer.isActive()
         self._pending = None
         self._anim_timer.stop()
         self.probe.stop()
-        self._finish("Detenido")
+        self._finish("Detenido", guardar=midiendo)
 
-    def _finish(self, status_text):
+    def _finish(self, status_text, guardar=True):
         """Cierra la corrida con lo que haya quedado medido.
 
         Un equipo real también entrega los puntos ya fijados si se corta
@@ -457,7 +464,7 @@ class DpoaePanel(QWidget):
         self.cursor_f2.setVisible(False)
         for line in self.spec_lines.values():
             line.setVisible(False)
-        if ear is None or not self._committed:
+        if ear is None or not self._committed or not guardar:
             return
         threshold = self.generator.normative["min_dp_above_noise_db"]
         min_pass = int(self.generator.normative["pass_points_min"])

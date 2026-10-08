@@ -187,16 +187,27 @@ class ZControl(QWidget, Ui_Z_control):
 
     def la_super(self, data, appointment_id=None):
         self.appointment_id = appointment_id
+        # Cambio de paciente (o cierre): se corta lo que estuviera sonando o
+        # barriendo y se borra lo medido; sin esto el paciente 2 veía el
+        # timpanograma y los reflejos del 1
+        self.time_ch0.stop()
+        self.probe_tone.stop()
+        self.time_reflex.stop()
+        self.reflex_tone.stop()
+        self.store_data[0].clean()
+        self.store_data[1].clean()
+        self.new = [True, True]
+        self.reflex_results = {
+            0: {'IPSI': [None] * 4, 'CONTRA': [None] * 5},
+            1: {'IPSI': [None] * 4, 'CONTRA': [None] * 5},
+        }
+        self.Z_reflex.clear_response()
+        self.refresh_reflex_table()
+        self.data = data  # None limpia el caso anterior: sin esto el log seguía marcando al paciente ya cerrado
+        self.refresh()
         if data is None:
-            self.data = None  # limpia el caso anterior: sin esto el log seguía marcando al paciente ya cerrado
             return
-        self.data = data
         self.preCharger()
-        if data['sector'] == 'Z_OI' or data['sector'] == 'Z_OD':
-            self.preCharger()
-        else:
-            pass
-            # otro examen que no es Z puede ser reflejos y deterioro
 
     def preCharger(self):
         side = sideText(f"Z_{self.Z.get_side()}")
@@ -209,7 +220,16 @@ class ZControl(QWidget, Ui_Z_control):
             debug_print(f"side : {side}")
             if self.data is not None:
                 seed_key = (self.data.get('id'), self.Z.get_side(), self.probe_freq)
-                zGerger = self.data[f"Z_{self.Z.get_side()}"]
+                zGerger = self.data.get(f"Z_{self.Z.get_side()}")
+                try:
+                    vol = self.data['volume'][side]
+                except (KeyError, IndexError, TypeError):
+                    vol = None
+                if not zGerger or vol in (None, ''):
+                    # caso sin timpanograma cargado para este oido: el modulo
+                    # queda sin curva, no se inventa una
+                    self.update_reflex_volume()
+                    return
                 # La edad decide si la sonda elegida sirve: bajo los 6
                 # meses la de 226 Hz dibuja el pico de la pared del
                 # conducto y tapa un oido medio lleno.
@@ -217,7 +237,6 @@ class ZControl(QWidget, Ui_Z_control):
                     zGerger, self.probe_freq, seed_key=seed_key,
                     edad_meses=edad_meses_del_caso(self.data),
                     forzado=z1000_del_caso(self.data, self.Z.get_side()))
-                vol = self.data['volume'][side]
             else:
                 seed_key = None
                 zGerger = "N"
@@ -274,6 +293,10 @@ class ZControl(QWidget, Ui_Z_control):
         else:
             self.Z.set_side('OD')
         self.Z_reflex.set_side(self.Z.get_side())
+        # barrido a medias: se corta antes de cambiar de curva (la del otro
+        # oido puede ser mas corta y el tono de sonda seguia sonando)
+        self.time_ch0.stop()
+        self.probe_tone.stop()
         self.refresh()
         self.preCharger()
         self.time_reflex.stop()
@@ -328,6 +351,10 @@ class ZControl(QWidget, Ui_Z_control):
             stop = True
         if not stop:
             idx = self.frame.get(2)
+            if idx >= memory_len:
+                self.time_ch0.stop()
+                self.probe_tone.stop()
+                return
             data_idx = memory_len - 1 - idx if self.direction == 'neg->pos' else idx
 
             self.frame.agrege(0, memory[0][data_idx])
@@ -516,7 +543,11 @@ class ZControl(QWidget, Ui_Z_control):
             self.timerAnimation()
 
     def reflex_stimulus(self):
-        if not hasattr(self, 'data') or self.data is None or 'Reflex' not in self.data:
+        if not hasattr(self, 'data') or self.data is None:
+            return
+        reflex = self.data.get('Reflex')
+        # Sin reflejos cargados PHP lo manda como lista vacia, no como dict
+        if not isinstance(reflex, dict):
             return
         side = self.Z.get_side()
         probe_idx = 0 if side == 'OD' else 1
@@ -525,11 +556,17 @@ class ZControl(QWidget, Ui_Z_control):
         freq = freqs[self.reflex_freq_idx]
         row_idx = ['500', '1000', '2000', '4000', 'NBN'].index(freq)
 
-        reflex_data = self.data['Reflex'].get(self.reflex_mode.lower(), [])
-        threshold = reflex_data[row_idx][probe_idx] if row_idx < len(reflex_data) else None
+        reflex_data = reflex.get(self.reflex_mode.lower(), [])
+        # El umbral puede venir como texto ("85") o vacio: se pasa a numero y
+        # lo que no se pueda leer cuenta como sin reflejo
+        try:
+            threshold = float(reflex_data[row_idx][probe_idx])
+        except (IndexError, KeyError, TypeError, ValueError):
+            threshold = None
 
         present = threshold is not None and self.dB >= threshold
-        curve_type = self.data['Reflex'].get('tipo', {}).get(side_key, 'normal')
+        tipos = reflex.get('tipo')
+        curve_type = tipos.get(side_key, 'normal') if isinstance(tipos, dict) else 'normal'
         x, y = Reflex_curve(present=present, dB=self.dB, threshold=threshold, curve_type=curve_type).getDataSet()
 
         self.time_reflex.stop()

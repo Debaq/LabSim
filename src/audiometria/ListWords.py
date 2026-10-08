@@ -130,7 +130,7 @@ class ListWords(QWidget, Ui_ListWords):
             self._is_stimulus_playing = True
             self.channel_0.setSource(word)
             self.channel_0.play()
-            self.time_1.start()
+            self.time_1.start(50)  # sin intervalo corria a 0 ms, a full CPU
             self.lbl_list1.setText(f"Última : {self.text}")
             self.lbl_list2.setText(f"Última : {self.text}")
             self.lbl_list2_2.setText(f"Última : {self.text}")
@@ -158,6 +158,13 @@ class ListWords(QWidget, Ui_ListWords):
         
     def timer(self):
         stat = str(self.channel_0.mediaStatus())
+        if stat == "MediaStatus.InvalidMedia":
+            # El audio de la palabra no se pudo abrir: nunca llega al
+            # EndOfMedia y el timer quedaba girando para siempre
+            self._is_stimulus_playing = False
+            self.level_changed.emit(0.0)
+            self.time_1.stop()
+            return
         if stat == "MediaStatus.EndOfMedia":
             self._is_stimulus_playing = False
             self.level_changed.emit(0.0)
