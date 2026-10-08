@@ -271,6 +271,23 @@ class BackendClient:
         subida para ese oído/fase."""
         return self._get_bytes("/api/otoscopia_photo.php", {"case_id": case_id, "side": side, "fase": fase})
 
+    def send_ticket(self, descripcion: str, equipo_info: dict | None, detalle: dict,
+                    log_gz: bytes | None, timeout: int = 60) -> dict:
+        """Reporte de problema (Configuración → Reportar un problema, ver
+        core/soporte.py y ticket.php). Solo se llama después de que el
+        usuario aceptó mandar esta información. Devuelve {id}."""
+        form = {
+            "descripcion": descripcion,
+            "equipo": json.dumps(equipo_info or {}, ensure_ascii=False),
+            "detalle": json.dumps(detalle, ensure_ascii=False, default=str),
+            "acepta": "1",
+        }
+        files = {"log": ("labsim.log.gz", log_gz, "application/gzip")} if log_gz else None
+        resp = self._http.post(f"{self._base_url}/api/ticket.php", data=form, files=files,
+                               headers=self._headers(), timeout=timeout)
+        self._raise_for_status_with_detail(resp)
+        return resp.json()
+
     def post_logs_batch(self, entries: list[dict]) -> dict:
         return self._post("/api/logs_batch.php", {"entries": entries})
 

@@ -13,6 +13,11 @@ Ahora, mientras la atención está abierta, cada módulo se sube solo:
 El backend lo permite: mientras la atención siga 'atendiendo' el informe es
 un upsert libre (ver report_upload.php).
 
+Antes de cada subida el informe se escribe en el disco del equipo (ver
+core/respaldo_informes.py): sin red la subida falla, pero si la app se
+cierra lo hecho no se pierde. Al retomar, lo que quedó sin subir gana sobre
+lo del servidor, y el próximo tick lo sube.
+
 Contrato con los módulos: `report_job()` devuelve None (nada que subir) o
 un dict {appointment_id, tipo, data, images}, donde `images` es un callable
 que exporta los JPEG y devuelve {sufijo: ruta}. Un módulo que sube más de un
@@ -28,8 +33,11 @@ import os
 import shutil
 import tempfile
 
+import requests
+
 from PySide6.QtCore import QObject, QThread, QTimer, Signal, Slot
 
+from core import hilos, respaldo_informes
 from core.base import context
 from core.helpers import Preferences
 
@@ -59,12 +67,23 @@ def trabajos(modulo) -> list:
 
 
 def subir(job, client=None) -> None:
-    """Sube un informe en el hilo que llama. Lanza si falla."""
+    """Sube un informe en el hilo que llama. Lanza si falla. Si llega, el
+    respaldo del equipo con esa misma huella deja de estar pendiente."""
     client = client if client is not None else _client()
     if not client.is_logged_in():
         raise RuntimeError("no hay sesión con el servidor")
-    client.upload_report(int(job["appointment_id"]), job["tipo"], job["data"],
-                         job.get("images_listas") or {})
+    usuario = respaldo_informes.usuario_de(client)
+    try:
+        client.upload_report(int(job["appointment_id"]), job["tipo"], job["data"],
+                             job.get("images_listas") or {})
+    except requests.HTTPError as exc:
+        if getattr(exc.response, "status_code", None) == 409:
+            # Atención ya cerrada: el servidor no lo va a aceptar nunca.
+            respaldo_informes.marcar(usuario, job["appointment_id"], job["tipo"],
+                                     huella(job), "cerrada")
+        raise
+    respaldo_informes.marcar(usuario, job["appointment_id"], job["tipo"],
+                             huella(job), "subido")
 
 
 class _Subida(QThread):
@@ -107,6 +126,11 @@ class _Recuperacion(QThread):
         except Exception as exc:  # noqa: BLE001 -- sin red se atiende igual
             print(f"autosave: no se pudo recuperar lo guardado: {exc}")
             informes = []
+            client = None
+        if client is None:
+            client = _client()
+        informes = respaldo_informes.mezclar(respaldo_informes.usuario_de(client),
+                                             self.appointment_id, informes, self.tipos)
         self.lista.emit(self.appointment_id, informes)
 
 
@@ -148,6 +172,7 @@ class ReportAutosave(QObject):
         super().__init__(parent)
         self._modulos = modulos
         self._huellas = {}      # (appointment_id, tipo) -> huella subida
+        self._respaldadas = {}  # (appointment_id, tipo) -> (huella, quedó en el disco)
         self._hilos = {}        # (appointment_id, tipo) -> _Subida en curso
         self._timer = QTimer(self)
         self._timer.setInterval(INTERVALO_MS)
@@ -156,6 +181,7 @@ class ReportAutosave(QObject):
     def iniciar(self):
         """Arranca con una atención nueva: se olvida lo subido antes."""
         self._huellas.clear()
+        self._respaldadas.clear()
         for m in self._modulos():
             estado = getattr(m, "estado_informe", None)
             if estado is not None:
@@ -166,18 +192,33 @@ class ReportAutosave(QObject):
         self._timer.stop()
         self.esperar()
 
+    def reanudar(self):
+        """Vuelve a correr sin olvidar nada (la subida final falló y la
+        atención sigue abierta)."""
+        self._timer.start()
+
     def esperar(self):
         """Espera a que terminen las subidas en curso. Se llama antes de la
         subida final (cierre de atención): si una subida vieja terminara
         después, pisaría el informe final con uno anterior."""
         for hilo in list(self._hilos.values()):
-            hilo.wait(35_000)
+            if not hilo.wait(35_000):
+                # Con la red lenta la subida puede pasar los 35 s (el
+                # timeout de requests es por operación, no total). Borrarlo
+                # corriendo abortaba el proceso: se lo deja terminar solo.
+                # Lo que estaba subiendo ya quedó en el respaldo local.
+                print(f"autosave: la subida de {hilo.clave[1]} sigue en curso, se suelta")
+                del self._hilos[hilo.clave]
+                hilos.soltar(hilo)
+                continue
             # El aviso de fin quedó encolado: se procesa ya, así la huella
             # queda al día antes de la subida final.
             self._terminada(hilo, *getattr(hilo, "resultado", (False, "sin terminar")))
 
     def guardar(self, modulo=None):
-        """Sube en segundo plano lo que haya cambiado (uno o todos)."""
+        """Respalda en el disco y sube en segundo plano lo que haya cambiado
+        (uno o todos)."""
+        usuario = None
         for m in ([modulo] if modulo is not None else self._modulos()):
             try:
                 jobs = trabajos(m)
@@ -185,17 +226,28 @@ class ReportAutosave(QObject):
                 print(f"autosave: {type(m).__name__}: {exc}")
                 continue
             for job in jobs:
-                self._subir_si_cambio(m, job)
+                if usuario is None:
+                    usuario = respaldo_informes.usuario_de(_client())
+                self._subir_si_cambio(m, job, usuario)
 
-    def _subir_si_cambio(self, modulo, job):
+    def _subir_si_cambio(self, modulo, job, usuario):
         clave = (job["appointment_id"], job["tipo"])
+        h = huella(job)
+        if self._respaldadas.get(clave, (None,))[0] != h:
+            # Primero al disco, aunque haya una subida en curso: si la red
+            # está colgada esa subida puede tardar, y lo nuevo no puede
+            # quedar solo en memoria mientras tanto.
+            exportar = job.get("images")
+            imagenes = exportar() if callable(exportar) else {}
+            self._respaldadas[clave] = (
+                h, respaldo_informes.guardar(usuario, job, h, imagenes or {}))
         if clave in self._hilos:
             return  # sigue subiendo la anterior; el próximo tick va
-        h = huella(job)
         if self._huellas.get(clave) == h:
             return
         carpeta = tempfile.mkdtemp(prefix="labsim_informe_")
-        job["images_listas"] = self._copiar_imagenes(job, carpeta)
+        job["images_listas"] = self._copiar_imagenes(
+            respaldo_informes.imagenes(usuario, job["appointment_id"], job["tipo"]), carpeta)
         hilo = _Subida(job, clave, h, carpeta, self)
         hilo.modulo = modulo
         self._hilos[clave] = hilo
@@ -228,15 +280,12 @@ class ReportAutosave(QObject):
         self._huellas[(job["appointment_id"], job["tipo"])] = huella(job)
 
     @staticmethod
-    def _copiar_imagenes(job, carpeta):
-        """Copia las imágenes a una carpeta propia de esta subida: los
-        módulos exportan siempre al mismo archivo y la próxima exportación
-        lo pisaría mientras este hilo lo está mandando."""
+    def _copiar_imagenes(origen, carpeta):
+        """Copia las imágenes respaldadas ({sufijo: ruta}) a una carpeta
+        propia de esta subida: el próximo respaldo las pisaría mientras
+        este hilo las está mandando."""
         rutas = {}
-        exportar = job.get("images")
-        if not callable(exportar):
-            return rutas
-        for sufijo, ruta in (exportar() or {}).items():
+        for sufijo, ruta in origen.items():
             destino = os.path.join(carpeta, f"{sufijo}.jpg")
             try:
                 shutil.copyfile(ruta, destino)
@@ -247,7 +296,9 @@ class ReportAutosave(QObject):
 
     def _terminada(self, hilo, ok, err):
         # Puede llegar dos veces: desde esperar() y por la señal encolada.
+        # O de un hilo que esperar() soltó por lento (ver core/hilos.py).
         if self._hilos.get(hilo.clave) is not hilo:
+            shutil.rmtree(hilo.carpeta, ignore_errors=True)
             return
         del self._hilos[hilo.clave]
         shutil.rmtree(hilo.carpeta, ignore_errors=True)
@@ -259,7 +310,26 @@ class ReportAutosave(QObject):
         # El alumno ve en el módulo si quedó guardado (no hay botón).
         estado = getattr(getattr(hilo, "modulo", None), "estado_informe", None)
         if estado is not None:
-            estado.guardado(hilo.clave[1], ok, err)
+            estado.guardado(hilo.clave[1], ok, err,
+                            en_equipo=self._respaldadas.get(hilo.clave, (None, False))[1])
+
+
+def subir_pendientes(appointment_id, client=None) -> tuple[bool, str]:
+    """Sube lo que quedó en el equipo sin subir de esa cita (p. ej. la app
+    se cerró sin red y la atención se cierra sin haberla retomado). Antes de
+    cerrar una atención: si algo no sube, no se cierra."""
+    client = client if client is not None else _client()
+    usuario = respaldo_informes.usuario_de(client)
+    for registro in respaldo_informes.pendientes(usuario, appointment_id):
+        job = {"appointment_id": registro["appointment_id"], "tipo": registro["tipo"],
+               "data": registro["data"],
+               "images_listas": respaldo_informes.imagenes(
+                   usuario, registro["appointment_id"], registro["tipo"])}
+        try:
+            subir(job, client)
+        except Exception as exc:  # noqa: BLE001
+            return False, str(exc)
+    return True, ""
 
 
 def subir_ahora(job, client=None) -> tuple[bool, str]:
@@ -272,7 +342,11 @@ def subir_ahora(job, client=None) -> tuple[bool, str]:
     job["images_listas"] = {k: v for k, v in (exportar() if callable(exportar) else {}).items()
                             if os.path.isfile(v)}
     try:
-        subir(job, client)
+        cliente = client if client is not None else _client()
+        # Al disco antes que a la red: si la subida falla, al retomar vuelve.
+        respaldo_informes.guardar(respaldo_informes.usuario_de(cliente), job,
+                                  huella(job), job["images_listas"])
+        subir(job, cliente)
     except Exception as exc:  # noqa: BLE001
         return False, str(exc)
     return True, ""

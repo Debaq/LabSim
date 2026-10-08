@@ -607,7 +607,7 @@ class VempMainWindow(QMainWindow):
         """
         job = self.report_job()
         if job is None:
-            return
+            return True
         cliente = BackendClient(
             Preferences().get('BACKEND_URL'),
             context.get_resource('json/session.json'),
@@ -615,6 +615,7 @@ class VempMainWindow(QMainWindow):
         ok, error = subir_ahora(job, cliente)
         if not ok:
             print(f'VEMP: no se pudo subir el informe: {error}')
+        return ok
 
     def report_job(self):
         """El informe tal como se sube (ver core/report_autosave.py), o None."""

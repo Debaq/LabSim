@@ -53,6 +53,7 @@ import sys
 import tarfile
 import tempfile
 from pathlib import Path
+from http.client import HTTPException
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 from xml.etree import ElementTree
@@ -165,7 +166,7 @@ def _al_dia_segun_feed(local_id: str) -> bool:
     se verifico contra ella (si no, hay que ir a la API a verificarla)."""
     try:
         ultimo = _ultimo_build_feed()
-    except (URLError, OSError, ValueError, TimeoutError, ElementTree.ParseError):
+    except (URLError, OSError, ValueError, TimeoutError, HTTPException, ElementTree.ParseError):
         return False
     if ultimo is None or ultimo != local_id:
         return False
@@ -210,7 +211,7 @@ def _install_matches_release(release: dict, dist_dir: Path):
     try:
         with urlopen(Request(url), timeout=REQUEST_TIMEOUT * 3) as resp:
             manifest = json.load(resp)
-    except (URLError, OSError, ValueError, TimeoutError):
+    except (URLError, OSError, ValueError, TimeoutError, HTTPException):
         return None
     expected = (manifest.get("files") or {}).get("LabSim")
     exe = dist_dir / "LabSim"
@@ -305,14 +306,14 @@ def check_for_update(current_version: str, estricto: bool = False,
     if backend_url:
         try:
             releases = _fetch_releases_backend(backend_url)
-        except (URLError, OSError, ValueError, TimeoutError):
+        except (URLError, OSError, ValueError, TimeoutError, HTTPException):
             releases = None
     if releases is None:
         if _al_dia_segun_feed(local_build_id(current_version).lstrip("v")):
             return None
         try:
             releases = _fetch_releases()
-        except (URLError, OSError, ValueError, TimeoutError) as exc:
+        except (URLError, OSError, ValueError, TimeoutError, HTTPException) as exc:
             if estricto:
                 raise UpdateCheckError(str(exc)) from exc
             return None

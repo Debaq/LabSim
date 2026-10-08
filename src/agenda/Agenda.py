@@ -18,6 +18,7 @@ from PySide6.QtCore import QDate, QTime, QDateTime, Qt, QThread, Signal
 from PySide6.QtGui import QBrush, QColor, QFont, QTextCharFormat
 from agenda.UI.Ui_agenda import Ui_Form
 from core import feriados as feriados_cl
+from core import hilos
 from core.helpers import (Shedule, entry_estado_por, CasesOffline, debug_print,
                           es_docente,
                           marcar_entry_no_show,
@@ -111,8 +112,10 @@ class EvolucionWidget(QWidget):
             QMessageBox.warning(self, "Evolución", "Debes describir la evolución del paciente.")
             return
 
-        if self._on_guardar is not None:
-            self._on_guardar(nota)
+        # False: no se pudo cerrar (sin conexión). La nota queda escrita
+        # para volver a intentarlo.
+        if self._on_guardar is not None and self._on_guardar(nota) is False:
+            return
         self.texto.clear()
 
         padre = self.parent()
@@ -158,7 +161,14 @@ class Agenda(QWidget, Ui_Form):
 
         self.tableWidget.itemSelectionChanged.connect(self._on_selection_changed)
 
-        self.read_shedule()
+        try:
+            self.read_shedule()
+        except Exception:
+            # Sin red la agenda no se arma, y con ella se iría el hilo de
+            # feriados que ya arrancó arriba: destruido corriendo, Qt
+            # aborta el proceso (ver core/hilos.py).
+            hilos.soltar_hijos(self)
+            raise
         self.populate_shedule()
 
         self.pushButton.setVisible(False)
@@ -560,7 +570,7 @@ class Agenda(QWidget, Ui_Form):
         key = self._selected_row_key
 
         def _guardar(nota):
-            self.main_window.cerrar_atencion(key, nota)
+            return self.main_window.cerrar_atencion(key, nota)
 
         self.main_window.abrir_evolucion(nombre or "el paciente", _guardar)
 
@@ -611,7 +621,7 @@ class Agenda(QWidget, Ui_Form):
         key = self._selected_row_key
 
         def _guardar(nota):
-            self.main_window.cerrar_atencion_base(key, nota)
+            return self.main_window.cerrar_atencion_base(key, nota)
 
         self.main_window.abrir_evolucion(nombre or "el paciente", _guardar)
 

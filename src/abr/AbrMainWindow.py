@@ -40,6 +40,7 @@ from backend.client import BackendClient
 from core.base import context
 from core.estado_informe import EstadoInforme
 from core.helpers import Preferences, es_docente
+from core import respaldo_informes
 from core.report_autosave import subir_ahora
 from core.rng import stable_seed
 from PySide6.QtCore import QCoreApplication, QTimer
@@ -478,12 +479,15 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             self.select_session(None)
         jobs = self.report_jobs()
         if not jobs:
-            return
+            return True
         client = BackendClient(Preferences().get("BACKEND_URL"), context.get_resource('json/session.json'))
+        todo_ok = True
         for job in jobs:
             ok, error = subir_ahora(job, client)
             if not ok:
+                todo_ok = False
                 print(f"ABR: no se pudo subir el informe {job['tipo']}: {error}")
+        return todo_ok
 
     def report_job(self):
         """El informe tal como se sube (ver core/report_autosave.py), o None
@@ -738,11 +742,17 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         """
         if self.memory or self.session_idx is not None:
             return
+        tipos = ['ABR', 'ELECTROCOCLEO']
         try:
-            guardados = client.get_my_report(appointment_id, ['ABR', 'ELECTROCOCLEO'])
+            guardados = client.get_my_report(appointment_id, tipos)
         except Exception as exc:
+            # Sin red igual vuelve lo que quedo respaldado en el equipo.
             print(f"ABR: no se pudo recuperar lo guardado de esta atencion: {exc}")
-            return
+            guardados = []
+        # Lo que quedo en el equipo sin subir es mas nuevo que lo del
+        # servidor (ver core/respaldo_informes.py).
+        usuario = respaldo_informes.usuario_de(client)
+        guardados = respaldo_informes.mezclar(usuario, appointment_id, guardados, tipos)
         if self.memory or self.session_idx is not None:
             return  # empezo a registrar mientras se pedia
         # Puede haber un ABR y un ECochG de la misma atencion: el ultimo
@@ -755,13 +765,21 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
                 continue
             test = data.get('prueba') or (
                 'ECochG' if informe.get('tipo') == 'ELECTROCOCLEO' else 'ABR')
-            pruebas.setdefault(test, data)
+            pruebas.setdefault(test, (data, informe))
         if not pruebas:
             return
         actual = next(iter(pruebas))
-        for test, data in pruebas.items():
-            if test != actual:
+        for test, (data, informe) in pruebas.items():
+            if test == actual:
+                continue
+            if informe.get('origen') == 'equipo':
+                # No llego al servidor: se sube con las imagenes respaldadas.
+                self.otras_pruebas[test] = {
+                    'data': data, 'pendiente': True,
+                    'images': respaldo_informes.imagenes(usuario, appointment_id, informe['tipo'])}
+            else:
                 self.otras_pruebas[test] = {'data': data, 'images': {}, 'pendiente': False}
+        pruebas = {test: data for test, (data, _) in pruebas.items()}
         self.control.apply_protocol(actual)
         self.draw_session(pruebas[actual])
         self.eeg.set_reject(self.technical.get('artifact_reject_uv'))

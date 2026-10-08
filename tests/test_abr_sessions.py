@@ -12,6 +12,9 @@ import os
 import sys
 
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
+# El respaldo de informes en el equipo (core/respaldo_informes.py) va a
+# una carpeta de prueba, no a la de datos de quien corre los tests.
+os.environ.setdefault('LABSIM_DATA_DIR', __import__('tempfile').mkdtemp(prefix='labsim_datos_'))
 
 SRC = os.path.join(os.path.dirname(__file__), '..', 'src')
 if SRC not in sys.path:

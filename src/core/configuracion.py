@@ -1,4 +1,5 @@
-"""Configuración personal: atajos de teclado y mouse para zurdos.
+"""Configuración personal: atajos de teclado y mouse para zurdos. Además,
+reportar un problema con el registro del equipo (ver core/soporte.py).
 
 Lo que se guarda acá va a la cuenta del usuario (ver core/preferencias.py),
 no al equipo: en el laboratorio lo encuentra en cualquier computador.
@@ -9,7 +10,7 @@ from PySide6.QtWidgets import (QCheckBox, QDialog, QDialogButtonBox, QFormLayout
                                QHBoxLayout, QKeySequenceEdit, QLabel, QPushButton, QScrollArea,
                                QTabWidget, QVBoxLayout, QWidget)
 
-from core import atajos, keyboard_monitor
+from core import atajos, keyboard_monitor, soporte
 from core.kiosko import es_kiosko
 from core.preferencias import preferencias
 from core.ui_helpers import style_dialog
@@ -27,6 +28,7 @@ class ConfiguracionDialog(QDialog):
         tabs = QTabWidget(self)
         tabs.addTab(self._pestana_atajos(prefs.atajos()), "Atajos de teclado")
         tabs.addTab(self._pestana_mouse(prefs.mouse_zurdo()), "Mouse")
+        tabs.addTab(soporte.PaginaSoporte(self), "Reportar un problema")
         raiz.addWidget(tabs)
 
         self.lbl_error = QLabel(self)

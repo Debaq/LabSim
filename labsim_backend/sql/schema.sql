@@ -690,3 +690,24 @@ CREATE TABLE IF NOT EXISTS app_equipos (
     user_id INTEGER,
     last_seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Problemas reportados desde la app (Configuración → Reportar un problema;
+-- ver Tickets.php). El registro de la app va en data/tickets/, no acá. Se
+-- crea sola también (Tickets::migrar): la escribe la app. Mismo SQL.
+CREATE TABLE IF NOT EXISTS app_tickets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    -- sin REFERENCES, como app_equipos: el ticket sobrevive al usuario
+    user_id INTEGER,
+    descripcion TEXT NOT NULL DEFAULT '',
+    equipo_id TEXT NOT NULL DEFAULT '',
+    equipo_nombre TEXT NOT NULL DEFAULT '',
+    so TEXT NOT NULL DEFAULT '',
+    version TEXT NOT NULL DEFAULT '',
+    empaquetada INTEGER NOT NULL DEFAULT 1,
+    detalle TEXT NOT NULL DEFAULT '{}',   -- JSON: versión del SO, Python, Qt...
+    log_bytes INTEGER NOT NULL DEFAULT 0, -- tamaño del gzip guardado; 0 = sin registro
+    estado TEXT NOT NULL DEFAULT 'abierto',
+    nota TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_app_tickets_created ON app_tickets(created_at);

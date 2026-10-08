@@ -4380,3 +4380,61 @@ Lo que cambió en el generador:
 Límite del modelo: el VEMP del generador sortea umbral y no latencias, así que
 el VEMP de latencia larga de la EM y de la CMT no queda representado. Esa
 latencia la carga el docente a mano.
+
+## Sin internet: LabSim no se cierra, no pierde lo hecho y se puede reportar (2026-10-08)
+
+Reporte: "cuando hay problemas de internet el programa se cierra", y al volver
+a abrir el ABR no había nada.
+
+**Por qué se cerraba.** Qt aborta el proceso entero si se destruye un QThread
+que sigue corriendo ("QThread: Destroyed while thread is still running"); no
+hay try/except que lo ataje. Con la red lenta los hilos de red viven más y
+eso pasaba en varios lugares:
+- Cerrar sesión borra los módulos y con ellos sus hilos hijos (agenda, sala,
+  avatar y turno del chat, foto de otoscopia, feriados).
+- `ReportAutosave.esperar()` hacía `deleteLater()` del hilo de subida aunque
+  el `wait(35 s)` hubiera vencido (el timeout de requests es por operación,
+  no total).
+- `stop()` de SyncThread/LogUploader esperaba 2 s y soltaba la última
+  referencia a un hilo que seguía en una petición de 10.
+- Una agenda que no se pudo armar sin red se llevaba el hilo de feriados.
+
+Ahora `core/hilos.py`: `soltar(hilo)` lo desengancha de su dueño y lo guarda
+hasta que termina solo. Se usa en todos esos puntos. Además: el contador de la
+bandeja se consulta en el hilo de sync (antes congelaba la ventana cada 15 s),
+el updater ataja `http.client.HTTPException` (respuesta cortada al arrancar),
+y abrir o cerrar una atención sin red avisa en vez de tirar una excepción.
+
+**Lo hecho no se pierde.** `core/respaldo_informes.py`: cada vez que un informe
+de examen cambia se escribe en el disco del equipo *antes* de subirlo (datos +
+JPEG), por usuario/cita/tipo. Al retomar la atención lo pendiente del equipo
+gana sobre lo del servidor y el autoguardado lo sube. Cerrar la atención sube
+también lo pendiente de vueltas anteriores, y **si algo no sube no se cierra**:
+el servidor no acepta informes de una atención cerrada, así que cerrar sin red
+los dejaba afuera para siempre. La evolución escrita no se borra.
+El aviso del módulo distingue "guardado en este equipo, se sube cuando vuelva
+la conexión" (naranjo) de "no se pudo guardar" (rojo).
+
+Lo que sigue necesitando red, a propósito: iniciar sesión (ya era así, ver la
+actualización obligatoria del kiosko), abrir una atención (trae el caso y
+marca "atendiendo") y cerrarla. Una vez abierta se trabaja sin red.
+
+**Carpeta de datos** (`core/rutas.py`): `%LOCALAPPDATA%\LabSim` en Windows,
+`~/.local/share/LabSim` en Linux; `LABSIM_DATA_DIR` la cambia. Lo que vive al
+lado del programa se reemplaza en cada actualización, y el respaldo y el
+registro no pueden irse con eso. Lo ya subido se borra a los 30 días; lo
+pendiente nunca.
+
+**Registro y reportes.** El registro (`core/registro.py`) pasa a
+`<datos>/logs/labsim.log` en el build (desde el código sigue en
+`src/log_file.txt`), se rota al arrancar (5 MB, 3 copias) y cada arranque
+deja una línea con versión, equipo y sistema. En Configuración → "Reportar un
+problema" (`core/soporte.py`) cualquier usuario logueado describe qué pasó y
+manda los últimos 4 MB del registro, comprimidos. Antes se le muestra todo lo
+que sale del equipo (versión, nombre del equipo, SO y versión, arquitectura,
+Python/Qt, pantalla, si es del laboratorio) y tiene que aceptarlo; el backend
+(`api/ticket.php`) exige esa aceptación igual. Tope de 5 por usuario por hora.
+Al usuario no se le contesta: los tickets se ven en Sistema → "Tickets de la
+app" (`admin/tickets.php`, solo admin completo) con estado abierto/cerrado y
+una nota interna, para abrir issues después. El registro se guarda en
+`data/tickets/` (fuera de public/, como los informes).

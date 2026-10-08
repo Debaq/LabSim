@@ -194,6 +194,7 @@ function admin_header(string $title, ?array $currentUser = null): void
                     <a href="tokens.php"<?= $ariaCurrent('tokens.php') ?>>Sesiones</a>
                     <a href="audit.php"<?= $ariaCurrent('audit.php') ?>>Auditoría</a>
                     <a href="versiones.php"<?= $ariaCurrent('versiones.php') ?>>Versiones de la app</a>
+                    <a href="tickets.php"<?= $ariaCurrent('tickets.php') ?>>Tickets de la app</a>
                 </div>
             </details>
             <details class="nav-group" name="labsim-nav">

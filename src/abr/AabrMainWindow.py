@@ -687,12 +687,13 @@ class AabrMainWindow(QMainWindow):
         """
         job = self.report_job()
         if job is None:
-            return
+            return True
         client = BackendClient(Preferences().get("BACKEND_URL"),
                                context.get_resource('json/session.json'))
         ok, error = subir_ahora(job, client)
         if not ok:
             print(f"AABR: no se pudo subir el informe: {error}")
+        return ok
 
     def report_job(self):
         """El informe tal como se sube (ver core/report_autosave.py), o None."""

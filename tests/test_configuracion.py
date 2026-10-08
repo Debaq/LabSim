@@ -8,7 +8,6 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from PySide6.QtGui import QKeySequence  # noqa: E402
-from PySide6.QtWidgets import QDialogButtonBox  # noqa: E402
 
 from core.base import context  # noqa: E402,F401
 from core import configuracion, helpers  # noqa: E402
@@ -21,7 +20,7 @@ def _dialogo(prefs=None):
 
 
 def _guardar_habilitado(d):
-    return d.botones.button(QDialogButtonBox.StandardButton.Save).isEnabled()
+    return d.btn_guardar.isEnabled()
 
 
 def test_muestra_las_teclas_vigentes():

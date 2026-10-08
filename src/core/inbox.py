@@ -130,14 +130,17 @@ def crear_boton(main_window, layout):
     return btn
 
 
-def actualizar_badge(main_window):
+def actualizar_badge(main_window, items=None):
     """Refresca el contador de no leídos en el botón y lo resalta con color
     si hay algo nuevo -- llamar en cada ciclo de sync y al cerrar la
-    bandeja (por si se marcó algo como leído)."""
+    bandeja (por si se marcó algo como leído). `items`: la bandeja ya
+    consultada (el hilo de sync la trae); sin eso se pregunta acá."""
     btn = getattr(main_window, "btn_bandeja_oirs", None)
     if btn is None or not shiboken6.isValid(btn):
         return
-    no_leidos = sum(1 for it in inbox_list() if not it.get("leido"))
+    if items is None:
+        items = inbox_list()
+    no_leidos = sum(1 for it in items if not it.get("leido"))
     if no_leidos:
         btn.setText(f"Bandeja de entrada ({no_leidos})")
         btn.setStyleSheet(

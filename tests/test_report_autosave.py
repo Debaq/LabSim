@@ -11,12 +11,26 @@ import sys
 import tempfile
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+# El respaldo en el equipo (core/respaldo_informes.py) va a una carpeta de
+# prueba, no a la de datos de quien corre los tests.
+os.environ["LABSIM_DATA_DIR"] = tempfile.mkdtemp(prefix="labsim_datos_")
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from core.base import context  # crea la QApplication
 from core import report_autosave as ra
 
 APP = context.app
+
+
+class _Cliente:
+    """Sesión de mentira: el respaldo se guarda por usuario."""
+    user = {"id": 7}
+
+    def is_logged_in(self):
+        return True
+
+
+ra._client = lambda: _Cliente()
 
 
 class Modulo:
@@ -155,7 +169,8 @@ def test_el_modulo_muestra_si_quedo_guardado():
     m.data["curvas"]["R2"] = 60
     _tick(auto)
     texto = m.estado_informe.text()
-    assert "ABR: no se pudo guardar" in texto and "sin red" in texto, texto
+    # No llegó al servidor, pero quedó en el disco: no se pierde.
+    assert "ABR: sin conexión con el servidor: guardado en este equipo" in texto, texto
     assert "ECochG: informe guardado" in texto, texto
     auto.iniciar()   # atención nueva: lo de la anterior no dice nada
     assert "guardado" not in m.estado_informe.text().replace("se guarda", "")

@@ -18,11 +18,11 @@ from core import inbox
 from core import mis_pacientes
 from core import app_config_store
 from core import equipo
-from core.report_autosave import ReportAutosave
+from core.report_autosave import ReportAutosave, subir_pendientes
 from core.secretaria import Secretaria, siguiente_paciente
 from core.kiosko import es_kiosko, atender_apagado
 from core.preferencias import preferencias
-from core import mouse_zurdo, configuracion
+from core import mouse_zurdo, configuracion, hilos, registro, respaldo_informes
 from core.module_placeholder import ModulePlaceholder
 from core.updater import local_build_id
 from core.helpers import (CasesOffline, CreatePatient, Preferences, Shedule, Storage,
@@ -42,7 +42,6 @@ from core.app_layout import LayoutRetryThread, fetch_layout
 # Definir la raíz del proyecto
 BASE_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = BASE_DIR / 'resources' / 'config' / 'config.json'
-LOG_FILE = BASE_DIR / 'log_file.txt'
 
 __VERSION__ = 'v0.9.9'
 # Build real (con sufijo -r<commit> si aplica) para mostrar en el título --
@@ -92,6 +91,10 @@ LOCAL_LOG_QUEUE = get_log_queue()
 # ("cambio el sender", "True", [agenda_filter]...). Las acciones reales del
 # alumno (audio_stim_button, z_dial_change, etc.) se suben aparte, con
 # nombre propio, vía log_queue.push() explícito en Audiometer.py y Z.py.
+# El registro va a la carpeta de datos (sobrevive a las actualizaciones) y
+# se rota al arrancar; ver core/registro.py. Se manda desde Configuración.
+LOG_FILE = registro.archivo()
+registro.rotar(LOG_FILE)
 sys.stdout = Logger(LOG_FILE)
 # stderr al mismo archivo. Los errores de PySide ("Error calling Python
 # override of QWidget::eventFilter(): ...") y los traceback de cualquier
@@ -103,6 +106,7 @@ sys.stderr = Logger(LOG_FILE, stream=sys.__stderr__)
 # ejemplo) no deja traceback de Python: faulthandler escribe el stack en
 # el mismo log antes de que el proceso se vaya.
 faulthandler.enable(file=open(LOG_FILE, 'a', buffering=1))
+print(registro.encabezado())
 
 
 def _log_excepcion(tipo, valor, tb):
@@ -154,6 +158,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             MoveWindow(self).set_movewindow()
         self._aplicar_kiosko()
         self._setup_layout_status()
+        # Respaldos de informes ya subidos y viejos (ver core/respaldo_informes.py).
+        respaldo_informes.podar()
         # Kiosko: cada media hora se mira si salió una versión nueva (ver
         # core/actualizacion_kiosko.py y _on_update_disponible).
         self._chequeo_update = None
@@ -284,6 +290,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if self._layout_retry is not None:
             self._layout_retry.stop()
             self._layout_retry.wait(2000)
+            hilos.soltar(self._layout_retry)
             self._layout_retry = None
 
     def configure_btn(self):
@@ -551,6 +558,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def _stop_log_uploader(self):
         if self.log_uploader is not None:
             self.log_uploader.stop()
+            # stop() espera 2 s y una subida puede tardar 10: soltar la
+            # referencia con el hilo vivo abortaba el proceso.
+            hilos.soltar(self.log_uploader)
             self.log_uploader = None
 
     def _start_sync_thread(self):
@@ -571,12 +581,16 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         agenda_win = self.subw.get("AGENDA") if self.subw else None
         if agenda_win is not None:
             agenda_win.obj.refresh_async()
-        inbox.actualizar_badge(self)
+        # La bandeja viene consultada desde el hilo de sync: preguntarla acá,
+        # en el hilo de la ventana, la congelaba con la red lenta.
+        if _delta.get("_inbox") is not None:
+            inbox.actualizar_badge(self, _delta["_inbox"])
         app_config_store.update_from_sync(_delta.get("config"))
 
     def _stop_sync_thread(self):
         if self.sync_thread is not None:
             self.sync_thread.stop()
+            hilos.soltar(self.sync_thread)   # ver _stop_log_uploader
             self.sync_thread = None
 
     def toggle_login(self):
@@ -664,6 +678,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 continue
             sub = self.modules.get(pos_z)
             if sub is not None:
+                # Un hilo hijo esperando al servidor (agenda, chat,
+                # otoscopia) se destruiría corriendo junto con la ventana, y
+                # Qt aborta el proceso entero (ver core/hilos.py).
+                hilos.soltar_hijos(sub)
                 self.mdi_area.removeSubWindow(sub)
                 sub.deleteLater()
                 self.modules.set(pos_z, None)
@@ -730,7 +748,10 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         if self._otra_atencion_abierta(key):
             return
 
-        shedule = Shedule()
+        try:
+            shedule = Shedule()
+        except requests.RequestException as exc:
+            return self._atender_sin_conexion(exc)
         agenda = shedule.data.setdefault("agenda_1", {})
         entry = agenda.get(key)
         if entry is None:
@@ -739,13 +760,19 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         case_id = entry.case_id or None
         if not case_id:
             return
-        cases = CasesOffline().get_cases()
+        try:
+            cases = CasesOffline().get_cases()
+        except requests.RequestException as exc:
+            return self._atender_sin_conexion(exc)
         if case_id not in cases:
             return  # el caso fue borrado/no sincronizó -- no dejamos marcar "atendiendo" un caso inexistente
 
         if not es_prueba:
             marcar_entry_atendiendo(entry, self.data_login["user"])
-            shedule.set(shedule.data)
+            try:
+                shedule.set(shedule.data)
+            except requests.RequestException as exc:
+                return self._atender_sin_conexion(exc)
 
         self.data_current = cases[case_id]
         self.data_current_key = key
@@ -793,39 +820,73 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         # (ver _otra_atencion_abierta), así que el siguiente no cambia.
         self.secretaria.iniciar(siguiente_paciente(agenda, key, self.data_login["user"]))
 
+    def _atender_sin_conexion(self, detalle):
+        """Abrir una atención necesita al servidor (el caso, marcar
+        'atendiendo'). Una vez abierta se sigue trabajando sin red."""
+        print(f"atender: sin conexión: {detalle}")
+        dlg = QMessageBox(QMessageBox.Icon.Warning, "Sin conexión con el servidor",
+                          "No se pudo abrir la atención porque no hay conexión con el "
+                          "servidor. Inténtalo de nuevo en un momento.",
+                          QMessageBox.StandardButton.Ok, self)
+        style_dialog(dlg)
+        dlg.exec()
+
     def cerrar_atencion(self, key, nota):
         """Cierra la atención (estado 'atendido') guardando la nota de atención del estudiante"""
         if es_docente(self.data_login["permission"]):
             return  # admin/docente usan cerrar_atencion_prueba() o cerrar_atencion_base()
-        self._cerrar_atencion_real(key, nota)
+        return self._cerrar_atencion_real(key, nota)
 
     def cerrar_atencion_base(self, key, nota):
         """Contraparte de atender_paciente_base(): cierra de verdad (estado
         'atendido', chat guardado) la atención base del docente."""
         if not es_docente(self.data_login["permission"]):
             return  # esta variante es solo para admin/docente
-        self._cerrar_atencion_real(key, nota)
+        return self._cerrar_atencion_real(key, nota)
 
     def _cerrar_atencion_real(self, key, nota):
         """Lógica común a cerrar_atencion() (alumno) y cerrar_atencion_base()
-        (docente en modo "guardar base")."""
-        shedule = Shedule()
+        (docente en modo "guardar base").
+
+        Devuelve False si no se pudo cerrar (sin conexión): la atención
+        sigue abierta, los exámenes quedan respaldados en el equipo y la
+        evolución escrita no se borra, para reintentar."""
+        try:
+            shedule = Shedule()
+        except requests.RequestException as exc:
+            return self._cierre_sin_conexion(exc)
         agenda = shedule.data.setdefault("agenda_1", {})
         entry = agenda.get(key)
         if entry is None:
             return
 
-        if self.data_current_key == key:
+        actual = self.data_current_key == key
+        fallidos = []
+        if actual:
             # Los informes de los módulos "de examen" suben ANTES de marcar
             # 'atendido': shedule.set() empuja ese estado al backend en el
             # acto, y desde ahí report_upload.php rechaza con 409 (el
             # informe queda fijo). Con el orden al revés no se guardaba
             # ninguno. Además tiene que ser antes de _hydrate_modules(),
             # que les saca appointment_id/data_login.
-            self._subir_informes()
+            fallidos = self._subir_informes()
+        # Lo que quedó en el equipo sin subir de otra vuelta (la app se
+        # cerró sin red y se cierra sin haberla retomado).
+        try:
+            pendientes_ok, error = subir_pendientes(int(key))
+        except (TypeError, ValueError):
+            pendientes_ok, error = True, ""
+        if fallidos or not pendientes_ok:
+            # Cerrar ahora dejaba esos exámenes fuera para siempre (el
+            # servidor no acepta informes de una atención cerrada).
+            return self._cierre_sin_conexion(
+                ", ".join(fallidos) or error, reanudar=actual)
 
         marcar_entry_atendido(entry, self.data_login["user"], nota)
-        shedule.set(shedule.data)
+        try:
+            shedule.set(shedule.data)
+        except requests.RequestException as exc:
+            return self._cierre_sin_conexion(exc, reanudar=actual)
         self._stop_cronometro()
 
         if self.data_current_key == key:
@@ -838,6 +899,24 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.subw["AGENDA"].obj.refresh()
 
         self.statusbar.clearMessage()
+        return True
+
+    def _cierre_sin_conexion(self, detalle, reanudar=False):
+        """No se pudo cerrar la atención por la red. Sigue abierta y el
+        autoguardado vuelve a correr (se había detenido para la subida
+        final)."""
+        print(f"cerrar atención: sin conexión: {detalle}")
+        if reanudar:
+            self.report_autosave.reanudar()
+        dlg = QMessageBox(QMessageBox.Icon.Warning, "Sin conexión con el servidor",
+                          "No se pudo cerrar la atención porque no hay conexión con el "
+                          "servidor.\n\nTus exámenes quedaron guardados en este equipo y la "
+                          "atención sigue abierta. Cuando vuelva la conexión, guarda la "
+                          "evolución de nuevo (lo que escribiste no se borró).",
+                          QMessageBox.StandardButton.Ok, self)
+        style_dialog(dlg)
+        dlg.exec()
+        return False
 
     def _hydrate_modules(self):
         """Carga self.data_current en los módulos ya construidos, o los
@@ -1029,13 +1108,19 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def _subir_informes(self):
         """Subida final y sincrónica de todos los informes. Primero espera
         las subidas automáticas en curso: si una vieja terminara después,
-        pisaría esta."""
+        pisaría esta. Devuelve los módulos que no pudieron subir (lo suyo
+        quedó respaldado en el equipo, ver core/respaldo_informes.py)."""
         self.report_autosave.detener()
+        fallidos = []
         for modulo in self._modulos_examen():
             try:
-                modulo.submit_report()
+                ok = modulo.submit_report()
             except Exception as exc:
                 print(f"{type(modulo).__name__}: no se pudo subir el informe: {exc}")
+                ok = False
+            if ok is False:
+                fallidos.append(type(modulo).__name__)
+        return fallidos
 
     # El ABR recupera lo suyo solo (AbrMainWindow.restore_current), junto
     # con la lista de sesiones anteriores.

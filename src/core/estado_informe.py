@@ -30,17 +30,28 @@ class EstadoInforme(QLabel):
         self.setText("El informe se guarda solo mientras atiendes.")
         self.setStyleSheet("color: #666666;")
 
-    def guardado(self, tipo, ok, error=""):
-        self._estado[tipo] = (ok, datetime.now().strftime("%H:%M"), error)
+    def guardado(self, tipo, ok, error="", en_equipo=False):
+        """`en_equipo`: aunque no llegó al servidor, quedó respaldado en el
+        disco (core/respaldo_informes.py) -- no se pierde si la app se cierra."""
+        self._estado[tipo] = (ok, datetime.now().strftime("%H:%M"), error, en_equipo)
         varios = len(self._estado) > 1
         lineas = []
-        for t, (bien, hora, err) in self._estado.items():
+        for t, (bien, hora, err, local) in self._estado.items():
             prefijo = f"{ROTULOS.get(t, t)}: " if varios else ""
             if bien:
                 lineas.append(f"{prefijo}informe guardado a las {hora}.")
+            elif local:
+                lineas.append(f"{prefijo}sin conexión con el servidor: guardado en este "
+                              f"equipo a las {hora}. Se sube solo cuando vuelva la conexión.")
             else:
                 lineas.append(f"{prefijo}no se pudo guardar a las {hora} "
                               f"({(err or 'sin conexión')[:80]}). Se reintenta solo.")
         self.setText("\n".join(lineas))
-        todo_bien = all(bien for bien, _, _ in self._estado.values())
-        self.setStyleSheet("color: #27ae60;" if todo_bien else "color: #c0392b;")
+        estados = self._estado.values()
+        if all(e[0] for e in estados):
+            color = "#27ae60"
+        elif all(e[0] or e[3] for e in estados):
+            color = "#d35400"
+        else:
+            color = "#c0392b"
+        self.setStyleSheet(f"color: {color};")

@@ -32,6 +32,12 @@ class SyncThread(QThread):
             self.sync_failed.emit(str(exc))
             return
         self._since = result.get("server_time", self._since)
+        # El contador de la bandeja de entrada se consulta acá y no en el
+        # hilo de la ventana (ver MainWindow._on_backend_sync).
+        try:
+            result["_inbox"] = self._client.get_inbox().get("items", [])
+        except requests.RequestException:
+            result["_inbox"] = None
         self.sync_ok.emit(result)
 
     def _wait_interruptible(self, seconds: float) -> None:

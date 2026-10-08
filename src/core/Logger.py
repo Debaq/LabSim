@@ -13,7 +13,9 @@ class Logger(object):
         # build sin consola (PyInstaller windowed) puede ser None y ahi
         # solo queda el archivo.
         self.terminal = stream if stream is not None else sys.stdout
-        self.log = open(filename, "a")
+        # utf-8 explícito: en Windows el default es cp1252 y un carácter
+        # fuera de esa tabla hacía fallar el print() mismo.
+        self.log = open(filename, "a", encoding="utf-8", errors="replace")
         # Cola local opcional (ver lib/backend/log_queue.py): junta lo que se
         # imprime para subirlo despues al backend en lotes, sin bloquear acá
         # por red -- push() solo escribe a un sqlite local.
@@ -27,13 +29,20 @@ class Logger(object):
         prefijo = f"{get_timestamp()} - " if self._linea_nueva else ""
         timestamped_message = f"{prefijo}{message}"
         self._linea_nueva = message.endswith("\n")
+        # Escribir el registro nunca puede tirar abajo a quien imprime.
         if self.terminal is not None:
-            self.terminal.write(timestamped_message)
-        self.log.write(timestamped_message)
-        # Sin flush acá, esto queda en el buffer de Python hasta que se
-        # llene o el proceso cierre -- print() no hace flush solo porque
-        # este objeto no es un TTY real (no tiene isatty()).
-        self.log.flush()
+            try:
+                self.terminal.write(timestamped_message)
+            except (OSError, ValueError, UnicodeError):
+                pass
+        try:
+            self.log.write(timestamped_message)
+            # Sin flush acá, esto queda en el buffer de Python hasta que se
+            # llene o el proceso cierre -- print() no hace flush solo porque
+            # este objeto no es un TTY real (no tiene isatty()).
+            self.log.flush()
+        except (OSError, ValueError):
+            pass
         if self.log_queue is not None and message.strip():
             self.log_queue.push("console", {"message": message.strip()})
 

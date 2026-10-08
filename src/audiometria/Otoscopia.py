@@ -10,6 +10,7 @@ from audiometria.OtoscopiaInforme import InformeOtoscopia
 from backend.client import BackendClient
 from core.base import context
 from core.helpers import Preferences, foto_otoscopia
+from core.report_autosave import subir_ahora
 from PySide6.QtCore import QRect, Qt, QThread, Signal
 from PySide6.QtGui import QColor, QPainter, QPen, QPixmap, QRegion
 from PySide6.QtWidgets import (
@@ -268,10 +269,11 @@ class Otoscopia(QWidget):
         AbrMainWindow.submit_report). Best-effort: sin conexión falla en
         silencio, el cierre de la atención no se rompe por esto."""
         if self.report_job() is None:
-            return
+            return True
         ok, detalle = self._subir_informe()
         if not ok:
             print(f"Otoscopia: no se pudo subir el informe: {detalle}")
+        return ok
 
     def report_job(self):
         """El informe tal como se sube (ver core/report_autosave.py), o None.
@@ -297,17 +299,12 @@ class Otoscopia(QWidget):
         """(ok, detalle). Sube el informe tipo 'OTOSCOPIA' -- sin imágenes:
         lo que el alumno informa son las marcas por cuadrante, la foto del
         caso ya la tiene el backend (ver OtoscopiaPhoto.php)."""
-        try:
-            appointment_id = int(self.appointment_id)
-        except (TypeError, ValueError):
+        job = self.report_job()
+        if job is None:
             return False, "la cita no tiene un id válido"
         client = BackendClient(
             Preferences().get("BACKEND_URL"), context.get_resource("json/session.json")
         )
-        if not client.is_logged_in():
-            return False, "no hay sesión iniciada con el servidor"
-        try:
-            client.upload_report(appointment_id, "OTOSCOPIA", self.informe.to_dict(), {})
-        except Exception as exc:
-            return False, str(exc)
-        return True, ""
+        # Por subir_ahora, como los demás: queda respaldado en el equipo
+        # aunque no haya red (ver core/respaldo_informes.py).
+        return subir_ahora(job, client)
