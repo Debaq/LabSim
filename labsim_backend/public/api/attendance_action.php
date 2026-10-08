@@ -52,12 +52,24 @@ switch ($action) {
         $stmt->execute([$appointmentId]);
         $appt = $stmt->fetch();
         if ($appt) {
-            OirsEvaluator::evaluate(
-                $appointmentId,
-                (int) $user['id'],
-                $appt['case_id'] !== null ? (string) $appt['case_id'] : null,
-                $appt['patient_id'] !== null ? (int) $appt['patient_id'] : null
-            );
+            // La evaluación OIRS llama al LLM (hasta 30 s). Antes corría
+            // antes de responder: la app cortaba a los 10 s, creía que no
+            // se había cerrado y el alumno quedaba en un bucle de "sin
+            // conexión" con la atención ya cerrada. Ahora corre después de
+            // mandar la respuesta (Response::json hace exit y recién ahí
+            // se ejecutan las funciones de cierre).
+            $studentId = (int) $user['id'];
+            $caseId = $appt['case_id'] !== null ? (string) $appt['case_id'] : null;
+            $patientId = $appt['patient_id'] !== null ? (int) $appt['patient_id'] : null;
+            ignore_user_abort(true);
+            register_shutdown_function(static function () use ($appointmentId, $studentId, $caseId, $patientId): void {
+                if (function_exists('fastcgi_finish_request')) {
+                    fastcgi_finish_request();
+                } elseif (function_exists('litespeed_finish_request')) {
+                    litespeed_finish_request();
+                }
+                OirsEvaluator::evaluate($appointmentId, $studentId, $caseId, $patientId);
+            });
         }
         break;
 

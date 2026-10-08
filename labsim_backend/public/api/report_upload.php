@@ -31,6 +31,9 @@ require_once __DIR__ . '/../../src/ReportFile.php';
  * sobreescribir. (Hasta 2026-09-24 el ABR/electrococleo aceptaba marcas y
  * conclusiones después de cerrar; se sacó: cerrada la atención, no se
  * actualiza nada.)
+ *
+ * Opcional: version_base (int), ver reports.version / report_versions.
+ * Responde {ok, report_id, version}.
  */
 
 const REPORT_TIPOS = ['ABR', 'AABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'OTOSCOPIA'];
@@ -61,6 +64,7 @@ if (!is_array($data)) {
 }
 
 $pdo = Db::get();
+Db::ensureReportVersioning();
 
 $stmt = $pdo->prepare(
     'SELECT id, estado FROM attendances WHERE appointment_id = ? AND student_id = ?'
@@ -97,16 +101,44 @@ foreach (REPORT_IMAGE_SUFFIXES as $suffix) {
     $imageFiles[$suffix] = $tmpPath;
 }
 
-$pdo->prepare(
-    'INSERT INTO reports (attendance_id, tipo, data, updated_at)
-     VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-     ON CONFLICT(attendance_id, tipo) DO UPDATE SET
-        data = excluded.data, updated_at = CURRENT_TIMESTAMP'
-)->execute([$attendanceId, $tipo, json_encode($data, JSON_UNESCAPED_UNICODE)]);
+// version_base: la versión sobre la que la app armó este informe (0 =
+// no conocía ninguna). Si la que hay no es esa, alguien guardó en el
+// medio -- el alumno siguió en otro equipo, o retomó sin red y el módulo
+// arrancó vacío -- y lo que se pisa se aparta en report_versions en vez
+// de perderse. Sin version_base (app de antes de esto) se pisa como antes.
+$versionBase = isset($_POST['version_base']) ? (int) $_POST['version_base'] : null;
+$dataJson = json_encode($data, JSON_UNESCAPED_UNICODE);
 
-$stmt = $pdo->prepare('SELECT id FROM reports WHERE attendance_id = ? AND tipo = ?');
-$stmt->execute([$attendanceId, $tipo]);
-$reportId = (int) $stmt->fetchColumn();
+$pdo->beginTransaction();
+try {
+    $stmt = $pdo->prepare('SELECT id, data, version, updated_at FROM reports WHERE attendance_id = ? AND tipo = ?');
+    $stmt->execute([$attendanceId, $tipo]);
+    $previo = $stmt->fetch();
+    if ($previo) {
+        $reportId = (int) $previo['id'];
+        $version = (int) $previo['version'] + 1;
+        if ($versionBase !== null && $versionBase !== (int) $previo['version']
+                && $previo['data'] !== $dataJson) {
+            $pdo->prepare(
+                'INSERT INTO report_versions (report_id, version, data, guardado_at) VALUES (?, ?, ?, ?)'
+            )->execute([$reportId, (int) $previo['version'], $previo['data'], $previo['updated_at']]);
+        }
+        $pdo->prepare(
+            'UPDATE reports SET data = ?, version = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?'
+        )->execute([$dataJson, $version, $reportId]);
+    } else {
+        $version = 1;
+        $pdo->prepare(
+            'INSERT INTO reports (attendance_id, tipo, data, version, updated_at)
+             VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP)'
+        )->execute([$attendanceId, $tipo, $dataJson]);
+        $reportId = (int) $pdo->lastInsertId();
+    }
+    $pdo->commit();
+} catch (Throwable $e) {
+    $pdo->rollBack();
+    throw $e;
+}
 
 // El PDF (si ya se había generado en una subida anterior) queda
 // desactualizado apenas cambia data o alguna imagen -- se borra acá y se
@@ -118,4 +150,4 @@ foreach ($imageFiles as $suffix => $tmpPath) {
     ReportFile::saveImage($reportId, $suffix, $tmpPath);
 }
 
-Response::json(['ok' => true, 'report_id' => $reportId]);
+Response::json(['ok' => true, 'report_id' => $reportId, 'version' => $version]);

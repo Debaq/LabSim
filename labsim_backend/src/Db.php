@@ -619,14 +619,39 @@ final class Db
     }
 
     /**
-     * Amplía el CHECK de reports.tipo para aceptar 'OTOSCOPIA' (informe de
-     * otoscopia por cuadrantes que sube el alumno desde el módulo de
-     * otoscopia). SQLite no permite modificar un CHECK con ALTER TABLE:
-     * hay que reconstruir la tabla y copiar las filas, como en
-     * migrateAppConfigCourseIdIfNeeded. Debe llamarse ANTES de aplicar
-     * schema.sql, que recrea el índice de la tabla.
+     * Lo que report_upload.php y my_report.php necesitan de reports
+     * (version, AABR, report_versions), al vuelo: entre el despliegue y el
+     * "Aplicar schema" del admin cada subida fallaba por la columna que
+     * falta. Si ya está al día son dos consultas al catálogo.
      */
-    public static function migrateReportsOtoscopiaIfNeeded(): void
+    public static function ensureReportVersioning(): void
+    {
+        self::migrateReportsTiposIfNeeded();
+        $pdo = self::get();
+        $pdo->exec(
+            'CREATE TABLE IF NOT EXISTS report_versions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                report_id INTEGER NOT NULL REFERENCES reports(id),
+                version INTEGER NOT NULL,
+                data TEXT NOT NULL,
+                guardado_at TEXT NOT NULL,
+                reemplazado_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )'
+        );
+        $pdo->exec('CREATE INDEX IF NOT EXISTS idx_report_versions_report ON report_versions (report_id)');
+    }
+
+    /**
+     * Pone al día la tabla reports: el CHECK de reports.tipo acepta
+     * 'OTOSCOPIA' y 'AABR' (el AABR se subía desde 2026-10 y el CHECK lo
+     * rechazaba: cada informe de tamizaje fallaba), y existe la columna
+     * version (ver report_versions en schema.sql). SQLite no permite
+     * modificar un CHECK con ALTER TABLE: hay que reconstruir la tabla y
+     * copiar las filas, como en migrateAppConfigCourseIdIfNeeded. Debe
+     * llamarse ANTES de aplicar schema.sql, que recrea el índice de la
+     * tabla.
+     */
+    public static function migrateReportsTiposIfNeeded(): void
     {
         $pdo = self::get();
         $stmt = $pdo->prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'reports'");
@@ -634,29 +659,44 @@ final class Db
         $sql = (string) $stmt->fetchColumn();
         // Tabla todavía inexistente (instalación nueva): la crea schema.sql
         // ya con el CHECK nuevo, no hay nada que migrar.
-        if ($sql === '' || strpos($sql, 'OTOSCOPIA') !== false) {
+        if ($sql === '') {
             return;
         }
-        $pdo->exec('ALTER TABLE reports RENAME TO reports_old');
-        $pdo->exec(
-            "CREATE TABLE reports (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                attendance_id INTEGER NOT NULL REFERENCES attendances(id),
-                tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'OTOSCOPIA')),
-                data TEXT NOT NULL,
-                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE (attendance_id, tipo)
-            )"
-        );
-        // Se conservan los id: el PDF y las imágenes en disco se nombran a
-        // partir de reports.id (ver ReportFile::pdfPath()), reasignarlos
-        // dejaría cada informe apuntando a los archivos de otro.
-        $pdo->exec(
-            'INSERT INTO reports (id, attendance_id, tipo, data, created_at, updated_at)
-             SELECT id, attendance_id, tipo, data, created_at, updated_at FROM reports_old'
-        );
-        $pdo->exec('DROP TABLE reports_old');
+        $cols = array_column($pdo->query('PRAGMA table_info(reports)')->fetchAll(), 'name');
+        $tieneVersion = in_array('version', $cols, true);
+        if (strpos($sql, "'AABR'") !== false && $tieneVersion) {
+            return;
+        }
+        $pdo->beginTransaction();
+        try {
+            $pdo->exec('ALTER TABLE reports RENAME TO reports_old');
+            $pdo->exec(
+                "CREATE TABLE reports (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    attendance_id INTEGER NOT NULL REFERENCES attendances(id),
+                    tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'AABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'OTOSCOPIA')),
+                    data TEXT NOT NULL,
+                    version INTEGER NOT NULL DEFAULT 1,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE (attendance_id, tipo)
+                )"
+            );
+            // Se conservan los id: el PDF y las imágenes en disco se nombran a
+            // partir de reports.id (ver ReportFile::pdfPath()), reasignarlos
+            // dejaría cada informe apuntando a los archivos de otro.
+            $version = $tieneVersion ? 'version' : '1';
+            $pdo->exec(
+                "INSERT INTO reports (id, attendance_id, tipo, data, version, created_at, updated_at)
+                 SELECT id, attendance_id, tipo, data, {$version}, created_at, updated_at FROM reports_old"
+            );
+            $pdo->exec('DROP TABLE reports_old');
+            $pdo->exec('CREATE INDEX IF NOT EXISTS idx_reports_attendance ON reports (attendance_id)');
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
     }
 
     /**

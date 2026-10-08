@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../src/Oirs.php';
 require_once __DIR__ . '/../../src/Metrics.php';
 require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/ReportFile.php';
+require_once __DIR__ . '/../../src/ReportVersions.php';
 
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
@@ -62,6 +63,12 @@ foreach ($stmt->fetchAll() as $r) {
     $reportsByAppt[(int) $r['appointment_id']][] = $r;
 }
 $totalReports = array_sum(array_map('count', $reportsByAppt));
+// Versiones que otra subida pisó (ver ReportVersions): se ofrecen al lado.
+$versionesPorInforme = ReportVersions::contar(
+    array_merge([], ...array_map(static function (array $rs): array {
+        return array_column($rs, 'id');
+    }, array_values($reportsByAppt)))
+);
 
 $estadoCounts = ['atendiendo' => 0, 'atendido' => 0, 'no_show' => 0];
 foreach ($attendances as $a) {
@@ -234,7 +241,11 @@ admin_header('Alumno: ' . $student['display_name'], $me);
             <td>
                 <?php foreach ($reportsByAppt[(int) $a['appointment_id']] ?? [] as $r): ?>
                 <a href="report_pdf.php?id=<?= (int) $r['id'] ?>" target="_blank"
-                   title="<?= htmlspecialchars(ReportFile::LABELS[$r['tipo']] ?? $r['tipo']) ?> (PDF)"><?= htmlspecialchars(ReportFile::SHORT_LABELS[$r['tipo']] ?? $r['tipo']) ?></a><br>
+                   title="<?= htmlspecialchars(ReportFile::LABELS[$r['tipo']] ?? $r['tipo']) ?> (PDF)"><?= htmlspecialchars(ReportFile::SHORT_LABELS[$r['tipo']] ?? $r['tipo']) ?></a>
+                <?php if (!empty($versionesPorInforme[(int) $r['id']])): ?>
+                <a href="report_versions.php?report_id=<?= (int) $r['id'] ?>" class="help"
+                   title="Versiones reemplazadas por otra subida">(<?= (int) $versionesPorInforme[(int) $r['id']] ?> ant.)</a>
+                <?php endif; ?><br>
                 <?php endforeach; ?>
                 <?php if (empty($reportsByAppt[(int) $a['appointment_id']])): ?><span class="muted">—</span><?php endif; ?>
             </td>

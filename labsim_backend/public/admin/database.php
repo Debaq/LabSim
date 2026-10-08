@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'alumno demo' => static fn() => Db::migrateDemoStudentIfNeeded(),
                 'login propio del docente' => static fn() => Db::migrateProfileLoginIfNeeded(),
                 'usuarios sin distinguir mayúsculas' => static fn() => Db::migrateUsernameNoCaseIfNeeded(),
-                'otoscopía en informes' => static fn() => Db::migrateReportsOtoscopiaIfNeeded(),
+                'tipos y versión de informes' => static fn() => Db::migrateReportsTiposIfNeeded(),
                 // Antes de schema.sql, y no después: ese archivo trae un
                 // `CREATE INDEX ... ON cases(folder_id)` que en una base ya
                 // existente falla con "no such column: folder_id" si la

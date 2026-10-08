@@ -298,8 +298,12 @@ CREATE INDEX IF NOT EXISTS idx_attendances_student ON attendances (student_id);
 CREATE TABLE IF NOT EXISTS reports (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     attendance_id INTEGER NOT NULL REFERENCES attendances(id),
-    tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'OTOSCOPIA')),
+    tipo TEXT NOT NULL CHECK (tipo IN ('ABR', 'AABR', 'EOA', 'VEMP', 'ELECTROCOCLEO', 'OTOSCOPIA')),
     data TEXT NOT NULL,                -- JSON: latencias/amplitudes marcadas, conclusión escrita
+    -- Sube en cada guardado. La app manda la versión sobre la que armó el
+    -- informe: si no coincide (otro equipo, un retomar sin red) la que se
+    -- pisa va a report_versions en vez de perderse.
+    version INTEGER NOT NULL DEFAULT 1,
     -- Sin columna para el nombre del PDF: es determinista a partir de id
     -- (ver ReportFile::pdfPath()), igual que las imágenes.
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -307,6 +311,21 @@ CREATE TABLE IF NOT EXISTS reports (
     UNIQUE (attendance_id, tipo)
 );
 CREATE INDEX IF NOT EXISTS idx_reports_attendance ON reports (attendance_id);
+
+-- Informes pisados por una subida que no partía de ellos (ver
+-- reports.version y report_upload.php): el alumno siguió en otro equipo,
+-- o retomó sin red y el módulo arrancó vacío. Solo los datos (marcas,
+-- conclusión); las imágenes se rehacen con ellos. Se ven y se restauran
+-- desde la ficha del alumno en el admin.
+CREATE TABLE IF NOT EXISTS report_versions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    report_id INTEGER NOT NULL REFERENCES reports(id),
+    version INTEGER NOT NULL,
+    data TEXT NOT NULL,
+    guardado_at TEXT NOT NULL,         -- updated_at que tenía esa versión
+    reemplazado_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_report_versions_report ON report_versions (report_id);
 
 -- Registro de acciones del estudiante (reemplaza el print a consola).
 -- El cliente junta eventos localmente y los sube en lotes -> nunca streaming.
