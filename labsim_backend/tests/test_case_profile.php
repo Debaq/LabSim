@@ -405,9 +405,13 @@ $esperado = [
     'asfixia_perinatal' => 'neural', 'kernicterus' => 'neural',
     'nf2' => 'neural', 'tumor_angulo' => 'neural', 'compresion_microvascular' => 'neural',
     'esclerosis_multiple' => 'neural', 'infarto_pontino' => 'neural',
+    // El AICA se lleva la arteria laberíntica: sobre todo coclear.
+    'infarto_aica' => 'coclear',
     'glioma_tronco' => 'neural', 'siderosis' => 'neural', 'chiari_hic' => 'neural',
+    'hic_idiopatica' => 'neural',
     'leucodistrofia' => 'neural', 'neuropatia_hereditaria' => 'neural',
-    'tec_tronco' => 'neural', 'toxico_metabolico' => 'neural',
+    // Hipotiroidismo: la pérdida es coclear aunque el ABR también se enlentezca.
+    'tec_tronco' => 'neural', 'toxico_metabolico' => 'coclear',
     'hipotermia_farmacos' => 'neural', 'prematuro' => 'neural',
     'bloqueo_proximal' => 'neural',
     // Los dos componentes a la vez: con cce en el medio pesa el retro, que es
@@ -981,10 +985,10 @@ foreach (CaseProfile::SCENARIOS as $escKey => $esc) {
 // El schwannoma nace del nervio vestibular: no puede salir con VEMP normal.
 t_eq(CaseProfile::SCENARIOS['schwannoma']['vemp']['type'], 'neural',
     'El schwannoma vestibular desarma el VEMP');
-// Y la ANSD al revés: el VEMP conservado es el hallazgo que la separa de un
-// compromiso del VIII completo.
-t_eq(CaseProfile::SCENARIOS['neuropatia']['vemp']['type'], 'normal',
-    'La ANSD deja el VEMP conservado a propósito');
+// La ANSD también: el cVEMP sale alterado en el 91% (Hu 2020). Antes se
+// dejaba conservado a propósito y la literatura dice lo contrario.
+t_eq(CaseProfile::SCENARIOS['neuropatia']['vemp']['type'], 'neural',
+    'La ANSD compromete también el VEMP');
 
 // Un caso con patrón retro y el VEMP declarado normal a propósito ya no se
 // reclama: es lo que arma el generador para la ANSD.
@@ -1034,11 +1038,12 @@ foreach (CaseProfile::SCENARIOS as $escKey => $esc) {
 }
 
 // El acúfeno pulsátil no se sortea en cualquier cuadro: es el hallazgo de
-// una masa vascular, y repartirlo le sacaría el valor que tiene.
+// una masa vascular o de la hipertensión intracraneal, y repartirlo le
+// sacaría el valor que tiene.
 $conPulsatil = array_keys(array_filter(CaseProfile::SCENARIOS,
     fn ($e) => isset($e['tinnitus']['pulsatil'])));
-t_eq($conPulsatil, ['glomus_timpanico'],
-    'Solo el glomus declara acúfeno pulsátil');
+t_eq($conPulsatil, ['glomus_timpanico', 'hic_idiopatica'],
+    'Solo el glomus y la hipertensión intracraneal declaran acúfeno pulsátil');
 
 // Ningún cuadro puede prometer acúfeno siempre: dos casos del mismo cuadro
 // tienen que poder salir uno con y otro sin, o el alumno memoriza la

@@ -264,15 +264,15 @@ final class CaseBuilder
                 'desincronia' => 'alta', 'sensibilidad_tasa' => 'severa'],
         ],
         'toxico_metabolico' => [
-            'label' => 'Tóxico-metabólico (encefalopatía hepática, hipotiroidismo)',
+            'label' => 'Hipotiroidismo',
             'params' => ['i_iii_ms' => 0.20, 'iii_v_ms' => 0.25, 'global_delay_ms' => 0.25,
                 'bloqueo' => 'ninguno', 'v_i_factor' => 0.70, 'microfonica' => 'normal',
                 'desincronia' => 'leve', 'sensibilidad_tasa' => 'moderada'],
         ],
         'hipotermia_farmacos' => [
             'label' => 'Hipotermia / depresores del SNC',
-            'nota' => 'Conducción lenta pareja: corre TODO, onda I incluida, con interpicos normales. Es el único cuadro donde la onda I se mueve.',
-            'params' => ['i_iii_ms' => 0.0, 'iii_v_ms' => 0.0, 'global_delay_ms' => 0.80,
+            'nota' => 'Conducción lenta: corre TODO, onda I incluida, y los interpicos se alargan con ella (~7% por grado, Markand 1987). Valores de unos 33 °C. Es el único cuadro donde la onda I se mueve.',
+            'params' => ['i_iii_ms' => 0.60, 'iii_v_ms' => 0.50, 'global_delay_ms' => 0.40,
                 'bloqueo' => 'ninguno', 'v_i_factor' => 1.0, 'microfonica' => 'normal',
                 'desincronia' => 'ninguna', 'sensibilidad_tasa' => 'normal'],
         ],

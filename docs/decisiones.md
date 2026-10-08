@@ -4299,3 +4299,32 @@ Cada cita dice si la literatura coincide con lo que arma el generador: 64 sí,
 78 en parte y 13 no. **Ninguna discrepancia se aplicó al generador**: son
 cambios a decidir con el docente, y la página los marca ("la literatura NO
 coincide").
+
+### Cuadros corregidos contra la literatura (2026-10-08)
+
+Se aplicaron las 13 citas que contradecían al generador (la cita y el dato
+están en `BibliografiaPatologias`, con la nota "Aplicado"):
+
+- **Fractura de cadena:** el gap sube hacia los agudos (24 → 40 dB), no plano.
+- **Timpanoesclerosis:** el gap es mayor en graves (rigidez), no en agudos.
+- **Fijación congénita del estribo:** lleva muesca de Carhart; la separa de la
+  otoesclerosis la historia, no el audiograma.
+- **GJB2:** el comentario ya no dice "estable"; el caso sigue siendo una foto.
+- **Alport:** curva en surco con el fondo en 1-3 kHz, leve a moderada.
+- **Pendred:** gap en graves con timpanograma A (tercera ventana). Queda bajo
+  ~12 dB en 500 Hz para que el perfil no lo lea como transmisión y dibuje un
+  ABR conductivo.
+- **Neuropatía auditiva:** VEMP neural (alterado), no conservado.
+- **Infarto:** se separa en `infarto_pontino` (intraaxial, el de antes) e
+  `infarto_aica` (sensorioneural: súbita coclear moderada a profunda con
+  vestíbulo caído).
+- **Chiari / HIC:** se separa en `chiari_hic` (Chiari) e `hic_idiopatica`
+  (graves y acúfeno pulsátil, como el glomus).
+- **Tóxico-metabólico → Hipotiroidismo:** pérdida coclear (cce 70-95) con ABR
+  enlentecido. La encefalopatía hepática sale del catálogo: su ABR es normal.
+- **Hipotermia:** el preset alarga también los interpicos (I-III +0,6,
+  III-V +0,5, global +0,4 ms; unos 33 °C).
+
+El Ménière se queda con el ECochG siempre alterado aunque la literatura dé
+~50% normal: el generador muestra el cuadro típico y la variabilidad se
+enseña aparte (decisión del docente).

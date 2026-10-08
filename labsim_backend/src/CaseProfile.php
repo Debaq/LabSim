@@ -457,6 +457,7 @@ final class CaseProfile
         'compresion_microvascular' => [30, null],
         'esclerosis_multiple' => [18, null],
         'infarto_pontino' => [40, null],
+        'infarto_aica' => [40, null],
         'siderosis' => [30, null],
         'neuropatia_hereditaria' => [5, null],
         'toxico_metabolico' => [10, null],
@@ -732,12 +733,13 @@ final class CaseProfile
             'categoria' => 'conductiva',
             'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 8, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
             'sn_scale' => [0.0, 1.2],
-            // La misma planitud de la disyunción pero a media máquina: el
-            // hueso fracturado (mango del martillo, crura del estribo) sigue
-            // transmitiendo algo, así que el gap es parcial. La diferencia
-            // con la disyunción completa es de magnitud y de timpanograma, y
-            // separarlas es el ejercicio.
-            'gap_shape' => [125 => 32, 250 => 34, 500 => 35, 1000 => 35, 2000 => 32, 3000 => 30, 4000 => 30, 6000 => 30, 8000 => 30],
+            // Discontinuidad PARCIAL: el hueso fracturado (mango del
+            // martillo, crura del estribo) sigue transmitiendo los graves,
+            // que mueven la cadena entera, y pierde los agudos. El gap sube
+            // hacia los agudos -- en 4 kHz al menos 10 dB más que en
+            // 250-500 Hz (Sarmento 2017, Farahmand 2016). Es lo que la separa
+            // de la disyunción completa, que es plana y más grande.
+            'gap_shape' => [125 => 24, 250 => 24, 500 => 25, 1000 => 28, 2000 => 32, 3000 => 35, 4000 => 38, 6000 => 40, 8000 => 40],
             'gap_scale' => [0.5, 1.1],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
             // Puede quedar normal o algo hipermóvil: la cadena está dañada,
@@ -907,10 +909,11 @@ final class CaseProfile
             'categoria' => 'conductiva',
             'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 8, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
             'sn_scale' => [0.0, 1.2],
-            // Rigidez, no masa: el gap crece hacia los AGUDOS, al revés que
-            // la efusión. Con la curva As, ese sentido de la pendiente es
-            // todo el hallazgo.
-            'gap_shape' => [125 => 18, 250 => 18, 500 => 20, 1000 => 22, 2000 => 25, 3000 => 26, 4000 => 26, 6000 => 26, 8000 => 26],
+            // Rigidez: la placa endurece el sistema y la rigidez pesa en los
+            // GRAVES (la masa, en los agudos). El gap es mayor en 250-1000 Hz
+            // y baja hacia los agudos; lo que se recupera al operar es justo
+            // ese tramo (Stankovic 2009). Con la curva As es coherente.
+            'gap_shape' => [125 => 26, 250 => 26, 500 => 25, 1000 => 23, 2000 => 20, 3000 => 18, 4000 => 18, 6000 => 18, 8000 => 18],
             'gap_scale' => [0.4, 1.1],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
             'z' => ['As'], 'etf' => 'Normal',
@@ -960,11 +963,13 @@ final class CaseProfile
         'fijacion_congenita_estribo' => [
             'label' => 'Fijación congénita del estribo / malformación de cadena',
             'categoria' => 'conductiva',
-            // Sin muesca de Carhart: la fijación es de nacimiento y no
-            // arrastra el artefacto mecánico de la otoesclerosis. Un gap
-            // plano y grande con ósea limpia en 2 kHz es la diferencia.
-            'sn_shape' => [125 => 5, 250 => 5, 500 => 5, 1000 => 5, 2000 => 8, 3000 => 8, 4000 => 8, 6000 => 10, 8000 => 10],
-            'sn_scale' => [0.0, 1.2],
+            // CON muesca de Carhart: es un artefacto mecánico de cualquier
+            // estribo fijo, no exclusivo de la otoesclerosis, y aparece igual
+            // de seguido en las fijaciones congénitas (Cheon 2023). El
+            // audiograma no separa este cuadro de la otoesclerosis: lo separa
+            // la historia (de nacimiento, no progresiva).
+            'sn_shape' => [125 => 5, 250 => 5, 500 => 8, 1000 => 10, 2000 => 18, 3000 => 12, 4000 => 8, 6000 => 8, 8000 => 8],
+            'sn_scale' => [0.4, 1.2],
             'gap_shape' => [125 => 42, 250 => 44, 500 => 46, 1000 => 46, 2000 => 44, 3000 => 42, 4000 => 42, 6000 => 42, 8000 => 42],
             'gap_scale' => [0.6, 1.0],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
@@ -1002,7 +1007,7 @@ final class CaseProfile
             'z' => ['B', 'As'], 'etf' => 'Normal',
             'grados' => ['leve'], 'max_db' => 40, 'gap_max_db' => 42,
             'vemp' => ['type' => 'normal', 'umbral_gap' => true],
-            // El único cuadro del catálogo que enciende `pulsatil`: el
+            // Enciende `pulsatil` (como la hipertensión intracraneal): el
             // acúfeno va al compás del pulso porque la masa ES vascular. El
             // gap por sí solo no distingue esto de una otitis; el pulso sí.
             'tinnitus' => ['prob' => 0.9, 'ruido' => ['Zumbido'],
@@ -1326,8 +1331,10 @@ final class CaseProfile
         'gjb2' => [
             'label' => 'No sindrómica GJB2 (conexina 26)',
             'categoria' => 'sensorial',
-            // Plana, bilateral, simétrica y ESTABLE desde el nacimiento:
-            // es el patrón de la sordera congénita más frecuente.
+            // Plana, bilateral y simétrica: el patrón de la sordera congénita
+            // más frecuente. NO es estable: más de la mitad de los niños con
+            // audición residual progresa, casi siempre de a poco (Kenna
+            // 2010). El caso es una foto; la progresión va en la historia.
             'sn_shape' => [125 => 60, 250 => 62, 500 => 65, 1000 => 65, 2000 => 68, 3000 => 68, 4000 => 70, 6000 => 70, 8000 => 70],
             'sn_scale' => [0.6, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'bilateral',
@@ -1358,17 +1365,19 @@ final class CaseProfile
             'conciencia' => [10, 40],
         ],
         'alport' => [
-            'label' => 'Alport (descendente en agudos, adolescencia)',
+            'label' => 'Alport (en surco de frecuencias medias, adolescencia)',
             'categoria' => 'sensorial',
-            // Misma pendiente de la ototóxica sin el antecedente del
-            // fármaco: eso lo resuelve la anamnesis, no el audiograma.
-            'sn_shape' => [125 => 0, 250 => 0, 500 => 5, 1000 => 10, 2000 => 25, 3000 => 45, 4000 => 55, 6000 => 62, 8000 => 65],
+            // Empieza en las frecuencias MEDIAS: curva en surco ("groove")
+            // con el fondo en 1-3 kHz en el 92,7% (Zhang 2023), que después
+            // se extiende a los agudos y se estabiliza en 50-60 dB HL en la
+            // adolescencia. No es la pendiente de la ototóxica.
+            'sn_shape' => [125 => 10, 250 => 10, 500 => 20, 1000 => 35, 2000 => 45, 3000 => 45, 4000 => 40, 6000 => 35, 8000 => 30],
             'sn_scale' => [0.6, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal',
-            'grados' => ['leve'],
+            'grados' => ['leve', 'moderada'],
             'tinnitus' => ['prob' => 0.4, 'ruido' => ['Pitido', 'Siseo'],
-                           'frecuencia' => [4000, 6000], 'permanente' => 0.5],
+                           'frecuencia' => [2000, 3000], 'permanente' => 0.5],
             'conciencia' => [25, 55],
         ],
         'jervell_lange_nielsen' => [
@@ -1398,7 +1407,15 @@ final class CaseProfile
             // fluctuación --clásicamente tras un golpe en la cabeza--. Es el
             // contraejemplo del "pasó el screening, listo".
             'sn_shape' => [125 => 55, 250 => 58, 500 => 60, 1000 => 62, 2000 => 68, 3000 => 72, 4000 => 75, 6000 => 78, 8000 => 78],
-            'sn_scale' => [0.4, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'sn_scale' => [0.4, 1.4],
+            // Gap en los graves con oído medio NORMAL (timpanograma A):
+            // es la tercera ventana del acueducto dilatado, no transmisión
+            // (Seo 2016). Es el hallazgo que delata el cuadro. Se concentra
+            // bajo 500 Hz y en 500 no pasa de ~12 dB: desde 15 dB en las
+            // frecuencias núcleo el perfil lo leería como transmisión y el
+            // ABR saldría conductivo, cuando la cóclea es la que falla.
+            'gap_shape' => [125 => 25, 250 => 22, 500 => 8, 1000 => 0, 2000 => 0, 3000 => 0, 4000 => 0, 6000 => 0, 8000 => 0],
+            'gap_scale' => [0.6, 1.5], 'gap_max_db' => 40,
             'cce_pct' => [90, 100], 'retro' => null, 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal',
             'grados' => ['moderada', 'severa', 'profunda'],
@@ -1465,12 +1482,11 @@ final class CaseProfile
             'cce_pct' => [0, 10], 'retro' => 'ansd', 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal',
             'grados' => ['leve', 'moderada', 'severa', 'profunda'],
-            // VEMP CONSERVADO, y es a propósito: en la ANSD la lesión es de
-            // la vía auditiva y el nervio vestibular queda indemne. Un ABR
-            // desarmado con VEMP normal es lo que separa esto de un
-            // compromiso del VIII completo.
-            'vemp' => ['type' => 'normal',
-                       'umbral' => ['CVEMP' => [55, 70], 'OVEMP' => [60, 75], 'MVEMP' => [65, 80]]],
+            // VEMP alterado: el nervio vestibular también se compromete. En
+            // 22 neuropatías el cVEMP salió alterado en el 91% y el oVEMP en
+            // el 86% (Hu 2020).
+            'vemp' => ['type' => 'neural',
+                       'umbral' => ['CVEMP' => [90, 95], 'OVEMP' => [90, 95], 'MVEMP' => [90, 95]]],
         ],
 
         'asfixia_perinatal' => [
@@ -1575,13 +1591,33 @@ final class CaseProfile
             'conciencia' => [60, 90],
         ],
         'infarto_pontino' => [
-            'label' => 'Infarto pontino / AICA',
+            'label' => 'Infarto pontino (intraaxial)',
             'categoria' => 'neural',
+            // El infarto DENTRO del tronco: lesión de la vía, cóclea indemne
+            // y pérdida leve. El de la arteria cerebelosa anteroinferior es
+            // otro cuadro ('infarto_aica'): se lleva la arteria laberíntica.
             'sn_shape' => [125 => 8, 250 => 8, 500 => 10, 1000 => 12, 2000 => 15, 3000 => 18, 4000 => 20, 6000 => 22, 8000 => 25],
             'sn_scale' => [0.4, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [15, 45], 'retro' => 'infarto_pontino', 'lateralidad' => 'unilateral',
             'z' => ['A'], 'etf' => 'Normal',
             'grados' => ['leve'],
+            'conciencia' => [90, 100],
+        ],
+        'infarto_aica' => [
+            'label' => 'Infarto de la AICA (laberinto + tronco)',
+            'categoria' => 'sensorioneural',
+            // La arteria cerebelosa anteroinferior da la laberíntica: el
+            // infarto trae una súbita en el 92%, sobre todo COCLEAR, a veces
+            // con componente retrococlear, y el vestíbulo periférico caído en
+            // el 83% (Lee 2002, Lee 2012). Por eso es sensorioneural y no
+            // neural como el pontino intraaxial.
+            'sn_shape' => [125 => 55, 250 => 55, 500 => 60, 1000 => 60, 2000 => 60, 3000 => 62, 4000 => 65, 6000 => 65, 8000 => 65],
+            'sn_scale' => [0.6, 1.5], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [60, 90], 'retro' => 'infarto_pontino', 'lateralidad' => 'unilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['moderada', 'severa', 'profunda'],
+            'vemp' => ['type' => 'neural',
+                       'umbral' => ['CVEMP' => [88, 95], 'OVEMP' => [88, 95], 'MVEMP' => [88, 95]]],
             'conciencia' => [90, 100],
         ],
         'glioma_tronco' => [
@@ -1612,16 +1648,34 @@ final class CaseProfile
             'conciencia' => [40, 70],
         ],
         'chiari_hic' => [
-            'label' => 'Chiari / hipertensión intracraneal',
+            'label' => 'Malformación de Chiari',
             'categoria' => 'neural',
             // Compresión difusa: todo corrido y los interpicos largos, sin
-            // un tramo que domine.
+            // un tramo que domine. La hipertensión intracraneal idiopática
+            // es otro cuadro ('hic_idiopatica'): pierde graves y trae acúfeno
+            // pulsátil.
             'sn_shape' => [125 => 5, 250 => 5, 500 => 8, 1000 => 10, 2000 => 12, 3000 => 15, 4000 => 18, 6000 => 20, 8000 => 22],
             'sn_scale' => [0.4, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [20, 55], 'retro' => 'chiari_hic', 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal',
             'grados' => ['leve'],
             'conciencia' => [55, 85],
+        ],
+        'hic_idiopatica' => [
+            'label' => 'Hipertensión intracraneal idiopática',
+            'categoria' => 'neural',
+            // El acúfeno pulsátil y la pérdida de GRAVES pueden ser la
+            // manifestación principal o la única (Sismanis 1987): la presión
+            // del LCR se transmite al oído interno por el acueducto coclear.
+            'sn_shape' => [125 => 30, 250 => 28, 500 => 22, 1000 => 15, 2000 => 10, 3000 => 10, 4000 => 12, 6000 => 15, 8000 => 15],
+            'sn_scale' => [0.4, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [20, 55], 'retro' => 'chiari_hic', 'lateralidad' => 'bilateral',
+            'z' => ['A'], 'etf' => 'Normal',
+            'grados' => ['leve'],
+            'tinnitus' => ['prob' => 0.9, 'ruido' => ['Zumbido'],
+                           'frecuencia' => [125, 250], 'permanente' => 0.8,
+                           'pulsatil' => 0.9],
+            'conciencia' => [70, 95],
         ],
         'leucodistrofia' => [
             'label' => 'Leucodistrofia (Krabbe, adrenoleucodistrofia)',
@@ -1661,24 +1715,28 @@ final class CaseProfile
             'conciencia' => [90, 100],
         ],
         'toxico_metabolico' => [
-            'label' => 'Tóxico-metabólico (hepática, hipotiroidismo)',
-            'categoria' => 'neural',
-            // Todo lento y, a diferencia del resto de esta lista,
-            // reversible al corregir la causa. La reversibilidad no se
-            // modela: el caso es una foto.
-            'sn_shape' => [125 => 5, 250 => 5, 500 => 8, 1000 => 10, 2000 => 12, 3000 => 15, 4000 => 18, 6000 => 20, 8000 => 20],
-            'sn_scale' => [0.4, 1.3], 'gap_shape' => [], 'gap_scale' => [0, 0],
-            'cce_pct' => [20, 55], 'retro' => 'toxico_metabolico', 'lateralidad' => 'bilateral',
+            'label' => 'Hipotiroidismo',
+            'categoria' => 'sensorioneural',
+            // La pérdida es sobre todo COCLEAR (80% con hipoacusia, coclear
+            // en las pruebas especiales) y el ABR también se enlentece. Con
+            // levotiroxina mejoran los umbrales y el ABR NO (Anand 1989): lo
+            // reversible es la cóclea. La encefalopatía hepática salió de
+            // este cuadro: su ABR no se distingue de los controles en ningún
+            // grado (Yang 1986).
+            'sn_shape' => [125 => 15, 250 => 15, 500 => 18, 1000 => 20, 2000 => 22, 3000 => 25, 4000 => 28, 6000 => 30, 8000 => 30],
+            'sn_scale' => [0.6, 1.4], 'gap_shape' => [], 'gap_scale' => [0, 0],
+            'cce_pct' => [70, 95], 'retro' => 'toxico_metabolico', 'lateralidad' => 'bilateral',
             'z' => ['A'], 'etf' => 'Normal',
-            'grados' => ['leve'],
+            'grados' => ['leve', 'moderada'],
             'conciencia' => [40, 70],
         ],
         'hipotermia_farmacos' => [
             'label' => 'Hipotermia / depresores del SNC',
             'categoria' => 'neural',
-            // Audiograma NORMAL y ABR corrido entero, onda I incluida, con
-            // los interpicos intactos: es el único cuadro donde se mueve la
-            // onda I, y por eso no tiene grado de hipoacusia.
+            // Audiograma NORMAL y ABR corrido entero, onda I incluida, y los
+            // interpicos también: el frío alarga más los componentes tardíos
+            // (~7% por cada grado, Markand 1987). Es el único cuadro donde se
+            // mueve la onda I, y por eso no tiene grado de hipoacusia.
             'sn_shape' => [125 => 3, 250 => 3, 500 => 3, 1000 => 3, 2000 => 5, 3000 => 5, 4000 => 5, 6000 => 8, 8000 => 8],
             'sn_scale' => [0.0, 1.2], 'gap_shape' => [], 'gap_scale' => [0, 0],
             'cce_pct' => [20, 55], 'retro' => 'hipotermia_farmacos', 'lateralidad' => 'bilateral',

@@ -10,8 +10,9 @@ declare(strict_types=1);
  * se comprobó contra PubMed o Crossref (título y primer autor), y
  * 'respalda' dice qué valor del cuadro sostiene. 'coincide' marca si la
  * literatura está de acuerdo con lo que arma el generador hoy (si /
- * parcial / no): las que no coinciden son cambios A DISCUTIR con el
- * docente, no se aplicaron al generador.
+ * parcial / no). Las 13 que no coincidían se aplicaron al generador el
+ * 2026-10-08 (su nota empieza con "Aplicado"); las parciales quedan a
+ * discutir con el docente.
  */
 final class BibliografiaPatologias
 {
@@ -125,8 +126,8 @@ final class BibliografiaPatologias
                 'cita' => 'Sarmento KMA Jr, Sampaio ALL, Santos TGT, Oliveira CACP. High-frequency conductive hearing loss as a diagnostic test for incomplete ossicular discontinuity in non-cholesteatomatous chronic suppurative otitis media. PLoS One. 2017;12(12):e0189997.',
                 'enlace' => 'https://doi.org/10.1371/journal.pone.0189997',
                 'respalda' => 'En 328 oídos, un gap en 4 kHz ≥10 dB mayor que el promedio de 0,25-0,5 kHz predijo la discontinuidad incompleta (sens. 83%, esp. 92%): respalda gap parcial y menor que la disyunción completa.',
-                'coincide' => 'no',
-                'nota' => 'La literatura dice que la discontinuidad parcial produce gap ASCENDENTE (mayor en agudos), no plano \'a media máquina\'. Sugerencia: gap_shape creciente, p. ej. 125-500 ≈ 20-25, 2 kHz ≈ 30, 4-8 kHz ≈ 35-40.',
+                'coincide' => 'si',
+                'nota' => 'Aplicado al generador el 2026-10-08. La literatura dice que la discontinuidad parcial produce gap ASCENDENTE (mayor en agudos), no plano \'a media máquina\'. Sugerencia: gap_shape creciente, p. ej. 125-500 ≈ 20-25, 2 kHz ≈ 30, 4-8 kHz ≈ 35-40.',
             ],
             [
                 'eje' => 'gap_shape',
@@ -257,8 +258,8 @@ final class BibliografiaPatologias
                 'cita' => 'Stankovic MD. Hearing results of surgery for tympanosclerosis. Eur Arch Otorhinolaryngol. 2009;266(5):635-640.',
                 'enlace' => 'https://doi.org/10.1007/s00405-008-0789-3',
                 'respalda' => 'En 117 pacientes operados el cambio del gap fue significativo sobre todo en las frecuencias graves y medias (0,5, 1 y 2 kHz).',
-                'coincide' => 'no',
-                'nota' => 'Lo que se recupera al operar es gap de graves/medios, lo que no cuadra con un gap que crece hacia los AGUDOS. La regla clásica de rigidez dice lo contrario del comentario del código: la rigidez afecta sobre todo los graves y la masa los agudos. Sugerencia: gap_shape plano o descendente (mayor en 250-1000 Hz), no ascendente.',
+                'coincide' => 'si',
+                'nota' => 'Aplicado al generador el 2026-10-08. Lo que se recupera al operar es gap de graves/medios, lo que no cuadra con un gap que crece hacia los AGUDOS. La regla clásica de rigidez dice lo contrario del comentario del código: la rigidez afecta sobre todo los graves y la masa los agudos. Sugerencia: gap_shape plano o descendente (mayor en 250-1000 Hz), no ascendente.',
             ],
             [
                 'eje' => 'gap_shape',
@@ -325,8 +326,8 @@ final class BibliografiaPatologias
                 'cita' => 'Cheon D, Kim D, Kim SH, Choi JY, Bae SH. Diagnostic Value of the Air-Bone Threshold Gap in Stapes Fixation. Audiol Neurootol. 2023;28(4):255-261.',
                 'enlace' => 'https://doi.org/10.1159/000528826',
                 'respalda' => 'La muesca de Carhart no fue más frecuente en la fijación del estribo que en fijaciones de otros huesecillos ni en la disyunción.',
-                'coincide' => 'no',
-                'nota' => 'El comentario del código dice que la falta de muesca separa este cuadro de la otoesclerosis. La literatura indica que la muesca es un artefacto mecánico de la conductiva en general, no exclusivo de la otoesclerosis, y Ma y Lee 2025 (PMID 40836780) describen la fijación congénita como conductiva máxima no progresiva. La ósea limpia en 2 kHz no debería enseñarse como el rasgo diferencial: lo que separa es la historia (congénita, no progresiva).',
+                'coincide' => 'si',
+                'nota' => 'Aplicado al generador el 2026-10-08. El comentario del código dice que la falta de muesca separa este cuadro de la otoesclerosis. La literatura indica que la muesca es un artefacto mecánico de la conductiva en general, no exclusivo de la otoesclerosis, y Ma y Lee 2025 (PMID 40836780) describen la fijación congénita como conductiva máxima no progresiva. La ósea limpia en 2 kHz no debería enseñarse como el rasgo diferencial: lo que separa es la historia (congénita, no progresiva).',
             ],
         ],
         'barotrauma' => [
@@ -734,8 +735,8 @@ final class BibliografiaPatologias
                 'cita' => 'Kenna MA, Feldman HA, Neault MW, Frangulov A, Wu BL, Fligor B, et al. Audiologic phenotype and progression in GJB2 (Connexin 26) hearing loss. Arch Otolaryngol Head Neck Surg. 2010;136(1):81-7. doi:10.1001/archoto.2009.202',
                 'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/20083784/',
                 'respalda' => 'En 126 niños con GJB2 bialélico la hipoacusia va de leve a profunda y suele ser congénita: respalda el inicio congénito y la bilateralidad.',
-                'coincide' => 'no',
-                'nota' => 'Contradice el comentario \'ESTABLE desde el nacimiento\': el 56% de los niños con audición residual mostró progresión, casi siempre gradual y a veces brusca. No afecta los valores del modelo, que es una foto, pero sí el texto docente y la anamnesis. Sugerencia: no presentarla como estable.',
+                'coincide' => 'si',
+                'nota' => 'Aplicado al generador el 2026-10-08. Contradice el comentario \'ESTABLE desde el nacimiento\': el 56% de los niños con audición residual mostró progresión, casi siempre gradual y a veces brusca. No afecta los valores del modelo, que es una foto, pero sí el texto docente y la anamnesis. Sugerencia: no presentarla como estable.',
             ],
             [
                 'eje' => 'sn_shape',
@@ -788,8 +789,8 @@ final class BibliografiaPatologias
                 'cita' => 'Zhang X, Zhang Y, Zhang Y, Gu H, Chen Z, Ren L, et al. X-linked Alport syndrome: pathogenic variant features and further auditory genotype-phenotype correlations in males. Orphanet J Rare Dis. 2018;13(1):229. doi:10.1186/s13023-018-0974-4',
                 'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/30577881/',
                 'respalda' => 'En 87 varones con Alport ligado al X: hipoacusia sensorioneural bilateral simétrica, que empieza en la edad escolar y es progresiva. Respalda la lateralidad bilateral y la aparición en la infancia o adolescencia.',
-                'coincide' => 'no',
-                'nota' => 'Contradice la forma y el grado: la hipoacusia empieza en frecuencias MEDIAS (curva en surco/\'groove\' en 92,7%) y después se extiende a los agudos, mayormente leve-moderada, estabilizándose en 50-60 dB HL en la adolescencia. El modelo pone una caída en agudos (como la ototóxica) y solo grado \'leve\'. Sugerencia: una curva en U/surco con máximo en 1-3 kHz (ej. 250:10, 500:20, 1000:35, 2000:45, 3000:45, 4000:40, 6000:35, 8000:30) y grados [\'leve\',\'moderada\'].',
+                'coincide' => 'si',
+                'nota' => 'Aplicado al generador el 2026-10-08. Contradice la forma y el grado: la hipoacusia empieza en frecuencias MEDIAS (curva en surco/\'groove\' en 92,7%) y después se extiende a los agudos, mayormente leve-moderada, estabilizándose en 50-60 dB HL en la adolescencia. El modelo pone una caída en agudos (como la ototóxica) y solo grado \'leve\'. Sugerencia: una curva en U/surco con máximo en 1-3 kHz (ej. 250:10, 500:20, 1000:35, 2000:45, 3000:45, 4000:40, 6000:35, 8000:30) y grados [\'leve\',\'moderada\'].',
             ],
             [
                 'eje' => 'grados',
@@ -841,8 +842,8 @@ final class BibliografiaPatologias
                 'cita' => 'Seo YJ, Kim J, Choi JY. Correlation of vestibular aqueduct size with air-bone gap in enlarged vestibular aqueduct syndrome. Laryngoscope. 2016;126(7):1633-8. doi:10.1002/lary.25664',
                 'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/26372147/',
                 'respalda' => 'En 98 oídos con Pendred, 60 tenían gap aéreo-óseo en graves, mayor cuanto más ancho el acueducto, por efecto de tercera ventana.',
-                'coincide' => 'no',
-                'nota' => 'El modelo pone gap_shape [] y gap_scale [0,0], pero el gap en graves (250-1000 Hz) con oído medio normal es un hallazgo característico del acueducto dilatado (~60% de los oídos). Sugerencia: gap_shape con máximo en 250-500 Hz (ej. 250:20, 500:15, 1000:10, 2000:0) y gap_scale ~[0, 1,5] para que aparezca en una parte de los casos, manteniendo z=A.',
+                'coincide' => 'si',
+                'nota' => 'Aplicado al generador el 2026-10-08. El modelo pone gap_shape [] y gap_scale [0,0], pero el gap en graves (250-1000 Hz) con oído medio normal es un hallazgo característico del acueducto dilatado (~60% de los oídos). Sugerencia: gap_shape con máximo en 250-500 Hz (ej. 250:20, 500:15, 1000:10, 2000:0) y gap_scale ~[0, 1,5] para que aparezca en una parte de los casos, manteniendo z=A.',
             ],
             [
                 'eje' => 'vemp',
@@ -943,8 +944,8 @@ final class BibliografiaPatologias
                 'cita' => 'Hu J, Chen Z, Zhang Y, Xu Y, Ma W, Zhang Y, et al. Vestibular dysfunction in patients with auditory neuropathy detected by vestibular evoked myogenic potentials. Clin Neurophysiol. 2020;131(7):1664-1671. doi:10.1016/j.clinph.2020.02.002',
                 'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/32089450/',
                 'respalda' => 'Contradice el VEMP \'normal\' configurado para la ANSD.',
-                'coincide' => 'no',
-                'nota' => 'En 22 pacientes con NA, el cVEMP salió alterado (ausente o con parámetros anormales) en el 91 % y el oVEMP en el 86 %, con calórica alterada en el 70 %. Hay series pequeñas de Sinha et al. (J Vestib Res 2014, PMID 25095776) que van en la misma línea. Se sugiere VEMP tipo \'neural\' (ausente o elevado) como opción principal y dejar el normal como minoría.',
+                'coincide' => 'si',
+                'nota' => 'Aplicado al generador el 2026-10-08. En 22 pacientes con NA, el cVEMP salió alterado (ausente o con parámetros anormales) en el 91 % y el oVEMP en el 86 %, con calórica alterada en el 70 %. Hay series pequeñas de Sinha et al. (J Vestib Res 2014, PMID 25095776) que van en la misma línea. Se sugiere VEMP tipo \'neural\' (ausente o elevado) como opción principal y dejar el normal como minoría.',
             ],
         ],
         'asfixia_perinatal' => [
@@ -1061,22 +1062,22 @@ final class BibliografiaPatologias
                 'coincide' => 'si',
             ],
         ],
-        'infarto_pontino' => [
+        'infarto_aica' => [
             [
                 'eje' => 'cce_pct',
                 'cita' => 'Lee H, Sohn SI, Jung DK, Cho YW, Lim JG, Yi SD, et al. Sudden deafness and anterior inferior cerebellar artery infarction. Stroke. 2002;33(12):2807-2812. doi:10.1161/01.str.0000038692.17290.24',
                 'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/12468774/',
                 'respalda' => 'Contradice cce_pct 15-45 y grados solo \'leve\' para el componente AICA.',
-                'coincide' => 'no',
-                'nota' => 'En 12 infartos AICA hubo hipoacusia neurosensorial súbita en el 92 %: predominantemente coclear en 6, coclear más retrococlear en 4 y solo retrococlear en 1. La calórica estuvo ausente en el 83 %. Para AICA se sugiere cce_pct ~60-90, grados hasta severa/profunda y vestibular periférico alterado. El perfil retro puro y leve corresponde al infarto pontino intraaxial; convendría separar ambos cuadros.',
+                'coincide' => 'si',
+                'nota' => 'Aplicado al generador el 2026-10-08. En 12 infartos AICA hubo hipoacusia neurosensorial súbita en el 92 %: predominantemente coclear en 6, coclear más retrococlear en 4 y solo retrococlear en 1. La calórica estuvo ausente en el 83 %. Para AICA se sugiere cce_pct ~60-90, grados hasta severa/profunda y vestibular periférico alterado. El perfil retro puro y leve corresponde al infarto pontino intraaxial; convendría separar ambos cuadros.',
             ],
             [
                 'eje' => 'vemp',
                 'cita' => 'Lee H. Audiovestibular loss in anterior inferior cerebellar artery territory infarction: a window to early detection? J Neurol Sci. 2012;313(1-2):153-159. doi:10.1016/j.jns.2011.08.039',
                 'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/21996273/',
                 'respalda' => 'La pérdida audiovestibular aguda es un signo frecuente del infarto AICA y el patrón más común es la pérdida auditiva y vestibular combinada.',
-                'coincide' => 'no',
-                'nota' => 'El cuadro no define \'vemp\' (queda normal). Se sugiere VEMP o función vestibular alterada del lado del infarto, al menos en la variante AICA.',
+                'coincide' => 'si',
+                'nota' => 'Aplicado al generador el 2026-10-08. El cuadro no define \'vemp\' (queda normal). Se sugiere VEMP o función vestibular alterada del lado del infarto, al menos en la variante AICA.',
             ],
         ],
         'glioma_tronco' => [
@@ -1109,14 +1110,6 @@ final class BibliografiaPatologias
         ],
         'chiari_hic' => [
             [
-                'eje' => 'sn_shape',
-                'cita' => 'Sismanis A. Otologic manifestations of benign intracranial hypertension syndrome: diagnosis and management. Laryngoscope. 1987;97(S42):1-17. doi:10.1288/00005537-198708001-00001',
-                'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/3302575/',
-                'respalda' => 'Contradice la forma (más pérdida en agudos) y la ausencia de acúfeno para la hipertensión intracraneal.',
-                'coincide' => 'no',
-                'nota' => 'En 20 pacientes con HIC benigna, el acúfeno pulsátil objetivo y la hipoacusia de graves pueden ser la manifestación principal o la única. Para la rama HIC se sugiere sn_shape con más pérdida en graves (ascendente) y tinnitus con prob alta, tipo pulsátil y frecuencia grave.',
-            ],
-            [
                 'eje' => 'general',
                 'cita' => 'Kumar A, Patni AH, Charbel F. The Chiari I malformation and the neurotologist. Otol Neurotol. 2002;23(5):727-735. doi:10.1097/00129492-200209000-00021',
                 'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/12218627/',
@@ -1130,6 +1123,16 @@ final class BibliografiaPatologias
                 'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/12650414/',
                 'respalda' => 'En Chiari I el I-V basal está alargado (4,19 ± 0,22 ms) y se acorta con la descompresión ósea, lo que respalda la conducción de tronco enlentecida difusa del preset chiari_hic.',
                 'coincide' => 'si',
+            ],
+        ],
+        'hic_idiopatica' => [
+            [
+                'eje' => 'sn_shape',
+                'cita' => 'Sismanis A. Otologic manifestations of benign intracranial hypertension syndrome: diagnosis and management. Laryngoscope. 1987;97(S42):1-17. doi:10.1288/00005537-198708001-00001',
+                'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/3302575/',
+                'respalda' => 'Contradice la forma (más pérdida en agudos) y la ausencia de acúfeno para la hipertensión intracraneal.',
+                'coincide' => 'si',
+                'nota' => 'Aplicado al generador el 2026-10-08. En 20 pacientes con HIC benigna, el acúfeno pulsátil objetivo y la hipoacusia de graves pueden ser la manifestación principal o la única. Para la rama HIC se sugiere sn_shape con más pérdida en graves (ascendente) y tinnitus con prob alta, tipo pulsátil y frecuencia grave.',
             ],
         ],
         'leucodistrofia' => [
@@ -1191,16 +1194,16 @@ final class BibliografiaPatologias
                 'cita' => 'Anand VT, Mann SB, Dash RJ, Mehra YN. Auditory investigations in hypothyroidism. Acta Otolaryngol. 1989;108(1-2):83-87. doi:10.3109/00016488909107396',
                 'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/2763838/',
                 'respalda' => 'En 20 hipotiroideos, el ABR muestra la onda V y los interpicos I-III e I-V alargados y amplitudes reducidas, lo que respalda el preset \'todo lento\'.',
-                'coincide' => 'no',
-                'nota' => 'El 80 % tenía hipoacusia, de tipo coclear en las pruebas especiales, y 4 eran mixtas con timpanograma B. Tras la levotiroxina mejoraron los umbrales y el timpanograma, pero el ABR no. Esto contradice cce_pct 20-55, z solo \'A\' y la idea de que lo reversible es el ABR. Para hipotiroidismo se sugiere cce_pct alto, permitir z \'B\'/gap leve y grados hasta moderada.',
+                'coincide' => 'si',
+                'nota' => 'Aplicado al generador el 2026-10-08. El 80 % tenía hipoacusia, de tipo coclear en las pruebas especiales, y 4 eran mixtas con timpanograma B. Tras la levotiroxina mejoraron los umbrales y el timpanograma, pero el ABR no. Esto contradice cce_pct 20-55, z solo \'A\' y la idea de que lo reversible es el ABR. Para hipotiroidismo se sugiere cce_pct alto, permitir z \'B\'/gap leve y grados hasta moderada.',
             ],
             [
                 'eje' => 'retro',
                 'cita' => 'Yang SS, Chu NS, Liaw YF. Brainstem auditory evoked potentials in hepatic encephalopathy. Hepatology. 1986;6(6):1352-1355. doi:10.1002/hep.1840060622',
                 'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/3025070/',
                 'respalda' => 'Contradice el I-V largo para la rama hepática.',
-                'coincide' => 'no',
-                'nota' => 'En 30 pacientes, el tiempo de conducción central (I-V) no difirió de los controles en ningún grado de encefalopatía hepática (grados 1 a 4). Se sugiere separar las ramas: en la hepática, ABR normal o casi normal; el enlentecimiento queda para el hipotiroidismo.',
+                'coincide' => 'si',
+                'nota' => 'Aplicado al generador el 2026-10-08. En 30 pacientes, el tiempo de conducción central (I-V) no difirió de los controles en ningún grado de encefalopatía hepática (grados 1 a 4). Se sugiere separar las ramas: en la hepática, ABR normal o casi normal; el enlentecimiento queda para el hipotiroidismo.',
             ],
         ],
         'hipotermia_farmacos' => [
@@ -1209,8 +1212,8 @@ final class BibliografiaPatologias
                 'cita' => 'Markand ON, Lee BI, Warren C, Stoelting RK, King RD, Brown JW, Mahomed Y. Effects of hypothermia on brainstem auditory evoked potentials in humans. Ann Neurol. 1987;22(4):507-513. doi:10.1002/ana.410220410',
                 'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/3435069/',
                 'respalda' => 'La hipotermia alarga las latencias de I, III y V, onda I incluida, lo que respalda que se corre la onda I. También respalda el audiograma normal, porque el cambio es reversible al recalentar.',
-                'coincide' => 'no',
-                'nota' => 'Contradice \'interpicos intactos\': el alargamiento es mayor en los componentes tardíos, así que I-III, III-V e I-V también se alargan (~7 % por cada °C, y se duplican cerca de 26 °C). Todas las ondas siguen presentes sobre 23 °C y desaparecen bajo 20 °C. Se sugiere escalar también los interpicos con la temperatura.',
+                'coincide' => 'si',
+                'nota' => 'Aplicado al generador el 2026-10-08. Contradice \'interpicos intactos\': el alargamiento es mayor en los componentes tardíos, así que I-III, III-V e I-V también se alargan (~7 % por cada °C, y se duplican cerca de 26 °C). Todas las ondas siguen presentes sobre 23 °C y desaparecen bajo 20 °C. Se sugiere escalar también los interpicos con la temperatura.',
             ],
             [
                 'eje' => 'general',
