@@ -76,3 +76,20 @@ foreach (Bibliografia::PATOLOGIAS as $clave => $citas) {
         t_eq($c['coincide'], 'si', "Cita {$clave}#{$i}: revisada (ni parcial ni contradicha)");
     }
 }
+
+// "Para su teoría": lo que el generador muestra siempre alterado y en la
+// realidad no siempre tiene que quedar a la vista del docente, no enterrado
+// en la nota de una cita.
+$decisiones = Bibliografia::decisiones();
+$ejesDe = function (string $clave) use ($decisiones): array {
+    return array_column($decisiones[$clave] ?? [], 'eje');
+};
+t_true(in_array('ecochg', $ejesDe('meniere'), true), 'Para su teoría: el Ménière con ECochG normal');
+t_true(in_array('vemp', $ejesDe('esclerosis_multiple'), true), 'Para su teoría: la EM con VEMP normal');
+foreach ($decisiones as $clave => $lista) {
+    foreach ($lista as $d) {
+        t_true($d['texto'] !== '', "Para su teoría de {$clave}: dice algo");
+    }
+}
+$pagina = (string) @file_get_contents(dirname(__DIR__) . '/public/admin/bibliografia.php');
+t_true(strpos($pagina, 'id="decisiones"') !== false, 'La página tiene la sección Para su teoría');

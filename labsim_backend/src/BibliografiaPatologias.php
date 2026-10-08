@@ -469,7 +469,7 @@ final class BibliografiaPatologias
                 'enlace' => 'https://doi.org/10.1080/14992027.2019.1606947',
                 'respalda' => 'Un SP/AP elevado es el hallazgo electrococleográfico del Ménière (especificidad 83.8%).',
                 'coincide' => 'si',
-                'nota' => 'Decisión docente: el generador muestra el cuadro típico y patológico, con SP/AP siempre alterado. Que cerca de la mitad de los Ménière definidos tenga SP/AP normal (sensibilidad 47.6%) se enseña aparte y no cambia el generador.',
+                'nota' => 'Decisión docente: en la realidad cerca de la mitad de los Ménière definidos tiene la ECochG normal (sensibilidad del extratimpánico 47,6 % en este metaanálisis; 25-54 % normales según Lamounier 2014). El generador la muestra siempre alterada (PS/PA 0,46-0,70 con electrodo de tímpano); un Ménière con ECochG normal se arma a mano.',
             ],
         ],
         'subita' => [
@@ -1127,7 +1127,7 @@ final class BibliografiaPatologias
                 'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/12169329/',
                 'respalda' => 'VEMP alterado en el 31 % de 70 EM: el VEMP es una prueba más de tronco, como el ABR.',
                 'coincide' => 'si',
-                'nota' => 'Decisión docente: aunque el VEMP alterado es minoría en esta serie, el cuadro muestra la forma patológica. Se altera por latencia con umbral normal (Murofushi 2001); el VEMP normal se enseña aparte.',
+                'nota' => 'Decisión docente: en la realidad la mayoría de los pacientes con EM tiene el VEMP normal: alterado en el 31 % de 70 pacientes en esta serie y en el 25 % de los lados en Murofushi 2001. El generador lo muestra siempre alterado, por latencia y con umbral normal (Murofushi 2001); una EM con VEMP normal se arma a mano.',
             ],
             [
                 'eje' => 'grados',

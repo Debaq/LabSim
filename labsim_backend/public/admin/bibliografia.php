@@ -52,6 +52,29 @@ function bib_ficha(string $fid, array $f): void
     <?php
 }
 
+/**
+ * Recuadro "para su teoría": lo que el cuadro muestra siempre alterado y en
+ * la realidad no siempre (ver Bibliografia::decisiones).
+ */
+function bib_decisiones(array $lista): void
+{
+    ?>
+    <div style="margin-top:0.5rem; padding:0.4rem 0.6rem; border-left:3px solid var(--color-warn-text); background:var(--color-warn-bg); color:var(--color-warn-text); font-size:0.88em;">
+        <strong>Para su teoría:</strong> el generador muestra este cuadro siempre así; en la realidad no siempre.
+        <ul style="margin:0.2rem 0 0 1.2rem; padding:0;">
+            <?php foreach ($lista as $d): ?>
+            <li><strong><?= htmlspecialchars(Bibliografia::EJES[$d['eje']] ?? 'General') ?>:</strong>
+                <?= htmlspecialchars($d['texto']) ?>
+                <?php $anio = preg_match('/\b(19|20)\d{2}\b/', $d['cita'], $m) ? ' ' . $m[0] : ''; ?>
+                <span style="opacity:0.75;">(<?= htmlspecialchars(rtrim((string) strtok($d['cita'], ' '), ',') . $anio) ?>)</span></li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+    <?php
+}
+
+$decisiones = Bibliografia::decisiones();
+
 admin_header('Bibliografía', $me);
 ?>
 
@@ -63,6 +86,8 @@ admin_header('Bibliografía', $me);
         <li><a href="#<?= htmlspecialchars($sid) ?>"><?= htmlspecialchars($sec['titulo']) ?></a>
             (<?= count(Bibliografia::fuentes($sid)) ?> fuentes)</li>
         <?php endforeach; ?>
+        <li><a href="#decisiones">Para su teoría: lo que el generador muestra siempre alterado</a>
+            (<?= count($decisiones) ?> cuadros)</li>
         <li><a href="#patologias">Patologías del generador</a>
             (<?= count(CaseProfile::SCENARIOS) ?> cuadros, <?= count(Bibliografia::PATOLOGIAS) ?> con bibliografía)</li>
     </ul>
@@ -118,6 +143,19 @@ foreach ($catalogo['cuadros'] as $clave => $c) {
     $porCategoria[$c['categoria']][$clave] = $c;
 }
 ?>
+<div class="card" id="decisiones">
+    <details open>
+        <summary><strong>Para su teoría: lo que el generador muestra siempre alterado</strong></summary>
+        <p class="help help--mt">El generador enseña cada cuadro en su forma típica y patológica: un Ménière con la electrococleografía alterada, una esclerosis múltiple con el VEMP alterado. En la realidad, una parte de esos pacientes tiene ese examen normal, o el cuadro tiene otras formas. Eso no se sortea: se lo da usted en la teoría, y acá está, cuadro por cuadro, con la cifra y la fuente. Un caso con la forma menos frecuente se arma a mano.</p>
+        <?php foreach ($decisiones as $clave => $lista): ?>
+        <div style="margin-top:0.7rem;">
+            <a href="#cuadro-<?= htmlspecialchars($clave) ?>"><strong><?= htmlspecialchars(CaseProfile::SCENARIOS[$clave]['label']) ?></strong></a>
+            <?php bib_decisiones($lista); ?>
+        </div>
+        <?php endforeach; ?>
+    </details>
+</div>
+
 <div class="card" id="patologias">
     <details open>
         <summary><strong>Patologías del generador</strong></summary>
@@ -132,7 +170,9 @@ foreach ($catalogo['cuadros'] as $clave => $c) {
             <?php $citas = Bibliografia::PATOLOGIAS[$clave] ?? []; ?>
             <details style="margin:0.6rem 0 0 0.8rem;" id="cuadro-<?= htmlspecialchars($clave) ?>">
                 <summary><?= htmlspecialchars($c['label']) ?>
-                    <span style="opacity:0.7; font-size:0.85em;">· <?= $citas ? count($citas) . ' citas' : 'sin bibliografía' ?></span></summary>
+                    <span style="opacity:0.7; font-size:0.85em;">· <?= $citas ? count($citas) . ' citas' : 'sin bibliografía' ?></span>
+                    <?php if (!empty($decisiones[$clave])): ?><span class="tag--warn" style="font-size:0.8em; padding:0 0.3rem;">para su teoría</span><?php endif; ?></summary>
+                <?php if (!empty($decisiones[$clave])) { bib_decisiones($decisiones[$clave]); } ?>
                 <table style="width:100%; font-size:0.85em; margin-top:0.4rem; border-collapse:collapse;">
                     <?php foreach ($c['filas'] as $fila): ?>
                     <tr style="border-top:1px solid var(--color-border, #ddd); vertical-align:top;">

@@ -4465,3 +4465,23 @@ olvidar:
   - Al generar, si el otro oído quedó sano o al azar, lo completa solo.
   - Si el docente eligió otra patología en ese oído, se respeta y el estado
     lo avisa con un "OJO".
+
+## "Para su teoría": la fracción normal, a la vista del docente (2026-10-08)
+
+El generador muestra cada cuadro en su forma típica y patológica. Por
+ejemplo, el Ménière sale con la ECochG alterada y la esclerosis múltiple con
+el VEMP alterado. En la realidad, una parte de esos pacientes tiene ese examen
+normal, y eso el docente lo enseña en la teoría. Ese dato estaba enterrado en
+la nota de una cita. El docente pidió tenerlo marcado para leerlo.
+
+`Bibliografia::decisiones()` junta las citas cuya nota empieza con "Decisión
+docente:", sin una segunda lista que mantener. `admin/bibliografia.php` las
+muestra en dos lugares:
+
+- en una sección propia, "Para su teoría", enlazada desde el índice;
+- en un recuadro arriba de cada cuadro, que además lleva la etiqueta en el
+  título.
+
+Las notas del Ménière y de la EM ahora dan la cifra de la realidad: ECochG
+normal en cerca de la mitad de los Ménière, y VEMP normal en el 69-75 % de
+las EM. `test_bibliografia` exige que las dos aparezcan.

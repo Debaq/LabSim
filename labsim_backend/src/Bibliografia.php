@@ -247,6 +247,42 @@ final class Bibliografia
         'contralateral' => 'Oído contrario que exige el cuadro',
     ];
 
+    /** Prefijo de la nota de una cita donde el generador difiere a propósito. */
+    public const PREFIJO_DECISION = 'Decisión docente:';
+
+    /**
+     * Lo que el generador muestra SIEMPRE de una forma y en la realidad no
+     * siempre es así: el Ménière con ECochG alterada, la EM con VEMP
+     * alterado, el schwannoma con ABR alterado. El criterio es enseñar el
+     * cuadro típico y patológico, y la fracción normal la da el docente en
+     * la teoría. Para eso la tiene que tener a la vista, no enterrada en la
+     * nota de una cita: la página la muestra arriba de cada cuadro y junta
+     * en una sección.
+     *
+     * Sale de las citas cuya nota empieza con PREFIJO_DECISION, así que no
+     * hay una segunda lista que mantener.
+     *
+     * @return array<string, array<int, array{eje:string, texto:string, cita:string}>>
+     */
+    public static function decisiones(): array
+    {
+        $out = [];
+        foreach (self::PATOLOGIAS as $clave => $citas) {
+            foreach ($citas as $c) {
+                $nota = (string) ($c['nota'] ?? '');
+                if (strpos($nota, self::PREFIJO_DECISION) !== 0) {
+                    continue;
+                }
+                $out[$clave][] = [
+                    'eje' => (string) $c['eje'],
+                    'texto' => trim(substr($nota, strlen(self::PREFIJO_DECISION))),
+                    'cita' => (string) $c['cita'],
+                ];
+            }
+        }
+        return $out;
+    }
+
     /**
      * Los cuadros del generador (CaseProfile::SCENARIOS) con el porqué de
      * cada eje.
