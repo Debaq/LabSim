@@ -223,31 +223,173 @@ final class Bibliografia
      * 'usa'), así que se escriben como reglas que se puedan medir en el
      * registro de acciones.
      *
-     * 'fuentes' queda vacío hasta contrastar la técnica con la literatura
-     * científica y la normativa: con la misma regla que las citas, no se
-     * completa de memoria.
+     * 'fuentes' dice qué pasos respalda cada fuente (la ficha de la cita está
+     * en FUENTES_TECNICAS, ver fuentesTecnica()). Solo entra lo que la fuente
+     * respalda y se leyó; lo que difiere o no se pudo verificar va a
+     * docs/observaciones_tecnicas.md, para investigarlo.
      */
     public const TECNICAS = [
+        'T00' => [
+            'titulo' => 'Orden de la audiometría',
+            'resumen' => 'Las pruebas se hacen siempre en el mismo orden.',
+            'pasos' => [
+                'Umbrales aéreos (T01).',
+                'Logoaudiometría.',
+                'Tinnitumetría.',
+                'Pruebas supraliminares.',
+                'Umbrales óseos (T02).',
+            ],
+            'usa' => [
+                'Indicador "Orden de las pruebas" de la atención (AudiometriaTecnica), que ven el docente y el alumno.',
+            ],
+            'fuentes' => [
+                'ISO2010' => ['usa' => ['La vía aérea antes que la ósea (4.1).']],
+                'ISP2012' => ['usa' => ['En la evaluación médico-legal (§2), logoaudiometría, tinnitumetría y supraliminares van en ese orden, después de los umbrales. El documento lo da como orden de secciones, no de aplicación.']],
+            ],
+            'nota' => 'Decisión docente: la vía ósea va al final para hacer primero todo lo que va con fonos y cambiar el transductor una sola vez. Las fuentes que ordenan la batería la ponen justo después de la aérea (docs/observaciones_tecnicas.md). La tinnitumetría todavía no se simula en el audiómetro.',
+        ],
         'T01' => [
             'titulo' => 'Umbrales tonales por vía aérea',
             'resumen' => 'Técnica determinista y ordenada: siempre los mismos pasos, en el mismo orden.',
             'pasos' => [
-                'Se parte por el oído mejor.',
+                'Se parte por el oído mejor según los umbrales del caso. Partir por el otro oído ya es un error de técnica.',
                 'Cada estímulo dura entre 1 y 2 segundos.',
                 'Familiarización en 1 kHz: se parte en 40 dB HL. Si no responde, se sube de 10 en 10 dB hasta la primera respuesta.',
-                'Desde la primera respuesta comienza la técnica: se dan dos estímulos en cada nivel y se baja de 10 en 10 dB mientras responda.',
-                'Cuando en un nivel no responde, se sube de 5 en 5 dB para precisar el umbral: el umbral es el nivel que responde 2 de 3 o 3 de 5 veces.',
+                'Desde la primera respuesta comienza la técnica: se baja de 10 en 10 dB mientras responda.',
+                'Cuando no responde, se sube de 5 en 5 dB para precisar el umbral: el umbral es el nivel que responde a 2 de 3 o 3 de 5 estímulos en ascenso.',
                 'Orden de frecuencias: 1, 2, 3, 4, 6 y 8 kHz; luego 500, 250 y 125 Hz.',
                 'Cada frecuencia nueva parte 10 dB sobre el umbral de la frecuencia anterior. Si no responde, se sube de 10 en 10 dB hasta la primera respuesta (familiarización) y luego sigue la técnica.',
                 'Al terminar se repite 1 kHz para confirmar. Si da una diferencia mayor a 10 dB respecto de la primera vez, se repite todo el umbral.',
+                'Luego el otro oído, con la misma técnica: familiarización en 1 kHz desde 40 dB HL, el mismo orden de frecuencias y la repetición de 1 kHz.',
             ],
             'usa' => [
-                'Indicador de efectividad de la toma de umbrales aéreos (pendiente): se evalúa con el registro de acciones del audiómetro.',
+                'Indicador "Umbrales aéreos" de la atención (AudiometriaTecnica), que ven el docente y el alumno. Los números se ajustan por curso.',
             ],
-            'fuentes' => [],
-            'nota' => 'Técnica tal como la enseña el docente. Falta contrastarla con la literatura científica y la normativa.',
+            'fuentes' => [
+                'ISP2018' => ['usa' => [
+                    'Se parte por el oído que impresiona con mejor audición.',
+                    'Estímulos de 1 a 2 segundos.',
+                    'Familiarización en 1 kHz a 40 dB HL.',
+                    'Subir de 5 en 5 dB; umbral con 3 de 5.',
+                    'Orden 1000, 2000, 3000, 4000, 6000, 8000, 500 y 250 Hz.',
+                ]],
+                'ISP2012' => ['usa' => [
+                    'Se parte por el oído mejor y luego se evalúa el otro (§2.2.2.1).',
+                    'Estímulos de 1 a 2 segundos (§1.2.1).',
+                ]],
+                'ASHA2005' => ['usa' => [
+                    'Se parte por el oído mejor cuando se lo puede identificar.',
+                    'Estímulos de 1 a 2 segundos.',
+                    'Subir de 5 en 5 dB; umbral con al menos 2 de 3 respuestas en ascenso.',
+                    'Orden 1, 2, 3, 4, 6 y 8 kHz; luego 500, 250 y 125 Hz.',
+                    'Se repite 1 kHz.',
+                    'El otro oído con el mismo procedimiento.',
+                ]],
+                'BSA2018' => ['usa' => [
+                    'Familiarización en 1 kHz a 40 dB HL, subiendo de 10 en 10 dB hasta la respuesta (§6.6).',
+                    'Tras responder, bajar de 10 en 10 dB hasta que no responda; subir de 5 en 5 dB (§6.7).',
+                    'Repetir 1 kHz al final del primer oído y, si difiere, repetir el oído completo (§6.4).',
+                ]],
+                'ISO1989' => ['usa' => [
+                    'Estímulos de 1 a 2 segundos (6.2.1).',
+                    'Bajar de 10 en 10 dB hasta que no responda y subir de 5 en 5 dB (6.2.3.1).',
+                    'Umbral con 3 de 5 (método completo) o 2 de 3 (abreviado) en ascenso.',
+                    'Orden desde 1 kHz hacia los agudos y luego los graves; al final se repite 1 kHz (6.1).',
+                ]],
+                'ISO2010' => ['usa' => ['Se parte por el oído que se considera más sensible (4.4).']],
+            ],
+            'nota' => 'Técnica tal como la enseña el docente, contrastada con la literatura y la normativa el 2026-10-08. Lo que difiere o no se pudo verificar está en docs/observaciones_tecnicas.md.',
+        ],
+        'T02' => [
+            'titulo' => 'Umbrales tonales por vía ósea',
+            'resumen' => 'La misma técnica de la vía aérea (T01), con otro rango de frecuencias y partiendo por el otro oído.',
+            'pasos' => [
+                'Se toman al final, después de las pruebas supraliminares (T00): todo lo que va con fonos se hace primero y el transductor se cambia una sola vez.',
+                'Frecuencias de 250 Hz a 4 kHz.',
+                'Se parte por el oído peor según los umbrales del caso.',
+                'Misma técnica que la vía aérea: familiarización en 1 kHz desde 40 dB HL, bajar de 10 en 10 dB, subir de 5 en 5 dB, umbral con 2 de 3 o 3 de 5, y cada frecuencia nueva parte 10 dB sobre el umbral de la anterior.',
+                'Orden de frecuencias: 1, 2, 3 y 4 kHz; luego 500 y 250 Hz.',
+                'Al terminar se repite 1 kHz para confirmar. Si da una diferencia mayor a 10 dB respecto de la primera vez, se repite todo el umbral.',
+                'Luego el otro oído, con la misma técnica.',
+                'No siempre se toman: en un oído sano no hacen falta.',
+            ],
+            'usa' => [
+                'Indicador "Umbrales óseos" de la atención (AudiometriaTecnica), que ven el docente y el alumno. Los números se ajustan por curso.',
+            ],
+            'fuentes' => [
+                'ISP2012' => ['usa' => [
+                    'Frecuencias de 250 a 4000 Hz.',
+                    'Se parte por el oído con peor vía aérea.',
+                ]],
+                'PREXOR' => ['usa' => ['Vía ósea de 250 a 4000 Hz (ficha del Anexo 12.3).']],
+                'ASHA2005' => ['usa' => [
+                    'El procedimiento es el mismo sea cual sea el transductor.',
+                    'Octavas de 250 a 4000 Hz, más 3000 Hz.',
+                    'Orden 1, 2, 3 y 4 kHz; luego 500 y 250 Hz.',
+                ]],
+                'BSA2018' => ['usa' => [
+                    'Se parte por el oído peor (§7.1).',
+                    'La misma búsqueda de umbral que la vía aérea (§7.5, remite a §6.7).',
+                ]],
+                'NTP285' => ['usa' => ['La vía ósea interesa cuando la vía aérea está alterada (sobre 25 dB).']],
+            ],
+            'nota' => 'Técnica tal como la enseña el docente, contrastada con la literatura y la normativa el 2026-10-08. Lo que difiere o no se pudo verificar está en docs/observaciones_tecnicas.md. Falta agregar el enmascaramiento.',
         ],
     ];
+
+    /**
+     * Ficha de cada fuente de las técnicas, una sola vez: TECNICAS solo dice
+     * qué pasos respalda. Revisadas el 2026-10-08 (investigación en
+     * docs/investigacion/tecnica_audiometria_tonal/informe.md).
+     */
+    public const FUENTES_TECNICAS = [
+        'ISP2018' => [
+            'cita' => 'Instituto de Salud Pública de Chile. Guía Técnica para la Evaluación Auditiva de Vigilancia de la Salud de los Trabajadores Expuestos Ocupacionalmente a Ruido, v2.0. Aprobada por Res. Ex. N° 740 del 21-03-2018.',
+            'enlace' => 'https://multimedia.3m.com/mws/media/1571671O',
+            'nota' => 'Es la guía que exige la SUSESO para la vigilancia ocupacional; solo cubre la vía aérea. Copia alojada por 3M: no se encontró la URL oficial en ispch.cl.',
+        ],
+        'ISP2012' => [
+            'cita' => 'Instituto de Salud Pública de Chile (2012). Guía Técnica para la Evaluación Auditiva de los Trabajadores Expuestos Ocupacionalmente a Ruido, v1.0. §2: Evaluación Audiológica Médico Legal.',
+            'enlace' => 'https://multimedia.3m.com/mws/media/1571670O',
+            'nota' => 'Única fuente chilena oficial leída sobre vía ósea y batería. No se pudo confirmar si la §2 sigue vigente: la versión de 2018 ya no trae ese procedimiento. Copia alojada por 3M.',
+        ],
+        'PREXOR' => [
+            'cita' => 'Ministerio de Salud de Chile (2013). Protocolo sobre normas mínimas para el desarrollo de programas de vigilancia de la pérdida auditiva por exposición a ruido en los lugares de trabajo (PREXOR). Norma Técnica N° 156, D.Ex. N° 1052.',
+            'enlace' => 'https://educa.saludpublica.uchile.cl/espsystem/files/t/asignaturas_bibliografia/8418/archivos/Prortocolo_de_Exposicion_Ocupacional_Ruido%20PREXOR.pdf',
+        ],
+        'ASHA2005' => [
+            'cita' => 'American Speech-Language-Hearing Association (2005). Guidelines for Manual Pure-Tone Threshold Audiometry.',
+            'enlace' => 'https://www.asha.org/policy/gl2005-00014/',
+        ],
+        'BSA2018' => [
+            'cita' => 'British Society of Audiology (2018). Recommended Procedure: Pure-tone air-conduction and bone-conduction threshold audiometry with and without masking (OD104-32).',
+            'enlace' => 'https://www.thebsa.org.uk/wp-content/uploads/2024/01/Recommended-Procedure-Pure-Tone-Audiometry-2018.pdf',
+        ],
+        'ISO1989' => [
+            'cita' => 'ISO 8253-1:1989. Acoustics -- Audiometric test methods -- Part 1: Basic pure tone air and bone conduction threshold audiometry.',
+            'enlace' => 'https://cdn.standards.iteh.ai/samples/15356/38da68db4ff04c24992d32a095ec0a7e/ISO-8253-1-1989.pdf',
+            'nota' => 'Edición anulada por la ISO 8253-1:2010. Se cita porque es la que se pudo leer completa.',
+        ],
+        'ISO2010' => [
+            'cita' => 'ISO 8253-1:2010. Acoustics -- Audiometric test methods -- Part 1: Pure-tone air and bone conduction audiometry.',
+            'enlace' => 'https://www.iso.org/standard/43601.html',
+            'nota' => 'Edición vigente. Solo se leyeron las cláusulas 1 a 5 (vista previa); el procedimiento (6.2) y la vía ósea (8) son de pago.',
+        ],
+        'NTP285' => [
+            'cita' => 'Instituto Nacional de Seguridad y Salud en el Trabajo (1992). NTP 285: Audiometría tonal liminar: vía ósea y enmascaramiento.',
+            'enlace' => 'https://www.insst.es/documentacion/colecciones-tecnicas/ntp-notas-tecnicas-de-prevencion/8-serie-ntp-numeros-261-a-295-ano-1992/ntp-285-audiometria-tonal-liminar-via-osea-y-enmascaramiento',
+        ],
+    ];
+
+    /** Las fuentes de una técnica con su ficha completa y qué pasos respaldan. */
+    public static function fuentesTecnica(string $tid): array
+    {
+        $out = [];
+        foreach (self::TECNICAS[$tid]['fuentes'] ?? [] as $fid => $f) {
+            $out[$fid] = (self::FUENTES_TECNICAS[$fid] ?? []) + $f;
+        }
+        return $out;
+    }
 
     /**
      * Bibliografía de cada cuadro de CaseProfile::SCENARIOS, por clave.

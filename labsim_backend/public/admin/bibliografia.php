@@ -141,7 +141,8 @@ admin_header('Bibliografía', $me);
         <?php foreach (Bibliografia::TECNICAS as $tid => $t): ?>
         <div style="margin-top:0.8rem; font-size:0.9em;">
             <strong><?= htmlspecialchars($tid) ?> · <?= htmlspecialchars($t['titulo']) ?></strong>
-            <?php if (!$t['fuentes']): ?><span class="badge-warn">· sin bibliografía todavía</span><?php endif; ?>
+            <?php $fuentesT = Bibliografia::fuentesTecnica((string) $tid); ?>
+            <?php if (!$fuentesT): ?><span class="badge-warn">· sin bibliografía todavía</span><?php endif; ?>
             <div style="opacity:0.8;"><?= htmlspecialchars($t['resumen']) ?></div>
             <ol style="margin:0.3rem 0 0 1.2rem; padding:0;">
                 <?php foreach ($t['pasos'] as $paso): ?>
@@ -157,7 +158,10 @@ admin_header('Bibliografía', $me);
                 <li><?= htmlspecialchars($uso) ?></li>
                 <?php endforeach; ?>
             </ul>
-            <?php foreach ($t['fuentes'] as $fid => $f): ?>
+            <?php if ($fuentesT): ?>
+            <p class="help help--mt"><strong>Fuentes</strong> (solo lo que respaldan; lo que difiere está en docs/observaciones_tecnicas.md)</p>
+            <?php endif; ?>
+            <?php foreach ($fuentesT as $fid => $f): ?>
             <?php bib_ficha((string) $fid, $f); ?>
             <?php endforeach; ?>
         </div>
