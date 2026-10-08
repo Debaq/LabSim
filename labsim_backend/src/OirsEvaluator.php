@@ -37,7 +37,9 @@ final class OirsEvaluator
         // si el alumno reabre y vuelve a cerrar la misma atención.
         $stmt = Db::get()->prepare('SELECT 1 FROM inbox_messages WHERE appointment_id = ? AND student_id = ?');
         $stmt->execute([$appointmentId, $studentId]);
-        if ($stmt->fetch()) {
+        $yaEvaluado = (bool) $stmt->fetch();
+        $stmt->closeCursor();   // ver Db::get: una lectura abierta hace fallar la escritura que sigue
+        if ($yaEvaluado) {
             return;
         }
 
@@ -54,6 +56,7 @@ final class OirsEvaluator
         $stmt = Db::get()->prepare('SELECT data FROM cases WHERE id = ?');
         $stmt->execute([$caseId]);
         $caseRow = $stmt->fetch();
+        $stmt->closeCursor();   // después viene la llamada al LLM y la escritura
         $caseData = $caseRow ? (json_decode((string) $caseRow['data'], true) ?: []) : [];
         $disposition = (int) ($caseData['PatientDisposition'] ?? 0);
 

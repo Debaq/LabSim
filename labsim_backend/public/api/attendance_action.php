@@ -51,6 +51,7 @@ switch ($action) {
         $stmt = $pdo->prepare('SELECT case_id, patient_id FROM appointments WHERE id = ?');
         $stmt->execute([$appointmentId]);
         $appt = $stmt->fetch();
+        $stmt->closeCursor();   // ver Db::get: una lectura abierta hace fallar la escritura que sigue
         if ($appt) {
             // La evaluación OIRS llama al LLM (hasta 30 s). Antes corría
             // antes de responder: la app cortaba a los 10 s, creía que no
@@ -90,4 +91,8 @@ switch ($action) {
 
 $stmt = $pdo->prepare('SELECT * FROM attendances WHERE appointment_id = ? AND student_id = ?');
 $stmt->execute([$appointmentId, $user['id']]);
-Response::json(['attendance' => $stmt->fetch()]);
+$attendance = $stmt->fetch();
+// Cerrada antes de responder: la evaluación OIRS escribe después, en la
+// función de cierre, y con esta lectura abierta fallaba ("database is locked").
+$stmt->closeCursor();
+Response::json(['attendance' => $attendance]);

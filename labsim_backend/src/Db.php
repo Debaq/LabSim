@@ -24,8 +24,21 @@ final class Db
             // WAL: permite varios lectores concurrentes (polling de los 14
             // clientes) mientras hay un escritor ocasional, sin bloquearse.
             self::$pdo->exec('PRAGMA journal_mode = WAL');
+            // En WAL, NORMAL sincroniza el disco en los checkpoints y no en
+            // cada commit: cada escritura tiene la base tomada mucho menos
+            // tiempo (en un hosting compartido el fsync es lento). Un corte
+            // del servidor puede perder la última transacción, nunca
+            // corromper la base.
+            self::$pdo->exec('PRAGMA synchronous = NORMAL');
             self::$pdo->exec('PRAGMA foreign_keys = ON');
             self::$pdo->exec('PRAGMA busy_timeout = 5000');
+            // OJO al escribir código acá: una consulta leída a medias
+            // (fetch() de una sola fila sin closeCursor) deja abierta una
+            // foto vieja de la base, y la escritura que venga después en esta
+            // misma conexión falla AL INSTANTE con "database is locked" si
+            // otro kiosko escribió entremedio -- sin esperar busy_timeout, y
+            // reintentar no sirve. Fue la causa de casi todos los bloqueos del
+            // 2026-10-08 (Auth, chat, OIRS). Leer y cerrar antes de escribir.
         }
         return self::$pdo;
     }

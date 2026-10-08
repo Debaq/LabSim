@@ -96,6 +96,7 @@ final class Auth
         );
         $stmt->execute([$code]);
         $row = $stmt->fetch();
+        $stmt->closeCursor();   // ver Db::get: una lectura abierta hace fallar la escritura que sigue
         if (!$row) {
             return null;
         }
@@ -137,6 +138,7 @@ final class Auth
         );
         $stmt->execute([$token]);
         $userId = $stmt->fetchColumn();
+        $stmt->closeCursor();
         if ($userId === false) {
             return null;
         }
@@ -488,6 +490,7 @@ final class Auth
         );
         $stmt->execute([$token]);
         $row = $stmt->fetch();
+        $stmt->closeCursor();   // ver Db::get: una lectura abierta hace fallar la escritura que sigue
         if (!$row) {
             Response::error('Token inválido o expirado', 401);
         }

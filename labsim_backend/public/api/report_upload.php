@@ -73,6 +73,7 @@ $stmt = $pdo->prepare(
 );
 $stmt->execute([$appointmentId, $user['id']]);
 $attendance = $stmt->fetch();
+$stmt->closeCursor();   // ver Db::get: una lectura abierta hace fallar la escritura que sigue
 
 if (!$attendance) {
     // Puede ser que attendance_action.php (estado 'atendiendo') todavía no

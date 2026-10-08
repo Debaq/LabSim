@@ -60,6 +60,7 @@ if (!LlmConfig::get()['active']) {
 $stmt = Db::get()->prepare('SELECT data FROM cases WHERE id = ?');
 $stmt->execute([$caseId]);
 $row = $stmt->fetch();
+$stmt->closeCursor();   // ver Db::get: una lectura abierta hace fallar la escritura que sigue
 if (!$row) {
     Response::error('El caso no existe.', 404);
 }
@@ -148,6 +149,7 @@ if ($appointmentId > 0) {
         $cStmt = Db::get()->prepare('SELECT course_id FROM appointments WHERE id = ?');
         $cStmt->execute([$appointmentId]);
         $cRow = $cStmt->fetch();
+        $cStmt->closeCursor();
         $courseId = $cRow ? (int) ($cRow['course_id'] ?? 0) : 0;
     } catch (Throwable $e) {
         $courseId = 0;

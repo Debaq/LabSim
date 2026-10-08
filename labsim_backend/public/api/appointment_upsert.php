@@ -42,6 +42,7 @@ if ($id > 0) {
     $stmt = $pdo->prepare('SELECT course_id, assigned_group_id, assigned_student_id FROM appointments WHERE id = ?');
     $stmt->execute([$id]);
     $guardada = $stmt->fetch();
+    $stmt->closeCursor();   // ver Db::get: una lectura abierta hace fallar la escritura que sigue
     if ($guardada !== false) {
         $asignacion = [
             'course_id' => $guardada['course_id'],
