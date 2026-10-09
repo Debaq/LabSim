@@ -4,6 +4,7 @@
 con las iniciales del nombre -- mismo criterio visual que Slack/Gmail/etc.
 para cuando alguien no tiene foto de perfil."""
 
+import re
 from PySide6.QtCore import Qt, QRectF
 from PySide6.QtGui import QPixmap, QPainter, QPainterPath, QColor, QFont
 
@@ -14,7 +15,9 @@ _PALETTE = [
 
 
 def _iniciales(nombre):
-    partes = [p for p in (nombre or "").split() if p]
+    # El rol del acompañante viaja en la etiqueta ("Rosa (Madre)"): sin
+    # sacarlo, el círculo decía "R(".
+    partes = [p for p in re.sub(r"\([^)]*\)", " ", nombre or "").split() if p]
     if not partes:
         return "?"
     if len(partes) == 1:

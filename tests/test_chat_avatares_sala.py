@@ -32,6 +32,13 @@ def _widget():
     return w
 
 
+def test_iniciales_sin_el_rol_del_acompanante():
+    from core.avatar import _iniciales
+    assert _iniciales("Rosa (Madre)") == "RO"
+    assert _iniciales("Gladys Pérez (Esposa)") == "GP"
+    assert _iniciales("Juan") == "JU"
+
+
 def test_foto_key_paciente_es_la_clave_historica():
     w = _widget()
     w._aplicar_sala(SALA)
