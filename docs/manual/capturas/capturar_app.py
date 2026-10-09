@@ -572,6 +572,32 @@ def impedanciometro():
 
 
 @captura
+def impedanciometro_decay_etf():
+    w, frame, ag = atendiendo("38")
+    frame.hide()
+    ir_a_box(w, "Box Audiología")
+    fz = abrir(w, "Z")
+    z = fz.obj
+    # Decay en OI (reflejo presente, se sostiene)
+    z.side_change()
+    z.show_screen(z.Z_decay)
+    z.dial.setValue(95)
+    z.decay_stimulus()
+    while z.time_decay.isActive():
+        z.decay_animate()
+    z.reflex_tone.stop()
+    guardar(fz, "impedanciometro-decay")
+    # ETF, membrana íntegra: reposo, Valsalva y Toynbee
+    z.side_change()
+    z.show_screen(z.Z_etf)
+    z.btn1_click()
+    for maniobra in ("reposo", "valsalva", "toynbee"):
+        z.etf_maniobra(maniobra)
+    guardar(fz, "impedanciometro-etf")
+    w.close()
+
+
+@captura
 def otoscopia():
     w, frame, ag = atendiendo("41")
     frame.hide()

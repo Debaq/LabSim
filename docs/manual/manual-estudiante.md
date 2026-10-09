@@ -41,7 +41,7 @@ De la actividad en Moodle a la atención cerrada. Lo más importante es **cerrar
 <div class="paso">
 <div class="paso-cab"><span class="num">2</span><span class="titulo">Entra a LabSim</span></div>
 <img src="img/estudiante/login.png">
-<p>En LabSim, <em>Ingresar</em> (arriba a la derecha). Deja <strong>Usuario</strong> vacío, escribe el código en <strong>Contraseña</strong> y haz clic en <em>Ingresar</em>.</p>
+<p>En LabSim, <em>Ingresar</em> (arriba a la derecha) y escribe el código en <strong>Código de Moodle</strong>. Al completar los 6 dígitos entra solo.</p>
 </div>
 </div>
 
@@ -113,10 +113,11 @@ LabSim no tiene contraseña propia para los estudiantes: entras con un **código
 1. En Moodle, abre la actividad LabSim de tu curso.
 2. La página dice *«Ingreso correcto»* y muestra el código, con *«Vence en N segundos»*. Si se venció, usa *Generar código nuevo*.
 3. Abre LabSim en el computador y haz clic en **Ingresar** (arriba a la derecha).
-4. En la ventana **Ingreso**, deja **Usuario** vacío y escribe el código en **Contraseña**.
-5. Haz clic en el botón **Ingresar** de esa ventana.
+4. En la ventana **Ingreso**, escribe el código en **Código de Moodle**. Al completar los 6 dígitos, LabSim entra solo: no hay que hacer clic en nada.
 
-![La ventana de ingreso: el usuario va vacío y el código en la contraseña](img/estudiante/login.png)
+![La ventana de ingreso: solo el código de Moodle](img/estudiante/login.png)
+
+El link de abajo, *Ingresar con usuario y contraseña*, es para los docentes; desde ahí, *Ingresar con el código de Moodle* vuelve al código.
 
 Mientras conecta aparece *«Conectando con el servidor...»*. Al entrar, arriba a la derecha aparece tu usuario y el botón cambia a **Cerrar Sesión**.
 
@@ -389,7 +390,7 @@ Elegir **Habla** como estímulo cambia la prueba a **Logoaudiometría**: la pant
 ![Las listas de palabras](img/estudiante/listas-de-palabras.png)
 
 1. Con *Habla* en un canal, botón **Listas de Palabras**.
-2. Elige la lista: **Disilabos (Palacios)** o **Terminos Conocidos**.
+2. Elige la lista: **Disilabos (Palacios)** o **Terminos Conocidos**. Las palabras desactivadas todavía no tienen su grabación: dejando el mouse encima dice cuál falta.
 3. Haz clic en una palabra: suena por la salida del canal. El paciente la repite (o dice otra cosa, si no la entendió).
 4. Anota con **+1** o **-1** en el audiómetro. **<** y **>** cambian el total de palabras; **Limpiar** vuelve los aciertos a cero.
 
@@ -464,6 +465,36 @@ Las otras teclas cambian la dirección del barrido, la escala (en cc) y los lím
 3. Ajusta la intensidad con la perilla (de a 5 dB) y presiona **Inicio**: se dibuja la respuesta.
 
 Cuando hay reflejo, el equipo anota en la tabla la intensidad que usaste.
+
+### 18.3 Tone Decay
+
+![Tone Decay: la contracción durante los 10 s y lo que queda de ella](img/estudiante/impedanciometro-decay.png)
+
+1. **Tone Decay**, y elige **IPSI** o **CONTRA** (con *IPSI/CONTRA* o con un clic sobre la pantalla).
+2. La primera tecla elige la frecuencia: **500** o **1000 Hz**.
+3. Ajusta la intensidad con la perilla y presiona **Inicio** (o *Estímulo*): el tono dura **10 segundos**.
+
+La curva muestra la contracción durante los 10 s y, a la derecha, cuánto de la amplitud inicial queda a los **5 s** y a los **10 s**. Si no hay reflejo a esa intensidad, la curva queda plana y no hay porcentaje.
+
+### 18.4 Función tubaria (ETF)
+
+La pantalla **ETF** tiene dos pruebas; la primera tecla (**Prueba**) cambia entre ellas. Cuál corresponde lo decides tú, según lo que viste en la otoscopía y en el timpanograma.
+
+**Membrana íntegra.** Se comparan timpanogramas antes y después de las maniobras:
+
+![ETF con membrana íntegra: reposo, Valsalva y Toynbee superpuestos](img/estudiante/impedanciometro-etf.png)
+
+1. **Reposo**: el timpanograma de partida (blanco).
+2. Pídele al paciente la maniobra y presiona **Valsalva** (amarillo) o **Toynbee** (verde).
+
+A la derecha queda la presión del pico de cada timpanograma.
+
+**Membrana perforada (o con tubo).** Se presuriza el conducto y el paciente traga:
+
+1. Con la perilla, elige la presión (por ejemplo, -200 o +200 daPa).
+2. **Inicio**: durante 10 s el paciente traga tres veces (las líneas *trague*).
+
+A la derecha quedan la presión inicial y la final.
 
 ---
 
@@ -640,6 +671,7 @@ Si LabSim se cerró solo, se colgó o algo no funcionó, avísalo desde **Config
 | *Atención abierta* al querer atender | Cierra primero la atención que tienes (*Cerrar/Evolucionar*) |
 | El paciente no levanta la mano | Revisa que le diste la instrucción con **Talkback** y que el canal suena (indicador lila) |
 | *Listas de Palabras* no abre | Primero elige **Habla** en un canal del audiómetro |
+| Una palabra de la lista está desactivada | Todavía no tiene su grabación; usa otra |
 | Una ventana quedó tapada o fuera de la pantalla | **Cerrar ventanas** y vuelve a abrir el equipo |
 | *sin conexión* bajo un equipo | Sigue trabajando: se guarda en el computador y se sube cuando vuelva internet |
 | *Sesión vencida* | Vuelve a ingresar con un código nuevo; lo hecho no se pierde |
