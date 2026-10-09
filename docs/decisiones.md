@@ -4983,12 +4983,16 @@ o un segfault del recolector de Python, casi siempre con el hilo de la agenda
 ya inválido. El arreglo del 2026-10-08 (borrar el QThread recién después de
 `wait()`) venía en esa versión y no alcanzó.
 
-La agenda y la subida de pendientes creaban y borraban un QThread de Python
-cada 15 s, y el sync pasaba un dict por una señal encolada en cada ciclo:
-miles de envoltorios de Shiboken naciendo y muriendo entre dos hilos por
-jornada. No se pudo reproducir en el PC de desarrollo (ni con el patrón
-viejo bajo estrés), así que en vez de seguir parchando el ciclo de vida se
-sacó QThread de la app:
+El frame que borra es `QThreadWrapper::~QThreadWrapper` (QtCore.abi3.so
++0x12ca00 en el build de rc84c5553, desensamblado: `Shiboken::Object::destroy`
+y después `QThread::~QThread`): se rompe **al borrar un QThread** cuyo
+envoltorio de Python ya estaba liberado, aunque el hilo haya terminado. La
+agenda y la subida de pendientes creaban y borraban un QThread de Python cada
+15 s (y el sync pasaba un dict por una señal encolada en cada ciclo): miles
+de envoltorios de Shiboken naciendo y muriendo entre dos hilos por jornada.
+No se pudo reproducir en el PC de desarrollo (ni con el patrón viejo bajo
+estrés), así que en vez de seguir parchando el ciclo de vida se sacó QThread
+de la app:
 
 - `hilos.en_fondo(funcion, ..., listo=, fallo=, dueno=)`: la consulta corre en
   un `threading.Thread` daemon; el resultado vuelve por una cola de Python y a
@@ -5006,7 +5010,7 @@ hasta 4 s a lo que sigue en curso; si algo queda, `os._exit` como antes.
 el final dejaba a la ventana sin volver nunca al bucle de eventos cuando un
 aviso lanzaba otra tarea que terminaba al instante.
 
-Queda abierta otra causa posible, que no se descartó: el build trae ~70
-librerías copiadas del sistema del PC donde se compila (pila X11/xcb, glib,
+Aparte, y no descartado como factor: el build trae ~70 librerías copiadas
+del sistema del PC donde se compila (pila X11/xcb, glib,
 fontconfig/freetype, dbus, libstdc++…), mientras que libxcb, harfbuzz, GL y
 pipewire se cargan del sistema del equipo. Ver TODO.md.

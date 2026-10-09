@@ -49,7 +49,8 @@ Revisado contra el código el 2026-09-24.
       donde se compila (pila X11/xcb, xkbcommon, glib/gio, dbus,
       fontconfig/freetype, libstdc++, libgcc_s, pulse…) y en el equipo se
       mezclan con las suyas (libxcb, harfbuzz, GL/Mesa, pipewire vienen del
-      sistema). Posible causa de los cierres del laboratorio.
+      sistema). Los cierres del 2026-10-09 eran el borrado de QThread, pero
+      la mezcla queda como riesgo.
       § Sin QThread: el trabajo de red va en hilos de Python
 
 ## Decisiones pendientes
