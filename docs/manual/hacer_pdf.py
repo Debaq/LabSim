@@ -37,6 +37,15 @@ M = MANUALES[cual]
 # para qué versión se escribió y se actualiza solo al cambiarla.
 _main = (dir_.parents[1] / 'src' / 'main.py').read_text(encoding='utf-8')
 VERSION = re.search(r"__VERSION__\s*=\s*'v?([^']+)'", _main)[1]
+# Y el commit, con el mismo formato que el título de la app (v0.9.9-r<sha>,
+# ver scripts/release_pyinstaller.sh): dice exactamente qué código describe
+# el manual. Sin git (copia suelta), solo la versión.
+try:
+    _sha = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], cwd=dir_, check=True,
+                          capture_output=True, text=True).stdout.strip()
+    VERSION = f'v{VERSION}-r{_sha}' if _sha else f'v{VERSION}'
+except (OSError, subprocess.CalledProcessError):
+    VERSION = f'v{VERSION}'
 md = (dir_ / f'manual-{cual}.md').read_text(encoding='utf-8')
 
 cuerpo = markdown.markdown(md, extensions=['tables', 'fenced_code'])
