@@ -249,7 +249,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.actionSalir.setText(QCoreApplication.translate("MainWindow", u"Salir", None))
-        self.actionP_rametros_Avanzados.setText(QCoreApplication.translate("MainWindow", u"P\u00e1rametros Avanzados", None))
+        self.actionP_rametros_Avanzados.setText(QCoreApplication.translate("MainWindow", u"Par\u00e1metros Avanzados", None))
         self.actionCambiar_Caso.setText(QCoreApplication.translate("MainWindow", u"Cambiar Caso", None))
         self.lbl_info.setText("")
         self.lbl_time.setText("")

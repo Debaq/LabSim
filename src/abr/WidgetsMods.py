@@ -111,9 +111,15 @@ class GraphicsLayoutWidgetMod(GraphicsLayoutWidget):
         x3 = smooth.addAction(QCoreApplication.translate("GraphicsLayoutWidgetMod", "x3"))
         x4 = smooth.addAction(QCoreApplication.translate("GraphicsLayoutWidgetMod", "x4"))
 
-        a_b = view.addAction(QCoreApplication.translate("GraphicsLayoutWidgetMod", "A-B"))
-        contra = view.addAction(QCoreApplication.translate("GraphicsLayoutWidgetMod", "contra"))
-       
+        # Los mismos interruptores que los botones AB y C junto al gráfico
+        # (los pone AbrMainWindow en view_toggles): el menú los refleja y
+        # los mueve, no lleva un estado propio.
+        for etiqueta, boton in getattr(self, 'view_toggles', {}).items():
+            accion = view.addAction(QCoreApplication.translate("GraphicsLayoutWidgetMod", etiqueta))
+            accion.setCheckable(True)
+            accion.setChecked(boton.isChecked())
+            accion.triggered.connect(boton.setChecked)
+        view.setEnabled(bool(getattr(self, 'view_toggles', {})))
 
         mark_all.triggered.connect(self.delete_all_marks)
 

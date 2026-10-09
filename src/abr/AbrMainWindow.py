@@ -157,8 +157,11 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
 
         ########Conexiones de slots
         self.actionP_rametros_Avanzados.triggered.connect(self.active_advance_setting)
-        # "Cambiar Caso" ya no aplica (el caso lo trae el paciente en
-        # atención, ver la_super) -- el menú queda sin acción conectada.
+        # "Cambiar Caso" y "Salir" ya no aplican: el caso lo trae el paciente
+        # en atención (ver la_super) y la ventana se cierra con su ✕. Se
+        # ocultan en vez de quedar en el menú sin hacer nada.
+        self.actionCambiar_Caso.setVisible(False)
+        self.actionSalir.setVisible(False)
         self.table_r.sig_measure_value.connect(self.measure_action)
         self.table_l.sig_measure_value.connect(self.measure_action)
         self.table_ec_r.sig_mark.connect(self.mark_ecochg)
@@ -185,6 +188,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
         self.btn_scale_minus.setToolTip("Achicar las curvas (más µV en la ventana)")
         self.btn_toggle_sub.toggled.connect(self.toggle_sub)
         self.btn_toggle_contra.toggled.connect(self.toggle_contra)
+        # "Mostrar" del menú del botón derecho: los mismos dos botones.
+        for grafico in (self.graph_r, self.graph_l):
+            grafico.view_toggles = {'A-B': self.btn_toggle_sub, 'contra': self.btn_toggle_contra}
         # Subpromedios A-B y contralateral arrancan apagados (en el .ui los
         # botones vienen tildados).
         self.btn_toggle_sub.setChecked(False)
