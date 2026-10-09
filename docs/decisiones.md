@@ -8,6 +8,7 @@ principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 ## Consola remota: Claude con acceso a la base viva, por token temporal (2026-10-09)
 
 Para diagnosticar y arreglar en producción sin pasarle la contraseña a nadie.
+Cómo se usa: [consola_remota.md](consola_remota.md).
 El admin genera un token en **Datos e IA → Consola remota**
 (`admin/consola.php`) y lo guarda en su terminal con
 `scripts/labsim_token.sh lsc_...` (queda en `~/.config/labsim/consola.env`,
