@@ -7,15 +7,17 @@
 #                                                               #
 #################################################################
 import contextlib
-import itertools
+import os
 import random
+import re
 
 from PySide6 import QtCore
 from PySide6.QtMultimedia import QAudioBufferOutput, QAudioOutput, QMediaPlayer
-from PySide6.QtWidgets import QWidget
+from PySide6.QtWidgets import QPushButton, QWidget
 
 from audiometria.audio_player import audio_buffer_level
-from audiometria.h_audio import create_word, create_word_response
+from audiometria.h_audio import create_word, create_word_response, normalize
+from core.base import context
 from audiometria.logoaudiometry import CalculateLogo
 from audiometria.UI.Ui_ListWord import Ui_ListWords
 
@@ -76,13 +78,43 @@ class ListWords(QWidget, Ui_ListWords):
         self.time_2.timeout.connect(self.wait)
         
                 
-    def create_actions_btn(self): 
-        t = dir(self)
-        letters = ["f","g","h","i", "l"]
-        for letter, i in itertools.product(letters, range(26)):
-            for btn in t:
-                if btn == f"btn_{letter}{str(i)}":
-                    getattr(self, btn).clicked.connect(self.pushaudio)
+    # Botón de palabra: btn_<lista><n> (btn_f1, btn_g25) o, en la tercera
+    # lista de disílabos, btn_f<n>_2. El número es la posición en la lista.
+    _BOTON_PALABRA = re.compile(r"^btn_[a-z](\d+)(?:_\d+)?$")
+
+    def create_actions_btn(self):
+        """Conecta cada palabra y desactiva las que no tienen audio.
+
+        Una palabra necesita dos grabaciones: la que oye el paciente
+        (LP_palacios_1_<palabra>) y la que dice al repetirla
+        (LP_palacios_r_feme1_<palabra>). Sin la primera no suena nada; sin la
+        segunda el paciente se queda callado aunque haya entendido. En los
+        dos casos el botón queda desactivado, con el motivo en el tooltip,
+        hasta que se graben.
+
+        Antes solo se conectaban btn_f/g/h/i/l<n>: la tercera lista de
+        disílabos (btn_f<n>_2) no sonaba nunca.
+        """
+        for btn in self.findChildren(QPushButton):
+            if not self._BOTON_PALABRA.match(btn.objectName()):
+                continue
+            btn.clicked.connect(self.pushaudio)
+            falta = self._audio_faltante(btn.text())
+            if falta:
+                btn.setEnabled(False)
+                btn.setToolTip(f"Sin audio grabado ({falta}): todavía no se puede usar.")
+
+    @staticmethod
+    def _audio_faltante(texto):
+        """Qué grabación le falta a la palabra, o '' si están las dos."""
+        palabra = texto.strip().lower()
+        estimulo = context.get_resource(normalize(f"audio/LP_palacios_1_{palabra}.mp3"))
+        respuesta = context.get_resource(normalize(f"audio/LP_palacios_r_feme1_{palabra}.mp3"))
+        if not os.path.exists(estimulo):
+            return "la palabra"
+        if not os.path.exists(respuesta):
+            return "la respuesta del paciente"
+        return ""
 
     def la_super(self, data, appointment_id=None):
         if data is None:
@@ -117,7 +149,7 @@ class ListWords(QWidget, Ui_ListWords):
 
     def pushaudio(self):
         btn = self.sender()
-        self.num  = int(''.join(filter(str.isdigit, self.sender().objectName())))
+        self.num = int(self._BOTON_PALABRA.match(btn.objectName()).group(1))
         self.text = (btn.text()).lower()
         file = f"LP_palacios_1_{self.text}"
         word = create_word(file, self.playable[2])
