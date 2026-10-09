@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (QTableWidgetItem, QAbstractItemView,
                                 QDateEdit, QPushButton, QMessageBox, QLineEdit,
                                 QVBoxLayout, QLabel, QTextEdit,
                                 QCheckBox)
-from PySide6.QtCore import QDate, QTime, QDateTime, Qt, QThread, QTimer, Signal
+from PySide6.QtCore import QDate, QTime, QDateTime, Qt, QTimer
 from PySide6.QtGui import QBrush, QColor, QFont, QTextCharFormat
 from agenda.UI.Ui_agenda import Ui_Form
 from core import feriados as feriados_cl
@@ -28,32 +28,24 @@ from core.ficha import parse_fecha_agenda, render_ficha_html
 from core.practica import abrir_ficha_estudio
 
 
-class _SheduleFetchThread(QThread):
-    """Trae Shedule() (llamada de red) fuera del hilo de UI.
+def _traer_agenda(con_practica):
+    """Shedule() (llamada de red) fuera del hilo de UI: (agenda, práctica).
 
-    Mismo patrón silencioso que SyncThread.sync_failed: si el backend no
-    responde, no hay diálogo ni excepción -- se reintenta en el próximo
-    ciclo de polling."""
-    fetched = Signal(dict)
-    failed = Signal(str)
-    practica = Signal(list)
-
-    def __init__(self, parent=None, con_practica=False):
-        super().__init__(parent)
-        self._con_practica = con_practica
-
-    def run(self):
+    Silencioso como el sync (backend/sync_thread.py): si el backend no responde, no
+    hay diálogo -- se reintenta en el próximo ciclo de polling. Corre en
+    otro hilo (hilos.en_fondo): nada de widgets acá."""
+    try:
+        data = Shedule().get()
+    except requests.RequestException as exc:
+        print(f"agenda: sin respuesta del servidor: {exc}")
+        return None, None
+    practica = None
+    if con_practica:
         try:
-            data = Shedule().get()
+            practica = lista_practica()
         except requests.RequestException as exc:
-            self.failed.emit(str(exc))
-            return
-        self.fetched.emit(data)
-        if self._con_practica:
-            try:
-                self.practica.emit(lista_practica())
-            except requests.RequestException as exc:
-                self.failed.emit(str(exc))
+            print(f"agenda: sin lista de práctica: {exc}")
+    return data, practica
 
 
 PENDIENTE_COLOR = QColor(255, 244, 200)
@@ -213,14 +205,7 @@ class Agenda(QWidget, Ui_Form):
 
         self.tableWidget.itemSelectionChanged.connect(self._on_selection_changed)
 
-        try:
-            self.read_shedule()
-        except Exception:
-            # Sin red la agenda no se arma, y con ella se iría el hilo de
-            # feriados que ya arrancó arriba: destruido corriendo, Qt
-            # aborta el proceso (ver core/hilos.py).
-            hilos.soltar_hijos(self)
-            raise
+        self.read_shedule()
         self.populate_shedule()
 
         self.pushButton.setVisible(False)
@@ -347,9 +332,9 @@ class Agenda(QWidget, Ui_Form):
         faltantes = [y for y in self._anios_feriados if feriados_cl.load_cache(y) is None]
         if not faltantes:
             return
-        self._feriados_thread = feriados_cl.FeriadosThread(faltantes, self)
-        self._feriados_thread.listo.connect(self._aplicar_feriados)
-        self._feriados_thread.start()
+        hilos.en_fondo(feriados_cl.refrescar_varios, faltantes, dueno=self,
+                       listo=lambda por_anio: por_anio and self._aplicar_feriados(por_anio),
+                       nombre="feriados")
 
     def _aplicar_feriados(self, por_anio):
         """Pinta {año: {"MM-DD": descripción}} en el calendario emergente."""
@@ -407,30 +392,35 @@ class Agenda(QWidget, Ui_Form):
         dispara SIEMPRE una consulta nueva a Shedule() (get_full_state), y si
         se hacía en el hilo de UI, un backend caído congelaba la ventana
         completa (timeout SSL de hasta 10s, cada ciclo de sync)."""
-        if getattr(self, "_shedule_fetch_thread", None) is not None:
+        if getattr(self, "_shedule_fetch", None) is not None:
             # Hay una en curso, quizás de antes del cambio que hay que
             # mostrar (atender/cerrar): se repite al terminar.
             self._refrescar_otra_vez = True
             return
         self._refrescar_otra_vez = False
-        hilo = _SheduleFetchThread(self, con_practica=self._modo_practica)
-        hilo.fetched.connect(self._on_refresh_async_done)
-        hilo.practica.connect(self._on_practica_fetched)
-        hilo.finished.connect(self._on_refresh_async_finished)
-        self._shedule_fetch_thread = hilo
-        hilo.start()
+        # Sin QThread por consulta: ver hilos.en_fondo (cierres del
+        # 2026-10-09, uno cada 15 s durante toda la jornada).
+        self._shedule_fetch = hilos.en_fondo(
+            _traer_agenda, self._modo_practica, dueno=self,
+            listo=self._on_refresh_async_done, fallo=self._on_refresh_async_fallo,
+            nombre="agenda")
 
-    def _on_refresh_async_done(self, data):
-        self.shedule = data
-        self.populate_shedule()
-
-    def _on_refresh_async_finished(self):
-        # Cada 15 s se creaba uno nuevo y ninguno se borraba.
-        hilo, self._shedule_fetch_thread = self._shedule_fetch_thread, None
-        if hilo is not None:
-            hilos.borrar(hilo)   # no deleteLater pelado: ver hilos.borrar_al_terminar
+    def _on_refresh_async_done(self, resultado):
+        self._shedule_fetch = None
+        data, practica = resultado
+        if data is not None:
+            self.shedule = data
+            self.populate_shedule()
+        if practica is not None:
+            self._on_practica_fetched(practica)
         if getattr(self, "_refrescar_otra_vez", False):
             self.refresh_async()
+
+    def _on_refresh_async_fallo(self, exc):
+        # Una respuesta rara (no de red) no puede dejar la agenda sin
+        # refrescar para siempre: se sigue en el próximo ciclo.
+        print(f"agenda: no se pudo refrescar: {type(exc).__name__}: {exc}")
+        self._on_refresh_async_done((None, None))
 
     def _current_username(self):
         data_login = getattr(self.main_window, "data_login", None) or {}

@@ -43,7 +43,7 @@ from core.helpers import Preferences, es_docente
 from core import hilos, respaldo_informes
 from core.report_autosave import recuperar, subir_ahora
 from core.rng import stable_seed
-from PySide6.QtCore import QCoreApplication, QThread, QTimer, Signal
+from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import (QComboBox, QLabel, QMainWindow, QPushButton,
                                QSizePolicy, QSpacerItem)
 
@@ -67,33 +67,26 @@ ALTO_DOCK_DETALLE = 220
 
 
 
-class _Retomar(QThread):
+def _retomar(appointment_id):
     """Sesiones anteriores + lo guardado de esta atencion, fuera del hilo
-    de la ventana (ver AbrMainWindow.fetch_sessions)."""
-    listo = Signal(object, object, object, object)   # cita, sesiones, guardados, usuario
-
-    def __init__(self, appointment_id, parent=None):
-        super().__init__(parent)
-        self.appointment_id = appointment_id
-
-    def run(self):
-        reports = None
-        try:
-            client = BackendClient(Preferences().get("BACKEND_URL"),
-                                   context.get_resource('json/session.json'))
-        except Exception as exc:  # noqa: BLE001
-            print(f"ABR: sin cliente del servidor: {exc}")
-            return
-        if not client.is_logged_in():
-            return
-        try:
-            reports = client.get_patient_reports(self.appointment_id)
-        except Exception as exc:  # noqa: BLE001
-            # Sin conexion se atiende igual: solo no se ven las anteriores.
-            print(f"ABR: no se pudieron traer las sesiones anteriores: {exc}")
-        guardados = recuperar(self.appointment_id, ['ABR', 'ELECTROCOCLEO'], client)
-        self.listo.emit(self.appointment_id, reports, guardados,
-                        respaldo_informes.usuario_de(client))
+    de la ventana (hilos.en_fondo, ver AbrMainWindow.fetch_sessions).
+    None si no hay sesion con el servidor."""
+    reports = None
+    try:
+        client = BackendClient(Preferences().get("BACKEND_URL"),
+                               context.get_resource('json/session.json'))
+    except Exception as exc:  # noqa: BLE001
+        print(f"ABR: sin cliente del servidor: {exc}")
+        return None
+    if not client.is_logged_in():
+        return None
+    try:
+        reports = client.get_patient_reports(appointment_id)
+    except Exception as exc:  # noqa: BLE001
+        # Sin conexion se atiende igual: solo no se ven las anteriores.
+        print(f"ABR: no se pudieron traer las sesiones anteriores: {exc}")
+    guardados = recuperar(appointment_id, ['ABR', 'ELECTROCOCLEO'], client)
+    return appointment_id, reports, guardados, respaldo_informes.usuario_de(client)
 
 class AbrMainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, data_login=None) -> None:
@@ -759,11 +752,9 @@ class AbrMainWindow(QMainWindow, Ui_MainWindow):
             appointment_id = int(self.appointment_id)
         except (TypeError, ValueError):
             return
-        hilo = _Retomar(appointment_id, self)
-        hilo.listo.connect(self._on_retomar)
-        hilos.borrar_al_terminar(hilo)
-        self._retomar = hilo
-        hilo.start()
+        self._retomar = hilos.en_fondo(
+            _retomar, appointment_id, dueno=self, nombre="abr-retomar",
+            listo=lambda r: r is not None and self._on_retomar(*r))
 
     def _on_retomar(self, appointment_id, reports, guardados, usuario):
         if str(self.appointment_id) != str(appointment_id) or self.data_current is None:

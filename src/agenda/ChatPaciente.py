@@ -8,69 +8,19 @@
 #   NOTA: si no hablas español, no es mi culpa, aprende         #
 #################################################################
 
-import requests
 from PySide6.QtWidgets import QWidget
 from PySide6.QtWidgets import QPushButton, QLineEdit, QVBoxLayout, QHBoxLayout, QLabel, QTextEdit
-from PySide6.QtCore import QThread, Signal, QTimer, QUrl
+from PySide6.QtCore import QTimer, QUrl
 from PySide6.QtGui import QTextDocument
 from core.helpers import chat_con_paciente, foto_paciente, sala_del_caso
 from core import hilos
 from core.avatar import avatar_iniciales, avatar_circular_desde_bytes, color_por_nombre
 
 
-class _ChatPacienteThread(QThread):
-    """Manda un turno de chat al backend (llamada de red) fuera del hilo de UI."""
-    respondido = Signal(dict)
-    fallo = Signal(str)
-
-    def __init__(self, case_id, nombre, edad, procedimiento, history, message,
-                 appointment_id=None, parent=None):
-        super().__init__(parent)
-        self._args = (case_id, nombre, edad, procedimiento, history, message, appointment_id)
-
-    def run(self):
-        try:
-            resultado = chat_con_paciente(*self._args)
-        except (RuntimeError, requests.RequestException) as exc:
-            self.fallo.emit(str(exc))
-            return
-        self.respondido.emit(resultado)
-
-
-class _SalaFetchThread(QThread):
-    """Trae quiénes están en el box (ver Sala.php) fuera del hilo de UI. Se
-    pide al abrir el chat y no después del primer mensaje: el alumno tiene
-    que ver con quién viene el paciente al entrar."""
-    listo = Signal(object)
-
-    def __init__(self, case_id, nombre, edad, parent=None):
-        super().__init__(parent)
-        self._args = (case_id, nombre, edad)
-
-    def run(self):
-        self.listo.emit(sala_del_caso(*self._args))
-
-
-class _AvatarFetchThread(QThread):
-    """Trae el avatar circular de una persona de la sala (si tiene foto
-    subida) fuera del hilo de UI -- ver foto_paciente() en helpers.py. Emite
-    None si no tiene foto o no hay conexión, no es una falla (fallback a
-    iniciales).
-
-    `foto_key` es la clave con la que el backend guarda esa foto y no el id
-    de persona: el paciente conserva la clave histórica del caso (persona
-    vacía) aunque en la sala sea `p1` -- ver PatientPhoto::key y
-    _foto_key() más abajo."""
-    listo = Signal(str, object)
-
-    def __init__(self, case_id, persona_id, foto_key, parent=None):
-        super().__init__(parent)
-        self._case_id = case_id
-        self._persona_id = persona_id
-        self._foto_key = foto_key
-
-    def run(self):
-        self.listo.emit(self._persona_id, foto_paciente(self._case_id, self._foto_key))
+# Las tres consultas corren con hilos.en_fondo (sin QThread: ver los
+# cierres del 2026-10-09 en core/hilos.py). chat_con_paciente lanza
+# RuntimeError o requests.RequestException si no hubo respuesta; la sala y
+# las fotos devuelven vacío/None sin conexión (no es una falla).
 
 
 class ChatPacienteWidget(QWidget):
@@ -105,7 +55,6 @@ class ChatPacienteWidget(QWidget):
         self._procedimiento = ""
         self._history = []
         self._thread = None
-        self._avatar_threads = []
         self._sala_thread = None
         self._mensaje_pendiente = None  # último mensaje enviado, para reintentar sin retipear
         self._intentos = 0
@@ -195,10 +144,9 @@ class ChatPacienteWidget(QWidget):
     # -----------------------------------------------------------------
 
     def _pedir_sala(self):
-        self._sala_thread = _SalaFetchThread(self._case_id, self._nombre, self._edad, parent=self)
-        self._sala_thread.listo.connect(lambda sala, cid=self._case_id: self._on_sala_lista(cid, sala))
-        hilos.borrar_al_terminar(self._sala_thread)
-        self._sala_thread.start()
+        self._sala_thread = hilos.en_fondo(
+            sala_del_caso, self._case_id, self._nombre, self._edad, dueno=self, nombre="sala",
+            listo=lambda sala, cid=self._case_id: self._on_sala_lista(cid, sala))
 
     def _on_sala_lista(self, case_id_solicitado, sala):
         if case_id_solicitado != self._case_id:
@@ -282,15 +230,9 @@ class ChatPacienteWidget(QWidget):
         """Foto real de esa persona si tiene una subida (ver
         PatientPhoto.php) -- mientras tanto (o si no hay), queda el círculo
         con iniciales."""
-        hilo = _AvatarFetchThread(self._case_id, persona_id, self._foto_key(persona_id), parent=self)
-        hilo.listo.connect(lambda pid, data, cid=self._case_id: self._on_avatar_listo(cid, pid, data))
-        # Se guardan todos: son varios en paralelo (uno por persona) y si se
-        # pierde la referencia, Qt puede destruir el QThread a mitad de la
-        # llamada de red.
-        self._avatar_threads.append(hilo)
-        hilo.finished.connect(lambda h=hilo: self._avatar_threads.remove(h) if h in self._avatar_threads else None)
-        hilos.borrar_al_terminar(hilo)
-        hilo.start()
+        hilos.en_fondo(
+            foto_paciente, self._case_id, self._foto_key(persona_id), dueno=self, nombre="avatar",
+            listo=lambda data, pid=persona_id, cid=self._case_id: self._on_avatar_listo(cid, pid, data))
 
     def _on_avatar_listo(self, case_id_solicitado, persona_id, data):
         if case_id_solicitado != self._case_id or not data:
@@ -387,15 +329,13 @@ class ChatPacienteWidget(QWidget):
         self.btn_enviar.setEnabled(False)
 
         case_id_solicitado = self._case_id
-        self._thread = _ChatPacienteThread(
-            self._case_id, self._nombre, self._edad, self._procedimiento,
-            list(self._history), mensaje, appointment_id=self._appointment_id, parent=self,
-        )
-        self._thread.respondido.connect(lambda r: self._on_respuesta(case_id_solicitado, mensaje, r))
-        self._thread.fallo.connect(lambda e: self._on_fallo(case_id_solicitado, mensaje, e))
-        self._thread.finished.connect(self._on_thread_finished)
-        hilos.borrar_al_terminar(self._thread)
-        self._thread.start()
+        self._thread = hilos.en_fondo(
+            chat_con_paciente, self._case_id, self._nombre, self._edad, self._procedimiento,
+            list(self._history), mensaje, self._appointment_id, dueno=self, nombre="chat",
+            listo=lambda r: self._on_thread_finished(
+                self._on_respuesta, case_id_solicitado, mensaje, r),
+            fallo=lambda e: self._on_thread_finished(
+                self._on_fallo, case_id_solicitado, mensaje, str(e)))
 
     def _on_respuesta(self, case_id_solicitado, mensaje, resultado):
         self.input.setEnabled(True)
@@ -444,6 +384,7 @@ class ChatPacienteWidget(QWidget):
             self._mostrar_estado("No hubo respuesta. Puedes reintentar.")
             self.btn_reintentar.show()
 
-    def _on_thread_finished(self):
+    def _on_thread_finished(self, aviso, *args):
+        aviso(*args)
         self._thread = None
         self.input.setFocus()

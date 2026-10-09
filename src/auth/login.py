@@ -1,11 +1,11 @@
 # pylint: disable=no-name-in-module
-from PySide6.QtCore import QThread, Signal
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QMessageBox, QWidget
 from core import hilos
 
 from auth.func_login import LoginConnect
 from auth.login_busy_dialog import LoginBusyDialog
-from auth.login_worker import LoginWorker
+from auth import login_worker
 from auth.UI.Ui_Login import Ui_Login
 
 
@@ -37,9 +37,8 @@ class MainLogin(QWidget, Ui_Login):
         self.setTabOrder(self.Le_name, self.Le_passw)
         self.Le_name.setFocus()
 
-        # Estado del worker async. None cuando no hay login en curso.
+        # Login en curso (hilos.Tarea); None cuando no hay.
         self._login_thread = None
-        self._login_worker = None
         self._busy = None
 
     def showEvent(self, event) -> None:
@@ -63,46 +62,28 @@ class MainLogin(QWidget, Ui_Login):
         self._start_login(name, passw)
 
     def _start_login(self, name: str, passw: str) -> None:
-        """Lanza LoginWorker en un QThread para no congelar la UI.
+        """Corre el login con hilos.en_fondo para no congelar la UI.
 
         El HTTP a /api/admin_login.php (o /api/pair_exchange.php) puede
         tardar varios segundos con red lenta; antes esto se ejecutaba
-        sincrónico y la ventana quedaba pegada. Con el worker + overlay
+        sincrónico y la ventana quedaba pegada. Con el overlay
         (LoginBusyDialog), el usuario ve feedback de progreso y los inputs
         quedan bloqueados para evitar doble submit.
+
+        Sin QThread ni worker de Qt: con QThread + LoginWorker hubo segfault
+        (2026-09-07, deleteLater del worker en su propio hilo) y, con el
+        mismo patrón en la agenda, los cierres del 2026-10-09. El resultado
+        llega por `listo` ya en el hilo de la ventana, con la consulta
+        terminada: el post-login (load_sub_windows) nunca corre en paralelo
+        con él.
         """
         self._show_busy(True)
-        thread = QThread(self)
-        worker = LoginWorker(name, passw)
-        worker.moveToThread(thread)
-        thread.started.connect(worker.run)
-        # OJO con el ciclo de vida (aquí hubo segfault, ver core dumps del
-        # 2026-09-07): NO usar worker.deleteLater(). Ese DeferredDelete se
-        # despacha en el thread del worker y Shiboken destruye ahí el
-        # wrapper Python mientras el thread de la GUI todavía tiene la
-        # referencia y está construyendo la ventana principal -> "QObject:
-        # shared QObject was deleted directly" + SIGSEGV/SIGBUS dentro del
-        # QThread. El worker lo libera Python solo, al soltar la referencia
-        # en _on_login_finished, ya con el thread parado.
-        worker.finished.connect(thread.quit)
-        # El resultado se procesa en thread.finished (ya en el thread GUI y
-        # con el worker detenido), no en worker.finished: así el trabajo
-        # pesado del post-login (load_sub_windows) nunca corre en paralelo
-        # con el thread del worker aún vivo.
-        thread.finished.connect(self._on_login_finished)
-        hilos.borrar_al_terminar(thread)
-        self._login_thread = thread
-        self._login_worker = worker  # evita GC antes de que termine
-        thread.start()
+        self._login_thread = hilos.en_fondo(
+            login_worker.intentar_login, name, passw, dueno=self,
+            listo=self._on_login_finished, nombre="login")
 
-    def _on_login_finished(self) -> None:
-        """Slot llamado en el thread de la GUI cuando el QThread del login
-        ya terminó. Lee el resultado del worker, suelta las referencias
-        (eso destruye el worker desde este thread, no desde el suyo) y
-        delega al _verify_result existente (mismo path que antes)."""
-        worker = self._login_worker
-        result = worker.result if worker is not None else 0
-        self._login_worker = None
+    def _on_login_finished(self, result) -> None:
+        """En el hilo de la GUI, con el login ya terminado."""
         self._login_thread = None
         self._show_busy(False)
         self._verify_result(result)
@@ -123,12 +104,11 @@ class MainLogin(QWidget, Ui_Login):
                 self._busy = None
 
     def closeEvent(self, event) -> None:
-        """Si hay un login en curso al cerrar la ventana, parar el thread
-        limpio para no dejar zombie ni RuntimeError por emitir a un slot
-        de un widget ya destruido."""
-        if self._login_thread is not None and self._login_thread.isRunning():
-            self._login_thread.quit()
-            self._login_thread.wait(2000)
+        """Un login en curso al cerrar la ventana sigue solo y su resultado
+        ya no le llega a nadie (ver hilos.Tarea.descartar)."""
+        if self._login_thread is not None:
+            self._login_thread.descartar()
+            self._login_thread = None
         super().closeEvent(event)
 
     def _verify_result(self, result:any) -> None:

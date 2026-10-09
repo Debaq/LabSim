@@ -35,7 +35,7 @@ import tempfile
 
 import requests
 
-from PySide6.QtCore import QObject, QThread, QTimer, Signal, Slot
+from PySide6.QtCore import QObject, QTimer
 
 from core import hilos, respaldo_informes
 from core.base import context
@@ -95,40 +95,26 @@ def subir(job, client=None) -> None:
                              huella(job), "subido", version=version)
 
 
-class _Subida(QThread):
-    # (hilo, ok, error). Se conecta a un método de ReportAutosave, que vive
-    # en el hilo principal: así el aviso llega encolado allá. Con una lambda
-    # corría en ESTE hilo, que terminaba borrándose a sí mismo.
-    terminada = Signal(object, bool, str)
+class _Subida:
+    """Una subida en curso del autoguardado (corre con hilos.en_fondo, sin
+    QThread: ver los cierres del 2026-10-09 en core/hilos.py)."""
 
-    def __init__(self, job, clave, huella_job, carpeta, parent=None):
-        super().__init__(parent)
+    def __init__(self, job, clave, huella_job, carpeta, modulo=None):
         self.job = job
         self.clave = clave
         self.huella = huella_job
         self.carpeta = carpeta
-
-    def run(self):
-        try:
-            subir(self.job)
-        except Exception as exc:  # noqa: BLE001 -- best-effort, se reintenta
-            self.resultado = (False, str(exc))
-        else:
-            self.resultado = (True, "")
-        self.terminada.emit(self, *self.resultado)
+        self.modulo = modulo
+        self.tarea = None
 
 
-class _Recuperacion(QThread):
-    """Trae lo ya guardado de una cita (my_report.php) fuera del hilo de UI."""
-    lista = Signal(object, object)   # appointment_id, [informes]
-
-    def __init__(self, appointment_id, tipos, parent=None):
-        super().__init__(parent)
-        self.appointment_id = appointment_id
-        self.tipos = tipos
-
-    def run(self):
-        self.lista.emit(self.appointment_id, recuperar(self.appointment_id, self.tipos))
+def _subir_resultado(job):
+    """(ok, error) de subir(job); corre en el hilo de en_fondo."""
+    try:
+        subir(job)
+    except Exception as exc:  # noqa: BLE001 -- best-effort, se reintenta
+        return False, str(exc)
+    return True, ""
 
 
 def recuperar(appointment_id, tipos, client=None) -> list:
@@ -153,15 +139,13 @@ def recuperar(appointment_id, tipos, client=None) -> list:
                                      servidor_ok=servidor_ok)
 
 
-class _Reparto(QObject):
+class _Reparto:
     """Le da a cada módulo lo recuperado (ver ReportAutosave.recuperar)."""
 
-    def __init__(self, destinos, sigue_vigente, parent=None):
-        super().__init__(parent)
+    def __init__(self, destinos, sigue_vigente):
         self.destinos = destinos
         self.sigue_vigente = sigue_vigente
 
-    @Slot(object, object)
     def repartir(self, cita, informes):
         if not self.sigue_vigente(cita):
             return
@@ -257,19 +241,17 @@ class ReportAutosave(QObject):
         """Espera a que terminen las subidas en curso. Se llama antes de la
         subida final (cierre de atención): si una subida vieja terminara
         después, pisaría el informe final con uno anterior."""
-        for hilo in list(self._hilos.values()):
-            if not hilo.wait(35_000):
+        for subida in list(self._hilos.values()):
+            if not subida.tarea.esperar(35_000):
                 # Con la red lenta la subida puede pasar los 35 s (el
-                # timeout de requests es por operación, no total). Borrarlo
-                # corriendo abortaba el proceso: se lo deja terminar solo.
-                # Lo que estaba subiendo ya quedó en el respaldo local.
-                print(f"autosave: la subida de {hilo.clave[1]} sigue en curso, se suelta")
-                del self._hilos[hilo.clave]
-                hilos.soltar(hilo)
+                # timeout de requests es por operación, no total). Sigue
+                # sola; lo que estaba subiendo ya quedó en el respaldo local.
+                print(f"autosave: la subida de {subida.clave[1]} sigue en curso, se suelta")
+                del self._hilos[subida.clave]
                 continue
-            # El aviso de fin quedó encolado: se procesa ya, así la huella
+            # El aviso de fin está en camino: se procesa ya, así la huella
             # queda al día antes de la subida final.
-            self._terminada(hilo, *getattr(hilo, "resultado", (False, "sin terminar")))
+            self._terminada(subida, subida.tarea.resultado or (False, "sin terminar"))
 
     def guardar(self, modulo=None):
         """Respalda en el disco y sube en segundo plano lo que haya cambiado
@@ -304,16 +286,10 @@ class ReportAutosave(QObject):
         carpeta = tempfile.mkdtemp(prefix="labsim_informe_")
         job["images_listas"] = self._copiar_imagenes(
             respaldo_informes.imagenes(usuario, job["appointment_id"], job["tipo"]), carpeta)
-        hilo = _Subida(job, clave, h, carpeta, self)
-        hilo.modulo = modulo
-        self._hilos[clave] = hilo
-        hilo.terminada.connect(self._terminada)
-        # Se borra recién cuando terminó del todo (ver hilos.borrar_al_terminar).
-        # `terminada` se emite dentro de run(): borrarlo desde ahí
-        # (deleteLater en _terminada) lo destruía con run() todavía
-        # devolviendo y Qt abortaba (laboratorio, 2026-10-08).
-        hilos.borrar_al_terminar(hilo)
-        hilo.start()
+        subida = _Subida(job, clave, h, carpeta, modulo)
+        self._hilos[clave] = subida
+        subida.tarea = hilos.en_fondo(_subir_resultado, job, nombre="autosave",
+                                      listo=lambda r, s=subida: self._terminada(s, r))
 
     def recuperar(self, appointment_id, destinos, sigue_vigente):
         """Retomar la atención: pide lo ya guardado de esa cita y se lo da a
@@ -322,15 +298,10 @@ class ReportAutosave(QObject):
         `sigue_vigente(appointment_id)`: si el alumno ya cerró o cambió de
         atención cuando llega la respuesta, no se toca nada.
         """
-        reparto = _Reparto(destinos, sigue_vigente, self)
-        hilo = _Recuperacion(appointment_id, list(destinos), self)
-        # A un método de un QObject del hilo principal: el aviso llega
-        # encolado allá, no en el hilo de la consulta.
-        hilo.lista.connect(reparto.repartir)
-        hilos.borrar_al_terminar(hilo)
-        hilo.finished.connect(reparto.deleteLater)
-        hilo.start()
-        return hilo
+        reparto = _Reparto(destinos, sigue_vigente)
+        return hilos.en_fondo(recuperar, appointment_id, list(destinos), dueno=self,
+                              nombre="recuperar", listo=lambda informes:
+                              reparto.repartir(appointment_id, informes))
 
     def olvidar(self, appointment_id, tipo):
         """La subida final ya se hizo a mano: que el próximo tick no crea
@@ -355,23 +326,27 @@ class ReportAutosave(QObject):
             rutas[sufijo] = destino
         return rutas
 
-    def _terminada(self, hilo, ok, err):
-        # Puede llegar dos veces: desde esperar() y por la señal encolada.
-        # O de un hilo que esperar() soltó por lento (ver core/hilos.py).
-        if self._hilos.get(hilo.clave) is not hilo:
-            shutil.rmtree(hilo.carpeta, ignore_errors=True)
+    def _terminada(self, subida, resultado):
+        # Puede llegar dos veces: desde esperar() y por el aviso de en_fondo.
+        # O de una subida que esperar() soltó por lenta.
+        ok, err = resultado
+        if self._hilos.get(subida.clave) is not subida:
+            shutil.rmtree(subida.carpeta, ignore_errors=True)
             return
-        del self._hilos[hilo.clave]
-        shutil.rmtree(hilo.carpeta, ignore_errors=True)
+        del self._hilos[subida.clave]
+        shutil.rmtree(subida.carpeta, ignore_errors=True)
         if ok:
-            self._huellas[hilo.clave] = hilo.huella
+            self._huellas[subida.clave] = subida.huella
         else:
-            print(f"autosave: no se pudo subir {hilo.clave[1]}: {err}")
+            print(f"autosave: no se pudo subir {subida.clave[1]}: {err}")
         # El alumno ve en el módulo si quedó guardado (no hay botón).
-        estado = getattr(getattr(hilo, "modulo", None), "estado_informe", None)
+        estado = getattr(subida.modulo, "estado_informe", None)
         if estado is not None:
-            estado.guardado(hilo.clave[1], ok, err,
-                            en_equipo=self._respaldadas.get(hilo.clave, (None, False))[1])
+            try:
+                estado.guardado(subida.clave[1], ok, err,
+                                en_equipo=self._respaldadas.get(subida.clave, (None, False))[1])
+            except RuntimeError:   # el módulo ya no existe (cerró sesión)
+                pass
 
 
 def subir_pendientes(appointment_id=None, client=None, excluir=None) -> tuple[bool, str]:
@@ -400,20 +375,6 @@ def subir_pendientes(appointment_id=None, client=None, excluir=None) -> tuple[bo
                   f"({registro.get('tipo')}) no subió: {exc}")
             primer_error = primer_error or str(exc)
     return not primer_error, primer_error
-
-
-class SubidaPendientes(QThread):
-    """subir_pendientes() de todas las citas, fuera del hilo de la ventana."""
-
-    def __init__(self, excluir, parent=None):
-        super().__init__(parent)
-        self.excluir = excluir
-
-    def run(self):
-        try:
-            subir_pendientes(None, excluir=self.excluir)
-        except Exception as exc:  # noqa: BLE001
-            print(f"autosave: no se pudieron subir los pendientes: {exc}")
 
 
 # Motivo de la última subida sincrónica fallida de cada tipo: el cierre de

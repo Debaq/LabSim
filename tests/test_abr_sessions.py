@@ -62,7 +62,7 @@ def _traer(w):
     w.fetch_sessions()
     hilo = getattr(w, '_retomar', None)
     if hilo is not None:
-        hilo.wait(5000)
+        hilo.esperar(5000)
     from core.base import context
     context.app.processEvents()
 

@@ -10,7 +10,7 @@ calendario sin feriados marcados es un detalle visual, no un error:
   1. resources/local_cache/feriados_<año>.json -- lo que ya se bajó alguna
      vez. Si existe se usa tal cual y NO se vuelve a pedir por red: la lista
      de un año no cambia (salvo ley nueva, ver refrescar()).
-  2. la API, en un hilo aparte (ver FeriadosThread) para no congelar la
+  2. la API, en un hilo aparte (ver refrescar_varios) para no congelar la
      ventana si netlify no responde.
   3. resources/json/feriados_backup.json -- copia versionada en el repo,
      para una instalación nueva sin red.
@@ -23,7 +23,6 @@ import os
 from pathlib import Path
 
 import requests
-from PySide6.QtCore import QThread, Signal
 
 FERIADOS_URL = "https://feriados-cl.netlify.app/api/holidays/{year}"
 FERIADOS_TIMEOUT = 5
@@ -129,7 +128,7 @@ def feriados_offline(year: int) -> dict:
 
 def refrescar(year: int) -> dict:
     """Feriados del año pidiéndolos por red solo si no hay cache. Bloquea:
-    llamar desde FeriadosThread, no desde el hilo de UI.
+    llamar desde refrescar_varios en un hilo aparte, no desde el hilo de UI.
 
     Sin TTL a propósito: los feriados de un año ya bajado no cambian. Si
     algún año se agrega uno por ley, basta borrar resources/local_cache/
@@ -140,24 +139,13 @@ def refrescar(year: int) -> dict:
     return fetch_from_network(year) or load_backup(year)
 
 
-class FeriadosThread(QThread):
-    """Trae los feriados de varios años fuera del hilo de UI (netlify caído
-    congelaría la agenda hasta FERIADOS_TIMEOUT por año). Emite una sola vez
-    con {año: {"MM-DD": descripción}}; si no consiguió nada, no emite."""
-
-    listo = Signal(dict)
-
-    def __init__(self, years, parent=None):
-        super().__init__(parent)
-        self._years = list(years)
-
-    def run(self) -> None:
-        resultado = {}
-        for year in self._years:
-            if self.isInterruptionRequested():
-                return
-            mapa = refrescar(year)
-            if mapa:
-                resultado[year] = mapa
-        if resultado:
-            self.listo.emit(resultado)
+def refrescar_varios(years) -> dict:
+    """{año: {"MM-DD": descripción}} de varios años (los que se consiguen).
+    Bloquea: la agenda la corre con hilos.en_fondo (netlify caído
+    congelaría la agenda hasta FERIADOS_TIMEOUT por año)."""
+    resultado = {}
+    for year in years:
+        mapa = refrescar(year)
+        if mapa:
+            resultado[year] = mapa
+    return resultado

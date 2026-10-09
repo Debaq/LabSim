@@ -1,6 +1,6 @@
 # pylint: disable=no-name-in-module
 """Overlay "Conectando con el servidor..." mostrado sobre la ventana de
-login mientras LoginWorker corre el HTTP en background.
+login mientras el HTTP corre en background (login_worker.intentar_login).
 
 Diseño: QDialog frameless translúcido con un spinner Unicode que rota
 vía QTimer (sin assets). Se ve más cuidado que un QProgressDialog genérico

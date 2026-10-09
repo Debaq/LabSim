@@ -4969,3 +4969,44 @@ Los casos de referencia de la mano están en
 `labsim_backend/tests/test_audiometria_paciente.php` (contra la copia).
 Cambiar `response.py` sin cambiar la copia rompe el de Python.
 
+
+## Sin QThread: el trabajo de red va en hilos de Python (2026-10-09)
+
+Tickets 1 a 14 del panel: con 0.9.9-rc84c5553 LabSim se cerró solo en los
+cinco equipos del laboratorio, más o menos una vez por hora en cada uno,
+hiciera el alumno el examen que hiciera (el ticket 2, "se actualiza
+constantemente", eran tres cierres seguidos que el kiosko reabría). Los
+volcados son siempre memoria corrupta en el hilo de la ventana: un `free()`
+inválido al borrar un QObject (`DeferredDelete` → `Shiboken::Object::destroy`)
+o un segfault del recolector de Python, casi siempre con el hilo de la agenda
+(`_SheduleFetchThread`) a mitad de una consulta y con el frame de su `run()`
+ya inválido. El arreglo del 2026-10-08 (borrar el QThread recién después de
+`wait()`) venía en esa versión y no alcanzó.
+
+La agenda y la subida de pendientes creaban y borraban un QThread de Python
+cada 15 s, y el sync pasaba un dict por una señal encolada en cada ciclo:
+miles de envoltorios de Shiboken naciendo y muriendo entre dos hilos por
+jornada. No se pudo reproducir en el PC de desarrollo (ni con el patrón
+viejo bajo estrés), así que en vez de seguir parchando el ciclo de vida se
+sacó QThread de la app:
+
+- `hilos.en_fondo(funcion, ..., listo=, fallo=, dueno=)`: la consulta corre en
+  un `threading.Thread` daemon; el resultado vuelve por una cola de Python y a
+  Qt solo le llega un aviso sin argumentos (`_Correo.hay`). Si `dueno` ya no
+  existe, no se avisa. Agenda, feriados, pendientes, autoguardado, recuperar
+  informes, chat/sala/avatares, otoscopia, sesiones del ABR, login y tickets.
+- `hilos.Ciclo` + `hilos.avisar()`: lo periódico (sync, subida de logs,
+  reintento del layout).
+
+Ya no hay `deleteLater` de hilos ni nada que Qt destruya corriendo, así que
+`soltar`/`soltar_hijos`/`borrar_al_terminar` se fueron. Al cerrar se espera
+hasta 4 s a lo que sigue en curso; si algo queda, `os._exit` como antes.
+
+`_Correo.repartir` atiende solo lo que había al entrar: vaciar la cola hasta
+el final dejaba a la ventana sin volver nunca al bucle de eventos cuando un
+aviso lanzaba otra tarea que terminaba al instante.
+
+Queda abierta otra causa posible, que no se descartó: el build trae ~70
+librerías copiadas del sistema del PC donde se compila (pila X11/xcb, glib,
+fontconfig/freetype, dbus, libstdc++…), mientras que libxcb, harfbuzz, GL y
+pipewire se cargan del sistema del equipo. Ver TODO.md.

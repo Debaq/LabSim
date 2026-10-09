@@ -20,7 +20,8 @@ import os
 from pathlib import Path
 
 import requests
-from PySide6.QtCore import QThread, Signal
+
+from core import hilos
 
 # Primer intento corto: si hay cache preferimos abrir ya y reintentar en
 # background. Sin cache no hay alternativa, así que damos un segundo
@@ -134,36 +135,27 @@ def fetch_layout(backend_url: str) -> dict | None:
     return None
 
 
-class LayoutRetryThread(QThread):
+class LayoutRetryThread(hilos.Ciclo):
     """Reintenta el layout cada `interval` segundos mientras la app corre
-    en modo offline (abierta con cache, o sin layout). Emite `recovered`
-    con el layout fresco la primera vez que el backend responde; el caller
-    decide si basta con sacar el aviso o hay que reiniciar (cuando el
-    layout nuevo no coincide con el que se está usando)."""
+    en modo offline (abierta con cache, o sin layout). Llama a
+    `al_recuperar` (en el hilo de la ventana) con el layout fresco la
+    primera vez que el backend responde; el caller decide si basta con
+    sacar el aviso o hay que reiniciar (cuando el layout nuevo no coincide
+    con el que se está usando). Hilo de Python, no QThread (core/hilos.py)."""
 
-    recovered = Signal(dict)
-
-    def __init__(self, backend_url: str, interval: int = 60, parent=None):
-        super().__init__(parent)
+    def __init__(self, backend_url: str, interval: int = 60, al_recuperar=None, dueno=None):
+        super().__init__(interval, "LayoutRetryThread")
         self._backend_url = backend_url
-        self._interval = interval
-        self._stop = False
-
-    def stop(self) -> None:
-        self._stop = True
+        self._al_recuperar = al_recuperar
+        self._dueno = dueno
 
     def run(self) -> None:
-        while not self._stop:
-            # Espera troceada para poder cortar rápido al cerrar la app.
-            for _ in range(self._interval):
-                if self._stop:
-                    return
-                self.msleep(1000)
-            if self._stop:
-                return
+        # Primero espera: recién se intentó al arrancar.
+        while not self._parar.wait(self._intervalo_s):
             try:
                 data = fetch_from_network(self._backend_url, LAYOUT_TIMEOUT_RETRY)
             except LayoutFetchError:
                 continue
-            self.recovered.emit(data)
+            if self._al_recuperar is not None:
+                hilos.avisar(self._al_recuperar, data, dueno=self._dueno)
             return

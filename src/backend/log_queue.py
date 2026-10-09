@@ -15,7 +15,8 @@ from datetime import datetime
 from pathlib import Path
 
 import requests
-from PySide6.QtCore import QThread, Signal
+
+from core import hilos
 
 
 class LocalLogQueue:
@@ -129,20 +130,18 @@ def get_log_queue() -> "LocalLogQueue":
     return _SHARED_QUEUE
 
 
-class LogUploaderThread(QThread):
+class LogUploaderThread(hilos.Ciclo):
     """
     Sube los logs acumulados en lotes (nunca streaming). Si el POST falla
     (sin internet, backend caído) los eventos quedan en la cola local y se
-    reintentan en el siguiente ciclo -- no se pierden.
+    reintentan en el siguiente ciclo -- no se pierden. Hilo de Python, no
+    QThread (ver core/hilos.py).
     """
 
-    upload_failed = Signal(str)
-
-    def __init__(self, queue: LocalLogQueue, client, interval_s: int = 20, batch_size: int = 200, parent=None):
-        super().__init__(parent)
+    def __init__(self, queue: LocalLogQueue, client, interval_s: int = 20, batch_size: int = 200):
+        super().__init__(interval_s, "LogUploaderThread")
         self._queue = queue
         self._client = client
-        self._interval_s = interval_s
         self._batch_size = batch_size
         # Solo lo de quien tiene el token (ver LocalLogQueue.set_usuario).
         self._usuario = (getattr(client, "user", None) or {}).get("id")
@@ -150,10 +149,8 @@ class LogUploaderThread(QThread):
         # la vez y lo subían dos veces, por la misma conexión.
         self._lock = threading.Lock()
 
-    def run(self) -> None:
-        while not self.isInterruptionRequested():
-            self._flush_once()
-            self._wait_interruptible(self._interval_s)
+    def paso(self) -> None:
+        self._flush_once()
 
     def flush_now(self) -> None:
         """Fuerza una subida inmediata (bloqueante) fuera del ciclo normal.
@@ -171,20 +168,8 @@ class LogUploaderThread(QThread):
                            for e in batch]
                 try:
                     self._client.post_logs_batch(entries)
-                except requests.RequestException as exc:
-                    self.upload_failed.emit(str(exc))
-                    return
+                except requests.RequestException:
+                    return   # quedan en la cola: el próximo ciclo
                 self._queue.delete_ids([e["id"] for e in batch])
             except sqlite3.Error as exc:
                 print(f"log_queue: no se pudo leer la cola: {exc}")
-
-    def _wait_interruptible(self, seconds: float) -> None:
-        elapsed = 0.0
-        step = 0.5
-        while elapsed < seconds and not self.isInterruptionRequested():
-            self.msleep(int(step * 1000))
-            elapsed += step
-
-    def stop(self) -> None:
-        self.requestInterruption()
-        self.wait(2000)

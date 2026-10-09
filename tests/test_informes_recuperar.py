@@ -194,7 +194,7 @@ def test_el_reparto_le_da_a_cada_modulo_lo_suyo():
         vemp, oto = Modulo(), Modulo()
         auto = ra.ReportAutosave(lambda: [])
         hilo = auto.recuperar(42, {'VEMP': vemp, 'OTOSCOPIA': oto}, lambda cita: cita == 42)
-        hilo.wait(5000)
+        hilo.esperar(5000)
         for _ in range(5):
             APP.processEvents()
         assert vemp.recibido == [{'n': 2}]
@@ -202,7 +202,7 @@ def test_el_reparto_le_da_a_cada_modulo_lo_suyo():
 
         tarde = Modulo()
         hilo = auto.recuperar(42, {'VEMP': tarde}, lambda cita: False)
-        hilo.wait(5000)
+        hilo.esperar(5000)
         for _ in range(5):
             APP.processEvents()
         assert tarde.recibido == []   # el alumno ya cambió de atención

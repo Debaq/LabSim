@@ -2,8 +2,8 @@
 
 - Respaldo de informes en el equipo (core/respaldo_informes.py): lo que no
   llegó al servidor vuelve al retomar, y gana sobre lo del servidor.
-- Hilos de red que sobreviven a su dueño (core/hilos.py): destruir un
-  QThread corriendo abortaba el proceso entero.
+- Trabajo de red sin QThread (core/hilos.py): destruir un QThread
+  corriendo, o borrarlo mientras su hilo lo tocaba, abortaba el proceso.
 - Registro rotado y su cola para el reporte (core/registro.py).
 - Reportar un problema (core/soporte.py): nada sale sin aceptar.
 """
@@ -20,7 +20,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import requests  # noqa: E402
 import shiboken6  # noqa: E402
-from PySide6.QtCore import QThread  # noqa: E402
 from PySide6.QtWidgets import QWidget  # noqa: E402
 
 from core.base import context  # noqa: E402  (crea la QApplication)
@@ -136,32 +135,88 @@ def test_atencion_cerrada_no_queda_pendiente_para_siempre():
 
 # -- hilos ----------------------------------------------------------------------
 
-class _Lento(QThread):
-    def run(self):
-        time.sleep(0.4)
+def _esperar_entrega(tarea, limite_s=3):
+    assert tarea.esperar(limite_s * 1000)
+    fin = time.time() + limite_s
+    while time.time() < fin and tarea in hilos._tareas:
+        APP.processEvents()
+        time.sleep(0.005)
 
 
-def test_borrar_al_dueno_de_un_hilo_corriendo_no_aborta():
+def test_borrar_al_dueno_de_una_tarea_corriendo_no_aborta_ni_le_avisa():
     dueno = QWidget()
-    hilo = _Lento(dueno)
-    hilo.start()
-    hilos.soltar_hijos(dueno)
-    # Sin soltar_hijos esto aborta el proceso entero: "QThread: Destroyed
-    # while thread is still running".
+    avisos = []
+    tarea = hilos.en_fondo(time.sleep, 0.3, dueno=dueno, listo=avisos.append)
     shiboken6.delete(dueno)
     del dueno
-    assert hilo in hilos._sueltos
-    hilo.wait(3000)
-    APP.processEvents()
-    assert hilo not in hilos._sueltos
+    _esperar_entrega(tarea)
+    assert avisos == []          # ya no hay a quién avisarle
+    assert not tarea.corriendo()
 
 
-def test_soltar_un_hilo_terminado_no_hace_nada():
-    hilo = _Lento()
-    hilo.start()
-    hilo.wait(3000)
-    hilos.soltar(hilo)
-    assert hilo not in hilos._sueltos
+def test_el_resultado_llega_en_el_hilo_de_la_ventana():
+    import threading
+    hilos_del_aviso = []
+    tarea = hilos.en_fondo(lambda: {"agenda_1": {"1": [1, 2, 3]}},
+                           listo=lambda r: hilos_del_aviso.append(
+                               (threading.current_thread() is threading.main_thread(), r)))
+    _esperar_entrega(tarea)
+    assert hilos_del_aviso == [(True, {"agenda_1": {"1": [1, 2, 3]}})]
+
+
+def test_una_excepcion_llega_a_fallo_y_no_a_listo():
+    listos, fallos = [], []
+
+    def revienta():
+        raise ValueError("respuesta rara")
+
+    tarea = hilos.en_fondo(revienta, listo=listos.append, fallo=fallos.append)
+    _esperar_entrega(tarea)
+    assert listos == [] and len(fallos) == 1 and isinstance(fallos[0], ValueError)
+
+
+def test_muchas_tareas_cortas_con_el_recolector_andando_no_abortan():
+    """Lo que hacía la agenda cada 15 s durante toda la jornada, apurado:
+    con QThread + señal con datos esto terminaba en memoria corrupta
+    (laboratorio, 2026-10-09)."""
+    import gc
+    recibidos = []
+    dueno = QWidget()
+    tareas = [hilos.en_fondo(lambda i=i: {"i": i, "datos": list(range(200))},
+                             dueno=dueno, listo=recibidos.append)
+              for i in range(300)]
+    fin = time.time() + 15
+    while time.time() < fin and len(recibidos) < 300:
+        APP.processEvents()
+        gc.collect()
+    assert len(recibidos) == 300
+    assert not any(t.corriendo() for t in tareas)
+
+
+def test_un_ciclo_avisa_en_la_ventana_y_se_para():
+    import threading
+
+    class _Cuenta(hilos.Ciclo):
+        def __init__(self, avisos):
+            super().__init__(0.01, "cuenta")
+            self.n = 0
+            self.avisos = avisos
+
+        def paso(self):
+            self.n += 1
+            hilos.avisar(lambda n: self.avisos.append(
+                (n, threading.current_thread() is threading.main_thread())), self.n)
+
+    avisos = []
+    ciclo = _Cuenta(avisos)
+    ciclo.start()
+    fin = time.time() + 3
+    while time.time() < fin and len(avisos) < 3:
+        APP.processEvents()
+        time.sleep(0.005)
+    ciclo.stop()
+    assert not ciclo.isRunning()
+    assert avisos[:3] == [(1, True), (2, True), (3, True)]
 
 
 # -- registro ---------------------------------------------------------------------
@@ -369,78 +424,34 @@ def test_una_cola_de_acciones_danada_no_impide_abrir():
     assert os.path.exists(ruta + ".danado")
 
 
-def test_quedan_vivos_avisa_de_un_hilo_soltado_que_sigue():
-    dueno = QWidget()
-    hilo = _Lento(dueno)
-    hilo.start()
-    hilos.soltar_hijos(dueno)
+def test_quedan_vivos_avisa_de_una_tarea_que_sigue():
+    tarea = hilos.en_fondo(time.sleep, 0.3)
     assert hilos.quedan_vivos()
-    hilo.wait(2000)
-    APP.processEvents()
+    _esperar_entrega(tarea)
     assert not hilos.quedan_vivos()
 
 
+def test_una_subida_fallida_se_atiende_una_sola_vez():
+    """esperar() atiende el fin de la subida en el momento y el aviso de
+    en_fondo llega después: el segundo no tiene que hacer nada."""
+    original = ra.subir
 
-def test_una_subida_fallida_no_borra_su_hilo_antes_de_que_termine():
-    """El hilo avisa (terminada) dentro de run() y recién después termina.
-    Borrarlo con ese aviso abortaba el proceso si run() todavía no había
-    devuelto (laboratorio, 2026-10-08)."""
-    from PySide6.QtCore import QCoreApplication, QEvent
+    def sin_red(job, client=None):
+        raise requests.ConnectionError("sin red")
 
-    class _Lenta(ra._Subida):
-        def run(self):
-            self.resultado = (False, "sin red")
-            self.terminada.emit(self, *self.resultado)
-            time.sleep(0.4)   # como un hilo que espera el GIL para salir
-
-    original = ra._Subida
-    ra._Subida = _Lenta
+    ra.subir = sin_red
     try:
         auto = ra.ReportAutosave(lambda: [])
         job = _job({"curvas": {"R1": 33}}, cita=80)
         auto._subir_si_cambio(None, job, "u1")
-        hilo = auto._hilos[(80, "ABR")]
-        time.sleep(0.1)
-        APP.processEvents()                       # llega `terminada`
-        QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
-        assert shiboken6.isValid(hilo) and hilo.isRunning()
-        hilo.wait(2000)
+        subida = auto._hilos[(80, "ABR")]
+        auto.esperar()
+        assert (80, "ABR") not in auto._hilos
+        assert (80, "ABR") not in auto._huellas      # no subió: se reintenta
+        _esperar_entrega(subida.tarea)               # llega el aviso tardío
+        assert not os.path.exists(subida.carpeta)
     finally:
-        ra._Subida = original
-
-
-def test_borrar_al_terminar_borra_recien_cuando_salio_y_no_aborta():
-    """Muchos hilos cortos que avisan a Python al terminar, como la agenda
-    cada 15 s o el autoguardado: con finished -> deleteLater el objeto de
-    Python del hilo se destruía mientras el hilo todavía lo tocaba y la
-    memoria quedaba corrupta (aborto en Shiboken::Object::destroy)."""
-    from PySide6.QtCore import QObject, Signal
-
-    class _Corto(QThread):
-        listo = Signal(object)
-
-        def run(self):
-            self.listo.emit({"dato": list(range(50))})
-
-    recibidos = []
-    dueno = QObject()
-    lanzados = []
-    for _ in range(200):
-        h = _Corto(dueno)
-        h.listo.connect(lambda d: recibidos.append(d))
-        h.finished.connect(lambda: None)
-        hilos.borrar_al_terminar(h)
-        h.start()
-        lanzados.append(h)
-        APP.processEvents()
-    limite = time.time() + 10
-    while time.time() < limite and any(shiboken6.isValid(h) for h in lanzados):
-        APP.processEvents()
-        from PySide6.QtCore import QCoreApplication, QEvent
-        QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
-        time.sleep(0.01)
-    assert len(recibidos) == 200
-    assert not any(shiboken6.isValid(h) for h in lanzados), "quedaron hilos sin borrar"
+        ra.subir = original
 
 
 def test_un_cierre_inesperado_se_ofrece_una_vez_aunque_se_actualice_en_el_medio():
@@ -479,15 +490,15 @@ class _ClienteTicket:
 
 def test_el_reporte_de_una_caida_usa_la_sesion_que_quedo_o_va_sin_sesion():
     from core import soporte
-    envio = soporte._Envio("", {}, {}, cierre_inesperado=True)
+    args = ("", {}, {}, None)
     con = _ClienteTicket(True)
-    envio._enviar_cierre(con, None)
+    soporte._enviar_cierre(con, args)
     assert con.envios == [(True, False)]                 # a nombre del alumno
     vencida = _ClienteTicket(True, token_valido=False)
-    envio._enviar_cierre(vencida, None)
+    soporte._enviar_cierre(vencida, args)
     assert vencida.envios == [(True, True)]              # token vencido: sin sesión
     sin = _ClienteTicket(False)
-    envio._enviar_cierre(sin, None)
+    soporte._enviar_cierre(sin, args)
     assert sin.envios == [(True, True)]
 
 if __name__ == "__main__":

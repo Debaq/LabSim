@@ -12,7 +12,7 @@ from core.base import context
 from core import hilos
 from core.helpers import Preferences, foto_otoscopia
 from core.report_autosave import subir_ahora
-from PySide6.QtCore import QRect, Qt, QThread, Signal
+from PySide6.QtCore import QRect, Qt
 from PySide6.QtGui import QColor, QPainter, QPen, QPixmap, QRegion
 from PySide6.QtWidgets import (
     QButtonGroup,
@@ -34,20 +34,10 @@ SIN_IMAGEN_TEXTO = "Otoscopio sin batería"
 FASE_FIJA = 0
 
 
-class _OtoscopiaFetchThread(QThread):
-    """Trae las imágenes OD/OI del caso fuera del hilo de UI -- mismo
-    patrón que _AvatarFetchThread en agenda/ChatPaciente.py. Emite None por
-    lado si no hay imagen subida o no hay conexión (no es una falla)."""
-    listo = Signal(object, object)
-
-    def __init__(self, case_id, parent=None):
-        super().__init__(parent)
-        self._case_id = case_id
-
-    def run(self):
-        od = foto_otoscopia(self._case_id, "od", FASE_FIJA)
-        oi = foto_otoscopia(self._case_id, "oi", FASE_FIJA)
-        self.listo.emit(od, oi)
+def _traer_fotos(case_id):
+    """Imágenes OD/OI del caso (bytes o None por lado: sin imagen subida o
+    sin conexión no es una falla). Corre con hilos.en_fondo."""
+    return foto_otoscopia(case_id, "od", FASE_FIJA), foto_otoscopia(case_id, "oi", FASE_FIJA)
 
 
 class _OtoscopioVisor(QWidget):
@@ -247,12 +237,9 @@ class Otoscopia(QWidget):
         if self._case_id_pedido is None:
             return
 
-        self._fetch_thread = _OtoscopiaFetchThread(self._case_id_pedido, parent=self)
-        self._fetch_thread.listo.connect(
-            lambda od, oi, cid=self._case_id_pedido: self._on_fotos_listas(cid, od, oi)
-        )
-        hilos.borrar_al_terminar(self._fetch_thread)
-        self._fetch_thread.start()
+        self._fetch_thread = hilos.en_fondo(
+            _traer_fotos, self._case_id_pedido, dueno=self, nombre="otoscopia",
+            listo=lambda fotos, cid=self._case_id_pedido: self._on_fotos_listas(cid, *fotos))
 
     def _on_fotos_listas(self, case_id_solicitado, od_bytes, oi_bytes):
         if case_id_solicitado != self._case_id_pedido:

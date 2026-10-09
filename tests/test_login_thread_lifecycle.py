@@ -9,7 +9,7 @@ de la GUI corría el post-login (load_sub_windows) y soltaba su referencia
 al worker. Dos dueños liberando el mismo objeto en paralelo ->
 "QObject: shared QObject was deleted directly" y crash intermitente.
 
-El test corre el flujo real de MainLogin (QThread + LoginWorker) N veces
+El test corre el flujo real de MainLogin (hoy hilos.en_fondo) N veces
 con LoginConnect stubeado, haciendo trabajo pesado de widgets dentro del
 slot de resultado para forzar la carrera. Va en un SUBPROCESO a propósito:
 la regresión no es una excepción, es un segfault, y mataría al runner.

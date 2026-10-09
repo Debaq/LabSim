@@ -20,7 +20,7 @@ from core import mis_pacientes
 from core import app_config_store
 from core import equipo
 from core import report_autosave
-from core.report_autosave import ReportAutosave, SubidaPendientes, subir_pendientes
+from core.report_autosave import ReportAutosave, subir_pendientes
 from core.secretaria import Secretaria, siguiente_paciente
 from core.kiosko import es_kiosko, atender_apagado
 from core.preferencias import preferencias
@@ -272,8 +272,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def _start_layout_retry(self):
         if not BACKEND_URL:
             return
-        self._layout_retry = LayoutRetryThread(BACKEND_URL, parent=self)
-        self._layout_retry.recovered.connect(self._on_layout_recovered)
+        self._layout_retry = LayoutRetryThread(
+            BACKEND_URL, al_recuperar=self._on_layout_recovered, dueno=self)
         self._layout_retry.start()
 
     def _on_layout_recovered(self, data):
@@ -333,8 +333,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
     def _stop_layout_retry(self):
         if self._layout_retry is not None:
             self._layout_retry.stop()
-            self._layout_retry.wait(2000)
-            hilos.soltar(self._layout_retry)
             self._layout_retry = None
 
     def configure_btn(self):
@@ -616,10 +614,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
     def _stop_log_uploader(self):
         if self.log_uploader is not None:
+            # Espera 2 s; si sigue en una subida termina sola (hilo de
+            # Python, ver core/hilos.Ciclo).
             self.log_uploader.stop()
-            # stop() espera 2 s y una subida puede tardar 10: soltar la
-            # referencia con el hilo vivo abortaba el proceso.
-            hilos.soltar(self.log_uploader)
             self.log_uploader = None
 
     def _start_sync_thread(self):
@@ -628,26 +625,27 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         client = self._logged_in_client()
         if client is None:
             return
-        self.sync_thread = SyncThread(client)
-        self.sync_thread.sync_ok.connect(self._on_backend_sync)
+        self.sync_thread = SyncThread(client, al_sincronizar=self._on_backend_sync, dueno=self)
         self.sync_thread.start()
 
     def _subir_pendientes_en_fondo(self):
         """Informes que quedaron en este equipo sin subir, de cualquier
         atención del usuario (ver report_autosave.subir_pendientes). Al
         iniciar sesión y con cada sync, que es cuando hay red."""
-        hilo = getattr(self, "_subida_pendientes", None)
-        if hilo is not None:
+        if self._subida_pendientes is not None:
             return
-        hilo = SubidaPendientes(lambda: self.data_current_key, self)
-        hilo.finished.connect(self._fin_subida_pendientes)
-        self._subida_pendientes = hilo
-        hilo.start()
+        # Con cada sync (15 s): sin QThread, ver hilos.en_fondo.
+        self._subida_pendientes = hilos.en_fondo(
+            subir_pendientes, None, excluir=lambda: self.data_current_key,
+            listo=self._fin_subida_pendientes, fallo=self._fallo_subida_pendientes,
+            nombre="pendientes")
 
-    def _fin_subida_pendientes(self):
-        hilo, self._subida_pendientes = self._subida_pendientes, None
-        if hilo is not None:
-            hilos.borrar(hilo)   # no deleteLater pelado: ver hilos.borrar_al_terminar
+    def _fin_subida_pendientes(self, _resultado=None):
+        self._subida_pendientes = None
+
+    def _fallo_subida_pendientes(self, exc):
+        print(f"autosave: no se pudieron subir los pendientes: {exc}")
+        self._subida_pendientes = None
 
     def _on_backend_sync(self, _delta):
         # refresh_async: este callback corre en cada ciclo de polling (15s);
@@ -666,8 +664,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
 
     def _stop_sync_thread(self):
         if self.sync_thread is not None:
-            self.sync_thread.stop()
-            hilos.soltar(self.sync_thread)   # ver _stop_log_uploader
+            self.sync_thread.stop()   # ver _stop_log_uploader
             self.sync_thread = None
 
     def toggle_login(self):
@@ -759,19 +756,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                 continue
             sub = self.modules.get(pos_z)
             if sub is not None:
-                # Un hilo hijo esperando al servidor (agenda, chat,
-                # otoscopia) se destruiría corriendo junto con la ventana, y
-                # Qt aborta el proceso entero (ver core/hilos.py).
-                hilos.soltar_hijos(sub)
+                # Lo que la ventana tenga pidiendo al servidor (agenda,
+                # chat, otoscopia) corre con hilos.en_fondo: termina solo y
+                # su resultado ya no le llega a nadie.
                 self.mdi_area.removeSubWindow(sub)
                 sub.deleteLater()
                 self.modules.set(pos_z, None)
-
-        # Las subventanas que nunca se abrieron no tienen padre: al soltarlas
-        # acá el GC las destruye junto con sus hilos (la agenda se refresca
-        # cada 15 s aunque esté cerrada, la otoscopia baja la foto al
-        # atender). Un hilo vivo destruido así abortaba el proceso.
-        self._soltar_hilos_de_ventanas(incluir_login=False)
 
         login_subw = self.subw.get("LOGIN") if self.subw else None
         self.subw = {"LOGIN": login_subw} if login_subw else None
@@ -780,18 +770,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                      "subw_aabr", "subw_eoas", "subw_vemp"):
             if hasattr(self, attr):
                 delattr(self, attr)
-
-    def _soltar_hilos_de_ventanas(self, incluir_login=True):
-        """Suelta (core/hilos.py) los hilos de todas las subventanas, estén
-        abiertas o no, antes de que se borren."""
-        frames = list((self.subw or {}).items())
-        frames += [(attr, getattr(self, attr, None)) for attr in
-                   ("subw_a", "subw_w", "subw_z", "subw_ac", "subw_ot", "subw_abr",
-                    "subw_aabr", "subw_eoas", "subw_vemp")]
-        for nombre, frame in frames:
-            if frame is None or (nombre == "LOGIN" and not incluir_login):
-                continue
-            hilos.soltar_hijos(frame)
 
     def atender_paciente(self, key):
         """
@@ -1395,10 +1373,6 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self._stop_log_uploader()
         self._stop_sync_thread()
         self._stop_layout_retry()
-        # Lo que siga esperando al servidor (chat, agenda, avatares) no
-        # puede destruirse con la ventana: Qt abortaría el proceso.
-        self._soltar_hilos_de_ventanas()
-        hilos.soltar_hijos(self)
         super().closeEvent(event)
 
 

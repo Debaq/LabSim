@@ -8,7 +8,6 @@ ticket es para que el equipo de LabSim abra un issue.
 """
 import gzip
 
-from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import (QCheckBox, QDialog, QDialogButtonBox, QFormLayout, QGroupBox,
                                QLabel, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget)
 
@@ -23,48 +22,38 @@ _ROTULOS = {"so_version": "Sistema operativo", "distribucion": "Distribución",
             "pantalla": "Pantalla", "kiosko": "Equipo del laboratorio"}
 
 
-class _Envio(QThread):
-    listo = Signal(bool, str)   # ok, número de ticket o motivo
+def _enviar(descripcion, equipo_info, detalle, cierre_inesperado=False):
+    """Manda el ticket con la cola del registro. Devuelve (ok, número de
+    ticket o motivo). Corre con hilos.en_fondo: nada de widgets acá."""
+    from backend.client import BackendClient
+    try:
+        log_gz = gzip.compress(registro.cola())
+        client = BackendClient(Preferences().get("BACKEND_URL"),
+                               context.get_resource("json/session.json"))
+        if cierre_inesperado:
+            respuesta = _enviar_cierre(client, (descripcion, equipo_info, detalle, log_gz or None))
+        else:
+            if not client.is_logged_in():
+                raise RuntimeError("no hay sesión iniciada con el servidor")
+            respuesta = client.send_ticket(descripcion, equipo_info, detalle, log_gz or None)
+    except Exception as exc:  # noqa: BLE001 -- se le muestra al usuario
+        print(f"soporte: no se pudo enviar el reporte: {exc}")
+        return False, str(exc)
+    print(f"soporte: reporte enviado, ticket #{respuesta.get('id')}")
+    return True, str(respuesta.get("id", ""))
 
-    def __init__(self, descripcion, equipo_info, detalle, cierre_inesperado=False):
-        super().__init__()
-        self.descripcion = descripcion
-        self.equipo_info = equipo_info
-        self.detalle = detalle
-        self.cierre_inesperado = cierre_inesperado
 
-    def run(self):
-        from backend.client import BackendClient
+def _enviar_cierre(client, args):
+    """Con la sesión que quedó de antes de la caída, si sigue valiendo
+    (el ticket queda a nombre de ese usuario); si no, sin sesión."""
+    import requests
+    if client.is_logged_in():
         try:
-            log_gz = gzip.compress(registro.cola())
-            client = BackendClient(Preferences().get("BACKEND_URL"),
-                                   context.get_resource("json/session.json"))
-            if self.cierre_inesperado:
-                respuesta = self._enviar_cierre(client, log_gz or None)
-            else:
-                if not client.is_logged_in():
-                    raise RuntimeError("no hay sesión iniciada con el servidor")
-                respuesta = client.send_ticket(self.descripcion, self.equipo_info,
-                                               self.detalle, log_gz or None)
-        except Exception as exc:  # noqa: BLE001 -- se le muestra al usuario
-            print(f"soporte: no se pudo enviar el reporte: {exc}")
-            self.listo.emit(False, str(exc))
-            return
-        print(f"soporte: reporte enviado, ticket #{respuesta.get('id')}")
-        self.listo.emit(True, str(respuesta.get("id", "")))
-
-    def _enviar_cierre(self, client, log_gz):
-        """Con la sesión que quedó de antes de la caída, si sigue valiendo
-        (el ticket queda a nombre de ese usuario); si no, sin sesión."""
-        import requests
-        args = (self.descripcion, self.equipo_info, self.detalle, log_gz)
-        if client.is_logged_in():
-            try:
-                return client.send_ticket(*args, cierre_inesperado=True)
-            except requests.HTTPError as exc:
-                if getattr(exc.response, "status_code", None) != 401:
-                    raise
-        return client.send_ticket(*args, cierre_inesperado=True, anonimo=True)
+            return client.send_ticket(*args, cierre_inesperado=True)
+        except requests.HTTPError as exc:
+            if getattr(exc.response, "status_code", None) != 401:
+                raise
+    return client.send_ticket(*args, cierre_inesperado=True, anonimo=True)
 
 
 def ofrecer_envio_por_cierre(parent, hora_arranque):
@@ -102,11 +91,9 @@ def ofrecer_envio_por_cierre(parent, hora_arranque):
     if respuesta != QDialog.DialogCode.Accepted:
         print("soporte: no se envió el registro del cierre inesperado")
         return None
-    envio = _Envio(descripcion.toPlainText().strip(), info_equipo, detalle, cierre_inesperado=True)
-    envio.start()
     # No hay ventana que espere la respuesta: el resultado queda en el registro.
-    hilos.soltar(envio)
-    return envio
+    return hilos.en_fondo(_enviar, descripcion.toPlainText().strip(), info_equipo, detalle,
+                          cierre_inesperado=True, nombre="soporte")
 
 
 def _caja_que_se_envia(parent, info_equipo, detalle):
@@ -204,13 +191,11 @@ class PaginaSoporte(QWidget):
             return
         self.lbl_estado.setStyleSheet("color:#666666;")
         self.lbl_estado.setText("Enviando…")
-        self._envio = _Envio(self.txt_descripcion.toPlainText().strip(),
-                             self._equipo, self._detalle)
-        self._envio.listo.connect(self._enviado)
-        self._envio.start()
-        # Si se cierra Configuración mientras sube, el hilo sigue solo
-        # (ver core/hilos.py) en vez de destruirse corriendo.
-        hilos.soltar(self._envio)
+        # Si se cierra Configuración mientras sube, sigue solo y el
+        # resultado ya no le llega a nadie (dueno).
+        self._envio = hilos.en_fondo(_enviar, self.txt_descripcion.toPlainText().strip(),
+                                     self._equipo, self._detalle, dueno=self,
+                                     listo=lambda r: self._enviado(*r), nombre="soporte")
         self._actualizar_boton()
 
     def _enviado(self, ok, detalle):
