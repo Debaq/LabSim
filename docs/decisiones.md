@@ -79,6 +79,10 @@ se equivocó en dos cosas:
   audio del audiómetro.
 - La segunda ICU (v78, ~38 MB) se creyó que la usaba `_sqlite3` y se dejó.
   No era así (ver abajo, "Tercera pasada").
+- `qwebp` **no** es sobrante: `OtoscopiaPhoto.php` guarda las fotos en WebP
+  cuando el servidor tiene `imagewebp`. Sin el plugin, a los alumnos les
+  llegaban los bytes pero `QPixmap` quedaba nulo y el otoscopio en negro
+  (2026-10-08). Volvió al build.
 
 Se mantiene el plugin wayland (la distro del kiosko puede no tener
 XWayland) y, en Windows, `opengl32sw.dll` (OpenGL por software para equipos

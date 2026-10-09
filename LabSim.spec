@@ -25,8 +25,10 @@ a = Analysis(
 # docs/decisiones.md, "Build más liviano".
 #
 # NO sacar: QtQuick/Qml (los importa libffmpegmediaplugin, el audio),
-# QtMultimedia/FFmpeg, QtNetwork, QtOpenGL/QtSvg/QtTest (pyqtgraph), ni el
-# plugin wayland (la distro del kiosko puede no tener XWayland).
+# QtMultimedia/FFmpeg, QtNetwork, QtOpenGL/QtSvg/QtTest (pyqtgraph), el
+# plugin wayland (la distro del kiosko puede no tener XWayland), ni el
+# imageformat qwebp (las otoscopias se guardan en WebP en el backend: sin el
+# plugin llegan los bytes pero el QPixmap queda nulo).
 import fnmatch
 import os
 import subprocess
@@ -39,7 +41,6 @@ QT_DROP = [
     '*plugins/platforminputcontexts/*qtvirtualkeyboardplugin.*',
     '*plugins/imageformats/*qpdf.*',
     '*plugins/imageformats/*qtiff.*',
-    '*plugins/imageformats/*qwebp.*',
     '*plugins/imageformats/*qicns.*',
     '*plugins/imageformats/*qtga.*',
     '*plugins/imageformats/*qwbmp.*',

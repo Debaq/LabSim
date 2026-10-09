@@ -258,11 +258,14 @@ class Otoscopia(QWidget):
         if case_id_solicitado != self._case_id_pedido:
             return  # el alumno ya cambió de paciente (o se deshidrató) mientras se pedía
         for lbl, data in ((self.lbl_od, od_bytes), (self.lbl_oi, oi_bytes)):
-            if data:
-                pix = QPixmap()
-                pix.loadFromData(data)
+            pix = QPixmap()
+            if data and pix.loadFromData(data):
                 lbl.setPixmap(pix)
             else:
+                if data:
+                    # Llegó la foto pero Qt no la sabe leer (p. ej. WebP sin
+                    # el plugin qwebp en el build, ver LabSim.spec).
+                    print(f"Otoscopia: no se pudo decodificar la imagen ({len(data)} bytes, {data[:12]!r})")
                 lbl.setText(SIN_IMAGEN_TEXTO)
 
     def submit_report(self):
