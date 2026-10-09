@@ -151,7 +151,7 @@ class LayoutRetryThread(hilos.Ciclo):
 
     def run(self) -> None:
         # Primero espera: recién se intentó al arrancar.
-        while not self._parar.wait(self._intervalo_s):
+        while self._esperar_turno():
             try:
                 data = fetch_from_network(self._backend_url, LAYOUT_TIMEOUT_RETRY)
             except LayoutFetchError:

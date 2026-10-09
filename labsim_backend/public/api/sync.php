@@ -7,7 +7,7 @@ require_once __DIR__ . '/../bootstrap.php';
 /**
  * Sync incremental por polling. El cliente manda la última marca de tiempo
  * que ya tiene (`since`) y recibe solo lo que cambió desde entonces.
- * Con 14 clientes y polling cada ~15s esto es liviano para hosting compartido;
+ * Con 14 clientes y polling cada ~60s esto es liviano para hosting compartido;
  * evita mantener conexiones abiertas (websockets/long-poll) que ese tipo de
  * hosting no siempre soporta bien.
  *
@@ -28,29 +28,29 @@ $courseId = $platformId !== null ? Lti::courseForLaunch($platformId, $contextId)
 $since = $_GET['since'] ?? '1970-01-01 00:00:00';
 $pdo = Db::get();
 
+// Qué citas ve este usuario (con o sin `since`). El admin, todas menos los
+// intentos de práctica de los alumnos (ver Practica); el alumno, las sin
+// curso y las de su curso/grupo/propias.
 if ($user['role'] === 'admin') {
     // Docente/admin en el cliente de escritorio necesita ver todo, sin
     // filtro por curso (mismo criterio que ya usan dashboard.php/agenda.php
     // para el admin completo).
-    // Sin los intentos de práctica de los alumnos (ver Practica).
-    $stmt = $pdo->prepare('SELECT * FROM appointments WHERE updated_at > ? AND ' . Practica::sinPractica());
-    $stmt->execute([$since]);
+    $visibles = Practica::sinPractica();
+    $visiblesParams = [];
 } else {
-    // PDO no permite mezclar placeholders posicionales y nombrados en la
-    // misma query -- :since se repite en vez de usar "?" para $since.
-    $stmt = $pdo->prepare(
-        'SELECT * FROM appointments WHERE updated_at > :since AND (
+    $visibles = '(
             course_id IS NULL
             OR assigned_student_id = :me
             OR assigned_group_id IN (SELECT group_id FROM group_members WHERE user_id = :me)
             OR (assigned_student_id IS NULL AND assigned_group_id IS NULL
                 AND course_id IN (SELECT course_id FROM course_students WHERE user_id = :me))
-        )'
-    );
-    $stmt->bindValue(':since', $since);
-    $stmt->bindValue(':me', $user['id']);
-    $stmt->execute();
+        )';
+    $visiblesParams = [':me' => $user['id']];
 }
+// PDO no permite mezclar placeholders posicionales y nombrados en la
+// misma query: todo nombrado.
+$stmt = $pdo->prepare('SELECT * FROM appointments WHERE updated_at > :since AND ' . $visibles);
+$stmt->execute([':since' => $since] + $visiblesParams);
 $appointments = Db::castAppointments($stmt->fetchAll());
 
 // paciente_*: identidad del paciente dueño del caso (patients), que la app
@@ -92,8 +92,25 @@ foreach (AppConfig::changedKeysSince($since, $courseId) as $k) {
     $config[] = ['k' => $k, 'v' => AppConfig::getEffective($k, $courseId)];
 }
 
+// Las citas que hoy le tocan, solo los id: el delta no avisa una cita
+// borrada ni una que se reasignó a otro grupo, y con esto la app las saca
+// sin bajar todo de nuevo (ver core/helpers.py: aplicar_delta).
+$stmt = $pdo->prepare('SELECT id FROM appointments WHERE ' . $visibles);
+$stmt->execute($visiblesParams);
+$appointmentIds = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+$stmt->closeCursor();
+
+// No leídos de la bandeja: la app pide la bandeja entera (inbox.php) solo
+// si esto cambia o si el alumno la abre. Antes la pedía en cada ciclo.
+$stmt = $pdo->prepare('SELECT COUNT(*) FROM inbox_messages WHERE student_id = ? AND leido = 0');
+$stmt->execute([$user['id']]);
+$inboxNoLeidos = (int) $stmt->fetchColumn();
+$stmt->closeCursor();
+
 Response::json([
     'server_time' => (new DateTime())->format('Y-m-d H:i:s'),
+    'appointment_ids' => $appointmentIds,
+    'inbox_no_leidos' => $inboxNoLeidos,
     'appointments' => $appointments,
     'cases' => $cases,
     'attendances' => $attendances,

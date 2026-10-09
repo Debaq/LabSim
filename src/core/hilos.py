@@ -253,6 +253,7 @@ class Ciclo:
         self._intervalo_s = intervalo_s
         self._nombre = nombre
         self._parar = threading.Event()
+        self._despertar = threading.Event()
         self._hilo = None
 
     def start(self):
@@ -265,13 +266,25 @@ class Ciclo:
     def run(self):
         while not self._parar.is_set():
             self.paso()
-            self._parar.wait(self._intervalo_s)
+            self._esperar_turno()
+
+    def _esperar_turno(self) -> bool:
+        """Espera el intervalo o hasta ahora()/stop(). False si lo pararon."""
+        self._despertar.wait(self._intervalo_s)
+        self._despertar.clear()
+        return not self._parar.is_set()
+
+    def ahora(self):
+        """Que el próximo paso sea ya, sin esperar el intervalo (después de
+        un evento importante: atender, cerrar la atención, salir)."""
+        self._despertar.set()
 
     def paso(self):
         raise NotImplementedError
 
     def requestInterruption(self):
         self._parar.set()
+        self._despertar.set()
 
     def isInterruptionRequested(self) -> bool:
         return self._parar.is_set()

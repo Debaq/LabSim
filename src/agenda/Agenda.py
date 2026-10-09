@@ -19,7 +19,7 @@ from PySide6.QtGui import QBrush, QColor, QFont, QTextCharFormat
 from agenda.UI.Ui_agenda import Ui_Form
 from core import feriados as feriados_cl
 from core import hilos, respaldo_informes
-from core.helpers import (Shedule, entry_estado_por, CasesOffline, debug_print,
+from core.helpers import (Shedule, aplicar_delta, entry_estado_por, CasesOffline, debug_print,
                           es_docente, lista_practica, iniciar_practica,
                           marcar_entry_no_show,
                           obtener_nota_atencion,
@@ -291,7 +291,7 @@ class Agenda(QWidget, Ui_Form):
         if checked:
             self.tableWidget.setHorizontalHeaderLabels(
                 ["Intentos", "Último", "RUT", "Nombre", "Apellido", "Fecha nac.", "Procedimiento"])
-            self.refresh_async()
+            self._pedir_practica()
         else:
             self.tableWidget.setHorizontalHeaderLabels(self._encabezados_agenda)
         self._selected_row_key = None
@@ -388,10 +388,10 @@ class Agenda(QWidget, Ui_Form):
     def refresh_async(self):
         """Como refresh(), pero la llamada de red corre en un hilo aparte.
 
-        Usado por el polling de fondo (main._on_backend_sync): ese refresh
-        dispara SIEMPRE una consulta nueva a Shedule() (get_full_state), y si
-        se hacía en el hilo de UI, un backend caído congelaba la ventana
-        completa (timeout SSL de hasta 10s, cada ciclo de sync)."""
+        Baja la agenda entera (Shedule() -> get_full_state): solo cuando el
+        delta del sync no alcanza (ver aplicar_delta) o sin sync. En el hilo
+        de UI, un backend caído congelaba la ventana completa (timeout SSL
+        de hasta 10s)."""
         if getattr(self, "_shedule_fetch", None) is not None:
             # Hay una en curso, quizás de antes del cambio que hay que
             # mostrar (atender/cerrar): se repite al terminar.
@@ -404,6 +404,31 @@ class Agenda(QWidget, Ui_Form):
             _traer_agenda, self._modo_practica, dueno=self,
             listo=self._on_refresh_async_done, fallo=self._on_refresh_async_fallo,
             nombre="agenda")
+
+    def aplicar_delta(self, delta):
+        """Lo que trajo un ciclo de sync (main._on_backend_sync): se arma la
+        agenda en memoria y solo se baja entera si hace falta (ver
+        helpers.aplicar_delta)."""
+        que, data = aplicar_delta(delta)
+        if que == "completo":
+            self.refresh_async()
+            return
+        if que == "nuevo":
+            self.shedule = data
+            self.populate_shedule()
+            if self._modo_practica:
+                self._pedir_practica()
+
+    def _pedir_practica(self):
+        hilos.en_fondo(lista_practica, dueno=self, nombre="practica",
+                       listo=self._on_practica_fetched)
+
+    def actualizar(self):
+        """Tras una acción propia (atender, inasistencia, práctica): que el
+        sync pregunte ya, en vez de bajar la agenda entera."""
+        pedir = getattr(self.main_window, "sync_ahora", None)
+        if pedir is None or not pedir():
+            self.refresh_async()
 
     def _on_refresh_async_done(self, resultado):
         self._shedule_fetch = None
@@ -871,7 +896,7 @@ class Agenda(QWidget, Ui_Form):
         except requests.RequestException as exc:
             QMessageBox.warning(self, "Marcar inasistencia",
                                 f"No hay conexión con el servidor. Inténtalo de nuevo.\n\n{exc}")
-        self.refresh_async()
+        self.actualizar()
 
     def _ver_ficha_paciente(self):
         if self._selected_row_key is None:

@@ -130,6 +130,12 @@ def get_log_queue() -> "LocalLogQueue":
     return _SHARED_QUEUE
 
 
+# Las acciones del alumno se juntan en la cola local (sqlite) y suben cada
+# 5 min, o al tiro con ahora() en un evento importante (iniciar sesión,
+# atender, cerrar la atención, salir): el docente no las mira en vivo.
+INTERVALO_S = 300
+
+
 class LogUploaderThread(hilos.Ciclo):
     """
     Sube los logs acumulados en lotes (nunca streaming). Si el POST falla
@@ -138,7 +144,7 @@ class LogUploaderThread(hilos.Ciclo):
     QThread (ver core/hilos.py).
     """
 
-    def __init__(self, queue: LocalLogQueue, client, interval_s: int = 20, batch_size: int = 200):
+    def __init__(self, queue: LocalLogQueue, client, interval_s: int = INTERVALO_S, batch_size: int = 200):
         super().__init__(interval_s, "LogUploaderThread")
         self._queue = queue
         self._client = client

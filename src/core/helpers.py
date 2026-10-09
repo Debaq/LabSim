@@ -40,6 +40,10 @@ from backend.shedule_sync import backend_state_to_shedule, diff_and_push_shedule
 _backend_client = None
 _shedule_snapshot = {"agenda_1": {}}
 _cases_snapshot = {}
+# Lo que mandó el servidor para armar la agenda, por id (ver aplicar_delta):
+# {"students": [...], "appointments": {id: fila}, "cases": {...},
+# "attendances": {...}}. None = todavía no se bajó entero.
+_estado_agenda = None
 # None = todavía no se leyó session.json (ver sesion_es_docente).
 _sesion_docente = None
 
@@ -239,6 +243,8 @@ def reset_backend_session() -> None:
     _sesion_docente = None
     _shedule_snapshot = {"agenda_1": {}}
     _cases_snapshot = {}
+    global _estado_agenda
+    _estado_agenda = None
 
 
 class CasesOffline():
@@ -281,6 +287,8 @@ class Shedule:
         own_username = (client.user or {}).get("username", "")
         state = client.get_full_state()
         app_config_store.update_from_sync(state.get("config"))
+        global _estado_agenda
+        _estado_agenda = _indexar(state)
         data = backend_state_to_shedule(state, own_id, own_username)
         # deepcopy por la misma razón que en CasesOffline.get_cases():
         # self.data se muta en el sitio (nuevas citas, edición de filas)
@@ -301,6 +309,67 @@ class Shedule:
         own_username = (client.user or {}).get("username", "")
         diff_and_push_shedule(client, data, _shedule_snapshot, own_username)
         _shedule_snapshot = deepcopy(data)
+
+
+def _indexar(state: dict) -> dict:
+    return {
+        "students": list(state.get("students") or []),
+        "appointments": {int(r["id"]): r for r in state.get("appointments") or []},
+        "cases": {str(r["id"]): r for r in state.get("cases") or []},
+        "attendances": {r["id"]: r for r in state.get("attendances") or []},
+    }
+
+
+def aplicar_delta(delta: dict):
+    """Aplica a la agenda en memoria lo que trajo un ciclo de sync, sin
+    bajar todo de nuevo (antes: sync desde 1970 cada 15 s, ~210 KB por
+    equipo). Devuelve (que, agenda):
+
+    - ("igual", None): nada que cambie la agenda.
+    - ("nuevo", agenda): la agenda armada con el delta (y el snapshot del
+      diff al día, como Shedule()).
+    - ("completo", None): hace falta bajarla entera (nunca se bajó, el
+      servidor no manda appointment_ids, o el docente ve atenciones de un
+      alumno que no está en su lista).
+    """
+    global _shedule_snapshot
+    estado = _estado_agenda
+    if estado is None:
+        return "completo", None
+    cambio = False
+    for fila in delta.get("appointments") or []:
+        estado["appointments"][int(fila["id"])] = fila
+        cambio = True
+    for fila in delta.get("cases") or []:
+        estado["cases"][str(fila["id"])] = fila
+        cambio = True
+    for fila in delta.get("attendances") or []:
+        estado["attendances"][fila["id"]] = fila
+        cambio = True
+    ids = delta.get("appointment_ids")
+    if ids is None:
+        # Backend sin appointment_ids: no se sabe qué se borró.
+        return ("completo", None) if cambio else ("igual", None)
+    visibles = {int(i) for i in ids}
+    for borrada in [k for k in estado["appointments"] if k not in visibles]:
+        del estado["appointments"][borrada]
+        cambio = True
+    if not cambio:
+        return "igual", None
+
+    client = _get_backend_client()
+    user = client.user or {}
+    if user.get("role") == "admin":
+        conocidos = {s["id"] for s in estado["students"]} | {user.get("id")}
+        if any(a.get("student_id") not in conocidos for a in delta.get("attendances") or []):
+            return "completo", None   # alumno nuevo: admin_dump trae su username
+    state = {"students": estado["students"],
+             "appointments": list(estado["appointments"].values()),
+             "cases": list(estado["cases"].values()),
+             "attendances": list(estado["attendances"].values())}
+    data = backend_state_to_shedule(state, user.get("id"), user.get("username", ""))
+    _shedule_snapshot = deepcopy(data)
+    return "nuevo", data
 
 
 def entry_estado_por(entry, username: str) -> str | None:

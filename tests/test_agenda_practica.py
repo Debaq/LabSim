@@ -63,8 +63,9 @@ def _armar(monkey_iniciar):
     mod.iniciar_practica = monkey_iniciar
     main = _Main()
     ag = mod.Agenda(444, main)
-    # Sin hilo: se entrega la lista como lo haría refresh_async (hilos.en_fondo).
-    ag.refresh_async = lambda: ag._on_practica_fetched(mod.lista_practica())
+    # Sin hilo: se entrega la lista como lo haría _pedir_practica (hilos.en_fondo).
+    ag._pedir_practica = lambda: ag._on_practica_fetched(mod.lista_practica())
+    ag.refresh_async = ag._pedir_practica
     return ag, main
 
 

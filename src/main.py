@@ -634,7 +634,7 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         iniciar sesión y con cada sync, que es cuando hay red."""
         if self._subida_pendientes is not None:
             return
-        # Con cada sync (15 s): sin QThread, ver hilos.en_fondo.
+        # Con cada sync: sin QThread, ver hilos.en_fondo.
         self._subida_pendientes = hilos.en_fondo(
             subir_pendientes, None, excluir=lambda: self.data_current_key,
             listo=self._fin_subida_pendientes, fallo=self._fallo_subida_pendientes,
@@ -647,20 +647,33 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         print(f"autosave: no se pudieron subir los pendientes: {exc}")
         self._subida_pendientes = None
 
-    def _on_backend_sync(self, _delta):
-        # refresh_async: este callback corre en cada ciclo de polling (15s);
-        # refresh() normal dispara una consulta de red nueva y BLOQUEANTE
-        # (Shedule() -> get_full_state), que con el backend caído congelaba
-        # toda la ventana hasta 10s por ciclo (timeout SSL).
+    def _on_backend_sync(self, delta):
+        # Cada ciclo de sync (60 s, o al tiro con sync_ahora): la agenda se
+        # arma con el delta en memoria; ya no se baja entera cada vez
+        # (ver helpers.aplicar_delta).
         agenda_win = self.subw.get("AGENDA") if self.subw else None
         if agenda_win is not None:
-            agenda_win.obj.refresh_async()
-        # La bandeja viene consultada desde el hilo de sync: preguntarla acá,
-        # en el hilo de la ventana, la congelaba con la red lenta.
-        if _delta.get("_inbox") is not None:
-            inbox.actualizar_badge(self, _delta["_inbox"])
-        app_config_store.update_from_sync(_delta.get("config"))
+            agenda_win.obj.aplicar_delta(delta)
+        if "inbox_no_leidos" in delta:
+            inbox.actualizar_badge(self, no_leidos=delta["inbox_no_leidos"])
+        else:   # backend anterior: la bandeja entera, fuera de la ventana
+            hilos.en_fondo(inbox.inbox_list, dueno=self, nombre="bandeja",
+                           listo=lambda items: inbox.actualizar_badge(self, items))
+        app_config_store.update_from_sync(delta.get("config"))
         self._subir_pendientes_en_fondo()
+
+    def sync_ahora(self) -> bool:
+        """Que el sync pregunte ya (tras atender, cerrar, una inasistencia).
+        False si no hay sync corriendo (quien llama baja la agenda entera)."""
+        if self.sync_thread is None:
+            return False
+        self.sync_thread.ahora()
+        return True
+
+    def _subir_logs_ahora(self):
+        """Evento importante: las acciones juntadas en la cola suben ya."""
+        if self.log_uploader is not None:
+            self.log_uploader.ahora()
 
     def _stop_sync_thread(self):
         if self.sync_thread is not None:
@@ -858,7 +871,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             # En segundo plano: con la red cortada justo acá, el refresh
             # sincrónico lanzaba y la atención quedaba abierta en el
             # servidor sin módulos cargados ni autoguardado.
-            self.subw["AGENDA"].obj.refresh_async()
+            self.subw["AGENDA"].obj.actualizar()
+            self._subir_logs_ahora()
 
         self._hydrate_modules()
         if self.data_current:
@@ -1002,7 +1016,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
             self.paciente_actual = None
             self._hydrate_modules()
         if self.subw and "AGENDA" in self.subw:
-            self.subw["AGENDA"].obj.refresh_async()
+            self.subw["AGENDA"].obj.actualizar()
+        self._subir_logs_ahora()
         self.statusbar.clearMessage()
         if avisar:
             self._aviso("Atención cerrada",

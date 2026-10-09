@@ -23,8 +23,8 @@ un dict {appointment_id, tipo, data, images}, donde `images` es un callable
 que exporta los JPEG y devuelve {sufijo: ruta}. Un módulo que sube más de un
 informe por atención (el ABR: un ABR y un ECochG) expone además
 `report_jobs()`, con la lista entera. Las imágenes se exportan
-solo si `data` cambió: exportar los gráficos cuesta y no hace falta cada 30
-segundos si el alumno no tocó nada.
+solo si `data` cambió: exportar los gráficos cuesta y no hace falta en cada
+tick si el alumno no tocó nada.
 """
 
 import hashlib
@@ -42,7 +42,10 @@ from core.base import context
 from core.helpers import Preferences
 
 
-INTERVALO_MS = 30_000
+# Cada 2 min (eran 30 s): en el equipo queda cada 5 s (INTERVALO_DISCO_MS) y
+# se sube además al esconder el módulo y al cerrar la atención o la app; a
+# otro equipo le llega a lo sumo 2 min atrasado.
+INTERVALO_MS = 120_000
 # Respaldo en el disco de los datos (sin exportar gráficos), más seguido
 # que la subida: un corte de luz pierde a lo sumo esto.
 INTERVALO_DISCO_MS = 5_000
