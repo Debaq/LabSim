@@ -56,7 +56,9 @@ QT_DROP = [
     # memoria compartida y la app no usa OpenGL; traían libwayland-egl y el
     # driver de video del equipo (ver "Build encapsulado" más abajo)
     '*plugins/wayland-graphics-integration-client/*',
-    # la app no instala ningun QTranslator: los .qm no se leen nunca
+    # los .qm de PySide6 no se leen: el unico que usa la app (qtbase_es, los
+    # botones Si/No de los avisos) va en resources/translations, ver
+    # core/base.instalar_traduccion_qt
     'PySide6/*translations/*',
     # segunda ICU (v78, ~38 MB): la pide la libsqlite3 del env conda, pero
     # PyInstaller empaqueta la de /usr/lib, que no usa ICU. Qt trae la suya

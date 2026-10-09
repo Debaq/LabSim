@@ -4,7 +4,7 @@
 
 import sys
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTranslator
 from PySide6.QtGui import QColor, QPalette
 from PySide6.QtWidgets import QApplication
 
@@ -70,6 +70,22 @@ def aplicar_tema_claro(app) -> bool:
     return True
 
 
+def instalar_traduccion_qt(app):
+    """Los textos que pone Qt mismo (Yes/No/OK/Cancel de los avisos, el menú
+    de copiar y pegar) en español. La app no instalaba ningún traductor y
+    esos botones salían en inglés en medio de una interfaz en español.
+
+    El .qm es el de Qt (qtbase_es) copiado a resources/translations: así se
+    lee igual en desarrollo y en el build, que deja afuera las traducciones
+    de PySide6. Si no está, la app sigue igual que antes, en inglés solo en
+    esos botones."""
+    traductor = QTranslator(app)
+    if traductor.load("qtbase_es", "resources/translations"):
+        app.installTranslator(traductor)
+        return traductor
+    return None
+
+
 class ApplicationContext():
 
     def __init__(self) -> None:
@@ -88,6 +104,7 @@ class ApplicationContext():
         if hasattr(hints, "setColorScheme"):
             hints.setColorScheme(Qt.ColorScheme.Light)
         aplicar_tema_claro(self.app)
+        self._traductor = instalar_traduccion_qt(self.app)
 
     def get_resource(self, path):
         return f"resources/{path}"
