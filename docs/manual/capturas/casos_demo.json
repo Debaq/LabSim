@@ -355,6 +355,10 @@
    "tipo": {
     "od": "normal",
     "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
    }
   },
   "ETF": [
@@ -1189,6 +1193,10 @@
    "tipo": {
     "od": "normal",
     "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
    }
   },
   "ETF": [
@@ -2030,6 +2038,10 @@
    "tipo": {
     "od": "normal",
     "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
    }
   },
   "ETF": [
@@ -2879,6 +2891,10 @@
    "tipo": {
     "od": "normal",
     "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
    }
   },
   "ETF": [
@@ -3735,6 +3751,10 @@
    "tipo": {
     "od": "normal",
     "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
    }
   },
   "ETF": [
@@ -4581,6 +4601,10 @@
    "tipo": {
     "od": "normal",
     "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
    }
   },
   "ETF": [
@@ -5424,8 +5448,12 @@
     ]
    ],
    "tipo": {
-    "od": "off",
+    "od": "normal",
     "oi": "normal"
+   },
+   "decay": {
+    "od": true,
+    "oi": false
    }
   },
   "ETF": [
@@ -6265,8 +6293,12 @@
     ]
    ],
    "tipo": {
-    "od": "off",
-    "oi": "off"
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": true,
+    "oi": true
    }
   },
   "ETF": [
@@ -7116,6 +7148,10 @@
    "tipo": {
     "od": "normal",
     "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
    }
   },
   "ETF": [
@@ -7957,6 +7993,10 @@
    "tipo": {
     "od": "normal",
     "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
    }
   },
   "ETF": [

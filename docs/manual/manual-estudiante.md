@@ -15,7 +15,7 @@ TecMedHub · Universidad Austral de Chile, Sede Puerto Montt
 
 | Parte | Contenido |
 |---|---|
-| **Guía rápida** | De Moodle al paciente atendido, paso a paso: el código, la agenda, la atención, los exámenes y el cierre |
+| **Guía rápida** | Del curso en línea al paciente atendido, paso a paso: el código, la agenda, la atención, los exámenes y el cierre |
 | **I — Entrar** | Qué es LabSim, cómo se ingresa, la ventana principal y qué pasa con la sesión |
 | **II — Atender** | La agenda, la práctica libre, la ficha, la conversación con el paciente, el cierre y lo que queda guardado |
 | **III — Box Audiología** | Audiómetro, instrucciones al paciente, enmascaramiento, logoaudiometría, supraliminares, acumetría, otoscopía e impedanciómetro |
@@ -28,20 +28,20 @@ TecMedHub · Universidad Austral de Chile, Sede Puerto Montt
 
 # Guía rápida
 
-De la actividad en Moodle a la atención cerrada. Lo más importante es **cerrar la atención** al terminar (paso 8): mientras no la cierres, el paciente sigue "en atención".
+De la actividad del curso a la atención cerrada. Lo más importante es **cerrar la atención** al terminar (paso 8): mientras no la cierres, el paciente sigue "en atención".
 
 <div class="guia">
 
 <div class="par">
 <div class="paso">
-<div class="paso-cab"><span class="num">1</span><span class="titulo">Pide el código en Moodle</span></div>
-<p>Abre la actividad <strong>LabSim</strong> de tu curso en Moodle. La página muestra <em>«Ingreso correcto»</em> y un <strong>código de 6 dígitos</strong> que vence en unos minutos. Si venció, <em>Generar código nuevo</em>.</p>
+<div class="paso-cab"><span class="num">1</span><span class="titulo">Pide el código de ingreso</span></div>
+<p>Abre la actividad <strong>LabSim</strong> de tu curso en la plataforma de tu universidad (por ejemplo, Moodle). La página muestra <em>«Ingreso correcto»</em> y un <strong>código de 6 dígitos</strong> que vence en unos minutos. Si venció, <em>Generar código nuevo</em>.</p>
 </div>
 <div class="hueco"></div>
 <div class="paso">
 <div class="paso-cab"><span class="num">2</span><span class="titulo">Entra a LabSim</span></div>
 <img src="img/estudiante/login.png">
-<p>En LabSim, <em>Ingresar</em> (arriba a la derecha) y escribe el código en <strong>Código de Moodle</strong>. Al completar los 6 dígitos entra solo.</p>
+<p>En LabSim, <em>Ingresar</em> (arriba a la derecha) y escribe el código en <strong>Código de ingreso</strong>. Al completar los 6 dígitos entra solo.</p>
 </div>
 </div>
 
@@ -91,7 +91,7 @@ De la actividad en Moodle a la atención cerrada. Lo más importante es **cerrar
 
 # Parte I — Entrar
 
-Esta parte cuenta qué es LabSim, cómo se ingresa con el código de Moodle, cómo está organizada la ventana y qué pasa con la sesión.
+Esta parte cuenta qué es LabSim, cómo se ingresa con el código de ingreso, cómo está organizada la ventana y qué pasa con la sesión.
 
 ## 1. Qué es LabSim
 
@@ -106,18 +106,18 @@ Lo que haces queda registrado (los exámenes, la conversación y tu evolución) 
 
 ## 2. Ingresar
 
-### 2.1 El código de Moodle
+### 2.1 El código de ingreso
 
-LabSim no tiene contraseña propia para los estudiantes: entras con un **código de 6 dígitos** que te da Moodle.
+LabSim no tiene contraseña propia para los estudiantes: entras con un **código de ingreso** de 6 dígitos que te da la actividad LabSim de tu curso, en la plataforma de tu universidad (Moodle u otra).
 
-1. En Moodle, abre la actividad LabSim de tu curso.
+1. En la plataforma del curso, abre la actividad LabSim.
 2. La página dice *«Ingreso correcto»* y muestra el código, con *«Vence en N segundos»*. Si se venció, usa *Generar código nuevo*.
 3. Abre LabSim en el computador y haz clic en **Ingresar** (arriba a la derecha).
-4. En la ventana **Ingreso**, escribe el código en **Código de Moodle**. Al completar los 6 dígitos, LabSim entra solo: no hay que hacer clic en nada.
+4. En la ventana **Ingreso**, escribe el código en **Código de ingreso**. Al completar los 6 dígitos, LabSim entra solo: no hay que hacer clic en nada.
 
-![La ventana de ingreso: solo el código de Moodle](img/estudiante/login.png)
+![La ventana de ingreso: solo el código de ingreso](img/estudiante/login.png)
 
-El link de abajo, *Ingresar con usuario y contraseña*, es para los docentes; desde ahí, *Ingresar con el código de Moodle* vuelve al código.
+El link de abajo, *Ingresar con usuario y contraseña*, es para los docentes; desde ahí, *Ingresar con código de ingreso* vuelve al código.
 
 Mientras conecta aparece *«Conectando con el servidor...»*. Al entrar, arriba a la derecha aparece tu usuario y el botón cambia a **Cerrar Sesión**.
 
@@ -125,7 +125,7 @@ Mientras conecta aparece *«Conectando con el servidor...»*. Al entrar, arriba 
 
 | Mensaje | Qué hacer |
 |---|---|
-| *Código inválido, ya usado o expirado* | El código se usa una vez y vence en minutos. Genera uno nuevo en Moodle |
+| *Código inválido, ya usado o expirado* | El código se usa una vez y vence en minutos. Genera uno nuevo en la actividad del curso |
 | *No hay conexión con el servidor. Revisa la red e inténtalo de nuevo.* | El computador no tiene internet o el servidor no responde |
 | *Demasiados intentos fallidos…* | Espera unos minutos antes de volver a intentarlo |
 | *Tu cuenta está bloqueada. Habla con tu docente.* | Solo tu docente puede desbloquearla |
@@ -298,7 +298,7 @@ La OIRS es parte del ejercicio: después de la atención, el paciente virtual pu
 
 ![Los exámenes guardados de una atención](img/estudiante/mis-pacientes-examenes.png)
 
-El informe en PDF de cada examen y el resultado de tu técnica de audiometría se ven en la web, desde Moodle: *Ver mis pacientes*.
+El informe en PDF de cada examen y el resultado de tu técnica de audiometría se ven en la web, desde la actividad del curso: *Ver mis pacientes*.
 
 ---
 
@@ -480,14 +480,15 @@ La curva muestra la contracción durante los 10 s y, a la derecha, cuánto de la
 
 La pantalla **ETF** tiene dos pruebas; la primera tecla (**Prueba**) cambia entre ellas. Cuál corresponde lo decides tú, según lo que viste en la otoscopía y en el timpanograma.
 
-**Membrana íntegra.** Se comparan timpanogramas antes y después de las maniobras:
+**Membrana íntegra.** Se comparan timpanogramas antes y después de tragar con el conducto presurizado:
 
-![ETF con membrana íntegra: reposo, Valsalva y Toynbee superpuestos](img/estudiante/impedanciometro-etf.png)
+![ETF con membrana íntegra: los tres timpanogramas superpuestos](img/estudiante/impedanciometro-etf.png)
 
 1. **Reposo**: el timpanograma de partida (blanco).
-2. Pídele al paciente la maniobra y presiona **Valsalva** (amarillo) o **Toynbee** (verde).
+2. **+400 trag**: el equipo presuriza el conducto a +400 daPa, el paciente traga y se repite el timpanograma (amarillo).
+3. **-400 trag**: lo mismo con -400 daPa (verde).
 
-A la derecha queda la presión del pico de cada timpanograma.
+A la derecha queda la presión del pico de cada timpanograma. Las diferencias son de pocos daPa: compáralas con cuidado.
 
 **Membrana perforada (o con tubo).** Se presuriza el conducto y el paciente traga:
 
@@ -666,7 +667,7 @@ Si LabSim se cerró solo, se colgó o algo no funcionó, avísalo desde **Config
 
 | Problema | Qué hacer |
 |---|---|
-| El código de Moodle no sirve | Se usa una vez y vence en minutos: genera uno nuevo |
+| El código de ingreso no sirve | Se usa una vez y vence en minutos: genera uno nuevo |
 | No aparece un equipo | Tu curso no lo tiene habilitado; consulta a tu docente |
 | *Atención abierta* al querer atender | Cierra primero la atención que tienes (*Cerrar/Evolucionar*) |
 | El paciente no levanta la mano | Revisa que le diste la instrucción con **Talkback** y que el canal suena (indicador lila) |

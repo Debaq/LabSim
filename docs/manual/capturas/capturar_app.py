@@ -587,11 +587,11 @@ def impedanciometro_decay_etf():
         z.decay_animate()
     z.reflex_tone.stop()
     guardar(fz, "impedanciometro-decay")
-    # ETF, membrana íntegra: reposo, Valsalva y Toynbee
+    # ETF, membrana íntegra: reposo, +400 y tragar, -400 y tragar
     z.side_change()
     z.show_screen(z.Z_etf)
     z.btn1_click()
-    for maniobra in ("reposo", "valsalva", "toynbee"):
+    for maniobra in ("reposo", "positiva", "negativa"):
         z.etf_maniobra(maniobra)
     guardar(fz, "impedanciometro-etf")
     w.close()
