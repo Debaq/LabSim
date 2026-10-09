@@ -1006,23 +1006,20 @@ class Audiometer(QWidget, Ui_Audiometer):
         self.modify_max_int()
 
     def stim_output(self):
-        trans_set = {self.lbl_trans[0].text(), self.lbl_trans[1].text()}
-        result = 0
-        if trans_list[1] in trans_set:
-            trans_set = list(trans_set)
-            if trans_set[0] == trans_set[1]:
-                result = 1
-            if trans_set[0] == trans_list[1] and self.lbl_stim[0] in [
-                stim_list[0],
-                stim_list[1],
-            ]:
-                result = 1
-            if trans_set[1] == trans_list[1] and self.lbl_stim[1] in [
-                stim_list[0],
-                stim_list[1],
-            ]:
-                result = 1
-        return result
+        """Qué lista de frecuencias usa el cambio de frecuencia: la ósea (1)
+        si algún canal tiene el tono (Tono o FM) en el vibrador, si no la
+        aérea (0). Ver frecuency_dict en config_audiometer.json.
+
+        Antes armaba un set con los dos transductores y leía su segundo
+        elemento: con los dos canales en ósea el set tenía uno solo y el
+        cambio de frecuencia se caía (IndexError). Y comparaba el QLabel del
+        estímulo con un texto, así que nunca elegía la lista ósea.
+        """
+        for ch in (0, 1):
+            if (self.lbl_trans[ch].text() == trans_list[1]
+                    and self.lbl_stim[ch].text() in (stim_list[0], stim_list[1])):
+                return 1
+        return 0
 
 # START LOGO #############################################
 
