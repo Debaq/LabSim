@@ -11,6 +11,8 @@
  * alta masiva) y en qué pestaña dejar al docente, en vez de imprimir nada:
  * quien renderiza es courses.php.
  */
+require_once __DIR__ . '/CourseAvance.php';
+
 final class CourseAdmin
 {
     /**
@@ -40,6 +42,10 @@ final class CourseAdmin
         'practice_add' => 'practica',
         'practice_remove' => 'practica',
         'practice_set_sheet' => 'practica',
+        'objective_add' => 'avance',
+        'objective_edit' => 'avance',
+        'objective_delete' => 'avance',
+        'objective_move' => 'avance',
     ];
 
     public static function tabForAction(string $action): ?string
@@ -182,6 +188,31 @@ final class CourseAdmin
                     ? 'La ficha de estudio queda disponible al cerrar cada intento.'
                     : 'La ficha de estudio ya no se muestra al cerrar.';
                 AdminAudit::log($me, 'practice_set_sheet', ['course_id' => $courseId, 'practice_id' => $practiceId, 'show' => $mostrar]);
+                break;
+
+            case 'objective_add':
+            case 'objective_edit':
+                $id = (int) ($post['objective_id'] ?? 0);
+                $err = $action === 'objective_add'
+                    ? CourseAvance::crearObjetivo($courseId, (string) ($post['texto'] ?? ''), (string) ($post['indicador'] ?? ''), (string) ($post['meta'] ?? ''), (int) $me['id'])
+                    : CourseAvance::editarObjetivo($courseId, $id, (string) ($post['texto'] ?? ''), (string) ($post['indicador'] ?? ''), (string) ($post['meta'] ?? ''));
+                if ($err !== null) {
+                    $res['error'] = $err;
+                    break;
+                }
+                $res['success'] = $action === 'objective_add' ? 'Objetivo agregado.' : 'Objetivo actualizado.';
+                AdminAudit::log($me, 'course_' . $action, ['course_id' => $courseId, 'objective_id' => $id, 'indicador' => (string) ($post['indicador'] ?? '')]);
+                break;
+
+            case 'objective_delete':
+                $id = (int) ($post['objective_id'] ?? 0);
+                CourseAvance::borrarObjetivo($courseId, $id);
+                $res['success'] = 'Objetivo eliminado.';
+                AdminAudit::log($me, 'course_objective_delete', ['course_id' => $courseId, 'objective_id' => $id]);
+                break;
+
+            case 'objective_move':
+                CourseAvance::moverObjetivo($courseId, (int) ($post['objective_id'] ?? 0), ($post['dir'] ?? '') === 'up' ? -1 : 1);
                 break;
 
             case 'generate_demo_code':

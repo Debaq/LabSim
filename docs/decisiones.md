@@ -5,6 +5,39 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Avance del curso y objetivos de aprendizaje (2026-10-09)
+
+Pestaña **Avance** en la página del curso (`courses.php?tab=avance`, entre
+Resumen y Personas). Resumen sigue siendo la logística (checklist, próximas
+citas); Avance es cómo van los alumnos.
+
+- **Objetivos de aprendizaje**: el texto lo escribe el docente (el sistema
+  no propone objetivos: el contenido docente es suyo). Cada uno se puede
+  atar a un indicador que la app ya mide con una meta (mínimo o máximo
+  según el indicador): atenciones cerradas, técnica de audiometría
+  (promedio o la última), informes (total o por examen), práctica libre,
+  preguntas al paciente, duración típica, felicitaciones, sugerencias de
+  mejora. Sin indicador, el objetivo solo se lista. Se ordenan con ▲▼.
+  Tabla `course_objectives` (nace con "Aplicar schema.sql"; sin ella la
+  pestaña avisa y el resto funciona).
+- **Un alumno sin datos no falla**: sin audiometrías, la meta de técnica
+  queda "sin datos", ni a favor ni en contra. Con 0 atenciones sí falla
+  "atenciones ≥ 3": cero es un dato.
+- **Cifras del curso**: alumnos con atenciones, atenciones cerradas,
+  técnica del curso con su tendencia (todas las audiometrías en orden de
+  fecha), informes, % de objetivos cumplidos.
+- **Necesitan atención**: sin atenciones cerradas, sin cerrar una hace 14
+  días, técnica bajo 60 % o bajando 10 puntos o más.
+- **Lo que más le cuesta al curso**: cuenta ALUMNOS, no atenciones, y un
+  alumno cuenta si falló el paso en la mayoría de sus audiometrías (un
+  error de la primera semana no lo deja marcado para siempre).
+- **Semana a semana** (atenciones cerradas y técnica promedio) y la tabla
+  alumnos × objetivos (✓ / ✗ / —).
+- Todo acotado al curso por `appointments.course_id`; la práctica libre
+  entra en la técnica y se cuenta aparte en atenciones.
+
+Cálculo en `src/CourseAvance.php` (tests en `tests/test_course_avance.php`).
+
 ## Ficha del alumno: indicadores en vez del registro de acciones (2026-10-09)
 
 `admin/student.php` abría con una tabla de contadores técnicos y terminaba

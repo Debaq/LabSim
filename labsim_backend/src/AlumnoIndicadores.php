@@ -23,6 +23,24 @@ final class AlumnoIndicadores
      */
     public static function pasosDificiles(array $tecnicas): array
     {
+        $fallados = array_values(array_filter(self::conteoPasos($tecnicas), static function (array $c): bool {
+            return $c['fallos'] > 0;
+        }));
+        usort($fallados, static function (array $a, array $b): int {
+            return [$b['fallos'] / $b['evaluadas'], $b['fallos']] <=> [$a['fallos'] / $a['evaluadas'], $a['fallos']];
+        });
+        return $fallados;
+    }
+
+    /**
+     * Cada paso evaluado, cumplido o no, con sus fallos y evaluaciones,
+     * indexado por "Sección|texto". Lo usan pasosDificiles() y el avance del
+     * curso (que cuenta alumnos en vez de atenciones).
+     *
+     * @return array<string,array{seccion:string, texto:string, fallos:int, evaluadas:int}>
+     */
+    public static function conteoPasos(array $tecnicas): array
+    {
         $cuenta = [];
         foreach ($tecnicas as $t) {
             foreach (self::SECCIONES as $clave => $seccion) {
@@ -50,13 +68,7 @@ final class AlumnoIndicadores
                 }
             }
         }
-        $fallados = array_values(array_filter($cuenta, static function (array $c): bool {
-            return $c['fallos'] > 0;
-        }));
-        usort($fallados, static function (array $a, array $b): int {
-            return [$b['fallos'] / $b['evaluadas'], $b['fallos']] <=> [$a['fallos'] / $a['evaluadas'], $a['fallos']];
-        });
-        return $fallados;
+        return $cuenta;
     }
 
     /**

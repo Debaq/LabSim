@@ -7,6 +7,8 @@ require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/CourseParams.php';
 require_once __DIR__ . '/../../src/CourseAdmin.php';
 require_once __DIR__ . '/../../src/CourseOverview.php';
+require_once __DIR__ . '/../../src/CourseAvance.php';
+require_once __DIR__ . '/../../src/AudiometriaTecnicaVista.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/_layout.php';
 
@@ -76,6 +78,7 @@ if ($detailId !== null) {
     $counts = Courses::counts($courseId);
     $courseTabs = [
         'resumen' => ['label' => 'Resumen'],
+        'avance' => ['label' => 'Avance'],
         'personas' => ['label' => 'Personas', 'count' => $counts['alumnos']],
         'modulos' => ['label' => 'Módulos', 'count' => $counts['modulos']],
         'agenda' => ['label' => 'Agenda'],
@@ -98,6 +101,23 @@ if ($detailId !== null) {
             $proximas = CourseOverview::proximasCitas($courseId, 7);
             $conteoCitas = CourseOverview::conteoCitas($courseId);
             $sinActividad = CourseOverview::alumnosSinActividad($courseId);
+            break;
+
+        case 'avance':
+            // Antes de "Aplicar schema.sql" la tabla de objetivos no existe:
+            // la pestaña lo avisa en vez de romperse.
+            try {
+                $objetivos = CourseAvance::objetivos($courseId);
+                $faltaSchema = false;
+            } catch (PDOException $e) {
+                $objetivos = [];
+                $faltaSchema = true;
+            }
+            $avanceAlumnos = CourseAvance::porAlumno($courseId);
+            $objetivos = CourseAvance::resumenObjetivos($objetivos, $avanceAlumnos);
+            $avanceSemanas = CourseAvance::porSemana($avanceAlumnos, $courseId);
+            $pasosCurso = array_slice(CourseAvance::pasosDelCurso($avanceAlumnos), 0, 6);
+            $necesitan = CourseAvance::necesitanAtencion($avanceAlumnos, date('Y-m-d'));
             break;
 
         case 'personas':

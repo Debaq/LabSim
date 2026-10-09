@@ -790,3 +790,20 @@ CREATE TABLE IF NOT EXISTS consola_consultas (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_consola_consultas_token ON consola_consultas(token_id, id);
+
+-- Objetivos de aprendizaje del curso (pestaña Avance, ver CourseAvance.php).
+-- El texto lo escribe el docente; opcionalmente se ata a un indicador que el
+-- sistema ya mide (CourseAvance::indicadores) con una meta, y entonces la
+-- pestaña cuenta cuántos alumnos lo cumplen. indicador '' = sin medición
+-- automática (solo se lista).
+CREATE TABLE IF NOT EXISTS course_objectives (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    course_id INTEGER NOT NULL REFERENCES courses(id),
+    texto TEXT NOT NULL,
+    indicador TEXT NOT NULL DEFAULT '',
+    meta REAL,
+    orden INTEGER NOT NULL DEFAULT 0,
+    created_by INTEGER,               -- sin REFERENCES, como app_tickets
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_course_objectives_course ON course_objectives(course_id, orden);
