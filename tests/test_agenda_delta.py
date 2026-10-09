@@ -119,6 +119,53 @@ def test_un_ciclo_se_despierta_con_ahora():
     assert not ciclo.isRunning()
 
 
+def test_sesion_vencida_avisa_una_vez_y_para_el_sync():
+    import time
+    import requests
+    from core import hilos
+    from core.base import context
+    from backend.sync_thread import SyncThread
+
+    class _Vencido:
+        llamadas = 0
+
+        def get_sync(self, since):
+            _Vencido.llamadas += 1
+            r = requests.Response()
+            r.status_code = 401
+            raise requests.HTTPError("Sesión vencida o revocada", response=r)
+
+    avisos = []
+    sync = SyncThread(_Vencido(), interval_s=0.01, al_vencer=lambda: avisos.append(1))
+    sync.start()
+    fin = time.time() + 3
+    while time.time() < fin and (sync.isRunning() or not avisos):
+        context.app.processEvents()
+        time.sleep(0.01)
+    assert avisos == [1], avisos
+    assert not sync.isRunning() and _Vencido.llamadas == 1
+
+
+def test_sin_red_el_sync_sigue_callado():
+    import time
+    import requests
+    from backend.sync_thread import SyncThread
+
+    class _SinRed:
+        llamadas = 0
+
+        def get_sync(self, since):
+            _SinRed.llamadas += 1
+            raise requests.ConnectionError("sin red")
+
+    avisos = []
+    sync = SyncThread(_SinRed(), interval_s=0.01, al_vencer=lambda: avisos.append(1))
+    sync.start()
+    time.sleep(0.2)
+    sync.stop()
+    assert avisos == [] and _SinRed.llamadas > 2
+
+
 if __name__ == "__main__":
     fallas = 0
     for nombre, fn in sorted(globals().items()):

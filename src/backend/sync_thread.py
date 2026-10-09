@@ -21,16 +21,25 @@ INTERVALO_S = 60
 
 class SyncThread(hilos.Ciclo):
     def __init__(self, client, interval_s: int = INTERVALO_S, since: str = "1970-01-01 00:00:00",
-                 al_sincronizar=None, dueno=None):
+                 al_sincronizar=None, al_vencer=None, dueno=None):
         super().__init__(interval_s, "SyncThread")
         self._client = client
         self._since = since
         self._al_sincronizar = al_sincronizar
+        self._al_vencer = al_vencer
         self._dueno = dueno
 
     def paso(self) -> None:
         try:
             result = self._client.get_sync(self._since)
+        except requests.HTTPError as exc:
+            if getattr(exc.response, "status_code", None) == 401:
+                # Sesión vencida (vida máxima, ver Tokens.php) o revocada
+                # desde el panel: se avisa una vez y el sync se detiene.
+                self.requestInterruption()
+                if self._al_vencer is not None:
+                    hilos.avisar(self._al_vencer, dueno=self._dueno)
+            return
         except requests.RequestException:
             return   # silencioso: se reintenta en el próximo ciclo
         self._since = result.get("server_time", self._since)

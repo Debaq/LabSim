@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/UserPrefs.php';
+require_once __DIR__ . '/Tokens.php';
 
 final class Auth
 {
@@ -429,7 +430,6 @@ final class Auth
         }
     }
 
-    private const TOKEN_INACTIVE_DAYS = 30;
 
     private static function issueTokenFor(int $userId, ?int $ltiPlatformId = null, ?string $contextId = null): array
     {
@@ -437,12 +437,11 @@ final class Auth
         $token = bin2hex(random_bytes(32));
         $pdo->prepare('INSERT INTO tokens (token, user_id, lti_platform_id, context_id) VALUES (?, ?, ?, ?)')
             ->execute([$token, $userId, $ltiPlatformId, $contextId]);
-        // Purga oportunista de tokens inactivos -- no se puede borrar "todos
-        // menos el último" porque un mismo user entra desde varios
-        // dispositivos a la vez; solo se descartan los que ya nadie usa.
-        $pdo->exec(
-            "DELETE FROM tokens WHERE last_seen_at < datetime('now', '-" . self::TOKEN_INACTIVE_DAYS . " days')"
-        );
+        // Purga oportunista de las sesiones vencidas (vida máxima desde que
+        // se iniciaron, ver Tokens::duracionHoras) -- no se puede borrar
+        // "todos menos el último" porque un mismo user entra desde varios
+        // dispositivos a la vez.
+        Tokens::purgarVencidas($pdo);
         $courseId = $ltiPlatformId !== null
             ? Lti::courseForLaunch($ltiPlatformId, $contextId)
             : null;
@@ -486,17 +485,19 @@ final class Auth
         $pdo = Db::get();
         $stmt = $pdo->prepare(
             'SELECT u.*, t.lti_platform_id AS session_lti_platform_id, t.context_id AS session_context_id
-             FROM tokens t JOIN users u ON u.id = t.user_id WHERE t.token = ? AND u.active = 1'
+             FROM tokens t JOIN users u ON u.id = t.user_id
+             WHERE t.token = ? AND u.active = 1 AND t.created_at > datetime(\'now\', ?)'
         );
-        $stmt->execute([$token]);
+        $stmt->execute([$token, Tokens::limiteSql()]);
         $row = $stmt->fetch();
         $stmt->closeCursor();   // ver Db::get: una lectura abierta hace fallar la escritura que sigue
         if (!$row) {
-            Response::error('Token inválido o expirado', 401);
+            // La app reconoce el 401 y vuelve al login (ver sync_thread.py).
+            Response::error('Sesión vencida o revocada. Vuelve a iniciar sesión.', 401);
         }
 
-        // Solo sirve para podar tokens sin uso (días): basta con anotarlo
-        // una vez por minuto. Antes se escribía en CADA petición, y con los
+        // Solo es informativo (lo muestra admin/tokens.php): basta con
+        // anotarlo una vez por minuto. Antes se escribía en CADA petición, y con los
         // kioskos sincronizando, guardando y subiendo acciones a la vez, si
         // esta escritura esperaba más que busy_timeout la petición entera
         // moría ("database is locked") aunque fuera una subida de informe.

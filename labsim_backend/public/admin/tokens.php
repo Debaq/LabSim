@@ -13,7 +13,8 @@ require_once __DIR__ . '/_layout.php';
  * revocan de a una, las marcadas, o todas las que muestra el filtro (ver
  * Tokens). Revocar corta la sesión al instante: ese equipo vuelve a pedir el
  * login. El panel no usa estos tokens (sesión PHP): revocar los de admin no
- * cierra esta página.
+ * cierra esta página. Cada sesión vence sola a las N horas de iniciada
+ * (Tokens::duracionHoras, se cambia acá).
  */
 
 $me = Auth::requireFullAdminSession();
@@ -29,7 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $uno = (string) ($_POST['revocar_uno'] ?? '');
     $revocados = null;
 
-    if ($uno !== '') {
+    if ($action === 'duracion') {
+        $horas = Tokens::guardarDuracionHoras((int) ($_POST['horas'] ?? Tokens::DURACION_DEFAULT_HORAS));
+        $purgadas = Tokens::purgarVencidas($pdo);
+        $success = "Las sesiones duran ahora {$horas} h desde que se inician."
+            . ($purgadas ? " Se cerraron {$purgadas} que ya pasaban ese tiempo." : '');
+        AdminAudit::log($me, 'token_duracion', ['horas' => $horas, 'purgadas' => $purgadas]);
+    } elseif ($uno !== '') {
         $revocados = Tokens::revocar($pdo, [$uno]);
     } elseif ($action === 'revocar_seleccionados') {
         $marcados = $_POST['tokens'] ?? [];
@@ -60,6 +67,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Las vencidas se rechazan igual (Auth); acá se borran para no mostrarlas.
+Tokens::purgarVencidas($pdo);
+$duracion = Tokens::duracionHoras();
 $tokens = Tokens::listar($pdo, $filtros);
 $hayFiltro = $filtros['q'] !== '' || $filtros['rol'] !== '' || $filtros['actividad'] !== '';
 $total = (int) $pdo->query('SELECT COUNT(*) FROM tokens')->fetchColumn();
@@ -76,6 +86,22 @@ admin_header('Sesiones (tokens)', $me);
         Úsalo si se perdió un equipo, una cuenta quedó comprometida o un token se filtró.
         Esta página no usa estos tokens: revocar los de admin no te saca del panel.
     </p>
+
+    <form method="post" style="display:flex; flex-wrap:wrap; align-items:flex-end; gap:0.6rem; margin:0.7rem 0;
+                               padding-bottom:0.7rem; border-bottom:1px solid var(--color-border);">
+        <?= csrf_field() ?>
+        <input type="hidden" name="form_action" value="duracion">
+        <label>Duración de cada sesión (horas)
+            <input type="number" name="horas" value="<?= $duracion ?>" required
+                   min="<?= Tokens::DURACION_MIN_HORAS ?>" max="<?= Tokens::DURACION_MAX_HORAS ?>" style="width:6rem;">
+        </label>
+        <button type="submit" style="margin-top:0;">Guardar</button>
+        <span class="muted" style="flex-basis:100%;">
+            Contadas desde que se inicia sesión, se use o no. Al vencer, la app vuelve a pedir el
+            inicio de sesión; lo hecho queda en el equipo y se sube al volver a entrar.
+            Bajarla cierra al guardar las sesiones que ya pasan ese tiempo.
+        </span>
+    </form>
 
     <form method="get" style="display:flex; flex-wrap:wrap; align-items:flex-end; gap:0.6rem; margin:0.7rem 0;">
         <label>Buscar
@@ -133,7 +159,7 @@ admin_header('Sesiones (tokens)', $me);
                 <th style="width:2rem;">
                     <input type="checkbox" id="tokens-todos" title="Seleccionar todos" aria-label="Seleccionar todos">
                 </th>
-                <th>Usuario</th><th>Rol</th><th>Creado</th><th>Última actividad</th><th>Token</th><th></th>
+                <th>Usuario</th><th>Rol</th><th>Creado</th><th>Última actividad</th><th>Vence</th><th>Token</th><th></th>
             </tr>
             <?php foreach ($tokens as $t): ?>
             <tr>
@@ -144,6 +170,7 @@ admin_header('Sesiones (tokens)', $me);
                 <td><?= htmlspecialchars($t['role'] === 'student' ? 'alumno' : $t['role']) ?></td>
                 <td><?= htmlspecialchars($t['created_at']) ?></td>
                 <td><?= htmlspecialchars($t['last_seen_at']) ?></td>
+                <td><?= htmlspecialchars((string) $t['vence_at']) ?></td>
                 <td class="mono" style="font-size:0.78rem;">&hellip;<?= htmlspecialchars(substr($t['token'], -8)) ?></td>
                 <td>
                     <button type="submit" name="revocar_uno" value="<?= htmlspecialchars($t['token']) ?>"
@@ -153,7 +180,7 @@ admin_header('Sesiones (tokens)', $me);
             </tr>
             <?php endforeach; ?>
             <?php if (!$tokens): ?>
-            <tr><td colspan="7" class="muted"><?= $hayFiltro ? 'Ninguna sesión con este filtro.' : 'Ninguna sesión activa.' ?></td></tr>
+            <tr><td colspan="8" class="muted"><?= $hayFiltro ? 'Ninguna sesión con este filtro.' : 'Ninguna sesión activa.' ?></td></tr>
             <?php endif; ?>
         </table>
         </div>

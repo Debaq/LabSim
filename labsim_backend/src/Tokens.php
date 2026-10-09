@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/AppConfig.php';
+
 /**
  * Sesiones de la app de escritorio (tabla `tokens`: bearer opaco, uno por
  * dispositivo/login) vistas y revocadas desde el panel (admin/tokens.php).
@@ -14,6 +16,60 @@ declare(strict_types=1);
 final class Tokens
 {
     public const ROLES = ['admin', 'student'];
+
+    // Vida máxima de una sesión desde que se inició (no desde el último
+    // uso: así un token en uso tampoco vive para siempre). Se cambia en
+    // admin/tokens.php; se guarda en app_config global.
+    public const DURACION_KEY = 'sesion.duracion';
+    public const DURACION_DEFAULT_HORAS = 12;
+    public const DURACION_MIN_HORAS = 1;
+    public const DURACION_MAX_HORAS = 720;   // 30 días
+
+    /** @var int|null por petición: requireUser la consulta en cada llamada */
+    private static $duracionCache = null;
+
+    public static function duracionHoras(): int
+    {
+        if (self::$duracionCache === null) {
+            $guardada = null;
+            try {
+                $guardada = AppConfig::getEffective(self::DURACION_KEY, null);
+            } catch (Throwable $e) {
+                error_log('[Tokens] no se pudo leer la duración: ' . $e->getMessage());
+            }
+            $horas = is_array($guardada) && isset($guardada['horas'])
+                ? (int) $guardada['horas'] : self::DURACION_DEFAULT_HORAS;
+            self::$duracionCache = self::acotarHoras($horas);
+        }
+        return self::$duracionCache;
+    }
+
+    public static function acotarHoras(int $horas): int
+    {
+        return max(self::DURACION_MIN_HORAS, min(self::DURACION_MAX_HORAS, $horas));
+    }
+
+    public static function guardarDuracionHoras(int $horas): int
+    {
+        $horas = self::acotarHoras($horas);
+        AppConfig::set(self::DURACION_KEY, ['horas' => $horas], null);
+        self::$duracionCache = $horas;
+        return $horas;
+    }
+
+    /** Para comparar con created_at en SQLite: datetime('now', ?). */
+    public static function limiteSql(): string
+    {
+        return '-' . self::duracionHoras() . ' hours';
+    }
+
+    /** Borra las sesiones que ya pasaron su vida máxima. Devuelve cuántas. */
+    public static function purgarVencidas(PDO $pdo): int
+    {
+        $stmt = $pdo->prepare("DELETE FROM tokens WHERE created_at <= datetime('now', ?)");
+        $stmt->execute([self::limiteSql()]);
+        return $stmt->rowCount();
+    }
     // Última actividad: hoy, la última semana, o más vieja que una semana.
     public const ACTIVIDAD = ['hoy', 'semana', 'vieja'];
 
@@ -74,7 +130,8 @@ final class Tokens
         [$where, $params] = self::where($f);
         $stmt = $pdo->prepare(
             "SELECT t.token, t.created_at, t.last_seen_at, u.id AS user_id, u.username,
-                    u.display_name, u.role
+                    u.display_name, u.role,
+                    datetime(t.created_at, '+" . self::duracionHoras() . " hours') AS vence_at
              FROM tokens t JOIN users u ON u.id = t.user_id
              WHERE {$where}
              ORDER BY t.last_seen_at DESC"

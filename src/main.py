@@ -626,7 +626,8 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         client = self._logged_in_client()
         if client is None:
             return
-        self.sync_thread = SyncThread(client, al_sincronizar=self._on_backend_sync, dueno=self)
+        self.sync_thread = SyncThread(client, al_sincronizar=self._on_backend_sync,
+                                      al_vencer=self._sesion_vencida, dueno=self)
         self.sync_thread.start()
 
     def _subir_pendientes_en_fondo(self):
@@ -662,6 +663,22 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
                            listo=lambda items: inbox.actualizar_badge(self, items))
         app_config_store.update_from_sync(delta.get("config"))
         self._subir_pendientes_en_fondo()
+
+    def _sesion_vencida(self):
+        """El servidor ya no acepta la sesión: venció (dura N horas desde el
+        inicio, ver admin/tokens.php) o la revocaron. Se vuelve al login; lo
+        hecho queda en el equipo y sube al volver a entrar (ver
+        report_autosave.subir_pendientes)."""
+        if not self.data_login:
+            return
+        print("sync: la sesión venció o fue revocada, se vuelve al login")
+        self._aviso("Sesión vencida",
+                    "Tu sesión con el servidor venció. Vuelve a iniciar sesión.\n\n"
+                    "Lo que hiciste quedó guardado en este equipo y se sube solo al "
+                    "volver a entrar; la atención abierta se puede retomar.",
+                    QMessageBox.Icon.Information)
+        if self.data_login:
+            self.logout()
 
     def sync_ahora(self) -> bool:
         """Que el sync pregunte ya (tras atender, cerrar, una inasistencia).

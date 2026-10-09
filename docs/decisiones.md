@@ -5108,3 +5108,23 @@ de la app con un token de admin vigente. El paquete de actualización ya los
 excluía (`scripts/update_diff.py`), el completo no. Ahora el spec no los copia
 y corta el build si aparecen. Los tokens de admin que salieron así hay que
 revocarlos en el servidor (tabla `tokens`).
+
+## Sesiones de la app: 12 horas desde que se inician (2026-10-09)
+
+Los tokens de la app (`tokens`) no vencían: solo se purgaban los que llevaban
+30 días sin uso, así que uno en uso vivía para siempre (y el que se filtró en
+el tarball público seguía vigente). Ahora cada sesión dura N horas **desde que
+se inicia**, se use o no (default 12, entre 1 y 720), configurable en
+Sistema → Sesiones (`admin/tokens.php`, guardado en `app_config` global,
+clave `sesion.duracion`). `Auth::requireUserWithSession` rechaza con 401 el
+token pasado de ese tiempo; los vencidos se borran al emitir uno nuevo y al
+abrir la página. Bajar la duración cierra al guardar las que ya la pasan.
+
+Vida máxima y no inactividad: con inactividad, un equipo sincronizando cada
+minuto no vencería nunca.
+
+La app (`SyncThread`) reconoce el 401: avisa una vez "tu sesión venció" y
+vuelve al login. Lo hecho queda en el equipo (respaldo de informes, cola de
+logs) y sube al volver a entrar; la atención abierta se retoma. Una versión
+de la app anterior a este cambio no lo reconoce: deja de sincronizar en
+silencio hasta que el alumno cierra sesión (cerrar la atención sí le avisa).

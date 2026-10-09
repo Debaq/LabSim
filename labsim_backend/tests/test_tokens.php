@@ -59,3 +59,26 @@ t_eq(Tokens::listar($pdo, Tokens::filtros([])), [], 'No queda ninguna');
 $pagina = (string) file_get_contents(__DIR__ . '/../public/admin/tokens.php');
 t_true(strpos($pagina, 'revocarFiltrados($pdo, $filtros)') !== false,
        'Revocar todas arma el conjunto en el servidor con el mismo filtro');
+
+// Vida máxima de las sesiones (desde que se inician).
+t_eq(Tokens::acotarHoras(0), Tokens::DURACION_MIN_HORAS, 'Duración: mínimo');
+t_eq(Tokens::acotarHoras(100000), Tokens::DURACION_MAX_HORAS, 'Duración: máximo');
+t_eq(Tokens::DURACION_DEFAULT_HORAS, 12, 'Por defecto 12 h');
+$cache = new ReflectionProperty(Tokens::class, 'duracionCache');
+$cache->setAccessible(true);
+$cache->setValue(null, 12);
+t_eq(Tokens::limiteSql(), '-12 hours', 'Límite para SQLite');
+$pdo->exec("INSERT INTO tokens VALUES
+    ('nuevo00000000001', 2, datetime('now','-11 hours'), datetime('now')),
+    ('viejo00000000001', 3, datetime('now','-13 hours'), datetime('now'))");
+t_eq(Tokens::purgarVencidas($pdo), 1, 'Purga la que pasó las 12 h aunque se haya usado recién');
+$quedan = Tokens::listar($pdo, Tokens::filtros([]));
+t_eq(array_column($quedan, 'token'), ['nuevo00000000001'], 'Queda la de 11 h');
+t_true(strtotime($quedan[0]['vence_at']) - strtotime($quedan[0]['created_at']) === 12 * 3600,
+       'Vence a las 12 h de creada');
+$cache->setValue(null, null);
+
+$auth = (string) file_get_contents(__DIR__ . '/../src/Auth.php');
+t_true(strpos($auth, "t.created_at > datetime(\\'now\\', ?)") !== false
+       && strpos($auth, 'Tokens::limiteSql()') !== false,
+       'Auth rechaza el token pasada la vida máxima');
