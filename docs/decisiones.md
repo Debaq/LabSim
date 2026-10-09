@@ -5010,7 +5010,77 @@ hasta 4 s a lo que sigue en curso; si algo queda, `os._exit` como antes.
 el final dejaba a la ventana sin volver nunca al bucle de eventos cuando un
 aviso lanzaba otra tarea que terminaba al instante.
 
-Aparte, y no descartado como factor: el build trae ~70 librerías copiadas
-del sistema del PC donde se compila (pila X11/xcb, glib,
-fontconfig/freetype, dbus, libstdc++…), mientras que libxcb, harfbuzz, GL y
-pipewire se cargan del sistema del equipo. Ver TODO.md.
+Aparte, y no descartado como factor: el build mezclaba librerías del PC de
+build con las del equipo. Ver "Build encapsulado".
+
+## Build encapsulado: lo que carga la app viene del dist (2026-10-09)
+
+El build de Linux trae ~70 librerías copiadas de `/usr/lib` del PC donde se
+compila (mismo md5): pila X11/xcb, xkbcommon, glib/gio, dbus, fontconfig y
+freetype, libstdc++, libgcc_s, pulse, krb5... Pero algunas se cargaban del
+sistema del equipo: `libxcb` (PyInstaller la excluye a propósito),
+`libharfbuzz`/`libgraphite2` (libfreetype las abre con dlopen, el análisis no
+las ve), `libwayland-*`, `libpipewire` y la capa GL. En los equipos del
+laboratorio, con libs de fines de julio, convivían su libxcb con nuestra
+libX11 de fines de agosto, su harfbuzz con nuestra glib y freetype. No era la
+causa de los cierres del 2026-10-09 (ver "Sin QThread"), pero es el mismo
+tipo de memoria rota esperando pasar.
+
+Ahora (`LabSim.spec`, "Build encapsulado"):
+- `EMPAQUETAR_DEL_SISTEMA` mete en el dist libxcb, harfbuzz, graphite2,
+  libwayland-client/cursor y libdrm (FFmpeg la pide para decodificar por
+  hardware, que el audio no usa).
+- `installer/hooks/rth_entorno_qt.py` pone `QT_XCB_GL_INTEGRATION=none`: la
+  app es todo widgets raster, no usa OpenGL, y así el driver de video del
+  equipo no se carga. Se sacan también los plugins de integración GL de
+  Wayland (`wayland-graphics-integration-client`).
+- Al final del build se revisa cada ELF del dist: si alguno pide (NEEDED) una
+  lib que no está en el dist ni en `SISTEMA_PERMITIDO` (glibc y el despachador
+  GL de glvnd), el build se corta.
+- `scripts/verificar_bundle.py` (lo corre `build.sh` si hay sesión gráfica)
+  arranca el dist unos segundos y lista lo que cargó de fuera; falla si hay
+  algo más que glibc, sus módulos nss, glvnd y libpipewire (permitida: tiene
+  que calzar con el daemon del equipo). Borra lo que la app escribe en el
+  dist al arrancar (`resources/local_cache`), que si no terminaría en el
+  paquete de la versión.
+
+Medido en este PC, xcb y wayland: del sistema solo glibc, nss y glvnd (13
+libs); el build anterior cargaba además libxcb, harfbuzz, graphite2,
+libpipewire y libwayland.
+
+Lo que no se puede encapsular es glibc: las libs copiadas exigen la del PC de
+build (hoy 2.43, igual que el build anterior). El build la anota en
+`_internal/glibc_minima.txt` y cada ticket trae la glibc del equipo y la que
+pide el build: si el PC de build se actualiza y el laboratorio no, se ve ahí.
+
+## Menos llamadas al servidor: la agenda con el delta, lo demás en cola (2026-10-09)
+
+Antes, por cada equipo con sesión: `sync.php` con los cambios + `inbox.php` +
+`sync.php` **desde 1970** (todos los casos, ~210 KB de JSON) cada 15 s, más
+los logs de acciones cada 20 s y el autoguardado cada 30 s. Con 5 equipos,
+~3 600 peticiones por hora y ~250 MB de descargas, para mostrar en vivo algo
+que nadie mira en vivo. `inbox.php` además escribe (`Oirs::normalizarGuardados`)
+en cada GET: 20 escrituras por minuto en el SQLite de producción.
+
+Ahora:
+- **Sync cada 60 s**, y al tiro (`Ciclo.ahora()`) tras una acción propia:
+  atender, cerrar la atención, inasistencia (`MainWindow.sync_ahora`).
+- **La agenda se arma con el delta** (`helpers.aplicar_delta`): se guarda en
+  memoria lo que mandó el servidor (citas, casos y atenciones por id) y se le
+  aplica cada delta. El delta no avisa borrados ni reasignaciones, así que
+  `sync.php` manda además `appointment_ids` (las citas que hoy le tocan a ese
+  usuario, solo los id) y lo que no está se saca. Se baja entera solo al
+  iniciar sesión, con un backend sin `appointment_ids`, o si el docente ve la
+  atención de un alumno que no está en su lista (admin_dump trae los nombres).
+- **Bandeja**: `sync.php` trae `inbox_no_leidos`; la bandeja entera se pide
+  solo al abrirla.
+- **Logs de acciones**: se juntan en la cola local (sqlite, ya existía) y
+  suben cada 5 min, o al tiro al atender, cerrar la atención o salir.
+- **Autoguardado**: al disco cada 5 s como antes; al servidor cada 2 min
+  (eran 30 s), al esconder el módulo y al cerrar la atención o la app. A
+  otro equipo le llega a lo sumo 2 min atrasado.
+
+Queda, por equipo, 1 petición por minuto en régimen más lo que dispare el
+alumno. Carrera conocida y aceptada: si una descarga entera (rara ahora)
+termina después de un delta que llegó mientras tanto, ese delta se pisa hasta
+el próximo cambio de esas filas.

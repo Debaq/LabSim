@@ -8,7 +8,7 @@ a = Analysis(
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
-    runtime_hooks=[],
+    runtime_hooks=['installer/hooks/rth_entorno_qt.py'],
     # scipy ya no es dependencia (core/dsp.py), pero si esta instalado en el
     # entorno pyqtgraph lo arrastra: solo lo usa en affineSlice con
     # interpolacion de orden > 1, que la app no llama. Son ~70 MB.
@@ -52,6 +52,10 @@ QT_DROP = [
     '*plugins/platforms/*qvkkhrdisplay.*',
     '*plugins/platforms/*qoffscreen.*',
     '*plugins/egldeviceintegrations/*',
+    # integraciones GL de Wayland (wayland-egl, dmabuf): los widgets van por
+    # memoria compartida y la app no usa OpenGL; traían libwayland-egl y el
+    # driver de video del equipo (ver "Build encapsulado" más abajo)
+    '*plugins/wayland-graphics-integration-client/*',
     # la app no instala ningun QTranslator: los .qm no se leen nunca
     'PySide6/*translations/*',
     # segunda ICU (v78, ~38 MB): la pide la libsqlite3 del env conda, pero
@@ -142,6 +146,52 @@ def prune_qt(binaries, datas):
 
 a.binaries, a.datas = prune_qt(a.binaries, a.datas)
 
+# --- Build encapsulado (Linux) -------------------------------------------------
+# Lo que la app carga tiene que venir del dist, no del sistema del equipo:
+# si no, conviven dos versiones de la misma lib (la del PC de build, que
+# viene empaquetada, y la del equipo, que abre alguna lib del sistema) y
+# eso es memoria rota a la espera de pasar. PyInstaller deja afuera a
+# propósito algunas que aquí sí hacen falta:
+# - libxcb: la excluye por el driver GL, que acá no se carga
+#   (installer/hooks/rth_entorno_qt.py); sin ella se mezclaba la libxcb del
+#   equipo con libX11/libxcb-* del PC de build.
+# - libharfbuzz/libgraphite2: libfreetype las abre con dlopen, así que el
+#   análisis no las ve; venían del sistema y a su vez pedían su glib y su
+#   freetype.
+# - libwayland-client/cursor: el plugin wayland se queda (ver arriba).
+# - libdrm: la pide FFmpeg (libavutil) para decodificar por hardware, que el
+#   audio no usa; la excluye por el driver GL, que no se carga.
+# Del sistema solo puede venir lo de SISTEMA_PERMITIDO (se chequea al final).
+EMPAQUETAR_DEL_SISTEMA = ['libxcb.so.1', 'libharfbuzz.so.0', 'libgraphite2.so.3',
+                          'libwayland-client.so.0', 'libwayland-cursor.so.0',
+                          'libdrm.so.2']
+
+SISTEMA_PERMITIDO = {
+    # glibc: no se empaqueta nunca (ABI estable hacia adelante)
+    'ld-linux-x86-64.so.2', 'libc.so.6', 'libm.so.6', 'libdl.so.2',
+    'libpthread.so.0', 'librt.so.1', 'libutil.so.1', 'libresolv.so.2',
+    'libanl.so.1', 'libcrypt.so.2',
+    # glvnd: despachador GL, tiene que ser el del equipo (elige su driver)
+    'libGL.so.1', 'libEGL.so.1', 'libGLX.so.0', 'libOpenGL.so.0',
+    'libGLdispatch.so.0', 'libGLESv2.so.2',
+}
+
+
+def _lib_sistema(nombre):
+    out = subprocess.run(['ldconfig', '-p'], capture_output=True, text=True).stdout
+    for line in out.splitlines():
+        partes = line.strip().split(' => ')
+        if len(partes) == 2 and partes[0].split()[0] == nombre and 'x86-64' in partes[0]:
+            return os.path.realpath(partes[1])
+    raise SystemExit(f'build encapsulado: no está {nombre} en este PC')
+
+
+if sys.platform.startswith('linux'):
+    ya = {_base(d) for d, _, _ in a.binaries}
+    for nombre in EMPAQUETAR_DEL_SISTEMA:
+        if nombre.lower() not in ya:
+            a.binaries.append((nombre, _lib_sistema(nombre), 'BINARY'))
+
 # --- setuptools --------------------------------------------------------------
 # urllib3 prueba `from backports import zstd` (opcional; en 3.14 usa
 # compression.zstd) y el hook de PyInstaller para `backports` lo resuelve en
@@ -215,6 +265,47 @@ if sys.platform.startswith('linux') and shutil.which('strip'):
                 if not os.path.islink(p)]
     subprocess.run(['strip', '--strip-debug', *to_strip], check=True)
     print(f'strip: --strip-debug en {len(to_strip)} archivos')
+
+# Chequeo del build encapsulado: cada ELF del dist pide (NEEDED) solo libs
+# que están en el dist o en SISTEMA_PERMITIDO. Si no, se corta: esa lib se
+# cargaría del sistema del equipo. Además se anota la glibc más nueva que
+# pide algo del dist: el equipo tiene que tener esa o una posterior.
+if sys.platform.startswith('linux'):
+    import re
+    elfs = []
+    for root, _, files in os.walk(os.path.join(dist_dir, '_internal')):
+        for name in files:
+            path = os.path.join(root, name)
+            if os.path.islink(path) or not ('.so' in name or name == 'LabSim'):
+                continue
+            with open(path, 'rb') as f:
+                if f.read(4) == b'\x7fELF':
+                    elfs.append(path)
+    elfs.append(os.path.join(dist_dir, 'LabSim'))
+    en_dist = {os.path.basename(p) for p in elfs}
+    for root, _, files in os.walk(os.path.join(dist_dir, '_internal')):
+        en_dist |= set(files)
+    faltan, glibc = {}, (0, 0)
+    for path in elfs:
+        out = subprocess.run(['objdump', '-p', path], capture_output=True,
+                             text=True).stdout
+        for line in out.splitlines():
+            line = line.strip()
+            if line.startswith('NEEDED'):
+                lib = line.split()[1]
+                if lib not in en_dist and lib not in SISTEMA_PERMITIDO:
+                    faltan.setdefault(lib, []).append(os.path.relpath(path, dist_dir))
+            m = re.search(r'GLIBC_(\d+)\.(\d+)', line)
+            if m:
+                glibc = max(glibc, (int(m.group(1)), int(m.group(2))))
+    if faltan:
+        detalle = '\n'.join(f'  {lib}  <- {", ".join(sorted(q)[:3])}'
+                            for lib, q in sorted(faltan.items()))
+        raise SystemExit('build encapsulado: estas libs vendrían del sistema '
+                         f'del equipo (agregarlas a EMPAQUETAR_DEL_SISTEMA):\n{detalle}')
+    with open(os.path.join(dist_dir, '_internal', 'glibc_minima.txt'), 'w') as f:
+        f.write(f'{glibc[0]}.{glibc[1]}\n')
+    print(f'build encapsulado: {len(elfs)} ELF revisados, glibc mínima {glibc[0]}.{glibc[1]}')
 
 if sys.platform != 'win32':
     run_sh = os.path.join(dist_dir, 'run.sh')

@@ -19,7 +19,7 @@ from core.ui_helpers import style_dialog
 # Rótulos de detalle_sistema() para mostrar.
 _ROTULOS = {"so_version": "Sistema operativo", "distribucion": "Distribución",
             "arquitectura": "Arquitectura", "python": "Python", "qt": "Qt",
-            "pantalla": "Pantalla", "kiosko": "Equipo del laboratorio"}
+            "pantalla": "Pantalla", "kiosko": "Equipo del laboratorio", "glibc": "glibc"}
 
 
 def _enviar(descripcion, equipo_info, detalle, cierre_inesperado=False):

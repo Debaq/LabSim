@@ -7,6 +7,7 @@ Reportar un problema se manda al servidor (ver core/soporte.py).
 
 Corriendo desde el código sigue en src/log_file.txt, donde siempre estuvo.
 """
+import os
 import platform
 import socket
 import sys
@@ -80,7 +81,29 @@ def detalle_sistema() -> dict:
             info["distribucion"] = platform.freedesktop_os_release().get("PRETTY_NAME", "")
         except (OSError, AttributeError):
             pass
+        glibc = _glibc()
+        if glibc:
+            info["glibc"] = glibc
     return info
+
+
+def _glibc() -> str:
+    """glibc del equipo y la que pide el build (glibc_minima.txt, lo deja
+    LabSim.spec): las libs empaquetadas se copian del PC donde se compila y
+    no abren con una glibc más vieja."""
+    try:
+        equipo_glibc = os.confstr("CS_GNU_LIBC_VERSION") or ""
+    except (ValueError, OSError):
+        return ""
+    minima = ""
+    base = getattr(sys, "_MEIPASS", None)
+    if base:
+        try:
+            with open(os.path.join(base, "glibc_minima.txt"), encoding="utf-8") as f:
+                minima = f.read().strip()
+        except OSError:
+            pass
+    return f"{equipo_glibc} (el build pide {minima})" if minima else equipo_glibc
 
 
 def encabezado() -> str:
