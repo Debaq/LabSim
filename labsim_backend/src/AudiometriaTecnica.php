@@ -97,32 +97,179 @@ final class AudiometriaTecnica
     }
 
     /**
+     * Sube cuando cambia cómo se evalúa (reglas, textos, umbrales): las
+     * evaluaciones guardadas con otra versión se recalculan solas.
+     */
+    public const CACHE_VERSION = 1;
+
+    /**
      * Indicadores de la atención $appointmentId del alumno $studentId, o null
      * si no usó el audiómetro con ese paciente. $logs: las filas de
      * action_logs del alumno si ya se tienen (payload como texto o array);
-     * si no, se leen.
+     * si no, se leen solo si hace falta (ver deAtenciones).
      */
     public static function paraAtencion(int $appointmentId, int $studentId, ?array $logs = null): ?array
     {
+        return self::deAtenciones($studentId, [$appointmentId], $logs)[$appointmentId] ?? null;
+    }
+
+    /**
+     * La técnica de varias atenciones de un alumno: [appointment_id => resultado
+     * de evaluar() o null].
+     *
+     * Una atención cerrada no cambia, así que su evaluación se guarda en
+     * audiometria_tecnica_cache y la próxima vez no se lee ni un registro: el
+     * curso tenía ~70 mil filas del audiómetro y leerlas en cada visita de
+     * Avance tardaba 11 s. La clave guarda todo lo que mueve el resultado
+     * (CACHE_VERSION, los parámetros del curso, la ficha y la atención:
+     * reabrirla y volver a cerrarla cambia su updated_at). Lo que falta se
+     * calcula leyendo los registros del alumno UNA vez, repartidos por cita.
+     * Sin la tabla (antes de aplicar schema.sql) se calcula igual, sin guardar.
+     *
+     * @param array<int,int> $appointmentIds
+     * @return array<int,?array>
+     */
+    public static function deAtenciones(int $studentId, array $appointmentIds, ?array $logs = null): array
+    {
+        $ids = array_values(array_unique(array_map('intval', $appointmentIds)));
+        if (!$ids) {
+            return [];
+        }
         $pdo = Db::get();
+        $ph = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = $pdo->prepare(
+            "SELECT a.id, a.course_id, c.data, c.updated_at AS caso_at, att.estado, att.updated_at AS att_at
+               FROM appointments a
+               LEFT JOIN cases c ON c.id = a.case_id
+               LEFT JOIN attendances att ON att.appointment_id = a.id AND att.student_id = ?
+              WHERE a.id IN ({$ph})"
+        );
+        $stmt->execute(array_merge([$studentId], $ids));
+        $citas = [];
+        $paramsCurso = [];
+        foreach ($stmt->fetchAll() as $f) {
+            $courseId = $f['course_id'] !== null ? (int) $f['course_id'] : null;
+            $k = (string) $courseId;
+            if (!isset($paramsCurso[$k])) {
+                $paramsCurso[$k] = self::parametros($courseId);
+            }
+            $citas[(int) $f['id']] = [
+                'caso' => $f['data'] ? json_decode((string) $f['data'], true) : null,
+                'params' => $paramsCurso[$k],
+                'cerrada' => $f['estado'] === 'atendido',
+                'clave' => sha1(json_encode([self::CACHE_VERSION, $paramsCurso[$k], $f['caso_at'], $f['att_at']])),
+            ];
+        }
+
+        $out = [];
+        $guardadas = self::leerCache($studentId, array_keys($citas));
+        $faltan = [];
+        foreach ($citas as $ap => $c) {
+            if (!is_array($c['caso'])) {
+                $out[$ap] = null;
+            } elseif ($c['cerrada'] && isset($guardadas[$ap]) && $guardadas[$ap]['clave'] === $c['clave']) {
+                $out[$ap] = $guardadas[$ap]['resultado'];
+            } else {
+                $faltan[] = $ap;
+            }
+        }
+        if (!$faltan) {
+            return $out;
+        }
+
         if ($logs === null) {
+            // De a una fila y sin traer todo a memoria: solo se decodifica lo
+            // de las citas que faltan (el número de cita se mira en el texto).
             $stmt = $pdo->prepare("SELECT client_ts, action, payload FROM action_logs WHERE user_id = ? AND action LIKE 'audio\\_%' ESCAPE '\\' ORDER BY id");
             $stmt->execute([$studentId]);
-            $logs = $stmt->fetchAll();
+            $quiero = array_flip($faltan);
+            $porCita = [];
+            while (($l = $stmt->fetch()) !== false) {
+                if (!preg_match('/"appointment_id":"?(\d+)/', (string) $l['payload'], $m) || !isset($quiero[(int) $m[1]])) {
+                    continue;
+                }
+                $p = json_decode((string) $l['payload'], true);
+                if (is_array($p)) {
+                    $porCita[(int) $m[1]][] = ['client_ts' => $l['client_ts'], 'action' => $l['action'], 'payload' => $p];
+                }
+            }
+            $stmt->closeCursor();   // antes de guardar (ver Db::get)
+        } else {
+            $porCita = self::logsPorCita($logs, $faltan);
         }
-        $propios = self::logsDeAtencion($logs, $appointmentId);
-        if ($propios === []) {
-            return null;
+        foreach ($faltan as $ap) {
+            $c = $citas[$ap];
+            $res = isset($porCita[$ap])
+                ? self::evaluar(AudiometriaRegistro::leer($porCita[$ap], $c['caso']), $c['caso'], $c['params'])
+                : null;
+            $out[$ap] = $res;
+            if ($c['cerrada']) {
+                self::guardarCache($ap, $studentId, $c['clave'], $res);
+            }
         }
-        $stmt = $pdo->prepare('SELECT a.course_id, c.data FROM appointments a LEFT JOIN cases c ON c.id = a.case_id WHERE a.id = ?');
-        $stmt->execute([$appointmentId]);
-        $fila = $stmt->fetch();
-        $caso = $fila && $fila['data'] ? json_decode((string) $fila['data'], true) : null;
-        if (!is_array($caso)) {
-            return null;
+        return $out;
+    }
+
+    /**
+     * Las filas del audiómetro repartidas por cita, con el payload
+     * decodificado una sola vez (antes se decodificaba todo el historial del
+     * alumno por cada atención).
+     *
+     * @param array<int,int> $soloCitas
+     * @return array<int,array<int,array>>
+     */
+    public static function logsPorCita(array $logs, array $soloCitas): array
+    {
+        $quiero = array_flip(array_map('intval', $soloCitas));
+        $out = [];
+        foreach ($logs as $l) {
+            if (strpos((string) $l['action'], 'audio_') !== 0) {
+                continue;
+            }
+            $p = $l['payload'] ?? null;
+            if (!is_array($p)) {
+                $p = $p ? json_decode((string) $p, true) : null;
+            }
+            $ap = is_array($p) ? (int) ($p['appointment_id'] ?? 0) : 0;
+            if ($ap > 0 && isset($quiero[$ap])) {
+                $out[$ap][] = ['client_ts' => $l['client_ts'], 'action' => $l['action'], 'payload' => $p];
+            }
         }
-        $courseId = $fila['course_id'] !== null ? (int) $fila['course_id'] : null;
-        return self::evaluar(AudiometriaRegistro::leer($propios, $caso), $caso, self::parametros($courseId));
+        return $out;
+    }
+
+    /** @return array<int,array{clave:string, resultado:?array}> */
+    private static function leerCache(int $studentId, array $ids): array
+    {
+        if (!$ids) {
+            return [];
+        }
+        try {
+            $ph = implode(',', array_fill(0, count($ids), '?'));
+            $stmt = Db::get()->prepare("SELECT appointment_id, clave, resultado FROM audiometria_tecnica_cache WHERE student_id = ? AND appointment_id IN ({$ph})");
+            $stmt->execute(array_merge([$studentId], $ids));
+            $out = [];
+            foreach ($stmt->fetchAll() as $f) {
+                $res = json_decode((string) $f['resultado'], true);
+                $out[(int) $f['appointment_id']] = ['clave' => (string) $f['clave'], 'resultado' => is_array($res) ? $res : null];
+            }
+            return $out;
+        } catch (PDOException $e) {
+            return [];   // sin la tabla todavía: se calcula sin guardar
+        }
+    }
+
+    /** Guardar es un extra: si la base está ocupada o falta la tabla, la página sigue igual. */
+    private static function guardarCache(int $appointmentId, int $studentId, string $clave, ?array $resultado): void
+    {
+        try {
+            Db::get()->prepare(
+                'INSERT INTO audiometria_tecnica_cache (appointment_id, student_id, clave, resultado) VALUES (?, ?, ?, ?)
+                 ON CONFLICT(appointment_id, student_id) DO UPDATE SET clave = excluded.clave, resultado = excluded.resultado, created_at = CURRENT_TIMESTAMP'
+            )->execute([$appointmentId, $studentId, $clave, json_encode($resultado, JSON_UNESCAPED_UNICODE)]);
+        } catch (PDOException $e) {
+            error_log('[AudiometriaTecnica] no se pudo guardar la evaluación: ' . $e->getMessage());
+        }
     }
 
     /** Las filas del audiómetro de una atención, con el payload decodificado. */

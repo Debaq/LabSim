@@ -38,6 +38,25 @@ citas); Avance es cómo van los alumnos.
 
 Cálculo en `src/CourseAvance.php` (tests en `tests/test_course_avance.php`).
 
+**Sin la lectura gigante (mismo día).** Medido con el volumen real del curso
+de Audiología (~68 mil filas del audiómetro, 10 MB), Avance tardaba 11,5 s y
+70 MB: leía todos los registros y los decodificaba una vez por atención.
+Ahora la técnica de una atención **cerrada** se calcula una vez y se guarda
+(`audiometria_tecnica_cache`, `AudiometriaTecnica::deAtenciones`); la clave
+incluye `CACHE_VERSION`, los parámetros de técnica del curso, la ficha y la
+atención, así que reabrir/cerrar, editar el caso o cambiar los parámetros la
+recalcula sola. **Si cambian las reglas de la técnica, subir
+`CACHE_VERSION`.** Lo que falta se calcula leyendo cada alumno una vez, de a
+fila y decodificando solo sus citas. Resultado: 0,03 s y 8 MB con la caché
+llena; ~2 s la primera vez. Lo aprovechan también la ficha del alumno, Ver
+atención, el portal del alumno y launch.php. La ficha del alumno arma el
+registro técnico (que sí necesita todas las filas) solo al pedirlo
+(`?registro=1`).
+
+**Duración promedio de una atención del curso**, con su tendencia y por
+semana. No cuenta atenciones de más de 3 h (`CourseAvance::DURACION_MAX_S`):
+quedaron abiertas y no dicen cuánto demoró el alumno.
+
 ## Ficha del alumno: indicadores en vez del registro de acciones (2026-10-09)
 
 `admin/student.php` abría con una tabla de contadores técnicos y terminaba

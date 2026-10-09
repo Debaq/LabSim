@@ -216,12 +216,13 @@ a.curso-card:hover, a.curso-card:focus-visible { transform: translateY(-2px); bo
 .paso-barra span { display: block; height: 100%; background: var(--color-danger); }
 
 .semanas { display: flex; flex-direction: column; gap: 0.3rem; margin-top: var(--space-3); }
-.semana { display: grid; grid-template-columns: 3.5rem minmax(0, 1fr) 2.5rem 3.5rem; align-items: center; gap: var(--space-3); font-size: 0.82rem; }
+.semana { display: grid; grid-template-columns: 3.5rem minmax(0, 1fr) 2.5rem 4.5rem 3.5rem; align-items: center; gap: var(--space-3); font-size: 0.82rem; }
 .semana-fecha { color: var(--color-muted); }
 .semana-barra { height: 12px; border-radius: 3px; background: var(--color-table-head); overflow: hidden; }
 .semana-barra span { display: block; height: 100%; background: var(--color-primary); }
 .semana-n { text-align: right; font-weight: 600; }
 .semana-tec { text-align: right; font-weight: 600; }
+.semana-dur { text-align: right; color: var(--color-muted); white-space: nowrap; }
 
 .avance-tabla .col-objetivo { text-align: center; width: 4rem; }
 .avance-tabla .obj-si { color: var(--color-success-text); font-weight: 700; background: var(--color-success-bg); }

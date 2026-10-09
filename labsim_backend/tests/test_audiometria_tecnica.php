@@ -490,3 +490,15 @@ at_secuencia($vuelve, 2000, [20, 10, 0, 5, 10, 0, 5, 10]);
 $r = AudiometriaTecnica::evaluar(AudiometriaRegistro::leer($vuelve->logs, at_caso()), at_caso(), $params);
 t_eq($r['aereos']['observaciones'], [], 'Volver a verificar: no es repetir sin necesidad');
 t_true(at_falla(at_reglas($r['aereos']), 'OD · Se verifica el umbral'), 'Volver a verificar: irse sin verificar igual se marca');
+
+// Registros repartidos por cita, decodificando una sola vez (deAtenciones).
+$porCita = AudiometriaTecnica::logsPorCita([
+    ['client_ts' => 't1', 'action' => 'audio_freq_change', 'payload' => '{"appointment_id":"4","freq":1000}'],
+    ['client_ts' => 't2', 'action' => 'audio_freq_change', 'payload' => ['appointment_id' => 5]],
+    ['client_ts' => 't3', 'action' => 'chat_send', 'payload' => '{"appointment_id":4}'],
+    ['client_ts' => 't4', 'action' => 'audio_stim_button', 'payload' => '{"appointment_id":9}'],
+    ['client_ts' => 't5', 'action' => 'audio_stim_button', 'payload' => null],
+], [4, 5]);
+t_eq(array_keys($porCita), [4, 5], 'Técnica: solo las citas pedidas (el id puede venir como texto)');
+t_eq(count($porCita[4]), 1, 'Técnica: lo que no es del audiómetro no entra');
+t_eq($porCita[4][0]['payload']['freq'], 1000, 'Técnica: payload decodificado');

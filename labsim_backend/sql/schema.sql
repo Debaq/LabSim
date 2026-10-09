@@ -807,3 +807,18 @@ CREATE TABLE IF NOT EXISTS course_objectives (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_course_objectives_course ON course_objectives(course_id, orden);
+
+-- Evaluación de la técnica de audiometría de cada atención cerrada (ver
+-- AudiometriaTecnica::deAtenciones): calcularla relee todos los registros
+-- del audiómetro del alumno, y un curso ya tenía ~70 mil. Se guarda una vez;
+-- 'clave' resume lo que mueve el resultado (versión del cálculo, parámetros
+-- del curso, ficha y atención) y si no calza se recalcula sola. Se puede
+-- vaciar entera sin perder nada: se vuelve a llenar.
+CREATE TABLE IF NOT EXISTS audiometria_tecnica_cache (
+    appointment_id INTEGER NOT NULL,
+    student_id INTEGER NOT NULL,
+    clave TEXT NOT NULL,
+    resultado TEXT NOT NULL,          -- JSON de AudiometriaTecnica::evaluar(), o null
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (appointment_id, student_id)
+);

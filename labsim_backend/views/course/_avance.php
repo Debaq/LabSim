@@ -25,6 +25,12 @@ foreach ($avanceAlumnos as $al) {
 }
 usort($todas, static fn(array $a, array $b): int => $a[0] <=> $b[0]);
 $tendenciaCurso = AlumnoIndicadores::tendencia(array_column($todas, 1));
+$duracionesCurso = array_merge([], ...array_values(array_column($avanceAlumnos, 'duraciones')));
+$duracionPromedio = AlumnoIndicadores::promedio($duracionesCurso);
+$duracionMediana = AlumnoIndicadores::mediana($duracionesCurso);
+// Tendencia de la duración: las primeras atenciones del curso contra las últimas.
+$durSemanas = array_values(array_filter(array_column($avanceSemanas, 'duracion_s'), static fn($v): bool => $v !== null));
+$durTendencia = count($durSemanas) >= 2 ? AlumnoIndicadores::tendencia($durSemanas) : null;
 $medidos = array_values(array_filter($objetivos, static fn(array $o): bool => $o['indicador'] !== ''));
 $cumplenTotal = array_sum(array_column($medidos, 'cumplen'));
 $evaluadosTotal = $cumplenTotal + array_sum(array_column($medidos, 'no_cumplen'));
@@ -55,6 +61,17 @@ $selectIndicador = static function (string $elegido) use ($indicadores): void {
         <div class="kpi-c-valor"><?= $atencionesCurso ?></div>
         <div class="kpi-c-nombre">Atenciones cerradas</div>
         <div class="kpi-c-pie"><?= $practicaCurso ?> intento(s) de práctica libre aparte</div>
+    </div>
+    <div class="kpi-c">
+        <div class="kpi-c-valor"><?= htmlspecialchars(AlumnoIndicadores::minutos($duracionPromedio)) ?></div>
+        <div class="kpi-c-nombre">Duración promedio de una atención</div>
+        <div class="kpi-c-pie">
+            <?php if ($durTendencia !== null && abs($durTendencia) >= 60): ?>
+            <span class="<?= $durTendencia < 0 ? 'kpi-sube' : 'kpi-baja' ?>"><?= $durTendencia < 0 ? '▼ ' : '▲ +' ?><?= htmlspecialchars(AlumnoIndicadores::minutos(abs($durTendencia))) ?></span>
+            de las primeras semanas a las últimas<br>
+            <?php endif; ?>
+            <span title="No cuenta las atenciones de más de <?= intdiv(CourseAvance::DURACION_MAX_S, 3600) ?> h: quedaron abiertas y no dicen cuánto demoró el alumno">mediana <?= htmlspecialchars(AlumnoIndicadores::minutos($duracionMediana)) ?> · <?= count($duracionesCurso) ?> atención(es)</span>
+        </div>
     </div>
     <div class="kpi-c">
         <div class="kpi-c-valor" style="color:<?= AudiometriaTecnicaVista::color($tecnicaCurso) ?>;"><?= htmlspecialchars(AudiometriaTecnicaVista::pct($tecnicaCurso)) ?></div>
@@ -210,7 +227,7 @@ $selectIndicador = static function (string $elegido) use ($indicadores): void {
 <?php if ($avanceSemanas): ?>
 <div class="card">
     <strong>Semana a semana</strong>
-    <p class="help help--xs">Atenciones cerradas (barra) y técnica promedio de las audiometrías de cada semana.</p>
+    <p class="help help--xs">Atenciones cerradas (barra), su duración promedio y la técnica promedio de las audiometrías de cada semana.</p>
     <?php $maxAt = max(array_column($avanceSemanas, 'atenciones') ?: [1]) ?: 1; ?>
     <div class="semanas">
         <?php foreach ($avanceSemanas as $lunes => $s): ?>
@@ -218,6 +235,7 @@ $selectIndicador = static function (string $elegido) use ($indicadores): void {
             <span class="semana-fecha"><?= htmlspecialchars(date('d-m', strtotime($lunes))) ?></span>
             <span class="semana-barra"><span style="width:<?= round(100 * $s['atenciones'] / $maxAt, 1) ?>%;"></span></span>
             <span class="semana-n"><?= $s['atenciones'] ?></span>
+            <span class="semana-dur" title="Duración promedio"><?= htmlspecialchars(AlumnoIndicadores::minutos($s['duracion_s'])) ?></span>
             <span class="semana-tec" style="color:<?= AudiometriaTecnicaVista::color($s['tecnica']) ?>;"
                   title="<?= $s['n_tecnica'] ?> audiometría(s)"><?= htmlspecialchars(AudiometriaTecnicaVista::pct($s['tecnica'])) ?></span>
         </div>
@@ -232,7 +250,7 @@ $selectIndicador = static function (string $elegido) use ($indicadores): void {
     <div class="table-wrap">
     <table class="table-dense avance-tabla">
         <tr>
-            <th>Alumno</th><th>Atenciones</th><th>Técnica</th><th>Informes</th><th>Última</th>
+            <th>Alumno</th><th>Atenciones</th><th title="Mediana de sus atenciones cerradas">Duración</th><th>Técnica</th><th>Informes</th><th>Última</th>
             <?php foreach ($medidos as $j => $o): ?>
             <th class="col-objetivo" title="<?= htmlspecialchars($o['texto'] . ' — ' . ($indicadores[$o['indicador']]['label'] ?? '') . ' ' . CourseAvance::metaTexto($o['indicador'], $o['meta'])) ?>">Obj. <?= $j + 1 ?></th>
             <?php endforeach; ?>
@@ -241,6 +259,7 @@ $selectIndicador = static function (string $elegido) use ($indicadores): void {
         <tr>
             <td><a href="student.php?id=<?= (int) $uid ?>"><?= htmlspecialchars($al['nombre']) ?></a></td>
             <td><?= $al['atenciones'] ?><?= $al['en_curso'] ? ' <span class="help help--xs">+' . $al['en_curso'] . ' en curso</span>' : '' ?></td>
+            <td class="nowrap"><?= $al['duracion'] !== null ? $al['duracion'] . ' min' : '—' ?></td>
             <td style="color:<?= AudiometriaTecnicaVista::color($al['tecnica_promedio']) ?>; font-weight:600;"><?= htmlspecialchars(AudiometriaTecnicaVista::pct($al['tecnica_promedio'])) ?></td>
             <td><?= $al['informes'] ?></td>
             <td class="nowrap help"><?= htmlspecialchars($al['ultima'] ?? '—') ?></td>
@@ -253,7 +272,7 @@ $selectIndicador = static function (string $elegido) use ($indicadores): void {
         </tr>
         <?php endforeach; ?>
         <?php if (!$avanceAlumnos): ?>
-        <tr><td colspan="<?= 5 + count($medidos) ?>" class="muted">Sin alumnos matriculados.</td></tr>
+        <tr><td colspan="<?= 6 + count($medidos) ?>" class="muted">Sin alumnos matriculados.</td></tr>
         <?php endif; ?>
     </table>
     </div>

@@ -23,6 +23,13 @@ final class CourseAvance
     public const DIAS_SIN_ACTIVIDAD = 14;
 
     /**
+     * Una atención que duró más que esto no se cuenta en las duraciones: la
+     * dejaron abierta (se cerró al otro día, o al volver de almuerzo) y no
+     * dice cuánto demoró el alumno con el paciente.
+     */
+    public const DURACION_MAX_S = 3 * 3600;
+
+    /**
      * Indicadores a los que se puede atar un objetivo: rótulo, unidad y si la
      * meta es un mínimo (>=) o un máximo (<=).
      *
@@ -186,7 +193,7 @@ final class CourseAvance
                 'atenciones' => 0, 'en_curso' => 0, 'practica' => 0, 'informes' => 0,
                 'felicitaciones' => 0, 'sugerencias' => 0,
                 'tecnica_promedio' => null, 'tecnica_ultima' => null, 'preguntas' => null, 'duracion' => null,
-                'ultima' => null, 'serie' => [], 'tecnicas' => [],
+                'ultima' => null, 'serie' => [], 'tecnicas' => [], 'duraciones' => [],
             ] + array_fill_keys(array_map(static function (string $t): string {
                 return 'informes_' . $t;
             }, array_keys(ReportFile::LABELS)), 0);
@@ -242,15 +249,16 @@ final class CourseAvance
             }
         }
 
-        // El audiómetro: solo las filas audio_* de los alumnos del curso.
-        $stmt = $pdo->prepare(
-            "SELECT user_id, client_ts, action, payload FROM action_logs
-              WHERE user_id IN ({$ph}) AND action LIKE 'audio\\_%' ESCAPE '\\' ORDER BY id"
-        );
-        $stmt->execute($ids);
-        $logs = [];
-        foreach ($stmt->fetchAll() as $l) {
-            $logs[(int) $l['user_id']][] = $l;
+        // Técnica: una consulta por alumno solo para lo que no esté guardado
+        // (ver AudiometriaTecnica::deAtenciones). Antes se traían de una vez
+        // todas las filas del audiómetro del curso (~70 mil): 11 s y 70 MB.
+        $citasAlumno = [];
+        foreach ($atenciones as $a) {
+            $citasAlumno[(int) $a['student_id']][] = (int) $a['appointment_id'];
+        }
+        $tecnicas = [];
+        foreach ($citasAlumno as $uid => $citas) {
+            $tecnicas[$uid] = AudiometriaTecnica::deAtenciones($uid, $citas);
         }
 
         $duraciones = $preguntasAlumno = [];
@@ -263,7 +271,7 @@ final class CourseAvance
                 $alumnos[$uid]['ultima'] = substr((string) $a['updated_at'], 0, 10);
                 if (!$practica) {
                     $d = Metrics::attendanceDurationSeconds($a['hora_real'], $a['updated_at']);
-                    if ($d !== null) {
+                    if ($d !== null && $d <= self::DURACION_MAX_S) {
                         $duraciones[$uid][] = $d;
                     }
                 }
@@ -273,9 +281,9 @@ final class CourseAvance
             if (!$practica && isset($preguntas[$ap][$uid])) {
                 $preguntasAlumno[$uid][] = $preguntas[$ap][$uid];
             }
-            if (isset($logs[$uid])) {
-                $tec = AudiometriaTecnica::paraAtencion($ap, $uid, $logs[$uid]);
-                if ($tec !== null && $tec['puntaje']['pct'] !== null) {
+            $tec = $tecnicas[$uid][$ap] ?? null;
+            if ($tec !== null) {
+                if ($tec['puntaje']['pct'] !== null) {
                     $alumnos[$uid]['tecnicas'][] = $tec;
                     $alumnos[$uid]['serie'][] = [substr((string) $a['updated_at'], 0, 10), (int) $tec['puntaje']['pct']];
                 }
@@ -289,6 +297,7 @@ final class CourseAvance
             $al['preguntas'] = AlumnoIndicadores::mediana($preguntasAlumno[$uid] ?? []);
             $med = AlumnoIndicadores::mediana($duraciones[$uid] ?? []);
             $al['duracion'] = $med !== null ? (int) round($med / 60) : null;
+            $al['duraciones'] = $duraciones[$uid] ?? [];
         }
         unset($al);
         return $alumnos;
@@ -329,19 +338,20 @@ final class CourseAvance
     }
 
     /**
-     * Por semana (lunes): atenciones cerradas de prácticos y promedio de la
-     * técnica de las audiometrías de esa semana. Semanas sin nada no salen.
+     * Por semana (lunes): atenciones cerradas de prácticos, su duración
+     * promedio y el promedio de la técnica de las audiometrías de esa
+     * semana. Semanas sin nada no salen.
      *
-     * @return array<string,array{atenciones:int, tecnica:?int, n_tecnica:int}> 'Y-m-d' del lunes => ...
+     * @return array<string,array{atenciones:int, duracion_s:?int, tecnica:?int, n_tecnica:int}> 'Y-m-d' del lunes => ...
      */
     public static function porSemana(array $alumnos, int $courseId): array
     {
         $stmt = Db::get()->prepare(
-            "SELECT att.updated_at FROM attendances att JOIN appointments a ON a.id = att.appointment_id
+            "SELECT att.updated_at, att.hora_real FROM attendances att JOIN appointments a ON a.id = att.appointment_id
               WHERE a.course_id = ? AND att.estado = 'atendido' AND a.practice_id IS NULL"
         );
         $stmt->execute([$courseId]);
-        $semanas = [];
+        $semanas = $durSemana = [];
         $lunes = static function (string $fecha): string {
             $t = strtotime($fecha);
             return date('Y-m-d', $t - ((int) date('N', $t) - 1) * 86400);
@@ -349,6 +359,13 @@ final class CourseAvance
         foreach ($stmt->fetchAll() as $r) {
             $k = $lunes((string) $r['updated_at']);
             $semanas[$k]['atenciones'] = ($semanas[$k]['atenciones'] ?? 0) + 1;
+            $d = Metrics::attendanceDurationSeconds($r['hora_real'], $r['updated_at']);
+            if ($d !== null && $d <= self::DURACION_MAX_S) {
+                $durSemana[$k][] = $d;
+            }
+        }
+        foreach ($durSemana as $k => $lista) {
+            $semanas[$k]['duracion_s'] = AlumnoIndicadores::promedio($lista);
         }
         $pcts = [];
         foreach ($alumnos as $al) {
@@ -361,7 +378,7 @@ final class CourseAvance
             $semanas[$k]['n_tecnica'] = count($lista);
         }
         foreach ($semanas as &$s) {
-            $s += ['atenciones' => 0, 'tecnica' => null, 'n_tecnica' => 0];
+            $s += ['atenciones' => 0, 'tecnica' => null, 'n_tecnica' => 0, 'duracion_s' => null];
         }
         unset($s);
         ksort($semanas);

@@ -98,80 +98,85 @@ $stmt = $pdo->prepare(
 $stmt->execute([$studentId]);
 $inboxMessages = $stmt->fetchAll();
 
-$stmt = $pdo->prepare(
-    'SELECT action, COUNT(*) AS n, MAX(client_ts) AS last_ts
-     FROM action_logs WHERE user_id = ? GROUP BY action ORDER BY n DESC'
-);
+// El registro técnico (ritmo, acciones, últimas 30) necesita TODAS las filas
+// de action_logs del alumno: miles. Se arma solo cuando se pide
+// (?registro=1); la vista normal no lee ni una.
+$verRegistro = ($_GET['registro'] ?? '') === '1';
+$stmt = $pdo->prepare('SELECT COUNT(*) FROM action_logs WHERE user_id = ?');
 $stmt->execute([$studentId]);
-$actionCounts = $stmt->fetchAll();
-$totalActions = array_sum(array_column($actionCounts, 'n'));
-
-$stmt = $pdo->prepare(
-    'SELECT client_ts, action, payload FROM action_logs WHERE user_id = ? ORDER BY id DESC LIMIT 30'
-);
-$stmt->execute([$studentId]);
-$recentLogs = $stmt->fetchAll();
-
-$stmt = $pdo->prepare('SELECT user_id, client_ts, action, payload FROM action_logs WHERE user_id = ? ORDER BY id');
-$stmt->execute([$studentId]);
-$allLogs = Metrics::decodeLogs($stmt->fetchAll());
-$sessionsTodas = Metrics::buildSessions($allLogs);
-$logsPracticos = array_values(array_filter(
-    $allLogs,
-    static fn(array $l): bool => $l['appointment_id'] === null || $l['appointment_id'] === ''
-        || !isset($citasPractica[(int) $l['appointment_id']])
-));
-$sessions = Metrics::buildSessions($logsPracticos);
-$behaviorStats = Metrics::summarizeSessions($sessions);
-$weekly = Metrics::sessionsByWeek($sessions);
-$histogram = Metrics::deltaHistogram($sessions);
-$histTotal = array_sum($histogram) ?: 1;
-
-// buildSessions() ya corta una sesión nueva cuando cambia appointment_id/case_id
-// (ver Metrics::buildSessions), así que agrupar por ahí separa correctamente
-// las métricas de comportamiento por atención -- necesario porque en una
-// misma sesión de trabajo el alumno puede pasar por más de un paciente y el
-// análisis (para nota/feedback) es por caso, no por el total mezclado.
-$sessionsByAppt = [];
-foreach ($sessionsTodas as $s) {
-    $key = $s['appointment_id'] !== null ? (int) $s['appointment_id'] : 0;
-    $sessionsByAppt[$key][] = $s;
-}
+$totalActions = (int) $stmt->fetchColumn();
+$stmt->closeCursor();
+$actionCounts = $recentLogs = $allLogs = $weekly = $histogram = [];
+$behaviorStats = ['n_sessions' => 0, 'long_pauses' => 0, 'no_pause_actions' => 0];
 $statsByAppt = [];
-foreach ($sessionsByAppt as $key => $group) {
-    $stats = Metrics::summarizeSessions($group);
-    // total_duration_s de summarizeSessions() suma solo los bloques activos
-    // y esconde pausas >5min dentro de la misma atención (ver
-    // Metrics::wallClockDurationSeconds) -- acá sí queremos el reloj real,
-    // porque es lo que se compara contra "cuánto duró la atención" cronometrado.
-    $stats['total_duration_s'] = Metrics::wallClockDurationSeconds($group);
-    $statsByAppt[$key] = $stats;
-}
-
-// Duración total del resumen: mismo criterio real por atención que usa la
-// tabla "Atenciones" (hora_real->updated_at si está cerrada, si no reloj
-// real de bloques) -- $behaviorStats['total_duration_s'] no sirve acá
-// porque solo suma bloques activos y esconde pausas largas (ver comentario
-// arriba y Metrics::wallClockDurationSeconds).
 $totalDurationRealS = 0;
-foreach ($attendances as $a) {
-    $aStats = $statsByAppt[(int) $a['appointment_id']] ?? null;
-    $realDuration = $a['estado'] === 'atendido'
-        ? Metrics::attendanceDurationSeconds($a['hora_real'], $a['updated_at'])
-        : null;
-    $totalDurationRealS += $realDuration ?? ($aStats['total_duration_s'] ?? 0);
+$histTotal = 1;
+if ($verRegistro) {
+    $stmt = $pdo->prepare(
+        'SELECT action, COUNT(*) AS n, MAX(client_ts) AS last_ts
+         FROM action_logs WHERE user_id = ? GROUP BY action ORDER BY n DESC'
+    );
+    $stmt->execute([$studentId]);
+    $actionCounts = $stmt->fetchAll();
+
+    $stmt = $pdo->prepare(
+        'SELECT client_ts, action, payload FROM action_logs WHERE user_id = ? ORDER BY id DESC LIMIT 30'
+    );
+    $stmt->execute([$studentId]);
+    $recentLogs = $stmt->fetchAll();
+
+    $stmt = $pdo->prepare('SELECT user_id, client_ts, action, payload FROM action_logs WHERE user_id = ? ORDER BY id');
+    $stmt->execute([$studentId]);
+    $allLogs = Metrics::decodeLogs($stmt->fetchAll());
+    $sessionsTodas = Metrics::buildSessions($allLogs);
+    $logsPracticos = array_values(array_filter(
+        $allLogs,
+        static fn(array $l): bool => $l['appointment_id'] === null || $l['appointment_id'] === ''
+            || !isset($citasPractica[(int) $l['appointment_id']])
+    ));
+    $sessions = Metrics::buildSessions($logsPracticos);
+    $behaviorStats = Metrics::summarizeSessions($sessions);
+    $weekly = Metrics::sessionsByWeek($sessions);
+    $histogram = Metrics::deltaHistogram($sessions);
+    $histTotal = array_sum($histogram) ?: 1;
+
+    // buildSessions() ya corta una sesión nueva cuando cambia appointment_id/case_id
+    // (ver Metrics::buildSessions), así que agrupar por ahí separa correctamente
+    // las métricas de comportamiento por atención.
+    $sessionsByAppt = [];
+    foreach ($sessionsTodas as $s) {
+        $key = $s['appointment_id'] !== null ? (int) $s['appointment_id'] : 0;
+        $sessionsByAppt[$key][] = $s;
+    }
+    foreach ($sessionsByAppt as $key => $group) {
+        $stats = Metrics::summarizeSessions($group);
+        // total_duration_s de summarizeSessions() suma solo los bloques activos
+        // y esconde pausas >5min (ver Metrics::wallClockDurationSeconds): acá
+        // se quiere el reloj real.
+        $stats['total_duration_s'] = Metrics::wallClockDurationSeconds($group);
+        $statsByAppt[$key] = $stats;
+    }
+
+    // Duración total: mismo criterio real por atención que la tabla
+    // (hora_real->updated_at si está cerrada, si no reloj real de bloques).
+    foreach ($attendances as $a) {
+        $aStats = $statsByAppt[(int) $a['appointment_id']] ?? null;
+        $realDuration = $a['estado'] === 'atendido'
+            ? Metrics::attendanceDurationSeconds($a['hora_real'], $a['updated_at'])
+            : null;
+        $totalDurationRealS += $realDuration ?? ($aStats['total_duration_s'] ?? 0);
+    }
 }
 
 // Técnica de la audiometría por atención (ver AudiometriaTecnica): pasos
 // cumplidos sobre los evaluables, con el detalle en "Ver atención". Se
 // guarda el resultado entero: de ahí salen los pasos que más le cuestan.
-$tecnicaCompleta = [];
-foreach ($todasLasAtenciones as $a) {
-    $tec = AudiometriaTecnica::paraAtencion((int) $a['appointment_id'], $studentId, $allLogs);
-    if ($tec !== null) {
-        $tecnicaCompleta[(int) $a['appointment_id']] = $tec;
-    }
-}
+// Las cerradas salen guardadas (ver AudiometriaTecnica::deAtenciones).
+$tecnicaCompleta = array_filter(AudiometriaTecnica::deAtenciones(
+    $studentId,
+    array_map('intval', array_column($todasLasAtenciones, 'appointment_id')),
+    $verRegistro ? $allLogs : null
+));
 $tecnicaByAppt = array_map(static function (array $t): array {
     return $t['puntaje'];
 }, $tecnicaCompleta);
@@ -467,8 +472,14 @@ $tipoLabels = Oirs::LABELS;
 </div>
 
 <?php /* Lo de abajo es el registro crudo: sirve para investigar un caso
-         raro o exportar, no para leer al alumno. Plegado. */ ?>
-<details class="card registro-crudo">
+         raro o exportar, no para leer al alumno. Se arma solo al pedirlo. */ ?>
+<?php if (!$verRegistro): ?>
+<div class="card registro-crudo">
+    <a href="student.php?id=<?= (int) $studentId ?>&amp;registro=1#registro"><strong>Ver el registro técnico</strong></a>
+    <span class="help">ritmo de trabajo, acciones registradas y descargas (<?= $totalActions ?> acciones; se calcula al abrirlo)</span>
+</div>
+<?php else: ?>
+<details class="card registro-crudo" id="registro" open>
     <summary><strong>Registro técnico</strong> <span class="help">ritmo de trabajo, acciones registradas y descargas (<?= $totalActions ?> acciones)</span></summary>
 
     <div class="section-sep">
@@ -559,5 +570,6 @@ $tipoLabels = Oirs::LABELS;
         </div>
     </div>
 </details>
+<?php endif; ?>
 <?php
 admin_footer();
