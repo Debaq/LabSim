@@ -17,6 +17,7 @@ require_once __DIR__ . '/../../src/Consola.php';
  *   {"accion": "archivos", "ruta": "tickets"}      listado dentro de data/
  *   {"accion": "leer", "ruta": "tickets/x.log.gz"} un archivo de data/
  *   {"accion": "ping"}                             datos del token
+ *   {"accion": "revocar"}                          corta este mismo token
  */
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
@@ -74,6 +75,9 @@ try {
             $resultado = ['ruta' => $texto, 'entradas' => Consola::listarArchivos($texto)];
         } elseif ($tipo === 'leer') {
             $resultado = Consola::leerArchivo($texto);
+        } elseif ($tipo === 'revocar') {
+            Consola::revocar($tokenId);
+            $resultado = ['revocado' => true];
         } elseif ($tipo === 'ping') {
             $resultado = [
                 'etiqueta' => $token['etiqueta'],

@@ -3,8 +3,8 @@
 """Cliente de la consola remota del backend (api/consola.php).
 
 El token se genera en el panel (Datos e IA -> Consola remota) y vence solo.
-Lee LABSIM_CONSOLA_URL y LABSIM_CONSOLA_TOKEN del entorno, o de un archivo
-con esas dos lineas (--env), que es el bloque que copia el panel.
+Lee LABSIM_CONSOLA_URL y LABSIM_CONSOLA_TOKEN de --env, del entorno o de
+~/.config/labsim/consola.env (lo escribe scripts/labsim_token.sh).
 
     consola.py ping
     consola.py sql "SELECT id, username FROM users WHERE role = ?" -p '["student"]'
@@ -13,6 +13,7 @@ con esas dos lineas (--env), que es el bloque que copia el panel.
     consola.py backup
     consola.py archivos tickets
     consola.py leer tickets/ticket_3.log.gz [-o salida]
+    consola.py revocar                     (corta el token y borra el archivo)
 
 Solo stdlib: no depende del entorno de la app.
 """
@@ -25,9 +26,13 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+ENV_POR_DEFECTO = Path.home() / ".config" / "labsim" / "consola.env"
 
-def _cargar_env(ruta: str | None) -> tuple[str, str]:
+
+def _cargar_env(ruta: str | None) -> tuple[str, str, str | None]:
     valores = dict(os.environ)
+    if not ruta and "LABSIM_CONSOLA_TOKEN" not in valores and ENV_POR_DEFECTO.is_file():
+        ruta = str(ENV_POR_DEFECTO)
     if ruta:
         for linea in Path(ruta).read_text(encoding="utf-8").splitlines():
             if "=" in linea and not linea.lstrip().startswith("#"):
@@ -36,8 +41,8 @@ def _cargar_env(ruta: str | None) -> tuple[str, str]:
     url = valores.get("LABSIM_CONSOLA_URL", "")
     token = valores.get("LABSIM_CONSOLA_TOKEN", "")
     if not url or not token:
-        sys.exit("Faltan LABSIM_CONSOLA_URL / LABSIM_CONSOLA_TOKEN (entorno o --env)")
-    return url, token
+        sys.exit("Sin token: correr scripts/labsim_token.sh <token> (o --env / entorno)")
+    return url, token, ruta
 
 
 def _llamar(url: str, token: str, cuerpo: dict) -> dict:
@@ -83,7 +88,7 @@ def main() -> None:
     s.add_argument("-p", "--params", default="[]", help="JSON: lista para ?, objeto para :nombre")
     s = sub.add_parser("script")
     s.add_argument("archivo", help="archivo .sql o - para stdin")
-    for nombre in ("ping", "esquema", "backup"):
+    for nombre in ("ping", "esquema", "backup", "revocar"):
         sub.add_parser(nombre)
     s = sub.add_parser("archivos")
     s.add_argument("ruta", nargs="?", default="")
@@ -92,7 +97,7 @@ def main() -> None:
     s.add_argument("-o", "--salida", help="guardar en archivo en vez de imprimir")
     a = ap.parse_args()
 
-    url, token = _cargar_env(a.env)
+    url, token, ruta_env = _cargar_env(a.env)
     if a.cmd == "sql":
         cuerpo = {"sql": a.sql, "params": json.loads(a.params)}
     elif a.cmd == "script":
@@ -112,6 +117,10 @@ def main() -> None:
         print(f"\n{r['n']} fila(s){extra}, {r['ms']} ms")
     elif a.cmd in ("sql", "script"):
         print(f"{r['cambios']} fila(s) modificada(s), {r['ms']} ms")
+    elif a.cmd == "revocar":
+        if ruta_env == str(ENV_POR_DEFECTO):
+            ENV_POR_DEFECTO.unlink(missing_ok=True)
+        print("Token revocado")
     elif a.cmd == "esquema":
         for o in r["objetos"]:
             if o.get("sql"):

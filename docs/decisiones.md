@@ -9,9 +9,12 @@ principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
 Para diagnosticar y arreglar en producción sin pasarle la contraseña a nadie.
 El admin genera un token en **Datos e IA → Consola remota**
-(`admin/consola.php`), copia el bloque que muestra (URL + token) y se lo
-pega a Claude en la sesión. Claude lo usa con `scripts/consola.py`, que
-habla con `api/consola.php`.
+(`admin/consola.php`) y lo guarda en su terminal con
+`scripts/labsim_token.sh lsc_...` (queda en `~/.config/labsim/consola.env`,
+permisos 600). Claude lo usa con `scripts/consola.py`, que lee ese archivo y
+habla con `api/consola.php`. Así el token no pasa por el chat. Al terminar,
+Claude lo corta con `consola.py revocar` (revoca y borra el archivo); el
+botón Revocar del panel hace lo mismo.
 
 Decidido con el docente:
 
