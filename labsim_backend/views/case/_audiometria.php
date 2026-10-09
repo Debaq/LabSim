@@ -142,6 +142,8 @@
           // tildado, y al destildarlo nadie las volvía a habilitar: quedaban
           // muertas hasta recargar la página. ?>
     <p class="help">Con <em>auto</em> encendido se escriben solas desde los umbrales y <strong>se pueden editar</strong>: lo que quede en pantalla es lo que se guarda. Volver a tocar un umbral las recalcula y pisa lo editado a mano; para que no se toquen más, apagar la casilla.</p>
+    <?php $uAcu = $umbralesAcumetria ?? CaseBuilder::acumetriaUmbrales(); ?>
+    <p class="help">Cómo calcula el auto: Rinne <em>negativo</em> si el gap de ese oído es de <?= $uAcu['rinne_gap'] ?> dB o más; <em>falso negativo</em> si no hay gap, la aérea está en <?= $uAcu['rinne_falso_negativo_aerea'] ?> dB o más y la ósea del otro oído es <?= $uAcu['rinne_gap'] ?> dB mejor. Weber: suma la diferencia de gap (lo lleva al oído con más gap) y la de vía ósea (lo lleva al de mejor ósea); lateraliza desde <?= $uAcu['weber_asimetria'] ?> dB. Los umbrales se calibran en <a href="normativas.php#acumetria">Normativas</a>; la literatura está en <a href="bibliografia.php#acumetria">Bibliografía › Acumetría</a>.</p>
     <div class="table-wrap">
     <table class="grid-table" style="margin-bottom:0.5rem;">
         <tr><th></th><?php foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $freqIdx): ?><th><?= $hz ?> Hz</th><?php endforeach; ?></tr>

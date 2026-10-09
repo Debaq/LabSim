@@ -499,8 +499,19 @@ final class CaseBuilder
         'negativo' => 'Negativo (CO > CA)',
         'falso_negativo' => 'Falso negativo (hipoacusia sensorioneural profunda, cruce óseo contralateral)',
     ];
+    // Umbrales del Rinne y el Weber automáticos. Son los de fábrica: el
+    // docente los calibra en Normativas (app_config, clave
+    // ACUMETRIA_CONFIG_KEY) y lo que valga ahí es lo que usa el formulario
+    // al guardar -- ver acumetriaUmbrales(). Qué dice la literatura de cada
+    // uno está en Bibliografia::ACUMETRIA_LITERATURA.
+    //
     // Gap aérea-ósea (dB) desde el cual el Rinne auto-calculado da negativo.
     public const RINNE_GAP_THRESHOLD = 15;
+    // Aérea (dB HL) del oído examinado desde la que el Rinne sale FALSO
+    // negativo (el diapasón en la mastoides lo oye la otra cóclea): la
+    // pérdida sensorioneural "severa" de la BSA; 70 es el piso de severa del
+    // BIAP (71-90) en el escalón del audiómetro.
+    public const RINNE_FALSO_NEGATIVO_AEREA_MIN = 70;
 
     public const WEBER_OPTIONS = ['centrado', 'od', 'oi'];
     public const WEBER_LABELS = [
@@ -508,11 +519,48 @@ final class CaseBuilder
         'od' => 'Lateraliza a OD',
         'oi' => 'Lateraliza a OI',
     ];
-    // Asimetría de vía ósea (dB) entre oídos desde la cual el Weber
-    // auto-calculado lateraliza (al oído con mejor -- menor dB -- umbral óseo).
+    // Asimetría (dB) desde la cual el Weber auto-calculado lateraliza (ver
+    // weberAuto: suma la diferencia de gap y la de vía ósea).
     public const WEBER_ASYMMETRY_THRESHOLD = 10;
 
-    /** Rinne auto: negativo si el gap aérea-ósea de ese oído en esa frecuencia es >= RINNE_GAP_THRESHOLD. "falso_negativo" nunca se auto-calcula, es solo elegible a mano. */
+    /** Clave de app_config (global, sin curso) con los umbrales calibrados. */
+    public const ACUMETRIA_CONFIG_KEY = 'acumetria.umbrales';
+
+    /**
+     * Los tres umbrales que el docente puede calibrar: valor de fábrica y
+     * rango aceptado. El editor (admin/normativas.php) y el cálculo leen de
+     * acá; la literatura de cada uno, de Bibliografia::ACUMETRIA_LITERATURA.
+     */
+    public const ACUMETRIA_UMBRALES = [
+        'rinne_gap' => ['label' => 'Rinne negativo: gap aéreo-óseo mínimo del oído (dB)',
+                        'default' => self::RINNE_GAP_THRESHOLD, 'min' => 5, 'max' => 50],
+        'rinne_falso_negativo_aerea' => ['label' => 'Rinne falso negativo: aérea mínima del oído examinado (dB HL)',
+                        'default' => self::RINNE_FALSO_NEGATIVO_AEREA_MIN, 'min' => 40, 'max' => 120],
+        'weber_asimetria' => ['label' => 'Weber: asimetría mínima para lateralizar (dB)',
+                        'default' => self::WEBER_ASYMMETRY_THRESHOLD, 'min' => 5, 'max' => 40],
+    ];
+
+    /**
+     * Umbrales en uso: los de fábrica, pisados por lo que el docente guardó
+     * (si guardó algo). Lo guardado fuera de rango se recorta, y lo que no
+     * es número se ignora: un valor roto en app_config no puede dejar el
+     * formulario sin Rinne.
+     *
+     * @param array|null $guardado lo que hay en app_config, o null
+     * @return array<string,int>
+     */
+    public static function acumetriaUmbrales(?array $guardado = null): array
+    {
+        $out = [];
+        foreach (self::ACUMETRIA_UMBRALES as $clave => $def) {
+            $v = $guardado[$clave] ?? null;
+            $out[$clave] = is_numeric($v)
+                ? (int) max($def['min'], min($def['max'], (int) round((float) $v)))
+                : (int) $def['default'];
+        }
+        return $out;
+    }
+
     /**
      * Picos SOAE cargados en el formulario -> shape de cases.data.
      *
@@ -747,18 +795,57 @@ final class CaseBuilder
         return null;
     }
 
-    public static function rinneAuto(int $air, int $bone): string
+    /**
+     * Rinne de un oído: aérea de ese oído contra el diapasón en su mastoides.
+     *
+     * - Gap propio >= RINNE_GAP_THRESHOLD: negativo (hay componente
+     *   conductivo).
+     * - Sin ese gap, pero con la aérea en severa y la ósea del OTRO oído
+     *   mejor por el mismo margen: falso negativo. La vía ósea cruza el
+     *   cráneo casi sin atenuación, así que lo que suena "más fuerte detrás
+     *   de la oreja" lo está oyendo la otra cóclea. Es la cófosis unilateral.
+     * - Si no, positivo.
+     *
+     * Sin `$boneOtro` (null) no se puede saber del cruce: solo negativo o
+     * positivo, que era el comportamiento de antes.
+     */
+    public static function rinneAuto(int $air, int $bone, ?int $boneOtro = null, ?array $umbrales = null): string
     {
-        return ($air - $bone) >= self::RINNE_GAP_THRESHOLD ? 'negativo' : 'positivo';
+        $u = $umbrales ?? self::acumetriaUmbrales();
+        if (($air - $bone) >= $u['rinne_gap']) {
+            return 'negativo';
+        }
+        if ($boneOtro !== null && $air >= $u['rinne_falso_negativo_aerea']
+            && ($air - $boneOtro) >= $u['rinne_gap'] && $boneOtro < $bone) {
+            return 'falso_negativo';
+        }
+        return 'positivo';
     }
 
-    /** Weber auto: lateraliza al oído con mejor (menor) umbral óseo si la asimetría ósea entre oídos es >= WEBER_ASYMMETRY_THRESHOLD; si no, centrado. */
-    public static function weberAuto(int $boneOd, int $boneOi): string
+    /**
+     * Weber: a qué oído lateraliza el diapasón en la frente.
+     *
+     * Dos efectos, y se suman (BSA 2022, §4.1.3): una conductiva lo lleva
+     * hacia el oído PEOR (el del gap mayor) y una sensorioneural asimétrica
+     * hacia el oído MEJOR (el de mejor vía ósea). Antes solo se miraba la
+     * ósea, así que una otoesclerosis unilateral lateralizaba al oído sano.
+     *
+     * En una mixta los dos efectos se oponen y el resultado depende de cuál
+     * pesa más; si se anulan, centrado. Es lo que dice la clínica: en la
+     * mixta el Weber no es confiable.
+     */
+    public static function weberAuto(int $airOd, int $boneOd, int $airOi, int $boneOi, ?array $umbrales = null): string
     {
-        if (abs($boneOd - $boneOi) < self::WEBER_ASYMMETRY_THRESHOLD) {
+        $u = $umbrales ?? self::acumetriaUmbrales();
+        // Positivo = hacia OD. El gap nunca es negativo: una ósea "sin
+        // respuesta" (130) sobre una aérea de 110 no es un gap al revés.
+        $gapOd = max(0, $airOd - $boneOd);
+        $gapOi = max(0, $airOi - $boneOi);
+        $haciaOd = ($gapOd - $gapOi) + ($boneOi - $boneOd);
+        if (abs($haciaOd) < $u['weber_asimetria']) {
             return 'centrado';
         }
-        return $boneOd < $boneOi ? 'od' : 'oi';
+        return $haciaOd > 0 ? 'od' : 'oi';
     }
 
     // Requisitos clínicos de aplicabilidad de Fowler/I.W.A. (ABLB): oído de

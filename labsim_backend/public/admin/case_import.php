@@ -91,6 +91,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $post['paciente_conciencia'] = '0';
         }
 
+        // Lo que en el formulario escribe profile-preview.js antes de
+        // enviar: tipo y umbral del ABR, EOA, reflejos, SISI, decay, LDL y
+        // logoaudiometría, desde el audiograma. Solo donde el JSON no dijo
+        // nada.
+        $post = CaseForm::completarConProyeccion($post);
+
         try {
             $form = CaseForm::fromPost($post, $pdo, $me, null, false);
         } catch (Throwable $e) {
@@ -106,38 +112,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Alta: el mismo bloque que case_create.php para un caso nuevo.
         $data = $form->data;
 
-        // Lo que el formulario habría escrito y un JSON no: en la página,
-        // profile-preview.js pinta la proyección en los campos antes de
-        // enviar, así que el POST ES la proyección. Acá no hay navegador,
-        // así que donde el JSON no dijo nada mandan los defaults del
-        // formulario y lo que proyectó el audiograma se pierde.
-        foreach (['od' => 'OD', 'oi' => 'OI'] as $ladoForm => $lado) {
-            // Umbral del ABR, en dB nHL (el audiograma está en dB HL: un
-            // oído con 35 dB HL de conductiva tiene el ABR en 55 nHL).
-            if (!isset($post['abr'][$ladoForm]['umbral'])
-                || $post['abr'][$ladoForm]['umbral'] === '') {
-                $proyectado = $data['ABR'][$lado]['umbral_por_estimulo']['click'] ?? null;
-                if ($proyectado !== null) {
-                    $data['ABR'][$lado]['umbral'] = (int) $proyectado;
-                }
-            }
-            // Atenuación de la OEA: es la que baja las emisiones por el gap
-            // y por el transitorio de las primeras horas. Sin esto un
-            // recién nacido con el oído medio ocupado salía con las
-            // emisiones presentes.
-            if (!isset($post['eoas'][$ladoForm]['atten_db'])
-                && isset($form->proyeccion['eoas'][$lado]['atten_db'])) {
-                $data['EOAS'][$lado]['atten_db'] =
-                    $form->proyeccion['eoas'][$lado]['atten_db'];
-            }
-            // Y las desviaciones por frecuencia, que son las que dibujan la
-            // caída de la emisión donde el audiograma cae.
-            if (!isset($post['eoas'][$ladoForm]['desviaciones'])
-                && isset($form->proyeccion['eoas'][$lado]['desviaciones'])) {
-                $data['EOAS'][$lado]['desviaciones'] =
-                    $form->proyeccion['eoas'][$lado]['desviaciones'];
-            }
-        }
         $nombre = trim($form->nombre1 . ' ' . trim((string) ($post['nombre2'] ?? '')));
         $apellido = trim($form->apellido1 . ' ' . trim((string) ($post['apellido2'] ?? '')));
         $rut = trim((string) ($post['rut'] ?? '')) !== ''
@@ -188,7 +162,7 @@ admin_header('Importar casos', $me);
     <strong>Importar casos desde JSON</strong>
     <p class="help">Una lista de casos. Cada uno lleva los mismos campos del formulario de creación, así que se guardan por el mismo camino: validan, proyectan y quedan igual que si los hubieras hecho a mano. Lo mínimo es <code>age</code>, <code>nombre1</code> y <code>apellido1</code>; el resto cae en los defaults.</p>
     <p class="help"><strong>Ojo con las unidades:</strong> el audiograma va en <strong>dB HL</strong> y el umbral del ABR en <strong>dB nHL</strong>, que no son lo mismo -- un oído con 35 dB HL de conductiva tiene el ABR en 55 nHL. Lo más seguro es <strong>no mandar</strong> <code>abr[od][umbral]</code>: si viene vacío, se toma el que proyecta el perfil desde el audiograma.</p>
-    <p class="help"><strong>Ojo con el tipo:</strong> lo posteado le gana a la proyección, así que el tipo de cada oído se declara --<code>abr[od][type]</code> y <code>eoas[od][type]</code>, con <code>normal</code>, <code>transmission</code>, <code>coclear</code> o <code>neural</code>--. Si no viene, el caso queda "normal" aunque el audiograma diga otra cosa. Los módulos en automático van en <code>perfil[auto][abr]</code>, <code>[eoas]</code>, <code>[reflex]</code>, <code>[recruit]</code> y <code>[logo]</code>; el patrón retrococlear, en <code>abr[od][neural]</code>.</p>
+    <p class="help"><strong>Módulos en automático:</strong> con <code>perfil[auto][abr]</code>, <code>[eoas]</code>, <code>[reflex]</code>, <code>[recruit]</code> y <code>[logo]</code> en 1, lo que el JSON no trae se completa desde el audiograma, igual que en el formulario: tipo y umbral del ABR, EOA, reflejos, SISI, decay, LDL y logoaudiometría. Lo que el JSON sí trae gana. Sin el automático, lo que no venga queda en el default del formulario (reflejos ausentes, por ejemplo). El patrón retrococlear va en <code>abr[od][neural]</code>.</p>
     <p class="help">Para un recién nacido: <code>age</code> en 0 y <code>edad_valor</code>/<code>edad_unidad</code> con la edad exacta. El audiograma va como <code>"aerea": {"od": {"0": 10, "1": 10, ...}, "oi": {...}}</code> y lo mismo <code>osea</code>, con una entrada por frecuencia en este orden: <?= implode(', ', CaseBuilder::FREQUENCIES) ?> Hz. El perfil por oído va en <code>perfil[od][cce_pct]</code> y <code>perfil[od][retro][...]</code>.</p>
 
     <?php if ($errorGeneral !== ''): ?>

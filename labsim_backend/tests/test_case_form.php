@@ -113,12 +113,43 @@ t_eq($cfF->error, null, 'Caso conductivo simple: se guarda');
 t_eq($cfF->data['Aerea'][0], [60, 5], 'Los umbrales viajan como pares [OD, OI]');
 t_eq($cfF->data['Rinne']['500']['od'], 'negativo', 'Rinne auto: gap >= 15 dB da negativo');
 t_eq($cfF->data['Rinne']['500']['oi'], 'positivo', 'Rinne auto: sin gap da positivo');
-t_eq($cfF->data['Weber']['500'], 'centrado', 'Weber auto: óseas parejas quedan centradas');
+// Antes daba centrado (solo miraba la ósea): una conductiva unilateral
+// lateraliza al oído enfermo (BSA 2022, §4.1.3).
+t_eq($cfF->data['Weber']['500'], 'od', 'Weber auto: conductiva unilateral lateraliza al oído con gap');
 
-// Weber lateraliza al oído de mejor umbral óseo.
+// Los umbrales se calibran (Normativas): con el gap del Rinne en 20, un gap
+// de 15 deja de dar negativo. Lo guardado fuera de rango se recorta y lo
+// que no es número no pisa el valor de fábrica.
+$uCal = CaseBuilder::acumetriaUmbrales(['rinne_gap' => 20]);
+t_eq(CaseBuilder::rinneAuto(25, 10, 5, $uCal), 'positivo', 'Rinne calibrado en 20: gap de 15 queda positivo');
+t_eq(CaseBuilder::rinneAuto(25, 10, 5), 'negativo', 'Rinne de fábrica (15): gap de 15 da negativo');
+t_eq(CaseBuilder::acumetriaUmbrales(['rinne_gap' => 500, 'weber_asimetria' => 'x'])['rinne_gap'], 50,
+    'Umbral calibrado fuera de rango: se recorta al máximo');
+t_eq(CaseBuilder::acumetriaUmbrales(['weber_asimetria' => 'x'])['weber_asimetria'],
+    CaseBuilder::WEBER_ASYMMETRY_THRESHOLD, 'Umbral calibrado que no es número: queda el de fábrica');
+t_eq(CaseBuilder::weberAuto(25, 5, 5, 5, CaseBuilder::acumetriaUmbrales(['weber_asimetria' => 25])), 'centrado',
+    'Weber calibrado en 25: un gap de 20 ya no lateraliza');
+
+// Sensorioneural asimétrica: el Weber va al oído mejor y el Rinne queda
+// positivo en los dos (50 dB no es severa: no hay falso negativo).
 $cfF = $cfRun(['aerea' => ['od' => array_fill(0, 9, 50), 'oi' => array_fill(0, 9, 5)],
                'osea' => ['od' => array_fill(0, 9, 50), 'oi' => array_fill(0, 9, 5)]]);
-t_eq($cfF->data['Weber']['500'], 'oi', 'Weber auto: lateraliza al oído con mejor ósea');
+t_eq($cfF->data['Weber']['500'], 'oi', 'Weber auto: sensorioneural lateraliza al oído con mejor ósea');
+t_eq($cfF->data['Rinne']['500']['od'], 'positivo', 'Rinne auto: moderada sensorioneural no da falso negativo');
+
+// Cófosis OD: el diapasón en la mastoides lo oye la cóclea del OI.
+$cfF = $cfRun(['aerea' => ['od' => array_fill(0, 9, 130), 'oi' => array_fill(0, 9, 0)],
+               'osea' => ['od' => array_fill(0, 9, 130), 'oi' => array_fill(0, 9, 0)]]);
+t_eq($cfF->data['Rinne']['500']['od'], 'falso_negativo', 'Rinne auto: cófosis da falso negativo');
+t_eq($cfF->data['Rinne']['500']['oi'], 'positivo', 'Rinne auto: el oído sano de la cófosis, positivo');
+t_eq($cfF->data['Weber']['500'], 'oi', 'Weber auto: cófosis OD lateraliza al OI');
+
+// Mixta: el gap tira hacia el oído enfermo y la ósea hacia el sano; si se
+// compensan, centrado.
+$cfF = $cfRun(['aerea' => ['od' => array_fill(0, 9, 55), 'oi' => array_fill(0, 9, 0)],
+               'osea' => ['od' => array_fill(0, 9, 25), 'oi' => array_fill(0, 9, 0)]]);
+t_eq($cfF->data['Weber']['500'], 'centrado', 'Weber auto: mixta con gap y ósea parejos queda centrado');
+t_eq($cfF->data['Rinne']['500']['od'], 'negativo', 'Rinne auto: la mixta con gap de 30 da negativo verdadero');
 
 // "Igualar ósea a aérea" sugiere: la copia la hace el formulario en vivo y
 // deja la ósea editable, así que al guardar gana la ósea posteada. Sin ósea

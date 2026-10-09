@@ -1129,3 +1129,32 @@ foreach (CaseProfile::SCENARIOS as $clave => $esc) {
 }
 t_true(strpos($genJs, 'function resolverContralateral') !== false,
     'El generador completa el oído contrario al generar');
+
+// --- Importar por JSON: la proyección completa lo que el JSON no trae -------
+
+require_once dirname(__DIR__) . '/src/CaseForm.php';
+
+// Otoesclerosis OD (As) con todo en automático: lo que en el formulario
+// escribe profile-preview.js tiene que aparecer en el POST.
+$impPost = [
+    'age' => '34', 'z_od' => 'As', 'z_oi' => 'A',
+    'aerea' => ['od' => [55, 55, 50, 45, 40, 40, 40, 40, 40], 'oi' => array_fill(0, 9, 0)],
+    'osea' => ['od' => [10, 10, 10, 15, 25, 20, 15, 15, 15], 'oi' => array_fill(0, 9, 0)],
+    'perfil' => ['auto' => ['abr' => '1', 'eoas' => '1', 'reflex' => '1', 'recruit' => '1', 'logo' => '1']],
+];
+$impOut = CaseForm::completarConProyeccion($impPost);
+t_eq($impOut['abr']['od']['type'], 'transmission', 'Importar: el tipo del ABR sale del audiograma');
+t_eq($impOut['eoas']['od']['type'], 'transmission', 'Importar: el tipo de la EOA sale del audiograma');
+t_eq($impOut['reflex_ipsi']['od'], ['130', '130', '130', '130'], 'Importar: sonda en un oído As, reflejos ausentes');
+t_eq($impOut['reflex_ipsi']['oi'][0], '85', 'Importar: oído sano, reflejo ipsi presente');
+t_eq($impOut['ldl_habilitado'], ['od' => '1', 'oi' => '1'], 'Importar: el LDL queda medido');
+t_true(isset($impOut['umd_pct']['od'], $impOut['sisi']['od'], $impOut['carhart']['od']),
+    'Importar: logo, SISI y decay completados');
+
+// Lo que el JSON trae gana; y sin automático no se toca nada.
+$impOut = CaseForm::completarConProyeccion($impPost + ['reflex_type' => ['od' => 'on-off'], 'abr' => ['od' => ['type' => 'coclear']]]);
+t_eq($impOut['reflex_type']['od'], 'on-off', 'Importar: el tipo de curva posteado gana');
+t_eq($impOut['abr']['od']['type'], 'coclear', 'Importar: el tipo de ABR posteado gana');
+$impSinAuto = $impPost;
+unset($impSinAuto['perfil']);
+t_eq(CaseForm::completarConProyeccion($impSinAuto), $impSinAuto, 'Importar: sin perfil[auto] el POST queda igual');

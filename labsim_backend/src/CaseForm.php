@@ -222,13 +222,15 @@ final class CaseForm
         $weber = [];
         $acumetriaValid = true;
         $acumetriaIsAuto = isset($v['acumetria_auto']);
+        $umbralesAcumetria = self::umbralesAcumetria();
         foreach (CaseBuilder::ACUMETRIA_FREQS as $hz => $freqIdx) {
             $rinne[$hz] = [];
             foreach (['od', 'oi'] as $lado) {
                 $manual = self::val($v, ['rinne', $hz, $lado], null);
                 if ($manual === null) {
                     $rinne[$hz][$lado] = $acumetriaIsAuto
-                        ? CaseBuilder::rinneAuto($aerea[$lado][$freqIdx], $osea[$lado][$freqIdx])
+                        ? CaseBuilder::rinneAuto($aerea[$lado][$freqIdx], $osea[$lado][$freqIdx],
+                            $osea[$lado === 'od' ? 'oi' : 'od'][$freqIdx], $umbralesAcumetria)
                         : 'positivo';
                     continue;
                 }
@@ -240,7 +242,8 @@ final class CaseForm
             $manualWeber = self::val($v, ['weber', $hz], null);
             if ($manualWeber === null) {
                 $weber[$hz] = $acumetriaIsAuto
-                    ? CaseBuilder::weberAuto($osea['od'][$freqIdx], $osea['oi'][$freqIdx])
+                    ? CaseBuilder::weberAuto($aerea['od'][$freqIdx], $osea['od'][$freqIdx],
+                        $aerea['oi'][$freqIdx], $osea['oi'][$freqIdx], $umbralesAcumetria)
                     : 'centrado';
                 continue;
             }
@@ -608,6 +611,160 @@ final class CaseForm
         $f->nombre1 = $nombre1;
         $f->apellido1 = $apellido1;
         return $f;
+    }
+
+    /**
+     * El POST con lo que el perfil auditivo proyecta, en los módulos que
+     * tienen el automático encendido (perfil[auto][...]) y SOLO donde el
+     * POST no trae nada: lo posteado sigue ganando.
+     *
+     * En el formulario esto lo hace profile-preview.js (hidratar) antes de
+     * enviar, así que el POST ya llega proyectado. Un JSON importado no pasa
+     * por el navegador: sin esto, los reflejos quedaban todos ausentes
+     * (130), el SISI en 0, el decay en 0, el LDL sin medir y la
+     * logoaudiometría en el default, aunque el audiograma dijera otra cosa.
+     */
+    public static function completarConProyeccion(array $v): array
+    {
+        $auto = [];
+        foreach (CaseProfile::AUTO_MODULES as $m) {
+            $auto[$m] = (bool) self::val($v, ['perfil', 'auto', $m], false);
+        }
+        if (!in_array(true, $auto, true)) {
+            return $v;
+        }
+        $age = max(0, (int) ($v['age'] ?? 0));
+        $horas = self::horasDeVida($v, $age);
+        $edadMeses = $horas !== null ? $horas / 720.0 : $age * 12.0;
+        $nacimiento = $horas !== null ? self::parseNacimiento($v) : [];
+        // El percentil de cada oído se sortea si no viene: queda escrito en
+        // el POST para que fromPost() guarde el MISMO con el que se proyectó.
+        foreach ($nacimiento['percentil'] ?? [] as $L => $pct) {
+            $v['nacimiento']['percentil'][$L] = (string) $pct;
+        }
+
+        $curva = static function (string $clave, string $lado) use ($v): array {
+            $out = [];
+            foreach (array_keys(CaseBuilder::FREQUENCIES) as $n) {
+                $out[] = (int) self::val($v, [$clave, $lado, (string) $n], 0);
+            }
+            return $out;
+        };
+        $aerea = ['od' => $curva('aerea', 'od'), 'oi' => $curva('aerea', 'oi')];
+        $osea = [];
+        foreach (['od', 'oi'] as $l) {
+            $osea[$l] = isset($v['igualar'][$l]) && !isset($v['osea'][$l]) ? $aerea[$l] : $curva('osea', $l);
+        }
+        $perfil = ['version' => CaseProfile::VERSION, 'auto' => $auto];
+        foreach (CaseBuilder::LADOS as $l => $L) {
+            $cce = self::val($v, ['perfil', $l, 'cce_pct'], null);
+            $retro = [];
+            foreach (CaseBuilder::ABR_NEURAL_DEFAULTS as $k => $def) {
+                $retro[$k] = self::val($v, ['abr', $l, 'neural', $k], $def);
+            }
+            $perfil[$L] = [
+                'cce_pct' => ($cce === null || $cce === '') ? CaseProfile::DEFAULT_CCE_PCT : max(0.0, min(100.0, (float) $cce)),
+                'retro' => CaseProfile::normalizeRetro($retro),
+            ];
+        }
+        $p = CaseProfile::project(
+            self::zip($aerea['od'], $aerea['oi']), self::zip($osea['od'], $osea['oi']), $perfil,
+            ['OD' => (string) ($v['z_od'] ?? 'A'), 'OI' => (string) ($v['z_oi'] ?? 'A')],
+            $horas, $edadMeses, $nacimiento
+        );
+
+        $poner = static function (array &$v, array $ruta, $valor): void {
+            if (self::val($v, $ruta, null) !== null || $valor === null) {
+                return;
+            }
+            $ref = &$v;
+            foreach ($ruta as $k) {
+                if (!isset($ref[$k]) || !is_array($ref[$k])) {
+                    $ref[$k] = [];
+                }
+                $ref = &$ref[$k];
+            }
+            $ref = is_bool($valor) ? ($valor ? '1' : '') : (string) $valor;
+        };
+
+        // Casilla: ausente en el POST = apagada, así que el reclutamiento
+        // solo se completa si el JSON no trae el bloque `recruit` entero.
+        $recruitSinPostear = !array_key_exists('recruit', $v);
+        foreach (CaseBuilder::LADOS as $l => $L) {
+            $j = $l === 'od' ? 0 : 1;
+            if ($auto['abr']) {
+                $poner($v, ['abr', $l, 'type'], $p['abr'][$L]['type']);
+                $poner($v, ['abr', $l, 'umbral'], $p['abr'][$L]['umbral']);
+            }
+            if ($auto['eoas']) {
+                $poner($v, ['eoas', $l, 'type'], $p['eoas'][$L]['type']);
+                $poner($v, ['eoas', $l, 'umbral'], $p['eoas'][$L]['umbral']);
+                $poner($v, ['eoas', $l, 'atten_db'], $p['eoas'][$L]['atten_db'] ?? null);
+                if (!isset($v['eoas'][$l]['desv'])) {
+                    foreach ($p['eoas'][$L]['desviaciones'] as $hz => $d) {
+                        $poner($v, ['eoas', $l, 'desv', (string) $hz], $d);
+                    }
+                }
+            }
+            if ($auto['reflex']) {
+                foreach (['ipsi', 'contra'] as $modo) {
+                    if (!isset($v['reflex_' . $modo][$l])) {
+                        foreach ($p['reflex'][$modo][$l] as $n => $db) {
+                            $poner($v, ['reflex_' . $modo, $l, (string) $n], $db);
+                        }
+                    }
+                }
+                $poner($v, ['reflex_type', $l], $p['reflex']['tipo'][$l]);
+            }
+            if ($auto['recruit']) {
+                $poner($v, ['sisi', $l], $p['recruit']['sisi'][$j]);
+                if ($recruitSinPostear && $p['recruit']['recruit'][$j]) {
+                    $v['recruit'][$l] = '1';
+                }
+                foreach (array_keys(CaseProfile::DECAY_FREQ_IDX) as $modo) {
+                    if (!isset($v[$modo][$l])) {
+                        foreach ($p['recruit']['decay'][$modo][$l] as $n => $db) {
+                            $poner($v, [$modo, $l, (string) $n], $db);
+                        }
+                    }
+                }
+                if (!isset($v['ldl'][$l]) && !isset($v['ldl_habilitado'][$l])) {
+                    foreach ($p['recruit']['ldl'][$l] as $n => $db) {
+                        $poner($v, ['ldl', $l, (string) $n], $db);
+                    }
+                    $v['ldl_habilitado'][$l] = '1';
+                }
+            }
+            if ($auto['logo']) {
+                $poner($v, ['umd_int', $l], $p['logo'][$L]['int']);
+                $poner($v, ['umd_pct', $l], $p['logo'][$L]['pct']);
+            }
+        }
+        if ($auto['recruit']) {
+            foreach ($p['recruit']['fowler'] as $idx => $patron) {
+                $poner($v, ['fowler_pattern', (string) $idx], $patron);
+            }
+        }
+        return $v;
+    }
+
+    /**
+     * Umbrales de la acumetría automática: los que calibró el docente en
+     * Normativas, o los de fábrica. Sin AppConfig cargado (los tests, que no
+     * pasan por bootstrap) o sin base, los de fábrica: el formulario no
+     * puede quedarse sin Rinne porque no se pudo leer la configuración.
+     */
+    public static function umbralesAcumetria(): array
+    {
+        $guardado = null;
+        if (class_exists('AppConfig') && class_exists('Db')) {
+            try {
+                $guardado = AppConfig::getEffective(CaseBuilder::ACUMETRIA_CONFIG_KEY, null);
+            } catch (Throwable $e) {
+                error_log('[CaseForm::umbralesAcumetria] ' . $e->getMessage());
+            }
+        }
+        return CaseBuilder::acumetriaUmbrales(is_array($guardado) ? $guardado : null);
     }
 
     /**

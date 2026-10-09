@@ -34,6 +34,26 @@ foreach (array_keys(Bibliografia::USO_ABR) as $fid) {
     t_true(isset(AbrReferences::FUENTES[$fid]), "Uso ABR {$fid}: la fuente existe");
 }
 
+// --- Acumetría ---------------------------------------------------------------
+
+// Cada umbral calibrable trae su literatura, y la literatura cita fuentes que
+// existen; los cuadros de ejemplo de la tabla existen en el generador.
+t_eq(array_keys(Bibliografia::ACUMETRIA_LITERATURA), array_keys(CaseBuilder::ACUMETRIA_UMBRALES),
+    'Acumetría: cada umbral calibrable tiene su literatura');
+foreach (Bibliografia::ACUMETRIA_LITERATURA as $clave => $lit) {
+    foreach ($lit['fuentes'] as $fid) {
+        t_true(isset(Bibliografia::ACUMETRIA[$fid]), "Acumetría {$clave}: la fuente {$fid} existe");
+    }
+}
+foreach (Bibliografia::ACUMETRIA_PATRONES as $i => $pat) {
+    foreach ($pat['ejemplos'] as $k) {
+        t_true(isset(CaseProfile::SCENARIOS[$k]), "Acumetría patrón {$i}: el cuadro {$k} existe");
+    }
+    foreach ($pat['fuentes'] as $fid) {
+        t_true(isset(Bibliografia::ACUMETRIA[$fid]), "Acumetría patrón {$i}: la fuente {$fid} existe");
+    }
+}
+
 // --- Técnicas de examen -----------------------------------------------------
 
 // La técnica es la referencia del indicador de efectividad: sin pasos no hay

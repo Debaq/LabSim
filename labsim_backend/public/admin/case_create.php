@@ -426,6 +426,9 @@ foreach ($pendientesResumen as $pendiente) {
 // que es la que va a usar el equipo -- ver VEMP_generator_v1, que la aplica
 // después de calcular las ondas.
 $vempBaselineOverride = AppConfig::getEffective('normative_data.vemp', null) ?? [];
+// Umbrales del Rinne y el Weber automáticos, como los calibró el docente en
+// Normativas: el JS calcula en vivo con los mismos que usa el guardado.
+$umbralesAcumetria = CaseForm::umbralesAcumetria();
 
 admin_add_css('case.css');
 // El JS de esta página vive en public/js/case/*.js y se emite al final del
@@ -624,8 +627,9 @@ window.CASE_CONST = <?= json_encode([
     'histCheckboxes' => CaseBuilder::HIST_CHECKBOXES,
     'nombres' => CaseBuilder::nameBank(),
     'otoscopiaMaxFases' => CaseBuilder::OTOSCOPIA_MAX_FASES,
-    'rinneGap' => CaseBuilder::RINNE_GAP_THRESHOLD,
-    'weberAsym' => CaseBuilder::WEBER_ASYMMETRY_THRESHOLD,
+    'rinneGap' => $umbralesAcumetria['rinne_gap'],
+    'rinneFalsoNegAerea' => $umbralesAcumetria['rinne_falso_negativo_aerea'],
+    'weberAsym' => $umbralesAcumetria['weber_asimetria'],
     // implode/array_values: ACUMETRIA_FREQS es Hz => índice, al JS solo le
     // sirven los índices.
     'acumetriaFreqIdx' => array_values(CaseBuilder::ACUMETRIA_FREQS),

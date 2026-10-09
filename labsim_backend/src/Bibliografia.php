@@ -41,6 +41,10 @@ final class Bibliografia
             'titulo' => 'Tamizaje auditivo neonatal',
             'resumen' => 'Probabilidad de que un recién nacido pase TEOAE o AABR según las horas de vida, e indicadores de riesgo del paciente neonato.',
         ],
+        'acumetria' => [
+            'titulo' => 'Acumetría (Rinne y Weber)',
+            'resumen' => 'Cómo funcionan los diapasones, qué resultado se espera según el tipo de pérdida y de dónde salen los umbrales del Rinne y el Weber automáticos del caso (que se calibran en Normativas).',
+        ],
         'normas' => [
             'titulo' => 'Normas y clasificaciones',
             'resumen' => 'Normas y convenciones que usan el generador de casos, la ficha y el PDF: umbral esperable por edad, grado de hipoacusia, símbolos del audiograma.',
@@ -188,6 +192,120 @@ final class Bibliografia
                 'Peso y semanas mueven el tamizaje; las infecciones congénitas NO (son hipoacusia real, a veces tardía).',
                 'Ficha PDF: línea "Indicadores de riesgo (JCIH 2019)".',
             ],
+        ],
+    ];
+
+    /**
+     * Acumetría: Rinne y Weber. Las cuatro se leyeron (la BSA completa, las
+     * otras por su resumen en Europe PMC) el 2026-10-09.
+     */
+    public const ACUMETRIA = [
+        'BSA2022RW' => [
+            'cita' => 'British Society of Audiology (2022). Recommended Procedure: Rinne and Weber Tuning Fork Tests (OD104-51 v2). Turton L, Batty S.',
+            'enlace' => 'https://www.thebsa.org.uk/wp-content/uploads/2023/10/OD104-51-BSA-Recommended-Procedure-Rinne-Weber-Tuning-Fork-Tests-February-2022.pdf',
+            'protocolo' => 'Diapasón de 512 Hz; primero el Weber y después el Rinne, empezando por el oído al que lateralizó el Weber.',
+            'usa' => [
+                'Weber (§4.1.3): central con audición simétrica; al oído MEJOR en una sensorioneural asimétrica; al oído PEOR en una conductiva asimétrica, y al de mayor gap si la conductiva es de los dos lados. Es la regla del Weber automático.',
+                'Weber: discrimina unos 5 dB de diferencia de vía ósea entre oídos (citando a Thiagarajan y Arjunan 2012).',
+                'Rinne (§4.2.3): positivo = normal o sensorioneural; negativo = componente conductivo significativo. Distingue un gap de 17,5 a 30 dB (citando a Jacob 1993 y Burkey 1998); con menos de 17,5 dB tiene uso limitado.',
+                'Falso negativo del Rinne: con una sensorioneural severa del lado examinado, la vía ósea cruza el cráneo y la oye la mejor cóclea. Se reconoce porque el Weber contradice (va al otro oído). Es la regla del falso negativo automático.',
+                'Apéndice A: tabla de resultados Weber + Rinne y su interpretación (ver "Resultados esperados" arriba).',
+            ],
+        ],
+        'KELLY2018' => [
+            'cita' => 'Kelly EA, Li B, Adams ME. Diagnostic accuracy of tuning fork tests for hearing loss: a systematic review. Otolaryngol Head Neck Surg. 2018;159(2):220-230. doi:10.1177/0194599818770405. PMID 29661046.',
+            'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/29661046/',
+            'n' => '17 estudios, 3158 participantes (adultos y niños)',
+            'usa' => [
+                'El Rinne pasa de normal a anormal entre 13 y 40 dB de conductiva, según el estudio.',
+                'El Weber pasa de normal a anormal entre 2,5 y 4 dB de asimetría.',
+                'Rinne con 512 Hz: sensibilidad 16-87%, especificidad 55-100% para detectar conductiva (con 256 Hz, 43-91% y 50-100%).',
+            ],
+        ],
+        'UNGAR2021' => [
+            'cita' => 'Ungar OJ, Wengier A, Cavel O, Abergel A, Safadi A, Warshavsky A, et al. Does sinusitis affect lateralization of a tuning fork Weber test? Otol Neurotol. 2021;42:792-798. doi:10.1097/MAO.0000000000003086.',
+            'enlace' => 'https://doi.org/10.1097/MAO.0000000000003086',
+            'usa' => ['El Weber lateraliza normalmente hacia el oído con hipoacusia conductiva y se aleja del oído con hipoacusia sensorioneural.'],
+        ],
+        'STANK1979' => [
+            'cita' => 'Stankiewicz JA, Mowry HJ. Clinical accuracy of tuning fork tests. Laryngoscope. 1979;89(12):1956-1963. doi:10.1288/00005537-197912000-00009.',
+            'enlace' => 'https://doi.org/10.1288/00005537-197912000-00009',
+            'protocolo' => 'Rinne, Weber y Bing con 256, 512 y 1024 Hz, contrastados con otoscopia, audiometría e impedanciometría.',
+            'usa' => ['Para su teoría: los diapasones no predicen el tipo de hipoacusia con la frecuencia que sugiere la literatura. La app los da siempre "de libro".'],
+        ],
+    ];
+
+    /**
+     * Qué dice la literatura de cada umbral calibrable de la acumetría
+     * (CaseBuilder::ACUMETRIA_UMBRALES). Lo muestra el editor de Normativas
+     * junto a cada campo, para calibrar con la fuente a la vista.
+     */
+    public const ACUMETRIA_LITERATURA = [
+        'rinne_gap' => [
+            'texto' => 'El Rinne de 512 Hz distingue una conductiva con gap de 17,5 a 30 dB; bajo 17,5 dB tiene uso limitado (BSA 2022). Entre estudios, la transición va de 13 a 40 dB (Kelly 2018).',
+            'fuentes' => ['BSA2022RW', 'KELLY2018'],
+        ],
+        'rinne_falso_negativo_aerea' => [
+            'texto' => 'El falso negativo aparece con una pérdida sensorioneural severa del lado examinado: la vía ósea la oye la otra cóclea (BSA 2022). El valor de fábrica, 70 dB, es el piso de "severa" del BIAP en el escalón del audiómetro.',
+            'fuentes' => ['BSA2022RW'],
+        ],
+        'weber_asimetria' => [
+            'texto' => 'El Weber discrimina unos 5 dB de diferencia entre oídos (BSA 2022); la transición va de 2,5 a 4 dB de asimetría (Kelly 2018). El valor de fábrica es 10: con escalones de 5 dB, un umbral de 5 haría lateralizar cualquier diferencia de un escalón.',
+            'fuentes' => ['BSA2022RW', 'KELLY2018'],
+        ],
+    ];
+
+    /**
+     * Resultados esperados de la acumetría según el tipo de pérdida, que es
+     * lo que calcula el automático del caso. Sale del apéndice A de la BSA
+     * 2022 y de su §4.1.3/§4.2.3. 'ejemplos' son claves de
+     * CaseProfile::SCENARIOS (el test verifica que existan).
+     */
+    public const ACUMETRIA_PATRONES = [
+        [
+            'patron' => 'Audición normal o pérdida sensorioneural simétrica',
+            'ejemplos' => ['normal', 'presbiacusia', 'nihl_cronica'],
+            'weber' => 'Centrado',
+            'rinne' => 'Positivo en los dos oídos',
+            'fuentes' => ['BSA2022RW'],
+        ],
+        [
+            'patron' => 'Conductiva de un oído',
+            'ejemplos' => ['otoesclerosis', 'otitis_media', 'colesteatoma', 'tapon_cerumen'],
+            'weber' => 'Al oído enfermo',
+            'rinne' => 'Negativo en el oído enfermo si el gap alcanza el umbral; positivo en el sano',
+            'fuentes' => ['BSA2022RW', 'UNGAR2021'],
+        ],
+        [
+            'patron' => 'Conductiva de los dos oídos',
+            'ejemplos' => ['otitis_media'],
+            'weber' => 'Al oído con más gap; centrado si los gaps son parejos',
+            'rinne' => 'Negativo en los dos (donde el gap alcance el umbral)',
+            'fuentes' => ['BSA2022RW'],
+        ],
+        [
+            'patron' => 'Sensorioneural asimétrica (no severa)',
+            'ejemplos' => ['meniere', 'schwannoma', 'subita'],
+            'weber' => 'Al oído sano',
+            'rinne' => 'Positivo en los dos oídos',
+            'fuentes' => ['BSA2022RW', 'UNGAR2021'],
+            'nota' => 'La BSA advierte que con una sensorioneural de larga data en un oído el Weber puede salir central; la app lo da lateralizado.',
+        ],
+        [
+            'patron' => 'Sensorioneural severa o profunda de un oído (cófosis)',
+            'ejemplos' => ['parotiditis', 'subita'],
+            'weber' => 'Al oído sano',
+            'rinne' => 'FALSO negativo en el oído enfermo (lo oye la otra cóclea); positivo en el sano',
+            'fuentes' => ['BSA2022RW'],
+            'nota' => 'Weber y Rinne se contradicen: el Weber va al sano y el Rinne "conductivo" está en el enfermo. Esa contradicción es la que delata el falso negativo.',
+        ],
+        [
+            'patron' => 'Mixta de un oído',
+            'ejemplos' => ['mixta_otitis_cronica'],
+            'weber' => 'Variable: el gap lo lleva al oído enfermo y la pérdida coclear al sano; si se compensan, centrado',
+            'rinne' => 'Negativo en el oído enfermo si el gap alcanza el umbral',
+            'fuentes' => ['BSA2022RW'],
+            'nota' => 'La app suma los dos efectos (diferencia de gap más diferencia de vía ósea) y lateraliza hacia donde pesa más.',
         ],
     ];
 
@@ -639,6 +757,8 @@ final class Bibliografia
                 return $out;
             case 'tamizaje':
                 return self::TAMIZAJE;
+            case 'acumetria':
+                return self::ACUMETRIA;
             case 'normas':
                 return self::NORMAS;
         }

@@ -5,6 +5,37 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Acumetría con literatura y umbrales calibrables; importador con la proyección completa (2026-10-09)
+
+Salió armando los 10 pacientes de práctica deliberada (casos 33-42, cargados
+en prod en la práctica de los dos cursos).
+
+- **Weber automático** (`CaseBuilder::weberAuto`, espejo en
+  `js/case/acumetria.js`): antes miraba solo la vía ósea, así que una
+  otoesclerosis unilateral lateralizaba al oído SANO. Ahora suma dos
+  efectos: la diferencia de gap lo lleva al oído con más gap y la de vía ósea
+  al de mejor ósea (BSA 2022, §4.1.3). En una mixta se compensan y puede
+  salir centrado, que es lo que pasa en la clínica.
+- **Rinne falso negativo automático**: con la aérea en severa (70 dB o más)
+  y la ósea del otro oído mejor por el umbral del Rinne, sale
+  `falso_negativo` (lo oye la otra cóclea). Antes la cófosis daba Rinne
+  positivo. Se corrigió a mano el caso 42 en prod.
+- **Umbrales calibrables** en Configuración › Normativas (`app_config`
+  global, clave `acumetria.umbrales`; solo se guarda lo que difiere de
+  fábrica). El gap del Rinne **sigue en 15 dB** por decisión del docente,
+  aunque la BSA da 17,5-30 dB: la literatura se muestra junto al campo para
+  que él lo calibre. Un cambio vale para los casos que se guarden después,
+  no reescribe los guardados.
+- **Bibliografía › Acumetría**: BSA 2022 (leída completa), Kelly 2018,
+  Ungar 2021 y Stankiewicz 1979 (por su resumen), y la tabla de resultados
+  esperados según el tipo de pérdida, con los cuadros del generador.
+- **`case_import.php`** no aplicaba la proyección de reflejos, SISI, decay,
+  LDL ni logoaudiometría: un caso importado quedaba con los reflejos
+  ausentes aunque el audiograma fuera normal. Ahora
+  `CaseForm::completarConProyeccion()` hace lo de `profile-preview.js`
+  (solo donde el JSON no trae nada) antes de `fromPost`, incluido el tipo
+  de ABR y EOA, que antes había que declarar.
+
 ## Dashboard: rápido y en datos que se entienden (2026-10-09)
 
 El dashboard es donde aterriza el docente al entrar desde Moodle, y cargaba

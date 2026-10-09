@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/_layout.php';
 require_once __DIR__ . '/../../src/Bibliografia.php';
+require_once __DIR__ . '/../../src/CaseForm.php';
 
 /**
  * Toda la bibliografía de la app, por examen, con a qué corresponde cada
@@ -114,6 +115,38 @@ admin_header('Bibliografía', $me);
             <div style="opacity:0.8;"><?= htmlspecialchars($lim['nota']) ?></div>
         </div>
         <?php endforeach; ?>
+        <p class="help help--mt"><strong>Fuentes</strong></p>
+        <?php endif; ?>
+
+        <?php if ($sid === 'acumetria'): ?>
+        <?php $uAcu = CaseForm::umbralesAcumetria(); ?>
+        <p class="help help--mt"><strong>Umbrales que usa hoy el automático del caso</strong> (se calibran en <a href="normativas.php#acumetria">Normativas</a>; un cambio vale para los casos que se guarden después, no reescribe los ya guardados)</p>
+        <?php foreach (CaseBuilder::ACUMETRIA_UMBRALES as $clave => $def): ?>
+        <?php $lit = Bibliografia::ACUMETRIA_LITERATURA[$clave]; ?>
+        <div style="margin-top:0.5rem; font-size:0.9em;">
+            <strong><?= htmlspecialchars($def['label']) ?>:</strong> <?= (int) $uAcu[$clave] ?>
+            <?php if ((int) $uAcu[$clave] !== (int) $def['default']): ?><span style="opacity:0.75;">(de fábrica: <?= (int) $def['default'] ?>)</span><?php endif; ?>
+            <div style="opacity:0.8;"><?= htmlspecialchars($lit['texto']) ?> · <?= htmlspecialchars(implode(', ', $lit['fuentes'])) ?></div>
+        </div>
+        <?php endforeach; ?>
+        <p class="help help--mt"><strong>Resultados esperados según el tipo de pérdida</strong> (lo que calcula el automático; diapasón sin enmascarar)</p>
+        <div class="table-wrap">
+        <table style="width:100%; font-size:0.85em; border-collapse:collapse;">
+            <thead><tr style="text-align:left;"><th>Pérdida</th><th>Weber</th><th>Rinne</th><th>Cuadros del generador</th></tr></thead>
+            <tbody>
+            <?php foreach (Bibliografia::ACUMETRIA_PATRONES as $pat): ?>
+            <tr style="border-top:1px solid var(--color-border, #ddd); vertical-align:top;">
+                <td style="padding:0.3rem 0.5rem 0.3rem 0;"><strong><?= htmlspecialchars($pat['patron']) ?></strong>
+                    <div style="opacity:0.7;"><?= htmlspecialchars(implode(', ', $pat['fuentes'])) ?></div></td>
+                <td style="padding:0.3rem 0.5rem 0.3rem 0;"><?= htmlspecialchars($pat['weber']) ?></td>
+                <td style="padding:0.3rem 0.5rem 0.3rem 0;"><?= htmlspecialchars($pat['rinne']) ?>
+                    <?php if (!empty($pat['nota'])): ?><div style="opacity:0.8;"><em><?= htmlspecialchars($pat['nota']) ?></em></div><?php endif; ?></td>
+                <td style="padding:0.3rem 0;"><?= htmlspecialchars(implode(', ', array_map(static function ($k) { return CaseProfile::SCENARIOS[$k]['label']; }, $pat['ejemplos']))) ?></td>
+            </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+        </div>
         <p class="help help--mt"><strong>Fuentes</strong></p>
         <?php endif; ?>
 

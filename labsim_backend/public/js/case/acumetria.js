@@ -4,6 +4,7 @@
 // lo que quedó en pantalla (ver CaseForm, "acá gana lo posteado").
 (function () {
     var RINNE_GAP = window.CASE_CONST.rinneGap;
+    var RINNE_FALSO_NEG = window.CASE_CONST.rinneFalsoNegAerea;
     var WEBER_ASYM = window.CASE_CONST.weberAsym;
     var FREQ_IDX = window.CASE_CONST.acumetriaFreqIdx;
 
@@ -11,12 +12,15 @@
         var el = document.getElementById(kind + '_' + side + '_' + n);
         return el ? (parseInt(el.value, 10) || 0) : 0;
     }
-    function rinneAuto(air, bone) {
-        return (air - bone) >= RINNE_GAP ? 'negativo' : 'positivo';
+    function rinneAuto(air, bone, boneOtro) {
+        if ((air - bone) >= RINNE_GAP) return 'negativo';
+        if (air >= RINNE_FALSO_NEG && (air - boneOtro) >= RINNE_GAP && boneOtro < bone) return 'falso_negativo';
+        return 'positivo';
     }
-    function weberAuto(boneOd, boneOi) {
-        if (Math.abs(boneOd - boneOi) < WEBER_ASYM) return 'centrado';
-        return boneOd < boneOi ? 'od' : 'oi';
+    function weberAuto(airOd, boneOd, airOi, boneOi) {
+        var haciaOd = (Math.max(0, airOd - boneOd) - Math.max(0, airOi - boneOi)) + (boneOi - boneOd);
+        if (Math.abs(haciaOd) < WEBER_ASYM) return 'centrado';
+        return haciaOd > 0 ? 'od' : 'oi';
     }
 
     /**
@@ -51,11 +55,14 @@
             ['od', 'oi'].forEach(function (side) {
                 var select = document.getElementById('rinne_' + n + '_' + side);
                 if (!select || !isAuto) return;
-                escribir(select, rinneAuto(threshold('aerea', side, n), threshold('osea', side, n)));
+                var otro = side === 'od' ? 'oi' : 'od';
+                escribir(select, rinneAuto(threshold('aerea', side, n), threshold('osea', side, n),
+                    threshold('osea', otro, n)));
             });
             var weberSelect = document.getElementById('weber_' + n);
             if (!weberSelect || !isAuto) return;
-            escribir(weberSelect, weberAuto(threshold('osea', 'od', n), threshold('osea', 'oi', n)));
+            escribir(weberSelect, weberAuto(threshold('aerea', 'od', n), threshold('osea', 'od', n),
+                threshold('aerea', 'oi', n), threshold('osea', 'oi', n)));
         });
         // La acumetría vive en Audiometría, pero la reescriben umbrales que
         // se tipean en cualquier lado (el generador, por ejemplo).

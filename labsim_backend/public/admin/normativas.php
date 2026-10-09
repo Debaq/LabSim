@@ -8,8 +8,9 @@ require_once __DIR__ . '/_layout.php';
 
 /**
  * Configuración global (no por curso): catálogos de referencia bibliográfica
- * que alimentan los "autocompletar" de las fichas clínicas -- hoy solo ABR
- * (baselines de onda I/III/V por población, lat/amp), a futuro otros exámenes
+ * que alimentan los "autocompletar" de las fichas clínicas -- los umbrales
+ * de la acumetría automática (Rinne/Weber) y el ABR (baselines de onda
+ * I/III/V por población, lat/amp), a futuro otros exámenes
  * (ver comentario de AppConfig.php: "ABR primero, P300/electrococleografía
  * después"). Esto define de dónde sale el click "normal" según el autor
  * elegido al crear el paciente; cómo se desvían chirp y burst de ese click
@@ -18,6 +19,8 @@ require_once __DIR__ . '/_layout.php';
  */
 
 require_once __DIR__ . '/../../src/AbrReferences.php';
+require_once __DIR__ . '/../../src/CaseForm.php';
+require_once __DIR__ . '/../../src/Bibliografia.php';
 
 const ABR_AUTHORS_KEY = 'abr_reference_authors';
 const ABR_WAVES = ['I', 'III', 'V'];
@@ -102,6 +105,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $success = "Set '{$label}' actualizado.";
             AdminAudit::log($me, 'abr_author_update', ['author_id' => $id, 'label' => $label]);
         }
+    } elseif ($action === 'save_acumetria') {
+        // Solo se guarda lo que difiere de fábrica: así, si mañana cambia el
+        // valor de fábrica, lo que el docente nunca tocó lo sigue.
+        $guardar = [];
+        foreach (CaseBuilder::ACUMETRIA_UMBRALES as $clave => $def) {
+            $val = trim((string) ($_POST['acumetria'][$clave] ?? ''));
+            if ($val === '' || !is_numeric($val)) {
+                continue;
+            }
+            $n = (int) round((float) $val);
+            if ($n < $def['min'] || $n > $def['max']) {
+                $error = sprintf('%s: tiene que estar entre %d y %d.', $def['label'], $def['min'], $def['max']);
+                break;
+            }
+            if ($n !== (int) $def['default']) {
+                $guardar[$clave] = $n;
+            }
+        }
+        if ($error === null) {
+            AppConfig::set(CaseBuilder::ACUMETRIA_CONFIG_KEY, $guardar, null);
+            $success = 'Umbrales de la acumetría guardados. Valen para los casos que se guarden desde ahora.';
+            AdminAudit::log($me, 'acumetria_umbrales', ['valores' => $guardar]);
+        }
     } elseif ($action === 'delete_author') {
         $id = (string) ($_POST['author_id'] ?? '');
         if (isset($authors[$id])) {
@@ -120,6 +146,34 @@ admin_header('Normativas', $me);
 ?>
 <?php if ($error !== null): ?><p class="error"><?= htmlspecialchars($error) ?></p><?php endif; ?>
 <?php if ($success !== null): ?><p class="success"><?= htmlspecialchars($success) ?></p><?php endif; ?>
+
+<?php $uAcu = CaseForm::umbralesAcumetria(); ?>
+<div class="card" id="acumetria">
+    <strong>Acumetría -- umbrales del Rinne y el Weber automáticos</strong>
+    <p class="help help--mt">
+        Con la casilla <em>auto</em> de la ficha Audiometría, el caso calcula el Rinne y el Weber desde los umbrales tonales con estos tres números.
+        Valen para los casos que se guarden desde ahora: los casos ya guardados conservan su Rinne y su Weber hasta que se vuelvan a guardar.
+        Junto a cada uno, lo que dice la literatura (fichas completas en <a href="bibliografia.php#acumetria">Bibliografía › Acumetría</a>).
+    </p>
+    <form method="post" style="margin-top:0.5rem;">
+        <?= csrf_field() ?>
+        <input type="hidden" name="form_action" value="save_acumetria">
+        <?php foreach (CaseBuilder::ACUMETRIA_UMBRALES as $clave => $def): ?>
+        <?php $lit = Bibliografia::ACUMETRIA_LITERATURA[$clave]; ?>
+        <div style="margin-top:0.6rem;">
+            <label><?= htmlspecialchars($def['label']) ?>
+                <input type="number" name="acumetria[<?= htmlspecialchars($clave) ?>]" value="<?= (int) $uAcu[$clave] ?>"
+                       min="<?= (int) $def['min'] ?>" max="<?= (int) $def['max'] ?>" step="5" style="width:6rem;">
+            </label>
+            <span class="help">de fábrica: <?= (int) $def['default'] ?></span>
+            <div class="help"><?= htmlspecialchars($lit['texto']) ?> (<?= htmlspecialchars(implode(', ', $lit['fuentes'])) ?>)</div>
+        </div>
+        <?php endforeach; ?>
+        <div style="margin-top:0.6rem;">
+            <button type="submit" class="btn btn--secondary">Guardar umbrales</button>
+        </div>
+    </form>
+</div>
 
 <div class="card">
     <strong>ABR -- autores de referencia</strong>
