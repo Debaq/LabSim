@@ -6,6 +6,7 @@ import sys
 import traceback
 import requests
 from PySide6.QtCore import QEvent, Qt, QSize, QTimer, Signal, Slot
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QMainWindow, QWidget, QPushButton, QMessageBox, QProgressDialog
 
 from agenda import Agenda
@@ -1563,6 +1564,10 @@ if __name__ == '__main__':
                 print("actualización: no se pudo comprobar, se sigue con esta versión")
                 traceback.print_exc()
 
+    # Ícono de la app para la barra de tareas y Alt+Tab: sin esto, en
+    # Windows Qt no encuentra uno en el .exe (PyInstaller no deja IDI_ICON1)
+    # y queda el genérico. Ver scripts/generar_icono.py.
+    context.app.setWindowIcon(QIcon(context.get_resource("img/icono_app.png")))
     window = MainWindow()
     Preferences.get_style(window)
     if es_kiosko():

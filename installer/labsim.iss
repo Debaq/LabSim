@@ -1,4 +1,4 @@
-; Instalador Windows de LabSim (build PyInstaller onedir).
+﻿; Instalador Windows de LabSim (build PyInstaller onedir).
 ;
 ; Se compila en CI (.github/workflows/build-windows.yml) con:
 ;   ISCC /DMyAppVersion=<build_id> /DNumVersion=<x.y.z> installer\labsim.iss
@@ -9,10 +9,14 @@
 ; Instalacion PER-USER a proposito (PrivilegesRequired=lowest, DefaultDirName
 ; en {localappdata}): sin UAC, y sobre todo porque core/updater.py reemplaza
 ; archivos al lado del ejecutable. En "Program Files" eso falla por permisos.
+;
+; Archivo en UTF-8 con BOM (Inno Setup 6 lo lee así): lleva tildes.
 
 #define MyAppName "LabSim"
 #define MyAppExeName "LabSim.exe"
-#define MyAppPublisher "Nicolas Baier Quezada"
+#define MyAppPublisher "TecMedHub, Universidad Austral de Chile"
+#define MyAppAutor "Nicolás Baier Quezada"
+#define MyAppDescripcion "Simulador de laboratorio de audiología"
 #define MyAppURL "https://github.com/Debaq/LabSim"
 
 #ifndef MyAppVersion
@@ -34,10 +38,18 @@ AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
+AppCopyright=© 2026 {#MyAppAutor}. Desarrollado en TecMedHub, Universidad Austral de Chile
+AppComments={#MyAppDescripcion}. Desarrollado en TecMedHub, Universidad Austral de Chile.
+AppContact={#MyAppAutor}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}/issues
 AppUpdatesURL={#MyAppURL}/releases
 VersionInfoVersion={#NumVersion}
+VersionInfoCompany={#MyAppPublisher}
+VersionInfoDescription=Instalador de {#MyAppName}, {#MyAppDescripcion}
+VersionInfoCopyright=© 2026 {#MyAppAutor}. Desarrollado en TecMedHub, Universidad Austral de Chile
+VersionInfoProductName={#MyAppName}
+VersionInfoProductVersion={#NumVersion}
 DefaultDirName={localappdata}\Programs\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
@@ -58,6 +70,11 @@ CloseApplicationsFilter=*.exe,*.dll,*.pyd
 [Languages]
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Messages]
+; Primera página del asistente: qué es y quién lo hace.
+spanish.WelcomeLabel2=Este programa instalará [name/ver] en su equipo.%n%n{#MyAppName} es un simulador de laboratorio de audiología, desarrollado en TecMedHub, Universidad Austral de Chile.%n%nAutor: {#MyAppAutor}.%n%nSe recomienda cerrar las demás aplicaciones antes de continuar.
+english.WelcomeLabel2=This will install [name/ver] on your computer.%n%n{#MyAppName} is an audiology laboratory simulator developed at TecMedHub, Universidad Austral de Chile.%n%nAuthor: {#MyAppAutor}.%n%nIt is recommended that you close all other applications before continuing.
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"

@@ -208,6 +208,36 @@ a.datas = [e for e in a.datas
 
 pyz = PYZ(a.pure)
 
+# --- Datos del programa en el .exe (Windows: Propiedades -> Detalles) ----------
+EDITOR = 'TecMedHub, Universidad Austral de Chile'
+DESCRIPCION = 'LabSim, simulador de laboratorio de audiología'
+COPYRIGHT = ('© 2026 Nicolás Baier Quezada. Desarrollado en TecMedHub, '
+             'Universidad Austral de Chile')
+version_exe = None
+if sys.platform == 'win32':
+    import re as _re
+    from PyInstaller.utils.win32.versioninfo import (
+        FixedFileInfo, StringFileInfo, StringStruct, StringTable, VarFileInfo,
+        VarStruct, VSVersionInfo)
+    with open(os.path.join(SPECPATH, 'src', 'main.py'), encoding='utf-8') as f:
+        _ver = _re.search(r"__VERSION__ = 'v([\d.]+)'", f.read()).group(1)
+    _nums = tuple(int(n) for n in (_ver.split('.') + ['0'] * 4)[:4])
+    version_exe = VSVersionInfo(
+        ffi=FixedFileInfo(filevers=_nums, prodvers=_nums),
+        kids=[
+            StringFileInfo([StringTable('0C0A04B0', [   # español (moderno), Unicode
+                StringStruct('CompanyName', EDITOR),
+                StringStruct('FileDescription', DESCRIPCION),
+                StringStruct('FileVersion', _ver),
+                StringStruct('InternalName', 'LabSim'),
+                StringStruct('LegalCopyright', COPYRIGHT),
+                StringStruct('OriginalFilename', 'LabSim.exe'),
+                StringStruct('ProductName', 'LabSim'),
+                StringStruct('ProductVersion', _ver),
+            ])]),
+            VarFileInfo([VarStruct('Translation', [0x0C0A, 1200])]),
+        ])
+
 exe = EXE(
     pyz,
     a.scripts,
@@ -225,6 +255,7 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon='icons/Icon.ico',
+    version=version_exe,
 )
 coll = COLLECT(
     exe,
@@ -319,11 +350,18 @@ if sys.platform != 'win32':
 # which isn't available on Windows runners) keeps this build portable.
 # Los caches de audio (_generated, _panned) se rehacen solos en runtime dentro
 # del dist, asi que no tiene sentido copiarlos y engordar el build.
+# local_cache/ y json/session.json son del PC donde se compila: la sesion
+# (token de admin) y la cola de logs, imagenes y layout de desarrollo. El
+# tarball completo es publico (release de GitHub): se colaban ahi (hasta
+# 72b3414e) y un equipo instalado desde cero quedaba con la sesion del admin.
 resources_dst = os.path.join(dist_dir, 'resources')
 if os.path.isdir(resources_dst):
     shutil.rmtree(resources_dst)
 shutil.copytree(
     os.path.join(SPECPATH, 'resources'),
     resources_dst,
-    ignore=shutil.ignore_patterns('_generated', '_panned'),
+    ignore=shutil.ignore_patterns('_generated', '_panned', 'local_cache', 'session.json'),
 )
+for _privado in ('local_cache', os.path.join('json', 'session.json')):
+    if os.path.exists(os.path.join(resources_dst, _privado)):
+        raise SystemExit(f'build: resources/{_privado} no puede ir en el dist')

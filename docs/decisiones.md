@@ -5084,3 +5084,27 @@ Queda, por equipo, 1 petición por minuto en régimen más lo que dispare el
 alumno. Carrera conocida y aceptada: si una descarga entera (rara ahora)
 termina después de un delta que llegó mientras tanto, ese delta se pisa hasta
 el próximo cambio de esas filas.
+
+## Ícono, datos del programa y lo privado fuera del build (2026-10-09)
+
+**Ícono.** `icons/Icon.ico` traía solo 228×228 y 229×229: Windows lo
+reescalaba y en la barra de tareas o el Explorador quedaba borroso, con el
+texto saliéndose del círculo. `scripts/generar_icono.py` lo dibuja en cada
+tamaño (16 a 256 px): mismo círculo #5D1049 y DejaVu Sans, "LabSim" adentro
+del círculo, y "LS" en 16-32 px, donde "LabSim" no se lee. También deja
+`resources/img/icono_app.png` (512 px), que main.py le pone a la aplicación
+(`setWindowIcon`): sin eso, Qt en Windows busca el recurso IDI_ICON1, que
+PyInstaller no deja, y en la barra de tareas quedaba el ícono genérico.
+
+**Quién lo hace.** El instalador (installer/labsim.iss) y el .exe
+(`version` en LabSim.spec, solo Windows) dicen que LabSim se desarrolló en
+TecMedHub, Universidad Austral de Chile: editor, copyright, descripción, y la
+primera página del asistente. Autor: Nicolás Baier Quezada.
+
+**Lo privado no va en el dist.** El tarball completo de Linux (asset de una
+release pública) llevaba `resources/local_cache/` y `resources/json/session.json`
+del PC de build: la cola de logs, imágenes y layout de desarrollo, y la sesión
+de la app con un token de admin vigente. El paquete de actualización ya los
+excluía (`scripts/update_diff.py`), el completo no. Ahora el spec no los copia
+y corta el build si aparecen. Los tokens de admin que salieron así hay que
+revocarlos en el servidor (tabla `tokens`).
