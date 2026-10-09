@@ -161,7 +161,7 @@ color: rgb(255, 255, 255);</string>
          <item>
           <widget class="QLabel" name="label_13">
            <property name="text">
-            <string>Presure :</string>
+            <string>Pressure :</string>
            </property>
           </widget>
          </item>

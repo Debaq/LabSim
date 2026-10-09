@@ -5,6 +5,33 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Impedanciómetro: Tone Decay y ETF (2026-10-09)
+
+Las dos pantallas estaban vacías. Decidido con el docente:
+
+- **Tone Decay**: protocolo clásico. 500 o 1000 Hz, ipsi o contra, la
+  intensidad del dial, 10 s de tono (traza de 12 s dibujada en 6). Muestra
+  cuánto queda de la amplitud inicial a los 5 y a los 10 s; el alumno
+  concluye. Decae (media vida ~4 s, ~18% a los 10 s) si el oído
+  **estimulado** tiene el tipo de curva `off` del caso, que es lo que el
+  perfil asigna al retrococlear (CaseProfile::reflexCurveType). En CONTRA el
+  estimulado es el oído opuesto a la sonda.
+- **ETF**: el alumno elige la prueba (tecla 1), y el oído se comporta según
+  la ficha (`cases.data.ETF`): *Normal* / *Disfunción tubaria* son membrana
+  íntegra, *Permeable* / *No permeable* son membrana perforada.
+  - Membrana íntegra (Williams): timpanogramas en reposo, tras Valsalva
+    (+40 daPa) y tras Toynbee (-30) con trompa normal; con disfunción el
+    pico no se mueve; con membrana perforada no hay pico.
+  - Membrana perforada: se presuriza el conducto con el dial y el paciente
+    traga tres veces en 10 s; con trompa permeable cada deglución deja el
+    35% de la presión; si no, se mantiene (y con la membrana íntegra
+    también: el conducto queda sellado).
+
+Ojo, pendiente de revisar: en la pantalla **Reflejos** el tipo `off` se
+dibuja como *efecto off* (nada durante el estímulo, pico al apagarlo),
+mientras el backend lo usa como *decay*. El decay nuevo usa la lectura del
+backend.
+
 ## Acumetría con literatura y umbrales calibrables; importador con la proyección completa (2026-10-09)
 
 Salió armando los 10 pacientes de práctica deliberada (casos 33-42, cargados

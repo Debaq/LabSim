@@ -17,11 +17,13 @@ from backend.log_queue import get_log_queue
 from impedanciometria.ZZscreen import ZZscreen
 from impedanciometria.ZRscreen import ZRscreen
 from impedanciometria.ZDscreen import ZDscreen
-from impedanciometria.ZETFscreen import ZETFscreen
+from impedanciometria.ZETFscreen import (ZETFscreen, PRUEBA_INTEGRA, PRUEBA_PERFORADA)
 from impedanciometria.h_z import changeSide, changeSideText, sideText, printer, date_time
-from impedanciometria.z_generator import (Z_225, Reflex_curve, edad_meses_del_caso,
+from impedanciometria.z_generator import (Z_225, Reflex_curve, decay_curve, edad_meses_del_caso,
+                                          etf_prueba_integra, etf_prueba_perforada,
                                           is_infant_ear, map_letter_for_probe,
                                           z1000_del_caso)
+from impedanciometria.ZDscreen import DECAY_FRECUENCIAS
 from impedanciometria.z_audio import ProbeTone, ReflexTone
 from core.helpers import Storage, debug_print
 from core import atajos, keyboard_monitor
@@ -123,13 +125,21 @@ class ZControl(QWidget, Ui_Z_control):
         self._aplicar_atajos()
 
         self.btn_3.setEnabled(True)
-        self.btn_3.clicked.connect(self.direction_change)
+        self.btn_3.clicked.connect(self.btn3_click)
         self.btn_5.setEnabled(True)
-        self.btn_5.clicked.connect(lambda: self.window_change('neg'))
+        self.btn_5.clicked.connect(self.btn5_click)
         self.btn_6.setEnabled(True)
-        self.btn_6.clicked.connect(lambda: self.window_change('pos'))
+        self.btn_6.clicked.connect(self.btn6_click)
         self.btn_4.setEnabled(True)
-        self.btn_4.clicked.connect(self.height_change)
+        self.btn_4.clicked.connect(self.btn4_click)
+
+        # Tone Decay: comparte modo (IPSI/CONTRA), intensidad y presión con
+        # los reflejos; la frecuencia es solo 500 o 1000 Hz.
+        self.decay_freq_idx = 1
+        self.Z_decay.set_freq(DECAY_FRECUENCIAS[self.decay_freq_idx])
+        self.Z_decay.start_clicked.connect(self.stimulus_click)
+        self.Z_decay.ipsi_clicked.connect(lambda: self.set_reflex_mode('IPSI'))
+        self.Z_decay.contra_clicked.connect(lambda: self.set_reflex_mode('CONTRA'))
 
         # DIRECTION / WINDOW STATE
         self.direction = 'pos->neg'
@@ -151,6 +161,10 @@ class ZControl(QWidget, Ui_Z_control):
         self.time_ch1.start(3000)
         self.time_reflex = QTimer(self)
         self.time_reflex.timeout.connect(self.reflex_animate)
+        self.time_decay = QTimer(self)
+        self.time_decay.timeout.connect(self.decay_animate)
+        self.time_etf = QTimer(self)
+        self.time_etf.timeout.connect(self.etf_animate)
 
         # AUDIO: tono de sonda (timpanograma) y tono/ruido activador (reflejos),
         # ambos con fundido de entrada/salida (ver impedanciometria/z_audio.py).
@@ -194,6 +208,7 @@ class ZControl(QWidget, Ui_Z_control):
         self.probe_tone.stop()
         self.time_reflex.stop()
         self.reflex_tone.stop()
+        self._parar_decay_y_etf()
         self.store_data[0].clean()
         self.store_data[1].clean()
         self.new = [True, True]
@@ -295,6 +310,9 @@ class ZControl(QWidget, Ui_Z_control):
         else:
             self.Z.set_side('OD')
         self.Z_reflex.set_side(self.Z.get_side())
+        self.Z_decay.set_side(self.Z.get_side())
+        self.Z_etf.set_side(self.Z.get_side())
+        self._parar_decay_y_etf()
         # barrido a medias: se corta antes de cambiar de curva (la del otro
         # oido puede ser mas corta y el tono de sonda seguia sonando)
         self.time_ch0.stop()
@@ -443,13 +461,23 @@ class ZControl(QWidget, Ui_Z_control):
         if self.current_screen is self.Z_reflex and screen is not self.Z_reflex:
             self.time_reflex.stop()
             self.reflex_tone.stop()
+        if self.current_screen in (self.Z_decay, self.Z_etf) and screen is not self.current_screen:
+            self._parar_decay_y_etf()
         self.current_screen = screen
         if screen is self.Z_reflex:
             self.Z_reflex.set_side(self.Z.get_side())
             self.Z_reflex.clear_response()
             self.refresh_reflex_table()
             self.update_reflex_volume()
-        self.btn_reflex.setEnabled(screen is self.Z_reflex)
+        elif screen is self.Z_decay:
+            self.Z_decay.set_side(self.Z.get_side())
+            self.Z_decay.set_mode(self.reflex_mode)
+            self.Z_decay.set_intensity(self.dB)
+            self.Z_decay.set_pressure(self.reflex_pressure)
+            self.update_reflex_volume()
+        elif screen is self.Z_etf:
+            self.Z_etf.set_side(self.Z.get_side())
+        self.btn_reflex.setEnabled(screen in (self.Z_reflex, self.Z_decay))
         self.btn_up.setEnabled(screen in (self.Z_reflex, self.Z_decay))
         self.btn_down.setEnabled(screen in (self.Z_reflex, self.Z_decay))
 
@@ -499,6 +527,9 @@ class ZControl(QWidget, Ui_Z_control):
         if self.reflex_freq_idx >= len(freqs):
             self.reflex_freq_idx = len(freqs) - 1
         self.Z_reflex.set_mode(self.reflex_mode)
+        self.Z_decay.set_mode(self.reflex_mode)
+        self.Z_decay.clear_response()
+        self.time_decay.stop()
         self.Z_reflex.set_freq(freqs[self.reflex_freq_idx])
         self.Z_reflex.set_nbn_enabled(self.reflex_mode == 'CONTRA')
         self.time_reflex.stop()
@@ -523,11 +554,50 @@ class ZControl(QWidget, Ui_Z_control):
         elif self.current_screen is self.Z:
             self._log("z_move_mark", direction=-1)
             self.move(-1)
+        elif self.current_screen is self.Z_decay:
+            self.decay_freq_idx = (self.decay_freq_idx + 1) % len(DECAY_FRECUENCIAS)
+            self._log("z_decay_freq_change", freq=DECAY_FRECUENCIAS[self.decay_freq_idx])
+            self.Z_decay.set_freq(DECAY_FRECUENCIAS[self.decay_freq_idx])
+            self.time_decay.stop()
+            self.reflex_tone.stop()
+            self.Z_decay.clear_response()
+        elif self.current_screen is self.Z_etf:
+            prueba = PRUEBA_INTEGRA if self.Z_etf.prueba == PRUEBA_PERFORADA else PRUEBA_PERFORADA
+            self._log("z_etf_prueba_change", prueba=prueba)
+            self.time_etf.stop()
+            self.Z_etf.set_prueba(prueba)
 
     def btn2_click(self):
         if self.current_screen is self.Z:
             self._log("z_move_mark", direction=1)
             self.move(1)
+        elif self.current_screen is self.Z_decay:
+            self.decay_stimulus()
+        elif self.current_screen is self.Z_etf:
+            if self.Z_etf.prueba == PRUEBA_PERFORADA:
+                self.etf_perforada()
+            else:
+                self.etf_maniobra('reposo')
+
+    def btn3_click(self):
+        if self.current_screen is self.Z:
+            self.direction_change()
+        elif self.current_screen is self.Z_etf and self.Z_etf.prueba == PRUEBA_INTEGRA:
+            self.etf_maniobra('valsalva')
+
+    def btn4_click(self):
+        if self.current_screen is self.Z:
+            self.height_change()
+        elif self.current_screen is self.Z_etf and self.Z_etf.prueba == PRUEBA_INTEGRA:
+            self.etf_maniobra('toynbee')
+
+    def btn5_click(self):
+        if self.current_screen is self.Z:
+            self.window_change('neg')
+
+    def btn6_click(self):
+        if self.current_screen is self.Z:
+            self.window_change('pos')
 
     def stimulus_click(self):
         if self.current_screen is self.Z_reflex:
@@ -541,6 +611,13 @@ class ZControl(QWidget, Ui_Z_control):
                 dB=self.dB,
             )
             self.reflex_stimulus()
+        elif self.current_screen is self.Z_decay:
+            self.decay_stimulus()
+        elif self.current_screen is self.Z_etf:
+            if self.Z_etf.prueba == PRUEBA_PERFORADA:
+                self.etf_perforada()
+            else:
+                self.etf_maniobra('reposo')
         else:
             self._log("z_stimulus_click", screen='tymp', side=self.Z.get_side(), leak=self.leak)
             if self.data is None:
@@ -616,6 +693,121 @@ class ZControl(QWidget, Ui_Z_control):
                 self.reflex_results[probe_idx][self.reflex_mode][row_idx] = self.dB
                 self.refresh_reflex_table()
 
+    # ------------------------------------------------------------------
+    # Tone Decay
+    # ------------------------------------------------------------------
+
+    def _umbral_reflejo(self, row_idx, probe_idx):
+        """Umbral del reflejo del caso en el modo actual, o None si no hay."""
+        reflex = (self.data or {}).get('Reflex')
+        if not isinstance(reflex, dict):
+            return None
+        try:
+            return float(reflex.get(self.reflex_mode.lower(), [])[row_idx][probe_idx])
+        except (IndexError, KeyError, TypeError, ValueError):
+            return None
+
+    def decay_stimulus(self):
+        """10 s de tono a la intensidad del dial; decae si el oído ESTIMULADO
+        es retrococlear (tipo de curva 'off' en el caso).
+
+        En IPSI el estimulado es el de la sonda; en CONTRA, el otro: el decay
+        es del nervio que recibe el tono, no del oído donde se mide."""
+        if self.data is None:
+            return
+        side = self.Z.get_side()
+        probe_idx = 0 if side == 'OD' else 1
+        freq = DECAY_FRECUENCIAS[self.decay_freq_idx]
+        row_idx = ['500', '1000', '2000', '4000', 'NBN'].index(freq)
+        threshold = self._umbral_reflejo(row_idx, probe_idx)
+        present = threshold is not None and self.dB >= threshold
+        estimulado = probe_idx if self.reflex_mode == 'IPSI' else 1 - probe_idx
+        tipos = (self.data.get('Reflex') or {}).get('tipo') if isinstance(self.data.get('Reflex'), dict) else None
+        tipo = tipos.get('od' if estimulado == 0 else 'oi', 'normal') if isinstance(tipos, dict) else 'normal'
+        x, y, pct5, pct10 = decay_curve(present, dB=self.dB, threshold=threshold, decae=(tipo == 'off'))
+        self._log("z_stimulus_click", screen='decay', side=side, mode=self.reflex_mode, freq=freq, dB=self.dB)
+
+        self.time_decay.stop()
+        self.Z_decay.clear_response()
+        self.decay_anim = (x, y, 1, pct5, pct10)
+        # 12 s de traza dibujados en 6 s reales: el doble de rápido, como
+        # los 2 s del reflejo que se dibujan en 1.
+        tick_ms = round(6000 / len(x))
+        self.time_decay.start(tick_ms)
+        total_ms = tick_ms * len(x)
+        level = max(0.0, min(1.0, (self.dB - 40) / 80))
+        self.reflex_tone.burst(freq, delay_ms=round(total_ms / 12), duration_ms=round(total_ms * 10 / 12),
+                               volume=(0.15 + 0.35 * level))
+
+    def decay_animate(self):
+        x, y, idx, pct5, pct10 = self.decay_anim
+        self.Z_decay.plot_response(x[:idx + 1], y[:idx + 1])
+        idx += 1
+        self.decay_anim = (x, y, idx, pct5, pct10)
+        if idx >= len(x):
+            self.time_decay.stop()
+            self.Z_decay.set_result(pct5, pct10)
+
+    # ------------------------------------------------------------------
+    # ETF
+    # ------------------------------------------------------------------
+
+    def _etf_del_oido(self):
+        etf = (self.data or {}).get('ETF')
+        idx = 0 if self.Z.get_side() == 'OD' else 1
+        try:
+            return str(etf[idx])
+        except (IndexError, KeyError, TypeError):
+            return 'Normal'
+
+    def etf_perforada(self):
+        """Conducto presurizado (dial) y tres degluciones en 10 s."""
+        if self.data is None:
+            return
+        etf = self._etf_del_oido()
+        x, y, final = etf_prueba_perforada(etf, self.etf_pressure)
+        self._log("z_etf_test", prueba=PRUEBA_PERFORADA, side=self.Z.get_side(), pressure=self.etf_pressure)
+        self.time_etf.stop()
+        self.Z_etf.plot_presion([], [])
+        self.Z_etf.set_resultado_perforada(self.etf_pressure, None)
+        self.etf_anim = (x, y, 1, final)
+        self.time_etf.start(round(5000 / len(x)))   # 10 s dibujados en 5
+
+    def etf_animate(self):
+        x, y, idx, final = self.etf_anim
+        self.Z_etf.plot_presion(x[:idx + 1], y[:idx + 1])
+        idx += 1
+        self.etf_anim = (x, y, idx, final)
+        if idx >= len(x):
+            self.time_etf.stop()
+            self.Z_etf.set_resultado_perforada(self.etf_pressure, final)
+
+    def etf_maniobra(self, maniobra):
+        """Timpanograma de la prueba de membrana íntegra tras la maniobra."""
+        if self.data is None:
+            return
+        side = self.Z.get_side()
+        idx = 0 if side == 'OD' else 1
+        letra = self.data.get(f"Z_{side}") or 'A'
+        try:
+            vol = self.data['volume'][idx]
+        except (KeyError, IndexError, TypeError):
+            vol = 1.0
+        x, y, c, p, *_ = etf_prueba_integra(self._etf_del_oido(), letra, vol, maniobra,
+                                            seed_key=(self.data.get('id'), side, 'etf'))
+        try:
+            pico = int(round(float(p))) if float(c) > 0.05 else None
+        except (TypeError, ValueError):
+            pico = None
+        self._log("z_etf_test", prueba=PRUEBA_INTEGRA, side=side, maniobra=maniobra)
+        self.Z_etf.plot_timpanograma(maniobra, x, y, pico)
+
+    def _parar_decay_y_etf(self):
+        self.time_decay.stop()
+        self.time_etf.stop()
+        self.Z_decay.clear_response()
+        self.Z_etf.set_prueba(self.Z_etf.prueba)
+
     def refresh_reflex_table(self):
         side = self.Z.get_side()
         probe_idx = 0 if side == 'OD' else 1
@@ -644,10 +836,11 @@ class ZControl(QWidget, Ui_Z_control):
         side = sideText(side_text)
         memory = self.store_data[side].get(0)
         try:
-            c = self.Z.find_nearest(memory[0], self.reflex_pressure, memory[1])
-            self.Z_reflex.set_volume(round(c, 2))
+            c = round(self.Z.find_nearest(memory[0], self.reflex_pressure, memory[1]), 2)
         except (TypeError, IndexError):
-            self.Z_reflex.set_volume(None)
+            c = None
+        self.Z_reflex.set_volume(c)
+        self.Z_decay.set_volume(c)
 
     def timeStamp(self):
         time = date_time()

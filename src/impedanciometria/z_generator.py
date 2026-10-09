@@ -373,3 +373,122 @@ class Reflex_curve():
 
     def getDataSet(self):
         return self.x.tolist(), self.y.tolist()
+
+
+# ---------------------------------------------------------------------------
+# Decay del reflejo (pantalla "Tone Decay")
+# ---------------------------------------------------------------------------
+
+# Protocolo clásico: tono de 500 o 1000 Hz, 10 dB sobre el umbral del
+# reflejo, sostenido 10 s. La traza dura 12 s (1 s antes y 1 s después).
+DECAY_DURACION_S = 12.0
+DECAY_INICIO_S = 1.0
+DECAY_ESTIMULO_S = 10.0
+# Un reflejo que decae cae a la mitad en unos 4 s (la caída de más del 50%
+# dentro de los 10 s es lo que se busca); uno sano apenas se mueve.
+DECAY_MEDIA_VIDA_S = 4.0
+DECAY_SANO_PERDIDA = 0.06
+
+
+def decay_curve(present, dB=None, threshold=None, decae=False, num_pts=240, max_amp=100.0):
+    """Traza del decay del reflejo: (x en s, y en μl, % a los 5 s, % a los 10 s).
+
+    `decae` dice si el oído ESTIMULADO es retrococlear (tipo de curva
+    'off' en el caso, ver CaseProfile::reflexCurveType). Los % son la
+    amplitud que queda respecto de la del inicio del estímulo, medida sobre
+    la contracción sin ruido -- lo que reporta el equipo --; sin reflejo,
+    None.
+    """
+    t = np.linspace(0.0, DECAY_DURACION_S, num_pts)
+    y = np.random.normal(0, 3, num_pts)
+    if not present:
+        return t.tolist(), y.tolist(), None, None
+
+    excess = max(dB - threshold, 0) if dB is not None and threshold is not None else 10
+    amp = max_amp * min(1.0, 0.3 + excess / 40)
+    fin = DECAY_INICIO_S + DECAY_ESTIMULO_S
+
+    def envolvente(s):
+        """Fracción de la amplitud inicial a los `s` segundos de estímulo."""
+        if decae:
+            return 0.5 ** (s / DECAY_MEDIA_VIDA_S)
+        return 1.0 - DECAY_SANO_PERDIDA * (s / DECAY_ESTIMULO_S)
+
+    en_estimulo = (t >= DECAY_INICIO_S) & (t <= fin)
+    s = t[en_estimulo] - DECAY_INICIO_S
+    subida = np.clip(s / 0.1, 0.0, 1.0)            # flanco del inicio, 100 ms
+    bajada = np.clip((DECAY_ESTIMULO_S - s) / 0.1, 0.0, 1.0)
+    forma = np.minimum(subida, bajada) * np.array([envolvente(v) for v in s])
+    y[en_estimulo] += -amp * forma
+
+    pct5 = round(100 * envolvente(5.0))
+    pct10 = round(100 * envolvente(10.0))
+    return t.tolist(), y.tolist(), pct5, pct10
+
+
+# ---------------------------------------------------------------------------
+# Función tubaria (pantalla "ETF")
+# ---------------------------------------------------------------------------
+
+# Valores de la ficha (CaseBuilder::ETF_OPTIONS): los dos primeros son de una
+# membrana íntegra, los otros dos de una membrana perforada (o con tubo).
+ETF_PERFORADA = ('Permeable', 'No permeable')
+ETF_DEGLUCIONES_S = (2.5, 5.0, 7.5)
+ETF_DURACION_S = 10.0
+# Lo que una deglución deja de la presión del conducto cuando la trompa se
+# abre (membrana perforada): tres degluciones la llevan casi a 0.
+ETF_PERMEABLE_FACTOR = 0.35
+# Corrimiento del pico del timpanograma tras las maniobras, membrana íntegra
+# con trompa que funciona (Valsalva lo lleva a positivo, Toynbee a negativo).
+ETF_VALSALVA_DAPA = 40
+ETF_TOYNBEE_DAPA = -30
+
+
+def etf_membrana_perforada(etf):
+    """¿La ficha dice membrana perforada (o con tubo)?"""
+    return etf in ETF_PERFORADA
+
+
+def etf_prueba_perforada(etf, presion_inicial, num_pts=200):
+    """Presión del conducto (daPa) durante 10 s con tres degluciones.
+
+    Solo se iguala si la membrana está perforada Y la trompa es permeable:
+    con la membrana íntegra el conducto queda sellado por la membrana y la
+    presión se mantiene, igual que con una trompa no permeable.
+    Devuelve (x, y, presión final).
+    """
+    t = np.linspace(0.0, ETF_DURACION_S, num_pts)
+    abre = etf == 'Permeable'
+    p = float(presion_inicial)
+    y = np.empty(num_pts)
+    nivel = p
+    for i, s in enumerate(t):
+        objetivo = p * (ETF_PERMEABLE_FACTOR ** sum(1 for d in ETF_DEGLUCIONES_S if s >= d)) if abre else p
+        # cada deglución se ve como un escalón de unos 300 ms, no instantáneo
+        nivel += (objetivo - nivel) * 0.25
+        y[i] = nivel
+    y = y + np.random.normal(0, 1.5, num_pts)
+    return t.tolist(), y.tolist(), int(round(y[-1] / 5.0) * 5)
+
+
+def etf_prueba_integra(etf, letter, vol, maniobra, win_neg=-400, win_pos=200, seed_key=None):
+    """Timpanograma de la prueba de membrana íntegra (Williams).
+
+    `maniobra`: 'reposo', 'valsalva' o 'toynbee'. Con la trompa normal el
+    pico se corre (positivo tras Valsalva, negativo tras Toynbee); con
+    disfunción tubaria se queda donde estaba. Con la membrana perforada no
+    hay pico que correr: la curva sale plana.
+    Devuelve el dataset de Z_225 (x, y, c, p, g, vol, pmax).
+    """
+    if etf_membrana_perforada(etf):
+        return Z_225(letter='B', vol=vol, win_neg=win_neg, win_pos=win_pos, seed_key=seed_key).getDataSet()
+    base = Z_225(letter=letter, vol=vol, win_neg=win_neg, win_pos=win_pos, seed_key=seed_key)
+    corrimiento = 0
+    if etf == 'Normal':
+        corrimiento = {'valsalva': ETF_VALSALVA_DAPA, 'toynbee': ETF_TOYNBEE_DAPA}.get(maniobra, 0)
+    try:
+        p = int(base.pressure) + corrimiento + (random.randint(-3, 3) if maniobra != 'reposo' else 0)
+        return Z_225(manual=True, c=base.compliance, p=p, vol=base.volume, pmax=base.pressure_max,
+                     win_neg=win_neg, win_pos=win_pos).getDataSet()
+    except (TypeError, ValueError):
+        return base.getDataSet()

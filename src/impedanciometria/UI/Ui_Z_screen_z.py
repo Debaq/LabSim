@@ -152,7 +152,7 @@ class Ui_Z_zscreen(object):
         self.lbl_probe_freq.setText(_translate("Z_zscreen", "226 Hz"))
         self.lbl_timeDate.setText(_translate("Z_zscreen", "26/07/2021"))
         self.label_11.setText(_translate("Z_zscreen", "Compliance :"))
-        self.label_13.setText(_translate("Z_zscreen", "Presure :"))
+        self.label_13.setText(_translate("Z_zscreen", "Pressure :"))
         self.label_15.setText(_translate("Z_zscreen", "Volume :"))
         self.label_17.setText(_translate("Z_zscreen", "Gradient :"))
         self.label_3.setText(_translate("Z_zscreen", "<--"))
