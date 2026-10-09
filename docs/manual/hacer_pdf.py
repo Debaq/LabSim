@@ -33,6 +33,10 @@ cual = sys.argv[1] if len(sys.argv) > 1 else 'estudiante'
 if cual not in MANUALES:
     sys.exit('Uso: hacer_pdf.py estudiante|docente')
 M = MANUALES[cual]
+# La versión de la app, de donde la define la app misma: el manual dice
+# para qué versión se escribió y se actualiza solo al cambiarla.
+_main = (dir_.parents[1] / 'src' / 'main.py').read_text(encoding='utf-8')
+VERSION = re.search(r"__VERSION__\s*=\s*'v?([^']+)'", _main)[1]
 md = (dir_ / f'manual-{cual}.md').read_text(encoding='utf-8')
 
 cuerpo = markdown.markdown(md, extensions=['tables', 'fenced_code'])
@@ -68,6 +72,7 @@ portada = f'''<section class="portada">
   <p class="kicker">{M['kicker']}</p>
   <h1 class="tapa">{titulo}</h1>
   <p class="bajada">{M['bajada']}</p>
+  <p class="version">LabSim {VERSION}</p>
   <img class="ilustracion" src="{M['portada']}">
   <div class="pie-tapa">
     <div class="logos">{"".join(f'<img src="{x}">' for x in LOGOS)}</div>
@@ -125,7 +130,9 @@ css = f"""
                    text-transform: uppercase; color: #E7A7BA; }}
 .portada h1.tapa {{ position: absolute; top: 38mm; left: 20mm; right: 20mm; margin: 0; font: 700 40pt/1.08 Fraunces, serif; color: #F8F1F3; }}
 .portada .bajada {{ position: absolute; top: 56mm; left: 0; right: 0; margin: 0; font: 13pt Jakarta; color: #DCC8CF; }}
-.portada .ilustracion {{ position: absolute; top: 74mm; left: 37mm; width: 136mm; }}
+.portada .version {{ position: absolute; top: 64mm; left: 0; right: 0; margin: 0; font: 600 10pt Jakarta;
+                    letter-spacing: .3pt; color: #E7A7BA; }}
+.portada .ilustracion {{ position: absolute; top: 78mm; left: 37mm; width: 136mm; }}
 .portada .pie-tapa {{ position: absolute; bottom: 18mm; left: 20mm; right: 20mm; border-top: .8pt solid #4a2232; padding-top: 6mm; }}
 .portada .logos {{ display: flex; justify-content: center; align-items: center; gap: 14mm; margin: 0 0 5mm; }}
 .portada .logos img {{ height: 19mm; }}
