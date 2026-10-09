@@ -759,3 +759,34 @@ CREATE TABLE IF NOT EXISTS app_tickets (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_app_tickets_created ON app_tickets(created_at);
+
+-- Consola remota (admin/consola.php, api/consola.php): SQL libre contra la
+-- base viva con un token temporal que el admin genera desde el panel y pasa
+-- a quien diagnostica (Claude en una sesión de trabajo). Se guarda solo el
+-- hash; el token en claro se muestra una vez. Vence solo (expires_at) y se
+-- puede revocar antes. Cada consulta queda en consola_consultas.
+CREATE TABLE IF NOT EXISTS consola_tokens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_hash TEXT NOT NULL UNIQUE,  -- sha256 del token en claro
+    etiqueta TEXT NOT NULL DEFAULT '',
+    created_by INTEGER,               -- sin REFERENCES, como app_tickets
+    created_by_username TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at TEXT NOT NULL,
+    revoked_at TEXT,
+    last_used_at TEXT,
+    usos INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS consola_consultas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_id INTEGER NOT NULL,
+    tipo TEXT NOT NULL,               -- sql | script | esquema | backup | archivos | leer | ping
+    texto TEXT NOT NULL DEFAULT '',   -- el SQL o la ruta, recortado
+    filas INTEGER,
+    cambios INTEGER,
+    ms INTEGER,
+    error TEXT,
+    ip TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_consola_consultas_token ON consola_consultas(token_id, id);

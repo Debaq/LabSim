@@ -208,6 +208,7 @@ function admin_header(string $title, ?array $currentUser = null): void
                 <div class="nav-dropdown">
                     <a href="llm.php"<?= $ariaCurrent('llm.php') ?>>IA Paciente</a>
                     <a href="database.php"<?= $ariaCurrent('database.php') ?>>Base de datos</a>
+                    <a href="consola.php"<?= $ariaCurrent('consola.php') ?>>Consola remota</a>
                 </div>
             </details>
             <details class="nav-group" name="labsim-nav">

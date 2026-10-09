@@ -5,6 +5,40 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Consola remota: Claude con acceso a la base viva, por token temporal (2026-10-09)
+
+Para diagnosticar y arreglar en producción sin pasarle la contraseña a nadie.
+El admin genera un token en **Datos e IA → Consola remota**
+(`admin/consola.php`), copia el bloque que muestra (URL + token) y se lo
+pega a Claude en la sesión. Claude lo usa con `scripts/consola.py`, que
+habla con `api/consola.php`.
+
+Decidido con el docente:
+
+- **SQL libre, escritura incluida, sin enmascarar datos.** No hay lista
+  blanca ni modo de solo lectura: el acceso es para ordenar y arreglar, no
+  solo para mirar. El explorador de `database.php` sigue siendo el de solo
+  lectura.
+- **Token por sesión de trabajo, no permanente.** Dura 1 a 72 h (4 por
+  defecto), se revoca desde la misma página y en la base queda solo el
+  sha256: el token en claro se muestra una vez. Solo un admin completo lo
+  genera.
+- **Todo queda registrado** en `consola_consultas` (SQL, filas, cambios,
+  error, IP), visible en la misma página. Crear y revocar tokens va además
+  a la Auditoría.
+- **`script` va en una transacción**: varias sentencias entran todas o
+  ninguna. `backup` hace la misma copia que el botón de Base de datos, para
+  usar antes de un cambio grande. `archivos`/`leer` ven solo `data/`
+  (informes, tickets, backups; los `.gz` vienen descomprimidos); nada fuera
+  de ahí, ni `config/`.
+- **Las tablas se crean con "Aplicar schema.sql"**, no desde el endpoint:
+  una migración corrida desde un endpoint ya tumbó los informes en
+  producción. Sin las tablas, la API responde 503 y el panel avisa.
+
+Probado de punta a punta en `php:7.4-cli` (lectura, escritura con
+parámetros, script que falla y vuelve atrás entero, backup, `.gz`, `../`
+rechazado, token falso y revocado rechazados, página del panel).
+
 ## Práctica deliberada: pacientes para practicar cuando el alumno quiera (2026-10-08)
 
 Hasta ahora el alumno solo veía los pacientes que el docente le citaba para
