@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 520" font-family="sans-serif">
+  <!-- monitor -->
+  <rect x="70" y="40" width="440" height="290" rx="16" fill="#2f1622" stroke="#E7A7BA" stroke-width="4"/>
+  <rect x="92" y="62" width="396" height="246" rx="6" fill="#F8F1F3"/>
+  <path d="M250 330 L240 380 L340 380 L330 330" fill="#2f1622" stroke="#E7A7BA" stroke-width="4" stroke-linejoin="round"/>
+  <rect x="200" y="378" width="180" height="14" rx="7" fill="#E7A7BA"/>
+  <!-- audiograma (mitad izquierda de la pantalla) -->
+  <g stroke="#dcc8cf" stroke-width="1">
+    <line x1="112" y1="90" x2="282" y2="90"/><line x1="112" y1="120" x2="282" y2="120"/>
+    <line x1="112" y1="150" x2="282" y2="150"/><line x1="112" y1="180" x2="282" y2="180"/>
+    <line x1="112" y1="210" x2="282" y2="210"/><line x1="112" y1="240" x2="282" y2="240"/>
+    <line x1="112" y1="270" x2="282" y2="270"/>
+    <line x1="122" y1="84" x2="122" y2="280"/><line x1="152" y1="84" x2="152" y2="280"/>
+    <line x1="182" y1="84" x2="182" y2="280"/><line x1="212" y1="84" x2="212" y2="280"/>
+    <line x1="242" y1="84" x2="242" y2="280"/><line x1="272" y1="84" x2="272" y2="280"/>
+  </g>
+  <polyline points="122,108 152,108 182,114 212,132 242,168 272,196" fill="none" stroke="#c0283e" stroke-width="3"/>
+  <g fill="none" stroke="#c0283e" stroke-width="3">
+    <circle cx="122" cy="108" r="6"/><circle cx="152" cy="108" r="6"/><circle cx="182" cy="114" r="6"/>
+    <circle cx="212" cy="132" r="6"/><circle cx="242" cy="168" r="6"/><circle cx="272" cy="196" r="6"/>
+  </g>
+  <polyline points="122,100 152,102 182,104 212,110 242,124 272,140" fill="none" stroke="#2456b3" stroke-width="3"/>
+  <g stroke="#2456b3" stroke-width="3">
+    <path d="M116 94 l12 12 M128 94 l-12 12"/><path d="M146 96 l12 12 M158 96 l-12 12"/>
+    <path d="M176 98 l12 12 M188 98 l-12 12"/><path d="M206 104 l12 12 M218 104 l-12 12"/>
+    <path d="M236 118 l12 12 M248 118 l-12 12"/><path d="M266 134 l12 12 M278 134 l-12 12"/>
+  </g>
+  <!-- ABR (mitad derecha) -->
+  <line x1="300" y1="80" x2="300" y2="290" stroke="#dcc8cf" stroke-width="1"/>
+  <g fill="none" stroke-width="2.5" stroke="#641c34">
+    <path d="M314 112 C326 112 330 98 336 112 S350 120 356 104 S372 96 378 112 S396 86 404 110 S428 120 470 112"/>
+    <path d="M314 162 C326 162 330 152 336 162 S350 168 358 156 S374 150 380 162 S400 140 408 160 S432 168 470 162"/>
+    <path d="M314 212 C330 212 340 210 350 212 S376 206 384 212 S404 194 414 210 S438 216 470 212"/>
+    <path d="M314 262 C340 262 360 261 380 262 S410 258 420 262 S446 264 470 262"/>
+  </g>
+  <g font-size="13" font-weight="700" fill="#a8325a">
+    <text x="331" y="94">I</text><text x="373" y="90">III</text><text x="400" y="80">V</text>
+    <text x="404" y="134">V</text><text x="410" y="186">V</text>
+  </g>
+  <!-- audífonos -->
+  <g fill="none" stroke="#E7A7BA" stroke-width="10" stroke-linecap="round">
+    <path d="M520 360 C520 250 640 250 640 360"/>
+  </g>
+  <rect x="500" y="350" width="40" height="76" rx="14" fill="#c0283e" stroke="#F8F1F3" stroke-width="3"/>
+  <rect x="620" y="350" width="40" height="76" rx="14" fill="#2456b3" stroke="#F8F1F3" stroke-width="3"/>
+  <!-- onda sonora -->
+  <g fill="none" stroke="#E7A7BA" stroke-width="4" stroke-linecap="round" opacity="0.8">
+    <path d="M70 440 q20 -30 40 0 t40 0 t40 0 t40 0 t40 0 t40 0"/>
+    <path d="M70 470 q20 -14 40 0 t40 0 t40 0 t40 0 t40 0 t40 0" opacity="0.6"/>
+  </g>
+</svg>
