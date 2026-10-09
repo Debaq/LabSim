@@ -1,13 +1,13 @@
 <?php
 /**
- * Pestaña Pruebas: el alumno demo del curso.
+ * Pestaña Pruebas: el alumno demo del curso. Va abierta: es lo único de la
+ * pestaña, y plegada se veía una tarjeta vacía.
  *
  * Espera: $courseId, $demoStudent.
  */
 ?>
 <div class="card">
-    <details>
-    <summary><strong>Área de pruebas</strong></summary>
+    <strong>Área de pruebas</strong>
     <p class="help help--mt">
         Un alumno más del curso para probar la app de punta a punta (agendarle pacientes, atender, etc.) sin tocar datos de alumnos reales. Invisible para los alumnos -- solo docente/admin lo ven acá. Entra con código de 6 dígitos, igual que un alumno LTI -- sin usuario ni contraseña que gestionar.
     </p>
@@ -27,5 +27,4 @@
         </form>
         <?php endif; ?>
     </div>
-    </details>
 </div>

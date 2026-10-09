@@ -17,19 +17,19 @@
         <input type="hidden" name="form_action" value="set_modules">
         <input type="hidden" name="course_id" value="<?= $courseId ?>">
         <?php foreach (Courses::modulesGroupedByBox() as $boxLabel => $boxModules): ?>
-        <div class="section-sep">
-            <strong><?= htmlspecialchars($boxLabel) ?></strong>
-            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:0.4rem 1rem; margin-top:0.4rem;">
+        <div class="modulos-box">
+            <div class="modulos-box-titulo"><?= htmlspecialchars($boxLabel) ?></div>
+            <div class="modulos-grid">
                 <?php foreach ($boxModules as $code => $label): ?>
-                <label style="font-weight:normal; display:flex; align-items:center; gap:0.3rem; margin:0;">
+                <label class="modulo-tile">
                     <input type="checkbox" name="modules[]" value="<?= htmlspecialchars($code) ?>" <?= in_array($code, $enabledModules, true) ? 'checked' : '' ?>>
-                    <?= htmlspecialchars($label) ?>
+                    <span class="modulo-tile-nombre"><?= htmlspecialchars($label) ?></span>
                 </label>
                 <?php endforeach; ?>
             </div>
         </div>
         <?php endforeach; ?>
-        <button type="submit" class="btn btn--secondary" style="margin-top:0.6rem;">Guardar módulos</button>
+        <button type="submit" class="btn" style="margin-top:var(--space-5);">Guardar módulos</button>
     </form>
 </div>
 

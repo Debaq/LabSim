@@ -5,6 +5,30 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Cursos: lista en tarjetas, módulos en mosaicos, tablero ordenado (2026-10-09)
+
+Primera vez que la página de cursos se vio en un navegador (el rediseño del
+2026-09-12 solo pasó `php -l`): con PHP 7.4 en podman, la estructura real de
+los dos cursos (grupos, módulos, cantidades) y alumnos inventados. Lo que se
+vio y se cambió:
+
+- **Lista**: una tarjeta por curso en vez de la tabla, con los boxes que usa
+  (Audiología, Electrofisiología), los docentes y cuántos alumnos, grupos y
+  módulos tiene. Crear curso es la última tarjeta, no una card arriba.
+- **Módulos**: cada módulo es un mosaico que se marca entero. Antes el
+  checkbox quedaba a media celda, lejos de su nombre (el `input` global es
+  `width:100%`).
+- **Personas**: el formulario de renombrar grupo se veía siempre debajo del
+  título (el `hidden` perdía contra `.inline`). Encabezado de columna con el
+  número en una burbuja, la tarjeta del alumno en dos líneas (usuario y
+  cifras) y la barra de arriba en una sola fila.
+- **Pruebas** va abierta: plegada era una tarjeta vacía.
+- **Arreglos globales**: `[hidden] { display:none !important }` en `base.css`
+  (cualquier regla con `display` le ganaba al atributo: ya había mordido dos
+  veces en el mismo día) y `.input--narrow` con `!important` (`.input` va
+  más abajo y lo dejaba al 100%; también afectaba al UMD del editor de
+  casos).
+
 ## Fichas clínicas como carpetas (2026-10-09)
 
 La biblioteca de fichas (`admin/patients.php`) pasó de una fila de pastillas

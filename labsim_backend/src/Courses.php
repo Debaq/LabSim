@@ -246,8 +246,9 @@ final class Courses
     }
 
     /**
-     * Cursos con la cuenta de docentes y de alumnos reales (sin el demo)
-     * resuelta en la misma consulta. La lista de courses.php llamaba a
+     * Cursos con la cuenta de docentes, alumnos reales (sin el demo) y
+     * grupos, los módulos y los nombres de los docentes, resuelto en la misma
+     * consulta (lo pinta la tarjeta de cada curso en la lista). La lista de courses.php llamaba a
      * teachers() y students() dentro del foreach: dos queries por fila y el
      * roster entero traído a memoria para contarlo.
      * $courseIds null = todos (admin completo); array = solo esos (docente).
@@ -258,7 +259,11 @@ final class Courses
                        (SELECT COUNT(*) FROM course_teachers ct WHERE ct.course_id = c.id) AS n_teachers,
                        (SELECT COUNT(*) FROM course_students cs
                           JOIN users u ON u.id = cs.user_id
-                         WHERE cs.course_id = c.id AND u.is_demo = 0) AS n_students
+                         WHERE cs.course_id = c.id AND u.is_demo = 0) AS n_students,
+                       (SELECT COUNT(*) FROM student_groups g WHERE g.course_id = c.id) AS n_groups,
+                       (SELECT group_concat(module_code) FROM course_modules m WHERE m.course_id = c.id) AS module_codes,
+                       (SELECT group_concat(u.display_name, \', \') FROM course_teachers ct
+                          JOIN users u ON u.id = ct.user_id WHERE ct.course_id = c.id) AS teacher_names
                 FROM courses c';
         $args = [];
         if ($courseIds !== null) {

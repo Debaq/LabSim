@@ -4,6 +4,11 @@
  */
 
 * { box-sizing: border-box; }
+/* [hidden] oculta siempre. Sin esto, cualquier regla con display (.inline,
+ * .bulk-bar, .row...) le ganaba al atributo y el elemento "oculto" se veía:
+ * la barra de tanda de Fichas con "0 seleccionada(s)", el renombrar grupo
+ * del tablero de cursos duplicando el título. */
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 
 body {
@@ -214,7 +219,7 @@ th {
 .input--auto { width: auto !important; }
 /* Numérico corto en línea con su par (ej. "UMD (int / %)"): sin esto el
    input, select { width:100% } global los apila a lo ancho. */
-.input--narrow { width: 5rem; }
+.input--narrow { width: 5rem !important; }   /* !important: .input (width:100%) va más abajo y le ganaba */
 
 /* Help aún más chico para notas al pie muy pequeñas */
 .help--xs { font-size: 0.75rem; }

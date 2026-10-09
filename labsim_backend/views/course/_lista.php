@@ -37,38 +37,56 @@
 </div>
 <?php endif; ?>
 
-<?php if ($isFullAdmin): ?>
-<div class="card">
-    <strong>Crear curso</strong>
-    <form method="post">
+<?php
+// Qué boxes de la app tiene cada curso, para las etiquetas de la tarjeta:
+// dicen de un vistazo si es un curso de audiología, de electrofisiología o
+// los dos, sin entrar a la pestaña Módulos.
+$boxDeModulo = [];
+foreach (Courses::modulesGroupedByBox() as $boxLabel => $boxModules) {
+    foreach (array_keys($boxModules) as $code) {
+        $boxDeModulo[$code] = preg_replace('/^Box\s+/u', '', $boxLabel);
+    }
+}
+?>
+<div class="cursos-grid">
+    <?php foreach ($courses as $c): ?>
+    <?php
+    $codes = array_filter(explode(',', (string) ($c['module_codes'] ?? '')));
+    $boxes = [];
+    foreach ($codes as $code) {
+        $b = $boxDeModulo[$code] ?? null;
+        if ($b !== null && $b !== 'Otros módulos' && $b !== 'Sala de Espera') {
+            $boxes[$b] = true;
+        }
+    }
+    ?>
+    <a class="curso-card<?= $c['active'] ? '' : ' curso-card--archivado' ?>" href="courses.php?id=<?= (int) $c['id'] ?>">
+        <span class="curso-card-arriba">
+            <span class="tag <?= $c['active'] ? 'tag--success' : 'tag--muted' ?>"><?= $c['active'] ? 'activo' : 'archivado' ?></span>
+            <?php foreach (array_keys($boxes) as $b): ?>
+            <span class="tag curso-box"><?= htmlspecialchars($b) ?></span>
+            <?php endforeach; ?>
+        </span>
+        <span class="curso-nombre"><?= htmlspecialchars($c['name']) ?></span>
+        <span class="curso-docentes"><?= $c['teacher_names'] ? htmlspecialchars((string) $c['teacher_names']) : 'Sin docente asignado' ?></span>
+        <span class="curso-cifras">
+            <span><strong><?= (int) $c['n_students'] ?></strong> alumnos</span>
+            <span><strong><?= (int) $c['n_groups'] ?></strong> grupos</span>
+            <span><strong><?= count($codes) ?></strong> módulos</span>
+        </span>
+    </a>
+    <?php endforeach; ?>
+
+    <?php if ($isFullAdmin): ?>
+    <form method="post" class="curso-card curso-card--nuevo">
     <?= csrf_field() ?>
         <input type="hidden" name="form_action" value="create_course">
-        <label class="field-label">Nombre
-            <input class="input" type="text" name="name" required>
-        </label>
-        <div class="form-actions-sticky">
-            <button class="btn" type="submit">Crear</button>
-        </div>
+        <span class="curso-nombre">+ Curso nuevo</span>
+        <input class="input" type="text" name="name" placeholder="Nombre, ej. Audiología aplicada ETMP176" required>
+        <button class="btn btn--sm" type="submit">Crear</button>
     </form>
+    <?php endif; ?>
 </div>
+<?php if (!$courses && !$isFullAdmin): ?>
+<p class="muted">Ningún curso creado todavía.</p>
 <?php endif; ?>
-
-<div class="card">
-    <strong>Cursos</strong>
-    <div class="table-wrap">
-    <table>
-        <tr><th>Nombre</th><th>Estado</th><th>Docentes</th><th>Alumnos</th></tr>
-        <?php foreach ($courses as $c): ?>
-        <tr>
-            <td><a href="courses.php?id=<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></a></td>
-            <td><?= $c['active'] ? 'activo' : 'archivado' ?></td>
-            <td><?= (int) $c['n_teachers'] ?></td>
-            <td><?= (int) $c['n_students'] ?></td>
-        </tr>
-        <?php endforeach; ?>
-        <?php if (!$courses): ?>
-        <tr><td colspan="4" class="muted">Ningún curso creado todavía.</td></tr>
-        <?php endif; ?>
-    </table>
-    </div>
-</div>

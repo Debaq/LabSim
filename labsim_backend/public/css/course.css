@@ -1,0 +1,136 @@
+/* public/css/course.css — admin/courses.php: lista de cursos como tarjetas,
+ * módulos como mosaicos y el tablero de personas (lo base del tablero sigue
+ * en admin.css).
+ */
+
+/* Lista de cursos: una tarjeta por curso con lo que lo identifica (qué
+ * boxes usa, quién lo da, cuántos alumnos) y, al final, la de crear. */
+.cursos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+  gap: var(--space-5);
+}
+.curso-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-decoration: none;
+  box-shadow: var(--shadow-1);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+a.curso-card:hover, a.curso-card:focus-visible { transform: translateY(-2px); box-shadow: var(--shadow-2); outline: none; }
+.curso-card--archivado { border-left-color: var(--color-secondary); opacity: 0.7; }
+.curso-card-arriba { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.curso-card-arriba .tag { margin: 0; }
+.curso-box { background: var(--color-primary-soft); color: var(--color-primary); }
+.curso-nombre { font-size: 1.05rem; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
+.curso-docentes { font-size: 0.82rem; color: var(--color-muted); }
+.curso-cifras {
+  display: flex;
+  gap: var(--space-6);
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+.curso-cifras strong { display: block; font-size: 1.3rem; color: var(--color-text); }
+.curso-card--nuevo {
+  border-style: dashed;
+  border-left-width: 1px;
+  border-color: var(--color-border-strong);
+  box-shadow: none;
+  justify-content: center;
+}
+.curso-card--nuevo .curso-nombre { color: var(--color-primary); }
+.curso-card--nuevo input { margin: 0; }
+.curso-card--nuevo .btn { align-self: flex-start; margin: 0; }
+
+/* Módulos: un mosaico por módulo; marcado = borde y fondo del color del
+ * sitio. El checkbox va chico a la izquierda (el input global es width:100%
+ * y lo estiraba hasta el medio de la celda). */
+.modulos-box { margin-top: var(--space-5); }
+.modulos-box-titulo {
+  margin-bottom: var(--space-2);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.modulos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: var(--space-3);
+}
+.modulo-tile {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-weight: 400;
+  font-size: 0.88rem;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: border-color 0.1s ease, background 0.1s ease;
+}
+.modulo-tile:hover { border-color: var(--color-border-strong); }
+.modulo-tile input { width: auto; margin: 0; flex: none; accent-color: var(--color-primary); }
+.modulo-tile:has(input:checked) {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  font-weight: 600;
+}
+
+/* Tablero de personas: encabezado de columna con el número en una
+ * burbuja, acciones a la derecha; tarjeta en dos líneas (usuario y cifras). */
+.group_head { margin: 0; align-items: center; gap: var(--space-2); flex-wrap: nowrap; }
+.group_head > strong { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.group_badge {
+  display: inline-block;
+  min-width: 1.5rem;
+  margin-left: 0.2rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  text-align: center;
+}
+.group_actions { display: inline-flex; gap: 0.2rem; flex: none; }
+.group_actions .btn, .group_actions form { margin: 0; }
+.group_rename { flex: 1 1 auto; min-width: 0; }
+.group_rename input { width: 100%; margin: 0; padding: 0.2rem 0.4rem; }
+.group_column--sin { border-style: dashed; background: transparent; }
+.group_column--sin .group_badge { background: var(--color-border); color: var(--color-muted); }
+.group_card__meta { margin-top: 0.15rem; font-size: 0.75rem; color: var(--color-muted); overflow-wrap: anywhere; }
+.group_card__stats { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.3rem; }
+.group_card__stats span {
+  padding: 0 0.35rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-row-alt);
+  font-size: 0.7rem;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+/* Práctica: la casilla al pie del resto de los campos del formulario. */
+.practica-check { margin: 0 0 0.55rem; }
+
+/* Barra de arriba del tablero: buscador que crece, crear grupo y repartir
+ * en una sola línea (cada form no se parte por dentro). */
+.people-toolbar { margin-top: var(--space-4); align-items: center; gap: var(--space-4); }
+.people-toolbar-form { display: flex; align-items: center; gap: var(--space-2); margin: 0; flex-wrap: nowrap; }
+.people-toolbar-form .btn { margin: 0; white-space: nowrap; }
+.people-toolbar-form .input--auto { width: 9rem !important; }
+.people-toolbar-form .people-prefix { width: 6rem !important; }

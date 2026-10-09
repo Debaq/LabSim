@@ -37,22 +37,22 @@ $renderCard = static function (array $s, bool $isCandidate) use ($courseId, $pro
                 <button type="submit" class="btn btn--danger btn--xs" title="Quitar del curso">&times;</button>
             </form>
         </div>
-        <div class="group_card__meta help help--xs">
-            <?= htmlspecialchars($s['username']) ?>
-            <span class="card-member-only" <?= $isCandidate ? 'hidden' : '' ?>>
-                &nbsp;·&nbsp; <?= $p['asignadas'] ?> cita<?= $p['asignadas'] === 1 ? '' : 's' ?>
-                &nbsp;·&nbsp; <?= $p['atendidas'] ?> cerrada<?= $p['atendidas'] === 1 ? '' : 's' ?>
-                <?php if ($p['practicas'] > 0): ?>
-                &nbsp;·&nbsp; <?= $p['practicas'] ?> práctica<?= $p['practicas'] === 1 ? '' : 's' ?>
-                <?php endif; ?>
-                <?php if ($p['ultima'] !== null): ?>
-                &nbsp;·&nbsp; últ. <?= htmlspecialchars(substr((string) $p['ultima'], 0, 10)) ?>
-                <?php endif; ?>
-            </span>
-            <span class="card-enroll-only" <?= $isCandidate ? '' : 'hidden' ?>>
-                <?= !empty($s['origin']) ? '&nbsp;·&nbsp; ' . htmlspecialchars((string) $s['origin']) : '' ?>
-            </span>
+        <div class="group_card__meta"><?= htmlspecialchars($s['username']) ?></div>
+        <div class="group_card__stats card-member-only" <?= $isCandidate ? 'hidden' : '' ?>>
+            <span title="Citas asignadas"><?= $p['asignadas'] ?> cita<?= $p['asignadas'] === 1 ? '' : 's' ?></span>
+            <span title="Atenciones cerradas"><?= $p['atendidas'] ?> cerrada<?= $p['atendidas'] === 1 ? '' : 's' ?></span>
+            <?php if ($p['practicas'] > 0): ?>
+            <span title="Intentos de práctica libre"><?= $p['practicas'] ?> práctica<?= $p['practicas'] === 1 ? '' : 's' ?></span>
+            <?php endif; ?>
+            <?php if ($p['ultima'] !== null): ?>
+            <span title="Última actividad">últ. <?= htmlspecialchars(substr((string) $p['ultima'], 0, 10)) ?></span>
+            <?php endif; ?>
         </div>
+        <?php if (!empty($s['origin'])): ?>
+        <div class="group_card__stats card-enroll-only" <?= $isCandidate ? '' : 'hidden' ?>>
+            <span title="Curso de Moodle de donde vino"><?= htmlspecialchars((string) $s['origin']) ?></span>
+        </div>
+        <?php endif; ?>
     </div>
     <?php
 };
@@ -66,9 +66,9 @@ $renderCard = static function (array $s, bool $isCandidate) use ($courseId, $pro
         Cada tarjeta es un alumno; arrastrarla a otra columna lo mueve de grupo (pertenece a uno solo a la vez). Los candidatos del panel de la derecha --alumnos activos que todavía no están en este curso-- se matriculan al soltarlos en una columna, o marcándolos y usando el botón, para tandas grandes.
     </p>
 
-    <div class="row" style="margin-top:0.6rem; flex-wrap:wrap; gap:0.6rem;">
+    <div class="row people-toolbar">
         <input type="text" id="people_search" class="input grow" placeholder="Buscar por nombre, usuario u origen...">
-        <form method="post" class="row" style="margin:0; gap:0.4rem;">
+        <form method="post" class="people-toolbar-form">
         <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="create_group">
             <input type="hidden" name="course_id" value="<?= $courseId ?>">
@@ -76,13 +76,13 @@ $renderCard = static function (array $s, bool $isCandidate) use ($courseId, $pro
             <button type="submit" class="btn btn--secondary btn--sm">Crear grupo</button>
         </form>
         <?php if ($sinGrupo): ?>
-        <form method="post" class="row" style="margin:0; gap:0.4rem;"
+        <form method="post" class="people-toolbar-form"
               onsubmit="return confirm('Crea los grupos nuevos y reparte entre ellos a los alumnos que hoy están sin grupo. ¿Seguir?');">
         <?= csrf_field() ?>
             <input type="hidden" name="form_action" value="split_groups">
             <input type="hidden" name="course_id" value="<?= $courseId ?>">
             <input type="number" name="n_groups" class="input input--narrow" min="2" max="40" value="4" required title="Cuántos grupos crear">
-            <input type="text" name="group_prefix" class="input input--auto" value="Grupo" title="Prefijo del nombre">
+            <input type="text" name="group_prefix" class="input input--auto people-prefix" value="Grupo" title="Prefijo del nombre">
             <button type="submit" class="btn btn--secondary btn--sm">Repartir <?= count($sinGrupo) ?> sin grupo</button>
         </form>
         <?php endif; ?>
@@ -95,9 +95,9 @@ $renderCard = static function (array $s, bool $isCandidate) use ($courseId, $pro
              data-course-id="<?= $courseId ?>"
              data-csrf="<?= htmlspecialchars(Auth::csrfToken()) ?>"
              data-endpoint="group_move.php">
-            <div class="pane group_column" data-group-id="">
-                <div class="row row--between" style="margin:0; align-items:center;">
-                    <strong>Sin grupo (<span class="group_count"><?= count($sinGrupo) ?></span>)</strong>
+            <div class="pane group_column group_column--sin" data-group-id="">
+                <div class="row group_head">
+                    <strong>Sin grupo <span class="group_badge group_count"><?= count($sinGrupo) ?></span></strong>
                 </div>
                 <div class="group_dropzone">
                     <?php foreach ($sinGrupo as $s) {
@@ -107,8 +107,8 @@ $renderCard = static function (array $s, bool $isCandidate) use ($courseId, $pro
             </div>
             <?php foreach ($groups as $g): ?>
             <div class="pane group_column" data-group-id="<?= (int) $g['id'] ?>">
-                <div class="row row--between" style="margin:0; align-items:center;">
-                    <strong class="group_title"><?= htmlspecialchars($g['name']) ?> (<span class="group_count"><?= (int) $g['member_count'] ?></span>)</strong>
+                <div class="row group_head">
+                    <strong class="group_title"><?= htmlspecialchars($g['name']) ?> <span class="group_badge group_count"><?= (int) $g['member_count'] ?></span></strong>
                     <form method="post" class="inline group_rename" hidden>
                     <?= csrf_field() ?>
                         <input type="hidden" name="form_action" value="rename_group">
@@ -116,7 +116,7 @@ $renderCard = static function (array $s, bool $isCandidate) use ($courseId, $pro
                         <input type="hidden" name="group_id" value="<?= (int) $g['id'] ?>">
                         <input type="text" name="name" class="input input--auto" value="<?= htmlspecialchars($g['name']) ?>" required>
                     </form>
-                    <span class="row" style="margin:0; gap:0.2rem;">
+                    <span class="group_actions">
                         <button type="button" class="btn btn--ghost btn--xs" title="Renombrar grupo" data-rename-toggle>&#9998;</button>
                         <form method="post" class="inline" onsubmit="return confirm(<?= htmlspecialchars(json_encode('¿Eliminar el grupo ' . $g['name'] . '? Sus miembros quedan sin grupo.'), ENT_QUOTES) ?>);">
                         <?= csrf_field() ?>
@@ -164,7 +164,7 @@ $renderCard = static function (array $s, bool $isCandidate) use ($courseId, $pro
                 <p class="help help--xs">No quedan alumnos activos fuera de este curso.</p>
                 <?php endif; ?>
             </div>
-            <button type="submit" form="enroll_form" class="btn btn--secondary btn--sm" style="margin-top:0.5rem;">Matricular marcados (<span id="candidate_count">0</span>)</button>
+            <button type="submit" form="enroll_form" class="btn btn--secondary btn--sm" style="margin-top:0.5rem;"><span>Matricular marcados (<span id="candidate_count">0</span>)</span></button>
 
             <details class="section-sep">
                 <summary>Alumno nuevo o sin Moodle</summary>

@@ -82,7 +82,7 @@
         <label>Procedimiento
             <input type="text" name="procedimiento" placeholder="Audiometría">
         </label>
-        <label class="help help--xs">
+        <label class="inline-check practica-check">
             <input type="checkbox" name="show_study_sheet" value="1"> Ficha de estudio al cerrar
         </label>
         <button type="submit" class="btn">Agregar</button>

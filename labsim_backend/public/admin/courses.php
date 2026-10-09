@@ -170,6 +170,7 @@ if ($detailId !== null) {
             break;
     }
 
+    admin_add_css('course.css');
     admin_header($course['name'], $me);
     ?>
     <p class="help help--xs" style="margin-top:-0.6rem;">
@@ -188,6 +189,7 @@ if ($detailId !== null) {
 
 // Sin id: admin completo ve la lista global; docente sin cursos ve un aviso
 // (con 1 curso ya se redirigió arriba, con 2+ se lista solo lo suyo).
+admin_add_css('course.css');
 admin_header('Cursos', $me);
 if (!$isFullAdmin && !$myCourseIds) {
     echo '<p class="muted">Todavía no estás asignado como docente de ningún curso.</p>';
