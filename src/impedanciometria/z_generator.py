@@ -390,11 +390,27 @@ DECAY_MEDIA_VIDA_S = 4.0
 DECAY_SANO_PERDIDA = 0.06
 
 
+def reflex_decay_del_caso(reflex, lado):
+    """¿Decae el reflejo de este oído (estimulado)? cases.data.Reflex.decay.
+
+    Espejo de CaseBuilder::reflexDecayDe: un caso guardado antes de que
+    existiera Reflex.decay (2026-10-09) lo tenía escondido en la forma de la
+    curva -- el perfil le ponía 'off' al oído retrococlear --, así que ahí
+    'off' cuenta como decay."""
+    if not isinstance(reflex, dict):
+        return False
+    decay = reflex.get('decay')
+    if isinstance(decay, dict):
+        return bool(decay.get(lado))
+    tipos = reflex.get('tipo')
+    return isinstance(tipos, dict) and tipos.get(lado) == 'off'
+
+
 def decay_curve(present, dB=None, threshold=None, decae=False, num_pts=240, max_amp=100.0):
     """Traza del decay del reflejo: (x en s, y en μl, % a los 5 s, % a los 10 s).
 
-    `decae` dice si el oído ESTIMULADO es retrococlear (tipo de curva
-    'off' en el caso, ver CaseProfile::reflexCurveType). Los % son la
+    `decae` dice si el caso marca decay del reflejo en el oído ESTIMULADO
+    (ver reflex_decay_del_caso). Los % son la
     amplitud que queda respecto de la del inicio del estímulo, medida sobre
     la contracción sin ruido -- lo que reporta el equipo --; sin reflejo,
     None.
@@ -438,10 +454,17 @@ ETF_DURACION_S = 10.0
 # Lo que una deglución deja de la presión del conducto cuando la trompa se
 # abre (membrana perforada): tres degluciones la llevan casi a 0.
 ETF_PERMEABLE_FACTOR = 0.35
-# Corrimiento del pico del timpanograma tras las maniobras, membrana íntegra
-# con trompa que funciona (Valsalva lo lleva a positivo, Toynbee a negativo).
-ETF_VALSALVA_DAPA = 40
-ETF_TOYNBEE_DAPA = -30
+# Prueba de membrana íntegra: presión-deglución de Williams (1975), la del
+# módulo ETF de los impedanciómetros clínicos. Se presuriza el conducto
+# (+400 o -400 daPa), el paciente traga y se repite el timpanograma: con la
+# trompa sana el pico se corre al lado contrario de la presión aplicada.
+# En sanos la diferencia máxima entre los picos es pequeña: mediana 11 daPa
+# (RIC 6-17); con disfunción tubaria obstructiva, 0 daPa (RIC 0-2), corte
+# <= 4 daPa (Lu y Wang 2026). Ver Bibliografia::IMPEDANCIOMETRIA.
+ETF_INTEGRA_MANIOBRAS = ('reposo', 'positiva', 'negativa')
+ETF_INTEGRA_PRESION_DAPA = 400
+ETF_SANO_CORRIMIENTO = (4, 9)        # daPa por maniobra (la suma cae en 8-18)
+ETF_DISFUNCION_CORRIMIENTO = (0, 1)
 
 
 def etf_membrana_perforada(etf):
@@ -472,23 +495,28 @@ def etf_prueba_perforada(etf, presion_inicial, num_pts=200):
 
 
 def etf_prueba_integra(etf, letter, vol, maniobra, win_neg=-400, win_pos=200, seed_key=None):
-    """Timpanograma de la prueba de membrana íntegra (Williams).
+    """Timpanograma de la prueba de membrana íntegra (presión-deglución).
 
-    `maniobra`: 'reposo', 'valsalva' o 'toynbee'. Con la trompa normal el
-    pico se corre (positivo tras Valsalva, negativo tras Toynbee); con
-    disfunción tubaria se queda donde estaba. Con la membrana perforada no
-    hay pico que correr: la curva sale plana.
+    `maniobra`: 'reposo', 'positiva' (+400 daPa en el conducto y tragar) o
+    'negativa' (-400 daPa y tragar). Con la trompa normal el pico se corre
+    hacia negativo tras la positiva y hacia positivo tras la negativa, unos
+    pocos daPa; con disfunción tubaria casi no se mueve. Con la membrana
+    perforada no hay pico (curva plana): la prueba no corresponde.
+
+    El pico de reposo sale de la letra de Jerger y del paciente (seed_key),
+    sin el temblor de cada barrido: las tres curvas tienen que compararse.
     Devuelve el dataset de Z_225 (x, y, c, p, g, vol, pmax).
     """
+    rng = random.Random(str(seed_key)) if seed_key is not None else random
     if etf_membrana_perforada(etf):
-        return Z_225(letter='B', vol=vol, win_neg=win_neg, win_pos=win_pos, seed_key=seed_key).getDataSet()
-    base = Z_225(letter=letter, vol=vol, win_neg=win_neg, win_pos=win_pos, seed_key=seed_key)
-    corrimiento = 0
-    if etf == 'Normal':
-        corrimiento = {'valsalva': ETF_VALSALVA_DAPA, 'toynbee': ETF_TOYNBEE_DAPA}.get(maniobra, 0)
-    try:
-        p = int(base.pressure) + corrimiento + (random.randint(-3, 3) if maniobra != 'reposo' else 0)
-        return Z_225(manual=True, c=base.compliance, p=p, vol=base.volume, pmax=base.pressure_max,
+        return Z_225(manual=True, c=0.0, p=0, vol=vol, pmax=ANCHOS_JERGER['B'],
                      win_neg=win_neg, win_pos=win_pos).getDataSet()
-    except (TypeError, ValueError):
-        return base.getDataSet()
+    c_min, c_max, p_min, p_max = FORMAS_JERGER.get(letter, FORMAS_JERGER['A'])
+    c = rng.uniform(c_min, c_max)
+    p = rng.randint(int(p_min), int(p_max))
+    rango = ETF_SANO_CORRIMIENTO if etf == 'Normal' else ETF_DISFUNCION_CORRIMIENTO
+    corr_pos = rng.randint(*rango)   # tras la positiva: pico hacia negativo
+    corr_neg = rng.randint(*rango)   # tras la negativa: pico hacia positivo
+    p = p + {'positiva': -corr_pos, 'negativa': corr_neg}.get(maniobra, 0)
+    return Z_225(manual=True, c=c, p=p, vol=vol, pmax=ANCHOS_JERGER.get(letter, ANCHOS_JERGER['A']),
+                 win_neg=win_neg, win_pos=win_pos).getDataSet()

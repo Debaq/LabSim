@@ -169,12 +169,13 @@ hay que dibujarlo, cae de la física. En una retrococlear el LDL sí acompaña
 al umbral (campo dinámico conservado, `LDL_FULL_RANGE_DB = 95`), y el gap
 corre todo hacia arriba porque el oído medio atenúa también lo fuerte.
 
-### 8. Morfología de la curva del reflejo
+### 8. Morfología de la curva del reflejo y decay del reflejo
 
-Solo se deriva el patrón **OFF** (el reflejo que no se sostiene: decay,
-signo retrococlear del mismo eje que el deterioro tonal). `invertido` y
-`on-off` quedan siempre al docente: el primero es un artefacto de registro
-y el segundo un hallazgo puntual, ninguno se deduce del sitio de la lesión.
+Corregido 2026-10-09: la forma de la curva (ON, OFF, ON-OFF, invertido) **no
+se deriva**: la elige el docente. Lo que se deriva es el **decay del
+reflejo** (`Reflex.decay` por oído, `CaseProfile::reflexDecay`), signo
+retrococlear del mismo eje que el deterioro tonal. Antes el perfil ponía
+`off` como si OFF fuera decay; son cosas distintas (ver docs/decisiones.md).
 
 ### 9. Ya derivados hoy (precedente del patrón)
 

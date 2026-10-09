@@ -187,8 +187,12 @@
                     });
                 });
             });
+            // La forma de la curva (ON/OFF/ON-OFF/invertido) no se deriva:
+            // la elige el docente. Lo que sí sale del perfil es el decay.
             ['od', 'oi'].forEach(function (lado) {
-                setVal('reflex_type[' + lado + ']', p.reflex.tipo[lado]);
+                if (p.reflex.decay) {
+                    setVal('reflex_decay[' + lado + ']', p.reflex.decay[lado] ? '1' : '0');
+                }
             });
             // La tabla-resumen de reflejos se dibuja desde los inputs.
             if (window.drawReflexPattern) { window.drawReflexPattern(); }

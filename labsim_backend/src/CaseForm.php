@@ -175,11 +175,15 @@ final class CaseForm
         }
 
         $reflexType = ['od' => 'normal', 'oi' => 'normal'];
+        // Decay del reflejo por oído (estimulado): sí/no. Es otro dato que
+        // la forma de la curva -- ver CaseProfile::reflexDecay.
+        $reflexDecay = ['od' => false, 'oi' => false];
         foreach (['od', 'oi'] as $lado) {
             $type = (string) self::val($v, ['reflex_type', $lado], 'normal');
             if (in_array($type, CaseBuilder::REFLEX_CURVE_TYPES, true)) {
                 $reflexType[$lado] = $type;
             }
+            $reflexDecay[$lado] = (string) self::val($v, ['reflex_decay', $lado], '') === '1';
         }
 
         $airPairs = self::zip($aerea['od'], $aerea['oi']);
@@ -527,6 +531,7 @@ final class CaseForm
                     'ipsi' => self::zip($reflexIpsi['od'], $reflexIpsi['oi']),
                     'contra' => self::zip($reflexContra['od'], $reflexContra['oi']),
                     'tipo' => $reflexType,
+                    'decay' => $reflexDecay,
                 ],
                 'etf_od' => $etfOd,
                 'etf_oi' => $etfOi,
@@ -714,7 +719,9 @@ final class CaseForm
                         }
                     }
                 }
-                $poner($v, ['reflex_type', $l], $p['reflex']['tipo'][$l]);
+                // La forma de la curva no se proyecta (la elige el docente);
+                // el decay sí.
+                $poner($v, ['reflex_decay', $l], $p['reflex']['decay'][$l]);
             }
             if ($auto['recruit']) {
                 $poner($v, ['sisi', $l], $p['recruit']['sisi'][$j]);

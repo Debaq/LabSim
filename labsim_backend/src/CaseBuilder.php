@@ -1276,6 +1276,24 @@ final class CaseBuilder
      * case_create.php a partir de un `cases.data` ya guardado, para
      * precargar el formulario al editar un caso existente.
      */
+    /**
+     * Decay del reflejo de un oído según cases.data.Reflex. Un caso guardado
+     * antes de que existiera Reflex.decay (2026-10-09) lo tenía escondido en
+     * la forma de la curva: el perfil le ponía 'off' al oído retrococlear.
+     * Ahí, 'off' cuenta como decay -- la migración de prod lo pasa a
+     * Reflex.decay; esto cubre lo que quede sin migrar.
+     */
+    public static function reflexDecayDe($reflex, string $lado): bool
+    {
+        if (!is_array($reflex)) {
+            return false;
+        }
+        if (isset($reflex['decay']) && is_array($reflex['decay'])) {
+            return !empty($reflex['decay'][$lado]);
+        }
+        return (($reflex['tipo'] ?? [])[$lado] ?? 'normal') === 'off';
+    }
+
     public static function caseDataToForm(array $data): array
     {
         $unzip = static function (array $pairs, int $count): array {
@@ -1383,6 +1401,10 @@ final class CaseBuilder
             'od' => (string) ($reflexTipo['od'] ?? 'normal'),
             'oi' => (string) ($reflexTipo['oi'] ?? 'normal'),
         ];
+        $v['reflex_decay'] = [];
+        foreach (['od', 'oi'] as $l) {
+            $v['reflex_decay'][$l] = self::reflexDecayDe($reflex, $l) ? '1' : '0';
+        }
 
         $etf = $data['ETF'] ?? ['Normal', 'Normal'];
         $v['etf_od'] = $etf[0] ?? 'Normal';

@@ -42,7 +42,7 @@
             Logoaudiometría (máxima discriminación)
         </label>
     </div>
-    <p class="help"><strong>OEA</strong>: la atenuación por frecuencia pasa a calcularse del componente coclear y del gap. <strong>Reflejos</strong>: el oído de la sonda decide si el reflejo se ve y el estimulado a qué nivel aparece; el umbral se separa del esperado según cuánto haya de coclear y cuánto de retro, y el patrón OFF sale del componente retro. <strong>Supraliminares</strong>: reclutamiento, deterioro tonal y LDL se escriben desde el mismo número, así que no pueden contradecirse entre sí.</p>
+    <p class="help"><strong>OEA</strong>: la atenuación por frecuencia pasa a calcularse del componente coclear y del gap. <strong>Reflejos</strong>: el oído de la sonda decide si el reflejo se ve y el estimulado a qué nivel aparece; el umbral se separa del esperado según cuánto haya de coclear y cuánto de retro, y el decay del reflejo sale del componente retro (la forma de la curva, ON, OFF u ON-OFF, no se deriva: la elige usted). <strong>Supraliminares</strong>: reclutamiento, deterioro tonal y LDL se escriben desde el mismo número, así que no pueden contradecirse entre sí.</p>
     <p class="help"><strong>Logoaudiometría</strong>: la discriminación máxima y a qué nivel se alcanza se calculan del componente retro, no del promedio tonal. El gap no la baja, solo corre la curva a más intensidad. El rollover no sale de acá: ya venía del reclutamiento.</p>
     <p class="help">El timpanograma no se deriva: qué curva sale depende de la patología concreta (B ocupación, As rígido, Ad hipercompliante, C retracción) y esa es una decisión clínica, no una cuenta. Lo que sí se hace es avisar si contradice al gap.</p>
 </div>

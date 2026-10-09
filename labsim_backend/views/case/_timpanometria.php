@@ -140,7 +140,7 @@
 
 <div class="card">
     <strong>Reflejos acústicos (dB HL, 130 = ausente)</strong>
-    <p class="derivado-aviso" data-derivado="reflex" hidden>Los umbrales y el tipo de curva los sugiere el <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>, porque la casilla <em>Reflejos acústicos</em> está encendida: se escriben solos con lo que predice el perfil y <strong>se pueden editar</strong>: lo que quede en pantalla es lo que se guarda. Cambiar el audiograma o el perfil vuelve a sugerir y pisa lo editado a mano; para que no se toquen más, apagar esa casilla.</p>
+    <p class="derivado-aviso" data-derivado="reflex" hidden>Los umbrales y el decay del reflejo los sugiere el <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>, porque la casilla <em>Reflejos acústicos</em> está encendida: se escriben solos con lo que predice el perfil y <strong>se pueden editar</strong>: lo que quede en pantalla es lo que se guarda. Cambiar el audiograma o el perfil vuelve a sugerir y pisa lo editado a mano; para que no se toquen más, apagar esa casilla.</p>
     <?php
     $reflexGroups = ['ipsi' => ['label' => 'Ipsilateral', 'freqs' => [500, 1000, 2000, 4000]],
                       'contra' => ['label' => 'Contralateral', 'freqs' => [500, 1000, 2000, 4000, 'WN']]];
@@ -162,9 +162,10 @@
     <?php endforeach; ?>
     <div class="table-wrap">
     <table class="grid-table">
-        <tr><th class="side-label">Tipo de reflejo</th><th>Curva</th></tr>
+        <tr><th class="side-label">Tipo de reflejo</th><th>Curva</th><th>Decay del reflejo</th></tr>
         <?php foreach (CaseBuilder::LADOS as $lado => $ladoLabel):
             $reflexTypeSelected = (string) fv($v, ['reflex_type', $lado], 'normal');
+            $reflexDecaySelected = (string) fv($v, ['reflex_decay', $lado], '0');
         ?>
         <tr>
             <td class="side-label"><?= $ladoLabel ?></td>
@@ -175,10 +176,17 @@
                     <?php endforeach; ?>
                 </select>
             </td>
+            <td>
+                <select id="reflex_decay_<?= $lado ?>" name="reflex_decay[<?= $lado ?>]">
+                    <option value="0" <?= $reflexDecaySelected !== '1' ? 'selected' : '' ?>>No decae</option>
+                    <option value="1" <?= $reflexDecaySelected === '1' ? 'selected' : '' ?>>Decae</option>
+                </select>
+            </td>
         </tr>
         <?php endforeach; ?>
     </table>
     </div>
+    <p class="help">La <strong>curva</strong> es la forma del reflejo en la pantalla Reflejos (ON, OFF: deflexión al apagar el tono, ON-OFF: al encender y al apagar, Invertido) y la elige usted. El <strong>decay</strong> es lo que muestra la pantalla Tone Decay cuando ese oído es el estimulado: si decae, la contracción cae a menos de la mitad en los 10 s.</p>
 </div>
 </div>
 </div>

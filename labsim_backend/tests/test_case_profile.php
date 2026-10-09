@@ -608,27 +608,21 @@ t_true($ldlCond[3] > $ldlSano[3],
     'Conductiva: el oído medio atenúa también lo fuerte, el LDL sube con el gap');
 
 // ---------------------------------------------------------------------
-// Morfología de la curva del reflejo.
+// Decay del reflejo (no la forma de la curva, que la elige el docente).
 // ---------------------------------------------------------------------
 
-t_eq(CaseProfile::reflexCurveType($dNormal, 100.0, $sinRetro), 'normal',
-    'Oído sano: curva de reflejo normal (ON sostenido)');
-t_eq(CaseProfile::reflexCurveType($dCoclear40, 100.0, $sinRetro), 'normal',
-    'Coclear: sin decay del reflejo');
-t_eq(CaseProfile::reflexCurveType($dRetro40, 0.0, $sinRetro), 'off',
-    'Retrococlear: patrón OFF, el reflejo no se sostiene');
-t_eq(CaseProfile::reflexCurveType($dNormal, 100.0, $schwannoma), 'off',
+t_eq(CaseProfile::reflexDecay($dNormal, 100.0, $sinRetro), false, 'Oído sano: el reflejo se sostiene');
+t_eq(CaseProfile::reflexDecay($dCoclear40, 100.0, $sinRetro), false, 'Coclear: sin decay del reflejo');
+t_eq(CaseProfile::reflexDecay($dRetro40, 0.0, $sinRetro), true, 'Retrococlear: el reflejo decae');
+t_eq(CaseProfile::reflexDecay($dNormal, 100.0, $schwannoma), true,
     'Patrón retro cargado: decay aunque el audiograma esté limpio');
-foreach (['normal', 'off'] as $tipoRef) {
-    t_true(in_array($tipoRef, CaseBuilder::REFLEX_CURVE_TYPES, true),
-        "El tipo derivado '$tipoRef' es uno de los que acepta el formulario");
-}
 
 // project() los trae todos.
 $p = CaseProfile::project($paresAsim, $paresAsim, $perfilCoclearOD, ['OD' => 'A', 'OI' => 'A']);
 t_true(isset($p['logo']['OD']['pct'], $p['logo']['OD']['int']), 'project(): trae la logoaudiometría');
 t_eq(count($p['recruit']['ldl']['od']), count(CaseBuilder::FREQUENCIES), 'project(): trae el LDL completo');
-t_eq($p['reflex']['tipo']['oi'], 'normal', 'project(): trae la morfología del reflejo por oído');
+t_eq($p['reflex']['decay']['oi'], false, 'project(): trae el decay del reflejo por oído');
+t_true(!isset($p['reflex']['tipo']), 'project(): la forma de la curva no se deriva (la elige el docente)');
 t_true($p['logo']['OD']['pct'] < $p['logo']['OI']['pct'],
     'project(): el oído dañado discrimina menos que el sano');
 
@@ -1154,7 +1148,16 @@ t_true(isset($impOut['umd_pct']['od'], $impOut['sisi']['od'], $impOut['carhart']
 // Lo que el JSON trae gana; y sin automático no se toca nada.
 $impOut = CaseForm::completarConProyeccion($impPost + ['reflex_type' => ['od' => 'on-off'], 'abr' => ['od' => ['type' => 'coclear']]]);
 t_eq($impOut['reflex_type']['od'], 'on-off', 'Importar: el tipo de curva posteado gana');
+t_true(isset($impOut['reflex_decay']['od']), 'Importar: el decay del reflejo sale del perfil');
 t_eq($impOut['abr']['od']['type'], 'coclear', 'Importar: el tipo de ABR posteado gana');
 $impSinAuto = $impPost;
 unset($impSinAuto['perfil']);
 t_eq(CaseForm::completarConProyeccion($impSinAuto), $impSinAuto, 'Importar: sin perfil[auto] el POST queda igual');
+
+// --- Decay de un caso guardado antes de Reflex.decay ------------------------
+
+t_eq(CaseBuilder::reflexDecayDe(['tipo' => ['od' => 'off', 'oi' => 'normal']], 'od'), true,
+    'Caso viejo: el off que puso el perfil cuenta como decay');
+t_eq(CaseBuilder::reflexDecayDe(['tipo' => ['od' => 'off'], 'decay' => ['od' => false]], 'od'), false,
+    'Con Reflex.decay, manda el dato nuevo y el off es solo la forma');
+t_eq(CaseBuilder::reflexDecayDe([], 'oi'), false, 'Sin reflejos: no decae');

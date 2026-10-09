@@ -45,6 +45,10 @@ final class Bibliografia
             'titulo' => 'Acumetría (Rinne y Weber)',
             'resumen' => 'Cómo funcionan los diapasones, qué resultado se espera según el tipo de pérdida y de dónde salen los umbrales del Rinne y el Weber automáticos del caso (que se calibran en Normativas).',
         ],
+        'impedanciometria' => [
+            'titulo' => 'Impedanciometría (reflejos, decay y función tubaria)',
+            'resumen' => 'La forma de la curva del reflejo (ON, OFF, ON-OFF), el decay del reflejo y las pruebas de función tubaria con membrana íntegra y perforada. La forma de la curva y el decay son datos distintos: la forma la elige el docente y el decay sale del perfil (componente retrococlear). No se encontró una fuente para el reflejo OFF solo (sin ON): está descrito como variante parcial del ON-OFF.',
+        ],
         'normas' => [
             'titulo' => 'Normas y clasificaciones',
             'resumen' => 'Normas y convenciones que usan el generador de casos, la ficha y el PDF: umbral esperable por edad, grado de hipoacusia, símbolos del audiograma.',
@@ -306,6 +310,76 @@ final class Bibliografia
             'rinne' => 'Negativo en el oído enfermo si el gap alcanza el umbral',
             'fuentes' => ['BSA2022RW'],
             'nota' => 'La app suma los dos efectos (diferencia de gap más diferencia de vía ósea) y lateraliza hacia donde pesa más.',
+        ],
+    ];
+
+    /**
+     * Impedanciometría. Leídas por su resumen en Europe PMC (y la guía de GSI
+     * en su sitio) el 2026-10-09.
+     */
+    public const IMPEDANCIOMETRIA = [
+        'GSI-AR' => [
+            'cita' => 'Grason-Stadler (GSI). Acoustic Reflex Testing (guía de pruebas). Consultada 2026-10-09.',
+            'enlace' => 'https://grason-stadler.com/education/guides/acoustic-reflexes',
+            'nota' => 'Guía de un fabricante, sin autor ni fecha.',
+            'usa' => [
+                'Tone Decay: tono de 500 o 1000 Hz, 10 dB sobre el umbral del reflejo, contralateral; decae si la amplitud cae al 50% del pico, típicamente dentro de los 10 s.',
+                'El decay apoya la sospecha de patología retrococlear.',
+            ],
+        ],
+        'COOK1999' => [
+            'cita' => 'Cook RD, Ferguson MO, Hall JW 3rd, Grose JH, Pillsbury HC. The effects of amplitude modulation on acoustic reflex decay. Audiol Neurootol. 1999;4(2):104-113. doi:10.1159/000013827.',
+            'enlace' => 'https://doi.org/10.1159/000013827',
+            'usa' => ['El decay rápido con tono puro de 1000 Hz o menos es el signo clásico de lesión neural; en frecuencias más altas también decaen los oídos normales. Por eso la pantalla Tone Decay solo ofrece 500 y 1000 Hz.'],
+        ],
+        'ROSENHALL1979' => [
+            'cita' => 'Rosenhall U, Lidén G, Nilsson E. Stapedius reflex decay in normal hearing subjects. J Am Audiol Soc. 1979;4(4):157-162.',
+            'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/422428/',
+            'n' => '100 oídos normales',
+            'usa' => ['En la mayoría de los oídos sanos el reflejo pierde menos del 10% a los 10 s con un tono 10 dB sobre el umbral: en la app el oído sin decay pierde 6%.'],
+        ],
+        'HIRSCH1983' => [
+            'cita' => 'Hirsch A. The stapedius reflex tests in retrocochlear hearing disorders. Audiology. 1983;22(5):463-470. doi:10.3109/00206098309072807.',
+            'enlace' => 'https://doi.org/10.3109/00206098309072807',
+            'n' => '97 tumores del VIII par',
+            'usa' => ['95 de 97 oídos con tumor del VIII par tenían el umbral del reflejo elevado o decay patológico: el decay del reflejo sale del componente retrococlear del perfil (CaseProfile::reflexDecay).'],
+        ],
+        'DEBRUYNE1992' => [
+            'cita' => 'Debruyne F. Clinical observations on the on-off effect of the acoustic stapedius reflex. Clin Otolaryngol Allied Sci. 1992;17(1):10-12. doi:10.1111/j.1365-2273.1992.tb00979.x.',
+            'enlace' => 'https://doi.org/10.1111/j.1365-2273.1992.tb00979.x',
+            'usa' => ['El efecto ON-OFF aparece en la otosclerosis, la disyunción de cadena y algunas sensorioneurales (un quinto con Ménière): es una forma de la curva, no el decay retrococlear. Por eso la forma no se deriva del perfil y la elige el docente.'],
+        ],
+        'CAMICAS1992' => [
+            'cita' => 'Camicas M. Interprétation acoustique et mécanique de l\'effet «on-off». Rev Laryngol Otol Rhinol (Bord). 1992;113(4):355-358.',
+            'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/1344554/',
+            'usa' => ['ON-OFF: doble deflexión al comenzar y al terminar el estímulo, muy frecuente en la otoespongiosis incipiente (pantalla Reflejos, curva ON-OFF).'],
+        ],
+        'COLLETTI1987' => [
+            'cita' => 'Colletti V, Fiorino FG. Stapedius reflex in the monitoring of NaF treatment of subclinical otosclerosis. Acta Otolaryngol. 1987;104(5-6):447-453.',
+            'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/3434266/',
+            'usa' => ['El ON-OFF puede ser parcial o completo y, al avanzar la otosclerosis, el reflejo termina ausente.'],
+        ],
+        'WILLIAMS1975' => [
+            'cita' => 'Williams PS. A tympanometric pressure swallow test for assessment of eustachian tube function. Ann Otol Rhinol Laryngol. 1975;84(3 Pt 1):339-343. doi:10.1177/000348947508400309.',
+            'enlace' => 'https://doi.org/10.1177/000348947508400309',
+            'usa' => ['ETF con membrana íntegra: timpanograma de base, conducto presurizado y deglución. Tras la presión positiva el pico se corre a negativo y tras la negativa a positivo si la trompa abre.'],
+        ],
+        'LU2026' => [
+            'cita' => 'Lu CY, Wang JJ. Functional assessment beyond type A tympanograms: pressure-swallow testing for chronic Eustachian tube dysfunction in a Taiwanese cohort. Diagnostics (Basel). 2026;16(17):2738. doi:10.3390/diagnostics16172738.',
+            'enlace' => 'https://doi.org/10.3390/diagnostics16172738',
+            'n' => '100 controles y 52 con disfunción tubaria obstructiva',
+            'usa' => ['Magnitudes de la prueba de membrana íntegra: diferencia máxima entre picos de 11 daPa (RIC 6-17) en sanos y 0 daPa (RIC 0-2) con disfunción; corte exploratorio de 4 daPa o menos. En la app: 8-18 daPa con trompa normal, 0-2 con disfunción.'],
+        ],
+        'LEE2026' => [
+            'cita' => 'Lee DH, Heo Y, Na HS, Lee S, Oh SJ, Choi SW. Clinical utility of modified inflation-deflation test in Eustachian tube function testing. Diagnostics (Basel). 2026;16(16):2534. doi:10.3390/diagnostics16162534.',
+            'enlace' => 'https://doi.org/10.3390/diagnostics16162534',
+            'n' => '192 oídos con membrana perforada',
+            'usa' => ['ETF con membrana perforada: presión en el conducto y tres aperturas de la trompa; con disfunción queda más presión residual tras las tres. En la app, con trompa permeable cada deglución deja el 35% de la presión.'],
+        ],
+        'SMITH2015' => [
+            'cita' => 'Smith ME, Tysome JR. Tests of Eustachian tube function: a review. Clin Otolaryngol. 2015;40(4):300-311. doi:10.1111/coa.12428.',
+            'enlace' => 'https://doi.org/10.1111/coa.12428',
+            'usa' => ['Para su teoría: ninguna prueba de función tubaria es estándar de oro; se interpretan junto con la clínica. La app las da siempre "de libro".'],
         ],
     ];
 
@@ -759,6 +833,8 @@ final class Bibliografia
                 return self::TAMIZAJE;
             case 'acumetria':
                 return self::ACUMETRIA;
+            case 'impedanciometria':
+                return self::IMPEDANCIOMETRIA;
             case 'normas':
                 return self::NORMAS;
         }

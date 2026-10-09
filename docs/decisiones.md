@@ -5,6 +5,31 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Reflejo: la forma de la curva y el decay, separados (2026-10-09)
+
+El perfil auditivo le ponía forma de curva **OFF** a todo oído
+retrococlear, porque el código suponía que OFF era el decay del reflejo.
+Son cosas distintas: el reflejo OFF (y el ON-OFF) es una forma de la curva
+propia de la otosclerosis incipiente o la disyunción de cadena (Debruyne
+1992, Camicas 1992); el decay es que la contracción no se sostiene con un
+tono de 10 s, signo retrococlear (Hirsch 1983). La pantalla Reflejos ya
+dibujaba OFF como efecto off, así que el alumno veía en los casos retro una
+curva que nadie eligió, y además la tabla no le anotaba el umbral.
+
+- La forma de la curva **no se deriva**: la elige el docente (el perfil ya
+  no la pisa con el automático encendido).
+- `Reflex.decay = {od, oi}` nuevo, derivado del componente retro
+  (`CaseProfile::reflexDecay`, la misma regla de antes) y editable en la
+  ficha Timpanometría. Lo usa la pantalla Tone Decay por oído estimulado.
+- Casos viejos sin la clave: `off` cuenta como decay
+  (`CaseBuilder::reflexDecayDe`, espejo en `z_generator.reflex_decay_del_caso`).
+- **Prod migrado**: los 7 casos con `off` (27, 28, 30, 31, 32, 39, 40) tenían
+  el reflejo en automático, o sea que el `off` lo puso el perfil: curva ON y
+  decay donde estaba el `off`. Todos los casos llevan ya `Reflex.decay`.
+  Respaldo previo: `labsim_2026-10-09_202707.sqlite`.
+- Literatura en Bibliografía › Impedanciometría (11 fuentes). No se encontró
+  fuente para el OFF solo, sin ON.
+
 ## Impedanciómetro: Tone Decay y ETF (2026-10-09)
 
 Las dos pantallas estaban vacías. Decidido con el docente:
@@ -19,18 +44,20 @@ Las dos pantallas estaban vacías. Decidido con el docente:
 - **ETF**: el alumno elige la prueba (tecla 1), y el oído se comporta según
   la ficha (`cases.data.ETF`): *Normal* / *Disfunción tubaria* son membrana
   íntegra, *Permeable* / *No permeable* son membrana perforada.
-  - Membrana íntegra (Williams): timpanogramas en reposo, tras Valsalva
-    (+40 daPa) y tras Toynbee (-30) con trompa normal; con disfunción el
-    pico no se mueve; con membrana perforada no hay pico.
+  - Membrana íntegra: presión-deglución de Williams (1975), la del módulo
+    ETF de los equipos: timpanograma de base, +400 daPa y tragar, -400 y
+    tragar. Con trompa normal el pico se corre al lado contrario de la
+    presión, con una diferencia máxima de 8-18 daPa (sanos: mediana 11, RIC
+    6-17); con disfunción, 0-2 (Lu y Wang 2026). Con membrana perforada no
+    hay pico. La primera versión usaba Valsalva/Toynbee con +40/-30 daPa:
+    sin respaldo numérico, se cambió el mismo día.
   - Membrana perforada: se presuriza el conducto con el dial y el paciente
     traga tres veces en 10 s; con trompa permeable cada deglución deja el
     35% de la presión; si no, se mantiene (y con la membrana íntegra
     también: el conducto queda sellado).
 
-Ojo, pendiente de revisar: en la pantalla **Reflejos** el tipo `off` se
-dibuja como *efecto off* (nada durante el estímulo, pico al apagarlo),
-mientras el backend lo usa como *decay*. El decay nuevo usa la lectura del
-backend.
+La forma de la curva y el decay se separaron el mismo día (sección de
+arriba).
 
 ## Acumetría con literatura y umbrales calibrables; importador con la proyección completa (2026-10-09)
 

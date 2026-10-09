@@ -20,6 +20,7 @@ from impedanciometria.ZDscreen import ZDscreen
 from impedanciometria.ZETFscreen import (ZETFscreen, PRUEBA_INTEGRA, PRUEBA_PERFORADA)
 from impedanciometria.h_z import changeSide, changeSideText, sideText, printer, date_time
 from impedanciometria.z_generator import (Z_225, Reflex_curve, decay_curve, edad_meses_del_caso,
+                                          reflex_decay_del_caso,
                                           etf_prueba_integra, etf_prueba_perforada,
                                           is_infant_ear, map_letter_for_probe,
                                           z1000_del_caso)
@@ -583,13 +584,13 @@ class ZControl(QWidget, Ui_Z_control):
         if self.current_screen is self.Z:
             self.direction_change()
         elif self.current_screen is self.Z_etf and self.Z_etf.prueba == PRUEBA_INTEGRA:
-            self.etf_maniobra('valsalva')
+            self.etf_maniobra('positiva')
 
     def btn4_click(self):
         if self.current_screen is self.Z:
             self.height_change()
         elif self.current_screen is self.Z_etf and self.Z_etf.prueba == PRUEBA_INTEGRA:
-            self.etf_maniobra('toynbee')
+            self.etf_maniobra('negativa')
 
     def btn5_click(self):
         if self.current_screen is self.Z:
@@ -708,8 +709,10 @@ class ZControl(QWidget, Ui_Z_control):
             return None
 
     def decay_stimulus(self):
-        """10 s de tono a la intensidad del dial; decae si el oído ESTIMULADO
-        es retrococlear (tipo de curva 'off' en el caso).
+        """10 s de tono a la intensidad del dial; decae si el caso marca decay
+        del reflejo en el oído ESTIMULADO (cases.data.Reflex.decay, ver
+        CaseProfile::reflexDecay). No es la forma de la curva: un reflejo OFF
+        es otra cosa (ver reflex_stimulus).
 
         En IPSI el estimulado es el de la sonda; en CONTRA, el otro: el decay
         es del nervio que recibe el tono, no del oído donde se mide."""
@@ -722,9 +725,8 @@ class ZControl(QWidget, Ui_Z_control):
         threshold = self._umbral_reflejo(row_idx, probe_idx)
         present = threshold is not None and self.dB >= threshold
         estimulado = probe_idx if self.reflex_mode == 'IPSI' else 1 - probe_idx
-        tipos = (self.data.get('Reflex') or {}).get('tipo') if isinstance(self.data.get('Reflex'), dict) else None
-        tipo = tipos.get('od' if estimulado == 0 else 'oi', 'normal') if isinstance(tipos, dict) else 'normal'
-        x, y, pct5, pct10 = decay_curve(present, dB=self.dB, threshold=threshold, decae=(tipo == 'off'))
+        decae = reflex_decay_del_caso(self.data.get('Reflex'), 'od' if estimulado == 0 else 'oi')
+        x, y, pct5, pct10 = decay_curve(present, dB=self.dB, threshold=threshold, decae=decae)
         self._log("z_stimulus_click", screen='decay', side=side, mode=self.reflex_mode, freq=freq, dB=self.dB)
 
         self.time_decay.stop()

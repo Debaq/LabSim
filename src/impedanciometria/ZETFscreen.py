@@ -3,13 +3,14 @@
 - Membrana perforada (o con tubo): se presuriza el conducto con el dial y
   se le pide al paciente que trague tres veces durante 10 s. Si la trompa
   abre, la presión se va a 0 con cada deglución.
-- Membrana íntegra (Williams): timpanograma en reposo, después de Valsalva y
-  después de Toynbee. Si la trompa funciona, el pico se corre.
+- Membrana íntegra (presión-deglución de Williams): timpanograma en reposo,
+  después de presurizar el conducto a +400 daPa y tragar, y después de
+  -400 daPa y tragar. Si la trompa funciona, el pico se corre unos daPa.
 
 La tecla 1 elige la prueba. Las teclas bajo la pantalla (ver la fila de
 rótulos de abajo):
 - perforada: 1 prueba · 2 Inicio · 6 presión (con el dial);
-- íntegra:   1 prueba · 2 Reposo · 3 Valsalva · 4 Toynbee.
+- íntegra:   1 prueba · 2 Reposo · 3 +400 y tragar · 4 -400 y tragar.
 """
 import pyqtgraph as pg
 from PySide6.QtCore import Qt
@@ -20,9 +21,9 @@ from impedanciometria.z_generator import ETF_DEGLUCIONES_S, ETF_DURACION_S
 PRUEBA_PERFORADA = 'perforada'
 PRUEBA_INTEGRA = 'integra'
 NOMBRE_PRUEBA = {PRUEBA_PERFORADA: "Membrana perforada", PRUEBA_INTEGRA: "Membrana íntegra"}
-MANIOBRAS = ('reposo', 'valsalva', 'toynbee')
-NOMBRE_MANIOBRA = {'reposo': "Reposo", 'valsalva': "Valsalva", 'toynbee': "Toynbee"}
-COLOR_MANIOBRA = {'reposo': 'w', 'valsalva': 'y', 'toynbee': (120, 255, 120)}
+MANIOBRAS = ('reposo', 'positiva', 'negativa')
+NOMBRE_MANIOBRA = {'reposo': "Reposo", 'positiva': "+400 trag", 'negativa': "-400 trag"}
+COLOR_MANIOBRA = {'reposo': 'w', 'positiva': 'y', 'negativa': (120, 255, 120)}
 
 
 def _rotulo(texto="", alinear=Qt.AlignCenter):
@@ -127,7 +128,7 @@ class ZETFscreen(QWidget):
         if self.prueba == PRUEBA_PERFORADA:
             textos = ["Inicial: ---- daPa", "Final:   ---- daPa", ""]
         else:
-            textos = [f"{NOMBRE_MANIOBRA[m]:<9}---- daPa" for m in MANIOBRAS]
+            textos = [f"{NOMBRE_MANIOBRA[m]:<10}---- daPa" for m in MANIOBRAS]
         for lbl, texto in zip(self.lbl_info, textos):
             lbl.setText(texto)
 
@@ -145,7 +146,7 @@ class ZETFscreen(QWidget):
         self.curvas[maniobra] = self.pw.plot(x, y, pen=pg.mkPen(COLOR_MANIOBRA[maniobra], width=2))
         i = MANIOBRAS.index(maniobra)
         texto = f"{pico:>4} daPa" if pico is not None else "sin pico"
-        self.lbl_info[i].setText(f"{NOMBRE_MANIOBRA[maniobra]:<9}{texto}")
+        self.lbl_info[i].setText(f"{NOMBRE_MANIOBRA[maniobra]:<10}{texto}")
 
 
 if __name__ == "__main__":

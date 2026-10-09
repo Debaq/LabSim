@@ -856,7 +856,10 @@ final class CaseSheetPdf
         } else {
             $this->parrafo(
                 'Umbrales en dB SPL; (-) = sin respuesta en toda la escala. Morfología de la curva: OD '
-                . (string) ($tipos['od'] ?? 'normal') . ', OI ' . (string) ($tipos['oi'] ?? 'normal') . '.',
+                . (CaseBuilder::REFLEX_CURVE_LABELS[$tipos['od'] ?? 'normal'] ?? (string) ($tipos['od'] ?? 'normal'))
+                . ', OI ' . (CaseBuilder::REFLEX_CURVE_LABELS[$tipos['oi'] ?? 'normal'] ?? (string) ($tipos['oi'] ?? 'normal'))
+                . '. Decay del reflejo (oído estimulado): OD ' . (CaseBuilder::reflexDecayDe($reflex, 'od') ? 'decae' : 'no decae')
+                . ', OI ' . (CaseBuilder::reflexDecayDe($reflex, 'oi') ? 'decae' : 'no decae') . '.',
                 7
             );
             // Esto explica cómo arma la curva el generador (compliance y

@@ -2928,26 +2928,26 @@ final class CaseProfile
     }
 
     /**
-     * Morfología de la curva del reflejo (ver CaseBuilder::REFLEX_CURVE_TYPES).
+     * ¿El reflejo de este oído (estimulado) decae? Es el decay del reflejo:
+     * con un tono sostenido 10 s, la contracción cae a la mitad o menos. Signo
+     * retrococlear (Hirsch 1983; ver Bibliografia::IMPEDANCIOMETRIA), del
+     * mismo eje que el deterioro tonal.
      *
-     * Solo se deriva el patrón OFF, que es el decay del reflejo: la
-     * contracción no se sostiene y cae durante la estimulación. Es signo
-     * retrococlear, del mismo eje que el deterioro tonal.
-     *
-     * 'invertido' y 'on-off' se dejan siempre al docente a propósito: el
-     * primero es un artefacto de registro (sonda mal sellada, presión mal
-     * compensada) y el segundo un hallazgo puntual; ninguno se deduce del
-     * sitio de la lesión, y sortearlos solo agregaría ruido al caso.
+     * NO es la forma de la curva (CaseBuilder::REFLEX_CURVE_TYPES: ON, OFF,
+     * ON-OFF, invertido). Hasta 2026-10-09 esta lógica devolvía 'off' como
+     * forma de la curva, confundiendo el reflejo OFF (deflexión al apagar el
+     * estímulo, propio de la otosclerosis incipiente) con el decay. La forma
+     * de la curva no se deriva: la elige el docente.
      *
      * @param array<string,mixed> $retro
      */
-    public static function reflexCurveType(array $decomp, float $ccePct, array $retro): string
+    public static function reflexDecay(array $decomp, float $ccePct, array $retro): bool
     {
         if (self::retroActivo($retro)) {
-            return 'off';
+            return true;
         }
         $retroSn = self::coreMax($decomp['sn']) * (1.0 - self::clamp($ccePct, 0.0, 100.0) / 100.0);
-        return $retroSn >= 30.0 ? 'off' : 'normal';
+        return $retroSn >= 30.0;
     }
 
     // ---------------------------------------------------------------
@@ -3028,7 +3028,7 @@ final class CaseProfile
 
         $abr = [];
         $eoas = [];
-        $reflex = ['ipsi' => [], 'contra' => [], 'tipo' => []];
+        $reflex = ['ipsi' => [], 'contra' => [], 'decay' => []];
         $recPorLado = [];
         $logo = [];
         $ldl = [];
@@ -3109,7 +3109,7 @@ final class CaseProfile
             }
             $reflex['ipsi'][$ladoForm] = $ipsi;
             $reflex['contra'][$ladoForm] = $contra;
-            $reflex['tipo'][$ladoForm] = self::reflexCurveType($decomp[$lado], $ccePct, $retro);
+            $reflex['decay'][$ladoForm] = self::reflexDecay($decomp[$lado], $ccePct, $retro);
 
             $recPorLado[$lado] = self::recruitment($ccePct, $decomp[$lado]);
             $logo[$lado] = self::discrimination($decomp[$lado], $ccePct, $retro);
