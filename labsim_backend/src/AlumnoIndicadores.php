@@ -1,0 +1,109 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Indicadores de la ficha del alumno (admin/student.php) armados a partir de
+ * lo que ya se mide: la técnica de la audiometría por atención
+ * (AudiometriaTecnica::evaluar), las duraciones y los informes. Sin base:
+ * recibe los resultados ya calculados, así se puede testear.
+ */
+final class AlumnoIndicadores
+{
+    private const SECCIONES = ['orden' => 'Orden', 'aereos' => 'Aéreos', 'oseos' => 'Óseos'];
+
+    /**
+     * Pasos de la técnica que el alumno no cumplió, sumados entre atenciones:
+     * "Se parte por el oído mejor" falló en 3 de 4. Una regla cuenta una vez
+     * por atención aunque se repita por oído (falló si falló en alguno).
+     *
+     * @param array<int,array> $tecnicas resultados de AudiometriaTecnica::evaluar
+     * @return array<int,array{seccion:string, texto:string, fallos:int, evaluadas:int}>
+     *         los que fallaron al menos una vez, el que más falla primero
+     */
+    public static function pasosDificiles(array $tecnicas): array
+    {
+        $cuenta = [];
+        foreach ($tecnicas as $t) {
+            foreach (self::SECCIONES as $clave => $seccion) {
+                $listas = [$t[$clave]['reglas'] ?? []];
+                foreach ($t[$clave]['oidos'] ?? [] as $reglas) {
+                    $listas[] = $reglas;
+                }
+                $enEsta = [];
+                foreach ($listas as $reglas) {
+                    foreach ($reglas as $r) {
+                        if (($r['cumple'] ?? null) === null) {
+                            continue;
+                        }
+                        $k = $seccion . '|' . $r['texto'];
+                        $enEsta[$k] = ($enEsta[$k] ?? true) && $r['cumple'];
+                    }
+                }
+                foreach ($enEsta as $k => $cumplio) {
+                    if (!isset($cuenta[$k])) {
+                        [$s, $texto] = explode('|', $k, 2);
+                        $cuenta[$k] = ['seccion' => $s, 'texto' => $texto, 'fallos' => 0, 'evaluadas' => 0];
+                    }
+                    $cuenta[$k]['evaluadas']++;
+                    $cuenta[$k]['fallos'] += $cumplio ? 0 : 1;
+                }
+            }
+        }
+        $fallados = array_values(array_filter($cuenta, static function (array $c): bool {
+            return $c['fallos'] > 0;
+        }));
+        usort($fallados, static function (array $a, array $b): int {
+            return [$b['fallos'] / $b['evaluadas'], $b['fallos']] <=> [$a['fallos'] / $a['evaluadas'], $a['fallos']];
+        });
+        return $fallados;
+    }
+
+    /**
+     * Cuánto cambió un porcentaje entre la primera y la segunda mitad de la
+     * serie (en orden cronológico). null con menos de 2 puntos. Con un número
+     * impar, el del medio no entra en ninguna mitad.
+     *
+     * @param array<int,int> $serie
+     */
+    public static function tendencia(array $serie): ?int
+    {
+        $serie = array_values($serie);
+        $n = count($serie);
+        if ($n < 2) {
+            return null;
+        }
+        $mitad = intdiv($n, 2);
+        $antes = array_slice($serie, 0, $mitad);
+        $despues = array_slice($serie, $n - $mitad);
+        return (int) round(array_sum($despues) / $mitad - array_sum($antes) / $mitad);
+    }
+
+    /** @param array<int,int|float> $valores */
+    public static function promedio(array $valores): ?int
+    {
+        return $valores ? (int) round(array_sum($valores) / count($valores)) : null;
+    }
+
+    /** @param array<int,int|float> $valores */
+    public static function mediana(array $valores): ?int
+    {
+        if (!$valores) {
+            return null;
+        }
+        sort($valores);
+        $n = count($valores);
+        $m = intdiv($n, 2);
+        return (int) round($n % 2 ? $valores[$m] : ($valores[$m - 1] + $valores[$m]) / 2);
+    }
+
+    /** "12 min", "1 h 05 min": para una duración típica no hacen falta segundos. */
+    public static function minutos(?int $segundos): string
+    {
+        if ($segundos === null) {
+            return '—';
+        }
+        $min = (int) round($segundos / 60);
+        return $min < 60 ? "{$min} min" : sprintf('%d h %02d min', intdiv($min, 60), $min % 60);
+    }
+}

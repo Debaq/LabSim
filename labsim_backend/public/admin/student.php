@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../src/Courses.php';
 require_once __DIR__ . '/../../src/ReportFile.php';
 require_once __DIR__ . '/../../src/ReportVersions.php';
 require_once __DIR__ . '/../../src/AudiometriaTecnicaVista.php';
+require_once __DIR__ . '/../../src/AlumnoIndicadores.php';
 
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
@@ -162,86 +163,227 @@ foreach ($attendances as $a) {
 }
 
 // Técnica de la audiometría por atención (ver AudiometriaTecnica): pasos
-// cumplidos sobre los evaluables, con el detalle en "Ver atención".
-$tecnicaByAppt = [];
+// cumplidos sobre los evaluables, con el detalle en "Ver atención". Se
+// guarda el resultado entero: de ahí salen los pasos que más le cuestan.
+$tecnicaCompleta = [];
 foreach ($todasLasAtenciones as $a) {
     $tec = AudiometriaTecnica::paraAtencion((int) $a['appointment_id'], $studentId, $allLogs);
     if ($tec !== null) {
-        $tecnicaByAppt[(int) $a['appointment_id']] = $tec['puntaje'];
+        $tecnicaCompleta[(int) $a['appointment_id']] = $tec;
     }
 }
+$tecnicaByAppt = array_map(static function (array $t): array {
+    return $t['puntaje'];
+}, $tecnicaCompleta);
+
+// Serie cronológica del logro (la más vieja primero) para el gráfico y la
+// tendencia. Las atenciones vienen de la más nueva a la más vieja.
+$serieTecnica = [];
+foreach (array_reverse($todasLasAtenciones) as $a) {
+    $p = $tecnicaByAppt[(int) $a['appointment_id']]['pct'] ?? null;
+    if ($p !== null) {
+        $serieTecnica[] = [
+            'pct' => (int) $p,
+            'fecha' => (string) ($a['fecha'] ?: substr((string) $a['updated_at'], 0, 10)),
+            'paciente' => trim("{$a['nombre']} {$a['apellido']}"),
+            'practica' => $a['practice_id'] !== null,
+            'appointment_id' => (int) $a['appointment_id'],
+        ];
+    }
+}
+$pctsTecnica = array_column($serieTecnica, 'pct');
+$tecnicaPromedio = AlumnoIndicadores::promedio($pctsTecnica);
+$tecnicaTendencia = AlumnoIndicadores::tendencia($pctsTecnica);
+$pasosDificiles = array_slice(AlumnoIndicadores::pasosDificiles(array_values($tecnicaCompleta)), 0, 6);
+
+// Duración típica de una atención cerrada (mediana: una que quedó abierta
+// toda la tarde no la arrastra).
+$duraciones = [];
+foreach ($attendances as $a) {
+    if ($a['estado'] === 'atendido') {
+        $d = Metrics::attendanceDurationSeconds($a['hora_real'], $a['updated_at']);
+        if ($d !== null) {
+            $duraciones[] = $d;
+        }
+    }
+}
+$duracionTipica = AlumnoIndicadores::mediana($duraciones);
+
+// Preguntas que le hizo al paciente (turnos del alumno en el chat), por cita.
+$stmt = $pdo->prepare("SELECT appointment_id, COUNT(*) AS n FROM llm_chat_logs WHERE student_id = ? AND role = 'user' GROUP BY appointment_id");
+$stmt->execute([$studentId]);
+$preguntasByAppt = [];
+foreach ($stmt->fetchAll() as $r) {
+    $preguntasByAppt[(int) $r['appointment_id']] = (int) $r['n'];
+}
+$preguntasPracticos = [];
+foreach ($attendances as $a) {
+    if (isset($preguntasByAppt[(int) $a['appointment_id']])) {
+        $preguntasPracticos[] = $preguntasByAppt[(int) $a['appointment_id']];
+    }
+}
+
+// Informes entregados por examen.
+$informesPorTipo = [];
+foreach ($reportsByAppt as $rs) {
+    foreach ($rs as $r) {
+        $informesPorTipo[$r['tipo']] = ($informesPorTipo[$r['tipo']] ?? 0) + 1;
+    }
+}
+arsort($informesPorTipo);
+
+$oirsCuenta = ['merito' => 0, 'reclamo' => 0];
+foreach ($inboxMessages as $m) {
+    if (isset($oirsCuenta[$m['tipo']])) {
+        $oirsCuenta[$m['tipo']]++;
+    }
+}
+$practicasCerradas = count(array_filter($practicas, static fn(array $a): bool => $a['estado'] === 'atendido'));
+$ultimaActividad = $todasLasAtenciones[0]['updated_at'] ?? null;
+
+$stmt = $pdo->prepare('SELECT c.name FROM courses c JOIN course_students cs ON cs.course_id = c.id WHERE cs.user_id = ? ORDER BY c.name');
+$stmt->execute([$studentId]);
+$cursosAlumno = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+$estadoTag = ['atendido' => ['cerrada', 'tag--success'], 'atendiendo' => ['en curso', 'tag--warn'], 'no_show' => ['no se presentó', 'tag--muted']];
 
 admin_add_css('student-detail.css');
 admin_header('Alumno: ' . $student['display_name'], $me);
 ?>
-<div class="card">
-    <p>
-        <strong><?= htmlspecialchars($student['display_name']) ?></strong>
-        &nbsp;·&nbsp; <span class="mono"><?= htmlspecialchars($student['username']) ?></span>
-        &nbsp;·&nbsp; <?= $student['active'] ? 'activo' : 'inactivo' ?>
-        &nbsp;·&nbsp; alumno desde <?= htmlspecialchars($student['created_at']) ?>
-        &nbsp;·&nbsp; <a href="ver_como.php?id=<?= (int) $studentId ?>">Ver como alumno →</a>
-    </p>
+<div class="card alumno-cabecera">
+    <div>
+        <div class="help alumno-meta">
+            <span class="mono"><?= htmlspecialchars($student['username']) ?></span>
+            &nbsp;·&nbsp; <?= $student['active'] ? 'activo' : '<strong>inactivo</strong>' ?>
+            <?php if ($cursosAlumno): ?>&nbsp;·&nbsp; <?= htmlspecialchars(implode(', ', $cursosAlumno)) ?><?php endif; ?>
+            <?php if ($ultimaActividad): ?>&nbsp;·&nbsp; última atención <?= htmlspecialchars(substr((string) $ultimaActividad, 0, 10)) ?><?php endif; ?>
+        </div>
+    </div>
+    <a class="btn btn--sm btn--secondary" href="ver_como.php?id=<?= (int) $studentId ?>">Ver como alumno →</a>
 </div>
 
-<div class="card">
-    <strong>Resumen</strong>
-    <p class="legend">Total acumulado de <strong>todas</strong> las atenciones del alumno (todos los pacientes juntos) -- para ver el detalle caso por caso, revisa la tabla "Atenciones" más abajo.</p>
-    <div class="table-wrap">
-    <table>
-        <tr><td>Atendiendo (en curso)</td><td><strong><?= $estadoCounts['atendiendo'] ?></strong></td></tr>
-        <tr><td>Atendidos (cerrados)</td><td><strong><?= $estadoCounts['atendido'] ?></strong></td></tr>
-        <tr><td>No-show</td><td><strong><?= $estadoCounts['no_show'] ?></strong></td></tr>
-        <tr><td>Acciones registradas (total)</td><td><strong><?= $totalActions ?></strong></td></tr>
-        <tr><td>Intentos de práctica cerrados</td><td><strong><?= count(array_filter($practicas, static fn(array $a): bool => $a['estado'] === 'atendido')) ?></strong></td></tr>
-        <tr><td>Sesiones (login-logout)</td><td><strong><?= Metrics::countLoginSessions($allLogs) ?></strong></td></tr>
-        <tr><td>Atenciones (pacientes distintos)</td><td><strong><?= Metrics::countAttentions($logsPracticos) ?></strong></td></tr>
-        <tr><td>Bloques de actividad</td><td><strong><?= $behaviorStats['n_sessions'] ?></strong></td></tr>
-        <tr><td>Duración total</td><td><strong><?= htmlspecialchars(Metrics::formatDurationHms($totalDurationRealS)) ?></strong></td></tr>
-        <tr><td>Delta promedio entre acciones</td><td><strong><?= isset($behaviorStats['avg_delta_s']) ? htmlspecialchars(Metrics::formatDurationHms((int) round($behaviorStats['avg_delta_s']))) : '—' ?></strong></td></tr>
-        <tr><td>Pausas largas (≥30s)</td><td><strong<?= $behaviorStats['long_pauses'] > 0 ? ' class="badge-warn"' : '' ?>><?= $behaviorStats['long_pauses'] ?></strong></td></tr>
-        <tr><td>Acciones sin pausa (0s)</td><td><strong><?= $behaviorStats['no_pause_actions'] ?></strong></td></tr>
-    </table>
+<div class="kpis">
+    <div class="kpi">
+        <div class="kpi-valor"><?= $estadoCounts['atendido'] ?></div>
+        <div class="kpi-nombre">Atenciones cerradas</div>
+        <div class="kpi-pie">
+            <?= $estadoCounts['atendiendo'] ?> en curso<?= $estadoCounts['no_show'] ? ' · ' . $estadoCounts['no_show'] . ' no se presentó' : '' ?>
+        </div>
     </div>
-    <div class="hist-bar" title="0s: <?= $histogram['0s'] ?? 0 ?> · 1-5s: <?= $histogram['1-5s'] ?? 0 ?> · 6-15s: <?= $histogram['6-15s'] ?? 0 ?> · 16-30s: <?= $histogram['16-30s'] ?? 0 ?> · 30s+: <?= $histogram['30s+'] ?? 0 ?>">
-        <?php foreach (['0s' => '#2e7d32', '1-5s' => '#9ccc65', '6-15s' => '#ffb300', '16-30s' => '#fb8c00', '30s+' => '#c0392b'] as $bucket => $color):
-            $pct = round((($histogram[$bucket] ?? 0) / $histTotal) * 100, 1);
-            if ($pct <= 0) { continue; }
-        ?>
-        <span style="width:<?= $pct ?>%; background:<?= $color ?>;"></span>
-        <?php endforeach; ?>
+    <div class="kpi">
+        <div class="kpi-valor" style="color:<?= AudiometriaTecnicaVista::color($tecnicaPromedio) ?>;"><?= htmlspecialchars(AudiometriaTecnicaVista::pct($tecnicaPromedio)) ?></div>
+        <div class="kpi-nombre">Técnica de audiometría</div>
+        <div class="kpi-pie">
+            <?php if ($tecnicaTendencia !== null): ?>
+            <span class="<?= $tecnicaTendencia > 0 ? 'kpi-sube' : ($tecnicaTendencia < 0 ? 'kpi-baja' : '') ?>">
+                <?= $tecnicaTendencia > 0 ? '▲ +' : ($tecnicaTendencia < 0 ? '▼ ' : '= ') ?><?= $tecnicaTendencia ?> pts
+            </span> de las primeras a las últimas
+            <?php elseif ($pctsTecnica): ?>
+            de su única audiometría
+            <?php else: ?>
+            sin audiometrías todavía
+            <?php endif; ?>
+        </div>
     </div>
-    <p class="legend">Distribución de pausas entre acciones: verde (sin pausa) a rojo (pausa ≥30s).</p>
+    <div class="kpi">
+        <div class="kpi-valor"><?= (int) $totalReports ?></div>
+        <div class="kpi-nombre">Informes entregados</div>
+        <div class="kpi-pie">
+            <?php foreach ($informesPorTipo as $tipo => $n): ?>
+            <span class="tag"><?= htmlspecialchars(ReportFile::SHORT_LABELS[$tipo] ?? $tipo) ?> <?= $n ?></span>
+            <?php endforeach; ?>
+            <?php if (!$informesPorTipo): ?>ninguno todavía<?php endif; ?>
+        </div>
+    </div>
+    <div class="kpi">
+        <div class="kpi-valor"><?= htmlspecialchars(AlumnoIndicadores::minutos($duracionTipica)) ?></div>
+        <div class="kpi-nombre">Duración típica</div>
+        <div class="kpi-pie">mediana de <?= count($duraciones) ?> atención(es) cerrada(s)</div>
+    </div>
+    <div class="kpi">
+        <div class="kpi-valor"><?= AlumnoIndicadores::mediana($preguntasPracticos) ?? '—' ?></div>
+        <div class="kpi-nombre">Preguntas al paciente</div>
+        <div class="kpi-pie">por atención (mediana) en la anamnesis</div>
+    </div>
+    <div class="kpi">
+        <div class="kpi-valor"><?= $practicasCerradas ?></div>
+        <div class="kpi-nombre">Práctica libre</div>
+        <div class="kpi-pie"><?= count($practicas) ?> intento(s) en total</div>
+    </div>
+    <div class="kpi">
+        <div class="kpi-valor kpi-valor--par">
+            <span title="Felicitaciones" style="color:var(--color-success-text);">♥ <?= $oirsCuenta['merito'] ?></span>
+            <span title="Sugerencias de mejora" style="color:var(--color-warn-text);">✎ <?= $oirsCuenta['reclamo'] ?></span>
+        </div>
+        <div class="kpi-nombre">Trato al paciente</div>
+        <div class="kpi-pie">felicitaciones · sugerencias de mejora</div>
+    </div>
 </div>
 
+<?php if ($serieTecnica): ?>
 <div class="card">
-    <strong>Evolución semanal</strong>
-    <p class="legend">Bloques de actividad (corte por atención distinta o &gt;5 min de pausa) y delta promedio por semana -- para ver si el alumno mejora (deltas bajando) con el tiempo.</p>
-    <div class="table-wrap">
-    <table>
-        <tr><th>Semana</th><th>Bloques</th><th>Delta promedio</th></tr>
-        <?php $maxSessions = max(array_column($weekly, 'n_sessions') ?: [1]); ?>
-        <?php foreach ($weekly as $week => $w): ?>
-        <tr>
-            <td><?= htmlspecialchars($week) ?></td>
-            <td><span class="week-bar" style="width:<?= round(($w['n_sessions'] / $maxSessions) * 100, 1) ?>%;"></span><?= $w['n_sessions'] ?></td>
-            <td><?= isset($w['avg_delta_s']) ? htmlspecialchars(Metrics::formatDurationHms((int) round($w['avg_delta_s']))) : '—' ?></td>
-        </tr>
-        <?php endforeach; ?>
-        <?php if (!$weekly): ?>
-        <tr><td colspan="3" class="muted">Sin datos suficientes todavía.</td></tr>
-        <?php endif; ?>
-    </table>
+    <div class="row row--between" style="margin:0; align-items:baseline;">
+        <strong>Técnica de audiometría en el tiempo</strong>
+        <span class="help help--xs">verde ≥ 85 % · ámbar ≥ 60 % · rojo debajo · ○ práctica libre</span>
     </div>
+    <?php
+    // Gráfico de línea en SVG: x = orden de la atención, y = % de logro.
+    $n = count($serieTecnica);
+    $ancho = 600;
+    $alto = 140;
+    $margen = 14;
+    $x = static fn(int $i): float => $n === 1 ? $ancho / 2 : $margen + $i * ($ancho - 2 * $margen) / ($n - 1);
+    $y = static fn(int $pct): float => $margen + (100 - $pct) * ($alto - 2 * $margen) / 100;
+    $puntos = [];
+    foreach ($serieTecnica as $i => $p) {
+        $puntos[] = round($x($i), 1) . ',' . round($y($p['pct']), 1);
+    }
+    ?>
+    <svg class="tec-grafico" viewBox="0 0 <?= $ancho ?> <?= $alto ?>" preserveAspectRatio="none" role="img"
+         aria-label="Logro de la técnica en cada audiometría, de la primera a la última">
+        <rect x="0" y="<?= $y(100) ?>" width="<?= $ancho ?>" height="<?= $y(85) - $y(100) ?>" class="tec-banda tec-banda--bien"/>
+        <rect x="0" y="<?= $y(85) ?>" width="<?= $ancho ?>" height="<?= $y(60) - $y(85) ?>" class="tec-banda tec-banda--medio"/>
+        <rect x="0" y="<?= $y(60) ?>" width="<?= $ancho ?>" height="<?= $y(0) - $y(60) ?>" class="tec-banda tec-banda--bajo"/>
+        <?php if ($n > 1): ?><polyline points="<?= implode(' ', $puntos) ?>" class="tec-linea" vector-effect="non-scaling-stroke"/><?php endif; ?>
+    </svg>
+    <div class="tec-puntos">
+        <?php foreach ($serieTecnica as $i => $p): ?>
+        <a class="tec-punto<?= $p['practica'] ? ' tec-punto--practica' : '' ?>"
+           style="left:<?= round($x($i) / $ancho * 100, 2) ?>%; top:<?= round($y($p['pct']) / $alto * 100, 2) ?>%; --c:<?= AudiometriaTecnicaVista::color($p['pct']) ?>;"
+           href="chat_detail.php?appointment_id=<?= $p['appointment_id'] ?>&student_id=<?= (int) $studentId ?>#tecnica"
+           title="<?= htmlspecialchars($p['fecha'] . ' · ' . ($p['paciente'] ?: 'sin nombre') . ' · ' . $p['pct'] . ' %' . ($p['practica'] ? ' (práctica libre)' : '')) ?>"></a>
+        <?php endforeach; ?>
+    </div>
+
+    <?php if ($pasosDificiles): ?>
+    <div class="section-sep">
+        <strong>Lo que más le cuesta</strong>
+        <p class="help help--xs">Pasos de la técnica que no cumplió, sobre las audiometrías donde se podían evaluar.</p>
+        <div class="pasos">
+            <?php foreach ($pasosDificiles as $paso): ?>
+            <?php $pctFallo = (int) round(100 * $paso['fallos'] / $paso['evaluadas']); ?>
+            <div class="paso">
+                <span class="tag tag--muted"><?= htmlspecialchars($paso['seccion']) ?></span>
+                <span class="paso-texto"><?= htmlspecialchars($paso['texto']) ?></span>
+                <span class="paso-barra" title="<?= $pctFallo ?> %"><span style="width:<?= $pctFallo ?>%;"></span></span>
+                <span class="paso-cuenta"><?= $paso['fallos'] ?> de <?= $paso['evaluadas'] ?></span>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php elseif (count($serieTecnica) > 0): ?>
+    <p class="help section-sep">Cumplió todos los pasos evaluables en sus audiometrías.</p>
+    <?php endif; ?>
 </div>
+<?php endif; ?>
 
 <?php
 /** Tabla de atenciones (prácticos o intentos de práctica), una fila por cita. */
-$tablaAtenciones = static function (array $filas, string $vacio) use ($statsByAppt, $studentId, $reportsByAppt, $versionesPorInforme, $tecnicaByAppt): void {
+$tablaAtenciones = static function (array $filas, string $vacio) use ($statsByAppt, $studentId, $reportsByAppt, $versionesPorInforme, $tecnicaByAppt, $preguntasByAppt, $estadoTag): void {
     ?>
     <div class="table-wrap">
-    <table>
-        <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Bloques</th><th>Duración</th><th>Delta prom.</th><th>Pausas largas</th><th>Hora real</th><th>Nota</th><th>Exámenes</th><th title="Logro de la técnica de audiometría (pasos cumplidos sobre los evaluables)">Técnica</th><th>Actualizado</th><th>Detalle</th></tr>
+    <table class="table-dense">
+        <tr><th>Cita</th><th>Paciente</th><th>Procedimiento</th><th>Estado</th><th>Duración</th><th title="Preguntas que le hizo al paciente en el chat">Preguntas</th><th title="Logro de la técnica de audiometría (pasos cumplidos sobre los evaluables)">Técnica</th><th>Exámenes</th><th>Nota</th><th></th></tr>
         <?php foreach ($filas as $a):
             $aStats = $statsByAppt[(int) $a['appointment_id']] ?? null;
             // Duración real (Atender -> Atendido) siempre que esté cerrada;
@@ -252,38 +394,35 @@ $tablaAtenciones = static function (array $filas, string $vacio) use ($statsByAp
                 ? Metrics::attendanceDurationSeconds($a['hora_real'], $a['updated_at'])
                 : null;
             $durationS = $realDuration ?? ($aStats['total_duration_s'] ?? null);
+            [$estadoTexto, $estadoClase] = $estadoTag[$a['estado']] ?? [$a['estado'], 'tag--muted'];
         ?>
         <tr>
-            <td><a href="dashboard.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>#student-<?= (int) $studentId ?>">#<?= (int) $a['appointment_id'] ?> (<?= htmlspecialchars($a['fecha'] ?: '—') ?> <?= htmlspecialchars($a['hora'] ?: '') ?>)</a></td>
+            <td class="nowrap"><a href="dashboard.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>#student-<?= (int) $studentId ?>"><?= htmlspecialchars($a['fecha'] ?: '—') ?> <?= htmlspecialchars($a['hora'] ?: '') ?></a></td>
             <td><?= htmlspecialchars(trim("{$a['nombre']} {$a['apellido']}")) ?: '—' ?></td>
             <td><?= htmlspecialchars($a['procedimiento']) ?></td>
-            <td><?= htmlspecialchars($a['estado']) ?></td>
-            <td><?= $aStats['n_sessions'] ?? '—' ?></td>
-            <td><?= $durationS !== null ? htmlspecialchars(Metrics::formatDurationHms((int) $durationS)) : '—' ?></td>
-            <td><?= isset($aStats['avg_delta_s']) ? htmlspecialchars(Metrics::formatDurationHms((int) round($aStats['avg_delta_s']))) : '—' ?></td>
-            <td<?= ($aStats['long_pauses'] ?? 0) > 0 ? ' class="badge-warn"' : '' ?>><?= $aStats['long_pauses'] ?? '—' ?></td>
-            <td><?= htmlspecialchars($a['hora_real'] ?: '—') ?></td>
-            <td class="help"><?= htmlspecialchars($a['nota'] ?: '—') ?></td>
+            <td><span class="tag <?= $estadoClase ?>"><?= htmlspecialchars($estadoTexto) ?></span></td>
+            <td class="nowrap"><?= $durationS !== null ? htmlspecialchars(AlumnoIndicadores::minutos((int) $durationS)) : '—' ?></td>
+            <td><?= $preguntasByAppt[(int) $a['appointment_id']] ?? '—' ?></td>
+            <td><?php $tec = $tecnicaByAppt[(int) $a['appointment_id']] ?? null; ?>
+                <?php if ($tec): ?><a href="chat_detail.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>#tecnica"
+                   title="<?= (int) $tec['cumple'] ?> de <?= (int) $tec['total'] ?> pasos" style="color:<?= AudiometriaTecnicaVista::color($tec['pct']) ?>; font-weight:600;"><?= htmlspecialchars(AudiometriaTecnicaVista::pct($tec['pct'])) ?></a><?php else: ?><span class="muted">—</span><?php endif; ?></td>
             <td>
                 <?php foreach ($reportsByAppt[(int) $a['appointment_id']] ?? [] as $r): ?>
-                <a href="report_pdf.php?id=<?= (int) $r['id'] ?>" target="_blank"
+                <a class="tag" href="report_pdf.php?id=<?= (int) $r['id'] ?>" target="_blank"
                    title="<?= htmlspecialchars(ReportFile::LABELS[$r['tipo']] ?? $r['tipo']) ?> (PDF)"><?= htmlspecialchars(ReportFile::SHORT_LABELS[$r['tipo']] ?? $r['tipo']) ?></a>
                 <?php if (!empty($versionesPorInforme[(int) $r['id']])): ?>
                 <a href="report_versions.php?report_id=<?= (int) $r['id'] ?>" class="help"
                    title="Versiones reemplazadas por otra subida">(<?= (int) $versionesPorInforme[(int) $r['id']] ?> ant.)</a>
-                <?php endif; ?><br>
+                <?php endif; ?>
                 <?php endforeach; ?>
                 <?php if (empty($reportsByAppt[(int) $a['appointment_id']])): ?><span class="muted">—</span><?php endif; ?>
             </td>
-            <td><?php $tec = $tecnicaByAppt[(int) $a['appointment_id']] ?? null; ?>
-                <?php if ($tec): ?><a href="chat_detail.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>#tecnica"
-                   title="<?= (int) $tec['cumple'] ?> de <?= (int) $tec['total'] ?> pasos" style="color:<?= AudiometriaTecnicaVista::color($tec['pct']) ?>; font-weight:600;"><?= htmlspecialchars(AudiometriaTecnicaVista::pct($tec['pct'])) ?></a><?php else: ?><span class="muted">—</span><?php endif; ?></td>
-            <td><?= htmlspecialchars($a['updated_at']) ?></td>
-            <td><a href="chat_detail.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>">Ver atención</a></td>
+            <td class="help"><?= htmlspecialchars($a['nota'] ?: '') ?></td>
+            <td class="nowrap"><a href="chat_detail.php?appointment_id=<?= (int) $a['appointment_id'] ?>&student_id=<?= (int) $studentId ?>">Ver atención</a></td>
         </tr>
         <?php endforeach; ?>
         <?php if (!$filas): ?>
-        <tr><td colspan="14" class="muted"><?= htmlspecialchars($vacio) ?></td></tr>
+        <tr><td colspan="10" class="muted"><?= htmlspecialchars($vacio) ?></td></tr>
         <?php endif; ?>
     </table>
     </div>
@@ -291,15 +430,14 @@ $tablaAtenciones = static function (array $filas, string $vacio) use ($statsByAp
 };
 ?>
 <div class="card">
-    <strong>Atenciones (<?= count($attendances) ?>) · Exámenes con informe (<?= (int) $totalReports ?>)</strong>
-    <p class="legend">Comportamiento aislado por cada atención (cita/paciente) -- así un caso no ensucia las métricas de otro cuando el alumno revisó más de uno.</p>
+    <strong>Atenciones (<?= count($attendances) ?>)</strong>
     <?php $tablaAtenciones($attendances, 'Sin atenciones registradas todavía.'); ?>
 </div>
 
 <?php if ($practicas): ?>
 <div class="card">
-    <strong>Práctica deliberada (<?= count($practicas) ?> intento<?= count($practicas) === 1 ? '' : 's' ?>)</strong>
-    <p class="legend">Pacientes de la lista de práctica del curso, abiertos cuando el alumno quiso. Cada intento es una fila; no entran al resumen de arriba.</p>
+    <strong>Práctica libre (<?= count($practicas) ?> intento<?= count($practicas) === 1 ? '' : 's' ?>)</strong>
+    <p class="legend">Pacientes de la lista de práctica del curso, abiertos cuando el alumno quiso. No entran a los indicadores de los prácticos, salvo la técnica (marcada con ○ en el gráfico).</p>
     <?php $tablaAtenciones($practicas, ''); ?>
 </div>
 <?php endif; ?>
@@ -310,66 +448,116 @@ $tipoLabels = Oirs::LABELS;
 <div class="card">
     <strong>Bandeja de entrada (<?= count($inboxMessages) ?>)</strong>
     <p class="legend">Avisos automáticos sobre el trato a pacientes (ver Admin -> IA Paciente) y mensajes que algún docente le mandó directo. Misma bandeja que ve el alumno en la app.</p>
-    <div class="table-wrap">
-    <table>
-        <tr><th>Tipo</th><th>Remitente</th><th>Cita</th><th>Asunto</th><th>Cuerpo</th><th>Fecha</th></tr>
+    <?php if ($inboxMessages): ?>
+    <div class="mensajes">
         <?php foreach ($inboxMessages as $m): ?>
-        <tr>
-            <td<?= $m['tipo'] === 'reclamo' ? ' class="badge-warn"' : '' ?>><?= htmlspecialchars($tipoLabels[$m['tipo']] ?? $m['tipo']) ?></td>
-            <td><?= htmlspecialchars($m['remitente']) ?></td>
-            <td><?= $m['appointment_id'] ? '#' . (int) $m['appointment_id'] . ' (' . htmlspecialchars($m['fecha'] ?: '—') . ' ' . htmlspecialchars($m['hora'] ?: '') . ') -- ' . htmlspecialchars($m['procedimiento']) : '—' ?></td>
-            <td><?= htmlspecialchars($m['asunto']) ?></td>
-            <td class="help"><?= htmlspecialchars($m['cuerpo']) ?></td>
-            <td><?= htmlspecialchars($m['created_at']) ?></td>
-        </tr>
+        <div class="mensaje mensaje--<?= htmlspecialchars($m['tipo']) ?>">
+            <div class="mensaje-cabeza">
+                <span class="tag <?= $m['tipo'] === 'merito' ? 'tag--success' : ($m['tipo'] === 'reclamo' ? 'tag--warn' : '') ?>"><?= htmlspecialchars($tipoLabels[$m['tipo']] ?? $m['tipo']) ?></span>
+                <strong><?= htmlspecialchars($m['asunto']) ?></strong>
+                <span class="help help--xs"><?= htmlspecialchars($m['remitente']) ?> · <?= htmlspecialchars(substr((string) $m['created_at'], 0, 16)) ?><?= $m['appointment_id'] ? ' · ' . htmlspecialchars(trim(($m['fecha'] ?: '') . ' ' . ($m['procedimiento'] ?: ''))) : '' ?></span>
+            </div>
+            <div class="mensaje-cuerpo"><?= nl2br(htmlspecialchars($m['cuerpo'])) ?></div>
+        </div>
         <?php endforeach; ?>
-        <?php if (!$inboxMessages): ?>
-        <tr><td colspan="6" class="muted">Sin mensajes todavía.</td></tr>
-        <?php endif; ?>
-    </table>
     </div>
+    <?php else: ?>
+    <p class="muted">Sin mensajes todavía.</p>
+    <?php endif; ?>
 </div>
 
-<div class="card">
-    <strong>Acciones por tipo</strong>
-    <div class="table-wrap">
-    <table>
-        <tr><th>Acción</th><th>Veces</th><th>Última vez</th></tr>
-        <?php foreach ($actionCounts as $ac): ?>
-        <tr>
-            <td><?= htmlspecialchars(Metrics::actionLabel($ac['action'])) ?> <span class="mono" style="font-size:0.75rem; color:var(--color-muted);"><?= htmlspecialchars($ac['action']) ?></span></td>
-            <td><?= (int) $ac['n'] ?></td>
-            <td><?= htmlspecialchars($ac['last_ts']) ?></td>
-        </tr>
-        <?php endforeach; ?>
-        <?php if (!$actionCounts): ?>
-        <tr><td colspan="3" class="muted">Sin acciones registradas todavía.</td></tr>
-        <?php endif; ?>
-    </table>
-    </div>
-</div>
+<?php /* Lo de abajo es el registro crudo: sirve para investigar un caso
+         raro o exportar, no para leer al alumno. Plegado. */ ?>
+<details class="card registro-crudo">
+    <summary><strong>Registro técnico</strong> <span class="help">ritmo de trabajo, acciones registradas y descargas (<?= $totalActions ?> acciones)</span></summary>
 
-<div class="card">
-    <strong>Últimas 30 acciones (detalle)</strong>
-    &nbsp;·&nbsp;
-    <a href="logs_download.php?id=<?= (int) $studentId ?>">Descargar registro completo (CSV, <?= $totalActions ?>)</a>
-    &nbsp;·&nbsp;
-    <a href="dashboard_report.php?student_id=<?= (int) $studentId ?>">Descargar informe de sesiones (CSV)</a>
-    <div class="table-wrap">
-    <table>
-        <tr><th>Cuándo (cliente)</th><th>Acción</th><th>Payload</th></tr>
-        <?php foreach ($recentLogs as $log): ?>
-        <tr>
-            <td><?= htmlspecialchars($log['client_ts']) ?></td>
-            <td><?= htmlspecialchars(Metrics::actionLabel($log['action'])) ?></td>
-            <td class="mono" style="font-size:0.75rem;"><?= htmlspecialchars($log['payload'] ?? '') ?></td>
-        </tr>
-        <?php endforeach; ?>
-        <?php if (!$recentLogs): ?>
-        <tr><td colspan="3" class="muted">Sin acciones registradas todavía.</td></tr>
-        <?php endif; ?>
-    </table>
+    <div class="section-sep">
+        <a href="logs_download.php?id=<?= (int) $studentId ?>">Descargar registro completo (CSV)</a>
+        &nbsp;·&nbsp;
+        <a href="dashboard_report.php?student_id=<?= (int) $studentId ?>">Descargar informe de sesiones (CSV)</a>
     </div>
-</div>
+
+    <div class="section-sep">
+        <strong>Ritmo de trabajo</strong>
+        <div class="table-wrap">
+        <table class="table-dense">
+            <tr><td>Sesiones (login-logout)</td><td><strong><?= Metrics::countLoginSessions($allLogs) ?></strong></td></tr>
+            <tr><td>Pacientes distintos con actividad</td><td><strong><?= Metrics::countAttentions($logsPracticos) ?></strong></td></tr>
+            <tr><td>Bloques de actividad</td><td><strong><?= $behaviorStats['n_sessions'] ?></strong></td></tr>
+            <tr><td>Duración total</td><td><strong><?= htmlspecialchars(Metrics::formatDurationHms($totalDurationRealS)) ?></strong></td></tr>
+            <tr><td>Tiempo promedio entre acciones</td><td><strong><?= isset($behaviorStats['avg_delta_s']) ? htmlspecialchars(Metrics::formatDurationHms((int) round($behaviorStats['avg_delta_s']))) : '—' ?></strong></td></tr>
+            <tr><td>Pausas largas (≥30s)</td><td><strong<?= $behaviorStats['long_pauses'] > 0 ? ' class="badge-warn"' : '' ?>><?= $behaviorStats['long_pauses'] ?></strong></td></tr>
+            <tr><td>Acciones sin pausa (0s)</td><td><strong><?= $behaviorStats['no_pause_actions'] ?></strong></td></tr>
+        </table>
+        </div>
+        <div class="hist-bar" title="0s: <?= $histogram['0s'] ?? 0 ?> · 1-5s: <?= $histogram['1-5s'] ?? 0 ?> · 6-15s: <?= $histogram['6-15s'] ?? 0 ?> · 16-30s: <?= $histogram['16-30s'] ?? 0 ?> · 30s+: <?= $histogram['30s+'] ?? 0 ?>">
+            <?php foreach (['0s' => '#2e7d32', '1-5s' => '#9ccc65', '6-15s' => '#ffb300', '16-30s' => '#fb8c00', '30s+' => '#c0392b'] as $bucket => $color):
+                $pct = round((($histogram[$bucket] ?? 0) / $histTotal) * 100, 1);
+                if ($pct <= 0) { continue; }
+            ?>
+            <span style="width:<?= $pct ?>%; background:<?= $color ?>;"></span>
+            <?php endforeach; ?>
+        </div>
+        <p class="legend">Pausas entre acciones: verde (sin pausa) a rojo (pausa ≥30s).</p>
+    </div>
+
+    <div class="section-sep">
+        <strong>Por semana</strong>
+        <div class="table-wrap">
+        <table class="table-dense">
+            <tr><th>Semana</th><th>Bloques</th><th>Tiempo promedio entre acciones</th></tr>
+            <?php $maxSessions = max(array_column($weekly, 'n_sessions') ?: [1]); ?>
+            <?php foreach ($weekly as $week => $w): ?>
+            <tr>
+                <td><?= htmlspecialchars($week) ?></td>
+                <td><span class="week-bar" style="width:<?= round(($w['n_sessions'] / $maxSessions) * 100, 1) ?>%;"></span><?= $w['n_sessions'] ?></td>
+                <td><?= isset($w['avg_delta_s']) ? htmlspecialchars(Metrics::formatDurationHms((int) round($w['avg_delta_s']))) : '—' ?></td>
+            </tr>
+            <?php endforeach; ?>
+            <?php if (!$weekly): ?>
+            <tr><td colspan="3" class="muted">Sin datos suficientes todavía.</td></tr>
+            <?php endif; ?>
+        </table>
+        </div>
+    </div>
+
+    <div class="section-sep">
+        <strong>Acciones por tipo</strong>
+        <div class="table-wrap">
+        <table class="table-dense">
+            <tr><th>Acción</th><th>Veces</th><th>Última vez</th></tr>
+            <?php foreach ($actionCounts as $ac): ?>
+            <tr>
+                <td><?= htmlspecialchars(Metrics::actionLabel($ac['action'])) ?> <span class="mono" style="font-size:0.75rem; color:var(--color-muted);"><?= htmlspecialchars($ac['action']) ?></span></td>
+                <td><?= (int) $ac['n'] ?></td>
+                <td><?= htmlspecialchars($ac['last_ts']) ?></td>
+            </tr>
+            <?php endforeach; ?>
+            <?php if (!$actionCounts): ?>
+            <tr><td colspan="3" class="muted">Sin acciones registradas todavía.</td></tr>
+            <?php endif; ?>
+        </table>
+        </div>
+    </div>
+
+    <div class="section-sep">
+        <strong>Últimas 30 acciones</strong>
+        <div class="table-wrap">
+        <table class="table-dense">
+            <tr><th>Cuándo (cliente)</th><th>Acción</th><th>Payload</th></tr>
+            <?php foreach ($recentLogs as $log): ?>
+            <tr>
+                <td class="nowrap"><?= htmlspecialchars($log['client_ts']) ?></td>
+                <td><?= htmlspecialchars(Metrics::actionLabel($log['action'])) ?></td>
+                <td class="mono" style="font-size:0.75rem;"><?= htmlspecialchars($log['payload'] ?? '') ?></td>
+            </tr>
+            <?php endforeach; ?>
+            <?php if (!$recentLogs): ?>
+            <tr><td colspan="3" class="muted">Sin acciones registradas todavía.</td></tr>
+            <?php endif; ?>
+        </table>
+        </div>
+    </div>
+</details>
 <?php
 admin_footer();

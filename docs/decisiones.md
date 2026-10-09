@@ -5,6 +5,31 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Ficha del alumno: indicadores en vez del registro de acciones (2026-10-09)
+
+`admin/student.php` abría con una tabla de contadores técnicos y terminaba
+con las últimas 30 acciones en crudo (`audio_stim_button` y su JSON): al
+docente no le decía cómo va el alumno. Ahora:
+
+- **Indicadores arriba**: atenciones cerradas, técnica de audiometría
+  (promedio y cuántos puntos subió o bajó de la primera mitad de sus
+  audiometrías a la segunda), informes entregados por examen, duración
+  típica (mediana: una atención olvidada abierta no la arrastra), preguntas
+  al paciente por atención (turnos del alumno en el chat), práctica libre y
+  trato al paciente (felicitaciones / sugerencias de mejora).
+- **Técnica en el tiempo**: un punto por audiometría sobre las bandas
+  85/60 %, cada punto lleva a la atención; los de práctica libre van huecos.
+- **Lo que más le cuesta**: los pasos de la técnica que no cumplió, sumados
+  entre atenciones ("Se parte por el oído mejor: 2 de 6"). Una regla que se
+  evalúa por oído cuenta una vez por atención (falló si falló en uno).
+  Cálculo en `src/AlumnoIndicadores.php`, con tests.
+- Tabla de atenciones más corta (sin bloques, delta, pausas, hora real):
+  fecha, paciente, estado, duración, preguntas, técnica, exámenes, nota.
+- Bandeja como notas con el color del tipo.
+- **El registro técnico no se borró**: ritmo de trabajo, evolución por
+  semana, acciones por tipo, las últimas 30 y las descargas CSV quedan en
+  una sección plegada al final.
+
 ## Cursos: lista en tarjetas, módulos en mosaicos, tablero ordenado (2026-10-09)
 
 Primera vez que la página de cursos se vio en un navegador (el rediseño del
