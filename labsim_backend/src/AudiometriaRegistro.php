@@ -195,8 +195,9 @@ final class AudiometriaRegistro
         $canal = $estado['canales'][$c];
         $otro = $estado['canales'][1 - $c];
         $ruido = null;
-        if ($otro['on'] && in_array($otro['stim'], ['Narrow Band Noise', 'Withe Noise', 'Speech Noise', 'Pink Noise'], true)) {
-            $ruido = ['int' => (int) $otro['int'], 'stim' => $otro['stim'], 'oido' => self::oido($otro['output'])];
+        $stimOtro = AudiometriaPaciente::estimulo((string) $otro['stim']);
+        if ($otro['on'] && in_array($stimOtro, ['Narrow Band Noise', 'White Noise', 'Speech Noise', 'Pink Noise'], true)) {
+            $ruido = ['int' => (int) $otro['int'], 'stim' => $stimOtro, 'oido' => self::oido($otro['output'])];
         }
         $via = $canal['trans'] === 'Aerea' ? 'aerea' : ($canal['trans'] === 'Oséa' ? 'osea' : 'campo');
         return [
@@ -253,7 +254,7 @@ final class AudiometriaRegistro
     {
         $canales = [];
         foreach ($estado['canales'] as $c) {
-            $stim = array_search($c['stim'], AudiometriaPaciente::ESTIMULOS, true);
+            $stim = array_search(AudiometriaPaciente::estimulo((string) $c['stim']), AudiometriaPaciente::ESTIMULOS, true);
             $trans = array_search($c['trans'], AudiometriaPaciente::TRANSDUCTORES, true);
             $canales[] = [
                 'on' => $c['on'],

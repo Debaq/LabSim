@@ -212,7 +212,7 @@ class TipoDeRuidoTest(unittest.TestCase):
 
     def test_ruido_blanco_enmascara_con_ce(self):
         texto = self.montar(4)
-        self.assertIn("Withe Noise 40 dB en OI", texto)
+        self.assertIn("White Noise 40 dB en OI", texto)
         self.assertIn("CE +10 dB", texto)
 
     def test_pink_noise_enmascara_con_ce_menor(self):

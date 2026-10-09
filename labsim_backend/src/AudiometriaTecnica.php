@@ -100,7 +100,9 @@ final class AudiometriaTecnica
      * Sube cuando cambia cómo se evalúa (reglas, textos, umbrales): las
      * evaluaciones guardadas con otra versión se recalculan solas.
      */
-    public const CACHE_VERSION = 1;
+    // 2: "Withe Noise" pasó a "White Noise" (2026-10-09); lo guardado
+    // antes trae el rótulo viejo en el ruido de cada presentación.
+    public const CACHE_VERSION = 2;
 
     /**
      * Indicadores de la atención $appointmentId del alumno $studentId, o null

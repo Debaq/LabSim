@@ -32,7 +32,18 @@ final class AudiometriaPaciente
     public const OCLUSION = [15, 15, 15, 10, 0, 0, 0, 0, 0];
 
     /** stim_list de resources/json/config_audiometer.json, en orden. */
-    public const ESTIMULOS = ['Tono', 'FM', 'Habla', 'Narrow Band Noise', 'Withe Noise', 'Speech Noise', 'Pink Noise'];
+    public const ESTIMULOS = ['Tono', 'FM', 'Habla', 'Narrow Band Noise', 'White Noise', 'Speech Noise', 'Pink Noise'];
+    /**
+     * Rótulos viejos de la app, como quedaron en los registros ya subidos:
+     * hasta 2026-10 el audiómetro decía "Withe Noise".
+     */
+    public const ALIAS_ESTIMULOS = ['Withe Noise' => 'White Noise'];
+
+    /** El rótulo del estímulo con el nombre de hoy (ver ALIAS_ESTIMULOS). */
+    public static function estimulo(string $stim): string
+    {
+        return self::ALIAS_ESTIMULOS[$stim] ?? $stim;
+    }
     /** trans_list, en orden: 0 aérea, 1 ósea, 2 campo libre. */
     public const TRANSDUCTORES = ['Aerea', 'Oséa', 'Campo libre'];
     /** Índices de ESTIMULOS que enmascaran (masking_params.RUIDOS_ENMASCARANTES). */

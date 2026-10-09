@@ -12,7 +12,7 @@ modulos que los consumen. Ver docs/decisiones.md.
 """
 
 # Indices de stim_list (resources/json/config_audiometer.json):
-# ["Tono","FM","Habla","Narrow Band Noise","Withe Noise","Speech Noise","Pink Noise"]
+# ["Tono","FM","Habla","Narrow Band Noise","White Noise","Speech Noise","Pink Noise"]
 STIM_TONO = 0
 STIM_FM = 1
 STIM_HABLA = 2
@@ -25,7 +25,7 @@ RUIDOS_ENMASCARANTES = (STIM_NBN, STIM_WN, STIM_SN, STIM_PN)
 
 NOMBRE_RUIDO = {
     STIM_NBN: "Narrow Band Noise",
-    STIM_WN: "Withe Noise",
+    STIM_WN: "White Noise",
     STIM_SN: "Speech Noise",
     STIM_PN: "Pink Noise",
 }

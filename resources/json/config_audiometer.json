@@ -25,7 +25,7 @@
         [[250,8000],[3000,6000],[]]
     ]},
 "output_list" : ["Derecha","Izquierda","Simultáneo"],
-"stim_list" : ["Tono","FM","Habla","Narrow Band Noise","Withe Noise",
+"stim_list" : ["Tono","FM","Habla","Narrow Band Noise","White Noise",
     "Speech Noise", "Pink Noise"],
 "stim_list_short" : ["NBN","WN","SN","PN"],
 "test_list" : ["Umbrales", "Logoaudiometría"],
