@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../src/ReportFile.php';
 require_once __DIR__ . '/../../src/ReportVersions.php';
 require_once __DIR__ . '/../../src/AudiometriaTecnicaVista.php';
 require_once __DIR__ . '/../../src/AlumnoIndicadores.php';
+require_once __DIR__ . '/../../views/indicadores/tecnica.php';
 
 $me = Auth::requireAdminSession();
 $pdo = Db::get();
@@ -193,6 +194,7 @@ foreach (array_reverse($todasLasAtenciones) as $a) {
             'paciente' => trim("{$a['nombre']} {$a['apellido']}"),
             'practica' => $a['practice_id'] !== null,
             'appointment_id' => (int) $a['appointment_id'],
+            'href' => 'chat_detail.php?appointment_id=' . (int) $a['appointment_id'] . '&student_id=' . $studentId . '#tecnica',
         ];
     }
 }
@@ -252,6 +254,7 @@ $cursosAlumno = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 $estadoTag = ['atendido' => ['cerrada', 'tag--success'], 'atendiendo' => ['en curso', 'tag--warn'], 'no_show' => ['no se presentó', 'tag--muted']];
 
+admin_add_css('indicadores.css');
 admin_add_css('student-detail.css');
 admin_header('Alumno: ' . $student['display_name'], $me);
 ?>
@@ -331,50 +334,13 @@ admin_header('Alumno: ' . $student['display_name'], $me);
         <strong>Técnica de audiometría en el tiempo</strong>
         <span class="help help--xs">verde ≥ 85 % · ámbar ≥ 60 % · rojo debajo · ○ práctica libre</span>
     </div>
-    <?php
-    // Gráfico de línea en SVG: x = orden de la atención, y = % de logro.
-    $n = count($serieTecnica);
-    $ancho = 600;
-    $alto = 140;
-    $margen = 14;
-    $x = static fn(int $i): float => $n === 1 ? $ancho / 2 : $margen + $i * ($ancho - 2 * $margen) / ($n - 1);
-    $y = static fn(int $pct): float => $margen + (100 - $pct) * ($alto - 2 * $margen) / 100;
-    $puntos = [];
-    foreach ($serieTecnica as $i => $p) {
-        $puntos[] = round($x($i), 1) . ',' . round($y($p['pct']), 1);
-    }
-    ?>
-    <svg class="tec-grafico" viewBox="0 0 <?= $ancho ?> <?= $alto ?>" preserveAspectRatio="none" role="img"
-         aria-label="Logro de la técnica en cada audiometría, de la primera a la última">
-        <rect x="0" y="<?= $y(100) ?>" width="<?= $ancho ?>" height="<?= $y(85) - $y(100) ?>" class="tec-banda tec-banda--bien"/>
-        <rect x="0" y="<?= $y(85) ?>" width="<?= $ancho ?>" height="<?= $y(60) - $y(85) ?>" class="tec-banda tec-banda--medio"/>
-        <rect x="0" y="<?= $y(60) ?>" width="<?= $ancho ?>" height="<?= $y(0) - $y(60) ?>" class="tec-banda tec-banda--bajo"/>
-        <?php if ($n > 1): ?><polyline points="<?= implode(' ', $puntos) ?>" class="tec-linea" vector-effect="non-scaling-stroke"/><?php endif; ?>
-    </svg>
-    <div class="tec-puntos">
-        <?php foreach ($serieTecnica as $i => $p): ?>
-        <a class="tec-punto<?= $p['practica'] ? ' tec-punto--practica' : '' ?>"
-           style="left:<?= round($x($i) / $ancho * 100, 2) ?>%; top:<?= round($y($p['pct']) / $alto * 100, 2) ?>%; --c:<?= AudiometriaTecnicaVista::color($p['pct']) ?>;"
-           href="chat_detail.php?appointment_id=<?= $p['appointment_id'] ?>&student_id=<?= (int) $studentId ?>#tecnica"
-           title="<?= htmlspecialchars($p['fecha'] . ' · ' . ($p['paciente'] ?: 'sin nombre') . ' · ' . $p['pct'] . ' %' . ($p['practica'] ? ' (práctica libre)' : '')) ?>"></a>
-        <?php endforeach; ?>
-    </div>
+    <?php indicadores_tecnica_grafico($serieTecnica); ?>
 
     <?php if ($pasosDificiles): ?>
     <div class="section-sep">
         <strong>Lo que más le cuesta</strong>
         <p class="help help--xs">Pasos de la técnica que no cumplió, sobre las audiometrías donde se podían evaluar.</p>
-        <div class="pasos">
-            <?php foreach ($pasosDificiles as $paso): ?>
-            <?php $pctFallo = (int) round(100 * $paso['fallos'] / $paso['evaluadas']); ?>
-            <div class="paso">
-                <span class="tag tag--muted"><?= htmlspecialchars($paso['seccion']) ?></span>
-                <span class="paso-texto"><?= htmlspecialchars($paso['texto']) ?></span>
-                <span class="paso-barra" title="<?= $pctFallo ?> %"><span style="width:<?= $pctFallo ?>%;"></span></span>
-                <span class="paso-cuenta"><?= $paso['fallos'] ?> de <?= $paso['evaluadas'] ?></span>
-            </div>
-            <?php endforeach; ?>
-        </div>
+        <?php indicadores_pasos($pasosDificiles); ?>
     </div>
     <?php elseif (count($serieTecnica) > 0): ?>
     <p class="help section-sep">Cumplió todos los pasos evaluables en sus audiometrías.</p>

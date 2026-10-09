@@ -1,0 +1,72 @@
+/* public/css/indicadores.css — indicadores de un alumno, compartidos entre
+ * la ficha que ve el docente (admin/student.php) y la que ve el propio
+ * alumno (student/mis_pacientes.php): tarjetas con el número grande, la
+ * técnica de audiometría en el tiempo y los pasos que más cuestan. El HTML
+ * del gráfico y de los pasos sale de views/indicadores/tecnica.php.
+ */
+
+/* Indicadores: una tarjeta por número, el número grande. */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-1);
+}
+.kpi-valor { font-size: 1.9rem; font-weight: 700; line-height: 1.1; }
+.kpi-valor--par { display: flex; gap: var(--space-5); font-size: 1.5rem; }
+.kpi-nombre { font-weight: 600; font-size: 0.85rem; }
+.kpi-pie { font-size: 0.74rem; color: var(--color-muted); line-height: 1.4; }
+.kpi-pie .tag { margin: 0.1rem 0.15rem 0 0; }
+.kpi-sube { color: var(--color-success-text); font-weight: 700; }
+.kpi-baja { color: var(--color-danger); font-weight: 700; }
+
+/* Técnica en el tiempo: el SVG se estira a lo ancho (la línea no engorda
+ * con vector-effect) y los puntos van encima en HTML, para que sean
+ * redondos a cualquier ancho y tengan su enlace y tooltip. */
+.tec-grafico { display: block; width: 100%; height: 140px; margin-top: var(--space-3); }
+.tec-banda--bien { fill: var(--color-success-bg); }
+.tec-banda--medio { fill: var(--color-warn-bg); opacity: 0.6; }
+.tec-banda--bajo { fill: var(--color-danger-bg); opacity: 0.6; }
+.tec-linea { fill: none; stroke: var(--color-primary); stroke-width: 2; }
+.tec-puntos { position: relative; height: 140px; margin-top: -140px; pointer-events: none; }
+.tec-punto {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: var(--c);
+  border: 2px solid var(--color-surface);
+  box-shadow: 0 0 0 1px var(--c);
+  pointer-events: auto;
+}
+.tec-punto--practica { background: var(--color-surface); border-color: var(--c); }
+.tec-punto:hover { transform: scale(1.35); }
+
+.pasos { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-3); }
+.paso {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr) 8rem 4.5rem;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 0.85rem;
+}
+.paso .tag { margin: 0; text-align: center; }
+.paso-barra { height: 8px; border-radius: 4px; background: var(--color-table-head); overflow: hidden; }
+.paso-barra span { display: block; height: 100%; background: var(--color-danger); }
+.paso-cuenta { font-size: 0.78rem; color: var(--color-muted); text-align: right; white-space: nowrap; }
+@media (max-width: 40rem) {
+  .paso { grid-template-columns: minmax(0, 1fr) 4.5rem; }
+  .paso .tag, .paso-barra { display: none; }
+}
+

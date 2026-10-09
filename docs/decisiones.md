@@ -5,6 +5,32 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Mis pacientes del alumno: cómo va, en palabras de alumno (2026-10-09)
+
+`student/mis_pacientes.php` mostraba por atención "Bloques", "Delta prom." y
+"Pausas largas" (métricas del registro de acciones que ni el docente sabía
+leer) y para eso leía el registro entero del alumno en cada visita. Ahora:
+
+- **Cómo vas**: pacientes atendidos, tu técnica de audiometría y cuánto
+  subiste, tiempo por paciente, preguntas al paciente, informes entregados
+  y comentarios de tu docente.
+- **Objetivos de tu curso**, si el docente escribió alguno: cada uno con ✓
+  si ya lo logró y "llevas X" si no. Decidido mostrarlos: los objetivos son
+  para guiar al alumno; un objetivo que el docente no quiera mostrar se deja
+  sin indicador o no se escribe ahí.
+- **Tu técnica atención por atención** y **En qué fijarte** (los pasos que
+  más se le pasan): mismas vistas que la ficha del docente
+  (`views/indicadores/tecnica.php`, estilos en `css/indicadores.css`).
+- Cada paciente es una tarjeta (en el celular la tabla no se leía) con
+  tiempo, preguntas, técnica, informes, "Tu docente comentó" y
+  felicitación / sugerencia de mejora.
+- `atencion.php` perdió la tarjeta "Comportamiento" (bloques, delta, pausas)
+  y la lectura del registro; "Datos de la atención" dice el tiempo con el
+  paciente y cuántas preguntas le hizo. Se sacaron "Inicio real" y "Cerrada"
+  como horas de reloj: venían en UTC (3 h corridas).
+
+Ninguna de las dos páginas lee ya `action_logs` completo.
+
 ## Avance del curso y objetivos de aprendizaje (2026-10-09)
 
 Pestaña **Avance** en la página del curso (`courses.php?tab=avance`, entre

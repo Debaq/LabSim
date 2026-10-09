@@ -37,6 +37,7 @@ $cssV = static fn (string $path): string => (string) (@filemtime($path) ?: time(
 ?>
 <link rel="stylesheet" href="../css/tokens.css?v=<?= $cssV(__DIR__ . '/../css/tokens.css') ?>">
 <link rel="stylesheet" href="../css/base.css?v=<?= $cssV(__DIR__ . '/../css/base.css') ?>">
+<link rel="stylesheet" href="../css/indicadores.css?v=<?= $cssV(__DIR__ . '/../css/indicadores.css') ?>">
 <link rel="stylesheet" href="../css/student.css?v=<?= $cssV(__DIR__ . '/../css/student.css') ?>">
 </head>
 <body>

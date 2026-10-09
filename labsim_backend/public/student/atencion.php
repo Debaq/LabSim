@@ -9,9 +9,10 @@ require_once __DIR__ . '/../../src/HistoriaClinica.php';
 require_once __DIR__ . '/../../src/Oirs.php';
 require_once __DIR__ . '/../../src/ReportFile.php';
 require_once __DIR__ . '/../../src/AudiometriaTecnicaVista.php';
+require_once __DIR__ . '/../../src/AlumnoIndicadores.php';
 
 /**
- * Detalle de una atención propia ya cerrada: stats de comportamiento, ficha
+ * Detalle de una atención propia ya cerrada: datos de la atención, ficha
  * clínica (las atenciones previas del caso y las tuyas en una sola línea de
  * tiempo, ver HistoriaClinica::lineaTiempo) y la
  * conversación con el paciente simulado, con la retroalimentación que tu
@@ -44,16 +45,9 @@ if (!$attendance || !$appointment) {
     exit;
 }
 
-$stmt = $pdo->prepare('SELECT user_id, client_ts, action, payload FROM action_logs WHERE user_id = ? ORDER BY id');
-$stmt->execute([$me['id']]);
-$sessions = array_values(array_filter(
-    Metrics::buildSessions(Metrics::decodeLogs($stmt->fetchAll())),
-    static fn (array $s) => $s['appointment_id'] !== null && (int) $s['appointment_id'] === $appointmentId
-));
-$stats = Metrics::summarizeSessions($sessions);
-// Duración real (Atender -> Atendido), mismo criterio que admin/student.php
-// -- $stats['total_duration_s'] es action_logs y esconde el rato leyendo el
-// caso antes de tocar el audiómetro/impedanciómetro.
+// Duración real (Atender -> Atendido), mismo criterio que admin/student.php.
+// Antes se leía además el registro de acciones entero del alumno para sacar
+// "bloques" y "delta promedio", que no le decían nada; ya no se lee.
 $duracionS = Metrics::attendanceDurationSeconds($attendance['hora_real'], $attendance['updated_at']);
 
 $historiaClinica = '';
@@ -175,11 +169,12 @@ student_header($paciente, $me);
 
 <div class="card">
     <h2>Datos de la atención</h2>
+    <?php $nPreguntas = count(array_filter($log, static fn (array $l): bool => $l['role'] === 'user')); ?>
     <p>
         <b>Procedimiento:</b> <?= htmlspecialchars($appointment['procedimiento'] ?: '—') ?><br>
         <b>Cita:</b> <?= htmlspecialchars($appointment['fecha'] ?: '—') ?> <?= htmlspecialchars($appointment['hora'] ?: '') ?><br>
-        <b>Inicio real:</b> <?= htmlspecialchars($attendance['hora_real'] ?: '—') ?><br>
-        <b>Cerrada:</b> <?= htmlspecialchars($attendance['updated_at']) ?>
+        <b>Tiempo con el paciente:</b> <?= $duracionS !== null ? htmlspecialchars(AlumnoIndicadores::minutos($duracionS)) : '—' ?><br>
+        <b>Preguntas que le hiciste:</b> <?= $nPreguntas ?>
     </p>
     <?php if ($attendanceComments['procedimiento']): ?>
     <p class="legend" style="margin-top:0.8rem;">Comentarios de tu docente sobre el procedimiento:</p>
@@ -187,17 +182,10 @@ student_header($paciente, $me);
     <?php endif; ?>
 </div>
 
+<?php if ($attendance['nota'] || $attendanceComments['evolucion']): ?>
 <div class="card">
-    <h2>Comportamiento durante la atención</h2>
-    <table>
-        <tr><td>Bloques de actividad</td><td><b><?= $stats['n_sessions'] ?></b></td></tr>
-        <tr><td>Duración total</td><td><b><?= $duracionS !== null ? htmlspecialchars(Metrics::formatDurationHms($duracionS)) : '—' ?></b></td></tr>
-        <tr><td>Delta promedio entre acciones</td><td><b><?= $stats['avg_delta_s'] !== null ? htmlspecialchars(Metrics::formatDurationHms((int) round($stats['avg_delta_s']))) : '—' ?></b></td></tr>
-        <tr><td>Pausas largas (&ge;30s)</td><td><b<?= $stats['long_pauses'] > 0 ? ' class="badge-warn"' : '' ?>><?= $stats['long_pauses'] ?></b></td></tr>
-        <tr><td>Acciones sin pausa (0s)</td><td><b><?= $stats['no_pause_actions'] ?></b></td></tr>
-    </table>
     <?php if ($attendance['nota']): ?>
-    <h2 style="margin-top:1rem;">Tu evolución registrada</h2>
+    <h2>Tu evolución registrada</h2>
     <p><?= nl2br(htmlspecialchars($attendance['nota'])) ?></p>
     <?php endif; ?>
     <?php if ($attendanceComments['evolucion']): ?>
@@ -205,9 +193,10 @@ student_header($paciente, $me);
     <?php render_attendance_comments($attendanceComments['evolucion']); ?>
     <?php endif; ?>
 </div>
+<?php endif; ?>
 
 <?php if ($tecnica !== null): ?>
-<div class="card">
+<div class="card" id="tecnica">
     <h2>Pasos de la técnica de audiometría</h2>
     <?php AudiometriaTecnicaVista::render($tecnica, false); ?>
 </div>
