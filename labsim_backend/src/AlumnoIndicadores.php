@@ -109,6 +109,67 @@ final class AlumnoIndicadores
         return (int) round($n % 2 ? $valores[$m] : ($valores[$m - 1] + $valores[$m]) / 2);
     }
 
+    /** Equipo de cada prefijo de action_logs (lo único que la app registra acción por acción). */
+    public const EQUIPOS = ['audio_' => 'Audiómetro', 'z_' => 'Impedanciómetro'];
+
+    /**
+     * Cuánto usó cada equipo en una atención, en palabras: suma los
+     * intervalos entre acciones seguidas del mismo equipo, sin contar los de
+     * más de $pausaMax segundos (se fue a otra cosa: conversar, el otro
+     * equipo, un informe). Sin acciones, el equipo no aparece.
+     *
+     * @param array<int,array{action:string, client_ts:string}> $logs en orden
+     * @return array<string,array{segundos:int, acciones:int}> por nombre de equipo, en orden de uso
+     */
+    public static function usoEquipos(array $logs, int $pausaMax = 60): array
+    {
+        $out = [];
+        $anterior = [];
+        foreach ($logs as $l) {
+            $equipo = null;
+            foreach (self::EQUIPOS as $prefijo => $nombre) {
+                if (strpos((string) $l['action'], $prefijo) === 0) {
+                    $equipo = $nombre;
+                    break;
+                }
+            }
+            if ($equipo === null) {
+                continue;
+            }
+            $t = strtotime((string) $l['client_ts']);
+            if (!isset($out[$equipo])) {
+                $out[$equipo] = ['segundos' => 0, 'acciones' => 0];
+            }
+            $out[$equipo]['acciones']++;
+            if (isset($anterior[$equipo]) && $t !== false) {
+                $dt = $t - $anterior[$equipo];
+                if ($dt > 0 && $dt <= $pausaMax) {
+                    $out[$equipo]['segundos'] += $dt;
+                }
+            }
+            if ($t !== false) {
+                $anterior[$equipo] = $t;
+            }
+        }
+        return $out;
+    }
+
+    /** "hace 5 min", "hace 3 h", "hace 2 días": para "última atención". */
+    public static function hace(int $segundos): string
+    {
+        if ($segundos < 60) {
+            return 'recién';
+        }
+        if ($segundos < 3600) {
+            return 'hace ' . intdiv($segundos, 60) . ' min';
+        }
+        if ($segundos < 86400) {
+            return 'hace ' . intdiv($segundos, 3600) . ' h';
+        }
+        $dias = intdiv($segundos, 86400);
+        return $dias === 1 ? 'ayer' : "hace {$dias} días";
+    }
+
     /** "12 min", "1 h 05 min": para una duración típica no hacen falta segundos. */
     public static function minutos(?int $segundos): string
     {

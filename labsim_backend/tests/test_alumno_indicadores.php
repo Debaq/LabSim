@@ -39,3 +39,21 @@ t_eq(AlumnoIndicadores::promedio([50, 100]), 75, 'Promedio');
 t_eq(AlumnoIndicadores::minutos(null), '—', 'Sin duración');
 t_eq(AlumnoIndicadores::minutos(750), '13 min', 'Minutos redondeados');
 t_eq(AlumnoIndicadores::minutos(3900), '1 h 05 min', 'Más de una hora');
+
+$uso = AlumnoIndicadores::usoEquipos([
+    ['action' => 'audio_freq_change', 'client_ts' => '2026-10-09 10:00:00'],
+    ['action' => 'audio_stim_button', 'client_ts' => '2026-10-09 10:00:20'],
+    ['action' => 'z_pressure_change', 'client_ts' => '2026-10-09 10:00:30'],
+    ['action' => 'audio_stim_button', 'client_ts' => '2026-10-09 10:00:50'],   // 30 s después del audio anterior: cuenta
+    ['action' => 'audio_stim_button', 'client_ts' => '2026-10-09 10:10:00'],   // pausa de 9 min: no cuenta
+    ['action' => 'z_pressure_change', 'client_ts' => '2026-10-09 10:10:10'],   // 9 min 40 s del z anterior: no cuenta
+    ['action' => 'session_login', 'client_ts' => '2026-10-09 10:10:20'],
+]);
+t_eq(array_keys($uso), ['Audiómetro', 'Impedanciómetro'], 'Equipos en orden de uso, sin lo que no es equipo');
+t_eq($uso['Audiómetro'], ['segundos' => 50, 'acciones' => 4], 'Uso del audiómetro sin la pausa larga');
+t_eq($uso['Impedanciómetro'], ['segundos' => 0, 'acciones' => 2], 'Impedanciómetro con una sola pausa larga');
+t_eq(AlumnoIndicadores::hace(30), 'recién', 'Recién');
+t_eq(AlumnoIndicadores::hace(600), 'hace 10 min', 'Minutos');
+t_eq(AlumnoIndicadores::hace(7300), 'hace 2 h', 'Horas');
+t_eq(AlumnoIndicadores::hace(90000), 'ayer', 'Ayer');
+t_eq(AlumnoIndicadores::hace(3 * 86400), 'hace 3 días', 'Días');

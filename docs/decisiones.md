@@ -5,6 +5,32 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Dashboard: rápido y en datos que se entienden (2026-10-09)
+
+El dashboard es donde aterriza el docente al entrar desde Moodle, y cargaba
+`action_logs` entero (113 mil filas en producción) en cada visita para
+mostrar "bloques", "delta promedio", "pausas largas" y barras de colores por
+acción. Ahora:
+
+- **Vista general** sale de las atenciones (decenas de filas), la técnica
+  guardada y dos consultas chicas (preguntas, informes): cifras de la
+  semana, **atendiendo ahora** (atenciones abiertas, para destrabar en el
+  laboratorio), últimas atenciones cerradas, alumnos y pacientes (los 15 más
+  recientes; el resto con un botón). El curso se muestra por su código.
+- **Una cita**: una tarjeta por alumno con tiempo con el paciente,
+  preguntas, técnica, informes, evolución y **cuánto usó cada equipo**
+  (`AlumnoIndicadores::usoEquipos`: audiómetro e impedanciómetro, que son
+  lo único que registra acción por acción). Lee solo las acciones de esa
+  cita (`DashboardDatos::logsDeCita`, con LIKE sobre el JSON). Las acciones
+  crudas quedan plegadas al final.
+- Cerrar / reactivar / eliminar resultado / referencia siguen igual.
+  Eliminar ya no lee todo el historial del alumno, y ahora solo actúa sobre
+  alumnos que ese docente puede ver (antes las tarjetas de una cita podían
+  mostrar alumnos de otro curso).
+
+Medido en la copia de prueba (68 mil filas): vista general 1,75 s → 0,08 s;
+una cita 0,83 s → 0,13 s.
+
 ## Mis pacientes del alumno: cómo va, en palabras de alumno (2026-10-09)
 
 `student/mis_pacientes.php` mostraba por atención "Bloques", "Delta prom." y
