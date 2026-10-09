@@ -13,7 +13,7 @@ from auth.func_login import LoginConnect
 
 def intentar_login(name: str, passw: str):
     """Lo mismo que LoginConnect.login(): dict con datos del usuario si
-    todo OK, o 0 si falló red/credenciales."""
+    todo OK, o un LoginFallido (falso) con el motivo."""
     try:
         return LoginConnect().login(name, passw)
     except Exception:  # noqa: BLE001

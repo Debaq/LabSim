@@ -20,7 +20,11 @@ if (Auth::loginBlocked($username, $ip)) {
     Response::error('Demasiados intentos fallidos. Espera unos minutos e inténtalo de nuevo.', 429);
 }
 
-$result = Auth::loginAdmin($username, $password);
+try {
+    $result = Auth::loginAdmin($username, $password);
+} catch (CuentaBloqueada $e) {
+    Response::error(Bloqueos::MENSAJE, 403, ['codigo' => Bloqueos::CODIGO]);
+}
 Auth::recordLoginAttempt($username, $ip, $result !== null);
 if ($result === null) {
     Response::error('Usuario o contraseña incorrectos', 401);

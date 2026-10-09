@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
 require_once __DIR__ . '/../../src/Tokens.php';
+require_once __DIR__ . '/../../src/Bloqueos.php';
 require_once __DIR__ . '/_layout.php';
 
 /**
@@ -14,7 +15,8 @@ require_once __DIR__ . '/_layout.php';
  * Tokens). Revocar corta la sesión al instante: ese equipo vuelve a pedir el
  * login. El panel no usa estos tokens (sesión PHP): revocar los de admin no
  * cierra esta página. Cada sesión vence sola a las N horas de iniciada
- * (Tokens::duracionHoras, se cambia acá).
+ * (Tokens::duracionHoras, se cambia acá). También se bloquean cuentas: se
+ * cortan sus sesiones y no pueden volver a entrar (ver Bloqueos).
  */
 
 $me = Auth::requireFullAdminSession();
@@ -30,7 +32,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $uno = (string) ($_POST['revocar_uno'] ?? '');
     $revocados = null;
 
-    if ($action === 'duracion') {
+    $bloquearUno = (int) ($_POST['bloquear_usuario'] ?? 0);
+    $motivo = (string) ($_POST['motivo'] ?? '');
+    if ($bloquearUno > 0 || $action === 'bloquear_seleccionados') {
+        // Usuarios a bloquear: el de la fila, o los dueños de las sesiones
+        // marcadas (resueltos acá, no confiando en el navegador).
+        $ids = [];
+        if ($bloquearUno > 0) {
+            $ids = [$bloquearUno];
+        } else {
+            $marcados = is_array($_POST['tokens'] ?? null) ? array_values($_POST['tokens']) : [];
+            foreach (Tokens::listar($pdo, Tokens::filtros([])) as $t) {
+                if (in_array($t['token'], $marcados, true)) {
+                    $ids[] = (int) $t['user_id'];
+                }
+            }
+            $ids = array_values(array_unique($ids));
+        }
+        $bloqueados = [];
+        foreach ($ids as $id) {
+            try {
+                Bloqueos::bloquear($pdo, $me, $id, $motivo);
+                $bloqueados[] = $id;
+            } catch (InvalidArgumentException $e) {
+                $error = $e->getMessage();
+            }
+        }
+        if ($bloqueados) {
+            $success = (count($bloqueados) === 1 ? '1 usuario bloqueado' : count($bloqueados) . ' usuarios bloqueados')
+                . ': ya no pueden entrar a la app y sus sesiones se cerraron.';
+        } elseif ($error === null) {
+            $error = 'No marcaste ninguna sesión.';
+        }
+    } elseif ((int) ($_POST['desbloquear_usuario'] ?? 0) > 0) {
+        try {
+            Bloqueos::desbloquear($pdo, $me, (int) $_POST['desbloquear_usuario']);
+            $success = 'Usuario desbloqueado: puede volver a entrar.';
+        } catch (InvalidArgumentException $e) {
+            $error = $e->getMessage();
+        }
+    } elseif ($action === 'duracion') {
         $horas = Tokens::guardarDuracionHoras((int) ($_POST['horas'] ?? Tokens::DURACION_DEFAULT_HORAS));
         $purgadas = Tokens::purgarVencidas($pdo);
         $success = "Las sesiones duran ahora {$horas} h desde que se inician."
@@ -71,6 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 Tokens::purgarVencidas($pdo);
 $duracion = Tokens::duracionHoras();
 $tokens = Tokens::listar($pdo, $filtros);
+$bloqueadas = Bloqueos::listar($pdo);
 $hayFiltro = $filtros['q'] !== '' || $filtros['rol'] !== '' || $filtros['actividad'] !== '';
 $total = (int) $pdo->query('SELECT COUNT(*) FROM tokens')->fetchColumn();
 
@@ -132,6 +174,7 @@ admin_header('Sesiones (tokens)', $me);
         <input type="hidden" name="q" value="<?= htmlspecialchars($filtros['q']) ?>">
         <input type="hidden" name="rol" value="<?= htmlspecialchars($filtros['rol']) ?>">
         <input type="hidden" name="actividad" value="<?= htmlspecialchars($filtros['actividad']) ?>">
+        <input type="hidden" name="motivo" id="motivo-bloqueo" value="">
 
         <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.6rem; margin:0.5rem 0;">
             <span class="muted">
@@ -142,6 +185,11 @@ admin_header('Sesiones (tokens)', $me);
                     style="margin-top:0;" id="btn-revocar-marcadas" disabled
                     onclick="return confirm('¿Revocar las sesiones marcadas? Esos equipos tendrán que volver a iniciar sesión.');">
                 Revocar marcadas
+            </button>
+            <button type="submit" name="form_action" value="bloquear_seleccionados" class="danger"
+                    style="margin-top:0;" id="btn-bloquear-marcadas" disabled
+                    onclick="return pedirMotivo('¿Bloquear a los usuarios de las sesiones marcadas? No podrán volver a entrar a la app hasta que los desbloquees.');">
+                Bloquear a sus usuarios
             </button>
             <?php if ($tokens): ?>
             <button type="submit" name="form_action" value="revocar_filtrados" class="danger" style="margin-top:0;"
@@ -176,6 +224,11 @@ admin_header('Sesiones (tokens)', $me);
                     <button type="submit" name="revocar_uno" value="<?= htmlspecialchars($t['token']) ?>"
                             class="danger" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;"
                             onclick="return confirm('¿Revocar esta sesión? El equipo tendrá que volver a iniciar sesión.');">Revocar</button>
+                    <?php if ((int) $t['user_id'] !== (int) $me['id']): ?>
+                    <button type="submit" name="bloquear_usuario" value="<?= (int) $t['user_id'] ?>"
+                            class="secondary" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;"
+                            onclick="return pedirMotivo('¿Bloquear a <?= htmlspecialchars(addslashes($t['username']), ENT_QUOTES) ?>? Se cierran todas sus sesiones y no podrá volver a entrar hasta que lo desbloquees.');">Bloquear usuario</button>
+                    <?php endif; ?>
                 </td>
             </tr>
             <?php endforeach; ?>
@@ -187,19 +240,58 @@ admin_header('Sesiones (tokens)', $me);
     </form>
 </div>
 
+<div class="card">
+    <h2 style="margin-top:0;">Cuentas bloqueadas</h2>
+    <p class="muted">No pueden usar la app ni volver a entrar (contraseña o código de Moodle) hasta que las desbloquees.</p>
+    <div class="table-wrap">
+    <table>
+        <tr><th>Usuario</th><th>Rol</th><th>Bloqueada</th><th>Por</th><th>Motivo</th><th></th></tr>
+        <?php foreach ($bloqueadas as $b): ?>
+        <tr>
+            <td><?= htmlspecialchars($b['display_name']) ?> <span class="muted">(<?= htmlspecialchars($b['username']) ?>)</span></td>
+            <td><?= htmlspecialchars($b['role'] === 'student' ? 'alumno' : $b['role']) ?></td>
+            <td><?= htmlspecialchars($b['bloqueado_at'] ?: '—') ?></td>
+            <td><?= htmlspecialchars($b['bloqueado_por'] ?: '—') ?></td>
+            <td><?= htmlspecialchars($b['motivo'] ?: '—') ?></td>
+            <td>
+                <form method="post" class="inline" onsubmit="return confirm('¿Desbloquear? Podrá volver a entrar a la app.');">
+                    <?= csrf_field() ?>
+                    <button type="submit" name="desbloquear_usuario" value="<?= (int) $b['id'] ?>"
+                            class="secondary" style="margin-top:0; padding:0.15rem 0.5rem; font-size:0.75rem;">Desbloquear</button>
+                </form>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+        <?php if (!$bloqueadas): ?>
+        <tr><td colspan="6" class="muted">Ninguna cuenta bloqueada.</td></tr>
+        <?php endif; ?>
+    </table>
+    </div>
+</div>
+
 <style>
+#btn-bloquear-marcadas:disabled,
 #btn-revocar-marcadas:disabled { opacity: 0.45; cursor: not-allowed; }
 </style>
 <script>
+// Bloquear: confirma y pide un motivo opcional (queda en la auditoría).
+function pedirMotivo(pregunta) {
+    var m = prompt(pregunta + '\n\nMotivo (opcional):', '');
+    if (m === null) return false;
+    document.getElementById('motivo-bloqueo').value = m;
+    return true;
+}
 (function () {
     var todos = document.getElementById('tokens-todos');
     var marcas = Array.prototype.slice.call(document.querySelectorAll('.token-marca'));
     var contador = document.getElementById('tokens-marcados');
     var boton = document.getElementById('btn-revocar-marcadas');
+    var botonBloquear = document.getElementById('btn-bloquear-marcadas');
     function actualizar() {
         var n = marcas.filter(function (m) { return m.checked; }).length;
         contador.textContent = n;
         boton.disabled = n === 0;
+        botonBloquear.disabled = n === 0;
         todos.checked = n > 0 && n === marcas.length;
         todos.indeterminate = n > 0 && n < marcas.length;
     }

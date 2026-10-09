@@ -7,6 +7,17 @@ from core.base import context
 
 pref_data = Preferences()
 
+class LoginFallido:
+    """Login que no resultó, con el motivo para mostrar. Es falso (como el 0
+    de antes), así que quien solo pregunta "¿entró?" sigue funcionando."""
+
+    def __init__(self, mensaje: str):
+        self.mensaje = mensaje
+
+    def __bool__(self) -> bool:
+        return False
+
+
 class LoginConnect():
     """Conecta la gui con labsim_backend."""
     def __init__(self) -> None:
@@ -22,7 +33,7 @@ class LoginConnect():
             username (str): usuario admin, o vacío si es login de alumno
             password (str): contraseña admin, o código de 6 dígitos
         Returns:
-            dict: datos del usuario, o 0 si falló el login/la conexión
+            dict: datos del usuario, o LoginFallido (falso) con el motivo
         """
         session_file = context.get_resource('json/session.json')
         client = BackendClient(pref_data.get("BACKEND_URL"), session_file)
@@ -32,8 +43,14 @@ class LoginConnect():
                 result = client.pair_exchange(code)
             else:
                 result = client.login_admin(username, password)
-        except (http_requests.RequestException, KeyError):
-            return 0
+        except http_requests.HTTPError as exc:
+            # El servidor dice por qué (cuenta bloqueada, contraseña o código
+            # que no sirven, demasiados intentos): eso es lo que se muestra.
+            return LoginFallido(str(exc) or "No es posible ingresar")
+        except http_requests.RequestException:
+            return LoginFallido("No hay conexión con el servidor. Revisa la red e inténtalo de nuevo.")
+        except KeyError:
+            return LoginFallido("No es posible ingresar")
 
         user = result["user"]
         return {

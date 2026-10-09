@@ -36,6 +36,7 @@ from core.ui_helpers import MoveWindow, ToolBar, show_hide, toggle_max_min, titl
 from audiometria.UI.Ui_command_voice_A import Ui_Form as commandVoiceA
 from core.UI.Ui_Main import Ui_MainWindow
 from core.Logger import Logger
+from backend import client as backend_client
 from backend.client import BackendClient
 from backend.log_queue import LogUploaderThread, get_log_queue
 from backend.sync_thread import SyncThread
@@ -156,6 +157,12 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         self.cmb_case.setVisible(False)
         self.cmb_case.setEnabled(False)
         self.create_variables()
+        # Sesión vencida o cuenta bloqueada, venga de la llamada que venga
+        # (ver backend/client.py: _revisar_sesion): se atiende en la ventana.
+        hilos.preparar()
+        self._avisando_sesion = False
+        backend_client.al_perder_sesion = (
+            lambda motivo: hilos.avisar(self._sesion_perdida, motivo, dueno=self))
         # Mouse para zurdos: sigue a la preferencia del alumno logueado, solo
         # en modo laboratorio (ver core/mouse_zurdo.py).
         mouse_zurdo.conectar()
@@ -626,8 +633,9 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         client = self._logged_in_client()
         if client is None:
             return
-        self.sync_thread = SyncThread(client, al_sincronizar=self._on_backend_sync,
-                                      al_vencer=self._sesion_vencida, dueno=self)
+        # El 401 lo avisa backend_client.al_perder_sesion (cualquier
+        # llamada); el sync además se detiene solo.
+        self.sync_thread = SyncThread(client, al_sincronizar=self._on_backend_sync, dueno=self)
         self.sync_thread.start()
 
     def _subir_pendientes_en_fondo(self):
@@ -664,21 +672,41 @@ class MainWindow(QMainWindow, Ui_MainWindow, ToolBar):
         app_config_store.update_from_sync(delta.get("config"))
         self._subir_pendientes_en_fondo()
 
-    def _sesion_vencida(self):
+    def _sesion_perdida(self, motivo):
         """El servidor ya no acepta la sesión: venció (dura N horas desde el
-        inicio, ver admin/tokens.php) o la revocaron. Se vuelve al login; lo
+        inicio, ver admin/tokens.php), la revocaron o bloquearon la cuenta.
+        Se avisa una vez y se vuelve al login para conectarse de nuevo; lo
         hecho queda en el equipo y sube al volver a entrar (ver
         report_autosave.subir_pendientes)."""
-        if not self.data_login:
+        if not self.data_login or self._avisando_sesion:
             return
-        print("sync: la sesión venció o fue revocada, se vuelve al login")
-        self._aviso("Sesión vencida",
-                    "Tu sesión con el servidor venció. Vuelve a iniciar sesión.\n\n"
-                    "Lo que hiciste quedó guardado en este equipo y se sube solo al "
-                    "volver a entrar; la atención abierta se puede retomar.",
-                    QMessageBox.Icon.Information)
-        if self.data_login:
-            self.logout()
+        self._avisando_sesion = True
+        try:
+            print(f"sesión perdida ({motivo}): se vuelve al login")
+            dlg = QMessageBox(self)
+            if motivo == "bloqueada":
+                dlg.setIcon(QMessageBox.Icon.Warning)
+                dlg.setWindowTitle("Cuenta bloqueada")
+                dlg.setText("Tu cuenta está bloqueada. Habla con tu docente.")
+                dlg.setInformativeText("Lo que hiciste quedó guardado en este equipo.")
+                dlg.addButton("Aceptar", QMessageBox.ButtonRole.AcceptRole)
+            else:
+                dlg.setIcon(QMessageBox.Icon.Information)
+                dlg.setWindowTitle("Sesión vencida")
+                dlg.setText("Tu sesión con el servidor venció.")
+                dlg.setInformativeText(
+                    "Vuelve a iniciar sesión para seguir. Lo que hiciste quedó guardado "
+                    "en este equipo y se sube solo al volver a entrar; la atención "
+                    "abierta se puede retomar.")
+                dlg.addButton("Volver a iniciar sesión", QMessageBox.ButtonRole.AcceptRole)
+            style_dialog(dlg)
+            dlg.exec()
+            if self.data_login:
+                self.logout()
+            if motivo != "bloqueada" and not self.data_login and self.subw and "LOGIN" in self.subw:
+                self.toggle_login()   # sin sesión: abre el login
+        finally:
+            self._avisando_sesion = False
 
     def sync_ahora(self) -> bool:
         """Que el sync pregunte ya (tras atender, cerrar, una inasistencia).

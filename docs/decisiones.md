@@ -5128,3 +5128,28 @@ vuelve al login. Lo hecho queda en el equipo (respaldo de informes, cola de
 logs) y sube al volver a entrar; la atención abierta se retoma. Una versión
 de la app anterior a este cambio no lo reconoce: deja de sincronizar en
 silencio hasta que el alumno cierra sesión (cerrar la atención sí le avisa).
+
+### Sesión perdida en cualquier llamada, y bloqueo de cuentas (2026-10-09)
+
+**La app se entera venga de donde venga.** Antes solo el sync miraba el 401.
+Ahora `backend/client.py` pone un hook de respuesta en la sesión de requests
+de cada BackendClient: un 401 a una petición con token (sesión vencida o
+revocada) o un 403 con `codigo: cuenta_bloqueada` llaman a
+`al_perder_sesion`, que MainWindow pasa a la ventana con `hilos.avisar`. Se
+avisa una sola vez: "Tu sesión venció → Volver a iniciar sesión" (cierra la
+sesión y abre el login) o "Tu cuenta está bloqueada" (cierra la sesión). Lo
+hecho queda en el equipo. El login muestra el motivo real que manda el
+servidor (`LoginFallido`) en vez de "No es posible ingresar".
+
+**Bloquear** (Sistema → Sesiones, o Bloquear en Usuarios) = `users.active = 0`
++ revocar todas sus sesiones; quién, cuándo y por qué quedan en
+`admin_audit_log` (`user_block`), sin columnas nuevas (`src/Bloqueos.php`). El
+bloqueado no entra ni con contraseña ni con el código de Moodle: 403 con
+`codigo: cuenta_bloqueada` (la contraseña se verifica antes, para que el
+mensaje no sirva para averiguar qué usuarios existen). Un token de una cuenta
+desactivada por otro camino responde lo mismo y se borra. Nadie puede
+bloquearse a sí mismo.
+
+Como al bloquear se borran sus tokens, la app que el bloqueado tenga abierta
+ve primero "sesión vencida" y, al intentar volver a entrar, "cuenta
+bloqueada".

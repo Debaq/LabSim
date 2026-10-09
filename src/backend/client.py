@@ -21,6 +21,36 @@ DEFAULT_TIMEOUT = 10
 CLOCK_SKEW_TOLERANCE_S = 120
 
 
+# Lo fija MainWindow: se llama (desde cualquier hilo) cuando el servidor deja
+# de aceptar la sesión, con el motivo: "vencida" (401: pasó la duración de
+# las sesiones o la revocaron, ver admin/tokens.php) o "bloqueada" (403 con
+# codigo cuenta_bloqueada, ver Bloqueos.php). Vale para todas las
+# instancias de BackendClient (cada módulo crea la suya).
+al_perder_sesion = None
+
+
+def _revisar_sesion(resp, *args, **kwargs):
+    """Hook de requests: mira cada respuesta a una petición con token."""
+    aviso = al_perder_sesion
+    if aviso is None or not resp.request.headers.get("Authorization"):
+        return
+    motivo = None
+    if resp.status_code == 401:
+        motivo = "vencida"
+    elif resp.status_code == 403:
+        try:
+            codigo = (resp.json() or {}).get("codigo")
+        except (ValueError, AttributeError):
+            codigo = None
+        if codigo == "cuenta_bloqueada":
+            motivo = "bloqueada"
+    if motivo is not None:
+        try:
+            aviso(motivo)
+        except Exception as exc:  # noqa: BLE001 -- el aviso no corta la petición
+            print(f"backend: no se pudo avisar la sesión perdida: {exc}")
+
+
 class BackendClient:
     def __init__(self, base_url: str, session_file: str | Path):
         self._base_url = base_url.rstrip("/")
@@ -31,6 +61,7 @@ class BackendClient:
         # entre llamadas -- sin esto, SyncThread (polling cada 15s, ver
         # sync_thread.py) repetía el handshake completo en cada ciclo.
         self._http = requests.Session()
+        self._http.hooks["response"].append(_revisar_sesion)
         self._load_session()
 
     # -- sesión local -----------------------------------------------------

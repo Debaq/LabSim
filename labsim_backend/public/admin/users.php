@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 require_once __DIR__ . '/../../src/Users.php';
 require_once __DIR__ . '/../../src/AdminAudit.php';
+require_once __DIR__ . '/../../src/Bloqueos.php';
 require_once __DIR__ . '/_layout.php';
 
 $me = Auth::requireFullAdminSession();
@@ -65,9 +66,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $userId = (int) ($_POST['user_id'] ?? 0);
         $active = ($_POST['active'] ?? '') === '1';
         if ($userId > 0) {
-            Users::setActive($userId, $active);
-            $success = 'Usuario actualizado.';
-            AdminAudit::log($me, $active ? 'user_activate' : 'user_deactivate', ['user_id' => $userId]);
+            // Bloquear también corta sus sesiones abiertas (ver Bloqueos).
+            try {
+                if ($active) {
+                    Bloqueos::desbloquear(Db::get(), $me, $userId);
+                    $success = 'Usuario desbloqueado: puede volver a entrar.';
+                } else {
+                    $n = Bloqueos::bloquear(Db::get(), $me, $userId, (string) ($_POST['motivo'] ?? ''));
+                    $success = 'Usuario bloqueado' . ($n ? " y {$n} sesiones cerradas." : '.');
+                }
+            } catch (InvalidArgumentException $e) {
+                $error = $e->getMessage();
+            }
         }
     }
 }
@@ -150,15 +160,18 @@ admin_header('Usuarios', $me);
                 <?php endif; ?>
             </td>
             <td><?= $u['lti_sub'] ? 'sí' : '—' ?></td>
-            <td><?= $u['active'] ? 'sí' : 'no' ?></td>
+            <td><?= $u['active'] ? 'sí' : '<span class="tag tag--warn">bloqueado</span>' ?></td>
             <td>
-                <form method="post" class="inline">
+                <form method="post" class="inline"<?= $u['active']
+                    ? " onsubmit=\"var m = prompt('Motivo del bloqueo (opcional). No podrá entrar a la app hasta que lo desbloquees.'); if (m === null) return false; this.motivo.value = m; return true;\""
+                    : '' ?>>
                 <?= csrf_field() ?>
+                    <input type="hidden" name="motivo" value="">
                     <input type="hidden" name="form_action" value="toggle_active">
                     <input type="hidden" name="user_id" value="<?= (int) $u['id'] ?>">
                     <input type="hidden" name="active" value="<?= $u['active'] ? '0' : '1' ?>">
                     <button type="submit" class="secondary" style="margin-top:0; padding:0.2rem 0.6rem; font-size:0.8rem;">
-                        <?= $u['active'] ? 'Desactivar' : 'Activar' ?>
+                        <?= $u['active'] ? 'Bloquear' : 'Desbloquear' ?>
                     </button>
                 </form>
             </td>

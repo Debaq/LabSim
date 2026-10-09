@@ -10,8 +10,9 @@ final class Response
         exit;
     }
 
-    public static function error(string $message, int $status = 400): void
+    /** @param array<string, mixed> $extra campos además de 'error' (ej. 'codigo') */
+    public static function error(string $message, int $status = 400, array $extra = []): void
     {
-        self::json(['error' => $message], $status);
+        self::json(['error' => $message] + $extra, $status);
     }
 }

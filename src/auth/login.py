@@ -123,7 +123,8 @@ class MainLogin(QWidget, Ui_Login):
             self._disable_widgets()
             self.data_login_signal.emit(result)
         else:
-            QMessageBox.critical(self, "Ingreso", "No es posible ingresar")
+            QMessageBox.critical(self, "Ingreso",
+                                 getattr(result, "mensaje", None) or "No es posible ingresar")
 
     def _verify_login(self, username:str, password:str) -> bool:
         """

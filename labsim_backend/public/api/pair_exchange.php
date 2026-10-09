@@ -19,7 +19,11 @@ if (Auth::pairExchangeBlocked($ip)) {
     Response::error('Demasiados intentos fallidos. Espera unos minutos e inténtalo de nuevo.', 429);
 }
 
-$result = Auth::exchangePairingCode($code);
+try {
+    $result = Auth::exchangePairingCode($code);
+} catch (CuentaBloqueada $e) {
+    Response::error(Bloqueos::MENSAJE, 403, ['codigo' => Bloqueos::CODIGO]);
+}
 Auth::recordPairExchangeAttempt($ip, $result !== null);
 if ($result === null) {
     Response::error('Código inválido, ya usado o expirado', 404);

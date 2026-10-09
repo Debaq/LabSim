@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/UserPrefs.php';
 require_once __DIR__ . '/Tokens.php';
+require_once __DIR__ . '/Bloqueos.php';
 
 final class Auth
 {
@@ -103,6 +104,9 @@ final class Auth
         }
 
         $pdo->prepare('UPDATE pairing_codes SET used = 1 WHERE code = ?')->execute([$code]);
+        if (Bloqueos::estaBloqueado($pdo, (int) $row['user_id'])) {
+            throw new CuentaBloqueada();
+        }
 
         return self::issueTokenFor(
             (int) $row['user_id'],
@@ -159,11 +163,17 @@ final class Auth
         // COLLATE NOCASE: el usuario se tipea a mano en la app, y "NBaier"
         // tiene que entrar igual que "nbaier". El índice único
         // idx_users_username_nocase garantiza que eso no sea ambiguo.
-        $stmt = Db::get()->prepare('SELECT * FROM users WHERE username = ? COLLATE NOCASE AND active = 1');
+        $stmt = Db::get()->prepare('SELECT * FROM users WHERE username = ? COLLATE NOCASE');
         $stmt->execute([$username]);
         $row = $stmt->fetch();
+        $stmt->closeCursor();
         if (!$row || !$row['password_hash'] || !password_verify($password, $row['password_hash'])) {
             return null;
+        }
+        // Solo con la contraseña correcta se dice que está bloqueada: si no,
+        // el mensaje serviría para averiguar qué usuarios existen.
+        if ((int) $row['active'] !== 1) {
+            throw new CuentaBloqueada();
         }
         return self::issueTokenFor((int) $row['id']);
     }
@@ -486,14 +496,21 @@ final class Auth
         $stmt = $pdo->prepare(
             'SELECT u.*, t.lti_platform_id AS session_lti_platform_id, t.context_id AS session_context_id
              FROM tokens t JOIN users u ON u.id = t.user_id
-             WHERE t.token = ? AND u.active = 1 AND t.created_at > datetime(\'now\', ?)'
+             WHERE t.token = ? AND t.created_at > datetime(\'now\', ?)'
         );
         $stmt->execute([$token, Tokens::limiteSql()]);
         $row = $stmt->fetch();
         $stmt->closeCursor();   // ver Db::get: una lectura abierta hace fallar la escritura que sigue
         if (!$row) {
-            // La app reconoce el 401 y vuelve al login (ver sync_thread.py).
-            Response::error('Sesión vencida o revocada. Vuelve a iniciar sesión.', 401);
+            // La app reconoce el 401 y vuelve al login (ver backend/client.py).
+            Response::error('Sesión vencida o revocada. Vuelve a iniciar sesión.', 401,
+                            ['codigo' => 'sesion_vencida']);
+        }
+        if ((int) $row['active'] !== 1) {
+            // Bloqueada con la sesión abierta (los tokens se borran al
+            // bloquear; esto cubre una cuenta desactivada por otro camino).
+            $pdo->prepare('DELETE FROM tokens WHERE token = ?')->execute([$token]);
+            Response::error(Bloqueos::MENSAJE, 403, ['codigo' => Bloqueos::CODIGO]);
         }
 
         // Solo es informativo (lo muestra admin/tokens.php): basta con
