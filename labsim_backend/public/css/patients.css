@@ -1,5 +1,5 @@
 /* public/css/patients.css — admin/patients.php (biblioteca de fichas clínicas).
- * Toolbar de búsqueda/filtro + botones de acción por fila en la tabla.
+ * Carpetas (inicio y explorador), toolbar de búsqueda y acciones por fila.
  */
 
 .patients-toolbar {
@@ -127,39 +127,157 @@ details.row-menu[open] .row-menu-dropdown { display: flex; }
  * Biblioteca de fichas: carpetas, selección en tanda y tabla densa.
  * ------------------------------------------------------------------ */
 
-/* Carpetas como pastillas: filtro y ubicación a la vez. Planas, sin árbol
- * -- con doscientas fichas lo que ordena es separar por semestre/práctica,
- * no navegar niveles. */
-.folder-bar {
+/* Biblioteca como explorador de carpetas. INICIO: las carpetas como
+ * tarjetas, agrupadas por tema («ABR 2 · ...» va bajo ABR). LISTA: el
+ * explorador al costado y la tabla de la carpeta a la derecha. Las
+ * carpetas siguen siendo planas: el "tema" sale del nombre, no hay árbol. */
+.biblioteca-cabecera { flex-wrap: wrap; gap: var(--space-3); }
+.biblioteca-cabecera .btn { text-decoration: none; margin: 0; }
+.ruta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.35rem; font-size: 1.05rem; }
+.ruta a { text-decoration: none; }
+.ruta-sep { color: var(--color-faint); }
+.ruta-actual { font-weight: 700; }
+
+.icono-carpeta { width: 1.6rem; height: 1.6rem; fill: currentColor; flex: none; }
+.icono-carpeta--sm { width: 1rem; height: 1rem; vertical-align: -0.15rem; }
+
+.tema { margin-top: var(--space-6); }
+.tema-titulo {
+  margin: 0 0 var(--space-3);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.carpetas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: var(--space-4);
+}
+.carpeta {
+  position: relative;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-top: 3px solid var(--color-primary);
+  border-radius: var(--radius-sm) var(--radius-lg) var(--radius-lg) var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-decoration: none;
+  box-shadow: var(--shadow-1);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+/* La pestaña de la carpeta. */
+.carpeta::before {
+  content: '';
+  position: absolute;
+  top: -0.6rem;
+  left: -1px;
+  width: 4.5rem;
+  height: 0.6rem;
+  background: var(--color-primary);
+  border-radius: var(--radius-sm) var(--radius-md) 0 0;
+}
+.carpeta:hover, .carpeta:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+  outline: none;
+}
+.carpeta-cabeza { display: flex; align-items: center; gap: var(--space-2); color: var(--color-primary); }
+.carpeta-numero {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+}
+.carpeta-cuenta { margin-left: auto; font-size: 1.4rem; font-weight: 700; line-height: 1; }
+.carpeta-titulo { font-weight: 600; line-height: 1.3; }
+.carpeta-nombres { font-size: 0.78rem; color: var(--color-muted); line-height: 1.4; }
+.carpeta-tags { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: auto; }
+.carpeta-tags .tag { margin: 0; }
+.carpeta--vacia { opacity: 0.6; }
+/* Vistas (sin carpeta, todas, archivadas): mismas tarjetas, en gris -- no
+ * son carpetas donde se guarda algo. */
+.carpeta--vista { border-top-color: var(--color-secondary); }
+.carpeta--vista::before { background: var(--color-secondary); }
+.carpeta--vista .carpeta-cabeza { color: var(--color-secondary); }
+.carpetas-grid--vistas { grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); }
+
+.biblioteca-cuerpo {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  gap: var(--space-6);
+  margin-top: var(--space-4);
+  align-items: start;
+}
+.biblioteca-cuerpo--inicio { display: block; margin-top: 0; }
+.explorador {
+  position: sticky;
+  top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-right: var(--space-4);
+  border-right: 1px solid var(--color-border);
+}
+.explorador-tema {
+  margin: var(--space-4) 0 var(--space-1);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.explorador-tema:first-child { margin-top: 0; }
+.explorador-item {
+  display: flex;
   align-items: center;
   gap: var(--space-2);
-  margin: 0.9rem 0 0.2rem;
-}
-.folder-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.15rem 0.7rem;
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  font-size: 0.8rem;
-  text-decoration: none;
+  padding: 0.3rem var(--space-2);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
   color: var(--color-text);
+  text-decoration: none;
+}
+.explorador-item .icono-carpeta { color: var(--color-muted); align-self: flex-start; margin-top: 0.1rem; }
+.explorador-item:hover { background: var(--color-row-alt); }
+.explorador-item.is-active { background: var(--color-primary-soft); font-weight: 600; }
+.explorador-item.is-active .icono-carpeta { color: var(--color-primary); }
+.explorador-nombre { flex: 1 1 auto; min-width: 0; line-height: 1.3; }
+.explorador-cuenta { font-size: 0.72rem; color: var(--color-muted); }
+
+/* En un teléfono el explorador va arriba de la tabla, en dos columnas. */
+@media (max-width: 56rem) {
+  .biblioteca-cuerpo { grid-template-columns: minmax(0, 1fr); }
+  .explorador {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    padding: 0 0 var(--space-4);
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .explorador-tema { grid-column: 1 / -1; }
+}
+
+/* Encabezado de carpeta dentro de la tabla (vistas Todas y Archivadas). */
+.table-dense tr.fila-carpeta td {
+  padding-top: var(--space-4);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-primary);
   background: var(--color-surface);
+  border-bottom: 2px solid var(--color-primary-soft);
 }
-.folder-pill:hover { background: var(--color-row-alt); }
-.folder-pill.is-active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-primary-contrast);
-}
-.folder-pill-count { font-size: 0.7rem; opacity: 0.7; }
-/* Archivadas queda a la derecha y separada: es otra vista, no una carpeta
- * más -- lo archivado no se mezcla con lo vivo ni de refilón. */
-.folder-pill--archive { margin-left: auto; }
+
 .folder-admin { margin: 0; }
+.folder-admin > summary { list-style: none; margin: 0; }
+.folder-admin > summary::-webkit-details-marker { display: none; }
+.folder-admin-help { padding: 0 0.9rem; margin: 0 0 var(--space-2); }
 .row-menu-dropdown--wide { min-width: 300px; }
 .folder-form {
   display: flex;
@@ -189,6 +307,9 @@ details.row-menu[open] .row-menu-dropdown { display: flex; }
   background: var(--color-warn-bg);
   color: var(--color-warn-text);
 }
+/* Sin esto el display:flex de arriba le gana a [hidden] y la barra se veía
+ * siempre, con "0 seleccionada(s)". */
+.bulk-bar[hidden] { display: none; }
 .bulk-bar .btn { margin: 0; }
 .bulk-move { display: inline-flex; gap: 0.3rem; align-items: center; }
 .bulk-move select { width: auto; margin: 0; }

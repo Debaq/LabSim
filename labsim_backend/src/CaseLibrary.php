@@ -38,6 +38,61 @@ final class CaseLibrary
     }
 
     /**
+     * Separa el nombre de una carpeta en tema, número y título, para que la
+     * vista agrupe sin otra tabla: "ABR 2 · Recién nacido con hipoacusia" es
+     * tema "ABR", número "2", título "Recién nacido con hipoacusia". Sin
+     * " · " el nombre entero es el título y no tiene tema.
+     *
+     * @return array{tema:string, numero:string, titulo:string}
+     */
+    public static function partesNombre(string $nombre): array
+    {
+        $nombre = trim($nombre);
+        $corte = mb_strpos($nombre, ' · ');
+        if ($corte === false) {
+            return ['tema' => '', 'numero' => '', 'titulo' => $nombre];
+        }
+        $prefijo = trim(mb_substr($nombre, 0, $corte));
+        $titulo = trim(mb_substr($nombre, $corte + 3));
+        $numero = '';
+        if (preg_match('/^(.*\S)\s+(\d+)$/u', $prefijo, $m)) {
+            $prefijo = $m[1];
+            $numero = $m[2];
+        }
+        return ['tema' => $prefijo, 'numero' => $numero, 'titulo' => $titulo !== '' ? $titulo : $prefijo];
+    }
+
+    /**
+     * Carpetas agrupadas por tema (ver partesNombre), en el orden en que ya
+     * vienen (por nombre). Las sin tema van al final, juntas.
+     *
+     * @param array<int,array> $folders filas de folders()
+     * @return array<int,array{tema:string, carpetas:array<int,array>}>
+     */
+    public static function agruparPorTema(array $folders): array
+    {
+        $grupos = [];
+        $sinTema = [];
+        foreach ($folders as $f) {
+            $f += self::partesNombre((string) $f['name']);
+            if ($f['tema'] === '') {
+                $sinTema[] = $f;
+                continue;
+            }
+            $clave = mb_strtolower($f['tema']);
+            if (!isset($grupos[$clave])) {
+                $grupos[$clave] = ['tema' => $f['tema'], 'carpetas' => []];
+            }
+            $grupos[$clave]['carpetas'][] = $f;
+        }
+        $grupos = array_values($grupos);
+        if ($sinTema !== []) {
+            $grupos[] = ['tema' => '', 'carpetas' => $sinTema];
+        }
+        return $grupos;
+    }
+
+    /**
      * Crea una carpeta y devuelve su id, o null si el nombre ya estaba
      * (índice único sin distinguir mayúsculas: dos "Semestre 1" no son dos
      * carpetas, son la misma escrita dos veces).

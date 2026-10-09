@@ -5,6 +5,29 @@ este archivo no se mantienen**: lo pendiente vive en `TODO.md`, que enlaza acá
 por el título de cada sección. Una decisión nueva se agrega como sección al
 principio de este archivo; si deja algo pendiente, eso va además a `TODO.md`.
 
+## Fichas clínicas como carpetas (2026-10-09)
+
+La biblioteca de fichas (`admin/patients.php`) pasó de una fila de pastillas
+sobre una tabla a un explorador de carpetas:
+
+- **Inicio**: las carpetas como tarjetas (cuántas fichas, los primeros
+  nombres, cuántas en agenda o incompletas), agrupadas por tema. El buscador
+  del inicio busca en todas las fichas y cambia las tarjetas por la tabla.
+- **Dentro de una carpeta**: ruta arriba (Fichas clínicas › ABR › título),
+  explorador al costado y la tabla de siempre. "Todas las fichas" y
+  "Archivadas" muestran la tabla con un encabezado por carpeta.
+- **El tema sale del nombre** («ABR 2 · Recién nacido con hipoacusia»: tema
+  ABR, orden 2), no de otra tabla: las carpetas siguen planas y renombrar
+  basta para reordenar. Sin « · », la carpeta va en "Otras carpetas".
+- Se arregló de paso la barra de acciones en tanda, que se veía siempre con
+  "0 seleccionada(s)" (su `display:flex` le ganaba a `hidden`).
+
+Las carpetas iniciales las armó Claude desde la consola remota mirando cada
+caso (audiograma, ABR/EOA, perfil neural, anamnesis): ABR 1-4 (RN que pasa,
+RN con hipoacusia, neuropatía, adulto coclear/retrococlear), Audiología 1-2
+(conductiva, sensorioneural) y Revisar (caso de prueba, RN duplicados; la
+copia vieja de los 8 RN quedó archivada).
+
 ## Consola remota: Claude con acceso a la base viva, por token temporal (2026-10-09)
 
 Para diagnosticar y arreglar en producción sin pasarle la contraseña a nadie.
