@@ -9,7 +9,8 @@ from auth.func_login import LoginConnect
 from auth.login_busy_dialog import LoginBusyDialog
 from auth import login_worker
 
-# Largo del código que entrega la actividad LabSim en Moodle (ver
+# Largo del código de ingreso que entrega la actividad LabSim en la
+# plataforma del curso (Moodle u otra con LTI; ver
 # labsim_backend/public/lti/launch.php).
 LARGO_CODIGO = 6
 
@@ -18,7 +19,8 @@ class MainLogin(QWidget):
     """Ventana de ingreso.
 
     Lo que abre es el ingreso del alumno: un solo campo para el código de 6
-    dígitos de Moodle, que se envía apenas está completo (no hay que hacer
+    dígitos que da la plataforma del curso (Moodle u otra, por LTI), que
+    se envía apenas está completo (no hay que hacer
     clic en nada). Abajo, un link pasa al ingreso con usuario y contraseña
     (docentes y administración), y desde ahí otro vuelve al código.
 
@@ -63,7 +65,7 @@ class MainLogin(QWidget):
         col.setSpacing(4)
 
         fila = QHBoxLayout()
-        etiqueta = QLabel("Código de Moodle :")
+        etiqueta = QLabel("Código de ingreso :")
         self.Le_codigo = QLineEdit()
         self.Le_codigo.setObjectName("Le_codigo")
         self.Le_codigo.setPlaceholderText("6 dígitos")
@@ -80,7 +82,7 @@ class MainLogin(QWidget):
         fila.addWidget(self.Le_codigo, 1)
         col.addLayout(fila)
 
-        ayuda = QLabel("Lo muestra la actividad LabSim de tu curso en Moodle.")
+        ayuda = QLabel("Lo muestra la actividad LabSim de tu curso.")
         ayuda.setStyleSheet("color: #666;")
         col.addWidget(ayuda)
         col.addWidget(self._link("Ingresar con usuario y contraseña", self.PAGINA_USUARIO))
@@ -113,7 +115,7 @@ class MainLogin(QWidget):
         fila.addLayout(campos, 1)
         fila.addWidget(self.btn_login, 0, Qt.AlignBottom)
         col.addLayout(fila)
-        col.addWidget(self._link("Ingresar con el código de Moodle", self.PAGINA_CODIGO))
+        col.addWidget(self._link("Ingresar con código de ingreso", self.PAGINA_CODIGO))
         self.setTabOrder(self.Le_name, self.Le_passw)
         return pagina
 
