@@ -318,8 +318,7 @@ La misma página de la actividad LabSim que te da el código de ingreso muestra,
 
 | Parte | Qué dice |
 |---|---|
-| **Tu actividad** | Pacientes atendidos (los intentos de práctica libre van aparte, entre paréntesis), los minutos en total y el tiempo promedio entre acciones |
-| **Pacientes atendidos por semana** | Cuántas atenciones cerraste cada semana |
+| **Tu actividad** | Pacientes atendidos (los intentos de práctica libre van aparte, entre paréntesis) y los minutos en total |
 | **Tu última atención** | Si fue una audiometría, el logro de tu técnica en gráficos: el anillo con el porcentaje de esa atención; al lado, tu logro en cada audiometría, en orden, con esa atención marcada (verde desde 85 %, ámbar desde 60 %), y debajo un cuadrito por cada paso de la técnica (verde si lo cumpliste, rojo si no), agrupados por prueba: → orden, O X aéreos, < > óseos. Con el mouse encima, cada cuadrito dice qué paso es |
 
 **Ver mis pacientes** abre tu página personal, *Mis pacientes atendidos*. El botón de arriba a la izquierda (☀) cambia entre tema claro y oscuro.
