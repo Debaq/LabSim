@@ -144,8 +144,13 @@ ALUMNO = {"user": "valentina.rojas", "name": "Valentina Rojas", "permission": 44
 
 
 def procesar(n=6):
+    """Deja que Qt haga lo pendiente, incluidos los deleteLater(): sin
+    eso, al cambiar de sección los botones de la anterior seguían en la
+    foto (en la app se borran al volver al bucle de eventos)."""
+    from PySide6.QtCore import QCoreApplication, QEvent
     for _ in range(n):
         APP.processEvents()
+        QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)
 
 
 def guardar(widget, nombre):
@@ -333,9 +338,14 @@ def ficha_y_chat():
     chat._burbuja_usuario("¿Siente algún ruido o zumbido en los oídos?")
     chat._burbuja_persona("p1", "Hernán", "Un siseo, en los dos oídos, más que nada cuando está todo en silencio.")
     procesar()
-    frame_chat = w.subw["CHAT"]
-    frame_chat.resize(600, 660)
-    guardar(frame_chat, "chat")
+    guardar(subventana(w.subw["CHAT"]), "chat")
+    # Sin respuesta del servidor: tras el reintento automático queda el botón.
+    chat._burbuja_usuario("¿Desde cuándo nota que escucha menos?")
+    chat._mensaje_pendiente = "¿Desde cuándo nota que escucha menos?"
+    chat._intentos = chat.REINTENTOS_AUTOMATICOS
+    chat._on_fallo(chat._case_id, chat._mensaje_pendiente, "sin conexión")
+    procesar()
+    guardar(subventana(w.subw["CHAT"]), "chat-reintentar")
     w.close()
 
 
@@ -472,6 +482,16 @@ import numpy as np  # noqa: E402
 from PySide6.QtWidgets import QPushButton  # noqa: E402
 
 
+def subventana(frame):
+    """La QMdiSubWindow que envuelve al marco: se ve con el tamaño del layout,
+    como en la app."""
+    from PySide6.QtWidgets import QMdiSubWindow
+    sub = frame
+    while sub is not None and not isinstance(sub, QMdiSubWindow):
+        sub = sub.parentWidget()
+    return sub or frame
+
+
 def mover(frame, x, y):
     from PySide6.QtWidgets import QMdiSubWindow
     sub = frame
@@ -562,10 +582,19 @@ def impedanciometro():
     z.refresh()
     procesar()
     guardar(fz, "impedanciometro-timpanograma")
-    z.reflex_results[0]["IPSI"] = [None, None, None, None]
-    z.reflex_results[1]["CONTRA"] = [None, None, 100, 110, None]
+    w.close()
+    # Reflejos con una curva de ejemplo: Ménière, OD sano, ipsi a 90 dB
+    w, frame, ag = atendiendo("38")
+    frame.hide()
+    ir_a_box(w, "Box Audiología")
+    fz = abrir(w, "Z")
+    z = fz.obj
     z.show_screen(z.Z_reflex)
-    z.refresh_reflex_table()
+    z.dial.setValue(90)
+    z.reflex_stimulus()
+    while z.time_reflex.isActive():
+        z.reflex_animate()
+    z.reflex_tone.stop()
     procesar()
     guardar(fz, "impedanciometro-reflejos")
     w.close()
@@ -595,6 +624,26 @@ def impedanciometro_decay_etf():
         z.etf_maniobra(maniobra)
     guardar(fz, "impedanciometro-etf")
     w.close()
+    # ETF, membrana perforada: el caso de otitis crónica con la ficha de un
+    # oído perforado y trompa permeable (dato de ejemplo para el manual).
+    CASOS["41"]["ETF"] = ["Normal", "Permeable"]
+    try:
+        w, frame, ag = atendiendo("41")
+        frame.hide()
+        ir_a_box(w, "Box Audiología")
+        fz = abrir(w, "Z")
+        z = fz.obj
+        z.side_change()
+        z.show_screen(z.Z_etf)
+        z.dial.setValue(-200)
+        z.etf_perforada()
+        while z.time_etf.isActive():
+            z.etf_animate()
+        procesar()
+        guardar(fz, "impedanciometro-etf-perforada")
+        w.close()
+    finally:
+        CASOS["41"]["ETF"] = ["Normal", "Disfunción tubaria"]
 
 
 @captura
@@ -604,7 +653,14 @@ def otoscopia():
     ir_a_box(w, "Box Audiología")
     fo = abrir(w, "OT")
     o = fo.obj
-    guardar(fo, "otoscopio")
+    # Fotos de ejemplo (capturas/otoscopia/), con el cono apuntando al conducto.
+    carpeta = pathlib.Path(__file__).with_name("otoscopia")
+    o._on_fotos_listas(o._case_id_pedido, (carpeta / "od.webp").read_bytes(), (carpeta / "oi.webp").read_bytes())
+    procesar()
+    for visor in (o.lbl_od, o.lbl_oi):
+        visor._mouse_pos = QPoint(visor.width() // 2, visor.height() // 2)
+        visor.update()
+    guardar(subventana(fo), "otoscopio")
     o.tabs.setCurrentIndex(1)
     o.informe.from_dict({"od": {"cae": ["cae_normal"]},
                          "oi": {"cuadrantes": {"pars_flaccida": ["retraction", "cholesteatoma"]},

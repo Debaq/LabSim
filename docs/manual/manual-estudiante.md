@@ -18,9 +18,10 @@ TecMedHub · Universidad Austral de Chile, Sede Puerto Montt
 | **Guía rápida** | Del curso en línea al paciente atendido, paso a paso: el código, la agenda, la atención, los exámenes y el cierre |
 | **I — Entrar** | Qué es LabSim, cómo se ingresa, la ventana principal y qué pasa con la sesión |
 | **II — Atender** | La agenda, la práctica libre, la ficha, la conversación con el paciente, el cierre y lo que queda guardado |
-| **III — Box Audiología** | Audiómetro, instrucciones al paciente, enmascaramiento, logoaudiometría, supraliminares, acumetría, otoscopía e impedanciómetro |
-| **IV — Box Electrofisiología** | ABR, electrococleografía, AABR, emisiones otoacústicas y VEMP |
-| **V — Ajustes y problemas** | Atajos de teclado, controlador LabSim, mouse para zurdos, reportar un problema y problemas frecuentes |
+| **III — Tu avance en la web** | Mis pacientes en la web: cómo vas, tu técnica de audiometría, el detalle de cada atención, los informes y la ficha de estudio |
+| **IV — Box Audiología** | Audiómetro, instrucciones al paciente, enmascaramiento, logoaudiometría, supraliminares, acumetría, otoscopía e impedanciómetro |
+| **V — Box Electrofisiología** | ABR, electrococleografía, AABR, emisiones otoacústicas y VEMP |
+| **VI — Ajustes y problemas** | Atajos de teclado, controlador LabSim, mouse para zurdos, reportar un problema y problemas frecuentes |
 
 > **Aviso sobre las imágenes.** Las capturas son de la aplicación real, con pacientes inventados para este manual (los mismos de la práctica libre). Los nombres, RUT y fechas no corresponden a personas reales. Lo que muestre tu pantalla puede variar según los equipos que tu curso tenga habilitados.
 
@@ -242,8 +243,11 @@ Los intentos de práctica no aparecen como citas en la agenda ni cuentan como pr
 ![La entrevista: el paciente viene con su esposa, y contesta quien corresponda](img/estudiante/chat.png)
 
 - Si el paciente viene **acompañado** (un niño con su madre, un adulto mayor con su esposa), el encabezado dice a quiénes estás atendiendo. No eliges a quién le hablas: nómbralo al escribir y contesta quien corresponda.
-- Mientras se prepara la respuesta aparece *«Pensando la respuesta…»*. Si no llega, *Reintentar*.
+- Mientras se prepara la respuesta aparece *«Pensando la respuesta…»*.
+- Si no llega (sin conexión, o el servidor no respondió), abajo aparece *«No hubo respuesta. Puedes reintentar.»* y el botón **Reintentar**, que vuelve a enviar la misma pregunta: no hay que escribirla de nuevo.
 - La conversación queda guardada con la atención; tu docente la lee y puede dejarte comentarios.
+
+![Cuando no llega la respuesta: Reintentar](img/estudiante/chat-reintentar.png)
 
 ### 7.3 Los avisos de la secretaria
 
@@ -298,29 +302,153 @@ La OIRS es parte del ejercicio: después de la atención, el paciente virtual pu
 
 ![Los exámenes guardados de una atención](img/estudiante/mis-pacientes-examenes.png)
 
-El informe en PDF de cada examen y el resultado de tu técnica de audiometría se ven en la web, desde la actividad del curso: *Ver mis pacientes*.
+El informe en PDF de cada examen y el resultado de tu técnica de audiometría se ven en la web, desde la actividad del curso: *Ver mis pacientes* (parte III).
 
 ---
 
-# Parte III — Box Audiología
+# Parte III — Tu avance en la web
+
+Lo que haces en LabSim también se ve en la web, desde la actividad del curso: tus pacientes atendidos, cómo va tu técnica, los comentarios de tu docente y los informes en PDF. No hace falta tener LabSim abierto y se puede mirar desde el celular.
+
+## 11. Entrar a la web
+
+La misma página de la actividad LabSim que te da el código de ingreso muestra, debajo, un resumen de tu actividad:
+
+![La actividad del curso: el código, «Ver mis pacientes» y el resumen de tu actividad](img/estudiante/web-ingreso-lti.png)
+
+| Parte | Qué dice |
+|---|---|
+| **Tu actividad** | Pacientes atendidos (los intentos de práctica libre van aparte, entre paréntesis), los minutos en total y el tiempo promedio entre acciones |
+| **Pacientes atendidos por semana** | Cuántas atenciones cerraste cada semana |
+| **Tu última atención** | El paciente, tus pausas y, si fue una audiometría, el logro de tu técnica. En la franja, cada barra es una acción en el equipo: su ancho es la demora desde la anterior y un borde rojo arriba marca una pausa de 30 s o más |
+
+**Ver mis pacientes** abre tu página personal, *Mis pacientes atendidos*. El botón de arriba a la izquierda (☀) cambia entre tema claro y oscuro.
+
+![En el celular, las mismas tarjetas una debajo de otra](img/estudiante/web-mis-pacientes-movil.png)
+
+Si dejas la página abierta mucho rato, la sesión vence. Vuelve a la actividad del curso y entra otra vez con *Ver mis pacientes*:
+
+![Sesión vencida en la web](img/estudiante/web-sesion-vencida.png)
+
+## 12. Cómo vas
+
+La primera parte de *Mis pacientes* resume tu avance:
+
+![Cómo vas: el resumen de tus atenciones](img/estudiante/web-como-vas.png)
+
+| Tarjeta | Qué cuenta |
+|---|---|
+| **Pacientes atendidos** | Las atenciones de los prácticos que cerraste; debajo, los intentos de práctica libre |
+| **Tu técnica de audiometría** | El logro promedio de tu técnica y cuántos puntos subiste desde tus primeras audiometrías |
+| **Tiempo por paciente** | Lo que demoras normalmente, desde *Atender* hasta cerrar |
+| **Preguntas al paciente** | Las que haces normalmente en la anamnesis |
+| **Informes entregados** | Cuántos informes guardaste, por examen |
+| **Comentarios de tu docente** | Cuántos te dejó y en cuántas atenciones |
+
+### 12.1 Objetivos del curso
+
+![Los objetivos del curso y cuánto llevas de cada uno](img/estudiante/web-objetivos.png)
+
+Si tu docente fijó objetivos para el curso, aparecen aquí con tu avance: **✓** cuando ya lo cumpliste y un círculo vacío mientras no. Los objetivos que LabSim no puede medir (por ejemplo, explicar el examen al paciente) aparecen solo como texto: esos los revisa tu docente.
+
+### 12.2 Tu técnica, atención por atención
+
+![Tu técnica de audiometría en cada atención y los pasos que más se te pasan](img/estudiante/web-tecnica-grafico.png)
+
+Cada punto del gráfico es una audiometría, en orden: **verde** desde 85 % de logro, **ámbar** desde 60 % y **rojo** bajo eso. Los huecos son intentos de práctica libre. Pincha un punto para ver qué pasos cumpliste en esa atención.
+
+Debajo, **En qué fijarte** junta los pasos de la técnica que más se te pasan y en cuántas audiometrías: *3 de 5* quiere decir que ese paso faltó en 3 de las 5 audiometrías en que correspondía.
+
+## 13. Tus atenciones
+
+### 13.1 La lista
+
+![Los pacientes que has atendido](img/estudiante/web-lista-atenciones.png)
+
+**Pacientes que has atendido** muestra tus atenciones de los prácticos, de la más nueva a la más antigua. Cada una dice el procedimiento, los minutos con el paciente, las preguntas que le hiciste y el logro de tu técnica, y lleva etiquetas para los informes guardados (*ABR*, *Otoscopia*…), los comentarios de tu docente (*Tu docente comentó (N)*) y los mensajes de la OIRS simulada (*Felicitación* o *Sugerencia de mejora*).
+
+![La práctica libre: cada intento por separado](img/estudiante/web-practica-libre.png)
+
+Debajo va **Práctica libre**: cada vez que abriste un paciente de práctica queda como un intento aparte.
+
+Pincha una atención para ver el detalle.
+
+### 13.2 Datos y evolución
+
+![Datos de la atención y tu evolución, con los comentarios de tu docente](img/estudiante/web-atencion-datos.png)
+
+**Datos de la atención** tiene el procedimiento, la cita, el tiempo con el paciente y las preguntas que le hiciste. **Tu evolución registrada** es la evolución que escribiste al cerrar. Bajo cada una, en amarillo, los comentarios de tu docente.
+
+### 13.3 Pasos de la técnica de audiometría
+
+Si la atención tuvo audiometría, esta tarjeta dice qué pasos de la técnica cumpliste: el logro total y, debajo, cada prueba con su porcentaje.
+
+![Los pasos de la técnica, cerrados](img/estudiante/web-atencion-tecnica.png)
+
+Pincha una prueba para abrirla:
+
+![Una prueba abierta: cada paso, lo que hiciste y los umbrales que obtuviste](img/estudiante/web-atencion-tecnica-abierta.png)
+
+Cada paso lleva **✓** si lo cumpliste o **!** si hay que revisarlo y, en gris, lo que hiciste (por ejemplo, *Se partió en 1 kHz a 40 dB HL* o *No se repitió 1 kHz*). Las reglas por oído van bajo **OD** y **OI**. La tabla final compara cada umbral que obtuviste con la audición del paciente:
+
+| Resultado | Qué significa |
+|---|---|
+| **Corresponde** | El umbral coincide con la audición del paciente |
+| **Curva sombra** | El umbral que obtuviste es el del otro oído, no el del oído evaluado |
+| **No corresponde** | El umbral no coincide con la audición del paciente |
+| **No verificó 2/3 ni 3/5** | No confirmaste el umbral antes de cambiar de frecuencia |
+
+### 13.4 Informes, mensajes, ficha y conversación
+
+![Tus informes, con su PDF](img/estudiante/web-atencion-informes.png)
+
+**Tus informes** lista los exámenes que guardaste en esa atención, con la hora de la última actualización. **Ver PDF** abre el informe (sección 14).
+
+![Un mensaje de la OIRS simulada](img/estudiante/web-atencion-mensaje-sugerencia.png)
+
+**Mensajes recibidos** junta lo que te llegó por esa atención: los de tu docente y los de la OIRS simulada, los mismos de la *Bandeja de entrada* de LabSim (sección 9).
+
+**Ficha clínica** es la ficha del paciente, con su historial; tu evolución queda como la última entrada.
+
+![La conversación, con un comentario de tu docente en amarillo](img/estudiante/web-atencion-conversacion.png)
+
+**Conversación con el paciente** es la entrevista completa. Los globos amarillos son comentarios de tu docente sobre ese turno en particular.
+
+En un intento de **práctica libre**, la primera tarjeta es la **Ficha de estudio**, si tu docente la dejó disponible:
+
+![Un intento de práctica: la ficha de estudio arriba](img/estudiante/web-atencion-practica.png)
+
+## 14. Los informes y la ficha de estudio en PDF
+
+Cada informe en PDF tiene los datos del paciente, quién lo hizo (*Evaluador*) y la fecha, y después lo que guardaste en el equipo: las curvas y sus valores, los hallazgos y tu conclusión.
+
+![Informe de ABR](img/estudiante/web-informe-abr.png) ![Informe de otoscopía](img/estudiante/web-informe-otoscopia.png)
+
+La **ficha de estudio** tiene los resultados del caso, para comparar con lo que obtuviste en tu intento: la anamnesis, la otoscopía, la audiometría, la acumetría, las supraliminares, la logoaudiometría y los demás exámenes del caso. Solo existe para los pacientes de práctica libre, si tu docente la dejó disponible, y se abre después de cerrar al menos un intento.
+
+![Ficha de estudio, primera hoja](img/estudiante/web-ficha-estudio-1.png) ![Ficha de estudio, segunda hoja](img/estudiante/web-ficha-estudio-2.png)
+
+---
+
+# Parte IV — Box Audiología
 
 Los equipos de la audiología: **A** audiómetro, **AC** acumetría, **OT** otoscopía y **Z** impedanciómetro.
 
 ![Los botones del Box Audiología, con una atención abierta](img/estudiante/barra-audiologia.png)
 
-## 11. El audiómetro
+## 15. El audiómetro
 
 ![El audiómetro: canal 1 a la izquierda, canal 2 a la derecha](img/estudiante/audiometro.png)
 
 El audiómetro tiene **dos canales**: el **canal 1** a la izquierda y el **canal 2** a la derecha. Cada canal tiene su propia pantalla, sus botones y su perilla de intensidad.
 
-### 11.1 La pantalla
+### 15.1 La pantalla
 
 - **Al centro**: la frecuencia (*1000 Hz*), la prueba (*Umbrales* o *Logoaudiometría*) y el cronómetro.
 - **Indicador de respuesta**: una franja que se pone **lila** cuando el paciente **levanta la mano**.
 - **En cada canal**: la intensidad (*dB HL*), el transductor (*Aerea*, *Oséa*), el paso (*Pasos: 5 dB*), la salida (*Derecha*, *Izquierda*), el estímulo (*Tono*, *Narrow Band Noise*…), el modo (*Continuo*, *Pulsado*, *Alternado*) y si está invertido. El indicador del canal se pone lila mientras suena.
 
-### 11.2 Los controles de cada canal
+### 15.2 Los controles de cada canal
 
 | Control | Qué hace |
 |---|---|
@@ -332,7 +460,7 @@ El audiómetro tiene **dos canales**: el **canal 1** a la izquierda y el **canal
 | **Invertir** | El canal queda sonando continuo y *Estímulo* lo silencia: así se deja el ruido enmascarante encendido |
 | **Estímulo** (botón grande) | Presenta el estímulo **mientras lo mantienes apretado** |
 
-### 11.3 Los controles del centro
+### 15.3 Los controles del centro
 
 | Control | Qué hace |
 |---|---|
@@ -341,14 +469,14 @@ El audiómetro tiene **dos canales**: el **canal 1** a la izquierda y el **canal
 | **Ext. Rango** | Extiende el máximo de la vía aérea de 100 a 120 dB HL |
 | **Alta frec.** | Suma las frecuencias de 9 a 16 kHz |
 | **Alternado** | Pone los dos canales en modo alternado (un oído y el otro) |
-| **Talkback** | Le dice al paciente la instrucción elegida en *Comandos de voz* (sección 12) |
+| **Talkback** | Le dice al paciente la instrucción elegida en *Comandos de voz* (sección 16) |
 | **Monitor ch1 / ch2** | El volumen de cada canal en tus fonos |
 | **Iniciar · Detener · Borrar** | El cronómetro de la pantalla |
-| **+1 · -1 · Limpiar** | Los aciertos de la logoaudiometría (sección 14) |
+| **+1 · -1 · Limpiar** | Los aciertos de la logoaudiometría (sección 18) |
 
 Los límites de intensidad son los del equipo: la vía aérea va de -15 a 100 dB HL (120 con *Ext. Rango*) y la vía ósea tiene máximos más bajos en los graves.
 
-## 12. Las instrucciones al paciente
+## 16. Las instrucciones al paciente
 
 El paciente responde según la **última instrucción** que le diste. Las instrucciones se eligen en la ventana **Comandos de voz** y se le dicen con **Talkback**.
 
@@ -361,7 +489,7 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 | Instrucción | Para | Qué hace el paciente |
 |---|---|---|
 | **Colocar fonos** / **Colocar vibrador** | Umbrales sin enmascarar | Levanta la mano mientras suena un tono que oye |
-| **Aerea + ruido** / **vibrador + ruido** | Umbrales enmascarados | Igual, con ruido en el otro oído (sección 13) |
+| **Aerea + ruido** / **vibrador + ruido** | Umbrales enmascarados | Igual, con ruido en el otro oído (sección 17) |
 | **Escuche mi voz** | Umbral de detección de la voz | Con *Habla* y *pa pa pa* elegido, levanta la mano si lo oye |
 | **Pitos fuertes** | Umbral de molestia (LDL) | Dice *«molesta»* cuando el tono le molesta |
 | **Cambie de volumen** | SISI | Dice *«sí»* cuando nota que el tono subió |
@@ -373,7 +501,7 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 
 > Cualquier otra instrucción **reemplaza** la anterior. Si después de *Pitos fuertes* le preguntas *¿Molesta?*, el paciente deja de responder a la LDL hasta que repitas *Pitos fuertes*.
 
-## 13. Enmascaramiento
+## 17. Enmascaramiento
 
 Para enmascarar, usa el **canal 1 para el tono** y el **canal 2 para el ruido**, en el oído contrario:
 
@@ -383,7 +511,7 @@ Para enmascarar, usa el **canal 1 para el tono** y el **canal 2 para el ruido**,
 
 El paciente responde según el nivel del ruido, como uno real: con poco ruido sigue oyendo el tono por el otro oído (curva sombra); con el ruido justo responde con su umbral real; con demasiado ruido deja de oír.
 
-## 14. Logoaudiometría y listas de palabras
+## 18. Logoaudiometría y listas de palabras
 
 Elegir **Habla** como estímulo cambia la prueba a **Logoaudiometría**: la pantalla muestra los aciertos (*0/25 : 0%*) y el otro canal pasa a **Speech Noise**. En logoaudiometría solo se enmascara con **SN**.
 
@@ -396,9 +524,9 @@ Elegir **Habla** como estímulo cambia la prueba a **Logoaudiometría**: la pant
 
 Para volver a los umbrales, elige **Tono** o **FM**.
 
-## 15. Pruebas supraliminares
+## 19. Pruebas supraliminares
 
-Todas se hacen con el audiómetro y la instrucción de la tabla de la sección 12.
+Todas se hacen con el audiómetro y la instrucción de la tabla de la sección 16.
 
 - **SISI**: instrucción *Cambie de volumen*, paso **1** dB. Con el tono sonando, sube la intensidad de a 1 dB; el paciente dice *«sí»* cuando lo nota. Las subidas de 5 dB las nota siempre (sirven para familiarizarlo).
 - **Fowler**: los dos canales en *Tono*, uno a cada oído, **Alternado**, e instrucción *Dos pitos*. Manteniendo *Estímulo*, elige *¿Sonidos iguales?* o *¿En qué oído?* y *Talkback*: el paciente contesta. Para otra frecuencia, repite *Dos pitos*.
@@ -406,7 +534,7 @@ Todas se hacen con el audiómetro y la instrucción de la tabla de la sección 1
 - **LDL**: instrucción *Pitos fuertes*. El paciente dice *«molesta»* al **presentar** el tono a una intensidad que le molesta.
 - **Stenger**: instrucción *Mano levantada en ruido*, con los dos canales sonando, uno a cada oído.
 
-## 16. Acumetría
+## 20. Acumetría
 
 **AC** abre la acumetría con diapasones de **500 Hz** y **1000 Hz**. Abajo de cada prueba, un registro va mostrando lo que haces y lo que contesta el paciente.
 
@@ -425,12 +553,14 @@ Todas se hacen con el audiómetro y la instrucción de la tabla de la sección 1
 
 LabSim no te da el resultado: la interpretación la concluyes tú con lo que contestó el paciente.
 
-## 17. Otoscopía
+## 21. Otoscopía
 
 **OT** abre el otoscopio, con un visor para cada oído.
 
 - Mueve el mouse sobre el visor para **mirar por el otoscopio**: se ve un círculo de luz que sigue al cursor; fuera del visor, todo queda negro.
 - **Cono pediátrico** o **Cono adulto** cambia el tamaño del campo que se ve.
+
+![El otoscopio: con el mouse sobre cada visor se ve la membrana de ese oído](img/estudiante/otoscopio.png)
 
 En la pestaña **Informe** marcas lo que viste:
 
@@ -442,11 +572,11 @@ En la pestaña **Informe** marcas lo que viste:
 
 **Limpiar marcas** borra el esquema de ese oído.
 
-## 18. Impedanciómetro
+## 22. Impedanciómetro
 
 **Z** abre el impedanciómetro. Las teclas bajo la pantalla cambian de función según la pantalla; su nombre aparece en la fila de abajo de la pantalla.
 
-### 18.1 Timpanometría
+### 22.1 Timpanometría
 
 ![Un timpanograma: compliance, presión, volumen y gradiente](img/estudiante/impedanciometro-timpanograma.png)
 
@@ -456,17 +586,17 @@ En la pestaña **Informe** marcas lo que viste:
 
 Las otras teclas cambian la dirección del barrido, la escala (en cc) y los límites del barrido (en daPa). A la derecha de la curva: *Compliance*, *Presure*, *Volume* y *Gradient*.
 
-### 18.2 Reflejos
+### 22.2 Reflejos
 
-![La pantalla de reflejos](img/estudiante/impedanciometro-reflejos.png)
+![Un reflejo ipsilateral del OD a 500 Hz, presente a 90 dB](img/estudiante/impedanciometro-reflejos.png)
 
 1. **Reflejos**, y elige **IPSI** o **CONTRA** (también con un clic sobre la pantalla).
 2. Elige la frecuencia con la primera tecla (*NBN* solo existe en CONTRA).
 3. Ajusta la intensidad con la perilla (de a 5 dB) y presiona **Inicio**: se dibuja la respuesta.
 
-Cuando hay reflejo, el equipo anota en la tabla la intensidad que usaste.
+Cuando hay reflejo, la curva baja mientras dura el tono y vuelve a la línea base al terminar, y el equipo anota en la tabla (*Threshold*) la intensidad que usaste. Sin reflejo, la curva queda plana.
 
-### 18.3 Tone Decay
+### 22.3 Tone Decay
 
 ![Tone Decay: la contracción durante los 10 s y lo que queda de ella](img/estudiante/impedanciometro-decay.png)
 
@@ -476,7 +606,7 @@ Cuando hay reflejo, el equipo anota en la tabla la intensidad que usaste.
 
 La curva muestra la contracción durante los 10 s y, a la derecha, cuánto de la amplitud inicial queda a los **5 s** y a los **10 s**. Si no hay reflejo a esa intensidad, la curva queda plana y no hay porcentaje.
 
-### 18.4 Función tubaria (ETF)
+### 22.4 Función tubaria (ETF)
 
 La pantalla **ETF** tiene dos pruebas; la primera tecla (**Prueba**) cambia entre ellas. Cuál corresponde lo decides tú, según lo que viste en la otoscopía y en el timpanograma.
 
@@ -495,17 +625,19 @@ A la derecha queda la presión del pico de cada timpanograma. Las diferencias so
 1. Con la perilla, elige la presión (por ejemplo, -200 o +200 daPa).
 2. **Inicio**: durante 10 s el paciente traga tres veces (las líneas *trague*).
 
+![ETF con membrana perforada: la presión del conducto con cada deglución](img/estudiante/impedanciometro-etf-perforada.png)
+
 A la derecha quedan la presión inicial y la final.
 
 ---
 
-# Parte IV — Box Electrofisiología
+# Parte V — Box Electrofisiología
 
 Los equipos de electrofisiología: **ABR**, **AABR**, **VEMP** y **EOAS**. Estos equipos ocupan toda la ventana.
 
 ![Los botones del Box Electrofisiología](img/estudiante/barra-electrofisiologia.png)
 
-## 19. ABR
+## 23. ABR
 
 ![El ABR: parámetros a la izquierda, curvas al centro, valores a la derecha y el registro abajo](img/estudiante/abr.png)
 
@@ -516,18 +648,18 @@ La ventana del ABR tiene:
 - **Valores** (derecha): las latencias y amplitudes que marcas, y los interpicos que se calculan solos.
 - **Prueba** (abajo): el **EEG** en vivo, el **FSP** y el ruido residual de la curva que se está registrando.
 
-### 19.1 Configurar el equipo
+### 23.1 Configurar el equipo
 
 El equipo **no viene configurado**: la tasa y las promediaciones arrancan al azar, y configurarlo es parte del examen.
 
-- **Prueba**: **ABR** o **ECochG** (sección 20). Las demás aparecen como *en desarrollo*.
+- **Prueba**: **ABR** o **ECochG** (sección 24). Las demás aparecen como *en desarrollo*.
 - **Estímulo**: *Click*, *CE-Chirp*, *CE-Chirp LS*, *NB CE-Chirp LS* (500 Hz a 4 kHz) y *Burst* (500 Hz a 4 kHz).
 - **Polaridad**: *Alternada*, *Condensación* o *Rarefacción*.
 - **Archivo → Párametros Avanzados**: el transductor, el montaje, la ventana, la ganancia, los filtros y, en la pestaña *Registro*, los **electrodos**: la posición y la impedancia de cada uno (activo, referencias y tierra).
 
 ![Parámetros avanzados: la pestaña Registro con los electrodos](img/estudiante/abr-avanzados-2.png)
 
-### 19.2 Registrar
+### 23.2 Registrar
 
 1. **Iniciar**. La curva se registra en vivo; la línea de arriba dice cuántos barridos van, el FSP, el ruido y si hay rechazo.
 2. **Pausar** / **Continuar** o **Detener**; si no, termina sola.
@@ -535,7 +667,7 @@ El equipo **no viene configurado**: la tasa y las promediaciones arrancan al aza
 
 Mira el **EEG** abajo: si el paciente está inquieto o un electrodo está mal, se nota ahí antes de promediar.
 
-### 19.3 Marcar las ondas
+### 23.3 Marcar las ondas
 
 Cada gráfico tiene dos banderas verticales que se arrastran: **A** y **A'**.
 
@@ -546,7 +678,7 @@ Cada gráfico tiene dos banderas verticales que se arrastran: **A** y **A'**.
 
 Los interpicos (I-V, III-V, I-III) y la relación V/I se calculan solos; lo que queda fuera de la norma se pinta en rojo. Con el botón derecho sobre el gráfico: *Eliminar curva*, *Eliminar marcas* y *Suavizar*. Los botones **+** y **-** agrandan o achican las curvas.
 
-### 19.4 Latencia/intensidad y conclusiones
+### 23.4 Latencia/intensidad y conclusiones
 
 La pestaña **Latencia/Intensidad** grafica las latencias que marcaste contra la intensidad, sobre la banda normal.
 
@@ -556,7 +688,7 @@ En **Conclusiones** escribes la **Descripción** y la **Conclusión** del examen
 
 Si el paciente tiene un ABR de una atención anterior, arriba aparece **Sesión:** con las sesiones anteriores: elegir una la muestra **solo para mirar**.
 
-## 20. Electrococleografía
+## 24. Electrococleografía
 
 La electrococleografía vive dentro del ABR: en **Prueba**, elige **ECochG**. El equipo cambia a un montaje timpánico y una ventana de 10 ms, y la tabla de valores cambia a la del ECochG.
 
@@ -570,7 +702,7 @@ La tabla calcula la amplitud del PS y del PA, la **razón PS/PA**, la razón de 
 
 Cambiar de prueba no borra nada: el ABR y el ECochG se guardan por separado.
 
-## 21. AABR
+## 25. AABR
 
 **AABR** es el equipo de tamizaje automatizado.
 
@@ -582,7 +714,7 @@ Cambiar de prueba no borra nada: el ABR y el ECochG se guardan por separado.
 
 Si la sonda no sella, se detiene en el paso 1: acomódala y vuelve a iniciar. En **Informe**, el resultado de cada oído queda precargado; completa las **observaciones del registro** y la **conducta**.
 
-## 22. Emisiones otoacústicas
+## 26. Emisiones otoacústicas
 
 **EOAS** abre el emisor otoacústico, con una pestaña por prueba: **TEOAE**, **DPOAE**, **SOAE**, **SFOAE** e **Informe**.
 
@@ -605,7 +737,7 @@ Todas funcionan igual:
 
 En **Informe** escribes la descripción y la conclusión; las pruebas que capturaste se adjuntan solas.
 
-## 23. VEMP
+## 27. VEMP
 
 **VEMP** abre los potenciales vestibulares: **cVEMP** (cervical), **oVEMP** (ocular) y **mVEMP** (masetérico).
 
@@ -620,13 +752,13 @@ La tabla **Medidas** junta las curvas, y **Comparación entre oídos** calcula l
 
 ---
 
-# Parte V — Ajustes y problemas
+# Parte VI — Ajustes y problemas
 
-## 24. Configuración
+## 28. Configuración
 
 **Configuración** (arriba a la derecha) tiene tres pestañas. Lo que guardes queda en tu perfil y te sigue a cualquier computador.
 
-### 24.1 Atajos de teclado
+### 28.1 Atajos de teclado
 
 ![Los atajos del audiómetro y del impedanciómetro](img/estudiante/config-atajos.png)
 
@@ -645,15 +777,15 @@ El audiómetro y el impedanciómetro se pueden manejar con el teclado. Las tecla
 
 Puedes cambiar cualquiera; **Restaurar teclas por defecto** vuelve a las de fábrica. Las teclas **5** y **E** están reservadas en el audiómetro. Los atajos funcionan mientras el equipo esté abierto, salvo cuando escribes en un campo de texto.
 
-### 24.2 El controlador LabSim
+### 28.2 El controlador LabSim
 
 En el laboratorio, el audiómetro se maneja con el **controlador LabSim**: botones, dos perillas (una por canal) y dos teclas de estímulo. Cuando está conectado, LabSim usa sus teclas y la pestaña lo indica; las teclas del controlador no se pueden cambiar.
 
-### 24.3 Mouse para zurdos
+### 28.3 Mouse para zurdos
 
 En la pestaña **Mouse**, **Mouse para zurdos** intercambia los botones izquierdo y derecho. Se aplica en los computadores del laboratorio; en otro computador, configúralo en el sistema.
 
-## 25. Reportar un problema
+## 29. Reportar un problema
 
 Si LabSim se cerró solo, se colgó o algo no funcionó, avísalo desde **Configuración → Reportar un problema**:
 
@@ -663,7 +795,7 @@ Si LabSim se cerró solo, se colgó o algo no funcionó, avísalo desde **Config
 2. Revisa en *Qué se envía* los datos del computador; **Ver el registro** muestra el registro de la app.
 3. Marca la casilla de aceptación y **Enviar reporte**. LabSim te da el número del reporte.
 
-## 26. Problemas frecuentes
+## 30. Problemas frecuentes
 
 | Problema | Qué hacer |
 |---|---|
