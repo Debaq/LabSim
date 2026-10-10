@@ -5272,3 +5272,44 @@ que ya dice la línea de arriba) y el "promedio entre acciones". "Tu
 actividad" queda en pacientes atendidos (+ práctica libre) y minutos;
 la página ya no carga Chart.js. `Metrics::attentionsByWeek` se borra: solo
 lo usaba ese gráfico.
+
+## Manuales del estudiante y del docente (2026-10-09)
+
+Dos manuales en `docs/manual/`, con el formato del de PosAR: markdown +
+`hacer_pdf.py` (WeasyPrint; correr con `/usr/bin/python`, que tiene
+markdown/weasyprint; el env labsim no). Autores, en este orden: Nicolás
+Baier-Quezada, Vanessa Uribe-Hernández, Fernanda López-Moncada, Cristina
+Vargas-Bustamante. Portada con la versión y el commit, como la app
+(`v0.9.9-r<sha>`, de `src/main.py` + `git rev-parse`), y el logo LabSim chico
+en la fila de logos (grande arriba se probó y se veía ridículo: el círculo
+repite "LabSim").
+
+**Manual del estudiante: hecho** (57 páginas). Guía rápida en 8 pasos y seis
+partes: I Entrar, II Atender, III Tu avance en la web, IV Box Audiología,
+V Box Electrofisiología, VI Ajustes y problemas. Textos = cómo opera el
+software, no clínica.
+
+Capturas reales, con datos inventados (pacientes de práctica 33-42, en
+`capturas/casos_demo.json`):
+
+- **App**: `micromamba run -n labsim python docs/manual/capturas/capturar_app.py
+  [grupo…]` desde la raíz. Offscreen; bloquea `requests` entero (sin eso el
+  ABR consultó prod), un vigilante cierra los QMessageBox (offscreen
+  cuelgan), procesa los DeferredDelete antes de cada foto, saca la
+  subventana del MDI al tamaño de `Layout.php`. Correr los grupos en
+  procesos separados: de corrido se cuelga a la altura del AABR. Fotos de
+  otoscopía: `capturas/otoscopia/` (membranas reales del caso 28).
+- **Portal web**: `docs/manual/capturas/capturar_portal.sh`. Copia el
+  backend a un directorio nuevo (sin base ni config), siembra con
+  `sembrar_portal.php` en podman php:7.4-cli, agrega un launch LTI firmado y
+  un login de alumno falsos SOLO en la copia, y saca las fotos con Chromium
+  por DevTools. Nunca toca prod ni el backend del repo.
+
+Al sacar las capturas aparecieron y se arreglaron: los intentos de práctica
+libre contados como atendidos en el resumen LTI, la sangría de los globos
+del chat en el portal, acciones sin nombre en Metrics, "desde Moodle" en el
+aviso de sesión vencida, el título "Otoscopia" solo en la ficha PDF y los
+rótulos "trague" encimados en la ETF perforada. De paso, "Tu última
+atención" pasó a mostrar el logro de la técnica (sección de arriba).
+
+**Manual del docente: pendiente.** Plan en `docs/manual/ROADMAP.md`.

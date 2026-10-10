@@ -6,7 +6,7 @@ Al cerrar un ítem se borra de acá; si deja una decisión, va como sección nue
 en `docs/decisiones.md`.
 
 Cada ítem tiene un número fijo para nombrarlo. Al cerrar uno no se renumera
-el resto; un ítem nuevo toma el número siguiente al más alto (hoy 64).
+el resto; un ítem nuevo toma el número siguiente al más alto (hoy 65).
 
 Revisado contra el código el 2026-09-24.
 
@@ -181,6 +181,10 @@ gap significativo. § Parámetros de audiometría configurables por curso
       nivel inicial del ruido, meseta); hoy solo aparece como "curva sombra".
 - [ ] 63. Tinnitumetría en el audiómetro, para que entre al orden (T00).
 - [ ] 64. Logoaudiometría y supraliminares como técnicas propias (T03+).
+
+### Manuales
+- [ ] 65. Manual del docente (plan y fases en `docs/manual/ROADMAP.md`).
+      § Manuales del estudiante y del docente
 
 ### Menores
 - [ ] 56. Los `print()` de ABR, EOA y VEMP son de error; si algún día imprimen
