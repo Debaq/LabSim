@@ -2359,16 +2359,19 @@ final class CaseSheetPdf
         // simple de "Historia"/"En la consulta". Reserva por defecto: las
         // fotos ya reservan su propio espacio en fotosOtoscopia().
         $this->titulo('Otoscopia');
-        if ($fases === []) {
-            $this->parrafo('Sin otoscopia cargada.', 8);
-        } else {
-            foreach (array_values($fases) as $i => $fase) {
-                $texto = trim((string) (is_array($fase) ? ($fase['texto'] ?? '') : ''));
-                if ($texto !== '') {
-                    $this->parrafo($texto, 8);
-                }
-                $this->fotosOtoscopia($i);
+        // Una fase sin texto ni fotos (el caso nuevo trae una vacía) no
+        // imprime nada: sin el aviso quedaba el título solo.
+        $hubo = false;
+        foreach (array_values($fases) as $i => $fase) {
+            $texto = trim((string) (is_array($fase) ? ($fase['texto'] ?? '') : ''));
+            if ($texto !== '') {
+                $this->parrafo($texto, 8);
+                $hubo = true;
             }
+            $hubo = $this->fotosOtoscopia($i) || $hubo;
+        }
+        if (!$hubo) {
+            $this->parrafo('Sin otoscopia cargada.', 8);
         }
     }
 
@@ -2476,7 +2479,7 @@ final class CaseSheetPdf
      * GD-- se omite ese hueco en vez de dejar un recuadro vacío: media
      * otoscopia impresa es más útil que ninguna.
      */
-    private function fotosOtoscopia(int $faseIdx): void
+    private function fotosOtoscopia(int $faseIdx): bool
     {
         $fotos = [];
         foreach (['od' => 'OD', 'oi' => 'OI'] as $lado => $rotulo) {
@@ -2486,7 +2489,7 @@ final class CaseSheetPdf
             }
         }
         if ($fotos === []) {
-            return;
+            return false;
         }
 
         // El doble del tamaño original (108pt) -- se veían chicas al lado
@@ -2516,6 +2519,7 @@ final class CaseSheetPdf
             $x += $ancho + $gap;
         }
         $this->y += $altoMax + 16;
+        return true;
     }
 
     // -----------------------------------------------------------------

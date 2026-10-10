@@ -202,7 +202,21 @@ if ($isPortalUser) {
     $myLogs = Metrics::decodeLogs($stmt->fetchAll());
     $mySessions = Metrics::buildSessions($myLogs);
     $mySummary = Metrics::summarizeSessions($mySessions);
-    $myAttentions = Metrics::countAttentions($myLogs);
+    // Los intentos de práctica libre se cuentan aparte, como en Mis
+    // pacientes: si no, acá decía 5 atendidos y allá "3 + 2 de práctica".
+    $citasPractica = [];
+    if (Practica::listo()) {
+        $stmt = Db::get()->prepare('SELECT id FROM appointments WHERE assigned_student_id = ? AND ' . Practica::soloPractica());
+        $stmt->execute([$userId]);
+        $citasPractica = array_fill_keys(array_map('intval', array_column($stmt->fetchAll(), 'id')), true);
+    }
+    $esPractica = static function (array $log) use ($citasPractica): bool {
+        return isset($citasPractica[(int) ($log['appointment_id'] ?? 0)]);
+    };
+    $myPracticas = Metrics::countAttentions(array_filter($myLogs, $esPractica));
+    $myAttentions = Metrics::countAttentions(array_filter($myLogs, static function (array $l) use ($esPractica): bool {
+        return !$esPractica($l);
+    }));
     $myWeeks = Metrics::attentionsByWeek($myLogs);
 
     // Última atención: mismo detalle (timeline por bloques + comportamiento)
@@ -376,10 +390,10 @@ header('Content-Type: text/html; charset=utf-8');
                     <p class="stats-empty">Todos los alumnos han atendido al menos un paciente.</p>
                 <?php endif; ?>
             <?php endif; ?>
-        <?php elseif ($myAttentions > 0): ?>
+        <?php elseif ($myAttentions + $myPracticas > 0): ?>
             <h2>Tu actividad</h2>
             <p class="stats-summary">
-                <?= $myAttentions ?> paciente<?= $myAttentions === 1 ? '' : 's' ?> atendido<?= $myAttentions === 1 ? '' : 's' ?> · <?= round($mySummary['total_duration_s'] / 60, 1) ?> min en total
+                <?= $myAttentions ?> paciente<?= $myAttentions === 1 ? '' : 's' ?> atendido<?= $myAttentions === 1 ? '' : 's' ?><?= $myPracticas ? ' (+ ' . $myPracticas . ' de práctica libre)' : '' ?> · <?= round($mySummary['total_duration_s'] / 60, 1) ?> min en total
                 <?php if ($mySummary['avg_delta_s'] !== null): ?>
                     · <?= $mySummary['avg_delta_s'] ?>s promedio entre acciones
                 <?php endif; ?>
@@ -425,11 +439,11 @@ header('Content-Type: text/html; charset=utf-8');
         <?php endif; ?>
     </div>
 
-    <?php if (!$isPortalUser && $myAttentions > 0): ?>
+    <?php if (!$isPortalUser && $myAttentions + $myPracticas > 0): ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <?php endif; ?>
     <script>
-    <?php if (!$isPortalUser && $myAttentions > 0): ?>
+    <?php if (!$isPortalUser && $myAttentions + $myPracticas > 0): ?>
     (function () {
         var statsCanvas = document.getElementById('statsChart');
         if (statsCanvas && window.Chart) {

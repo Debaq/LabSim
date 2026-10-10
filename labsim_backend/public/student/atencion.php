@@ -287,7 +287,7 @@ student_header($paciente, $me);
         ?>
         <div>
             <div style="display:flex; justify-content:<?= $role === 'user' ? 'flex-end' : 'flex-start' ?>;">
-                <div style="max-width:80%; padding:0.5rem 0.8rem; border-radius:12px; font-size:0.9rem; white-space:pre-wrap;
+                <div style="max-width:80%; padding:0.5rem 0.8rem; border-radius:12px; font-size:0.9rem;
                     <?= $role === 'user' ? 'background:#3b5bdb; color:#fff;' : 'background:#fff; border:1px solid #e5e5ea;' ?>">
                     <span class="bubble-system-header--muted">
                         <?php
@@ -298,7 +298,8 @@ student_header($paciente, $me);
                         ?>
                         <?= htmlspecialchars($role === 'assistant' ? $hablante : 'Tú') ?> · <?= htmlspecialchars($turn['created_at']) ?>
                     </span>
-                    <?= htmlspecialchars($turn['content']) ?>
+                    <?php // pre-wrap solo en el texto del turno: en el globo entero tomaba la sangría de esta plantilla como espacio ?>
+                    <div style="white-space:pre-wrap;"><?= htmlspecialchars($turn['content']) ?></div>
                 </div>
             </div>
             <?php foreach ($turnComments as $c): ?>

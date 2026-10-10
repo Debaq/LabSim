@@ -368,7 +368,7 @@ final class Auth
             header('Content-Type: text/html; charset=utf-8');
             echo '<!doctype html><html lang="es"><head><meta charset="utf-8"><title>LabSim</title></head>'
                 . '<body style="font-family: sans-serif; text-align: center; margin-top: 4rem;">'
-                . '<h1>Tu sesión venció</h1><p>Vuelve a abrir la actividad desde Moodle y pincha '
+                . '<h1>Tu sesión venció</h1><p>Vuelve a abrir la actividad LabSim en la plataforma de tu curso y pincha '
                 . '"Ver mis pacientes" de nuevo.</p></body></html>';
             exit;
         }

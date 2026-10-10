@@ -22,7 +22,9 @@ final class Metrics
         // Audiómetro
         'audio_intensity_change' => 'Cambio de intensidad (dB)',
         'audio_freq_change' => 'Cambio de frecuencia (Hz)',
+        'audio_stim_button' => 'Presentación del estímulo',
         'audio_stim_select' => 'Selección de estímulo (tono/ruido)',
+        'audio_logo_response' => 'Acierto o error en logoaudiometría',
         'audio_output_select' => 'Selección de salida (audífono/vibrador/altavoz)',
         'audio_trans_select' => 'Selección de transductor',
         'audio_reverse_toggle' => 'Inversión de canal (reverse)',
@@ -47,6 +49,10 @@ final class Metrics
         'z_screen_change' => 'Cambio de pantalla (timpanograma/reflejo/decay/ETF)',
         'z_side_change' => 'Cambio de oído',
         'z_stimulus_click' => 'Estímulo manual (click)',
+        'z_probe_freq_change' => 'Cambio de tono de sonda (226/1000 Hz)',
+        'z_decay_freq_change' => 'Cambio de frecuencia del tone decay',
+        'z_etf_prueba_change' => 'Cambio de prueba de función tubaria',
+        'z_etf_test' => 'Prueba de función tubaria',
         // Sistema
         'session_login' => 'Inicio de sesión',
         'session_logout' => 'Cierre de sesión',

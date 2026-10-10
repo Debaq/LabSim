@@ -24,7 +24,7 @@ function render_sso_error(string $message): void
     <body style="font-family: sans-serif; text-align: center; margin-top: 4rem;">
         <h1>No se pudo entrar</h1>
         <p><?= htmlspecialchars($message) ?></p>
-        <p>Vuelve a abrir la actividad desde Moodle y pincha "Ver mis pacientes" de nuevo.</p>
+        <p>Vuelve a abrir la actividad LabSim en la plataforma de tu curso y pincha "Ver mis pacientes" de nuevo.</p>
     </body>
     </html>
     <?php
