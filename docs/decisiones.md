@@ -5238,3 +5238,26 @@ bloquearse a sí mismo.
 Como al bloquear se borran sus tokens, la app que el bloqueado tenga abierta
 ve primero "sesión vencida" y, al intentar volver a entrar, "cuenta
 bloqueada".
+
+## "Tu última atención" del alumno: la técnica en gráficos, sin palabras (2026-10-09)
+
+En la página de la actividad LabSim (`lti/launch.php`), "Tu última atención"
+mostraba la franja de acciones del dashboard docente (una barra por acción,
+ancho = demora) con su leyenda de colores, más "delta promedio · pausas
+largas · sin pausa". Al alumno no le decía nada. Se reemplaza, si la
+atención tuvo audiometría y ya está cerrada, por dos SVG inline sin texto
+(`src/AudiometriaTecnicaGrafico.php`):
+
+- **Audiograma de lo que obtuvo**, con los símbolos de siempre (O X, < >,
+  enmascarados △ □ [ ], flecha de sin respuesta). De cada frecuencia vale la
+  última vez que la tomó (la repetición de 1 kHz). Los umbrales que no
+  corresponden (curva sombra, no corresponde, sin verificar) llevan un halo
+  ámbar. **Nunca se dibuja el umbral real**: sería darle la respuesta; qué
+  falló exactamente está en el detalle de la atención.
+- **Un cuadrito por regla de la técnica**, verde o rojo, agrupado por prueba
+  bajo su símbolo (→ orden, O X aéreos, < > óseos).
+
+Las palabras quedan solo en los `<title>` (al pasar el mouse). SVG del
+servidor y no Chart.js: se ve igual en el iframe de la plataforma y en el
+celular, y no carga nada. Sin audiometría, la tarjeta queda con el paciente
+y el procedimiento. La franja sigue en el dashboard del docente.
