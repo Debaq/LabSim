@@ -109,9 +109,12 @@ class ZETFscreen(QWidget):
             self.pw.setLabel(axis='left', text='daPa')
             self.pw.getAxis('bottom').setTicks(None)
             self.pw.getAxis('left').setTicks(None)
+            # Un solo anchor: pyqtgraph elige uno u otro según el lado del
+            # centro del gráfico y los rótulos de 2.5 y 5 s se juntaban.
             for s in ETF_DEGLUCIONES_S:
                 self.pw.addItem(pg.InfiniteLine(pos=s, angle=90, pen=pg.mkPen('w', style=Qt.DashLine),
-                                                label="trague", labelOpts={'position': 0.95, 'color': 'w'}))
+                                                label="trague", labelOpts={'position': 0.95, 'color': 'w',
+                                                                           'anchors': [(0, 0.5), (0, 0.5)]}))
             self.curvas['presion'] = self.pw.plot([], [], pen=pg.mkPen('y', width=2))
             textos[1] = "Inicio"
             textos[5] = f"{self.presion} daPa"
