@@ -218,7 +218,6 @@ if ($isPortalUser) {
     $myAttentions = Metrics::countAttentions(array_filter($myLogs, static function (array $l) use ($esPractica): bool {
         return !$esPractica($l);
     }));
-    $myWeeks = Metrics::attentionsByWeek($myLogs);
 
     // Última atención: el logro de su técnica de audiometría en gráficos sin
     // palabras (ver AudiometriaTecnicaGrafico). Antes iba la franja de acciones del
@@ -290,10 +289,9 @@ header('Content-Type: text/html; charset=utf-8');
     .stats h2 { font-size: 1.1rem; text-align: center; }
     .stats-summary, .stats-caption { text-align: center; color: #555; font-size: 0.9rem; }
     .stats-empty { text-align: center; color: #888; font-size: 0.9rem; }
-    .chart-wrap { max-height: 320px; margin-top: 0.5rem; }
     .no-activity-list { columns: 2; column-gap: 1.5rem; font-size: 0.9rem; margin: 0.3rem 0; padding-left: 1.2rem; }
     .last-attention { margin-top: 1.8rem; }
-    .last-attention h3 { font-size: 1rem; margin-bottom: 0.2rem; }
+    .last-attention h3 { font-size: 1rem; margin-bottom: 0.2rem; text-align: center; }
     .tecnica-logro { display: flex; justify-content: center; align-items: center; gap: 1.2rem; margin-top: 0.8rem; flex-wrap: wrap; }
     .tecnica-anillo { width: 96px; height: 96px; flex-shrink: 0; }
     .tecnica-evolucion { width: 260px; max-width: 100%; height: auto; border-radius: 4px; }
@@ -358,13 +356,8 @@ header('Content-Type: text/html; charset=utf-8');
         <?php elseif ($myAttentions + $myPracticas > 0): ?>
             <h2>Tu actividad</h2>
             <p class="stats-summary">
-                <?= $myAttentions ?> paciente<?= $myAttentions === 1 ? '' : 's' ?> atendido<?= $myAttentions === 1 ? '' : 's' ?><?= $myPracticas ? ' (+ ' . $myPracticas . ' de práctica libre)' : '' ?> · <?= round($mySummary['total_duration_s'] / 60, 1) ?> min en total
-                <?php if ($mySummary['avg_delta_s'] !== null): ?>
-                    · <?= $mySummary['avg_delta_s'] ?>s promedio entre acciones
-                <?php endif; ?>
+                <?= $myAttentions ?> paciente<?= $myAttentions === 1 ? '' : 's' ?> atendido<?= $myAttentions === 1 ? '' : 's' ?><?= $myPracticas ? ' (+ ' . $myPracticas . ' de práctica libre)' : '' ?> · <?= (int) round($mySummary['total_duration_s'] / 60) ?> min en total
             </p>
-            <p class="stats-caption">Pacientes atendidos por semana</p>
-            <div class="chart-wrap"><canvas id="statsChart"></canvas></div>
 
             <?php if ($lastAttentionKey !== null): ?>
             <div class="last-attention">
@@ -389,32 +382,7 @@ header('Content-Type: text/html; charset=utf-8');
         <?php endif; ?>
     </div>
 
-    <?php if (!$isPortalUser && $myAttentions + $myPracticas > 0): ?>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-    <?php endif; ?>
     <script>
-    <?php if (!$isPortalUser && $myAttentions + $myPracticas > 0): ?>
-    (function () {
-        var statsCanvas = document.getElementById('statsChart');
-        if (statsCanvas && window.Chart) {
-            new Chart(statsCanvas, {
-                type: 'bar',
-                data: {
-                    labels: <?= json_encode(array_keys($myWeeks)) ?>,
-                    datasets: [{
-                        label: 'Pacientes atendidos',
-                        data: <?= json_encode(array_values($myWeeks)) ?>,
-                        backgroundColor: '#4a7dbd'
-                    }]
-                },
-                options: {
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-                }
-            });
-        }
-    })();
-    <?php endif; ?>
     (function () {
         var KEY = <?= json_encode($refreshKey) ?>;
         var remaining = <?= $expiresIn ?>;

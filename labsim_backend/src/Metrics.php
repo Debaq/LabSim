@@ -311,26 +311,6 @@ final class Metrics
         return count(self::attentionKeys($decodedLogs));
     }
 
-    /** Atenciones distintas agrupadas por semana ISO -- mismo criterio que countAttentions(). */
-    public static function attentionsByWeek(array $decodedLogs): array
-    {
-        $weeks = [];
-        foreach ($decodedLogs as $log) {
-            if (!($log['con_paciente'] ?? false)) {
-                continue;
-            }
-            $ts = strtotime((string) $log['client_ts']) ?: 0;
-            $week = date('o-\WW', $ts);
-            $weeks[$week][self::attentionKey($log)] = true;
-        }
-        ksort($weeks);
-        $out = [];
-        foreach ($weeks as $week => $set) {
-            $out[$week] = count($set);
-        }
-        return $out;
-    }
-
     private static function attentionKey(array $log): string
     {
         return ($log['case_id'] ?? '') . '|' . ($log['appointment_id'] ?? '');

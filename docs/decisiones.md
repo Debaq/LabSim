@@ -5265,3 +5265,10 @@ Primero se probó un **audiograma con los umbrales que obtuvo** (halo ámbar
 en los que no corresponden, nunca el umbral real). El docente lo encontró
 bueno pero pidió el indicador de logro acá; `audiograma()` queda en la clase,
 con su test, para usarlo más adelante.
+
+En la misma página se saca "Pacientes atendidos por semana" (barras de
+Chart.js con la semana ISO, "2026-W37", ilegible para el alumno, y una cuenta
+que ya dice la línea de arriba) y el "promedio entre acciones". "Tu
+actividad" queda en pacientes atendidos (+ práctica libre) y minutos;
+la página ya no carga Chart.js. `Metrics::attentionsByWeek` se borra: solo
+lo usaba ese gráfico.
