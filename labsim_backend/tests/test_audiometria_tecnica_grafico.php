@@ -44,3 +44,13 @@ $pasos = AudiometriaTecnicaGrafico::pasos($tecnica);
 t_eq(substr_count($pasos, '<rect '), 3, 'Gráfico técnica: un cuadrito por regla evaluable (la que no aplica no)');
 t_eq(substr_count($pasos, '#c0392b'), 1, 'Gráfico técnica: la regla no cumplida va en rojo');
 t_eq(AudiometriaTecnicaGrafico::pasos(['orden' => ['reglas' => []]]), '', 'Gráfico técnica: sin reglas no hay fila');
+
+$anillo = AudiometriaTecnicaGrafico::anillo(72);
+t_true(strpos($anillo, '>72%<') !== false, 'Gráfico técnica: el anillo lleva el % de logro');
+t_true(strpos($anillo, AudiometriaTecnicaVista::color(72)) !== false, 'Gráfico técnica: el anillo usa el color de siempre (ámbar en 72)');
+t_true(strpos(AudiometriaTecnicaGrafico::anillo(null), '>—<') !== false, 'Gráfico técnica: sin logro, raya');
+
+$evol = AudiometriaTecnicaGrafico::evolucion([40, 70, 90], 1);
+t_eq(substr_count($evol, '<circle '), 3, 'Gráfico técnica: un punto por audiometría');
+t_eq(substr_count($evol, 'r="5.5"'), 1, 'Gráfico técnica: la atención actual va marcada');
+t_eq(AudiometriaTecnicaGrafico::evolucion([80], 0), '', 'Gráfico técnica: con una sola audiometría no hay curva');

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/AudiometriaPaciente.php';
 require_once __DIR__ . '/CaseCharts.php';
+require_once __DIR__ . '/AudiometriaTecnicaVista.php';
 
 /**
  * La técnica de audiometría de una atención en dos gráficos sin palabras
@@ -11,12 +12,17 @@ require_once __DIR__ . '/CaseCharts.php';
  * en el celular). Reemplaza a la franja de acciones de "Tu última atención"
  * en lti/launch.php, que no decía nada.
  *
- * - audiograma(): los umbrales que obtuvo el alumno, con los símbolos de
- *   siempre. Los que no corresponden a la audición del paciente llevan un
- *   halo ámbar. NUNCA se dibuja el umbral real: sería darle la respuesta.
+ * - anillo(): el % de logro de la técnica en esa atención, con el color de
+ *   siempre (AudiometriaTecnicaVista::color: verde desde 85, ámbar desde 60).
+ * - evolucion(): el logro de todas sus audiometrías en orden, con la
+ *   atención actual marcada, sobre las mismas franjas de color.
  * - pasos(): un cuadrito por regla de la técnica (verde = cumplida, rojo =
  *   no), agrupados por prueba bajo su símbolo (→ orden, O X aéreos, < >
  *   óseos).
+ * - audiograma(): los umbrales que obtuvo el alumno, con los símbolos de
+ *   siempre; los que no corresponden llevan un halo ámbar. NUNCA el umbral
+ *   real: sería darle la respuesta. Hoy no se muestra en ninguna página (se
+ *   probó en launch.php y el docente lo dejó para más adelante).
  *
  * El detalle con palabras está en student/atencion.php; acá solo el <title>
  * de cada elemento, para quien pase el mouse.
@@ -43,6 +49,63 @@ final class AudiometriaTecnicaGrafico
         'sin verificar' => 'no verificó 2/3 ni 3/5',
         'sin dato' => '',
     ];
+
+    public static function anillo(?int $pct): string
+    {
+        $color = AudiometriaTecnicaVista::color($pct);
+        $r = 30.0;
+        $c = 2 * M_PI * $r;
+        $lleno = $pct === null ? 0.0 : $c * max(0, min(100, $pct)) / 100;
+        return sprintf(
+            '<svg class="tecnica-anillo" viewBox="0 0 80 80" role="img" aria-label="Logro de la técnica: %1$s">'
+            . '<circle cx="40" cy="40" r="%2$s" fill="none" stroke="#e8e8e8" stroke-width="9"/>'
+            . '<circle cx="40" cy="40" r="%2$s" fill="none" stroke="%3$s" stroke-width="9" stroke-linecap="round"'
+            . ' stroke-dasharray="%4$s %5$s" transform="rotate(-90 40 40)"/>'
+            . '<text x="40" y="46" font-size="17" font-weight="bold" fill="%3$s" text-anchor="middle">%6$s</text></svg>',
+            htmlspecialchars(AudiometriaTecnicaVista::pct($pct)), self::n($r), $color,
+            self::n($lleno), self::n($c), $pct === null ? '—' : $pct . '%'
+        );
+    }
+
+    /**
+     * @param array<int,int> $pcts logro de cada audiometría, en orden
+     * @param int $actual índice de la atención que se está mostrando
+     */
+    public static function evolucion(array $pcts, int $actual): string
+    {
+        $pcts = array_values($pcts);
+        $n = count($pcts);
+        if ($n < 2) {
+            return '';
+        }
+        $ancho = 200;
+        $alto = 80;
+        $mx = 8;
+        $my = 6;
+        $fx = static function (int $i) use ($n, $ancho, $mx): float {
+            return $mx + $i * ($ancho - 2 * $mx) / ($n - 1);
+        };
+        $fy = static function (float $pct) use ($alto, $my): float {
+            return $my + (100 - $pct) / 100 * ($alto - 2 * $my);
+        };
+        $o = [sprintf('<svg class="tecnica-evolucion" viewBox="0 0 %d %d" role="img" aria-label="Tu logro en cada audiometría">', $ancho, $alto)];
+        foreach ([[100, 85, '#e6f4ea'], [85, 60, '#fdf3e1'], [60, 0, '#fbeaea']] as [$desde, $hasta, $fondo]) {
+            $o[] = sprintf('<rect x="0" y="%s" width="%d" height="%s" fill="%s"/>',
+                self::n($fy($desde)), $ancho, self::n($fy($hasta) - $fy($desde)), $fondo);
+        }
+        $puntos = [];
+        foreach ($pcts as $i => $p) {
+            $puntos[] = self::n($fx($i)) . ',' . self::n($fy($p));
+        }
+        $o[] = sprintf('<polyline points="%s" fill="none" stroke="#7a1f3d" stroke-width="1.5"/>', implode(' ', $puntos));
+        foreach ($pcts as $i => $p) {
+            $o[] = sprintf('<circle cx="%s" cy="%s" r="%s" fill="%s" stroke="#fff" stroke-width="%s"><title>%d %%</title></circle>',
+                self::n($fx($i)), self::n($fy($p)), $i === $actual ? '5.5' : '3',
+                AudiometriaTecnicaVista::color($p), $i === $actual ? '2' : '1', $p);
+        }
+        $o[] = '</svg>';
+        return implode('', $o);
+    }
 
     public static function audiograma(array $tecnica): string
     {

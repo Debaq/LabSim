@@ -220,8 +220,8 @@ if ($isPortalUser) {
     }));
     $myWeeks = Metrics::attentionsByWeek($myLogs);
 
-    // Última atención: su técnica de audiometría en gráficos sin palabras
-    // (ver AudiometriaTecnicaGrafico). Antes iba la franja de acciones del
+    // Última atención: el logro de su técnica de audiometría en gráficos sin
+    // palabras (ver AudiometriaTecnicaGrafico). Antes iba la franja de acciones del
     // dashboard docente, que al alumno no le decía nada.
     $lastAttentionKey = null;
     $lastAttentionEnd = null;
@@ -250,6 +250,25 @@ if ($isPortalUser) {
             }
         }
     }
+    // El logro de todas sus audiometrías cerradas, en orden (práctica libre
+    // incluida, como en Mis pacientes): la curva marca dónde cae la última.
+    $logroSerie = [];
+    $logroActual = null;
+    if ($lastTecnica !== null) {
+        $stmt = Db::get()->prepare("SELECT appointment_id FROM attendances WHERE student_id = ? AND estado = 'atendido' ORDER BY updated_at");
+        $stmt->execute([$userId]);
+        $citas = array_map('intval', array_column($stmt->fetchAll(), 'appointment_id'));
+        $tecnicas = AudiometriaTecnica::deAtenciones((int) $userId, $citas, $myLogs);
+        foreach ($citas as $ap) {
+            $pct = $tecnicas[$ap]['puntaje']['pct'] ?? null;
+            if ($pct !== null) {
+                if ($ap === (int) $lastAttentionKey['appointment_id']) {
+                    $logroActual = count($logroSerie);
+                }
+                $logroSerie[] = (int) $pct;
+            }
+        }
+    }
 }
 
 header('Content-Type: text/html; charset=utf-8');
@@ -275,7 +294,9 @@ header('Content-Type: text/html; charset=utf-8');
     .no-activity-list { columns: 2; column-gap: 1.5rem; font-size: 0.9rem; margin: 0.3rem 0; padding-left: 1.2rem; }
     .last-attention { margin-top: 1.8rem; }
     .last-attention h3 { font-size: 1rem; margin-bottom: 0.2rem; }
-    .tecnica-audiograma { display: block; width: 100%; max-width: 420px; margin: 0.6rem auto 0; }
+    .tecnica-logro { display: flex; justify-content: center; align-items: center; gap: 1.2rem; margin-top: 0.8rem; flex-wrap: wrap; }
+    .tecnica-anillo { width: 96px; height: 96px; flex-shrink: 0; }
+    .tecnica-evolucion { width: 260px; max-width: 100%; height: auto; border-radius: 4px; }
     .tecnica-pasos { display: block; max-width: 100%; height: 34px; margin: 0.8rem auto 0; }
 
     @media (max-width: 30rem) {
@@ -357,7 +378,10 @@ header('Content-Type: text/html; charset=utf-8');
                     <?php endif; ?>
                 </p>
                 <?php if ($lastTecnica !== null): ?>
-                <?= AudiometriaTecnicaGrafico::audiograma($lastTecnica) ?>
+                <div class="tecnica-logro">
+                    <?= AudiometriaTecnicaGrafico::anillo($lastTecnica['puntaje']['pct'] ?? null) ?>
+                    <?= $logroActual !== null ? AudiometriaTecnicaGrafico::evolucion($logroSerie, $logroActual) : '' ?>
+                </div>
                 <?= AudiometriaTecnicaGrafico::pasos($lastTecnica) ?>
                 <?php endif; ?>
             </div>
