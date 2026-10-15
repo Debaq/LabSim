@@ -24,7 +24,7 @@ Las pruebas de sitio de lesión no son de rutina. Se indican cuando el audiogram
 **Asimetría + acúfeno unilateral + mala discriminación** = la tríada que obliga a pensar en el VIII par.
 :::
 
-Todas estas pruebas se hacen sobre umbrales confiables y con el **oído no evaluado enmascarado** cuando el tono puede cruzar. Un deterioro "positivo" que en realidad era el oído sano contestando por el malo es el error más frecuente (Priede y Coles, 1975).
+Todas estas pruebas se hacen sobre umbrales confiables y con el **oído no evaluado enmascarado** cuando el tono puede cruzar. El error más frecuente es un deterioro **negativo falso**: el tono que el oído malo deja de oír lo sigue oyendo el sano por vía cruzada, y el paciente no baja la mano (Priede y Coles, 1975).
 
 ### Deterioro tonal
 
@@ -88,7 +88,7 @@ Se miden:
 <!-- Protocolo ORL 2019: subir la tasa a 81,1/s "en sospecha de neuropatía". La tasa alta es una prueba de la vía retrococlear (desmielinización, compresión). En la neuropatía auditiva lo que decide es la microfónica coclear con polaridades separadas y el tubo pinzado (cap. 13). -->
 
 :::comentario Para el SISI
-El SISI se describe en el capítulo 9, junto con el reclutamiento. En este capítulo importa su lectura: en una lesión retrococlear el puntaje es **bajo**, porque no hay reclutamiento.
+El SISI se describe en H6, junto con el reclutamiento. En este capítulo importa su lectura: en una lesión retrococlear el puntaje es **bajo**, porque no hay reclutamiento.
 :::
 
 ## Fisiología
