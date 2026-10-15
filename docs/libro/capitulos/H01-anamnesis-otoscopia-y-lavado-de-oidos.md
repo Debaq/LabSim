@@ -71,7 +71,16 @@ La membrana timpánica es un cono poco profundo con el vértice hacia adentro, e
 
 Las referencias que se buscan en toda membrana son tres: la **apófisis corta** del martillo (un relieve blanco arriba), el **mango del martillo** (que baja y va hacia atrás hasta el umbo) y el **triángulo luminoso** (el reflejo de la luz del otoscopio, que sale del umbo hacia adelante y abajo). Una línea a lo largo del mango y otra perpendicular por el umbo dividen la pars tensa en **cuatro cuadrantes**: anterosuperior, anteroinferior, posteroinferior y posterosuperior.
 
-![Membranas timpánicas derecha e izquierda vistas por el otoscopio, en espejo. Rotular: anillo timpánico, pars flácida, apófisis corta, mango del martillo, umbo y triángulo luminoso (anteroinferior: a las 5 en el oído derecho y a las 7 en el izquierdo). Una línea punteada a lo largo del mango y otra perpendicular por el umbo dividen la pars tensa en cuadrantes AS, AI, PI y PS. Indicar con flechas "anterior" (hacia la nariz) y "posterior" en cada oído.](ilustraciones/h01-cuadrantes.png)
+:::imagen ilustraciones/h01-cuadrantes.svg Membranas timpánicas derecha e izquierda vistas por el otoscopio
+- @7.5,28 | **Anillo timpánico.** El borde engrosado que fija la membrana al hueso. Si no lo recorres entero, puedes no ver una perforación marginal.
+- @33,11 | **Pars flácida.** La porción pequeña de arriba, sobre la apófisis corta. Es donde se forman las bolsas de retracción del colesteatoma atical.
+- @33.5,19 | **Apófisis corta del martillo.** El punto blanco de arriba: la primera referencia que se busca.
+- @31,35 | **Mango del martillo.** Baja desde la apófisis corta hacia **posterior** hasta el umbo. Si se ve más horizontal y marcado, la membrana está retraída.
+- @20,50 | **Umbo.** El centro de la membrana, donde termina el mango.
+- @35,73 | **Triángulo luminoso.** El reflejo de la luz, siempre **anteroinferior**: a las 5 en el oído derecho y a las 7 en el izquierdo. Si falta o está deformado, algo cambió la forma o la posición de la membrana.
+- @46,43 | **Anterior.** Hacia la cara del paciente. En el oído derecho queda a tu derecha; en el izquierdo, a tu izquierda: las dos membranas se ven en espejo.
+- Las líneas punteadas siguen el mango y su perpendicular por el umbo, y dividen la pars tensa en cuatro **cuadrantes**: anterosuperior (AS), anteroinferior (AI), posterosuperior (PS) y posteroinferior (PI). Un hallazgo se ubica diciendo su cuadrante.
+:::
 
 El triángulo luminoso existe porque la membrana está inclinada y tiene forma de cono: refleja la luz de vuelta solo en esa zona. Si la membrana cambia de forma o de posición (abombada, retraída, engrosada) el reflejo se deforma, se acorta o desaparece. Por eso es un buen indicador, pero también depende del ángulo con que mires: **su ausencia sola no hace un diagnóstico**.
 
@@ -84,6 +93,19 @@ El triángulo luminoso existe porque la membrana está inclinada y tiene forma d
 - **Videotoscopio**, si hay. Permite mostrarle al paciente lo que ves y guardar la imagen para comparar en el control (Sullivan, 1997).
 - **Guantes**, si hay secreción, erosiones o lesiones de piel.
 - Para el lavado, el material de su sección (más abajo).
+
+### Conoce tu equipo: el otoscopio
+
+El otoscopio es una linterna con lupa. La luz entra por el espéculo, ilumina el fondo del conducto, y tú miras por la lente, que agranda la imagen. Todo lo que puede salir mal en una otoscopía tiene que ver con una de sus partes: poca luz, un espéculo chico o la lente sucia.
+
+:::imagen ilustraciones/h01-otoscopio.png El otoscopio y sus partes
+<!-- dibujo: a handheld clinical otoscope shown from the side: cylindrical handle with battery, the head with its light source, the magnifying viewing lens at the back, and a disposable black ear speculum cone attached at the front. -->
+- @33,16 | **Espéculo.** El cono que entra al conducto. Se usa el más grande que entre cómodo: más luz y más campo de visión. Uno por paciente, o se limpia entre uno y otro.
+- @50,21 | **Fuente de luz.** Tiene que ser blanca e intensa: con luz amarilla, una membrana normal parece inflamada.
+- @69,22 | **Lente de aumento.** Por aquí miras. Agranda unas tres veces; en algunos modelos se desliza hacia un lado para pasar instrumentos.
+- @57,32 | **Cabezal.** Une la luz, la lente y el espéculo. En los modelos neumáticos tiene una conexión para la pera de goma (otoscopía neumática).
+- @53,62 | **Mango.** Lleva la batería. Se toma como un lápiz, apoyando el borde de la mano en la mejilla del paciente: si el paciente se mueve, el otoscopio se mueve con él.
+:::
 
 ### Higiene
 

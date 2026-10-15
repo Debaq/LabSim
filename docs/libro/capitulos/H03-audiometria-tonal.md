@@ -60,6 +60,31 @@ La cóclea está ordenada por frecuencias: la base responde a los agudos y el á
 
 <!-- Protocolo ORL 2019: remitía la verificación diaria a la ISO 8253-1:1989. Esa edición está anulada; la vigente es la ISO 8253-1:2010, que la reemplaza (ISO 8253-1:2010, prefacio). -->
 
+### Conoce tu equipo: el audiómetro
+
+Todo audiómetro clínico tiene la misma lógica: **dos canales** independientes, cada uno con su pantalla y sus controles, y un **centro** con lo que comparten los dos (la frecuencia, el paso, el cronómetro). Uno lleva el tono al oído que estás midiendo; el otro, cuando hace falta, lleva el ruido que enmascara al oído contrario. La figura muestra el audiómetro de LabSim armado justo así: tono por el canal 1 al oído derecho y ruido de banda estrecha por el canal 2 al izquierdo.
+
+:::imagen /docs/manual/img/estudiante/audiometro.png El audiómetro de LabSim, con un enmascaramiento armado
+- @4,13 | **Pantalla del canal 1.** Intensidad (40 dB HL), transductor (*Aérea*), paso (5 dB), salida (*Derecha*) y estímulo (*Tono*). Léela antes de cada presentación: es lo que de verdad va a sonar.
+- @40,10 | **Frecuencia y prueba.** 1.000 Hz, en *Umbrales*. Se cambia con las flechas de abajo.
+- @51,22 | **Indicador de respuesta.** Se pone lila cuando el paciente levanta la mano. Es tu único dato: no mires al paciente, mira esto.
+- @96,13 | **Pantalla del canal 2.** Ruido de banda estrecha (*Narrow Band Noise*) a 60 dB al oído izquierdo: es el enmascarante (→ H4).
+- @10,30 | **Salida.** A qué oído va el canal. Un error aquí invierte el audiograma completo.
+- @26,59 | **Estímulo.** Tono, tono modulado (FM), habla y los ruidos: blanco (WN), banda estrecha (NBN), rosa (PN) y de habla (SN).
+- @36,52 | **Transductor.** Fonos (*Aéreo*) o vibrador (*Osea*). Al pasar a ósea, cambia también lo que tiene puesto el paciente.
+- @42,43 | **Alta frecuencia.** Suma las frecuencias de 9 a 16 kHz para el monitoreo de ototóxicos.
+- @42,53 | **Paso.** 1, 3 o 5 dB por clic de la perilla. Para buscar umbrales se usa 5.
+- @42,61 | **Rango extendido.** Lleva la vía aérea de 100 a 120 dB HL.
+- @8,78 | **Perilla del canal 1.** Sube y baja la intensidad del canal.
+- @16.5,72.5 | **Pulsado e Invertir.** Pulsado: el tono suena en pulsos. Invertir: el canal queda sonando continuo; así se deja encendido el ruido enmascarante.
+- @16.5,84 | **Estímulo (botón grande).** El tono suena **solo mientras lo mantienes apretado**. Uno a dos segundos, con pausas irregulares.
+- @32.5,82 | **Talkback.** Le hablas al paciente dentro de la cabina, por ejemplo para darle la instrucción.
+:::
+
+:::ayuda Antes de cada tono, de izquierda a derecha
+**Salida → transductor → estímulo → intensidad.** Cuatro datos en la pantalla del canal. Si uno está mal, el umbral que anotas es de otro oído, otra vía u otro sonido.
+:::
+
 ### Paciente
 
 - **Otoscopía primero** (→ H1). Un tapón de cerumen o un cuerpo extraño fabrican un gap; un conducto que colapsa bajo el fono supraaural, también.
@@ -129,7 +154,7 @@ Se toma **apenas termina la vía aérea**, antes de la logoaudiometría. El enma
 
 <!-- Protocolo ORL 2019 no fija tolerancia para repetir 1 kHz; se tomó la de 5 dB (ASHA 2005, BSA 2018, ISO 8253-1:1989). -->
 
-![Colocación del vibrador óseo. Panel principal: cabeza de perfil, vibrador B-71 apoyado en la mastoides derecha, detrás del pabellón y sin tocarlo, con la diadema cruzando la cabeza hasta la sien izquierda; el conducto derecho destapado. Paneles pequeños con una X roja: vibrador tocando el pabellón, vibrador sobre el pelo, vibrador sobre la escama del temporal (demasiado alto).](ilustraciones/h03-vibrador-mastoides.png)
+![Colocación del vibrador óseo. Panel principal: cabeza de perfil derecho; el vibrador óseo (un transductor pequeño, rectangular y plano, del tamaño de una caja de fósforos) apoyado de plano sobre el hueso mastoides, detrás del pabellón y sin tocarlo, sujeto por una vincha metálica delgada que pasa por encima de la cabeza hasta la sien izquierda; el conducto derecho queda destapado. Paneles pequeños con una X roja: vibrador tocando el pabellón, vibrador sobre el pelo, vibrador sobre la escama del temporal (demasiado alto).](ilustraciones/h03-vibrador-mastoides.png)
 
 ¿Por qué no se mide la ósea en 125 Hz ni sobre 4 kHz? El vibrador distorsiona en los graves y en los agudos irradia sonido por el aire. Además, en 250 Hz el paciente puede **sentir** la vibración antes de oírla: en la mastoides, el umbral táctil puede estar en 25 dB a 250 Hz, 55 dB a 500 Hz y 70 dB a 1 kHz (BSA, 2018). Una "respuesta" ósea por encima de esos niveles en graves puede ser tacto, y se anota así en el audiograma (ASHA, 2005).
 

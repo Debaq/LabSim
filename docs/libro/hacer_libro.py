@@ -25,6 +25,7 @@ import tempfile
 import markdown
 
 AQUI = pathlib.Path(__file__).resolve().parent
+RAIZ = AQUI.parents[1]
 CAPITULOS = AQUI / 'capitulos'
 CASOS = AQUI / 'casos'
 SALIDA_FIG = AQUI / 'figuras' / 'salida'
@@ -32,6 +33,16 @@ ROSTROS = AQUI / 'rostros'
 OTOSCOPIAS = AQUI / 'otoscopias'
 FUENTES = AQUI.parent / 'manual' / 'fuentes'
 CASOS_DEMO = AQUI.parent / 'manual' / 'capturas' / 'casos_demo.json'
+
+# Formato de página. 'a4': para imprimir y anillar ya (margen interior más
+# ancho del lado del anillado, alternando páginas pares e impares). 'libro':
+# para enviar a imprenta; el tamaño se ajusta al libro de referencia cuando se
+# decida (python3 hacer_libro.py --formato libro).
+FORMATOS = {
+    'a4': {'tamano': 'A4', 'interior': '24mm', 'exterior': '14mm', 'arriba': '17mm', 'abajo': '18mm'},
+    'libro': {'tamano': '210mm 280mm', 'interior': '22mm', 'exterior': '15mm', 'arriba': '18mm', 'abajo': '20mm'},
+}
+FORMATO = FORMATOS['a4']
 
 TITULO = 'Casos clínicos en audiología y electrofisiología'
 BAJADA = 'Razonamiento clínico con LabSim'
@@ -291,6 +302,32 @@ def figura_con_globos(nombre, tipo, n, lineas, numero_fig):
             f'<ol class="obs">{"".join(obs)}</ol></div>')
 
 
+def imagen_con_globos(ruta, titulo, lineas, numero):
+    """Una imagen (dibujo o captura de LabSim) con globos numerados encima.
+
+    Líneas '- @x,y | texto' (x e y en % del ancho y el alto de la imagen) o
+    '- texto' sin globo. La ruta es relativa a docs/libro/ (o absoluta al
+    repo con '/docs/...')."""
+    archivo = (RAIZ / ruta.lstrip('/')) if ruta.startswith('/') else (AQUI / ruta)
+    if not archivo.exists():
+        return f'<p class="pendiente"><span>Falta la imagen</span> {html.escape(ruta)}</p>'
+    globos, obs, k = [], [], 0
+    for linea in lineas:
+        linea = re.sub(r'^\s*[-*]\s*', '', linea).strip()
+        if not linea:
+            continue
+        m = re.match(r'@\s*([\d.]+)\s*,\s*([\d.]+)\s*\|(.*)', linea)
+        if m:
+            k += 1
+            globos.append(f'<span class="globo-img" style="left:{m[1]}%;top:{m[2]}%">{k}</span>')
+            obs.append(f'<li><span class="globo">{k}</span>{markdown.markdown(m[3].strip())[3:-4]}</li>')
+        else:
+            obs.append(f'<li class="sin-globo">{markdown.markdown(linea)[3:-4]}</li>')
+    lista = f'<ol class="obs">{"".join(obs)}</ol>' if obs else ''
+    return (f'<div class="figobs"><figure class="fig"><div class="img-globos"><img src="{archivo.as_uri()}">'
+            f'{"".join(globos)}</div><figcaption>Figura {numero}. {html.escape(titulo)}</figcaption></figure>{lista}</div>')
+
+
 def capitulo(md_texto):
     cap = re.match(r'#\s+([A-Z]?\d+)\.', md_texto)
     cap = cap[1] if cap else '0'
@@ -337,6 +374,13 @@ def capitulo(md_texto):
     patron = re.compile(r'\{\{caso\s+([a-z0-9_]+)\}\}|\{\{resultados\s+([a-z0-9_]+)\}\}'
                         r'|^:::figura\s+([a-z0-9_]+)\s+([a-z]+)(?:\s+(\d+))?\s*\n(.*?)^:::\s*$', re.M | re.S)
 
+    def img(ruta, titulo, cuerpo_img):
+        nfig['img'] = nfig.get('img', 0) + 1
+        return guardar(imagen_con_globos(ruta, titulo or '', cuerpo_img.splitlines(), f'{cap}.{nfig["img"]}'))
+
+    texto_img = re.compile(r'^:::imagen\s+(\S+)(?:[ \t]+(.*?))?\s*\n(.*?)^:::\s*$', re.M | re.S)
+    md_texto = texto_img.sub(lambda m: img(m[1], m[2], m[3]), md_texto)
+
     def uno(m):
         if m[1]:
             return caso(m[1])
@@ -381,13 +425,17 @@ def capitulo(md_texto):
     return cuerpo
 
 
-CSS = f"""
+def css():
+    return f"""
 @font-face {{ font-family: Fraunces; src: url('{(FUENTES / 'fraunces-latin.woff2').as_uri()}'); }}
 @font-face {{ font-family: 'Plus Jakarta Sans'; src: url('{(FUENTES / 'plus-jakarta-sans-latin.woff2').as_uri()}'); }}
 @font-face {{ font-family: 'Plus Jakarta Sans'; src: url('{(FUENTES / 'plus-jakarta-sans-latin-ext.woff2').as_uri()}'); }}
-@page {{ size: A4; margin: 17mm 16mm 18mm 16mm;
+@page {{ size: {FORMATO['tamano']}; margin: {FORMATO['arriba']} {FORMATO['exterior']} {FORMATO['abajo']} {FORMATO['interior']};
         @bottom-right {{ content: counter(page); font: 8pt 'Plus Jakarta Sans'; color: #8f7a83; }}
         @bottom-left {{ content: "{TITULO}"; font: 8pt 'Plus Jakarta Sans'; color: #8f7a83; }} }}
+@page :left {{ margin-left: {FORMATO['exterior']}; margin-right: {FORMATO['interior']};
+        @bottom-left {{ content: counter(page); font: 8pt 'Plus Jakarta Sans'; color: #8f7a83; }}
+        @bottom-right {{ content: "{TITULO}"; font: 8pt 'Plus Jakarta Sans'; color: #8f7a83; }} }}
 @page portada {{ margin: 0; background: #24101a; @bottom-left {{ content: none; }} @bottom-right {{ content: none; }} }}
 html {{ font: 9.8pt/1.55 'Plus Jakarta Sans', sans-serif; color: #2a1a20; }}
 .portada {{ page: portada; height: 297mm; color: #F8F1F3; text-align: center; padding-top: 70mm; box-sizing: border-box; }}
@@ -465,6 +513,11 @@ ol.obs li.sin-globo {{ padding-left: 0; }}
                   font-size: 8.8pt; }}
 .ilu-pendiente span {{ display: block; font: 700 7.5pt 'Plus Jakarta Sans'; letter-spacing: 1pt; text-transform: uppercase;
                        color: #8e2a4a; margin-bottom: 1.5mm; }}
+.img-globos {{ position: relative; display: block; margin: 0 auto; width: fit-content; max-width: 100%; }}
+.img-globos img {{ display: block; max-width: 100%; max-height: 120mm; margin: 0 auto; border-radius: 1.5mm; }}
+.globo-img {{ position: absolute; transform: translate(-50%, -50%); width: 5.4mm; height: 5.4mm; border-radius: 50%;
+              background: #24101a; color: #fff; border: .5mm solid #fff; font: 700 7.6pt/5.4mm 'Plus Jakarta Sans';
+              text-align: center; box-shadow: 0 0 0 .3mm rgba(0,0,0,.15); }}
 .fig {{ margin: 2mm 0 5mm; break-inside: avoid; }}
 .fig svg.grafico {{ display: block; max-width: 100%; height: auto; margin: 0 auto; }}
 figcaption {{ font-size: 7.8pt; color: #7d6670; margin-top: 1.2mm; text-align: center; }}
@@ -473,7 +526,13 @@ strong {{ color: #24101a; }}
 
 
 def main():
-    pedido = sys.argv[1:]
+    global FORMATO
+    args = sys.argv[1:]
+    if '--formato' in args:
+        i = args.index('--formato')
+        FORMATO = FORMATOS[args[i + 1]]
+        del args[i:i + 2]
+    pedido = args
 
     def clave(x):
         # 'H04' -> 'H4', '011' -> '11'
@@ -488,7 +547,7 @@ def main():
     portada = (f'<section class="portada"><h1>{TITULO}</h1><p class="bajada">{BAJADA}</p>'
                f'<p class="autores">{" · ".join(AUTORES)}</p><p class="licencia">{LICENCIA}</p></section>')
     cuerpo = portada + ''.join(capitulo(a.read_text(encoding='utf-8')) for a in archivos)
-    doc = f'<!doctype html><html lang="es"><head><meta charset="utf-8"><title>{TITULO}</title><style>{CSS}</style></head><body>{cuerpo}</body></html>'
+    doc = f'<!doctype html><html lang="es"><head><meta charset="utf-8"><title>{TITULO}</title><style>{css()}</style></head><body>{cuerpo}</body></html>'
     destino = AQUI / ('libro.pdf' if not pedido else f'libro-{"-".join(pedido)}.pdf')
     weasy = shutil.which('weasyprint') or str(pathlib.Path.home() / '.local' / 'bin' / 'weasyprint')
     with tempfile.NamedTemporaryFile('w', suffix='.html', encoding='utf-8', delete=False) as f:
