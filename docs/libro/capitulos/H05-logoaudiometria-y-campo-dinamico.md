@@ -48,11 +48,11 @@ Si presentas listas de palabras a distintos niveles y anotas el porcentaje que e
 {{caso h5_p34}}
 
 :::figura h5_p34 logoaudiometria
-- @OI 0 | El OI es normal. En el umbral la voz se detecta, pero no se entiende ninguna palabra.
-- @OI 20 | El tramo empinado: entre 15 y 35 dB, cada 5 dB suman unas **5 palabras** de 25.
-- @OI 35 | A **35 dB HL** repite el 100 %; de ahí en adelante la curva queda plana.
-- @OD 40 | El OD, con su otoesclerosis, no repite ninguna palabra hasta 40 dB. Su PTP es de **45 dB**.
-- @OD 80 | Llega al **100 % a 80 dB**: la misma curva del OI, corrida unos 45 dB. La cóclea está sana y solo faltaba volumen. Para medirlo hubo que enmascarar el OI (→ paso 5).
+- @OI 0 | El OI es normal: a **0 dB HL**, su SRT, repite la mitad de las palabras. Unos 10 dB más abajo detecta la voz sin entender ninguna.
+- @OI 10 | El tramo empinado: de 0 a 10 dB pasa de 50 a 82 %, unas **8 palabras** de 25.
+- @OI 35 | Desde unos **30 dB HL** repite el 100 %; de ahí en adelante la curva queda plana.
+- @OD 40 | El OD, con su otoesclerosis, no repite ninguna palabra hasta 30 dB y pasa el 50 % a **40 dB**, su SRT: a 5 dB de su PTP de **45 dB**.
+- @OD 80 | Llega al **100 % a 80 dB**: la forma de la curva del OI, corrida unos 40 dB. La cóclea está sana y solo faltaba volumen. Para medirlo hubo que enmascarar el OI (→ paso 5).
 :::
 
 ### Las listas de palabras
@@ -201,7 +201,7 @@ La BSA (2022) coincide en el tono de 1 segundo, los pasos de 5 dB y el método a
 - Dos puntajes son distintos solo si la diferencia supera lo que explica el azar. Con 25 palabras ese margen es amplio, sobre todo cerca del 50 % (Thornton y Raffin, 1978): de 96 % a 88 % son dos palabras, no una "baja".
 
 :::comentario Un ejemplo de informe
-*Logoaudiometría con bisílabos (listas de Palacio), material grabado y ruido de habla contralateral cuando correspondió. OD: SRT 20 dB HL, concordante con el promedio de los dos mejores umbrales (22 dB); máxima discriminación 92 % a 65 dB HL, con caída a 68 % a 80 dB HL. OI: SRT 25 dB HL, concordante; máxima discriminación 88 % a 70 dB HL. LDL 100 dB HL de 250 a 2.000 Hz y 105 dB HL en 3.000 y 4.000 Hz en ambos oídos: campo dinámico reducido en agudos. Discriminación acorde al grado de pérdida.*
+*Logoaudiometría con bisílabos (listas de Palacio), material grabado y ruido de habla contralateral cuando correspondió. OD: SRT 20 dB HL, concordante con el promedio de los dos mejores umbrales (22 dB); máxima discriminación 92 % a 65 dB HL y 80 % a 90 dB HL (índice de roll-over 0,13). OI: SRT 25 dB HL, concordante; máxima discriminación 88 % a 70 dB HL. LDL 100 dB HL de 250 a 2.000 Hz y 105 dB HL en 3.000 y 4.000 Hz en ambos oídos: campo dinámico reducido en agudos. Discriminación acorde al grado de pérdida.*
 :::
 
 ### Las formas de la curva
@@ -213,7 +213,7 @@ La normal y la conductiva están en la curva de Carolina. En la **coclear** el m
 :::figura h5_p36 logoaudiometria
 - @OD 65 | El OD llega a su máximo, **92 % a 65 dB**: 23 de 25 palabras. Con un PTP de 28 dB, es acorde a la pérdida.
 - @OI 70 | El OI llega a **88 % a 70 dB**. Para alcanzar el máximo hubo que subir mucho más que en un oído normal.
-- @OD 80 | Pasado el máximo la curva baja: a 80 dB el OD repite **68 %**. En un adulto mayor esa caída es frecuente y no apunta por sí sola a un tumor (Gang, 1976).
+- @OD 90 | Pasado el máximo la curva baja poco: **84 % a 80 dB** y **80 % desde 90 dB**. Índice de roll-over (92 − 80) / 92 = **0,13**, lejos del corte de 0,45. En un adulto mayor una caída así es frecuente y no apunta a un tumor (Gang, 1976).
 - Calza con lo que cuenta Hernán: con la voz bien alta entiende casi todo; en los almuerzos familiares, asiente sin entender.
 :::
 
@@ -236,13 +236,14 @@ En la **retrococlear** el paciente entiende mucho menos de lo que oye: el máxim
 
 :::figura h5_p39 logoaudiometria
 - @OD max | El máximo del OD es **52 % a 55 dB**: 13 de 25 palabras. Con un PTP de 22 dB, es una discriminación **desproporcionadamente mala**.
-- @OD 80 | Subir más no ayuda: la curva queda plana.
+- @OD 40 | Con un máximo tan bajo, la curva apenas pasa el 50 % a **40 dB**: el SRT medido con palabras queda unos 18 dB peor que el PTP, y no es un error de medición.
+- @OD 80 | Subir más empeora: 31 % a 70 dB y **20 % desde 80 dB**. Índice de roll-over (52 − 20) / 52 = **0,62**, sobre el corte de 0,45.
 - @OI 40 | El OI, normal: 100 % a 40 dB.
-- Sin enmascarar, desde 75 dB el OI contesta por el OD y la curva "mejora" hasta el 100 % a 85 dB: el hallazgo desaparece. Raúl ya lo había dicho: por el derecho "escucha la voz pero no entiende". Se estudia como retrococlear hasta demostrar lo contrario (→ capítulo 11).
+- Sin enmascarar, desde 55 dB el OI contesta por el OD y la curva "mejora" hasta el 100 % a 85 dB: el máximo bajo y el roll-over desaparecen. Raúl ya lo había dicho: por el derecho "escucha la voz pero no entiende". Se estudia como retrococlear hasta demostrar lo contrario (→ capítulo 11).
 :::
 
 :::comentario El roll-over en LabSim
-En el simulador la curva cae pasado el máximo cuando el oído tiene **reclutamiento**: la voz fuerte llega distorsionada a una cóclea con el campo estrecho. Por eso los oídos de Hernán y de Luis bajan y el de Raúl queda plano. La literatura describe el roll-over marcado sobre todo en lesiones **retrococleares**, y uno más leve en cocleares y adultos mayores (Jerger y Jerger, 1971; Gang, 1976). La curva de Hernán, seguida hasta 100 dB, da un índice de 0,61 en un oído coclear. Ningún índice decide solo: lo que orienta a una lesión retrococlear es una **discriminación pobre para el PTP**, asimétrica, con el resto de la batería (reflejos, deterioro tonal, PEAT) apuntando al mismo lado.
+En el simulador la caída pasado el máximo sale del **componente retrococlear** del caso, no del reclutamiento: un oído coclear baja poco (Hernán, índice 0,13) y uno retrococlear mucho (Raúl, 0,62), como describe la literatura (Jerger y Jerger, 1971; Gang, 1976). La caída se completa unos 25 dB sobre el máximo, o en los 100 dB del canal de habla, y la curva nunca llega a 0. Ningún índice decide solo: lo que orienta a una lesión retrococlear es una **discriminación pobre para el PTP**, asimétrica, con el resto de la batería (reflejos, deterioro tonal, PEAT) apuntando al mismo lado.
 :::
 
 ### Sin enmascarar: la curva prestada
@@ -252,16 +253,16 @@ Cuando el oído peor no se enmascara, su curva copia la del oído mejor desde qu
 {{caso h5_p41}}
 
 :::figura h5_p41 logoaudiometria
-- @OI 70 | Hasta 70 dB el OI contesta solo: 60 %.
-- @OI 80 | A 80 dB "llega" al **100 %**. No es el OI: la voz cruza con 45 dB menos, alcanza el OD a 35 dB y el OD normal entiende todo a ese nivel.
-- @OD 35 | La curva del OD: 100 % a 35 dB. Es la que se copia en el tramo alto del OI.
+- @OI 45 | A 45 dB el OI ya "repite" la mitad. No es el OI: la voz cruza con 45 dB menos y alcanza el OD a 0 dB, su SRT.
+- @OI 80 | A 80 dB "llega" al **100 %**: al OD llegan 35 dB y el OD normal entiende todo a ese nivel.
+- @OD 35 | La curva del OD: 100 % a 35 dB. Toda la curva del OI sin enmascarar es una copia de ella, corrida 45 dB.
 :::
 
 :::figura h5_p41 logoaudiometria 2
-- @OI 80 | Con ruido de habla en el OD, a 80 dB el OI repite **76 %**.
+- @OI 60 | Con ruido de habla en el OD, a 60 dB el OI repite **73 %**; sin enmascarar "repetía" 91 %.
 - @OI 90 | Su máximo real es **92 % a 90 dB**. El ruido en el OD va entre 90 − 45 − 0 + 0 = **45 dB** y 28 + 45 = **73 dB** (28 es el PTP óseo del OI).
-- @OI 100 | Pasado el máximo baja a 76 %. Sin enmascarar, la caída tampoco se veía.
-- Toda la curva del OI necesitaba ruido: empieza sobre los 50 dB y el PTP óseo del OD es 0.
+- @OI 100 | Pasado el máximo baja a **79 %** a 100 dB. Sin enmascarar, la caída tampoco se veía.
+- Toda la curva del OI necesitaba ruido: empieza sobre los 40 dB y el PTP óseo del OD es 0, así que desde 45 dB cada nivel pide enmascarar.
 :::
 
 ## Errores frecuentes
@@ -283,20 +284,16 @@ Antes de firmar, pregúntate si la discriminación **calza con el audiograma**. 
 ## En LabSim
 
 1. Elige **Habla** en el canal 1, la salida y el nivel, y activa **Invertir** para dejar el canal abierto.
-2. **SDT:** elige *pa pa pa* en *Comandos de voz*, da la instrucción **Escuche mi voz** con *Talkback* y presenta: el paciente levanta la mano cuando oye la voz.
+2. **SDT:** elige *pa pa pa* en *Comandos de voz*, da la instrucción **Escuche mi voz** con *Talkback* y presenta: el paciente levanta la mano cuando oye la voz. En los pacientes de práctica la levanta **5 dB bajo su SRT**.
 3. **Palabras:** abre **Listas de Palabras** y haz clic en cada palabra. Anota cada acierto con **+1**; **Limpiar** antes de cada lista.
 4. **Enmascarar:** **SN** en el canal 2, al otro oído, con *Invertir*.
 5. **LDL:** vuelve a **Tono**, da la instrucción **Pitos fuertes** y presenta: el paciente dice "molesta" al llegar a su umbral de molestia.
 
-El paciente simulado repite bien, en cada nivel, una cantidad fija de las 25 palabras, la que le corresponde según su curva: los porcentajes son siempre **múltiplos de 4**, y cuáles acierta cambia de una lista a otra. Su curva parte del audiograma, con el 0 % en el promedio de sus dos mejores umbrales entre 250 y 4.000 Hz, y sube hasta el máximo del caso. Si no enmascaras, la voz cruza con 45 dB menos y contesta con el oído que mejor entienda; si enmascaras de más, el ruido cruza de vuelta y la curva se corre de a poco a la derecha. Con un ruido que no es de habla, el enmascaramiento rinde menos.
+El paciente simulado repite bien, en cada nivel, una cantidad fija de las 25 palabras, la que le corresponde según su curva: los porcentajes son siempre **múltiplos de 4**, y cuáles acierta cambia de una lista a otra. Su curva pasa la **mitad de su máximo en el SRT** del caso, que en los pacientes de práctica es el promedio de los dos mejores umbrales de 500, 1.000 y 2.000 Hz: el SRT que midas con palabras concuerda con el PTP. Arranca unos 10 dB bajo el SRT, a 20 dB sobre él ya está cerca de su máximo y lo alcanza en el nivel que fija el caso. Si no enmascaras, la voz cruza con 45 dB menos y contesta con el oído que mejor entienda; si enmascaras de más, el ruido cruza de vuelta y la curva se corre de a poco a la derecha. Con un ruido que no es de habla, el enmascaramiento rinde menos. Para el SDT, el ruido mínimo es unos 5 dB más que el de la fórmula: el oído no evaluado detecta la voz 5 dB antes de reconocerla.
 
 :::comentario Lo que el simulador no tiene
 Las palabras de LabSim están **grabadas**, con una sola voz: la voz viva no se practica. Las palabras desactivadas todavía no tienen grabación.
-
-La curva de palabras del simulador sube más lento que la de un paciente real: en un oído normal, el 50 % llega unos 20 dB sobre el umbral tonal. Por eso el SRT que midas con palabras en LabSim va a quedar **por encima del PTP**. Para practicar la concordancia, usa el SDT contra el mejor umbral tonal, que sí se comporta como en la clínica.
 :::
-
-<!-- verificar (para el autor): en CalculateLogo la curva va de 0 % en el promedio de los dos mejores umbrales de 250-4000 Hz hasta el UMD del caso (35 dB en un normal), así que el 50 % cae ~22 dB en un oído normal (OI de Carolina, 33), ~67 dB en Carolina OD (PTP 45) y ~39 dB en Hernán OD (PTP 28), mientras la ficha guarda SRT = SDT ≈ PTP. Carlo y cols. 2020 dan el 50 % de bisílabos en 6,9 dB HL en normoyentes. Si se ajusta el motor, sacar el segundo párrafo de este recuadro. -->
 
 Los pacientes de este capítulo están entre los de práctica (★): Carolina, Hernán, Raúl y Luis.
 

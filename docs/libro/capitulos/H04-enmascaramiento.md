@@ -251,7 +251,7 @@ La ósea sin enmascarar **nunca** te dice de qué oído es. Si vas a informar un
 La lógica es la misma, con habla y ruido de habla. El cruce se hace evidente en la discriminación, porque el oído bueno entiende casi todo con muy poco nivel.
 
 :::figura h4_p42 logoaudiometria
-- @OD 60 | Sin enmascarar, el OD anacúsico ya "entiende" el **20 %** a 60 dB.
+- @OD 40 | Sin enmascarar, el OD anacúsico ya "entiende" el **20 %** a 40 dB, y a 45 dB la mitad: al OI llegan 0 dB, su SRT.
 - @OD 80 | A 80 dB repite el **100 %**. Es la curva del OI corrida 45 dB: lo que llega al OI son 35 dB, y a 35 dB el OI entiende todo.
 :::
 

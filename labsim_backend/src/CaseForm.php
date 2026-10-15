@@ -190,14 +190,16 @@ final class CaseForm
         $fletcher = CaseBuilder::fletcherAvg($airPairs);
         // SDT/SRT "auto (Fletcher)": el JS escribe el promedio en el campo y
         // lo deja editable, así que gana lo posteado. El cálculo de acá es
-        // el respaldo para un POST sin ese campo.
+        // el respaldo para un POST sin ese campo. El SDT auto va
+        // SDT_BAJO_SRT_DB bajo el Fletcher (CaseBuilder::sdtAuto).
         $sdt = [];
         $srt = [];
         foreach (['od' => 0, 'oi' => 1] as $lado => $i) {
             foreach ([['sdt', &$sdt], ['srt', &$srt]] as [$clave, &$destino]) {
                 $posteado = self::val($v, [$clave, $lado], null);
+                $auto = $clave === 'sdt' ? CaseBuilder::sdtAuto($fletcher[$i]) : $fletcher[$i];
                 $destino[] = ($posteado === null && isset($v[$clave . '_auto'][$lado]))
-                    ? $fletcher[$i] : (int) ($posteado ?? 0);
+                    ? $auto : (int) ($posteado ?? 0);
             }
             unset($destino);
         }

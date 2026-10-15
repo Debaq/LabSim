@@ -195,7 +195,7 @@
             <td class="side-label"><?= $ladoLabel ?></td>
             <td>
                 <input type="number" step="5" class="sdt-input" data-side="<?= $lado ?>" name="sdt[<?= $lado ?>]" value="<?= htmlspecialchars((string) fv($v, ['sdt', $lado], 0)) ?>">
-                <label class="inline-check"><input type="checkbox" class="auto-toggle" data-target="sdt-input" data-side="<?= $lado ?>" name="sdt_auto[<?= $lado ?>]" <?= !isset($v['sdt_auto']) || isset($v['sdt_auto'][$lado]) ? 'checked' : '' ?>>auto (Fletcher)</label>
+                <label class="inline-check"><input type="checkbox" class="auto-toggle" data-target="sdt-input" data-side="<?= $lado ?>" name="sdt_auto[<?= $lado ?>]" <?= !isset($v['sdt_auto']) || isset($v['sdt_auto'][$lado]) ? 'checked' : '' ?>>auto (Fletcher − 5)</label>
             </td>
             <td>
                 <input type="number" step="5" class="srt-input" data-side="<?= $lado ?>" name="srt[<?= $lado ?>]" value="<?= htmlspecialchars((string) fv($v, ['srt', $lado], 0)) ?>">
@@ -298,7 +298,7 @@
         <p class="help">Requisitos ABLB: oído de referencia ≤ <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL, oído en estudio &gt; <?= CaseBuilder::FOWLER_NORMAL_HL ?> dB HL y sensorioneural (gap aéreo-óseo ≤ <?= CaseBuilder::FOWLER_SNHL_GAP_MAX ?> dB), diferencia interaural <?= CaseBuilder::FOWLER_DIFF_MIN ?>-<?= CaseBuilder::FOWLER_DIFF_MAX ?> dB en cada frecuencia evaluada.</p>
         <p class="help">Sin reclutamiento = el paciente nunca iguala. Parcial = se acerca pero no cierra del todo. Completo = iguala sonoridad. Sobre-reclutamiento = en niveles altos el oído afectado empieza a sonar más fuerte que el sano.</p>
     </div>
-    <p class="help">Auto (SDT/SRT) = mejor promedio de 2 de 3 (500/1000/2000 Hz vía aérea), redondeado a múltiplo de 5. Destildar para escribir un valor manual.</p>
+    <p class="help">Auto SRT = mejor promedio de 2 de 3 (500/1000/2000 Hz vía aérea), al múltiplo de 5 de abajo. Auto SDT = ese mismo promedio menos 5 dB (sin respuesta queda sin respuesta). Destildar para escribir un valor manual.</p>
 </div>
 </div>
 

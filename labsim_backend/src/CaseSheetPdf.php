@@ -1004,7 +1004,7 @@ final class CaseSheetPdf
             }
             $propio = $colorDe($lado);
             $contrario = $colorDe($otro);
-            $mkg = CaseMasking::logo($nivel, $bone[$lado], $bone[$otro], $porLado[$otro]['sdt']);
+            $mkg = CaseMasking::logo($nivel, $bone[$lado], $bone[$otro], $porLado[$otro]['srt']);
             $segmentos = [[self::db($nivel) . ' dB', $propio]];
             if ($mkg['cruza']) {
                 $segmentos[] = ['/', self::GRIS_TEXTO];

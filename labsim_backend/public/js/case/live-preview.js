@@ -21,6 +21,16 @@
         var trio = [f500, f1000, f2000].sort(function (x, y) { return x - y; });
         return Math.floor(((trio[0] + trio[1]) / 2) / 5) * 5;
     }
+    // Espejo de CaseBuilder::SDT_BAJO_SRT_DB / SDT_MIN_DB / sdtAuto(): el
+    // SDT auto va 5 dB bajo el Fletcher (ASHA 1988: 8-9 dB bajo el SRT), y
+    // un oído sin respuesta (130) sigue sin respuesta.
+    var SDT_BAJO_SRT_DB = 5;
+    var SDT_MIN_DB = -10;
+    var SIN_RESPUESTA_DB = 130;
+    function sdtAuto(f) {
+        if (f >= SIN_RESPUESTA_DB) { return f; }
+        return Math.max(SDT_MIN_DB, f - SDT_BAJO_SRT_DB);
+    }
 
     ['od', 'oi'].forEach(function (side) {
         // "Igualar ósea a aérea" copia y nada más: la ósea queda editable
@@ -68,8 +78,9 @@
                 // Escribe el promedio de Fletcher y deja el campo editable:
                 // el docente puede correr el SDT/SRT del promedio tonal (que
                 // es justo el hallazgo de la simulación y del retrococlear).
+                // El SDT auto va SDT_BAJO_SRT_DB bajo ese promedio.
                 if (auto.checked) {
-                    var nuevo = String(fletcher(side));
+                    var nuevo = String(kind === 'sdt' ? sdtAuto(fletcher(side)) : fletcher(side));
                     if (input.value !== nuevo) {
                         input.value = nuevo;
                         avisar('el auto de Fletcher reescribió el ' + kind.toUpperCase());

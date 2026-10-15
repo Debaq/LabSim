@@ -257,9 +257,10 @@ class ResponseAudiometry():
         """
         Logoaudiometría con enmascaramiento: ruido de habla (Speech Noise) en el oido no estudiado.
         at fijo en 45, no depende de frecuencia (a diferencia de la via tonal).
-        minimo: int_est - at - uone + uane
+        minimo: int_est - at - uone + uane + (SRT - SDT del no estudiado)
         maximo: at + uoe
-        uae/uane: umbral aereo de habla (SDT guardado en el perfil) del oido estudiado/no estudiado
+        uae: SDT guardado en el perfil del oido estudiado (donde levanta la mano)
+        uane: SRT del no estudiado (su aereo de habla, para el gap; sin SRT, su SDT)
         uoe/uone: umbral oseo (predicho por Fletcher, no hay SDT oseo) del oido estudiado/no estudiado
         """
         stim = self.data['audio']['stim']
@@ -295,18 +296,40 @@ class ResponseAudiometry():
         sdt = self.dbdata.get('SDT') #umbral guardado en el perfil del paciente
         try:
             uae = sdt[o_e]
-            uane = sdt[o_n]
+            sdt_ne = sdt[o_n]
         except (TypeError, IndexError, KeyError):
             # caso sin SDT cargado: no se inventa un umbral, el paciente
             # no responde
             return 130
+        # El gap del no estudiado se mide con su SRT (aéreo de habla en la
+        # métrica del óseo de Fletcher), no con su SDT: el SDT auto va
+        # 5 dB bajo el Fletcher (CaseBuilder::SDT_BAJO_SRT_DB) y el gap
+        # salía corto. Sin SRT en la ficha, el SDT (lo de antes).
+        srt = self.dbdata.get('SRT')
+        try:
+            uane = srt[o_n]
+        except (TypeError, IndexError, KeyError):
+            uane = sdt_ne
+        # Lo que el no estudiado detecta antes de reconocer (SRT - SDT):
+        # la voz que cruza la nota ese tanto bajo su umbral de habla.
+        det_ne = max(0, uane - sdt_ne)
         sdt_osea = self.calc_sdt(self.dbdata['Osea_mkg'])
 
         at = 45
         uoe = sdt_osea[o_e]
         uone = sdt_osea[o_n]
+        # la voz que cruza al otro oído (curva sombra) la detecta a su óseo
+        # + 45, menos lo que ese oído detecta bajo su umbral de habla
+        cruce = at + uone - det_ne
+        if int_mkg <= 0:
+            # sin ruido el cruce está tal cual: antes un ruido en 0 contaba
+            # como "en la meseta" cuando el mínimo daba 0 o menos, y la
+            # sombra salía un escalón tarde
+            return min(uae, cruce)
 
-        mkg_min = int_ - at - uone + uane
+        # el ruido tiene que tapar también esos det_ne dB que el otro oído
+        # detecta bajo su SRT
+        mkg_min = int_ - at - uone + uane + det_ne
         mkg_max = at + uoe
         mkg_lo, mkg_hi = sorted([mkg_min, mkg_max])
 
@@ -315,7 +338,8 @@ class ResponseAudiometry():
         elif int_mkg > mkg_hi:
             return 130
         else:
-            return min(uae, at + uone)
+            # sub-enmascarado: responde la sombra
+            return min(uae, cruce)
 
     def calc_sdt(self, lista):
         # Promedio de Fletcher: mejores 2 de 500/1000/2000 Hz (indices 2,3,4)

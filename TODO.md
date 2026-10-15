@@ -45,11 +45,6 @@ Revisado contra el código el 2026-09-24.
 - [ ] 9. El informe de otoscopia no se guarda local: sin conexión, al cerrar la
       atención se pierde (el autosave de 30 s lo mitiga, pero solo sube).
       § Otoscopia: cono del espéculo e informe por cuadrantes
-- [ ] 66. El SDT "auto" de la ficha es el mismo Fletcher que el SRT; en la
-      clínica va 5-10 dB más abajo. La curva de palabras no lo necesita, pero
-      la mano levantada del SDT (`response.py`) responde en el SRT. Decidir
-      si el auto pasa a Fletcher - 5. § Logoaudiometría: la curva anclada al
-      SRT
 
 ## Decisiones pendientes
 

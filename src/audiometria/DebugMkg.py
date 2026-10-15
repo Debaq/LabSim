@@ -530,8 +530,8 @@ def _bloque_logo(logo, case, logo_state):
         return lineas
     bone = logo._bone_sdt()
     gap = logo._air_bone_gap()
-    lineas.append(f"SDT calculado por CalculateLogo (Fletcher aéreo): "
-                  f"{_fmt_par(logo.sdt, ' dB')}")
+    lineas.append(f"SRT aéreo de habla (gap y enmascaramiento):      "
+                  f"{_fmt_par(logo._srt_aereo(), ' dB')}")
     lineas.append(f"SDT del perfil (el que usa response.py):          "
                   f"{_fmt_par(case.get('SDT', ['-', '-']), ' dB')}")
     lineas.append(f"Óseo de Fletcher: {_fmt_par(bone, ' dB')}   "

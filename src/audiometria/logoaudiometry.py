@@ -20,8 +20,9 @@ class CalculateLogo():
     def __init__(self, thr, umd):
         self.thr = thr
         self.logo_attenuation = 45
-        # SDT por Fletcher aéreo: lo usa la mano levantada del SDT
-        # (response_A.logo_sdt) y el panel de enmascaramiento, no la curva.
+        # Mejores 2 de 250-4000 Hz: solo lo usa response_A.logo_sdt (ruta
+        # vieja); la mano del SDT de la app es response.py con el SDT de la
+        # ficha, y el gap/enmascaramiento usan el SRT (_srt_aereo).
         self.sdt = self.sdt_calcule(self.thr)
         datos = dict(thr)
         datos['UMD'] = umd
@@ -114,18 +115,26 @@ class CalculateLogo():
             return self.data[side][str(nivel)]
         return round(pct_logo(self.cfg[side], float(nivel)), 1)
 
+    def _srt_aereo(self):
+        """Umbral aéreo de habla de cada oído, en la métrica del óseo de
+        Fletcher: el SRT de la ficha (sin SRT, el SDT; sin ninguno, el
+        Fletcher aéreo). El SDT no sirve para el gap: el auto va
+        CaseBuilder::SDT_BAJO_SRT_DB bajo el Fletcher, y restarle el óseo
+        de Fletcher le quitaba esos 5 dB al gap de un oído que no cambió."""
+        return [self.cfg[i]['srt'] for i in (0, 1)]
+
     def _air_bone_gap(self):
-        """Gap aereo-oseo de habla por oido (SDT - Fletcher oseo)."""
-        sdt = self.thr.get('SDT', self.sdt)
+        """Gap aereo-oseo de habla por oido (SRT - Fletcher oseo)."""
+        srt = self._srt_aereo()
         bone = self._bone_sdt()
-        return [max(0, sdt[i] - bone[i]) for i in (0, 1)]
+        return [max(0, srt[i] - bone[i]) for i in (0, 1)]
 
     def _masking_range(self, side, other, intensity, stim_mkg=None):
         ce = ce_logo(stim_mkg)
-        sdt = self.thr.get('SDT', self.sdt)
+        srt = self._srt_aereo()
         bone = self._bone_sdt()
         at = self.logo_attenuation
-        uane = sdt[other]
+        uane = srt[other]
         uoe = bone[side]
         uone = bone[other]
         mkg_min = intensity - at - uone + uane + ce

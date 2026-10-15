@@ -1280,6 +1280,35 @@ final class CaseBuilder
     }
 
     /**
+     * Cuánto queda el SDT "auto" bajo el SRT "auto" (el Fletcher). ASHA
+     * (1988, citando a Chaiklin 1959) pone el SDT 8-9 dB por debajo del SRT
+     * y "consistente con el mejor umbral tonal de 250-4000 Hz". Con el SRT
+     * al piso de 5 (en promedio ~2,5 dB bajo el PTA), restarle 5 deja el
+     * SDT ~7,5 dB bajo el PTA, lo más cerca de los 8-9 dB que da la grilla
+     * de 5 dB del audiómetro; restarle 10 lo dejaba ~12,5 dB abajo y, en un
+     * audiograma plano, 10 dB bajo el mejor tono. Ver docs/decisiones.md,
+     * "Logoaudiometría: el SDT auto 5 dB bajo el SRT" (2026-10-15).
+     * Espejo: SDT_BAJO_SRT_DB en public/js/case/live-preview.js.
+     */
+    public const SDT_BAJO_SRT_DB = 5;
+
+    /** Piso del SDT auto: el mínimo del audiómetro (-10 dB HL). */
+    public const SDT_MIN_DB = -10;
+
+    /**
+     * El SDT "auto" desde el Fletcher del oído (el mismo número que llena
+     * el SRT auto). Un oído sin respuesta (130, CaseProfile::SIN_RESPUESTA_DB)
+     * sigue sin respuesta: 125 no es un umbral que nadie midió.
+     */
+    public static function sdtAuto(int $fletcher): int
+    {
+        if ($fletcher >= (int) CaseProfile::SIN_RESPUESTA_DB) {
+            return $fletcher;
+        }
+        return max(self::SDT_MIN_DB, $fletcher - self::SDT_BAJO_SRT_DB);
+    }
+
+    /**
      * Banco de nombres y apellidos, compartido con la app de escritorio
      * (resources/names.json).
      *

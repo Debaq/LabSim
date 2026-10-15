@@ -405,3 +405,26 @@ t_true(strtotime($nacio) <= strtotime(date('d-m-Y')),
     'Diez horas de vida: nunca en el futuro');
 t_eq(CaseBuilder::fechaNacFromHoras(30), date('d-m-Y', time() - 30 * 3600),
     'Treinta horas: ayer o antes de ayer, según la hora');
+
+// SDT "auto": 5 dB bajo el Fletcher que llena el SRT (ASHA 1988 lo pone
+// 8-9 dB bajo el SRT; ver CaseBuilder::SDT_BAJO_SRT_DB). Un oído sin
+// respuesta sigue sin respuesta, y el piso es el del audiómetro.
+t_eq(CaseBuilder::sdtAuto(40), 35, 'sdtAuto: 5 dB bajo el Fletcher');
+t_eq(CaseBuilder::sdtAuto(0), -5, 'sdtAuto: oído sano, -5 dB HL');
+t_eq(CaseBuilder::sdtAuto(-10), -10, 'sdtAuto: no baja del mínimo del audiómetro');
+t_eq(CaseBuilder::sdtAuto(130), 130, 'sdtAuto: sin respuesta sigue sin respuesta');
+$cfF = $cfRun(['aerea' => ['od' => array_fill(0, 9, 45), 'oi' => array_fill(0, 9, 0)],
+               'sdt_auto' => ['od' => '1', 'oi' => '1'], 'srt_auto' => ['od' => '1', 'oi' => '1']]);
+t_eq($cfF->data['SRT'], [45, 0], 'SRT auto: el Fletcher');
+t_eq($cfF->data['SDT'], [40, -5], 'SDT auto: el Fletcher menos 5');
+// Lo que escribe el docente (o lo que dejó el JS en el campo) manda.
+$cfF = $cfRun(['aerea' => ['od' => array_fill(0, 9, 45), 'oi' => array_fill(0, 9, 0)],
+               'sdt' => ['od' => '45', 'oi' => '10'], 'sdt_auto' => ['od' => '1']]);
+t_eq($cfF->data['SDT'], [45, 10], 'SDT: el valor posteado gana sobre el auto');
+
+// El JS del editor escribe el mismo número que el servidor.
+$cfJs = (string) file_get_contents(__DIR__ . '/../public/js/case/live-preview.js');
+t_true(strpos($cfJs, 'var SDT_BAJO_SRT_DB = ' . CaseBuilder::SDT_BAJO_SRT_DB . ';') !== false,
+    'live-preview.js: SDT_BAJO_SRT_DB igual a CaseBuilder');
+t_true(strpos($cfJs, 'var SDT_MIN_DB = ' . CaseBuilder::SDT_MIN_DB . ';') !== false,
+    'live-preview.js: SDT_MIN_DB igual a CaseBuilder');

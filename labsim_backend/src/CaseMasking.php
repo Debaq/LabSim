@@ -190,19 +190,24 @@ final class CaseMasking
      * masking_params.py::CE_LOGO) -- con otro ruido el mínimo sube, pero
      * eso lo decide el alumno en la cabina, no la ficha.
      *
+     * El gap de habla del oído contrario es su SRT menos su óseo de
+     * Fletcher: los dos en la misma métrica. Con el SDT (que ahora va
+     * CaseBuilder::SDT_BAJO_SRT_DB bajo el Fletcher) el gap salía 5 dB
+     * corto y el mínimo bajaba sin que cambiara el oído.
+     *
      * @param float $boneEstudiado umbral óseo de referencia (boneSdt) del oído que se prueba
      * @param float $boneNoEstudiado umbral óseo de referencia del oído contrario
-     * @param float $sdtNoEstudiado SDT del oído contrario
+     * @param float $srtNoEstudiado SRT del oído contrario
      * @return array{cruza:bool,min:float,max:float}
      */
-    public static function logo(float $intensidad, float $boneEstudiado, float $boneNoEstudiado, float $sdtNoEstudiado): array
+    public static function logo(float $intensidad, float $boneEstudiado, float $boneNoEstudiado, float $srtNoEstudiado): array
     {
         $at = self::AI_HABLA;
         // El habla cruza por vía ósea al contralateral: solo hay algo que
         // enmascarar si esa cruzada supera el umbral óseo del otro oído.
         $cruza = ($intensidad - $at) >= $boneNoEstudiado;
 
-        $min = $intensidad - $at - $boneNoEstudiado + $sdtNoEstudiado;
+        $min = $intensidad - $at - $boneNoEstudiado + $srtNoEstudiado;
         $max = $at + $boneEstudiado;
         if ($min > $max) {
             [$min, $max] = [$max, $min];
