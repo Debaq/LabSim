@@ -14,6 +14,7 @@ Mismo diagramador que el manual (markdown + WeasyPrint, fuentes del manual).
 """
 import html
 import json
+import math
 import pathlib
 import re
 import shutil
@@ -151,6 +152,64 @@ CAJAS = {
 SECCIONES_DOS_COLUMNAS = ('Técnica', 'Fisiología', 'Patología', 'Razonamiento')
 
 
+GRILLAS = ('#e7e5e0', '#cfccc5', '#f4f2ee')
+R_GLOBO = 7.5
+
+
+def obstaculos(svg):
+    """Puntos de lo dibujado (trazos, símbolos, textos), para que un globo
+    no tape un valor. La grilla y los fondos no cuentan."""
+    pts = []
+
+    def tramo(x1, y1, x2, y2):
+        n = max(1, int(math.hypot(x2 - x1, y2 - y1) / 3))
+        pts.extend((x1 + (x2 - x1) * i / n, y1 + (y2 - y1) * i / n) for i in range(n + 1))
+
+    for d in re.findall(r'<path d="([^"]+)"', svg):
+        previo = None
+        for cmd, x, y in re.findall(r'([MLZ]?)\s*(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)', d):
+            x, y = float(x), float(y)
+            if previo and cmd != 'M':
+                tramo(*previo, x, y)
+            else:
+                pts.append((x, y))
+            previo = (x, y)
+    for cx, cy, r in re.findall(r'<circle cx="([\d.-]+)" cy="([\d.-]+)" r="([\d.]+)"', svg):
+        cx, cy, r = float(cx), float(cy), float(r)
+        pts.extend((cx + r * math.cos(a / 4 * math.pi), cy + r * math.sin(a / 4 * math.pi)) for a in range(8))
+        pts.append((cx, cy))
+    for x1, y1, x2, y2, color in re.findall(
+            r'<line x1="([\d.-]+)" y1="([\d.-]+)" x2="([\d.-]+)" y2="([\d.-]+)" stroke="([^"]+)"', svg):
+        if color not in GRILLAS:
+            tramo(float(x1), float(y1), float(x2), float(y2))
+    for x, y, tam, ancla, texto in re.findall(
+            r'<text x="([\d.-]+)" y="([\d.-]+)" font-size="([\d.]+)"[^>]*?text-anchor="(\w+)"[^>]*>([^<]*)</text>', svg):
+        x, y, tam = float(x), float(y), float(tam)
+        w = len(html.unescape(texto)) * tam * 0.56
+        x0 = x - w if ancla == 'end' else x - w / 2 if ancla == 'middle' else x
+        for i in range(int(w / 3) + 1):
+            pts.append((x0 + i * 3, y - tam * 0.35))
+    return pts
+
+
+def ubicar_globo(x, y, pts, puestos, ancho, alto):
+    """La posición alrededor de (x, y) que menos tapa: prueba ángulos y
+    distancias y se queda con la de menos puntos dibujados debajo."""
+    mejor = None
+    for dist in (16, 21, 27, 34, 42, 52):
+        for paso in range(12):
+            ang = math.radians(-45 + paso * 30)        # parte arriba a la derecha
+            gx, gy = x + dist * math.cos(ang), y + dist * math.sin(ang)
+            if not (R_GLOBO + 1 < gx < ancho - R_GLOBO - 1 and R_GLOBO + 1 < gy < alto - R_GLOBO - 1):
+                continue
+            tapa = sum(1 for px, py in pts if (px - gx) ** 2 + (py - gy) ** 2 < (R_GLOBO + 3) ** 2)
+            choca = sum(1 for bx, by in puestos if (bx - gx) ** 2 + (by - gy) ** 2 < (2 * R_GLOBO + 4) ** 2)
+            puntaje = tapa * 10 + choca * 1000 + dist * 0.25 + paso * 0.05
+            if mejor is None or puntaje < mejor[0]:
+                mejor = (puntaje, gx, gy)
+    return (mejor[1], mejor[2]) if mejor else (x + 13, y - 15)
+
+
 def figura_con_globos(nombre, tipo, n, lineas, numero_fig):
     """Una figura del motor con globos numerados y las observaciones abajo.
 
@@ -164,6 +223,10 @@ def figura_con_globos(nombre, tipo, n, lineas, numero_fig):
     m = re.search(r'<metadata id="anclas">(.*?)</metadata>', svg)
     anclas = json.loads(m[1]) if m else {}
     globos, obs, k = [], [], 0
+    pts = obstaculos(svg)
+    puestos = []
+    vb = re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"', svg)
+    ancho, alto = (float(vb[1]), float(vb[2])) if vb else (600.0, 400.0)
     for linea in lineas:
         linea = re.sub(r'^\s*[-*]\s*', '', linea).strip()
         if not linea:
@@ -176,9 +239,13 @@ def figura_con_globos(nombre, tipo, n, lineas, numero_fig):
                 raise SystemExit(f'{archivo.name}: no hay ancla "{ref}". Algunas: {", ".join(cerca)}')
             k += 1
             x, y = anclas[ref]
-            gx, gy = x + 13, y - 15
-            globos.append(f'<line x1="{x}" y1="{y}" x2="{gx}" y2="{gy}" stroke="#24101a" stroke-width="0.9"/>'
-                          f'<circle cx="{x}" cy="{y}" r="2.2" fill="#24101a"/>'
+            gx, gy = ubicar_globo(x, y, pts, puestos, ancho, alto)
+            puestos.append((gx, gy))
+            gx, gy = round(gx, 2), round(gy, 2)
+            # la guía termina 4 px antes del dato, para no taparlo
+            d = math.hypot(gx - x, gy - y) or 1
+            lx, ly = round(x + (gx - x) * 4 / d, 2), round(y + (gy - y) * 4 / d, 2)
+            globos.append(f'<line x1="{lx}" y1="{ly}" x2="{gx}" y2="{gy}" stroke="#24101a" stroke-width="0.9"/>'
                           f'<circle cx="{gx}" cy="{gy}" r="7.5" fill="#24101a" stroke="#ffffff" stroke-width="1.5"/>'
                           f'<text x="{gx}" y="{gy + 3.2}" font-size="9" font-weight="700" fill="#ffffff" '
                           f'text-anchor="middle">{k}</text>')
