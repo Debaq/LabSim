@@ -22,9 +22,10 @@ import pathlib
 import subprocess
 import sys
 
-AQUI = pathlib.Path(__file__).resolve().parent
-RAIZ = AQUI.parents[1]
-CASOS = AQUI / 'casos'
+AQUI = pathlib.Path(__file__).resolve().parent        # docs/libro/herramientas
+LIBRO = AQUI.parent                                   # docs/libro
+RAIZ = LIBRO.parents[1]
+CASOS = LIBRO / 'casos'
 GENERADOS = CASOS / 'generados'
 
 
@@ -135,9 +136,9 @@ class Capitulo:
         if '--solo-pdf' not in argv:
             if rearmar:
                 print('Armando casos:', ', '.join(rearmar))
-                subprocess.run([str(AQUI / 'figuras' / 'armar_casos.sh'), *rearmar], check=True, cwd=RAIZ)
+                subprocess.run([str(LIBRO / 'figuras' / 'armar_casos.sh'), *rearmar], check=True, cwd=RAIZ)
             if '--sin-figuras' not in argv:
                 print('Figuras:', ', '.join(nombres))
-                subprocess.run(['micromamba', 'run', '-n', 'labsim', 'python', str(AQUI / 'figuras' / 'hacer_figuras.py'),
+                subprocess.run(['micromamba', 'run', '-n', 'labsim', 'python', str(LIBRO / 'figuras' / 'hacer_figuras.py'),
                                 *nombres], check=True, cwd=RAIZ, env=dict(os.environ, QT_QPA_PLATFORM='offscreen'))
         subprocess.run([sys.executable, str(AQUI / 'hacer_libro.py'), str(self.numero)], check=True, cwd=RAIZ)

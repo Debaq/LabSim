@@ -4,9 +4,9 @@
     capitulos/NN-titulo.py   el GENERADOR: pacientes y figuras (se edita y se corre)
     capitulos/NN-titulo.md   el TEXTO: bloques, recuadros y figuras relatadas
 
-    python3 docs/libro/nuevo_capitulo.py 11          un capítulo clínico
-    python3 docs/libro/nuevo_capitulo.py H4          una herramienta
-    python3 docs/libro/nuevo_capitulo.py todos       todos los que falten
+    python3 docs/libro/herramientas/nuevo_capitulo.py 11          un capítulo clínico
+    python3 docs/libro/herramientas/nuevo_capitulo.py H4          una herramienta
+    python3 docs/libro/herramientas/nuevo_capitulo.py todos       todos los que falten
     ... --forzar                                     pisa los que existan (¡texto del autor!)
 
 Nunca pisa un archivo existente sin --forzar. Después:
@@ -34,11 +34,12 @@ import subprocess
 import sys
 import unicodedata
 
-AQUI = pathlib.Path(__file__).resolve().parent
-RAIZ = AQUI.parents[1]
-INDICE = AQUI / 'indice.md'
-CAPITULOS = AQUI / 'capitulos'
-INVESTIGACION = AQUI / 'investigacion'
+AQUI = pathlib.Path(__file__).resolve().parent        # docs/libro/herramientas
+LIBRO = AQUI.parent                                   # docs/libro
+RAIZ = LIBRO.parents[1]
+INDICE = LIBRO / 'indice.md'
+CAPITULOS = LIBRO / 'capitulos'
+INVESTIGACION = LIBRO / 'investigacion'
 
 PHP_DATOS = r'''
 foreach (["Bibliografia","BibliografiaPatologias","AbrReferences","EcochgReferences","CaseProfile"] as $c) require_once "src/$c.php";
@@ -237,7 +238,7 @@ od=, oi=, grado_od=, grado_oi=, edad=, sexo='hombre'|'mujer', semilla=.
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'herramientas'))
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
 FIGURAS = [{figuras_por_defecto(n)}]
@@ -347,7 +348,7 @@ Una herramienta no necesita pacientes, pero puede ilustrar con algunos
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'herramientas'))
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
 CASOS = [

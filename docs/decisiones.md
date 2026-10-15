@@ -5504,3 +5504,22 @@ Había dos PDF por capítulo (estudiante y `--docente`) armados del mismo
 `--docente` desapareció de `hacer_libro.py` y `libro.py`. "Cómo usar este
 libro" le pide al docente que, si trabaja el caso en ABP, el estudiante no
 lea la guía antes de resolverlo.
+
+## Libro: carpeta ordenada y libro.pdf siempre al día (2026-10-15)
+
+Él pidió ordenar `docs/libro/` y tener el compilado al día después de cada
+cambio.
+
+- Scripts a `herramientas/` (`hacer_libro.py`, `libro.py`,
+  `nuevo_capitulo.py`, `ilustrar.py`); PDF de capítulos sueltos a `salida/`
+  (no se versiona); el protocolo privado a `fuentes/` (no se versiona).
+  `LEEME.md` explica cada carpeta y los comandos.
+- Armar un capítulo arma **después el libro completo** (`libro.pdf`, unos
+  3 minutos); `--sin-completo` lo salta para pruebas. Se escribe en un
+  temporal y se reemplaza de una vez, para no dejar un PDF a medias.
+- Armador: las secciones a dos columnas ya no usan `column-span` (WeasyPrint
+  perdía el resto del capítulo si caía en un salto de página): lo ancho
+  corta las columnas. Los globos de las capturas se miden sobre la imagen
+  (contenedor inline-block; `width: fit-content` no lo entiende WeasyPrint),
+  admiten coordenadas negativas y `:::imagen ruta ancho=60% Título` achica
+  la imagen.

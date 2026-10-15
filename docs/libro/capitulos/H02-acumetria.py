@@ -11,7 +11,7 @@ entiende mirando los umbrales que lo producen. Los casos se nombran en el
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'herramientas'))
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
 DIAPASON = [fig.acumetria(), fig.audiograma(ldl=False)]

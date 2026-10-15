@@ -10,7 +10,7 @@ Una herramienta no necesita pacientes, pero puede ilustrar con algunos
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'herramientas'))
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
 # La sonda va como texto ('226', '1000'), igual que en la app (Z.probe_freq):

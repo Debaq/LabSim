@@ -10,7 +10,7 @@ Acá se deciden los pacientes y las figuras del capítulo; el texto está en
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'herramientas'))
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402
 
 # Lo que se mira en todos los casos retrococleares del capítulo

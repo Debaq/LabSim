@@ -1,3 +1,7 @@
-libro*.pdf
-PROTOCOLO*.pdf
+# El compilado (libro.pdf) se rearma con herramientas/hacer_libro.py
+libro.pdf
+salida/
+# Material privado del autor: no se publica
+fuentes/
 otoscopias/bancos/
+__pycache__/

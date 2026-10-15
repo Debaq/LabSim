@@ -13,7 +13,7 @@ od=, oi=, grado_od=, grado_oi=, edad=, sexo='hombre'|'mujer', semilla=.
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'herramientas'))
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
 FIGURAS = [fig.timpanograma(sonda=1000), fig.teoae(), fig.abr(niveles=(80, 60, 40, 20))]

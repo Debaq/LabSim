@@ -12,7 +12,7 @@ reales. En el .md, la segunda figura del mismo tipo se nombra con un 2
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'herramientas'))
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
 PAR = [fig.audiograma(sin_enmascarar=True), fig.audiograma()]

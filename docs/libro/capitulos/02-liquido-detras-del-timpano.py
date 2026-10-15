@@ -13,7 +13,7 @@ od=, oi=, grado_od=, grado_oi=, edad=, sexo='hombre'|'mujer', semilla=.
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'herramientas'))
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
 # Lo que se mira en todo oído medio: el umbral con su gap, la curva y los reflejos

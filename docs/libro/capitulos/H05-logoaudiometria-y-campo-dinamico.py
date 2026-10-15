@@ -13,7 +13,7 @@ enmascarar / enmascarado de una mixta (41). La cófosis (42) ya la usa H4.
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / 'herramientas'))
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
 CASOS = [

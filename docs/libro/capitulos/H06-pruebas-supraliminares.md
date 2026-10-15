@@ -77,13 +77,13 @@ Las supraliminares no necesitan un equipo especial: usan los controles del audi�
 En LabSim el paciente responde según la **última instrucción** que le diste. Cada prueba tiene la suya en la ventana *Comandos de voz*.
 
 :::imagen /docs/manual/img/estudiante/comandos-de-voz.png Las instrucciones de las pruebas supraliminares en LabSim
-- @16.6,72 | **Pitos fuertes.** El umbral de molestia (LDL), antes de cualquier supraliminar (→ H5).
-- @55.4,50.5 | **Dos pitos.** El Fowler. Después, *¿Sonidos iguales?* o *¿En qué oído?* para preguntar en cada comparación.
-- @37.9,82.5 | **Cambie de volumen.** El SISI: el paciente dice "sí" cada vez que nota la subida.
-- @83.7,17.5 | **Mano levantada.** El Carhart.
-- @83.7,82.5 | **Rosemberg bilateral.** El Rosenberg (así se escribe en el botón).
-- @83.7,72 | **Ruido blanco contralateral.** El STAT: tono fuerte en un oído y ruido en el otro.
-- @83.7,28 | **Mano levantada en ruido.** El Stenger, con los dos canales sonando.
+- @-3,70 | **Pitos fuertes.** El umbral de molestia (LDL), antes de cualquier supraliminar (→ H5).
+- @32.8,48 | **Dos pitos.** El Fowler. Después, *¿Sonidos iguales?* o *¿En qué oído?* para preguntar en cada comparación.
+- @32.8,81 | **Cambie de volumen.** El SISI: el paciente dice "sí" cada vez que nota la subida.
+- @103,15 | **Mano levantada.** El Carhart.
+- @103,81 | **Rosemberg bilateral.** El Rosenberg (así se escribe en el botón).
+- @103,70 | **Ruido blanco contralateral.** El STAT: tono fuerte en un oído y ruido en el otro.
+- @103,26 | **Mano levantada en ruido.** El Stenger, con los dos canales sonando.
 :::
 
 ## Paso a paso

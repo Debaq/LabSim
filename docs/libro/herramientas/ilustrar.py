@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Dibuja las ilustraciones del libro con Gemini, en estilo BioRender.
 
-    GEMINI_API_KEY=... python3 docs/libro/ilustrar.py              las que falten
-    GEMINI_API_KEY=... python3 docs/libro/ilustrar.py h01-otoscopio   solo esa (la rehace)
-    python3 docs/libro/ilustrar.py --listar                         qué falta, sin dibujar
+    GEMINI_API_KEY=... python3 docs/libro/herramientas/ilustrar.py              las que falten
+    GEMINI_API_KEY=... python3 docs/libro/herramientas/ilustrar.py h01-otoscopio   solo esa (la rehace)
+    python3 docs/libro/herramientas/ilustrar.py --listar                         qué falta, sin dibujar
 
 Busca en capitulos/*.md las imágenes de ilustraciones/ que todavía no existen:
 `![descripción](ilustraciones/x.png)` y `:::imagen ilustraciones/x.png Título`
@@ -26,8 +26,9 @@ import re
 import sys
 import urllib.request
 
-AQUI = pathlib.Path(__file__).resolve().parent
-ILUSTRACIONES = AQUI / 'ilustraciones'
+AQUI = pathlib.Path(__file__).resolve().parent        # docs/libro/herramientas
+LIBRO = AQUI.parent
+ILUSTRACIONES = LIBRO / 'ilustraciones'
 REGISTRO = ILUSTRACIONES / 'REGISTRO.md'
 MODELO = 'gemini-3.1-flash-image'
 
@@ -53,7 +54,7 @@ def clave():
 def pedidos():
     """{nombre: descripción} de todas las ilustraciones nombradas en los capítulos."""
     out = {}
-    for md in sorted((AQUI / 'capitulos').glob('*.md')):
+    for md in sorted((LIBRO / 'capitulos').glob('*.md')):
         texto = md.read_text(encoding='utf-8')
         for desc, ruta in re.findall(r'!\[([^\]]+)\]\((ilustraciones/[^)]+)\)', texto):
             out[pathlib.Path(ruta).stem] = desc
