@@ -262,60 +262,40 @@ al capítulo donde está su técnica.
 
 ---
 
-## Lo que no tenemos
+## Investigación hecha (2026-10-15)
 
-### Referencias de técnica
-| Cap. | Falta |
+Las referencias marcadas ✗ arriba se buscaron y están en `docs/libro/investigacion/`,
+cada artículo verificado con DOI o PMID en Crossref/PubMed:
+
+| Archivo | Qué trae |
 |---|---|
-| 1 | Técnica de otoscopía |
-| 2 | Timpanometría: clasificación (Jerger 1970 / Lidén), normas de volumen, compliancia y gradiente |
-| 4 | Normas del umbral del reflejo estapedial; patrones de reflejo de Jerger |
-| 5 | Logoaudiometría (SRT, discriminación, PB máx., roll-over); LDL y campo dinámico; listas en español de Chile |
-| 6 | OEA: TEOAE, DPOAE y SOAE (técnica y criterios de presencia); acufenometría |
-| 7 | Atenuación interaural por transductor; método del plateau (Hood) |
-| 8 | Guía de monitoreo de ototoxicidad (ASHA u otra) con criterios de cambio |
-| 9 | Fowler y SISI |
-| 10 | Audiometría pediátrica: observación conductual y condicionada por juego |
-| 11 | Deterioro tonal (Carhart, Rosenberg, Stat) |
-| 13 | Microfónica coclear y la prueba de pinzar el tubo |
-| 14 | Efecto de la temperatura en el ABR |
-| 15 | Fuente clásica del dilema de enmascaramiento |
-| 17 | Timpanometría de 1000 Hz; tablas de corrección nHL → eHL |
-| 18 | Rechazo de artefactos; artefacto de estímulo; respuesta postauricular |
-| 19 | Pérdida no orgánica: Stenger, concordancia SRT-PTA |
-| 20 | VEMP: técnica de cVEMP y oVEMP, corrección por EMG, normas |
+| `tecnica_a.md` | 59 refs: otoscopía, timpanometría 226 y 1000 Hz, reflejo, Carhart 1950, logoaudiometría (incluye listas chilenas: Burdiles 2024, Cañete 2024), LDL, ototoxicidad, audiometría pediátrica |
+| `tecnica_b.md` | 96 refs: OEA, acufenometría, enmascaramiento (Hood, Naunton, atenuación interaural), Fowler, SISI, deterioro tonal, microfónica y tubo pinzado, temperatura, nHL→eHL, artefactos y PAM, no orgánica, VEMP |
+| `fisiologia.md` | los 19 temas con 2-3 refs cada uno + textos generales (Pickles, Møller, Gelfand, Katz, Salesa, Suárez/Gil-Carcedo) |
+| `imagenes.md` | otoscopías de glomus, hemotímpano, estenosis, carcinoma y retracción en artículos CC BY; anatomía (Servier, OpenStax, Gray, Blausen); fotos de técnica |
 
-### Referencias de fisiología
-No hay ninguna en el sistema, y hace falta una por capítulo:
+Ojo con CC BY-SA en imágenes: se pueden usar solo tal cual; para traducir o
+rotular, preferir CC BY o dominio público.
 
-- Oído externo: resonancia del conducto y cerumen
-- Trompa de Eustaquio
-- Adaptación de impedancias del oído medio
-- Conducción ósea
-- Arco reflejo
-- Muesca de Carhart
-- Tonotopía y codificación del habla
-- Células ciliadas externas y electromotilidad
-- Atenuación interaural
-- Vulnerabilidad de la base de la cóclea
-- Endolinfa y potencial endococlear
-- Potasio y conexina 26
-- Adaptación neural
-- Generadores del ABR
-- Sincronía neural y sinapsis de la célula ciliada interna
-- Maduración de la vía
-- Oído del recién nacido
-- EEG de fondo y promediación
-- Vía vestíbulo-cólica
+## Le toca al autor
 
-Un tratado o dos que cubran casi todo resolverían la mayoría, por ejemplo Pickles, Møller o un handbook de audiología clínica.
+### Referencias que no están indexadas
+- Listas chilenas originales: Rosenblüt y de Cruz (Rev Otorrinolaringol Chile, 1961 o 1962: las fuentes no coinciden) y Farfán, Solís y Palacio 2001 (Rev Chil Tecnol Méd). Están en papel o en la biblioteca.
+- Tato y cols., bisílabos (Argentina, alrededor de 1948): está en el libro de Tato.
+- Rosenberg 1958/1969 (deterioro tonal): fue congreso y folleto. Mientras tanto se cita Olsen y Noffsinger 1974.
+- Ventry y Chaiklin 1965 y Chaiklin 1967 (J Aud Res, sin DOI): falta confirmar volumen y páginas.
+- Stenger original (1900/1907).
+- Páginas de Elpern y Naunton 1963; parte II de Buus 1982 (SISI); capítulo de enmascaramiento del Katz 7.ª ed. (número y autor).
+- El texto de fisiología en español que usan tus alumnos, si no es Salesa.
 
 ### Imágenes
-- **Otoscopías sin fuente libre:** glomus, hemotímpano (barotrauma, fracturas), atresia o estenosis del conducto, carcinoma del conducto, membrana retraída
-- **Ilustraciones de anatomía y fisiología:** no hay ninguna (oído externo, medio e interno, órgano de Corti, vía auditiva, vía del VEMP)
-- **Fotos de técnica:** otoscopía, posición del vibrador óseo, montaje de electrodos del ABR, ECochG y VEMP, sonda de timpanometría. Se pueden sacar en el laboratorio.
+- Hemotímpano postraumático. Las fotos libres que hay son de hemotímpano espontáneo.
+- Otoscopía de atresia congénita. Solo hay vista externa y TC.
+- Carcinoma del conducto en etapa temprana, el que simula otitis externa.
+- Serie de Sadé graduada (la publicada es ND) y serie de glomus por clase.
+- Fotos de técnica: vibrador óseo en audiometría tonal, TIPtrode, sonda de timpanometría y montaje de ABR en adulto. Todas se pueden sacar en el laboratorio.
 
-### Del motor (no es para buscar, es trabajo de código)
+### Del motor (trabajo de código, no de búsqueda)
 - TODO 40: ósea supranormal (Pendred)
 - TODO 41-42: progresión y asimetría (CMV, ototoxicidad seriada, autoinmune)
 - TODO 45: eje no orgánico (simulación)
