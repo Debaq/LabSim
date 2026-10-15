@@ -232,17 +232,21 @@
   "edad_horas": null,
   "nacimiento": [],
   "volume": [
-   1.15,
-   1.68,
+   1.66,
+   1.52,
    "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
   ],
   "UMD": [
    {
-    "int": 65,
+    "int": 60,
     "percentage": 100
    },
    {
-    "int": 65,
+    "int": 60,
     "percentage": 100
    }
   ],
@@ -841,7 +845,7 @@
     "tinnitus": true,
     "anamnesis": true
    },
-   "at": "2026-10-15T19:28:37+00:00",
+   "at": "2026-10-15T20:11:24+00:00",
    "by": "andrea.soto"
   },
   "tipo": "normal",

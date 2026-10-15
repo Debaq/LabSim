@@ -73,6 +73,8 @@ Todos los impedanciómetros tienen la misma lógica: una pantalla que cambia seg
 - @77.5,67.5 | **Control.** El oído (*OD/OI*) y la sonda (*226 Hz* o *1000 Hz*).
 :::
 
+<!-- verificar: la captura impedanciometro-timpanograma.png es anterior al cambio de la gradiente al sentido clásico (2026-10-15) y muestra Gradient 0,26; con la app actual el As da 0,58 (como la figura de Carolina más abajo). Conviene recapturarla. -->
+
 ### Paciente
 
 - **Otoscopía primero** (→ H1). Ella decide si se puede poner la sonda en cada oído (recuadro de abajo). Si una perforación se ve, la timpanometría no agrega nada; si no se ve bien, el volumen del conducto puede delatarla (BSA, 2024).
@@ -115,7 +117,7 @@ Con la timpanometría lista, sin sacar la sonda, se buscan los reflejos **a la p
 - **Ipsilateral primero**, en 500, 1000, 2000 y 4000 Hz; luego **contralateral** en las mismas frecuencias más un **ruido** (de banda ancha en muchos equipos; en LabSim, NBN).
 - Se parte en **80 dB** y se sube de **5 en 5** hasta ver la deflexión.
 - **Criterio de presencia**: una deflexión de al menos **0,02 mL**, con la forma típica (baja al empezar el tono, vuelve al terminar). Se sube 5 dB para confirmar que **crece**, y se baja 10 para comprobar que el umbral se repite (BSA, 2024).
-- **Tope**: no pasar de 105 dB HL con tonos, por riesgo para la audición que queda (BSA, 2024).
+- **Tope**: no pasar de 105 dB HL con tonos, por riesgo para la audición que queda (BSA, 2024). En un equipo que muestra dB SPL, como el de LabSim, eso es algo más: entre 105 y 117 dB SPL según la frecuencia y el transductor (ver "El reflejo: umbral y Metz").
 
 El **umbral del reflejo** es la menor intensidad que da una deflexión repetible.
 
@@ -227,15 +229,17 @@ Ante una curva **B**, el volumen del conducto es el que dice qué pasa (BSA, 202
 
 - **Volumen normal**: la sonda está frente a un tímpano íntegro que no se mueve. Lo habitual es **líquido** en el oído medio.
 - **Volumen alto** (en el adulto, sobre unos 3,6 mL y distinto del otro oído): se está midiendo el conducto **más el oído medio**. Hay una **perforación** o un tubo de ventilación permeable.
-- **Volumen muy bajo**: la sonda está tapada con cerumen o apoyada en la pared. Se corrige y se repite.
+- **Volumen muy bajo**: la sonda está tapada con cerumen o apoyada en la pared, o un tapón de cerumen cierra el conducto y la sonda mide solo el aire que queda hasta él (→ cap. 1). Se corrige y se repite; con un tapón, primero se resuelve el conducto.
 
 El rango del volumen en adultos es de 0,6 a 2,2 mL; en niños de 5 a 7 años, de 0,7 a 1,3 mL. Más que el número aislado, cuenta la **diferencia entre los dos oídos** (BSA, 2024).
 
 ### La gradiente
 
-La gradiente es un número para la forma del pico. En LabSim es la altura de la curva a 50 daPa de cada lado del pico, dividida por la altura del pico: **más baja cuanto más en punta**. En las figuras de este capítulo, el Ad da 0,32, la A 0,42 y la C 0,50. Hay equipos que informan lo contrario (uno menos ese número), así que antes de leerla averigua qué convención usa el tuyo. Por eso hoy se prefiere el **ancho timpanométrico** (TW): el ancho del pico, en daPa, a la mitad de su altura. En niños de 1 a 7 años, un TW bajo 200 daPa se considera normal (Nozza y cols., 1994).
+La gradiente es un número para la forma del pico. Se unen con una recta los dos puntos de la curva que están a 50 daPa de cada lado del pico, y se mide cuánto **sobresale el pico** por encima de esa recta, como fracción de su altura (Brooks, 1968): **cerca de 1, la curva es en punta; cerca de 0, ancha y redondeada**, y una curva plana da 0. En LabSim, el recuadro amarillo que el equipo dibuja sobre el pico mide 100 daPa de ancho y lo que el pico tiene de alto: la gradiente es la parte de su altura que queda por encima de la curva en los bordes del recuadro. En las figuras de este capítulo, el Ad da 0,68, la A 0,58 y la C 0,50.
 
-<!-- verificar con el autor: la gradiente de LabSim (Z_225._calc_gradient) tiene el sentido invertido respecto de la clásica; está pendiente en TODO.md (punto 16). El texto describe la de la app. -->
+<!-- Brooks 1968: datos verificados en Crossref; el texto completo no se leyó. La fórmula (pico sobre la recta a ±50 daPa, dividida por la altura) es la forma de cociente con que se enseña (ver Bibliografia.php, BROOKS1968). -->
+
+No todos los equipos la calculan igual, así que antes de comparar con una tabla averigua cómo la calcula el tuyo. Por eso hoy se prefiere el **ancho timpanométrico** (TW): el ancho del pico, en daPa, a la mitad de su altura. De ocho formas de medir la forma del pico, fue la que se prefirió (Koebsell y Margolis, 1986). En niños de 1 a 7 años, un TW bajo 200 daPa se considera normal (Nozza y cols., 1994).
 
 ### El reflejo: umbral y Metz
 
@@ -245,13 +249,20 @@ En una **hipoacusia coclear** el reflejo no sube en proporción a la pérdida: s
 
 <!-- Protocolo ORL 2019: Metz "a intensidades iguales o menores a 60 dB sobre el umbral". La BSA 2024 dice "menos de 60 dB SL"; se dejó el criterio de la guía. -->
 
-En nuestro laboratorio, el umbral del reflejo se **anota en dB SPL**, y así lo rotula la ficha de LabSim. La razón es que el reflejo responde a la energía que realmente llega al oído, y lo que el equipo controla dentro de un conducto sellado, sobre todo en el ipsilateral, donde el tono sale de la misma sonda, es una presión sonora.
+En nuestro laboratorio, el umbral del reflejo se **anota en dB SPL**, y así lo muestran el equipo y la ficha de LabSim. La razón es que el reflejo responde a la energía que realmente llega al oído, y lo que el equipo controla dentro de un conducto sellado, sobre todo en el ipsilateral, donde el tono sale de la misma sonda, es una presión sonora.
+
+Para pasar de dB HL a dB SPL se suma la **corrección del transductor** que suena (su nivel de referencia, el RETSPL). En el ipsilateral el tono sale de la sonda; en el contralateral, de un fono supraaural, que necesita más presión para el mismo dB HL (Interacoustics, AT235):
+
+| Corrección (dB) | 500 Hz | 1000 Hz | 2000 Hz | 4000 Hz |
+|---|---|---|---|---|
+| Ipsilateral (sonda) | 5,5 | 0 | 3 | 5,5 |
+| Contralateral (fono TDH39) | 11,5 | 7 | 9 | 9,5 |
+
+Por eso un oído sano de LabSim da el ipsilateral en **90, 85, 90 y 90 dB SPL** y el contralateral en **95, 90, 95 y 95 dB SPL**, y el ruido contralateral en 95: es el mismo reflejo de unos 85 dB HL, con la corrección de cada transductor y redondeado a 5 dB, el paso del dial. Para el **Metz**, resta primero la corrección: un contralateral a 95 dB SPL en 500 Hz son 83,5 dB HL, y es ese número el que se compara con el umbral tonal.
 
 :::comentario Lo que dicen las normas
-La BSA prefiere expresar el estímulo del reflejo en **dB HL** y acepta dB SPL, pero advierte que entonces hay que aplicar correcciones para comparar con los valores normales (BSA, 2024). Las tablas de normalidad que se citan arriba (Wiley y cols., 1987; Gelfand y cols., 1990) y el cálculo de Metz están en dB HL: el umbral del reflejo se resta del umbral tonal, y los dos tienen que estar en la misma escala. Si tu equipo muestra SPL, haz la corrección antes de restar.
+La BSA prefiere expresar el estímulo del reflejo en **dB HL** y acepta dB SPL, siempre que se apliquen las correcciones para comparar con los valores normales (BSA, 2024). Las tablas de normalidad que se citan arriba (Wiley y cols., 1987; Gelfand y cols., 1990) y el cálculo de Metz están en dB HL: el umbral del reflejo se resta del umbral tonal, y los dos tienen que estar en la misma escala. El tope de 105 dB HL que recomienda equivale, con las correcciones de la tabla, a 105 a 110,5 dB SPL en el ipsilateral y a 112 a 116,5 dB SPL en el contralateral. El dial de LabSim llega a 120 dB SPL: el tope lo pones tú.
 :::
-
-<!-- verificar con el autor: la decisión 2026-09-14 rotula los reflejos en dB SPL, pero el modelo de LabSim (CaseProfile::reflexThreshold) arma el umbral como umbral tonal en dB HL + SL (85 dB normal, Metz con SL de 25) mientras que la ficha y las figuras rotulan dB SPL. Con eso, los 85 dB "SPL" de un oído normal de LabSim son en realidad el valor normal en dB HL de las tablas (Wiley 1987). Conviene revisarlo. -->
 
 ### Patrones de reflejo
 
@@ -274,7 +285,7 @@ Un oído medio enfermo **borra el reflejo cuando tiene la sonda**, aun con una p
 
 ## Lectura en pacientes
 
-El **patrón diagonal** es el de Raúl, el paciente con schwannoma del capítulo 11 (paciente de práctica 39): falla todo lo que se estimula por el OD, mientras que con el tono en el OI y la sonda en el OD el reflejo aparece a 85 dB. Con solo 15 dB de pérdida en 1 kHz, no es la cóclea: es el VIII par. Una cófosis derecha (paciente de práctica 42) da el mismo patrón.
+El **patrón diagonal** es el de Raúl, el paciente con schwannoma del capítulo 11 (paciente de práctica 39): falla todo lo que se estimula por el OD, mientras que con el tono en el OI y la sonda en el OD el reflejo aparece a su nivel normal (90 a 95 dB SPL). Con solo 15 dB de pérdida en 1 kHz, no es la cóclea: es el VIII par. Una cófosis derecha (paciente de práctica 42) da el mismo patrón.
 
 ### La forma de la curva del reflejo
 
@@ -290,13 +301,13 @@ Además del umbral, mira la **forma** de la deflexión. La normal baja al empeza
 
 :::figura h7_p34 reflejos
 - @ipsi OD 1000 | Con la sonda en el OD rígido faltan el ipsilateral y el contralateral que se registra ahí, aunque el tono entre por el OI sano.
-- @contra OI 2000 | Con el **tono en el OD** el reflejo sube lo que pierde en el oído medio: 100 dB en 2 kHz, 110 en 4 kHz, y ausente en 500 y 1000 Hz, donde el gap es de 45 dB.
+- @contra OI 2000 | Con el **tono en el OD** el reflejo sube lo que pierde en el oído medio: 110 dB SPL en 2 kHz, 120 en 4 kHz, y ausente en 500 y 1000 Hz, donde el gap es de 45 dB.
 - @ipsi OI 1000 | Solo el ipsilateral del OI sale normal. Tres filas alteradas en torno al OD: **L invertida**, conductivo.
 :::
 
 #### Un ejemplo de informe: Carolina
 
-> **Impedanciometría.** OD: timpanograma tipo As (volumen 1,24 mL, compliancia 0,18 mL, presión 18 daPa). Reflejos ipsilaterales ausentes; contralaterales con sonda OD ausentes. OI: timpanograma tipo A (volumen 1,03 mL, compliancia 1,41 mL, presión −2 daPa). Reflejos ipsilaterales presentes a 85 dB en todas las frecuencias; contralaterales con tono en OD ausentes en 500, 1000 Hz y ruido, presentes a 100 dB en 2 kHz y 110 dB en 4 kHz. Patrón de L invertida en torno al OD, compatible con alteración de oído medio derecho.
+> **Impedanciometría.** OD: timpanograma tipo As (volumen 1,24 mL, compliancia 0,18 mL, presión 18 daPa). Reflejos ipsilaterales ausentes; contralaterales con sonda OD ausentes. OI: timpanograma tipo A (volumen 1,03 mL, compliancia 1,41 mL, presión −2 daPa). Reflejos ipsilaterales presentes a 90, 85, 90 y 90 dB SPL (500 a 4000 Hz); contralaterales con tono en OD ausentes en 500, 1000 Hz y ruido, presentes a 110 dB SPL en 2 kHz y 120 dB SPL en 4 kHz. Patrón de L invertida en torno al OD, compatible con alteración de oído medio derecho.
 
 El informe describe; el diagnóstico lo hace el médico. En el formulario se dibuja la curva con el color de cada oído y se escriben al lado los números.
 
@@ -313,7 +324,7 @@ El informe describe; el diagnóstico lo hace el médico. En el formulario se dib
 :::figura h7_retraccion timpanograma
 - @OD pico | **Tipo C**: el pico tiene altura normal (1,39 mL) pero está corrido a −167 daPa. El oído medio está a presión negativa.
 - @OI pico | El OI es A, con el pico cerca de cero.
-- La gradiente del OD (0,50) es más alta que la del OI (0,42): su curva es más ancha.
+- La gradiente del OD (0,50) es más baja que la del OI (0,58): su curva es más ancha.
 :::
 
 {{caso h7_disyuncion}}
@@ -321,7 +332,7 @@ El informe describe; el diagnóstico lo hace el médico. En el formulario se dib
 :::figura h7_disyuncion timpanograma
 - @OD pico | **Tipo Ad**: un pico de 1,97 mL, casi al tope de la escala, en −43 daPa. Sin la cadena que lo frene, el tímpano se mueve de más.
 - @OI pico | El OI es A (1,46 mL): el OD tiene un pico más alto que el oído sano.
-- La curva del OD es la más en punta de este capítulo: gradiente 0,32. Con un gap aéreo-óseo de 50 a 60 dB, un Ad orienta a **disyunción de la cadena** (Lidén y cols., 1974).
+- La curva del OD es la más en punta de este capítulo: gradiente 0,68, la más alta. Con un gap aéreo-óseo de 50 a 60 dB, un Ad orienta a **disyunción de la cadena** (Lidén y cols., 1974).
 :::
 
 {{caso h7_lactante}}
@@ -357,18 +368,25 @@ Antes de informar, haz calzar la impedanciometría con el audiograma. Un oído c
 
 El impedanciómetro se abre con la tecla **Z**. Tiene las cuatro pantallas de este capítulo: timpanograma (sonda de 226 o 1000 Hz), reflejos ipsi y contra, *Tone Decay* y *ETF*.
 
-- El **timpanograma** quiebra en el pico, como uno real, y su ancho depende del tipo: el Ad es el más en punta y la C la más redondeada.
-- Los **reflejos** siguen la audición del paciente: aparecen a su nivel normal en un oído sano, se acercan al umbral tonal en uno coclear, suben con el gap de un oído conductivo y faltan cuando la sonda está en un oído medio rígido o lleno.
+- El **timpanograma** quiebra en el pico, como uno real, y su ancho depende del tipo: el Ad es el más en punta y el Cs el más redondeado.
+- El **volumen del conducto** dice dónde mide la sonda. Una perforación da una curva plana con volumen **alto**, porque la sonda suma el aire del oído medio, y en ella la prueba de membrana perforada muestra si la trompa es permeable. Un tapón de cerumen da una curva plana con volumen **bajo**: la sonda solo mide el poco aire que queda hasta el cerumen.
+- Los **reflejos** siguen la audición del paciente: aparecen a su nivel normal en un oído sano, se acercan al umbral tonal en uno coclear, suben con el gap de un oído conductivo y faltan cuando la sonda está en un oído medio rígido o lleno. El dial y la ficha están en **dB SPL**.
 - La **forma de la curva** del reflejo (normal, ON-OFF) la elige el docente para cada caso, y el **deterioro** depende de si el oído estimulado tiene un componente retrococlear.
-- Si la otoscopía del caso no permite poner la sonda, el caso trae ese oído como **no realizable** y el equipo no mide en él: ni timpanograma ni reflejos que pasen por ese oído. Se informa "No realizable" con el motivo.
+- Si la otoscopía del caso no permite poner nada en el conducto (otitis externa, cuerpo extraño, conducto ausente; el docente puede marcar cualquier otro oído, como uno con otorrea), el caso trae ese oído como **no realizable**. El equipo no te avisa al elegir el oído: decidir no medir es parte del ejercicio, y sale de la otoscopía y la entrevista. Se informa "No realizable" con el motivo.
+- Intentar medir en ese oído (con la sonda, o con el fono de un contralateral) es una **falta grave**. El equipo no mide, lo avisa en rojo, queda registrado en tu atención y el impedanciómetro queda **fuera de uso el resto de la atención, en los dos oídos**: la sonda que entró a un oído con secreción no puede ir al otro. Con el paciente siguiente el equipo vuelve limpio. La falta se muestra aparte y no cambia tu porcentaje de técnica.
+- Una **perforación seca no es "no realizable"**: se mide, da su volumen alto y su función tubaria se hace con la prueba de membrana perforada. Lo que no entra es la sonda en un oído con secreción.
 - En **ETF** eliges tú la prueba (membrana íntegra o perforada) según lo que viste en la otoscopía y el timpanograma.
 - Si a un **lactante** le pones la sonda de 226 Hz, el equipo te deja hacerlo y dibuja un pico aunque el oído medio esté lleno. El simulador te deja cometer el error, como el equipo real.
 
-:::comentario Lo que el simulador no tiene
-En LabSim el **volumen del conducto no cambia con una perforación**: un timpanograma plano por perforación sale con volumen normal. En la clínica, ese volumen alto es justamente lo que delata la perforación. Y las pruebas de función tubaria salen siempre "de libro", sin la variabilidad de un paciente real.
+:::comentario Lo que dicen las normas
+La BSA no recomienda la timpanometría cuando la perforación se ve en la otoscopía, porque no agrega nada; sirve cuando la membrana no se ve bien (BSA, 2024). LabSim la deja hacer a propósito: el volumen alto es lo que tienes que aprender a reconocer, para cuando la perforación no se vea.
 :::
 
-Para practicar, los pacientes de práctica (★) de este capítulo son Carolina y Benjamín; Tomás (33) para ver un oído normal, con reflejos a 85 dB en todas las casillas; para el patrón diagonal, Raúl (39) y el paciente con cófosis (42).
+:::comentario Lo que el simulador no tiene
+Las pruebas de función tubaria salen siempre "de libro", sin la variabilidad de un paciente real. Y la fila de **ruido** (NBN) del contralateral se calcula con el promedio de los tonos: no sale más baja que ellos, como saldría con un ruido de verdad.
+:::
+
+Para practicar, los pacientes de práctica (★) de este capítulo son Carolina y Benjamín; Tomás (33) para ver un oído normal, con el ipsilateral en 90, 85, 90 y 90 dB SPL y el contralateral en 95, 90, 95 y 95; para el patrón diagonal, Raúl (39) y el paciente con cófosis (42).
 
 :::pregunta Preguntas para practicar
 1. Un adulto tiene un timpanograma plano en el OI con un volumen de 4,2 mL, y en el OD un tipo A con 1,1 mL. ¿Qué esperas ver en la otoscopía? ¿Qué prueba de función tubaria le harías?
@@ -385,6 +403,8 @@ Para practicar, los pacientes de práctica (★) de este capítulo son Carolina 
 1. British Society of Audiology. Recommended procedure: tympanometry and acoustic reflex thresholds [Internet]. BSA; 2024 Feb (enmiendas menores feb 2025 y mar 2026) [citado 2026 oct 15]. Disponible en: https://www.thebsa.org.uk/wp-content/uploads/2026/03/BSA-Recommended-Procedure-Tympanometry-Acoustic-Reflex-Thresholds-March-2026-minor-revision.pdf
 1. American Speech-Language-Hearing Association. Guidelines for audiologic screening [Guidelines]. Rockville (MD): ASHA; 1997. doi:10.1044/policy.GL1997-00199
 1. Jerger J. Clinical experience with impedance audiometry. Arch Otolaryngol. 1970;92(4):311-24. doi:10.1001/archotol.1970.04310040005002
+1. Brooks DN. An objective method of detecting fluid in the middle ear. Int Audiol. 1968;7(3):280-6. doi:10.3109/05384916809074333
+1. Koebsell KA, Margolis RH. Tympanometric gradient measured from normal preschool children. Audiology. 1986;25(3):149-57. doi:10.3109/00206098609078381
 1. Lidén G, Harford E, Hallén O. Tympanometry for the diagnosis of ossicular disruption. Arch Otolaryngol. 1974;99(1):23-9. doi:10.1001/archotol.1974.00780030027005
 1. Nozza RJ, Bluestone CD, Kardatzke D, Bachman R. Identification of middle ear effusion by aural acoustic admittance and otoscopy. Ear Hear. 1994;15(4):310-23. doi:10.1097/00003446-199408000-00005
 1. Jerger J, Jerger S, Mauldin L. Studies in impedance audiometry. I. Normal and sensorineural ears. Arch Otolaryngol. 1972;96(6):513-23. doi:10.1001/archotol.1972.00770090791004
@@ -392,6 +412,7 @@ Para practicar, los pacientes de práctica (★) de este capítulo son Carolina 
 1. Jerger S, Jerger J. Diagnostic value of crossed vs uncrossed acoustic reflexes: eighth nerve and brain stem disorders. Arch Otolaryngol. 1977;103(8):445-53. doi:10.1001/archotol.1977.00780250039002
 1. Wiley TL, Oviatt DL, Block MG. Acoustic-immittance measures in normal ears. J Speech Hear Res. 1987;30(2):161-70. doi:10.1044/jshr.3002.161
 1. Gelfand SA, Schwander T, Silman S. Acoustic reflex thresholds in normal and cochlear-impaired ears: effects of no-response rates on 90th percentiles in a large sample. J Speech Hear Disord. 1990;55(2):198-205. doi:10.1044/jshd.5502.198
+1. Interacoustics A/S. AT235 / AT235h impedance audiometer: technical specifications (tabla 2, valores de referencia del estímulo) [Internet]. Consultada 2026-10-15. Disponible en: https://doc.es.aau.dk/fileadmin/doc/labs_facillities/acoustics/man/AT235/Spec_AT235.pdf
 1. Golding M, Doyle K, Sindhusake D, Mitchell P, Newall P, Hartley D. Tympanometric and acoustic stapedius reflex measures in older adults: the Blue Mountains Hearing Study. J Am Acad Audiol. 2007;18(5):391-403. doi:10.3766/jaaa.18.5.4
 1. Grason-Stadler (GSI). Acoustic Reflex Testing (guía de pruebas). Consultada 2026-10-09. Disponible en: https://grason-stadler.com/education/guides/acoustic-reflexes
 1. Cook RD, Ferguson MO, Hall JW 3rd, Grose JH, Pillsbury HC. The effects of amplitude modulation on acoustic reflex decay. Audiol Neurootol. 1999;4(2):104-13. doi:10.1159/000013827

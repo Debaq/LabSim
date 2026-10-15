@@ -19,12 +19,15 @@ from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 # Lo que se mira en este capítulo: acumetría (el diapasón no entra al conducto)
 # y la audiometría por vía aérea con fonos supraaurales y por vía ósea. La otitis
 # externa no lleva figuras: hoy no se mide (la acumetría va en el texto). Sin
-# timpanograma ni reflejos: en estos oídos la sonda no se pone (conducto
-# ocluido, inflamado, con un cuerpo extraño, sin conducto o con una masa).
+# reflejos: en estos oídos la sonda no se pone (conducto ocluido, inflamado,
+# con un cuerpo extraño, sin conducto o con una masa). El tapón sí lleva su
+# timpanograma: es lo que se obtiene si igual se mide (plano con volumen
+# bajo), y enseña a leer el volumen antes que la letra.
 ACU_AUDIO = [fig.acumetria(), fig.audiograma()]
+TAPON = ACU_AUDIO + [fig.timpanograma(sonda='226')]
 
 CASOS = [
-    cuadro('tapon_cerumen', ACU_AUDIO, od='tapon_cerumen', edad=58,
+    cuadro('tapon_cerumen', TAPON, od='tapon_cerumen', edad=58,
            anamnesis="""Tiene 58 años y es profesor de historia en un liceo. Hace tres semanas, al salir de la ducha,
            sintió el oído derecho "tapado", y así sigue: oye su propia voz como dentro de un tarro. Se limpia los
            oídos con cotonitos todos los días "porque le pica". Fue a una tienda que hacía audiometrías gratis; le

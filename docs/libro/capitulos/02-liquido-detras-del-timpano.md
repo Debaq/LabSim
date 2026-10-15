@@ -44,7 +44,7 @@ Una curva plana dice que el tímpano no se mueve **o** que la sonda no está mid
 
 - **Volumen normal para la edad**: la sonda mide un conducto cerrado por un tímpano que no se mueve. La caja está ocupada: **líquido**, sangre o, raramente, una masa.
 - **Volumen alto**: la sonda está midiendo el conducto **más** la caja y la mastoides. Hay una **perforación** o un **tubo de ventilación** que funciona.
-- **Volumen muy bajo**: la sonda está contra la pared del conducto o tapada por cerumen. No es un resultado: se recoloca la oliva y se mide de nuevo.
+- **Volumen muy bajo**: la sonda está contra la pared del conducto o tapada por cerumen, o un tapón cierra el conducto y la sonda mide solo el aire que queda hasta él (→ cap. 1). No es un resultado del oído medio: se recoloca la oliva y se mide de nuevo, o se resuelve primero el tapón.
 
 Como referencia, el volumen del conducto va de unos 0,4 a 1,0 mL en niños de 3 a 5 años y de 0,6 a 1,5 mL en adultos (Margolis y Heller, 1987). Son rangos del 90 %: algunos oídos sanos quedan fuera. Por eso, más que el número aislado, sirve **compararlo con el otro oído**: una perforación da un volumen claramente mayor que el del lado sano. En un niño, un timpanograma plano con más de 1,0 mL es criterio de derivación (ASHA, 1997).
 
@@ -56,10 +56,10 @@ Un B con volumen normal y otro con volumen alto se dibujan igual. Si informas "c
 
 ### La gradiente
 
-La gradiente describe qué tan en punta es el pico. En LabSim, como en el equipo que simula, es la altura de la curva a 50 daPa de cada lado del pico dividida por la altura del pico: **cerca de 1, la curva es ancha y redondeada**; cerca de 0, es angosta y en punta. Una curva que se redondea y se ensancha es la de un oído medio que empieza a ocuparse.
+La gradiente describe qué tan en punta es el pico. Se unen con una recta los puntos de la curva que están a 50 daPa de cada lado del pico y se mide cuánto **sobresale el pico** por encima de esa recta, como fracción de su altura (Brooks, 1968). **Cerca de 1, la curva es angosta y en punta; cerca de 0, ancha y redondeada**, y una curva plana da 0. En LabSim, un A da 0,58, un C 0,50 y un Cs 0,35 (caso 2.3): una gradiente que baja es la de una curva que se redondea y se ensancha, como la de un oído medio que empieza a ocuparse.
 
 :::comentario Lo que dicen las normas
-La gradiente clásica se calcula al revés (cerca de 1 es una curva en punta), así que antes de comparar con una tabla hay que saber cómo la calcula tu equipo. Las guías actuales prefieren el **ancho timpanométrico**: el ancho de la curva, en daPa, a la mitad de su altura. Es el mejor indicador timpanométrico de efusión en niños (Nozza y cols., 1994), y un ancho sobre unos 200 a 235 daPa es criterio de derivación (ASHA, 1997).
+No todos los equipos calculan la gradiente igual, así que antes de comparar con una tabla hay que saber cómo la calcula el tuyo. Las guías actuales prefieren el **ancho timpanométrico**: el ancho de la curva, en daPa, a la mitad de su altura. Es el mejor indicador timpanométrico de efusión en niños (Nozza y cols., 1994), y un ancho sobre unos 200 a 235 daPa es criterio de derivación (ASHA, 1997).
 :::
 
 ### Los reflejos en un oído medio enfermo
@@ -286,13 +286,13 @@ El dolor ya pasó. ¿Qué esperas de la vía ósea del OD en esta fase? Si sale 
 - @rinne OD 500 | Rinne negativo en el OD y positivo en el OI.
 :::
 :::figura cap02_otitis_media_aguda timpanograma
-- @OD pico | **B** con un volumen de 0,89 mL, normal: tímpano entero y caja ocupada.
-- @OI pico | **A**, con el pico en −12 daPa.
+- @OD pico | **B** con un volumen de 0,85 mL, normal: tímpano entero y caja ocupada.
+- @OI pico | **A**, con el pico en 16 daPa.
 :::
 :::figura cap02_otitis_media_aguda reflejos
 - @ipsi OD 1000 | Con la sonda en el OD no hay reflejo, ni ipsi ni contralateral.
-- @contra OI 1000 | Con la sonda en el OI y el tono en el OD aparece a 105 dB: llega, pero tarde, porque el tono tiene que cruzar el gap del OD.
-- @ipsi OI 1000 | El ipsilateral del OI está en 85 dB, normal.
+- @contra OI 1000 | Con la sonda en el OI y el tono en el OD aparece a 110 dB SPL en 1 kHz (110 a 120 en todas): llega, pero tarde, porque el tono tiene que cruzar el gap del OD.
+- @ipsi OI 1000 | El ipsilateral del OI está en 85 dB SPL en 1 kHz (90 en las demás), normal.
 :::
 
 :::docente Guía del caso
@@ -325,9 +325,9 @@ El otorrino pidió función tubaria. ¿Qué prueba de función tubaria correspon
 - @OD 4000 | Desde 3 kHz los dos oídos están casi normales (15 a 20 dB): el gap es **de graves**.
 :::
 :::figura cap02_disfuncion_tubaria timpanograma
-- @OD pico | Pico en −233 daPa con solo 0,27 mL de compliancia: **Cs**. La caja está muy negativa y el sistema rígido.
-- @OI pico | Pico en −114 daPa con 1,11 mL: **C** con compliancia normal.
-- Los volúmenes (1,15 y 1,68 mL) son de un conducto cerrado: los tímpanos están enteros.
+- @OD pico | Pico en −114 daPa con solo 0,29 mL de compliancia: **Cs**. La caja está a presión negativa y el sistema, rígido; la curva es la más redondeada (gradiente 0,35).
+- @OI pico | Pico en −196 daPa con 1,03 mL: **C** con compliancia normal (gradiente 0,50).
+- Los volúmenes (1,66 y 1,52 mL) son de un conducto cerrado: los tímpanos están enteros.
 :::
 :::figura cap02_disfuncion_tubaria reflejos
 - @ipsi OI 1000 | No hay reflejos en ninguna combinación, ni siquiera con la sonda en el OI, que tiene compliancia normal.
@@ -366,12 +366,12 @@ El tímpano izquierdo está violáceo, con sangre detrás. ¿Qué curva esperas?
 - @OD 1000 | El OD es normal.
 :::
 :::figura cap02_barotrauma timpanograma
-- @OI pico | **B** con 1,00 mL. Es menos que el OD (1,29 mL): el tímpano está entero y la caja, ocupada por sangre.
-- @OD pico | **A**, con el pico en −27 daPa.
+- @OI pico | **B** con 1,30 mL, un volumen normal y parecido al del OD (1,44 mL): el tímpano está entero y la caja, ocupada por sangre.
+- @OD pico | **A**, con el pico en −75 daPa.
 :::
 :::figura cap02_barotrauma reflejos
-- @ipsi OD 1000 | El ipsilateral del OD está en 85 dB, normal.
-- @contra OD 2000 | Con la sonda en el OD y el tono en el OI, el reflejo aparece solo en 2 y 4 kHz (110 y 105 dB), donde el gap del OI es menor.
+- @ipsi OD 1000 | El ipsilateral del OD está en 85 dB SPL en 1 kHz (90 en las demás), normal.
+- @contra OD 2000 | Con la sonda en el OD y el tono en el OI, el reflejo aparece solo en 2 y 4 kHz (120 y 115 dB SPL), donde el gap del OI es menor.
 - @ipsi OI 1000 | Con la sonda en el OI no hay reflejo: la caja está ocupada.
 :::
 
@@ -419,7 +419,7 @@ El control no es un trámite: es la única forma de saber si la ósea volvió. U
 
 #### Razonamiento
 
-La historia es de una trompa que no se abre: rinitis, oídos tapados de meses, crujidos y alivio con el Valsalva. Las curvas C confirman la presión negativa, y la prueba de presión-deglución muestra que tragar no la corrige. El OD va un paso más adelante: un Cs muy negativo y rígido, sin reflejos, puede estar empezando a ocuparse.
+La historia es de una trompa que no se abre: rinitis, oídos tapados de meses, crujidos y alivio con el Valsalva. Las curvas C confirman la presión negativa, y la prueba de presión-deglución muestra que tragar no la corrige. El OD va un paso más adelante: un Cs rígido y redondeado, sin reflejos, puede estar empezando a ocuparse.
 
 #### Diagnóstico y qué sigue
 
@@ -465,6 +465,7 @@ El acúfeno grave e intermitente acompaña a la caja ocupada. Si después de la 
 
 ### Técnica
 
+1. Brooks DN. An objective method of detecting fluid in the middle ear. Int Audiol. 1968;7(3):280-6. doi:10.3109/05384916809074333
 1. Jerger J. Clinical experience with impedance audiometry. Arch Otolaryngol. 1970;92(4):311-24. doi:10.1001/archotol.1970.04310040005002
 1. Jerger J, Anthony L, Jerger S, Mauldin L. Studies in impedance audiometry. 3. Middle ear disorders. Arch Otolaryngol. 1974;99(3):165-71. doi:10.1001/archotol.1974.00780030173003
 1. Margolis RH, Heller JW. Screening tympanometry: criteria for medical referral. Audiology. 1987;26(4):197-208. doi:10.3109/00206098709081549

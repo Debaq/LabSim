@@ -248,22 +248,26 @@
    "pretermino": false,
    "muy_bajo_peso": false,
    "percentil": {
-    "OD": 0.5793,
-    "OI": 0.3618
+    "OD": 0.9648,
+    "OI": 0.9884
    }
   },
   "volume": [
-   0.81,
-   0.31,
+   0.76,
+   0.71,
    "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
   ],
   "UMD": [
    {
-    "int": 65,
+    "int": 60,
     "percentage": 100
    },
    {
-    "int": 35,
+    "int": 30,
     "percentage": 100
    }
   ],
@@ -353,7 +357,7 @@
    "ipsi": [
     [
      130,
-     85
+     90
     ],
     [
      130,
@@ -361,11 +365,11 @@
     ],
     [
      130,
-     85
+     90
     ],
     [
      130,
-     85
+     90
     ]
    ],
    "contra": [
@@ -379,11 +383,11 @@
     ],
     [
      130,
-     110
+     120
     ],
     [
      130,
-     105
+     115
     ],
     [
      130,
@@ -446,7 +450,7 @@
      "disposicion": 0
     },
     {
-     "id": "amv9xn0obcm",
+     "id": "amv9z5mdocm",
      "rol": "madre",
      "nombre": "Esther Delgado",
      "edad": 33,
@@ -877,7 +881,7 @@
     "tinnitus": true,
     "anamnesis": true
    },
-   "at": "2026-10-15T19:29:19+00:00",
+   "at": "2026-10-15T20:11:47+00:00",
    "by": "andrea.soto"
   },
   "tipo": "normal",

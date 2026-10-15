@@ -25,6 +25,10 @@
       "estudio": true,
       "ldl": true,
       "sin_enmascarar": false
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": "226"
     }
   ]
 }

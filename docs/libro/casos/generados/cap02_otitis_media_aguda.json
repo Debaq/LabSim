@@ -231,17 +231,21 @@
   "edad_horas": null,
   "nacimiento": [],
   "volume": [
-   0.89,
-   0.57,
+   0.85,
+   0.68,
    "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
   ],
   "UMD": [
    {
-    "int": 65,
+    "int": 60,
     "percentage": 100
    },
    {
-    "int": 35,
+    "int": 30,
     "percentage": 100
    }
   ],
@@ -331,7 +335,7 @@
    "ipsi": [
     [
      130,
-     85
+     90
     ],
     [
      130,
@@ -339,33 +343,33 @@
     ],
     [
      130,
-     85
+     90
     ],
     [
      130,
-     85
+     90
     ]
    ],
    "contra": [
+    [
+     130,
+     120
+    ],
     [
      130,
      110
     ],
     [
      130,
-     105
+     110
     ],
     [
      130,
-     100
+     110
     ],
     [
      130,
-     100
-    ],
-    [
-     130,
-     105
+     115
     ]
    ],
    "tipo": {
@@ -424,7 +428,7 @@
      "disposicion": 0
     },
     {
-     "id": "amv9xm65bqo",
+     "id": "amv9z59qpqo",
      "rol": "madre",
      "nombre": "Marta Cardenas",
      "edad": 37,
@@ -855,7 +859,7 @@
     "tinnitus": true,
     "anamnesis": true
    },
-   "at": "2026-10-15T19:28:40+00:00",
+   "at": "2026-10-15T20:11:31+00:00",
    "by": "andrea.soto"
   },
   "tipo": "normal",

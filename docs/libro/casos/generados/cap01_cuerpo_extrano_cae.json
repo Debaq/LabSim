@@ -231,17 +231,21 @@
   "edad_horas": null,
   "nacimiento": [],
   "volume": [
-   1.67,
-   1.15,
+   0.94,
+   1.44,
    "N/D"
+  ],
+  "volume_cae": [
+   "normal",
+   "normal"
   ],
   "UMD": [
    {
-    "int": 35,
+    "int": 30,
     "percentage": 100
    },
    {
-    "int": 65,
+    "int": 60,
     "percentage": 100
    }
   ],
@@ -330,7 +334,7 @@
   "Reflex": {
    "ipsi": [
     [
-     85,
+     90,
      130
     ],
     [
@@ -338,11 +342,11 @@
      130
     ],
     [
-     85,
+     90,
      130
     ],
     [
-     85,
+     90,
      130
     ]
    ],
@@ -840,7 +844,7 @@
     "tinnitus": true,
     "anamnesis": true
    },
-   "at": "2026-10-15T19:29:33+00:00",
+   "at": "2026-10-15T20:11:05+00:00",
    "by": "andrea.soto"
   },
   "tipo": "normal",
