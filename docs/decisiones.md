@@ -5380,6 +5380,9 @@ las figuras del libro dibujan en 70 dB con su flecha toda ósea guardada en
 130 **o por encima de 70**, y no la unen a la línea punteada. El LDL no
 cambia: comparte el recorte de frecuencias de la ósea, no su tope.
 
-Queda abierto: el audiómetro de la app (`resources/json/config_audiometer.json`,
-transductor óseo) deja subir la ósea hasta 100 dB de 1 kHz en adelante y
-topa en 40-50 dB en los graves; no coincide con el tope de 70.
+El audiómetro de la app también: en `resources/json/config_audiometer.json`
+(transductor 1, óseo) la ósea de 1 a 4 kHz topa en 70 dB (antes 100), así el
+alumno no encuentra una ósea que la ficha da como "no responde". Los graves
+siguen en 40-50 dB (125-500 Hz, como un vibrador real) y 6-8 kHz no se miden
+por ósea. Espejo en `AudiometriaTecnica::TOPES['oseos']` (el indicador de
+técnica: llegar al tope sin respuesta es frecuencia cerrada).
