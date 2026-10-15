@@ -300,4 +300,4 @@ rotular, preferir CC BY o dominio público.
 - TODO 41-42: progresión y asimetría (CMV, ototoxicidad seriada, autoinmune)
 - TODO 45: eje no orgánico (simulación)
 - Generar casos con semilla fuera del navegador
-- `CaseCharts` a SVG/PNG para las figuras del libro
+- Figuras: motor hecho (`docs/libro/figuras/`) con audiograma, timpanograma, reflejos y ABR; faltan logoaudiometría, OEA, ECochG y VEMP

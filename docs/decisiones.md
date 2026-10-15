@@ -5313,3 +5313,33 @@ rótulos "trague" encimados en la ETF perforada. De paso, "Tu última
 atención" pasó a mostrar el logro de la técnica (sección de arriba).
 
 **Manual del docente: pendiente.** Plan en `docs/manual/ROADMAP.md`.
+
+## Timpanograma en punta, no redondeado (2026-10-15)
+
+El docente objetó la forma: un timpanograma real no es una campana con la
+cima redonda, sube cóncavo y **quiebra en el pico**, como dos exponenciales
+que se juntan en la punta. La app dibujaba un coseno alzado (pendiente cero
+arriba) y la ficha PDF ya imprimía la punta, así que además no coincidían.
+
+Ahora `Z_225.curve_z` (app) y `CaseCharts::curvaTimpanograma` (espejo PHP de
+la gradiente) son `c · exp(-|x - p| / w)` con `w = TW / (2 ln 2)`: el ancho a
+media altura sigue siendo `ANCHOS_JERGER` de cada letra. La gradiente de la
+app (altura a ±50 daPa / pico) pasa de ~0,31 a ~0,42 en una A y conserva el
+orden Ad < A < C < Cs. La grilla es de 10 daPa (el barrido dura lo mismo) más
+5 daPa cerca del pico y el pico exacto, para no recortar la punta.
+
+## Figuras del libro: motor propio en SVG (2026-10-15)
+
+`docs/libro/figuras/`: un motor y un JSON por caso (`docs/libro/casos/`), no
+un script por caso. Los datos salen de los mismos generadores que ve el
+alumno: audiograma y reflejos de `cases.data`, timpanograma de `Z_225` con la
+semilla del paciente, ABR de la ventana ABR real abierta sin pantalla (se
+captura nivel por nivel). Las ondas se rotulan donde las puso el generador
+(`waves` en la metadata de `generate_curve`, agregada para esto) y solo sobre
+un máximo local real de la curva promediada.
+
+El dibujo es SVG escrito a mano: ni los gráficos del backend (referenciales,
+de baja calidad) ni matplotlib (descartado por feo). Estilo en
+`motor/estilo.py`, fuentes del manual. `salida/` no se versiona: se rehace
+con `micromamba run -n labsim python docs/libro/figuras/hacer_figuras.py`
+(~25 s por caso por el ABR); `salida/index.html` es la hoja para revisarlas.

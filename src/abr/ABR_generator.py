@@ -3318,6 +3318,12 @@ class ABRGenerator:
             'residual_noise_nv': residual_nv,
             'recording': hay_registro,
             'tube_clamped': clamp,
+            # Latencia y amplitud de cada onda tal como se armo la curva
+            # (despues de estimulo, tasa y via). Nadie del panel la lee: la
+            # usan las figuras del libro para rotular I/III/V sin adivinar
+            # dónde está el pico.
+            'waves': {w: {'lat': float(d['lat']), 'amp': float(d.get('amp', 0.0))}
+                      for w, d in values.items()},
             # Bloque de promediado en curso: con el lo calcula el monitor
             # de EEG el mismo tramo de agitacion que el promediador, y el
             # trazo sucio y el promedio frenado quedan sincronizados.

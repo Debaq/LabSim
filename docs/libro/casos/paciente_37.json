@@ -1,0 +1,9 @@
+{
+  "caso": "demo:37",
+  "figuras": [
+    {"tipo": "audiograma"},
+    {"tipo": "timpanograma"},
+    {"tipo": "reflejos"},
+    {"tipo": "abr", "niveles": [80, 60, 40, 20], "marcar": ["I", "III", "V"]}
+  ]
+}

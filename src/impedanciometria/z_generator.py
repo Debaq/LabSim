@@ -137,9 +137,8 @@ def map_letter_for_probe(letter, probe_freq, seed_key=None, edad_meses=None,
 #    curva que el equipo pueda mostrar (el eje abre en 2 cc).
 #  - El pico de C/Cs llega hasta -250 daPa, no hasta -400: -400 es el borde
 #    mismo de la ventana de barrido y ahí no queda pico que leer.
-# Ancho de la curva, en daPa: es el TW (ancho a media altura) y también el
-# semiancho del coseno alzado, porque en esa forma la media altura cae justo
-# a pmax/2 de cada lado del pico.
+# Ancho de la curva, en daPa: es el TW (ancho a media altura) de la curva en
+# punta (ver Z_225.curve_z).
 #
 # Antes era 200 daPa para TODAS las letras, y como la gradiente se lee a ±50
 # daPa del pico, el equipo informaba 0,85 en cualquier curva con pico: un
@@ -244,31 +243,25 @@ class Z_225():
         c = self.compliance
         p = self.pressure
         pmax = self.pressure_max
-        num_pts = self.num_pts
 
-        # Curva en coseno alzado: pendiente cero en ambos extremos de cada
-        # tramo, tanto en el peak como en el empalme con la línea base.
-        # Evita el "nudito"/quiebre filoso que dejaba el bezier anterior
-        # (llegaba y salía del peak en tangente vertical).
-        t = np.linspace(0.0, 1.0, num_pts)
-        x_left = (-pmax + p) + t * pmax
-        y_left = c * (0.5 - 0.5 * np.cos(np.pi * t))
-        x_right = p + t * pmax
-        y_right = c * (0.5 + 0.5 * np.cos(np.pi * t))
-
-        x = np.append(x_left, x_right[1:])
-        y = np.append(y_left, y_right[1:])
-
-        x_neg = np.arange(self.win_neg-10, min(x)-10, 10)
-        x_pos = np.arange(max(x)+10, self.win_pos+10, 10)
-
-        y_neg = np.zeros(len(x_neg))
-        y_pos = np.zeros(len(x_pos))
-
-        y = np.append(y_neg,y)
-        y = np.append(y,y_pos)
-        x = np.append(x_neg, x)
-        x = np.append(x, x_pos)
+        # Curva EN PUNTA: dos exponenciales que se juntan en el pico,
+        # c * exp(-|x - p| / w). Un timpanograma real no es una campana
+        # redondeada: sube cóncavo hacia el pico y ahí quiebra (era un coseno
+        # alzado, con pendiente cero arriba, y el docente lo objetó).
+        # w sale del ancho de la letra (pmax = TW, ancho a media altura):
+        # exp(-d / w) = 1/2 en d = w ln 2, así que w = TW / (2 ln 2) deja el
+        # TW igual que antes. Misma cuenta que CaseCharts::curvaTimpanograma.
+        w = max(float(pmax), 1.0) / (2 * np.log(2))
+        # Grilla de 10 daPa (el barrido anima un punto por tick y así dura
+        # lo mismo que antes), de 5 cerca del pico y el pico exacto, para
+        # que el muestreo no recorte la punta.
+        x = np.concatenate([
+            np.arange(self.win_neg - 10, self.win_pos + 10, 10),
+            np.arange(p - pmax, p + pmax + 5, 5),
+            [p],
+        ]).astype(float)
+        x = np.unique(x)
+        y = c * np.exp(-np.abs(x - p) / w)
 
         noise_std = max(0.005, 0.02 * abs(c))
         y_noise = np.random.normal(0, noise_std, y.shape)

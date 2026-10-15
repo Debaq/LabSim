@@ -150,11 +150,8 @@ final class CaseCharts
     ];
 
     /**
-     * Ancho de la curva del EQUIPO por letra, en daPa: el barrido sube desde
-     * la línea base en `pico - ancho` y vuelve a ella en `pico + ancho`. Es
-     * `pressure_max` de Z_225 y, en un coseno alzado, coincide con el TW
-     * (ancho a media altura), porque la media altura cae justo a la mitad de
-     * cada tramo.
+     * Ancho de la curva del EQUIPO por letra, en daPa: es el TW (ancho a
+     * media altura) de la curva en punta, `pressure_max` de Z_225.
      *
      * Espejo de ANCHOS_JERGER en src/impedanciometria/z_generator.py. Era
      * 200 daPa para todas las letras, y como la gradiente se lee a ±50 daPa
@@ -170,9 +167,6 @@ final class CaseCharts
         'B'  => 400.0,
     ];
 
-    /** Puntos por tramo (subida y bajada), `num_pts` de Z_225. */
-    public const PUNTOS_TIMPANOGRAMA = 20;
-
     /**
      * La gradiente se lee a ±50 daPa del pico: es la altura promedio ahí
      * dividida por la del pico (ver Z.move en src/impedanciometria/Z.py).
@@ -186,9 +180,8 @@ final class CaseCharts
      * impresa tan ancha como la que el alumno ve en el equipo.
      *
      * Se deriva y no se escribe a mano para que no haya dos anchos para la
-     * misma letra: la forma es distinta a propósito --punta contra coseno
-     * alzado, ver tympanogramPoints()-- pero el ancho es el hallazgo y tiene
-     * que ser el mismo en la ficha y en la pantalla.
+     * misma letra: el ancho es el hallazgo y tiene que ser el mismo en la
+     * ficha y en la pantalla.
      */
     public static function anchoImpreso(string $tipo): float
     {
@@ -577,10 +570,9 @@ final class CaseCharts
      * src/impedanciometria/Z.py). Ojo con el sentido: acá 1 es una curva
      * ancha y 0 una en punta, al revés de la gradiente clásica.
      *
-     * Esta versión la mide sobre la curva que genera la app, así que es el
-     * número que va a leer el alumno en la pantalla del equipo, no el que se
-     * lee en la curva impresa de la ficha: la forma es otra (coseno alzado
-     * contra ápice en punta) aunque el ancho sea el mismo.
+     * Esta versión la mide sobre la curva que genera la app (la misma forma
+     * en punta que la ficha), así que es el número que va a leer el alumno
+     * en la pantalla del equipo.
      */
     public static function gradienteTimpanograma(float $compliance, float $pico, float $ancho): float
     {
@@ -627,25 +619,20 @@ final class CaseCharts
     }
 
     /**
-     * La curva del equipo: coseno alzado a cada lado del pico, pendiente
-     * cero en el ápice y en el empalme con la línea base, y línea base plana
-     * fuera del tramo. Espejo de Z_225.curve_z, sin el ruido de medición
-     * --la ficha imprime la forma, no una toma concreta.
+     * La curva del equipo: en punta, dos exponenciales que se juntan en el
+     * pico, con el ancho a media altura igual al TW de la letra. Espejo de
+     * Z_225.curve_z, sin el ruido de medición --la ficha imprime la forma,
+     * no una toma concreta--. Era un coseno alzado (redondeado arriba) hasta
+     * que el docente lo objetó: un timpanograma real quiebra en el pico.
      *
      * @return array<int,array{0:float,1:float}> pares [presión, compliance]
      */
     public static function curvaTimpanograma(float $compliance, float $pico, float $ancho): array
     {
-        $pmax = $ancho;
-        $n = self::PUNTOS_TIMPANOGRAMA;
+        $w = max($ancho, 1.0) / (2 * M_LN2);
         $pts = [];
-        for ($i = 0; $i < $n; $i++) {
-            $t = $i / ($n - 1);
-            $pts[] = [$pico - $pmax + $t * $pmax, $compliance * (0.5 - 0.5 * cos(M_PI * $t))];
-        }
-        for ($i = 1; $i < $n; $i++) {
-            $t = $i / ($n - 1);
-            $pts[] = [$pico + $t * $pmax, $compliance * (0.5 + 0.5 * cos(M_PI * $t))];
+        for ($p = $pico - $ancho; $p <= $pico + $ancho + 0.001; $p += 5.0) {
+            $pts[] = [$p, $compliance * exp(-abs($p - $pico) / $w)];
         }
 
         return $pts;
@@ -664,9 +651,8 @@ final class CaseCharts
         $pico = round(($pMin + $pMax) / 2);
         $ancho = self::anchoImpreso($tipo);
 
-        // Exponencial de |distancia| y no una gaussiana ni el coseno alzado
-        // de la app: el timpanograma impreso tiene el ápice EN PUNTA, y es
-        // así como se lee en una ficha. El paso es de 5 daPa porque con 10
+        // Exponencial de |distancia|, igual que la curva del equipo: el
+        // timpanograma tiene el ápice EN PUNTA, y es así como se lee. El paso es de 5 daPa porque con 10
         // el muestreo recortaba la punta.
         $pts = [];
         for ($p = -400.0; $p <= 200.0; $p += 5.0) {
