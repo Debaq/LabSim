@@ -136,9 +136,10 @@ def ficha(nombre, numero, cap):
     # Sin anamnesis en el caso (los armados por cuadro): la cuenta el texto del capítulo
     anamnesis = ''.join(partes)
 
-    otos = []
+    otos, hay_otoscopia = [], False
     for lado in ('od', 'oi'):
         f = next((p for p in OTOSCOPIAS.glob(f'{nombre}_{lado}.*')), None) if OTOSCOPIAS.exists() else None
+        hay_otoscopia = hay_otoscopia or f is not None
         otos.append(f'<figure class="oto"><img src="{f.as_uri()}"><figcaption>{lado.upper()}</figcaption></figure>' if f
                     else f'<div class="oto vacia">Otoscopía {lado.upper()}</div>')
 
@@ -146,7 +147,7 @@ def ficha(nombre, numero, cap):
 <div class="caso-cab">{rostro}<div><p class="caso-num">Caso {cap}.{numero}{practica}</p>
 <p class="caso-quien">{html.escape(quien)}</p><p class="caso-datos">{edad_txt} · {sexo}</p></div></div>
 <div class="anamnesis">{anamnesis}</div>
-<div class="otoscopia">{"".join(otos)}</div>
+{f'<div class="otoscopia">{"".join(otos)}</div>' if hay_otoscopia else ''}
 </section>'''
     return cab
 

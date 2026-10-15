@@ -14,6 +14,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
 CASOS = [
+    demo(35, []),   # Benjamín, 5 años, con su mamá: ejemplo de anamnesis de un niño (sin figuras)
 ]
 
 if __name__ == '__main__':
