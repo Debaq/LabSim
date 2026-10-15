@@ -312,9 +312,11 @@ Antes de firmar un audiograma con una asimetría o un gap, haz una sola pregunta
 
 El audiómetro del simulador tiene dos canales. Para enmascarar, deja el tono en el canal del oído evaluado y en el otro canal elige un ruido (banda estrecha, blanco, rosa o de habla) y el oído no evaluado como salida. El paciente simulado contesta según de dónde le llegue el tono:
 
-- Con el ruido **dentro de la ventana** (entre el mínimo y el máximo), contesta su umbral verdadero.
-- Con el ruido **bajo el mínimo**, contesta la curva sombra, como si no hubiera ruido. En un paciente real el umbral subiría de a poco, 1 dB por dB; en el simulador salta de la sombra al umbral verdadero cuando el ruido pasa el mínimo. Calcula el mínimo antes de poner el ruido.
-- Con el ruido **sobre el máximo**, deja de contestar: lo sobreenmascaraste.
+- Con el ruido **bajo el mínimo**, contesta por el otro oído: la curva sombra, que **sube dB a dB** a medida que subes el ruido. Es el tramo inclinado del gráfico del plateau.
+- Con el ruido **dentro de la ventana** (entre el mínimo y el máximo), contesta su umbral verdadero y deja de moverse aunque subas el ruido: la **meseta**.
+- Con el ruido **sobre el máximo**, el umbral vuelve a **subir dB a dB**: el ruido cruzó y está tapando el oído que evalúas. Lo sobreenmascaraste.
+
+Por eso el método del plateau funciona igual que con un paciente real: sube el ruido de a 10 dB y mira si el umbral se mueve.
 
 Lo que usa el simulador para calcular:
 
@@ -326,7 +328,7 @@ Lo que usa el simulador para calcular:
 Los audiogramas del libro que dicen "sin enmascarar" están calculados con la misma regla: aérea = la ósea del otro oído más la atenuación de la frecuencia; ósea = la mejor de las dos.
 
 :::ojo Ojo con el dilema
-Cuando el mínimo queda sobre el máximo, el simulador todavía no lo bloquea: si pones un ruido entre los dos valores, el paciente contesta su umbral. Haz la cuenta igual: si te da un mínimo mayor que el máximo, lo que corresponde informar es el dilema, no el umbral.
+Cuando el mínimo queda sobre el máximo, el simulador se comporta como el paciente real: **no hay meseta**. El umbral sigue subiendo con el ruido y, como mucho, pasa una vez por el valor verdadero sin quedarse ahí. Si no encuentras tres niveles seguidos con el mismo umbral, haz la cuenta: un mínimo mayor que el máximo es el dilema, y eso es lo que se informa.
 :::
 
 :::pregunta Preguntas para practicar
