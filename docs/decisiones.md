@@ -5495,3 +5495,12 @@ nada a ese conducto.
 - No hay cuadro de herpes zóster ótico (Ramsay Hunt) en `SCENARIOS`; se arma
   a mano con NR en el oído afectado.
 
+
+## Libro: una sola edición, con la guía docente adentro (2026-10-15)
+
+Había dos PDF por capítulo (estudiante y `--docente`) armados del mismo
+`.md`. Él lo pidió así: **un solo libro**. Los recuadros `:::docente`
+("Para el docente", verde) van siempre, dentro de cada caso; el flag
+`--docente` desapareció de `hacer_libro.py` y `libro.py`. "Cómo usar este
+libro" le pide al docente que, si trabaja el caso en ABP, el estudiante no
+lea la guía antes de resolverlo.

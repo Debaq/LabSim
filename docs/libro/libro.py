@@ -140,5 +140,4 @@ class Capitulo:
                 print('Figuras:', ', '.join(nombres))
                 subprocess.run(['micromamba', 'run', '-n', 'labsim', 'python', str(AQUI / 'figuras' / 'hacer_figuras.py'),
                                 *nombres], check=True, cwd=RAIZ, env=dict(os.environ, QT_QPA_PLATFORM='offscreen'))
-        extra = ['--docente'] if '--docente' in argv else []
-        subprocess.run([sys.executable, str(AQUI / 'hacer_libro.py'), str(self.numero), *extra], check=True, cwd=RAIZ)
+        subprocess.run([sys.executable, str(AQUI / 'hacer_libro.py'), str(self.numero)], check=True, cwd=RAIZ)

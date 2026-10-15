@@ -43,7 +43,6 @@ FORMATOS = {
     'libro': {'tamano': '210mm 280mm', 'interior': '22mm', 'exterior': '15mm', 'arriba': '18mm', 'abajo': '20mm'},
 }
 FORMATO = FORMATOS['a4']
-DOCENTE = False   # --docente: incluye los recuadros :::docente (guía del docente)
 
 TITULO = 'Casos clínicos en audiología y electrofisiología'
 BAJADA = 'Razonamiento clínico con LabSim'
@@ -374,8 +373,8 @@ def capitulo(md_texto):
 
     def caja(m):
         tipo, titulo, dentro = m[1], (m[2] or '').strip(), m[3]
-        if tipo.startswith('docente') and not DOCENTE:
-            return ''                           # la edición estudiante no lleva la guía del docente
+        # Un solo libro (decisión 2026-10-15): la guía del docente va
+        # dentro de cada caso, en su recuadro verde, no en otra edición.
         ancho = tipo.endswith('-ancho')
         tipo = tipo.replace('-ancho', '')
         titulo = titulo or CAJAS.get(tipo, '')
@@ -675,7 +674,7 @@ def paginas_iniciales(capitulos):
     presentación, índice, cómo usar y abreviaturas. Cada una empieza en
     página derecha; las hojas blancas de por medio las pone el paginado."""
     anio = __import__('datetime').date.today().year
-    portada = (f'<section class="portada"><div class="pt-banda-sup">LabSim{" · Edición docente" if DOCENTE else ""}</div>'
+    portada = (f'<section class="portada"><div class="pt-banda-sup">LabSim</div>'
                f'<div class="pt-centro"><h1>{TITULO}</h1><p class="bajada">{BAJADA}</p></div>'
                f'{trazos_portada()}'
                + (f'<p class="autores">{" · ".join(AUTORES)}</p>' if AUTORES else '') +
@@ -736,11 +735,8 @@ def separador(parte):
 
 
 def main():
-    global FORMATO, DOCENTE
+    global FORMATO
     args = sys.argv[1:]
-    if '--docente' in args:
-        DOCENTE = True
-        args.remove('--docente')
     if '--formato' in args:
         i = args.index('--formato')
         FORMATO = FORMATOS[args[i + 1]]
@@ -776,8 +772,7 @@ def main():
         cuerpo = (paginas_iniciales(capitulos) + '<div class="cuerpo">' + ''.join(cuerpo_caps) + '</div>'
                   + contraportada())
     doc = f'<!doctype html><html lang="es"><head><meta charset="utf-8"><title>{TITULO}</title><style>{css()}</style></head><body>{cuerpo}</body></html>'
-    sufijo = '-docente' if DOCENTE else ''
-    destino = AQUI / (f'libro{sufijo}.pdf' if not pedido else f'libro-{"-".join(pedido)}{sufijo}.pdf')
+    destino = AQUI / ('libro.pdf' if not pedido else f'libro-{"-".join(pedido)}.pdf')
     weasy = shutil.which('weasyprint') or str(pathlib.Path.home() / '.local' / 'bin' / 'weasyprint')
     with tempfile.NamedTemporaryFile('w', suffix='.html', encoding='utf-8', delete=False) as f:
         f.write(doc)

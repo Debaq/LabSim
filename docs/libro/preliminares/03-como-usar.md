@@ -51,7 +51,7 @@ Lo que la experiencia agrega a la técnica: la práctica del laboratorio y lo qu
 
 ## Para el docente
 
-Existe una **edición docente** de este libro. Trae, en cada caso, una guía con los datos clave de la entrevista, las hipótesis esperables, qué debería pedir el estudiante, los errores más frecuentes y cómo usar el caso en LabSim.
+Cada caso trae su **guía para el docente** en un recuadro verde, «Para el docente»: los datos clave de la entrevista, las hipótesis esperables, qué debería pedir el estudiante, los errores más frecuentes y cómo usar el caso en LabSim. Si trabajas el caso en clase con aprendizaje basado en problemas, pide a tus estudiantes que no lo lean antes de resolverlo.
 
 ## Las referencias
 
