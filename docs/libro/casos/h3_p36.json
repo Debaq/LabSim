@@ -1,0 +1,11 @@
+{
+  "caso": "demo:36",
+  "figuras": [
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": false,
+      "sin_enmascarar": false
+    }
+  ]
+}
