@@ -32,8 +32,13 @@ class fig:
     """Las figuras que sabe hacer el motor (figuras/motor/), con sus opciones."""
 
     @staticmethod
-    def audiograma(estudio=True, ldl=True):
-        return {'tipo': 'audiograma', 'estudio': estudio, 'ldl': ldl}
+    def audiograma(estudio=True, ldl=True, sin_enmascarar=False):
+        """estudio: ósea solo donde la aérea es anormal; sin_enmascarar: la curva sombra."""
+        return {'tipo': 'audiograma', 'estudio': estudio, 'ldl': ldl, 'sin_enmascarar': sin_enmascarar}
+
+    @staticmethod
+    def acumetria():
+        return {'tipo': 'acumetria'}
 
     @staticmethod
     def logo(enmascarado=True):

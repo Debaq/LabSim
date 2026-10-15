@@ -39,7 +39,7 @@ AUTORES = ['Nicolás Baier Quezada']
 LICENCIA = 'CC BY-NC-SA 4.0'
 
 NOMBRE_FIGURA = {
-    'audiograma': 'Audiometría tonal', 'logoaudiometria': 'Logoaudiometría', 'timpanograma': 'Timpanometría',
+    'audiograma': 'Audiometría tonal', 'acumetria': 'Acumetría', 'logoaudiometria': 'Logoaudiometría', 'timpanograma': 'Timpanometría',
     'reflejos': 'Reflejos estapediales', 'teoae': 'Emisiones otoacústicas transitorias',
     'dpoae': 'Productos de distorsión', 'abr': 'Potenciales evocados auditivos de tronco',
     'ecochg': 'Electrococleografía', 'vemp': 'VEMP',
@@ -281,6 +281,8 @@ def figura_con_globos(nombre, tipo, n, lineas, numero_fig):
     svg = svg.replace('</svg>', ''.join(globos) + '</svg>')
     svg = re.sub(r'<svg ', '<svg class="grafico" ', svg, count=1)
     rot = NOMBRE_FIGURA.get(tipo, tipo)
+    if 'sin enmascarar' in svg and 'sin enmascarar' not in rot:
+        rot += ' sin enmascarar'
     return (f'<div class="figobs"><figure class="fig">{svg}<figcaption>Figura {numero_fig}. {rot}.</figcaption></figure>'
             f'<ol class="obs">{"".join(obs)}</ol></div>')
 

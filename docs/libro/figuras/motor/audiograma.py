@@ -32,11 +32,34 @@ def _num(v):
         return None
 
 
-def dibujar(caso, estudio=True, ldl=True, oidos=('OD', 'OI')):
+def sombra(aerea, osea):
+    """Lo que mide quien NO enmascara: el oído mejor contesta por el peor.
+
+    Por aérea el tono cruza con la atenuación interaural de la frecuencia
+    (ATENUACION_AEREA, la misma regla de enmascaramiento de la ficha) y lo
+    oye la cóclea contraria, que se mide por su ósea; por ósea la atenuación
+    es casi nula, así que contesta la mejor ósea de las dos."""
+    otro = {'OD': 'OI', 'OI': 'OD'}
+    a2, o2 = {}, {}
+    for lado in ('OD', 'OI'):
+        a2[lado], o2[lado] = [], []
+        for i in range(len(FRECUENCIAS)):
+            a, o, oo = _num(aerea[lado][i]), _num(osea[lado][i]), _num(osea[otro[lado]][i])
+            cruce = oo + ATENUACION_AEREA[i] if oo is not None else None
+            a2[lado].append(min(a, cruce) if a is not None and cruce is not None else a)
+            o2[lado].append(min(o, oo) if o is not None and oo is not None else o)
+    return a2, o2
+
+
+def dibujar(caso, estudio=True, ldl=True, oidos=('OD', 'OI'), sin_enmascarar=False):
     """estudio=True: la ósea no aparece donde el aéreo de ese oído es normal
-    (como en la ficha de estudio; un examen real no la busca ahí)."""
+    (como en la ficha de estudio; un examen real no la busca ahí).
+    sin_enmascarar=True: lo que anota quien no enmascara (curva sombra)."""
     aerea = por_oido(caso['Aerea'])
     osea = por_oido(caso['Osea'])
+    if sin_enmascarar:
+        aerea, osea = sombra(aerea, osea)
+        ldl = False
     ldl_d = por_oido(caso['LDL']) if ldl and caso.get('LDL') else None
     otro = {'OD': 'OI', 'OI': 'OD'}
 
@@ -108,7 +131,8 @@ def dibujar(caso, estudio=True, ldl=True, oidos=('OD', 'OI')):
                 continue
             sin = a[i] >= SIN_RESPUESTA
             x, y = X(f), Y(NIVEL_MAXIMO if sin else a[i])
-            enmascarada = o_otro[i] is not None and (a[i] - o_otro[i]) >= ATENUACION_AEREA[i]
+            enmascarada = (not sin_enmascarar and o_otro[i] is not None
+                           and (a[i] - o_otro[i]) >= ATENUACION_AEREA[i])
             _simbolo_aereo(s, lado, x, y, col, enmascarada)
             s.ancla(f'{lado} {f}', x, y)
             if sin:
@@ -116,12 +140,14 @@ def dibujar(caso, estudio=True, ldl=True, oidos=('OD', 'OI')):
         for i in idx_osea:
             sin = o[i] > TOPE_OSEA
             x, y = X(FRECUENCIAS[i]) + desp, Y(TOPE_OSEA if sin else o[i])
-            enmascarada = a[i] is not None and (a[i] - o[i]) >= GAP_ENMASCARA_OSEA
+            enmascarada = not sin_enmascarar and a[i] is not None and (a[i] - o[i]) >= GAP_ENMASCARA_OSEA
             _simbolo_oseo(s, lado, x, y, col, enmascarada)
             s.ancla(f'{lado} osea {FRECUENCIAS[i]}', x, y)
             if sin:
                 _flecha(s, x, y, col, -1 if lado == 'OD' else 1)
 
+    if sin_enmascarar:
+        s.texto(s.ancho - 14, 14, 'sin enmascarar', E.T_CHICO, E.TENUE, 'end')
     s.texto(14, mt + ph / 2, 'dB HL', E.T_EJE, E.TENUE,
             extra=f'transform="rotate(-90 14 {mt + ph / 2:.1f})"')
     s.texto(s.ancho / 2, mt + ph + 34, 'Frecuencia (Hz)', E.T_EJE, E.TENUE)

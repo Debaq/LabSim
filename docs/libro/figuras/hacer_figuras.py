@@ -12,7 +12,7 @@ Cada caso es un JSON con el paciente y las figuras que lleva:
                  {"tipo": "reflejos"},
                  {"tipo": "abr", "niveles": [80, 60, 40], "marcar": ["I", "III", "V"]}]}
 
-Tipos: audiograma, timpanograma, reflejos, logoaudiometria (enmascarado),
+Tipos: audiograma (estudio, sin_enmascarar), acumetria, timpanograma, reflejos, logoaudiometria (enmascarado),
 abr (niveles, estimulo, marcar), ecochg (nivel), teoae, dpoae,
 vemp (subtipo cvemp|ovemp). Un caso por cuadro ("caso": {"cuadro": ...})
 se arma antes con armar_casos.sh.
@@ -29,7 +29,7 @@ import sys
 AQUI = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI))
 
-from motor import abr, audiograma, ecochg, impedancia, logo, oae, vemp  # noqa: E402
+from motor import abr, acumetria, audiograma, ecochg, impedancia, logo, oae, vemp  # noqa: E402
 from motor.datos import cargar_caso  # noqa: E402
 
 CASOS = AQUI.parent / 'casos'
@@ -41,7 +41,10 @@ def figura(caso, f):
     tipo = f['tipo']
     if tipo == 'audiograma':
         return audiograma.dibujar(caso, estudio=f.get('estudio', True), ldl=f.get('ldl', True),
-                                  oidos=tuple(f.get('oidos', ('OD', 'OI'))))
+                                  oidos=tuple(f.get('oidos', ('OD', 'OI'))),
+                                  sin_enmascarar=f.get('sin_enmascarar', False))
+    if tipo == 'acumetria':
+        return acumetria.dibujar(caso)
     if tipo == 'timpanograma':
         return impedancia.timpanograma(caso, oidos=tuple(f.get('oidos', ('OD', 'OI'))),
                                        escala_ml=f.get('escala_ml', 2.0), sonda=f.get('sonda', 226))
