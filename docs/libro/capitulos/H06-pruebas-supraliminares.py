@@ -14,6 +14,10 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
 
 CASOS = [
+    # Reclutamiento presente: Ménière del OI (Fowler completo, SISI alto)
+    demo(38, [fig.audiograma()]),
+    # Sin reclutamiento y con deterioro: schwannoma del OD
+    demo(39, [fig.audiograma()]),
 ]
 
 if __name__ == '__main__':
