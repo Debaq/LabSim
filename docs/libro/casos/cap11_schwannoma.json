@@ -1,0 +1,10 @@
+{
+  "caso": {"cuadro": {"OD": "schwannoma", "OI": "normal"}, "grado": {"OD": "moderada"},
+           "edad": 52, "sexo": "mujer"},
+  "figuras": [
+    {"tipo": "audiograma"},
+    {"tipo": "timpanograma"},
+    {"tipo": "reflejos"},
+    {"tipo": "abr", "niveles": [80, 60, 40], "marcar": ["I", "III", "V"]}
+  ]
+}

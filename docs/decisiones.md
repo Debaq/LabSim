@@ -5343,3 +5343,29 @@ de baja calidad) ni matplotlib (descartado por feo). Estilo en
 `motor/estilo.py`, fuentes del manual. `salida/` no se versiona: se rehace
 con `micromamba run -n labsim python docs/libro/figuras/hacer_figuras.py`
 (~25 s por caso por el ABR); `salida/index.html` es la hoja para revisarlas.
+
+## Libro: casos por cuadro con el editor real, y el resto de las figuras (2026-10-15)
+
+`docs/libro/figuras/armar_casos.sh` arma un caso pedido por cuadro
+(`"caso": {"cuadro": {...}, "grado": {...}, "edad", "sexo", "semilla"}`)
+abriendo `admin/case_create.php` en una copia aislada del backend (podman
+php:7.4 + Chromium, como las capturas del manual) con `Math.random`
+sembrado: elige cuadro y grado, aprieta "Generar caso", tilda la revisión
+del Resumen y "Crear caso". No hay una segunda copia de generator.js ni de
+CaseForm. El resultado queda versionado en `docs/libro/casos/generados/` y
+es la fuente del caso: el volumen del conducto lo sortea PHP en el servidor
+(`CaseBuilder::earVolume`, fuera de la semilla), así que rearmar puede
+cambiarlo. Dos trampas del editor: la categoría tiene que ser la del cuadro
+(con "al azar" el generador sortea otra y pisa el cuadro) y el Resumen
+bloquea el envío hasta tildar las 11 fichas.
+
+Figuras nuevas, todas con el código de la app: logoaudiometría
+(`CalculateLogo`, curva propia por oído o la del alumno sin enmascarar),
+TEOAE y DPOAE (generadores de `src/oae` con su semilla), ECochG
+(`ECochG_Curve` + `auto_marks`/`measure_complex`, protocolo estándar) y
+VEMP (`MotorVemp` promediado como la ventana; la app no lo siembra, el
+libro sí, por paciente/oído/subtipo).
+
+Timpanograma: además de la punta, el temblor de medición pasa de ruido
+blanco (2 % de la compliancia por punto, se veía serrucho) a uno chico y
+suavizado (1 %, media móvil de 7 puntos): la curva del equipo es lisa.

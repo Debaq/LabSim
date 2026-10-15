@@ -299,5 +299,4 @@ rotular, preferir CC BY o dominio público.
 - TODO 40: ósea supranormal (Pendred)
 - TODO 41-42: progresión y asimetría (CMV, ototoxicidad seriada, autoinmune)
 - TODO 45: eje no orgánico (simulación)
-- Generar casos con semilla fuera del navegador
-- Figuras: motor hecho (`docs/libro/figuras/`) con audiograma, timpanograma, reflejos y ABR; faltan logoaudiometría, OEA, ECochG y VEMP
+- Figuras: motor hecho (`docs/libro/figuras/`): audiograma, logoaudiometría, timpanograma, reflejos, TEOAE, DPOAE, ABR, ECochG y VEMP; casos por cuadro con `armar_casos.sh`

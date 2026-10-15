@@ -12,6 +12,11 @@ Cada caso es un JSON con el paciente y las figuras que lleva:
                  {"tipo": "reflejos"},
                  {"tipo": "abr", "niveles": [80, 60, 40], "marcar": ["I", "III", "V"]}]}
 
+Tipos: audiograma, timpanograma, reflejos, logoaudiometria (enmascarado),
+abr (niveles, estimulo, marcar), ecochg (nivel), teoae, dpoae,
+vemp (subtipo cvemp|ovemp). Un caso por cuadro ("caso": {"cuadro": ...})
+se arma antes con armar_casos.sh.
+
 Salida: figuras/salida/<caso>_<tipo>.svg (con sufijo si un tipo se repite)
 y figuras/salida/index.html, una hoja para revisarlas todas juntas.
 El entorno labsim hace falta por el ABR (PySide6); el resto es Python puro.
@@ -24,7 +29,7 @@ import sys
 AQUI = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI))
 
-from motor import abr, audiograma, impedancia  # noqa: E402
+from motor import abr, audiograma, ecochg, impedancia, logo, oae, vemp  # noqa: E402
 from motor.datos import cargar_caso  # noqa: E402
 
 CASOS = AQUI.parent / 'casos'
@@ -47,6 +52,17 @@ def figura(caso, f):
                               estimulo=f.get('estimulo'), promediaciones=f.get('promediaciones', 2000))
         return abr.dibujar(curvas, marcar=tuple(f.get('marcar', ('I', 'III', 'V'))),
                            ms_max=f.get('ms_max', 12.0))
+    if tipo == 'logoaudiometria':
+        return logo.dibujar(caso, enmascarado=f.get('enmascarado', True))
+    if tipo == 'teoae':
+        return oae.dibujar_teoae(caso)
+    if tipo == 'dpoae':
+        return oae.dibujar_dpoae(caso)
+    if tipo == 'ecochg':
+        return ecochg.dibujar(caso, nivel=f.get('nivel', 90), ms_max=f.get('ms_max', 5.0))
+    if tipo == 'vemp':
+        return vemp.dibujar(caso, subtipo=f.get('subtipo', 'cvemp'), intensidad=f.get('intensidad', 100),
+                            promedios=f.get('promedios', 200))
     raise ValueError(f'Tipo de figura desconocido: {tipo!r}')
 
 
@@ -58,7 +74,14 @@ def main(patrones):
     hechas = []
     for arch in archivos:
         spec = json.loads(arch.read_text(encoding='utf-8'))
-        caso = cargar_caso(spec['caso'])
+        origen = spec['caso']
+        if isinstance(origen, dict):
+            # Pedido por cuadro: lo arma armar_casos.sh con el editor real
+            generado = CASOS / 'generados' / f'{arch.stem}.json'
+            if not generado.exists():
+                sys.exit(f'{arch.stem}: falta el caso armado; correr docs/libro/figuras/armar_casos.sh {arch.stem}')
+            origen = f'archivo:{generado}'
+        caso = cargar_caso(origen)
         vistos = {}
         for f in spec['figuras']:
             n = vistos[f['tipo']] = vistos.get(f['tipo'], 0) + 1

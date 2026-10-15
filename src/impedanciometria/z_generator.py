@@ -263,8 +263,14 @@ class Z_225():
         x = np.unique(x)
         y = c * np.exp(-np.abs(x - p) / w)
 
-        noise_std = max(0.005, 0.02 * abs(c))
-        y_noise = np.random.normal(0, noise_std, y.shape)
+        # Temblor de medición chico y SUAVE: un timpanograma real es una
+        # línea lisa con apenas una ondulación, no un serrucho. Ruido blanco
+        # punto a punto (era 2 % de la compliancia por muestra) dibujaba
+        # dientes en toda la curva; acá se promedia en una ventana de 7
+        # puntos, así que lo que queda es una ondulación lenta y leve.
+        noise_std = max(0.003, 0.01 * abs(c))
+        kernel = np.ones(7) / 7
+        y_noise = np.convolve(np.random.normal(0, noise_std, y.shape[0] + 6), kernel, mode='valid')
         y = y + y_noise
 
         self.gradient = self._calc_gradient(x, y, p, c)

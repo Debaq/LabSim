@@ -58,3 +58,16 @@ def cargar_caso(origen):
 def por_oido(pares):
     """[[od, oi], ...] -> {'OD': [...], 'OI': [...]}, como lo guarda cases.data."""
     return {'OD': [p[0] for p in pares], 'OI': [p[1] for p in pares]}
+
+
+class en_raiz:
+    """La app abre resources/ con rutas relativas a la raíz del repo."""
+
+    def __enter__(self):
+        import os
+        self.antes = os.getcwd()
+        os.chdir(RAIZ)
+
+    def __exit__(self, *exc):
+        import os
+        os.chdir(self.antes)
