@@ -85,8 +85,9 @@ window.drawTympanogram = (function () {
 
             // Ventana de la gradiente: rectángulo de 100 daPa centrado en el
             // pico y de la altura del pico, igual que lo marca el equipo
-            // (ZZscreen.set_gradient_box). La gradiente es cuánto de ese alto
-            // conserva la curva en los bordes del rectángulo.
+            // (ZZscreen.set_gradient_box). La gradiente (clásica) es cuánto de
+            // ese alto queda por encima de la curva en los bordes del
+            // rectángulo: 1 en punta, 0 plana.
             if (v.c > 0) {
                 var x0 = xPos(v.p - GRADIENT_DELTA), x1 = xPos(v.p + GRADIENT_DELTA);
                 var yTop = yPos(v.c);

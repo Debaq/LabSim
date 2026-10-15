@@ -675,7 +675,9 @@ def _chk_reflejo(case, avisos):
             niveles = [f[side] for f in reflex.get('ipsi') or []]
         except (IndexError, TypeError, KeyError):
             continue
-        presentes = [n for n in niveles if n < 105]
+        # 130 = ausente (CaseProfile::REFLEX_ABSENT_DB). Los umbrales van
+        # en dB SPL y uno presente llega hasta 120 (el tope del dial).
+        presentes = [n for n in niveles if n < 130]
         if gap >= GAP_SIGNIFICATIVO and presentes:
             avisos.append(("!", f"reflejo ipsi {_oi(side)} presente a "
                                 f"{min(presentes)} dB con gap {gap:g} dB: una "

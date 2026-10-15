@@ -228,6 +228,10 @@
             if (window.drawAudiogram) { window.drawAudiogram(); }
         }
 
+        // El rollover (RI) no es un campo del caso: sale siempre del perfil
+        // (CaseProfile::rolloverIndex), esté o no el módulo en auto -- lo
+        // mismo hacen el PDF y la app.
+        window.LOGO_RI = { od: p.logo.OD.ri || 0, oi: p.logo.OI.ri || 0 };
         if (autoOn('logo')) {
             moduloActual = 'logo';
             ['od', 'oi'].forEach(function (lado) {
@@ -235,8 +239,8 @@
                 setVal('umd_int[' + lado + ']', p.logo[lo].int);
                 setVal('umd_pct[' + lado + ']', p.logo[lo].pct);
             });
-            if (window.drawLogogram) { window.drawLogogram(); }
         }
+        if (window.drawLogogram) { window.drawLogogram(); }
         moduloActual = null;
 
         // La primera proyección es la de abrir el caso: pone en pantalla lo
@@ -255,11 +259,12 @@
      * sortean por patología, y la patología la decide esta proyección.
      */
     function proyectar() {
-        // Sin ningún módulo derivado no hay nada que pintar: el formulario
-        // es del docente y no se le toca ni un campo.
+        // Sin ningún módulo derivado el formulario es del docente y no se le
+        // toca ni un campo (hidratar() solo escribe los módulos en auto),
+        // pero la proyección se pide igual: el rollover del logoaudiograma
+        // sale siempre del perfil (window.LOGO_RI).
         if (!MODULOS.some(autoOn)) {
             if (preview) { preview.hidden = true; }
-            return Promise.resolve();
         }
         var body = new URLSearchParams();
         body.set('csrf_token', CSRF);

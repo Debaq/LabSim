@@ -176,8 +176,10 @@ final class CaseCharts
     ];
 
     /**
-     * La gradiente se lee a ±50 daPa del pico: es la altura promedio ahí
-     * dividida por la del pico (ver Z.move en src/impedanciometria/Z.py).
+     * La gradiente se lee a ±50 daPa del pico: es lo que el pico sobresale
+     * de la recta que une la curva en esos dos puntos, dividido por la
+     * altura del pico (gradiente clásica, ver gradienteDe y Z.move en
+     * src/impedanciometria/Z.py).
      */
     public const GRADIENTE_DELTA_DAPA = 50.0;
 
@@ -482,8 +484,8 @@ final class CaseCharts
 
         // Ventana de la gradiente: el equipo la marca como un rectángulo de
         // 100 daPa de ancho centrado en el pico y de la altura del pico, y
-        // la gradiente es cuánto de ese rectángulo llena la curva por los
-        // costados (ver ZZscreen.set_gradient_box). Va primero para que la
+        // la gradiente es cuánto de ese alto queda POR ENCIMA de la curva en
+        // los costados (ver ZZscreen.set_gradient_box). Va primero para que la
         // grilla y la curva queden encima del relleno.
         $marcarPico = !$v['plana'];
         if ($marcarPico) {
@@ -593,10 +595,11 @@ final class CaseCharts
     }
 
     /**
-     * Gradiente tal como la calcula el equipo: altura de la curva a ±50 daPa
-     * del pico, promediada y dividida por la altura del pico (Z.move en
-     * src/impedanciometria/Z.py). Ojo con el sentido: acá 1 es una curva
-     * ancha y 0 una en punta, al revés de la gradiente clásica.
+     * Gradiente tal como la calcula el equipo (Z.move en
+     * src/impedanciometria/Z.py), en el sentido clásico (Brooks 1968): lo
+     * que el pico sobresale de la recta que une la curva a ±50 daPa, sobre
+     * la altura del pico. 1 es una curva en punta, 0 una plana o muy
+     * redondeada. Hasta 2026-10-15 se informaba el complemento (1 - esta).
      *
      * Esta versión la mide sobre la curva que genera la app (la misma forma
      * en punta que la ficha), así que es el número que va a leer el alumno
@@ -615,7 +618,8 @@ final class CaseCharts
         }
         $menos = self::interpolar($pts, $pico - self::GRADIENTE_DELTA_DAPA);
         $mas = self::interpolar($pts, $pico + self::GRADIENTE_DELTA_DAPA);
-        $g = ($menos + $mas) / (2 * $compliance);
+        // hp / c: la recta entre los dos puntos pasa por su promedio en el pico.
+        $g = 1.0 - ($menos + $mas) / (2 * $compliance);
 
         return round(max(0.0, min(1.0, $g)), 2);
     }
@@ -694,13 +698,25 @@ final class CaseCharts
     // Logoaudiograma
     // -----------------------------------------------------------------
 
+    /** Del 0 % a la mitad del máximo: al menos estos dB bajo el SRT. */
+    public const LOGO_PIE_DB = 10.0;
     /**
-     * Curva de discriminación (% vs dB HL) por oído, redondeada. Espejo de
-     * logogram.js: 0 % en el SDT, sube hasta la UMD y de ahí meseta, o cae
-     * si hay reclutamiento (rollover). El SRT va como vertical punteada
-     * porque es un umbral, no un punto de la curva.
+     * Pendiente en el SRT, como fracción del máximo por dB (0,05 = 5 %/dB
+     * en un oído que llega a 100): entre los espondeos (~8-10 %/dB) y los
+     * monosílabos (~3-5 %/dB), que es donde caen los bisílabos.
+     */
+    public const LOGO_PENDIENTE = 0.05;
+    /** El rollover completa su caída en estos dB sobre el máximo... */
+    public const LOGO_ROLL_DB = 25.0;
+    /** ...o en el techo del canal de habla del audiómetro de la app. */
+    public const LOGO_TECHO_DB = 100.0;
+
+    /**
+     * Curva de discriminación (% vs dB HL) por oído: pctLogo(), la misma
+     * función que el editor (logogram.js) y la app. El SRT va como vertical
+     * punteada porque es un umbral, no un punto de la curva.
      *
-     * @param array<string,array{sdt:float,srt:float,umd_int:float,umd_pct:float,recruit:bool}> $porLado
+     * @param array<string,array{sdt:float,srt:float,umd_int:float,umd_pct:float,ri:float}> $porLado
      */
     public static function logogram(MiniPdf $pdf, float $x, float $y, float $w, float $h, array $porLado): void
     {
@@ -835,70 +851,94 @@ final class CaseCharts
     }
 
     /**
-     * Puntos de la curva de discriminación. Misma forma que curvePoints() en
-     * logogram.js, incluido el rollover: con reclutamiento la curva CAE
-     * pasada la UMD en vez de quedarse en meseta.
+     * Función de desempeño-intensidad (logoaudiometría): % de palabras
+     * repetidas bien a `db` dB HL para un oído. ES LA CURVA: la misma
+     * función está en public/js/case/logogram.js (editor) y en
+     * src/audiometria/logo_curva.py (lo que mide el alumno en la app y lo
+     * que dibuja el libro). tests/test_charts_vs_js.php compara PHP contra
+     * JS y los dos suites de tests comparten números de los pacientes
+     * 33-42. Ver decisiones.md, "Logoaudiometría: la curva anclada al SRT"
+     * (2026-10-15).
      *
-     * @param array{sdt:float,srt:float,umd_int:float,umd_pct:float,recruit:bool} $cfg
+     * Forma, sobre el máximo del caso (umd_pct a umd_int):
+     *  - el SRT del caso es donde la curva pasa la MITAD de su máximo (50 %
+     *    en un oído que llega a 100), así que el SRT medido con palabras cae
+     *    sobre el que guarda la ficha, que es el promedio tonal;
+     *  - pie: 0 % hasta LOGO_PIE_DB bajo el SRT (o desde el SDT, si el caso
+     *    lo trae más abajo);
+     *  - dos tramos cúbicos (Hermite) que se juntan en el SRT con pendiente
+     *    LOGO_PENDIENTE (5 %/dB en un oído sano, acotada para que la curva
+     *    sea monótona) y llegan al máximo con tangente horizontal;
+     *  - pasado el máximo, meseta, o rollover si ri > 0: cae suave hasta
+     *    PBmin = máximo * (1 - ri), alcanzado LOGO_ROLL_DB más arriba o en
+     *    el techo del canal de habla (LOGO_TECHO_DB), lo que pase primero.
+     *    Nunca colapsa a 0 salvo que el máximo ya sea 0.
+     *
+     * @param array{sdt:float,srt:float,umd_int:float,umd_pct:float,ri?:float} $cfg
+     */
+    public static function pctLogo(array $cfg, float $db): float
+    {
+        $pmax = max(0.0, min(100.0, (float) $cfg['umd_pct']));
+        if ($pmax <= 0.0) {
+            return 0.0;
+        }
+        $lmax = (float) $cfg['umd_int'];
+        // Un SRT cargado por encima del máximo es un dato cruzado: manda el
+        // máximo y el SRT se corre lo justo para que haya subida.
+        $l50 = min((float) $cfg['srt'], $lmax - 5.0);
+        $lon = min((float) $cfg['sdt'], $l50 - self::LOGO_PIE_DB);
+        $hA = $l50 - $lon;
+        $hB = $lmax - $l50;
+        // Hermite con una tangente en 0 es monótono si la otra no pasa de
+        // 3 veces la pendiente media del tramo (0,5 / h).
+        $k = min(self::LOGO_PENDIENTE, 1.5 / $hA, 1.5 / $hB);
+
+        if ($db <= $lon) {
+            $s = 0.0;
+        } elseif ($db <= $l50) {
+            $t = ($db - $lon) / $hA;
+            $s = 0.5 * (3 * $t ** 2 - 2 * $t ** 3) + $hA * $k * ($t ** 3 - $t ** 2);
+        } elseif ($db <= $lmax) {
+            $t = ($db - $l50) / $hB;
+            $s = 0.5 * (2 * $t ** 3 - 3 * $t ** 2 + 1) + $hB * $k * ($t ** 3 - 2 * $t ** 2 + $t)
+                + (3 * $t ** 2 - 2 * $t ** 3);
+        } else {
+            $s = 1.0;
+            $ri = max(0.0, min(1.0, (float) ($cfg['ri'] ?? 0.0)));
+            $ltop = min($lmax + self::LOGO_ROLL_DB, self::LOGO_TECHO_DB);
+            if ($ri > 0.0 && $ltop > $lmax) {
+                $t = min(1.0, ($db - $lmax) / ($ltop - $lmax));
+                $s = 1.0 - $ri * (3 * $t ** 2 - 2 * $t ** 3);
+            }
+        }
+        return $pmax * max(0.0, min(1.0, $s));
+    }
+
+    /**
+     * La curva muestreada cada 1 dB de -10 a 120 dB HL (el eje del
+     * gráfico), para dibujarla: con puntos tan juntos la cúbica de
+     * curvaSuave() pasa encima de pctLogo() sin separarse.
+     *
+     * @param array{sdt:float,srt:float,umd_int:float,umd_pct:float,ri?:float} $cfg
      * @return array<int,array{0:float,1:float}>
      */
     public static function logogramPoints(array $cfg): array
     {
-        $sdt = (float) $cfg['sdt'];
-        $umdInt = (float) $cfg['umd_int'];
-        $umdPct = (float) $cfg['umd_pct'];
-
-        $pts = [[-10.0, 0.0], [$sdt, 0.0], [$umdInt, $umdPct]];
-        $pts[] = !empty($cfg['recruit'])
-            ? [120.0, max(0.0, $umdPct - (120 - $umdInt) / 5 * 5)]
-            : [120.0, $umdPct];
-        usort($pts, static fn ($a, $b) => $a[0] <=> $b[0]);
+        $pts = [];
+        for ($db = -10; $db <= 120; $db++) {
+            $pts[] = [(float) $db, self::pctLogo($cfg, (float) $db)];
+        }
         return $pts;
     }
 
     /**
-     * El % de discriminación a un dB dado, sobre la MISMA curva que dibuja
-     * `logogram()` -- la cúbica suave de `curvaSuave()`, no una recta entre
-     * los puntos. Cualquier punto que se marque con esto (o un número de
-     * tabla que se calcule con esto) cae justo encima de la curva impresa;
-     * calcularlo con una recta lo dejaba visiblemente afuera.
-     *
-     * `curvaSuave()` no depende de en qué unidades vengan los puntos --acá
-     * se le pasan directo en (dB, %), sin pasar por px/py de ningún
-     * gráfico-- así que sirve tanto para ubicar algo en la página como para
-     * leer un número solo.
+     * El % de discriminación a un dB dado, sobre la misma curva que dibuja
+     * `logogram()`. Nombre de antes, se queda porque lo usa
+     * CaseSheetPdf::pctEnNivelUmd(); ahora es pctLogo() directo.
      */
     public static function pctLogoEnDb(array $cfg, float $db): float
     {
-        $pts = self::logogramPoints($cfg);
-        $db = max($pts[0][0], min($pts[count($pts) - 1][0], $db));
-        foreach (self::curvaSuave($pts) as [$x0, $y0, $c1x, $c1y, $c2x, $c2y, $x1, $y1]) {
-            if ($db < $x0 - 1e-9 || $db > $x1 + 1e-9) {
-                continue;
-            }
-            // Bisección sobre t: la x de una cúbica no se invierte a mano,
-            // pero es monótona creciente en cada tramo (mismo supuesto que
-            // ya hace curvaSuave para no pasarse de 100 % ni bajar de 0).
-            $bez = static fn (float $p0, float $p1, float $p2, float $p3, float $t): float => (1 - $t) ** 3 * $p0
-                + 3 * (1 - $t) ** 2 * $t * $p1
-                + 3 * (1 - $t) * $t ** 2 * $p2
-                + $t ** 3 * $p3;
-            $lo = 0.0;
-            $hi = 1.0;
-            for ($n = 0; $n < 40; $n++) {
-                $mid = ($lo + $hi) / 2;
-                if ($bez($x0, $c1x, $c2x, $x1, $mid) < $db) {
-                    $lo = $mid;
-                } else {
-                    $hi = $mid;
-                }
-            }
-            return $bez($y0, $c1y, $c2y, $y1, ($lo + $hi) / 2);
-        }
-        // No debería llegar acá ($db ya quedó dentro del rango de los
-        // puntos), pero un extremo es la salida segura si algún redondeo lo
-        // deja justo afuera del último tramo.
-        return $pts[count($pts) - 1][1];
+        return self::pctLogo($cfg, $db);
     }
 
     // -----------------------------------------------------------------

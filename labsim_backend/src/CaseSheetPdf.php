@@ -852,9 +852,9 @@ final class CaseSheetPdf
         $filasZ[] = ['Compliance estática', $compliance($vOd), $compliance($vOi)];
         $filasZ[] = ['Presión del pico', $presion($vOd), $presion($vOi)];
         $filasZ[] = ['Gradiente', $gradiente($vOd), $gradiente($vOi)];
-        // "Gradiente en el equipo" es el mismo dato recalculado con el ancho
-        // fijo que usa la app internamente: sirve para comparar contra la
-        // tabla del alumno, no para la ficha que el alumno recibe.
+        // "Gradiente en el equipo" es el mismo dato recalculado sobre la curva
+        // que genera la app: sirve para comparar contra la tabla del alumno,
+        // no para la ficha que el alumno recibe.
         if (!$estudio) {
             $filasZ[] = ['Gradiente en el equipo', $gradienteEquipo($vOd), $gradienteEquipo($vOi)];
         }
@@ -910,9 +910,10 @@ final class CaseSheetPdf
                 'El caso guarda sólo la letra de Jerger: la compliance y la presión las sortea el equipo '
                 . 'dentro del rango de arriba, distintas para cada paciente, y la curva de acá usa el centro. '
                 . 'El recuadro amarillo es de donde sale la gradiente --alto del pico por 100 daPa a su '
-                . 'alrededor--, que es cuánto de ese alto conserva la curva en los bordes. La segunda fila '
-                . 'es la que va a leer el alumno: el equipo dibuja todas las curvas con el mismo ancho, así '
-                . 'que ahí da 0,85 en cualquier curva con pico y no distingue una letra de otra.',
+                . 'alrededor--, en el sentido clásico: la fracción de ese alto que queda por encima de la '
+                . 'curva en los bordes (1 en punta, 0 plana). La segunda fila es la que calcula el equipo '
+                . 'sobre su propia curva, con el ancho de cada letra: es la que va a leer el alumno con el '
+                . 'cursor en el pico, más o menos el temblor de la medición.',
                 7
             );
         }
@@ -925,7 +926,9 @@ final class CaseSheetPdf
         $umd = is_array($data['UMD'] ?? null) ? $data['UMD'] : [];
         $sdt = is_array($data['SDT'] ?? null) ? $data['SDT'] : [0, 0];
         $srt = is_array($data['SRT'] ?? null) ? $data['SRT'] : [0, 0];
-        $recruit = is_array($data['recruit'] ?? null) ? $data['recruit'] : [false, false];
+        // El rollover no es un campo del caso: sale del perfil (componente
+        // retrococlear), igual que en la app (ver CaseProfile::rolloverIndex).
+        $ri = CaseProfile::rolloverDeCaso($data);
         // El enmascaramiento de SDT/SRT/UMD se calcula contra la vía ósea
         // del oído contrario (ver CaseMasking::logo()): hace falta la
         // audiometría, no solo lo que guarda esta sección.
@@ -939,7 +942,7 @@ final class CaseSheetPdf
                 'srt' => (float) ($srt[$i] ?? 0),
                 'umd_int' => (float) ($umd[$i]['int'] ?? 35),
                 'umd_pct' => (float) ($umd[$i]['percentage'] ?? 100),
-                'recruit' => !empty($recruit[$i]),
+                'ri' => (float) $ri[$i],
             ];
         }
 
@@ -952,8 +955,8 @@ final class CaseSheetPdf
         // queda en "--": ese oído no se probó ahí, no se inventa un número
         // leyendo la curva más allá de donde el examen llegó.
         $propios = [
-            'od' => self::nivelesUmdEar($porLado['od']['umd_int'], $porLado['od']['recruit']),
-            'oi' => self::nivelesUmdEar($porLado['oi']['umd_int'], $porLado['oi']['recruit']),
+            'od' => self::nivelesUmdEar($porLado['od']['umd_int'], $porLado['od']['ri']),
+            'oi' => self::nivelesUmdEar($porLado['oi']['umd_int'], $porLado['oi']['ri']),
         ];
         foreach (['od', 'oi'] as $lado) {
             // Los mismos puntos, para marcarlos en el gráfico de arriba: el
@@ -1031,8 +1034,8 @@ final class CaseSheetPdf
         if (!$estudio) {
             $filas[] = [
                 'label' => 'Rollover',
-                'od' => [[$porLado['od']['recruit'] ? 'Sí' : 'No', $colorDe('od')]],
-                'oi' => [[$porLado['oi']['recruit'] ? 'Sí' : 'No', $colorDe('oi')]],
+                'od' => [[self::indiceRollover($porLado['od']), $colorDe('od')]],
+                'oi' => [[self::indiceRollover($porLado['oi']), $colorDe('oi')]],
             ];
         }
         $yTabla = self::tablaHablaColoreada($this->pdf, $x, $this->y + 8, $ancho, $filas);
@@ -3138,31 +3141,44 @@ final class CaseSheetPdf
 
     /**
      * Los niveles de UMD de UN oído (no de los dos juntos): la ventana de
-     * hasta 3 escalones de nivelesUmd(), y si el oído tiene rollover, un
-     * escalón más ARRIBA del máximo -- ahí es donde se ve la caída, así que
-     * en ese caso sí hace falta seguir subiendo. Sin rollover no hay motivo
-     * clínico para seguir, así que la ventana no pasa del máximo.
+     * hasta 3 escalones de nivelesUmd(), y si el oído tiene rollover (ri >
+     * 0), un nivel más ARRIBA del máximo -- ahí es donde se ve la caída, así
+     * que en ese caso sí hace falta seguir subiendo. Sin rollover no hay
+     * motivo clínico para seguir, así que la ventana no pasa del máximo.
+     *
+     * El nivel de más es donde la caída ya se completó (máximo + 25 dB, o el
+     * techo de 100 dB del canal de habla; ver CaseCharts::pctLogo): desde
+     * 2026-10-15 el rollover baja suave a lo largo de esos dB, así que un
+     * solo escalón de 5 dB sobre el máximo casi no lo mostraba.
      *
      * @return array<int,float>
      */
-    private static function nivelesUmdEar(float $umdInt, bool $recruit): array
+    private static function nivelesUmdEar(float $umdInt, float $ri): array
     {
         $niveles = self::nivelesUmd($umdInt);
-        if ($recruit) {
-            $niveles[] = max(45.0, round($umdInt / 5) * 5) + 5.0;
+        $tope = max(45.0, round($umdInt / 5) * 5);
+        $arriba = min($tope + CaseCharts::LOGO_ROLL_DB, CaseCharts::LOGO_TECHO_DB);
+        if ($ri > 0.0 && $arriba > $tope) {
+            $niveles[] = (float) (floor($arriba / 5) * 5);
         }
         return $niveles;
     }
 
+    /** "0,61" -- el RI del oído para la ficha docente; "No" si no tiene. */
+    private static function indiceRollover(array $lado): string
+    {
+        $ri = (float) ($lado['ri'] ?? 0.0);
+        return $ri > 0.0 ? 'RI ' . number_format($ri, 2, ',', '') : 'No';
+    }
+
     /**
-     * El % de discriminación a un nivel dado, con la MISMA curva por tramos
-     * que dibuja el logoaudiograma (ver CaseCharts::logogramPoints): plano
-     * en 0 hasta el SDT, subida recta hasta el UMD y de ahí en más plano
-     * (o cayendo, con rollover). Así un nivel que le pertenece al otro oído
-     * -- porque la tabla trae la unión de los dos-- no inventa un número
-     * que contradiga al gráfico.
+     * El % de discriminación a un nivel dado, con la MISMA curva que dibuja
+     * el logoaudiograma (CaseCharts::pctLogo, la que mide el alumno en la
+     * app). Así un nivel que le pertenece al otro oído -- porque la tabla
+     * trae la unión de los dos-- no inventa un número que contradiga al
+     * gráfico.
      *
-     * @param array{sdt:float,umd_int:float,umd_pct:float,recruit:bool} $lado
+     * @param array{sdt:float,srt:float,umd_int:float,umd_pct:float,ri:float} $lado
      */
     private static function pctEnNivelUmd(float $db, array $lado): float
     {

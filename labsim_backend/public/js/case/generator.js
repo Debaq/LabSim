@@ -480,6 +480,11 @@
         if (z) { z.value = alAzar(esc.z && esc.z.length ? esc.z : ['A']); }
         var etf = document.querySelector('select[name="etf_' + lado + '"]');
         if (etf) { etf.value = esc.etf || 'Normal'; }
+        // Volumen del conducto que lee la sonda: bajo con un tapón que ocluye,
+        // alto con la membrana perforada (SCENARIOS.volumen_cae). Sin la
+        // clave, el normal para la edad.
+        var vol = document.querySelector('select[name="volumen_cae_' + lado + '"]');
+        if (vol) { vol.value = esc.volumen_cae || 'normal'; }
 
         var cce = document.querySelector('input[name="perfil[' + lado + '][cce_pct]"]');
         if (cce) { cce.value = Math.round(entre(esc.cce_pct[0], esc.cce_pct[1]) / 5) * 5; }

@@ -191,14 +191,65 @@ if (!is_string($genPy) || $genPy === '') {
     }
 }
 
-// --- Rollover del logoaudiograma (logogram.js) --------------------------
+// --- Curva del logoaudiograma (logogram.js) ------------------------------
+//
+// pctLogo() es LA curva: CaseCharts::pctLogo (PDF), logogram.js (editor) y
+// src/audiometria/logo_curva.py (app y libro). Primero las constantes, que
+// se leen del JS; después la función entera, corriendo el JS con node.
 
 $logoJs = js_fuente('logogram.js');
-t_true(
-    preg_match('/umdPct\s*-\s*\(120\s*-\s*umdInt\)\s*\/\s*5\s*\*\s*5/', $logoJs) === 1,
-    'El editor calcula el rollover como umdPct - (120 - umdInt)/5*5'
-);
-// Y el PHP tiene que dar exactamente ese número para el mismo caso.
-$puntos = CaseCharts::logogramPoints(['sdt' => 30, 'srt' => 38, 'umd_int' => 60, 'umd_pct' => 90, 'recruit' => true]);
-t_eq(end($puntos)[1], 90.0 - (120 - 60) / 5 * 5,
-    'El PDF aplica la misma caída por reclutamiento que el editor');
+foreach (['LOGO_PIE_DB', 'LOGO_PENDIENTE', 'LOGO_ROLL_DB', 'LOGO_TECHO_DB'] as $const) {
+    $num = js_numeros($logoJs, '/var ' . $const . '\s*=\s*([\d.]+)/', "la constante {$const}");
+    t_eq($num[0] ?? null, (float) constant('CaseCharts::' . $const),
+        "Logoaudiograma: {$const} es la misma en el PDF y en el editor");
+}
+
+// Configuraciones que cubren los tramos: sano, conductiva, coclear con
+// rollover leve, retro con máximo bajo y RI alto, SDT bajo el pie, SRT
+// cruzado por encima de la UMD, máximo sobre el techo y cófosis.
+$cfgsLogo = [
+    ['sdt' => 0, 'srt' => 0, 'umd_int' => 35, 'umd_pct' => 100, 'ri' => 0.0],
+    ['sdt' => 40, 'srt' => 40, 'umd_int' => 80, 'umd_pct' => 100, 'ri' => 0.0],
+    ['sdt' => 25, 'srt' => 25, 'umd_int' => 70, 'umd_pct' => 88, 'ri' => 0.13],
+    ['sdt' => 15, 'srt' => 15, 'umd_int' => 55, 'umd_pct' => 52, 'ri' => 0.62],
+    ['sdt' => 10, 'srt' => 30, 'umd_int' => 60, 'umd_pct' => 96, 'ri' => 0.3],
+    ['sdt' => 50, 'srt' => 75, 'umd_int' => 60, 'umd_pct' => 80, 'ri' => 0.2],
+    ['sdt' => 60, 'srt' => 60, 'umd_int' => 105, 'umd_pct' => 72, 'ri' => 0.5],
+    ['sdt' => 130, 'srt' => 130, 'umd_int' => 110, 'umd_pct' => 0, 'ri' => 0.0],
+];
+$dbsLogo = [];
+for ($db = -10; $db <= 120; $db += 2.5) {
+    $dbsLogo[] = $db;
+}
+
+// Los mismos números que tests/test_logo_curva.py (PUNTOS_36_OI): la app
+// tiene que dar exactamente esto para el OI del paciente 36.
+foreach ([0 => 0.0, 12.5 => 0.0, 30 => 57.097394, 47 => 82.125125, 70 => 88.0, 90 => 77.74976, 100 => 76.56] as $db => $pct) {
+    t_close(CaseCharts::pctLogo($cfgsLogo[2], (float) $db), $pct, 1e-5,
+        "Logoaudiograma del 36 OI a {$db} dB: el mismo número que la app");
+}
+
+$node = trim((string) @shell_exec('command -v node 2>/dev/null'));
+if ($node === '') {
+    // Sin node no se puede correr el JS; las constantes de arriba igual
+    // quedan comparadas.
+    echo "  (test_charts_vs_js: sin node en el PATH, no se compara pctLogo del JS)\n";
+} else {
+    $script = 'global.window = {}; global.document = {};'
+        . 'eval(require("fs").readFileSync(process.argv[1], "utf8"));'
+        . 'var e = JSON.parse(process.argv[2]), f = window.drawLogogram.pctLogo;'
+        . 'process.stdout.write(JSON.stringify(e.cfgs.map(function (c) {'
+        . ' return e.dbs.map(function (d) { return f(c, d); }); })));';
+    $cmd = escapeshellarg($node) . ' -e ' . escapeshellarg($script) . ' '
+        . escapeshellarg(dirname(__DIR__) . '/public/js/case/logogram.js') . ' '
+        . escapeshellarg((string) json_encode(['cfgs' => $cfgsLogo, 'dbs' => $dbsLogo]));
+    $salidaJs = json_decode((string) shell_exec($cmd), true);
+    t_true(is_array($salidaJs), 'logogram.js corre con node y devuelve la curva');
+    $maxDif = 0.0;
+    foreach ($cfgsLogo as $i => $cfg) {
+        foreach ($dbsLogo as $j => $db) {
+            $maxDif = max($maxDif, abs(CaseCharts::pctLogo($cfg, (float) $db) - (float) ($salidaJs[$i][$j] ?? INF)));
+        }
+    }
+    t_true($maxDif < 1e-9, 'El editor (logogram.js) y el PDF dan la misma curva de logoaudiometría en todos los tramos');
+}

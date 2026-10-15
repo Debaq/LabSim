@@ -20,7 +20,8 @@ from impedanciometria.ZDscreen import ZDscreen
 from impedanciometria.ZETFscreen import (ZETFscreen, PRUEBA_INTEGRA, PRUEBA_PERFORADA)
 from impedanciometria.h_z import changeSide, changeSideText, sideText, printer, date_time
 from impedanciometria.z_generator import (Z_225, Reflex_curve, decay_curve, edad_meses_del_caso,
-                                          reflex_decay_del_caso,
+                                          reflex_decay_del_caso, gradiente_clasica,
+                                          REFLEX_DIAL_MIN_DB_SPL, REFLEX_DIAL_MAX_DB_SPL,
                                           etf_prueba_integra, etf_prueba_perforada,
                                           is_infant_ear, map_letter_for_probe,
                                           oido_no_realizable, z1000_del_caso)
@@ -475,10 +476,13 @@ class ZControl(QWidget, Ui_Z_control):
             c = round(c, 2)
             self.Z.lbl_c.setText(str(c))
 
+            # Gradiente clásica en el cursor: cuánto del alto del recuadro
+            # amarillo queda por encima de la curva en sus bordes (1 = pico
+            # agudo, 0 = plana). Ver z_generator.gradiente_clasica.
             if c > 0:
                 y_minus = self.Z.find_nearest(memory[0], pos - 50, memory[1])
                 y_plus = self.Z.find_nearest(memory[0], pos + 50, memory[1])
-                gradient = round(min(max((y_minus + y_plus) / (2 * c), 0.0), 1.0), 2)
+                gradient = gradiente_clasica(c, y_minus, y_plus)
             else:
                 gradient = 0.0
             self.Z.lbl_g.setText(str(gradient))
@@ -548,8 +552,9 @@ class ZControl(QWidget, Ui_Z_control):
             self.dial.setMaximum(20)
             self.dial.setValue(self.leak)
         elif screen in (self.Z_reflex, self.Z_decay):
-            self.dial.setMinimum(0)
-            self.dial.setMaximum(120)
+            # dB SPL, la misma unidad que los umbrales del caso
+            self.dial.setMinimum(REFLEX_DIAL_MIN_DB_SPL)
+            self.dial.setMaximum(REFLEX_DIAL_MAX_DB_SPL)
             self.dial.setValue(self.dB)
         elif screen is self.Z_etf:
             self.dial.setMinimum(-400)

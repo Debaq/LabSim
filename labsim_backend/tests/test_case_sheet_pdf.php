@@ -143,9 +143,10 @@ t_true(strpos($pdfDemo, 'LDL (dB HL)') === false,
     'El LDL no se repite en tabla: ya está dibujado en el audiograma');
 
 // UMD: no es un solo punto, es la subida de 5 en 5 dB hasta el máximo de
-// CADA oído (ficha_caso_demo: OD 96% a 70dB desde SDT 38 sin rollover, OI
-// 80% a 65dB con rollover desde SDT 30 -- por eso OI sigue un escalón más
-// arriba, a 70). La tabla junta las dos ventanas en filas compartidas, pero
+// CADA oído (ficha_caso_demo: OD 96% a 70dB sin rollover, OI 80% a 65dB con
+// rollover -- el perfil le da RI 0,39 por el patrón retro del ABR, así que
+// OI sigue un nivel más arriba, a 90 dB, donde la caída ya se completó; ver
+// CaseCharts::pctLogo). La tabla junta las dos ventanas en filas compartidas, pero
 // un nivel que no es de la ventana PROPIA de un oído queda en "--": nada de
 // seguir subiendo la intensidad en el oído que ya no tiene motivo clínico
 // para seguir (sin rollover, no hay nada más que ver arriba del máximo).
@@ -160,20 +161,18 @@ foreach (['UMD1', 'UMD2', 'UMD3', 'UMD4'] as $fila) {
 // OD (sin rollover) no se prueba a 55 dB -- ese nivel es de la ventana de
 // OI, no de la suya -- así que ningún % calculado para OD en ese nivel
 // tiene que aparecer en la ficha.
-t_true(strpos($pdfDemo, '51 %') === false,
+t_true(strpos($pdfDemo, '82 %') === false,
     'OD no se prueba a 55 dB (no es su ventana): no aparece el % que daría leer su curva ahí');
-// Los % salen de la MISMA cúbica que dibuja la curva (CaseCharts::pctLogoEnDb,
-// Fritsch-Carlson), no de una recta entre SDT y UMD -- por eso no son un
-// tercio/dos tercios parejos entre SDT y UMD.
-foreach (['74 %', '90 %', '96 %'] as $pctOd) {
+// Los % salen de la MISMA curva que mide el alumno en la app
+// (CaseCharts::pctLogo), anclada al SRT: a 10-15 dB del máximo ya está
+// cerca de él, no a un tercio/dos tercios de una recta desde el SDT.
+foreach (['91 %', '95 %', '96 %'] as $pctOd) {
     t_true(strpos($pdfDemo, $pctOd) !== false, "UMD de OD: aparece {$pctOd} en su propia ventana (60/65/70 dB)");
 }
-// OI tiene rollover: sobre su propio UMD (65 dB) el % cae, no se mantiene,
-// y por eso su ventana sí sigue un escalón más arriba (70 dB) -- ahí es
-// donde se ve la caída (la Fritsch-Carlson anula la tangente en el pico,
-// así que la caída a solo 5 dB del máximo es suave, no un escalón brusco).
-foreach (['64 %', '76 %', '80 %', '79 %'] as $pctOi) {
-    t_true(strpos($pdfDemo, $pctOi) !== false, "UMD de OI (con rollover): aparece {$pctOi} en su propia ventana (55/60/65/70 dB)");
+// OI tiene rollover: sobre su propio UMD (65 dB) el % cae, y su ventana
+// sigue hasta donde la caída se completa (90 dB): 80 % * (1 - 0,39).
+foreach (['77 %', '79 %', '80 %', '49 %'] as $pctOi) {
+    t_true(strpos($pdfDemo, $pctOi) !== false, "UMD de OI (con rollover): aparece {$pctOi} en su propia ventana (55/60/65/90 dB)");
 }
 
 // El mkg de SDT/SRT/UMD (CaseMasking::logo()/boneSdt()): un solo valor --
@@ -198,8 +197,11 @@ $umdSoloUnNivel = ficha_caso_demo();
 $umdSoloUnNivel['UMD'] = [['int' => 45, 'percentage' => 100], ['int' => 45, 'percentage' => 100]];
 // Sin rollover en ninguno de los dos oídos: si no, el oído con rollover
 // agrega su propio escalón de más arriba y el caso deja de aislar lo que
-// se quiere probar acá.
-$umdSoloUnNivel['recruit'] = [false, false];
+// se quiere probar acá. El rollover sale del perfil (CaseProfile::
+// rolloverIndex), así que se sacan la pérdida sensorioneural y el patrón
+// retro del ABR de OI: RI 0 en los dos.
+$umdSoloUnNivel['Osea'] = array_fill(0, 9, [10, 10]);
+unset($umdSoloUnNivel['ABR']['OI']['neural']);
 $pdfUmdUnNivel = CaseSheetPdf::build('UMD45', $umdSoloUnNivel);
 t_true(strpos($pdfUmdUnNivel, 'UMD1') !== false,
     'Si el máximo sale ya a 45 dB, la tabla de UMD trae un solo nivel');
@@ -210,7 +212,6 @@ t_true(strpos($pdfUmdUnNivel, 'UMD2') === false,
 // máximo -- aunque el otro oído no tenga motivo para seguir.
 $umdConRolloverA45 = ficha_caso_demo();
 $umdConRolloverA45['UMD'] = [['int' => 45, 'percentage' => 100], ['int' => 45, 'percentage' => 90]];
-$umdConRolloverA45['recruit'] = [false, true];
 $pdfUmdRolloverA45 = CaseSheetPdf::build('UMD45R', $umdConRolloverA45);
 t_true(strpos($pdfUmdRolloverA45, 'UMD2') !== false,
     'Con rollover, la ventana de ese oído sigue un escalón más arriba del máximo aunque sea a 45 dB');
@@ -219,14 +220,18 @@ t_true(strpos($pdfUmdRolloverA45, 'UMD2') !== false,
 // oído, no la unión de los dos -- eso lo arma logoaudiometria() aparte.
 $nivelesUmdEar = new ReflectionMethod('CaseSheetPdf', 'nivelesUmdEar');
 $nivelesUmdEar->setAccessible(true);
-t_eq($nivelesUmdEar->invoke(null, 70.0, false), [60.0, 65.0, 70.0],
+t_eq($nivelesUmdEar->invoke(null, 70.0, 0.0), [60.0, 65.0, 70.0],
     'nivelesUmdEar sin rollover no pasa del máximo propio');
-t_eq($nivelesUmdEar->invoke(null, 65.0, true), [55.0, 60.0, 65.0, 70.0],
-    'nivelesUmdEar con rollover agrega un escalón sobre el máximo propio');
-t_eq($nivelesUmdEar->invoke(null, 45.0, false), [45.0],
+t_eq($nivelesUmdEar->invoke(null, 65.0, 0.39), [55.0, 60.0, 65.0, 90.0],
+    'nivelesUmdEar con rollover agrega el nivel donde la caída se completa (máximo + 25)');
+t_eq($nivelesUmdEar->invoke(null, 45.0, 0.0), [45.0],
     'nivelesUmdEar sin rollover y máximo a 45 dB no agrega nada');
-t_eq($nivelesUmdEar->invoke(null, 45.0, true), [45.0, 50.0],
-    'nivelesUmdEar con rollover sigue un escalón más arriba aunque el máximo ya sea 45 dB');
+t_eq($nivelesUmdEar->invoke(null, 45.0, 0.39), [45.0, 70.0],
+    'nivelesUmdEar con rollover sigue más arriba aunque el máximo ya sea 45 dB');
+t_eq($nivelesUmdEar->invoke(null, 90.0, 0.6), [80.0, 85.0, 90.0, 100.0],
+    'nivelesUmdEar: la caída no pasa del techo de 100 dB del canal de habla');
+t_eq($nivelesUmdEar->invoke(null, 110.0, 0.6), [100.0, 105.0, 110.0],
+    'nivelesUmdEar: con el máximo sobre el techo no hay dónde ver el rollover');
 
 t_true(strpos($pdfDemo, 'Interpico I-V') !== false,
     'El ABR informa los interpicos a 80 dB');
@@ -581,12 +586,13 @@ t_true($pendienteJuntoAlPico > $pendienteLejos,
 // La escala del eje es fija: los dos oídos y todas las fichas se leen igual.
 t_eq(CaseCharts::ESCALA_TIMPANOGRAMA_ML, 2.0, 'El timpanograma se dibuja siempre de 0 a 2 mL');
 
-// Dos gradientes, y las dos con la cuenta del equipo (Z.move): altura a +-50
-// daPa del pico sobre la altura del pico, entre 0 y 1. Ojo con el sentido:
-// 1 es una curva ANCHA y 0 una en punta, al revés de la gradiente clásica.
+// Dos gradientes, y las dos con la cuenta del equipo (Z.move), en el sentido
+// clásico (Brooks 1968, desde 2026-10-15): lo que el pico sobresale de la
+// recta entre la curva a +-50 daPa, sobre la altura del pico, entre 0 y 1.
+// 1 es una curva EN PUNTA y 0 una plana.
 //  - 'gradiente' sale de la curva IMPRESA (ápice en punta).
-//  - 'gradiente_equipo' sale de la curva de la app (coseno alzado). Es la
-//    que va a leer el alumno en pantalla y la ficha tiene que anticiparla.
+//  - 'gradiente_equipo' sale de la curva de la app. Es la que va a leer el
+//    alumno en pantalla y la ficha tiene que anticiparla.
 // Las dos tienen que DISTINGUIR las letras: mientras el ancho de la app fue
 // fijo, la del equipo daba 0,85 en cualquier curva con pico y no informaba
 // nada.
@@ -609,12 +615,18 @@ foreach (['gradiente', 'gradiente_equipo'] as $clave) {
         "La {$clave} no es el mismo número en todas las letras");
     // Cs es la redondeada --retracción con efusión incipiente-- y Ad la más
     // en punta: es el orden que tiene que salir de la cuenta, sin listarlo.
-    t_true(CaseCharts::valoresTimpanograma('Cs')[$clave] > CaseCharts::valoresTimpanograma('A')[$clave],
-        "Timpanograma Cs: la {$clave} delata una curva más redondeada que la A");
-    t_true(CaseCharts::valoresTimpanograma('Ad')[$clave] < CaseCharts::valoresTimpanograma('A')[$clave],
-        "Timpanograma Ad: la {$clave} delata una curva más en punta que la A");
+    t_true(CaseCharts::valoresTimpanograma('Cs')[$clave] < CaseCharts::valoresTimpanograma('A')[$clave],
+        "Timpanograma Cs: la {$clave} (clásica) delata una curva más redondeada que la A");
+    t_true(CaseCharts::valoresTimpanograma('Ad')[$clave] > CaseCharts::valoresTimpanograma('A')[$clave],
+        "Timpanograma Ad: la {$clave} (clásica) delata una curva más en punta que la A");
 }
 t_eq(CaseCharts::gradienteTimpanograma(0.0, 0.0, 80.0), 0.0, 'Sin compliance no hay gradiente que calcular');
+// El número concreto de la A del equipo: TW 80 daPa en exp(-|x|/w) con
+// w = 80 / (2 ln 2) deja a 50 daPa exp(-50/w) = 0,42 del pico; la clásica
+// es lo que falta: 0,58 (antes se informaba 0,42).
+t_eq(CaseCharts::gradienteTimpanograma(1.0, 0.0, 80.0), 0.58, 'Gradiente clásica de una A del equipo: 0,58');
+// Una plana no sobresale de nada: gradiente 0 (en el sentido viejo daba 1).
+t_eq(CaseCharts::valoresTimpanograma('B')['gradiente_equipo'], 0.0, 'Timpanograma B: gradiente 0');
 // Un TW de adulto normal (50 a 110 daPa) para las curvas con pico normal:
 // con los 200 daPa fijos de antes ninguna caía en ese rango.
 foreach (['A', 'As', 'Ad'] as $tipo) {
@@ -622,13 +634,15 @@ foreach (['A', 'As', 'Ad'] as $tipo) {
     t_true($tw >= 50.0 && $tw <= 110.0, "Timpanograma {$tipo}: el ancho es el de un adulto (TW 50-110 daPa)");
 }
 
-// Logoaudiograma: con reclutamiento la curva CAE pasada la UMD (rollover),
-// y sin él se queda en meseta. Es el hallazgo que el gráfico tiene que
-// mostrar, no un detalle de dibujo.
-$conRollover = CaseCharts::logogramPoints(['sdt' => 30, 'srt' => 38, 'umd_int' => 65, 'umd_pct' => 80, 'recruit' => true]);
-$sinRollover = CaseCharts::logogramPoints(['sdt' => 30, 'srt' => 38, 'umd_int' => 65, 'umd_pct' => 80, 'recruit' => false]);
-t_true(end($conRollover)[1] < 80, 'Con reclutamiento, la discriminación cae después de la máxima');
-t_eq(end($sinRollover)[1], 80.0, 'Sin reclutamiento, la curva se queda en meseta');
+// Logoaudiograma: con RI > 0 la curva CAE pasada la UMD (rollover) hasta
+// máximo * (1 - RI), sin colapsar a 0; con RI 0 se queda en meseta. Es el
+// hallazgo que el gráfico tiene que mostrar, no un detalle de dibujo.
+$conRollover = CaseCharts::logogramPoints(['sdt' => 30, 'srt' => 38, 'umd_int' => 65, 'umd_pct' => 80, 'ri' => 0.5]);
+$sinRollover = CaseCharts::logogramPoints(['sdt' => 30, 'srt' => 38, 'umd_int' => 65, 'umd_pct' => 80, 'ri' => 0.0]);
+t_close(end($conRollover)[1], 40.0, 1e-9, 'Con RI 0,5 la discriminación cae a la mitad del máximo y ahí se queda');
+t_eq(end($sinRollover)[1], 80.0, 'Sin rollover, la curva se queda en meseta');
+t_close(CaseCharts::pctLogo(['sdt' => 30, 'srt' => 38, 'umd_int' => 65, 'umd_pct' => 80, 'ri' => 0.0], 38.0), 40.0, 1e-9,
+    'En el SRT la curva pasa la mitad de su máximo');
 foreach ([$conRollover, $sinRollover] as $curva) {
     $previa = -INF;
     foreach ($curva as [$db, $pct]) {
@@ -695,7 +709,7 @@ t_true(strpos($pdfEstudio, 'Weber') !== false, 'La ficha de estudio sigue trayen
 // El rollover de OI queda igual visible -- en los propios niveles de UMD,
 // que bajan pasado el máximo -- solo que sin el veredicto explícito.
 t_true(strpos($pdfDemo, 'Rollover') !== false, 'La ficha docente sí trae el veredicto de rollover');
-foreach (['64 %', '76 %', '80 %', '79 %'] as $pctOi) {
+foreach (['77 %', '79 %', '80 %', '49 %'] as $pctOi) {
     t_true(strpos($pdfEstudio, $pctOi) !== false,
         "La ficha de estudio conserva {$pctOi} en la ventana de UMD de OI (ahí se ve la caída)");
 }

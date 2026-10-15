@@ -83,7 +83,7 @@ class ZDscreen(QWidget):
         teclas = QHBoxLayout()
         self.lbl_freq = _rotulo("1000 Hz")
         self.lbl_inicio = _rotulo("Inicio")
-        self.lbl_db = _rotulo("85 dB")
+        self.lbl_db = _rotulo("85 dB SPL")
         self.lbl_ipsi = _rotulo("IPSI")
         self.lbl_contra = _rotulo("CONTRA")
         self.lbl_presion = _rotulo("0 daP")
@@ -105,7 +105,7 @@ class ZDscreen(QWidget):
         self.lbl_mode.setText(mode)
 
     def set_intensity(self, db):
-        self.lbl_db.setText(f"{db} dB")
+        self.lbl_db.setText(f"{db} dB SPL")
 
     def set_pressure(self, pressure):
         self.lbl_presion.setText(f"{pressure} daP")

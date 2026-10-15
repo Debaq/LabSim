@@ -105,10 +105,6 @@ class LogoMaskingTest(unittest.TestCase):
         self.assertEqual(l.get(0, False, -10, None), l.data[0]["0"])
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class TipoDeRuidoLogoTest(unittest.TestCase):
     """En logoaudiometría el ruido correcto es el conformado al habla: el
     habla ocupa todo el espectro y una banda estrecha deja pasar casi todo.
@@ -171,7 +167,10 @@ class CurvaSombraTest(unittest.TestCase):
         self.logo = logo(CASO_ANACUSIA_OD)
 
     def test_bajo_la_atenuacion_interaural_no_hay_nada(self):
-        for inten in (40, 45, 50):
+        # El OI sano tiene el SRT en 5 dB y su curva arranca 10 dB más abajo
+        # (logo_curva.PIE_DB): hasta que el habla le llega a -5 dB HL --40
+        # dB en el OD, con 45 de atenuación interaural-- no entiende nada.
+        for inten in (30, 35, 40):
             self.assertEqual(self.logo.get(0, False, inten, None), 0,
                              f"a {inten} dB el habla no debería cruzar")
 
@@ -193,3 +192,9 @@ class CurvaSombraTest(unittest.TestCase):
         --UMD fuera de la escala-- quedaban con ese valor crudo, así que un
         oído muerto 'discriminaba' 1% en los niveles altos."""
         self.assertEqual(set(self.logo.data[0].values()), {0})
+
+
+# Al final: antes estaba a la mitad y `python tests/test_logo_masking.py`
+# corría solo la primera clase.
+if __name__ == "__main__":
+    unittest.main()

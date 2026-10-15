@@ -187,6 +187,31 @@ FORMAS_JERGER = {
 }
 
 
+# La gradiente se lee a ±50 daPa del pico (una ventana de 100 daPa de ancho,
+# el recuadro amarillo de ZZscreen.set_gradient_box).
+GRADIENTE_DELTA_DAPA = 50
+
+
+def gradiente_clasica(c, y_menos, y_mas):
+    """Gradiente del timpanograma en el sentido clásico (Brooks 1968).
+
+    Es la altura del pico POR ENCIMA de la recta que une la curva a ±50 daPa
+    del pico, sobre la altura del pico: hp / c, con hp = c - (y_menos +
+    y_mas) / 2. Un pico agudo da cerca de 1, una curva redondeada cerca de
+    0, y una plana 0. Hasta 2026-10-15 la app informaba lo complementario
+    ((y_menos + y_mas) / 2c: 1 = ancha), al revés de la literatura.
+    Espejo de CaseCharts::gradienteDe.
+    """
+    try:
+        c = float(c)
+    except (TypeError, ValueError):
+        return 0.0
+    if c <= 0:
+        return 0.0
+    g = 1.0 - (float(y_menos) + float(y_mas)) / (2 * c)
+    return round(min(max(g, 0.0), 1.0), 2)
+
+
 class Z_225():
     def __init__(self, manual=False, letter="A", c=1, p=0, g=1, pmax=200, num_pts=20, vol=1.8, unseal=False, win_neg=-400, win_pos=200, seed_key=None):
 
@@ -297,10 +322,9 @@ class Z_225():
         order = np.argsort(x)
         xs = x[order]
         ys = y[order]
-        y_minus = np.interp(p - 50, xs, ys)
-        y_plus = np.interp(p + 50, xs, ys)
-        gradient = (y_minus + y_plus) / (2 * c)
-        return round(min(max(gradient, 0.0), 1.0), 2)
+        y_minus = np.interp(p - GRADIENTE_DELTA_DAPA, xs, ys)
+        y_plus = np.interp(p + GRADIENTE_DELTA_DAPA, xs, ys)
+        return gradiente_clasica(c, y_minus, y_plus)
 
 
 
@@ -386,6 +410,15 @@ class Reflex_curve():
 
     def getDataSet(self):
         return self.x.tolist(), self.y.tolist()
+
+
+# Dial de Reflejos y Tone Decay, en dB SPL: los umbrales del caso
+# (cases.data.Reflex) vienen en dB SPL desde 2026-10-15 -- el backend los
+# calcula en HL y los convierte con el RETSPL de cada transductor
+# (CaseProfile::REFLEX_RETSPL_DB). El más alto posible es 120, este tope
+# (espejo de CaseProfile::REFLEX_DIAL_MAX_DB); 130 es "ausente".
+REFLEX_DIAL_MIN_DB_SPL = 0
+REFLEX_DIAL_MAX_DB_SPL = 120
 
 
 # ---------------------------------------------------------------------------

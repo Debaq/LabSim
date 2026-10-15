@@ -5,12 +5,17 @@
 // polyline. Las tangentes son las de Fritsch-Carlson (cúbica monótona), las
 // mismas que CaseCharts::curvaSuave usa para el PDF -- monótona y no un
 // spline cualquiera porque la curva no puede pasar de 100 % ni bajar de 0.
-// Curva simplificada para vista previa en vivo
-// -- no replica CalculateLogo.cal_new_umd completo (src/audiometria/
-// logoaudiometry.py de la app de escritorio), pero sigue la misma forma:
-// 0% en SDT, sube hasta UMD(int,%), y desde ahí meseta plana o cae si hay
-// reclutamiento (rollover). SRT se marca aparte como línea vertical, ya que
-// es un umbral de detección, no un punto de la curva de discriminación.
+//
+// La curva es pctLogo(): la MISMA función que CaseCharts::pctLogo (PDF) y
+// src/audiometria/logo_curva.py (lo que mide el alumno en la app). El SRT
+// del caso es donde pasa la mitad de su máximo, llega al máximo en la UMD y
+// de ahí meseta, o rollover si el perfil le da RI > 0 (componente
+// retrococlear, CaseProfile::rolloverIndex; el RI llega con la proyección
+// del perfil en window.LOGO_RI, ver profile-preview.js). Si cambia algo
+// acá, cambia en los otros dos: tests/test_charts_vs_js.php corre esta
+// función con node y la compara con la del PHP.
+// SRT se marca aparte como línea vertical, ya que es un umbral, no un punto
+// de la curva de discriminación.
 window.drawLogogram = (function () {
     var NS = 'http://www.w3.org/2000/svg';
     function logoX(db) { db = Math.max(-10, Math.min(120, db)); return 32 + (db - (-10)) / 130 * 280; }
@@ -41,18 +46,59 @@ window.drawLogogram = (function () {
         return l;
     }
 
-    function curvePoints(side) {
-        var sdt = val('.sdt-input', side, 0);
-        var umdInt = val('.umd-int-input', side, 35);
-        var umdPct = val('.umd-pct-input', side, 100);
-        var recruitEl = document.querySelector('.recruit-toggle[data-side="' + side + '"]');
-        var recruit = !!(recruitEl && recruitEl.checked);
+    // Constantes de la curva: las mismas de CaseCharts (LOGO_*).
+    var LOGO_PIE_DB = 10;
+    var LOGO_PENDIENTE = 0.05;
+    var LOGO_ROLL_DB = 25;
+    var LOGO_TECHO_DB = 100;
 
-        var pts = [[-10, 0], [sdt, 0], [umdInt, umdPct]];
-        pts.push(recruit ? [120, Math.max(0, umdPct - (120 - umdInt) / 5 * 5)] : [120, umdPct]);
-        // Ordenado por dB creciente -- si SDT/UMD quedan invertidos (dato mal
-        // tipeado) igual se dibuja algo coherente en vez de una polyline en zigzag.
-        pts.sort(function (a, b) { return a[0] - b[0]; });
+    /** % de palabras a `db` dB HL. Espejo exacto de CaseCharts::pctLogo. */
+    function pctLogo(cfg, db) {
+        var pmax = Math.max(0, Math.min(100, cfg.umd_pct));
+        if (pmax <= 0) { return 0; }
+        var lmax = cfg.umd_int;
+        var l50 = Math.min(cfg.srt, lmax - 5);
+        var lon = Math.min(cfg.sdt, l50 - LOGO_PIE_DB);
+        var hA = l50 - lon, hB = lmax - l50;
+        var k = Math.min(LOGO_PENDIENTE, 1.5 / hA, 1.5 / hB);
+        var s, t;
+        if (db <= lon) {
+            s = 0;
+        } else if (db <= l50) {
+            t = (db - lon) / hA;
+            s = 0.5 * (3 * t * t - 2 * t * t * t) + hA * k * (t * t * t - t * t);
+        } else if (db <= lmax) {
+            t = (db - l50) / hB;
+            s = 0.5 * (2 * t * t * t - 3 * t * t + 1) + hB * k * (t * t * t - 2 * t * t + t)
+                + (3 * t * t - 2 * t * t * t);
+        } else {
+            s = 1;
+            var ri = Math.max(0, Math.min(1, cfg.ri || 0));
+            var ltop = Math.min(lmax + LOGO_ROLL_DB, LOGO_TECHO_DB);
+            if (ri > 0 && ltop > lmax) {
+                t = Math.min(1, (db - lmax) / (ltop - lmax));
+                s = 1 - ri * (3 * t * t - 2 * t * t * t);
+            }
+        }
+        return pmax * Math.max(0, Math.min(1, s));
+    }
+
+    function cfgDe(side) {
+        var ri = (window.LOGO_RI && window.LOGO_RI[side]) || 0;
+        return {
+            sdt: val('.sdt-input', side, 0),
+            srt: val('.srt-input', side, 0),
+            umd_int: val('.umd-int-input', side, 35),
+            umd_pct: val('.umd-pct-input', side, 100),
+            ri: ri
+        };
+    }
+
+    // Muestreada cada 1 dB, como CaseCharts::logogramPoints().
+    function curvePoints(side) {
+        var cfg = cfgDe(side);
+        var pts = [];
+        for (var db = -10; db <= 120; db++) { pts.push([db, pctLogo(cfg, db)]); }
         return pts;
     }
 
@@ -101,7 +147,7 @@ window.drawLogogram = (function () {
         return path;
     }
 
-    return function drawLogogram() {
+    function drawLogogram() {
         var group = document.getElementById('logogram-data');
         if (!group) return;
         while (group.firstChild) group.removeChild(group.firstChild);
@@ -124,5 +170,8 @@ window.drawLogogram = (function () {
             group.appendChild(makeDot(logoX(sdt), logoY(0), color));
             group.appendChild(makeUmdMark(logoX(umdInt), logoY(umdPct), color));
         });
-    };
+    }
+    // Expuesta para tests/test_charts_vs_js.php (la corre con node).
+    drawLogogram.pctLogo = pctLogo;
+    return drawLogogram;
 })();

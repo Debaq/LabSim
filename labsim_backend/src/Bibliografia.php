@@ -381,6 +381,40 @@ final class Bibliografia
             'enlace' => 'https://doi.org/10.1111/coa.12428',
             'usa' => ['Para su teoría: ninguna prueba de función tubaria es estándar de oro; se interpretan junto con la clínica. La app las da siempre "de libro".'],
         ],
+        'BSA2024' => [
+            'cita' => 'British Society of Audiology. Recommended Procedure: Tympanometry and Acoustic Reflex Thresholds. BSA; 2024 (enmiendas menores 2025 y marzo 2026).',
+            'enlace' => 'https://www.thebsa.org.uk/wp-content/uploads/2026/03/BSA-Recommended-Procedure-Tympanometry-Acoustic-Reflex-Thresholds-March-2026-minor-revision.pdf',
+            'usa' => [
+                'Volumen del conducto (§11.1.4): la sonda ocluida da un volumen chico y la perforación abierta suma el oído medio y da uno anormalmente grande; las dos con curva plana. 90% normal del adulto 0,6-2,2 cm3; 3,6 cm3 o más, distinto del otro oído, sugiere perforación. En la app: tapón = B con volumen bajo, perforación = B con volumen alto (CaseBuilder::earVolume).',
+                'Reflejos (§10.3): el nivel del estímulo se expresa preferentemente en dB HL y puede expresarse en dB SPL aplicando correcciones para compararlo con las normas; no se recomienda presentar sobre 105 dB HL. LabSim los informa en dB SPL (decisión docente del 2026-09-14) y hace la corrección con el RETSPL de cada transductor (AT235).',
+            ],
+        ],
+        'SHANKS1992' => [
+            'cita' => 'Shanks JE, Stelmachowicz PG, Beauchaine KL, Schulte L. Equivalent ear canal volumes in children pre- and post-tympanostomy tube insertion. J Speech Hear Res. 1992;35(4):936-941. doi:10.1044/jshr.3504.936.',
+            'enlace' => 'https://doi.org/10.1044/jshr.3504.936',
+            'n' => '334 niños de 6 semanas a 6,7 años',
+            'usa' => ['Un volumen de 1,0 cm3 o más indica membrana perforada (o tubo permeable) con el menor error. En la app la perforación de un niño queda siempre en 1,0 cm3 o más.'],
+        ],
+        'AT235' => [
+            'cita' => 'Interacoustics A/S. AT235 / AT235h Impedance Audiometer: Technical Specifications (tabla 2, valores de referencia del estímulo). Consultada 2026-10-15.',
+            'enlace' => 'https://doc.es.aau.dk/fileadmin/doc/labs_facillities/acoustics/man/AT235/Spec_AT235.pdf',
+            'nota' => 'Hoja técnica de un fabricante. Los valores de los tonos son los de ISO 389-1 (TDH39) e ISO 389-2 (EAR-3A en acoplador de 2 cc) que la misma hoja cita.',
+            'usa' => [
+                'RETSPL del reflejo (CaseProfile::REFLEX_RETSPL_DB): ipsi por la sonda 5,5 / 0 / 3,0 / 5,5 dB SPL y contra por el TDH39 11,5 / 7 / 9 / 9,5 dB SPL en 500 / 1000 / 2000 / 4000 Hz. Con eso el umbral del modelo (dB HL) se informa en dB SPL.',
+                'Rango de medida 0,1-6,0 ml: tope del volumen alto de la perforación.',
+            ],
+        ],
+        'BROOKS1968' => [
+            'cita' => 'Brooks DN. An objective method of detecting fluid in the middle ear. Int Audiol. 1968;7(3):280-286. doi:10.3109/05384916809074333.',
+            'enlace' => 'https://doi.org/10.3109/05384916809074333',
+            'nota' => 'Datos bibliográficos verificados en Crossref; el texto completo no se leyó. La fórmula (altura del pico sobre la recta a ±50 daPa, dividida por la altura del pico) es la forma de cociente con que se enseña.',
+            'usa' => ['Gradiente del timpanograma en el sentido clásico (1 en punta, 0 plana): Z.move y z_generator.gradiente_clasica en la app, CaseCharts::gradienteDe en la ficha. Hasta 2026-10-15 se informaba el complemento.'],
+        ],
+        'KOEBSELL1986' => [
+            'cita' => 'Koebsell KA, Margolis RH. Tympanometric gradient measured from normal preschool children. Audiology. 1986;25(3):149-157. doi:10.3109/00206098609078381.',
+            'enlace' => 'https://doi.org/10.3109/00206098609078381',
+            'usa' => ['La gradiente es una medida de la forma del timpanograma cerca del pico; de las ocho variantes probadas, la preferida es el ancho a media altura (TW), que es el que fija ANCHOS_JERGER.'],
+        ],
     ];
 
     /** Normas y clasificaciones. */
@@ -605,6 +639,7 @@ final class Bibliografia
         'retro' => 'Patrón retrococlear del ABR',
         'z' => 'Timpanograma',
         'etf' => 'Función tubaria',
+        'volumen_cae' => 'Volumen del conducto (ECV)',
         'vemp' => 'VEMP',
         'ecochg' => 'Electrococleografía',
         'tinnitus' => 'Acúfeno',

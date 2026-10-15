@@ -196,8 +196,10 @@ $dRetro40 = CaseProfile::decompose($plana40, $plana40, 0, 0.0);
 $dCond = CaseProfile::decompose($aereaCond, $oseaCond, 0, 100.0);
 $sinRetro = CaseBuilder::ABR_NEURAL_DEFAULTS;
 
+// El modelo piensa en HL y el caso guarda SPL. En ipsi a 1000 Hz el RETSPL
+// de la sonda es 0 (ISO 389-2 en 2 cc), así que ahí los dos números coinciden.
 t_eq(CaseProfile::reflexThreshold($dNormal, $dNormal, 'A', 100.0, $sinRetro, 1000), 85,
-    'Oído sano: reflejo a 85 dB HL');
+    'Oído sano: reflejo a 85 dB HL = 85 dB SPL ipsi en 1000 Hz');
 
 // Metz: la coclear NO sube el umbral del reflejo en proporción a la pérdida.
 t_eq(CaseProfile::reflexThreshold($dNormal, $dCoclear40, 'A', 100.0, $sinRetro, 1000), 85,
@@ -233,9 +235,63 @@ t_eq(CaseProfile::reflexThreshold($dNormal, $dNormal, 'A', 0.0, $ansdParams, 100
     CaseProfile::REFLEX_ABSENT_DB,
     'ANSD: sin ondas no hay arco reflejo, ausente a cualquier nivel');
 
-// Ruido de banda estrecha (fila NBN del contra): se juzga sobre el promedio.
-t_eq(CaseProfile::reflexThreshold($dNormal, $dNormal, 'A', 100.0, $sinRetro, 'NBN'), 85,
-    'Fila NBN: mismo criterio, sobre el promedio 500-4000');
+// Ruido de banda estrecha (fila NBN del contra): se juzga sobre el promedio,
+// y su RETSPL es el promedio del TDH39 en 500-4000 (9,25): 85 + 9,25 -> 95.
+t_eq(CaseProfile::reflexThreshold($dNormal, $dNormal, 'A', 100.0, $sinRetro, 'NBN', 'contra'), 95,
+    'Fila NBN: mismo criterio, sobre el promedio 500-4000, en dB SPL del auricular contra');
+
+// --- dB SPL: el umbral sale con el RETSPL del transductor que suena -------
+// Tabla del AT235 (ISO 389-2 sonda / ISO 389-1 TDH39). Se verifica contra los
+// valores publicados, no contra la misma constante.
+t_eq(CaseProfile::REFLEX_RETSPL_DB['ipsi'], [500 => 5.5, 1000 => 0.0, 2000 => 3.0, 4000 => 5.5],
+    'RETSPL ipsi: sonda EAR-3A en 2 cc (ISO 389-2)');
+t_eq(CaseProfile::REFLEX_RETSPL_DB['contra'], [500 => 11.5, 1000 => 7.0, 2000 => 9.0, 4000 => 9.5],
+    'RETSPL contra: TDH39 (ISO 389-1)');
+$splSano = [];
+foreach (['ipsi' => CaseProfile::REFLEX_FREQS_IPSI, 'contra' => CaseProfile::REFLEX_FREQS_CONTRA] as $modoSpl => $freqsSpl) {
+    foreach ($freqsSpl as $hzSpl) {
+        $splSano[$modoSpl][] = CaseProfile::reflexThreshold($dNormal, $dNormal, 'A', 100.0, $sinRetro, $hzSpl, $modoSpl);
+    }
+}
+// 85 HL + RETSPL, redondeado a 5 recién en SPL: ipsi 90,5/85/88/90,5 y
+// contra 96,5/92/94/94,5/94,25.
+t_eq($splSano['ipsi'], [90, 85, 90, 90], 'Oído sano, ipsi en dB SPL: 90 / 85 / 90 / 90');
+t_eq($splSano['contra'], [95, 90, 95, 95, 95], 'Oído sano, contra en dB SPL: 95 / 90 / 95 / 95 / NBN 95');
+// Mismo oído, mismo umbral en HL: el contra se lee más alto en SPL porque
+// el TDH39 necesita más presión que la sonda para el mismo 0 dB HL.
+t_true($splSano['contra'][0] > $splSano['ipsi'][0], 'En 500 Hz el contra (TDH39) da más dB SPL que el ipsi (sonda)');
+// El techo sigue en HL: 110 dB HL es el umbral más alto que existe, y en SPL
+// cae justo en el tope del dial; un dB más arriba ya es ausente.
+$dCoclear85 = CaseProfile::decompose(audiograma([125 => 85]), audiograma([125 => 85]), 0, 100.0);
+t_eq(CaseProfile::reflexThreshold($dNormal, $dCoclear85, 'A', 100.0, $sinRetro, 500, 'contra'), 120,
+    'Coclear de 85 dB: 85 + 25 (Metz) = 110 dB HL, + 11,5 del TDH39 = 121,5 -> 120 dB SPL, el tope del dial');
+t_true(120 <= CaseProfile::REFLEX_DIAL_MAX_DB, 'El umbral más alto posible entra en el dial');
+$dCoclear90 = CaseProfile::decompose(audiograma([125 => 90]), audiograma([125 => 90]), 0, 100.0);
+t_eq(CaseProfile::reflexThreshold($dNormal, $dCoclear90, 'A', 100.0, $sinRetro, 500, 'contra'),
+    CaseProfile::REFLEX_ABSENT_DB, 'Coclear de 90 dB: 115 dB HL pasa el techo del modelo, ausente');
+// Sobre una grilla de pérdidas, ningún umbral presente se sale del dial ni
+// queda fuera de los pasos de 5 dB que da la perilla.
+foreach ([0, 20, 40, 60, 70, 80, 85] as $perdida) {
+    foreach ([0.0, 50.0, 100.0] as $cceGrilla) {
+        $dG = CaseProfile::decompose(audiograma([125 => $perdida]), audiograma([125 => $perdida]), 0, $cceGrilla);
+        foreach (['ipsi' => CaseProfile::REFLEX_FREQS_IPSI, 'contra' => CaseProfile::REFLEX_FREQS_CONTRA] as $modoG => $freqsG) {
+            foreach ($freqsG as $hzG) {
+                $u = CaseProfile::reflexThreshold($dNormal, $dG, 'A', $cceGrilla, $sinRetro, $hzG, $modoG);
+                if ($u === CaseProfile::REFLEX_ABSENT_DB) {
+                    continue;
+                }
+                t_true($u <= CaseProfile::REFLEX_DIAL_MAX_DB && $u % 5 === 0,
+                    "Reflejo {$modoG} {$hzG} con {$perdida} dB y CCE {$cceGrilla}%: {$u} dB SPL dentro del dial y en pasos de 5");
+            }
+        }
+    }
+}
+// El tope del dial de la app es el mismo número (z_generator.py).
+$zGen = (string) file_get_contents(dirname(__DIR__, 2) . '/src/impedanciometria/z_generator.py');
+t_true(preg_match('/^REFLEX_DIAL_MAX_DB_SPL = (\d+)/m', $zGen, $mDial) === 1
+    && (int) $mDial[1] === CaseProfile::REFLEX_DIAL_MAX_DB,
+    'El dial de Reflejos de la app topa donde lo espera el backend (REFLEX_DIAL_MAX_DB)');
+
 
 // ---------------------------------------------------------------------
 // Deterioro tonal.
@@ -558,7 +614,8 @@ foreach ($p['recruit']['fowler'] as $freqIdx => $patron) {
 }
 
 // Un oído sin pérdida no puede tener reflejos ausentes ni deterioro tonal.
-t_eq($p['reflex']['ipsi']['oi'], [85, 85, 85, 85], 'project(): el oído sano tiene reflejos normales');
+// En dB SPL de la sonda: 85 dB HL + RETSPL (5,5 / 0 / 3 / 5,5).
+t_eq($p['reflex']['ipsi']['oi'], [90, 85, 90, 90], 'project(): el oído sano tiene reflejos normales (dB SPL)');
 t_eq($p['recruit']['decay']['carhart']['oi'], [0, 0, 0, 0], 'project(): el oído sano no tiene deterioro tonal');
 
 // ---------------------------------------------------------------------
@@ -595,6 +652,37 @@ t_true($logoCond['int'] > $logoSano['int'] + 25,
 $dCofosis = CaseProfile::decompose(array_fill(0, 9, [130, 0]), array_fill(0, 9, [130, 0]), 0, 100.0);
 $logoCofosis = CaseProfile::discrimination($dCofosis, 100.0, $sinRetro);
 t_eq($logoCofosis['pct'], 0, 'Cófosis: 0 % de discriminación, no un porcentaje inventado');
+
+// Rollover (RI de Jerger & Jerger): sale del componente retrococlear, no
+// del reclutamiento. Leve en la cóclea, fuerte en lo retro (decisiones.md,
+// "Logoaudiometría: la curva anclada al SRT", 2026-10-15).
+t_eq(CaseProfile::rolloverIndex($dNormal, 100.0, $sinRetro), 0.0, 'Oído sano: sin rollover');
+t_eq(CaseProfile::rolloverIndex($dCond, 100.0, $sinRetro), 0.0, 'Conductiva: sin rollover');
+$riCoclear = CaseProfile::rolloverIndex($dCoclear40, 100.0, $sinRetro);
+t_true($riCoclear > 0.0 && $riCoclear < 0.3, 'Coclear de 40 dB: rollover leve (RI < 0,3)');
+t_true(CaseProfile::rolloverIndex($dRetro40, 0.0, $sinRetro) >= 0.45,
+    'Retrococlear de 40 dB: RI sobre el corte de 0,45 de Jerger & Jerger');
+t_true(CaseProfile::rolloverIndex($dNormal, 100.0, $schwannoma) > 0.0,
+    'Patrón retro con umbrales normales: algo de rollover igual');
+t_eq(CaseProfile::rolloverIndex($dCofosis, 100.0, $sinRetro), 0.0, 'Cófosis: sin curva, sin rollover');
+t_true(!isset($logoSano['ri']), 'discrimination() no agrega claves: el RI viaja aparte en project()');
+
+// Los pacientes de práctica 33-42: los MISMOS números que la app
+// (tests/test_logo_curva.py, RI_DEMO) -- el PDF, el editor y lo que mide
+// el alumno usan este RI.
+$demoRuta = dirname(__DIR__, 2) . '/docs/manual/capturas/casos_demo.json';
+$demo = is_file($demoRuta) ? json_decode((string) file_get_contents($demoRuta), true) : null;
+t_true(is_array($demo), 'Se leen los pacientes demo (docs/manual/capturas/casos_demo.json)');
+$riDemo = [
+    '33' => [0.0, 0.0], '34' => [0.0, 0.0], '35' => [0.0, 0.0],
+    '36' => [0.13, 0.13], '37' => [0.14, 0.14], '38' => [0.0, 0.15],
+    '39' => [0.62, 0.0], '40' => [0.76, 0.76], '41' => [0.0, 0.14],
+    '42' => [0.0, 0.0],
+];
+foreach ($riDemo as $clave => $esperado) {
+    $caso = is_array($demo) ? ($demo[$clave] ?? []) : [];
+    t_eq(CaseProfile::rolloverDeCaso($caso['data'] ?? $caso), $esperado, "RI del paciente demo {$clave}");
+}
 
 // ---------------------------------------------------------------------
 // LDL: el reclutamiento no se dibuja, cae de la física.
@@ -1146,7 +1234,7 @@ $impOut = CaseForm::completarConProyeccion($impPost);
 t_eq($impOut['abr']['od']['type'], 'transmission', 'Importar: el tipo del ABR sale del audiograma');
 t_eq($impOut['eoas']['od']['type'], 'transmission', 'Importar: el tipo de la EOA sale del audiograma');
 t_eq($impOut['reflex_ipsi']['od'], ['130', '130', '130', '130'], 'Importar: sonda en un oído As, reflejos ausentes');
-t_eq($impOut['reflex_ipsi']['oi'][0], '85', 'Importar: oído sano, reflejo ipsi presente');
+t_eq($impOut['reflex_ipsi']['oi'][0], '90', 'Importar: oído sano, reflejo ipsi presente (500 Hz, 90 dB SPL)');
 t_eq($impOut['ldl_habilitado'], ['od' => '1', 'oi' => '1'], 'Importar: el LDL queda medido');
 t_true(isset($impOut['umd_pct']['od'], $impOut['sisi']['od'], $impOut['carhart']['od']),
     'Importar: logo, SISI y decay completados');
@@ -1194,3 +1282,77 @@ t_true(in_array('NR', CaseBuilder::Z_OPTIONS, true), 'NR es una opción del timp
 foreach (['estenosis_atresia_cae', 'otitis_externa', 'cuerpo_extrano_cae'] as $sinSonda) {
     t_eq(CaseProfile::SCENARIOS[$sinSonda]['z'], ['NR'], "$sinSonda: la sonda no va (NR)");
 }
+
+// ---------------------------------------------------------------------
+// Volumen del conducto (2026-10-15): tapón y perforación son B, y lo que
+// los separa de una efusión es el volumen (BSA 2024, §11.1.4).
+// ---------------------------------------------------------------------
+
+$tapon = CaseProfile::SCENARIOS['tapon_cerumen'];
+t_eq($tapon['z'], ['B'], 'Tapón que ocluye: curva plana, no As');
+t_eq($tapon['volumen_cae'] ?? null, 'bajo', 'Tapón que ocluye: volumen bajo (la sonda mide hasta el cerumen)');
+t_eq($tapon['etf'], 'Normal', 'Tapón: la membrana está entera');
+$perf = CaseProfile::SCENARIOS['perforacion'];
+t_eq($perf['z'], ['B'], 'Perforación: curva plana');
+t_eq($perf['volumen_cae'] ?? null, 'alto', 'Perforación: volumen alto (suma el oído medio)');
+t_true(in_array($perf['etf'], CaseBuilder::ETF_PERFORADA, true),
+    'Perforación: la ETF es de membrana perforada (la app hace la prueba de Lee, no la de Williams)');
+
+// Ningún cuadro se contradice entre curva, ETF y volumen.
+foreach (CaseProfile::SCENARIOS as $claveEsc => $esc) {
+    $volEsc = $esc['volumen_cae'] ?? 'normal';
+    t_true(in_array($volEsc, CaseBuilder::VOLUMEN_CAE_OPTIONS, true), "$claveEsc: volumen_cae válido");
+    foreach ($esc['z'] ?? ['A'] as $zEsc) {
+        t_eq(CaseBuilder::avisosVolumenCae(['OD' => $zEsc, 'OI' => 'A'],
+            ['OD' => (string) ($esc['etf'] ?? 'Normal'), 'OI' => 'Normal'],
+            ['OD' => $volEsc, 'OI' => 'normal']), [],
+            "$claveEsc ($zEsc): curva, ETF y volumen cuentan la misma historia");
+    }
+}
+
+// Los avisos del editor cazan las combinaciones imposibles.
+t_eq(count(CaseBuilder::avisosVolumenCae(['OD' => 'B', 'OI' => 'A'],
+    ['OD' => 'Permeable', 'OI' => 'Normal'], ['OD' => 'normal', 'OI' => 'normal'])), 1,
+    'Aviso: membrana perforada en la ETF con volumen normal');
+t_eq(count(CaseBuilder::avisosVolumenCae(['OD' => 'B', 'OI' => 'A'],
+    ['OD' => 'Normal', 'OI' => 'Normal'], ['OD' => 'alto', 'OI' => 'normal'])), 1,
+    'Aviso: volumen alto con membrana íntegra');
+t_eq(count(CaseBuilder::avisosVolumenCae(['OD' => 'As', 'OI' => 'A'],
+    ['OD' => 'Normal', 'OI' => 'Normal'], ['OD' => 'bajo', 'OI' => 'normal'])), 1,
+    'Aviso: tapón (volumen bajo) con curva con pico');
+t_eq(CaseBuilder::avisosVolumenCae(['OD' => 'NR', 'OI' => 'A'],
+    ['OD' => 'Permeable', 'OI' => 'Normal'], ['OD' => 'normal', 'OI' => 'normal']), [],
+    'NR: sin sonda no hay volumen que discutir');
+
+// earVolume por categoría: bajo siempre debajo del mínimo normal de la edad,
+// alto siempre arriba del máximo -- y en el niño >= 1,0 cm3 (Shanks 1992),
+// en el adulto > 2,2 cm3 (90% normal, BSA 2024) y nunca sobre 6 (AT235).
+mt_srand(20261015);
+$rangosNormales = [3 => [0.30, 0.90], 8 => [0.40, 1.00], 15 => [0.60, 1.30], 40 => [0.80, 2.00]];
+foreach ($rangosNormales as $edadVol => [$minNormal, $maxNormal]) {
+    $bajos = $altos = $normales = [];
+    for ($i = 0; $i < 300; $i++) {
+        $generoVol = $i % 2;
+        $bajos[] = CaseBuilder::earVolume($edadVol, $generoVol, 'bajo');
+        $altos[] = CaseBuilder::earVolume($edadVol, $generoVol, 'alto');
+        $normales[] = CaseBuilder::earVolume($edadVol, $generoVol);
+    }
+    t_true(min($bajos) >= 0.10 && max($bajos) < $minNormal,
+        "Volumen bajo a los {$edadVol} años: entre 0,10 y menos del mínimo normal ({$minNormal})");
+    t_true(min($altos) > $maxNormal, "Volumen alto a los {$edadVol} años: sobre el máximo normal ({$maxNormal})");
+    t_true(max($altos) <= 6.0, "Volumen alto a los {$edadVol} años: dentro del rango del equipo (6 ml)");
+    t_true(min($normales) >= $minNormal && max($normales) <= $maxNormal,
+        "Volumen normal a los {$edadVol} años: el de siempre");
+    if ($edadVol < 7) {
+        t_true(min($altos) >= 1.0, "Perforación a los {$edadVol} años: 1,0 cm3 o más (Shanks 1992)");
+    }
+    if ($edadVol >= 18) {
+        t_true(min($altos) > 2.2, 'Perforación del adulto: sobre el 90% normal (2,2 cm3, BSA 2024)');
+    }
+}
+
+// Un caso guardado antes de volume_cae: la ETF de membrana perforada dice alto.
+t_eq(CaseBuilder::volumenCaeDe(['ETF' => ['Permeable', 'Normal']], 0), 'alto', 'Caso viejo con ETF perforada: alto');
+t_eq(CaseBuilder::volumenCaeDe(['ETF' => ['Permeable', 'Normal']], 1), 'normal', 'Caso viejo con ETF íntegra: normal');
+t_eq(CaseBuilder::volumenCaeDe(['volume_cae' => ['bajo', 'normal'], 'ETF' => ['Normal', 'Normal']], 0), 'bajo',
+    'La categoría guardada manda');

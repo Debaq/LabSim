@@ -24,7 +24,7 @@ if SRC not in sys.path:
 from impedanciometria.z_generator import (edad_meses_del_caso, is_infant_ear,
                                           map_letter_for_probe, z1000_del_caso)
 from impedanciometria.z_generator import (ANCHOS_JERGER, FORMAS_JERGER,
-                                          Z_225)
+                                          Z_225, gradiente_clasica)
 
 SEED = ('paciente-1', 'OD', '226')
 
@@ -59,10 +59,24 @@ def test_el_pico_de_las_c_queda_dentro_de_la_ventana():
 
 
 def test_la_gradiente_distingue_las_curvas():
-    """Ad en punta, Cs redondeada. Acá 1 es ancha y 0 es en punta."""
+    """Ad en punta, Cs redondeada. Gradiente clásica: 1 en punta, 0 plana."""
     g = {letra: float(_curva(letra)[4]) for letra in ('A', 'Ad', 'C', 'Cs')}
-    assert g['Ad'] < g['A'] < g['C'] < g['Cs']
+    assert g['Ad'] > g['A'] > g['C'] > g['Cs']
     assert len(set(g.values())) == len(g), f"la gradiente no separa las letras: {g}"
+
+
+def test_la_gradiente_es_la_clasica():
+    """Brooks (1968): lo que el pico sobresale de la recta a ±50 daPa, sobre
+    el pico. Hasta 2026-10-15 la app informaba el complemento (1 = ancha)."""
+    # Pico de 1 mL y la curva a 0,42 en los dos bordes: sobresale 0,58.
+    assert gradiente_clasica(1.0, 0.42, 0.42) == 0.58
+    # Plana o sin compliance: nada que sobresalga.
+    assert gradiente_clasica(0.0, 0.0, 0.0) == 0.0
+    assert gradiente_clasica('N/D', 0.0, 0.0) == 0.0
+    # Un B (compliance ~0) da 0, no 1 como en el sentido viejo.
+    assert float(_curva('B')[4]) == 0.0
+    # La A del equipo (TW 80 daPa) ronda 0,58, más o menos el temblor.
+    assert 0.45 <= float(_curva('A')[4]) <= 0.70
 
 
 def test_el_ancho_es_el_de_un_adulto():

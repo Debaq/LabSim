@@ -1416,6 +1416,11 @@ reflejos se informan en dB SPL. Corregido el texto en las dos versiones
 (`CaseSheetPdf::impedanciometria()`) -- no es un cambio de valores, los
 números no se tocan, era la unidad mal puesta.
 
+**Actualización 2026-10-15:** los números sí eran HL (85 = umbral normal en
+HL, Metz relativo al umbral en HL). Desde ese día el modelo sigue en HL y el
+caso guarda SPL con el RETSPL de cada transductor (ver "Reflejos en dB SPL de
+verdad: RETSPL por transductor").
+
 ## Fowler: el criterio de calificación no va en la ficha de estudio (2026-09-14)
 
 Cuando ninguna frecuencia califica para Fowler, el PDF explicaba la regla
@@ -1915,6 +1920,11 @@ una curva ancha y 0 una en punta.
       equipo. Hoy la ficha muestra las dos: la de la curva impresa, que sí
       distingue los tipos, y abajo la del equipo, que es la que el alumno lee
       en pantalla.
+
+**Actualización:** el ancho por letra se resolvió el mismo día (ver
+"Rangos de compliance y presión por letra") y el sentido el 2026-10-15: la
+app, la ficha y el libro informan la gradiente clásica (ver "Gradiente del
+timpanograma en el sentido clásico").
 
 Decisión del 2026-09-11: la ficha **no** dibuja la curva de la app. Se probó
 --el coseno alzado de ancho fijo, redondeado en el ápice-- y se volvió a la
@@ -5595,3 +5605,274 @@ Fuentes:
   1982;3(1):34-36.
 - Kinstler DB, Phelan JG, Lavender RW. The Stenger and speech Stenger tests
   in functional hearing loss. Audiology. 1972;11(3):187-193.
+
+## Logoaudiometría: la curva anclada al SRT (2026-10-15)
+
+Dos bugs del motor de las listas de palabras (`CalculateLogo`), y una
+tercera cosa que los dejaba vivir: la app, el PDF y el editor dibujaban
+curvas distintas para el mismo caso.
+
+**Lo que estaba mal.**
+
+- **El SRT medido no coincidía con el PTA.** La curva de la app iba de 0 %
+  en el promedio de los dos mejores umbrales aéreos (250-4000 Hz) hasta la
+  UMD del caso, que en un oído sano se guarda a 35 dB. El 50 % caía ~22 dB
+  sobre el umbral: un oído sano medía SRT 20-25 dB HL con PTA 0, contra una
+  ficha que guarda SRT = SDT = PTA. Clínicamente el SRT (50 % de palabras)
+  queda a ±6-10 dB del PTA de 500/1000/2000 Hz (ASHA 1988), el SDT 5-10 dB
+  por debajo del SRT, y con bisílabos el oído sano llega a su máximo 20-30
+  dB sobre el SRT.
+- **El rollover colgaba del reclutamiento y era un espejo de la subida.**
+  Pasado el máximo la curva bajaba lo mismo que había subido: el paciente
+  37 (coclear) caía de 100 % a 0 % a 85 dB, el 36 (coclear) tenía RI 0,61 y
+  el 39 (retrococlear) no tenía rollover. Al revés de la clínica: el
+  reclutamiento es coclear y no da rollover (o da uno leve, RI típico
+  < 0,25-0,3, que crece con la edad: Gang 1976); el rollover marcado es
+  retrococlear (corte RI ≥ 0,45 de Jerger & Jerger 1971; 0,35 con NU-6,
+  Meyer & Mishler 1985). El backend, mientras, bajaba ~1 %/dB: otra curva.
+
+**Lo que es ahora: una sola función, tres copias vigiladas.**
+`CaseCharts::pctLogo` (PDF), `pctLogo` en `public/js/case/logogram.js`
+(editor) y `pct_logo` en `src/audiometria/logo_curva.py` (lo que mide el
+alumno con `CalculateLogo` y lo que dibuja `docs/libro/figuras/motor/logo.py`).
+Con el máximo del caso (UMD: `percentage` a `int` dB HL):
+
+- **Anclada al SRT de la ficha:** ahí pasa la MITAD de su máximo (50 % en
+  un oído que llega a 100). El SRT "auto" de la ficha es el Fletcher, así
+  que el SRT que mide el alumno con palabras cae sobre el PTA. Un oído con
+  máximo bajo (retro) no llega al 50 % en el SRT tonal: es la disociación,
+  no un error.
+- **Pie:** 0 % hasta 10 dB bajo el SRT (`LOGO_PIE_DB`), o desde el SDT si el
+  docente lo cargó más abajo.
+- **Subida:** dos tramos cúbicos de Hermite que se juntan en el SRT con
+  pendiente de 5 %/dB (`LOGO_PENDIENTE`, entre espondeos ~8-10 %/dB y
+  monosílabos ~3-5 %/dB), acotada para que la curva sea monótona, y llegan
+  al máximo con tangente horizontal. Oído sano (SRT 0, UMD 30-35): 82 % a
+  +10 dB, 96 % a +20.
+- **Pasado el máximo:** meseta, o rollover si el RI del oído es > 0: baja
+  suave (smoothstep) hasta `máximo * (1 - RI)`, alcanzado 25 dB sobre el
+  máximo (`LOGO_ROLL_DB`) o en el techo de 100 dB del canal de habla de la
+  app (`LOGO_TECHO_DB`), lo que pase primero, y ahí se queda. Nunca colapsa
+  a 0 salvo que el máximo ya sea 0.
+- **El RI sale del perfil, no del flag de reclutamiento**
+  (`CaseProfile::rolloverIndex`, espejo en `logo_curva.rollover_index`): un
+  poco por la cóclea (0,15 × cce_pct, solo con pérdida sensorioneural) y el
+  resto por la MISMA carga retro que le baja el máximo en
+  `discrimination()` (80 puntos de % perdidos por lo retro = RI 1, con tope
+  0,75 para lo retro y 0,9 en total). No es un campo nuevo del caso: se
+  calcula del perfil normalizado y del audiograma guardado
+  (`rolloverDeCaso`), así que vale para los casos viejos sin migrar nada. Si
+  el docente quiere más o menos rollover, mueve `cce_pct` o el patrón retro.
+- `CaseProfile::LOGO_SL_DB` baja de 35 a 30 dB: la UMD derivada del perfil
+  cae en el rango de 20-30 dB sobre el SRT de los bisílabos.
+
+**Pacientes de práctica, antes → ahora (app, lo que mide el alumno).** SRT
+medido = donde la curva pasa el 50 %; PTA = mejores 2 de 500/1000/2000.
+
+| Paciente | SRT medido (PTA) | Máx. | RI |
+|---|---|---|---|
+| 33 sano OD/OI | 22,5 → 0 (0) | 100 | 0 → 0 |
+| 34 OD conductiva | 67,5 → 40 (42,5) | 100 | 0 → 0 |
+| 35 OD/OI | 52,5 → 25 / 30 (27,5 / 30) | 100 | 0 → 0 |
+| 36 OD / OI coclear | 38,8 / 46,2 → 21,5 / 27,3 (22,5 / 27,5) | 92 / 88 | 0,61 / 0,55 → 0,13 / 0,13 |
+| 37 OD / OI coclear | 32,5 / 38,5 → 5 / 5,7 (5 / 7,5) | 100 / 96 | 1,00 / 1,00 → 0,14 / 0,14 |
+| 38 OI | 51,2 → 37,1 (35) | 88 | 0,45 → 0,15 |
+| 39 OD retro | 53,8 → 38,3 (17,5) | 52 | 0 → 0,62 |
+| 40 neuropatía | no llega al 50 % | 32 / 36 | 0 → 0,76 |
+| 41 OI | 63,8 → 51,3 (52,5) | 92 | 0,17 → 0,14 |
+| 42 OD cófosis | -- | 0 | 0 → 0 |
+
+En el PDF la curva era otra (SRT de la curva 17,5 dB en un oído sano, el
+37 con RI 0,51); ahora da los mismos números que la app.
+
+**Lo que acompaña:**
+
+- `CalculateLogo.data` guarda la curva con un decimal (antes la grilla de
+  4 en 4 de `por_logo`); las palabras que acierta siguen saliendo de ahí
+  (`ListWords`, 4 % cada una). `_curve` ya no acota los niveles negativos a
+  0 dB: el habla que cruza a la cóclea contraria a (intensidad - 45) puede
+  quedar bajo 0 dB HL, y leerla como 0 le daba al oído sano el 20-50 % de
+  su propio 0 dB (con la curva anclada al SRT). La curva sombra ahora
+  aparece cuando el habla cruzada llega al pie de la curva del otro oído.
+- PDF: la ventana de UMD de un oído con rollover suma el nivel donde la
+  caída se completó (máximo + 25 dB o 100 dB), no un escalón de 5 dB: con
+  la caída suave de ahora, 5 dB sobre el máximo casi no la mostraban. La
+  fila "Rollover" de la ficha docente dice el RI ("RI 0,62") en vez de
+  Sí/No; la de estudio sigue sin traerla.
+- Editor: el RI llega con la proyección del perfil (`case_project.php`,
+  `logo.ri`) y la proyección se pide aunque no haya ningún módulo en auto
+  (no escribe campos, solo pinta).
+- Libro: el logoaudiograma dibuja `pct_logo` de a 1 dB y el rótulo del
+  máximo busca un lugar que no pise ninguna curva ni el otro rótulo (en el
+  36 el "92 %" quedaba debajo de la curva del OI), del lado de su propia
+  curva y de su color.
+- Tests: `tests/test_logo_curva.py` (pacientes 33-42: SRT a ≤ 6 dB del PTA
+  en todo oído con máximo ≥ 80 %, coclear con RI < 0,3, retro con RI ≥ 0,45
+  y máximo bajo, conductiva corrida sin bajar el máximo, nunca cae a 0);
+  `test_case_profile.php` (los mismos RI de los 10 pacientes);
+  `test_charts_vs_js.php` (constantes del JS, y la función entera corrida
+  con node contra la del PHP en todos los tramos, más los mismos puntos del
+  36 OI que la app).
+
+Queda abierto (TODO 66): el SDT "auto" de la ficha es el mismo Fletcher que
+el SRT, cuando clínicamente va 5-10 dB más abajo. La curva no lo necesita
+(el pie va 10 dB bajo el SRT igual), pero la mano levantada del SDT
+(`response.py`) responde en el SRT.
+
+Fuentes:
+- American Speech-Language-Hearing Association. Guidelines for determining
+  threshold level for speech. ASHA. 1988;30(3):85-89.
+- Jerger J, Jerger S. Diagnostic significance of PB word functions. Arch
+  Otolaryngol. 1971;93(6):573-580.
+- Gang RP. The effects of age on the diagnostic utility of the rollover
+  phenomenon. J Speech Hear Disord. 1976;41(1):63-69.
+- Meyer DH, Mishler ET. Rollover measurements with Auditec NU-6 word lists.
+  J Speech Hear Disord. 1985;50(4):356-360.
+- Bess FH, Josey AF, Humes LE. Performance intensity functions in cochlear
+  and eighth nerve disorders. Am J Otol. 1979;1(1):27-31.
+- Wilson RH, Margolis RH. Measurements of auditory thresholds for speech
+  stimuli. En: Konkle DF, Rintelmann WF, eds. Principles of Speech
+  Audiometry. Baltimore: University Park Press; 1983:79-126.
+
+## Impedanciometría: tapón y perforación se distinguen por el volumen del conducto (2026-10-15)
+
+Dos cuadros salían con una impedanciometría que no se ve en la clínica:
+
+- `tapon_cerumen` daba **As**, que es un oído medio rígido. Con un tapón que
+  ocluye, la sonda queda frente al cerumen y no ve la membrana: la curva es
+  **plana (B) con volumen bajo**.
+- `perforacion` daba B con el volumen **normal para la edad**
+  (`CaseBuilder::earVolume` no miraba la membrana) y la ETF en `Normal`, que
+  en LabSim es membrana íntegra: la pantalla ETF le hacía la prueba de
+  Williams a un tímpano perforado. Una perforación abierta es **B con volumen
+  alto**, porque la sonda suma el aire del oído medio al del conducto.
+
+La BSA lo dice así (Recommended Procedure: Tympanometry and Acoustic Reflex
+Thresholds, 2024, §11.1.4): la sonda ocluida da un volumen aparentemente
+chico, la perforación abierta uno anormalmente grande, y las dos van con
+curva plana. 90% normal del adulto 0,6-2,2 cm3; 3,6 cm3 o más, distinto del
+otro oído, sugiere perforación. En niños de hasta 6,7 años, 1,0 cm3 o más
+indica perforación o tubo permeable con el menor error (Shanks y cols. 1992).
+
+**Cómo quedó.** El volumen sigue siendo un número que sortea el servidor,
+pero ahora dentro de una **categoría por oído** (`CaseBuilder::VOLUMEN_CAE_OPTIONS`:
+normal / bajo / alto), que el cuadro declara (`SCENARIOS[...]['volumen_cae']`,
+eje nuevo de la Bibliografía) y el editor muestra en la ficha Timpanometría
+("Volumen del conducto OD/OI"). Se guarda en `cases.data.volume_cae` para que
+editar el caso no la pierda; un caso viejo sin el campo es `alto` si su ETF
+es de membrana perforada y `normal` si no (`CaseBuilder::volumenCaeDe`).
+
+- **bajo**: entre 0,10 cm3 y la mitad del mínimo normal de la edad. La BSA
+  no da un número; lo que importa es que quede claramente por debajo.
+- **alto**: el conducto de la edad más el oído medio
+  (`CaseBuilder::VOLUMEN_OIDO_MEDIO_CM3`): 0,7-1,5 cm3 hasta los 5 años,
+  1,0-2,0 hasta los 12, 1,5-3,0 hasta los 17 y 2,0-4,0 en el adulto. Así un
+  niño nunca baja de 1,0 cm3 (Shanks) y un adulto queda en 2,8-6,0, por
+  encima del 90% normal y sin pasar el rango de medida del equipo (AT235:
+  0,1-6,0 ml).
+- `perforacion`: `etf` pasa a **Permeable**. En 192 oídos perforados, 117
+  tenían la trompa normal (Lee y cols. 2026), y es la prueba de membrana
+  perforada la que lo muestra (la presión se iguala al tragar). Una
+  perforación con trompa cerrada se arma eligiendo "No permeable".
+- **Avisos del editor** (`CaseBuilder::avisosVolumenCae`, como los del perfil:
+  se leen y se guarda igual): ETF de membrana perforada con volumen que no es
+  alto, volumen alto con ETF de membrana íntegra, y volumen bajo o alto con
+  una curva con pico.
+- `colesteatoma`, `mixta_otitis_cronica`, `colesteatoma_fistula` y
+  `oido_operado` quedan como estaban: los arma el generador con membrana
+  cerrada (ETF de membrana íntegra). Si el caso tiene la membrana perforada,
+  el docente elige la ETF y el volumen; el aviso le recuerda poner los dos.
+
+Lo que dice la norma y LabSim no hace: la BSA (§8) no recomienda timpanometría
+con una perforación evidente en la otoscopía, porque no agrega nada; sirve
+cuando la membrana no se ve. LabSim la deja hacer a propósito (decisión de
+"Impedanciometría no realizable (NR)": la perforación seca no es NR), y el
+volumen alto es justamente lo que el alumno tiene que reconocer. Una
+perforación con secreción sí es NR.
+
+**Pendiente en producción:** los casos de tapón (As) y de perforación (volumen
+normal, ETF Normal) que ya existen no cambian solos; hay que editarlos.
+`tapon_cerumen` y `perforacion` en `BibliografiaPatologias` llevan las citas
+nuevas (BSA 2024, Shanks 1992, Lee 2026) y la nota del tapón que pedía revisar
+la As quedó resuelta. El capítulo 1 del libro tiene un comentario `verificar`
+sobre esto que ya se puede cerrar.
+
+## Reflejos en dB SPL de verdad: RETSPL por transductor (2026-10-15)
+
+El 2026-09-14 se decidió informar los reflejos en dB SPL y se cambió solo el
+rótulo. Pero `CaseProfile::reflexThreshold` calcula en HL: el umbral normal
+de 85 es 85 dB HL (~85 dB sobre el umbral auditivo), Metz es el SL sobre el
+umbral en HL y el techo de 110 es HL. El número que leía el alumno era HL con
+la etiqueta SPL.
+
+**Decisión:** se mantiene la del docente (dB SPL) y se hace verdad. El modelo
+sigue pensando en HL y se convierte **a la salida**, con el RETSPL del
+transductor que suena en cada modo (`CaseProfile::REFLEX_RETSPL_DB`):
+
+| Hz | ipsi: sonda (ISO 389-2, EAR-3A, 2 cc) | contra: TDH39 (ISO 389-1) |
+|---|---|---|
+| 500 | 5,5 | 11,5 |
+| 1000 | 0 | 7 |
+| 2000 | 3,0 | 9 |
+| 4000 | 5,5 | 9,5 |
+| NBN | 3,5 (promedio) | 9,25 (promedio) |
+
+Fuente: Interacoustics AT235, *Technical Specifications*, tabla 2 (valores de
+referencia del estímulo; la misma hoja cita ISO 389-1 para el TDH39 e ISO
+389-2 para el inserto ipsi en acoplador IEC 126 de 2 cc). Es un
+impedanciómetro clínico común, de la misma marca cuyo protocolo ya sigue la
+sonda de 1000 Hz: el contra suena por un TDH39 y el ipsi por la sonda.
+
+- **NBN**: el modelo juzga esa fila sobre el promedio de 500-4000 Hz, no
+  sobre una banda de ruido de verdad (un ruido daría un umbral más bajo que
+  los tonos). Por eso su RETSPL es el promedio de los cuatro tonos del mismo
+  transductor, no el de ruido de banda ancha del AT235 (-8 dB en el TDH39),
+  que mezclaría dos modelos.
+- Se redondea a 5 dB **recién en SPL** (no en HL y otra vez en SPL): el dial
+  va de 5 en 5 y el alumno tiene que poder caer justo en el umbral de la
+  ficha.
+- `REFLEX_MAX_DB` (110) sigue siendo el techo del modelo en HL. El umbral más
+  alto posible es 110 + 11,5 = 121,5 -> 120 dB SPL, que es el tope del dial
+  de la app (`REFLEX_DIAL_MAX_DB_SPL` en `z_generator.py`, espejo
+  `CaseProfile::REFLEX_DIAL_MAX_DB`; un test compara los dos). 130 sigue
+  siendo "ausente".
+- Oído sano: ipsi 90 / 85 / 90 / 90, contra 95 / 90 / 95 / 95 / NBN 95 dB SPL
+  (antes 85 en todo).
+- Consumidores: `project()` y `warnings()` pasan el modo; la app compara el
+  dial (sus topes ahora son constantes en dB SPL) contra el número del caso,
+  así que Z.py no cambia de lógica; el editor rotula "dB SPL"; `DebugMkg` contaba
+  como ausente un reflejo de 105 o más y ahora solo el 130.
+- Pacientes de práctica 33-42 en `docs/manual/capturas/casos_demo.json`
+  reproyectados (todos tenían el reflejo en automático: el cambio es solo la
+  unidad).
+
+Lo que dicen las normas: la BSA (2024, §10.3) prefiere expresar el estímulo
+en dB HL y acepta dB SPL con las correcciones para comparar con las normas, y
+no recomienda pasar de 105 dB HL. LabSim informa SPL por decisión docente y
+deja el techo del modelo en 110 dB HL.
+
+**Pendiente en producción:** los casos guardados tienen los umbrales en HL.
+Los de reflejo en automático se arreglan reproyectando; los cargados a mano
+necesitan sumar el RETSPL de su fila (o que el docente los revise).
+
+## Gradiente del timpanograma en el sentido clásico (2026-10-15)
+
+Cierra el TODO 16. La app informaba `(y(p-50) + y(p+50)) / 2c`: 1 = curva
+ancha, 0 = en punta, al revés de la gradiente clásica (Brooks 1968), que es
+lo que el pico **sobresale** de la recta que une la curva a ±50 daPa, sobre
+la altura del pico: `hp / c = 1 - (y(p-50) + y(p+50)) / 2c`. 1 = en punta,
+0 = plana.
+
+Cambiado en los tres lugares que la calculan: `z_generator.gradiente_clasica`
+(usada por `Z_225._calc_gradient` y por `Z.move`, el cursor), y
+`CaseCharts::gradienteDe` (las dos filas de la ficha). El libro la toma de
+`Z_225`, así que no hubo que tocarlo. El recuadro amarillo (100 daPa por la
+altura del pico) sigue igual y ahora se lee directo: la gradiente es la parte
+de su alto que queda por encima de la curva en los bordes.
+
+Con los anchos por letra queda Ad 0,69 > A/As 0,58 > C 0,50 > Cs 0,35, y B 0
+(antes 0,31 / 0,42 / 0,50 / 0,65; la B daba 0 igual porque su compliance
+redondea a cero, y en el sentido clásico una plana es 0, así que ahora además
+es coherente). Koebsell y Margolis (1986) compararon ocho medidas de la forma
+cerca del pico y prefirieron el ancho a media altura (TW), que es el que fija
+`ANCHOS_JERGER`.

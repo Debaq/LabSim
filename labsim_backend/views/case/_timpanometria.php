@@ -135,11 +135,21 @@
                 <?php endforeach; ?>
             </select>
         </label>
+        <?php foreach (['od' => 'OD', 'oi' => 'OI'] as $ladoVol => $rotVol): ?>
+        <label>Volumen del conducto <?= $rotVol ?>
+            <select name="volumen_cae_<?= $ladoVol ?>">
+                <?php foreach (CaseBuilder::VOLUMEN_CAE_LABELS as $opt => $lbl): ?>
+                <option value="<?= $opt ?>" <?= ($v['volumen_cae_' . $ladoVol] ?? 'normal') === $opt ? 'selected' : '' ?>><?= htmlspecialchars($lbl) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <?php endforeach; ?>
     </div>
+    <p class="help">El volumen del conducto lo sortea el equipo dentro de la categoría y la edad del paciente. <strong>Bajo</strong>: la sonda mide solo hasta lo que ocluye el conducto. <strong>Alto</strong>: con la membrana perforada (ETF Permeable o No permeable) mide el conducto más el oído medio.</p>
 </div>
 
 <div class="card">
-    <strong>Reflejos acústicos (dB HL, 130 = ausente)</strong>
+    <strong>Reflejos acústicos (dB SPL, 130 = ausente)</strong>
     <p class="derivado-aviso" data-derivado="reflex" hidden>Los umbrales y el decay del reflejo los sugiere el <a href="#" class="tab-link" data-goto-tab="perfil">Perfil auditivo</a>, porque la casilla <em>Reflejos acústicos</em> está encendida: se escriben solos con lo que predice el perfil y <strong>se pueden editar</strong>: lo que quede en pantalla es lo que se guarda. Cambiar el audiograma o el perfil vuelve a sugerir y pisa lo editado a mano; para que no se toquen más, apagar esa casilla.</p>
     <?php
     $reflexGroups = ['ipsi' => ['label' => 'Ipsilateral', 'freqs' => [500, 1000, 2000, 4000]],

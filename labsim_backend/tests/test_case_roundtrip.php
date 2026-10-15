@@ -133,3 +133,16 @@ $vempMedio = $viejo;
 $vempMedio['VEMP'] = ['OD' => ['type' => 'normal', 'decidido' => true], 'OI' => ['type' => 'normal']];
 $v = CaseBuilder::caseDataToForm($vempMedio);
 t_true(!isset($v['revisado']['vemp']), 'VEMP legado: con un solo oído decidido la ficha sigue sin revisar');
+
+// =====================================================================
+// Volumen del conducto (2026-10-15): la categoría vuelve al formulario
+// =====================================================================
+
+$conVolumen = $viejo;
+$conVolumen['volume'] = [0.21, 4.1, 'N/D'];
+$conVolumen['volume_cae'] = ['bajo', 'alto'];
+$conVolumen['ETF'] = ['Normal', 'Permeable'];
+$v = CaseBuilder::caseDataToForm($conVolumen);
+t_eq([$v['volumen_cae_od'], $v['volumen_cae_oi']], ['bajo', 'alto'], 'La categoría de volumen guardada vuelve al formulario');
+$v = CaseBuilder::caseDataToForm($viejo);
+t_eq([$v['volumen_cae_od'], $v['volumen_cae_oi']], ['normal', 'normal'], 'Caso sin volume_cae ni ETF perforada: normal');

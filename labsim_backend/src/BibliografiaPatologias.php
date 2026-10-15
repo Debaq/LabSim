@@ -191,6 +191,30 @@ final class BibliografiaPatologias
                 'coincide' => 'si',
                 'nota' => 'El artículo sitúa la conductiva por perforación entre despreciable y ~50 dB; gap_max_db 55 queda en el borde. El volumen del oído medio explica hasta 35 dB de diferencia entre perforaciones iguales, lo que justifica un gap_scale amplio.',
             ],
+            [
+                'eje' => 'volumen_cae',
+                'cita' => 'British Society of Audiology. Recommended Procedure: Tympanometry and Acoustic Reflex Thresholds. BSA; 2024 (enmiendas 2025 y marzo 2026), §11.1.4.',
+                'enlace' => 'https://www.thebsa.org.uk/wp-content/uploads/2026/03/BSA-Recommended-Procedure-Tympanometry-Acoustic-Reflex-Thresholds-March-2026-minor-revision.pdf',
+                'respalda' => 'La perforación abierta suma el volumen del oído medio al del conducto: curva plana con volumen anormalmente grande. 90% normal del adulto 0,6-2,2 cm3; 3,6 cm3 o más, distinto del otro oído, sugiere perforación (oído medio de 3-7 ml, Mehta 2006). Respalda z B y volumen_cae alto.',
+                'coincide' => 'si',
+                'nota' => 'Aplicado al generador el 2026-10-15: antes el volumen salía normal para la edad (CaseBuilder::earVolume no miraba la membrana). En adultos se suman 2-4 cm3 al conducto (total 2,8-6,0), por encima del 90% normal; el tope de 6 es el rango de medida del AT235.',
+            ],
+            [
+                'eje' => 'volumen_cae',
+                'cita' => 'Shanks JE, Stelmachowicz PG, Beauchaine KL, Schulte L. Equivalent ear canal volumes in children pre- and post-tympanostomy tube insertion. J Speech Hear Res. 1992;35(4):936-941. doi:10.1044/jshr.3504.936.',
+                'enlace' => 'https://doi.org/10.1044/jshr.3504.936',
+                'respalda' => 'En 334 niños de 6 semanas a 6,7 años, un volumen de 1,0 cm3 o más indicó membrana perforada (o tubo permeable) con el menor error: respalda el volumen alto en niños, que en el generador nunca baja de 1,0 cm3.',
+                'coincide' => 'si',
+                'nota' => 'Bajo los 4 años las distribuciones pre y posoperatorias se superponen: en la clínica un volumen alto de lactante no es tan nítido como el que arma el generador (cuadro típico).',
+            ],
+            [
+                'eje' => 'etf',
+                'cita' => 'Lee DH, Heo Y, Na HS, Lee S, Oh SJ, Choi SW. Clinical utility of modified inflation-deflation test in Eustachian tube function testing. Diagnostics (Basel). 2026;16(16):2534. doi:10.3390/diagnostics16162534.',
+                'enlace' => 'https://doi.org/10.3390/diagnostics16162534',
+                'respalda' => 'En 192 oídos con membrana perforada, 117 tenían función tubaria normal por sonotubometría y 75 disfunción: respalda etf Permeable como presentación más frecuente, medida con la prueba de membrana perforada.',
+                'coincide' => 'si',
+                'nota' => 'Aplicado el 2026-10-15: el cuadro tenía etf Normal, que en LabSim es membrana íntegra (la app hacía la prueba de Williams sobre un tímpano perforado). La perforación con trompa no permeable se arma eligiendo No permeable a mano.',
+            ],
         ],
         'disfuncion_tubaria' => [
             [
@@ -224,7 +248,15 @@ final class BibliografiaPatologias
                 'enlace' => 'https://pubmed.ncbi.nlm.nih.gov/23175910/',
                 'respalda' => 'En 42 oídos con tapón la hipoacusia fue conductiva en todos y leve como grado predominante (8 de 42 con componente sensorineural agregado): respalda grados [\'leve\'] y max_db 40.',
                 'coincide' => 'si',
-                'nota' => 'Sin cita peer-review encontrada para la timpanometría: el patrón que enseñan los materiales docentes para un tapón oclusivo es curva plana (B) con volumen equivalente BAJO, no As. Revisar z [\'As\'].',
+                'nota' => 'La timpanometría del tapón (B con volumen bajo, antes As) se aplicó el 2026-10-15 con la recomendación de la BSA: ver la cita de z.',
+            ],
+            [
+                'eje' => 'z',
+                'cita' => 'British Society of Audiology. Recommended Procedure: Tympanometry and Acoustic Reflex Thresholds. BSA; 2024 (enmiendas 2025 y marzo 2026), §8 (cerumen) y §11.1.4.',
+                'enlace' => 'https://www.thebsa.org.uk/wp-content/uploads/2026/03/BSA-Recommended-Procedure-Tympanometry-Acoustic-Reflex-Thresholds-March-2026-minor-revision.pdf',
+                'respalda' => 'Con la punta de la sonda ocluida se indica un volumen aparentemente chico, con curva plana; la timpanometría sirve para ver si el cerumen ocluye. Respalda z B y volumen_cae bajo para el tapón oclusivo.',
+                'coincide' => 'si',
+                'nota' => 'Aplicado al generador el 2026-10-15 (antes z As, que es un oído medio rígido y no un conducto tapado). La BSA lo dice para la sonda ocluida en general (pared o cerumen); no da un valor de volumen: el generador lo deja entre 0,10 cm3 y la mitad del mínimo normal de la edad. Un tapón que no ocluye del todo no cambia la curva: ese caso se arma a mano con la letra que corresponda.',
             ],
             [
                 'eje' => 'gap_shape',

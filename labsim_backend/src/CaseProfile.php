@@ -854,7 +854,17 @@ final class CaseProfile
             'gap_shape' => [125 => 36, 250 => 36, 500 => 32, 1000 => 25, 2000 => 18, 3000 => 15, 4000 => 12, 6000 => 12, 8000 => 12],
             'gap_scale' => [0.4, 1.1],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
-            'z' => ['B'], 'etf' => 'Normal',
+            // Plana porque la membrana no puede presurizarse, y la ETF es la
+            // de membrana perforada: con 'Normal' la app hacía la prueba de
+            // membrana íntegra. Permeable: es lo más frecuente en la
+            // perforación (117 de 192 oídos con trompa normal en Lee 2026),
+            // y la prueba lo muestra igualando la presión al tragar.
+            'z' => ['B'], 'etf' => 'Permeable',
+            // El hallazgo que separa la perforación de una efusión: volumen
+            // ALTO, porque la sonda suma el aire del oído medio al del
+            // conducto (BSA 2024; >= 1,0 cm3 en niños, Shanks 1992). Ver
+            // CaseBuilder::earVolume.
+            'volumen_cae' => 'alto',
             // Una perforación subtotal, con la cadena ya comprometida, llega
             // a 55 dB de gap en los graves; más que eso es otra cosa, no el
             // agujero. Con los agudos casi indemnes el promedio BIAP se
@@ -899,7 +909,12 @@ final class CaseProfile
             'gap_shape' => [125 => 30, 250 => 30, 500 => 28, 1000 => 25, 2000 => 25, 3000 => 25, 4000 => 25, 6000 => 28, 8000 => 30],
             'gap_scale' => [0.3, 1.0],
             'cce_pct' => [100, 100], 'retro' => null, 'lateralidad' => 'unilateral',
-            'z' => ['As'], 'etf' => 'Normal',
+            // Tapón que OCLUYE: la sonda queda frente al cerumen y no ve la
+            // membrana, así que la curva es plana (B), no As -- antes salía
+            // As, como si fuera un oído medio rígido. Lo que lo delata es el
+            // volumen BAJO (BSA 2024, §11.1.4). La membrana está entera.
+            'z' => ['B'], 'etf' => 'Normal',
+            'volumen_cae' => 'bajo',
             // Un tapón, aunque ocluya del todo, no pasa de ~40 dB: es el
             // cuadro leve por definición, y de ahí que sorprenda tanto al
             // paciente cuando se lo sacan.
@@ -2669,10 +2684,31 @@ final class CaseProfile
     public const LOGO_RETRO_SLOPE = 1.8;
     public const LOGO_RETRO_KNEE_DB = 10.0;
 
-    /** Cuánto por encima del umbral del habla se alcanza el máximo. */
-    public const LOGO_SL_DB = 35.0;
+    /**
+     * Cuánto por encima del umbral del habla se alcanza el máximo. Con
+     * bisílabos el oído sano llega a su máximo 20-30 dB sobre el SRT (ver
+     * decisiones.md, "Logoaudiometría: la curva anclada al SRT"); con 35
+     * el máximo quedaba más lejos de lo que se ve en clínica.
+     */
+    public const LOGO_SL_DB = 30.0;
     /** Salida máxima practicable del canal de habla. */
     public const LOGO_MAX_DB = 110.0;
+
+    /**
+     * Rollover: índice RI = (PBmax - PBmin) / PBmax, Jerger & Jerger 1971.
+     *
+     * La cóclea da poco o nada (RI típico < 0,25-0,3): LOGO_RI_COCLEAR es lo
+     * que aporta un oído coclear puro con pérdida. El rollover fuerte es del
+     * componente retrococlear, y sale de la MISMA carga retro que le baja el
+     * máximo en discrimination(): LOGO_RI_RETRO_DB puntos de % perdidos por
+     * lo retro dan RI 1. Con el paciente de práctica 39 (retro, desincronía
+     * leve) da ~0,6, sobre el corte de 0,45 de Jerger; un coclear como el 36
+     * queda en ~0,13.
+     */
+    public const LOGO_RI_COCLEAR = 0.15;
+    public const LOGO_RI_RETRO_DB = 80.0;
+    public const LOGO_RI_RETRO_MAX = 0.75;
+    public const LOGO_RI_MAX = 0.9;
 
     /**
      * Máxima discriminación del oído y a qué intensidad se alcanza.
@@ -2681,13 +2717,11 @@ final class CaseProfile
      * atenúa. Lo que hace es correr la curva a la derecha, así que entra
      * en la intensidad y no en el máximo.
      *
-     * El porcentaje se cuantiza a múltiplos de 4 porque es la grilla que
-     * usa el motor del logoaudiograma (`por_logo` en
-     * src/audiometria/logoaudiometry.py); un valor fuera de la grilla
-     * revienta el índice al armar la curva.
+     * El porcentaje se cuantiza a múltiplos de 4 porque la lista es de 25
+     * palabras: cada palabra vale 4 % (ver ListWords.list_success).
      *
-     * El reclutamiento (rollover: la curva CAE pasado el máximo) no se
-     * decide acá -- sale del flag `recruit`, que ya deriva recruitment().
+     * El rollover (la curva CAE pasado el máximo) no se decide acá: es
+     * rolloverIndex(), que sale de la misma carga retro.
      *
      * @param array $decomp Salida de decompose()
      * @return array{pct:int, int:int}
@@ -2698,16 +2732,44 @@ final class CaseProfile
         // oír ni al máximo del audiómetro, la discriminación es 0 %. Antes la
         // cuenta general daba un porcentaje inventado (20 % a 110 dB en el
         // paciente de práctica 42).
-        $sinHabla = array_intersect($decomp['sin_respuesta']['air'] ?? [], [500, 1000, 2000]);
-        if (count($sinHabla) >= 2) {
+        if (self::sinHabla($decomp)) {
             return ['pct' => 0, 'int' => (int) self::LOGO_MAX_DB];
         }
-        $ccePct = self::clamp($ccePct, 0.0, 100.0);
-        // Para el porcentaje manda la banda de las consonantes; para la
-        // intensidad a la que se alcanza, el promedio de Fletcher.
-        $snDiscrim = self::weightedAverage($decomp['sn'], self::SPEECH_WEIGHTS);
+        // Para la intensidad a la que se alcanza manda el promedio de
+        // Fletcher; para el porcentaje, la banda de las consonantes
+        // (cargasLogo).
         $sn = self::speechAverage($decomp['sn']);
         $gap = self::speechAverage($decomp['gap']);
+        [$porCoclear, $porRetro] = self::cargasLogo($decomp, $ccePct, $retro);
+        $pct = self::clamp(100.0 - $porCoclear - $porRetro, 0.0, 100.0);
+
+        return [
+            'pct' => (int) (round($pct / 4) * 4),
+            'int' => (int) self::clamp(
+                round(($sn + $gap + self::LOGO_SL_DB) / 5) * 5, 0.0, self::LOGO_MAX_DB
+            ),
+        ];
+    }
+
+    /** Sin respuesta en 2 o más de 500/1000/2000 Hz: no hay habla que oír. */
+    private static function sinHabla(array $decomp): bool
+    {
+        $sinHabla = array_intersect($decomp['sin_respuesta']['air'] ?? [], [500, 1000, 2000]);
+        return count($sinHabla) >= 2;
+    }
+
+    /**
+     * Puntos de % de discriminación que se pierden por la cóclea y por lo
+     * retrococlear, en ese orden. Es la cuenta de siempre de
+     * discrimination(), separada para que el rollover salga de la MISMA
+     * carga retro y no de un número aparte.
+     *
+     * @return array{0:float,1:float}
+     */
+    private static function cargasLogo(array $decomp, float $ccePct, array $retro): array
+    {
+        $ccePct = self::clamp($ccePct, 0.0, 100.0);
+        $snDiscrim = self::weightedAverage($decomp['sn'], self::SPEECH_WEIGHTS);
         $cce = $snDiscrim * $ccePct / 100.0;
         $retroSn = $snDiscrim - $cce;
 
@@ -2718,14 +2780,63 @@ final class CaseProfile
         if (self::retroActivo($retro)) {
             $porRetro += 20.0;
         }
-        $pct = self::clamp(100.0 - $porCoclear - $porRetro, 0.0, 100.0);
+        return [$porCoclear, $porRetro];
+    }
 
-        return [
-            'pct' => (int) (round($pct / 4) * 4),
-            'int' => (int) self::clamp(
-                round(($sn + $gap + self::LOGO_SL_DB) / 5) * 5, 0.0, self::LOGO_MAX_DB
-            ),
-        ];
+    /**
+     * Índice de rollover del oído, RI = (PBmax - PBmin) / PBmax (Jerger &
+     * Jerger 1971), con PBmin medido entre el máximo y el techo del canal de
+     * habla (ver CaseCharts::pctLogo).
+     *
+     * Antes el rollover colgaba del flag de reclutamiento y era un espejo
+     * de la subida: un coclear caía de 100 % a 0 % (paciente 37) y el
+     * retrococlear, que es el que lo tiene, no caía nada (paciente 39). Al
+     * revés de la clínica: el reclutamiento es coclear y el rollover fuerte
+     * es retrococlear.
+     *
+     * Ahora: un poco por la cóclea (solo si hay pérdida sensorioneural,
+     * nunca más de LOGO_RI_COCLEAR) y el resto por la carga retro que ya le
+     * bajó el máximo en discrimination(). Determinístico, sin azar.
+     *
+     * @param array $decomp Salida de decompose()
+     */
+    public static function rolloverIndex(array $decomp, float $ccePct, array $retro): float
+    {
+        if (self::sinHabla($decomp)) {
+            return 0.0;
+        }
+        $ccePct = self::clamp($ccePct, 0.0, 100.0);
+        [, $porRetro] = self::cargasLogo($decomp, $ccePct, $retro);
+        $coclear = self::coreMax($decomp['sn']) > self::SN_NORMAL_DB
+            ? self::LOGO_RI_COCLEAR * $ccePct / 100.0
+            : 0.0;
+        $retroRi = min(self::LOGO_RI_RETRO_MAX, $porRetro / self::LOGO_RI_RETRO_DB);
+        return round(min(self::LOGO_RI_MAX, $coclear + $retroRi), 2);
+    }
+
+    /**
+     * RI de los dos oídos [OD, OI] de un cases.data guardado. Lo usan el
+     * PDF y el editor; la app lo calcula igual en
+     * src/audiometria/logo_curva.py (rollover_de_caso), con los mismos
+     * números de prueba en los dos lados.
+     *
+     * Sale del perfil normalizado (un caso sin perfil infiere cce_pct de la
+     * EOA/ABR, como en todos lados) y del audiograma Aerea/Osea guardado.
+     *
+     * @param array<string,mixed> $data cases.data
+     * @return array{0:float,1:float}
+     */
+    public static function rolloverDeCaso(array $data): array
+    {
+        $perfil = self::normalize($data);
+        $air = is_array($data['Aerea'] ?? null) ? $data['Aerea'] : [];
+        $bone = is_array($data['Osea'] ?? null) ? $data['Osea'] : [];
+        $out = [];
+        foreach (['OD' => 0, 'OI' => 1] as $lado => $side) {
+            $cce = (float) $perfil[$lado]['cce_pct'];
+            $out[] = self::rolloverIndex(self::decompose($air, $bone, $side, $cce), $cce, $perfil[$lado]['retro']);
+        }
+        return $out;
     }
 
     // ---------------------------------------------------------------
@@ -2854,8 +2965,42 @@ final class CaseProfile
      */
     public const REFLEX_RETRO_PENALTY_DB = 15.0;
 
-    /** Salida máxima del canal de reflejo: por encima, "ausente". */
+    /**
+     * Techo del canal de reflejo, en dB HL: un umbral que pasa de acá queda
+     * "ausente". Está en HL porque todo el modelo de arriba lo está
+     * (REFLEX_NORMAL_DB, Metz, gap); el caso lo informa en SPL al final
+     * (ver REFLEX_RETSPL_DB). Convertido, el umbral más alto posible es
+     * 110 + 11,5 = 121,5 -> 120 dB SPL, justo el tope del dial
+     * (REFLEX_DIAL_MAX_DB).
+     */
     public const REFLEX_MAX_DB = 110.0;
+
+    /**
+     * RETSPL de cada transductor del reflejo: los dB SPL que corresponden a
+     * 0 dB HL. Los reflejos se informan en dB SPL (decisión del
+     * 2026-09-14), pero el modelo piensa en HL -- el reflejo de un oído
+     * sano está a ~85 dB por SOBRE su umbral -- y se convierte recién a la
+     * salida, con el transductor que de verdad suena:
+     *  - ipsi: el auricular de la sonda, inserto calibrado en acoplador de
+     *    2 cc (IEC 126 / IEC 60318-5), valores ISO 389-2 del EAR-3A;
+     *  - contra: el auricular supraaural del estímulo contralateral, TDH39
+     *    en acoplador de 6 cc, valores ISO 389-1.
+     * Fuente: Interacoustics AT235, Technical Specifications, tabla 2
+     * (Bibliografia::IMPEDANCIOMETRIA['AT235']). La fila NBN no tiene una
+     * frecuencia: el modelo la juzga sobre el promedio de CORE_FREQS, así
+     * que su RETSPL es el promedio de los cuatro tonos (reflexRetspl).
+     */
+    public const REFLEX_RETSPL_DB = [
+        'ipsi' => [500 => 5.5, 1000 => 0.0, 2000 => 3.0, 4000 => 5.5],
+        'contra' => [500 => 11.5, 1000 => 7.0, 2000 => 9.0, 4000 => 9.5],
+    ];
+
+    /**
+     * Tope del dial del impedanciómetro en Reflejos y Tone Decay, en dB SPL.
+     * Espejo de REFLEX_DIAL_MAX_DB_SPL en src/impedanciometria/z_generator.py:
+     * un umbral por encima no lo encuentra nadie.
+     */
+    public const REFLEX_DIAL_MAX_DB = 120;
 
     /**
      * Gap aéreo-óseo en el oído SONDA desde el cual el reflejo no se puede
@@ -2884,8 +3029,29 @@ final class CaseProfile
     }
 
     /**
-     * Umbral del reflejo acústico (dB HL) para una frecuencia, o
-     * REFLEX_ABSENT_DB si no se registra.
+     * RETSPL (dB) del transductor del modo para una frecuencia; para 'NBN',
+     * el promedio de CORE_FREQS (ver REFLEX_RETSPL_DB).
+     *
+     * @param int|string $hz
+     */
+    public static function reflexRetspl(string $modo, $hz): float
+    {
+        $tabla = self::REFLEX_RETSPL_DB[$modo] ?? self::REFLEX_RETSPL_DB['ipsi'];
+        if ($hz === 'NBN') {
+            $suma = 0.0;
+            foreach (self::CORE_FREQS as $f) {
+                $suma += $tabla[$f];
+            }
+            return $suma / count(self::CORE_FREQS);
+        }
+        return (float) ($tabla[(int) $hz] ?? 0.0);
+    }
+
+    /**
+     * Umbral del reflejo acústico (dB SPL) para una frecuencia, o
+     * REFLEX_ABSENT_DB si no se registra. Todo el cálculo es en dB HL y se
+     * pasa a SPL al final con el RETSPL del transductor del modo ($modo:
+     * 'ipsi' suena por la sonda, 'contra' por el auricular del otro oído).
      *
      * Son DOS oídos: la sonda mide en uno y el estímulo entra por otro
      * (el mismo en ipsi, el contrario en contra). El oído medio de la
@@ -2898,6 +3064,7 @@ final class CaseProfile
      * @param string $tympProbe   tipo de timpanograma del oído sonda (Z_OD/Z_OI)
      * @param array<string,mixed> $retroStim patrón retrococlear del oído estimulado
      * @param int|string $hz      frecuencia, o 'NBN' para el ruido de banda
+     * @param string $modo        'ipsi' o 'contra': decide el transductor
      */
     public static function reflexThreshold(
         array $decompProbe,
@@ -2905,7 +3072,8 @@ final class CaseProfile
         string $tympProbe,
         float $ccePctStim,
         array $retroStim,
-        $hz
+        $hz,
+        string $modo = 'ipsi'
     ): int {
         // 1. ¿Se puede registrar? Lo decide el oído medio de la sonda.
         if (in_array($tympProbe, self::REFLEX_PROBE_TYMP_ABSENT, true)) {
@@ -2948,7 +3116,10 @@ final class CaseProfile
         if ($umbral > self::REFLEX_MAX_DB) {
             return self::REFLEX_ABSENT_DB;
         }
-        return (int) (round($umbral / 5) * 5);
+        // HL -> SPL con el transductor del modo. Se redondea a 5 recién en
+        // SPL (no en HL y después otra vez): el dial va de 5 en 5 y el
+        // alumno tiene que poder caer justo en el umbral de la ficha.
+        return (int) (round(($umbral + self::reflexRetspl($modo, $hz)) / 5) * 5);
     }
 
     /**
@@ -3118,7 +3289,7 @@ final class CaseProfile
             $tymp = (string) ($tympPorLado[$lado] ?? 'A');
             $ipsi = [];
             foreach (self::REFLEX_FREQS_IPSI as $hz) {
-                $ipsi[] = self::reflexThreshold($decomp[$lado], $decomp[$lado], $tymp, $ccePct, $retro, $hz);
+                $ipsi[] = self::reflexThreshold($decomp[$lado], $decomp[$lado], $tymp, $ccePct, $retro, $hz, 'ipsi');
             }
             // Contra: la sonda va en ESTE oído y el estímulo entra por el
             // contrario (ver reflex_stimulus() en Z.py, que indexa las filas
@@ -3129,7 +3300,7 @@ final class CaseProfile
                 $contra[] = $contraSinEstimulo ? self::REFLEX_ABSENT_DB : self::reflexThreshold(
                     $decomp[$lado], $decomp[$otro], $tymp,
                     (float) ($perfil[$otro]['cce_pct'] ?? self::DEFAULT_CCE_PCT),
-                    self::normalizeRetro($perfil[$otro]['retro'] ?? []), $hz
+                    self::normalizeRetro($perfil[$otro]['retro'] ?? []), $hz, 'contra'
                 );
             }
             $reflex['ipsi'][$ladoForm] = $ipsi;
@@ -3137,7 +3308,10 @@ final class CaseProfile
             $reflex['decay'][$ladoForm] = self::reflexDecay($decomp[$lado], $ccePct, $retro);
 
             $recPorLado[$lado] = self::recruitment($ccePct, $decomp[$lado]);
-            $logo[$lado] = self::discrimination($decomp[$lado], $ccePct, $retro);
+            // `ri` no es un campo del caso: el editor lo usa para dibujar el
+            // rollover en vivo (logogram.js), con o sin el módulo en auto.
+            $logo[$lado] = self::discrimination($decomp[$lado], $ccePct, $retro)
+                + ['ri' => self::rolloverIndex($decomp[$lado], $ccePct, $retro)];
             $ldl[$ladoForm] = self::ldlCurve($decomp[$lado], $ccePct);
         }
 
@@ -3310,7 +3484,8 @@ final class CaseProfile
                             (string) ($tympPorLado[$lado] ?? 'A'),
                             (float) ($perfil[$estimulado]['cce_pct'] ?? self::DEFAULT_CCE_PCT),
                             self::normalizeRetro($perfil[$estimulado]['retro'] ?? []),
-                            $hz
+                            $hz,
+                            $modo
                         );
                         $cargadoPresente = (float) $filas[$i] < self::REFLEX_ABSENT_DB;
                         if ($esperado === self::REFLEX_ABSENT_DB && $cargadoPresente) {

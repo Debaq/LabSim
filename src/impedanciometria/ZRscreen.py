@@ -51,7 +51,7 @@ class ZRscreen(QWidget, Ui_Z_rscreen):
         self.label_7.setText(side)
 
     def set_intensity(self, db):
-        self.label_6.setText(f"{db} dB")
+        self.label_6.setText(f"{db} dB SPL")
 
     def set_pressure(self, pressure):
         self.label.setText(f"{pressure} daP")

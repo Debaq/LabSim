@@ -82,6 +82,27 @@ final class CaseBuilder
         'negativo' => 'Negativo (sin pico)',
     ];
     public const ETF_OPTIONS = ['Normal', 'Disfunción tubaria', 'Permeable', 'No permeable'];
+    /** ETF de membrana perforada (o con tubo): la prueba de Lee/MIDT, no la de Williams. */
+    public const ETF_PERFORADA = ['Permeable', 'No permeable'];
+
+    /**
+     * Volumen equivalente del conducto (ECV) que lee la sonda, por oído. No
+     * es un número que se cargue: es la categoría, y earVolume() sortea el
+     * valor dentro del rango de la edad.
+     *  - normal: el conducto solo (el de siempre);
+     *  - bajo: algo ocluye el conducto y la sonda mide el poco aire que
+     *    queda entre ella y la obstrucción (tapón de cerumen);
+     *  - alto: la membrana perforada (o un tubo permeable) suma el aire del
+     *    oído medio al del conducto.
+     * En los dos extremos la curva es plana (B): lo que separa un tapón de
+     * una perforación de una efusión es el volumen (BSA 2024, §11.1.4).
+     */
+    public const VOLUMEN_CAE_OPTIONS = ['normal', 'bajo', 'alto'];
+    public const VOLUMEN_CAE_LABELS = [
+        'normal' => 'Normal para la edad',
+        'bajo' => 'Bajo (conducto ocluido: la sonda mide hasta el tapón)',
+        'alto' => 'Alto (membrana perforada o tubo: suma el oído medio)',
+    ];
 
     // Patología ABR por oído -- ver AbrMainWindow.py::test_test() (llama a
     // ABR_Curve, que mapea 'transmission' -> 'conductive' internamente).
@@ -1079,23 +1100,116 @@ final class CaseBuilder
     }
 
     /**
+     * Aire del oído medio (cm3) que una membrana perforada suma al conducto,
+     * por edad: [mín, máx]. Con la suma, una perforación de niño queda
+     * siempre en 1,0 cm3 o más (el criterio de Shanks 1992 en menores de 7
+     * años) y una de adulto por encima de 2,2 cm3, el borde del 90% normal
+     * (BSA 2024, §11.1.4), sin pasar de 6 cm3, el tope de medida del equipo
+     * (AT235). Ver VOLUMEN_CAE_OPTIONS.
+     */
+    public const VOLUMEN_OIDO_MEDIO_CM3 = [
+        5 => [0.7, 1.5],
+        12 => [1.0, 2.0],
+        17 => [1.5, 3.0],
+        'adulto' => [2.0, 4.0],
+    ];
+
+    /**
      * Volumen del canal auditivo (Vea) en cm3 -- mismo rango clínico
      * (Katz, Handbook of Clinical Audiology) que CreatePatient.ear_volume
-     * en src/lib/helpers.py. gender: 0 = hombre, 1 = mujer.
+     * en src/core/helpers.py. gender: 0 = hombre, 1 = mujer.
+     *
+     * $tipo es la categoría de VOLUMEN_CAE_OPTIONS:
+     *  - 'normal': el conducto solo, en el rango de la edad;
+     *  - 'bajo': la sonda mide hasta el tapón -- entre 0,10 cm3 y la mitad
+     *    del mínimo normal de la edad, así que siempre queda por debajo;
+     *  - 'alto': el conducto MÁS el oído medio (VOLUMEN_OIDO_MEDIO_CM3).
      */
-    public static function earVolume(int $age, int $gender): float
+    public static function earVolume(int $age, int $gender, string $tipo = 'normal'): float
     {
         if ($age <= 5) {
             [$low, $high] = [0.30, 0.90];
+            $medio = self::VOLUMEN_OIDO_MEDIO_CM3[5];
         } elseif ($age <= 12) {
             [$low, $high] = [0.40, 1.00];
+            $medio = self::VOLUMEN_OIDO_MEDIO_CM3[12];
         } elseif ($age <= 17) {
             [$low, $high] = [0.60, 1.30];
+            $medio = self::VOLUMEN_OIDO_MEDIO_CM3[17];
         } else {
             [$low, $high] = $gender === 0 ? [0.9, 2.0] : [0.8, 1.8];
+            $medio = self::VOLUMEN_OIDO_MEDIO_CM3['adulto'];
         }
-        $value = $low + (mt_rand() / mt_getrandmax()) * ($high - $low);
+        $azar = static function (float $a, float $b): float {
+            return $a + (mt_rand() / mt_getrandmax()) * ($b - $a);
+        };
+        if ($tipo === 'bajo') {
+            return round($azar(0.10, max(0.10, $low / 2)), 2);
+        }
+        $value = $azar($low, $high);
+        if ($tipo === 'alto') {
+            $value += $azar($medio[0], $medio[1]);
+        }
         return round($value, 2);
+    }
+
+    /**
+     * Categoría de volumen de un oído para precargar el editor: la guardada
+     * (cases.data.volume_cae) o, en un caso anterior a que existiera, 'alto'
+     * si la ETF dice membrana perforada y 'normal' si no.
+     *
+     * @param array<string,mixed> $data
+     */
+    public static function volumenCaeDe(array $data, int $idx): string
+    {
+        $guardado = (string) (($data['volume_cae'] ?? [])[$idx] ?? '');
+        if (in_array($guardado, self::VOLUMEN_CAE_OPTIONS, true)) {
+            return $guardado;
+        }
+        $etf = (string) (($data['ETF'] ?? [])[$idx] ?? 'Normal');
+        return in_array($etf, self::ETF_PERFORADA, true) ? 'alto' : 'normal';
+    }
+
+    /**
+     * Contradicciones entre el timpanograma, la ETF y el volumen del
+     * conducto de un mismo oído. Avisan, no bloquean (como
+     * CaseProfile::warnings): la membrana la declaran dos campos --la ETF y
+     * el volumen-- y tienen que contar la misma historia.
+     *
+     * @param array<string,string> $z   ['OD' => 'B', 'OI' => 'A']
+     * @param array<string,string> $etf ['OD' => 'Permeable', ...]
+     * @param array<string,string> $vol ['OD' => 'alto', ...]
+     * @return list<string>
+     */
+    public static function avisosVolumenCae(array $z, array $etf, array $vol): array
+    {
+        $avisos = [];
+        foreach (['OD', 'OI'] as $lado) {
+            $zLado = (string) ($z[$lado] ?? 'A');
+            if ($zLado === self::Z_NO_REALIZABLE) {
+                continue;
+            }
+            $volLado = (string) ($vol[$lado] ?? 'normal');
+            $perforada = in_array((string) ($etf[$lado] ?? 'Normal'), self::ETF_PERFORADA, true);
+            if ($perforada && $volLado !== 'alto') {
+                $avisos[] = sprintf(
+                    'Timpanometría %s: la ETF dice membrana perforada (%s) pero el volumen del conducto es %s. Con la membrana abierta la sonda mide también el oído medio: el volumen es alto.',
+                    $lado, (string) $etf[$lado], $volLado
+                );
+            } elseif (!$perforada && $volLado === 'alto') {
+                $avisos[] = sprintf(
+                    'Timpanometría %s: volumen del conducto alto (membrana perforada) con una ETF de membrana íntegra (%s). Elegí Permeable o No permeable, o volvé el volumen a normal.',
+                    $lado, (string) ($etf[$lado] ?? 'Normal')
+                );
+            }
+            if ($volLado !== 'normal' && $zLado !== 'B') {
+                $avisos[] = sprintf(
+                    'Timpanometría %s: volumen %s con curva %s. Un tapón que ocluye o una membrana perforada no dejan pico: la curva es B.',
+                    $lado, $volLado, $zLado
+                );
+            }
+        }
+        return $avisos;
     }
 
     /**
@@ -1241,7 +1355,19 @@ final class CaseBuilder
             // Circunstancias del parto y el percentil sorteado de cada oído
             // (ver NewbornScreening). Solo en recién nacidos.
             'nacimiento' => $form['nacimiento'] ?? [],
-            'volume' => [self::earVolume($age, $gender), self::earVolume($age, $gender), 'N/D'],
+            // El volumen lo sortea el servidor dentro de la categoría de cada
+            // oído (VOLUMEN_CAE_OPTIONS); la categoría se guarda aparte para
+            // que editar el caso no la pierda. Un caso sin el campo (de
+            // create_a.py o anterior) es 'normal'.
+            'volume' => [
+                self::earVolume($age, $gender, (string) ($form['volumen_cae_od'] ?? 'normal')),
+                self::earVolume($age, $gender, (string) ($form['volumen_cae_oi'] ?? 'normal')),
+                'N/D',
+            ],
+            'volume_cae' => [
+                (string) ($form['volumen_cae_od'] ?? 'normal'),
+                (string) ($form['volumen_cae_oi'] ?? 'normal'),
+            ],
             'UMD' => $form['umd'],
             'SDT' => $form['sdt'],
             'SRT' => $form['srt'],
@@ -1424,6 +1550,8 @@ final class CaseBuilder
         $etf = $data['ETF'] ?? ['Normal', 'Normal'];
         $v['etf_od'] = $etf[0] ?? 'Normal';
         $v['etf_oi'] = $etf[1] ?? 'Normal';
+        $v['volumen_cae_od'] = self::volumenCaeDe($data, 0);
+        $v['volumen_cae_oi'] = self::volumenCaeDe($data, 1);
 
         $anamnesis = $data['Anamnesis'] ?? [];
         $antecedentes = $anamnesis['antecedentes'] ?? [];

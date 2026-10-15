@@ -216,6 +216,16 @@ final class CaseForm
         }
         $etfOd = (string) ($v['etf_od'] ?? 'Normal');
         $etfOi = (string) ($v['etf_oi'] ?? 'Normal');
+        // Categoría del volumen del conducto (CaseBuilder::VOLUMEN_CAE_OPTIONS).
+        // Un valor desconocido o ausente es 'normal', como el z1000.
+        $volCaeOd = (string) ($v['volumen_cae_od'] ?? 'normal');
+        $volCaeOi = (string) ($v['volumen_cae_oi'] ?? 'normal');
+        if (!in_array($volCaeOd, CaseBuilder::VOLUMEN_CAE_OPTIONS, true)) {
+            $volCaeOd = 'normal';
+        }
+        if (!in_array($volCaeOi, CaseBuilder::VOLUMEN_CAE_OPTIONS, true)) {
+            $volCaeOi = 'normal';
+        }
 
         // Acumetría (Rinne/Weber). El "auto" global de la tabla (un solo
         // checkbox para las 6 celdas) la calcula desde los umbrales tonales
@@ -473,6 +483,11 @@ final class CaseForm
                 ['ipsi' => $reflexIpsi, 'contra' => $reflexContra],
                 ['OD' => $zOd, 'OI' => $zOi]
             );
+            $avisosPerfil = array_merge($avisosPerfil, CaseBuilder::avisosVolumenCae(
+                ['OD' => $zOd, 'OI' => $zOi],
+                ['OD' => $etfOd, 'OI' => $etfOi],
+                ['OD' => $volCaeOd, 'OI' => $volCaeOi]
+            ));
         }
 
         if ($error === null && $avisosPerfil === []) {
@@ -535,6 +550,8 @@ final class CaseForm
                 ],
                 'etf_od' => $etfOd,
                 'etf_oi' => $etfOi,
+                'volumen_cae_od' => $volCaeOd,
+                'volumen_cae_oi' => $volCaeOi,
                 'tinnitus' => $tinnitusPresente ? [
                     'presente' => true,
                     'lateralidad' => $tinnitusLateralidad,

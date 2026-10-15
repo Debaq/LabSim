@@ -6,7 +6,7 @@ Al cerrar un ítem se borra de acá; si deja una decisión, va como sección nue
 en `docs/decisiones.md`.
 
 Cada ítem tiene un número fijo para nombrarlo. Al cerrar uno no se renumera
-el resto; un ítem nuevo toma el número siguiente al más alto (hoy 65).
+el resto; un ítem nuevo toma el número siguiente al más alto (hoy 66).
 
 Revisado contra el código el 2026-09-24.
 
@@ -45,6 +45,11 @@ Revisado contra el código el 2026-09-24.
 - [ ] 9. El informe de otoscopia no se guarda local: sin conexión, al cerrar la
       atención se pierde (el autosave de 30 s lo mitiga, pero solo sube).
       § Otoscopia: cono del espéculo e informe por cuadrantes
+- [ ] 66. El SDT "auto" de la ficha es el mismo Fletcher que el SRT; en la
+      clínica va 5-10 dB más abajo. La curva de palabras no lo necesita, pero
+      la mano levantada del SDT (`response.py`) responde en el SRT. Decidir
+      si el auto pasa a Fletcher - 5. § Logoaudiometría: la curva anclada al
+      SRT
 
 ## Decisiones pendientes
 
@@ -77,10 +82,6 @@ Pedagógicas o de la docente; bloquean lo que cuelga de ellas.
 - [ ] 15. **¿Los pacientes están congelados o envejecen?** Sugerencia anotada:
       congelar todo y agregar al recién nacido "horas de vida al momento de
       la cita". § A decidir: ¿los pacientes están congelados o envejecen?
-- [ ] 16. **Gradiente del timpanograma**: acá 1 = curva ancha, la de Brooks es al
-      revés (`1 - esto`). Dar vuelta la resta toca `Z_225._calc_gradient`,
-      `Z.move` y `CaseCharts::gradienteDe`. § Rangos de compliance y presión
-      por letra
 - [ ] 17. **Razón V/I del ABR** (piso normal pasó a 1.0): `v_i_factor` (default
       0.45, ayuda "1.0 = sin caída") ¿se renombra o se recalibra? ¿El límite
       normal sale de `amplitude_v_i_ratio` por población en vez de una

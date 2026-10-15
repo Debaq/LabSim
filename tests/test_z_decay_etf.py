@@ -85,6 +85,32 @@ def test_etf_integra_con_membrana_perforada_no_tiene_pico():
         assert _pico(etf, 'reposo') is None
 
 
+def test_perforacion_del_generador_se_lee_entera():
+    """El cuadro 'perforacion' (2026-10-15): B, volumen alto y ETF Permeable.
+
+    El timpanograma no tiene pico ni gradiente pero muestra el volumen alto
+    (el hallazgo), la prueba de membrana perforada iguala la presión al
+    tragar y la de membrana íntegra no tiene pico que correr.
+    """
+    from impedanciometria.z_generator import Z_225
+    d = Z_225(letter='B', vol=4.1, seed_key=(1, 'OD', '226')).getDataSet()
+    assert float(d[2]) == 0.0 and float(d[4]) == 0.0
+    assert d[5] == '4.1'
+    _, _, final = etf_prueba_perforada('Permeable', 200)
+    assert abs(final) <= 15, final           # 200 * 0,35^3 = 8,6 daPa
+    _, _, final_np = etf_prueba_perforada('No permeable', 200)
+    assert final_np >= 190, final_np
+    assert _pico('Permeable', 'positiva') is None
+
+
+def test_dial_de_reflejos_en_spl():
+    """El dial llega al umbral más alto que da el backend (110 dB HL + 11,5
+    del TDH39 -> 120 dB SPL, CaseProfile::REFLEX_DIAL_MAX_DB)."""
+    from impedanciometria.z_generator import REFLEX_DIAL_MAX_DB_SPL, REFLEX_DIAL_MIN_DB_SPL
+    assert REFLEX_DIAL_MIN_DB_SPL == 0
+    assert REFLEX_DIAL_MAX_DB_SPL == 120
+
+
 def test_decay_del_caso_y_casos_viejos():
     from impedanciometria.z_generator import reflex_decay_del_caso
     assert reflex_decay_del_caso({'decay': {'od': True, 'oi': False}}, 'od') is True
