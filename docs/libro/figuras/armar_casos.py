@@ -101,6 +101,10 @@ def llenar_js(p):
   var g = document.querySelector('#case-form input[name="gender"][value="{sexo}"]');
   g.checked = true; g.dispatchEvent(new Event('change', {{bubbles:true}}));
   fijar(document.getElementById('patient-age'), {json.dumps(str(p.get('edad', 30)))});
+  if ({json.dumps(p.get('edad_valor') is not None)}) {{
+    fijar(document.getElementById('patient-edad-unidad'), {json.dumps(p.get('edad_unidad', 'horas'))});
+    fijar(document.getElementById('patient-edad-valor'), {json.dumps(str(p.get('edad_valor', '')))});
+  }}
   var ig = document.getElementById('armado-igualar');
   if (ig.checked) {{ ig.checked = false; ig.dispatchEvent(new Event('change', {{bubbles:true}})); }}
   var cuadro = {json.dumps(cuadro)}, grado = {json.dumps(grado)}, faltan = [];

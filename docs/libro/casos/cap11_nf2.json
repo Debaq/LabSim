@@ -4,19 +4,22 @@
       "OD": "nf2",
       "OI": "nf2"
     },
+    "edad": 24,
+    "sexo": "hombre",
     "grado": {
       "OD": "moderada",
       "OI": "leve"
-    },
-    "edad": 24,
-    "sexo": "hombre"
+    }
   },
   "figuras": [
     {
-      "tipo": "audiograma"
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true
     },
     {
-      "tipo": "logoaudiometria"
+      "tipo": "logoaudiometria",
+      "enmascarado": true
     },
     {
       "tipo": "reflejos"

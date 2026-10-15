@@ -4,18 +4,21 @@
       "OD": "normal",
       "OI": "tumor_angulo"
     },
+    "edad": 61,
+    "sexo": "hombre",
     "grado": {
       "OI": "leve"
-    },
-    "edad": 61,
-    "sexo": "hombre"
+    }
   },
   "figuras": [
     {
-      "tipo": "audiograma"
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true
     },
     {
-      "tipo": "logoaudiometria"
+      "tipo": "logoaudiometria",
+      "enmascarado": true
     },
     {
       "tipo": "reflejos"

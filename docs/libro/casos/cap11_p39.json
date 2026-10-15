@@ -1,14 +1,18 @@
 {
-  "caso": "demo:35",
+  "caso": "demo:39",
   "figuras": [
     {
-      "tipo": "audiograma"
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true
     },
     {
-      "tipo": "logoaudiometria"
+      "tipo": "logoaudiometria",
+      "enmascarado": true
     },
     {
-      "tipo": "timpanograma"
+      "tipo": "timpanograma",
+      "sonda": 226
     },
     {
       "tipo": "reflejos"

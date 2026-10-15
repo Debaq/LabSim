@@ -4,18 +4,21 @@
       "OD": "schwannoma",
       "OI": "normal"
     },
+    "edad": 52,
+    "sexo": "mujer",
     "grado": {
       "OD": "moderada"
-    },
-    "edad": 52,
-    "sexo": "mujer"
+    }
   },
   "figuras": [
     {
-      "tipo": "audiograma"
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true
     },
     {
-      "tipo": "logoaudiometria"
+      "tipo": "logoaudiometria",
+      "enmascarado": true
     },
     {
       "tipo": "reflejos"
@@ -34,7 +37,8 @@
       ]
     },
     {
-      "tipo": "vemp"
+      "tipo": "vemp",
+      "subtipo": "cvemp"
     }
   ]
 }

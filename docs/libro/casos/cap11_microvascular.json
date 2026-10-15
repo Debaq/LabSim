@@ -9,10 +9,13 @@
   },
   "figuras": [
     {
-      "tipo": "audiograma"
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true
     },
     {
-      "tipo": "logoaudiometria"
+      "tipo": "logoaudiometria",
+      "enmascarado": true
     },
     {
       "tipo": "reflejos"

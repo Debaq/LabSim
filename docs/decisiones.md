@@ -5386,3 +5386,27 @@ alumno no encuentra una ósea que la ficha da como "no responde". Los graves
 siguen en 40-50 dB (125-500 Hz, como un vibrador real) y 6-8 kHz no se miden
 por ósea. Espejo en `AudiometriaTecnica::TOPES['oseos']` (el indicador de
 técnica: llegar al tope sin respuesta es frecuencia cerrada).
+
+## Libro: Bases, Caja de herramientas y capítulos clínicos con generador propio (2026-10-15)
+
+El libro es la nueva versión del protocolo técnico de ORL del autor, con
+sentido pedagógico. Tres tipos de capítulo, todos autónomos:
+
+- **B1. Fisiología auditiva**: la escribe una colega; los bloques de
+  fisiología de los clínicos quedan cortos y remiten a él.
+- **H1-H14, Caja de herramientas**: cómo se hace cada examen (para qué
+  sirve, fundamento, antes de empezar, paso a paso, cómo se informa, errores
+  frecuentes, en LabSim, referencias). Ahí vive el "cómo se hace": la
+  audiometría, la impedanciometría, el enmascaramiento y sus técnicas.
+- **1-20, capítulos clínicos**: razonan desde un problema; su técnica es
+  "Técnica en foco" (qué mirar en ESTE problema) con → a la herramienta.
+
+Cada capítulo son dos archivos: `capitulos/NN-*.py` (generador: pacientes con
+`demo()`/`cuadro()` y figuras con `fig.*`, ver `docs/libro/libro.py`) y
+`capitulos/NN-*.md` (texto). `python3 capitulos/NN-*.py` arma los casos que
+cambiaron, las figuras y el PDF de ese capítulo. `nuevo_capitulo.py todos`
+crea los que falten sin pisar nada. Recién nacidos y lactantes con
+`edad_horas=`/`edad_meses=`. Ilustraciones tipo BioRender con
+`![qué muestra](ilustraciones/x.png)`: sale "pendiente" hasta que existe el
+archivo (BioRender publica solo con plan pagado; Servier Medical Art, CC BY
+4.0, es la alternativa de estilo parecido).

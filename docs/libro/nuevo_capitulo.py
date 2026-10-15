@@ -1,22 +1,31 @@
 #!/usr/bin/env python3
-"""Arma el esqueleto de un capítulo a partir del índice.
+"""Crea los dos archivos de un capítulo a partir del índice (indice.md):
 
-    python3 docs/libro/nuevo_capitulo.py 11            -> capitulos/11-<título>.md
-    python3 docs/libro/nuevo_capitulo.py 11 --forzar   (pisa uno existente)
+    capitulos/NN-titulo.py   el GENERADOR: pacientes y figuras (se edita y se corre)
+    capitulos/NN-titulo.md   el TEXTO: bloques, recuadros y figuras relatadas
 
-Del índice (indice.md) toma el título, los temas de Técnica y Fisiología y
-los casos. Deja un hueco "✍" por bloque para el texto, los recuadros
-(:::objetivos, :::ayuda, :::sabias, :::pregunta...), y por cada caso que ya
-tenga pedido en casos/: la ficha {{caso ...}}, la pregunta "¿Qué pedirías?" y
-un :::figura por figura, para relatarla con globos. También las referencias
-SUGERIDAS, sacadas de:
+    python3 docs/libro/nuevo_capitulo.py 11          un capítulo clínico
+    python3 docs/libro/nuevo_capitulo.py H4          una herramienta
+    python3 docs/libro/nuevo_capitulo.py todos       todos los que falten
+    ... --forzar                                     pisa los que existan (¡texto del autor!)
 
-  - Técnica: las ✓ del índice (Bibliografia, AbrReferences, EcochgReferences)
-    y la investigación (investigacion/tecnica_a.md, tecnica_b.md);
+Nunca pisa un archivo existente sin --forzar. Después:
+
+    python3 docs/libro/capitulos/NN-titulo.py        arma casos, figuras y PDF
+
+Capítulo clínico: cada paciente ★ del índice entra como demo(), cada cuadro
+como cuadro() con la edad y la lateralidad que admite el catálogo
+(CaseProfile); las figuras por defecto salen de la parte del libro. El texto
+trae un hueco "✍" por bloque, los recuadros, la ficha y un :::figura por
+figura para relatarla con globos, y las referencias SUGERIDAS:
+
+  - Técnica: las ✓ del índice y la investigación (tecnica_a.md, tecnica_b.md);
   - Fisiología: investigacion/fisiologia.md;
   - Patología: BibliografiaPatologias, de los cuadros de los casos.
 
-Las referencias se escriben una vez: el autor las poda y ordena en el .md.
+Herramienta (H): plantilla de 8 secciones (para qué sirve, fundamento, antes
+de empezar, paso a paso, cómo se informa, errores frecuentes, en LabSim,
+referencias) y un generador sin pacientes, para agregar los que ilustren.
 """
 import json
 import pathlib
@@ -28,12 +37,11 @@ import unicodedata
 AQUI = pathlib.Path(__file__).resolve().parent
 RAIZ = AQUI.parents[1]
 INDICE = AQUI / 'indice.md'
-CASOS = AQUI / 'casos'
 CAPITULOS = AQUI / 'capitulos'
 INVESTIGACION = AQUI / 'investigacion'
 
-PHP_REFS = r'''
-foreach (["Bibliografia","BibliografiaPatologias","AbrReferences","EcochgReferences"] as $c) require_once "src/$c.php";
+PHP_DATOS = r'''
+foreach (["Bibliografia","BibliografiaPatologias","AbrReferences","EcochgReferences","CaseProfile"] as $c) require_once "src/$c.php";
 $cita = function ($v) { foreach (["cita","ref","referencia","titulo"] as $k) if (is_array($v) && isset($v[$k]) && is_string($v[$k])) return $v[$k]; return is_string($v) ? $v : null; };
 $codigos = [];
 foreach (["ABR_COMPLEMENTARIAS","TAMIZAJE","ACUMETRIA","IMPEDANCIOMETRIA","NORMAS","FUENTES_TECNICAS"] as $k)
@@ -42,70 +50,125 @@ foreach (AbrReferences::FUENTES as $id => $v) $codigos[$id] = $cita($v);
 foreach (EcochgReferences::FUENTES as $id => $v) $codigos[$id] = $cita($v);
 $pat = [];
 foreach (BibliografiaPatologias::CITAS as $k => $lista) $pat[$k] = array_values(array_filter(array_map($cita, $lista)));
-echo json_encode(["codigos" => $codigos, "patologias" => $pat], JSON_UNESCAPED_UNICODE);
+$neo = defined("CaseProfile::SCENARIO_NEONATAL") ? CaseProfile::SCENARIO_NEONATAL : [];
+$esc = [];
+foreach (CaseProfile::SCENARIOS as $k => $s)
+    $esc[$k] = ["lateralidad" => $s["lateralidad"] ?? null, "grados" => $s["grados"] ?? [],
+                "edad" => CaseProfile::SCENARIO_EDAD[$k] ?? null, "neonatal" => in_array($k, $neo, true)];
+echo json_encode(["codigos" => $codigos, "patologias" => $pat, "escenarios" => $esc], JSON_UNESCAPED_UNICODE);
 '''
 
+# Figuras por defecto según la parte del libro (se cambian en el generador)
+FIGURAS_POR_CAPITULO = {
+    range(1, 5): 'fig.audiograma(), fig.timpanograma(), fig.reflejos()',
+    range(5, 11): 'fig.audiograma(), fig.logo(), fig.teoae(), fig.dpoae()',
+    range(11, 15): 'fig.audiograma(), fig.logo(), fig.reflejos(), fig.abr()',
+    range(15, 16): 'fig.audiograma(), fig.timpanograma(), fig.reflejos(), fig.abr()',
+    range(16, 18): 'fig.timpanograma(sonda=1000), fig.teoae(), fig.abr(niveles=(80, 60, 40, 20))',
+    range(18, 20): 'fig.audiograma(), fig.logo(), fig.abr()',
+    range(20, 21): 'fig.audiograma(), fig.vemp(), fig.vemp(subtipo="ovemp")',
+}
 
-def referencias_del_sistema():
-    r = subprocess.run(['php', '-r', PHP_REFS], cwd=RAIZ / 'labsim_backend',
+SECCIONES_HERRAMIENTA = [
+    ('Para qué sirve', 'la pregunta clínica que responde y cuándo se pide'),
+    ('Fundamento', 'la fisiología justa para entender por qué se hace así (remite a B1)'),
+    ('Antes de empezar', 'equipo, calibración, ambiente y preparación del paciente'),
+    ('Paso a paso', 'el procedimiento, con el porqué de cada paso'),
+    ('Cómo se informa', 'criterios, valores de referencia y un ejemplo de informe'),
+    ('Errores frecuentes', 'los que se ven en la práctica y en LabSim'),
+    ('En LabSim', 'cómo se practica en el simulador'),
+]
+
+
+def datos_del_sistema():
+    r = subprocess.run(['php', '-r', PHP_DATOS], cwd=RAIZ / 'labsim_backend',
                        check=True, capture_output=True, text=True)
     return json.loads(r.stdout)
 
 
-def capitulo_del_indice(n):
+def seccion_del_indice(clave):
+    """'11' o 'H4' -> (título, cuerpo de la sección)."""
     texto = INDICE.read_text(encoding='utf-8')
-    m = re.search(rf'^### {n}\. (.+?)$\n(.*?)(?=^#{{2,3}} |\Z)', texto, re.M | re.S)
+    m = re.search(rf'^### {re.escape(clave)}\. (.+?)$\n(.*?)(?=^#{{2,3}} |\Z)', texto, re.M | re.S)
     if not m:
-        sys.exit(f'No encuentro el capítulo {n} en {INDICE.name}')
-    titulo, cuerpo = m[1].strip(), m[2]
+        sys.exit(f'No encuentro "### {clave}." en {INDICE.name}')
+    titulo = re.sub(r'\s*\*\(.*?\)\*\s*$', '', m[1]).strip()
+    return titulo, m[2]
+
+
+def capitulo_clinico(n):
+    titulo, cuerpo = seccion_del_indice(str(n))
 
     def bloque(nombre):
-        b = re.search(rf'^- \*\*{nombre}:\*\*(.*?)(?=^- \*\*|\Z)', cuerpo, re.M | re.S)
+        b = re.search(rf'^- \*\*{nombre}(?: en foco\*\* \(→ [^)]*\))?:(?:\*\*)?(.*?)(?=^- \*\*|\Z)', cuerpo, re.M | re.S)
         return b[1].strip() if b else ''
 
+    foco = re.search(r'Técnica en foco\*\* \(→ ([^)]*)\)', cuerpo)
     casos = re.search(r'^- \*\*Casos:\*\*(.*?)(?=^- \*\*|\Z)', cuerpo, re.M | re.S)
     casos = casos[1] if casos else ''
-    # orden de aparición en el índice: '★39' o la clave del cuadro
+    # orden de aparición: '★39' o la clave del cuadro; cada ★ va con la clave que la sigue
     orden = [m.group(1) or m.group(2) for m in re.finditer(r'★(\d+)|\[`([a-z0-9_]+)`', casos)]
-    nombres = [re.sub(r'^★\d+\s*', '', m[1].strip(' -')) for m in re.finditer(r'(?:★\d+\s*)?([^·\n\[\]]+?)\s*\[`[a-z0-9_]+`\]', casos)]
-    return {
-        'n': n, 'titulo': titulo, 'orden': orden, 'nombres': [x for x in nombres if x],
-        'tecnica': bloque('Técnica'), 'fisiologia': bloque('Fisiología'),
-        'cuadros': list(dict.fromkeys(re.findall(r'\[`([a-z0-9_]+)`', casos))),
-        'estrellas': re.findall(r'★(\d+)', casos),
-    }
+    nombres = {m[2]: re.sub(r'^★\d+\s*', '', m[1].strip(' -'))
+               for m in re.finditer(r'(?:★\d+\s*)?([^·\n\[\]]+?)\s*\[`([a-z0-9_]+)`\]', casos)}
+    return {'titulo': titulo, 'tecnica': bloque('Técnica'), 'fisiologia': bloque('Fisiología'),
+            'foco': foco[1] if foco else '', 'orden': orden, 'nombres': nombres}
 
 
 def sin_marcas(s):
-    """El tema tal como lo escribe el índice, sin las marcas ✓/✗ ni códigos."""
     s = re.sub(r'\((?:✓|✗)[^)]*\)', '', s)
-    s = re.sub(r'\s+', ' ', s.replace('\n', ' ')).strip(' ;·-')
-    return s
+    return re.sub(r'\s+', ' ', s.replace('\n', ' ')).strip(' ;·-')
 
 
 def codigos_ok(s):
     out = []
     for grupo in re.findall(r'✓ ([^)]*)\)', s):
         grupo = grupo.split(';')[0]
-        out += [c.strip() for c in grupo.split(',') if re.fullmatch(r'[A-Z][A-Z0-9-]*', c.strip())]
+        for c in (c.strip() for c in grupo.split(',')):
+            rango = re.fullmatch(r'([A-Z])(\d+)-\1?(\d+)', c)      # E01-E07, F01-F27
+            if rango:
+                ancho = len(rango[2])
+                out += [f'{rango[1]}{i:0{ancho}d}' for i in range(int(rango[2]), int(rango[3]) + 1)]
+            elif re.fullmatch(r'[A-Z][A-Z0-9-]*', c):
+                out.append(c)
     return out
 
 
-def investigacion(archivo, n):
-    """Entradas de la investigación cuyo título dice (cap. n) o (caps. ... n ...)."""
-    texto = (INVESTIGACION / archivo).read_text(encoding='utf-8')
-    texto = texto.split('## No encontrado')[0]
+def investigacion(archivo, clave):
+    """Entradas cuyo título dice (cap. N) o (caps. ... N ...)."""
+    texto = (INVESTIGACION / archivo).read_text(encoding='utf-8').split('## No encontrado')[0]
     out = []
     for sec in re.split(r'^## ', texto, flags=re.M)[1:]:
         cab = sec.splitlines()[0]
         caps = re.search(r'\(caps?\.\s*([^)]*)\)', cab)
-        if not caps or str(n) not in re.findall(r'\d+', caps[1]):
+        if not caps or str(clave) not in re.findall(r'\d+', caps[1]):
             continue
         for bloque in re.split(r'\n\s*\n', sec):
             lineas = [l.strip() for l in bloque.strip().splitlines() if l.strip()]
             if len(lineas) >= 2 and lineas[1].startswith('—'):
-                sirve = next((l for l in lineas if l.lower().startswith('sirve para')), '')
-                out.append((lineas[0], sirve))
+                out.append(lineas[0])
+            elif lineas and lineas[0].startswith('- ') and '—' in lineas[0]:
+                out.append(lineas[0][2:].split(' — ')[0])
+    return out
+
+
+def investigacion_por_seccion(texto_indice):
+    """Entradas de las secciones que nombra el índice: `tecnica_b.md` §3, §6-§9."""
+    out = []
+    for archivo, secs in re.findall(r'`((?:tecnica_[ab]|fisiologia)\.md)`\s*((?:§\d+(?:-§?\d+)?[,\s]*)+)', texto_indice):
+        nums = []
+        for a, b in re.findall(r'§(\d+)(?:-§?(\d+))?', secs):
+            nums += list(range(int(a), int(b or a) + 1))
+        texto = (INVESTIGACION / archivo).read_text(encoding='utf-8').split('## No encontrado')[0]
+        for sec in re.split(r'^## ', texto, flags=re.M)[1:]:
+            m = re.match(r'(\d+)\.', sec)
+            if not m or int(m[1]) not in nums:
+                continue
+            for bloque in re.split(r'\n\s*\n', sec):
+                lineas = [l.strip() for l in bloque.strip().splitlines() if l.strip()]
+                if len(lineas) >= 2 and lineas[1].startswith('—'):
+                    out.append(lineas[0])
+                elif lineas and lineas[0].startswith('- ') and '—' in lineas[0]:
+                    out.append(lineas[0][2:].split(' — ')[0])
     return out
 
 
@@ -114,77 +177,219 @@ def slug(s):
     return re.sub(r'[^a-z0-9]+', '-', s).strip('-')[:40]
 
 
-def main():
-    args = [a for a in sys.argv[1:] if not a.startswith('--')]
-    if not args:
-        sys.exit(__doc__)
-    n = int(args[0])
-    cap = capitulo_del_indice(n)
-    CAPITULOS.mkdir(exist_ok=True)
-    destino = CAPITULOS / f'{n:02d}-{slug(cap["titulo"])}.md'
-    if destino.exists() and '--forzar' not in sys.argv:
-        sys.exit(f'{destino.name} ya existe (tiene texto del autor). Usar --forzar para pisarlo.')
+def figuras_por_defecto(n):
+    for rango, figs in FIGURAS_POR_CAPITULO.items():
+        if n in rango:
+            return figs
+    return 'fig.audiograma()'
 
-    sistema = referencias_del_sistema()
-    pedidos = sorted(p.stem for p in CASOS.glob(f'cap{n:02d}_*.json')) + \
-        [f'paciente_{e}' for e in cap['estrellas'] if (CASOS / f'paciente_{e}.json').exists()]
-    cubiertos, posicion = set(), {}
-    for p in pedidos:
-        spec = json.loads((CASOS / f'{p}.json').read_text(encoding='utf-8'))
-        if isinstance(spec['caso'], dict):
-            claves = list(spec['caso'].get('cuadro', {}).values())
-        else:
-            # paciente ★: su cuadro es la clave que sigue a la ★ en el índice
-            num = p.split('_')[-1]
-            i = cap['orden'].index(num) if num in cap['orden'] else -1
-            claves = [num] + ([cap['orden'][i + 1]] if 0 <= i < len(cap['orden']) - 1 else [])
-        cubiertos |= set(claves)
-        posicion[p] = min((cap['orden'].index(k) for k in claves if k in cap['orden']), default=999)
-    pedidos.sort(key=lambda p: posicion[p])
-    sin_pedido = [c for c in cap['cuadros'] if c not in cubiertos]
 
+# Edad por defecto de los capítulos del recién nacido y el lactante
+EDAD_POR_CAPITULO = {16: 'edad_horas=24', 17: 'edad_meses=4'}
+
+
+def pedidos_clinicos(cap, esc, n=None):
+    """Lista de (nombre, código del caso, cuadros, nota) en el orden del índice."""
+    out, vistos = [], set()
+    orden = cap['orden']
+    for i, tok in enumerate(orden):
+        if tok.isdigit():
+            clave = orden[i + 1] if i + 1 < len(orden) and not orden[i + 1].isdigit() else None
+            vistos.add(clave)
+            out.append((f'p{tok}', f'demo({tok}, FIGURAS)', [clave], ''))
+            continue
+        if tok in vistos:
+            continue
+        vistos.add(tok)
+        e = esc.get(tok, {})
+        r0, r1 = e.get('edad') or [None, None]
+        # un adulto de 45, dentro del rango de edad que admite el cuadro
+        edad = max(45, r0 or 0)
+        if r1 is not None:
+            edad = min(edad, r1)
+        lados = "od='{0}', oi='{0}'".format(tok) if e.get('lateralidad') == 'bilateral' else f"od='{tok}'"
+        nota = ''
+        if r1 is not None and r1 < 1:          # solo existe en el recién nacido
+            nota = 'recién nacido: armar_casos.sh todavía no carga la edad en horas'
+        edad_txt = EDAD_POR_CAPITULO.get(n, f'edad={edad}')
+        if n in EDAD_POR_CAPITULO:
+            nota = ''
+        out.append((tok, f"cuadro('{tok}', FIGURAS, {lados}, {edad_txt})", [tok], nota))
+    return out
+
+
+def generador_clinico(n, cap, pedidos, archivo_md):
+    lineas = []
+    for _, codigo, _, nota in pedidos:
+        lineas.append(f'    # {nota}\n    # {codigo},' if nota else f'    {codigo},')
+    return f'''#!/usr/bin/env python3
+"""Capítulo {n} — {cap['titulo']}.
+
+    python3 docs/libro/capitulos/{archivo_md.stem}.py              casos + figuras + PDF
+    python3 docs/libro/capitulos/{archivo_md.stem}.py --solo-pdf   solo el PDF (cambió el texto)
+    python3 docs/libro/capitulos/{archivo_md.stem}.py --rearmar    vuelve a armar los casos por cuadro
+
+Acá se deciden los pacientes y las figuras del capítulo; el texto está en
+{archivo_md.name} (cada caso se nombra ahí como cap{n:02d}_<nombre>).
+Cuadros y grados: claves de CaseProfile::SCENARIOS. Un cuadro() acepta
+od=, oi=, grado_od=, grado_oi=, edad=, sexo='hombre'|'mujer', semilla=.
+"""
+import pathlib
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
+
+FIGURAS = [{figuras_por_defecto(n)}]
+
+CASOS = [
+{chr(10).join(lineas)}
+]
+
+if __name__ == '__main__':
+    Capitulo({n}).generar(CASOS)
+'''
+
+
+def referencias(clave, tecnica, fisiologia, cuadros, sistema):
+    L = ['## Referencias', '', '<!-- Sugeridas: podar y ordenar. -->', '', '### Técnica', '']
+    tec = [sistema['codigos'][c] for c in codigos_ok(tecnica) if sistema['codigos'].get(c)]
+    tec += investigacion('tecnica_a.md', clave) + investigacion('tecnica_b.md', clave)
+    L += [f'1. {r}' for r in dict.fromkeys(tec)] or ['> ✍ Sin referencias de técnica todavía']
+    if fisiologia is not None:
+        L += ['', '### Fisiología', '']
+        fis = investigacion('fisiologia.md', clave)
+        L += [f'1. {r}' for r in dict.fromkeys(fis)] or ['> ✍ Sin referencias de fisiología todavía']
+    if cuadros:
+        L += ['', '### Patología', '']
+        pat = [c for k in cuadros for c in sistema['patologias'].get(k, [])]
+        L += [f'1. {r}' for r in dict.fromkeys(pat)] or ['> ✍ Sin referencias de patología todavía']
+    return L
+
+
+def texto_clinico(n, cap, pedidos, figuras, sistema):
+    prefijo = f'cap{n:02d}_'
+    foco = f' (→ {cap["foco"]})' if cap['foco'] else ''
+    cuadros = [c for p in pedidos for c in p[2] if c]
     L = [f'# {n}. {cap["titulo"]}', '',
          ':::objetivos En este capítulo', '- ✍ Objetivos del capítulo', ':::', '',
-         '> ✍ Párrafo de entrada: la situación clínica que abre el capítulo', '']
-    for bloque, tema in (('Técnica', cap['tecnica']), ('Fisiología', cap['fisiologia'])):
-        L += [f'## {bloque}', '', f'> ✍ {sin_marcas(tema) or "Texto del autor"}', '',
-              ':::ayuda Ayuda memoria', '✍', ':::', '']
-    L += ['## Patología', '', '> ✍ ' + '; '.join(cap['nombres']), '',
-          ':::sabias ¿Sabías que?', '✍', ':::', '',
-          '## Razonamiento', '', '> ✍ Texto del autor', '',
-          ':::pregunta Pregunta abierta', '✍', ':::', '', '## Casos', '']
-    for p in pedidos:
-        spec = json.loads((CASOS / f'{p}.json').read_text(encoding='utf-8'))
-        L += [f'{{{{caso {p}}}}}', '', ':::pregunta ¿Qué pedirías?', '✍', ':::', '']
+         '> ✍ Párrafo de entrada: la situación clínica que abre el capítulo', '',
+         '## Técnica en foco', '',
+         f'> ✍ Qué mirar de la técnica en este problema{foco}: {sin_marcas(cap["tecnica"])}', '',
+         ':::ayuda Ayuda memoria', '✍', ':::', '',
+         '## Fisiología', '',
+         f'> ✍ {sin_marcas(cap["fisiologia"]) or "Lo justo del mecanismo"} (el detalle está en B1)', '',
+         '## Patología', '', '> ✍ ' + '; '.join(cap['nombres'].get(c, c) for c in cuadros), '',
+         ':::sabias ¿Sabías que?', '✍', ':::', '',
+         '## Razonamiento', '', '> ✍ Texto del autor', '',
+         ':::pregunta Pregunta abierta', '✍', ':::', '', '## Casos', '']
+    for nombre, _, _, nota in pedidos:
+        if nota:
+            L += [f'<!-- {prefijo}{nombre}: {nota} -->', '']
+            continue
+        L += [f'{{{{caso {prefijo}{nombre}}}}}', '', ':::pregunta ¿Qué pedirías?', '✍', ':::', '']
         vistos = {}
-        for f in spec.get('figuras', []):
-            vistos[f['tipo']] = vistos.get(f['tipo'], 0) + 1
-            extra = f" {vistos[f['tipo']]}" if vistos[f['tipo']] > 1 else ''
-            L += [f":::figura {p} {f['tipo']}{extra}",
+        for tipo in figuras:
+            vistos[tipo] = vistos.get(tipo, 0) + 1
+            extra = f' {vistos[tipo]}' if vistos[tipo] > 1 else ''
+            L += [f':::figura {prefijo}{nombre} {tipo}{extra}',
                   '- ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")',
                   ':::', '']
         L += ['#### Razonamiento', '', '> ✍ Texto del autor', '',
               '#### Diagnóstico y qué sigue', '', '> ✍ Texto del autor', '']
-    if sin_pedido:
-        L += [f'<!-- Cuadros del índice sin pedido en casos/: {", ".join(sin_pedido)} -->', '']
-
     L += ['## Para cerrar', '', ':::pregunta Preguntas para discutir', '1. ✍', ':::', '',
           ':::ayuda Ayuda memoria del capítulo', '- ✍', ':::', '']
-    L += ['## Referencias', '', '<!-- Sugeridas: podar y ordenar. -->', '', '### Técnica', '']
-    tec = [sistema['codigos'][c] for c in codigos_ok(cap['tecnica']) if sistema['codigos'].get(c)]
-    tec += [r for r, _ in investigacion('tecnica_a.md', n) + investigacion('tecnica_b.md', n)]
-    L += [f'1. {r}' for r in dict.fromkeys(tec)] or ['> ✍ Sin referencias de técnica todavía']
-    L += ['', '### Fisiología', '']
-    fis = [sistema['codigos'][c] for c in codigos_ok(cap['fisiologia']) if sistema['codigos'].get(c)]
-    fis += [r for r, _ in investigacion('fisiologia.md', n)]
-    L += [f'1. {r}' for r in dict.fromkeys(fis)] or ['> ✍ Sin referencias de fisiología todavía']
-    L += ['', '### Patología', '']
-    pat = [c for k in cap['cuadros'] for c in sistema['patologias'].get(k, [])]
-    L += [f'1. {r}' for r in dict.fromkeys(pat)] or ['> ✍ Sin referencias de patología todavía']
-    destino.write_text('\n'.join(L) + '\n', encoding='utf-8')
-    print(destino)
-    if sin_pedido:
-        print('Cuadros sin pedido de caso:', ', '.join(sin_pedido))
+    L += referencias(n, cap['tecnica'], cap['fisiologia'], cuadros, sistema)
+    return '\n'.join(L) + '\n'
+
+
+def herramienta(clave, sistema):
+    titulo, cuerpo = seccion_del_indice(clave)
+    descripcion = sin_marcas(re.sub(r'Refs?:.*$', '', cuerpo.strip(), flags=re.S))
+    L = [f'# {clave}. {titulo}', '',
+         ':::objetivos En esta herramienta', '- ✍ Qué vas a saber hacer al terminar', ':::', '',
+         f'> ✍ {descripcion}', '']
+    for sec, que in SECCIONES_HERRAMIENTA:
+        L += [f'## {sec}', '', f'> ✍ {que}', '']
+        if sec == 'Paso a paso':
+            L += [':::ayuda Ayuda memoria', '✍', ':::', '']
+        if sec == 'Errores frecuentes':
+            L += [':::ojo Ojo clínico', '✍', ':::', '']
+    L += [':::pregunta Preguntas para practicar', '1. ✍', ':::', '']
+    # Las herramientas toman las referencias que el índice les asigna (✓ y §),
+    # no por número: H4 no es el capítulo 4.
+    tec = [sistema['codigos'][c] for c in codigos_ok(cuerpo) if sistema['codigos'].get(c)]
+    tec += investigacion_por_seccion(cuerpo)
+    L += ['## Referencias', '', '<!-- Sugeridas: podar y ordenar. -->', '']
+    L += [f'1. {r}' for r in dict.fromkeys(tec)] or ['> ✍ Sin referencias todavía']
+    gen = f'''#!/usr/bin/env python3
+"""Herramienta {clave} — {titulo}.
+
+    python3 docs/libro/capitulos/<este archivo>.py              figuras + PDF
+    python3 docs/libro/capitulos/<este archivo>.py --solo-pdf   solo el PDF
+
+Una herramienta no necesita pacientes, pero puede ilustrar con algunos
+(demo() o cuadro(), igual que un capítulo clínico; ver libro.py).
+"""
+import pathlib
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+from libro import Capitulo, cuadro, demo, fig  # noqa: E402,F401
+
+CASOS = [
+]
+
+if __name__ == '__main__':
+    Capitulo('{clave}').generar(CASOS)
+'''
+    return titulo, '\n'.join(L) + '\n', gen
+
+
+def crear(clave, sistema, forzar):
+    CAPITULOS.mkdir(exist_ok=True)
+    if clave.upper().startswith('B'):
+        # Bases: capítulos que escribe otra persona; solo el lugar en el libro
+        clave = clave.upper()
+        titulo, cuerpo = seccion_del_indice(clave)
+        base = CAPITULOS / f'B{int(clave[1:]):02d}-{slug(titulo)}'
+        md = f'# {clave}. {titulo}\n\n> ✍ {sin_marcas(cuerpo.strip())}\n'
+        py = None
+    elif clave.upper().startswith('H'):
+        clave = clave.upper()
+        titulo, md, py = herramienta(clave, sistema)
+        base = CAPITULOS / f'H{int(clave[1:]):02d}-{slug(titulo)}'
+    else:
+        n = int(clave)
+        cap = capitulo_clinico(n)
+        base = CAPITULOS / f'{n:02d}-{slug(cap["titulo"])}'
+        pedidos = pedidos_clinicos(cap, sistema['escenarios'], n)
+        figuras = ['logoaudiometria' if f == 'logo' else f
+                   for f in re.findall(r'fig\.(\w+)\(', figuras_por_defecto(n))]
+        py = generador_clinico(n, cap, pedidos, base.with_suffix('.md'))
+        md = texto_clinico(n, cap, pedidos, figuras, sistema)
+    hechos = []
+    for archivo, contenido in ((base.with_suffix('.py'), py), (base.with_suffix('.md'), md)):
+        if contenido is None or (archivo.exists() and not forzar):
+            continue
+        archivo.write_text(contenido, encoding='utf-8')
+        if archivo.suffix == '.py':
+            archivo.chmod(0o755)
+        hechos.append(archivo.name)
+    print(f'{clave}: ' + (', '.join(hechos) if hechos else 'ya existía, no se tocó'))
+
+
+def main():
+    args = [a for a in sys.argv[1:] if not a.startswith('--')]
+    if not args:
+        sys.exit(__doc__)
+    sistema = datos_del_sistema()
+    if args == ['todos']:
+        claves = re.findall(r'^### ([HB]?\d+)\. ', INDICE.read_text(encoding='utf-8'), re.M)
+    else:
+        claves = args
+    for clave in claves:
+        crear(clave, sistema, '--forzar' in sys.argv)
 
 
 if __name__ == '__main__':

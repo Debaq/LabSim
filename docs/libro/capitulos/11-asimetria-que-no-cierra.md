@@ -107,6 +107,8 @@ La adaptación no es exclusiva del nervio: aparece en todos los niveles de la v�
 
 El reflejo tiene una rama **aferente** (cóclea y VIII par), un relevo en el tronco (núcleo coclear y complejo olivar superior, de los dos lados) y una rama **eferente** (núcleo y nervio facial hasta el músculo del estribo). Por eso un estímulo en un oído contrae los dos estapedios.
 
+![Arco del reflejo estapedial: cóclea y VIII par (aferente), núcleo coclear y complejo olivar superior de ambos lados, núcleo y nervio facial hasta el músculo del estribo (eferente). Marcar con una X dónde corta una lesión del VIII par derecho.](ilustraciones/arco-reflejo.png)
+
 Con una lesión del VIII par, el reflejo falla **cada vez que se estimula el oído enfermo**, se registre donde se registre: ipsilateral de ese oído y contralateral con el tono en ese oído (Jerger y cols., 1974). Es el patrón "diagonal" de la tabla de reflejos.
 
 :::ayuda Ayuda memoria: patrones de reflejo
@@ -123,6 +125,8 @@ Cada onda del PEAT es la suma de la actividad sincrónica de una región de la v
 - La onda **II** sale de la porción proximal del nervio, ya en el ángulo (Møller y cols., 1981).
 - La onda **III** sale del núcleo coclear y del tronco bajo.
 - La onda **V** sale del lemnisco lateral y del colículo inferior.
+
+![Vía auditiva del nervio al colículo inferior, con cada onda del PEAT ubicada en su región: I en el nervio distal, II en el nervio proximal, III en el núcleo coclear, V en el lemnisco lateral y colículo inferior. Sombrear el tramo que mide el interpico I-III.](ilustraciones/generadores-peat.png)
 
 Asignar "una onda, un núcleo" es una simplificación útil: cada onda tiene aportes de varias poblaciones (Melcher y Kiang, 1996).
 
@@ -196,44 +200,44 @@ Un paciente tiene emisiones otoacústicas presentes en un oído con 50 dB de pé
 
 ## Casos
 
-{{caso paciente_39}}
+{{caso cap11_p39}}
 
 :::pregunta ¿Qué pedirías?
 Con una asimetría de agudos y un acúfeno de dos años en el mismo oído, ¿qué pruebas agregarías a la audiometría? ¿Cuál esperas que se altere primero?
 :::
 
-:::figura paciente_39 audiograma
+:::figura cap11_p39 audiograma
 - @OD 4000 | En 4 kHz el OD está en 55 dB y el OI en 15: **40 dB de asimetría**, muy por encima de los 15 que obligan a estudiar.
 - @OD osea 2000 | La ósea va pegada a la aérea: no hay gap, la pérdida es **sensorioneural**.
 - @OI 4000 | El OI es normal para la edad. Con un oído sano al lado, cualquier hallazgo del OD se compara contra él.
 :::
 
-:::figura paciente_39 logoaudiometria
+:::figura cap11_p39 logoaudiometria
 - @OD max | El OD no pasa del **52 %**, aunque en las frecuencias del habla su pérdida es leve. Un oído coclear con esa curva suele llegar al 90 % o más.
 - @OI max | El OI llega al 100 % a 40 dB: es la referencia de lo esperable.
 :::
 
-:::figura paciente_39 timpanograma
+:::figura cap11_p39 timpanograma
 - @OD pico | Curva A en los dos oídos: el oído medio está sano y no explica nada de lo que sigue. Sin este dato, los reflejos no se pueden leer.
 :::
 
-:::figura paciente_39 reflejos
+:::figura cap11_p39 reflejos
 - @ipsi OD 1000 | El ipsilateral del OD falta en todas las frecuencias.
 - @contra OI 1000 | También falta el contralateral con el **tono en el OD** (sonda en el OI).
 - @contra OD 1000 | En cambio, con el tono en el OI y la sonda en el OD, el reflejo aparece a 85 dB: el músculo y el facial del OD funcionan.
 - Falla **todo lo que se estimula por el OD**: es el patrón diagonal, aferente.
 :::
 
-:::figura paciente_39 teoae
+:::figura cap11_p39 teoae
 - @OD 2000 | Las emisiones del OD están **presentes** en las cinco bandas, con reproducibilidad alta.
 - Un oído con 30 a 55 dB de pérdida en esas frecuencias y emisiones presentes: **las células ciliadas externas funcionan**. El problema está después de la cóclea.
 :::
 
-:::figura paciente_39 dpoae
+:::figura cap11_p39 dpoae
 - @OD 4000 | Los productos de distorsión confirman lo mismo: pasan en todas las frecuencias del OD, incluso donde el audiograma marca la mayor pérdida.
 :::
 
-:::figura paciente_39 abr
+:::figura cap11_p39 abr
 - @OI 80 V | La onda V del OI aparece en su lugar, con I y III bien formadas.
 - @OD 80 V | La V del OD llega cerca de **1 ms más tarde** que la del OI al mismo nivel. La diferencia interaural supera de lejos los 0,4 ms.
 - @OD 80 I | La onda I del OD existe y está en su lugar: la señal sale bien de la cóclea y se atrasa en el camino.

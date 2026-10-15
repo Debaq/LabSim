@@ -1,0 +1,885 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "rubeola_congenita",
+   "OI": "rubeola_congenita"
+  },
+  "edad": 0,
+  "sexo": "hombre",
+  "edad_valor": 4,
+  "edad_unidad": "meses"
+ },
+ "semilla": 401866633,
+ "data": {
+  "gender": 0,
+  "id": 9633,
+  "Aerea": [
+   [
+    65,
+    70
+   ],
+   [
+    65,
+    80
+   ],
+   [
+    70,
+    80
+   ],
+   [
+    75,
+    75
+   ],
+   [
+    80,
+    85
+   ],
+   [
+    75,
+    80
+   ],
+   [
+    75,
+    90
+   ],
+   [
+    80,
+    90
+   ],
+   [
+    80,
+    90
+   ]
+  ],
+  "Osea": [
+   [
+    65,
+    70
+   ],
+   [
+    65,
+    80
+   ],
+   [
+    70,
+    80
+   ],
+   [
+    75,
+    75
+   ],
+   [
+    80,
+    85
+   ],
+   [
+    75,
+    80
+   ],
+   [
+    75,
+    90
+   ],
+   [
+    80,
+    90
+   ],
+   [
+    80,
+    90
+   ]
+  ],
+  "LDL": [
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    105
+   ],
+   [
+    100,
+    105
+   ],
+   [
+    100,
+    105
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    65,
+    70
+   ],
+   [
+    65,
+    80
+   ],
+   [
+    70,
+    80
+   ],
+   [
+    75,
+    75
+   ],
+   [
+    80,
+    85
+   ],
+   [
+    75,
+    80
+   ],
+   [
+    75,
+    90
+   ],
+   [
+    80,
+    90
+   ],
+   [
+    80,
+    90
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    65,
+    70
+   ],
+   [
+    65,
+    80
+   ],
+   [
+    70,
+    80
+   ],
+   [
+    75,
+    75
+   ],
+   [
+    80,
+    85
+   ],
+   [
+    75,
+    80
+   ],
+   [
+    75,
+    90
+   ],
+   [
+    80,
+    90
+   ],
+   [
+    80,
+    90
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "od",
+   "1000": "centrado"
+  },
+  "sector": "Camara_sono",
+  "edad": 0,
+  "edad_horas": 2880,
+  "nacimiento": {
+   "parto": "vaginal",
+   "semanas": null,
+   "peso_g": null,
+   "torch": null,
+   "torch_sintomatica": false,
+   "uci_dias": null,
+   "ototoxicos": false,
+   "exanguinotransfusion": false,
+   "peg": false,
+   "vernix_limpiado": false,
+   "liquido_persistente": false,
+   "cesarea": false,
+   "pretermino_tardio": false,
+   "pretermino": false,
+   "muy_bajo_peso": false,
+   "percentil": {
+    "OD": 0.2471,
+    "OI": 0.1881
+   }
+  },
+  "volume": [
+   0.69,
+   0.39,
+   "N/D"
+  ],
+  "UMD": [
+   {
+    "int": 110,
+    "percentage": 60
+   },
+   {
+    "int": 110,
+    "percentage": 52
+   }
+  ],
+  "SDT": [
+   70,
+   75
+  ],
+  "SRT": [
+   70,
+   75
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Rosemberg": [
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     90,
+     100
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     100,
+     105
+    ],
+    [
+     95,
+     130
+    ]
+   ],
+   "contra": [
+    [
+     100,
+     90
+    ],
+    [
+     95,
+     95
+    ],
+    [
+     105,
+     100
+    ],
+    [
+     130,
+     95
+    ],
+    [
+     105,
+     95
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "",
+   "cirugias": "",
+   "otros": "",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "David",
+     "edad": 0,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": false,
+     "interrumpe": 20,
+     "conciencia": 0,
+     "confiabilidad": 76,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    },
+    {
+     "id": "amv9qv6gn4a",
+     "rol": "madre",
+     "nombre": "Sara Romero",
+     "edad": 28,
+     "genero": 1,
+     "es_paciente": false,
+     "informante": true,
+     "interrumpe": 100,
+     "conciencia": 80,
+     "confiabilidad": 92,
+     "version": "",
+     "comportamiento": "conversadora, se va por las ramas y hay que traerla de vuelta",
+     "disposicion": 2
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": false
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 95,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 95,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   }
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 85,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 90,
+     "tone_burst_1000Hz": 90,
+     "tone_burst_2000Hz": 90,
+     "tone_burst_4000Hz": 80,
+     "nb_ce_chirp_ls_500Hz": 85,
+     "nb_ce_chirp_ls_1000Hz": 85,
+     "nb_ce_chirp_ls_2000Hz": 85,
+     "nb_ce_chirp_ls_4000Hz": 80,
+     "click": 85,
+     "ce_chirp": 80,
+     "ce_chirp_ls": 80
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.31,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2303,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.03,
+      "amp": -0.11
+     },
+     "onda_III": {
+      "lat": 0.1,
+      "amp": -0.05
+     },
+     "onda_V": {
+      "lat": 0.06,
+      "amp": 0
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 95,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 100,
+     "tone_burst_1000Hz": 90,
+     "tone_burst_2000Hz": 95,
+     "tone_burst_4000Hz": 95,
+     "nb_ce_chirp_ls_500Hz": 95,
+     "nb_ce_chirp_ls_1000Hz": 85,
+     "nb_ce_chirp_ls_2000Hz": 90,
+     "nb_ce_chirp_ls_4000Hz": 95,
+     "click": 95,
+     "ce_chirp": 90,
+     "ce_chirp_ls": 90
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.25,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2450,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.11,
+      "amp": -0.07
+     },
+     "onda_III": {
+      "lat": 0.05,
+      "amp": -0.01
+     },
+     "onda_V": {
+      "lat": 0.05,
+      "amp": 0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "toddler",
+    "baseline": {
+     "I": {
+      "lat": 1.52,
+      "amp": 0.231
+     },
+     "III": {
+      "lat": 3.67,
+      "amp": 0.27
+     },
+     "V": {
+      "lat": 5.8,
+      "amp": 0.388
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 45,
+     "1000": 45,
+     "1500": 45,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 0.4,
+    "sello_pct": 87,
+    "variabilidad_db": 3.2,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 45,
+     "1000": 45,
+     "1500": 45,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 2.7,
+    "sello_pct": 83,
+    "variabilidad_db": 2,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 70,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-15T16:19:43+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "David Damián",
+   "apellido": "Romero Sánchez",
+   "rut": "28234325",
+   "fecha_nac": "17-06-2026"
+  },
+  "historia_clinica": ""
+ }
+}

@@ -1,23 +1,21 @@
 {
-  "caso": "demo:39",
+  "caso": {
+    "cuadro": {
+      "OD": "asfixia_perinatal",
+      "OI": "asfixia_perinatal"
+    },
+    "edad": 0,
+    "sexo": "hombre",
+    "edad_valor": 4,
+    "edad_unidad": "meses"
+  },
   "figuras": [
     {
-      "tipo": "audiograma"
-    },
-    {
-      "tipo": "logoaudiometria"
-    },
-    {
-      "tipo": "timpanograma"
-    },
-    {
-      "tipo": "reflejos"
+      "tipo": "timpanograma",
+      "sonda": 1000
     },
     {
       "tipo": "teoae"
-    },
-    {
-      "tipo": "dpoae"
     },
     {
       "tipo": "abr",
@@ -32,9 +30,6 @@
         "III",
         "V"
       ]
-    },
-    {
-      "tipo": "vemp"
     }
   ]
 }

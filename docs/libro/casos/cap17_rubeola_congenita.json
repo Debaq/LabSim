@@ -1,23 +1,21 @@
 {
-  "caso": "demo:36",
+  "caso": {
+    "cuadro": {
+      "OD": "rubeola_congenita",
+      "OI": "rubeola_congenita"
+    },
+    "edad": 0,
+    "sexo": "hombre",
+    "edad_valor": 4,
+    "edad_unidad": "meses"
+  },
   "figuras": [
     {
-      "tipo": "audiograma"
-    },
-    {
-      "tipo": "logoaudiometria"
-    },
-    {
-      "tipo": "timpanograma"
-    },
-    {
-      "tipo": "reflejos"
+      "tipo": "timpanograma",
+      "sonda": 1000
     },
     {
       "tipo": "teoae"
-    },
-    {
-      "tipo": "dpoae"
     },
     {
       "tipo": "abr",

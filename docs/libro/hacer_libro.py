@@ -50,10 +50,19 @@ ANTECEDENTES = {
 }
 
 
+class CasoPendiente(Exception):
+    pass
+
+
 def cargar(nombre):
+    if not (CASOS / f'{nombre}.json').exists():
+        raise CasoPendiente(nombre)
     spec = json.loads((CASOS / f'{nombre}.json').read_text(encoding='utf-8'))
     if isinstance(spec['caso'], dict):
-        datos = json.loads((CASOS / 'generados' / f'{nombre}.json').read_text(encoding='utf-8'))['data']
+        gen = CASOS / 'generados' / f'{nombre}.json'
+        if not gen.exists():
+            raise CasoPendiente(nombre)
+        datos = json.loads(gen.read_text(encoding='utf-8'))['data']
     else:
         tipo, _, clave = spec['caso'].partition(':')
         datos = json.loads(CASOS_DEMO.read_text(encoding='utf-8'))[clave] if tipo == 'demo' else {}
@@ -88,13 +97,28 @@ def ficha(nombre, numero, cap):
     pac = d.get('paciente_snapshot') or {}
     quien = ' '.join(x for x in (pac.get('nombre', '').split(' ')[0], pac.get('apellido', '').split(' ')[0]) if x) or nombre
     edad = d.get('edad')
-    edad_txt = f'{edad} años' if edad else (f'{d.get("edad_horas")} horas' if d.get('edad_horas') else '')
+    horas = d.get('edad_horas')
+    try:
+        horas = float(horas) if horas not in (None, '') else None
+    except (TypeError, ValueError):
+        horas = None
+    if edad:
+        edad_txt = f'{edad} años'
+    elif horas is not None and horas >= 24 * 60:
+        edad_txt = f'{round(horas / 720)} meses'
+    elif horas is not None and horas >= 72:
+        edad_txt = f'{round(horas / 24)} días'
+    elif horas is not None:
+        edad_txt = f'{horas:g} horas de vida'
+    else:
+        edad_txt = ''
     sexo = 'mujer' if str(d.get('gender')) == '1' else 'hombre'
     iniciales = ''.join(p[0] for p in quien.split()[:2]).upper()
     foto = next((p for p in (ROSTROS / f'{nombre}.png', ROSTROS / f'{nombre}.jpg') if p.exists()), None)
     rostro = (f'<img class="rostro" src="{foto.as_uri()}">' if foto
               else f'<div class="rostro vacio">{html.escape(iniciales)}</div>')
-    practica = ' <span class="estrella">★ paciente de práctica</span>' if nombre.startswith('paciente_') else ''
+    es_demo = isinstance(spec['caso'], str) and spec['caso'].startswith('demo:')
+    practica = ' <span class="estrella">★ paciente de práctica</span>' if es_demo else ''
 
     an = d.get('Anamnesis') or {}
     marcados = [v for k, v in ANTECEDENTES.items() if (an.get('antecedentes') or {}).get(k)]
@@ -149,7 +173,9 @@ CAJAS = {
     'objetivos': 'En este capítulo', 'ayuda': 'Ayuda memoria', 'sabias': '¿Sabías que?',
     'ojo': 'Ojo clínico', 'pregunta': 'Pregunta abierta', 'comentario': 'Comentario',
 }
-SECCIONES_DOS_COLUMNAS = ('Técnica', 'Fisiología', 'Patología', 'Razonamiento')
+SECCIONES_DOS_COLUMNAS = ('Técnica', 'Técnica en foco', 'Fisiología', 'Patología', 'Razonamiento',
+                          'Para qué sirve', 'Fundamento', 'Antes de empezar', 'Paso a paso',
+                          'Cómo se informa', 'Errores frecuentes', 'En LabSim')
 
 
 GRILLAS = ('#e7e5e0', '#cfccc5', '#f4f2ee')
@@ -260,7 +286,7 @@ def figura_con_globos(nombre, tipo, n, lineas, numero_fig):
 
 
 def capitulo(md_texto):
-    cap = re.match(r'#\s+(\d+)\.', md_texto)
+    cap = re.match(r'#\s+([A-Z]?\d+)\.', md_texto)
     cap = cap[1] if cap else '0'
     marcas, contador, actual, nfig = {}, [0], {}, {}
 
@@ -269,13 +295,22 @@ def capitulo(md_texto):
         marcas[clave] = h
         return f'\n\n{clave}\n\n'
 
+    def pendiente(nombre):
+        return guardar(f'<p class="pendiente"><span>Caso pendiente</span> {nombre}: correr el generador del capítulo</p>')
+
     def caso(nombre):
         contador[0] += 1
         actual[nombre] = contador[0]
-        return guardar(ficha(nombre, contador[0], cap))
+        try:
+            return guardar(ficha(nombre, contador[0], cap))
+        except CasoPendiente:
+            return pendiente(nombre)
 
     def res(nombre):
-        return guardar(resultados(nombre, actual.get(nombre, 0), cap))
+        try:
+            return guardar(resultados(nombre, actual.get(nombre, 0), cap))
+        except CasoPendiente:
+            return pendiente(nombre)
 
     def fig(nombre, tipo, n, cuerpo_fig):
         num = actual.get(nombre, 0)
@@ -314,6 +349,22 @@ def capitulo(md_texto):
         if re.sub(r'<.*?>', '', partes[i]).strip() in SECCIONES_DOS_COLUMNAS:
             partes[i + 1] = f'<div class="dos-col">{partes[i + 1]}</div>'
     cuerpo = ''.join(partes)
+    # Ilustraciones (dibujos tipo BioRender): ![descripción](ilustraciones/x.png).
+    # Si el archivo todavía no existe sale un recuadro con la descripción,
+    # para que se vea dónde va y qué tiene que mostrar.
+    nilu = [0]
+
+    def ilustracion(m):
+        alt, src = html.unescape(m[1]), m[2]
+        nilu[0] += 1
+        ruta = AQUI / src
+        pie = f'<figcaption>Ilustración {cap}.{nilu[0]}. {html.escape(alt)}</figcaption>'
+        if ruta.exists():
+            return f'<figure class="ilustracion"><img src="{ruta.as_uri()}">{pie}</figure>'
+        return (f'<figure class="ilustracion"><div class="ilu-pendiente"><span>Ilustración pendiente</span>'
+                f'{html.escape(alt)}<br><small>{html.escape(src)}</small></div>{pie}</figure>')
+
+    cuerpo = re.sub(r'<p>\s*<img alt="([^"]*)" src="([^"]*)"\s*/?>\s*</p>', ilustracion, cuerpo)
     # huecos del autor
     cuerpo = re.sub(r'<blockquote>\s*<p>✍\s*(.*?)</p>\s*</blockquote>',
                     r'<div class="pendiente"><span>Falta texto</span> \1</div>', cuerpo, flags=re.S)
@@ -397,6 +448,12 @@ ol.obs li {{ break-inside: avoid; margin: 0 0 1.8mm; padding-left: 6.5mm; positi
 ol.obs li.sin-globo {{ padding-left: 0; }}
 .globo {{ position: absolute; left: 0; top: .2mm; width: 4.6mm; height: 4.6mm; border-radius: 50%; background: #24101a;
           color: #fff; font: 700 7.4pt/4.6mm 'Plus Jakarta Sans'; text-align: center; }}
+.ilustracion {{ margin: 2mm 0 4mm; break-inside: avoid; text-align: center; }}
+.ilustracion img {{ max-width: 100%; max-height: 95mm; }}
+.ilu-pendiente {{ border: 1pt dashed #b9a3ac; border-radius: 2mm; background: #fbf8f9; color: #6f5a63; padding: 8mm 5mm;
+                  font-size: 8.8pt; }}
+.ilu-pendiente span {{ display: block; font: 700 7.5pt 'Plus Jakarta Sans'; letter-spacing: 1pt; text-transform: uppercase;
+                       color: #8e2a4a; margin-bottom: 1.5mm; }}
 .fig {{ margin: 2mm 0 5mm; break-inside: avoid; }}
 .fig svg.grafico {{ display: block; max-width: 100%; height: auto; margin: 0 auto; }}
 figcaption {{ font-size: 7.8pt; color: #7d6670; margin-top: 1.2mm; text-align: center; }}
@@ -406,9 +463,15 @@ strong {{ color: #24101a; }}
 
 def main():
     pedido = sys.argv[1:]
-    archivos = sorted(CAPITULOS.glob('*.md'))
+
+    def clave(x):
+        # 'H04' -> 'H4', '011' -> '11'
+        return re.sub(r'^([A-Za-z]?)0*', r'\1', str(x)).upper()
+
+    # orden del libro: Bases (B1...), Caja de herramientas (H1...), capítulos clínicos
+    archivos = sorted(CAPITULOS.glob('*.md'), key=lambda a: ({'B': 0, 'H': 1}.get(a.name[:1].upper(), 2), a.name))
     if pedido:
-        archivos = [a for a in archivos if a.name.split('-')[0].lstrip('0') in {p.lstrip('0') for p in pedido}]
+        archivos = [a for a in archivos if clave(a.name.split('-')[0]) in {clave(p) for p in pedido}]
     if not archivos:
         sys.exit('No hay capítulos que armar en capitulos/')
     portada = (f'<section class="portada"><h1>{TITULO}</h1><p class="bajada">{BAJADA}</p>'

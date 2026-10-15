@@ -4,19 +4,40 @@ Borrador del índice (2026-10-15). Libro gratuito; licencia propuesta
 **CC BY-NC-SA 4.0** (la obliga OtitisMediaKPJ, la única fuente con colesteatoma
 y efusión).
 
-Cada capítulo tiene la misma estructura, y sus referencias van al final del
-capítulo (no hay bibliografía general):
+El libro es la nueva versión del protocolo técnico de ORL, con sentido
+pedagógico. Tiene dos tipos de capítulo, todos autónomos (se pueden leer
+sueltos) y con sus referencias al final (no hay bibliografía general):
 
-1. **Técnica** — la prueba que el capítulo enseña a hacer
-2. **Fisiología** — lo que esa prueba mide
+**Caja de herramientas (H1-H14): cómo se hace cada examen.** Una técnica por
+capítulo, con la misma secuencia:
+
+1. **Para qué sirve** — qué pregunta clínica responde
+2. **Fundamento** — la fisiología justa para entender por qué se hace así
+3. **Antes de empezar** — equipo, calibración, preparación del paciente
+4. **Paso a paso** — el procedimiento, con el porqué de cada paso
+5. **Cómo se informa** — criterios, valores de referencia, ejemplo de informe
+6. **Errores frecuentes** — los que se ven en la práctica y en LabSim
+7. **En LabSim** — cómo se practica en el simulador
+8. **Referencias**
+
+**Capítulos clínicos (1-20): cómo se razona.** Parten de un problema:
+
+1. **Técnica en foco** — qué mirar de la técnica para ESTE problema (el cómo
+   se hace está en la herramienta indicada con →)
+2. **Fisiología** — lo que hay que entender del mecanismo
 3. **Patología** — los cuadros del capítulo
 4. **Razonamiento** — cómo se llega del resultado al diagnóstico
-5. **Casos** — cada uno sale de una clave de `CaseProfile::SCENARIOS`, así
-   que las figuras las genera el mismo motor de la app
-6. **Referencias del capítulo**
+5. **Casos** — ficha, "¿qué pedirías?", resultados relatados con globos,
+   razonamiento y diagnóstico. Cada caso sale de los generadores de la app
+6. **Para cerrar** y **Referencias**
 
-Cada técnica se enseña una sola vez, en el capítulo donde más pesa; los
-capítulos siguientes la dan por sabida.
+Antes de todo va **Bases** (B1, fisiología auditiva, a cargo de una colega).
+
+Todos llevan recuadros: objetivos, ayuda memoria, ¿sabías que?, ojo clínico,
+preguntas abiertas y comentarios. Las ilustraciones (dibujos tipo BioRender)
+se marcan en el texto con `![qué muestra](ilustraciones/archivo.png)`; hasta
+que existe el archivo sale un recuadro "ilustración pendiente". Cada capítulo tiene su generador
+(`capitulos/NN-*.py`: casos y figuras) y su texto (`capitulos/NN-*.md`).
 
 **Leyenda:**
 
@@ -41,10 +62,59 @@ capítulos siguientes la dan por sabida.
 - Sobre las imágenes: otoscopías de bancos abiertos, rostros generados con IA,
   personajes ficticios
 
+## Bases
+
+### B1. Fisiología auditiva *(la escribe una colega; se recibe más adelante)*
+Anatomía y fisiología del oído externo, medio e interno, la vía auditiva y el sistema vestibular. Es el capítulo de base: los bloques de **Fisiología** de los capítulos clínicos quedan cortos y remiten a él. Ilustraciones tipo BioRender.
+
+## Caja de herramientas
+
+### H1. Anamnesis, otoscopía y lavado de oídos
+Entrevista audiológica (motivo, evolución, antecedentes, fármacos, ruido, acúfeno); otoscopía (técnica, hallazgos, cuándo no seguir); lavado de oídos (indicaciones y contraindicaciones). Refs: `tecnica_a.md` §1.
+
+### H2. Acumetría
+Rinne y Weber con diapasón: técnica, lectura, falsos negativos (✓ BSA2022RW, KELLY2018, UNGAR2021, STANK1979).
+
+### H3. Audiometría tonal
+Vía aérea y ósea: orden, método ascendente, criterio de umbral, colocación del vibrador, grados y símbolos (✓ ISO2010, ASHA2005, BSA2018, S02, S03); audiometría de screening y ocupacional (✓ ISP2018, ISP2012, PREXOR); alta frecuencia (`tecnica_a.md` §6).
+
+### H4. Enmascaramiento
+Por qué se cruza el sonido (atenuación interaural por transductor), cuándo enmascarar en aérea, ósea y logoaudiometría, cuánto ruido, y las técnicas: plateau de Hood, fórmulas de nivel mínimo y máximo, sobreenmascaramiento, efecto de oclusión, el dilema (✓ BSA2018, NTP285; `tecnica_b.md` §3).
+
+### H5. Logoaudiometría y campo dinámico
+SRT, umbral de detección, discriminación, PB máx., roll-over, listas en español de Chile; LDL y campo dinámico (`tecnica_a.md` §5).
+
+### H6. Pruebas supraliminares
+Reclutamiento (Fowler, SISI), deterioro tonal (Carhart, Rosenberg, STAT) y pruebas de pérdida no orgánica (Stenger, concordancia SRT-PTA) (`tecnica_b.md` §4, §5, §10).
+
+### H7. Impedanciometría
+Timpanometría de 226 y 1000 Hz (tipos, volumen, compliancia, gradiente), reflejo estapedial (umbral, patrones, ON-OFF, Metz, deterioro) y función tubaria (`tecnica_a.md` §2, §3, §8; ✓ GSI-AR, WILLIAMS1975, SMITH2015).
+
+### H8. Audiometría pediátrica y campo libre
+Observación conductual, VRA, audiometría por juego, campo libre (`tecnica_a.md` §7).
+
+### H9. Emisiones otoacústicas
+TEOAE, DPOAE y SOAE: sonda, criterios de presencia, tamizaje y clínica (`tecnica_b.md` §1; ✓ N01-N11).
+
+### H10. Potenciales evocados auditivos de tronco
+Montaje, estímulos, filtros y promediación; búsqueda de umbral (click y tone burst, nHL→eHL), PEAT neurootológico, vía ósea, AABR de tamizaje, artefactos (✓ F01-F27, A01-A06; `tecnica_b.md` §6-§9).
+
+### H11. Electrococleografía
+Electrodos, protocolo, PS/PA y razón de áreas; test de glicerol (✓ E01-E07).
+
+### H12. VEMP
+cVEMP y oVEMP: montaje, estímulo, corrección por EMG, umbral, asimetría (`tecnica_b.md` §11).
+
+### H13. Evaluación vestibular *(propuesto, del protocolo)*
+Videonistagmografía, prueba calórica, maniobras de diagnóstico y reposición.
+
+### H14. Potenciales de estado estable *(propuesto, del protocolo)*
+ASSR: estimación de umbral por frecuencia.
+
 ## Parte I — El oído que transmite
 
 ### 1. Antes de medir: el conducto
-- **Técnica:** otoscopía (✗) · acumetría, Rinne y Weber (✓ BSA2022RW, KELLY2018, UNGAR2021, STANK1979)
+- **Técnica en foco** (→ H1, H2): otoscopía (✗) · acumetría, Rinne y Weber (✓ BSA2022RW, KELLY2018, UNGAR2021, STANK1979)
 - **Fisiología:** oído externo, resonancia del conducto, migración del epitelio y cerumen (✗)
 - **Casos:**
   - Tapón de cerumen [`tapon_cerumen`] — V/B
@@ -54,7 +124,7 @@ capítulos siguientes la dan por sabida.
   - Carcinoma del conducto [`carcinoma_cae`] — ✗
 
 ### 2. Líquido detrás del tímpano
-- **Técnica:** timpanometría de 226 Hz: tipos, volumen, compliancia, gradiente (✗); función tubaria (✓ WILLIAMS1975, SMITH2015, LU2026, LEE2026)
+- **Técnica en foco** (→ H7): timpanometría de 226 Hz: tipos, volumen, compliancia, gradiente (✗); función tubaria (✓ WILLIAMS1975, SMITH2015, LU2026, LEE2026)
 - **Fisiología:** trompa de Eustaquio y ventilación del oído medio (✗)
 - **Casos:**
   - ★35 Benjamín, 5 años, resfríos todo el invierno [`otitis_media`] — K
@@ -63,7 +133,7 @@ capítulos siguientes la dan por sabida.
   - Barotrauma [`barotrauma`] — ✗
 
 ### 3. Membrana y cadena
-- **Técnica:** audiometría tonal por vía aérea y ósea (✓ ISO2010, ISO1989, ASHA2005, BSA2018, ISP2018, NTP285); grados (✓ S02 BIAP)
+- **Técnica en foco** (→ H3): audiometría tonal por vía aérea y ósea (✓ ISO2010, ISO1989, ASHA2005, BSA2018, ISP2018, NTP285); grados (✓ S02 BIAP)
 - **Fisiología:** adaptación de impedancias del oído medio, que son la relación de áreas y la palanca (✗); mecanismos de la conducción ósea (✗)
 - **Casos:**
   - Perforación timpánica [`perforacion`] — K
@@ -75,7 +145,7 @@ capítulos siguientes la dan por sabida.
   - ★41 Chofer de micro operado de niño [`oido_operado` / `mixta_otitis_cronica`] — K/B
 
 ### 4. Rigidez
-- **Técnica:** reflejo estapedial: umbral, ipsi y contra, ON-OFF (✓ GSI-AR, DEBRUYNE1992, CAMICAS1992, COLLETTI1987); normas del umbral del reflejo y patrones de Jerger (✗)
+- **Técnica en foco** (→ H7): reflejo estapedial: umbral, ipsi y contra, ON-OFF (✓ GSI-AR, DEBRUYNE1992, CAMICAS1992, COLLETTI1987); normas del umbral del reflejo y patrones de Jerger (✗)
 - **Fisiología:** arco reflejo estapedial (✗); muesca de Carhart (✗ Carhart 1950)
 - **Casos:**
   - ★34 Secretaria de notaría, 34 años [`otoesclerosis`] — N
@@ -85,14 +155,14 @@ capítulos siguientes la dan por sabida.
 ## Parte II — La cóclea
 
 ### 5. Envejecer oyendo
-- **Técnica:** logoaudiometría: SRT, discriminación, PB máx., roll-over, curva sombra (✗); LDL y campo dinámico (✗)
+- **Técnica en foco** (→ H5): logoaudiometría: SRT, discriminación, PB máx., roll-over, curva sombra (✗); LDL y campo dinámico (✗)
 - **Fisiología:** tonotopía y codificación del habla (✗); umbrales por edad (✓ S01 ISO 7029)
 - **Casos:**
   - ★36 Carpintero jubilado, 74 años, "yo escucho bien" [`presbiacusia`]
   - Diabetes / insuficiencia renal [`metabolica`]
 
 ### 6. Ruido
-- **Técnica:** emisiones otoacústicas TEOAE, DPOAE y SOAE (✗); audiometría ocupacional (✓ ISP2018, ISP2012, PREXOR); acufenometría (✗)
+- **Técnica en foco** (→ H9, H3): emisiones otoacústicas TEOAE, DPOAE y SOAE (✗); audiometría ocupacional (✓ ISP2018, ISP2012, PREXOR); acufenometría (✗)
 - **Fisiología:** células ciliadas externas, amplificador coclear, electromotilidad (✗)
 - **Casos:**
   - ★33 Electricista de 23 años antes de entrar a la mina: la línea de base [`normal`]
@@ -100,7 +170,7 @@ capítulos siguientes la dan por sabida.
   - Trauma acústico agudo [`trauma_acustico_agudo`] · muesca en 4 kHz [`muesca_4k`]
 
 ### 7. De un día para otro
-- **Técnica:** enmascaramiento: cuándo y cuánto, atenuación interaural por transductor, plateau, efecto de oclusión (✓ BSA2018, NTP285; ✗ atenuación interaural de inserto/supraaural/vibrador, plateau de Hood)
+- **Técnica en foco** (→ H4): enmascaramiento: cuándo y cuánto, atenuación interaural por transductor, plateau, efecto de oclusión (✓ BSA2018, NTP285; ✗ atenuación interaural de inserto/supraaural/vibrador, plateau de Hood)
 - **Fisiología:** atenuación interaural y curva sombra (✗)
 - **Casos:**
   - Hipoacusia súbita [`subita`]
@@ -110,7 +180,7 @@ capítulos siguientes la dan por sabida.
   - Autoinmune / otosífilis [`autoinmune`] (TODO 42)
 
 ### 8. Lo que deja un tratamiento
-- **Técnica:** monitoreo de ototoxicidad: audiometría de alta frecuencia y seriada, criterios de cambio (✗)
+- **Técnica en foco** (→ H3): monitoreo de ototoxicidad: audiometría de alta frecuencia y seriada, criterios de cambio (✗)
 - **Fisiología:** por qué la base de la cóclea cae primero (✗)
 - **Casos:**
   - Ototoxicidad por cisplatino o aminoglucósidos [`ototoxica`] (TODO 41)
@@ -118,14 +188,14 @@ capítulos siguientes la dan por sabida.
   - Post-radioterapia de cabeza y cuello [`post_radioterapia`]
 
 ### 9. Hidrops
-- **Técnica:** electrococleografía: SP/AP, área, electrodo (✓ E01-E07); reclutamiento: Fowler y SISI (✗)
+- **Técnica en foco** (→ H11, H6): electrococleografía: SP/AP, área, electrodo (✓ E01-E07); reclutamiento: Fowler y SISI (✗)
 - **Fisiología:** endolinfa, potencial endococlear, potencial de sumación (✗)
 - **Casos:**
   - ★38 Profesora de lenguaje, primera crisis hace un año [`meniere`]
   - Hidrops retardado contralateral [`hidrops_retardado`]
 
 ### 10. Lo que viene en la familia
-- **Técnica:** audiometría en el niño: conductual, condicionada por juego (✗)
+- **Técnica en foco** (→ H8): audiometría en el niño: conductual, condicionada por juego (✗)
 - **Fisiología:** homeostasis del potasio en la cóclea y conexina 26; estría vascular (✗)
 - **Casos:**
   - GJB2 [`gjb2`] · Waardenburg [`waardenburg`] · Usher 2 [`usher`]
@@ -135,7 +205,7 @@ capítulos siguientes la dan por sabida.
 ## Parte III — Más allá de la cóclea
 
 ### 11. Asimetría que no cierra
-- **Técnica:**
+- **Técnica en foco** (→ H6, H7, H10):
   - Deterioro tonal de Carhart, Rosenberg y Stat (✗)
   - Decay del reflejo (✓ HIRSCH1983, ROSENHALL1979, COOK1999)
   - SISI (✗)
@@ -148,7 +218,7 @@ capítulos siguientes la dan por sabida.
   - Coclear con componente retrococlear [`sensorioneural`]
 
 ### 12. El tronco
-- **Técnica:** ABR: interpicos, diferencia interaural, efecto de la tasa (✓ F13, F10, F16)
+- **Técnica en foco** (→ H10): ABR: interpicos, diferencia interaural, efecto de la tasa (✓ F13, F10, F16)
 - **Fisiología:** generadores de las ondas I-VII y vía auditiva central (✗ Møller)
 - **Casos:**
   - Esclerosis múltiple [`esclerosis_multiple`]
@@ -157,7 +227,7 @@ capítulos siguientes la dan por sabida.
   - Siderosis [`siderosis`] · TEC de tronco [`tec_tronco`]
 
 ### 13. Oye pero no entiende
-- **Técnica:** microfónica coclear: polaridad (✓ F27), pinzar el tubo (✗); OEA + ABR juntos (✗)
+- **Técnica en foco** (→ H10, H9): microfónica coclear: polaridad (✓ F27), pinzar el tubo (✗); OEA + ABR juntos (✗)
 - **Fisiología:** sincronía neural, sinapsis de la célula ciliada interna (✗)
 - **Casos:**
   - ★40 Escolar de 15 años, "escucho que me hablan pero no entiendo" [`neuropatia`]
@@ -165,7 +235,7 @@ capítulos siguientes la dan por sabida.
   - Kernícterus [`kernicterus`] · Leucodistrofia [`leucodistrofia`]
 
 ### 14. Lo que mueve el ABR sin ser el oído
-- **Técnica:** factores del sujeto: edad, sexo, temperatura, fármacos (✓ F09, F10, F20; ✗ temperatura)
+- **Técnica en foco** (→ H10): factores del sujeto: edad, sexo, temperatura, fármacos (✓ F09, F10, F20; ✗ temperatura)
 - **Fisiología:** mielinización y maduración de la vía (✓ F19, F11; ✗ revisión de fisiología)
 - **Casos:**
   - Hipotiroidismo [`toxico_metabolico`]
@@ -176,7 +246,7 @@ capítulos siguientes la dan por sabida.
 ## Parte IV — Mixtas y complicadas
 
 ### 15. Cuando también cae la ósea
-- **Técnica:** el dilema de enmascaramiento (✓ BSA2018; ✗ fuente clásica del dilema); ABR por vía ósea (✓ A02, A06, F18)
+- **Técnica en foco** (→ H4, H10): el dilema de enmascaramiento (✓ BSA2018; ✗ fuente clásica del dilema); ABR por vía ósea (✓ A02, A06, F18)
 - **Fisiología:** por qué la ósea cae en la otoesclerosis sin daño coclear (✗ Carhart 1950, ya pedido en el cap. 4)
 - **Casos:**
   - Otitis crónica con daño coclear [`mixta_otitis_cronica`] — K/B
@@ -189,14 +259,14 @@ capítulos siguientes la dan por sabida.
 ## Parte V — El recién nacido
 
 ### 16. Tamizaje: las primeras horas
-- **Técnica:** TEOAE y AABR de tamizaje, protocolo y momento (✓ N01-N11, JCIH 2019)
+- **Técnica en foco** (→ H9, H10): TEOAE y AABR de tamizaje, protocolo y momento (✓ N01-N11, JCIH 2019)
 - **Fisiología:** oído del recién nacido: vérnix, mesénquima, transitorio de las primeras horas (✓ N08; ✗ fuente de fisiología)
 - **Casos:**
   - Recién nacido sano a las 12 h y a las 48 h [`normal` + `efusion_neonatal`]
   - AABR que pasa con TEOAE que refiere
 
 ### 17. El lactante que se estudia
-- **Técnica:**
+- **Técnica en foco** (→ H7, H10):
   - Timpanometría de 1000 Hz (✗)
   - ABR con tone burst y estimación de umbral, corrección nHL a eHL (✓ F23, A03; ✗ tablas de corrección)
   - Vía ósea del lactante (✓ A04, A05, A06)
@@ -209,7 +279,7 @@ capítulos siguientes la dan por sabida.
 ## Parte VI — Cuando el problema es la técnica
 
 ### 18. El ABR que engaña
-- **Técnica:** promediación, FSP y ruido residual (✓ A01 Elberling y Don); rechazo de artefactos (✗); artefacto de estímulo, respuesta postauricular, falsa V (✗)
+- **Técnica en foco** (→ H10): promediación, FSP y ruido residual (✓ A01 Elberling y Don); rechazo de artefactos (✗); artefacto de estímulo, respuesta postauricular, falsa V (✗)
 - **Fisiología:** el EEG de fondo, el músculo, y por qué el promedio mejora con la raíz de los barridos (✗)
 - **Casos:**
   - Falsa onda V: los subpromedios A/B la delatan
@@ -219,7 +289,7 @@ capítulos siguientes la dan por sabida.
   - Onda I ausente por el montaje: el falso retrococlear
 
 ### 19. El paciente que no calza
-- **Técnica:** pérdida no orgánica: SRT vs. PTA, Stenger, ABR mejor que el audiograma (✗)
+- **Técnica en foco** (→ H6, H5): pérdida no orgánica: SRT vs. PTA, Stenger, ABR mejor que el audiograma (✗)
 - **Fisiología:** no aplica; acá el bloque es la conducta del paciente (✗ fuente)
 - **Casos:**
   - Simulación (a mano; TODO 45)
@@ -228,7 +298,7 @@ capítulos siguientes la dan por sabida.
 ## Parte VII — Cuando también hay vértigo
 
 ### 20. VEMP
-- **Técnica:** cVEMP y oVEMP: montaje, estímulo, corrección por EMG, umbral (✗ excepto Murofushi 2001, dentro de patologías)
+- **Técnica en foco** (→ H12): cVEMP y oVEMP: montaje, estímulo, corrección por EMG, umbral (✗ excepto Murofushi 2001, dentro de patologías)
 - **Fisiología:** vía vestíbulo-cólica y vestíbulo-ocular, sáculo y utrículo (✗)
 - **Casos:**
   - Ménière: VEMP sacular alterado [`meniere`]
