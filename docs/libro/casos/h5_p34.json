@@ -1,0 +1,9 @@
+{
+  "caso": "demo:34",
+  "figuras": [
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    }
+  ]
+}

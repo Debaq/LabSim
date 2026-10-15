@@ -1,0 +1,13 @@
+{
+  "caso": "demo:41",
+  "figuras": [
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": false
+    },
+    {
+      "tipo": "logoaudiometria",
+      "enmascarado": true
+    }
+  ]
+}
