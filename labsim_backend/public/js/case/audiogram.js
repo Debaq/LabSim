@@ -48,6 +48,12 @@ window.drawAudiogram = (function () {
     var MAX_LEVEL_DB = 120;
     function noResponse(v) { return v >= NO_RESPONSE_DB; }
     function plotDb(v) { return noResponse(v) ? MAX_LEVEL_DB : v; }
+    // El vibrador óseo no pasa de 70 dB HL: una ósea sin respuesta (o
+    // guardada por encima) se dibuja en 70 con su flecha, no en 120. Espejo
+    // de CaseCharts::TOPE_OSEA_DB.
+    var BONE_MAX_DB = 70;
+    function boneNoResponse(v) { return v > BONE_MAX_DB; }
+    function plotBoneDb(v) { return boneNoResponse(v) ? BONE_MAX_DB : v; }
 
     function xPos(freq) { return 32 + (Math.log(freq) / Math.LN2 - MIN_LOG) / (MAX_LOG - MIN_LOG) * 280; }
     function yPos(db) {
@@ -160,11 +166,11 @@ window.drawAudiogram = (function () {
 
         // Une los puntos, cortando en cada frecuencia sin respuesta: un
         // umbral que no existe no puede ser extremo de un segmento.
-        function drawLine(vals, color, dash, soloOsea) {
+        function drawLine(vals, color, dash, soloOsea, tope) {
             var tramos = [], actual = [];
             vals.forEach(function (v, i) {
                 if (soloOsea && !boneMeasured(i)) { return; }
-                if (noResponse(v)) {
+                if (noResponse(v) || (tope !== undefined && v > tope)) {
                     if (actual.length > 1) { tramos.push(actual); }
                     actual = [];
                     return;
@@ -205,18 +211,18 @@ window.drawAudiogram = (function () {
         // Vía ósea: unida con línea punteada, y enmascarada si hay gap
         // aéreo-óseo >=10dB en el mismo oído. La línea se dibuja antes que
         // los corchetes para que el símbolo quede encima.
-        drawLine(oseaOd, window.sideColor('od'), BONE_DASH, true);
-        drawLine(oseaOi, window.sideColor('oi'), BONE_DASH, true);
+        drawLine(oseaOd, window.sideColor('od'), BONE_DASH, true, BONE_MAX_DB);
+        drawLine(oseaOi, window.sideColor('oi'), BONE_DASH, true, BONE_MAX_DB);
         for (var m = 0; m < FREQS.length; m++) {
             if (!boneMeasured(m)) { continue; }
             var x2 = xPos(FREQS[m]);
-            var yBOd = yPos(plotDb(oseaOd[m])), yBOi = yPos(plotDb(oseaOi[m]));
+            var yBOd = yPos(plotBoneDb(oseaOd[m])), yBOi = yPos(plotBoneDb(oseaOi[m]));
             // El símbolo (no la línea) se corre de la intersección: ver
             // BONE_OFFSET arriba.
             group.appendChild(makeBracket(x2 - BONE_OFFSET, yBOd, window.sideColor('od'), 'left', boneMasked(aereaOd[m], oseaOd[m])));
-            if (noResponse(oseaOd[m])) { group.appendChild(makeNoResponseArrow(x2 - BONE_OFFSET, yBOd, window.sideColor('od'), -1)); }
+            if (boneNoResponse(oseaOd[m])) { group.appendChild(makeNoResponseArrow(x2 - BONE_OFFSET, yBOd, window.sideColor('od'), -1)); }
             group.appendChild(makeBracket(x2 + BONE_OFFSET, yBOi, window.sideColor('oi'), 'right', boneMasked(aereaOi[m], oseaOi[m])));
-            if (noResponse(oseaOi[m])) { group.appendChild(makeNoResponseArrow(x2 + BONE_OFFSET, yBOi, window.sideColor('oi'), 1)); }
+            if (boneNoResponse(oseaOi[m])) { group.appendChild(makeNoResponseArrow(x2 + BONE_OFFSET, yBOi, window.sideColor('oi'), 1)); }
         }
 
         // LDL: solo si "LDL medido" está activo para ese oído -- si no, el

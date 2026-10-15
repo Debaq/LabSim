@@ -5369,3 +5369,17 @@ libro sí, por paciente/oído/subtipo).
 Timpanograma: además de la punta, el temblor de medición pasa de ruido
 blanco (2 % de la compliancia por punto, se veía serrucho) a uno chico y
 suavizado (1 %, media móvil de 7 puntos): la curva del equipo es lisa.
+
+## Ósea sin respuesta: en el tope del vibrador, 70 dB HL (2026-10-15)
+
+Decidido con el docente. La ósea "no responde" se dibujaba en 120 dB, como
+la aérea, y el vibrador no llega ahí. Ahora la ficha PDF
+(`CaseCharts::TOPE_OSEA_DB`), el editor (`BONE_MAX_DB` en
+`public/js/case/audiogram.js`, con test de espejo en test_charts_vs_js) y
+las figuras del libro dibujan en 70 dB con su flecha toda ósea guardada en
+130 **o por encima de 70**, y no la unen a la línea punteada. El LDL no
+cambia: comparte el recorte de frecuencias de la ósea, no su tope.
+
+Queda abierto: el audiómetro de la app (`resources/json/config_audiometer.json`,
+transductor óseo) deja subir la ósea hasta 100 dB de 1 kHz en adelante y
+topa en 40-50 dB en los graves; no coincide con el tope de 70.

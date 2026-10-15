@@ -85,9 +85,9 @@ t_eq(js_numeros($audiogramJs, '/BONE_FREQS\s*=\s*\[([^\]]*)\]/', 'las frecuencia
     array_map('floatval', CaseCharts::FREQS_OSEA),
     'La vía ósea y el LDL se dibujan en las mismas frecuencias en el editor y en el PDF');
 t_true(
-    preg_match('/drawLine\(oseaOd,.*BONE_DASH, true\);/', $audiogramJs) === 1
-    && preg_match('/drawLine\(oseaOi,.*BONE_DASH, true\);/', $audiogramJs) === 1,
-    'El editor une los puntos de la vía ósea de los dos oídos'
+    preg_match('/drawLine\(oseaOd,.*BONE_DASH, true, BONE_MAX_DB\);/', $audiogramJs) === 1
+    && preg_match('/drawLine\(oseaOi,.*BONE_DASH, true, BONE_MAX_DB\);/', $audiogramJs) === 1,
+    'El editor une los puntos de la vía ósea de los dos oídos, cortando sobre el tope del vibrador'
 );
 
 // --- Límite de normalidad -----------------------------------------------
@@ -116,6 +116,10 @@ foreach (CaseCharts::FORMAS_TIMPANOGRAMA as $tipo => $forma) {
     t_eq($enJs, array_map('floatval', $forma),
         "Timpanograma {$tipo}: el editor sortea en el mismo rango que la ficha");
 }
+
+t_eq(js_numeros($audiogramJs, '/BONE_MAX_DB = (\d+)/', 'el tope del vibrador'),
+    [(float) CaseCharts::TOPE_OSEA_DB],
+    'El editor y la ficha dibujan la ósea sin respuesta en el mismo tope del vibrador');
 
 $rangoPresion = js_numeros($tympJs, '/p = Math\.max\((-?\d+), Math\.min\((\d+), p\)\)/', 'el rango de presión');
 t_eq($rangoPresion, [-400.0, 200.0], 'El timpanograma va de -400 a 200 daPa en los dos lados');

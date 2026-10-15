@@ -99,6 +99,14 @@ final class CaseCharts
     public const NIVEL_MAXIMO_DB = 120;
 
     /**
+     * Tope del vibrador óseo (dB HL). Más arriba no hay umbral óseo que se
+     * pueda medir: una ósea "sin respuesta" --o guardada por encima de esto--
+     * se dibuja AQUÍ con su flecha, no en 120 dB como la aérea. Mismo valor
+     * que BONE_MAX_DB en public/js/case/audiogram.js.
+     */
+    public const TOPE_OSEA_DB = 70;
+
+    /**
      * Límite de la audición normal (dB HL). En Chile llega hasta 20 dB HL
      * inclusive, así que el grado leve arranca en 21 -- es el mismo número
      * que `CaseProfile::GRADES['leve']` (y un test comprueba que sigan de
@@ -289,7 +297,7 @@ final class CaseCharts
             'oi' => self::freqsOseaVisibles($freqs, $aerea['oi'] ?? [], $estudio),
         ];
         foreach (['od' => self::COLOR_OD, 'oi' => self::COLOR_OI] as $lado => $color) {
-            foreach (self::tramosConUmbral($osea[$lado] ?? [], $freqsOseaPorLado[$lado], $fx, $fy) as $tramo) {
+            foreach (self::tramosConUmbral($osea[$lado] ?? [], $freqsOseaPorLado[$lado], $fx, $fy, (float) self::TOPE_OSEA_DB) as $tramo) {
                 $pdf->polyline($tramo, 0.9, $color, self::TRAZO_OSEA);
             }
         }
@@ -334,8 +342,10 @@ final class CaseCharts
             $mostrarOseaOd = in_array($hz, $freqsOseaPorLado['od'], true);
             $mostrarOseaOi = in_array($hz, $freqsOseaPorLado['oi'], true);
             if ($mostrarOseaOd || $mostrarOseaOi) {
-                $yOOd = $oOd >= self::SIN_UMBRAL_DB ? $fy((float) self::NIVEL_MAXIMO_DB) : $fy($oOd);
-                $yOOi = $oOi >= self::SIN_UMBRAL_DB ? $fy((float) self::NIVEL_MAXIMO_DB) : $fy($oOi);
+                $sinOseaOd = $oOd > self::TOPE_OSEA_DB;
+                $sinOseaOi = $oOi > self::TOPE_OSEA_DB;
+                $yOOd = $sinOseaOd ? $fy((float) self::TOPE_OSEA_DB) : $fy($oOd);
+                $yOOi = $sinOseaOi ? $fy((float) self::TOPE_OSEA_DB) : $fy($oOi);
                 // El símbolo (no la línea) se corre de la intersección:
                 // centrado, un umbral óseo igual al aéreo -lo más común-
                 // queda tapado por el círculo/cruz de la vía aérea.
@@ -344,13 +354,13 @@ final class CaseCharts
 
                 if ($mostrarOseaOd) {
                     self::corchete($pdf, $cxOOd, $yOOd, self::COLOR_OD, 'izq', ($aOd - $oOd) >= self::GAP_ENMASCARA_OSEA);
-                    if ($oOd >= self::SIN_UMBRAL_DB) {
+                    if ($sinOseaOd) {
                         self::flechaAbajo($pdf, $cxOOd, $yOOd, self::COLOR_OD, -1);
                     }
                 }
                 if ($mostrarOseaOi) {
                     self::corchete($pdf, $cxOOi, $yOOi, self::COLOR_OI, 'der', ($aOi - $oOi) >= self::GAP_ENMASCARA_OSEA);
-                    if ($oOi >= self::SIN_UMBRAL_DB) {
+                    if ($sinOseaOi) {
                         self::flechaAbajo($pdf, $cxOOi, $yOOi, self::COLOR_OI, 1);
                     }
                 }
@@ -1335,15 +1345,18 @@ final class CaseCharts
      * @param array<int,int> $freqs frecuencias a considerar (en orden)
      * @param callable $fx Hz -> x
      * @param callable $fy dB -> y
+     * @param float|null $tope por encima de esto tampoco hay umbral (la ósea)
      * @return array<int,array<int,array{0:float,1:float}>> tramos de puntos
      */
-    private static function tramosConUmbral(array $valores, array $freqs, callable $fx, callable $fy): array
+    private static function tramosConUmbral(array $valores, array $freqs, callable $fx, callable $fy, ?float $tope = null): array
     {
         $tramos = [];
         $actual = [];
         foreach ($freqs as $i => $hz) {
             $valor = (float) ($valores[$i] ?? 0);
-            if ($valor >= self::SIN_UMBRAL_DB) {
+            // Sin respuesta: 130, o por encima del tope del transductor (la
+            // ósea no pasa de TOPE_OSEA_DB).
+            if ($valor >= self::SIN_UMBRAL_DB || ($tope !== null && $valor > $tope)) {
                 if (count($actual) > 0) {
                     $tramos[] = $actual;
                     $actual = [];

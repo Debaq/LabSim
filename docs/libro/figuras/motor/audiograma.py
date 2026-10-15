@@ -17,6 +17,7 @@ ATENUACION_AEREA = [35, 40, 40, 40, 40, 45, 45, 50, 50]   # CaseCharts::ATENUACI
 GAP_ENMASCARA_OSEA = 10
 SIN_RESPUESTA = 130
 NIVEL_MAXIMO = 120
+TOPE_OSEA = 70            # el vibrador no pasa de acá (CaseCharts::TOPE_OSEA_DB)
 LIMITE_NORMAL = 20
 CORRIMIENTO_OSEA = 9      # px: OD a la izquierda, OI a la derecha
 ROTULO = {1000: '1k', 2000: '2k', 3000: '3k', 4000: '4k', 6000: '6k', 8000: '8k'}
@@ -83,7 +84,7 @@ def dibujar(caso, estudio=True, ldl=True, oidos=('OD', 'OI')):
                     and o[i] is not None
                     and (not estudio or (a[i] is not None and a[i] > LIMITE_NORMAL))]
         desp = -CORRIMIENTO_OSEA if lado == 'OD' else CORRIMIENTO_OSEA
-        for tramo in _tramos([(X(FRECUENCIAS[i]) + desp, Y(o[i])) if i in idx_osea and o[i] < SIN_RESPUESTA else None
+        for tramo in _tramos([(X(FRECUENCIAS[i]) + desp, Y(o[i])) if i in idx_osea and o[i] <= TOPE_OSEA else None
                               for i in range(len(FRECUENCIAS))]):
             s.trazo(tramo, col, 0.9, guiones='1 2.5')
 
@@ -112,8 +113,8 @@ def dibujar(caso, estudio=True, ldl=True, oidos=('OD', 'OI')):
             if sin:
                 _flecha(s, x, y, col, -1 if lado == 'OD' else 1)
         for i in idx_osea:
-            sin = o[i] >= SIN_RESPUESTA
-            x, y = X(FRECUENCIAS[i]) + desp, Y(NIVEL_MAXIMO if sin else o[i])
+            sin = o[i] > TOPE_OSEA
+            x, y = X(FRECUENCIAS[i]) + desp, Y(TOPE_OSEA if sin else o[i])
             enmascarada = a[i] is not None and (a[i] - o[i]) >= GAP_ENMASCARA_OSEA
             _simbolo_oseo(s, lado, x, y, col, enmascarada)
             if sin:
