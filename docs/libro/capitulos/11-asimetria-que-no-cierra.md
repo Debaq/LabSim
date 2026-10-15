@@ -179,7 +179,7 @@ Frente a una asimetría sensorioneural, el razonamiento sigue cuatro preguntas, 
 | | Coclear | Retrococlear |
 |---|---|---|
 | Discriminación | acorde a la pérdida | **peor** de lo esperable |
-| Roll-over | ausente | **presente** |
+| Roll-over | ausente o leve | **presente** |
 | Reflejo | presente a bajo nivel SL | **elevado o ausente** |
 | Deterioro del reflejo | ausente | **presente** |
 | Deterioro tonal | 0 a 25 dB | **30 dB o más** |
@@ -226,6 +226,7 @@ Con una asimetría de agudos y un acúfeno de dos años en el mismo oído, ¿qu�
 :::figura cap11_p39 logoaudiometria
 - @OD max | El OD no pasa del **52 %**, aunque en las frecuencias del habla su pérdida es leve. Un oído coclear con esa curva suele llegar al 90 % o más.
 - @OI max | El OI llega al 100 % a 40 dB: es la referencia de lo esperable.
+- @OD 80 | Pasado el máximo, la curva del OD **cae**: a 80 dB entiende el 20 %. Es el **roll-over**: (52 − 20) / 52 da un índice de 0,62, por encima del corte de 0,45 que sugiere lesión retrococlear (Jerger y Jerger, 1971).
 :::
 :::figura cap11_p39 timpanograma
 - @OD pico | Curva A en los dos oídos: el oído medio está sano y no explica nada de lo que sigue. Sin este dato, los reflejos no se pueden leer.
@@ -233,9 +234,20 @@ Con una asimetría de agudos y un acúfeno de dos años en el mismo oído, ¿qu�
 :::figura cap11_p39 reflejos
 - @ipsi OD 1000 | El ipsilateral del OD falta en todas las frecuencias.
 - @contra OI 1000 | También falta el contralateral con el **tono en el OD** (sonda en el OI).
-- @contra OD 1000 | En cambio, con el tono en el OI y la sonda en el OD, el reflejo aparece a 85 dB: el músculo y el facial del OD funcionan.
+- @contra OD 1000 | En cambio, con el tono en el OI y la sonda en el OD, el reflejo aparece a 90 dB en 1 kHz: el músculo y el facial del OD funcionan.
 - Falla **todo lo que se estimula por el OD**: es el patrón diagonal, aferente.
 :::
+
+:::ayuda-ancho Lo que entrega Raúl sobre el umbral (→ H6)
+| Prueba | OD | OI |
+|---|---|---|
+| Fowler, 2, 3 y 4 kHz | **sin reclutamiento** | referencia |
+| SISI | **alrededor de 10 %** | 0 % |
+| Carhart y Rosenberg, 500 a 4.000 Hz | **30 dB** | no det. |
+| STAT, 500, 1.000 y 2.000 Hz | **(+)**: baja la mano antes del minuto | (−) |
+:::
+
+A 100 dB HL a su OD le sobran 70 a 85 dB sobre el umbral, y aun así no sostiene el tono: eso es lo que busca el STAT.
 :::figura cap11_p39 teoae
 - @OD 2000 | Las emisiones del OD están **presentes** en las cinco bandas, con reproducibilidad alta.
 - Un oído con 30 a 55 dB de pérdida en esas frecuencias y emisiones presentes: **las células ciliadas externas funcionan**. El problema está después de la cóclea.
@@ -253,7 +265,7 @@ Con una asimetría de agudos y un acúfeno de dos años en el mismo oído, ¿qu�
 :::docente Guía del caso
 - **Datos clave:** pérdida unilateral del OD de dos años, pitido del mismo lado, dificultad para entender por teléfono (discriminación, no solo umbral), inestabilidad leve; otoscopía normal.
 - **Hipótesis esperables:** coclear unilateral (ruido, súbita antigua), hidrops, **retrococlear**. Sin exposición a ruido ni crisis de vértigo, la asimetría + acúfeno + mala discriminación deben hacer pensar en el VIII par.
-- **Qué pedir:** audiometría con enmascaramiento, logoaudiometría, impedanciometría con reflejos y su deterioro, emisiones y PEAT (→ H3, H5, H7, H9, H10).
+- **Qué pedir:** audiometría con enmascaramiento, logoaudiometría, supraliminares (deterioro tonal, STAT, SISI), impedanciometría con reflejos y su deterioro, emisiones y PEAT (→ H3, H5, H6, H7, H9, H10).
 - **Errores esperables:** atribuirlo a la edad; no enmascarar el OD; leer la latencia de V sin el audiograma.
 - **En LabSim:** es el paciente de práctica 39; se atiende desde "Práctica libre". Unos 45 minutos con toda la batería.
 :::
@@ -280,7 +292,7 @@ La pérdida del OD es mayor que en el caso anterior y no hay acúfeno. ¿Cambia 
 - @OD osea 2000 | La ósea coincide con la aérea: sensorioneural.
 :::
 :::figura cap11_schwannoma logoaudiometria
-- @OD max | El OD no pasa del **20 %**, ni siquiera a 85 dB. Con 45 dB en 1 kHz, un oído coclear entendería bastante más.
+- @OD max | El OD no pasa del **20 %**, que alcanza recién a 70-80 dB, y más arriba cae. Con 45 dB en 1 kHz, un oído coclear entendería bastante más.
 :::
 :::figura cap11_schwannoma reflejos
 - @ipsi OD 1000 | Sin reflejo ipsilateral en el OD.
@@ -367,12 +379,12 @@ La asimetría es moderada, la pérdida del OI no pasa de moderada y el paciente 
 - @OD 4000 | El OD está en 20 dB en 4 kHz. Una presbiacusia sería **simétrica**: esta diferencia no la explica la edad.
 :::
 :::figura cap11_angulo logoaudiometria
-- @OI max | El OI llega al 68 %, menos de lo esperable para su curva.
+- @OI max | El OI llega al 68 %, menos de lo esperable para su curva, y pasados los 50 dB cae.
 :::
 :::figura cap11_angulo reflejos
-- @ipsi OI 500 | Con tono en el OI, el reflejo aparece recién a 110 dB en los graves: **elevado**.
+- @ipsi OI 500 | Con tono en el OI, el reflejo aparece recién a 115 dB en 500 Hz, 25 dB más arriba que en el OD: **elevado**.
 - @ipsi OI 2000 | En los agudos ya no aparece.
-- @contra OD 500 | Con el tono en el OI y la sonda en el OD pasa lo mismo: 110 dB. El problema está en el oído que recibe el tono.
+- @contra OD 500 | Con el tono en el OI y la sonda en el OD pasa lo mismo: 120 dB, contra 95 en el sentido opuesto. El problema está en el oído que recibe el tono.
 :::
 :::figura cap11_angulo abr
 - @OD 80 V | La V del OD llega en su lugar.
@@ -407,11 +419,11 @@ Una mujer de 47 años con zumbido en el OD y una pérdida leve en agudos de ese 
 - @OD 4000 | La pérdida aparece desde 2 kHz y llega a 55 dB en 4 kHz: es **de frecuencia específica**.
 :::
 :::figura cap11_microvascular logoaudiometria
-- @OD max | El OD llega al 60 %, poco para una pérdida que respeta los graves.
+- @OD max | El OD llega al 60 %, poco para una pérdida que respeta los graves, y sobre 50 dB cae.
 :::
 :::figura cap11_microvascular reflejos
-- @ipsi OD 500 | Con tono en el OD, el reflejo aparece en 500 Hz pero elevado (105 dB).
-- @ipsi OD 2000 | Desde 1 kHz desaparece: justo donde empieza la pérdida.
+- @ipsi OD 500 | Con tono en el OD, el reflejo aparece en 500 Hz pero elevado: 110 dB, contra 90 en el OI.
+- @ipsi OD 2000 | Desde 1 kHz desaparece, con umbrales de 20 a 55 dB: una pérdida coclear de ese grado lo conservaría.
 :::
 :::figura cap11_microvascular abr
 - @OD 80 I | La onda I del OD está en su lugar.
@@ -448,7 +460,7 @@ Un hombre de 66 años con pérdida moderada del OI y acúfeno de ese lado. ¿Qu�
 - @OD 4000 | El OD tiene solo la caída de agudos esperable a su edad.
 :::
 :::figura cap11_retrococlear logoaudiometria
-- @OI max | Con esa curva, una lesión solo coclear daría 80 % o más. El OI **no pasa del 36 %**.
+- @OI max | Con esa curva, una lesión solo coclear daría 80 % o más. El OI **no pasa del 36 %**, y sobre 70 dB cae.
 :::
 :::figura cap11_retrococlear reflejos
 - @ipsi OI 1000 | Sin reflejo al estimular el OI, ni ipsi ni contralateral.
@@ -475,7 +487,7 @@ Intenta resolver cada caso con los pasos del aprendizaje basado en problemas ant
 
 #### Razonamiento
 
-Todas las pruebas apuntan al mismo lugar. La cóclea del OD funciona: hay emisiones y la onda I está en su lugar. Pero la señal llega tarde al tronco, los reflejos fallan al estimular ese oído y la discriminación es mucho peor que el umbral. Es una **lesión del VIII par derecho** hasta que la imagen demuestre otra cosa.
+Todas las pruebas apuntan al mismo lugar. La cóclea del OD funciona: hay emisiones y la onda I está en su lugar. Pero la señal llega tarde al tronco, los reflejos fallan al estimular ese oído, el tono se apaga (deterioro de 30 dB y STAT positivo) y la discriminación es mucho peor que el umbral, con roll-over. Es una **lesión del VIII par derecho** hasta que la imagen demuestre otra cosa.
 
 #### Diagnóstico y qué sigue
 
@@ -579,6 +591,7 @@ Es el paciente que vuelve molesto porque "el audífono no le sirve". La discrimi
 1. Olsen WO, Noffsinger D. Comparison of one new and three old tests of auditory adaptation. Arch Otolaryngol. 1974;99(2):94-9. doi:10.1001/archotol.1974.00780030100004
 1. Jerger J, Jerger S. A simplified tone decay test. Arch Otolaryngol. 1975;101(7):403-7. doi:10.1001/archotol.1975.00780360003001
 1. Priede VM, Coles RR. Masking of the non-test ear in tone decay, Békésy audiometry and SISI tests. J Laryngol Otol. 1975;89(3):227-36. doi:10.1017/s0022215100080324
+1. Jerger J, Jerger S. Diagnostic significance of PB word functions. Arch Otolaryngol. 1971;93(6):573-80.
 1. Cook RD, Ferguson MO, Hall JW 3rd, Grose JH, Pillsbury HC. The effects of amplitude modulation on acoustic reflex decay. Audiol Neurootol. 1999;4(2):104-113. doi:10.1159/000013827
 1. Rosenhall U, Lidén G, Nilsson E. Stapedius reflex decay in normal hearing subjects. J Am Audiol Soc. 1979;4(4):157-62.
 1. Hirsch A. The stapedius reflex tests in retrocochlear hearing disorders. Audiology. 1983;22(5):463-70. doi:10.3109/00206098309072807

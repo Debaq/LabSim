@@ -57,7 +57,7 @@ No se hacen todas: se hacen las que contestan la pregunta del caso, según la p�
 | **IWA** | reclutamiento por vía ósea | los mismos del Fowler | 250 a 4.000 Hz |
 | **SISI** | reclutamiento | no pide asimetría: se hace en cada oído | las de la pérdida |
 | **Carhart y Rosenberg** | adaptación en el umbral | asimetría, acúfeno unilateral o discriminación que no calza; pérdida de hasta 70 dB HL | dos contiguas, de 500 a 4.000 Hz |
-| **STAT** | adaptación a nivel alto | los mismos; umbral de molestia por encima del nivel de la prueba | 500, 1.000 y 2.000 Hz |
+| **STAT** | adaptación a nivel alto | los mismos; que el paciente tolere el nivel de la prueba (LDL de 100 dB HL o más) | 500, 1.000 y 2.000 Hz |
 | **Stenger** | pérdida no orgánica | pérdida de un solo oído o muy asimétrica | la de la asimetría |
 :::
 
@@ -77,13 +77,14 @@ Las supraliminares no necesitan un equipo especial: usan los controles del audi�
 En LabSim el paciente responde según la **última instrucción** que le diste. Cada prueba tiene la suya en la ventana *Comandos de voz*.
 
 :::imagen /docs/manual/img/estudiante/comandos-de-voz.png Las instrucciones de las pruebas supraliminares en LabSim
+- @-3,15 | **Colocar fonos.** La de los umbrales, y también la del Stenger: al paciente no se le anuncia otra prueba.
 - @-3,70 | **Pitos fuertes.** El umbral de molestia (LDL), antes de cualquier supraliminar (→ H5).
 - @32.8,48 | **Dos pitos.** El Fowler. Después, *¿Sonidos iguales?* o *¿En qué oído?* para preguntar en cada comparación.
 - @32.8,81 | **Cambie de volumen.** El SISI: el paciente dice "sí" cada vez que nota la subida.
 - @103,15 | **Mano levantada.** El Carhart.
 - @103,81 | **Rosemberg bilateral.** El Rosenberg (así se escribe en el botón).
 - @103,70 | **Ruido blanco contralateral.** El STAT: tono fuerte en un oído y ruido en el otro.
-- @103,26 | **Mano levantada en ruido.** El Stenger, con los dos canales sonando.
+- @103,26 | **Mano levantada en ruido.** El Carhart avisando el ruido en el otro oído.
 :::
 
 ## Paso a paso
@@ -205,7 +206,7 @@ El STAT (*suprathreshold adaptation test*) no busca nada en el umbral. Presenta 
 En dB HL, con fonos supraaurales, el tono va a **100 dB en 500 y 2.000 Hz y 105 dB en 1.000 Hz**, con **ruido blanco a 90 dB** en el oído contrario. Cada oído se evalúa por separado.
 
 :::ojo Ojo clínico
-En el STAT el oído contrario **siempre** va enmascarado: a 100 dB HL el tono cruza el cráneo de sobra y el oído sano lo oiría por el malo. Y mira el LDL antes: si el paciente marca molestia en 100 dB o menos, el STAT no se hace.
+En el STAT el oído contrario **siempre** va enmascarado: a 100 dB HL el tono cruza el cráneo de sobra y el oído sano lo oiría por el malo. Y mira el LDL antes: si el paciente marca molestia bajo 100 dB HL, el STAT no se hace.
 :::
 
 ### Pérdida no orgánica
@@ -228,6 +229,7 @@ Sin enmascarar, un oído "muerto" responde por el otro alrededor de los 40 a 60 
 
 Se basa en un efecto que el paciente no controla: si suena el mismo tono en los dos oídos a la vez, **solo se percibe el que está más fuerte**, en el oído donde está más fuerte (Kinstler y cols., 1972). Sirve cuando la pérdida que se informa es de un solo oído o muy asimétrica.
 
+1. **Instrucción**: la misma de los umbrales, "cada pito que escuche, levante la mano". No se le anuncia nada distinto: si el paciente sabe que viene otra prueba, aprende a cuidarse.
 1. **Tono al oído bueno** 10 dB sobre su umbral. El paciente responde.
 2. **Tono a los dos oídos a la vez**: el bueno sigue 10 dB sobre su umbral y el "malo" va **10 dB bajo el umbral que el paciente informó**.
 3. **Si la pérdida es real**, el tono del oído malo no se oye y el paciente sigue oyendo el del bueno: **responde**. Stenger negativo.
@@ -272,11 +274,12 @@ Ninguna prueba sola basta. Lo que da confianza es que varias apunten al mismo la
 | Fowler, 1 kHz | referencia | **reclutamiento completo**: los dos suenan igual a 70 dB HL |
 | SISI, 1 y 2 kHz | 0 % | **alrededor de 90 %** |
 | Carhart, 1 y 2 kHz | no det. | det. 5 dB |
+| STAT, 500, 1.000 y 2.000 Hz | (−) | (−): oye el minuto completo |
 :::
 
-Las tres pruebas de reclutamiento coinciden y el deterioro es el de un oído normal. Todo apunta a la cóclea (→ cap. 9). Su informe podría decir:
+Las tres pruebas de reclutamiento coinciden, el deterioro en el umbral es el de un oído normal y a 100 dB HL el tono se sostiene. Todo apunta a la cóclea (→ cap. 9). Su informe podría decir:
 
-> **Pruebas supraliminares.** OI: Fowler en 1 kHz con reclutamiento completo. SISI de 90 % en 1 y 2 kHz en el OI y de 0 % en el OD. Carhart en 1 y 2 kHz: OI deterioro de 5 dB, OD sin deterioro. Hallazgos concordantes con reclutamiento en el OI, sin signos de adaptación patológica.
+> **Pruebas supraliminares.** OI: Fowler en 1 kHz con reclutamiento completo. SISI de 90 % en 1 y 2 kHz en el OI y de 0 % en el OD. Carhart en 1 y 2 kHz: OI deterioro de 5 dB, OD sin deterioro. STAT negativo en ambos oídos. Hallazgos concordantes con reclutamiento en el OI, sin signos de adaptación patológica.
 
 Igual que en la audiometría, el informe dice qué se midió y qué mostró, no el diagnóstico médico.
 
@@ -296,11 +299,12 @@ Igual que en la audiometría, el informe dice qué se midió y qué mostró, no 
 | SISI, 2 y 4 kHz | **alrededor de 10 %** | 0 % |
 | Carhart, 2 y 4 kHz | **det. 30 dB** | no det. |
 | Rosenberg, 2 y 4 kHz | **30 dB** | no det. |
+| STAT, 500, 1.000 y 2.000 Hz | **(+)**: baja la mano antes del minuto | (−) |
 :::
 
-No hay reclutamiento y el tono se apaga. Las supraliminares apuntan al nervio, y con eso Raúl va a PEAT y a resonancia (→ cap. 11).
+No hay reclutamiento y el tono se apaga: en el umbral y también a 100 dB HL, donde a su OD le sobran 70 a 85 dB de margen. En el STAT el hallazgo es no llegar al minuto, no el segundo exacto en que baja la mano. Las supraliminares apuntan al nervio, y con eso Raúl va a PEAT y a resonancia (→ cap. 11).
 
-Lo de Patricia y Raúl se resume así, junto con lo que agregan el STAT y el reflejo:
+Lo de Patricia y Raúl se resume así, junto con lo que agrega el reflejo:
 
 :::ayuda-ancho Cóclea o nervio, lado a lado
 | | Coclear | Retrococlear |
@@ -331,12 +335,13 @@ Cada prueba se hace con su instrucción de la figura H6.1, dada con *Talkback*, 
 
 - **SISI**: con el tono sonando, sube un clic de 1 dB y vuelve a bajarlo. Las subidas de 5 dB las nota siempre; con el portador bajo el umbral no nota ninguna.
 - **Fowler**: en una frecuencia que no cumple los requisitos, el paciente contesta como un oído sin reclutamiento.
-- **Deterioro tonal**: en el Carhart cada subida reinicia el minuto; en el Rosenberg el minuto es uno solo. El minuto es real: cronométralo.
-- **STAT**: el tono va a 100 dB HL, con ruido blanco de al menos 80 dB en el otro oído. A otro nivel, o sin el ruido, no hay resultado.
+- **Deterioro tonal**: en el Carhart cada subida reinicia el minuto; en el Rosenberg el minuto es uno solo. El minuto es real: cronométralo. El Carhart se instruye con *Mano levantada* o, si quieres avisarle del ruido en el otro oído, con *Mano levantada en ruido*: es la misma prueba.
+- **STAT**: el tono va a 100 dB HL, con ruido blanco de al menos 80 dB en el otro oído. A otro nivel, o sin el ruido, no hay resultado. Un oído retrococlear baja la mano antes del minuto aunque le sobre margen sobre su umbral; uno coclear lo sostiene.
+- **Stenger**: se instruye con *Colocar fonos*, como los umbrales. El paciente lo reconoce por el estímulo: el mismo tono, por vía aérea, en los dos oídos a la vez. Percibe el tono con más nivel de sensación sobre sus umbrales **verdaderos**, no sobre los que te dio.
 - **Orden**: el indicador de técnica espera las supraliminares entre la logoaudiometría y la vía ósea.
 
 :::comentario Lo que el simulador todavía no tiene
-La IWA no se practica en LabSim, y no hay pacientes de práctica con pérdida no orgánica (el docente puede crear uno marcando el Stenger). El paciente simulado tampoco se cansa ni se confunde; uno real sí.
+La IWA no se practica en LabSim, y entre los pacientes de práctica no hay ninguno con pérdida no orgánica. El docente puede crear uno marcando el oído fingido (casilla Stenger del caso): sus umbrales son los que el paciente entrega, y el verdadero se supone igual al del otro oído, como en alguien que oye parejo y finge una pérdida de un lado. Lo que todavía no se puede es cargar el umbral verdadero del oído fingido, así que una pérdida real que el paciente exagera no se puede armar. El paciente simulado tampoco se cansa ni se confunde; uno real sí.
 :::
 
 Para practicar, Patricia y Raúl están entre los pacientes de práctica (★).
@@ -345,7 +350,7 @@ Para practicar, Patricia y Raúl están entre los pacientes de práctica (★).
 1. En Patricia, ¿por qué no puedes hacer el Fowler en 500 Hz? ¿En qué frecuencias sí, y cuál elegirías primero?
 2. En un Carhart partiste en 35 dB HL y el paciente oyó el minuto completo recién a 65 dB HL. ¿Cuánto deterioró? ¿Qué cambia si hubieras partido 10 dB sobre el umbral?
 3. Raúl tiene un SISI bajo en el OD. ¿Te basta para decir que no recluta? ¿Qué otra prueba de reclutamiento le puedes hacer y qué esperas de ella?
-4. Hernán (caso H3.3) tiene una presbiacusia simétrica y un LDL de 100 dB. ¿Por qué no le puedes hacer un Fowler y sí un SISI? ¿Por qué no le harías un STAT?
+4. Hernán (caso H3.3) tiene una presbiacusia simétrica y un LDL de 100 dB. ¿Por qué no le puedes hacer un Fowler y sí un SISI? ¿Está indicado un STAT?
 5. Un paciente informa 70 dB en el OD y 10 dB en el OI en 1 kHz. Presentas 20 dB al OI y 60 dB al OD a la vez, y no responde. ¿Cómo se llama esa prueba y qué te dice el resultado?
 :::
 
