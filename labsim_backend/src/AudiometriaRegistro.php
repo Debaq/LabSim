@@ -168,6 +168,11 @@ final class AudiometriaRegistro
                 } elseif ($abiertas[$c] === null && $on && self::esTono($estado['canales'][$c]['stim'])) {
                     $presentaciones[] = self::presentacion($estado, $c, $t, $mano) + ['ms' => $ms];
                     $abiertas[$c] = count($presentaciones) - 1;
+                    if (self::esStenger($estado) && $abiertas[1 - $c] !== null) {
+                        // el tono del otro canal se abrió primero, solo, y
+                        // quedó como umbral: es la otra mitad del Stenger
+                        $presentaciones[$abiertas[1 - $c]]['prueba'] = 'supra';
+                    }
                     $pruebas[] = [$t, $presentaciones[$abiertas[$c]]['prueba']];
                 } elseif ($on && ($estado['canales'][$c]['stim'] === 'Habla')) {
                     $pruebas[] = [$t, 'logo'];
@@ -226,7 +231,29 @@ final class AudiometriaRegistro
         if ($estado['prueba'] !== 'Umbrales') {
             return 'logo';
         }
+        if (self::esStenger($estado)) {
+            // se instruye como los umbrales (colocar_fonos), pero es una
+            // supraliminar y no entra en la técnica de los aéreos
+            return 'supra';
+        }
         return $via === 'osea' ? 'oseos' : 'aereos';
+    }
+
+    /**
+     * Stenger: el mismo tono por vía aérea en los dos oídos a la vez
+     * (response.py: _es_stenger).
+     */
+    private static function esStenger(array $estado): bool
+    {
+        $a = $estado['canales'][0];
+        $b = $estado['canales'][1];
+        return $estado['prueba'] === 'Umbrales'
+            && $a['on'] && $b['on']
+            && self::esTono((string) $a['stim']) && $a['stim'] === $b['stim']
+            && $a['trans'] === 'Aerea' && $b['trans'] === 'Aerea'
+            && self::oido((string) $a['output']) !== null
+            && self::oido((string) $b['output']) !== null
+            && self::oido((string) $a['output']) !== self::oido((string) $b['output']);
     }
 
     public static function pruebaDeInstruccion(?string $cmd): ?string

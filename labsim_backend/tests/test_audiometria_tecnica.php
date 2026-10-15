@@ -502,3 +502,25 @@ $porCita = AudiometriaTecnica::logsPorCita([
 t_eq(array_keys($porCita), [4, 5], 'Técnica: solo las citas pedidas (el id puede venir como texto)');
 t_eq(count($porCita[4]), 1, 'Técnica: lo que no es del audiómetro no entra');
 t_eq($porCita[4][0]['payload']['freq'], 1000, 'Técnica: payload decodificado');
+
+// Stenger: se instruye con colocar_fonos, pero el mismo tono en los dos oídos
+// es una supraliminar y no entra en la técnica de los umbrales aéreos.
+$stengerCanal = static function (bool $on, string $output, int $db): array {
+    return ['on' => $on, 'invertido' => false, 'intensity' => "{$db} dB HL", 'stim' => 'Tono', 'output' => $output, 'trans' => 'Aerea', 'contin' => 'Continuo'];
+};
+$stengerFoto = static function (bool $od, bool $oi) use ($stengerCanal): array {
+    return ['prueba' => 'Umbrales', 'freq' => '1000 Hz', 'step' => 5, 'instruccion' => 'colocar_fonos',
+        'canales' => [$stengerCanal($od, 'Derecha', 15), $stengerCanal($oi, 'Izquierda', 30)]];
+};
+$stengerLog = static function (string $ts, string $accion, array $payload): array {
+    return ['client_ts' => "2026-10-15 10:00:{$ts}", 'action' => $accion, 'payload' => $payload + ['v' => 2, 'appointment_id' => 7]];
+};
+$stengerReg = AudiometriaRegistro::leer([
+    $stengerLog('00.000', 'audio_talkback_press', ['command' => 'colocar_fonos']),
+    $stengerLog('01.000', 'audio_stim_button', ['ch' => 0, 'play' => true, 'estado' => $stengerFoto(false, false)]),
+    $stengerLog('01.100', 'audio_stim_button', ['ch' => 1, 'play' => true, 'estado' => $stengerFoto(true, false)]),
+    $stengerLog('02.500', 'audio_stim_button', ['ch' => 0, 'play' => false, 'estado' => $stengerFoto(true, true)]),
+    $stengerLog('02.600', 'audio_stim_button', ['ch' => 1, 'play' => false, 'estado' => $stengerFoto(false, true)]),
+], at_caso());
+t_eq(array_column($stengerReg['presentaciones'], 'prueba'), ['supra', 'supra'], 'Stenger: las dos mitades cuentan como supraliminar, no como umbral aéreo');
+t_eq(end($stengerReg['pruebas'])[1], 'supra', 'Stenger: el orden de las pruebas lo ve como supraliminar');

@@ -53,6 +53,12 @@ class ResponseAudiometry():
         'mano_levantada': {                  # Carhart
             'data_key': 'Carhart', 'frequencies': [2, 3, 4, 6], 'contra': 'mask',
         },
+        # Carhart enmascarado: la misma prueba, con la instruccion que avisa
+        # del ruido en el otro oido. Antes iba al Stenger, que no lleva ruido
+        # ni se instruye asi (ver response_stenger).
+        'mano_levantada_en_ruido': {
+            'data_key': 'Carhart', 'frequencies': [2, 3, 4, 6], 'contra': 'mask',
+        },
         'ruido_blanco_contralateral': {       # Stat
             'data_key': 'Stat', 'frequencies': [2, 3, 4], 'contra': 'white_noise',
             'fixed_level': True,
@@ -70,6 +76,12 @@ class ResponseAudiometry():
     STAT_LEVEL_DB = 100
     STAT_LEVEL_TOL = 5     # +-5 dB HL: sigue siendo "administrado a nivel"
     STAT_NOISE_MIN_DB = 80  # ruido contralateral bajo este nivel no enmascara
+    # El valor del caso es el deterioro en la escala del Carhart (dB sobre el
+    # umbral para sostener el minuto). Desde aca el oido es retrococlear y
+    # tampoco sostiene el tono a 100 dB HL: es lo que el Stat busca (Jerger y
+    # Jerger 1975). Leerlo como margen sobre el umbral dejaba el Stat negativo
+    # en casi todo oido retrococlear: a 100 dB HL sobran 70-85 dB.
+    STAT_POSITIVO_DB = 30
 
     def __init__(self,obj_audio):
         super().__init__()
@@ -114,7 +126,7 @@ class ResponseAudiometry():
                 elif self.history_command[0] == 'mano_levantada':
                     self.response_tone_decay('mano_levantada')
                 elif self.history_command[0] == 'mano_levantada_en_ruido':
-                    self.response_stenger()
+                    self.response_tone_decay('mano_levantada_en_ruido')
                 elif self.history_command[0] == 'ruido_blanco_contralateral':
                     self.response_tone_decay('ruido_blanco_contralateral')
                 elif self.history_command[0] == 'rosemberg_bilateral':
@@ -425,6 +437,9 @@ class ResponseAudiometry():
         - Stat: nivel único de protocolo (STAT_LEVEL_DB) con ruido blanco
           contralateral; no se escala. Fuera de ese nivel el paciente sigue
           respondiendo por audibilidad, pero la prueba no entrega resultado.
+          A nivel, un deterioro de STAT_POSITIVO_DB o más (retrococlear) lo
+          pierde antes del minuto; con menos, solo si a 100 dB HL no le
+          alcanza el margen sobre el umbral.
         """
         cfg = self.DECAY_TESTS[command]
         stim_on = self._tone_channel()
@@ -501,8 +516,12 @@ class ResponseAudiometry():
 
         elapsed_ms = self._decay_elapsed_ms(cfg, command, ear, freq, int_)
         extra = int_ - threshold
+        # Stat en oido retrococlear: no lo sostiene a 100 dB HL por mucho que
+        # sobre margen sobre el umbral (ver STAT_POSITIVO_DB)
+        stat_retro = (cfg.get('fixed_level')
+                      and decay_total >= self.STAT_POSITIVO_DB)
 
-        if extra >= decay_total:
+        if extra >= decay_total and not stat_retro:
             # sostiene el tono el minuto completo a este nivel
             self.decay_timer.stop()
             self.upHand()
@@ -519,7 +538,13 @@ class ResponseAudiometry():
         # sostiene más rato y puede calcular la velocidad de deterioro él
         # mismo, en vez de que quede fija en "60s o nada" en cualquier nivel
         # insuficiente. Por eso estos milisegundos tienen que ser tiempo real.
-        hold_ms = int(self.DECAY_HOLD_MS * extra / decay_total) - elapsed_ms
+        frac = extra / decay_total
+        if stat_retro:
+            # cuanto mas deterioro, antes se pierde: 30 dB lo sostiene ~30 s,
+            # 60 dB ~15 s. El hallazgo es no llegar al minuto, no el segundo
+            # exacto
+            frac = min(frac, self.STAT_POSITIVO_DB / (2 * decay_total))
+        hold_ms = int(self.DECAY_HOLD_MS * frac) - elapsed_ms
         if hold_ms <= 0:
             # el tiempo que este nivel daba ya se consumió (en Rosemberg,
             # además, el minuto siguió corriendo mientras se subía el nivel)
@@ -546,32 +571,67 @@ class ResponseAudiometry():
     def _decay_timeout(self):
         self.downHand()  # el paciente "se adapta" y deja de percibir el tono
 
+    def _es_stenger(self):
+        """El mismo tono, por vía aérea, en los dos oídos a la vez."""
+        a = self.data['audio']
+        return (a['test'] == 'Umbrales'
+                and a['stimOn'] == [True, True]
+                and a['stim'][0] == a['stim'][1] and a['stim'][0] in (0, 1)
+                and a['trans'] == [0, 0]
+                and a['output'][0] != a['output'][1])
+
+    def _umbral_verdadero(self, freq, ear):
+        """Umbral aéreo con el que el oído oye de verdad.
+
+        El caso guarda el umbral que el paciente DA. En un oído orgánico es
+        el mismo; en uno marcado 'Stenger' (pérdida no orgánica) es el que
+        finge, y el verdadero no está en el caso: se toma el del otro oído
+        (pérdida unilateral fingida en alguien que oye parejo), sin pasar
+        del que da. Con los dos marcados no hay oído de referencia y se usa
+        el que da (el Stenger necesita asimetría)."""
+        dado = self.dbdata['Aerea_mkg'][freq]
+        stenger = self.dbdata.get('Stenger') or [False, False]
+        if stenger[ear] and not stenger[1 - ear]:
+            return min(dado[ear], dado[1 - ear])
+        return dado[ear]
+
     def response_stenger(self):
-        """Stenger: tono simultaneo en ambos oidos. Si el oido peor esta
-        marcado como funcional/no organico ('Stenger'), el paciente no
-        responde pese a oir claramente por el oido sano."""
-        if self.data['audio']['test'] != 'Umbrales':
+        """Stenger: el mismo tono en los dos oídos a la vez.
+
+        Principio de Stenger: de dos tonos iguales y simultáneos se percibe
+        solo el de mayor nivel de sensación, medido contra los umbrales
+        VERDADEROS, y se oye en ese oído. Técnica clásica: 10 dB sobre el
+        umbral del oído bueno y 10 dB bajo el que el paciente dio en el malo.
+
+        - Pérdida orgánica: el tono del oído malo queda bajo su umbral real,
+          se oye el del bueno y levanta la mano -> Stenger negativo.
+        - Pérdida no orgánica: el tono del oído "malo" tiene más nivel de
+          sensación, se oye solo en ese oído y, como finge no oír por ahí
+          a ese nivel, no levanta la mano aunque el del bueno sea audible
+          -> Stenger positivo.
+        """
+        if not self._es_stenger():
             return
-        if self.data['audio']['stimOn'].count(True) != 2:
+        a = self.data['audio']
+        freq = a['freq']
+        nivel = [0, 0]
+        for ch in (0, 1):
+            nivel[a['output'][ch]] = a['int'][ch]
+        sl = [nivel[o] - self._umbral_verdadero(freq, o) for o in (0, 1)]
+        if max(sl) < 0:
+            self.downHand()  # no oye ninguno de los dos
             return
-        out = self.data['audio']['output']
-        if out[0] == out[1]:
+        if sl[0] == sl[1]:
+            self.upHand()    # mismo nivel de sensación: lo oye al centro
             return
-        freq = self.data['audio']['freq']
-        thr = self.dbdata['Aerea'][freq]
-        stenger = self.dbdata.get('Stenger', [False, False])
-        worse = 0 if thr[0] > thr[1] else 1
-        better = int(not worse)
-        int_worse = self.data['audio']['int'][out.index(worse)]
-        int_better = self.data['audio']['int'][out.index(better)]
-        audible_worse = int_worse >= thr[worse]
-        audible_better = int_better >= thr[better]
-        if stenger[worse] and audible_worse and audible_better:
+        percibe = 0 if sl[0] > sl[1] else 1
+        stenger = self.dbdata.get('Stenger') or [False, False]
+        dado = self.dbdata['Aerea_mkg'][freq][percibe]
+        if stenger[percibe] and nivel[percibe] < dado:
+            # lo oye solo en el oído en que dice no oír a ese nivel
             self.downHand()
-        elif audible_worse or audible_better:
-            self.upHand()
         else:
-            self.downHand()
+            self.upHand()
 
     def response_sisi(self, channel, delta):
         """SISI: con el tono portador sonando, cada subida de intensidad es
@@ -832,9 +892,12 @@ class ResponseAudiometry():
                     self.downHand()
 
             elif self.data['audio']['stimOn'].count(True) == 2:
-                debug_print("escucho en ambos oidos")
-                #deberia tener umbral en el mejor
-        
+                # el Stenger se instruye como los umbrales ("cada pito que
+                # escuche, levante la mano"): lo que lo distingue es el
+                # estimulo, el mismo tono en los dos oidos a la vez
+                if self._es_stenger():
+                    self.response_stenger()
+
     def Action(self, action):
         t,p,m = action.split('_')
         if t in ['THR', 'S', 'L']:

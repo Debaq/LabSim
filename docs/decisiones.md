@@ -5523,3 +5523,75 @@ cambio.
   (contenedor inline-block; `width: fit-content` no lo entiende WeasyPrint),
   admiten coordenadas negativas y `:::imagen ruta ancho=60% Título` achica
   la imagen.
+
+## Stat y Stenger contra la clínica (2026-10-15)
+
+**Stat.** El STAT (Jerger y Jerger 1975) presenta el tono a 100-105 dB HL
+durante un minuto, con ruido contralateral: positivo si el tono se pierde
+antes del minuto. Se pensó a nivel alto justamente porque el oído coclear
+puede deteriorar cerca del umbral pero sostiene el tono a ese nivel, y el
+retrococlear no. El motor leía el valor del caso como en el Carhart (dB
+sobre el umbral para sostener el minuto) y exigía que superara 100 dB HL
+menos el umbral: a 100 dB HL sobran 70-85 dB y casi ningún oído
+retrococlear daba positivo (paciente demo 39, schwannoma OD, Stat 30 con
+umbrales de 15-30 dB HL: negativo).
+
+- Se mantiene el nivel fijo de 100 dB HL con ruido blanco de 80 dB o más,
+  y el valor sigue en la escala del Carhart. Cambia cómo se lee:
+  `STAT_POSITIVO_DB = 30` en `response.py`. Con 30 dB o más el oído es
+  retrococlear y pierde el tono antes del minuto aunque le sobre margen;
+  cuanto mayor el valor, antes (60 s × 30 / (2 × valor): 30 dB, unos 30 s;
+  60 dB, unos 15 s). El hallazgo es no llegar al minuto, no el segundo
+  exacto. Con menos de 30 sigue la regla de antes: negativo, salvo que a
+  100 dB HL no alcance el margen sobre el umbral.
+- 30 es el mismo corte que ya usa `CaseProfile::toneDecay()` para el
+  retrococlear (30 retro, 20 mixto, 5 coclear), así que el perfil no se
+  tocó: un caso derivado sale coherente en las tres pruebas, y el Stat
+  positivo cae en el mismo oído que deteriora en Carhart y Rosemberg.
+- Pacientes demo: el 39 pasa a Stat positivo en OD (500, 1000 y 2000 Hz) y
+  sigue negativo en OI. El 36 (coclear bilateral, 0-5 dB) y el 38 (OI
+  coclear, 5 dB) siguen negativos.
+- Se actualizó la ayuda del formulario (`_audiometria.php`).
+
+**Stenger.** Principio de Stenger: de dos tonos iguales y simultáneos se
+percibe solo el de mayor nivel de sensación, medido contra los umbrales
+**verdaderos**, y se oye en ese oído (Martin y Shipp 1982; Kinstler, Phelan
+y Lavender 1972). Técnica clásica: 10 dB sobre el umbral del oído bueno y
+10 dB bajo el que el paciente dio en el malo. El motor dejaba de responder
+solo si el tono del oído malo pasaba el umbral que el paciente dio, así que
+con la técnica clásica la pérdida no orgánica salía negativa.
+
+- La casilla "Stenger" del caso marca el oído con pérdida no orgánica: sus
+  umbrales son los que el paciente **da**. El verdadero no está en el caso
+  y se toma el del otro oído (pérdida unilateral fingida en alguien que oye
+  parejo), sin pasar del que da. Con los dos oídos marcados no hay
+  referencia y se usa el que da: el Stenger necesita asimetría.
+- `response_stenger()`: si el tono que gana en nivel de sensación es el del
+  oído marcado y está bajo el umbral que dio, no levanta la mano
+  (positivo); si no, responde (negativo). Ninguno audible, no responde;
+  empate, responde.
+- **Instrucción.** El Stenger se instruye como los umbrales ("cada pito que
+  escuche, levante la mano"): avisar algo distinto le enseña al paciente a
+  cuidarse. Se reconoce por el estímulo (el mismo tono, por vía aérea, a
+  los dos oídos a la vez) con *Colocar fonos*. El botón *Mano levantada en
+  ruido* anuncia un ruido en el otro oído y pide sostener la mano: es el
+  Carhart con ruido contralateral y ahora corre ese motor (antes iba al
+  Stenger). Los mapeos muertos (`command_voice.json`,
+  `response_A.set_command`) dicen lo mismo.
+- Registro: dos tonos iguales a los dos oídos cuentan como **supraliminar**
+  y no entran en la técnica de los umbrales aéreos (`AudiometriaRegistro`;
+  `AudiometriaTecnica::CACHE_VERSION` pasa a 3). `AudiometriaPaciente` no
+  cambia: es la copia del motor para los registros viejos, y ahí dos tonos
+  con *Colocar fonos* no movían la mano.
+- Queda pendiente (TODO 45): cargar el umbral verdadero del oído fingido.
+  Hoy un positivo exige suponerlo igual al del otro oído; una pérdida
+  orgánica exagerada (parte real, parte fingida) no se puede armar.
+
+Fuentes:
+- Jerger J, Jerger S. A simplified tone decay test. Arch Otolaryngol.
+  1975;101(7):403-407.
+- Martin FN, Shipp DB. The effects of sophistication on three threshold
+  tests for subjects with simulated hearing loss. Ear Hear.
+  1982;3(1):34-36.
+- Kinstler DB, Phelan JG, Lavender RW. The Stenger and speech Stenger tests
+  in functional hearing loss. Audiology. 1972;11(3):187-193.

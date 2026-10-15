@@ -88,10 +88,9 @@ class ToneDecayTest(unittest.TestCase):
         self.assertFalse(self.r.decay_timer.isActive())
 
     def test_stat_positivo_suelta_antes_del_minuto(self):
-        # OD necesita 40 dB sobre umbral (20) = 60 dB de margen; a 100 dB HL
-        # el margen es 80... se sostiene. Con umbral 20 y decay 40 el extra es
-        # 80 >= 40 -> aguanta. Se fuerza un decay mayor al margen disponible.
-        self.r.dbdata["Stat"] = [[0, 0], [200, 0], [0, 0]]
+        # OD con 40 dB de deterioro (retrococlear, >= STAT_POSITIVO_DB): a
+        # 100 dB HL le sobran 80 dB sobre el umbral y aun asi no sostiene el
+        # minuto. Antes el valor se leia como margen y daba negativo.
         self.run_test("ruido_blanco_contralateral", stimOn=[True, True],
                       stim=[0, 4], output=[0, 1], int=[100, 90])
         self.assertTrue(self.hand_up())
@@ -211,7 +210,7 @@ class ToneDecayTest(unittest.TestCase):
         self.assertAlmostEqual(self.r.decay_timer.interval(), bruto_30, delta=1)
 
     def test_stat_recalculado_no_estira_el_minuto(self):
-        self.r.dbdata["Stat"] = [[0, 0], [200, 0], [0, 0]]
+        # OD con 40 dB de deterioro: lo sostiene ~22 s a 100 dB HL
         self.run_test("ruido_blanco_contralateral", stimOn=[True, True],
                       stim=[0, 4], output=[0, 1], int=[100, 90])
         inicial = self.r.decay_timer.interval()

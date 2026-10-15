@@ -85,7 +85,9 @@ class Response(QWidget):
         elif cmd == "mano_levantada":
             self.state = "S_CARHART_X"
         elif cmd == "mano_levantada_en_ruido":
-            self.state = "S_STENGER_X"
+            # Carhart con ruido contralateral; el Stenger va con la
+            # instruccion de umbrales (colocar_fonos), ver response.py
+            self.state = "S_CARHART_MKG"
         elif cmd == "ruido_blanco_contralateral":
             self.state = "S_STAT_X"
         elif cmd == "rosemberg_bilateral":

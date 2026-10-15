@@ -487,7 +487,7 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 
 | Instrucción | Para | Qué hace el paciente |
 |---|---|---|
-| **Colocar fonos** / **Colocar vibrador** | Umbrales sin enmascarar | Levanta la mano mientras suena un tono que oye |
+| **Colocar fonos** / **Colocar vibrador** | Umbrales sin enmascarar (y Stenger) | Levanta la mano mientras suena un tono que oye |
 | **Aerea + ruido** / **vibrador + ruido** | Umbrales enmascarados | Igual, con ruido en el otro oído (sección 17) |
 | **Escuche mi voz** | Umbral de detección de la voz | Con *Habla* y *pa pa pa* elegido, levanta la mano si lo oye |
 | **Pitos fuertes** | Umbral de molestia (LDL) | Dice *«molesta»* cuando el tono le molesta |
@@ -496,7 +496,7 @@ El paciente responde según la **última instrucción** que le diste. Las instru
 | **Mano levantada** | Deterioro tonal (Carhart) | Mantiene la mano arriba mientras siga oyendo el tono |
 | **Rosemberg bilateral** | Deterioro tonal (Rosemberg) | Igual que Carhart |
 | **Ruido blanco contralateral** | STAT | Mantiene la mano arriba mientras siga oyendo el tono |
-| **Mano levantada en ruido** | Stenger | Levanta la mano con los dos canales sonando |
+| **Mano levantada en ruido** | Deterioro tonal (Carhart) con ruido en el otro oído | Igual que Carhart; al ruido no le hace caso |
 
 > Cualquier otra instrucción **reemplaza** la anterior. Si después de *Pitos fuertes* le preguntas *¿Molesta?*, el paciente deja de responder a la LDL hasta que repitas *Pitos fuertes*.
 
@@ -531,7 +531,7 @@ Todas se hacen con el audiómetro y la instrucción de la tabla de la sección 1
 - **Fowler**: los dos canales en *Tono*, uno a cada oído, **Alternado**, e instrucción *Dos pitos*. Manteniendo *Estímulo*, elige *¿Sonidos iguales?* o *¿En qué oído?* y *Talkback*: el paciente contesta. Para otra frecuencia, repite *Dos pitos*.
 - **Deterioro tonal**: tono **continuo** por vía aérea en 500, 1000, 2000 o 4000 Hz, e instrucción *Mano levantada* (Carhart) o *Rosemberg bilateral*. El paciente mantiene la mano arriba mientras oye; cronometra con *Iniciar / Detener / Borrar*. El minuto es real.
 - **LDL**: instrucción *Pitos fuertes*. El paciente dice *«molesta»* al **presentar** el tono a una intensidad que le molesta.
-- **Stenger**: instrucción *Mano levantada en ruido*, con los dos canales sonando, uno a cada oído.
+- **Stenger**: instrucción *Colocar fonos*, la misma de los umbrales (al paciente no se le anuncia nada distinto). Los dos canales en *Tono*, uno a cada oído, sonando a la vez. El paciente levanta la mano si oye un pito.
 
 ## 20. Acumetría
 

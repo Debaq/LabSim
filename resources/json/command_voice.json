@@ -11,7 +11,7 @@
         "dos_pitos": "S_FOWLER_X",
         "cambie_de_volumen": "S_SISI_X",
         "mano_levantada": "S_CARHART_X",
-        "mano_levantada_en_ruido": "S_STENGER_X",
+        "mano_levantada_en_ruido": "S_CARHART_MKG",
         "ruido_blanco_contralateral": "S_STAT_X",
         "rosemberg_bilateral": "S_ROSEMBERG_X",
         "muy_fuerte": "X_X_X",

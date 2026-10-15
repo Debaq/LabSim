@@ -143,7 +143,10 @@ gap significativo. § Parámetros de audiometría configurables por curso
 - [ ] 42. Asimetría declarada por el cuadro (autoinmune, CMV).
 - [ ] 43. Otoscopia ligada al cuadro (OMA, colesteatoma, perforación, glomus,
       atresia).
-- [ ] 45. Eje no orgánico (inconsistencias, SRT vs PTA, Stenger).
+- [ ] 45. Eje no orgánico (inconsistencias, SRT vs PTA). El Stenger ya
+      responde con la casilla del caso, pero el umbral verdadero del oído
+      fingido se supone igual al del otro: falta poder cargarlo. § Stat y
+      Stenger contra la clínica
 - [ ] 46. Procesamiento auditivo central (pruebas dicóticas).
 - [ ] 47. Hiperacusia / misofonía como eje del perfil.
 

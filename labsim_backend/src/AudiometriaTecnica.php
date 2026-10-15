@@ -102,7 +102,9 @@ final class AudiometriaTecnica
      */
     // 2: "Withe Noise" pasó a "White Noise" (2026-10-09); lo guardado
     // antes trae el rótulo viejo en el ruido de cada presentación.
-    public const CACHE_VERSION = 2;
+    // 3: el Stenger (mismo tono en los dos oídos) cuenta como supraliminar,
+    // no como presentación de umbral aéreo (2026-10-15).
+    public const CACHE_VERSION = 3;
 
     /**
      * Indicadores de la atención $appointmentId del alumno $studentId, o null
