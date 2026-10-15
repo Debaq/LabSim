@@ -19,6 +19,10 @@ NO_REALIZABLE = 'NR'
 def _curva(caso, lado, sonda=226):
     from impedanciometria.z_generator import (Z_225, edad_meses_del_caso,
                                               map_letter_for_probe, z1000_del_caso)
+    # La app maneja la sonda como texto ('226'/'1000', ver Z.set_probe_freq):
+    # con un entero map_letter_for_probe no reconoce la de 1000 y la semilla
+    # sale distinta de la que ve el alumno.
+    sonda = str(sonda)
     letra = caso.get(f'Z_{lado}')
     try:
         vol = caso['volume'][0 if lado == 'OD' else 1]

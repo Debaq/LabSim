@@ -579,7 +579,7 @@ Es el paciente que vuelve molesto porque "el audífono no le sirve". La discrimi
 1. Olsen WO, Noffsinger D. Comparison of one new and three old tests of auditory adaptation. Arch Otolaryngol. 1974;99(2):94-9. doi:10.1001/archotol.1974.00780030100004
 1. Jerger J, Jerger S. A simplified tone decay test. Arch Otolaryngol. 1975;101(7):403-7. doi:10.1001/archotol.1975.00780360003001
 1. Priede VM, Coles RR. Masking of the non-test ear in tone decay, Békésy audiometry and SISI tests. J Laryngol Otol. 1975;89(3):227-36. doi:10.1017/s0022215100080324
-1. Cook RD, Ferguson MO, Hall JW 3rd, Grose JH, Pillsbury HC. The effects of amplitude modulation on acoustic reflex decay. Audiol Neurootol. 1999;4(2):117-26.
+1. Cook RD, Ferguson MO, Hall JW 3rd, Grose JH, Pillsbury HC. The effects of amplitude modulation on acoustic reflex decay. Audiol Neurootol. 1999;4(2):104-113. doi:10.1159/000013827
 1. Rosenhall U, Lidén G, Nilsson E. Stapedius reflex decay in normal hearing subjects. J Am Audiol Soc. 1979;4(4):157-62.
 1. Hirsch A. The stapedius reflex tests in retrocochlear hearing disorders. Audiology. 1983;22(5):463-70. doi:10.3109/00206098309072807
 1. Grason-Stadler (GSI). Acoustic Reflex Testing (guía de pruebas).
