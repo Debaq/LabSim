@@ -1,0 +1,34 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "compresion_microvascular",
+      "OI": "normal"
+    },
+    "edad": 47,
+    "sexo": "mujer"
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma"
+    },
+    {
+      "tipo": "logoaudiometria"
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    }
+  ]
+}

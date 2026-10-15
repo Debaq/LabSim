@@ -60,10 +60,12 @@ def dibujar(caso, enmascarado=True, oidos=('OD', 'OI')):
         pts = c[lado]
         s.trazo([(X(db), Y(p)) for db, p in pts], col, E.LINEA)
         for db, p in pts:
+            s.ancla(f'{lado} {db}', X(db), Y(p))
             if db % 10 == 0:
                 _simbolo(s, lado, X(db), Y(p))
         # rótulo de la máxima, una sola vez por curva
         db_max, p_max = max(pts, key=lambda q: (q[1], -q[0]))
+        s.ancla(f'{lado} max', X(db_max), Y(p_max))
         # arriba de la curva, salvo pegado al techo (ahí iría sobre la leyenda)
         dy = 14 if p_max >= 90 else -9
         s.texto(X(db_max) + 6, Y(p_max) + dy, f'{p_max:.0f} %', E.T_CHICO, E.TINTA_2, 'start')

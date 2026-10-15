@@ -67,6 +67,7 @@ def dibujar(caso, oidos=('OD', 'OI'), nivel=90, ms_max=5.0):
             v = _interp(lat, r['t'], r['y'])
             arriba = v >= base
             s.linea(X(lat), Y(base), X(lat), Y(v), E.TINTA_2, 0.8)
+            s.ancla(f'{lado} {clave}', X(lat), Y(v))
             s.texto(X(lat) + 4, Y(v) + (-6 if arriba else 12), rot, E.T_CHICO, E.TINTA, 'start', 600)
         res = [('PS/PA', f"{m['sp_ap']:.2f}".replace('.', ',')),
                ('Razón de áreas', f"{m['area_ratio']:.2f}".replace('.', ',')),

@@ -1,4 +1,5 @@
 """Lienzo SVG mínimo: lo justo para las figuras del libro, sin dependencias."""
+import json
 from xml.sax.saxutils import escape
 
 from . import estilo as E
@@ -12,6 +13,12 @@ class Svg:
     def __init__(self, ancho, alto):
         self.ancho, self.alto = ancho, alto
         self.partes = []
+        # Anclas: dónde quedó cada cosa dibujada ("OD 4000", "OD 80 V"...),
+        # para que el libro ponga globos encima sin rehacer las cuentas.
+        self.anclas = {}
+
+    def ancla(self, clave, x, y):
+        self.anclas[clave] = [round(x, 2), round(y, 2)]
 
     def crudo(self, s):
         self.partes.append(s)
@@ -47,4 +54,6 @@ class Svg:
     def svg(self):
         return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {_n(self.ancho)} {_n(self.alto)}" '
                 f'width="{_n(self.ancho)}" height="{_n(self.alto)}" font-family="{E.FUENTE}">'
-                f'<rect width="100%" height="100%" fill="{E.PAPEL}"/>' + ''.join(self.partes) + '</svg>')
+                f'<rect width="100%" height="100%" fill="{E.PAPEL}"/>' + ''.join(self.partes)
+                + (f'<metadata id="anclas">{json.dumps(self.anclas, ensure_ascii=False)}</metadata>' if self.anclas else '')
+                + '</svg>')

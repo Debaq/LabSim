@@ -63,9 +63,17 @@ PHP
 
 cat > "$TRABAJO/_libro/ultimo_caso.php" <<'PHP'
 <?php
-// cases.data del último caso creado, tal como quedó en la base.
+// cases.data del último caso creado, tal como quedó en la base, con el
+// paciente al lado (mismo formato que docs/manual/capturas/casos_demo.json).
 $pdo = new PDO('sqlite:/app/data/labsim.sqlite');
-echo $pdo->query('SELECT data FROM cases ORDER BY id DESC LIMIT 1')->fetchColumn();
+$f = $pdo->query('SELECT c.data, p.nombre, p.apellido, p.rut, p.fecha_nac, p.historia_clinica
+                  FROM cases c LEFT JOIN patients p ON p.id = c.patient_id
+                  ORDER BY c.id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);
+$data = json_decode($f['data'], true);
+$data['paciente_snapshot'] = ['nombre' => $f['nombre'], 'apellido' => $f['apellido'],
+                              'rut' => $f['rut'], 'fecha_nac' => $f['fecha_nac']];
+$data['historia_clinica'] = $f['historia_clinica'];
+echo json_encode($data, JSON_UNESCAPED_UNICODE);
 PHP
 
 podman rm -f "$NOMBRE" >/dev/null 2>&1 || true

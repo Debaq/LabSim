@@ -227,8 +227,8 @@
   "edad_horas": null,
   "nacimiento": [],
   "volume": [
-   1.6,
-   1.35,
+   1.75,
+   1.4,
    "N/D"
   ],
   "UMD": [
@@ -840,7 +840,7 @@
     "tinnitus": true,
     "anamnesis": true
    },
-   "at": "2026-10-15T15:32:44+00:00",
+   "at": "2026-10-15T15:52:07+00:00",
    "by": "andrea.soto"
   },
   "tipo": "normal",
@@ -848,8 +848,7 @@
    "nombre": "Lourdes Susana",
    "apellido": "García Guzmán",
    "rut": "12565584",
-   "fecha_nac": "08-03-1974",
-   "procedimiento": "Audiometría"
+   "fecha_nac": "08-03-1974"
   },
   "historia_clinica": ""
  }

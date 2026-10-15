@@ -1,0 +1,37 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "sensorioneural"
+    },
+    "grado": {
+      "OI": "moderada"
+    },
+    "edad": 66,
+    "sexo": "hombre"
+  },
+  "figuras": [
+    {
+      "tipo": "audiograma"
+    },
+    {
+      "tipo": "logoaudiometria"
+    },
+    {
+      "tipo": "reflejos"
+    },
+    {
+      "tipo": "abr",
+      "niveles": [
+        80,
+        60,
+        40
+      ],
+      "marcar": [
+        "I",
+        "III",
+        "V"
+      ]
+    }
+  ]
+}

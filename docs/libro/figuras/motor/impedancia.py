@@ -63,6 +63,8 @@ def timpanograma(caso, oidos=('OD', 'OI'), escala_ml=2.0, sonda=226):
             s.texto(x0 + pw / 2, mt + ph / 2, 'Sin timpanograma en el caso', E.T_ROTULO, E.TENUE)
             continue
         pts = sorted(zip(d['x'], d['y']))
+        px, py = max(pts, key=lambda q: q[1])
+        s.ancla(f'{lado} pico', X(px), Y(py))
         s.trazo([(X(px), Y(py)) for px, py in pts if x_min <= px <= x_max], col, E.LINEA)
         if _f(d['compliancia']) and _f(d['compliancia']) > escala_ml:
             s.texto(x0 + pw - 4, mt + 10, f'se sale de la escala de {escala_ml:g} mL', E.T_CHICO, E.TENUE, 'end')
@@ -121,6 +123,7 @@ def reflejos(caso):
         s.texto(92, y + rh / 2 + 3, sub, E.T_EJE, E.TINTA_2, 'start')
         for i, v in enumerate(vals):
             cx = ml + cw * i + cw / 2
+            s.ancla(f"{'ipsi' if nombre == 'Ipsilateral' else 'contra'} {lado} {FRECS_REFLEJO[i]}", cx, y + rh / 2)
             if i == 4 and nombre == 'Ipsilateral' and v is None:
                 s.texto(cx, y + rh / 2 + 3, '·', E.T_ROTULO, E.MUY_TENUE)
             elif v is None or v >= SIN_REFLEJO:

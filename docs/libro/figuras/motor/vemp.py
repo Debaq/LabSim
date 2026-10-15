@@ -74,6 +74,7 @@ def dibujar(caso, subtipo='cvemp', intensidad=100, promedios=200, ms_max=50.0):
         d = r[lado]
         s.trazo([(X(t), Y(v)) for t, v in zip(d['x'], d['y']) if 0 <= t <= ms_max], col, E.LINEA)
         for p, (lat, amp) in d['marcas'].items():
+            s.ancla(f'{lado} {ROTULO.get(p, p)}', X(lat), Y(amp))
             arriba = amp >= 0
             s.linea(X(lat), Y(amp) + (-4 if arriba else 4), X(lat), Y(amp) + (-10 if arriba else 10), E.TINTA_2, 0.8)
             s.texto(X(lat), Y(amp) + (-13 if arriba else 20), ROTULO.get(p, p), E.T_CHICO, E.TINTA, peso=600)

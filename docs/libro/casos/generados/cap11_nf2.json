@@ -1,0 +1,861 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "nf2",
+   "OI": "nf2"
+  },
+  "grado": {
+   "OD": "moderada",
+   "OI": "leve"
+  },
+  "edad": 24,
+  "sexo": "hombre"
+ },
+ "semilla": 1609524647,
+ "data": {
+  "gender": 0,
+  "id": 9647,
+  "Aerea": [
+   [
+    20,
+    15
+   ],
+   [
+    25,
+    10
+   ],
+   [
+    35,
+    15
+   ],
+   [
+    40,
+    25
+   ],
+   [
+    60,
+    35
+   ],
+   [
+    85,
+    45
+   ],
+   [
+    90,
+    55
+   ],
+   [
+    100,
+    55
+   ],
+   [
+    115,
+    65
+   ]
+  ],
+  "Osea": [
+   [
+    20,
+    15
+   ],
+   [
+    25,
+    10
+   ],
+   [
+    35,
+    15
+   ],
+   [
+    40,
+    25
+   ],
+   [
+    60,
+    35
+   ],
+   [
+    85,
+    45
+   ],
+   [
+    90,
+    55
+   ],
+   [
+    100,
+    55
+   ],
+   [
+    115,
+    65
+   ]
+  ],
+  "LDL": [
+   [
+    100,
+    100
+   ],
+   [
+    100,
+    100
+   ],
+   [
+    110,
+    100
+   ],
+   [
+    115,
+    100
+   ],
+   [
+    120,
+    110
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ],
+   [
+    120,
+    120
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    20,
+    15
+   ],
+   [
+    25,
+    10
+   ],
+   [
+    35,
+    15
+   ],
+   [
+    40,
+    25
+   ],
+   [
+    60,
+    35
+   ],
+   [
+    85,
+    45
+   ],
+   [
+    90,
+    55
+   ],
+   [
+    100,
+    55
+   ],
+   [
+    115,
+    65
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    20,
+    15
+   ],
+   [
+    25,
+    10
+   ],
+   [
+    35,
+    15
+   ],
+   [
+    40,
+    25
+   ],
+   [
+    60,
+    35
+   ],
+   [
+    85,
+    45
+   ],
+   [
+    90,
+    55
+   ],
+   [
+    100,
+    55
+   ],
+   [
+    115,
+    65
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "A",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "positivo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "positivo"
+   }
+  },
+  "Weber": {
+   "500": "oi",
+   "1000": "oi"
+  },
+  "sector": "Camara_sono",
+  "edad": 24,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.27,
+   1.26,
+   "N/D"
+  ],
+  "UMD": [
+   {
+    "int": 80,
+    "percentage": 16
+   },
+   {
+    "int": 60,
+    "percentage": 52
+   }
+  ],
+  "SDT": [
+   35,
+   20
+  ],
+  "SRT": [
+   35,
+   20
+  ],
+  "Fowler": {
+   "enabled": true,
+   "patterns": {
+    "2": "none"
+   },
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   10,
+   10
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   false,
+   false
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ]
+  ],
+  "Stat": [
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ]
+  ],
+  "Rosemberg": [
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ],
+   [
+    30,
+    30
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ]
+   ],
+   "contra": [
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     130,
+     130
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": true,
+    "oi": true
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": false,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": false,
+    "hta": false
+   },
+   "medicamentos": "",
+   "cirugias": "",
+   "otros": "",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Víctor",
+     "edad": 24,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 83,
+     "confiabilidad": 89,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": true,
+   "lateralidad": "bilateral",
+   "oido": null,
+   "predominio": "igual",
+   "pulsatil": false,
+   "permanente": true,
+   "ruido": "Pitido",
+   "frecuencia": 4000
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 25,
+    "retro": {
+     "i_iii_ms": 0.45,
+     "iii_v_ms": 0.35,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.4,
+     "microfonica": "normal",
+     "desincronia": "leve",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 25,
+    "retro": {
+     "i_iii_ms": 0.45,
+     "iii_v_ms": 0.35,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.4,
+     "microfonica": "normal",
+     "desincronia": "leve",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   }
+  },
+  "ABR": {
+   "OD": {
+    "type": "neural",
+    "umbral": 90,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 55,
+     "tone_burst_1000Hz": 55,
+     "tone_burst_2000Hz": 70,
+     "tone_burst_4000Hz": 95,
+     "nb_ce_chirp_ls_500Hz": 50,
+     "nb_ce_chirp_ls_1000Hz": 50,
+     "nb_ce_chirp_ls_2000Hz": 65,
+     "nb_ce_chirp_ls_4000Hz": 95,
+     "click": 90,
+     "ce_chirp": 70,
+     "ce_chirp_ls": 70
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": null,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": null,
+     "nb_ce_chirp_ls_2000Hz": null,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.45,
+     "iii_v_ms": 0.35,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.4,
+     "microfonica": "normal",
+     "desincronia": "leve",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": false,
+    "repro_var": 0.32,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.28,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 3460,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.02,
+      "amp": 0.02
+     },
+     "onda_III": {
+      "lat": 0.03,
+      "amp": 0
+     },
+     "onda_V": {
+      "lat": 0.03,
+      "amp": 0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "neural",
+    "umbral": 55,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 35,
+     "tone_burst_1000Hz": 40,
+     "tone_burst_2000Hz": 45,
+     "tone_burst_4000Hz": 60,
+     "nb_ce_chirp_ls_500Hz": 30,
+     "nb_ce_chirp_ls_1000Hz": 35,
+     "nb_ce_chirp_ls_2000Hz": 40,
+     "nb_ce_chirp_ls_4000Hz": 60,
+     "click": 55,
+     "ce_chirp": 45,
+     "ce_chirp_ls": 45
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 50,
+     "tone_burst_1000Hz": 55,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": 45,
+     "nb_ce_chirp_ls_1000Hz": 50,
+     "nb_ce_chirp_ls_2000Hz": 55,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.45,
+     "iii_v_ms": 0.35,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.4,
+     "microfonica": "normal",
+     "desincronia": "leve",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": false,
+    "repro_var": 0.2,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.16,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 3998,
+    "desviaciones": {
+     "onda_I": {
+      "lat": -0.04,
+      "amp": -0.01
+     },
+     "onda_III": {
+      "lat": 0.04,
+      "amp": -0.02
+     },
+     "onda_V": {
+      "lat": -0.01,
+      "amp": -0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "adult_male",
+    "baseline": {
+     "I": {
+      "lat": 1.47,
+      "amp": 0.32
+     },
+     "III": {
+      "lat": 3.75,
+      "amp": 0.37
+     },
+     "V": {
+      "lat": 5.68,
+      "amp": 0.4
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "neural",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 7.5,
+     "4000": 9,
+     "6000": 12,
+     "8000": 16.5
+    },
+    "atten_db": 0,
+    "ruido_db": 2.7,
+    "sello_pct": 88,
+    "variabilidad_db": 2.3,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "neural",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 0,
+     "4000": 0,
+     "6000": 0,
+     "8000": 1.5
+    },
+    "atten_db": 0,
+    "ruido_db": 2,
+    "sello_pct": 87,
+    "variabilidad_db": 2.1,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "neural",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 80,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "neural",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 60,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 80,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-15T15:52:02+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Víctor Pepe",
+   "apellido": "Cruz Arias",
+   "rut": "21070440",
+   "fecha_nac": "23-07-2002"
+  },
+  "historia_clinica": ""
+ }
+}

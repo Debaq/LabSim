@@ -124,6 +124,7 @@ def dibujar(curvas, marcar=('I', 'III', 'V'), ms_max=12.0, uv_px=80):
             s.trazo(P(c['a']), col, E.LINEA_FINA, E.OPACIDAD_SECUNDARIA)
             s.trazo(P(c['b']), col, E.LINEA_FINA, E.OPACIDAD_SECUNDARIA)
             s.trazo(P(c['y']), col, E.LINEA)
+            s.ancla(f"{lado} {c['db']:g}", X(ms_max) - 4, base)
             if k == 0:
                 s.texto(ml - 12, base + 3, f"{c['db']:g} dB", E.T_ROTULO, E.TINTA_2, 'end')
             if c['visibles']:
@@ -133,6 +134,7 @@ def dibujar(curvas, marcar=('I', 'III', 'V'), ms_max=12.0, uv_px=80):
                         continue
                     t, y = pico
                     px, py = X(t), base - (y - m) * uv_px
+                    s.ancla(f"{lado} {c['db']:g} {onda}", px, py)
                     s.linea(px, py - 4, px, py - 10, E.TINTA_2, 0.8)
                     s.texto(px, py - 13, onda, E.T_CHICO, E.TINTA, peso=600)
 

@@ -72,6 +72,7 @@ def dibujar_teoae(caso, oidos=('OD', 'OI')):
             pasa = bool(r['pass_per_band'].get(banda, False))
             y = Y(min(y_max, max(y_min, _interp(f, [q[0] for q in fs], [q[1] for q in fs]))))
             s.circulo(X(f), y, 3.8, col, col if pasa else E.PAPEL, 1.4)
+            s.ancla(f'{lado} {int(f)}', X(f), y)
         res = [('Reproducibilidad', f"{r['reproducibility_pct']:.0f} %"),
                ('Bandas que pasan', f"{r['n_pass']} de {len(r['snr_per_band'])}")]
         for i, (rot, val) in enumerate(res):
@@ -100,6 +101,7 @@ def dibujar_dpoae(caso, oidos=('OD', 'OI')):
         s.trazo([(X(f), Y(dp)) for f, dp in zip(f2, r['dp_levels_db_spl'])], col, E.LINEA)
         for p in r['points']:
             s.circulo(X(float(p['f2_hz'])), Y(p['dp_db']), 3.8, col, col if p['passed'] else E.PAPEL, 1.4)
+            s.ancla(f"{lado} {int(float(p['f2_hz']))}", X(float(p['f2_hz'])), Y(p['dp_db']))
         s.texto(x0, mt + ph + 42, 'Frecuencias que pasan', E.T_CHICO, E.TENUE, 'start')
         s.texto(x0, mt + ph + 54, f"{r['n_pass']} de {r['n_total']}  ·  L1/L2 {r['l1_db']:g}/{r['l2_db']:g} dB SPL",
                 E.T_ROTULO, E.TINTA_2, 'start', 600)

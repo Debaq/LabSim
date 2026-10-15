@@ -110,6 +110,7 @@ def dibujar(caso, estudio=True, ldl=True, oidos=('OD', 'OI')):
             x, y = X(f), Y(NIVEL_MAXIMO if sin else a[i])
             enmascarada = o_otro[i] is not None and (a[i] - o_otro[i]) >= ATENUACION_AEREA[i]
             _simbolo_aereo(s, lado, x, y, col, enmascarada)
+            s.ancla(f'{lado} {f}', x, y)
             if sin:
                 _flecha(s, x, y, col, -1 if lado == 'OD' else 1)
         for i in idx_osea:
@@ -117,6 +118,7 @@ def dibujar(caso, estudio=True, ldl=True, oidos=('OD', 'OI')):
             x, y = X(FRECUENCIAS[i]) + desp, Y(TOPE_OSEA if sin else o[i])
             enmascarada = a[i] is not None and (a[i] - o[i]) >= GAP_ENMASCARA_OSEA
             _simbolo_oseo(s, lado, x, y, col, enmascarada)
+            s.ancla(f'{lado} osea {FRECUENCIAS[i]}', x, y)
             if sin:
                 _flecha(s, x, y, col, -1 if lado == 'OD' else 1)
 
