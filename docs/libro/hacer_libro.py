@@ -375,6 +375,7 @@ def capitulo(md_texto):
                         r'|^:::figura\s+([a-z0-9_]+)\s+([a-z]+)(?:\s+(\d+))?\s*\n(.*?)^:::\s*$', re.M | re.S)
 
     def img(ruta, titulo, cuerpo_img):
+        cuerpo_img = re.sub(r'<!--.*?-->', '', cuerpo_img, flags=re.S)   # notas internas (p. ej. el pedido del dibujo)
         nfig['img'] = nfig.get('img', 0) + 1
         return guardar(imagen_con_globos(ruta, titulo or '', cuerpo_img.splitlines(), f'{cap}.{nfig["img"]}'))
 
@@ -421,7 +422,13 @@ def capitulo(md_texto):
     # huecos del autor
     cuerpo = re.sub(r'<blockquote>\s*<p>✍\s*(.*?)</p>\s*</blockquote>',
                     r'<div class="pendiente"><span>Falta texto</span> \1</div>', cuerpo, flags=re.S)
-    cuerpo = cuerpo.replace('<h1>', '<h1 class="capitulo">', 1)
+    # Apertura del capítulo: bloque con el número y el título (estilo de libro de texto)
+    m = re.search(r'<h1>\s*(?:[A-Z]?\d+\.\s*)?(.*?)</h1>', cuerpo, re.S)
+    if m:
+        tipo = {'H': 'Herramienta', 'B': 'Bases'}.get(cap[:1], 'Capítulo')
+        apertura = (f'<header class="apertura" id="cap-{cap}"><div class="ap-num"><span class="ap-tipo">{tipo}</span>'
+                    f'<span class="ap-n">{cap}</span></div><h1 class="capitulo">{m[1]}</h1></header>')
+        cuerpo = cuerpo[:m.start()] + apertura + cuerpo[m.end():]
     return cuerpo
 
 
@@ -436,13 +443,49 @@ def css():
 @page :left {{ margin-left: {FORMATO['exterior']}; margin-right: {FORMATO['interior']};
         @bottom-left {{ content: counter(page); font: 8pt 'Plus Jakarta Sans'; color: #8f7a83; }}
         @bottom-right {{ content: "{TITULO}"; font: 8pt 'Plus Jakarta Sans'; color: #8f7a83; }} }}
-@page portada {{ margin: 0; background: #24101a; @bottom-left {{ content: none; }} @bottom-right {{ content: none; }} }}
+@page :right {{ @top-right {{ content: string(capitulo); font: 7.5pt 'Plus Jakarta Sans'; color: #8f7a83; }} }}
+@page :left {{ @top-left {{ content: string(capitulo); font: 7.5pt 'Plus Jakarta Sans'; color: #8f7a83; }} }}
+@page portada {{ margin: 0; background: #24101a; @top-left {{ content: none; }} @top-right {{ content: none; }}
+                @bottom-left {{ content: none; }} @bottom-right {{ content: none; }} }}
+@page inicial {{ @top-left {{ content: none; }} @top-right {{ content: none; }}
+                @bottom-left {{ content: none; }} @bottom-right {{ content: none; }} }}
+@page parte {{ margin: 0; background: #8e2a4a; @top-left {{ content: none; }} @top-right {{ content: none; }}
+              @bottom-left {{ content: none; }} @bottom-right {{ content: none; }} }}
 html {{ font: 9.8pt/1.55 'Plus Jakarta Sans', sans-serif; color: #2a1a20; }}
-.portada {{ page: portada; height: 297mm; color: #F8F1F3; text-align: center; padding-top: 70mm; box-sizing: border-box; }}
-.portada h1 {{ font: 700 34pt/1.1 Fraunces, serif; color: #F8F1F3; margin: 0 22mm 6mm; }}
-.portada .bajada {{ font: 14pt 'Plus Jakarta Sans'; color: #E7A7BA; margin: 0 0 40mm; }}
-.portada .autores {{ font: 600 11pt 'Plus Jakarta Sans'; color: #F8F1F3; }}
-.portada .licencia {{ font: 8.5pt 'Plus Jakarta Sans'; color: #A68F98; margin-top: 4mm; }}
+.portada {{ page: portada; position: relative; height: 297mm; color: #F8F1F3; box-sizing: border-box; }}
+.pt-banda-sup {{ position: absolute; top: 0; left: 0; right: 0; height: 14mm; background: #8e2a4a; color: #fff;
+                 font: 700 10pt/14mm 'Plus Jakarta Sans'; letter-spacing: 3pt; text-transform: uppercase; padding-left: 22mm; }}
+.pt-centro {{ position: absolute; top: 58mm; left: 22mm; right: 22mm; border-left: 3pt solid #E7A7BA; padding-left: 8mm; }}
+.portada h1 {{ font: 700 38pt/1.08 Fraunces, serif; color: #F8F1F3; margin: 0 0 7mm; }}
+.portada .bajada {{ font: 15pt/1.3 'Plus Jakarta Sans'; color: #E7A7BA; margin: 0; }}
+.portada .trazos {{ position: absolute; left: 0; right: 0; top: 150mm; width: 210mm; height: 78mm; }}
+.pt-pie {{ position: absolute; left: 0; right: 0; bottom: 0; height: 42mm; background: #F8F1F3; color: #24101a;
+           padding: 13mm 22mm 0; box-sizing: border-box; }}
+.portada .autores {{ font: 600 14pt 'Plus Jakarta Sans'; color: #24101a; margin: 0; }}
+.portadilla {{ page: inicial; break-before: page; padding-top: 80mm; text-align: center; }}
+.pd-titulo {{ font: 700 24pt/1.15 Fraunces, serif; color: #24101a; margin: 0 20mm 4mm; }}
+.pd-bajada {{ font: 12pt 'Plus Jakarta Sans'; color: #8e2a4a; }}
+.creditos {{ page: inicial; break-before: page; padding-top: 150mm; font-size: 8.4pt; line-height: 1.5; color: #4a3a40; }}
+.creditos p {{ margin: 0 0 3mm; }}
+.indice {{ page: inicial; break-before: page; }}
+.titulo-indice {{ font: 700 26pt Fraunces, serif; color: #24101a; margin: 0 0 6mm; padding-bottom: 3mm; border-bottom: 2pt solid #8e2a4a; }}
+.toc-parte {{ font: 700 8pt 'Plus Jakarta Sans'; letter-spacing: 1.2pt; text-transform: uppercase; color: #8e2a4a;
+              margin: 5mm 0 1.5mm; break-after: avoid; }}
+a.toc {{ display: block; color: #2a1a20; text-decoration: none; font-size: 10pt; margin: 0 0 1.4mm; }}
+a.toc::after {{ content: leader('.') target-counter(attr(href), page); color: #8f7a83; }}
+.toc-n {{ display: inline-block; width: 11mm; font-weight: 700; color: #8e2a4a; }}
+.parte {{ page: parte; break-before: page; height: 297mm; position: relative; color: #fff; }}
+.pt-num {{ position: absolute; top: 95mm; left: 25mm; margin: 0; font: 700 13pt 'Plus Jakarta Sans'; letter-spacing: 3pt;
+           text-transform: uppercase; color: #F5C9D6; }}
+.pt-titulo {{ position: absolute; top: 108mm; left: 25mm; right: 25mm; margin: 0; font: 700 34pt/1.1 Fraunces, serif; color: #fff; }}
+.apertura {{ break-before: page; display: flex; align-items: flex-end; gap: 6mm; margin: 0 0 7mm; padding-bottom: 4mm;
+             border-bottom: 2pt solid #8e2a4a; }}
+.ap-num {{ flex: none; width: 28mm; height: 28mm; background: #24101a; color: #fff; border-radius: 0 0 4mm 0;
+           display: flex; flex-direction: column; justify-content: center; align-items: center; }}
+.ap-tipo {{ font: 700 6.6pt 'Plus Jakarta Sans'; letter-spacing: 1.2pt; text-transform: uppercase; color: #E7A7BA; }}
+.ap-n {{ font: 700 28pt/1 Fraunces, serif; margin-top: 1mm; }}
+.apertura h1.capitulo {{ string-set: capitulo content(); break-before: auto; border: 0; padding: 0; margin: 0;
+                         font: 700 25pt/1.1 Fraunces, serif; color: #24101a; }}
 h1.capitulo {{ break-before: page; font: 700 26pt/1.1 Fraunces, serif; color: #24101a; margin: 0 0 6mm;
               padding-bottom: 3mm; border-bottom: 2pt solid #8e2a4a; }}
 h2 {{ font: 600 15pt/1.2 Fraunces, serif; color: #24101a; margin: 8mm 0 2.5mm; break-after: avoid; }}
@@ -525,6 +568,81 @@ strong {{ color: #24101a; }}
 """
 
 
+def partes_del_indice():
+    """{clave de capítulo: (parte, título de la parte)} leído de indice.md."""
+    out, parte = {}, None
+    for linea in (AQUI / 'indice.md').read_text(encoding='utf-8').splitlines():
+        m = re.match(r'^## (.+)$', linea)
+        if m:
+            titulo = m[1].strip()
+            pm = re.match(r'Parte ([IVX]+) — (.+)', titulo)
+            parte = (f'Parte {pm[1]}', pm[2]) if pm else (titulo, '')
+            continue
+        m = re.match(r'^### ([HB]?\d+)\. ', linea)
+        if m and parte:
+            out[m[1]] = parte
+    return out
+
+
+def trazos_portada():
+    """Franja de trazos de PEAT para la portada, dibujados con la misma forma que el motor."""
+    import math
+    w, h, filas = 600, 220, 7
+    caminos = []
+    for k in range(filas):
+        base = 30 + k * 27
+        amp = 14 * (1 - k / (filas + 2))
+        lat = 5.6 + k * 0.35
+        pts = []
+        for i in range(301):
+            ms = i / 25
+            y = sum(a * math.exp(-((ms - l) / 0.28) ** 2) for a, l in ((0.5, 1.6 + k * .08), (0.7, 3.8 + k * .2), (1.0, lat)))
+            y -= 0.5 * math.exp(-((ms - lat - 1.1) / 0.5) ** 2)
+            y += 0.06 * math.sin(ms * 7 + k)
+            pts.append(f'{ms / 12 * w:.1f},{base - y * amp:.1f}')
+        op = 0.85 - k * 0.09
+        caminos.append(f'<path d="M{" L".join(pts)}" fill="none" stroke="#E7A7BA" stroke-width="1.6" stroke-opacity="{op:.2f}"/>')
+    return (f'<svg class="trazos" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" preserveAspectRatio="none">'
+            + ''.join(caminos) + '</svg>')
+
+
+def paginas_iniciales(capitulos):
+    """Portada, portadilla, créditos e índice del libro completo."""
+    fecha = __import__('datetime').date.today()
+    meses = 'enero febrero marzo abril mayo junio julio agosto septiembre octubre noviembre diciembre'.split()
+    portada = (f'<section class="portada"><div class="pt-banda-sup">LabSim</div>'
+               f'<div class="pt-centro"><h1>{TITULO}</h1><p class="bajada">{BAJADA}</p></div>'
+               f'{trazos_portada()}'
+               f'<div class="pt-pie"><p class="autores">{" · ".join(AUTORES)}</p></div></section>')
+    portadilla = f'<section class="portadilla"><p class="pd-titulo">{TITULO}</p><p class="pd-bajada">{BAJADA}</p></section>'
+    creditos = (f'<section class="creditos"><p><strong>{TITULO}</strong><br>{BAJADA}</p>'
+                f'<p>{", ".join(AUTORES)}</p>'
+                f'<p>Primera edición en preparación · {meses[fecha.month - 1]} de {fecha.year}</p>'
+                f'<p>Esta obra se distribuye con licencia <strong>Creative Commons Atribución-NoComercial-'
+                f'CompartirIgual 4.0 Internacional ({LICENCIA})</strong>. Puedes copiarla, distribuirla y adaptarla '
+                f'sin fines comerciales, citando a los autores y compartiendo las obras derivadas con la misma licencia.</p>'
+                f'<p>Los pacientes de los casos son ficticios. Sus exámenes fueron generados con el simulador LabSim. '
+                f'Las otoscopías provienen de bancos de imágenes de acceso libre, con su autoría y licencia en el pie '
+                f'de cada figura.</p>'
+                f'<p>La audiología avanza: las normas, valores de referencia y criterios de este libro se revisaron '
+                f'con la bibliografía citada en cada capítulo, pero quien atiende a un paciente debe contrastarlos '
+                f'con la normativa vigente y el protocolo de su lugar de trabajo.</p></section>')
+    filas, parte_actual = [], None
+    for cap, titulo, parte in capitulos:
+        if parte and parte != parte_actual:
+            filas.append(f'<p class="toc-parte">{parte[0]}{" · " + parte[1] if parte[1] else ""}</p>')
+            parte_actual = parte
+        filas.append(f'<a class="toc" href="#cap-{cap}"><span class="toc-n">{cap}</span>{titulo}</a>')
+    indice = f'<section class="indice"><h1 class="titulo-indice">Índice</h1>{"".join(filas)}</section>'
+    return portada + portadilla + creditos + indice
+
+
+def separador(parte):
+    if not parte[1]:          # Bases, Caja de herramientas: el nombre va grande
+        return f'<section class="parte"><p class="pt-titulo">{parte[0]}</p></section>'
+    return f'<section class="parte"><p class="pt-num">{parte[0]}</p><p class="pt-titulo">{parte[1]}</p></section>'
+
+
 def main():
     global FORMATO
     args = sys.argv[1:]
@@ -544,9 +662,23 @@ def main():
         archivos = [a for a in archivos if clave(a.name.split('-')[0]) in {clave(p) for p in pedido}]
     if not archivos:
         sys.exit('No hay capítulos que armar en capitulos/')
-    portada = (f'<section class="portada"><h1>{TITULO}</h1><p class="bajada">{BAJADA}</p>'
-               f'<p class="autores">{" · ".join(AUTORES)}</p><p class="licencia">{LICENCIA}</p></section>')
-    cuerpo = portada + ''.join(capitulo(a.read_text(encoding='utf-8')) for a in archivos)
+    if pedido:
+        # un capítulo suelto: sin portada, índice ni separadores
+        cuerpo = ''.join(capitulo(a.read_text(encoding='utf-8')) for a in archivos)
+    else:
+        partes = partes_del_indice()
+        capitulos, cuerpo_caps, parte_actual = [], [], None
+        for a in archivos:
+            md = a.read_text(encoding='utf-8')
+            m = re.match(r'#\s+([A-Z]?\d+)\.\s*(.+)', md)
+            cap, titulo = (m[1], m[2].strip()) if m else ('', a.stem)
+            parte = partes.get(cap)
+            capitulos.append((cap, titulo, parte))
+            if parte and parte != parte_actual:
+                cuerpo_caps.append(separador(parte))
+                parte_actual = parte
+            cuerpo_caps.append(capitulo(md))
+        cuerpo = paginas_iniciales(capitulos) + ''.join(cuerpo_caps)
     doc = f'<!doctype html><html lang="es"><head><meta charset="utf-8"><title>{TITULO}</title><style>{css()}</style></head><body>{cuerpo}</body></html>'
     destino = AQUI / ('libro.pdf' if not pedido else f'libro-{"-".join(pedido)}.pdf')
     weasy = shutil.which('weasyprint') or str(pathlib.Path.home() / '.local' / 'bin' / 'weasyprint')
