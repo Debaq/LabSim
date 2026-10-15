@@ -1,0 +1,31 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "estenosis_atresia_cae",
+      "OI": "normal"
+    },
+    "edad": 8,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Ramón tiene 8 años y viene con su mamá, Rocío. Nació con la oreja derecha pequeña y sin el agujero del oído. El tamizaje auditivo lo pasó por el izquierdo; por el derecho no se pudo hacer. Habla bien y le va bien en el colegio, pero se sienta con el oído izquierdo hacia la profesora y en el patio no sabe de dónde lo llaman. Su otorrinolaringólogo lo deriva para una audiometría antes de decidir el tratamiento del oído derecho.",
+      "historia": "{{-2900}} Maternidad: microtia y ausencia de conducto auditivo derecho. Tamizaje auditivo: pasa OI, OD no evaluable. Se deriva a otorrinolaringología.\n{{-45}} Otorrinolaringólogo: control; solicita audiometría con vía ósea para definir el tratamiento del OD.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "acumetria"
+    },
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

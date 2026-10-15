@@ -1,0 +1,18 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "otitis_externa",
+      "OI": "normal"
+    },
+    "edad": 22,
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 22 años, estudia pedagogía en educación física y nada en la piscina universitaria cuatro veces por semana. Hace cinco días le empezó a picar el oído derecho; desde hace tres le duele, sobre todo al masticar y al apoyar ese lado en la almohada, y lo siente tapado. Ayer en la mañana tenía la almohada manchada con un líquido amarillento. Viene a la hora de audiometría que le dejaron en el servicio de urgencia.",
+      "historia": "{{-2}} Servicio de urgencia: otalgia OD. Se indican gotas óticas antibióticas e ibuprofeno; se deja hora de audiometría por \"oído tapado\".",
+      "hist": [],
+      "medicamentos": "Gotas óticas antibióticas (desde hace dos días); ibuprofeno si duele",
+      "cirugias": ""
+    }
+  },
+  "figuras": []
+}

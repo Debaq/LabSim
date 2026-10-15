@@ -1,0 +1,30 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "tapon_cerumen",
+      "OI": "normal"
+    },
+    "edad": 58,
+    "sexo": "hombre",
+    "anamnesis": {
+      "otros": "Tiene 58 años y es profesor de historia en un liceo. Hace tres semanas, al salir de la ducha, sintió el oído derecho \"tapado\", y así sigue: oye su propia voz como dentro de un tarro. Se limpia los oídos con cotonitos todos los días \"porque le pica\". Fue a una tienda que hacía audiometrías gratis; le dijeron que había perdido audición del oído derecho y le ofrecieron un audífono. Antes de comprarlo consultó a su médico. No le duele, no le supura y nunca lo han operado de los oídos.",
+      "historia": "{{-18}} Tienda de audífonos: audiometría \"hipoacusia OD, se sugiere adaptación de audífono\". No registra otoscopía.\n{{-6}} Médico general: deriva a evaluación auditiva antes de adaptar un audífono.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Losartán 50 mg al día",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "acumetria"
+    },
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

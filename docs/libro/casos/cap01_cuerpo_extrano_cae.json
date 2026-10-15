@@ -1,0 +1,28 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "cuerpo_extrano_cae"
+    },
+    "edad": 31,
+    "sexo": "hombre",
+    "anamnesis": {
+      "otros": "Tiene 31 años y trabaja en el aserradero de una planta de paneles. En la faena usa tapones de espuma. Hace una semana, al sacárselos después del turno, sintió que en el oído izquierdo \"quedó algo\"; desde entonces lo siente lleno, como con agua, y al masticar le cruje. Intentó sacárselo con un cotonito y después con un clip, sin resultado. No le duele ni le supura. Lo mandaron de la empresa porque salió mal en la audiometría anual.",
+      "historia": "{{-5}} Vigilancia por ruido (audiometría en la empresa): \"OI alterado; derivar a evaluación\". No registra otoscopía.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "acumetria"
+    },
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

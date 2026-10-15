@@ -1,0 +1,34 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "normal",
+      "OI": "carcinoma_cae"
+    },
+    "edad": 69,
+    "sexo": "hombre",
+    "grado": {
+      "OI": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Tiene 69 años y es agricultor jubilado. Desde joven le supura el oído izquierdo de vez en cuando. Hace cuatro meses le empezó a doler, cada vez más y sobre todo de noche; ahora la secreción viene con sangre y tiene mal olor. Lo han tratado dos veces con gotas por una otitis externa, sin mejoría. Oye menos por el izquierdo y a ratos le sisean los dos oídos.",
+      "historia": "{{-120}} Médico general: otitis externa OI. Gotas óticas antibióticas.\n{{-50}} Médico general: otorrea OI persistente; segundo curso de gotas. Sin mejoría.\n{{-12}} Médico general: otalgia nocturna y otorrea con sangre; deriva a otorrinolaringología y solicita audiometría.",
+      "hist": [
+        "otitis",
+        "diabetes"
+      ],
+      "medicamentos": "Metformina 850 mg dos veces al día",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "acumetria"
+    },
+    {
+      "tipo": "audiograma",
+      "estudio": true,
+      "ldl": true,
+      "sin_enmascarar": false
+    }
+  ]
+}

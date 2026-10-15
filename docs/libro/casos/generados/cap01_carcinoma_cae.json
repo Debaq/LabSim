@@ -1,0 +1,868 @@
+{
+ "pedido": {
+  "cuadro": {
+   "OD": "normal",
+   "OI": "carcinoma_cae"
+  },
+  "edad": 69,
+  "sexo": "hombre",
+  "grado": {
+   "OI": "moderada"
+  },
+  "anamnesis": {
+   "otros": "Tiene 69 años y es agricultor jubilado. Desde joven le supura el oído izquierdo de vez en cuando. Hace cuatro meses le empezó a doler, cada vez más y sobre todo de noche; ahora la secreción viene con sangre y tiene mal olor. Lo han tratado dos veces con gotas por una otitis externa, sin mejoría. Oye menos por el izquierdo y a ratos le sisean los dos oídos.",
+   "historia": "{{-120}} Médico general: otitis externa OI. Gotas óticas antibióticas.\n{{-50}} Médico general: otorrea OI persistente; segundo curso de gotas. Sin mejoría.\n{{-12}} Médico general: otalgia nocturna y otorrea con sangre; deriva a otorrinolaringología y solicita audiometría.",
+   "hist": [
+    "otitis",
+    "diabetes"
+   ],
+   "medicamentos": "Metformina 850 mg dos veces al día",
+   "cirugias": ""
+  }
+ },
+ "semilla": 433380010,
+ "data": {
+  "gender": 0,
+  "id": 9010,
+  "Aerea": [
+   [
+    10,
+    45
+   ],
+   [
+    10,
+    45
+   ],
+   [
+    10,
+    50
+   ],
+   [
+    10,
+    45
+   ],
+   [
+    15,
+    60
+   ],
+   [
+    20,
+    70
+   ],
+   [
+    30,
+    70
+   ],
+   [
+    30,
+    85
+   ],
+   [
+    35,
+    80
+   ]
+  ],
+  "Osea": [
+   [
+    10,
+    25
+   ],
+   [
+    10,
+    20
+   ],
+   [
+    10,
+    30
+   ],
+   [
+    10,
+    25
+   ],
+   [
+    15,
+    35
+   ],
+   [
+    20,
+    50
+   ],
+   [
+    30,
+    55
+   ],
+   [
+    30,
+    60
+   ],
+   [
+    35,
+    60
+   ]
+  ],
+  "LDL": [
+   [
+    100,
+    120
+   ],
+   [
+    100,
+    120
+   ],
+   [
+    100,
+    120
+   ],
+   [
+    100,
+    120
+   ],
+   [
+    100,
+    120
+   ],
+   [
+    100,
+    120
+   ],
+   [
+    100,
+    115
+   ],
+   [
+    100,
+    120
+   ],
+   [
+    100,
+    120
+   ]
+  ],
+  "Aerea_mkg": [
+   [
+    10,
+    45
+   ],
+   [
+    10,
+    45
+   ],
+   [
+    10,
+    50
+   ],
+   [
+    10,
+    45
+   ],
+   [
+    15,
+    60
+   ],
+   [
+    20,
+    70
+   ],
+   [
+    30,
+    70
+   ],
+   [
+    30,
+    85
+   ],
+   [
+    35,
+    80
+   ]
+  ],
+  "Osea_mkg": [
+   [
+    10,
+    25
+   ],
+   [
+    10,
+    20
+   ],
+   [
+    10,
+    30
+   ],
+   [
+    10,
+    25
+   ],
+   [
+    15,
+    35
+   ],
+   [
+    20,
+    50
+   ],
+   [
+    30,
+    55
+   ],
+   [
+    30,
+    60
+   ],
+   [
+    35,
+    60
+   ]
+  ],
+  "Z_OD": "A",
+  "Z_OI": "B",
+  "Z1000_OD": "auto",
+  "Z1000_OI": "auto",
+  "Rinne": {
+   "500": {
+    "od": "positivo",
+    "oi": "negativo"
+   },
+   "1000": {
+    "od": "positivo",
+    "oi": "negativo"
+   }
+  },
+  "Weber": {
+   "500": "centrado",
+   "1000": "centrado"
+  },
+  "sector": "Camara_sono",
+  "edad": 69,
+  "edad_horas": null,
+  "nacimiento": [],
+  "volume": [
+   1.69,
+   1.73,
+   "N/D"
+  ],
+  "UMD": [
+   {
+    "int": 45,
+    "percentage": 100
+   },
+   {
+    "int": 85,
+    "percentage": 88
+   }
+  ],
+  "SDT": [
+   10,
+   45
+  ],
+  "SRT": [
+   10,
+   45
+  ],
+  "Fowler": {
+   "enabled": false,
+   "patterns": [],
+   "diplacusia": false
+  },
+  "Stenger": [
+   false,
+   false
+  ],
+  "SISI": [
+   90,
+   90
+  ],
+  "box": "Box_1",
+  "result": 1,
+  "state_login": 1,
+  "recruit": [
+   true,
+   true
+  ],
+  "decay": [
+   false,
+   false
+  ],
+  "Carhart": [
+   [
+    0,
+    5
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Stat": [
+   [
+    0,
+    5
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    5
+   ]
+  ],
+  "Rosemberg": [
+   [
+    0,
+    5
+   ],
+   [
+    0,
+    0
+   ],
+   [
+    0,
+    5
+   ],
+   [
+    5,
+    5
+   ]
+  ],
+  "Reflex": {
+   "ipsi": [
+    [
+     85,
+     130
+    ],
+    [
+     85,
+     130
+    ],
+    [
+     85,
+     130
+    ],
+    [
+     85,
+     130
+    ]
+   ],
+   "contra": [
+    [
+     105,
+     130
+    ],
+    [
+     105,
+     130
+    ],
+    [
+     130,
+     130
+    ],
+    [
+     105,
+     130
+    ],
+    [
+     105,
+     130
+    ]
+   ],
+   "tipo": {
+    "od": "normal",
+    "oi": "normal"
+   },
+   "decay": {
+    "od": false,
+    "oi": false
+   }
+  },
+  "ETF": [
+   "Normal",
+   "Normal"
+  ],
+  "Anamnesis": {
+   "antecedentes": {
+    "hipoacusia_familiar": false,
+    "ototoxicos": false,
+    "trauma_acustico": false,
+    "otitis": true,
+    "meningitis": false,
+    "tce": false,
+    "diabetes": true,
+    "hta": false
+   },
+   "medicamentos": "Metformina 850 mg dos veces al día",
+   "cirugias": "",
+   "otros": "Tiene 69 años y es agricultor jubilado. Desde joven le supura el oído izquierdo de vez en cuando. Hace cuatro meses le empezó a doler, cada vez más y sobre todo de noche; ahora la secreción viene con sangre y tiene mal olor. Lo han tratado dos veces con gotas por una otitis externa, sin mejoría. Oye menos por el izquierdo y a ratos le sisean los dos oídos.",
+   "ia": {
+    "generado": false,
+    "verificado": false,
+    "generado_en": "",
+    "verificado_por": "",
+    "verificado_en": ""
+   }
+  },
+  "PatientBehavior": "",
+  "PatientDisposition": 0,
+  "Sala": {
+   "version": 1,
+   "personas": [
+    {
+     "id": "p1",
+     "rol": "paciente",
+     "nombre": "Enrique",
+     "edad": 69,
+     "genero": 0,
+     "es_paciente": true,
+     "informante": true,
+     "interrumpe": 20,
+     "conciencia": 68,
+     "confiabilidad": 84,
+     "version": "",
+     "comportamiento": "",
+     "disposicion": 0
+    }
+   ]
+  },
+  "Tinnitus": {
+   "presente": true,
+   "lateralidad": "bilateral",
+   "oido": null,
+   "predominio": "igual",
+   "pulsatil": false,
+   "permanente": false,
+   "ruido": "Siseo",
+   "frecuencia": 4000
+  },
+  "Otoscopia": {
+   "fases": [
+    {
+     "texto": ""
+    }
+   ]
+  },
+  "Perfil": {
+   "version": 1,
+   "OD": {
+    "cce_pct": 100,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "OI": {
+    "cce_pct": 95,
+    "retro": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    }
+   },
+   "auto": {
+    "abr": true,
+    "eoas": true,
+    "reflex": true,
+    "recruit": true,
+    "logo": true
+   }
+  },
+  "ABR": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 30,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 30,
+     "tone_burst_1000Hz": 25,
+     "tone_burst_2000Hz": 25,
+     "tone_burst_4000Hz": 35,
+     "nb_ce_chirp_ls_500Hz": 25,
+     "nb_ce_chirp_ls_1000Hz": 20,
+     "nb_ce_chirp_ls_2000Hz": 20,
+     "nb_ce_chirp_ls_4000Hz": 35,
+     "click": 30,
+     "ce_chirp": 25,
+     "ce_chirp_ls": 25
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": 45,
+     "tone_burst_1000Hz": 40,
+     "tone_burst_2000Hz": 40,
+     "tone_burst_4000Hz": 50,
+     "nb_ce_chirp_ls_500Hz": 40,
+     "nb_ce_chirp_ls_1000Hz": 35,
+     "nb_ce_chirp_ls_2000Hz": 35,
+     "nb_ce_chirp_ls_4000Hz": 50,
+     "click": 45,
+     "ce_chirp": 40,
+     "ce_chirp_ls": 40
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.25,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 1991,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.1,
+      "amp": -0.1
+     },
+     "onda_III": {
+      "lat": 0.11,
+      "amp": -0.04
+     },
+     "onda_V": {
+      "lat": 0.07,
+      "amp": -0.01
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "OI": {
+    "type": "transmission",
+    "umbral": 75,
+    "umbral_por_estimulo": {
+     "tone_burst_500Hz": 70,
+     "tone_burst_1000Hz": 60,
+     "tone_burst_2000Hz": 70,
+     "tone_burst_4000Hz": 75,
+     "nb_ce_chirp_ls_500Hz": 65,
+     "nb_ce_chirp_ls_1000Hz": 55,
+     "nb_ce_chirp_ls_2000Hz": 65,
+     "nb_ce_chirp_ls_4000Hz": 75,
+     "click": 75,
+     "ce_chirp": 65,
+     "ce_chirp_ls": 65
+    },
+    "umbral_por_estimulo_oseo": {
+     "tone_burst_500Hz": null,
+     "tone_burst_1000Hz": 55,
+     "tone_burst_2000Hz": null,
+     "tone_burst_4000Hz": null,
+     "nb_ce_chirp_ls_500Hz": null,
+     "nb_ce_chirp_ls_1000Hz": 50,
+     "nb_ce_chirp_ls_2000Hz": 55,
+     "nb_ce_chirp_ls_4000Hz": null,
+     "click": null,
+     "ce_chirp": null,
+     "ce_chirp_ls": null
+    },
+    "neural": {
+     "i_iii_ms": 0.2,
+     "iii_v_ms": 0.2,
+     "global_delay_ms": 0,
+     "bloqueo": "ninguno",
+     "v_i_factor": 0.45,
+     "microfonica": "normal",
+     "desincronia": "ninguna",
+     "sensibilidad_tasa": "severa"
+    },
+    "repro": true,
+    "repro_var": 0,
+    "inquietud": 0,
+    "pam": 0,
+    "falsa_v": {
+     "amp": 0,
+     "lat": 5.6,
+     "int_min": 0,
+     "int_max": 120,
+     "mitad": "auto"
+    },
+    "ecochg": {
+     "sp_ap": 0.2,
+     "tasa": 1,
+     "rar_cond_ms": 0.1,
+     "mc": "normal"
+    },
+    "average_objetivo": 2030,
+    "desviaciones": {
+     "onda_I": {
+      "lat": 0.29,
+      "amp": -0.06
+     },
+     "onda_III": {
+      "lat": 0.29,
+      "amp": -0.07
+     },
+     "onda_V": {
+      "lat": 0.29,
+      "amp": -0.08
+     }
+    },
+    "nivel_referencia": null,
+    "barridos_criterio": 2000,
+    "respuesta_en_referencia": "presente",
+    "fsp_puntos": {
+     "800": 2.3,
+     "2000": 2.8,
+     "objetivo": 3
+    }
+   },
+   "autor": {
+    "set": "__default__",
+    "label": "LabSim (default)",
+    "poblacion": "elderly_male",
+    "baseline": {
+     "I": {
+      "lat": 1.83,
+      "amp": 0.288
+     },
+     "III": {
+      "lat": 3.98,
+      "amp": 0.333
+     },
+     "V": {
+      "lat": 5.85,
+      "amp": 0.36
+     }
+    }
+   }
+  },
+  "EOAS": {
+   "OD": {
+    "type": "coclear",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 0,
+     "1000": 0,
+     "1500": 0,
+     "2000": 0,
+     "3000": 6,
+     "4000": 18,
+     "6000": 18,
+     "8000": 24
+    },
+    "atten_db": 0,
+    "ruido_db": 0.1,
+    "sello_pct": 90,
+    "variabilidad_db": 1.8,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   },
+   "OI": {
+    "type": "transmission",
+    "umbral": 0,
+    "desviaciones": {
+     "500": 40.2,
+     "1000": 34.5,
+     "1500": 45,
+     "2000": 45,
+     "3000": 45,
+     "4000": 45,
+     "6000": 45,
+     "8000": 45
+    },
+    "atten_db": 0,
+    "ruido_db": 2.8,
+    "sello_pct": 73,
+    "variabilidad_db": 2,
+    "soae_mode": "auto",
+    "soae_peaks": []
+   }
+  },
+  "VEMP": {
+   "OD": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 75,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 65,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   },
+   "OI": {
+    "type": "normal",
+    "subtipos": {
+     "CVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 80,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 200,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "OVEMP": {
+      "peaks": [
+       "n10",
+       "p16"
+      ],
+      "umbral": 85,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "n10": {
+        "lat": 0,
+        "amp": 0
+       },
+       "p16": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     },
+     "MVEMP": {
+      "peaks": [
+       "p13",
+       "n23"
+      ],
+      "umbral": 90,
+      "repro": true,
+      "repro_var": 0.2,
+      "average_objetivo": 300,
+      "desviaciones": {
+       "p13": {
+        "lat": 0,
+        "amp": 0
+       },
+       "n23": {
+        "lat": 0,
+        "amp": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "Revision": {
+   "tabs": {
+    "paciente": true,
+    "sala": true,
+    "perfil": true,
+    "audiometria": true,
+    "otoscopia": true,
+    "timpanometria": true,
+    "abr": true,
+    "eoas": true,
+    "vemp": true,
+    "tinnitus": true,
+    "anamnesis": true
+   },
+   "at": "2026-10-15T19:28:58+00:00",
+   "by": "andrea.soto"
+  },
+  "tipo": "normal",
+  "paciente_snapshot": {
+   "nombre": "Enrique Javier",
+   "apellido": "Aguilar Delgado",
+   "rut": "7544131",
+   "fecha_nac": "06-06-1957"
+  },
+  "historia_clinica": "{{-120}} Médico general: otitis externa OI. Gotas óticas antibióticas.\r\n{{-50}} Médico general: otorrea OI persistente; segundo curso de gotas. Sin mejoría.\r\n{{-12}} Médico general: otalgia nocturna y otorrea con sangre; deriva a otorrinolaringología y solicita audiometría."
+ }
+}
