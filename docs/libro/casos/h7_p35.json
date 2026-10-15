@@ -1,0 +1,9 @@
+{
+  "caso": "demo:35",
+  "figuras": [
+    {
+      "tipo": "timpanograma",
+      "sonda": "226"
+    }
+  ]
+}

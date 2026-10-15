@@ -1,0 +1,27 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "disfuncion_tubaria",
+      "OI": "normal"
+    },
+    "edad": 29,
+    "sexo": "mujer",
+    "grado": {
+      "OD": "leve"
+    },
+    "semilla": 1,
+    "anamnesis": {
+      "otros": "Tiene 29 años y es profesora de básica. Hace tres semanas tuvo un resfrío fuerte: el resfrío pasó, pero el oído derecho le quedó tapado, \"como con agua\", y siente que su propia voz le retumba. A ratos, al bostezar, se le destapa un segundo y se vuelve a tapar. Tiene rinitis alérgica desde chica. No le duele, no le ha salido nada del oído y no tiene zumbido.",
+      "historia": "{{-20}} SAPU: cuadro respiratorio alto; se indica reposo y paracetamol.\n{{-6}} Médico general: tímpano derecho retraído, sin líquido evidente. Indica corticoide nasal y deriva a evaluación auditiva.",
+      "hist": [],
+      "medicamentos": "Loratadina 10 mg cuando tiene alergia; mometasona nasal desde hace 6 días",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "timpanograma",
+      "sonda": "226"
+    }
+  ]
+}

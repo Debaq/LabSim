@@ -1,0 +1,28 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "disyuncion_cadena",
+      "OI": "normal"
+    },
+    "edad": 33,
+    "sexo": "hombre",
+    "grado": {
+      "OD": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Tiene 33 años y es repartidor en moto. Hace cuatro meses chocó y se golpeó el lado derecho de la cabeza; estuvo inconsciente unos minutos y lo dejaron un día en observación. Desde el accidente oye menos por el oído derecho, \"como con algodón\", y no ha mejorado. No tiene zumbido ni mareos. Le preocupa porque en el trabajo usa el manos libres en ese oído.",
+      "historia": "{{-120}} Urgencia: TEC leve por accidente de tránsito en moto; TAC de cerebro sin lesiones agudas. Alta a las 24 horas.\n{{-20}} Otorrinolaringólogo: tímpano derecho íntegro, sin hemotímpano. Solicita audiometría e impedanciometría.",
+      "hist": [
+        "tce"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "timpanograma",
+      "sonda": "226"
+    }
+  ]
+}

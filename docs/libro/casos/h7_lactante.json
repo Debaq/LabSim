@@ -1,0 +1,29 @@
+{
+  "caso": {
+    "cuadro": {
+      "OD": "efusion_neonatal",
+      "OI": "normal"
+    },
+    "edad": 0,
+    "sexo": "mujer",
+    "edad_valor": 2,
+    "edad_unidad": "meses",
+    "anamnesis": {
+      "otros": "Sara tiene dos meses y viene con su mamá, Esther. Nació de término, por parto normal y sin complicaciones, y se fue de alta a los dos días. En el tamizaje auditivo de la maternidad el oído derecho \"no pasó\" y el izquierdo sí; en el control de las tres semanas volvió a no pasar el derecho. Hace una semana estuvo resfriada, con mocos. La mamá cuenta que se asusta con los portazos y se calma cuando le habla.",
+      "historia": "{{-58}} Tamizaje auditivo neonatal: refiere OD, pasa OI.\n{{-38}} Rescreening: refiere OD, pasa OI. Se deriva a evaluación audiológica.",
+      "hist": [],
+      "medicamentos": "",
+      "cirugias": ""
+    }
+  },
+  "figuras": [
+    {
+      "tipo": "timpanograma",
+      "sonda": "226"
+    },
+    {
+      "tipo": "timpanograma",
+      "sonda": "1000"
+    }
+  ]
+}
