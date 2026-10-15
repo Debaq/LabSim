@@ -8,13 +8,23 @@
     "sexo": "mujer",
     "grado": {
       "OD": "moderada"
+    },
+    "anamnesis": {
+      "otros": "Tiene 52 años y es secretaria en un juzgado. Hace unos dos años nota que por el oído derecho \"oye pero no entiende\": al principio pensó que era el teléfono de la oficina, y ahora se cambia el celular al izquierdo sin darse cuenta. No tiene pitido en los oídos. A veces, al darse vuelta rápido en la cama, siente un mareo de segundos que se le pasa solo. Nunca ha tenido dolor ni secreción de oídos.",
+      "historia": "{{-730}} Control con médico general por \"baja audición OD\"; otoscopía normal, se indica observar.\n{{-60}} Otorrinolaringólogo: otoscopía normal bilateral. Se solicita audiometría e impedanciometría.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Losartán 50 mg al día",
+      "cirugias": ""
     }
   },
   "figuras": [
     {
       "tipo": "audiograma",
       "estudio": true,
-      "ldl": true
+      "ldl": true,
+      "sin_enmascarar": false
     },
     {
       "tipo": "logoaudiometria",

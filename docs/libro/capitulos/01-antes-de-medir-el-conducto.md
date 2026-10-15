@@ -36,11 +36,23 @@
 
 ## Casos
 
+Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
+
 {{caso cap01_tapon_cerumen}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap01_tapon_cerumen audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -54,19 +66,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap01_cuerpo_extrano_cae}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap01_cuerpo_extrano_cae audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -80,19 +102,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap01_otitis_externa}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap01_otitis_externa audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -106,19 +138,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap01_estenosis_atresia_cae}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap01_estenosis_atresia_cae audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -132,19 +174,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap01_carcinoma_cae}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap01_carcinoma_cae audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -157,6 +209,60 @@
 :::figura cap01_carcinoma_cae reflejos
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
+
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
+
+## Resolución de los casos
+
+Intenta resolver cada caso con los pasos del aprendizaje basado en problemas antes de leer esta sección.
+
+### Caso 1.1
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 1.2
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 1.3
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 1.4
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 1.5
 
 #### Razonamiento
 

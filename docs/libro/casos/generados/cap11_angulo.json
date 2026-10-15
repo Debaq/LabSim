@@ -4,11 +4,20 @@
    "OD": "normal",
    "OI": "tumor_angulo"
   },
+  "edad": 61,
+  "sexo": "hombre",
   "grado": {
    "OI": "leve"
   },
-  "edad": 61,
-  "sexo": "hombre"
+  "anamnesis": {
+   "otros": "Tiene 61 años y fue chofer de buses interurbanos hasta que jubiló el año pasado. Su señora le dice que sube mucho el volumen de la tele; él cree que oye bien \"por el derecho\". Hace unos meses le zumba a ratos el oído izquierdo, sobre todo en la noche. No ha tenido mareos.",
+   "historia": "{{-120}} Médico general: hipoacusia OI referida por la familia; otoscopía normal. Se deriva a otorrinolaringología.",
+   "hist": [
+    "hta"
+   ],
+   "medicamentos": "Enalapril 10 mg cada 12 horas",
+   "cirugias": ""
+  }
  },
  "semilla": 2606714072,
  "data": {
@@ -227,8 +236,8 @@
   "edad_horas": null,
   "nacimiento": [],
   "volume": [
-   1.54,
    1.09,
+   1.36,
    "N/D"
   ],
   "UMD": [
@@ -389,11 +398,11 @@
     "meningitis": false,
     "tce": false,
     "diabetes": false,
-    "hta": false
+    "hta": true
    },
-   "medicamentos": "",
+   "medicamentos": "Enalapril 10 mg cada 12 horas",
    "cirugias": "",
-   "otros": "",
+   "otros": "Tiene 61 años y fue chofer de buses interurbanos hasta que jubiló el año pasado. Su señora le dice que sube mucho el volumen de la tele; él cree que oye bien \"por el derecho\". Hace unos meses le zumba a ratos el oído izquierdo, sobre todo en la noche. No ha tenido mareos.",
    "ia": {
     "generado": false,
     "verificado": false,
@@ -846,7 +855,7 @@
     "tinnitus": true,
     "anamnesis": true
    },
-   "at": "2026-10-15T15:51:57+00:00",
+   "at": "2026-10-15T19:07:25+00:00",
    "by": "andrea.soto"
   },
   "tipo": "normal",
@@ -856,6 +865,6 @@
    "rut": "9831089",
    "fecha_nac": "22-01-1965"
   },
-  "historia_clinica": ""
+  "historia_clinica": "{{-120}} Médico general: hipoacusia OI referida por la familia; otoscopía normal. Se deriva a otorrinolaringología."
  }
 }

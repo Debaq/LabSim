@@ -43,10 +43,15 @@ FORMATOS = {
     'libro': {'tamano': '210mm 280mm', 'interior': '22mm', 'exterior': '15mm', 'arriba': '18mm', 'abajo': '20mm'},
 }
 FORMATO = FORMATOS['a4']
+DOCENTE = False   # --docente: incluye los recuadros :::docente (guía del docente)
 
 TITULO = 'Casos clínicos en audiología y electrofisiología'
 BAJADA = 'Razonamiento clínico con LabSim'
-AUTORES = ['Baier-Quezada', 'López-Moncada', 'Uribe-Hernández', 'Vargas-Bustamante', 'Catipillán-Ulloa']
+# Autores: por ahora no van en el libro (decisión 2026-10-15). Los previstos,
+# para cuando se agreguen: pasarlos a AUTORES y vuelven a la portada, la
+# portada interior, los créditos, la página de autores y la contraportada.
+AUTORES_PREVISTOS = ['Baier-Quezada', 'López-Moncada', 'Uribe-Hernández', 'Vargas-Bustamante', 'Catipillán-Ulloa']
+AUTORES = []
 LICENCIA = 'CC BY-NC-SA 4.0'
 EDICION = 'Primera edición'
 SELLO = ['TecMedHub', 'Universidad Austral de Chile', 'Sede Puerto Montt']
@@ -191,6 +196,7 @@ def resultados(nombre, numero, cap):
 CAJAS = {
     'objetivos': 'En este capítulo', 'ayuda': 'Ayuda memoria', 'sabias': '¿Sabías que?',
     'ojo': 'Ojo clínico', 'pregunta': 'Pregunta abierta', 'comentario': 'Comentario',
+    'docente': 'Para el docente',
 }
 SECCIONES_DOS_COLUMNAS = ('Técnica', 'Técnica en foco', 'Fisiología', 'Patología', 'Razonamiento',
                           'Para qué sirve', 'Fundamento', 'Antes de empezar', 'Paso a paso',
@@ -368,6 +374,8 @@ def capitulo(md_texto):
 
     def caja(m):
         tipo, titulo, dentro = m[1], (m[2] or '').strip(), m[3]
+        if tipo.startswith('docente') and not DOCENTE:
+            return ''                           # la edición estudiante no lleva la guía del docente
         ancho = tipo.endswith('-ancho')
         tipo = tipo.replace('-ancho', '')
         titulo = titulo or CAJAS.get(tipo, '')
@@ -590,6 +598,8 @@ h3 + ol li {{ font-size: 8.4pt; line-height: 1.4; }}
 .caja-ojo .caja-titulo {{ color: #c62f3a; }}
 .caja-pregunta {{ background: #fff8e6; border: .8pt dashed #c99400; }}
 .caja-pregunta .caja-titulo {{ color: #9a7100; }}
+.caja-docente {{ background: #eaf6ef; border: 1pt solid #2e7d4f; }}
+.caja-docente .caja-titulo {{ color: #2e7d4f; }}
 .caja-comentario {{ background: #f3f3f1; border-left: 2.4pt solid #8a8a90; font-style: italic; }}
 .caja-comentario .caja-titulo {{ color: #55555b; font-style: normal; }}
 .figobs {{ break-inside: avoid; margin: 3mm 0 5mm; }}
@@ -665,20 +675,20 @@ def paginas_iniciales(capitulos):
     presentación, índice, cómo usar y abreviaturas. Cada una empieza en
     página derecha; las hojas blancas de por medio las pone el paginado."""
     anio = __import__('datetime').date.today().year
-    portada = (f'<section class="portada"><div class="pt-banda-sup">LabSim</div>'
+    portada = (f'<section class="portada"><div class="pt-banda-sup">LabSim{" · Edición docente" if DOCENTE else ""}</div>'
                f'<div class="pt-centro"><h1>{TITULO}</h1><p class="bajada">{BAJADA}</p></div>'
                f'{trazos_portada()}'
-               f'<p class="autores">{" · ".join(AUTORES)}</p>'
+               + (f'<p class="autores">{" · ".join(AUTORES)}</p>' if AUTORES else '') +
                f'<div class="pt-logos">{logo("uach-pm-blanco.png")}{logo("tecmedhub-blanco.png", "tm")}</div></section>')
     portadilla = f'<section class="portadilla"><p class="pd-titulo">{TITULO}</p></section>'
     interior = (f'<section class="interior"><p class="in-titulo">{TITULO}</p><p class="in-bajada">{BAJADA}</p>'
-                f'<p class="in-autores">{"<br>".join(AUTORES)}</p>'
+                + (f'<p class="in-autores">{"<br>".join(AUTORES)}</p>' if AUTORES else '<p class="in-autores"></p>') +
                 f'<p class="in-edicion">{EDICION}</p>'
                 f'<div class="in-sello">{logo("uach-pm.png")}{logo("tecmedhub.png", "tm")}'
                 f'<p>{" · ".join(SELLO)}<br>{CIUDAD}, {anio}</p></div></section>')
     creditos = (f'<section class="creditos"><p><strong>{TITULO}</strong><br>{BAJADA}</p>'
                 f'<p>{EDICION}, {anio}</p>'
-                f'<p>Autores: {", ".join(AUTORES)}</p>'
+                + (f'<p>Autores: {", ".join(AUTORES)}</p>' if AUTORES else '') +
                 f'<p>Edita: {", ".join(SELLO)}. {CIUDAD}, Chile.</p>'
                 f'<p>ISBN: en trámite</p>'
                 f'<p>Esta obra se distribuye con licencia <strong>Creative Commons Atribución-NoComercial-'
@@ -691,7 +701,7 @@ def paginas_iniciales(capitulos):
                 f'con la bibliografía citada en cada capítulo, pero quien atiende a un paciente debe contrastarlos '
                 f'con la normativa vigente y el protocolo de su lugar de trabajo.</p>'
                 f'<p>Diseño y diagramación: generados con las herramientas del proyecto LabSim.</p></section>')
-    autores = ('<section class="preliminar"><h1 class="prelim">Autores</h1>'
+    autores = '' if not AUTORES else ('<section class="preliminar"><h1 class="prelim">Autores</h1>'
                + ''.join(f'<div class="autor"><p class="autor-n">{a}</p>'
                          f'<div class="pendiente"><span>Falta texto</span> nombre completo, título y afiliación</div></div>'
                          for a in AUTORES) + '</section>')
@@ -714,7 +724,7 @@ def contraportada():
             f'con pacientes. Cada técnica se explica paso a paso y cada caso se razona desde la anamnesis hasta el '
             f'diagnóstico, con los exámenes relatados sobre sus gráficos. Los pacientes y sus resultados salen del '
             f'simulador LabSim, así que cada caso del libro se puede atender en el laboratorio.</p>'
-            f'<p class="cp-autores">{" · ".join(AUTORES)}</p>'
+            + (f'<p class="cp-autores">{" · ".join(AUTORES)}</p>' if AUTORES else '') +
             f'<div class="cp-logos">{logo("uach-pm-blanco.png")}{logo("tecmedhub-blanco.png", "tm")}</div>'
             f'<p class="cp-licencia">{LICENCIA}</p></section>')
 
@@ -726,8 +736,11 @@ def separador(parte):
 
 
 def main():
-    global FORMATO
+    global FORMATO, DOCENTE
     args = sys.argv[1:]
+    if '--docente' in args:
+        DOCENTE = True
+        args.remove('--docente')
     if '--formato' in args:
         i = args.index('--formato')
         FORMATO = FORMATOS[args[i + 1]]
@@ -763,7 +776,8 @@ def main():
         cuerpo = (paginas_iniciales(capitulos) + '<div class="cuerpo">' + ''.join(cuerpo_caps) + '</div>'
                   + contraportada())
     doc = f'<!doctype html><html lang="es"><head><meta charset="utf-8"><title>{TITULO}</title><style>{css()}</style></head><body>{cuerpo}</body></html>'
-    destino = AQUI / ('libro.pdf' if not pedido else f'libro-{"-".join(pedido)}.pdf')
+    sufijo = '-docente' if DOCENTE else ''
+    destino = AQUI / (f'libro{sufijo}.pdf' if not pedido else f'libro-{"-".join(pedido)}{sufijo}.pdf')
     weasy = shutil.which('weasyprint') or str(pathlib.Path.home() / '.local' / 'bin' / 'weasyprint')
     with tempfile.NamedTemporaryFile('w', suffix='.html', encoding='utf-8', delete=False) as f:
         f.write(doc)

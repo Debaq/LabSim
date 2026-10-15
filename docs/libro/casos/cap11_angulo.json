@@ -8,13 +8,23 @@
     "sexo": "hombre",
     "grado": {
       "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 61 años y fue chofer de buses interurbanos hasta que jubiló el año pasado. Su señora le dice que sube mucho el volumen de la tele; él cree que oye bien \"por el derecho\". Hace unos meses le zumba a ratos el oído izquierdo, sobre todo en la noche. No ha tenido mareos.",
+      "historia": "{{-120}} Médico general: hipoacusia OI referida por la familia; otoscopía normal. Se deriva a otorrinolaringología.",
+      "hist": [
+        "hta"
+      ],
+      "medicamentos": "Enalapril 10 mg cada 12 horas",
+      "cirugias": ""
     }
   },
   "figuras": [
     {
       "tipo": "audiograma",
       "estudio": true,
-      "ldl": true
+      "ldl": true,
+      "sin_enmascarar": false
     },
     {
       "tipo": "logoaudiometria",

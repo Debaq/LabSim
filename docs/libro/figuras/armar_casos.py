@@ -125,6 +125,14 @@ def llenar_js(p):
   }});
   if (faltan.length) {{ return 'NO: ' + faltan.join(', '); }}
   document.getElementById('perfil-generar').click();
+  var an = {json.dumps(p.get('anamnesis') or {})};
+  function campo(sel, v){{ var e = document.querySelector('#case-form ' + sel); if (e && v !== undefined) fijar(e, v); }}
+  if (an.otros !== undefined) campo('[name="otros"]', an.otros);
+  if (an.historia !== undefined) campo('[name="historia_clinica"]', an.historia);
+  if (an.medicamentos) campo('[name="medicamentos"]', an.medicamentos);
+  if (an.cirugias) campo('[name="cirugias"]', an.cirugias);
+  (an.hist || []).forEach(function(k){{ var c = document.querySelector('#case-form [name="hist[' + k + ']"]');
+    if (c && !c.checked) {{ c.checked = true; c.dispatchEvent(new Event('change', {{bubbles:true}})); }} }});
   var quedo = ['od','oi'].map(function(l){{ return document.querySelector('.perfil-escenario[data-lado="'+l+'"]').value; }});
   if (quedo[0] !== (cuadro.od || 'normal') || quedo[1] !== (cuadro.oi || 'normal')) {{
     return 'NO: el editor dejó ' + quedo.join(' / ');

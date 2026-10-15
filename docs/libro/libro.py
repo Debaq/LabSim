@@ -82,7 +82,8 @@ def demo(numero, figuras, nombre=None):
 
 
 def cuadro(nombre, figuras, od='normal', oi='normal', grado_od=None, grado_oi=None,
-           edad=40, sexo='hombre', semilla=None, edad_horas=None, edad_meses=None):
+           edad=40, sexo='hombre', semilla=None, edad_horas=None, edad_meses=None,
+           anamnesis=None, historia=None, antecedentes=(), medicamentos='', cirugias=''):
     """Un caso nuevo por cuadro (claves de CaseProfile::SCENARIOS) y grado.
 
     Un recién nacido o lactante va con edad_horas= o edad_meses= (la edad en
@@ -97,6 +98,15 @@ def cuadro(nombre, figuras, od='normal', oi='normal', grado_od=None, grado_oi=No
         pedido['grado'] = grado
     if semilla is not None:
         pedido['semilla'] = semilla
+    # La anamnesis va AL CASO (no solo al libro): queda en la ficha y en el
+    # paciente de LabSim, que responde en el chat con esa misma historia.
+    # historia: lista de (días hacia atrás, texto) -> líneas '{{-N}} texto'.
+    if anamnesis or historia or antecedentes or medicamentos or cirugias:
+        pedido['anamnesis'] = {
+            'otros': ' '.join((anamnesis or '').split()),
+            'historia': '\n'.join(f'{{{{-{d}}}}} {txt}' for d, txt in (historia or [])),
+            'hist': list(antecedentes), 'medicamentos': medicamentos, 'cirugias': cirugias,
+        }
     return {'nombre': nombre, 'caso': pedido, 'figuras': list(figuras)}
 
 
@@ -130,4 +140,5 @@ class Capitulo:
                 print('Figuras:', ', '.join(nombres))
                 subprocess.run(['micromamba', 'run', '-n', 'labsim', 'python', str(AQUI / 'figuras' / 'hacer_figuras.py'),
                                 *nombres], check=True, cwd=RAIZ, env=dict(os.environ, QT_QPA_PLATFORM='offscreen'))
-        subprocess.run([sys.executable, str(AQUI / 'hacer_libro.py'), str(self.numero)], check=True, cwd=RAIZ)
+        extra = ['--docente'] if '--docente' in argv else []
+        subprocess.run([sys.executable, str(AQUI / 'hacer_libro.py'), str(self.numero), *extra], check=True, cwd=RAIZ)

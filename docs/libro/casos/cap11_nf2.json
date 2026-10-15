@@ -9,13 +9,23 @@
     "grado": {
       "OD": "moderada",
       "OI": "leve"
+    },
+    "anamnesis": {
+      "otros": "Tiene 24 años y estudia mecánica en un instituto. Desde los 20 nota que oye menos, sobre todo por el derecho: en clases se sienta adelante y aun así se pierde. Tiene un pitido en los dos oídos todo el día. Últimamente se tropieza más al caminar de noche. Su mamá perdió la audición de un oído cuando era joven y la operaron \"de algo en la cabeza\" a los 35 años.",
+      "historia": "{{-1460}} Control de salud: dificultad para oír en clases; otoscopía normal.\n{{-30}} Neurólogo: inestabilidad de la marcha y antecedente familiar; deriva a evaluación auditiva.",
+      "hist": [
+        "hipoacusia_familiar"
+      ],
+      "medicamentos": "",
+      "cirugias": ""
     }
   },
   "figuras": [
     {
       "tipo": "audiograma",
       "estudio": true,
-      "ldl": true
+      "ldl": true,
+      "sin_enmascarar": false
     },
     {
       "tipo": "logoaudiometria",

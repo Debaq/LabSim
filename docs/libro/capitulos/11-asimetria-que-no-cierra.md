@@ -200,49 +200,278 @@ Un paciente tiene emisiones otoacústicas presentes en un oído con 50 dB de pé
 
 ## Casos
 
+Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
+
 {{caso cap11_p39}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
+¿Qué datos de su relato orientan a dónde está el problema? ¿Cuáles son señales de alarma?
+:::
+
+:::pregunta Paso 2 · Tus hipótesis
+Plantea al menos tres causas posibles para una pérdida de un solo oído con acúfeno del mismo lado.
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
 Con una asimetría de agudos y un acúfeno de dos años en el mismo oído, ¿qué pruebas agregarías a la audiometría? ¿Cuál esperas que se altere primero?
 :::
+
+#### Paso 4 · Los resultados
 
 :::figura cap11_p39 audiograma
 - @OD 4000 | En 4 kHz el OD está en 55 dB y el OI en 15: **40 dB de asimetría**, muy por encima de los 15 que obligan a estudiar.
 - @OD osea 2000 | La ósea va pegada a la aérea: no hay gap, la pérdida es **sensorioneural**.
 - @OI 4000 | El OI es normal para la edad. Con un oído sano al lado, cualquier hallazgo del OD se compara contra él.
 :::
-
 :::figura cap11_p39 logoaudiometria
 - @OD max | El OD no pasa del **52 %**, aunque en las frecuencias del habla su pérdida es leve. Un oído coclear con esa curva suele llegar al 90 % o más.
 - @OI max | El OI llega al 100 % a 40 dB: es la referencia de lo esperable.
 :::
-
 :::figura cap11_p39 timpanograma
 - @OD pico | Curva A en los dos oídos: el oído medio está sano y no explica nada de lo que sigue. Sin este dato, los reflejos no se pueden leer.
 :::
-
 :::figura cap11_p39 reflejos
 - @ipsi OD 1000 | El ipsilateral del OD falta en todas las frecuencias.
 - @contra OI 1000 | También falta el contralateral con el **tono en el OD** (sonda en el OI).
 - @contra OD 1000 | En cambio, con el tono en el OI y la sonda en el OD, el reflejo aparece a 85 dB: el músculo y el facial del OD funcionan.
 - Falla **todo lo que se estimula por el OD**: es el patrón diagonal, aferente.
 :::
-
 :::figura cap11_p39 teoae
 - @OD 2000 | Las emisiones del OD están **presentes** en las cinco bandas, con reproducibilidad alta.
 - Un oído con 30 a 55 dB de pérdida en esas frecuencias y emisiones presentes: **las células ciliadas externas funcionan**. El problema está después de la cóclea.
 :::
-
 :::figura cap11_p39 dpoae
 - @OD 4000 | Los productos de distorsión confirman lo mismo: pasan en todas las frecuencias del OD, incluso donde el audiograma marca la mayor pérdida.
 :::
-
 :::figura cap11_p39 abr
 - @OI 80 V | La onda V del OI aparece en su lugar, con I y III bien formadas.
 - @OD 80 V | La V del OD llega cerca de **1 ms más tarde** que la del OI al mismo nivel. La diferencia interaural supera de lejos los 0,4 ms.
 - @OD 80 I | La onda I del OD existe y está en su lugar: la señal sale bien de la cóclea y se atrasa en el camino.
 - @OD 40 | A 40 dB el OD ya no responde, aunque su umbral en 2 kHz es de 30 dB.
 :::
+
+:::docente Guía del caso
+- **Datos clave:** pérdida unilateral del OD de dos años, pitido del mismo lado, dificultad para entender por teléfono (discriminación, no solo umbral), inestabilidad leve; otoscopía normal.
+- **Hipótesis esperables:** coclear unilateral (ruido, súbita antigua), hidrops, **retrococlear**. Sin exposición a ruido ni crisis de vértigo, la asimetría + acúfeno + mala discriminación deben hacer pensar en el VIII par.
+- **Qué pedir:** audiometría con enmascaramiento, logoaudiometría, impedanciometría con reflejos y su deterioro, emisiones y PEAT (→ H3, H5, H7, H9, H10).
+- **Errores esperables:** atribuirlo a la edad; no enmascarar el OD; leer la latencia de V sin el audiograma.
+- **En LabSim:** es el paciente de práctica 39; se atiende desde "Práctica libre". Unos 45 minutos con toda la batería.
+:::
+
+{{caso cap11_schwannoma}}
+
+:::pregunta Paso 1 · ¿Qué datos importan?
+¿Qué te dice que "oye pero no entiende" por un solo oído? ¿Y el mareo al darse vuelta en la cama?
+:::
+
+:::pregunta Paso 2 · Tus hipótesis
+¿Coclear o retrococlear? Anota qué dato de la historia apoya cada opción.
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+La pérdida del OD es mayor que en el caso anterior y no hay acúfeno. ¿Cambia en algo el estudio? ¿Te sirve buscar los interpicos en este oído?
+:::
+
+#### Paso 4 · Los resultados
+
+:::figura cap11_schwannoma audiograma
+- @OD 4000 | Pérdida **severa en agudos**: 95 dB en 4 kHz.
+- @OD 1000 | En las frecuencias del habla la pérdida es moderada (45 dB en 1 kHz).
+- @OD osea 2000 | La ósea coincide con la aérea: sensorioneural.
+:::
+:::figura cap11_schwannoma logoaudiometria
+- @OD max | El OD no pasa del **20 %**, ni siquiera a 85 dB. Con 45 dB en 1 kHz, un oído coclear entendería bastante más.
+:::
+:::figura cap11_schwannoma reflejos
+- @ipsi OD 1000 | Sin reflejo ipsilateral en el OD.
+- @contra OI 1000 | Sin reflejo con el tono en el OD: otra vez el **patrón diagonal**.
+:::
+:::figura cap11_schwannoma abr
+- @OD 80 V | A 80 dB el OD apenas insinúa una onda V tardía. No hay I ni III.
+- @OI 80 V | El OI tiene todas sus ondas bien formadas.
+- Ojo con la lectura: con 70 a 95 dB de pérdida entre 2 y 4 kHz, un click a 80 dB queda casi en el umbral de las frecuencias que usa. La falta de I y III **no basta sola** para hablar de nervio.
+:::
+:::figura cap11_schwannoma vemp
+- @OD P13 | El VEMP cervical del OD es pequeño.
+- @OI P13 | El del OI tiene una amplitud normal. Corregida por el EMG, la asimetría es grande.
+- El VEMP no depende de la audición: sigue informando aunque el umbral ya no deje leer el PEAT.
+:::
+
+:::docente Guía del caso
+- **Datos clave:** pérdida OD de dos años, discriminación muy mala ("oye pero no entiende"), sin acúfeno, mareo breve al girar en la cama.
+- **Hipótesis:** coclear unilateral contra **retrococlear**. El mareo posicional breve puede ser un VPPB que coexiste, no tiene por qué ser el tumor; que no haya acúfeno no descarta nada.
+- **Qué pedir:** lo mismo que en el caso anterior, más **VEMP**: con una pérdida severa en agudos el PEAT pierde poder y el VEMP no depende de la audición (→ H12).
+- **Errores esperables:** concluir "coclear" porque el PEAT no muestra I ni III, cuando la causa es la pérdida.
+- **En LabSim:** caso armado para el libro (no está en la práctica del curso); el docente puede crearlo con el cuadro *schwannoma* moderado en el OD.
+:::
+
+{{caso cap11_nf2}}
+
+:::pregunta Paso 1 · ¿Qué datos importan?
+Este paciente es joven y tiene pérdida en los dos oídos. ¿Qué antecedente de su familia cambia la lectura?
+:::
+
+:::pregunta Paso 2 · Tus hipótesis
+¿Hipoacusia genética coclear o algo que afecta a los dos nervios? ¿Qué examen te ayudaría a separarlas?
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+Un hombre de 24 años con pérdida en **los dos oídos**, peor a la derecha y con acúfeno bilateral. ¿Qué te hace pensar que no es una hipoacusia genética coclear común?
+:::
+
+#### Paso 4 · Los resultados
+
+:::figura cap11_nf2 audiograma
+- @OD 4000 | El OD llega a 90 dB en 4 kHz.
+- @OI 4000 | El OI llega a 55 dB en 4 kHz: los dos oídos están afectados, pero **de forma muy asimétrica**.
+:::
+:::figura cap11_nf2 logoaudiometria
+- @OD max | El OD no pasa del 16 %.
+- @OI max | El OI llega al 52 %, aunque su pérdida en el habla es leve. Los **dos** oídos entienden menos de lo que oyen.
+:::
+:::figura cap11_nf2 reflejos
+- @ipsi OD 1000 | No hay reflejos en ninguna combinación.
+- @contra OD 1000 | Tampoco en los contralaterales. Con dos nervios afectados, ningún estímulo dispara el arco.
+:::
+:::figura cap11_nf2 abr
+- @OD 80 | El OD no tiene respuesta a 80 dB.
+- @OI 80 V | El OI muestra ondas de mala morfología y una V tardía para su umbral.
+:::
+
+:::docente Guía del caso
+- **Datos clave:** 24 años, pérdida bilateral asimétrica, acúfeno bilateral, inestabilidad que empeora en la oscuridad, **madre con pérdida unilateral joven y cirugía "de la cabeza"**.
+- **Hipótesis:** hipoacusia genética coclear contra **neurofibromatosis tipo 2**. El antecedente familiar y la inestabilidad inclinan a lo segundo.
+- **Qué pedir:** batería completa con reflejos, deterioro tonal y PEAT; la discriminación de los dos oídos es clave.
+- **Errores esperables:** quedarse con "genética coclear" sin mirar la discriminación ni los reflejos.
+- **Para discutir en clases:** rehabilitación cuando los dos nervios están comprometidos (implante de tronco).
+:::
+
+{{caso cap11_angulo}}
+
+:::pregunta Paso 1 · ¿Qué datos importan?
+Fue chofer de bus durante años. ¿Podría eso explicar que oiga peor por el izquierdo? ¿Qué esperarías encontrar si fuera así?
+:::
+
+:::pregunta Paso 2 · Tus hipótesis
+Separa las causas que darían una pérdida asimétrica del OI en un hombre de 61 años.
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+La asimetría es moderada, la pérdida del OI no pasa de moderada y el paciente tiene 61 años. ¿Lo atribuirías a la edad? ¿Qué dato de la audiometría te haría seguir estudiando?
+:::
+
+#### Paso 4 · Los resultados
+
+:::figura cap11_angulo audiograma
+- @OI 4000 | El OI está en 45 dB en 4 kHz.
+- @OD 4000 | El OD está en 20 dB en 4 kHz. Una presbiacusia sería **simétrica**: esta diferencia no la explica la edad.
+:::
+:::figura cap11_angulo logoaudiometria
+- @OI max | El OI llega al 68 %, menos de lo esperable para su curva.
+:::
+:::figura cap11_angulo reflejos
+- @ipsi OI 500 | Con tono en el OI, el reflejo aparece recién a 110 dB en los graves: **elevado**.
+- @ipsi OI 2000 | En los agudos ya no aparece.
+- @contra OD 500 | Con el tono en el OI y la sonda en el OD pasa lo mismo: 110 dB. El problema está en el oído que recibe el tono.
+:::
+:::figura cap11_angulo abr
+- @OD 80 V | La V del OD llega en su lugar.
+- @OI 80 V | La V del OI llega más tarde y con amplitud baja, aunque su pérdida a esa altura es leve.
+:::
+
+:::docente Guía del caso
+- **Datos clave:** 61 años, pérdida del OI que nota la familia, zumbido intermitente del OI, **ex chofer**.
+- **La trampa:** un chofer puede tener más daño por ruido en el **oído izquierdo**, el de la ventana. Pero una pérdida por ruido da una muesca en 4 kHz, buena discriminación y reflejos presentes a bajo nivel de sensación. Aquí la discriminación es baja, los reflejos están elevados y hay deterioro: eso no lo explica el ruido.
+- **Hipótesis:** presbiacusia (no: es simétrica), ruido asimétrico, **retrococlear**.
+- **Errores esperables:** cerrar el caso con "presbiacusia + ruido" sin pruebas suprasliminares.
+:::
+
+{{caso cap11_microvascular}}
+
+:::pregunta Paso 1 · ¿Qué datos importan?
+Los mareos duran segundos, "como un golpe". ¿En qué se diferencian de las crisis de Ménière?
+:::
+
+:::pregunta Paso 2 · Tus hipótesis
+¿Qué cuadros darían un acúfeno unilateral con mareos muy breves y una pérdida leve en agudos?
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+Una mujer de 47 años con zumbido en el OD y una pérdida leve en agudos de ese oído. El Weber no lateraliza en 500 Hz. ¿Qué te dice eso y qué otra prueba agregarías?
+:::
+
+#### Paso 4 · Los resultados
+
+:::figura cap11_microvascular audiograma
+- @OD 500 | Los **graves están conservados**: 10 dB en 500 Hz. Por eso el Weber no lateraliza en esa frecuencia.
+- @OD 4000 | La pérdida aparece desde 2 kHz y llega a 55 dB en 4 kHz: es **de frecuencia específica**.
+:::
+:::figura cap11_microvascular logoaudiometria
+- @OD max | El OD llega al 60 %, poco para una pérdida que respeta los graves.
+:::
+:::figura cap11_microvascular reflejos
+- @ipsi OD 500 | Con tono en el OD, el reflejo aparece en 500 Hz pero elevado (105 dB).
+- @ipsi OD 2000 | Desde 1 kHz desaparece: justo donde empieza la pérdida.
+:::
+:::figura cap11_microvascular abr
+- @OD 80 I | La onda I del OD está en su lugar.
+- @OD 80 III | La III ya llega tarde: el interpico **I-III** está alargado. Es el tramo del nervio dentro del conducto y el ángulo.
+- @OI 80 V | La V del OI marca lo normal para comparar.
+:::
+
+:::docente Guía del caso
+- **Datos clave:** acúfeno OD intermitente que empeora en silencio, mareos de segundos sin náuseas, sonidos agudos "metálicos" por el OD.
+- **Hipótesis:** Ménière (no calza: sus crisis duran horas, con plenitud y pérdida en graves), schwannoma, **compresión microvascular** (episodios muy breves y repetidos).
+- **Qué pedir:** batería completa con PEAT, mirando el **interpico I-III**.
+- **Errores esperables:** tratarla como Ménière por "acúfeno + mareo".
+:::
+
+{{caso cap11_retrococlear}}
+
+:::pregunta Paso 1 · ¿Qué datos importan?
+¿Qué te dice que el audífono "se oye fuerte, pero no se entiende nada"?
+:::
+
+:::pregunta Paso 2 · Tus hipótesis
+Trabajó 30 años con ruido. ¿Por qué eso no alcanza para explicar todo lo que tiene?
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+Un hombre de 66 años con pérdida moderada del OI y acúfeno de ese lado. ¿Qué esperas de la discriminación si la lesión es solo coclear? ¿Y si además hay compromiso del nervio?
+:::
+
+#### Paso 4 · Los resultados
+
+:::figura cap11_retrococlear audiograma
+- @OI 1000 | Pérdida moderada del OI, plana hasta 2 kHz (40 dB en 1 kHz).
+- @OI 4000 | Más pérdida en agudos: 70 dB en 4 kHz.
+- @OD 4000 | El OD tiene solo la caída de agudos esperable a su edad.
+:::
+:::figura cap11_retrococlear logoaudiometria
+- @OI max | Con esa curva, una lesión solo coclear daría 80 % o más. El OI **no pasa del 36 %**.
+:::
+:::figura cap11_retrococlear reflejos
+- @ipsi OI 1000 | Sin reflejo al estimular el OI, ni ipsi ni contralateral.
+- @contra OD 1000 | Con el tono en el OI y la sonda en el OD, tampoco: patrón diagonal desde el OI.
+:::
+:::figura cap11_retrococlear abr
+- @OI 80 V | A 80 dB el OI apenas muestra III y V.
+- @OI 60 | A 60 dB el OI ya no responde.
+- @OD 80 V | El OD responde bien.
+:::
+
+:::docente Guía del caso
+- **Datos clave:** pérdida y pitido del OI, 30 años en un aserradero, **audífono abandonado** porque no entiende.
+- **Hipótesis:** daño por ruido (sería simétrico), presbiacusia (simétrica), **coclear con componente retrococlear** del OI.
+- **El dato que decide:** el fracaso del audífono anuncia una discriminación pobre, mucho peor que el umbral.
+- **Errores esperables:** leerlo como "ruido + edad" y volver a indicar audífono sin estudiar el OI.
+:::
+
+## Resolución de los casos
+
+Intenta resolver cada caso con los pasos del aprendizaje basado en problemas antes de leer esta sección.
+
+### Caso 11.1
 
 #### Razonamiento
 
@@ -256,38 +485,7 @@ Hipoacusia sensorioneural del OD de **características retrococleares**. Se info
 Es el caso tal como llega a la consulta: un adulto que "solo" consulta por el teléfono. La anamnesis cuidadosa (cambia de oído para hablar) vale tanto como cualquier prueba.
 :::
 
-{{caso cap11_schwannoma}}
-
-:::pregunta ¿Qué pedirías?
-La pérdida del OD es mayor que en el caso anterior y no hay acúfeno. ¿Cambia en algo el estudio? ¿Te sirve buscar los interpicos en este oído?
-:::
-
-:::figura cap11_schwannoma audiograma
-- @OD 4000 | Pérdida **severa en agudos**: 95 dB en 4 kHz.
-- @OD 1000 | En las frecuencias del habla la pérdida es moderada (45 dB en 1 kHz).
-- @OD osea 2000 | La ósea coincide con la aérea: sensorioneural.
-:::
-
-:::figura cap11_schwannoma logoaudiometria
-- @OD max | El OD no pasa del **20 %**, ni siquiera a 85 dB. Con 45 dB en 1 kHz, un oído coclear entendería bastante más.
-:::
-
-:::figura cap11_schwannoma reflejos
-- @ipsi OD 1000 | Sin reflejo ipsilateral en el OD.
-- @contra OI 1000 | Sin reflejo con el tono en el OD: otra vez el **patrón diagonal**.
-:::
-
-:::figura cap11_schwannoma abr
-- @OD 80 V | A 80 dB el OD apenas insinúa una onda V tardía. No hay I ni III.
-- @OI 80 V | El OI tiene todas sus ondas bien formadas.
-- Ojo con la lectura: con 70 a 95 dB de pérdida entre 2 y 4 kHz, un click a 80 dB queda casi en el umbral de las frecuencias que usa. La falta de I y III **no basta sola** para hablar de nervio.
-:::
-
-:::figura cap11_schwannoma vemp
-- @OD P13 | El VEMP cervical del OD es pequeño.
-- @OI P13 | El del OI tiene una amplitud normal. Corregida por el EMG, la asimetría es grande.
-- El VEMP no depende de la audición: sigue informando aunque el umbral ya no deje leer el PEAT.
-:::
+### Caso 11.2
 
 #### Razonamiento
 
@@ -301,31 +499,7 @@ Hipoacusia sensorioneural del OD de predominio en agudos con signos retrococlear
 Cuando la pérdida es severa, el PEAT pierde poder para separar cóclea de nervio. Ahí pesan las pruebas que no dependen tanto del umbral: el VEMP y la discriminación.
 :::
 
-{{caso cap11_nf2}}
-
-:::pregunta ¿Qué pedirías?
-Un hombre de 24 años con pérdida en **los dos oídos**, peor a la derecha y con acúfeno bilateral. ¿Qué te hace pensar que no es una hipoacusia genética coclear común?
-:::
-
-:::figura cap11_nf2 audiograma
-- @OD 4000 | El OD llega a 90 dB en 4 kHz.
-- @OI 4000 | El OI llega a 55 dB en 4 kHz: los dos oídos están afectados, pero **de forma muy asimétrica**.
-:::
-
-:::figura cap11_nf2 logoaudiometria
-- @OD max | El OD no pasa del 16 %.
-- @OI max | El OI llega al 52 %, aunque su pérdida en el habla es leve. Los **dos** oídos entienden menos de lo que oyen.
-:::
-
-:::figura cap11_nf2 reflejos
-- @ipsi OD 1000 | No hay reflejos en ninguna combinación.
-- @contra OD 1000 | Tampoco en los contralaterales. Con dos nervios afectados, ningún estímulo dispara el arco.
-:::
-
-:::figura cap11_nf2 abr
-- @OD 80 | El OD no tiene respuesta a 80 dB.
-- @OI 80 V | El OI muestra ondas de mala morfología y una V tardía para su umbral.
-:::
+### Caso 11.3
 
 #### Razonamiento
 
@@ -339,31 +513,7 @@ Hipoacusia sensorioneural bilateral asimétrica con signos retrococleares bilate
 Si el tratamiento de uno de los tumores deja ese oído sin audición, ¿qué opciones de rehabilitación tiene un paciente con NF2? ¿Por qué el implante coclear no siempre sirve?
 :::
 
-{{caso cap11_angulo}}
-
-:::pregunta ¿Qué pedirías?
-La asimetría es moderada, la pérdida del OI no pasa de moderada y el paciente tiene 61 años. ¿Lo atribuirías a la edad? ¿Qué dato de la audiometría te haría seguir estudiando?
-:::
-
-:::figura cap11_angulo audiograma
-- @OI 4000 | El OI está en 45 dB en 4 kHz.
-- @OD 4000 | El OD está en 20 dB en 4 kHz. Una presbiacusia sería **simétrica**: esta diferencia no la explica la edad.
-:::
-
-:::figura cap11_angulo logoaudiometria
-- @OI max | El OI llega al 68 %, menos de lo esperable para su curva.
-:::
-
-:::figura cap11_angulo reflejos
-- @ipsi OI 500 | Con tono en el OI, el reflejo aparece recién a 110 dB en los graves: **elevado**.
-- @ipsi OI 2000 | En los agudos ya no aparece.
-- @contra OD 500 | Con el tono en el OI y la sonda en el OD pasa lo mismo: 110 dB. El problema está en el oído que recibe el tono.
-:::
-
-:::figura cap11_angulo abr
-- @OD 80 V | La V del OD llega en su lugar.
-- @OI 80 V | La V del OI llega más tarde y con amplitud baja, aunque su pérdida a esa altura es leve.
-:::
+### Caso 11.4
 
 #### Razonamiento
 
@@ -377,31 +527,7 @@ Hipoacusia sensorioneural asimétrica del OI con signos retrococleares. No se de
 La presbiacusia es **bilateral y simétrica**. Una "presbiacusia de un solo oído" no existe: es otra cosa hasta que se demuestre lo contrario.
 :::
 
-{{caso cap11_microvascular}}
-
-:::pregunta ¿Qué pedirías?
-Una mujer de 47 años con zumbido en el OD y una pérdida leve en agudos de ese oído. El Weber no lateraliza en 500 Hz. ¿Qué te dice eso y qué otra prueba agregarías?
-:::
-
-:::figura cap11_microvascular audiograma
-- @OD 500 | Los **graves están conservados**: 10 dB en 500 Hz. Por eso el Weber no lateraliza en esa frecuencia.
-- @OD 4000 | La pérdida aparece desde 2 kHz y llega a 55 dB en 4 kHz: es **de frecuencia específica**.
-:::
-
-:::figura cap11_microvascular logoaudiometria
-- @OD max | El OD llega al 60 %, poco para una pérdida que respeta los graves.
-:::
-
-:::figura cap11_microvascular reflejos
-- @ipsi OD 500 | Con tono en el OD, el reflejo aparece en 500 Hz pero elevado (105 dB).
-- @ipsi OD 2000 | Desde 1 kHz desaparece: justo donde empieza la pérdida.
-:::
-
-:::figura cap11_microvascular abr
-- @OD 80 I | La onda I del OD está en su lugar.
-- @OD 80 III | La III ya llega tarde: el interpico **I-III** está alargado. Es el tramo del nervio dentro del conducto y el ángulo.
-- @OI 80 V | La V del OI marca lo normal para comparar.
-:::
+### Caso 11.5
 
 #### Razonamiento
 
@@ -415,32 +541,7 @@ Hipoacusia sensorioneural leve del OD con signos retrococleares. La resonancia d
 En la compresión microvascular, la frecuencia del acúfeno suele coincidir con la de mayor pérdida. En algunos pacientes la audición mejora después de la descompresión quirúrgica, justo en esa frecuencia (De Ridder y cols.).
 :::
 
-{{caso cap11_retrococlear}}
-
-:::pregunta ¿Qué pedirías?
-Un hombre de 66 años con pérdida moderada del OI y acúfeno de ese lado. ¿Qué esperas de la discriminación si la lesión es solo coclear? ¿Y si además hay compromiso del nervio?
-:::
-
-:::figura cap11_retrococlear audiograma
-- @OI 1000 | Pérdida moderada del OI, plana hasta 2 kHz (40 dB en 1 kHz).
-- @OI 4000 | Más pérdida en agudos: 70 dB en 4 kHz.
-- @OD 4000 | El OD tiene solo la caída de agudos esperable a su edad.
-:::
-
-:::figura cap11_retrococlear logoaudiometria
-- @OI max | Con esa curva, una lesión solo coclear daría 80 % o más. El OI **no pasa del 36 %**.
-:::
-
-:::figura cap11_retrococlear reflejos
-- @ipsi OI 1000 | Sin reflejo al estimular el OI, ni ipsi ni contralateral.
-- @contra OD 1000 | Con el tono en el OI y la sonda en el OD, tampoco: patrón diagonal desde el OI.
-:::
-
-:::figura cap11_retrococlear abr
-- @OI 80 V | A 80 dB el OI apenas muestra III y V.
-- @OI 60 | A 60 dB el OI ya no responde.
-- @OD 80 V | El OD responde bien.
-:::
+### Caso 11.6
 
 #### Razonamiento
 
@@ -453,6 +554,7 @@ Hipoacusia sensorioneural del OI con componente retrococlear. Se sugiere resonan
 :::comentario Comentario
 Es el paciente que vuelve molesto porque "el audífono no le sirve". La discriminación del 36 % lo anunciaba desde el primer día.
 :::
+
 
 ## Para cerrar
 

@@ -4,12 +4,21 @@
    "OD": "nf2",
    "OI": "nf2"
   },
+  "edad": 24,
+  "sexo": "hombre",
   "grado": {
    "OD": "moderada",
    "OI": "leve"
   },
-  "edad": 24,
-  "sexo": "hombre"
+  "anamnesis": {
+   "otros": "Tiene 24 años y estudia mecánica en un instituto. Desde los 20 nota que oye menos, sobre todo por el derecho: en clases se sienta adelante y aun así se pierde. Tiene un pitido en los dos oídos todo el día. Últimamente se tropieza más al caminar de noche. Su mamá perdió la audición de un oído cuando era joven y la operaron \"de algo en la cabeza\" a los 35 años.",
+   "historia": "{{-1460}} Control de salud: dificultad para oír en clases; otoscopía normal.\n{{-30}} Neurólogo: inestabilidad de la marcha y antecedente familiar; deriva a evaluación auditiva.",
+   "hist": [
+    "hipoacusia_familiar"
+   ],
+   "medicamentos": "",
+   "cirugias": ""
+  }
  },
  "semilla": 1609524647,
  "data": {
@@ -228,8 +237,8 @@
   "edad_horas": null,
   "nacimiento": [],
   "volume": [
-   1.27,
-   1.26,
+   1.42,
+   1.02,
    "N/D"
   ],
   "UMD": [
@@ -382,7 +391,7 @@
   ],
   "Anamnesis": {
    "antecedentes": {
-    "hipoacusia_familiar": false,
+    "hipoacusia_familiar": true,
     "ototoxicos": false,
     "trauma_acustico": false,
     "otitis": false,
@@ -393,7 +402,7 @@
    },
    "medicamentos": "",
    "cirugias": "",
-   "otros": "",
+   "otros": "Tiene 24 años y estudia mecánica en un instituto. Desde los 20 nota que oye menos, sobre todo por el derecho: en clases se sienta adelante y aun así se pierde. Tiene un pitido en los dos oídos todo el día. Últimamente se tropieza más al caminar de noche. Su mamá perdió la audición de un oído cuando era joven y la operaron \"de algo en la cabeza\" a los 35 años.",
    "ia": {
     "generado": false,
     "verificado": false,
@@ -846,7 +855,7 @@
     "tinnitus": true,
     "anamnesis": true
    },
-   "at": "2026-10-15T15:52:02+00:00",
+   "at": "2026-10-15T19:07:31+00:00",
    "by": "andrea.soto"
   },
   "tipo": "normal",
@@ -856,6 +865,6 @@
    "rut": "21070440",
    "fecha_nac": "23-07-2002"
   },
-  "historia_clinica": ""
+  "historia_clinica": "{{-1460}} Control de salud: dificultad para oír en clases; otoscopía normal.\r\n{{-30}} Neurólogo: inestabilidad de la marcha y antecedente familiar; deriva a evaluación auditiva."
  }
 }

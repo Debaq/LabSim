@@ -36,11 +36,23 @@
 
 ## Casos
 
+Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
+
 {{caso cap10_gjb2}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap10_gjb2 audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -58,19 +70,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap10_waardenburg}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap10_waardenburg audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -88,19 +110,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap10_usher}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap10_usher audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -118,19 +150,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap10_alport}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap10_alport audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -148,19 +190,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap10_jervell_lange_nielsen}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap10_jervell_lange_nielsen audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -178,19 +230,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap10_stickler}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap10_stickler audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -208,19 +270,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap10_pendred}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap10_pendred audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -237,6 +309,80 @@
 :::figura cap10_pendred dpoae
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
+
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
+
+## Resolución de los casos
+
+Intenta resolver cada caso con los pasos del aprendizaje basado en problemas antes de leer esta sección.
+
+### Caso 10.1
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 10.2
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 10.3
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 10.4
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 10.5
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 10.6
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 10.7
 
 #### Razonamiento
 

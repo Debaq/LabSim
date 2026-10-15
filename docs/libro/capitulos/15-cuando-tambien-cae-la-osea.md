@@ -36,11 +36,23 @@
 
 ## Casos
 
+Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
+
 {{caso cap15_mixta_otitis_cronica}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap15_mixta_otitis_cronica audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -58,19 +70,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap15_mixta_otoesclerosis}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap15_mixta_otoesclerosis audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -88,19 +110,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap15_colesteatoma_fistula}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap15_colesteatoma_fistula audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -118,19 +150,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap15_fractura_transversal}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap15_fractura_transversal audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -148,19 +190,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap15_trauma_craneal_completo}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap15_trauma_craneal_completo audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -178,19 +230,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap15_osificacion_coclear}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap15_osificacion_coclear audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -207,6 +269,70 @@
 :::figura cap15_osificacion_coclear abr
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
+
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
+
+## Resolución de los casos
+
+Intenta resolver cada caso con los pasos del aprendizaje basado en problemas antes de leer esta sección.
+
+### Caso 15.1
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 15.2
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 15.3
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 15.4
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 15.5
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 15.6
 
 #### Razonamiento
 

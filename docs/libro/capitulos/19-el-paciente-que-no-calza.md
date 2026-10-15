@@ -36,6 +36,12 @@
 
 ## Casos
 
+Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
+
+## Resolución de los casos
+
+Intenta resolver cada caso con los pasos del aprendizaje basado en problemas antes de leer esta sección.
+
 ## Para cerrar
 
 :::pregunta Preguntas para discutir

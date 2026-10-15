@@ -36,11 +36,23 @@
 
 ## Casos
 
+Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
+
 {{caso cap06_p33}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap06_p33 audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -58,19 +70,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap06_p37}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap06_p37 audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -88,19 +110,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap06_trauma_acustico_agudo}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap06_trauma_acustico_agudo audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -118,19 +150,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap06_muesca_4k}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap06_muesca_4k audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -147,6 +189,50 @@
 :::figura cap06_muesca_4k dpoae
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
+
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
+
+## Resolución de los casos
+
+Intenta resolver cada caso con los pasos del aprendizaje basado en problemas antes de leer esta sección.
+
+### Caso 6.1
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 6.2
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 6.3
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 6.4
 
 #### Razonamiento
 

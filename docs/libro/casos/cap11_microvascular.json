@@ -5,13 +5,21 @@
       "OI": "normal"
     },
     "edad": 47,
-    "sexo": "mujer"
+    "sexo": "mujer",
+    "anamnesis": {
+      "otros": "Tiene 47 años y es contadora. Hace un año le apareció un zumbido en el oído derecho que va y viene y que empeora en el silencio de la noche. Ha tenido tres o cuatro mareos de segundos, \"como un golpe\", sin náuseas. Nota que por el derecho los sonidos agudos \"suenan raro\", como metálicos.",
+      "historia": "{{-300}} Médico general: acúfeno OD, otoscopía normal. Se indica betahistina, sin mejoría.\n{{-40}} Otorrinolaringólogo: solicita evaluación audiológica completa.",
+      "hist": [],
+      "medicamentos": "Betahistina (la dejó por no notar cambios)",
+      "cirugias": ""
+    }
   },
   "figuras": [
     {
       "tipo": "audiograma",
       "estudio": true,
-      "ldl": true
+      "ldl": true,
+      "sin_enmascarar": false
     },
     {
       "tipo": "logoaudiometria",

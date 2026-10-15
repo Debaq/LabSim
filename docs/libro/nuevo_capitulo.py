@@ -282,12 +282,19 @@ def texto_clinico(n, cap, pedidos, figuras, sistema):
          '## Patología', '', '> ✍ ' + '; '.join(cap['nombres'].get(c, c) for c in cuadros), '',
          ':::sabias ¿Sabías que?', '✍', ':::', '',
          '## Razonamiento', '', '> ✍ Texto del autor', '',
-         ':::pregunta Pregunta abierta', '✍', ':::', '', '## Casos', '']
+         ':::pregunta Pregunta abierta', '✍', ':::', '', '## Casos', '',
+         'Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, '
+         'separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los '
+         'resultados. La resolución de cada caso está al final del capítulo.', '']
     for nombre, _, _, nota in pedidos:
         if nota:
             L += [f'<!-- {prefijo}{nombre}: {nota} -->', '']
             continue
-        L += [f'{{{{caso {prefijo}{nombre}}}}}', '', ':::pregunta ¿Qué pedirías?', '✍', ':::', '']
+        L += [f'{{{{caso {prefijo}{nombre}}}}}', '',
+              ':::pregunta Paso 1 · ¿Qué datos importan?', '✍', ':::', '',
+              ':::pregunta Paso 2 · Tus hipótesis', '✍', ':::', '',
+              ':::pregunta Paso 3 · ¿Qué pedirías y por qué?', '✍', ':::', '',
+              '#### Paso 4 · Los resultados', '']
         vistos = {}
         for tipo in figuras:
             vistos[tipo] = vistos.get(tipo, 0) + 1
@@ -295,7 +302,13 @@ def texto_clinico(n, cap, pedidos, figuras, sistema):
             L += [f':::figura {prefijo}{nombre} {tipo}{extra}',
                   '- ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")',
                   ':::', '']
-        L += ['#### Razonamiento', '', '> ✍ Texto del autor', '',
+        L += [':::docente Guía del caso',
+              '- **Datos clave:** ✍', '- **Hipótesis esperables:** ✍', '- **Qué pedir:** ✍',
+              '- **Errores esperables:** ✍', '- **En LabSim:** ✍', ':::', '']
+    L += ['## Resolución de los casos', '',
+          'Intenta resolver cada caso con los pasos del aprendizaje basado en problemas antes de leer esta sección.', '']
+    for k, (nombre, _, _, nota) in enumerate([q for q in pedidos if not q[3]], start=1):
+        L += [f'### Caso {n}.{k}', '', '#### Razonamiento', '', '> ✍ Texto del autor', '',
               '#### Diagnóstico y qué sigue', '', '> ✍ Texto del autor', '']
     L += ['## Para cerrar', '', ':::pregunta Preguntas para discutir', '1. ✍', ':::', '',
           ':::ayuda Ayuda memoria del capítulo', '- ✍', ':::', '']

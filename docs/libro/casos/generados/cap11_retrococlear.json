@@ -4,11 +4,20 @@
    "OD": "normal",
    "OI": "sensorioneural"
   },
+  "edad": 66,
+  "sexo": "hombre",
   "grado": {
    "OI": "moderada"
   },
-  "edad": 66,
-  "sexo": "hombre"
+  "anamnesis": {
+   "otros": "Tiene 66 años, trabajó 30 años en un aserradero y hoy cuida su huerto. Hace tiempo oye menos por el izquierdo y tiene un pitido constante de ese lado. Hace un año compró un audífono para el izquierdo en una óptica, pero lo dejó en el cajón: \"se oye fuerte, pero no se entiende nada\".",
+   "historia": "{{-400}} Compra de audífono OI sin evaluación audiológica previa.\n{{-45}} Médico general: hipoacusia OI asimétrica con acúfeno; deriva a evaluación auditiva.",
+   "hist": [
+    "trauma_acustico"
+   ],
+   "medicamentos": "",
+   "cirugias": ""
+  }
  },
  "semilla": 4200626570,
  "data": {
@@ -227,8 +236,8 @@
   "edad_horas": null,
   "nacimiento": [],
   "volume": [
-   1.82,
-   1.98,
+   1.5,
+   0.91,
    "N/D"
   ],
   "UMD": [
@@ -386,7 +395,7 @@
    "antecedentes": {
     "hipoacusia_familiar": false,
     "ototoxicos": false,
-    "trauma_acustico": false,
+    "trauma_acustico": true,
     "otitis": false,
     "meningitis": false,
     "tce": false,
@@ -395,7 +404,7 @@
    },
    "medicamentos": "",
    "cirugias": "",
-   "otros": "",
+   "otros": "Tiene 66 años, trabajó 30 años en un aserradero y hoy cuida su huerto. Hace tiempo oye menos por el izquierdo y tiene un pitido constante de ese lado. Hace un año compró un audífono para el izquierdo en una óptica, pero lo dejó en el cajón: \"se oye fuerte, pero no se entiende nada\".",
    "ia": {
     "generado": false,
     "verificado": false,
@@ -848,7 +857,7 @@
     "tinnitus": true,
     "anamnesis": true
    },
-   "at": "2026-10-15T15:52:04+00:00",
+   "at": "2026-10-15T19:07:34+00:00",
    "by": "andrea.soto"
   },
   "tipo": "normal",
@@ -858,6 +867,6 @@
    "rut": "8388293",
    "fecha_nac": "30-03-1960"
   },
-  "historia_clinica": ""
+  "historia_clinica": "{{-400}} Compra de audífono OI sin evaluación audiológica previa.\r\n{{-45}} Médico general: hipoacusia OI asimétrica con acúfeno; deriva a evaluación auditiva."
  }
 }

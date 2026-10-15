@@ -36,11 +36,23 @@
 
 ## Casos
 
+Cada caso se trabaja en cuatro pasos, como en el aprendizaje basado en problemas: lee la entrevista, separa los datos que importan, plantea tus hipótesis y decide qué pedir **antes** de mirar los resultados. La resolución de cada caso está al final del capítulo.
+
 {{caso cap08_ototoxica}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap08_ototoxica audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -58,19 +70,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap08_salicilatos}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap08_salicilatos audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -88,19 +110,29 @@
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
 
-#### Razonamiento
-
-> ✍ Texto del autor
-
-#### Diagnóstico y qué sigue
-
-> ✍ Texto del autor
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
 
 {{caso cap08_post_radioterapia}}
 
-:::pregunta ¿Qué pedirías?
+:::pregunta Paso 1 · ¿Qué datos importan?
 ✍
 :::
+
+:::pregunta Paso 2 · Tus hipótesis
+✍
+:::
+
+:::pregunta Paso 3 · ¿Qué pedirías y por qué?
+✍
+:::
+
+#### Paso 4 · Los resultados
 
 :::figura cap08_post_radioterapia audiograma
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
@@ -117,6 +149,40 @@
 :::figura cap08_post_radioterapia dpoae
 - ✍ observación (con globo: "- @ANCLA | texto"; anclas como "OD 4000", "OD 80 V", "ipsi OD 1000", "OD max")
 :::
+
+:::docente Guía del caso
+- **Datos clave:** ✍
+- **Hipótesis esperables:** ✍
+- **Qué pedir:** ✍
+- **Errores esperables:** ✍
+- **En LabSim:** ✍
+:::
+
+## Resolución de los casos
+
+Intenta resolver cada caso con los pasos del aprendizaje basado en problemas antes de leer esta sección.
+
+### Caso 8.1
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 8.2
+
+#### Razonamiento
+
+> ✍ Texto del autor
+
+#### Diagnóstico y qué sigue
+
+> ✍ Texto del autor
+
+### Caso 8.3
 
 #### Razonamiento
 

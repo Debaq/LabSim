@@ -4,11 +4,20 @@
    "OD": "schwannoma",
    "OI": "normal"
   },
+  "edad": 52,
+  "sexo": "mujer",
   "grado": {
    "OD": "moderada"
   },
-  "edad": 52,
-  "sexo": "mujer"
+  "anamnesis": {
+   "otros": "Tiene 52 años y es secretaria en un juzgado. Hace unos dos años nota que por el oído derecho \"oye pero no entiende\": al principio pensó que era el teléfono de la oficina, y ahora se cambia el celular al izquierdo sin darse cuenta. No tiene pitido en los oídos. A veces, al darse vuelta rápido en la cama, siente un mareo de segundos que se le pasa solo. Nunca ha tenido dolor ni secreción de oídos.",
+   "historia": "{{-730}} Control con médico general por \"baja audición OD\"; otoscopía normal, se indica observar.\n{{-60}} Otorrinolaringólogo: otoscopía normal bilateral. Se solicita audiometría e impedanciometría.",
+   "hist": [
+    "hta"
+   ],
+   "medicamentos": "Losartán 50 mg al día",
+   "cirugias": ""
+  }
  },
  "semilla": 737291868,
  "data": {
@@ -227,8 +236,8 @@
   "edad_horas": null,
   "nacimiento": [],
   "volume": [
-   1.75,
-   1.4,
+   1.64,
+   1.38,
    "N/D"
   ],
   "UMD": [
@@ -390,11 +399,11 @@
     "meningitis": false,
     "tce": false,
     "diabetes": false,
-    "hta": false
+    "hta": true
    },
-   "medicamentos": "",
+   "medicamentos": "Losartán 50 mg al día",
    "cirugias": "",
-   "otros": "",
+   "otros": "Tiene 52 años y es secretaria en un juzgado. Hace unos dos años nota que por el oído derecho \"oye pero no entiende\": al principio pensó que era el teléfono de la oficina, y ahora se cambia el celular al izquierdo sin darse cuenta. No tiene pitido en los oídos. A veces, al darse vuelta rápido en la cama, siente un mareo de segundos que se le pasa solo. Nunca ha tenido dolor ni secreción de oídos.",
    "ia": {
     "generado": false,
     "verificado": false,
@@ -840,7 +849,7 @@
     "tinnitus": true,
     "anamnesis": true
    },
-   "at": "2026-10-15T15:52:07+00:00",
+   "at": "2026-10-15T19:07:37+00:00",
    "by": "andrea.soto"
   },
   "tipo": "normal",
@@ -850,6 +859,6 @@
    "rut": "12565584",
    "fecha_nac": "08-03-1974"
   },
-  "historia_clinica": ""
+  "historia_clinica": "{{-730}} Control con médico general por \"baja audición OD\"; otoscopía normal, se indica observar.\r\n{{-60}} Otorrinolaringólogo: otoscopía normal bilateral. Se solicita audiometría e impedanciometría."
  }
 }

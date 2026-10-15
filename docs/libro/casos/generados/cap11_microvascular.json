@@ -5,7 +5,14 @@
    "OI": "normal"
   },
   "edad": 47,
-  "sexo": "mujer"
+  "sexo": "mujer",
+  "anamnesis": {
+   "otros": "Tiene 47 años y es contadora. Hace un año le apareció un zumbido en el oído derecho que va y viene y que empeora en el silencio de la noche. Ha tenido tres o cuatro mareos de segundos, \"como un golpe\", sin náuseas. Nota que por el derecho los sonidos agudos \"suenan raro\", como metálicos.",
+   "historia": "{{-300}} Médico general: acúfeno OD, otoscopía normal. Se indica betahistina, sin mejoría.\n{{-40}} Otorrinolaringólogo: solicita evaluación audiológica completa.",
+   "hist": [],
+   "medicamentos": "Betahistina (la dejó por no notar cambios)",
+   "cirugias": ""
+  }
  },
  "semilla": 2574321501,
  "data": {
@@ -224,8 +231,8 @@
   "edad_horas": null,
   "nacimiento": [],
   "volume": [
-   1.55,
-   1.52,
+   1.65,
+   1.56,
    "N/D"
   ],
   "UMD": [
@@ -388,9 +395,9 @@
     "diabetes": false,
     "hta": false
    },
-   "medicamentos": "",
+   "medicamentos": "Betahistina (la dejó por no notar cambios)",
    "cirugias": "",
-   "otros": "",
+   "otros": "Tiene 47 años y es contadora. Hace un año le apareció un zumbido en el oído derecho que va y viene y que empeora en el silencio de la noche. Ha tenido tres o cuatro mareos de segundos, \"como un golpe\", sin náuseas. Nota que por el derecho los sonidos agudos \"suenan raro\", como metálicos.",
    "ia": {
     "generado": false,
     "verificado": false,
@@ -843,7 +850,7 @@
     "tinnitus": true,
     "anamnesis": true
    },
-   "at": "2026-10-15T15:51:59+00:00",
+   "at": "2026-10-15T19:07:28+00:00",
    "by": "andrea.soto"
   },
   "tipo": "normal",
@@ -853,6 +860,6 @@
    "rut": "14251446",
    "fecha_nac": "22-10-1979"
   },
-  "historia_clinica": ""
+  "historia_clinica": "{{-300}} Médico general: acúfeno OD, otoscopía normal. Se indica betahistina, sin mejoría.\r\n{{-40}} Otorrinolaringólogo: solicita evaluación audiológica completa."
  }
 }

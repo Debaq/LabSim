@@ -4,7 +4,8 @@
     {
       "tipo": "audiograma",
       "estudio": true,
-      "ldl": true
+      "ldl": true,
+      "sin_enmascarar": false
     },
     {
       "tipo": "logoaudiometria",
