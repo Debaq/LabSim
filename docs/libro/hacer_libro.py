@@ -481,16 +481,18 @@ body {{ margin: 0; }}
 .pt-logos .logo, .cp-logos .logo {{ height: 13mm; }}
 .pt-logos .logo.tm, .cp-logos .logo.tm {{ height: 17mm; }}
 /* preliminares: números romanos, sin cabecera; el cuerpo arranca en 1 */
-.portadilla, .interior, .creditos, .indice, .preliminar {{ page: frontal; }}
+/* portadilla, portada interior y créditos van sin número; el resto de las preliminares, en romanos */
+.portadilla, .interior, .creditos {{ page: inicial; }}
+.indice, .preliminar {{ page: frontal; }}
 .cuerpo {{ counter-reset: page 1; }}
 .portadilla, .interior, .indice, .preliminar {{ break-before: right; }}
 .creditos {{ break-before: left; }}
-.interior {{ text-align: center; padding-top: 40mm; height: 240mm; position: relative; }}
+.interior {{ text-align: center; padding-top: 28mm; height: 255mm; box-sizing: border-box; position: relative; }}
 .in-titulo {{ font: 700 28pt/1.12 Fraunces, serif; color: #24101a; margin: 0 10mm 4mm; }}
 .in-bajada {{ font: 13pt 'Plus Jakarta Sans'; color: #8e2a4a; margin: 0 0 22mm; }}
 .in-autores {{ font: 600 12pt/1.9 'Plus Jakarta Sans'; color: #2a1a20; margin: 0 0 14mm; }}
 .in-edicion {{ font: 600 10pt 'Plus Jakarta Sans'; letter-spacing: 1.5pt; text-transform: uppercase; color: #8e2a4a; }}
-.in-sello {{ position: absolute; left: 0; right: 0; bottom: 0; }}
+.in-sello {{ position: absolute; left: 0; right: 0; bottom: 6mm; }}
 .in-sello .logo {{ height: 15mm; margin: 0 6mm; vertical-align: middle; }}
 .in-sello .logo.tm {{ height: 22mm; }}
 .in-sello p {{ font: 9pt/1.5 'Plus Jakarta Sans'; color: #6f5a63; margin: 4mm 0 0; }}
